@@ -8,12 +8,16 @@
     "prepare": "node .husky/install.mjs",
     "release": "standard-version"
   },
+  "lint-staged": {
+    "*.js": "eslint --fix"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
     "standard-version": "^9.5.0"
   }
 }
