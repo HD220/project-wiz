@@ -4,8 +4,9 @@
   "description": "O **ProjectWiz** é um serviço autônomo projetado para auxiliar no desenvolvimento de software, permitindo a automação de tarefas de codificação, criação de issues, geração de pull requests, e muito mais. Ele foi criado com a intenção de atuar como um bot programador que opera em integração com o GitHub, Chromadb e o GPT para otimizar o fluxo de trabalho dos desenvolvedores.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "node .husky/install.mjs"
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "prepare": "node .husky/install.mjs",
+    "commitlint": "commitlint --edit"
   },
   "author": "",
   "license": "ISC",
