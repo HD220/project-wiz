@@ -2,15 +2,13 @@ import express, { Router } from "express";
 import bodyParser from "body-parser";
 import { Server } from "http";
 
-export function serverExpress(apiRoutes: Router[]) {
+export function serverExpress(routes: Router) {
   const app = express();
   const PORT = process.env.PORT || 3000;
 
   // Middleware
   app.use(bodyParser.json());
-
-  // API Endpoints
-  apiRoutes.forEach((route) => app.use("/api", route));
+  app.use("/api", routes);
 
   let listener: Server | undefined;
 

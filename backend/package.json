@@ -11,7 +11,11 @@
     "dev": "nodemon --watch src/**/*.ts --exec ts-node -r tsconfig-paths/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 0",
     "prepare": "node .husky/install.mjs",
-    "release": "standard-version"
+    "release": "standard-version",
+    "knex:make": "npx knex migrate:make -x ts --knexfile ./src/infra/services/knex/knexfile.ts",
+    "knex:latest": "npx knex migrate:latest --knexfile ./src/infra/services/knex/knexfile.ts",
+    "knex:rollback": "npx knex migrate:rollback --knexfile ./src/infra/services/knex/knexfile.ts",
+    "knex:seed": "npx knex seed:run --specific=seed_reset.ts --specific=seed_data.ts --knexfile ./src/infra/services/knex/knexfile.ts"
   },
   "lint-staged": {
     "*": [
@@ -27,6 +31,7 @@
     "@eslint/js": "^9.12.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.13",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.7.4",
     "eslint": "^9.12.0",
     "eslint-plugin-react": "^7.37.1",
@@ -44,6 +49,9 @@
   },
   "dependencies": {
     "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "sqlite3": "^5.1.7",
     "zod": "^3.23.8"
   }
 }
