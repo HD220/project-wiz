@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { H1 } from "./typography/h1";
+import { signIn } from "@/lib/auth";
 
 export function Header() {
   return (
@@ -23,6 +24,16 @@ export function Header() {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+          <DropdownMenuItem>
+            <form
+              action={async () => {
+                "use server";
+                await signIn("github");
+              }}
+            >
+              <Button type="submit">Login</Button>
+            </form>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <Link href="/billing">Cobrança</Link>
