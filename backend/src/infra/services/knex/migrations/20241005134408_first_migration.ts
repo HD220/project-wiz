@@ -1,7 +1,7 @@
 import { Knex } from "knex";
 
 export async function up(knex: Knex): Promise<void> {
-  knex.schema.createTable("git_repository_links", (table) => {
+  return knex.schema.createTable("git_repository_links", (table) => {
     table.uuid("id").primary().defaultTo(knex.fn.uuid());
     table.string("name", 500);
     table.enu("provider", ["github"]);
@@ -17,5 +17,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  knex.schema.dropTable("git_repository_links");
+  return knex.schema.dropTable("git_repository_links");
 }

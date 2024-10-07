@@ -1,8 +1,7 @@
 import { Entitie } from "@/application/domain/entities/Entitie";
-import { OnlyProperties } from "./utils";
 
 export interface IRepository<T extends Entitie> {
-  save(entity: OnlyProperties<T>): Promise<T>; //update,insert (upsert)
+  save(entity: T): Promise<T>; //update,insert (upsert)
 
   findById(id: string | number): Promise<T | null>;
 

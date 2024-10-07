@@ -19,11 +19,18 @@ export class CreateRepositoryLinkUseCase implements IUseCase<Input, Output> {
     this.repo = repository;
   }
   async execute(data?: Input): Promise<Output> {
-    const { id = randomUUID(), ...repo } = gitRepositoryLinkSchema.parse(data);
+    const { id, ...repo } = gitRepositoryLinkSchema.parse({
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...data,
+    });
 
-    const project = await this.repo.save(
-      new GitRepositoryLink({ id, ...repo })
-    );
+    const entitie = new GitRepositoryLink({ id, ...repo });
+    console.log("entitie", entitie);
+
+    const project = await this.repo.save(entitie);
+
     return {
       id: project.id,
       name: project.name,

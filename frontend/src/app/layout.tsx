@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { inter } from "./fonts";
+import { cn } from "@/lib/utils";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
   title: "Project Wiz",
@@ -26,16 +18,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={cn(`${inter.variable} antialiased`, "min-h-screen")}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="p-4">
+            <Header />
+            <main className="">{children}</main>
+          </div>
         </ThemeProvider>
       </body>
     </html>

@@ -1,29 +1,42 @@
 import { GitRepositoryLink } from "@/application/domain/entities/GitRepositoryLink";
 import { IRepository } from "@/application/interfaces/IRepository";
+import { OnlyProperties } from "@/application/interfaces/utils";
 import { Knex } from "knex";
 
 export class GitRepositoryLinkRepository
   implements IRepository<GitRepositoryLink>
 {
   private db: Knex;
-  private tableName = "git_repositories" as const;
+  private tableName = "git_repository_links" as const;
 
   constructor(db: Knex) {
     this.db = db;
   }
 
   async save(entity: GitRepositoryLink): Promise<GitRepositoryLink> {
-    const { id, ...data } = entity;
+    const id = entity.id;
+    const dto = {
+      id: entity.id,
+      cloneUrl: entity.cloneUrl,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      defaultBranch: entity.defaultBranch,
+      description: entity.description,
+      isPrivate: entity.isPrivate,
+      name: entity.name,
+      owner: entity.owner,
+      sshUrl: entity.sshUrl,
+    };
     const existingEntity = await this.db(this.tableName).where({ id }).first();
     if (existingEntity) {
       const [updatedEntity] = await this.db(this.tableName)
-        .update(data)
+        .update(dto)
         .where({ id })
         .returning("*");
       return this.toEntitie(updatedEntity);
     } else {
       const [createdEntity] = await this.db(this.tableName)
-        .insert(entity)
+        .insert(dto)
         .returning("*");
       return this.toEntitie(createdEntity);
     }
