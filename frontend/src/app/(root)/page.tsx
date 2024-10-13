@@ -15,7 +15,7 @@ export default async function Home({
   searchParams: { q?: string; owner?: string };
 }) {
   const session = await auth();
-  const { owner = session?.user.github_id || "", q = "" } = searchParams;
+  const { owner = session?.user.username || "", q = "" } = searchParams;
 
   return (
     <>

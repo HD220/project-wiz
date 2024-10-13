@@ -1,15 +1,12 @@
 "use client";
 
-import { signOutAction } from "@/actions/auth.actions";
-import { DropdownMenuItem } from "./ui/dropdown-menu";
+import { signOut } from "next-auth/react";
+import { Button } from "./ui/button";
 
 export function SignOutButton() {
   return (
-    <DropdownMenuItem
-      className="p-2 w-full justify-start"
-      onClick={() => signOutAction()}
-    >
-      Logout
-    </DropdownMenuItem>
+    <Button className="p-2 justify-start" onClick={() => signOut()}>
+      Sair
+    </Button>
   );
 }

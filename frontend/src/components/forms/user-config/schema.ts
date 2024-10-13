@@ -8,6 +8,14 @@ export const userConfigSchema = z.object({
   budget: z.coerce.number().refine((val) => Number(val) > 0, {
     message: "O orçamento deve ser um número positivo.",
   }),
+  allocations: z.array(
+    z.object({
+      repository: z.string().min(1, "Selecione um repositório"), //owner/repo
+      budget: z.coerce.number().refine((val) => Number(val) > 0, {
+        message: "O orçamento deve ser um número positivo.",
+      }),
+    })
+  ),
 });
 
 export type UserConfig = z.infer<typeof userConfigSchema>;

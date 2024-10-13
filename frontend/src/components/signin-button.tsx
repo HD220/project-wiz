@@ -1,17 +1,14 @@
 "use client";
 
-import { signInAction } from "@/actions/auth.actions";
-import { DropdownMenuItem } from "./ui/dropdown-menu";
 import { LogIn } from "lucide-react";
+import { Button } from "./ui/button";
+import { signIn } from "next-auth/react";
 
 export function SignInButton() {
   return (
-    <DropdownMenuItem
-      className="p-2 w-full justify-start"
-      onClick={() => signInAction()}
-    >
+    <Button className="p-2 justify-start" onClick={() => signIn("github")}>
       <LogIn className="w-4 h-4 mr-2" />
-      Login
-    </DropdownMenuItem>
+      Entrar
+    </Button>
   );
 }

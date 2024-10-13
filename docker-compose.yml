@@ -1,25 +1,26 @@
 services:
-  frontend:
-    build: ./frontend
-    networks:
-      - projectwiz
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-      - CHROMA_CLIENT_AUTH_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
+  # frontend:
+  #   build: ./frontend
+  #   networks:
+  #     - projectwiz
+  #   ports:
+  #     - "3001:3001"
+  #   environment:
+  #     - PORT=3001
+  #     - CHROMA_CLIENT_AUTH_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
   
-  backend:
-    build: ./backend
-    networks:
-      - projectwiz
-    ports:
-      - "3000:3000"
-    environment:
-      - CHROMA_CLIENT_AUTH_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
+  # backend:
+  #   build: ./backend
+  #   networks:
+  #     - projectwiz
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - CHROMA_CLIENT_AUTH_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
   
   redis:
-    image: redis/redis-stack-server:latest
+    image: redis/redis-stack:latest
+    container_name: redis
     networks:
       - projectwiz
     ports:

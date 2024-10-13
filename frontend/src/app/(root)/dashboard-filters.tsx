@@ -28,11 +28,11 @@ export function DashboardFilters({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const owner = searchParams.get("owner") || session?.user.github_id;
+  const owner = searchParams.get("owner") || session?.user.username;
 
   function handleFilterChange(value: string) {
     const params = new URLSearchParams(searchParams);
-    if (value === session?.user.github_id) {
+    if (value === session?.user.username) {
       params.delete("owner");
     } else {
       params.set("owner", value);
@@ -59,11 +59,11 @@ export function DashboardFilters({
             value={owner}
             onValueChange={handleFilterChange}
           >
-            <DropdownMenuRadioItem value={session?.user.github_id || ""}>
+            <DropdownMenuRadioItem value={session?.user.username || ""}>
               {session?.user.username}
             </DropdownMenuRadioItem>
             {orgs.map((org) => (
-              <DropdownMenuRadioItem key={org.id} value={org.id.toString()}>
+              <DropdownMenuRadioItem key={org.name} value={org.name}>
                 {org.name}
               </DropdownMenuRadioItem>
             ))}

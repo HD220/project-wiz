@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { inter } from "./fonts";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
-import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Project Wiz",
@@ -28,13 +29,14 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider session={session}>
+          <AuthProvider session={session}>
             <div className="p-4">
               <Header />
               <main className="">{children}</main>
             </div>
-          </SessionProvider>
+          </AuthProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

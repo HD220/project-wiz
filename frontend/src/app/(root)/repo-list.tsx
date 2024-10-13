@@ -11,7 +11,8 @@ import {
 import { ScrollAreaGrab, ScrollBar } from "@/components/ui/scroll-area";
 import { Eye } from "lucide-react";
 import Link from "next/link";
-import { CardBudgetUsage } from "./card-budget-usage";
+import { CardBudgetUsage } from "../../components/cards/card-budget-usage";
+import { auth } from "@/lib/auth";
 
 export async function RepositoryList({
   q = "",
@@ -20,7 +21,8 @@ export async function RepositoryList({
   q?: string;
   owner: string;
 }) {
-  const repos = await getUserInstalledRepos({
+  const session = await auth();
+  const repos = await getUserInstalledRepos(session!.user.access_token, {
     owner: owner,
     search: q,
   });
@@ -56,11 +58,11 @@ export async function RepositoryList({
                 <H3>
                   {repo.name}{" "}
                   <span className="text-sm text-muted-foreground">
-                    {repo.owner.login}
+                    {repo.owner}
                   </span>
                 </H3>
 
-                <Link href={`/repository/${repo.id}`}>
+                <Link href={`/repository/${owner}/${repo.name}`}>
                   <Button variant="outline" size="icon">
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -69,7 +71,6 @@ export async function RepositoryList({
 
               <ScrollAreaGrab className="w-full pb-3">
                 <div className="flex w-max gap-4">
-                  <CardBudgetUsage />
                   <CardBudgetUsage />
                 </div>
                 <ScrollBar className="" orientation="horizontal" />
