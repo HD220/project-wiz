@@ -1,10 +1,18 @@
-export type PrimitivesTypes = string | number | Date | boolean | undefined;
-export type InputType<T> = Record<string, T> | { [key: string]: string };
-export type OutputType<T> = Record<string, T> | { [key: string]: string };
+export interface IUseCase<Entitie> {
+  save(entity: Partial<Entitie>): Promise<Entitie>;
 
-export type IUseCase<
-  I extends InputType<PrimitivesTypes>,
-  O extends OutputType<PrimitivesTypes>,
-> = {
-  execute: (args?: I) => Promise<O>;
-};
+  delete(pk: Entitie[keyof Entitie]): Promise<boolean>;
+
+  findByPk(pk: Entitie[keyof Entitie]): Promise<Entitie>;
+
+  find(
+    criteria?: Partial<Entitie>,
+    page?: number,
+    page_size?: number
+  ): Promise<{
+    data: Entitie[];
+    page: number;
+    page_size: number;
+    total_pages: number;
+  }>;
+}

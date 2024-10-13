@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const gitRepositoryLinkSchema = z.object({
+export const gitRepositoryLinkModelSchema = z.object({
   id: z.string().uuid(),
   name: z.coerce.string(),
   description: z.coerce.string().optional(),
@@ -15,4 +15,6 @@ export const gitRepositoryLinkSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
-export type GitRepositoryLink = z.infer<typeof gitRepositoryLinkSchema>;
+export type GitRepositoryLinkModel = z.infer<
+  typeof gitRepositoryLinkModelSchema
+>;

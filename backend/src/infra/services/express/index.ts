@@ -8,7 +8,7 @@ export function serverExpress(routes: Router) {
 
   // Middleware
   app.use(bodyParser.json());
-  app.use("/api", routes);
+  app.use(routes);
 
   let listener: Server | undefined;
 

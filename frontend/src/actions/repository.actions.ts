@@ -4,7 +4,6 @@
 import { LinkRepositoryInput, linkRepositorySchema } from "./schemas";
 
 export async function linkRepositoryAction(values: LinkRepositoryInput) {
-  console.log(values);
   const { data, success, error } = linkRepositorySchema.safeParse(values);
 
   if (success) {
@@ -18,7 +17,6 @@ export async function linkRepositoryAction(values: LinkRepositoryInput) {
       });
       const result = await response.json();
       //   if(response_data.ok) redirect('')
-      console.log(result);
     } catch (error) {
       console.error(error);
       throw Error("Algo deu errado, tente novamente!");

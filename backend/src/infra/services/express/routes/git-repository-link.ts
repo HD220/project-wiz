@@ -1,19 +1,18 @@
-import { Router } from "express";
-import { createController } from "@/infra/services/express/controllers/create-controller";
-import { CreateRepositoryLinkUseCase } from "@/application/use-cases/CreateRepositoryLinkUseCase";
-import { GitRepositoryLinkRepository } from "@/infra/repositories/GitRepositoryLinkRepository";
+import { GenericUseCase } from "@/application/use-cases/GenericUseCase";
+import { GenericRepository } from "@/infra/repositories/GenericRepository";
 import { db } from "../../knex/db";
+import { gitRepositoryLinkModelSchema } from "../../knex/models/GitRepositoryLinkModel";
+import { generateGenericRoutes } from "../controllers/generateGenericRoutes";
 
-const repository = new GitRepositoryLinkRepository(db);
-const createGitRepositoryLinkUseCase = new CreateRepositoryLinkUseCase(
-  repository
+const gitRepositoryRepository = new GenericRepository(
+  db,
+  "git_repository_links",
+  gitRepositoryLinkModelSchema,
+  "id"
 );
+const gitRepositoryUseCase = new GenericUseCase(gitRepositoryRepository);
 
-const router = Router();
-
-router.use(
+export const gitRepositoryLinkRouter = generateGenericRoutes(
   "/repositories",
-  createController("POST", createGitRepositoryLinkUseCase)
+  gitRepositoryUseCase
 );
-
-export default router;

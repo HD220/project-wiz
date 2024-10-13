@@ -1,22 +1,20 @@
-import { Entitie } from "@/application/domain/entities/Entitie";
+export interface IRepository<T> {
+  save(entity: Partial<T>): Promise<T>;
 
-export interface IRepository<T extends Entitie> {
-  save(entity: T): Promise<T>; //update,insert (upsert)
+  delete(pk: T[keyof T]): Promise<boolean>;
 
-  findById(id: string | number): Promise<T | null>;
+  findByPk(pk: T[keyof T]): Promise<T>;
 
-  findAll(
+  find(
+    criteria?: Partial<T>,
     page?: number,
-    pageSize?: number
-  ): Promise<{ data: T[]; total: number }>;
-
-  delete(id: string | number): Promise<boolean>;
-
-  findByCriteria(
-    criteria: Partial<T>,
-    page?: number,
-    pageSize?: number
-  ): Promise<{ data: T[]; total: number }>;
+    page_size?: number
+  ): Promise<{
+    data: T[];
+    page: number;
+    page_size: number;
+    total_pages: number;
+  }>;
 
   count(criteria?: Partial<T>): Promise<number>;
 }

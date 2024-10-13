@@ -1,5 +1,5 @@
 import { serverExpress } from "@/infra/services/express";
-import router from "@/infra/services/express/routes";
+import routes from "@/infra/services/express/routes";
 
-const api = serverExpress(router);
+const api = serverExpress(routes);
 api.start();

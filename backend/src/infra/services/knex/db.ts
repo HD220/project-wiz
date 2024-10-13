@@ -1,9 +1,14 @@
 import { config } from "@/infra/services/knex/knexfile";
 import knex from "knex";
 
-export function dbConnection() {
-  // console.log(config);
+export function createConnection() {
   return knex(config[process.env.NODE_ENV || "development"]);
 }
 
-export const db = dbConnection();
+declare const globalThis: {
+  dbGlobal: ReturnType<typeof createConnection>;
+} & typeof global;
+
+export const db = globalThis.dbGlobal ?? createConnection();
+
+globalThis.dbGlobal = db;
