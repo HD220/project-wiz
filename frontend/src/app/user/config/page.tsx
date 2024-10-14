@@ -1,6 +1,6 @@
 import { getUserInstalledRepos } from "@/actions/github.actions";
+import { getUserConfigAction } from "@/actions/user.actions";
 import { UserConfigForm } from "@/components/forms/user-config";
-import { getUserConfigAction } from "@/components/forms/user-config/actions";
 import { auth } from "@/lib/auth";
 
 export default async function Page() {

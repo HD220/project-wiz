@@ -11,8 +11,8 @@ import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { auth } from "@/lib/auth";
 import { TabButton } from "./tab-button";
 import { RepositoryConfigForm } from "@/components/forms/repository-config";
-import { getUserConfigAction } from "@/components/forms/user-config/actions";
-import { getRepositoryConfigAction } from "@/components/forms/repository-config/actions";
+import { getUserConfigAction } from "@/actions/user.actions";
+import { getRepositoryConfigAction } from "@/actions/repository.actions";
 
 export default async function Page({
   params: {
@@ -30,7 +30,10 @@ export default async function Page({
     owner,
     repository
   );
-  const repoConfig = await getRepositoryConfigAction(`${owner}/${repository}`);
+  const repoConfig = await getRepositoryConfigAction(
+    owner,
+    `${owner}/${repository}`
+  );
 
   return (
     <Tabs defaultValue={tab}>

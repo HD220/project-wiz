@@ -1,3 +1,4 @@
+import { getUserConfigAction } from "@/actions/user.actions";
 import {
   Card,
   CardContent,
@@ -6,7 +7,6 @@ import {
   CardTitle,
 } from "@/components//ui/card";
 import { auth } from "@/lib/auth";
-import { getUserConfigAction } from "../forms/user-config/actions";
 
 export async function CardBudgetUsage() {
   const session = await auth();

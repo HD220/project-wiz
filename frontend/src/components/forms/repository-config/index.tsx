@@ -77,7 +77,7 @@ export function RepositoryConfigForm({
       <CardHeader>
         <CardTitle>Configurações do Repositório</CardTitle>
         <CardDescription>
-          Esta configuração sobreescreve a configuração da conta.
+          Defina configuração especifica para esse repositório.
         </CardDescription>
       </CardHeader>
       <Form {...form}>

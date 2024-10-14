@@ -2,7 +2,7 @@ services:
   # frontend:
   #   build: ./frontend
   #   networks:
-  #     - projectwiz
+  #     - project-wiz
   #   ports:
   #     - "3001:3001"
   #   environment:
@@ -12,7 +12,7 @@ services:
   # backend:
   #   build: ./backend
   #   networks:
-  #     - projectwiz
+  #     - project-wiz
   #   ports:
   #     - "3000:3000"
   #   environment:
@@ -22,7 +22,7 @@ services:
     image: redis/redis-stack:latest
     container_name: redis
     networks:
-      - projectwiz
+      - project-wiz
     ports:
       - 6379:6379
       - 8001:8001
@@ -34,8 +34,9 @@ services:
 
   chromadb:
     image: chromadb/chroma
+    container_name: chroma
     networks:
-      - projectwiz
+      - project-wiz
     environment:
       - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
       - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_SERVER_AUTHN_PROVIDER}
@@ -48,7 +49,7 @@ services:
     image: grafana/loki:latest
     container_name: loki
     networks:
-      - projectwiz
+      - project-wiz
     ports:
       - "3100:3100"
     environment:
@@ -67,7 +68,7 @@ services:
     ports:
       - "3002:3000"
     networks:
-      - projectwiz
+      - project-wiz
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -84,7 +85,7 @@ services:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     networks:
-      - projectwiz
+      - project-wiz
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -94,7 +95,7 @@ services:
     entrypoint: ["/bin/sh", "/entrypoint.sh"]
 
 networks:
-  projectwiz:
+  project-wiz:
 
 volumes:
   redis-data:
