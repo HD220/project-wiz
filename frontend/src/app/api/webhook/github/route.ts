@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   );
   const data = JSON.parse(payload);
   const redis = await connectRedis();
-  const owner = data.installation.account.login;
+
   const action: "created" | "deleted" | "added" | "removed" = data.action;
   const installation: {
     id: number;
@@ -36,14 +36,16 @@ export async function POST(req: NextRequest) {
   } = data.installation;
 
   switch (event) {
-    case "push":
+    case "push": {
       console.log("Push event:", data);
       break;
-    case "pull_request":
+    }
+    case "pull_request": {
       console.log("Pull Request event:", data);
       break;
-    case "installation_repositories":
-      console.log(data);
+    }
+    case "installation_repositories": {
+      const owner = data.installation.account.login;
       switch (action) {
         case "added":
           const added: Repositories[] = data.repositories_added;
@@ -74,7 +76,9 @@ export async function POST(req: NextRequest) {
           break;
       }
       break;
-    case "installation":
+    }
+    case "installation": {
+      const owner = data.installation.account.login;
       switch (action) {
         case "created":
           const added: Repositories[] = data.repositories;
@@ -112,9 +116,11 @@ export async function POST(req: NextRequest) {
       }
       // console.log("Installation Request event:", action, repositories);
       break;
-    default:
-      console.log("Unhandled event type:", event, data);
+    }
+    default: {
+      console.log("Unhandled event type:", event, data.action);
       break;
+    }
   }
 
   return Response.json(
