@@ -3,6 +3,7 @@
 // import { auth } from "@/lib/auth";
 import { Octokit } from "octokit";
 import jwt from "jsonwebtoken";
+import { Installation } from "./schemas";
 
 // Função para gerar um JWT
 export async function generateJWT() {
@@ -153,9 +154,9 @@ export async function getUserInstalledRepos(
     owner?: string;
     search?: string;
   }
-) {
+): Promise<Installation[]> {
   if (!access_token) return [];
-  let repos = [];
+  let repos: Installation[] = [];
   try {
     const installations = await getAppInstallations();
 
@@ -166,16 +167,14 @@ export async function getUserInstalledRepos(
       );
       for (const repoUser of reposUser) {
         repos.push({
-          ...repoUser,
-          installation_id: installation.id,
-          installation_type: installation.installation_type,
-          installation_owner: installation.owner,
-          installation_owner_id: installation.owner_id,
+          id: installation.id,
+          repository_id: repoUser.id,
+          name: repoUser.name,
+          owner: repoUser.owner,
+          full_name: `${repoUser.owner}/${repoUser.name}`,
         });
       }
     }
-
-    console.log("owner", owner);
 
     if (owner !== "all") {
       repos = repos.filter((repo) => {

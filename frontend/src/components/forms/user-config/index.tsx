@@ -23,7 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { UserConfig, userConfigSchema } from "./schema";
-import { saveUserConfigAction } from "./actions";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo } from "react";
 import {
@@ -43,12 +42,14 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { saveUserConfigAction } from "@/actions/user.actions";
+import { Installation } from "@/actions/schemas";
 
 export function UserConfigForm({
-  repositories,
+  installations,
   defaultValues,
 }: {
-  repositories: { full_name: string; name: string }[];
+  installations: Installation[];
   defaultValues?: UserConfig;
 }) {
   const { toast } = useToast();
@@ -59,7 +60,9 @@ export function UserConfigForm({
       api_token: defaultValues?.api_token || "",
       is_batch_api: defaultValues?.is_batch_api || true,
       budget: defaultValues?.budget || 0.0,
-      allocations: [...(defaultValues?.allocations || [])],
+      allocations: [
+        ...((defaultValues?.allocations || []) as UserConfig["allocations"]),
+      ],
     },
     reValidateMode: "onChange",
   });
@@ -72,17 +75,19 @@ export function UserConfigForm({
   const allocations = form.watch("allocations");
 
   const availableRepositories = useMemo(() => {
-    return repositories.filter((repo) =>
-      allocations.every((alloc) => alloc.repository != repo.full_name)
+    return installations.filter((installation) =>
+      allocations.every(
+        (alloc) => Number(alloc.id) != installation.repository_id
+      )
     );
-  }, [allocations, repositories]);
+  }, [allocations, installations]);
 
   useEffect(() => {
     const totalAllocated = allocations.reduce(
-      (sum, allocation) => sum + Number(allocation.budget),
+      (sum, allocation) => sum + allocation.budget,
       0
     );
-    if (totalAllocated > Number(budget)) {
+    if (totalAllocated > budget) {
       form.setError("budget", {
         type: "manual",
         message:
@@ -94,7 +99,7 @@ export function UserConfigForm({
   }, [allocations, budget, form]);
 
   const addLine = () => {
-    append({ repository: "", budget: 0.0 });
+    append({ id: "", budget: 0.0 });
   };
 
   async function onSubmit(values: UserConfig) {
@@ -122,7 +127,6 @@ export function UserConfigForm({
       0
     );
     if (totalAllocated > Number(budget)) {
-      console.log("extrapolou");
       form.setError(`allocations.${index}.budget`, {
         type: "manual",
         message: "A soma das alocações não pode exceder o orçamento geral.",
@@ -239,12 +243,12 @@ export function UserConfigForm({
                       <TableCell className="max-w-0">
                         <FormField
                           control={form.control}
-                          name={`allocations.${index}.repository`}
+                          name={`allocations.${index}.id`}
                           render={({ field }) => (
                             <FormItem>
                               <Select
                                 onValueChange={field.onChange}
-                                defaultValue={String(field.value)}
+                                defaultValue={field.value}
                               >
                                 <FormControl>
                                   <SelectTrigger>
@@ -253,19 +257,21 @@ export function UserConfigForm({
                                 </FormControl>
                                 <SelectContent>
                                   {[
-                                    ...(repositories.filter(
-                                      (repo) => repo.full_name == field.value
+                                    ...(installations.filter(
+                                      (repo) =>
+                                        `${repo.repository_id}` == field.value
                                     ) || []),
                                     ...availableRepositories.filter(
-                                      (repo) => repo.full_name != field.value
+                                      (repo) =>
+                                        `${repo.repository_id}` != field.value
                                     ),
                                   ].map((repo) => (
                                     <SelectItem
-                                      key={repo.full_name}
-                                      value={repo.full_name}
+                                      key={repo.repository_id}
+                                      value={String(repo.repository_id)}
                                     >
                                       <span className="block truncate">
-                                        {repo.name}
+                                        {repo.full_name}
                                       </span>
                                     </SelectItem>
                                   ))}

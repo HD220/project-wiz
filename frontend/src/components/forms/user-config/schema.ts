@@ -10,7 +10,7 @@ export const userConfigSchema = z.object({
   }),
   allocations: z.array(
     z.object({
-      repository: z.string().min(1, "Selecione um repositório"), //owner/repo
+      id: z.string().min(1),
       budget: z.coerce.number().refine((val) => Number(val) > 0, {
         message: "O orçamento deve ser um número positivo.",
       }),

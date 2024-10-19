@@ -1,9 +1,5 @@
 import { NextRequest } from "next/server";
 
-export function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-
-  console.log("installation_id", searchParams.get("installation_id"));
-
-  return Response.json({ message: "ok" });
+export async function GET(request: NextRequest) {
+  return Response.redirect(new URL("/", request.url));
 }

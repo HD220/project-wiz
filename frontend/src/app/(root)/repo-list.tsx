@@ -62,7 +62,7 @@ export async function RepositoryList({
                   </span>
                 </H3>
 
-                <Link href={`/repository/${owner}/${repo.name}`}>
+                <Link href={`/repository/${repo.owner}/${repo.name}`}>
                   <Button variant="outline" size="icon">
                     <Eye className="w-4 h-4" />
                   </Button>

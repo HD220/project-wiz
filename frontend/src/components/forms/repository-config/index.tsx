@@ -22,41 +22,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import { RepositoryConfig, repositoryConfigSchema } from "./schema";
-import { saveRepositoryConfigAction } from "./actions";
+import { saveRepositoryConfigAction } from "@/actions/repository.actions";
 
 export function RepositoryConfigForm({
   defaultValues,
-  repository,
-  budget_reserved,
-  general_budget,
 }: {
   defaultValues?: RepositoryConfig;
-  repository: string;
-  general_budget: number;
-  budget_reserved: number;
 }) {
   const { toast } = useToast();
-  const { data: session } = useSession();
   const form = useForm<RepositoryConfig>({
     resolver: zodResolver(repositoryConfigSchema),
     defaultValues: {
-      api_token: defaultValues?.api_token || "",
-      is_batch_api: defaultValues?.is_batch_api || true,
-      budget: defaultValues?.budget || 0.0,
+      ...(defaultValues || {}),
     },
     reValidateMode: "onChange",
   });
 
   async function onSubmit(values: RepositoryConfig) {
     try {
-      await saveRepositoryConfigAction(
-        session!.user.username,
-        repository,
-        values
-      );
+      await saveRepositoryConfigAction(values.id, values.owner, values);
 
       toast({
         description: "Configurações salvas com sucesso!",
@@ -70,8 +56,6 @@ export function RepositoryConfigForm({
     }
   }
 
-  const budget = form.watch("budget");
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -83,6 +67,7 @@ export function RepositoryConfigForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
+            <div>{JSON.stringify(form.formState.errors)}</div>
             <FormField
               control={form.control}
               name="api_token"
@@ -117,48 +102,6 @@ export function RepositoryConfigForm({
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="budget"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Orçamento Mensal</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Insira seu orçamento"
-                      className="flex-1"
-                      {...field}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        const rest_budget =
-                          general_budget -
-                          (budget_reserved - (defaultValues?.budget || 0.0));
-                        if (value > rest_budget) {
-                          form.setError("budget", {
-                            type: "manual",
-                            message: "O valor do orçamento extrapolado!",
-                          });
-                        } else {
-                          field.onChange(value);
-                          form.clearErrors("budget");
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Restante: ${" "}
-                    {(
-                      general_budget -
-                      (budget_reserved - (defaultValues?.budget || 0.0)) -
-                      budget
-                    ).toFixed(2)}
-                  </FormDescription>
-                  <FormMessage />
                 </FormItem>
               )}
             />

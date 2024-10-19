@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { auth } from "@/lib/auth";
 import { TabButton } from "./tab-button";
 import { RepositoryConfigForm } from "@/components/forms/repository-config";
-import { getUserConfigAction } from "@/actions/user.actions";
 import { getRepositoryConfigAction } from "@/actions/repository.actions";
 
 export default async function Page({
@@ -24,16 +23,12 @@ export default async function Page({
   searchParams: { tab: "dash" | "bot" | "context" | "graph" | "config" };
 }) {
   const session = await auth();
-  const config = await getUserConfigAction(session?.user.username);
   const repo = await getRepository(
     session!.user.access_token,
     owner,
     repository
   );
-  const repoConfig = await getRepositoryConfigAction(
-    owner,
-    `${owner}/${repository}`
-  );
+  const repoConfig = await getRepositoryConfigAction(owner, repo.id);
 
   return (
     <Tabs defaultValue={tab}>
@@ -90,16 +85,12 @@ export default async function Page({
 
       <TabsContent value="config">
         <RepositoryConfigForm
-          repository={`${owner}/${repository}`}
-          budget_reserved={
-            config?.allocations.reduce((sum, cur) => sum + cur.budget, 0.0) ||
-            0.0
-          }
-          general_budget={config?.budget || 0.0}
           defaultValues={{
+            id: repo.id,
+            owner: repo.owner,
+            name: repo.name,
             api_token: repoConfig?.api_token || "",
             is_batch_api: repoConfig?.is_batch_api || true,
-            budget: repoConfig?.budget || 0.0,
           }}
         />
       </TabsContent>

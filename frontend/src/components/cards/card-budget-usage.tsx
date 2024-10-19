@@ -1,4 +1,3 @@
-import { getUserConfigAction } from "@/actions/user.actions";
 import {
   Card,
   CardContent,
@@ -6,15 +5,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components//ui/card";
-import { auth } from "@/lib/auth";
 
-export async function CardBudgetUsage() {
-  const session = await auth();
-  const config = await getUserConfigAction(session?.user.username);
-  const reserved =
-    config?.allocations.reduce((sum, curr) => sum + curr.budget, 0.0) || 0.0;
-  const shared = (config?.budget || 0.0) - reserved;
-
+export async function CardBudgetUsage({
+  total = 0,
+  used = 0,
+  shared = 0,
+  dedicate = 0,
+}: {
+  total?: number;
+  shared?: number;
+  dedicate?: number;
+  used?: number;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -23,13 +25,13 @@ export async function CardBudgetUsage() {
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-4">
         <div className="flex items-baseline gap-1 text-md font-bold tabular-nums leading-none">
-          $ {config?.budget.toFixed(2) || "0,00"}
+          $ {total.toFixed(2) || "0,00"}
           <span className="text-xs font-normal text-muted-foreground">
             total
           </span>
         </div>
         <div className="flex items-baseline gap-1 text-md font-bold tabular-nums leading-none">
-          $ {reserved.toFixed(2) || "0,00"}
+          $ {dedicate.toFixed(2) || "0,00"}
           <span className="text-xs font-normal text-muted-foreground">
             dedicado
           </span>
@@ -41,7 +43,7 @@ export async function CardBudgetUsage() {
           </span>
         </div>
         <div className="flex items-baseline gap-1 text-md font-bold tabular-nums leading-none">
-          $ 0,00
+          $ {used.toFixed(2) || "0,00"}
           <span className="text-xs font-normal text-muted-foreground">
             usado
           </span>

@@ -1,8 +1,10 @@
 "use server";
 
+import { NextRequest } from "next/server";
 import crypto from "node:crypto";
 
-const ENCRYPTION_KEY = process.env.APP_SECRET_KEY!;
+const GITHUB_SECRET = process.env.GITHUB_WEBHOOK_SECRET;
+const ENCRYPTION_KEY = process.env.GITHUB_WEBHOOK_SECRET!;
 const IV_LENGTH = 16;
 
 export async function encrypt(text: string) {
@@ -32,4 +34,12 @@ export async function decrypt(text: string) {
     decipher.final(),
   ]);
   return decrypted.toString();
+}
+
+// Validação da assinatura do GitHub (opcional, mas recomendado)
+export async function validateSignature(req: NextRequest, payload: string) {
+  const signature = req.headers.get("x-hub-signature-256")!;
+  const hmac = crypto.createHmac("sha256", GITHUB_SECRET!);
+  const digest = "sha256=" + hmac.update(payload).digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
