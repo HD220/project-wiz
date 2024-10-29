@@ -37,11 +37,11 @@ export async function POST(req: NextRequest) {
 
   switch (event) {
     case "push": {
-      console.log("Push event:", data);
+      console.log("Push event:", data.action);
       break;
     }
     case "pull_request": {
-      console.log("Pull Request event:", data);
+      console.log("Pull Request event:", data.action);
       break;
     }
     case "installation_repositories": {
@@ -64,11 +64,6 @@ export async function POST(req: NextRequest) {
         case "removed":
           const removed: Repositories[] = data.repositories_removed;
           for (const repo of removed) {
-            console.log(
-              "removendo",
-              `user:${owner}`,
-              `$.repositories.${repo.id}`
-            );
             await redis.json.del(`user:${owner}`, `$.repositories.${repo.id}`);
           }
           break;
@@ -114,7 +109,6 @@ export async function POST(req: NextRequest) {
         default:
           break;
       }
-      // console.log("Installation Request event:", action, repositories);
       break;
     }
     default: {
