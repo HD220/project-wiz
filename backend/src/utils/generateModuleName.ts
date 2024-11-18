@@ -8,18 +8,29 @@ const stopWords = [
   "post",
   "delete",
   "put",
+  "jwt",
+  "map",
+  "by",
+  "generate",
+  "key",
+  "build",
+  "a",
+  "as",
+  "for",
 ];
 
 // Tokenização - separa palavras de identificadores por CamelCase ou underscores
-function tokenize(identifier: string) {
+export function tokenize(identifier: string) {
   return identifier
-    .split(/(?=[A-Z])|_/)
+    .split(/(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])|[_\-\s]/)
     .map((word) => word.toLowerCase())
     .filter((word) => !stopWords.includes(word)); // Filtra palavras comuns
 }
 
 // Agrupamento de tokens
-function groupTokens(identifiers: string[]): { [token: string]: number } {
+export function groupTokens(identifiers: string[]): {
+  [token: string]: number;
+} {
   const tokenFrequency = {};
 
   identifiers.forEach((id) => {
@@ -36,18 +47,19 @@ function groupTokens(identifiers: string[]): { [token: string]: number } {
 }
 
 // Seleção de tokens relevantes para gerar o nome do módulo
-function selectTokens(
+export function selectTokens(
   tokenFrequency: { [token: string]: number },
-  minFrequency = 2
+  minFrequency = 1
 ) {
   return Object.entries(tokenFrequency)
     .filter(([, freq]) => freq >= minFrequency)
     .sort((a, b) => b[1] - a[1]) // Ordena pelos tokens mais frequentes
-    .map(([token]) => capitalize(token));
+    .map(([token]) => capitalize(token))
+    .slice(0, 3);
 }
 
 // Função utilitária para capitalizar a primeira letra
-function capitalize(word) {
+export function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
@@ -56,5 +68,5 @@ export function generateModuleName(identifiers: string[]) {
   const tokenFrequency = groupTokens(identifiers);
   const selectedTokens = selectTokens(tokenFrequency);
 
-  return selectedTokens.join("") + "Module";
+  return (selectedTokens.join("") || "Unknown") + "Module";
 }

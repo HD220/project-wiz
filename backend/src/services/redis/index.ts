@@ -1,0 +1,1 @@
+export { connectRedis } from "./connectRedis";

@@ -1,11 +1,11 @@
 import { installationQueue, installationWorker } from "./workers/installation";
-import { connectRedis, getItemsByKeyPattern } from "./services/redis";
+import { connectRedis } from "./services/redis";
 import * as dotenv from "dotenv";
 import { defaultBranchChangeWorker } from "./workers/branchChange";
 import path from "node:path";
 import fs from "node:fs";
 import { analyseRepositoryWorker } from "./workers/analyseRepository";
-import { generateGraphWorker } from "./workers/generateGraph";
+import { analyseFileWorker } from "./workers/analyseFile";
 
 dotenv.config();
 
@@ -42,8 +42,7 @@ async function main() {
   }
 
   const redis = await connectRedis();
-  const data = (await getItemsByKeyPattern(
-    redis,
+  const data = (await redis.getItemsByKeyPattern(
     "user:*"
   )) as unknown as ResponseData[];
 
@@ -56,8 +55,9 @@ async function main() {
   installationWorker.run();
   defaultBranchChangeWorker.run();
   analyseRepositoryWorker.run();
-  generateGraphWorker.run();
-  await installationQueue.removeJobScheduler("tst");
+  analyseFileWorker.run();
+  // generateGraphWorker.run();
+  // await installationQueue.removeJobScheduler("tst");
 
   setTimeout(async () => {
     //remove pendentes
@@ -70,7 +70,7 @@ async function main() {
         repositories,
         type: "installation",
       },
-      { jobId: "", removeOnComplete: true, removeOnFail: true }
+      { removeOnComplete: true, removeOnFail: true }
     );
   }, 500);
 }

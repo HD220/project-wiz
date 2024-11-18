@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
-// import { Octokit } from "octokit";
 
-// Função para gerar um JWT
 export function generateJWT() {
   try {
     const payload = {
@@ -17,15 +15,4 @@ export function generateJWT() {
     console.error(error);
     return "";
   }
-}
-
-export async function getOctoKit() {
-  const jwtToken = generateJWT();
-  const octo = await import("octokit");
-
-  const octokit = new octo.Octokit({
-    auth: jwtToken,
-  });
-
-  return octokit;
 }

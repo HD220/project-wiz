@@ -37,9 +37,9 @@ services:
     container_name: chroma
     networks:
       - project-wiz
-    environment:
-      - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
-      - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_SERVER_AUTHN_PROVIDER}
+    # environment:
+    #   - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_CLIENT_AUTH_CREDENTIALS}
+    #   - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_SERVER_AUTHN_PROVIDER}
     ports:
       - 8000:8000
     volumes:
