@@ -91,7 +91,11 @@ export const createSimpleGit = async ({
     await sg.pull();
 
     const lastCommitHash = (await sg.log()).latest!.hash;
-    fs.renameSync(to, path.resolve(basePath, lastCommitHash));
+    if (fs.existsSync(path.resolve(basePath, lastCommitHash))) {
+      fs.rmSync(to, { force: true, recursive: true });
+    } else {
+      fs.renameSync(to, path.resolve(basePath, lastCommitHash));
+    }
 
     return lastCommitHash;
   }
