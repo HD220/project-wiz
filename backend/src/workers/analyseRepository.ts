@@ -44,7 +44,7 @@ export const analyseRepositoryWorker =
             previousCommitHash || git.firstCommit
           );
 
-          const blocks = tsFiles.slice(0, 1).map((data) => {
+          const blocks = tsFiles.map((data) => {
             const analyse = {
               ...data,
               analyse: createTypescriptAnalyser(
