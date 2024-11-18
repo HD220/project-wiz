@@ -117,6 +117,8 @@ export const chatCompletionWorker = createWorker<
           MAX_DELAY
         );
       }
+
+      console.log("chatCompletion delay", delay);
       await job.moveToDelayed(Date.now() + delay, token);
       throw new DelayedError();
     }

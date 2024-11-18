@@ -25,6 +25,9 @@ export const analyseRepositoryWorker =
     "analyse-repository",
     async (job, token) => {
       const { commitHash, previousCommitHash } = job.data;
+      console.log("analyse-repository", job.data);
+
+      if (!commitHash) return;
 
       const workingDirectory = path.resolve(
         process.cwd(),
@@ -34,20 +37,14 @@ export const analyseRepositoryWorker =
 
       const git = await createSimpleGit({});
 
-      console.log("analyse-repository", job.data);
-
-      // const redis = await connectRedis();
       switch (job.data.step || "initial") {
         case "initial": {
-          console.log("get-diff");
           const { tsFiles } = await git.getFilesDiff(
             commitHash,
             previousCommitHash || git.firstCommit
           );
 
-          // console.log("analyse files", tsFiles);
           const blocks = tsFiles.slice(0, 1).map((data) => {
-            // console.log("analysing", data);
             const analyse = {
               ...data,
               analyse: createTypescriptAnalyser(
@@ -55,14 +52,12 @@ export const analyseRepositoryWorker =
                 data.filePath
               ).analyze(),
             };
-            // console.log("analyse", analyse.analyse);
             return analyse;
           });
 
           //cria jobs filhas para criação das descrições com a IA e aguarda conclusão
-          console.log("analyseFileQueue");
           await analyseFileQueue.addBulk(
-            blocks.slice(0, 2).map((block) => {
+            blocks.slice(0, 1).map((block) => {
               return {
                 name: `${path.basename(block.filePath)}`,
                 data: {
@@ -83,8 +78,7 @@ export const analyseRepositoryWorker =
           );
 
           await job.updateData({ ...job.data, step: "description-collect" });
-
-          await job.moveToDelayed(Date.now() + 100, token!);
+          await job.moveToDelayed(Date.now() + 100, token);
           throw new DelayedError();
         }
         case "description-collect": {

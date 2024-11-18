@@ -13,7 +13,6 @@ import { createChroma } from "@/services/chroma/createChroma";
 
 import path from "node:path";
 import { DelayedError, WaitingChildrenError } from "bullmq";
-import { BatchProcessResponse } from "@/services/openai/types";
 import { chatCompletionQueue } from "./chatCompletion";
 
 const chromaClient = createChroma();
@@ -57,8 +56,11 @@ export const analyseFileWorker = createWorker<AnalyseFileWorkerData>(
     } = job.data;
     const { blocks } = fileAnalysis;
 
+    console.log("analyse-file", job.name, blocks.length, job.data.step);
+
     if (status === "D") return; // se arquivo foi deleteado ignora-o
 
+    // await chromaClient.deleteCollection({ name: "blocks" });
     const collection = await chromaClient.getOrCreateCollection({
       name: "blocks",
       embeddingFunction: new DefaultEmbeddingFunction(),
@@ -67,22 +69,28 @@ export const analyseFileWorker = createWorker<AnalyseFileWorkerData>(
     switch (step) {
       case "validating": {
         const data = await Promise.all(
-          blocks.map(async (block) =>
-            collection.get({
-              include: ["embeddings"] as IncludeEnum[],
+          blocks.map(async (block) => {
+            return collection.get({
+              include: [
+                "embeddings",
+                "documents",
+                "metadatas",
+              ] as IncludeEnum[],
               where: {
-                $and: [{ blockHash: block.blockHash }],
+                blockHash: block.blockHash,
               },
-            })
-          )
+            });
+          })
         );
 
-        const docs = data.map((block) => ({
-          id: block.ids[0],
-          document: block.documents[0],
-          embedding: block.embeddings?.[0],
-          metadata: block.metadatas[0],
-        }));
+        const docs = data
+          .filter((block) => block.ids.length >= 1)
+          .map((block) => ({
+            id: block.ids[0],
+            document: block.documents[0],
+            embedding: block.embeddings?.[0],
+            metadata: block.metadatas[0],
+          }));
 
         const undocumentedBlock = blocks.filter(
           (block) =>
@@ -113,61 +121,71 @@ export const analyseFileWorker = createWorker<AnalyseFileWorkerData>(
           step: "in_progress",
           documents: [...documents, ...docs],
         });
+
         await job.moveToDelayed(Date.now() + 100, token);
         throw new DelayedError();
       }
       case "in_progress": {
         const shouldWait = await job.moveToWaitingChildren(token!);
-
         if (shouldWait) throw new WaitingChildrenError();
 
         const childrenResult = await job.getChildrenValues();
-        const promptResults: { id: string; response: BatchProcessResponse }[] =
-          Object.entries(childrenResult).map(([, result]) => result);
+        const promptResults:
+          | { id: string; result: string; usage: number }[]
+          | undefined = Object.entries(childrenResult).map(
+          ([, result]) => result
+        )[0];
 
-        //add undocumentedBlock
-        await collection.add(
-          promptResults.reduce(
-            (acc, cur) => ({
-              ids: [...acc.ids, randomUUID()],
-              documents: [
-                ...(acc.documents || []),
-                cur.response.response.body.choices[0].message.content,
-              ],
-              metadatas: [
-                ...(Array.isArray(acc.metadatas) ? acc.metadatas : []),
-                {
-                  blockHash: cur.id,
-                  commitHash,
-                },
-              ],
-            }),
-            {} as AddRecordsParams
-          )
-        );
+        try {
+          //add undocumentedBlock
+          if (promptResults?.length) {
+            const doc = promptResults.reduce(
+              (acc, cur) => ({
+                ids: [...(acc.ids || []), randomUUID()],
+                documents: [...(acc.documents || []), cur.result || ""],
+                metadatas: [
+                  ...(Array.isArray(acc.metadatas) ? acc.metadatas : []),
+                  {
+                    blockHash: cur.id,
+                    commitHash,
+                  },
+                ],
+              }),
+              {} as AddRecordsParams
+            );
+            await collection.add(doc);
+          }
 
-        //replicate documentedDoc
-        await collection.add(
-          documents.reduce(
-            (acc, cur) => ({
-              ids: [...acc.ids, randomUUID()],
-              documents: [...(acc.documents || []), cur.document || ""],
-              embeddings: [
-                ...(Array.isArray(acc.embeddings) ? acc.embeddings : []),
-                cur.embedding || null,
-              ] as Embeddings,
-              metadata: [
-                ...(Array.isArray(acc.metadatas) ? acc.metadatas : []),
-                {
-                  ...cur.metadata,
-                  commitHash,
-                },
-              ],
-            }),
-            {} as AddRecordsParams
-          )
-        );
+          //replicate documentedDoc
+          if (documents.length) {
+            const doc = documents.reduce(
+              (acc, cur) => ({
+                ids: [...(acc.ids || []), randomUUID()],
+                documents: [...(acc.documents || []), cur.document || ""],
+                embeddings: [
+                  ...(Array.isArray(acc.embeddings) ? acc.embeddings : []),
+                  cur.embedding || [],
+                ] as Embeddings,
+                metadata: [
+                  ...(Array.isArray(acc.metadatas) ? acc.metadatas : []),
+                  {
+                    ...cur.metadata,
+                    commitHash,
+                  },
+                ],
+              }),
+              {} as AddRecordsParams
+            );
+            await collection.add(doc);
+          }
+        } catch (error) {
+          console.error({ error });
+        }
 
+        await job.updateData({
+          ...job.data,
+          step: "completed",
+        });
         await job.moveToDelayed(Date.now() + 100, token);
         throw new DelayedError();
       }

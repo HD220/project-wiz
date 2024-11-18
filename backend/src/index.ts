@@ -1,13 +1,14 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import { installationQueue, installationWorker } from "./workers/installation";
 import { connectRedis } from "./services/redis";
-import * as dotenv from "dotenv";
 import { defaultBranchChangeWorker } from "./workers/branchChange";
 import path from "node:path";
 import fs from "node:fs";
 import { analyseRepositoryWorker } from "./workers/analyseRepository";
 import { analyseFileWorker } from "./workers/analyseFile";
-
-dotenv.config();
+import { chatCompletionWorker } from "./workers/chatCompletion";
 
 type ResponseData = {
   data: {
@@ -56,6 +57,7 @@ async function main() {
   defaultBranchChangeWorker.run();
   analyseRepositoryWorker.run();
   analyseFileWorker.run();
+  chatCompletionWorker.run();
   // generateGraphWorker.run();
   // await installationQueue.removeJobScheduler("tst");
 
@@ -64,6 +66,7 @@ async function main() {
     await installationQueue.drain();
 
     //insere nova job
+    console.log("installation queued");
     await installationQueue.add(
       "teste",
       {

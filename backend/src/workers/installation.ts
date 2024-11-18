@@ -33,6 +33,7 @@ export const installationWorker = createWorker<InstallationWorkerData>(
 
                 const commitHash = await git.clone(repoUrl);
 
+                console.log("analyse-repo-cloned");
                 await analyseRepositoryQueue.add(
                   "repo-cloned",
                   {

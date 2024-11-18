@@ -9,7 +9,7 @@ const PROMPTS = {
     system: {
       role: "system",
       content:
-        "You are a typescript code documenter and you are interacting with the bot that sends you code and you must provide a high-level description for the code or text provided.",
+        "You are an assistant specialized in summarizing code. Given a block of code, provide a high-level description using only relevant keywords and concepts, avoiding step-by-step explanations. Keep the description under 250 characters.",
     },
     user: {
       role: "user",
