@@ -60,7 +60,7 @@ export class DependencyGraphBuilder {
   }
 
   public findComponents(): string[][] {
-    return graphlib.alg.components(this.graph);
+    return graphlib.alg.components(this.graph); //tarjan
   }
 
   public getModules(): Map<string, { filePath: string; name: string }[]> {

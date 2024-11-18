@@ -9,6 +9,10 @@ import fs from "node:fs";
 import { analyseRepositoryWorker } from "./workers/analyseRepository";
 import { analyseFileWorker } from "./workers/analyseFile";
 import { chatCompletionWorker } from "./workers/chatCompletion";
+import { createDependencyGraph } from "./services/anyliser/dependencyGraphBuilder";
+import { createSimpleGit } from "./services/simple-git";
+import { createTypescriptAnalyser } from "./services/anyliser/typescryptAnalyser";
+import { FileNode, ModuleAnalyzer } from "./services/anyliser/moduleAnalyser";
 
 type ResponseData = {
   data: {
@@ -61,21 +65,61 @@ async function main() {
   // generateGraphWorker.run();
   // await installationQueue.removeJobScheduler("tst");
 
-  setTimeout(async () => {
-    //remove pendentes
-    await installationQueue.drain();
+  // graph.addFileAnalysis()
+  const git = await createSimpleGit({});
+  const { tsFiles } = await git.getFilesDiff(
+    "197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae",
+    git.firstCommit
+  );
+  // const graph = createDependencyGraph();
 
-    //insere nova job
-    console.log("installation queued");
-    await installationQueue.add(
-      "new-installation",
-      {
-        repositories,
-        type: "installation",
-      },
-      { removeOnComplete: true, removeOnFail: true }
-    );
-  }, 500);
+  const analysedFiles = tsFiles.map((file, idx) => {
+    console.log("analisando", idx + 1, "de", tsFiles.length);
+
+    const analyse = createTypescriptAnalyser(
+      path.resolve(
+        process.cwd(),
+        "./data/repos",
+        "197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae"
+      ),
+      file.filePath
+    ).analyze();
+
+    return {
+      filePath: file.filePath.replace(".ts", "").replace(".tsx", ""),
+      imports: analyse.imports.map((imp) => imp.path),
+    };
+    // graph.addFileAnalysis(analyse);
+  });
+  // graph.buildGraph();
+  // console.log("graph", graph.getGraphInfo());
+
+  // Exemplo de uso:
+  const analyzer = new ModuleAnalyzer();
+  const files: FileNode[] = analysedFiles.map((file) => ({
+    path: file.filePath,
+    description: "",
+    imports: file.imports,
+  }));
+  const moduleGroups = analyzer.analyzeModules(files);
+
+  console.log("Módulos identificados:", moduleGroups);
+
+  // setTimeout(async () => {
+  //   //remove pendentes
+  //   await installationQueue.drain();
+
+  //   //insere nova job
+  //   console.log("installation queued");
+  //   await installationQueue.add(
+  //     "new-installation",
+  //     {
+  //       repositories,
+  //       type: "installation",
+  //     },
+  //     { removeOnComplete: true, removeOnFail: true }
+  //   );
+  // }, 500);
 }
 
 main();
