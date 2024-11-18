@@ -57,7 +57,7 @@ export const analyseRepositoryWorker =
 
           //cria jobs filhas para criação das descrições com a IA e aguarda conclusão
           await analyseFileQueue.addBulk(
-            blocks.slice(0, 1).map((block) => {
+            blocks.map((block) => {
               return {
                 name: `${path.basename(block.filePath)}`,
                 data: {
