@@ -25,8 +25,6 @@ export const analyseRepositoryWorker =
     "analyse-repository",
     async (job, token) => {
       const { commitHash, previousCommitHash } = job.data;
-      console.log("analyse-repository", job.data);
-
       if (!commitHash) return;
 
       const workingDirectory = path.resolve(
@@ -39,11 +37,13 @@ export const analyseRepositoryWorker =
 
       switch (job.data.step || "initial") {
         case "initial": {
+          console.log(job.name, " starting with data ", job.data);
           const { tsFiles } = await git.getFilesDiff(
             commitHash,
             previousCommitHash || git.firstCommit
           );
 
+          console.log(job.name, " analysing ", tsFiles.length, " files");
           const blocks = tsFiles.map((data) => {
             const analyse = {
               ...data,
@@ -54,6 +54,12 @@ export const analyseRepositoryWorker =
             };
             return analyse;
           });
+          console.log(
+            job.name,
+            " extracted ",
+            blocks.reduce((acc, file) => acc + file.analyse.blocks.length, 0),
+            " blocks"
+          );
 
           //cria jobs filhas para criação das descrições com a IA e aguarda conclusão
           await analyseFileQueue.addBulk(
@@ -78,20 +84,21 @@ export const analyseRepositoryWorker =
           );
 
           await job.updateData({ ...job.data, step: "description-collect" });
-          await job.moveToDelayed(Date.now() + 100, token);
+          await job.moveToDelayed(Date.now() + 10, token);
           throw new DelayedError();
         }
         case "description-collect": {
+          console.log(job.name, "wait children");
           const shoudWait = await job.moveToWaitingChildren(token!);
           if (shoudWait) throw new WaitingChildrenError();
-          console.log("descrições coletadas");
           await job.updateData({ ...job.data, step: "completed" });
 
-          await job.moveToDelayed(Date.now() + 100, token!);
+          console.log("descrições coletadas");
+          await job.moveToDelayed(Date.now() + 10, token!);
           throw new DelayedError();
         }
         default:
-          console.log(job.id, "analyseRepository completed!");
+          console.log(job.name, "analyseRepository completed!");
           break;
       }
       return;

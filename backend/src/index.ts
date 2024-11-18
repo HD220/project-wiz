@@ -68,7 +68,7 @@ async function main() {
     //insere nova job
     console.log("installation queued");
     await installationQueue.add(
-      "teste",
+      "new-installation",
       {
         repositories,
         type: "installation",

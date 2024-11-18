@@ -25,6 +25,7 @@ export const installationWorker = createWorker<InstallationWorkerData>(
         case "installation": {
           switch (step) {
             case "validating": {
+              console.log(job.name, " start with data ", job.data);
               const git = await createSimpleGit({});
               const installationToken = generateJWT();
 
@@ -33,7 +34,7 @@ export const installationWorker = createWorker<InstallationWorkerData>(
 
                 const commitHash = await git.clone(repoUrl);
 
-                console.log("analyse-repo-cloned");
+                console.log(job.name, " repo ", repo, " cloned");
                 await analyseRepositoryQueue.add(
                   "repo-cloned",
                   {
@@ -51,19 +52,20 @@ export const installationWorker = createWorker<InstallationWorkerData>(
               }
 
               await job.updateData({ ...job.data, step: "in_progress" });
-              await job.moveToDelayed(Date.now() + 100, token);
+              await job.moveToDelayed(Date.now() + 10, token);
               throw new DelayedError();
             }
             case "in_progress": {
+              console.log(job.name, "wait children");
               const shouldWait = await job.moveToWaitingChildren(token!);
               if (shouldWait) throw new WaitingChildrenError();
 
               await job.updateData({ ...job.data, step: "completed" });
-              await job.moveToDelayed(Date.now() + 100, token);
+              await job.moveToDelayed(Date.now() + 10, token);
               throw new DelayedError();
             }
             default: {
-              console.log("installation completed!");
+              console.log(job.name, " installation completed");
               break;
             }
           }

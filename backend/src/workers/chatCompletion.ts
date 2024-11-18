@@ -85,7 +85,7 @@ export const chatCompletionWorker = createWorker<
         },
       });
 
-      await job.moveToDelayed(Date.now() + 100, token);
+      await job.moveToDelayed(Date.now() + 10, token);
       throw new DelayedError();
     }
     case "in_progress": {
