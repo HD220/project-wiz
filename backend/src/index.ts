@@ -38,15 +38,15 @@ type ResponseData = {
 };
 
 async function main() {
-  const workingDirectory = path.resolve(process.cwd(), "./data/repos");
+  // const workingDirectory = path.resolve(process.cwd(), "./data/repos");
 
-  try {
-    if (!fs.existsSync(workingDirectory)) {
-      fs.mkdirSync(workingDirectory, { recursive: true });
-    }
-  } catch (error) {
-    console.error(error);
-  }
+  // try {
+  //   if (!fs.existsSync(workingDirectory)) {
+  //     fs.mkdirSync(workingDirectory, { recursive: true });
+  //   }
+  // } catch (error) {
+  //   console.error(error);
+  // }
 
   const redis = await connectRedis();
   const data = (await redis.getItemsByKeyPattern(
@@ -75,7 +75,7 @@ async function main() {
   );
   // const graph = createDependencyGraph();
 
-  const analysedFiles = tsFiles.slice(0, 10).map((file, idx) => {
+  const analysedFiles = tsFiles.slice(0, 20).map((file, idx) => {
     console.log("analisando", idx + 1, "de", tsFiles.length);
 
     const analyse = createTypescriptAnalyser(

@@ -1,4 +1,2 @@
-import { createQueue } from "./createQueue";
-export { createQueue };
-import { createWorker } from "./createWorker";
-export { createWorker };
+export { createQueue } from "./createQueue";
+export { createWorker } from "./createWorker";

@@ -38,6 +38,18 @@ class TypescriptAnalyzer {
           }
         }
       }
+      // Analisar declarações de exportação inline
+      if (ts.isExportDeclaration(node) && node.moduleSpecifier) {
+        const exportPath = (node.moduleSpecifier as ts.StringLiteral).text;
+        if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+          node.exportClause.elements.forEach((element) => {
+            analysis.imports.push({
+              name: element.name.text,
+              path: path.join(path.dirname(this.pathLocation), exportPath),
+            });
+          });
+        }
+      }
     });
   }
 
