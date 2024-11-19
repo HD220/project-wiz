@@ -1,5 +1,6 @@
 // Lista de palavras comuns a serem ignoradas
 const stopWords = [
+  "index",
   "get",
   "fetch",
   "create",

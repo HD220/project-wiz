@@ -1,2 +1,4 @@
-export { createOpenAI } from "./createOpenAI";
-export { OpenAIClient, PromptTypes } from "./OpenAIClient";
+import { createOpenAI } from "./createOpenAI";
+export { createOpenAI };
+import { OpenAIClient, PromptTypes } from "./OpenAIClient";
+export { OpenAIClient, PromptTypes };

@@ -1,1 +1,2 @@
-export { connectRedis } from "./connectRedis";
+import { connectRedis } from "./connectRedis";
+export { connectRedis };

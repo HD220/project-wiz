@@ -1,2 +1,4 @@
-export { generateJWT } from "./generateJWT";
-export { getOctoKit } from "./getOctoKit";
+import { generateJWT } from "./generateJWT";
+export { generateJWT };
+import { getOctoKit } from "./getOctoKit";
+export { getOctoKit };

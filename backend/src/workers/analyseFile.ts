@@ -9,7 +9,7 @@ import {
   Embeddings,
 } from "chromadb";
 import { randomUUID } from "crypto";
-import { createChroma } from "@/services/chroma/createChroma";
+import { createChroma } from "@/services/chroma";
 
 import path from "node:path";
 import { DelayedError, WaitingChildrenError } from "bullmq";

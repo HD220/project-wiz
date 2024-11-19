@@ -12,7 +12,9 @@ import { chatCompletionWorker } from "./workers/chatCompletion";
 import { createDependencyGraph } from "./services/anyliser/dependencyGraphBuilder";
 import { createSimpleGit } from "./services/simple-git";
 import { createTypescriptAnalyser } from "./services/anyliser/typescryptAnalyser";
-import { FileNode, ModuleAnalyzer } from "./services/anyliser/moduleAnalyser";
+// import { FileNode, ModuleAnalyzer } from "./services/anyliser/moduleAnalyser";
+import { GraphBuilder, FileNode } from "./services/anyliser/GraphBuilder";
+import { tokenize } from "./utils/generateModuleName";
 
 type ResponseData = {
   data: {
@@ -73,7 +75,7 @@ async function main() {
   );
   // const graph = createDependencyGraph();
 
-  const analysedFiles = tsFiles.map((file, idx) => {
+  const analysedFiles = tsFiles.slice(0, 10).map((file, idx) => {
     console.log("analisando", idx + 1, "de", tsFiles.length);
 
     const analyse = createTypescriptAnalyser(
@@ -85,9 +87,20 @@ async function main() {
       file.filePath
     ).analyze();
 
+    console.log(file.filePath, "imports", analyse.imports.length);
+
     return {
-      filePath: file.filePath.replace(".ts", "").replace(".tsx", ""),
+      filePath: path.resolve(
+        process.cwd(),
+        "data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae",
+        file.filePath
+          .replace("index.tsx", "")
+          .replace("index.ts", "")
+          .replace(".tsx", "")
+          .replace(".ts", "")
+      ),
       imports: analyse.imports.map((imp) => imp.path),
+      content: analyse.blocks.map((block) => block.name).join("_"),
     };
     // graph.addFileAnalysis(analyse);
   });
@@ -95,15 +108,13 @@ async function main() {
   // console.log("graph", graph.getGraphInfo());
 
   // Exemplo de uso:
-  const analyzer = new ModuleAnalyzer();
+
   const files: FileNode[] = analysedFiles.map((file) => ({
     path: file.filePath,
-    description: "",
     imports: file.imports,
+    tokens: tokenize(file.content),
   }));
-  const moduleGroups = analyzer.analyzeModules(files);
-
-  console.log("Módulos identificados:", moduleGroups);
+  new GraphBuilder(files);
 
   // setTimeout(async () => {
   //   //remove pendentes

@@ -1,1 +1,2 @@
-export { createChromaClient } from "./createChroma";
+import { createChroma } from "./createChroma";
+export { createChroma };

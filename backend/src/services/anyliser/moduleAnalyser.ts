@@ -1,4 +1,6 @@
+import { generateModuleName } from "@/utils/generateModuleName";
 import { Graph } from "@dagrejs/graphlib";
+import path from "path";
 
 export type FileNode = {
   path: string;
@@ -10,7 +12,7 @@ export type FileNode = {
 
 export type ModuleGroup = {
   files: string[];
-  //   name: string,
+  name: string;
   //   description: string;
   cohesion: number;
   coupling: number;
@@ -41,14 +43,16 @@ export class ModuleAnalyzer {
   private buildDependencyGraph(files: FileNode[]) {
     // Adicionar nós
     files.forEach((file) => {
+      // console.log("add node", file.path);
       this.graph.setNode(file.path, file);
     });
 
     // Adicionar arestas baseadas em imports/exports
     files.forEach((file) => {
       file.imports.forEach((imp) => {
+        // console.log("add edge", imp, "from", file.path);
         if (this.graph.hasNode(imp)) {
-          this.graph.setEdge(file.path, imp);
+          this.graph.setEdge(file.path, imp, { weigth: 1 });
         }
       });
     });
@@ -56,111 +60,139 @@ export class ModuleAnalyzer {
 
   private calculateEdgeWeights() {
     this.graph.edges().forEach((e) => {
-      const weight = this.calculateEdgeWeight(
-        this.graph.node(e.v),
-        this.graph.node(e.w)
-      );
+      const source = this.graph.node(e.v) as FileNode;
+      const target = this.graph.node(e.w) as FileNode;
+      const weight = this.calculateEdgeWeight(source, target);
       this.graph.setEdge(e.v, e.w, { weight });
     });
   }
 
   private calculateEdgeWeight(source: FileNode, target: FileNode): number {
-    let weight = 0;
+    let weight = 1;
 
-    // 1. Peso baseado em imports diretos
-    weight += 1;
-
-    // 2. Peso baseado em similaridade de conteúdo
-    weight += this.calculateContentSimilarity(source, target);
-
-    // 3. Peso baseado em padrões de nome/caminho
-    weight += this.calculatePathSimilarity(source.path, target.path);
-
-    // 4. Peso baseado em similaridade semântica das descrições
-    weight += this.calculateDescriptionSimilarity(
-      source.description,
-      target.description
+    // 1. Peso baseado em coesão entre os arquivos
+    const sharedNeighbors = this.calculateSharedNeighbors(
+      source.path,
+      target.path
     );
+    weight += sharedNeighbors;
+
+    // 2. Peso baseado em acoplamento (número de conexões externas)
+    const sourceDegree = this.graph.neighbors(source.path)?.length || 0;
+    const targetDegree = this.graph.neighbors(target.path)?.length || 0;
+    weight += 1 / (sourceDegree + targetDegree + 1); // Penaliza arquivos com muitas conexões externas
+
+    // 3. Similaridade de caminho
+    weight += this.calculatePathSimilarity(source.path, target.path);
 
     return weight;
   }
 
-  private calculateContentSimilarity(file1: FileNode, file2: FileNode): number {
-    // Implementar similaridade usando TF-IDF ou outra métrica
-    return 0;
+  private calculateSharedNeighbors(path1: string, path2: string): number {
+    const neighbors1 = new Set(this.graph.neighbors(path1) || []);
+    const neighbors2 = new Set(this.graph.neighbors(path2) || []);
+    const shared = [...neighbors1].filter((n) => neighbors2.has(n));
+    return shared.length;
   }
 
   private calculatePathSimilarity(path1: string, path2: string): number {
-    const segments1 = path1.split("/");
-    const segments2 = path2.split("/");
-    const commonSegments =
-      segments1.length >= segments2.length
-        ? segments1.reduce((acc, cur, idx) => {
-            if (segments2[idx] !== undefined) return acc + 1;
-            return acc;
-          }, 0)
-        : segments2.reduce((acc, cur, idx) => {
-            if (segments1[idx] !== undefined) return acc + 1;
-            return acc;
-          }, 0);
-    return commonSegments / Math.max(segments1.length, segments2.length);
-  }
-
-  private calculateDescriptionSimilarity(desc1: string, desc2: string): number {
-    // Implementar similaridade semântica usando embeddings ou outra técnica
-    return 0;
+    const segments1 = path1.split("\\");
+    const segments2 = path2.split("\\");
+    const commonSegments = segments1.filter(
+      (seg, idx) => seg === segments2[idx]
+    );
+    return commonSegments.length / Math.max(segments1.length, segments2.length);
   }
 
   private detectCommunities(): ModuleGroup[] {
-    return this.louvainCommunityDetection();
-  }
-
-  private louvainCommunityDetection(): ModuleGroup[] {
     const communities: ModuleGroup[] = [];
-    const nodes = this.graph.nodes();
-    let currentCommunity: string[] = [];
-
-    // Implementação simplificada do algoritmo de Louvain
     const visited = new Set<string>();
 
-    const processNode = (node: string) => {
-      if (visited.has(node)) return;
+    // Ordenar nós pelo peso acumulado das arestas
+    const nodesSortedByEdgeWeight = this.graph
+      .nodes()
+      .sort(
+        (a, b) => this.calculateNodeWeight(b) - this.calculateNodeWeight(a)
+      );
 
-      visited.add(node);
-      currentCommunity.push(node);
-
-      // Encontrar vizinhos com maior modularity
-      const neighbors = this.graph.neighbors(node);
-      if (!neighbors) return;
-
-      neighbors
-        .filter((n) => !visited.has(n))
-        .sort((a, b) => {
-          const weightA = this.graph.edge(node, a)?.weight || 0;
-          const weightB = this.graph.edge(node, b)?.weight || 0;
-          return weightB - weightA;
-        })
-        .forEach(processNode);
-    };
-
-    // Processar cada nó não visitado
-    nodes.forEach((node) => {
+    nodesSortedByEdgeWeight.forEach((node) => {
       if (!visited.has(node)) {
-        currentCommunity = [];
-        processNode(node);
+        const currentCommunity = this.collectCommunity(node, visited);
 
-        if (currentCommunity.length > 0) {
-          communities.push({
-            files: currentCommunity,
-            cohesion: this.calculateGroupCohesion(currentCommunity),
-            coupling: this.calculateGroupCoupling(currentCommunity),
-            centralFile: this.findCentralFile(currentCommunity),
-          });
-        }
+        const cohesion = this.calculateGroupCohesion(currentCommunity);
+        const coupling = this.calculateGroupCoupling(currentCommunity);
+
+        communities.push({
+          files: currentCommunity,
+          name: "",
+          cohesion,
+          coupling,
+          centralFile: this.findCentralFile(currentCommunity),
+        });
       }
     });
 
     return communities;
+  }
+
+  private calculateNodeWeight(node: string): number {
+    const neighbors = this.graph.neighbors(node) || [];
+    return neighbors.reduce((sum, neighbor) => {
+      const edge = this.graph.edge(node, neighbor) as { weight: number };
+      return sum + (edge?.weight || 0);
+    }, 0);
+  }
+
+  // private louvainCommunityDetection(): ModuleGroup[] {
+  //   const communities: ModuleGroup[] = [];
+  //   const visited = new Set<string>();
+
+  //   this.graph.nodes().forEach((node) => {
+  //     if (!visited.has(node)) {
+  //       const currentCommunity = this.collectCommunity(node, visited);
+
+  //       const cohesion = this.calculateGroupCohesion(currentCommunity);
+  //       const coupling = this.calculateGroupCoupling(currentCommunity);
+
+  //       console.log(node, cohesion, coupling);
+
+  //       communities.push({
+  //         files: currentCommunity,
+  //         name: "",
+  //         cohesion,
+  //         coupling,
+  //         centralFile: this.findCentralFile(currentCommunity),
+  //       });
+  //     }
+  //   });
+
+  //   return communities;
+  // }
+
+  private collectCommunity(node: string, visited: Set<string>): string[] {
+    const community: string[] = [];
+    const stack = [node];
+
+    while (stack.length) {
+      const current = stack.pop()!;
+      if (!visited.has(current)) {
+        visited.add(current);
+        community.push(current);
+
+        // Obter vizinhos ordenados pelo peso das arestas
+        const neighbors = (this.graph.neighbors(current) || [])
+          .filter((n) => !visited.has(n))
+          .sort((a, b) => {
+            const edgeA = this.graph.edge(current, a) as { weight: number };
+            const edgeB = this.graph.edge(current, b) as { weight: number };
+            return (edgeB?.weight || 0) - (edgeA?.weight || 0);
+          });
+
+        stack.push(...neighbors);
+      }
+    }
+
+    return community;
   }
 
   private calculateGroupCohesion(files: string[]): number {
@@ -184,6 +216,7 @@ export class ModuleAnalyzer {
 
     files.forEach((file) => {
       const neighbors = this.graph.neighbors(file) || [];
+
       neighbors.forEach((neighbor) => {
         if (!fileSet.has(neighbor)) {
           externalEdges++;
@@ -219,7 +252,20 @@ export class ModuleAnalyzer {
     // 3. Otimizar baseado em métricas
     // groups = this.optimizeGroups(groups);
 
-    return groups;
+    return groups.map((group) => {
+      // console.log("group:", group.centralFile, "width", group.files.length);
+      console.log(
+        "group_names",
+        group.files.map((file) => this.graph.node(file).description)
+      );
+
+      return {
+        ...group,
+        name: generateModuleName(
+          group.files.map((file) => this.graph.node(file).description)
+        ),
+      };
+    });
   }
 
   private mergeSmallGroups(groups: ModuleGroup[]): ModuleGroup[] {
