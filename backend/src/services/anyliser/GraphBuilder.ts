@@ -7,24 +7,21 @@ export type FileNode = {
 };
 
 export type ModuleGroup = {
-  files: string[];
   name: string;
+  files: string[];
+  centralFile?: string;
   cohesion: number;
   coupling: number;
-  centralFile?: string;
 };
 
 export class GraphBuilder {
   private graph: graphlib.Graph;
-  private nodeScores: Map<string, number>;
 
   constructor(files: FileNode[]) {
     this.graph = new graphlib.Graph({ directed: true });
-    this.nodeScores = new Map();
     this.buildGraph(files);
-    // this.discoveryGroups();
-    this.calculateNodeScores();
-    console.log("nodeScores", this.nodeScores);
+    this.calculateCohesionAndCoupling();
+    console.log("modules", this.identifyClusters(0.5, 0.5));
   }
 
   private buildGraph(files: FileNode[]) {
@@ -35,7 +32,7 @@ export class GraphBuilder {
     files.forEach((file) => {
       file.imports.forEach((imp) => {
         if (this.graph.hasNode(imp)) {
-          this.graph.setEdge(file.path, imp);
+          this.graph.setEdge(file.path, imp, { cohesion: 0, coupling: 0 });
         }
       });
     });
@@ -49,56 +46,103 @@ export class GraphBuilder {
     });
   }
 
-  private calculateNodeScores(): void {
-    // Ordenação topológica para garantir que os predecessores sejam visitados antes
-    const nodes = this.graph.nodes();
-    const sortedNodes = this.topologicalSort(nodes);
+  private calculateCohesionAndCoupling(): void {
+    this.graph.edges().forEach((edge) => {
+      const source = edge.v as string;
+      const target = edge.w as string;
 
-    // Inicializar pontuações
-    sortedNodes.forEach((node) => this.nodeScores.set(node, 0));
+      let internalEdges = 0;
+      let externalEdges = 0;
 
-    // Calcular pontuações
-    sortedNodes.forEach((node) => {
-      const predecessors = this.graph.predecessors(node) || [];
-      const score = predecessors.reduce(
-        (sum, pred) => sum + (this.nodeScores.get(pred) || 0) + 1,
-        0
-      );
-      this.nodeScores.set(node, score);
+      const sourceNeighbors = this.graph.successors(source) || [];
+      const targetNeighbors = this.graph.successors(target) || [];
+
+      sourceNeighbors.forEach((neighbor) => {
+        if (neighbor === target || this.graph.hasEdge(neighbor, target)) {
+          internalEdges++;
+        } else {
+          externalEdges++;
+        }
+      });
+
+      targetNeighbors.forEach((neighbor) => {
+        if (neighbor === source || this.graph.hasEdge(neighbor, source)) {
+          internalEdges++;
+        } else {
+          externalEdges++;
+        }
+      });
+
+      const totalEdges = internalEdges + externalEdges;
+      const cohesion = totalEdges === 0 ? 0 : internalEdges / totalEdges;
+      const coupling = totalEdges === 0 ? 0 : externalEdges / totalEdges;
+
+      this.graph.edge(edge).cohesion = cohesion;
+      this.graph.edge(edge).coupling = coupling;
     });
   }
 
-  private topologicalSort(nodes: string[]): string[] {
-    const visited = new Set<string>();
-    const stack: string[] = [];
+  public identifyClusters(
+    thresholdCohesion: number,
+    thresholdCoupling: number
+  ): ModuleGroup[] {
+    const clusters: ModuleGroup[] = [];
+    const visitedNodes: Set<string> = new Set();
 
-    const visit = (node: string) => {
-      if (!visited.has(node)) {
-        visited.add(node);
-        const neighbors = this.graph.successors(node) || [];
-        neighbors.forEach(visit);
-        stack.push(node);
+    this.graph.nodes().forEach((node) => {
+      if (!visitedNodes.has(node)) {
+        const cluster: ModuleGroup = {
+          files: [],
+          name: `Cluster ${clusters.length + 1}`,
+          cohesion: 0,
+          coupling: 0,
+        };
+
+        this.exploreCluster(
+          node,
+          cluster,
+          visitedNodes,
+          thresholdCohesion,
+          thresholdCoupling
+        );
+        clusters.push(cluster);
       }
-    };
+    });
 
-    nodes.forEach(visit);
-    return stack.reverse();
+    return clusters;
   }
 
-  private discoveryGroups() {
-    const dijkstra = graphlib.alg.floydWarshall(this.graph);
-    console.log(
-      "dijkstra",
-      Object.entries(dijkstra).map(([node, path]) => ({
-        node,
-        targets: Object.entries(path)
-          .filter(
-            ([, path]) => path.distance !== Infinity && path.distance !== 0
-          )
-          .map(([dest, path]) =>
-            JSON.stringify({ dest: dest, distance: path.distance })
-          ),
-      }))
-    );
+  private exploreCluster(
+    node: string,
+    cluster: ModuleGroup,
+    visitedNodes: Set<string>,
+    thresholdCohesion: number,
+    thresholdCoupling: number
+  ): void {
+    cluster.files.push(node);
+    visitedNodes.add(node);
+
+    const neighbors = this.graph.successors(node) || [];
+
+    neighbors.forEach((neighbor) => {
+      if (!visitedNodes.has(neighbor)) {
+        const edge = this.graph.edge(node, neighbor);
+        if (
+          edge.cohesion >= thresholdCohesion &&
+          edge.coupling <= thresholdCoupling
+        ) {
+          cluster.cohesion += edge.cohesion;
+          cluster.coupling += edge.coupling;
+
+          this.exploreCluster(
+            neighbor,
+            cluster,
+            visitedNodes,
+            thresholdCohesion,
+            thresholdCoupling
+          );
+        }
+      }
+    });
   }
 }

@@ -32,7 +32,9 @@ export async function connectRedis() {
         timestamp: number;
         status?: "analysing" | "analysed";
       };
-    };
+    } | null;
+
+    if (!versions) return null;
 
     const [lastestVersion] = Object.entries(versions)
       .filter(([, value]) => value.status === "analysed")

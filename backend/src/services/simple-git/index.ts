@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { simpleGit, CleanOptions, SimpleGitOptions } from "simple-git";
 import { randomUUID } from "node:crypto";
 
-const options: Partial<SimpleGitOptions> = {
+const DEFAULT_OPTIONS: Partial<SimpleGitOptions> = {
   binary: "git",
   maxConcurrentProcesses: 6,
   trimmed: false,
@@ -14,11 +14,25 @@ export const createSimpleGit = async ({
 }: {
   basePath?: string;
 }) => {
-  const sg = simpleGit({ ...options });
+  const sg = simpleGit({ ...DEFAULT_OPTIONS });
   await sg.clean(CleanOptions.FORCE);
 
+  const resolveRepoPath = (hash: string) => path.resolve(basePath, hash);
+
+  const deletePathIfExists = (dir: string) => {
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { force: true, recursive: true });
+    }
+  };
+
+  const moveRepo = (source: string, destination: string) => {
+    deletePathIfExists(destination);
+    fs.renameSync(source, destination);
+  };
+
   async function getFilesDiff(commitHash: string, previousCommitHash: string) {
-    await sg.cwd(path.resolve(basePath, commitHash));
+    const repoPath = resolveRepoPath(commitHash);
+    await sg.cwd(repoPath);
 
     const diffSummary = await sg.diff([
       "--name-status",
@@ -28,53 +42,43 @@ export const createSimpleGit = async ({
 
     const lines = diffSummary.split("\n");
 
-    const modifiedFiles: {
-      filePath: string;
-      status: "A" | "I" | "R" | "M";
-    }[] = lines
+    const modifiedFiles = lines
       .map((line) => {
         const [status, filePath] = line.split("\t");
-        return {
-          status,
-          filePath,
-        } as {
+        return { status, filePath } as {
           filePath: string;
           status: "A" | "I" | "R" | "M";
         };
       })
       .filter(({ filePath }) => Boolean(filePath));
 
-    const tsFiles = modifiedFiles.filter(({ filePath }) => {
-      return filePath.endsWith(".ts") || filePath.endsWith(".tsx");
-    });
+    const filterFilesByExtensions = (extensions: string[]) =>
+      modifiedFiles.filter(({ filePath }) =>
+        extensions.some((ext) => filePath.endsWith(ext))
+      );
 
-    const docFiles = modifiedFiles.filter(
-      ({ filePath }) => filePath.endsWith(".md") || filePath.endsWith(".mdx")
-    );
-
-    return { tsFiles, docFiles };
+    return {
+      tsFiles: filterFilesByExtensions([".ts", ".tsx"]),
+      docFiles: filterFilesByExtensions([".md", ".mdx"]),
+    };
   }
 
   async function clone(url: string) {
     try {
-      const repositoriePath = path.resolve(basePath, randomUUID());
+      const tempRepoPath = path.resolve(basePath, randomUUID());
 
-      if (fs.existsSync(repositoriePath))
-        fs.rmSync(repositoriePath, { force: true, recursive: true });
+      deletePathIfExists(tempRepoPath);
+      await sg.clone(url, tempRepoPath);
 
-      await sg.clone(url, repositoriePath);
-
-      await sg.cwd(repositoriePath);
+      await sg.cwd(tempRepoPath);
       const { latest } = await sg.log();
 
-      const newPath = path.resolve(basePath, latest!.hash);
+      if (!latest) throw new Error("No commits found in repository");
 
-      if (fs.existsSync(newPath)) {
-        fs.rmSync(newPath, { force: true, recursive: true });
-      }
-      fs.renameSync(repositoriePath, newPath);
+      const finalRepoPath = resolveRepoPath(latest.hash);
+      moveRepo(tempRepoPath, finalRepoPath);
 
-      return latest!.hash;
+      return latest.hash;
     } catch (error) {
       console.error({ message: "simple-git", error });
       return "";
@@ -82,29 +86,34 @@ export const createSimpleGit = async ({
   }
 
   async function pull(hash: string) {
-    const from = path.resolve(basePath, hash);
-    const to = path.resolve(basePath, randomUUID());
+    const sourcePath = resolveRepoPath(hash);
+    const tempRepoPath = path.resolve(basePath, randomUUID());
 
-    fs.cpSync(from, to, { recursive: true });
-
-    await sg.cwd(to);
+    fs.cpSync(sourcePath, tempRepoPath, { recursive: true });
+    await sg.cwd(tempRepoPath);
     await sg.pull();
 
-    const lastCommitHash = (await sg.log()).latest!.hash;
-    if (fs.existsSync(path.resolve(basePath, lastCommitHash))) {
-      fs.rmSync(to, { force: true, recursive: true });
+    const { latest } = await sg.log();
+    if (!latest) throw new Error("Failed to retrieve the latest commit hash");
+
+    const finalRepoPath = resolveRepoPath(latest.hash);
+
+    if (fs.existsSync(finalRepoPath)) {
+      deletePathIfExists(tempRepoPath);
     } else {
-      fs.renameSync(to, path.resolve(basePath, lastCommitHash));
+      moveRepo(tempRepoPath, finalRepoPath);
     }
 
-    return lastCommitHash;
+    return latest.hash;
   }
+
+  const firstCommitHash = await sg.firstCommit();
 
   return {
     getFilesDiff,
     clone,
-    firstCommit: await sg.firstCommit(),
-    core: sg,
     pull,
+    firstCommit: firstCommitHash,
+    core: sg,
   };
 };

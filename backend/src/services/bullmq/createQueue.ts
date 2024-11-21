@@ -1,10 +1,15 @@
 import { Queue } from "bullmq";
 import { connection } from "./config";
+import { WorkerInputBase } from "./types";
 
-export const createQueue = <WorkerData, WorkerReturn = unknown>(
+export const createQueue = <
+  WorkerInputData extends WorkerInputBase = any,
+  WorkerOutputData = any,
+  Name extends string = string,
+>(
   name: string
 ) => {
-  const queue = new Queue<WorkerData, WorkerReturn>(name, {
+  const queue = new Queue<WorkerInputData, WorkerOutputData, Name>(name, {
     connection,
     defaultJobOptions: {
       removeOnComplete: true,

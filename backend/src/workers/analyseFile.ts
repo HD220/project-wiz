@@ -1,19 +1,17 @@
 import { BlockInfo } from "@/services/anyliser/types";
-import { createQueue, createWorker } from "../services/bullmq";
 import {
-  DefaultEmbeddingFunction,
   AddRecordsParams,
+  DefaultEmbeddingFunction,
   Embedding,
   IncludeEnum,
   Metadata,
-  Embeddings,
 } from "chromadb";
-import { randomUUID } from "crypto";
+import { createQueue, createWorker } from "@/services/bullmq";
 import { createChroma } from "@/services/chroma";
-
+import { chatCompletionQueue } from "./chatCompletion";
 import path from "node:path";
 import { DelayedError, WaitingChildrenError } from "bullmq";
-import { chatCompletionQueue } from "./chatCompletion";
+import { randomUUID } from "node:crypto";
 
 const chromaClient = createChroma();
 
@@ -137,7 +135,8 @@ export const analyseFileWorker = createWorker<AnalyseFileWorkerData>(
         const promptResults:
           | { id: string; result: string; usage: number }[]
           | undefined = Object.entries(childrenResult).map(
-          ([, result]) => result
+          ([, result]) =>
+            result as { id: string; result: string; usage: number }[]
         )[0];
 
         try {
@@ -175,27 +174,30 @@ export const analyseFileWorker = createWorker<AnalyseFileWorkerData>(
                 .length,
               " blocks into chroma"
             );
-            const doc = documents
-              .filter((doc) => doc.metadata?.commitHash !== commitHash)
-              .reduce(
-                (acc, cur) => ({
-                  ids: [...(acc.ids || []), randomUUID()],
-                  documents: [...(acc.documents || []), cur.document || ""],
-                  embeddings: [
-                    ...(Array.isArray(acc.embeddings) ? acc.embeddings : []),
-                    cur.embedding || [],
-                  ] as Embeddings,
-                  metadata: [
-                    ...(Array.isArray(acc.metadatas) ? acc.metadatas : []),
-                    {
-                      ...cur.metadata,
-                      commitHash,
-                    },
-                  ],
-                }),
-                {} as AddRecordsParams
-              );
-            await collection.add(doc);
+
+            // const doc = documents
+            //   .filter((doc) => doc.metadata?.commitHash !== commitHash)
+            //   .reduce(
+            //     (acc, cur) => ({
+            //       ids: [...(acc.ids || []), randomUUID()],
+            //       documents: [...(acc.documents || []), cur.document || ""],
+            //       embeddings: [
+            //         ...(Array.isArray(acc.embeddings) ? acc.embeddings : []),
+            //         cur.embedding || [],
+            //       ] as Embeddings,
+            //       metadata: [
+            //         ...(Array.isArray(acc.metadatas) ? acc.metadatas : []),
+            //         {
+            //           ...cur.metadata,
+            //           commitHash,
+            //         },
+            //       ],
+            //     }),
+            //     {} as AddRecordsParams
+            //   );
+            await collection.add(
+              createAddRecordsParamsForDocuments(documents, commitHash)
+            );
           }
         } catch (error) {
           console.error({ error });
@@ -214,3 +216,25 @@ export const analyseFileWorker = createWorker<AnalyseFileWorkerData>(
     }
   }
 );
+
+function createAddRecordsParamsForDocuments(documents, commitHash) {
+  const initialParams: AddRecordsParams = {
+    ids: [],
+    documents: [],
+    embeddings: [],
+    metadatas: [],
+  };
+
+  return documents
+    .filter((doc) => doc.metadata?.commitHash !== commitHash)
+    .reduce((acc, cur) => {
+      acc.ids.push(randomUUID());
+      acc.documents.push(cur.documents || "");
+      acc.embeddings.push(cur.embeddings || []);
+      acc.metadatas.push({
+        ...cur.metadatas,
+        commitHash,
+      });
+      return acc;
+    }, initialParams);
+}
