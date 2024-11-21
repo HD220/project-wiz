@@ -1,0 +1,216 @@
+[
+  {
+    "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/index.ts",
+    "imports": [
+      {
+        "name": "dotenv",
+        "alias": "dotenv",
+        "path": "dotenv",
+        "isNamespace": true,
+        "isLib": true,
+        "isDefault": false
+      },
+      {
+        "name": "installationQueue",
+        "alias": "installationQueue",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/installation.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "installationWorker",
+        "alias": "installationWorker",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/installation.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "connectRedis",
+        "alias": "connectRedis",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/services/redis/index.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "defaultBranchChangeWorker",
+        "alias": "defaultBranchChangeWorker",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/branchChange.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "path",
+        "alias": "path",
+        "path": "node:path",
+        "isNamespace": false,
+        "isLib": true,
+        "isDefault": true
+      },
+      {
+        "name": "fs",
+        "alias": "fs",
+        "path": "node:fs",
+        "isNamespace": false,
+        "isLib": true,
+        "isDefault": true
+      },
+      {
+        "name": "analyseRepositoryWorker",
+        "alias": "analyseRepositoryWorker",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/analyseRepository.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "analyseFileWorker",
+        "alias": "analyseFileWorker",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/analyseFile.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "chatCompletionWorker",
+        "alias": "chatCompletionWorker",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/chatCompletion.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      }
+    ],
+    "exports": [],
+    "blocks": [
+      {
+        "hash": "096024c284e7ce7c4f8e2b01c29c8e3b846a3a93",
+        "name": "ResponseData",
+        "kind": "265",
+        "content": "type ResponseData = {\r\n  data: {\r\n    installations: {\r\n      [id: string]: {\r\n        id: number;\r\n        repository_selection: string;\r\n        created_at: Date;\r\n        updated_at: Date;\r\n      };\r\n    };\r\n    repositories: {\r\n      [id: string]: {\r\n        id: number;\r\n        name: string;\r\n        owner: string;\r\n        is_batch_api: boolean;\r\n      };\r\n    };\r\n  };\r\n};",
+        "start": 13,
+        "end": 32
+      },
+      {
+        "hash": "62839e91716b56347cf05bc335b5d86979c527ec",
+        "name": "main",
+        "kind": "262",
+        "content": "async function main() {\r\n  const workingDirectory = path.resolve(process.cwd(), \"./data/repos\");\r\n\r\n  try {\r\n    if (!fs.existsSync(workingDirectory)) {\r\n      fs.mkdirSync(workingDirectory, { recursive: true });\r\n    }\r\n  } catch (error) {\r\n    console.error(error);\r\n  }\r\n\r\n  const redis = await connectRedis();\r\n  const data = (await redis.getItemsByKeyPattern(\r\n    \"user:*\"\r\n  )) as unknown as ResponseData[];\r\n\r\n  const repositories = data\r\n    .map((item: ResponseData) =>\r\n      Object.entries(item.data.repositories).map(([, repo]) => ({ ...repo }))\r\n    )\r\n    .reduce((acc, cur) => [...acc, ...cur], []);\r\n\r\n  installationWorker.run();\r\n  defaultBranchChangeWorker.run();\r\n  analyseRepositoryWorker.run();\r\n  analyseFileWorker.run();\r\n  chatCompletionWorker.run();\r\n  // generateGraphWorker.run();\r\n  // await installationQueue.removeJobScheduler(\"tst\");\r\n\r\n  setTimeout(async () => {\r\n    //remove pendentes\r\n    await installationQueue.drain();\r\n\r\n    //insere nova job\r\n    console.log(\"installation queued\");\r\n    await installationQueue.add(\r\n      \"new-installation\",\r\n      {\r\n        repositories,\r\n        type: \"installation\",\r\n      },\r\n      { removeOnComplete: true, removeOnFail: true }\r\n    );\r\n  }, 500);\r\n}",
+        "start": 34,
+        "end": 79
+      }
+    ]
+  },
+  {
+    "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/installation.ts",
+    "imports": [
+      {
+        "name": "createSimpleGit",
+        "alias": "createSimpleGit",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/services/simple-git/index.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "createQueue",
+        "alias": "createQueue",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/services/bullmq/index.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "createWorker",
+        "alias": "createWorker",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/services/bullmq/index.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "generateJWT",
+        "alias": "generateJWT",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/services/github/index.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "analyseRepositoryQueue",
+        "alias": "analyseRepositoryQueue",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/workers/analyseRepository.ts",
+        "isNamespace": false,
+        "isLib": false,
+        "isDefault": false
+      },
+      {
+        "name": "DelayedError",
+        "alias": "DelayedError",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/node_modules/bullmq/dist/esm/index.d.ts",
+        "isNamespace": false,
+        "isLib": true,
+        "isDefault": false
+      },
+      {
+        "name": "WaitingChildrenError",
+        "alias": "WaitingChildrenError",
+        "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/node_modules/bullmq/dist/esm/index.d.ts",
+        "isNamespace": false,
+        "isLib": true,
+        "isDefault": false
+      }
+    ],
+    "exports": [
+      {
+        "name": "installationQueue",
+        "alias": "installationQueue",
+        "isDefault": false,
+        "isNamespace": false
+      },
+      {
+        "name": "InstallationWorkerData",
+        "alias": "InstallationWorkerData",
+        "isDefault": false,
+        "isNamespace": false
+      },
+      {
+        "name": "installationWorker",
+        "alias": "installationWorker",
+        "isDefault": false,
+        "isNamespace": false
+      }
+    ],
+    "blocks": [
+      {
+        "hash": "a5a5a84849ffe787c61efc74b520413e4aa87907",
+        "name": "InstallationWorkerData",
+        "kind": "265",
+        "content": "export type InstallationWorkerData = {\r\n  type: \"installation\" | \"uninstallation\";\r\n  step?: \"validating\" | \"in_progress\" | \"finalizing\" | \"completed\";\r\n  repositories: {\r\n    name: string;\r\n    owner: string;\r\n  }[];\r\n};",
+        "start": 9,
+        "end": 16
+      }
+    ]
+  },
+  {
+    "path": "D:/Documentos/Pessoal/Github/project-wiz/backend/data/repos/197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend/src/services/bullmq/index.ts",
+    "imports": [],
+    "exports": [
+      {
+        "name": "createQueue",
+        "alias": "createQueue",
+        "isDefault": false,
+        "isNamespace": false
+      },
+      {
+        "name": "createWorker",
+        "alias": "createWorker",
+        "isDefault": false,
+        "isNamespace": false
+      }
+    ],
+    "blocks": []
+  }
+]
