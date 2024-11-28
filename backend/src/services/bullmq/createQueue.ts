@@ -1,9 +1,8 @@
 import { Queue } from "bullmq";
 import { connection } from "./config";
-import { WorkerInputBase } from "./types";
 
 export const createQueue = <
-  WorkerInputData extends WorkerInputBase = any,
+  WorkerInputData = any,
   WorkerOutputData = any,
   Name extends string = string,
 >(

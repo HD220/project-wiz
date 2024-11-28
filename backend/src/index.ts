@@ -1,19 +1,10 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { installationWorker } from "./workers/installation";
-import { connectRedis } from "./services/redis";
-import { defaultBranchChangeWorker } from "./workers/branchChange";
-import { analyseRepositoryWorker } from "./workers/analyseRepository";
-import { analyseFileWorker } from "./workers/analyseFile";
-import { chatCompletionWorker } from "./workers/chatCompletion";
-import { createSimpleGit } from "./services/simple-git";
-import { createTypescriptAnalyser } from "./services/anyliser/typescryptAnalyser";
 import path from "node:path";
-import { FileNode, GraphBuilder } from "./services/anyliser/GraphBuilder";
-import { tokenize } from "./utils/generateModuleName";
-import { generateDependencyGraph } from "./services/anyliser/ProjectAnalyser";
-import { writeFileSync, writeSync } from "fs-extra";
+import { writeFileSync } from "fs-extra";
+import { TypescriptRepositoryMapper } from "./services/analyzer/TypescriptRepositoryMapper";
+import { ModuleDetection } from "./services/analyzer/ModuleDetection";
 
 type ResponseData = {
   data: {
@@ -57,14 +48,24 @@ async function main() {
   const project = path.resolve(
     process.cwd(),
     "data/repos",
-    "197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend"
+    "197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae"
+    // "milli-platform"
+    // "natural"
   );
-  const extractor = await generateDependencyGraph(project);
-  writeFileSync("teste.json", JSON.stringify(extractor, null, 2));
-  // console.log(
-  //   "extractor",
-  //   extractor.map((e) => e.imports)
+  const repoMapper = new TypescriptRepositoryMapper();
+  const extracted = await repoMapper.loadRepository(project);
+
+  writeFileSync(`teste.json`, JSON.stringify(extracted, null, 2));
+
+  // const detection = new ModuleDetection(
+  //   extracted
+  //     .map((ext) => ext.analyze)
+  //     .reduce((acc, cur) => [...acc, ...cur], [])
   // );
+  // const modules = detection.buildModuleHierarchy();
+  // console.log("general modules", modules.length);
+
+  // writeFileSync(`modules_by_resolution.json`, JSON.stringify(modules, null, 2));
 }
 
 main();

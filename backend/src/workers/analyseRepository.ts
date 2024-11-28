@@ -2,7 +2,7 @@ import { createQueue, createWorker } from "../services/bullmq";
 import path from "node:path";
 import { createSimpleGit } from "@/services/simple-git";
 import { DelayedError, WaitingChildrenError } from "bullmq";
-import { createTypescriptAnalyser } from "@/services/anyliser/typescryptAnalyser";
+import { createTypescriptAnalyser } from "@/services/analyzer/typescryptAnalyser";
 import { analyseFileQueue } from "./analyseFile";
 
 type AnalyseRepositoryWorkerData = {

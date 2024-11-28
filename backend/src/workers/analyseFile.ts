@@ -1,4 +1,4 @@
-import { BlockInfo } from "@/services/anyliser/types";
+import { BlockInfo } from "@/services/analyzer/types";
 import {
   AddRecordsParams,
   DefaultEmbeddingFunction,

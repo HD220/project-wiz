@@ -1,9 +1,8 @@
 import { Worker, Processor } from "bullmq";
 import { connection } from "./config";
-import { WorkerInputBase } from "./types";
 
 export const createWorker = <
-  WorkerInputData extends WorkerInputBase = any,
+  WorkerInputData = any,
   WorkerOutputData = any,
   Name extends string = string,
 >(
