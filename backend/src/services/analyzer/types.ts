@@ -2,11 +2,6 @@ export type ImportInfo = {
   moduleSpecifier: string;
   elements: string[];
   isDefault: boolean;
-  // name: string;
-  // alias: string;
-  // path: string;
-  // isNamespace: boolean;
-  // isLib: boolean;
 };
 
 export type ExportInfo = {
@@ -14,8 +9,6 @@ export type ExportInfo = {
   type: string;
   from?: string;
   namespace?: string;
-  // isNamespace: boolean;
-  // isDefault: boolean;
 };
 
 export type BlockDependency = {
@@ -47,4 +40,12 @@ export type ModuleNode = {
   name: string;
   resolution: number;
   submodules: (ModuleNode | CodeBlockInfo)[];
+};
+
+export type ProjectAnalysis = {
+  project: string;
+  analysis: {
+    modules: string[];
+    fileAnalysis: FileAnalysisInfo[];
+  };
 };

@@ -3,8 +3,6 @@ dotenv.config();
 
 import path from "node:path";
 import { writeFileSync } from "fs-extra";
-import { TypescriptRepositoryMapper } from "./services/analyzer/TypescriptRepositoryMapper";
-import { ModuleDetection } from "./services/analyzer/ModuleDetection";
 
 type ResponseData = {
   data: {
@@ -45,23 +43,23 @@ async function main() {
   // analyseFileWorker.run();
   // chatCompletionWorker.run();
 
-  const project = path.resolve(
+  const repositoryPath = path.resolve(
     process.cwd(),
     "data/repos",
-    "197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae"
+    "197f5d11f98ea10d74b9be03de2dfe8b4f0c30ae/backend"
     // "milli-platform"
     // "natural"
   );
-  const repoMapper = new TypescriptRepositoryMapper();
-  const extracted = await repoMapper.loadRepository(project);
 
-  writeFileSync(`teste.json`, JSON.stringify(extracted, null, 2));
+  const analyzer = new EnhancedProjectAnalyzer(repositoryPath);
+  await analyzer.analyze();
 
-  // const detection = new ModuleDetection(
-  //   extracted
-  //     .map((ext) => ext.analyze)
-  //     .reduce((acc, cur) => [...acc, ...cur], [])
-  // );
+  // const repoMapper = new RepositoryAnalyzer();
+  // const extracted = await repoMapper.analyzeRepository(repositoryPath);
+
+  // writeFileSync(`teste.json`, JSON.stringify(extracted, null, 2));
+
+  // const detection = new ModuleDetection(extracted);
   // const modules = detection.buildModuleHierarchy();
   // console.log("general modules", modules.length);
 

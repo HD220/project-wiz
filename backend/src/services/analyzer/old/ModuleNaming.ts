@@ -4,12 +4,12 @@ export class ModuleNaming {
   private tfidf: TfIdf = new TfIdf();
   private tokenizer = new WordTokenizer({
     discardEmpty: true,
-    gaps: true,
   });
   // new RegexpTokenizer({
   //   pattern: /(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])|[_\-\s/\\:]/,
   // });
   private terms = new Set<string>();
+  private termsScore: Record<string, number> = {};
   private readonly stopWords = new Set([
     "index",
     "get",
@@ -62,16 +62,32 @@ export class ModuleNaming {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   }
 
+  evaluateScore() {
+    const score: Record<string, number[]> = {};
+
+    this.tfidf.documents.map((doc, idx) => {
+      return this.tfidf.listTerms(idx).forEach((tfidf) => {
+        if (!score[tfidf.term]) score[tfidf.term] = [];
+        score[tfidf.term].push(tfidf.tfidf);
+      });
+    });
+
+    this.termsScore = Object.keys(score)
+      .map((term) => ({
+        [term]:
+          score[term].reduce((acc, cur) => acc + cur, 0) /
+          this.tfidf.documents.length,
+      }))
+      .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+  }
+
   getScoreTerm(term: string) {
-    const total = this.tfidf.documents
-      .map((_, idx) => this.tfidf.tfidf(term, idx) || 0)
-      .reduce((acc, cur) => acc + cur, 0);
-    return total / this.tfidf.documents.length;
+    return this.termsScore[term];
   }
 
   getScore() {
     return new Map(
-      [...this.terms].map((term) => [term, this.getScoreTerm(term)])
+      [...this.terms].map((term) => [term, this.termsScore[term]])
     );
   }
 
