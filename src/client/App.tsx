@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "./components/ui/button";
+import { ModeToggle } from "./components/mode-toggle";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -22,6 +23,7 @@ function App() {
         >
           count is {count}
         </Button>
+        <ModeToggle />
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
