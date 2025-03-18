@@ -1,18 +1,20 @@
-import "./styles/globals.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+
+import "./styles/globals.css";
+
 import App from "./App.tsx";
-import { ThemeProvider } from "./components/providers/theme.tsx";
+import { detectLocale, dynamicActivate } from "./i18n.ts";
 
-const root = document.getElementById("root")!;
+const root = createRoot(document.getElementById("root")!);
 
-createRoot(root).render(
-  <StrictMode>
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+dynamicActivate(detectLocale()).then(() => {
+  root.render(
+    <StrictMode>
       <App />
-    </ThemeProvider>
-  </StrictMode>
-);
+    </StrictMode>
+  );
+});
 
 console.log(
   '👋 This message is being logged by "renderer.ts", included via Vite'
