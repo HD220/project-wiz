@@ -3,12 +3,14 @@ import { createRoot } from "react-dom/client";
 
 import "./styles/globals.css";
 
-import App from "./App.tsx";
-import { detectLocale, dynamicActivate } from "./i18n.ts";
+import App from "./App";
+import { detectLocale, dynamicActivate } from "./i18n";
 
 const root = createRoot(document.getElementById("root")!);
 
 dynamicActivate(detectLocale()).then(() => {
+  window.electronAPI.run("vamos navegar?");
+
   root.render(
     <StrictMode>
       <App />

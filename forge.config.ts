@@ -9,7 +9,9 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpackDir: "{node_modules/node-llama-cpp, node_modules/@node-llama-cpp}",
+    },
   },
   rebuildConfig: {},
   makers: [
@@ -19,6 +21,10 @@ const config: ForgeConfig = {
     new MakerDeb({}),
   ],
   plugins: [
+    {
+      name: "@electron-forge/plugin-auto-unpack-natives",
+      config: {},
+    },
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.
@@ -26,12 +32,12 @@ const config: ForgeConfig = {
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: "src/core/main.ts",
-          config: "vite.main.config.ts",
+          config: "vite.main.config.mts",
           target: "main",
         },
         {
           entry: "src/core/preload.ts",
-          config: "vite.preload.config.ts",
+          config: "vite.preload.config.mts",
           target: "preload",
         },
       ],

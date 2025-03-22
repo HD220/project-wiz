@@ -2,7 +2,7 @@ import { useState } from "react";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 
-import { ThemeProvider } from "./components/providers/theme.tsx";
+import { ThemeProvider } from "./components/providers/theme";
 import { Button } from "./components/ui/button";
 import { ModeToggle } from "./components/mode-toggle";
 
