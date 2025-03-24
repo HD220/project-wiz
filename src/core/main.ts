@@ -1,97 +1,13 @@
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  utilityProcess,
-  MessageChannelMain,
-  ipcRenderer,
-} from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import { EventEmitter } from "events";
-import type { LlamaUtilityMessage } from "./llama/types";
-import { fileURLToPath } from "node:url";
+import { LlamaProcessManager } from "./llama/LlamaProcessManager";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
 let mainWindow: BrowserWindow | null = null;
-let llamaProcess: Electron.UtilityProcess | null = null;
-
-function createLlamaProcess() {
-  type LlamaEventMap = {
-    [K in LlamaUtilityMessage["type"]]: [
-      data: {
-        [P in keyof Extract<
-          LlamaUtilityMessage,
-          { type: K }
-        > as P extends "type" ? never : P]: Extract<
-          LlamaUtilityMessage,
-          { type: K }
-        >[P];
-      }
-    ];
-  };
-
-  const emitter = new EventEmitter<
-    LlamaEventMap & {
-      stdout: [any];
-      stderr: [any];
-    }
-  >();
-  const { port1: mainPort, port2: childPort } = new MessageChannelMain();
-
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const workerPath = path.join(__dirname, "llama/llama-worker.js");
-  llamaProcess = utilityProcess.fork(workerPath, [], {
-    serviceName: "llama-process",
-    stdio: "pipe",
-  });
-  llamaProcess.stdout?.on("data", (data) => {
-    emitter.emit("stdout", data);
-    console.log(`[LLAMA] stdout: ${data}`);
-  });
-
-  llamaProcess.stderr?.on("data", (data) => {
-    emitter.emit("stderr", data);
-    console.error(`[LLAMA] stderr: ${data}`);
-  });
-
-  llamaProcess.on("spawn", () => {
-    llamaProcess.postMessage("init", [childPort]);
-
-    mainPort.on("message", (event) => {
-      const { data } = event;
-      const { type, ...message }: LlamaUtilityMessage = data;
-
-      if (type === "ready") {
-        childPort.emit("prompt", { text: "" });
-      }
-
-      emitter.emit(type, message);
-      // console.log(type, message);
-    });
-
-    mainPort.start();
-  });
-
-  llamaProcess.on("exit", (code) => {
-    if (code !== 0) {
-      console.error("error", `[LLAMA] Process stopped with exit code ${code}`);
-    }
-    mainPort.close();
-  });
-
-  emitter.on("prompt", (prompt) => {
-    console.log("sending", prompt);
-    mainPort.postMessage({
-      type: "prompt",
-      prompt,
-    });
-  });
-
-  return emitter;
-}
+let llamaProcessManager: LlamaProcessManager | null = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -119,23 +35,30 @@ if (started) {
 }
 
 app.on("ready", () => {
-  const processEmitter = createLlamaProcess();
+  llamaProcessManager = new LlamaProcessManager();
 
-  processEmitter.on("downloadProgress", (data) => {
-    // console.log("enviando para o renderer", data);
+  llamaProcessManager.on("downloadProgress", (data) => {
     mainWindow.webContents.send("llm:download-progress", data);
   });
 
-  processEmitter.on("loadProgress", (data) => {
+  llamaProcessManager.on("loadProgress", (data) => {
     mainWindow.webContents.send("llm:load-progress", data);
+  });
+
+  ipcMain.handle("llm:download-model", async (event, modelId) => {
+    return new Promise<void>((resolve, reject) => {
+      llamaProcessManager?.once("downloadComplete", resolve);
+      llamaProcessManager?.once("downloadError", reject);
+      llamaProcessManager?.emit("downloadModel", modelId);
+    });
   });
 
   createWindow();
 });
 
 app.on("before-quit", () => {
-  if (llamaProcess) {
-    llamaProcess.kill();
+  if (llamaProcessManager) {
+    llamaProcessManager.shutdown();
   }
 });
 

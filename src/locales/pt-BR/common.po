@@ -15,18 +15,24 @@ msgstr ""
 
 #. System Theme
 #. js-lingui-explicit-id
-#: src/client/components/messages/common.tsx:21
+#: src/client/components/messages/common.tsx:29
 msgid "common.theme.system"
 msgstr "Auto"
 
 #. Dark Theme
 #. js-lingui-explicit-id
-#: src/client/components/messages/common.tsx:13
+#: src/client/components/messages/common.tsx:21
 msgid "common.theme.dark"
 msgstr "Escuro"
 
 #. Light Theme
 #. js-lingui-explicit-id
-#: src/client/components/messages/common.tsx:5
+#: src/client/components/messages/common.tsx:13
 msgid "common.theme.light"
 msgstr "Claro"
+
+#. System Name
+#. js-lingui-explicit-id
+#: src/client/components/messages/common.tsx:5
+msgid "common.system_name"
+msgstr ""

@@ -2,6 +2,7 @@ import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 
 import { ThemeProvider } from "./components/providers/theme";
+import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Dashboard from "@/components/dashboard";
 import ActivityLog from "@/components/activity-log";
@@ -210,6 +211,7 @@ export default function App() {
           </div>
         </div>
       </I18nProvider>
+      <Toaster />
     </ThemeProvider>
   );
 }
