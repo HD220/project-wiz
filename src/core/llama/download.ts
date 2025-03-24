@@ -3,19 +3,22 @@ import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export async function modelDownload(uri: string) {
+export async function modelDownload({
+  uri,
+  onProgress
+}:{uri: string, onProgress?: (status: {
+  totalSize: number;
+  downloadedSize: number;
+}) => void}) {
   const { createModelDownloader } = await import("node-llama-cpp");
   const downloader = await createModelDownloader({
     modelUri: uri,
     dirPath: path.join(__dirname, "models"),
     parallelDownloads: 5,
     deleteTempFileOnCancel: true,
-    showCliProgress: true,
+    showCliProgress: false,
     skipExisting: true,
-    onProgress: (status) => {
-      console.log("status:", status);
-    },
-    // showCliProgress: true,
+    onProgress,
   });
   const modelPath = await downloader.download();
 

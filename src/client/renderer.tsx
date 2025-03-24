@@ -9,8 +9,6 @@ import { detectLocale, dynamicActivate } from "./i18n";
 const root = createRoot(document.getElementById("root")!);
 
 dynamicActivate(detectLocale()).then(() => {
-  window.electronAPI.run("vamos navegar?");
-
   root.render(
     <StrictMode>
       <App />

@@ -1,12 +1,10 @@
 import { defineConfig } from "vite";
 
-const external: string[] = ["node-llama-cpp", "@node-llama-cpp"];
-
-// https://vitejs.dev/config
 export default defineConfig({
   build: {
     rollupOptions: {
-      external,
+      // Externalize the native dependency and the main module so that Rollup does not attempt to bundle them.
+      external: ["@node-llama-cpp", "node-llama-cpp"],
     },
   },
 });
