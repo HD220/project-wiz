@@ -1,5 +1,13 @@
 import { Trans } from "@lingui/react/macro";
 
+export function SystemLabel() {
+  return (
+    <Trans id="common.system_name" comment="System Name">
+      Project Wiz
+    </Trans>
+  );
+}
+
 export function ThemeLightLabel() {
   return (
     <Trans id="common.theme.light" comment="Light Theme">
