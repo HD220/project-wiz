@@ -9,9 +9,7 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: {
-      unpackDir: "{node_modules/node-llama-cpp, node_modules/@node-llama-cpp}",
-    },
+    asar: true,
   },
   rebuildConfig: {},
   makers: [
@@ -39,6 +37,10 @@ const config: ForgeConfig = {
           entry: "src/core/preload.ts",
           config: "vite.preload.config.mts",
           target: "preload",
+        },
+        {
+          entry: "src/core/llama/llama-worker.ts",
+          config: "vite.worker.config.mts"
         },
       ],
       renderer: [
