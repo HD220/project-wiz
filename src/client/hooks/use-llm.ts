@@ -14,20 +14,18 @@ export function useLLM() {
   });
 
   useEffect(() => {
-    const listenerDownload = window.electronAPI.onDownloadProgress(
-      ({ progress }) => {
-        setDownloadDebounced(progress);
-      }
-    );
-
-    const listenerLoad = window.electronAPI.onLoadProgress(({ progress }) => {
-      setLoadDebounced(progress);
-    });
-
-    return () => {
-      listenerDownload();
-      listenerLoad();
-    };
+    // const listenerDownload = window.electronAPI.onDownloadProgress(
+    //   ({ progress }) => {
+    //     setDownloadDebounced(progress);
+    //   }
+    // );
+    // const listenerLoad = window.electronAPI.onLoadProgress(({ progress }) => {
+    //   setLoadDebounced(progress);
+    // });
+    // return () => {
+    //   listenerDownload();
+    //   listenerLoad();
+    // };
   }, []);
 
   return {

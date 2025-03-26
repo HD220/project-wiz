@@ -95,3 +95,6 @@ src/locales/**/*.ts
 
 # Electron-Forge
 out/
+
+
+cline_docs/node-llama-cpp
