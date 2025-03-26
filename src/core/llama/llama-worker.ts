@@ -1,144 +1,106 @@
-import { modelDownload } from "./download";
-import type { LlamaUtilityMessage } from "./types";
-import type {
-  LlamaChatSession,
-  LlamaModel,
-  LlamaContext,
+import {
+  type LlamaOptions,
+  type LlamaModelOptions,
+  type LlamaContextOptions,
+  type LlamaChatSessionOptions,
+  type LLamaChatPromptOptions,
+  type LlamaModel,
+  type LlamaContext,
+  type Llama,
 } from "node-llama-cpp";
+import { LlamaUtilityMessage } from "./types";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-enum WorkerState {
-  Downloading = "downloading",
-  Loading = "loading",
-  Prompting = "prompting",
-  Answering = "answering",
-  Standby = "standby",
-  Error = "error",
-}
+async function LlamaClient() {
+  const { getLlama, LlamaChatSession, createModelDownloader } = await import(
+    "node-llama-cpp"
+  );
 
-let state: WorkerState = WorkerState.Standby;
-let session: LlamaChatSession | null = null;
-let model: LlamaModel | null = null;
-let context: LlamaContext | null = null;
-let parentPort: Electron.MessagePortMain | null = null;
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-process.parentPort.once("message", async (event) => {
-  const { ports, data } = event;
-  const [port] = ports;
-  parentPort = port;
-  port.start();
+  let llama: Llama | null = null;
+  let model: LlamaModel | null = null;
+  let chatSession: Omit<typeof LlamaChatSession, "prototype"> | null = null;
 
-  await initializeModel(data.modelId);
-});
-
-function updateState(newState: WorkerState) {
-  state = newState;
-  parentPort?.postMessage({ type: "stateChange", state });
-}
-
-async function initializeModel(modelId: string) {
-  try {
-    const modelPath = await downloadModel(modelId);
-    await loadModel(modelPath);
-
-    updateState(WorkerState.Standby);
-    parentPort?.postMessage({ type: "ready" });
-  } catch (error) {
-    updateState(WorkerState.Error);
-    process.send?.({
-      type: "error",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-}
-
-async function downloadModel(modelId: string): Promise<string> {
-  updateState(WorkerState.Downloading);
-
-  const modelPath: string = await modelDownload({
-    uri: modelId,
-    onProgress(status) {
-      const progress = status.downloadedSize
-        ? status.downloadedSize / status.totalSize
-        : 0.0;
-      parentPort?.postMessage({ type: "downloadProgress", progress });
-    },
-  })
-    .then((modelPath: string) => {
-      parentPort?.postMessage({ type: "downloadComplete" });
-      return modelPath;
-    })
-    .catch((error) => {
-      parentPort?.postMessage({
-        type: "downloadError",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    });
-
-  return modelPath;
-}
-
-async function loadModel(modelPath: string) {
-  updateState(WorkerState.Loading);
-
-  const { getLlama, LlamaChatSession } = await import("node-llama-cpp");
-  const llama = await getLlama({
-    logger: (level, message) => {
-      parentPort?.postMessage({ type: "log", level, message });
-    },
-    progressLogs: true,
-    maxThreads: 4,
-  });
-
-  model = await llama.loadModel({
-    modelPath,
-    onLoadProgress: (progress) => {
-      parentPort?.postMessage({ type: "loadProgress", progress });
-    },
-  });
-
-  context = await model.createContext({ threads: 4 });
-  session = new LlamaChatSession({ contextSequence: context.getSequence() });
-}
-
-async function handlePrompt(prompt: string) {
-  if (!session) {
-    throw new Error("Model not initialized");
-  }
-
-  updateState(WorkerState.Prompting);
-  const response = await session.prompt(prompt, {
-    onTextChunk: (text) => {
-      updateState(WorkerState.Answering);
-      parentPort?.postMessage({ type: "textChunk", text });
-    },
-  });
-
-  updateState(WorkerState.Standby);
-  return response;
-}
-
-parentPort?.on("message", async (event: { data: LlamaUtilityMessage }) => {
-  const message = event.data;
-  try {
-    switch (message.type) {
-      case "init":
-        await initializeModel(message.modelId);
-        break;
-
-      case "prompt":
-        await handlePrompt(message.prompt);
-        break;
+  const loadLlama = async (options?: LlamaOptions) => {
+    try {
+      llama = await getLlama(options);
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    updateState(WorkerState.Error);
-    parentPort?.postMessage({
-      type: "error",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
+  };
 
-process.on("SIGKILL", () => {
-  process.abort();
-});
+  const loadModel = async (
+    uri: string,
+    options?: Omit<LlamaModelOptions, "modelPath">
+  ) => {
+    try {
+      const downloader = await createModelDownloader({
+        modelUri: uri,
+        dirPath: path.join(__dirname, "models"),
+        onProgress: ({ downloadedSize, totalSize }) => {
+          console.log("download", downloadedSize, totalSize);
+        },
+      });
+      const modelPath = await downloader.download();
+      model = await llama.loadModel({
+        ...options,
+        modelPath,
+        onLoadProgress: (progress) => {
+          console.log("progress", progress);
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const createSession = async (
+    contextOptions?: LlamaContextOptions,
+    sessionOptions?: Omit<LlamaChatSessionOptions, "contextSequence">
+  ) => {
+    try {
+      const context = await model.createContext(contextOptions);
+      const session = new LlamaChatSession({
+        ...sessionOptions,
+        contextSequence: context.getSequence(),
+      });
+      chatSession = session;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  process.parentPort.once("message", async (event) => {
+    console.log("event", event);
+    const { ports } = event;
+    const [port] = ports;
+
+    port.on("message", async (message) => {
+      const data = message.data as LlamaUtilityMessage;
+
+      switch (data.type) {
+        case "init":
+          await loadLlama(data.options);
+          port.postMessage({ type: "init-response" } as LlamaUtilityMessage);
+          console.log("llama-loaded");
+          break;
+        case "load-model":
+          await loadModel(data.uri, data.options);
+          console.log("model-loaded");
+          break;
+        case "create-session":
+          await createSession(data.contextOptions, data.sessionOptions);
+          console.log("session-created");
+        default:
+          break;
+      }
+    });
+
+    port.start();
+    port.postMessage({ type: "worker-loaded" } as LlamaUtilityMessage);
+  });
+}
+
+LlamaClient();

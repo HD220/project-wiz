@@ -45,12 +45,18 @@ export default function ModelCard({
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
-      window.electronAPI.downloadModel(model.modelId, (progress: number) => {
-        setDownloadProgress(progress);
-      });
+      await window.electronAPI.downloadModel(
+        model.modelId,
+        (progress: number) => {
+          setDownloadProgress(progress);
+        }
+      );
       toast.success(`Modelo ${model.modelId} baixado com sucesso`);
     } catch (error) {
-      toast.error(`Falha ao baixar o modelo ${model.modelId}`);
+      console.error("Erro no download:", error);
+      toast.error(
+        `Falha ao baixar o modelo ${model.modelId}: ${error.message}`
+      );
     } finally {
       setIsDownloading(false);
       setDownloadProgress(0);
