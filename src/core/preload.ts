@@ -51,4 +51,11 @@ const electronAPI: ElectronAPI = {
   },
 };
 
-contextBridge.exposeInMainWorld("electronAPI", electronAPI);
+contextBridge.exposeInMainWorld("electronAPI", {
+  ...electronAPI,
+  createLlamaChannel: () => {
+    const { port1, port2 } = new MessageChannel();
+    ipcRenderer.postMessage("llama-port", null, [port2]);
+    return port1;
+  },
+});

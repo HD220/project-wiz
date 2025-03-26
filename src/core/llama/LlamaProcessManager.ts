@@ -4,20 +4,31 @@ import {
   UtilityProcess,
   utilityProcess,
 } from "electron";
-import type { LlamaUtilityMessage } from "./types";
 import { EventEmitter } from "node:stream";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import LlamaWorkerFactory from "./LlamaWorkerFactory";
+import {
+  WorkerType,
+  WorkerMessage,
+  WorkerEvent,
+  LlamaContextOptions,
+  LlamaChatSessionOptions,
+} from "./types";
 
 export class LlamaProcessManager extends EventEmitter {
   private process: UtilityProcess;
   private mainPort: MessagePortMain;
+  private workers = new Map<WorkerType, any>();
 
   constructor() {
     super();
+    this.initializeProcess();
+  }
 
+  private initializeProcess() {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const workerPath = path.join(__dirname, "llama/llama-worker.js");
+    const workerPath = path.join(__dirname, "llama-worker.js");
 
     const { port1, port2 } = new MessageChannelMain();
     this.mainPort = port1;
@@ -29,29 +40,22 @@ export class LlamaProcessManager extends EventEmitter {
     });
 
     this.process.on("spawn", () => {
-      try {
-        this.process.postMessage("port-transfer", [port2]);
+      this.process.postMessage("port-transfer", [port2]);
+      this.setupMessageHandlers();
+      this.setupProcessListeners();
+    });
+  }
 
-        this.mainPort.on("message", (event) => {
-          const data = event.data as LlamaUtilityMessage;
-          switch (data.type) {
-            case "worker-loaded":
-              this.mainPort.postMessage({
-                type: "init",
-              } as LlamaUtilityMessage);
-              break;
-            case "init-response":
-              console.log("llm inicializada");
-            default:
-              break;
-          }
-        });
-      } catch (error) {
-        console.error("Error setting up message handling:", error);
+  private setupMessageHandlers() {
+    this.mainPort.on("message", async (event) => {
+      const message = event.data as WorkerMessage;
+      const worker = this.workers.get(message.type as WorkerType);
+
+      if (worker) {
+        const response = await worker.processMessage(message);
+        this.mainPort.postMessage(response);
       }
     });
-
-    this.setupProcessListeners();
   }
 
   private setupProcessListeners(): void {
@@ -103,11 +107,41 @@ export class LlamaProcessManager extends EventEmitter {
   //   this.mainPort.postMessage({ type: eventName, ...data });
   // }
 
+  async createWorker(type: WorkerType): Promise<void> {
+    const worker = LlamaWorkerFactory.createWorker(type);
+    await worker.initialize();
+    this.workers.set(type, worker);
+  }
+
+  async loadModel(type: WorkerType, modelUri: string): Promise<void> {
+    const worker = this.workers.get(type);
+    if (!worker) throw new Error(`Worker ${type} not initialized`);
+    await worker.loadModel(modelUri);
+  }
+
+  async sendMessage(type: WorkerType, message: any): Promise<any> {
+    const worker = this.workers.get(type);
+    if (!worker) throw new Error(`Worker ${type} not initialized`);
+    return worker.processMessage(message);
+  }
+
+  async createSession(
+    type: WorkerType,
+    sessionId: string,
+    contextOptions?: LlamaContextOptions,
+    sessionOptions?: LlamaChatSessionOptions
+  ): Promise<void> {
+    const worker = this.workers.get(type);
+    if (!worker) throw new Error(`Worker ${type} not initialized`);
+    await worker.createSession(sessionId, contextOptions, sessionOptions);
+  }
+
   public shutdown(): void {
     if (this.process) {
       try {
         this.process.kill();
         this.mainPort.close();
+        this.workers.clear();
         console.log("Llama process shutdown initiated");
       } catch (error) {
         console.error("Error during process shutdown:", error);
