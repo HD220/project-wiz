@@ -1,0 +1,284 @@
+# Diretrizes de Código Limpo
+
+## Princípios Fundamentais de Clean Code
+
+### 1. Nomes Significativos e Intencionais
+   - Escolha nomes que revelem a verdadeira intenção do código
+   - Evite abreviações enigmáticas e siglas não padronizadas
+   - Use nomes que descrevam o comportamento, não a implementação
+   
+   **Exemplos:**
+   ```typescript
+   // Ruim
+   function p(x: number[]): number {
+     return x.reduce((a, b) => a + b, 0);
+   }
+
+   // Bom
+   function calculateTotalPrice(items: number[]): number {
+     return items.reduce((total, price) => total + price, 0);
+   }
+   ```
+
+### 2. Métodos Pequenos, Coesos e de Única Responsabilidade
+   - Cada método deve ter uma única responsabilidade
+   - Use nomes de métodos verbais que descrevam claramente a ação
+   - Prefira composição a métodos longos e complexos
+
+   **Princípios:**
+   - Single Responsibility Principle (SRP)
+   - Métodos devem ser facilmente testáveis
+   - Facilite a leitura e manutenção
+
+### 3. Tipagem Forte e Expressiva
+   - Utilize tipos específicos, evitando `any`
+   - Crie interfaces e tipos customizados para estruturas complexas
+   - Use generics para aumentar a flexibilidade e reutilização
+   - Prefira tipos literais e uniões para representar estados discretos
+
+   **Exemplos:**
+   ```typescript
+   // Ruim
+   function processData(data: any) { }
+
+   // Bom
+   type UserStatus = 'active' | 'inactive' | 'suspended';
+   interface User {
+     id: number;
+     name: string;
+     status: UserStatus;
+   }
+   ```
+
+### 4. Documentação Inteligente
+   - O código deve ser autoexplicativo
+   - Comentários devem explicar o "por que", não o "o que"
+   - Use documentação para explicar decisões arquiteturais complexas
+   - Prefira código limpo a comentários extensos
+
+### 5. Consistência e Padrões
+   - Mantenha um estilo de código uniforme
+   - Use formatadores automáticos (Prettier, ESLint)
+   - Siga convenções da linguagem e do projeto
+   - Estabeleça e mantenha guias de estilo
+
+## Práticas Específicas de TypeScript
+
+### Definição de Tipos
+   - Use `interface` para definir contratos e estruturas abertas
+   - Use `type` para uniões, interseções e tipos complexos
+   - Prefira tipos descritivos a tipos primitivos
+   - Utilize type guards para refinamento de tipos
+
+   ```typescript
+   // Bom
+   type Result<T> = { success: true, data: T } | { success: false, error: string };
+   ```
+
+### Tratamento de Erros Robusto
+   - Crie hierarquias de erro customizadas
+   - Use exceções para condições excepcionais
+   - Implemente tratamento de erros consistente
+   - Forneça contexto detalhado em mensagens de erro
+
+   ```typescript
+   class DatabaseError extends Error {
+     constructor(message: string, public code?: number) {
+       super(message);
+       this.name = 'DatabaseError';
+     }
+   }
+   ```
+
+### Organização e Modularização
+   - Agrupe funcionalidades relacionadas
+   - Use módulos para separar conceitos
+   - Minimize acoplamento entre módulos
+   - Implemente injeção de dependência
+   - Utilize princípios SOLID
+
+### Boas Práticas Adicionais
+   - Evite efeitos colaterais
+   - Prefira imutabilidade
+   - Use programação funcional quando possível
+   - Minimize o estado mutável
+   - Implemente testes unitários rigorosos
+
+### Performance e Otimização
+   - Evite operações custosas em loops
+   - Use lazy evaluation quando possível
+   - Prefira algoritmos de complexidade menor
+   - Utilize técnicas de memoização
+   - Faça profile de desempenho regularmente
+
+## Princípios de Arquitetura Limpa
+   - Mantenha separação clara de responsabilidades
+   - Use padrões de design apropriados
+   - Projete para extensibilidade
+   - Minimize dependências complexas
+   - Priorize legibilidade sobre engenhosidade
+
+## Boas Práticas de React
+
+### Componentes
+   - Mantenha componentes pequenos e focados
+   - Prefira componentes funcionais com hooks
+   - Evite componentes com muitas responsabilidades
+   - Use composição em vez de herança
+   
+   **Exemplo:**
+   ```typescript
+   // Ruim: Componente grande e complexo
+   function UserProfile({ user, onEdit, onDelete }) {
+     // Muitas responsabilidades
+     return (
+       <div>
+         {/* Lógica de edição, deleção, renderização */}
+       </div>
+     );
+   }
+
+   // Bom: Componentes menores e especializados
+   function UserDetails({ user }) {
+     return <div>{/* Apenas detalhes do usuário */}</div>;
+   }
+
+   function UserActions({ onEdit, onDelete }) {
+     return <div>{/* Apenas ações */}</div>;
+   }
+
+   function UserProfile({ user }) {
+     return (
+       <div>
+         <UserDetails user={user} />
+         <UserActions 
+           onEdit={() => {/* lógica de edição */}} 
+           onDelete={() => {/* lógica de deleção */}} 
+         />
+       </div>
+     );
+   }
+   ```
+
+### Hooks
+   - Use hooks de forma consistente e clara
+   - Evite lógica complexa dentro de hooks
+   - Crie hooks customizados para lógica reutilizável
+   - Siga as regras dos hooks (não use em condicionais)
+
+   **Exemplo:**
+   ```typescript
+   // Hook customizado para gerenciar estado de carregamento
+   function useLoadingState<T>(initialValue: T) {
+     const [data, setData] = useState<T>(initialValue);
+     const [loading, setLoading] = useState(false);
+     const [error, setError] = useState<Error | null>(null);
+
+     return { data, loading, error, setData, setLoading, setError };
+   }
+   ```
+
+### Performance
+   - Use `React.memo()` para componentes que não precisam re-renderizar
+   - Utilize `useMemo` e `useCallback` para otimizar cálculos e funções
+   - Evite criar funções ou objetos dentro do corpo do componente
+   
+   **Exemplo:**
+   ```typescript
+   // Otimizando re-renderizações
+   const ExpensiveComponent = React.memo(({ data }) => {
+     const processedData = useMemo(() => {
+       // Cálculo caro só é refeito quando 'data' muda
+       return heavyComputation(data);
+     }, [data]);
+
+     const handleClick = useCallback(() => {
+       // Função de callback estável
+     }, []);
+
+     return <div>{/* Renderização */}</div>;
+   });
+   ```
+
+### Gerenciamento de Estado
+   - Prefira estado local quando possível
+   - Use Context API para estado global simples
+   - Para estados complexos, considere Redux ou outras bibliotecas
+   - Mantenha o estado imutável e previsível
+
+### Estilização
+   - Use tailwindcss
+   - Evite estilos globais
+   - Mantenha estilos simples e reutilizáveis
+   - Considere design systems para consistência
+
+### Tratamento de Erros
+   - Implemente Error Boundaries
+   - Forneça feedback claro ao usuário em caso de erro
+   - Log erros para monitoramento
+
+### Acessibilidade
+   - Use semântica HTML correta
+   - Adicione atributos ARIA quando necessário
+   - Garanta navegação por teclado
+   - Teste com leitores de tela
+
+### Testes
+   - Teste componentes de forma isolada
+   - Use React Testing Library
+   - Foque em testes de comportamento
+   - Cubra casos de borda e cenários de erro
+
+## Práticas de Commits e Controle de Versão
+
+### Princípios Fundamentais de Commits
+   - Faça commits pequenos e frequentes
+   - Cada commit deve representar uma única mudança lógica
+   - Escreva mensagens de commit claras e descritivas
+   - Use o tempo presente nos verbos da mensagem de commit
+
+### Estrutura de Mensagens de Commit
+   Siga o padrão: `<tipo>(<escopo>): <descrição>`
+
+   **Tipos de Commit:**
+   - `feat`: Nova funcionalidade
+   - `fix`: Correção de bug
+   - `docs`: Mudanças na documentação
+   - `style`: Formatação de código (sem alteração de lógica)
+   - `refactor`: Refatoração de código
+   - `test`: Adição ou modificação de testes
+   - `chore`: Tarefas de manutenção, configurações
+   - `perf`: Melhorias de performance
+   - `ci`: Mudanças em configurações de CI/CD
+
+   **Exemplos:**
+   ```
+   feat(auth): adiciona autenticação JWT
+   fix(login): corrige erro de validação de senha
+   docs(readme): atualiza instruções de instalação
+   refactor(components): simplifica componente de usuário
+   ```
+
+### Boas Práticas
+   - Commits devem ser atômicos (uma única responsabilidade)
+   - Evite commits com muitas alterações
+   - Não faça commit de código comentado
+   - Não faça commit de arquivos de configuração local
+   - Use `.gitignore` para excluir arquivos desnecessários
+
+### Fluxo de Trabalho com Commits
+   1. Antes de commitar:
+      - Rode linters e formatadores
+      - Execute testes
+      - Verifique se não há erros
+   
+   2. Ao final de cada tarefa:
+      - Faça um commit descritivo
+      - Se necessário, use `git rebase` para organizar commits
+      - Empurre código para o repositório remoto
+
+### Dicas Adicionais
+   - Use commits semânticos para gerar changelogs automaticamente
+   - Considere usar commitlint para validar mensagens de commit
+   - Mantenha um histórico de commits limpo e legível
+   - Documente decisões importantes nos commits
