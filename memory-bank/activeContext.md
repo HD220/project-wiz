@@ -40,4 +40,28 @@ A documentação completa da implementação foi salva nos seguintes arquivos:
 - `memory-bank/integracao-main-preload.md`
 - `memory-bank/implementacao-llama-worker-final.md`
 
-*
+## 2025-03-27 17:33:00 - Refatoração do LlamaWorker para LlamaChatSession
+
+Realizamos uma refatoração completa do `llama-worker.ts` para usar exclusivamente o `LlamaChatSession`. As principais mudanças incluem:
+
+- Método unificado de geração de texto
+- Suporte a diferentes tipos de entrada (prompt simples e mensagens de chat)
+- Implementação de streaming de resposta
+- Maior flexibilidade nas opções de geração
+- Preparação para futuras evoluções da biblioteca node-llama-cpp
+
+Esta refatoração simplifica significativamente o código e melhora a manutenibilidade do serviço de LLM.
+
+### Atualização de Flexibilidade no Download de Modelos
+
+- Método `downloadModel` agora suporta download de modelo único ou múltiplos modelos
+- Mantém compatibilidade com chamadas anteriores
+- Adiciona suporte para download paralelo de modelos
+- Implementa tratamento de erros mais robusto
+
+#### Casos de Uso
+
+- `{ modelId: 'hf://modelo' }` - Download de modelo único
+- `{ modelIds: ['hf://modelo1', 'hf://modelo2'] }` - Download de múltiplos modelos
+
+-

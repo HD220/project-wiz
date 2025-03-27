@@ -83,7 +83,10 @@ class LlamaWorker {
         await this.generateText(message.messages, message.options);
         break;
       case "download_model":
-        await this.downloadModel(message.modelId, message.requestId);
+        await this.downloadModel(
+          message.modelId || message.modelIds,
+          message.requestId
+        );
         break;
       case "abort":
         this.abort();
@@ -424,48 +427,83 @@ class LlamaWorker {
   }
 
   /**
-   * Baixa um modelo do HuggingFace ou URL direta
-   * @param modelId ID do modelo (hf://org/repo) ou URL
+   * Baixa um ou mais modelos usando createModelDownloader
+   * @param modelIds ID(s) do modelo (hf://org/repo ou URL)
    * @param requestId ID da requisição para rastreamento
    */
-  private async downloadModel(modelId: string, requestId: string) {
+  private async downloadModel(modelIds: string | string[], requestId: string) {
     try {
-      this.sendInfo(`Iniciando download do modelo: ${modelId}`);
+      this.sendInfo(`Iniciando download do(s) modelo(s): ${modelIds}`);
       this.downloadAbortController = new AbortController();
 
       const modelsDir = path.join(process.cwd(), "models");
-      if (!fs.existsSync(modelsDir)) {
-        fs.mkdirSync(modelsDir, { recursive: true });
-      }
+      fs.mkdirSync(modelsDir, { recursive: true });
 
-      // Determinar a URL do modelo
-      let modelUrl: string;
-      if (modelId.startsWith("hf://")) {
-        const hfPath = modelId.replace("hf://", "");
-        modelUrl = `https://huggingface.co/${hfPath}/resolve/main/model.gguf`;
-      } else {
-        modelUrl = modelId;
-      }
+      const modelList = Array.isArray(modelIds) ? modelIds : [modelIds];
 
-      const fileName = path.basename(modelUrl);
-      const filePath = path.join(modelsDir, fileName);
+      const downloaders = modelList.map(async (modelId) => {
+        // Determinar a URL do modelo
+        let modelUrl: string;
+        if (modelId.startsWith("hf://")) {
+          const hfPath = modelId.replace("hf://", "");
+          modelUrl = `https://huggingface.co/${hfPath}/resolve/main/model.gguf`;
+        } else {
+          modelUrl = modelId;
+        }
 
-      // Implementação manual de download com progresso
-      await this.downloadFile(modelUrl, filePath, (progress) => {
-        this.sendDownloadProgress(requestId, progress);
+        return createModelDownloader({
+          modelUri: modelUrl,
+          dirPath: modelsDir,
+          onProgress: (progress) => {
+            this.sendDownloadProgress(requestId, progress);
+          },
+        });
       });
 
-      this.sendDownloadComplete(requestId, filePath);
-      this.sendInfo(`Modelo baixado com sucesso: ${filePath}`);
+      const combinedDownloader =
+        downloaders.length > 1
+          ? await combineModelDownloaders(downloaders)
+          : await downloaders[0];
+
+      const downloadedFiles = await combinedDownloader.download({
+        signal: this.downloadAbortController.signal,
+      });
+
+      downloadedFiles.forEach((filePath) => {
+        this.sendDownloadComplete(requestId, filePath);
+      });
+
+      this.sendInfo(
+        `Modelo(s) baixado(s) com sucesso: ${downloadedFiles.join(", ")}`
+      );
     } catch (error: any) {
-      if (error.name === "AbortError") {
-        this.sendInfo("Download abortado pelo usuário");
-      } else {
-        this.sendDownloadError(requestId, error.message);
-        this.sendError("Erro ao baixar modelo", error.message);
-      }
+      this.handleDownloadError(requestId, error);
     } finally {
       this.downloadAbortController = null;
+    }
+  }
+
+  /**
+   * Trata erros de download de forma detalhada
+   * @param requestId ID da requisição
+   * @param error Erro ocorrido
+   */
+  private handleDownloadError(requestId: string, error: Error) {
+    if (error.name === "AbortError") {
+      this.sendInfo("Download abortado pelo usuário");
+    } else {
+      this.sendDownloadError(requestId, error.message);
+
+      // Tratamento de erros específicos
+      if (error.message.includes("ENOSPC")) {
+        this.sendError("Erro de download: Espaço em disco insuficiente");
+      } else if (error.message.includes("ECONNRESET")) {
+        this.sendError("Erro de download: Conexão interrompida");
+      } else if (error.message.includes("Invalid URL")) {
+        this.sendError("Erro de download: URL inválida");
+      } else {
+        this.sendError("Erro no download do modelo", error);
+      }
     }
   }
 
