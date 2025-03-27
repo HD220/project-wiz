@@ -8,28 +8,12 @@ import {
   LlamaModel,
   LlamaChatSession,
   LLamaChatPromptOptions,
-  createModelDownloader,
-  combineModelDownloaders,
   LlamaModelOptions,
   LlamaChatSessionOptions,
-} from "node-llama-cpp";
+  LlamaWorkerMessageType,
+} from "./llama-types";
 import { fileURLToPath } from "url";
 
-/**
- * LlamaWorker - Interface com node-llama-cpp usando MessagePort
- *
- * Implementação refatorada para usar exclusivamente o LlamaChatSession
- * para todas as interações de geração de texto.
- *
- * Esta implementação suporta:
- * - Geração de texto a partir de prompt simples
- * - Geração de texto a partir de mensagens de chat
- * - Streaming de resposta
- * - Todas as opções nativas do LlamaChatSession
- *
- * Esta classe implementa uma interface simplificada para o node-llama-cpp
- * que se comunica com o processo principal do Electron via MessagePort.
- */
 class LlamaWorker {
   private llamaInstance: Llama = null;
   private model: LlamaModel = null;
@@ -61,7 +45,10 @@ class LlamaWorker {
     });
   }
 
-  private async handleMessage(message: any) {
+  private async handleMessage(message: {
+    type: LlamaWorkerMessageType;
+    [key: string]: any;
+  }) {
     switch (message.type) {
       case "init":
         await this.initialize(message.options);
@@ -352,6 +339,10 @@ class LlamaWorker {
       );
 
       const modelList = Array.isArray(modelUri) ? modelUri : [modelUri];
+
+      const { createModelDownloader, combineModelDownloaders } = await import(
+        "node-llama-cpp"
+      );
 
       const downloaders = modelList.map(async (modelUri) => {
         return createModelDownloader({
