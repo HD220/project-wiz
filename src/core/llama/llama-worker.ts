@@ -10,11 +10,10 @@ import {
   LLamaChatPromptOptions,
   createModelDownloader,
   combineModelDownloaders,
-  ModelDownloader,
   LlamaModelOptions,
   LlamaChatSessionOptions,
-  ChatHistoryItem,
 } from "node-llama-cpp";
+import { fileURLToPath } from "url";
 
 /**
  * LlamaWorker - Interface com node-llama-cpp usando MessagePort
@@ -73,11 +72,8 @@ class LlamaWorker {
       case "create_context":
         await this.createContext();
         break;
-      case "generate_completion":
+      case "prompt_completion":
         await this.generateText(message.prompt, message.options);
-        break;
-      case "generate_chat_completion":
-        await this.generateText(message.messages, message.options);
         break;
       case "download_model":
         await this.downloadModel(
@@ -345,28 +341,21 @@ class LlamaWorker {
    * @param modelIds ID(s) do modelo (hf://org/repo ou URL)
    * @param requestId ID da requisição para rastreamento
    */
-  private async downloadModel(modelIds: string | string[], requestId: string) {
+  private async downloadModel(modelUri: string | string[], requestId: string) {
     try {
-      this.sendInfo(`Iniciando download do(s) modelo(s): ${modelIds}`);
+      this.sendInfo(`Iniciando download do(s) modelo(s): ${modelUri}`);
       this.downloadAbortController = new AbortController();
 
-      const modelsDir = path.join(process.cwd(), "models");
-      fs.mkdirSync(modelsDir, { recursive: true });
+      const modelsDir = path.join(
+        path.dirname(fileURLToPath(import.meta.url)),
+        "models"
+      );
 
-      const modelList = Array.isArray(modelIds) ? modelIds : [modelIds];
+      const modelList = Array.isArray(modelUri) ? modelUri : [modelUri];
 
-      const downloaders = modelList.map(async (modelId) => {
-        // Determinar a URL do modelo
-        let modelUrl: string;
-        if (modelId.startsWith("hf://")) {
-          const hfPath = modelId.replace("hf://", "");
-          modelUrl = `https://huggingface.co/${hfPath}/resolve/main/model.gguf`;
-        } else {
-          modelUrl = modelId;
-        }
-
+      const downloaders = modelList.map(async (modelUri) => {
         return createModelDownloader({
-          modelUri: modelUrl,
+          modelUri,
           dirPath: modelsDir,
           onProgress: ({ downloadedSize, totalSize }) => {
             this.sendDownloadProgress(requestId, downloadedSize / totalSize);

@@ -1,11 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import type {
-  DownloadProgress,
-  ModelInfo,
-  CompletionData,
-  ErrorData,
-} from "./llama-types";
 
 export interface LLMState {
   download: number;
