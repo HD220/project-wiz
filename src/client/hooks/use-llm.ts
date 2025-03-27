@@ -28,7 +28,7 @@ export function useLLM() {
     completionOutput: "",
     modelInfo: null,
   });
-  // Novo estado para gerenciamento de download
+  // Estados para gerenciamento de download
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
@@ -194,8 +194,51 @@ export function useLLM() {
     };
   }, [setDownloadDebounced, setLoadDebounced]);
 
+  // Função para iniciar o download de um modelo
+  const startDownload = useCallback((modelId: string) => {
+    setIsDownloading(true);
+    setDownloadProgress(0);
+    setDownloadError(null);
+
+    window.electronAPI.llm
+      .downloadModel(modelId, (progress: number) => {
+        setDownloadProgress(progress);
+      })
+      .then(() => {
+        setIsDownloading(false);
+        // Atualizar o estado para refletir que o download foi concluído
+        setState((prev) => ({
+          ...prev,
+          download: 100,
+        }));
+      })
+      .catch((error) => {
+        setIsDownloading(false);
+        setDownloadError(error.message);
+      });
+  }, []);
+
+  // Função para cancelar o download em andamento
+  const cancelDownload = useCallback(() => {
+    window.electronAPI.llm
+      .abortDownload()
+      .then(() => {
+        setIsDownloading(false);
+        setDownloadProgress(0);
+      })
+      .catch((error) => {
+        console.error("Erro ao cancelar download:", error);
+        setDownloadError("Falha ao cancelar o download");
+      });
+  }, []);
+
   return {
-    state,
+    state: {
+      ...state,
+      downloadProgress,
+      isDownloading,
+      downloadError,
+    },
     actions: {
       initLLM,
       loadModel,
@@ -203,6 +246,8 @@ export function useLLM() {
       generateCompletion,
       generateChatCompletion,
       abort,
+      startDownload,
+      cancelDownload,
     },
   };
 }

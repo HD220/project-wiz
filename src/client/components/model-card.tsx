@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useLLM } from "../hooks/use-llm";
 import { useState } from "react";
 
 interface Model {
@@ -33,8 +34,11 @@ export default function ModelCard({
   isActive,
   onActivate,
 }: ModelCardProps) {
-  const [downloadProgress, setDownloadProgress] = useState(0);
-  const [isDownloading, setIsDownloading] = useState(false);
+  // Usar o hook useLLM para gerenciar o download
+  const {
+    state: { downloadProgress, isDownloading },
+    actions: { startDownload, cancelDownload },
+  } = useLLM();
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Never";
@@ -42,36 +46,20 @@ export default function ModelCard({
     return date.toLocaleString();
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     try {
-      setIsDownloading(true);
-      await window.electronAPI.llm.downloadModel(
-        model.modelId,
-        (progress: number) => {
-          setDownloadProgress(Math.round(progress * 100));
-        }
-      );
-      toast.success(`Modelo ${model.modelId} baixado com sucesso`);
+      startDownload(model.modelId);
+      toast.success(`Iniciando download do modelo ${model.modelId}`);
     } catch (error: any) {
-      if (error.name === "AbortError") {
-        toast.info(`Download do modelo ${model.modelId} cancelado`);
-      } else {
-        console.error("Erro no download:", error);
-        toast.error(
-          `Falha ao baixar o modelo ${model.modelId}: ${error.message}`
-        );
-      }
-    } finally {
-      setIsDownloading(false);
-      setDownloadProgress(0);
+      console.error("Erro ao iniciar download:", error);
+      toast.error(`Falha ao iniciar o download do modelo ${model.modelId}`);
     }
   };
 
-  // Remover a duplicação da função handleCancelDownload
-
-  const handleCancelDownload = async () => {
+  const handleCancelDownload = () => {
     try {
-      await window.electronAPI.llm.abortDownload();
+      cancelDownload();
+      toast.info(`Download do modelo ${model.modelId} cancelado`);
     } catch (error) {
       console.error("Erro ao cancelar download:", error);
       toast.error("Falha ao cancelar o download");

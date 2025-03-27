@@ -1,9 +1,14 @@
+# Implementação Final do llama-worker.ts
+
+Baseado na análise dos arquivos existentes e nos requisitos do usuário, vamos criar uma implementação final do `llama-worker.ts` que servirá como interface com o node-llama-cpp.
+
+## Código Final
+
+```typescript
 import { MessagePortMain } from "electron";
 import path from "path";
 import fs from "fs";
-import https from "https";
-import { Readable } from "stream";
-import { parentPort } from "worker_threads";
+import { AbortController } from "node:abort-controller";
 
 /**
  * LlamaWorker - Interface com node-llama-cpp usando MessagePort
@@ -307,75 +312,6 @@ class LlamaWorker {
   }
 
   /**
-   * Implementa o download de um arquivo com progresso
-   * @param url URL do arquivo
-   * @param filePath Caminho onde o arquivo será salvo
-   * @param onProgress Callback para reportar progresso
-   */
-  private async downloadFile(
-    url: string,
-    filePath: string,
-    onProgress: (progress: number) => void
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const fileStream = fs.createWriteStream(filePath);
-      let downloadedBytes = 0;
-      let totalBytes = 0;
-
-      https
-        .get(url, (response) => {
-          if (response.statusCode !== 200) {
-            reject(
-              new Error(
-                `Falha ao baixar arquivo: ${response.statusCode} ${response.statusMessage}`
-              )
-            );
-            return;
-          }
-
-          totalBytes = parseInt(response.headers["content-length"] || "0", 10);
-
-          response.on("data", (chunk) => {
-            downloadedBytes += chunk.length;
-            if (totalBytes > 0) {
-              const progress = downloadedBytes / totalBytes;
-              onProgress(progress);
-            }
-          });
-
-          response.pipe(fileStream);
-
-          fileStream.on("finish", () => {
-            fileStream.close();
-            resolve();
-          });
-
-          fileStream.on("error", (err) => {
-            fs.unlink(filePath, () => {});
-            reject(err);
-          });
-
-          // Verificar se o download foi abortado
-          if (this.downloadAbortController) {
-            this.downloadAbortController.signal.addEventListener(
-              "abort",
-              () => {
-                response.destroy();
-                fileStream.close();
-                fs.unlink(filePath, () => {});
-                reject(new Error("Download abortado"));
-              }
-            );
-          }
-        })
-        .on("error", (err) => {
-          fs.unlink(filePath, () => {});
-          reject(err);
-        });
-    });
-  }
-
-  /**
    * Baixa um modelo do HuggingFace ou URL direta
    * @param modelId ID do modelo (hf://org/repo) ou URL
    * @param requestId ID da requisição para rastreamento
@@ -399,13 +335,20 @@ class LlamaWorker {
         modelUrl = modelId;
       }
 
+      // Usar o módulo de download do node-llama-cpp
+      const { downloadModel } = await import("node-llama-cpp");
+
+      await downloadModel({
+        url: modelUrl,
+        directory: modelsDir,
+        signal: this.downloadAbortController.signal,
+        onProgress: (progress: number) => {
+          this.sendDownloadProgress(requestId, progress);
+        },
+      });
+
       const fileName = path.basename(modelUrl);
       const filePath = path.join(modelsDir, fileName);
-
-      // Implementação manual de download com progresso
-      await this.downloadFile(modelUrl, filePath, (progress) => {
-        this.sendDownloadProgress(requestId, progress);
-      });
 
       this.sendDownloadComplete(requestId, filePath);
       this.sendInfo(`Modelo baixado com sucesso: ${filePath}`);
@@ -465,7 +408,7 @@ class LlamaWorker {
 }
 
 // Inicialização do worker
-parentPort?.once("message", async (messageData) => {
+process.parentPort.once("message", async (messageData) => {
   try {
     const [port] = messageData.ports;
     const worker = new LlamaWorker(port);
@@ -476,3 +419,38 @@ parentPort?.once("message", async (messageData) => {
     process.exit(1);
   }
 });
+```
+
+## Principais Características da Implementação
+
+1. **Simplicidade**: A implementação é focada em ser simples e direta, seguindo os requisitos do usuário.
+
+2. **Compatibilidade**: A interface é compatível com a definida em `electronAPI.d.ts` e funciona com o hook `use-llm.ts`.
+
+3. **Funcionalidades Principais**:
+
+   - Inicialização do node-llama-cpp
+   - Carregamento de modelos
+   - Criação de contexto
+   - Geração de texto (completion e chat)
+   - Download de modelos
+
+4. **Comunicação via MessagePort**: Toda a comunicação é feita através de MessagePorts, conforme solicitado.
+
+5. **Tratamento de Erros**: Implementação robusta de tratamento de erros para garantir que o worker não falhe silenciosamente.
+
+6. **Progresso**: Reporta progresso para operações de longa duração como carregamento de modelos e downloads.
+
+7. **Abortar Operações**: Suporte para abortar operações em andamento, tanto para geração de texto quanto para downloads.
+
+8. **Limpeza de Recursos**: Garante que todos os recursos sejam liberados ao encerrar o worker.
+
+## Próximos Passos
+
+1. **Implementar o arquivo llama-worker.ts**: Criar o arquivo com o código acima.
+
+2. **Configurar o Vite**: Garantir que o worker seja compilado corretamente.
+
+3. **Testar a Integração**: Verificar se a comunicação entre o worker, o processo principal e o renderer está funcionando corretamente.
+
+4. **Ajustar Conforme Necessário**: Fazer ajustes com base nos resultados dos testes.
