@@ -1,50 +1,39 @@
-# Log de Decisões
+## Decisões de Implementação - Refatoração LlamaWorker
 
-Este arquivo registra decisões arquiteturais e de implementação usando um formato de lista.
-2025-03-27 08:17:39 - Log de atualizações.
+### Mudança para LlamaChatSession
 
--
+- **Data**: 27/03/2025
+- **Decisão**: Migrar completamente para LlamaChatSession
+- **Justificativa**:
+  - Simplificar código
+  - Usar API mais moderna
+  - Ganhar flexibilidade na geração de texto
 
-## Decisão
+### Principais Modificações
 
--
+1. **Método de Geração de Texto**
 
-## Razão
+   - Unificação dos métodos `generateCompletion` e `generateChatCompletion`
+   - Suporte a entrada como string ou array de mensagens
+   - Tratamento inteligente de diferentes tipos de mensagens
 
--
+2. **Carregamento de Modelo**
 
-## Detalhes de Implementação
+   - Aceitar diretamente objeto `LlamaModelOptions`
+   - Maior flexibilidade na configuração do modelo
 
-| 2025-03-27 08:19:31 | Inicialização do Memory Bank | Criado para manter o contexto do projeto | Diretório e arquivos Markdown criados com sucesso |
+3. **Sessão de Chat**
+   - Criação dinâmica com `contextSequence`
+   - Suporte a opções avançadas como prompt de sistema
 
-| 2025-03-27 08:21:54 | Atualização do Product Context | Adicionadas informações sobre tecnologias e arquitetura | Detalhes sobre Electron.js, Vite, React e TypeScript incluídos |
+### Impactos Positivos
 
-## 2025-03-27 14:28:00 - Decisão de Implementação do node-llama-cpp
+- Código mais limpo e conciso
+- Melhor aproveitamento das funcionalidades do node-llama-cpp
+- Preparação para futuras evoluções da biblioteca
 
-### Decisão
+### Considerações Futuras
 
-Implementar uma interface simplificada para o node-llama-cpp usando um único arquivo worker que se comunica com o processo principal do Electron através de MessagePorts.
-
-### Rationale
-
-1. **Simplicidade**: Uma implementação mais simples é mais fácil de manter e entender.
-2. **Desempenho**: O uso de MessagePorts permite que operações intensivas sejam executadas em um processo separado, evitando bloqueios no processo principal.
-3. **Compatibilidade**: A interface proposta é compatível com a definida em `electronAPI.d.ts` e funciona com o hook `use-llm.ts` existente.
-4. **Modularidade**: Mesmo sendo uma implementação simplificada, a estrutura permite futuras extensões se necessário.
-
-### Implementação
-
-1. Criar um único arquivo `llama-worker.ts` que implementa todas as funcionalidades necessárias.
-2. Utilizar a biblioteca node-llama-cpp diretamente, sem camadas adicionais de abstração.
-3. Implementar comunicação via MessagePorts para todas as operações.
-4. Garantir tratamento adequado de erros e progresso para operações de longa duração.
-5. Implementar suporte para abortar operações em andamento.
-
-A implementação detalhada está documentada nos arquivos:
-
-- `memory-bank/planejamento-integracao-llama.md`
-- `memory-bank/implementacao-llama-worker.md`
-- `memory-bank/integracao-main-preload.md`
-- `memory-bank/implementacao-llama-worker-final.md`
-
-*
+- Monitorar performance
+- Realizar testes abrangentes
+- Documentar mudanças para a equipe

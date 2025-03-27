@@ -2,19 +2,40 @@ import { MessagePortMain } from "electron";
 import path from "path";
 import fs from "fs";
 import https from "https";
-import { Readable } from "stream";
-import { parentPort } from "worker_threads";
+import {
+  Llama,
+  LlamaContext,
+  LlamaModel,
+  LlamaChatSession,
+  LLamaChatPromptOptions,
+  createModelDownloader,
+  combineModelDownloaders,
+  ModelDownloader,
+  LlamaModelOptions,
+  LlamaChatSessionOptions,
+  ChatHistoryItem,
+} from "node-llama-cpp";
 
 /**
  * LlamaWorker - Interface com node-llama-cpp usando MessagePort
+ *
+ * Implementação refatorada para usar exclusivamente o LlamaChatSession
+ * para todas as interações de geração de texto.
+ *
+ * Esta implementação suporta:
+ * - Geração de texto a partir de prompt simples
+ * - Geração de texto a partir de mensagens de chat
+ * - Streaming de resposta
+ * - Todas as opções nativas do LlamaChatSession
  *
  * Esta classe implementa uma interface simplificada para o node-llama-cpp
  * que se comunica com o processo principal do Electron via MessagePort.
  */
 class LlamaWorker {
-  private llamaInstance: any = null;
-  private model: any = null;
-  private context: any = null;
+  private llamaInstance: Llama = null;
+  private model: LlamaModel = null;
+  private context: LlamaContext = null;
+  private chatSession: LlamaChatSession = null;
   private port: MessagePortMain;
   private abortController: AbortController | null = null;
   private downloadAbortController: AbortController | null = null;
@@ -48,16 +69,18 @@ class LlamaWorker {
         await this.initialize(message.options);
         break;
       case "load_model":
-        await this.loadModel(message.modelPath, message.options);
+        await this.loadModel(message.options);
         break;
       case "create_context":
         await this.createContext();
         break;
       case "generate_completion":
-        await this.generateCompletion(message.prompt, message.options);
+        // Usar o novo método unificado para prompt simples
+        await this.generateText(message.prompt, message.options);
         break;
       case "generate_chat_completion":
-        await this.generateChatCompletion(message.messages, message.options);
+        // Usar o novo método unificado para mensagens de chat
+        await this.generateText(message.messages, message.options);
         break;
       case "download_model":
         await this.downloadModel(message.modelId, message.requestId);
@@ -158,31 +181,25 @@ class LlamaWorker {
 
   /**
    * Carrega um modelo do disco
-   * @param modelPath Caminho para o arquivo do modelo
-   * @param options Opções de carregamento
+   *
+   * Nota: Esta versão refatorada aceita diretamente um objeto LlamaModelOptions
+   * em vez de parâmetros separados, para maior flexibilidade e compatibilidade
+   * com a API atual do node-llama-cpp.
+   *
+   * @param options Opções de carregamento do modelo, incluindo modelPath
    */
-  private async loadModel(modelPath: string, options?: any) {
+  private async loadModel(options: LlamaModelOptions) {
     if (!this.llamaInstance) {
       throw new Error("node-llama-cpp não inicializado");
     }
 
     try {
-      this.sendInfo(`Carregando modelo: ${modelPath}`);
-      this.model = await this.llamaInstance.loadModel({
-        modelPath,
-        gpuLayers: options?.gpuLayers,
-        contextSize: options?.contextSize,
-        batchSize: options?.batchSize,
-        seed: options?.seed,
-        onLoadProgress: (progress: number) => {
-          this.sendProgress("load", progress);
-        },
-      });
+      this.sendInfo(`Carregando modelo: ${options.modelPath}`);
+      this.model = await this.llamaInstance.loadModel(options);
 
       const modelInfo = {
-        name: path.basename(modelPath),
-        size: fs.statSync(modelPath).size,
-        parameters: this.model.params?.nParams || "Desconhecido",
+        name: path.basename(options.modelPath),
+        size: this.model.fileInsights.modelSize,
       };
 
       this.sendProgress("load", 1.0);
@@ -205,6 +222,12 @@ class LlamaWorker {
     try {
       this.sendInfo("Criando contexto...");
       this.context = await this.model.createContext();
+
+      // Limpar a sessão de chat anterior, se existir
+      if (this.chatSession) {
+        this.chatSession = null;
+      }
+
       this.sendInfo("Contexto criado com sucesso");
     } catch (error: any) {
       this.sendError("Erro ao criar contexto", error.message);
@@ -213,94 +236,119 @@ class LlamaWorker {
   }
 
   /**
-   * Gera texto a partir de um prompt
-   * @param prompt Texto de entrada
-   * @param options Opções de geração
+   * Garante que uma sessão de chat esteja disponível
+   *
+   * Cria uma nova instância de LlamaChatSession se não existir,
+   * usando a sequência de contexto atual e opções de configuração flexíveis.
+   *
+   * Características:
+   * - Usa a sequência de contexto atual como base
+   * - Permite configurações personalizadas via LlamaChatSessionOptions
+   * - Suporta prompt de sistema, wrappers de chat, e outras configurações avançadas
+   *
+   * A sessão é criada usando a API moderna do LlamaChatSession com contextSequence,
+   * conforme recomendado na documentação.
+   *
+   * @param options Opções de configuração da sessão de chat, exceto contextSequence
    */
-  private async generateCompletion(prompt: string, options?: any) {
+  private async ensureChatSession(
+    options?: Omit<LlamaChatSessionOptions, "contextSequence">
+  ) {
     if (!this.context) {
       throw new Error("Contexto não criado");
     }
 
-    try {
-      this.sendInfo("Gerando completion...");
-      this.abortController = new AbortController();
-
-      let fullText = "";
-
-      await this.context.completion({
-        prompt,
-        maxTokens: options?.maxTokens || 512,
-        temperature: options?.temperature || 0.8,
-        topP: options?.topP || 0.95,
-        stopSequences: options?.stopSequences || [],
-        stream: true,
-        signal: this.abortController.signal,
-        onToken: (chunk: string) => {
-          this.sendCompletionChunk(chunk);
-          fullText += chunk;
-        },
+    if (!this.chatSession) {
+      this.chatSession = new LlamaChatSession({
+        ...options,
+        contextSequence: this.context.getSequence(),
       });
-
-      this.sendCompletionDone(fullText, {
-        promptTokens: prompt.length / 4, // Estimativa simples
-        completionTokens: fullText.length / 4, // Estimativa simples
-        totalTokens: (prompt.length + fullText.length) / 4, // Estimativa simples
-      });
-
-      this.sendInfo("Completion concluída");
-    } catch (error: any) {
-      if (error.name === "AbortError") {
-        this.sendInfo("Geração abortada pelo usuário");
-      } else {
-        this.sendError("Erro ao gerar completion", error.message);
-        throw error;
-      }
     }
   }
 
   /**
-   * Gera respostas de chat a partir de mensagens
-   * @param messages Array de mensagens (system, user, assistant)
-   * @param options Opções de geração
+   * Gera texto usando LlamaChatSession
+   *
+   * Este método unificado substitui os antigos generateCompletion e generateChatCompletion,
+   * usando exclusivamente o LlamaChatSession para todas as interações de geração de texto.
+   *
+   * Suporta dois tipos de entrada:
+   * 1. String: Tratada como um prompt simples
+   * 2. Array de ChatMessage: Tratada como uma sequência de mensagens de chat
+   *
+   * Todas as opções são passadas diretamente para o LlamaChatSession.prompt(),
+   * permitindo o uso de todas as funcionalidades nativas da biblioteca.
+   *
+   * @param input Texto de entrada (string) ou mensagens de chat (ChatMessage[])
+   * @param options Opções de geração (todas as opções do LlamaChatSession são suportadas)
    */
-  private async generateChatCompletion(messages: any[], options?: any) {
-    if (!this.context) {
-      throw new Error("Contexto não criado");
-    }
-
+  private async generateText(
+    input: string | ChatHistoryItem[],
+    options?: Omit<LlamaChatSessionOptions, "contextSequences">
+  ) {
     try {
-      this.sendInfo("Gerando chat completion...");
+      this.sendInfo("Gerando texto...");
       this.abortController = new AbortController();
+
+      // Garantir que a sessão de chat existe
+      await this.ensureChatSession(options);
 
       let fullText = "";
 
-      await this.context.chat({
-        messages,
-        maxTokens: options?.maxTokens || 512,
-        temperature: options?.temperature || 0.8,
-        topP: options?.topP || 0.95,
-        stopSequences: options?.stopSequences || [],
-        stream: true,
+      // Preparar opções para o LlamaChatSession
+      const promptOptions: LLamaChatPromptOptions = {
+        // Passar todas as opções diretamente para manter compatibilidade com a API
+        ...options,
+
+        // Garantir que o signal e onTextChunk estejam configurados
         signal: this.abortController.signal,
-        onToken: (chunk: string) => {
+        onTextChunk: (chunk: string) => {
           this.sendCompletionChunk(chunk);
           fullText += chunk;
         },
-      });
+      };
+
+      // Determinar se a entrada é um prompt simples ou mensagens de chat
+      if (typeof input === "string") {
+        // Caso de prompt simples
+        await this.chatSession.prompt(input, promptOptions);
+      } else {
+        // Caso de mensagens de chat
+        // Definir o histórico de chat (todas as mensagens exceto a última)
+        this.chatSession.setChatHistory(input.slice(0, -1));
+
+        // Usar a última mensagem como prompt
+        const lastMessage = input[input.length - 1];
+
+        // Verificar o tipo da mensagem
+        // Se for uma mensagem do usuário, usamos seu texto como prompt
+        // Se for uma mensagem do assistente ou sistema, usamos um prompt vazio
+        // Isso garante que o modelo continue a partir do contexto correto
+        if (lastMessage.type == "user") {
+          await this.chatSession.prompt(lastMessage.text, promptOptions);
+        } else {
+          await this.chatSession.prompt("", promptOptions);
+        }
+      }
+
+      // Calcular estatísticas aproximadas
+      const inputSize =
+        typeof input === "string"
+          ? input.length / 4
+          : JSON.stringify(input).length / 4;
 
       this.sendCompletionDone(fullText, {
-        promptTokens: JSON.stringify(messages).length / 4, // Estimativa simples
-        completionTokens: fullText.length / 4, // Estimativa simples
-        totalTokens: (JSON.stringify(messages).length + fullText.length) / 4, // Estimativa simples
+        promptTokens: inputSize,
+        completionTokens: fullText.length / 4,
+        totalTokens: inputSize + fullText.length / 4,
       });
 
-      this.sendInfo("Chat completion concluída");
+      this.sendInfo("Geração de texto concluída");
     } catch (error: any) {
       if (error.name === "AbortError") {
         this.sendInfo("Geração abortada pelo usuário");
       } else {
-        this.sendError("Erro ao gerar chat completion", error.message);
+        this.sendError("Erro ao gerar texto", error.message);
         throw error;
       }
     }
@@ -450,6 +498,10 @@ class LlamaWorker {
     this.abort();
     this.abortDownload();
 
+    if (this.chatSession) {
+      this.chatSession = null;
+    }
+
     if (this.context) {
       this.context.dispose();
       this.context = null;
@@ -461,11 +513,14 @@ class LlamaWorker {
     }
 
     this.sendInfo("Recursos liberados");
+    this.port.close();
   }
 }
 
 // Inicialização do worker
-parentPort?.once("message", async (messageData) => {
+// Nota: Esta implementação foi refatorada para usar exclusivamente o LlamaChatSession
+// para todas as interações de geração de texto, conforme o plano de refatoração.
+process.parentPort?.on("message", async (messageData) => {
   try {
     const [port] = messageData.ports;
     const worker = new LlamaWorker(port);
