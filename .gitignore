@@ -98,3 +98,8 @@ out/
 
 
 cline_docs/node-llama-cpp
+
+# Roo Flow
+.roo
+.roo*
+insert-variables.cmd
