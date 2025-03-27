@@ -1,8 +1,11 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
-import { ElectronAPI } from "./electronAPI";
+import { contextBridge, ipcRenderer } from "electron";
+import { LlamaAPI } from "./electronAPI";
+import { LlamaMessageType } from "./llama";
 
-const electronAPI: ElectronAPI = {};
+const { port1: llamaAPI, port2: llamaService } = new MessageChannel();
 
-contextBridge.exposeInMainWorld("electronAPI", {
-  ...electronAPI,
-});
+// Funções da API que serão expostas ao renderer
+const electronAPI: LlamaAPI = {};
+
+// Expor a API para o renderer
+contextBridge.exposeInMainWorld("electronAPI", electronAPI);

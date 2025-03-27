@@ -1,4 +1,4 @@
-export type ElectronAPI = {};
+export interface LlamaAPI {}
 
 declare global {
   interface Window {
