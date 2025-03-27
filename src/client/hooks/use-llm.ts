@@ -1,5 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import type {
+  DownloadProgress,
+  ModelInfo,
+  CompletionData,
+  ErrorData,
+} from "./llama-types";
 
 export interface LLMState {
   download: number;
@@ -8,11 +14,7 @@ export interface LLMState {
   error: string | null;
   isGenerating: boolean;
   completionOutput: string;
-  modelInfo: {
-    name: string;
-    size: number;
-    contextSize: number;
-  } | null;
+  modelInfo: ModelInfo | null;
 }
 
 export function useLLM() {
@@ -26,6 +28,10 @@ export function useLLM() {
     completionOutput: "",
     modelInfo: null,
   });
+  // Novo estado para gerenciamento de download
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   // Callbacks para atualização de estado com debounce
   const setDownloadDebounced = useDebouncedCallback(
@@ -132,7 +138,7 @@ export function useLLM() {
   useEffect(() => {
     // Configurar listeners para eventos do LLM
     const modelLoadedRemover = window.electronAPI.llm.onModelLoaded(
-      (modelInfo) => {
+      (modelInfo: ModelInfo) => {
         setState((prev) => ({
           ...prev,
           isReady: true,
@@ -141,23 +147,27 @@ export function useLLM() {
       }
     );
 
-    const progressRemover = window.electronAPI.llm.onProgress((data) => {
-      if (data.operation === "download") {
-        setDownloadDebounced(data.progress);
-      } else if (data.operation === "load") {
-        setLoadDebounced(data.progress);
+    const progressRemover = window.electronAPI.llm.onProgress(
+      (data: DownloadProgress) => {
+        if (data.operation === "download") {
+          setDownloadDebounced(data.progress);
+        } else if (data.operation === "load") {
+          setLoadDebounced(data.progress);
+        }
       }
-    });
+    );
 
-    const chunkRemover = window.electronAPI.llm.onCompletionChunk((chunk) => {
-      setState((prev) => ({
-        ...prev,
-        completionOutput: prev.completionOutput + chunk,
-      }));
-    });
+    const chunkRemover = window.electronAPI.llm.onCompletionChunk(
+      (chunk: string) => {
+        setState((prev) => ({
+          ...prev,
+          completionOutput: prev.completionOutput + chunk,
+        }));
+      }
+    );
 
     const completionDoneRemover = window.electronAPI.llm.onCompletionDone(
-      (data) => {
+      (data: CompletionData) => {
         setState((prev) => ({
           ...prev,
           isGenerating: false,
@@ -166,7 +176,7 @@ export function useLLM() {
       }
     );
 
-    const errorRemover = window.electronAPI.llm.onError((data) => {
+    const errorRemover = window.electronAPI.llm.onError((data: ErrorData) => {
       setState((prev) => ({
         ...prev,
         isGenerating: false,

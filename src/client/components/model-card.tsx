@@ -67,6 +67,8 @@ export default function ModelCard({
     }
   };
 
+  // Remover a duplicação da função handleCancelDownload
+
   const handleCancelDownload = async () => {
     try {
       await window.electronAPI.llm.abortDownload();
