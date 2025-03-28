@@ -1,23 +1,34 @@
-# Contexto do Produto
+# Product Context
 
-## Objetivo Principal
-Desenvolver um assistente de desenvolvimento autônomo que opera localmente na máquina do usuário, utilizando modelos LLM para automatizar tarefas em repositórios Git.
+Este arquivo fornece uma visão geral de alto nível do projeto e do produto esperado. Inicialmente, ele é baseado no `projectBrief.md` (se fornecido) e em todas as outras informações relacionadas ao projeto disponíveis no diretório de trabalho. Este arquivo deve ser atualizado conforme o projeto evolui e deve ser usado para informar todos os outros modos sobre os objetivos e o contexto do projeto.
+2025-03-27 08:17:12 - Log de atualizações será anexado ao final deste arquivo.
 
-## Funcionalidades Chave
-- Análise e resolução de issues do GitHub
-- Criação e gerenciamento de branches e PRs
-- Timeline de atividades para acompanhamento
-- Busca semântica em repositórios
-- Interface gráfica intuitiva
-- Suporte a múltiplos idiomas
+*
 
-## Público Alvo
-- Desenvolvedores que desejam automatizar tarefas repetitivas
-- Equipes que precisam de assistência na resolução de issues
-- Projetos que buscam melhorar a documentação e qualidade do código
+## Objetivo do Projeto
 
-## Diferenciais
-- Execução completamente local
-- Privacidade total dos dados
-- Integração segura com Git e GitHub
-- Interface moderna e responsiva
+*   
+
+## Principais Funcionalidades
+
+*   
+
+## Arquitetura Geral
+
+## Objetivo do Projeto
+
+* Desenvolver uma aplicação desktop usando Electron.js, Vite, React e TypeScript.
+
+## Principais Funcionalidades
+
+* Interface moderna com componentes da Radix UI e estilização com Tailwind CSS.
+* Internacionalização com Lingui.
+* Validação de formulários com React Hook Form e Zod.
+
+## Arquitetura Geral
+
+* Estrutura modular com separação clara entre main, preload e renderer processes.
+* Build otimizado com Vite e Electron Forge.
+
+
+*

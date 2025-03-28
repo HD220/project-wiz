@@ -1,16 +1,20 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import {
+  app,
+  BrowserWindow,
+  MessageChannelMain,
+  utilityProcess,
+} from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import { LlamaProcessManager } from "./llama/LlamaProcessManager";
+import { fileURLToPath } from "node:url";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
-let mainWindow: BrowserWindow | null = null;
-let llamaProcessManager: LlamaProcessManager | null = null;
+export const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -26,41 +30,35 @@ function createWindow() {
     );
   }
 
+  // //exemplo chamada do worker (só assi funciona)
+  const { port1, port2 } = new MessageChannelMain();
+
+  const workerPath = path.join(__dirname, "llama-worker.js");
+
+  const llamaServiceProcess = utilityProcess.fork(workerPath, [], {
+    serviceName: "llama-worker",
+  });
+
+  llamaServiceProcess.postMessage("port", [port1]);
+
+  port1.on("message", (data) => {
+    console.log("main", data);
+  });
+
+  mainWindow.webContents.postMessage("port", [], [port2]);
+
   mainWindow.webContents.openDevTools();
 }
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
 
-app.on("ready", () => {
-  llamaProcessManager = new LlamaProcessManager();
-
-  llamaProcessManager.on("downloadProgress", (data) => {
-    mainWindow.webContents.send("llm:download-progress", data);
-  });
-
-  llamaProcessManager.on("loadProgress", (data) => {
-    mainWindow.webContents.send("llm:load-progress", data);
-  });
-
-  ipcMain.handle("llm:download-model", async (event, modelId) => {
-    return new Promise<void>((resolve, reject) => {
-      llamaProcessManager?.once("downloadComplete", resolve);
-      llamaProcessManager?.once("downloadError", reject);
-      llamaProcessManager?.emit("downloadModel", modelId);
-    });
-  });
-
+app.on("ready", async () => {
   createWindow();
 });
 
-app.on("before-quit", () => {
-  if (llamaProcessManager) {
-    llamaProcessManager.shutdown();
-  }
-});
+app.on("before-quit", () => {});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

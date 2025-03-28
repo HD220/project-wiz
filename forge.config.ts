@@ -40,7 +40,7 @@ const config: ForgeConfig = {
         },
         {
           entry: "src/core/llama/llama-worker.ts",
-          config: "vite.worker.config.mts"
+          config: "vite.worker.config.mts",
         },
       ],
       renderer: [

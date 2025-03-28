@@ -1,0 +1,4 @@
+!memory-bank/
+.git
+.vite
+node_modules

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import ModelCard from "./model-card";
+import ModelList from "./model-list";
 
 export default function ModelSettings() {
   const [modelId, setModelId] = useState("mistralai/Mistral-7B-v0.1");
@@ -104,15 +105,23 @@ export default function ModelSettings() {
         </TabsList>
 
         <TabsContent value="models" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {models.map((model) => (
-              <ModelCard
-                key={model.id}
-                model={model}
-                isActive={model.modelId === modelId}
-                onActivate={setModelId}
-              />
-            ))}
+          {/* Usando o componente ModelList para exibir os modelos */}
+          <div className="mb-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              Modelos disponíveis para download e uso. Clique em "Download" para
+              baixar um modelo ou "Activate" para ativar um modelo já baixado.
+            </p>
+          </div>
+
+          {/* Importando o componente ModelList que contém os modelos de exemplo */}
+          <div className="border rounded-md">
+            <div className="p-4 border-b bg-muted/50">
+              <h3 className="font-medium">Modelos Disponíveis</h3>
+            </div>
+            <div>
+              {/* Componente que lista os modelos, incluindo o modelo simples para teste */}
+              <ModelList />
+            </div>
           </div>
         </TabsContent>
 

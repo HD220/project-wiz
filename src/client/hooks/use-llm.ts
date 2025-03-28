@@ -1,39 +1,247 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
+export interface LLMState {
+  download: number;
+  load: number;
+  isReady: boolean;
+  error: string | null;
+  isGenerating: boolean;
+  completionOutput: string;
+  modelInfo: ModelInfo | null;
+}
+
 export function useLLM() {
-  const [download, setDownload] = useState(0);
-  const [load, setLoad] = useState(0);
-
-  const setDownloadDebounced = useDebouncedCallback(setDownload, 100, {
-    maxWait: 1000,
+  // Estado principal do LLM
+  const [state, setState] = useState<LLMState>({
+    download: 0,
+    load: 0,
+    isReady: false,
+    error: null,
+    isGenerating: false,
+    completionOutput: "",
+    modelInfo: null,
   });
+  // Estados para gerenciamento de download
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  const setLoadDebounced = useDebouncedCallback(setLoad, 100, {
-    maxWait: 1000,
-  });
+  // Callbacks para atualização de estado com debounce
+  const setDownloadDebounced = useDebouncedCallback(
+    (progress: number) => {
+      setState((prev) => ({ ...prev, download: progress * 100.0 }));
+    },
+    100,
+    { maxWait: 1000 }
+  );
 
+  const setLoadDebounced = useDebouncedCallback(
+    (progress: number) => {
+      setState((prev) => ({ ...prev, load: progress * 100.0 }));
+    },
+    100,
+    { maxWait: 1000 }
+  );
+
+  // Ações do LLM
+  const initLLM = useCallback(
+    (options?: {
+      debug?: boolean;
+      gpu?: "auto" | "cuda" | "metal" | "vulkan" | "off";
+      numThreads?: number;
+    }) => {
+      window.electronAPI.llm.init(options);
+    },
+    []
+  );
+
+  const loadModel = useCallback(
+    (
+      modelPath: string,
+      options?: {
+        gpuLayers?: number;
+        contextSize?: number;
+        batchSize?: number;
+        seed?: number;
+        ignoreMemorySafetyChecks?: boolean;
+      }
+    ) => {
+      setState((prev) => ({ ...prev, load: 0, isReady: false }));
+      window.electronAPI.llm.loadModel(modelPath, options);
+    },
+    []
+  );
+
+  const createContext = useCallback(() => {
+    window.electronAPI.llm.createContext();
+  }, []);
+
+  const generateCompletion = useCallback(
+    (
+      prompt: string,
+      options?: {
+        maxTokens?: number;
+        temperature?: number;
+        topP?: number;
+        stopSequences?: string[];
+        streamResponse?: boolean;
+      }
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        isGenerating: true,
+        completionOutput: "",
+        error: null,
+      }));
+      window.electronAPI.llm.generateCompletion(prompt, options);
+    },
+    []
+  );
+
+  const generateChatCompletion = useCallback(
+    (
+      messages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }>,
+      options?: {
+        maxTokens?: number;
+        temperature?: number;
+        topP?: number;
+        stopSequences?: string[];
+        streamResponse?: boolean;
+      }
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        isGenerating: true,
+        completionOutput: "",
+        error: null,
+      }));
+      window.electronAPI.llm.generateChatCompletion(messages, options);
+    },
+    []
+  );
+
+  const abort = useCallback(() => {
+    window.electronAPI.llm.abort();
+  }, []);
+
+  // Configuração de event listeners
   useEffect(() => {
-    const listenerDownload = window.electronAPI.onDownloadProgress(
-      ({ progress }) => {
-        setDownloadDebounced(progress);
+    // Configurar listeners para eventos do LLM
+    const modelLoadedRemover = window.electronAPI.llm.onModelLoaded(
+      (modelInfo: ModelInfo) => {
+        setState((prev) => ({
+          ...prev,
+          isReady: true,
+          modelInfo,
+        }));
       }
     );
 
-    const listenerLoad = window.electronAPI.onLoadProgress(({ progress }) => {
-      setLoadDebounced(progress);
+    const progressRemover = window.electronAPI.llm.onProgress(
+      (data: DownloadProgress) => {
+        if (data.operation === "download") {
+          setDownloadDebounced(data.progress);
+        } else if (data.operation === "load") {
+          setLoadDebounced(data.progress);
+        }
+      }
+    );
+
+    const chunkRemover = window.electronAPI.llm.onCompletionChunk(
+      (chunk: string) => {
+        setState((prev) => ({
+          ...prev,
+          completionOutput: prev.completionOutput + chunk,
+        }));
+      }
+    );
+
+    const completionDoneRemover = window.electronAPI.llm.onCompletionDone(
+      (data: CompletionData) => {
+        setState((prev) => ({
+          ...prev,
+          isGenerating: false,
+          completionOutput: data.fullText,
+        }));
+      }
+    );
+
+    const errorRemover = window.electronAPI.llm.onError((data: ErrorData) => {
+      setState((prev) => ({
+        ...prev,
+        isGenerating: false,
+        error: data.error,
+      }));
     });
 
+    // Remover todos os listeners ao desmontar o componente
     return () => {
-      listenerDownload();
-      listenerLoad();
+      modelLoadedRemover();
+      progressRemover();
+      chunkRemover();
+      completionDoneRemover();
+      errorRemover();
     };
+  }, [setDownloadDebounced, setLoadDebounced]);
+
+  // Função para iniciar o download de um modelo
+  const startDownload = useCallback((modelId: string) => {
+    setIsDownloading(true);
+    setDownloadProgress(0);
+    setDownloadError(null);
+
+    window.electronAPI.llm
+      .downloadModel(modelId, (progress: number) => {
+        setDownloadProgress(progress);
+      })
+      .then(() => {
+        setIsDownloading(false);
+        // Atualizar o estado para refletir que o download foi concluído
+        setState((prev) => ({
+          ...prev,
+          download: 100,
+        }));
+      })
+      .catch((error) => {
+        setIsDownloading(false);
+        setDownloadError(error.message);
+      });
+  }, []);
+
+  // Função para cancelar o download em andamento
+  const cancelDownload = useCallback(() => {
+    window.electronAPI.llm
+      .abortDownload()
+      .then(() => {
+        setIsDownloading(false);
+        setDownloadProgress(0);
+      })
+      .catch((error) => {
+        console.error("Erro ao cancelar download:", error);
+        setDownloadError("Falha ao cancelar o download");
+      });
   }, []);
 
   return {
     state: {
-      download: download * 100.0,
-      load: load * 100.0,
+      ...state,
+      downloadProgress,
+      isDownloading,
+      downloadError,
+    },
+    actions: {
+      initLLM,
+      loadModel,
+      createContext,
+      generateCompletion,
+      generateChatCompletion,
+      abort,
+      startDownload,
+      cancelDownload,
     },
   };
 }

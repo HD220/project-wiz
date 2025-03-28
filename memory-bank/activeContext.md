@@ -1,29 +1,27 @@
-# Contexto Atual
+# Active Context
 
-## Status Atual
+Este arquivo rastreia o status atual do projeto, incluindo alterações recentes, objetivos atuais e questões em aberto.
+2025-03-27 08:17:24 - Log de atualizações.
+2025-03-28 07:31:00 - Atualização do tipo de mensagem do LlamaWorker
 
-- Configuração do ambiente de desenvolvimento em andamento
-- Integração inicial com node-llama-cpp em progresso
-- Estrutura básica do projeto concluída
-- Definição da arquitetura finalizada
-- Implementação de download de modelos com progresso concluída
-- Configuração inicial de MCP Servers
+## Foco Atual
 
-## Próximos Passos
+- Finalização da implementação do serviço de LLM com node-llama-cpp
+- Testes e validação da integração de download de modelos
 
-1. Finalizar configuração do ambiente de desenvolvimento
-2. Completar integração básica com node-llama-cpp
-3. Implementar interface básica de gerenciamento de repositórios
-4. Configurar internacionalização com LinguiJS
-5. Iniciar desenvolvimento do sistema de busca semântica
-6. Implementar sistema de ativação de modelos baixados
-7. Finalizar configuração de MCP Servers
+## Alterações Recentes
 
-## Decisões Recentes
+- Refatoração completa do `llama-worker.ts` para uso de LlamaChatSession
+- Implementação de método flexível de download de modelos
+- Suporte a download de modelos únicos e múltiplos
+- Melhoria na robustez do tratamento de erros
+- Refatoração do `LlamaWorkerMessageType` para tipagem mais segura
+  - Convertido de união de strings para união de objetos
+  - Adicionada tipagem específica para cada tipo de mensagem
+  - Tornado `modelUris` um parâmetro obrigatório para download de modelos
 
-- Adoção de shadcn/ui para componentes UI
-- Uso de LinguiJS para internacionalização
-- Implementação local com node-llama-cpp
-- Armazenamento vetorial com sqlite-vec
-- Configuração de MCP Servers para operações seguras
-- Uso de child_process e IPC para downloads com progresso
+## Questões/Problemas em Aberto
+
+- Realizar testes unitários abrangentes do serviço de LLM
+- Validar performance do download de modelos
+- Verificar compatibilidade com implementações existentes após mudanças no tipo de mensagem
