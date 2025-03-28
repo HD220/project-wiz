@@ -96,9 +96,5 @@ src/locales/**/*.ts
 # Electron-Forge
 out
 
-
-cline_docs/node-llama-cpp
-
 # Roo Flow
-insert-variables.cmd
 .git
