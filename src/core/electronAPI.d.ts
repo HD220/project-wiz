@@ -1,48 +1,64 @@
+import {
+  LlamaWorkerMessageType,
+  LlamaOptions,
+  LlamaModelOptions,
+  LlamaChatSessionOptions,
+  LlamaMessageType,
+  BaseCallback,
+  InitCallbackData,
+  ModelLoadCallbackData,
+  PromptCompletionCallbackData,
+  ModelDownloadCallbackData,
+} from "./llama/llama-types";
+
 export interface LlamaAPI {
-  init(options?: {
-    debug?: boolean;
-    gpu?: "auto" | "cuda" | "metal" | "vulkan" | "off";
-    numThreads?: number;
-  }): void;
-
-  loadModel(
-    modelPath: string,
-    options?: {
-      gpuLayers?: number;
-      contextSize?: number;
-      batchSize?: number;
-      seed?: number;
-      ignoreMemorySafetyChecks?: boolean;
+  initializeLlamaEnvironment(
+    message: LlamaMessageType<"init"> & {
+      callbacks?: BaseCallback<
+        InitCallbackData["progress"],
+        InitCallbackData["result"],
+        InitCallbackData["error"]
+      >;
     }
-  ): void;
-
-  createContext(): void;
-
-  generateCompletion(
-    prompt: string,
-    options?: {
-      maxTokens?: number;
-      temperature?: number;
-      topP?: number;
-      stopSequences?: string[];
-      streamResponse?: boolean;
-    }
-  ): void;
-
-  downloadModel(
-    modelId: string,
-    progressCallback: (progress: number) => void
   ): Promise<void>;
 
-  abortDownload(): Promise<void>;
+  prepareModelForInference(
+    message: LlamaMessageType<"load_model"> & {
+      callbacks?: BaseCallback<
+        ModelLoadCallbackData["progress"],
+        ModelLoadCallbackData["result"],
+        ModelLoadCallbackData["error"]
+      >;
+    }
+  ): Promise<void>;
 
-  abort(): void;
+  createInferenceContext(
+    message: LlamaMessageType<"create_context"> & {
+      callbacks?: BaseCallback;
+    }
+  ): Promise<void>;
 
-  onModelLoaded(callback: (modelInfo: any) => void): () => void;
-  onProgress(callback: (data: any) => void): () => void;
-  onCompletionChunk(callback: (chunk: string) => void): () => void;
-  onCompletionDone(callback: (data: any) => void): () => void;
-  onError(callback: (data: any) => void): () => void;
+  generateTextCompletion(
+    message: LlamaMessageType<"prompt_completion"> & {
+      callbacks?: BaseCallback<
+        PromptCompletionCallbackData["progress"],
+        PromptCompletionCallbackData["result"],
+        PromptCompletionCallbackData["error"]
+      >;
+    }
+  ): Promise<string>;
+
+  downloadModelSafely(
+    message: LlamaMessageType<"download_model"> & {
+      callbacks?: BaseCallback<
+        ModelDownloadCallbackData["progress"],
+        ModelDownloadCallbackData["result"],
+        ModelDownloadCallbackData["error"]
+      >;
+    }
+  ): Promise<void>;
+
+  cancelOngoingOperation(message: LlamaMessageType<"abort">): void;
 }
 
 declare global {
