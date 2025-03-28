@@ -1,7 +1,5 @@
 import { MessagePortMain } from "electron";
 import path from "path";
-import fs from "fs";
-import https from "https";
 import {
   Llama,
   LlamaContext,
@@ -11,6 +9,7 @@ import {
   LlamaModelOptions,
   LlamaChatSessionOptions,
   LlamaWorkerMessageType,
+  LlamaOptions,
 } from "./llama-types";
 import { fileURLToPath } from "url";
 
@@ -36,7 +35,7 @@ class LlamaWorker {
 
   private setupMessageHandlers() {
     this.port.on("message", async (event) => {
-      const message = event.data;
+      const message = event.data as LlamaWorkerMessageType;
       try {
         await this.handleMessage(message);
       } catch (error: any) {
@@ -45,10 +44,7 @@ class LlamaWorker {
     });
   }
 
-  private async handleMessage(message: {
-    type: LlamaWorkerMessageType;
-    [key: string]: any;
-  }) {
+  private async handleMessage(message: LlamaWorkerMessageType) {
     switch (message.type) {
       case "init":
         await this.initialize(message.options);
@@ -64,7 +60,7 @@ class LlamaWorker {
         break;
       case "download_model":
         await this.downloadModel(
-          message.modelId || message.modelIds,
+          message.modelUris, //ajustar o tipo em llama-types.ts
           message.requestId
         );
         break;
@@ -75,82 +71,17 @@ class LlamaWorker {
         this.abortDownload();
         break;
       default:
-        this.sendError(`Tipo de mensagem desconhecido: ${message.type}`);
+        this.sendError(
+          `Tipo de mensagem desconhecido: ${JSON.stringify(message)}`
+        );
     }
   }
 
-  // Métodos para enviar respostas
-  private sendInfo(message: string) {
-    this.port.postMessage({ type: "info", message });
-  }
-
-  private sendError(error: string, details?: any) {
-    this.port.postMessage({ type: "error", error, details });
-  }
-
-  private sendProgress(progressType: string, progress: number) {
-    this.port.postMessage({
-      type: "progress",
-      operation: progressType,
-      progress,
-    });
-  }
-
-  private sendCompletionChunk(chunk: string) {
-    this.port.postMessage({
-      type: "completion_chunk",
-      chunk,
-    });
-  }
-
-  private sendCompletionDone(fullText: string, stats: any) {
-    this.port.postMessage({
-      type: "completion_done",
-      fullText,
-      stats,
-    });
-  }
-
-  private sendModelLoaded(modelInfo: any) {
-    this.port.postMessage({
-      type: "model_loaded",
-      modelInfo,
-    });
-  }
-
-  private sendDownloadProgress(requestId: string, progress: number) {
-    this.port.postMessage({
-      type: "download_progress",
-      requestId,
-      progress,
-    });
-  }
-
-  private sendDownloadComplete(requestId: string, filePath: string) {
-    this.port.postMessage({
-      type: "download_complete",
-      requestId,
-      filePath,
-    });
-  }
-
-  private sendDownloadError(requestId: string, error: string) {
-    this.port.postMessage({
-      type: "download_error",
-      requestId,
-      error,
-    });
-  }
-
-  private async initialize(options?: any) {
+  private async initialize(options?: LlamaOptions) {
     try {
       this.sendInfo("Inicializando node-llama-cpp...");
       const { getLlama } = await import("node-llama-cpp");
-      this.llamaInstance = await getLlama({
-        debug: options?.debug || false,
-        gpu: options?.gpu || "auto",
-        maxThreads: options?.numThreads,
-      });
+      this.llamaInstance = await getLlama(options);
       this.sendInfo("node-llama-cpp inicializado com sucesso");
     } catch (error: any) {
       this.sendError("Falha ao inicializar node-llama-cpp", error.message);
@@ -254,83 +185,13 @@ class LlamaWorker {
     }
   }
 
-  /**
-   * Implementa o download de um arquivo com progresso
-   * @param url URL do arquivo
-   * @param filePath Caminho onde o arquivo será salvo
-   * @param onProgress Callback para reportar progresso
-   */
-  private async downloadFile(
-    url: string,
-    filePath: string,
-    onProgress: (progress: number) => void
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const fileStream = fs.createWriteStream(filePath);
-      let downloadedBytes = 0;
-      let totalBytes = 0;
-
-      https
-        .get(url, (response) => {
-          if (response.statusCode !== 200) {
-            reject(
-              new Error(
-                `Falha ao baixar arquivo: ${response.statusCode} ${response.statusMessage}`
-              )
-            );
-            return;
-          }
-
-          totalBytes = parseInt(response.headers["content-length"] || "0", 10);
-
-          response.on("data", (chunk) => {
-            downloadedBytes += chunk.length;
-            if (totalBytes > 0) {
-              const progress = downloadedBytes / totalBytes;
-              onProgress(progress);
-            }
-          });
-
-          response.pipe(fileStream);
-
-          fileStream.on("finish", () => {
-            fileStream.close();
-            resolve();
-          });
-
-          fileStream.on("error", (err) => {
-            fs.unlink(filePath, () => {});
-            reject(err);
-          });
-
-          // Verificar se o download foi abortado
-          if (this.downloadAbortController) {
-            this.downloadAbortController.signal.addEventListener(
-              "abort",
-              () => {
-                response.destroy();
-                fileStream.close();
-                fs.unlink(filePath, () => {});
-                reject(new Error("Download abortado"));
-              }
-            );
-          }
-        })
-        .on("error", (err) => {
-          fs.unlink(filePath, () => {});
-          reject(err);
-        });
-    });
-  }
-
-  /**
-   * Baixa um ou mais modelos usando createModelDownloader
-   * @param modelIds ID(s) do modelo (hf://org/repo ou URL)
-   * @param requestId ID da requisição para rastreamento
-   */
-  private async downloadModel(modelUri: string | string[], requestId: string) {
+  private async downloadModel(modelUris: string[], requestId: string) {
     try {
-      this.sendInfo(`Iniciando download do(s) modelo(s): ${modelUri}`);
+      const { createModelDownloader, combineModelDownloaders } = await import(
+        "node-llama-cpp"
+      );
+
+      this.sendInfo(`Iniciando download do(s) modelo(s): ${modelUris}`);
       this.downloadAbortController = new AbortController();
 
       const modelsDir = path.join(
@@ -338,13 +199,7 @@ class LlamaWorker {
         "models"
       );
 
-      const modelList = Array.isArray(modelUri) ? modelUri : [modelUri];
-
-      const { createModelDownloader, combineModelDownloaders } = await import(
-        "node-llama-cpp"
-      );
-
-      const downloaders = modelList.map(async (modelUri) => {
+      const downloaders = modelUris.map(async (modelUri) => {
         return createModelDownloader({
           modelUri,
           dirPath: modelsDir,
@@ -428,6 +283,69 @@ class LlamaWorker {
 
     this.sendInfo("Recursos liberados");
     this.port.close();
+  }
+
+  // Métodos para enviar respostas
+  private sendInfo(message: string) {
+    this.port.postMessage({ type: "info", message });
+  }
+
+  private sendError(error: string, details?: any) {
+    this.port.postMessage({ type: "error", error, details });
+  }
+
+  private sendProgress(progressType: string, progress: number) {
+    this.port.postMessage({
+      type: "progress",
+      operation: progressType,
+      progress,
+    });
+  }
+
+  private sendCompletionChunk(chunk: string) {
+    this.port.postMessage({
+      type: "completion_chunk",
+      chunk,
+    });
+  }
+
+  private sendCompletionDone(fullText: string, stats: any) {
+    this.port.postMessage({
+      type: "completion_done",
+      fullText,
+      stats,
+    });
+  }
+
+  private sendModelLoaded(modelInfo: any) {
+    this.port.postMessage({
+      type: "model_loaded",
+      modelInfo,
+    });
+  }
+
+  private sendDownloadProgress(requestId: string, progress: number) {
+    this.port.postMessage({
+      type: "download_progress",
+      requestId,
+      progress,
+    });
+  }
+
+  private sendDownloadComplete(requestId: string, filePath: string) {
+    this.port.postMessage({
+      type: "download_complete",
+      requestId,
+      filePath,
+    });
+  }
+
+  private sendDownloadError(requestId: string, error: string) {
+    this.port.postMessage({
+      type: "download_error",
+      requestId,
+      error,
+    });
   }
 }
 

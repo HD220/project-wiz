@@ -1,70 +1,30 @@
-## Decisões de Implementação - Refatoração LlamaWorker
+## Registro de Decisões de Desenvolvimento
 
-### Mudança para LlamaChatSession
+### Refatoração do Tipo de Mensagem do LlamaWorker
 
-- **Data**: 27/03/2025
-- **Decisão**: Migrar completamente para LlamaChatSession
-- **Justificativa**:
-  - Simplificar código
-  - Usar API mais moderna
-  - Ganhar flexibilidade na geração de texto
+#### Decisão
+- Modificar `LlamaWorkerMessageType` para uma estrutura de objeto mais segura e explícita
+- Tornar `modelUris` um parâmetro obrigatório para mensagens de download de modelo
 
-### Principais Modificações
+#### Motivação
+- Melhorar a segurança de tipos em tempo de compilação
+- Prevenir erros potenciais relacionados a parâmetros de mensagem
 
-1. **Método de Geração de Texto**
+#### Detalhes da Implementação
+- Localização: `src/core/llama/llama-types.ts`
+- Mudança de tipo: De união de strings para união de objetos
+- Adição de propriedades específicas para cada tipo de mensagem
+- Remoção da natureza opcional de `modelUris`
 
-   - Unificação dos métodos `generateCompletion` e `generateChatCompletion`
-   - Suporte a entrada como string ou array de mensagens
-   - Tratamento inteligente de diferentes tipos de mensagens
+#### Impacto
+- Melhoria na clareza do código
+- Redução de possíveis erros de tipo
+- Documentação mais explícita das estruturas de mensagem
 
-2. **Carregamento de Modelo**
+#### Próximos Passos
+- Realizar testes de compatibilidade
+- Verificar todas as chamadas que utilizam este tipo de mensagem
+- Atualizar documentação relacionada
 
-   - Aceitar diretamente objeto `LlamaModelOptions`
-   - Maior flexibilidade na configuração do modelo
-
-3. **Sessão de Chat**
-   - Criação dinâmica com `contextSequence`
-   - Suporte a opções avançadas como prompt de sistema
-
-### Impactos Positivos
-
-- Código mais limpo e conciso
-- Melhor aproveitamento das funcionalidades do node-llama-cpp
-- Preparação para futuras evoluções da biblioteca
-
-### Considerações Futuras
-
-- Monitorar performance
-- Realizar testes abrangentes
-
-### Refatoração para LlamaChatSession
-
-- **Data**: 27/03/2025
-- **Decisão**: Migrar completamente para método unificado de geração de texto usando LlamaChatSession
-- **Justificativa**:
-  - Simplificar a lógica de geração de texto
-  - Usar API moderna do node-llama-cpp
-  - Ganhar flexibilidade na geração de texto
-
-### Principais Modificações
-
-1. **Método de Geração Unificado**
-
-   - Substituição de `generateCompletion` e `generateChatCompletion`
-   - Suporte a entrada como string ou array de mensagens
-   - Tratamento inteligente de diferentes tipos de entrada
-
-2. **Sessão de Chat Dinâmica**
-   - Criação sob demanda de `LlamaChatSession`
-   - Uso de `contextSequence` do contexto atual
-   - Suporte a opções avançadas como prompt de sistema
-
-### Benefícios
-
-- Código mais limpo e conciso
-- Melhor aproveitamento das funcionalidades do node-llama-cpp
-- Preparação para futuras evoluções da biblioteca
-
-| 2025-03-27 17:38:00 | Refatoração do Método de Download de Modelos | Implementação de suporte a múltiplos modelos e uso de createModelDownloader | Substituição do método manual de download por uma abordagem mais robusta usando node-llama-cpp, com suporte a múltiplas fontes e melhor tratamento de erros |
-
-- Documentar mudanças para a equipe
+#### Data da Decisão
+2025-03-28

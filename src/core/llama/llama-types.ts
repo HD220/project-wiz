@@ -1,22 +1,39 @@
 // Tipos reutilizados do node-llama-cpp para LlamaWorker
-export {
+import {
   Llama,
+  LlamaOptions,
   LlamaContext,
   LlamaModel,
-  LlamaChatSession,
-  LLamaChatPromptOptions,
   LlamaModelOptions,
+  LlamaChatSession,
   LlamaChatSessionOptions,
-  ChatHistoryItem,
+  LLamaChatPromptOptions,
   ModelDownloaderOptions,
 } from "node-llama-cpp";
 
 // Tipos adicionais específicos para o Worker, se necessário
 export type LlamaWorkerMessageType =
-  | "init"
-  | "load_model"
-  | "create_context"
-  | "prompt_completion"
-  | "download_model"
-  | "abort"
-  | "abort_download";
+  | { type: "init"; options?: LlamaOptions }
+  | { type: "load_model"; options: LlamaModelOptions }
+  | { type: "create_context" }
+  | {
+      type: "prompt_completion";
+      prompt: string;
+      options?: Omit<LlamaChatSessionOptions, "contextSequence">;
+    }
+  | { type: "download_model"; modelUris: string[]; requestId: string }
+  | { type: "abort" }
+  | { type: "abort_download" };
+
+// Re-exportar tipos para uso em outros módulos
+export {
+  Llama,
+  LlamaOptions,
+  LlamaContext,
+  LlamaModel,
+  LlamaModelOptions,
+  LlamaChatSession,
+  LlamaChatSessionOptions,
+  LLamaChatPromptOptions,
+  ModelDownloaderOptions,
+};
