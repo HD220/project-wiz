@@ -25,14 +25,6 @@ const electronAPI: { llm: LlamaAPI } = {
       llamaAPI.postMessage({ type: "generate_completion", prompt, options });
     },
 
-    generateChatCompletion: (messages, options) => {
-      llamaAPI.postMessage({
-        type: "generate_chat_completion",
-        messages,
-        options,
-      });
-    },
-
     downloadModel: (modelId, progressCallback) => {
       return new Promise<void>((resolve, reject) => {
         const requestId = Date.now().toString();

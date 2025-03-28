@@ -29,20 +29,6 @@ export interface LlamaAPI {
     }
   ): void;
 
-  generateChatCompletion(
-    messages: Array<{
-      role: "system" | "user" | "assistant";
-      content: string;
-    }>,
-    options?: {
-      maxTokens?: number;
-      temperature?: number;
-      topP?: number;
-      stopSequences?: string[];
-      streamResponse?: boolean;
-    }
-  ): void;
-
   downloadModel(
     modelId: string,
     progressCallback: (progress: number) => void
