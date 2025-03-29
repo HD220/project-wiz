@@ -1,70 +1,44 @@
 import {
-  LlamaWorkerMessageType,
-  LlamaOptions,
-  LlamaModelOptions,
-  LlamaChatSessionOptions,
-  LlamaMessageType,
-  BaseCallback,
-  InitCallbackData,
-  ModelLoadCallbackData,
-  PromptCompletionCallbackData,
-  ModelDownloadCallbackData,
+  LlamaClientMessageType,
+  LlamaWorkerResponseType,
+  ModelInfo,
+  DownloadProgress,
+  CompletionData,
+  ErrorData,
 } from "./llama/llama-types";
 
-export interface LlamaAPI {
-  initializeLlamaEnvironment(
-    message: LlamaMessageType<"init"> & {
-      callbacks?: BaseCallback<
-        InitCallbackData["progress"],
-        InitCallbackData["result"],
-        InitCallbackData["error"]
-      >;
-    }
-  ): Promise<void>;
+/**
+ * Interface para os handlers de eventos do LLM
+ */
+export interface LlamaEventHandlers {
+  onModelLoaded: (modelInfo: ModelInfo) => void;
+  onProgress: (data: DownloadProgress) => void;
+  onCompletionChunk: (chunk: string) => void;
+  onCompletionDone: (data: CompletionData) => void;
+  onError: (error: string) => void;
+  onDownloadProgress: (requestId: string, progress: number) => void;
+  onDownloadComplete: (requestId: string, filePath: string) => void;
+  onDownloadError: (requestId: string, error: string) => void;
+}
 
-  prepareModelForInference(
-    message: LlamaMessageType<"load_model"> & {
-      callbacks?: BaseCallback<
-        ModelLoadCallbackData["progress"],
-        ModelLoadCallbackData["result"],
-        ModelLoadCallbackData["error"]
-      >;
-    }
-  ): Promise<void>;
+/**
+ * API exposta pelo preload para comunicação com o worker LLM
+ */
+export interface ElectronAPI {
+  // Solicita porta de comunicação com o worker
+  requestLlamaPort: () => void;
 
-  createInferenceContext(
-    message: LlamaMessageType<"create_context"> & {
-      callbacks?: BaseCallback;
-    }
-  ): Promise<void>;
+  // Configura handlers para eventos do worker
+  setupLlamaHandlers: (
+    handlers: LlamaEventHandlers
+  ) => (() => void) | undefined;
 
-  generateTextCompletion(
-    message: LlamaMessageType<"prompt_completion"> & {
-      callbacks?: BaseCallback<
-        PromptCompletionCallbackData["progress"],
-        PromptCompletionCallbackData["result"],
-        PromptCompletionCallbackData["error"]
-      >;
-    }
-  ): Promise<string>;
-
-  downloadModelSafely(
-    message: LlamaMessageType<"download_model"> & {
-      callbacks?: BaseCallback<
-        ModelDownloadCallbackData["progress"],
-        ModelDownloadCallbackData["result"],
-        ModelDownloadCallbackData["error"]
-      >;
-    }
-  ): Promise<void>;
-
-  cancelOngoingOperation(message: LlamaMessageType<"abort">): void;
+  // Envia mensagem para o worker
+  sendToLlamaWorker: (message: LlamaClientMessageType) => void;
 }
 
 declare global {
   interface Window {
-    electronAPI: {
-      llm: LlamaAPI;
-    };
+    electronAPI: ElectronAPI;
   }
 }
