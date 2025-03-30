@@ -1,68 +1,44 @@
-export interface LlamaAPI {
-  init(options?: {
-    debug?: boolean;
-    gpu?: "auto" | "cuda" | "metal" | "vulkan" | "off";
-    numThreads?: number;
-  }): void;
+import {
+  LlamaClientMessageType,
+  LlamaWorkerResponseType,
+  ModelInfo,
+  DownloadProgress,
+  CompletionData,
+  ErrorData,
+} from "./llama/llama-types";
 
-  loadModel(
-    modelPath: string,
-    options?: {
-      gpuLayers?: number;
-      contextSize?: number;
-      batchSize?: number;
-      seed?: number;
-      ignoreMemorySafetyChecks?: boolean;
-    }
-  ): void;
+/**
+ * Interface para os handlers de eventos do LLM
+ */
+export interface LlamaEventHandlers {
+  onModelLoaded: (modelInfo: ModelInfo) => void;
+  onProgress: (data: DownloadProgress) => void;
+  onCompletionChunk: (chunk: string) => void;
+  onCompletionDone: (data: CompletionData) => void;
+  onError: (error: string) => void;
+  onDownloadProgress: (requestId: string, progress: number) => void;
+  onDownloadComplete: (requestId: string, filePath: string) => void;
+  onDownloadError: (requestId: string, error: string) => void;
+}
 
-  createContext(): void;
+/**
+ * API exposta pelo preload para comunicação com o worker LLM
+ */
+export interface ElectronAPI {
+  // Solicita porta de comunicação com o worker
+  requestLlamaPort: () => void;
 
-  generateCompletion(
-    prompt: string,
-    options?: {
-      maxTokens?: number;
-      temperature?: number;
-      topP?: number;
-      stopSequences?: string[];
-      streamResponse?: boolean;
-    }
-  ): void;
+  // Configura handlers para eventos do worker
+  setupLlamaHandlers: (
+    handlers: LlamaEventHandlers
+  ) => (() => void) | undefined;
 
-  generateChatCompletion(
-    messages: Array<{
-      role: "system" | "user" | "assistant";
-      content: string;
-    }>,
-    options?: {
-      maxTokens?: number;
-      temperature?: number;
-      topP?: number;
-      stopSequences?: string[];
-      streamResponse?: boolean;
-    }
-  ): void;
-
-  downloadModel(
-    modelId: string,
-    progressCallback: (progress: number) => void
-  ): Promise<void>;
-
-  abortDownload(): Promise<void>;
-
-  abort(): void;
-
-  onModelLoaded(callback: (modelInfo: any) => void): () => void;
-  onProgress(callback: (data: any) => void): () => void;
-  onCompletionChunk(callback: (chunk: string) => void): () => void;
-  onCompletionDone(callback: (data: any) => void): () => void;
-  onError(callback: (data: any) => void): () => void;
+  // Envia mensagem para o worker
+  sendToLlamaWorker: (message: LlamaClientMessageType) => void;
 }
 
 declare global {
   interface Window {
-    electronAPI: {
-      llm: LlamaAPI;
-    };
+    electronAPI: ElectronAPI;
   }
 }
