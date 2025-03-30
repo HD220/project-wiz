@@ -98,4 +98,4 @@ out
 
 # Roo Flow
 .git
-docs/node-llama-cpp
+.rooignore
