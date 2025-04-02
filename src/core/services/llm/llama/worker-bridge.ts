@@ -1,6 +1,6 @@
-import { MessageChannelMain, MessagePortMain } from "electron";
+import { MessagePortMain } from "electron";
 import { EventEmitter } from "stream";
-import type { LlamaWorker } from "./worker.js";
+import type { LlamaWorker } from "./worker.ts";
 
 type LlamaWorkerBridgeEvents<T> = {
   [K in keyof T as `${string & K}`]: T[K] extends (...args: any) => any
@@ -29,13 +29,6 @@ class IPCEventBridge<
     this.port.start();
   }
 }
-
-const channel = new MessageChannelMain();
-const a = new IPCEventBridge<LlamaWorkerBridgeEvents<LlamaWorker>>(
-  channel.port1
-);
-
-a.emit("", {});
 
 class LlamaWorkerBridge {
   private port: MessagePortMain;
