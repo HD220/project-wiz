@@ -2,6 +2,14 @@ import { ipcMain, utilityProcess, MessageChannelMain } from "electron";
 import path from "path";
 import { IPCManager } from "./ipc.js";
 import { performance } from "perf_hooks";
+import {
+  ModelDownloaderOptions,
+  LlamaOptions,
+  LlamaModelOptions,
+  LlamaContextOptions,
+  LlamaChatSessionOptions,
+  LLamaChatPromptOptions,
+} from "node-llama-cpp";
 
 export class WorkerService {
   private workerProcess: Electron.UtilityProcess;
@@ -27,30 +35,66 @@ export class WorkerService {
   }
 
   private setupHandlers() {
-    ipcMain.handle("worker:initialize", async (_event, payload) => {
-      return await this.workerIPC.requestResponse("initializeLlama", payload);
-    });
+    ipcMain.handle(
+      "worker:initialize",
+      async (_event, options: LlamaOptions) => {
+        return await this.workerIPC.requestResponse("initializeLlama", options);
+      }
+    );
 
-    ipcMain.handle("worker:loadModel", async (_event, payload) => {
-      this.trackModelUsage(payload.modelPath, payload.estimatedSize);
-      return await this.workerIPC.requestResponse("loadModel", payload);
-    });
+    ipcMain.handle(
+      "worker:loadModel",
+      async (_event, options: LlamaModelOptions) => {
+        return await this.workerIPC.requestResponse("loadModel", options);
+      }
+    );
 
-    ipcMain.handle("worker:createContext", async (_event, payload) => {
-      return await this.workerIPC.requestResponse("createContext", payload);
-    });
+    ipcMain.handle(
+      "worker:createContext",
+      async (_event, options: LlamaContextOptions) => {
+        return await this.workerIPC.requestResponse("createContext", options);
+      }
+    );
 
-    ipcMain.handle("worker:initializeSession", async (_event, payload) => {
-      return await this.workerIPC.requestResponse("initializeSession", payload);
-    });
+    ipcMain.handle(
+      "worker:initializeSession",
+      async (_event, options: LlamaChatSessionOptions) => {
+        return await this.workerIPC.requestResponse(
+          "initializeSession",
+          options
+        );
+      }
+    );
 
-    ipcMain.handle("worker:prompt", async (_event, payload) => {
-      return await this.workerIPC.requestResponse("processRequest", payload);
-    });
+    ipcMain.handle(
+      "worker:prompt",
+      async (
+        _event,
+        {
+          prompt,
+          options,
+        }: { prompt: string; options?: LLamaChatPromptOptions }
+      ) => {
+        return await this.workerIPC.requestResponse("prompt", {
+          prompt,
+          options,
+        });
+      }
+    );
 
-    ipcMain.handle("worker:unloadModel", async (_event, modelPath) => {
-      return await this.workerIPC.requestResponse("unloadModel", { modelPath });
-    });
+    ipcMain.handle(
+      "worker:unloadModel",
+      async (_event, options: { modelPath: string }) => {
+        return await this.workerIPC.requestResponse("unloadModel", options);
+      }
+    );
+
+    ipcMain.handle(
+      "worker:downloadModel",
+      async (_event, options: ModelDownloaderOptions) => {
+        return await this.workerIPC.requestResponse("downloadModel", options);
+      }
+    );
   }
 
   private trackModelUsage(modelPath: string, estimatedSize: number) {

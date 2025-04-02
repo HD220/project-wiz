@@ -11,6 +11,93 @@ Os serviços LLM fornecem integração com modelos de linguagem locais via node-
 
 ## Arquitetura
 
+### Interface IPC do WorkerService
+
+Os handlers IPC do WorkerService seguem um padrão uniforme, recebendo e repassando payloads idênticos aos do worker. Todos os handlers são registrados no processo principal e delegam as operações para o worker via IPC.
+
+#### Handlers Disponíveis:
+
+1. **worker:initialize**
+
+   - **Payload:** `LlamaOptions`
+   - **Descrição:** Inicializa o runtime Llama
+   - **Exemplo:**
+     ```typescript
+     await ipcRenderer.invoke("worker:initialize", {
+       modelPath: "model.bin",
+       gpuLayers: 20,
+     });
+     ```
+
+2. **worker:loadModel**
+
+   - **Payload:** `LlamaModelOptions`
+   - **Descrição:** Carrega um modelo na memória
+   - **Exemplo:**
+     ```typescript
+     await ipcRenderer.invoke("worker:loadModel", {
+       modelPath: "model.bin",
+       gpuLayers: 20,
+     });
+     ```
+
+3. **worker:createContext**
+
+   - **Payload:** `LlamaContextOptions`
+   - **Descrição:** Cria um novo contexto para inferência
+   - **Exemplo:**
+     ```typescript
+     await ipcRenderer.invoke("worker:createContext", {
+       seed: 42,
+       threads: 4,
+     });
+     ```
+
+4. **worker:initializeSession**
+
+   - **Payload:** `LlamaChatSessionOptions`
+   - **Descrição:** Inicializa uma sessão de chat
+   - **Exemplo:**
+     ```typescript
+     await ipcRenderer.invoke("worker:initializeSession", {
+       systemPrompt: "Você é um assistente útil",
+     });
+     ```
+
+5. **worker:prompt**
+
+   - **Payload:** `{ prompt: string, options?: LLamaChatPromptOptions }`
+   - **Descrição:** Executa um prompt no modelo carregado
+   - **Exemplo:**
+     ```typescript
+     const response = await ipcRenderer.invoke("worker:prompt", {
+       prompt: "Explique clean architecture",
+       options: { temperature: 0.7 },
+     });
+     ```
+
+6. **worker:unloadModel**
+
+   - **Payload:** `{ modelPath: string }`
+   - **Descrição:** Descarrega um modelo da memória
+   - **Exemplo:**
+     ```typescript
+     await ipcRenderer.invoke("worker:unloadModel", {
+       modelPath: "model.bin",
+     });
+     ```
+
+7. **worker:downloadModel**
+   - **Payload:** `ModelDownloaderOptions`
+   - **Descrição:** Baixa um modelo remoto
+   - **Exemplo:**
+     ```typescript
+     await ipcRenderer.invoke("worker:downloadModel", {
+       repo: "TheBloke/Llama-2-7B-GGUF",
+       file: "llama-2-7b.Q4_K_M.gguf",
+     });
+     ```
+
 ### Componentes Principais
 
 #### LlamaWorker (`worker.ts`)
