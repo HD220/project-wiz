@@ -1,4 +1,3 @@
-import { fileURLToPath } from "url";
 import path from "path";
 
 import {
@@ -12,9 +11,9 @@ import {
   LlamaModel,
   LlamaModelOptions,
   LlamaOptions,
+  createModelDownloader,
+  ModelDownloaderOptions,
 } from "node-llama-cpp";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class LlamaWorker {
   private llama!: Llama;
@@ -71,5 +70,22 @@ export class LlamaWorker {
     this.session = undefined;
     this.context = undefined;
     this.model = undefined;
+  }
+
+  async downloadModel(options: ModelDownloaderOptions) {
+    try {
+      const modelsDir = path.join(__dirname, "models");
+      const downloader = await createModelDownloader({
+        ...options,
+        dirPath: modelsDir,
+      });
+
+      const modelPath = await downloader.download();
+
+      return modelPath;
+    } catch (error) {
+      console.error("Failed to download model:", error);
+      throw error;
+    }
   }
 }
