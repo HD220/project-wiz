@@ -1,6 +1,4 @@
-!memory-bank/
+.swc
 .git
 .vite
 node_modules
-docs/node-llama-cpp
-custom_modes.json

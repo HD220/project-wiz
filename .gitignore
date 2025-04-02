@@ -92,11 +92,10 @@ src/locales/**/*.ts
 
 # Vite
 .vite
+.swc
 
 # Electron-Forge
 out
 
 # Roo Flow
 .git
-.rooignore
-custom_modes.json
