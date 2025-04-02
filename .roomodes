@@ -54,7 +54,7 @@
       "read",
       "command",
       ["edit", {
-        "fileRegex": "\\.(ts|js|java|py|go|rs)$",
+        "fileRegex": "\\.*$",
         "description": "Only implementation source files"
       }]
     ]
@@ -170,7 +170,7 @@
       "read",
       "command",
       ["edit", {
-        "fileRegex": "\\.(ts|js|java|py|go|rs)$",
+        "fileRegex": "\\.*$",
         "description": "Only implementation source files"
       }]
     ]
@@ -184,7 +184,7 @@
       "read",
       "command",
       ["edit", {
-        "fileRegex": "\\.(ts|js|java|py|go|rs)$",
+        "fileRegex": "\\.*$",
         "description": "Only implementation source files"
       }]
     ]
@@ -205,7 +205,7 @@
       "read",
       "command",
       ["edit", {
-        "fileRegex": "\\.(ts|js|java|py|go|rs)$|\\.md$",
+        "fileRegex": "\\.md$",
         "description": "Only API source and documentation files"
       }]
     ]

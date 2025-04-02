@@ -13,6 +13,7 @@
 
 ## Guias
 
+- [Guia do Usuário](./user-guide.md) - Documentação para usuários finais
 - [Configuração](./guides/setup.md) - Como configurar o ambiente
 - [Desenvolvimento](./guides/development.md) - Fluxo de desenvolvimento
 - [Testes](./guides/testing.md) - Como executar testes
