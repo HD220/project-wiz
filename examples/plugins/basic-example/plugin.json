@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../src/core/plugins/plugin-schema.json",
+  "name": "basic-example",
+  "version": "1.0.0",
+  "main": "./plugin.js",
+  "description": "Basic plugin example demonstrating core functionality",
+  "permissions": [],
+  "capabilities": ["example"]
+}
