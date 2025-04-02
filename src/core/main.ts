@@ -1,6 +1,8 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
+import { WorkerService } from "./services/llm/WorkerService";
+import { ModelDownloaderOptions, LLamaChatPromptOptions } from "node-llama-cpp";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -8,6 +10,8 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 if (started) {
   app.quit();
 }
+
+let workerService: WorkerService;
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -31,7 +35,51 @@ function createWindow() {
   mainWindow.webContents.openDevTools();
 }
 
+function setupWorkerHandlers() {
+  workerService = new WorkerService();
+
+  ipcMain.handle(
+    "download-model",
+    async (event, options: ModelDownloaderOptions) => {
+      try {
+        const result = await workerService.downloadModel(options);
+        return { success: true, modelPath: result };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    }
+  );
+
+  ipcMain.handle(
+    "send-prompt",
+    async (
+      event,
+      {
+        prompt,
+        options,
+      }: {
+        prompt: string;
+        options?: LLamaChatPromptOptions;
+      }
+    ) => {
+      try {
+        const response = await workerService.prompt(prompt, options);
+        return { success: true, response };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    }
+  );
+}
+
 app.whenReady().then(() => {
+  setupWorkerHandlers();
   createWindow();
 
   app.on("activate", () => {

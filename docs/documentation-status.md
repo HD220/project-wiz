@@ -8,17 +8,19 @@
 | Arquitetura          | 🟡 Parcial    | 2025-04-02         | Documentation |
 | Componentes UI       | 🟢 Completa   | 2025-04-02         | Frontend      |
 | ModelList Refatorado | 🟢 Completa   | 2025-04-02         | Frontend      |
-| Serviços LLM         | 🟢 Completa   | 2025-04-02         | Core          |
+| Serviços LLM         | 🟡 Parcial    | 2025-04-02         | Core          |
+| Worker Bridge        | Completa      | 2025-04-02         | Core          |
 | Internacionalização  | 🟡 Parcial    | -                  | Frontend      |
 | Testes               | 🔴 Incompleta | -                  | QA            |
 
 ## Documentação Recentemente Atualizada
 
 - [Componentes UI](./ui-components.md): 2025-04-02 - Documentação completa
+- [Histórico de Mudanças](../CHANGES.md): 2025-04-02 - Criação inicial
 
 - [Contexto do Projeto](./project-context.md): 2025-04-02 - Criação inicial
 - [Índice Principal](./index.md): 2025-04-02 - Criação inicial
-- [Serviços LLM](./llm-services.md): 2025-04-02 - Documentação completa
+- [Serviços LLM](./llm-services.md): 2025-04-02 - Documentação atualizada
 - [Componentes UI](./ui-components.md): 2025-04-02 - Documentação completa
 - [ModelList Refatorado](./ui-components.md#modellist): 2025-04-02 - Documentação atualizada
 
@@ -30,8 +32,8 @@
 
 ## Métricas de Documentação
 
-- Total de Arquivos: 5
-- Cobertura Atual: 70%
+- Total de Arquivos: 6
+- Cobertura Atual: 75%
 - Idade Média: 1 dia
 
 ## Roteiro de Documentação

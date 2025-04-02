@@ -45,6 +45,38 @@ Esta estratégia define a abordagem de testes para o Project Wiz, alinhada com o
 - Jest + Testing Library
 - MSW para mock de APIs
 
+#### Testes de Worker
+
+- Testar comunicação IPC com o worker
+- Verificar tratamento de erros
+- Validar fluxos assíncronos
+
+**Exemplo:**
+
+```typescript
+describe("Worker IPC Integration", () => {
+  it("should handle sendPrompt operation", async () => {
+    const response = await ipcRenderer.invoke("worker:sendPrompt", {
+      prompt: "Test prompt",
+      options: { temperature: 0.5 },
+    });
+
+    expect(response).toHaveProperty("operationId");
+    expect(typeof response.operationId).toBe("string");
+  });
+
+  it("should handle downloadModel operation", async () => {
+    const response = await ipcRenderer.invoke("worker:downloadModel", {
+      repo: "test/repo",
+      file: "model.gguf",
+    });
+
+    expect(response).toHaveProperty("status");
+    expect(response.status).toBe("started");
+  });
+});
+```
+
 ### 3. Testes de Sistema (e2e)
 
 **Cobertura mínima: 50%**

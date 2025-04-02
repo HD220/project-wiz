@@ -132,4 +132,15 @@ export class WorkerService {
       }
     }, this.cleanupInterval);
   }
+
+  public async downloadModel(options: ModelDownloaderOptions) {
+    return await this.workerIPC.requestResponse("downloadModel", options);
+  }
+
+  public async prompt(prompt: string, options?: LLamaChatPromptOptions) {
+    return await this.workerIPC.requestResponse("prompt", {
+      prompt,
+      options,
+    });
+  }
 }

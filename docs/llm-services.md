@@ -8,6 +8,8 @@ Os serviços LLM fornecem integração com modelos de linguagem locais via node-
 - Criação de contextos de inferência
 - Geração de respostas via prompts
 - Comunicação IPC entre processos
+- Download de modelos remotos
+- Envio de prompts assíncronos
 
 ## Arquitetura
 
@@ -88,6 +90,7 @@ Os handlers IPC do WorkerService seguem um padrão uniforme, recebendo e repassa
      ```
 
 7. **worker:downloadModel**
+
    - **Payload:** `ModelDownloaderOptions`
    - **Descrição:** Baixa um modelo remoto
    - **Exemplo:**
@@ -95,6 +98,17 @@ Os handlers IPC do WorkerService seguem um padrão uniforme, recebendo e repassa
      await ipcRenderer.invoke("worker:downloadModel", {
        repo: "TheBloke/Llama-2-7B-GGUF",
        file: "llama-2-7b.Q4_K_M.gguf",
+     });
+     ```
+
+8. **worker:sendPrompt**
+   - **Payload:** `{ prompt: string, options?: LLamaChatPromptOptions }`
+   - **Descrição:** Envia um prompt de forma assíncrona, retornando um ID de operação
+   - **Exemplo:**
+     ```typescript
+     const operationId = await ipcRenderer.invoke("worker:sendPrompt", {
+       prompt: "Explique clean architecture",
+       options: { temperature: 0.7 },
      });
      ```
 

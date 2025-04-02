@@ -1,8 +1,9 @@
-# Tool Restrictions
+# Tools
 
 switch_mode: DISABLED
 ask_followup_question: DISABLED
 attempt_completion -> result:REQUIRED command: DISABLED
+execute_command: use ";" as command separator
 
 # General Guidance
 
@@ -61,7 +62,7 @@ All profiles should contribute to and maintain the documentation system:
 2. **Knowledge Continuity**: Ensure knowledge is preserved for future work
 3. **Documentation Synchronization**: Keep documentation in sync with code changes
 4. **Architectural Documentation**: Document architectural decisions and boundaries
-5. **Task Handoff**: Create proper handoff documentation when pausing work
+5. **Task Handoff**: Create proper handoff documentation
 
 ## Documentation Handoff System
 
