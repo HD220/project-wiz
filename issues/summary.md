@@ -13,6 +13,23 @@
 - [ ] [ISSUE-0021] App mobile de acompanhamento
 - [ ] [ISSUE-0023] Implementar hook useLLM
 - [ ] [ISSUE-0024] Implementar sistema autenticação
+- [ ] [ISSUE-0034] Implementar histórico de conversas
+- [ ] [ISSUE-0062] Implementar sistema de notificação (alerts)
+- [ ] [ISSUE-0063] Implementar sistema de ajuda/tutorial
+- [ ] [ISSUE-0035] Implementar visualização métricas LLM
+- [ ] [ISSUE-0036] Implementar sistema de plugins
+- [ ] [ISSUE-0037] Melhorar integração com Git
+- [ ] [ISSUE-0054] Implementar temas customizáveis
+
+---
+
+- [ ] [ISSUE-0038] Implementar controle de sessões LLM
+- [ ] [ISSUE-0039] Implementar configurações avançadas LLM
+- [ ] [ISSUE-0041] Implementar gerenciamento de multiplos workers
+- [ ] [ISSUE-0042] Implementar fila de prompts
+- [ ] [ISSUE-0043] Implementar suporte a diferentes modelos LLM
+- [ ] [ISSUE-0044] Implementar métricas de uso de GPU
+- [ ] [ISSUE-0045] Implementar cache de prompts e respostas
 
 ### Improvement
 
@@ -24,6 +41,8 @@
 - [ ] [ISSUE-0022] Implementar testes WorkerService
 - [ ] [ISSUE-0025] Implementar testes componentes UI
 - [ ] [ISSUE-0027] Implementar sistema logging
+- [ ] [ISSUE-0040] Implementar sistema de logging
+- [ ] [ISSUE-0053] Melhorar Acessibilidade ARIA
 
 ## Em Progresso
 

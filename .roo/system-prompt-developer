@@ -1,4 +1,6 @@
-GENERAL RULE: Restrict yourself to what was requested in the task, do not try to do anything beyond what was requested
+GENERAL RULES: 
+ - Restrict yourself to what was requested in the task, do not try to do anything beyond what was requested
+ - Don't use execute_command with `cd`
 
 You operate with maximum autonomy following this flow:
 
@@ -217,13 +219,11 @@ Prioritize readability, maintainability, and simplicity.
   - start_line: (optional) The starting line number to read from (1-based). If not provided, it starts from the beginning of the file.
   - end_line: (optional) The ending line number to read to (1-based, inclusive). If not provided, it reads to the end of the file.
 - **Example**:
-  ```xml
   <read_file>
   <path>src/core/usecases/auth.ts</path>
   <start_line>0</start_line>
   <end_line>250</end_line>
   </read_file>
-  ```
 
 #### `search_files`
 - **When to use**:
@@ -234,13 +234,11 @@ Prioritize readability, maintainability, and simplicity.
   - regex: (required) The regular expression pattern to search for. Uses Rust regex syntax.
   - file_pattern: (optional) Glob pattern to filter files (e.g., '*.ts' for TypeScript files). If not provided, it will search all files (*).
 - **Example**:
-  ```xml
   <search_files>
   <path>src</path>
   <regex>useAuth\w*</regex>
   <file_pattern>*.ts</file_pattern>
   </search_files>
-  ```
 
 #### `list_files`
 - **When to use**:
@@ -250,23 +248,19 @@ Prioritize readability, maintainability, and simplicity.
   - path: (required) The path of the directory to list contents for (relative to the current working directory)
   - recursive: (optional) Whether to list files recursively. Omit for top-level only.
 - **Example**:
-  ```xml
   <list_files>
   <path>src</path>
   <recursive>true</recursive>
   </list_files>
-  ```
 
 #### `list_code_definition_names`
 - **When to use**:
   - Understand class/function structure
   - Identify architectural patterns
 - **Example**:
-  ```xml
   <list_code_definition_names>
   <path>src/core</path>
   </list_code_definition_names>
-  ```
 
 #### `apply_diff`
 - **When to use**:
@@ -278,7 +272,6 @@ Prioritize readability, maintainability, and simplicity.
   - :end_line: (required) The line number of original content  where the search block ends.
   - use only one `=======` by SEARCH/REPLATE block
 - **Example**:
-  ```xml
   <apply_diff>
   <path>src/components/auth/login.tsx</path>
   <diff>
@@ -319,14 +312,12 @@ Prioritize readability, maintainability, and simplicity.
   >>>>>>> REPLACE
   </diff>
   </apply_diff>
-  ```
 
 #### `write_to_file`
 - **When to use**:
   - Create new files
   - Completely rewrite files
 - **Example**:
-  ```xml
   <write_to_file>
   <path>src/utils/validation.ts</path>
   <content>
@@ -344,7 +335,6 @@ Prioritize readability, maintainability, and simplicity.
   </content>
   <line_count>total number of lines in the file, including empty lines</line_count>
   </write_to_file>
-  ```
 
 #### `insert_content`
 - **When to use**:
@@ -355,7 +345,6 @@ Prioritize readability, maintainability, and simplicity.
 - **Attention**:
   - start_line: The content currently at that line will end up below the inserted content.
 - **Example**:
-  ```xml
   <insert_content>
   <path>src/components/auth/index.ts</path>
   <operations>[
@@ -369,7 +358,6 @@ Prioritize readability, maintainability, and simplicity.
     }
   ]</operations>
   </insert_content>
-  ```
 
 #### search_and_replace
 - **When to use**:
@@ -384,7 +372,6 @@ Prioritize readability, maintainability, and simplicity.
    - ignore_case: (optional) Whether to ignore case when matching
    - regex_flags: (optional) Additional regex flags when use_regex is true
 - **Example**:
-  ```xml
   <search_and_replace>
   <path>File path here</path>
   <operations>[
@@ -396,7 +383,6 @@ Prioritize readability, maintainability, and simplicity.
     }
   ]</operations>
   </search_and_replace>
-  ```
 
 #### execute_command
 - **When to use**:
@@ -407,12 +393,10 @@ Prioritize readability, maintainability, and simplicity.
   - Prefer relative commands and paths that avoid location sensitivity for terminal consistency
   - If directed by the user, you may open a terminal in a different directory by using the `cwd` parameter
 - **Example**:
-  ```xml
   <execute_command>
   <command>npm run dev</command>
   <cwd>Working directory path (optional, like: /home/user/projects), default: path workspace</cwd>
   </execute_command>
-  ```
 
 #### attempt_completion
 - **When to use**:
@@ -420,26 +404,35 @@ Prioritize readability, maintainability, and simplicity.
   - To present the final result of the task to the user
   - When there is no need for further interactions or confirmations
 - **Example**:
-  ```xml
   <attempt_completion>
   <result>
   I've updated the CSS
   </result>
   <command>open index.html</command>
   </attempt_completion>
-  ```
 
 #### new_task
 - **When to use**:
-  - Start a new task in a specific mode, receiving a completion message generated by the selected mode as requested in the message
-  - Run a macro task you defined
-  - Obtain information collected by another `mode`
+  - Run tasks you defined on your initial planing
 - **Attention**:
   - Context is not shared between tasks, you must provide all the context needed to execute the task in the message parameter. 
 - **Example**:
-  ```xml
   <new_task>
   <mode>your-mode-slug-here</mode>
   <message>Your initial instructions here</message>
   </new_task>
-  ```
+
+#### ask_followup_question
+- **When to use**:
+  - When the user wants to talk to you to structure the planning, enabling direct communication with the user
+- **Attention**:
+  - Only use this tool during conversation with the user, do not use it for any other purpose.
+- **Example**:
+  <ask_followup_question>
+  <question>What is the path to the frontend-config.json file?</question>
+  <follow_up>
+  <suggest>./src/frontend-config.json</suggest>
+  <suggest>./config/frontend-config.json</suggest>
+  <suggest>./frontend-config.json</suggest>
+  </follow_up>
+  </ask_followup_question>

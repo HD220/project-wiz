@@ -4,6 +4,7 @@
 
 | Área                   | Status      | Última Atualização | Responsável   |
 | ---------------------- | ----------- | ------------------ | ------------- |
+| README                 | 🟢 Completa | 2025-04-06         | Documentation |
 | Visão Geral            | 🟢 Completa | 2025-04-05         | Documentation |
 | Arquitetura            | 🟡 Parcial  | 2025-04-05         | Documentation |
 | Componentes UI         | 🟢 Completa | 2025-04-05         | Frontend      |
@@ -20,6 +21,7 @@
 
 ## Documentação Recentemente Atualizada
 
+- [README](../README.md): 2025-04-06 - Documentação completa e reorganizada
 - [Componentes UI](./ui-components.md): 2025-04-02 - Documentação completa
 - [Histórico de Mudanças](../CHANGES.md): 2025-04-02 - Criação inicial
 - [Contexto do Projeto](./project-context.md): 2025-04-02 - Criação inicial

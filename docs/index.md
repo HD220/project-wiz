@@ -1,56 +1,25 @@
-# Índice de Documentação - Project Wiz
+# Visão Geral do Project Wiz
 
-## Visão Geral
+O Project Wiz é um sistema para automatizar tarefas de desenvolvimento usando modelos de linguagem (LLMs). Ele permite que a LLM trabalhe de forma autônoma, executando tarefas como um desenvolvedor em repositórios GitHub.
 
-- [Contexto do Projeto](./project-context.md) - Visão geral e objetivos
-- [README](../README.md) - Introdução ao projeto
-- [Histórico de Mudanças](../CHANGES.md) - Registro de versões
+## Funcionalidades Principais
 
-## Documentação Técnica
+- **Gerenciamento de modelos LLM locais**: Permite baixar, gerenciar e selecionar modelos LLM para uso.
+- **Configuração de parâmetros dos modelos**: Permite configurar parâmetros como temperatura, top_p e tamanho máximo da resposta para controlar o comportamento da LLM.
+- **Integração com repositórios GitHub**: Permite conectar-se a repositórios GitHub para automatizar tarefas relacionadas ao desenvolvimento.
+- **Automação de tarefas de desenvolvimento**: Permite automatizar tarefas como geração de código, análise de código, criação de pull requests, etc.
+- **Interface do usuário para interação e monitoramento**: Fornece uma interface intuitiva para interagir com a LLM, monitorar o progresso das tarefas e visualizar os resultados.
 
-### Arquitetura
+## Fluxo de Trabalho Básico
 
-- [Visão Arquitetural](./architecture.md) - Diagramas e decisões
-- [Sistema de Plugins](./plugin-system.md) - Extensibilidade do projeto
-- [Configurações TS/Vite](./ts-vite-config.md) - Setup do ambiente
+1.  **Configuração**: O usuário configura os repositórios GitHub e os modelos LLM.
+2.  **Seleção da Tarefa**: O usuário seleciona uma tarefa a ser executada (ex: gerar documentação, analisar um problema).
+3.  **Execução**: O Project Wiz executa a tarefa, utilizando a LLM para realizar as ações necessárias.
+4.  **Monitoramento**: O usuário monitora o progresso da tarefa através da interface.
+5.  **Resultados**: O usuário visualiza os resultados da tarefa (ex: código gerado, análise de código, pull request criado).
 
-### Componentes
+## Público-alvo
 
-- [UI Components](./ui-components.md) - Componentes de interface
-- [Model Management](./model-management.md) - Gerenciamento de modelos LLM
-- [Core Services](./core-services.md) - Serviços principais
-
-## Guias
-
-### Para Usuários
-
-- [Guia do Usuário](./user-guide.md) - Como usar o produto
-- [Configuração Inicial](./setup-guide.md) - Primeiros passos
-
-### Para Desenvolvedores
-
-- [Fluxo de Desenvolvimento](./development.md) - Processos e padrões
-- [Estratégia de Testes](./testing-strategy.md) - Abordagem de testes
-- [Otimização de Memória](./memory-optimization.md) - Boas práticas
-
-## Referência
-
-- [Status da Documentação](./documentation-status.md) - Cobertura atual
-- [Dívida Técnica](./technical-debt.md) - Itens pendentes
-- [Decisões Arquiteturais](./decisions.md) - ADRs importantes
-- [Glossário](./glossary.md) - Terminologia do projeto
-- [Padrões de Código](./coding-standards.md) - Convenções e boas práticas
-
-## Manutenção do Índice
-
-Este arquivo deve ser atualizado sempre que:
-
-1. Nova documentação for adicionada
-2. Documentação existente for movida/renomeada
-3. A estrutura de documentação for alterada
-
-Verifique periodicamente os links com:
-
-```bash
-npm run check-links
-```
+- Desenvolvedores que buscam automatizar tarefas.
+- Equipes de desenvolvimento que desejam aumentar a produtividade.
+- Pessoas interessadas em LLMs e automação.
