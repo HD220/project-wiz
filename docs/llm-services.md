@@ -182,7 +182,16 @@ try {
 
 ## Integração com Hugging Face
 
-(Seção a ser preenchida quando a integração for implementada)
+> **Nota:** Esta funcionalidade está planejada para versões futuras. A integração permitirá:
+>
+> - Download direto de modelos do Hugging Face Hub
+> - Conversão automática de formatos de modelo
+> - Gerenciamento de repositórios de modelos
+
+**Roadmap:**
+
+- Q2 2025: Implementação inicial
+- Q3 2025: Suporte a modelos específicos
 
 ## Referências
 

@@ -2,31 +2,55 @@
 
 ## Visão Geral
 
-- [Contexto do Projeto](./project-context.md) - Visão geral e estado atual
+- [Contexto do Projeto](./project-context.md) - Visão geral e objetivos
 - [README](../README.md) - Introdução ao projeto
+- [Histórico de Mudanças](../CHANGES.md) - Registro de versões
 
 ## Documentação Técnica
 
-- [Arquitetura](./architecture.md) - Visão arquitetural do sistema
-- [Componentes](./components.md) - Documentação dos componentes principais
-- [API](./api.md) - Documentação da API interna
+### Arquitetura
+
+- [Visão Arquitetural](./architecture.md) - Diagramas e decisões
+- [Sistema de Plugins](./plugin-system.md) - Extensibilidade do projeto
+- [Configurações TS/Vite](./ts-vite-config.md) - Setup do ambiente
+
+### Componentes
+
+- [UI Components](./ui-components.md) - Componentes de interface
+- [Model Management](./model-management.md) - Gerenciamento de modelos LLM
+- [Core Services](./core-services.md) - Serviços principais
 
 ## Guias
 
-- [Guia do Usuário](./user-guide.md) - Documentação para usuários finais
-- [Configuração](./guides/setup.md) - Como configurar o ambiente
-- [Desenvolvimento](./guides/development.md) - Fluxo de desenvolvimento
-- [Testes](./guides/testing.md) - Como executar testes
+### Para Usuários
 
-## Status
+- [Guia do Usuário](./user-guide.md) - Como usar o produto
+- [Configuração Inicial](./setup-guide.md) - Primeiros passos
 
-- [Documentação](./documentation-status.md) - Status da documentação
-- [Documentação](./documentation-status.md) - Status da documentação
-- [Histórico de Mudanças](../CHANGES.md) - Registro de alterações recentes
-- [Dívida Técnica](./technical-debt.md) - Itens de dívida técnica
+### Para Desenvolvedores
+
+- [Fluxo de Desenvolvimento](./development.md) - Processos e padrões
+- [Estratégia de Testes](./testing-strategy.md) - Abordagem de testes
+- [Otimização de Memória](./memory-optimization.md) - Boas práticas
 
 ## Referência
 
-- [Decisões Arquiteturais](./decisions.md) - ADRs e decisões importantes
+- [Status da Documentação](./documentation-status.md) - Cobertura atual
+- [Dívida Técnica](./technical-debt.md) - Itens pendentes
+- [Decisões Arquiteturais](./decisions.md) - ADRs importantes
 - [Glossário](./glossary.md) - Terminologia do projeto
-- [Padrões](./standards.md) - Padrões de código e convenções
+- [Padrões de Código](./coding-standards.md) - Convenções e boas práticas
+
+## Manutenção do Índice
+
+Este arquivo deve ser atualizado sempre que:
+
+1. Nova documentação for adicionada
+2. Documentação existente for movida/renomeada
+3. A estrutura de documentação for alterada
+
+Verifique periodicamente os links com:
+
+```bash
+npm run check-links
+```
