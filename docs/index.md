@@ -20,7 +20,7 @@
 
 ## Status
 
-- [Progresso](./progress/implementation-progress.md) - Status de implementação
+- [Documentação](./documentation-status.md) - Status da documentação
 - [Documentação](./documentation-status.md) - Status da documentação
 - [Histórico de Mudanças](../CHANGES.md) - Registro de alterações recentes
 - [Dívida Técnica](./technical-debt.md) - Itens de dívida técnica
