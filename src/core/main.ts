@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
+import GithubService from "./services/github";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { WorkerService } from "./services/llm/WorkerService";
@@ -68,6 +69,28 @@ function setupWorkerHandlers() {
       try {
         const response = await workerService.prompt(prompt, options);
         return { success: true, response };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    }
+  );
+  ipcMain.handle(
+    "github:getIssue",
+    async (
+      event,
+      {
+        owner,
+        repo,
+        issue_number,
+      }: { owner: string; repo: string; issue_number: number }
+    ) => {
+      try {
+        const githubService = new GithubService("YOUR_GITHUB_TOKEN"); // Substitua pelo token real
+        const issue = await githubService.getIssue(owner, repo, issue_number);
+        return { success: true, issue };
       } catch (error) {
         return {
           success: false,
