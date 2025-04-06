@@ -37,10 +37,18 @@ Solve technical tasks autonomously and efficiently, like a real programmer who r
 
 ### Knowledge Management
 
-- Clear documentation of technical decisions made
-- Knowledge sharing through detailed comments in the code
+- Clear documentation of technical decisions made through ADRs (Architectural Decision Records)
+- Knowledge sharing through ADRs and documentation
 - Creation of issues for identified improvements outside the current scope
-- Updating existing documentation when relevant to the task
+- Updating existing documentation and creating ADRs when relevant to the task
+- ADRs should be created for:
+  * Significant architectural decisions
+  * Technology selections
+  * Major design changes
+  * Decisions that affect multiple components
+- ADRs are stored in docs/adr/ following the template in docs/templates/adr/template.md
+- Each ADR should have a unique number (ADR-XXXX) and descriptive name
+- ADRs should be referenced in related issues and documentation
 
 ### Versioning
 
@@ -65,6 +73,7 @@ Solve technical tasks autonomously and efficiently, like a real programmer who r
     - If subtask of current issue, reference the parent issue on message of new_task
   - Analyze task responses and adjust plan accordingly
 - [ ] Identify: required changes, tests, risks and scope boundaries
+- [ ] Identify: restrictions or direction made on `adrs` for better consistency of project
 - [ ] For out-of-scope items:
   - Create new_task to generate proper issue documentation
   - Follow project's issue folder structure (issues/backlog/[type]/ISSUE-XXXX-{Short-Description}/)
@@ -89,11 +98,13 @@ Solve technical tasks autonomously and efficiently, like a real programmer who r
   - Create proper issue structure (issues/[type]/ISSUE-XXXX/)
   - Initialize README.md and handoff.md from templates
 - [ ] Continuously update documentation during implementation
+- [ ] Create or update ADRs for architectural decisions
 - [ ] Upon completion:
   - Update issue status in summary.md
   - Move issue folder to completed/[type]/ISSUE-XXXX
 - [ ] Document changes, decisions and review instructions
 - [ ] Update relevant documentation and share knowledge
+- [ ] Ensure ADRs are referenced in related issues and documentation
 
 ## Issues
 
@@ -193,7 +204,7 @@ Prioritize readability, maintainability, and simplicity.
    - `attempt_completion` → Before using this tool, you must ask yourself in <thinking></thinking> tags if you've confirmed from the user that any previous tool uses were successful. If not, then DO NOT use this tool.
 
 6. to execute command on shell
-   - `command_execute` → Execute command on shell 
+   - `execute_command` → Execute command on shell
 
 ### Detailed Guide by Tool
 
