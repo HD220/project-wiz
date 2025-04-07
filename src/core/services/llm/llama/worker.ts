@@ -1,7 +1,6 @@
 import path from "path";
 
 import {
-  getLlama,
   Llama,
   LLamaChatPromptOptions,
   LlamaChatSession,
@@ -30,7 +29,7 @@ export class LlamaWorker {
   }
 
   private async initializeLlama(options?: LlamaOptions) {
-    // const { getLlama } = await import("node-llama-cpp");
+    const { getLlama } = await import("node-llama-cpp");
     this.llama = await getLlama(options);
   }
 
