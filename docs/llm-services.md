@@ -2,7 +2,26 @@
 
 ## Visão Geral
 
-Os serviços LLM fornecem integração com modelos de linguagem locais via node-llama-cpp, permitindo:
+Os serviços LLM fornecem integração com modelos de linguagem locais via node-llama-cpp, seguindo os princípios de Clean Architecture:
+
+### Camadas da Arquitetura
+
+1. **Domain** (Lógica de negócio):
+   - Define interfaces e entidades principais
+   - Contratos para serviços LLM
+   - Exemplo: `IModelManager`
+
+2. **Application** (Casos de uso):
+   - Implementa lógica de negócio
+   - Orquestra fluxos complexos
+   - Exemplo: `ModelManagerService`
+
+3. **Infrastructure** (Implementações):
+   - Adaptadores para Electron e node-llama-cpp
+   - Comunicação IPC
+   - Exemplo: `ElectronModelManagerAdapter`
+
+Os serviços LLM permitem:
 
 - Carregamento de modelos Llama
 - Criação de contextos de inferência

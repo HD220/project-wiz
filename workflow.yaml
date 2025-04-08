@@ -1,0 +1,9 @@
+name: Teste de fluxo de trabalho
+description: Um fluxo de trabalho simples para teste
+steps:
+  - type: log
+    config:
+      message: "Olá, mundo!"
+  - type: wait
+    config:
+      duration: 5000
