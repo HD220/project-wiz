@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import "./styles/globals.css";
 
-import App from "./App";
+import App from "./main";
 import { detectLocale, dynamicActivate } from "./i18n";
 
 const root = createRoot(document.getElementById("root")!);

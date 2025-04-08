@@ -1,6 +1,7 @@
 # Resumo de Issues
 
 ## Backlog
+- [ ] [ISSUE-0067] Documentação nova estrutura
 
 ### Feature
 
@@ -41,6 +42,9 @@
 - [ ] [ISSUE-0040] Implementar sistema de logging
 - [ ] [ISSUE-0052] Implementar testes unitarios e integracao
 - [ ] [ISSUE-0053] Melhorar Acessibilidade ARIA
+- [ ] [ISSUE-0065] Reorganização estrutura pastas
+- [ ] [ISSUE-0066] Implementar testes componentes críticos
+- [ ] [ISSUE-0068] Consolidação serviços LLM
 - [ ] [ISSUE-0065] Refatorar RepositorySettings
 - [ ] [ISSUE-0069] Refatorar comunicação IPC para utilizar `contextBridge` corretamente
 - [ ] [ISSUE-0070] Implementar testes unitários e de integração para os serviços no processo principal e no worker

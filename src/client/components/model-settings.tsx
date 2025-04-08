@@ -20,8 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { useLLM } from "@/hooks/use-llm";
-import ModelCard from "./model-card";
 import ModelList from "./model-list";
 import ModelConfiguration from "./model-configuration";
 import PromptCustomization from "./prompt-customization";

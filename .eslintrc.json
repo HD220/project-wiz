@@ -5,6 +5,7 @@
     "node": true
   },
   "rules": {
+    "@typescript-eslint/no-non-null-assertion": 0
   },
   "extends": [
     "eslint:recommended",
@@ -14,12 +15,5 @@
     "plugin:import/electron",
     "plugin:import/typescript"
   ],
-  "parser": "@typescript-eslint/parser",
-  "settings": {
-    "import/resolver": {
-      "typescript": {
-        "project": "./tsconfig.json"
-      }
-    }
-  }
+  "parser": "@typescript-eslint/parser"
 }
