@@ -7,6 +7,7 @@
 - [ ] [ISSUE-0013] Completar documentação arquitetura
 - [ ] [ISSUE-0014] Completar guia internacionalização
 - [ ] [ISSUE-0026] Documentar componentes UI
+- [ ] [ISSUE-0067] Documentação nova estrutura
 
 ### Feature
 
@@ -43,6 +44,9 @@
 - [ ] [ISSUE-0027] Implementar sistema logging
 - [ ] [ISSUE-0040] Implementar sistema de logging
 - [ ] [ISSUE-0053] Melhorar Acessibilidade ARIA
+- [ ] [ISSUE-0065] Reorganização estrutura pastas
+- [ ] [ISSUE-0066] Implementar testes componentes críticos
+- [ ] [ISSUE-0068] Consolidação serviços LLM
 
 ## Em Progresso
 

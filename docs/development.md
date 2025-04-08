@@ -5,8 +5,19 @@
 1.  **Node.js e npm**: Certifique-se de ter o Node.js (versão 18+) e o npm (versão 9+) instalados.
 2.  **Editor de código**: Use um editor de código como o VS Code, com as extensões recomendadas para TypeScript, ESLint e Prettier.
 3.  **Git**: Certifique-se de ter o Git instalado.
-4.  **Dependências**:
-    - Execute `npm install` no diretório raiz do projeto para instalar as dependências.
+4.  **Dependências**: Execute `npm install` no diretório raiz do projeto para instalar as dependências. As dependências principais incluem:
+    - electron
+    - react
+    - react-dom
+    - @lingui/core
+    - @lingui/react
+    - next-themes
+    - node-llama-cpp
+    - sonner
+    - tailwindcss
+    - class-variance-authority
+    - clsx
+    - cmdk
 
 ## Guia de Contribuição
 
@@ -36,14 +47,6 @@
 - **TypeScript**: Use TypeScript para tipagem estática e para garantir a qualidade do código.
 - **Convenções de Commit**: Use as convenções de commit do projeto para facilitar a leitura do histórico de commits.
 
-## Testes
-
-- **Testes Unitários**: Use o Jest para testes unitários. Os testes unitários devem cobrir a maior parte do código possível.
-- **Testes de Integração**: Use testes de integração para testar a comunicação entre os componentes e a integração com o GitHub.
-- **Executando os testes**:
-  ```bash
-  npm test
-  ```
 
 ## Processo de Build e Deploy
 
@@ -56,3 +59,7 @@
   npm run package
   ```
 - **Deploy**: (Em desenvolvimento) - Detalhes sobre o processo de deploy serão adicionados em breve.
+
+## Testes
+
+Atualmente, não há testes automatizados implementados no projeto. A validação das funcionalidades é feita manualmente.

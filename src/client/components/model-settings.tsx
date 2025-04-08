@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import ModelCard from "./model-card";
 import ModelList from "./model-list";
 
 export default function ModelSettings() {
