@@ -36,7 +36,7 @@ const sampleModels: Model[] = [
   {
     id: '3',
     name: "Mistral 7B Instruct v0.2",
-    modelId: "hf://mistralai/Mistral-7B-Instruct-v0.2/model.gguf",
+    modelId: "Mistral-7B-Instruct-v0.2.gguf",
     size: "4.1 GB",
     status: "downloaded",
     lastUsed: "2025-03-25T14:30:00",

@@ -49,6 +49,9 @@ cd project-wiz
 # Instalar dependências
 npm install
 
+# Instalar o babel-jest (necessário para testes de componentes React)
+npm install --save-dev babel-jest @babel/core @babel/preset-env
+
 # Iniciar a aplicação
 npm run dev
 ```

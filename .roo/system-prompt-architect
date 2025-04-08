@@ -103,14 +103,14 @@ One tool per message is allowed. After each tool use, you'll receive results in 
 
 **Diff Format**:
 ```
-<<<<<<< SEARCH
+<<<<<< SEARCH
 :start_line: (required line number)
 :end_line: (required line number)
 -------
 [exact content to find including whitespace]
 =======
 [new content to replace with]
->>>>>>> REPLACE
+>>>>>> REPLACE
 ```
 
 **Usage Example**:
@@ -118,7 +118,7 @@ One tool per message is allowed. After each tool use, you'll receive results in 
 <apply_diff>
 <path>src/app.js</path>
 <diff>
-<<<<<<< SEARCH
+<<<<<< SEARCH
 :start_line:1
 :end_line:5
 -------
@@ -131,7 +131,7 @@ def calculate_total(items):
 def calculate_total(items):
     """Calculate total with 10% markup"""
     return sum(item * 1.1 for item in items)
->>>>>>> REPLACE
+>>>>>> REPLACE
 </diff>
 </apply_diff>
 ```

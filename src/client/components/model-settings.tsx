@@ -21,13 +21,28 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import ModelList from "./model-list";
+import ModelConfiguration from "./model-configuration";
+import PromptCustomization from "./prompt-customization";
+
+export interface Model {
+  id: number;
+  name: string;
+  modelId: string;
+  size: string;
+  status: string;
+  lastUsed: string | null;
+  description: string;
+  modelType: "llama" | "mistral";
+}
+
+const defaultPrompts = {
+  "prompt.initial": "Você é um assistente virtual.",
+  "prompt.code": "Escreva um código em JavaScript.",
+  "prompt.translate": "Traduza para o inglês.",
+};
 
 export default function ModelSettings() {
-  const [modelId, setModelId] = useState("mistralai/Mistral-7B-v0.1");
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(2048);
-  const [memoryLimit, setMemoryLimit] = useState(8);
-  const [autoUpdate, setAutoUpdate] = useState(true);
+  const { loadModel } = useLLM();
 
   const models = [
     {
@@ -39,6 +54,7 @@ export default function ModelSettings() {
       lastUsed: "2023-06-15T10:42:00",
       description:
         "A powerful 7B parameter model with strong coding capabilities.",
+      modelType: "mistral" as "mistral",
     },
     {
       id: 2,
@@ -49,6 +65,7 @@ export default function ModelSettings() {
       lastUsed: "2023-06-14T15:30:00",
       description:
         "Meta's Llama 2 model with 7B parameters, good for general tasks.",
+      modelType: "llama" as "llama",
     },
     {
       id: 3,
@@ -58,6 +75,7 @@ export default function ModelSettings() {
       status: "not-downloaded",
       lastUsed: null,
       description: "Specialized model for code generation and understanding.",
+      modelType: "llama" as "llama",
     },
     {
       id: 4,
@@ -68,6 +86,7 @@ export default function ModelSettings() {
       lastUsed: "2023-06-10T09:15:00",
       description:
         "Smaller but efficient model from Microsoft, good for lightweight tasks.",
+      modelType: "llama" as "llama",
     },
   ];
 
@@ -100,6 +119,7 @@ export default function ModelSettings() {
         <TabsList>
           <TabsTrigger value="models">Available Models</TabsTrigger>
           <TabsTrigger value="settings">Model Configuration</TabsTrigger>
+          <TabsTrigger value="prompts">Prompt Customization</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
 
@@ -125,205 +145,37 @@ export default function ModelSettings() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Model Configuration</CardTitle>
-              <CardDescription>
-                Configure parameters for the active model
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="model-select">Active Model</Label>
-                <Select value={modelId} onValueChange={setModelId}>
-                  <SelectTrigger id="model-select">
-                    <SelectValue placeholder="Select a model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {models
-                      .filter((model) => model.status === "downloaded")
-                      .map((model) => (
-                        <SelectItem key={model.id} value={model.modelId}>
-                          {model.name} ({model.modelId})
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <ModelConfiguration models={models} />
+        </TabsContent>
 
-              <div className="space-y-2 pt-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="temperature">
-                    Temperature: {temperature}
-                  </Label>
-                  <span className="text-sm text-muted-foreground w-12 text-right">
-                    {temperature}
-                  </span>
-                </div>
-                <Slider
-                  id="temperature"
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  value={[temperature]}
-                  onValueChange={(value) => setTemperature(value[0])}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Controls randomness: Lower values are more deterministic,
-                  higher values more creative.
-                </p>
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="max-tokens">Max Tokens: {maxTokens}</Label>
-                  <span className="text-sm text-muted-foreground w-12 text-right">
-                    {maxTokens}
-                  </span>
-                </div>
-                <Slider
-                  id="max-tokens"
-                  min={256}
-                  max={4096}
-                  step={256}
-                  value={[maxTokens]}
-                  onValueChange={(value) => setMaxTokens(value[0])}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Maximum number of tokens to generate in a single response.
-                </p>
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="memory-limit">
-                    Memory Limit (GB): {memoryLimit}
-                  </Label>
-                  <span className="text-sm text-muted-foreground w-12 text-right">
-                    {memoryLimit}GB
-                  </span>
-                </div>
-                <Slider
-                  id="memory-limit"
-                  min={4}
-                  max={16}
-                  step={1}
-                  value={[memoryLimit]}
-                  onValueChange={(value) => setMemoryLimit(value[0])}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Maximum memory allocation for the model.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between pt-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="auto-update">
-                    Automatically Update Models
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Download model updates when available
-                  </p>
-                </div>
-                <Switch
-                  id="auto-update"
-                  checked={autoUpdate}
-                  onCheckedChange={setAutoUpdate}
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save Configuration</Button>
-            </CardFooter>
-          </Card>
+        <TabsContent value="prompts" className="space-y-4">
+          <PromptCustomization
+            modelId={"mistralai/Mistral-7B-v0.1"}
+            prompts={defaultPrompts}
+          />
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Performance Monitoring</CardTitle>
+              <CardTitle>Performance Metrics</CardTitle>
               <CardDescription>
-                Monitor resource usage and model performance
+                Track model performance and resource usage over time
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Memory Usage</Label>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="bg-primary h-full"
-                    style={{ width: "45%" }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>45% (4.5GB / 10GB)</span>
-                  <Button variant="link" size="sm" className="h-auto p-0">
-                    View Details
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <Label>CPU Usage</Label>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="bg-primary h-full"
-                    style={{ width: "30%" }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>30%</span>
-                  <Button variant="link" size="sm" className="h-auto p-0">
-                    View Details
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <Label>Response Time</Label>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div
-                    className="bg-green-500 h-full"
-                    style={{ width: "80%" }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Average: 1.2s</span>
-                  <Button variant="link" size="sm" className="h-auto p-0">
-                    View Details
-                  </Button>
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <h3 className="text-sm font-medium mb-2">
-                  Performance History
-                </h3>
-                <div className="bg-muted rounded-md p-4 h-48 flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mx-auto mb-2"
-                    >
-                      <path d="M3 3v18h18" />
-                      <path d="m19 9-5 5-4-4-3 3" />
-                    </svg>
-                    <p>Performance metrics chart will appear here</p>
-                  </div>
-                </div>
+              <div>
+                {/* Placeholder for performance charts and metrics */}
+                <p>
+                  Performance data will be displayed here once the model is
+                  active.
+                </p>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="outline">Reset Statistics</Button>
-              <Button>Generate Report</Button>
+              {/* Add any relevant actions or links here */}
+              <Button variant="outline">View Full Report</Button>
+              <Badge variant="secondary">Beta</Badge>
             </CardFooter>
           </Card>
         </TabsContent>

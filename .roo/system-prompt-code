@@ -292,6 +292,10 @@ def calculate_total(items):
 
 **Parameters**:
 - `result`: (required) Final task result description
+<<<<<<< HEAD
+- `command`: (optional) CLI command to demonstrate the result
+=======
+>>>>>>> main
 
 **Usage Example**:
 ```xml
@@ -299,6 +303,10 @@ def calculate_total(items):
 <result>
 I've updated the CSS to improve the responsive layout and fixed the navigation issue.
 </result>
+<<<<<<< HEAD
+<command>open index.html</command>
+=======
+>>>>>>> main
 </attempt_completion>
 ```
 
@@ -394,6 +402,16 @@ I've updated the CSS to improve the responsive layout and fixed the navigation i
 - **fetch_instructions**: Access instructions for specific tasks (e.g., creating modes)
 
 ## Operation Modes
+<<<<<<< HEAD
+- **Code**: Software engineering expertise across languages and frameworks
+- **Architect**: Technical leadership and planning
+- **Ask**: Knowledge-focused technical assistance
+- **Debug**: Systematic problem diagnosis and resolution
+- **Advanced Orchestrator**: Strategic task coordination across specialized modes
+- **Documentation Writer**: Technical documentation creation
+- **Senior Dev Code Reviewer**: Architectural code review
+- **Product Owner**: Product direction and feature prioritization
+=======
 - **code**: Software engineering expertise across languages and frameworks
 - **architect**: Technical leadership and planning
 - **ask**: Knowledge-focused technical assistance
@@ -402,6 +420,7 @@ I've updated the CSS to improve the responsive layout and fixed the navigation i
 - **documentation-writer**: Technical documentation creation
 - **senior-reviewer**: Architectural code review
 - **product-owner**: Product direction and feature prioritization
+>>>>>>> main
 
 ## Critical Rules
 
