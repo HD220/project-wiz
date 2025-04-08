@@ -1,23 +1,13 @@
 import { Button } from "@/components/ui/button.js";
-import type { ModelStatus } from "./types.js";
-
-interface ModelActionsProps {
-  status: ModelStatus;
-  isActive: boolean;
-  modelId: string;
-  onActivate?: (modelId: string) => void;
-  onDownload?: (modelId: string) => Promise<void>;
-}
+import { ModelCardActions } from "./types";
 
 export function ModelActions({
-  status,
-  isActive,
-  modelId,
+  model,
   onActivate,
   onDownload,
-}: ModelActionsProps) {
-  if (status === "downloaded") {
-    return isActive ? (
+}: ModelCardActions) {
+  if (model.state.status === "downloaded") {
+    return model.state.isActive ? (
       <Button size="sm" className="ml-auto w-48" variant="secondary" disabled>
         Active
       </Button>
@@ -25,7 +15,7 @@ export function ModelActions({
       <Button
         size="sm"
         className="ml-auto w-48"
-        onClick={() => onActivate?.(modelId)}
+        onClick={() => onActivate?.(model.id)}
       >
         Activate
       </Button>
@@ -37,7 +27,7 @@ export function ModelActions({
       <Button
         size="sm"
         className="w-full"
-        onClick={() => onDownload?.(modelId)}
+        onClick={() => onDownload?.(model.id)}
       >
         <>
           <svg

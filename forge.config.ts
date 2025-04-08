@@ -39,7 +39,7 @@ const config: ForgeConfig = {
           target: "preload",
         },
         {
-          entry: "src/core/llama/llama-worker.ts",
+          entry: "src/core/services/llm/index.ts",
           config: "vite.worker.config.mts",
         },
       ],

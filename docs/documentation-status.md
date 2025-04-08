@@ -1,12 +1,25 @@
 # Status da Documentação - Project Wiz
 
+## ADRs (Architecture Decision Records)
+
+| ID       | Título                                 | Status     |
+|----------|----------------------------------------|------------|
+| ADR-0001 | Implementação de ADRs                  | ✅ Aceito  |
+| ADR-0002 | Componentes shadcn/ui                  | ✅ Aceito  |
+| ADR-0003 | Não utilizar JSDocs                   | ✅ Aceito  |
+| ADR-0004 | Estrutura de Documentação             | ✅ Aceito  |
+| ADR-0005 | Estrutura de Pastas Electron           | ✅ Aceito  |
+| ADR-0006 | Nomenclatura Serviços LLM             | ✅ Aceito  |
+| ADR-0007 | Implementação TanStack Router/Drizzle | ✅ Aceito  |
+| ADR-0008 | Clean Architecture para Serviços LLM  | ✅ Proposto|
+
 ## Cobertura da Documentação
 
 | Área                   | Status      | Última Atualização | Responsável   |
 | ---------------------- | ----------- | ------------------ | ------------- |
 | README                 | 🟢 Completa | 2025-04-06         | Documentation |
 | Visão Geral            | 🟢 Completa | 2025-04-05         | Documentation |
-| Arquitetura            | 🟡 Parcial  | 2025-04-05         | Documentation |
+| Arquitetura            | 🟡 Parcial  | 2025-04-08         | Documentation |
 | Componentes UI         | 🟢 Completa | 2025-04-05         | Frontend      |
 | ModelList Refatorado   | 🟢 Completa | 2025-04-05         | Frontend      |
 | Serviços LLM           | 🟡 Parcial  | 2025-04-05         | Core          |
@@ -21,6 +34,7 @@
 
 ## Documentação Recentemente Atualizada
 
+- [ADR-0008](../adr/ADR-0008-Clean-Architecture-LLM.md): 2025-04-08 - Proposta de Clean Architecture
 - [README](../README.md): 2025-04-06 - Documentação completa e reorganizada
 - [Componentes UI](./ui-components.md): 2025-04-02 - Documentação completa
 - [Histórico de Mudanças](../CHANGES.md): 2025-04-02 - Criação inicial
