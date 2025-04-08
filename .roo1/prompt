@@ -1,0 +1,112 @@
+# FUNDAMENTAL CONSTRAINTS
+
+1. Work ONLY on what was explicitly requested in the task
+2. NEVER use execute_command with `cd`
+3. When modifying files, ALWAYS provide the FULL content
+4. Run only ONE tool at a time
+5. ALWAYS wait for user confirmation after each tool use
+6. Focus on the task given to the user
+7. Read adr related to task resolution
+
+# CLEAN CODE PRINCIPLES
+
+1. **Use Descriptive Names**
+- Variables should reveal their purpose
+- Functions should describe what they do
+- Avoid abbreviations and single-letter names
+
+2. **Keep Functions Small**
+- Each function should do exactly one thing
+- Limit function size to less than 20 lines
+- Minimize the number of parameters (maximum 3-4)
+- If a function exceeds 50 lines, create a `new_task` requesting refactoring
+
+3. **Follow the SOLID Principles**
+- Single Responsibility: A reason to change
+- Open/Closed: Open for extension, closed for modification
+- Liskov Substitution: Subtypes should be substitutable
+- Interface Segregation: Specific interfaces instead of general ones
+- Dependency Inversion: Depend on abstractions
+
+4. **Ensure Code is Testable**
+- Write pure functions when possible
+- Decouple components to make testing easier
+- Consider edge cases in implementation
+
+5. **Apply the DRY Principle**
+- Extract repeated code into reusable functions
+- Create utilities for common operations
+- Avoid copying and pasting code
+
+# ISSUES STRUCTURE
+
+```plaintext
+issues/
+├── backlog/
+| └── [type]/
+├── completed/
+| └── [type]/
+├── working/[type]/ (bug, feature, improvement, etc.)
+│ └── ISSUE-XXXX-{Short-Description}/ (sequential code)
+│ ├── README.md (Issue body)
+│ ├── handoff.md (handoff documentation)
+│ └── other-files (screenshots, documents)
+```
+
+# DISPONIBLE MODES FOR NEW_TASK
+
+- **developer**: Focus on implementation and coding details
+- **architect**: Focus on planning, analysis, and design decisions
+
+# DEALING WITH COMPLEX PROBLEMS
+
+1. **Try resolution first**
+- Try to solve the problem using your knowledge and skills
+- Do up to three different attempts with different approaches
+
+2. **Document the challenges**
+- If unsuccessful after three attempts, document the challenges in handoff.md
+- Explain which approaches were attempted and why they failed
+- Include any error messages or unexpected behaviors
+
+3. **Use attempt_completion**
+- After documenting the challenges, use `attempt_completion`
+- include clear information on whether or not the task has been completed
+- Mention that the details are available in the handoff.md file
+
+4. **For overly complex problems**
+- Document your analysis and recommendations in handoff.md
+- Suggest breaking it down into smaller tasks in `attempt_completion`
+
+# REFACTORING REQUESTS
+
+1. **Monitor code size**
+- Check if any files, classes, or functions exceed 50 lines
+- This applies to both existing code and as to the new code you write
+
+2. **Create refactoring tasks**
+- If the code exceeds 50 lines, create a `new_task` for refactoring
+  - Include the file path and the specific section that needs refactoring
+  - Await a response with a list of the changes made
+
+3. **Provide refactoring suggestions**
+- Include initial suggestions on how the code could be refactored
+- Identify potential extraction points for new functions or classes
+- Suggest names for new components
+
+# FINAL CHECK
+
+1. **Verify task completion**
+- Verify that all requirements have been met
+- Ensure that all necessary files have been modified
+- Confirm that the solution works as expected
+
+2. **Review code quality**
+- Verify adherence to clean code principles
+- Verify consistency with existing standards
+- Ensure that no unnecessary changes have been made
+
+3. **Confirm documentation**
+- Verify that all relevant documentation is up to date
+- Ensure ADRs are created for architectural decisions
+- Verify that the issue status is up to date

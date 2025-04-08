@@ -1,96 +1,46 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import ConversationService from "@/core/services/conversation";
+
+interface Activity {
+  id: number;
+  timestamp: string;
+  action: string;
+  type: string;
+  details: string;
+}
 
 export default function ActivityLog() {
-  const [filter, setFilter] = useState("")
-
-  const activities = [
-    {
-      id: 1,
-      timestamp: "2023-06-15T10:42:00",
-      action: "Created PR #143: Fix authentication bug in login form",
-      type: "pull-request",
-      details:
-        "Created a pull request to fix the authentication bug on mobile devices. The PR includes changes to the login form validation and API error handling.",
-    },
-    {
-      id: 2,
-      timestamp: "2023-06-15T10:30:00",
-      action: "Generated API documentation for user endpoints",
-      type: "documentation",
-      details:
-        "Generated comprehensive documentation for the user management API endpoints, including authentication, registration, and profile management.",
-    },
-    {
-      id: 3,
-      timestamp: "2023-06-15T10:15:00",
-      action: "Analyzed issue #142: Authentication not working on mobile",
-      type: "issue",
-      details:
-        "Analyzed the authentication issue on mobile devices. Identified the root cause as improper handling of token expiration on slow network connections.",
-    },
-    {
-      id: 4,
-      timestamp: "2023-06-15T09:58:00",
-      action: "Updated README.md with installation instructions",
-      type: "documentation",
-      details:
-        "Updated the README.md file with detailed installation instructions for different operating systems and environments.",
-    },
-    {
-      id: 5,
-      timestamp: "2023-06-15T09:45:00",
-      action: "Created branch fix/auth-mobile-142 from main",
-      type: "branch",
-      details:
-        "Created a new branch 'fix/auth-mobile-142' from the main branch to address the authentication issue on mobile devices.",
-    },
-    {
-      id: 6,
-      timestamp: "2023-06-15T09:30:00",
-      action: "Reviewed code in file src/auth/login.ts",
-      type: "code-review",
-      details:
-        "Reviewed the authentication code in src/auth/login.ts and identified potential issues with token refresh logic.",
-    },
-    {
-      id: 7,
-      timestamp: "2023-06-15T09:15:00",
-      action: "Generated unit tests for authentication module",
-      type: "testing",
-      details:
-        "Generated comprehensive unit tests for the authentication module, covering login, logout, and token refresh scenarios.",
-    },
-    {
-      id: 8,
-      timestamp: "2023-06-15T09:00:00",
-      action: "Started model execution with mistralai/Mistral-7B-v0.1",
-      type: "system",
-      details:
-        "Initialized the LLM with model mistralai/Mistral-7B-v0.1 and connected to the repository user/project-name.",
-    },
-  ]
+  const [filter, setFilter] = useState("");
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const conversationService = new ConversationService();
 
   const filteredActivities = activities.filter(
     (activity) =>
       activity.action.toLowerCase().includes(filter.toLowerCase()) ||
       activity.type.toLowerCase().includes(filter.toLowerCase()) ||
-      activity.details.toLowerCase().includes(filter.toLowerCase()),
-  )
+      activity.details.toLowerCase().includes(filter.toLowerCase())
+  );
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return (
       date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
       " " +
       date.toLocaleDateString([], { month: "short", day: "numeric" })
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -137,14 +87,19 @@ export default function ActivityLog() {
       <Card>
         <CardHeader>
           <CardTitle>Model Activity Timeline</CardTitle>
-          <CardDescription>Chronological log of all actions performed by the model</CardDescription>
+          <CardDescription>
+            Chronological log of all actions performed by the model
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
             {filteredActivities.map((activity) => (
               <div key={activity.id} className="relative pb-8">
                 {activity.id !== filteredActivities.length && (
-                  <span className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-muted" aria-hidden="true"></span>
+                  <span
+                    className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-muted"
+                    aria-hidden="true"
+                  ></span>
                 )}
                 <div className="relative flex items-start space-x-3">
                   <div
@@ -152,16 +107,16 @@ export default function ActivityLog() {
                       activity.type === "pull-request"
                         ? "bg-blue-100"
                         : activity.type === "documentation"
-                          ? "bg-purple-100"
-                          : activity.type === "issue"
-                            ? "bg-yellow-100"
-                            : activity.type === "branch"
-                              ? "bg-green-100"
-                              : activity.type === "code-review"
-                                ? "bg-orange-100"
-                                : activity.type === "testing"
-                                  ? "bg-pink-100"
-                                  : "bg-gray-100"
+                        ? "bg-purple-100"
+                        : activity.type === "issue"
+                        ? "bg-yellow-100"
+                        : activity.type === "branch"
+                        ? "bg-green-100"
+                        : activity.type === "code-review"
+                        ? "bg-orange-100"
+                        : activity.type === "testing"
+                        ? "bg-pink-100"
+                        : "bg-gray-100"
                     }`}
                   >
                     {activity.type === "pull-request" && (
@@ -287,7 +242,14 @@ export default function ActivityLog() {
                         strokeLinejoin="round"
                         className="text-gray-700"
                       >
-                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                        <rect
+                          width="18"
+                          height="18"
+                          x="3"
+                          y="3"
+                          rx="2"
+                          ry="2"
+                        />
                         <line x1="3" y1="9" x2="21" y2="9" />
                         <line x1="3" y1="15" x2="21" y2="15" />
                         <line x1="9" y1="3" x2="9" y2="21" />
@@ -297,8 +259,12 @@ export default function ActivityLog() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div>
-                      <div className="text-sm font-medium text-foreground">{activity.action}</div>
-                      <p className="mt-0.5 text-sm text-muted-foreground">{formatDate(activity.timestamp)}</p>
+                      <div className="text-sm font-medium text-foreground">
+                        {activity.action}
+                      </div>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {formatDate(activity.timestamp)}
+                      </p>
                     </div>
                     <div className="mt-2 text-sm text-muted-foreground">
                       <p>{activity.details}</p>
@@ -311,6 +277,5 @@ export default function ActivityLog() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

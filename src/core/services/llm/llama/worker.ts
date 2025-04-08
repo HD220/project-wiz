@@ -1,43 +1,44 @@
 import path from "path";
+import fs from "fs";
 
+import Handlebars from "handlebars";
 import {
-  getLlama,
   Llama,
-  LLamaChatPromptOptions,
+  LlamaModelOptions,
+  LlamaContextOptions,
   LlamaChatSession,
   LlamaChatSessionOptions,
-  LlamaContext,
-  LlamaContextOptions,
-  LlamaModel,
-  LlamaModelOptions,
-  LlamaOptions,
-  createModelDownloader,
+  LLamaChatPromptOptions,
   ModelDownloaderOptions,
+  createModelDownloader,
 } from "node-llama-cpp";
 
 export class LlamaWorker {
   private llama!: Llama;
-  private model?: LlamaModel;
-  private context?: LlamaContext;
-  private session?: LlamaChatSession;
+  private model?: any;
+  private context?: any;
+  private session?: any;
+  private modelPath?: string;
 
-  private constructor() {}
+  private constructor() {
+  }
 
-  static async create(options?: LlamaOptions) {
+  static async create(): Promise<LlamaWorker> {
+    const { getLlama } = await import("node-llama-cpp");
+    const llama = await getLlama({});
     const instance = new LlamaWorker();
-    await instance.initializeLlama(options);
+    instance.llama = llama;
     return instance;
   }
 
-  private async initializeLlama(options?: LlamaOptions) {
-    // const { getLlama } = await import("node-llama-cpp");
-    this.llama = await getLlama(options);
-  }
-
   async loadModel(options: LlamaModelOptions) {
+    if (this.model) {
+      await this.unloadModel();
+    }
+    this.modelPath = path.join(__dirname, "models", options.modelPath);
     this.model = await this.llama.loadModel({
       ...options,
-      modelPath: path.join(__dirname, "models", options.modelPath),
+      modelPath: this.modelPath,
     });
   }
 
@@ -61,7 +62,10 @@ export class LlamaWorker {
   async prompt(prompt: string, options?: LLamaChatPromptOptions) {
     if (!this.session) throw new Error("Session not loaded.");
 
-    const responseText = await this.session.prompt(prompt, options);
+    const template = Handlebars.compile(prompt);
+    const compiledPrompt = template({});
+
+    const responseText = await this.session.prompt(compiledPrompt, options);
 
     return responseText;
   }
@@ -70,6 +74,25 @@ export class LlamaWorker {
     this.session = undefined;
     this.context = undefined;
     this.model = undefined;
+  }
+
+  private getPromptsConfigPath() {
+    if (!this.modelPath) throw new Error("Model path not loaded.");
+    return path.join(path.dirname(this.modelPath), "prompts.json");
+  }
+
+  async savePrompts(prompts: { [key: string]: string }) {
+    const configPath = this.getPromptsConfigPath();
+    fs.writeFileSync(configPath, JSON.stringify(prompts));
+  }
+
+  async loadPrompts(): Promise<{ [key: string]: string }> {
+    const configPath = this.getPromptsConfigPath();
+    if (!fs.existsSync(configPath)) {
+      return {};
+    }
+    const config = fs.readFileSync(configPath, "utf-8");
+    return JSON.parse(config);
   }
 
   async downloadModel(options: ModelDownloaderOptions) {

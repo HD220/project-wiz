@@ -94,3 +94,12 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+import { WorkflowEngine } from './services/workflow';
+
+async function testWorkflow() {
+  const workflowEngine = new WorkflowEngine();
+  await workflowEngine.executeWorkflow('workflow.yaml');
+}
+
+testWorkflow();
