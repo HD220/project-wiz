@@ -10,8 +10,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
-import ConversationService from "@/core/services/conversation";
+import { useState } from "react";
 
 interface Activity {
   id: number;
@@ -24,7 +23,6 @@ interface Activity {
 export default function ActivityLog() {
   const [filter, setFilter] = useState("");
   const [activities, setActivities] = useState<Activity[]>([]);
-  const conversationService = new ConversationService();
 
   const filteredActivities = activities.filter(
     (activity) =>
@@ -107,16 +105,16 @@ export default function ActivityLog() {
                       activity.type === "pull-request"
                         ? "bg-blue-100"
                         : activity.type === "documentation"
-                        ? "bg-purple-100"
-                        : activity.type === "issue"
-                        ? "bg-yellow-100"
-                        : activity.type === "branch"
-                        ? "bg-green-100"
-                        : activity.type === "code-review"
-                        ? "bg-orange-100"
-                        : activity.type === "testing"
-                        ? "bg-pink-100"
-                        : "bg-gray-100"
+                          ? "bg-purple-100"
+                          : activity.type === "issue"
+                            ? "bg-yellow-100"
+                            : activity.type === "branch"
+                              ? "bg-green-100"
+                              : activity.type === "code-review"
+                                ? "bg-orange-100"
+                                : activity.type === "testing"
+                                  ? "bg-pink-100"
+                                  : "bg-gray-100"
                     }`}
                   >
                     {activity.type === "pull-request" && (

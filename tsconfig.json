@@ -1,25 +1,26 @@
 {
   "compilerOptions": {
-      "target": "ESNext",
-      "module": "ESNext",
-      "moduleResolution": "node",
-      "outDir": "dist",
-      "baseUrl": ".",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "outDir": "dist",
+    "baseUrl": ".",
 
-      "noEmit": false,
+    "noEmit": false,
 
-      //electron
-      "types": ["node", "electron"],
-      "esModuleInterop": true,
-      "strict": true,
+    //electron
+    "types": ["node", "electron"],
+    "esModuleInterop": true,
+    "strict": true,
 
-      "allowJs": true,
-      "skipLibCheck": true,
-      "noImplicitAny": true,
-      "sourceMap": true,
-      "resolveJsonModule": true,
-      "jsx": "react-jsx",
-      "paths": {
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "paths": {
       "@/*": ["./src/client/*"]
     }
   },

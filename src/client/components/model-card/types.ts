@@ -1,4 +1,3 @@
-
 export type ModelStatus = "downloaded" | "not_downloaded";
 
 export interface ModelMetadata {
@@ -7,7 +6,7 @@ export interface ModelMetadata {
   modelId: string;
   size: string;
   description: string;
-  state: ModelState
+  state: ModelState;
 }
 
 export interface ModelState {
@@ -17,8 +16,7 @@ export interface ModelState {
 }
 
 export interface ModelCardActions {
-  model: ModelMetadata
+  model: ModelMetadata;
   onActivate?: (modelId: string) => void;
   onDownload?: (modelId: string) => Promise<void>;
 }
-

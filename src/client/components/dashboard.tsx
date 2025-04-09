@@ -1,19 +1,29 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            <span className="mr-1 h-2 w-2 rounded-full bg-green-500"></span> Model Active
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
+            <span className="mr-1 h-2 w-2 rounded-full bg-green-500"></span>{" "}
+            Model Active
           </Badge>
           <Button variant="outline" size="sm">
             <svg
@@ -87,7 +97,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">4</div>
-            <p className="text-xs text-muted-foreground">Created by LLM Assistant</p>
+            <p className="text-xs text-muted-foreground">
+              Created by LLM Assistant
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -146,24 +158,40 @@ export default function Dashboard() {
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Last 10 actions performed by the model</CardDescription>
+            <CardDescription>
+              Last 10 actions performed by the model
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
                 {
                   time: "10:42 AM",
-                  action: "Created PR #143: Fix authentication bug in login form",
+                  action:
+                    "Created PR #143: Fix authentication bug in login form",
                   type: "pull-request",
                 },
-                { time: "10:30 AM", action: "Generated API documentation for user endpoints", type: "documentation" },
+                {
+                  time: "10:30 AM",
+                  action: "Generated API documentation for user endpoints",
+                  type: "documentation",
+                },
                 {
                   time: "10:15 AM",
-                  action: "Analyzed issue #142: Authentication not working on mobile",
+                  action:
+                    "Analyzed issue #142: Authentication not working on mobile",
                   type: "issue",
                 },
-                { time: "09:58 AM", action: "Updated README.md with installation instructions", type: "documentation" },
-                { time: "09:45 AM", action: "Created branch fix/auth-mobile-142 from main", type: "branch" },
+                {
+                  time: "09:58 AM",
+                  action: "Updated README.md with installation instructions",
+                  type: "documentation",
+                },
+                {
+                  time: "09:45 AM",
+                  action: "Created branch fix/auth-mobile-142 from main",
+                  type: "branch",
+                },
               ].map((item, i) => (
                 <div key={i} className="flex items-start">
                   <div
@@ -252,7 +280,9 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">{item.action}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {item.action}
+                    </p>
                     <p className="text-sm text-muted-foreground">{item.time}</p>
                   </div>
                 </div>
@@ -263,7 +293,9 @@ export default function Dashboard() {
         <Card className="col-span-3">
           <CardHeader>
             <CardTitle>Repository Status</CardTitle>
-            <CardDescription>Current repository: user/project-name</CardDescription>
+            <CardDescription>
+              Current repository: user/project-name
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -376,6 +408,5 @@ export default function Dashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

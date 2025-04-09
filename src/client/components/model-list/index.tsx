@@ -6,7 +6,7 @@ interface Model {
   name: string;
   modelId: string;
   size: string;
-  status: 'downloaded' | 'not_downloaded';
+  status: "downloaded" | "not_downloaded";
   lastUsed: string | null;
   description: string;
 }
@@ -14,7 +14,7 @@ interface Model {
 // Modelo simples para teste
 const sampleModels: Model[] = [
   {
-    id: '1',
+    id: "1",
     name: "Tiny Llama 1.1B",
     modelId: "hf://TinyLlama/TinyLlama-1.1B-Chat-v1.0/model.gguf",
     size: "1.1 GB",
@@ -24,7 +24,7 @@ const sampleModels: Model[] = [
       "Modelo pequeno e rápido para testes, com apenas 1.1B de parâmetros.",
   },
   {
-    id: '2',
+    id: "2",
     name: "Phi-2",
     modelId: "hf://microsoft/phi-2/model.gguf",
     size: "2.7 GB",
@@ -34,7 +34,7 @@ const sampleModels: Model[] = [
       "Modelo de linguagem de 2.7B de parâmetros da Microsoft, com bom desempenho em tarefas de raciocínio.",
   },
   {
-    id: '3',
+    id: "3",
     name: "Mistral 7B Instruct v0.2",
     modelId: "Mistral-7B-Instruct-v0.2.gguf",
     size: "4.1 GB",
@@ -77,7 +77,11 @@ export default function ModelList() {
             modelId: model.modelId,
             name: model.name,
             size: model.size,
-            state: {isActive: model.modelId === activeModelId,lastUsed: model.lastUsed, status: model.status}
+            state: {
+              isActive: model.modelId === activeModelId,
+              lastUsed: model.lastUsed,
+              status: model.status,
+            },
           }}
           onActivate={handleActivateModel}
         />

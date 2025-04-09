@@ -1,5 +1,5 @@
 declare global {
   interface Window {
-    llama: {};
+    api: false;
   }
 }

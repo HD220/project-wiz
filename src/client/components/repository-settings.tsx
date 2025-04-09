@@ -14,17 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { useState, useCallback } from "react";
-
-interface ElectronAPI {
-  getIssue: (owner: string, repo: string, issue_number: number) => Promise<any>;
-}
-
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
-  }
-}
+import { useState } from "react";
 
 export default function RepositorySettings() {
   const [repoUrl, setRepoUrl] = useState(
@@ -75,54 +65,6 @@ export default function RepositorySettings() {
     return date.toLocaleString();
   };
 
-  const handleGetIssue = useCallback(async () => {
-    if (window.electronAPI && window.electronAPI.getIssue) {
-      try {
-        const owner = "octokit";
-        const repo = "octokit.js";
-        const issue_number = 123;
-        const result = await window.electronAPI.getIssue(owner, repo, issue_number);
-        console.log("Issue:", result);
-      } catch (error) {
-        console.error("Error fetching issue:", error);
-      }
-    } else {
-      console.error("Electron API not available.");
-    }
-  }, []);
-
-  const handleGetIssue = useCallback(async () => {
-    if (window.electronAPI && window.electronAPI.getIssue) {
-      try {
-        const owner = "octokit";
-        const repo = "octokit.js";
-        const issue_number = 123;
-        const result = await window.electronAPI.getIssue(owner, repo, issue_number);
-        console.log("Issue:", result);
-      } catch (error) {
-        console.error("Error fetching issue:", error);
-      }
-    } else {
-      console.error("Electron API not available.");
-    }
-  }, []);
-
-  const handleGetIssue = useCallback(async () => {
-    if (window.electronAPI && window.electronAPI.getIssue) {
-      try {
-        const owner = "octokit";
-        const repo = "octokit.js";
-        const issue_number = 123;
-        const result = await window.electronAPI.getIssue(owner, repo, issue_number);
-        console.log("Issue:", result);
-      } catch (error) {
-        console.error("Error fetching issue:", error);
-      }
-    } else {
-      console.error("Electron API not available.");
-    }
-  }, []);
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -154,7 +96,6 @@ export default function RepositorySettings() {
           <TabsTrigger value="repositories">Repositories</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="access">Access Tokens</TabsTrigger>
-          <TabsTrigger value="test">Test</TabsTrigger>
         </TabsList>
 
         <TabsContent value="repositories" className="space-y-4">
@@ -425,10 +366,6 @@ export default function RepositorySettings() {
               <Button>Save Token</Button>
             </CardFooter>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="test" className="space-y-4">
-          <Button onClick={handleGetIssue}>Test Get Issue</Button>
         </TabsContent>
       </Tabs>
     </div>

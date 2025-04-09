@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -17,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { useLLM } from "@/hooks/use-llm";
 
 interface Model {
   id: number;
@@ -27,7 +25,6 @@ interface Model {
   status: string;
   lastUsed: string | null;
   description: string;
-  modelType: "llama" | "mistral";
 }
 
 interface ModelConfigurationProps {
@@ -37,7 +34,6 @@ interface ModelConfigurationProps {
 export default function ModelConfiguration({
   models,
 }: ModelConfigurationProps) {
-  const { loadModel } = useLLM();
   const [modelId, setModelId] = useState("mistralai/Mistral-7B-v0.1");
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(2048);
@@ -59,18 +55,6 @@ export default function ModelConfiguration({
             value={modelId}
             onValueChange={(value) => {
               setModelId(value);
-              // Find the selected model and pass the modelType to the WorkerService
-              const selectedModel = models.find(
-                (model) => model.modelId === value
-              );
-              if (selectedModel) {
-                loadModel({
-                  modelId: selectedModel.modelId,
-                  modelPath: selectedModel.modelId,
-                  modelType: selectedModel.modelType as "llama" | "mistral",
-                });
-                console.log("Selected model:", selectedModel);
-              }
             }}
           >
             <SelectTrigger id="model-select">

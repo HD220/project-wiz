@@ -11,11 +11,7 @@ import { ModelStatusBadge } from "./ModelStatusBadge.js";
 import { ModelActions } from "./ModelActions.js";
 import { ModelCardActions } from "./types.js";
 
-function ModelCard({
-  model,
-  onActivate,
-  onDownload
-}: ModelCardActions) {
+function ModelCard({ model, onActivate, onDownload }: ModelCardActions) {
   return (
     <Card className={model.state.isActive ? "border-primary" : ""}>
       <CardHeader className="pb-2">

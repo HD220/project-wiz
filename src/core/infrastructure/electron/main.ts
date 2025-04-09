@@ -1,19 +1,12 @@
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
-import fs from "fs";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
 if (started) {
   app.quit();
-}
-
-// Garante que o diretório de dados do usuário existe
-const userDataPath = app.getPath("userData");
-if (!fs.existsSync(userDataPath)) {
-  fs.mkdirSync(userDataPath, { recursive: true });
 }
 
 function createWindow() {

@@ -7,22 +7,10 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
 import ModelList from "./model-list";
 import ModelConfiguration from "./model-configuration";
-import PromptCustomization from "./prompt-customization";
 
 export interface Model {
   id: number;
@@ -32,19 +20,10 @@ export interface Model {
   status: string;
   lastUsed: string | null;
   description: string;
-  modelType: "llama" | "mistral";
 }
 
-const defaultPrompts = {
-  "prompt.initial": "Você é um assistente virtual.",
-  "prompt.code": "Escreva um código em JavaScript.",
-  "prompt.translate": "Traduza para o inglês.",
-};
-
 export default function ModelSettings() {
-  const { loadModel } = useLLM();
-
-  const models = [
+  const models: Model[] = [
     {
       id: 1,
       name: "Mistral 7B",
@@ -54,7 +33,6 @@ export default function ModelSettings() {
       lastUsed: "2023-06-15T10:42:00",
       description:
         "A powerful 7B parameter model with strong coding capabilities.",
-      modelType: "mistral" as "mistral",
     },
     {
       id: 2,
@@ -65,7 +43,6 @@ export default function ModelSettings() {
       lastUsed: "2023-06-14T15:30:00",
       description:
         "Meta's Llama 2 model with 7B parameters, good for general tasks.",
-      modelType: "llama" as "llama",
     },
     {
       id: 3,
@@ -75,7 +52,6 @@ export default function ModelSettings() {
       status: "not-downloaded",
       lastUsed: null,
       description: "Specialized model for code generation and understanding.",
-      modelType: "llama" as "llama",
     },
     {
       id: 4,
@@ -86,7 +62,6 @@ export default function ModelSettings() {
       lastUsed: "2023-06-10T09:15:00",
       description:
         "Smaller but efficient model from Microsoft, good for lightweight tasks.",
-      modelType: "llama" as "llama",
     },
   ];
 
@@ -119,7 +94,6 @@ export default function ModelSettings() {
         <TabsList>
           <TabsTrigger value="models">Available Models</TabsTrigger>
           <TabsTrigger value="settings">Model Configuration</TabsTrigger>
-          <TabsTrigger value="prompts">Prompt Customization</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
 
@@ -146,13 +120,6 @@ export default function ModelSettings() {
 
         <TabsContent value="settings" className="space-y-4">
           <ModelConfiguration models={models} />
-        </TabsContent>
-
-        <TabsContent value="prompts" className="space-y-4">
-          <PromptCustomization
-            modelId={"mistralai/Mistral-7B-v0.1"}
-            prompts={defaultPrompts}
-          />
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-4">

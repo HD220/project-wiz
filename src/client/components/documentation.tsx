@@ -1,12 +1,18 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useState } from "react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
 
 export default function Documentation() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const docFiles = [
     {
@@ -213,21 +219,27 @@ The project is divided into the following components:
 
 The application is deployed using Docker containers on a Kubernetes cluster.`,
     },
-  ]
+  ];
 
   const filteredDocs = docFiles.filter(
     (doc) =>
       doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.path.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.content.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      doc.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
-  }
+    const date = new Date(dateString);
+    return date.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
-  const selectedFileContent = selectedFile ? docFiles.find((doc) => doc.path === selectedFile)?.content : null
+  const selectedFileContent = selectedFile
+    ? docFiles.find((doc) => doc.path === selectedFile)?.content
+    : null;
 
   return (
     <div className="space-y-4">
@@ -318,7 +330,9 @@ The application is deployed using Docker containers on a Kubernetes cluster.`,
                     </svg>
                     <div>
                       <div className="font-medium">{doc.name}</div>
-                      <div className="text-xs text-muted-foreground">{doc.path}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {doc.path}
+                      </div>
                     </div>
                   </Button>
                 ))}
@@ -330,11 +344,17 @@ The application is deployed using Docker containers on a Kubernetes cluster.`,
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>
-              {selectedFile ? docFiles.find((doc) => doc.path === selectedFile)?.name : "Select a file"}
+              {selectedFile
+                ? docFiles.find((doc) => doc.path === selectedFile)?.name
+                : "Select a file"}
             </CardTitle>
             {selectedFile && (
               <CardDescription>
-                Last updated: {formatDate(docFiles.find((doc) => doc.path === selectedFile)?.lastUpdated || "")}
+                Last updated:{" "}
+                {formatDate(
+                  docFiles.find((doc) => doc.path === selectedFile)
+                    ?.lastUpdated || ""
+                )}
               </CardDescription>
             )}
           </CardHeader>
@@ -370,6 +390,5 @@ The application is deployed using Docker containers on a Kubernetes cluster.`,
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

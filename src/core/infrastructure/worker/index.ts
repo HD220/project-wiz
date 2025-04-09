@@ -1,4 +1,3 @@
-import { EventEmitter } from "events";
 import type {
   LlamaModelOptions,
   LlamaContextOptions,
@@ -12,21 +11,19 @@ import type {
 } from "node-llama-cpp";
 import { createModelDownloader, LlamaChatSession } from "node-llama-cpp";
 import path from "node:path";
-import { IWorkerService } from "../../domain/ports/iworker-service.port";
 
-export class WorkerService extends EventEmitter implements IWorkerService {
+const modelsDir = path.join(__dirname, "models");
+
+export class LlamaWorker {
   private llama!: Llama;
-  private model?: any;
-  private context?: any;
-  private session?: any;
-  private modelPath?: string;
+  private model?: LlamaModel;
+  private context?: LlamaContext;
+  private session?: LlamaChatSession;
 
-  private constructor() {
-    super();
-  }
+  private constructor() {}
 
   static async create(options?: LlamaOptions) {
-    const instance = new WorkerService();
+    const instance = new LlamaWorker();
     await instance.initializeLlama(options);
     return instance;
   }
@@ -40,10 +37,8 @@ export class WorkerService extends EventEmitter implements IWorkerService {
     if (this.model) {
       await this.unloadModel();
     }
-    this.modelPath = path.join(__dirname, "models", options.modelPath);
     this.model = await this.llama.loadModel({
       ...options,
-      modelPath: this.modelPath,
     });
   }
 
@@ -67,42 +62,23 @@ export class WorkerService extends EventEmitter implements IWorkerService {
   async prompt(prompt: string, options?: LLamaChatPromptOptions) {
     if (!this.session) throw new Error("Session not loaded.");
 
-    const template = Handlebars.compile(prompt);
-    const compiledPrompt = template({});
-
-    const responseText = await this.session.prompt(compiledPrompt, options);
+    const responseText = await this.session.prompt(prompt, options);
 
     return responseText;
   }
 
   async unloadModel() {
-    this.session = undefined;
-    this.context = undefined;
-    this.model = undefined;
-  }
-
-  private getPromptsConfigPath() {
-    if (!this.modelPath) throw new Error("Model path not loaded.");
-    return path.join(path.dirname(this.modelPath), "prompts.json");
-  }
-
-  async savePrompts(prompts: { [key: string]: string }) {
-    const configPath = this.getPromptsConfigPath();
-    fs.writeFileSync(configPath, JSON.stringify(prompts));
-  }
-
-  async loadPrompts(): Promise<{ [key: string]: string }> {
-    const configPath = this.getPromptsConfigPath();
-    if (!fs.existsSync(configPath)) {
-      return {};
+    try {
+      await this.model?.dispose();
+      this.session?.dispose();
+      await this.context?.dispose();
+    } catch (error) {
+      console.error(error);
     }
-    const config = fs.readFileSync(configPath, "utf-8");
-    return JSON.parse(config);
   }
 
   async downloadModel(options: ModelDownloaderOptions) {
     try {
-      const modelsDir = path.join(__dirname, "models");
       const downloader = await createModelDownloader({
         ...options,
         dirPath: modelsDir,
