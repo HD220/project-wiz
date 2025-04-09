@@ -6,7 +6,7 @@ Foram implementados testes robustos para o `WorkerService`, cobrindo a inicializ
 
 ## Descrição da tarefa
 
-Corrigir os testes no arquivo `src/core/__tests__/WorkerService.test.ts` seguindo as correções detalhadas no arquivo `issues/working/documentation/ISSUE-0067-Documentar-testes-WorkerService/test-corrections.md`. As correções incluem:
+Corrigir os testes no arquivo `src/core/__tests__/WorkerService.test.ts` seguindo as correções detalhadas no arquivo `issues/working/documentation/ISSUE-0102-Documentar-testes-WorkerService/test-corrections.md`. As correções incluem:
 
 *   Alterar o `expect` nos testes `should load a model` e `should load a mistral model` para verificar apenas o final do caminho do `worker-bridge`.
 *   Ajustar o mock do `requestResponse` no teste `should send a prompt` para retornar o valor correto.

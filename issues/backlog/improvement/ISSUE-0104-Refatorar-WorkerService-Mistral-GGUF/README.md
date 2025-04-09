@@ -1,4 +1,4 @@
-# ISSUE-0068: Refatorar WorkerService para Mistral GGUF
+# ISSUE-0104: Refatorar WorkerService para Mistral GGUF
 
 ## Descrição
 

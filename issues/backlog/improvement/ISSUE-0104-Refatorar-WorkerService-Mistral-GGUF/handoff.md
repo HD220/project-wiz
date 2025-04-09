@@ -1,4 +1,4 @@
-# Handoff - ISSUE-0068: Refatorar WorkerService para Mistral GGUF
+# Handoff - ISSUE-0104: Refatorar WorkerService para Mistral GGUF
 
 ## Descrição
 

@@ -1,4 +1,4 @@
-# ISSUE-0073 - Implementar análise e visualização do histórico de conversas
+# ISSUE-0107 - Implementar análise e visualização do histórico de conversas
 
 ## Descrição
 Fornecer métricas e visualizações sobre o uso do sistema, como número de conversas, mensagens, tópicos mais frequentes, etc.

@@ -1,4 +1,4 @@
-# ISSUE-0067: Documentar testes do WorkerService
+# ISSUE-0102: Documentar testes do WorkerService
 
 ## Descrição
 
