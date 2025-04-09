@@ -36,35 +36,34 @@
 - [ ] [ISSUE-0018] Melhorar main process
 - [ ] [ISSUE-0019] Adicionar husky lint-staged
 - [ ] [ISSUE-0020] Otimizar scripts build
-- [ ] [ISSUE-0022] Implementar testes WorkerService
-- [ ] [ISSUE-0025] Implementar testes componentes UI
 - [ ] [ISSUE-0027] Implementar sistema logging
 - [ ] [ISSUE-0040] Implementar sistema de logging
-- [ ] [ISSUE-0052] Implementar testes unitarios e integracao
 - [ ] [ISSUE-0053] Melhorar Acessibilidade ARIA
 - [ ] [ISSUE-0065] Reorganização estrutura pastas
-- [ ] [ISSUE-0066] Implementar testes componentes críticos
-- [ ] [ISSUE-0068] Consolidação serviços LLM
 - [ ] [ISSUE-0065] Refatorar RepositorySettings
 - [ ] [ISSUE-0069] Refatorar comunicação IPC para utilizar `contextBridge` corretamente
-- [ ] [ISSUE-0070] Implementar testes unitários e de integração para os serviços no processo principal e no worker
-- [ ] [ISSUE-0071] Configurar um ambiente de CI/CD para automatizar os testes
 - [ ] [ISSUE-0072] Definir e implementar o processo de deploy da aplicação Electron
+- [ ] [ISSUE-0079] Reforcar sanitizacao backend frontend Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0080] Correcao conversao tipos frontend Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0081] Substituir checksum por assinatura digital Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0082] Centralizar validacoes no SettingsService Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0083] Confirmacao e preview na importacao Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0084] Adicionar campo description Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0085] Historico de versoes e rollback Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0086] Controle multi-tenant e permissoes Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0087] Gerenciamento de tokens de compartilhamento Personalizacao Prompts (Pendente, 09/04/2025)
+- [ ] [ISSUE-0088] Alertas dados sensiveis Personalizacao Prompts (Pendente, 09/04/2025)
 
 ## Em Progresso
 
 ### Documentation
 
 - [ ] [ISSUE-0013] Completar documentacao arquitetura
-- [ ] [ISSUE-0073] Completar a documentação da arquitetura e documentar os testes do WorkerService
 
 ### Feature
 
 - [ ] [ISSUE-0021] App mobile de acompanhamento
-- [ ] [ISSUE-0023] Implementar hook useLLM
-- [ ] [ISSUE-0031] Implementar personalizacao de prompts
-- [ ] [ISSUE-0032] Melhorar integracao com GitHub
-- [ ] [ISSUE-0034] Implementar historico de conversas
+
 
 ## Concluídas
 
@@ -89,18 +88,22 @@
 
 ### Feature
 
-- [x] [ISSUE-0024] Implementar sistema autenticacao
+- [x] [ISSUE-0023] Implementar hook useLLM (Concluída em 09/04/2025)
+- [x] [ISSUE-0024] Implementar sistema autenticação
 - [x] [ISSUE-0028] Suporte ao modelo Mistral
-- [x] [ISSUE-0032] Melhorar integracao com GitHub
+- [x] [ISSUE-0031] Implementar personalizacao de prompts (Concluída em 09/04/2025)
+- [x] [ISSUE-0032] Melhorar integracao com GitHub: melhoria na integração com GitHub: gerenciamento de PAT, criação de PRs, documentação completa.
 - [x] [ISSUE-0033] Implementar fluxos de trabalho
 - [x] [ISSUE-0036] Implementar sistema de plugins
 - [x] [ISSUE-0041] Implementar gerenciamento de multiplos workers
 - [x] [ISSUE-0043] Implementar suporte a diferentes modelos LLM
 - [x] [ISSUE-0045] Implementar cache de prompts e respostas
 - [x] [ISSUE-0064] Implementar compartilhamento de prompts
+- [x] [ISSUE-0034] Implementar histórico de conversas (Concluída em 09/04/2025)
 
 ### Improvement
 
 - [x] [ISSUE-0016] Adicionar responsividade mobile
 - [x] [ISSUE-0066] Melhorar suporte Mistral
 - [x] [ISSUE-0067] Refatorar WorkerService para suporte a Mistral GGUF, fila de prompts e múltiplos workers
+- [x] [ISSUE-0068] Consolidação serviços LLM

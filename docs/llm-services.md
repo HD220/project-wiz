@@ -1,218 +1,226 @@
-# Serviços LLM do Project Wiz
+# Serviços LLM - Arquitetura Consolidada
 
 ## Visão Geral
 
-Os serviços LLM fornecem integração com modelos de linguagem locais via node-llama-cpp, seguindo os princípios de Clean Architecture:
+A nova arquitetura dos serviços LLM do Project Wiz foi consolidada para garantir:
 
-### Camadas da Arquitetura
+- Separação clara entre domínio, aplicação, infraestrutura e frontend
+- Suporte nativo a **streaming** de respostas
+- Comunicação eficiente via **IPC com MessagePort**
+- Facilidade de uso via **hook React `useLLM`**
+- Adoção dos princípios **Clean Architecture**
 
-1. **Domain** (Lógica de negócio):
-   - Define interfaces e entidades principais
-   - Contratos para serviços LLM
-   - Exemplo: `IModelManager`
+---
 
-2. **Application** (Casos de uso):
-   - Implementa lógica de negócio
-   - Orquestra fluxos complexos
-   - Exemplo: `ModelManagerService`
+## Camadas e Componentes
 
-3. **Infrastructure** (Implementações):
-   - Adaptadores para Electron e node-llama-cpp
-   - Comunicação IPC
-   - Exemplo: `ElectronModelManagerAdapter`
+### 1. Domain
 
-Os serviços LLM permitem:
+- **Entidades:** `Prompt`, `StreamChunk`
+- **Interfaces:** `ILlmService`, `IWorkerService`, `IModelManager`
+- Define contratos para geração, carregamento e streaming
 
-- Carregamento de modelos Llama
-- Criação de contextos de inferência
-- Geração de respostas via prompts
-- Comunicação IPC entre processos
-- Download de modelos remotos
-- Envio de prompts assíncronos
+### 2. Application
 
-## Arquitetura
+- **Classe principal:** `LlmService`
+- Orquestra carregamento de modelos, geração síncrona e streaming
+- Expõe métodos:
+  - `loadModel(modelPath: string)`
+  - `prompt(promptText: string)`
+  - `promptStream(prompt: Prompt, onChunk: (chunk: StreamChunk) => void)`
 
-### Interface IPC do WorkerService
+### 3. Infrastructure
 
-Os handlers IPC do WorkerService seguem um padrão uniforme, recebendo e repassando payloads idênticos aos do worker. Todos os handlers são registrados no processo principal e delegam as operações para o worker via IPC.
+- **Adaptadores IPC:** `ElectronWorkerAdapter`, `LlmBridge`
+- Gerenciam comunicação com workers via MessagePort
+- Tratam erros e propagam eventos de streaming
 
-#### Handlers Disponíveis:
+### 4. Frontend
 
-1. **worker:initialize**
+- **Hook React:** `useLLM`
+- Facilita integração com UI
+- Suporte a geração síncrona e streaming com cancelamento
 
-   - **Payload:** `LlamaOptions`
-   - **Descrição:** Inicializa o runtime Llama
-   - **Exemplo:**
-     ```typescript
-     await ipcRenderer.invoke("worker:initialize", {
-       modelPath: "model.bin",
-       gpuLayers: 20,
-     });
-     ```
+---
 
-2. **worker:loadModel**
-
-   - **Payload:** `LlamaModelOptions`
-   - **Descrição:** Carrega um modelo na memória
-   - **Exemplo:**
-     ```typescript
-     await ipcRenderer.invoke("worker:loadModel", {
-       modelPath: "model.bin",
-       gpuLayers: 20,
-     });
-     ```
-
-3. **worker:createContext**
-
-   - **Payload:** `LlamaContextOptions`
-   - **Descrição:** Cria um novo contexto para inferência
-   - **Exemplo:**
-     ```typescript
-     await ipcRenderer.invoke("worker:createContext", {
-       seed: 42,
-       threads: 4,
-     });
-     ```
-
-4. **worker:initializeSession**
-
-   - **Payload:** `LlamaChatSessionOptions`
-   - **Descrição:** Inicializa uma sessão de chat
-   - **Exemplo:**
-     ```typescript
-     await ipcRenderer.invoke("worker:initializeSession", {
-       systemPrompt: "Você é um assistente útil",
-     });
-     ```
-
-5. **worker:prompt**
-
-   - **Payload:** `{ prompt: string, options?: LLamaChatPromptOptions }`
-   - **Descrição:** Executa um prompt no modelo carregado
-   - **Exemplo:**
-     ```typescript
-     const response = await ipcRenderer.invoke("worker:prompt", {
-       prompt: "Explique clean architecture",
-       options: { temperature: 0.7 },
-     });
-     ```
-
-6. **worker:unloadModel**
-
-   - **Payload:** `{ modelPath: string }`
-   - **Descrição:** Descarrega um modelo da memória
-   - **Exemplo:**
-     ```typescript
-     await ipcRenderer.invoke("worker:unloadModel", {
-       modelPath: "model.bin",
-     });
-     ```
-
-7. **worker:downloadModel**
-
-   - **Payload:** `ModelDownloaderOptions`
-   - **Descrição:** Baixa um modelo remoto
-   - **Exemplo:**
-     ```typescript
-     await ipcRenderer.invoke("worker:downloadModel", {
-       repo: "TheBloke/Llama-2-7B-GGUF",
-       file: "llama-2-7b.Q4_K_M.gguf",
-     });
-     ```
-
-8. **worker:sendPrompt**
-   - **Payload:** `{ prompt: string, options?: LLamaChatPromptOptions }`
-   - **Descrição:** Envia um prompt de forma assíncrona, retornando um ID de operação
-   - **Exemplo:**
-     ```typescript
-     const operationId = await ipcRenderer.invoke("worker:sendPrompt", {
-       prompt: "Explique clean architecture",
-       options: { temperature: 0.7 },
-     });
-     ```
-
-### Componentes Principais
-
-#### LlamaWorker (`worker.ts`)
-
-Classe principal que gerencia o ciclo de vida do modelo LLM:
-
-- `loadModel()`: Carrega o modelo a partir do caminho especificado
-- `createContext()`: Cria contexto para inferência
-- `initializeSession()`: Inicializa sessão de chat
-- `prompt()`: Executa inferência com o prompt fornecido
-
-#### LlamaWorkerBridge (`worker-bridge.ts`)
-
-Gerencia a comunicação IPC entre processos:
-
-- Recebe mensagens via MessagePortMain
-- Roteia chamadas para o LlamaWorker
-- Implementa padrão EventEmitter para comunicação assíncrona
-
-## Fluxo de Comunicação IPC
+## Fluxo de Streaming Consolidado
 
 ```mermaid
 sequenceDiagram
-    Processo Principal->>WorkerBridge: Envia mensagem (loadModel/createContext/prompt)
-    WorkerBridge->>LlamaWorker: Chama método correspondente
-    LlamaWorker-->>WorkerBridge: Retorna resultado
-    WorkerBridge-->>Processo Principal: Retorna resposta via IPC
+    participant UI as React (useLLM)
+    participant App as LlmService
+    participant Bridge as LlmBridge
+    participant Worker as Worker LLM
+
+    UI->>App: promptStream(prompt, onChunk)
+    App->>Bridge: promptStream(prompt, onChunk)
+    Bridge->>Worker: Envia 'promptStream' via MessagePort
+    loop Enquanto resposta não finalizada
+        Worker-->>Bridge: streamChunk
+        Bridge-->>App: onChunk(chunk)
+        App-->>UI: onChunk(chunk)
+    end
+    Worker-->>Bridge: streamEnd
+    Bridge-->>App: onChunk({isFinal: true})
+    App-->>UI: onChunk({isFinal: true})
 ```
 
-## Configuração de Modelos
+- O fluxo é **assíncrono e incremental**
+- Cada chunk parcial é propagado até a UI
+- Cancelamento possível via método `cancel()`
 
-1. Modelos devem ser colocados em `src/core/services/llm/llama/models/`
-2. Configuração básica:
+---
+
+## Protocolo IPC Atualizado
+
+### Canais e Mensagens
+
+| Tipo de Mensagem     | Direção             | Payload                               | Descrição                                 |
+|----------------------|---------------------|---------------------------------------|-------------------------------------------|
+| `loadModel`          | UI → Worker         | `{ modelPath }`                       | Carrega modelo                           |
+| `prompt`             | UI → Worker         | `{ prompt }`                          | Geração síncrona                         |
+| `promptStream`       | UI → Worker         | `{ prompt }`                          | Inicia geração via streaming             |
+| `cancelStream`       | UI → Worker         | `{ requestId }`                       | Cancela streaming                        |
+| `response`           | Worker → UI         | `string`                              | Resposta final síncrona                  |
+| `streamChunk`        | Worker → UI         | `StreamChunk`                         | Pedaço parcial da resposta               |
+| `streamEnd`          | Worker → UI         | `void`                                | Fim do streaming                         |
+| `error`              | Worker → UI         | `Error`                               | Erro na operação                         |
+
+- Cada requisição possui um `requestId` único
+- Streaming envia múltiplos `streamChunk` e finaliza com `streamEnd`
+- Cancelamento interrompe o fluxo
+
+---
+
+## Interfaces Principais
+
+### `LlmService`
 
 ```typescript
-const worker = await LlamaWorker.create();
-await worker.loadModel({
-  modelPath: "nome-do-modelo.bin",
-  gpuLayers: 20,
-});
-```
+const llmService = new LlmService(workerService, modelManager);
 
-## Exemplos de Uso
+await llmService.loadModel('model.bin');
 
-### Carregamento e Inferência Básica
+const resposta = await llmService.prompt('Explique Clean Architecture');
 
-```typescript
-const worker = await LlamaWorker.create();
-await worker.loadModel({ modelPath: "model.bin" });
-await worker.createContext();
-await worker.initializeSession();
-
-const response = await worker.prompt("Qual é o sentido da vida?");
-console.log(response);
-```
-
-### Tratamento de Erros
-
-```typescript
-try {
-  await worker.prompt("...");
-} catch (error) {
-  if (error.message === "Session not loaded.") {
-    // Tratar erro de sessão não inicializada
+await llmService.promptStream(
+  { text: 'Explique Clean Architecture' },
+  (chunk) => {
+    console.log('Chunk recebido:', chunk.content, 'Final?', chunk.isFinal);
   }
-}
+);
 ```
 
-## Integração com Hugging Face
+### Hook `useLLM`
 
-> **Nota:** Esta funcionalidade está planejada para versões futuras. A integração permitirá:
->
-> - Download direto de modelos do Hugging Face Hub
-> - Conversão automática de formatos de modelo
-> - Gerenciamento de repositórios de modelos
+```typescript
+const {
+  isLoading,
+  error,
+  loadModel,
+  generate,
+  generateStream,
+} = useLLM(llmBridge);
 
-**Roadmap:**
+// Carregar modelo
+await loadModel({ modelPath: 'model.bin' });
 
-- Q2 2025: Implementação inicial
-- Q3 2025: Suporte a modelos específicos
+// Geração simples
+const resposta = await generate({ prompt: 'Explique Clean Architecture' });
+
+// Geração com streaming
+const { cancel } = generateStream(
+  { text: 'Explique Clean Architecture' },
+  (chunk) => {
+    console.log('Chunk:', chunk.content, 'Final?', chunk.isFinal);
+  }
+);
+
+// Cancelar se necessário
+cancel();
+```
+
+---
+
+## Guia de Migração
+
+### Mudanças Principais
+
+- **Substituição do uso direto de `ipcRenderer.invoke`** pelo `LlmBridge` via `MessagePort`
+- **Uso do `LlmService`** para orquestração, em vez de chamadas diretas
+- **Streaming via `promptStream`** com callback incremental
+- **Hook `useLLM`** para integração React, substituindo chamadas manuais
+
+### Passos para Adoção
+
+1. **Atualize imports**
+
+```typescript
+// Antes
+import { ipcRenderer } from 'electron';
+
+// Depois
+import { LlmService } from 'src/core/application/services/llm-service';
+import { useLLM } from 'src/client/hooks/use-llm';
+```
+
+2. **Instancie o serviço**
+
+```typescript
+const llmService = new LlmService(workerService, modelManager);
+```
+
+3. **Adapte chamadas síncronas**
+
+```typescript
+// Antes
+await ipcRenderer.invoke('worker:prompt', { prompt: '...' });
+
+// Depois
+await llmService.prompt('...');
+```
+
+4. **Implemente streaming**
+
+```typescript
+await llmService.promptStream(prompt, onChunk);
+```
+
+ou via hook:
+
+```typescript
+const { generateStream } = useLLM(bridge);
+generateStream(prompt, onChunk);
+```
+
+5. **Gerencie cancelamento**
+
+```typescript
+const { cancel } = generateStream(prompt, onChunk);
+cancel();
+```
+
+6. **Remova código legado**
+
+- Handlers IPC antigos
+- Chamadas diretas a `ipcRenderer.invoke`
+- Listeners manuais
+
+---
+
+## Considerações Finais
+
+- O fluxo de streaming **não remove listeners automaticamente** (ver `LlmService`), atenção para evitar vazamentos.
+- O protocolo IPC é **baseado em mensagens com `requestId`** para múltiplas requisições simultâneas.
+- A arquitetura segue **Clean Architecture**, facilitando testes e manutenção.
+- Consulte os ADRs relacionados para decisões detalhadas:
+  - [ADR-0006 - Nomenclatura Serviços LLM](../docs/adr/ADR-0006-Nomenclatura-Servicos-LLM.md)
+  - [ADR-0008 - Clean Architecture LLM](../docs/adr/ADR-0008-Clean-Architecture-LLM.md)
+
+---
 
 ## Referências
 
-- [Documentação node-llama-cpp](https://github.com/withcatai/node-llama-cpp)
-- [Padrões IPC do Electron](https://www.electronjs.org/docs/latest/tutorial/ipc)
+- [node-llama-cpp](https://github.com/withcatai/node-llama-cpp)
+- [Electron IPC](https://www.electronjs.org/docs/latest/tutorial/ipc)
+- [Documentação React](https://reactjs.org/docs/hooks-intro.html)
