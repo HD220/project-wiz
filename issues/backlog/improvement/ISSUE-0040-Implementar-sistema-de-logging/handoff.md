@@ -7,14 +7,20 @@
 - **Requisitos:** Registrar eventos, configurar níveis de log, persistir logs em arquivo.
 - **Constraints:** Configuração de níveis de detalhe, formato legível, Clean Code.
 
+## Status da Implementação
+
+**Pendente.**
+
+Até o momento, o sistema de logging **não foi implementado**. O projeto utiliza apenas chamadas dispersas a `console.log` no backend e frontend, sem centralização, sem níveis configuráveis e sem persistência em arquivo.
+
 ## Estrutura de Pastas
 
 N/A
 
 ## Componentes/Serviços Envolvidos
 
-- Core
-- Client
+- Core (backend)
+- Client (frontend)
 
 ## Configuração
 
@@ -27,5 +33,6 @@ N/A
 
 ## Observações
 
-- Considerar o uso de uma biblioteca de logging existente para facilitar a implementação.
+- Recomenda-se uso de biblioteca de logging consolidada para facilitar configuração e persistência.
+- A solução deve abranger backend (core) e frontend (client).
 - Documentar a API do sistema de logging para facilitar o uso por outros desenvolvedores.

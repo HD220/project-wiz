@@ -26,5 +26,13 @@ import { WorkerManager } from './WorkerManager';
 import { ProcessManager } from '../processes/ProcessManager';
 ```
 
+## Status da Revisão
+
+- Revisão realizada em 10/04/2025
+- **Status:** Não implementado
+- A nomenclatura antiga (`WorkerService`, `WorkerManager`, `worker.ts`) ainda está presente no código.
+- Estrutura de pastas não reorganizada conforme ADR-0006.
+- Issue permanece no backlog aguardando execução.
+
 ## Histórico de Revisões
 - 2025-04-07: Handoff criado

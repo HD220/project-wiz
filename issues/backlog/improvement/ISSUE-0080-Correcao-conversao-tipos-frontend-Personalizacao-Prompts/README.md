@@ -6,6 +6,16 @@ ISSUE-0080-Correcao-conversao-tipos-frontend-Personalizacao-Prompts
 
 ### Descrição
 
+**Status da revisão (10/04/2025):**
+
+- A conversão correta de tipos (string para boolean, number, date) **não está implementada** no frontend.
+- O valor padrão das variáveis é tratado como string, sem parsing ou validação.
+- A persistência força todos os tipos para string, causando risco de inconsistência.
+- Atualizações sobrescrevem o tipo para string e required para false, gerando perda de informação.
+- Não há validações específicas para tipos nem feedback para valores inválidos.
+- Issue permanece **pendente** aguardando implementação.
+
+
 **Objetivo:**  
 Corrigir a conversão de tipos no frontend da feature **Personalização de Prompts** para garantir integridade dos dados enviados e evitar erros silenciosos.
 
