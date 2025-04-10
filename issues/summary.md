@@ -21,6 +21,8 @@
   - Diagnóstico realizado e instrumentação com logs concluída.
   - Aguardando coleta e análise dos logs para confirmação do problema e aplicação da correção definitiva.
 - **ISSUE-0097 - Timeouts e limpeza automática LlmService** (pendente)
+- **ISSUE-0148-Remover-dados-fixos-do-dashboard-e-paginas** (pendente)
+- **ISSUE-0150-Refatorar-integracoes-mobile-criptografia-e-tratamento-de-erros** (pendente)
 
 ### Melhorias concluídas
 - **ISSUE-0092 - Refatorar componente ActivityLog**
@@ -104,10 +106,12 @@ As seguintes features foram revisadas e permanecem **pendentes**, aguardando imp
 - **ISSUE-0071 - Implementar importação histórico conversas** (pendente)
 - **ISSUE-0072 - Implementar backup e restauração histórico** (pendente)
 - **ISSUE-0107 - Implementar análise e visualização histórico** (pendente)
+- **ISSUE-0151-Implementar-React-Navigation-no-app-mobile** (pendente)
 
 ### Documentação pendente
 
 - **ISSUE-0130 - Documentar build/deploy Electron** (pendente)
+- **ISSUE-0145-Documentar-entidades-value-objects-use-cases** (pendente)
 
 ### Melhorias pendentes no backlog
 
@@ -116,7 +120,6 @@ As seguintes features foram revisadas e permanecem **pendentes**, aguardando imp
   - Persistência força todos os tipos para string, causando risco de inconsistência.
   - Validações e feedback para inputs inválidos ausentes.
   - Atualização e criação sobrescrevem tipos para string, gerando perda de informação.
-
 
 - **ISSUE-0078 - Monitorar e otimizar performance LLM** (pendente)
 
@@ -173,6 +176,17 @@ As seguintes features foram revisadas e permanecem **pendentes**, aguardando imp
 - **ISSUE-0123 - Testes automatizados acessibilidade ARIA** (pendente)
 - **ISSUE-0124 - Coletar métricas reais LLM WorkerServiceAdapter** (pendente)
 - **ISSUE-0131 - Testes automatizados componentes refatorados** (pendente)
+- **ISSUE-0141-Refatorar-tipos-dominio-para-domain-contracts** (pendente)
+- **ISSUE-0142-Padronizar-nomenclatura-ingles-backend** (pendente)
+- **ISSUE-0143-Extrair-import-export-prompts-para-servicos-dedicados** (pendente)
+- **ISSUE-0144-Reforcar-testes-unitarios-backend** (pendente)
+- **ISSUE-0146-Refatorar-Sidebar-em-componentes-menores** (pendente)
+- **ISSUE-0147-Refatorar-hooks-complexos-e-duplicados** (pendente)
+- **ISSUE-0149-Melhorar-acessibilidade-frontend-e-mobile** (pendente)
+
+### Segurança pendente
+
+- **ISSUE-0140-Adicionar-validacoes-infraestrutura** (pendente)
 
 ## Status geral
 
