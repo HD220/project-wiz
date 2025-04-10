@@ -1,16 +1,24 @@
 import { useState, useCallback } from 'react';
 import type { LlamaModelOptions, LLamaChatPromptOptions, LlamaContextOptions } from 'node-llama-cpp';
-import type { Prompt } from '../../core/domain/entities/prompt';
-import type { StreamChunk } from '../../core/domain/entities/stream-chunk';
+import type { Prompt } from '../../core/domain/value-objects/prompt';
+import type { StreamChunk } from '../../core/domain/value-objects/stream-chunk';
 import type { ILlmBridge } from '../../core/domain/ports/llm-bridge.port';
+import { retryWithBackoff } from '../lib/utils';
 
 export interface GenerateOptions {
   prompt: string;
   options?: Omit<LLamaChatPromptOptions, 'prompt'>;
+  signal?: AbortSignal;
 }
 
 export interface ModelOptions extends Partial<LlamaModelOptions> {
   modelPath: string;
+}
+
+export interface UseLLMConfig {
+  maxRetries?: number;
+  initialDelay?: number;
+  backoffFactor?: number;
 }
 
 export interface UseLLMReturn {
@@ -28,43 +36,65 @@ export interface UseLLMReturn {
   ) => { cancel: () => void };
 }
 
-export function useLLM(bridge: ILlmBridge): UseLLMReturn {
+export function useLLM(
+  bridge: ILlmBridge,
+  config: UseLLMConfig = {}
+): UseLLMReturn {
+  const {
+    maxRetries = 3,
+    initialDelay = 500,
+    backoffFactor = 2,
+  } = config;
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [loadedModel, setLoadedModel] = useState<ModelOptions | null>(null);
 
-  const executeOperation = useCallback(async <T>(operation: () => Promise<T>, errorMessage: string): Promise<T> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await operation();
-      return result;
-    } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error(errorMessage);
-      setError(errorObj);
-      throw errorObj;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const executeOperation = useCallback(
+    async <T>(operation: () => Promise<T>, errorMessage: string): Promise<T> => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        return await retryWithBackoff(
+          operation,
+          maxRetries,
+          initialDelay,
+          backoffFactor
+        );
+      } catch (err) {
+        const errorObj = err instanceof Error ? err : new Error(errorMessage);
+        setError(errorObj);
+        throw errorObj;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [maxRetries, initialDelay, backoffFactor]
+  );
 
-  const loadModel = useCallback(async (options: ModelOptions) => {
-    return executeOperation(async () => {
-      await bridge.loadModel(options.modelPath);
-      setLoadedModel(options);
-    }, 'Falha ao carregar o modelo');
-  }, [bridge, executeOperation]);
+  const loadModel = useCallback(
+    async (options: ModelOptions) => {
+      return executeOperation(async () => {
+        await bridge.loadModel(options.modelPath);
+        setLoadedModel(options);
+      }, 'Falha ao carregar o modelo');
+    },
+    [bridge, executeOperation]
+  );
 
   const unloadModel = useCallback(async () => {
     console.warn('unloadModel ainda não suportado na bridge');
     setLoadedModel(null);
   }, []);
 
-  const generate = useCallback(async ({ prompt, options }: GenerateOptions) => {
-    return executeOperation(async () => {
-      return bridge.prompt(prompt);
-    }, 'Falha ao gerar texto');
-  }, [bridge, executeOperation]);
+  const generate = useCallback(
+    async ({ prompt, options, signal }: GenerateOptions) => {
+      return executeOperation(async () => {
+        return bridge.prompt(prompt, signal);
+      }, 'Falha ao gerar texto');
+    },
+    [bridge, executeOperation]
+  );
 
   const getLoadedModel = useCallback(async () => {
     return loadedModel;
@@ -79,9 +109,12 @@ export function useLLM(bridge: ILlmBridge): UseLLMReturn {
     console.warn('setOptions ainda não suportado na bridge');
   }, []);
 
-  const generateStream = useCallback((prompt: Prompt, onChunk: (chunk: StreamChunk) => void) => {
-    return bridge.promptStream(prompt, onChunk);
-  }, [bridge]);
+  const generateStream = useCallback(
+    (prompt: Prompt, onChunk: (chunk: StreamChunk) => void) => {
+      return bridge.promptStream(prompt, onChunk);
+    },
+    [bridge]
+  );
 
   return {
     isLoading,

@@ -1,63 +1,72 @@
-import { SettingsService } from "./settings-service";
-import { PromptRepository } from "../../infrastructure/db/promptRepository";
-import { PromptValidator, PromptValidationConfig, PromptData } from "../../domain/entities/prompt-validator";
+import { PromptRepositoryPort, Prompt } from '../ports/PromptRepositoryPort';
+import { SettingsService } from './settings-service';
+import { PromptPolicyService, PromptValidationConfig } from './prompt-policy-service';
 
 export class PromptService {
-  static async createPrompt(data: PromptData) {
-    const [
-      maxPrompts,
-      maxContentLength,
-      maxVariables,
-      forbiddenWords,
-    ] = await Promise.all([
-      SettingsService.getMaxPromptsPerUser(),
-      SettingsService.getMaxPromptContentLength(),
-      SettingsService.getMaxVariablesPerPrompt(),
-      SettingsService.getForbiddenWords(),
-    ]);
+  constructor(
+    private readonly promptRepository: PromptRepositoryPort,
+    private readonly settingsService: SettingsService,
+    private readonly promptPolicyService: PromptPolicyService
+  ) {}
 
-    const config: PromptValidationConfig = {
-      maxPrompts,
-      maxContentLength,
-      maxVariables,
-      forbiddenWords,
-    };
+  async createPrompt(promptData: Prompt): Promise<void> {
+    const config = await this.loadValidationConfig();
 
-    const existingPrompts = await PromptRepository.listPromptNames();
-    const totalPromptsCount = existingPrompts.length;
+    const existingPrompts = await this.promptRepository.getAllPrompts();
 
-    PromptValidator.validateCreatePrompt(data, config, existingPrompts, totalPromptsCount);
+    this.promptPolicyService.validateCreatePrompt(
+      promptData,
+      config,
+      existingPrompts
+    );
 
-    return PromptRepository.createPrompt(data);
+    await this.promptRepository.savePrompt(promptData);
   }
 
-  static async updatePrompt(id: string, updatedData: Partial<PromptData>) {
+  async updatePrompt(
+    id: string,
+    updatedData: Partial<Prompt>
+  ): Promise<void> {
+    const config = await this.loadValidationConfig();
+
+    const existingPrompt = await this.promptRepository.getPromptById(id);
+    if (!existingPrompt) {
+      throw new Error('Prompt não encontrado.');
+    }
+
+    const existingPrompts = (await this.promptRepository.getAllPrompts()).filter(
+      (p) => (p as any)['id'] !== id
+    );
+
+    this.promptPolicyService.validateUpdatePrompt(
+      updatedData,
+      config,
+      existingPrompts,
+      existingPrompt
+    );
+
+    const updatedPrompt = { ...existingPrompt, ...updatedData };
+    await this.promptRepository.updatePrompt(id, updatedPrompt);
+  }
+
+  private async loadValidationConfig(): Promise<PromptValidationConfig> {
     const [
+      maxPrompts,
       maxContentLength,
       maxVariables,
       forbiddenWords,
     ] = await Promise.all([
-      SettingsService.getMaxPromptContentLength(),
-      SettingsService.getMaxVariablesPerPrompt(),
-      SettingsService.getForbiddenWords(),
+      this.settingsService.getMaxPromptsPerUser(),
+      this.settingsService.getMaxPromptContentLength(),
+      this.settingsService.getMaxVariablesPerPrompt(),
+      this.settingsService.getForbiddenWords(),
     ]);
 
-    const config: PromptValidationConfig = {
-      maxPrompts: 0,
+    return {
+      maxPrompts,
       maxContentLength,
       maxVariables,
       forbiddenWords,
     };
-
-    const existingPrompt = await PromptRepository.getPromptById(id);
-    if (!existingPrompt) {
-      throw new Error("Prompt não encontrado.");
-    }
-
-    const existingPrompts = await PromptRepository.listPromptNamesExceptId(id);
-
-    PromptValidator.validateUpdatePrompt(updatedData, config, existingPrompts, existingPrompt);
-
-    return PromptRepository.updatePrompt(id, updatedData);
   }
 }

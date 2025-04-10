@@ -4,87 +4,138 @@
 
 O Project Wiz é uma aplicação Electron que utiliza React no frontend e Node.js no backend (com comunicação IPC). O objetivo é fornecer uma interface para automatizar tarefas de desenvolvimento usando LLMs.
 
+A arquitetura segue os princípios da **Clean Architecture** ([ADR-0008](adr/ADR-0008-Clean-Architecture-LLM.md)), separando claramente domínio, aplicação, infraestrutura e apresentação.
+
+### Diagrama Geral da Arquitetura
+
+```mermaid
+flowchart TD
+    subgraph Frontend
+        A1[React UI]
+        A2[Hooks (useLLM, useHistory)]
+        A1 --> A2
+    end
+
+    subgraph IPC
+        B1[IPC Electron]
+    end
+
+    subgraph Backend
+        C1[Application Layer]
+        C2[Domain Layer]
+        C3[Infrastructure Layer]
+        C1 --> C2
+        C1 --> C3
+        C3 --> C2
+    end
+
+    subgraph Services
+        D1[WorkerService]
+        D2[ModelManager]
+        D3[PromptQueue]
+        D4[LLM Providers]
+    end
+
+    A2 -->|via IPC| B1 --> C1
+    C1 --> D3
+    D3 --> D1
+    D1 --> D2
+    D2 --> D4
+    D1 --> C1
+    C1 -->|via IPC| B1 --> A2
+```
+
+---
+
 ## Estrutura de Pastas
 
-A aplicação segue uma estrutura organizada por processos Electron e responsabilidades:
+A estrutura detalhada está documentada no [ADR-0005](adr/ADR-0005-Estrutura-de-Pastas-Electron.md).
 
 ```plaintext
 src/
 ├── client/       # Processo renderer (frontend)
-│   ├── components/ # Componentes customizados
-│   │   └── ui/    # Componentes shadcn/ui
-│   ├── hooks/    # Custom hooks
-│   ├── services/ # Serviços frontend
-│   ├── utils/    # Utilitários específicos
-│   ├── styles/   # Estilos globais
-│   └── lib/      # Bibliotecas auxiliares
+│   ├── components/ # Componentes React
+│   ├── hooks/      # Custom hooks
+│   ├── services/   # Serviços frontend
+│   ├── utils/      # Utilitários
+│   ├── styles/     # Estilos
+│   └── lib/        # Bibliotecas auxiliares
 │
 ├── core/         # Processo main (backend)
-│   ├── main/     # Código principal
-│   ├── preload/  # Código de preload
-│   ├── services/ # Serviços backend
-│   │   └── llm/  # Implementação dos serviços LLM
-│   ├── utils/    # Utilitários do backend
-│   └── events/   # Comunicação IPC
+│   ├── domain/         # Entidades, interfaces, regras de negócio
+│   ├── application/    # Casos de uso, serviços de aplicação
+│   ├── infrastructure/ # Implementações concretas, gateways, adapters
 │
 └── shared/       # Recursos compartilhados
-    ├── types/    # Tipos TypeScript
-    ├── constants/# Constantes e enums
-    └── config/   # Configurações
+    ├── types/
+    ├── constants/
+    └── config/
 ```
 
-Esta estrutura está documentada no [ADR-0005](adr/ADR-0005-Estrutura-de-Pastas-Electron.md).
+---
 
-## Componentes Principais
+## Decisões Arquiteturais Importantes
 
-### Frontend (src/client)
-- **ui/**: Componentes React organizados por funcionalidade:
-  - App.tsx: Componente principal
-  - Dashboard, ActivityLog, Documentation, RepositorySettings, ModelSettings
-- **hooks/**: Custom hooks (useLLM, useMobile, etc)
-- **services/**: Chamadas de API e integrações frontend
-- **utils/**: Utilitários específicos do frontend
+- **Clean Architecture para LLMs:** [ADR-0008](adr/ADR-0008-Clean-Architecture-LLM.md)
+- **Refatoração WorkerService com múltiplos modelos GGUF:** [ADR-0007](adr/ADR-0007-Refatoracao-WorkerService-Mistral-GGUF.md)
+- **Estrutura de pastas Electron:** [ADR-0005](adr/ADR-0005-Estrutura-de-Pastas-Electron.md)
+- **DSL para fluxos de trabalho:** [ADR-0006](adr/ADR-0006-DSL-para-fluxos-de-trabalho.md)
+- **Implementação TanStack Router + Drizzle ORM:** [ADR-0007](adr/ADR-0007-Implementacao-TanStack-Router-Drizzle.md)
+- **Histórico de conversas com SQLite + Drizzle:** [ADR-0010](adr/ADR-0010-Historico-Conversas-SQLite-Drizzle.md)
 
-### Core (src/core)
-- **main/**:
-  - main.ts: Processo principal do Electron
-- **preload/**:
-  - preload.ts: Exposição segura de APIs Node.js
-- **services/**:
-  - llm/: Implementação dos serviços LLM
-  - Outros serviços backend
-- **events/**:
-  - bridge.ts: Comunicação IPC entre processos
+---
 
-### Shared (src/shared)
-- **types/**: Tipos TypeScript compartilhados
-- **constants/**: Constantes e enums globais
-- **config/**: Configurações compartilhadas
-## Gerenciamento de Recursos e Escalabilidade
+## Fluxos Principais
 
-O WorkerService implementa várias estratégias para otimizar o uso de recursos e garantir a escalabilidade:
+### Execução de Prompts
 
-- **Cache de modelos**: Os modelos são armazenados em cache para reduzir a latência e o tempo de carregamento.
-- **Monitoramento de memória**: O uso de memória é monitorado para evitar o esgotamento de recursos.
-- **Políticas de descarregamento**: Modelos não utilizados são descarregados para liberar memória.
-- **Limites de recursos configuráveis**: Os limites de recursos podem ser configurados para controlar o uso de memória e CPU.
+1. **Usuário** interage com a interface React.
+2. **Frontend** envia prompt via IPC para backend.
+3. **Application Layer** recebe e enfileira o prompt na **PromptQueue**.
+4. **WorkerService** consome a fila, verifica o cache de modelos via **ModelManager**.
+5. Se necessário, **ModelManager** baixa/carrega o modelo.
+6. **WorkerService** processa o prompt com o modelo LLM.
+7. Resposta é enviada via IPC para o frontend.
+8. Interface é atualizada com a resposta.
 
-## Integração com ADR-0007
+### Download e Gerenciamento de Modelos
 
-Esta refatoração do WorkerService está detalhada no [ADR-0007](docs/adr/ADR-0007-Refatoracao-WorkerService-Mistral-GGUF.md). O ADR explica a decisão arquitetural, as alternativas consideradas e as consequências da decisão.
+1. **Solicitação** para usar um modelo específico.
+2. **ModelManager** verifica se o modelo está disponível localmente.
+3. Se não estiver, inicia **download** do repositório remoto.
+4. Após download, o modelo é armazenado em cache.
+5. **ModelManager** carrega o modelo na memória.
+6. **WorkerService** utiliza o modelo carregado para processar prompts.
 
-## Fluxo de Processamento de Prompts
+---
 
-1. Frontend envia prompt via IPC
-2. WorkerService coloca na PromptQueue
-3. Worker Process:
-   - Verifica se modelo necessário está em cache
-   - Carrega modelo se necessário (ou usa cache)
-   - Processa prompt
-   - Retorna resultado via IPC
-4. WorkerService envia resposta para Frontend
+## Módulos Principais
 
-## Diagrama do WorkerService
+### Core (`src/core`)
+
+- **Domain:** Entidades (Prompt, Session, Model), interfaces (ports) para LLM, ModelManager, WorkerService.
+- **Application:** Casos de uso (criar prompt, atualizar prompt, streaming), serviços de orquestração.
+- **Infrastructure:** Implementações concretas, gateways para Electron, workers, integrações com LLMs.
+
+### Client (`src/client`)
+
+- **Componentes React:** UI, dashboards, configurações, histórico.
+- **Hooks:** `useLLM`, `useHistory`, `useRepositorySettings`.
+- **Services:** Integrações frontend, temas, armazenamento local.
+- **Roteamento:** TanStack Router ([ADR-0007](adr/ADR-0007-Implementacao-TanStack-Router-Drizzle.md)).
+
+### Services
+
+- **WorkerService:** Gerencia pool de workers, fila de prompts, execução paralela.
+- **ModelManager:** Download, cache, carregamento e descarregamento de modelos.
+- **PromptQueue:** Fila assíncrona para controle de carga.
+- **LLM Providers:** Integração com diferentes modelos (Mistral, Llama, etc).
+
+---
+
+## Diagramas Específicos
+
+### WorkerService
 
 ```mermaid
 graph TD
@@ -100,35 +151,19 @@ graph TD
     end
 ```
 
-## WorkerService
+---
 
-### Nova Estrutura do WorkerService
+## Links Relacionados
 
-O WorkerService foi refatorado para suportar múltiplos modelos de LLM e implementar uma fila de prompts. A nova arquitetura inclui os seguintes componentes principais:
+- [Visão do Domínio](domain-overview.md)
+- [Contratos e Value Objects](domain-contratos-e-value-objects.md)
+- [Infraestrutura](infrastructure-overview.md)
+- [Referência da API](api-reference.md)
+- [Guia de Desenvolvimento](development.md)
+- [Guia de Testes](testing-strategy.md)
+- [Guia do Usuário](user-guide.md)
 
-- **WorkerPool**: Gerencia um pool de workers, cada um responsável por executar prompts em um modelo LLM específico.
-- **PromptQueue**: Implementa uma fila para gerenciar prompts recebidos, garantindo que sejam processados na ordem correta e evitando sobrecarga do sistema.
-- **ModelManager**: Responsável por carregar, armazenar em cache e descarregar modelos LLM conforme necessário.
-
-A nova estrutura permite:
-
-- **Suporte a múltiplos modelos**: O WorkerService pode carregar e gerenciar vários modelos simultaneamente (Llama, Mistral, etc.).
-- **Carregamento dinâmico de modelos GGUF**: Os modelos GGUF são carregados dinamicamente conforme necessário, otimizando o uso de memória.
-- **Fila de prompts**: Garante que os prompts sejam processados de forma ordenada, evitando sobrecarga e garantindo a estabilidade do sistema.
-- **Gerenciamento de recursos**: Otimiza o uso de recursos (CPU, memória, GPU) para garantir a escalabilidade e o desempenho do sistema.
-
-
-## Fluxo de Dados
-
-1. **Interação do Usuário**: O usuário interage com a interface do usuário (React).
-2. **Envio do Prompt**: O frontend envia o prompt para o WorkerService via IPC.
-3. **Enfileiramento do Prompt**: O WorkerService enfileira o prompt na PromptQueue.
-4. **Processamento do Prompt**: O WorkerPool retira o prompt da fila e o atribui a um worker disponível.
-5. **Geração da Resposta**: O worker carrega o modelo LLM necessário (se ainda não estiver carregado) e gera a resposta.
-6. **Retorno da Resposta**: O worker retorna a resposta para o WorkerService.
-7. **Envio da Resposta ao Frontend**: O WorkerService envia a resposta para o frontend via IPC.
-4.  **Retorno dos Resultados**: O backend retorna os resultados para o frontend (via IPC).
-8. **Atualização da Interface**: O frontend atualiza a interface do usuário com os resultados.
+---
 
 ## Tecnologias Utilizadas
 
@@ -136,7 +171,9 @@ A nova estrutura permite:
 - React
 - TypeScript
 - Vite
-- Shadcn/ui (para componentes da interface)
+- Shadcn/ui
 - Node.js
-- GitHub API (via Octokit)
-- Modelos LLM (ex: Mistral, Llama 2, etc.)
+- Drizzle ORM
+- SQLite
+- Octokit (GitHub API)
+- Modelos LLM (Mistral, Llama 2, etc)

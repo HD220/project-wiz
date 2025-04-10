@@ -4,6 +4,14 @@ import started from "electron-squirrel-startup";
 import { historyService } from "./history-service";
 import { saveToken, removeToken, hasToken } from "./github-token-manager";
 
+// Adição: importar express e libs auxiliares
+import express from "express";
+import crypto from "crypto";
+import cors from "cors";
+
+// Importar adaptador GPU
+import { GpuMetricsProviderElectronAdapter } from "./adapters/GpuMetricsProviderElectronAdapter";
+
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
@@ -61,6 +69,81 @@ function registerGitHubTokenHandlers() {
   });
 }
 
+/**
+ * Registra os handlers IPC para métricas do WorkerService
+ */
+function registerWorkerServiceHandlers(workerService: import('../../domain/ports/worker-service.port').WorkerServicePort) {
+  ipcMain.handle('llm:getMetrics', async () => {
+    return workerService.getMetrics();
+  });
+}
+
+/**
+ * Registra os handlers IPC para métricas de GPU
+ */
+function registerGpuMetricsHandlers(gpuMetricsProvider: import('../../domain/ports/gpu-metrics-provider.port').GpuMetricsProviderPort) {
+  ipcMain.handle('dashboard:get-gpu-metrics', async () => {
+    return gpuMetricsProvider.getGpuMetrics();
+  });
+}
+
+// Token de pareamento gerado na inicialização
+const pairingToken = crypto.randomBytes(32).toString("hex");
+
+// Inicializa API HTTP para o app mobile
+function startMobileApiServer() {
+  const api = express();
+  api.use(cors());
+  api.use(express.json());
+
+  // Middleware de autenticação
+  api.use((req, res, next) => {
+    if (req.path === "/pairing") {
+      return next();
+    }
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const token = authHeader.substring(7);
+    if (token !== pairingToken) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    next();
+  });
+
+  // Endpoint para pareamento via QR code
+  api.get("/pairing", (req, res) => {
+    res.json({
+      token: pairingToken,
+      url: `http://localhost:3001`,
+    });
+  });
+
+  // Endpoint status do bot
+  api.get("/status", (req, res) => {
+    res.json({ status: "online" });
+  });
+
+  // Endpoint histórico
+  api.get("/history", async (req, res) => {
+    const conversations = await historyService.getConversations();
+    res.json(conversations);
+  });
+
+  // Endpoint configurações básicas (mock)
+  api.get("/settings", (req, res) => {
+    res.json({
+      language: "pt-BR",
+      theme: "dark",
+    });
+  });
+
+  api.listen(3001, () => {
+    console.log("API mobile listening on http://localhost:3001");
+  });
+}
+
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -83,12 +166,21 @@ function createWindow() {
   mainWindow.webContents.openDevTools();
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  const { WorkerServiceAdapter } = await import('../worker/adapters/WorkerServiceAdapter');
+  const workerService = await WorkerServiceAdapter.create();
+
+  const gpuMetricsProvider = new GpuMetricsProviderElectronAdapter();
+
   registerHistoryServiceHandlers();
   registerGitHubTokenHandlers();
-  createWindow();
+  registerWorkerServiceHandlers(workerService);
+  registerGpuMetricsHandlers(gpuMetricsProvider);
 
-  app.on("activate", () => {
+  createWindow();
+  startMobileApiServer();
+
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }

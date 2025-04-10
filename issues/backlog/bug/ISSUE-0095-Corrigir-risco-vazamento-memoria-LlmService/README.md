@@ -1,29 +1,30 @@
-# ISSUE-0095 - Corrigir risco de vazamento de memória na `LlmService` devido a listeners não removidos
+# ISSUE-0095 Corrigir risco de vazamento de memória no LlmService
 
-## Descrição
+## Contexto
+Foi identificado risco de vazamento de memória no serviço LLM, utilizado para comunicação com modelos de linguagem.
 
-Na classe `LlmService` (`src/core/application/services/llm-service.ts`), o método `promptStream` adiciona listeners para eventos `'response'` e `'error'` no `worker`, mas **não remove esses listeners** após a conclusão da operação.
+## Diagnóstico
+- O serviço é implementado pela classe `LlmBridgeGateway`.
+- Ela mantém mapas `pendingRequests` e `streamHandlers` para gerenciar requisições e streams.
+- O vazamento pode ocorrer se esses mapas crescerem indefinidamente, por streams não finalizados ou requisições não limpas.
 
-## Impacto
+## Ações realizadas
+- Instrumentação do código com logs detalhados para monitorar:
+  - Criação e remoção de entradas nos mapas.
+  - Tamanho atual dos mapas.
+  - Cancelamento e finalização de streams.
+- O objetivo é confirmar se o problema está nesses pontos antes da correção definitiva.
 
-- Pode causar vazamento de memória
-- Listeners acumulados podem gerar comportamentos inesperados
-- Dificulta o gerenciamento correto do ciclo de vida
+## Próximos passos
+- Executar o sistema e coletar os logs.
+- Confirmar se os mapas crescem sem limite.
+- Se confirmado, implementar:
+  - Timeout para limpar entradas antigas.
+  - Cancelamento automático de streams inativos.
+  - Tratamento para falhas de comunicação.
 
-## Sugestão
-
-- Implementar mecanismo para remover os listeners após a resposta final ou erro
-- Avaliar se a interface `IWorkerService` deve suportar método `off` para remoção
-- Documentar a necessidade de gerenciamento correto de listeners
-
-## Prioridade
-
-Alta (pode afetar estabilidade e performance)
-
-## Status
-
-Backlog
-
-## Tipo
-
-Bug
+## Critérios de aceitação
+- Vazamento eliminado.
+- Serviço estável, sem crescimento anormal de memória.
+- Testes cobrindo o cenário.
+- Documentação da correção no handoff da issue.

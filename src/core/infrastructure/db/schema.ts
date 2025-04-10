@@ -1,6 +1,5 @@
 import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 
-// Tabela de modelos LLM
 export const models = sqliteTable("models", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -10,7 +9,6 @@ export const models = sqliteTable("models", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
-// Tabela de configurações
 export const settings = sqliteTable("settings", {
   id: text("id").primaryKey(),
   key: text("key").notNull().unique(),
@@ -18,7 +16,6 @@ export const settings = sqliteTable("settings", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
-// Tabela de histórico de atividades
 export const activityLog = sqliteTable("activity_log", {
   id: text("id").primaryKey(),
   type: text("type").notNull(),
@@ -27,15 +24,15 @@ export const activityLog = sqliteTable("activity_log", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
-// Tabela de conversas
 export const conversations = sqliteTable("conversations", {
   id: text("id").primaryKey(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   title: text("title"),
+  status: text("status").notNull().default("ativa"), // ativa, pausada, encerrada
+  metadata: blob("metadata", { mode: "json" }), // repositório, tarefa, fluxo
 });
 
-// Tabela de mensagens
 export const messages = sqliteTable("messages", {
   id: text("id").primaryKey(),
   conversationId: text("conversation_id").notNull(),

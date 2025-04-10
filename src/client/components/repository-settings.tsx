@@ -1,27 +1,16 @@
 "use client";
 
-import {  
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-  } from "@/components/ui/card";
-import { RepositoryConfigForm } from "@/components/repository-config-form";
-import { RepositoryCard } from "@/components/repository-card";
-import { Input } from "@/components/ui/input";
-import {  Button  } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { AddRepositoryButton } from "@/components/add-repository-button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {  Tabs, TabsContent, TabsList, TabsTrigger  } from "@/components/ui/tabs";
-import { AccessTokenForm } from "@/components/access-token-form";
-import {  Badge  } from "@/components/ui/badge";
-import { PermissionsList } from "@/components/permissions-list";
-import { useState } from "react";
-
 import { useRepositorySettings } from "@/hooks/use-repository-settings";
+import { RepositoryCard } from "@/components/repository-card";
+import { RepositoryConfigForm } from "@/components/repository-config-form";
+import { AccessTokenForm } from "@/components/access-token-form";
 
 export default function RepositorySettings() {
   const {
@@ -58,271 +47,33 @@ export default function RepositorySettings() {
         <TabsContent value="repositories" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {repositories.map((repo) => (
-              <Card key={repo.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{repo.name}</CardTitle>
-                    <Badge
-                      variant={
-                        repo.status === "active" ? "default" : "secondary"
-                      }
-                    >
-                      {repo.status === "active" ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    <a
-                      href={repo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
-                    >
-                      {repo.url}
-                    </a>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div>
-                      <div className="text-2xl font-bold">{repo.issues}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Issues
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold">{repo.prs}</div>
-                      <div className="text-xs text-muted-foreground">PRs</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold">{repo.branches}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Branches
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 text-xs text-muted-foreground">
-                    Last synced: {formatDate(repo.lastSync)}
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" size="sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2"
-                    >
-                      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                      <path d="M3 3v5h5" />
-                      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                      <path d="M16 21h5v-5" />
-                    </svg>
-                    Sync
-                  </Button>
-                  <Button
-                    variant={
-                      repo.status === "active" ? "destructive" : "default"
-                    }
-                    size="sm"
-                  >
-                    {repo.status === "active" ? "Deactivate" : "Activate"}
-                  </Button>
-                </CardFooter>
-              </Card>
+              <RepositoryCard
+                key={repo.id}
+                repo={repo}
+                formatDate={formatDate}
+              />
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Repository Configuration</CardTitle>
-              <CardDescription>
-                Configure how the LLM interacts with your repositories
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="repo-url">Default Repository URL</Label>
-                <Input
-                  id="repo-url"
-                  value={repoUrl}
-                  onChange={(e) => setRepoUrl(e.target.value)}
-                  placeholder="https://github.com/username/repository"
-                />
-              </div>
-
-              <div className="space-y-4 pt-4">
-                <h3 className="text-lg font-medium">Automation Settings</h3>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto-pr">
-                      Automatically Create Pull Requests
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow the LLM to create branches and PRs for fixes
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto-pr"
-                    checked={autoCreatePR}
-                    onCheckedChange={setAutoCreatePR}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto-docs">
-                      Automatically Generate Documentation
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow the LLM to create and update documentation files
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto-docs"
-                    checked={autoGenerateDocs}
-                    onCheckedChange={setAutoGenerateDocs}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto-issues">
-                      Automatically Analyze Issues
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow the LLM to analyze and work on open issues
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto-issues"
-                    checked={autoAnalyzeIssues}
-                    onCheckedChange={setAutoAnalyzeIssues}
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save Settings</Button>
-            </CardFooter>
-          </Card>
+          <RepositoryConfigForm
+            repoUrl={repoUrl}
+            setRepoUrl={setRepoUrl}
+            autoCreatePR={autoCreatePR}
+            setAutoCreatePR={setAutoCreatePR}
+            autoGenerateDocs={autoGenerateDocs}
+            setAutoGenerateDocs={setAutoGenerateDocs}
+            autoAnalyzeIssues={autoAnalyzeIssues}
+            setAutoAnalyzeIssues={setAutoAnalyzeIssues}
+          />
         </TabsContent>
 
         <TabsContent value="access" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>GitHub Access Token</CardTitle>
-              <CardDescription>
-                Provide a GitHub personal access token with appropriate
-                permissions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="access-token">Personal Access Token</Label>
-                <div className="flex">
-                  <Input
-                    id="access-token"
-                    value={accessToken}
-                    onChange={(e) => setAccessToken(e.target.value)}
-                    type="password"
-                    className="rounded-r-none"
-                  />
-                  <Button variant="outline" className="rounded-l-none">
-                    Show
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Token requires: repo, workflow, and read:org scopes
-                </p>
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <h3 className="text-lg font-medium">Required Permissions</h3>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>Read and write access to code</span>
-                  </li>
-                  <li className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>Read and write access to issues</span>
-                  </li>
-                  <li className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>Read and write access to pull requests</span>
-                  </li>
-                  <li className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>Read access to organization members</span>
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save Token</Button>
-            </CardFooter>
-          </Card>
+          <AccessTokenForm
+            accessToken={accessToken}
+            setAccessToken={setAccessToken}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -37,3 +37,28 @@
 - Validar todos os inputs do usuário
 - Usar CSRF tokens para forms
 - Nunca expor mensagens de erro detalhadas
+
+## Implementação Realizada (Fase 2)
+
+### Backend (Core)
+- Interfaces e tipos definidos em `src/core/services/auth/types.ts`.
+- Repositório seguro com `keytar` em `AuthRepositoryKeytar`.
+- Estratégia manual de token (`ManualTokenStrategy`).
+- Serviço OAuth GitHub (`GitHubOAuthService`) com fluxo completo.
+- Exportações centralizadas em `src/core/services/auth/index.ts`.
+
+### Frontend
+- Hook `useAuth` para login OAuth, manual, logout e status.
+- Contexto global `AuthProvider`.
+- Componente `LoginForm` com login OAuth, manual e logout.
+
+### Segurança
+- Tokens armazenados criptografados via `keytar`.
+- Validação básica de tokens.
+- Logout remove token localmente.
+
+### Pendências Futuras
+- Configurar `CLIENT_ID` e `CLIENT_SECRET` no serviço OAuth.
+- Implementar proteção opcional com senha local (`IPasswordService`).
+- Melhorar UX e tratamento de erros.
+

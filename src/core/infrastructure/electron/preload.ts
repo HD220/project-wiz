@@ -58,14 +58,22 @@ contextBridge.exposeInMainWorld("githubTokenAPI", {
     ipcRenderer.invoke("githubToken:save", token),
 
   /**
-   * Remove o token salvo
+   * Remove o token do GitHub
    */
-  removeGitHubToken: () =>
-    ipcRenderer.invoke("githubToken:remove"),
+  removeGitHubToken: () => ipcRenderer.invoke("githubToken:remove"),
 
   /**
-   * Verifica se há um token salvo
+   * Verifica se há token salvo
    */
-  getGitHubTokenStatus: () =>
-    ipcRenderer.invoke("githubToken:status"),
+  hasGitHubToken: () => ipcRenderer.invoke("githubToken:status"),
+});
+
+/**
+ * API segura para métricas LLM via IPC
+ */
+contextBridge.exposeInMainWorld("llmMetricsAPI", {
+  /**
+   * Obtém métricas do WorkerService
+   */
+  getMetrics: () => ipcRenderer.invoke("llm:getMetrics"),
 });

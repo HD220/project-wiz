@@ -1,9 +1,9 @@
 import type {
   LlamaModelOptions,
   ModelDownloaderOptions
-} from "node-llama-cpp";
+} from 'node-llama-cpp';
 
-export interface IModelManager {
+export interface ModelManagementPort {
   downloadModel(options: ModelDownloaderOptions): Promise<string>;
   loadModel(modelPath: string, options?: LlamaModelOptions): Promise<void>;
   unloadModel(modelPath: string): Promise<void>;

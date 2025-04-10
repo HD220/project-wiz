@@ -1,37 +1,38 @@
-# Handoff - ISSUE-0095 - Corrigir risco de vazamento de memória na `LlmService`
+# Handoff Técnico - ISSUE-0095 Corrigir risco de vazamento de memória no LlmService
 
-## Contexto
+## Diagnóstico
 
-Foi identificado que a classe `LlmService` (`src/core/application/services/llm-service.ts`) adiciona listeners para `'response'` e `'error'` no método `promptStream`, mas **não remove esses listeners** após a conclusão da operação.
+- O `LlmService` é implementado pela classe `LlmBridgeGateway`.
+- Ela mantém dois mapas internos:
+  - `pendingRequests`: requisições assíncronas pendentes.
+  - `streamHandlers`: streams ativos para respostas parciais.
+- O risco de vazamento está relacionado ao crescimento indefinido desses mapas, caso entradas não sejam removidas corretamente.
 
-## Problema
+## Hipóteses principais do vazamento
 
-- Potencial vazamento de memória devido a listeners acumulados
-- Pode causar comportamentos inesperados em chamadas subsequentes
-- Dificulta o gerenciamento do ciclo de vida dos workers
+- Streams que não recebem evento `'streamEnd'` e não são cancelados manualmente.
+- Requisições que não recebem resposta ou erro, permanecendo no mapa.
+- Comunicação interrompida ou falha que impede a limpeza.
 
-## Objetivo da Correção
+## Ações realizadas
 
-- Garantir que todos os listeners adicionados sejam removidos após a resposta final ou erro
-- Avaliar se a interface `IWorkerService` deve expor método `off` para remoção de listeners
-- Documentar a necessidade de gerenciamento correto de listeners
+- Inseridos logs detalhados para:
+  - Criação e remoção de entradas nos mapas.
+  - Tamanho atual dos mapas após cada operação.
+  - Cancelamento e finalização de streams.
+- Esses logs permitirão confirmar se o problema está nesses pontos.
 
-## Critérios de Aceite
+## Próximos passos recomendados
 
-- Listeners são removidos corretamente após a conclusão da operação
-- Não há vazamento de memória detectável relacionado a listeners
-- Código documentado explicando a importância da remoção
-- Testes cobrindo o ciclo completo, incluindo adição e remoção de listeners
+- Executar o sistema e coletar os logs.
+- Analisar se os mapas crescem indefinidamente.
+- Se confirmado, implementar:
+  - Timeout para limpar entradas antigas.
+  - Cancelamento automático de streams inativos.
+  - Tratamento para falhas de comunicação.
 
-## Prioridade
+## Status atual
 
-Alta
-
-## Dependências
-
-- Revisão da interface `IWorkerService`
-- Testes de stress para validar ausência de vazamento
-
-## Status
-
-Backlog
+- Diagnóstico detalhado preparado.
+- Código instrumentado para coleta de dados.
+- Aguardando logs de execução para confirmação final e correção.

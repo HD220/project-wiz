@@ -1,11 +1,17 @@
-import type { Prompt } from '../entities/prompt';
-import type { StreamChunk } from '../entities/stream-chunk';
+import type { StreamChunk } from '../value-objects/stream-chunk';
+import type { Prompt } from '../value-objects/prompt';
 
-export interface ILlmBridge {
+export interface BridgeModelLoaderPort {
   loadModel(modelPath: string): Promise<void>;
-  prompt(prompt: string): Promise<string>;
+}
+
+export interface BridgePromptExecutorPort {
+  prompt(prompt: string, signal?: AbortSignal): Promise<string>;
+
   promptStream(
     prompt: Prompt,
     onChunk: (chunk: StreamChunk) => void
   ): { cancel: () => void };
 }
+
+export interface ILlmBridge extends BridgeModelLoaderPort, BridgePromptExecutorPort {}

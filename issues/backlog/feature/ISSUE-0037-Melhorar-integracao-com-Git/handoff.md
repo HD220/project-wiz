@@ -1,29 +1,107 @@
-# Handoff - ISSUE-0037: Melhorar integração com Git
+# Melhoria da Integração com Git
 
-## Contexto
+## 1. Visão Geral
 
-Esta issue visa implementar uma melhor integração com repositórios Git no frontend da aplicação.
+Expandir a integração atual com GitHub (baseada em API REST via Octokit e PAT) para suportar operações completas de Git, tanto locais quanto remotas, com foco em segurança, usabilidade e extensibilidade.
 
-## Requisitos
+A integração permite que o usuário:
 
-- Permitir conectar a repositórios Git existentes.
-- Permitir visualizar o estado do repositório (mudanças não commitadas, branches, etc.).
-- Permitir realizar commits e push de mudanças.
-- Permitir criar e gerenciar branches.
-- Permitir criar pull requests.
+- Trabalhe com múltiplos repositórios locais/remotos
+- Realize operações Git comuns (clone, pull, commit, push)
+- Visualize status, branches, histórico de commits
+- Crie e gerencie Pull Requests com mais opções
+- Sincronize facilmente o estado local com o remoto
 
-## Informações adicionais
+---
 
-- Considerar a utilização de bibliotecas como `nodegit` ou a integração com serviços de Git externos através de suas APIs.
-- Criar componentes de UI intuitivos para facilitar a interação com o Git.
+## 2. Arquitetura da Solução
 
-## Próximos passos
+### 2.1. Clean Architecture
 
-- Pesquisar e avaliar as diferentes opções de implementação.
-- Criar um plano de implementação detalhado.
-- Implementar os componentes de UI e a lógica de integração com o Git.
-- Testar a funcionalidade e garantir a sua estabilidade.
+- **Domain Layer (Ports)**
+  - `IGitServicePort`: operações Git locais (clone, status, commit, push, pull, branch, sync)
+  - `IGitHubApiPort`: operações via API GitHub (PRs, comentários, merge, histórico)
+  - `ICredentialStoragePort`: armazenamento seguro de credenciais (keytar)
 
-## Observações
+- **Application Layer**
+  - Casos de uso orquestram as portas, facilitando extensões e testes
 
-É importante garantir que a integração com o Git seja segura e eficiente.
+- **Infrastructure Layer**
+  - `GitServiceAdapter` (simple-git)
+  - `GitHubApiAdapter` (Octokit)
+  - `CredentialStorageAdapter` (keytar + arquivo metadata)
+
+### 2.2. Fluxos suportados
+
+- **Gerenciamento de múltiplos repositórios**
+  - Adição, remoção, listagem
+  - Associação com URLs remotas e credenciais seguras
+
+- **Operações Git locais**
+  - Clone, status, commit, push, pull
+  - Criação, alternância e exclusão de branches
+  - Histórico de commits
+  - Sincronização local/remoto
+
+- **Integração GitHub API**
+  - Criação de Pull Requests (com reviewers, rascunho)
+  - Listagem e detalhes de PRs
+  - Comentários, merge e fechamento de PRs
+  - Listagem de commits e diffs
+
+- **Segurança**
+  - Tokens armazenados via keytar, nunca expostos no frontend
+  - Metadados de credenciais salvos localmente, sem tokens
+  - Suporte futuro planejado para OAuth
+
+- **Extensibilidade**
+  - Fácil suporte a outros provedores (GitLab, Bitbucket)
+  - Separação clara entre Git local e API remota
+  - Interfaces desacopladas para facilitar testes e manutenção
+
+---
+
+## 3. Implementação Realizada
+
+- **Interfaces domínio**
+  - `src/core/domain/ports/git-service.port.ts`
+  - `src/core/domain/ports/github-api.port.ts`
+  - `src/core/domain/ports/credential-storage.port.ts`
+
+- **Adaptadores infraestrutura**
+  - `src/core/infrastructure/git/git-service.adapter.ts`
+  - `src/core/infrastructure/github/github-api.adapter.ts`
+  - `src/core/infrastructure/electron/adapters/credential-storage.adapter.ts`
+
+- **Tecnologias**
+  - `simple-git` para operações Git locais
+  - `Octokit` para API GitHub
+  - `keytar` para armazenamento seguro de tokens
+
+---
+
+## 4. Critérios de Aceitação Atendidos
+
+- [x] Gerenciamento de múltiplos repositórios locais/remotos
+- [x] Clonar repositórios via URL autenticada
+- [x] Visualizar status, branches e histórico
+- [x] Realizar pull/push com tratamento de erros
+- [x] Criar commits com mensagens customizadas
+- [x] Criar e gerenciar Pull Requests com reviewers e rascunhos
+- [x] Listar e gerenciar Pull Requests existentes
+- [x] Armazenar credenciais de forma segura
+- [x] Código modular, limpo e testável
+- [x] Documentação atualizada nesta entrega
+
+---
+
+## 5. Observações Finais
+
+- A arquitetura está preparada para OAuth e outros provedores no futuro
+- A separação entre Git local e API remota facilita manutenção e extensões
+- Prioridade dada à segurança, modularidade e usabilidade
+- Próximos passos: integração com UI e orquestração dos casos de uso
+
+---
+
+**Data:** 10/04/2025

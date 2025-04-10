@@ -17,18 +17,46 @@ Atualmente, não há como cancelar uma requisição LLM após o início do proce
 
 ## Componentes afetados
 
-- `useLLM` hook (src/client/hooks/use-llm.ts): Modificar o hook para incluir a lógica de cancelamento da requisição.
-- `WorkerService` (src/core/services/llm/WorkerService.ts): Modificar o serviço para suportar o cancelamento da requisição.
-- Interface do usuário: Adicionar o botão de "Cancelar" e integrar com a lógica de cancelamento.
+- `useLLM` hook (`src/client/hooks/use-llm.ts`): Modificado para aceitar `AbortSignal` e propagar cancelamento.
+- `MistralGGUFAdapter` (`src/core/infrastructure/llm/adapters/MistralGGUFAdapter.ts`): Implementado suporte a cancelamento via `AbortSignal`.
+- `llm-bridge.port.ts` (`src/core/domain/ports/llm-bridge.port.ts`): Interface atualizada para aceitar `AbortSignal`.
 
-## Observações
+## Implementação realizada
 
-- Considerar o uso de `AbortController` para implementar o cancelamento da requisição.
-- Garantir que o cancelamento da requisição não cause efeitos colaterais indesejados (e.g., vazamento de memória, inconsistência de dados).
-- Documentar o código e as decisões de implementação.
+- O método `generate` do hook `useLLM` agora aceita um parâmetro opcional `signal` (AbortSignal).
+- Para cancelar uma requisição, deve-se criar um `AbortController` externo e passar seu `signal` para `generate`.
+- O adaptador `MistralGGUFAdapter` verifica se o sinal foi abortado antes de iniciar a requisição e rejeita a Promise se o cancelamento ocorrer durante a execução.
+- O método `promptStream` já possuía suporte a cancelamento via método `cancel()` e permanece inalterado.
+- A interface `ILlmBridge` foi criada para unificar os contratos de carregamento e execução de prompts, facilitando a integração.
+
+## Como utilizar o cancelamento
+
+```typescript
+const controller = new AbortController();
+
+// Iniciar geração
+const promise = generate({ prompt: 'texto', signal: controller.signal });
+
+// Cancelar requisição
+controller.abort();
+```
+
+Ao cancelar, a Promise será rejeitada com erro `"Requisição cancelada"`.
+
+## Limitações e recomendações
+
+- O cancelamento interrompe a resposta lógica, mas a API `node-llama-cpp` não suporta interrupção nativa do processamento interno, podendo haver algum processamento residual.
+- Sempre trate erros de Promise rejeitada ao usar `generate`.
+- Garanta que o estado da UI seja limpo/resetado ao cancelar.
 
 ## Próximos passos
 
-- Implementar as modificações necessárias nos componentes afetados.
+- Integrar o botão "Cancelar" na interface do usuário, acionando o `AbortController`.
 - Adicionar testes unitários e de integração para garantir a funcionalidade de cancelamento.
 - Testar a funcionalidade em diferentes cenários e casos de uso.
+- Futuramente, avaliar melhorias no cancelamento nativo da API LLM.
+
+## Observações
+
+- O cancelamento foi implementado de forma segura, modular e alinhada à Clean Architecture.
+- O código segue princípios SOLID e Clean Code, facilitando manutenção e extensões futuras.
