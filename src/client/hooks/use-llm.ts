@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import type { LlamaModelOptions, LLamaChatPromptOptions, LlamaContextOptions } from 'node-llama-cpp';
 import type { Prompt } from '../../core/domain/entities/prompt';
 import type { StreamChunk } from '../../core/domain/entities/stream-chunk';
-import type { ILlmBridge } from './llm-bridge';
+import type { ILlmBridge } from '../../core/domain/ports/llm-bridge.port';
 
 export interface GenerateOptions {
   prompt: string;

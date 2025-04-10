@@ -28,32 +28,52 @@ export class LlmService implements ILlmService {
     await this.ensureModelLoaded();
 
     return new Promise<void>((resolve, reject) => {
-      const handleResponse = (response: string) => {
-        const chunk: StreamChunk = { content: response, isFinal: false };
-        onChunk(chunk);
-      };
+      const responseHandler = this.createResponseHandler(onChunk);
+      const errorHandler = this.createErrorHandler(reject);
 
-      const handleError = (error: Error) => {
-        // Não é possível remover listeners sem suporte a 'off'
-        reject(error);
-      };
+      this.registerWorkerListeners(responseHandler, errorHandler);
 
-      // ATENÇÃO: Não há suporte para remover listeners atualmente.
-      // Isso pode causar vazamento de memória.
-      // Aguardar implementação da melhoria para corrigir.
-      this.worker.on('response', handleResponse);
-      this.worker.on('error', handleError);
-
-      this.worker.prompt(prompt.text)
-        .then((finalResponse) => {
-          const finalChunk: StreamChunk = { content: finalResponse, isFinal: true };
-          onChunk(finalChunk);
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
+      this.sendPromptAndHandleFinalResponse(prompt, onChunk, resolve, reject);
     });
+  }
+
+  private createResponseHandler(onChunk: (chunk: StreamChunk) => void) {
+    return (response: string) => {
+      const chunk: StreamChunk = { content: response, isFinal: false };
+      onChunk(chunk);
+    };
+  }
+
+  private createErrorHandler(reject: (reason?: any) => void) {
+    return (error: Error) => {
+      reject(error);
+    };
+  }
+
+  private registerWorkerListeners(
+    responseHandler: (response: string) => void,
+    errorHandler: (error: Error) => void
+  ) {
+    this.worker.on('response', responseHandler);
+    this.worker.on('error', errorHandler);
+  }
+
+  private sendPromptAndHandleFinalResponse(
+    prompt: Prompt,
+    onChunk: (chunk: StreamChunk) => void,
+    resolve: () => void,
+    reject: (reason?: any) => void
+  ) {
+    this.worker
+      .prompt(prompt.text)
+      .then((finalResponse) => {
+        const finalChunk: StreamChunk = { content: finalResponse, isFinal: true };
+        onChunk(finalChunk);
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      });
   }
 
   private async ensureModelLoaded(): Promise<void> {

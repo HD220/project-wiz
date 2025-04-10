@@ -74,17 +74,6 @@ One tool per message is allowed. After each tool use, you'll receive results in 
   - `command`: (required) Command to execute
   - `cwd`: (optional) Working directory
 
-- **ask_followup_question**: Requests additional information.
-  - `question`: (required) Clear question
-  - `follow_up`: (required) 2-4 suggested answers in this format:
-    ```xml
-    <follow_up>
-    <suggest>Specific answer option 1</suggest>
-    <suggest>Specific answer option 2</suggest>
-    <suggest>Specific answer option 3</suggest>
-    </follow_up>
-    ```
-
 - **attempt_completion**: Presents the final result.
   - `result`: (required) Result description
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { VariableData } from '../../../core/infrastructure/db/promptRepository';
+import { VariableUI } from '../../types/prompt';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
@@ -10,8 +10,8 @@ import { Textarea } from '../ui/textarea';
  * Propriedades para o editor de variáveis.
  */
 interface VariableEditorProps {
-  variables: VariableData[];
-  onChange: (vars: VariableData[]) => void;
+  variables: VariableUI[];
+  onChange: (vars: VariableUI[]) => void;
 }
 
 /**
@@ -21,7 +21,7 @@ export function VariableEditor({ variables, onChange }: VariableEditorProps) {
   /**
    * Atualiza uma variável na lista.
    */
-  const updateVariable = (index: number, updated: Partial<VariableData>) => {
+  const updateVariable = (index: number, updated: Partial<VariableUI>) => {
     const newVars = [...variables];
     newVars[index] = { ...newVars[index], ...updated };
     onChange(newVars);
@@ -62,7 +62,7 @@ export function VariableEditor({ variables, onChange }: VariableEditorProps) {
             <Select
               value={v.type}
               onValueChange={(val) =>
-                updateVariable(idx, { type: val as VariableData['type'] })
+                updateVariable(idx, { type: val as VariableUI['type'] })
               }
             >
               <option value="string">Texto</option>

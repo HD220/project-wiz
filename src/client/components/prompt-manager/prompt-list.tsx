@@ -1,25 +1,19 @@
 import React, { useState } from 'react';
-import { PromptData } from '../../../core/infrastructure/db/promptRepository';
+import { PromptUI } from '../../types/prompt';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
-/**
- * Propriedades para o componente PromptList.
- */
 interface PromptListProps {
-  prompts: PromptData[];
+  prompts: PromptUI[];
   onCreate: () => void;
-  onEdit: (prompt: PromptData) => void;
+  onEdit: (prompt: PromptUI) => void;
   onDelete: (id: string) => void;
   onRestoreDefaults: () => void;
   onExport: () => void;
   onImport: () => void;
-  onGenerateLink: (prompt: PromptData) => void;
+  onGenerateLink: (prompt: PromptUI) => void;
 }
 
-/**
- * Lista de prompts com busca, filtros e ações.
- */
 export function PromptList({
   prompts,
   onCreate,
@@ -64,12 +58,6 @@ export function PromptList({
           >
             <div>
               <div className="font-semibold">{prompt.name}</div>
-              {prompt.isDefault && (
-                <span className="text-xs text-gray-500">Padrão</span>
-              )}
-              {prompt.isShared && (
-                <span className="text-xs text-blue-500 ml-2">Compartilhado</span>
-              )}
             </div>
             <div className="flex gap-2 flex-wrap">
               <Button size="sm" onClick={() => onEdit(prompt)}>

@@ -1,45 +1,30 @@
-import { Prompt } from '../../domain/entities/prompt';
+import { Prompt, PromptParameter, PromptParameters, PromptValues } from '../../domain/entities/prompt';
 
-/**
- * Tipos suportados para variáveis de prompt
- */
-type PromptParameterType = 'string' | 'number' | 'boolean' | 'date' | 'enum';
+export function applyPrompt(prompt: Prompt, values: PromptValues): string {
+  const parameters: PromptParameters = prompt.parameters || {};
 
-/**
- * Definição de uma variável do prompt
- */
-interface PromptParameter {
-  type: PromptParameterType;
-  required?: boolean;
-  enum?: any[]; // para tipo enum
+  validatePromptValues(parameters, values);
+
+  const convertedValues = convertPromptValues(parameters, values);
+
+  return replacePromptPlaceholders(prompt.text, parameters, convertedValues);
 }
 
-/**
- * Aplica variáveis a um prompt, validando e substituindo placeholders
- * @param prompt O objeto Prompt com texto e parâmetros
- * @param values Valores fornecidos para as variáveis
- * @returns Texto final com variáveis aplicadas
- */
-export function applyPrompt(
-  prompt: Prompt,
-  values: Record<string, any>
-): string {
-  const parameters: Record<string, PromptParameter> = prompt.parameters || {};
-
+function validatePromptValues(
+  parameters: PromptParameters,
+  values: PromptValues
+): void {
   for (const [name, param] of Object.entries(parameters)) {
     const value = values[name];
 
-    // Verifica obrigatoriedade
     if (param.required && (value === undefined || value === null)) {
       throw new Error(`Variável obrigatória "${name}" não fornecida.`);
     }
 
-    // Ignora variáveis opcionais não fornecidas
     if (value === undefined || value === null) {
       continue;
     }
 
-    // Validação de tipo
     switch (param.type) {
       case 'string':
         if (typeof value !== 'string') {
@@ -57,15 +42,21 @@ export function applyPrompt(
         }
         break;
       case 'date':
-        if (!(value instanceof Date) && isNaN(Date.parse(value))) {
-          throw new Error(`Variável "${name}" deve ser uma data válida.`);
+        if (!(value instanceof Date)) {
+          if (typeof value === 'string' || typeof value === 'number') {
+            if (isNaN(Date.parse(String(value)))) {
+              throw new Error(`Variável "${name}" deve ser uma data válida.`);
+            }
+          } else {
+            throw new Error(`Variável "${name}" deve ser uma data válida.`);
+          }
         }
         break;
       case 'enum':
         if (!param.enum || !Array.isArray(param.enum)) {
           throw new Error(`Enumeração não definida para variável "${name}".`);
         }
-        if (!param.enum.includes(value)) {
+        if (!param.enum.includes(value as string)) {
           throw new Error(
             `Valor inválido para "${name}". Esperado um dos: ${param.enum.join(', ')}.`
           );
@@ -75,15 +66,19 @@ export function applyPrompt(
         throw new Error(`Tipo de variável desconhecido: ${param.type}`);
     }
   }
+}
 
-  let finalText = prompt.text;
+function convertPromptValues(
+  parameters: PromptParameters,
+  values: PromptValues
+): Record<string, string> {
+  const converted: Record<string, string> = {};
 
-  // Substituição dos placeholders
   for (const [name, param] of Object.entries(parameters)) {
     const value = values[name];
 
     if (value === undefined || value === null) {
-      continue; // ignora variáveis opcionais não fornecidas
+      continue;
     }
 
     let stringValue: string;
@@ -93,12 +88,10 @@ export function applyPrompt(
         stringValue =
           value instanceof Date
             ? value.toISOString()
-            : new Date(value).toISOString();
+            : new Date(value as string | number).toISOString();
         break;
       case 'boolean':
       case 'number':
-        stringValue = String(value);
-        break;
       case 'string':
       case 'enum':
         stringValue = String(value);
@@ -107,32 +100,37 @@ export function applyPrompt(
         stringValue = String(value);
     }
 
-    // Sanitização básica para evitar injeções
-    stringValue = sanitizeValue(stringValue);
+    converted[name] = sanitizeValue(stringValue);
+  }
 
-    // Substitui todas as ocorrências do placeholder
+  return converted;
+}
+
+function replacePromptPlaceholders(
+  text: string,
+  parameters: PromptParameters,
+  convertedValues: Record<string, string>
+): string {
+  let finalText = text;
+
+  for (const name of Object.keys(parameters)) {
+    const value = convertedValues[name];
+
+    if (value === undefined) {
+      continue;
+    }
+
     const regex = new RegExp(`{{\\s*${escapeRegExp(name)}\\s*}}`, 'g');
-    finalText = finalText.replace(regex, stringValue);
+    finalText = finalText.replace(regex, value);
   }
 
   return finalText;
 }
 
-/**
- * Sanitiza valores para evitar injeções no prompt
- * @param value Valor a ser sanitizado
- * @returns Valor seguro para inserção
- */
 function sanitizeValue(value: string): string {
-  // Remove chaves para evitar quebra de placeholders
   return value.replace(/[{}]/g, '');
 }
 
-/**
- * Escapa caracteres especiais para uso em regex
- * @param str String a ser escapada
- * @returns String escapada
- */
-function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

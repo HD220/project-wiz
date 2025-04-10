@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Prompt } from '../../../core/domain/entities/prompt';
-import { VariableData } from '../../../core/infrastructure/db/promptRepository';
+import { VariableUI } from '../../types/prompt';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
@@ -10,7 +10,7 @@ import { Checkbox } from '../ui/checkbox';
  */
 interface PromptPreviewProps {
   content: string;
-  variables: VariableData[];
+  variables: VariableUI[];
   values: Record<string, any>;
   onChangeValues: (values: Record<string, any>) => void;
 }
@@ -90,7 +90,7 @@ export function PromptPreview({
               value={values[v.name] ?? ''}
               onValueChange={(val) => updateValue(v.name, val)}
             >
-              {(v.options || []).map((opt, idx) => (
+              {(v.options || []).map((opt: string, idx: number) => (
                 <option key={idx} value={opt}>
                   {opt}
                 </option>

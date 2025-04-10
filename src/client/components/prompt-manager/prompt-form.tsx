@@ -1,43 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { PromptData, VariableData } from '../../../core/infrastructure/db/promptRepository';
+import { PromptUI, VariableUI } from '../../types/prompt';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { VariableEditor } from './VariableEditor';
-import { PromptPreview } from './PromptPreview';
+import { VariableEditor } from './variable-editor';
+import { PromptPreview } from './prompt-preview';
 
-/**
- * Propriedades para o formulário de criação/edição de prompt.
- */
 interface PromptFormProps {
-  prompt: PromptData | null;
-  onSave: (data: PromptData) => void;
+  prompt: PromptUI | null;
+  onSave: (prompt: PromptUI) => void;
   onCancel: () => void;
 }
 
-/**
- * Formulário para criar ou editar um prompt.
- */
 export function PromptForm({ prompt, onSave, onCancel }: PromptFormProps) {
   const [name, setName] = useState(prompt?.name || '');
-  const [description, setDescription] = useState(''); // UI only
+  const [description, setDescription] = useState(prompt?.description || '');
   const [content, setContent] = useState(prompt?.content || '');
-  const [variables, setVariables] = useState<VariableData[]>(prompt?.variables || []);
+  const [variables, setVariables] = useState<VariableUI[]>(prompt?.variables || []);
   const [values, setValues] = useState<Record<string, any>>({});
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Reset ao trocar prompt
     setName(prompt?.name || '');
+    setDescription(prompt?.description || '');
     setContent(prompt?.content || '');
     setVariables(prompt?.variables || []);
     setValues({});
     setError(null);
   }, [prompt]);
 
-  /**
-   * Valida e envia o formulário.
-   */
   const handleSubmit = () => {
     if (!name.trim()) {
       setError('O nome é obrigatório.');
@@ -47,13 +38,19 @@ export function PromptForm({ prompt, onSave, onCancel }: PromptFormProps) {
       setError('O conteúdo do prompt é obrigatório.');
       return;
     }
-    // TODO: validar nome único (futuro)
-    const data: PromptData = {
-      id: prompt?.id,
+
+    const now = new Date();
+
+    const data: PromptUI = {
+      id: prompt?.id ?? '',
       name,
+      description,
       content,
       variables,
+      createdAt: prompt?.createdAt ?? now,
+      updatedAt: now,
     };
+
     onSave(data);
   };
 
@@ -71,7 +68,7 @@ export function PromptForm({ prompt, onSave, onCancel }: PromptFormProps) {
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Descrição opcional (não salva ainda)"
+          placeholder="Descrição opcional"
         />
       </div>
 

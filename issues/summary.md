@@ -54,6 +54,19 @@
 - [ ] [ISSUE-0087] Gerenciamento de tokens de compartilhamento Personalizacao Prompts (Pendente, 09/04/2025)
 - [ ] [ISSUE-0088] Alertas dados sensiveis Personalizacao Prompts (Pendente, 09/04/2025)
 
+#### Refatoração Clean Architecture (Core)
+
+**Status geral:** _Pendente de auditoria e atualização do plano_
+
+As seguintes issues são estratégicas e **pré-requisito para continuidade da refatoração nas camadas core**. Elas visam garantir que a execução da Clean Architecture esteja alinhada com o plano e padrões definidos.
+
+- [ ] **[ISSUE-0121] Auditar execução da refatoração nas camadas core**
+- [ ] **[ISSUE-0122] Atualizar plano de refatoração Clean Architecture**
+
+Essas etapas estratégicas estão relacionadas ao plano detalhado em [`docs/refatoracao-clean-architecture/README.md`](../docs/refatoracao-clean-architecture/README.md).
+
+> **Importante:** A refatoração do **client** está em andamento, porém a continuidade da refatoração do **core** depende da conclusão dessas etapas estratégicas.
+
 ## Em Progresso
 
 ### Documentation
@@ -63,7 +76,6 @@
 ### Feature
 
 - [ ] [ISSUE-0021] App mobile de acompanhamento
-
 
 ## Concluídas
 

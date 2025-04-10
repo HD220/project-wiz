@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-interface Conversation {
+export interface Conversation {
   id: string;
   title: string;
   createdAt?: string;
@@ -35,9 +35,7 @@ interface UseHistoryResult {
   exportHistory: (format: ExportFormat) => Promise<Blob | string | null>;
 }
 
-/**
- * Hook para gerenciar o histórico de conversas via window.historyAPI
- */
+
 export function useHistory(): UseHistoryResult {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -45,9 +43,7 @@ export function useHistory(): UseHistoryResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Busca todas as conversas
-   */
+  
   const fetchConversations = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -61,17 +57,13 @@ export function useHistory(): UseHistoryResult {
     }
   }, []);
 
-  /**
-   * Seleciona uma conversa
-   */
+  
   const selectConversation = useCallback((conversation: Conversation) => {
     setSelectedConversation(conversation);
-    setMessages([]); // Limpa mensagens ao trocar de conversa
+    setMessages([]); 
   }, []);
 
-  /**
-   * Busca mensagens da conversa selecionada
-   */
+  
   const fetchMessages = useCallback(async (conversationId: string) => {
     setLoading(true);
     setError(null);
@@ -85,9 +77,7 @@ export function useHistory(): UseHistoryResult {
     }
   }, []);
 
-  /**
-   * Cria uma nova conversa
-   */
+  
   const createConversation = useCallback(async (title?: string) => {
     setLoading(true);
     setError(null);
@@ -101,9 +91,7 @@ export function useHistory(): UseHistoryResult {
     }
   }, [fetchConversations]);
 
-  /**
-   * Adiciona uma mensagem a uma conversa
-   */
+  
   const addMessage = useCallback(async (conversationId: string, role: "user" | "assistant", content: string) => {
     setLoading(true);
     setError(null);
@@ -117,9 +105,7 @@ export function useHistory(): UseHistoryResult {
     }
   }, [fetchMessages]);
 
-  /**
-   * Deleta uma conversa
-   */
+  
   const deleteConversation = useCallback(async (conversationId: string) => {
     setLoading(true);
     setError(null);
@@ -137,9 +123,7 @@ export function useHistory(): UseHistoryResult {
     }
   }, [fetchConversations, selectedConversation]);
 
-  /**
-   * Renomeia uma conversa
-   */
+  
   const renameConversation = useCallback(async (conversationId: string, newTitle: string) => {
     setLoading(true);
     setError(null);
@@ -153,9 +137,7 @@ export function useHistory(): UseHistoryResult {
     }
   }, [fetchConversations]);
 
-  /**
-   * Exporta o histórico em JSON ou CSV
-   */
+  
   const exportHistory = useCallback(async (format: ExportFormat) => {
     setLoading(true);
     setError(null);

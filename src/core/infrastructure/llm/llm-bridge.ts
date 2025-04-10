@@ -1,25 +1,6 @@
-import type { Prompt } from '../../core/domain/entities/prompt';
-import type { StreamChunk } from '../../core/domain/entities/stream-chunk';
-
-/**
- * Interface da ponte de comunicação com o serviço LLM via MessagePort
- */
-export interface ILlmBridge {
-  loadModel(modelPath: string): Promise<void>;
-
-  prompt(prompt: string): Promise<string>;
-
-  /**
-   * Geração via streaming
-   * @param prompt objeto Prompt
-   * @param onChunk callback para cada pedaço recebido
-   * @returns objeto com método cancel()
-   */
-  promptStream(
-    prompt: Prompt,
-    onChunk: (chunk: StreamChunk) => void
-  ): { cancel: () => void };
-}
+import type { Prompt } from '../../../core/domain/entities/prompt';
+import type { StreamChunk } from '../../../core/domain/entities/stream-chunk';
+import type { ILlmBridge } from '../../../core/domain/ports/llm-bridge.port';
 
 interface PendingRequest {
   resolve: (value: any) => void;
