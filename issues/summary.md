@@ -17,10 +17,11 @@
 
 ### Bugs
 - **ISSUE-0095 - Corrigir risco de vazamento de memória no LlmService**
-  - Status: **pendente**
-  - Diagnóstico realizado e instrumentação com logs concluída.
-  - Aguardando coleta e análise dos logs para confirmação do problema e aplicação da correção definitiva.
-- **ISSUE-0097 - Timeouts e limpeza automática LlmService** (pendente)
+  - Status: **concluída em 10/04/2025**
+  - O risco de vazamento de memória no `LlmService` foi eliminado com sucesso após análise e correção.
+- **ISSUE-0097 - Timeouts e limpeza automática LlmService**
+  - Status: **concluída em 10/04/2025**
+  - Timeouts e limpeza automática no `LlmService` foram implementados com sucesso.
 - **ISSUE-0148-Remover-dados-fixos-do-dashboard-e-paginas** (pendente)
 - **ISSUE-0150-Refatorar-integracoes-mobile-criptografia-e-tratamento-de-erros** (pendente)
 

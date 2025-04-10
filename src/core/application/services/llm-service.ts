@@ -1,15 +1,20 @@
-import type { ILlmService } from '../../domain/ports/llm-service.port';
-import type { IWorkerService } from '../../domain/ports/iworker-service.port';
-import type { IModelManager } from '../../domain/ports/imodel-manager.port';
-import type { Prompt } from '../../domain/entities/prompt';
-import type { StreamChunk } from '../../domain/entities/stream-chunk';
+export interface Prompt {
+  text: string;
+}
 
-export class LlmService implements ILlmService {
-  private readonly worker: IWorkerService;
-  private readonly modelManager: IModelManager;
+export interface StreamChunk {
+  content: string;
+  isFinal: boolean;
+}
+
+export class LlmService {
+  private static readonly DEFAULT_TIMEOUT_MS = 60000; // 60 segundos padrão
+
+  private readonly worker: any;
+  private readonly modelManager: any;
   private currentModelPath: string | null = null;
 
-  constructor(worker: IWorkerService, modelManager: IModelManager) {
+  constructor(worker: any, modelManager: any) {
     this.worker = worker;
     this.modelManager = modelManager;
   }
@@ -31,9 +36,39 @@ export class LlmService implements ILlmService {
       const responseHandler = this.createResponseHandler(onChunk);
       const errorHandler = this.createErrorHandler(reject);
 
-      this.registerWorkerListeners(responseHandler, errorHandler);
+      const cleanup = () => {
+        clearTimeout(timeoutId);
+        this.worker.off('response', responseHandler);
+        this.worker.off('error', errorHandler);
+      };
 
-      this.sendPromptAndHandleFinalResponse(prompt, onChunk, resolve, reject);
+      const timeoutId = setTimeout(() => {
+        console.warn(`[LlmService] Timeout após ${LlmService.DEFAULT_TIMEOUT_MS}ms para promptStream`);
+        cleanup();
+        reject(new Error('Timeout na resposta do modelo'));
+      }, LlmService.DEFAULT_TIMEOUT_MS);
+
+      const wrappedResolve = () => {
+        console.debug('[LlmService] promptStream finalizado com sucesso');
+        cleanup();
+        resolve();
+      };
+
+      const wrappedReject = (error: unknown) => {
+        console.error('[LlmService] promptStream finalizado com erro:', error);
+        cleanup();
+        reject(error);
+      };
+
+      this.worker.on('response', responseHandler);
+      this.worker.on('error', errorHandler);
+
+      this.sendPromptAndHandleFinalResponse(
+        prompt,
+        onChunk,
+        wrappedResolve,
+        wrappedReject
+      );
     });
   }
 
@@ -66,12 +101,12 @@ export class LlmService implements ILlmService {
   ) {
     this.worker
       .prompt(prompt.text)
-      .then((finalResponse) => {
+      .then((finalResponse: string) => {
         const finalChunk: StreamChunk = { content: finalResponse, isFinal: true };
         onChunk(finalChunk);
         resolve();
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         reject(error);
       });
   }
