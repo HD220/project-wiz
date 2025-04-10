@@ -1,14 +1,17 @@
-# ADR-0007: Implementação do TanStack Router e Drizzle ORM
+# ADR-0009: Implementação do TanStack Router e Drizzle ORM
 
 ## Status
-Proposto
+
+Aceito
 
 ## Contexto
+
 O projeto necessita de:
 1. Um sistema de roteamento cliente robusto e tipado
 2. Uma solução ORM para interação com banco de dados SQLite
 
 ## Decisão
+
 Adotar:
 - **@tanstack/react-router**: Para roteamento no frontend, oferecendo:
   - Tipagem TypeScript forte
@@ -23,6 +26,7 @@ Adotar:
   - Não requer compilação (mais fácil de instalar)
 
 ## Consequências
+
 ### Benefícios
 - Melhor organização do código frontend com roteamento estruturado
 - Segurança de tipos em rotas e parâmetros

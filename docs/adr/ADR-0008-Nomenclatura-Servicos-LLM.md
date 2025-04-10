@@ -1,11 +1,8 @@
-# ADR-0006: Nomenclatura e Arquitetura dos Serviços LLM
+# ADR-0008: Nomenclatura e Arquitetura dos Serviços LLM
 
 ## Status
 
-✅ Proposto  
-☑️ Aceito  
-⬜️ Depreciado  
-⬜️ Substituído por [ADR-XXXX](link)
+Aceito
 
 ## Contexto
 

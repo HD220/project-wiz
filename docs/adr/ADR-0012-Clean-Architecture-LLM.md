@@ -1,11 +1,8 @@
-# ADR-0008: Implementação de Clean Architecture para Serviços LLM
+# ADR-0012: Implementação de Clean Architecture para Serviços LLM
 
 ## Status
 
-✅ Proposto  
-✅ Aceito  
-⬜️ Depreciado  
-⬜️ Substituído por [ADR-XXXX](link)
+Aceito
 
 ## Contexto
 
@@ -81,12 +78,10 @@ graph TD
    └── infrastructure/
        └── llm/      # ElectronLLMAdapter.ts
    ```
-
 2. **ModelManager**:
    - Extrair interface para `domain/ports/IModelManager.ts`
    - Implementação em `application/services/ModelManagerService.ts`
    - Adaptador em `infrastructure/llm/ElectronModelManager.ts`
-
 3. **Contracts**:
    - Definir DTOs para todas as comunicações entre camadas
    - Tipos estritos para eventos de streaming
@@ -96,7 +91,6 @@ graph TD
    - Interface: `domain/ports/IWorkerService.ts`
    - Implementação: `application/services/WorkerService.ts`
    - Adaptador: `infrastructure/llm/ElectronWorkerAdapter.ts`
-
 2. **Streaming Protocol**:
    ```typescript
    // domain/entities/Streaming.ts
@@ -106,7 +100,6 @@ graph TD
      timestamp: number;
    }
    ```
-
 3. **IPC Handlers**:
    - Definir contratos de mensagens
    - Implementar serialização/deserialização
@@ -120,11 +113,9 @@ graph TD
 1. **Testes**:
    - 100% cobertura das interfaces
    - Testes de integração entre camadas
-
 2. **Performance**:
    - Benchmark antes/depois
    - Monitorar uso de memória
-
 3. **Documentação**:
    - Guia de migração para devs
    - Exemplos de uso

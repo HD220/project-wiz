@@ -1,8 +1,8 @@
-# ADR-0005: Não implementar sistema de plugins
+# ADR-0006: Não implementar sistema de plugins
 
 ## Status
 
-Proposed
+Rejeitada
 
 ## Context
 

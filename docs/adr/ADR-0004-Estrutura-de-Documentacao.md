@@ -2,7 +2,7 @@
 
 ## Status
 
-✅ Aprovado
+Aceito
 
 ## Contexto
 
@@ -28,18 +28,18 @@ Adotamos a seguinte estrutura de documentação:
 
 ## Consequências
 
-- ✅ Melhor organização da documentação
-- ✅ Facilidade para encontrar informações
-- ✅ Consistência entre documentos
-- ➖ Requer manutenção contínua para atualizar links e referências
+- Melhor organização da documentação
+- Facilidade para encontrar informações
+- Consistência entre documentos
+- Requer manutenção contínua para atualizar links e referências
 
 ## Alternativas Consideradas
 
 1. Documentação monolítica em um único arquivo
 
-   - ❌ Difícil manutenção
-   - ❌ Pouca organização
+   - Difícil manutenção
+   - Pouca organização
 
 2. Documentação apenas no README
-   - ❌ Limita a profundidade técnica
-   - ❌ Polui o arquivo principal
+   - Limita a profundidade técnica
+   - Polui o arquivo principal

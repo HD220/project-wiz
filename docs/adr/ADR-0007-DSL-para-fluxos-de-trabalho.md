@@ -1,8 +1,8 @@
-# ADR-0006: DSL para fluxos de trabalho
+# ADR-0007: DSL para fluxos de trabalho
 
 ## Status
 
-REJECTED
+Rejeitada
 
 ## Motivo da Rejeição
 
@@ -49,14 +49,14 @@ steps:
 
 ## Consequências
 
-*   YAML é fácil de ler e escrever.
-*   Existem muitas bibliotecas para analisar e gerar YAML em diferentes linguagens de programação.
-*   YAML pode ser facilmente armazenado em arquivos ou bancos de dados.
+- YAML é fácil de ler e escrever.
+- Existem muitas bibliotecas para analisar e gerar YAML em diferentes linguagens de programação.
+- YAML pode ser facilmente armazenado em arquivos ou bancos de dados.
 
 ## Próximos passos
 
-*   Definir a estrutura completa da DSL.
-*   Implementar a engine de execução.
+- Definir a estrutura completa da DSL.
+- Implementar a engine de execução.
 
 ## Estrutura da DSL
 

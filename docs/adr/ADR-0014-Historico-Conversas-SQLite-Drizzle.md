@@ -1,9 +1,11 @@
-# ADR-0010: Persistência e Acesso ao Histórico de Conversas com SQLite, Drizzle ORM e IPC Seguro
+# ADR-0014: Persistência e Acesso ao Histórico de Conversas com SQLite, Drizzle ORM e IPC Seguro
 
 ## Status
-Decisão implementada
+
+Aceito
 
 ## Contexto
+
 A aplicação requer um mecanismo eficiente, seguro e local para armazenar o histórico de conversas entre usuário e assistente, com suporte a múltiplas conversas, exportação e fácil integração com o frontend React.
 
 ## Decisão
@@ -40,24 +42,28 @@ A aplicação requer um mecanismo eficiente, seguro e local para armazenar o his
 - Facilita integração com componentes React, mantendo isolamento da lógica IPC.
 
 ## Justificativas Técnicas
+
 - **SQLite**: solução madura, sem dependências externas, ideal para persistência local.
 - **Drizzle ORM**: abstração leve, com tipagem Typescript, facilitando manutenção e evitando SQL manual.
 - **IPC seguro**: evita exposição do banco ao frontend, reduzindo riscos de segurança.
 - **Hook React**: simplifica consumo da API, melhora experiência do desenvolvedor.
 
 ## Alternativas Consideradas
+
 - **Persistência em arquivos JSON**: simples, mas difícil de escalar, consultar e manter integridade.
 - **Outros ORMs (Prisma, TypeORM)**: mais complexos ou pesados para o escopo local.
 - **Persistência remota (Firebase, Supabase)**: não atende requisito de funcionamento offline/local.
 - **Acesso direto ao SQLite no frontend**: inseguro e difícil de manter.
 
 ## Consequências
+
 - Solução simples, segura e eficiente para histórico local.
 - Fácil extensão futura (ex: tags, favoritos, anexos).
 - Exportação facilitada para backup ou análise.
 - Onboarding simplificado para novos desenvolvedores.
 
 ## Referências
+
 - [SQLite](https://sqlite.org)
 - [Drizzle ORM](https://orm.drizzle.team)
 - [Electron IPC](https://www.electronjs.org/docs/latest/tutorial/ipc)

@@ -2,10 +2,7 @@
 
 ## Status
 
-✅ Proposto  
-☑️ Aceito  
-⬜️ Depreciado  
-⬜️ Substituído por [ADR-XXXX](link)
+Aceito
 
 ## Contexto
 

@@ -10,22 +10,16 @@ This file consolidates the **core definitions, accepted architectural decisions 
 - **ADR-0002:** Use of **shadcn-ui** as the UI component library.
 - **ADR-0003:** **Do not use JSDoc** for code documentation.
 - **ADR-0004:** Standardized structure for technical documentation.
-- **ADR-0005:** 
-  - Folder structure for Electron.
-  - **Do not implement a plugin system**.
-- **ADR-0006:** 
-  - Use of a **DSL for workflow orchestration**.
-  - Naming conventions for **LLM services**.
-- **ADR-0007:** 
-  - Use of **TanStack Router** with **Drizzle ORM**.
-  - Refactoring **WorkerService** to support **Mistral GGUF**.
-- **ADR-0008:** 
-  - Update target to a recent ECMAScript version.
-  - Adopt **Clean Architecture** principles for LLM modules.
-- **ADR-0009:** Refactor dashboard to support **dynamic data**.
-- **ADR-0010:** Store conversation history using **SQLite + Drizzle**.
-- **ADR-0011:** Use **kebab-case** naming for files and folders.
-- **ADR-0012:** Efficient management of **streams** in LlmService requests.
+- **ADR-0005:** Folder structure for Electron.
+- **ADR-0008:** Naming conventions for **LLM services**.
+- **ADR-0009:** Use of **TanStack Router** with **Drizzle ORM**.
+- **ADR-0012:** Adopt **Clean Architecture** principles for LLM modules.
+- **ADR-0013:** Refactor dashboard to support **dynamic data**.
+- **ADR-0014:** Store conversation history using **SQLite + Drizzle**.
+- **ADR-0015:** Use **kebab-case** naming for files and folders.
+- **ADR-0016:** Efficient management of **streams** in LlmService requests.
+- **ADR-0017:** Governance process for ADRs.
+- **ADR-0018:** All source code, including variable names, function names, comments, and internal messages, **must be written in English**.
 
 ---
 
@@ -41,6 +35,9 @@ This file consolidates the **core definitions, accepted architectural decisions 
 - Keep issues and ADRs updated to reflect decisions and progress.
 - Work **only** on what was explicitly requested; create issues for anything outside the scope.
 - Facilitate collaboration by providing clear, actionable outputs.
+- **Attention:** When creating a new task with `new_task`, **the current context information is NOT automatically shared**.
+- Only what is **explicitly included in the `new_task` message** or **referenced via files/documents** will be available to the new task.
+- Therefore, **always provide all necessary data explicitly in the `new_task` message** to ensure the new task has full context.
 
 ---
 

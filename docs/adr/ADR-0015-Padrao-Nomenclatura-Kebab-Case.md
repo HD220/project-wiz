@@ -1,4 +1,8 @@
-# ADR: Padrão de nomenclatura de arquivos - kebab-case
+# ADR-0015: Padrão de nomenclatura de arquivos - kebab-case
+
+## Status
+
+Aceito
 
 ## Contexto
 
@@ -15,12 +19,12 @@ Para garantir **consistência**, **legibilidade** e **facilidade de navegação*
 
 ### Exemplos
 
-| Antes                        | Depois                        |
-|------------------------------|-------------------------------|
-| `ModelSettings.tsx`          | `model-settings.tsx`          |
-| `useRepositorySettings.ts`   | `use-repository-settings.ts`  |
-| `PromptManager.tsx`          | `prompt-manager.tsx`          |
-| `github_token_manager.tsx`   | `github-token-manager.tsx`    |
+| Antes                      | Depois                       |
+|----------------------------|------------------------------|
+| `ModelSettings.tsx`        | `model-settings.tsx`         |
+| `useRepositorySettings.ts` | `use-repository-settings.ts` |
+| `PromptManager.tsx`        | `prompt-manager.tsx`         |
+| `github_token_manager.tsx` | `github-token-manager.tsx`   |
 
 ## Justificativa
 
@@ -37,10 +41,5 @@ Para garantir **consistência**, **legibilidade** e **facilidade de navegação*
 - Novos arquivos devem obrigatoriamente seguir este padrão
 - Documentação e exemplos devem ser atualizados para refletir o padrão
 
-## Status
-
-**Aceito e em implementação**
-
 ---
-
 **Objetivo:** Formalizar a decisão para orientar a equipe e futuras contribuições.
