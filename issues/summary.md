@@ -20,6 +20,7 @@
   - Status: **pendente**
   - Diagnóstico realizado e instrumentação com logs concluída.
   - Aguardando coleta e análise dos logs para confirmação do problema e aplicação da correção definitiva.
+- **ISSUE-0097 - Timeouts e limpeza automática LlmService** (pendente)
 
 ### Melhorias concluídas
 - **ISSUE-0092 - Refatorar componente ActivityLog**
@@ -104,6 +105,10 @@ As seguintes features foram revisadas e permanecem **pendentes**, aguardando imp
 - **ISSUE-0072 - Implementar backup e restauração histórico** (pendente)
 - **ISSUE-0107 - Implementar análise e visualização histórico** (pendente)
 
+### Documentação pendente
+
+- **ISSUE-0130 - Documentar build/deploy Electron** (pendente)
+
 ### Melhorias pendentes no backlog
 
 - **ISSUE-0080 - Correção conversão tipos frontend Personalização Prompts** (pendente)
@@ -164,6 +169,10 @@ As seguintes features foram revisadas e permanecem **pendentes**, aguardando imp
   - @testing-library/react não atualizado ou removido
   - Outras dependências em geral atualizadas
   - Necessário revisar resolução do Electron e dependências de testes
+
+- **ISSUE-0123 - Testes automatizados acessibilidade ARIA** (pendente)
+- **ISSUE-0124 - Coletar métricas reais LLM WorkerServiceAdapter** (pendente)
+- **ISSUE-0131 - Testes automatizados componentes refatorados** (pendente)
 
 ## Status geral
 
