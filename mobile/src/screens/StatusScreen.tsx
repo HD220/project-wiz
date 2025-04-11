@@ -18,6 +18,7 @@ export default function StatusScreen() {
       });
       setStatus(response.data.status);
     } catch (error) {
+      console.error('Error fetching status:', error);
       setStatus('Erro ao conectar');
     }
   };

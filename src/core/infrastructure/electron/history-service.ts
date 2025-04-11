@@ -1,6 +1,7 @@
-import { db } from "../db/client";
+
 import { conversations, messages } from "../db/schema";
 import { eq, like, and, asc, desc } from "drizzle-orm";
+import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -27,7 +28,9 @@ export interface HistoryService {
 /**
  * Implementação do serviço de histórico
  */
-class HistoryServiceImpl implements HistoryService {
+export class HistoryServiceImpl implements HistoryService {
+  constructor(private db: BetterSQLite3Database<any>){}
+
   async createConversation(title?: string): Promise<Conversation> {
     const now = new Date();
     const conversation: NewConversation = {
@@ -36,7 +39,7 @@ class HistoryServiceImpl implements HistoryService {
       updatedAt: now,
       title: title ?? null,
     };
-    await db.insert(conversations).values(conversation).run();
+    this.db.insert(conversations).values(conversation).run();
     return conversation as Conversation;
   }
 
@@ -48,7 +51,7 @@ class HistoryServiceImpl implements HistoryService {
       content,
       timestamp: new Date(),
     };
-    await db.insert(messages).values(message).run();
+    this.db.insert(messages).values(message).run();
     return message as Message;
   }
 
@@ -58,7 +61,7 @@ class HistoryServiceImpl implements HistoryService {
       whereClauses.push(like(conversations.title, `%${params.search}%`));
     }
 
-    const baseQuery = db.select().from(conversations);
+    const baseQuery = this.db.select().from(conversations);
 
     const filteredQuery = whereClauses.length > 0
       ? baseQuery.where(and(...whereClauses))
@@ -78,7 +81,7 @@ class HistoryServiceImpl implements HistoryService {
   }
 
   async getMessages(conversationId: string): Promise<Message[]> {
-    return await db
+    return await this.db
       .select()
       .from(messages)
       .where(eq(messages.conversationId, conversationId))
@@ -87,13 +90,13 @@ class HistoryServiceImpl implements HistoryService {
   }
 
   async deleteConversation(conversationId: string): Promise<void> {
-    await db.delete(messages).where(eq(messages.conversationId, conversationId)).run();
-    await db.delete(conversations).where(eq(conversations.id, conversationId)).run();
+    this.db.delete(messages).where(eq(messages.conversationId, conversationId)).run();
+    this.db.delete(conversations).where(eq(conversations.id, conversationId)).run();
   }
 
   async exportHistory(format: "json" | "csv"): Promise<Blob | string> {
-    const allConversations = await db.select().from(conversations).all();
-    const allMessages = await db.select().from(messages).all();
+    const allConversations = this.db.select().from(conversations).all();
+    const allMessages = this.db.select().from(messages).all();
 
     if (format === "json") {
       const data = { conversations: allConversations, messages: allMessages };
@@ -117,7 +120,7 @@ class HistoryServiceImpl implements HistoryService {
   }
 
   async renameConversation(conversationId: string, newTitle: string): Promise<void> {
-    await db
+    await this.db
       .update(conversations)
       .set({ title: newTitle, updatedAt: new Date() })
       .where(eq(conversations.id, conversationId))
@@ -125,7 +128,3 @@ class HistoryServiceImpl implements HistoryService {
   }
 }
 
-/**
- * Instância única do serviço de histórico
- */
-export const historyService: HistoryService = new HistoryServiceImpl();

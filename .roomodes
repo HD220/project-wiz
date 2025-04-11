@@ -19,14 +19,14 @@
     {
       "slug": "documentation-writer",
       "name": "Documentation Writer",
-      "roleDefinition": "You are Roo, a technical documentation expert. You create, improve, and maintain clear, comprehensive documentation, including READMEs, API docs, user guides, ADRs, and technical design documents. You ensure consistency, clarity, and adherence to project standards.",
+      "roleDefinition": "You are Roo, a technical documentation expert. You create, improve, and maintain clear, comprehensive documentation, including READMEs, API docs, user guides, ADRs, GDRs, SDRs, and technical design documents. You ensure consistency, clarity, and adherence to project standards.",
       "groups": [
         "read",
         [
           "edit",
           {
-            "fileRegex": "docs/.*\\.md$|issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$",
-            "description": "Documentation, ADRs, and issue markdown files"
+            "fileRegex": "docs/.*\\.md$|issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$",
+            "description": "Documentation, ADRs, GDRs, SDRs, and issue markdown files"
           }
         ],
         "command"
@@ -42,8 +42,8 @@
         [
           "edit",
           {
-            "fileRegex": "docs/adr/.*\\.md$|docs/.*\\.md$|issues/.*/README\\.md$|issues/.*/handoff\\.md$",
-            "description": "ADRs, design docs, and issue markdown files"
+            "fileRegex": "docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/.*\\.md$|issues/.*/README\\.md$|issues/.*/handoff\\.md$",
+            "description": "ADRs, GDRs, SDRs, design docs, and issue markdown files"
           }
         ],
         "command"
@@ -59,8 +59,8 @@
         [
           "edit",
           {
-            "fileRegex": "issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$|docs/.*\\.md$",
-            "description": "Backlog, issues, ADRs, and product documentation"
+            "fileRegex": "issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/.*\\.md$",
+            "description": "Backlog, issues, ADRs, GDRs, SDRs, and product documentation"
           }
         ]
       ],
@@ -75,8 +75,8 @@
         [
           "edit",
           {
-            "fileRegex": "src/.*\\.(ts|tsx|js|jsx|json)$|package\\.json$|tsconfig\\.json$|vite.*\\.config\\.(js|ts|mts)$|forge.*\\.(js|ts)$",
-            "description": "Source code and configuration files"
+            "fileRegex": "\\..*$",
+            "description": "Source code, ADRs, GDRs, SDRs, configuration files, and documentation"
           }
         ],
         "command"
@@ -92,8 +92,8 @@
         [
           "edit",
           {
-            "fileRegex": "docs/adr/.*\\.md$|docs/.*\\.md$|src/.*\\.(ts|tsx|js|jsx|json)$|package\\.json$|tsconfig\\.json$|vite.*\\.config\\.(js|ts|mts)$|forge.*\\.(js|ts)$",
-            "description": "Architecture docs, ADRs, and source code"
+            "fileRegex": "docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/.*\\.md$|src/.*\\.(ts|tsx|js|jsx|json)$|package\\.json$|tsconfig\\.json$|vite.*\\.config\\.(js|ts|mts)$|forge.*\\.(js|ts)$",
+            "description": "Architecture docs, ADRs, GDRs, SDRs, and source code"
           }
         ],
         "command"

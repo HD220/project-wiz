@@ -7,8 +7,8 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { ModelStatusBadge } from "./ModelStatusBadge.js";
-import { ModelActions } from "./ModelActions.js";
+import { ModelStatusBadge } from "./model-status-badge";
+import { ModelActions } from "./model-actions";
 import { ModelCardActions } from "./types.js";
 
 function ModelCard({ model, onActivate, onDownload }: ModelCardActions) {

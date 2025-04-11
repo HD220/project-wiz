@@ -1,4 +1,4 @@
-# ADR-0004: Estrutura de Documentação
+# ADR 0004: Estrutura de documentação
 
 ## Status
 
@@ -36,10 +36,13 @@ Adotamos a seguinte estrutura de documentação:
 ## Alternativas Consideradas
 
 1. Documentação monolítica em um único arquivo
-
    - Difícil manutenção
    - Pouca organização
 
 2. Documentação apenas no README
    - Limita a profundidade técnica
    - Polui o arquivo principal
+
+## Links relacionados
+
+- [Template de documentação](../templates/)

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+
 // Placeholder para QR code scanner
 // Em projeto real, usar react-native-camera ou expo-camera
 // Aqui, simula leitura do QR code
@@ -10,15 +11,19 @@ interface Props {
 
 export default function PairingScreen({ onPaired }: Props) {
   const [scanned, setScanned] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleScan = () => {
-    // Simula leitura do QR code e armazenamento do token
-    // Em produção, usar scanner real e extrair token + URL
-    import('../storage/tokenStorage').then(({ saveToken }) => {
-      saveToken('http://localhost:3001', 'TOKEN_EXEMPLO');
+  const handleScan = async () => {
+    try {
+      const storage = await import('../storage/tokenStorage');
+      await storage.saveToken('http://localhost:3001', 'TOKEN_EXEMPLO');
       setScanned(true);
       onPaired();
-    });
+    } catch (err) {
+      console.error('Error during pairing:', err);
+      setError('Failed to save credentials. Please try again.');
+      Alert.alert('Error', 'Failed to save credentials. Please try again.');
+    }
   };
 
   return (
@@ -29,6 +34,7 @@ export default function PairingScreen({ onPaired }: Props) {
       ) : (
         <Text>Dispositivo vinculado!</Text>
       )}
+      {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
     </View>
   );
 }

@@ -24,11 +24,8 @@ const config: ForgeConfig = {
       config: {},
     },
     new VitePlugin({
-      // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
-      // If you are familiar with Vite configuration, it will look really familiar.
       build: [
         {
-          // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: "src/core/infrastructure/electron/main.ts",
           config: "vite.main.config.mts",
           target: "main",
@@ -38,10 +35,10 @@ const config: ForgeConfig = {
           config: "vite.preload.config.mts",
           target: "preload",
         },
-        {
-          entry: "src/core/infrastructure/worker/index.ts",
-          config: "vite.worker.config.mts",
-        },
+        // {
+        //   entry: "src/core/infrastructure/worker/index.ts",
+        //   config: "vite.worker.config.mts",
+        // },
       ],
       renderer: [
         {

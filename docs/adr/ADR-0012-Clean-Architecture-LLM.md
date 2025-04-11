@@ -1,4 +1,4 @@
-# ADR-0012: Implementação de Clean Architecture para Serviços LLM
+# ADR 0012: Implementação de Clean Architecture para Serviços LLM
 
 ## Status
 
@@ -172,8 +172,8 @@ interface PromptOptions {
 3. Adaptar WorkerManager existente (semana 3)
 4. Atualizar client hooks (semana 4)
 
-## Links Relacionados
+## Links relacionados
 
-- [ADR-0005](docs/adr/ADR-0005-Estrutura-de-Pastas-Electron.md) - Estrutura anterior
-- [ISSUE-0065](issues/backlog/improvement/ISSUE-0065-Reorganizacao-estrutura-pastas) - Reorganização de pastas
-- [ISSUE-0068](issues/working/improvement/ISSUE-0068-Consolidacao-servicos-LLM) - Consolidação serviços LLM
+- [ADR-0005 - Estrutura anterior](docs/adr/ADR-0005-Estrutura-de-Pastas-Electron.md)
+- [ISSUE-0065 - Reorganização de pastas](issues/backlog/improvement/ISSUE-0065-Reorganizacao-estrutura-pastas)
+- [ISSUE-0068 - Consolidação serviços LLM](issues/working/improvement/ISSUE-0068-Consolidacao-servicos-LLM)

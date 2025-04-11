@@ -5,6 +5,8 @@
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
+    "audit": "npm audit --audit-level=high",
+    "audit:ci": "audit-ci --audit-level=high --fail-on-severity=high",
     "start": "electron-forge start",
     "dev": "electron-forge start",
     "package": "electron-forge package",
@@ -104,7 +106,7 @@
     "node-llama-cpp": "^3.6.0",
     "octokit": "^4.1.2",
     "react": "^19.0.0",
-    "react-day-picker": "^8.10.1",
+    "react-day-picker": "^9.6.5",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-resizable-panels": "^2.1.7",
@@ -122,7 +124,7 @@
   },
   "resolutions": {
     "@swc/core": "1.3.56",
-    "electron": "^34.0.2",
+    "electron": "^35.1.4",
     "electron-builder": "^25.1.8"
   }
 }

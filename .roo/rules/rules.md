@@ -1,14 +1,13 @@
 # Project Definitions and Accepted ADRs
 
-This file consolidates the **core definitions, accepted architectural decisions (ADRs), conventions, and standards** for the project. It serves as the **single source of truth** for all modes and contributors.
+This file consolidates the **core definitions, accepted architectural decisions (ADRs), governance decisions (GDRs), standards (SDRs), conventions, and rules** for the project. It serves as the **single source of truth** for all modes and contributors.
 
 ---
 
-## Accepted ADRs Summary
+## Accepted Architecture Decisions (ADRs)
 
 - **ADR-0001:** Formal process to record architectural decisions via ADRs.
 - **ADR-0002:** Use of **shadcn-ui** as the UI component library.
-- **ADR-0003:** **Do not use JSDoc** for code documentation.
 - **ADR-0004:** Standardized structure for technical documentation.
 - **ADR-0005:** Folder structure for Electron.
 - **ADR-0008:** Naming conventions for **LLM services**.
@@ -18,8 +17,15 @@ This file consolidates the **core definitions, accepted architectural decisions 
 - **ADR-0014:** Store conversation history using **SQLite + Drizzle**.
 - **ADR-0015:** Use **kebab-case** naming for files and folders.
 - **ADR-0016:** Efficient management of **streams** in LlmService requests.
-- **ADR-0017:** Governance process for ADRs.
-- **ADR-0018:** All source code, including variable names, function names, comments, and internal messages, **must be written in English**.
+
+## Accepted Governance Decisions (GDRs)
+
+- **GDR-0001:** Governance process for ADRs.
+
+## Accepted Standards Decisions (SDRs)
+
+- **SDR-0001:** All source code, including variable names, function names, comments, and internal messages, **must be written in English**.
+- **SDR-0002:** Do not use JSDoc for code documentation.
 
 ---
 
@@ -129,3 +135,4 @@ issues/
 - Document architectural decisions via ADRs.
 - Keep issues organized and updated.
 - Follow clean code principles to ensure quality and maintainability.
+- use ";" for multiples commands inline

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useConversations } from "./use-conversations";
 import { useMessages } from "./use-messages";
-import { ElectronHistoryServiceAdapter } from "../../core/infrastructure/electron/adapters/ElectronHistoryServiceAdapter";
+import { IpcHistoryServiceAdapter } from "../services/ipc-history-service-adapter";
 
 export function useActivityLog() {
-  const historyService = new ElectronHistoryServiceAdapter();
+  const historyService = new IpcHistoryServiceAdapter();
 
   const {
     conversations,
