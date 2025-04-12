@@ -9,7 +9,7 @@
  */
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { DocFile } from "../hooks/use-documentation";
+import type { DocFile } from "../../shared/types/doc-file";
 import { FileListItem } from "./file-list-item";
 import { t } from "@lingui/macro";
 import { useKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
@@ -22,18 +22,10 @@ interface FileListEmptyStateProps {
   message?: string;
 }
 
-/**
- * Internal subcomponent responsible for presenting the empty state of the file list.
- * Handles accessibility attributes and i18n.
- */
-function FileListEmptyState({ message }: FileListEmptyStateProps) {
+export function FileListEmptyState({ message }: FileListEmptyStateProps) {
   return (
-    <div
-      className="text-muted-foreground text-center py-4"
-      role="status"
-      aria-live="polite"
-    >
-      {message ?? t`fileList.noFiles`}
+    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+      <span className="text-sm">{message ?? t`No files found.`}</span>
     </div>
   );
 }
@@ -44,34 +36,45 @@ interface FileListProps {
   onFileSelect: (filePath: string) => void;
 }
 
-export function FileList({ fileList, selectedFilePath, onFileSelect }: FileListProps) {
-  // Keyboard navigation and selection integration
-  const { getItemProps } = useKeyboardNavigation({
+export function FileList({
+  fileList,
+  selectedFilePath,
+  onFileSelect,
+}: FileListProps) {
+  const { focusedIndex, setFocusedIndex, listRef } = useKeyboardNavigation({
     itemCount: fileList.length,
-    onItemSelect: (idx) => {
-      if (fileList[idx]) {
-        onFileSelect(fileList[idx].path);
+    onItemSelect: (index) => {
+      if (fileList[index]) {
+        onFileSelect(fileList[index].path);
       }
     },
   });
 
+  if (!fileList.length) {
+    return <FileListEmptyState />;
+  }
+
   return (
-    <ScrollArea className="h-[calc(100vh-300px)]">
-      <div className="space-y-1" role="list">
-        {fileList.length === 0 ? (
-          <FileListEmptyState />
-        ) : (
-          fileList.map((file, idx) => (
+    <ScrollArea className="h-full w-full">
+      <ul
+        ref={listRef}
+        className="flex flex-col gap-1"
+        role="listbox"
+        aria-label={t`Documentation files`}
+      >
+        {fileList.map((file, idx) => (
+          <li key={file.path} role="option" aria-selected={selectedFilePath === file.path}>
             <FileListItem
-              key={file.id}
               file={file}
               isSelected={selectedFilePath === file.path}
               onFileSelect={onFileSelect}
-              {...getItemProps(idx)}
+              tabIndex={0}
+              ref={idx === focusedIndex ? listRef : null}
+              onFocus={() => setFocusedIndex(idx)}
             />
-          ))
-        )}
-      </div>
+          </li>
+        ))}
+      </ul>
     </ScrollArea>
   );
 }

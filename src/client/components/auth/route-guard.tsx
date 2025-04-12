@@ -9,8 +9,8 @@ interface RouteGuardProps {
 export const RouteGuard: React.FC<RouteGuardProps> = ({ children, fallback = null }) => {
   const { isAuthenticated, loading } = useAuthContext();
 
-  if (loading) return <div>Carregando...</div>;
-  if (!isAuthenticated) return fallback || <div>Acesso restrito. Faça login.</div>;
+  if (loading) return <div>Loading...</div>;
+  if (!isAuthenticated) return fallback || <div>Restricted access. Please sign in.</div>;
 
   return <>{children}</>;
 };

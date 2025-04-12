@@ -35,7 +35,7 @@ msgstr "Claro"
 #. js-lingui-explicit-id
 #: src/client/components/messages/common.tsx:5
 msgid "common.system_name"
-msgstr ""
+msgstr "Project Wiz"
 
 #. LLM Metric Cards - Empty State
 #: src/client/components/llm-metrics-dashboard/LlmMetricCards.tsx
@@ -67,21 +67,77 @@ msgstr "Erros"
 msgid "Memory (MB)"
 msgstr "Memória (MB)"
 
-#. Título da Documentação
+#. Documentation Title
 msgid "documentation.title"
 msgstr "Documentação"
 
-#. Pesquisa de Documentação - Placeholder
+#. Documentation Search - Placeholder
 #: src/client/components/documentation-search.tsx
 msgid "documentation.search.placeholder"
-msgstr "Pesquisar na documentação..."
+msgstr "Buscar na documentação..."
 
-#. Pesquisa de Documentação - Aria Label
+#. Documentation Search - Aria Label
 #: src/client/components/documentation-search.tsx
 msgid "documentation.search.ariaLabel"
-msgstr "Pesquisar na documentação"
+msgstr "Buscar na documentação"
 
-#. Pesquisa de Documentação - Descrição
+#. Documentation Search - Description
 #: src/client/components/documentation-search.tsx
 msgid "documentation.search.description"
-msgstr "Digite para filtrar os arquivos da documentação"
+msgstr "Digite para filtrar arquivos da documentação"
+
+#. GitHub Token Manager - Title
+msgid "githubTokenManager.title"
+msgstr "Token de Acesso Pessoal do GitHub"
+
+#. GitHub Token Manager - Description
+msgid "githubTokenManager.description"
+msgstr "O token é armazenado localmente e pode ser removido a qualquer momento."
+
+#. GitHub Token Manager - Placeholder
+msgid "githubTokenManager.placeholder"
+msgstr "ghp_xxxxxxxxxxxxxxxxxxxxx"
+
+#. GitHub Token Manager - Save
+msgid "githubTokenManager.save"
+msgstr "Salvar"
+
+#. GitHub Token Manager - Remove
+msgid "githubTokenManager.remove"
+msgstr "Remover"
+
+#. GitHub Token Manager - Status
+msgid "githubTokenManager.status"
+msgstr "Status:"
+
+#. GitHub Token Manager - Token Saved
+msgid "githubTokenManager.tokenSaved"
+msgstr "Token salvo"
+
+#. GitHub Token Manager - No Token Saved
+msgid "githubTokenManager.noTokenSaved"
+msgstr "Nenhum token salvo"
+
+#. GitHub Token Manager - Save Success
+msgid "githubTokenManager.saveSuccess"
+msgstr "Token salvo com sucesso."
+
+#. GitHub Token Manager - Save Error
+msgid "githubTokenManager.saveError"
+msgstr "Falha ao salvar o token."
+
+#. GitHub Token Manager - Remove Success
+msgid "githubTokenManager.removeSuccess"
+msgstr "Token removido com sucesso."
+
+#. GitHub Token Manager - Remove Error
+msgid "githubTokenManager.removeError"
+msgstr "Falha ao remover o token."
+
+#. GitHub Token Manager - Status Error
+msgid "githubTokenManager.statusError"
+msgstr "Falha ao verificar o status do token."
+
+#. GitHub Token Manager - Invalid Token
+msgid "githubTokenManager.invalidToken"
+msgstr "Token inválido. Deve começar com \"ghp_\"."

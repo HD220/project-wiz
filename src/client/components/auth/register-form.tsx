@@ -24,7 +24,7 @@ export const RegisterForm: React.FC = () => {
       await login(email, password);
       setSuccess(true);
     } catch (err: any) {
-      setFormError(err.message || "Falha no registro");
+      setFormError(err.message || "Registration failed");
     } finally {
       setSubmitting(false);
     }
@@ -32,10 +32,10 @@ export const RegisterForm: React.FC = () => {
 
   return (
     <form onSubmit={handleRegister}>
-      <h2>Registrar</h2>
+      <h2>Register</h2>
       <input
         type="email"
-        placeholder="E-mail"
+        placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -43,7 +43,7 @@ export const RegisterForm: React.FC = () => {
       />
       <input
         type="password"
-        placeholder="Senha"
+        placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
@@ -51,17 +51,17 @@ export const RegisterForm: React.FC = () => {
       />
       <input
         type="password"
-        placeholder="Confirme a senha"
+        placeholder="Confirm password"
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
         required
         autoComplete="new-password"
       />
       <button type="submit" disabled={submitting}>
-        {submitting ? "Registrando..." : "Registrar"}
+        {submitting ? "Registering..." : "Register"}
       </button>
       {formError && <div style={{ color: "red" }}>{formError}</div>}
-      {success && <div style={{ color: "green" }}>Registro realizado com sucesso!</div>}
+      {success && <div style={{ color: "green" }}>Registration successful!</div>}
     </form>
   );
 };

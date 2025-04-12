@@ -3,13 +3,6 @@ import { ConfigSlider } from "@/components/ui/config-slider";
 import { Trans } from "@lingui/macro";
 import { i18n } from "@lingui/core";
 
-/**
- * Props for TemperatureSlider component.
- * @property value - Current temperature value.
- * @property onChange - Callback to set the temperature.
- * @property error - Optional error message (already translated).
- * @property i18n - Lingui i18n instance for translations.
- */
 export interface TemperatureSliderProps {
   value: number;
   onChange: (value: number) => void;

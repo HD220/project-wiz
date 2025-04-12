@@ -85,3 +85,59 @@ msgstr "Search documentation"
 #: src/client/components/documentation-search.tsx
 msgid "documentation.search.description"
 msgstr "Type to filter documentation files"
+
+#. GitHub Token Manager - Title
+msgid "githubTokenManager.title"
+msgstr "GitHub Personal Access Token"
+
+#. GitHub Token Manager - Description
+msgid "githubTokenManager.description"
+msgstr "The token is stored locally and can be removed at any time."
+
+#. GitHub Token Manager - Placeholder
+msgid "githubTokenManager.placeholder"
+msgstr "ghp_xxxxxxxxxxxxxxxxxxxxx"
+
+#. GitHub Token Manager - Save
+msgid "githubTokenManager.save"
+msgstr "Save"
+
+#. GitHub Token Manager - Remove
+msgid "githubTokenManager.remove"
+msgstr "Remove"
+
+#. GitHub Token Manager - Status
+msgid "githubTokenManager.status"
+msgstr "Status:"
+
+#. GitHub Token Manager - Token Saved
+msgid "githubTokenManager.tokenSaved"
+msgstr "Token saved"
+
+#. GitHub Token Manager - No Token Saved
+msgid "githubTokenManager.noTokenSaved"
+msgstr "No token saved"
+
+#. GitHub Token Manager - Save Success
+msgid "githubTokenManager.saveSuccess"
+msgstr "Token saved successfully."
+
+#. GitHub Token Manager - Save Error
+msgid "githubTokenManager.saveError"
+msgstr "Failed to save token."
+
+#. GitHub Token Manager - Remove Success
+msgid "githubTokenManager.removeSuccess"
+msgstr "Token removed successfully."
+
+#. GitHub Token Manager - Remove Error
+msgid "githubTokenManager.removeError"
+msgstr "Failed to remove token."
+
+#. GitHub Token Manager - Status Error
+msgid "githubTokenManager.statusError"
+msgstr "Failed to check token status."
+
+#. GitHub Token Manager - Invalid Token
+msgid "githubTokenManager.invalidToken"
+msgstr "Invalid token. It must start with \"ghp_\"."

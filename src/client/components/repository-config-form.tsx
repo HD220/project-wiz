@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { RepositoryUrlField } from "./repository-url-field";
 import { AutomationSwitch } from "./automation-switch";
-import { useRepositoryAutomation, UseRepositoryAutomationProps } from "./use-repository-automation";
+import { useRepositoryAutomation, UseRepositoryAutomationProps } from "../hooks/use-repository-automation";
 
 /**
  * Props for RepositoryConfigForm component.

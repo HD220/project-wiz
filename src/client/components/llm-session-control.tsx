@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useSessions, SessionStatus, LlmSession } from "../hooks/use-sessions";
+import React from "react";
+import { SessionStatus } from "../hooks/use-sessions";
+import { useLlmSessionControl } from "../hooks/use-llm-session-control";
 
 const statusLabels: Record<SessionStatus, string> = {
   running: "Running",
@@ -16,34 +17,28 @@ const statusColors: Record<SessionStatus, string> = {
 export const LlmSessionControl: React.FC = () => {
   const {
     sessions,
-    createSession,
     pauseSession,
     cancelSession,
     restoreSession,
     removeSession,
-  } = useSessions();
-
-  const [newSessionName, setNewSessionName] = useState("");
+    newSessionName,
+    handleInputChange,
+    handleFormSubmit,
+  } = useLlmSessionControl();
 
   return (
     <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, maxWidth: 480 }}>
       <h3 style={{ marginTop: 0, marginBottom: 12 }}>LLM Sessions</h3>
       <div style={{ marginBottom: 16 }}>
         <form
-          onSubmit={e => {
-            e.preventDefault();
-            if (newSessionName.trim()) {
-              createSession(newSessionName.trim());
-              setNewSessionName("");
-            }
-          }}
+          onSubmit={handleFormSubmit}
           style={{ display: "flex", gap: 8, marginBottom: 12 }}
         >
           <input
             type="text"
             placeholder="New session name"
             value={newSessionName}
-            onChange={e => setNewSessionName(e.target.value)}
+            onChange={handleInputChange}
             style={{ flex: 1, padding: 4 }}
             aria-label="New session name"
           />

@@ -5,7 +5,7 @@ import { i18n } from "@lingui/core";
 import { Outlet } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { Sidebar } from "./sidebar";
+import { Sidebar } from "@/components/ui/sidebar";
 
 export function Layout() {
   return (

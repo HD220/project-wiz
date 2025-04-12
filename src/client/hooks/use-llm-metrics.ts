@@ -1,55 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useState, useCallback } from 'react';
+import { usePolling } from './use-polling';
+import { ILlmMetricsService, WorkerMetrics, LlmMetricsFilters } from '../types/llm-metrics-service';
+import { LlmMetricsService } from '../services/llm-metrics-service';
 
-export interface WorkerMetrics {
-  totalTokensProcessed: number;
-  totalRequests: number;
-  averageResponseTimeMs: number;
-  errorCount: number;
-  memoryUsageMB: number;
-  timestamp: number;
-}
-
-interface UseLlmMetricsOptions {
+export interface UseLlmMetricsOptions {
   intervalMs?: number;
-  filters?: {
-    model?: string;
-    period?: '1m' | '5m' | '15m' | '1h' | '24h';
-    metricType?: 'tokens' | 'requests' | 'latency' | 'errors' | 'memory';
-  };
+  filters?: LlmMetricsFilters;
+  service?: ILlmMetricsService;
 }
 
 export function useLlmMetrics(options?: UseLlmMetricsOptions) {
+  const {
+    intervalMs = 2000,
+    filters,
+    service = new LlmMetricsService(),
+  } = options || {};
+
   const [metrics, setMetrics] = useState<WorkerMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    let intervalId: NodeJS.Timeout;
-
-    async function fetchMetrics() {
-      try {
-        const data = await (window as any).llmMetricsAPI.getMetrics();
-        if (isMounted) {
-          setMetrics(data);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err as Error);
-          setLoading(false);
-        }
-      }
+  const fetchMetrics = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await service.getMetrics(filters);
+      setMetrics(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      setLoading(false);
     }
+  }, [service, filters]);
 
-    fetchMetrics();
-    intervalId = setInterval(fetchMetrics, options?.intervalMs ?? 2000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, [options?.intervalMs, options?.filters]);
+  usePolling(fetchMetrics, {
+    interval: intervalMs,
+    immediate: true,
+    enabled: true,
+  });
 
   return { metrics, loading, error };
 }

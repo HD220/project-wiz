@@ -3,14 +3,6 @@ import { ModelSelect } from "@/components/ui/model-select";
 import { Trans } from "@lingui/macro";
 import { i18n } from "@lingui/core";
 
-/**
- * Props for ModelIdSelector component.
- * @property models - List of available models.
- * @property value - Currently selected modelId.
- * @property onChange - Callback to set the selected modelId.
- * @property error - Optional error message (already translated).
- * @property i18n - Lingui i18n instance for translations.
- */
 export interface ModelIdSelectorProps {
   models: { modelId: string; name?: string; status: string }[];
   value: string;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { DocFile } from "../mocks/mock-doc-files";
+import type { DocFile } from "../../shared/types/doc-file";
 import { filterDocsBySearchTerm, getDocContentByPath } from "../lib/documentation-utils";
 import { formatDate } from "../lib/utils";
 
@@ -19,22 +19,21 @@ export interface UseDocumentationResult {
   /** Filtered documentation files based on the search term */
   filteredDocs: DocFile[];
   /** Returns the content of the selected file, or null if none is selected */
-  selectedFileContent: string | null;
-  /** Formats a date string for display */
-  formatDate: (dateString: string) => string;
+  getSelectedFileContent: () => string | null;
 }
 
 /**
- * useDocumentation hook
- * @param docFiles Array of documentation files
- * @returns State and helpers for documentation search and selection
+ * Returns documentation search/filter state and helpers.
  */
 export function useDocumentation(docFiles: DocFile[]): UseDocumentationResult {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const filteredDocs = filterDocsBySearchTerm(docFiles, searchTerm);
-  const selectedFileContent = getDocContentByPath(docFiles, selectedFile);
+
+  function getSelectedFileContent() {
+    return getDocContentByPath(docFiles, selectedFile);
+  }
 
   return {
     searchTerm,
@@ -42,7 +41,6 @@ export function useDocumentation(docFiles: DocFile[]): UseDocumentationResult {
     selectedFile,
     setSelectedFile,
     filteredDocs,
-    selectedFileContent,
-    formatDate,
+    getSelectedFileContent,
   };
 }

@@ -1,6 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import DOMPurify from "dompurify";
 import React from "react";
+import { useTrustedContent } from "@/hooks/use-trusted-content";
 
 interface FileViewerProps {
   content: string;
@@ -19,13 +19,15 @@ interface FileViewerProps {
  * FileViewer component displays file content securely and accessibly.
  * - Adds role="region" and aria-label for assistive technologies.
  * - Ensures <pre> is focusable for keyboard navigation and text selection.
- * - Sanitizes HTML content if not trusted.
+ * - Delegates trust/sanitization logic to useTrustedContent hook.
  */
 export function FileViewer({
   content,
   isContentTrusted = false,
   ariaLabel = "File content",
 }: FileViewerProps) {
+  const trusted = useTrustedContent(content, isContentTrusted);
+
   return (
     <ScrollArea className="h-[calc(100vh-300px)]">
       <div
@@ -33,13 +35,13 @@ export function FileViewer({
         role="region"
         aria-label={ariaLabel}
       >
-        {isContentTrusted ? (
+        {trusted.type === "text" ? (
           <pre
             className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-md"
             aria-label="File content (plain text)"
             tabIndex={0}
           >
-            {content}
+            {trusted.value}
           </pre>
         ) : (
           <pre
@@ -47,9 +49,9 @@ export function FileViewer({
             aria-label="File content (sanitized HTML)"
             tabIndex={0}
             // Using dangerouslySetInnerHTML to allow rendering sanitized HTML content.
-            // DOMPurify ensures that any potentially dangerous HTML is removed.
+            // Sanitization is handled by useTrustedContent hook.
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(content),
+              __html: trusted.value,
             }}
           />
         )}

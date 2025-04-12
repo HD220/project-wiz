@@ -8,7 +8,7 @@ export const LoginForm: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (loading) return <div>Carregando...</div>;
+  if (loading) return <div>Loading...</div>;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +17,7 @@ export const LoginForm: React.FC = () => {
     try {
       await login(email, password);
     } catch (err: any) {
-      setFormError(err.message || "Falha no login");
+      setFormError(err.message || "Login failed");
     } finally {
       setSubmitting(false);
     }
@@ -26,7 +26,7 @@ export const LoginForm: React.FC = () => {
   if (isAuthenticated) {
     return (
       <div>
-        <p>Bem-vindo, {user?.email}!</p>
+        <p>Welcome, {user?.email}!</p>
         <button onClick={logout}>Logout</button>
       </div>
     );
@@ -37,7 +37,7 @@ export const LoginForm: React.FC = () => {
       <h2>Login</h2>
       <input
         type="email"
-        placeholder="E-mail"
+        placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -45,14 +45,14 @@ export const LoginForm: React.FC = () => {
       />
       <input
         type="password"
-        placeholder="Senha"
+        placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
         autoComplete="current-password"
       />
       <button type="submit" disabled={submitting}>
-        {submitting ? "Entrando..." : "Entrar"}
+        {submitting ? "Signing in..." : "Sign in"}
       </button>
       {formError && <div style={{ color: "red" }}>{formError}</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}

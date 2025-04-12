@@ -1,118 +1,100 @@
 import { useState, useCallback } from "react";
-import type { IHistoryService } from "../../core/domain/ports/history-service.port";
+import { IpcHistoryServiceAdapter } from "../services/ipc-history-service-adapter";
+import { Conversation } from "../types/history";
+import { IHistoryService } from "../types/history-service";
+import { useAsyncAction } from "./use-async-action";
 
-export interface Conversation {
-  id: string;
-  title: string;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: any;
-}
-
-export type ExportFormat = "json" | "csv";
-
-interface UseConversationsResult {
-  conversations: Conversation[];
-  selectedConversation: Conversation | null;
-  loading: boolean;
-  error: string | null;
-  fetchConversations: () => Promise<void>;
-  createConversation: (title?: string) => Promise<void>;
-  deleteConversation: (conversationId: string) => Promise<void>;
-  renameConversation: (conversationId: string, newTitle: string) => Promise<void>;
-  selectConversation: (conversation: Conversation | null) => void;
-  exportHistory: (format: ExportFormat) => Promise<Blob | string | null>;
-}
-
-export function useConversations(historyService: IHistoryService): UseConversationsResult {
+/**
+ * Hook to manage conversations: list, create, delete, rename.
+ * Allows optional injection of a history service for testability.
+ */
+export function useConversations(historyService?: IHistoryService) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchConversations = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await historyService.getConversations();
-      setConversations(data);
-    } catch (err: any) {
-      setError(err.message || "Erro ao buscar conversas");
-    } finally {
-      setLoading(false);
-    }
-  }, [historyService]);
+  const [execute, loading, error, setError] = useAsyncAction();
 
-  const createConversation = useCallback(async (title?: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await historyService.createConversation(title);
-      await fetchConversations();
-    } catch (err: any) {
-      setError(err.message || "Erro ao criar conversa");
-    } finally {
-      setLoading(false);
-    }
-  }, [historyService, fetchConversations]);
+  // Use injected service or default to IPC adapter
+  const service = historyService ?? new IpcHistoryServiceAdapter();
 
-  const deleteConversation = useCallback(async (conversationId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await historyService.deleteConversation(conversationId);
-      if (selectedConversation?.id === conversationId) {
-        setSelectedConversation(null);
+  const fetchConversations = useCallback(
+    execute(async () => {
+      try {
+        const data = await service.getAllConversations();
+        if (!Array.isArray(data)) throw new Error("Invalid conversations data");
+        setConversations(data as Conversation[]);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch conversations");
       }
-      await fetchConversations();
-    } catch (err: any) {
-      setError(err.message || "Erro ao deletar conversa");
-    } finally {
-      setLoading(false);
-    }
-  }, [historyService, fetchConversations, selectedConversation]);
+    }),
+    [service]
+  );
 
-  const renameConversation = useCallback(async (conversationId: string, newTitle: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await historyService.renameConversation(conversationId, newTitle);
-      await fetchConversations();
-    } catch (err: any) {
-      setError(err.message || "Erro ao renomear conversa");
-    } finally {
-      setLoading(false);
-    }
-  }, [historyService, fetchConversations]);
+  const createConversation = useCallback(
+    execute(async (title?: string) => {
+      if (title !== undefined && typeof title !== "string") {
+        throw new Error("Title must be a string");
+      }
+      try {
+        await service.createConversation(title);
+        await fetchConversations();
+      } catch (err: any) {
+        setError(err.message || "Failed to create conversation");
+      }
+    }),
+    [service, fetchConversations]
+  );
 
-  const selectConversation = useCallback((conversation: Conversation | null) => {
+  const deleteConversation = useCallback(
+    execute(async (conversationId: string) => {
+      if (!conversationId || typeof conversationId !== "string") {
+        throw new Error("Invalid conversation ID");
+      }
+      try {
+        await service.deleteConversation(conversationId);
+        if (selectedConversation?.id === conversationId) {
+          setSelectedConversation(null);
+        }
+        await fetchConversations();
+      } catch (err: any) {
+        setError(err.message || "Failed to delete conversation");
+      }
+    }),
+    [service, fetchConversations, selectedConversation]
+  );
+
+  const renameConversation = useCallback(
+    execute(async (conversationId: string, newTitle: string) => {
+      if (!conversationId || typeof conversationId !== "string") {
+        throw new Error("Invalid conversation ID");
+      }
+      if (!newTitle || typeof newTitle !== "string") {
+        throw new Error("Invalid new title");
+      }
+      try {
+        await service.renameConversation(conversationId, newTitle);
+        await fetchConversations();
+      } catch (err: any) {
+        setError(err.message || "Failed to rename conversation");
+      }
+    }),
+    [service, fetchConversations]
+  );
+
+  const selectConversation = useCallback((conversation: Conversation) => {
     setSelectedConversation(conversation);
   }, []);
-
-  const exportHistory = useCallback(async (format: ExportFormat) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await historyService.exportHistory(format);
-      return data;
-    } catch (err: any) {
-      setError(err.message || "Error exporting history");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [historyService]);
 
   return {
     conversations,
     selectedConversation,
     loading,
     error,
+    setError,
     fetchConversations,
     createConversation,
     deleteConversation,
     renameConversation,
     selectConversation,
-    exportHistory,
   };
 }

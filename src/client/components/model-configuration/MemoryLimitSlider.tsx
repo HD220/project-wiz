@@ -3,13 +3,6 @@ import { ConfigSlider } from "@/components/ui/config-slider";
 import { Trans } from "@lingui/macro";
 import { i18n } from "@lingui/core";
 
-/**
- * Props for MemoryLimitSlider component.
- * @property value - Current memory limit value (in GB).
- * @property onChange - Callback to set the memory limit.
- * @property error - Optional error message (already translated).
- * @property i18n - Lingui i18n instance for translations.
- */
 export interface MemoryLimitSliderProps {
   value: number;
   onChange: (value: number) => void;

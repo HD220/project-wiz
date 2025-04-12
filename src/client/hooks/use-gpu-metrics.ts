@@ -1,51 +1,37 @@
-declare global {
-  interface Window {
-    electron: any;
-  }
+import { useState, useCallback } from 'react';
+import { GpuMetrics } from '../types/gpu-metrics';
+import { GpuMetricsService, IpcGpuMetricsServiceAdapter } from '../services/ipc-gpu-metrics-service-adapter';
+import { usePolling } from './use-polling';
+
+export interface UseGpuMetricsResult {
+  metrics: GpuMetrics[];
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
 }
 
-import { useEffect, useState, useRef } from 'react';
-
-export interface GpuMetrics {
-  gpuId: string;
-  utilization: number;
-  memoryUsedMB: number;
-  memoryTotalMB: number;
-  temperatureC: number;
-  powerUsageW?: number;
-  clockMHz?: number;
-  processes?: string[];
-}
-
-export function useGpuMetrics(pollInterval = 2000) {
+export function useGpuMetrics(
+  pollInterval = 2000,
+  service: GpuMetricsService = new IpcGpuMetricsServiceAdapter()
+): UseGpuMetricsResult {
   const [metrics, setMetrics] = useState<GpuMetrics[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const result = await window.electron.ipcRenderer.invoke('dashboard:get-gpu-metrics');
+      const result = await service.getGpuMetrics();
       setMetrics(result);
       setError(null);
     } catch (err) {
-      setError(err as Error);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [service]);
 
-  useEffect(() => {
-    fetchMetrics();
-    intervalRef.current = setInterval(fetchMetrics, pollInterval);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [pollInterval]);
+  usePolling(fetchMetrics, { interval: pollInterval, immediate: true, enabled: true });
 
   return { metrics, loading, error, refresh: fetchMetrics };
 }

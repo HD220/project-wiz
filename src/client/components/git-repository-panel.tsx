@@ -3,8 +3,7 @@ import { useGitRepositories } from "../hooks/use-git-repositories";
 import { useGitStatus } from "../hooks/use-git-status";
 import { useGitBranches } from "../hooks/use-git-branches";
 import { useGitHistory } from "../hooks/use-git-history";
-import { useGitSync } from "../hooks/use-git-sync";
-import { useCommitMessage } from "../hooks/use-commit-message";
+import { useGitCommit } from "../hooks/use-git-commit";
 import { useNewBranch } from "../hooks/use-new-branch";
 import { RepositorySelector } from "./repository-selector";
 import { ErrorMessage } from "./error-message";
@@ -52,22 +51,18 @@ export function GitRepositoryPanel() {
     error: errorHistory,
   } = useGitHistory(selectedRepo);
 
-  // Sync (commit, push, pull)
-  const {
-    commitChanges,
-    pushChanges,
-    pullChanges,
-    loading: loadingSync,
-    error: errorSync,
-  } = useGitSync(selectedRepo);
-
-  // Commit message
+  // Commit logic isolated
   const {
     commitMessage,
     setCommitMessage,
-    isValid: canCommit,
-    error: commitError,
-  } = useCommitMessage();
+    canCommit,
+    commitError,
+    commitChanges,
+    pushChanges,
+    pullChanges,
+    loading: loadingCommit,
+    error: errorCommit,
+  } = useGitCommit(selectedRepo);
 
   // New branch
   const {
@@ -83,13 +78,13 @@ export function GitRepositoryPanel() {
     loadingStatus ||
     loadingBranches ||
     loadingHistory ||
-    loadingSync;
+    loadingCommit;
   const error =
     errorRepos ||
     errorStatus ||
     errorBranches ||
     errorHistory ||
-    errorSync;
+    errorCommit;
 
   return (
     <div className="p-6 max-w-3xl">
@@ -112,7 +107,7 @@ export function GitRepositoryPanel() {
           />
           <ErrorMessage message={commitError || ""} />
           <GitCommitPanel
-            loading={loadingSync}
+            loading={loadingCommit}
             commitMsg={commitMessage}
             onCommitMsgChange={setCommitMessage}
             onCommit={() =>

@@ -14,16 +14,7 @@ import {
   useAutoUpdate,
   AvailableModel,
 } from "@/hooks/use-model-configuration";
-
-interface Model {
-  id: number;
-  name: string;
-  modelId: string;
-  size: string;
-  status: string;
-  lastUsed: string | null;
-  description: string;
-}
+import { mapModelsToAvailableModels, Model } from "@/hooks/use-model-mapping";
 
 interface ModelConfigurationProps {
   models: Model[];
@@ -32,11 +23,7 @@ interface ModelConfigurationProps {
 export default function ModelConfiguration({ models }: ModelConfigurationProps) {
   const { i18n } = useLingui();
 
-  // Adapt models to AvailableModel type for the hook
-  const availableModels: AvailableModel[] = models.map((m) => ({
-    modelId: m.modelId,
-    status: m.status,
-  }));
+  const availableModels: AvailableModel[] = mapModelsToAvailableModels(models);
 
   const {
     modelId,

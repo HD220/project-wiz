@@ -11,7 +11,7 @@ import {
   logout as apiLogout,
   refresh as apiRefresh,
 } from "./auth-api";
-import { handleAuthError } from "../lib/handle-auth-error";
+import { handleAuthError } from "../../shared/utils/handle-auth-error";
 
 /**
  * Auth Actions Layer

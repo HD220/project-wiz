@@ -1,8 +1,23 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useConversations } from "./use-conversations";
 import { useMessages } from "./use-messages";
+import { useMessageFilter } from "./use-message-filter";
 import { IpcHistoryServiceAdapter } from "../services/ipc-history-service-adapter";
 import { formatDateTime } from "../lib/utils";
+import { exportDataAsFile } from "../lib/export-history";
+
+/**
+ * Exports conversation history as a file using the provided exportHistory function.
+ * This function is pure and can be used in UI event handlers.
+ */
+export async function exportHistoryFile(
+  exportHistory: (format: string) => Promise<string | Blob | undefined>,
+  filename: string = "conversation_history.json"
+) {
+  const data = await exportHistory("json");
+  if (!data) return;
+  exportDataAsFile(data, filename, "application/json");
+}
 
 export function useActivityLog() {
   const historyService = new IpcHistoryServiceAdapter();
@@ -28,8 +43,6 @@ export function useActivityLog() {
     error: errorMessages,
   } = useMessages(historyService);
 
-  const [filter, setFilter] = useState("");
-
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
@@ -40,31 +53,17 @@ export function useActivityLog() {
     }
   }, [selectedConversation, fetchMessages]);
 
-  const filteredMessages = messages.filter(
-    (msg) =>
-      msg.content.toLowerCase().includes(filter.toLowerCase()) ||
-      msg.role.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  const handleExport = async () => {
-    const data = await exportHistory("json");
-    if (!data) return;
-    const blob =
-      data instanceof Blob ? data : new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "historico_conversas.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
+  const {
+    filter,
+    setFilter,
+    filteredMessages,
+  } = useMessageFilter(messages);
 
   return {
     conversations,
     selectedConversation,
     messages,
+    filteredMessages,
     fetchConversations,
     fetchMessages,
     createConversation,
@@ -77,8 +76,6 @@ export function useActivityLog() {
     error: errorConversations || errorMessages,
     filter,
     setFilter,
-    filteredMessages,
     formatDate: formatDateTime,
-    handleExport,
   };
 }

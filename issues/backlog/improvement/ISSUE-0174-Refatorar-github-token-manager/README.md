@@ -4,10 +4,13 @@
 
 O componente `src/client/components/github-token-manager.tsx` está funcional, porém apresenta violações de princípios de Clean Code, Clean Architecture e ADRs do projeto. Foram identificados problemas de clareza, acoplamento excessivo, ausência de internacionalização e uso inadequado de integrações com Electron.
 
+Além disso, o componente centraliza múltiplas responsabilidades: gerencia estado interno, executa validação, realiza operações de salvamento/remoção e exibe o token na interface. Essa concentração de responsabilidades dificulta a manutenção, a testabilidade e a evolução do código, violando o princípio da responsabilidade única (SRP).
+
 A refatoração é necessária para garantir clareza, manutenibilidade, internacionalização e desacoplamento de infraestrutura, alinhando o componente aos padrões estabelecidos no projeto.
 
 ## Problemas Identificados
 
+- O componente principal possui múltiplas responsabilidades: gerenciamento de estado, validação, salvamento, remoção e exibição do token.
 - Nomes pouco descritivos (`fetchStatus`, `isSaved`).
 - Mistura de lógica de UI, validação e integração com Electron.
 - Mensagens duplicadas e hardcoded, em português.
@@ -16,6 +19,7 @@ A refatoração é necessária para garantir clareza, manutenibilidade, internac
 
 ## Objetivos da Refatoração
 
+- Segregar responsabilidades, extraindo a lógica de estado e efeitos para hooks ou utilitários dedicados, melhorando SRP e testabilidade.
 - Tornar os nomes de variáveis e funções mais descritivos e alinhados ao domínio.
 - Extrair integração com Electron para hook/serviço dedicado (ex: `useGitHubToken`).
 - Extrair validação para utilitário externo.
@@ -25,6 +29,7 @@ A refatoração é necessária para garantir clareza, manutenibilidade, internac
 
 ## Checklist de Ações
 
+- [ ] Segregar lógica de estado e efeitos em hooks/utilitários dedicados.
 - [ ] Renomear variáveis e funções para nomes descritivos (ex: `fetchGitHubTokenStatus`, `isTokenSaved`).
 - [ ] Extrair integração com Electron para hook/serviço dedicado.
 - [ ] Extrair validação para utilitário externo.
