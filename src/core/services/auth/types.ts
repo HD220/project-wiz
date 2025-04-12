@@ -1,27 +1,42 @@
+// Auth types for AuthService
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  passwordHash?: string;
+  createdAt: string;
+}
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
 export interface AuthToken {
-  token: string;
-  type: 'oauth' | 'pat';
-  createdAt: Date;
-  expiresAt?: Date;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
 }
 
-export interface IAuthRepository {
-  saveToken(token: AuthToken): Promise<void>;
-  loadToken(): Promise<AuthToken | null>;
-  removeToken(): Promise<void>;
+export interface AuthSession {
+  user: {
+    id: string;
+    email: string;
+  };
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
 }
 
-export interface IGitHubOAuthService {
-  startOAuthFlow(): Promise<AuthToken>;
-}
-
-export interface ICryptoService {
-  encrypt(data: string): Promise<string>;
-  decrypt(data: string): Promise<string>;
-}
-
-export interface IPasswordService {
-  setPassword(password: string): Promise<void>;
-  verifyPassword(password: string): Promise<boolean>;
-  isPasswordSet(): Promise<boolean>;
+export interface AuthServiceInterface {
+  register(input: RegisterInput): Promise<AuthUser>;
+  login(input: LoginInput): Promise<AuthSession>;
+  logout(token: string): Promise<void>;
+  verifySession(token: string): Promise<AuthUser | null>;
+  refreshToken(refreshToken: string): Promise<AuthSession>;
 }

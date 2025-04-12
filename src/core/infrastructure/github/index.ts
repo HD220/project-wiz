@@ -1,27 +1,27 @@
 import { Octokit } from "octokit";
 
 /**
- * Serviço para integração com a API do GitHub.
+ * Service for integration with the GitHub API.
  * 
- * Suporta modo autenticado (com token) e anônimo (sem token).
- * O token pode ser configurado dinamicamente em tempo de execução.
+ * Supports authenticated mode (with token) and anonymous mode (without token).
+ * The token can be dynamically configured at runtime.
  */
 class GithubService {
   private octokit: Octokit;
   private token: string | null = null;
 
   constructor() {
-    // Inicializa em modo anônimo por padrão
+    // Initializes in anonymous mode by default
     this.octokit = new Octokit();
   }
 
   /**
-   * Define ou remove o token de acesso do GitHub.
+   * Sets or removes the GitHub access token.
    * 
-   * - Se `token` for uma string, ativa o modo autenticado.
-   * - Se `token` for `null`, usa modo anônimo (somente operações públicas).
+   * - If `token` is a string, enables authenticated mode.
+   * - If `token` is `null`, uses anonymous mode (public operations only).
    * 
-   * @param token Personal Access Token ou null para modo anônimo
+   * @param token Personal Access Token or null for anonymous mode
    */
   setToken(token: string | null) {
     this.token = token;
@@ -33,15 +33,15 @@ class GithubService {
   }
 
   /**
-   * Cria um Pull Request autenticado no repositório especificado.
+   * Creates an authenticated Pull Request in the specified repository.
    * 
-   * @param owner Proprietário do repositório
-   * @param repo Nome do repositório
-   * @param title Título do Pull Request
-   * @param head Branch de origem (ex: feature-branch)
-   * @param base Branch de destino (ex: main)
-   * @param body (opcional) Descrição do Pull Request
-   * @returns Dados do PR criado ou erro detalhado
+   * @param owner Repository owner
+   * @param repo Repository name
+   * @param title Pull Request title
+   * @param head Source branch (e.g., feature-branch)
+   * @param base Target branch (e.g., main)
+   * @param body (optional) Pull Request description
+   * @returns Created PR data or detailed error
    */
   async createPullRequest(
     owner: string,
@@ -59,29 +59,29 @@ class GithubService {
         head,
         base,
         body,
-        // Futuro: adicionar suporte a rascunho (draft: true)
-        // Futuro: adicionar reviewers via API após criação
+        // Future: add support for draft (draft: true)
+        // Future: add reviewers via API after creation
       });
       return response.data;
     } catch (error: any) {
-      // Tratamento detalhado de erros comuns
+      // Detailed handling of common errors
       if (error.status === 422) {
-        // Exemplo: branch inexistente ou PR já existente
+        // Example: non-existent branch or PR already exists
         return {
           error: true,
-          message: "Falha na criação do Pull Request: verifique se as branches existem e se já não há um PR aberto entre elas.",
+          message: "Failed to create Pull Request: check if the branches exist and if there is already an open PR between them.",
           details: error.response?.data || error.message,
         };
       } else if (error.status === 403) {
         return {
           error: true,
-          message: "Permissão negada para criar Pull Request. Verifique o token e permissões.",
+          message: "Permission denied to create Pull Request. Check the token and permissions.",
           details: error.response?.data || error.message,
         };
       } else {
         return {
           error: true,
-          message: "Erro inesperado ao criar Pull Request.",
+          message: "Unexpected error while creating Pull Request.",
           details: error.response?.data || error.message,
         };
       }
@@ -89,7 +89,7 @@ class GithubService {
   }
 
   /**
-   * Obtém uma issue do repositório especificado.
+   * Gets an issue from the specified repository.
    */
   async getIssue(owner: string, repo: string, issue_number: number) {
     try {
@@ -100,7 +100,7 @@ class GithubService {
       });
       return response.data;
     } catch (error) {
-      console.error("Erro ao obter issue:", error);
+      console.error("Error getting issue:", error);
       throw error;
     }
   }

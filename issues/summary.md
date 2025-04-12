@@ -1,3 +1,5 @@
+- [x] ISSUE-0037-Melhorar-integracao-com-Git: concluída e movida para completed/feature/ISSUE-0037-Melhorar-integracao-com-Git em 11/04/2025.
+
 - **ISSUE-0087-Gerenciamento-de-tokens-de-compartilhamento-Personalizacao-Prompts**: pendente
 - **ISSUE-0088-Alertas-dados-sensiveis-Personalizacao-Prompts**: pendente
 # Resumo das Issues - Branch "fase2"
@@ -14,6 +16,12 @@
   - App React Native com pareamento via QR code (simulado)
   - Comunicação segura via token
   - Primeira entrega funcional concluída e movida para `completed/feature/`
+- **ISSUE-0024 - Implementar sistema de autenticação**
+  - Sistema completo de autenticação JWT implementado (registro, login, logout, refresh, verificação de sessão)
+  - Endpoints REST expostos no backend (Express)
+  - Hook useAuth, LoginForm, RegisterForm, RouteGuard e persistência de sessão no frontend
+  - Proteção de rotas, validação de inputs e tratamento seguro de tokens
+  - Critérios de aceitação atendidos e documentação registrada em `handoff.md`
 
 ### Bugs
 - **ISSUE-0095 - Corrigir risco de vazamento de memória no LlmService**
@@ -22,6 +30,13 @@
 - **ISSUE-0097 - Timeouts e limpeza automática LlmService**
   - Status: **concluída em 10/04/2025**
   - Timeouts e limpeza automática no `LlmService` foram implementados com sucesso.
+- **ISSUE-0161 - Corrigir build Electron main entrypoint**
+  - Status: **concluída em 11/04/2025**
+- **ISSUE-0134 - Corrigir violações de ADRs existentes**
+  - Status: **concluída em 11/04/2025**
+  - Todas as violações dos ADRs aceitos (especialmente SDR-0001: código-fonte, comentários, mensagens e valores em inglês) foram identificadas e corrigidas em todo o projeto. Documentação registrada em `handoff.md` e issue movida para `completed/bug/`.
+
+  - Corrigido o caminho de saída do bundle main.js do processo principal do Electron, garantindo geração em `.vite/build/main.js` e empacotamento correto pelo Electron Forge.
 - **ISSUE-0148-Remover-dados-fixos-do-dashboard-e-paginas** (pendente)
 - **ISSUE-0150-Refatorar-integracoes-mobile-criptografia-e-tratamento-de-erros** (pendente)
 
@@ -151,6 +166,7 @@ As seguintes features foram revisadas e permanecem **pendentes**, aguardando imp
   - Risco de dados maliciosos persistirem e afetarem outras partes do sistema.
   - Hooks e UI preparados para exibir métricas.
   - Backend ainda retorna métricas mockadas (`WorkerServiceAdapter.getMetrics`).
+
   - Coleta real de métricas detalhadas e otimizações de performance **não implementadas**.
 
 

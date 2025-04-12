@@ -3,52 +3,44 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-
-declare global {
-  interface Window {
-    githubTokenAPI: {
-      saveGitHubToken(token: string): Promise<void>;
-      removeGitHubToken(): Promise<void>;
-      getGitHubTokenStatus(): Promise<boolean>;
-    };
-  }
-}
+import { useGitHubToken } from '@/hooks/use-github-token';
+import { validateGitHubToken } from '@/lib/validate-github-token';
+import { i18n } from '../i18n';
 
 const GitHubTokenManager: React.FC = () => {
   const [token, setToken] = useState('');
-  const [isSaved, setIsSaved] = useState(false);
+  const [isTokenSaved, setIsTokenSaved] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const fetchStatus = async () => {
+  const { getGitHubTokenStatus, saveGitHubToken, removeGitHubToken } = useGitHubToken();
+
+  const fetchGitHubTokenStatus = async () => {
     try {
-      const status = await window.githubTokenAPI.getGitHubTokenStatus();
-      setIsSaved(status);
+      const status = await getGitHubTokenStatus();
+      setIsTokenSaved(status);
     } catch {
-      toast.error('Erro ao verificar status do token');
+      toast.error(i18n._('Failed to check token status.'));
     }
   };
 
   useEffect(() => {
-    fetchStatus();
+    fetchGitHubTokenStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const validateToken = (token: string) => {
-    return token.startsWith('ghp_');
-  };
-
   const handleSave = async () => {
-    if (!validateToken(token)) {
-      toast.error('Token inválido. Deve começar com "ghp_".');
+    if (!validateGitHubToken(token)) {
+      toast.error(i18n._('Invalid token. It must start with "ghp_".'));
       return;
     }
     setLoading(true);
     try {
-      await window.githubTokenAPI.saveGitHubToken(token);
-      toast.success('Token salvo com sucesso.');
+      await saveGitHubToken(token);
+      toast.success(i18n._('Token saved successfully.'));
       setToken('');
-      fetchStatus();
+      fetchGitHubTokenStatus();
     } catch {
-      toast.error('Erro ao salvar o token.');
+      toast.error(i18n._('Failed to save token.'));
     } finally {
       setLoading(false);
     }
@@ -57,11 +49,11 @@ const GitHubTokenManager: React.FC = () => {
   const handleRemove = async () => {
     setLoading(true);
     try {
-      await window.githubTokenAPI.removeGitHubToken();
-      toast.success('Token removido com sucesso.');
-      fetchStatus();
+      await removeGitHubToken();
+      toast.success(i18n._('Token removed successfully.'));
+      fetchGitHubTokenStatus();
     } catch {
-      toast.error('Erro ao remover o token.');
+      toast.error(i18n._('Failed to remove token.'));
     } finally {
       setLoading(false);
     }
@@ -69,9 +61,11 @@ const GitHubTokenManager: React.FC = () => {
 
   return (
     <div className="space-y-4 p-4 border rounded-md">
-      <h2 className="text-lg font-semibold">Token de Acesso Pessoal do GitHub</h2>
+      <h2 className="text-lg font-semibold">
+        {i18n._('GitHub Personal Access Token')}
+      </h2>
       <p className="text-sm text-muted-foreground">
-        O token é armazenado localmente e pode ser removido a qualquer momento.
+        {i18n._('The token is stored locally and can be removed at any time.')}
       </p>
       <div className="flex items-center space-x-2">
         <Input
@@ -81,18 +75,22 @@ const GitHubTokenManager: React.FC = () => {
           disabled={loading}
         />
         <Button onClick={handleSave} disabled={loading || !token}>
-          Salvar
+          {i18n._('Save')}
         </Button>
-        <Button variant="outline" onClick={handleRemove} disabled={loading || !isSaved}>
-          Remover
+        <Button variant="outline" onClick={handleRemove} disabled={loading || !isTokenSaved}>
+          {i18n._('Remove')}
         </Button>
       </div>
       <div>
-        Status:{' '}
-        {isSaved ? (
-          <Badge variant="default">Token salvo</Badge>
+        {i18n._('Status:')}{' '}
+        {isTokenSaved ? (
+          <Badge variant="default">
+            {i18n._('Token saved')}
+          </Badge>
         ) : (
-          <Badge variant="secondary">Nenhum token salvo</Badge>
+          <Badge variant="secondary">
+            {i18n._('No token saved')}
+          </Badge>
         )}
       </div>
     </div>

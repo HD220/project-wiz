@@ -1,3 +1,5 @@
+# NOT IMPLEMENT TESTS, 
+
 # Project Definitions and Accepted ADRs
 
 This file consolidates the **core definitions, accepted architectural decisions (ADRs), governance decisions (GDRs), standards (SDRs), conventions, and rules** for the project. It serves as the **single source of truth** for all modes and contributors.
@@ -136,3 +138,4 @@ issues/
 - Keep issues organized and updated.
 - Follow clean code principles to ensure quality and maintainability.
 - use ";" for multiples commands inline
+- try write_file if others tools fails

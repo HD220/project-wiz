@@ -63,5 +63,5 @@ export class MistralGGUFAdapter implements LlmServicePort {
     this.session = new LlamaChatSession(this.context!, options);
   }
 
-  // Outros métodos do LlmServicePort...
+  // Other methods of LlmServicePort...
 }

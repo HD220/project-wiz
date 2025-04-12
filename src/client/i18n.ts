@@ -32,3 +32,5 @@ export async function dynamicActivate(locale: string) {
 
   i18n.activate(locale);
 }
+export { i18n };
+

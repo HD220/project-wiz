@@ -1,20 +1,20 @@
 /** 
- * Tipos compartilhados da camada Application
- * Não dependem da infraestrutura
+ * Shared types for the Application layer
+ * Do not depend on infrastructure
  */
 
-/** Representa um prompt configurável */
+/** Represents a configurable prompt */
 export interface PromptDTO {
   id: string
   title: string
   description?: string
   content: string
-  variables: Record<string, string> // variáveis padrão ou placeholders
+  variables: Record<string, string> // default variables or placeholders
   createdAt: Date
   updatedAt: Date
 }
 
-/** Representa uma requisição para um modelo LLM */
+/** Represents a request to an LLM model */
 export interface LLMRequestDTO {
   prompt: string
   variables?: Record<string, string>
@@ -26,7 +26,7 @@ export interface LLMRequestDTO {
   model?: string
 }
 
-/** Representa uma resposta do modelo LLM */
+/** Represents a response from the LLM model */
 export interface LLMResponseDTO {
   id: string
   content: string
@@ -39,7 +39,7 @@ export interface LLMResponseDTO {
   isFinal: boolean
 }
 
-/** Representa uma entrada no histórico de conversas */
+/** Represents an entry in the conversation history */
 export interface HistoryEntryDTO {
   id: string
   sessionId: string
@@ -48,7 +48,7 @@ export interface HistoryEntryDTO {
   createdAt: Date
 }
 
-/** Representa configurações gerais da aplicação e do modelo */
+/** Represents general application and model settings */
 export interface SettingsDTO {
   defaultModel: string
   temperature: number

@@ -8,7 +8,7 @@ export interface StreamChunk {
 }
 
 export class LlmService {
-  private static readonly DEFAULT_TIMEOUT_MS = 60000; // 60 segundos padrão
+  private static readonly DEFAULT_TIMEOUT_MS = 60000; // 60 seconds default
 
   private readonly worker: any;
   private readonly modelManager: any;
@@ -43,19 +43,19 @@ export class LlmService {
       };
 
       const timeoutId = setTimeout(() => {
-        console.warn(`[LlmService] Timeout após ${LlmService.DEFAULT_TIMEOUT_MS}ms para promptStream`);
+        console.warn(`[LlmService] Timeout after ${LlmService.DEFAULT_TIMEOUT_MS}ms for promptStream`);
         cleanup();
-        reject(new Error('Timeout na resposta do modelo'));
+        reject(new Error('Timeout in model response'));
       }, LlmService.DEFAULT_TIMEOUT_MS);
 
       const wrappedResolve = () => {
-        console.debug('[LlmService] promptStream finalizado com sucesso');
+        console.debug('[LlmService] promptStream successfully finished');
         cleanup();
         resolve();
       };
 
       const wrappedReject = (error: unknown) => {
-        console.error('[LlmService] promptStream finalizado com erro:', error);
+        console.error('[LlmService] promptStream finished with error:', error);
         cleanup();
         reject(error);
       };
@@ -113,7 +113,7 @@ export class LlmService {
 
   private async ensureModelLoaded(): Promise<void> {
     if (!this.currentModelPath) {
-      throw new Error('Nenhum modelo carregado');
+      throw new Error('No model loaded');
     }
     const loaded = this.modelManager.isModelLoaded(this.currentModelPath);
     if (!loaded) {

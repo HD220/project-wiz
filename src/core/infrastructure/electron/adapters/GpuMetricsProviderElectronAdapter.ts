@@ -3,7 +3,7 @@ import { GpuMetrics } from '../../../domain/value-objects/GpuMetrics';
 
 export class GpuMetricsProviderElectronAdapter implements GpuMetricsProviderPort {
   async getGpuMetrics(): Promise<GpuMetrics[]> {
-    // Mock de duas GPUs com valores aleatórios
+    // Mock of two GPUs with random values
     return [
       {
         gpuId: 'GPU-0',
@@ -13,7 +13,7 @@ export class GpuMetricsProviderElectronAdapter implements GpuMetricsProviderPort
         temperatureC: 50 + Math.floor(Math.random() * 30),
         powerUsageW: 100 + Math.floor(Math.random() * 50),
         clockMHz: 1500 + Math.floor(Math.random() * 200),
-        processes: ['ProcessoA', 'ProcessoB']
+        processes: ['ProcessA', 'ProcessB']
       },
       {
         gpuId: 'GPU-1',
@@ -23,7 +23,7 @@ export class GpuMetricsProviderElectronAdapter implements GpuMetricsProviderPort
         temperatureC: 40 + Math.floor(Math.random() * 20),
         powerUsageW: 80 + Math.floor(Math.random() * 30),
         clockMHz: 1200 + Math.floor(Math.random() * 150),
-        processes: ['ProcessoC']
+        processes: ['ProcessC']
       }
     ];
   }

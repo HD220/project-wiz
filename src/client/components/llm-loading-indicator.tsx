@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../styles/llm-loading-indicator.css';
 
 interface LlmLoadingIndicatorProps {
   isLoading: boolean;
@@ -9,25 +10,15 @@ export function LlmLoadingIndicator({ isLoading, size = 24 }: LlmLoadingIndicato
   if (!isLoading) return null;
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 8 }}>
+    <div
+      className="llm-loading-indicator-container"
+      role="status"
+      aria-live="polite"
+    >
       <div
-        style={{
-          width: size,
-          height: size,
-          border: '3px solid #ccc',
-          borderTop: '3px solid #333',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }}
+        className="llm-loading-spinner"
+        style={{ width: size, height: size }}
       />
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 }

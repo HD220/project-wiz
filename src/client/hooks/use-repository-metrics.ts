@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t } from '@lingui/macro';
 // import { db } from '../../core/infrastructure/db/client';
 import { activityLog } from '../../core/infrastructure/db/schema';
 import { eq } from 'drizzle-orm';
@@ -45,19 +46,19 @@ export function useRepositoryMetrics(): { metrics: RepositoryMetric[]; loading: 
 
         setMetrics([
           {
-            label: 'Commits',
+            label: t`Commits`,
             value: commitCount,
             progress: Math.min(100, Math.round((commitCount / total) * 100)),
             icon: '📈',
           },
           {
-            label: 'Pull Requests',
+            label: t`Pull Requests`,
             value: prCount,
             progress: Math.min(100, Math.round((prCount / total) * 100)),
             icon: '🔀',
           },
           {
-            label: 'Issues',
+            label: t`Issues`,
             value: issueCount,
             progress: Math.min(100, Math.round((issueCount / total) * 100)),
             icon: '🐞',
@@ -68,7 +69,7 @@ export function useRepositoryMetrics(): { metrics: RepositoryMetric[]; loading: 
         setError(null);
       } catch (err: any) {
         console.error('Error fetching repository metrics', err);
-        setError('Failed to load metrics');
+        setError(t`Failed to load metrics`);
       } finally {
         setLoading(false);
       }

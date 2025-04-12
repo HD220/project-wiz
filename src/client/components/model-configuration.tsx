@@ -1,21 +1,10 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/macro";
+import { ModelSelect } from "@/components/ui/ModelSelect";
+import { ConfigSlider } from "@/components/ui/ConfigSlider";
+import { AutoUpdateSwitch } from "@/components/ui/AutoUpdateSwitch";
+import { useModelConfiguration } from "@/hooks/use-model-configuration";
 
 interface Model {
   id: number;
@@ -31,123 +20,107 @@ interface ModelConfigurationProps {
   models: Model[];
 }
 
-export default function ModelConfiguration({
-  models,
-}: ModelConfigurationProps) {
-  const [modelId, setModelId] = useState("mistralai/Mistral-7B-v0.1");
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(2048);
-  const [memoryLimit, setMemoryLimit] = useState(8);
-  const [autoUpdate, setAutoUpdate] = useState(true);
+export default function ModelConfiguration({ models }: ModelConfigurationProps) {
+  const { i18n } = useLingui();
+
+  const {
+    modelId,
+    temperature,
+    maxTokens,
+    memoryLimit,
+    autoUpdate,
+    errors,
+    setModelId,
+    setTemperature,
+    setMaxTokens,
+    setMemoryLimit,
+    setAutoUpdate,
+  } = useModelConfiguration({
+    initialModelId: models.find((m) => m.status === "downloaded")?.modelId || "",
+    availableModels: models,
+  });
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Model Configuration</CardTitle>
+        <CardTitle>
+          <Trans>Model Configuration</Trans>
+        </CardTitle>
         <CardDescription>
-          Configure parameters for the active model
+          <Trans>Configure parameters for the active model</Trans>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="model-select">Active Model</Label>
-          <Select
-            value={modelId}
-            onValueChange={(value) => {
-              setModelId(value);
-            }}
-          >
-            <SelectTrigger id="model-select">
-              <SelectValue placeholder="Select a model" />
-            </SelectTrigger>
-            <SelectContent>
-              {models
-                .filter((model) => model.status === "downloaded")
-                .map((model) => (
-                  <SelectItem key={model.id} value={model.modelId}>
-                    {model.name} ({model.modelId})
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <ModelSelect
+          id="model-select"
+          label={<Trans>Active Model</Trans>}
+          models={models}
+          value={modelId}
+          onChange={setModelId}
+          error={errors.modelId ? i18n._(errors.modelId) : undefined}
+          placeholder={i18n._("Select a model")}
+        />
 
-        <div className="space-y-2 pt-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="temperature">Temperature: {temperature}</Label>
-            <span className="text-sm text-muted-foreground w-12 text-right">
-              {temperature}
-            </span>
-          </div>
-          <Slider
-            id="temperature"
-            min={0}
-            max={1}
-            step={0.1}
-            value={[temperature]}
-            onValueChange={(value) => setTemperature(value[0])}
-          />
-          <p className="text-xs text-muted-foreground">
-            Controls randomness: Lower values are more deterministic, higher
-            values more creative.
-          </p>
-        </div>
+        <ConfigSlider
+          id="temperature"
+          label={<Trans>Temperature</Trans>}
+          value={temperature}
+          min={0}
+          max={1}
+          step={0.1}
+          onChange={setTemperature}
+          description={
+            <Trans>
+              Controls randomness: Lower values are more deterministic, higher values more creative.
+            </Trans>
+          }
+          error={errors.temperature ? i18n._(errors.temperature) : undefined}
+        />
 
-        <div className="space-y-2 pt-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="max-tokens">Max Tokens: {maxTokens}</Label>
-            <span className="text-sm text-muted-foreground w-12 text-right">
-              {maxTokens}
-            </span>
-          </div>
-          <Slider
-            id="max-tokens"
-            min={256}
-            max={4096}
-            step={256}
-            value={[maxTokens]}
-            onValueChange={(value) => setMaxTokens(value[0])}
-          />
-          <p className="text-xs text-muted-foreground">
-            Maximum number of tokens to generate in a single response.
-          </p>
-        </div>
+        <ConfigSlider
+          id="max-tokens"
+          label={<Trans>Max Tokens</Trans>}
+          value={maxTokens}
+          min={256}
+          max={4096}
+          step={256}
+          onChange={setMaxTokens}
+          description={
+            <Trans>
+              Maximum number of tokens to generate in a single response.
+            </Trans>
+          }
+          error={errors.maxTokens ? i18n._(errors.maxTokens) : undefined}
+        />
 
-        <div className="space-y-2 pt-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="memory-limit">
-              Memory Limit (GB): {memoryLimit}
-            </Label>
-            <span className="text-sm text-muted-foreground w-12 text-right">
-              {memoryLimit}GB
-            </span>
-          </div>
-          <Slider
-            id="memory-limit"
-            min={4}
-            max={16}
-            step={1}
-            value={[memoryLimit]}
-            onValueChange={(value) => setMemoryLimit(value[0])}
-          />
-          <p className="text-xs text-muted-foreground">
-            Maximum memory allocation for the model.
-          </p>
-        </div>
+        <ConfigSlider
+          id="memory-limit"
+          label={<Trans>Memory Limit (GB)</Trans>}
+          value={memoryLimit}
+          min={4}
+          max={16}
+          step={1}
+          onChange={setMemoryLimit}
+          description={
+            <Trans>
+              Maximum memory allocation for the model.
+            </Trans>
+          }
+          error={errors.memoryLimit ? i18n._(errors.memoryLimit) : undefined}
+          unit="GB"
+        />
 
-        <div className="flex items-center justify-between pt-4">
-          <div className="space-y-0.5">
-            <Label htmlFor="auto-update">Automatically Update Models</Label>
-            <p className="text-sm text-muted-foreground">
+        <AutoUpdateSwitch
+          id="auto-update"
+          label={<Trans>Automatically Update Models</Trans>}
+          description={
+            <Trans>
               Enable automatic updates for models.
-            </p>
-          </div>
-          <Switch
-            id="auto-update"
-            checked={autoUpdate}
-            onCheckedChange={setAutoUpdate}
-          />
-        </div>
+            </Trans>
+          }
+          checked={autoUpdate}
+          onChange={setAutoUpdate}
+        />
       </CardContent>
     </Card>
   );

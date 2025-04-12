@@ -81,7 +81,7 @@ export class PromptRepositoryImpl implements PromptRepositoryPort {
   async updatePrompt(id: string, prompt: Prompt): Promise<void> {
     const existing = await db.select().from(prompts).where(eq(prompts.id, id));
     if (existing.length === 0) {
-      throw new Error("Prompt não encontrado.");
+      throw new Error("Prompt not found.");
     }
 
     const now = new Date();
@@ -118,7 +118,7 @@ export class PromptRepositoryImpl implements PromptRepositoryPort {
     await db.delete(prompts).where(eq(prompts.id, id));
   }
 
-  // Métodos auxiliares específicos da infraestrutura, não fazem parte do contrato PromptRepositoryPort
+  // Infrastructure-specific helper methods, not part of PromptRepositoryPort contract
 
   async importPrompts(data: any[]): Promise<void> {
     for (const prompt of data) {

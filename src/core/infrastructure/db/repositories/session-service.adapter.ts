@@ -12,7 +12,7 @@ export class SessionServiceAdapter implements SessionServicePort {
       createdAt: now,
       updatedAt: now,
       title,
-      status: "ativa",
+      status: "active",
       metadata,
     });
     return {
@@ -20,26 +20,26 @@ export class SessionServiceAdapter implements SessionServicePort {
       createdAt: now,
       updatedAt: now,
       title,
-      status: "ativa",
+      status: "active",
       metadata,
     };
   }
 
   async pauseSession(sessionId: string): Promise<void> {
     await db.update(conversations)
-      .set({ status: "pausada", updatedAt: new Date() })
+      .set({ status: "paused", updatedAt: new Date() })
       .where(eq(conversations.id, sessionId));
   }
 
   async resumeSession(sessionId: string): Promise<void> {
     await db.update(conversations)
-      .set({ status: "ativa", updatedAt: new Date() })
+      .set({ status: "active", updatedAt: new Date() })
       .where(eq(conversations.id, sessionId));
   }
 
   async endSession(sessionId: string): Promise<void> {
     await db.update(conversations)
-      .set({ status: "encerrada", updatedAt: new Date() })
+      .set({ status: "closed", updatedAt: new Date() })
       .where(eq(conversations.id, sessionId));
   }
 
@@ -53,7 +53,7 @@ export class SessionServiceAdapter implements SessionServicePort {
       whereClauses.length > 0 ? and(...whereClauses) : undefined
     );
 
-    // Filtro por metadados em memória
+    // In-memory filter by metadata
     const filtered = results.filter((row) => {
       const metadata = row.metadata as SessionMetadata | undefined;
       if (!filter) return true;

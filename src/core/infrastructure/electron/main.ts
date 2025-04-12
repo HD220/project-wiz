@@ -8,7 +8,138 @@ import { saveToken, removeToken, hasToken } from "./github-token-manager";
 import crypto from "crypto";
 // import cors from "cors";
 
+// --- Auth REST API ---
+import express from "express";
+import cors from "cors";
+import { AuthService } from "../../../core/services/auth/auth-service";
+import { authMiddleware } from "../../../core/services/auth/middlewares/auth-middleware";
+
+const api = express();
+api.use(cors());
+api.use(express.json());
+
+const authService = new AuthService();
+
+// Register
+api.post("/auth/register", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
+    const user = await authService.register({ email, password });
+    res.status(201).json({ id: user.id, email: user.email });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Login
+api.post("/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
+    const session = await authService.login({ email, password });
+    res.json(session);
+  } catch (e: any) {
+    res.status(401).json({ error: e.message });
+  }
+});
+
+// Logout (stateless)
+api.post("/auth/logout", authMiddleware, async (_req, res) => {
+  res.status(204).send();
+});
+
+// Verify session
+api.get("/auth/session", authMiddleware, async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const user = await authService.verifySession(token);
+  if (!user) return res.status(401).json({ error: "Invalid session" });
+  res.json({ id: user.id, email: user.email });
+});
+
+// Refresh token
+api.post("/auth/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.status(400).json({ error: "Missing refresh token" });
+    const session = await authService.refreshToken(refreshToken);
+    res.json(session);
+  } catch (e: any) {
+    res.status(401).json({ error: e.message });
+  }
+});
+
+// Example protected route
+api.get("/protected", authMiddleware, (_req, res) => {
+  res.json({ message: "Access granted" });
+});
+
+api.listen(3333, () => {
+  console.log("Auth API listening on http://localhost:3333");
+});
+// --- End Auth REST API ---
+
+
 import { GpuMetricsProviderElectronAdapter } from "./adapters/GpuMetricsProviderElectronAdapter";
+
+import { GitServiceAdapter } from "../git/git-service.adapter";
+
+/**
+ * Registers IPC handlers for GitService
+ */
+function registerGitServiceHandlers() {
+  const gitService = new GitServiceAdapter();
+
+  ipcMain.handle("git:addRepository", async (_event, localPath: string, remoteUrl: string, credentialsId?: string) => {
+    return gitService.addRepository(localPath, remoteUrl, credentialsId);
+  });
+
+  ipcMain.handle("git:listRepositories", async () => {
+    return gitService.listRepositories();
+  });
+
+  ipcMain.handle("git:getStatus", async (_event, repositoryId: string) => {
+    return gitService.getStatus(repositoryId);
+  });
+
+  ipcMain.handle("git:commitChanges", async (_event, params) => {
+    return gitService.commitChanges(params);
+  });
+
+  ipcMain.handle("git:pushChanges", async (_event, params) => {
+    return gitService.pushChanges(params);
+  });
+
+  ipcMain.handle("git:pullChanges", async (_event, params) => {
+    return gitService.pullChanges(params);
+  });
+
+  ipcMain.handle("git:createBranch", async (_event, params) => {
+    return gitService.createBranch(params);
+  });
+
+  ipcMain.handle("git:switchBranch", async (_event, params) => {
+    return gitService.switchBranch(params);
+  });
+
+  ipcMain.handle("git:deleteBranch", async (_event, params) => {
+    return gitService.deleteBranch(params);
+  });
+
+  ipcMain.handle("git:listBranches", async (_event, repositoryId: string) => {
+    return gitService.listBranches(repositoryId);
+  });
+
+  ipcMain.handle("git:getHistory", async (_event, repositoryId: string, branchName?: string) => {
+    return gitService.getHistory(repositoryId, branchName);
+  });
+
+  ipcMain.handle("git:syncWithRemote", async (_event, repositoryId: string, credentialsId?: string) => {
+    return gitService.syncWithRemote(repositoryId, credentialsId);
+  });
+}
+
 
 import { z } from "zod";
 import { createDatabase } from "./db-client";
@@ -21,7 +152,7 @@ if (started) {
 }
 
 /**
- * Registra os handlers IPC para o HistoryService
+ * Registers IPC handlers for HistoryService
  */
 async function registerHistoryServiceHandlers() {
   const db = await createDatabase();
@@ -94,7 +225,7 @@ async function registerHistoryServiceHandlers() {
 }
 
 /**
- * Registra os handlers IPC para gerenciamento do token GitHub
+ * Registers IPC handlers for GitHub token management
  */
 function registerGitHubTokenHandlers() {
   ipcMain.handle("githubToken:save", async (_event, token: string) => {
@@ -114,7 +245,7 @@ function registerGitHubTokenHandlers() {
 }
 
 /**
- * Registra os handlers IPC para métricas do WorkerService
+ * Registers IPC handlers for WorkerService metrics
  */
 function registerWorkerServiceHandlers(workerService: import('../../domain/ports/worker-service.port').WorkerServicePort) {
   ipcMain.handle('llm:getMetrics', async () => {
@@ -123,7 +254,7 @@ function registerWorkerServiceHandlers(workerService: import('../../domain/ports
 }
 
 /**
- * Registra os handlers IPC para métricas de GPU
+ * Registers IPC handlers for GPU metrics
  */
 function registerGpuMetricsHandlers(gpuMetricsProvider: import('../../domain/ports/gpu-metrics-provider.port').GpuMetricsProviderPort) {
   ipcMain.handle('dashboard:get-gpu-metrics', async () => {
@@ -131,16 +262,16 @@ function registerGpuMetricsHandlers(gpuMetricsProvider: import('../../domain/por
   });
 }
 
-// Token de pareamento gerado na inicialização
+// Pairing token generated at initialization
 const pairingToken = crypto.randomBytes(32).toString("hex");
 
-// Inicializa API HTTP para o app mobile
+// Initializes HTTP API for the mobile app
 // function startMobileApiServer() {
 //   const api = express();
 //   api.use(cors());
 //   api.use(express.json());
 
-//   // Middleware de autenticação
+//   // Authentication middleware
 //   api.use((req, res, next) => {
 //     if (req.path === "/pairing") {
 //       return next();
@@ -156,7 +287,7 @@ const pairingToken = crypto.randomBytes(32).toString("hex");
 //     next();
 //   });
 
-//   // Endpoint para pareamento via QR code
+//   // Endpoint for pairing via QR code
 //   api.get("/pairing", (req, res) => {
 //     res.json({
 //       token: pairingToken,
@@ -164,18 +295,18 @@ const pairingToken = crypto.randomBytes(32).toString("hex");
 //     });
 //   });
 
-//   // Endpoint status do bot
+//   // Bot status endpoint
 //   api.get("/status", (req, res) => {
 //     res.json({ status: "online" });
 //   });
 
-//   // Endpoint histórico
+//   // History endpoint
 //   api.get("/history", async (req, res) => {
 //     const conversations = await historyService.getConversations();
 //     res.json(conversations);
 //   });
 
-//   // Endpoint configurações básicas (mock)
+//   // Basic settings endpoint (mock)
 //   api.get("/settings", (req, res) => {
 //     res.json({
 //       language: "pt-BR",
@@ -184,7 +315,7 @@ const pairingToken = crypto.randomBytes(32).toString("hex");
 //   });
 
 //   api.listen(3001, () => {
-//     console.log("API mobile listening on http://localhost:3001");
+//     console.log("Mobile API listening on http://localhost:3001");
 //   });
 // }
 
@@ -221,6 +352,7 @@ app.whenReady().then(async () => {
   registerGitHubTokenHandlers();
   registerWorkerServiceHandlers(workerService);
   registerGpuMetricsHandlers(gpuMetricsProvider);
+  registerGitServiceHandlers();
 
   createWindow();
   // startMobileApiServer();

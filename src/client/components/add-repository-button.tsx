@@ -1,24 +1,18 @@
 import { Button } from "@/components/ui/button";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
+import { AddRepositoryIcon } from "./add-repository-icon";
 
 export function AddRepositoryButton() {
+  const { i18n } = useLingui();
+
   return (
     <Button>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="mr-2"
-      >
-        <path d="M5 12h14" />
-        <path d="M12 5v14" />
-      </svg>
-      Add Repository
+      <AddRepositoryIcon
+        title={i18n._("Add repository icon")}
+        desc={i18n._("Plus sign icon representing the action to add a new repository")}
+      />
+      <Trans>Add Repository</Trans>
     </Button>
   );
 }

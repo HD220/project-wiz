@@ -1,150 +1,130 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import ModelList from "./model-list";
 import ModelConfiguration from "./model-configuration";
+import { useAvailableModels } from "../hooks/use-available-models";
+import { Trans } from "@lingui/macro";
 
-export interface Model {
-  id: number;
-  name: string;
-  modelId: string;
-  size: string;
-  status: string;
-  lastUsed: string | null;
-  description: string;
+// UI text constants for i18n
+const UI_TEXT = {
+  title: <Trans>Model Settings</Trans>,
+  downloadButton: <Trans>Download New Model</Trans>,
+  tabs: {
+    models: <Trans>Available Models</Trans>,
+    settings: <Trans>Model Configuration</Trans>,
+    performance: <Trans>Performance</Trans>,
+  },
+  modelsDescription: (
+    <Trans>
+      Models available for download and use. Click "Download" to get a model or "Activate" to enable a downloaded model.
+    </Trans>
+  ),
+  modelsHeader: <Trans>Available Models</Trans>,
+  performanceTitle: <Trans>Performance Metrics</Trans>,
+  performanceDescription: <Trans>Track model performance and resource usage over time</Trans>,
+  performancePlaceholder: (
+    <Trans>
+      Performance data will be displayed here once the model is active.
+    </Trans>
+  ),
+  viewFullReport: <Trans>View Full Report</Trans>,
+  beta: <Trans>Beta</Trans>,
+};
+
+function ModelSettingsHeader() {
+  return (
+    <div className="flex items-center justify-between">
+      <h2 className="text-3xl font-bold tracking-tight">{UI_TEXT.title}</h2>
+      <Button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mr-2"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        {UI_TEXT.downloadButton}
+      </Button>
+    </div>
+  );
+}
+
+function ModelsTab({ models }: { models: any[] }) {
+  return (
+    <div className="space-y-4">
+      <div className="mb-4">
+        <p className="text-sm text-muted-foreground mb-2">{UI_TEXT.modelsDescription}</p>
+      </div>
+      <div className="border rounded-md">
+        <div className="p-4 border-b bg-muted/50">
+          <h3 className="font-medium">{UI_TEXT.modelsHeader}</h3>
+        </div>
+        <div>
+          <ModelList models={models} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PerformancePanel() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{UI_TEXT.performanceTitle}</CardTitle>
+        <CardDescription>{UI_TEXT.performanceDescription}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p>{UI_TEXT.performancePlaceholder}</p>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline">{UI_TEXT.viewFullReport}</Button>
+        <Badge variant="secondary">{UI_TEXT.beta}</Badge>
+      </CardFooter>
+    </Card>
+  );
 }
 
 export default function ModelSettings() {
-  const models: Model[] = [
-    {
-      id: 1,
-      name: "Mistral 7B",
-      modelId: "mistralai/Mistral-7B-v0.1",
-      size: "7B parameters",
-      status: "downloaded",
-      lastUsed: "2023-06-15T10:42:00",
-      description:
-        "A powerful 7B parameter model with strong coding capabilities.",
-    },
-    {
-      id: 2,
-      name: "Llama 2 7B",
-      modelId: "meta-llama/Llama-2-7b-hf",
-      size: "7B parameters",
-      status: "downloaded",
-      lastUsed: "2023-06-14T15:30:00",
-      description:
-        "Meta's Llama 2 model with 7B parameters, good for general tasks.",
-    },
-    {
-      id: 3,
-      name: "CodeLlama 7B",
-      modelId: "codellama/CodeLlama-7b-hf",
-      size: "7B parameters",
-      status: "not-downloaded",
-      lastUsed: null,
-      description: "Specialized model for code generation and understanding.",
-    },
-    {
-      id: 4,
-      name: "Phi-2",
-      modelId: "microsoft/phi-2",
-      size: "2.7B parameters",
-      status: "downloaded",
-      lastUsed: "2023-06-10T09:15:00",
-      description:
-        "Smaller but efficient model from Microsoft, good for lightweight tasks.",
-    },
-  ];
+  const { models, loading, error } = useAvailableModels();
+
+  if (loading) {
+    return <div className="p-4"><Trans>Loading models...</Trans></div>;
+  }
+  if (error) {
+    return <div className="p-4 text-red-500"><Trans>Error loading models.</Trans></div>;
+  }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Model Settings</h2>
-        <Button>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mr-2"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          Download New Model
-        </Button>
-      </div>
-
+      <ModelSettingsHeader />
       <Tabs defaultValue="models" className="w-full">
         <TabsList>
-          <TabsTrigger value="models">Available Models</TabsTrigger>
-          <TabsTrigger value="settings">Model Configuration</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="models">{UI_TEXT.tabs.models}</TabsTrigger>
+          <TabsTrigger value="settings">{UI_TEXT.tabs.settings}</TabsTrigger>
+          <TabsTrigger value="performance">{UI_TEXT.tabs.performance}</TabsTrigger>
         </TabsList>
-
         <TabsContent value="models" className="space-y-4">
-          {/* Usando o componente ModelList para exibir os modelos */}
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground mb-2">
-              Modelos disponíveis para download e uso. Clique em "Download" para
-              baixar um modelo ou "Activate" para ativar um modelo já baixado.
-            </p>
-          </div>
-
-          {/* Importando o componente ModelList que contém os modelos de exemplo */}
-          <div className="border rounded-md">
-            <div className="p-4 border-b bg-muted/50">
-              <h3 className="font-medium">Modelos Disponíveis</h3>
-            </div>
-            <div>
-              {/* Componente que lista os modelos, incluindo o modelo simples para teste */}
-              <ModelList />
-            </div>
-          </div>
+          <ModelsTab models={models} />
         </TabsContent>
-
         <TabsContent value="settings" className="space-y-4">
           <ModelConfiguration models={models} />
         </TabsContent>
-
         <TabsContent value="performance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>
-                Track model performance and resource usage over time
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                {/* Placeholder for performance charts and metrics */}
-                <p>
-                  Performance data will be displayed here once the model is
-                  active.
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              {/* Add any relevant actions or links here */}
-              <Button variant="outline">View Full Report</Button>
-              <Badge variant="secondary">Beta</Badge>
-            </CardFooter>
-          </Card>
+          <PerformancePanel />
         </TabsContent>
       </Tabs>
     </div>
