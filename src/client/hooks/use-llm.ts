@@ -77,13 +77,13 @@ export function useLLM(
       return executeOperation(async () => {
         await bridge.loadModel(options.modelPath);
         setLoadedModel(options);
-      }, 'Falha ao carregar o modelo');
+      }, 'Failed to load model');
     },
     [bridge, executeOperation]
   );
 
   const unloadModel = useCallback(async () => {
-    console.warn('unloadModel ainda não suportado na bridge');
+    console.warn('unloadModel is not supported by the bridge yet');
     setLoadedModel(null);
   }, []);
 
@@ -91,7 +91,7 @@ export function useLLM(
     async ({ prompt, options, signal }: GenerateOptions) => {
       return executeOperation(async () => {
         return bridge.prompt(prompt, signal);
-      }, 'Falha ao gerar texto');
+      }, 'Failed to generate text');
     },
     [bridge, executeOperation]
   );
@@ -101,12 +101,12 @@ export function useLLM(
   }, [loadedModel]);
 
   const getAvailableModels = useCallback(async () => {
-    console.warn('getAvailableModels ainda não suportado na bridge');
+    console.warn('getAvailableModels is not supported by the bridge yet');
     return [];
   }, []);
 
   const setOptions = useCallback(async (_options: LlamaContextOptions) => {
-    console.warn('setOptions ainda não suportado na bridge');
+    console.warn('setOptions is not supported by the bridge yet');
   }, []);
 
   const generateStream = useCallback(

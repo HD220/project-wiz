@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/macro";
-import { ModelSelect } from "@/components/ui/ModelSelect";
-import { ConfigSlider } from "@/components/ui/ConfigSlider";
-import { AutoUpdateSwitch } from "@/components/ui/AutoUpdateSwitch";
+import { ModelSelect } from "@/components/ui/model-select";
+import { ConfigSlider } from "@/components/ui/config-slider";
+import { AutoUpdateSwitch } from "@/components/ui/auto-update-switch";
 import { useModelConfiguration } from "@/hooks/use-model-configuration";
 
 interface Model {

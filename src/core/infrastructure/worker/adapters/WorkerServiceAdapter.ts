@@ -32,14 +32,13 @@ export class WorkerServiceAdapter implements WorkerServicePort {
   }
 
   async getMetrics() {
-    // TODO: substituir por coleta real
+    const metrics = await this.mistralAdapter.getMetrics();
+    // Uso de memória do processo em MB
+    const memoryUsageMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
+
     return {
-      totalTokensProcessed: 12345,
-      totalRequests: 678,
-      averageResponseTimeMs: 150,
-      errorCount: 3,
-      memoryUsageMB: 512,
-      timestamp: Date.now(),
+      ...metrics,
+      memoryUsageMB,
     };
   }
 }

@@ -7,7 +7,7 @@
  */
 import React from "react";
 import { Button } from "@/components/ui/button";
-import type { DocFile } from "./use-documentation";
+import type { DocFile } from "../hooks/use-documentation";
 import { useLingui } from "@lingui/react";
 
 interface FileListItemProps {

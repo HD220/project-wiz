@@ -27,7 +27,7 @@ export function ConversationItem({
         selected ? "bg-blue-100 border-blue-400" : "hover:bg-gray-100"
       }`}
     >
-      <div className="font-semibold">{title || "Sem título"}</div>
+      <div className="font-semibold">{title || "Untitled"}</div>
       <div className="text-xs text-gray-500">
         {formatDate(updatedAt || createdAt)}
       </div>

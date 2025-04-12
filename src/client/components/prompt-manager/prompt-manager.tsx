@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { usePromptManager } from '../../hooks/prompt/usePromptManager';
-import { usePromptShare } from '../../hooks/prompt/usePromptShare';
-import { PromptStatus } from './PromptStatus';
-import { PromptToolbar } from './PromptToolbar';
-import { PromptContainer } from './PromptContainer';
+import { usePromptManager } from '../../hooks/prompt/use-prompt-manager';
+import { usePromptShare } from '../../hooks/prompt/use-prompt-share';
+import { PromptStatus } from './prompt-status';
+import { PromptToolbar } from './prompt-toolbar';
+import { PromptContainer } from './prompt-container';
 import { PromptList } from './prompt-list';
 import { PromptForm } from './prompt-form';
 import type { PromptUI } from '../../types/prompt';

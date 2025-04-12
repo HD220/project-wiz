@@ -35,11 +35,11 @@ export function exportPromptsWithChecksum(prompts: PromptData[]): ExportedPrompt
  */
 export function validateImportedPackage(pkg: ExportedPromptPackage): void {
   if (!pkg.prompts || !Array.isArray(pkg.prompts)) {
-    throw new Error("Pacote inválido: prompts ausentes ou formato incorreto.");
+    throw new Error("Invalid package: missing prompts or incorrect format.");
   }
   const expectedChecksum = generateChecksum(pkg.prompts);
   if (expectedChecksum !== pkg.checksum) {
-    throw new Error("Falha na validação: checksum não confere. O arquivo pode estar corrompido ou adulterado.");
+    throw new Error("Validation failed: checksum does not match. The file may be corrupted or tampered with.");
   }
 }
 

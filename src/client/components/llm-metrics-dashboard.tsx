@@ -7,7 +7,7 @@ import { LlmMetricCards } from "./llm-metrics-dashboard/LlmMetricCards";
 import { LlmMetricsCharts } from "./llm-metrics-dashboard/LlmMetricsCharts";
 import { GpuMetricsPanel } from "./llm-metrics-dashboard/GpuMetricsPanel";
 import { i18n } from "../i18n";
-import StatusMessage from "./status-message";
+import { StatusMessage } from "@/components/ui";
 
 export function LlmMetricsDashboard() {
   const [view, setView] = useState<"llm" | "gpu">("llm");

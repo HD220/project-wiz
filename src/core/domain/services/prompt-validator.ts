@@ -8,29 +8,29 @@ export class PromptValidator {
     totalPromptsCount: number
   ) {
     if (data.name.length < 3 || data.name.length > 50) {
-      throw new Error("O nome do prompt deve ter entre 3 e 50 caracteres.");
+      throw new Error("Prompt name must be between 3 and 50 characters.");
     }
 
     if (existingPromptNames.includes(data.name)) {
-      throw new Error("Já existe um prompt com este nome.");
+      throw new Error("A prompt with this name already exists.");
     }
 
     if (totalPromptsCount >= config.maxPrompts) {
-      throw new Error(`Limite máximo de ${config.maxPrompts} prompts atingido.`);
+      throw new Error(`Maximum limit of ${config.maxPrompts} prompts reached.`);
     }
 
     if (data.content.length > config.maxContentLength) {
-      throw new Error(`O conteúdo do prompt excede o limite de ${config.maxContentLength} caracteres.`);
+      throw new Error(`Prompt content exceeds the limit of ${config.maxContentLength} characters.`);
     }
 
     if (data.variables.length > config.maxVariables) {
-      throw new Error(`Número máximo de variáveis por prompt é ${config.maxVariables}.`);
+      throw new Error(`Maximum number of variables per prompt is ${config.maxVariables}.`);
     }
 
     const contentLower = data.content.toLowerCase();
     for (const word of config.forbiddenWords) {
       if (contentLower.includes(word.toLowerCase())) {
-        throw new Error(`O conteúdo do prompt contém uma palavra proibida: "${word}".`);
+        throw new Error(`Prompt content contains a forbidden word: "${word}".`);
       }
     }
   }
@@ -43,27 +43,27 @@ export class PromptValidator {
   ) {
     if (data.name) {
       if (data.name.length < 3 || data.name.length > 50) {
-        throw new Error("O nome do prompt deve ter entre 3 e 50 caracteres.");
+        throw new Error("Prompt name must be between 3 and 50 characters.");
       }
 
       if (data.name !== currentPrompt.name && existingPromptNames.includes(data.name)) {
-        throw new Error("Já existe um prompt com este nome.");
+        throw new Error("A prompt with this name already exists.");
       }
     }
 
     if (data.content && data.content.length > config.maxContentLength) {
-      throw new Error(`O conteúdo do prompt excede o limite de ${config.maxContentLength} caracteres.`);
+      throw new Error(`Prompt content exceeds the limit of ${config.maxContentLength} characters.`);
     }
 
     if (data.variables && data.variables.length > config.maxVariables) {
-      throw new Error(`Número máximo de variáveis por prompt é ${config.maxVariables}.`);
+      throw new Error(`Maximum number of variables per prompt is ${config.maxVariables}.`);
     }
 
     if (data.content) {
       const contentLower = data.content.toLowerCase();
       for (const word of config.forbiddenWords) {
         if (contentLower.includes(word.toLowerCase())) {
-          throw new Error(`O conteúdo do prompt contém uma palavra proibida: "${word}".`);
+          throw new Error(`Prompt content contains a forbidden word: "${word}".`);
         }
       }
     }

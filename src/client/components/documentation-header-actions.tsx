@@ -1,4 +1,4 @@
-import { ExportButton } from "./export-button";
+import { ExportButton, RefreshButton } from "@/components/ui";
 import { RefreshButton } from "./refresh-button";
 
 export function DocumentationHeaderActions() {

@@ -30,7 +30,7 @@ export class GitHubOAuthService implements IGitHubOAuthService {
         const url = new URL(details.url);
         const code = url.searchParams.get("code");
         if (!code) {
-          reject(new Error("Código OAuth não encontrado."));
+          reject(new Error("OAuth code not found."));
           authWindow.close();
           return;
         }

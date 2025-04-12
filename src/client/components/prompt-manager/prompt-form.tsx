@@ -68,7 +68,7 @@ export function PromptForm({ prompt, onSave, onCancel }: PromptFormProps) {
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Descrição opcional"
+          placeholder="Optional description"
         />
       </div>
 

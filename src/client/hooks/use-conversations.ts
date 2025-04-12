@@ -96,7 +96,7 @@ export function useConversations(historyService: IHistoryService): UseConversati
       const data = await historyService.exportHistory(format);
       return data;
     } catch (err: any) {
-      setError(err.message || "Erro ao exportar histórico");
+      setError(err.message || "Error exporting history");
       return null;
     } finally {
       setLoading(false);

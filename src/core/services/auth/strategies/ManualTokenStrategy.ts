@@ -11,7 +11,7 @@ export class ManualTokenStrategy {
   async loginWithToken(rawToken: string): Promise<AuthToken> {
     const type = this.detectTokenType(rawToken);
     if (!type) {
-      throw new Error("Token inválido ou não suportado.");
+      throw new Error("Invalid or unsupported token.");
     }
 
     const tokenObj: AuthToken = {

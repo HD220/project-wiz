@@ -116,7 +116,7 @@ export class HistoryServiceImpl implements HistoryService {
       }
       return convCsv.join("\n") + "\n\n" + msgCsv.join("\n");
     }
-    throw new Error("Formato de exportação não suportado");
+    throw new Error("Export format not supported");
   }
 
   async renameConversation(conversationId: string, newTitle: string): Promise<void> {

@@ -26,7 +26,7 @@ function isValidToken(token: string): boolean {
  */
 export async function saveToken(token: string): Promise<void> {
   if (!isValidToken(token)) {
-    throw new Error("Token inválido. Deve começar com 'ghp_'.");
+    throw new Error("Invalid token. It must start with 'ghp_'.");
   }
   const keytar = await getKeytar();
   await keytar.setPassword(SERVICE, ACCOUNT, token);

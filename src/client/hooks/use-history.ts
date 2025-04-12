@@ -145,7 +145,7 @@ export function useHistory(): UseHistoryResult {
       const data = await window.historyAPI.exportHistory(format);
       return data;
     } catch (err: any) {
-      setError(err.message || "Erro ao exportar histórico");
+      setError(err.message || "Error exporting history");
       return null;
     } finally {
       setLoading(false);

@@ -9,7 +9,7 @@
  */
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { DocFile } from "./use-documentation";
+import type { DocFile } from "../hooks/use-documentation";
 import { FileListItem } from "./file-list-item";
 import { t } from "@lingui/macro";
 import { useKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
