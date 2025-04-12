@@ -1,3 +1,20 @@
+## [2025-04-12] Refactoring completed by Code mode
+
+**Action:** Full refactor of `src/client/components/git-repository-panel.tsx` to comply with Clean Code principles and project rules.
+
+**Decisions and changes:**
+- Extracted subcomponents: `RepositorySelector` (repository selection and sync), `ErrorMessage` (standardized error messages)
+- Extracted hooks: `useCommitMessage` (commit message state/validation), `useNewBranch` (new branch state/validation)
+- Reduced main component to orchestration only, with less than 50 lines of JSX
+- Improved cohesion, modularity, and clarity by grouping props and handlers
+- Standardized feedback/messages in reusable components
+- Documented all interfaces and props in English, as required by SDR-0001
+- No changes to tests (per requirements)
+- All changes strictly followed the mandatory refactoring plan
+
+**Justification:**
+Component previously violated Clean Code (large size, multiple responsibilities, mixed state/UI logic). Now fully compliant and ready for further implementation.
+
 # Progresso e Handoff — ISSUE-0173
 
 Este arquivo deve ser utilizado para registrar o progresso, decisões, dificuldades e próximos passos relacionados à refatoração do componente `git-repository-panel.tsx`.

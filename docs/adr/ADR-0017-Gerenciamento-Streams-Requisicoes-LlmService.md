@@ -1,16 +1,16 @@
-# ADR 0017: Gerenciamento de Streams e Requisições no LlmService para Prevenir Vazamento de Memória
+# ADR-0017: Gerenciamento de Streams e Requisições no LlmService para Prevenir Vazamento de Memória
 
 ## Status
 
-Implementado e validado com testes automatizados.
+- 🟢 **Aceito**
+
+---
 
 ## Contexto
 
-Foi identificado risco de vazamento de memória no serviço LLM (`LlmService`), utilizado para comunicação com modelos de linguagem. O problema estava relacionado ao crescimento indefinido dos mapas `pendingRequests` e `streamHandlers` na classe `LlmBridgeGateway`, que gerenciam requisições e streams.
+Foi identificado risco de vazamento de memória no serviço LLM (`LlmService`), utilizado para comunicação com modelos de linguagem. O problema estava relacionado ao crescimento indefinido dos mapas `pendingRequests` e `streamHandlers` na classe `LlmBridgeGateway`, que gerenciam requisições e streams. Sem um gerenciamento adequado, entradas antigas permaneciam nos mapas, levando a consumo excessivo de memória, especialmente em cenários com muitas requisições ou streams longos/interrompidos.
 
-## Problema
-
-Sem um gerenciamento adequado, entradas antigas permaneciam nos mapas, levando a consumo excessivo de memória, especialmente em cenários com muitas requisições ou streams longos/interrompidos.
+---
 
 ## Decisão
 
@@ -19,25 +19,28 @@ Sem um gerenciamento adequado, entradas antigas permaneciam nos mapas, levando a
 - Adicionar **tratamento para falhas de comunicação**, garantindo que recursos sejam liberados mesmo em erros.
 - Instrumentar o código com **logs detalhados** para monitorar criação, remoção e tamanho dos mapas.
 
-## Alternativas Consideradas
-
-- Coleta manual periódica via cron ou agendamento externo.
-- Uso de garbage collection explícita ou WeakMaps (não adequado para controle ativo).
-- Monitoramento externo com alertas, sem ação automática.
+---
 
 ## Consequências
 
+**Positivas:**
 - Redução significativa do risco de vazamento de memória.
 - Maior estabilidade e previsibilidade do serviço.
-- Código um pouco mais complexo devido à lógica de timeout e cancelamento, porém controlada.
 - Facilidade para diagnóstico futuro via logs.
 
-## Data
+**Negativas:**
+- Código um pouco mais complexo devido à lógica de timeout e cancelamento, porém controlada.
 
-10/04/2025
+---
 
-## Decisores
+## Alternativas Consideradas
 
-Equipe de desenvolvimento do projeto Wiz
+- **Coleta manual periódica via cron ou agendamento externo** — rejeitado por não ser reativo.
+- **Uso de garbage collection explícita ou WeakMaps** — rejeitado por não permitir controle ativo.
+- **Monitoramento externo com alertas, sem ação automática** — rejeitado por não resolver o problema de forma autônoma.
 
-## Links relacionados
+---
+
+## Links Relacionados
+
+- [ISSUE-0095 - Corrigir risco de vazamento de memória no LlmService](../../issues/completed/bug/ISSUE-0095-Corrigir-risco-vazamento-memoria-LlmService/README.md)

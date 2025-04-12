@@ -1,86 +1,123 @@
-import React, { useState } from "react";
-import { useGitRepository } from "../hooks/use-git-repository";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Label } from "./ui/label";
+import React from "react";
+import { useGitRepositories } from "../hooks/use-git-repositories";
+import { useGitStatus } from "../hooks/use-git-status";
+import { useGitBranches } from "../hooks/use-git-branches";
+import { useGitHistory } from "../hooks/use-git-history";
+import { useGitSync } from "../hooks/use-git-sync";
+import { useCommitMessage } from "../hooks/use-commit-message";
+import { useNewBranch } from "../hooks/use-new-branch";
+import { RepositorySelector } from "./repository-selector";
+import { ErrorMessage } from "./error-message";
 import { GitStatusPanel } from "./git-status-panel";
 import { GitCommitPanel } from "./git-commit-panel";
 import { GitBranchesPanel } from "./git-branches-panel";
 import { GitHistoryPanel } from "./git-history-panel";
 
 export function GitRepositoryPanel() {
+  // Repositories
   const {
     repositories,
     selectedRepo,
     selectRepository,
+    refreshRepositories,
+    syncWithRemote,
+    loading: loadingRepos,
+    error: errorRepos,
+  } = useGitRepositories();
+
+  // Status
+  const {
     status,
+    fetchStatus,
+    loading: loadingStatus,
+    error: errorStatus,
+  } = useGitStatus(selectedRepo);
+
+  // Branches
+  const {
     branches,
-    history,
-    loading,
-    error,
-    commitChanges,
-    pushChanges,
-    pullChanges,
+    fetchBranches,
     createBranch,
     switchBranch,
     deleteBranch,
-    syncWithRemote,
-    fetchStatus,
-    fetchBranches,
-    fetchHistory,
-  } = useGitRepository();
+    loading: loadingBranches,
+    error: errorBranches,
+  } = useGitBranches(selectedRepo);
 
-  const [commitMsg, setCommitMsg] = useState("");
-  const [newBranch, setNewBranch] = useState("");
+  // History
+  const {
+    history,
+    fetchHistory,
+    loading: loadingHistory,
+    error: errorHistory,
+  } = useGitHistory(selectedRepo);
+
+  // Sync (commit, push, pull)
+  const {
+    commitChanges,
+    pushChanges,
+    pullChanges,
+    loading: loadingSync,
+    error: errorSync,
+  } = useGitSync(selectedRepo);
+
+  // Commit message
+  const {
+    commitMessage,
+    setCommitMessage,
+    isValid: canCommit,
+    error: commitError,
+  } = useCommitMessage();
+
+  // New branch
+  const {
+    newBranch,
+    setNewBranch,
+    isValid: canCreateBranch,
+    error: branchError,
+  } = useNewBranch();
+
+  // Aggregate loading and error for top-level display
+  const loading =
+    loadingRepos ||
+    loadingStatus ||
+    loadingBranches ||
+    loadingHistory ||
+    loadingSync;
+  const error =
+    errorRepos ||
+    errorStatus ||
+    errorBranches ||
+    errorHistory ||
+    errorSync;
 
   return (
     <div className="p-6 max-w-3xl">
       <h2 className="text-2xl font-bold mb-4">Git Integration</h2>
-      {error && <div className="text-red-600 mb-2">{error}</div>}
-      <Card className="mb-4 p-4 flex flex-col gap-2">
-        <Label htmlFor="repository-select">Repository:</Label>
-        <Select
-          value={selectedRepo?.id || ""}
-          onValueChange={selectRepository}
-          disabled={loading}
-        >
-          <SelectTrigger id="repository-select" aria-label="Select repository">
-            <SelectValue placeholder="Select..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Select...</SelectItem>
-            {repositories.map(repo => (
-              <SelectItem key={repo.id} value={repo.id}>
-                {repo.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          onClick={() => selectedRepo && syncWithRemote(selectedRepo.id)}
-          disabled={loading || !selectedRepo}
-          aria-label="Sync with remote"
-        >
-          Sync
-        </Button>
-      </Card>
-
+      <ErrorMessage message={error || ""} />
+      <RepositorySelector
+        repositories={repositories}
+        selectedRepo={selectedRepo}
+        onSelectRepository={selectRepository}
+        onSync={syncWithRemote}
+        loading={loadingRepos}
+      />
       {selectedRepo && (
         <div className="flex flex-col gap-4">
           <GitStatusPanel
-            loading={loading}
+            loading={loadingStatus}
             status={status}
             currentBranch={selectedRepo.currentBranch}
             onRefresh={() => fetchStatus(selectedRepo.id)}
           />
+          <ErrorMessage message={commitError || ""} />
           <GitCommitPanel
-            loading={loading}
-            commitMsg={commitMsg}
-            onCommitMsgChange={setCommitMsg}
+            loading={loadingSync}
+            commitMsg={commitMessage}
+            onCommitMsgChange={setCommitMessage}
             onCommit={() =>
               selectedRepo &&
-              commitChanges({ repositoryId: selectedRepo.id, message: commitMsg })
+              commitChanges({ repositoryId: selectedRepo.id, message: commitMessage })
             }
             onPush={() =>
               selectedRepo && pushChanges({ repositoryId: selectedRepo.id })
@@ -88,10 +125,11 @@ export function GitRepositoryPanel() {
             onPull={() =>
               selectedRepo && pullChanges({ repositoryId: selectedRepo.id })
             }
-            canCommit={!!commitMsg}
+            canCommit={canCommit}
           />
+          <ErrorMessage message={branchError || ""} />
           <GitBranchesPanel
-            loading={loading}
+            loading={loadingBranches}
             branches={branches}
             newBranch={newBranch}
             onNewBranchChange={setNewBranch}
@@ -110,7 +148,7 @@ export function GitRepositoryPanel() {
             onRefreshBranches={() => fetchBranches(selectedRepo.id)}
           />
           <GitHistoryPanel
-            loading={loading}
+            loading={loadingHistory}
             history={history}
             onRefreshHistory={() => fetchHistory(selectedRepo.id)}
           />

@@ -1,252 +1,48 @@
 import { useState } from "react";
+import type { DocFile } from "../mocks/mock-doc-files";
+import { filterDocsBySearchTerm, getDocContentByPath } from "../lib/documentation-utils";
+import { formatDate } from "../lib/utils";
 
-export interface DocFile {
-  id: number;
-  name: string;
-  path: string;
-  lastUpdated: string;
-  content: string;
+/**
+ * Hook for managing documentation search and file selection state.
+ * Receives the list of documentation files as a parameter.
+ */
+export interface UseDocumentationResult {
+  /** Current search term */
+  searchTerm: string;
+  /** Updates the search term */
+  setSearchTerm: (term: string) => void;
+  /** Currently selected file path (or null) */
+  selectedFile: string | null;
+  /** Updates the selected file path */
+  setSelectedFile: (path: string | null) => void;
+  /** Filtered documentation files based on the search term */
+  filteredDocs: DocFile[];
+  /** Returns the content of the selected file, or null if none is selected */
+  selectedFileContent: string | null;
+  /** Formats a date string for display */
+  formatDate: (dateString: string) => string;
 }
 
-export function useDocumentation() {
+/**
+ * useDocumentation hook
+ * @param docFiles Array of documentation files
+ * @returns State and helpers for documentation search and selection
+ */
+export function useDocumentation(docFiles: DocFile[]): UseDocumentationResult {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  const docFiles: DocFile[] = [
-    {
-      id: 1,
-      name: "README.md",
-      path: "/docs/README.md",
-      lastUpdated: "2023-06-15T10:30:00",
-      content: `# Project Name
-
-A description of your project goes here.
-
-## Installation
-
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
-
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
-
-## API Documentation
-
-See the [API docs](/docs/api/README.md) for more information.`,
-    },
-    {
-      id: 2,
-      name: "API Overview",
-      path: "/docs/api/README.md",
-      lastUpdated: "2023-06-15T09:45:00",
-      content: `# API Documentation
-
-This document provides an overview of the API endpoints available in this project.
-
-## Authentication
-
-All API requests require authentication using a JWT token.
-
-### Endpoints
-
-- POST /api/auth/login
-- POST /api/auth/register
-- GET /api/auth/me
-- POST /api/auth/logout
-
-## Users
-
-User management endpoints.
-
-### Endpoints
-
-- GET /api/users
-- GET /api/users/:id
-- PUT /api/users/:id
-- DELETE /api/users/:id`,
-    },
-    {
-      id: 3,
-      name: "Authentication API",
-      path: "/docs/api/auth.md",
-      lastUpdated: "2023-06-15T10:42:00",
-      content: `# Authentication API
-
-This document provides detailed information about the authentication API endpoints.
-
-## Login
-
-\`\`\`
-POST /api/auth/login
-\`\`\`
-
-### Request Body
-
-\`\`\`json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-\`\`\`
-
-### Response
-
-\`\`\`json
-{
-  "token": "jwt.token.here",
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
-  }
-}
-\`\`\`
-
-## Register
-
-\`\`\`
-POST /api/auth/register
-\`\`\`
-
-### Request Body
-
-\`\`\`json
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "name": "John Doe"
-}
-\`\`\`
-
-### Response
-
-\`\`\`json
-{
-  "token": "jwt.token.here",
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
-  }
-}
-\`\`\``,
-    },
-    {
-      id: 4,
-      name: "User API",
-      path: "/docs/api/users.md",
-      lastUpdated: "2023-06-14T15:30:00",
-      content: `# User API
-
-This document provides detailed information about the user management API endpoints.
-
-## Get All Users
-
-\`\`\`
-GET /api/users
-\`\`\`
-
-### Response
-
-\`\`\`json
-{
-  "users": [
-    {
-      "id": 1,
-      "email": "user1@example.com",
-      "name": "John Doe"
-    },
-    {
-      "id": 2,
-      "email": "user2@example.com",
-      "name": "Jane Smith"
-    }
-  ]
-}
-\`\`\`
-
-## Get User by ID
-
-\`\`\`
-GET /api/users/:id
-\`\`\`
-
-### Response
-
-\`\`\`json
-{
-  "user": {
-    "id": 1,
-    "email": "user1@example.com",
-    "name": "John Doe"
-  }
-}
-\`\`\``,
-    },
-    {
-      id: 5,
-      name: "Architecture Overview",
-      path: "/docs/architecture.md",
-      lastUpdated: "2023-06-13T11:20:00",
-      content: `# Architecture Overview
-
-This document provides an overview of the project's architecture.
-
-## Components
-
-The project is divided into the following components:
-
-- **Frontend**: React application with TypeScript
-- **Backend**: Node.js API with Express
-- **Database**: PostgreSQL
-
-## Data Flow
-
-1. User interacts with the React frontend
-2. Frontend makes API calls to the backend
-3. Backend processes the request and interacts with the database
-4. Backend returns the response to the frontend
-5. Frontend updates the UI based on the response
-
-## Deployment
-
-The application is deployed using Docker containers on a Kubernetes cluster.`,
-    },
-  ];
-
-  const filteredDocs = docFiles.filter(
-    (doc) =>
-      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.path.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString([], {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const selectedFileContent = selectedFile
-    ? docFiles.find((doc) => doc.path === selectedFile)?.content
-    : null;
+  const filteredDocs = filterDocsBySearchTerm(docFiles, searchTerm);
+  const selectedFileContent = getDocContentByPath(docFiles, selectedFile);
 
   return {
     searchTerm,
     setSearchTerm,
     selectedFile,
     setSelectedFile,
-    docFiles,
     filteredDocs,
-    formatDate,
     selectedFileContent,
+    formatDate,
   };
 }

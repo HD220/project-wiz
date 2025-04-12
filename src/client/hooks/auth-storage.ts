@@ -1,14 +1,8 @@
-export interface AuthUser {
-  id: string;
-  email: string;
-}
+import { AuthUser, AuthSession } from "../types/auth";
 
-export interface AuthSession {
-  user: AuthUser;
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: string;
-}
+/**
+ * Utility functions for storing and retrieving authentication tokens and user info.
+ */
 
 export function saveTokens(session: AuthSession) {
   localStorage.setItem("accessToken", session.accessToken);

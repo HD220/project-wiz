@@ -4,7 +4,7 @@ export interface SessionMetadata {
   workflow?: string;
 }
 
-export type SessionStatus = 'ativa' | 'pausada' | 'encerrada';
+export type SessionStatus = 'active' | 'paused' | 'ended';
 
 export interface Session {
   id: string;

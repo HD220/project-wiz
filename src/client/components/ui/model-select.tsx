@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import { useLingui } from "@lingui/react";
+import { i18n } from "../../client/i18n";
 import { Label } from "./label";
 import {
   Select,
@@ -32,17 +34,26 @@ export function ModelSelect({
   value,
   onChange,
   error,
-  placeholder = "Select a model",
+  placeholder,
 }: ModelSelectProps) {
+  useLingui(); // Ensure re-render on locale change
+
+  const resolvedPlaceholder =
+    placeholder ??
+    i18n._("modelSelect.placeholder", {
+      message: "Select a model",
+    });
+
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
-      <Select
-        value={value}
-        onValueChange={onChange}
-      >
-        <SelectTrigger id={id} aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined}>
-          <SelectValue placeholder={placeholder} />
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger
+          id={id}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-error` : undefined}
+        >
+          <SelectValue placeholder={resolvedPlaceholder} />
         </SelectTrigger>
         <SelectContent>
           {models

@@ -2,24 +2,25 @@
 
 ## Status
 
-Aceito
+- 🟢 **Aceito**
+
+---
 
 ## Contexto
 
-- Os serviços LLM atualmente usam termos como "Worker" que não refletem precisamente sua implementação via `utilityProcess.fork`
-- A comunicação entre processos está implementada mas com nomenclatura confusa
-- Necessidade de clareza conceitual entre:
-  - Processos principais
-  - Processos de serviço (utility processes)
-  - Canais de comunicação
+Os serviços LLM utilizavam termos como "Worker" que não refletiam precisamente sua implementação via `utilityProcess.fork`. A comunicação entre processos estava implementada, mas com nomenclatura confusa. Havia necessidade de clareza conceitual entre:
+- Processos principais
+- Processos de serviço (utility processes)
+- Canais de comunicação
+
+---
 
 ## Decisão
 
 - Renomear componentes conforme nova nomenclatura:
   - `WorkerManager` → `ProcessManager`
-  - `WorkerService` → `InferenceService` 
+  - `WorkerService` → `InferenceService`
   - `Worker` → `InferenceProcess`
-
 - Reorganizar estrutura de pastas:
   ```
   src/core/services/llm/
@@ -28,11 +29,12 @@ Aceito
   ├── ipc/           # Comunicação entre processos
   └── interfaces.ts  # Contratos públicos
   ```
-
 - Implementar comunicação baseada em:
   - `utilityProcess.fork` para processos filhos
   - `MessageChannelMain` para comunicação
   - Schemas Zod para validação
+
+---
 
 ## Consequências
 
@@ -47,18 +49,18 @@ Aceito
 - Atualização da documentação existente
 - Potencial quebra de compatibilidade temporária
 
+---
+
 ## Alternativas Consideradas
 
-1. **Manter nomenclatura atual**
-   - Rejeitado por perpetuar confusão conceitual
+- **Manter nomenclatura atual** — rejeitado por perpetuar confusão conceitual.
+- **Usar Web Workers** — rejeitado por limitações técnicas no Electron.
+- **Implementar como serviços separados** — rejeitado por complexidade desnecessária.
 
-2. **Usar Web Workers**
-   - Rejeitado por limitações técnicas no Electron
-
-3. **Implementar como serviços separados**
-   - Rejeitado por complexidade desnecessária
+---
 
 ## Links Relacionados
 
-- [Documentação utilityProcess](https://www.electronjs.org/docs/latest/api/utility-process)
-- [Exemplo MessageChannelMain](https://github.com/electron/electron/blob/main/docs/api/message-channel-main.md)
+- [Documentação utilityProcess (Electron)](https://www.electronjs.org/docs/latest/api/utility-process)
+- [Exemplo MessageChannelMain (Electron)](https://github.com/electron/electron/blob/main/docs/api/message-channel-main.md)
+- [ISSUE-0068 - Consolidação dos serviços LLM](../../issues/backlog/improvement/ISSUE-0068-Consolidacao-servicos-LLM/README.md)

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useConversations } from "./use-conversations";
 import { useMessages } from "./use-messages";
 import { IpcHistoryServiceAdapter } from "../services/ipc-history-service-adapter";
+import { formatDateTime } from "../lib/utils";
 
 export function useActivityLog() {
   const historyService = new IpcHistoryServiceAdapter();
@@ -45,16 +46,6 @@ export function useActivityLog() {
       msg.role.toLowerCase().includes(filter.toLowerCase())
   );
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return (
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
-      " " +
-      date.toLocaleDateString([], { month: "short", day: "numeric" })
-    );
-  };
-
   const handleExport = async () => {
     const data = await exportHistory("json");
     if (!data) return;
@@ -87,7 +78,7 @@ export function useActivityLog() {
     filter,
     setFilter,
     filteredMessages,
-    formatDate,
+    formatDate: formatDateTime,
     handleExport,
   };
 }

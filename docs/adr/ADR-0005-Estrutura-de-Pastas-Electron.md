@@ -1,21 +1,25 @@
-# ADR 0005: Estrutura de Pastas para Aplicação Electron
+# ADR-0005: Estrutura de Pastas para Aplicação Electron
 
 ## Status
 
-Aceito
+- 🟢 **Aceito**
+
+---
 
 ## Contexto
 
-O projeto atual possui uma estrutura de pastas básica que não reflete claramente:
+O projeto possuía uma estrutura de pastas básica que não refletia claramente:
 1. A separação entre processos Main e Renderer do Electron
 2. A localização dos serviços LLM
 3. A organização interna de utilitários e serviços compartilhados
 
-Isso dificulta a manutenção e escalabilidade do projeto.
+Essa limitação dificultava a manutenção e a escalabilidade do projeto.
+
+---
 
 ## Decisão
 
-Adotar a seguinte estrutura:
+Adotar a seguinte estrutura de pastas para o projeto Electron:
 
 ```
 src/
@@ -42,6 +46,8 @@ src/
     └── config/   # Configurações
 ```
 
+---
+
 ## Consequências
 
 **Positivas:**
@@ -54,16 +60,20 @@ src/
 - Requer atualização de imports e referências
 - Necessário atualizar configurações de build
 
-## Alternativas consideradas
+---
 
-1. **Estrutura por features**:
-   - Vantagem: Organização por domínio
-   - Desvantagem: Dificulta separação Electron main/renderer
+## Alternativas Consideradas
 
-2. **Manter estrutura atual**:
-   - Vantagem: Nenhum trabalho de migração
-   - Desvantagem: Não resolve problemas de organização
+- **Estrutura por features**  
+  - Vantagem: Organização por domínio  
+  - Desvantagem: Dificulta separação Electron main/renderer
 
-## Links relacionados
+- **Manter estrutura atual**  
+  - Vantagem: Nenhum trabalho de migração  
+  - Desvantagem: Não resolve problemas de organização
 
-- [ISSUE-0065](issues/backlog/improvement/ISSUE-0065-Reorganizacao-estrutura-pastas)
+---
+
+## Links Relacionados
+
+- [ISSUE-0065 - Reorganização da estrutura de pastas](../../issues/backlog/improvement/ISSUE-0065-Reorganizacao-estrutura-pastas/README.md)

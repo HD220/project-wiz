@@ -1,15 +1,16 @@
-# ADR 0001: Implementação de ADRs para registro de decisões arquiteturais
+# ADR-0001: Implementação de ADRs para registro de decisões arquiteturais
 
 ## Status
 
-Aceito
+🟢 **Aceito**
+
+---
 
 ## Contexto
 
-- O projeto está crescendo em complexidade e tomando decisões arquiteturais importantes
-- Há necessidade de documentar essas decisões para manter consistência e histórico
-- Decisões atuais estão espalhadas em issues, PRs ou apenas na memória dos desenvolvedores
-- ADRs (Architectural Decision Records) são uma prática consolidada para este propósito
+O projeto está crescendo em complexidade e tomando decisões arquiteturais importantes. Há necessidade de documentar essas decisões para manter consistência e histórico. Decisões atuais estão espalhadas em issues, PRs ou apenas na memória dos desenvolvedores. ADRs (Architectural Decision Records) são uma prática consolidada para este propósito.
+
+---
 
 ## Decisão
 
@@ -19,28 +20,30 @@ Aceito
 - Registrar decisões significativas retroativamente quando necessário
 - Atualizar o system-prompt para incluir diretrizes sobre quando criar ADRs
 
+---
+
 ## Consequências
 
 **Positivas:**
-
 - Melhor rastreabilidade e documentação de decisões
 - Contexto preservado para futuros desenvolvedores
 - Maior consistência arquitetural
 - Facilita onboarding de novos membros
 
 **Negativas:**
-
 - Sobrecarga inicial para documentar decisões existentes
 - Necessidade de disciplina para manter atualizado
 
-## Alternativas consideradas
+---
 
-- **Manter status quo (issues e documentação esparsa)**
-  - Rejeitado por não fornecer visão clara do histórico de decisões
-- **Usar outra ferramenta de documentação**
-  - Rejeitado por adicionar complexidade desnecessária
+## Alternativas Consideradas
 
-## Links relacionados
+- Manter status quo (issues e documentação esparsa) — rejeitado por não fornecer visão clara do histórico de decisões
+- Usar outra ferramenta de documentação — rejeitado por adicionar complexidade desnecessária
 
-- [Template de ADR](docs/templates/adr/template.md)
-- [Atualização do system-prompt](.roo/system-prompt-developer)
+---
+
+## Links Relacionados
+
+- [Template de ADR](../templates/adr/template.md)
+- [Atualização do system-prompt](../../.roo/system-prompt-developer)

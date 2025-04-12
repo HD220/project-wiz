@@ -2,48 +2,40 @@
 
 ## Status
 
-Rejeitada
+- 🔴 **Rejeitado**
 
-## Motivo da Rejeição
-
-Esta funcionalidade não será implementada conforme decisão do time, que optou por priorizar outras features no roadmap atual.
+---
 
 ## Contexto
 
-O objetivo é refatorar o `WorkerService` para suportar modelos Mistral (GGUF) usando `node-llama-cpp`, garantindo o uso de `utilityProcess.fork` e evitando a criação de um worker para cada modelo.
+Foi proposta a refatoração do `WorkerService` para suportar modelos Mistral (GGUF) usando `node-llama-cpp`, garantindo o uso de `utilityProcess.fork` e evitando a criação de um worker para cada modelo. O objetivo era melhorar a eficiência no carregamento e gerenciamento de múltiplos modelos, reduzindo consumo de recursos e aumentando a escalabilidade.
 
-A arquitetura atual do `WorkerService` pode não ser otimizada para o carregamento e gerenciamento eficiente de múltiplos modelos GGUF, especialmente o Mistral. Criar um worker para cada modelo pode levar a um alto consumo de recursos e baixa escalabilidade.
+Após análise, a equipe decidiu **não implementar** essa funcionalidade neste momento, priorizando outras features no roadmap atual.
 
-**Restrições:**
-
-- Obrigatório usar `utilityProcess.fork`.
-- Não criar um worker para cada modelo.
+---
 
 ## Decisão
 
-Implementar um único processo worker gerenciado pelo `WorkerService`. O worker deve ser capaz de carregar e descarregar modelos GGUF dinamicamente, conforme necessário. A mensagem enviada ao worker deve especificar qual modelo GGUF deve ser usado para a inferência. Implementar um cache de modelos no worker para evitar recarregamentos desnecessários. Monitorar o uso de memória do worker e liberar modelos não utilizados. Implementar tratamento de erros robusto no worker.
+A proposta de refatoração do `WorkerService` para suporte a múltiplos modelos GGUF com gerenciamento dinâmico foi rejeitada. O time optou por manter a arquitetura atual e focar em demandas mais prioritárias.
+
+---
 
 ## Consequências
 
-- Melhor utilização de recursos.
-- Maior escalabilidade.
-- Maior flexibilidade para adicionar novos modelos.
-- Complexidade adicional no gerenciamento do worker e dos modelos.
-- Necessidade de implementar um cache de modelos eficiente.
-- Necessidade de monitorar o uso de memória para evitar problemas de desempenho.
+- Não haverá suporte dedicado a múltiplos modelos GGUF via gerenciamento dinâmico no `WorkerService`.
+- O consumo de recursos e escalabilidade permanecem conforme a arquitetura vigente.
+- Redução de complexidade e esforço de implementação neste momento.
 
-## Alternativas consideradas
+---
 
-- **Criar um worker para cada modelo:** Descartado devido ao alto consumo de recursos e baixa escalabilidade.
-- **Usar um pool de workers:** Descartado devido à complexidade adicional no gerenciamento do pool e na distribuição das tarefas.
+## Alternativas Consideradas
 
-## Implementação
+- **Criar um worker para cada modelo** — descartado devido ao alto consumo de recursos e baixa escalabilidade.
+- **Usar um pool de workers** — descartado pela complexidade adicional no gerenciamento do pool e distribuição das tarefas.
+- **Implementar gerenciamento dinâmico de modelos em um único worker** — rejeitado por não ser prioridade no momento.
 
-- Modificar o `WorkerService` para gerenciar um único worker.
-- Implementar a lógica de carregamento e descarregamento de modelos no worker.
-- Adicionar tratamento de erros e logging no worker.
-- Implementar testes unitários e de integração.
+---
 
-## Links relacionados
+## Links Relacionados
 
-- [Link para a issue relacionada](link)
+- [ISSUE-0103 - Refatoração WorkerService para Mistral GGUF](../../issues/completed/improvement/ISSUE-0103-Refatorar-WorkerService-Mistral-GGUF/README.md)

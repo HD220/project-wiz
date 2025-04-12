@@ -39,7 +39,7 @@ export class SessionServiceAdapter implements SessionServicePort {
 
   async endSession(sessionId: string): Promise<void> {
     await db.update(conversations)
-      .set({ status: "closed", updatedAt: new Date() })
+      .set({ status: "ended", updatedAt: new Date() })
       .where(eq(conversations.id, sessionId));
   }
 

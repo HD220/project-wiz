@@ -1,10 +1,19 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/macro";
-import { ModelSelect } from "@/components/ui/model-select";
-import { ConfigSlider } from "@/components/ui/config-slider";
 import { AutoUpdateSwitch } from "@/components/ui/auto-update-switch";
-import { useModelConfiguration } from "@/hooks/use-model-configuration";
+import { ModelIdSelector } from "@/components/model-configuration/ModelIdSelector";
+import { TemperatureSlider } from "@/components/model-configuration/TemperatureSlider";
+import { MaxTokensSlider } from "@/components/model-configuration/MaxTokensSlider";
+import { MemoryLimitSlider } from "@/components/model-configuration/MemoryLimitSlider";
+import {
+  useModelId,
+  useTemperature,
+  useMaxTokens,
+  useMemoryLimit,
+  useAutoUpdate,
+  AvailableModel,
+} from "@/hooks/use-model-configuration";
 
 interface Model {
   id: number;
@@ -23,22 +32,40 @@ interface ModelConfigurationProps {
 export default function ModelConfiguration({ models }: ModelConfigurationProps) {
   const { i18n } = useLingui();
 
+  // Adapt models to AvailableModel type for the hook
+  const availableModels: AvailableModel[] = models.map((m) => ({
+    modelId: m.modelId,
+    status: m.status,
+  }));
+
   const {
     modelId,
-    temperature,
-    maxTokens,
-    memoryLimit,
-    autoUpdate,
-    errors,
     setModelId,
-    setTemperature,
-    setMaxTokens,
-    setMemoryLimit,
-    setAutoUpdate,
-  } = useModelConfiguration({
+    errorKey: modelIdErrorKey,
+  } = useModelId({
     initialModelId: models.find((m) => m.status === "downloaded")?.modelId || "",
-    availableModels: models,
+    availableModels,
   });
+
+  const {
+    temperature,
+    setTemperature,
+    errorKey: temperatureErrorKey,
+  } = useTemperature();
+
+  const {
+    maxTokens,
+    setMaxTokens,
+    errorKey: maxTokensErrorKey,
+  } = useMaxTokens();
+
+  const {
+    memoryLimit,
+    setMemoryLimit,
+    errorKey: memoryLimitErrorKey,
+  } = useMemoryLimit();
+
+  const { autoUpdate, setAutoUpdate } = useAutoUpdate();
 
   return (
     <Card>
@@ -51,63 +78,33 @@ export default function ModelConfiguration({ models }: ModelConfigurationProps) 
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <ModelSelect
-          id="model-select"
-          label={<Trans>Active Model</Trans>}
+        <ModelIdSelector
           models={models}
           value={modelId}
           onChange={setModelId}
-          error={errors.modelId ? i18n._(errors.modelId) : undefined}
-          placeholder={i18n._("Select a model")}
+          error={modelIdErrorKey ? i18n._(modelIdErrorKey) : undefined}
+          i18n={i18n}
         />
 
-        <ConfigSlider
-          id="temperature"
-          label={<Trans>Temperature</Trans>}
+        <TemperatureSlider
           value={temperature}
-          min={0}
-          max={1}
-          step={0.1}
           onChange={setTemperature}
-          description={
-            <Trans>
-              Controls randomness: Lower values are more deterministic, higher values more creative.
-            </Trans>
-          }
-          error={errors.temperature ? i18n._(errors.temperature) : undefined}
+          error={temperatureErrorKey ? i18n._(temperatureErrorKey) : undefined}
+          i18n={i18n}
         />
 
-        <ConfigSlider
-          id="max-tokens"
-          label={<Trans>Max Tokens</Trans>}
+        <MaxTokensSlider
           value={maxTokens}
-          min={256}
-          max={4096}
-          step={256}
           onChange={setMaxTokens}
-          description={
-            <Trans>
-              Maximum number of tokens to generate in a single response.
-            </Trans>
-          }
-          error={errors.maxTokens ? i18n._(errors.maxTokens) : undefined}
+          error={maxTokensErrorKey ? i18n._(maxTokensErrorKey) : undefined}
+          i18n={i18n}
         />
 
-        <ConfigSlider
-          id="memory-limit"
-          label={<Trans>Memory Limit (GB)</Trans>}
+        <MemoryLimitSlider
           value={memoryLimit}
-          min={4}
-          max={16}
-          step={1}
           onChange={setMemoryLimit}
-          description={
-            <Trans>
-              Maximum memory allocation for the model.
-            </Trans>
-          }
-          error={errors.memoryLimit ? i18n._(errors.memoryLimit) : undefined}
-          unit="GB"
+          error={memoryLimitErrorKey ? i18n._(memoryLimitErrorKey) : undefined}
+          i18n={i18n}
         />
 
         <AutoUpdateSwitch

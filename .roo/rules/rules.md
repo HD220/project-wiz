@@ -68,6 +68,7 @@ This document consolidates the core definitions, accepted architectural decision
 - Keep issues and ADRs updated to reflect decisions and progress.
 - Work only on what was explicitly requested; create issues for anything outside the scope.
 - Facilitate collaboration by providing clear, actionable outputs.
+- When searching for an issue or defining the next numbering, ALWAYS filter at the root of the issues folder.
 - When creating a new task with `new_task`, the current context information is NOT automatically shared. Always provide all necessary data explicitly in the `new_task` message.
 
 ---
@@ -83,7 +84,7 @@ This document consolidates the core definitions, accepted architectural decision
    - Each function should do only one thing.
    - Limit function size to less than 20 lines.
    - Minimize the number of parameters (maximum 3 or 4).
-   - If a function exceeds 50 lines, create a `new_task` requesting refactoring.
+   - Limit function 50 lines.
 
 3. **Follow SOLID principles**
    - Single Responsibility: one reason to change.

@@ -1,170 +1,116 @@
 import { useState, useCallback } from "react";
+import { IpcHistoryServiceAdapter } from "../services/ipc-history-service-adapter";
+import { Conversation, Message, ExportFormat } from "../types/history";
+import { useAsyncAction } from "./use-async-action";
 
-export interface Conversation {
-  id: string;
-  title: string;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: any;
-}
+/**
+ * Singleton instance of the history service.
+ */
+const historyService = new IpcHistoryServiceAdapter();
 
-interface Message {
-  id: string;
-  conversationId: string;
-  role: "user" | "assistant";
-  content: string;
-  createdAt?: string;
-  [key: string]: any;
-}
-
-type ExportFormat = "json" | "csv";
-
-interface UseHistoryResult {
-  conversations: Conversation[];
-  messages: Message[];
-  selectedConversation: Conversation | null;
-  loading: boolean;
-  error: string | null;
-  fetchConversations: () => Promise<void>;
-  selectConversation: (conversation: Conversation) => void;
-  fetchMessages: (conversationId: string) => Promise<void>;
-  createConversation: (title?: string) => Promise<void>;
-  addMessage: (conversationId: string, role: "user" | "assistant", content: string) => Promise<void>;
-  deleteConversation: (conversationId: string) => Promise<void>;
-  renameConversation: (conversationId: string, newTitle: string) => Promise<void>;
-  exportHistory: (format: ExportFormat) => Promise<Blob | string | null>;
-}
-
-
-export function useHistory(): UseHistoryResult {
+/**
+ * Hook to manage conversations: list, create, delete, rename.
+ */
+export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  
-  const fetchConversations = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await window.historyAPI.getConversations();
+  const [execute, loading, error, setError] = useAsyncAction();
+
+  const fetchConversations = useCallback(
+    execute(async () => {
+      const data = await historyService.getAllConversations();
       setConversations(data as Conversation[]);
-    } catch (err: any) {
-      setError(err.message || "Erro ao buscar conversas");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    }),
+    []
+  );
 
-  
-  const selectConversation = useCallback((conversation: Conversation) => {
-    setSelectedConversation(conversation);
-    setMessages([]); 
-  }, []);
-
-  
-  const fetchMessages = useCallback(async (conversationId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await window.historyAPI.getMessages(conversationId);
-      setMessages(data as Message[]);
-    } catch (err: any) {
-      setError(err.message || "Erro ao buscar mensagens");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  
-  const createConversation = useCallback(async (title?: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await window.historyAPI.createConversation(title);
+  const createConversation = useCallback(
+    execute(async (title?: string) => {
+      await historyService.createConversation(title);
       await fetchConversations();
-    } catch (err: any) {
-      setError(err.message || "Erro ao criar conversa");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchConversations]);
+    }),
+    [fetchConversations]
+  );
 
-  
-  const addMessage = useCallback(async (conversationId: string, role: "user" | "assistant", content: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await window.historyAPI.addMessage(conversationId, role, content);
-      await fetchMessages(conversationId);
-    } catch (err: any) {
-      setError(err.message || "Erro ao adicionar mensagem");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchMessages]);
-
-  
-  const deleteConversation = useCallback(async (conversationId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await window.historyAPI.deleteConversation(conversationId);
+  const deleteConversation = useCallback(
+    execute(async (conversationId: string) => {
+      await historyService.deleteConversation(conversationId);
       if (selectedConversation?.id === conversationId) {
         setSelectedConversation(null);
-        setMessages([]);
       }
       await fetchConversations();
-    } catch (err: any) {
-      setError(err.message || "Erro ao deletar conversa");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchConversations, selectedConversation]);
+    }),
+    [fetchConversations, selectedConversation]
+  );
 
-  
-  const renameConversation = useCallback(async (conversationId: string, newTitle: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await window.historyAPI.renameConversation(conversationId, newTitle);
+  const renameConversation = useCallback(
+    execute(async (conversationId: string, newTitle: string) => {
+      await historyService.renameConversation(conversationId, newTitle);
       await fetchConversations();
-    } catch (err: any) {
-      setError(err.message || "Erro ao renomear conversa");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchConversations]);
+    }),
+    [fetchConversations]
+  );
 
-  
-  const exportHistory = useCallback(async (format: ExportFormat) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await window.historyAPI.exportHistory(format);
-      return data;
-    } catch (err: any) {
-      setError(err.message || "Error exporting history");
-      return null;
-    } finally {
-      setLoading(false);
-    }
+  const selectConversation = useCallback((conversation: Conversation) => {
+    setSelectedConversation(conversation);
   }, []);
 
   return {
     conversations,
-    messages,
     selectedConversation,
     loading,
     error,
+    setError,
     fetchConversations,
-    selectConversation,
-    fetchMessages,
     createConversation,
-    addMessage,
     deleteConversation,
     renameConversation,
-    exportHistory,
+    selectConversation,
   };
+}
+
+/**
+ * Hook to manage messages of a conversation.
+ */
+export function useMessages() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [execute, loading, error, setError] = useAsyncAction();
+
+  const fetchMessages = useCallback(
+    execute(async (conversationId: string) => {
+      const data = await historyService.getMessages(conversationId);
+      setMessages(data as Message[]);
+    }),
+    []
+  );
+
+  const addMessage = useCallback(
+    execute(async (conversationId: string, role: "user" | "assistant", content: string) => {
+      await historyService.addMessage(conversationId, role, content);
+      await fetchMessages(conversationId);
+    }),
+    [fetchMessages]
+  );
+
+  return {
+    messages,
+    loading,
+    error,
+    setError,
+    fetchMessages,
+    addMessage,
+  };
+}
+
+/**
+ * Utility to export conversation history.
+ */
+export async function exportHistory(format: ExportFormat): Promise<Blob | string | null> {
+  try {
+    return await historyService.exportHistory(format);
+  } catch (err: any) {
+    // Error message should be handled by the caller and integrated with i18n if needed
+    throw new Error(err.message || "Error exporting history");
+  }
 }

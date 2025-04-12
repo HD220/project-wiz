@@ -2,87 +2,39 @@
 
 ## Status
 
-Rejeitada
+- 🔴 **Rejeitado**
 
-## Motivo da Rejeição
-
-Esta funcionalidade não será implementada conforme decisão do time, que optou por priorizar outras features no roadmap atual.
+---
 
 ## Contexto
 
-O projeto atualmente utiliza `commonjs` como sistema de módulos e `ES2020` como target ECMAScript no `tsconfig.json`. A migração para ES Modules (ESM) e a atualização do target para `ESNext` podem trazer os seguintes benefícios:
+Foi proposta a migração do projeto para ES Modules (ESM) e atualização do target ECMAScript para `ESNext`, visando melhor compatibilidade com o ecossistema JavaScript moderno, desempenho aprimorado e acesso a novas funcionalidades da linguagem.
 
-- Melhor compatibilidade com o ecossistema JavaScript moderno.
-- Melhor desempenho da aplicação.
-- Acesso a novas funcionalidades da linguagem.
-- Possível redução do tamanho do bundle.
+Após análise, a equipe decidiu **não implementar** essa migração neste momento, priorizando outras demandas do roadmap e considerando possíveis impactos de compatibilidade e esforço de refatoração.
+
+---
 
 ## Decisão
 
-Recomenda-se migrar para ES Modules (ESM) e atualizar o target do ECMAScript para `ESNext`.
+A proposta de migração para ES Modules e atualização do target ECMAScript foi rejeitada. O projeto permanecerá utilizando `commonjs` e `ES2020` até que haja uma necessidade crítica ou mudança de contexto.
+
+---
 
 ## Consequências
 
-**Positivas:**
+- O projeto continuará utilizando `commonjs` e `ES2020` como padrão.
+- Não haverá necessidade de refatoração de imports/exports ou ajustes em ferramentas de build.
+- Possíveis limitações em relação a novas funcionalidades do JavaScript moderno permanecem.
 
-- Melhor compatibilidade com o ecossistema JavaScript moderno.
-- Melhor desempenho da aplicação.
-- Acesso a novas funcionalidades da linguagem.
-- Possível redução do tamanho do bundle.
+---
 
-**Negativas:**
+## Alternativas Consideradas
 
-- Possível incompatibilidade com dependências (deve ser verificado).
-- Possível necessidade de polyfills para navegadores mais antigos (depende das funcionalidades utilizadas).
-- Necessidade de refatoração do código existente para usar `import` e `export`.
-- Possível necessidade de ajustes nas ferramentas de build.
+- **Migrar para ES Modules e ESNext** — rejeitado por não ser prioridade e pelo risco de incompatibilidade com dependências.
+- **Manter configuração atual** — mantido por simplicidade e estabilidade.
 
-## Plano de Migração
+---
 
-1. **Atualizar `target` para `ESNext`:**
-   - Modificar o arquivo `tsconfig.json` para atualizar o target para `ESNext`.
-   ```json
-   {
-     "compilerOptions": {
-       "target": "ESNext"
-     }
-   }
-   ```
-2. **Migrar para ES Modules (ESM):**
-   - Modificar o arquivo `tsconfig.json` para atualizar o module para `ESNext` ou `ES2020` (ou superior).
-   ```json
-   {
-     "compilerOptions": {
-       "module": "ESNext"
-     }
-   }
-   ```
-   - Adicionar `"type": "module"` no `package.json`.
-   - Substituir `require` por `import` e `module.exports` por `export` no código.
-   - Renomear arquivos `.js` para `.mts` (para módulos TypeScript) ou `.cts` (para CommonJS TypeScript, se necessário).
-3. **Verificar Dependências:**
-   - Analisar as dependências no `package.json` e verificar se elas suportam ESM.
-   - Se alguma dependência não suportar ESM, considerar alternativas ou usar wrappers.
-4. **Atualizar Ferramentas de Build:**
-   - Verificar se as ferramentas de build (Electron Forge, Vite) precisam de configurações adicionais para suportar ESM.
-5. **Testes:**
-   - Executar os testes da aplicação para garantir que não haja regressões.
-   ```bash
-   npm test
-   ```
-6. **Verificar Funcionalidade:**
-   - Verificar se a aplicação continua funcionando corretamente no Electron e em diferentes navegadores.
-7. **Monitorar:**
-   - Monitorar o tamanho do bundle para garantir que não haja um aumento significativo.
-   - Realizar testes de desempenho antes e depois da atualização para garantir que não haja regressões.
+## Links Relacionados
 
-## Observações
-
-- É importante verificar a compatibilidade das dependências com ESM antes de realizar a migração.
-- Considerar a necessidade de polyfills para navegadores mais antigos.
-- A migração deve ser feita de forma gradual, convertendo módulos individualmente.
-
-## Próximos Passos
-
-1. Mudar para o modo "Developer" para atualizar o `tsconfig.json` e o `package.json`.
-2. Executar os testes para verificar se há alguma regressão.
+- [ISSUE-0111 - Proposta de migração para ES Modules](../../issues/backlog/improvement/ISSUE-0111-Refatorar-PromptForm-em-componentes-menores/README.md)

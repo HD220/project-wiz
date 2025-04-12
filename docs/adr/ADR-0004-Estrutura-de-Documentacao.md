@@ -1,30 +1,35 @@
-# ADR 0004: Estrutura de documentação
+# ADR-0004: Estrutura de documentação
 
 ## Status
 
-Aceito
+🟢 **Aceito**
+
+---
 
 ## Contexto
 
 O projeto precisava de uma estrutura de documentação clara e abrangente para:
-
 - Facilitar a manutenção
 - Permitir fácil expansão
 - Garantir consistência
 - Apoiar novos contribuidores
 
+---
+
 ## Decisão
 
 Adotamos a seguinte estrutura de documentação:
 
-1. **README.md** - Visão geral do projeto e ponto de entrada
+1. **README.md** – Visão geral do projeto e ponto de entrada
 2. **docs/**
-   - **project-context.md** - Visão geral técnica
-   - **documentation-status.md** - Status e métricas
-   - **ui-components.md** - Documentação de componentes
-   - **llm-services.md** - Documentação de serviços
-   - **adr/** - Decisões arquiteturais
-   - **templates/** - Templates para documentação
+   - **project-context.md** – Visão geral técnica
+   - **documentation-status.md** – Status e métricas
+   - **ui-components.md** – Documentação de componentes
+   - **llm-services.md** – Documentação de serviços
+   - **adr/** – Decisões arquiteturais
+   - **templates/** – Templates para documentação
+
+---
 
 ## Consequências
 
@@ -33,16 +38,15 @@ Adotamos a seguinte estrutura de documentação:
 - Consistência entre documentos
 - Requer manutenção contínua para atualizar links e referências
 
+---
+
 ## Alternativas Consideradas
 
-1. Documentação monolítica em um único arquivo
-   - Difícil manutenção
-   - Pouca organização
+- Documentação monolítica em um único arquivo — rejeitado por dificultar manutenção e organização
+- Documentação apenas no README — rejeitado por limitar a profundidade técnica e poluir o arquivo principal
 
-2. Documentação apenas no README
-   - Limita a profundidade técnica
-   - Polui o arquivo principal
+---
 
-## Links relacionados
+## Links Relacionados
 
 - [Template de documentação](../templates/)

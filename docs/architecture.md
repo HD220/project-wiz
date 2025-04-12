@@ -124,6 +124,21 @@ src/
 - **Services:** Integrações frontend, temas, armazenamento local.
 - **Roteamento:** TanStack Router ([ADR-0007](adr/ADR-0007-Implementacao-TanStack-Router-Drizzle.md)).
 
+#### Autenticação: Contratos e Responsabilidades
+
+- **API (`auth-api.ts`)**: Responsável por chamadas HTTP/IPC para autenticação (login, logout, register, refresh). Não manipula estado ou storage.
+- **Actions (`auth-actions.ts`)**: Funções puras, sem dependência de React ou UI. Recebem apenas dados, retornam objetos de resultado (`{ user }`, `{ session }`, `{ success: true }`) ou lançam erros previsíveis. Não manipulam setters de estado nem efeitos colaterais de UI. Persistem tokens via storage.
+- **Storage (`auth-storage.ts`)**: Camada de persistência local de tokens (get, save, clear). Não possui lógica de negócio.
+- **Hooks (`useAuth`, etc.)**: Responsáveis por consumir as actions puras, atualizar o estado da UI e tratar feedback ao usuário. Toda manipulação de estado React ocorre apenas nos hooks.
+
+**Contrato das actions:**
+- Todas as funções são assíncronas e retornam objetos de resultado ou lançam erros tratados.
+- Exemplo: `loginUser(email, password): Promise<{ session: AuthSession }>`
+- Erros são lançados e devem ser tratados pelo consumidor (hook/UI).
+
+**Observação:**
+- Está BLOQUEADA a implementação de novas features de autenticação/sessão até a conclusão total desta refatoração, para garantir a padronização e evitar regressões.
+
 ### Services
 
 - **WorkerService:** Gerencia pool de workers, fila de prompts, execução paralela.

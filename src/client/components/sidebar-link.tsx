@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 interface SidebarLinkProps {
   to: string;
-  label: string;
+  label: React.ReactNode;
   icon: React.ReactNode;
   active?: boolean;
 }

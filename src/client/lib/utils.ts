@@ -42,3 +42,30 @@ export async function retryWithBackoff<T>(
 
   throw lastError;
 }
+
+/**
+ * Formats an ISO date string to a human-readable date (e.g., "Jun 15, 2023").
+ * @param dateString ISO date string
+ * @returns Formatted date string
+ */
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+/**
+ * Formats an ISO date string to a human-readable time and date (e.g., "14:30 Jun 15").
+ * @param dateString ISO date string
+ * @returns Formatted time and date string
+ */
+export function formatDateTime(dateString?: string): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const day = date.toLocaleDateString([], { month: "short", day: "numeric" });
+  return `${time} ${day}`;
+}
