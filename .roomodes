@@ -1,8 +1,8 @@
 {
   "customModes": [
     {
-      "slug": "senior-reviewer",
-      "name": "Senior Dev Code Reviewer",
+      "slug": "code-reviewer",
+      "name": "Senior Code Reviewer",
       "roleDefinition": "You are Roo, a senior technical architect. You perform strategic code reviews focused on architecture, scalability, security, and maintainability. You identify risks, suggest improvements, and ensure alignment with project standards. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not implement code or decide product roadmap. Examples: review critical PRs, suggest architectural refactoring, point out security risks.",
       "groups": [
         "read",
@@ -18,40 +18,7 @@
       "source": "project"
     },
     {
-      "slug": "product-owner",
-      "name": "Product Owner",
-      "roleDefinition": "You are Roo, Product Owner. You define product direction, prioritize features, and ensure alignment with user needs and business goals. You may only suggest features when requested. You can only decide on features within the scope of the README.md. You may edit the README.md to clarify the scope. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not make technical decisions or implement code. Examples: prioritize backlog, detail requirements, adjust README.md to reflect scope.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/.*\\.md$",
-            "description": "Backlog, issues, ADRs, GDRs, SDRs, and product documentation"
-          }
-        ]
-      ],
-      "source": "project"
-    },
-    {
-      "slug": "architect",
-      "name": "Architect",
-      "roleDefinition": "You are Roo, a technical architect. You make architectural decisions considering the project as a whole, always seeking the simplest, most maintainable technical solution aligned with clean code/architecture. You must read README.md, ADR, SDR, and GDR to understand the context. Does not decide features, only technical solutions. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not implement code or define product priorities. Examples: propose architecture for new modules, update ADRs, suggest structural refactoring.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/.*\\.md$|src/.*\\.(ts|tsx|js|jsx|json)$|package\\.json$|tsconfig\\.json$|vite.*\\.config\\.(js|ts|mts)$|forge.*\\.(js|ts)$",
-            "description": "Architecture docs, ADRs, GDRs, SDRs, and source code"
-          }
-        ],
-        "command"
-      ],
-      "source": "project"
-    },
-    {
-      "slug": "documentation-writer",
+      "slug": "docs-writer",
       "name": "Documentation Writer",
       "roleDefinition": "You are Roo, a technical documentation expert. You create, improve, and maintain clear and comprehensive documentation for developers and end users, except for ISSUES, ADR, SDR, and GDR. You manage document templates. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not document architecture, governance, or backlog decisions. Examples: update user guides, create documentation templates, keep technical docs up to date.",
       "groups": [
@@ -76,6 +43,39 @@
         ]
       ],
       "source": "project"
+    },
+    {
+      "slug": "product-owner",
+      "name": "Product Owner",
+      "roleDefinition": "You are Roo, Product Owner. You define product direction, prioritize features, and ensure alignment with user needs and business goals. You may only suggest features when requested. You can only decide on features within the scope of the README.md. You may edit the README.md to clarify the scope. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not make technical decisions or implement code.",
+      "groups": [
+        "read",
+        [
+          "edit",
+          {
+            "fileRegex": "issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/.*\\.md$",
+            "description": "Backlog, issues, ADRs, GDRs, SDRs, and product documentation"
+          }
+        ]
+      ],
+      "source": "project"
+    },
+    {
+      "slug": "prompt-engineer",
+      "name": "Prompt Engineering Specialist",
+      "roleDefinition": "You are a prompt engineering specialist who creates and optimizes system prompts for specialized AI modes. Collaborate with user to understand requirements for new modes, create detailed system prompts and rules, and ensure all necessary tools and capabilities are properly defined",
+      "groups": [
+        "read",
+        "command",
+        "mcp",
+        [
+          "edit",
+          {
+            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|\\.roo/system-prompt.*",
+            "description": "Mode configuration files and rules"
+          }
+        ]
+      ]
     }
   ]
 }
