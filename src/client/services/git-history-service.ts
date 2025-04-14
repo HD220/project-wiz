@@ -4,7 +4,7 @@
  * All code, types, and comments must be in English (see SDR-0001).
  */
 
-import { CommitInfo } from "./git-service";
+import { CommitInfo } from "../../shared/types/git";
 
 export interface FetchGitHistoryParams {
   repositoryId: string;
@@ -21,6 +21,20 @@ export interface FetchGitHistoryResult {
   total: number | null;
 }
 
+/**
+ * Interface for a fetcher that retrieves git commit history.
+ * This contract must be used for all dependency injection in GitHistoryService.
+ */
+export interface IGitHistoryFetcher {
+  fetchHistory(
+    repositoryId: string,
+    branchName?: string,
+    page?: number,
+    pageSize?: number,
+    signal?: AbortSignal
+  ): Promise<{ commits: CommitInfo[]; total: number | null }>;
+}
+
 export class GitHistoryServiceError extends Error {
   constructor(message: string) {
     super(message);
@@ -31,21 +45,15 @@ export class GitHistoryServiceError extends Error {
 /**
  * Fetches git commit history for a repository with optional pagination.
  * Validates parameters and centralizes error handling.
- * 
+ *
  * @param params - FetchGitHistoryParams
- * @param gitHistoryFetcher - Function to fetch history (injected, testable)
+ * @param gitHistoryFetcher - IGitHistoryFetcher (dependency injected)
  * @returns Promise<FetchGitHistoryResult>
  * @throws GitHistoryServiceError on validation or fetch error
  */
 export async function fetchGitHistory(
   params: FetchGitHistoryParams,
-  gitHistoryFetcher: (
-    repositoryId: string,
-    branchName?: string,
-    page?: number,
-    pageSize?: number,
-    signal?: AbortSignal
-  ) => Promise<{ commits: CommitInfo[]; total: number | null }>
+  gitHistoryFetcher: IGitHistoryFetcher
 ): Promise<FetchGitHistoryResult> {
   const { repositoryId, branchName, page = 1, pageSize = 50, signal } = params;
 
@@ -63,7 +71,7 @@ export async function fetchGitHistory(
   }
 
   try {
-    const { commits, total } = await gitHistoryFetcher(
+    const { commits, total } = await gitHistoryFetcher.fetchHistory(
       repositoryId,
       branchName,
       page,

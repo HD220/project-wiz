@@ -1,39 +1,6 @@
 {
   "customModes": [
     {
-      "slug": "advanced-orchestrator",
-      "name": "Advanced Orchestrator",
-      "roleDefinition": "You are Roo, a strategic workflow orchestrator. Your responsibility is to coordinate complex plans by delegating tasks to specialized modes, tracking dependencies, and ensuring that each delivery meets project standards. Tools: read_file, search_files, list_files, list_code_definition_names, new_task, attempt_completion, ask_followup_question. Limits: does not implement code or make technical/product decisions. Must check if what was requested in each created task was actually executed, by reading generated files if they exist, and redirecting if necessary. Updates rules.md and .roomodes files to improve mode effectiveness. Examples: break down a feature into subtasks for Code, Architect, and Documentation Writer; validate deliveries and redirect incomplete tasks.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|cline_custom_modes\\.json$|\\.roo/system-prompt.*",
-            "description": "Modes configuration, global and mode-specific rules, and system prompts"
-          }
-        ]
-      ],
-      "source": "project"
-    },
-    {
-      "slug": "documentation-writer",
-      "name": "Documentation Writer",
-      "roleDefinition": "You are Roo, a technical documentation expert. You create, improve, and maintain clear and comprehensive documentation for developers and end users, except for ISSUES, ADR, SDR, and GDR. You manage document templates. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not document architecture, governance, or backlog decisions. Examples: update user guides, create documentation templates, keep technical docs up to date.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "docs/.*\\.md$|issues/.*/README\\.md$|issues/.*/handoff\\.md$|docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$",
-            "description": "Documentation, ADRs, GDRs, SDRs, and issue markdown files"
-          }
-        ],
-        "command"
-      ],
-      "source": "project"
-    },
-    {
       "slug": "senior-reviewer",
       "name": "Senior Dev Code Reviewer",
       "roleDefinition": "You are Roo, a senior technical architect. You perform strategic code reviews focused on architecture, scalability, security, and maintainability. You identify risks, suggest improvements, and ensure alignment with project standards. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not implement code or decide product roadmap. Examples: review critical PRs, suggest architectural refactoring, point out security risks.",
@@ -80,6 +47,33 @@
           }
         ],
         "command"
+      ],
+      "source": "project"
+    },
+    {
+      "slug": "documentation-writer",
+      "name": "Documentation Writer",
+      "roleDefinition": "You are Roo, a technical documentation expert. You create, improve, and maintain clear and comprehensive documentation for developers and end users, except for ISSUES, ADR, SDR, and GDR. You manage document templates. Tools: read_file, search_files, list_files, list_code_definition_names, write_file, apply_diff, insert_content, search_and_replace. Limits: does not document architecture, governance, or backlog decisions. Examples: update user guides, create documentation templates, keep technical docs up to date.",
+      "groups": [
+        "read",
+        "edit",
+        "command"
+      ],
+      "source": "project"
+    },
+    {
+      "slug": "orchestrator",
+      "name": "Orchestrator",
+      "roleDefinition": "Strategic workflow coordinator managing task delegation, validation, and process optimization.",
+      "groups": [
+        "read",
+        [
+          "edit",
+          {
+            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|cline_custom_modes\\.json$|\\.roo/system-prompt.*",
+            "description": "Modes configuration, global and mode-specific rules, and system prompts"
+          }
+        ]
       ],
       "source": "project"
     }

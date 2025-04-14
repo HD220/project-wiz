@@ -3,10 +3,10 @@ import GitHubTokenManager from '@/components/github-token-manager'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/settings/')({
-  component: Index,
+  component: SettingsPage,
 })
 
-function Index() {
+function SettingsPage() {
   return (
     <div className="space-y-6 p-4">
       <GitHubTokenManager />
