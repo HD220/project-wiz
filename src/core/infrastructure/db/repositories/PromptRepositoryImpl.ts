@@ -1,3 +1,4 @@
+import { ValidationStrategy, RequiredFieldValidation, MaxLengthValidation, MinLengthValidation } from '../../../application/strategies/ValidationStrategy';
 import { db } from "../client";
 import { prompts, variables } from "../schema";
 import { eq, inArray, sql } from "drizzle-orm";
@@ -51,6 +52,18 @@ export class PromptRepositoryImpl implements PromptRepositoryPort {
     const promptId = uuidv4();
     const now = new Date();
 
+    const validations: ValidationStrategy[] = [
+      new RequiredFieldValidation('text'),
+      new MaxLengthValidation('text', 255),
+      new MinLengthValidation('text', 10),
+    ];
+
+    for (const validation of validations) {
+      if (!validation.validate(prompt)) {
+        throw new Error(`Validation failed: ${validation.constructor.name}`);
+      }
+    }
+
     await db.insert(prompts).values({
       id: promptId,
       name: prompt.text.substring(0, 50),
@@ -86,6 +99,18 @@ export class PromptRepositoryImpl implements PromptRepositoryPort {
 
     const now = new Date();
     const newVersion = existing[0].version + 1;
+
+    const validations: ValidationStrategy[] = [
+      new RequiredFieldValidation('text'),
+      new MaxLengthValidation('text', 255),
+      new MinLengthValidation('text', 10),
+    ];
+
+    for (const validation of validations) {
+      if (!validation.validate(prompt)) {
+        throw new Error(`Validation failed: ${validation.constructor.name}`);
+      }
+    }
 
     await db
       .update(prompts)
@@ -152,7 +177,7 @@ export class PromptRepositoryImpl implements PromptRepositoryPort {
 
   async listPromptNames(): Promise<string[]> {
     const promptsList = await db.select({ name: prompts.name }).from(prompts);
-    return promptsList.map((p) => p.name);
+    return promptsList.map((p: { name: string }) => p.name);
   }
 
   async listPromptNamesExceptId(id: string): Promise<string[]> {
@@ -160,7 +185,7 @@ export class PromptRepositoryImpl implements PromptRepositoryPort {
       .select({ name: prompts.name })
       .from(prompts)
       .where(sql`prompts.id != ${id}`);
-    return promptsList.map((p) => p.name);
+    return promptsList.map((p: { name: string }) => p.name);
   }
 
   async restoreDefaultPrompts(): Promise<void> {

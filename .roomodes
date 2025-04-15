@@ -9,7 +9,7 @@
         [
           "edit",
           {
-            "fileRegex": "src/.*\\.(ts|tsx|js|jsx|css|scss|html|json)$|mobile/.*\\.(ts|tsx|js|jsx|css|scss|html|json)$"
+            "fileRegex": "\\.(ts|tsx|js|jsx|css|scss|html|json)$|src/.*\\.(ts|tsx|js|jsx|css|scss|html|json)$|mobile/.*\\.(ts|tsx|js|jsx|css|scss|html|json)$"
           }
         ],
         "command",
