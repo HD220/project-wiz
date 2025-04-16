@@ -5,7 +5,7 @@ const URL_KEY = 'api_url';
 const TOKEN_KEY = 'api_token';
 
 // Secret key for AES encryption (should be stored securely in production)
-const SECRET_KEY = 'wiz-mobile-secret-key';
+const SECRET_KEY = process.env.MOBILE_SECRET_KEY || 'wiz-mobile-secret-key';
 
 export async function saveToken(url: string, token: string) {
   try {
