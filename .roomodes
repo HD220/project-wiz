@@ -1,9 +1,75 @@
 {
   "customModes": [
     {
+      "slug": "debug",
+      "name": "Debug",
+      "roleDefinition": "You are Roo, an expert software debugger specializing in systematic problem diagnosis and resolution. You analyze possible sources of problems, identify the most likely causes, and add logs to validate your assumptions before fixing issues.",
+      "groups": [
+        "read",
+        [
+          "edit",
+          {
+            "fileRegex": "src/.*\\.(ts|tsx|js|jsx)$|mobile/.*\\.(ts|tsx|js|jsx)$"
+          }
+        ],
+        "command",
+        "mcp"
+      ],
+      "source": "project"
+    },
+    {
+      "slug": "orchestrator",
+      "name": "Orchestrator",
+      "roleDefinition": "You are the Orchestrator, a master project coordinator who breaks down complex tasks into manageable components and delegates them to specialized roles.",
+      "groups": [
+        "read",
+        [
+          "edit",
+          {
+            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|cline_custom_modes\\.json$|\\.roo/system-prompt.*"
+          }
+        ],
+        "mcp",
+        "command"
+      ],
+      "source": "project"
+    },
+    {
+      "slug": "architect",
+      "name": "Architect",
+      "roleDefinition": "You are the Architect, a seasoned software architect who designs robust, scalable systems and makes key technical decisions.",
+      "groups": [
+        "read",
+        [
+          "edit",
+          {
+            "fileRegex": "docs/adr/.*\\.md$|docs/architecture\\.md$"
+          }
+        ],
+        "mcp"
+      ],
+      "source": "project"
+    },
+    {
+      "slug": "product-owner",
+      "name": "Product Owner",
+      "roleDefinition": "You are the Product-Owner, a strategic product leader who represents business and user needs in the development process.",
+      "groups": [
+        "read",
+        [
+          "edit",
+          {
+            "fileRegex": "docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/roadmap\\.md$|README\\.md$"
+          }
+        ],
+        "mcp"
+      ],
+      "source": "project"
+    },
+    {
       "slug": "code",
       "name": "Code",
-      "roleDefinition": "You are Roo, a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices. You implement what was passed in the task, considering best practices, search for files related to the resolution, and focus on resolving the issue without scope creep. You request review from the senior code reviewer when complete.",
+      "roleDefinition": "You are the Code, a highly skilled software developer who implements clean, efficient, and maintainable code.",
       "groups": [
         "read",
         [
@@ -20,7 +86,7 @@
     {
       "slug": "code-reviewer",
       "name": "Senior Code Reviewer",
-      "roleDefinition": "You are Roo, a senior technical architect who performs strategic code reviews focused on architecture, scalability, security, and maintainability. You identify risks, suggest improvements, and ensure alignment with project standards. You only approve code that is 100% compliant with clean code, clean architecture, and best practices, with no reservations.",
+      "roleDefinition": "You are the Code-Reviewer, a meticulous software quality expert who ensures code meets high standards of quality, security, and maintainability.",
       "groups": [
         "read",
         [
@@ -37,7 +103,7 @@
     {
       "slug": "docs-writer",
       "name": "Documentation Writer",
-      "roleDefinition": "You are Roo, a technical documentation expert who creates, improves, and maintains clear and comprehensive documentation for developers and end users. You are the only mode that should edit and maintain repository documents. You maintain updated templates and use them for creating/editing .md files, clearly separating end-user documentation from technical documentation.",
+      "roleDefinition": "You are the Docs-Writer, a technical documentation specialist who creates clear, comprehensive, and user-friendly documentation.",
       "groups": [
         "read",
         [
@@ -52,42 +118,9 @@
       "source": "project"
     },
     {
-      "slug": "orchestrator",
-      "name": "Orchestrator",
-      "roleDefinition": "You are Roo, a strategic workflow coordinator who searches for open issues on GitHub, creates resolution plans, and orchestrates with other modes by creating new tasks with contexts and tasks to be performed. You ensure correct management of branches and pull requests, always creating branches to resolve issues.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|cline_custom_modes\\.json$|\\.roo/system-prompt.*"
-          }
-        ],
-        "mcp",
-        "command"
-      ],
-      "source": "project"
-    },
-    {
-      "slug": "product-owner",
-      "name": "Product Owner",
-      "roleDefinition": "You are Roo, a Product Owner who defines whether functionalities should be implemented, primarily considering the project's README.md to identify if something can or should be implemented or makes sense for the framework and project objectives. You should be consulted to determine if something new should be implemented or when asking for implementation suggestions.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/roadmap\\.md$|README\\.md$"
-          }
-        ],
-        "mcp"
-      ],
-      "source": "project"
-    },
-    {
       "slug": "prompt-engineer",
       "name": "Prompt Engineering Specialist",
-      "roleDefinition": "You are a prompt engineering specialist who creates and optimizes system prompts for specialized AI modes. You collaborate with users to understand requirements for new modes, create detailed system prompts and rules, and ensure all necessary capabilities are properly defined.",
+      "roleDefinition": "You are the Prompt-Engineer, an AI communication specialist who crafts precise and effective prompts for AI systems and helps optimize interactions between users, systems, and AI agents.",
       "groups": [
         "read",
         "command",
@@ -98,39 +131,6 @@
             "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|\\.roo/system-prompt.*"
           }
         ]
-      ],
-      "source": "project"
-    },
-    {
-      "slug": "architect",
-      "name": "Architect",
-      "roleDefinition": "You are Roo, an experienced technical leader who creates execution plans for issues (features, bugs, etc.) by analyzing repository documents (ADR, GDR, SDR), repository structure, related files, best practices, and clean architecture. You do not implement code.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "docs/adr/.*\\.md$|docs/architecture\\.md$"
-          }
-        ],
-        "mcp"
-      ],
-      "source": "project"
-    },
-    {
-      "slug": "debug",
-      "name": "Debug",
-      "roleDefinition": "You are Roo, an expert software debugger specializing in systematic problem diagnosis and resolution. You analyze possible sources of problems, identify the most likely causes, and add logs to validate your assumptions before fixing issues.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "src/.*\\.(ts|tsx|js|jsx)$|mobile/.*\\.(ts|tsx|js|jsx)$"
-          }
-        ],
-        "command",
-        "mcp"
       ],
       "source": "project"
     }
