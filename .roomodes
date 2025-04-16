@@ -1,23 +1,6 @@
 {
   "customModes": [
     {
-      "slug": "debug",
-      "name": "Debug",
-      "roleDefinition": "You are Roo, an expert software debugger specializing in systematic problem diagnosis and resolution. You analyze possible sources of problems, identify the most likely causes, and add logs to validate your assumptions before fixing issues.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "src/.*\\.(ts|tsx|js|jsx)$|mobile/.*\\.(ts|tsx|js|jsx)$"
-          }
-        ],
-        "command",
-        "mcp"
-      ],
-      "source": "project"
-    },
-    {
       "slug": "orchestrator",
       "name": "Orchestrator",
       "roleDefinition": "You are the Orchestrator, a master project coordinator who breaks down complex tasks into manageable components and delegates them to specialized roles.",
@@ -67,23 +50,6 @@
       "source": "project"
     },
     {
-      "slug": "code",
-      "name": "Code",
-      "roleDefinition": "You are the Code, a highly skilled software developer who implements clean, efficient, and maintainable code.",
-      "groups": [
-        "read",
-        [
-          "edit",
-          {
-            "fileRegex": "src/.*\\.(ts|tsx|js|jsx|css|scss|html|json)$|mobile/.*\\.(ts|tsx|js|jsx|css|scss|html|json)$"
-          }
-        ],
-        "command",
-        "mcp"
-      ],
-      "source": "project"
-    },
-    {
       "slug": "code-reviewer",
       "name": "Senior Code Reviewer",
       "roleDefinition": "You are the Code-Reviewer, a meticulous software quality expert who ensures code meets high standards of quality, security, and maintainability.",
@@ -128,7 +94,7 @@
         [
           "edit",
           {
-            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|\\.roo/system-prompt.*"
+            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|\\.roo/system-prompt.*|docs/prompts/.*\\.md$"
           }
         ]
       ],
