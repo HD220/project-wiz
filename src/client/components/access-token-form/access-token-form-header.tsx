@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Trans } from "@lingui/macro";
-import { CardHeader, CardDescription } from "./ui/card";
+import { CardHeader, CardDescription } from "@/components/ui/card";
 
 const AccessTokenFormHeader: React.FC = () => (
   <CardHeader>

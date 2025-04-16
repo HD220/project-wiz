@@ -1,23 +1,26 @@
 // AuthService: JWT-based authentication service for user registration, login, logout, session verification, and token refresh.
 
 import jwt from "jsonwebtoken";
-import { compare, hash } from "bcryptjs";
+import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { AuthUser, AuthToken, AuthServiceInterface, RegisterInput, LoginInput, AuthSession } from "./types";
 
 // In-memory user store for demonstration (replace with DB in production)
 const users: Record<string, AuthUser> = {};
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+let JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable not defined");
+}
 const JWT_EXPIRES_IN = "1h";
 const JWT_REFRESH_EXPIRES_IN = "7d";
 
 function generateToken(payload: object, expiresIn: string) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  return jwt.sign(payload, JWT_SECRET as string, { expiresIn: expiresIn, algorithm: 'HS256' });
 }
 
 function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET);
+  return jwt.verify(token, JWT_SECRET as string);
 }
 
 export class AuthService implements AuthServiceInterface {
@@ -25,7 +28,7 @@ export class AuthService implements AuthServiceInterface {
     if (users[input.email]) {
       throw new Error("User already exists");
     }
-    const passwordHash = await hash(input.password, 10);
+    const passwordHash = await bcrypt.hash(input.password, 10);
     const user: AuthUser = {
       id: uuidv4(),
       email: input.email,
@@ -38,8 +41,8 @@ export class AuthService implements AuthServiceInterface {
 
   async login(input: LoginInput): Promise<AuthSession> {
     const user = users[input.email];
-    if (!user) throw new Error("Invalid credentials");
-    const valid = await compare(input.password, user.passwordHash);
+    if (!user || !user.passwordHash) throw new Error("Invalid credentials");
+    const valid = await bcrypt.compare(input.password, user.passwordHash);
     if (!valid) throw new Error("Invalid credentials");
     const accessToken = generateToken({ sub: user.id, email: user.email }, JWT_EXPIRES_IN);
     const refreshToken = generateToken({ sub: user.id, email: user.email }, JWT_REFRESH_EXPIRES_IN);
