@@ -68,7 +68,7 @@ interface GenerateOptions {
 
 #### `loadModel(options: ModelOptions): Promise<void>`
 
-Carrega um modelo LLM com as opções fornecidas.
+Carrega um modelo LLM com das opções fornecidas.
 
 - **Parâmetros:**
   - `options`: Objeto `ModelOptions` com o caminho e configurações do modelo.
@@ -161,3 +161,153 @@ function ChatComponent() {
 O hook `useLLM` simplifica a integração com modelos LLM no frontend React, abstraindo a comunicação IPC e fornecendo uma API clara para carregar modelos, gerar texto e configurar o contexto.
 
 Para detalhes sobre as opções específicas de modelos e geração, consulte a documentação da biblioteca [`node-llama-cpp`](https://github.com/abetlen/llama-cpp-python).
+
+---
+
+## Validação em APIs
+
+### Exemplo de Validação de Endpoint
+
+```typescript
+import { InputValidator } from '@/core/infrastructure/validation';
+import { z } from 'zod';
+
+// Definindo schema para payload de usuário
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(3).max(100),
+  email: z.string().email()
+});
+
+// Criando validador
+const userValidator = new InputValidator(UserSchema);
+
+// Usando em um endpoint
+router.post('/users', async (req, res) => {
+  try {
+    const validData = userValidator.validate(req.body);
+    // Processar dados válidos...
+  } catch (error) {
+    res.status(400).json({
+      error: error.code,
+      message: error.message,
+      path: error.path
+    });
+  }
+});
+```
+
+### Validação de Headers
+
+```typescript
+const AuthHeaderSchema = z.object({
+  authorization: z.string().regex(/^Bearer .+$/)
+});
+
+const authValidator = new InputValidator(AuthHeaderSchema);
+
+router.use((req, res, next) => {
+  try {
+    authValidator.validate(req.headers);
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid auth header' });
+  }
+});
+```
+
+### Validação Customizada
+
+```typescript
+class AgeValidator extends InputValidator<{ age: number }> {
+  protected formatError(error: z.ZodError): ValidationError {
+    return {
+      code: 'INVALID_AGE',
+      message: 'Idade deve ser entre 18 e 120 anos',
+      path: error.errors[0].path
+    };
+  }
+}
+
+const ageSchema = z.object({
+  age: z.number().min(18).max(120)
+});
+
+const ageValidator = new AgeValidator(ageSchema);
+
+## Validação de Tokens OAuth do GitHub
+
+### Schema de Validação
+```typescript
+import { z } from 'zod';
+
+const OAuthTokenPattern = /^[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]*$/;
+
+export const GitHubOAuthTokenSchema = z.object({
+  access_token: z.string()
+    .min(40, 'Token deve ter no mínimo 40 caracteres')
+    .max(2000, 'Token deve ter no máximo 2000 caracteres')
+    .regex(OAuthTokenPattern, 'Formato de token inválido'),
+  token_type: z.literal('bearer'),
+  scope: z.string()
+    .min(3, 'Escopo deve ter no mínimo 3 caracteres')
+    .max(500, 'Escopo deve ter no máximo 500 caracteres')
+}).strict();
+```
+
+### Regras de Validação
+1. **access_token**:
+   - Obrigatório
+   - Formato JWT válido
+   - Tamanho: 40-2000 caracteres
+   - Regex: `^[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]*$`
+
+2. **token_type**:
+   - Obrigatório
+   - Valor fixo: 'bearer'
+
+3. **scope**:
+   - Obrigatório
+   - Tamanho: 3-500 caracteres
+
+### Exemplos
+
+**Payload válido:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "token_type": "bearer",
+  "scope": "repo,user"
+}
+```
+
+**Erros comuns:**
+1. Token muito curto:
+```json
+{
+  "error": "ValidationError",
+  "code": "INVALID_INPUT",
+  "message": "Token deve ter no mínimo 40 caracteres",
+  "path": ["access_token"]
+}
+```
+
+2. Formato inválido:
+```json
+{
+  "error": "ValidationError",
+  "code": "INVALID_INPUT",
+  "message": "Formato de token inválido",
+  "path": ["access_token"]
+}
+```
+
+3. Propriedade extra:
+```json
+{
+  "error": "ValidationError",
+  "code": "UNRECOGNIZED_KEYS",
+  "message": "Propriedade não reconhecida: 'extra'",
+  "path": []
+}
+```

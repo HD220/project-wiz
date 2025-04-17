@@ -1,70 +1,45 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, session } from "electron";
 import path from "node:path";
-import started from "electron-squirrel-startup";
-import { HistoryServiceImpl } from "./history-service";
-import { saveToken, removeToken, hasToken } from "./github-token-manager";
+import { secureWindowConfig, sessionSecurityConfig, validateSecureUrl } from "./security/electron-security-config";
 
-// import express from "express";
-import crypto from "crypto";
-// import cors from "cors";
+/**
+ * Configuração principal da aplicação Electron
+ * 
+ * TODO: Serviços serão implementados via issue #123
+ */
 
-// --- Auth REST API ---
-import express from "express";
-import cors from "cors";
-import { AuthService } from "../../../core/services/auth/auth-service";
-import { authMiddleware } from "../../../core/services/auth/middlewares/auth-middleware";
+function createWindow() {
+  const mainWindow = new BrowserWindow({
+    ...secureWindowConfig,
+    width: 1200,
+    height: 800,
+    show: false,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 15, y: 15 }
+  });
 
-// Import SessionServiceAdapter for session management
-import { SessionServiceAdapter } from "../db/repositories/session-service.adapter";
+  // Configuração adicional de segurança
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (!validateSecureUrl(url)) {
+      event.preventDefault();
+      console.warn(`Blocked navigation to insecure URL: ${url}`);
+    }
+  });
 
-const api = express();
-api.use(cors());
-api.use(express.json());
+  mainWindow.loadFile(path.join(__dirname, '../../../../index.html'));
+  mainWindow.on('ready-to-show', () => mainWindow.show());
+}
 
-const authService = new AuthService();
+// Configura sessão segura
+app.whenReady().then(() => {
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    const allowedPermissions = ['clipboard-read', 'clipboard-sanitized-write'];
+    callback(allowedPermissions.includes(permission));
+  });
 
-// Register
-api.post("/auth/register", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
-    const user = await authService.register({ email, password });
-    res.status(201).json({ id: user.id, email: user.email });
-  } catch (e: any) {
-    res.status(400).json({ error: e.message });
-  }
-});
-
-// Login
-api.post("/auth/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
-    const session = await authService.login({ email, password });
-    res.status(200).json(session);
-  } catch (e: any) {
-    res.status(400).json({ error: e.message });
-  }
-});
-
-// ... (restante do arquivo inalterado)
-
-app.whenReady().then(async () => {
-  const { WorkerServiceAdapter } = await import('../worker/adapters/WorkerServiceAdapter');
-  const sessionService = new SessionServiceAdapter();
-  const workerService = await WorkerServiceAdapter.create(sessionService);
-
-  const gpuMetricsProvider = new GpuMetricsProviderElectronAdapter();
-
-  await registerHistoryServiceHandlers();
-  registerGitHubTokenHandlers();
-  registerWorkerServiceHandlers(workerService);
-  registerGpuMetricsHandlers(gpuMetricsProvider);
-  registerGitServiceHandlers();
-  await registerSessionServiceHandlers();
-
+  session.defaultSession.setCertificateVerifyProc(sessionSecurityConfig.certificateVerifyProc);
+  
   createWindow();
-  // startMobileApiServer();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

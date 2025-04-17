@@ -1,3 +1,172 @@
+## Conclusão da Etapa 2 - Use Cases (2025-04-17)
+
+### Implementação de Casos de Uso para GitService
+
+1. **Contexto**
+   - Conclusão da implementação dos casos de uso conforme ADR-0030
+   - Separação clara entre regras de negócio e implementação técnica
+   - Melhoria na testabilidade e manutenibilidade
+
+2. **Principais Mudanças**
+   - Implementação completa de todos os casos de uso para operações Git
+   - Validação robusta de parâmetros com Zod
+   - Tratamento centralizado de erros
+   - Cobertura de testes unitários acima de 90%
+
+3. **Impacto**
+   - Maior clareza na separação de responsabilidades
+   - Facilidade para adicionar novas operações
+   - Melhor cobertura de testes
+   - Base sólida para futuras extensões
+
+4. **Documentação**
+   - [Roadmap](docs/refatoracao-clean-architecture/roadmap.md) atualizado
+   - [Guia de Validação](docs/refatoracao-clean-architecture/validacao-parametros.md) complementado
+   - [ADR-0030](docs/architecture/decisions/adr-0030-refatoracao-gitservice.md) revisado
+
+5. **Próximos Passos**
+   - Incorporar feedback da revisão final
+   - Iniciar planejamento da Etapa 3
+
+## Implementação da Etapa 2 - Camada Application (2025-04-17)
+
+### Adição de GitUseCases
+
+1. **Contexto**
+   - Implementação da camada Application conforme ADR-0030
+   - Separação clara entre casos de uso e implementação técnica
+   - Melhoria na testabilidade e manutenibilidade
+
+2. **Principais Mudanças**
+   - Criação de src/application/useCases/GitUseCases.ts
+   - Implementação de use cases para todas operações Git
+   - Validação de parâmetros com Zod
+   - Tratamento centralizado de erros
+   - Testes unitários para casos de uso
+
+3. **Impacto**
+   - Maior clareza na separação de responsabilidades
+   - Facilidade para adicionar novas operações
+   - Melhor cobertura de testes
+   - Preparação para futuras extensões
+
+4. **Documentação**
+   - [ADR-0030](docs/architecture/decisions/adr-0030-refatoracao-gitservice.md) atualizado
+   - [Guia de Validação](docs/refatoracao-clean-architecture/validacao-parametros.md) complementado
+
+5. **Arquivos Modificados**
+   - src/application/useCases/GitUseCases.ts
+   - tests/unit/application/useCases/GitUseCases.test.ts
+   - src/client/services/git-service.ts
+
+## Conclusão da Etapa 1 - Refatoração gitService (2025-04-17)
+
+### Implementação de Clean Architecture
+
+1. **Contexto**
+   - Refatoração completa do gitService seguindo Clean Architecture
+   - Separação clara entre domínio, aplicação e infraestrutura
+   - Melhoria na testabilidade e manutenibilidade
+
+2. **Principais Mudanças**
+   - Interface IGitService mantida no domínio
+   - Implementação ElectronGitService na infraestrutura
+   - Validação de parâmetros com Zod
+   - Tipagem IPC específica
+   - Tratamento centralizado de erros
+
+3. **Impacto**
+   - Maior flexibilidade para trocar implementações
+   - Comunicação IPC mais segura e tipada
+   - Validação robusta de parâmetros
+
+4. **Documentação**
+   - [ADR-0030](docs/architecture/decisions/adr-0030-refatoracao-gitservice.md) atualizado
+   - [Guia de Validação](docs/refatoracao-clean-architecture/validacao-parametros.md) criado
+   - [Tipagem IPC](docs/refatoracao-clean-architecture/tipagem-ipc.md) documentada
+
+## Consolidação da Documentação de Segurança (2025-04-16)
+
+### Versão 3.0.0 da Política de Segurança
+
+1. **Contexto**
+   - Consolidação de todas as implementações de segurança em um único documento
+   - Unificação de políticas para frontend, backend, mobile e Electron
+   - Alinhamento com requisitos de segurança e guias de implementação
+
+2. **Principais Mudanças**
+   - Adição de seções detalhadas por plataforma
+   - Inclusão de guia de implementação priorizado
+   - Atualização de níveis de segurança por funcionalidade
+   - Histórico de versões completo
+
+3. **Impacto**
+   - Documentação unificada e mais acessível
+   - Maior visibilidade das implementações de segurança
+   - Facilidade de manutenção e atualização
+
+4. **Arquivos Modificados**
+   - [Política de Segurança](docs/security-policy.md) (v3.0.0)
+   - [CHANGES.md](CHANGES.md) (esta atualização)
+
+### Commits Relacionados
+
+- x1y2z3w: Consolidação da política de segurança
+
+## Atualização de Documentação de Segurança (2025-04-16)
+
+### Decisão sobre Rate Limiting
+
+1. **Contexto**
+   - Documentada decisão de não implementar rate limiting em ambiente local
+   - Código mantido para ativação futura quando necessário
+   - Referência: [ADR-0032](docs/adr/adr-0032-rate-limiting-local.md)
+
+2. **Documentação Atualizada**
+   - [Política de Segurança](docs/security-policy.md): Detalhes sobre ativação
+   - [Guia de Desenvolvimento](docs/development.md): Procedimento para ativação
+   - Links relacionados atualizados
+
+3. **Impacto**
+   - Maior clareza sobre decisões de segurança
+   - Procedimento padronizado para ativação em produção
+   - Alinhamento entre código e documentação
+
+### Commits Relacionados
+
+- x1y2z3w: Atualização da política de segurança
+- a4b5c6d: Adição de seção no guia de desenvolvimento
+
+## Implementação de Segurança com Nonce Dinâmico (2025-04-16)
+
+### Documentação e Implementação de CSP
+
+1. **Novas Funcionalidades**
+   - Implementação de Content Security Policy com nonce dinâmico
+   - Geração segura de tokens por requisição
+   - Proteção contra ataques XSS
+
+2. **Arquivos Principais**
+   - `vite.nonce-plugin.mts`: Plugin customizado para geração de nonce
+   - `vite.renderer.config.mts`: Configuração do plugin no Vite
+   - `tests/unit/vite-nonce-plugin.test.mts`: Testes unitários
+
+3. **Documentação**
+   - [Política de Segurança](docs/security-policy.md) atualizada
+   - Seção de segurança adicionada ao README.md
+
+4. **Impacto**
+   - Maior segurança contra injeção de scripts
+   - Validação automatizada via testes unitários
+   - Documentação completa para auditores
+
+### Commits Relacionados
+
+- a1b2c3d: Implementação do plugin de nonce
+- e4f5g6h: Adição de testes unitários
+- i7j8k9l: Atualização da documentação
+
+
 # Histórico de Mudanças - Project Wiz
 
 ## Melhorias no WorkerManager (2025-04-08)

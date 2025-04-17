@@ -13,7 +13,7 @@ function RepositorySettingsPage() {
 }
 
 // TanStack Router route definition
-export const Route = createFileRoute('/repositories/')({
+export const Route = createFileRoute('/repositories/infrastructure/router/repositories-router')({
   component: RepositorySettingsPage,
 });
 

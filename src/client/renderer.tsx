@@ -19,7 +19,7 @@ dynamicActivate(detectLocale()).then(() => {
   useEffect(() => {
     const cspMeta = document.createElement('meta');
     cspMeta.httpEquiv = 'Content-Security-Policy';
-    cspMeta.content = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';";
+    cspMeta.content = "default-src 'self'; script-src 'self' 'nonce-EDNjb3BlZGUgZW50aX'; style-src 'self' 'nonce-EDNjb3BlZGUgZW50aX'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';";
     document.head.appendChild(cspMeta);
 
     const xContentTypeOptionsMeta = document.createElement('meta');

@@ -46,4 +46,9 @@ O projeto está crescendo em complexidade e tomando decisões arquiteturais impo
 ## Links Relacionados
 
 - [Template de ADR](../templates/adr/template.md)
-- [Atualização do system-prompt](../../.roo/system-prompt-developer)
+- [Atualização do system-prompt](../../.roo/1-system-prompt)
+- **Exemplos de ADRs implementados**:
+  - [ADR-0002: Componentes shadcn/ui](./ADR-0002-Componentes-shadcn-ui.md)
+  - [ADR-0004: Estrutura de Documentação](./ADR-0004-Estrutura-de-Documentacao.md)
+
+**Última Atualização**: 2025-04-16

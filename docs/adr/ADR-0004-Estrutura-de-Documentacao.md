@@ -27,7 +27,10 @@ Adotamos a seguinte estrutura de documentação:
    - **ui-components.md** – Documentação de componentes
    - **llm-services.md** – Documentação de serviços
    - **adr/** – Decisões arquiteturais
-   - **templates/** – Templates para documentação
+   - **templates/** – Templates padronizados
+   - **style-guide.md** – Guia de estilo para documentação
+   - **development.md** – Guia de desenvolvimento
+   - **testing-strategy.md** – Estratégia de testes
 
 ---
 
@@ -49,4 +52,9 @@ Adotamos a seguinte estrutura de documentação:
 
 ## Links Relacionados
 
-- [Template de documentação](../templates/)
+- [Guia de Estilo](../style-guide.md)
+- [Templates de Documentação](../templates/README.md)
+- [ADR-0001: Implementação de ADRs](./ADR-0001-Implementacao-de-ADRs.md)
+
+**Criado em**: 2025-02-10
+**Última Atualização**: 2025-04-16

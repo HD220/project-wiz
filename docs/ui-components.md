@@ -1,59 +1,134 @@
 # Documentação de Componentes UI
 
+## Visão Arquitetural (Atualizada)
+
+Os componentes UI implementam a camada de apresentação seguindo os princípios da Clean Architecture ([ADR-0012](../adr/ADR-0012-Clean-Architecture-LLM.md)):
+
+```mermaid
+flowchart TD
+    subgraph UI[Client Layer]
+        A[Componentes] --> B[useLLM]
+        A --> C[useHistory]
+    end
+    subgraph App[Application Layer]
+        B --> D[LlmService]
+        C --> E[HistoryService]
+    end
+    subgraph Domain[Domain Layer]
+        D --> F[ILlmService]
+        E --> G[IHistoryRepository]
+    end
+    subgraph Infra[Infrastructure Layer]
+        D --> H[ElectronIPC]
+        H --> I[InferenceProcess]
+    end
+```
+
+### Princípios de Integração:
+1. **Separação Clara:** UI não acessa diretamente infraestrutura
+2. **Contratos Definidos:** Comunicação via interfaces (ILlmService)
+3. **Gerenciamento de Estado:** Hooks centralizam lógica complexa
+4. **Tratamento de Erros:** Timeouts e cancelamento conforme [ADR-0017](../adr/ADR-0017-Gerenciamento-Streams-Requisicoes-LlmService.md)
+
 ## Visão Geral
 
-Componentes reutilizáveis que compõem a interface do usuário do Project Wiz.
+Componentes reutilizáveis que compõem a interface do usuário do Project Wiz, seguindo os princípios de Clean Architecture.
 
 ---
 
 ## ModelCard
 
+### Contexto Arquitetural (Atualizado)
+- **Camada:** Client (UI)
+- **Dependências:**
+  - Hook `useLLM` (Application Layer)
+  - Interface `IModel` (Domain Layer)
+- **Contratos:**
+  - Implementa `IModelCardProps` (Domain)
+  - Consome `useLLM().getModels()` (Application)
+- **Padrões:**
+  - Strategy Pattern para diferentes estados de modelo
+  - Observer Pattern para atualizações
+
 ### Descrição
 
-Componente que exibe informações detalhadas sobre um modelo LLM, permitindo a visualização de seus metadados, status (baixado, não baixado, ativo) e a possibilidade de ativação para uso. Inclui subcomponentes para exibir diferentes aspectos do modelo.
+Componente que exibe informações detalhadas sobre um modelo LLM, seguindo os princípios de Clean Architecture:
+1. **UI:** Renderização e interação
+2. **Hooks:** Comunicação com camada de aplicação
+3. **Contratos:** Interfaces bem definidas com domínio
 
-### Props
+Permite a visualização de metadados, status (baixado, não baixado, ativo) e ativação para uso, seguindo o padrão de projeto Strategy para diferentes estados.
+
+### Contratos e Tipos
 
 ```typescript
-interface Model {
-  id: number;
+// Domain Layer Contract
+interface IModel {
+  id: string;
   name: string;
-  modelId: string;
-  size: string;
-  status: string; // 'downloaded' | 'not_downloaded'
-  lastUsed: string | null;
-  description: string;
+  status: 'downloaded' | 'not_downloaded' | 'active';
+  metadata: {
+    size: string;
+    description: string;
+    lastUsed?: Date;
+  };
 }
 
+// Component Props
 interface ModelCardProps {
-  model: Model;
-  isActive: boolean;
-  onActivate: (modelId: string) => void;
+  model: IModel;
+  onStatusChange: (newStatus: IModel['status']) => Promise<void>;
+  onError: (error: Error) => void; // Error handling from ADR-0017
 }
 ```
 
-### Comportamento
+### Comportamento (Atualizado)
 
-- Exibe status do modelo (Ativo/Baixado/Não baixado)
-- Mostra informações básicas (nome, ID, tamanho, descrição)
-- Permite ativar modelos já baixados
-- Oferece opção para baixar modelos não disponíveis
+1. **Renderização:**
+   - Exibe status do modelo com ícones visuais
+   - Mostra metadados formatados
 
-### Exemplo de Uso
+2. **Interações:**
+   - Ativação via `onStatusChange` (gerencia loading/error states)
+   - Download via `useLLM().downloadModel()`
+   - Tratamento de erros conforme [ADR-0017](../adr/ADR-0017-Gerenciamento-Streams-Requisicoes-LlmService.md)
+
+3. **Otimizações:**
+   - Memoização de props
+   - Lazy loading de recursos pesados
+
+### Exemplo de Uso (Atualizado)
 
 ```tsx
-<ModelCard
-  model={{
-    id: 1,
-    name: "Llama 3",
-    modelId: "llama-3-8b",
-    size: "8GB",
-    status: "downloaded",
-    description: "Modelo de última geração para tarefas gerais",
-  }}
-  isActive={true}
-  onActivate={(modelId) => console.log(`Ativando ${modelId}`)}
-/>
+function ModelExample() {
+  const { models, error } = useLLM();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const handleStatusChange = async (modelId: string, status: IModel['status']) => {
+    setLoadingId(modelId);
+    try {
+      await useLLM().setModelStatus(modelId, status);
+    } catch (err) {
+      console.error('Falha na atualização', err);
+      // Implementação do ADR-0017
+      if (err instanceof TimeoutError) {
+        showToast('Timeout - tente novamente');
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  if (error) return <ErrorView error={error} />;
+
+  return (
+    <ModelCard
+      model={models[0]}
+      onStatusChange={(status) => handleStatusChange(models[0].id, status)}
+      onError={(err) => console.error('Erro no ModelCard', err)}
+    />
+  );
+}
 ```
 
 ### Componentes Relacionados
@@ -251,3 +326,36 @@ Componente que permite configurar as definições do repositório, como URL, tok
 ```tsx
 <RepositorySettings />
 ```
+
+---
+
+## Boas Práticas
+
+1. **Testabilidade:**
+   - Mockar `useLLM` em testes
+   - Testar estados de loading/error
+   - Verificar contratos com Domain
+
+2. **Performance:**
+   - Evitar re-renders desnecessários
+   - Usar virtualização em listas grandes
+   - Implementar lazy loading
+
+3. **Acessibilidade:**
+   - ARIA labels para estados
+   - Foco gerenciado
+   - Suporte a teclado
+
+## Referências
+
+- [ADR-0012](../adr/ADR-0012-Clean-Architecture-LLM.md): Arquitetura
+- [ADR-0017](../adr/ADR-0017-Gerenciamento-Streams-Requisicoes-LlmService.md): Tratamento de erros
+- [Guia de Estilo](../style-guide.md): Convenções
+- [Documentação shadcn-ui](https://ui.shadcn.com/docs): Componentes base
+
+**Histórico de Versões:**
+| Versão | Data       | Mudanças                |
+|--------|------------|-------------------------|
+| 2.0.0  | 2025-04-16 | Alinhamento com ADRs    |
+| 1.1.0  | 2025-03-15 | Adição de TypeScript    |
+| 1.0.0  | 2025-02-10 | Versão inicial          |

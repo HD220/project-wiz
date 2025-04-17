@@ -42,7 +42,7 @@
         [
           "edit",
           {
-            "fileRegex": "docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/roadmap\\.md$|README\\.md$"
+            "fileRegex": "docs\/.*\\.md$|CHANGES\\.md$|docs/adr/.*\\.md$|docs/gdr/.*\\.md$|docs/sdr/.*\\.md$|docs/roadmap\\.md$|README\\.md$"
           }
         ],
         "mcp"
@@ -75,7 +75,7 @@
         [
           "edit",
           {
-            "fileRegex": "docs/.*\\.md$|README\\.md$|CHANGES\\.md$"
+            "fileRegex": "docs\/.*\\.md$|README\\.md$|CHANGES\\.md$"
           }
         ],
         "command",
@@ -94,7 +94,7 @@
         [
           "edit",
           {
-            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|\\.roo/system-prompt.*|docs/prompts/.*\\.md$"
+            "fileRegex": "\\.roomodes$|\\.roo/rules/rules\\.md$|\\.roo/rules-[^/]+/rules\\.md$|\\.roo/system-prompt.*|docs/prompts/.*\\.md$|\\.roo/.*$"
           }
         ]
       ],

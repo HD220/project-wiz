@@ -38,3 +38,8 @@ O projeto utiliza componentes UI da biblioteca shadcn-ui na pasta `src/client/co
 ## Links Relacionados
 
 - [Site oficial shadcn-ui](https://ui.shadcn.com/)
+- [ADR-0001: Implementação de ADRs](./ADR-0001-Implementacao-de-ADRs.md)
+- **Exemplo**: Componente `CustomButton` criado em `src/client/components/CustomButton.tsx`
+
+**Criado em**: 2025-03-15
+**Última Atualização**: 2025-04-16

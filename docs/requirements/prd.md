@@ -271,3 +271,27 @@ MEDIUM - Important for data integrity and system robustness.
 - Ensures data integrity and consistency.
 - Reduces the risk of system errors and failures.
 - Improves the overall reliability and stability of the application.
+
+## Electron Layer Security Requirements
+
+### User Stories
+1. As an Administrator, I want to have full access to all data and functionalities so that I can manage the system effectively.
+2. As a Standard User, I want to access only the data and functionalities relevant to my role so that I can perform my tasks securely.
+3. As a Guest User, I want to have limited access to the application so that I can explore the features without compromising security.
+
+### Acceptance Criteria
+- User authentication must be implemented using a secure and industry-standard method.
+- Access control mechanisms must be in place to restrict access to sensitive data and functionalities based on user roles.
+- All sensitive data must be encrypted at rest and in transit.
+- Security events must be logged and audited regularly.
+- The application must comply with all relevant security standards and regulations.
+- Security measures must not significantly impact the performance of the application.
+
+### Priority
+HIGH - Security is a critical aspect of the application and must be addressed with high priority.
+
+### Business Value
+- Protecting sensitive data and preventing unauthorized access.
+- Ensuring compliance with security standards and regulations.
+- Maintaining user trust and confidence in the application.
+- Reducing the risk of security breaches and data loss.

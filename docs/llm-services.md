@@ -1,226 +1,100 @@
-# Serviços LLM - Arquitetura Consolidada
+# Serviços LLM - Arquitetura e Protocolos
 
-## Visão Geral
+## Contexto Arquitetural (Atualizado)
+- **Base:** [ADR-0012](../adr/ADR-0012-Clean-Architecture-LLM.md) (Clean Architecture)
+- **Nomenclatura:** [ADR-0008](../adr/ADR-0008-Nomenclatura-Servicos-LLM.md)
+- **Camadas:**
+  - **Domain:**
+    - Entidades (`Prompt`, `Model`)
+    - Interfaces (`ILlmService`, `IStreamHandler`)
+  - **Application:**
+    - `InferenceService` (ex-LlmService)
+    - `PromptOrchestrator`
+  - **Infrastructure:**
+    - `ElectronIPCAdapter`
+    - `InferenceProcess` (ex-Worker)
+  - **Client:**
+    - Hook `useLLM` (interface única)
 
-A nova arquitetura dos serviços LLM do Project Wiz foi consolidada para garantir:
-
-- Separação clara entre domínio, aplicação, infraestrutura e frontend
-- Suporte nativo a **streaming** de respostas
-- Comunicação eficiente via **IPC com MessagePort**
-- Facilidade de uso via **hook React `useLLM`**
-- Adoção dos princípios **Clean Architecture**
-
----
-
-## Camadas e Componentes
-
-### 1. Domain
-
-- **Entidades:** `Prompt`, `StreamChunk`
-- **Interfaces:** `ILlmService`, `IWorkerService`, `IModelManager`
-- Define contratos para geração, carregamento e streaming
-
-### 2. Application
-
-- **Classe principal:** `LlmService`
-- Orquestra carregamento de modelos, geração síncrona e streaming
-- Expõe métodos:
-  - `loadModel(modelPath: string)`
-  - `prompt(promptText: string)`
-  - `promptStream(prompt: Prompt, onChunk: (chunk: StreamChunk) => void)`
-
-### 3. Infrastructure
-
-- **Adaptadores IPC:** `ElectronWorkerAdapter`, `LlmBridge`
-- Gerenciam comunicação com workers via MessagePort
-- Tratam erros e propagam eventos de streaming
-
-### 4. Frontend
-
-- **Hook React:** `useLLM`
-- Facilita integração com UI
-- Suporte a geração síncrona e streaming com cancelamento
-
----
-
-## Fluxo de Streaming Consolidado
-
+## Diagrama de Fluxo (Atualizado)
 ```mermaid
-sequenceDiagram
-    participant UI as React (useLLM)
-    participant App as LlmService
-    participant Bridge as LlmBridge
-    participant Worker as Worker LLM
-
-    UI->>App: promptStream(prompt, onChunk)
-    App->>Bridge: promptStream(prompt, onChunk)
-    Bridge->>Worker: Envia 'promptStream' via MessagePort
-    loop Enquanto resposta não finalizada
-        Worker-->>Bridge: streamChunk
-        Bridge-->>App: onChunk(chunk)
-        App-->>UI: onChunk(chunk)
+flowchart TD
+    subgraph UI[Client Layer]
+        A[Componentes] -->|chama| B[useLLM]
     end
-    Worker-->>Bridge: streamEnd
-    Bridge-->>App: onChunk({isFinal: true})
-    App-->>UI: onChunk({isFinal: true})
+    subgraph App[Application Layer]
+        B -->|implementa| C[InferenceService]
+        C -->|usa| D[PromptQueue]
+    end
+    subgraph Domain[Domain Layer]
+        C -->|implementa| E[ILlmService]
+        D -->|implementa| F[IPromptQueue]
+    end
+    subgraph Infra[Infrastructure Layer]
+        C -->|adaptador| G[ElectronIPCAdapter]
+        G -->|comunica| H[InferenceProcess]
+    end
 ```
 
-- O fluxo é **assíncrono e incremental**
-- Cada chunk parcial é propagado até a UI
-- Cancelamento possível via método `cancel()`
+## Implementação Detalhada
 
----
+### Fluxo de Streaming (Conforme ADR-0017)
+1. **Inicialização:**
+   - UI chama `useLLM().generateStream()`
+   - `InferenceService` valida e enfileira prompt
+   - Cria `StreamHandler` com timeout configurável
 
-## Protocolo IPC Atualizado
+2. **Execução:**
+   - `ElectronIPCAdapter` envia `inferenceRequest`
+   - `InferenceProcess` inicia geração
+   - Chunks são enviados via `streamChunk`
 
-### Canais e Mensagens
+3. **Finalização:**
+   - Sucesso: `streamEnd` com metadados
+   - Erro: `streamError` com detalhes
+   - Timeout: cancelamento automático
 
-| Tipo de Mensagem     | Direção             | Payload                               | Descrição                                 |
-|----------------------|---------------------|---------------------------------------|-------------------------------------------|
-| `loadModel`          | UI → Worker         | `{ modelPath }`                       | Carrega modelo                           |
-| `prompt`             | UI → Worker         | `{ prompt }`                          | Geração síncrona                         |
-| `promptStream`       | UI → Worker         | `{ prompt }`                          | Inicia geração via streaming             |
-| `cancelStream`       | UI → Worker         | `{ requestId }`                       | Cancela streaming                        |
-| `response`           | Worker → UI         | `string`                              | Resposta final síncrona                  |
-| `streamChunk`        | Worker → UI         | `StreamChunk`                         | Pedaço parcial da resposta               |
-| `streamEnd`          | Worker → UI         | `void`                                | Fim do streaming                         |
-| `error`              | Worker → UI         | `Error`                               | Erro na operação                         |
+### Protocolo IPC (Completo)
+| Mensagem            | Direção            | Payload                          | Timeout Padrão |
+|---------------------|--------------------|----------------------------------|----------------|
+| `inferenceRequest`  | App → Infra        | { prompt: string, params: {...} }| 30s            |
+| `streamChunk`       | Infra → App        | { chunk: string, id: string }    | -              |
+| `streamEnd`         | Infra → App        | { id: string, stats: {...} }     | -              |
+| `streamError`       | Infra → App        | { id: string, error: string }    | -              |
+| `cancelRequest`     | App → Infra        | { id: string }                   | -              |
 
-- Cada requisição possui um `requestId` único
-- Streaming envia múltiplos `streamChunk` e finaliza com `streamEnd`
-- Cancelamento interrompe o fluxo
+### Gerenciamento de Recursos
+- **Timeout:** Configurável por requisição
+- **Retry:** Política exponencial (max 3 tentativas)
+- **Cleanup:** Remove streams inativos após 5min
 
----
+## Boas Práticas
 
-## Interfaces Principais
+1. **Client:**
+   - Usar apenas `useLLM` hook
+   - Tratar todos os estados (loading, error, success)
+   - Implementar cancelamento via `AbortController`
 
-### `LlmService`
+2. **Application:**
+   - Validar inputs no boundary
+   - Logar métricas de performance
+   - Implementar circuit breaker
 
-```typescript
-const llmService = new LlmService(workerService, modelManager);
-
-await llmService.loadModel('model.bin');
-
-const resposta = await llmService.prompt('Explique Clean Architecture');
-
-await llmService.promptStream(
-  { text: 'Explique Clean Architecture' },
-  (chunk) => {
-    console.log('Chunk recebido:', chunk.content, 'Final?', chunk.isFinal);
-  }
-);
-```
-
-### Hook `useLLM`
-
-```typescript
-const {
-  isLoading,
-  error,
-  loadModel,
-  generate,
-  generateStream,
-} = useLLM(llmBridge);
-
-// Carregar modelo
-await loadModel({ modelPath: 'model.bin' });
-
-// Geração simples
-const resposta = await generate({ prompt: 'Explique Clean Architecture' });
-
-// Geração com streaming
-const { cancel } = generateStream(
-  { text: 'Explique Clean Architecture' },
-  (chunk) => {
-    console.log('Chunk:', chunk.content, 'Final?', chunk.isFinal);
-  }
-);
-
-// Cancelar se necessário
-cancel();
-```
-
----
-
-## Guia de Migração
-
-### Mudanças Principais
-
-- **Substituição do uso direto de `ipcRenderer.invoke`** pelo `LlmBridge` via `MessagePort`
-- **Uso do `LlmService`** para orquestração, em vez de chamadas diretas
-- **Streaming via `promptStream`** com callback incremental
-- **Hook `useLLM`** para integração React, substituindo chamadas manuais
-
-### Passos para Adoção
-
-1. **Atualize imports**
-
-```typescript
-// Antes
-import { ipcRenderer } from 'electron';
-
-// Depois
-import { LlmService } from 'src/core/application/services/llm-service';
-import { useLLM } from 'src/client/hooks/use-llm';
-```
-
-2. **Instancie o serviço**
-
-```typescript
-const llmService = new LlmService(workerService, modelManager);
-```
-
-3. **Adapte chamadas síncronas**
-
-```typescript
-// Antes
-await ipcRenderer.invoke('worker:prompt', { prompt: '...' });
-
-// Depois
-await llmService.prompt('...');
-```
-
-4. **Implemente streaming**
-
-```typescript
-await llmService.promptStream(prompt, onChunk);
-```
-
-ou via hook:
-
-```typescript
-const { generateStream } = useLLM(bridge);
-generateStream(prompt, onChunk);
-```
-
-5. **Gerencie cancelamento**
-
-```typescript
-const { cancel } = generateStream(prompt, onChunk);
-cancel();
-```
-
-6. **Remova código legado**
-
-- Handlers IPC antigos
-- Chamadas diretas a `ipcRenderer.invoke`
-- Listeners manuais
-
----
-
-## Considerações Finais
-
-- O fluxo de streaming **não remove listeners automaticamente** (ver `LlmService`), atenção para evitar vazamentos.
-- O protocolo IPC é **baseado em mensagens com `requestId`** para múltiplas requisições simultâneas.
-- A arquitetura segue **Clean Architecture**, facilitando testes e manutenção.
-- Consulte os ADRs relacionados para decisões detalhadas:
-  - [ADR-0006 - Nomenclatura Serviços LLM](../docs/adr/ADR-0006-Nomenclatura-Servicos-LLM.md)
-  - [ADR-0008 - Clean Architecture LLM](../docs/adr/ADR-0008-Clean-Architecture-LLM.md)
-
----
+3. **Infrastructure:**
+   - Usar `MessageChannelMain` para IPC
+   - Serializar/validar payloads com Zod
+   - Monitorar recursos dos processos
 
 ## Referências
 
-- [node-llama-cpp](https://github.com/withcatai/node-llama-cpp)
-- [Electron IPC](https://www.electronjs.org/docs/latest/tutorial/ipc)
-- [Documentação React](https://reactjs.org/docs/hooks-intro.html)
+- [ADR-0012](../adr/ADR-0012-Clean-Architecture-LLM.md): Arquitetura
+- [ADR-0008](../adr/ADR-0008-Nomenclatura-Servicos-LLM.md): Nomenclatura
+- [ADR-0017](../adr/ADR-0017-Gerenciamento-Streams-Requisicoes-LlmService.md): Streams
+- [IPC Best Practices](https://www.electronjs.org/docs/latest/api/ipc-best-practices)
+
+**Histórico de Versões:**
+| Versão | Data       | Mudanças                |
+|--------|------------|-------------------------|
+| 2.1.0  | 2025-04-16 | Timeouts e cancelamento |
+| 2.0.0  | 2025-03-28 | Nova nomenclatura       |
+| 1.0.0  | 2025-02-15 | Versão inicial          |

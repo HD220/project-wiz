@@ -33,6 +33,13 @@ Project Wiz é um sistema ElectronJS para automatizar tarefas de desenvolvimento
 - Suporte a múltiplos idiomas (pt-BR, en)
 - Fácil adição de novos idiomas
 
+🔒 **Segurança**
+
+- Implementação de CSP com nonce dinâmico para proteção contra XSS
+- Geração segura de tokens por requisição
+- Detalhes completos: [Política de Segurança](docs/security-policy.md)
+
+
 ## Pré-requisitos
 
 - Node.js 18+
@@ -105,3 +112,20 @@ Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 - [Configuração TS/Vite](docs/ts-vite-config.md)
 - [Componentes UI](docs/ui-components.md)
 - [Serviços LLM](docs/llm-services.md)
+
+## Monitoramento de Documentação
+
+O projeto inclui um sistema automatizado para monitorar a qualidade e adoção da documentação:
+
+- **Dashboard:** [Documentation Monitoring Dashboard](docs/dashboards/documentation-monitoring.md)
+- **Frequência:** Atualizado diariamente via GitHub Action
+- **Métricas coletadas:**
+  - Adoção de templates de documentação
+  - Conformidade com ADRs (Architecture Decision Records)
+  - Histórico de métricas
+
+Para executar manualmente o monitoramento:
+```bash
+gh workflow run documentation-monitoring.yml
+```
+

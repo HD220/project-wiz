@@ -1,100 +1,65 @@
-# Documentação dos Templates
+# Templates de Documentação
 
-Este documento descreve os templates disponíveis na pasta `docs/templates/` e como utilizá-los.
-
-## Propósito dos Templates
-
-Os templates fornecem estruturas padronizadas para documentação do projeto, garantindo:
-
-- Consistência na documentação
-- Facilidade de criação de novos documentos
-- Cobertura completa de informações importantes
-- Alinhamento com boas práticas
+Este diretório contém templates padronizados para vários tipos de documentação do projeto.
 
 ## Templates Disponíveis
 
-### 1. API Inventory (`api-inventory.md`)
+### [Documentação Técnica](./technical-documentation.md)
+Para documentar componentes, serviços e features técnicas.
 
-**Propósito**: Rastrear todas as APIs do projeto, seu status e documentação.
+### [ADR (Architecture Decision Record)](./ADR.md)
+Para registrar decisões arquiteturais importantes.
 
-**Quando usar**:
+### [GDR (Governance Decision Record)](./GDR.md)
+Para registrar decisões de governança.
 
-- Para inventariar APIs existentes
-- Para planejar novas APIs
-- Para acompanhar mudanças em APIs
+### [SDR (Style Decision Record)](./SDR.md)
+Para registrar decisões de estilo e padrões.
 
-**Exemplo de uso**:
+### [Documentação de API](./api-inventory.md)
+Para documentar endpoints e contratos de API.
 
-```markdown
-# API Inventory
+## Como Usar
 
-## API Overview
+1. Selecione o template apropriado para seu tipo de documentação
+2. Copie o template para um novo arquivo
+3. Preencha todas as seções relevantes
+4. Remova seções não aplicáveis
+5. Adicione exemplos específicos quando possível
 
-| API Name | Version | Status | Last Updated | Owner |
-| -------- | ------- | ------ | ------------ | ----- |
-| User API | v1.2.0  | Active | 2025-04-01   | @dev1 |
+## Boas Práticas
+
+- Mantenha um tom consistente em toda a documentação
+- Atualize os templates conforme as necessidades do projeto evoluem
+- Consulte o [Guia de Estilo](../style-guide.md) para formatação
+- Adicione diagramas e exemplos de código quando relevante
+
+## Exemplo de Uso
+
+```bash
+# Criar nova documentação técnica
+cp technical-documentation.md ../new-component.md
+
+# Criar novo ADR
+cp ADR.md ../adr/ADR-0019-nova-decisao.md
+
+# Criar novo GDR (Governance Decision Record)
+cp GDR.md ../gdr/GDR-0005-nova-decisao.md
+
+# Criar novo SDR (Style Decision Record)
+cp SDR.md ../sdr/SDR-0003-novo-padrao.md
 ```
 
-### 2. Task Handoff (`task-handoff.md`)
+## Boas Práticas Adicionais
 
-**Propósito**: Documentar transferência de tarefas entre times/membros.
+- Sempre verifique a versão mais recente dos templates
+- Consulte o [Guia de Estilo](../style-guide.md) antes de criar novos documentos
+- Atualize o [documentation-status.md](../documentation-status.md) após criar/atualizar documentos
 
-**Quando usar**:
+## Histórico de Versões
 
-- Ao passar trabalho para outra pessoa
-- Ao assumir trabalho de outra pessoa
-- Para documentar contexto importante
-
-**Exemplo de uso**:
-
-```markdown
-# Task Handoff: User Authentication Refactor
-
-## Current Status
-
-Refatoração 70% completa, faltando integração com novo serviço de tokens.
-
-## Next Steps
-
-- Integrar com TokenService
-- Atualizar testes
-- Documentar mudanças
-```
-
-### 3. Documentation Status Dashboard (`documentation-status-dashboard.md`)
-
-**Propósito**: Acompanhar o status geral da documentação do projeto.
-
-**Quando usar**:
-
-- Para revisões periódicas de documentação
-- Para planejar esforços de documentação
-- Para identificar áreas carentes
-
-**Exemplo de uso**:
-
-```markdown
-# Documentation Status Dashboard
-
-## Documentation Coverage
-
-| Area          | Status      | Last Updated | Responsible |
-| ------------- | ----------- | ------------ | ----------- |
-| Core API      | 🟢 Complete | 2025-04-01   | @doc-team   |
-| UI Components | 🟡 Partial  | 2025-03-15   | @frontend   |
-```
-
-## Processo para Novos Templates
-
-1. **Proposta**: Descrever o propósito e estrutura proposta
-2. **Revisão**: Discutir com a equipe de documentação
-3. **Implementação**: Criar o template na pasta `/templates`
-4. **Documentação**: Adicionar ao README.md dos templates
-5. **Divulgação**: Comunicar à equipe sobre o novo template
-
-## Melhores Práticas
-
-- Use os templates como ponto de partida, adaptando conforme necessário
-- Mantenha os templates atualizados com as necessidades do projeto
-- Revise os templates periodicamente para melhorias
-- Documente exemplos de uso para cada template
+| Data       | Versão | Mudanças                |
+|------------|--------|-------------------------|
+| 2025-04-16 | 1.2.0  | Atualização templates GDR/SDR |
+| 2025-04-16 | 1.1.0  | Adicionado template técnico |
+| 2025-04-05 | 1.0.0  | Versão inicial          |

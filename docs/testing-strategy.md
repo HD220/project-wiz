@@ -2,21 +2,45 @@
 
 ## Visão Geral
 
-Devido a restrições de tempo e recursos, o projeto atualmente não possui testes automatizados. A validação das funcionalidades é realizada manualmente.
+Atualmente, o projeto não possui uma suíte de testes automatizados implementada. A validação de qualidade é feita através de:
 
-## Testes Manuais
+1. **Testes manuais** realizados pelos desenvolvedores
+2. **Code reviews** entre pares
+3. **Verificação funcional** antes de cada release
 
-A validação manual é crucial para garantir a qualidade do software. Recomenda-se seguir os seguintes passos:
+## Processo de Teste Atual
 
-1.  **Testes Funcionais:** Verificar se as funcionalidades do sistema operam conforme o esperado.
-2.  **Testes de Integração:** Validar a interação entre diferentes componentes do sistema.
-3.  **Testes de Interface:** Garantir que a interface do usuário seja intuitiva e responsiva.
-4.  **Testes de Regressão:** Após cada alteração no código, realizar testes para garantir que novas funcionalidades não afetem as funcionalidades existentes.
+1. **Pré-commit**:
+   - Verificação manual das alterações
+   - Testes básicos de funcionalidade
+
+2. **Pré-release**:
+   - Checklist de testes manuais
+   - Validação cruzada entre desenvolvedores
+
+3. **Pós-release**:
+   - Monitoramento de erros em produção
+   - Feedback dos usuários
 
 ## Próximos Passos
 
-A implementação de testes automatizados é uma prioridade para o futuro do projeto. Recomenda-se:
+Planejamos implementar testes automatizados seguindo esta priorização:
 
-1.  **Implementar Testes Unitários:** Criar testes para os componentes individuais.
-2.  **Implementar Testes de Integração:** Validar a interação entre os componentes.
-3.  **Implementar Testes End-to-End:** Garantir que os fluxos de usuário funcionem corretamente.
+1. **Testes Unitários** (Jest):
+   - Componentes isolados
+   - Funções utilitárias
+
+2. **Testes de Integração**:
+   - Comunicação entre módulos
+   - Fluxos principais
+
+3. **Testes E2E** (Playwright):
+   - Fluxos completos do usuário
+   - Casos de uso críticos
+
+## Referências
+
+- [Guia de Estilo](../style-guide.md)
+- [Documentação de Desenvolvimento](../development.md)
+
+**Última Atualização**: 2025-04-16

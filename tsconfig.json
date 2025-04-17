@@ -10,7 +10,7 @@
     "noEmit": false,
 
     //electron
-    "types": ["node", "electron"],
+    "types": ["node", "electron", "jest"],
     "esModuleInterop": true,
     "strict": true,
 
@@ -24,6 +24,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules"]
 }

@@ -14,9 +14,12 @@ import { Route as rootRoute } from './pages/__root'
 import { Route as IndexImport } from './pages/index'
 import { Route as SettingsIndexImport } from './pages/settings/index'
 import { Route as RepositoriesIndexImport } from './pages/repositories/index'
-import { Route as ModelsIndexImport } from './pages/models/index'
 import { Route as DocumentationIndexImport } from './pages/documentation/index'
 import { Route as ActivityLogIndexImport } from './pages/activity-log/index'
+import { Route as ModelsModelsPageImport } from './pages/models/models-page'
+import { Route as RepositoriesPresentationRepositoriesPageImport } from './pages/repositories/presentation/RepositoriesPage'
+import { Route as RepositoriesApplicationRepositoriesControllerImport } from './pages/repositories/application/RepositoriesController'
+import { Route as RepositoriesInfrastructureRouterRepositoriesRouterImport } from './pages/repositories/infrastructure/router/repositories-router'
 
 // Create/Update Routes
 
@@ -38,12 +41,6 @@ const RepositoriesIndexRoute = RepositoriesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ModelsIndexRoute = ModelsIndexImport.update({
-  id: '/models/',
-  path: '/models/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const DocumentationIndexRoute = DocumentationIndexImport.update({
   id: '/documentation/',
   path: '/documentation/',
@@ -56,6 +53,33 @@ const ActivityLogIndexRoute = ActivityLogIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ModelsModelsPageRoute = ModelsModelsPageImport.update({
+  id: '/models/models-page',
+  path: '/models/models-page',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RepositoriesPresentationRepositoriesPageRoute =
+  RepositoriesPresentationRepositoriesPageImport.update({
+    id: '/repositories/presentation/RepositoriesPage',
+    path: '/repositories/presentation/RepositoriesPage',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const RepositoriesApplicationRepositoriesControllerRoute =
+  RepositoriesApplicationRepositoriesControllerImport.update({
+    id: '/repositories/application/RepositoriesController',
+    path: '/repositories/application/RepositoriesController',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const RepositoriesInfrastructureRouterRepositoriesRouterRoute =
+  RepositoriesInfrastructureRouterRepositoriesRouterImport.update({
+    id: '/repositories/infrastructure/router/repositories-router',
+    path: '/repositories/infrastructure/router/repositories-router',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -65,6 +89,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/models/models-page': {
+      id: '/models/models-page'
+      path: '/models/models-page'
+      fullPath: '/models/models-page'
+      preLoaderRoute: typeof ModelsModelsPageImport
       parentRoute: typeof rootRoute
     }
     '/activity-log/': {
@@ -81,13 +112,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocumentationIndexImport
       parentRoute: typeof rootRoute
     }
-    '/models/': {
-      id: '/models/'
-      path: '/models'
-      fullPath: '/models'
-      preLoaderRoute: typeof ModelsIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/repositories/': {
       id: '/repositories/'
       path: '/repositories'
@@ -102,6 +126,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/repositories/application/RepositoriesController': {
+      id: '/repositories/application/RepositoriesController'
+      path: '/repositories/application/RepositoriesController'
+      fullPath: '/repositories/application/RepositoriesController'
+      preLoaderRoute: typeof RepositoriesApplicationRepositoriesControllerImport
+      parentRoute: typeof rootRoute
+    }
+    '/repositories/presentation/RepositoriesPage': {
+      id: '/repositories/presentation/RepositoriesPage'
+      path: '/repositories/presentation/RepositoriesPage'
+      fullPath: '/repositories/presentation/RepositoriesPage'
+      preLoaderRoute: typeof RepositoriesPresentationRepositoriesPageImport
+      parentRoute: typeof rootRoute
+    }
+    '/repositories/infrastructure/router/repositories-router': {
+      id: '/repositories/infrastructure/router/repositories-router'
+      path: '/repositories/infrastructure/router/repositories-router'
+      fullPath: '/repositories/infrastructure/router/repositories-router'
+      preLoaderRoute: typeof RepositoriesInfrastructureRouterRepositoriesRouterImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -109,76 +154,103 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/models/models-page': typeof ModelsModelsPageRoute
   '/activity-log': typeof ActivityLogIndexRoute
   '/documentation': typeof DocumentationIndexRoute
-  '/models': typeof ModelsIndexRoute
   '/repositories': typeof RepositoriesIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/repositories/application/RepositoriesController': typeof RepositoriesApplicationRepositoriesControllerRoute
+  '/repositories/presentation/RepositoriesPage': typeof RepositoriesPresentationRepositoriesPageRoute
+  '/repositories/infrastructure/router/repositories-router': typeof RepositoriesInfrastructureRouterRepositoriesRouterRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/models/models-page': typeof ModelsModelsPageRoute
   '/activity-log': typeof ActivityLogIndexRoute
   '/documentation': typeof DocumentationIndexRoute
-  '/models': typeof ModelsIndexRoute
   '/repositories': typeof RepositoriesIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/repositories/application/RepositoriesController': typeof RepositoriesApplicationRepositoriesControllerRoute
+  '/repositories/presentation/RepositoriesPage': typeof RepositoriesPresentationRepositoriesPageRoute
+  '/repositories/infrastructure/router/repositories-router': typeof RepositoriesInfrastructureRouterRepositoriesRouterRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/models/models-page': typeof ModelsModelsPageRoute
   '/activity-log/': typeof ActivityLogIndexRoute
   '/documentation/': typeof DocumentationIndexRoute
-  '/models/': typeof ModelsIndexRoute
   '/repositories/': typeof RepositoriesIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/repositories/application/RepositoriesController': typeof RepositoriesApplicationRepositoriesControllerRoute
+  '/repositories/presentation/RepositoriesPage': typeof RepositoriesPresentationRepositoriesPageRoute
+  '/repositories/infrastructure/router/repositories-router': typeof RepositoriesInfrastructureRouterRepositoriesRouterRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/models/models-page'
     | '/activity-log'
     | '/documentation'
-    | '/models'
     | '/repositories'
     | '/settings'
+    | '/repositories/application/RepositoriesController'
+    | '/repositories/presentation/RepositoriesPage'
+    | '/repositories/infrastructure/router/repositories-router'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/models/models-page'
     | '/activity-log'
     | '/documentation'
-    | '/models'
     | '/repositories'
     | '/settings'
+    | '/repositories/application/RepositoriesController'
+    | '/repositories/presentation/RepositoriesPage'
+    | '/repositories/infrastructure/router/repositories-router'
   id:
     | '__root__'
     | '/'
+    | '/models/models-page'
     | '/activity-log/'
     | '/documentation/'
-    | '/models/'
     | '/repositories/'
     | '/settings/'
+    | '/repositories/application/RepositoriesController'
+    | '/repositories/presentation/RepositoriesPage'
+    | '/repositories/infrastructure/router/repositories-router'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ModelsModelsPageRoute: typeof ModelsModelsPageRoute
   ActivityLogIndexRoute: typeof ActivityLogIndexRoute
   DocumentationIndexRoute: typeof DocumentationIndexRoute
-  ModelsIndexRoute: typeof ModelsIndexRoute
   RepositoriesIndexRoute: typeof RepositoriesIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  RepositoriesApplicationRepositoriesControllerRoute: typeof RepositoriesApplicationRepositoriesControllerRoute
+  RepositoriesPresentationRepositoriesPageRoute: typeof RepositoriesPresentationRepositoriesPageRoute
+  RepositoriesInfrastructureRouterRepositoriesRouterRoute: typeof RepositoriesInfrastructureRouterRepositoriesRouterRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ModelsModelsPageRoute: ModelsModelsPageRoute,
   ActivityLogIndexRoute: ActivityLogIndexRoute,
   DocumentationIndexRoute: DocumentationIndexRoute,
-  ModelsIndexRoute: ModelsIndexRoute,
   RepositoriesIndexRoute: RepositoriesIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  RepositoriesApplicationRepositoriesControllerRoute:
+    RepositoriesApplicationRepositoriesControllerRoute,
+  RepositoriesPresentationRepositoriesPageRoute:
+    RepositoriesPresentationRepositoriesPageRoute,
+  RepositoriesInfrastructureRouterRepositoriesRouterRoute:
+    RepositoriesInfrastructureRouterRepositoriesRouterRoute,
 }
 
 export const routeTree = rootRoute
@@ -192,15 +264,21 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/models/models-page",
         "/activity-log/",
         "/documentation/",
-        "/models/",
         "/repositories/",
-        "/settings/"
+        "/settings/",
+        "/repositories/application/RepositoriesController",
+        "/repositories/presentation/RepositoriesPage",
+        "/repositories/infrastructure/router/repositories-router"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/models/models-page": {
+      "filePath": "models/models-page.tsx"
     },
     "/activity-log/": {
       "filePath": "activity-log/index.tsx"
@@ -208,14 +286,20 @@ export const routeTree = rootRoute
     "/documentation/": {
       "filePath": "documentation/index.tsx"
     },
-    "/models/": {
-      "filePath": "models/index.tsx"
-    },
     "/repositories/": {
       "filePath": "repositories/index.tsx"
     },
     "/settings/": {
       "filePath": "settings/index.tsx"
+    },
+    "/repositories/application/RepositoriesController": {
+      "filePath": "repositories/application/RepositoriesController.tsx"
+    },
+    "/repositories/presentation/RepositoriesPage": {
+      "filePath": "repositories/presentation/RepositoriesPage.tsx"
+    },
+    "/repositories/infrastructure/router/repositories-router": {
+      "filePath": "repositories/infrastructure/router/repositories-router.tsx"
     }
   }
 }

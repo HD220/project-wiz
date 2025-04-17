@@ -1,65 +1,62 @@
 # Desenvolvimento
 
-## Configuração do Ambiente
+Este documento fornece uma visão geral do processo de desenvolvimento do Project Wiz. Para guias detalhados, consulte:
 
-1.  **Node.js e npm**: Certifique-se de ter o Node.js (versão 18+) e o npm (versão 9+) instalados.
-2.  **Editor de código**: Use um editor de código como o VS Code, com as extensões recomendadas para TypeScript, ESLint e Prettier.
-3.  **Git**: Certifique-se de ter o Git instalado.
-4.  **Dependências**: Execute `npm install` no diretório raiz do projeto para instalar as dependências. As dependências principais incluem:
-    - electron
-    - react
-    - react-dom
-    - @lingui/core
-    - @lingui/react
-    - next-themes
-    - node-llama-cpp
-    - sonner
-    - tailwindcss
-    - class-variance-authority
-    - clsx
-    - cmdk
+- [Configuração de Ambiente Local](../guides/ambiente-local.md)
+- [Fluxo de Trabalho Git](../guides/fluxo-git.md)
+- [Convenções de Código](../guides/convencoes-codigo.md)
 
-## Guia de Contribuição
-
-1.  **Fork do repositório**: Faça um fork do repositório do Project Wiz no GitHub.
-2.  **Criação da branch**: Crie uma branch para sua feature ou correção:
-    ```bash
-    git checkout -b feature/sua-feature
-    ```
-3.  **Implementação**: Faça as alterações no código.
-4.  **Commit**: Faça commit das suas mudanças, seguindo as convenções de commit do projeto:
-    ```bash
-    git commit -m "feat: Adiciona nova feature"
-    ```
-    ou
-    ```bash
-    git commit -m "fix: Corrige um bug"
-    ```
-5.  **Push**: Faça push para a branch no seu repositório fork:
-    ```bash
-    git push origin feature/sua-feature
-    ```
-6.  **Pull Request**: Abra um Pull Request no repositório original do Project Wiz.
-
-## Padrões de Código e Estilo
-
-- **ESLint e Prettier**: Siga os padrões de código e estilo definidos no arquivo `.eslintrc.json` e `.prettierrc.js`.
-- **TypeScript**: Use TypeScript para tipagem estática e para garantir a qualidade do código.
-- **Convenções de Commit**: Use as convenções de commit do projeto para facilitar a leitura do histórico de commits.
+## Visão Geral
+O projeto segue os princípios de:
+- Desenvolvimento modular
+- Revisão por pares
+- Integração contínua
+- Documentação como código
 
 
-## Processo de Build e Deploy
+## Build e Deploy
 
-- **Build do Frontend**: Use o Vite para build do frontend.
-  ```bash
-  npm run build
-  ```
-- **Build do Aplicativo Electron**: Use o Electron Forge para build do aplicativo Electron.
-  ```bash
-  npm run package
-  ```
-- **Deploy**: (Em desenvolvimento) - Detalhes sobre o processo de deploy serão adicionados em breve.
+### Desenvolvimento
+```bash
+npm run dev
+```
+
+### Produção
+```bash
+npm run build:prod
+npm run package
+```
+
+### Publicação
+- Automatizada via GitHub Actions
+- Gera artefatos para Windows, Linux e macOS
+- Configuração detalhada em `.github/workflows`
 
 ## Testes
 
-Atualmente, não há testes automatizados implementados no projeto. A validação das funcionalidades é feita manualmente.
+Consulte a [Estratégia de Testes](../testing-strategy.md) para detalhes completos.
+
+Processo atual:
+- Testes unitários: `npm test`
+- Testes manuais seguindo checklist
+- Code Review obrigatório antes do merge
+
+---
+
+## Segurança
+
+Principais considerações:
+- Rate Limiting (configurável via ADR-0032)
+- Política de atualização de dependências
+- Validação de inputs
+
+Consulte a [Política de Segurança](../security-policy.md) para detalhes completos.
+
+## Referências
+
+- [Guia de Estilo](../style-guide.md)
+- [Estratégia de Testes](../testing-strategy.md)
+- [Política de Segurança](../security-policy.md)
+- [Visão da Arquitetura](../architecture-overview.md)
+
+**Última Atualização**: 2025-04-17

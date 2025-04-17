@@ -2,7 +2,7 @@ import ModelSettings from '@/components/model-settings'
 import { createFileRoute } from '@tanstack/react-router'
 import LlmSessionControl from '@/components/llm-session-control'
 
-export const Route = createFileRoute('/models/')({
+export const Route = createFileRoute('/models/models-page')({
   component: ModelsPage,
 })
 

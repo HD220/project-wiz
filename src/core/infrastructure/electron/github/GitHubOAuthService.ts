@@ -1,6 +1,16 @@
 import { BrowserWindow, session } from "electron";
 import fetch from "node-fetch";
-import { IGitHubOAuthService, AuthToken } from "../../../services/auth/types";
+import { GitHubOAuthCallbackValidator, GitHubOAuthTokenValidator } from "../../validation/github-validators";
+
+interface AuthToken {
+  token: string;
+  type: string;
+  createdAt: Date;
+}
+
+interface IGitHubOAuthService {
+  startOAuthFlow(): Promise<AuthToken>;
+}
 
 const CLIENT_ID = "YOUR_CLIENT_ID";
 const CLIENT_SECRET = "YOUR_CLIENT_SECRET";
@@ -28,9 +38,16 @@ export class GitHubOAuthService implements IGitHubOAuthService {
 
       session.defaultSession.webRequest.onCompleted(filter, async (details) => {
         const url = new URL(details.url);
-        const code = url.searchParams.get("code");
-        if (!code) {
-          reject(new Error("OAuth code not found."));
+        const params = Object.fromEntries(url.searchParams.entries());
+        let code: string;
+        try {
+          ({ code } = GitHubOAuthCallbackValidator.validate(params));
+        } catch (err) {
+          if (err instanceof Error && 'message' in err) {
+            reject(new Error(`Erro de validação: ${err.message}`));
+          } else {
+            reject(new Error("OAuth code not found."));
+          }
           authWindow.close();
           return;
         }
@@ -67,9 +84,14 @@ export class GitHubOAuthService implements IGitHubOAuthService {
     });
 
     const data = await response.json();
-    if (!data.access_token) {
+    try {
+      const { access_token } = GitHubOAuthTokenValidator.validate(data);
+      return access_token;
+    } catch (err) {
+      if (err instanceof Error && 'message' in err) {
+        throw new Error(`Token inválido: ${err.message}`);
+      }
       throw new Error("Falha ao obter access token do GitHub.");
     }
-    return data.access_token;
   }
 }

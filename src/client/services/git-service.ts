@@ -1,9 +1,24 @@
-import { IGitService } from "../../core/application/git/igit-service";
-import { ElectronGitService } from "../../core/infrastructure/git/electron-git-service";
+import { GitUseCases } from "@/application/useCases/GitUseCases";
+import { ElectronGitService } from "@/infrastructure/ElectronGitService";
 
-/**
- * Dependency injection entry point for GitService.
- * By default, exports the ElectronGitService implementation.
- * All contracts are defined in src/shared/types/git.ts.
- */
-export const gitService: IGitService = new ElectronGitService();
+// Create the infrastructure adapter
+const gitAdapter = new ElectronGitService();
+
+// Create the application layer with injected adapter
+export const gitService = new GitUseCases(gitAdapter);
+
+// Export individual use cases for convenience
+export const {
+  addRepository,
+  listRepositories,
+  getStatus,
+  commitChanges,
+  pushChanges,
+  pullChanges,
+  createBranch,
+  switchBranch,
+  deleteBranch,
+  listBranches,
+  getHistory,
+  syncWithRemote,
+} = gitService;
