@@ -2,35 +2,19 @@ import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import { lingui } from "@lingui/vite-plugin";
 import react from "@vitejs/plugin-react-swc";
-import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
-import noncePlugin from "./vite.nonce-plugin.mts";
 
 // https://vitejs.dev/config
 export default defineConfig({
-  server: {
-    headers: {
-      "Content-Security-Policy": [
-        "default-src 'self'",
-        "script-src 'self' 'nonce-__NONCE__'",
-        "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data:",
-        "connect-src 'self'",
-        "font-src 'self'",
-        "object-src 'none'",
-        "frame-ancestors 'none'",
-        "base-uri 'self'"
-      ].join('; ')
-    }
-  },
   plugins: [
-    noncePlugin(),
     TanStackRouterVite({
-      target: 'react', 
+      target: "react",
       autoCodeSplitting: true,
-      routesDirectory: './src/client/pages',
-      generatedRouteTree: './src/client/routeTree.gen.ts'
-     }),
+      routesDirectory: "./src/infrastructure/frameworks/react/pages",
+      generatedRouteTree:
+        "./src/infrastructure/frameworks/react/routeTree.gen.ts",
+    }),
     react({
       plugins: [["@lingui/swc-plugin", {}]],
     }),
@@ -41,7 +25,23 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@/components/*": path.resolve(
+        __dirname,
+        "./src/infrastructure/frameworks/react/components"
+      ),
+      "@/ui/*": path.resolve(
+        __dirname,
+        "./src/infrastructure/frameworks/react/components/ui"
+      ),
+      "@/lib/*": path.resolve(
+        __dirname,
+        "./src/infrastructure/frameworks/react/lib"
+      ),
+      "@/hooks/*": path.resolve(
+        __dirname,
+        "./src/infrastructure/frameworks/react/hooks"
+      ),
+      "@": path.resolve(__dirname, "./src/infrastructure/frameworks/react"),
     },
   },
 });

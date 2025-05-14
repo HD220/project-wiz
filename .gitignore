@@ -73,6 +73,7 @@ typings/
 # swc.js build output
 .swc
 
+# lingui
 src/locales/**/*.ts
 
 # vuepress build output
@@ -87,6 +88,10 @@ src/locales/**/*.ts
 # DynamoDB Local files
 .dynamodb/
 
+# slite3
+*.db
+*.sqlite3
+
 # Webpack
 .webpack/
 
@@ -96,6 +101,4 @@ src/locales/**/*.ts
 
 # Electron-Forge
 out
-
-# Roo Flow
-.git
+_old

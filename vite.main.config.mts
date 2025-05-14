@@ -1,19 +1,15 @@
+import path from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
-    outDir: ".vite/build",
-    rollupOptions: {
-      external: [
-        "better-sqlite3",
-        "sqlite3",
-        "keytar",
-        "@node-llama-cpp",
-        "node-llama-cpp"
-      ],
-      output: {
-        entryFileNames: "main.js"
-      }
-    }
-  }
+    rollupOptions: { external: ["better-sqlite3"] },
+  },
+  resolve: {
+    alias: {
+      "@/core/*": path.resolve(__dirname, "./src/core"),
+      "@/infrastructure/*": path.resolve(__dirname, "./src/infrastructure"),
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 });

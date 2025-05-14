@@ -10,7 +10,7 @@
     "noEmit": false,
 
     //electron
-    "types": ["node", "electron", "jest"],
+    "types": ["node", "electron"],
     "esModuleInterop": true,
     "strict": true,
 
@@ -21,9 +21,13 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/components/*": ["./src/infrastructure/frameworks/react/components/*"],
+      "@/lib/*": ["./src/infrastructure/frameworks/react/lib/*"],
+      "@/hooks/*": ["./src/infrastructure/frameworks/react/hooks/*"],
+      "@/ui/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
+      "@/*": ["./src/*"],
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "src/**/*"],
   "exclude": ["node_modules"]
 }
