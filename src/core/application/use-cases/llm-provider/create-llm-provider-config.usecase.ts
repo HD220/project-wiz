@@ -5,19 +5,25 @@ import {
   LLMProviderConfigName,
 } from "@/core/domain/entities/llm-provider-config/value-objects";
 import { LLMProviderId } from "@/core/domain/entities/llm-provider/value-objects";
-import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.repository";
-import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.repository";
+import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
+import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.interface";
 import { LLMModelId } from "@/core/domain/entities/llm-model/value-objects";
 
 export class CreateLLMProviderConfigUseCase
-  implements Executable<Input, Output>
+  implements
+    Executable<
+      CreateLLMProviderConfigUseCaseInput,
+      CreateLLMProviderConfigUseCaseOutput
+    >
 {
   constructor(
     private readonly llmProviderRepository: ILLMProviderRepository,
     private readonly llmProviderConfigRepository: ILLMProviderConfigRepository
   ) {}
 
-  async execute(data: Input): Promise<Result<Output>> {
+  async execute(
+    data: CreateLLMProviderConfigUseCaseInput
+  ): Promise<Result<CreateLLMProviderConfigUseCaseOutput>> {
     try {
       const { name, apiKey, modelId, llmProviderId } = data;
 
@@ -41,13 +47,13 @@ export class CreateLLMProviderConfigUseCase
   }
 }
 
-type Input = {
+export type CreateLLMProviderConfigUseCaseInput = {
   name: string;
   apiKey: string;
   llmProviderId: string;
   modelId: string;
 };
 
-type Output = {
+export type CreateLLMProviderConfigUseCaseOutput = {
   llmProviderConfigId: string | number;
 };

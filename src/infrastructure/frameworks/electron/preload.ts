@@ -1,12 +1,13 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
+import { slugfy } from "@/core/common/utils";
 import { contextBridge, ipcRenderer } from "electron";
 
 interface API {
-  invoke: <R>(channel: string, data: any) => Promise<R>;
-  send: (channel: string, data: any) => void;
-  on: (channel: string, listener: (data: any) => Promise<void>) => () => void;
+  invoke: <R>(channel: string, data?: any) => Promise<R>;
+  send: (channel: string, data?: any) => void;
+  on: (channel: string, listener: (data?: any) => Promise<void>) => () => void;
 }
 
 contextBridge.exposeInMainWorld("api", {

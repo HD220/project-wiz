@@ -12,7 +12,7 @@ export type UserConstructor = {
   email: UserEmail;
   avatar: UserAvatar;
   defaultLLMProviderConfigId: LLMProviderConfigId;
-  assistantId: AgentId;
+  assistantId?: AgentId;
 };
 
 export class User {

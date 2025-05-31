@@ -12,8 +12,8 @@ import {
 } from "@/core/domain/entities/source-code/value-objects";
 import { IFileSystem } from "@/core/ports/adapter/file-system";
 import { IVersionControlSystem } from "@/core/ports/adapter/version-control-sistem";
-import { IProjectRepository } from "@/core/ports/repositories/project.repository";
-import { ISourceCodeRepository } from "@/core/ports/repositories/source-code.repository";
+import { IProjectRepository } from "@/core/ports/repositories/project.interface";
+import { ISourceCodeRepository } from "@/core/ports/repositories/source-code.interface";
 
 export class CreateProjectUseCase implements Executable<Input, Output> {
   constructor(
@@ -32,18 +32,18 @@ export class CreateProjectUseCase implements Executable<Input, Output> {
         description: new ProjectDescription(projectDescription),
       });
 
-      const dirbase = `${project.getId().value}`;
+      const dirbase = `${project.id.value}`;
       const dirs = await this.prepareFolders(dirbase);
       await this.setupRepository(dirs.code);
 
       await this.sourceCodeRepository.create({
         path: new RepositoryPath(dirs.code),
         docsPath: new RepositoryDocsPath(dirs.docs),
-        projectId: project.getId(),
+        projectId: project.id,
       });
 
       return OK({
-        projectId: project.getId().value,
+        projectId: project.id.value,
       });
     } catch (error) {
       if (error instanceof AppError) {

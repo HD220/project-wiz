@@ -1,6 +1,6 @@
 import { Executable } from "@/core/common/executable";
 import { NOK, OK, Result } from "@/core/common/result";
-import { IPersonaRepository } from "@/core/ports/repositories/persona.repository";
+import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
 export class PersonaQuery implements Executable<Input, Output> {
   constructor(private readonly personaRepository: IPersonaRepository) {}

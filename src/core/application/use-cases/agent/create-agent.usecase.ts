@@ -3,9 +3,9 @@ import { NOK, OK, Result } from "@/core/common/result";
 import { AgentTemperature } from "@/core/domain/entities/agent/value-objects";
 import { LLMProviderConfigId } from "@/core/domain/entities/llm-provider-config/value-objects";
 import { PersonaId } from "@/core/domain/entities/persona/value-objects";
-import { IAgentRepository } from "@/core/ports/repositories/agent.repository";
-import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.repository";
-import { IPersonaRepository } from "@/core/ports/repositories/persona.repository";
+import { IAgentRepository } from "@/core/ports/repositories/agent.interface";
+import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
+import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
 export class CreateAgentUseCase implements Executable<Input, Output> {
   constructor(

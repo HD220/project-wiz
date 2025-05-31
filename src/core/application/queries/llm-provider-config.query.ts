@@ -1,6 +1,6 @@
 import { Executable } from "@/core/common/executable";
 import { NOK, OK, Result } from "@/core/common/result";
-import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.repository";
+import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
 
 export class LLMProviderConfigQuery implements Executable<Input, Output> {
   constructor(

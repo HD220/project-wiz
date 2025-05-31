@@ -41,6 +41,8 @@ export default defineConfig({
         __dirname,
         "./src/infrastructure/frameworks/react/hooks"
       ),
+      "@/application/*": path.resolve(__dirname, "./src/core/application"),
+      "@/shared/*": path.resolve(__dirname, "./src/shared"),
       "@": path.resolve(__dirname, "./src/infrastructure/frameworks/react"),
     },
   },

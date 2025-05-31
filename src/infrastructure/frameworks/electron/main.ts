@@ -31,6 +31,8 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+  mainWindow.setMenu(null);
+  // mainWindow.removeMenu();
 };
 
 app.on("ready", async () => {

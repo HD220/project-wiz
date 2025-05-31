@@ -1,5 +1,12 @@
-import { Link, ToOptions, useMatchRoute } from "@tanstack/react-router";
-import { Plus, Home, Archive } from "lucide-react";
+import {
+  Link,
+  LinkComponentProps,
+  LinkOptions,
+  LinkProps,
+  ToOptions,
+  useMatchRoute,
+} from "@tanstack/react-router";
+import { Plus, Home, Archive, Rss } from "lucide-react";
 import { ReactNode } from "react";
 import {
   Tooltip,
@@ -12,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { VariantProps } from "class-variance-authority";
+import { Slot } from "@radix-ui/react-slot";
 
 export type Project = {
   name: string;
@@ -62,42 +70,43 @@ const projects: Project[] = [
 ];
 
 export function MenuItem({
-  children,
   tooltip,
-  exact = false,
+  variant,
+  size,
   asChild,
-  variant = "default",
-  size = "default",
-  ...linkOptions
+  className,
+  ...props
 }: {
   children: ReactNode;
   tooltip: string;
-  exact?: boolean;
   asChild?: boolean;
-  variant?: VariantProps<typeof buttonVariants>["variant"];
-  size?: VariantProps<typeof buttonVariants>["size"];
-} & ToOptions) {
-  const matched = useMatchRoute();
-  const isActive = matched({ ...linkOptions, fuzzy: !exact });
+  className?: string;
+} & VariantProps<typeof buttonVariants> &
+  LinkProps) {
+  const Comp = asChild ? Slot : Link;
+  const {
+    activeOptions = { exact: false },
+    activeProps = {
+      className: "border-2 border-primary",
+    },
+    ...rest
+  } = props || {};
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          {asChild ? (
-            children
-          ) : (
-            <Button
-              asChild
-              variant={isActive !== false ? "default" : variant}
-              size={size}
-              className={cn(
-                "h-12 w-12 rounded-2xl",
-                isActive && "border-2 border-primary-foreground"
-              )}
-            >
-              <Link {...linkOptions}>{children}</Link>
-            </Button>
-          )}
+          <Comp
+            className={cn(
+              buttonVariants({
+                variant,
+                size,
+                className: cn("h-12 w-12 rounded-2xl", className),
+              })
+            )}
+            activeOptions={!asChild ? activeOptions : undefined}
+            activeProps={!asChild ? activeProps : undefined}
+            {...rest}
+          />
         </TooltipTrigger>
         <TooltipContent side="right">{tooltip}</TooltipContent>
       </Tooltip>
@@ -107,33 +116,20 @@ export function MenuItem({
 
 export function AppSidebar() {
   return (
-    <div className="flex w-16 flex-col items-center gap-2 p-2 bg-slate-950/50 h-screen overflow-hidden shrink-0">
-      <MenuItem
-        tooltip="Início"
-        to="/onbording"
-        // mask={{ to: "/general" }}
-        variant={"outline"}
-      >
+    <div className="flex w-16 flex-col items-center gap-2 bg-card/70 h-screen overflow-hidden shrink-0 pt-2">
+      <MenuItem tooltip="Início" to="/user" variant={"secondary"}>
         <Home className="h-6 w-6" />
         <span className="sr-only">Project Wiz</span>
       </MenuItem>
       <Separator className="my-1" />
-      <MenuItem tooltip="Adicionar Projecto" asChild>
-        <Button
-          className="h-12 w-12 rounded-2xl"
-          onClick={() => alert("abc")}
-          variant={"secondary"}
-        >
+      <MenuItem className="cursor-pointer" tooltip="Adicionar Projeto" asChild>
+        <Button>
           <Plus className="h-6 w-6" />
           <span className="sr-only">Adicionar Projeto</span>
         </Button>
       </MenuItem>
-      <MenuItem tooltip="Ver Arquivados" asChild>
-        <Button
-          className="h-12 w-12 rounded-2xl"
-          onClick={() => alert("abc")}
-          variant={"secondary"}
-        >
+      <MenuItem className="cursor-pointer" tooltip="Ver Arquivados" asChild>
+        <Button>
           <Archive className="h-6 w-6" />
           <span className="sr-only">Arquivados</span>
         </Button>
@@ -141,15 +137,14 @@ export function AppSidebar() {
       <Separator className="my-1" />
       <div className="flex-1 overflow-hidden gap-2 mx-auto">
         <ScrollArea className="h-full scrollbar-hide">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 pb-2">
             {projects.map((project, idx) => (
               <MenuItem
                 key={idx}
                 tooltip={project.tooltip || project.name}
                 to={`/project/$id`}
-                // exact={false}
                 params={{ id: `${idx}` }}
-                variant={"outline"}
+                variant={"secondary"}
               >
                 <span>{project.name.substring(0, 2).toUpperCase()}</span>
                 <span className="sr-only">{project.name}</span>

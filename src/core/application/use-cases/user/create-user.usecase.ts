@@ -1,6 +1,5 @@
 import { Executable } from "@/core/common/executable";
 import { NOK, OK, Result } from "@/core/common/result";
-import { AgentId } from "@/core/domain/entities/agent/value-objects";
 import { LLMProviderConfigId } from "@/core/domain/entities/llm-provider-config/value-objects";
 import {
   UserAvatar,
@@ -8,35 +7,29 @@ import {
   UserNickname,
   UserUsername,
 } from "@/core/domain/entities/user/value-objects";
-import { IAgentRepository } from "@/core/ports/repositories/agent.repository";
-import { IPersonaRepository } from "@/core/ports/repositories/persona.repository";
-import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.repository";
-import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.repository";
-import { IUserRepository } from "@/core/ports/repositories/user.repository";
+import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
+import { IUserRepository } from "@/core/ports/repositories/user.interface";
+import { slugfy } from "@/shared/slugfy";
 
-export class CreateUserUseCase implements Executable<Input, Output> {
+export class CreateUserUseCase
+  implements Executable<CreateUserUseCaseInput, CreateUserUseCaseOutput>
+{
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly llmProviderRepository: ILLMProviderRepository,
-    private readonly llmProviderConfigRepository: ILLMProviderConfigRepository,
-    private readonly personaRepository: IPersonaRepository,
-    private readonly agentRepository: IAgentRepository
+    private readonly llmProviderConfigRepository: ILLMProviderConfigRepository
   ) {}
 
-  async execute(data: Input): Promise<Result<Output>> {
+  async execute(
+    data: CreateUserUseCaseInput
+  ): Promise<Result<CreateUserUseCaseOutput>> {
     try {
       const {
         user: { username, nickname, email, avatarUrl },
         llmProviderConfigId,
-        assistantAgentId,
       } = data;
 
       const llmProviderConfig = await this.llmProviderConfigRepository.load(
         new LLMProviderConfigId(llmProviderConfigId)
-      );
-
-      const agent = await this.agentRepository.load(
-        new AgentId(assistantAgentId)
       );
 
       const user = await this.userRepository.create({
@@ -45,7 +38,6 @@ export class CreateUserUseCase implements Executable<Input, Output> {
         email: new UserEmail(email),
         avatar: new UserAvatar(avatarUrl),
         defaultLLMProviderConfigId: llmProviderConfig.id,
-        assistantId: agent.id,
       });
 
       return OK({
@@ -57,7 +49,7 @@ export class CreateUserUseCase implements Executable<Input, Output> {
   }
 }
 
-type Input = {
+export type CreateUserUseCaseInput = {
   user: {
     nickname: string;
     username?: string;
@@ -65,9 +57,8 @@ type Input = {
     avatarUrl: string;
   };
   llmProviderConfigId: string | number;
-  assistantAgentId: string | number;
 };
 
-type Output = {
+export type CreateUserUseCaseOutput = {
   userId: string | number;
 };

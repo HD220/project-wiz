@@ -11,25 +11,24 @@
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root'
-import { Route as ProjectRouteImport } from './pages/project/route'
-import { Route as GeneralRouteImport } from './pages/general/route'
+import { Route as loggedRouteImport } from './pages/(logged)/route'
 import { Route as IndexImport } from './pages/index'
-import { Route as ProjectIndexImport } from './pages/project/index'
-import { Route as OnbordingIndexImport } from './pages/onbording/index'
-import { Route as GeneralIndexImport } from './pages/general/index'
-import { Route as ProjectIdIndexImport } from './pages/project/$id/index'
+import { Route as loggedUserRouteImport } from './pages/(logged)/user/route'
+import { Route as loggedProjectRouteImport } from './pages/(logged)/project/route'
+import { Route as publicOnbordingIndexImport } from './pages/(public)/onbording/index'
+import { Route as publicHomeIndexImport } from './pages/(public)/home/index'
+import { Route as loggedUserIndexImport } from './pages/(logged)/user/index'
+import { Route as loggedProjectIndexImport } from './pages/(logged)/project/index'
+import { Route as loggedUserUserGuidesRouteImport } from './pages/(logged)/user/user-guides/route'
+import { Route as loggedUserUserGuidesIndexImport } from './pages/(logged)/user/user-guides/index'
+import { Route as loggedProjectIdIndexImport } from './pages/(logged)/project/$id/index'
+import { Route as loggedUserDmIdRouteImport } from './pages/(logged)/user/dm/$id/route'
+import { Route as loggedUserDmIdIndexImport } from './pages/(logged)/user/dm/$id/index'
 
 // Create/Update Routes
 
-const ProjectRouteRoute = ProjectRouteImport.update({
-  id: '/project',
-  path: '/project',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const GeneralRouteRoute = GeneralRouteImport.update({
-  id: '/general',
-  path: '/general',
+const loggedRouteRoute = loggedRouteImport.update({
+  id: '/(logged)',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -39,28 +38,70 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProjectIndexRoute = ProjectIndexImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProjectRouteRoute,
+const loggedUserRouteRoute = loggedUserRouteImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => loggedRouteRoute,
 } as any)
 
-const OnbordingIndexRoute = OnbordingIndexImport.update({
-  id: '/onbording/',
+const loggedProjectRouteRoute = loggedProjectRouteImport.update({
+  id: '/project',
+  path: '/project',
+  getParentRoute: () => loggedRouteRoute,
+} as any)
+
+const publicOnbordingIndexRoute = publicOnbordingIndexImport.update({
+  id: '/(public)/onbording/',
   path: '/onbording/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const GeneralIndexRoute = GeneralIndexImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => GeneralRouteRoute,
+const publicHomeIndexRoute = publicHomeIndexImport.update({
+  id: '/(public)/home/',
+  path: '/home/',
+  getParentRoute: () => rootRoute,
 } as any)
 
-const ProjectIdIndexRoute = ProjectIdIndexImport.update({
+const loggedUserIndexRoute = loggedUserIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => loggedUserRouteRoute,
+} as any)
+
+const loggedProjectIndexRoute = loggedProjectIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => loggedProjectRouteRoute,
+} as any)
+
+const loggedUserUserGuidesRouteRoute = loggedUserUserGuidesRouteImport.update({
+  id: '/user-guides',
+  path: '/user-guides',
+  getParentRoute: () => loggedUserRouteRoute,
+} as any)
+
+const loggedUserUserGuidesIndexRoute = loggedUserUserGuidesIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => loggedUserUserGuidesRouteRoute,
+} as any)
+
+const loggedProjectIdIndexRoute = loggedProjectIdIndexImport.update({
   id: '/$id/',
   path: '/$id/',
-  getParentRoute: () => ProjectRouteRoute,
+  getParentRoute: () => loggedProjectRouteRoute,
+} as any)
+
+const loggedUserDmIdRouteRoute = loggedUserDmIdRouteImport.update({
+  id: '/dm/$id',
+  path: '/dm/$id',
+  getParentRoute: () => loggedUserRouteRoute,
+} as any)
+
+const loggedUserDmIdIndexRoute = loggedUserDmIdIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => loggedUserDmIdRouteRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -74,144 +115,261 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/general': {
-      id: '/general'
-      path: '/general'
-      fullPath: '/general'
-      preLoaderRoute: typeof GeneralRouteImport
+    '/(logged)': {
+      id: '/(logged)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof loggedRouteImport
       parentRoute: typeof rootRoute
     }
-    '/project': {
-      id: '/project'
+    '/(logged)/project': {
+      id: '/(logged)/project'
       path: '/project'
       fullPath: '/project'
-      preLoaderRoute: typeof ProjectRouteImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof loggedProjectRouteImport
+      parentRoute: typeof loggedRouteImport
     }
-    '/general/': {
-      id: '/general/'
-      path: '/'
-      fullPath: '/general/'
-      preLoaderRoute: typeof GeneralIndexImport
-      parentRoute: typeof GeneralRouteImport
+    '/(logged)/user': {
+      id: '/(logged)/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof loggedUserRouteImport
+      parentRoute: typeof loggedRouteImport
     }
-    '/onbording/': {
-      id: '/onbording/'
-      path: '/onbording'
-      fullPath: '/onbording'
-      preLoaderRoute: typeof OnbordingIndexImport
-      parentRoute: typeof rootRoute
+    '/(logged)/user/user-guides': {
+      id: '/(logged)/user/user-guides'
+      path: '/user-guides'
+      fullPath: '/user/user-guides'
+      preLoaderRoute: typeof loggedUserUserGuidesRouteImport
+      parentRoute: typeof loggedUserRouteImport
     }
-    '/project/': {
-      id: '/project/'
+    '/(logged)/project/': {
+      id: '/(logged)/project/'
       path: '/'
       fullPath: '/project/'
-      preLoaderRoute: typeof ProjectIndexImport
-      parentRoute: typeof ProjectRouteImport
+      preLoaderRoute: typeof loggedProjectIndexImport
+      parentRoute: typeof loggedProjectRouteImport
     }
-    '/project/$id/': {
-      id: '/project/$id/'
+    '/(logged)/user/': {
+      id: '/(logged)/user/'
+      path: '/'
+      fullPath: '/user/'
+      preLoaderRoute: typeof loggedUserIndexImport
+      parentRoute: typeof loggedUserRouteImport
+    }
+    '/(public)/home/': {
+      id: '/(public)/home/'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof publicHomeIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/(public)/onbording/': {
+      id: '/(public)/onbording/'
+      path: '/onbording'
+      fullPath: '/onbording'
+      preLoaderRoute: typeof publicOnbordingIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/(logged)/user/dm/$id': {
+      id: '/(logged)/user/dm/$id'
+      path: '/dm/$id'
+      fullPath: '/user/dm/$id'
+      preLoaderRoute: typeof loggedUserDmIdRouteImport
+      parentRoute: typeof loggedUserRouteImport
+    }
+    '/(logged)/project/$id/': {
+      id: '/(logged)/project/$id/'
       path: '/$id'
       fullPath: '/project/$id'
-      preLoaderRoute: typeof ProjectIdIndexImport
-      parentRoute: typeof ProjectRouteImport
+      preLoaderRoute: typeof loggedProjectIdIndexImport
+      parentRoute: typeof loggedProjectRouteImport
+    }
+    '/(logged)/user/user-guides/': {
+      id: '/(logged)/user/user-guides/'
+      path: '/'
+      fullPath: '/user/user-guides/'
+      preLoaderRoute: typeof loggedUserUserGuidesIndexImport
+      parentRoute: typeof loggedUserUserGuidesRouteImport
+    }
+    '/(logged)/user/dm/$id/': {
+      id: '/(logged)/user/dm/$id/'
+      path: '/'
+      fullPath: '/user/dm/$id/'
+      preLoaderRoute: typeof loggedUserDmIdIndexImport
+      parentRoute: typeof loggedUserDmIdRouteImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface GeneralRouteRouteChildren {
-  GeneralIndexRoute: typeof GeneralIndexRoute
+interface loggedProjectRouteRouteChildren {
+  loggedProjectIndexRoute: typeof loggedProjectIndexRoute
+  loggedProjectIdIndexRoute: typeof loggedProjectIdIndexRoute
 }
 
-const GeneralRouteRouteChildren: GeneralRouteRouteChildren = {
-  GeneralIndexRoute: GeneralIndexRoute,
+const loggedProjectRouteRouteChildren: loggedProjectRouteRouteChildren = {
+  loggedProjectIndexRoute: loggedProjectIndexRoute,
+  loggedProjectIdIndexRoute: loggedProjectIdIndexRoute,
 }
 
-const GeneralRouteRouteWithChildren = GeneralRouteRoute._addFileChildren(
-  GeneralRouteRouteChildren,
+const loggedProjectRouteRouteWithChildren =
+  loggedProjectRouteRoute._addFileChildren(loggedProjectRouteRouteChildren)
+
+interface loggedUserUserGuidesRouteRouteChildren {
+  loggedUserUserGuidesIndexRoute: typeof loggedUserUserGuidesIndexRoute
+}
+
+const loggedUserUserGuidesRouteRouteChildren: loggedUserUserGuidesRouteRouteChildren =
+  {
+    loggedUserUserGuidesIndexRoute: loggedUserUserGuidesIndexRoute,
+  }
+
+const loggedUserUserGuidesRouteRouteWithChildren =
+  loggedUserUserGuidesRouteRoute._addFileChildren(
+    loggedUserUserGuidesRouteRouteChildren,
+  )
+
+interface loggedUserDmIdRouteRouteChildren {
+  loggedUserDmIdIndexRoute: typeof loggedUserDmIdIndexRoute
+}
+
+const loggedUserDmIdRouteRouteChildren: loggedUserDmIdRouteRouteChildren = {
+  loggedUserDmIdIndexRoute: loggedUserDmIdIndexRoute,
+}
+
+const loggedUserDmIdRouteRouteWithChildren =
+  loggedUserDmIdRouteRoute._addFileChildren(loggedUserDmIdRouteRouteChildren)
+
+interface loggedUserRouteRouteChildren {
+  loggedUserUserGuidesRouteRoute: typeof loggedUserUserGuidesRouteRouteWithChildren
+  loggedUserIndexRoute: typeof loggedUserIndexRoute
+  loggedUserDmIdRouteRoute: typeof loggedUserDmIdRouteRouteWithChildren
+}
+
+const loggedUserRouteRouteChildren: loggedUserRouteRouteChildren = {
+  loggedUserUserGuidesRouteRoute: loggedUserUserGuidesRouteRouteWithChildren,
+  loggedUserIndexRoute: loggedUserIndexRoute,
+  loggedUserDmIdRouteRoute: loggedUserDmIdRouteRouteWithChildren,
+}
+
+const loggedUserRouteRouteWithChildren = loggedUserRouteRoute._addFileChildren(
+  loggedUserRouteRouteChildren,
 )
 
-interface ProjectRouteRouteChildren {
-  ProjectIndexRoute: typeof ProjectIndexRoute
-  ProjectIdIndexRoute: typeof ProjectIdIndexRoute
+interface loggedRouteRouteChildren {
+  loggedProjectRouteRoute: typeof loggedProjectRouteRouteWithChildren
+  loggedUserRouteRoute: typeof loggedUserRouteRouteWithChildren
 }
 
-const ProjectRouteRouteChildren: ProjectRouteRouteChildren = {
-  ProjectIndexRoute: ProjectIndexRoute,
-  ProjectIdIndexRoute: ProjectIdIndexRoute,
+const loggedRouteRouteChildren: loggedRouteRouteChildren = {
+  loggedProjectRouteRoute: loggedProjectRouteRouteWithChildren,
+  loggedUserRouteRoute: loggedUserRouteRouteWithChildren,
 }
 
-const ProjectRouteRouteWithChildren = ProjectRouteRoute._addFileChildren(
-  ProjectRouteRouteChildren,
+const loggedRouteRouteWithChildren = loggedRouteRoute._addFileChildren(
+  loggedRouteRouteChildren,
 )
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/general': typeof GeneralRouteRouteWithChildren
-  '/project': typeof ProjectRouteRouteWithChildren
-  '/general/': typeof GeneralIndexRoute
-  '/onbording': typeof OnbordingIndexRoute
-  '/project/': typeof ProjectIndexRoute
-  '/project/$id': typeof ProjectIdIndexRoute
+  '/': typeof loggedRouteRouteWithChildren
+  '/project': typeof loggedProjectRouteRouteWithChildren
+  '/user': typeof loggedUserRouteRouteWithChildren
+  '/user/user-guides': typeof loggedUserUserGuidesRouteRouteWithChildren
+  '/project/': typeof loggedProjectIndexRoute
+  '/user/': typeof loggedUserIndexRoute
+  '/home': typeof publicHomeIndexRoute
+  '/onbording': typeof publicOnbordingIndexRoute
+  '/user/dm/$id': typeof loggedUserDmIdRouteRouteWithChildren
+  '/project/$id': typeof loggedProjectIdIndexRoute
+  '/user/user-guides/': typeof loggedUserUserGuidesIndexRoute
+  '/user/dm/$id/': typeof loggedUserDmIdIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/general': typeof GeneralIndexRoute
-  '/onbording': typeof OnbordingIndexRoute
-  '/project': typeof ProjectIndexRoute
-  '/project/$id': typeof ProjectIdIndexRoute
+  '/': typeof loggedRouteRouteWithChildren
+  '/project': typeof loggedProjectIndexRoute
+  '/user': typeof loggedUserIndexRoute
+  '/home': typeof publicHomeIndexRoute
+  '/onbording': typeof publicOnbordingIndexRoute
+  '/project/$id': typeof loggedProjectIdIndexRoute
+  '/user/user-guides': typeof loggedUserUserGuidesIndexRoute
+  '/user/dm/$id': typeof loggedUserDmIdIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/general': typeof GeneralRouteRouteWithChildren
-  '/project': typeof ProjectRouteRouteWithChildren
-  '/general/': typeof GeneralIndexRoute
-  '/onbording/': typeof OnbordingIndexRoute
-  '/project/': typeof ProjectIndexRoute
-  '/project/$id/': typeof ProjectIdIndexRoute
+  '/(logged)': typeof loggedRouteRouteWithChildren
+  '/(logged)/project': typeof loggedProjectRouteRouteWithChildren
+  '/(logged)/user': typeof loggedUserRouteRouteWithChildren
+  '/(logged)/user/user-guides': typeof loggedUserUserGuidesRouteRouteWithChildren
+  '/(logged)/project/': typeof loggedProjectIndexRoute
+  '/(logged)/user/': typeof loggedUserIndexRoute
+  '/(public)/home/': typeof publicHomeIndexRoute
+  '/(public)/onbording/': typeof publicOnbordingIndexRoute
+  '/(logged)/user/dm/$id': typeof loggedUserDmIdRouteRouteWithChildren
+  '/(logged)/project/$id/': typeof loggedProjectIdIndexRoute
+  '/(logged)/user/user-guides/': typeof loggedUserUserGuidesIndexRoute
+  '/(logged)/user/dm/$id/': typeof loggedUserDmIdIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/general'
     | '/project'
-    | '/general/'
-    | '/onbording'
+    | '/user'
+    | '/user/user-guides'
     | '/project/'
+    | '/user/'
+    | '/home'
+    | '/onbording'
+    | '/user/dm/$id'
     | '/project/$id'
+    | '/user/user-guides/'
+    | '/user/dm/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/general' | '/onbording' | '/project' | '/project/$id'
+  to:
+    | '/'
+    | '/project'
+    | '/user'
+    | '/home'
+    | '/onbording'
+    | '/project/$id'
+    | '/user/user-guides'
+    | '/user/dm/$id'
   id:
     | '__root__'
     | '/'
-    | '/general'
-    | '/project'
-    | '/general/'
-    | '/onbording/'
-    | '/project/'
-    | '/project/$id/'
+    | '/(logged)'
+    | '/(logged)/project'
+    | '/(logged)/user'
+    | '/(logged)/user/user-guides'
+    | '/(logged)/project/'
+    | '/(logged)/user/'
+    | '/(public)/home/'
+    | '/(public)/onbording/'
+    | '/(logged)/user/dm/$id'
+    | '/(logged)/project/$id/'
+    | '/(logged)/user/user-guides/'
+    | '/(logged)/user/dm/$id/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  GeneralRouteRoute: typeof GeneralRouteRouteWithChildren
-  ProjectRouteRoute: typeof ProjectRouteRouteWithChildren
-  OnbordingIndexRoute: typeof OnbordingIndexRoute
+  loggedRouteRoute: typeof loggedRouteRouteWithChildren
+  publicHomeIndexRoute: typeof publicHomeIndexRoute
+  publicOnbordingIndexRoute: typeof publicOnbordingIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GeneralRouteRoute: GeneralRouteRouteWithChildren,
-  ProjectRouteRoute: ProjectRouteRouteWithChildren,
-  OnbordingIndexRoute: OnbordingIndexRoute,
+  loggedRouteRoute: loggedRouteRouteWithChildren,
+  publicHomeIndexRoute: publicHomeIndexRoute,
+  publicOnbordingIndexRoute: publicOnbordingIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -225,41 +383,77 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/general",
-        "/project",
-        "/onbording/"
+        "/(logged)",
+        "/(public)/home/",
+        "/(public)/onbording/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/general": {
-      "filePath": "general/route.tsx",
+    "/(logged)": {
+      "filePath": "(logged)/route.tsx",
       "children": [
-        "/general/"
+        "/(logged)/project",
+        "/(logged)/user"
       ]
     },
-    "/project": {
-      "filePath": "project/route.tsx",
+    "/(logged)/project": {
+      "filePath": "(logged)/project/route.tsx",
+      "parent": "/(logged)",
       "children": [
-        "/project/",
-        "/project/$id/"
+        "/(logged)/project/",
+        "/(logged)/project/$id/"
       ]
     },
-    "/general/": {
-      "filePath": "general/index.tsx",
-      "parent": "/general"
+    "/(logged)/user": {
+      "filePath": "(logged)/user/route.tsx",
+      "parent": "/(logged)",
+      "children": [
+        "/(logged)/user/user-guides",
+        "/(logged)/user/",
+        "/(logged)/user/dm/$id"
+      ]
     },
-    "/onbording/": {
-      "filePath": "onbording/index.tsx"
+    "/(logged)/user/user-guides": {
+      "filePath": "(logged)/user/user-guides/route.tsx",
+      "parent": "/(logged)/user",
+      "children": [
+        "/(logged)/user/user-guides/"
+      ]
     },
-    "/project/": {
-      "filePath": "project/index.tsx",
-      "parent": "/project"
+    "/(logged)/project/": {
+      "filePath": "(logged)/project/index.tsx",
+      "parent": "/(logged)/project"
     },
-    "/project/$id/": {
-      "filePath": "project/$id/index.tsx",
-      "parent": "/project"
+    "/(logged)/user/": {
+      "filePath": "(logged)/user/index.tsx",
+      "parent": "/(logged)/user"
+    },
+    "/(public)/home/": {
+      "filePath": "(public)/home/index.tsx"
+    },
+    "/(public)/onbording/": {
+      "filePath": "(public)/onbording/index.tsx"
+    },
+    "/(logged)/user/dm/$id": {
+      "filePath": "(logged)/user/dm/$id/route.tsx",
+      "parent": "/(logged)/user",
+      "children": [
+        "/(logged)/user/dm/$id/"
+      ]
+    },
+    "/(logged)/project/$id/": {
+      "filePath": "(logged)/project/$id/index.tsx",
+      "parent": "/(logged)/project"
+    },
+    "/(logged)/user/user-guides/": {
+      "filePath": "(logged)/user/user-guides/index.tsx",
+      "parent": "/(logged)/user/user-guides"
+    },
+    "/(logged)/user/dm/$id/": {
+      "filePath": "(logged)/user/dm/$id/index.tsx",
+      "parent": "/(logged)/user/dm/$id"
     }
   }
 }

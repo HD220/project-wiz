@@ -1,6 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  redirect,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { useDebouncedCallback } from "use-debounce";
+import { Check, Router } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,6 +37,10 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { providersQuery, useCore, userQuery } from "@/hooks/use-core";
+import { toast } from "sonner";
+import { slugfy } from "@/shared/slugfy";
+import { tryCatch } from "@/shared/tryCatch";
 
 type LLMModel = {
   id: string | number;
@@ -38,46 +48,21 @@ type LLMModel = {
   slug: string;
 };
 
-type LLMProvider = {
-  id: string | number;
-  name: string;
-  slug: string;
-  models: LLMModel[];
-};
+// type LLMProvider = {
+//   id: string | number;
+//   name: string;
+//   slug: string;
+//   models: LLMModel[];
+// };
 
-function slugfy(text: string): string {
-  if (typeof text !== "string") {
-    return "";
-  }
-
-  let slug = text.toLowerCase();
-
-  // 2. Remove acentos e caracteres diacríticos
-  // Normaliza para decompor (ex: 'é' -> 'e', '\u0301')
-  // Remove os caracteres diacríticos (intervalo Unicode \u0300-\u036f)
-  slug = slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  // 3. Substitui espaços e caracteres não-alfanuméricos por um hífen
-  // [^a-z0-9] => Qualquer caractere que NÃO seja uma letra minúscula ou número
-  // + => Corresponde a uma ou mais ocorrências do caractere anterior
-  // g => Substitui todas as ocorrências
-  slug = slug.replace(/[^a-z0-9]+/g, "-");
-
-  // 4. Remove hifens do início e do fim da string
-  // ^-+ => Um ou mais hifens no início da string
-  // | => OU
-  // -+$ => Um ou mais hifens no fim da string
-  slug = slug.replace(/^-+|-+$/g, "");
-
-  return slug;
-}
-
-export const Route = createFileRoute("/onbording/")({
+export const Route = createFileRoute("/(public)/onbording/")({
   component: OnbordingPage,
+  async beforeLoad() {
+    const { data, error } = await tryCatch(userQuery());
+    if (error === null) throw redirect({ to: "/user", replace: true });
+  },
   async loader() {
-    const providers: { success: boolean; data: LLMProvider[] } =
-      await window.api.invoke("query:llm-provider", {});
-    console.log(providers, "providers");
+    const providers = await providersQuery();
     return {
       providers,
     };
@@ -109,6 +94,9 @@ const formSchema = z.object({
 type FormType = z.infer<typeof formSchema>;
 
 export default function OnboardingConfig() {
+  const core = useCore();
+  const router = useRouter();
+
   const { providers } = Route.useLoaderData();
   const [models, setModels] = useState<LLMModel[]>([]);
   const form = useForm<FormType>({
@@ -125,28 +113,64 @@ export default function OnboardingConfig() {
   });
 
   const nickname = form.watch("nickname");
-  useEffect(() => {
+  const avatarDebounced = useDebouncedCallback(() => {
     form.setValue(
       "avatar",
       `https://api.dicebear.com/7.x/avataaars/svg?seed=${nickname}`
     );
+  }, 200);
+  useEffect(() => {
     form.setValue("username", slugfy(`${nickname}`));
   }, [nickname]);
-  // const avatar = form.watch("avatar");
 
+  avatarDebounced();
   const selectedProvider = form.watch("providerId");
   useEffect(() => {
     setModels(() => {
-      const data =
-        providers.data.find((provider) => provider.id === selectedProvider)
-          ?.models || [];
+      const [data] = providers.filter(
+        (provider) => provider.id === selectedProvider
+      );
 
-      return [...data];
+      if (!data) return [];
+
+      return [...data.models];
     });
   }, [selectedProvider]);
 
   const handleSubmit = async (data: FormType) => {
-    console.log("Configuração salva", data);
+    const { data: llmConfig, error: llmConfigError } = await tryCatch(
+      core.usecase.createLLMProviderConfig({
+        apiKey: data.apiKey,
+        llmProviderId: data.providerId,
+        modelId: data.modelId,
+        name: "default",
+      })
+    );
+
+    if (llmConfigError) {
+      toast("Não foi possivel salvar a configuração da llm");
+      return;
+    }
+
+    const { data: user, error: userError } = await tryCatch(
+      core.usecase.createUser({
+        user: {
+          nickname: data.nickname,
+          email: data.email,
+          avatarUrl: data.avatar,
+        },
+        llmProviderConfigId: llmConfig.llmProviderConfigId,
+      })
+    );
+
+    if (userError) {
+      toast("Não foi possivel criar o usuário!");
+      return;
+    }
+
+    await router.invalidate();
+
+    console.log("usuário criado com sucesso", user.userId);
   };
 
   return (
@@ -182,7 +206,7 @@ export default function OnboardingConfig() {
                     name="avatar"
                     render={({ field }) => (
                       <FormItem>
-                        <div className="h-16 w-16 rounded-full overflow-hidden shadow-md m-5">
+                        <div className="h-16 w-16 rounded-full overflow-hidden shadow-md m-5 border-4 border-b-muted">
                           <img
                             src={field.value}
                             alt={`Avatar de Usuário`}
@@ -282,7 +306,7 @@ export default function OnboardingConfig() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {providers.data.map((provider) => (
+                            {providers.map((provider) => (
                               <SelectItem
                                 key={provider.id}
                                 value={`${provider.id}`}

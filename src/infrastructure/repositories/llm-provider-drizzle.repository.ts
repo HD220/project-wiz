@@ -7,11 +7,11 @@ import {
   LLMProviderName,
   LLMProviderSlug,
 } from "@/core/domain/entities/llm-provider/value-objects";
-import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.repository";
+import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.interface";
 import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import { eq } from "drizzle-orm";
-import { llmProvidersTable } from "../services/drizzle/schemas/llm-providers";
-import { llmModelsTable } from "../services/drizzle/schemas/llm-models";
+import { llmProviders } from "../services/drizzle/schemas/llm-providers";
+import { llmModels } from "../services/drizzle/schemas/llm-models";
 import { LLMModel } from "@/core/domain/entities/llm-model";
 import {
   LLMModelId,
@@ -26,20 +26,43 @@ export class LLMProviderRepositoryDrizzle implements ILLMProviderRepository {
   create(props: Omit<LLMProviderConstructor, "id">): Promise<LLMProvider> {
     throw new Error("Method not implemented.");
   }
-  load(id: LLMProviderId): Promise<LLMProvider> {
-    throw new Error("Method not implemented.");
+  async load(id: LLMProviderId): Promise<LLMProvider> {
+    const [provider] = await this.db
+      .select()
+      .from(llmProviders)
+      .where(eq(llmProviders.id, `${id.value}`));
+
+    const modelsData = await this.db
+      .select()
+      .from(llmModels)
+      .where(eq(llmModels.llmProviderId, provider.id));
+
+    const models = modelsData.map((model) => {
+      return new LLMModel({
+        id: new LLMModelId(model.id),
+        name: new LLMModelName(model.name),
+        slug: new LLMModelSlug(model.slug),
+      });
+    });
+
+    return new LLMProvider({
+      id: new LLMProviderId(provider.id),
+      name: new LLMProviderName(provider.name),
+      slug: new LLMProviderSlug(provider.slug),
+      models,
+    });
   }
-  save(entity: LLMProvider): Promise<LLMProviderId> {
+  save(entity: LLMProvider): Promise<LLMProvider> {
     throw new Error("Method not implemented.");
   }
   async list(): Promise<LLMProvider[]> {
-    const providersData = await this.db.select().from(llmProvidersTable);
+    const providersData = await this.db.select().from(llmProviders);
 
     const providers = providersData.map(async (provider) => {
       const modelsData = await this.db
         .select()
-        .from(llmModelsTable)
-        .where(eq(llmModelsTable.llmProviderId, provider.id));
+        .from(llmModels)
+        .where(eq(llmModels.llmProviderId, provider.id));
       const models = modelsData.map((model) => {
         return new LLMModel({
           id: new LLMModelId(model.id),

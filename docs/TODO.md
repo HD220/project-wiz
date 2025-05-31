@@ -1,3 +1,5 @@
+# TODO
+
 - [ ] Cadastro de projetos
 - [ ] Documentação dos projetos
 - [ ] Adicionar seleção de projetos em branco ou github
@@ -13,3 +15,4 @@
 - [ ] Geração de personas
 - [ ] Cadastro de personas
 - [ ] Cadastro de agentes
+- [ ] Tela de boas vidas/seleção da conta/perfil

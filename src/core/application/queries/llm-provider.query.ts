@@ -1,11 +1,13 @@
 import { Executable } from "@/core/common/executable";
 import { NOK, OK, Result } from "@/core/common/result";
-import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.repository";
+import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.interface";
 
-export class LLMProviderQuery implements Executable<Input, Output> {
+export class LLMProviderQuery
+  implements Executable<LLMProviderQueryInput, LLMProviderQueryOutput>
+{
   constructor(private readonly llmProviderRepository: ILLMProviderRepository) {}
 
-  async execute(): Promise<Result<Output>> {
+  async execute(): Promise<Result<LLMProviderQueryOutput>> {
     try {
       const llmProviders = await this.llmProviderRepository.list();
 
@@ -27,8 +29,8 @@ export class LLMProviderQuery implements Executable<Input, Output> {
   }
 }
 
-type Input = undefined;
-type Output = {
+export type LLMProviderQueryInput = undefined;
+export type LLMProviderQueryOutput = {
   id: string | number;
   name: string;
   models: {

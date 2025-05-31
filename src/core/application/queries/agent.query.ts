@@ -1,6 +1,6 @@
 import { Executable } from "@/core/common/executable";
 import { NOK, OK, Result } from "@/core/common/result";
-import { IAgentRepository } from "@/core/ports/repositories/agent.repository";
+import { IAgentRepository } from "@/core/ports/repositories/agent.interface";
 
 export class AgentQuery implements Executable<Input, Output> {
   constructor(private readonly agentRepository: IAgentRepository) {}

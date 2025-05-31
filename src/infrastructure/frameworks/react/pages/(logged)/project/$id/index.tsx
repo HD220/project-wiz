@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/project/$id/")({
+export const Route = createFileRoute("/(logged)/project/$id/")({
   component: RouteComponent,
   loader(ctx) {
     const params = ctx.params;

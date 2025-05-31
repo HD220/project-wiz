@@ -8,7 +8,7 @@ import {
   PersonaPersonality,
   PersonaRole,
 } from "@/core/domain/entities/persona/value-objects";
-import { IPersonaRepository } from "@/core/ports/repositories/persona.repository";
+import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
 export class CreatePersonaUseCase implements Executable<Input, Output> {
   constructor(private readonly personaRepository: IPersonaRepository) {}

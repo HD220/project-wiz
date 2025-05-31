@@ -1,5 +1,6 @@
-import { llmModelsTable } from "@/infrastructure/services/drizzle/schemas/llm-models";
-import { llmProvidersTable } from "@/infrastructure/services/drizzle/schemas/llm-providers";
+import { llmModels } from "@/infrastructure/services/drizzle/schemas/llm-models";
+import { llmProviders } from "@/infrastructure/services/drizzle/schemas/llm-providers";
+import { tryCatch } from "@/shared/tryCatch";
 import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
 export async function initializeDatabase(
@@ -40,24 +41,43 @@ export async function initializeDatabase(
   ];
 
   providers.forEach(async (provider) => {
-    const [{ id: providerInsertedId }] = await db
-      .insert(llmProvidersTable)
-      .values({
-        name: provider.name,
-        slug: provider.slug,
-      })
-      .onConflictDoNothing({ target: llmProvidersTable.slug })
-      .returning({ id: llmProvidersTable.id });
-
-    provider.modelsId.forEach(async (model) => {
-      await db
-        .insert(llmModelsTable)
+    const providerData = await tryCatch(
+      db
+        .insert(llmProviders)
         .values({
-          name: model.name,
-          slug: model.slug,
-          llmProviderId: providerInsertedId,
+          name: provider.name,
+          slug: provider.slug,
         })
-        .onConflictDoNothing({ target: llmModelsTable.slug });
-    });
+        .onConflictDoNothing({ target: llmProviders.slug })
+        .returning({ id: llmProviders.id })
+    );
+    // const [{ id: providerInsertedId }] = await ;
+    if (providerData.error) {
+      console.error(
+        `[ERROR][DATABASE_SEED]: ${JSON.stringify(providerData.error)}`
+      );
+      return;
+    }
+    if (providerData.data.length >= 1) {
+      const [{ id: providerInsertedId }] = providerData.data;
+
+      provider.modelsId.forEach(async (model) => {
+        const modelData = await tryCatch(
+          db
+            .insert(llmModels)
+            .values({
+              name: model.name,
+              slug: model.slug,
+              llmProviderId: providerInsertedId,
+            })
+            .onConflictDoNothing({ target: llmModels.slug })
+        );
+        if (modelData.error) {
+          console.error(
+            `[ERROR][DATABASE_SEED]: ${JSON.stringify(modelData.error)}`
+          );
+        }
+      });
+    }
   });
 }

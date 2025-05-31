@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export const llmProvidersTable = sqliteTable("llm_providers", {
+export const llmProviders = sqliteTable("llm_providers", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => randomUUID()),
