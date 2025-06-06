@@ -7,7 +7,7 @@ import { IAgentRepository } from "@/core/ports/repositories/agent.interface";
 import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
 import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
-export class CreateAgentUseCase implements Executable<Input, Output> {
+export class ExecuteTaskUseCase implements Executable<Input, Output> {
   constructor(
     private readonly agentRepository: IAgentRepository,
     private readonly personaRepository: IPersonaRepository,
@@ -33,7 +33,7 @@ export class CreateAgentUseCase implements Executable<Input, Output> {
       });
 
       return OK({
-        agentId: agent.id.value,
+        response: "",
       });
     } catch (error) {
       return NOK(error as Error);
@@ -42,11 +42,10 @@ export class CreateAgentUseCase implements Executable<Input, Output> {
 }
 
 type Input = {
-  personaId: string;
-  llmProviderConfigId: string;
-  temperature: number;
+  agentId: string;
+  taskId: string;
 };
 
 type Output = {
-  agentId: string | number;
+  response: string;
 };

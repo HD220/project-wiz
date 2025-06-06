@@ -2,8 +2,6 @@ import { ipcMain } from "electron";
 import { db } from "@/infrastructure/services/drizzle";
 import { UserRepositoryDrizzle } from "@/infrastructure/repositories/user-drizzle.repository";
 import { CreateUserUseCase } from "@/core/application/use-cases/user/create-user.usecase";
-import { PersonaQuery } from "@/core/application/queries/persona.query";
-import { PersonaRepositoryDrizzle } from "@/infrastructure/repositories/persona-drizzle.repository";
 import { LLMProviderRepositoryDrizzle } from "@/infrastructure/repositories/llm-provider-drizzle.repository";
 import { LLMProviderQuery } from "@/core/application/queries/llm-provider.query";
 import { CreateLLMProviderConfigUseCase } from "@/core/application/use-cases/llm-provider/create-llm-provider-config.usecase";

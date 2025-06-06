@@ -1,5 +1,8 @@
-import { PersonaConstructor, Persona } from "@/core/domain/entities/persona";
-import { PersonaId } from "@/core/domain/entities/persona/value-objects";
+import {
+  PersonaConstructor,
+  Persona,
+} from "@/core/domain/entities/agent/value-objects/persona";
+import { PersonaId } from "@/core/domain/entities/agent/value-objects/persona/value-objects";
 import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 

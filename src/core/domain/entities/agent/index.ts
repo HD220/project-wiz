@@ -1,4 +1,4 @@
-import { Persona } from "../persona";
+import { Persona } from "./value-objects/persona";
 import { LLMProviderConfig } from "../llm-provider-config";
 import { AgentId, AgentTemperature } from "./value-objects";
 

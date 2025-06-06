@@ -4,6 +4,7 @@ import started from "electron-squirrel-startup";
 import "./main/handlers";
 import { db } from "@/infrastructure/services/drizzle";
 import { initializeDatabase } from "./main/seed";
+import { main } from "./main/agent";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -33,6 +34,8 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
   mainWindow.setMenu(null);
   // mainWindow.removeMenu();
+
+  main().catch(console.error);
 };
 
 app.on("ready", async () => {
