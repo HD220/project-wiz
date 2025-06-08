@@ -32,7 +32,7 @@ export async function main() {
   });
 
   const initialMessage = `Olá! Eu quero um **sistema desktop** que funcione como uma **fábrica de software automática**. A ideia principal é que eu consiga **transformar minhas ideias em código** sem precisar programar, já que meu tempo é curto.
-A interface vai ser tipo um **Discord**, onde eu interago com **agentes de inteligência artificial**. Esses agentes e eu podemos conversar, trocar ideias e até mesmo ver o andamento das coisas.
+A interface vai ser tipo um **Discord**, onde eu interajo com **agentes de inteligência artificial**. Esses agentes e eu podemos conversar, trocar ideias e até mesmo ver o andamento das coisas.
 Dentro dessa interface, cada **servidor representa um projeto**. Teremos uma parte para **gerenciamento de tarefas (issues)**, igual a um Jira, onde tanto eu quanto os agentes podem criar e acompanhar o que está sendo feito. A atualização dessas tarefas pelos agentes vai ser **automática**.
 Os agentes de IA terão **autonomia para tomar decisões e implementar**, mas tudo precisa ser **muito bem embasado**. Eles não podem "chutar" ou assumir informações que não têm. Se eles precisarem de algo, eles vão me perguntar.
 A **documentação do projeto** será toda **gerada pelos próprios agentes** durante a interação no Discord. Essa documentação é crucial para eles tomarem decisões, e eles terão a liberdade de criar a estrutura que acharem melhor, sem seguir modelos fixos.
@@ -47,7 +47,6 @@ Em resumo: é um sistema para mim "ter ideias" e a IA "transformar em realidade"
   let reponseCTO = "";
   let reponsePO = "";
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (reponseCTO) {
       poActivity.addToHistory({

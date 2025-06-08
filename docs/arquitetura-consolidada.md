@@ -1,24 +1,29 @@
----
-
-## Documentação da Arquitetura: Sistema de Jobs e Workers
-
-### 1. Visão Geral
-
-Este documento descreve a arquitetura do nosso sistema de processamento assíncrono, focado na execução de unidades de trabalho chamadas **Jobs** por **Workers (Agentes)**, gerenciadas por uma **Fila (Queue)** com persistência em SQLite.
+# Documentação da Arquitetura: Sistema de Jobs (Clean Architecture + Electron)
 
 ---
 
-### 2. Conceitos Fundamentais
+## 1. Visão Geral
+
+Este documento descreve a arquitetura do sistema de processamento assíncrono seguindo os princípios de **Clean Architecture**, com integração **Electron** e divisão clara entre:
+- **Core** (Domain + Application)
+- **Infrastructure** (implementações específicas)
+Focado na execução de **Jobs** por **Workers**, gerenciadas por uma **Queue** com persistência em SQLite.
+
+---
+
+## 2. Conceitos Fundamentais
 
 * **Job**: A representação persistida de uma unidade de trabalho no sistema. É um registro de dados que descreve "o que" precisa ser feito. Uma Job é gerenciada exclusivamente pela Fila.
+* **Clean Architecture**: Uma abordagem que separa o software em camadas concêntricas, onde as dependências fluem de fora para dentro (Infrastructure -> Application -> Domain). Isso garante que a lógica de negócio (Domain) seja independente de frameworks e bancos de dados.
+* **Electron**: Framework para construir aplicações desktop com tecnologias web. Possui dois tipos de processos principais: `Main Process` (controla a aplicação) e `Renderer Process` (exibe a interface do usuário). A comunicação entre eles é feita via IPC (Inter-Process Communication).
 * **Task**: É a lógica de execução em memória para um tipo específico de trabalho. A Task sabe "como" interagir com serviços externos para realizar a parte computacional de uma Job. A Task não se preocupa com persistência ou status de fila.
 * **Fila (Queue)**: O componente central responsável pelo gerenciamento do ciclo de vida das Jobs. Ela persiste o estado das Jobs, controla as transições de status, gerencia retentativas, atrasos e dependências. Sua persistência inicial é em SQLite.
 * **Worker**: Uma classe que recebe a fila a ser escutada (identificada pelo ID do agente) e a função de processamento que será executada. O Worker é responsável por orquestrar a execução e notificar a Fila sobre o desfecho da Job.
-* **Agente**: Contém a lógica específica de como executar uma determinada Task. A função de processamento passada para o Worker é um método da classe do Agente.
+* **Agent**: Contém a lógica específica de como executar uma determinada Task. A função de processamento passada para o Worker é um método da classe do Agente.
 
 ---
 
-### 3. Entidade Job
+## 3. Entidade Job
 
 A entidade `Job` armazena todas as informações necessárias para o gerenciamento de uma unidade de trabalho pela Fila.
 
@@ -45,23 +50,26 @@ A entidade `Job` armazena todas as informações necessárias para o gerenciamen
 
 ```mermaid
 graph TD
-    B[pending]
-    C[executing]
-    D[finished]
-    E[delayed]
-    F[waiting]
-    G[failed]
-
-    B --> C
-    C --> D
-    C --> E
-    E --> B
-    B --> F
-    F --> B
-    C --> G
-    G --> E
+    subgraph Clean Architecture
+      D[Domain]
+      A[Application]
+      I[Infrastructure]
+    end
+    
+    subgraph Electron
+      M[Main Process]
+      R[Renderer Process]
+    end
+    
+    D --> A
+    A --> I
+    I --> M
+    M --> R
+    
+    style D fill:#f9f,stroke:#333
+    style A fill:#bbf,stroke:#333
+    style I fill:#f96,stroke:#333
 ```
-
 
 * **`pending` -> `executing`**: Worker pegou a Job para processar.
 * **`executing` -> `finished`**: Job concluída com sucesso (Agente retorna um valor).
@@ -74,7 +82,7 @@ graph TD
 
 ---
 
-### 4. Componentes e Fluxo de Interação
+## 4. Componentes e Fluxo de Interação
 
 #### 4.1. Fila (`Queue`)
 
@@ -93,7 +101,7 @@ graph TD
     5.  **Captura exceções (`throw new Error`)** lançadas pela função de processamento.
     6.  **Com base no sucesso ou no erro capturado**, o Worker notifica a Fila para que esta faça a alteração necessária nos status da Job.
 
-#### 4.3. Agente
+#### 4.3. Agent
 
 * **Responsabilidade Principal**: Executar a lógica da **Task**.
 * **Funcionamento**:
@@ -124,9 +132,70 @@ graph TD
 
 ---
 
-### 5. Interação com LLMs e Tools
+## 5. Interação com LLMs e Tools
 
 * As chamadas para LLMs são feitas usando o `ai-sdk`, fornecendo **Tools** para serem executadas.
 * Uma "step" da Job pode ter várias chamadas à LLM. Uma step finaliza quando a LLM usa a Tool `finalAnswer`.
 * A Tool `finalAnswer` possui os parâmetros `answer` e `taskFinished` (booleano).
 * As **Tools** são de dois tipos: **Tools do Agente** (genéricas) e **Tools da Task/Job** (específicas). O `tipo da task` no `payload` da Job influencia como o prompt é criado e quais **Tools** (além das do Agente) estão disponíveis. A classe **Task** cuida de quais **Tools** estarão disponíveis.
+
+---
+
+## 6. Implementação Nativa (EventEmitter + Child Processes)
+
+### 6.1 Job Queue com EventEmitter
+```typescript
+class NativeJobQueue implements IJobQueue {
+  private emitter = new EventEmitter();
+  
+  async addJob(job: Job): Promise<Job> {
+    // Persiste no SQLite
+    const savedJob = await this.repository.save(job);
+    this.emitter.emit('new_job', savedJob);
+    return savedJob;
+  }
+}
+```
+
+### 6.2 Worker Pool com Child Processes
+```typescript
+class WorkerPool {
+  private workers: ChildProcess[] = [];
+  
+  constructor(size: number) {
+    for (let i = 0; i < size; i++) {
+      const worker = fork('worker.js');
+      this.workers.push(worker);
+    }
+  }
+}
+```
+
+### 6.3 Fluxo Integrado
+```mermaid
+sequenceDiagram
+    participant R as Renderer
+    participant M as Main
+    participant Q as Queue
+    participant W as WorkerPool
+    participant C as ChildProcess
+    
+    R->>M: IPC: createJob(payload)
+    M->>Q: addJob(payload)
+    Q->>W: new_job event
+    W->>C: fork(worker.js)
+    C->>Q: getNextJob()
+    Q->>C: Job
+    C->>Q: updateStatus(executing)
+    C->>Q: updateStatus(finished/failed)
+```
+
+---
+
+## 7. Lições Aprendidas
+
+* **Padrão Result**: A adoção do padrão Result (ok/error) para encapsular resultados de operações provou ser eficaz no tratamento de erros e no controle de fluxo.
+* **Gestão de Dependências**: A implementação de `depends_on` para criar workflows complexos mostrou-se poderosa, porém requer cuidados com deadlocks e ciclos.
+* **Retry com Backoff Exponencial**: O mecanismo de retentativas com cálculo `((attempts+1) ** 2) * retry_delay` mostrou-se eficiente para lidar com falhas temporárias.
+* **Separação de Responsabilidades**: A clara divisão entre Queue (gestão de estado), Worker (orquestração) e Task (lógica de negócio) facilitou a manutenção e evolução do sistema.
+

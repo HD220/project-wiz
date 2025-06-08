@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { error, ok, Result } from "@/shared/result";
 import {
   PersonaBackstory,
   PersonaGoal,
@@ -22,11 +22,12 @@ export class CreatePersonaUseCase implements Executable<Input, Output> {
         backstory: new PersonaBackstory(backstory),
       });
 
-      return OK({
+      return ok({
         personaId: persona.id.value,
       });
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 }

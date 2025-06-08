@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { error, ok, Result } from "@/shared/result";
 import { LLMProviderConfigId } from "@/core/domain/entities/llm-provider-config/value-objects";
 import {
   UserAvatar,
@@ -40,11 +40,12 @@ export class CreateUserUseCase
         defaultLLMProviderConfigId: llmProviderConfig.id,
       });
 
-      return OK({
+      return ok({
         userId: user.id.value,
       });
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 }

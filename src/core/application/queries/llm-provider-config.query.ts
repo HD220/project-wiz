@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { error, ok, Result } from "@/shared/result";
 import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
 
 export class LLMProviderConfigQuery implements Executable<Input, Output> {
@@ -7,11 +7,11 @@ export class LLMProviderConfigQuery implements Executable<Input, Output> {
     private readonly llmProviderConfigRepository: ILLMProviderConfigRepository
   ) {}
 
-  async execute(data: Input): Promise<Result<Output>> {
+  async execute(_: Input): Promise<Result<Output>> {
     try {
       const llmProviderConfigs = await this.llmProviderConfigRepository.list();
 
-      return OK({
+      return ok({
         data: llmProviderConfigs.map((llmProviderConfig) => ({
           id: llmProviderConfig.id.value,
           name: llmProviderConfig.name.value,
@@ -20,8 +20,9 @@ export class LLMProviderConfigQuery implements Executable<Input, Output> {
           modelId: llmProviderConfig.model.id.value,
         })),
       });
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 }

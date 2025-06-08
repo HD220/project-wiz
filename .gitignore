@@ -102,3 +102,6 @@ src/locales/**/*.ts
 # Electron-Forge
 out
 _old
+
+.roo
+.cursor

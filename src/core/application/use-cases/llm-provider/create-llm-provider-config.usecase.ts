@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { error, ok, Result } from "@/shared/result";
 import {
   LLMProviderConfigApiKey,
   LLMProviderConfigName,
@@ -38,11 +38,12 @@ export class CreateLLMProviderConfigUseCase
         model: llmProvider.getModelById(new LLMModelId(modelId)),
       });
 
-      return OK({
+      return ok({
         llmProviderConfigId: llmProviderConfig.id.value,
       });
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 }

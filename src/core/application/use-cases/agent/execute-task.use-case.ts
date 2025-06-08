@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { error, ok, Result } from "@/shared/result";
 import { AgentTemperature } from "@/core/domain/entities/agent/value-objects";
 import { LLMProviderConfigId } from "@/core/domain/entities/llm-provider-config/value-objects";
 import { PersonaId } from "@/core/domain/entities/agent/value-objects/persona/value-objects";
@@ -26,24 +26,26 @@ export class ExecuteTaskUseCase implements Executable<Input, Output> {
         new LLMProviderConfigId(llmProviderConfigId)
       );
 
-      const agent = await this.agentRepository.create({
+      await this.agentRepository.create({
         persona,
         llmProviderConfig,
         temperature: new AgentTemperature(temperature),
       });
 
-      return OK({
+      return ok({
         response: "",
       });
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 }
 
 type Input = {
-  agentId: string;
-  taskId: string;
+  personaId: string;
+  llmProviderConfigId: string;
+  temperature: number;
 };
 
 type Output = {

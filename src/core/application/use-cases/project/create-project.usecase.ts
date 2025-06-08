@@ -1,7 +1,7 @@
 import { AppError } from "@/core/common/errors";
 import { Executable } from "@/core/common/executable";
 import { IdentityType } from "@/core/common/identity";
-import { NOK, OK, Result } from "@/core/common/result";
+import { error, ok, Result } from "@/shared/result";
 import {
   ProjectDescription,
   ProjectName,
@@ -42,15 +42,16 @@ export class CreateProjectUseCase implements Executable<Input, Output> {
         projectId: project.id,
       });
 
-      return OK({
+      return ok({
         projectId: project.id.value,
       });
-    } catch (error) {
-      if (error instanceof AppError) {
-        return NOK(error);
+    } catch (err) {
+      if (err instanceof AppError) {
+        return error(err.message);
       }
 
-      return NOK(new AppError("CreateProjectUseCase", String(error)));
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 
