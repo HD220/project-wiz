@@ -6,10 +6,11 @@ export const jobs = sqliteTable("jobs", {
   status: text("status", {
     enum: [
       "PENDING",
-      "PROCESSING",
-      "COMPLETED",
+      "WAITING",
+      "DELAYED",
+      "EXECUTING",
+      "FINISHED",
       "FAILED",
-      "RETRYING",
       "CANCELLED",
     ],
   }).notNull(),
@@ -18,6 +19,13 @@ export const jobs = sqliteTable("jobs", {
   retry_delay: integer("retry_delay").notNull(),
   payload: text("payload"),
   data: text("data"),
+  result: text("result"),
+  priority: integer("priority").notNull(),
+  depends_on: text("depends_on"),
   created_at: text("created_at").notNull(),
   updated_at: text("updated_at"),
+  activity_type: text("activity_type"),
+  activity_context: text("activity_context", { mode: "json" }),
+  parent_id: text("parent_id"),
+  related_activity_ids: text("related_activity_ids", { mode: "json" }),
 });

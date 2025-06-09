@@ -60,11 +60,9 @@ export class RetryJobUseCase
     const nextAttemptAt = new Date(Date.now() + nextAttemptDelay);
 
     // 4. Atualizar job com nova tentativa e status RETRYING
-    const updatedJob = job.withAttempt(
-      job.attempts + 1,
-      nextAttemptAt,
-      new JobStatus("RETRYING")
-    );
+    const updatedJob = job
+      .withAttempt(job.attempts + 1)
+      .updateStatus(JobStatus.create("DELAYED")); // Ou PENDING, dependendo da lógica
 
     await this.jobRepository.update(updatedJob);
 

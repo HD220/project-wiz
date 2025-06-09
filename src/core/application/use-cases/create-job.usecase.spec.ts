@@ -14,11 +14,31 @@ describe("CreateJobUseCase", () => {
       maxRetries: 3,
       delay: 1000,
     },
+    activityType: "ACTIVITY_GROUP",
+    context: {
+      activityHistory: [
+        {
+          timestamp: new Date(),
+          role: "system",
+          content: "Job created",
+        },
+      ],
+    },
   };
 
   const invalidInput = {
     name: "", // Nome vazio inválido
     payload: {}, // Payload vazio (tipo correto mas falha na validação)
+    activityType: "ACTIVITY_GROUP",
+    context: {
+      activityHistory: [
+        {
+          timestamp: new Date(),
+          role: "system",
+          content: "Job created",
+        },
+      ],
+    },
   };
 
   beforeEach(() => {
@@ -28,6 +48,8 @@ describe("CreateJobUseCase", () => {
       update: jest.fn(),
       delete: jest.fn(),
       list: jest.fn(),
+      findByIds: jest.fn(),
+      findDependentJobs: jest.fn(),
     };
     jobQueue = {
       addJob: jest.fn(),
@@ -48,6 +70,15 @@ describe("CreateJobUseCase", () => {
             name: validInput.name,
             status: "PENDING",
             createdAt: expect.any(Date),
+            activityType: validInput.activityType,
+            context: expect.objectContaining({
+              activityHistory: expect.arrayContaining([
+                expect.objectContaining({
+                  role: "system",
+                  content: "Job created",
+                }),
+              ]),
+            }),
           })
         );
 
@@ -70,6 +101,8 @@ describe("CreateJobUseCase", () => {
             name: validInput.name,
             status: "PENDING",
             createdAt: expect.any(Date),
+            activityType: undefined, // Should be undefined as it's not provided
+            context: undefined, // Should be undefined as it's not provided
           })
         );
 

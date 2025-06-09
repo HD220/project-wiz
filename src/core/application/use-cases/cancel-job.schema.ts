@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
-import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
+import {
+  JobStatus,
+  jobStatusSchema,
+} from "../../domain/entities/job/value-objects/job-status.vo";
 
 export const CancelJobInputSchema = z.object({
   id: z.instanceof(JobId, {
@@ -12,7 +15,7 @@ export type CancelJobUseCaseInput = z.infer<typeof CancelJobInputSchema>;
 
 export const CancelJobOutputSchema = z.object({
   id: z.instanceof(JobId),
-  status: z.instanceof(JobStatus),
+  status: z.object({ value: jobStatusSchema }),
   updatedAt: z.date(),
 });
 

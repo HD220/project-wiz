@@ -2,11 +2,16 @@ import { QueueService } from "./queue.service";
 import { Job } from "../../core/domain/entities/job/job.entity";
 import { JobId } from "../../core/domain/entities/job/value-objects/job-id.vo";
 import { JobStatus } from "../../core/domain/entities/job/value-objects/job-status.vo";
-import { RetryPolicy } from "../../core/domain/entities/job/value-objects/retry-policy.vo";
+import {
+  BackoffType,
+  RetryPolicy,
+} from "../../core/domain/entities/job/value-objects/retry-policy.vo";
 import { Worker } from "../../core/domain/entities/worker/worker.entity";
 import { WorkerId } from "../../core/domain/entities/worker/value-objects/worker-id.vo";
 import { WorkerStatus } from "../../core/domain/entities/worker/value-objects/worker-status.vo";
-import { ok, error } from "../../shared/result";
+import { ok, error, Ok } from "../../shared/result";
+import { JobPriority } from "../../core/domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../core/domain/entities/job/value-objects/job-depends-on.vo";
 import { JobRepository } from "../../core/application/ports/job-repository.interface";
 import { ProcessJobService } from "../../core/application/ports/process-job-service.interface";
 
@@ -48,6 +53,8 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("WAITING"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
       });
 
@@ -62,6 +69,8 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("WAITING"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
       });
 
@@ -80,6 +89,8 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("WAITING"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
       });
 
@@ -96,6 +107,8 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("DELAYED"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
       });
 
@@ -112,6 +125,8 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("FINISHED"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
       });
 
@@ -128,9 +143,12 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("WAITING"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
         retryPolicy: new RetryPolicy({
           maxAttempts: 3,
+          backoffType: BackoffType.EXPONENTIAL,
           delayBetweenAttempts: 1000,
         }),
       });
@@ -161,6 +179,8 @@ describe("QueueService", () => {
         name: "test-job",
         status: JobStatus.create("WAITING"),
         attempts: 0,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         createdAt: new Date(),
       });
 

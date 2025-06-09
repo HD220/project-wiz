@@ -3,7 +3,9 @@ import { ProcessJobUseCase } from "./process-job.usecase";
 import { Job } from "../../domain/entities/job/job.entity";
 import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
 import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
-import { ok, error } from "../../../shared/result";
+import { ok, error, Ok } from "../../../shared/result";
+import { JobPriority } from "../../domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../domain/entities/job/value-objects/job-depends-on.vo";
 import { JobRepository } from "../ports/job-repository.interface";
 import { ProcessJobService } from "../ports/process-job-service.interface";
 import { WorkerAssignmentService } from "../ports/worker-assignment-service.interface";
@@ -16,6 +18,8 @@ const mockJobRepository: JobRepository = {
   update: vi.fn(),
   delete: vi.fn(),
   list: vi.fn(),
+  findByIds: vi.fn(),
+  findDependentJobs: vi.fn(),
 };
 
 const mockWorkerAssignmentService: WorkerAssignmentService = {
@@ -24,6 +28,7 @@ const mockWorkerAssignmentService: WorkerAssignmentService = {
 
 const mockProcessJobService: ProcessJobService = {
   process: vi.fn(),
+  executeJob: vi.fn(),
 };
 
 describe("ProcessJobUseCase", () => {
@@ -46,6 +51,8 @@ describe("ProcessJobUseCase", () => {
       attempts: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
+      priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+      dependsOn: new JobDependsOn([]),
     });
   };
 

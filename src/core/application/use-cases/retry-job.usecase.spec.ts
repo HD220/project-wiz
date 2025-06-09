@@ -3,6 +3,9 @@ import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
 import { Job } from "../../domain/entities/job/job.entity";
 import { RetryPolicy } from "../../domain/entities/job/value-objects/retry-policy.vo";
 import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
+import { JobPriority } from "../../domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../domain/entities/job/value-objects/job-depends-on.vo";
+import { Ok } from "../../../shared/result";
 
 describe("RetryJobUseCase", () => {
   let jobRepository: jest.Mocked<RetryJobUseCase["jobRepository"]>;
@@ -24,6 +27,7 @@ describe("RetryJobUseCase", () => {
     describe("when job exists and can be retried", () => {
       it("should retry the job successfully", async () => {
         const jobId = new JobId("job-1");
+
         const job = new Job({
           id: jobId,
           name: "test-job",
@@ -32,8 +36,10 @@ describe("RetryJobUseCase", () => {
             maxAttempts: 3,
             delayBetweenAttempts: 1000,
           }),
-          status: new JobStatus("FAILED"),
+          status: JobStatus.create("FAILED"),
           createdAt: new Date(),
+          priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+          dependsOn: new JobDependsOn([]),
         });
 
         jobRepository.findById.mockResolvedValue(job);
@@ -61,8 +67,10 @@ describe("RetryJobUseCase", () => {
             maxAttempts: 3,
             delayBetweenAttempts: 1000,
           }),
-          status: new JobStatus("FAILED"),
+          status: JobStatus.create("FAILED"),
           createdAt: new Date(),
+          priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+          dependsOn: new JobDependsOn([]),
         });
 
         jobRepository.findById.mockResolvedValue(job);
@@ -92,8 +100,10 @@ describe("RetryJobUseCase", () => {
           name: "test-job",
           attempts: 1,
           retryPolicy: undefined,
-          status: new JobStatus("FAILED"),
+          status: JobStatus.create("FAILED"),
           createdAt: new Date(),
+          priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+          dependsOn: new JobDependsOn([]),
         });
 
         jobRepository.findById.mockResolvedValue(job);
@@ -113,8 +123,10 @@ describe("RetryJobUseCase", () => {
             maxAttempts: 3,
             delayBetweenAttempts: 1000,
           }),
-          status: new JobStatus("FAILED"),
+          status: JobStatus.create("FAILED"),
           createdAt: new Date(),
+          priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+          dependsOn: new JobDependsOn([]),
         });
 
         jobRepository.findById.mockResolvedValue(job);

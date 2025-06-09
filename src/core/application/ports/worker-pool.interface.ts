@@ -2,9 +2,8 @@ import { WorkerId } from "../../domain/entities/worker/value-objects/worker-id.v
 import { Job } from "../../domain/entities/job/job.entity";
 import { Worker } from "../../domain/entities/worker/worker.entity";
 
-export interface WorkerPool {
-  addWorker(worker: Worker): Promise<void>;
-  removeWorker(workerId: WorkerId): Promise<void>;
-  getAvailableWorkers(): Promise<Worker[]>;
-  assignJob(workerId: WorkerId, job: Job): Promise<void>;
+export interface IWorkerPool {
+  start(): Promise<void>;
+  stop(): Promise<void>;
+  processJob(job: Job): Promise<void>;
 }

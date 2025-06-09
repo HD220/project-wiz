@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { jobStatusSchema } from "../../domain/entities/job/value-objects/job-status.vo";
+import { activityContextPropsSchema } from "../../domain/entities/job/job.schema";
 
 export const CreateJobInputSchema = z.object({
   name: z
@@ -22,6 +23,10 @@ export const CreateJobInputSchema = z.object({
         .min(0, "Delay entre tentativas deve ser não-negativo"),
     })
     .optional(),
+  activityType: z.string().optional(),
+  context: activityContextPropsSchema.optional(),
+  parentId: z.string().uuid().optional(),
+  relatedActivityIds: z.array(z.string().uuid()).optional(),
 });
 
 export type CreateJobUseCaseInput = z.infer<typeof CreateJobInputSchema>;

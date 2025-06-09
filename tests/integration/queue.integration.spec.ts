@@ -3,6 +3,9 @@ import { Job } from "../../src/core/domain/entities/job/job.entity";
 import { JobId } from "../../src/core/domain/entities/job/value-objects/job-id.vo";
 import { JobStatus } from "../../src/core/domain/entities/job/value-objects/job-status.vo";
 import { RetryPolicy } from "../../src/core/domain/entities/job/value-objects/retry-policy.vo";
+import { JobPriority } from "../../src/core/domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../src/core/domain/entities/job/value-objects/job-depends-on.vo";
+import { Ok } from "../../src/shared/result";
 import { RetryJobUseCase } from "../../src/core/application/use-cases/retry-job.usecase";
 
 describe("Queue Integration Tests", () => {
@@ -30,8 +33,10 @@ describe("Queue Integration Tests", () => {
       testJob = new Job({
         id: new JobId("job-1"),
         name: "test-job",
-        status: new JobStatus("FAILED"),
+        status: JobStatus.create("FAILED"),
         attempts: 1,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         retryPolicy: new RetryPolicy({
           maxAttempts: 3,
           delayBetweenAttempts: 1000,
@@ -44,7 +49,7 @@ describe("Queue Integration Tests", () => {
       // Arrange
       jobRepository.findById.mockResolvedValue(testJob);
       jobRepository.update.mockImplementation((updatedJob) => {
-        expect(updatedJob.status.value).toBe("RETRYING");
+        expect(updatedJob.status.value).toBe("PENDING");
         expect(updatedJob.attempts).toBe(2);
         return Promise.resolve();
       });
@@ -67,7 +72,7 @@ describe("Queue Integration Tests", () => {
       expect(workerPool.enqueue).toHaveBeenCalledWith(
         expect.objectContaining({
           id: testJob.id,
-          status: new JobStatus("RETRYING"),
+          status: JobStatus.create("PENDING"),
         })
       );
     });
@@ -77,8 +82,10 @@ describe("Queue Integration Tests", () => {
       const jobWithoutPolicy = new Job({
         id: new JobId("job-no-policy"),
         name: "test-job-no-retry",
-        status: new JobStatus("FAILED"),
+        status: JobStatus.create("FAILED"),
         attempts: 1,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         retryPolicy: undefined,
         createdAt: new Date(),
       });
@@ -96,8 +103,10 @@ describe("Queue Integration Tests", () => {
       const maxAttemptJob = new Job({
         id: new JobId("job-max"),
         name: "max-attempt-job",
-        status: new JobStatus("FAILED"),
+        status: JobStatus.create("FAILED"),
         attempts: 3,
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
         retryPolicy: new RetryPolicy({
           maxAttempts: 3,
           delayBetweenAttempts: 1000,

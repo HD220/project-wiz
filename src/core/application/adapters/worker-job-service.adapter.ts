@@ -1,10 +1,10 @@
-import { ProcessJobService } from "../ports/process-job-service.interface";
-import { WorkerJobService } from "../ports/worker-job-service.interface";
-import { JobRepository } from "../ports/job-repository.interface";
-import { WorkerRepository } from "../ports/worker-repository.interface";
-import { Job } from "../../domain/entities/job/job.entity";
-import { Worker } from "../../domain/entities/worker/worker.entity";
-import { Result, error } from "../../../shared/result";
+import { ProcessJobService } from "@/core/application/ports/process-job-service.interface";
+import { WorkerJobService } from "@/core/application/ports/worker-job-service.interface";
+import { JobRepository } from "@/core/application/ports/job-repository.interface";
+import { WorkerRepository } from "@/core/application/ports/worker-repository.interface";
+import { Job } from "@/core/domain/entities/job/job.entity";
+import { Worker } from "@/core/domain/entities/worker/worker.entity";
+import { Result, error, ok } from "@/shared/result"; // Adicionado 'ok'
 
 export class WorkerJobServiceAdapter implements ProcessJobService {
   constructor(
@@ -36,5 +36,15 @@ export class WorkerJobServiceAdapter implements ProcessJobService {
         `Erro ao processar job: ${err instanceof Error ? err.message : String(err)}`
       );
     }
+  }
+
+  // Implementação do método executeJob, que é responsabilidade do AgentService
+  async executeJob(job: Job): Promise<Result<void>> {
+    // Este método não deve ser chamado aqui, pois a execução real do job
+    // é feita pelo AgentService. Este é um stub para satisfazer a interface.
+    console.warn(
+      `WorkerJobServiceAdapter.executeJob called for job: ${job.id.value}. This method should be handled by AgentService.`
+    );
+    return ok(undefined);
   }
 }

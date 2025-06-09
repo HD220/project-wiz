@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { jobStatusSchema } from "../../domain/entities/job/value-objects/job-status.vo"; // Alterado para jobStatusSchema
+import { activityContextPropsSchema } from "../../domain/entities/job/job.schema";
 // Removido import de RetryPolicy
 
 export const UpdateJobInputSchema = z.object({
@@ -20,6 +21,10 @@ export const UpdateJobInputSchema = z.object({
     })
     .optional()
     .describe("Política de retentativa, se fornecida"),
+  activityType: z.string().optional(),
+  context: activityContextPropsSchema.optional(),
+  parentId: z.string().uuid().optional(),
+  relatedActivityIds: z.array(z.string().uuid()).optional(),
 });
 
 export type UpdateJobUseCaseInput = z.infer<typeof UpdateJobInputSchema>;

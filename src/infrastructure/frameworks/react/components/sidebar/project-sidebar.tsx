@@ -107,7 +107,7 @@ const channels: Channel[] = [
   },
 ];
 const agrupedChannels = Object.entries(
-  Object.groupBy(channels, ({ category }) => category)
+  Object.groupBy(channels, ({ category }: Channel) => category)
 );
 // .map(([category, channels])=>({category, channels}))
 
@@ -162,7 +162,7 @@ export function ProjectSidebar() {
                 <CollapsibleContent>
                   <SidebarGroupContent>
                     <SidebarMenu className="gap-1">
-                      {channels?.map((channel) => (
+                      {channels?.map((channel: Channel) => (
                         <SidebarMenuItem key={channel.id}>
                           <SidebarMenuButton>
                             <div className="flex flex-1 justify-start items-center">

@@ -1,7 +1,10 @@
 import type { Result } from "@/shared/result";
 import type { CreateLLMProviderConfigUseCaseInput } from "@/core/application/use-cases/llm-provider/create-llm-provider-config.usecase";
 import type { CreateLLMProviderConfigUseCaseOutput } from "@/core/application/use-cases/llm-provider/create-llm-provider-config.usecase";
-import type { CreateUserUseCaseInput } from "@/core/application/use-cases/user/create-user.usecase";
+import type {
+  CreateUserUseCaseInput,
+  CreateUserUseCaseOutput,
+} from "@/core/application/use-cases/user/create-user.usecase";
 // Removido import de JobId
 import type { Job } from "@/core/domain/entities/job/job.entity";
 import type { ProcessJobInput } from "@/core/application/use-cases/process-job.schema"; // Adicionar este import
@@ -29,7 +32,7 @@ export type IpcChannelsInternal = {
     };
     CREATE_USER: {
       request: CreateUserUseCaseInput;
-      response: Result<CreateLLMProviderConfigUseCaseOutput>;
+      response: Result<CreateUserUseCaseOutput>;
     };
   };
 };

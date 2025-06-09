@@ -4,6 +4,13 @@ import { JobId } from "../../src/core/domain/entities/job/value-objects/job-id.v
 import { JobStatus } from "../../src/core/domain/entities/job/value-objects/job-status.vo";
 import { RetryPolicy } from "../../src/core/domain/entities/job/value-objects/retry-policy.vo";
 import { RetryJobUseCase } from "../../src/core/application/use-cases/retry-job.usecase";
+import { JobPriority } from "../../src/core/domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../src/core/domain/entities/job/value-objects/job-depends-on.vo";
+import { Ok, ok as resultOk } from "../../src/shared/result";
+import { ActivityType } from "../../src/core/domain/entities/job/value-objects/activity-type.vo";
+import { ActivityContext } from "../../src/core/domain/entities/job/value-objects/activity-context.vo";
+import { ActivityHistoryEntry } from "../../src/core/domain/entities/job/value-objects/activity-history-entry.vo";
+import { ActivityHistory } from "../../src/core/domain/entities/job/value-objects/activity-history.vo";
 
 describe("Job Integration Tests", () => {
   describe("Retry Job Flow", () => {
@@ -40,6 +47,16 @@ describe("Job Integration Tests", () => {
           delayBetweenAttempts: 1000,
         }),
         createdAt: new Date(),
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
+        activityType: (
+          ActivityType.create("TASK_EXECUTION") as Ok<ActivityType>
+        ).value,
+        context: ActivityContext.create({
+          activityHistory: ActivityHistory.create([
+            ActivityHistoryEntry.create("system", "Initial state", new Date()),
+          ]),
+        }),
       });
 
       jobRepository.findById.mockResolvedValue(job);
@@ -82,6 +99,16 @@ describe("Job Integration Tests", () => {
         attempts: 1,
         retryPolicy: undefined,
         createdAt: new Date(),
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
+        activityType: (
+          ActivityType.create("TASK_EXECUTION") as Ok<ActivityType>
+        ).value,
+        context: ActivityContext.create({
+          activityHistory: ActivityHistory.create([
+            ActivityHistoryEntry.create("system", "Initial state", new Date()),
+          ]),
+        }),
       });
 
       jobRepository.findById.mockResolvedValue(job);
@@ -105,6 +132,16 @@ describe("Job Integration Tests", () => {
           delayBetweenAttempts: 1000,
         }),
         createdAt: new Date(),
+        priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+        dependsOn: new JobDependsOn([]),
+        activityType: (
+          ActivityType.create("TASK_EXECUTION") as Ok<ActivityType>
+        ).value,
+        context: ActivityContext.create({
+          activityHistory: ActivityHistory.create([
+            ActivityHistoryEntry.create("system", "Initial state", new Date()),
+          ]),
+        }),
       });
 
       jobRepository.findById.mockResolvedValue(job);

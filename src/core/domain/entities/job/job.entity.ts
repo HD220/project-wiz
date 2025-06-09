@@ -1,8 +1,14 @@
 import { JobId } from "./value-objects/job-id.vo";
+import { ActivityType } from "./value-objects/activity-type.vo";
+import { ActivityContext } from "./value-objects/activity-context.vo";
 import { JobStatus } from "./value-objects/job-status.vo";
 import { RetryPolicy } from "./value-objects/retry-policy.vo";
+import { JobPriority } from "./value-objects/job-priority.vo";
+import { JobDependsOn } from "./value-objects/job-depends-on.vo";
+import { RelatedActivityIds } from "./value-objects/related-activity-ids.vo";
 import { jobSchema } from "./job.schema";
-import { JobBuilder } from "./job-builder"; // Revertido para import normal
+import { JobBuilder } from "./job-builder";
+import { Ok } from "../../../../shared/result";
 
 export type JobProps = {
   id: JobId;
@@ -14,11 +20,19 @@ export type JobProps = {
   updatedAt?: Date;
   payload?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  data?: Record<string, unknown>;
+  result?: unknown;
+  priority?: JobPriority;
+  dependsOn?: JobDependsOn;
+  activityType?: ActivityType;
+  context?: ActivityContext;
+  parentId?: JobId;
+  relatedActivityIds?: RelatedActivityIds;
 };
 
 export class Job {
   constructor(private readonly fields: JobProps) {
-    jobSchema.parse(fields);
+    jobSchema.parse(this.fields);
   }
 
   get id(): JobId {
@@ -58,12 +72,43 @@ export class Job {
     return this.retryPolicy.calculateDelay(this.attempts);
   }
 
+  get data(): Record<string, unknown> | undefined {
+    return this.fields.data;
+  }
+
+  get result(): unknown | undefined {
+    return this.fields.result;
+  }
+
+  get priority(): JobPriority | undefined {
+    return this.fields.priority;
+  }
+
+  get dependsOn(): JobDependsOn | undefined {
+    return this.fields.dependsOn;
+  }
+
+  get activityType(): ActivityType | undefined {
+    return this.fields.activityType;
+  }
+
+  get context(): ActivityContext | undefined {
+    return this.fields.context;
+  }
+
+  get parentId(): JobId | undefined {
+    return this.fields.parentId;
+  }
+
+  get relatedActivityIds(): RelatedActivityIds | undefined {
+    return this.fields.relatedActivityIds;
+  }
+
   withAttempt(attempts: number): Job {
-    return new Job({
-      ...this.fields,
-      attempts,
-      updatedAt: new Date(),
-    });
+    return new JobBuilder(this.fields)
+      .withAttempts(attempts)
+      .withUpdatedAt(new Date())
+      .build();
   }
 
   get metadata(): Record<string, unknown> | undefined {
@@ -71,15 +116,20 @@ export class Job {
   }
 
   updateStatus(newStatus: JobStatus): Job {
-    if (!this.status.canTransitionTo(newStatus.value)) {
-      throw new Error(
-        `Invalid status transition from ${this.status.value} to ${newStatus.value}`
-      );
-    }
+    this.ensureValidStatusTransition(newStatus);
     return new JobBuilder(this.fields)
       .withStatus(newStatus)
       .withUpdatedAt(new Date())
       .build();
+  }
+
+  private ensureValidStatusTransition(newStatus: JobStatus): void {
+    if (this.status.canTransitionTo(newStatus.value)) {
+      return; // Valid transition, do nothing
+    }
+    throw new Error(
+      `Invalid status transition from ${this.status.value} to ${newStatus.value}`
+    );
   }
 
   start(): Job {
@@ -98,7 +148,18 @@ export class Job {
     return this.updateStatus(this.status.transitionTo("DELAYED"));
   }
 
-  wait(): Job {
+  toWaiting(): Job {
     return this.updateStatus(this.status.transitionTo("WAITING"));
+  }
+
+  toPending(payload?: Record<string, unknown>): Job {
+    const newStatus = this.status.transitionTo("PENDING");
+    this.ensureValidStatusTransition(newStatus);
+
+    return new JobBuilder(this.fields)
+      .withStatus(newStatus)
+      .withUpdatedAt(new Date())
+      .withPayload(payload) // Apply payload directly, even if undefined
+      .build();
   }
 }

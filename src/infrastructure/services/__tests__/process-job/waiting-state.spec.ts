@@ -6,7 +6,10 @@ import { JobStatus } from "../../../../core/domain/entities/job/value-objects/jo
 import { Worker } from "../../../../core/domain/entities/worker/worker.entity";
 import { WorkerId } from "../../../../core/domain/entities/worker/value-objects/worker-id.vo";
 import { WorkerStatus } from "../../../../core/domain/entities/worker/value-objects/worker-status.vo";
-import { ok } from "../../../../shared/result";
+import { ok, Ok } from "../../../../shared/result";
+import { JobPriority } from "../../../../core/domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../../../core/domain/entities/job/value-objects/job-depends-on.vo";
+import { IAgentService } from "../../../../core/application/ports/agent-service.interface";
 
 type MockJobRepository = {
   findById: ReturnType<typeof vi.fn>;
@@ -14,6 +17,8 @@ type MockJobRepository = {
   update: ReturnType<typeof vi.fn>;
   delete: ReturnType<typeof vi.fn>;
   list: ReturnType<typeof vi.fn>;
+  findByIds: ReturnType<typeof vi.fn>;
+  findDependentJobs: ReturnType<typeof vi.fn>;
 };
 
 type MockQueueService = {
@@ -32,6 +37,8 @@ describe("ProcessJobService - WAITING state", () => {
     update: vi.fn(),
     delete: vi.fn(),
     list: vi.fn(),
+    findByIds: vi.fn(),
+    findDependentJobs: vi.fn(),
   };
   const mockQueueService: MockQueueService = {
     enqueue: vi.fn(),
@@ -42,7 +49,14 @@ describe("ProcessJobService - WAITING state", () => {
   };
 
   beforeEach(() => {
-    service = new ProcessJobServiceImpl(mockJobRepository, mockQueueService);
+    const mockAgentService: IAgentService = {
+      executeTask: vi.fn().mockResolvedValue(ok(undefined)),
+    };
+    service = new ProcessJobServiceImpl(
+      mockJobRepository,
+      mockQueueService,
+      mockAgentService
+    );
     vi.clearAllMocks();
   });
 
@@ -54,6 +68,8 @@ describe("ProcessJobService - WAITING state", () => {
       attempts,
       createdAt: new Date(),
       updatedAt: new Date(),
+      priority: (JobPriority.create(0) as Ok<JobPriority>).value,
+      dependsOn: new JobDependsOn([]),
     });
   };
 
@@ -68,7 +84,7 @@ describe("ProcessJobService - WAITING state", () => {
   };
 
   it("should transition WAITING to PROCESSING", async () => {
-    const job = createJob(JobStatus.waiting());
+    const job = createJob(JobStatus.create("WAITING"));
     const worker = createWorker();
 
     mockJobRepository.findById.mockResolvedValue(ok(job));

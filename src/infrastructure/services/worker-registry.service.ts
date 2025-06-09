@@ -1,10 +1,10 @@
-import { WorkerService } from "../../core/application/ports/worker-service.interface";
+import { IWorkerRegistryService } from "../../core/application/ports/worker-registry.service.interface";
 import { Worker } from "../../core/domain/entities/worker/worker.entity";
 import { WorkerId } from "../../core/domain/entities/worker/value-objects/worker-id.vo";
 import { Result, ok, error } from "../../shared/result";
 import { WorkerRepository } from "../../core/application/ports/worker-repository.interface";
 
-export class WorkerServiceImpl implements WorkerService {
+export class WorkerRegistryServiceImpl implements IWorkerRegistryService {
   constructor(private readonly workerRepository: WorkerRepository) {}
 
   async register(worker: Worker): Promise<Result<Worker>> {

@@ -1,4 +1,5 @@
-type Constructor<T = unknown, _ID = unknown> = new (...args: unknown[]) => T;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor<T = unknown> = new (...args: any[]) => T;
 type ConstructorArgs<C extends Constructor> = ConstructorParameters<C>[0];
 type Instance<C extends Constructor> = InstanceType<C>;
 

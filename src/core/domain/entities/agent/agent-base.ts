@@ -1,5 +1,5 @@
 import { Task } from "@/core/ports/task.interface";
-import { Job } from "../job";
+import { Job } from "../job/job.entity";
 
 export abstract class AgentBase {
   protected abstract getTools(): unknown[];

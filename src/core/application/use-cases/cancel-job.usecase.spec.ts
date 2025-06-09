@@ -2,10 +2,12 @@ import "@types/jest";
 import { CancelJobUseCase } from "./cancel-job.usecase";
 import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
 import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
-import { ok, error } from "../../../shared/result";
+import { ok, error, Ok } from "../../../shared/result";
 import { JobBuilder } from "../../domain/entities/job/job-builder";
 import { Job } from "../../domain/entities/job/job.entity";
 import { Result } from "../../../shared/result";
+import { JobPriority } from "../../domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../domain/entities/job/value-objects/job-depends-on.vo";
 
 // Interface para o JobRepository mock
 interface MockJobRepository {
@@ -14,6 +16,8 @@ interface MockJobRepository {
   create: jest.Mock<Promise<Result<Job>>>;
   delete: jest.Mock<Promise<Result<void>>>;
   list: jest.Mock<Promise<Result<Job[]>>>;
+  findByIds: jest.Mock<Promise<Result<Job[]>>>;
+  findDependentJobs: jest.Mock<Promise<Result<Job[]>>>;
 }
 
 // Interface para o JobQueue mock com tipos exatos
@@ -32,6 +36,8 @@ describe("CancelJobUseCase", () => {
     create: jest.fn(),
     delete: jest.fn(),
     list: jest.fn(),
+    findByIds: jest.fn(),
+    findDependentJobs: jest.fn(),
   };
 
   const mockJobQueue: MockJobQueue = {
@@ -45,11 +51,15 @@ describe("CancelJobUseCase", () => {
   const pendingJob = new JobBuilder()
     .withId(new JobId("job-id"))
     .withStatus(JobStatus.create("PENDING"))
+    .withPriority((JobPriority.create(0) as Ok<JobPriority>).value)
+    .withDependsOn(new JobDependsOn([]))
     .build();
 
   const cancelledJob = new JobBuilder()
     .withId(new JobId("job-id"))
     .withStatus(JobStatus.create("CANCELLED"))
+    .withPriority((JobPriority.create(0) as Ok<JobPriority>).value)
+    .withDependsOn(new JobDependsOn([]))
     .build();
 
   const validInput = { id: new JobId("job-id") };

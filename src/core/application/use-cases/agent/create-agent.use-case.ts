@@ -7,7 +7,7 @@ import { IAgentRepository } from "@/core/ports/repositories/agent.interface";
 import { ILLMProviderConfigRepository } from "@/core/ports/repositories/llm-provider-config.interface";
 import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
-export class ExecuteTaskUseCase implements Executable<Input, Output> {
+export class CreateAgentUseCase implements Executable<Input, Output> {
   constructor(
     private readonly agentRepository: IAgentRepository,
     private readonly personaRepository: IPersonaRepository,

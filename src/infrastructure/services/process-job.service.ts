@@ -1,15 +1,18 @@
 import { ProcessJobService } from "../../core/application/ports/process-job-service.interface";
-import { Job } from "../../core/domain/entities/job/job.entity";
-import { Worker } from "../../core/domain/entities/worker/worker.entity";
-import { Result, ok, error } from "../../shared/result";
+import { Job } from "@/core/domain/entities/job/job.entity";
+import { Worker } from "@/core/domain/entities/worker/worker.entity";
+import { Result, ok, error } from "@/shared/result";
 import { JobRepository } from "../../core/application/ports/job-repository.interface";
 import { QueueService } from "../../core/application/ports/queue-service.interface";
 import { JobId } from "../../core/domain/entities/job/value-objects/job-id.vo";
+import { IAgentService } from "../../core/application/ports/agent-service.interface";
+import { AgentServiceImpl } from "./agent.service";
 
 export class ProcessJobServiceImpl implements ProcessJobService {
   constructor(
     private readonly jobRepository: JobRepository,
-    private readonly queueService: QueueService
+    private readonly queueService: QueueService,
+    private readonly agentService: IAgentService
   ) {}
 
   async process(job: Job, worker: Worker): Promise<Result<Job>> {
@@ -40,21 +43,23 @@ export class ProcessJobServiceImpl implements ProcessJobService {
         return ok(job.start());
       }
 
-      const processedJob = await this.executeJob(job, worker);
+      const executionResult = await this.executeJob(job);
 
-      if (processedJob.isError()) {
+      if (executionResult.isError()) {
         if (
           job.retryPolicy &&
           job.attempts < job.retryPolicy.value.maxAttempts
         ) {
           const delayedJob = job.delay();
           await this.queueService.enqueue(delayedJob);
-          return error(`Job falhou e será retentado: ${processedJob.message}`);
+          return error(
+            `Job falhou e será retentado: ${executionResult.message}`
+          );
         }
-        return error(processedJob.message);
+        return error(executionResult.message);
       }
 
-      return ok(processedJob.value);
+      return ok(job.complete());
     } catch (err) {
       return error(
         `Erro inesperado ao processar job: ${err instanceof Error ? err.message : String(err)}`
@@ -108,16 +113,13 @@ export class ProcessJobServiceImpl implements ProcessJobService {
     }
   }
 
-  private async executeJob(job: Job, _worker: Worker): Promise<Result<Job>> {
+  async executeJob(job: Job): Promise<Result<void>> {
     try {
-      // Simula falha quando o repositório retorna erro
-      const result = await this.jobRepository.findById(job.id);
+      const result = await this.agentService.executeTask(job);
       if (result.isError()) {
         return error(result.message);
       }
-
-      // TODO: Implementar lógica real de execução do job
-      return ok(job.complete());
+      return ok(undefined);
     } catch (err) {
       return error(
         `Falha ao executar job: ${err instanceof Error ? err.message : String(err)}`

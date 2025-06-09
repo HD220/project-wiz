@@ -1,5 +1,5 @@
 import { Executable } from "../../../shared/executable";
-import { Result, ok, error } from "../../../shared/result";
+import { Result, ok, error, Ok } from "../../../shared/result";
 import {
   CreateJobUseCaseInput,
   CreateJobUseCaseOutput,
@@ -11,6 +11,12 @@ import { JobBuilder } from "../../domain/entities/job/job-builder"; // Corrigido
 import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
 import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
 import { RetryPolicy } from "../../domain/entities/job/value-objects/retry-policy.vo";
+import { ActivityType } from "../../domain/entities/job/value-objects/activity-type.vo";
+import { ActivityContext } from "../../domain/entities/job/value-objects/activity-context.vo";
+import { ActivityHistoryEntry } from "../../domain/entities/job/value-objects/activity-history-entry.vo";
+import { ActivityHistory } from "../../domain/entities/job/value-objects/activity-history.vo";
+import { ActivityNotes } from "../../domain/entities/job/value-objects/activity-notes.vo";
+import { RelatedActivityIds } from "../../domain/entities/job/value-objects/related-activity-ids.vo";
 
 export class CreateJobUseCase
   implements Executable<CreateJobUseCaseInput, Result<CreateJobUseCaseOutput>>
@@ -29,26 +35,7 @@ export class CreateJobUseCase
         return error(validation.error.message);
       }
 
-      const jobId = new JobId(Date.now().toString());
-      const jobStatus = JobStatus.createInitial(); // Corrigido para usar o método estático
-
-      const retryPolicyInput = input.retryPolicy
-        ? {
-            maxAttempts: input.retryPolicy.maxRetries,
-            delayBetweenAttempts: input.retryPolicy.delay,
-          }
-        : undefined;
-
-      const retryPolicy = new RetryPolicy(retryPolicyInput);
-
-      const job = new JobBuilder()
-        .withId(jobId)
-        .withName(input.name)
-        .withStatus(jobStatus)
-        .withCreatedAt(new Date())
-        .withPayload(input.payload ?? {})
-        .withRetryPolicy(retryPolicy)
-        .build();
+      const job = this.buildJobFromInput(input);
 
       await this.jobRepository.create(job);
       await this.jobQueue.addJob(job);
@@ -60,7 +47,65 @@ export class CreateJobUseCase
         createdAt: job.createdAt,
       });
     } catch (err) {
-      return error(err instanceof Error ? err.message : "Failed to create job");
+      return error(this.formatErrorMessage("create job", err));
     }
+  }
+  private buildJobFromInput(input: CreateJobUseCaseInput): Job {
+    const jobId = new JobId(Date.now().toString());
+    const jobStatus = JobStatus.createInitial();
+
+    const retryPolicyInput = input.retryPolicy
+      ? {
+          maxAttempts: input.retryPolicy.maxRetries,
+          delayBetweenAttempts: input.retryPolicy.delay,
+        }
+      : undefined;
+
+    const retryPolicy = new RetryPolicy(retryPolicyInput);
+
+    return new JobBuilder()
+      .withId(jobId)
+      .withName(input.name)
+      .withStatus(jobStatus)
+      .withCreatedAt(new Date())
+      .withPayload(input.payload ?? {})
+      .withRetryPolicy(retryPolicy)
+      .withActivityType(
+        input.activityType
+          ? (ActivityType.create(input.activityType) as Ok<ActivityType>).value
+          : undefined
+      )
+      .withContext(
+        input.context
+          ? ActivityContext.create({
+              ...input.context,
+              activityHistory: ActivityHistory.create(
+                input.context.activityHistory.map((entry) =>
+                  ActivityHistoryEntry.create(
+                    entry.role,
+                    entry.content,
+                    entry.timestamp
+                  )
+                )
+              ),
+              activityNotes: input.context.activityNotes
+                ? ActivityNotes.create(input.context.activityNotes)
+                : undefined,
+            })
+          : undefined
+      )
+      .withParentId(input.parentId ? new JobId(input.parentId) : undefined)
+      .withRelatedActivityIds(
+        input.relatedActivityIds
+          ? RelatedActivityIds.create(
+              input.relatedActivityIds.map((id) => new JobId(id))
+            )
+          : undefined
+      )
+      .build();
+  }
+
+  private formatErrorMessage(operation: string, err: unknown): string {
+    return `Failed to ${operation}: ${err instanceof Error ? err.message : String(err)}`;
   }
 }

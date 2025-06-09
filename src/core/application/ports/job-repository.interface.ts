@@ -8,4 +8,6 @@ export interface JobRepository {
   update(job: Job): Promise<Result<Job>>;
   delete(id: JobId): Promise<Result<void>>;
   list(): Promise<Result<Job[]>>;
+  findByIds(ids: JobId[]): Promise<Result<Job[]>>;
+  findDependentJobs(jobId: JobId): Promise<Result<Job[]>>;
 }
