@@ -18,9 +18,6 @@ Em resumo, o `AgentInternalState` fornece o "pano de fundo" global para o Agente
 O `AgentInternalState` é um objeto conciso que pode incluir campos como:
 
 - `agentId`: Identificador único do Agente ao qual este estado pertence.
-- `currentProjectId`: Opcional. O ID do projeto no qual o Agente está trabalhando ativamente.
-- `currentIssueId`: Opcional. O ID da issue específica dentro do projeto que está sendo abordada.
-- `currentGoal`: Opcional. Uma descrição do objetivo de alto nível que o Agente está tentando alcançar.
 - `generalNotes`: Opcional. Um array de strings contendo notas gerais, observações ou aprendizados que se aplicam ao Agente como um todo, não a uma atividade específica.
 - `promisesMade`: Opcional. Um array de strings registrando compromissos ou promessas que o Agente fez (a usuários, outros agentes, etc.) e que precisam ser lembrados e possivelmente cumpridos.
 - _(Outros campos podem ser adicionados conforme necessário para o estado global de negócio do Agente)_

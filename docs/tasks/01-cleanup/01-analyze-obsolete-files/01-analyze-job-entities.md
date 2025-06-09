@@ -12,7 +12,7 @@ Esta é a primeira etapa da análise de arquivos obsoletos. O diretório `src/co
 
 1.  Navegue até o diretório `src/core/domain/entities/job`.
 2.  Examine cada arquivo `.ts` neste diretório.
-3.  Com base na documentação da nova arquitetura ([docs/architecture-agents-workers-queue.md](docs/architecture-agents-workers-queue.md), [docs/architectural-design-workers-agents.md](docs/architectural-design-workers-agents.md)), determine se a entidade ou Value Object definido no arquivo é obsoleto ou se pode ser refatorado (o que será tratado em tarefas posteriores).
+3.  Com base na documentação da nova arquitetura docs/agents-automato/03-arquitetura, determine se a entidade ou Value Object definido no arquivo é obsoleto ou se pode ser refatorado (o que será tratado em tarefas posteriores).
 4.  Crie uma lista temporária dos caminhos dos arquivos neste diretório que são considerados obsoletos.
 
 ## Expected Deliverable:

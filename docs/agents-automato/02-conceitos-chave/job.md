@@ -11,8 +11,8 @@ A entidade Job possui os seguintes atributos:
 - `id`: Identificador único da Job.
 - `name`: Nome descritivo da Job.
 - `payload`: O payload de entrada inicial da Job. Este campo não deve ser alterado internamente durante a execução da Job.
-- `data`: Campo utilizado para armazenar informações mutáveis que podem ser salvas durante a execução da Job. No contexto dos Agentes, este campo contém o `ActivityContext`, que inclui detalhes como `messageContent`, `sender`, `toolName`, `toolArgs`, `goalToPlan`, `plannedSteps`, `activityNotes`, `validationCriteria`, `validationResult`, e o crucial `activityHistory` (um array de mensagens que armazena a conversa e interações relacionadas exclusivamente a esta Activity, garantindo contexto isolado para o LLM).
-- `result`: O resultado final da execução da Job. É opcional e preenchido ao final do processamento.
+- `data`: Campo utilizado para armazenar informações mutáveis que podem ser salvas durante a execução da Job. No contexto dos Agentes, este campo contém o `ActivityContext`, e o crucial `activityHistory` (um array de mensagens que armazena a conversa e interações relacionadas exclusivamente a esta Activity, garantindo contexto isolado para o LLM).
+- `result`: O resultado final da execução da Job. Ultima resposta da llm pela tool de resposta final.
 - `max_attempts`: A quantidade máxima de tentativas permitidas para a execução da Job em caso de falha.
 - `attempts`: A quantidade de tentativas de execução que já foram realizadas para esta Job.
 - `max_retry_delay`: O tempo máximo de espera entre as retentativas em caso de falha.
@@ -22,8 +22,6 @@ A entidade Job possui os seguintes atributos:
 - `status`: O estado atual da Job no seu ciclo de vida. Veja a seção "Estados do Status da Job" para mais detalhes.
 - `depends_on`: Uma lista de `jobIds` das quais esta Job depende para poder ser executada. A Job só passará para o status `pending` quando todas as Jobs listadas em `depends_on` estiverem no status `finished`. A saída dessas Jobs dependentes pode ser incluída no `payload` ou `data` da Job atual pela Queue.
 - `parentId`: O ID da Job pai, caso esta Job seja uma sub-Job ou sub-Activity. É opcional.
-- `relatedActivityIds`: Uma lista opcional de IDs de Activities relacionadas a esta Job.
-- `blockingActivityId`: O ID opcional de uma Activity que está bloqueando a execução desta Job.
 
 ## Estados do Status da Job
 

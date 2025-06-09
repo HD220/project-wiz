@@ -6,8 +6,6 @@ A Task é a unidade fundamental de trabalho que interage diretamente com Large L
 
 Cada Task recebe os dados necessários para sua execução diretamente da Job que a originou. Isso inclui o `ActivityContext`, que fornece o histórico e o estado atual da atividade, e as Tools relevantes que são injetadas pelo Agente responsável por orquestrar a execução da Task.
 
-A instanciação da Task apropriada para uma determinada Job é realizada pelo `TaskFactory`. O `TaskFactory` utiliza informações contidas na Job para determinar qual implementação de Task deve ser criada e executada.
-
 Após a execução, a Task pode retornar de três formas principais, que influenciam o comportamento do Worker e da Queue:
 
 1.  **Retorno de Sucesso:** A Task concluiu sua execução com êxito. O Worker pode então processar a próxima Task ou finalizar a Job, dependendo da lógica de orquestração do Agente.

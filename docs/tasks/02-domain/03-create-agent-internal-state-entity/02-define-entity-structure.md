@@ -11,10 +11,10 @@ A entidade `AgentInternalState` armazena informações de alto nível sobre o ag
 ## Specific Instructions:
 
 1.  No arquivo da entidade `AgentInternalState` (aberto ou criado na sub-sub-tarefa anterior), defina a estrutura da classe.
-2.  Adicione campos privados `readonly` para representar o estado global do agente. Inclua campos como `agentId` (utilizando o VO `AgentId`), `currentProjectId` (utilizando o VO `ProjectId`), `currentIssueId`, `currentGoal`, `generalNotes`, `promisesMade`, entre outros que representem o estado global do agente conforme a documentação.
+2.  Adicione campos privados `readonly` para representar o estado global do agente. Inclua campos como `agentId` (utilizando o VO `AgentId`),`generalNotes`, `promisesMade`, entre outros que representem o estado global do agente conforme a documentação.
 3.  Adicione getters públicos para acessar o valor desses campos.
 4.  Implemente o construtor para inicializar esses campos.
-5.  Garanta que a entidade seja independente de qualquer lógica de persistência ou infraestrutura.
+5.  Garanta que a entidade seja independsente de qualquer lógica de persistência ou infraestrutura.
 
 ## Expected Deliverable:
 
