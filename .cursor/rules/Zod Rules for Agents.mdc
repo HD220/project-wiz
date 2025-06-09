@@ -1,0 +1,70 @@
+## ---
+
+**description: Enforce Zod best practices for schema definition, validation, and type inference. globs: \["/\*.ts", "/\*.tsx"\] alwaysApply: false tags: \[zod, validation, typescript, schema\] version: "1.0.0"**
+
+# **Zod Best Practices**
+
+This rule set guides the AI in effectively using Zod for schema definition, data validation, and TypeScript type inference, ensuring robust data integrity.
+
+## **Context**
+
+This rule applies to TypeScript files (.ts, .tsx) where Zod schemas are typically defined and used for validation. It should be automatically attached when working on these files.
+
+## **Requirements**
+
+* **Schema First Approach:** Always define a Zod schema for input validation before processing any external data (e.g., API responses, form submissions, environment variables).  
+* **Strict Object Schemas:** Prefer z.object().strict() for object schemas to disallow unknown keys by default, enhancing data integrity and preventing unexpected data.  
+* **Type Inference:** Utilize Zod's z.infer\<typeof yourSchema\> to derive TypeScript types directly from your schemas. This ensures type safety and consistency between runtime validation and compile-time types.  
+* **Refinement for Complex Logic:** Use z.refine() or z.superRefine() for complex validation logic that cannot be expressed with built-in Zod methods (e.g., cross-field validation, custom business rules).  
+* **Error Message Customization:** Provide descriptive custom error messages for validation failures using the .min(), .max(), .email(), etc., methods or by passing an error object to z.string() etc.  
+* **Optional and Nullable Fields:** Clearly distinguish between optional (z.optional()), nullable (z.nullable()), and default (z.default()) fields in schemas to reflect data presence accurately.  
+* **Transformations (.transform()):** Use .transform() for data transformations *after* validation. For example, parsing strings to numbers or dates, ensuring data is in the desired format post-validation.  
+* **Union Types:** Leverage z.union() for fields that can have multiple valid types (e.g., a field that can be a string or a number), providing flexible validation.  
+* **Validation in API Endpoints/Entry Points:** Perform Zod validation at the earliest possible entry point for external data, typically in API routes, controller functions, or command handlers, to ensure data cleanliness.
+
+## **Examples**
+
+\<example\>
+
+TypeScript
+
+import { z } from 'zod';
+
+// Good: Strict schema, type inference, custom error, refinement  
+const UserSchema \= z.object({  
+  id: z.string().uuid(),  
+  name: z.string().min(3, { message: "Name must be at least 3 characters long" }),  
+  email: z.string().email(),  
+  age: z.number().int().positive().optional(),  
+  role: z.union(\[z.literal('admin'), z.literal('user')\]).default('user'),  
+}).strict().refine(data \=\> {  
+  if (data.role \=== 'admin' &&\!data.age) {  
+    return false; // Admins must have age defined  
+  }  
+  return true;  
+}, { message: "Admin users must have an age defined", path: \["age"\] });
+
+type User \= z.infer\<typeof UserSchema\>;
+
+const validUser \= UserSchema.parse({ id: '123e4567-e89b-12d3-a456-426614174000', name: 'Alice', email: 'alice@example.com' });
+
+\</example\>  
+\<example type="invalid"\>
+
+TypeScript
+
+import { z } from 'zod';
+
+// Bad: Non-strict schema, no custom errors, missing handling  
+const ProductSchema \= z.object({  
+  name: z.string(),  
+  price: z.number(),  
+  // BAD: No strict()  
+  // BAD: No custom error message  
+});
+
+// BAD: Direct usage without parsing/validation  
+const rawData \= { name: 'Laptop', price: 1200, extraField: 'ignored' };  
+// const product: Product \= rawData; // Type safety bypassed
+
+\</example\>

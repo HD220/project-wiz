@@ -1,0 +1,85 @@
+## ---
+
+**description: Enforce 20 common software development best practices for robust and maintainable code. alwaysApply: true tags: \[best-practices, general-development, code-quality\] version: "1.0.0"**
+
+# **20 Most Common Development Rules**
+
+This rule set enforces general software development best practices applicable across various projects and technologies, promoting robust, readable, and maintainable code.
+
+## **Context**
+
+This rule applies globally to all code files within the project. It aims to guide the AI in generating and refactoring code to adhere to these widely accepted principles.
+
+## **Requirements**
+
+* **DRY (Don't Repeat Yourself):** Eliminate code duplication. Abstract common logic into reusable functions, classes, or modules instead of copying and pasting.  
+* **KISS (Keep It Simple, Stupid):** Design solutions that are as simple as possible but no simpler. Avoid unnecessary complexity.  
+* **YAGNI (You Aren't Gonna Need It):** Implement only the functionality that is currently required. Avoid adding features or abstractions speculatively for future needs.  
+* **Descriptive Naming:** Use clear, unambiguous, and descriptive names for variables, functions, classes, and files. Names should convey intent and purpose.  
+* **Single Responsibility Principle (SRP):** Each module, class, or function should have one, and only one, reason to change. It should do one thing well.  
+* **Fail Fast:** Detect errors as early as possible and exit gracefully. Validate inputs at the earliest opportunity to prevent propagation of invalid states.  
+* **Consistent Formatting:** Adhere to a consistent code formatting style (e.g., Prettier, ESLint rules). Maintain uniform indentation, spacing, and bracket placement.  
+* **Comprehensive Testing:** Write automated tests (unit, integration, end-to-end) for all critical paths and business logic. Aim for high test coverage.  
+* **Idempotent Operations:** Design operations to be idempotent where applicable, meaning executing them multiple times has the same effect as executing them once.  
+* **Immutable Data:** Prefer immutable data structures when possible. Avoid modifying objects or arrays in place; instead, create new instances with updated values.  
+* **Meaningful Comments:** Write comments to explain *why* code exists, not *what* it does (unless the 'what' is complex). Document complex algorithms, tricky logic, or non-obvious choices.  
+* **Version Control Discipline:** Commit small, atomic changes with clear and descriptive commit messages. Use feature branches and pull requests for collaboration.  
+* **Dependency Management:** Manage project dependencies explicitly (e.g., package.json, requirements.txt). Keep dependencies updated and monitor for vulnerabilities.  
+* **Error Handling:** Implement robust error handling mechanisms. Catch and log errors, provide meaningful error messages, and handle exceptions gracefully to prevent crashes.  
+* **Performance Awareness:** Consider performance impacts of code choices. Optimize critical paths, reduce unnecessary computations, and minimize resource consumption.  
+* **Security Best Practices:** Be mindful of security vulnerabilities. Sanitize all user inputs, avoid hardcoding sensitive information, and follow secure coding guidelines.  
+* **Refactoring Regularly:** Continuously refactor code to improve its design, readability, and maintainability. Don't defer technical debt indefinitely.  
+* **Avoid Magic Numbers/Strings:** Replace hardcoded numbers or strings with named constants or configuration variables to improve readability and maintainability.  
+* **Loose Coupling, High Cohesion:** Design modules to be loosely coupled (minimize dependencies between them) and highly cohesive (elements within a module are functionally related).  
+* **Code Reviews:** Participate in and conduct thorough code reviews to catch errors, share knowledge, and improve code quality.
+
+## **Examples**
+
+\<example\>
+
+TypeScript
+
+// Good: DRY, Descriptive Naming, SRP  
+function calculateTotalPrice(items: { price: number; quantity: number }): number {  
+  return items.reduce((total, item) \=\> total \+ (item.price \* item.quantity), 0);  
+}
+
+// Good: Fail Fast  
+function validateUserInput(input: string): void {  
+  if (\!input |  
+| input.trim() \=== '') {  
+    throw new Error('Input cannot be empty.');  
+  }  
+}
+
+// Good: Meaningful Comments  
+// Why: This regex ensures email format for user registration to prevent invalid data.  
+const EMAIL\_REGEX \= /^\[^\\s@\]+@\[^\\s@\]+\\.\[^\\s@\]+$/;
+
+\</example\>  
+\<example type="invalid"\>
+
+TypeScript
+
+// Bad: Duplication (violates DRY)  
+function calculateOrderTotal(items: any): number {  
+  let total \= 0;  
+  for (const item of items) {  
+    total \+= item.price \* item.quantity;  
+  }  
+  return total;  
+}
+
+function calculateInvoiceTotal(products: any): number {  
+  let total \= 0;  
+  for (const product of products) {  
+    total \+= product.price \* product.quantity;  
+  }  
+  return total;  
+}
+
+// Bad: Magic Number  
+const TAX\_RATE \= 0.05; // Should be a named constant  
+const finalPrice \= price \* (1 \+ 0.05);
+
+\</example\>
