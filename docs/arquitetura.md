@@ -35,10 +35,10 @@ A entidade `Job` armazena todas as informações necessárias para o gerenciamen
 * `delay`: Tempo de espera/atraso quando entra no status `delayed`.
 * `priority`: Valor de prioridade. **Menor número significa MAIOR prioridade.**
 * `status`:
-    * `pending`: Pronta para ser executada.
-    * `waiting`: Esperando pelas Jobs de qual depende.
+    * `waiting`: Esperando ser executada ou pelas filhas serem concluidas.
     * `delayed`: Postergado por delay (pode ser por conta de um retry ou por já ter sido inserida com delay de início).
-    * `finished`: Quando foi concluída com ou sem erro de execução.
+    * `success`: Quando foi concluída sem erro de execução.
+    * `failed`: Quando foi concluída com erro de execução.
     * `executing`: Durante o processamento da Job.
 * `depends_on`: Lista de `jobIds` da qual essa Job depende para poder ser executada. A Job receberá a saída dessas Jobs como parte do seu `payload` (em `job.data`).
 
@@ -58,18 +58,17 @@ graph TD
     C --> E
     C --> G
     C --> D
+    C --> F
     E --> F
 ```
 
 
-* **`pending` -> `executing`**: Worker pegou a Job para processar.
-* **`executing` -> `finished`**: Job concluída com sucesso (Agente retorna um valor).
-* **`executing` -> `delayed`**: Job não concluída, mas sem erro (Agente não retorna nada). A Job será re-agendada.
+* **`waiting` -> `executing`**: Worker pegou a Job para processar.
+* **`executing` -> `success`**: Job concluída com sucesso.
+* **`executing` -> `delayed`**: Quando ocorre um erro mas não extrapolou numero de retentativas.
 * **`executing` -> `failed`**: Ocorreu um erro durante a execução da Job (Agente lançou uma exceção).
-* **`failed` -> `delayed`**: A Job é colocada em `delayed` para uma retentativa.
-* **`delayed` -> `pending`**: Após o delay (que pode ser 0), a Job está pronta para ser re-executada.
-* **Jobs com `depends_on`**: Entram em `waiting` se suas dependências não estiverem `finished`.
-* **`waiting` -> `pending`**: Quando todas as dependências estão `finished`, a Job em `waiting` recebe os resultados das dependências em seu `payload` (pela Fila) e passa para `pending`.
+* **`delayed` -> `waiting`**: Após o delay (que pode ser 0), a Job está pronta para ser re-executada.
+* **Jobs com `depends_on`**: Fica em `waiting` se suas dependências não estiverem `finished`.
 
 ---
 
