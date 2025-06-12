@@ -1,11 +1,11 @@
 ---
 description: 
-globs: 
-alwaysApply: true
+globs: *.ts,*.tsx
+alwaysApply: false
 ---
 ## ---
 
-**description: Enforce TypeScript best practices for type safety, interfaces, and module usage. globs: \["/\*.ts", "/\*.tsx"\] alwaysApply: false tags: \[typescript, type-safety, best-practices\] version: "1.0.0"**
+**description: Enforce TypeScript best practices for type safety, interfaces, and module usage. globs: ["/*.ts", "/*.tsx"] alwaysApply: false tags: [typescript, type-safety, best-practices] version: "1.0.0"**
 
 # **TypeScript Best Practices**
 
@@ -28,43 +28,39 @@ This rule applies to all TypeScript (.ts) and TSX (.tsx) files within the projec
 
 ## **Examples**
 
-\<example\>
-
+<example type="valid">
 TypeScript
 
-interface User {  
-  readonly id: string;  
-  name: string;  
-  email?: string;  
+type User = {
+  readonly id: string;
+  name: string;
+  email?: string;
 }
 
-type UserRole \= 'admin' | 'editor' | 'viewer';
+type UserRole = 'admin' | 'editor' | 'viewer';
 
-function getUserById(id: string): User | undefined {  
-  //... logic  
-  return { id: '123', name: 'John Doe' };  
+function getUserById(id: string): User | undefined {
+  //... logic
+  return { id: '123', name: 'John Doe' };
 }
 
-const role: UserRole \= 'admin';
-
-\</example\>  
-\<example type="invalid"\>
-
+const role: UserRole = 'admin';
+</example>
+<example type="invalid">
 TypeScript
 
-function processData(data: any) { // Avoid 'any'  
-  //...  
+function processData(data: any) { // Avoid 'any'
+  //...
 }
 
-class Config {  
-  value: string; // Should be readonly if not re-assigned  
+class Config {
+  value: string; // Should be readonly if not re-assigned
 }
 
 enum Status { // Prefer union for simple strings  
-  Active \= 'ACTIVE',  
-  Inactive \= 'INACTIVE'  
+  Active = 'ACTIVE',
+  Inactive = 'INACTIVE'
 }
 
 let user: { name: string }; // Use interface/type alias
-
-\</example\>
+</example>

@@ -1,6 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 ## ---
 
-**description: Enforce Object Calisthenics for clean, modular, and testable code. alwaysApply: true tags: \[clean-code, object-calisthenics, code-quality\] version: "1.0.0"**
+**description: Enforce Object Calisthenics for clean, modular, and testable code. alwaysApply: true tags: [clean-code, object-calisthenics, code-quality] version: "1.0.0"**
 
 # **Clean Code: Object Calisthenics**
 
@@ -24,78 +29,74 @@ This rule applies globally to all code files within the project. It aims to guid
 
 ## **Examples**
 
-\<example\>
-
+<example type="valid">
 TypeScript
 
-// One Level of Indentation, No ELSE  
-function processOrder(order: Order): void {  
-  if (\!order.isValid()) {  
-    throw new InvalidOrderError();  
-  }  
-  order.processPayment();  
-  order.dispatch();  
+// One Level of Indentation, No ELSE
+function processOrder(order: Order): void {
+  if (!order.isValid()) {
+    throw new InvalidOrderError();
+  }
+  order.processPayment();
+  order.dispatch();
 }
 
 // Wrapped Primitive  
-class Email {  
-  constructor(private value: string) {}  
-  isValid(): boolean { return this.value.includes('@'); }  
+class Email {
+  constructor(private value: string) {}
+  isValid(): boolean { return this.value.includes('@'); }
 }
 
-// First Class Collection  
-class Users {  
-  private users: User;  
-  constructor(users: User) { this.users \= users; }  
-  findActiveUsers(): Users {  
-    return new Users(this.users.filter(u \=\> u.isActive()));  
-  }  
+// First Class Collection
+class Users {
+  private users: User;
+  constructor(users: User) { this.users = users; }
+  findActiveUsers(): Users {
+    return new Users(this.users.filter(u => u.isActive()));
+  }
 }
 
 // One Dot Per Line  
-const user \= getUser();  
-const address \= user.getAddress();  
-const city \= address.getCity();
+const user = getUser();
+const address = user.getAddress();
+const city = address.getCity();
 
-// No Getters/Setters  
-class Account {  
-  private balance: number;  
-  deposit(amount: number): void { this.balance \+= amount; }  
-  withdraw(amount: number): void { /\*... \*/ }  
+// No Getters/Setters
+class Account {
+  private balance: number;
+  deposit(amount: number): void { this.balance \+= amount; }
+  withdraw(amount: number): void { /*... */ }
 }
-
-\</example\>  
-\<example type="invalid"\>
-
+</example>
+<example type="invalid">
 TypeScript
 
-// Multiple Indentation Levels, ELSE  
-function processOrder(order: Order): void {  
-  if (order.isValid()) {  
-    if (order.hasPayment()) {  
-      order.processPayment();  
-    } else {  
-      throw new Error("No payment");  
-    }  
-  } else {  
-    throw new Error("Invalid order");  
-  }  
+// Multiple Indentation Levels, ELSE
+function processOrder(order: Order): void {
+  if (order.isValid()) {
+    if (order.hasPayment()) {
+      order.processPayment();
+    } else {
+      throw new Error("No payment");
+    }
+  } else {
+    throw new Error("Invalid order");
+  }
 }
 
-// Primitive Obsession  
-function sendEmail(email: string) { /\*... \*/ }
+// Primitive Obsession
+function sendEmail(email: string) { /*... */ }
 
-// Direct Collection Usage  
-const activeUsers \= users.filter(u \=\> u.isActive());
+// Direct Collection Usage
+const activeUsers = users.filter(u => u.isActive());
 
-// Multiple Dots Per Line  
-const city \= getUser().getAddress().getCity();
+// Multiple Dots Per Line
+const city = getUser().getAddress().getCity();
 
-// Getters/Setters  
-class Account {  
-  private \_balance: number;  
-  get balance(): number { return this.\_balance; }  
-  set balance(value: number) { this.\_balance \= value; }  
+// Getters/Setters
+class Account {
+  private _balance: number;
+  get balance(): number { return this._balance; }
+  set balance(value: number) { this._balance = value; }
 }
-
-\</example\>
+</example>

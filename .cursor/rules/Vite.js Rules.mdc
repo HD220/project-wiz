@@ -1,6 +1,11 @@
+---
+description: 
+globs: vite.*.*
+alwaysApply: false
+---
 ## ---
 
-**description: Enforce Vite.js best practices for configuration, asset handling, and build optimization. globs: \["vite.config.js", "vite.config.ts"\] alwaysApply: false tags: \[vitejs, build-tool, frontend, configuration\] version: "1.0.0"**
+**description: Enforce Vite.js best practices for configuration, asset handling, and build optimization. globs: ["vite.config.js", "vite.config.ts"] alwaysApply: false tags: [vitejs, build-tool, frontend, configuration] version: "1.0.0"**
 
 # **Vite.js Best Practices**
 
@@ -23,49 +28,45 @@ This rule applies to Vite configuration files (vite.config.js, vite.config.ts). 
 
 ## **Examples**
 
-\<example\>
-
+<example type="valid">
 TypeScript
 
-// vite.config.ts (Good)  
-import { defineConfig } from 'vite';  
+// vite.config.ts (Good)
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({  
-  plugins: \[react()\],  
-  define: {  
-    'process.env.VITE\_API\_URL': JSON.stringify(process.env.VITE\_API\_URL),  
-  },  
-  build: {  
-    sourcemap: true,  
-  },  
+export default defineConfig({
+  plugins: [react()],
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
+  },
+  build: {
+    sourcemap: true,
+  },
 });
 
-// Example usage in component  
-const apiUrl \= import.meta.env.VITE\_API\_URL;
-
-\</example\>  
-\<example type="invalid"\>
-
+// Example usage in component
+const apiUrl = import.meta.env.VITE_API_URL;
+</example>
+<example type="invalid">
 TypeScript
 
-// vite.config.ts (Bad)  
+// vite.config.ts (Bad)
 import { defineConfig } from 'vite';
 
-export default defineConfig({  
-  // BAD: Complex logic directly in config  
-  server: {  
-    proxy: {  
-      '/api': {  
-        target: 'http://localhost:3000',  
-        rewrite: (path) \=\> path.replace(/^\\/api/, ''),  
-      },  
-    },  
-  },  
-  // BAD: Directly using process.env without VITE\_ prefix  
-  define: {  
-    'process.env.MY\_SECRET\_KEY': JSON.stringify(process.env.MY\_SECRET\_KEY),  
-  },  
+export default defineConfig({
+  // BAD: Complex logic directly in config
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
+  // BAD: Directly using process.env without VITE_ prefix
+  define: {
+    'process.env.MY_SECRET\_KEY': JSON.stringify(process.env.MY_SECRET_KEY),
+  },
 });
-
-\</example\>
+</example>

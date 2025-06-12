@@ -1,6 +1,11 @@
+---
+description: 
+globs: *.ts,*.tsx
+alwaysApply: false
+---
 ## ---
 
-**description: Enforce Zod best practices for schema definition, validation, and type inference. globs: \["/\*.ts", "/\*.tsx"\] alwaysApply: false tags: \[zod, validation, typescript, schema\] version: "1.0.0"**
+**description: Enforce Zod best practices for schema definition, validation, and type inference. globs: ["/*.ts", "/*.tsx"] alwaysApply: false tags: [zod, validation, typescript, schema] version: "1.0.0"**
 
 # **Zod Best Practices**
 
@@ -24,47 +29,43 @@ This rule applies to TypeScript files (.ts, .tsx) where Zod schemas are typicall
 
 ## **Examples**
 
-\<example\>
-
+<example type="valid">
 TypeScript
 
 import { z } from 'zod';
 
-// Good: Strict schema, type inference, custom error, refinement  
-const UserSchema \= z.object({  
-  id: z.string().uuid(),  
-  name: z.string().min(3, { message: "Name must be at least 3 characters long" }),  
-  email: z.string().email(),  
-  age: z.number().int().positive().optional(),  
-  role: z.union(\[z.literal('admin'), z.literal('user')\]).default('user'),  
-}).strict().refine(data \=\> {  
-  if (data.role \=== 'admin' &&\!data.age) {  
-    return false; // Admins must have age defined  
-  }  
-  return true;  
-}, { message: "Admin users must have an age defined", path: \["age"\] });
+// Good: Strict schema, type inference, custom error, refinement
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(3, { message: "Name must be at least 3 characters long" }),
+  email: z.string().email(),
+  age: z.number().int().positive().optional(),
+  role: z.union([z.literal('admin'), z.literal('user')]).default('user'),
+}).strict().refine(data => {
+  if (data.role === 'admin' &&\!data.age) {  
+    return false; // Admins must have age defined
+  }
+  return true;
+}, { message: "Admin users must have an age defined", path: ["age"] });
 
-type User \= z.infer\<typeof UserSchema\>;
+type User = z.infer<typeof UserSchema>;
 
-const validUser \= UserSchema.parse({ id: '123e4567-e89b-12d3-a456-426614174000', name: 'Alice', email: 'alice@example.com' });
-
-\</example\>  
-\<example type="invalid"\>
-
+const validUser = UserSchema.parse({ id: '123e4567-e89b-12d3-a456-426614174000', name: 'Alice', email: 'alice@example.com' });
+</example>
+<example type="invalid">
 TypeScript
 
 import { z } from 'zod';
 
-// Bad: Non-strict schema, no custom errors, missing handling  
-const ProductSchema \= z.object({  
-  name: z.string(),  
+// Bad: Non-strict schema, no custom errors, missing handling
+const ProductSchema = z.object({
+  name: z.string(),
   price: z.number(),  
-  // BAD: No strict()  
-  // BAD: No custom error message  
+  // BAD: No strict()
+  // BAD: No custom error message
 });
 
-// BAD: Direct usage without parsing/validation  
-const rawData \= { name: 'Laptop', price: 1200, extraField: 'ignored' };  
-// const product: Product \= rawData; // Type safety bypassed
-
-\</example\>
+// BAD: Direct usage without parsing/validation
+const rawData = { name: 'Laptop', price: 1200, extraField: 'ignored' };
+// const product: Product = rawData; // Type safety bypassed
+</example>

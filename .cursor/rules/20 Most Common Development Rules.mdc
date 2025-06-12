@@ -1,6 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 ## ---
 
-**description: Enforce 20 common software development best practices for robust and maintainable code. alwaysApply: true tags: \[best-practices, general-development, code-quality\] version: "1.0.0"**
+**description: Enforce 20 common software development best practices for robust and maintainable code. alwaysApply: true tags: [best-practices, general-development, code-quality] version: "1.0.0"**
 
 # **20 Most Common Development Rules**
 
@@ -35,51 +40,46 @@ This rule applies globally to all code files within the project. It aims to guid
 
 ## **Examples**
 
-\<example\>
-
+<example type="valid">
 TypeScript
 
 // Good: DRY, Descriptive Naming, SRP  
-function calculateTotalPrice(items: { price: number; quantity: number }): number {  
-  return items.reduce((total, item) \=\> total \+ (item.price \* item.quantity), 0);  
+function calculateTotalPrice(items: { price: number; quantity: number }): number {
+  return items.reduce((total, item) => total + (item.price * item.quantity), 0);
 }
 
 // Good: Fail Fast  
-function validateUserInput(input: string): void {  
-  if (\!input |  
-| input.trim() \=== '') {  
-    throw new Error('Input cannot be empty.');  
-  }  
+function validateUserInput(input: string): void {
+  if (!input || input.trim() === '') {
+    throw new Error('Input cannot be empty.');
+  }
 }
 
-// Good: Meaningful Comments  
-// Why: This regex ensures email format for user registration to prevent invalid data.  
-const EMAIL\_REGEX \= /^\[^\\s@\]+@\[^\\s@\]+\\.\[^\\s@\]+$/;
-
-\</example\>  
-\<example type="invalid"\>
-
+// Good: Meaningful Comments
+// Why: This regex ensures email format for user registration to prevent invalid data.
+const EMAIL_REGEX = /^\[^\\s@\]+@\[^\\s@\]+\\.\[^\\s@\]+$/;
+</example\>  
+<example type="invalid">
 TypeScript
 
 // Bad: Duplication (violates DRY)  
-function calculateOrderTotal(items: any): number {  
-  let total \= 0;  
-  for (const item of items) {  
-    total \+= item.price \* item.quantity;  
-  }  
-  return total;  
+function calculateOrderTotal(items: any): number {
+  let total = 0;
+  for (const item of items) {
+    total += item.price * item.quantity;
+  }
+  return total;
 }
 
-function calculateInvoiceTotal(products: any): number {  
-  let total \= 0;  
-  for (const product of products) {  
-    total \+= product.price \* product.quantity;  
-  }  
-  return total;  
+function calculateInvoiceTotal(products: any): number {
+  let total = 0;
+  for (const product of products) {
+    total += product.price * product.quantity;
+  }
+  return total;
 }
 
 // Bad: Magic Number  
-const TAX\_RATE \= 0.05; // Should be a named constant  
-const finalPrice \= price \* (1 \+ 0.05);
-
-\</example\>
+const TAX_RATE = 0.05; // Should be a named constant
+const finalPrice = price * (1 + 0.05);
+</example\>

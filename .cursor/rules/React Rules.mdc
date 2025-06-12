@@ -1,6 +1,11 @@
+---
+description: 
+globs: *.tsx
+alwaysApply: false
+---
 ## ---
 
-**description: Enforce React best practices for functional components, hooks, and performance. globs: \["src//\*.jsx", "src//\*.tsx"\] alwaysApply: false tags: \[react, frontend, components, hooks\] version: "1.0.0"**
+**description: Enforce React best practices for functional components, hooks, and performance. globs: ["src//*.jsx", "src//*.tsx"] alwaysApply: false tags: [react, frontend, components, hooks] version: "1.0.0"**
 
 # **React Best Practices**
 
@@ -26,40 +31,35 @@ This rule applies to React component files (.jsx, .tsx) within the src directory
 
 ## **Examples**
 
-\<example\>
-
-TypeScript
-
+<example type="valid">
 // Good: Functional Component with Hook, Key Prop, Semantic HTML  
 import React, { useState } from 'react';
 
-interface Item {  
+type Item = {  
   id: string;  
   name: string;  
 }
 
-interface ItemListProps {  
+type ItemListProps = {  
   items: Item;  
 }
 
-const ItemList: React.FC\<ItemListProps\> \= ({ items }) \=\> {  
-  const \= useState\<Item | null\>(null);
+export function ItemList({ items }:ItemListProps) {  
+  const = useState<Item | null>(null);
 
   return (  
-    \<ul aria-label\="List of items"\>  
-      {items.map((item) \=\> (  
-        \<li key\={item.id} onClick\={() \=\> setSelectedItem(item)}\>  
-          {item.name}  
-        \</li\>  
+    <ul aria-label="List of items">
+      {items.map((item) => (
+        <li key={item.id} onClick={() => setSelectedItem(item)}>
+          {item.name}
+        </li>
       ))}  
-    \</ul\>  
-  );  
+    </ul>
+  );
 };
+</example>
 
-export default ItemList;
-
-\</example\>  
-\<example type="invalid"\>
+<example type="invalid">
 
 TypeScript
 
@@ -69,13 +69,12 @@ import React from 'react';
 class ItemList extends React.Component {  
   render() {  
     return (  
-      \<div\>  
-        {this.props.items.map((item, index) \=\> ( // BAD: Using index as key  
-          \<div\>{item.name}\</div\> // BAD: Non-semantic div  
-        ))}  
-      \</div\>  
+      <div>  
+        {this.props.items.map((item, index) \=\> ( // BAD: Using index as key
+          <div>{item.name}</div> // BAD: Non-semantic div
+        ))}
+      </div>
     );  
   }  
 }
-
-\</example\>
+</example>

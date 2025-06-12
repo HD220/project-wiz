@@ -1,6 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 ## ---
 
-**description: Enforce Electron.js best practices for process separation, IPC, and security. globs: \["electron//\*.js", "electron//\*.ts", "main.js", "preload.js", "renderer.js", "index.html"\] alwaysApply: false tags: \[electronjs, desktop-app, security, ipc\] version: "1.0.0"**
+**description: Enforce Electron.js best practices for process separation, IPC, and security. alwaysApply: true tags: [electronjs, desktop-app, security, ipc] version: "1.0.0"**
 
 # **Electron.js Best Practices**
 
@@ -24,62 +29,80 @@ This rule applies to files typically found in Electron.js projects, including ma
 
 ## **Examples**
 
-\<example\>
+<example type="valid">
+TypeScript
 
-JavaScript
+// main.ts (Main Process)
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
 
-// main.js (Main Process)  
-const { app, BrowserWindow, ipcMain } \= require('electron');  
-const path \= require('path');
-
-function createWindow() {  
-  const win \= new BrowserWindow({  
-    webPreferences: {  
-      preload: path.join(\_\_dirname, 'preload.js'),  
-      contextIsolation: true,  
-      nodeIntegration: false,  
-    }  
-  });  
-  win.loadFile('index.html');  
+function createWindow(): void {
+  const win = new BrowserWindow({
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    }
+  });
+  win.loadFile('index.html');
 }
 
-ipcMain.handle('get-app-version', () \=\> app.getVersion());
+app.whenReady().then(() => {
+  createWindow();
 
-// preload.js (Preload Script)  
-const { contextBridge, ipcRenderer } \= require('electron');
-
-contextBridge.exposeInMainWorld('api', {  
-  getAppVersion: () \=\> ipcRenderer.invoke('get-app-version'),  
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
 });
 
-// renderer.js (Renderer Process)  
-async function displayVersion() {  
-  const version \= await window.api.getAppVersion();  
-  document.getElementById('version').innerText \= \`App Version: ${version}\`;  
-}  
-displayVersion();
+ipcMain.handle('get-app-version', (): string => app.getVersion());
 
-\</example\>  
-\<example type="invalid"\>
+// preload.ts (Preload Script)
+import { contextBridge, ipcRenderer } from 'electron';
 
-JavaScript
+contextBridge.exposeInMainWorld('api', {
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke('get-app-version'),
+});
 
-// main.js (Main Process \- BAD)  
-const { app, BrowserWindow } \= require('electron');  
-function createWindow() {  
-  const win \= new BrowserWindow({  
-    webPreferences: {  
-      nodeIntegration: true, // BAD: Exposes Node.js to renderer  
-      contextIsolation: false, // BAD: Disables context isolation  
-    }  
-  });  
-  win.loadFile('index.html');  
+// renderer.ts (Renderer Process)
+async function displayVersion(): Promise<void> {
+  const version = await window.api.getAppVersion();
+  const versionElement = document.getElementById('version');
+  if (versionElement) {
+    versionElement.innerText = `App Version: ${version}`;
+  }
 }
 
-// renderer.js (Renderer Process \- BAD)  
-const fs \= require('fs'); // BAD: Direct Node.js import in renderer  
-fs.readFile('package.json', 'utf-8', (err, data) \=\> {  
-  console.log(data);  
-});
+displayVersion().catch(console.error);
+</example>
+<example type="invalid">
+Typescript
 
-\</example\>
+// main.ts (Main Process - BAD)
+import { app, BrowserWindow } from 'electron';
+
+function createWindow(): void {
+  const win = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true, // BAD: Exposes Node.js to renderer
+      contextIsolation: false, // BAD: Disables context isolation
+    }
+  });
+  win.loadFile('index.html');
+}
+
+app.whenReady().then(createWindow);
+
+// renderer.ts (Renderer Process - BAD)
+import fs from 'fs'; // BAD: Direct Node.js import in renderer
+
+fs.readFile('package.json', 'utf-8', (err, data) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log(data);
+});
+</example>

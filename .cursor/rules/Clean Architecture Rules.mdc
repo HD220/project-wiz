@@ -1,6 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 ## ---
 
-**description: Guide Clean Architecture principles for robust, testable, and scalable applications. alwaysApply: false tags: \[clean-architecture, architecture, design-patterns, scalability\] version: "1.0.0"**
+**description: Guide Clean Architecture principles for robust, testable, and scalable applications. alwaysApply: false tags: [clean-architecture, architecture, design-patterns, scalability] version: "1.0.0"**
 
 # **Clean Architecture Principles**
 
@@ -29,55 +34,52 @@ This rule is available for the AI to consider when tasks involve architectural d
 
 ## **Examples**
 
-\<example\>
-
+<example type="valid">
 TypeScript
 
-// Good: Use Case (Inner Layer)  
-interface UserRepository {  
-  findById(id: string): Promise\<User | null\>;  
-  save(user: User): Promise\<void\>;  
+// Good: Use Case (Inner Layer)
+interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  save(user: User): Promise<void>;
 }
 
-class GetUserByIdUseCase {  
-  constructor(private userRepository: UserRepository) {} // IoC  
-  async execute(userId: string): Promise\<User | null\> {  
-    return this.userRepository.findById(userId);  
-  }  
+class GetUserByIdUseCase {
+  constructor(private userRepository: UserRepository) {} // IoC
+  async execute(userId: string): Promise<User | null> {
+    return this.userRepository.findById(userId);
+  }
 }
 
-// Good: Adapter (Outer Layer)  
-class MongoUserRepository implements UserRepository {  
-  async findById(id: string): Promise\<User | null\> {  
-    // MongoDB specific logic  
-    return null;  
-  }  
-  async save(user: User): Promise\<void\> {  
-    // MongoDB specific logic  
-  }  
+// Good: Adapter (Outer Layer)
+class MongoUserRepository implements UserRepository {
+  async findById(id: string): Promise<User | null> {
+    // MongoDB specific logic
+    return null;
+  }
+  async save(user: User): Promise<void> {
+    // MongoDB specific logic
+  }
 }
 
-\</example\>  
-\<example type="invalid"\>
-
+</example>
+<example type="invalid">
 TypeScript
 
-// Bad: Use Case directly importing framework (Dependency Rule Violation)  
+// Bad: Use Case directly importing framework (Dependency Rule Violation)
 import { Express } from 'express'; // BAD: Framework import in inner layer
 
-class CreateUserUseCase {  
-  execute(userData: any, req: Express.Request) { // BAD: Framework specific types  
-    //...  
-  }  
+class CreateUserUseCase {
+  execute(userData: any, req: Express.Request) { // BAD: Framework specific types
+    //...
+  }
 }
 
-// Bad: Entity with persistence logic (Persistence Ignorance Violation)  
-class Product {  
-  id: string;  
-  name: string;  
-  saveToDatabase(): void { // BAD: Entity knows about persistence  
-    // db.save(this);  
-  }  
+// Bad: Entity with persistence logic (Persistence Ignorance Violation)
+class Product {
+  id: string;
+  name: string;
+  saveToDatabase(): void { // BAD: Entity knows about persistence
+    // db.save(this);
+  }
 }
-
-\</example\>
+</example>
