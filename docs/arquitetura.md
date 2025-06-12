@@ -51,7 +51,7 @@ graph TD
     D[finished]
     E[delayed]
     F[waiting]
-    G[failed]
+    G[success]
 
     B --> F
     F --> C
