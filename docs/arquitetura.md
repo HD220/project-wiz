@@ -46,21 +46,19 @@ A entidade `Job` armazena todas as informações necessárias para o gerenciamen
 
 ```mermaid
 graph TD
-    B[pending]
+    B[new]
     C[executing]
     D[finished]
     E[delayed]
     F[waiting]
     G[failed]
 
-    B --> C
-    C --> D
-    C --> E
-    E --> B
     B --> F
-    F --> B
+    F --> C
+    C --> E
     C --> G
-    G --> E
+    C --> D
+    E --> F
 ```
 
 
