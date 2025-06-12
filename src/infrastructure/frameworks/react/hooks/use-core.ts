@@ -6,7 +6,7 @@ import {
   LLMProviderQueryInput,
   LLMProviderQueryOutput,
 } from "@/core/application/queries/llm-provider.query";
-import { Result } from "@/core/common/result";
+import { Result } from "@/shared/result";
 import {
   CreateUserUseCaseInput,
   CreateUserUseCaseOutput,

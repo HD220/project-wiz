@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { NOK, OK, Result } from "@/shared/result";
 import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
 export class PersonaQuery implements Executable<Input, Output> {

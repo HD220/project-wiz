@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { NOK, OK, Result } from "@/shared/result";
 import { AgentTemperature } from "@/core/domain/entities/agent/value-objects";
 import { LLMProviderConfigId } from "@/core/domain/entities/llm-provider-config/value-objects";
 import { PersonaId } from "@/core/domain/entities/agent/value-objects/persona/value-objects";

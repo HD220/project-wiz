@@ -1,3 +1,4 @@
+
 ---
 
 ## Documentação da Arquitetura: Sistema de Jobs e Workers

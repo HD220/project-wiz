@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { NOK, OK, Result } from "@/shared/result";
 import { IUserRepository } from "@/core/ports/repositories/user.interface";
 
 export class UserQuery implements Executable<UserQueryInput, UserQueryOutput> {

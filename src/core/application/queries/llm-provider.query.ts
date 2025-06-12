@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { NOK, OK, Result } from "@/shared/result";
 import { ILLMProviderRepository } from "@/core/ports/repositories/llm-provider.interface";
 
 export class LLMProviderQuery

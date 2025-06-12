@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/core/common/result";
+import { NOK, OK, Result } from "@/shared/result";
 import { LLMProviderConfigId } from "@/core/domain/entities/llm-provider-config/value-objects";
 import {
   UserAvatar,

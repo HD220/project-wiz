@@ -1,7 +1,7 @@
 import { AppError } from "@/core/common/errors";
 import { Executable } from "@/core/common/executable";
 import { IdentityType } from "@/core/common/identity";
-import { NOK, OK, Result } from "@/core/common/result";
+import { NOK, OK, Result } from "@/shared/result";
 import {
   ProjectDescription,
   ProjectName,
