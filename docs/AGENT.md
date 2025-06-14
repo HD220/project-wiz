@@ -68,3 +68,60 @@ Pode ser usado pelo agente para notificar algo ou para perguntar/conversar com o
 - Direct: Envia mensagem para um usuário especifico.
 - Channel: Envia mensagem em um canal de um projeto.
 - Forum: Envia mensagem em topico de um forum de projeto.
+
+## Interações entre Agentes
+
+### Padrões de Comunicação
+
+- **Broadcast**: Um agente envia mensagem para todos os agentes do mesmo tipo
+- **Direct**: Comunicação 1:1 entre agentes específicos
+- **Pub/Sub**: Assinatura de tópicos específicos
+- **Orquestração**: Agente coordenador gerencia fluxo entre especialistas
+
+Exemplo:
+```mermaid
+sequenceDiagram
+    participant Orchestrator
+    participant SpecialistA
+    participant SpecialistB
+    
+    Orchestrator->>SpecialistA: Consulta técnica
+    SpecialistA->>Orchestrator: Resposta parcial
+    Orchestrator->>SpecialistB: Consulta complementar
+    SpecialistB->>Orchestrator: Resposta final
+```
+
+## Exemplos Práticos
+
+### Uso de Tools
+
+```typescript
+import { z } from 'zod';
+import { generateText, tool } from 'ai';
+
+// Exemplo: Agente usando tools da ai-sdk
+const result = await generateText({
+  model: yourModel,
+  tools: {
+    weather: tool({
+      description: 'Get the weather in a location',
+      parameters: z.object({
+        location: z.string().describe('The location to get the weather for'),
+      }),
+      execute: async ({ location }) => ({
+        location,
+        temperature: 72 + Math.floor(Math.random() * 21) - 10,
+      }),
+    }),
+  },
+  prompt: 'What is the weather in San Francisco?',
+});
+```
+
+**Nota sobre disponibilização de tools:**  
+As tools são disponibilizadas para a LLM através da propriedade `tools` na configuração de chamadas como `generateText`. Cada tool deve ser definida com:
+- Uma descrição clara
+- Parâmetros validados com Zod
+- Uma função execute que implementa a funcionalidade
+A LLM decide automaticamente quando usar cada tool baseada no contexto da solicitação.
+

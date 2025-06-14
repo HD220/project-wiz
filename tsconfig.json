@@ -27,6 +27,7 @@
       "@/ui/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
       "@/application/*": ["./src/core/application/*"],
       "@/shared/*": ["./src/shared/*"],
+      "@interfaces/*": ["./src/core/domain/entities/**/interfaces/*"],
       "@/*": ["./src/*"]
     }
   },

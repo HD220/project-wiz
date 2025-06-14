@@ -1,131 +1,42 @@
-# Project Wiz - Automação de Tarefas de Desenvolvimento com LLMs
+# Project Wiz
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+## Sistema de Tools
 
-## Visão Geral
+O Project Wiz possui um sistema modular de Tools que permite aos agentes realizar operações específicas. As principais características incluem:
 
-Project Wiz é um sistema ElectronJS para automatizar tarefas de desenvolvimento usando modelos LLM (Large Language Models) localmente. Ele permite que a LLM trabalhe de forma autônoma, executando tarefas como um desenvolvedor em repositórios GitHub.
+### Tools Implementadas
 
-## Funcionalidades Principais
+1. **MemoryTool**
+   - Armazenamento persistente de informações
+   - Busca semântica usando RAG
+   - Operações: Write, Delete, Search
 
-✅ **Automação de Tarefas**
+2. **TaskTool** (em desenvolvimento)
+   - Gerenciamento de tarefas e subtarefas
+   - Validação de workflows
+   - Integração com sistema de filas
 
-- Geração de código
-- Análise de código
-- Criação de pull requests
-- Geração de documentação
-- Análise de issues
+### Arquitetura
 
-🎛️ **Controle e Personalização**
+- **Camada Core**: Interfaces e contratos (`src/core/ports/tools`)
+- **Camada Infrastructure**: Implementações concretas (`src/infrastructure/tools`)
+- **Testes**: Cobertura abrangente com Vitest
 
-- Configuração de parâmetros dos modelos (temperatura, prompts)
-- Definição de fluxos de trabalho
-- Personalização de prompts
+### Documentação
 
-🔌 **Integrações**
+- [Arquitetura das Tools](docs/design/tools-architecture.md)
+- [Plano de Implementação](docs/plan/tools-implementation.md)
 
-- GitHub (via Octokit)
-- Modelos LLM locais (ex: Mistral, Llama 2)
-- Comunicação IPC entre processos
+## Como Contribuir
 
-🌐 **Internacionalização**
+1. Siga os padrões de Clean Architecture
+2. Mantenha cobertura de testes acima de 80%
+3. Documente todas as novas features
 
-- Suporte a múltiplos idiomas (pt-BR, en)
-- Fácil adição de novos idiomas
-
-🔒 **Segurança**
-
-- Implementação de CSP com nonce dinâmico para proteção contra XSS
-- Geração segura de tokens por requisição
-- Detalhes completos: [Política de Segurança](docs/security-policy.md)
-
-
-## Pré-requisitos
-
-- Node.js 18+
-- npm 9+
-- Python 3.8+ (para alguns modelos)
-
-## Instalação
-
-```bash
-# Clonar o repositório
-git clone https://github.com/seu-usuario/project-wiz.git
-cd project-wiz
-
-# Instalar dependências
-npm install
-
-# Instalar o babel-jest (necessário para testes de componentes React)
-npm install --save-dev babel-jest @babel/core @babel/preset-env
-
-# Iniciar a aplicação
-npm run dev
-```
-
-## Uso Básico
-
-1. Inicie a aplicação com `npm run dev`
-2. Configure os repositórios GitHub na seção "Repository Settings".
-3. Configure os modelos LLM na seção "Model Settings".
-4. Defina os fluxos de trabalho para automatizar as tarefas desejadas.
-5. Monitore o progresso das tarefas no "Activity Log".
-
-## Estrutura do Projeto
-
-```
-project-wiz/
-├── src/
-│   ├── client/       # Interface do usuário (React)
-│   ├── core/         # Lógica principal e comunicação Electron
-│   └── locales/      # Internacionalização (i18n)
-├── docs/            # Documentação do sistema
-└── tests/           # Testes automatizados
-```
-
-Para detalhes completos da arquitetura, consulte [Documentação de Contexto do Projeto](docs/project-context.md).
-
-## Desenvolvimento
-
-Contribuições são bem-vindas! Siga estes passos:
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Faça push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
-
-## Roadmap
-
-- Versão 1.0 (30/04/2025): Documentação completa
-- Versão 1.1 (15/05/2025): Suporte a múltiplos modelos LLM GUFF
-
-Consulte o [roadmap completo](docs/project-context.md#próximos-marcos) para mais detalhes.
-
-## Licença
-
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
-
-## Documentação Completa
-
-- [Visão Geral do Projeto](docs/index.md)
-- [Configuração TS/Vite](docs/ts-vite-config.md)
-- [Componentes UI](docs/ui-components.md)
-- [Serviços LLM](docs/llm-services.md)
-
-## Monitoramento de Documentação
-
-O projeto inclui um sistema automatizado para monitorar a qualidade e adoção da documentação:
-
-- **Dashboard:** [Documentation Monitoring Dashboard](docs/dashboards/documentation-monitoring.md)
-- **Frequência:** Atualizado diariamente via GitHub Action
-- **Métricas coletadas:**
-  - Adoção de templates de documentação
-  - Conformidade com ADRs (Architecture Decision Records)
-  - Histórico de métricas
-
-Para executar manualmente o monitoramento:
-```bash
-gh workflow run documentation-monitoring.yml
-```
-
+```typescript
+// Exemplo de uso da MemoryTool
+const memoryTool = new SqliteMemoryTool(db, vectorStore);
+await memoryTool.write({
+  content: 'Exemplo de conteúdo',
+  metadata: { source: 'README' }
+});
