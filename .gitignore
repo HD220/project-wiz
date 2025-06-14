@@ -99,3 +99,6 @@ out
 
 # Roo Flow
 .git
+
+_old
+*.db
