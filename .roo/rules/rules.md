@@ -1,75 +1,42 @@
-# Project Coding Standards
+==== MANDATORY WORKFLOW INSTRUCTIONS ====
 
-## 1.1. Core Principles
+Its mandatory operational steps guidelines are as follows:
 
-- **Strict Pattern Adherence:** All code MUST follow the existing patterns and standards documented here. Analyze existing files before writing new code.
-- **Validation First:** Always validate data before creating objects.
-- **No `any` Type:** The `any` type is strictly forbidden. Use specific types or generics.
-- **Clean Architecture:** Adhere to the separation of concerns between layers.
+1. **Context Gathering**:
+    * Initiate by gathering all necessary context. Utilize tools such as `read_file` or `search_files` to comprehensively understand the user's request and relevant environmental factors (e.g., repository structure, existing documentation).
 
-## 1.2. Directory Structure
+2. **Strategic Planning**:
+    * Upon sufficient context acquisition, formulate a **detailed, executable plan** to address the user's task.
+    * **Validate Prerequisites**: Critically analyze all proposed plan steps. Identify and resolve any potential conflicts with existing documentation, code organization, or repository structure. Adjust the plan as necessary to ensure feasibility and prevent regressions.
 
-```plaintext
-src/
-├── core/
-│   ├── domain/
-│   │   ├── entities/         # One folder per entity
-│   │   │   └── value-objects/  # Lives inside entity's folder
-│   └── application/
-│       ├── use-cases/
-│       ├── queries/
-│       └── ports/            # Interfaces for infrastructure
-├── infrastructure/
-│   ├── repositories/
-│   └── services/
-└── shared/
-```
+3. **Plan Documentation**:
+    * Once the plan is confirmed and refined, persist it. Write the complete plan into a Markdown file located in the `docs` directory.
 
-## 1.3. Architectural Layers & Naming Conventions
+4. **Task Decomposition & Delegation**:
+    * Break down the validated plan into **logical, independent subtasks**.
+    * For each subtask, delegate it using the `new_task` tool.
+    * **Mode Selection**: Always select the *most appropriate specialized mode* for the specific objective of the subtask.
+    * **Comprehensive Subtask Instructions**: The `message` parameter of `new_task` **must** contain:
+        * **Full Context**: Include all relevant information from the parent task or previous subtasks required for the delegated mode to operate autonomously.
+        * **Clear Scope**: Explicitly define what the subtask **must** accomplish and what it **must not** deviate from. Be specific, think that the person who will receive the task is a brainless person and needs everything to be detailed and specific. For example:
+          * if you need a file to be created, ask "create file xyx, in location yxy".
+          * if you need the return of the activity to have specific information, inform it.
+          * if you have to follow a certain action, inform it.
+        * **Completion Signal**: Instruct the subtask to signal its completion by using the `attempt_completion` tool. The `result` parameter of `attempt_completion` **must** provide a concise, thorough, and factual summary of the outcome, serving as the definitive record of completed work for the project.
 
-### Domain Layer (Business Rules)
+5. **Progress Monitoring & Adaptive Refinement**:
+    * Continuously track and manage the progress of all delegated subtasks.
+    * Upon subtask completion, meticulously analyze its results. Based on the outcome, determine the subsequent steps.
+    * **Dynamic Re-planning**: Iteratively improve the overall workflow and plan based on the results of completed subtasks. Be prepared to adjust the plan's direction if new information or challenges arise.
 
-- **Value Objects (`*.vo.ts`)**
-  - **Structure:** MUST only contain a `constructor` and a `get value()` accessor.
-  - **Immutability:** MUST be immutable after creation.
-  - **Logic:** MUST NOT contain complex business logic.
-  - **Example:** `class AgentId extends Identity<string | number> {}`
-- **Entities (`*.ts`)**
-  - **Structure:** Encapsulate properties in a `private readonly fields` object.
-  - **Access:** Expose properties ONLY via getters. Public setters are forbidden.
-  - **Validation:** MUST use external Zod schemas (`*.schema.ts`) if the entity file exceeds 100 lines.
+6. **Operational Safeguard (Re-plan Threshold)**:
+    * Maintain a count of executed operations. If the count of *newly delegated subtasks* within a single execution phase exceeds **5**, immediately trigger a **re-plan phase**. This means returning to **step 1** of this workflow guide to re-evaluate the overall strategy and context. This prevents excessive, unguided execution.
 
-### Application Layer (Use Cases)
+7. **Delegation Protocol**:
+    * Send **only one `new_task` delegation per message**.
+    * Always provide a **clear and concise reasoning** for why a specific task is being delegated to a particular mode.
 
-- **Use Cases (`[action]-[entity].usecase.ts`)**
-  - **Interface:** MUST implement the `Executable` interface.
-  - **Return Type:** MUST return a `Result<T>` monad.
-- **Ports (`*.interface.ts`)**
-  - **Naming:** Do NOT use an "I" prefix for interfaces (e.g., `worker.interface.ts`).
+8. **Final Synthesis**:
+    * Once **all** subtasks are successfully completed, synthesize their individual results into a comprehensive overview. Provide a clear, detailed summary of all accomplishments related to the user's initial request.
 
-### Infrastructure Layer (Implementations)
-
-- **Repositories (`[entity]-[tech].repository.ts`)**
-  - **Purpose:** Implement interfaces defined in the application layer's ports.
-  - **Example:** `agent-drizzle.repository.ts`
-
-## 1.4. Object Calisthenics (Strictly Enforced)
-
-- [ ] **One Level of Indentation Per Method:** Refactor nested logic into new private methods.
-- [ ] **Don't Use the `else` Keyword:** Use guard clauses or polymorphism.
-- [ ] **Wrap All Primitives and Strings:** Encapsulate primitives in meaningful domain objects (Value Objects).
-- [ ] **First-Class Collections:** Any collection (e.g., `Array`) MUST be wrapped in its own class with domain-specific methods.
-- [ ] **One Dot Per Line:** Limit method chaining. Adhere to the Law of Demeter.
-- [ ] **Don't Abbreviate:** Use full, descriptive names for variables, methods, and classes.
-- [ ] **Keep Entities Small:** Aim for classes under 50 lines and functions under 15 lines.
-- [ ] **No More Than Two Instance Variables Per Class:** Use composition if more state is needed.
-- [ ] **No Getters/Setters/Properties (for behavior, not state):** Methods should describe what an object *does*, not just expose its internal state. Allow simple getters for Entities as defined above.
-- [ ] **No Comments or documentation on code:**: avoid comments in the code, except for explaining very complex things that cannot be explicitly made readable with the previous rules.
-
-## 2. Pre-Change Analysis Checklist
-
-Before implementing any change, you MUST verify the following:
-
-- [ ] Confirmed the project's dependencies and patterns.
-- [ ] Analyzed 3+ comparable code examples in the existing codebase.
-- [ ] Verified the impact of changes on dependent code.
+**Clarity & Focus**: Use subtasks to maintain absolute clarity. If a user request or a subtask's progression necessitates a significant shift in focus or demands a different specialized expertise (mode), always prefer creating a new, dedicated subtask rather than attempting to overload an existing one. Avoid ambiguous instructions; if a request is unclear, request clarification from the user.
