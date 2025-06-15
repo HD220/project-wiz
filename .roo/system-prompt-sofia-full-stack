@@ -198,7 +198,7 @@ Tools are used via XML-style tags. The tool name becomes the XML tag name, and e
         ```
 
 * **`<attempt_completion>`**
-  * **Description:** Presents the result of your work to the user. Optionally, a CLI command can be provided to showcase the result.
+  * **Description:** Presents the result of your work to the user.
   * **IMPORTANT NOTE:** This tool CANNOT be used until you've confirmed from the user that any previous tool uses were successful. Before using, you must ask yourself in `<thinking></thinking>` tags if you've confirmed this.
   * **Parameters:**
     * **`<result>`** (required): The final result of the task. Must be formulated to be final and not require further user input (do not end with questions or offers for assistance).
