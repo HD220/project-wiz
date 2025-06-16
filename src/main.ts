@@ -18,10 +18,16 @@ import { RemoveJobUseCase } from './core/application/use-cases/job/remove-job.us
 import { ListAnnotationsUseCase } from './core/application/use-cases/annotation/list-annotations.usecase';
 import { SaveAnnotationUseCase } from './core/application/use-cases/annotation/save-annotation.usecase';
 import { RemoveAnnotationUseCase } from './core/application/use-cases/annotation/remove-annotation.usecase';
+import { DrizzleMemoryRepository } from './infrastructure/repositories/drizzle/memory.repository'; // Added
+import { SaveMemoryItemUseCase } from './core/application/use-cases/memory/save-memory-item.usecase'; // Added
+import { SearchMemoryItemsUseCase } from './core/application/use-cases/memory/search-memory-items.usecase'; // Added
+import { RemoveMemoryItemUseCase } from './core/application/use-cases/memory/remove-memory-item.usecase'; // Added
 
 import { TaskTool, getTaskToolDefinitions } from './infrastructure/tools/task.tool';
 import { FileSystemTool, getFileSystemToolDefinitions } from './infrastructure/tools/file-system.tool';
 import { AnnotationTool, getAnnotationToolDefinitions } from './infrastructure/tools/annotation.tool';
+import { TerminalTool, getTerminalToolDefinitions } from './infrastructure/tools/terminal.tool';
+import { MemoryTool, getMemoryToolDefinitions } from './infrastructure/tools/memory.tool'; // Added
 import { toolRegistry } from './infrastructure/tools/tool-registry';
 
 import { IAgentExecutor } from './core/ports/agent/agent-executor.interface';
@@ -73,8 +79,9 @@ async function main() {
   const queueRepository = new DrizzleQueueRepository(db);
   const jobRepository = new DrizzleJobRepository(db);
   const annotationRepository = new DrizzleAnnotationRepository(db);
-  const personaTemplateRepository = new FileSystemAgentPersonaTemplateRepository(); // New
-  await personaTemplateRepository.init(); // New
+  const memoryRepository = new DrizzleMemoryRepository(db); // Added
+  const personaTemplateRepository = new FileSystemAgentPersonaTemplateRepository();
+  await personaTemplateRepository.init();
 
   console.log("Repositories instantiated.");
 
@@ -87,6 +94,10 @@ async function main() {
   const listAnnotationsUseCase = new ListAnnotationsUseCase(annotationRepository);
   const saveAnnotationUseCase = new SaveAnnotationUseCase(annotationRepository);
   const removeAnnotationUseCase = new RemoveAnnotationUseCase(annotationRepository);
+  // Memory UseCases
+  const saveMemoryItemUseCase = new SaveMemoryItemUseCase(memoryRepository); // Added
+  const searchMemoryItemsUseCase = new SearchMemoryItemsUseCase(memoryRepository); // Added
+  const removeMemoryItemUseCase = new RemoveMemoryItemUseCase(memoryRepository); // Added
   console.log("UseCases instantiated.");
 
   // --- 3. Tools and ToolRegistry ---
@@ -95,10 +106,14 @@ async function main() {
   const fileSystemToolInstance = new FileSystemTool(CWD);
   const annotationToolInstance = new AnnotationTool(listAnnotationsUseCase, saveAnnotationUseCase, removeAnnotationUseCase);
   const taskToolInstance = new TaskTool(listJobsUseCase, saveJobUseCase, removeJobUseCase);
+  const terminalToolInstance = new TerminalTool(CWD);
+  const memoryToolInstance = new MemoryTool(saveMemoryItemUseCase, searchMemoryItemsUseCase, removeMemoryItemUseCase); // Added
 
   getFileSystemToolDefinitions(fileSystemToolInstance).forEach(t => toolRegistry.registerTool(t));
   getAnnotationToolDefinitions(annotationToolInstance).forEach(t => toolRegistry.registerTool(t));
   getTaskToolDefinitions(taskToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getTerminalToolDefinitions(terminalToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getMemoryToolDefinitions(memoryToolInstance).forEach(t => toolRegistry.registerTool(t)); // Added
 
   console.log("All tools registered in ToolRegistry:");
   toolRegistry.getAllTools().forEach(t => console.log(` - ${t.name} (${t.description.substring(0,50)}...)`));

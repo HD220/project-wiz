@@ -6,6 +6,8 @@
   "toolNames": [
     "fileSystem.readFile", "fileSystem.writeFile", "fileSystem.listDirectory", "fileSystem.createDirectory", "fileSystem.removeFile", "fileSystem.removeDirectory", "fileSystem.moveFile", "fileSystem.moveDirectory",
     "annotation.save", "annotation.list", "annotation.remove",
-    "taskManager.listJobs", "taskManager.saveJob", "taskManager.removeJob"
+    "taskManager.listJobs", "taskManager.saveJob", "taskManager.removeJob",
+    "terminal.executeCommand",
+    "memory.save", "memory.search", "memory.remove"
   ]
 }
