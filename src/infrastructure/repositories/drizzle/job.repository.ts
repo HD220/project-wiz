@@ -140,6 +140,29 @@ export class DrizzleJobRepository implements IJobRepository {
     return results.map(dbToDomain);
   }
 
+  async findPendingByRole(queueId: string, role: string, limit: number): Promise<Job<any, any>[]> {
+    const now = new Date();
+    const results = await this.repositoryDB
+      .select()
+      .from(jobsTable)
+      .where(
+        and(
+          eq(jobsTable.queueId, queueId),
+          eq(jobsTable.targetAgentRole, role), // Filter by role
+          or(
+            eq(jobsTable.status, JobStatusType.WAITING),
+            and(
+              eq(jobsTable.status, JobStatusType.DELAYED),
+              lte(jobsTable.executeAfter, now)
+            )
+          )
+        )
+      )
+      .orderBy(asc(jobsTable.priority), asc(jobsTable.createdAt))
+      .limit(limit);
+    return results.map(dbToDomain);
+  }
+
   async delete(jobId: string): Promise<void> {
     console.log(`DrizzleJobRepository: Deleting job ${jobId}`);
     const result = await this.repositoryDB.delete(jobsTable).where(eq(jobsTable.id, jobId)).returning();

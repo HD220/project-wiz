@@ -21,19 +21,6 @@ export class ToolRegistry {
   getAllTools(): IAgentTool<any, any>[] {
     return Array.from(this.tools.values());
   }
-
-  // Method to get tool definitions in a format ai-sdk's `generateObject` consumes
-  getAiSdkTools(): Record<string, ReturnType<typeof tool>> {
-    const aiTools: Record<string, ReturnType<typeof tool>> = {};
-    this.tools.forEach(t => {
-      aiTools[t.name] = tool({
-        description: t.description,
-        parameters: t.parameters, // This is the Zod schema instance
-        execute: t.execute.bind(t), // Bind 'this' if methods depend on tool instance state
-      });
-    });
-    return aiTools;
-  }
 }
 
 // Singleton instance of the registry

@@ -5,7 +5,7 @@ import { db } from './infrastructure/services/drizzle/index';
 import { DrizzleQueueRepository } from './infrastructure/repositories/drizzle/queue.repository';
 import { DrizzleJobRepository } from './infrastructure/repositories/drizzle/job.repository';
 import { DrizzleAnnotationRepository } from './infrastructure/repositories/drizzle/annotation.repository';
-import { InMemoryAgentPersonaTemplateRepository } from './infrastructure/repositories/in-memory-agent-persona-template.repository';
+import { FileSystemAgentPersonaTemplateRepository } from './infrastructure/repositories/file-system-agent-persona-template.repository';
 
 import { WorkerService } from './core/domain/services/worker.service';
 import { Queue } from './core/domain/entities/queue/queue.entity';
@@ -73,7 +73,8 @@ async function main() {
   const queueRepository = new DrizzleQueueRepository(db);
   const jobRepository = new DrizzleJobRepository(db);
   const annotationRepository = new DrizzleAnnotationRepository(db);
-  const personaTemplateRepository = new InMemoryAgentPersonaTemplateRepository(); // Contains default templates
+  const personaTemplateRepository = new FileSystemAgentPersonaTemplateRepository(); // New
+  await personaTemplateRepository.init(); // New
 
   console.log("Repositories instantiated.");
 

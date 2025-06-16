@@ -1,24 +1,23 @@
 // src/infrastructure/agents/generic-agent-executor.ts
 import { AgentPersonaTemplate } from '../../core/domain/entities/agent/persona-template.types';
 import { Job } from '../../core/domain/entities/jobs/job.entity';
-import { toolRegistry, ToolRegistry } from './tool-registry'; // Assuming singleton instance and updated path
+import { toolRegistry, ToolRegistry } from './tool-registry';
 import { IAgentTool } from '../../core/tools/tool.interface';
 import {
   AgentJobState,
-  PlanStep,
-  AgentExecutorResultStatus,
+  // PlanStep, // No longer using pre-defined PlanStep for iterative execution
   AgentExecutorResult
 } from '../../core/domain/jobs/job-processing.types';
 import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
 
-import { generateObject, tool as aiToolHelper, Tool } from 'ai'; // Renamed 'tool' to 'aiToolHelper' to avoid conflict
+import { generateObject, tool as aiToolHelper, Tool, Message, ToolInvocation, ToolResult } from 'ai';
 import { z } from 'zod';
 import { deepseek } from '@ai-sdk/deepseek'; // Or your chosen LLM provider
 
 export class GenericAgentExecutor implements IAgentExecutor {
   private personaTemplate: AgentPersonaTemplate;
   private toolRegistryInstance: ToolRegistry;
-  private availableAiTools: Record<string, Tool<any, any>>; // For ai-sdk { [toolName]: toolDefinition }
+  private availableAiTools: Record<string, Tool<any, any>>;
 
   constructor(personaTemplate: AgentPersonaTemplate, toolReg: ToolRegistry = toolRegistry) {
     this.personaTemplate = personaTemplate;
@@ -37,10 +36,10 @@ export class GenericAgentExecutor implements IAgentExecutor {
     this.personaTemplate.toolNames.forEach(toolName => {
       const toolInstance = this.toolRegistryInstance.getTool(toolName);
       if (toolInstance) {
-        toolsForSdk[toolInstance.name] = aiToolHelper({ // Using the imported 'aiToolHelper'
+        toolsForSdk[toolInstance.name] = aiToolHelper({
           description: toolInstance.description,
-          parameters: toolInstance.parameters, // This is the Zod schema
-          execute: async (params) => toolInstance.execute(params, { agentId: this.personaTemplate.id, role: this.personaTemplate.role /*, jobId: currentJob.id */ }), // Pass context if needed
+          parameters: toolInstance.parameters,
+          execute: async (params) => toolInstance.execute(params, { agentId: this.personaTemplate.id, role: this.personaTemplate.role }),
         });
       } else {
         console.warn(`GenericAgentExecutor: Tool '${toolName}' specified in persona template '${this.personaTemplate.id}' not found in ToolRegistry.`);
@@ -51,150 +50,109 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
   public async processJob(job: Job<any, any>): Promise<AgentExecutorResult> {
     console.log(`
-AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Processing Job ID ${job.id}, Name: ${job.name}`);
-    const jobGoal = job.payload?.goal || job.name; // Assuming goal is in payload or use job name
+AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Iteratively Processing Job ID ${job.id}, Name: ${job.name}`);
+    const jobGoal = job.payload?.goal || job.name;
 
-    // --- 1. Initialize or Load Agent State from Job ---
     let agentState: AgentJobState = job.data?.agentState || {
-      currentPlan: [],
-      completedSteps: 0,
+      conversationHistory: [],
       executionHistory: [],
     };
-    // Ensure executionHistory is initialized
+    agentState.conversationHistory = agentState.conversationHistory || [];
     agentState.executionHistory = agentState.executionHistory || [];
 
-
-    // --- 2. API Key Check ---
+    // --- API Key Check ---
     if (!process.env.DEEPSEEK_API_KEY) { // Or your chosen LLM provider's key
       console.error(`AgentExecutor (${this.personaTemplate.role}): LLM API Key not set.`);
-      agentState.executionHistory.push({ step: agentState.completedSteps, tool: 'system', params: {}, result: null, error: "LLM API Key not set." });
-      job.data = { ...job.data, agentState }; // Persist error in history
-      return { status: 'FAILED', message: "LLM API Key not configured.", /*jobDataToUpdate: { data: job.data }*/ };
+      agentState.executionHistory.push({ tool: 'system', params: {}, result: null, error: "LLM API Key not set." });
+      job.data = { ...job.data, agentState };
+      return { status: 'FAILED', message: "LLM API Key not configured." };
     }
 
-    // --- 3. Planning Phase (if no plan or plan is completed but goal might not be) ---
-    // Simple model: if plan is empty, generate one. If plan exists, execute next step.
-    // More complex: LLM could be asked to verify plan completion or re-plan if context changes.
-    if (agentState.currentPlan.length === 0 || agentState.completedSteps === agentState.currentPlan.length) {
-        // If plan was completed, but we are called again, it might mean previous execution was only partial
-        // or the goal is not yet met. For now, if plan is "done", we assume goal is met unless error.
-        // A more robust system might re-evaluate. If currentPlan exists and completedSteps == length, we assume it's done.
-        if (agentState.currentPlan.length > 0 && agentState.completedSteps === agentState.currentPlan.length) {
-             console.log(`AgentExecutor (${this.personaTemplate.role}): Existing plan completed. Assuming goal achieved.`);
-             job.data = { ...job.data, agentState };
-             return { status: 'COMPLETED', message: 'Previously completed plan executed.', output: agentState.executionHistory, /*jobDataToUpdate: { data: job.data }*/ };
-        }
-
-      console.log(`AgentExecutor (${this.personaTemplate.role}): Planning phase for goal: "${jobGoal}"`);
+    // --- Construct initial messages if history is empty ---
+    if (agentState.conversationHistory.length === 0) {
       const systemPrompt = \`You are ${this.personaTemplate.role}. Your primary goal is: "${this.personaTemplate.goal}". Your backstory is: "${this.personaTemplate.backstory}".
-You are currently working on the task: "${jobGoal}".
-Generate a step-by-step plan to achieve this task using ONLY the tools available to you.
-Available tools: ${Object.values(this.availableAiTools).map(t => t.description).join(', ')}.
-Each step in your plan must specify the exact tool name (e.g., 'fileSystem.readFile') and its parameters.
-Be methodical. If a task involves multiple operations (e.g., read a file, then write a modified version), make them separate, sequential steps.
-If the goal is simple and can be achieved with one tool call, create a plan with one step.\`;
+You are currently working on the overall task: "${jobGoal}".
+You have access to the following tools:
+${Object.entries(this.availableAiTools).map(([name, toolDef]) => `- ${name}: ${toolDef.description}`).join('\n')}
+Based on the user's request and the conversation history (which will include results or errors from previous tool calls), decide the next action. This could be calling one of your tools or providing a final answer if the goal is achieved.
 
-      try {
-        const { object: planObject } = await generateObject({
-          model: deepseek('deepseek-chat'),
-          system: systemPrompt,
-          prompt: \`Generate a plan for task: "${jobGoal}".
-Initial job payload/context (if any): ${JSON.stringify(job.payload)}\`,
-          schema: z.object({
-            plan: z.array(
-              z.object({
-                tool: z.string().describe("Full tool name from the available tools list."),
-                params: z.any().describe("Parameters object for the tool call."),
-                description: z.string().describe("Your description of what this step achieves."),
-              })
-            ).describe("The sequence of tool calls to achieve the goal. Should not be empty unless goal is trivial and unachievable with tools."),
-            initialThought: z.string().describe("Your brief rationale for this plan."),
-          }),
-          // Pass the dynamically prepared tools for this persona
-          tools: this.availableAiTools
+**Error Handling and Re-planning:**
+If a previous tool call resulted in an error, that error information will be in the conversation history. You MUST analyze this error.
+- If the error seems temporary or due to incorrect parameters you provided, you MAY try the same tool again with corrected parameters, or try a different tool if more appropriate.
+- If a tool consistently fails, or if the error indicates a fundamental problem with achieving a step, explain the issue in your final summary and indicate why the goal cannot be fully achieved.
+- Do not repeatedly try the same failing tool call with the same parameters. Adapt your plan.
+
+If you call a tool, I will execute it and give you back the result (or an error message if it fails).\`;
+      agentState.conversationHistory.push({ role: 'system', content: systemPrompt });
+      agentState.conversationHistory.push({ role: 'user', content: \`The task is: "${jobGoal}". Initial context (if any): ${JSON.stringify(job.payload?.initialContext || {})}. Please proceed.\` });
+    }
+
+    console.log(`AgentExecutor (${this.personaTemplate.role}): Current conversation length: ${agentState.conversationHistory.length}. Last message: ${agentState.conversationHistory[agentState.conversationHistory.length-1]?.content.substring(0,100)}`);
+
+    try {
+      const { messages: newMessages, toolCalls, toolResults, finishReason, usage, object: finalObject } = await generateObject({
+        model: deepseek('deepseek-chat'),
+        messages: agentState.conversationHistory,
+        schema: z.object({
+          finalSummary: z.string().describe("A summary of all actions taken and the final outcome if the goal is complete and no more tool calls are needed."),
+          outputData: z.any().optional().describe("Any relevant data produced as a final result."),
+        }),
+        tools: this.availableAiTools,
+        maxToolRoundtrips: 1,
+      });
+
+      agentState.conversationHistory = newMessages;
+
+      if (toolCalls && toolCalls.length > 0) {
+        console.log(`AgentExecutor (${this.personaTemplate.role}): LLM decided to call ${toolCalls.length} tool(s). SDK handled execution.`);
+        toolCalls.forEach(tc => {
+          const tr = toolResults?.find(r => r.toolCallId === tc.toolCallId);
+          agentState.executionHistory?.push({
+              tool: tc.toolName,
+              params: tc.args,
+              result: tr?.result !== undefined ? tr.result : "No explicit result from tool execution by SDK.",
+              error: tr?.result instanceof Error ? tr.result.message : undefined
+          });
+          console.log(\`  Tool call: ${tc.toolName}, Args: ${JSON.stringify(tc.args)}\`);
+          if (tr) console.log(\`  Tool result: \${JSON.stringify(tr.result)}\`);
         });
 
-        if (!planObject.plan || planObject.plan.length === 0) {
-          console.warn(`AgentExecutor (${this.personaTemplate.role}): LLM did not generate a plan for "${jobGoal}".`);
-          agentState.executionHistory.push({ step: agentState.completedSteps, tool: 'planner', params: {}, result: null, error: "LLM failed to generate a plan." });
+        job.data = { ...job.data, agentState };
+        return { status: 'CONTINUE_PROCESSING', message: `Executed tool(s): ${toolCalls.map(t => t.toolName).join(', ')}. Ready for next step.` };
+
+      } else if (finishReason === 'stop' || finishReason === 'length') {
+        console.log(`AgentExecutor (${this.personaTemplate.role}): Goal considered complete by LLM. Final summary: ${finalObject?.finalSummary}`);
+        agentState.executionHistory?.push({ tool: 'LLM', params: { finalDecision: true }, result: finalObject, error: undefined });
+        job.data = { ...job.data, agentState };
+        return { status: 'COMPLETED', message: finalObject?.finalSummary || "Goal achieved.", output: finalObject?.outputData };
+
+      } else if (finishReason === 'error') {
+          console.error(`AgentExecutor (${this.personaTemplate.role}): LLM generation error.`);
+          agentState.executionHistory?.push({ tool: 'LLM', params: {}, result: null, error: "LLM generation error" });
           job.data = { ...job.data, agentState };
-          return { status: 'FAILED', message: 'LLM failed to generate a plan.', /*jobDataToUpdate: { data: job.data }*/ };
-        }
-        agentState.currentPlan = planObject.plan as PlanStep[];
-        agentState.completedSteps = 0; // Reset completed steps for new plan
-        agentState.executionHistory.push({ step: 0, tool: 'planner', params: { goal: jobGoal }, result: { thought: planObject.initialThought, plan: agentState.currentPlan }, error: undefined });
+          return { status: 'FAILED', message: 'LLM generation error.' };
 
-        console.log(`AgentExecutor (${this.personaTemplate.role}): Plan generated: ${planObject.initialThought}`);
-        agentState.currentPlan.forEach((step, idx) => console.log(`  Step ${idx + 1}: ${step.description} (Tool: ${step.tool})`));
-
-      } catch (error) {
-        console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM planning phase:`, error);
-        agentState.executionHistory.push({ step: agentState.completedSteps, tool: 'planner', params: {}, result: null, error: \`LLM planning error: ${error instanceof Error ? error.message : 'Unknown error'}\` });
-        job.data = { ...job.data, agentState };
-        return { status: 'FAILED', message: \`LLM planning error: ${error instanceof Error ? error.message : 'Unknown error'}\`, /*jobDataToUpdate: { data: job.data }*/ };
-      }
-    } else {
-      console.log(`AgentExecutor (${this.personaTemplate.role}): Resuming execution of existing plan from step ${agentState.completedSteps + 1}. Total steps: ${agentState.currentPlan.length}`);
-    }
-
-    // --- 4. Execution Phase ---
-    if (agentState.completedSteps < agentState.currentPlan.length) {
-      const stepToExecute = agentState.currentPlan[agentState.completedSteps];
-      console.log(`AgentExecutor (${this.personaTemplate.role}): Executing Step ${agentState.completedSteps + 1}/${agentState.currentPlan.length}: ${stepToExecute.description} (Tool: ${stepToExecute.tool})`);
-
-      const toolToCall = this.availableAiTools[stepToExecute.tool]; // This is an ai-sdk prepared tool object
-      if (!toolToCall || typeof toolToCall.execute !== 'function') {
-         const errorMsg = `Execution error: Tool '${stepToExecute.tool}' not found or not executable in prepared tools.`;
-        console.error(`AgentExecutor (${this.personaTemplate.role}): ${errorMsg}`);
-        agentState.executionHistory.push({ step: agentState.completedSteps + 1, tool: stepToExecute.tool, params: stepToExecute.params, result: null, error: errorMsg });
-        job.data = { ...job.data, agentState };
-        return { status: 'FAILED', message: errorMsg, /*jobDataToUpdate: { data: job.data }*/ };
+      } else if (finishReason === 'tool-calls' && (!toolCalls || toolCalls.length === 0)) {
+          // This condition means the LLM intended to call tools, but for some reason, they weren't captured or returned.
+          // This might happen if the LLM's response format is off or if there's an issue with how ai-sdk processes it when no valid tool calls are made.
+          console.warn(`AgentExecutor (${this.personaTemplate.role}): LLM finishReason was 'tool-calls' but no toolCalls were processed or returned. This may indicate the LLM tried to call a tool it doesn't have or formatted its request incorrectly.`);
+          agentState.executionHistory?.push({ tool: 'LLM', params: {}, result: null, error: "LLM indicated tool_calls finish reason but no valid calls were processed." });
+          job.data = { ...job.data, agentState };
+          // Treat as needing continuation, as the LLM likely expects to make a tool call.
+          return { status: 'CONTINUE_PROCESSING', message: 'LLM intended tool use, but no valid tool calls were made. Review conversation history.' };
       }
 
-      try {
-        // The `toolToCall.execute` is already the bound `execute` from the IAgentTool instance,
-        // wrapped by ai-sdk's `tool` helper.
-        // The `ai-sdk` `tool` helper's `execute` expects the validated params.
-        // The `generateObject` function, when it decides to call a tool, typically provides the params.
-        // Here, we are manually executing a plan step, so we call the original tool's execute method.
-        // This part needs refinement: we should use the `toolToCall` which is the ai-sdk tool object,
-        // or directly call the original tool method from toolRegistry.
-        // Let's assume we call the original tool method for directness in a manual loop.
-        const originalToolInstance = this.toolRegistryInstance.getTool(stepToExecute.tool);
-        if (!originalToolInstance) throw new Error (\`Original tool instance for '${stepToExecute.tool}' not found in registry\`);
-
-        // Validate params with the tool's Zod schema before execution
-        const validationResult = originalToolInstance.parameters.safeParse(stepToExecute.params);
-        if (!validationResult.success) {
-            throw new Error(\`Invalid parameters for tool '${stepToExecute.tool}': ${validationResult.error.errors.map(e => e.message).join(', ')}\`);
-        }
-
-        const result = await originalToolInstance.execute(validationResult.data, { agentId: this.personaTemplate.id, role: this.personaTemplate.role, jobId: job.id });
-
-        console.log(`AgentExecutor (${this.personaTemplate.role}): Step ${agentState.completedSteps + 1} result:`, result !== undefined ? result : "No explicit result (void)");
-        agentState.executionHistory.push({ step: agentState.completedSteps + 1, tool: stepToExecute.tool, params: validationResult.data, result: result !== undefined ? result : "void", error: undefined });
-        agentState.completedSteps++;
-        job.data = { ...job.data, agentState }; // Persist state after each successful step
-
-        if (agentState.completedSteps < agentState.currentPlan.length) {
-          console.log(`AgentExecutor (${this.personaTemplate.role}): Step completed. Requesting continuation.`);
-          return { status: 'CONTINUE_PROCESSING', message: `Step ${agentState.completedSteps} ('${stepToExecute.description}') completed. Plan execution paused, ready for next step.`, /*jobDataToUpdate: { data: job.data }*/ };
-        } else {
-          console.log(`AgentExecutor (${this.personaTemplate.role}): All plan steps executed successfully for goal: "${jobGoal}"`);
-          return { status: 'COMPLETED', message: `Goal "${jobGoal}" achieved successfully.`, output: agentState.executionHistory, /*jobDataToUpdate: { data: job.data }*/ };
-        }
-
-      } catch (error) {
-        console.error(`AgentExecutor (${this.personaTemplate.role}): Error during plan execution (Step ${agentState.completedSteps + 1} - ${stepToExecute.tool}):`, error);
-        agentState.executionHistory.push({ step: agentState.completedSteps + 1, tool: stepToExecute.tool, params: stepToExecute.params, result: null, error: \`Execution error: ${error instanceof Error ? error.message : 'Unknown error'}\` });
-        job.data = { ...job.data, agentState };
-        return { status: 'FAILED', message: \`Error executing step ${agentState.completedSteps + 1} ('${stepToExecute.description}'): ${error instanceof Error ? error.message : 'Unknown error'}\`, /*jobDataToUpdate: { data: job.data }*/ };
-      }
-    } else {
-      // This case (plan exists and all steps completed) should ideally be caught at the beginning of the method.
-      console.log(`AgentExecutor (${this.personaTemplate.role}): All plan steps previously executed.`);
+      console.warn(\`AgentExecutor (\${this.personaTemplate.role}): LLM interaction finished with unhandled reason: \${finishReason}\`);
+      agentState.executionHistory?.push({ tool: 'LLM', params: {}, result: null, error: \`LLM interaction finished with unhandled reason: \${finishReason}\` });
       job.data = { ...job.data, agentState };
-      return { status: 'COMPLETED', message: 'All plan steps previously executed.', output: agentState.executionHistory, /*jobDataToUpdate: { data: job.data }*/ };
+      return { status: 'FAILED', message: \`LLM interaction finished with unhandled reason: \${finishReason}\` };
+
+    } catch (error) {
+      console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM interaction or tool execution:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      agentState.executionHistory?.push({ tool: 'system', params: {}, result: null, error: \`LLM/Tool error: ${errorMessage}\` });
+      job.data = { ...job.data, agentState };
+      return { status: 'FAILED', message: \`Error during LLM interaction: ${errorMessage}\` };
     }
   }
 }

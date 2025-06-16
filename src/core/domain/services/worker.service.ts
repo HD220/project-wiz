@@ -91,14 +91,11 @@ export class WorkerService { // Removed <PInput, POutput>
       const availableSlots = this.queueConfig.concurrency - this.activeJobs;
       if (availableSlots <= 0) return;
 
-      const pendingJobs = await this.jobRepository.findPending(this.queueConfig.id, availableSlots);
-
-      if (pendingJobs.length === 0) {
-        return;
-      }
-
-      // Filter jobs for this worker's handled role
-      const jobsForThisWorker = pendingJobs.filter(job => job.targetAgentRole === this.handlesRole);
+      const jobsForThisWorker = await this.jobRepository.findPendingByRole(
+        this.queueConfig.id,
+        this.handlesRole,
+        availableSlots
+      );
 
       if (jobsForThisWorker.length === 0) {
         // console.log(`WorkerService (${this.handlesRole}): No jobs found for role ${this.handlesRole} in this poll.`);
