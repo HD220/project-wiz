@@ -7,10 +7,10 @@ import { ArrowRight, Settings } from "lucide-react"; // Icons
 
 interface ProjectCardProps {
   project: PlaceholderProject;
-  // onNavigateToProject: (projectId: string) => void; // Optional: callback for navigation
+  onNavigateToProject?: (projectId: string) => void;
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, onNavigateToProject }: ProjectCardProps) {
   // Placeholder progress calculation
   const progressValue = project.status === "Concluído" ? 100 : (project.name.length % 50) + 25; // Example placeholder logic
 
@@ -68,7 +68,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <Settings className="h-4 w-4" />
           <span className="sr-only">Configurações do Projeto</span>
         </Button>
-        <Button variant="outline" size="sm" /* onClick={() => onNavigateToProject(project.id)} */ >
+        <Button variant="outline" size="sm" onClick={() => onNavigateToProject && onNavigateToProject(project.id)} >
           Ver Detalhes <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>

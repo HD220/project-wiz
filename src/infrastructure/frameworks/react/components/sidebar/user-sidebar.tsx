@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Calendar, Home, Inbox, Plus, Search, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Link } from "@tanstack/react-router";
 import { H4 } from "../typography/titles";
@@ -171,12 +171,7 @@ export function UserSidebar() {
                               <Avatar className="size-12 border-2">
                                 <AvatarImage></AvatarImage>
                                 <AvatarFallback>
-                                  {users
-                                    .find((user) => user.id === message.userId)
-                                    ?.name.split(" ")
-                                    .join()
-                                    .substring(0, 2)
-                                    .toUpperCase()}
+                                  {getInitials(users.find((user) => user.id === message.userId)?.name)}
                                 </AvatarFallback>
                               </Avatar>
                             ) : (
@@ -195,14 +190,7 @@ export function UserSidebar() {
                                     >
                                       <AvatarImage></AvatarImage>
                                       <AvatarFallback>
-                                        {users
-                                          .find(
-                                            (user) => user.id === member.userId
-                                          )
-                                          ?.name.split(" ")
-                                          .join()
-                                          .substring(0, 2)
-                                          .toUpperCase()}
+                                        {getInitials(users.find((user) => user.id === member.userId)?.name)}
                                       </AvatarFallback>
                                     </Avatar>
                                   ))}

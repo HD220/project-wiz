@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"; // For potential actions
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // For user display
 import { placeholderUserProjects, placeholderUserActivity, PlaceholderProject } from "@/lib/placeholders"; // To be added
 import { ProjectCard } from "@/components/projects/project-card";
+import { getInitials } from "@/lib/utils";
 
 export function UserDashboard() {
   const userName = "Usuário Exemplo"; // Placeholder
@@ -14,7 +15,7 @@ export function UserDashboard() {
       <section className="flex items-center space-x-4 p-6 bg-card text-card-foreground rounded-lg shadow">
         <Avatar className="h-16 w-16">
           <AvatarImage src={userAvatarUrl} alt={userName} />
-          <AvatarFallback>{userName.substring(0, 2).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{getInitials(userName)}</AvatarFallback>
         </Avatar>
         <div>
           <h1 className="text-2xl font-semibold">Bem-vindo de volta, {userName}!</h1>
@@ -28,7 +29,7 @@ export function UserDashboard() {
         {placeholderUserProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {placeholderUserProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} onNavigateToProject={(id) => console.log("UserDashboard: Navigate to project:", id)} />
             ))}
           </div>
         ) : (

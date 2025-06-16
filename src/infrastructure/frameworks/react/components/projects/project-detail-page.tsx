@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { placeholderUserProjects, PlaceholderProject, placeholderProjectDetails, PlaceholderTask, PlaceholderTeamMember, getProjectDetailsPlaceholder } from "@/lib/placeholders"; // To be updated in placeholders
+import { getInitials } from "@/lib/utils";
 
 interface ProjectDetailPageProps {
   projectId: string;
@@ -110,7 +111,7 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
                     <Card key={member.id} className="p-4 flex flex-col items-center text-center">
                       <Avatar className="w-16 h-16 mb-2">
                         <AvatarImage src={member.avatarUrl} alt={member.name} />
-                        <AvatarFallback>{member.name.substring(0,2).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
                       </Avatar>
                       <p className="font-semibold">{member.name}</p>
                       <p className="text-sm text-muted-foreground">{member.role}</p>

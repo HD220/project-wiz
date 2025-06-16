@@ -12,5 +12,5 @@ function RouteComponent() {
   // The ChatThread component expects messages of type ChatMessageProps[].
   // Our placeholderDirectMessages (PlaceholderChatMessage[]) should be compatible.
   // If not, a mapping function would be needed, but their structures are aligned.
-  return <ChatThread threadId={params.id} messages={placeholderDirectMessages} />;
+  return <ChatThread threadId={params.id} messages={placeholderDirectMessages} title={`Chat com Usuário ${params.id}`} />;
 }
