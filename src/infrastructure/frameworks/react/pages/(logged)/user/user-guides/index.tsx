@@ -1,71 +1,24 @@
 import { MarkdownView } from "@/components/markdown-render";
+// ScrollArea might not be needed if MarkdownView handles its own scrolling or if page layout is simpler.
+// Keeping it for now as it was in the original.
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { createFileRoute } from "@tanstack/react-router";
+import { userGuideContent } from "@/lib/placeholders"; // Import from placeholders
 
 export const Route = createFileRoute("/(logged)/user/user-guides/")({
-  component: Home,
+  component: UserGuidesPage, // Renamed component
 });
 
-export function Home() {
+export function UserGuidesPage() {
   return (
-    <div className="m-4 pb-4">
-      <MarkdownView className="h-full">{userguide}</MarkdownView>
-    </div>
+    // If MarkdownView takes full height and has its own scroll, ScrollArea might be redundant.
+    // For now, structure remains similar to original.
+    <ScrollArea className="h-[calc(100vh-theme(spacing.16))]"> {/* Example: Adjust height based on layout */}
+      <div className="m-4 pb-4">
+        <MarkdownView className="prose dark:prose-invert max-w-none">
+          {userGuideContent}
+        </MarkdownView>
+      </div>
+    </ScrollArea>
   );
 }
-
-const userguide = `
-# GFM
-
-## Autolink literals
-
-www.example.com, https://example.com, and contact@example.com.
-
-## Footnote
-
-A note[^1]
-
-[^1]: Big note.
-
-## Strikethrough
-
-~one~ or ~~two~~ tildes.
-
-## Table
-
-| a | b  |  c |  d  |
-| - | :- | -: | :-: |
-| a | b  |  c |  d  |
-
-## Tasklist
-
-* [ ] to do
-* [x] done
- 
-# GFM
-
-## Autolink literals
-
-www.example.com, https://example.com, and contact@example.com.
-
-## Footnote
-
-A note[^1]
-
-[^1]: Big note.
-
-## Strikethrough
-
-~one~ or ~~two~~ tildes.
-
-## Table
-
-| a | b  |  c |  d  |
-| - | :- | -: | :-: |
-| a | b  |  c |  d  |
-
-## Tasklist
-
-* [ ] to do
-* [x] done
-`;
