@@ -1,10 +1,10 @@
 # Arquitetura do Sistema de Processamento Assíncrono (Jobs & Workers)
 
-Este documento detalha a arquitetura de backend do Project Wiz responsável pelo processamento assíncrono de tarefas. Ele descreve os componentes chave como Jobs, Tasks, a Fila (Queue), Workers e Agentes, e como eles interagem para permitir a execução de trabalho automatizado pelas Personas.
+Este documento detalha a arquitetura de backend do Project Wiz responsável pelo processamento assíncrono de tarefas, bem como aspectos gerais da arquitetura da aplicação. Ele descreve os componentes chave como Jobs, Tasks, a Fila (Queue), Workers, Agentes, e como eles interagem para permitir a execução de trabalho automatizado pelas Personas. A aplicação é construída com Electron, com o frontend utilizando React e TanStack Router para roteamento, e Lingui para internacionalização.
 
-## 1. Visão Geral
+## 1. Visão Geral do Sistema de Processamento Assíncrono
 
-O sistema é projetado para gerenciar e executar unidades de trabalho chamadas **Jobs** por **Workers** (que são instâncias de [Agentes](./02-agent-framework.md)), tudo orquestrado por uma **Fila (Queue)** com persistência inicial em SQLite. O objetivo é fornecer um mecanismo robusto e escalável para a automação de tarefas no Project Wiz.
+O sistema de processamento assíncrono é projetado para gerenciar e executar unidades de trabalho chamadas **Jobs** por **Workers** (que são instâncias de [Agentes](./02-agent-framework.md)), tudo orquestrado por uma **Fila (Queue)** com persistência inicial em SQLite. O objetivo é fornecer um mecanismo robusto e escalável para a automação de tarefas no Project Wiz.
 
 ## 2. Conceitos Fundamentais
 
@@ -52,7 +52,7 @@ graph TD
 ```
 
 *   **`new` (implícito) -> `waiting`**: Uma nova Job é adicionada à Fila.
-*   **`waiting` -> `executing`**: Um Worker/Agente pega a Job para processar.
+*   **`waiting` -> `executing`**: Um Worker ([Agente](./02-agent-framework.md)) pega a Job para processar.
 *   **`executing` -> `success`**: A Job é concluída com sucesso.
 *   **`executing` -> `delayed`**: Ocorre um erro, mas ainda há tentativas restantes. A Job é colocada em `delayed` antes de voltar para `waiting`.
 *   **`executing` -> `failed`**: Ocorre um erro e não há mais tentativas, ou a falha é definitiva.
@@ -64,10 +64,24 @@ graph TD
 ### 4.1. Fila (`Queue`)
 
 *   **Responsabilidade Principal**: Gerenciamento de estado e ciclo de vida das **Jobs**.
-*   **Persistência**: As Jobs são persistidas em SQLite (inicialmente).
+*   **Persistência**: As Jobs são persistidas em SQLite (inicialmente), utilizando Drizzle ORM. As alterações de schema são gerenciadas através de **migrações versionadas**.
 *   **Funções**: A Fila é a **única** responsável por atualizar o `status` de uma Job, incrementar `attempts`, gerenciar `delay`, `depends_on`, e armazenar `result`. Ela recebe notificações do Worker sobre o desfecho da execução.
 
-### 4.2. Worker
+### 4.2. Processos da Aplicação Electron
+
+O Project Wiz, sendo uma aplicação Electron, é dividido em processos principais:
+
+*   **Processo Main (Electron):**
+    *   Responsável pela manipulação do ciclo de vida das janelas da aplicação.
+    *   Gerencia a comunicação IPC (Inter-Process Communication) tipada com os processos de renderer.
+    *   Coordena o gerenciamento dos [Agentes](./02-agent-framework.md) (Personas).
+    *   Realiza a integração com APIs externas, como a API do GitHub (utilizando Octokit).
+*   **Processo Renderer (React):**
+    *   Constrói e renderiza a interface do usuário utilizando React, componentes Radix UI e Tailwind CSS.
+    *   Gerencia o roteamento da interface com TanStack Router.
+    *   Comunica-se com o Processo Main via IPC para operações de backend e acesso a recursos nativos.
+
+### 4.3. Worker (Orquestrador de Jobs do Agente)
 
 *   **Responsabilidade Principal**: Orquestrar a execução das Jobs por um [Agente](./02-agent-framework.md) específico.
 *   **Funcionamento**:
@@ -107,14 +121,26 @@ graph TD
     *   A LLM pode solicitar a execução de [Tools](./02-agent-framework.md#tools) fornecidas.
     *   O retorno da Task (ou a ausência dele) e o lançamento de erros seguem as regras definidas para o Agente.
 
-## 5. Interação com LLMs e Tools
+## 5. Mecanismos de Comunicação Adicionais
 
-*   As chamadas para LLMs são feitas primariamente dentro das Tasks, utilizando SDKs como `ai-sdk`.
+Além da interação com LLMs:
+
+*   **IPC Tipado:** A comunicação entre o processo Main do Electron e os processos Renderer é feita através de IPC, com um esforço para manter essa comunicação tipada, garantindo maior segurança e robustez no desenvolvimento.
+*   **APIs Externas:** O sistema interage com APIs externas, como a API do GitHub (via Octokit), para funcionalidades como análise de repositórios e integração com issues/pull requests.
+
+## 6. Interação com LLMs e Tools (Dentro das Tasks)
+
+*   As chamadas para LLMs são feitas primariamente dentro das Tasks, utilizando SDKs como `ai-sdk` (veja [Integração com LLMs](./04-llm-integration.md)).
 *   As [Tools](./02-agent-framework.md#tools) são fornecidas à LLM durante essas chamadas, permitindo que o modelo solicite ações no sistema (ler arquivos, executar comandos, etc.).
 *   Uma "step" de execução de uma Job por uma Task pode envolver múltiplas interações com a LLM e suas Tools. Uma "step" geralmente termina quando a LLM invoca uma Tool especial como `finalAnswer` (ou similar) ou quando a Task decide que completou uma unidade lógica de trabalho.
 *   A Tool `finalAnswer` (ou um mecanismo similar) normalmente indica se a Task considera a Job como um todo concluída (`taskFinished: true`) ou se apenas uma etapa foi finalizada (`taskFinished: false`).
 *   As **Tools** são um conceito central e são detalhadas no documento [Estrutura do Agente (Agent Framework)](./02-agent-framework.md#tools). Elas podem ser genéricas (disponíveis para muitos Agentes, como `FilesystemTool`) ou específicas de uma Task/Job.
 
-## 6. Conclusão
+## 7. Build e Implantação
 
-A arquitetura de Jobs e Workers do Project Wiz é projetada para ser flexível e robusta, permitindo a automação de tarefas complexas através de Agentes de IA. A separação clara de responsabilidades entre a Fila (gerenciamento de estado), o Worker (orquestração da execução) e o Agente/Task (lógica de execução) visa criar um sistema modular e extensível. Futuras melhorias podem incluir diferentes implementações de Fila, estratégias de priorização mais avançadas e maior observabilidade do sistema.
+*   **Build do Frontend/Renderer:** Vite é utilizado para um build otimizado do código do frontend.
+*   **Empacotamento da Aplicação:** Electron Forge é a ferramenta utilizada para empacotar a aplicação Electron para distribuição.
+
+## 8. Conclusão
+
+A arquitetura do Project Wiz é projetada para ser flexível e robusta, permitindo a automação de tarefas complexas através de Agentes de IA e uma clara separação de responsabilidades entre os processos e componentes. A utilização de um sistema de Jobs e Fila, juntamente com a interação com LLMs e Tools, forma o núcleo da capacidade de automação. Futuras melhorias podem incluir diferentes implementações de Fila, estratégias de priorização mais avançadas e maior observabilidade do sistema.

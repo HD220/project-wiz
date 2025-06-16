@@ -40,6 +40,14 @@ Para alcançar esta visão, o Project Wiz tem os seguintes objetivos estratégic
     *   Incentivar a contribuição da comunidade no desenvolvimento de novas Personas, Tools e funcionalidades para a plataforma.
     *   Criar um espaço para compartilhamento de conhecimento e melhores práticas no uso de IA para desenvolvimento de software.
 
+## Stakeholders Principais
+
+Os principais interessados no sucesso e evolução do Project Wiz incluem:
+
+*   **Mantenedores do Projeto:** Como Nicolas Fraga Faust (autor/maintainer inicial).
+*   **Equipe de Desenvolvimento:** Contribuidores ativos que constroem e melhoram a plataforma.
+*   **Usuários Finais:** Primariamente desenvolvedores e equipes de desenvolvimento que utilizarão o Project Wiz para automatizar suas tarefas e aumentar a produtividade.
+
 ## Como Estes Objetivos se Conectam ao Usuário?
 
 *   **Maior Produtividade:** Automatize mais, codifique menos (nas tarefas repetitivas).

@@ -83,12 +83,32 @@ Se você deseja contribuir com código, siga estes passos:
 ## Padrões de Código e Estilo
 
 *   **Linguagem Principal:** TypeScript.
-*   **Formatação:** O projeto provavelmente usa Prettier ou uma configuração ESLint para formatação automática. Configure seu editor para usar as configurações do projeto ou execute o script de formatação.
-*   **Linting:** Siga as regras definidas no arquivo de configuração do ESLint.
-*   **Nomenclatura:** Use nomes claros e descritivos para variáveis, funções e classes.
+    *   Utilizamos a configuração `strict` ativada (`noImplicitAny`, `strictNullChecks`) para maior segurança de tipo.
+    *   Path aliases como `@/components`, `@/lib` são utilizados para facilitar a importação.
+    *   Priorize a tipagem forte; evite `any` sempre que possível e justifique seu uso se estritamente necessário.
+*   **Formatação (Prettier):**
+    *   O projeto utiliza Prettier para garantir consistência na formatação do código.
+    *   Principais configurações: indentação de 2 espaços, aspas simples, ponto e vírgula opcional (verifique as configurações do Prettier no projeto para detalhes completos).
+    *   Recomenda-se configurar seu editor para formatar ao salvar ou executar `npm run format` (se disponível).
+*   **Linting (ESLint):**
+    *   ESLint é usado para análise estática de código. A configuração base estende-se de `eslint:recommended`, `@typescript-eslint/recommended`, e `import/recommended`.
+    *   Regras customizadas podem incluir permissões para non-null assertions, funções vazias e `explicit any` (com moderação e justificativa).
+    *   O plugin `eslint-plugin-import` ajuda a manter a organização das importações.
+    *   Execute `npm run lint` para verificar e `npm run lint:fix` para tentar correções automáticas.
+*   **Convenções de Nomenclatura:**
+    *   Use nomes claros, descritivos e em inglês para variáveis, funções, classes, arquivos e pastas.
+    *   Pastas devem ser nomeadas em inglês.
+*   **Controle de Versão (Git):**
+    *   Faça commits pequenos e atômicos.
+    *   Escreva mensagens de commit claras, descritivas e em inglês. Siga o padrão de [Commits Semânticos](https://www.conventionalcommits.org/) se possível (ex: `feat: Adiciona nova Tool X`, `fix: Corrige problema de login ao usar Y`).
 *   **Comentários:** Comente código complexo ou não óbvio, mas evite comentários desnecessários para código autoexplicativo.
 
 **Para um conjunto mais abrangente de diretrizes de desenvolvimento, incluindo boas práticas gerais, de arquitetura e específicas de tecnologias utilizadas no projeto, consulte o documento: [Boas Práticas e Diretrizes de Desenvolvimento](../technical-documentation/08-best-practices-and-guidelines.md).**
+
+## Documentação e Decisões de Arquitetura
+
+*   **Manutenção da Documentação:** Contribuições para a documentação (localizada na pasta `docs/`) são muito bem-vindas, seja para adicionar novos conteúdos, corrigir erros ou melhorar a clareza.
+*   **ADRs (Architecture Decision Records):** Decisões importantes de arquitetura são documentadas usando ADRs, que também fazem parte da documentação do projeto. Consulte-os para entender o racional por trás de escolhas arquiteturais chave.
 
 ## Testes
 

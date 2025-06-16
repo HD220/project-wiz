@@ -12,6 +12,8 @@ Bem-vindo à documentação oficial do Project Wiz. Utilize os links abaixo para
   - [Configurando o Ambiente de Desenvolvimento](./technical-documentation/06-development-setup.md)
   - [Estratégia de Testes](./technical-documentation/07-testing-strategy.md)
   - [Boas Práticas e Diretrizes de Desenvolvimento](./technical-documentation/08-best-practices-and-guidelines.md)
+  - [Diretrizes de Segurança](./technical-documentation/09-security-guidelines.md)
+  - [Tratamento de Erros e Validação de Dados](./technical-documentation/10-error-handling-and-validation.md)
 - [Visão Geral do Projeto](./project-overview/vision-and-goals.md)
 - [Guia de Contribuição](./contribution-guide.md)
 - [Código de Conduta](./code-of-conduct.md)

@@ -1,6 +1,6 @@
 # Introdução ao Project Wiz
 
-Bem-vindo ao Project Wiz!
+Bem-vindo ao Project Wiz! Seu propósito é ser um sistema ElectronJS para automatizar tarefas de desenvolvimento usando modelos LLM (Large Language Models) localmente, permitindo que a LLM trabalhe de forma autônoma em repositórios GitHub.
 
 Este guia é destinado a ajudar você, usuário, a compreender o que é o Project Wiz, para quem ele se destina e como você pode se beneficiar de suas funcionalidades.
 
@@ -24,8 +24,15 @@ O Project Wiz é ideal para:
 Com o Project Wiz, você poderá:
 
 *   [Gerenciar seus projetos de software](./04-managing-projects.md) em um ambiente centralizado.
-*   Criar e configurar [Personas (Agentes de IA)](./05-personas-agents.md) especializadas para diferentes papéis (desenvolvedor, QA, etc.).
-*   Definir e atribuir [Jobs (tarefas)](./06-jobs-automation.md) para suas Personas executarem.
+*   Criar e configurar [Personas (Agentes de IA)](./05-personas-agents.md) especializadas para diferentes papéis.
+*   Definir e atribuir [Jobs (tarefas)](./06-jobs-automation.md) para suas Personas executarem, abrangendo atividades como:
+    *   Geração de código
+    *   Análise de código
+    *   Criação de pull requests (planejado)
+    *   Geração de documentação
+    *   Análise de issues (planejado)
+*   Configurar parâmetros dos modelos de linguagem utilizados pelas Personas.
+*   Definir fluxos de trabalho de automação.
 *   Acompanhar o progresso das tarefas e a performance dos seus agentes.
 *   Interagir com as Personas através de uma interface de chat.
 *   E muito mais à medida que o projeto evolui!

@@ -18,6 +18,10 @@ Eles ilustram como os Agentes podem ser direcionados para analisar, decompor e p
     *   **Propósito:** Um template de prompt que instrui um LLM a processar uma análise de lacunas (provavelmente o resultado do prompt `analysis.md`). As instruções incluem categorizar os pontos de esclarecimento, formatá-los para discussão com stakeholders (virtuais ou reais) e propor os próximos passos no processo de refinamento da tarefa.
     *   **Uso Potencial:** Segue a análise, ajudando um Agente a preparar o feedback para o usuário ou para outro Agente, facilitando o ciclo de refinamento de requisitos.
 
+*   **[./agent-operational-workflow.md](./agent-operational-workflow.md):**
+    *   **Propósito:** Descreve um fluxo de trabalho operacional padrão (Coleta de Contexto, Planejamento, Decomposição/Delegação, Monitoramento, Síntese) que pode ser usado como base para o design de prompts de Agentes de alto nível ou para definir o comportamento de Agentes que gerenciam tarefas complexas. Originado de `.roo/rules/rules.md`.
+    *   **Uso Potencial:** Guia para desenvolvedores de Agentes sobre como estruturar a lógica de processamento de tarefas de forma robusta e metódica.
+
 ## Como Utilizar
 
 Estes exemplos servem como:
