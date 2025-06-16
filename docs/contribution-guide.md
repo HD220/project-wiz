@@ -88,6 +88,8 @@ Se você deseja contribuir com código, siga estes passos:
 *   **Nomenclatura:** Use nomes claros e descritivos para variáveis, funções e classes.
 *   **Comentários:** Comente código complexo ou não óbvio, mas evite comentários desnecessários para código autoexplicativo.
 
+**Para um conjunto mais abrangente de diretrizes de desenvolvimento, incluindo boas práticas gerais, de arquitetura e específicas de tecnologias utilizadas no projeto, consulte o documento: [Boas Práticas e Diretrizes de Desenvolvimento](../technical-documentation/08-best-practices-and-guidelines.md).**
+
 ## Testes
 
 *   Novas funcionalidades devem ser acompanhadas de testes unitários e/ou de integração.
