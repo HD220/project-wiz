@@ -28,7 +28,7 @@ O Agente é um componente central na [Arquitetura do Sistema de Processamento As
 
 ## 3. Ferramentas do Agente (Tools)
 
-As Tools são a interface primária pela qual os Agentes interagem com o sistema Project Wiz, o ambiente de desenvolvimento, e fontes de informação externas. Elas capacitam os Agentes a realizar ações concretas para completar seus Jobs.
+As Tools são a interface primária pela qual os Agentes interagem com o sistema Project Wiz, o ambiente de desenvolvimento, e fontes de informação externas. Elas capacitam os Agentes a realizar ações concretas para completar seus Jobs. Para detalhes sobre como desenvolver novas tools, consulte o [Guia de Desenvolvimento de Tools](./03-developing-tools.md).
 
 A seguir, uma descrição das Tools disponíveis para os Agentes:
 

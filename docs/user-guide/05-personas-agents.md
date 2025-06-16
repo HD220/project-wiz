@@ -8,15 +8,15 @@ No Project Wiz, uma "Persona" é um agente de IA que você define com caracterí
 
 Elas são projetadas para:
 
-*   Executar **Jobs** (tarefas) de forma autônoma ou semi-autônoma.
-*   Utilizar um conjunto de **Tools** (ferramentas) para interagir com o sistema, arquivos, código e LLMs.
+*   Executar **[Jobs](./06-jobs-automation.md)** (tarefas) de forma autônoma ou semi-autônoma. (Veja também a [arquitetura de Jobs](../technical-documentation/01-architecture.md))
+*   Utilizar um conjunto de **[Tools](../technical-documentation/02-agent-framework.md#ferramentas-do-agente-tools)** (ferramentas) para interagir com o sistema, arquivos, código e LLMs. (Veja também [desenvolvendo Tools](../technical-documentation/03-developing-tools.md))
 *   Colaborar no ciclo de vida do desenvolvimento de software.
 
 Você pode encontrar a área de gerenciamento de Personas na seção "Agentes (Personas)" na "Home (Visão Geral Global)" da aplicação.
 
 ## 2. Criando ou Gerando uma Nova Persona
 
-Conforme o roadmap do projeto (veja [TODO_base_roadmap.md](../project-overview/TODO_base_roadmap.md)), estão planejadas as seguintes funcionalidades:
+Conforme o roadmap do projeto (veja [Roadmap de Desenvolvimento](../project-overview/roadmap.md)), estão planejadas as seguintes funcionalidades:
 
 *   **Cadastro de Personas:** Permitirá que você crie uma Persona manualmente, definindo todos os seus atributos.
 *   **Geração de Personas:** Possivelmente, o sistema oferecerá templates ou um processo assistido para gerar Personas com base em papéis comuns (ex: "Desenvolvedor Python Júnior", "Analista de Testes Cypress", "Revisor de Código Técnico").
@@ -41,14 +41,14 @@ Após a criação, você poderá configurar mais detalhes de uma Persona:
 
 ## 4. Interagindo com Personas
 
-A principal forma de interação com as Personas é através da atribuição de **Jobs**.
+A principal forma de interação com as Personas é através da atribuição de **[Jobs](./06-jobs-automation.md)**.
 
-*   **Atribuindo Jobs:** Você definirá tarefas (Jobs) e as designará para Personas específicas que sejam adequadas para o trabalho. Veja o guia [Automatizando Tarefas com Jobs](./06-jobs-automation.md) (em breve) para mais detalhes.
+*   **Atribuindo Jobs:** Você definirá tarefas (Jobs) e as designará para Personas específicas que sejam adequadas para o trabalho. Veja o guia [Automatizando Tarefas com Jobs](./06-jobs-automation.md) para mais detalhes.
 *   **Chat:** A interface do Project Wiz, similar ao Discord, permitirá que você converse diretamente com as Personas:
     *   Para dar instruções adicionais.
     *   Para pedir esclarecimentos sobre o progresso de um Job.
     *   Para receber notificações ou resultados.
-    *   As Personas também podem usar a `MessageTool` para se comunicar com você ou outras Personas.
+    *   As Personas também podem usar a `MessageTool` (descrita em [Ferramentas do Agente](../technical-documentation/02-agent-framework.md#37-messagetool)) para se comunicar com você ou outras Personas.
 
 ## 5. Gerenciando o Desempenho das Personas
 
@@ -57,7 +57,7 @@ A principal forma de interação com as Personas é através da atribuição de 
 
 ## Próximos Passos
 
-*   Agora que você entende como configurar Personas, aprenda a colocar elas para trabalhar em: [Automatizando Tarefas com Jobs](./06-jobs-automation.md) (em breve).
+*   Agora que você entende como configurar Personas, aprenda a colocar elas para trabalhar em: [Automatizando Tarefas com Jobs](./06-jobs-automation.md).
 *   Consulte a [Visão Geral da Interface](./03-interface-overview.md) para localizar as seções de gerenciamento de Agentes.
 
 Este guia será atualizado à medida que as funcionalidades de gerenciamento e interação com Personas evoluem.

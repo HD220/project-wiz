@@ -55,6 +55,6 @@ Esta seção é dedicada às configurações globais que afetam toda a aplicaç�
 
 Esta visão geral fornece um mapa básico da interface do Project Wiz. Cada seção mencionada possui funcionalidades ricas que serão exploradas em detalhes em outros guias.
 
-Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-quick-start.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](./04-managing-projects.md) (em breve).
+Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-quick-start.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](./04-managing-projects.md).
 
 Este documento será expandido e atualizado conforme a interface do usuário evolui.

@@ -19,12 +19,12 @@ Aspiramos criar uma plataforma onde:
 Para alcançar esta visão, o Project Wiz tem os seguintes objetivos estratégicos e específicos:
 
 1.  **Desenvolver um Framework de Agentes Robusto e Extensível:**
-    *   Criar Agentes (Personas) com capacidades avançadas de compreensão, planejamento, raciocínio e aprendizado.
-    *   Fornecer um sistema de **Tools** rico e expansível, permitindo que os Agentes interajam efetivamente com diversos sistemas e dados.
+    *   Criar Agentes (Personas) com capacidades avançadas de compreensão, planejamento, raciocínio e aprendizado (veja [Estrutura e Funcionamento dos Agentes](../technical-documentation/02-agent-framework.md)).
+    *   Fornecer um sistema de **Tools** rico e expansível (veja [Desenvolvendo Novas Tools](../technical-documentation/03-developing-tools.md)), permitindo que os Agentes interajam efetivamente com diversos sistemas e dados.
     *   Permitir a fácil criação e personalização de novas Personas e Tools pela comunidade e usuários.
 
 2.  **Construir uma Plataforma de Orquestração Inteligente:**
-    *   Implementar um sistema eficiente de **Jobs e Filas (Queues)** para gerenciar e priorizar o trabalho dos Agentes.
+    *   Implementar um sistema eficiente de **Jobs e Filas (Queues)** para gerenciar e priorizar o trabalho dos Agentes (veja [Arquitetura do Sistema de Processamento Assíncrono](../technical-documentation/01-architecture.md)).
     *   Desenvolver mecanismos para que os Agentes possam colaborar entre si e com usuários humanos de forma fluida.
     *   Integrar capacidades de **monitoramento e analytics** para acompanhar o desempenho dos Agentes e o progresso dos projetos.
 

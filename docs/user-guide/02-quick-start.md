@@ -20,6 +20,7 @@ Recomendamos que você se familiarize com as principais áreas da interface. O d
 
 *   Instruções sobre como criar ou importar seu primeiro projeto.
 *   Como configurar o básico para que as Personas possam começar a trabalhar nele.
+*   Para mais detalhes, consulte o guia [Gerenciando Projetos](./04-managing-projects.md).
 
 *(Esta seção será detalhada conforme as funcionalidades de gerenciamento de projeto e onboarding de usuários amadurecem.)*
 
@@ -27,15 +28,17 @@ Recomendamos que você se familiarize com as principais áreas da interface. O d
 
 *   Como definir uma nova Persona (Agente de IA).
 *   Configurando seu papel, objetivos e backstory.
+*   Para mais detalhes, consulte o guia [Configurando e Utilizando Personas](./05-personas-agents.md).
 
 *(Esta seção será detalhada conforme as funcionalidades de gerenciamento de Personas são implementadas.)*
 
 ## 6. Atribuindo seu Primeiro Job (Em Breve)
 
 *   Como criar uma tarefa (Job) e atribuí-la a uma Persona.
+*   Para mais detalhes, consulte o guia [Automatizando Tarefas com Jobs](./06-jobs-automation.md).
 
 *(Esta seção será detalhada conforme o sistema de Jobs é completamente funcional a partir da UI.)*
 
 ## Próximos Passos
 
-Explore as outras seções do [Guia do Usuário](./) para aprender mais sobre cada funcionalidade em detalhe.
+Explore as outras seções do Guia do Usuário para aprender mais sobre cada funcionalidade em detalhe, começando pela [Introdução ao Project Wiz](./01-introduction.md) se ainda não o fez.

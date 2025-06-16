@@ -2,6 +2,8 @@
 
 Agradecemos seu interesse em contribuir para o Project Wiz! Toda contribuição é bem-vinda, seja ela código, documentação, sugestões de funcionalidades ou relato de bugs.
 
+Antes de começar, por favor, leia nosso [Código de Conduta](./code-of-conduct.md). Esperamos que todos os membros da comunidade sigam estas diretrizes para garantir um ambiente colaborativo e respeitoso.
+
 Este guia fornece diretrizes para ajudar você a começar.
 
 ## Como Contribuir
