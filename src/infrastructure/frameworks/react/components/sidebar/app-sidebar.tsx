@@ -20,54 +20,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
-
-export type Project = {
-  name: string;
-  tooltip?: string;
-  icon?: ReactNode;
-};
-
-const projects: Project[] = [
-  {
-    name: "Projeto 1",
-  },
-  {
-    name: "Projeto 2",
-  },
-  {
-    name: "Projeto 3",
-  },
-  {
-    name: "Projeto 4",
-  },
-  {
-    name: "Projeto 5",
-  },
-  {
-    name: "Projeto 6",
-  },
-  {
-    name: "Projeto 7",
-  },
-  {
-    name: "Projeto 8",
-  },
-  {
-    name: "Projeto 9",
-  },
-  {
-    name: "Projeto 10",
-  },
-  {
-    name: "Projeto 11",
-  },
-  {
-    name: "Projeto 12",
-  },
-  {
-    name: "Projeto 13",
-  },
-];
+import { placeholderAppSidebarProjects, AppSidebarProjectPlaceholder } from "@/lib/placeholders";
 
 export function MenuItem({
   tooltip,
@@ -138,7 +91,7 @@ export function AppSidebar() {
       <div className="flex-1 overflow-hidden gap-2 mx-auto">
         <ScrollArea className="h-full scrollbar-hide">
           <div className="flex flex-col gap-2 pb-2">
-            {projects.map((project, idx) => (
+            {placeholderAppSidebarProjects.map((project: AppSidebarProjectPlaceholder, idx: number) => (
               <MenuItem
                 key={idx}
                 tooltip={project.tooltip || project.name}

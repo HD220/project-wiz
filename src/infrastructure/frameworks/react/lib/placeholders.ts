@@ -369,3 +369,120 @@ export const placeholderDirectMessages: PlaceholderChatMessage[] = [
     timestamp: "Hoje às 10:15",
   }
 ];
+
+// AppSidebar Project Placeholders
+export type AppSidebarProjectPlaceholder = {
+  name: string;
+  tooltip?: string;
+  icon?: React.ReactNode; // Note: React.ReactNode might be problematic for direct placeholder data if it involves JSX.
+                           // For simplicity with data, stick to string data or simple structures if icons are just names/keys.
+                           // The current usage in AppSidebar just uses name for icon text, so string is fine.
+};
+
+export const placeholderAppSidebarProjects: AppSidebarProjectPlaceholder[] = [
+  { name: "Projeto 1" },
+  { name: "Projeto 2" },
+  { name: "Projeto 3" },
+  { name: "Projeto 4" },
+  { name: "Projeto 5" },
+  { name: "Projeto 6" },
+  { name: "Projeto 7" },
+  { name: "Projeto 8" },
+  { name: "Projeto 9" },
+  { name: "Projeto 10" },
+  { name: "Projeto 11" },
+  { name: "Projeto 12" },
+  { name: "Projeto 13" },
+];
+
+// ProjectSidebar Placeholders
+// import { Home, Inbox, Calendar, Search, Settings, LucideIcon } from "lucide-react"; // This line is commented out as imports are not allowed in placeholder data files. The mapping will be in the component.
+
+export type ProjectNavItemPlaceholder = {
+  title: string;
+  url: string;
+  iconName: "Home" | "Inbox" | "Calendar" | "Search" | "Settings"; // Store names
+};
+
+export const placeholderProjectNavItems: ProjectNavItemPlaceholder[] = [
+  { title: "Dashboard", url: "/user", iconName: "Home" }, // Assuming /user is a generic dashboard link for now
+  { title: "Tarefas", url: "#", iconName: "Inbox" },
+  { title: "Forum", url: "/user/user-guides", iconName: "Calendar" }, // Assuming a generic forum link
+  { title: "Documentação", url: "#", iconName: "Search" },
+  { title: "Analytics", url: "#", iconName: "Settings" },
+  { title: "Configurações", url: "#", iconName: "Settings" },
+];
+
+export type ProjectChannelPlaceholder = {
+  id: string;
+  name: string;
+  category: string;
+};
+
+export const placeholderProjectChannels: ProjectChannelPlaceholder[] = [
+  { id: "ch-1", name: "canal 1", category: "categoria 1" },
+  { id: "ch-2", name: "canal 2", category: "categoria 1" },
+  { id: "ch-3", name: "canal 3", category: "categoria 1" },
+  { id: "ch-4", name: "canal 4", category: "categoria 2" },
+  { id: "ch-5", name: "canal 5", category: "categoria 2" },
+  { id: "ch-6", name: "canal 6", category: "categoria 2" },
+  { id: "ch-7", name: "canal 7", category: "categoria 3" },
+];
+
+// Helper to map icon names to actual components (can be defined in ProjectSidebar or here)
+// For now, will implement mapping within ProjectSidebar to keep placeholders pure.
+
+// UserSidebar Placeholders
+// Assuming icon names will be mapped like in ProjectSidebar
+export type UserSidebarNavItemPlaceholder = {
+  title: string;
+  url: string;
+  iconName: "Home" | "Inbox" | "Calendar" | "Search" | "Settings"; // Add more if needed
+};
+
+export const placeholderUserSidebarNavItems: UserSidebarNavItemPlaceholder[] = [
+  { title: "Dashboard", url: "/user", iconName: "Home" },
+  { title: "Integrações", url: "#", iconName: "Inbox" },
+  { title: "Guias de Uso", url: "/user/user-guides", iconName: "Calendar" },
+  { title: "MCPs", url: "#", iconName: "Search" },
+  { title: "Personas/Agents", url: "#", iconName: "Settings" },
+  { title: "Configurações", url: "#", iconName: "Settings" },
+];
+
+export type UserPlaceholder = {
+  id: string;
+  name: string;
+  status: "invisible" | "busy" | "absent" | "available";
+  avatar: string; // URL to avatar image
+};
+
+export const placeholderUserListForDM: UserPlaceholder[] = [
+  { id: "user-nicolas", name: "Nicolas", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nicolas", status: "available" },
+  { id: "user-julio", name: "Júlio Scremin", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Julio", status: "available" },
+  { id: "user-renos1", name: "Renos1", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Renos1", status: "available" },
+  // Added from previous placeholderProjectDetails for consistency if needed
+  { id: "user-ana", name: "Ana Silva", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana", status: "available" },
+  { id: "user-carlos", name: "Carlos Oliveira", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos", status: "available" },
+];
+
+export type IndividualDMPlaceholder = {
+  type: "individual";
+  id: string; // DM thread ID
+  userId: string; // ID of the other user
+};
+
+export type GroupDMPlaceholder = {
+  type: "group";
+  id: string; // DM thread ID
+  description: string; // Group name
+  participants: { userId: string }[];
+};
+
+export type DirectMessageThreadPlaceholder = IndividualDMPlaceholder | GroupDMPlaceholder;
+
+export const placeholderDirectMessageThreads: DirectMessageThreadPlaceholder[] = [
+  { type: "individual", id: "dm-julio", userId: "user-julio" },
+  { type: "individual", id: "dm-renos1", userId: "user-renos1" },
+  { type: "group", id: "dm-group-apoio", description: "Apoio Mateus", participants: [{ userId: "user-nicolas" }, { userId: "user-julio" }, { userId: "user-renos1" }] },
+  { type: "individual", id: "dm-ana", userId: "user-ana" },
+];
