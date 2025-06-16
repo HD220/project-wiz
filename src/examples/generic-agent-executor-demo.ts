@@ -6,7 +6,7 @@ import { Job } from '../core/domain/entities/jobs/job.entity';
 import { Queue } from '../core/domain/entities/queue/queue.entity';
 import { AgentPersonaTemplate } from '../core/domain/entities/agent/persona-template.types';
 import { WorkerService } from '../core/domain/services/worker.service';
-import { GenericAgentExecutor } from '../core/agents/generic-agent-executor'; // The star of the show
+import { GenericAgentExecutor } from '../infrastructure/agents/generic-agent-executor'; // The star of the show
 
 // --- Repository Imports ---
 import { DrizzleJobRepository } from '../infrastructure/repositories/drizzle/job.repository';

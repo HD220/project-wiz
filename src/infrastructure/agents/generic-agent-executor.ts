@@ -1,38 +1,21 @@
-// src/core/agents/generic-agent-executor.ts
-import { AgentPersonaTemplate } from '../domain/entities/agent/persona-template.types';
-import { Job } from '../domain/entities/jobs/job.entity';
-import { toolRegistry, ToolRegistry } from '../../infrastructure/tools/tool-registry'; // Assuming singleton instance
-import { IAgentTool } from '../tools/tool.interface';
+// src/infrastructure/agents/generic-agent-executor.ts
+import { AgentPersonaTemplate } from '../../core/domain/entities/agent/persona-template.types';
+import { Job } from '../../core/domain/entities/jobs/job.entity';
+import { toolRegistry, ToolRegistry } from './tool-registry'; // Assuming singleton instance and updated path
+import { IAgentTool } from '../../core/tools/tool.interface';
+import {
+  AgentJobState,
+  PlanStep,
+  AgentExecutorResultStatus,
+  AgentExecutorResult
+} from '../../core/domain/jobs/job-processing.types';
+import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
 
 import { generateObject, tool as aiToolHelper, Tool } from 'ai'; // Renamed 'tool' to 'aiToolHelper' to avoid conflict
 import { z } from 'zod';
 import { deepseek } from '@ai-sdk/deepseek'; // Or your chosen LLM provider
 
-// Define structure for agent state stored within Job.data
-export interface AgentJobState {
-  currentPlan: PlanStep[];
-  completedSteps: number;
-  // internalScratchpad?: Record<string, any>; // For more complex state
-  executionHistory?: { step: number; tool: string; params: any; result: any; error?: string }[];
-}
-
-// Define a structure for plan steps (consistent with OrchestratorAgent)
-export interface PlanStep extends Record<string, any> {
-  tool: string; // Name of the tool from ToolRegistry, e.g., 'fileSystem.readFile'
-  params: any;  // Parameters for the tool method
-  description: string; // LLM-generated description of what this step does
-}
-
-// Define the result structure for the executor's process method
-export type AgentExecutorResultStatus = 'COMPLETED' | 'FAILED' | 'CONTINUE_PROCESSING';
-export interface AgentExecutorResult {
-  status: AgentExecutorResultStatus;
-  message: string;
-  output?: any; // Final output or accumulated outputs
-  // jobDataToUpdate: Partial<Pick<JobProps, 'data'>>; // The calling worker will handle job saving
-}
-
-export class GenericAgentExecutor {
+export class GenericAgentExecutor implements IAgentExecutor {
   private personaTemplate: AgentPersonaTemplate;
   private toolRegistryInstance: ToolRegistry;
   private availableAiTools: Record<string, Tool<any, any>>; // For ai-sdk { [toolName]: toolDefinition }

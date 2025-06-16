@@ -6,17 +6,17 @@ import { IJobRepository } from '../../ports/repositories/job.interface';
 import { Job } from '../entities/jobs/job.entity';
 import { Queue } from '../entities/queue/queue.entity';
 import { JobStatusType } from '../entities/jobs/job-status';
-import { GenericAgentExecutor, AgentExecutorResult } from '../../agents/generic-agent-executor'; // AgentExecutorResultStatus not used directly here
-import { AgentPersonaTemplate } from '../entities/agent/persona-template.types';
-import { toolRegistry, ToolRegistry } from '../../../infrastructure/tools/tool-registry';
+import { IAgentExecutor, AgentExecutorResult } from '../../ports/agent/agent-executor.interface';
+// import { AgentPersonaTemplate } from '../entities/agent/persona-template.types'; // No longer directly stored
+// import { toolRegistry, ToolRegistry } from '../../../infrastructure/tools/tool-registry'; // No longer used for construction
 
 
 export class WorkerService { // Removed <PInput, POutput>
   private queueRepository: IQueueRepository;
   private jobRepository: IJobRepository;
   // private processor: IProcessor<PInput, POutput>; // Remove this
-  private agentPersonaTemplate: AgentPersonaTemplate;
-  private agentExecutor: GenericAgentExecutor;
+  private agentExecutor: IAgentExecutor; // Change to interface
+  private handlesRole: string; // Add this
   private isRunning: boolean = false;
   private activeJobs: number = 0;
   private queueConfig: Queue | null = null;
@@ -26,19 +26,18 @@ export class WorkerService { // Removed <PInput, POutput>
   constructor(
     queueRepository: IQueueRepository,
     jobRepository: IJobRepository,
-    // processor: IProcessor<PInput, POutput>, // Remove this parameter
-    agentPersonaTemplate: AgentPersonaTemplate, // Add this
-    toolReg: ToolRegistry = toolRegistry, // Add this, with default
+    agentExecutor: IAgentExecutor, // Inject the interface
+    handlesRole: string,          // Specify which role this worker instance handles
     options?: { pollFrequencyMs?: number }
   ) {
     this.queueRepository = queueRepository;
     this.jobRepository = jobRepository;
-    this.agentPersonaTemplate = agentPersonaTemplate; // Store this
-    this.agentExecutor = new GenericAgentExecutor(this.agentPersonaTemplate, toolReg); // Instantiate executor
+    this.agentExecutor = agentExecutor; // Store the injected executor
+    this.handlesRole = handlesRole;     // Store the role it handles
     if (options?.pollFrequencyMs) {
       this.pollFrequencyMs = options.pollFrequencyMs;
     }
-    console.log(`WorkerService initialized for Agent Role: ${this.agentPersonaTemplate.role}`);
+    console.log(`WorkerService initialized to handle role: ${this.handlesRole}`);
   }
 
   public async start(queueName: string): Promise<void> {
@@ -98,7 +97,17 @@ export class WorkerService { // Removed <PInput, POutput>
         return;
       }
 
-      for (const job of pendingJobs) {
+      // Filter jobs for this worker's handled role
+      const jobsForThisWorker = pendingJobs.filter(job => job.targetAgentRole === this.handlesRole);
+
+      if (jobsForThisWorker.length === 0) {
+        // console.log(`WorkerService (${this.handlesRole}): No jobs found for role ${this.handlesRole} in this poll.`);
+        return;
+      }
+      // console.log(`WorkerService (${this.handlesRole}): Found ${jobsForThisWorker.length} jobs for role ${this.handlesRole}.`);
+
+
+      for (const job of jobsForThisWorker) {
         if (this.activeJobs < this.queueConfig.concurrency) {
           this.activeJobs++;
           // Non-blocking call to processJob
@@ -116,7 +125,7 @@ export class WorkerService { // Removed <PInput, POutput>
 
   private async processJob(job: Job<any, any>): Promise<void> { // Input/Output types might be broader now
     try {
-      console.log(`WorkerService: Processing job ${job.id} for agent role ${this.agentPersonaTemplate.role}. Attempt: ${job.attempts + 1}`);
+      console.log(`WorkerService: Processing job ${job.id} for handled role '${this.handlesRole}'. Attempt: ${job.attempts + 1}`);
 
       if (!job.status.is(JobStatusType.WAITING) && !job.status.is(JobStatusType.DELAYED)) {
           console.warn(`Job ${job.id} is not in a processable state. Current status: ${job.status.value}. Skipping.`);
