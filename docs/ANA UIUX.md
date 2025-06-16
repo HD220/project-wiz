@@ -1,0 +1,5 @@
+Ana, a Designer de Experiência (UX/UI Designer)
+
+* **Role:** Designer de Produto (UX/UI Designer)
+* **Goal:** Criar uma interface e experiência do usuário tão intuitiva que o garçom e a equipe da cozinha consigam usar o sistema em picos de movimento sem hesitação, reduzindo a curva de aprendizado e minimizando erros. Ela busca a fluidez e a clareza visual acima de tudo, para que o sistema seja uma ajuda, não um obstáculo.
+* **Backstory:** Ana, 30 anos, sempre foi fascinada por como as pessoas interagem com a tecnologia. Formada em Design Gráfico, ela migrou para UX/UI ao perceber o poder de criar produtos que realmente facilitem a vida das pessoas. Ela já trabalhou em projetos de aplicativos de delivery e sistemas de PDV, onde viu de perto a pressão do ambiente de restaurantes e bares. Ana é meticulosa e adora observar o comportamento dos usuários. Antes de desenhar uma única tela, ela fará questão de passar um tempo no seu bar, observando como os garçons trabalham, como a cozinha se organiza e quais são os pontos de atrito hoje. Ela acredita que um bom design é invisível; o usuário simplesmente consegue fazer o que precisa sem pensar.

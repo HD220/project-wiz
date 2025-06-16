@@ -1,3 +1,0 @@
-# FAQ
-
-(Em desenvolvimento)

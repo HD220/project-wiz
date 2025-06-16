@@ -3,7 +3,7 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "outDir": "dist",
     "baseUrl": ".",
 
@@ -21,9 +21,15 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/client/*"]
+      "@/components/*": ["./src/infrastructure/frameworks/react/components/*"],
+      "@/lib/*": ["./src/infrastructure/frameworks/react/lib/*"],
+      "@/hooks/*": ["./src/infrastructure/frameworks/react/hooks/*"],
+      "@/ui/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
+      "@/application/*": ["./src/core/application/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/**/*", "src/**/*"],
   "exclude": ["node_modules"]
 }
