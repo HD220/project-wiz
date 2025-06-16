@@ -1,31 +1,42 @@
+import { randomUUID } from "crypto";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+export const jobStatus = [
+  "waiting",
+  "active",
+  "completed",
+  "failed",
+  "delayed",
+] as const;
+
 export const jobs = sqliteTable("jobs", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
-  status: text("status", {
-    enum: [
-      "PENDING",
-      "WAITING",
-      "DELAYED",
-      "EXECUTING",
-      "FINISHED",
-      "FAILED",
-      "CANCELLED",
-    ],
-  }).notNull(),
-  attempts: integer("attempts").notNull(),
-  max_attempts: integer("max_attempts").notNull(),
-  retry_delay: integer("retry_delay").notNull(),
-  payload: text("payload"),
-  data: text("data"),
-  result: text("result"),
+  data: text("data", { mode: "json" })
+    .$type<Record<string, unknown>>()
+    .notNull(),
+  opts: text("opts", { mode: "json" })
+    .$type<Record<string, unknown>>()
+    .notNull(),
+  status: text("status", { enum: jobStatus }).notNull(),
   priority: integer("priority").notNull(),
-  depends_on: text("depends_on"),
-  created_at: text("created_at").notNull(),
-  updated_at: text("updated_at"),
-  activity_type: text("activity_type"),
-  activity_context: text("activity_context", { mode: "json" }),
-  parent_id: text("parent_id"),
-  related_activity_ids: text("related_activity_ids", { mode: "json" }),
+  delay: integer("delay").notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  startedAt: integer("started_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  finishedAt: integer("finished_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  failedReason: text("failed_reason"),
 });
+
+export type JobsInsert = typeof jobs.$inferInsert;
+export type JobsUpdate = Required<Pick<typeof jobs.$inferInsert, "id">> &
+  Partial<Omit<typeof jobs.$inferInsert, "id">>;
+export type JobsSelect = typeof jobs.$inferSelect;
+export type JobsDelete = Required<Pick<typeof jobs.$inferInsert, "id">>;

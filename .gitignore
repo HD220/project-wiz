@@ -101,6 +101,13 @@ src/locales/**/*.ts
 
 # Electron-Forge
 out
+
+*.db
+
+
+# Roo Flow
+.git
+
 _old
 
 .roo
@@ -109,4 +116,3 @@ _old
 docs/tasks_old
 
 docs/prompts
-

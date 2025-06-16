@@ -1,0 +1,105 @@
+---
+description: Enforce Electron.js best practices for process separation, IPC, and security.
+globs: *
+alwaysApply: true
+---
+
+# **Electron.js Best Practices**
+
+This rule set guides the AI in developing robust, secure, and performant Electron applications by enforcing best practices for process separation, inter-process communication (IPC), and security.
+
+## **Context**
+
+This rule applies to files typically found in Electron.js projects, including main process files, preload scripts, and renderer process files. It should be automatically attached when working on these files.
+
+## **Requirements**
+
+* **Separate Main and Renderer Processes:** Strictly separate logic. The main process handles app lifecycle and native APIs. Renderer processes handle UI. Avoid mixing concerns.  
+* **IPC Communication:** Use ipcMain and ipcRenderer for all communication between main and renderer processes. Define clear, descriptive channel names and send only necessary data.  
+* **Security Best Practices:** Implement strict security: enable contextIsolation, disable nodeIntegration in renderer processes, and use preload scripts to expose only safe APIs via contextBridge.  
+* **Preload Scripts:** All inter-process communication (IPC) for renderer processes must be handled via a secure preload script. Do not expose Node.js APIs directly to the renderer.  
+* **Context Bridge Usage:** Expose only specific, safe functions and objects from the main process to the renderer via contextBridge in the preload script. Avoid exposing ipcRenderer directly.  
+* **Resource Handling:** Manage application resources (files, database connections) primarily in the main process. Renderers should request these resources via IPC.  
+* **Performance Considerations:** Optimize startup time and resource usage. Lazy-load modules, minimize synchronous operations, and manage memory efficiently, especially for multiple windows.  
+* **Error Handling and Logging:** Implement robust error handling across both processes. Centralize logging for main and renderer errors to facilitate debugging.  
+* **Native Module Integration:** When using native Node.js modules, ensure they are correctly rebuilt for Electron and handled exclusively in the main process.
+
+## **Examples**
+
+<example type="valid">
+TypeScript
+
+// main.ts (Main Process)
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+
+function createWindow(): void {
+  const win = new BrowserWindow({
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    }
+  });
+  win.loadFile('index.html');
+}
+
+app.whenReady().then(() => {
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+ipcMain.handle('get-app-version', (): string => app.getVersion());
+
+// preload.ts (Preload Script)
+import { contextBridge, ipcRenderer } from 'electron';
+
+contextBridge.exposeInMainWorld('api', {
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke('get-app-version'),
+});
+
+// renderer.ts (Renderer Process)
+async function displayVersion(): Promise<void> {
+  const version = await window.api.getAppVersion();
+  const versionElement = document.getElementById('version');
+  if (versionElement) {
+    versionElement.innerText = `App Version: ${version}`;
+  }
+}
+
+displayVersion().catch(console.error);
+</example>
+<example type="invalid">
+Typescript
+
+// main.ts (Main Process - BAD)
+import { app, BrowserWindow } from 'electron';
+
+function createWindow(): void {
+  const win = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true, // BAD: Exposes Node.js to renderer
+      contextIsolation: false, // BAD: Disables context isolation
+    }
+  });
+  win.loadFile('index.html');
+}
+
+app.whenReady().then(createWindow);
+
+// renderer.ts (Renderer Process - BAD)
+import fs from 'fs'; // BAD: Direct Node.js import in renderer
+
+fs.readFile('package.json', 'utf-8', (err, data) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log(data);
+});
+</example>
