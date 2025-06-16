@@ -1,7 +1,7 @@
 // src/core/domain/services/worker.service.ts
 
-import { IQueueRepository } from '../../ports/repositories/queue.repository';
-import { IJobRepository } from '../../ports/repositories/job.repository';
+import { IQueueRepository } from '../../ports/repositories/queue.interface';
+import { IJobRepository } from '../../ports/repositories/job.interface';
 import { IProcessor } from '../../ports/queue/processor.interface';
 import { Job } from '../entities/jobs/job.entity';
 import { Queue } from '../entities/queue/queue.entity';

@@ -1,4 +1,4 @@
-// src/core/ports/repositories/queue.repository.ts
+// src/core/ports/repositories/queue.interface.ts
 
 import { Queue } from '../../domain/entities/queue/queue.entity';
 

@@ -103,8 +103,8 @@ async function main() {
   console.log('Starting Queue System Initializer...');
 
   // Instantiate repositories
-  const queueRepository = new DrizzleQueueRepository();
-  const jobRepository = new DrizzleJobRepository();
+  const queueRepository = new DrizzleQueueRepository(db);
+  const jobRepository = new DrizzleJobRepository(db);
 
   // 1. Initialize Queue
   const queue = await initializeQueue(queueRepository, QUEUE_NAME, CONCURRENCY);

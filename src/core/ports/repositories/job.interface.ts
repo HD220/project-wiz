@@ -1,4 +1,4 @@
-// src/core/ports/repositories/job.repository.ts
+// src/core/ports/repositories/job.interface.ts
 
 import { Job } from '../../domain/entities/jobs/job.entity';
 
