@@ -8,6 +8,11 @@ import { Queue } from './core/domain/entities/queue/queue.entity';
 import { Job } from './core/domain/entities/jobs/job.entity';
 import { db } from './infrastructure/services/drizzle/index'; // Ensure db instance is available from index.ts
 import { SummarizationAgent } from './infrastructure/agents/summarization.agent';
+import { ListJobsUseCase } from './core/application/use-cases/job/list-jobs.usecase';
+import { SaveJobUseCase } from './core/application/use-cases/job/save-job.usecase';
+import { RemoveJobUseCase } from './core/application/use-cases/job/remove-job.usecase';
+import { TaskTool } from './infrastructure/tools/task.tool';
+import { TaskManagerAgent } from './infrastructure/agents/task-manager.agent';
 
 // --- Configuration ---
 const QUEUE_NAME = 'my-logging-queue';
@@ -181,6 +186,27 @@ async function main() {
   await summarizationWorkerService.start(summarizationQueue.name);
 
   console.log('All WorkerServices are running. Press Ctrl+C to stop.');
+
+  console.log('\n--- Setting up TaskManagerAgent (Instantiation Demo) ---');
+
+  // TaskManagerAgent requires TaskTool, which requires Job UseCases.
+  // The Job UseCases require an IJobRepository. We already have 'jobRepository'.
+
+  const listJobsUseCase = new ListJobsUseCase(jobRepository);
+  const saveJobUseCase = new SaveJobUseCase(jobRepository);
+  const removeJobUseCase = new RemoveJobUseCase(jobRepository); // Will use the repo without a delete method for now
+
+  const taskTool = new TaskTool(
+    listJobsUseCase,
+    saveJobUseCase,
+    removeJobUseCase
+  );
+
+  const taskManagerAgent = new TaskManagerAgent(taskTool);
+
+  console.log(`TaskManagerAgent named '${taskManagerAgent.name}' instantiated successfully with TaskTool.`);
+  console.log(`Note: TaskManagerAgent is not processing jobs from a queue in this main.ts setup.`);
+  console.log(`Its LLM interaction capabilities are demonstrated in 'src/examples/task-tool-ai-sdk-demo.ts'.`);
 
   // Graceful shutdown handling
   process.on('SIGINT', async () => {
