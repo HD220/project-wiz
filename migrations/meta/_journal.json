@@ -43,6 +43,27 @@
       "when": 1747266045107,
       "tag": "0005_unknown_kang",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1750082266886,
+      "tag": "0006_fluffy_nighthawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1750085636025,
+      "tag": "0007_peaceful_mad_thinker",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1750088650639,
+      "tag": "0008_faithful_raza",
+      "breakpoints": true
     }
   ]
 }
