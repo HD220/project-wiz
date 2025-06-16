@@ -9,8 +9,9 @@ Agents can be equipped with "tools" that provide specific functionalities. These
 This example demonstrates:
 - Defining UseCases for core functionalities (job management).
 - Creating a `TaskTool` that utilizes these UseCases.
-- Equipping an `Agent` (`TaskManagerAgent`) with this tool.
-- Showing how such a tool can be described to and invoked by an LLM using `ai-sdk`.
+- How such tools are defined with `IAgentTool` interface, Zod schemas for parameters, and then registered with the central `ToolRegistry`.
+- How a `GenericAgentExecutor`, configured with an `AgentPersonaTemplate` that specifies allowed `toolNames`, can then make these tools available to an LLM.
+- Showing how such a tool can be described to and invoked by an LLM using `ai-sdk` (as shown in the demo script).
 
 ## 2. Core Components for `TaskTool`
 
@@ -58,22 +59,19 @@ export class TaskTool implements ITaskTool {
 }
 ```
 
-## 3. `TaskManagerAgent`
+## 3. Using Tools within an Agent (Conceptual)
 
-**File:** `src/infrastructure/agents/task-manager.agent.ts`
+In the refactored architecture, specific agent classes like the former `TaskManagerAgent` are superseded by the `GenericAgentExecutor`. The `GenericAgentExecutor` is configured with an `AgentPersonaTemplate` which defines its role, goals, and importantly, the `toolNames` it is allowed to use from the central `ToolRegistry`.
 
-This agent is designed to manage tasks or jobs, potentially directed by an LLM.
+-   **Tool Availability**: An instance of `GenericAgentExecutor` gets its tools from the `ToolRegistry` based on the `toolNames` listed in its `AgentPersonaTemplate`.
+-   **`process(job: Job)` Method (Conceptual within `GenericAgentExecutor`)**:
+    -   The `GenericAgentExecutor`'s `process` method receives a job.
+    -   It uses an LLM (e.g., via `ai-sdk`'s `generateObject`) for planning and execution.
+    -   It makes its persona-specific subset of tools (obtained from the `ToolRegistry`) available to the LLM.
+    -   The LLM, based on the job's payload (e.g., `job.payload.goal`), decides which tool method to call and with what parameters to achieve the goal or a step towards it.
+    -   The `GenericAgentExecutor` then executes the chosen tool method.
 
--   **Constructor**: It's instantiated with an instance of `TaskTool` (and could receive other tools).
-    ```typescript
-    const taskTool = new TaskTool(listJobsUseCase, saveJobUseCase, removeJobUseCase);
-    const taskManagerAgent = new TaskManagerAgent(taskTool);
-    ```
--   **`process(job: Job)` Method**:
-    -   In a complete implementation, this method would involve an LLM call (e.g., using `generateObject` from `ai-sdk`).
-    -   The agent would pass its tools (like `this.taskTool`) to the LLM.
-    -   The LLM, based on the job's payload (e.g., an instruction like "Create a job to summarize 'text'"), would decide which tool method to call and with what parameters.
-    -   The current version in `main.ts` only shows instantiation, not this full processing loop.
+For the concrete implementation, refer to `src/infrastructure/agents/generic-agent-executor.ts` and the overall architecture described in `docs/autonomous-agent-architecture.md`. The instantiation of `GenericAgentExecutor` with a persona and its tools (via the registry) is shown in `src/main.ts` and `src/examples/generic-agent-executor-demo.ts`.
 
 ## 4. Demonstrating Tool Usage with `ai-sdk`
 
@@ -124,4 +122,4 @@ This standalone script demonstrates how the `TaskTool` can be integrated with `a
 
 ## 5. Conclusion
 
-This `TaskTool` example illustrates a pattern for creating sophisticated agents that can leverage application-specific functionalities (exposed via UseCases) through LLM interactions. By defining tools with clear schemas and descriptions, developers can empower LLMs to perform complex actions and integrate more deeply with the application's capabilities. Remember to fully implement any dependent repository methods (like `delete` for `IJobRepository`) for production use.
+This `TaskTool` example illustrates a pattern for creating tools that can be used by AI agents. In the current architecture, these tools are registered in the `ToolRegistry` and utilized by the `GenericAgentExecutor` as specified by an agent's `AgentPersonaTemplate`. By defining tools with clear schemas (`parameters`) and descriptions, developers can empower LLMs (via `GenericAgentExecutor`) to perform complex actions and integrate deeply with the application's capabilities. Remember to fully implement any dependent repository methods (like `delete` for `IJobRepository`) for production use of tools that rely on them.

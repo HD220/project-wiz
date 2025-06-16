@@ -1,3 +1,6 @@
+**Deprecated:** This document describes a previous version of an orchestrator agent. The current architecture uses `GenericAgentExecutor` with `AgentPersonaTemplate`s and a `ToolRegistry`. Please refer to `docs/autonomous-agent-architecture.md` for the current design and `src/examples/generic-agent-executor-demo.ts` for a relevant example.
+
+---
 # Guide: Orchestrator Agent with Advanced Tools
 
 This document details the `OrchestratorAgent`, a sophisticated AI agent designed for complex task execution using multiple tools, LLM-driven planning, and a defined persona.

@@ -1,4 +1,7 @@
 // src/examples/generic-agent-executor-demo.ts
+// This script demonstrates the use of GenericAgentExecutor with a defined AgentPersonaTemplate
+// to process a multi-step goal. It relies on tools being registered in the ToolRegistry.
+// For a full understanding of the architecture, see docs/autonomous-agent-architecture.md.
 import 'dotenv/config';
 // --- Core Entity & Service Imports ---
 import { db } from '../infrastructure/services/drizzle';

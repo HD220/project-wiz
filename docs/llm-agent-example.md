@@ -1,3 +1,6 @@
+**Note:** This document describes an earlier, simpler agent implementation. For the current architecture involving `GenericAgentExecutor`, `AgentPersonaTemplate`, and `ToolRegistry`, please refer to `docs/autonomous-agent-architecture.md` and the example in `src/examples/generic-agent-executor-demo.ts`. This example may not reflect best practices for the refactored system.
+
+---
 # LLM Agent Example: Text Summarization
 
 This document provides an example of how to create and use an LLM-based agent within the queue system, using the `ai-sdk`. The example focuses on a `SummarizationAgent` that summarizes text.
