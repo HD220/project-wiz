@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { llmProvidersPlaceholder, LLMModelPlaceholder } from "@/lib/placeholders"; // To be added to placeholders
+import type { FormType } from "@/pages/(public)/onbording/index";
+import { Trans, t } from "@lingui/macro";
 
 // Define the expected part of the form schema this component handles
 export type LLMConfigFormValues = {
@@ -14,14 +16,15 @@ export type LLMConfigFormValues = {
 };
 
 interface LLMConfigFormProps {
-  control: Control<any>;
-  watch: UseFormWatch<any>;
-  setValue: UseFormSetValue<any>;
+  control: Control<FormType>;
+  watch: UseFormWatch<FormType>;
+  setValue: UseFormSetValue<FormType>;
+  providers?: LLMProviderPlaceholder[];
 }
 
-export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) {
+export function LLMConfigForm({ control, watch, setValue, providers: liveProviders = llmProvidersPlaceholder }: LLMConfigFormProps) {
   const [models, setModels] = useState<LLMModelPlaceholder[]>([]);
-  const providers = llmProvidersPlaceholder; // Use placeholder
+  const providers = liveProviders; // Use liveProviders or fallback to placeholder
   const selectedProvider = watch("providerId");
 
   useEffect(() => {
@@ -36,10 +39,8 @@ export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Configuração do Provedor LLM</CardTitle>
-        <CardDescription>
-          Configure as definições do seu provedor LLM para alimentar a fabrica.
-        </CardDescription>
+        <CardTitle><Trans>Configuração do Provedor LLM</Trans></CardTitle>
+        <CardDescription><Trans>Configure as definições do seu provedor LLM para alimentar a fabrica.</Trans></CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <FormField
@@ -47,11 +48,11 @@ export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) 
           name="apiKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Token da API</FormLabel>
+              <FormLabel><Trans>Token da API</Trans></FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Seu token de API"
+                  placeholder={t`Seu token de API`}
                   {...field}
                 />
               </FormControl>
@@ -65,7 +66,7 @@ export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) 
             name="providerId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Provedor LLM</FormLabel>
+                <FormLabel><Trans>Provedor LLM</Trans></FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -75,7 +76,7 @@ export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) 
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o provedor" />
+                      <SelectValue placeholder={t`Selecione o provedor`} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -98,7 +99,7 @@ export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) 
             name="modelId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Modelo LLM</FormLabel>
+                <FormLabel><Trans>Modelo LLM</Trans></FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -106,7 +107,7 @@ export function LLMConfigForm({ control, watch, setValue }: LLMConfigFormProps) 
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o modelo" />
+                      <SelectValue placeholder={t`Selecione o modelo`} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

@@ -45,7 +45,7 @@ export function MarkdownView({
           code: ({ node, ...props }) => <Code {...props} />,
           a: ({ node, ...props }) => (
             <Button variant={"link"} asChild>
-              <a target="_blank" {...props} />
+              <a target="_blank" rel="noopener noreferrer" {...props} />
             </Button>
           ),
         }}

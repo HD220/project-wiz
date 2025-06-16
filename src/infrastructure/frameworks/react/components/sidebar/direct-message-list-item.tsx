@@ -4,6 +4,7 @@ import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/utils"; // Assuming getInitials is here
 import { UserPlaceholder, DirectMessageThreadPlaceholder } from "@/lib/placeholders";
+import { t } from "@lingui/macro";
 
 interface DirectMessageListItemProps {
   dmThread: DirectMessageThreadPlaceholder;
@@ -14,7 +15,7 @@ export function DirectMessageListItem({ dmThread, users }: DirectMessageListItem
   const getDmDisplayName = () => {
     if (dmThread.type === "individual") {
       const user = users.find((u) => u.id === dmThread.userId);
-      return user?.name || "Usuário Desconhecido";
+      return user?.name || t`Usuário Desconhecido`;
     }
     return dmThread.description;
   };

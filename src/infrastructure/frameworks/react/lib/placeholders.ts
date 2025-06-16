@@ -372,27 +372,25 @@ export const placeholderDirectMessages: PlaceholderChatMessage[] = [
 
 // AppSidebar Project Placeholders
 export type AppSidebarProjectPlaceholder = {
+  id: string;
   name: string;
   tooltip?: string;
-  icon?: React.ReactNode; // Note: React.ReactNode might be problematic for direct placeholder data if it involves JSX.
-                           // For simplicity with data, stick to string data or simple structures if icons are just names/keys.
-                           // The current usage in AppSidebar just uses name for icon text, so string is fine.
 };
 
 export const placeholderAppSidebarProjects: AppSidebarProjectPlaceholder[] = [
-  { name: "Projeto 1" },
-  { name: "Projeto 2" },
-  { name: "Projeto 3" },
-  { name: "Projeto 4" },
-  { name: "Projeto 5" },
-  { name: "Projeto 6" },
-  { name: "Projeto 7" },
-  { name: "Projeto 8" },
-  { name: "Projeto 9" },
-  { name: "Projeto 10" },
-  { name: "Projeto 11" },
-  { name: "Projeto 12" },
-  { name: "Projeto 13" },
+  { id: "proj-appsb-1", name: "Projeto 1" },
+  { id: "proj-appsb-2", name: "Projeto 2" },
+  { id: "proj-appsb-3", name: "Projeto 3" },
+  { id: "proj-appsb-4", name: "Projeto 4" },
+  { id: "proj-appsb-5", name: "Projeto 5" },
+  { id: "proj-appsb-6", name: "Projeto 6" },
+  { id: "proj-appsb-7", name: "Projeto 7" },
+  { id: "proj-appsb-8", name: "Projeto 8" },
+  { id: "proj-appsb-9", name: "Projeto 9" },
+  { id: "proj-appsb-10", name: "Projeto 10" },
+  { id: "proj-appsb-11", name: "Projeto 11" },
+  { id: "proj-appsb-12", name: "Projeto 12" },
+  { id: "proj-appsb-13", name: "Projeto 13" },
 ];
 
 // ProjectSidebar Placeholders

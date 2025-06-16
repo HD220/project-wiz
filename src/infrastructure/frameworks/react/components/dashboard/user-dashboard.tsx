@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; //
 import { placeholderUserProjects, placeholderUserActivity, PlaceholderProject } from "@/lib/placeholders"; // To be added
 import { ProjectCard } from "@/components/projects/project-card";
 import { getInitials } from "@/lib/utils";
+import { Trans, t } from "@lingui/macro";
 
 export function UserDashboard() {
   const userName = "Usuário Exemplo"; // Placeholder
@@ -18,14 +19,14 @@ export function UserDashboard() {
           <AvatarFallback>{getInitials(userName)}</AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-2xl font-semibold">Bem-vindo de volta, {userName}!</h1>
-          <p className="text-muted-foreground">Aqui está um resumo da sua atividade.</p>
+          <h1 className="text-2xl font-semibold"><Trans>Bem-vindo de volta, {userName}!</Trans> {/* Lingui: Exemplo com variável. Idealmente usar <Trans id="welcome" values={{ name: userName }} /> */}</h1>
+          <p className="text-muted-foreground"><Trans>Aqui está um resumo da sua atividade.</Trans></p>
         </div>
       </section>
 
       {/* Projects Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Meus Projetos</h2>
+        <h2 className="text-xl font-semibold mb-4"><Trans>Meus Projetos</Trans></h2>
         {placeholderUserProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {placeholderUserProjects.map((project) => (
@@ -35,8 +36,8 @@ export function UserDashboard() {
         ) : (
           <Card>
             <CardContent className="p-6">
-              <p className="text-muted-foreground">Você ainda não tem projetos. Crie um para começar!</p>
-              <Button className="mt-4">Criar Novo Projeto</Button>
+              <p className="text-muted-foreground"><Trans>Você ainda não tem projetos. Crie um para começar!</Trans></p>
+              <Button className="mt-4"><Trans>Criar Novo Projeto</Trans></Button>
             </CardContent>
           </Card>
         )}
@@ -44,7 +45,7 @@ export function UserDashboard() {
 
       {/* Recent Activity Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Atividade Recente</h2>
+        <h2 className="text-xl font-semibold mb-4"><Trans>Atividade Recente</Trans></h2>
         {placeholderUserActivity.length > 0 ? (
           <Card>
             <CardContent className="p-0"> {/* Remove padding for list items */}
@@ -61,7 +62,7 @@ export function UserDashboard() {
         ) : (
           <Card>
             <CardContent className="p-6">
-              <p className="text-muted-foreground">Nenhuma atividade recente para mostrar.</p>
+              <p className="text-muted-foreground"><Trans>Nenhuma atividade recente para mostrar.</Trans></p>
             </CardContent>
           </Card>
         )}
@@ -71,10 +72,10 @@ export function UserDashboard() {
       <section>
          <Card>
             <CardHeader>
-                <CardTitle>Configurações</CardTitle>
+                <CardTitle><Trans>Configurações</Trans></CardTitle>
             </CardHeader>
             <CardContent>
-                <Button variant="outline">Ir para Configurações</Button>
+                <Button variant="outline"><Trans>Ir para Configurações</Trans></Button>
             </CardContent>
          </Card>
       </section>

@@ -5,11 +5,13 @@ import { H3 } from "@/components/typography/titles";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage, ChatMessageProps } from "@/components/chat/chat-message";
+import { Trans, t } from "@lingui/macro";
+import { i18n } from "@lingui/core"; // For default prop value
 
 export function ChatThread({
   threadId,
   messages,
-  title = "Chat",
+  title = i18n._("chatThread.defaultTitle", "Chat"),
 }: {
   threadId: string;
   messages: ChatMessageProps[];
@@ -28,8 +30,8 @@ export function ChatThread({
           <div className="flex flex-col gap-2 h-full">
             {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-4">
-              <p className="text-muted-foreground">Nenhuma mensagem ainda.</p>
-              <p className="text-sm text-muted-foreground">Envie uma mensagem para começar a conversa!</p>
+              <p className="text-muted-foreground"><Trans>Nenhuma mensagem ainda.</Trans></p>
+              <p className="text-sm text-muted-foreground"><Trans>Envie uma mensagem para começar a conversa!</Trans></p>
             </div>
           ) : (
             messages.map((message) => (

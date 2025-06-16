@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { t } from "@lingui/macro";
 
 export function ChatInput() {
   return (
@@ -17,7 +18,7 @@ export function ChatInput() {
         <ScrollArea className="flex-1 max-h-40 ">
           <Textarea
             className=" flex-1 h-full resize-none border-none focus-visible:ring-0 dark:bg-card"
-            placeholder="Enviar mensagem"
+            placeholder={t`Enviar mensagem`}
           />
         </ScrollArea>
       </div>

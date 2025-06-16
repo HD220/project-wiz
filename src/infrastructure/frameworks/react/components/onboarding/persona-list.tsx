@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { personasPlaceholder } from "@/lib/placeholders"; // To be created in placeholders.ts
+import { Trans, t } from "@lingui/macro";
 
 // Type for a single persona (assuming structure from original file)
 export type Persona = {
@@ -19,6 +20,10 @@ export type Persona = {
   gender: "masculino" | "feminino";
   color: string;
 };
+
+interface PersonaListProps {
+  onSelectPersona?: (personaId: string | null) => void;
+}
 
 // getColorClass function (copied from original)
 const getColorClass = (color: string, isSelected: boolean) => {
@@ -36,43 +41,44 @@ const getColorClass = (color: string, isSelected: boolean) => {
   );
 };
 
-export function PersonaList() {
+export function PersonaList({ onSelectPersona }: PersonaListProps) {
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
   const personas = personasPlaceholder; // Use placeholder
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Personalidade do Assistente</CardTitle>
-        <CardDescription>
-          Escolha uma persona para seu assistente. Você pode personalizar ou
-          alterar isso mais tarde.
-        </CardDescription>
+        <CardTitle><Trans>Personalidade do Assistente</Trans></CardTitle>
+        <CardDescription><Trans>Escolha uma persona para seu assistente. Você pode personalizar ou
+          alterar isso mais tarde.</Trans></CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div role="radiogroup" aria-label={t`Escolha a personalidade do assistente`} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Coluna de personas masculinas */}
           <div className="space-y-6">
-            <h3 className="text-lg font-medium">Personas Masculinas</h3>
+            <h3 className="text-lg font-medium"><Trans>Personas Masculinas</Trans></h3>
             <div className="space-y-4">
               {personas
                 .filter((persona) => persona.gender === "masculino")
                 .map((persona) => (
                   <div
                     key={persona.id}
+                    role="radio"
+                    aria-checked={selectedPersona === persona.id}
+                    tabIndex={selectedPersona === persona.id ? 0 : -1}
                     className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all min-h-[124px] select-none
                      ${getColorClass(
                        persona.color,
                        selectedPersona === persona.id
                      )}`}
-                    onClick={() => setSelectedPersona(persona.id)}
+                    onClick={() => { setSelectedPersona(persona.id); onSelectPersona && onSelectPersona(persona.id); }}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
                         <div className="h-16 w-16 rounded-full overflow-hidden shadow-md">
                           <img
                             src={persona.avatar || "/placeholder.svg"}
-                            alt={`Avatar de ${persona.name}`}
+                            alt={t({ id: "personaList.avatarAlt", message: `Avatar de ${persona.name}`, values: { name: persona.name }})}
                             width={80}
                             height={80}
                             className="object-cover"
@@ -98,26 +104,29 @@ export function PersonaList() {
 
           {/* Coluna de personas femininas */}
           <div className="space-y-6">
-            <h3 className="text-lg font-medium">Personas Femininas</h3>
+            <h3 className="text-lg font-medium"><Trans>Personas Femininas</Trans></h3>
             <div className="space-y-4">
               {personas
                 .filter((persona) => persona.gender === "feminino")
                 .map((persona) => (
                   <div
                     key={persona.id}
+                    role="radio"
+                    aria-checked={selectedPersona === persona.id}
+                    tabIndex={selectedPersona === persona.id ? 0 : -1}
                     className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all min-h-[124px] select-none
                     ${getColorClass(
                       persona.color,
                       selectedPersona === persona.id
                     )}`}
-                    onClick={() => setSelectedPersona(persona.id)}
+                    onClick={() => { setSelectedPersona(persona.id); onSelectPersona && onSelectPersona(persona.id); }}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
                         <div className="h-16 w-16 rounded-full overflow-hidden shadow-md">
                           <img
                             src={persona.avatar || "/placeholder.svg"}
-                            alt={`Avatar de ${persona.name}`}
+                            alt={t({ id: "personaList.avatarAlt", message: `Avatar de ${persona.name}`, values: { name: persona.name }})}
                             width={80}
                             height={80}
                             className="object-cover"
@@ -143,10 +152,8 @@ export function PersonaList() {
         </div>
       </CardContent>
       <CardFooter>
-        <p className="text-sm text-muted-foreground">
-          Você pode alterar ou personalizar essas configurações a qualquer
-          momento no menu de preferências.
-        </p>
+        <p className="text-sm text-muted-foreground"><Trans>Você pode alterar ou personalizar essas configurações a qualquer
+          momento no menu de preferências.</Trans></p>
       </CardFooter>
     </Card>
   );

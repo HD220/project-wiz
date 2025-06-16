@@ -11,6 +11,12 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { ScrollArea } from "../ui/scroll-area";
+import { Link } from "@tanstack/react-router";
+import { placeholderProjectNavItems, placeholderProjectChannels, ProjectNavItemPlaceholder, ProjectChannelPlaceholder } from "@/lib/placeholders";
+import { H4 } from "../typography/titles";
+import { Trans, t } from "@lingui/macro";
+import { i18n } from "@lingui/core";
 import {
   Calendar,
   ChevronDown,
@@ -18,15 +24,9 @@ import {
   Inbox,
   Plus,
   Search,
-  ChevronDown,
-  Plus,
-  // Lucide Icons for the map will be imported explicitly now
+  Settings,
+  LucideIcon, // LucideIcon is a type
 } from "lucide-react";
-import { ScrollArea } from "../ui/scroll-area";
-import { Link } from "@tanstack/react-router";
-import { placeholderProjectNavItems, placeholderProjectChannels, ProjectNavItemPlaceholder, ProjectChannelPlaceholder } from "@/lib/placeholders";
-import { Home, Inbox, Calendar, Search, Settings, LucideIcon } from "lucide-react"; // Explicit imports for iconMap
-import { H4 } from "../typography/titles";
 import {
   Collapsible,
   CollapsibleContent,
@@ -35,7 +35,7 @@ import {
 
 // .map(([category, channels])=>({category, channels}))
 
-export function ProjectSidebar({ projectName = "Nome do Projeto Placeholder" }: { projectName?: string }) {
+export function ProjectSidebar({ projectName = i18n._("projectSidebar.defaultProjectName", "Nome do Projeto Placeholder") }: { projectName?: string }) {
   const iconMap: Record<ProjectNavItemPlaceholder["iconName"], LucideIcon> = {
     Home: Home,
     Inbox: Inbox,
@@ -82,9 +82,9 @@ export function ProjectSidebar({ projectName = "Nome do Projeto Placeholder" }: 
             </SidebarGroupContent>
           </SidebarGroup>
           <SidebarGroup>
-            <SidebarGroupLabel>Canais</SidebarGroupLabel>
-            <SidebarGroupAction title="Nova Mensagem">
-              <Plus /> <span className="sr-only">Novo Canal</span>
+            <SidebarGroupLabel><Trans>Canais</Trans></SidebarGroupLabel>
+            <SidebarGroupAction title={t`Nova Mensagem`}>
+              <Plus onClick={() => console.warn("TODO: Implement Novo Canal action")} /> <span className="sr-only"><Trans>Novo Canal</Trans></span>
             </SidebarGroupAction>
           </SidebarGroup>
           {agrupedChannels.map(([categoryName, channels]) => (
@@ -101,10 +101,13 @@ export function ProjectSidebar({ projectName = "Nome do Projeto Placeholder" }: 
                     <SidebarMenu className="gap-1">
                       {channels?.map((channel: ProjectChannelPlaceholder) => (
                         <SidebarMenuItem key={channel.id}>
-                          <SidebarMenuButton>
-                            <div className="flex flex-1 justify-start items-center">
-                              <span> # {`${channel.name}`}</span>
-                            </div>
+                          <SidebarMenuButton asChild>
+                            {/* TODO: Define actual route for channel pages */}
+                            <Link to="#" title={t({ id: "projectSidebar.navigateToChannel", message: `Ir para canal ${channel.name}`, values: { channelName: channel.name }})}>
+                              <div className="flex flex-1 justify-start items-center">
+                                <span> # {`${channel.name}`}</span>
+                              </div>
+                            </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}

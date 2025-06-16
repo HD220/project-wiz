@@ -14,8 +14,6 @@ export const detectLocale = () =>
   detect(fromUrl("lang"), fromStorage("lang"), fromNavigator()) || "pt-BR";
 
 export async function dynamicActivate(locale: string) {
-  console.log("DIRETORIO!", import.meta.filename)
-
   const { messages: common } = await import(`./locales/${locale}/common.ts`);
   const { messages: validation } = await import(
     `./locales/${locale}/validation.ts`

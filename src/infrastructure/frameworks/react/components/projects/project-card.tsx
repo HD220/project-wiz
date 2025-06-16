@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress"; // For showing project progress
 import { PlaceholderProject } from "@/lib/placeholders";
 import { ArrowRight, Settings } from "lucide-react"; // Icons
+import { Trans, t } from "@lingui/macro";
 
 interface ProjectCardProps {
   project: PlaceholderProject;
@@ -50,26 +51,26 @@ export function ProjectCard({ project, onNavigateToProject }: ProjectCardProps) 
           </Badge>
         </div>
         <CardDescription className="text-xs">
-          Última atualização: {new Date(project.lastUpdate).toLocaleDateString()}
+          <Trans>Última atualização:</Trans> {new Date(project.lastUpdate).toLocaleDateString()}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{project.description}</p>
         <div>
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
-            <span>Progresso</span>
+            <span><Trans>Progresso</Trans></span>
             <span>{progressValue}%</span>
           </div>
-          <Progress value={progressValue} aria-label={`Progresso do projeto ${project.name}`} className="h-2" />
+          <Progress value={progressValue} aria-label={t({ id: "projectCard.progressAriaLabel", message: `Progresso do projeto ${project.name}`, values: { name: project.name }})} className="h-2" />
         </div>
       </CardContent>
       <CardFooter className="border-t pt-4 flex justify-end space-x-2">
-        <Button variant="ghost" size="sm" title="Configurações">
+        <Button variant="ghost" size="sm" title={t`Configurações`}>
           <Settings className="h-4 w-4" />
-          <span className="sr-only">Configurações do Projeto</span>
+          <span className="sr-only"><Trans>Configurações do Projeto</Trans></span>
         </Button>
         <Button variant="outline" size="sm" onClick={() => onNavigateToProject && onNavigateToProject(project.id)} >
-          Ver Detalhes <ArrowRight className="ml-2 h-4 w-4" />
+          <Trans>Ver Detalhes</Trans> <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>
     </Card>

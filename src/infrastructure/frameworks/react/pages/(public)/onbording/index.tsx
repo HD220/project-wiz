@@ -43,6 +43,9 @@ import { providersQuery, useCore, userQuery } from "@/hooks/use-core";
 import { toast } from "sonner";
 import { slugfy } from "@/shared/slugfy"; // slugfy is now used in UserInfoForm
 import { tryCatch } from "@/shared/tryCatch";
+import { Trans } from "@lingui/macro";
+import { i18n } from "@lingui/core";
+import { SystemText } from "@/components/messages/common";
 
 // type LLMProvider = {
 //   id: string | number;
@@ -85,15 +88,16 @@ const formSchema = z.object({
   apiKey: z.string().min(32),
   providerId: z.string().uuid(),
   modelId: z.string().uuid(),
+  personaId: z.string().optional(),
 });
 
-type FormType = z.infer<typeof formSchema>;
+export type FormType = z.infer<typeof formSchema>;
 
 export default function OnboardingConfig() {
   const core = useCore();
   const router = useRouter();
 
-  // const { providers } = Route.useLoaderData(); // Data now from placeholders in sub-components
+  const { providers } = Route.useLoaderData();
   // const [models, setModels] = useState<LLMModel[]>([]); // Logic moved to LLMConfigForm
 
   const form = useForm<FormType>({
@@ -106,6 +110,7 @@ export default function OnboardingConfig() {
       modelId: "", // Will be handled by LLMConfigForm
       providerId: "", // Will be handled by LLMConfigForm
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=abc`, // Initial, UserInfoForm will update
+      personaId: undefined,
     },
   });
 
@@ -123,7 +128,7 @@ export default function OnboardingConfig() {
     );
 
     if (llmConfigError) {
-      toast("Não foi possivel salvar a configuração da llm");
+      toast(i18n._("onboarding.toast.llmConfigFailed", "Não foi possivel salvar a configuração da llm"));
       return;
     }
 
@@ -139,26 +144,22 @@ export default function OnboardingConfig() {
     );
 
     if (userError) {
-      toast("Não foi possivel criar o usuário!");
+      toast(i18n._("onboarding.toast.userCreateFailed", "Não foi possivel criar o usuário!"));
       return;
     }
 
     await router.invalidate();
 
-    console.log("usuário criado com sucesso", user.userId);
+    // console.log("usuário criado com sucesso", user.userId); // Removed console.log
   };
 
   return (
     <div className="container mx-auto py-8 max-w-4xl">
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">
-            Bem-vindo ao Project Wiz - Sua fabrica de software
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Vamos configurar suas preferências para começar. Você pode alterar
-            essas configurações a qualquer momento.
-          </p>
+          <h1 className="text-3xl font-bold"><Trans>Bem-vindo ao <SystemText /> - Sua fabrica de software</Trans></h1>
+          <p className="text-muted-foreground mt-2"><Trans>Vamos configurar suas preferências para começar. Você pode alterar
+            essas configurações a qualquer momento.</Trans></p>
         </div>
 
         <Form {...form}>
@@ -167,14 +168,12 @@ export default function OnboardingConfig() {
             className="space-y-8"
           >
             <UserInfoForm control={form.control} watch={form.watch} setValue={form.setValue} />
-            <LLMConfigForm control={form.control} watch={form.watch} setValue={form.setValue} />
+            <LLMConfigForm control={form.control} watch={form.watch} setValue={form.setValue} providers={providers} />
 
-            <Button type="submit" className="w-full">
-              Salvar Configuração
-            </Button>
+            <Button type="submit" className="w-full"><Trans>Salvar Configuração</Trans></Button>
           </form>
         </Form>
-        <PersonaList />
+        <PersonaList onSelectPersona={(id) => form.setValue("personaId", id || undefined)} />
       </div>
     </div>
   );

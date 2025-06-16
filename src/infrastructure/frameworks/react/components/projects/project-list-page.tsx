@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { placeholderUserProjects, PlaceholderProject } from "@/lib/placeholders"; // Using existing placeholders
 import { PlusCircle } from "lucide-react"; // Icon for create button
 import { ProjectCard } from "@/components/projects/project-card";
+import { Trans } from "@lingui/macro";
 
 export function ProjectListPage() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Meus Projetos</h1>
+        <h1 className="text-3xl font-bold"><Trans>Meus Projetos</Trans></h1>
         <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Criar Novo Projeto
+          <PlusCircle className="mr-2 h-4 w-4" /> <Trans>Criar Novo Projeto</Trans>
         </Button>
       </header>
 
@@ -23,14 +24,14 @@ export function ProjectListPage() {
       ) : (
         <Card className="text-center">
           <CardHeader>
-            <CardTitle>Nenhum Projeto Encontrado</CardTitle>
+            <CardTitle><Trans>Nenhum Projeto Encontrado</Trans></CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Você ainda não tem projetos. Comece criando um novo.
+              <Trans>Você ainda não tem projetos. Comece criando um novo.</Trans>
             </p>
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> Criar Primeiro Projeto
+              <PlusCircle className="mr-2 h-4 w-4" /> <Trans>Criar Primeiro Projeto</Trans>
             </Button>
           </CardContent>
         </Card>

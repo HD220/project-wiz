@@ -21,8 +21,10 @@ import { placeholderUserSidebarNavItems, placeholderUserListForDM, placeholderDi
 import { DirectMessageListItem } from "./direct-message-list-item";
 import { Home, Inbox, Calendar, Search, Settings, LucideIcon } from "lucide-react"; // Explicit imports for iconMap
 import { H4 } from "../typography/titles";
+import { Trans, t } from "@lingui/macro";
+import { i18n } from "@lingui/core";
 
-export function UserSidebar({ userName = "Nome do Usuário Placeholder" }: { userName?: string }) {
+export function UserSidebar({ userName = i18n._("userSidebar.defaultUserName", "Nome do Usuário Placeholder") }: { userName?: string }) {
   const iconMap: Record<UserSidebarNavItemPlaceholder["iconName"], LucideIcon> = {
     Home: Home,
     Inbox: Inbox,
@@ -67,9 +69,9 @@ export function UserSidebar({ userName = "Nome do Usuário Placeholder" }: { use
             </SidebarGroupContent>
           </SidebarGroup>
           <SidebarGroup>
-            <SidebarGroupLabel>Mensagens Diretas</SidebarGroupLabel>
-            <SidebarGroupAction title="Nova Mensagem">
-              <Plus /> <span className="sr-only">Nova Mensagem</span>
+            <SidebarGroupLabel><Trans>Mensagens Diretas</Trans></SidebarGroupLabel>
+            <SidebarGroupAction title={t`Nova Mensagem`}>
+              <Plus onClick={() => console.warn("TODO: Implement Nova Mensagem (DM) action")} /> <span className="sr-only"><Trans>Nova Mensagem</Trans></span>
             </SidebarGroupAction>
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
