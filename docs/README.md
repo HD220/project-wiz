@@ -1,51 +1,30 @@
-Interface
-Barra lateral principal:
-Home (/)
-Add projeto (/project/new)
-Projetos arquivados (switch)
-Lista projetos
-Projeto 1 (/project/{projectId})
-...
-Na parte inferior configuração geral (/settings)
+# Documentação do Project Wiz
 
-    Home (/)
-        Barra lateral:
-            Lista de menus
-                Dashboard (/ || /dashboard)
-                Tarefas (/tasks)
-                Agentes (/agents)
-                Integrações (/integrations)
-                MCPs (/mcps)
-                Analytics (/analytics)
+Bem-vindo à documentação oficial do Project Wiz. Utilize os links abaixo para navegar pelas diferentes seções:
 
-            Lista de conversas
-                Chat 1 (/chat/{chatId})
-                ...
+- [Guia do Usuário](./user-guide/01-introduction.md)
+- [Documentação Técnica](./technical-documentation/01-architecture.md)
+  - [Arquitetura do Sistema de Processamento Assíncrono](./technical-documentation/01-architecture.md)
+  - [Estrutura e Funcionamento dos Agentes (Personas)](./technical-documentation/02-agent-framework.md)
+  - [Desenvolvendo Novas Tools para Agentes](./technical-documentation/03-developing-tools.md)
+  - [Integração com Modelos de Linguagem Grande (LLMs)](./technical-documentation/04-llm-integration.md)
+  - [Schema do Banco de Dados](./technical-documentation/05-database-schema.md)
+  - [Configurando o Ambiente de Desenvolvimento](./technical-documentation/06-development-setup.md)
+  - [Estratégia de Testes](./technical-documentation/07-testing-strategy.md)
+  - [Boas Práticas e Diretrizes de Desenvolvimento](./technical-documentation/08-best-practices-and-guidelines.md)
+  - [Diretrizes de Segurança](./technical-documentation/09-security-guidelines.md)
+  - [Tratamento de Erros e Validação de Dados](./technical-documentation/10-error-handling-and-validation.md)
+- [Visão Geral do Projeto](./project-overview/vision-and-goals.md)
+- [Guia de Contribuição](./contribution-guide.md)
+- [Código de Conduta](./code-of-conduct.md)
+- [Tópicos Avançados](./advanced-topics/prompt-examples/README.md)
+  - Inclui [Exemplos de Prompts](./advanced-topics/prompt-examples/README.md)
 
-        Conteudo
-            Menus
-                Dashboard (/ || /dashboard): Overview de todos os projetos
-                Tarefas (/tasks): Tarefas em andamento em todos projetos
-                Agentes (/agents): Lista de agentes da fabrica
-                Forum (/project/{projectId}/forum): Forum de todos projetos
-                Integrações (/integrations): Configurações para integrações sistemas externos (github, confluence, etc.)
-                MCPs (/mcps): Tela para configuração de servidores MCP que habilitam tools para os agentes
-                Analytics (/analytics): Relatórios de analise
-            Conversa
-                Chat 1 (/chat/{chatId}): Conversa com agente ou grupo de agentes, com opção de enviar mensagens
+*Nota sobre a organização: Devido a limitações ambientais encontradas na criação dinâmica de todos os subdiretórios planejados, a estrutura da documentação está parcialmente normalizada. Especificamente:*
+*   *Os principais guias de usuário, documentos técnicos e visão geral do projeto estão organizados em suas respectivas subpastas (`user-guide/`, `technical-documentation/`, `project-overview/`, `advanced-topics/prompt-examples/`).*
+*   *Os documentos `contribution-guide.md` e `code-of-conduct.md` estão temporariamente localizados na raiz da pasta `docs/`.*
+*   *Os arquivos de exemplos de personas (como `ANA UIUX.md`, `CAMILA.md`, etc.) também estão temporariamente localizados na raiz da pasta `docs/` em vez de em `docs/misc/example-project-personas/`.*
+*   *O diretório `docs/prompts/` (que continha exemplos de prompts mais antigos) pode ainda existir, mas está vazio; seu conteúdo foi movido para `docs/advanced-topics/prompt-examples/`. Tentativas de remover este diretório vazio falharam.*
+*   *Os diretórios `docs/contributing/` e `docs/misc/` (incluindo `docs/misc/example-project-personas/`) não puderam ser criados.*
 
-    Projeto (/project/{projectId})
-        Barra Lateral:
-            Lista de menus
-                Dashboard (/project/{projectId} || /project/{projectId}/dashboard): Overview do projeto
-                Tarefas (/project/{projectId}/tasks): Tarefas do projeto
-                Forum (/project/{projectId}/forum): Forum do projeto
-                Documentation (/project/{projectId}/documentation): Documentação do projeto
-                Analytics (/project/{projectId}/analytics): Relatorios de analise
-
-            Lista de canais
-                channel 1 (/project/{projectId}/channel/{channelId})
-                - Pode ter um agrupador de canais para listagem
-        Conteudo
-            Menu
-            Conversa
+*A estrutura será totalmente normalizada assim que as limitações do ambiente forem resolvidas. Agradecemos a sua compreensão.*
