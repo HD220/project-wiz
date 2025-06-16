@@ -1,5 +1,4 @@
 import { MarkdownView } from "@/components/markdown-render";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(logged)/user/user-guides/")({

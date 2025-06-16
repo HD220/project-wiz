@@ -1,12 +1,9 @@
 import {
   Link,
-  LinkComponentProps,
-  LinkOptions,
+  // Removidos LinkComponentProps, LinkOptions, ToOptions, useMatchRoute
   LinkProps,
-  ToOptions,
-  useMatchRoute,
 } from "@tanstack/react-router";
-import { Plus, Home, Archive, Rss } from "lucide-react";
+import { Plus, Home, Archive } from "lucide-react"; // Removido Rss
 import { ReactNode } from "react";
 import {
   Tooltip,

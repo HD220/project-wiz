@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react"; // Removido createContext, useContext
 import { Theme, ThemeProviderContext, ThemeProviderProps } from "./context";
 
 export function ThemeProvider({

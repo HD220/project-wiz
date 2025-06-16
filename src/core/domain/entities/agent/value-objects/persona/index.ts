@@ -16,6 +16,10 @@ export type PersonaConstructor = {
 export class Persona {
   constructor(private readonly fields: PersonaConstructor) {}
 
+  get id() {
+    return this.fields.id;
+  }
+
   get name() {
     return this.fields.name;
   }

@@ -1,14 +1,17 @@
 import {
   CoreMessage,
-  createDataStreamResponse,
   InvalidToolArgumentsError,
   NoSuchToolError,
   streamText,
   TextPart,
   ToolExecutionError,
   ToolSet,
-} from "ai";
+} from "ai"; // Removido createDataStreamResponse
 import { ProvidersWithModel, registry } from "../registry";
+
+interface FinalAnswerArgs {
+  answer: string;
+}
 
 export class Activity {
   private history: CoreMessage[];
@@ -74,7 +77,8 @@ export class Activity {
             console.error("onError: An unknown error occurred.", error);
           }
         },
-        onFinish: async ({ text, usage, response, toolCalls }) => {
+        onFinish: async ({ response }) => {
+          // Removidos text, usage, toolCalls
           // console.log(
           //   `Finish LLM call, data: ${usage}, ${text.substring(0, 100)}, ${JSON.stringify(toolCalls)}`
           // );
@@ -91,7 +95,7 @@ export class Activity {
                   ) {
                     const convertedAnswerToText: TextPart = {
                       type: "text",
-                      text: (part.args as any).answer,
+                      text: (part.args as FinalAnswerArgs).answer,
                       providerOptions: part.providerOptions,
                     };
                     return convertedAnswerToText;
@@ -124,7 +128,7 @@ export class Activity {
     ## Interaction Envoriment
     
     You MUST either use a tool OR give your best final answer not both at the same time. When responding, you must use the following instructions:
-
+    
     * You can use more than one tool per answer.
     * Always use the thinking tool and at least one other tool.
     * You MUST ALWAYS use the thinking tool for any integration action; only one thinking call can be used per action.

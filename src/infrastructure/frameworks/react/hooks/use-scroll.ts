@@ -1,6 +1,12 @@
 import { RefObject, useEffect, useRef } from "react";
 
-export function useScroll<T extends any[]>(
+/**
+ * Hook para rolar automaticamente um elemento para a visão
+ * @param dep - Array de dependências que disparam o scroll
+ * @param options - Opções de scroll (comportamento, etc)
+ * @returns Ref para ser atribuído ao elemento que deve ser rolado
+ */
+export function useScroll<T extends unknown[]>(
   dep: T,
   options?: ScrollIntoViewOptions
 ): RefObject<HTMLDivElement | null> {
@@ -11,11 +17,6 @@ export function useScroll<T extends any[]>(
   useEffect(() => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior, ...scrollOptions });
-      //   scrollTo({
-      //     top: ref.current.scrollHeight,
-      //     behavior: "smooth",
-      //     left: 0,
-      //   });
     }
   }, dep);
 

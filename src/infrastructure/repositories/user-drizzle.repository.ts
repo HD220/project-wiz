@@ -38,10 +38,10 @@ export class UserRepositoryDrizzle implements IUserRepository {
       ),
     });
   }
-  load(id: UserId): Promise<User> {
+  load(_id: UserId): Promise<User> {
     throw new Error("Method not implemented.");
   }
-  save(entity: User): Promise<User> {
+  save(_entity: User): Promise<User> {
     throw new Error("Method not implemented.");
   }
   async list(): Promise<User[]> {
@@ -61,7 +61,7 @@ export class UserRepositoryDrizzle implements IUserRepository {
         })
     );
   }
-  delete(id: UserId): Promise<void> {
+  delete(_id: UserId): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

@@ -1,5 +1,4 @@
 import { ProjectSidebar } from "@/components/sidebar/project-sidebar";
-import { UserSidebar } from "@/components/sidebar/user-sidebar";
 import {
   ResizableHandle,
   ResizablePanel,
