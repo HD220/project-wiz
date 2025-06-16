@@ -139,4 +139,18 @@ export class DrizzleJobRepository implements IJobRepository {
 
     return results.map(dbToDomain);
   }
+
+  async delete(jobId: string): Promise<void> {
+    console.log(`DrizzleJobRepository: Deleting job ${jobId}`);
+    const result = await this.repositoryDB.delete(jobsTable).where(eq(jobsTable.id, jobId)).returning();
+    if (result.length === 0) {
+      // Consider if this should throw an error or if not finding is acceptable.
+      // For a delete operation, usually if the item doesn't exist, it's not an error,
+      // but an operation that results in the desired state (item is not present).
+      // However, the use case currently checks findById first.
+      console.warn(`DrizzleJobRepository: Job with id ${jobId} not found for deletion, or delete returned no confirmation.`);
+    } else {
+      console.log(`DrizzleJobRepository: Job ${jobId} deleted successfully.`);
+    }
+  }
 }
