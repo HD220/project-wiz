@@ -7,10 +7,13 @@ import { WorkerService } from './core/domain/services/worker.service';
 import { Queue } from './core/domain/entities/queue/queue.entity';
 import { Job } from './core/domain/entities/jobs/job.entity';
 import { db } from './infrastructure/services/drizzle/index'; // Ensure db instance is available from index.ts
+import { SummarizationAgent } from './infrastructure/agents/summarization.agent';
 
 // --- Configuration ---
 const QUEUE_NAME = 'my-logging-queue';
 const CONCURRENCY = 2;
+const SUMMARIZATION_QUEUE_NAME = 'summarization-queue';
+const SUMMARIZATION_CONCURRENCY = 1; // LLM tasks can be slower
 
 async function initializeQueue(queueRepo: DrizzleQueueRepository, queueName: string, concurrency: number): Promise<Queue> {
   let queue = await queueRepo.findByName(queueName);
@@ -99,6 +102,23 @@ async function addSampleJobs(jobRepo: DrizzleJobRepository, queueId: string) {
   console.log('Sample jobs added.');
 }
 
+async function addSummarizationSampleJob(jobRepo: DrizzleJobRepository, queueId: string) {
+  console.log(`Adding sample summarization job to queue ${queueId}...`);
+  const textToSummarize = "Electron is a framework for creating native applications with web technologies like JavaScript, HTML, and CSS. It takes care of the hard parts so you can focus on the core of your application. It's used by companies like Slack, Microsoft, and GitHub.";
+
+  const summarizationJob = Job.create({
+    queueId,
+    name: 'SummarizeTextJob_1',
+    payload: textToSummarize, // Direct string payload as expected by SummarizationAgent/Task
+    priority: 1,
+    maxAttempts: 2,
+    maxRetryDelay: 60000, // 1 minute
+  });
+
+  await jobRepo.save(summarizationJob);
+  console.log('Sample summarization job added.');
+}
+
 async function main() {
   console.log('Starting Queue System Initializer...');
 
@@ -133,20 +153,49 @@ async function main() {
   console.log(`Starting WorkerService for queue: ${queue.name}...`);
   await workerService.start(queue.name);
 
-  console.log('WorkerService is running. Press Ctrl+C to stop.');
+  console.log('\n--- Setting up Summarization Agent ---');
+
+  // 3b. Initialize Summarization Queue
+  const summarizationQueue = await initializeQueue(queueRepository, SUMMARIZATION_QUEUE_NAME, SUMMARIZATION_CONCURRENCY);
+
+  // 4b. Add sample summarization job (optional, for testing)
+  const existingSummarizationJobs = await jobRepository.findPending(summarizationQueue.id, 1);
+  if (existingSummarizationJobs.length === 0) {
+    await addSummarizationSampleJob(jobRepository, summarizationQueue.id);
+  } else {
+    console.log("Summarization jobs already exist in the queue, not adding sample job.");
+  }
+
+  // 5b. Instantiate Summarization Agent
+  const summarizationAgent = new SummarizationAgent();
+
+  // 6b. Instantiate and Start WorkerService for Summarization
+  const summarizationWorkerService = new WorkerService(
+    queueRepository,
+    jobRepository,
+    summarizationAgent, // Pass the summarization agent
+    { pollFrequencyMs: 5000 } // Can have a different polling frequency
+  );
+
+  console.log(`Starting WorkerService for queue: ${summarizationQueue.name}...`);
+  await summarizationWorkerService.start(summarizationQueue.name);
+
+  console.log('All WorkerServices are running. Press Ctrl+C to stop.');
 
   // Graceful shutdown handling
   process.on('SIGINT', async () => {
-    console.log('SIGINT received. Stopping WorkerService...');
-    workerService.stop();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log('SIGINT received. Stopping WorkerServices...');
+    workerService.stop(); // Existing worker
+    summarizationWorkerService.stop(); // New summarization worker
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Give some time to stop
     console.log('Exiting.');
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
-    console.log('SIGTERM received. Stopping WorkerService...');
-    workerService.stop();
+    console.log('SIGTERM received. Stopping WorkerServices...');
+    workerService.stop(); // Existing worker
+    summarizationWorkerService.stop(); // New summarization worker
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log('Exiting.');
     process.exit(0);
