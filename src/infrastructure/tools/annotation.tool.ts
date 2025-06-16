@@ -69,3 +69,29 @@ export class AnnotationTool implements IAnnotationTool {
     await this.removeAnnotationUseCase.execute(params.annotationId);
   }
 }
+
+// New function to generate tool definitions for an instance
+import { IAgentTool } from '../../core/tools/tool.interface';
+
+export function getAnnotationToolDefinitions(annotationToolInstance: AnnotationTool): IAgentTool[] {
+  return [
+    {
+      name: 'annotation.list',
+      description: 'Lists annotations, typically for a specific agent.',
+      parameters: listAnnotationsParamsSchema,
+      execute: async (params) => annotationToolInstance.list(params),
+    },
+    {
+      name: 'annotation.save',
+      description: 'Saves an annotation (note or comment).',
+      parameters: saveAnnotationParamsSchema,
+      execute: async (params) => annotationToolInstance.save(params),
+    },
+    {
+      name: 'annotation.remove',
+      description: 'Removes an annotation by its ID.',
+      parameters: removeAnnotationParamsSchema,
+      execute: async (params) => annotationToolInstance.remove(params),
+    }
+  ];
+}

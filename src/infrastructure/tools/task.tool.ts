@@ -33,6 +33,8 @@ const saveParamsSchema = z.object({
   priority: z.number().optional().describe("Job priority (lower is higher)."),
   delay: z.number().optional().describe("Delay in milliseconds before the job is active."),
   maxAttempts: z.number().optional().describe("Maximum number of attempts."),
+  targetAgentRole: z.string().optional().describe("The role of the agent best suited for this job."),
+  requiredCapabilities: z.array(z.string()).optional().describe("List of capabilities/tool names required for this job."),
   // Add other fields from SaveJobDTO as needed by the agent's capabilities
 }).describe("Parameters for creating or updating a job.");
 
@@ -76,6 +78,8 @@ export class TaskTool implements ITaskTool {
         priority: params.priority,
         delay: params.delay,
         maxAttempts: params.maxAttempts,
+        targetAgentRole: params.targetAgentRole,
+        requiredCapabilities: params.requiredCapabilities,
         // Ensure all required fields by SaveJobDTO are covered or are optional
     };
     return this.saveJobUseCase.execute(jobData);
@@ -88,4 +92,30 @@ export class TaskTool implements ITaskTool {
     // Note: RemoveJobUseCase currently has a placeholder for actual deletion.
     // This tool method will reflect that limitation until the use case is fully implemented.
   }
+}
+
+// New function to generate tool definitions for an instance
+import { IAgentTool } from '../../core/tools/tool.interface';
+
+export function getTaskToolDefinitions(taskToolInstance: TaskTool): IAgentTool[] {
+  return [
+    {
+      name: 'taskManager.listJobs', // Renamed for clarity, was taskTool.list
+      description: 'Lists jobs in a specified queue.',
+      parameters: listParamsSchema, // Already defined in this file
+      execute: async (params) => taskToolInstance.list(params),
+    },
+    {
+      name: 'taskManager.saveJob', // Renamed for clarity
+      description: 'Creates a new job or updates an existing one. Use this to schedule sub-tasks or modify existing ones.',
+      parameters: saveParamsSchema, // Already defined in this file
+      execute: async (params) => taskToolInstance.save(params),
+    },
+    {
+      name: 'taskManager.removeJob', // Renamed for clarity
+      description: 'Removes a job by its ID.',
+      parameters: removeParamsSchema, // Already defined in this file
+      execute: async (params) => taskToolInstance.remove(params),
+    }
+  ];
 }

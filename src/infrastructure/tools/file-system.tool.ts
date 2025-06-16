@@ -114,3 +114,59 @@ export class FileSystemTool implements IFileSystemTool {
     await fs.rm(safePath, { recursive: true, force: true }); // force true to not error if path doesn't exist
   }
 }
+
+// New function to generate tool definitions for an instance
+import { IAgentTool } from '../../core/tools/tool.interface';
+
+export function getFileSystemToolDefinitions(fsToolInstance: FileSystemTool): IAgentTool[] {
+  return [
+    {
+      name: 'fileSystem.readFile',
+      description: 'Reads the content of a file at a given path.',
+      parameters: readFileParamsSchema,
+      execute: async (params) => fsToolInstance.readFile(params),
+    },
+    {
+      name: 'fileSystem.writeFile',
+      description: 'Writes content to a file at a given path. Creates directories if they don\'t exist.',
+      parameters: writeFileParamsSchema,
+      execute: async (params) => fsToolInstance.writeFile(params),
+    },
+    {
+      name: 'fileSystem.moveFile',
+      description: 'Moves a file from a source path to a destination path.',
+      parameters: moveFileParamsSchema,
+      execute: async (params) => fsToolInstance.moveFile(params),
+    },
+    {
+      name: 'fileSystem.removeFile',
+      description: 'Deletes a file at the specified path.',
+      parameters: removeFileParamsSchema,
+      execute: async (params) => fsToolInstance.removeFile(params),
+    },
+    {
+      name: 'fileSystem.listDirectory',
+      description: 'Lists all files and directories within a given path.',
+      parameters: listDirectoryParamsSchema,
+      execute: async (params) => fsToolInstance.listDirectory(params),
+    },
+    {
+      name: 'fileSystem.createDirectory',
+      description: 'Creates a new directory at the specified path, including parent directories if needed.',
+      parameters: createDirectoryParamsSchema,
+      execute: async (params) => fsToolInstance.createDirectory(params),
+    },
+    {
+      name: 'fileSystem.moveDirectory',
+      description: 'Moves a directory from a source path to a destination path.',
+      parameters: moveDirectoryParamsSchema,
+      execute: async (params) => fsToolInstance.moveDirectory(params),
+    },
+    {
+      name: 'fileSystem.removeDirectory',
+      description: 'Deletes a directory and its contents recursively at the specified path.',
+      parameters: removeDirectoryParamsSchema,
+      execute: async (params) => fsToolInstance.removeDirectory(params),
+    }
+  ];
+}

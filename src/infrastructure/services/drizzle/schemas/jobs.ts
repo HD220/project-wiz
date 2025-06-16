@@ -34,6 +34,10 @@ export const jobsTable = sqliteTable('jobs', {
 
   // Specific time after which the job should be executed
   executeAfter: integer('execute_after', { mode: 'timestamp_ms' }),
+
+  // New fields for agent targeting
+  targetAgentRole: text('target_agent_role'),
+  requiredCapabilities: text('required_capabilities', { mode: 'json' }).$type<string[] | null>(),
 });
 
 export type InsertJob = typeof jobsTable.$inferInsert;

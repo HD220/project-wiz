@@ -4,7 +4,12 @@ import { IJobRepository } from '../../../../core/ports/repositories/job.interfac
 
 // Define a DTO for creating/updating jobs if JobProps is not suitable directly
 // For now, assuming JobProps (or a subset) can be used.
-export type SaveJobDTO = Partial<JobProps<any, any>> & { queueId: string; name: string; }; // Example DTO
+export type SaveJobDTO = Partial<Omit<JobProps<any, any>, 'queueId' | 'name'>> & {
+  queueId: string;
+  name: string;
+  targetAgentRole?: string;
+  requiredCapabilities?: string[];
+};
 
 export interface ISaveJobUseCase {
   execute(jobData: SaveJobDTO): Promise<Job<any, any>>;
@@ -22,20 +27,19 @@ export class SaveJobUseCase implements ISaveJobUseCase {
 
     let jobToSave: Job<any,any>;
     if (jobData.id) {
-        // This is an update, fetch existing to merge or rely on Job constructor to handle partial updates
         const existingJob = await this.jobRepository.findById(jobData.id);
         if (!existingJob) {
             throw new Error(`Job with id ${jobData.id} not found for update.`);
         }
-        // Update properties of existingJob or create new instance with merged data
-        // For simplicity, let's assume Job entity can handle this merge or a new instance is created
-        // This part would need careful handling of partial updates.
-        // A simpler approach for this example is to treat it like Job.create and let repo.save handle upsert.
-        const updatedProps = { ...existingJob.props, ...jobData };
-        jobToSave = new Job(updatedProps); // Or existingJob.update(jobData) if such method exists
+        // Update existing job properties. Job constructor or a dedicated update method should handle this.
+        // The Job class's props was made public for this, allowing direct update before save.
+        // A more encapsulated approach would be an `existingJob.update(jobData)` method.
+        Object.assign(existingJob.props, jobData);
+        (existingJob.props as any).updatedAt = new Date(); // Manually update updatedAt before saving
+        jobToSave = existingJob;
     } else {
-        // This is a new job
-        jobToSave = Job.create(jobData);
+        // This is a new job. Job.create now handles targetAgentRole and requiredCapabilities.
+        jobToSave = Job.create(jobData as JobProps<any,any>); // Cast needed as SaveJobDTO is Partial for some JobProps fields
     }
 
     await this.jobRepository.save(jobToSave);

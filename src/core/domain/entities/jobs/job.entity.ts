@@ -21,10 +21,12 @@ export interface JobProps<Input = any, Output = any> {
   createdAt: Date;
   updatedAt: Date;
   executeAfter?: Date; // Specific time after which the job should be executed
+  targetAgentRole?: string;
+  requiredCapabilities?: string[];
 }
 
 export class Job<Input = any, Output = any> {
-  private props: JobProps<Input, Output>;
+  public props: JobProps<Input, Output>; // Made public for easier access in SaveJobUseCase, consider implications
 
   constructor(props: Omit<JobProps<Input, Output>, 'status' | 'attempts' | 'retryDelay' | 'createdAt' | 'updatedAt'> & { status?: JobStatusType, attempts?: number, retryDelay?: number, createdAt?: Date, updatedAt?: Date }) {
     const now = new Date();
@@ -56,6 +58,8 @@ export class Job<Input = any, Output = any> {
   public get createdAt(): Date { return this.props.createdAt; }
   public get updatedAt(): Date { return this.props.updatedAt; }
   public get executeAfter(): Date | undefined { return this.props.executeAfter; }
+  public get targetAgentRole(): string | undefined { return this.props.targetAgentRole; }
+  public get requiredCapabilities(): string[] | undefined { return this.props.requiredCapabilities; }
 
   // Public methods to change status
   public moveToWaiting(): boolean {
@@ -117,7 +121,7 @@ export class Job<Input = any, Output = any> {
 
   public static create<I, O>(
     props: Omit<JobProps<I, O>, 'id' | 'status' | 'attempts' | 'retryDelay' | 'createdAt' | 'updatedAt' | 'delay'> &
-           { id?: string, status?: JobStatusType, attempts?: number, initialRetryDelay?: number, delay?: number }
+           { id?: string, status?: JobStatusType, attempts?: number, initialRetryDelay?: number, delay?: number, targetAgentRole?: string, requiredCapabilities?: string[] }
   ): Job<I, O> {
     const id = props.id || crypto.randomUUID(); // Assuming browser/node crypto
     const initialDelay = props.delay !== undefined ? props.delay : 0;
@@ -135,6 +139,8 @@ export class Job<Input = any, Output = any> {
       retryDelay: props.initialRetryDelay || 0, // This will be calculated on first moveToDelayed if needed
       delay: initialDelay,
       executeAfter: executeAfterDate,
+      targetAgentRole: props.targetAgentRole,
+      requiredCapabilities: props.requiredCapabilities,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

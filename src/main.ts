@@ -11,8 +11,16 @@ import { SummarizationAgent } from './infrastructure/agents/summarization.agent'
 import { ListJobsUseCase } from './core/application/use-cases/job/list-jobs.usecase';
 import { SaveJobUseCase } from './core/application/use-cases/job/save-job.usecase';
 import { RemoveJobUseCase } from './core/application/use-cases/job/remove-job.usecase';
-import { TaskTool } from './infrastructure/tools/task.tool';
+import { DrizzleAnnotationRepository } from './infrastructure/repositories/drizzle/annotation.repository';
+import { ListAnnotationsUseCase } from './core/application/use-cases/annotation/list-annotations.usecase';
+import { SaveAnnotationUseCase } from './core/application/use-cases/annotation/save-annotation.usecase';
+import { RemoveAnnotationUseCase } from './core/application/use-cases/annotation/remove-annotation.usecase';
+import { TaskTool, getTaskToolDefinitions } from './infrastructure/tools/task.tool';
+import { FileSystemTool, getFileSystemToolDefinitions } from './infrastructure/tools/file-system.tool';
+import { AnnotationTool, getAnnotationToolDefinitions } from './infrastructure/tools/annotation.tool';
 import { TaskManagerAgent } from './infrastructure/agents/task-manager.agent';
+import { toolRegistry } from './infrastructure/tools/tool-registry';
+import path from 'path'; // For FileSystemTool CWD if needed
 
 // --- Configuration ---
 const QUEUE_NAME = 'my-logging-queue';
@@ -202,11 +210,32 @@ async function main() {
     removeJobUseCase
   );
 
-  const taskManagerAgent = new TaskManagerAgent(taskTool);
+  const taskManagerAgent = new TaskManagerAgent(taskTool); // This specific agent demo instance only uses TaskTool
 
   console.log(`TaskManagerAgent named '${taskManagerAgent.name}' instantiated successfully with TaskTool.`);
   console.log(`Note: TaskManagerAgent is not processing jobs from a queue in this main.ts setup.`);
   console.log(`Its LLM interaction capabilities are demonstrated in 'src/examples/task-tool-ai-sdk-demo.ts'.`);
+
+  console.log('\n--- Registering all Tools in ToolRegistry ---');
+  const annotationRepository = new DrizzleAnnotationRepository(db);
+
+  const listAnnotationsUseCase = new ListAnnotationsUseCase(annotationRepository);
+  const saveAnnotationUseCase = new SaveAnnotationUseCase(annotationRepository);
+  const removeAnnotationUseCase = new RemoveAnnotationUseCase(annotationRepository);
+
+  // FileSystemTool can be initialized with a default base path, e.g., project root or a specific 'workspace' directory
+  // For main.ts, using current working directory. Orchestrator demo uses a specific output folder.
+  const fileSystemToolInstance = new FileSystemTool(process.cwd());
+  const annotationToolInstance = new AnnotationTool(listAnnotationsUseCase, saveAnnotationUseCase, removeAnnotationUseCase);
+  // taskTool instance is already created above for the TaskManagerAgent demo
+
+  getFileSystemToolDefinitions(fileSystemToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getAnnotationToolDefinitions(annotationToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getTaskToolDefinitions(taskTool).forEach(t => toolRegistry.registerTool(t)); // taskTool instance already exists
+
+  console.log("All tools registered in ToolRegistry:");
+  toolRegistry.getAllTools().forEach(t => console.log(` - ${t.name}: ${t.description}`));
+
 
   // Graceful shutdown handling
   process.on('SIGINT', async () => {

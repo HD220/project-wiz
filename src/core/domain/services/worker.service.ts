@@ -2,15 +2,21 @@
 
 import { IQueueRepository } from '../../ports/repositories/queue.interface';
 import { IJobRepository } from '../../ports/repositories/job.interface';
-import { IProcessor } from '../../ports/queue/processor.interface';
+// import { IProcessor } from '../../ports/queue/processor.interface'; // No longer used
 import { Job } from '../entities/jobs/job.entity';
 import { Queue } from '../entities/queue/queue.entity';
 import { JobStatusType } from '../entities/jobs/job-status';
+import { GenericAgentExecutor, AgentExecutorResult } from '../../agents/generic-agent-executor'; // AgentExecutorResultStatus not used directly here
+import { AgentPersonaTemplate } from '../entities/agent/persona-template.types';
+import { toolRegistry, ToolRegistry } from '../../../infrastructure/tools/tool-registry';
 
-export class WorkerService<PInput = any, POutput = any> {
+
+export class WorkerService { // Removed <PInput, POutput>
   private queueRepository: IQueueRepository;
   private jobRepository: IJobRepository;
-  private processor: IProcessor<PInput, POutput>;
+  // private processor: IProcessor<PInput, POutput>; // Remove this
+  private agentPersonaTemplate: AgentPersonaTemplate;
+  private agentExecutor: GenericAgentExecutor;
   private isRunning: boolean = false;
   private activeJobs: number = 0;
   private queueConfig: Queue | null = null;
@@ -20,15 +26,19 @@ export class WorkerService<PInput = any, POutput = any> {
   constructor(
     queueRepository: IQueueRepository,
     jobRepository: IJobRepository,
-    processor: IProcessor<PInput, POutput>,
+    // processor: IProcessor<PInput, POutput>, // Remove this parameter
+    agentPersonaTemplate: AgentPersonaTemplate, // Add this
+    toolReg: ToolRegistry = toolRegistry, // Add this, with default
     options?: { pollFrequencyMs?: number }
   ) {
     this.queueRepository = queueRepository;
     this.jobRepository = jobRepository;
-    this.processor = processor;
+    this.agentPersonaTemplate = agentPersonaTemplate; // Store this
+    this.agentExecutor = new GenericAgentExecutor(this.agentPersonaTemplate, toolReg); // Instantiate executor
     if (options?.pollFrequencyMs) {
       this.pollFrequencyMs = options.pollFrequencyMs;
     }
+    console.log(`WorkerService initialized for Agent Role: ${this.agentPersonaTemplate.role}`);
   }
 
   public async start(queueName: string): Promise<void> {
@@ -104,58 +114,73 @@ export class WorkerService<PInput = any, POutput = any> {
     }
   }
 
-  private async processJob(job: Job<PInput, POutput>): Promise<void> {
+  private async processJob(job: Job<any, any>): Promise<void> { // Input/Output types might be broader now
     try {
-      console.log(`Processing job ${job.id} from queue ${job.queueId}. Attempt: ${job.attempts + 1}`);
+      console.log(`WorkerService: Processing job ${job.id} for agent role ${this.agentPersonaTemplate.role}. Attempt: ${job.attempts + 1}`);
 
       if (!job.status.is(JobStatusType.WAITING) && !job.status.is(JobStatusType.DELAYED)) {
-          console.warn(`Job ${job.id} is not in a processable state (WAITING or DELAYED). Current status: ${job.status.value}. Skipping.`);
-          this.activeJobs--; // Decrement as it won't be processed
+          console.warn(`Job ${job.id} is not in a processable state. Current status: ${job.status.value}. Skipping.`);
+          this.activeJobs--;
           return;
       }
 
       if (!job.moveToActive()) {
-        console.warn(`Job ${job.id} could not be moved to ACTIVE state. Current status: ${job.status.value}. This might indicate a race condition or invalid prior state.`);
+        console.warn(`Job ${job.id} could not be moved to ACTIVE. Current status: ${job.status.value}.`);
         this.activeJobs--;
         return;
       }
-      await this.jobRepository.update(job);
+      // Save job as ACTIVE before processing
+      // Note: job.data might have been updated by a previous partial execution by GenericAgentExecutor
+      // So, using save() instead of update() to ensure full state persistence if job entity was re-fetched.
+      // However, if 'job' is the same instance that GenericAgentExecutor modified, update() is fine.
+      // For robustness with the new agentState in job.data, jobRepository.save is better.
+      await this.jobRepository.save(job);
 
-      try {
-        const result = await this.processor.process(job);
+      const executorResult: AgentExecutorResult = await this.agentExecutor.processJob(job);
 
-        if (result !== undefined) {
-          job.moveToCompleted(result as POutput);
-          console.log(`Job ${job.id} completed successfully.`);
-        } else {
-          job.moveToDelayed(0);
-          console.log(`Job ${job.id} requires continuation, moved to DELAYED for re-polling.`);
-        }
-      } catch (error: any) {
-        console.error(`Error processing job ${job.id}:`, error.message);
-        if (job.attempts < job.maxAttempts) {
-          const nextRetryDelay = job.calculateNextRetryDelay(); // Use default base delay from Job entity
-          job.moveToDelayed(nextRetryDelay);
-          console.log(`Job ${job.id} failed. Will retry in ${nextRetryDelay}ms. Attempt ${job.attempts}/${job.maxAttempts}.`);
-        } else {
-          job.moveToFailed(error.message || 'Max attempts reached');
-          console.log(`Job ${job.id} failed after ${job.maxAttempts} attempts.`);
-        }
+      // IMPORTANT: GenericAgentExecutor modifies job.data directly.
+      // Now, WorkerService needs to persist this modified job object.
+
+      switch (executorResult.status) {
+        case 'COMPLETED':
+          job.moveToCompleted(executorResult.output || { message: executorResult.message });
+          console.log(`WorkerService: Job ${job.id} COMPLETED by agent. Message: ${executorResult.message}`);
+          await this.jobRepository.save(job); // Save final state
+          break;
+        case 'FAILED':
+          job.moveToFailed(executorResult.message); // Store failure message
+          console.log(`WorkerService: Job ${job.id} FAILED execution by agent. Message: ${executorResult.message}`);
+          await this.jobRepository.save(job); // Save final state
+          break;
+        case 'CONTINUE_PROCESSING':
+          // AgentExecutor has updated job.data with new agentState.
+          // WorkerService needs to save this job, and it should be picked up again.
+          // Move to WAITING to be picked up immediately in next poll cycle, or DELAYED for a short pause.
+          job.moveToWaiting(); // Or job.moveToDelayed(500); // e.g., 0.5 second delay
+          console.log(`WorkerService: Job ${job.id} requires CONTINUATION. Message: ${executorResult.message}. Job saved and re-queued.`);
+          await this.jobRepository.save(job); // Persist the updated job.data (with agentState)
+          break;
+        default:
+          console.error(`WorkerService: Unknown status from AgentExecutor for job ${job.id}: ${executorResult.status}`);
+          job.moveToFailed(\`Unknown executor status: \${executorResult.status}\`);
+          await this.jobRepository.save(job);
       }
-      await this.jobRepository.update(job);
-
-    } catch (outerError) {
-      console.error(`Critical error in processJob for job ${job.id}:`, outerError);
-      try {
-        // Attempt to fetch the latest state and mark as FAILED if it was left ACTIVE
-        const currentJobState = await this.jobRepository.findById(job.id);
-        if (currentJobState && currentJobState.status.is(JobStatusType.ACTIVE)) {
-            currentJobState.moveToFailed('Critical processing error');
-            await this.jobRepository.update(currentJobState);
-            console.error(`Job ${job.id} marked as FAILED due to critical error during processing loop.`);
-        }
-      } catch (rescueError) {
-          console.error(`Failed to update job ${job.id} to FAILED after critical error:`, rescueError);
+    } catch (error: any) { // Catch errors from agentExecutor.processJob or job state transitions
+      console.error(`WorkerService: Error processing job ${job.id}:`, error.message);
+      // Generic retry logic (could be enhanced)
+      if (job.status.is(JobStatusType.ACTIVE)) { // Ensure it was active
+          if (job.attempts < job.maxAttempts) {
+              const nextRetryDelay = job.calculateNextRetryDelay();
+              job.moveToDelayed(nextRetryDelay);
+              console.log(`Job ${job.id} failed. Will retry in ${nextRetryDelay}ms. Attempt ${job.attempts}/${job.maxAttempts}.`);
+          } else {
+              job.moveToFailed(error.message || 'Max attempts reached after worker error');
+              console.log(`Job ${job.id} failed after ${job.maxAttempts} attempts.`);
+          }
+          await this.jobRepository.save(job); // Save updated state
+      } else {
+          // If it wasn't even active, something went wrong earlier. Log and don't change state further.
+          console.error(`Job ${job.id} was not in ACTIVE state when error occurred in worker. Current status: ${job.status.value}`);
       }
     } finally {
       this.activeJobs--;
