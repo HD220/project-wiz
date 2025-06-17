@@ -1,18 +1,12 @@
-import { useEffect, useState } from 'react';
-import { placeholderUserSidebarNavItems, UserSidebarNavItemPlaceholder } from '../lib/placeholders';
+import { useSyncExternalStore } from 'react';
+import { subscribe, getSnapshot } from '@/infrastructure/frameworks/react/stores/user-sidebar-nav-items-store'; // Adjusted path
+import type { UserSidebarNavItemPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders'; // Adjusted path
 
-export const useSyncedUserSidebarNavItems = () => {
-  const [navItems, setNavItems] = useState<UserSidebarNavItemPlaceholder[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setNavItems(placeholderUserSidebarNavItems);
-      setIsLoading(false);
-    }, 1000); // Simulate 1 second delay
-
-    return () => clearTimeout(timer); // Cleanup timer on unmount
-  }, []);
-
-  return { navItems, isLoading };
-};
+/**
+ * Hook to get the current user sidebar nav items, updated in real-time via IPC events
+ * from the Electron main process.
+ */
+export function useSyncedUserSidebarNavItems(): UserSidebarNavItemPlaceholder[] {
+  const navItems = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return navItems || [];
+}

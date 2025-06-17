@@ -1,25 +1,18 @@
-import { useEffect, useState } from 'react';
-import { placeholderProjectNavItems, ProjectNavItemPlaceholder } from '../lib/placeholders';
+import { useSyncExternalStore } from 'react';
+import {
+    subscribe,
+    getSnapshot
+} from '@/infrastructure/frameworks/react/stores/project-nav-items-store';
+import type { ProjectNavItemsState } from '@/infrastructure/frameworks/react/stores/project-nav-items-store';
 
-export const useSyncedProjectNavItems = (projectId: string | null | undefined) => {
-  const [navItems, setNavItems] = useState<ProjectNavItemPlaceholder[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (projectId) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        // In a real scenario, you might fetch nav items specific to the projectId
-        setNavItems(placeholderProjectNavItems);
-        setIsLoading(false);
-      }, 1000); // Simulate 1 second delay
-
-      return () => clearTimeout(timer); // Cleanup timer on unmount
-    } else {
-      setNavItems([]);
-      setIsLoading(false);
-    }
-  }, [projectId]);
-
-  return { navItems, isLoading };
-};
+/**
+ * Hook to get the nav items for the active project, loading state, and active project ID.
+ * Data is updated in real-time if the store receives IPC events for the active project.
+ *
+ * To load or change project nav items, import and call `loadNavItemsForProject(projectId)`
+ * from `@/infrastructure/frameworks/react/stores/project-nav-items-store` directly in your component.
+ */
+export function useSyncedProjectNavItems(): ProjectNavItemsState {
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return state;
+}

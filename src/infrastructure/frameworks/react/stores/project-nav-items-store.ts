@@ -1,10 +1,15 @@
-import type { ProjectNavItemPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders'; // Adjusted path
+import type { ProjectNavItemPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders';
 
-// Augment Window interface for Electron API
+export type ProjectNavItemsState = {
+  navItems: ProjectNavItemPlaceholder[] | null;
+  isLoading: boolean;
+  activeProjectIdForNav: string | null;
+};
+
+// Augment Window interface (assuming it's correctly defined for onProjectNavItemsChanged and api.invoke)
 declare global {
   interface Window {
     electronAPI?: {
-      // ... other existing listeners ...
       onProjectNavItemsChanged: (callback: (data: { projectId: string; navItems: ProjectNavItemPlaceholder[] | null }) => void) => void;
       removeProjectNavItemsChangedListener: (callback: (data: { projectId: string; navItems: ProjectNavItemPlaceholder[] | null }) => void) => void;
     };
@@ -14,16 +19,16 @@ declare global {
   }
 }
 
-let currentNavItemsSnapshot: ProjectNavItemPlaceholder[] | null = null;
-let activeProjectIdForNav: string | null = null;
+let storeState: ProjectNavItemsState = {
+  navItems: null,
+  isLoading: false,
+  activeProjectIdForNav: null,
+};
+
 const listeners = new Set<() => void>();
 
-export function getSnapshot(): ProjectNavItemPlaceholder[] | null {
-  return currentNavItemsSnapshot;
-}
-
-export function getActiveProjectIdForNav(): string | null {
-  return activeProjectIdForNav;
+export function getSnapshot(): ProjectNavItemsState {
+  return storeState;
 }
 
 export function subscribe(listener: () => void): () => void {
@@ -34,6 +39,7 @@ export function subscribe(listener: () => void): () => void {
 }
 
 function emitChange(): void {
+  storeState = { ...storeState }; // Ensure new object for change detection
   for (const listener of listeners) {
     listener();
   }
@@ -41,8 +47,9 @@ function emitChange(): void {
 
 function handleProjectNavItemsChanged(data: { projectId: string; navItems: ProjectNavItemPlaceholder[] | null }): void {
   console.log("project-nav-items-store: Received project nav items update via IPC", data);
-  if (data.projectId === activeProjectIdForNav) {
-    currentNavItemsSnapshot = data.navItems || []; // Ensure array or null
+  if (data.projectId === storeState.activeProjectIdForNav) {
+    storeState.navItems = data.navItems || []; // Ensure array or null
+    storeState.isLoading = false; // Assume IPC update means loading is done
     emitChange();
   }
 }
@@ -50,39 +57,46 @@ function handleProjectNavItemsChanged(data: { projectId: string; navItems: Proje
 export async function loadNavItemsForProject(projectId: string | null): Promise<void> {
   if (!projectId) {
     console.log("project-nav-items-store: Project ID is null, clearing nav items.");
-    activeProjectIdForNav = null;
-    currentNavItemsSnapshot = null;
+    storeState.activeProjectIdForNav = null;
+    storeState.navItems = null;
+    storeState.isLoading = false;
     emitChange();
     return;
   }
 
-  if (activeProjectIdForNav === projectId && currentNavItemsSnapshot !== null) {
-    console.log(`project-nav-items-store: Nav items for project ${projectId} already loaded.`);
-    return;
-  }
+  // if (storeState.activeProjectIdForNav === projectId && storeState.navItems !== null && !storeState.isLoading) {
+  //   console.log(`project-nav-items-store: Nav items for project ${projectId} already loaded.`);
+  //   return;
+  // }
 
   console.log(`project-nav-items-store: Loading nav items for project ${projectId}...`);
-  activeProjectIdForNav = projectId;
-  currentNavItemsSnapshot = null;
+  storeState.activeProjectIdForNav = projectId;
+  storeState.navItems = null;
+  storeState.isLoading = true;
   emitChange();
 
   if (window.api?.invoke) {
     try {
       const navItems = await window.api.invoke("query:get-project-nav-items", { projectId }) as ProjectNavItemPlaceholder[] | null;
       console.log(`project-nav-items-store: Initial nav items for project ${projectId} fetched:`, navItems);
-      if(activeProjectIdForNav === projectId) {
-        currentNavItemsSnapshot = navItems || [];
+      if (storeState.activeProjectIdForNav === projectId) {
+        storeState.navItems = navItems || [];
       }
     } catch (error) {
       console.error(`project-nav-items-store: Failed to initialize nav items for ${projectId}:`, error);
-      if(activeProjectIdForNav === projectId) {
-        currentNavItemsSnapshot = null;
+      if (storeState.activeProjectIdForNav === projectId) {
+        storeState.navItems = null;
+      }
+    } finally {
+      if (storeState.activeProjectIdForNav === projectId) {
+        storeState.isLoading = false;
       }
     }
   } else {
     console.warn("project-nav-items-store: window.api.invoke is not available.");
-    if(activeProjectIdForNav === projectId) {
-      currentNavItemsSnapshot = null;
+    if (storeState.activeProjectIdForNav === projectId) {
+      storeState.navItems = null;
+      storeState.isLoading = false;
     }
   }
   emitChange();

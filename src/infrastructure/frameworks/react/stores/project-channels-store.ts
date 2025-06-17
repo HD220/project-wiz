@@ -1,10 +1,15 @@
-import type { ProjectChannelPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders'; // Adjusted path
+import type { ProjectChannelPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders';
 
-// Augment Window interface for Electron API
+export type ProjectChannelsState = {
+  channels: ProjectChannelPlaceholder[] | null;
+  isLoading: boolean;
+  activeProjectIdForChannels: string | null;
+};
+
+// Augment Window interface (assuming it's correctly defined for onProjectChannelsChanged and api.invoke)
 declare global {
   interface Window {
     electronAPI?: {
-      // ... other existing listeners ...
       onProjectChannelsChanged: (callback: (data: { projectId: string; channels: ProjectChannelPlaceholder[] | null }) => void) => void;
       removeProjectChannelsChangedListener: (callback: (data: { projectId: string; channels: ProjectChannelPlaceholder[] | null }) => void) => void;
     };
@@ -14,16 +19,16 @@ declare global {
   }
 }
 
-let currentChannelsSnapshot: ProjectChannelPlaceholder[] | null = null;
-let activeProjectIdForChannels: string | null = null;
+let storeState: ProjectChannelsState = {
+  channels: null,
+  isLoading: false,
+  activeProjectIdForChannels: null,
+};
+
 const listeners = new Set<() => void>();
 
-export function getSnapshot(): ProjectChannelPlaceholder[] | null {
-  return currentChannelsSnapshot;
-}
-
-export function getActiveProjectIdForChannels(): string | null {
-  return activeProjectIdForChannels;
+export function getSnapshot(): ProjectChannelsState {
+  return storeState;
 }
 
 export function subscribe(listener: () => void): () => void {
@@ -34,6 +39,7 @@ export function subscribe(listener: () => void): () => void {
 }
 
 function emitChange(): void {
+  storeState = { ...storeState }; // Ensure new object for change detection
   for (const listener of listeners) {
     listener();
   }
@@ -41,8 +47,9 @@ function emitChange(): void {
 
 function handleProjectChannelsChanged(data: { projectId: string; channels: ProjectChannelPlaceholder[] | null }): void {
   console.log("project-channels-store: Received project channels update via IPC", data);
-  if (data.projectId === activeProjectIdForChannels) {
-    currentChannelsSnapshot = data.channels || []; // Ensure array or null
+  if (data.projectId === storeState.activeProjectIdForChannels) {
+    storeState.channels = data.channels || []; // Ensure array or null
+    storeState.isLoading = false; // Assume IPC update means loading is done
     emitChange();
   }
 }
@@ -50,39 +57,46 @@ function handleProjectChannelsChanged(data: { projectId: string; channels: Proje
 export async function loadChannelsForProject(projectId: string | null): Promise<void> {
   if (!projectId) {
     console.log("project-channels-store: Project ID is null, clearing channels.");
-    activeProjectIdForChannels = null;
-    currentChannelsSnapshot = null;
+    storeState.activeProjectIdForChannels = null;
+    storeState.channels = null;
+    storeState.isLoading = false;
     emitChange();
     return;
   }
 
-  if (activeProjectIdForChannels === projectId && currentChannelsSnapshot !== null) {
-    console.log(`project-channels-store: Channels for project ${projectId} already loaded.`);
-    return;
-  }
+  // if (storeState.activeProjectIdForChannels === projectId && storeState.channels !== null && !storeState.isLoading) {
+  //   console.log(`project-channels-store: Channels for project ${projectId} already loaded.`);
+  //   return;
+  // }
 
   console.log(`project-channels-store: Loading channels for project ${projectId}...`);
-  activeProjectIdForChannels = projectId;
-  currentChannelsSnapshot = null;
+  storeState.activeProjectIdForChannels = projectId;
+  storeState.channels = null;
+  storeState.isLoading = true;
   emitChange();
 
   if (window.api?.invoke) {
     try {
       const channels = await window.api.invoke("query:get-project-channels", { projectId }) as ProjectChannelPlaceholder[] | null;
       console.log(`project-channels-store: Initial channels for project ${projectId} fetched:`, channels);
-      if(activeProjectIdForChannels === projectId) {
-        currentChannelsSnapshot = channels || [];
+      if (storeState.activeProjectIdForChannels === projectId) {
+        storeState.channels = channels || [];
       }
     } catch (error) {
       console.error(`project-channels-store: Failed to initialize channels for ${projectId}:`, error);
-      if(activeProjectIdForChannels === projectId) {
-        currentChannelsSnapshot = null;
+      if (storeState.activeProjectIdForChannels === projectId) {
+        storeState.channels = null;
+      }
+    } finally {
+      if (storeState.activeProjectIdForChannels === projectId) {
+        storeState.isLoading = false;
       }
     }
   } else {
     console.warn("project-channels-store: window.api.invoke is not available.");
-    if(activeProjectIdForChannels === projectId) {
-      currentChannelsSnapshot = null;
+    if (storeState.activeProjectIdForChannels === projectId) {
+      storeState.channels = null;
+      storeState.isLoading = false;
     }
   }
   emitChange();

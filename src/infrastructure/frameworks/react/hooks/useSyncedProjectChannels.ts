@@ -1,25 +1,18 @@
-import { useEffect, useState } from 'react';
-import { placeholderProjectChannels, ProjectChannelPlaceholder } from '../lib/placeholders';
+import { useSyncExternalStore } from 'react';
+import {
+    subscribe,
+    getSnapshot
+} from '@/infrastructure/frameworks/react/stores/project-channels-store';
+import type { ProjectChannelsState } from '@/infrastructure/frameworks/react/stores/project-channels-store';
 
-export const useSyncedProjectChannels = (projectId: string | null | undefined) => {
-  const [channels, setChannels] = useState<ProjectChannelPlaceholder[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (projectId) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        // In a real scenario, you might fetch channels specific to the projectId
-        setChannels(placeholderProjectChannels);
-        setIsLoading(false);
-      }, 1000); // Simulate 1 second delay
-
-      return () => clearTimeout(timer); // Cleanup timer on unmount
-    } else {
-      setChannels([]);
-      setIsLoading(false);
-    }
-  }, [projectId]);
-
-  return { channels, isLoading };
-};
+/**
+ * Hook to get the channels for the active project, loading state, and active project ID.
+ * Data is updated in real-time if the store receives IPC events for the active project.
+ *
+ * To load or change project channels, import and call `loadChannelsForProject(projectId)`
+ * from `@/infrastructure/frameworks/react/stores/project-channels-store` directly in your component.
+ */
+export function useSyncedProjectChannels(): ProjectChannelsState {
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return state;
+}

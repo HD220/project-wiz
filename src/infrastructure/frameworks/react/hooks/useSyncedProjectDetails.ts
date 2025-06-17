@@ -1,30 +1,21 @@
-import { useEffect, useState } from 'react';
-import { getProjectDetailsPlaceholder, PlaceholderTask, PlaceholderTeamMember } from '../lib/placeholders';
+import { useSyncExternalStore } from 'react';
+import {
+    subscribe,
+    getSnapshot,
+    // No longer directly calling loadProjectDetails from the hook,
+    // but components will import it from the store.
+    // loadProjectDetails
+} from '@/infrastructure/frameworks/react/stores/project-details-store';
+import type { ProjectDetailsState } from '@/infrastructure/frameworks/react/stores/project-details-store';
 
-interface ProjectDetails {
-  tasks: PlaceholderTask[];
-  teamMembers: PlaceholderTeamMember[];
+/**
+ * Hook to get the current project details (tasks, team members), loading state, and active project ID.
+ * Data is updated in real-time if the store receives IPC events for the active project.
+ *
+ * To load or change project details, import and call `loadProjectDetails(projectId)`
+ * from `@/infrastructure/frameworks/react/stores/project-details-store` directly in your component.
+ */
+export function useSyncedProjectDetails(): ProjectDetailsState {
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return state;
 }
-
-export const useSyncedProjectDetails = (projectId: string | null | undefined) => {
-  const [projectDetails, setProjectDetails] = useState<ProjectDetails | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (projectId) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        const details = getProjectDetailsPlaceholder(projectId);
-        setProjectDetails(details);
-        setIsLoading(false);
-      }, 1000); // Simulate 1 second delay
-
-      return () => clearTimeout(timer); // Cleanup timer on unmount
-    } else {
-      setProjectDetails(null);
-      setIsLoading(false);
-    }
-  }, [projectId]);
-
-  return { projectDetails, isLoading };
-};

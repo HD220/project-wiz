@@ -1,18 +1,12 @@
-import { useEffect, useState } from 'react';
-import { personasPlaceholder, PersonaPlaceholder } from '../lib/placeholders';
+import { useSyncExternalStore } from 'react';
+import { subscribe, getSnapshot } from '@/infrastructure/frameworks/react/stores/personas-store'; // Adjusted path
+import type { PersonaPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders'; // Adjusted path
 
-export const useSyncedPersonas = () => {
-  const [personas, setPersonas] = useState<PersonaPlaceholder[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPersonas(personasPlaceholder);
-      setIsLoading(false);
-    }, 1000); // Simulate 1 second delay
-
-    return () => clearTimeout(timer); // Cleanup timer on unmount
-  }, []);
-
-  return { personas, isLoading };
-};
+/**
+ * Hook to get the current personas list, updated in real-time via IPC events
+ * from the Electron main process.
+ */
+export function useSyncedPersonas(): PersonaPlaceholder[] {
+  const personas = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return personas || [];
+}

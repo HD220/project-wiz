@@ -1,18 +1,12 @@
-import { useEffect, useState } from 'react';
-import { llmProvidersPlaceholder, LLMProviderPlaceholder } from '../lib/placeholders';
+import { useSyncExternalStore } from 'react';
+import { subscribe, getSnapshot } from '@/infrastructure/frameworks/react/stores/llm-providers-store'; // Adjusted path
+import type { LLMProviderPlaceholder } from '@/infrastructure/frameworks/react/lib/placeholders'; // Adjusted path
 
-export const useSyncedLLMProviders = () => {
-  const [llmProviders, setLLMProviders] = useState<LLMProviderPlaceholder[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLLMProviders(llmProvidersPlaceholder);
-      setIsLoading(false);
-    }, 1000); // Simulate 1 second delay
-
-    return () => clearTimeout(timer); // Cleanup timer on unmount
-  }, []);
-
-  return { llmProviders, isLoading };
-};
+/**
+ * Hook to get the current LLM providers list, updated in real-time via IPC events
+ * from the Electron main process.
+ */
+export function useSyncedLLMProviders(): LLMProviderPlaceholder[] {
+  const providers = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return providers || [];
+}
