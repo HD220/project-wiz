@@ -71,7 +71,7 @@ O `AutonomousAgent` é invocado por um `Worker` que lhe passa uma `Job` (Activit
 
 ### IAgentService
 
-O `IAgentService` é uma interface que permite ao `AutonomousAgent` despachar `Tasks` para execução por um `Worker`. Ele abstrai como a Task será executada, focando em expor a capacidade de "fazer" algo.
+O `IAgentService` é uma interface que permite ao `AutonomousAgent` despachar `Tasks` para execução por um `Worker`. Ele abstrai como a Task será executada, focando em expor a capacidade de "fazer" algo. O `IAgentService` foca em uma interface simples para o `AutonomousAgent` despachar tasks, utilizando o padrão Result para retornos. A assinatura e os métodos de gerenciamento de estado são projetados para suportar claramente este despacho.
 
 Quando o `AutonomousAgent` decide uma ação, ele invoca o `IAgentService`, que pode:
 1.  Criar novas `Jobs` (Activities) na fila para processamento assíncrono.
@@ -82,6 +82,7 @@ Após a execução da `Task`, o `IAgentService` retorna o resultado ao `Autonomo
 ### Job
 
 Uma **Job** é a representação persistida de uma unidade de trabalho, gerenciada pela **Queue**. No contexto dos Agentes Autônomos, a Job encapsula uma **Activity** completa, armazenando o `ActivityContext` em seu campo `data`.
+A entidade Job é projetada com campos encapsulados e modificações são tipicamente gerenciadas através do padrão Builder. A validação dos dados da Job é realizada externamente, por exemplo, utilizando schemas Zod. A lógica de transição de status é idealmente gerenciada por serviços dedicados na camada de aplicação.
 
 Principais atributos da Job:
 - `id`, `name`, `payload` (entrada inicial, não mutável internamente).
@@ -119,7 +120,7 @@ Interage com `WorkerPool` (notificando sobre novas Jobs) e `Workers` (recebendo 
 
 ### Task
 
-Uma **Task** representa a lógica de execução em memória para um tipo específico de trabalho, encapsulando uma ação acionável dentro do contexto de uma Job/Activity. Ela interage com LLMs e Tools, operando em memória sem se preocupar com persistência ou filas. A Task recebe dados da Job (incluindo `ActivityContext`) e Tools injetadas pelo Agente.
+Uma **Task** representa a lógica de execução em memória para um tipo específico de trabalho, encapsulando uma ação acionável dentro do contexto de uma Job/Activity. Ela interage com LLMs e Tools, operando em memória sem se preocupar com persistência ou filas. A Task recebe dados da Job (incluindo `ActivityContext`) e Tools injetadas pelo Agente. A implementação das Tasks geralmente adere a uma interface comum (por exemplo, `Task.interface.ts`) e pode herdar de uma classe base abstrata (como `BaseTask`) que pode fornecer funcionalidade ou estrutura comum. Exemplos de Tasks concretas incluem a execução de uma Tool específica (`CallToolTask`) ou a realização de um ciclo de raciocínio com o LLM (`LLMReasoningTask`).
 
 Retornos da Task e suas consequências:
 1.  **Sucesso:** A Task concluiu. O Worker pode prosseguir ou finalizar a Job.
@@ -134,7 +135,7 @@ Tipos de Tools:
 - **Tools do Agente:** Genéricas, úteis para diversos agentes e tarefas (ex: manipulação de arquivos).
 - **Tools da Task/Job:** Específicas para o contexto de uma Task ou tipo de Job. A classe `Task` define quais Tools específicas são acessíveis.
 
-Tools bem definidas, com interfaces claras, são cruciais para que o LLM as utilize eficazmente.
+Tools bem definidas, com interfaces claras, são cruciais para que o LLM as utilize eficazmente. O design do sistema de Tools visa o registro dinâmico, descrições claras para consumo pelo LLM (essenciais para prompt engineering eficaz), e validação robusta dos inputs fornecidos às tools. Adicionalmente, os adaptadores que implementam as interfaces das tools devem ser projetados para resiliência, especialmente se interagirem com sistemas externos (e.g., aplicando Circuit Breakers para operações de FileSystem ou Terminal onde apropriado). A validação de parâmetros na fronteira do adaptador é essencial, assim como a observabilidade através de métricas e logs estruturados para operações críticas. Considera-se um sistema de plug-in para novos adaptadores de tools para facilitar a extensibilidade do framework.
 
 ### Worker Pool
 

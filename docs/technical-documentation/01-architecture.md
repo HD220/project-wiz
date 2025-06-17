@@ -15,33 +15,43 @@ A Clean Architecture organiza o código em camadas concêntricas, onde as depend
 - **Camadas Internas:** Contêm as regras de negócio mais abstratas e importantes.
 - **Camadas Externas:** Contêm detalhes de implementação, como banco de dados, UI, frameworks, etc.
 
-Essa estrutura torna o sistema mais fácil de testar, manter e evoluir, pois as mudanças em detalhes externos (como trocar o banco de dados) não afetam a lógica de negócio central.
+Essa estrutura torna o sistema mais fácil de testar, manter e evoluir, pois as mudanças em detalhes externos (como trocar o banco de dados) não afetam a lógica de negócio central. Processos de revisão de código e refatoração são aplicados continuamente para assegurar a aderência a estes princípios arquiteturais, resultando em melhorias na qualidade do código, coesão e redução da complexidade ciclomática.
 
 ### Domain Layer (O Núcleo)
 
 **Propósito:** O Domain Layer é o coração da aplicação, contendo as regras de negócio e a lógica essencial que não depende de frameworks ou tecnologias externas. É a camada mais interna e estável da arquitetura.
 
 **Componentes Principais:**
-- **Entidades:** Representam os conceitos de negócio com estado e comportamento. Possuem identidade e ciclo de vida (ex: Job, Worker, AgentInternalState).
-- **Value Objects:** Representam valores descritivos que não possuem identidade única. São imutáveis e definidos por seus atributos (ex: JobId, ActivityType).
+- **Entidades:** Representam os conceitos de negócio com estado e comportamento. Possuem identidade e ciclo de vida (ex: Job, Worker, AgentInternalState). As entidades são projetadas com campos encapsulados (frequentemente em um objeto `fields`), com acesso primário via getters e modificações geralmente gerenciadas por meio de builders. A validação externa (ex: Zod schemas) é comum, e a minimização de setters públicos promove a imutabilidade onde aplicável.
+- **Value Objects:** Representam valores descritivos que não possuem identidade única. São imutáveis, definidos por seus atributos e devem possuir validação abrangente (ex: JobId, ActivityType). Lógica de comportamento complexa é geralmente evitada em VOs.
 - **Interfaces de Repositório:** Contratos que definem como os dados do domínio podem ser persistidos e recuperados. A implementação desses contratos reside na camada de Infraestrutura (ex: IJobRepository).
+- **Lógica de Negócio em Entidades vs. Serviços:** Um princípio de design adotado é que a lógica de negócio mais complexa, especialmente aquela que envolve transições de estado de entidades (como o status de uma Job) ou coordena múltiplas entidades, deve ser encapsulada em serviços na Camada de Aplicação, em vez de residir diretamente nos métodos das entidades do domínio. Isso mantém as entidades focadas em representar o estado e as regras intrínsecas, enquanto os serviços orquestram os processos.
 
 ### Application Layer (Casos de Uso)
 
 **Propósito:** O Application Layer contém a lógica de aplicação que orquestra as interações entre o Domain Layer e o Infrastructure Layer. Define os casos de uso da aplicação.
 
 **Componentes Principais:**
-- **Use Cases:** Classes que implementam fluxos de trabalho específicos (ex: CreateJobUseCase, ProcessJobUseCase).
-- **Ports (Interfaces de Saída):** Interfaces que a camada de Aplicação usa para "falar" com o mundo exterior (a camada de Infraestrutura), sem saber quem está do outro lado (ex: IJobQueue, IWorkerPool).
-- **Serviços de Aplicação:** Componentes que coordenam a lógica de negócio (ex: AutonomousAgent, ProcessJobService).
-- **Factories:** Componentes para criar objetos complexos (ex: TaskFactory). Responsáveis pela criação de objetos complexos, como entidades ou Value Objects, garantindo que sejam criados em um estado válido.
+- **Use Cases:** Classes que implementam fluxos de trabalho específicos (ex: CreateJobUseCase, ProcessJobUseCase), representando as operações centrais que o sistema pode realizar.
+- **Ports (Interfaces de Saída):** Definem contratos para comunicação com a camada de Infraestrutura (ex: `IJobQueue`, `IWorkerPool`), permitindo que as implementações concretas (adapters) sejam facilmente substituídas. A comunicação é primariamente baseada nestas interfaces.
+- **Serviços de Aplicação:** Componentes que coordenam a lógica de negócio e orquestram os Use Cases e Entidades (ex: `AutonomousAgent`, `ProcessJobService`, `QueueService`). Estes serviços visam responsabilidades bem definidas e utilizam consistentemente o tratamento de erros (e.g., padrão Result).
+- **Factories:** Componentes como `TaskFactory` são responsáveis pela criação de objetos complexos (e.g., diferentes tipos de `Tasks`), garantindo que sejam instanciados em um estado válido e com suas dependências corretamente resolvidas.
+- **Injeção de Dependência (DI):** A DI é um princípio central, utilizada sistematicamente para fornecer as dependências aos componentes (e.g., serviços, use cases). A configuração das dependências é geralmente centralizada (potencialmente através de um contêiner de DI dedicado ou módulos de fábrica), promovendo baixo acoplamento e alta testabilidade.
+- **Padrões de Projeto Adicionais:** Além do Factory, outros padrões como Strategy (para selecionar diferentes `Tasks` ou comportamentos) e Facade (para simplificar a interface de subsistemas complexos, como o `IAgentService` faz para o `AutonomousAgent`) são empregados para melhorar a estrutura e manutenibilidade.
 
 ### Infrastructure Layer (Implementações)
 
 **Propósito:** O Infrastructure Layer lida com os detalhes técnicos e externos da aplicação, como bancos de dados, frameworks, serviços externos e interfaces de usuário. É a camada mais externa e volátil.
 
 **Componentes Principais:**
-- **Repositórios:** Implementações concretas das Interfaces de Repositório definidas no Domain Layer. Responsáveis pela comunicação com o banco de dados (ex: JobDrizzleRepository).
+- **Repositórios e Persistência:**
+    - As implementações concretas das Interfaces de Repositório (definidas no Domain Layer) são responsáveis pela comunicação com o banco de dados. A principal tecnologia de persistência utilizada é o **Drizzle ORM com SQLite**.
+    - As entidades do domínio, como `Job` e `Worker`, possuem schemas Drizzle correspondentes que definem o mapeamento para as tabelas do banco de dados. Campos complexos ou do tipo JSON nas entidades (e.g., `payload`, `data`, `result` na `Job`) são geralmente armazenados como colunas TEXT no SQLite e serializados/desserializados pela aplicação.
+    - É crucial manter a consistência dos dados, especialmente para campos enumerados como `Job.status`, cujos valores podem ter variações históricas ou entre diferentes camadas (SQL DDL, Drizzle enum, lógica da entidade no domínio). Migrações de banco de dados e mapeamento cuidadoso são essenciais.
+    - O schema do banco de dados evolui; por exemplo, a entidade `Job` no Drizzle pode incluir campos como `activity_type`, `activity_context`, `parent_id`, e `related_activity_ids` que refletem a integração com o sistema de Activities dos agentes.
+    - Os repositórios implementam as interfaces da camada de Aplicação, garantindo o mapeamento completo dos campos da entidade e utilizando padrões como o `Result` para um tratamento de erros robusto.
+    - Para otimizar o desempenho, índices são aplicados a colunas frequentemente consultadas (ex: `jobs.status`, `jobs.priority`, `workers.status`).
+    - Considerações futuras para a camada de persistência podem incluir a implementação de caching para consultas frequentes e o uso do padrão Unit of Work para gerenciar transações complexas.
 - **Adapters:** Implementações concretas das interfaces de Ports da Aplicação para interagir com tecnologias externas (ex: OpenAILLMAdapter para LLMs, FileSystemToolAdapter para acesso a arquivos). Adaptam interfaces externas (como APIs de terceiros ou sistemas de arquivos) para que possam ser utilizadas pela camada de Aplicação através das Ports.
 - **Serviços de Infraestrutura:** Implementações concretas de serviços definidos nas Ports da camada de Aplicação (ex: serviço de envio de e-mail, serviço de mensageria, ChildProcessWorkerPoolService).
 - **Workers (Infraestrutura):** Processos ou threads que executam tarefas em segundo plano, muitas vezes interagindo com filas ou sistemas de mensageria. (Nota: Estes 'Workers' são um conceito geral da camada de infraestrutura, distintos dos 'Workers' específicos do sistema de Jobs detalhados posteriormente).
@@ -361,9 +371,9 @@ graph TD
 
 ### 7.1. Fila (`Queue`)
 
-*   **Responsabilidade Principal**: Gerenciamento de estado e ciclo de vida das **Jobs**.
+*   **Responsabilidade Principal**: Gerenciamento de estado e ciclo de vida das **Jobs**. O `QueueService` associado à Fila é projetado para tratar adequadamente as dependências entre Jobs e utiliza o padrão Observer para notificar sobre eventos relevantes (e.g., novas Jobs prontas para processamento).
 *   **Persistência**: As Jobs são persistidas em SQLite (inicialmente), utilizando Drizzle ORM. As alterações de schema são gerenciadas através de **migrações versionadas**.
-*   **Funções**: A Fila é a **única** responsável por atualizar o `status` de uma Job, incrementar `attempts`, gerenciar `delay`, `depends_on`, e armazenar `result`. Ela recebe notificações do Worker sobre o desfecho da execução.
+*   **Funções**: A Fila é a **única** responsável por atualizar o `status` de uma Job, incrementar `attempts`, gerenciar `delay`, `depends_on`, e armazenar `result`. Ela recebe notificações do Worker sobre o desfecho da execução. A lógica de retentativa e a flexibilidade para suportar diferentes backends de fila são áreas de contínua atenção e desenvolvimento.
 
 ### 7.2. Processos da Aplicação Electron e Integração IPC
 
@@ -383,14 +393,15 @@ A integração com o Electron e a comunicação Inter-processos (IPC) entre o Ma
 
 ### 7.3. Worker (Orquestrador de Jobs do Agente)
 
-*   **Responsabilidade Principal**: Orquestrar a execução das Jobs por um [Agente](./02-agent-framework.md) específico.
+*   **Responsabilidade Principal**: Orquestrar a execução das Jobs por um [Agente](./02-agent-framework.md) específico. Os Workers são gerenciados por um `WorkerPool` (ex: `ChildProcessWorkerPool`), que é responsável pelo isolamento dos processos de worker, tratamento de seus eventos e gerenciamento da disponibilidade de workers.
 *   **Funcionamento**:
-    1.  Monitora a Fila por Jobs disponíveis que correspondem ao ID do Agente que ele serve.
+    1.  Monitora a Fila por Jobs disponíveis que correspondem ao ID do Agente que ele serve (geralmente via `WorkerPool`).
     2.  Recebe a função de processamento (um método da classe do [Agente](./02-agent-framework.md)) que será executada.
     3.  Pega a **Job** da Fila (transacionando seu status para `executing`).
     4.  Chama a função de processamento do [Agente](./02-agent-framework.md), passando a Job.
     5.  **Captura exceções (`throw new Error`)** lançadas pela função de processamento do Agente.
     6.  Com base no sucesso ou no erro capturado, o Worker notifica a Fila para que esta atualize o status da Job e armazene o resultado ou erro.
+    *Considerações para o `WorkerPool` incluem o gerenciamento do número de workers (atualmente fixo, com auto-scaling como possível melhoria) e a implementação de health checks para os workers individuais.*
 
 ### 7.4. Agente
 
