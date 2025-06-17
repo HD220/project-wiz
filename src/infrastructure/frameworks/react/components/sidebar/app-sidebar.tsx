@@ -17,54 +17,9 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
-
-export type Project = {
-  name: string;
-  tooltip?: string;
-  icon?: ReactNode;
-};
-
-const projects: Project[] = [
-  {
-    name: "Projeto 1",
-  },
-  {
-    name: "Projeto 2",
-  },
-  {
-    name: "Projeto 3",
-  },
-  {
-    name: "Projeto 4",
-  },
-  {
-    name: "Projeto 5",
-  },
-  {
-    name: "Projeto 6",
-  },
-  {
-    name: "Projeto 7",
-  },
-  {
-    name: "Projeto 8",
-  },
-  {
-    name: "Projeto 9",
-  },
-  {
-    name: "Projeto 10",
-  },
-  {
-    name: "Projeto 11",
-  },
-  {
-    name: "Projeto 12",
-  },
-  {
-    name: "Projeto 13",
-  },
-];
+import { placeholderAppSidebarProjects, AppSidebarProjectPlaceholder } from "@/lib/placeholders";
+import { Trans, t } from "@lingui/macro";
+import { SystemText } from "@/components/messages/common";
 
 export function MenuItem({
   tooltip,
@@ -114,33 +69,33 @@ export function MenuItem({
 export function AppSidebar() {
   return (
     <div className="flex w-16 flex-col items-center gap-2 bg-card/70 h-screen overflow-hidden shrink-0 pt-2">
-      <MenuItem tooltip="Início" to="/user" variant={"secondary"}>
+      <MenuItem tooltip={t`Início`} to="/user" variant={"secondary"}>
         <Home className="h-6 w-6" />
-        <span className="sr-only">Project Wiz</span>
+        <span className="sr-only"><SystemText /></span>
       </MenuItem>
       <Separator className="my-1" />
-      <MenuItem className="cursor-pointer" tooltip="Adicionar Projeto" asChild>
-        <Button>
+      <MenuItem className="cursor-pointer" tooltip={t`Adicionar Projeto`} asChild>
+        <Button onClick={() => console.warn("TODO: Implement Adicionar Projeto action")}>
           <Plus className="h-6 w-6" />
-          <span className="sr-only">Adicionar Projeto</span>
+          <span className="sr-only"><Trans>Adicionar Projeto</Trans></span>
         </Button>
       </MenuItem>
-      <MenuItem className="cursor-pointer" tooltip="Ver Arquivados" asChild>
-        <Button>
+      <MenuItem className="cursor-pointer" tooltip={t`Ver Arquivados`} asChild>
+        <Button onClick={() => console.warn("TODO: Implement Ver Arquivados action")}>
           <Archive className="h-6 w-6" />
-          <span className="sr-only">Arquivados</span>
+          <span className="sr-only"><Trans>Arquivados</Trans></span>
         </Button>
       </MenuItem>
       <Separator className="my-1" />
       <div className="flex-1 overflow-hidden gap-2 mx-auto">
         <ScrollArea className="h-full scrollbar-hide">
           <div className="flex flex-col gap-2 pb-2">
-            {projects.map((project, idx) => (
+            {placeholderAppSidebarProjects.map((project: AppSidebarProjectPlaceholder) => (
               <MenuItem
-                key={idx}
+                key={project.id}
                 tooltip={project.tooltip || project.name}
                 to={`/project/$id`}
-                params={{ id: `${idx}` }}
+                params={{ id: project.id }}
                 variant={"secondary"}
               >
                 <span>{project.name.substring(0, 2).toUpperCase()}</span>

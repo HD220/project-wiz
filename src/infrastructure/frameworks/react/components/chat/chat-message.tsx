@@ -6,13 +6,15 @@ export type ChatMessageProps = {
   avatar?: string;
   conteudo: string;
   timestamp: string;
+  isCurrentUser?: boolean;
 };
 
 export function ChatMessage({
-  message: { autor, avatar, conteudo, timestamp },
+  message: { autor, avatar, conteudo, timestamp, isCurrentUser },
 }: {
   message: ChatMessageProps;
 }) {
+  // TODO: Use `isCurrentUser` to apply different styling for user vs other messages
   return (
     <div className="group flex gap-4 px-4 py-2 hover:bg-zinc-800/50">
       <Avatar className="mt-0.5 h-10 w-10">
