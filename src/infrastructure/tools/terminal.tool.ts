@@ -17,8 +17,8 @@ export class TerminalTool {
   constructor(baseCwd: string = process.cwd()) {
     // In a real scenario, ensure baseCwd is a secure, isolated directory.
     // For now, using process.cwd() or a configurable path.
-    this.CWD = baseCwd;
-    console.log(\`TerminalTool initialized with base CWD: \${this.CWD}\`);
+    this.CWD = path.resolve(baseCwd); // Ensures this.CWD is stored as an absolute path
+    console.log(\`TerminalTool initialized with absolute base CWD: \${this.CWD}\`);
     // Ensure this directory exists, or handle error
     // For simplicity, we assume it exists or commands will handle it.
   }

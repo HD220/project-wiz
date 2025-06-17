@@ -12,11 +12,18 @@ export interface PlanStep extends Record<string, any> {
 */
 
 // Define structure for agent state stored within Job.data
+export interface ExecutionHistoryEntry {
+  timestamp: Date;
+  type: 'system_error' | 'llm_event' | 'llm_error' | 'llm_warning' | 'tool_call';
+  name: string; // e.g., 'api_key_check', 'planning', 'fileSystem.readFile'
+  params: any;
+  result: any;
+  error?: string;
+}
+
 export interface AgentJobState {
-  // currentPlan: PlanStep[]; // Removed for iterative model
-  // completedSteps: number;  // Removed for iterative model
-  conversationHistory: Message[]; // Stores { role: 'user' | 'assistant' | 'tool', content: string, toolInvocations?: ..., toolResults?: ... }
-  executionHistory?: { tool: string; params: any; result: any; error?: string }[]; // Can still be useful for a simpler log of executed actions
+  conversationHistory: Message[];
+  executionHistory?: ExecutionHistoryEntry[];
 }
 
 // Define the result structure for the executor's process method

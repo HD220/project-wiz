@@ -5,12 +5,11 @@ import { toolRegistry, ToolRegistry } from './tool-registry';
 import { IAgentTool } from '../../core/tools/tool.interface';
 import {
   AgentJobState,
-  // PlanStep, // No longer using pre-defined PlanStep for iterative execution
   AgentExecutorResult
-} from '../../core/domain/jobs/job-processing.types';
+} from '../../core/domain/jobs/job-processing.types'; // PlanStep removed
 import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
 
-import { generateObject, tool as aiToolHelper, Tool, Message, ToolInvocation, ToolResult } from 'ai';
+import { generateObject, tool as aiToolHelper, Tool, Message } from 'ai'; // ToolInvocation, ToolResult not directly used by this class anymore
 import { z } from 'zod';
 import { deepseek } from '@ai-sdk/deepseek'; // Or your chosen LLM provider
 
@@ -63,7 +62,7 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
     // --- API Key Check ---
     if (!process.env.DEEPSEEK_API_KEY) { // Or your chosen LLM provider's key
       console.error(`AgentExecutor (${this.personaTemplate.role}): LLM API Key not set.`);
-      agentState.executionHistory.push({ tool: 'system', params: {}, result: null, error: "LLM API Key not set." });
+      agentState.executionHistory.push({ timestamp: new Date(), type: 'system_error', name: 'api_key_check', params: {}, result: null, error: "LLM API Key not set." });
       job.data = { ...job.data, agentState };
       return { status: 'FAILED', message: "LLM API Key not configured." };
     }
@@ -108,7 +107,9 @@ If you call a tool, I will execute it and give you back the result (or an error 
         toolCalls.forEach(tc => {
           const tr = toolResults?.find(r => r.toolCallId === tc.toolCallId);
           agentState.executionHistory?.push({
-              tool: tc.toolName,
+              timestamp: new Date(),
+              type: 'tool_call',
+              name: tc.toolName,
               params: tc.args,
               result: tr?.result !== undefined ? tr.result : "No explicit result from tool execution by SDK.",
               error: tr?.result instanceof Error ? tr.result.message : undefined
@@ -122,35 +123,32 @@ If you call a tool, I will execute it and give you back the result (or an error 
 
       } else if (finishReason === 'stop' || finishReason === 'length') {
         console.log(`AgentExecutor (${this.personaTemplate.role}): Goal considered complete by LLM. Final summary: ${finalObject?.finalSummary}`);
-        agentState.executionHistory?.push({ tool: 'LLM', params: { finalDecision: true }, result: finalObject, error: undefined });
+        agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_event', name: 'goal_completed', params: { finalDecision: true }, result: finalObject, error: undefined });
         job.data = { ...job.data, agentState };
         return { status: 'COMPLETED', message: finalObject?.finalSummary || "Goal achieved.", output: finalObject?.outputData };
 
       } else if (finishReason === 'error') {
           console.error(`AgentExecutor (${this.personaTemplate.role}): LLM generation error.`);
-          agentState.executionHistory?.push({ tool: 'LLM', params: {}, result: null, error: "LLM generation error" });
+          agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_error', name: 'generation', params: {}, result: null, error: "LLM generation error" });
           job.data = { ...job.data, agentState };
           return { status: 'FAILED', message: 'LLM generation error.' };
 
       } else if (finishReason === 'tool-calls' && (!toolCalls || toolCalls.length === 0)) {
-          // This condition means the LLM intended to call tools, but for some reason, they weren't captured or returned.
-          // This might happen if the LLM's response format is off or if there's an issue with how ai-sdk processes it when no valid tool calls are made.
-          console.warn(`AgentExecutor (${this.personaTemplate.role}): LLM finishReason was 'tool-calls' but no toolCalls were processed or returned. This may indicate the LLM tried to call a tool it doesn't have or formatted its request incorrectly.`);
-          agentState.executionHistory?.push({ tool: 'LLM', params: {}, result: null, error: "LLM indicated tool_calls finish reason but no valid calls were processed." });
+          console.warn(`AgentExecutor (${this.personaTemplate.role}): LLM finishReason was 'tool-calls' but no toolCalls were processed/returned. This may indicate the LLM tried to call a tool it doesn't have or formatted its request incorrectly.`);
+          agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_warning', name: 'tool_call_mismatch', params: {}, result: null, error: "LLM indicated tool_calls finish reason but no valid calls were processed." });
           job.data = { ...job.data, agentState };
-          // Treat as needing continuation, as the LLM likely expects to make a tool call.
           return { status: 'CONTINUE_PROCESSING', message: 'LLM intended tool use, but no valid tool calls were made. Review conversation history.' };
       }
 
       console.warn(\`AgentExecutor (\${this.personaTemplate.role}): LLM interaction finished with unhandled reason: \${finishReason}\`);
-      agentState.executionHistory?.push({ tool: 'LLM', params: {}, result: null, error: \`LLM interaction finished with unhandled reason: \${finishReason}\` });
+      agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_warning', name: 'unhandled_finish_reason', params: { finishReason }, result: null, error: \`LLM interaction finished with unhandled reason: \${finishReason}\` });
       job.data = { ...job.data, agentState };
       return { status: 'FAILED', message: \`LLM interaction finished with unhandled reason: \${finishReason}\` };
 
     } catch (error) {
       console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM interaction or tool execution:`, error);
       const errorMessage = error instanceof Error ? error.message : String(error);
-      agentState.executionHistory?.push({ tool: 'system', params: {}, result: null, error: \`LLM/Tool error: ${errorMessage}\` });
+      agentState.executionHistory?.push({ timestamp: new Date(), type: 'system_error', name: 'processJob_exception', params: {}, result: null, error: \`LLM/Tool error: ${errorMessage}\` });
       job.data = { ...job.data, agentState };
       return { status: 'FAILED', message: \`Error during LLM interaction: ${errorMessage}\` };
     }

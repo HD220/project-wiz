@@ -5,10 +5,10 @@ import { randomUUID } from 'crypto';
 export const memoryItemsTable = sqliteTable('memory_items', {
   id: text('id').primaryKey().$defaultFn(() => randomUUID()),
   content: text('content').notNull(),
+  agentId: text('agent_id'), // Added
   tags: text('tags', { mode: 'json' }).$type<string[] | null>(), // Store as JSON string array
   source: text('source'),
-  // embedding column might be text for JSON string of numbers, or point to a vector DB
-  embeddingJson: text('embedding_json'), // Store embedding as JSON string for now
+  embedding: blob('embedding', { mode: 'buffer' }), // Changed from embeddingJson
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
