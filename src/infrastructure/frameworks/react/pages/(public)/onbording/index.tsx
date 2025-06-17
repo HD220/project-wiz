@@ -43,6 +43,7 @@ import { providersQuery, useCore, userQuery } from "@/hooks/use-core";
 import { toast } from "sonner";
 import { slugfy } from "@/shared/slugfy"; // slugfy is now used in UserInfoForm
 import { tryCatch } from "@/shared/tryCatch";
+import { AppErrorCode } from "@/lib/error-mapping";
 import { Trans } from "@lingui/macro";
 import { i18n } from "@lingui/core";
 import { SystemText } from "@/components/messages/common";
@@ -128,7 +129,12 @@ export default function OnboardingConfig() {
     );
 
     if (llmConfigError) {
-      toast(i18n._("onboarding.toast.llmConfigFailed", "Não foi possivel salvar a configuração da llm"));
+      let llmErrorMessage = i18n._(AppErrorCode.UnknownError, "Ocorreu um erro desconhecido ao salvar a configuração do LLM.");
+      if (llmConfigError.code === AppErrorCode.LLMProviderConfigSaveFailed) {
+        llmErrorMessage = i18n._(AppErrorCode.LLMProviderConfigSaveFailed, "Não foi possível salvar a configuração do provedor LLM. Verifique os dados e tente novamente.");
+      }
+      // Can add more else if (llmConfigError.code === ...) for other specific codes
+      toast.error(llmErrorMessage);
       return;
     }
 
@@ -144,7 +150,14 @@ export default function OnboardingConfig() {
     );
 
     if (userError) {
-      toast(i18n._("onboarding.toast.userCreateFailed", "Não foi possivel criar o usuário!"));
+      let userErrorMessage = i18n._(AppErrorCode.UnknownError, "Ocorreu um erro desconhecido ao criar o usuário.");
+      if (userError.code === AppErrorCode.UserCreateFailed) {
+        userErrorMessage = i18n._(AppErrorCode.UserCreateFailed, "Não foi possível criar o usuário. Verifique os dados e tente novamente.");
+      } else if (userError.code === AppErrorCode.UserNotFound) { // Example
+        userErrorMessage = i18n._(AppErrorCode.UserNotFound, "Usuário não encontrado durante o processo de criação.");
+      }
+      // Can add more specific error codes here
+      toast.error(userErrorMessage);
       return;
     }
 
