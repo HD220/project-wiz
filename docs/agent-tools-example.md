@@ -13,6 +13,8 @@ This example demonstrates:
 - How a `GenericAgentExecutor`, configured with an `AgentPersonaTemplate` that specifies allowed `toolNames`, can then make these tools available to an LLM.
 - Showing how such a tool can be described to and invoked by an LLM using `ai-sdk` (as shown in the demo script).
 
+While this document uses `TaskTool` as its primary detailed example of a tool built upon a UseCase layer, other tools like `FileSystemTool` (direct OS interaction), `AnnotationTool`, `TerminalTool`, and `MemoryTool` (featuring semantic search) follow the same core principles of implementing the `IAgentTool` interface and being registered with the central `ToolRegistry`. For a comprehensive overview of the tool architecture, how tools are integrated with `GenericAgentExecutor` via `AgentPersonaTemplate`s, and examples of multiple tools in action, please refer to `docs/autonomous-agent-architecture.md` and the demonstration script in `src/examples/fullstack-agent-demo.ts`.
+
 ## 2. Core Components for `TaskTool`
 
 ### 2.1. Job Management UseCases
@@ -59,7 +61,23 @@ export class TaskTool implements ITaskTool {
 }
 ```
 
-## 3. Using Tools within an Agent (Conceptual)
+## 3. Agent Tooling Examples & Usage
+
+### 3.1 Other Tool Examples (Brief)
+
+The system includes other tools with varying complexities:
+
+*   **`FileSystemTool`**: Provides direct file system operations (read, write, list, etc.) and typically wraps Node.js `fs` methods. It's an example of a tool that might not have an extensive UseCase layer for each of its actions, relying more on direct implementation and input validation via Zod schemas.
+
+*   **`MemoryTool`**: Offers capabilities to save, search, and remove memories. Its `memory.search` method is notably enhanced for **semantic search**. This involves:
+    1.  An `EmbeddingService` generating vector embeddings for memory content (on save) and search queries.
+    2.  Embeddings being stored as BLOBs in the `memory_items` table.
+    3.  A `sqlite-vec` virtual table (`vss_memory_items`) indexing these embeddings.
+    4.  The `DrizzleMemoryRepository.searchSimilar` method querying this VSS table for semantic matches.
+    5.  The `SearchSimilarMemoryItemsUseCase` orchestrating query embedding and calling the repository.
+    The `memory.search` tool method then exposes this semantic capability to the agent. For full details on this setup, consult `docs/autonomous-agent-architecture.md`.
+
+### 3.2 Using Tools within an Agent (Conceptual)
 
 In the refactored architecture, specific agent classes like the former `TaskManagerAgent` are superseded by the `GenericAgentExecutor`. The `GenericAgentExecutor` is configured with an `AgentPersonaTemplate` which defines its role, goals, and importantly, the `toolNames` it is allowed to use from the central `ToolRegistry`.
 
@@ -71,11 +89,12 @@ In the refactored architecture, specific agent classes like the former `TaskMana
     -   The LLM, based on the job's payload (e.g., `job.payload.goal`), decides which tool method to call and with what parameters to achieve the goal or a step towards it.
     -   The `GenericAgentExecutor` then executes the chosen tool method.
 
-For the concrete implementation, refer to `src/infrastructure/agents/generic-agent-executor.ts` and the overall architecture described in `docs/autonomous-agent-architecture.md`. The instantiation of `GenericAgentExecutor` with a persona and its tools (via the registry) is shown in `src/main.ts` and `src/examples/generic-agent-executor-demo.ts`.
+For the concrete implementation, refer to `src/infrastructure/agents/generic-agent-executor.ts` and the overall architecture described in `docs/autonomous-agent-architecture.md`. The instantiation of `GenericAgentExecutor` with a persona and its tools (via the registry) is shown in `src/main.ts` and `src/examples/fullstack-agent-demo.ts`.
 
 ## 4. Demonstrating Tool Usage with `ai-sdk`
 
 **File:** `src/examples/task-tool-ai-sdk-demo.ts`
+**(Note: This demo might be outdated or superseded by `fullstack-agent-demo.ts`. Refer to `docs/autonomous-agent-architecture.md` for the latest recommended examples.)**
 
 This standalone script demonstrates how the `TaskTool` can be integrated with `ai-sdk` for an LLM to use.
 

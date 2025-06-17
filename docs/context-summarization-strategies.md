@@ -118,3 +118,12 @@ Given the "Fullstack Developer" agent will engage in complex, multi-step tasks r
 The next actionable step after this research would be to implement **Phase A (LLM-Based Summarization of Oldest Turns)**. This would involve adding logic to `GenericAgentExecutor` to monitor context length and trigger summarization. A new roadmap item (e.g., A003 or similar) would detail this implementation.
 
 This research provides a foundation for making an informed decision on how to tackle context length, starting with a practical approach and paving the way for more sophisticated methods as the agent's capabilities evolve.
+---
+**Implementation Update (Task A004):**
+
+The **Phase A (LLM-Based Summarization of Oldest Turns)** strategy has been implemented in `GenericAgentExecutor`.
+- It uses constants like `MAX_HISTORY_MESSAGES_BEFORE_SUMMARY` (e.g., 20 messages) and `PRESERVE_INITIAL_MESSAGES_COUNT` (e.g., 2 messages like system prompt + initial user goal).
+- When triggered, it takes a chunk of the oldest messages (e.g., `NUM_MESSAGES_TO_SUMMARIZE_CHUNK = 10 messages`) occurring after the initially preserved messages.
+- These are summarized using an LLM call (e.g., via `generateObject` with DeepSeek).
+- The original chunk is replaced by a single system message containing this summary, e.g., `{ role: 'system', content: 'Summary of preceding N messages: [LLM-generated summary]' }`.
+- This process is integrated into the `processJob` method before the main LLM call for the current turn.

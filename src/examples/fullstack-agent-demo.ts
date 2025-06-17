@@ -66,10 +66,7 @@ async function mainDemo() {
   console.log("Repositories instantiated.");
 
   // --- 2. Tool Registry Check & Persona Template Fetching ---
-  // This demo assumes tools (TaskTool, FileSystemTool, AnnotationTool, TerminalTool, MemoryTool)
-  // and their dependencies (UseCases, Repositories) are instantiated and registered with toolRegistry
-  // in a central setup file (e.g., main.ts).
-  if (toolRegistry.getAllTools().length === 0) { // Basic check, could be more specific
+  if (toolRegistry.getAllTools().length === 0) {
       console.error("CRITICAL: ToolRegistry is empty or not fully populated. This demo relies on tools being registered during application startup.");
       console.log("Please ensure your main application setup (e.g., main.ts) registers all required tools (FileSystem, Annotation, TaskManager, Terminal, Memory).");
       return;
@@ -85,7 +82,6 @@ async function mainDemo() {
   }
   console.log(`Found persona template for: ${fullstackPersonaTemplate.role} (ID: ${fullstackPersonaTemplate.id})`);
 
-  // Verify all tools for this persona are in the registry
   let allPersonaToolsRegistered = true;
   for (const toolName of fullstackPersonaTemplate.toolNames) {
     if (!toolRegistry.getTool(toolName)) {
@@ -106,7 +102,7 @@ async function mainDemo() {
   const agentQueueName = "fullstack_developer_queue";
   let agentQueue = await queueRepository.findByName(agentQueueName);
   if (!agentQueue) {
-    const newQueueEntity = Queue.create({ name: agentQueueName, concurrency: 1 }); // Concurrency 1 for focused sequential processing
+    const newQueueEntity = Queue.create({ name: agentQueueName, concurrency: 1 });
     await queueRepository.save(newQueueEntity);
     agentQueue = newQueueEntity;
     console.log(`Queue '${agentQueueName}' created with ID: ${agentQueue.id}.`);
@@ -120,22 +116,25 @@ async function mainDemo() {
 
   // --- 5. Define and Enqueue Job ---
   const multiStepGoal = \`
-1. Create a new directory named 'my_web_project' inside the path '${demoOutputBasePath}'.
-2. Inside 'my_web_project', create a file named 'index.html' with the content '<h1>Hello, AI Developer!</h1>'.
-3. Execute the terminal command 'ls -la "${demoOutputBasePath}/my_web_project"'.
-4. Save a memory: 'Successfully created initial web project structure (index.html) and listed its contents using terminal.' with tags ['web_project_init', 'file_system', 'terminal_ops'].
-5. Search memories with the query 'web_project_init'.
-6. Save an annotation: 'Fullstack Developer demo: Initial project setup phase (HTML file and directory creation, terminal list, memory save/search) complete.'
+1. Create a new directory named 'my_ai_project' inside the path '\${demoOutputBasePath}'.
+2. Inside 'my_ai_project', create a file named 'main_logic.py' with the content '# Python script for AI logic\\nprint("AI logic initialized.")'.
+3. Execute the terminal command 'ls -la "\${demoOutputBasePath}/my_ai_project"'.
+4. Save a memory: 'Core AI project scaffolding complete: created main_logic.py and project directory.' with tags ['ai_project', 'scaffolding', 'python'].
+5. Save another memory: 'Best practices for Python projects include using virtual environments and a requirements.txt file.' with tags ['python', 'best_practices', 'environment'].
+6. Search memories with the natural language query: 'How was the AI project initialized?'
+7. Search memories with the query: 'Tips for python project setup.'
+8. Save an annotation: 'Fullstack Developer demo: AI project setup, memory save, and semantic search tests complete.'
   \`;
 
   const jobPayload = {
     goal: multiStepGoal,
-    initialContext: { // Provide base path context if tools need it explicitly, though FileSystemTool is CWD-aware from its own init
-        projectBasePath: demoOutputBasePath
+    initialContext: {
+        // Optional: Provide specific context if agent needs it beyond the CWD of tools
+        // For instance, if FileSystemTool's baseCWD was not the project root but a generic workspace.
     }
   };
 
-  const jobName = "FullstackDemoProjectSetup";
+  const jobName = "FullstackAgentDemoTask"; // Updated job name
   const existingJobs = await jobRepository.findPendingByRole(agentQueue.id, fullstackPersonaTemplate.role, 20);
   const jobAlreadyExists = existingJobs.some(j => j.name === jobName && j.payload.goal === multiStepGoal);
 
@@ -146,7 +145,7 @@ async function mainDemo() {
       payload: jobPayload,
       targetAgentRole: fullstackPersonaTemplate.role,
       priority: 1,
-      maxAttempts: 1, // Set to 1 for this demo to observe one full plan execution attempt
+      maxAttempts: 1,
     });
     await jobRepository.save(demoJob);
     console.log(\`Enqueued job '\${demoJob.name}' (ID: \${demoJob.id}) targeting role '\${fullstackPersonaTemplate.role}'.\`);
@@ -160,15 +159,24 @@ async function mainDemo() {
   const workerService = new WorkerService(
     queueRepository,
     jobRepository,
-    agentExecutor, // Pass the pre-configured IAgentExecutor instance
-    fullstackPersonaTemplate.role // Pass the role this worker handles
+    agentExecutor,
+    fullstackPersonaTemplate.role
   );
 
   await workerService.start(agentQueue.name);
   console.log(\`WorkerService started for queue '\${agentQueue.name}', handling role '\${fullstackPersonaTemplate.role}'. Monitoring for jobs...\`);
-  console.log("This demo will run and the agent will attempt the multi-step goal.");
-  console.log("Check console logs for detailed agent actions, LLM planning, tool calls, and results.");
-  console.log(\`Expected output directory: \${demoOutputBasePath}/my_web_project\`);
+
+  console.log("\n--- Goal for Fullstack Developer Agent ---");
+  console.log(multiStepGoal);
+  console.log("\n--- Expected Outcomes (Verify Manually) ---");
+  console.log(\`- Directory created: \${demoOutputBasePath}/my_ai_project\`);
+  console.log(\`- File created: \${demoOutputBasePath}/my_ai_project/main_logic.py with specific content.\`);
+  console.log("- Terminal command 'ls -la ...' executed (check agent's executionHistory for stdout in job.data.agentState).");
+  console.log("- Two memories saved (check agent's executionHistory for save parameters, or DB).");
+  console.log("- First semantic search for 'How was the AI project initialized?' should ideally return the first memory (check executionHistory for search results).");
+  console.log("- Second semantic search for 'Tips for python project setup.' should ideally return the second memory (check executionHistory for search results).");
+  console.log("- An annotation about completion saved (check agent's executionHistory or DB).");
+  console.log("Look for 'executionHistory' in the final job output (if COMPLETED) or agent logs to see tool call details and results.");
   console.log("Press Ctrl+C to stop the demo worker.");
 
   process.on('SIGINT', async () => {

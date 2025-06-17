@@ -18,10 +18,12 @@ import { RemoveJobUseCase } from './core/application/use-cases/job/remove-job.us
 import { ListAnnotationsUseCase } from './core/application/use-cases/annotation/list-annotations.usecase';
 import { SaveAnnotationUseCase } from './core/application/use-cases/annotation/save-annotation.usecase';
 import { RemoveAnnotationUseCase } from './core/application/use-cases/annotation/remove-annotation.usecase';
-import { DrizzleMemoryRepository } from './infrastructure/repositories/drizzle/memory.repository'; // Added
-import { SaveMemoryItemUseCase } from './core/application/use-cases/memory/save-memory-item.usecase'; // Added
-import { SearchMemoryItemsUseCase } from './core/application/use-cases/memory/search-memory-items.usecase'; // Added
-import { RemoveMemoryItemUseCase } from './core/application/use-cases/memory/remove-memory-item.usecase'; // Added
+import { DrizzleMemoryRepository } from './infrastructure/repositories/drizzle/memory.repository';
+import { SaveMemoryItemUseCase } from './core/application/use-cases/memory/save-memory-item.usecase';
+// import { SearchMemoryItemsUseCase } from './core/application/use-cases/memory/search-memory-items.usecase'; // Removed old
+import { SearchSimilarMemoryItemsUseCase } from './core/application/use-cases/memory/search-similar-memory-items.usecase'; // Added new
+import { RemoveMemoryItemUseCase } from './core/application/use-cases/memory/remove-memory-item.usecase';
+import { EmbeddingService } from './infrastructure/services/ai/embedding.service'; // Added
 
 import { TaskTool, getTaskToolDefinitions } from './infrastructure/tools/task.tool';
 import { FileSystemTool, getFileSystemToolDefinitions } from './infrastructure/tools/file-system.tool';
@@ -94,10 +96,15 @@ async function main() {
   const listAnnotationsUseCase = new ListAnnotationsUseCase(annotationRepository);
   const saveAnnotationUseCase = new SaveAnnotationUseCase(annotationRepository);
   const removeAnnotationUseCase = new RemoveAnnotationUseCase(annotationRepository);
+
+  // Embedding Service
+  const embeddingService = new EmbeddingService(); // Added
+  console.log("EmbeddingService instantiated.");
+
   // Memory UseCases
-  const saveMemoryItemUseCase = new SaveMemoryItemUseCase(memoryRepository); // Added
-  const searchMemoryItemsUseCase = new SearchMemoryItemsUseCase(memoryRepository); // Added
-  const removeMemoryItemUseCase = new RemoveMemoryItemUseCase(memoryRepository); // Added
+  const saveMemoryItemUseCase = new SaveMemoryItemUseCase(memoryRepository, embeddingService); // Updated
+  const searchSimilarMemoryItemsUseCase = new SearchSimilarMemoryItemsUseCase(memoryRepository, embeddingService); // New
+  const removeMemoryItemUseCase = new RemoveMemoryItemUseCase(memoryRepository);
   console.log("UseCases instantiated.");
 
   // --- 3. Tools and ToolRegistry ---
@@ -107,7 +114,7 @@ async function main() {
   const annotationToolInstance = new AnnotationTool(listAnnotationsUseCase, saveAnnotationUseCase, removeAnnotationUseCase);
   const taskToolInstance = new TaskTool(listJobsUseCase, saveJobUseCase, removeJobUseCase);
   const terminalToolInstance = new TerminalTool(CWD);
-  const memoryToolInstance = new MemoryTool(saveMemoryItemUseCase, searchMemoryItemsUseCase, removeMemoryItemUseCase); // Added
+  const memoryToolInstance = new MemoryTool(saveMemoryItemUseCase, searchSimilarMemoryItemsUseCase, removeMemoryItemUseCase); // Updated
 
   getFileSystemToolDefinitions(fileSystemToolInstance).forEach(t => toolRegistry.registerTool(t));
   getAnnotationToolDefinitions(annotationToolInstance).forEach(t => toolRegistry.registerTool(t));

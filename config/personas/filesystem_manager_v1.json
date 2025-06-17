@@ -12,6 +12,9 @@
     "fileSystem.removeDirectory",
     "fileSystem.moveFile",
     "fileSystem.moveDirectory",
-    "annotation.save"
+    "annotation.save",
+    "memory.save",
+    "memory.search",
+    "memory.remove"
   ]
 }
