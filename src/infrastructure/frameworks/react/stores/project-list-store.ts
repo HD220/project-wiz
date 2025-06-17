@@ -8,8 +8,8 @@ declare global {
   interface Window {
     electronAPI?: {
       // From user-data-store setup (assuming it's also needed or for completeness)
-      onUserDataChanged: (callback: (userData: any) => void) => void;
-      removeUserDataChangedListener: (callback: (userData: any) => void) => void;
+      onUserDataChanged?: (callback: (userData: any) => void) => void; // Optional here, just for structure
+      removeUserDataChangedListener?: (callback: (userData: any) => void) => void; // Optional
 
       // New for project list
       onProjectListChanged: (callback: (projectList: ProjectType[]) => void) => void;
