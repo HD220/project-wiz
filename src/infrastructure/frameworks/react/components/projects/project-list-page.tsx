@@ -1,11 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { placeholderUserProjects, PlaceholderProject } from "@/lib/placeholders"; // Using existing placeholders
+import { PlaceholderProject } from "@/lib/placeholders"; // Removed placeholderUserProjects
 import { PlusCircle } from "lucide-react"; // Icon for create button
 import { ProjectCard } from "@/components/projects/project-card";
 import { Trans } from "@lingui/macro";
+import { useSyncedProjectList } from "@/hooks/useSyncedProjectList";
 
 export function ProjectListPage() {
+  const projects = useSyncedProjectList();
   return (
     <div className="container mx-auto p-4 space-y-6">
       <header className="flex justify-between items-center mb-6">
@@ -15,9 +17,9 @@ export function ProjectListPage() {
         </Button>
       </header>
 
-      {placeholderUserProjects.length > 0 ? (
+      {projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {placeholderUserProjects.map((project) => (
+          {projects.map((project) => (
             <ProjectCard key={project.id} project={project} onNavigateToProject={(id) => console.log("ProjectListPage: Navigate to project:", id)} />
           ))}
         </div>

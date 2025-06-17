@@ -23,8 +23,21 @@ import { Home, Inbox, Calendar, Search, Settings, LucideIcon } from "lucide-reac
 import { H4 } from "../typography/titles";
 import { Trans, t } from "@lingui/macro";
 import { i18n } from "@lingui/core";
+import { useSyncedCurrentUser } from "@/hooks/useSyncedCurrentUser";
 
-export function UserSidebar({ userName = i18n._("userSidebar.defaultUserName", "Nome do Usuário Placeholder") }: { userName?: string }) {
+export function UserSidebar() {
+  const currentUser = useSyncedCurrentUser();
+  // Assuming UserQueryOutput is UserDTO[] and we need the first user, or it's UserDTO directly
+  // Based on user-data-store, currentUserSnapshot is UserQueryOutput | null.
+  // If UserQueryOutput is UserDTO[], then currentUser here would be UserDTO[] | null.
+  // And currentUser[0]?.nickname would be needed.
+  // However, userQuery in use-core returns a single UserDTO.
+  // And handleUserDataChanged in store sets currentUserSnapshot = newData (which is UserQueryOutput).
+  // Let's assume UserQueryOutput from the store is effectively a single user object or null.
+  // If UserQueryOutput from core is UserDTO[], the store or preload should handle picking the first element.
+  // For now, proceeding as if currentUser is { nickname: string } | null.
+  const displayName = currentUser?.nickname || i18n._("userSidebar.loadingOrNoUser", "Usuário");
+
   const iconMap: Record<UserSidebarNavItemPlaceholder["iconName"], LucideIcon> = {
     Home: Home,
     Inbox: Inbox,
@@ -39,7 +52,7 @@ export function UserSidebar({ userName = i18n._("userSidebar.defaultUserName", "
       className="!relative [&>[data-slot=sidebar-container]]:relative flex flex-1 w-full"
     >
       <SidebarHeader>
-        <H4 className=" truncate">{userName}</H4>
+        <H4 className=" truncate">{displayName}</H4>
         <SidebarSeparator className="mx-0 px-0" />
       </SidebarHeader>
       <SidebarContent>

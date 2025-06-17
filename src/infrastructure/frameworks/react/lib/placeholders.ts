@@ -1,4 +1,5 @@
 import type { ProjectStatus, TaskStatus, UserAvailabilityStatus } from "@/types/domain";
+import type { ProjectType } from "@/types/project";
 export const initialMessages = [];
 export const userGuideContent = `
 # GFM Guide
@@ -200,6 +201,9 @@ export const llmProvidersPlaceholder: LLMProviderPlaceholder[] = [
 ];
 
 // User Dashboard Placeholders
+// Replaced by ProjectType
+export type PlaceholderProject = ProjectType;
+/* Original PlaceholderProject structure was:
 export type PlaceholderProject = {
   id: string;
   name: string;
@@ -207,6 +211,7 @@ export type PlaceholderProject = {
   status: ProjectStatus;
   lastUpdate: string;
 };
+*/
 
 export type PlaceholderActivity = {
   id: string;
