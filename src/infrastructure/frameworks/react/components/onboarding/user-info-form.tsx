@@ -18,9 +18,9 @@ export type UserInfoFormValues = {
 };
 
 interface UserInfoFormProps {
-  control: Control<FormType>; // Control object from react-hook-form
-  watch: UseFormWatch<FormType>;
-  setValue: UseFormSetValue<FormType>;
+  control: Control<Pick<FormType, 'nickname' | 'email' | 'username' | 'avatar'>>; // Control object from react-hook-form
+  watch: UseFormWatch<Pick<FormType, 'nickname' | 'email' | 'username' | 'avatar'>>;
+  setValue: UseFormSetValue<Pick<FormType, 'nickname' | 'email' | 'username' | 'avatar'>>;
 }
 
 export function UserInfoForm({ control, watch, setValue }: UserInfoFormProps) {

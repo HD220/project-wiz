@@ -5,6 +5,7 @@ import { placeholderUserProjects, placeholderUserActivity, PlaceholderProject } 
 import { ProjectCard } from "@/components/projects/project-card";
 import { getInitials } from "@/lib/utils";
 import { Trans, t } from "@lingui/macro";
+import { ActivityListItem } from "./activity-list-item";
 
 export function UserDashboard() {
   const userName = "Usuário Exemplo"; // Placeholder
@@ -51,10 +52,7 @@ export function UserDashboard() {
             <CardContent className="p-0"> {/* Remove padding for list items */}
               <ul className="divide-y divide-border">
                 {placeholderUserActivity.map((activity) => (
-                  <li key={activity.id} className="p-4 hover:bg-muted/50">
-                    <p className="font-medium">{activity.description}</p>
-                    <p className="text-sm text-muted-foreground">{new Date(activity.timestamp).toLocaleDateString()}</p>
-                  </li>
+                  <ActivityListItem key={activity.id} activity={activity} />
                 ))}
               </ul>
             </CardContent>

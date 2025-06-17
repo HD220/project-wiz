@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
 import { Check } from "lucide-react";
 import {
   Card,
@@ -44,6 +44,55 @@ const getColorClass = (color: string, isSelected: boolean) => {
 export function PersonaList({ onSelectPersona }: PersonaListProps) {
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
   const personas = personasPlaceholder; // Use placeholder
+  const radioGroupRef = useRef<HTMLDivElement>(null);
+
+  // Function to handle selection and focus
+  const selectAndFocusPersona = useCallback((personaId: string) => {
+    setSelectedPersona(personaId);
+    if (onSelectPersona) {
+      onSelectPersona(personaId);
+    }
+    // Focus the newly selected radio item
+    const currentRadio = radioGroupRef.current?.querySelector(`[role="radio"][data-id="${personaId}"]`) as HTMLElement | null;
+    currentRadio?.focus();
+  }, [onSelectPersona]);
+
+  const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    if (!radioGroupRef.current) return;
+
+    const radios = Array.from(
+      radioGroupRef.current.querySelectorAll<HTMLElement>('[role="radio"]')
+    );
+    if (radios.length === 0) return;
+
+    const currentIndex = radios.findIndex(
+      (radio) => radio.getAttribute("data-id") === selectedPersona
+    );
+
+    let nextIndex = -1;
+
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        event.preventDefault();
+        nextIndex = currentIndex >= 0 ? (currentIndex + 1) % radios.length : 0;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        event.preventDefault();
+        nextIndex = currentIndex > 0 ? (currentIndex - 1 + radios.length) % radios.length : radios.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    if (nextIndex !== -1) {
+      const nextPersonaId = radios[nextIndex].getAttribute("data-id");
+      if (nextPersonaId) {
+        selectAndFocusPersona(nextPersonaId);
+      }
+    }
+  }, [selectedPersona, selectAndFocusPersona, radioGroupRef]);
 
   return (
     <Card>
@@ -53,25 +102,39 @@ export function PersonaList({ onSelectPersona }: PersonaListProps) {
           alterar isso mais tarde.</Trans></CardDescription>
       </CardHeader>
       <CardContent>
-        <div role="radiogroup" aria-label={t`Escolha a personalidade do assistente`} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div
+          ref={radioGroupRef}
+          role="radiogroup"
+          aria-label={t`Escolha a personalidade do assistente`}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          onKeyDown={handleKeyDown}
+        >
           {/* Coluna de personas masculinas */}
           <div className="space-y-6">
             <h3 className="text-lg font-medium"><Trans>Personas Masculinas</Trans></h3>
             <div className="space-y-4">
               {personas
                 .filter((persona) => persona.gender === "masculino")
-                .map((persona) => (
+                .map((persona) => ( // Removed index, arr from map as per simplified tabIndex logic for now
                   <div
                     key={persona.id}
+                    data-id={persona.id} // Add data-id for querying
                     role="radio"
                     aria-checked={selectedPersona === persona.id}
-                    tabIndex={selectedPersona === persona.id ? 0 : -1}
+                    // Manage tabIndex: only the selected one is in tab order, or first if none selected.
+                    tabIndex={selectedPersona === persona.id || (selectedPersona === null && persona.id === personas[0]?.id) ? 0 : -1}
                     className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all min-h-[124px] select-none
                      ${getColorClass(
                        persona.color,
                        selectedPersona === persona.id
                      )}`}
-                    onClick={() => { setSelectedPersona(persona.id); onSelectPersona && onSelectPersona(persona.id); }}
+                    onClick={() => selectAndFocusPersona(persona.id)}
+                    // Add onFocus to ensure roving tabindex works if user clicks to focus then uses arrows
+                    onFocus={() => {
+                        // If not selected, clicking or focusing should select it for arrow keys to work from it
+                        // This might be too aggressive if only focus is intended.
+                        // For now, onClick handles selection. Focus is for keyboard.
+                    }}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
@@ -108,18 +171,20 @@ export function PersonaList({ onSelectPersona }: PersonaListProps) {
             <div className="space-y-4">
               {personas
                 .filter((persona) => persona.gender === "feminino")
-                .map((persona) => (
+                .map((persona) => ( // Removed index, arr from map
                   <div
                     key={persona.id}
+                    data-id={persona.id} // Add data-id for querying
                     role="radio"
                     aria-checked={selectedPersona === persona.id}
-                    tabIndex={selectedPersona === persona.id ? 0 : -1}
+                     // Manage tabIndex (only selected one or first overall if none selected)
+                    tabIndex={selectedPersona === persona.id || (selectedPersona === null && !personas.some(p => p.gender === "masculino") && persona.id === personas.find(p=>p.gender === "feminino")?.id ) ? 0 : -1}
                     className={`relative cursor-pointer rounded-lg border-2 p-4 transition-all min-h-[124px] select-none
                     ${getColorClass(
                       persona.color,
                       selectedPersona === persona.id
                     )}`}
-                    onClick={() => { setSelectedPersona(persona.id); onSelectPersona && onSelectPersona(persona.id); }}
+                    onClick={() => selectAndFocusPersona(persona.id)}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">

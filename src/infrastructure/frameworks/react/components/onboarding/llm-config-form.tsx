@@ -16,9 +16,9 @@ export type LLMConfigFormValues = {
 };
 
 interface LLMConfigFormProps {
-  control: Control<FormType>;
-  watch: UseFormWatch<FormType>;
-  setValue: UseFormSetValue<FormType>;
+  control: Control<Pick<FormType, 'apiKey' | 'providerId' | 'modelId'>>;
+  watch: UseFormWatch<Pick<FormType, 'apiKey' | 'providerId' | 'modelId'>>;
+  setValue: UseFormSetValue<Pick<FormType, 'apiKey' | 'providerId' | 'modelId'>>;
   providers?: LLMProviderPlaceholder[];
 }
 

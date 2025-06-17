@@ -12,7 +12,7 @@ function RouteComponent() {
         <h1 className="text-4xl"><SystemText /></h1>
       </div>
       <div className="flex items-center justify-center">
-        <h1></h1>
+
       </div>
     </div>
   );

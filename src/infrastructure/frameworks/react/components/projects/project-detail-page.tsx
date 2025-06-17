@@ -8,6 +8,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { placeholderUserProjects, PlaceholderProject, placeholderProjectDetails, PlaceholderTask, PlaceholderTeamMember, getProjectDetailsPlaceholder } from "@/lib/placeholders"; // To be updated in placeholders
 import { getInitials } from "@/lib/utils";
 import { Trans, t } from "@lingui/macro";
+import { ProjectOverviewTab } from "./details/project-overview-tab";
+import { ProjectTasksTab } from "./details/project-tasks-tab";
+import { ProjectTeamTab } from "./details/project-team-tab";
+import { ProjectDiscussionsTab } from "./details/project-discussions-tab";
 
 interface ProjectDetailPageProps {
   projectId: string;
@@ -62,84 +66,19 @@ export function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle><Trans>Detalhes do Projeto</Trans></CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <p><strong><Trans>ID do Projeto:</Trans></strong> {project.id}</p>
-              <p><strong><Trans>Nome:</Trans></strong> {project.name}</p>
-              <p><strong><Trans>Descrição Completa:</Trans></strong> {project.description}</p>
-              {/* Add more detailed overview fields if necessary */}
-            </CardContent>
-          </Card>
+          <ProjectOverviewTab project={project} />
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle><Trans>Tarefas do Projeto</Trans></CardTitle></CardHeader>
-            <CardContent>
-              {details && details.tasks.length > 0 ? (
-                <ul className="space-y-3">
-                  {details.tasks.map(task => (
-                    <li key={task.id} className="p-3 border rounded-md flex justify-between items-center hover:bg-muted/50">
-                      <div>
-                        <p className="font-medium">{task.title}</p>
-                        <p className="text-sm text-muted-foreground">{task.assignedTo} - <Trans>Prioridade:</Trans> {task.priority}</p>
-                      </div>
-                      <Badge variant={task.status === "Concluída" ? "default" : "outline"}
-                             className={`${task.status === "Concluída" ? "bg-green-500 text-white" : ""}`}>
-                        {task.status}
-                      </Badge>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground"><Trans>Nenhuma tarefa definida para este projeto.</Trans></p>
-              )}
-            </CardContent>
-            <CardFooter>
-                <Button variant="outline"><Trans>Adicionar Tarefa</Trans></Button>
-            </CardFooter>
-          </Card>
+          <ProjectTasksTab tasks={details?.tasks} />
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle><Trans>Membros da Equipe</Trans></CardTitle></CardHeader>
-            <CardContent>
-              {details && details.teamMembers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {details.teamMembers.map(member => (
-                    <Card key={member.id} className="p-4 flex flex-col items-center text-center">
-                      <Avatar className="w-16 h-16 mb-2">
-                        <AvatarImage src={member.avatarUrl} alt={member.name} />
-                        <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                      </Avatar>
-                      <p className="font-semibold">{member.name}</p>
-                      <p className="text-sm text-muted-foreground">{member.role}</p>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground"><Trans>Nenhum membro da equipe atribuído a este projeto.</Trans></p>
-              )}
-            </CardContent>
-             <CardFooter>
-                <Button variant="outline"><Trans>Gerenciar Equipe</Trans></Button>
-            </CardFooter>
-          </Card>
+          <ProjectTeamTab teamMembers={details?.teamMembers} />
         </TabsContent>
 
         <TabsContent value="discussions" className="mt-4">
-          <Card>
-            <CardHeader><CardTitle><Trans>Discussões</Trans></CardTitle></CardHeader>
-            <CardContent>
-              {/* Placeholder for ChatThread or similar component */}
-              <p className="text-muted-foreground"><Trans>Funcionalidade de discussão a ser implementada. (Poderia usar o ChatThread aqui)</Trans></p>
-              <div className="mt-4 p-6 border rounded-md h-64 bg-muted/20 flex items-center justify-center">
-                 <p><Trans>Área de Chat/Discussão</Trans></p>
-              </div>
-            </CardContent>
-          </Card>
+          <ProjectDiscussionsTab />
         </TabsContent>
       </Tabs>
     </div>

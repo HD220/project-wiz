@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage, ChatMessageProps } from "@/components/chat/chat-message";
 import { Trans, t } from "@lingui/macro";
 import { i18n } from "@lingui/core"; // For default prop value
+import { useState } from "react";
 
 export function ChatThread({
   threadId,
@@ -17,7 +18,17 @@ export function ChatThread({
   messages: ChatMessageProps[];
   title?: string;
 }) {
-  const ref = useScroll([threadId], { behavior: "instant" });
+  const [inputValue, setInputValue] = useState("");
+
+  const handleSend = () => {
+    if (inputValue.trim()) {
+      console.warn("TODO: Implement actual message sending logic for:", inputValue);
+      // Example: onSendMessage(inputValue); // This would be a prop if ChatThread itself doesnt send
+      setInputValue(""); // Clear input after sending
+    }
+  };
+
+  const ref = useScroll([threadId, messages.length], { behavior: "smooth" });
 
   return (
     <div className="h-screen flex flex-1 flex-col">
@@ -41,7 +52,7 @@ export function ChatThread({
           </div>
         </ScrollArea>
       </div>
-      <ChatInput />
+      <ChatInput value={inputValue} onChange={setInputValue} onSend={handleSend} />
     </div>
   );
 }

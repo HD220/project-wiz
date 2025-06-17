@@ -1,3 +1,4 @@
+import type { ProjectStatus, TaskStatus, UserAvailabilityStatus } from "@/types/domain";
 export const initialMessages = [];
 export const userGuideContent = `
 # GFM Guide
@@ -203,13 +204,15 @@ export type PlaceholderProject = {
   id: string;
   name: string;
   description: string;
-  status: "Em Andamento" | "Concluído" | "Pausado";
+  status: ProjectStatus;
   lastUpdate: string;
 };
 
 export type PlaceholderActivity = {
   id: string;
-  description: string;
+  i18nKey: string; // Lingui message ID
+  values?: Record<string, string | number>; // Values for interpolation
+  defaultText?: string; // Default text for the message ID
   timestamp: string; // ISO date string
 };
 
@@ -220,16 +223,16 @@ export const placeholderUserProjects: PlaceholderProject[] = [
 ];
 
 export const placeholderUserActivity: PlaceholderActivity[] = [
-  { id: "act-1", description: "Você atualizou o status do projeto 'Refatoração do Frontend'.", timestamp: "2024-07-28T10:05:00Z" },
-  { id: "act-2", description: "Novo commit 'feat: add user dashboard skeleton' no projeto 'Project Wiz'.", timestamp: "2024-07-28T09:30:00Z" },
-  { id: "act-3", description: "Tarefa 'Criar layout básico' marcada como concluída no projeto 'Refatoração do Frontend'.", timestamp: "2024-07-27T18:00:00Z" },
+  { id: "act-1", i18nKey: "activity.projectStatusUpdated", values: { projectName: "Refatoração do Frontend" }, defaultText: "Você atualizou o status do projeto \"{projectName}\"." , timestamp: "2024-07-28T10:05:00Z" },
+  { id: "act-2", i18nKey: "activity.newCommit", values: { commitMessage: "feat: add user dashboard skeleton", projectName: "Project Wiz" }, defaultText: "Novo commit \"{commitMessage}\" no projeto \"{projectName}\"." , timestamp: "2024-07-28T09:30:00Z" },
+  { id: "act-3", i18nKey: "activity.taskCompleted", values: { taskName: "Criar layout básico", projectName: "Refatoração do Frontend" }, defaultText: "Tarefa \"{taskName}\" marcada como concluída no projeto \"{projectName}\"." , timestamp: "2024-07-27T18:00:00Z" },
 ];
 
 // Project Detail Placeholders
 export type PlaceholderTask = {
   id: string;
   title: string;
-  status: "Pendente" | "Em Andamento" | "Concluída";
+  status: TaskStatus;
   assignedTo: string;
   priority: "Alta" | "Média" | "Baixa";
 };
@@ -450,7 +453,7 @@ export const placeholderUserSidebarNavItems: UserSidebarNavItemPlaceholder[] = [
 export type UserPlaceholder = {
   id: string;
   name: string;
-  status: "invisible" | "busy" | "absent" | "available";
+  status: UserAvailabilityStatus;
   avatar: string; // URL to avatar image
 };
 

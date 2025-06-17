@@ -25,7 +25,7 @@ export function DirectMessageListItem({ dmThread, users }: DirectMessageListItem
       const user = users.find((u) => u.id === dmThread.userId);
       return (
         <Avatar className="size-12 border-2">
-          <AvatarImage src={user?.avatar} alt={user?.name} />
+          <AvatarImage src={user?.avatar} alt={user?.name ? t({ id: "dmItem.avatarAlt.user", message: `Avatar de ${user.name}`, values: { name: user.name }}) : t`Avatar de usuário desconhecido`} />
           <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
         </Avatar>
       );
@@ -43,7 +43,7 @@ export function DirectMessageListItem({ dmThread, users }: DirectMessageListItem
                 idx % 2 === 0 ? "left-0 top-0" : "right-0 bottom-0"
               )}
             >
-              <AvatarImage src={user?.avatar} alt={user?.name} />
+              <AvatarImage src={user?.avatar} alt={user?.name ? t({ id: "dmItem.avatarAlt.user", message: `Avatar de ${user.name}`, values: { name: user.name }}) : t`Avatar de participante`} />
               <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
             </Avatar>
           );
