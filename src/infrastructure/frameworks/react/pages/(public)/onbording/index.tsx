@@ -1,4 +1,4 @@
-import {
+ import {
   createFileRoute,
   redirect,
   useNavigate,
@@ -14,7 +14,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -58,7 +57,7 @@ import { SystemText } from "@/components/messages/common";
 export const Route = createFileRoute("/(public)/onbording/")({
   component: OnbordingPage,
   async beforeLoad() {
-    const { data, error } = await tryCatch(userQuery());
+    const { data: _data, error } = await tryCatch(userQuery());
     if (error === null) throw redirect({ to: "/user", replace: true });
   },
   async loader() {

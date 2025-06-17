@@ -17,7 +17,7 @@ import {
 } from "@/core/application/use-cases/llm-provider/create-llm-provider-config.usecase";
 import { AppErrorCode, createAppError } from "@/lib/error-mapping";
 
-export async function userQuery(data?: UserQueryInput) {
+export async function userQuery(_data?: UserQueryInput) {
   const result: Result<UserQueryOutput> =
     await window.api.invoke("query:get-user");
   const { success } = result;
@@ -28,11 +28,11 @@ export async function userQuery(data?: UserQueryInput) {
   return user;
 }
 
-export async function providersQuery(data?: LLMProviderQueryInput) {
+export async function providersQuery(_data?: LLMProviderQueryInput) {
   const providers: Result<LLMProviderQueryOutput> =
     await window.api.invoke("query:llm-provider");
-  if (!providers.success) return [];
-  return providers.data;
+  if (!providers.isOk()) return [];
+  return providers.value;
 }
 
 export async function createLLMProviderConfigUseCase(
@@ -49,7 +49,7 @@ export async function createLLMProviderConfigUseCase(
   if (!providerConfig.success)
     throw createAppError(AppErrorCode.LLMProviderConfigSaveFailed, providerConfig.error);
 
-  return providerConfig.data;
+  return providerConfig.value;
 }
 
 export async function createUserUseCase(

@@ -109,7 +109,7 @@ export class LLMProviderConfigRepositoryDrizzle
   list(): Promise<LLMProviderConfig[]> {
     throw new Error("Method not implemented.");
   }
-  delete(id: LLMProviderConfigId): Promise<void> {
+  delete(_id: LLMProviderConfigId): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

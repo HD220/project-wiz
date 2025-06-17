@@ -23,7 +23,7 @@ export class LLMProviderRepositoryDrizzle implements ILLMProviderRepository {
   constructor(
     private readonly db: BetterSQLite3Database<Record<string, never>>
   ) {}
-  create(props: Omit<LLMProviderConstructor, "id">): Promise<LLMProvider> {
+  create(_props: Omit<LLMProviderConstructor, "id">): Promise<LLMProvider> {
     throw new Error("Method not implemented.");
   }
   async load(id: LLMProviderId): Promise<LLMProvider> {
@@ -52,7 +52,7 @@ export class LLMProviderRepositoryDrizzle implements ILLMProviderRepository {
       models,
     });
   }
-  save(entity: LLMProvider): Promise<LLMProvider> {
+  save(_entity: LLMProvider): Promise<LLMProvider> {
     throw new Error("Method not implemented.");
   }
   async list(): Promise<LLMProvider[]> {
@@ -80,7 +80,7 @@ export class LLMProviderRepositoryDrizzle implements ILLMProviderRepository {
 
     return await Promise.all(providers);
   }
-  delete(id: LLMProviderId): Promise<void> {
+  delete(_id: LLMProviderId): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

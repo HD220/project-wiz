@@ -33,7 +33,6 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 
-// .map(([category, channels])=>({category, channels}))
 
 export function ProjectSidebar({ projectName = i18n._("projectSidebar.defaultProjectName", "Nome do Projeto Placeholder") }: { projectName?: string }) {
   const iconMap: Record<ProjectNavItemPlaceholder["iconName"], LucideIcon> = {

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
+// Removido import de ReactNode
 
 export function Code({ className, ...props }: React.ComponentProps<"code">) {
   return (

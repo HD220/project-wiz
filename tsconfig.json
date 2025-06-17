@@ -3,14 +3,14 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "lib": ["ES2024", "ES2022", "DOM", "DOM.Iterable"],
     "outDir": "dist",
     "baseUrl": ".",
 
     "noEmit": false,
 
     //electron
-    "types": ["node", "electron"],
+    "types": ["node", "electron", "vitest"],
     "esModuleInterop": true,
     "strict": true,
 
@@ -26,10 +26,20 @@
       "@/hooks/*": ["./src/infrastructure/frameworks/react/hooks/*"],
       "@/ui/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
       "@/application/*": ["./src/core/application/*"],
+      "@/core/*": ["./src/core/*"],
       "@/shared/*": ["./src/shared/*"],
+      "@/core/common/result": ["./src/shared/result.ts"],
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "tests/**/*", "src/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "drizzle.config.ts",
+    "forge.config.ts",
+    "forge.env.d.ts",
+    "lingui.config.ts",
+    "vitest.config.mts"
+  ],
+  "exclude": ["node_modules", "coverage"]
 }
