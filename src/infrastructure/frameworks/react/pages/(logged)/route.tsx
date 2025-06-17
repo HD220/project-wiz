@@ -9,7 +9,9 @@ function RouteComponent() {
   return (
     <div className="flex h-screen bg-background">
       <AppSidebar />
-      <Outlet />
+      <main className="flex-1 overflow-y-auto p-4">
+        <Outlet />
+      </main>
     </div>
   );
 }

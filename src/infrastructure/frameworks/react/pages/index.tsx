@@ -3,15 +3,14 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
+    // TODO: Show global loading indicator here (e.g., NProgress.start() or context update)
     try {
       await userQuery();
-      console.log("usuario conectado");
     } catch (error) {
-      console.log(error);
-      console.log("usuario ausente, enviando para onbording");
+      // TODO: Hide global loading indicator here (e.g., NProgress.done() or context update)
       throw redirect({ to: "/onbording", replace: true });
     }
-    console.log("usuario conectado, redirecionando para geral");
+    // TODO: Hide global loading indicator here (e.g., NProgress.done() or context update)
     throw redirect({ to: "/user", replace: true });
   },
 });

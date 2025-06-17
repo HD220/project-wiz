@@ -61,7 +61,7 @@ export function MarkdownView({
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           a: ({ node, ...props }) => (
             <Button variant={"link"} asChild>
-              <a target="_blank" {...props} />
+              <a target="_blank" rel="noopener noreferrer" {...props} />
             </Button>
           ),
         }}
