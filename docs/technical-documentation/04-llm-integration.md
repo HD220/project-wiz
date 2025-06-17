@@ -57,10 +57,35 @@ Quando um Agente está processando um Job através de uma Task (conforme descrit
 
 *   **Prompt Engineering:** A qualidade dos prompts construídos pelas Tasks é crucial para o desempenho dos Agentes.
 *   **Seleção de Modelo:** Diferentes modelos de LLM têm diferentes pontos fortes, fracos, custos e limites de taxa. A escolha do modelo certo para cada Agente ou tipo de Job pode ser importante.
-*   **Gerenciamento de Contexto:** LLMs têm janelas de contexto limitadas. As Tasks precisam gerenciar eficientemente o histórico da conversa e as informações fornecidas no prompt.
+*   **Gerenciamento de Contexto:** LLMs têm janelas de contexto limitadas. As Tasks precisam gerenciar eficientemente o histórico da conversa e as informações fornecidas no prompt. Consulte [Gerenciamento de Histórico de Atividades (Activity History)](./01-architecture.md#gerenciamento-de-hist-rico-de-atividades-activity-history)) para mais detalhes.
 *   **Custos de API:** O uso de APIs de LLM pode incorrer em custos. O sistema deve ser projetado com isso em mente, e os usuários devem estar cientes.
+*   **Abstração de Provedor:** O sistema é projetado com uma interface genérica para LLMs (definida na Camada de Aplicação como uma Port) e adaptadores específicos na Camada de Infraestrutura. Isso visa o desacoplamento de provedores específicos, facilitando a adoção de novos modelos ou provedores no futuro. A arquitetura busca um padrão de configuração unificado para estes adaptadores, abstraindo detalhes de cada provedor.
+*   **Streaming de Respostas:** O suporte a streaming de respostas do LLM é uma capacidade desejável para melhorar a interatividade e a percepção de velocidade para o usuário final, especialmente em interações conversacionais ou de geração de conteúdo longo.
+*   **Configuração Detalhada:** A capacidade de configurar detalhadamente modelos de LLM e seus parâmetros (como temperatura, top_p, etc.) por Agente/Persona é fundamental para otimizar tanto o desempenho quanto os custos para as diversas specializações de tarefas dos agentes.
+*   **Resiliência:** Dada a natureza externa das chamadas aos LLMs, a implementação de padrões de resiliência como políticas de retentativa (retry policies) e, potencialmente, circuit breakers nos adaptadores de LLM é crucial para aumentar a robustez do sistema contra falhas temporárias de rede ou do provedor.
+*   **Observabilidade:** Para depuração e monitoramento eficazes, os adaptadores de LLM devem ser instrumentados para coletar métricas de execução (e.g., tempo de resposta, taxa de erro, contagem de tokens) e gerar logs estruturados para operações críticas e interações com as APIs dos provedores.
 
-## Conclusão
+## 6. Tipos de Prompts Utilizados no Sistema
+
+Os prompts são instruções e contextos injetados no Large Language Model (LLM) em cada etapa lógica do ciclo do Agente Autônomo. Eles guiam o raciocínio do LLM e suas decisões sobre qual ação tomar, garantindo que ele opere de forma autônoma e focada na atividade mais relevante no momento. As informações de contexto passadas para cada prompt são dinâmicas, garantindo que o LLM tenha os dados mais relevantes para sua decisão atual. A Persona do Agente e as Regras Gerais do Sistema/Formato de Resposta são sempre incluídas antes dos prompts específicos de cada etapa.
+
+Aqui está um índice dos prompts utilizados (localizados em `docs/technical-documentation/llm-prompts/`):
+
+- [Prompt da Persona](../llm-prompts/prompt-persona.md)
+- [Prompt de Contexto e Comportamento do Sistema](../llm-prompts/prompt-contexto-comportamento.md)
+- [Prompt para "Obtém Próxima Atividade"](../llm-prompts/prompt-obtem-proxima-atividade.md)
+- [Prompt para "É uma Atividade Decomposta?"](../llm-prompts/prompt-atividade-decomposta.md)
+- [Prompt para "Pega Próxima Subtask da"](../llm-prompts/prompt-pega-proxima-subtask.md)
+- [Prompt para "É necessário contexto adicional?"](../llm-prompts/prompt-contexto-adicional.md)
+- [Prompt para "Coleta de Contexto"](../llm-prompts/prompt-coleta-contexto.md)
+- [Prompt para "Analise Intenção"](../llm-prompts/prompt-analise-intencao.md)
+- [Prompt para "Transformar em itens acionáveis (Sub Atividade ou Atividades)"](../llm-prompts/prompt-transformar-itens-acionaveis.md)
+- [Prompt para "Processa Próxima SubAtividade Pendente"](../llm-prompts/prompt-processa-proxima-subatividade.md)
+- [Prompt para "A Subtask Atual precisa ser dividida em subtasks?"](../llm-prompts/prompt-subtask-precisa-dividir.md)
+- [Prompt para "Geração da Saída"](../llm-prompts/prompt-geracao-saida.md)
+- [Prompt para "Atualização de Status/Contexto"](../llm-prompts/prompt-atualizacao-status-contexto.md)
+
+## 7. Conclusão
 
 A integração com LLMs é o que dá aos Agentes do Project Wiz sua capacidade de "pensar" e interagir de forma inteligente. Utilizando bibliotecas modernas como a Vercel AI SDK, o Project Wiz visa fornecer uma plataforma flexível e poderosa para construir uma verdadeira fábrica de software autônoma.
 

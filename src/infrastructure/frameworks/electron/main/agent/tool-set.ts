@@ -1,4 +1,4 @@
-import { tool, ToolCallUnion, ToolResultUnion, ToolSet } from "ai";
+import { tool, ToolSet } from "ai";
 import { z } from "zod";
 import nodePath from "node:path";
 import * as fs from "node:fs/promises";
@@ -95,6 +95,3 @@ export const toolSet: ToolSet = {
   thought: thoughtTool,
   finalAnswer: finalAnswerTool,
 };
-
-type MyToolCall = ToolCallUnion<typeof toolSet>;
-type MyToolResult = ToolResultUnion<typeof toolSet>;

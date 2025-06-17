@@ -13,4 +13,8 @@ export class Identity<T extends string | number> {
       throw new DomainError(validationError.message, validationError.stack);
     }
   }
+
+  equals(other: Identity<T>): boolean {
+    return this.value === other.value;
+  }
 }

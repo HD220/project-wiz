@@ -102,8 +102,17 @@ src/locales/**/*.ts
 # Electron-Forge
 out
 
+*.db
+
+
 # Roo Flow
 .git
 
 _old
-*.db
+
+.roo
+.cursor
+
+docs/tasks_old
+
+docs/prompts

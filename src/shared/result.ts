@@ -1,27 +1,29 @@
-export type ResultSuccess<T> = {
-  success: true;
-  data: T;
-};
-export type ResultError = {
-  success: false;
-  error: {
-    name: string;
-    message: string;
-    stack?: string;
-  };
-};
+export type Result<T> = Ok<T> | Error;
 
-export type Result<T> = ResultSuccess<T> | ResultError;
+export class Ok<T> {
+  constructor(public readonly value: T) {}
+  isOk(): this is Ok<T> {
+    return true;
+  }
+  isError(): this is Error {
+    return false;
+  }
+}
 
-export const OK = <T>(value: T): ResultSuccess<T> => ({
-  success: true,
-  data: value,
-});
-export const NOK = <E extends Error>(error: E): ResultError => ({
-  success: false,
-  error: {
-    message: error.message,
-    name: error.name,
-    stack: error.stack,
-  },
-});
+export class Error {
+  constructor(public readonly message: string) {}
+  isOk(): this is Ok<never> {
+    return false;
+  }
+  isError(): this is Error {
+    return true;
+  }
+}
+
+export function ok<T>(value: T): Result<T> {
+  return new Ok(value);
+}
+
+export function error(message: string): Result<never> {
+  return new Error(message);
+}

@@ -1,5 +1,5 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/shared/result";
+import { Result, ok, error } from "@/core/common/result";
 import { IUserRepository } from "@/core/ports/repositories/user.interface";
 
 export class UserQuery implements Executable<UserQueryInput, UserQueryOutput> {
@@ -9,7 +9,7 @@ export class UserQuery implements Executable<UserQueryInput, UserQueryOutput> {
     try {
       const users = await this.userRepository.list();
 
-      return OK(
+      return ok(
         users.map((user) => ({
           id: user.id.value,
           username: user.username.value,
@@ -20,8 +20,8 @@ export class UserQuery implements Executable<UserQueryInput, UserQueryOutput> {
           assistantId: user?.assistantId?.value,
         }))
       );
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      return error(err instanceof Error ? err.message : String(err));
     }
   }
 }

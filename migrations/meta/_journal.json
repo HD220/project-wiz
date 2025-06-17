@@ -43,6 +43,13 @@
       "when": 1747266045107,
       "tag": "0005_unknown_kang",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1749323492000,
+      "tag": "0006_jobs_initial",
+      "breakpoints": true
     }
   ]
 }
