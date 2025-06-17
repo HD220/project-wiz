@@ -108,7 +108,7 @@ Este é um ponto muito importante para evitar confusão. Cada tarefa (atividade)
 *   **Task**: É a lógica de execução em memória para um tipo específico de trabalho. A Task sabe "como" interagir com serviços externos (incluindo LLMs) para realizar a parte computacional de uma Job. A Task não se preocupa com persistência ou status de fila e é geralmente instanciada e executada por um [Agente](./02-agent-framework.md).
 *   **Fila (Queue)**: O componente central responsável pelo gerenciamento do ciclo de vida das Jobs. Ela persiste o estado das Jobs, controla as transições de status, gerencia retentativas, atrasos e dependências.
 *   **Worker (do sistema de Jobs)**: Uma classe que monitora a Fila por Jobs atribuídos a um [Agente](./02-agent-framework.md) específico. O Worker é responsável por pegar Jobs da Fila, orquestrar sua execução pelo Agente e notificar a Fila sobre o desfecho.
-*   **Agente**: Refere-se à entidade lógica ([Persona](./02-agent-framework.md#agent)) que executa a Task. A função de processamento que o Worker invoca é um método da classe do Agente, que por sua vez utiliza as [Tools](./02-agent-framework.md#tools) configuradas.
+*   **Agente**: Refere-se à entidade lógica ([Persona](./02-agent-framework.md#1-conceito-de-agente-e-persona)) que executa a Task. A função de processamento que o Worker invoca é um método da classe do Agente, que por sua vez utiliza as [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) configuradas.
 
 ## 5. Entidade Job
 
@@ -405,10 +405,10 @@ A integração com o Electron e a comunicação Inter-processos (IPC) entre o Ma
 
 ### 7.4. Agente
 
-*   **Responsabilidade Principal**: Executar a lógica da **Task** associada a uma Job, utilizando suas [Tools](./02-agent-framework.md#tools) e capacidades de IA.
+*   **Responsabilidade Principal**: Executar a lógica da **Task** associada a uma Job, utilizando suas [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) e capacidades de IA.
 *   **Funcionamento**:
     1.  Recebe uma **Job** do Worker.
-    2.  Instancia a classe **Task** apropriada (que sabe interagir com LLMs e outras ferramentas), usando os dados da Job e as [Tools](./02-agent-framework.md#tools) disponíveis para o Agente.
+    2.  Instancia a classe **Task** apropriada (que sabe interagir com LLMs e outras ferramentas), usando os dados da Job e as [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) disponíveis para o Agente.
     3.  Executa a `taskInstance`. O Agente em si não interage diretamente com a Fila ou gerencia o status da Job; essa é uma responsabilidade do Worker e da Fila.
 
 #### 7.4.1. Regras de Retorno do Agente (para o Worker)
@@ -442,10 +442,10 @@ Além da interação com LLMs:
 ## 9. Interação com LLMs e Tools (Dentro das Tasks)
 
 *   As chamadas para LLMs são feitas primariamente dentro das Tasks, utilizando SDKs como `ai-sdk` (veja [Integração com LLMs](./04-llm-integration.md)).
-*   As [Tools](./02-agent-framework.md#tools) são fornecidas à LLM durante essas chamadas, permitindo que o modelo solicite ações no sistema (ler arquivos, executar comandos, etc.).
+*   As [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) são fornecidas à LLM durante essas chamadas, permitindo que o modelo solicite ações no sistema (ler arquivos, executar comandos, etc.).
 *   Uma "step" de execução de uma Job por uma Task pode envolver múltiplas interações com a LLM e suas Tools. Uma "step" geralmente termina quando a LLM invoca uma Tool especial como `finalAnswer` (ou similar) ou quando a Task decide que completou uma unidade lógica de trabalho.
 *   A Tool `finalAnswer` (ou um mecanismo similar) normalmente indica se a Task considera a Job como um todo concluída (`taskFinished: true`) ou se apenas uma etapa foi finalizada (`taskFinished: false`).
-*   As **Tools** são um conceito central e são detalhadas no documento [Estrutura do Agente (Agent Framework)](./02-agent-framework.md#tools). Elas podem ser genéricas (disponíveis para muitos Agentes, como `FilesystemTool`) ou específicas de uma Task/Job.
+*   As **Tools** são um conceito central e são detalhadas no documento [Estrutura do Agente (Agent Framework)](./02-agent-framework.md#4-ferramentas-do-agente-tools). Elas podem ser genéricas (disponíveis para muitos Agentes, como `FilesystemTool`) ou específicas de uma Task/Job.
 
 ## 10. Build e Implantação
 
