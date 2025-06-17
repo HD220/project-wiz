@@ -11,113 +11,48 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Calendar, Home, Inbox, Plus, Search, Settings } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react"; // Keep Plus if used for "New Message"
+// Removed Calendar, Home, Inbox, Search, Settings from here as they'll be imported below for the map
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"; // Avatar imports are used by DirectMessageListItem, not directly here after refactor
+import { cn, getInitials } from "@/lib/utils"; // getInitials is used by DirectMessageListItem
 import { ScrollArea } from "../ui/scroll-area";
 import { Link } from "@tanstack/react-router";
+import { placeholderUserSidebarNavItems, placeholderUserListForDM, placeholderDirectMessageThreads, UserSidebarNavItemPlaceholder } from "@/lib/placeholders";
+import { DirectMessageListItem } from "./direct-message-list-item";
+import { Home, Inbox, Calendar, Search, Settings, LucideIcon } from "lucide-react"; // Explicit imports for iconMap
 import { H4 } from "../typography/titles";
-
-// Menu items.
-const items = [
-  {
-    title: "Dashboard",
-    url: "/user",
-    icon: Home,
-  },
-  {
-    title: "Integrações",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Guias de Uso",
-    url: "/user/user-guides",
-    icon: Calendar,
-  },
-  {
-    title: "MCPs",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Personas/Agents",
-    url: "#",
-    icon: Settings,
-  },
-  {
-    title: "Configurações",
-    url: "#",
-    icon: Settings,
-  },
-];
-
-type User = {
-  id: string;
-  name: string;
-  status: "invisible" | "busy" | "absent" | "available";
-  avatar: string;
-};
-const users: User[] = [
-  {
-    id: "1",
-    name: "Nicolas",
-    avatar: "",
-    status: "available",
-  },
-  {
-    id: "2",
-    name: "Júlio Scremin",
-    avatar: "",
-    status: "available",
-  },
-  {
-    id: "3",
-    name: "Renos1",
-    avatar: "",
-    status: "available",
-  },
-];
-
-type IndividualDM = {
-  type: "individual";
-  id: string;
-  userId: string;
-};
-type GroupDM = {
-  type: "group";
-  id: string;
-  description: string;
-  participants: { userId: string }[];
-};
-
-const dms: (IndividualDM | GroupDM)[] = [
-  {
-    type: "individual",
-    id: "1",
-    userId: "2",
-  },
-  {
-    type: "individual",
-    id: "2",
-    userId: "3",
-  },
-  {
-    type: "group",
-    id: "3",
-    description: "Apoio Mateus",
-    participants: [{ userId: "1" }, { userId: "2" }, { userId: "3" }],
-  },
-];
+import { Trans, t } from "@lingui/macro";
+import { i18n } from "@lingui/core";
+import { useSyncedCurrentUser } from "@/hooks/useSyncedCurrentUser";
 
 export function UserSidebar() {
+  const currentUser = useSyncedCurrentUser();
+  // Assuming UserQueryOutput is UserDTO[] and we need the first user, or it's UserDTO directly
+  // Based on user-data-store, currentUserSnapshot is UserQueryOutput | null.
+  // If UserQueryOutput is UserDTO[], then currentUser here would be UserDTO[] | null.
+  // And currentUser[0]?.nickname would be needed.
+  // However, userQuery in use-core returns a single UserDTO.
+  // And handleUserDataChanged in store sets currentUserSnapshot = newData (which is UserQueryOutput).
+  // Let's assume UserQueryOutput from the store is effectively a single user object or null.
+  // If UserQueryOutput from core is UserDTO[], the store or preload should handle picking the first element.
+  // For now, proceeding as if currentUser is { nickname: string } | null.
+  const displayName = currentUser?.nickname || i18n._("userSidebar.loadingOrNoUser", "Usuário");
+
+  const iconMap: Record<UserSidebarNavItemPlaceholder["iconName"], LucideIcon> = {
+    Home: Home,
+    Inbox: Inbox,
+    Calendar: Calendar,
+    Search: Search,
+    Settings: Settings,
+  };
+
   return (
     <Sidebar
       collapsible="none"
       className="!relative [&>[data-slot=sidebar-container]]:relative flex flex-1 w-full"
     >
       <SidebarHeader>
-        <H4 className=" truncate">Nome do usuário</H4>
+        <H4 className=" truncate">{displayName}</H4>
         <SidebarSeparator className="mx-0 px-0" />
       </SidebarHeader>
       <SidebarContent>
@@ -126,102 +61,35 @@ export function UserSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link
-                        to={item.url}
-                        activeProps={{ className: "bg-muted" }}
-                        activeOptions={{ exact: true }}
-                      >
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {placeholderUserSidebarNavItems.map((item) => {
+                  const IconComponent = iconMap[item.iconName];
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={item.url}
+                          activeProps={{ className: "bg-muted" }}
+                          activeOptions={{ exact: true }}
+                        >
+                          <IconComponent className="mr-2 h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
           <SidebarGroup>
-            <SidebarGroupLabel>Mensagens Diretas</SidebarGroupLabel>
-            <SidebarGroupAction title="Nova Mensagem">
-              <Plus /> <span className="sr-only">Nova Mensagem</span>
+            <SidebarGroupLabel><Trans>Mensagens Diretas</Trans></SidebarGroupLabel>
+            <SidebarGroupAction title={t`Nova Mensagem`}>
+              <Plus onClick={() => console.warn("TODO: Implement Nova Mensagem (DM) action")} /> <span className="sr-only"><Trans>Nova Mensagem</Trans></span>
             </SidebarGroupAction>
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
-                {[...dms].map((message) => (
-                  <SidebarMenuItem key={message.id}>
-                    <SidebarMenuButton
-                      className="h-12 hover:bg-accent/50"
-                      asChild
-                    >
-                      <Link
-                        to={`/user/dm/$id`}
-                        params={{ id: message.id }}
-                        className="py-2"
-                        activeOptions={{ exact: true }}
-                        activeProps={{
-                          className: "bg-accent",
-                        }}
-                      >
-                        <div className="flex flex-1 gap-2 items-center">
-                          <div className="w-12 h-12 relative">
-                            {message.type === "individual" ? (
-                              <Avatar className="size-12 border-2">
-                                <AvatarImage></AvatarImage>
-                                <AvatarFallback>
-                                  {users
-                                    .find((user) => user.id === message.userId)
-                                    ?.name.split(" ")
-                                    .join()
-                                    .substring(0, 2)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                            ) : (
-                              <>
-                                {message.participants
-                                  .slice(0, 2)
-                                  .map((member, idx) => (
-                                    <Avatar
-                                      key={`${idx}`}
-                                      className={cn(
-                                        "size-8 absolute border-2",
-                                        idx % 2 == 0
-                                          ? "left-0 top-0"
-                                          : "right-0 bottom-0"
-                                      )}
-                                    >
-                                      <AvatarImage></AvatarImage>
-                                      <AvatarFallback>
-                                        {users
-                                          .find(
-                                            (user) => user.id === member.userId
-                                          )
-                                          ?.name.split(" ")
-                                          .join()
-                                          .substring(0, 2)
-                                          .toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ))}
-                              </>
-                            )}
-                          </div>
-                          <div className="flex flex-1 justify-start items-center">
-                            <span>
-                              {message.type === "individual"
-                                ? users.find(
-                                    (user) => user.id === message.userId
-                                  )?.name
-                                : message.description}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                {placeholderDirectMessageThreads.map((dmThread) => (
+                  <DirectMessageListItem key={dmThread.id} dmThread={dmThread} users={placeholderUserListForDM} />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
