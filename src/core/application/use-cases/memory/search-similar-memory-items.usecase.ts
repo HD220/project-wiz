@@ -30,7 +30,7 @@ export class SearchSimilarMemoryItemsUseCase implements ISearchSimilarMemoryItem
     console.log(\`SearchSimilarMemoryItemsUseCase: Searching for memories similar to "\${queryText.substring(0,50)}..." for agentId: \${agentId}\`);
 
     try {
-      const { embedding: queryEmbedding } = await this.embeddingService.generateEmbedding(queryText);
+      const queryEmbedding = await this.embeddingService.generateEmbedding(queryText);
 
       if (!queryEmbedding || queryEmbedding.length === 0) {
         console.warn(\`SearchSimilarMemoryItemsUseCase: Failed to generate embedding for query "\${queryText}". Returning empty array.\`);

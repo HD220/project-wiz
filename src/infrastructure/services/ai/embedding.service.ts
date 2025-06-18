@@ -29,11 +29,11 @@ export class EmbeddingService implements IEmbeddingService {
     // e.g. if (this.embeddingModelName.startsWith('deepseek-embed') && !process.env.DEEPSEEK_API_KEY) { ... }
   }
 
-  async generateEmbedding(textToEmbed: string): Promise<EmbeddingResult> {
+  async generateEmbedding(textToEmbed: string): Promise<number[]> {
     if (!textToEmbed || textToEmbed.trim() === '') {
-      console.warn("EmbeddingService: Attempted to embed empty or whitespace-only text. Returning empty embedding.");
+      console.warn("EmbeddingService: Attempted to embed empty or whitespace-only text. Returning empty embedding vector.");
       // Or throw error, depending on desired handling
-      return { embedding: [], usage: { promptTokens: 0 } };
+      return [];
     }
 
     try {
@@ -49,8 +49,8 @@ export class EmbeddingService implements IEmbeddingService {
         value: textToEmbed,
       });
 
-      console.log(\`EmbeddingService: Embedding generated. Usage: \${usage.promptTokens} prompt tokens.\`);
-      return { embedding, usage };
+      console.log(\`EmbeddingService: Embedding generated. Usage: \${usage.promptTokens} prompt tokens. Returning only the embedding vector.\`);
+      return embedding;
 
     } catch (error: any) {
       console.error("EmbeddingService: Error generating embedding:", error.message);
