@@ -5,9 +5,9 @@ import { toolRegistry, ToolRegistry } from './tool-registry';
 import { IAgentTool } from '../../core/tools/tool.interface';
 import {
   AgentJobState,
-  AgentExecutorResult,
-  JobRuntimeData
+  AgentExecutorResult
 } from '../../core/domain/jobs/job-processing.types'; // PlanStep removed
+import { JobRuntimeData } from '../../core/domain/entities/jobs/job-runtime-data.interface'; // Corrected import path
 import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
 
 import { generateObject, tool as aiToolHelper, Tool, Message, generateText, ToolCallPart, ToolResultPart } from 'ai';
@@ -351,6 +351,13 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
       // even if the types from _fetchNextLLMDecision allow undefined.
       // The subsequent logic (e.g., if (toolCalls && toolCalls.length > 0)) already handles this.
 
+      // IMPORTANT: The order of these checks matters.
+      // 1. Clarifying questions: If LLM asks questions, we stop and wait for user.
+      // 2. Re-plan: If LLM requests re-plan, we reset and prepare for new planning.
+      // 3. Tool Calls: If LLM wants to use tools, we execute them.
+      // 4. Stop/Completion: If LLM indicates completion.
+      // 5. Errors/Other: Fallbacks.
+
       if (finalObject?.clarifyingQuestions && finalObject.clarifyingQuestions.length > 0) {
         console.log(`AgentExecutor (${this.personaTemplate.role}): LLM asked ${finalObject.clarifyingQuestions.length} clarifying questions for job ${job.id}.`);
 
@@ -428,31 +435,33 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
         };
       }
 
-      if (toolCalls && toolCalls.length > 0) {
+      if (toolCalls && toolCalls.length > 0) { // This block should now use _executeToolsAndHandleResults
         console.log(`AgentExecutor (${this.personaTemplate.role}): LLM returned ${toolCalls.length} tool call(s) to be executed.`);
 
-        // Execute tools and get results and updated history
+        // Note: `agentState.conversationHistory` at this point includes the LLM's `tool_calls` message.
+        // The `_executeToolsAndHandleResults` method will append `tool_results` messages to this history.
         const execOutcome = await this._executeToolsAndHandleResults(
           toolCalls,
-          agentState.conversationHistory, // History after LLM decision, including tool_call messages
+          agentState.conversationHistory,
           job,
-          agentState
+          agentState // Pass agentState for context, though it's not directly modified for lastFailureSummary inside
         );
-        agentState.conversationHistory = execOutcome.conversationHistory; // This history now includes tool_result messages
 
-        // Update execution history based on the original toolCalls and the processed toolResults from execOutcome
-        toolCalls.forEach(tc => {
-          const toolResultPart = execOutcome.toolResults.find(tr => tr.toolCallId === tc.toolCallId);
+        agentState.conversationHistory = execOutcome.conversationHistory; // Update history with tool results
+
+        // Log tool executions to executionHistory
+        // The `toolCalls` are what the LLM requested.
+        // The `execOutcome.toolResults` are what our execution wrapper produced.
+        toolCalls.forEach(requestedToolCall => {
+          const result = execOutcome.toolResults.find(r => r.toolCallId === requestedToolCall.toolCallId);
           agentState.executionHistory?.push({
             timestamp: new Date(),
             type: 'tool_call',
-            name: tc.toolName,
-            params: tc.args,
-            result: toolResultPart?.result !== undefined ? toolResultPart.result : "Tool execution did not yield an explicit result.",
-            // error field is based on whether toolResultPart.result itself is an error structure
-            error: (toolResultPart?.result as any)?.error ? String((toolResultPart.result as any).error) : undefined
+            name: requestedToolCall.toolName,
+            params: requestedToolCall.args,
+            result: result?.result !== undefined ? result.result : "No explicit result from tool execution.",
+            error: (result?.result as any)?.error ? String((result.result as any).error) : undefined,
           });
-          // Logging already happened inside _executeToolsAndHandleResults
         });
 
         job.setData({ ...(job.data || {}), agentState });

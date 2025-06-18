@@ -1,7 +1,7 @@
 // src/core/domain/entities/jobs/job.entity.ts
 
 import { JobStatus, JobStatusType } from './job-status';
-import { JobRuntimeData } from '../jobs/job-processing.types';
+import { JobRuntimeData } from './job-runtime-data.interface';
 
 export interface JobProps<Input = any, Output = any> {
   id: string;
