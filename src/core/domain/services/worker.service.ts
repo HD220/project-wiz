@@ -148,30 +148,9 @@ export class WorkerService { // Removed <PInput, POutput>
       // IMPORTANT: GenericAgentExecutor modifies job.data directly.
       // Now, WorkerService needs to persist this modified job object.
 
-      switch (executorResult.status) {
-        case 'COMPLETED':
-          job.moveToCompleted(executorResult.output || { message: executorResult.message });
-          console.log(`WorkerService: Job ${job.id} COMPLETED by agent. Message: ${executorResult.message}`);
-          await this.jobRepository.save(job); // Save final state
-          break;
-        case 'FAILED':
-          job.moveToFailed(executorResult.message); // Store failure message
-          console.log(`WorkerService: Job ${job.id} FAILED execution by agent. Message: ${executorResult.message}`);
-          await this.jobRepository.save(job); // Save final state
-          break;
-        case 'CONTINUE_PROCESSING':
-          // AgentExecutor has updated job.data with new agentState.
-          // WorkerService needs to save this job, and it should be picked up again.
-          // Move to WAITING to be picked up immediately in next poll cycle, or DELAYED for a short pause.
-          job.moveToWaiting(); // Or job.moveToDelayed(500); // e.g., 0.5 second delay
-          console.log(`WorkerService: Job ${job.id} requires CONTINUATION. Message: ${executorResult.message}. Job saved and re-queued.`);
-          await this.jobRepository.save(job); // Persist the updated job.data (with agentState)
-          break;
-        default:
-          console.error(`WorkerService: Unknown status from AgentExecutor for job ${job.id}: ${executorResult.status}`);
-          job.moveToFailed(\`Unknown executor status: \${executorResult.status}\`);
-          await this.jobRepository.save(job);
-      }
+      const finalizedJob = this._finalizeJobState(job, executorResult);
+      await this.jobRepository.save(finalizedJob);
+
     } catch (error: any) { // Catch errors from agentExecutor.processJob or job state transitions
       console.error(`WorkerService: Error processing job ${job.id}:`, error.message);
       // Generic retry logic (could be enhanced)
@@ -192,5 +171,37 @@ export class WorkerService { // Removed <PInput, POutput>
     } finally {
       this.activeJobs--;
     }
+  }
+
+  private _finalizeJobState(job: Job<any, any>, executorResult: AgentExecutorResult): Job<any, any> {
+    // IMPORTANT: GenericAgentExecutor modifies job.data directly.
+    // This method receives the job potentially already modified by agentExecutor,
+    // and further modifies its status and other properties based on executorResult.
+
+    switch (executorResult.status) {
+      case 'COMPLETED':
+        job.moveToCompleted(executorResult.output || { message: executorResult.message });
+        console.log(`WorkerService: Job ${job.id} COMPLETED by agent. Message: ${executorResult.message}`);
+        // REMOVE: await this.jobRepository.save(job);
+        break;
+      case 'FAILED':
+        job.moveToFailed(executorResult.message);
+        console.log(`WorkerService: Job ${job.id} FAILED execution by agent. Message: ${executorResult.message}`);
+        // REMOVE: await this.jobRepository.save(job);
+        break;
+      case 'CONTINUE_PROCESSING':
+        // AgentExecutor has updated job.data with new agentState.
+        // WorkerService needs to save this job, and it should be picked up again.
+        // Move to WAITING to be picked up immediately in next poll cycle, or DELAYED for a short pause.
+        job.moveToWaiting(); // Or job.moveToDelayed(500); // e.g., 0.5 second delay
+        console.log(`WorkerService: Job ${job.id} requires CONTINUATION. Message: ${executorResult.message}. Job status updated.`);
+        // REMOVE: await this.jobRepository.save(job);
+        break;
+      default:
+        console.error(`WorkerService: Unknown status from AgentExecutor for job ${job.id}: ${executorResult.status}`);
+        job.moveToFailed(\`Unknown executor status: \${executorResult.status}\`);
+        // REMOVE: await this.jobRepository.save(job);
+    }
+    return job; // Return the modified job
   }
 }
