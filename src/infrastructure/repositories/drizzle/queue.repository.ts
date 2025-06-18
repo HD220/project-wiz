@@ -1,9 +1,11 @@
 // src/infrastructure/repositories/drizzle/queue.repository.ts
 
-import { db } from '../../services/drizzle/index'; // CORRECTED: Path to the Drizzle instance in index.ts (better-sqlite3)
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+type DrizzleDB = BetterSQLite3Database<any>;
+
 import { queuesTable, InsertQueue, SelectQueue } from '../../services/drizzle/schemas/queues'; // Path to queues schema
 import { Queue } from '../../../core/domain/entities/queue/queue.entity';
-import { IQueueRepository } from '../../../core/ports/repositories/queue.repository';
+import { IQueueRepository } from '../../../core/ports/repositories/queue.interface';
 import { eq } from 'drizzle-orm';
 
 // Helper to convert DB row to Queue entity
@@ -47,8 +49,14 @@ function domainToDb(queue: Queue): InsertQueue {
 }
 
 export class DrizzleQueueRepository implements IQueueRepository {
+  private readonly repositoryDB: DrizzleDB;
+
+  constructor(dbInstance: DrizzleDB) {
+    this.repositoryDB = dbInstance;
+  }
+
   async findById(id: string): Promise<Queue | null> {
-    const result = await db.select().from(queuesTable).where(eq(queuesTable.id, id)).limit(1);
+    const result = await this.repositoryDB.select().from(queuesTable).where(eq(queuesTable.id, id)).limit(1);
     if (result.length === 0) {
       return null;
     }
@@ -56,7 +64,7 @@ export class DrizzleQueueRepository implements IQueueRepository {
   }
 
   async findByName(name: string): Promise<Queue | null> {
-    const result = await db.select().from(queuesTable).where(eq(queuesTable.name, name)).limit(1);
+    const result = await this.repositoryDB.select().from(queuesTable).where(eq(queuesTable.name, name)).limit(1);
     if (result.length === 0) {
       return null;
     }
@@ -69,7 +77,7 @@ export class DrizzleQueueRepository implements IQueueRepository {
     // Drizzle's insert with onConflictDoUpdate (upsert)
     // Ensure values align with InsertQueue type.
     // createdAt and updatedAt have defaults in schema but we provide from entity.
-    await db.insert(queuesTable).values(dbQueueData)
+    await this.repositoryDB.insert(queuesTable).values(dbQueueData)
       .onConflictDoUpdate({
         target: queuesTable.id, // Conflict on ID. Can also be an array of columns for composite PK.
                                  // If upserting based on 'name', target would be queuesTable.name
@@ -84,11 +92,11 @@ export class DrizzleQueueRepository implements IQueueRepository {
 
   // Optional methods from the template:
   // async delete(id: string): Promise<void> {
-  //   await db.delete(queuesTable).where(eq(queuesTable.id, id));
+  //   await this.repositoryDB.delete(queuesTable).where(eq(queuesTable.id, id));
   // }
 
   // async listAll(limit: number = 10, offset: number = 0): Promise<Queue[]> {
-  //   const results = await db.select().from(queuesTable).limit(limit).offset(offset);
+  //   const results = await this.repositoryDB.select().from(queuesTable).limit(limit).offset(offset);
   //   return results.map(dbToDomain);
   // }
 }

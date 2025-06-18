@@ -1,4 +1,4 @@
-// src/core/ports/repositories/job.repository.ts
+// src/core/ports/repositories/job.interface.ts
 
 import { Job } from '../../domain/entities/jobs/job.entity';
 
@@ -10,6 +10,7 @@ export interface IJobRepository {
   // For now, let's keep it simple as per the plan.
   // It should return jobs that are WAITING or DELAYED (and executeAfter is due).
   findPending(queueId: string, limit: number): Promise<Job<any, any>[]>;
+  findPendingByRole(queueId: string, role: string, limit: number): Promise<Job<any, any>[]>;
+  delete(jobId: string): Promise<void>;
   // Optional: findByQueueId(queueId: string, status?: JobStatusType, limit?: number, offset?: number): Promise<Job[]>;
-  // Optional: delete(id: string): Promise<void>;
 }

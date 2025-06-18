@@ -10,8 +10,8 @@ import {
   RepositoryDocsPath,
   RepositoryPath,
 } from "@/core/domain/entities/source-code/value-objects";
-import { IFileSystem } from "@/core/ports/adapter/file-system";
-import { IVersionControlSystem } from "@/core/ports/adapter/version-control-sistem";
+import { IFileSystem } from "@/core/ports/adapter/file-system.interface";
+import { IVersionControlSystem } from "@/core/ports/adapter/version-control-system.interface";
 import { IProjectRepository } from "@/core/ports/repositories/project.interface";
 import { ISourceCodeRepository } from "@/core/ports/repositories/source-code.interface";
 

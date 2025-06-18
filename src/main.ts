@@ -1,156 +1,199 @@
 // src/main.ts
+import 'dotenv/config'; // Ensure this is at the very top
 
+import { db } from './infrastructure/services/drizzle/index';
 import { DrizzleQueueRepository } from './infrastructure/repositories/drizzle/queue.repository';
 import { DrizzleJobRepository } from './infrastructure/repositories/drizzle/job.repository';
-import { SimpleLogAgent } from './infrastructure/agents/simple-log.agent';
+import { DrizzleAnnotationRepository } from './infrastructure/repositories/drizzle/annotation.repository';
+import { FileSystemAgentPersonaTemplateRepository } from './infrastructure/repositories/file-system-agent-persona-template.repository';
+
 import { WorkerService } from './core/domain/services/worker.service';
 import { Queue } from './core/domain/entities/queue/queue.entity';
 import { Job } from './core/domain/entities/jobs/job.entity';
-import { db } from './infrastructure/services/drizzle/index'; // Ensure db instance is available from index.ts
+import { AgentPersonaTemplate } from './core/domain/entities/agent/persona-template.types'; // For type usage
 
-// --- Configuration ---
-const QUEUE_NAME = 'my-logging-queue';
-const CONCURRENCY = 2;
+import { ListJobsUseCase } from './core/application/use-cases/job/list-jobs.usecase';
+import { SaveJobUseCase } from './core/application/use-cases/job/save-job.usecase';
+import { RemoveJobUseCase } from './core/application/use-cases/job/remove-job.usecase';
+import { ListAnnotationsUseCase } from './core/application/use-cases/annotation/list-annotations.usecase';
+import { SaveAnnotationUseCase } from './core/application/use-cases/annotation/save-annotation.usecase';
+import { RemoveAnnotationUseCase } from './core/application/use-cases/annotation/remove-annotation.usecase';
+import { DrizzleMemoryRepository } from './infrastructure/repositories/drizzle/memory.repository';
+import { SaveMemoryItemUseCase } from './core/application/use-cases/memory/save-memory-item.usecase';
+// import { SearchMemoryItemsUseCase } from './core/application/use-cases/memory/search-memory-items.usecase'; // Removed old
+import { SearchSimilarMemoryItemsUseCase } from './core/application/use-cases/memory/search-similar-memory-items.usecase'; // Added new
+import { RemoveMemoryItemUseCase } from './core/application/use-cases/memory/remove-memory-item.usecase';
+import { EmbeddingService } from './infrastructure/services/ai/embedding.service'; // Added
 
+import { TaskTool, getTaskToolDefinitions } from './infrastructure/tools/task.tool';
+import { FileSystemTool, getFileSystemToolDefinitions } from './infrastructure/tools/file-system.tool';
+import { AnnotationTool, getAnnotationToolDefinitions } from './infrastructure/tools/annotation.tool';
+import { TerminalTool, getTerminalToolDefinitions } from './infrastructure/tools/terminal.tool';
+import { MemoryTool, getMemoryToolDefinitions } from './infrastructure/tools/memory.tool'; // Added
+import { toolRegistry } from './infrastructure/tools/tool-registry';
+
+import { IAgentExecutor } from './core/ports/agent/agent-executor.interface';
+import { GenericAgentExecutor } from './infrastructure/agents/generic-agent-executor';
+
+import path from 'path'; // For FileSystemTool CWD if needed
+
+// Helper function (can be kept from previous versions)
 async function initializeQueue(queueRepo: DrizzleQueueRepository, queueName: string, concurrency: number): Promise<Queue> {
   let queue = await queueRepo.findByName(queueName);
   if (!queue) {
     console.log(`Queue ${queueName} not found, creating it...`);
-    // Note: Queue.create now returns a Queue instance, not props.
-    // The constructor of Queue now takes props that are slightly different from QueueProps.
-    // Let's use the static create method from the entity itself.
     const newQueueEntity = Queue.create({ name: queueName, concurrency });
-    await queueRepo.save(newQueueEntity); // Save the entity
-    queue = newQueueEntity; // Assign the created entity
+    await queueRepo.save(newQueueEntity);
+    queue = newQueueEntity;
     console.log(`Queue ${queueName} created with ID ${queue.id}`);
   } else {
     console.log(`Queue ${queueName} found with ID ${queue.id}`);
-    // Optionally, update concurrency if different, though save handles upsert based on ID
     if (queue.concurrency !== concurrency) {
-        console.log(`Updating concurrency for ${queueName} from ${queue.concurrency} to ${concurrency}`);
-        // To update, we'd modify the queue instance and save it.
-        // This requires Queue entity to have a setter or a method to update concurrency.
-        // For simplicity, we assume Queue.create + save handles this or it's done manually.
-        // A proper update would be:
-        // queue.updateConcurrency(concurrency); // Assuming such method exists
-        // await queueRepo.save(queue);
+      console.log(`Updating concurrency for ${queueName} from ${queue.concurrency} to ${concurrency}`);
+      // This part requires Queue entity to have a method to update concurrency, or handle directly.
+      // For now, we're just logging. A real update would be:
+      // queue.updateConcurrency(concurrency); // Assuming such method exists
+      // await queueRepo.save(queue);
     }
   }
   if (!queue) {
-    throw new Error("Failed to find or create queue"); // Should not happen if logic is correct
+    throw new Error(`Failed to find or create queue for ${queueName}`);
   }
   return queue;
 }
 
-async function addSampleJobs(jobRepo: DrizzleJobRepository, queueId: string) {
-  console.log(`Adding sample jobs to queue ${queueId}...`);
-
-  const job1Payload = { message: 'Hello from Job 1!', data: { value: 123 } };
-  const job1 = Job.create({
-    queueId,
-    name: 'LogMessageJob_1',
-    payload: job1Payload,
-    priority: 1, // Higher priority
-    maxAttempts: 3,
-    maxRetryDelay: 30000, // 30 seconds
-    // initialRetryDelay: 1000 // This was a param in Job.create before, now handled by moveToDelayed or default in calculateNextRetryDelay
-  });
-
-  const job2Payload = { message: 'This is Job 2 logging.', data: { info: 'test' } };
-  const job2 = Job.create({
-    queueId,
-    name: 'LogMessageJob_2',
-    payload: job2Payload,
-    priority: 2,
-    maxAttempts: 3,
-    maxRetryDelay: 30000,
-  });
-
-  // A job that will be delayed initially
-  const job3Payload = { message: 'Delayed Job 3 here.' };
-  const job3 = Job.create({
-    queueId,
-    name: 'DelayedLogMessageJob_3',
-    payload: job3Payload,
-    priority: 1,
-    maxAttempts: 2,
-    maxRetryDelay: 10000,
-    delay: 5000, // Delay execution by 5 seconds from creation
-  });
-
-  // A job that will be processed by SimpleLogTask as having "No message provided".
-  const job4Payload = { data: { shouldFail: true } }; // Missing message property
-  const job4 = Job.create({
-    queueId,
-    name: 'NoMessageJob_4',
-    // @ts-ignore to test missing message, though SimpleLogTask handles it gracefully
-    payload: job4Payload,
-    priority: 3,
-    maxAttempts: 1,
-    maxRetryDelay: 5000,
-  });
-
-
-  await jobRepo.save(job1);
-  await jobRepo.save(job2);
-  await jobRepo.save(job3);
-  await jobRepo.save(job4);
-
-  console.log('Sample jobs added.');
-}
 
 async function main() {
-  console.log('Starting Queue System Initializer...');
+  console.log('Starting Application - Refactored Main Setup...');
 
-  // Instantiate repositories
-  const queueRepository = new DrizzleQueueRepository();
-  const jobRepository = new DrizzleJobRepository();
+  // API Key Check (moved earlier for clarity)
+  if (!process.env.DEEPSEEK_API_KEY) {
+    console.error("CRITICAL: DEEPSEEK_API_KEY is not set. LLM-dependent agents will fail.");
+    // Depending on desired behavior, might exit: process.exit(1);
+  }
+  if (!process.env.DB_FILE_NAME) {
+    console.error("CRITICAL: DB_FILE_NAME is not set. Database operations will fail.");
+    process.exit(1); // Essential for operation
+  }
+  console.log(`Using database: ${process.env.DB_FILE_NAME}`);
 
-  // 1. Initialize Queue
-  const queue = await initializeQueue(queueRepository, QUEUE_NAME, CONCURRENCY);
+  // --- 1. Database and Core Repositories ---
+  const queueRepository = new DrizzleQueueRepository(db);
+  const jobRepository = new DrizzleJobRepository(db);
+  const annotationRepository = new DrizzleAnnotationRepository(db);
+  const memoryRepository = new DrizzleMemoryRepository(db); // Added
+  const personaTemplateRepository = new FileSystemAgentPersonaTemplateRepository();
+  await personaTemplateRepository.init();
 
-  // 2. Add sample jobs (optional, for testing)
-  const existingJobs = await jobRepository.findPending(queue.id, 1);
-  if (existingJobs.length === 0) {
-    await addSampleJobs(jobRepository, queue.id);
-  } else {
-    console.log("Jobs already exist in the queue, not adding sample jobs.");
+  console.log("Repositories instantiated.");
+
+  // --- 2. UseCases ---
+  // Job UseCases
+  const listJobsUseCase = new ListJobsUseCase(jobRepository);
+  const saveJobUseCase = new SaveJobUseCase(jobRepository);
+  const removeJobUseCase = new RemoveJobUseCase(jobRepository);
+  // Annotation UseCases
+  const listAnnotationsUseCase = new ListAnnotationsUseCase(annotationRepository);
+  const saveAnnotationUseCase = new SaveAnnotationUseCase(annotationRepository);
+  const removeAnnotationUseCase = new RemoveAnnotationUseCase(annotationRepository);
+
+  // Embedding Service
+  const embeddingService = new EmbeddingService(); // Added
+  console.log("EmbeddingService instantiated.");
+
+  // Memory UseCases
+  const saveMemoryItemUseCase = new SaveMemoryItemUseCase(memoryRepository, embeddingService); // Updated
+  const searchSimilarMemoryItemsUseCase = new SearchSimilarMemoryItemsUseCase(memoryRepository, embeddingService); // New
+  const removeMemoryItemUseCase = new RemoveMemoryItemUseCase(memoryRepository);
+  console.log("UseCases instantiated.");
+
+  // --- 3. Tools and ToolRegistry ---
+  const CWD = process.cwd(); // Or a specific workspace path like path.resolve(process.cwd(), 'agent_workspace')
+  console.log(`FileSystemTool operations will be based in CWD: ${CWD}`);
+  const fileSystemToolInstance = new FileSystemTool(CWD);
+  const annotationToolInstance = new AnnotationTool(listAnnotationsUseCase, saveAnnotationUseCase, removeAnnotationUseCase);
+  const taskToolInstance = new TaskTool(listJobsUseCase, saveJobUseCase, removeJobUseCase);
+  const terminalToolInstance = new TerminalTool(CWD);
+  const memoryToolInstance = new MemoryTool(saveMemoryItemUseCase, searchSimilarMemoryItemsUseCase, removeMemoryItemUseCase); // Updated
+
+  getFileSystemToolDefinitions(fileSystemToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getAnnotationToolDefinitions(annotationToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getTaskToolDefinitions(taskToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getTerminalToolDefinitions(terminalToolInstance).forEach(t => toolRegistry.registerTool(t));
+  getMemoryToolDefinitions(memoryToolInstance).forEach(t => toolRegistry.registerTool(t)); // Added
+
+  console.log("All tools registered in ToolRegistry:");
+  toolRegistry.getAllTools().forEach(t => console.log(` - ${t.name} (${t.description.substring(0,50)}...)`));
+
+  // --- 4. Setup and Start Workers for Personas ---
+  const activeWorkers: WorkerService[] = [];
+
+  const rolesToActivate = [
+    "FileSystem Manager",
+    // "Code Generator", // Example: Add other roles here to activate them
+    // "Generic Task Processor"
+  ];
+
+  for (const roleName of rolesToActivate) {
+    const personaTemplate = await personaTemplateRepository.findByRole(roleName);
+
+    if (personaTemplate) {
+      console.log(`
+--- Setting up Worker for Persona Role: ${roleName} ---`);
+      // Each worker gets its own GenericAgentExecutor instance configured with its persona
+      const agentExecutor = new GenericAgentExecutor(personaTemplate, toolRegistry, annotationToolInstance);
+      const queueName = `${roleName.toLowerCase().replace(/\s+/g, '_')}_queue`; // e.g., filesystem_manager_queue
+      const agentQueue = await initializeQueue(queueRepository, queueName, 1); // Concurrency 1 per agent type for now
+
+      const worker = new WorkerService(
+        queueRepository,
+        jobRepository,
+        agentExecutor, // Pass the IAgentExecutor instance
+        personaTemplate.role // Pass the role string this worker handles
+        // { pollFrequencyMs: 7000 } // Optional custom poll frequency
+      );
+      await worker.start(agentQueue.name);
+      activeWorkers.push(worker);
+
+      // Add a sample job for the FileSystem Manager if it's that role
+      if (roleName === "FileSystem Manager") {
+        const sampleGoal = "Create a file named 'main_welcome.txt' in the root directory with content 'Hello from the FileSystem Manager Agent via main.ts!', then list contents of the root directory, and save an annotation about this task.";
+        const existingJob = (await jobRepository.findPending(agentQueue.id, 20)).find(j => j.payload.goal === sampleGoal && j.targetAgentRole === roleName);
+        if (!existingJob) {
+            const job = Job.create({
+                queueId: agentQueue.id,
+                name: "MainFileSystemDemoTask",
+                payload: { goal: sampleGoal },
+                targetAgentRole: roleName,
+                priority: 1
+            });
+            await jobRepository.save(job);
+            console.log(`Sample job for ${roleName} enqueued with ID: ${job.id}`);
+        } else {
+            console.log(`Sample job for ${roleName} already exists.`);
+        }
+      }
+    } else {
+      console.warn(`Persona template for role '${roleName}' not found. Worker not started for this role.`);
+    }
   }
 
+  if (activeWorkers.length > 0) {
+    console.log('\nAll active WorkerServices are running. Press Ctrl+C to stop.');
+  } else {
+    console.warn('\nNo active WorkerServices started. Check persona template definitions and roles in rolesToActivate array.');
+  }
 
-  // 3. Instantiate Agent
-  const simpleLogAgent = new SimpleLogAgent();
-
-  // 4. Instantiate WorkerService
-  const workerService = new WorkerService(
-    queueRepository,
-    jobRepository,
-    simpleLogAgent,
-    { pollFrequencyMs: 3000 } // Poll a bit faster for the example
-  );
-
-  // 5. Start WorkerService
-  console.log(`Starting WorkerService for queue: ${queue.name}...`);
-  await workerService.start(queue.name);
-
-  console.log('WorkerService is running. Press Ctrl+C to stop.');
-
-  // Graceful shutdown handling
-  process.on('SIGINT', async () => {
-    console.log('SIGINT received. Stopping WorkerService...');
-    workerService.stop();
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log('Exiting.');
+  // --- Graceful Shutdown ---
+  const shutdown = async () => {
+    console.log('\nSIGINT/SIGTERM received. Stopping WorkerServices...');
+    activeWorkers.forEach(worker => worker.stop());
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Give time for graceful stop
+    console.log('All workers stopped. Exiting.');
     process.exit(0);
-  });
-
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM received. Stopping WorkerService...');
-    workerService.stop();
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log('Exiting.');
-    process.exit(0);
-  });
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 }
 
 main().catch(error => {

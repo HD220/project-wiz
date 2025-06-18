@@ -1,10 +1,12 @@
 // src/infrastructure/repositories/drizzle/job.repository.ts
 
-import { db } from '../../services/drizzle/index'; // Pointing to better-sqlite3 setup in index.ts
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+type DrizzleDB = BetterSQLite3Database<any>;
+
 import { jobsTable, InsertJob, SelectJob } from '../../services/drizzle/schemas/jobs'; // Path to jobs schema
 import { Job } from '../../../core/domain/entities/jobs/job.entity';
 import { JobStatus, JobStatusType } from '../../../core/domain/entities/jobs/job-status';
-import { IJobRepository } from '../../../core/ports/repositories/job.repository';
+import { IJobRepository } from '../../../core/ports/repositories/job.interface';
 import { eq, and, or, asc, lte, sql } from 'drizzle-orm'; // Removed gte as it's not used in the provided code
 
 // Helper to convert DB row to Job entity
@@ -59,8 +61,14 @@ function domainToDb(job: Job<any, any>): InsertJob {
 
 
 export class DrizzleJobRepository implements IJobRepository {
+  private readonly repositoryDB: DrizzleDB;
+
+  constructor(dbInstance: DrizzleDB) {
+    this.repositoryDB = dbInstance;
+  }
+
   async findById(id: string): Promise<Job<any, any> | null> {
-    const result = await db.select().from(jobsTable).where(eq(jobsTable.id, id)).limit(1);
+    const result = await this.repositoryDB.select().from(jobsTable).where(eq(jobsTable.id, id)).limit(1);
     if (result.length === 0) {
       return null;
     }
@@ -84,7 +92,7 @@ export class DrizzleJobRepository implements IJobRepository {
     // queueId, name are also often immutable after creation.
     const { id, createdAt, queueId, name, ...updateData } = valuesToInsert;
 
-    await db.insert(jobsTable).values(valuesToInsert)
+    await this.repositoryDB.insert(jobsTable).values(valuesToInsert)
       .onConflictDoUpdate({
         target: jobsTable.id, // Conflict on ID
         set: { // Fields to update on conflict
@@ -96,7 +104,7 @@ export class DrizzleJobRepository implements IJobRepository {
 
   async update(job: Job<any, any>): Promise<void> {
     const { id, createdAt, ...dbJobData } = domainToDb(job); // Exclude id and createdAt from set
-    await db.update(jobsTable)
+    await this.repositoryDB.update(jobsTable)
       .set({
         ...dbJobData,
         updatedAt: new Date(), // Ensure updatedAt is always fresh on update
@@ -106,7 +114,7 @@ export class DrizzleJobRepository implements IJobRepository {
 
   async findPending(queueId: string, limit: number): Promise<Job<any, any>[]> {
     const now = new Date(); // In UTC or consistent timezone with DB
-    const results = await db
+    const results = await this.repositoryDB
       .select()
       .from(jobsTable)
       .where(
@@ -130,5 +138,42 @@ export class DrizzleJobRepository implements IJobRepository {
       .limit(limit);
 
     return results.map(dbToDomain);
+  }
+
+  async findPendingByRole(queueId: string, role: string, limit: number): Promise<Job<any, any>[]> {
+    const now = new Date();
+    const results = await this.repositoryDB
+      .select()
+      .from(jobsTable)
+      .where(
+        and(
+          eq(jobsTable.queueId, queueId),
+          eq(jobsTable.targetAgentRole, role), // Filter by role
+          or(
+            eq(jobsTable.status, JobStatusType.WAITING),
+            and(
+              eq(jobsTable.status, JobStatusType.DELAYED),
+              lte(jobsTable.executeAfter, now)
+            )
+          )
+        )
+      )
+      .orderBy(asc(jobsTable.priority), asc(jobsTable.createdAt))
+      .limit(limit);
+    return results.map(dbToDomain);
+  }
+
+  async delete(jobId: string): Promise<void> {
+    console.log(`DrizzleJobRepository: Deleting job ${jobId}`);
+    const result = await this.repositoryDB.delete(jobsTable).where(eq(jobsTable.id, jobId)).returning();
+    if (result.length === 0) {
+      // Consider if this should throw an error or if not finding is acceptable.
+      // For a delete operation, usually if the item doesn't exist, it's not an error,
+      // but an operation that results in the desired state (item is not present).
+      // However, the use case currently checks findById first.
+      console.warn(`DrizzleJobRepository: Job with id ${jobId} not found for deletion, or delete returned no confirmation.`);
+    } else {
+      console.log(`DrizzleJobRepository: Job ${jobId} deleted successfully.`);
+    }
   }
 }
