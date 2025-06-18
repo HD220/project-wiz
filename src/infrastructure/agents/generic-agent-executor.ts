@@ -10,7 +10,7 @@ import {
 } from '../../core/domain/jobs/job-processing.types'; // PlanStep removed
 import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
 
-import { generateObject, tool as aiToolHelper, Tool, Message, generateText } from 'ai'; // ToolInvocation, ToolResult not directly used by this class anymore
+import { generateObject, tool as aiToolHelper, Tool, Message, generateText, ToolCallPart, ToolResultPart } from 'ai';
 import { z } from 'zod';
 import { deepseek } from '@ai-sdk/deepseek'; // Or your chosen LLM provider
 import { AnnotationTool } from '../tools/annotation.tool';
@@ -206,6 +206,105 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
     agentState.conversationHistory.push({ role: 'user', content: initialUserContent });
   }
 
+  private async _fetchNextLLMDecision(
+    conversationHistory: Message[]
+  ): Promise<{
+    messages: Message[],
+    toolCalls?: ToolCallPart[],
+    toolResults?: ToolResultPart[],
+    finishReason: string,
+    usage: { promptTokens: number, completionTokens?: number, totalTokens: number },
+    object: any
+  }> {
+    const llmResponseSchema = z.object({
+      finalSummary: z.string().describe("A summary of all actions taken and the final outcome if the goal is complete and no more tool calls are needed. If requesting a re-plan or asking clarifying questions, this summary can provide context or state the questions if not using the dedicated field."),
+      outputData: z.any().optional().describe("Any relevant data produced as a final result (not typically used when asking questions or requesting re-plan)."),
+      requestReplan: z.boolean().optional().describe("Set to true if a completely new plan is needed due to unrecoverable errors. If true, explain why in 'finalSummary' and do not ask clarifying questions or call tools."),
+      clarifyingQuestions: z.array(z.string()).optional().describe("If the task goal is ambiguous, provide a list of specific questions here. If you use this field, do not also set 'requestReplan' or expect tool calls in the same turn.")
+    });
+
+    const {
+      messages,
+      toolCalls,
+      toolResults,
+      finishReason,
+      usage,
+      object: finalObject
+    } = await generateObject({
+      model: deepseek('deepseek-chat'),
+      messages: conversationHistory,
+      schema: llmResponseSchema,
+      tools: this.availableAiTools,
+      maxToolRoundtrips: 1,
+    });
+
+    return { messages, toolCalls, toolResults, finishReason, usage, object: finalObject };
+  }
+
+  private async _executeToolsAndHandleResults(
+    toolCalls: ToolCallPart[],
+    currentConversationHistory: Message[], // Renamed to avoid conflict with agentState.conversationHistory
+    job: Job<any,any>, // Added job for context if needed by tools, though not directly used in this simplified version
+    agentState: AgentJobState // Passed for potential future use, not directly modified here for lastFailureSummary
+  ): Promise<{ toolResults: ToolResultPart[], conversationHistory: Message[] }> {
+    const toolResults: ToolResultPart[] = [];
+    let updatedConversationHistory = [...currentConversationHistory];
+
+    for (const toolCall of toolCalls) {
+      console.log(`GenericAgentExecutor (${this.personaTemplate.role}): Processing tool call: \${toolCall.toolName}, Args:`, toolCall.args);
+      // The AI SDK automatically adds the toolCall to the messages array.
+      // If we were manually constructing, we'd add it here:
+      // updatedConversationHistory.push(toolCall);
+
+      const registeredTool = this.toolRegistryInstance.getTool(toolCall.toolName);
+
+      if (!registeredTool) {
+        const errorMsg = `Tool '\${toolCall.toolName}' not found in registry.`;
+        console.error(`GenericAgentExecutor (${this.personaTemplate.role}): \${errorMsg}`);
+        const errorResult: ToolResultPart = {
+          toolCallId: toolCall.toolCallId,
+          toolName: toolCall.toolName,
+          args: toolCall.args,
+          result: { error: errorMsg },
+        };
+        toolResults.push(errorResult);
+        updatedConversationHistory.push(errorResult);
+        continue;
+      }
+
+      try {
+        const executionResult = await registeredTool.execute(
+          toolCall.args,
+          { agentId: this.personaTemplate.id, role: this.personaTemplate.role } // Pass execution context
+        );
+
+        const toolResult: ToolResultPart = {
+          toolCallId: toolCall.toolCallId,
+          toolName: toolCall.toolName,
+          args: toolCall.args,
+          result: executionResult,
+        };
+        toolResults.push(toolResult);
+        updatedConversationHistory.push(toolResult);
+        console.log(`GenericAgentExecutor (${this.personaTemplate.role}): Tool '\${toolCall.toolName}' executed. Result:`, executionResult);
+
+      } catch (e: any) {
+        const errorMsg = `Error executing tool '\${toolCall.toolName}': \${e.message}`;
+        console.error(`GenericAgentExecutor (${this.personaTemplate.role}): \${errorMsg}`, e);
+        const errorResult: ToolResultPart = {
+          toolCallId: toolCall.toolCallId,
+          toolName: toolCall.toolName,
+          args: toolCall.args,
+          result: { error: errorMsg }, // Ensure error is serializable
+        };
+        toolResults.push(errorResult);
+        updatedConversationHistory.push(errorResult);
+        // As per subtask: lastFailureSummary not updated here.
+      }
+    }
+    return { toolResults, conversationHistory: updatedConversationHistory };
+  }
+
   public async processJob(job: Job<any, any>): Promise<AgentExecutorResult> {
     console.log(`
 AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Iteratively Processing Job ID ${job.id}, Name: ${job.name}`);
@@ -237,20 +336,20 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
     console.log(`AgentExecutor (${this.personaTemplate.role}): Conversation length after potential summarization: ${agentState.conversationHistory.length}. Last message: ${agentState.conversationHistory[agentState.conversationHistory.length-1]?.content.substring(0,100)}`);
 
     try {
-      const { messages: newMessages, toolCalls, toolResults, finishReason, usage, object: finalObject } = await generateObject({
-        model: deepseek('deepseek-chat'),
-        messages: agentState.conversationHistory,
-        schema: z.object({
-          finalSummary: z.string().describe("A summary of all actions taken and the final outcome if the goal is complete and no more tool calls are needed. If requesting a re-plan or asking clarifying questions, this summary can provide context or state the questions if not using the dedicated field."),
-          outputData: z.any().optional().describe("Any relevant data produced as a final result (not typically used when asking questions or requesting re-plan)."),
-          requestReplan: z.boolean().optional().describe("Set to true if a completely new plan is needed due to unrecoverable errors. If true, explain why in 'finalSummary' and do not ask clarifying questions or call tools."),
-          clarifyingQuestions: z.array(z.string()).optional().describe("If the task goal is ambiguous, provide a list of specific questions here. If you use this field, do not also set 'requestReplan' or expect tool calls in the same turn.")
-        }),
-        tools: this.availableAiTools,
-        maxToolRoundtrips: 1,
-      });
+      const {
+        messages: newMessages,
+        toolCalls,
+        toolResults,
+        finishReason,
+        usage,
+        object: finalObject
+      } = await this._fetchNextLLMDecision(agentState.conversationHistory);
 
       agentState.conversationHistory = newMessages;
+
+      // Ensure toolCalls and toolResults are defined before trying to access them,
+      // even if the types from _fetchNextLLMDecision allow undefined.
+      // The subsequent logic (e.g., if (toolCalls && toolCalls.length > 0)) already handles this.
 
       if (finalObject?.clarifyingQuestions && finalObject.clarifyingQuestions.length > 0) {
         console.log(`AgentExecutor (${this.personaTemplate.role}): LLM asked ${finalObject.clarifyingQuestions.length} clarifying questions for job ${job.id}.`);
@@ -330,23 +429,34 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
       }
 
       if (toolCalls && toolCalls.length > 0) {
-        console.log(`AgentExecutor (${this.personaTemplate.role}): LLM decided to call ${toolCalls.length} tool(s). SDK handled execution.`);
+        console.log(`AgentExecutor (${this.personaTemplate.role}): LLM returned ${toolCalls.length} tool call(s) to be executed.`);
+
+        // Execute tools and get results and updated history
+        const execOutcome = await this._executeToolsAndHandleResults(
+          toolCalls,
+          agentState.conversationHistory, // History after LLM decision, including tool_call messages
+          job,
+          agentState
+        );
+        agentState.conversationHistory = execOutcome.conversationHistory; // This history now includes tool_result messages
+
+        // Update execution history based on the original toolCalls and the processed toolResults from execOutcome
         toolCalls.forEach(tc => {
-          const tr = toolResults?.find(r => r.toolCallId === tc.toolCallId);
+          const toolResultPart = execOutcome.toolResults.find(tr => tr.toolCallId === tc.toolCallId);
           agentState.executionHistory?.push({
-              timestamp: new Date(),
-              type: 'tool_call',
-              name: tc.toolName,
-              params: tc.args,
-              result: tr?.result !== undefined ? tr.result : "No explicit result from tool execution by SDK.",
-              error: tr?.result instanceof Error ? tr.result.message : undefined
+            timestamp: new Date(),
+            type: 'tool_call',
+            name: tc.toolName,
+            params: tc.args,
+            result: toolResultPart?.result !== undefined ? toolResultPart.result : "Tool execution did not yield an explicit result.",
+            // error field is based on whether toolResultPart.result itself is an error structure
+            error: (toolResultPart?.result as any)?.error ? String((toolResultPart.result as any).error) : undefined
           });
-          console.log(\`  Tool call: ${tc.toolName}, Args: ${JSON.stringify(tc.args)}\`);
-          if (tr) console.log(\`  Tool result: \${JSON.stringify(tr.result)}\`);
+          // Logging already happened inside _executeToolsAndHandleResults
         });
 
         job.setData({ ...(job.data || {}), agentState });
-        return { status: 'CONTINUE_PROCESSING', message: `Executed tool(s): ${toolCalls.map(t => t.toolName).join(', ')}. Ready for next step.` };
+        return { status: 'CONTINUE_PROCESSING', message: `Executed tool(s): ${toolCalls.map(t => t.toolName).join(', ')}. Ready for next LLM iteration.` };
 
       } else if (finishReason === 'stop' || finishReason === 'length') {
         console.log(`AgentExecutor (${this.personaTemplate.role}): Goal considered complete by LLM. Final summary: ${finalObject?.finalSummary}`);
