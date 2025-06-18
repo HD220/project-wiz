@@ -9,6 +9,7 @@ import {
 } from '../../core/domain/jobs/job-processing.types'; // PlanStep removed
 import { JobRuntimeData } from '../../core/domain/entities/jobs/job-runtime-data.interface'; // Corrected import path
 import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
+import { ConfigurationError, LLMError, ToolExecutionError, JobProcessingError } from '../../core/common/errors';
 
 import { generateObject, tool as aiToolHelper, Tool, Message, generateText, ToolCallPart, ToolResultPart } from 'ai';
 import { z } from 'zod';
@@ -71,8 +72,14 @@ Create a very concise summary of this failed attempt, highlighting the critical 
         // maxTokens: 150, // Keep summary concise
       });
       return summaryText || "Summary of failed attempt could not be generated, but re-plan was requested: " + replanReason;
-    } catch (error) {
-      console.error(\`GenericAgentExecutor (\${this.personaTemplate.role}): Error during failed attempt summarization LLM call:\`, error);
+    } catch (error: any) {
+      const llmError = new LLMError(
+        `Error during failed attempt summarization LLM call: ${error.message || String(error)}`,
+        'deepseek-chat', // Placeholder for actual model name if available
+        'deepseek',      // Placeholder for actual provider name if available
+        error
+      );
+      console.error(`GenericAgentExecutor (${this.personaTemplate.role}): ${llmError.message}`, llmError);
       return \`Error summarizing failed attempt. Re-plan requested by LLM due to: \${replanReason}\`;
     }
   }
@@ -154,8 +161,14 @@ Provide a concise summary that retains all critical information for continuing t
       console.log(\`GenericAgentExecutor (\${this.personaTemplate.role}): Conversation history summarized. Old length: \${currentHistory.length}, New length: \${newHistory.length}\`);
       return newHistory;
 
-    } catch (error) {
-      console.error(\`GenericAgentExecutor (\${this.personaTemplate.role}): Error during history summarization LLM call:\`, error);
+    } catch (error: any) {
+      const llmError = new LLMError(
+        `Error during history summarization LLM call: ${error.message || String(error)}`,
+        'deepseek-chat', // Placeholder
+        'deepseek',      // Placeholder
+        error
+      );
+      console.error(`GenericAgentExecutor (${this.personaTemplate.role}): ${llmError.message}`, llmError);
       return currentHistory; // Return original history on summarization error
     }
   }
@@ -223,22 +236,30 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
       clarifyingQuestions: z.array(z.string()).optional().describe("If the task goal is ambiguous, provide a list of specific questions here. If you use this field, do not also set 'requestReplan' or expect tool calls in the same turn.")
     });
 
-    const {
-      messages,
-      toolCalls,
-      toolResults,
-      finishReason,
-      usage,
-      object: finalObject
-    } = await generateObject({
-      model: deepseek('deepseek-chat'),
-      messages: conversationHistory,
-      schema: llmResponseSchema,
-      tools: this.availableAiTools,
-      maxToolRoundtrips: 1,
-    });
-
-    return { messages, toolCalls, toolResults, finishReason, usage, object: finalObject };
+    try {
+      const {
+        messages,
+        toolCalls,
+        toolResults,
+        finishReason,
+        usage,
+        object: finalObject
+      } = await generateObject({
+        model: deepseek('deepseek-chat'),
+        messages: conversationHistory,
+        schema: llmResponseSchema,
+        tools: this.availableAiTools,
+        maxToolRoundtrips: 1,
+      });
+      return { messages, toolCalls, toolResults, finishReason, usage, object: finalObject };
+    } catch (error: any) {
+      throw new LLMError(
+        `LLM call failed during _fetchNextLLMDecision: ${error.message || String(error)}`,
+        'deepseek-chat', // Placeholder
+        'deepseek',      // Placeholder
+        error
+      );
+    }
   }
 
   private async _executeToolsAndHandleResults(
@@ -289,17 +310,26 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
         console.log(`GenericAgentExecutor (${this.personaTemplate.role}): Tool '\${toolCall.toolName}' executed. Result:`, executionResult);
 
       } catch (e: any) {
-        const errorMsg = `Error executing tool '\${toolCall.toolName}': \${e.message}`;
-        console.error(`GenericAgentExecutor (${this.personaTemplate.role}): \${errorMsg}`, e);
+        let toolError: ToolExecutionError;
+        if (e instanceof ToolExecutionError) {
+          toolError = e;
+        } else {
+          toolError = new ToolExecutionError(
+            `Error executing tool '\${toolCall.toolName}': ${e.message || String(e)}`,
+            toolCall.toolName,
+            e
+          );
+        }
+        console.error(`GenericAgentExecutor (${this.personaTemplate.role}): ${toolError.message} (Tool: ${toolError.toolName})`, toolError.originalError || toolError);
+
         const errorResult: ToolResultPart = {
           toolCallId: toolCall.toolCallId,
           toolName: toolCall.toolName,
           args: toolCall.args,
-          result: { error: errorMsg }, // Ensure error is serializable
+          result: { error: toolError.message }, // Pass clean message to LLM
         };
         toolResults.push(errorResult);
         updatedConversationHistory.push(errorResult);
-        // As per subtask: lastFailureSummary not updated here.
       }
     }
     return { toolResults, conversationHistory: updatedConversationHistory };
@@ -319,10 +349,7 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
 
     // --- API Key Check ---
     if (!process.env.DEEPSEEK_API_KEY) { // Or your chosen LLM provider's key
-      console.error(`AgentExecutor (${this.personaTemplate.role}): LLM API Key not set.`);
-      agentState.executionHistory.push({ timestamp: new Date(), type: 'system_error', name: 'api_key_check', params: {}, result: null, error: "LLM API Key not set." });
-      job.setData({ ...(job.data || {}), agentState });
-      return { status: 'FAILED', message: "LLM API Key not configured." };
+      throw new ConfigurationError("LLM API Key (DEEPSEEK_API_KEY) is not set.");
     }
 
     // --- Construct initial messages if history is empty ---
@@ -382,14 +409,21 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
             error: undefined,
           });
         } catch (annotationError: any) {
-          console.error(`AgentExecutor (${this.personaTemplate.role}): Failed to save clarifying questions as annotation:`, annotationError.message);
+          let specificError: Error = annotationError instanceof Error ? annotationError : new Error(String(annotationError));
+          let annErrorMsg = specificError.message;
+          if (specificError instanceof ToolExecutionError) { // Though internalAnnotationTool.save is not an IAgentTool directly called by LLM
+             console.error(`AgentExecutor (${this.personaTemplate.role}): Failed to save clarifying questions as annotation (ToolExecutionError): ${specificError.message} (Tool: ${specificError.toolName})`, specificError.originalError || specificError);
+             annErrorMsg = `Annotation Tool Error: ${specificError.message}`;
+          } else {
+             console.error(`AgentExecutor (${this.personaTemplate.role}): Failed to save clarifying questions as annotation:`, specificError.message);
+          }
           agentState.executionHistory?.push({
             timestamp: new Date(),
             type: 'system_error',
             name: 'save_clarification_annotation_failed',
             params: { questions: finalObject.clarifyingQuestions },
             result: null,
-            error: annotationError.message,
+            error: annErrorMsg,
           });
         }
 
@@ -491,15 +525,38 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
       job.setData({ ...(job.data || {}), agentState });
       return { status: 'FAILED', message: \`LLM interaction finished with unhandled reason: \${finishReason}\` };
 
-    } catch (error) {
-      console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM interaction or tool execution:`, error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      agentState.executionHistory?.push({ timestamp: new Date(), type: 'system_error', name: 'processJob_exception', params: {}, result: null, error: \`LLM/Tool error: ${errorMessage}\` });
-      // When an exception occurs, job.data might not have been updated with the latest agentState if the error happened before job.setData
-      // However, the WorkerService will save the job with whatever state it had *before* this processJob call if this throws.
-      // For clarity, we can set it here one last time, though its persistence depends on WorkerService's error handling.
+    } catch (error: any) {
+      let errorMessage: string;
+      let errorToLog: Error = error instanceof Error ? error : new Error(String(error));
+
+      if (error instanceof ConfigurationError) {
+        console.error(`AgentExecutor (${this.personaTemplate.role}): ConfigurationError: ${error.message}`, error);
+        errorMessage = `Configuration Error: ${error.message}`;
+      } else if (error instanceof LLMError) {
+        console.error(`AgentExecutor (${this.personaTemplate.role}): LLMError: ${error.message} (Model: ${error.modelName}, Provider: ${error.provider})`, error.originalError || error);
+        errorMessage = `LLM Error: ${error.message}`;
+      } else if (error instanceof ToolExecutionError) {
+        console.error(`AgentExecutor (${this.personaTemplate.role}): ToolExecutionError: ${error.message} (Tool: ${error.toolName})`, error.originalError || error);
+        errorMessage = `Tool Execution Error: ${error.message}`;
+      } else if (error instanceof JobProcessingError) {
+        console.error(`AgentExecutor (${this.personaTemplate.role}): JobProcessingError: ${error.message}`, error);
+        errorMessage = `Job Processing Error: ${error.message}`;
+      }
+      else { // Generic error
+        console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM interaction or tool execution:`, errorToLog);
+        errorMessage = errorToLog.message;
+      }
+
+      agentState.executionHistory?.push({
+        timestamp: new Date(),
+        type: 'system_error',
+        name: errorToLog.name || 'processJob_exception',
+        params: {},
+        result: null,
+        error: `Error: ${errorMessage}${errorToLog.stack ? '\nStack: ' + errorToLog.stack : ''}`
+      });
       job.setData({ ...(job.data || {}), agentState });
-      return { status: 'FAILED', message: \`Error during LLM interaction: ${errorMessage}\` };
+      return { status: 'FAILED', message: errorMessage };
     }
   }
 }

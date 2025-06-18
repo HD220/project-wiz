@@ -8,6 +8,7 @@ import { Queue } from '../entities/queue/queue.entity';
 import { JobStatusType } from '../entities/jobs/job-status';
 import { JobRuntimeData } from '../entities/jobs/job-runtime-data.interface'; // Updated import path
 import { IAgentExecutor, AgentExecutorResult } from '../../ports/agent/agent-executor.interface';
+import { ConfigurationError, NotFoundError, LLMError, ToolExecutionError, JobProcessingError, CoreError } from '../common/errors';
 // import { AgentPersonaTemplate } from '../entities/agent/persona-template.types'; // No longer directly stored
 // import { toolRegistry, ToolRegistry } from '../../../infrastructure/tools/tool-registry'; // No longer used for construction
 
@@ -50,8 +51,7 @@ export class WorkerService { // Removed <PInput, POutput>
     this.queueConfig = await this.queueRepository.findByName(queueName);
     if (!this.queueConfig) {
       const errMsg = `Queue with name ${queueName} not found. WorkerService cannot start.`;
-      console.error(errMsg);
-      throw new Error(errMsg);
+      throw new NotFoundError(errMsg, 'Queue', queueName);
     }
 
     this.isRunning = true;
@@ -151,22 +151,56 @@ export class WorkerService { // Removed <PInput, POutput>
       const finalizedJob = this._finalizeJobState(job, executorResult);
       await this.jobRepository.save(finalizedJob);
 
-    } catch (error: any) { // Catch errors from agentExecutor.processJob or job state transitions
-      console.error(`WorkerService: Error processing job ${job.id}:`, error.message);
-      // Generic retry logic (could be enhanced)
-      if (job.status.is(JobStatusType.ACTIVE)) { // Ensure it was active
+    } catch (error: any) {
+      // Ensure error is an instance of Error for consistent message/stack access
+      const currentError: Error = error instanceof Error ? error : new Error(String(error));
+      let jobFailureMessage = currentError.message; // Default message
+
+      // Log with more context based on error type
+      if (currentError instanceof ConfigurationError) {
+        console.error(`WorkerService: ConfigurationError processing job ${job.id}: ${currentError.message}`, currentError);
+        jobFailureMessage = `Configuration Error: ${currentError.message}`;
+      } else if (currentError instanceof LLMError) {
+        console.error(`WorkerService: LLMError processing job ${job.id} (Model: ${currentError.modelName}): ${currentError.message}`, currentError.originalError || currentError);
+        jobFailureMessage = `LLM Error: ${currentError.message}`;
+      } else if (currentError instanceof ToolExecutionError) {
+        console.error(`WorkerService: ToolExecutionError processing job ${job.id} (Tool: ${currentError.toolName}): ${currentError.message}`, currentError.originalError || currentError);
+        jobFailureMessage = `Tool Error (${currentError.toolName || 'unknown'}): ${currentError.message}`;
+      } else if (currentError instanceof JobProcessingError) { // If AgentExecutor throws this
+        console.error(`WorkerService: JobProcessingError for job ${job.id} (Agent: ${currentError.agentRole}): ${currentError.message}`, currentError);
+        jobFailureMessage = `Job Processing Error: ${currentError.message}`;
+      } else { // Generic or unknown error
+        console.error(`WorkerService: Generic error processing job ${job.id}:`, currentError);
+        // jobFailureMessage remains currentError.message
+      }
+
+      // Store more detailed error info in job.data.error if possible
+      const errorForJobData = {
+        name: currentError.name,
+        message: currentError.message,
+        stack: currentError.stack,
+        // Add custom properties if available
+        ...(currentError instanceof LLMError && { modelName: currentError.modelName, provider: currentError.provider }),
+        ...(currentError instanceof ToolExecutionError && { toolName: currentError.toolName }),
+        ...(currentError instanceof JobProcessingError && { jobId: currentError.jobId, agentRole: currentError.agentRole }),
+        ...(currentError instanceof NotFoundError && { resourceType: currentError.resourceType, resourceId: currentError.resourceId }),
+      };
+
+      // Update job state (retry or fail)
+      if (job.status.is(JobStatusType.ACTIVE)) {
           if (job.attempts < job.maxAttempts) {
               const nextRetryDelay = job.calculateNextRetryDelay();
               job.moveToDelayed(nextRetryDelay);
-              console.log(`Job ${job.id} failed. Will retry in ${nextRetryDelay}ms. Attempt ${job.attempts}/${job.maxAttempts}.`);
+              job.setData({ ...(job.data || {}), error: errorForJobData, lastFailureSummary: jobFailureMessage });
+              console.log(`Job ${job.id} failed. Will retry in ${nextRetryDelay}ms. Attempt ${job.attempts}/${job.maxAttempts}. Error: ${jobFailureMessage}`);
           } else {
-              job.moveToFailed(error.message || 'Max attempts reached after worker error');
-              console.log(`Job ${job.id} failed after ${job.maxAttempts} attempts.`);
+              job.moveToFailed(jobFailureMessage);
+              job.setData({ ...(job.data || {}), error: errorForJobData, lastFailureSummary: jobFailureMessage });
+              console.log(`Job ${job.id} failed after ${job.maxAttempts} attempts. Error: ${jobFailureMessage}`);
           }
-          await this.jobRepository.save(job); // Save updated state
+          await this.jobRepository.save(job);
       } else {
-          // If it wasn't even active, something went wrong earlier. Log and don't change state further.
-          console.error(`Job ${job.id} was not in ACTIVE state when error occurred in worker. Current status: ${job.status.value}`);
+          console.error(`Job ${job.id} was not in ACTIVE state when error occurred in worker. Current status: ${job.status.value}. Error: ${jobFailureMessage}`);
       }
     } finally {
       this.activeJobs--;
