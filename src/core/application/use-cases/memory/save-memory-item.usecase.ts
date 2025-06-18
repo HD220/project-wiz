@@ -1,8 +1,7 @@
 // src/core/application/use-cases/memory/save-memory-item.usecase.ts
 import { MemoryItem, MemoryItemProps } from '../../../domain/entities/memory/memory.entity';
 import { IMemoryRepository } from '../../../../core/ports/repositories/memory.repository';
-// TODO: Refactor to use IEmbeddingService (port) instead of concrete EmbeddingService (infra) for Clean Architecture.
-import { EmbeddingService } from '../../../infrastructure/services/ai/embedding.service';
+import { IEmbeddingService } from '../../ports/services/embedding.interface';
 
 export type SaveMemoryItemDTO =
   Partial<Pick<MemoryItemProps, 'id' | 'tags' | 'source' | 'embedding' | 'agentId'>> &
@@ -15,7 +14,7 @@ export interface ISaveMemoryItemUseCase {
 export class SaveMemoryItemUseCase implements ISaveMemoryItemUseCase {
   constructor(
     private memoryRepository: IMemoryRepository,
-    private embeddingService: EmbeddingService // Added
+    private embeddingService: IEmbeddingService
   ) {}
 
   async execute(data: SaveMemoryItemDTO): Promise<MemoryItem> {

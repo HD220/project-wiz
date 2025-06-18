@@ -5,7 +5,8 @@ import { toolRegistry, ToolRegistry } from './tool-registry';
 import { IAgentTool } from '../../core/tools/tool.interface';
 import {
   AgentJobState,
-  AgentExecutorResult
+  AgentExecutorResult,
+  JobRuntimeData
 } from '../../core/domain/jobs/job-processing.types'; // PlanStep removed
 import { IAgentExecutor } from '../../core/ports/agent/agent-executor.interface';
 
@@ -159,35 +160,14 @@ Provide a concise summary that retains all critical information for continuing t
     }
   }
 
-  public async processJob(job: Job<any, any>): Promise<AgentExecutorResult> {
-    console.log(`
-AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Iteratively Processing Job ID ${job.id}, Name: ${job.name}`);
-    const jobGoal = job.payload?.goal || job.name;
-
-    let agentState: AgentJobState = job.data?.agentState || {
-      conversationHistory: [],
-      executionHistory: [],
-    };
-    agentState.conversationHistory = agentState.conversationHistory || [];
-    agentState.executionHistory = agentState.executionHistory || [];
-
-    // --- API Key Check ---
-    if (!process.env.DEEPSEEK_API_KEY) { // Or your chosen LLM provider's key
-      console.error(`AgentExecutor (${this.personaTemplate.role}): LLM API Key not set.`);
-      agentState.executionHistory.push({ timestamp: new Date(), type: 'system_error', name: 'api_key_check', params: {}, result: null, error: "LLM API Key not set." });
-      job.data = { ...job.data, agentState };
-      return { status: 'FAILED', message: "LLM API Key not configured." };
-    }
-
-    // --- Construct initial messages if history is empty ---
-    if (agentState.conversationHistory.length === 0) {
-      const systemPrompt = \`You are ${this.personaTemplate.role}. Your primary goal is: "${this.personaTemplate.goal}". Your backstory is: "${this.personaTemplate.backstory}".
-You are currently working on the overall task: "${jobGoal}".
+  private _initializeConversationHistory(job: Job<any, any>, agentState: AgentJobState, jobGoal: string): void {
+    const systemPrompt = \`You are \${this.personaTemplate.role}. Your primary goal is: "\${this.personaTemplate.goal}". Your backstory is: "\${this.personaTemplate.backstory}".
+You are currently working on the overall task: "\${jobGoal}".
 You have access to the following tools:
-${Object.entries(this.availableAiTools).map(([name, toolDef]) => `- ${name}: ${toolDef.description}`).join('\n')}
+\${Object.entries(this.availableAiTools).map(([name, toolDef]) => `- \${name}: \${toolDef.description}`).join('\n')}
 
 **Requirement Clarification:**
-Before generating a plan or calling any tools, you MUST first assess the clarity of the overall task: "${jobGoal}".
+Before generating a plan or calling any tools, you MUST first assess the clarity of the overall task: "\${jobGoal}".
 - If the task goal is ambiguous, lacks sufficient detail for you to create a concrete, actionable plan, or if you foresee multiple significantly different valid interpretations, your primary action is to ask clarifying questions.
 - Formulate specific, numbered questions that, if answered, would provide the necessary details for you to proceed effectively.
 - You MUST provide these questions in a 'clarifyingQuestions' array in your response.
@@ -210,19 +190,45 @@ If a previous tool call resulted in an error, that error information will be in 
 - If the error seems temporary or due to incorrect parameters you provided, you MAY try the same tool again with corrected parameters, or try a different tool if more appropriate.
 - If a tool consistently fails, or if the error indicates a fundamental problem with achieving a step, explain the issue in your final summary and indicate why the goal cannot be fully achieved.
 - Do not repeatedly try the same failing tool call with the same parameters. Adapt your plan.
-- If you determine that the current overall approach has fundamentally failed and you need to start fresh with a new plan to achieve the original task ("${jobGoal}"), you MUST indicate this by setting a 'requestReplan' flag to true in your response, along with a 'finalSummary' explaining the reason.
+- If you determine that the current overall approach has fundamentally failed and you need to start fresh with a new plan to achieve the original task ("\${jobGoal}"), you MUST indicate this by setting a 'requestReplan' flag to true in your response, along with a 'finalSummary' explaining the reason.
 
 If you call a tool, I will execute it and give you back the result (or an error message if it fails).\`;
-      agentState.conversationHistory.push({ role: 'system', content: systemPrompt });
+    agentState.conversationHistory.push({ role: 'system', content: systemPrompt });
 
-      let initialUserContent = \`The task is: "${jobGoal}". Initial context (if any): ${JSON.stringify(job.payload?.initialContext || {})}.\`;
-      if (job.data?.lastFailureSummary) {
-        initialUserContent += \`
-A previous attempt to solve this failed. Summary of that attempt: "${job.data.lastFailureSummary}". Please generate a new plan considering this past failure.\`;
-        // Clear the summary after using it - decided against for now, see longer comment in prompt.
-      }
-      initialUserContent += " Please proceed.";
-      agentState.conversationHistory.push({ role: 'user', content: initialUserContent });
+    let initialUserContent = \`The task is: "\${jobGoal}". Initial context (if any): \${JSON.stringify(job.payload?.initialContext || {})}.\`;
+    // Access job.data directly here as we are within the class method that has access to the job object.
+    // The JobRuntimeData type for job.data was defined in RT006.2
+    if (job.data?.lastFailureSummary) {
+      initialUserContent += \`
+A previous attempt to solve this failed. Summary of that attempt: "\${job.data.lastFailureSummary}". Please generate a new plan considering this past failure.\`;
+    }
+    initialUserContent += " Please proceed.";
+    agentState.conversationHistory.push({ role: 'user', content: initialUserContent });
+  }
+
+  public async processJob(job: Job<any, any>): Promise<AgentExecutorResult> {
+    console.log(`
+AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Iteratively Processing Job ID ${job.id}, Name: ${job.name}`);
+    const jobGoal = job.payload?.goal || job.name;
+
+    let agentState: AgentJobState = job.data?.agentState || {
+      conversationHistory: [],
+      executionHistory: [],
+    };
+    agentState.conversationHistory = agentState.conversationHistory || [];
+    agentState.executionHistory = agentState.executionHistory || [];
+
+    // --- API Key Check ---
+    if (!process.env.DEEPSEEK_API_KEY) { // Or your chosen LLM provider's key
+      console.error(`AgentExecutor (${this.personaTemplate.role}): LLM API Key not set.`);
+      agentState.executionHistory.push({ timestamp: new Date(), type: 'system_error', name: 'api_key_check', params: {}, result: null, error: "LLM API Key not set." });
+      job.setData({ ...(job.data || {}), agentState });
+      return { status: 'FAILED', message: "LLM API Key not configured." };
+    }
+
+    // --- Construct initial messages if history is empty ---
+    if (agentState.conversationHistory.length === 0) {
+      this._initializeConversationHistory(job, agentState, jobGoal);
     }
 
     // Summarize conversation history if needed
@@ -281,7 +287,7 @@ A previous attempt to solve this failed. Summary of that attempt: "${job.data.la
           });
         }
 
-        job.data = { ...job.data, agentState };
+        job.setData({ ...(job.data || {}), agentState });
         return {
           status: 'CONTINUE_PROCESSING', // Or a new status like 'PENDING_USER_CLARIFICATION' if WorkerService is adapted
           message: \`Agent has clarifying questions regarding job ${job.id} (Goal: "${jobGoal}"). Check annotations tagged with 'clarification_needed' and 'job:${job.id}'. User input needed to update job or provide context.\`,
@@ -309,11 +315,13 @@ A previous attempt to solve this failed. Summary of that attempt: "${job.data.la
         // Signal to re-initialize history in the next turn with failure context
         agentState.conversationHistory = []; // Mark history as needing re-init
         // Store summary for re-initialization
-        job.data = {
-          ...job.data,
-          agentState,
-          lastFailureSummary: failureSummary // Store summary at job.data level
+        // job.data is now managed by Job entity methods, use setData for type safety
+        const newJobData: JobRuntimeData = {
+          ...(job.data || {}), // Preserve existing fields from job.data
+          agentState,       // Overwrite agentState
+          lastFailureSummary: failureSummary // Add/overwrite lastFailureSummary
         };
+        job.setData(newJobData);
 
         return {
           status: 'CONTINUE_PROCESSING',
@@ -337,38 +345,41 @@ A previous attempt to solve this failed. Summary of that attempt: "${job.data.la
           if (tr) console.log(\`  Tool result: \${JSON.stringify(tr.result)}\`);
         });
 
-        job.data = { ...job.data, agentState };
+        job.setData({ ...(job.data || {}), agentState });
         return { status: 'CONTINUE_PROCESSING', message: `Executed tool(s): ${toolCalls.map(t => t.toolName).join(', ')}. Ready for next step.` };
 
       } else if (finishReason === 'stop' || finishReason === 'length') {
         console.log(`AgentExecutor (${this.personaTemplate.role}): Goal considered complete by LLM. Final summary: ${finalObject?.finalSummary}`);
         agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_event', name: 'goal_completed', params: { finalDecision: true }, result: finalObject, error: undefined });
-        job.data = { ...job.data, agentState };
+        job.setData({ ...(job.data || {}), agentState });
         return { status: 'COMPLETED', message: finalObject?.finalSummary || "Goal achieved.", output: finalObject?.outputData };
 
       } else if (finishReason === 'error') {
           console.error(`AgentExecutor (${this.personaTemplate.role}): LLM generation error.`);
           agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_error', name: 'generation', params: {}, result: null, error: "LLM generation error" });
-          job.data = { ...job.data, agentState };
+          job.setData({ ...(job.data || {}), agentState });
           return { status: 'FAILED', message: 'LLM generation error.' };
 
       } else if (finishReason === 'tool-calls' && (!toolCalls || toolCalls.length === 0)) {
           console.warn(`AgentExecutor (${this.personaTemplate.role}): LLM finishReason was 'tool-calls' but no toolCalls were processed/returned. This may indicate the LLM tried to call a tool it doesn't have or formatted its request incorrectly.`);
           agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_warning', name: 'tool_call_mismatch', params: {}, result: null, error: "LLM indicated tool_calls finish reason but no valid calls were processed." });
-          job.data = { ...job.data, agentState };
+          job.setData({ ...(job.data || {}), agentState });
           return { status: 'CONTINUE_PROCESSING', message: 'LLM intended tool use, but no valid tool calls were made. Review conversation history.' };
       }
 
       console.warn(\`AgentExecutor (\${this.personaTemplate.role}): LLM interaction finished with unhandled reason: \${finishReason}\`);
       agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_warning', name: 'unhandled_finish_reason', params: { finishReason }, result: null, error: \`LLM interaction finished with unhandled reason: \${finishReason}\` });
-      job.data = { ...job.data, agentState };
+      job.setData({ ...(job.data || {}), agentState });
       return { status: 'FAILED', message: \`LLM interaction finished with unhandled reason: \${finishReason}\` };
 
     } catch (error) {
       console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM interaction or tool execution:`, error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       agentState.executionHistory?.push({ timestamp: new Date(), type: 'system_error', name: 'processJob_exception', params: {}, result: null, error: \`LLM/Tool error: ${errorMessage}\` });
-      job.data = { ...job.data, agentState };
+      // When an exception occurs, job.data might not have been updated with the latest agentState if the error happened before job.setData
+      // However, the WorkerService will save the job with whatever state it had *before* this processJob call if this throws.
+      // For clarity, we can set it here one last time, though its persistence depends on WorkerService's error handling.
+      job.setData({ ...(job.data || {}), agentState });
       return { status: 'FAILED', message: \`Error during LLM interaction: ${errorMessage}\` };
     }
   }

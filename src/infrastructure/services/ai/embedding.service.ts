@@ -5,13 +5,10 @@ import { openai } from 'ai/providers'; // Using OpenAI provider as an example
 // import { deepseek } from '@ai-sdk/deepseek'; // If deepseek has an embed function like openai.embedding()
 // import { cohere } from 'ai/providers';
 
-// Define a type for the embedding result for clarity, though embed() result is structured.
-export interface EmbeddingResult {
-  embedding: number[];
-  usage: { promptTokens: number; totalTokens?: number }; // Based on ai-sdk structure
-}
+import { EmbeddingResult } from '../../../core/domain/ai/embedding.types';
+import { IEmbeddingService } from '../../../core/ports/services/embedding.interface';
 
-export class EmbeddingService {
+export class EmbeddingService implements IEmbeddingService {
   private embeddingModelName: string;
   public readonly dimensions: number; // Publicly accessible dimensions
 

@@ -6,6 +6,7 @@ import { IJobRepository } from '../../ports/repositories/job.interface';
 import { Job } from '../entities/jobs/job.entity';
 import { Queue } from '../entities/queue/queue.entity';
 import { JobStatusType } from '../entities/jobs/job-status';
+import { JobRuntimeData } from '../entities/jobs/job-processing.types'; // Added import
 import { IAgentExecutor, AgentExecutorResult } from '../../ports/agent/agent-executor.interface';
 // import { AgentPersonaTemplate } from '../entities/agent/persona-template.types'; // No longer directly stored
 // import { toolRegistry, ToolRegistry } from '../../../infrastructure/tools/tool-registry'; // No longer used for construction

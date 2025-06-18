@@ -1,13 +1,14 @@
 // src/core/domain/entities/jobs/job.entity.ts
 
 import { JobStatus, JobStatusType } from './job-status';
+import { JobRuntimeData } from '../jobs/job-processing.types';
 
 export interface JobProps<Input = any, Output = any> {
   id: string;
   queueId: string;
   name: string;
   payload: Input;
-  data?: any; // Data that can be modified during job execution
+  data?: JobRuntimeData; // Data that can be modified during job execution
   result?: Output;
   maxAttempts: number;
   attempts: number;
@@ -45,7 +46,7 @@ export class Job<Input = any, Output = any> {
   public get queueId(): string { return this.props.queueId; }
   public get name(): string { return this.props.name; }
   public get payload(): Input { return this.props.payload; }
-  public get data(): any | undefined { return this.props.data; }
+  public get data(): JobRuntimeData | undefined { return this.props.data; }
   public get result(): Output | undefined { return this.props.result; }
   public get maxAttempts(): number { return this.props.maxAttempts; }
   public get attempts(): number { return this.props.attempts; }
@@ -84,9 +85,12 @@ export class Job<Input = any, Output = any> {
     this.props.updatedAt = new Date();
   }
 
-  public moveToFailed(error?: any): void { // Error can be Error object or serialized error
+  public moveToFailed(errorInfo?: any): void { // errorInfo to distinguish from Error class
     this.props.status = this.props.status.moveTo(JobStatusType.FAILED);
-    this.props.data = { ...(this.props.data || {}), error }; // Store error info in data
+    this.props.data = {
+      ...(this.props.data || {}), // Preserve existing JobRuntimeData fields
+      error: errorInfo // Add/overwrite error field
+    };
     this.props.updatedAt = new Date();
   }
 
@@ -106,7 +110,7 @@ export class Job<Input = any, Output = any> {
     this.props.updatedAt = new Date();
   }
 
-  public setData(data: any): void {
+  public setData(data: JobRuntimeData): void {
     this.props.data = data;
     this.props.updatedAt = new Date();
   }

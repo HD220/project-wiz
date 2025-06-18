@@ -1,8 +1,7 @@
 // src/core/application/use-cases/memory/search-similar-memory-items.usecase.ts
 import { MemoryItem } from '../../../domain/entities/memory/memory.entity';
 import { IMemoryRepository } from '../../../../core/ports/repositories/memory.repository';
-// TODO: Refactor to use IEmbeddingService (port) instead of concrete EmbeddingService (infra) for Clean Architecture.
-import { EmbeddingService } from '../../../infrastructure/services/ai/embedding.service';
+import { IEmbeddingService } from '../../ports/services/embedding.interface';
 
 export interface SearchSimilarMemoryItemsDTO {
   queryText: string;
@@ -17,7 +16,7 @@ export interface ISearchSimilarMemoryItemsUseCase {
 export class SearchSimilarMemoryItemsUseCase implements ISearchSimilarMemoryItemsUseCase {
   constructor(
     private memoryRepository: IMemoryRepository,
-    private embeddingService: EmbeddingService // Injected
+    private embeddingService: IEmbeddingService
   ) {}
 
   async execute(dto: SearchSimilarMemoryItemsDTO): Promise<MemoryItem[]> {

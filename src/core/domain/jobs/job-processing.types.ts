@@ -34,3 +34,9 @@ export interface AgentExecutorResult {
   message: string;
   output?: any; // Final output or accumulated outputs
 }
+
+export interface JobRuntimeData {
+  agentState?: AgentJobState;
+  lastFailureSummary?: string;
+  error?: any; // For storing error messages/objects by WorkerService/Job entity
+}
