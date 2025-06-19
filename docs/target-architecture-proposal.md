@@ -77,9 +77,49 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
     *   Operam sobre múltiplas entidades ou coordenam comportamentos complexos do domínio.
     *   São stateless (sem estado próprio), e suas dependências (outros serviços, repositórios) são injetadas.
     *   Exemplo: Um serviço que determina a prioridade de um `Job` com base em múltiplas regras de negócio e no estado de outros `Jobs` ou `Projects`.
-*   **Lógica de Processamento de Job do Agente (em `domain/services` ou `domain/entities`):** A lógica específica de como um `AIAgent` processa um `Job` (anteriormente concebida como "Processadores de Job" separados) residirá:
-              *   Primariamente como um método dentro da própria entidade `AIAgent` (ex: `AIAgent.processJob(job, dependencies)`), onde as dependências de infraestrutura (`ILLMService`, `IToolRegistry`) são passadas em tempo de execução pelo `Worker`.
-              *   Alternativamente, se a lógica se tornar muito complexa ou tiver muitas dependências de infraestrutura, ela pode ser encapsulada em um `AIAgentDomainService` (localizado em `domain/services/`). Este serviço seria injetável, receberia suas dependências via construtor, e operaria sobre instâncias/configurações de `AIAgent`.
+
+        *   **`AIAgentExecutionService` (ex: `src/domain/services/agent/ai-agent-execution.service.ts`):**
+            Este serviço é crucial para a funcionalidade dos Agentes de IA. Ele não é o `AIAgent` (que é uma entidade de configuração/perfil), mas o orquestrador que executa a lógica de um agente para processar um `Job`.
+            **Responsabilidades:**
+            -   Fornecer a função `jobProcessor` que será executada pelos `Worker`s dedicados às filas de Agentes de IA.
+            -   Utilizar o `payload` do `Job` para identificar e carregar a configuração do `AIAgent` apropriado (via `IAIAgentRepository`).
+            -   Orquestrar a interação com o `ILLMService` (passando o perfil do agente, mensagens, ferramentas) e o `IToolRegistry` (para executar `tool-calls` do LLM).
+            -   Gerenciar o estado da tarefa do agente, utilizando `job.updateJobData()` (e subsequentemente `IJobRepository.save(job)`) para persistir o progresso.
+            -   Interagir com o `IJobQueueService` para operações avançadas na fila (ex: `requestMoveToDelayed`, `requestMoveToWaitingChildren`), passando o `job.id` e o `workerToken`, e então lançando os erros apropriados (`DelayedError`, `WaitingChildrenError`) para sinalizar ao `Worker`.
+            **Dependências (Injetadas via Construtor):** `ILLMService`, `IToolRegistry`, `IAIAgentRepository`, `IJobRepository`, `IJobQueueService`.
+
+            **Função `jobProcessor` Fornecida pelo Serviço:**
+            O `AIAgentExecutionService` teria um método que retorna (ou cujo corpo é) a função `jobProcessor`. Esta função teria a assinatura `async (job: Job, workerToken: string): Promise<any>`.
+            Exemplo conceitual da lógica interna desta função `jobProcessor`:
+            ```typescript
+            // Dentro do AIAgentExecutionService, ou um método que ele retorna:
+            // async function agentJobProcessor(this: AIAgentExecutionService, job: Job, workerToken: string): Promise<any> {
+            //   const agentId = job.payload.agentId || this.defaultAgentId; // Obter ID do agente do payload
+            //   const agentProfile = await this.aiAgentRepository.findById(agentId);
+            //   if (!agentProfile) throw new Error(`AIAgent profile ${agentId} not found.`);
+
+            //   const taskInput = job.payload.taskInput;
+            //   let conversationHistory = job.data?.conversationHistory || []; // Carregar histórico salvo
+
+            //   // Lógica de interação com LLM (múltiplos turnos, ferramentas)
+            //   // ... construir prompts com agentProfile.roleDescription
+            //   // ... chamar this.llmService.streamText(...)
+            //   // ... this.toolRegistry.executeTool(...)
+            //   // ... this.jobRepository.save(job) após job.updateJobData({ conversationHistory, ... })
+
+            //   // Exemplo de adiamento:
+            //   // if (someConditionToDelay) {
+            //   //   job.updateJobData({ ... }); // Salvar estado antes de adiar
+            //   //   await this.jobRepository.save(job);
+            //   //   const delayUntil = Date.now() + 60000;
+            //   //   await this.jobQueueService.requestMoveToDelayed(job.id, workerToken, delayUntil);
+            //   //   throw new DelayedError('Task part requires delay.');
+            //   // }
+
+            //   // return finalResult;
+            // }
+            ```
+        *   **Outros Serviços de Domínio:** Como o `JobPriorityService` mencionado anteriormente, se necessário.
 
 ### 3.2. Camada de Aplicação (`src/application`) - Opcional
 Esta camada é opcional e, em muitos projetos, suas responsabilidades podem ser incorporadas pela camada de Domínio (especificamente pelos Casos de Uso) ou pela camada de Infraestrutura (no que tange à adaptação de dados para a UI). Se utilizada, ela serve como um intermediário e pode conter:
@@ -106,33 +146,43 @@ A camada de Infraestrutura contém todas as implementações concretas e detalhe
     *   Utilizará Drizzle ORM para interagir com o banco de dados SQLite.
     *   Incluirá os esquemas do Drizzle, configurações de conexão com o banco de dados e scripts de migração.
     *   **Sistema de Filas Local (Inspirado em BullMQ, com Persistência em SQLite):**
-        A camada de infraestrutura será responsável por uma implementação customizada de um sistema de filas assíncronas, crucial para o processamento de `Job`s de forma desacoplada e robusta. Este sistema será desenvolvido internamente, **sem dependências de bibliotecas de mensageria externas** como Redis, RabbitMQ, ou mesmo o próprio BullMQ. A persistência de todos os dados dos jobs e o estado das filas será gerenciada através do **SQLite**, utilizando o Drizzle ORM. Cada fila nomeada será processada por um `Worker` dedicado, sendo que cada `Worker` é responsável por monitorar e processar jobs de uma única fila específica.
+        A camada de infraestrutura (`infrastructure/persistence/queue/`) será responsável por uma implementação customizada de um sistema de filas assíncronas. Este sistema é um componente fundamental e genérico, projetado para ser utilizável por qualquer parte da aplicação que necessite de processamento de tarefas desacoplado e robusto, não se limitando aos Agentes de IA.
 
-        Embora seja uma implementação local, ela será fortemente inspirada nos conceitos e funcionalidades ricas oferecidas pelo BullMQ, visando fornecer uma API similar e capacidades robustas. As funcionalidades chave incluem:
+        **Princípios e Funcionalidades Chave:**
+        *   **Implementação Local, Sem Dependências Externas:** O sistema será construído internamente, utilizando **SQLite** para persistência (via Drizzle ORM) de todos os dados dos jobs e estados de fila. Não haverá dependências de bibliotecas de mensageria externas (Redis, RabbitMQ, BullMQ etc.).
+        *   **Inspiração no BullMQ:** Embora customizado, o design da API e as funcionalidades serão fortemente inspirados pelo BullMQ para fornecer capacidades ricas e familiares.
+        *   **Jobs como Unidade de Trabalho:** A entidade `Job` (Seção 6.1) representa a unidade de trabalho, contendo `id`, `queueName`, `name` (tipo de job), `payload`, `status`, `attempts`, `maxAttempts`, `data` (para dados customizados do processador), `priority`, `delayUntil`, `parentId`, etc.
+        *   **Filas Nomeadas (`queueName`):** Jobs são categorizados e processados em filas específicas, identificadas por um `queueName`.
+        *   **Workers Genéricos:** Os `Worker`s (Seção 8.2) são componentes da infraestrutura que monitoram uma `queueName` e executam uma função `jobProcessor` fornecida para cada job retirado da fila.
+        *   **Gerenciamento Avançado de Estado do Job:** Suporte aos estados: `PENDING`, `ACTIVE`, `COMPLETED`, `FAILED`, `DELAYED`, `WAITING_CHILDREN`.
+        *   **Operações de Job (via `IJobQueueService` e `Job`):**
+            *   A interação do `jobProcessor` com o estado avançado da fila (adiar, esperar filhos, etc.) será mediada por um serviço `IJobQueueService` (interface em `domain/repositories/` ou `domain/services/`, implementação em `infrastructure/persistence/queue/`).
+            *   A entidade `Job` poderá ter métodos como `updateData(data: any)` para modificar seu estado em memória (`props.data`), que então será persistido pelo `jobProcessor` através do `IJobRepository.save(job)`.
+        *   **Opções de Job Configuráveis:** Suporte para `attempts`, `backoff` (estratégias de retentativa), `priority`, `delay` inicial.
+        *   **Locks de Job e `workerToken`:** O `IJobQueueService` gerenciará locks nos jobs ativos para garantir que um job seja processado por apenas um worker por vez. O `workerToken` (fornecido pelo `Worker` ao `jobProcessor`) será necessário para autorizar operações sensíveis no `IJobQueueService` (ex: `requestMoveToDelayed`, `requestMoveToWaitingChildren`).
+        *   **Jobs Filhos (Parent/Child):** Suporte para estruturar jobs hierarquicamente.
 
-        *   **Jobs como Unidade de Trabalho:** Representados pela entidade `Job` (descrita na Seção 6.1), contendo `id`, `name` (tipo de job), `payload` (dados), `status`, `attempts`, `maxAttempts`, `backoff`, `priority`, `createdAt`, `updatedAt`, `processedAt`, `finishedAt`, `data` (para dados customizados atualizáveis), `parentId`, etc.
-        *   **Filas Nomeadas:** Jobs serão associados a filas específicas através de um `queueName`, permitindo que diferentes `Worker`s processem jobs de diferentes categorias (ex: uma fila por `AIAgent`).
-        *   **Workers Dedicados:** Componentes (`AgentWorker` ou um `GenericQueueWorker`) que observam uma ou mais filas, retiram jobs e executam a lógica de processamento associada (o `jobProcessor`, que no caso dos agentes será o método `AIAgent.processJob`).
-        *   **Gerenciamento Avançado de Estado do Job:** O sistema suportará múltiplos estados para um job, como:
-            *   `PENDING` (ou `WAITING`): Esperando para ser processado.
-            *   `ACTIVE`: Sendo processado por um worker.
-            *   `COMPLETED`: Processado com sucesso.
-            *   `FAILED`: Falhou após todas as tentativas.
-            *   `DELAYED`: Adiado para processamento futuro.
-            *   `WAITING_CHILDREN`: Um job pai esperando pela conclusão de jobs filhos.
-        *   **`job.updateData(data: any): Promise<void>`:** Permitirá que um `jobProcessor` atualize os dados customizados (`Job.props.data`) de um job durante sua execução. Isso é útil para salvar o progresso de tarefas de múltiplas etapas.
-        *   **`job.moveToDelayed(timestamp: number, workerToken: string): Promise<void>`:** Permitirá que um `jobProcessor`, durante a execução de um job, adie o mesmo para um processamento futuro. O `workerToken` (fornecido ao `jobProcessor` pelo `Worker`) é necessário para garantir que a operação seja autorizada e para liberar o lock do worker sobre o job. O `jobProcessor` deverá lançar um erro especial (`DelayedError`) após chamar este método.
-        *   **`job.moveToWaitingChildren(workerToken: string): Promise<boolean>`:** Permitirá que um job pai (que adicionou jobs filhos) se mova para o estado `WAITING_CHILDREN` até que todos os seus filhos sejam concluídos. O `workerToken` é necessário. O método retornaria `true` se o job foi movido para esperar, ou `false` se não há filhos pendentes. O `jobProcessor` deverá lançar um erro especial (`WaitingChildrenError`) se `true`.
-        *   **Jobs Filhos (Parent/Child Jobs):** O sistema permitirá que jobs sejam estruturados hierarquicamente. Um job pai pode criar jobs filhos, e opcionalmente esperar por sua conclusão (usando `moveToWaitingChildren`).
-        *   **Opções de Job Configuráveis:** Ao adicionar um job à fila, será possível configurar:
-            *   `attempts`: Número máximo de tentativas em caso de falha.
-            *   `backoff`: Estratégia de delay entre tentativas (ex: `type: 'exponential'`, `delay: 1000` ou `type: 'fixed'`, `delay: 5000`).
-            *   `priority`: Jobs com menor valor de prioridade são processados primeiro.
-            *   `delay`: Um delay inicial antes que o job se torne ativo pela primeira vez.
-        *   **Locks de Job:** Para evitar que o mesmo job seja processado por múltiplos workers simultaneamente, o worker que retira um job da fila obterá um "lock" sobre ele (identificado pelo `workerToken`). Operações como `moveToDelayed` ou `moveToWaitingChildren` requerem este token.
-        *   **Design Genérico:** Embora crucial para os Agentes de IA, este sistema de filas será projetado para ser uma peça de infraestrutura genérica, utilizável por qualquer outra parte da aplicação que necessite de execução de tarefas assíncronas e robustas.
+        **Interface `IJobQueueService` (Conceitual):**
+        Esta interface (definida no domínio, implementada na infraestrutura) centralizará as operações diretas na fila que requerem conhecimento da persistência e do mecanismo de lock.
+        ```typescript
+        // Exemplo conceitual para domain/repositories/i-job-queue.service.ts
+        export interface IJobQueueService {
+          // Adiciona um job à fila (chamado pelo EnqueueJobUseCase, que usa IJobRepository)
+          // Esta interface pode não precisar de um método 'add' se o IJobRepository já cuida disso.
+          // A distinção é que IJobQueueService lida com operações de *estado* na fila.
 
-        A lógica para enfileirar, consultar, retirar jobs da fila, gerenciar seus estados e transições, e aplicar as opções de job (como retentativas e backoff) será implementada nesta camada, operando sobre as tabelas do SQLite.
+          getJobById(jobId: string): Promise<Job | null>; // Pode ser parte do IJobRepository
+
+          // Métodos chamados pelo jobProcessor (via AIAgentExecutionService, por exemplo)
+          requestMoveToDelayed(jobId: string, workerToken: string, delayUntilTimestamp: number): Promise<void>;
+          requestMoveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean>;
+          // Retorna true se movido para espera, false se não há filhos/já completou
+
+          // (Opcional) Outros métodos para gerenciamento da fila, se necessário
+          // countJobsByStatus(queueName: string, status: JobStatusVO): Promise<number>;
+        }
+        ```
+        A implementação concreta (`JobQueueService` em `infrastructure/persistence/queue/`) usará Drizzle para interagir com o SQLite, gerenciando os locks e o `workerToken` para garantir a integridade das operações. O `jobProcessor` invocará esses métodos e, se bem-sucedido, lançará erros como `DelayedError` para sinalizar ao `Worker`.
 
 *   **Interface do Usuário (UI) (`infrastructure/ui/react/`):**
     *   A aplicação React, incluindo:
@@ -157,7 +207,7 @@ A camada de Infraestrutura contém todas as implementações concretas e detalhe
 *   **Configuração de Injeção de Dependência (`infrastructure/ioc/`):**
     *   `inversify.config.ts`: Arquivo central para configurar o container InversifyJS. Define todos os bindings (como interfaces mapeiam para classes concretas e seus escopos).
     *   `types.ts`: Define os símbolos (identificadores de tipo) usados para a injeção de dependências.
-        *   **Workers de Agentes (`infrastructure/workers/` ou dentro de `infrastructure/electron/`):** Implementações dos `Worker`s dedicados para cada `AIAgent`. Cada worker monitora uma fila específica, obtém as dependências necessárias do container DI (como `ILLMService`, `IToolRegistry`), carrega a configuração do `AIAgent` e invoca o método de processamento do job do agente (ex: `AIAgent.processJob()`, passando as dependências, ou um método em um `AIAgentDomainService`), e gerencia o ciclo de vida dos jobs. A inicialização e o gerenciamento desses workers ocorrerão no processo principal do Electron.
+        *   **Workers de Agentes (`infrastructure/workers/` ou dentro de `infrastructure/electron/`):** Implementações dos `Worker`s genéricos dedicados a uma fila. Cada worker monitora uma fila específica (identificada por `queueName`), retira `Job`s, gera um `workerToken`, e executa uma função `jobProcessor` que lhe foi fornecida em sua configuração. Para jobs de agentes de IA, esta função `jobProcessor` é fornecida pelo `AIAgentExecutionService` (da camada de domínio) e contém a lógica específica do agente. O `Worker` também gerencia o ciclo de vida do job na fila com base no resultado do `jobProcessor` (incluindo tratamento de `DelayedError`, `WaitingChildrenError`). A inicialização e o gerenciamento desses workers ocorrerão no processo principal do Electron.
 
 ### 3.4. Camada de Apresentação (`src/presentation`) - Opcional
 Esta camada atua como um intermediário entre os Casos de Uso (Domínio/Aplicação) e a UI (Infraestrutura). Sua principal responsabilidade é adaptar os dados do formato dos Casos de Uso para um formato que seja facilmente consumível pela UI, e vice-versa.
@@ -239,22 +289,25 @@ container.bind<CreateJobUseCase>(TYPES.CreateJobUseCase).to(CreateJobUseCase).in
 // container.bind<JobHandlers>(TYPES.JobHandlers).to(JobHandlers).inSingletonScope();
 
         // --- Bindings para Serviços de Domínio/Aplicação ---
-        // import { AIAgentDomainService } from '@/domain/services/agent/ai-agent.service'; // Exemplo de caminho
-        // import { IAIAgentDomainService } from '@/domain/services/agent/i-ai-agent.service'; // Interface
-        // // Este serviço encapsularia a lógica de AIAgent.processJob e suas dependências diretas.
-        // container.bind<IAIAgentDomainService>(TYPES.IAIAgentDomainService).to(AIAgentDomainService).inTransientScope();
+        import { AIAgentExecutionService } from '@/domain/services/agent/ai-agent-execution.service'; // Ajustar caminho conforme estrutura final
+        import { IAIAgentExecutionService } from '@/domain/services/agent/i-ai-agent-execution.service'; // Interface
+        container.bind<IAIAgentExecutionService>(TYPES.IAIAgentExecutionService).to(AIAgentExecutionService).inSingletonScope(); // Ou inTransientScope() se fizer sentido
 
-        // import { JobQueueService } from '@/infrastructure/persistence/job-queue.service'; // Exemplo de caminho
-        // import { IJobQueueService } from '@/domain/services/i-job-queue.service'; // Interface
-        // container.bind<IJobQueueService>(TYPES.IJobQueueService).to(JobQueueService).inSingletonScope();
+        import { JobQueueService } from '@/infrastructure/persistence/queue/job-queue.service'; // Ajustar caminho
+        import { IJobQueueService } from '@/domain/repositories/i-job-queue.service'; // Ou domain/services/
+        container.bind<IJobQueueService>(TYPES.IJobQueueService).to(JobQueueService).inSingletonScope();
 
         // Nota sobre Workers:
-        // Os `AgentWorker`s (da camada de infraestrutura) são tipicamente instanciados e configurados
-        // programaticamente pelo `AgentLifecycleService` (ver Seção 8.3) para cada `AIAgent` ativo.
-        // O `AgentLifecycleService` obteria as dependências necessárias (como `IJobRepository`,
-        // `IAIAgentRepository`, `IAIAgentDomainService` ou `ILLMService`/`IToolRegistry`/`IJobQueueService`
-        // diretamente) do container e as passaria para o construtor do `AgentWorker` ou para
-        // o método que inicia seu ciclo de processamento.
+        // Os `AgentWorker`s (da camada de infraestrutura, ex: `infrastructure/workers/agent.worker.ts`)
+        // são instanciados e configurados programaticamente pelo `AgentLifecycleService` (ver Seção 8.3),
+        // que é parte da lógica de inicialização no processo principal do Electron.
+        // O `AgentLifecycleService` obteria o `IAIAgentExecutionService` e outras dependências
+        // (como `IJobRepository`) do container DI. Em seguida, para cada `AIAgent` configurado,
+        // ele instancia um `AgentWorker`, passando o `queueName` do agente e a função `jobProcessor`
+        // específica (obtida do `IAIAgentExecutionService`, possivelmente um método vinculado ou
+        // uma função curried com o `AIAgentId` ou `AIAgentProps` já configurados).
+        // As dependências diretas do `AgentWorker` (como `IJobRepository`) também podem ser passadas
+        // pelo `AgentLifecycleService` após serem resolvidas do container.
 
 export { container };
 ```
@@ -309,8 +362,9 @@ const TYPES = {
   // AgentWorker: Symbol.for('AgentWorker'),
 
   // Serviços de Domínio/Aplicação para Agentes
-  IAIAgentDomainService: Symbol.for('IAIAgentDomainService'), // Se a abordagem de serviço for usada
+  IAIAgentExecutionService: Symbol.for('IAIAgentExecutionService'),
   IJobQueueService: Symbol.for('IJobQueueService'),       // Para interações avançadas com a fila
+  // IAIAgentDomainService: Symbol.for('IAIAgentDomainService'), // Se a abordagem de serviço for usada -> substituído/renomeado para IAIAgentExecutionService
   // Fábricas
   // JobProcessorFactory: Symbol.for('JobProcessorFactory'), // Removido se job processors não são mais registrados individualmente
 };
@@ -421,135 +475,116 @@ import { CreateJobUseCase } from '@/domain/use-cases/job/create-job.use-case';
 // });
 ```
 
-Seguindo esses padrões, o InversifyJS ajudará a criar um sistema bem estruturado, onde as dependências são claramente definidas e gerenciadas externamente, facilitando a evolução e o teste do software. Os exemplos abaixo ilustram como a DI pode ser usada nos dois cenários principais para processamento de jobs por agentes.
+Com o container configurado e os tipos definidos, as classes podem ser marcadas como `@injectable()` para serem gerenciadas pelo container e terem suas dependências injetadas via construtor usando `@inject(TYPES.NomeDoSimbolo)`.
 
-**Cenário com `AIAgent.processJob` recebendo dependências:**
+**Exemplo com `AIAgentExecutionService`:**
 
-Como discutido na Seção 6.2, o método `AIAgent.processJob(job, workerToken, dependencies)` recebe suas dependências (`ILLMService`, `IToolRegistry`, `IJobQueueService`, `IJobRepository`) como parâmetros. O componente `AgentWorker` (da camada de infraestrutura), responsável por chamar este método, obteria estas dependências do container InversifyJS (provavelmente durante sua própria instanciação pelo `AgentLifecycleService`).
+Este serviço é central para a execução da lógica dos agentes de IA. Ele recebe todas as dependências necessárias para orquestrar a interação com LLMs, ferramentas, e o sistema de filas.
 
 ```typescript
-// Exemplo conceitual do Worker obtendo dependências para passar ao AIAgent.processJob()
-// src/infrastructure/workers/agent.worker.ts (simplificado)
+// Exemplo conceitual: src/domain/services/agent/ai-agent-execution.service.ts
+import { injectable, inject } from 'inversify';
+import { TYPES } from '@/infrastructure/ioc/types';
+import { IAIAgentRepository } from '@/domain/repositories/i-ai-agent.repository';
+import { IJobRepository } from '@/domain/repositories/i-job.repository';
+import { IJobQueueService } from '@/domain/repositories/i-job-queue.service';
+import { ILLMService } from '@/domain/services/i-llm.service';
+import { IToolRegistry } from '@/domain/services/i-tool-registry.service';
+import { Job } from '@/domain/entities/job.entity';
+import { AIAgent } from '@/domain/entities/ai-agent.entity'; // A entidade de configuração
+// Importar CoreMessage, DelayedError, WaitingChildrenError se necessário
 
-// class AgentWorker {
-//   private agentConfig: AIAgentProps; // Configuração do agente que este worker serve
-//   private queueName: string;
+export interface IAIAgentExecutionService {
+  getJobProcessorForAgent(agentId: string): (job: Job, workerToken: string) => Promise<any>;
+  // Ou, alternativamente, um método que executa diretamente:
+  // processAgentJob(agentId: string, job: Job, workerToken: string): Promise<any>;
+}
+
+@injectable()
+export class AIAgentExecutionService implements IAIAgentExecutionService {
+  constructor(
+    @inject(TYPES.IAIAgentRepository) private aiAgentRepository: IAIAgentRepository,
+    @inject(TYPES.IJobRepository) private jobRepository: IJobRepository,
+    @inject(TYPES.IJobQueueService) private jobQueueService: IJobQueueService,
+    @inject(TYPES.ILLMService) private llmService: ILLMService,
+    @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry
+  ) {}
+
+  // Opção 1: Retornar uma função jobProcessor configurada para um agente específico
+  public getJobProcessorForAgent(agentId: string): (job: Job, workerToken: string) => Promise<any> {
+    return async (job: Job, workerToken: string): Promise<any> => {
+      const agentProfile = await this.aiAgentRepository.findById(agentId);
+      if (!agentProfile) {
+        throw new Error(`AIAgent profile ${agentId} not found for job ${job.id}.`);
+      }
+
+      // Lógica de processamento do job do agente (interação com LLM, ferramentas, etc.)
+      // Esta é a lógica que antes estava esboçada em AIAgent.processJob
+      console.log(`[AIAgentExecutionService] Processing job ${job.id} for agent ${agentProfile.name} (Token: ${workerToken.substring(0,8)})`);
+
+      const taskInput = job.payload.taskInput || job.payload.goal;
+      let conversationHistory = job.data?.conversationHistory || [];
+      // Adicionar taskInput ao histórico, etc.
+
+      // Exemplo de interação com LLM
+      // const llmResult = await this.llmService.streamText({
+      //   modelId: agentProfile.props.modelId,
+      //   systemPrompt: agentProfile.props.roleDescription,
+      //   // ...
+      //   messages: conversationHistory,
+      //   tools: this.toolRegistry.getTools(agentProfile.props.availableTools),
+      // });
+      // ... (processar stream, executar ferramentas via this.toolRegistry)
+
+      // Exemplo de atualização de dados do job
+      // job.updateJobData({ conversationHistory, currentStep: 'llm_processed' });
+      // await this.jobRepository.save(job);
+
+      // Exemplo de adiamento do job
+      // if (conditionToDelay) {
+      //   job.setToBeDelayed(new Date(Date.now() + delayDuration));
+      //   await this.jobRepository.save(job); // Salva o estado pretendido
+      //   await this.jobQueueService.requestMoveToDelayed(job.id, workerToken, job.props.delayUntil!);
+      //   throw new DelayedError('Job processing delayed by agent logic.');
+      // }
+
+      const finalResult = { message: `Job ${job.id} processed for agent ${agentProfile.name}. Output: Example result.`};
+      // job.updateJobData({ finalResult }); // Salvar resultado final nos dados do job
+      // await this.jobRepository.save(job);
+
+      return finalResult;
+    };
+  }
+
+  // Opção 2: Método que executa diretamente (Worker passaria agentId) - menos flexível para o Worker genérico
+  // public async processAgentJob(agentId: string, job: Job, workerToken: string): Promise<any> {
+  //    // Lógica similar à de cima
+  // }
+}
+```
+
+**Obtendo e Usando o `jobProcessor` no `AgentLifecycleService` (Conceitual):**
+
+O `AgentLifecycleService` (mencionado na Seção 8.3), ao inicializar os `Worker`s, faria algo assim:
+
+```typescript
+// No AgentLifecycleService (lógica de inicialização)
+// const agentExecutionService = container.get<IAIAgentExecutionService>(TYPES.IAIAgentExecutionService);
+// const jobRepository = container.get<IJobRepository>(TYPES.IJobRepository); // e outras deps para o Worker
+
+// Para cada AIAgentConfig carregado do IAIAgentRepository:
+//   const agentConfig = ... // AIAgentProps
+//   const specificJobProcessor = agentExecutionService.getJobProcessorForAgent(agentConfig.id);
 //
-//   // Dependências que o Worker usa diretamente ou passa para AIAgent.processJob
-//   private jobRepository: IJobRepository;
-//   private aiAgentRepository: IAIAgentRepository; // Para carregar a entidade AIAgent completa se necessário
-//   private llmService: ILLMService;
-//   private toolRegistry: IToolRegistry;
-//   private jobQueueService: IJobQueueService;
-
-//   constructor(
-//     agentConfig: AIAgentProps, // Passado pelo AgentLifecycleService
-//     queueName: string,
-//     // Dependências resolvidas pelo AgentLifecycleService a partir do container:
-//     jobRepository: IJobRepository,
-//     aiAgentRepository: IAIAgentRepository,
-//     llmService: ILLMService,
-//     toolRegistry: IToolRegistry,
-//     jobQueueService: IJobQueueService
-//   ) {
-//     this.agentConfig = agentConfig;
-//     this.queueName = queueName;
-//     this.jobRepository = jobRepository;
-//     this.aiAgentRepository = aiAgentRepository; // Usado para carregar a entidade AIAgent
-//     this.llmService = llmService;
-//     this.toolRegistry = toolRegistry;
-//     this.jobQueueService = jobQueueService;
-//   }
-
-//   async start() {
-//     console.log(`Worker para agente ${this.agentConfig.id} (${this.agentConfig.name}) iniciado na fila ${this.queueName}.`);
-//     // Loop de processamento while(true)
-//     // Dentro do loop:
-//     // const job = await this.jobRepository.findNextPending(this.queueName);
-//     // if (job) {
-//     //   const agentEntity = await this.aiAgentRepository.findById(this.agentConfig.id); // Carrega a entidade
-//     //   if (agentEntity) {
-//     //      const workerToken = crypto.randomUUID(); // Gerar token
-//     //      try {
-//     //        const result = await agentEntity.processJob(job, workerToken, {
-//     //          llmService: this.llmService,
-//     //          toolRegistry: this.toolRegistry,
-//     //          jobQueueService: this.jobQueueService,
-//     //          jobRepository: this.jobRepository // Para job.updateData() ser persistido
-//     //        });
-//     //        // job.complete(result); await this.jobRepository.save(job);
-//     //      } catch (error) {
-//     //        // if (error instanceof DelayedError) { ... }
-//     //        // else if (error instanceof WaitingChildrenError) { ... }
-//     //        // else { job.fail(error); await this.jobRepository.save(job); }
-//     //      }
-//     //   }
-//     // }
-//   }
-// }
+//   const worker = new AgentWorker(
+//     agentConfig.queueName, // queueName da config do agente
+//     specificJobProcessor,
+//     jobRepository, // e outras dependências que o Worker precisa
+//     // ...
+//   );
+//   worker.start();
 ```
-
-**Cenário com `AIAgentDomainService`:**
-
-Se optarmos por um `AIAgentDomainService` para encapsular a lógica de processamento do job e suas dependências, este serviço seria injetável e o `AgentWorker` teria uma dependência dele.
-
-```typescript
-// src/domain/services/agent/ai-agent.service.ts (exemplo)
-// import { injectable, inject } from 'inversify';
-// import { TYPES } from '@/infrastructure/ioc/types';
-// import { ILLMService } from './i-llm.service'; // Supondo que está no mesmo dir ou shared
-// import { IToolRegistry } from './i-tool-registry.service';
-// import { IJobQueueService } from './i-job-queue.service';
-// import { IJobRepository } from '@/domain/repositories/i-job.repository';
-// import { AIAgentProps } from '@/domain/entities/ai-agent.entity'; // Usaria Props ou a entidade
-// import { Job } from '@/domain/entities/job.entity';
-
-// @injectable()
-// export class AIAgentDomainService implements IAIAgentDomainService {
-//   constructor(
-//     @inject(TYPES.ILLMService) private llmService: ILLMService,
-//     @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry,
-//     @inject(TYPES.IJobQueueService) private jobQueueService: IJobQueueService,
-//     @inject(TYPES.IJobRepository) private jobRepository: IJobRepository
-//   ) {}
-
-//   public async processJobForAgent(agentProps: AIAgentProps, job: Job, workerToken: string): Promise<any> {
-//     // Lógica similar ao que estava em AIAgent.processJob, usando this.llmService,
-//     // this.toolRegistry, this.jobQueueService, this.jobRepository
-//     // e as configurações de 'agentProps' (agentProps.modelId, agentProps.roleDescription, etc.)
-//     const taskDescription = job.payload.task;
-//     // ... construir mensagens, chamar LLM, usar ferramentas, interagir com jobQueueService ...
-//     // Exemplo: job.updateJobData(...); await this.jobRepository.save(job);
-//     // Exemplo: job.prepareForDelay(...); await this.jobRepository.save(job);
-//     //          await this.jobQueueService.requestMoveToDelayed(job.id, workerToken, ...);
-//     //          throw new DelayedError(...);
-//     return { success: true, data: "Job processed by AIAgentDomainService for " + agentProps.name };
-//   }
-// }
-
-// Exemplo do AgentWorker usando AIAgentDomainService:
-// class AgentWorker {
-//   constructor(
-//     private agentProps: AIAgentProps, // Configuração do agente
-//     private jobRepository: IJobRepository, // Para buscar jobs
-//     private agentDomainService: IAIAgentDomainService, // Injetado pelo AgentLifecycleService
-//     private queueName: string
-//   ) {}
-
-//   async start() {
-//     // Loop de processamento
-//     // const job = await this.jobRepository.findNextPending(this.queueName);
-//     // if (job) {
-//     //   const workerToken = crypto.randomUUID();
-//     //   try {
-//     //      const result = await this.agentDomainService.processJobForAgent(this.agentProps, job, workerToken);
-//     //      // job.complete(result); await this.jobRepository.save(job);
-//     //   } catch (error) { /* ... tratamento de erro ... */ }
-//     // }
-//   }
-// }
-```
-A escolha entre `AIAgent.processJob` com dependências passadas ou um `AIAgentDomainService` injetável dependerá da preferência por manter entidades mais "puras" versus a conveniência de ter serviços com suas dependências já resolvidas. A segunda abordagem (`AIAgentDomainService`) é geralmente mais alinhada com a separação de responsabilidades onde serviços orquestram e entidades contêm estado e lógica de negócio intrínseca.
+Isso demonstra como o `AIAgentExecutionService` atua como uma fábrica ou provedor para a lógica de processamento específica do agente, que é então executada por `Worker`s genéricos. A entidade `AIAgent` (Seção 6.2) agora serve primariamente como o DTO de configuração/perfil para o agente.
 
 ## 5. Proposta de Organização de Diretórios Detalhada
 
@@ -787,55 +822,66 @@ export class Job {
 }
 ```
 
-**Suporte a Funcionalidades Avançadas da Fila:**
+**Suporte a Funcionalidades Avançadas da Fila e Interação com `IJobQueueService`:**
 
-Para suportar as interações com o sistema de filas avançado, a entidade `Job` precisa permitir modificações em seu estado e dados, enquanto a lógica de interação com a infraestrutura da fila (que envolve `workerToken`, locks, etc.) é gerenciada externamente (pelo `AIAgent.processJob` ou um `AIAgentService` chamando um `IJobQueueService` da infraestrutura).
+A entidade `Job` é responsável por manter seu próprio estado e dados. Para funcionalidades avançadas da fila, como adiamento de jobs ou espera por jobs filhos, a entidade `Job` pode ter métodos para preparar seu estado interno. No entanto, a execução real dessas operações na fila (que envolvem lógica de persistência, `workerToken` e gerenciamento de locks) é responsabilidade de um serviço da camada de infraestrutura, o `IJobQueueService` (definido na Seção 3.3), que é invocado pelo `jobProcessor` (ex: a lógica dentro do `AIAgentExecutionService`).
 
 *   **`updateJobData(newData: any): void`**
-    *   **Propósito:** Permitir que a lógica de processamento do job (ex: `AIAgent.processJob`) atualize o campo `data` do job para salvar progresso ou resultados parciais.
+    *   **Propósito:** Permitir que o `jobProcessor` atualize o campo `data` do job (em memória) para salvar progresso ou resultados parciais.
     *   **Lógica na Entidade:**
         ```typescript
         public updateJobData(newData: any): void {
           this.props.data = { ...(this.props.data || {}), ...newData };
           this.props.updatedAt = new Date();
-          // Esta entidade foi modificada. O chamador (Worker/Serviço) é responsável por persistir via IJobRepository.
+          // O chamador (jobProcessor) é responsável por persistir o Job atualizado
+          // chamando `IJobRepository.save(thisJobInstance)` após esta modificação.
         }
         ```
 
-*   **Sinalizando Intenção de Adiar ou Esperar (Exemplo com `prepareForDelay`):**
-    *   **Propósito:** A entidade `Job` pode ter métodos para se colocar em um estado que sinaliza uma intenção, mas a ação final na fila é da infraestrutura.
-    *   **Lógica na Entidade (Exemplo para Adiar):**
+*   **Preparando o Job para Mudanças de Estado na Fila:**
+    A entidade `Job` pode ter métodos que validam se uma transição de estado é permitida e atualizam o estado da entidade em memória. O `jobProcessor` chamaria esses métodos antes de invocar o `IJobQueueService`.
+
+    *   **Exemplo: Preparando para Adiar (`setToBeDelayed`)**
         ```typescript
-        public prepareForDelay(delayTargetTimestamp: Date): void {
+        public setToBeDelayed(delayTargetTimestamp: Date): void {
           if (!this.props.status.is('ACTIVE')) { // Só pode adiar um job ativo
-            throw new Error('Job must be ACTIVE to be delayed.');
+            throw new Error('Job must be ACTIVE to be set for delay.');
           }
-          this.props.status = JobStatusVO.create('DELAYED');
+          // Validações adicionais podem ser aplicadas aqui.
+          this.props.status = JobStatusVO.create('DELAYED'); // Muda o status em memória
           this.props.delayUntil = delayTargetTimestamp;
           this.props.updatedAt = new Date();
-          // O chamador (AIAgent.processJob) DEVE então chamar um método no IJobQueueService
-          // (ex: jobQueueService.requestMoveToDelayed(this.id, workerToken, delayTargetTimestamp))
-          // e lançar DelayedError.
+          // O jobProcessor agora deve:
+          // 1. Chamar `IJobRepository.save(thisJobInstance)` para persistir este novo estado pretendido.
+          // 2. Chamar `IJobQueueService.requestMoveToDelayed(this.id, workerToken, delayTargetTimestamp)`.
+          // 3. Se bem-sucedido, lançar `DelayedError`.
         }
         ```
-    *   **Lógica na Entidade (Exemplo para Esperar Filhos):**
-         ```typescript
-        public prepareToWaitForChildren(): void {
-          if (!this.props.status.is('ACTIVE')) {
-            throw new Error('Job must be ACTIVE to wait for children.');
-          }
-          // Lógica para verificar se há filhos ou se é permitido esperar (pode estar em um Domain Service)
-          this.props.status = JobStatusVO.create('WAITING_CHILDREN');
-          this.props.updatedAt = new Date();
-          // O chamador (AIAgent.processJob) DEVE então chamar um método no IJobQueueService
-          // (ex: jobQueueService.requestMoveToWaitingChildren(this.id, workerToken))
-          // e lançar WaitingChildrenError se bem-sucedido.
-        }
-        ```
-*   **Interação com `IJobQueueService` (a ser chamado pelo `AIAgent.processJob`):**
-    A lógica de processamento do job (`AIAgent.processJob`) usaria esses métodos da entidade `Job` para preparar o estado e, em seguida, chamaria um serviço da camada de infraestrutura (ex: `IJobQueueService.requestMoveToDelayed(jobId, workerToken, timestamp)`) que lidaria com a lógica de lock, `workerToken` e a atualização final no banco de dados através do `IJobRepository`. Após a chamada bem-sucedida ao `IJobQueueService`, o `AIAgent.processJob` lançaria o erro apropriado (`DelayedError`, `WaitingChildrenError`).
 
-Essa separação garante que a entidade `Job` não se preocupe com detalhes da infraestrutura da fila como `workerToken`s, mas possa participar ativamente na definição de seu estado e dados.
+    *   **Exemplo: Preparando para Esperar Filhos (`setToBeWaitingForChildren`)**
+        ```typescript
+        public setToBeWaitingForChildren(): void {
+          if (!this.props.status.is('ACTIVE')) {
+            throw new Error('Job must be ACTIVE to be set to wait for children.');
+          }
+          // Validações adicionais (ex: verificar se o job tem filhos definidos).
+          this.props.status = JobStatusVO.create('WAITING_CHILDREN'); // Muda o status em memória
+          this.props.updatedAt = new Date();
+          // O jobProcessor agora deve:
+          // 1. Chamar `IJobRepository.save(thisJobInstance)`.
+          // 2. Chamar `IJobQueueService.requestMoveToWaitingChildren(this.id, workerToken)`.
+          // 3. Se bem-sucedido (e o job foi movido para espera), lançar `WaitingChildrenError`.
+        }
+        ```
+
+**Fluxo de Interação (no `jobProcessor`):**
+1.  O `jobProcessor` (ex: dentro do `AIAgentExecutionService`) decide que um job precisa ser adiado.
+2.  Ele chama `job.setToBeDelayed(newTimestamp)`.
+3.  Ele chama `jobRepository.save(job)` para persistir o novo status e `delayUntil` da entidade.
+4.  Ele chama `jobQueueService.requestMoveToDelayed(job.id, workerToken, newTimestamp)`. Este serviço da infraestrutura lida com a lógica de lock, verifica o `workerToken` e atualiza o registro do job na fila para refletir o estado `DELAYED` (pode ser redundante se o passo 3 já o fez, ou pode ser a única fonte de verdade para a mudança de estado na persistência da fila).
+5.  Se `requestMoveToDelayed` for bem-sucedido, o `jobProcessor` lança `DelayedError` para sinalizar ao `Worker`.
+
+Essa abordagem mantém a entidade `Job` focada em seu estado e regras de negócio, enquanto o `jobProcessor` orquestra a interação com os serviços de infraestrutura (`IJobRepository`, `IJobQueueService`) para operações que exigem conhecimento do `workerToken` ou da lógica específica da fila. A entidade `Job` em si permanece ignorante sobre `workerToken`s ou a mecânica exata da fila.
 ### 6.2. Exemplo de Entidade: `AIAgent`
 A entidade `AIAgent` (ou um nome similar como `AIWorkerProfile`, `AIModelExecutor`) representaria a configuração e o estado de um agente de IA capaz de executar jobs ou tarefas.
 
@@ -919,90 +965,16 @@ export class AIAgent {
     return this.props.isActive; // Simplificado
   }
 
-  // ... (outros métodos da classe AIAgent)
-
-    public async processJob(
-      job: Job, // A entidade Job
-      workerToken: string, // Token fornecido pelo Worker
-      dependencies: {
-        llmService: ILLMService;
-        toolRegistry: IToolRegistry;
-        jobQueueService: IJobQueueService; // Serviço para interagir com a fila
-        jobRepository: IJobRepository; // Para salvar o job após updateData
-      }
-    ): Promise<any> { // O tipo de retorno pode ser mais específico
-      // 1. Interpretar o job.payload e job.data (estado salvo).
-      const taskDescription = job.payload.task || job.payload.goal;
-      let currentStep = job.data?.currentStep || 'initial';
-
-      console.log(`[AIAgent ${this.id}] Job ${job.id} (Token: ${workerToken.substring(0,8)}...): Iniciando etapa ${currentStep}.`);
-
-      // Exemplo de um processo de múltiplas etapas
-      if (currentStep === 'initial') {
-        // ... fazer algum processamento inicial ...
-        console.log(`[AIAgent ${this.id}] Job ${job.id}: Executando etapa inicial.`);
-        // Simular trabalho
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Atualizar os dados do job com o progresso
-        job.updateJobData({ currentStep: 'processing', initialResult: 'resultFromInitialStep' });
-        await dependencies.jobRepository.save(job); // Persistir a atualização dos dados do job
-
-        // Exemplo: Adiar o job para a próxima etapa após um delay
-        const delayMilliseconds = job.payload.customDelay || 5000;
-        console.log(`[AIAgent ${this.id}] Job ${job.id}: Solicitando adiamento para próxima etapa em ${delayMilliseconds}ms.`);
-
-        job.prepareForDelay(new Date(Date.now() + delayMilliseconds));
-        await dependencies.jobRepository.save(job); // Salva o estado 'DELAYED' pretendido
-
-        // Efetivar o movimento na fila usando o JobQueueService e o workerToken
-        await dependencies.jobQueueService.requestMoveToDelayed(job.id, workerToken, job.props.delayUntil!); // props.delayUntil foi setado por prepareForDelay
-        throw new DelayedError('Job adiado para próxima etapa via AIAgent.processJob'); // Sinaliza ao Worker
-      }
-
-      if (currentStep === 'processing') {
-        // ... fazer mais algum processamento ...
-        console.log(`[AIAgent ${this.id}] Job ${job.id}: Executando etapa de processamento.`);
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Exemplo: Se este job fosse um pai e precisasse esperar por filhos (que teriam sido criados aqui)
-        // Suponha que 'job.hasPendingChildren()' seja uma lógica (talvez em JobDomainService)
-        // if (await dependencies.jobQueueService.jobHasPendingChildren(job.id)) {
-        //   console.log(`[AIAgent ${this.id}] Job ${job.id}: Solicitando espera por jobs filhos.`);
-        //   job.prepareToWaitForChildren();
-        //   await dependencies.jobRepository.save(job);
-        //   await dependencies.jobQueueService.requestMoveToWaitingChildren(job.id, workerToken);
-        //   throw new WaitingChildrenError('Job esperando conclusão dos filhos via AIAgent.processJob');
-        // }
-
-        job.updateJobData({ currentStep: 'final', processingResult: 'resultFromProcessingStep' });
-        await dependencies.jobRepository.save(job);
-        currentStep = 'final'; // Avança para a próxima etapa (simulado)
-      }
-
-      if (currentStep === 'final') {
-        console.log(`[AIAgent ${this.id}] Job ${job.id}: Executando etapa final.`);
-        const messages: CoreMessage[] = [ /* ... construir mensagens ... */ ];
-        // const llmResult = await dependencies.llmService.streamText({ ... });
-        // ... processar LLM e ferramentas ...
-        const finalAnswer = "Resultado final do processamento do LLM e ferramentas.";
-
-        console.log(`[AIAgent ${this.id}] Job ${job.id}: Etapa final concluída.`);
-        return { success: true, data: finalAnswer }; // Este resultado será usado por job.complete() no Worker
-      }
-
-      throw new Error(`[AIAgent ${this.id}] Job ${job.id}: Estado desconhecido ou inválido da etapa: ${currentStep}`);
-    }
+  // O método processJob foi removido desta entidade.
+  // A lógica de processamento de job agora reside no jobProcessor fornecido pelo AIAgentExecutionService (Seção 3.1).
 }
 ```
 
-**Fornecimento de Dependências e `workerToken` para `processJob`:**
+**Considerações sobre a Entidade `AIAgent`:**
 
-O método `processJob` requer um `workerToken` (fornecido pelo `Worker`) e um conjunto de dependências de serviço (`ILLMService`, `IToolRegistry`, `IJobQueueService`, `IJobRepository`). O `workerToken` é crucial para autorizar operações na fila através do `IJobQueueService`.
+Com a lógica de processamento de job movida para o `AIAgentExecutionService`, a entidade `AIAgent` torna-se primariamente um objeto de dados de configuração (um perfil de agente). Ela define *o quê* e *como* um agente deve se comportar (modelo LLM, persona/prompt do sistema, ferramentas disponíveis, etc.), mas não *executa* diretamente o processamento do job.
 
-Estas dependências são obtidas do container DI pelo `Worker` e passadas como argumentos para `AIAgent.processJob`. Esta abordagem mantém a entidade `AIAgent` relativamente limpa de conhecimento direto sobre o container DI, focando em sua configuração e na orquestração da lógica de processamento do job.
-
-Alternativamente, para encapsular ainda mais essa lógica e o gerenciamento de suas dependências, um `AIAgentDomainService` (localizado em `src/domain/services/agent/`) pode ser introduzido. Este serviço seria injetável (`@injectable`), receberia `ILLMService`, `IToolRegistry`, `IJobQueueService`, `IJobRepository` etc., em seu construtor, e teria um método como `executeAgentTask(agentConfig: AIAgentProps, job: Job, workerToken: string)`. O `Worker` então obteria uma instância deste serviço e o utilizaria. A entidade `AIAgent` se tornaria primariamente um objeto de dados/configuração. A escolha dependerá da complexidade e da preferência por manter as entidades mais puras.
+O `AIAgentExecutionService` utiliza as informações da entidade `AIAgent` (carregada via `IAIAgentRepository`) para orquestrar a interação com o LLM e as ferramentas ao processar um job. As dependências como `ILLMService`, `IToolRegistry`, `IJobQueueService` e `IJobRepository` são gerenciadas pelo `AIAgentExecutionService` (e injetadas nele), não pela entidade `AIAgent`.
 ### 6.3. Exemplo de Caso de Uso: `CreateProjectUseCase`
 Este caso de uso seria responsável por criar um novo projeto no sistema.
 
@@ -1310,27 +1282,43 @@ O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e a
         2.  Criar a entidade `Job`.
         3.  Salvar o `Job` usando `IJobRepository` (que o associará ao `queueName` correto).
 
-*   **`Worker` Dedicado por `AIAgent`:**
-    *   Cada instância ou tipo de `AIAgent` terá um `Worker` associado. O `Worker` não é uma entidade de domínio, mas um componente da camada de infraestrutura ou aplicação.
-    *   **Responsabilidades do `Worker`:**
-        1.  **Monitoramento de Fila Dedicada:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas) para verificar **sua única `Queue` designada (identificada pelo `queueName` configurado no Worker)** por novos `Job`s com status `PENDING`. Um Worker é sempre associado a uma e somente uma fila.
-        2.  **Retirada de Jobs (Polling):** Obter o próximo `Job` da fila (considerando prioridade, se aplicável) usando `IJobRepository.findNextPending(queueName)`.
-        3.  **Gerenciamento de Estado do Job:** Antes de processar, atualizar o status do `Job` para `ACTIVE` (via `job.startProcessing()` e `jobRepository.save(job)`).
-        4.  **Execução do Processamento do Job:** Gerar um `workerToken` único para este processamento. Invocar o método `processJob` na instância do `AIAgent` correspondente (ou em um `AIAgentService` associado), passando o `Job`, o `workerToken`, e as dependências necessárias (como `ILLMService`, `IToolRegistry`, que o Worker obteria do container DI). O método `AIAgent.processJob` pode, então, usar o `workerToken` ao chamar métodos no objeto `Job` que modificam seu estado na fila (ex: `job.requestDelayedProcessing(timestamp, workerToken)`).
-        5.  **Tratamento de Resultado/Erro:**
-            *   Se o `jobProcessor` (ou seja, o método `AIAgent.processJob`) for concluído normalmente, chamar `job.complete(result)` e salvar o job via `jobRepository.save(job)`.
-            *   Se o `jobProcessor` lançar uma exceção:
-                *   Se for `DelayedError` (lançado após o `jobProcessor` chamar um método como `job.requestDelayedProcessing`): O Worker entende que o job já foi movido para o estado `DELAYED` pela lógica da fila (que verificou o `workerToken`). Nenhuma ação adicional de mudança de estado é necessária no job pelo worker, apenas logging.
-                *   Se for `WaitingChildrenError` (lançado após o `jobProcessor` chamar `job.requestWaitingForChildren`): Similar ao `DelayedError`, o Worker entende que o job foi movido para `WAITING_CHILDREN`.
-                *   Para outras exceções: Chamar `job.fail(errorInfo)`. Se `job.canRetry()`, marcar para nova tentativa (`job.markAsPendingRetry()`) ou adiar. Salvar o job.
-        6.  **Ciclo de Vida:** O `Worker` deve ser iniciado quando a aplicação (ou o `AIAgent` correspondente) é ativado e parado graciosamente durante o desligamento da aplicação.
-    *   **Dependências do `Worker` (Injetadas):**
-        *   `queueName`: O nome da fila que este worker monitora.
-        *   `IJobRepository`: Para interagir com os jobs.
-        *   `IAIAgentRepository` (ou `IAIAgentServiceFactory` / `Container`): Para obter a instância/configuração do `AIAgent` ou do `AIAgentService` que o Worker irá servir. Se for `IAIAgentRepository`, o Worker carregaria a entidade `AIAgent` e chamaria seu método `processJob`. Se for um `AIAgentService`, o Worker obteria a instância do serviço e chamaria um método nele.
-        *   `ILLMService` (ou acesso ao container para obtê-lo): Necessário para ser passado para o método `AIAgent.processJob()`.
-        *   `IToolRegistry` (ou acesso ao container para obtê-lo): Necessário para ser passado para o método `AIAgent.processJob()`.
-        *   `LoggerService`: Para logging.
+*   **`Worker` Genérico Dedicado a uma Fila:**
+    Um `Worker` é um componente da camada de infraestrutura (`infrastructure/workers/`) responsável por processar jobs de **uma única e específica `queueName`**. Ele é configurado com esta `queueName` e uma função `jobProcessor` genérica no momento de sua instanciação (geralmente pelo `AgentLifecycleService` ou um serviço similar de gerenciamento de workers).
+
+    **Responsabilidades do `Worker`:**
+    1.  **Monitoramento de Fila Dedicada:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas) para verificar sua única `Queue` designada (identificada pelo `queueName` configurado no Worker) por novos `Job`s com status `PENDING`, utilizando o `IJobRepository`. Um Worker é sempre associado a uma e somente uma fila.
+    2.  **Retirada e Lock do Job:** Obter o próximo `Job` prioritário da fila. Ao fazer isso, o sistema de filas (através do `IJobRepository` ou `IJobQueueService`) deve aplicar um lock ao `Job` para evitar que outros workers o processem. O `Worker` gera um `workerToken` único associado a este lock e ao processamento atual.
+    3.  **Atualização de Status para `ACTIVE`:** Antes de invocar o `jobProcessor`, o `Worker` chama `job.startProcessing()` (que atualiza o estado do `Job` em memória para `ACTIVE` e incrementa `attempts`) e persiste essa mudança imediatamente via `IJobRepository.save(job)`.
+    4.  **Execução do `jobProcessor`:** Invocar a função `jobProcessor` fornecida, passando a instância do `Job` e o `workerToken`.
+        ```typescript
+        // Exemplo da chamada dentro do Worker:
+        // const jobProcessor = this.configuredJobProcessor; // Função fornecida na instanciação do Worker
+        // try {
+        //   const result = await jobProcessor(job, workerToken);
+        //   // Se chegou aqui, o jobProcessor concluiu sem sinalizar delay/espera
+        //   job.complete(result); // Atualiza estado e resultado em memória
+        //   await this.jobRepository.save(job); // Persiste COMPLETED
+        //   // Liberar o lock do job (feito pelo IJobQueueService implicitamente ou explicitamente)
+        // } catch (error) {
+        //   // ... tratamento de erro detalhado abaixo ...
+        // }
+        ```
+    5.  **Tratamento de Resultado/Erro do `jobProcessor`:**
+        *   **Conclusão Normal:** Se o `jobProcessor` retorna um valor sem lançar exceções especiais, o `Worker` considera o job bem-sucedido. Ele chama `job.complete(resultFromProcessor)` e então `this.jobRepository.save(job)` para persistir o estado `COMPLETED` e o resultado. O lock do job é liberado.
+        *   **`DelayedError` Lançado pelo `jobProcessor`:** Indica que o `jobProcessor` já interagiu com o `IJobQueueService` (passando o `workerToken`) para mover o job para o estado `DELAYED` na persistência da fila. O `Worker` apenas registra este evento e **não** tenta alterar o estado do job novamente. O lock do job já foi tratado pelo `IJobQueueService` como parte da operação `requestMoveToDelayed`.
+        *   **`WaitingChildrenError` Lançado pelo `jobProcessor`:** Similar ao `DelayedError`. O `jobProcessor` sinaliza que o job foi movido para `WAITING_CHILDREN` através do `IJobQueueService`. O `Worker` apenas registra e não altera o estado. O lock também foi tratado.
+        *   **Outras Exceções (Falhas Reais):** Se o `jobProcessor` lança qualquer outra exceção, o `Worker` considera uma falha no processamento. Ele chama `job.fail(error.message)`. Em seguida, verifica `job.canRetry()`.
+            *   Se `true`, o `Worker` chama `job.markAsPendingRetry()`. Se a estratégia de backoff exigir um adiamento, o `Worker` (ou o `jobProcessor` antes de falhar, ou um serviço de retentativa) precisaria interagir com o `IJobQueueService` para mover o job para `DELAYED` com o cálculo de backoff. Após preparar o job para retentativa (seja `PENDING` ou `DELAYED`), o `Worker` chama `this.jobRepository.save(job)`.
+            *   Se `false` (sem mais tentativas), o estado `FAILED` (já definido por `job.fail()`) é persistido com `this.jobRepository.save(job)`.
+            Em ambos os casos de falha, o lock do job é liberado.
+    6.  **Ciclo de Vida:** O `Worker` deve ser iniciado e parado graciosamente (permitindo que jobs ativos tentem concluir) como parte do ciclo de vida da aplicação.
+
+    **Dependências do `Worker` (Injetadas ou Fornecidas na Construção):**
+    *   `queueName`: `string`
+    *   `jobProcessor`: `(job: Job, workerToken: string) => Promise<any>`
+    *   `IJobRepository`: Para buscar jobs e salvar seus estados.
+    *   `IJobQueueService`: Embora o `jobProcessor` chame este serviço para operações de fila como `requestMoveToDelayed`, o `Worker` pode precisar dele para lógica de retentativa com backoff complexa ou para liberar locks explicitamente em certos cenários de falha (embora idealmente o `IJobQueueService` lide com locks expirados). Para simplificar, podemos assumir que o `jobProcessor` gerencia as chamadas que necessitam de `workerToken` ao `IJobQueueService`.
+    *   `LoggerService`: Para logging.
 
 *   **Persistência da Fila:**
     *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados que têm um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs. Esta abordagem de persistência é parte da implementação do sistema de filas local customizado, inspirado nos conceitos do BullMQ mas sem dependências externas, como descrito na Seção 3.3.
@@ -1356,10 +1344,14 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
         1.  Carregar todas as configurações ativas de `AIAgent` do `IAIAgentRepository`.
         2.  Para cada `AIAgent` ativo:
             a.  Instanciar um `Worker`. Isso pode ser feito diretamente ou através de uma fábrica (`AgentWorkerFactory`) se a construção do Worker for complexa.
-            b.  Instanciar um `Worker` (da classe `AgentWorker` da infraestrutura). O `Worker` será configurado com:
-                *   O `queueName` obtido do `AIAgent`.
-                *   Referências a serviços essenciais que ele obterá do container DI para passar ao método de processamento do agente, como `ILLMService` e `IToolRegistry`.
-                *   Uma referência ao `IAIAgentRepository` (ou `IAIAgentServiceFactory` se aplicável) para carregar/acessar a instância/configuração do `AIAgent` e invocar seu método `processJob`, ou para obter a instância do `AIAgentDomainService` correspondente.
+            b.  Instanciar um `Worker` (da classe `AgentWorker` da infraestrutura). O `AgentLifecycleService` (ou lógica de inicialização equivalente) será responsável por:
+                i.  Obter a instância do `IAIAgentExecutionService` do container DI.
+                ii. Para o `AIAgent` específico sendo configurado, chamar um método no `IAIAgentExecutionService` (ex: `getJobProcessorForAgent(agentIdOuConfig)`) para obter a função `jobProcessor` específica para aquele agente.
+                iii. Obter outras dependências que o `Worker` possa precisar diretamente (ex: `IJobRepository`, `LoggerService`) do container DI.
+                iv. Configurar o `Worker` com:
+                    *   O `queueName` obtido da configuração do `AIAgent`.
+                    *   A função `jobProcessor` obtida do `IAIAgentExecutionService`.
+                    *   As instâncias de `IJobRepository`, `LoggerService`, etc.
             c.  Iniciar o loop de processamento do `Worker`.
     *   Os `Worker`s seriam instâncias de uma classe `AgentWorker` (da camada de infraestrutura), que encapsula a lógica de polling da fila e chamada ao método de processamento do agente.
 
