@@ -43,6 +43,7 @@ O `AIAgentExecutionService` teria um método para fornecer o `jobProcessor` conf
 public getJobProcessorForAgent(agentId: string): (job: Job) => Promise<any> {
   // Retorna uma função 'jobProcessor' que tem acesso ao 'this' do AIAgentExecutionService
   // e ao agentId para carregar o perfil do agente específico.
+  // O jobProcessor opera apenas na entidade Job em memória.
   return async (job: Job): Promise<any> => {
     // 'this' aqui se refere à instância de AIAgentExecutionService
     const agentProfile = await this.aiAgentRepository.findById(agentId);
@@ -55,7 +56,15 @@ public getJobProcessorForAgent(agentId: string): (job: Job) => Promise<any> {
     let currentStep = job.props.data?.currentStep || 'initial_processing';
 
     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}, Agent ${agentProfile.props.name}, Step ${currentStep}`);
-    conversationHistory.push({ role: 'user', content: taskInput }); // Exemplo, pode variar
+    // Adiciona a entrada do usuário atual ao histórico da conversa, se aplicável.
+    // A lógica exata de como taskInput se relaciona com conversationHistory pode variar.
+    // Por exemplo, para um novo job, taskInput pode ser a primeira mensagem 'user'.
+    // Para um job que continua, o taskInput pode já estar implícito no conversationHistory vindo de job.props.data.
+    // Este exemplo assume que taskInput é algo a ser adicionado ou que inicia a conversa.
+    if (taskInput) { // Apenas adiciona se houver um taskInput explícito para esta execução
+        conversationHistory.push({ role: 'user', content: taskInput });
+    }
+
 
     // --- Início da Lógica de Interação com LLM e Ferramentas ---
     // (Esta é uma simulação de um loop de pensamento/ação do agente)
@@ -64,68 +73,97 @@ public getJobProcessorForAgent(agentId: string): (job: Job) => Promise<any> {
     let needsToolCall = false;
     let toolCallDetails: any = null; // Estrutura de um tool_call do LLM
 
-    // Exemplo de uma chamada inicial ao LLM
-    if (currentStep === 'initial_processing') {
-        const llmResultStream = await this.llmService.streamText({
+    // Exemplo de uma chamada inicial ao LLM ou continuação
+    if (currentStep === 'initial_processing' || currentStep === 'continue_processing') {
+        const llmResultStream = await this.llmService.streamText({ // Assumindo que ILLMService tem streamText
             modelId: agentProfile.props.modelId,
             systemPrompt: agentProfile.props.roleDescription,
             temperature: agentProfile.props.temperature,
-            tools: this.toolRegistry.getToolDefinitions(agentProfile.props.availableTools), // Definições para o LLM
-            messages: conversationHistory,
+            tools: this.toolRegistry.getToolDefinitions(agentProfile.props.availableTools),
+            messages: conversationHistory, // Passa o histórico atual
         });
 
-        for await (const part of llmResultStream.fullStream) {
+        for await (const part of llmResultStream.fullStream) { // Assumindo que fullStream é o nome correto
             if (part.type === 'text-delta') {
                 llmResponseText += part.textDelta;
-            } else if (part.type === 'tool-call') {
+            } else if (part.type === 'tool-call') { // Assumindo que 'tool-call' é o tipo correto
                 needsToolCall = true;
-                toolCallDetails = part; // { toolName, toolCallId, args }
+                toolCallDetails = part; // Ex: { toolName, toolCallId, args }
                 break;
             }
         }
-        conversationHistory.push({ role: 'assistant', content: needsToolCall ? null : llmResponseText, toolCalls: needsToolCall ? [toolCallDetails] : undefined });
-        job.updateJobData({ conversationHistory, currentStep: needsToolCall ? 'tool_execution_pending' : 'llm_response_complete' });
-        // O Worker persistirá este Job atualizado via QueueClient.saveJob()
-        // Se o jobProcessor precisar persistir dados *antes* de uma operação de fila (delay/wait)
-        // ou antes de uma longa chamada de ferramenta, ele NÃO o faz. Ele apenas atualiza job.data.
-        // A persistência ocorre no Worker após o jobProcessor retornar/lançar erro.
+
+        conversationHistory.push({
+            role: 'assistant',
+            content: needsToolCall ? null : llmResponseText,
+            toolCalls: needsToolCall ? [toolCallDetails] : undefined
+        });
+
+        currentStep = needsToolCall ? 'tool_execution_pending' : 'llm_response_complete';
+        job.updateJobData({ conversationHistory, currentStep });
+        // O Worker persistirá este Job atualizado (com novo histórico e step) quando o jobProcessor retornar ou lançar um erro.
+        // O jobProcessor NÃO chama o QueueClient ou IQueueRepository diretamente.
     }
 
     // Exemplo de execução de ferramenta (se indicada pelo LLM)
-    if (job.props.data?.currentStep === 'tool_execution_pending' && needsToolCall) {
+    if (currentStep === 'tool_execution_pending' && needsToolCall && toolCallDetails) {
         const toolExecutionResult = await this.toolRegistry.executeTool(toolCallDetails.toolName, toolCallDetails.args);
-        conversationHistory.push({ role: 'tool', toolCallId: toolCallDetails.toolCallId, toolName: toolCallDetails.toolName, content: JSON.stringify(toolExecutionResult) });
+        conversationHistory.push({
+            role: 'tool',
+            toolCallId: toolCallDetails.toolCallId,
+            toolName: toolCallDetails.toolName,
+            content: JSON.stringify(toolExecutionResult)
+        });
 
-        // Nova chamada ao LLM com o resultado da ferramenta
-        // (Omitido por brevidade, mas seguiria um fluxo similar ao de cima)
-        llmResponseText = "LLM response after tool execution."; // Simulado
-        conversationHistory.push({ role: 'assistant', content: llmResponseText });
-        job.updateJobData({ conversationHistory, currentStep: 'final_processing' });
+        currentStep = 'continue_processing';
+        job.updateJobData({ conversationHistory, currentStep });
+        // O Worker persistirá o estado atualizado. O jobProcessor não faz chamadas de persistência.
+        // Para uma conversa contínua, o LLM seria chamado novamente aqui com o novo histórico.
+        // (Lógica de chamada ao LLM omitida por brevidade, mas seguiria o padrão acima).
     }
 
     // --- Fim da Lógica de Interação ---
 
     // Exemplo de como o jobProcessor sinaliza um adiamento para o Worker:
     if (job.payload.someConditionToDelay) {
-      job.prepareForDelay(new Date(Date.now() + (job.payload.delayDuration || 60000)));
-      // job.updateJobData({ ... }); // Salvar qualquer estado relevante antes de adiar
-      throw new DelayedError('Task requires a specific delay based on its logic.');
+      job.updateJobData({ conversationHistory, currentStep: 'about_to_delay' }); // Salva estado atual em memória
+      job.prepareForDelay(new Date(Date.now() + (job.payload.delayDuration || 60000))); // Prepara o job em memória
+      throw new DelayedError('Task requires a specific delay based on its logic.'); // Sinaliza ao Worker
     }
 
     // Exemplo de como o jobProcessor sinaliza espera por filhos:
     if (job.payload.someConditionToWaitForChildren) {
-      job.prepareToWaitForChildren();
-      // job.updateJobData({ ... });
-      throw new WaitingChildrenError('Task created sub-tasks and must wait.');
+      job.updateJobData({ conversationHistory, currentStep: 'about_to_wait_children' });
+      job.prepareToWaitForChildren(); // Prepara o job em memória
+      // A lógica para verificar se realmente precisa esperar (ex: se há filhos)
+      // estaria aqui ou na entidade Job. Se não precisar esperar, não lança o erro.
+      // Ex: if (job.hasActualPendingChildren()) { throw new WaitingChildrenError('Task must wait.'); }
+      throw new WaitingChildrenError('Task created sub-tasks and must wait.'); // Sinaliza ao Worker
     }
 
-    // Se chegou ao final do processamento normal
-    if (job.props.data?.currentStep === 'final_processing' || job.props.data?.currentStep === 'llm_response_complete') {
+    // Se chegou ao final do processamento normal para esta execução
+    if (currentStep === 'final_processing' || currentStep === 'llm_response_complete') {
         return llmResponseText || "Task completed successfully by agent."; // Resultado final
+    } else if (currentStep === 'tool_execution_pending' && !needsToolCall) {
+        // LLM não pediu ferramenta, mas estávamos esperando uma. Pode ser um estado final.
+        return llmResponseText || "Task completed after initial LLM response (no tool call).";
+    } else if (currentStep === 'continue_processing') {
+        // O job foi salvo após uma execução de ferramenta e precisa ser processado novamente pelo LLM.
+        // Lançar um erro específico pode instruir o Worker a re-enfileirar imediatamente.
+        // Ou, se o Worker for projetado para reprocessar automaticamente jobs em certos estados,
+        // apenas retornar aqui pode ser suficiente se o estado for salvo.
+        // Para este exemplo, vamos assumir que o jobProcessor deve retornar um resultado ou lançar um erro de "estado final".
+        // Se o objetivo é continuar, o jobProcessor deveria ter feito outra chamada LLM.
+        // Se não, isso pode ser um estado inesperado ou uma lógica de fluxo incompleta no exemplo.
+        return llmResponseText || "Processing continued, awaiting next LLM call or completion.";
     }
 
-    // Se o fluxo chegar aqui, algo inesperado ocorreu.
-    throw new Error(`Job ${job.id} reached an unknown state in agent processing.`);
+
+    // Se o fluxo chegar aqui, algo inesperado ocorreu, ou o job não atingiu um estado final.
+    // Dependendo da lógica do agente, pode ser necessário um loop mais explícito ou
+    // mais estados para gerenciar conversas multi-turn complexas.
+    // Por segurança, lançar um erro se não houver um resultado claro.
+    throw new Error(`Job ${job.id} ended in an unresolved state: ${currentStep}. Final LLM text: "${llmResponseText}"`);
   };
 }
 ```

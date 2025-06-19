@@ -24,7 +24,7 @@ import { IAIAgentRepository } from '@/domain/repositories/i-ai-agent.repository'
 // import { IProjectRepository } from '@/domain/repositories/i-project.repository';
 
 // --- Implementações de Repositório (Infraestrutura) ---
-import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/repositories/job.repository';
+import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/repositories/job.repository'; // Path e nome da classe revertidos
 import { InMemoryAIAgentRepository } from '@/infrastructure/persistence/in-memory/ai-agent.repository'; // Exemplo de In-Memory
 // import { DrizzleProjectRepository } from '@/infrastructure/persistence/drizzle/repositories/project.repository';
 
@@ -157,9 +157,9 @@ export class AIAgentExecutionService implements IAIAgentExecutionService {
     @inject(TYPES.IAIAgentRepository) private aiAgentRepository: IAIAgentRepository,
     @inject(TYPES.ILLMService) private llmService: ILLMService,
     @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry
-    // Note: IJobRepository e IQueueClient não são injetados aqui diretamente,
-    // pois o jobProcessor que este serviço fornece espera receber o QueueClient
-    // como parâmetro em tempo de execução (do Worker), e o QueueClient usa IJobRepository.
+    // Note: IJobRepository e IQueueClient não são injetados aqui diretamente.
+    // O QueueClient é instanciado pelo AgentLifecycleService e recebe IJobRepository.
+    // O jobProcessor fornecido por este serviço não interage diretamente com o QueueClient.
   ) {}
 
   public getJobProcessorForAgent(agentId: string): (job: Job) => Promise<any> {
@@ -188,7 +188,7 @@ import { injectable, inject } from 'inversify';
 import { TYPES } from '@/infrastructure/ioc/types'; // Ajustar caminho
 import { IJobRepository } from '@/domain/repositories/i-job.repository';
 import { Job } from '@/domain/entities/job.entity';
-// import { DrizzleDb } from '../drizzle.instance'; // Exemplo de como obter o cliente DB
+import { JobStatusVO } from '@/domain/entities/value-objects/job-status.vo'; // Pode ser útil para a lógica interna de 'save'
 
 @injectable()
 export class DrizzleJobRepository implements IJobRepository {
@@ -196,24 +196,29 @@ export class DrizzleJobRepository implements IJobRepository {
 
   async add(job: Job): Promise<void> {
     console.log(`[DrizzleJobRepository] Adicionando job: ${job.id} à fila ${job.props.queueName}`);
-    // Lógica de inserção com Drizzle
-  }
-
-  async save(job: Job, lockToken?: string): Promise<void> {
-    console.log(`[DrizzleJobRepository] Salvando job: ${job.id} (Token: ${lockToken ? lockToken.substring(0,8) : 'N/A'})`);
-    // Lógica de atualização com Drizzle, validando lockToken se necessário,
-    // aplicando backoff, liberando lock, etc.
+    // TODO: Implementar lógica de inserção com Drizzle.
   }
 
   async findById(jobId: string): Promise<Job | null> {
     console.log(`[DrizzleJobRepository] Buscando job: ${jobId}`);
+    // TODO: Implementar lógica de busca com Drizzle.
     return null; // Simulado
   }
 
   async findNextPending(queueName: string, workerId: string): Promise<{ job: Job; lockToken: string } | null> {
     console.log(`[DrizzleJobRepository] Buscando próximo job pendente para fila ${queueName} por worker ${workerId}`);
-    // Lógica de busca e lock com Drizzle
+    // TODO: Implementar lógica de busca e lock com Drizzle.
     return null; // Simulado
+  }
+
+  async save(job: Job, lockToken: string): Promise<void> {
+    console.log(`[DrizzleJobRepository] Salvando job: ${job.id} com status ${job.status}. Token: ${lockToken.substring(0,8)}`);
+    // TODO: Implementar lógica de atualização completa com Drizzle.
+    // Esta implementação deve:
+    // 1. Validar o lockToken.
+    // 2. Persistir todas as propriedades relevantes de job.props.
+    // 3. Lidar com a lógica de transição de estado (ex: FAILED com retentativas -> DELAYED/PENDING com backoff).
+    // 4. Liberar o lock para estados terminais ou re-enfileirados.
   }
 }
 ```

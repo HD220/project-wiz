@@ -17,7 +17,7 @@ Esta subcamada é responsável por toda a lógica de persistência de dados da a
 ### 5.1.2. Implementações de Repositório (`src/infrastructure/persistence/drizzle/repositories/`)
 
 Este diretório contém as implementações concretas das interfaces de repositório definidas na camada de Domínio.
-*   **`job.repository.ts`:** Implementação `DrizzleJobRepository` da interface `IJobRepository` (definida em [`02-domain-layer.md`](./02-domain-layer.md#231-ijobrepository-exemplo-detalhado)). Esta classe lida com todas as operações CRUD para a entidade `Job` e também com a lógica complexa de gerenciamento de estado da fila, incluindo locks com `workerToken` e estratégias de backoff, conforme definido na interface `IJobRepository`.
+*   **`queue.repository.ts`:** Implementação `DrizzleQueueRepository` da interface `IQueueRepository` (definida em [`02-domain-layer.md#231-iqueuerepository-interface-de-fila-e-persistência-de-jobs`](./02-domain-layer.md#231-iqueuerepository-interface-de-fila-e-persistência-de-jobs)). Esta classe lida com todas as operações de persistência e gerenciamento de estado para a entidade `Job` na fila, incluindo a adição de novos jobs, busca, aplicação de locks, e as transições de estado granulares (ativação, conclusão, falha com backoff, adiamento, etc.) conforme definido na interface `IQueueRepository`.
 *   **`ai-agent.repository.ts`:** Implementação `DrizzleAIAgentRepository` (ou similar) da interface `IAIAgentRepository` para persistir as configurações/perfis dos `AIAgent`s.
 *   **Outros Repositórios:** Implementações para outras entidades de domínio (ex: `Project`) seguirão o mesmo padrão.
 
@@ -27,7 +27,7 @@ Se a estrutura das entidades de domínio divergir significativamente dos esquema
 
 ### 5.1.4. Implementação do `QueueClient` (`src/infrastructure/persistence/queue/`)
 
-*   **`queue.client.ts`:** Contém a implementação da classe `QueueClient` que implementa a interface `IQueueClient`. Esta classe atua como uma fachada para o `IJobRepository` para uma `queueName` específica, simplificando a API para os `Worker`s.
+*   **`queue.client.ts`:** Contém a implementação da classe `QueueClient` que implementa a interface `IQueueClient`. Esta classe atua como uma fachada para o `IQueueRepository` para uma `queueName` específica, simplificando a API para os `Worker`s.
     *   **Definição Detalhada:** Veja [`03-queue-subsystem.md#323-queueclient-fachada-para-uma-fila-específica`](./03-queue-subsystem.md#323-queueclient-fachada-para-uma-fila-específica).
 
 ## 5.2. Interface do Usuário (UI) (`src/infrastructure/ui/react/`)
@@ -74,6 +74,6 @@ Implementações dos `Worker`s genéricos que processam jobs das filas.
 
 Este diretório contém a configuração centralizada para o InversifyJS.
 *   **`inversify.config.ts`:** Define o container DI e todos os bindings entre interfaces (abstrações) e suas implementações concretas, incluindo seus escopos (singleton, transient).
-*   **`types.ts`:** Define os símbolos (identificadores de tipo) usados para a injeção de dependências (ex: `TYPES.IJobRepository`, `TYPES.IAIAgentExecutionService`).
+*   **`types.ts`:** Define os símbolos (identificadores de tipo) usados para a injeção de dependências (ex: `TYPES.IQueueRepository`, `TYPES.IAIAgentExecutionService`).
 *   **Detalhes da Configuração de DI:** Veja [`06-dependency-injection.md`](./06-dependency-injection.md).
 ```

@@ -16,7 +16,7 @@ Este subsistema é fundamentalmente agnóstico ao domínio. Ele gerencia `Job`s 
 *   **Modificação de Dados do Job em Execução:** O `jobProcessor` pode modificar a propriedade `data` da entidade `Job` (em memória), que é então persistida.
 *   **Operações de Fila Controladas:** O `jobProcessor` pode sinalizar a necessidade de adiar um job (`DelayedError`) ou esperar por jobs filhos (`WaitingChildrenError`) após preparar a entidade `Job` em memória. O `Worker` então orquestra a persistência desse estado via `QueueClient`.
 *   **Opções de Job Configuráveis:** `attempts` (tentativas), `backoff` (estratégias de adiamento entre tentativas), `priority`, `delay` inicial.
-*   **Locks de Job e `workerToken`:** Para garantir que um job ativo seja processado por apenas um worker por vez, o sistema utiliza locks gerenciados pelo `IJobRepository` e identificados por um `workerToken`.
+*   **Locks de Job e `workerToken`:** Para garantir que um job ativo seja processado por apenas um worker por vez, o sistema utiliza locks gerenciados pelo `IQueueRepository` e identificados por um `workerToken`.
 *   **Jobs Filhos (Parent/Child):** Suporte para estruturar tarefas hierarquicamente.
 
 ## 3.2. Componentes Principais do Subsistema de Filas
@@ -29,36 +29,53 @@ A unidade de trabalho no sistema de filas é a entidade `Job`. Ela é um objeto 
     *   A entidade `Job` (instância em memória) é modificada pelo `jobProcessor` para refletir o progresso e o estado desejado (ex: chamando `job.updateData()`, `job.prepareForDelay()`).
     *   O `Worker` então persiste essas modificações através do `QueueClient.saveJob()`.
 
-### 3.2.2. Interface `IJobRepository` (Porta de Persistência)
+### 3.2.2. Interface `IQueueRepository` (Porta de Persistência de Fila e Jobs)
 
-Esta interface é o contrato para todas as operações de persistência e gerenciamento de estado de baixo nível dos `Job`s na fila, utilizando SQLite.
-*   **Definição Detalhada:** Veja [`02-domain-layer.md#231-ijobrepository-exemplo-detalhado`](./02-domain-layer.md#231-ijobrepository-exemplo-detalhado).
-*   **Responsabilidades Chave no Contexto da Fila:**
-    *   `add(job: Job)`: Adicionar novos jobs à persistência.
-    *   `save(job: Job, lockToken?: string)`: Atualizar jobs existentes. Valida `lockToken` para jobs ativos. Persiste todas as propriedades do `Job` (status, data, delayUntil, attempts, etc.). Lida com a lógica de backoff para retentativas (movendo para `PENDING` ou `DELAYED`). Libera o lock se o job atingir estado terminal.
+Esta interface é o contrato para todas as operações de persistência e gerenciamento de estado de baixo nível dos `Job`s na fila, utilizando SQLite. Ela é central para o subsistema de filas.
+*   **Definição Detalhada:** Veja [`02-domain-layer.md#231-iqueuerepository-interface-de-fila-e-persistência-de-jobs`](./02-domain-layer.md#231-iqueuerepository-interface-de-fila-e-persistência-de-jobs).
+*   **Responsabilidades Chave no Contexto da Fila (conforme definido em `02-domain-layer.md`):**
+    *   `add(job: Job)`: Adicionar novos jobs.
     *   `findById(jobId: string)`: Buscar jobs.
-    *   `findNextPending(queueName: string, workerId: string)`: Encontra o próximo job, aplica um lock (registrando `workerId` e `lockToken`), e retorna o `Job` e o `lockToken`.
+    *   `findNextPending(queueName: string, workerId: string)`: Encontrar o próximo job pendente, aplicar um lock, e retornar o job e o `lockToken`.
+    *   `markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string)`: Persistir o estado ATIVO de um job.
+    *   `updateJobData(jobId: string, data: JobData, workerToken: string)`: Atualizar o campo `data` de um job ativo.
+    *   `requestMoveToDelayed(jobId: string, workerToken: string, delayUntilTimestamp: number)`: Mover um job ativo para o estado DELAYED.
+    *   `requestMoveToWaitingChildren(jobId: string, workerToken: string)`: Mover um job ativo para WAITING_CHILDREN.
+    *   `completeJob(jobId: string, result: any, workerToken: string)`: Marcar um job ativo como COMPLETED.
+    *   `failJob(...)`: Marcar um job ativo como FAILED ou re-enfileirá-lo com backoff.
 
 ### 3.2.3. `QueueClient` (Fachada para uma Fila Específica)
 
-Para simplificar a interação do `Worker` com sua fila dedicada e para encapsular a lógica de acesso ao `IJobRepository` para um `queueName` específico, introduzimos o `QueueClient`. Uma instância de `QueueClient` representa uma conexão operacional a uma única fila nomeada.
+Para simplificar a interação do `Worker` com sua fila dedicada e para encapsular a lógica de acesso ao `IQueueRepository` para um `queueName` específico, introduzimos o `QueueClient`. Uma instância de `QueueClient` representa uma conexão operacional a uma única fila nomeada.
 
 **Localização Conceitual da Implementação:** `infrastructure/persistence/queue/queue.client.ts`
 
 **Interface `IQueueClient` (Exemplo):**
 ```typescript
-// domain/interfaces/i-queue.client.ts (ou similar)
+// domain/interfaces/i-queue.client.ts (ou localização similar para interfaces de fachada da infra)
 import { Job } from '@/domain/entities/job.entity';
+// As interfaces JobData, BackoffOptions não são mais necessárias aqui, pois IQueueRepository.save() lida com isso.
 
 export interface IQueueClient {
   readonly queueName: string;
 
-  // Método para o Worker obter o próximo job e um lockToken
+  /**
+   * Obtém o próximo job disponível da fila associada, aplicando um lock.
+   * @param workerId O ID do worker que está solicitando o job.
+   * @returns Uma promessa para o job e seu lockToken, ou null se nenhum job estiver disponível.
+   */
   getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null>;
 
-  // Método para o Worker persistir o estado final/atualizado do Job
-  // Este método usará o IJobRepository.save(job, workerToken) internamente.
-  saveJob(job: Job, workerToken: string): Promise<void>;
+  /**
+   * Salva o estado atual completo do Job na persistência.
+   * Este método é usado pelo Worker para todas as atualizações de estado de um job
+   * que já foi pego (ex: após job.startProcessing(), job.complete(), job.fail(),
+   * ou após o jobProcessor preparar o job para DELAYED/WAITING_CHILDREN e lançar um erro).
+   * Ele delega para IQueueRepository.save(job, workerToken).
+   * @param job A entidade Job com seu estado atualizado em memória.
+   * @param workerToken O token de lock que o Worker possui para este job.
+   */
+  saveJobState(job: Job, workerToken: string): Promise<void>;
 }
 ```
 
@@ -66,27 +83,29 @@ export interface IQueueClient {
 ```typescript
 // infrastructure/persistence/queue/queue.client.ts
 import { IQueueClient } from '@/domain/interfaces/i-queue.client'; // Ajustar caminho
-import { IJobRepository } from '@/domain/repositories/i-job.repository';
+import { IQueueRepository } from '@/domain/repositories/i-queue.repository';
 import { Job } from '@/domain/entities/job.entity';
 
 export class QueueClient implements IQueueClient {
   public readonly queueName: string;
-  private jobRepository: IJobRepository;
+  private queueRepository: IQueueRepository;
 
   constructor(
     queueName: string,
-    jobRepository: IJobRepository
+    queueRepository: IQueueRepository
   ) {
     this.queueName = queueName;
-    this.jobRepository = jobRepository;
+    this.queueRepository = queueRepository;
   }
 
   async getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null> {
-    return this.jobRepository.findNextPending(this.queueName, workerId);
+    return this.queueRepository.findNextPending(this.queueName, workerId);
   }
 
-  async saveJob(job: Job, workerToken: string): Promise<void> {
-    await this.jobRepository.save(job, workerToken);
+  async saveJobState(job: Job, workerToken: string): Promise<void> {
+    // Este método chama o IQueueRepository.save, que é responsável por toda a lógica
+    // de persistência, validação de token, transição de estado (incluindo backoff), e liberação de lock.
+    return this.queueRepository.save(job, workerToken);
   }
 }
 ```
@@ -99,37 +118,43 @@ Um `Worker` é um componente da camada de infraestrutura (`infrastructure/worker
 **Dependências do `Worker` (Fornecidas na Construção):**
 *   `workerId`: `string` (Um identificador único para esta instância do worker)
 *   `queueClient`: `IQueueClient` (Instância configurada para a fila específica)
-*   `jobProcessor`: `(job: Job) => Promise<any>` (A função que contém a lógica de processamento do job. Não recebe `workerToken` nem `queueClient`.)
+*   `jobProcessor`: `(job: Job) => Promise<any>` (A função que contém a lógica de processamento do job. **Importante:** Não recebe `queueClient` nem `workerToken`.)
 *   `LoggerService`: Para logging.
 
 **Responsabilidades do `Worker`:**
-1.  **Monitoramento e Retirada de Jobs da Fila Dedicada:**
-    *   Executar um loop contínuo para verificar sua `IQueueClient` designada por novos `Job`s.
-    *   Chamar `this.queueClient.getNextJob(this.workerId)` para obter o próximo `Job` pendente e um `lockToken` associado.
-2.  **Início do Processamento do Job:**
-    *   Uma vez que um `Job` e seu `lockToken` são obtidos:
-        a.  O `Worker` chama `job.startProcessing()` na instância do `Job`.
-        b.  O `Worker` persiste este estado inicial: `await this.queueClient.saveJob(job, lockToken);`.
+1.  **Monitoramento e Retirada de Jobs:**
+    *   Chama `this.queueClient.getNextJob(this.workerId)` para obter um `Job` e `lockToken`.
+2.  **Início do Processamento:**
+    *   Após obter `job` e `lockToken`, chama `job.startProcessing()` (para atualizar o estado do `Job` em memória: status `ACTIVE`, `attempts` incrementado, `processedAt` setado).
+    *   Então, persiste este estado inicial chamando `await this.queueClient.saveJobState(job, lockToken);`.
 3.  **Execução do `jobProcessor`:**
-    *   Invocar a função `jobProcessor` configurada, passando apenas a instância do `Job`.
-4.  **Tratamento de Resultado/Erro Pós-`jobProcessor` e Persistência Final:**
-    *   Após a execução do `jobProcessor`:
-        *   **Se `DelayedError` foi lançado:** O `Worker` captura. O `job` já foi preparado em memória por `job.prepareForDelay()`. O `Worker` chama `await this.queueClient.saveJob(job, lockToken);`.
-        *   **Se `WaitingChildrenError` foi lançado:** Similar ao `DelayedError`. O `Worker` chama `await this.queueClient.saveJob(job, lockToken);`.
-        *   **Se Nenhuma Exceção Especial (Conclusão Normal):** O `Worker` chama `job.complete(resultFromProcessor)`. Então, `await this.queueClient.saveJob(job, lockToken);`.
-        *   **Se Outra Exceção (Falha Real):** O `Worker` chama `job.fail(error.message)`. Verifica `job.canRetry()`. Se sim, `job.markAsPendingRetry()`; se precisar de backoff, `job.prepareForDelay(timestampBackoff)`. Então, `await this.queueClient.saveJob(job, lockToken);`.
-5.  **Liberação de Lock:** A implementação de `this.queueClient.saveJob()` (que chama `IJobRepository.save()`) é responsável por liberar o lock se o job atingir um estado terminal ou for re-enfileirado.
+    *   Invoca `jobProcessor(job)`.
+    *   O `jobProcessor`:
+        *   Executa a lógica da tarefa, modificando o estado do `Job` *em memória* (ex: chamando `job.updateData(newData)`).
+        *   **Não interage diretamente com o `QueueClient` ou `IQueueRepository` para persistência.**
+        *   Se precisar adiar, chama `job.prepareForDelay(timestamp)` (em memória) e então lança `DelayedError` para sinalizar ao `Worker`.
+        *   Se precisar esperar por jobs filhos, chama `job.prepareToWaitForChildren()` (em memória) e então lança `WaitingChildrenError`.
+        *   Retorna um resultado (sucesso) ou lança uma exceção padrão (falha).
+4.  **Tratamento de Resultado/Erro e Persistência Final:**
+    *   Após a execução do `jobProcessor` (seja qual for o resultado: retorno normal, `DelayedError`, `WaitingChildrenError`, ou outra exceção):
+        *   Se `DelayedError` foi lançado: O `job` (que o `Worker` possui) já foi preparado em memória por `job.prepareForDelay()` (chamado pelo `jobProcessor`).
+        *   Se `WaitingChildrenError` foi lançado: O `job` já foi preparado em memória por `job.prepareToWaitForChildren()`.
+        *   Se conclusão normal (com `processingResult`): O `Worker` chama `job.complete(processingResult)` (atualiza o `job` em memória).
+        *   Se outra falha (com `jobProcessingError`): O `Worker` chama `job.fail(jobProcessingError.message)` (atualiza o `job` em memória).
+    *   Em **todos** esses casos, o `Worker` chama `await this.queueClient.saveJobState(job, lockToken);` para persistir o estado final/atualizado do `Job`. A implementação de `IQueueRepository.save()` lidará com a lógica de backoff, liberação de lock, etc., com base no estado do `job` passado.
+5.  **Liberação de Lock:** A implementação de `IQueueRepository.save()` (chamada via `queueClient.saveJobState()`) é responsável por liberar o lock se o job atingir um estado terminal ou for re-enfileirado.
 6.  **Ciclo de Vida:** Deve ser iniciado e parado graciosamente.
 
 ## 3.3. Fluxo de Vida de um Job no Sistema de Filas (Resumido)
 
-1.  **Enfileiramento:** `EnqueueJobUseCase` -> `Job.create()` -> `IJobRepository.add(job)`.
-2.  **Obtenção:** `Worker` -> `queueClient.getNextJob()` (que usa `IJobRepository.findNextPending()` e aplica lock).
-3.  **Ativação:** `Worker` -> `job.startProcessing()` -> `queueClient.saveJob(job, lockToken)`.
+1.  **Enfileiramento:** `EnqueueJobUseCase` -> `Job.create()` -> `IQueueRepository.add(job)`.
+2.  **Obtenção:** `Worker` -> `queueClient.getNextJob(workerId)`.
+3.  **Ativação:** `Worker` -> `job.startProcessing()` -> `queueClient.saveJobState(job, lockToken)`.
 4.  **Processamento:** `Worker` -> `jobProcessor(job)`.
     *   `jobProcessor` -> `job.updateData()` (em memória).
     *   `jobProcessor` -> `job.prepareForDelay()` -> `throw new DelayedError()`.
-5.  **Finalização:** `Worker` (após resultado ou erro do `jobProcessor`) -> `job.complete()/fail()/prepareFor...()` -> `queueClient.saveJob(job, lockToken)`.
+    *   `jobProcessor` -> `job.prepareToWaitForChildren()` -> `throw new WaitingChildrenError()`.
+5.  **Finalização:** `Worker` (após resultado ou erro do `jobProcessor`) -> (chama `job.complete()`, `job.fail()`, ou o job já está em estado preparado pela entidade `Job` devido ao erro específico) -> `queueClient.saveJobState(job, lockToken)`.
 
 ## 3.4. Gerenciamento de Workers e Filas
 
@@ -140,8 +165,8 @@ A instanciação e o gerenciamento do ciclo de vida dos `Worker`s e dos `QueueCl
     *   Um serviço como `AgentLifecycleService` (no processo principal do Electron):
         1.  Carrega as configurações ativas de `AIAgent`.
         2.  Para cada `AIAgent`:
-            a.  Obtém a instância de `IJobRepository` do container DI.
-            b.  Cria uma instância de `QueueClient`, passando o `queueName` do agente e o `IJobRepository`.
+            a.  Obtém a instância de `IQueueRepository` do container DI.
+            b.  Cria uma instância de `QueueClient`, passando o `queueName` do agente e o `IQueueRepository`.
             c.  Obtém a instância do `IAIAgentExecutionService` do container DI.
             d.  Chama um método no `IAIAgentExecutionService` (ex: `getJobProcessorForAgent(agentIdOuConfig)`) para obter a função `jobProcessor` específica.
             e.  Cria (instancia) um `Worker`, passando um `workerId` único, a instância de `QueueClient`, a função `jobProcessor`, e o `LoggerService` (de DI).
