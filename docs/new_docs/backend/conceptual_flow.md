@@ -2,53 +2,51 @@
 
 Este documento descreve o ciclo de vida típico de um `Job` (Atividade) dentro do Project Wiz, delineando como diferentes componentes do backend interagem em alto nível para processar tarefas. Um "Agente" aqui se refere à lógica autônoma que utiliza uma configuração de "Persona" para interagir com um LLM.
 
-1.  **Interação do Usuário e Decisão de Criação de Job pelo Agente:**
-    *   O usuário interage com um Agente (atuando com uma configuração de `Persona`) através da interface frontend, descrevendo uma necessidade, objetivo ou solicitando uma tarefa complexa.
-    *   O Agente, utilizando sua `Persona Core Logic` em conjunto com o `LLM`, analisa a solicitação do usuário.
-    *   Com base nessa análise, o Agente decide se um ou mais `Jobs` são necessários para atender ao pedido. Se sim, o próprio Agente define os detalhes destes `Jobs` (ex: tipo de tarefa, `Input Data/Payload` inicial derivado da conversa, dependências potenciais com outros `Jobs` que ele gerencia, `parent_job_id` se for um sub-job de um Job maior do próprio Agente). O `Job` é atribuído ao próprio Agente que o criou.
+1.  **Interação do Usuário e Análise Inicial pelo Agente:**
+    *   O usuário interage com um Agente (atuando com uma `Persona`) via frontend, descrevendo uma necessidade ou objetivo.
+    *   O Agente, usando sua `Persona Core Logic` e o `LLM`, analisa a solicitação para entender a intenção e os requisitos principais.
 
-2.  **Enfileiramento (Inspirado no BullMQ):**
-    *   O(s) `Job`(s) criado(s) pelo Agente são submetidos ao Sistema de Gerenciamento de Jobs/Atividades (`Queue`).
-    *   A `Queue`, projetada para robustez (ex: com persistência baseada em SQLite), armazena o `Job` com todos os seus detalhes. Define o status inicial (ex: "pendente" ou "aguardando" se existirem dependências).
-    *   A `Queue` gerencia dependências de `Jobs`, retentativas (retries), agendamento potencial e emite eventos sobre mudanças de status. A prioridade pode ser influenciada por Agentes interagindo com seus próprios `Jobs`.
+2.  **Planejamento, Definição de Pronto e Proposta ao Usuário:**
+    *   O Agente define uma `working-directory` isolada para o trabalho, potencialmente usando `GitTools` para clonar um repositório ou fazer checkout de um branch específico, se aplicável.
+    *   O Agente elabora um plano de alto nível, que pode incluir a decomposição da solicitação em múltiplos `Sub-Jobs` (que serão `Jobs` formais com `parent_job_id`).
+    *   Crucialmente, o Agente define os `validationCriteria` (Definição de Pronto) para o `Job` principal (ou para o conjunto de `Sub-Jobs`) ANTES de iniciar a execução detalhada.
+    *   **Ponto de Verificação com o Usuário:** O Agente apresenta seu plano e a Definição de Pronto ao usuário via chat: "Entendi que você precisa X. Meu plano é Y, que envolverá os seguintes Sub-Jobs: Y1, Y2. O resultado final será Z, conforme estes critérios. Você aprova esta abordagem?"
+    *   O usuário aprova ou sugere modificações. Se aprovado, o Agente prossegue.
 
-3.  **Agente (Worker) Solicita Job da Fila:**
-    *   Cada Agente executa seu próprio loop de processamento assíncrono (sua instância "Worker"). Neste loop, o Agente ativamente solicita à `Queue` por `Jobs` que lhe foram atribuídos e que estão elegíveis para execução (dependências cumpridas, não agendados para futuro, etc.).
-    *   A concorrência em nível de sistema é alcançada através de múltiplos Agentes operando seus loops de forma independente e simultânea.
+3.  **Criação e Enfileiramento de Jobs/Sub-Jobs:**
+    *   Com base no plano aprovado, o Agente cria formalmente o `Job` principal e/ou os `Sub-Jobs` necessários, preenchendo seus detalhes (tipo, payload inicial, `depends_on_job_ids` entre Sub-Jobs, `parent_job_id`).
+    *   Esses `Jobs` são submetidos pelo Agente à `Queue` (Sistema de Gerenciamento de Jobs). A `Queue` (inspirada no BullMQ, com persistência SQLite) os armazena e gerencia suas dependências e status.
 
-4.  **Carregamento de Contexto pelo Agente:**
-    *   Ao receber um `Job` da Fila, o Agente carrega:
-        *   **`AgentInternalState`:** Sua memória global e persistente, incluindo seus objetivos gerais, aprendizados passados, uma lista de todas as suas atividades (`Jobs`), e conhecimento acumulado.
-        *   **`ActivityContext`:** O contexto específico para *este* `Job`, incluindo o input inicial, o histórico de mensagens/interações desta tarefa (ex: `CoreMessages`), e quaisquer passos de planejamento ou resultados parciais anteriores.
+4.  **Agente (Worker) Solicita e Processa Job/Sub-Job da Fila:**
+    *   O Agente (atuando em seu loop "Worker") solicita à `Queue` o próximo `Job` ou `Sub-Job` elegível que lhe foi atribuído.
+    *   Ao receber um `Job/Sub-Job`, o Agente carrega seu `AgentInternalState` e o `ActivityContext` específico daquele `Job/Sub-Job` (incluindo histórico de mensagens, se for uma continuação).
 
-5.  **Raciocínio e Planejamento (Interação LLM via Persona):**
-    *   O Agente, utilizando seu `AgentInternalState` carregado e o `ActivityContext` do `Job` atual, formula um prompt para a `Persona` configurada. Este prompt instrui o Modelo de Linguagem Amplo (LLM) associado à `Persona`.
-    *   A interação com o LLM visa: entender o objetivo do `Job`, decompô-lo em passos gerenciáveis (planejamento), definir `validationCriteria` (Definição de Pronto para a tarefa), ou decidir a próxima `Task` ou uso de `Tool` imediato.
+5.  **Raciocínio e Planejamento Detalhado (LLM via Persona):**
+    *   Para o `Job/Sub-Job` atual, o Agente formula um prompt para o `LLM` (usando a `Persona` configurada), visando detalhar os passos de execução, identificar `Tools` a serem usadas, ou gerar artefatos parciais.
 
-6.  **Execução de Task/Tool:**
-    *   Com base na resposta do LLM (moldada pela `Persona`), o Agente seleciona e aciona:
-        *   Uma **`Task`**: Um objetivo específico ou prompt refinado direcionado ao LLM, que pode envolver planejamento adicional ou invocação direta de `Tool` pelo LLM.
-        *   Uma **`Tool`**: Uma capacidade pré-desenvolvida (ex: acesso a arquivos, execução de código, comunicação com outro Agente através de uma `SendMessageToAgentTool`).
-    *   Se a execução de uma `Tool` falhar, este erro é capturado no `ActivityContext`. O Agente pode decidir tentar novamente, usar uma `Tool` alternativa ou marcar o `Job` como falho com base nisso.
+6.  **Execução de Task/Tool (Dentro da `working-directory`):**
+    *   O Agente, instruído pelo `LLM`, executa `Tasks` (objetivos/prompts para o LLM) e `Tools` (ex: `readFileTool`, `writeFileTool`, `executeTerminalCommandTool`, `searchAndReplaceInFileTool`, `applyDiffTool`, `GitTools` como `gitAddTool`, `gitCommitTool`).
+    *   Todas as operações de arquivo e comandos são executados no contexto da `working-directory` do `Job` principal.
+    *   Falhas em `Tools` são capturadas; o Agente pode tentar novamente, usar alternativas, ou se encontrar dificuldades persistentes, aplicar "regras de ouro" (dividir o problema, reavaliar, ou pedir ajuda ao usuário como último recurso).
 
 7.  **Atualização de Contexto:**
-    *   Após cada execução (ou tentativa de execução) de `Task`/`Tool`, o Agente atualiza o `ActivityContext` para o `Job` atual.
-    *   Isso inclui resultados, erros encontrados, logs de ações tomadas, novas informações aprendidas e progresso em direção ao objetivo do `Job`. Este contexto atualizado, incluindo o histórico de mensagens, é usado para interações subsequentes com o LLM.
+    *   Resultados, erros, logs e aprendizados são registrados no `ActivityContext` do `Job/Sub-Job`. Informações relevantes podem ser promovidas ao `AgentInternalState` (conhecimento geral ou específico do projeto).
 
-8.  **Iteração e Replanejamento:**
-    *   O Agente avalia o `ActivityContext` atualizado e seu plano geral.
-    *   Se o objetivo principal do `Job` ainda não foi alcançado, ou se um passo falhou e uma nova abordagem é necessária, o Agente repete os passos 5 (Raciocínio/Planejamento), 6 (Execução de `Task`/`Tool`) e 7 (Atualização de Contexto). Este loop iterativo continua enquanto o Agente trabalha em seu plano.
+8.  **Iteração e Replanejamento (para o `Job/Sub-Job` atual):**
+    *   O Agente continua o ciclo de Raciocínio/Planejamento, Execução e Atualização de Contexto até que o objetivo do `Job/Sub-Job` atual seja alcançado.
 
-9.  **Auto-Validação (Self-Validation):**
-    *   Antes de considerar um `Job` completo, o Agente (guiado por sua `Persona`/LLM) pode realizar um passo de auto-validação usando os `validationCriteria` definidos no `ActivityContext`.
-    *   O `validationResult` é registrado. Se a validação falhar, o Agente pode retornar ao passo 8 (Iteração e Replanejamento) para corrigir as deficiências.
+9.  **Auto-Validação do `Job/Sub-Job`:**
+    *   Ao final de cada `Sub-Job` (ou do `Job` principal, se não houver decomposição), o Agente realiza a auto-validação contra os `validationCriteria` definidos para ele.
+    *   Se falhar, retorna ao passo de replanejamento/correção para aquele `Job/Sub-Job`.
 
-10. **Conclusão/Atualização de Status do Job:**
-    *   Uma vez que o Agente determina que os objetivos do `Job` foram atendidos (e a auto-validação foi bem-sucedida), ou se encontra um erro irrecuperável (ex: máximo de retentativas atingido, falha crítica de `Tool`, loop de planejamento insolúvel), ele finaliza o `Job`.
-    *   O Agente atualiza o status final do `Job` na `Queue` (ex: "finished", "failed") e armazena o resultado detalhado, incluindo quaisquer erros, no `ActivityContext` e potencialmente em logs.
+10. **Conclusão e Atualização de Status na Fila:**
+    *   Após a conclusão bem-sucedida (e validada) de um `Job` ou `Sub-Job`, o Agente atualiza seu status na `Queue` para "finished". Se falhar de forma irrecuperável, atualiza para "failed".
 
-11. **Armazenamento de Resultados e Notificação:**
-    *   O output final, artefatos ou resultados do `ActivityContext` são disponibilizados.
-    *   A `Queue` emite um evento para o status final do `Job`, que pode acionar notificações para o usuário através do frontend ou para outros sistemas/Agentes dependentes.
+11. **Entrega de Resultados e Notificação (para o Job Principal):**
+    *   Quando o `Job` principal (e todos os seus `Sub-Jobs` dependentes) são concluídos:
+        *   O Agente usa `GitTools` para commitar as alterações realizadas na `working-directory` em um novo branch (ex: `feature/refatoracao-modulo-xyz`).
+        *   Opcionalmente (configurável), o Agente pode fazer push do novo branch para o repositório remoto.
+        *   O Agente notifica o usuário (via chat no Frontend) sobre a conclusão, informando o nome do branch, um resumo das alterações, e o resultado da auto-validação. Pode também oferecer um `diff` das alterações.
+    *   O `ActivityContext` final e os artefatos são armazenados. A `Queue` emite eventos que atualizam a UI.
 
-Este ciclo de vida enfatiza uma abordagem centrada no Agente, onde cada Agente gerencia autonomamente seu fluxo de trabalho usando sua `Persona` configurada para interagir com LLMs e `Tools`, tudo orquestrado através de uma robusta Fila de `Jobs`.
+Este ciclo de vida enfatiza a autonomia do Agente no planejamento e execução, a importância da `working-directory` para operações de código, a decomposição de tarefas em `Sub-Jobs`, e a entrega de valor através de práticas Git.

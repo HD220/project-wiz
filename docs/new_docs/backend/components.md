@@ -3,24 +3,26 @@
 Este documento descreve os principais componentes conceituais do backend do Project Wiz, focando em suas responsabilidades primárias e funções no processo de desenvolvimento de software autônomo. Estas descrições são de alto nível e não mergulham em tecnologias de implementação específicas.
 
 -   **Lógica Central da Persona (Agente Autônomo) / `Persona Core Logic`:**
-    -   **Responsabilidade:** Esta é a lógica autônoma central que *utiliza* uma configuração de `Persona` para instruir um Modelo de Linguagem Amplo (LLM) e gerenciar a execução dos `Jobs` (Atividades) atribuídos. É responsável por todo o ciclo de vida de um `Job`, desde a compreensão dos objetivos até o planejamento, execução via `Tools` e auto-validação.
+    -   **Responsabilidade:** Esta é a lógica autônoma central que *utiliza* uma configuração de `Persona` para instruir um Modelo de Linguagem Amplo (LLM) e gerenciar a execução dos `Jobs` (Atividades) que o próprio Agente cria para si. É responsável por todo o ciclo de vida de um `Job`, desde a análise da solicitação do usuário, planejamento (incluindo a "Definição de Pronto" antecipada e a possível decomposição em `Sub-Jobs`), gerenciamento de uma `working-directory` (incluindo interações Git via `GitTools`), execução de `Tasks` via `Tools`, e auto-validação. Aplica estratégias de resolução de problemas (ex: "dividir para conquistar", reavaliação, pedir ajuda ao usuário como último recurso).
     -   **Funções Chave:**
-        -   Carrega e sintetiza sua memória de longo prazo (`AgentInternalState`) com o contexto dinâmico e específico do `Job` atual (`ActivityContext`, incluindo histórico conversacional como `CoreMessages`).
-        -   Interage com LLMs (através do `LLM Integration Point`) usando o prompt de sistema da `Persona` configurada, seus objetivos e `Tools` disponíveis para raciocinar, planejar, resolver problemas e gerar conteúdo ou código.
-        -   Define dinamicamente `validationCriteria` (Definição de Pronto) para um `Job` como parte de sua fase de planejamento.
-        -   Seleciona e aciona `Tasks` apropriadas (ou seja, formula objetivos/prompts para o LLM) ou solicita diretamente a execução de `Tools`.
-        -   Atualiza continuamente o `ActivityContext` com progresso, resultados de `Tools`, respostas do LLM, erros e logs. Isso inclui promover aprendizados relevantes do `ActivityContext` para o `AgentInternalState`.
-        -   Realiza auto-validação contra `validationCriteria` antes de marcar um `Job` como concluído.
+        -   Interpreta solicitações do usuário (via LLM) e decide sobre a criação de `Jobs` e `Sub-Jobs`.
+        -   Carrega e sintetiza sua memória de longo prazo (`AgentInternalState` geral e específico do projeto) com o contexto dinâmico do `Job` atual (`ActivityContext`, incluindo histórico conversacional).
+        -   Interage com LLMs (via `LLM Integration Point`) usando o prompt de sistema da `Persona`, seus objetivos e `Tools` disponíveis para raciocinar, planejar (incluindo a criação de `Sub-Jobs` e suas dependências), definir `validationCriteria` (Definição de Pronto) para o `Job` principal e para `Sub-Jobs`.
+        -   Gerencia uma `working-directory` para operações de arquivo e interações com `GitTools` (clone, checkout, commit, push, etc.).
+        -   Seleciona e aciona `Tasks` apropriadas ou solicita diretamente a execução de `Tools` (como `readFileTool`, `writeFileTool`, `searchAndReplaceInFileTool`, `applyDiffTool`, `executeTerminalCommandTool`, `findFilesByNameTool`, `searchInFileContentTool`).
+        -   Atualiza continuamente o `ActivityContext` com progresso, resultados de `Tools`, respostas do LLM, erros e logs.
+        -   Promove aprendizados relevantes do `ActivityContext` para o `AgentInternalState` (distinguindo entre conhecimento geral e específico do projeto).
+        -   Realiza auto-validação contra `validationCriteria` antes de marcar um `Job` (ou Sub-Job) como concluído.
         -   Determina a conclusão do `Job` (sucesso ou falha após retentativas/tratamento de erro).
         -   Pode se comunicar com outros Agentes ou com o usuário através de `Tools` específicas (ex: `SendMessageToAgentTool`).
 
 -   **Sistema de Gerenciamento de Jobs/Atividades (Fila) / `Job/Activity Management System (Queue)`:**
-    -   **Responsabilidade:** Gerencia o ciclo de vida de `Jobs` com funcionalidades robustas inspiradas em sistemas como BullMQ, atuando como um intermediário central de tarefas.
+    -   **Responsabilidade:** Gerencia o ciclo de vida de `Jobs` e `Sub-Jobs` com funcionalidades robustas inspiradas em sistemas como BullMQ, atuando como um intermediário central de tarefas.
     -   **Funções Chave:**
-        -   Persiste definições de `Jobs` (incluindo dados de entrada, Agente/`Persona` atribuído, dependências, status) usando SQLite.
-        -   Lida com transições de status de `Jobs` (ex: `pending`, `waiting`, `executing`, `delayed`, `finished`, `failed`).
-        -   Gerencia dependências de `Jobs` (relações `depends_on_job_ids` e `parent_job_id`).
-        -   Suporta mecanismos de retentativa configuráveis para `Jobs` falhos.
+        -   Persiste definições de `Jobs` (incluindo dados de entrada, Agente/`Persona` criador, dependências, status, `parent_job_id`) usando SQLite.
+        -   Lida com transições de status de `Jobs`.
+        -   Gerencia dependências complexas entre `Jobs` e `Sub-Jobs`, assegurando a ordem correta de execução.
+        -   Suporta mecanismos de retentativa configuráveis.
         -   Permite `Jobs` agendados ou atrasados.
         -   Emite eventos sobre mudanças de status, permitindo que componentes reativos respondam.
         -   Responde às solicitações dos Agentes (Workers), entregando o próximo `Job` elegível; os Agentes também podem usar `Tools` para interagir com `Jobs` na `Queue` (ex: para ajustar prioridades de sub-tasks).
@@ -46,9 +48,9 @@ Este documento descreve os principais componentes conceituais do backend do Proj
 -   **Framework/Registro de Ferramentas (Tools) / `Tool Framework/Registry`:**
     -   **Responsabilidade:** Fornece uma coleção de `Tools` pré-desenvolvidas e bem definidas (funções dentro do código fonte da aplicação) que são expostas ao LLM via um AI SDK, permitindo que o LLM (conforme direcionado pela `Persona`) escolha e solicite sua execução.
     -   **Funções Chave:**
-        -   Torna as `Tools` descobríveis e utilizáveis pelo LLM, tipicamente fornecendo suas descrições, parâmetros e formatos de saída esperados para o AI SDK.
-        -   Cada `Tool` realiza uma ação específica e discreta (ex: `ReadFileTool`, `WriteToDBTool`, `SendMessageToAgentTool`, `PostToProjectChannelTool`).
-        -   O framework garante que, quando um LLM solicita uma `Tool`, o código da aplicação correspondente seja executado de forma segura com os argumentos fornecidos.
+        -   Torna as `Tools` descobríveis e utilizáveis pelo LLM, tipicamente fornecendo suas descrições, parâmetros (com tipos e obrigatoriedade) e formatos de saída esperados para o AI SDK.
+        *   Cada `Tool` realiza uma ação específica e discreta (ex: `readFileTool`, `writeFileTool`, `executeTerminalCommandTool`, `gitCloneTool`, `gitCheckoutBranchTool`, `gitAddTool`, `gitCommitTool`, `gitCreateBranchTool`, `gitPushTool`, `searchAndReplaceInFileTool`, `applyDiffTool`, `findFilesByNameTool`, `searchInFileContentTool`, `SendMessageToAgentTool`, `PostToProjectChannelTool`).
+        *   O framework garante que, quando um LLM solicita uma `Tool`, o código da aplicação correspondente seja executado de forma segura com os argumentos fornecidos, operando dentro da `working-directory` do `Job` quando aplicável.
 
 -   **Subsistema de Gerenciamento de Estado / `State Management Subsystem`:**
     -   **Responsabilidade:** Lida com a persistência e recuperação robustas do `AgentInternalState` (a memória de longo prazo e conhecimento evolutivo do Agente) e do `ActivityContext` (o histórico conversacional dinâmico por `Job` e dados operacionais), primariamente usando SQLite.

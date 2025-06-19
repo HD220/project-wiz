@@ -34,8 +34,9 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
         -   Dados de Saída/Resultado: Informações/artefatos gerados.
         -   Marcas de tempo de Criação/Atualização.
         -   Máximo de Tentativas, Tentativas Atuais para retentativas.
-        -   `depends_on_job_ids`: Uma lista de outros IDs de `Job` que devem ser concluídos antes que este `Job` possa começar, habilitando o gerenciamento de dependências.
-        -   `parent_job_id`: Um identificador para um `Job` pai, se este `Job` faz parte de uma decomposição hierárquica de tarefa maior.
+        -   `depends_on_job_ids`: Uma lista de IDs de outros `Jobs` dos quais este `Job` depende. Essencial para a execução ordenada de `Sub-Jobs` ou `Jobs` sequenciais.
+        -   `parent_job_id`: O ID do `Job` principal se este for um `Sub-Job`, permitindo a rastreabilidade e o agrupamento de tarefas decompostas.
+        -   `working_directory_path` (Opcional): Caminho para um diretório de trabalho isolado que o `Agente` pode usar para este `Job` específico (ex: para checkout de código, criação de arquivos temporários).
 
 -   **ActivityContext:**
     -   **Propósito:** Contém informações contextuais específicas e dinâmicas para uma única instância de `Job` ativa sendo processada por um `Agente`. Guia o LLM (através da configuração da `Persona`) em seu fluxo de execução e tomada de decisão para aquele `Job`. Este contexto é continuamente atualizado conforme o `Job` progride.
@@ -51,22 +52,27 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
         -   Anotações ou informações chave deste `Job` que podem ser consideradas importantes o suficiente pelo `Agente` para serem promovidas ao seu `AgentInternalState` para recordação a longo prazo.
 
 -   **AgentInternalState:**
-    -   **Propósito:** Representa a memória persistente de médio a longo prazo e o estado evolutivo de um `Agente` (a lógica subjacente que utiliza uma configuração de `Persona`). Isso permite que um `Agente` mantenha continuidade, aprenda com interações passadas através de múltiplos `Jobs` e aplique um contexto mais amplo às suas tarefas.
+    -   **Propósito:** Representa a memória persistente de médio a longo prazo e o estado evolutivo de um `Agente` (a lógica subjacente que utiliza uma configuração de `Persona`). Isso permite que um `Agente` mantenha continuidade, aprenda com interações passadas através de múltiplos `Jobs` e aplique um contexto mais amplo às suas tarefas. Este estado é crucial para o aprendizado contínuo e adaptação do Agente.
     -   **Atributos/Dados Chave:**
         -   ID do `Agente` ao qual pertence.
         -   ID do `Project` atual e/ou ID da Issue em que o `Agente` pode estar focado.
         -   Meta ou diretiva geral de alto nível atual para o `Agente`.
-        -   Uma lista ou referência a todas as `Activities` (`Jobs`) gerenciadas ou processadas por este `Agente`, permitindo que ele entenda sua própria carga de trabalho e histórico.
-        -   Uma coleção de "promessas" ou compromissos feitos pelo `Agente` (ao usuário ou a outros Agentes).
-        -   Notas gerais, conhecimento acumulado e insights destilados (aprendizados) coletados pelo `Agente` de `ActivityContexts` anteriores ou interações diretas.
-        -   Este estado fornece contexto contínuo ao `Agente`, diferenciando-o do `ActivityContext` por `Job`.
+        -   Uma lista ou referência a todas as `Activities` (`Jobs`) gerenciadas ou processadas por este `Agente`.
+        -   Uma coleção de "promessas" ou compromissos feitos pelo `Agente`.
+        -   **Conhecimento Geral:** Notas, heurísticas, aprendizados sobre processos, `Tools` eficazes para certos tipos de `Tasks`, etc., que são aplicáveis independentemente do projeto.
+        *   **Conhecimento por Projeto (`conocimientoPorProjeto: Map<ProjectId, ProjectKnowledge>`):** Um mapa onde a chave é o ID de um `Project` e o valor é um objeto (`ProjectKnowledge`) contendo informações específicas daquele projeto, como:
+            *   Arquitetura do projeto, tecnologias chave.
+            *   Preferências de estilo de código específicas do projeto.
+            *   Resumos de módulos ou arquivos importantes (ex: "o `modulo.py` lida com X e Y").
+            *   Decisões de design anteriores ou feedback do usuário específico para aquele projeto.
+        -   Este estado fornece contexto contínuo ao `Agente`, diferenciando-o do `ActivityContext` por `Job`, e permite um aprendizado mais granular e contextualizado.
 
 -   **Tool:**
-    -   **Propósito:** Uma função ou capacidade específica, pré-desenvolvida dentro do código fonte do Project Wiz, que um `Agente` (através de seu LLM) pode solicitar que seja executada para realizar tarefas ou interagir com seu ambiente.
+    -   **Propósito:** Uma função ou capacidade específica, pré-desenvolvida dentro do código fonte do Project Wiz, que um `Agente` (através de seu LLM) pode solicitar que seja executada para realizar tarefas ou interagir com seu ambiente. As `Tools` são os "braços e mãos" do Agente.
     -   **Atributos/Dados Chave:**
-        -   Nome da `Tool` (ex: `ReadFileTool`, `CommitToGitRepoTool`, `SendMessageToAgentTool`, `PostToProjectChannelTool`).
-        -   Descrição de suas capacidades, parâmetros de entrada e formato de saída esperado (esta informação é tipicamente fornecida ao LLM através de um AI SDK para que ele saiba como e quando usar a `Tool`).
-        -   O código real que implementa a lógica da `Tool`.
+        *   Nome da `Tool` (ex: `readFileTool`, `writeFileTool`, `executeTerminalCommandTool`, `gitCloneTool`, `gitCheckoutBranchTool`, `gitAddTool`, `gitCommitTool`, `gitCreateBranchTool`, `gitPushTool`, `searchAndReplaceInFileTool`, `applyDiffTool`, `findFilesByNameTool`, `searchInFileContentTool`, `SendMessageToAgentTool`, `PostToProjectChannelTool`).
+        *   Descrição de suas capacidades, parâmetros de entrada (com tipos e obrigatoriedade) e formato de saída esperado. Esta informação é crucial e é tipicamente fornecida ao LLM através de um AI SDK para que ele saiba como e quando usar a `Tool` corretamente.
+        *   O código real que implementa a lógica da `Tool`, interagindo com o sistema de arquivos, APIs externas, ou outros componentes do Project Wiz.
 
 -   **Task:**
     -   **Propósito:** Representa um objetivo específico ou um prompt focado que a lógica interna do `Agente` direciona ao LLM (configurado pela `Persona`). O LLM então tenta alcançar esta `Task`, frequentemente planejando e utilizando `Tools` disponíveis. Uma `Task` não é uma sequência pré-codificada de `Tools`, mas sim o objetivo para o qual o LLM trabalha.

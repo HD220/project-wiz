@@ -33,8 +33,8 @@ O Project Wiz oferece aos usuários uma gama de funcionalidades para gerenciar e
 *   **Gerenciar Projetos:** Centralizar e supervisionar projetos de software dentro da aplicação.
 *   **Criar e Configurar Personas:** Definir, personalizar e gerenciar Personas de IA (que configuram como um LLM subjacente se comportará) com papéis, objetivos, históricos (backstories), configurações de LLM e `Tools` habilitadas específicas.
 *   **Solicitar Tarefas e Projetos às Personas:** Iniciar trabalhos e delegar tarefas complexas através da interação conversacional com as Personas. Estas, por sua vez, criam e gerenciam seus próprios `Jobs` (unidades de trabalho internas) para atender às solicitações, podendo definir dependências entre eles e influenciar suas prioridades.
-*   **Interagir com Personas:** Comunicar-se com Personas (e potencialmente testemunhar a comunicação inter-Persona) através de uma interface de chat para fornecer instruções, esclarecer requisitos, receber atualizações e colaborar em tarefas.
-*   **Monitorar o Progresso:** Acompanhar o status dos `Jobs` criados pelas Personas, revisar os resultados e monitorar o desempenho das Personas de IA e do sistema como um todo.
+*   **Interagir com Personas:** Comunicar-se com Personas (e potencialmente testemunhar a comunicação inter-Persona) através de uma interface de chat para fornecer instruções, aprovar planos de ação, esclarecer requisitos, receber atualizações e colaborar em tarefas.
+*   **Monitorar o Progresso e Revisar Resultados:** Acompanhar o status dos `Jobs` criados pelas Personas, revisar os resultados (ex: código, documentação, relatórios de teste) e, quando aplicável, analisar as alterações propostas em branches Git dedicadas.
 *   **Configurar LLMs:** Definir parâmetros para os Modelos de Linguagem Amplos (LLMs) que potencializam as Personas.
 
 ## Key Technologies

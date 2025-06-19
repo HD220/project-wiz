@@ -13,6 +13,7 @@ O propósito deste documento é realizar uma análise crítica da documentação
     *   A inclusão da lista de "Key Technologies" em `docs/new_docs/application/overview.md` é um ponto positivo, fornecendo um entendimento rápido da stack tecnológica base.
 
 *   **Áreas para Melhoria/Questões:**
+    *(Nota: Algumas das questões levantadas abaixo podem ter sido parcial ou totalmente endereçadas nas versões mais recentes dos documentos conceituais principais em `docs/new_docs/application/`, `frontend/` e `backend/` após esta análise inicial.)*
     *   **Dinâmica de Descoberta e Uso de Tools:** Como as `Tools` são efetivamente descobertas ou registradas no sistema? De que forma a `Persona Core Logic` (AutonomousAgent) decide qual `Tool` específica é a mais adequada para uma determinada `Task`? O `Tool Framework/Registry` é mencionado, mas a dinâmica dessa interação e decisão poderia ser mais explorada conceitualmente.
     *   **Comunicação Frontend-Backend:** Mesmo se tratando de uma aplicação Electron local, a interface de comunicação entre o `Frontend` e o `Backend` não é explicitada. Como as ações do usuário na UI (descritas em `frontend/user_interactions.md`) efetivamente disparam processos e fluxos no backend (como a criação de um `Job` descrito em `backend/conceptual_flow.md`)?
     *   **Persistência e Gerenciamento de Estado Detalhado:** São necessários mais detalhes sobre a persistência do `ActivityContext` e do `AgentInternalState`. O `entities.md` sugere que `AgentInternalState` é por `Persona` e `ActivityContext` é por `Job`, o que é uma boa distinção. No entanto, como o `AgentInternalState` global de uma `Persona` é acessado e atualizado por diferentes `Jobs` (possivelmente concorrentes ou sequenciais) atribuídos à mesma `Persona`? Questões sobre a dinâmica de atualização, versionamento ou concorrência desse estado seriam pertinentes.
@@ -26,6 +27,7 @@ O propósito deste documento é realizar uma análise crítica da documentação
     *   A distinção e o propósito do `AgentInternalState` versus `ActivityContext` são claros e positivos para o desenvolvimento.
 
 *   **Áreas para Melhoria/Questões:**
+    *(Nota: Algumas das questões levantadas abaixo podem ter sido parcial ou totalmente endereçadas nas versões mais recentes dos documentos conceituais principais em `docs/new_docs/application/`, `frontend/` e `backend/` após esta análise inicial.)*
     *   **Interação Task Execution System e Tool Framework:** Qual a relação exata entre uma `Task` e uma `Tool`? Uma `Task` é uma sequência predefinida de `Tools`, ou representa uma camada de abstração mais elevada que pode orquestrar `Tools` de forma mais dinâmica? Como um desenvolvedor backend criaria uma nova `Task` ou uma nova `Tool` e como ela seria integrada e reconhecida pelo sistema?
     *   **Detalhes do LLM Integration Point:** Que tipo de padronização ou abstração o `LLM Integration Point` oferece? Limita-se ao envio de prompts e recebimento de respostas, ou envolve uma orquestração mais complexa, como o gerenciamento automático de histórico de conversas para otimizar interações com o `LLM` ou a seleção de modelos?
     *   **Estrutura e Validação do Payload de Jobs:** Como o `Input Data/Payload` de um `Job` é estruturado? Existe um esquema definido? Como ele é validado na entrada do sistema? (Zod é mencionado na seção de tecnologias, mas sua aplicação no fluxo de dados do `Job` não está clara na documentação conceitual).
@@ -38,6 +40,7 @@ O propósito deste documento é realizar uma análise crítica da documentação
     *   A clareza sobre a inspiração no Discord e o foco no usuário único, como mencionado em `docs/new_docs/application/overview.md`, ajuda a contextualizar o design da UI.
 
 *   **Áreas para Melhoria/Questões:**
+    *(Nota: Algumas das questões levantadas abaixo podem ter sido parcial ou totalmente endereçadas nas versões mais recentes dos documentos conceituais principais em `docs/new_docs/application/`, `frontend/` e `backend/` após esta análise inicial.)*
     *   **Gerenciamento de Estado da UI e Eventos do Backend:** Como o estado da interface do usuário é gerenciado, especialmente em relação a eventos assíncronos originados no backend (por exemplo, a atualização em tempo real do status de um `Job` na lista de tarefas)?
     *   **Componentes de UI Específicos:** Além da utilização de bibliotecas como shadcn/ui (inferido pela menção a "UI Components (inspired by shadcn/ui)" nas tecnologias), existem componentes de UI reutilizáveis que são específicos do Project Wiz? A documentação atual não entra nesse nível de detalhe, o que é esperado para documentos conceituais, mas seria uma pergunta natural de um desenvolvedor frontend.
     *   **Configuração de Personas na UI e Segurança:** Como as configurações avançadas de `Personas` (modelos de `LLM`, `Tools` habilitadas) são gerenciadas e refletidas na UI? Como o usuário gerencia informações sensíveis (como chaves de acesso para `LLMs`) de forma segura através da interface?
@@ -50,6 +53,7 @@ O propósito deste documento é realizar uma análise crítica da documentação
     *   As entidades de aplicação descritas em `docs/new_docs/application/entities.md` são apresentadas de forma compreensível.
 
 *   **Áreas para Melhoria/Questões:**
+    *(Nota: Algumas das questões levantadas abaixo podem ter sido parcial ou totalmente endereçadas nas versões mais recentes dos documentos conceituais principais em `docs/new_docs/application/`, `frontend/` e `backend/` após esta análise inicial.)*
     *   **Métricas de Sucesso e Monitoramento:** O projeto visa tornar o desenvolvimento "mais rápido e eficiente". Como o sistema planeja medir ou permitir o acompanhamento dessa eficiência ou produtividade? A documentação menciona "Analytics" na UI, mas não especifica o quê seria monitorado para validar os objetivos do produto.
     *   **Definição e Visualização de Prioridades e Dependências de Jobs:** O `Queue` gerencia prioridades e dependências. Como um usuário define esses atributos para um `Job` através da interface? Como ele visualiza a cadeia de dependências ou a fila de prioridades?
     *   **Colaboração entre Personas:** A documentação atual foca primariamente na interação entre o usuário humano e as `Personas`. Existe um conceito de `Personas` colaborando entre si em `Jobs` mais complexos ou multifacetados? Se sim, como essa colaboração seria orquestrada, gerenciada e visualizada pelo usuário?
@@ -63,6 +67,7 @@ O propósito deste documento é realizar uma análise crítica da documentação
     *   As interações de usuário descritas em `docs/new_docs/frontend/user_interactions.md` definem casos de uso que podem ser diretamente traduzidos em testes funcionais.
 
 *   **Áreas para Melhoria/Questões:**
+    *(Nota: Algumas das questões levantadas abaixo podem ter sido parcial ou totalmente endereçadas nas versões mais recentes dos documentos conceituais principais em `docs/new_docs/application/`, `frontend/` e `backend/` após esta análise inicial.)*
     *   **Tratamento e Apresentação de Erros:** Como os erros são tratados, propagados através das camadas do sistema e, finalmente, apresentados ao usuário? Isso inclui tanto erros na execução de um `Job` por uma `Persona` quanto erros gerais da aplicação.
     *   **Critérios de Validação para Jobs:** O `ActivityContext` menciona `validationCriteria` e `validationResult`. Como esses critérios são definidos concretamente? Quem os define (o usuário ao criar o `Job`, a `Persona` durante o planejamento, ou são predefinidos para certos tipos de `Jobs`)? Como a validação é aplicada?
     *   **Testabilidade de Tools e Personas:** Como a funcionalidade de `Tools` individuais pode ser testada de forma isolada? Como se pode garantir que uma `Persona` está tomando decisões "corretas" ou esperadas dentro de um escopo de teste definido, especialmente considerando a natureza probabilística dos `LLMs`?

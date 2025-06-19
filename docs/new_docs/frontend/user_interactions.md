@@ -87,11 +87,14 @@ A interação direta com as Personas (Agentes) é o principal meio de iniciar e 
     *   A `Persona`, utilizando seu LLM configurado, analisa a solicitação do usuário.
     *   Com base nessa análise, a `Persona` pode decidir criar um ou mais `Jobs` para si mesma para atender ao pedido. Ela define os detalhes desses `Jobs`, como o tipo de tarefa, o "payload" (carga de dados) inicial (baseado na conversa), e possíveis dependências com outros `Jobs` que ela já esteja gerenciando.
     *   A UI não apresenta um formulário tradicional de "Criar Job"; a criação é uma consequência da interação inteligente com a `Persona`.
+    *   **Aprovação de Planos:** Após a `Persona` analisar a solicitação e planejar sua abordagem (incluindo a "Definição de Pronto" e possíveis `Sub-Jobs`), ela apresentará este plano ao usuário via chat. O usuário pode então aprovar, rejeitar ou pedir modificações no plano antes que a `Persona` inicie a execução principal.
 *   **Fornecendo Instruções e Contexto:**
     *   Dar instruções adicionais ou fornecer contexto para `Jobs` em andamento diretamente à `Persona` via chat.
     *   Pedir esclarecimentos sobre o progresso de um `Job` ou o plano de ação da `Persona`.
 *   **Recebendo Notificações e Resultados:**
-    *   Receber notificações, atualizações de status de `Jobs`, e resultados/artefatos diretamente das `Personas` no chat ou em canais de projeto.
+    *   Receber notificações sobre o progresso, conclusão ou falha de `Jobs`.
+    *   Para `Jobs` que envolvem modificações em código gerenciado por Git, a `Persona` informará o nome do branch onde as alterações foram commitadas (na `working-directory` local e opcionalmente no repositório remoto).
+    *   A `Persona` pode oferecer um resumo das alterações ou um `diff` textual via chat. O usuário pode então usar suas ferramentas Git padrão para revisar o branch e fazer o merge, se desejar.
 *   **Visibilidade da Comunicação Inter-Persona:** Usuários podem ter visibilidade (ex: em Canais de Projeto dedicados ou no Fórum do projeto) de comunicações relevantes entre diferentes `Personas`, caso elas estejam colaborando em tarefas complexas. As `Personas` utilizam `Tools` específicas para enviar mensagens a outros Agentes, postar em canais ou atualizar tópicos de fórum.
 *   **Respondendo a Solicitações da Persona:** `Personas` podem proativamente pedir ao usuário mais informações, clarificações sobre requisitos, ou aprovação para passos críticos durante a execução de um `Job`, tudo através da interface de chat.
 *   **Cancelando/Interrompendo Jobs:** O usuário pode, através de uma conversa com a `Persona` responsável ou por uma ação na UI (se disponível para `Jobs` em andamento), solicitar o cancelamento ou interrupção de um `Job`.
