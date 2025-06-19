@@ -12,11 +12,16 @@ const TYPES = {
   ILLMService: Symbol.for('ILLMService'),
   IToolRegistry: Symbol.for('IToolRegistry'),
   ILoggerService: Symbol.for('ILoggerService'),
+  IAgentLifecycleService: Symbol.for('IAgentLifecycleService'),
   // IQueueClient is not globally injected, but instantiated with parameters.
 
   // Casos de Uso
   EnqueueJobUseCase: Symbol.for('EnqueueJobUseCase'),
   CreateProjectUseCase: Symbol.for('CreateProjectUseCase'), // Assuming it will be needed
+
+  // Tools
+  FileSystemTool: Symbol.for('FileSystemTool'),
+  ExecuteCommandTool: Symbol.for('ExecuteCommandTool'),
 
   // Outras dependências específicas
   // DatabaseConnection: Symbol.for('DatabaseConnection'), // Example if direct DB access needed

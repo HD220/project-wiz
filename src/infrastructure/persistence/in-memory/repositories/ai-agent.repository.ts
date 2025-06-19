@@ -1,4 +1,4 @@
-// src/infrastructure/repositories/in-memory-ai-agent.repository.ts
+// src/infrastructure/persistence/in-memory/repositories/ai-agent.repository.ts
 import { IAIAgentRepository } from '@/domain/repositories/i-ai-agent.repository';
 import { AIAgent } from '@/domain/entities/ai-agent.entity';
 import { injectable } from 'inversify';
