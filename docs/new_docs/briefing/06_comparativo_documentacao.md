@@ -1,3 +1,7 @@
+---
+**Nota Histórica:** Este documento foi elaborado para comparar o estado da "Nova Documentação Conceitual" (em `docs/new_docs/`) após as rodadas iniciais de sua criação e refatoração, com a documentação original do projeto. A referência arquitetural principal e mais atualizada é o documento `../target_architecture.md`. Este comparativo pode não refletir o estado final de todos os documentos mencionados se eles continuaram a evoluir.
+---
+
 # Relatório de Comparação: Documentação Original vs. Nova Documentação Conceitual
 
 ## Introdução
@@ -56,4 +60,3 @@ A **Documentação Original (`docs/`)** contém informações valiosas, especial
 As duas documentações não são mutuamente exclusivas, mas sim **complementares**. A nova documentação pode servir como uma introdução conceitual e um guia de requisitos funcionais de alto nível, enquanto a documentação original pode ser consultada para detalhes técnicos de implementação, histórico de decisões e guias de uso mais profundos.
 
 O processo de criação da nova documentação também serviu para **explicitar e refinar muitos conceitos** que talvez estivessem implícitos ou menos detalhados na original, como a forma exata de criação de Jobs, o gerenciamento de Sub-Jobs, e a estrutura da memória do Agente.
-```

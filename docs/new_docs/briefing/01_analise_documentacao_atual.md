@@ -1,3 +1,7 @@
+---
+**Nota Histórica:** Este documento reflete discussões e análises de uma fase anterior do design conceitual do Project Wiz (aproximadamente em relação ao estado da documentação principal após as primeiras rodadas de criação). A referência arquitetural principal e mais atualizada é o documento `../target_architecture.md`. Consulte-o para a visão mais recente da arquitetura do sistema e como muitos dos pontos levantados aqui foram evoluindo.
+---
+
 # Análise Crítica da Documentação Conceitual do Project Wiz
 
 ## Introdução

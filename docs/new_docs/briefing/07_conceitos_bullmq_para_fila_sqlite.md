@@ -1,3 +1,7 @@
+---
+**Nota Histórica:** Este documento reflete discussões e análises sobre a adaptação dos conceitos do BullMQ para o Project Wiz, culminando na ideia de cada Agente/Persona operar sobre uma fila nomeada dedicada. A referência arquitetural principal e mais atualizada é o documento `../target_architecture.md`. Consulte-o para a visão mais recente da arquitetura do sistema de filas e demais componentes.
+---
+
 # Adaptação Conceitual de BullMQ para Sistema de Filas com SQLite no Project Wiz
 
 ## Introdução
@@ -81,4 +85,3 @@ Com base nos exemplos e explicações fornecidas, os seguintes aspectos do BullM
 ## Conclusão do Entendimento
 
 A ideia é adaptar a API e os conceitos do BullMQ para um sistema onde cada Agente gerencia sua própria fila nomeada (`queueName`) persistida em SQLite. O `QueueService` atuará como uma interface para esta persistência e para o registro de processadores pelos Agentes. Isso permite múltiplas filas no sistema (uma por Agente), mas cada Agente foca em sua própria lista de trabalho.
-```
