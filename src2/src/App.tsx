@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // Ajustar o caminho para os tipos, assumindo que App.tsx está em src2/src/
 import type { Job, NewJob } from '../core/domain/schemas';
 import './App.css'; // Se você tiver um App.css para estilização básica
@@ -6,26 +6,23 @@ import './App.css'; // Se você tiver um App.css para estilização básica
 function App() {
   const [message, setMessage] = useState<string>('Pronto.');
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
-  const [projectIdInput, setProjectIdInput] = useState<string>('project_default_123'); // ID do projeto para teste
 
   const handleAddJob = async () => {
-    // project_id é opcional, então pode ser null ou undefined se o input estiver vazio
-    const projectIdForJob = projectIdInput.trim() === '' ? null : projectIdInput.trim();
-
-    if (projectIdForJob === null) {
-      setMessage("Criando Job sem ID de Projeto específico.");
-      // Não precisa mais do return aqui, pois project_id pode ser nulo.
-    }
-
+    // project_id foi removido da jobsTable.
+    // Se um job está relacionado a um projeto, essa informação
+    // deve ser parte do payload ou data (ActivityContext).
     const jobData: NewJob = {
       name: 'Meu Job de Teste via UI ' + Date.now(),
-      project_id: projectIdForJob, // Pode ser null aqui
-      payload: { data: 'informação do job ' + Math.random().toString(36).substring(7) },
+      // project_id: null, // Removido do tipo NewJob implicitamente
+      payload: {
+        data: 'informação do job ' + Math.random().toString(36).substring(7),
+        // Se necessário, o ID do projeto iria aqui:
+        // for_project_id: 'algum_id_de_projeto_existente_se_precisar_validar_no_payload'
+      },
       priority: Math.floor(Math.random() * 10),
       persona_id: 'persona_test_ui',
-      // Outros campos usarão defaults do schema ou podem ser omitidos se opcionais no NewJob
     };
-    setMessage(`Adicionando job: ${jobData.name}${projectIdForJob ? ` para projeto ${projectIdForJob}` : ' (sem projeto específico)'}`);
+    setMessage(`Adicionando job: ${jobData.name}`);
     console.log('Enviando jobData:', jobData);
     try {
       const result = await window.electronAPI.queueAddJob(jobData);
@@ -45,6 +42,7 @@ function App() {
     setMessage('Buscando próximo job...');
     console.log('Chamando queueGetNextJob');
     try {
+      // O critério de personaId ainda é válido para buscar jobs de um agente específico
       const result = await window.electronAPI.queueGetNextJob({ personaId: 'persona_test_ui', excludedIds: currentJob ? [currentJob.id] : [] });
       console.log('Resultado de getNextJob:', result);
       if (result.success) {
@@ -106,20 +104,9 @@ function App() {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <h1>Teste do Sistema de Filas Project Wiz</h1>
-      <div style={{ marginBottom: '20px' }}>
-        <label htmlFor="projectIdInput" style={{ marginRight: '10px' }}>ID do Projeto (Opcional):</label>
-        <input
-          type="text"
-          id="projectIdInput"
-          value={projectIdInput}
-          onChange={(e) => setProjectIdInput(e.target.value)}
-          placeholder="Deixe em branco para Job sem projeto"
-          style={{padding: '5px'}}
-        />
-        <p><small>Nota: Se um ID de projeto for fornecido, ele precisa existir na tabela 'projects' do banco de dados devido à Foreign Key.</small></p>
-      </div>
+      {/* Removido input de projectId */}
       <div style={{ marginBottom: '10px' }}>
-        <button onClick={handleAddJob} style={{ marginRight: '10px', padding: '10px' }}>Adicionar Job de Teste</button>
+        <button onClick={handleAddJob} style={{ marginRight: '10px', padding: '10px' }}>Adicionar Job de Teste (sem project_id direto)</button>
         <button onClick={handleGetNextJob} style={{ padding: '10px' }}>Pegar Próximo Job (persona_test_ui)</button>
       </div>
       {currentJob && (
