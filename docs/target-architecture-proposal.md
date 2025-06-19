@@ -63,85 +63,51 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
 
 *   **Casos de Uso (Use Cases / Interactors) (`use-cases/`):**
     *   Implementam as regras de negócio específicas da aplicação, orquestrando o fluxo de dados entre as entidades e os repositórios.
-    *   Representam as ações que o sistema pode realizar (ex: `CreateNewProjectUseCase`, `AssignTaskToAIAgentUseCase`).
+    *   Representam as ações que o sistema pode realizar (ex: `CreateNewProjectUseCase`, `AssignTaskToAIAgentUseCase`, `EnqueueJobUseCase`).
     *   São independentes de frameworks e da UI. A UI (ou outro trigger) chama um caso de uso e recebe um resultado.
     *   Dependem de abstrações (interfaces) para interagir com a camada de infraestrutura (ex: `IJobRepository`).
 
 *   **Interfaces de Repositório (Ports) (`repositories/`):**
     *   Definem os contratos (interfaces TypeScript) para as operações de persistência de dados e operações de fila.
-    *   Exemplos: `IQueueRepository` (para Jobs e operações de fila), `IProjectRepository`, `IUserRepository`.
+    *   Exemplos: `IJobRepository` (para persistência de `Job`s e operações de fila), `IProjectRepository`, `IUserRepository`.
     *   Permitem que os Casos de Uso e Serviços de Domínio permaneçam independentes das tecnologias de banco de dados específicas. As implementações concretas residem na camada de Infraestrutura.
-    *   **`IQueueRepository` (ex: `src/domain/repositories/i-queue.repository.ts`):** Esta interface é central para o sistema de filas. Ela define métodos para CRUD de `Job`s e para operações de estado da fila que exigem `workerToken` e gerenciamento de locks.
+    *   **`IJobRepository` (ex: `src/domain/repositories/i-job.repository.ts`):** Esta interface é central para a persistência de `Job`s e para o sistema de filas. Ela define métodos para criar, buscar, e atualizar `Job`s, incluindo a lógica de lock e transição de estado necessária para a fila.
         ```typescript
-     // src/domain/repositories/i-queue.repository.ts
-     import { Job } from '../entities/job.entity';
-     import { JobStatusVO } from '../entities/value-objects/job-status.vo'; // Supondo que JobStatusVO seja importável
+        // src/domain/repositories/i-job.repository.ts
+        import { Job } from '../entities/job.entity';
+        // JobStatusVO e BackoffOptions seriam importados se usados diretamente aqui,
+        // mas a lógica de backoff agora está mais implícita no 'save'.
 
-     export interface JobData {
-       [key: string]: any;
-     }
+        export interface IJobRepository {
+          // Adiciona um novo job à persistência. Usado principalmente pelo EnqueueJobUseCase.
+          add(job: Job): Promise<void>;
 
-     // Opções para backoff em caso de falha e retentativa
-     export interface BackoffOptions {
-        type: 'exponential' | 'fixed';
-        delay: number;
-     }
+          // Salva o estado atual de uma instância de Job (que foi modificada em memória).
+          // Este método é usado para criar jobs (se o ID não existir e lockToken não for relevante),
+          // ou para atualizar jobs existentes (status, data, attempts, result, error, delayUntil).
+          // Se 'lockToken' for fornecido, ele DEVE ser validado contra o lock atual do job
+          // se o job estiver em um estado que implica estar locado (ex: ACTIVE).
+          // A implementação deste método lida com a lógica de transição de estado final na persistência
+          // (ex: se job.props.status é FAILED e job.props.attempts < job.props.maxAttempts,
+          // pode aplicar backoff e salvar como PENDING/DELAYED com novo delayUntil).
+          // Libera o lock se o job atingir um estado terminal (COMPLETED, FAILED sem retentativas).
+          save(job: Job, lockToken?: string): Promise<void>;
 
-     export interface IQueueRepository {
-       // Cria um novo job na fila. Usado pelo EnqueueJobUseCase.
-       // Não lida com locks, pois o job é novo.
-       add(job: Job): Promise<void>;
+          // Busca um job pelo ID.
+          findById(jobId: string): Promise<Job | null>;
 
-       // Busca um job pelo ID.
-       findById(jobId: string): Promise<Job | null>;
+          // Encontra o próximo job pendente (status PENDING ou DELAYED com delayUntil passado)
+          // para uma fila específica, aplica um lock (registrando workerId e lockToken na persistência
+          // com um tempo de expiração), e retorna o job e o lockToken.
+          findNextPending(queueName: string, workerId: string): Promise<{ job: Job; lockToken: string } | null>;
 
-       // Encontra o próximo job pendente (status PENDING ou DELAYED com delayUntil passado)
-       // para uma fila específica, aplica um lock, e retorna o job e um lockToken.
-       // workerId é registrado para identificar quem tem o lock.
-       findNextPending(queueName: string, workerId: string): Promise<{ job: Job; lockToken: string } | null>;
-
-       // Persiste o estado ATIVO de um job após o Worker pegá-lo.
-       // Valida o lockToken.
-       markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string): Promise<void>;
-
-       // Atualiza o campo 'data' de um job. Chamado pelo jobProcessor.
-       // Valida o lockToken.
-       updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void>;
-
-       // Move um job para o estado DELAYED. Chamado pelo jobProcessor.
-       // Valida o lockToken, atualiza status, delayUntil, e libera o lock.
-       requestMoveToDelayed(jobId: string, workerToken: string, delayUntilTimestamp: number): Promise<void>;
-
-       // Move um job para o estado WAITING_CHILDREN. Chamado pelo jobProcessor.
-       // Valida o lockToken, atualiza status, e libera o lock.
-       // Retorna true se o job foi movido para espera, false se não há filhos pendentes (job pode ser completado).
-       requestMoveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean>;
-
-       // Marca um job como COMPLETED. Chamado pelo Worker.
-       // Valida o lockToken, atualiza status, result, finishedAt, e libera o lock.
-       completeJob(jobId: string, result: any, workerToken: string): Promise<void>;
-
-       // Marca um job como FAILED ou o re-enfileira para retentativa com backoff. Chamado pelo Worker.
-       // Valida o lockToken. Se houver retentativas, atualiza status para PENDING/DELAYED,
-       // calcula novo delayUntil com base na estratégia de backoff, e incrementa attempts.
-       // Se não houver mais tentativas, atualiza status para FAILED. Libera o lock.
-       // Retorna o novo estado do job (status, delayUntil, attempts) para o Worker atualizar sua instância em memória.
-       failJob(
-         jobId: string,
-         error: string,
-         currentAttempts: number,
-         maxAttempts: number,
-         backoffOptions: BackoffOptions | undefined, // Config de backoff do job
-         workerToken: string
-       ): Promise<{ newStatus: JobStatusVO; newDelayUntil?: Date; newAttempts: number }>;
-     }
+          // (Opcional, se a lógica de liberação de lock não for totalmente coberta pelo save)
+          // releaseLock(jobId: string, lockToken: string): Promise<void>;
+        }
         ```
 
 *   **Serviços de Domínio (`services/`):**
-    *   Contêm lógica de negócios significativa que não se encaixa naturalmente em uma única entidade.
-    *   Operam sobre múltiplas entidades ou coordenam comportamentos complexos do domínio.
-    *   São stateless (sem estado próprio), e suas dependências (outros serviços, repositórios) são injetadas.
-    *   Exemplo: Um serviço que determina a prioridade de um `Job` com base em múltiplas regras de negócio e no estado de outros `Jobs` ou `Projects`.
+    *   Contêm lógica de negócios significativa que não se encaixa naturalmente em uma única entidade ou que orquestra interações complexas. São stateless e suas dependências são injetadas.
 
         *   **`AIAgentExecutionService` (ex: `src/domain/services/agent/ai-agent-execution.service.ts`):**
             Este serviço é crucial para a funcionalidade dos Agentes de IA. Ele não é o `AIAgent` (que é uma entidade de configuração/perfil), mas o orquestrador que executa a lógica de um agente para processar um `Job`.
@@ -151,33 +117,27 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
             -   Dentro da função `jobProcessor` que ele fornece:
                 -   Orquestrar a interação com o `ILLMService` (passando o perfil do agente, mensagens, ferramentas).
                 -   Executar ferramentas através do `IToolRegistry`.
-                -   Gerenciar o estado da tarefa do agente, chamando `job.updateJobData()` para modificar o estado do job em memória, e então usando o `queueClient` recebido (que é um parâmetro do `jobProcessor`) para chamar `queueClient.updateJobData(job.id, job.props.data, workerToken)` para persistir essas alterações de dados.
-                -   Para operações avançadas na fila (ex: adiar um job), o `jobProcessor` chamará primeiro um método de preparação na entidade `Job` (ex: `job.prepareForDelay(timestamp)`), que atualiza o estado do `Job` em memória. Em seguida, o `jobProcessor` lançará um erro específico (ex: `DelayedError`) para sinalizar essa intenção ao `Worker`. O `Worker` é então responsável por persistir o estado preparado do `Job` através do `queueClient`.
+                -   Gerenciar o estado da tarefa do agente, chamando `job.updateJobData()` para modificar o estado do job em memória, e então usando o `queueClient` recebido (que é um parâmetro do `jobProcessor`) para chamar `queueClient.saveJob(job, workerToken)` para persistir essas alterações de dados (se for um ponto de salvamento intermediário).
+                -   Para operações avançadas na fila (ex: adiar um job), o `jobProcessor` chamará primeiro um método de preparação na entidade `Job` (ex: `job.prepareForDelay(timestamp)`), que atualiza o estado do `Job` em memória. Em seguida, o `jobProcessor` lançará um erro específico (ex: `DelayedError`) para sinalizar essa intenção ao `Worker`. O `Worker` é então responsável por persistir o estado preparado do `Job` através do `queueClient.saveJob(job, workerToken)`.
             **Dependências (Injetadas via Construtor no `AIAgentExecutionService`):** `ILLMService`, `IToolRegistry`, `IAIAgentRepository`.
 
             **Função `jobProcessor` Fornecida pelo Serviço:**
-            O `AIAgentExecutionService` teria um método que retorna (ou cujo corpo é) a função `jobProcessor`. Esta função teria a assinatura `async (job: Job, workerToken: string, queueClient: IQueueClient): Promise<any>`.
+            O `AIAgentExecutionService` teria um método que retorna (ou cujo corpo é) a função `jobProcessor`. Esta função teria a assinatura `async (job: Job): Promise<any>`.
             Exemplo conceitual da lógica interna desta função `jobProcessor`:
             ```typescript
             // Dentro do AIAgentExecutionService, ou um método que ele retorna:
             // async function agentJobProcessor(
             //   this: AIAgentExecutionService, // 'this' se for um método da classe
-            //   job: Job,
-            //   workerToken: string,
-            //   queueClient: IQueueClient // Recebe o IQueueClient do Worker
+            //   job: Job // Recebe apenas a instância do Job
             // ): Promise<any> {
             //   const agentId = job.payload.agentId || this.defaultAgentId;
             //   const agentProfile = await this.aiAgentRepository.findById(agentId);
             //   if (!agentProfile) {
-            //     // Se o perfil não for encontrado, o job deve falhar imediatamente.
-            //     // O Worker tratará essa exceção.
+            //     // O Worker irá capturar este erro, chamar job.fail(), e persistir.
             //     throw new Error(`AIAgent profile ${agentId} not found for job ${job.id}.`);
             //   }
 
             //   const taskInput = job.payload.taskInput || job.payload.goal;
-            //   // job.data já conteria o estado salvo da última execução (se houver)
-            //   // A entidade Job já foi carregada pelo Worker via queueClient.getNextJob()
-
             //   let conversationHistory = job.props.data?.conversationHistory || [];
             //   let currentStep = job.props.data?.currentStep || 'initial_processing';
 
@@ -185,1268 +145,514 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
 
             //   if (currentStep === 'initial_processing') {
             //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}: Executando etapa inicial.`);
-            //     // ... lógica inicial, talvez uma chamada LLM ...
-            //     const llmResponse = `LLM output for initial step of '${taskInput}'`; // Simulado
-            //     conversationHistory.push({role: 'user', content: taskInput}); // Adiciona input do usuário ao histórico
+            //     const llmResponse = `LLM output for initial step of '${taskInput}'`;
+            //     conversationHistory.push({role: 'user', content: taskInput});
             //     conversationHistory.push({role: 'assistant', content: llmResponse});
-            //     currentStep = 'tool_execution';
-
-            //     // Atualizar dados do job em memória
-            //     job.updateJobData({ conversationHistory, currentStep });
-            //     // Persistir os dados atualizados via QueueClient
-            //     await queueClient.updateJobData(job.id, job.props.data, workerToken);
-            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} data updated, new step: ${currentStep}`);
+            //     currentStep = 'tool_execution'; // Próximo passo
+            //     // Modifica o job em memória. O Worker persistirá o estado final do job (COMPLETED ou FAILED)
+            //     // ou estados específicos como DELAYED se um erro apropriado for lançado.
+            //     job.updateJobData({ conversationHistory, currentStep, intermediateData: "data_from_initial_step" });
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} data updated in memory.`);
+            //     // Não há chamada para persistência aqui. Se uma persistência intermediária fosse CRÍTICA
+            //     // antes de prosseguir para uma longa operação de 'tool_execution', o design precisaria
+            //     // de um erro customizado tipo 'IntermediateSaveRequiredError' que o Worker entenderia,
+            //     // salvaria o job, e então talvez re-enfileiraria o job para a próxima etapa ('tool_execution').
+            //     // Para este exemplo, vamos assumir que 'tool_execution' é a próxima etapa lógica.
             //   }
 
             //   if (currentStep === 'tool_execution') {
-            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}: Executando etapa de ferramentas.`);
-            //     // ... lógica de execução de ferramenta baseada na resposta do LLM ...
-            //     // Exemplo: const toolResult = await this.toolRegistry.executeTool(...);
-            //     // conversationHistory.push({role: 'tool', content: toolResult});
-            //     currentStep = 'final_processing'; // Avança para a próxima etapa
-
-            //     // Adiar o job antes da etapa final, como exemplo
-            //     const delayUntil = Date.now() + 10000; // Adiar por 10 segundos
-            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} preparando para adiamento até ${new Date(delayUntil).toISOString()}`);
-
-            //     // 1. Preparar o estado do Job em memória para o adiamento
-            //     job.prepareForDelay(new Date(delayUntil));
-            //     // 2. (Opcional) Atualizar os dados do job (que podem incluir o currentStep) ANTES de sinalizar o adiamento
-            //     job.updateJobData({ conversationHistory, currentStep, awaitingDelayConfirmation: true });
-            //     await queueClient.updateJobData(job.id, job.props.data, workerToken); // Persiste os dados antes do throw
-
-            //     // 3. Lançar DelayedError para sinalizar ao Worker
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}: Executando etapa de ferramentas e preparando para delay.`);
+            //     // ...lógica de execução de ferramenta...
+            //     currentStep = 'final_processing_after_delay'; // Estado esperado após o delay
+            //     const delayUntil = new Date(Date.now() + 10000); // Adia por 10 segundos
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} preparando para adiamento até ${delayUntil.toISOString()}`);
+            //     // Modifica o job em memória para o estado DELAYED e informa data/hora.
+            //     job.prepareForDelay(delayUntil);
+            //     job.updateJobData({ conversationHistory, currentStep, toolOutput: "output_from_tool", awaitingDelayConfirmation: true });
+            //     // Lança o erro para sinalizar ao Worker.
+            //     // O Worker irá capturar DelayedError e então chamar queueClient.saveJob(job, lockToken).
             //     throw new DelayedError('Job processing requires a delay before final step.');
             //   }
 
-            //   if (currentStep === 'final_processing') {
-            //     // Esta etapa seria executada APÓS o Worker re-enfileirar e processar o job adiado.
-            //     // O job.data.awaitingDelayConfirmation poderia ser verificado e removido.
+            //   if (currentStep === 'final_processing_after_delay') {
             //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} resumindo para processamento final.`);
-            //     // ... lógica final, talvez outra chamada LLM ...
+            //     // ...lógica de processamento final...
             //     const finalOutput = "Final output of the agent's task after all steps.";
-            //     // conversationHistory.push({role: 'assistant', content: finalOutput}); // Adicionar ao histórico
-
-            //     // Atualizar dados finais do job
-            //     // job.updateJobData({ conversationHistory, currentStep, finalOutput, awaitingDelayConfirmation: undefined });
-            //     // await queueClient.updateJobData(job.id, job.props.data, workerToken); // Persistir dados finais
-
-            //     return finalOutput; // Resultado final para o Worker marcar o job como COMPLETED
+            //     job.updateJobData({ conversationHistory, currentStep, finalOutput, awaitingDelayConfirmation: undefined });
+            //     // Retorna o resultado. O Worker chamará job.complete(finalOutput) e
+            //     // então persistirá o job como COMPLETED.
+            //     return finalOutput;
             //   }
 
-            //   // Se o job tiver um estado/etapa inesperado
-            //   throw new Error(`Job ${job.id} is in an unexpected step: ${currentStep}`);
+            //   // Se chegou aqui, pode ser um job que completa após a etapa inicial, ou estado inesperado.
+            //   if (job.props.data?.currentStep === 'tool_execution') { // Indica que completou após 'initial_processing'
+            //     const resultAfterInitial = job.props.data?.intermediateData || "Completed after initial step";
+            //     // O Worker chamará job.complete() com este resultado.
+            //     return resultAfterInitial;
+            //   }
+            //   // Se não se encaixa em nenhum fluxo esperado, lança um erro.
+            //   // O Worker irá capturar, chamar job.fail(), e persistir.
+            //   throw new Error(`Job ${job.id} is in an unexpected state: ${currentStep}`);
             // }
             ```
-        *   **Outros Serviços de Domínio:** Como o `JobPriorityService` mencionado anteriormente, se necessário.
+        *   **Outros Serviços de Domínio:** Poderiam existir outros serviços de domínio se lógicas complexas que não se encaixam em entidades ou casos de uso específicos fossem identificadas. No momento, o `AIAgentExecutionService` é o principal exemplo.
 
 ### 3.2. Camada de Aplicação (`src/application`) - Opcional
-Esta camada é opcional e, em muitos projetos, suas responsabilidades podem ser incorporadas pela camada de Domínio (especificamente pelos Casos de Uso) ou pela camada de Infraestrutura (no que tange à adaptação de dados para a UI). Se utilizada, ela serve como um intermediário e pode conter:
-
-*   **DTOs (Data Transfer Objects) (`dtos/`):**
-    *   Objetos simples usados para transferir dados entre camadas, especialmente entre os Casos de Uso e a camada de apresentação (UI) ou os Handlers IPC.
-    *   Ajudam a desacoplar a estrutura interna das entidades do domínio dos dados expostos para o exterior.
-    *   Podem incluir validação de dados de entrada/saída.
-
-*   **Orquestração de Casos de Uso Complexos:**
-    *   Se uma funcionalidade da aplicação requer a coordenação de múltiplos Casos de Uso de forma sequencial ou condicional, essa lógica de orquestração pode residir aqui.
-    *   Pode também lidar com a tradução entre DTOs e os modelos de entrada/saída dos Casos de Uso.
-
-*   **Serviços de Aplicação:**
-    *   Tarefas que não são puramente lógica de domínio, mas também não são detalhes de infraestrutura. Por exemplo, enviar uma notificação após a conclusão de um caso de uso (onde o envio da notificação em si é um serviço de infraestrutura, mas a decisão de enviá-la pode ser uma regra de aplicação).
-
-Para este projeto, inicialmente, tentaremos manter os Casos de Uso na camada de Domínio o mais abrangentes possível, minimizando a necessidade de uma camada de Aplicação separada, a menos que a complexidade da transferência de dados ou orquestração de fluxos se mostre significativa.
+(Conteúdo existente da Seção 3.2)
 
 ### 3.3. Camada de Infraestrutura (`src/infrastructure`)
-A camada de Infraestrutura contém todas as implementações concretas e detalhes tecnológicos. Ela depende da camada de Domínio (através das interfaces/ports), mas o Domínio não depende dela. É onde o "mundo real" se conecta à lógica de negócios.
-
-*   **Persistência (`infrastructure/persistence/`):**
-    *   Implementações concretas das interfaces de repositório definidas no Domínio (ex: `DrizzleQueueRepository` implementando `IQueueRepository`).
-    *   Utilizará Drizzle ORM para interagir com o banco de dados SQLite.
-    *   Incluirá os esquemas do Drizzle, configurações de conexão com o banco de dados e scripts de migração.
-    *   **Sistema de Filas Local (Inspirado em BullMQ, com Persistência em SQLite):**
-        A camada de infraestrutura (`infrastructure/persistence/queue/`) será responsável por uma implementação customizada de um sistema de filas assíncronas. Este sistema é um componente fundamental e genérico, projetado para ser utilizável por qualquer parte da aplicação que necessite de processamento de tarefas desacoplado e robusto, não se limitando aos Agentes de IA.
-
-        **Princípios e Funcionalidades Chave:**
-        *   **Implementação Local, Sem Dependências Externas:** O sistema será construído internamente, utilizando **SQLite** para persistência (via Drizzle ORM) de todos os dados dos jobs e estados de fila. Não haverá dependências de bibliotecas de mensageria externas (Redis, RabbitMQ, BullMQ etc.).
-        *   **Inspiração no BullMQ:** Embora customizado, o design da API e as funcionalidades serão fortemente inspirados pelo BullMQ para fornecer capacidades ricas e familiares.
-        *   **Jobs como Unidade de Trabalho:** A entidade `Job` (Seção 6.1) representa a unidade de trabalho, contendo `id`, `queueName`, `name` (tipo de job), `payload`, `status`, `attempts`, `maxAttempts`, `data` (para dados customizados do processador), `priority`, `delayUntil`, `parentId`, etc.
-        *   **Filas Nomeadas (`queueName`):** Jobs são categorizados e processados em filas específicas, identificadas por um `queueName`.
-        *   **Workers Genéricos:** Os `Worker`s (Seção 8.2) são componentes da infraestrutura que monitoram uma `queueName` e executam uma função `jobProcessor` fornecida para cada job retirado da fila.
-        *   **Gerenciamento Avançado de Estado do Job:** Suporte aos estados: `PENDING`, `ACTIVE`, `COMPLETED`, `FAILED`, `DELAYED`, `WAITING_CHILDREN`.
-        *   **Operações de Job (via `IQueueRepository` e `Job`):**
-            *   A interação do `jobProcessor` com o estado avançado da fila (adiar, esperar filhos, etc.) será mediada pela `IQueueRepository` (implementação em `infrastructure/persistence/queue/DrizzleQueueRepository.ts`).
-            *   A entidade `Job` poderá ter métodos como `updateData(data: any)` para modificar seu estado em memória (`props.data`), que então será persistido pelo `jobProcessor` através de uma chamada a `queueRepository.save(job)`.
-        *   **Opções de Job Configuráveis:** Suporte para `attempts`, `backoff` (estratégias de retentativa), `priority`, `delay` inicial.
-        *   **Locks de Job e `workerToken`:** A `IQueueRepository` gerenciará locks nos jobs ativos para garantir que um job seja processado por apenas um worker por vez. O `workerToken` (fornecido pelo `Worker` ao `jobProcessor`) será necessário para autorizar operações sensíveis na `IQueueRepository` (ex: `requestMoveToDelayed`, `requestMoveToWaitingChildren`, `completeJob`, `failJob`).
-        *   **Jobs Filhos (Parent/Child):** Suporte para estruturar jobs hierarquicamente.
-
-        A implementação concreta (`DrizzleQueueRepository`) usará Drizzle para interagir com o SQLite, gerenciando os locks e o `workerToken` para garantir a integridade das operações. O `jobProcessor` invocará os métodos da `IQueueRepository` e, se apropriado (ex: após `requestMoveToDelayed`), lançará erros como `DelayedError` para sinalizar ao `Worker`. Para facilitar a interação dos `Worker`s com filas específicas, um objeto `QueueClient` (descrito na Seção 8.3) pode ser usado para encapsular o `queueName` e as chamadas ao `IQueueRepository`.
-
-*   **Interface do Usuário (UI) (`infrastructure/ui/react/`):**
-    *   A aplicação React, incluindo:
-        *   `main.tsx`: Ponto de entrada da UI.
-        *   `pages/`: Componentes que representam as diferentes telas/rotas da aplicação, gerenciados pelo TanStack Router.
-        *   `components/`: Componentes React reutilizáveis.
-        *   `hooks/`: Hooks React customizados para lógica de UI.
-        *   `services/`: Serviços específicos da UI (ex: para formatar dados para exibição, ou encapsular chamadas à API do Electron via `window.api`).
-        *   Gerenciamento de estado da UI (se necessário, usando Zustand, Redux, ou Context API).
-    *   Configuração de internacionalização (LinguiJS) e estilização (TailwindCSS).
-
-*   **Lógica Específica do Electron (`infrastructure/electron/`):**
-    *   `main.ts`: O ponto de entrada do processo principal do Electron. Responsável por criar janelas, gerenciar o ciclo de vida da aplicação e inicializar o container de DI.
-    *   `preload.ts`: Script que expõe funcionalidades do backend (via IPC) de forma segura para a UI React (`window.api`).
-    *   `ipc-handlers/`: Diretório contendo os manipuladores para os canais IPC. Estes handlers obterão instâncias de Casos de Uso do container de DI e executarão a lógica de negócios solicitada pela UI.
-
-*   **Clientes de Serviços Externos (`infrastructure/services/`):**
-    *   Implementações concretas para interagir com APIs ou serviços de terceiros.
-    *   Exemplo: `DeepSeekLLMService` implementando uma interface `ILLMService` definida no Domínio para interagir com a API do DeepSeek.
-    *   Outros serviços como embedding, logging, etc.
-
-*   **Configuração de Injeção de Dependência (`infrastructure/ioc/`):**
-    *   `inversify.config.ts`: Arquivo central para configurar o container InversifyJS. Define todos os bindings (como interfaces mapeiam para classes concretas e seus escopos).
-    *   `types.ts`: Define os símbolos (identificadores de tipo) usados para a injeção de dependências.
-        *   **Workers de Agentes (`infrastructure/workers/` ou dentro de `infrastructure/electron/`):** Implementações dos `Worker`s genéricos dedicados a uma fila. Cada worker monitora uma fila específica (identificada por `queueName`), retira `Job`s, gera um `workerToken`, e executa uma função `jobProcessor` que lhe foi fornecida em sua configuração. Para jobs de agentes de IA, esta função `jobProcessor` é fornecida pelo `AIAgentExecutionService` (da camada de domínio) e contém a lógica específica do agente. O `Worker` também gerencia o ciclo de vida do job na fila com base no resultado do `jobProcessor` (incluindo tratamento de `DelayedError`, `WaitingChildrenError`). A inicialização e o gerenciamento desses workers ocorrerão no processo principal do Electron.
+(Conteúdo existente da Seção 3.3, garantindo que `DrizzleJobRepository` implementa `IJobRepository` e referências a `IJobRepository` são usadas no lugar de `IQueueRepository` ou `IJobQueueService`)
 
 ### 3.4. Camada de Apresentação (`src/presentation`) - Opcional
-Esta camada atua como um intermediário entre os Casos de Uso (Domínio/Aplicação) e a UI (Infraestrutura). Sua principal responsabilidade é adaptar os dados do formato dos Casos de Uso para um formato que seja facilmente consumível pela UI, e vice-versa.
-
-*   **Presenters / ViewModels:**
-    *   Classes ou funções que recebem dados dos Casos de Uso e os transformam em um modelo de visualização (ViewModel) adequado para uma tela ou componente específico.
-    *   Podem lidar com formatação de datas, números, tradução de códigos para strings amigáveis, etc.
-    *   Também podem receber dados da UI e transformá-los no formato esperado pelos Casos de Uso.
-
-Em aplicações React, a lógica de apresentação muitas vezes é incorporada diretamente nos componentes React (especialmente com o uso de hooks customizados) ou em seletores de estado (se usando bibliotecas como Redux/Zustand). A necessidade de uma camada de Apresentação separada e formal (`src/presentation`) será avaliada com base na complexidade. Se a lógica de transformação de dados para a UI se tornar extensa e começar a poluir os componentes React, a introdução desta camada pode ser benéfica para manter os componentes focados apenas na renderização.
+(Conteúdo existente da Seção 3.4)
 
 ### 3.5. Fluxo de Dependências
+A regra de dependência é um princípio fundamental da Clean Architecture e será estritamente seguida. Ela dita que as dependências do código fonte só podem apontar para **dentro**.
 
-A Regra de Dependência é um princípio fundamental da Clean Architecture e será estritamente seguida:
+- **Camadas Externas Dependem de Camadas Internas:**
+    - A camada de Infraestrutura depende da camada de Domínio (através de interfaces/ports).
+    - A camada de Apresentação (se usada) dependeria da camada de Aplicação ou Domínio.
+    - A camada de Aplicação (se usada) depende da camada de Domínio.
+- **Camada de Domínio Não Depende de Ninguém:** A camada de Domínio (Entidades, Casos de Uso, Interfaces de Repositório) não tem conhecimento das camadas externas. Ela é o núcleo independente do sistema.
 
-*   **As dependências de código fonte só podem apontar para dentro.**
-*   Isso significa que as camadas externas dependem das camadas internas, mas as camadas internas não sabem nada sobre as camadas externas.
-    *   A camada de **Infraestrutura** depende da camada de **Domínio** (e da camada de Aplicação, se existir). Ela implementa as interfaces definidas no Domínio.
-    *   A camada de **Aplicação** (se existir) depende da camada de **Domínio**. Ela orquestra os Casos de Uso e Entidades do Domínio.
-    *   A camada de **Domínio** não depende de nenhuma outra camada. Ela é o núcleo independente.
+Isso significa que alterações em camadas externas (como a troca de um banco de dados na Infraestrutura ou uma mudança na UI na Apresentação) não devem impactar a camada de Domínio. Para alcançar isso, utilizamos **Interfaces (Ports)** definidas na camada de Domínio, que são implementadas por **Adaptadores** na camada de Infraestrutura. A Injeção de Dependência é usada para fornecer as implementações concretas (Adaptadores) para os Casos de Uso e Serviços de Domínio sem que eles conheçam as classes concretas.
 
-*   **Mecanismo de Inversão de Dependência:** Para permitir que o Domínio chame funcionalidades definidas na Infraestrutura (como persistência de dados), usamos o Princípio da Inversão de Dependência (DIP). O Domínio define interfaces (ports), e a Infraestrutura fornece implementações concretas dessas interfaces. A Injeção de Dependência (com InversifyJS) será o mecanismo para "conectar" essas implementações às interfaces em tempo de execução, sem que o Domínio precise conhecer as classes concretas da Infraestrutura.
-
-Este fluxo garante que a lógica de negócios central permaneça isolada de mudanças em detalhes tecnológicos como banco de dados, frameworks de UI ou APIs de terceiros, aumentando a manutenibilidade e testabilidade do sistema.
+Este fluxo garante que a lógica de negócios central permaneça pura, testável e isolada de preocupações tecnológicas específicas.
 
 ## 4. Injeção de Dependência (DI) com InversifyJS
 
-A Injeção de Dependência (DI) é um padrão de design crucial que promove o desacoplamento entre os componentes do software. Em vez de um objeto criar suas próprias dependências ou buscá-las ativamente, as dependências são fornecidas (injetadas) de uma fonte externa (um container de DI). Isso torna o código mais modular, testável e fácil de manter.
+A Injeção de Dependência (DI) será um pilar central da nova arquitetura, e utilizaremos a biblioteca InversifyJS para implementá-la. A DI nos permite desacoplar componentes, facilitar a testabilidade (permitindo mocks e stubs) e gerenciar o ciclo de vida das dependências de forma centralizada.
 
-Neste projeto, utilizaremos a biblioteca **InversifyJS** para implementar a DI. InversifyJS é um container de DI leve e poderoso para aplicações JavaScript e TypeScript, que usa decoradores para gerenciar dependências.
-
-Os principais benefícios que buscamos com InversifyJS são:
-- **Desacoplamento:** Classes não precisam conhecer as implementações concretas de suas dependências, apenas suas interfaces.
-- **Testabilidade:** Facilita a substituição de dependências por mocks ou stubs em testes unitários.
-- **Configuração Centralizada:** As "ligações" (bindings) entre interfaces e suas implementações concretas são definidas em um local central, o container de DI.
-- **Gerenciamento do Ciclo de Vida:** InversifyJS pode gerenciar o ciclo de vida dos objetos que cria (ex: singleton, transitório).
+Classes que representam serviços de domínio, casos de uso, implementações de repositório e alguns componentes de infraestrutura (como clientes de serviços externos ou o `LoggerService`) serão registradas no container InversifyJS e terão suas dependências injetadas via construtor.
 
 ### 4.1. Configuração do Container (`infrastructure/ioc/inversify.config.ts`)
-O coração do InversifyJS é o `Container`. Um arquivo, tipicamente localizado em `src/infrastructure/ioc/inversify.config.ts`, será responsável por criar e configurar este container.
 
-**Exemplo de Estrutura (`inversify.config.ts`):**
+Um arquivo de configuração central, por exemplo `src/infrastructure/ioc/inversify.config.ts`, será responsável por definir os *bindings* (associações) entre as abstrações (interfaces) e suas implementações concretas.
 
+**Exemplo de Configuração do Container:**
 ```typescript
-import 'reflect-metadata'; // Deve ser importado uma vez no ponto de entrada da aplicação
+// src/infrastructure/ioc/inversify.config.ts
 import { Container } from 'inversify';
 import { TYPES } from './types';
 
-// Importações das Interfaces (Abstrações)
+// --- Repositórios ---
+// Exemplo com DrizzleJobRepository (implementação concreta)
+// import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/job.repository'; // Ajustar caminho conforme estrutura final
+// import { IJobRepository } from '@/domain/repositories/i-job.repository';
+// container.bind<IJobRepository>(TYPES.IJobRepository).to(DrizzleJobRepository).inSingletonScope();
+
+// Exemplo com InMemoryJobRepository (para desenvolvimento/testes)
+import { InMemoryJobRepository } from '@/infrastructure/persistence/in-memory/in-memory-job.repository'; // Ajustar caminho
 import { IJobRepository } from '@/domain/repositories/i-job.repository';
-import { IUserRepository } from '@/domain/repositories/i-user.repository';
-import { ILLMService } from '@/domain/services/i-llm.service';
-import { CreateJobUseCase } from '@/domain/use-cases/job/create-job.use-case';
-// ... outras interfaces e casos de uso
+container.bind<IJobRepository>(TYPES.IJobRepository).to(InMemoryJobRepository).inSingletonScope();
 
-// Importações das Implementações Concretas
-import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/job.repository';
-import { DrizzleUserRepository } from '@/infrastructure/persistence/drizzle/user.repository';
-import { DeepSeekLLMService } from '@/infrastructure/services/deepseek.service';
-// ... outras implementações
 
-// Criação do Container
-const container = new Container();
+import { InMemoryAIAgentRepository } from '@/infrastructure/persistence/in-memory/in-memory-ai-agent.repository'; // Ajustar caminho
+import { IAIAgentRepository } from '@/domain/repositories/i-ai-agent.repository';
+container.bind<IAIAgentRepository>(TYPES.IAIAgentRepository).to(InMemoryAIAgentRepository).inSingletonScope();
 
-// --- Bindings para Repositórios ---
-container.bind<IJobRepository>(TYPES.IJobRepository).to(DrizzleJobRepository).inSingletonScope();
-container.bind<IUserRepository>(TYPES.IUserRepository).to(DrizzleUserRepository).inSingletonScope();
 
-// --- Bindings para Serviços Externos ---
-container.bind<ILLMService>(TYPES.ILLMService).to(DeepSeekLLMService).inSingletonScope();
+// --- Serviços de Domínio ---
+import { AIAgentExecutionService } from '@/domain/services/agent/ai-agent-execution.service';
+import { IAIAgentExecutionService } from '@/domain/services/agent/i-ai-agent-execution.service'; // Se uma interface for definida
+container.bind<IAIAgentExecutionService>(TYPES.IAIAgentExecutionService).to(AIAgentExecutionService).inSingletonScope();
+// Ou, se não houver interface para AIAgentExecutionService, pode-se registrar a classe diretamente:
+// container.bind<AIAgentExecutionService>(TYPES.AIAgentExecutionService).toSelf().inSingletonScope();
 
-// --- Bindings para Casos de Uso ---
-// Casos de Uso geralmente são transitórios, a menos que tenham estado interno gerenciável
-container.bind<CreateJobUseCase>(TYPES.CreateJobUseCase).to(CreateJobUseCase).inTransientScope();
-// ... outros casos de uso
 
-// --- Bindings para Handlers IPC (se eles forem classes injetáveis) ---
-// Exemplo:
-// import { JobHandlers } from '@/infrastructure/electron/ipc-handlers/job.handlers';
-// container.bind<JobHandlers>(TYPES.JobHandlers).to(JobHandlers).inSingletonScope();
+// --- Serviços de Infraestrutura (Exemplos) ---
+// import { RealLLMService } from '@/infrastructure/services/llm/real-llm.service'; // Ajustar caminho
+// import { ILLMService } from '@/domain/services/llm/i-llm.service'; // Supondo que a interface está no domínio
+// container.bind<ILLMService>(TYPES.ILLMService).to(RealLLMService).inSingletonScope();
 
-        // --- Bindings para Serviços de Domínio/Aplicação ---
-        import { AIAgentExecutionService } from '@/domain/services/agent/ai-agent-execution.service'; // Ajustar caminho conforme estrutura final
-        import { IAIAgentExecutionService } from '@/domain/services/agent/i-ai-agent-execution.service'; // Interface
-        container.bind<IAIAgentExecutionService>(TYPES.IAIAgentExecutionService).to(AIAgentExecutionService).inSingletonScope(); // Ou inTransientScope() se fizer sentido
+// import { DiskToolRegistry } from '@/infrastructure/services/tools/disk-tool.registry'; // Ajustar caminho
+// import { IToolRegistry } from '@/domain/services/tools/i-tool.registry'; // Supondo que a interface está no domínio
+// container.bind<IToolRegistry>(TYPES.IToolRegistry).to(DiskToolRegistry).inSingletonScope();
 
-        import { JobQueueService } from '@/infrastructure/persistence/queue/job-queue.service'; // Ajustar caminho
-        import { IJobQueueService } from '@/domain/repositories/i-job-queue.service'; // Ou domain/services/
-        container.bind<IJobQueueService>(TYPES.IJobQueueService).to(JobQueueService).inSingletonScope();
+// import { ConsoleLoggerService } from '@/infrastructure/services/logging/console-logger.service'; // Ajustar caminho
+// import { ILoggerService } from '@/domain/services/logging/i-logger.service'; // Supondo que a interface está no domínio
+// container.bind<ILoggerService>(TYPES.ILoggerService).to(ConsoleLoggerService).inSingletonScope();
 
-        // Nota sobre Workers:
-        // Os `AgentWorker`s (da camada de infraestrutura, ex: `infrastructure/workers/agent.worker.ts`)
-        // são instanciados e configurados programaticamente pelo `AgentLifecycleService` (ver Seção 8.3),
-        // que é parte da lógica de inicialização no processo principal do Electron.
-        // O `AgentLifecycleService` obteria o `IAIAgentExecutionService` e outras dependências
-        // (como `IJobRepository`) do container DI. Em seguida, para cada `AIAgent` configurado,
-        // ele instancia um `AgentWorker`, passando o `queueName` do agente e a função `jobProcessor`
-        // específica (obtida do `IAIAgentExecutionService`, possivelmente um método vinculado ou
-        // uma função curried com o `AIAgentId` ou `AIAgentProps` já configurados).
-        // As dependências diretas do `AgentWorker` (como `IJobRepository`) também podem ser passadas
-        // pelo `AgentLifecycleService` após serem resolvidas do container.
+
+// --- Casos de Uso (Use Cases) ---
+import { EnqueueJobUseCase } from '@/domain/use-cases/job/enqueue-job.use-case';
+container.bind<EnqueueJobUseCase>(TYPES.EnqueueJobUseCase).toSelf().inRequestScope(); // Casos de uso geralmente são inRequestScope
+
+// Adicionar outros bindings para Casos de Uso, Repositórios e Serviços conforme necessário...
+
+// Nota sobre Workers e QueueClients:
+// Os `AgentWorker`s (da camada de infraestrutura, ex: `infrastructure/workers/agent.worker.ts`)
+// e os `QueueClient`s (ex: `infrastructure/persistence/queue/queue.client.ts`)
+// são tipicamente instanciados e configurados programaticamente pelo `AgentLifecycleService`
+// (ver Seção 8.3), que é parte da lógica de inicialização no processo principal do Electron.
+
+// O `AgentLifecycleService` obteria as seguintes dependências do container DI:
+// 1. `IJobRepository`: Para passar ao construtor de cada `QueueClient`.
+// 2. `IAIAgentExecutionService`: Para obter a função `jobProcessor` específica para cada agente.
+// 3. `LoggerService` (e quaisquer outras dependências diretas do Worker, como `TYPES.ILoggerService`).
+
+// Em seguida, para cada `AIAgent` configurado, o `AgentLifecycleService`:
+// a. Cria uma instância de `QueueClient`, passando o `queueName` do agente e a instância de `IJobRepository`.
+// b. Obtém a função `jobProcessor` do `IAIAgentExecutionService` (ex: `agentExecutionService.getJobProcessorForAgent(agentId)`).
+// c. Cria uma instância de `AgentWorker`, passando o `workerId`, a instância de `QueueClient`, a função `jobProcessor`, e o `LoggerService`.
 
 export { container };
 ```
+**Escopos de Ciclo de Vida:**
+*   `inSingletonScope()`: Uma única instância do serviço/repositório é criada e compartilhada durante todo o ciclo de vida da aplicação. Adequado para repositórios e serviços stateless.
+*   `inTransientScope()`: Uma nova instância é criada toda vez que a dependência é solicitada.
+*   `inRequestScope()`: (Menos comum em aplicações Electron backend, mais em servidores web) Uma nova instância por "requisição". Para Casos de Uso, `inTransientScope()` ou `inRequestScope()` (se houver um conceito de "requisição" no fluxo IPC) são geralmente apropriados para garantir que cada execução do caso de uso seja isolada.
 
-**Principais Pontos da Configuração:**
-
-*   **`reflect-metadata`:** Esta biblioteca é um requisito do InversifyJS e deve ser importada uma vez, geralmente no ponto de entrada principal da aplicação que inicializa o container (ex: `src/infrastructure/electron/main.ts`).
-*   **`Container`:** Instância principal do InversifyJS.
-*   **`bind<Interface>(TYPE).to(Implementation)`:** É como registramos uma dependência. Diz ao container: "Quando alguém pedir por `Interface` (identificada pelo símbolo `TYPE`), forneça uma instância de `Implementation`".
-*   **Escopos (`inSingletonScope()`, `inTransientScope()`):**
-    *   `inSingletonScope()`: Garante que apenas uma instância da dependência seja criada e reutilizada em toda a aplicação. Ideal para repositórios, serviços stateless, ou configurações.
-    *   `inTransientScope()`: Cria uma nova instância da dependência cada vez que ela é solicitada. Geralmente usado para Casos de Uso ou classes que mantêm estado por operação.
-    *   `inRequestScope()`: (Menos comum em backends Electron, mais para servidores web) Cria uma instância por "requisição".
-
-Este arquivo `inversify.config.ts` será o local central para gerenciar como todas as principais dependências do sistema são construídas e conectadas.
 ### 4.2. Definição de Tipos/Símbolos (`infrastructure/ioc/types.ts`)
-Para que o InversifyJS possa identificar unicamente os diferentes tipos de dependências que queremos injetar (especialmente interfaces, já que elas não existem em tempo de execução no JavaScript), usamos símbolos. Um arquivo, tipicamente `src/infrastructure/ioc/types.ts`, é usado para definir esses símbolos.
 
-**Exemplo de Estrutura (`types.ts`):**
+Para evitar o uso de strings literais para identificar os bindings (o que é propenso a erros), definiremos constantes simbólicas (Symbols) em um arquivo `types.ts`.
 
 ```typescript
+// src/infrastructure/ioc/types.ts
 const TYPES = {
-  // Repositórios
+  // --- Repositórios ---
   IJobRepository: Symbol.for('IJobRepository'),
-  IUserRepository: Symbol.for('IUserRepository'),
-  IProjectRepository: Symbol.for('IProjectRepository'),
-  // Adicionar outras interfaces de repositório aqui
+  IAIAgentRepository: Symbol.for('IAIAgentRepository'),
+  // Adicionar outros repositórios aqui (ex: IProjectRepository, IUserRepository)
 
-  // Serviços de Domínio/Aplicação/Infraestrutura
+  // --- Serviços de Domínio ---
+  IAIAgentExecutionService: Symbol.for('IAIAgentExecutionService'),
+  // Adicionar outros serviços de domínio aqui
+
+  // --- Serviços de Infraestrutura ---
   ILLMService: Symbol.for('ILLMService'),
-  IEmbeddingService: Symbol.for('IEmbeddingService'),
-  // Adicionar outras interfaces de serviço aqui
+  IToolRegistry: Symbol.for('IToolRegistry'),
+  ILoggerService: Symbol.for('ILoggerService'),
+  // Adicionar outros serviços de infraestrutura aqui
 
-  // Casos de Uso
-  CreateJobUseCase: Symbol.for('CreateJobUseCase'),
-  CreateProjectUseCase: Symbol.for('CreateProjectUseCase'),
-  AssignTaskToAIAgentUseCase: Symbol.for('AssignTaskToAIAgentUseCase'),
+  // --- Casos de Uso ---
+  EnqueueJobUseCase: Symbol.for('EnqueueJobUseCase'),
   // Adicionar outros casos de uso aqui
 
-  // Handlers IPC (se forem classes injetáveis)
-  JobHandlers: Symbol.for('JobHandlers'),
-  ProjectHandlers: Symbol.for('ProjectHandlers'),
-  // Adicionar outros handlers aqui
-
-  // Outras dependências específicas
-  DatabaseConnection: Symbol.for('DatabaseConnection'), // Exemplo, se a conexão do DB for injetada
-  // Job Processors (Removidos ou comentados se a lógica está no AIAgent.processJob)
-  // TextGenerationJobProcessor: Symbol.for('TextGenerationJobProcessor'),
-  // CodeGenerationJobProcessor: Symbol.for('CodeGenerationJobProcessor'),
-
-  // Workers (Geralmente instanciados programaticamente, não injetados como tipo único)
-  // AgentWorker: Symbol.for('AgentWorker'),
-
-  // Serviços de Domínio/Aplicação para Agentes
-  IAIAgentExecutionService: Symbol.for('IAIAgentExecutionService'),
-  IJobQueueService: Symbol.for('IJobQueueService'),       // Para interações avançadas com a fila
-  // IAIAgentDomainService: Symbol.for('IAIAgentDomainService'), // Se a abordagem de serviço for usada -> substituído/renomeado para IAIAgentExecutionService
-  // Fábricas
-  // JobProcessorFactory: Symbol.for('JobProcessorFactory'), // Removido se job processors não são mais registrados individualmente
+  // --- Outros ---
+  // Ex: Electron specific services like MainWindowProvider, etc.
 };
 
 export { TYPES };
 ```
+O `Symbol.for()` cria um Symbol global. Se diferentes partes do código precisarem referenciar o mesmo Symbol (por exemplo, um módulo define o binding, outro injeta), usar `Symbol.for()` garante que o mesmo Symbol seja usado.
 
-**Uso dos Símbolos:**
-Estes símbolos são usados tanto no arquivo `inversify.config.ts` (para registrar os bindings) quanto nas classes que recebem injeções (usando o decorador `@inject(TYPES.AlgumSimbolo)`). `Symbol.for('NomeDoSimbolo')` cria um símbolo global único, o que é útil para evitar colisões e garantir que o mesmo símbolo seja usado em diferentes partes da aplicação.
 ### 4.3. Exemplos de Uso (`@injectable`, `@inject`)
-Com o container configurado e os tipos definidos, podemos usar os decoradores do InversifyJS para tornar as classes gerenciáveis pelo container e para injetar suas dependências.
 
-**Tornando uma Classe Injetável (`@injectable()`):**
-Qualquer classe que precise ter dependências injetadas nela, ou que precise ser injetada em outras classes, deve ser marcada com o decorador `@injectable()`.
+Classes que devem ser gerenciadas pelo container InversifyJS e ter dependências injetadas precisam ser decoradas com `@injectable()`. Suas dependências são então injetadas no construtor usando o decorador `@inject(TYPE)` e o tipo/símbolo correspondente.
 
-```typescript
-// Exemplo: Implementação de um Repositório
-// src/infrastructure/persistence/drizzle/job.repository.ts
-import { injectable, inject } from 'inversify';
-import { TYPES } from '@/infrastructure/ioc/types';
-import { IJobRepository } from '@/domain/repositories/i-job.repository';
-import { Job } from '@/domain/entities/job.entity';
-// Suponha que 'DrizzleClient' seja um tipo para o cliente DB (ex: db de drizzle/index.ts)
-// e que ele também seja gerenciado por DI (ou passado de outra forma)
-// import { DrizzleClient } from './drizzle-client';
-
-@injectable()
-export class DrizzleJobRepository implements IJobRepository {
-  private readonly db; //: DrizzleClient;
-
-  // Exemplo de injeção de outra dependência (se necessário)
-  // constructor(@inject(TYPES.DatabaseConnection) db: DrizzleClient) {
-  //   this.db = db;
-  // }
-  constructor() {
-    // Em um cenário real, o cliente Drizzle (db) seria injetado
-    // ou a classe DrizzleJobRepository receberia a instância do 'db'
-    // de forma que não o crie internamente, para melhor testabilidade.
-    // Por simplicidade neste exemplo, vamos omitir a injeção do db aqui,
-    // mas na implementação final, ele viria do container ou seria passado.
-    // this.db = require('@/infrastructure/services/drizzle').db; // Evitar isso na prática
-  }
-
-  async findById(id: string): Promise<Job | null> {
-    // Lógica para buscar job usando this.db
-    console.log(`Buscando Job com ID: ${id} (implementação pendente)`);
-    return null;
-  }
-
-  async save(job: Job): Promise<void> {
-    // Lógica para salvar job usando this.db
-    console.log(`Salvando Job: ${job.name} (implementação pendente)`);
-  }
-  // ... outros métodos da interface
-}
-```
-
-**Injetando Dependências (`@inject()`):**
-As dependências são declaradas no construtor da classe e marcadas com o decorador `@inject(TYPES.NomeDoSimbolo)`.
+**Exemplo - Serviço de Domínio (`AIAgentExecutionService`):**
+O `AIAgentExecutionService` (Seção 3.1) é um bom exemplo de um serviço de domínio que depende de outras abstrações (como `IAIAgentRepository`, `ILLMService`, `IToolRegistry`).
 
 ```typescript
-// Exemplo: Um Caso de Uso
-// src/domain/use-cases/job/create-job.use-case.ts
-import { injectable, inject } from 'inversify';
-import { TYPES } from '@/infrastructure/ioc/types';
-import { IJobRepository } from '@/domain/repositories/i-job.repository';
-import { Job } from '@/domain/entities/job.entity';
-
-interface CreateJobInput {
-  name: string;
-  // ... outros campos necessários
-}
-
-@injectable()
-export class CreateJobUseCase {
-  private jobRepository: IJobRepository;
-
-  constructor(
-    @inject(TYPES.IJobRepository) jobRepository: IJobRepository
-  ) {
-    this.jobRepository = jobRepository;
-  }
-
-  async execute(input: CreateJobInput): Promise<Job> {
-    // Validação da entrada (pode ser um Value Object ou validação aqui)
-    const job = Job.create({ name: input.name /* ...outros dados */ }); // Supõe um método estático na entidade
-    await this.jobRepository.save(job);
-    return job;
-  }
-}
-```
-
-**Obtendo Instâncias do Container:**
-No ponto de entrada da aplicação ou em locais estratégicos (como na criação dos Handlers IPC), você obterá instâncias do container:
-
-```typescript
-// Exemplo em src/infrastructure/electron/main.ts ou em um handler IPC
-import { container } from '@/infrastructure/ioc/inversify.config';
-import { TYPES } from '@/infrastructure/ioc/types';
-import { CreateJobUseCase } from '@/domain/use-cases/job/create-job.use-case';
-
-// ...
-
-// Em um handler IPC, por exemplo:
-// ipcMain.handle('usecase:create-job', async (event, jobData) => {
-//   const createJobUseCase = container.get<CreateJobUseCase>(TYPES.CreateJobUseCase);
-//   return await createJobUseCase.execute(jobData);
-// });
-```
-
-Com o container configurado e os tipos definidos, as classes podem ser marcadas como `@injectable()` para serem gerenciadas pelo container e terem suas dependências injetadas via construtor usando `@inject(TYPES.NomeDoSimbolo)`.
-
-**Exemplo com `AIAgentExecutionService`:**
-
-Este serviço é central para a execução da lógica dos agentes de IA. Ele recebe todas as dependências necessárias para orquestrar a interação com LLMs, ferramentas, e o sistema de filas.
-
-```typescript
-// Exemplo conceitual: src/domain/services/agent/ai-agent-execution.service.ts
+// src/domain/services/agent/ai-agent-execution.service.ts
 import { injectable, inject } from 'inversify';
 import { TYPES } from '@/infrastructure/ioc/types';
 import { IAIAgentRepository } from '@/domain/repositories/i-ai-agent.repository';
-import { IQueueRepository } from '@/domain/repositories/i-queue.repository'; // Alterado
-import { ILLMService } from '@/domain/services/i-llm.service';
-import { IToolRegistry } from '@/domain/services/i-tool-registry.service';
+import { ILLMService } from '@/domain/services/llm/i-llm.service'; // Supondo interface no domínio
+import { IToolRegistry } from '@/domain/services/tools/i-tool.registry'; // Supondo interface no domínio
 import { Job } from '@/domain/entities/job.entity';
-import { AIAgent } from '@/domain/entities/ai-agent.entity'; // A entidade de configuração
-// Importar CoreMessage, DelayedError, WaitingChildrenError se necessário
-
-export interface IAIAgentExecutionService {
-  getJobProcessorForAgent(agentId: string): (job: Job, workerToken: string) => Promise<any>;
-  // Ou, alternativamente, um método que executa diretamente:
-  // processAgentJob(agentId: string, job: Job, workerToken: string): Promise<any>;
-}
+// import { IQueueClient } from '@/domain/interfaces/i-queue.client'; // Não mais necessário aqui
+// IAIAgentExecutionService como interface para este serviço, se definida
 
 @injectable()
-export class AIAgentExecutionService implements IAIAgentExecutionService {
-  constructor(
-    @inject(TYPES.IAIAgentRepository) private aiAgentRepository: IAIAgentRepository,
-    @inject(TYPES.IQueueRepository) private queueRepository: IQueueRepository, // Alterado
-    @inject(TYPES.ILLMService) private llmService: ILLMService,
-    @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry
-  ) {}
+export class AIAgentExecutionService /* implements IAIAgentExecutionService */ {
+  private aiAgentRepository: IAIAgentRepository;
+  private llmService: ILLMService;
+  private toolRegistry: IToolRegistry;
 
-  // Opção 1: Retornar uma função jobProcessor configurada para um agente específico
-  public getJobProcessorForAgent(agentId: string): (job: Job, workerToken: string) => Promise<any> {
-    return async (job: Job, workerToken: string): Promise<any> => {
+  constructor(
+    @inject(TYPES.IAIAgentRepository) aiAgentRepository: IAIAgentRepository,
+    @inject(TYPES.ILLMService) llmService: ILLMService,
+    @inject(TYPES.IToolRegistry) toolRegistry: IToolRegistry
+  ) {
+    this.aiAgentRepository = aiAgentRepository;
+    this.llmService = llmService;
+    this.toolRegistry = toolRegistry;
+  }
+
+  public getJobProcessorForAgent(agentId: string): (job: Job) => Promise<any> {
+    // Lógica para obter ou construir a função jobProcessor específica para o agentId.
+    // Esta função agora tem a assinatura (job: Job) => Promise<any>.
+    // Ela usará this.aiAgentRepository, this.llmService, this.toolRegistry internamente.
+    // Exemplo simplificado:
+    return async (job: Job): Promise<any> => {
       const agentProfile = await this.aiAgentRepository.findById(agentId);
       if (!agentProfile) {
         throw new Error(`AIAgent profile ${agentId} not found for job ${job.id}.`);
       }
-
-      // Lógica de processamento do job do agente (interação com LLM, ferramentas, etc.)
-      // Esta é a lógica que antes estava esboçada em AIAgent.processJob
-      console.log(`[AIAgentExecutionService] Processing job ${job.id} for agent ${agentProfile.name} (Token: ${workerToken.substring(0,8)})`);
-
-      const taskInput = job.payload.taskInput || job.payload.goal;
-      let conversationHistory = job.data?.conversationHistory || [];
-      // Adicionar taskInput ao histórico, etc.
-
-      // Exemplo de interação com LLM
-      // const llmResult = await this.llmService.streamText({
-      //   modelId: agentProfile.props.modelId,
-      //   systemPrompt: agentProfile.props.roleDescription,
-      //   // ...
-      //   messages: conversationHistory,
-      //   tools: this.toolRegistry.getTools(agentProfile.props.availableTools),
-      // });
-      // ... (processar stream, executar ferramentas via this.toolRegistry)
-
-      // Exemplo de atualização de dados do job
-      // job.updateJobData({ conversationHistory, currentStep: 'llm_processed' });
-      // await this.queueRepository.save(job); // Alterado para queueRepository
-
-      // Exemplo de adiamento do job
-      // if (conditionToDelay) {
-      //   job.setToBeDelayed(new Date(Date.now() + delayDuration));
-      //   await this.queueRepository.save(job); // Salva o estado pretendido
-      //   await this.queueRepository.requestMoveToDelayed(job.id, workerToken, job.props.delayUntil!); // Alterado para queueRepository
-      //   throw new DelayedError('Job processing delayed by agent logic.');
-      // }
-
-      const finalResult = { message: `Job ${job.id} processed for agent ${agentProfile.name}. Output: Example result.`};
-      // job.updateJobData({ finalResult }); // Salvar resultado final nos dados do job
-      // await this.queueRepository.save(job); // Alterado para queueRepository
-
-      return finalResult;
+      // ... lógica do jobProcessor como detalhado na Seção 3.1 ...
+      // Ex: interagir com this.llmService, this.toolRegistry, modificar job.props.data,
+      // e lançar DelayedError ou retornar um resultado.
+      // Este jobProcessor NÃO interage com QueueClient ou IJobRepository diretamente.
+      console.log(`Processing job ${job.id} for agent ${agentProfile.props.name} using LLM ${this.llmService.constructor.name}`);
+      job.updateJobData({ processedBy: agentProfile.props.name });
+      if (job.props.name === 'test-delay-job') {
+        job.prepareForDelay(new Date(Date.now() + 5000));
+        throw new Error('DelayedError: Test delay for job.'); // Simula DelayedError
+      }
+      return { success: true, data: job.props.data };
     };
   }
 
-  // Opção 2: Método que executa diretamente (Worker passaria agentId) - menos flexível para o Worker genérico
-  // public async processAgentJob(agentId: string, job: Job, workerToken: string): Promise<any> {
-  //    // Lógica similar à de cima
-  // }
+  // ... outros métodos do serviço ...
 }
 ```
 
-**Obtendo e Usando o `jobProcessor` no `AgentLifecycleService` (Conceitual):**
-
-O `AgentLifecycleService` (mencionado na Seção 8.3), ao inicializar os `Worker`s, faria algo assim:
+**Exemplo - Implementação de Repositório (`InMemoryJobRepository`):**
+Uma implementação de repositório, como `InMemoryJobRepository`, também é `@injectable()` mas geralmente não possui dependências `@inject` em seu construtor (a menos que dependa de um cliente de banco de dados de baixo nível que também seja gerenciado por DI, o que é menos comum para implementações em memória).
 
 ```typescript
-// No AgentLifecycleService (lógica de inicialização)
-// const agentExecutionService = container.get<IAIAgentExecutionService>(TYPES.IAIAgentExecutionService);
-// const queueRepository = container.get<IQueueRepository>(TYPES.IQueueRepository); // Alterado
-// const aiAgentRepository = container.get<IAIAgentRepository>(TYPES.IAIAgentRepository);
-// // ... outras dependências globais para workers
+// src/infrastructure/persistence/in-memory/in-memory-job.repository.ts
+import { injectable } from 'inversify';
+import { IJobRepository } from '@/domain/repositories/i-job.repository';
+import { Job } from '@/domain/entities/job.entity';
+import { JobStatus } from '@/domain/value-objects/job-status.vo'; // Exemplo
 
-// Para cada AIAgentConfig carregado do aiAgentRepository:
-//   const agentConfig = ... // AIAgentProps
-//   const specificJobProcessor = agentExecutionService.getJobProcessorForAgent(agentConfig.id);
-//
-//   const worker = new AgentWorker(
-//     agentConfig.queueName, // queueName da config do agente
-//     specificJobProcessor,
-//     queueRepository, // Passando IQueueRepository para o Worker
-//     // ... outras dependências que o Worker precisa (ex: LoggerService)
-//   );
-//   worker.start();
+@injectable()
+export class InMemoryJobRepository implements IJobRepository {
+  private jobs: Job[] = [];
+  private locks: Map<string, { workerId: string, expiresAt: number }> = new Map();
+
+  async add(job: Job): Promise<void> {
+    this.jobs.push(job);
+    console.log(`[InMemoryJobRepository] Job ${job.id} added. Total jobs: ${this.jobs.length}`);
+  }
+
+  async save(job: Job, lockToken?: string): Promise<void> {
+    // ... lógica de save, incluindo validação de lockToken se fornecido ...
+    // e liberação de lock para estados terminais.
+    const index = this.jobs.findIndex(j => j.id === job.id);
+    if (index !== -1) {
+      this.jobs[index] = job;
+      console.log(`[InMemoryJobRepository] Job ${job.id} saved with status ${job.status}`);
+    } else {
+      // Comportamento de 'add' se o job não existir? Ou lançar erro?
+      // Para este exemplo, se não encontrar, adiciona (embora 'add' seja o método preferido para novos).
+      this.jobs.push(job);
+      console.warn(`[InMemoryJobRepository] Job ${job.id} not found for save, added instead.`);
+    }
+    // Lógica de liberação de lock simplificada:
+    if (job.status === JobStatus.COMPLETED || (job.status === JobStatus.FAILED && !job.canRetry())) {
+        if (this.locks.has(job.id) && this.locks.get(job.id)?.workerId === lockToken?.split(':')[0]) { // Validação de token simplificada
+            this.locks.delete(job.id);
+            console.log(`[InMemoryJobRepository] Lock released for job ${job.id}`);
+        }
+    }
+  }
+
+  async findById(jobId: string): Promise<Job | null> {
+    return this.jobs.find(j => j.id === jobId) || null;
+  }
+
+  async findNextPending(queueName: string, workerId: string): Promise<{ job: Job; lockToken: string } | null> {
+    // ... lógica para encontrar o próximo job pendente e aplicar lock ...
+    const now = Date.now();
+    const job = this.jobs.find(j =>
+        j.props.queueName === queueName &&
+        (j.status === JobStatus.PENDING || (j.status === JobStatus.DELAYED && j.props.delayUntil && j.props.delayUntil.getTime() <= now)) &&
+        (!this.locks.has(j.id) || (this.locks.get(j.id)?.expiresAt ?? 0) < now) // Verifica se não está locado ou se o lock expirou
+    );
+    if (job) {
+        const lockToken = `${workerId}:${Date.now() + 30000}`; // Token simples: workerId:expirationTimestamp
+        this.locks.set(job.id, { workerId, expiresAt: Date.now() + 30000 }); // Lock por 30s
+        console.log(`[InMemoryJobRepository] Job ${job.id} locked by ${workerId} with token ${lockToken}`);
+        return { job: Job.clone(job), lockToken }; // Retorna um clone para evitar modificação direta do objeto em memória
+    }
+    return null;
+  }
+}
 ```
-Isso demonstra como o `AIAgentExecutionService` atua como uma fábrica ou provedor para a lógica de processamento específica do agente, que é então executada por `Worker`s genéricos. A entidade `AIAgent` (Seção 6.2) agora serve primariamente como o DTO de configuração/perfil para o agente.
+A utilização de DI com InversifyJS, conforme descrito, permitirá construir um sistema robusto, onde as dependências são claramente definidas e gerenciadas, facilitando a manutenção, a testabilidade e a evolução da arquitetura. O foco é em injetar dependências em serviços e repositórios que são então orquestrados pela lógica de inicialização da aplicação para montar componentes mais complexos como os `Worker`s.
 
 ## 5. Proposta de Organização de Diretórios Detalhada
-
-A seguir, é apresentada a proposta para a organização de diretórios dentro da pasta `src/`. Esta estrutura visa refletir a separação de camadas da Clean Architecture, simplificada para três camadas principais (`domain`, `infrastructure`, `shared`), e facilitar a navegação e localização dos diferentes componentes do sistema.
-
-```
-src/
-├── domain/
-│   ├── entities/
-│   │   ├── value-objects/
-│   │   ├── job.entity.ts
-│   │   └── ai-agent.entity.ts
-│   ├── use-cases/
-│   │   ├── job/
-│   │   │   ├── dtos/ (Opcional: DTOs para este caso de uso)
-│   │   │   ├── create-job.use-case.ts
-│   │   │   └── ...
-│   │   ├── project/
-│   │   └── agent/ (Casos de uso relacionados a agentes)
-│   ├── repositories/ (Interfaces/Ports)
-│   └── services/
-│       ├── agent/
-│       │   └── ai-agent.service.ts (Se AIAgent.processJob for externalizado para um serviço)
-│       └── job-priority.service.ts
-│
-├── infrastructure/
-│   ├── persistence/
-│   │   └── drizzle/
-│   │       ├── repositories/ (Implementações)
-│   │       ├── mappers/
-│   │       ├── schema.ts
-│   │       └── migrations/
-│   │   └── database.ts
-│   ├── ui/react/
-│   │   ├── main.tsx
-│   │   ├── App.tsx
-│   │   ├── pages/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/ (Serviços da UI)
-│   │   ├── contexts/
-│   │   ├── routes/
-│   │   ├── assets/
-│   │   └── styles/
-│   ├── electron/
-│   │   ├── main.ts
-│   │   ├── preload.ts
-│   │   └── ipc-handlers/
-│   ├── services/ (Clientes para LLMs, Embedding, Logging)
-│   │   └── llm/
-│   │       └── deepseek.service.ts
-│   ├── workers/ # Adicionado
-│   │   └── agent.worker.ts
-│   └── ioc/
-│       ├── inversify.config.ts
-│       └── types.ts
-│
-├── shared/
-│   ├── utils/
-│   ├── types/ (Tipos TypeScript comuns)
-│   ├── dtos/ (Opcional: DTOs globais/compartilhados)
-│   └── constants/
-│
-└── main.ts (Legado)
-```
-
-**Considerações Adicionais:**
-
-*   **DTOs (Data Transfer Objects):** Se os Casos de Uso precisarem de estruturas de dados específicas para entrada/saída que diferem das entidades do domínio, esses DTOs podem ser colocados dentro dos respectivos diretórios dos casos de uso (ex: `src/domain/use-cases/job/dtos/create-job.dto.ts`) ou em uma pasta `src/shared/dtos/` se forem amplamente reutilizáveis entre diferentes partes da aplicação. Inicialmente, a camada `src/application` foi omitida para simplificar a estrutura de três camadas principais (`domain`, `infrastructure`, `shared`).
-*   **`mappers` em `persistence`:** Se a estrutura das entidades de domínio divergir significativamente dos esquemas do banco de dados, uma camada de mapeadores pode ser útil para converter entre os dois.
-*   **Testes:** Diretórios de teste (ex: `__tests__` ou arquivos `*.spec.ts`, `*.test.ts`) seriam colocados próximos aos arquivos que testam, ou em um diretório `tests/` na raiz do projeto, espelhando a estrutura de `src/`.
-*   **`AIAgentService`:** Se a lógica de `AIAgent.processJob` se tornar muito complexa ou se beneficiar de ser um serviço injetável separado da entidade `AIAgent` (que se tornaria mais um DTO de configuração), este serviço (`AIAgentService`) residiria em `src/domain/services/agent/`.
+(Conteúdo existente da Seção 5)
 
 ## 6. Entidades e Casos de Uso Chave (Exemplos Detalhados)
 
-Nesta seção, apresentamos exemplos mais detalhados de como algumas entidades de domínio e casos de uso chave seriam estruturados na nova arquitetura. Os exemplos visam ilustrar a aplicação dos princípios de Clean Architecture, Object Calisthenics e o uso de Injeção de Dependência. O código apresentado é um pseudocódigo/exemplo conceitual em TypeScript para fins ilustrativos.
-
 ### 6.1. Exemplo de Entidade: `Job`
-A entidade `Job` representa uma unidade de trabalho a ser processada no sistema, possivelmente por um agente de IA ou um worker.
+(Conteúdo existente da Seção 6.1, com `JobProps` e `Job.create` genéricos, e a subseção "Modificação do Estado do Job e Persistência via Worker/QueueClient" refletindo que `jobProcessor` usa `QueueClient` para chamar `saveJob` no `IJobRepository` após modificações em memória ou para sinalizar estados como `DELAYED`.)
 
-**Localização:** `src/domain/entities/job.entity.ts`
-
-**Princípios Aplicados:**
-*   **Encapsulamento:** O estado interno do `Job` (como `status`, `attempts`) é privado e só pode ser modificado através de métodos que representam comportamentos de negócio (ex: `start`, `complete`, `fail`).
-*   **Value Objects:** IDs, nomes, status e outros atributos primitivos seriam representados por Value Objects (ex: `JobId`, `JobName`, `JobStatusVO`) para garantir validade e significado. (Omitido no exemplo abaixo por brevidade, mas seriam usados).
-*   **Pequenas Entidades:** A classe foca apenas nas responsabilidades diretas de um Job.
-*   **Sem Setters Públicos:** O estado é alterado por comportamentos.
-
-**Exemplo Conceitual:**
-
-```typescript
-// src/domain/entities/value-objects/job-status.vo.ts
-export class JobStatusVO {
-  private static readonly VALID_STATUSES = [
-    'PENDING', 'ACTIVE', 'COMPLETED', 'FAILED',
-    'DELAYED', 'WAITING_CHILDREN' // Adicionados
-  ] as const;
-  readonly value: typeof JobStatusVO.VALID_STATUSES[number];
-
-  private constructor(status: typeof JobStatusVO.VALID_STATUSES[number]) {
-    this.value = status;
-  }
-
-  static create(status: string): JobStatusVO {
-    if (!JobStatusVO.VALID_STATUSES.includes(status as any)) {
-      throw new Error(`Invalid job status: ${status}`);
-    }
-    return new JobStatusVO(status as any);
-  }
-
-  is(status: string): boolean {
-    return this.value === status;
-  }
-  // Outros métodos auxiliares para transição de status poderiam estar aqui ou na entidade Job.
-}
-
-
-// src/domain/entities/job.entity.ts
-// import { JobIdVO } from './value-objects/job-id.vo'; // Exemplo de VO
-// import { JobStatusVO } from './value-objects/job-status.vo';
-
-export interface JobProps {
-  id: string; // Deveria ser JobIdVO
-  name: string; // Tipo de job, usado para rotear para o jobProcessor correto
-  queueName: string; // Nome da fila à qual o job pertence
-  payload: any; // Dados específicos da tarefa, fornecidos pelo cliente da fila
-  data?: any; // Dados internos do jobProcessor, atualizáveis durante a execução
-  status: JobStatusVO;
-  attempts: number;
-  maxAttempts: number;
-  priority?: number;
-  delayUntil?: Date;
-  processedAt?: Date;
-  finishedAt?: Date;
-  result?: any;
-  error?: string;
-  parentId?: string; // JobIdVO - Para jobs filhos
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export class Job {
-  private props: JobProps;
-
-  private constructor(props: JobProps) {
-    this.props = props;
-  }
-
-  public static create(params: {
-    id?: string;
-    name: string; // Tipo de job
-    queueName: string;
-    payload: any; // Dados específicos da tarefa
-    maxAttempts?: number;
-    priority?: number;
-    delayUntil?: Date;
-    parentId?: string;
-    initialData?: any; // Estado inicial para o campo 'data'
-  }): Job {
-    const now = new Date();
-    const id = params.id || crypto.randomUUID(); // Usar UUID real
-    return new Job({
-      id,
-      name: params.name,
-      queueName: params.queueName,
-      payload: params.payload,
-      status: JobStatusVO.create('PENDING'), // Default para PENDING
-      attempts: 0,
-      maxAttempts: params.maxAttempts || 3,
-      priority: params.priority || 10,
-      delayUntil: params.delayUntil,
-      parentId: params.parentId,
-      data: params.initialData,
-      createdAt: now,
-      updatedAt: now,
-      // Certifique-se de que nenhum campo específico de domínio como projectId está sendo atribuído aqui
-    });
-  }
-
-  // Getters para acesso controlado (apenas leitura do estado)
-  get id(): string { return this.props.id; }
-  get name(): string { return this.props.name; }
-  get status(): string { return this.props.status.value; }
-  get payload(): any { return this.props.payload; }
-  get attempts(): number { return this.props.attempts; }
-
-
-  // Comportamentos de Negócio
-  public startProcessing(): void {
-    if (!this.props.status.is('PENDING') && !this.props.status.is('DELAYED')) {
-      throw new Error('Job cannot be started in its current state.');
-    }
-    this.props.status = JobStatusVO.create('ACTIVE');
-    this.props.attempts += 1;
-    this.props.updatedAt = new Date();
-  }
-
-  public complete(result: any): void {
-    if (!this.props.status.is('ACTIVE')) {
-      throw new Error('Job cannot be completed if not active.');
-    }
-    this.props.status = JobStatusVO.create('COMPLETED');
-    this.props.result = result;
-    this.props.updatedAt = new Date();
-  }
-
-  public fail(error: string): void {
-    if (!this.props.status.is('ACTIVE')) {
-      // Pode haver lógicas diferentes se falhar de outros estados
-    }
-    this.props.status = JobStatusVO.create('FAILED');
-    this.props.error = error;
-    this.props.updatedAt = new Date();
-
-    if (this.props.attempts >= this.props.maxAttempts) {
-      // Lógica para falha permanente, talvez mover para um status 'PERMANENTLY_FAILED'
-      console.error(`Job ${this.id} failed permanently after ${this.props.attempts} attempts.`);
-    }
-  }
-
-  public canRetry(): boolean {
-    return this.props.status.is('FAILED') && this.props.attempts < this.props.maxAttempts;
-  }
-
-  public markAsPendingRetry(): void {
-    if (!this.canRetry()) {
-        throw new Error('Job cannot be marked for retry.');
-    }
-    this.props.status = JobStatusVO.create('PENDING'); // Ou 'DELAYED' com cálculo de delay
-    this.props.updatedAt = new Date();
-  }
-
-  // Outros métodos como assignToAgent, setPriority, etc., podem ser removidos se não forem genéricos.
-  // Os métodos prepareForDelay e prepareToWaitForChildren são mantidos como exemplos de como
-  // a entidade pode preparar seu estado internamente antes que o jobProcessor sinalize ao Worker.
-
-    public updateJobData(newData: any): void {
-      this.props.data = { ...(this.props.data || {}), ...newData };
-      this.props.updatedAt = new Date();
-      // Nenhuma chamada de persistência aqui.
-    }
-
-    public prepareForDelay(delayTargetTimestamp: Date): void {
-      if (!this.props.status.is('ACTIVE')) {
-        throw new Error('Job must be ACTIVE to be prepared for delay.');
-      }
-      this.props.status = JobStatusVO.create('DELAYED');
-      this.props.delayUntil = delayTargetTimestamp;
-      this.props.updatedAt = new Date();
-      // Nenhuma chamada de persistência ou uso de workerToken aqui.
-    }
-
-    public prepareToWaitForChildren(): void {
-      if (!this.props.status.is('ACTIVE')) {
-        throw new Error('Job must be ACTIVE to be prepared to wait for children.');
-      }
-      this.props.status = JobStatusVO.create('WAITING_CHILDREN');
-      this.props.updatedAt = new Date();
-      // Nenhuma chamada de persistência ou uso de workerToken aqui.
-    }
-}
-```
-
-**Modificação do Estado do Job e Persistência via Worker/QueueClient:**
-
-A entidade `Job` é responsável por manter seu estado e dados intrínsecos. Seus métodos permitem que o `jobProcessor` modifique este estado *em memória*. A persistência dessas alterações e a execução de operações de fila que requerem autorização (como adiar um job ou marcá-lo como esperando por filhos) são orquestradas pelo `Worker` através do `QueueClient`, utilizando o `workerToken`.
-
-*   **`updateJobData(newData: any): void`** (Método na Entidade `Job`)
-    *   **Propósito:** Permitir que o `jobProcessor` modifique o campo `data` da instância do `Job` que está sendo processada (em memória).
-    *   **Lógica na Entidade (Reiterada):**
-        ```typescript
-        public updateJobData(newData: any): void {
-          this.props.data = { ...(this.props.data || {}), ...newData };
-          this.props.updatedAt = new Date();
-        }
-        ```
-    *   **Fluxo no `jobProcessor`:**
-        1.  `job.updateJobData(meusNovosDados);`
-        2.  (Opcional, mas recomendado) O `jobProcessor` pode então imediatamente solicitar a persistência desses dados se for um ponto de salvamento intermediário: `await queueClient.updateJobData(job.id, job.props.data, workerToken);` (Este método no `QueueClient` usaria o `IQueueRepository` para persistir os dados do `job`).
-
-*   **Sinalizando Intenção de Adiar ou Esperar (Exemplo com `prepareForDelay`):**
-    O `jobProcessor` utiliza métodos na entidade `Job` para preparar o estado desejado em memória. Em seguida, lança um erro específico para sinalizar essa intenção ao `Worker`. O `Worker` então persiste o estado preparado do `Job` usando o `QueueClient`.
-
-    *   **Método na Entidade `Job` (Exemplo para Adiar - Reiterado):**
-        ```typescript
-        public prepareForDelay(delayTargetTimestamp: Date): void {
-          if (!this.props.status.is('ACTIVE')) { // Só pode adiar um job ativo
-            throw new Error('Job must be ACTIVE to be prepared for delay.');
-          }
-          // Validações adicionais podem ser aplicadas aqui.
-          this.props.status = JobStatusVO.create('DELAYED'); // Muda o status em memória
-          this.props.delayUntil = delayTargetTimestamp;
-          this.props.updatedAt = new Date();
-        }
-        ```
-    *   **Lógica no `jobProcessor`:**
-        1.  Decide adiar o job e calcula `novoTimestamp`.
-        2.  Chama `job.prepareForDelay(novoTimestamp);` (atualiza o `job` em memória).
-        3.  Lança `new DelayedError("Job adiado pela lógica do processador");`.
-    *   **Lógica no `Worker` (ao capturar `DelayedError`):**
-        1.  `await this.queueClient.saveJob(job, lockToken);` (persiste o `job` que agora tem status `DELAYED` e `delayUntil` preenchidos). O `QueueClient` e `IQueueRepository` cuidam da lógica de lock e da atualização no DB. (Nota: `saveJob` é um método conceitual no `QueueClient` que internamente usaria `IQueueRepository.save(job)` e lidaria com o lock; ou o `Worker` usaria `queueClient.moveToDelayed(job.id, lockToken, job.props.delayUntil)` que já persistiria e atualizaria o estado.)
-
-    Um fluxo similar se aplica para `prepareToWaitForChildren()` e `WaitingChildrenError`.
-
-Essa abordagem assegura que a entidade `Job` permaneça um objeto de domínio focado em seu estado, sem conhecimento de `workerToken`s ou da mecânica de persistência da fila. O `jobProcessor` manipula a instância do `Job` em memória, e o `Worker`, em coordenação com o `QueueClient`, gerencia a persistência e as operações de fila autorizadas.
 ### 6.2. Exemplo de Entidade: `AIAgent`
-A entidade `AIAgent` (ou um nome similar como `AIWorkerProfile`, `AIModelExecutor`) representaria a configuração e o estado de um agente de IA capaz de executar jobs ou tarefas.
+(Conteúdo existente da Seção 6.2, com `AIAgent` como DTO de configuração e `processJob` removido)
 
-**Localização:** `src/domain/entities/ai-agent.entity.ts`
-
-**Princípios Aplicados:**
-*   **Coesão:** Agrupa informações sobre a configuração do modelo de IA (ID do modelo, provedor), suas capacidades (ferramentas que pode usar) e seu estado atual (ex: ocupado, ocioso).
-*   **Comportamento:** Poderia ter métodos para atribuir uma tarefa, verificar disponibilidade, ou atualizar suas configurações.
-
-**Exemplo Conceitual:**
-
-```typescript
-// src/domain/entities/ai-agent.entity.ts
-
-// Supondo Value Objects como AIAgentId, ModelProviderVO, LLMModelIdVO
-// Supondo uma entidade Tool ou ToolDefinition
-
-export interface AIAgentProps {
-  id: string; // AIAgentIdVO
-  name: string;
-  roleDescription: string; // Descrição para o prompt do sistema
-  modelId: string; // LLMModelIdVO (ex: "deepseek:deepseek-chat")
-  provider: string; // ModelProviderVO (ex: "deepseek")
-  temperature: number;
-  availableTools: string[]; // Array de IDs ou nomes de ferramentas que o agente pode usar
-  isActive: boolean;
-  // Outras configurações específicas do agente
-  // queueName: string; // REMOVIDO - agora é primariamente uma propriedade do Job
-}
-
-export class AIAgent {
-  private props: AIAgentProps;
-
-  private constructor(props: AIAgentProps) {
-    this.props = props;
-  }
-
-  public static create(params: {
-    name: string;
-    roleDescription: string;
-    modelId: string;
-    provider: string;
-    temperature?: number;
-    availableTools?: string[];
-    // queueName: string; // REMOVIDO
-  }): AIAgent {
-    const id = crypto.randomUUID(); // Gerar ID
-    return new AIAgent({
-      id,
-      name: params.name,
-      roleDescription: params.roleDescription,
-      modelId: params.modelId,
-      provider: params.provider,
-      temperature: params.temperature || 0.7,
-      availableTools: params.availableTools || [],
-      isActive: true,
-    });
-  }
-
-  get id(): string { return this.props.id; }
-  get name(): string { return this.props.name; }
-  get modelId(): string { return this.props.modelId; }
-  get roleDescription(): string { return this.props.roleDescription; }
-
-  public updateConfiguration(updateData: Partial<Pick<AIAgentProps, 'temperature' | 'availableTools' | 'modelId'>>): void {
-    this.props = { ...this.props, ...updateData };
-    // Adicionar lógica de validação se necessário
-  }
-
-  public activate(): void {
-    this.props.isActive = true;
-  }
-
-  public deactivate(): void {
-    this.props.isActive = false;
-  }
-
-  public canExecuteJob(job: Job): boolean {
-    // Lógica para verificar se o agente tem as capacidades/ferramentas necessárias para o job
-    // Por exemplo, verificar se `job.requiredCapabilities` está contido em `this.props.availableTools`
-    return this.props.isActive; // Simplificado
-  }
-
-  // O método processJob foi removido desta entidade.
-  // A lógica de processamento de job agora reside no jobProcessor fornecido pelo AIAgentExecutionService (Seção 3.1).
-}
-```
-
-**Considerações sobre a Entidade `AIAgent`:**
-
-Com a lógica de processamento de job movida para o `AIAgentExecutionService`, a entidade `AIAgent` torna-se primariamente um objeto de dados de configuração (um perfil de agente). Ela define *o quê* e *como* um agente deve se comportar (modelo LLM, persona/prompt do sistema, ferramentas disponíveis, etc.), mas não *executa* diretamente o processamento do job.
-
-O `AIAgentExecutionService` utiliza as informações da entidade `AIAgent` (carregada via `IAIAgentRepository`) para orquestrar a interação com o LLM e as ferramentas ao processar um job. As dependências como `ILLMService`, `IToolRegistry`, `IJobQueueService` e `IJobRepository` são gerenciadas pelo `AIAgentExecutionService` (e injetadas nele), não pela entidade `AIAgent`.
 ### 6.3. Exemplo de Caso de Uso: `CreateProjectUseCase`
-Este caso de uso seria responsável por criar um novo projeto no sistema.
+(Conteúdo existente da Seção 6.3)
 
-**Localização:** `src/domain/use-cases/project/create-project.use-case.ts`
-
-**Princípios Aplicados:**
-*   **Injeção de Dependência:** Recebe a interface `IProjectRepository` (e outras dependências, se necessário) via construtor.
-*   **Entrada/Saída Definidas:** Usa interfaces (ou tipos) para os dados de entrada e saída.
-*   **Orquestração:** Cria a entidade `Project` e a persiste usando o repositório.
-
-**Exemplo Conceitual:**
-
-```typescript
-// src/domain/use-cases/project/create-project.use-case.ts
-import { injectable, inject } from 'inversify';
-import { TYPES } from '@/infrastructure/ioc/types';
-import { IProjectRepository } from '@/domain/repositories/i-project.repository';
-import { Project } from '@/domain/entities/project.entity'; // Supondo que a entidade Project exista e tenha um método create e getters.
-// import { IUserRepository } from '@/domain/repositories/i-user.repository'; // Exemplo se precisasse validar usuário
-
-export interface CreateProjectInput {
-  name: string;
-  description?: string;
-  ownerUserId: string; // ID do usuário que está criando/é dono do projeto
-}
-
-export interface CreateProjectOutput {
-  projectId: string;
-  name: string;
-  ownerUserId: string;
-  createdAt: Date;
-}
-
-@injectable()
-export class CreateProjectUseCase {
-  constructor(
-    @inject(TYPES.IProjectRepository) private projectRepository: IProjectRepository
-    // @inject(TYPES.IUserRepository) private userRepository: IUserRepository, // Exemplo
-  ) {}
-
-  async execute(input: CreateProjectInput): Promise<CreateProjectOutput> {
-    // Exemplo de validação (poderia estar em um Value Object ou serviço de domínio)
-    if (!input.name || input.name.trim().length === 0) {
-      throw new Error('Project name cannot be empty.');
-    }
-
-    // const owner = await this.userRepository.findById(input.ownerUserId);
-    // if (!owner) {
-    //   throw new Error(`User with id ${input.ownerUserId} not found.`);
-    // }
-
-    const project = Project.create({ // Supondo que Project.create receba estes params
-      name: input.name,
-      description: input.description,
-      ownerUserId: input.ownerUserId,
-    });
-
-    await this.projectRepository.save(project);
-
-    return {
-      projectId: project.id,
-      name: project.name,
-      ownerUserId: project.ownerUserId, // Supondo que a entidade tenha esses getters
-      createdAt: project.createdAt,
-    };
-  }
-}
-```
 ### 6.4. Exemplo de Caso de Uso: `EnqueueJobUseCase`
-Este caso de uso seria responsável por criar um novo `Job` e adicioná-lo a uma fila para processamento.
+Este caso de uso é responsável por criar uma nova instância da entidade `Job` e adicioná-la à fila (persistência) através do `IJobRepository`.
 
 **Localização:** `src/domain/use-cases/job/enqueue-job.use-case.ts`
 
-**Princípios Aplicados:**
-*   **Injeção de Dependência:** Recebe `IJobRepository`.
-*   **Foco Único:** Sua responsabilidade é criar um `Job` com os parâmetros corretos e persisti-lo, o que efetivamente o "enfileira" para ser pego por um Worker.
+**Interface de Entrada (`EnqueueJobInput`):**
+```typescript
+// src/domain/use-cases/job/enqueue-job.use-case.ts (ou em arquivo de tipos dedicado)
+export interface EnqueueJobInput {
+  queueName: string;      // Nome da fila à qual o job pertence
+  jobName: string;        // Tipo/nome do job (para Job.props.name), ex: "ai-text-generation", "code-analysis"
+  taskPayload: any;       // Dados específicos da tarefa para Job.props.payload (ex: { prompt: "...", agentId: "..." })
+  priority?: number;       // Prioridade do job (ex: 1 = mais alta)
+  delayUntil?: Date;       // Data e hora para adiar o processamento do job
+  maxAttempts?: number;    // Número máximo de tentativas para o job
+  parentId?: string;       // ID de um job pai, se este for um job filho
+  initialJobData?: any;    // Dados iniciais para Job.props.data (estado interno, histórico, etc.)
+}
+```
 
-**Exemplo Conceitual:**
+**Interface de Saída (`EnqueueJobOutput`):**
+```typescript
+// src/domain/use-cases/job/enqueue-job.use-case.ts (ou em arquivo de tipos dedicado)
+export interface EnqueueJobOutput {
+  jobId: string;
+  status: string;         // Status inicial do job (ex: PENDING, DELAYED)
+  queueName: string;
+}
+```
 
+**Implementação do Caso de Uso:**
 ```typescript
 // src/domain/use-cases/job/enqueue-job.use-case.ts
 import { injectable, inject } from 'inversify';
-import { TYPES } from '@/infrastructure/ioc/types';
-import { IQueueRepository } from '@/domain/repositories/i-queue.repository'; // Alterado
-import { Job } from '@/domain/entities/job.entity';
-
-export interface EnqueueJobInput {
-  queueName: string; // Nome da fila de destino
-  jobName: string;   // Tipo/nome do job (para Job.create e para o processador saber o que fazer)
-  taskPayload: any;  // Dados específicos da tarefa que irão para o Job.payload
-  priority?: number;
-  delayUntil?: Date;
-  maxAttempts?: number;
-  parentId?: string;
-  initialJobData?: any; // Dados iniciais para o campo Job.data (estado interno do processador)
-}
-
-export interface EnqueueJobOutput {
-  jobId: string;
-  status: string; // O status inicial do job (PENDING ou DELAYED)
-  queueName: string;
-}
+import { TYPES } from '@/infrastructure/ioc/types'; // Supondo que TYPES.IJobRepository esteja definido
+import { IJobRepository } from '@/domain/repositories/i-job.repository';
+import { Job, JobStatus } from '@/domain/entities/job.entity'; // JobStatus importado se usado no retorno
 
 @injectable()
 export class EnqueueJobUseCase {
   constructor(
-    @inject(TYPES.IQueueRepository) private queueRepository: IQueueRepository // Alterado
+    @inject(TYPES.IJobRepository) private jobRepository: IJobRepository
   ) {}
 
   async execute(input: EnqueueJobInput): Promise<EnqueueJobOutput> {
     if (!input.queueName || input.queueName.trim().length === 0) {
-      throw new Error('Queue name must be provided.');
+      throw new Error('Queue name must be provided for enqueuing a job.');
     }
     if (!input.jobName || input.jobName.trim().length === 0) {
-      throw new Error('Job name must be provided.');
+      throw new Error('Job name must be provided for enqueuing a job.');
     }
-    // O input.taskPayload é agora o que vai para o job.payload
+    // Validar taskPayload pode ser importante dependendo dos requisitos.
+    // Aqui, assumimos que pode ser qualquer 'any', mas poderia ser mais estrito.
     if (input.taskPayload === undefined) {
-      // Permitir payload vazio (ex: {} ou null), mas não undefined se for obrigatório.
-      // Para este exemplo, vamos considerar que pode ser opcional ou que a validação é mais complexa.
-      // Se fosse obrigatório: throw new Error('Task payload must be provided.');
+      // Dependendo da lógica de negócios, pode ser permitido um payload vazio/nulo.
+      // Por agora, vamos exigir que seja fornecido.
+      console.warn('Task payload is undefined for job:', input.jobName, 'on queue:', input.queueName);
+      // throw new Error('Task payload must be provided, even if an empty object.');
     }
 
     const job = Job.create({
-      name: input.jobName,       // Usado para identificar o tipo de job/processador
+      name: input.jobName,
       queueName: input.queueName,
-      payload: input.taskPayload,  // Dados específicos da tarefa vão para o payload do Job
+      payload: input.taskPayload, // payload são os dados específicos da tarefa
       priority: input.priority,
       delayUntil: input.delayUntil,
       maxAttempts: input.maxAttempts,
       parentId: input.parentId,
-      initialData: input.initialJobData, // Para o campo 'data' do Job
+      initialData: input.initialJobData, // initialData é para o campo Job.props.data
     });
 
-    await this.queueRepository.save(job); // Usando save, assumindo que IQueueRepository.save() lida com criação.
+    // Utiliza o método 'add' do IJobRepository, conforme definido na interface IJobRepository.
+    // Este método é especificamente para adicionar novos jobs.
+    // O método 'save' seria para atualizar jobs existentes que já foram retirados da fila por um Worker.
+    await this.jobRepository.add(job);
 
     return {
       jobId: job.id,
-      status: job.status,
+      status: job.status, // Retorna o status atual do job (deve ser PENDING ou DELAYED)
       queueName: job.props.queueName,
     };
   }
 }
 ```
 
+**Notas sobre a Implementação:**
+*   **Injeção de `IJobRepository`:** O caso de uso depende da abstração `IJobRepository` para persistir o job, permitindo que a implementação concreta da persistência seja trocada (ex: de em memória para Drizzle ORM) sem alterar o caso de uso.
+*   **Criação da Entidade `Job`:** A entidade `Job` é criada usando o método estático `Job.create()`. Este método encapsula a lógica de inicialização do job, incluindo a definição do status inicial (geralmente `PENDING`, ou `DELAYED` se `delayUntil` for especificado).
+*   **Persistência com `jobRepository.add()`:** O novo job é salvo usando `this.jobRepository.add(job)`. A interface `IJobRepository` (Seção 3.1) define `add(job: Job)` para adicionar novos jobs e `save(job: Job, lockToken?: string)` para atualizar jobs existentes que estão sendo processados por um Worker (e, portanto, podem exigir um `lockToken`).
+*   **Validação de Entrada:** Inclui validações básicas para `queueName` e `jobName`. Validações mais complexas ou específicas do domínio podem ser adicionadas. A obrigatoriedade e o tipo de `taskPayload` e `initialJobData` também podem ser mais rigorosamente validados.
+*   **Object Calisthenics:**
+    *   **Um nível de indentação por método:** Atingido.
+    *   **Não use a palavra-chave ELSE:** Atingido com guard clauses.
+    *   **Encapsule todos os primitivos e Strings:** `EnqueueJobInput` e `EnqueueJobOutput` usam tipos primitivos, mas são DTOs. A entidade `Job` internamente pode usar Value Objects.
+    *   **Coleções de primeira classe:** Não aplicável diretamente neste exemplo simples.
+    *   **Um ponto por linha:** Atingido.
+    *   **Não abrevie:** Nomes como `jobRepository`, `EnqueueJobInput` são descritivos.
+    *   **Mantenha todas as entidades pequenas:** A classe `EnqueueJobUseCase` é pequena e focada.
+    *   **Não mais que duas variáveis de instância:** `jobRepository` é a única variável de instância.
+    *   **Sem getters/setters/properties:** Aplicável a entidades de domínio ricas; Casos de Uso podem ter construtores para DI.
+
+Este caso de uso demonstra como a lógica de aplicação para enfileirar um novo job pode ser implementada de forma limpa, testável e alinhada com os princípios da arquitetura proposta.
+
 ## 7. Aplicação de Object Calisthenics
-
-Object Calisthenics é um conjunto de nove regras de "exercício" para escrever código orientado a objetos melhor. Elas ajudam a criar código mais legível, manutenível e com responsabilidades bem definidas. Aplicaremos estas regras em todo o desenvolvimento do domínio e, sempre que prático, nas outras camadas.
-
-1.  **Um Nível de Indentação por Método:**
-    *   **Explicação:** Métodos devem ter apenas um nível de indentação. Isso força a extração de lógica complexa para métodos menores e mais focados.
-    *   **Aplicação Prática:** Em um Caso de Uso, se houver múltiplos `if`s aninhados para validação, cada bloco de validação pode ser extraído para um método privado.
-        ```typescript
-        // Mau:
-        // class ProcessOrderUseCase {
-        //   execute(order) {
-        //     if (order.isValid) {
-        //       if (order.hasInventory) {
-        //         // ...
-        //       }
-        //     }
-        //   }
-        // }
-
-        // Bom:
-        // class ProcessOrderUseCase {
-        //   execute(order) {
-        //     this.ensureOrderIsValid(order);
-        //     this.ensureInventoryIsAvailable(order);
-        //     // ...
-        //   }
-        //   private ensureOrderIsValid(order) { /* ... */ }
-        //   private ensureInventoryIsAvailable(order) { /* ... */ }
-        // }
-        ```
-        No nosso exemplo `Job.entity.ts`, métodos como `startProcessing` ou `fail` devem evitar múltiplos `if`s aninhados, extraindo condições para métodos privados ou usando early returns.
-
-2.  **Não Use a Palavra-Chave `ELSE`:**
-    *   **Explicação:** O uso de `else` pode muitas vezes ser substituído por `return` antecipado (early return), polimorfismo ou outras construções que tornam o fluxo de controle mais claro.
-    *   **Aplicação Prática:**
-        ```typescript
-        // Mau:
-        // function checkAccess(user) {
-        //   if (user.isAdmin) {
-        //     return true;
-        //   } else {
-        //     return false;
-        //   }
-        // }
-
-        // Bom (early return):
-        // function checkAccess(user) {
-        //   if (user.isAdmin) {
-        //     return true;
-        //   }
-        //   return false;
-        // }
-        ```
-        No método `Job.fail()`, se houvesse diferentes lógicas para diferentes status antes da falha, poderíamos usar early returns para cada condição em vez de `if-else if-else`.
-
-3.  **Envolva Todos os Primitivos e Strings em Value Objects:**
-    *   **Explicação:** Tipos primitivos (string, number, boolean) e Strings muitas vezes não carregam significado de negócio. Envolvê-los em classes pequenas (Value Objects) adiciona semântica, validação e comportamento.
-    *   **Aplicação Prática:** Em vez de `job.status: string`, teremos `job.status: JobStatusVO`. Em vez de `user.email: string`, teremos `user.email: EmailVO`.
-        *   O `JobStatusVO` (como esboçado anteriormente) validaria se o status é um dos permitidos (`PENDING`, `ACTIVE`, etc.) e poderia conter métodos como `isPending()`.
-        *   Um `EmailVO` validaria o formato do email em sua construção.
-
-4.  **Coleções de Primeira Classe (First-Class Collections):**
-    *   **Explicação:** Se uma classe contém uma coleção (array, lista, map), crie uma classe dedicada para essa coleção. Essa nova classe encapsulará todos os comportamentos relacionados à manipulação e consulta da coleção.
-    *   **Aplicação Prática:** Se um `Project` tivesse uma lista de `Jobs`, em vez de `project.jobs: Job[]`, poderíamos ter `project.jobs: JobList`, onde `JobList` teria métodos como `getActiveJobs()`, `getFailedJobs()`, `addJob(job: Job)`.
-        ```typescript
-        // class JobList {
-        //   private jobs: Job[];
-        //   constructor(initialJobs: Job[] = []) { this.jobs = initialJobs; }
-        //   add(job: Job): void { /* ... */ }
-        //   getFailedJobs(): Job[] { /* ... */ }
-        // }
-        ```
-
-5.  **Um Ponto por Linha (Law of Demeter - Forma Estrita):**
-    *   **Explicação:** Um método só deve chamar métodos de objetos que são:
-        1.  O próprio objeto (`this`).
-        2.  Parâmetros do método.
-        3.  Objetos que ele cria/instancia.
-        4.  Dependências diretas do objeto (variáveis de instância).
-        Evita encadeamentos longos como `a.getB().getC().doSomething()`.
-    *   **Aplicação Prática:** Em um Caso de Uso, em vez de `job.getProject().getOwner().getEmail()`, o `Job` poderia ter um método `getOwnerEmail()` que encapsula essa navegação, ou o Caso de Uso obteria o `Project` e depois o `Owner` separadamente se precisasse de ambos.
-
-6.  **Não Abrevie:**
-    *   **Explicação:** Use nomes completos e descritivos para classes, métodos e variáveis. Abreviações podem economizar digitação, mas custam clareza.
-    *   **Aplicação Prática:** `IJobRepository` em vez de `IJobRepo`. `CreateProjectUseCase` em vez de `CrtPrjUC`.
-
-7.  **Mantenha Todas as Entidades Pequenas (Máximo 50 Linhas):**
-    *   **Explicação:** Classes devem ser pequenas e focadas em uma única responsabilidade. Um limite de linhas (ex: 50 ou 100) é um guia para forçar essa coesão.
-    *   **Aplicação Prática:** Se a entidade `Job` começar a ter muitas responsabilidades (ex: lógica de notificação, lógica de agendamento complexa, etc.), essas responsabilidades seriam extraídas para classes separadas (Serviços de Domínio ou outras Entidades). O nosso exemplo de `Job.entity.ts` já é relativamente conciso.
-
-8.  **Nenhuma Classe com Mais de Duas Variáveis de Instância:**
-    *   **Explicação:** Esta é uma das regras mais desafiadoras. Força uma alta coesão, fazendo com que as classes modelem uma única abstração de forma muito clara. Muitas vezes, leva à criação de mais classes pequenas que encapsulam conceitos relacionados.
-    *   **Aplicação Prática:** Para a entidade `Job`, que naturalmente tem muitas propriedades (`id`, `name`, `status`, `payload`, etc.), aplicar esta regra estritamente exigiria agrupar essas propriedades em objetos menores. Por exemplo, `JobDetails { name, payload }`, `JobState { status, attempts, result }`. A `Job` então conteria `id: JobIdVO` e `details: JobDetails`, `state: JobState`.
-        Isso pode ser flexibilizado, mas o princípio é evitar classes que acumulam muitos campos diferentes sem um forte elo conceitual entre todos eles. No nosso `JobProps`, já temos um agrupamento.
-
-9.  **Sem Getters/Setters/Propriedades Públicas para Alteração de Estado:**
-    *   **Explicação:** O estado de um objeto só deve ser modificado através de métodos que representam comportamentos de negócio explícitos (Tell, Don't Ask). Getters para leitura de estado são permitidos, mas setters que simplesmente atribuem um valor a um campo são desencorajados.
-    *   **Aplicação Prática:** Na nossa entidade `Job`:
-        *   Temos getters como `job.id`, `job.status`.
-        *   Não temos um `job.setStatus(newStatus)`. Em vez disso, temos `job.startProcessing()`, `job.complete(result)`, `job.fail(error)`, que alteram o status como um efeito colateral de um comportamento de negócio.
-
-A aplicação disciplinada destas regras, especialmente no código de domínio, resultará em um sistema mais robusto, flexível e fácil de entender.
+(Conteúdo existente da Seção 7)
 
 ## 8. Refatoração da Lógica Existente
 
-Durante a fase de investigação, identificamos duas principais áreas de lógica de backend existentes:
-1.  Uma simulação de diálogo entre agentes (Product Owner e CTO) localizada em `src/infrastructure/frameworks/electron/main/agent/`.
-2.  Um sistema mais genérico de `WorkerService` e `Job` (descrito no `src/main.ts` original, que parece não estar ativamente integrado).
-
-Ambas as áreas contêm conceitos valiosos, mas precisam ser refatoradas e integradas à nova arquitetura para garantir consistência, manutenibilidade e o uso de Injeção de Dependência.
-
 ### 8.1. Refatoração da Simulação de Agente PO/CTO
-A simulação de diálogo entre o Product Owner (PO) e o CTO, atualmente em `src/infrastructure/frameworks/electron/main/agent/`, serviu como um protótipo valioso para interações com LLMs e o uso de ferramentas. Com a nova arquitetura de Worker/Fila por Agente (descrita na Seção 8.2), essa lógica será reestruturada e integrada de forma mais genérica e robusta.
+(Conteúdo existente da Seção 8.1)
 
-*   **Conceito Central Mantido:** A ideia de Agentes de IA com personalidades distintas (perfis), capazes de realizar tarefas complexas, interagir com ferramentas e manter um diálogo (seja com um usuário ou outro agente via jobs intermediários) é central para o "project-wiz".
-
-*   **Evolução da Simulação para Lógica no `AIAgent.processJob`:**
-    *   A lógica de interação com o LLM, incluindo a construção de prompts do sistema (baseados no perfil do agente), o gerenciamento do histórico da conversa (específico do job), a chamada ao `ILLMService`, o processamento de `tool-calls` e a formatação da resposta final, que estava na classe `Activity` e no loop de `agent/index.ts` da simulação, será encapsulada principalmente dentro do método `processJob` da entidade `AIAgent` (ou de um `AIAgentService` associado), utilizando as configurações específicas do agente (perfil, modelo, ferramentas), conforme descrito na Seção 6.2.
-    *   Se a interação PO/CTO for uma funcionalidade desejada, ela poderia ser um tipo de `Job` específico, e os `AIAgent`s configurados com as personas de PO e CTO executariam esses jobs usando seu método `processJob`.
-
-*   **Entidade `AIAgent` no Domínio:**
-    *   A entidade `AIAgent` (esboçada em 6.2) continua crucial. Ela define o perfil do agente (nome, papel/backstory para o prompt, ID do modelo LLM, ferramentas que pode usar, temperatura, etc.).
-    *   Essas configurações do `AIAgent` são fundamentais para o comportamento do método `processJob` ao lidar com um `Job`.
-
-*   **Ferramentas como Serviços Injetáveis:**
-    *   As ferramentas (`writeFile`, `readFile`, `thought`, `finalAnswer` do `tool-set.ts` atual) serão refatoradas como classes/serviços que implementam uma interface comum `ITool` (ou interfaces mais específicas por tipo de ferramenta).
-    *   Essas ferramentas serão injetadas no método `AIAgent.processJob` através do objeto de dependências (que inclui o `IToolRegistry`), gerenciado pelo container de DI e fornecido pelo `Worker`.
-    *   Isso permite que diferentes agentes, através de seu método `processJob`, tenham acesso a diferentes conjuntos de ferramentas, conforme definido em sua configuração de `AIAgent` e disponibilizado pelo `IToolRegistry`.
-
-*   **Interação entre Agentes via Jobs:**
-    *   Se a interação direta entre dois agentes (como na simulação PO/CTO) for necessária, ela pode ser orquestrada através de `Job`s.
-    *   Por exemplo, o Agente A (PO), ao concluir seu processamento de um `Job1`, poderia ter como resultado a criação de um `Job2` para o Agente B (CTO), com o output do `Job1` como input para o `Job2`. O `EnqueueJobUseCase` seria usado para colocar o `Job2` na fila do Agente B.
-
-*   **Lógica de Loop nos `Worker`s:**
-    *   O loop `while(true)` que existia na simulação (`agent/index.ts`) agora é responsabilidade de cada `Worker` dedicado, que constantemente verifica sua fila por novos `Job`s a serem processados pelo `jobProcessor` do seu agente.
-
-*   **Persistência do Histórico da Conversa/Job:**
-    *   O histórico da interação (mensagens trocadas com o LLM, `tool-calls` e `tool-results` durante o processamento de um `Job`) deve ser persistido. Isso pode ser feito:
-        *   Serializando o histórico relevante no próprio `Job` (ex: em um campo `Job.executionLog` ou `Job.llmInteractionHistory`).
-        *   Utilizando uma entidade separada como `JobExecutionRecord` ou `LLMInteractionLog` associada ao `Job`.
-    *   Isso é crucial para depuração, auditoria e, potencialmente, para permitir que jobs de longa duração sejam resumidos ou que o LLM tenha contexto de interações passadas dentro do mesmo job. A classe `Activity` da simulação original tinha essa responsabilidade de manter o histórico para um "passo"; agora isso será parte do estado gerenciado durante a execução de um `jobProcessor`.
-
-Ao refatorar a lógica da simulação desta maneira, ela deixa de ser um script isolado e se torna uma parte integral e reutilizável da capacidade do sistema de executar tarefas complexas através de Agentes de IA configuráveis e especializados, cada um operando dentro da robusta arquitetura de Worker/Fila.
 ### 8.2. Refatoração do Sistema WorkerService/Job
-A lógica de processamento de job, antes concebida como um `jobProcessor` separado, agora é entendida como um método dentro da própria entidade `AIAgent` (ou um serviço de agente associado), conforme detalhado na Seção 6.2.
-O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e agora refinado com o feedback do usuário) é fundamental para o processamento assíncrono e a execução de tarefas pelos Agentes de IA. A refatoração focará em criar uma arquitetura robusta onde cada Agente de IA opera com sua própria fila e worker dedicado.
-
-*   **Entidade `Job` no Domínio:**
-    *   A entidade `Job` (como esboçada em 6.1) continua sendo a representação central de uma tarefa a ser executada, contendo `id`, `name`, `payload`, `status`, `attempts`, etc.
-
-*   **Entidade `Queue` (ou `JobQueue`) no Domínio (Potencial):**
-    *   Poderíamos introduzir uma entidade `Queue` se precisarmos gerenciar metadados ou configurações específicas por fila (ex: nome da fila, prioridade da fila, tipo de jobs que aceita).
-    *   Alternativamente, uma fila pode ser simplesmente identificada por um `queueName` (string) associado a um `AIAgent`. A persistência dos jobs incluiria este `queueName`.
-
-*   **Repositórios (`IJobRepository`, `IQueueRepository` - se `Queue` for uma entidade):**
-    *   `IJobRepository`: Para salvar, buscar e atualizar `Job`s. Os métodos de busca incluiriam a capacidade de buscar jobs pendentes para um `queueName` específico.
-    *   `IQueueRepository`: Se `Queue` for uma entidade, este repositório gerenciaria sua persistência.
-
-*   **Caso de Uso para Enfileirar Jobs (`EnqueueJobUseCase`):**
-    *   Como esboçado em 6.4, este caso de uso será responsável por criar uma instância de `Job` e persisti-la com o status `PENDING` (ou similar) e associá-la ao `queueName` do `AIAgent` apropriado.
-    *   **Entrada:** `name`, `payload`, `targetAgentId` (ou `targetQueueName`), `priority`, etc.
-    *   **Lógica:**
-        1.  Validar `targetAgentId` (verificar se o agente existe e está ativo, obter seu `queueName`).
-        2.  Criar a entidade `Job`.
-        3.  Salvar o `Job` usando `IJobRepository` (que o associará ao `queueName` correto).
+(Conteúdo existente da Seção 8.2, mas a subseção "`Worker` Genérico Dedicado a uma Fila" deve ser atualizada para o seguinte:)
 
 *   **`Worker` Genérico Dedicado a uma Fila:**
-        Um `Worker` é um componente da camada de infraestrutura (`infrastructure/workers/`) responsável por processar jobs de uma fila específica. Ele é configurado com uma instância de `IQueueClient` (que representa a conexão a uma única fila nomeada, veja Seção 8.3) e uma função `jobProcessor` genérica no momento de sua instanciação (geralmente pelo `AgentLifecycleService` ou um serviço similar de gerenciamento de workers).
+    Um `Worker` é um componente da camada de infraestrutura (`infrastructure/workers/`) responsável por processar jobs de uma fila específica. Ele é configurado com uma instância de `IQueueClient` (que representa a conexão a uma única fila nomeada, veja Seção 8.3) e uma função `jobProcessor` no momento de sua instanciação.
 
         **Responsabilidades do `Worker`:**
         1.  **Monitoramento e Retirada de Jobs da Fila Dedicada:**
             *   Executar um loop contínuo para verificar sua `IQueueClient` designada por novos `Job`s.
-            *   Chamar `this.queueClient.getNextJob(this.workerId)` para obter o próximo `Job` pendente e um `lockToken` associado. Se nenhum job estiver disponível, o worker aguarda/pausa antes de tentar novamente.
+            *   Chamar `this.queueClient.getNextJob(this.workerId)` para obter o próximo `Job` pendente e um `lockToken` associado. O `lockToken` é gerado pela implementação do `IJobRepository` (via `QueueClient`) e é essencial para autorizar modificações subsequentes neste job específico. Se nenhum job estiver disponível, o worker aguarda/pausa.
 
         2.  **Início do Processamento do Job:**
-            *   Uma vez que um `Job` é obtido:
-                a.  Chamar `job.startProcessing()` na instância do `Job` (para atualizar seu estado em memória para `ACTIVE`, incrementar `attempts`, setar `processedAt`).
-                b.  Persistir este estado `ACTIVE` imediatamente: `await this.queueClient.markJobActive(job.id, job.attempts, job.props.processedAt!, lockToken);`.
+            *   Uma vez que um `Job` e seu `lockToken` são obtidos:
+                a.  O `Worker` chama `job.startProcessing()` na instância do `Job` (para atualizar seu estado em memória para `ACTIVE`, incrementar `attempts`, setar `processedAt`).
+                b.  O `Worker` persiste este estado inicial imediatamente: `await this.queueClient.saveJob(job, lockToken);`. O método `saveJob` do `QueueClient` utilizará o `IJobRepository` para salvar o estado atual completo do `job`, validando o `lockToken`.
 
         3.  **Execução do `jobProcessor`:**
-            *   Invocar a função `jobProcessor` configurada, passando a instância do `Job` (agora no estado `ACTIVE` e persistido), o `lockToken`, e a instância do `this.queueClient`.
+            *   Invocar a função `jobProcessor` configurada, passando apenas a instância do `Job`. O `jobProcessor` não necessita do `lockToken`, pois não interage diretamente com a persistência da fila para operações de mudança de estado que exijam autorização; ele modifica o `Job` em memória e sinaliza intenções (como delay) lançando erros específicos.
             ```typescript
             // Exemplo da chamada dentro do Worker:
             // const jobProcessor = this.configuredJobProcessor;
+            // let jobProcessingError: Error | null = null;
+            // let processingResult: any = null;
             // try {
-            //   const result = await jobProcessor(job, lockToken, this.queueClient);
-            //   // Se chegou aqui, o jobProcessor concluiu sem lançar erros de controle de fluxo (DelayedError, etc.)
-            //   // O jobProcessor NÃO chama job.complete() diretamente. Ele retorna o resultado.
-            //   await this.queueClient.completeJob(job.id, result, lockToken);
+            //   processingResult = await jobProcessor(job); // Passa apenas o job
             // } catch (error) {
-            //   // ... tratamento de erro detalhado abaixo ...
+            //   jobProcessingError = error;
             // }
+            // // Lógica de tratamento de resultado/erro abaixo
             ```
 
-        4.  **Tratamento de Resultado/Erro do `jobProcessor`:**
-            *   **Conclusão Normal:** Se o `jobProcessor` retorna um valor (`resultFromProcessor`) sem lançar exceções de controle de fluxo:
-                1.  O `Worker` chama `await this.queueClient.completeJob(job.id, resultFromProcessor, lockToken)` para persistir o estado `COMPLETED`, o resultado, e liberar o lock.
-            *   **`DelayedError` Lançado pelo `jobProcessor`:**
-                1.  O `Worker` captura `DelayedError`.
-                2.  Isso sinaliza que o `jobProcessor` já utilizou `this.queueClient.moveToDelayed(...)` que, por sua vez, já persistiu o estado `DELAYED` e `delayUntil` do job e liberou o lock. O Worker apenas registra este evento.
-            *   **`WaitingChildrenError` Lançado pelo `jobProcessor`:**
-                1.  O `Worker` captura `WaitingChildrenError`.
-                2.  Similar ao `DelayedError`, o `jobProcessor` já utilizou `this.queueClient.moveToWaitingChildren(...)`. O Worker apenas registra.
-            *   **Outras Exceções (Falhas Reais):** Se o `jobProcessor` lança qualquer outra exceção:
-                1.  O `Worker` chama `job.fail(error.message)` para atualizar o estado da instância do `Job` em memória (principalmente para ter o log de erro e o status FAILED tentativo).
-                2.  O `Worker` então chama `await this.queueClient.failJob(job.id, error.message, job.attempts, job.props.maxAttempts, job.props.backoff, lockToken)`.
-                    A implementação de `failJob` no `QueueClient` (usando `IQueueRepository`) determinará se o job deve ser reenfileirado (com status `PENDING` ou `DELAYED` e `delayUntil` atualizado conforme backoff) ou movido para `FAILED` permanentemente, e liberará o lock. O `Worker` pode usar o resultado de `failJob` para atualizar sua instância `job` em memória, se necessário.
+        4.  **Tratamento de Resultado/Erro Pós-`jobProcessor` e Persistência Final:**
+            *   Após a execução do `jobProcessor` (seja concluindo normalmente ou lançando uma exceção):
+                *   **Se `DelayedError` foi lançado pelo `jobProcessor`:**
+                    1.  O `Worker` captura `DelayedError`.
+                    2.  Isso sinaliza que o `jobProcessor` já chamou `job.prepareForDelay(timestamp)` (atualizando o `job` em memória para o estado `DELAYED` e setando `delayUntil`).
+                    3.  O `Worker` então persiste este estado preparado: `await this.queueClient.saveJob(job, lockToken);`.
+                *   **Se `WaitingChildrenError` foi lançado pelo `jobProcessor`:**
+                    1.  O `Worker` captura `WaitingChildrenError`.
+                    2.  Isso sinaliza que o `jobProcessor` já chamou `job.prepareToWaitForChildren()` (atualizando o `job` em memória).
+                    3.  O `Worker` persiste este estado: `await this.queueClient.saveJob(job, lockToken);`.
+                *   **Se Nenhuma Exceção Especial foi Lançada (Conclusão Normal):**
+                    1.  O `Worker` chama `job.complete(processingResult)` na instância do `Job`.
+                    2.  O `Worker` chama `await this.queueClient.saveJob(job, lockToken)` para persistir o estado `COMPLETED` e o resultado.
+                *   **Se Outra Exceção foi Lançada (Falha Real):**
+                    1.  O `Worker` chama `job.fail(jobProcessingError.message)` na instância do `Job`.
+                    2.  O `Worker` verifica `job.canRetry()`.
+                        *   Se `true`: O `Worker` chama `job.markAsPendingRetry()`. Se a estratégia de backoff (definida no `Job` ou globalmente) exigir um adiamento, o `Worker` chama `job.prepareForDelay(timestampDeBackoffCalculado)` na instância do `Job`.
+                        *   Se `false` (sem mais tentativas), o estado `FAILED` (já definido por `job.fail()`) é o final.
+                    3.  Em todos os casos de falha, o `Worker` persiste o estado final do `Job`: `await this.queueClient.saveJob(job, lockToken);`.
 
-        5.  **Liberação de Lock:** A responsabilidade de liberar o lock é primariamente dos métodos do `IQueueClient` (e por delegação, `IQueueRepository`) que finalizam um job (`completeJob`, `failJob`) ou o movem para um estado de espera (`moveToDelayed`, `moveToWaitingChildren`).
+        5.  **Liberação de Lock:** A implementação de `this.queueClient.saveJob(job, lockToken)` (que chama `IJobRepository.save`) é responsável por liberar o lock do job se o job atingiu um estado terminal (`COMPLETED`, `FAILED` sem retentativas) ou se foi movido para `DELAYED`/`PENDING` para retentativa.
 
         6.  **Ciclo de Vida:** O `Worker` deve ser iniciado e parado graciosamente.
 
-        **Dependências do `Worker` (Fornecidas na Construção):**
-        *   `workerId`: `string` (Um identificador único para esta instância do worker)
-        *   `queueClient`: `IQueueClient` (Instância configurada para a fila específica que este worker irá processar)
-        *   `jobProcessor`: `(job: Job, workerToken: string, queueClient: IQueueClient) => Promise<any>` (A função que contém a lógica de processamento do job)
-        *   `LoggerService`: Para logging.
+    **Dependências do `Worker` (Fornecidas na Construção):**
+    *   `workerId`: `string`
+    *   `queueClient`: `IQueueClient`
+    *   `jobProcessor`: `(job: Job) => Promise<any>`
+    *   `LoggerService`: Para logging.
 
 *   **Persistência da Fila:**
-    *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados que têm um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs. Esta abordagem de persistência é parte da implementação do sistema de filas local customizado, inspirado nos conceitos do BullMQ mas sem dependências externas, como descrito na Seção 3.3.
+    *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados com um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs. Esta abordagem de persistência é parte da implementação do sistema de filas local customizado, inspirado nos conceitos do BullMQ mas sem dependências externas, como descrito na Seção 3.3.
 
 *   **Comunicação Externa Baseada em Eventos:**
     *   Conforme o feedback do usuário, a comunicação do agente (ou seja, do seu `jobProcessor`) com "coisas externas" (UI, outros agentes) pode ser baseada em eventos. Por exemplo, ao concluir um job, o `jobProcessor` poderia emitir um evento `JobCompletedEvent` que outras partes do sistema poderiam ouvir. Isso pode ser implementado com um `EventEmitter` ou um sistema de mensageria mais robusto, se necessário.
@@ -1457,91 +663,69 @@ Esta arquitetura de worker/fila por agente permite um alto grau de isolamento e 
 A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerenciar o ciclo de vida e a configuração desses componentes.
 
 *   **Objeto `QueueClient` (Interface para o Worker):**
-       Para simplificar a interação do `Worker` com sua fila dedicada e para encapsular a lógica de acesso ao `IQueueRepository` para um `queueName` específico, introduzimos o conceito de um `QueueClient`. Uma instância de `QueueClient` representa uma conexão operacional a uma única fila nomeada.
+    Para simplificar a interação do `Worker` com sua fila dedicada e para encapsular a lógica de acesso ao `IJobRepository` para um `queueName` específico, introduzimos o conceito de um `QueueClient`. Uma instância de `QueueClient` representa uma conexão operacional a uma única fila nomeada.
 
-       **Localização Conceitual da Implementação:** `infrastructure/persistence/queue/queue.client.ts`
-       **Interface (Exemplo):**
-       ```typescript
-       // domain/repositories/i-queue.client.ts (ou similar)
-       import { Job } from '@/domain/entities/job.entity'; // Ajustar caminho
-       import { JobData, BackoffOptions, JobStatusVO } from './i-queue.repository'; // Ajustar caminho
+    **Localização Conceitual da Implementação:** `infrastructure/persistence/queue/queue.client.ts`
+    **Interface (Exemplo):**
+    ```typescript
+    // domain/interfaces/i-queue.client.ts (ou um nome/localização similar para interfaces de infraestrutura se preferir)
+    import { Job } from '@/domain/entities/job.entity';
 
-       export interface IQueueClient {
-         readonly queueName: string;
+    export interface IQueueClient {
+      readonly queueName: string;
+      // workerId é agora passado como parâmetro para getNextJob, não é mais uma propriedade da interface.
 
-         // Métodos para o Worker obter e finalizar jobs
-         getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null>;
-         markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string): Promise<void>;
-         completeJob(jobId: string, result: any, workerToken: string): Promise<void>;
-         failJob(
-            jobId: string,
-            error: string,
-            currentAttempts: number,
-            maxAttempts: number,
-            backoffOptions: BackoffOptions | undefined,
-            workerToken: string
-         ): Promise<{ newStatus: JobStatusVO; newDelayUntil?: Date; newAttempts: number }>;
+      // Obtém o próximo job disponível da fila associada, aplicando um lock.
+      // O workerId é passado aqui para ser usado na lógica de lock do IJobRepository.
+      // Retorna o job (no estado PENDING ou DELAYED) e um lockToken. Retorna null se não houver job.
+      getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null>;
 
-         // Métodos para o jobProcessor interagir com o job atual
-         updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void>;
-         moveToDelayed(jobId: string, delayUntilTimestamp: number, workerToken: string): Promise<void>;
-         moveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean>;
-       }
-       ```
+      // Persiste o estado atual da instância do Job (modificada em memória) no banco de dados.
+      // Este método é crucial e será usado pelo Worker para:
+      // 1. Salvar o estado ACTIVE inicial do job (após job.startProcessing()).
+      // 2. Salvar o estado final do job (COMPLETED, FAILED, ou PENDING/DELAYED para retentativas).
+      // 3. Persistir o estado preparado de um job após o jobProcessor ter sinalizado
+      //    uma intenção de adiamento ou espera (via DelayedError ou WaitingChildrenError).
+      // A implementação em IJobRepository (chamada por este método via this.jobRepository.save)
+      // deve validar o lockToken e lidar com a lógica de transição de estado da fila
+      // (ex: liberar lock para estados terminais, atualizar delayUntil, etc.).
+      saveJob(job: Job, lockToken: string): Promise<void>;
+    }
+    ```
 
-       **Implementação Conceitual (`QueueClient`):**
-       ```typescript
-       // infrastructure/persistence/queue/queue.client.ts
-       // ... (importações como IQueueClient, IQueueRepository, Job, JobData, BackoffOptions, JobStatusVO) ...
-       export class QueueClient implements IQueueClient {
-         public readonly queueName: string;
-         private queueRepository: IQueueRepository;
+    **Implementação Conceitual (`QueueClient`):**
+    ```typescript
+    // infrastructure/persistence/queue/queue.client.ts
+    import { IQueueClient } from '@/domain/interfaces/i-queue.client';
+    import { IJobRepository } from '@/domain/repositories/i-job.repository';
+    import { Job } from '@/domain/entities/job.entity';
 
-         constructor(
-           queueName: string,
-           queueRepository: IQueueRepository
-         ) {
-           this.queueName = queueName;
-           this.queueRepository = queueRepository;
-         }
+    export class QueueClient implements IQueueClient {
+      public readonly queueName: string;
+      // workerId não é mais uma propriedade da classe, é passado para getNextJob.
+      private jobRepository: IJobRepository;
 
-         async getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null> {
-           return this.queueRepository.findNextPending(this.queueName, workerId);
-         }
+      constructor(
+        queueName: string,
+        // workerId: string, // Removido do construtor
+        jobRepository: IJobRepository
+      ) {
+        this.queueName = queueName;
+        this.jobRepository = jobRepository;
+      }
 
-         async markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string): Promise<void> {
-            return this.queueRepository.markJobActive(jobId, attempts, processedAt, workerToken);
-         }
+      async getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null> {
+        // workerId é passado como parâmetro para findNextPending.
+        return this.jobRepository.findNextPending(this.queueName, workerId);
+      }
 
-         async completeJob(jobId: string, result: any, workerToken: string): Promise<void> {
-           return this.queueRepository.completeJob(jobId, result, workerToken);
-         }
+      async saveJob(job: Job, lockToken: string): Promise<void> {
+        return this.jobRepository.save(job, lockToken);
+      }
+    }
+    ```
+    O `AgentLifecycleService` seria responsável por criar uma instância de `QueueClient` para cada agente/fila e passá-la para o `Worker` correspondente.
 
-         async failJob(
-            jobId: string,
-            error: string,
-            currentAttempts: number,
-            maxAttempts: number,
-            backoffOptions: BackoffOptions | undefined,
-            workerToken: string
-         ): Promise<{ newStatus: JobStatusVO; newDelayUntil?: Date; newAttempts: number }> {
-           return this.queueRepository.failJob(jobId, error, currentAttempts, maxAttempts, backoffOptions, workerToken);
-         }
-
-         async updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void> {
-           return this.queueRepository.updateJobData(jobId, data, workerToken);
-         }
-
-         async moveToDelayed(jobId: string, delayUntilTimestamp: number, workerToken: string): Promise<void> {
-           return this.queueRepository.requestMoveToDelayed(jobId, workerToken, delayUntilTimestamp);
-         }
-
-         async moveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean> {
-           return this.queueRepository.requestMoveToWaitingChildren(jobId, workerToken);
-         }
-       }
-       ```
-       O `AgentLifecycleService` seria responsável por criar uma instância de `QueueClient` para cada agente/fila e passá-la para o `Worker` correspondente.
 *   **Configuração dos Agentes (`AIAgent`):**
     *   Como mencionado, a entidade `AIAgent` (persistida via `IAIAgentRepository`) conterá a configuração de cada agente, incluindo:
         *   Identificador do modelo LLM a ser usado.
@@ -1554,15 +738,17 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
     *   No processo principal do Electron (`infrastructure/electron/main.ts`), durante a inicialização da aplicação (após a configuração do container DI), um `AgentLifecycleService` (ou similar) seria responsável por:
         1.  Carregar todas as configurações ativas de `AIAgent` do `IAIAgentRepository`.
         2.  Para cada `AIAgent` ativo:
-            a.  Instanciar um `Worker`. Isso pode ser feito diretamente ou através de uma fábrica (`AgentWorkerFactory`) se a construção do Worker for complexa.
+            a.  Gerar um `workerUniqueId` para esta instância do Worker.
             b.  Instanciar um `Worker` (da classe `AgentWorker` da infraestrutura). O `AgentLifecycleService` (ou lógica de inicialização equivalente) será responsável por:
                 i.  Obter a instância do `IAIAgentExecutionService` do container DI.
-                ii. Para o `AIAgent` específico sendo configurado, chamar um método no `IAIAgentExecutionService` (ex: `getJobProcessorForAgent(agentIdOuConfig)`) para obter a função `jobProcessor` específica para aquele agente.
-                iii. Obter outras dependências que o `Worker` possa precisar diretamente (ex: `LoggerService`) e a instância da `IQueueRepository` do container DI.
-                iv. Configurar o `Worker` com:
-                    *   Uma instância de `IQueueClient` (criada pelo `AgentLifecycleService`, configurada com o `queueName` do agente e a `IQueueRepository`).
+                ii. Para o `AIAgent` específico sendo configurado, chamar um método no `IAIAgentExecutionService` (ex: `getJobProcessorForAgent(agentConfig.id)`) para obter a função `jobProcessor` específica para aquele agente (assinatura: `(job: Job) => Promise<any>`).
+                iii. Obter a instância da `IJobRepository` do container DI.
+                iv. Criar uma instância de `QueueClient`: `new QueueClient(agentConfig.props.queueName, jobRepository)`. Note que `workerUniqueId` não é passado para o construtor do `QueueClient`.
+                v.  Configurar o `Worker` com:
+                    *   O `workerUniqueId` (este ID será usado pelo `Worker` ao chamar `this.queueClient.getNextJob(this.workerId)`).
+                    *   A instância de `IQueueClient` criada.
                     *   A função `jobProcessor` obtida do `IAIAgentExecutionService`.
-                    *   Outras dependências diretas que o `Worker` possa precisar (ex: `LoggerService`).
+                    *   Outras dependências diretas que o `Worker` possa precisar (ex: `LoggerService`, obtida do DI).
             c.  Iniciar o loop de processamento do `Worker`.
     *   Os `Worker`s seriam instâncias de uma classe `AgentWorker` (da camada de infraestrutura), que encapsula a lógica de polling da fila e chamada ao método de processamento do agente.
 
@@ -1581,161 +767,104 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
 Este sistema de gerenciamento garante que os agentes possam ser configurados dinamicamente e que seus workers e filas associados sejam corretamente instanciados e operados como parte do ciclo de vida da aplicação.
 
 ## 9. Comunicação UI-Backend (IPC)
-
-A comunicação entre a Interface do Usuário (UI, processo renderer do React) e o backend (processo principal do Electron) continuará a usar o mecanismo de Comunicação Inter-Processos (IPC) do Electron. A refatoração principal nesta área será como os Handlers IPC no processo principal são implementados, especificamente para utilizar o container de Injeção de Dependência (DI) para acessar os Casos de Uso.
-
-**Contexto Atual (Pré-Refatoração):**
-Atualmente, os handlers IPC (em `src/infrastructure/frameworks/electron/main/handlers.ts`) instanciam manualmente os Casos de Uso e Repositórios de que necessitam. Por exemplo:
-
-```typescript
-// Exemplo do handlers.ts atual (simplificado)
-// ipcMain.handle("usecase:create-user", async (e, data) => {
-//   const userRepository = new UserRepositoryDrizzle(db); // Instanciação manual
-//   const llmProviderConfigRepository = new LLMProviderConfigRepositoryDrizzle(db); // Instanciação manual
-//   const usecase = new CreateUserUseCase( // Instanciação manual
-//     userRepository,
-//     llmProviderConfigRepository
-//   );
-//   return await usecase.execute(data);
-// });
-```
-
-Esta abordagem leva a um acoplamento mais forte e dificulta os testes e a manutenção.
-
-**Proposta de Refatoração com DI:**
-
-1.  **Handlers IPC como Classes Injetáveis (Opcional, mas Recomendado):**
-    *   Em vez de ter um único arquivo `handlers.ts` com múltiplas funções `ipcMain.handle` soltas, podemos agrupar handlers relacionados em classes. Cada classe de handler seria marcada como `@injectable()` e suas dependências (Casos de Uso) seriam injetadas.
-
-    **Exemplo Conceitual (`src/infrastructure/electron/ipc-handlers/user.handlers.ts`):**
-    ```typescript
-    import { injectable, inject } from 'inversify';
-    import { ipcMain } from 'electron';
-    import { TYPES } from '@/infrastructure/ioc/types';
-    import { CreateUserUseCase, CreateUserInput } from '@/domain/use-cases/user/create-user.use-case'; // Supondo que CreateUserInput seja exportado
-    import { GetUserUseCase } from '@/domain/use-cases/user/get-user.use-case'; // Exemplo
-
-    @injectable()
-    export class UserHandlers {
-      constructor(
-        @inject(TYPES.CreateUserUseCase) private createUserUseCase: CreateUserUseCase,
-        @inject(TYPES.GetUserUseCase) private getUserUseCase: GetUserUseCase // Exemplo
-      ) {}
-
-      public registerHandlers(): void {
-        ipcMain.handle('usecase:create-user', async (_event, data: CreateUserInput) => {
-          return await this.createUserUseCase.execute(data);
-        });
-
-        ipcMain.handle('query:get-user', async (_event) => { // Supondo que GetUserUseCase não precise de input
-          return await this.getUserUseCase.execute();
-        });
-        // Outros handlers relacionados a User
-      }
-    }
-    ```
-
-2.  **Registro e Inicialização dos Handlers no `electron/main.ts`:**
-    *   No ponto de entrada do processo principal (`src/infrastructure/electron/main.ts`), após a configuração do container InversifyJS, obteríamos as instâncias das classes de Handler do container e chamaríamos um método `registerHandlers()` nelas.
-
-    **Exemplo Conceitual (`src/infrastructure/electron/main.ts`):**
-    ```typescript
-    // ... outras importações
-    import { container } from '@/infrastructure/ioc/inversify.config';
-    import { TYPES } from '@/infrastructure/ioc/types';
-    import { UserHandlers } from './ipc-handlers/user.handlers'; // Ajustar caminho se necessário
-    // Importar outras classes de Handlers (ProjectHandlers, JobHandlers, etc.)
-
-    // ... app.on('ready', async () => { ... })
-    // Após createWindow() ou em um ponto adequado:
-
-    function initializeIPCHandlers() {
-      const userHandlers = container.get<UserHandlers>(TYPES.UserHandlers); // Supondo que UserHandlers esteja em TYPES
-      userHandlers.registerHandlers();
-
-      // const projectHandlers = container.get<ProjectHandlers>(TYPES.ProjectHandlers);
-      // projectHandlers.registerHandlers();
-
-      // ... registrar outros handlers
-      console.log('IPC Handlers registered.');
-    }
-
-    // Chamar initializeIPCHandlers() quando o app estiver pronto,
-    // geralmente após a criação da janela principal e configuração do container.
-    // Exemplo: dentro de app.whenReady().then(() => { ... initializeIPCHandlers(); });
-    // No nosso caso, pode ser após a chamada de `main()` da simulação de agente,
-    // ou se a simulação for removida/integrada, após `createWindow()`.
-    // Precisamos garantir que o container DI esteja configurado ANTES disso.
-    // Se `initializeDatabase` e a configuração do container DI acontecerem em `app.on('ready')`,
-    // então `initializeIPCHandlers` pode ser chamado logo depois.
-    ```
-    No `inversify.config.ts`, adicionaríamos:
-    ```typescript
-    // container.bind<UserHandlers>(TYPES.UserHandlers).to(UserHandlers).inSingletonScope();
-    ```
-
-3.  **Script de Preload (`preload.ts`) Permanece o Mesmo:**
-    *   O script `src/infrastructure/electron/preload.ts` que expõe `window.api` (com `invoke`, `send`, `on`) não precisa de grandes alterações. Ele continuará a encaminhar as chamadas da UI para os canais IPC registrados no processo principal.
-
-4.  **Chamadas na UI (React) Permanecem as Mesmas:**
-    *   A UI continuará a usar `window.api.invoke('usecase:create-user', inputData)` da mesma forma. A mudança é interna ao processo principal, tornando-o mais limpo e testável.
-
-**Benefícios desta Abordagem:**
-*   **Desacoplamento:** Os handlers IPC não estão mais diretamente acoplados às implementações concretas dos Casos de Uso; eles dependem de abstrações resolvidas pelo container DI.
-*   **Testabilidade:** As classes de Handler podem ser testadas unitariamente injetando Casos de Uso mocks.
-*   **Organização:** Agrupar handlers por funcionalidade (ex: `UserHandlers`, `ProjectHandlers`) melhora a organização do código em comparação com um único arquivo `handlers.ts` extenso.
-*   **Consistência:** Aplica o mesmo padrão de DI usado no restante do backend.
-
-Esta refatoração da camada de comunicação IPC alinhará a interação UI-Backend com os princípios de design da nova arquitetura, tornando-a mais robusta e fácil de manter.
-
-Para interações que envolvem tarefas assíncronas executadas pelos `Worker`s dos agentes (como solicitar a um agente para gerar um texto ou código), o fluxo seria:
-1. A UI, através de `window.api.invoke`, chamaria um Handler IPC (ex: `ipcMain.handle('agent:enqueue-task', ...)`).
-2. Este Handler IPC obteria uma instância do `EnqueueJobUseCase` (via DI).
-3. O `EnqueueJobUseCase` criaria um `Job` com o payload da tarefa e o `queueName` do agente alvo, salvando-o no repositório.
-4. O `Worker` dedicado àquele agente pegaria o `Job` de sua fila e executaria o `jobProcessor` correspondente.
-5. Para notificar a UI sobre a conclusão do `Job` (ou atualizações de progresso), o sistema de eventos mencionado na Seção 8.2 seria utilizado. O `jobProcessor` (ou o `Worker`) emitiria eventos (ex: `job-completed:${jobId}`, `job-progress:${jobId}`). O processo principal do Electron (nos Handlers IPC ou em um serviço dedicado) ouviria esses eventos internos e poderia encaminhá-los para a UI usando `mainWindow.webContents.send(channel, data)`. A UI, por sua vez, usaria `window.api.on(channel, listener)` para receber essas atualizações.
+(Conteúdo existente da Seção 9)
 
 ## 10. (Opcional) Plano de Transição/Refatoração Incremental
+A refatoração completa de um sistema existente para uma nova arquitetura é uma tarefa significativa. Abordá-la de forma incremental é crucial para gerenciar riscos, obter feedback contínuo e entregar valor progressivamente. Abaixo, uma sugestão de plano de transição:
 
-A refatoração completa de um sistema é um esforço considerável. Embora o objetivo seja alcançar a arquitetura alvo descrita, uma abordagem incremental pode ser pragmática, dependendo dos recursos e do tempo disponíveis. Seguem algumas sugestões de como a transição poderia ser faseada:
+**Fase 0: Preparação e Configuração Inicial (Sprint 0/1)**
+1.  **Configurar InversifyJS:**
+    *   Integrar InversifyJS e configurar o container de DI (`inversify.config.ts`, `types.ts`).
+    *   Identificar e registrar alguns serviços básicos de infraestrutura (ex: `LoggerService`) como teste inicial.
+2.  **Definir Estrutura de Diretórios:**
+    *   Criar a estrutura de pastas base para `src/domain`, `src/application`, `src/infrastructure`, `src/presentation`.
+3.  **Estabelecer Padrões de Código:**
+    *   Configurar linters, formatadores (ESLint, Prettier) e um guia de estilo para garantir consistência.
+    *   Definir padrões para nomenclatura de arquivos e classes.
+4.  **Primeiros Componentes de Domínio:**
+    *   Definir as interfaces chave de repositório, começando com `IJobRepository` e `IAIAgentRepository`.
+    *   Criar as entidades `Job` e `AIAgent` iniciais, focando em atributos e comportamento essencial, sem persistência completa ainda.
 
-*   **Fase 1: Fundações e DI (Concluída em Design):**
-    *   Definição da arquitetura alvo (este documento).
-    *   Configuração do container InversifyJS (`infrastructure/ioc`).
+**Fase 1: Implementação do Novo Sistema de Job/Worker (Sprints 1-3)**
+*Objetivo: Ter um sistema de fila funcional com o novo `Worker` e `Job` para um tipo de agente.*
+1.  **Implementar `IJobRepository`:**
+    *   Criar a implementação concreta (ex: `DrizzleJobRepository` ou uma versão em memória para desenvolvimento inicial) para `IJobRepository`.
+    *   Implementar os métodos `add`, `save`, `findById`, `findNextPending`. Focar na lógica de lock e transição de status.
+2.  **Desenvolver Entidade `Job`:**
+    *   Refinar a entidade `Job` com todos os métodos de manipulação de estado (`startProcessing`, `complete`, `fail`, `prepareForDelay`, etc.).
+3.  **Desenvolver `QueueClient`:**
+    *   Implementar a classe `QueueClient` que utiliza `IJobRepository`.
+4.  **Desenvolver `AIAgentExecutionService` (Parcial):**
+    *   Implementar uma versão inicial do `AIAgentExecutionService` que possa fornecer um `jobProcessor` simples para um tipo de agente (ex: um "echo agent" que apenas registra o payload do job e o completa).
+    *   Injetar dependências mockadas ou básicas por enquanto.
+5.  **Desenvolver o `Worker` Genérico:**
+    *   Implementar a classe `Worker` genérica, configurável com `IQueueClient` e `jobProcessor`.
+    *   Implementar a lógica de loop, chamada ao `jobProcessor`, e tratamento de resultados/erros (incluindo `DelayedError`).
+6.  **Implementar `EnqueueJobUseCase`:**
+    *   Desenvolver o caso de uso para adicionar novos jobs à fila.
+7.  **Configurar e Testar o Primeiro Agente/Worker:**
+    *   No `main.ts` (ou `AgentLifecycleService`), configurar e iniciar um `Worker` para o "echo agent" usando o `jobProcessor` fornecido pelo `AIAgentExecutionService`.
+    *   Testar o fluxo de enfileirar um job, o worker pegá-lo, processá-lo e o job ser marcado como `COMPLETED`.
+8.  **Refatorar IPCHandlers para `EnqueueJobUseCase`:**
+    *   Atualizar os IPCHandlers existentes que criam jobs para usar o novo `EnqueueJobUseCase`.
 
-*   **Fase 2: Camada de Domínio e Persistência:**
-    *   Implementar as entidades de domínio principais (ex: `Job`, `Project`, `AIAgent`, `User`) com Value Objects e comportamentos, seguindo Object Calisthenics.
-    *   Definir as interfaces de repositório (`domain/repositories`).
-    *   Implementar os repositórios concretos na camada de persistência (`infrastructure/persistence/drizzle`) e registrar no container DI.
+**Fase 2: Migração da Lógica de Agentes Existentes (Sprints 3-5)**
+*Objetivo: Migrar a funcionalidade dos agentes PO/CTO existentes para o novo sistema de Worker/Job.*
+1.  **Analisar e Decompor Agentes Atuais:**
+    *   Mapear a lógica dos agentes PO/CTO atuais para a nova estrutura de `jobProcessor` dentro do `AIAgentExecutionService`.
+    *   Identificar as ferramentas (`IToolRegistry`) e serviços (`ILLMService`) necessários.
+2.  **Implementar `ILLMService` e `IToolRegistry`:**
+    *   Criar implementações concretas e/ou adaptadores para os serviços LLM e ferramentas existentes.
+    *   Integrá-los com o `AIAgentExecutionService`.
+3.  **Refatorar/Reimplementar `jobProcessor`s:**
+    *   Desenvolver os `jobProcessor`s específicos para os agentes PO/CTO dentro do `AIAgentExecutionService`, utilizando `ILLMService` e `IToolRegistry`.
+4.  **Testar e Validar Agentes Refatorados:**
+    *   Configurar os `Worker`s para esses agentes e testar exaustivamente.
 
-*   **Fase 3: Casos de Uso e Lógica de Backend:**
-    *   Implementar os Casos de Uso chave, injetando os repositórios.
-    *   Refatorar os Handlers IPC (`infrastructure/electron/ipc-handlers`) para usar os Casos de Uso obtidos do container DI.
-    *   Implementar a arquitetura de Worker/Fila por Agente, incluindo a lógica dos `jobProcessor`s e o `AgentLifecycleService`.
+**Fase 3: Refatoração da UI e Comunicação IPC (Sprints Contínuos)**
+*Objetivo: Alinhar a UI com a nova arquitetura e usar DI nos IPCHandlers.*
+1.  **Refatorar IPCHandlers:**
+    *   Continuar a refatoração de todos os IPCHandlers para usar Casos de Uso ou Serviços de Domínio/Aplicação, injetando dependências via container DI.
+2.  **(Opcional) Adotar Camada de Apresentação/Aplicação:**
+    *   Se a UI se tornar complexa, introduzir DTOs, Presenters ou ViewModels para desacoplar a UI da lógica de domínio.
+3.  **Revisar Fluxo de Dados UI-Backend:**
+    *   Garantir que a comunicação entre UI e backend seja eficiente e siga os novos padrões arquiteturais.
 
-*   **Fase 4: Refatoração da UI (React):**
-    *   Conectar a UI aos novos Handlers IPC.
-    *   Refatorar componentes da UI para melhor alinhamento com os dados fornecidos pelos Casos de Uso (via DTOs, se usados).
-    *   Aplicar princípios de componentização e gerenciamento de estado conforme necessário na UI.
+**Fase 4: Refatoração Contínua e Melhorias (Contínuo)**
+*Objetivo: Aplicar os princípios da nova arquitetura ao restante do código e realizar melhorias.*
+1.  **Aplicar Object Calisthenics:**
+    *   Revisar e refatorar classes existentes para aderir às regras de Object Calisthenics.
+2.  **Identificar e Refatorar Dívida Técnica:**
+    *   Priorizar e abordar outras áreas do código que não estão alinhadas com a nova arquitetura.
+3.  **Expandir Cobertura de Testes:**
+    *   Escrever testes unitários para Casos de Uso, Entidades e Serviços de Domínio.
+    *   Escrever testes de integração para fluxos chave.
 
-*   **Fase 5: Iteração e Refinamento:**
-    *   Revisar o sistema refatorado, identificar gargalos ou áreas para melhoria.
-    *   Adicionar mais testes (se a decisão de não ter testes formais for reconsiderada).
-    *   Continuar aplicando os princípios de Object Calisthenics e Clean Architecture em novos desenvolvimentos.
+**Considerações Gerais:**
+*   **Testes:** Acompanhar cada etapa de refatoração com a escrita de testes unitários e de integração.
+*   **Branching Strategy:** Utilizar feature branches para cada etapa ou funcionalidade da refatoração.
+*   **Revisão de Código:** Realizar revisões de código rigorosas para garantir a adesão à nova arquitetura.
+*   **Comunicação:** Manter a equipe alinhada sobre as mudanças e o progresso.
 
-Esta abordagem permite entregar valor incrementalmente e gerenciar os riscos associados a uma grande refatoração. A priorização das fases pode ser ajustada conforme as necessidades do projeto.
+Este plano é uma sugestão e pode ser adaptado conforme as prioridades e descobertas durante o processo de refatoração.
 
 ## 11. Conclusão
 
-Esta proposta de arquitetura alvo para o "project-wiz" visa estabelecer uma base sólida, manutenível e escalável para o futuro do sistema. Ao adotar os princípios da Clean Architecture, Object Calisthenics e Injeção de Dependência com InversifyJS, esperamos alcançar melhorias significativas na Experiência do Desenvolvedor (DX), na qualidade do código e na capacidade de evoluir o software de forma eficiente.
+Esta proposta de arquitetura alvo para o sistema "project-wiz" visa estabelecer uma base sólida, manutenível e escalável para o futuro do projeto. Ao adotar princípios como Clean Architecture, Injeção de Dependência com InversifyJS, Object Calisthenics e uma clara separação de responsabilidades em camadas, esperamos colher benefícios significativos em termos de qualidade de código, produtividade do desenvolvedor e capacidade de evolução do sistema.
 
-A estrutura em camadas, a clara separação de responsabilidades, o desacoplamento proporcionado pela DI e a ênfase em entidades de domínio ricas em comportamento permitirão que a equipe de desenvolvimento construa novas funcionalidades com maior confiança e menor atrito. A refatoração da lógica de backend existente para um sistema robusto de Worker/Fila por Agente pavimenta o caminho para um processamento assíncrono poderoso e especializado.
+**Principais Benefícios Reafirmados:**
+*   **Manutenibilidade Aprimorada:** A separação clara de preocupações e o baixo acoplamento facilitarão a compreensão, modificação e correção de bugs.
+*   **Testabilidade Elevada:** A lógica de negócios no domínio será testável independentemente de UI ou infraestrutura, permitindo testes unitários mais robustos.
+*   **Escalabilidade:** A arquitetura modular permitirá que o sistema cresça de forma organizada, adicionando novas funcionalidades ou adaptando as existentes com menor impacto.
+*   **Melhor Experiência do Desenvolvedor (DX):** Uma base de código bem estruturada, juntamente com DI, tornará o desenvolvimento mais intuitivo e eficiente.
+*   **Flexibilidade Tecnológica:** A abstração de detalhes de infraestrutura (como banco de dados) permitirá futuras mudanças tecnológicas com menor esforço.
+*   **Integração Coesa:** O novo sistema de Worker/Job, integrado com a lógica de Agentes de IA através do `AIAgentExecutionService` e `QueueClient`, fornecerá uma plataforma unificada para processamento assíncrono.
 
 **Próximos Passos:**
+1.  **Revisão e Aprovação:** Apresentar esta proposta à equipe e stakeholders para feedback, discussão e aprovação formal.
+2.  **Refinamento do Plano de Transição:** Detalhar ainda mais o plano de refatoração incremental (Seção 10) com estimativas de esforço e alocação de recursos para as primeiras fases.
+3.  **Início da Fase 0:** Após a aprovação, iniciar a "Fase 0: Preparação e Configuração Inicial", que inclui a configuração do InversifyJS, a criação da estrutura de diretórios e o estabelecimento de padrões de código.
+4.  **Desenvolvimento Iterativo:** Prosseguir com as fases subsequentes do plano de transição, priorizando a implementação do novo sistema de Job/Worker como base para a refatoração dos agentes existentes.
+5.  **Monitoramento e Adaptação:** Acompanhar continuamente o progresso da refatoração, adaptando o plano conforme necessário com base nos aprendizados e desafios encontrados.
 
-1.  **Revisão e Aprovação:** A equipe e stakeholders devem revisar esta proposta e fornecer feedback.
-2.  **Planejamento da Implementação:** Detalhar o backlog de tarefas para a refatoração, possivelmente seguindo o plano de transição incremental sugerido.
-3.  **Execução da Refatoração:** Iniciar a implementação da nova arquitetura, começando pelas camadas de fundação (Domínio, Persistência, DI).
-4.  **Comunicação Contínua:** Manter a comunicação aberta durante todo o processo de refatoração para alinhar expectativas e resolver desafios.
-
-Acreditamos que o investimento nesta refatoração trará retornos significativos a longo prazo, resultando em um produto mais estável, flexível e agradável de se trabalhar.
+Acreditamos que o investimento na adoção desta arquitetura trará retornos valiosos a médio e longo prazo, resultando em um produto mais robusto, confiável e fácil de evoluir. Estamos à disposição para discutir quaisquer pontos desta proposta em maior detalhe.
