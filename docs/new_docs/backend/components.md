@@ -17,28 +17,28 @@ Este documento descreve os principais componentes conceituais do backend do Proj
         -   Pode se comunicar com outros Agentes ou com o usuário através de `Tools` específicas (ex: `SendMessageToAgentTool`).
 
 -   **Sistema de Gerenciamento de Jobs/Atividades (Fila) / `Job/Activity Management System (QueueService)`:**
-    -   **Responsabilidade:** Gerencia o ciclo de vida de `Jobs` e `Sub-Jobs` dentro de **múltiplas filas nomeadas**, com funcionalidades robustas inspiradas em sistemas como BullMQ. Atua como um intermediário central para todas as tarefas assíncronas.
+    -   **Responsabilidade:** Gerencia o ciclo de vida de `Jobs` e `Sub-Jobs`. Embora o sistema como um todo possa ter múltiplas filas (uma por Agente), este serviço opera no contexto da `queueName` fornecida em suas chamadas de API, atuando como a interface para a persistência e lógica de fila para um Agente específico. Inspirado em BullMQ.
     -   **Funções Chave:**
-        -   A API do serviço (ex: métodos `addJob`, `processJob`) sempre inclui um parâmetro `queueName` para direcionar a operação à fila correta.
+        -   A API do serviço (ex: métodos `addJob`, `getNextJob`) sempre inclui um parâmetro `queueName` para identificar a fila do Agente específico em que a operação deve ocorrer.
         -   Persiste definições de `Jobs` (incluindo `queue_name`, dados de entrada, Agente/`Persona` criador, dependências, status, `parent_job_id`) usando SQLite.
-        -   Lida com transições de status de `Jobs`.
-        -   Gerencia dependências complexas entre `Jobs` e `Sub-Jobs` dentro e entre filas (se necessário).
-        -   Suporta mecanismos de retentativa configuráveis, potencialmente definidos por fila através de uma `QueueDefinition` (opções padrão de Job por fila).
+        -   Lida com transições de status de `Jobs` dentro de uma `queueName`.
+        -   Gerencia dependências complexas entre `Jobs` e `Sub-Jobs` (tipicamente dentro da mesma `queueName`, pois são criados pelo mesmo Agente).
+        -   Suporta mecanismos de retentativa configuráveis, cujas opções padrão (`defaultJobOptions`) podem ser associadas à `QueueDefinition` do Agente.
         -   Permite `Jobs` agendados ou atrasados.
-        -   Emite eventos sobre mudanças de status.
-        -   Responde às solicitações dos Agentes (Workers), entregando o próximo `Job` elegível de uma `queueName` específica para a qual o Worker está registrado.
+        -   Emite eventos sobre mudanças de status (para a `queueName` relevante).
+        -   Responde às solicitações de um Agente (Worker) para sua `queueName` específica, entregando o próximo `Job` elegível.
 
 -   **Worker & Worker Pool (Modelo de Concorrência de Agentes / Processadores de Fila):**
-    -   **Responsabilidade:** O "Worker Pool" (ou Gerenciador de Agentes) gerencia Agentes ativos e concorrentes. Cada "Worker" individual é efetivamente o loop de processamento assíncrono de um Agente, que se registra para processar `Jobs` de uma `queueName` e para `jobName`(s) específicos dentro daquela fila.
+    -   **Responsabilidade:** O "Worker Pool" (ou Gerenciador de Agentes) gerencia os Agentes ativos e concorrentes. Cada "Worker" individual é o loop de processamento assíncrono de um único Agente, intrinsecamente ligado a uma única `queueName` (a fila de trabalho desse Agente). Ele processa `Jobs` com `jobName`(s) específicos dentro dessa sua fila.
     -   **Funções Chave (Agente como Worker):**
-        -   Registra-se no `QueueService` para processar uma combinação específica de `queueName` e `jobName`, fornecendo uma função de processamento (sua `Persona Core Logic` adaptada para o Job).
-        -   Solicita ativamente `Jobs` (da `queueName` e `jobName` para os quais está registrado) à `Queue` para processamento.
+        -   Registra com o `QueueService` sua intenção de processar `jobName`(s) específicos para a sua `queueName` dedicada, fornecendo sua `Persona Core Logic` como a função de processamento.
+        -   Solicita ativamente `Jobs` (da sua `queueName` e para os `jobName`(s) que ele trata) à `QueueService`.
         -   Invoca sua `Persona Core Logic` para processar o `Job` recebido.
-        -   Reporta o status final do `Job` de volta para a `QueueService`.
+        -   Reporta o status final do `Job` de volta para a `QueueService` (indicando a `queueName` e `jobId`).
     -   **Funções Chave (Worker Pool / Gerenciador de Agentes):**
-        -   Gerencia o ciclo de vida das instâncias de Agentes (que atuam como Workers).
-        -   Assegura que haja Workers escutando nas filas configuradas conforme a demanda ou configuração do sistema.
-        -   A concorrência é alcançada por múltiplos Agentes/Workers processando Jobs de suas respectivas filas (ou da mesma fila, se a concorrência na função `process` for > 1, embora inicialmente seja 1 por Agente).
+        -   Gerencia o ciclo de vida das instâncias de Agentes (que atuam como Workers para suas respectivas filas).
+        -   Assegura que os Agentes estejam ativos e processando suas filas conforme configurado.
+        -   A concorrência no sistema é alcançada por múltiplos Agentes/Workers, cada um operando em sua própria fila nomeada.
 
 -   **Sistema de Execução de Tasks / `Task Execution System`:**
     -   **Responsabilidade:** Este não é um sistema para executar sequências de tarefas pré-codificadas, mas sim o mecanismo conceitual pelo qual a `Persona Core Logic` de um Agente formula e despacha objetivos específicos ou prompts focados (definidos como `Tasks`) para o LLM.

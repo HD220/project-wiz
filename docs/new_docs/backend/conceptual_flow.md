@@ -14,12 +14,12 @@ Este documento descreve o ciclo de vida típico de um `Job` (Atividade) dentro d
     *   O usuário aprova ou sugere modificações. Se aprovado, o Agente prossegue.
 
 3.  **Criação e Enfileiramento de Jobs/Sub-Jobs:**
-    *   Com base no plano aprovado, o Agente cria formalmente o `Job` principal e/ou os `Sub-Jobs` necessários, preenchendo seus detalhes (incluindo o `queue_name` apropriado para cada um, tipo, payload inicial, `depends_on_job_ids` entre Sub-Jobs, `parent_job_id`).
-    *   Esses `Jobs` são submetidos pelo Agente à `Queue` (Sistema de Gerenciamento de Jobs). A `Queue` (inspirada no BullMQ, com persistência SQLite) os armazena (com seu `queue_name`) e gerencia suas dependências e status.
+    *   Com base no plano aprovado, o Agente cria formalmente o `Job` principal e/ou os `Sub-Jobs` necessários. Crucialmente, todos os `Jobs` e `Sub-Jobs` criados por um Agente para atender a uma solicitação do usuário são tipicamente adicionados à **própria `queue_name` desse Agente**. Eles são preenchidos com detalhes como tipo (`jobName`), payload inicial, `depends_on_job_ids` (para sequenciar `Sub-Jobs`), e `parent_job_id`.
+    *   Esses `Jobs` são submetidos pelo Agente à `Queue` (Sistema de Gerenciamento de Jobs). A `Queue` os armazena (com o `queue_name` do Agente) e gerencia suas dependências e status.
 
 4.  **Agente (Worker) Solicita e Processa Job/Sub-Job da Fila:**
-    *   O Agente (atuando em seu loop "Worker" e configurado para ouvir uma ou mais `queue_name`s) solicita à `Queue` o próximo `Job` ou `Sub-Job` elegível de uma das filas que monitora e que lhe foi atribuído.
-    *   Ao receber um `Job/Sub-Job` (que terá um `queue_name`), o Agente carrega seu `AgentInternalState` e o `ActivityContext` específico daquele `Job/Sub-Job`.
+    *   O Agente (atuando em seu loop "Worker") solicita à `Queue` o próximo `Job` ou `Sub-Job` elegível de **sua `queue_name` específica** que lhe foi atribuído.
+    *   Ao receber um `Job/Sub-Job` (que pertencerá à sua `queue_name`), o Agente carrega seu `AgentInternalState` e o `ActivityContext` específico daquele `Job/Sub-Job`.
 
 5.  **Raciocínio e Planejamento Detalhado (LLM via Persona):**
     *   Para o `Job/Sub-Job` atual, o Agente formula um prompt para o `LLM` (usando a `Persona` configurada), visando detalhar os passos de execução, identificar `Tools` a serem usadas, ou gerar artefatos parciais.
