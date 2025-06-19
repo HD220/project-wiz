@@ -15,6 +15,7 @@ import { generateObject, tool as aiToolHelper, Tool, Message, generateText, Tool
 import { z } from 'zod';
 import { deepseek } from '@ai-sdk/deepseek'; // Or your chosen LLM provider
 import { AnnotationTool } from '../tools/annotation.tool';
+import { logger } from '../services/logging';
 
 export class GenericAgentExecutor implements IAgentExecutor {
   private personaTemplate: AgentPersonaTemplate;
@@ -37,9 +38,9 @@ export class GenericAgentExecutor implements IAgentExecutor {
     this.availableAiTools = this.prepareAiToolsForPersona();
 
     if (Object.keys(this.availableAiTools).length === 0) {
-        console.warn(`GenericAgentExecutor for ${this.personaTemplate.role}: No tools found or loaded from registry for tool names: ${this.personaTemplate.toolNames.join(', ')}. Agent may not be able to perform actions.`);
+        logger.warn(`No tools found or loaded from registry for persona. Agent may not be able to perform actions.`, { agentRole: this.personaTemplate.role, toolNames: this.personaTemplate.toolNames.join(', ') });
     } else {
-        console.log(`GenericAgentExecutor for ${this.personaTemplate.role} initialized with tools: ${Object.keys(this.availableAiTools).join(', ')}`);
+        logger.info(`Initialized with tools: ${Object.keys(this.availableAiTools).join(', ')}`, { agentRole: this.personaTemplate.role });
     }
   }
 
@@ -48,8 +49,9 @@ export class GenericAgentExecutor implements IAgentExecutor {
     jobGoal: string,
     replanReason: string
   ): Promise<string> {
-    console.log(`GenericAgentExecutor (${this.personaTemplate.role}): Summarizing failed attempt for re-planning.`);
+    logger.info("Summarizing failed attempt for re-planning.", { agentRole: this.personaTemplate.role, jobGoal });
     if (historyToSummarize.length === 0) {
+      logger.warn("No specific history for failed attempt, but re-plan requested by LLM.", { agentRole: this.personaTemplate.role, reason: replanReason });
       return "No specific history for failed attempt, but re-plan requested by LLM. Reason: " + replanReason;
     }
 
@@ -79,7 +81,7 @@ Create a very concise summary of this failed attempt, highlighting the critical 
         'deepseek',      // Placeholder for actual provider name if available
         error
       );
-      console.error(`GenericAgentExecutor (${this.personaTemplate.role}): ${llmError.message}`, llmError);
+      logger.error(\`Summarizing failed attempt LLM call failed: \${llmError.message}\`, llmError, { agentRole: this.personaTemplate.role });
       return \`Error summarizing failed attempt. Re-plan requested by LLM due to: \${replanReason}\`;
     }
   }
@@ -95,7 +97,7 @@ Create a very concise summary of this failed attempt, highlighting the critical 
           execute: async (params) => toolInstance.execute(params, { agentId: this.personaTemplate.id, role: this.personaTemplate.role }),
         });
       } else {
-        console.warn(`GenericAgentExecutor: Tool '${toolName}' specified in persona template '${this.personaTemplate.id}' not found in ToolRegistry.`);
+        logger.warn(`Tool specified in persona template not found in ToolRegistry.`, { agentRole: this.personaTemplate.role, personaId: this.personaTemplate.id, toolName });
       }
     });
     return toolsForSdk;
@@ -106,7 +108,7 @@ Create a very concise summary of this failed attempt, highlighting the critical 
       return currentHistory; // No summarization needed
     }
 
-    console.log(`GenericAgentExecutor (${this.personaTemplate.role}): History length ${currentHistory.length} exceeds max ${this.MAX_HISTORY_MESSAGES_BEFORE_SUMMARY}. Attempting summarization.`);
+    logger.info(\`History length exceeds max. Attempting summarization.\`, { agentRole: this.personaTemplate.role, historyLength: currentHistory.length, maxHistory: this.MAX_HISTORY_MESSAGES_BEFORE_SUMMARY});
 
     const preservedInitialMessages = currentHistory.slice(0, this.PRESERVE_INITIAL_MESSAGES_COUNT);
 
@@ -123,7 +125,7 @@ Create a very concise summary of this failed attempt, highlighting the critical 
     );
 
     if (summarizationChunk.length === 0) {
-      console.warn(`GenericAgentExecutor (${this.personaTemplate.role}): Summarization triggered but no messages available in the designated chunk to summarize.`);
+      logger.warn("Summarization triggered but no messages available in the designated chunk to summarize.", { agentRole: this.personaTemplate.role });
       return currentHistory; // Should not happen if MAX_HISTORY > PRESERVE_INITIAL + NUM_MESSAGES_TO_SUMMARIZE_CHUNK
     }
 
@@ -148,7 +150,7 @@ Provide a concise summary that retains all critical information for continuing t
       const summaryText = summaryObject.summary;
 
       if (!summaryText || summaryText.trim() === "") {
-        console.warn(`GenericAgentExecutor (${this.personaTemplate.role}): Summarization LLM call returned empty summary. Original history preserved for this turn.`);
+        logger.warn("Summarization LLM call returned empty summary. Original history preserved for this turn.", { agentRole: this.personaTemplate.role });
         return currentHistory;
       }
 
@@ -158,7 +160,7 @@ Provide a concise summary that retains all critical information for continuing t
       };
 
       const newHistory = [...preservedInitialMessages, summaryMessage, ...remainingLaterMessages];
-      console.log(\`GenericAgentExecutor (\${this.personaTemplate.role}): Conversation history summarized. Old length: \${currentHistory.length}, New length: \${newHistory.length}\`);
+      logger.info("Conversation history summarized.", { agentRole: this.personaTemplate.role, oldLength: currentHistory.length, newLength: newHistory.length});
       return newHistory;
 
     } catch (error: any) {
@@ -168,7 +170,7 @@ Provide a concise summary that retains all critical information for continuing t
         'deepseek',      // Placeholder
         error
       );
-      console.error(`GenericAgentExecutor (${this.personaTemplate.role}): ${llmError.message}`, llmError);
+      logger.error(\`History summarization LLM call failed: \${llmError.message}\`, llmError, { agentRole: this.personaTemplate.role });
       return currentHistory; // Return original history on summarization error
     }
   }
@@ -272,7 +274,7 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
     let updatedConversationHistory = [...currentConversationHistory];
 
     for (const toolCall of toolCalls) {
-      console.log(`GenericAgentExecutor (${this.personaTemplate.role}): Processing tool call: \${toolCall.toolName}, Args:`, toolCall.args);
+      logger.info(\`Processing tool call: \${toolCall.toolName}\`, { agentRole: this.personaTemplate.role, toolName: toolCall.toolName, args: toolCall.args });
       // The AI SDK automatically adds the toolCall to the messages array.
       // If we were manually constructing, we'd add it here:
       // updatedConversationHistory.push(toolCall);
@@ -281,7 +283,7 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
 
       if (!registeredTool) {
         const errorMsg = `Tool '\${toolCall.toolName}' not found in registry.`;
-        console.error(`GenericAgentExecutor (${this.personaTemplate.role}): \${errorMsg}`);
+        logger.error(errorMsg, undefined, { agentRole: this.personaTemplate.role, toolName: toolCall.toolName });
         const errorResult: ToolResultPart = {
           toolCallId: toolCall.toolCallId,
           toolName: toolCall.toolName,
@@ -307,7 +309,7 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
         };
         toolResults.push(toolResult);
         updatedConversationHistory.push(toolResult);
-        console.log(`GenericAgentExecutor (${this.personaTemplate.role}): Tool '\${toolCall.toolName}' executed. Result:`, executionResult);
+        logger.info(\`Tool '\${toolCall.toolName}' executed.\`, { agentRole: this.personaTemplate.role, toolName: toolCall.toolName, result: executionResult });
 
       } catch (e: any) {
         let toolError: ToolExecutionError;
@@ -320,7 +322,7 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
             e
           );
         }
-        console.error(`GenericAgentExecutor (${this.personaTemplate.role}): ${toolError.message} (Tool: ${toolError.toolName})`, toolError.originalError || toolError);
+        logger.error(\`\${toolError.message}\`, toolError.originalError || toolError, { agentRole: this.personaTemplate.role, toolName: toolError.toolName });
 
         const errorResult: ToolResultPart = {
           toolCallId: toolCall.toolCallId,
@@ -336,8 +338,7 @@ A previous attempt to solve this failed. Summary of that attempt: "\${job.data.l
   }
 
   public async processJob(job: Job<any, any>): Promise<AgentExecutorResult> {
-    console.log(`
-AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Iteratively Processing Job ID ${job.id}, Name: ${job.name}`);
+    logger.info("Iteratively Processing Job.", { agentRole: this.personaTemplate.role, agentId: this.personaTemplate.id, jobId: job.id, jobName: job.name });
     const jobGoal = job.payload?.goal || job.name;
 
     let agentState: AgentJobState = job.data?.agentState || {
@@ -360,7 +361,7 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
     // Summarize conversation history if needed
     agentState.conversationHistory = await this._summarizeOldestMessages(agentState.conversationHistory, jobGoal);
 
-    console.log(`AgentExecutor (${this.personaTemplate.role}): Conversation length after potential summarization: ${agentState.conversationHistory.length}. Last message: ${agentState.conversationHistory[agentState.conversationHistory.length-1]?.content.substring(0,100)}`);
+    logger.info(\`Conversation length after potential summarization: \${agentState.conversationHistory.length}\`, { agentRole: this.personaTemplate.role, jobId: job.id, lastMessageContentStart: agentState.conversationHistory[agentState.conversationHistory.length-1]?.content.substring(0,100) });
 
     try {
       const {
@@ -386,7 +387,7 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
       // 5. Errors/Other: Fallbacks.
 
       if (finalObject?.clarifyingQuestions && finalObject.clarifyingQuestions.length > 0) {
-        console.log(`AgentExecutor (${this.personaTemplate.role}): LLM asked ${finalObject.clarifyingQuestions.length} clarifying questions for job ${job.id}.`);
+        logger.info(\`LLM asked \${finalObject.clarifyingQuestions.length} clarifying questions.\`, { agentRole: this.personaTemplate.role, jobId: job.id });
 
         const questionsText = \`Clarifying questions for job '${job.id}' (Original Goal: "${jobGoal}"):
 - ${finalObject.clarifyingQuestions.join('\n- ')}\`;
@@ -398,7 +399,7 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
             jobId: job.id,
             tags: ['clarification_needed', \`job:\${job.id}\`, \`agent_role:\${this.personaTemplate.role}\`]
           });
-          console.log(`AgentExecutor (${this.personaTemplate.role}): Clarifying questions saved as annotation.`);
+          logger.info("Clarifying questions saved as annotation.", { agentRole: this.personaTemplate.role, jobId: job.id });
 
           agentState.executionHistory?.push({
             timestamp: new Date(),
@@ -411,11 +412,11 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
         } catch (annotationError: any) {
           let specificError: Error = annotationError instanceof Error ? annotationError : new Error(String(annotationError));
           let annErrorMsg = specificError.message;
-          if (specificError instanceof ToolExecutionError) { // Though internalAnnotationTool.save is not an IAgentTool directly called by LLM
-             console.error(`AgentExecutor (${this.personaTemplate.role}): Failed to save clarifying questions as annotation (ToolExecutionError): ${specificError.message} (Tool: ${specificError.toolName})`, specificError.originalError || specificError);
+          if (specificError instanceof ToolExecutionError) {
+             logger.error(\`Failed to save clarifying questions as annotation (ToolExecutionError): \${specificError.message}\`, specificError.originalError || specificError, { agentRole: this.personaTemplate.role, jobId: job.id, toolName: specificError.toolName });
              annErrorMsg = `Annotation Tool Error: ${specificError.message}`;
           } else {
-             console.error(`AgentExecutor (${this.personaTemplate.role}): Failed to save clarifying questions as annotation:`, specificError.message);
+             logger.error("Failed to save clarifying questions as annotation.", specificError, { agentRole: this.personaTemplate.role, jobId: job.id });
           }
           agentState.executionHistory?.push({
             timestamp: new Date(),
@@ -435,7 +436,7 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
       }
 
       if (finalObject?.requestReplan === true) {
-        console.log(`AgentExecutor (${this.personaTemplate.role}): LLM requested a re-plan. Reason: ${finalObject.finalSummary}`);
+        logger.info("LLM requested a re-plan.", { agentRole: this.personaTemplate.role, jobId: job.id, reason: finalObject.finalSummary });
         agentState.executionHistory?.push({
           timestamp: new Date(),
           type: 'llm_event',
@@ -469,8 +470,8 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
         };
       }
 
-      if (toolCalls && toolCalls.length > 0) { // This block should now use _executeToolsAndHandleResults
-        console.log(`AgentExecutor (${this.personaTemplate.role}): LLM returned ${toolCalls.length} tool call(s) to be executed.`);
+      if (toolCalls && toolCalls.length > 0) {
+        logger.info(\`LLM returned \${toolCalls.length} tool call(s) to be executed.\`, { agentRole: this.personaTemplate.role, jobId: job.id });
 
         // Note: `agentState.conversationHistory` at this point includes the LLM's `tool_calls` message.
         // The `_executeToolsAndHandleResults` method will append `tool_results` messages to this history.
@@ -502,25 +503,25 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
         return { status: 'CONTINUE_PROCESSING', message: `Executed tool(s): ${toolCalls.map(t => t.toolName).join(', ')}. Ready for next LLM iteration.` };
 
       } else if (finishReason === 'stop' || finishReason === 'length') {
-        console.log(`AgentExecutor (${this.personaTemplate.role}): Goal considered complete by LLM. Final summary: ${finalObject?.finalSummary}`);
+        logger.info("Goal considered complete by LLM.", { agentRole: this.personaTemplate.role, jobId: job.id, summary: finalObject?.finalSummary });
         agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_event', name: 'goal_completed', params: { finalDecision: true }, result: finalObject, error: undefined });
         job.setData({ ...(job.data || {}), agentState });
         return { status: 'COMPLETED', message: finalObject?.finalSummary || "Goal achieved.", output: finalObject?.outputData };
 
       } else if (finishReason === 'error') {
-          console.error(`AgentExecutor (${this.personaTemplate.role}): LLM generation error.`);
+          logger.error("LLM generation error.", undefined, { agentRole: this.personaTemplate.role, jobId: job.id });
           agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_error', name: 'generation', params: {}, result: null, error: "LLM generation error" });
           job.setData({ ...(job.data || {}), agentState });
           return { status: 'FAILED', message: 'LLM generation error.' };
 
       } else if (finishReason === 'tool-calls' && (!toolCalls || toolCalls.length === 0)) {
-          console.warn(`AgentExecutor (${this.personaTemplate.role}): LLM finishReason was 'tool-calls' but no toolCalls were processed/returned. This may indicate the LLM tried to call a tool it doesn't have or formatted its request incorrectly.`);
+          logger.warn("LLM finishReason 'tool-calls' but no toolCalls processed/returned.", { agentRole: this.personaTemplate.role, jobId: job.id, llmOutputObject: finalObject });
           agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_warning', name: 'tool_call_mismatch', params: {}, result: null, error: "LLM indicated tool_calls finish reason but no valid calls were processed." });
           job.setData({ ...(job.data || {}), agentState });
           return { status: 'CONTINUE_PROCESSING', message: 'LLM intended tool use, but no valid tool calls were made. Review conversation history.' };
       }
 
-      console.warn(\`AgentExecutor (\${this.personaTemplate.role}): LLM interaction finished with unhandled reason: \${finishReason}\`);
+      logger.warn(\`LLM interaction finished with unhandled reason: \${finishReason}\`, undefined, { agentRole: this.personaTemplate.role, jobId: job.id, finishReason });
       agentState.executionHistory?.push({ timestamp: new Date(), type: 'llm_warning', name: 'unhandled_finish_reason', params: { finishReason }, result: null, error: \`LLM interaction finished with unhandled reason: \${finishReason}\` });
       job.setData({ ...(job.data || {}), agentState });
       return { status: 'FAILED', message: \`LLM interaction finished with unhandled reason: \${finishReason}\` };
@@ -530,20 +531,20 @@ AgentExecutor (${this.personaTemplate.role} - ${this.personaTemplate.id}): Itera
       let errorToLog: Error = error instanceof Error ? error : new Error(String(error));
 
       if (error instanceof ConfigurationError) {
-        console.error(`AgentExecutor (${this.personaTemplate.role}): ConfigurationError: ${error.message}`, error);
+        logger.error(\`ConfigurationError: \${error.message}\`, error, { agentRole: this.personaTemplate.role, jobId: job.id });
         errorMessage = `Configuration Error: ${error.message}`;
       } else if (error instanceof LLMError) {
-        console.error(`AgentExecutor (${this.personaTemplate.role}): LLMError: ${error.message} (Model: ${error.modelName}, Provider: ${error.provider})`, error.originalError || error);
+        logger.error(\`LLMError: \${error.message}\`, error.originalError || error, { agentRole: this.personaTemplate.role, jobId: job.id, modelName: error.modelName, provider: error.provider });
         errorMessage = `LLM Error: ${error.message}`;
       } else if (error instanceof ToolExecutionError) {
-        console.error(`AgentExecutor (${this.personaTemplate.role}): ToolExecutionError: ${error.message} (Tool: ${error.toolName})`, error.originalError || error);
+        logger.error(\`ToolExecutionError: \${error.message}\`, error.originalError || error, { agentRole: this.personaTemplate.role, jobId: job.id, toolName: error.toolName });
         errorMessage = `Tool Execution Error: ${error.message}`;
       } else if (error instanceof JobProcessingError) {
-        console.error(`AgentExecutor (${this.personaTemplate.role}): JobProcessingError: ${error.message}`, error);
+        logger.error(\`JobProcessingError: \${error.message}\`, error, { agentRole: this.personaTemplate.role, jobId: job.id, jobProcessingAgent: error.agentRole });
         errorMessage = `Job Processing Error: ${error.message}`;
       }
       else { // Generic error
-        console.error(`AgentExecutor (${this.personaTemplate.role}): Error during LLM interaction or tool execution:`, errorToLog);
+        logger.error("Error during LLM interaction or tool execution.", errorToLog, { agentRole: this.personaTemplate.role, jobId: job.id });
         errorMessage = errorToLog.message;
       }
 
