@@ -6,50 +6,26 @@ import './App.css'; // Se você tiver um App.css para estilização básica
 function App() {
   const [message, setMessage] = useState<string>('Pronto.');
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
-  const [projectId, setProjectId] = useState<string>('project_default_123'); // ID do projeto para teste
-
-  // Efeito para criar um projeto padrão no DB ao iniciar a UI, se não existir.
-  // Isso é apenas para facilitar o teste da UI sem depender de um DB pré-populado.
-  // Em uma aplicação real, a criação de projetos seria uma funcionalidade da UI separada.
-  // E o Drizzle não deve ser chamado diretamente do renderer assim.
-  // Este é um HACK para teste.
-  /*
-  useEffect(() => {
-    const ensureProjectExists = async () => {
-      // Esta função é ilustrativa, não vai funcionar diretamente no renderer
-      // porque o renderer não tem acesso direto ao 'db' ou 'projectsTable'.
-      // Precisaria de um IPC handler para 'project:ensureExists'
-      try {
-        // Exemplo de como seria no main process:
-        // let project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-        // if (!project.length) {
-        //   await db.insert(projectsTable).values({ id: projectId, name: 'Projeto Padrão', caminho_working_directory: './workdir_default' });
-        //   setMessage(`Projeto padrão ${projectId} assegurado.`);
-        // }
-        setMessage(`Pronto. Certifique-se que o projeto com ID "${projectId}" existe no banco de dados.`);
-      } catch (e) {
-        setMessage(`Erro ao assegurar projeto: ${(e as Error).message}`);
-      }
-    };
-    ensureProjectExists();
-  }, [projectId]);
-  */
-
+  const [projectIdInput, setProjectIdInput] = useState<string>('project_default_123'); // ID do projeto para teste
 
   const handleAddJob = async () => {
-    if (!projectId) {
-      setMessage("Por favor, defina um ID de Projeto para criar um Job.");
-      return;
+    // project_id é opcional, então pode ser null ou undefined se o input estiver vazio
+    const projectIdForJob = projectIdInput.trim() === '' ? null : projectIdInput.trim();
+
+    if (projectIdForJob === null) {
+      setMessage("Criando Job sem ID de Projeto específico.");
+      // Não precisa mais do return aqui, pois project_id pode ser nulo.
     }
+
     const jobData: NewJob = {
       name: 'Meu Job de Teste via UI ' + Date.now(),
-      project_id: projectId,
+      project_id: projectIdForJob, // Pode ser null aqui
       payload: { data: 'informação do job ' + Math.random().toString(36).substring(7) },
       priority: Math.floor(Math.random() * 10),
       persona_id: 'persona_test_ui',
       // Outros campos usarão defaults do schema ou podem ser omitidos se opcionais no NewJob
     };
-    setMessage(`Adicionando job: ${jobData.name}`);
+    setMessage(`Adicionando job: ${jobData.name}${projectIdForJob ? ` para projeto ${projectIdForJob}` : ' (sem projeto específico)'}`);
     console.log('Enviando jobData:', jobData);
     try {
       const result = await window.electronAPI.queueAddJob(jobData);
@@ -131,16 +107,16 @@ function App() {
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <h1>Teste do Sistema de Filas Project Wiz</h1>
       <div style={{ marginBottom: '20px' }}>
-        <label htmlFor="projectId" style={{ marginRight: '10px' }}>ID do Projeto para Teste:</label>
+        <label htmlFor="projectIdInput" style={{ marginRight: '10px' }}>ID do Projeto (Opcional):</label>
         <input
           type="text"
-          id="projectId"
-          value={projectId}
-          onChange={(e) => setProjectId(e.target.value)}
-          placeholder="ex: project_default_123"
+          id="projectIdInput"
+          value={projectIdInput}
+          onChange={(e) => setProjectIdInput(e.target.value)}
+          placeholder="Deixe em branco para Job sem projeto"
           style={{padding: '5px'}}
         />
-        <p><small>Nota: Este projeto (ID: {projectId}) precisa existir na tabela 'projects' do banco de dados para que a criação de Jobs funcione corretamente devido à Foreign Key.</small></p>
+        <p><small>Nota: Se um ID de projeto for fornecido, ele precisa existir na tabela 'projects' do banco de dados devido à Foreign Key.</small></p>
       </div>
       <div style={{ marginBottom: '10px' }}>
         <button onClick={handleAddJob} style={{ marginRight: '10px', padding: '10px' }}>Adicionar Job de Teste</button>

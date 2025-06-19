@@ -16,7 +16,8 @@ export const projectsTable = sqliteTable('projects', {
 export const jobsTable = sqliteTable('jobs', {
   id: text('id').primaryKey().$defaultFn(() => randomUUID()),
   name: text('name'),
-  project_id: text('project_id').notNull().references(() => projectsTable.id),
+  // project_id agora é opcional
+  project_id: text('project_id').references(() => projectsTable.id),
   persona_id: text('persona_id'), // Pode ser um ID de configuração de Persona
   status: text('status', { enum: ['pending', 'executing', 'completed', 'failed', 'delayed', 'waiting_dependency'] }).notNull().default('pending'),
   priority: integer('priority').default(0),
@@ -27,14 +28,11 @@ export const jobsTable = sqliteTable('jobs', {
 
   attempts: integer('attempts').default(0),
   max_attempts: integer('max_attempts').default(3),
-  // Em vez de delay_ms absoluto, vamos usar 'delayed_until' timestamp
-  // ou manter delay_ms como duração e calcular o 'available_at' no serviço.
-  // Por ora, delay_ms será a DURAÇÃO do delay. O QueueService usará updated_at + delay_ms para saber quando está disponível.
   delay_ms: integer('delay_ms').default(0),
-  retry_delay_base_ms: integer('retry_delay_base_ms').default(1000), // Base para backoff exponencial
+  retry_delay_base_ms: integer('retry_delay_base_ms').default(1000),
 
-  depends_on_job_ids: text('depends_on_job_ids', { mode: 'json' }), // JSON array de strings (Job IDs)
-  parent_job_id: text('parent_job_id').references(() => jobsTable.id), // Auto-referência para Sub-Jobs
+  depends_on_job_ids: text('depends_on_job_ids', { mode: 'json' }),
+  parent_job_id: text('parent_job_id').references(() => jobsTable.id),
 
   created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
@@ -43,12 +41,13 @@ export const jobsTable = sqliteTable('jobs', {
   failed_reason: text('failed_reason'),
 });
 
-// Relações (opcional aqui, mas bom para ORM)
+// Relações
 export const projectRelations = relations(projectsTable, ({ many }) => ({
   jobs: many(jobsTable),
 }));
 
 export const jobRelations = relations(jobsTable, ({ one, many }) => ({
+  // A relação com project agora precisa lidar com project_id opcional
   project: one(projectsTable, {
     fields: [jobsTable.project_id],
     references: [projectsTable.id],
@@ -71,13 +70,16 @@ export type Job = typeof jobsTable.$inferSelect;
 export type NewProject = typeof projectsTable.$inferInsert;
 export type NewJob = typeof jobsTable.$inferInsert;
 
-// Schemas Zod para validação em tempo de execução (recomendado)
+// Schemas Zod para validação em tempo de execução
 export const insertProjectSchema = createInsertSchema(projectsTable);
 export const selectProjectSchema = createSelectSchema(projectsTable);
 
 export const insertJobSchema = createInsertSchema(jobsTable, {
-  // Exemplo de refinamento com Zod:
-  // priority: z.number().min(0).max(10),
-  // payload: z.object({ /* ... estrutura do payload ... */ }),
+  // project_id agora é opcional no schema Zod também
+  project_id: z.string().optional().nullable(),
+  // Outras validações Zod podem ser adicionadas aqui se necessário
+  // Exemplo: payload: z.object({ ... }).optional().nullable(),
 });
-export const selectJobSchema = createSelectSchema(jobsTable);
+export const selectJobSchema = createSelectSchema(jobsTable, {
+  project_id: z.string().optional().nullable(),
+});
