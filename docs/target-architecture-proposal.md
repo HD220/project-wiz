@@ -103,6 +103,7 @@ A camada de Infraestrutura contém todas as implementações concretas e detalhe
     *   Implementações concretas das interfaces de repositório definidas no Domínio (ex: `DrizzleJobRepository` implementando `IJobRepository`).
     *   Utilizará Drizzle ORM para interagir com o banco de dados SQLite.
     *   Incluirá os esquemas do Drizzle, configurações de conexão com o banco de dados e scripts de migração.
+    *   **Sistema de Filas Local (Conceito BullMQ com SQLite):** Além da persistência de entidades do domínio, esta camada também será responsável por implementar a lógica de um sistema de filas assíncronas customizado. Este sistema será desenvolvido internamente, inspirado pelos conceitos e funcionalidades do BullMQ (como jobs, workers, processadores, filas nomeadas, capacidade de agendamento, priorização e retentativas), mas utilizará o SQLite como backend de persistência para os jobs e o estado das filas. Crucialmente, não haverá dependência de sistemas de mensageria externos como Redis, RabbitMQ ou o próprio BullMQ. Este sistema de filas será projetado para ser genérico e utilizável por diferentes partes da aplicação que necessitem de processamento assíncrono, incluindo, mas não se limitando a, filas de jobs para os Agentes de IA. A lógica para enfileirar, consultar, retirar jobs da fila e gerenciar seus estados será implementada aqui, operando sobre as tabelas do SQLite.
 
 *   **Interface do Usuário (UI) (`infrastructure/ui/react/`):**
     *   A aplicação React, incluindo:
@@ -1054,7 +1055,7 @@ O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e a
         *   Outros serviços de domínio ou aplicação necessários.
 
 *   **Persistência da Fila:**
-    *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados que têm um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs.
+    *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados que têm um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs. Esta abordagem de persistência é parte da implementação do sistema de filas local customizado, inspirado nos conceitos do BullMQ mas sem dependências externas, como descrito na Seção 3.3.
 
 *   **Comunicação Externa Baseada em Eventos:**
     *   Conforme o feedback do usuário, a comunicação do agente (ou seja, do seu `jobProcessor`) com "coisas externas" (UI, outros agentes) pode ser baseada em eventos. Por exemplo, ao concluir um job, o `jobProcessor` poderia emitir um evento `JobCompletedEvent` que outras partes do sistema poderiam ouvir. Isso pode ser implementado com um `EventEmitter` ou um sistema de mensageria mais robusto, se necessário.
