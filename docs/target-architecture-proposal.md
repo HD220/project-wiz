@@ -106,7 +106,7 @@ A camada de Infraestrutura contém todas as implementações concretas e detalhe
     *   Utilizará Drizzle ORM para interagir com o banco de dados SQLite.
     *   Incluirá os esquemas do Drizzle, configurações de conexão com o banco de dados e scripts de migração.
     *   **Sistema de Filas Local (Inspirado em BullMQ, com Persistência em SQLite):**
-        A camada de infraestrutura será responsável por uma implementação customizada de um sistema de filas assíncronas, crucial para o processamento de `Job`s de forma desacoplada e robusta. Este sistema será desenvolvido internamente, **sem dependências de bibliotecas de mensageria externas** como Redis, RabbitMQ, ou mesmo o próprio BullMQ. A persistência de todos os dados dos jobs e o estado das filas será gerenciada através do **SQLite**, utilizando o Drizzle ORM.
+        A camada de infraestrutura será responsável por uma implementação customizada de um sistema de filas assíncronas, crucial para o processamento de `Job`s de forma desacoplada e robusta. Este sistema será desenvolvido internamente, **sem dependências de bibliotecas de mensageria externas** como Redis, RabbitMQ, ou mesmo o próprio BullMQ. A persistência de todos os dados dos jobs e o estado das filas será gerenciada através do **SQLite**, utilizando o Drizzle ORM. Cada fila nomeada será processada por um `Worker` dedicado, sendo que cada `Worker` é responsável por monitorar e processar jobs de uma única fila específica.
 
         Embora seja uma implementação local, ela será fortemente inspirada nos conceitos e funcionalidades ricas oferecidas pelo BullMQ, visando fornecer uma API similar e capacidades robustas. As funcionalidades chave incluem:
 
@@ -238,22 +238,23 @@ container.bind<CreateJobUseCase>(TYPES.CreateJobUseCase).to(CreateJobUseCase).in
 // import { JobHandlers } from '@/infrastructure/electron/ipc-handlers/job.handlers';
 // container.bind<JobHandlers>(TYPES.JobHandlers).to(JobHandlers).inSingletonScope();
 
-        // --- Bindings para Componentes dos Agentes ---
-        // A lógica de processamento do job agora está primariamente em AIAgent.processJob() (Seção 6.2)
-        // ou potencialmente em um AIAgentDomainService.
+        // --- Bindings para Serviços de Domínio/Aplicação ---
+        // import { AIAgentDomainService } from '@/domain/services/agent/ai-agent.service'; // Exemplo de caminho
+        // import { IAIAgentDomainService } from '@/domain/services/agent/i-ai-agent.service'; // Interface
+        // // Este serviço encapsularia a lógica de AIAgent.processJob e suas dependências diretas.
+        // container.bind<IAIAgentDomainService>(TYPES.IAIAgentDomainService).to(AIAgentDomainService).inTransientScope();
 
-        // Se a lógica de AIAgent.processJob() se tornar muito complexa e requerer muitas
-        // dependências de infraestrutura, ela pode ser movida para um AIAgentDomainService.
-        // Este AIAgentDomainService seria injetável e receberia suas dependências.
-        // Exemplo:
-        // import { AIAgentDomainService } from '@/domain/services/ai-agent-domain.service';
-        // container.bind<AIAgentDomainService>(TYPES.AIAgentDomainService).to(AIAgentDomainService).inTransientScope();
+        // import { JobQueueService } from '@/infrastructure/persistence/job-queue.service'; // Exemplo de caminho
+        // import { IJobQueueService } from '@/domain/services/i-job-queue.service'; // Interface
+        // container.bind<IJobQueueService>(TYPES.IJobQueueService).to(JobQueueService).inSingletonScope();
 
-        // Workers (`AgentWorker`) geralmente são instanciados programaticamente pelo AgentLifecycleService,
-        // e recebem suas dependências (como o container, ou serviços específicos) via construtor
-        // ou são configurados com instâncias de serviços obtidas do container.
-        // Portanto, um binding direto para AgentWorker pode não ser comum, a menos que
-        // o próprio AgentLifecycleService seja injetado com uma fábrica de workers.
+        // Nota sobre Workers:
+        // Os `AgentWorker`s (da camada de infraestrutura) são tipicamente instanciados e configurados
+        // programaticamente pelo `AgentLifecycleService` (ver Seção 8.3) para cada `AIAgent` ativo.
+        // O `AgentLifecycleService` obteria as dependências necessárias (como `IJobRepository`,
+        // `IAIAgentRepository`, `IAIAgentDomainService` ou `ILLMService`/`IToolRegistry`/`IJobQueueService`
+        // diretamente) do container e as passaria para o construtor do `AgentWorker` ou para
+        // o método que inicia seu ciclo de processamento.
 
 export { container };
 ```
@@ -308,7 +309,8 @@ const TYPES = {
   // AgentWorker: Symbol.for('AgentWorker'),
 
   // Serviços de Domínio/Aplicação para Agentes
-  // AIAgentDomainService: Symbol.for('AIAgentDomainService'), // Se usado
+  IAIAgentDomainService: Symbol.for('IAIAgentDomainService'), // Se a abordagem de serviço for usada
+  IJobQueueService: Symbol.for('IJobQueueService'),       // Para interações avançadas com a fila
   // Fábricas
   // JobProcessorFactory: Symbol.for('JobProcessorFactory'), // Removido se job processors não são mais registrados individualmente
 };
@@ -419,100 +421,131 @@ import { CreateJobUseCase } from '@/domain/use-cases/job/create-job.use-case';
 // });
 ```
 
-Seguindo esses padrões, o InversifyJS ajudará a criar um sistema bem estruturado, onde as dependências são claramente definidas e gerenciadas externamente, facilitando a evolução e o teste do software.
+Seguindo esses padrões, o InversifyJS ajudará a criar um sistema bem estruturado, onde as dependências são claramente definidas e gerenciadas externamente, facilitando a evolução e o teste do software. Os exemplos abaixo ilustram como a DI pode ser usada nos dois cenários principais para processamento de jobs por agentes.
 
 **Cenário com `AIAgent.processJob` recebendo dependências:**
 
-Como discutido na Seção 6.2, o método `AIAgent.processJob(job, dependencies)` recebe suas dependências (`ILLMService`, `IToolRegistry`, etc.) como parâmetros. O componente `Worker` (da camada de infraestrutura), responsável por chamar este método, obteria essas dependências do container InversifyJS.
+Como discutido na Seção 6.2, o método `AIAgent.processJob(job, workerToken, dependencies)` recebe suas dependências (`ILLMService`, `IToolRegistry`, `IJobQueueService`, `IJobRepository`) como parâmetros. O componente `AgentWorker` (da camada de infraestrutura), responsável por chamar este método, obteria estas dependências do container InversifyJS (provavelmente durante sua própria instanciação pelo `AgentLifecycleService`).
 
 ```typescript
 // Exemplo conceitual do Worker obtendo dependências para passar ao AIAgent.processJob()
 // src/infrastructure/workers/agent.worker.ts (simplificado)
-// (Este Worker em si pode ou não ser gerenciado pelo InversifyJS; muitas vezes são instanciados programaticamente)
 
 // class AgentWorker {
+//   private agentConfig: AIAgentProps; // Configuração do agente que este worker serve
+//   private queueName: string;
+//
+//   // Dependências que o Worker usa diretamente ou passa para AIAgent.processJob
+//   private jobRepository: IJobRepository;
+//   private aiAgentRepository: IAIAgentRepository; // Para carregar a entidade AIAgent completa se necessário
 //   private llmService: ILLMService;
 //   private toolRegistry: IToolRegistry;
-//   private jobRepository: IJobRepository;
-//   private aiAgentRepository: IAIAgentRepository; // Para carregar o AIAgent
-//   private queueName: string;
-//   private agentId: string;
+//   private jobQueueService: IJobQueueService;
 
 //   constructor(
-//     agentId: string,
+//     agentConfig: AIAgentProps, // Passado pelo AgentLifecycleService
 //     queueName: string,
-//     container: Container // Passando o container ou obtendo dependências específicas
+//     // Dependências resolvidas pelo AgentLifecycleService a partir do container:
+//     jobRepository: IJobRepository,
+//     aiAgentRepository: IAIAgentRepository,
+//     llmService: ILLMService,
+//     toolRegistry: IToolRegistry,
+//     jobQueueService: IJobQueueService
 //   ) {
-//     this.agentId = agentId;
+//     this.agentConfig = agentConfig;
 //     this.queueName = queueName;
-//     this.llmService = container.get<ILLMService>(TYPES.ILLMService);
-//     this.toolRegistry = container.get<IToolRegistry>(TYPES.IToolRegistry);
-//     this.jobRepository = container.get<IJobRepository>(TYPES.IJobRepository);
-//     this.aiAgentRepository = container.get<IAIAgentRepository>(TYPES.IAIAgentRepository);
+//     this.jobRepository = jobRepository;
+//     this.aiAgentRepository = aiAgentRepository; // Usado para carregar a entidade AIAgent
+//     this.llmService = llmService;
+//     this.toolRegistry = toolRegistry;
+//     this.jobQueueService = jobQueueService;
 //   }
 
-//   async run() {
-//     // Loop para buscar jobs da this.queueName usando this.jobRepository
-//     const job = await this.jobRepository.findNextPending(this.queueName);
-//     if (job) {
-//       const agent = await this.aiAgentRepository.findById(this.agentId);
-//       if (agent) {
-//         await agent.processJob(job, {
-//           llmService: this.llmService,
-//           toolRegistry: this.toolRegistry
-//         });
-//         // ... Lógica de atualização do job (completar, falhar)
-//       }
-//     }
+//   async start() {
+//     console.log(`Worker para agente ${this.agentConfig.id} (${this.agentConfig.name}) iniciado na fila ${this.queueName}.`);
+//     // Loop de processamento while(true)
+//     // Dentro do loop:
+//     // const job = await this.jobRepository.findNextPending(this.queueName);
+//     // if (job) {
+//     //   const agentEntity = await this.aiAgentRepository.findById(this.agentConfig.id); // Carrega a entidade
+//     //   if (agentEntity) {
+//     //      const workerToken = crypto.randomUUID(); // Gerar token
+//     //      try {
+//     //        const result = await agentEntity.processJob(job, workerToken, {
+//     //          llmService: this.llmService,
+//     //          toolRegistry: this.toolRegistry,
+//     //          jobQueueService: this.jobQueueService,
+//     //          jobRepository: this.jobRepository // Para job.updateData() ser persistido
+//     //        });
+//     //        // job.complete(result); await this.jobRepository.save(job);
+//     //      } catch (error) {
+//     //        // if (error instanceof DelayedError) { ... }
+//     //        // else if (error instanceof WaitingChildrenError) { ... }
+//     //        // else { job.fail(error); await this.jobRepository.save(job); }
+//     //      }
+//     //   }
+//     // }
 //   }
 // }
 ```
 
 **Cenário com `AIAgentDomainService`:**
 
-Se optarmos por um `AIAgentDomainService` para encapsular a lógica de processamento do job e suas dependências:
+Se optarmos por um `AIAgentDomainService` para encapsular a lógica de processamento do job e suas dependências, este serviço seria injetável e o `AgentWorker` teria uma dependência dele.
 
 ```typescript
-// src/domain/services/ai-agent-domain.service.ts
+// src/domain/services/agent/ai-agent.service.ts (exemplo)
 // import { injectable, inject } from 'inversify';
 // import { TYPES } from '@/infrastructure/ioc/types';
-// import { ILLMService } from './i-llm.service';
+// import { ILLMService } from './i-llm.service'; // Supondo que está no mesmo dir ou shared
 // import { IToolRegistry } from './i-tool-registry.service';
-// import { AIAgent } from '@/domain/entities/ai-agent.entity';
+// import { IJobQueueService } from './i-job-queue.service';
+// import { IJobRepository } from '@/domain/repositories/i-job.repository';
+// import { AIAgentProps } from '@/domain/entities/ai-agent.entity'; // Usaria Props ou a entidade
 // import { Job } from '@/domain/entities/job.entity';
 
 // @injectable()
-// export class AIAgentDomainService {
+// export class AIAgentDomainService implements IAIAgentDomainService {
 //   constructor(
 //     @inject(TYPES.ILLMService) private llmService: ILLMService,
-//     @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry
+//     @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry,
+//     @inject(TYPES.IJobQueueService) private jobQueueService: IJobQueueService,
+//     @inject(TYPES.IJobRepository) private jobRepository: IJobRepository
 //   ) {}
 
-//   public async processJobForAgent(agent: AIAgent, job: Job): Promise<any> {
-//     // Lógica do que estava em AIAgent.processJob, usando this.llmService, this.toolRegistry
-//     // e as configurações de 'agent' (agent.modelId, agent.roleDescription, etc.)
+//   public async processJobForAgent(agentProps: AIAgentProps, job: Job, workerToken: string): Promise<any> {
+//     // Lógica similar ao que estava em AIAgent.processJob, usando this.llmService,
+//     // this.toolRegistry, this.jobQueueService, this.jobRepository
+//     // e as configurações de 'agentProps' (agentProps.modelId, agentProps.roleDescription, etc.)
 //     const taskDescription = job.payload.task;
-//     // ... construir mensagens
-//     // const llmResult = await this.llmService.streamText({ ... });
-//     // ... processar resultado, ferramentas, etc.
-//     return { success: true, data: "Job processed by AIAgentDomainService" };
+//     // ... construir mensagens, chamar LLM, usar ferramentas, interagir com jobQueueService ...
+//     // Exemplo: job.updateJobData(...); await this.jobRepository.save(job);
+//     // Exemplo: job.prepareForDelay(...); await this.jobRepository.save(job);
+//     //          await this.jobQueueService.requestMoveToDelayed(job.id, workerToken, ...);
+//     //          throw new DelayedError(...);
+//     return { success: true, data: "Job processed by AIAgentDomainService for " + agentProps.name };
 //   }
 // }
 
-// O Worker então seria injetado com o AIAgentDomainService:
+// Exemplo do AgentWorker usando AIAgentDomainService:
 // class AgentWorker {
 //   constructor(
-//     private agent: AIAgent, // A configuração do agente
-//     private jobRepository: IJobRepository,
-//     private agentDomainService: AIAgentDomainService, // Injetado
+//     private agentProps: AIAgentProps, // Configuração do agente
+//     private jobRepository: IJobRepository, // Para buscar jobs
+//     private agentDomainService: IAIAgentDomainService, // Injetado pelo AgentLifecycleService
 //     private queueName: string
 //   ) {}
-//   async run() {
-//     const job = await this.jobRepository.findNextPending(this.queueName);
-//     if (job) {
-//       await this.agentDomainService.processJobForAgent(this.agent, job);
-//       // ...
-//     }
+
+//   async start() {
+//     // Loop de processamento
+//     // const job = await this.jobRepository.findNextPending(this.queueName);
+//     // if (job) {
+//     //   const workerToken = crypto.randomUUID();
+//     //   try {
+//     //      const result = await this.agentDomainService.processJobForAgent(this.agentProps, job, workerToken);
+//     //      // job.complete(result); await this.jobRepository.save(job);
+//     //   } catch (error) { /* ... tratamento de erro ... */ }
+//     // }
 //   }
 // }
 ```
@@ -520,103 +553,75 @@ A escolha entre `AIAgent.processJob` com dependências passadas ou um `AIAgentDo
 
 ## 5. Proposta de Organização de Diretórios Detalhada
 
-A seguir, é apresentada a proposta para a organização de diretórios dentro da pasta `src/`. Esta estrutura visa refletir a separação de camadas da Clean Architecture e facilitar a navegação e localização dos diferentes componentes do sistema.
+A seguir, é apresentada a proposta para a organização de diretórios dentro da pasta `src/`. Esta estrutura visa refletir a separação de camadas da Clean Architecture, simplificada para três camadas principais (`domain`, `infrastructure`, `shared`), e facilitar a navegação e localização dos diferentes componentes do sistema.
 
 ```
 src/
-├── domain/                     # Lógica de negócios pura, independente de frameworks
-│   ├── entities/               # Entidades de negócio (ex: Job, Project, User, AIAgent)
-│   │   ├── value-objects/      # Objetos de Valor (ex: EmailVO, JobIdVO, TaskStatusVO)
+├── domain/
+│   ├── entities/
+│   │   ├── value-objects/
 │   │   ├── job.entity.ts
-│   │   └── ...
-│   ├── use-cases/              # Casos de uso da aplicação
-│   │   ├── job/                # Agrupado por funcionalidade/entidade principal
+│   │   └── ai-agent.entity.ts
+│   ├── use-cases/
+│   │   ├── job/
+│   │   │   ├── dtos/ (Opcional: DTOs para este caso de uso)
 │   │   │   ├── create-job.use-case.ts
-│   │   │   └── get-job-details.use-case.ts
+│   │   │   └── ...
 │   │   ├── project/
-│   │   │   └── create-project.use-case.ts
-│   │   └── ...
-│   ├── repositories/           # Interfaces (Ports) para os repositórios de dados
-│   │   ├── i-job.repository.ts
-│   │   └── i-project.repository.ts
-│   └── services/               # Serviços de domínio (lógica de negócio que não cabe em uma entidade)
+│   │   └── agent/ (Casos de uso relacionados a agentes)
+│   ├── repositories/ (Interfaces/Ports)
+│   └── services/
+│       ├── agent/
+│       │   └── ai-agent.service.ts (Se AIAgent.processJob for externalizado para um serviço)
 │       └── job-priority.service.ts
 │
-├── application/                # (Opcional) Regras de negócio da aplicação, DTOs
-│   ├── dtos/                   # Data Transfer Objects (se necessário para casos de uso)
-│   │   ├── job.dto.ts
-│   │   └── ...
-│   └── services/               # Serviços de aplicação (orquestração, etc.)
+├── infrastructure/
+│   ├── persistence/
+│   │   └── drizzle/
+│   │       ├── repositories/ (Implementações)
+│   │       ├── mappers/
+│   │       ├── schema.ts
+│   │       └── migrations/
+│   │   └── database.ts
+│   ├── ui/react/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/ (Serviços da UI)
+│   │   ├── contexts/
+│   │   ├── routes/
+│   │   ├── assets/
+│   │   └── styles/
+│   ├── electron/
+│   │   ├── main.ts
+│   │   ├── preload.ts
+│   │   └── ipc-handlers/
+│   ├── services/ (Clientes para LLMs, Embedding, Logging)
+│   │   └── llm/
+│   │       └── deepseek.service.ts
+│   ├── workers/ # Adicionado
+│   │   └── agent.worker.ts
+│   └── ioc/
+│       ├── inversify.config.ts
+│       └── types.ts
 │
-├── infrastructure/             # Implementações concretas, frameworks, ferramentas
-│   ├── persistence/            # Lógica de persistência de dados
-│   │   ├── drizzle/            # Implementação com Drizzle ORM
-│   │   │   ├── repositories/   # Implementações concretas dos repositórios
-│   │   │   │   ├── job.repository.ts
-│   │   │   │   └── user.repository.ts
-│   │   │   ├── mappers/        # (Opcional) Mapeadores entre entidades de domínio e modelos de DB
-│   │   │   ├── schema.ts       # Esquemas do Drizzle para as tabelas do DB
-│   │   │   └── migrations/     # Arquivos de migração do Drizzle
-│   │   └── database.ts         # Configuração da conexão com o banco de dados
-│   │
-│   ├── ui/                     # Interface do Usuário
-│   │   └── react/              # Código específico do React
-│   │       ├── main.tsx        # Ponto de entrada da aplicação React
-│   │       ├── App.tsx         # Componente raiz da aplicação (com RouterProvider, etc.)
-│   │       ├── pages/          # Componentes de página (associados a rotas)
-│   │       │   ├── project/
-│   │       │   │   └── ProjectDetailsPage.tsx
-│   │       │   └── HomePage.tsx
-│   │       ├── components/       # Componentes React reutilizáveis
-│   │       │   ├── common/       # Componentes genéricos (Button, Input, Modal)
-│   │       │   └── job/          # Componentes específicos para a funcionalidade de Job
-│   │       │       └── JobList.tsx
-│   │       ├── hooks/            # Hooks React customizados
-│   │       ├── services/         # Serviços específicos da UI (chamadas à API Electron, formatação)
-│   │       ├── contexts/         # (Opcional) Contextos React para estado global simples
-│   │       ├── routes/           # Configuração de rotas (TanStack Router)
-│   │       │   └── routeTree.gen.ts # Arquivo gerado pelo TanStack Router
-│   │       ├── assets/           # Imagens, fontes, etc.
-│   │       └── styles/           # CSS global, temas (Tailwind config aqui ou na raiz)
-│   │
-│   ├── electron/               # Lógica específica do Electron
-│   │   ├── main.ts             # Ponto de entrada do processo principal do Electron
-│   │   ├── preload.ts          # Script de preload para a ponte Main <-> Renderer
-│   │   └── ipc-handlers/       # Manipuladores de eventos IPC
-│   │       ├── job.handlers.ts
-│   │       ├── project.handlers.ts
-│   │       └── index.ts          # (Opcional) Para agregar e exportar handlers
-│   │
-│   ├── services/               # Clientes para serviços externos
-│   │   ├── llm/                # Serviços relacionados a LLMs
-│   │   │   └── deepseek.service.ts
-│   │   ├── embedding/
-│   │   │   └── embedding.service.ts
-│   │   └── logging/
-│   │       └── logger.service.ts
-│   │
-│   └── ioc/                    # Configuração da Injeção de Dependência
-│       ├── inversify.config.ts # Configuração do container InversifyJS
-│       └── types.ts            # Definição dos símbolos (TYPES) para DI
+├── shared/
+│   ├── utils/
+│   ├── types/ (Tipos TypeScript comuns)
+│   ├── dtos/ (Opcional: DTOs globais/compartilhados)
+│   └── constants/
 │
-├── shared/                     # Código utilitário compartilhado entre camadas
-│   ├── utils/                  # Funções utilitárias genéricas (datas, strings, etc.)
-│   ├── types/                  # Tipos TypeScript comuns, não específicos de domínio
-│   └── constants/              # Constantes globais
-│
-└── main.ts                     # (Legado) Ponto de entrada original do backend.
-                                # Sua lógica será refatorada e distribuída
-                                # principalmente para `infrastructure/electron/main.ts`
-                                # e para os casos de uso e serviços no domínio.
+└── main.ts (Legado)
 ```
 
 **Considerações Adicionais:**
 
-*   **`src/application`:** Esta camada é marcada como opcional. Se os DTOs e a orquestração de casos de uso forem simples, podem ser incorporados diretamente nos casos de uso do domínio ou nos handlers/UI.
+*   **DTOs (Data Transfer Objects):** Se os Casos de Uso precisarem de estruturas de dados específicas para entrada/saída que diferem das entidades do domínio, esses DTOs podem ser colocados dentro dos respectivos diretórios dos casos de uso (ex: `src/domain/use-cases/job/dtos/create-job.dto.ts`) ou em uma pasta `src/shared/dtos/` se forem amplamente reutilizáveis entre diferentes partes da aplicação. Inicialmente, a camada `src/application` foi omitida para simplificar a estrutura de três camadas principais (`domain`, `infrastructure`, `shared`).
 *   **`mappers` em `persistence`:** Se a estrutura das entidades de domínio divergir significativamente dos esquemas do banco de dados, uma camada de mapeadores pode ser útil para converter entre os dois.
-*   **Testes:** Diretórios de teste (ex: `__tests__` ou `*.spec.ts`, `*.test.ts`) seriam colocados próximos aos arquivos que testam, ou em um diretório `tests/` na raiz, espelhando a estrutura de `src/`. (Embora a criação de testes formais tenha sido despriorizada pelo usuário, a estrutura deve permitir isso).
-
-Esta organização de diretórios visa fornecer uma separação clara de responsabilidades, tornando o sistema mais fácil de entender, manter e escalar.
+*   **Testes:** Diretórios de teste (ex: `__tests__` ou arquivos `*.spec.ts`, `*.test.ts`) seriam colocados próximos aos arquivos que testam, ou em um diretório `tests/` na raiz do projeto, espelhando a estrutura de `src/`.
+*   **`AIAgentService`:** Se a lógica de `AIAgent.processJob` se tornar muito complexa ou se beneficiar de ser um serviço injetável separado da entidade `AIAgent` (que se tornaria mais um DTO de configuração), este serviço (`AIAgentService`) residiria em `src/domain/services/agent/`.
 
 ## 6. Entidades e Casos de Uso Chave (Exemplos Detalhados)
 
@@ -638,7 +643,10 @@ A entidade `Job` representa uma unidade de trabalho a ser processada no sistema,
 ```typescript
 // src/domain/entities/value-objects/job-status.vo.ts
 export class JobStatusVO {
-  private static readonly VALID_STATUSES = ['PENDING', 'ACTIVE', 'COMPLETED', 'FAILED', 'DELAYED'] as const;
+  private static readonly VALID_STATUSES = [
+    'PENDING', 'ACTIVE', 'COMPLETED', 'FAILED',
+    'DELAYED', 'WAITING_CHILDREN' // Adicionados
+  ] as const;
   readonly value: typeof JobStatusVO.VALID_STATUSES[number];
 
   private constructor(status: typeof JobStatusVO.VALID_STATUSES[number]) {
@@ -664,28 +672,24 @@ export class JobStatusVO {
 // import { JobStatusVO } from './value-objects/job-status.vo';
 
 export interface JobProps {
-  id: string; // JobIdVO
-  name: string;
-  payload: any; // Dados específicos para a execução do job
+  id: string; // Deveria ser JobIdVO
+  name: string; // Deveria ser JobNameVO ou similar se houver regras
+  queueName: string; // Nome da fila à qual o job pertence
+  payload: any;
+  data?: any; // Dados customizados atualizáveis
   status: JobStatusVO;
   attempts: number;
   maxAttempts: number;
-  result?: any;
-  error?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  projectId?: string; // ProjectIdVO
-  assignedToAgentId?: string; // AIAgentIdVO
-  // Novas propriedades para funcionalidades avançadas da fila:
-  data?: any; // Para dados customizados que podem ser atualizados durante a execução
-  priority?: number; // Para priorização de jobs
+  priority?: number;
   delayUntil?: Date; // Para jobs que devem ser adiados antes da primeira execução
   processedAt?: Date; // Quando o processamento iniciou
   finishedAt?: Date; // Quando o processamento terminou (completado ou falhou)
+  result?: any;
+  error?: string;
   parentId?: string; // JobIdVO - Para jobs filhos
-  // children?: JobIdVO[]; // Poderia ser uma coleção de primeira classe JobChildList
-  // backoff?: { type: 'exponential' | 'fixed'; delay: number }; // Configuração de backoff
-  // lockToken?: string; // Token do worker que está processando (gerenciado pela infra da fila)
+  createdAt: Date;
+  updatedAt: Date;
+  // Outras props como backoffConfig poderiam ser adicionadas aqui ou gerenciadas pela infra da fila
 }
 
 export class Job {
@@ -696,36 +700,33 @@ export class Job {
   }
 
   public static create(params: {
-    id?: string; // Opcional, pode ser gerado
+    id?: string;
     name: string;
+    queueName: string; // Adicionado
     payload: any;
-    projectId?: string;
+    projectId?: string; // Mantido para contexto, mas não diretamente em JobProps no exemplo
     maxAttempts?: number;
     priority?: number;
-    delayUntil?: Date;
+    delayUntil?: Date; // Usado pelo EnqueueJobUseCase para setar status DELAYED
     parentId?: string;
     initialData?: any;
   }): Job {
     const now = new Date();
     const id = params.id || crypto.randomUUID(); // Usar UUID real
-    const initialStatus = params.delayUntil && params.delayUntil > now
-      ? JobStatusVO.create('DELAYED')
-      : JobStatusVO.create('PENDING');
-
     return new Job({
       id,
       name: params.name,
+      queueName: params.queueName,
       payload: params.payload,
-      status: initialStatus,
+      status: JobStatusVO.create('PENDING'), // Default para PENDING
       attempts: 0,
       maxAttempts: params.maxAttempts || 3,
-      createdAt: now,
-      updatedAt: now,
-      projectId: params.projectId,
-      priority: params.priority || 10, // Default priority
-      delayUntil: params.delayUntil,
+      priority: params.priority || 10,
+      delayUntil: params.delayUntil, // Armazenado para informação
       parentId: params.parentId,
       data: params.initialData,
+      createdAt: now,
+      updatedAt: now,
     });
   }
 
@@ -788,31 +789,53 @@ export class Job {
 
 **Suporte a Funcionalidades Avançadas da Fila:**
 
-Para interagir plenamente com o sistema de filas local avançado (descrito na Seção 3.3), a entidade `Job` (ou um `JobDomainService` que opera sobre ela) precisaria expor métodos que permitam ao `jobProcessor` (ou seja, ao método `AIAgent.processJob`) modificar o estado e os dados do job de maneiras específicas. A implementação exata de como o `workerToken` é manuseado e como as atualizações são persistidas seria responsabilidade da camada de infraestrutura da fila, mas a entidade pode definir a intenção.
+Para suportar as interações com o sistema de filas avançado, a entidade `Job` precisa permitir modificações em seu estado e dados, enquanto a lógica de interação com a infraestrutura da fila (que envolve `workerToken`, locks, etc.) é gerenciada externamente (pelo `AIAgent.processJob` ou um `AIAgentService` chamando um `IJobQueueService` da infraestrutura).
 
-Exemplos conceituais desses métodos (a decisão de colocá-los diretamente na entidade `Job` vs. um `JobDomainService` dependerá da complexidade e da necessidade de manter a entidade focada):
+*   **`updateJobData(newData: any): void`**
+    *   **Propósito:** Permitir que a lógica de processamento do job (ex: `AIAgent.processJob`) atualize o campo `data` do job para salvar progresso ou resultados parciais.
+    *   **Lógica na Entidade:**
+        ```typescript
+        public updateJobData(newData: any): void {
+          this.props.data = { ...(this.props.data || {}), ...newData };
+          this.props.updatedAt = new Date();
+          // Esta entidade foi modificada. O chamador (Worker/Serviço) é responsável por persistir via IJobRepository.
+        }
+        ```
 
-*   **`updateData(newData: any): void`**
-    *   **Propósito:** Permitir que o `jobProcessor` atualize o campo `data` do job, útil para salvar o progresso de tarefas de múltiplas etapas.
-    *   **Lógica:** Atualizaria `this.props.data` e marcaria o job para atualização (`this.props.updatedAt = new Date()`). A persistência real ocorreria via `IJobRepository.save(this)`.
-    ```typescript
-    // public updateData(newData: any): void {
-    //   this.props.data = { ...(this.props.data || {}), ...newData };
-    //   this.props.updatedAt = new Date();
-    //   // A chamada ao repositório para salvar seria feita pelo caso de uso ou serviço que usa este método.
-    // }
-    ```
+*   **Sinalizando Intenção de Adiar ou Esperar (Exemplo com `prepareForDelay`):**
+    *   **Propósito:** A entidade `Job` pode ter métodos para se colocar em um estado que sinaliza uma intenção, mas a ação final na fila é da infraestrutura.
+    *   **Lógica na Entidade (Exemplo para Adiar):**
+        ```typescript
+        public prepareForDelay(delayTargetTimestamp: Date): void {
+          if (!this.props.status.is('ACTIVE')) { // Só pode adiar um job ativo
+            throw new Error('Job must be ACTIVE to be delayed.');
+          }
+          this.props.status = JobStatusVO.create('DELAYED');
+          this.props.delayUntil = delayTargetTimestamp;
+          this.props.updatedAt = new Date();
+          // O chamador (AIAgent.processJob) DEVE então chamar um método no IJobQueueService
+          // (ex: jobQueueService.requestMoveToDelayed(this.id, workerToken, delayTargetTimestamp))
+          // e lançar DelayedError.
+        }
+        ```
+    *   **Lógica na Entidade (Exemplo para Esperar Filhos):**
+         ```typescript
+        public prepareToWaitForChildren(): void {
+          if (!this.props.status.is('ACTIVE')) {
+            throw new Error('Job must be ACTIVE to wait for children.');
+          }
+          // Lógica para verificar se há filhos ou se é permitido esperar (pode estar em um Domain Service)
+          this.props.status = JobStatusVO.create('WAITING_CHILDREN');
+          this.props.updatedAt = new Date();
+          // O chamador (AIAgent.processJob) DEVE então chamar um método no IJobQueueService
+          // (ex: jobQueueService.requestMoveToWaitingChildren(this.id, workerToken))
+          // e lançar WaitingChildrenError se bem-sucedido.
+        }
+        ```
+*   **Interação com `IJobQueueService` (a ser chamado pelo `AIAgent.processJob`):**
+    A lógica de processamento do job (`AIAgent.processJob`) usaria esses métodos da entidade `Job` para preparar o estado e, em seguida, chamaria um serviço da camada de infraestrutura (ex: `IJobQueueService.requestMoveToDelayed(jobId, workerToken, timestamp)`) que lidaria com a lógica de lock, `workerToken` e a atualização final no banco de dados através do `IJobRepository`. Após a chamada bem-sucedida ao `IJobQueueService`, o `AIAgent.processJob` lançaria o erro apropriado (`DelayedError`, `WaitingChildrenError`).
 
-*   **`requestDelayedProcessing(untilTimestamp: number, workerToken: string): void`**
-    *   **Propósito:** Sinalizar a intenção de que o job seja movido para o estado `DELAYED`.
-    *   **Lógica:** Este método na entidade poderia apenas validar se a ação é permitida pelo estado atual. A lógica real de mover para `DELAYED` no sistema de filas (incluindo a verificação do `workerToken` e a atualização do status no DB) seria gerenciada por um `JobQueueService` na infraestrutura, invocado pelo `jobProcessor`. O `jobProcessor` então lançaria `DelayedError`.
-    *   A entidade `Job` poderia ter um método como `prepareForDelay(until: Date)` que atualiza `this.props.delayUntil = until; this.props.status = JobStatusVO.create('DELAYED');` mas a transição de estado final e o lock seriam gerenciados pela infra da fila.
-
-*   **`requestWaitingForChildren(workerToken: string): void`**
-    *   **Propósito:** Sinalizar a intenção de que o job pai espere pelos filhos.
-    *   **Lógica:** Similar ao `requestDelayedProcessing`, a entidade pode validar o estado. A transição para `WAITING_CHILDREN` e a verificação do `workerToken` seriam feitas por um `JobQueueService`. O `jobProcessor` lançaria `WaitingChildrenError`.
-
-A interação precisa entre a entidade `Job`, o `jobProcessor` e o `JobQueueService` (da infraestrutura) precisará ser cuidadosamente desenhada para manter a separação de responsabilidades, garantindo que a entidade `Job` não conheça os detalhes da infraestrutura da fila (como `workerToken` ou o mecanismo de lock), mas possa expressar as intenções de mudança de estado ou dados. Um `JobDomainService` poderia ser um bom intermediário para orquestrar essas interações se elas se tornarem complexas para a entidade sozinha.
+Essa separação garante que a entidade `Job` não se preocupe com detalhes da infraestrutura da fila como `workerToken`s, mas possa participar ativamente na definição de seu estado e dados.
 ### 6.2. Exemplo de Entidade: `AIAgent`
 A entidade `AIAgent` (ou um nome similar como `AIWorkerProfile`, `AIModelExecutor`) representaria a configuração e o estado de um agente de IA capaz de executar jobs ou tarefas.
 
@@ -840,8 +863,7 @@ export interface AIAgentProps {
   availableTools: string[]; // Array de IDs ou nomes de ferramentas que o agente pode usar
   isActive: boolean;
   // Outras configurações específicas do agente
-  // queueName: string; // Nome da fila dedicada a este agente
-  // jobProcessorIdentifier: string; // REMOVIDO ou comentado
+  // queueName: string; // REMOVIDO - agora é primariamente uma propriedade do Job
 }
 
 export class AIAgent {
@@ -858,8 +880,7 @@ export class AIAgent {
     provider: string;
     temperature?: number;
     availableTools?: string[];
-    // queueName: string;
-    // jobProcessorIdentifier: string; // REMOVIDO
+    // queueName: string; // REMOVIDO
   }): AIAgent {
     const id = crypto.randomUUID(); // Gerar ID
     return new AIAgent({
@@ -871,8 +892,6 @@ export class AIAgent {
       temperature: params.temperature || 0.7,
       availableTools: params.availableTools || [],
       isActive: true,
-      // queueName: params.queueName,
-      // jobProcessorIdentifier: params.jobProcessorIdentifier, // REMOVIDO
     });
   }
 
@@ -903,98 +922,87 @@ export class AIAgent {
   // ... (outros métodos da classe AIAgent)
 
     public async processJob(
-      job: Job, // A entidade Job, que teria métodos como updateData, requestDelayedProcessing, etc.
-      workerToken: string, // Token fornecido pelo Worker que está processando este job
+      job: Job, // A entidade Job
+      workerToken: string, // Token fornecido pelo Worker
       dependencies: {
         llmService: ILLMService;
         toolRegistry: IToolRegistry;
-        // JobQueueService: IJobQueueService; // (Opcional) Se a lógica de mover job para delayed/waitingchildren estiver em um serviço
+        jobQueueService: IJobQueueService; // Serviço para interagir com a fila
+        jobRepository: IJobRepository; // Para salvar o job após updateData
       }
-    ): Promise<any> {
-      // 1. Interpretar o job.payload para entender a tarefa e o estado atual (se for de múltiplas etapas).
+    ): Promise<any> { // O tipo de retorno pode ser mais específico
+      // 1. Interpretar o job.payload e job.data (estado salvo).
       const taskDescription = job.payload.task || job.payload.goal;
-      let currentStep = job.data?.currentStep || 'initial'; // Exemplo de como obter o estado de job.data
+      let currentStep = job.data?.currentStep || 'initial';
+
+      console.log(`[AIAgent ${this.id}] Job ${job.id} (Token: ${workerToken.substring(0,8)}...): Iniciando etapa ${currentStep}.`);
 
       // Exemplo de um processo de múltiplas etapas
       if (currentStep === 'initial') {
         // ... fazer algum processamento inicial ...
-        // const initialProcessingResult = await this.performInitialStep(taskDescription, dependencies);
         console.log(`[AIAgent ${this.id}] Job ${job.id}: Executando etapa inicial.`);
+        // Simular trabalho
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // Atualizar os dados do job com o progresso
-        // await job.updateData({ currentStep: 'processing', initialResult: 'someResult' });
-        // A persistência real de job.updateData seria feita pelo IJobRepository,
-        // o método na entidade Job apenas atualizaria o estado em memória e marcaria como 'dirty'.
-        // O Worker ou um JobQueueService se encarregaria de chamar jobRepository.save(job).
-        // Por simplicidade, vamos assumir que o jobProcessor sinaliza a necessidade de salvar.
-        // (Em uma implementação real, job.updateData pode retornar um boolean indicando se precisa salvar)
+        job.updateJobData({ currentStep: 'processing', initialResult: 'resultFromInitialStep' });
+        await dependencies.jobRepository.save(job); // Persistir a atualização dos dados do job
 
         // Exemplo: Adiar o job para a próxima etapa após um delay
-        const delayMilliseconds = 5000; // 5 segundos
-        console.log(`[AIAgent ${this.id}] Job ${job.id}: Adiar para a próxima etapa em ${delayMilliseconds}ms.`);
-        // A entidade Job teria um método para solicitar o adiamento,
-        // mas a ação de mover na fila e gerenciar o lock é da infraestrutura da fila.
-        // O job.requestDelayedProcessing chamaria internamente o JobQueueService ou sinalizaria.
-        // await job.requestDelayedProcessing(Date.now() + delayMilliseconds, workerToken);
-        // throw new DelayedError(); // Sinaliza ao Worker que o job foi adiado.
+        const delayMilliseconds = job.payload.customDelay || 5000;
+        console.log(`[AIAgent ${this.id}] Job ${job.id}: Solicitando adiamento para próxima etapa em ${delayMilliseconds}ms.`);
 
-        // Para este exemplo, vamos apenas simular a conclusão da primeira etapa e avançar.
-        currentStep = 'final';
-        // await job.updateData({ currentStep: 'final' });
-        // (Necessário salvar o job aqui se job.updateData não o fizer implicitamente)
+        job.prepareForDelay(new Date(Date.now() + delayMilliseconds));
+        await dependencies.jobRepository.save(job); // Salva o estado 'DELAYED' pretendido
+
+        // Efetivar o movimento na fila usando o JobQueueService e o workerToken
+        await dependencies.jobQueueService.requestMoveToDelayed(job.id, workerToken, job.props.delayUntil!); // props.delayUntil foi setado por prepareForDelay
+        throw new DelayedError('Job adiado para próxima etapa via AIAgent.processJob'); // Sinaliza ao Worker
+      }
+
+      if (currentStep === 'processing') {
+        // ... fazer mais algum processamento ...
+        console.log(`[AIAgent ${this.id}] Job ${job.id}: Executando etapa de processamento.`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Exemplo: Se este job fosse um pai e precisasse esperar por filhos (que teriam sido criados aqui)
+        // Suponha que 'job.hasPendingChildren()' seja uma lógica (talvez em JobDomainService)
+        // if (await dependencies.jobQueueService.jobHasPendingChildren(job.id)) {
+        //   console.log(`[AIAgent ${this.id}] Job ${job.id}: Solicitando espera por jobs filhos.`);
+        //   job.prepareToWaitForChildren();
+        //   await dependencies.jobRepository.save(job);
+        //   await dependencies.jobQueueService.requestMoveToWaitingChildren(job.id, workerToken);
+        //   throw new WaitingChildrenError('Job esperando conclusão dos filhos via AIAgent.processJob');
+        // }
+
+        job.updateJobData({ currentStep: 'final', processingResult: 'resultFromProcessingStep' });
+        await dependencies.jobRepository.save(job);
+        currentStep = 'final'; // Avança para a próxima etapa (simulado)
       }
 
       if (currentStep === 'final') {
-        // 2. Construir o histórico da conversa para o LLM
-        const messages: CoreMessage[] = [
-          { role: 'user', content: `Execute the final step for task: ${taskDescription} (previous data: ${JSON.stringify(job.data)})` }
-        ];
+        console.log(`[AIAgent ${this.id}] Job ${job.id}: Executando etapa final.`);
+        const messages: CoreMessage[] = [ /* ... construir mensagens ... */ ];
+        // const llmResult = await dependencies.llmService.streamText({ ... });
+        // ... processar LLM e ferramentas ...
+        const finalAnswer = "Resultado final do processamento do LLM e ferramentas.";
 
-        // 3. Chamar o LLMService
-        const llmResult = await dependencies.llmService.streamText({
-          modelId: this.props.modelId,
-          systemPrompt: this.props.roleDescription,
-          temperature: this.props.temperature,
-          tools: dependencies.toolRegistry.getTools(this.props.availableTools),
-          messages: messages,
-        });
-
-        // 4. Processar o resultado do LLM, incluindo chamadas a ferramentas.
-        let finalAnswer = '';
-        // ... (lógica de processamento do stream e tool-calls como no exemplo anterior) ...
-        // Exemplo de chamada de ferramenta:
-        // if (part.type === 'tool-call') {
-        //   const toolResult = await dependencies.toolRegistry.executeTool(part, workerToken); // Passar workerToken se a ferramenta precisar interagir com a fila
-        //   messages.push({ role: 'tool', content: JSON.stringify(toolResult) });
-        //   // (Loop de execução de ferramenta-LLM)
-        // }
-        finalAnswer = "Final answer based on LLM processing and tool usage."; // Simulado
-
-        // Exemplo: Se este job fosse um pai e tivesse criado jobs filhos (não mostrado aqui)
-        // e precisasse esperar por eles:
-        // const allChildrenDone = false; // Lógica para verificar se os filhos terminaram
-        // if (!allChildrenDone) {
-        //   console.log(`[AIAgent ${this.id}] Job ${job.id}: Esperando jobs filhos.`);
-        //   // await job.requestWaitingForChildren(workerToken);
-        //   // throw new WaitingChildrenError(); // Sinaliza ao Worker
-        // }
-
-        // 5. Retornar o resultado final.
         console.log(`[AIAgent ${this.id}] Job ${job.id}: Etapa final concluída.`);
-        return { success: true, data: finalAnswer };
+        return { success: true, data: finalAnswer }; // Este resultado será usado por job.complete() no Worker
       }
 
-      // Se nenhuma etapa corresponder (não deveria acontecer com boa lógica de estado)
-      throw new Error(`[AIAgent ${this.id}] Job ${job.id}: Estado desconhecido ou inválido da etapa do job: ${currentStep}`);
+      throw new Error(`[AIAgent ${this.id}] Job ${job.id}: Estado desconhecido ou inválido da etapa: ${currentStep}`);
     }
 }
 ```
 
 **Fornecimento de Dependências e `workerToken` para `processJob`:**
 
-O método `processJob` requer um `workerToken` (fornecido pelo `Worker` que o está executando) e dependências como `ILLMService` e `IToolRegistry`. O `workerToken` é essencial se o `processJob` precisar interagir com a entidade `Job` para solicitar operações que afetam seu estado na fila (como `requestDelayedProcessing` ou `requestWaitingForChildren`), pois essas operações na infraestrutura da fila exigirão o token para autorização e gerenciamento de locks.
+O método `processJob` requer um `workerToken` (fornecido pelo `Worker`) e um conjunto de dependências de serviço (`ILLMService`, `IToolRegistry`, `IJobQueueService`, `IJobRepository`). O `workerToken` é crucial para autorizar operações na fila através do `IJobQueueService`.
 
-Como discutido anteriormente, estas dependências de serviço são obtidas do container DI pelo `Worker` e passadas como argumentos. Isso mantém a entidade `AIAgent` mais limpa. A alternativa com um `AIAgentDomainService` injetável (que receberia o `workerToken` como parâmetro em seu método de processamento de job) também é uma opção válida, especialmente para encapsular lógicas mais complexas.
+Estas dependências são obtidas do container DI pelo `Worker` e passadas como argumentos para `AIAgent.processJob`. Esta abordagem mantém a entidade `AIAgent` relativamente limpa de conhecimento direto sobre o container DI, focando em sua configuração e na orquestração da lógica de processamento do job.
+
+Alternativamente, para encapsular ainda mais essa lógica e o gerenciamento de suas dependências, um `AIAgentDomainService` (localizado em `src/domain/services/agent/`) pode ser introduzido. Este serviço seria injetável (`@injectable`), receberia `ILLMService`, `IToolRegistry`, `IJobQueueService`, `IJobRepository` etc., em seu construtor, e teria um método como `executeAgentTask(agentConfig: AIAgentProps, job: Job, workerToken: string)`. O `Worker` então obteria uma instância deste serviço e o utilizaria. A entidade `AIAgent` se tornaria primariamente um objeto de dados/configuração. A escolha dependerá da complexidade e da preferência por manter as entidades mais puras.
 ### 6.3. Exemplo de Caso de Uso: `CreateProjectUseCase`
 Este caso de uso seria responsável por criar um novo projeto no sistema.
 
@@ -1010,44 +1018,46 @@ Este caso de uso seria responsável por criar um novo projeto no sistema.
 ```typescript
 // src/domain/use-cases/project/create-project.use-case.ts
 import { injectable, inject } from 'inversify';
-import { TYPES } from '@/infrastructure/ioc/types'; // Supondo que TYPES seja definido
+import { TYPES } from '@/infrastructure/ioc/types';
 import { IProjectRepository } from '@/domain/repositories/i-project.repository';
-import { Project, ProjectProps } from '@/domain/entities/project.entity'; // Supondo a entidade Project
+import { Project } from '@/domain/entities/project.entity'; // Supondo que a entidade Project exista e tenha um método create e getters.
+// import { IUserRepository } from '@/domain/repositories/i-user.repository'; // Exemplo se precisasse validar usuário
 
 export interface CreateProjectInput {
   name: string;
   description?: string;
-  userId: string; // Dono do projeto
+  ownerUserId: string; // ID do usuário que está criando/é dono do projeto
 }
 
 export interface CreateProjectOutput {
   projectId: string;
   name: string;
+  ownerUserId: string;
   createdAt: Date;
 }
 
 @injectable()
 export class CreateProjectUseCase {
-  private projectRepository: IProjectRepository;
-
   constructor(
-    @inject(TYPES.IProjectRepository) projectRepository: IProjectRepository
-    // @inject(TYPES.IUserRepository) private userRepository: IUserRepository, // Exemplo de outra dependência
-  ) {
-    this.projectRepository = projectRepository;
-  }
+    @inject(TYPES.IProjectRepository) private projectRepository: IProjectRepository
+    // @inject(TYPES.IUserRepository) private userRepository: IUserRepository, // Exemplo
+  ) {}
 
   async execute(input: CreateProjectInput): Promise<CreateProjectOutput> {
-    // Validação: Verificar se o usuário existe (exemplo)
-    // const user = await this.userRepository.findById(input.userId);
-    // if (!user) {
-    //   throw new Error('User not found');
+    // Exemplo de validação (poderia estar em um Value Object ou serviço de domínio)
+    if (!input.name || input.name.trim().length === 0) {
+      throw new Error('Project name cannot be empty.');
+    }
+
+    // const owner = await this.userRepository.findById(input.ownerUserId);
+    // if (!owner) {
+    //   throw new Error(`User with id ${input.ownerUserId} not found.`);
     // }
 
-    const project = Project.create({
+    const project = Project.create({ // Supondo que Project.create receba estes params
       name: input.name,
       description: input.description,
-      ownerUserId: input.userId, // Ajustar conforme a entidade Project
+      ownerUserId: input.ownerUserId,
     });
 
     await this.projectRepository.save(project);
@@ -1055,7 +1065,8 @@ export class CreateProjectUseCase {
     return {
       projectId: project.id,
       name: project.name,
-      createdAt: project.createdAt, // Supondo que a entidade tenha createdAt
+      ownerUserId: project.ownerUserId, // Supondo que a entidade tenha esses getters
+      createdAt: project.createdAt,
     };
   }
 }
@@ -1066,8 +1077,8 @@ Este caso de uso seria responsável por criar um novo `Job` e adicioná-lo a uma
 **Localização:** `src/domain/use-cases/job/enqueue-job.use-case.ts`
 
 **Princípios Aplicados:**
-*   **Injeção de Dependência:** Recebe `IJobRepository` e, potencialmente, um `IJobQueueService` ou similar.
-*   **Foco Único:** Sua responsabilidade é criar e enfileirar o job.
+*   **Injeção de Dependência:** Recebe `IJobRepository`.
+*   **Foco Único:** Sua responsabilidade é criar um `Job` com os parâmetros corretos e persisti-lo, o que efetivamente o "enfileira" para ser pego por um Worker.
 
 **Exemplo Conceitual:**
 
@@ -1076,53 +1087,58 @@ Este caso de uso seria responsável por criar um novo `Job` e adicioná-lo a uma
 import { injectable, inject } from 'inversify';
 import { TYPES } from '@/infrastructure/ioc/types';
 import { IJobRepository } from '@/domain/repositories/i-job.repository';
-// Poderia haver um IJobQueueService para abstrair a lógica de "enfileiramento"
-// import { IJobQueueService } from '@/domain/services/i-job-queue.service';
 import { Job } from '@/domain/entities/job.entity';
 
 export interface EnqueueJobInput {
-  name: string;
+  queueName: string; // Nome da fila de destino
+  jobName: string;   // Tipo/nome do job (para o processador saber o que fazer)
   payload: any;
-  projectId?: string;
-  // Outros parâmetros como prioridade, delay, etc.
-  // targetAgentId?: string; // Para encontrar a queueName do agente
-  // queueName?: string; // Ou especificar diretamente a fila
+  priority?: number;
+  delayUntil?: Date;
+  maxAttempts?: number;
+  parentId?: string; // Para jobs filhos
+  initialData?: any;
 }
 
 export interface EnqueueJobOutput {
   jobId: string;
-  status: string;
+  status: string; // O status inicial do job (PENDING ou DELAYED)
+  queueName: string;
 }
 
 @injectable()
 export class EnqueueJobUseCase {
   constructor(
     @inject(TYPES.IJobRepository) private jobRepository: IJobRepository
-    // @inject(TYPES.IJobQueueService) private jobQueueService: IJobQueueService
   ) {}
 
   async execute(input: EnqueueJobInput): Promise<EnqueueJobOutput> {
-    // const determinedQueueName = input.queueName || await getQueueNameForAgent(input.targetAgentId);
-    const job = Job.create({
-      name: input.name,
+    if (!input.queueName || input.queueName.trim().length === 0) {
+      throw new Error('Queue name must be provided.');
+    }
+    if (!input.jobName || input.jobName.trim().length === 0) {
+      throw new Error('Job name must be provided.');
+    }
+
+    const job = Job.create({ // Usando o Job.create refinado da Seção 6.1
+      name: input.jobName,
+      queueName: input.queueName,
       payload: input.payload,
-      projectId: input.projectId,
-      // queueName: determinedQueueName, // queueName obtido a partir de targetAgentId ou fornecido diretamente
+      priority: input.priority,
+      delayUntil: input.delayUntil, // Job.create define status como DELAYED se esta data for no futuro
+      maxAttempts: input.maxAttempts,
+      parentId: input.parentId,
+      initialData: input.initialData,
     });
 
-    // Na Clean Architecture, o repositório geralmente lida com a persistência.
-    // Se "enfileirar" significa apenas salvar com status PENDING, o repositório é suficiente.
-    // Se "enfileirar" envolve um sistema de filas externo (Redis, RabbitMQ),
-    // então um IJobQueueService seria mais apropriado aqui para encapsular essa interação.
-    // Por simplicidade, vamos assumir que salvar no repositório com status PENDING é "enfileirar".
+    // A entidade Job (via Job.create) já deve ter definido o status inicial
+    // para PENDING ou DELAYED com base na presença e valor de delayUntil.
     await this.jobRepository.save(job);
-
-    // Exemplo se usasse um serviço de fila:
-    // await this.jobQueueService.enqueue(job);
 
     return {
       jobId: job.id,
-      status: job.status,
+      status: job.status, // Retorna o status real do job após a criação
+      queueName: job.props.queueName, // Retorna o nome da fila
     };
   }
 }
@@ -1297,7 +1313,7 @@ O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e a
 *   **`Worker` Dedicado por `AIAgent`:**
     *   Cada instância ou tipo de `AIAgent` terá um `Worker` associado. O `Worker` não é uma entidade de domínio, mas um componente da camada de infraestrutura ou aplicação.
     *   **Responsabilidades do `Worker`:**
-        1.  **Monitoramento da Fila:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas para evitar busy-waiting) para verificar sua `Queue` designada por novos `Job`s com status `PENDING`.
+        1.  **Monitoramento de Fila Dedicada:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas) para verificar **sua única `Queue` designada (identificada pelo `queueName` configurado no Worker)** por novos `Job`s com status `PENDING`. Um Worker é sempre associado a uma e somente uma fila.
         2.  **Retirada de Jobs (Polling):** Obter o próximo `Job` da fila (considerando prioridade, se aplicável) usando `IJobRepository.findNextPending(queueName)`.
         3.  **Gerenciamento de Estado do Job:** Antes de processar, atualizar o status do `Job` para `ACTIVE` (via `job.startProcessing()` e `jobRepository.save(job)`).
         4.  **Execução do Processamento do Job:** Gerar um `workerToken` único para este processamento. Invocar o método `processJob` na instância do `AIAgent` correspondente (ou em um `AIAgentService` associado), passando o `Job`, o `workerToken`, e as dependências necessárias (como `ILLMService`, `IToolRegistry`, que o Worker obteria do container DI). O método `AIAgent.processJob` pode, então, usar o `workerToken` ao chamar métodos no objeto `Job` que modificam seu estado na fila (ex: `job.requestDelayedProcessing(timestamp, workerToken)`).
@@ -1348,9 +1364,9 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
     *   Os `Worker`s seriam instâncias de uma classe `AgentWorker` (da camada de infraestrutura), que encapsula a lógica de polling da fila e chamada ao método de processamento do agente.
 
 *   **Criação e Gerenciamento de Filas (`Queues`):**
-    *   As "filas" são conceituais e representadas por `Job`s no banco de dados com um `queueName` específico. Não necessariamente exigem uma tabela separada para `Queues` no DB, a menos que precisemos armazenar metadados específicos da fila (além do que está no `AIAgent`).
-    *   Ao criar um novo `AIAgent`, um `queueName` único seria gerado (ex: `agent-${agentId}-queue`) e armazenado na configuração do `AIAgent`.
-    *   O `EnqueueJobUseCase` usaria o `targetAgentId` para buscar o `queueName` do `AIAgent` correspondente e associar o `Job` a essa fila.
+    *   As "filas" são conceituais e representadas por `Job`s no banco de dados com um `queueName` específico. Não necessariamente exigem uma tabela separada para `Queues` no DB, a menos que precisemos armazenar metadados específicos da fila (além do que está no `AIAgent`). A associação entre um `Worker` e o `queueName` que ele monitora é fundamental e de um para um.
+    *   Ao criar um novo `AIAgent`, um `queueName` único seria gerado (ex: `agent-${agentId}-queue`) e armazenado na configuração do `AIAgent`. Este `queueName` seria usado para configurar o `Worker` dedicado a este agente.
+    *   O `EnqueueJobUseCase` usaria o `targetAgentId` para buscar o `queueName` do `AIAgent` correspondente (ou o `queueName` seria fornecido diretamente ao caso de uso) para associar o `Job` a essa fila.
 
 *   **Escalabilidade e Concorrência (Considerações Futuras):**
     *   Inicialmente, cada `Worker` pode processar um job por vez para um determinado agente.
