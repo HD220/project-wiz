@@ -26,9 +26,10 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
     -   **Propósito:** Representa uma unidade de trabalho, uma tarefa ou uma atividade específica, tipicamente criada por um `Agente` para si mesmo em resposta a uma solicitação do usuário ou como parte da decomposição de uma tarefa maior. É então atribuído e executado por esse `Agente` (que utiliza uma configuração de `Persona`). `Jobs` são os itens operacionais fundamentais gerenciados e processados pelo sistema.
     -   **Atributos/Dados Chave:**
         -   Um identificador único para o `Job`.
-        -   Tipo/Nome: Categoriza o `Job` (ex: "GenerateCode", "RunTests", "AnalyzeIssue").
+        -   `queue_name`: (string, not null) O nome da fila específica à qual este `Job` pertence. Usado para rotear o `Job` ao `Worker`/processador correto que está escutando nessa fila.
+        -   Tipo/Nome: Categoriza o `Job` (ex: "GenerateCode", "RunTests", "AnalyzeIssue") dentro de sua fila.
         -   Descrição: Explicação detalhada do que o `Job` implica.
-        -   Status: Estado atual (ex: pendente, em execução, finalizado, falhou, aguardando, atrasado).
+        -   Status: Estado atual (ex: pendente, em execução, finalizado, falhou, aguardando, atrasado, aguardando_filhos).
         -   Prioridade: Embora uma prioridade base possa ser definida, ela é frequentemente gerenciada dinamicamente ou influenciada pelo `Agente`/LLM com base no contexto e dependências.
         -   Dados de Entrada/Payload: Dados/parâmetros para a `Persona` (Agente) iniciar o `Job`.
         -   Referência aos Dados do `ActivityContext`: Link para seu `ActivityContext` específico.
@@ -92,16 +93,23 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
 Estas entidades descrevem aspectos funcionais chave do sistema, em vez de modelos de dados diretos que são frequentemente persistidos da mesma forma que as entidades centrais.
 
 -   **Queue (Fila de Jobs):**
-    -   **Propósito:** Gerencia o ciclo de vida dos `Jobs`, inspirada por sistemas robustos como BullMQ.
-    -   **Função:** Fornece enfileiramento confiável de `Jobs` com funcionalidades como:
-        -   Persistência de `Jobs` (ex: usando SQLite via Drizzle ORM).
-        -   Gerenciamento de dependências de `Jobs` (`depends_on_job_ids`).
-        -   Gerenciamento de prioridade (embora a prioridade real possa ser dinamicamente influenciada por `Agentes` interagindo com seus próprios `Jobs` via `Tools`).
+    -   **Propósito:** Gerencia o ciclo de vida dos `Jobs` dentro de um contexto de múltiplas filas nomeadas, inspirada por sistemas robustos como BullMQ.
+    -   **Função:** Cada `Job` pertence a uma `queue_name` específica. O sistema de filas fornece enfileiramento confiável com funcionalidades como:
+        -   Persistência de `Jobs` (ex: usando SQLite via Drizzle ORM), incluindo seu `queue_name`.
+        -   Gerenciamento de dependências de `Jobs`.
+        -   Gerenciamento de prioridade (influenciada por Agentes para seus Jobs em suas respectivas filas).
         -   Suporte para retentativas (retries) com estratégias de backoff configuráveis.
         -   Agendamento de `Jobs` ou execução atrasada.
-        -   Emissão de eventos relacionados a mudanças de status de `Jobs`, permitindo que outras partes do sistema (como a UI ou um `Agente`) reajam.
-        -   Garante que os `Jobs` sejam selecionados pelos `Agentes` disponíveis para processamento.
+        -   Emissão de eventos relacionados a mudanças de status de `Jobs`.
+        -   Garante que os `Jobs` sejam selecionados por `Agentes` (Workers) que estão processando a `queue_name` específica.
 
 -   **Worker (Loop de Execução do Agente):**
-    -   **Propósito:** Conceitualmente, um "Worker" no Project Wiz representa o loop de processamento assíncrono individual de um único `Agente`. Cada `Agente` efetivamente atua como seu próprio worker para os `Jobs` que ele cria ou lhe são atribuídos.
-    -   **Função:** Um `Agente` (como Worker) solicita seu próximo `Job`/`Task` de sua representação interna de sua fila (que é originada da `Queue` principal), carrega o contexto necessário (`AgentInternalState`, `ActivityContext`) e o processa sequencialmente. A concorrência em nível de sistema é alcançada através de múltiplos `Agentes` distintos operando simultaneamente, cada um com seu próprio loop assíncrono, em vez de um único `Job` ser paralelizado através de múltiplos threads de worker tradicionais.
+    -   **Propósito:** Conceitualmente, um "Worker" no Project Wiz representa o loop de processamento assíncrono individual de um único `Agente`. Cada `Agente` efetivamente atua como seu próprio worker para os `Jobs` que ele cria ou lhe são atribuídos, e está tipicamente configurado para processar Jobs de uma ou mais `queue_name`(s) específicas.
+    -   **Função:** Um `Agente` (como Worker) solicita seu próximo `Job`/`Task` de uma `queue_name` específica, carrega o contexto necessário (`AgentInternalState`, `ActivityContext`) e o processa sequencialmente. A concorrência em nível de sistema é alcançada através de múltiplos `Agentes` distintos operando simultaneamente, cada um potencialmente focado em filas diferentes ou compartilhando filas com outros Agentes de mesma capacidade.
+
+-   **QueueDefinition (Definição de Fila - Conceitual):**
+    -   **Propósito:** Representar a configuração e as opções padrão para uma fila nomeada específica.
+    -   **Atributos/Dados Chave (Conceituais):**
+        *   `queue_name: string` (O identificador único da fila, ex: "fila_de_codificacao", "fila_de_testes").
+        *   `defaultJobOptions: JobOptions` (Objeto JSON ou similar contendo as opções padrão para Jobs adicionados a esta fila, como `attempts`, `backoff_type`, `backoff_delay`, etc.).
+    -   *Nota: Esta entidade pode não ser uma tabela separada no banco de dados inicialmente. As `defaultJobOptions` podem ser gerenciadas por configuração no código ao instanciar listeners para uma `queue_name` no `QueueService`, mas o conceito de que cada fila nomeada pode ter suas próprias configurações padrão é importante.*

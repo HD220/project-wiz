@@ -30,8 +30,8 @@ Os diagramas a seguir são propostas e sugestões para refinar, detalhar ou expa
         activate AgentePersona
         AgentePersona->>LLM: Analisa solicitação (com AgentInternalState)
         LLM-->>AgentePersona: Sugere criar Job(s) para atender solicitação
-        AgentePersona->>Fila: Cria e submete Job(s) para si (com detalhes, tipo, dependências)
-        Fila-->>Dados: Armazena Job(s) (status pendente/aguardando)
+        AgentePersona->>Fila: Cria e submete Job(s) para si (queueName, jobName, dados, opts)
+        Fila-->>Dados: Armazena Job(s) com queueName (status pendente/aguardando)
         AgentePersona-->>Frontend: Confirmação de recebimento e Jobs criados (feedback inicial)
         deactivate AgentePersona
 
@@ -39,8 +39,8 @@ Os diagramas a seguir são propostas e sugestões para refinar, detalhar ou expa
 
         %% Loop de processamento do Agente (Worker)
         activate AgentePersona
-        AgentePersona->>Fila: Solicita seu próximo Job elegível
-        Fila-->>AgentePersona: Entrega Job
+        AgentePersona->>Fila: Solicita seu próximo Job elegível (de uma queueName específica)
+        Fila-->>AgentePersona: Entrega Job (com queueName)
         AgentePersona-->>Frontend: (Opcional) Notifica usuário que Job X foi iniciado
 
         AgentePersona->>Dados: Carrega/Atualiza AgentInternalState (conhecimento global)
@@ -103,7 +103,7 @@ Os diagramas a seguir são propostas e sugestões para refinar, detalhar ou expa
         end
 
         subgraph "Núcleo do Backend (Electron Main Process)"
-            Queue["Sistema de Fila de Jobs (Queue)"]
+            Queue["Sistema de Fila de Jobs (Queue - Múltiplas Filas Nomeadas)"]
             AgentManager["Gerenciador de Agentes (Worker Pool)"]
             AgentLogic["Lógica do Agente (Persona Core Logic)"]
             TaskManager["Sistema de Execução de Tasks (Formula Prompts)"]
@@ -114,10 +114,10 @@ Os diagramas a seguir são propostas e sugestões para refinar, detalhar ou expa
         end
 
         UI -- "1. Interage com (via IPC)" --> AgentLogic %% Usuário conversa com um Agente
-        AgentLogic -- "2. Decide criar e submete Jobs para" --> Queue
+        AgentLogic -- "2. Decide criar e submete Jobs para Fila específica" --> Queue
 
-        AgentManager -- "3. Gerencia instâncias de Agentes" --- AgentLogic
-        AgentLogic -- "4. Solicita seus Jobs da" --> Queue
+        AgentManager -- "3. Gerencia instâncias de Agentes (Workers por queueName)" --- AgentLogic
+        AgentLogic -- "4. Solicita seus Jobs de uma queueName específica da" --> Queue
 
         AgentLogic -- "5. Carrega/Salva Estado" --> StateManager
         AgentLogic -- "6. Usa para Raciocínio" --> LLMIntegration

@@ -78,23 +78,24 @@ graph TD
         *   Com `StateManager`: Carrega/salva `AgentInternalState` e `ActivityContext`.
         *   Com `TaskExecutionSystem` (e indiretamente `LLMIntegrationPoint`): Formula e envia `Tasks` (prompts) para o LLM.
         *   Com `ToolFramework/Registry`: Solicita a execução de `Tools` conforme decidido pelo LLM.
-        *   Com `Queue`: Submete `Jobs` que ele mesmo cria e atualiza seus status.
+        *   Com `Queue`: Submete `Jobs` (especificando um `queueName`) que ele mesmo cria e atualiza seus status.
         *   Pode usar `Tools` de comunicação para interagir com outros Agentes ou com o usuário via Frontend (IPC).
 
-*   **Job/Activity Management System (Queue):** Inspirado em sistemas robustos como BullMQ e persistido em SQLite (via Drizzle ORM), este sistema atua como o coordenador central de `Jobs`.
-    *   **Responsabilidades Críticas:** Gerenciar de forma confiável a fila de `Jobs` de todo o sistema, assegurando que nenhum `Job` seja perdido e que as dependências sejam respeitadas.
+*   **Job/Activity Management System (QueueService):** Inspirado em sistemas robustos como BullMQ e persistido em SQLite (via Drizzle ORM), este serviço gerencia múltiplas **filas nomeadas** e atua como o coordenador central de `Jobs`.
+    *   **Responsabilidades Críticas:** Gerenciar de forma confiável os `Jobs` em suas respectivas filas, assegurando que nenhum `Job` seja perdido, que as dependências sejam respeitadas e que sejam roteados para os processadores corretos.
     *   **Interações:**
-        *   Recebe novos `Jobs` criados pelos `Agentes`.
-        *   Responde às solicitações dos `Agentes` (Workers), entregando o próximo `Job` elegível da fila específica daquele Agente.
-        *   Armazena e atualiza o status dos `Jobs`, gerencia dependências (`depends_on_job_ids`, `parent_job_id`), e lida com prioridades. Embora a prioridade base possa ser definida na criação do `Job` pelo Agente, o próprio Agente pode usar `Tools` para influenciar dinamicamente a prioridade de seus `Jobs` ou `Sub-Jobs`.
-        *   Suporta retentativas configuráveis e agendamento de `Jobs`. Emite eventos sobre mudanças de status, permitindo que a UI e outros sistemas reajam.
+        *   Recebe novos `Jobs` criados pelos `Agentes` (com um `queueName` especificado).
+        *   Responde às solicitações dos `Agentes` (Workers), entregando o próximo `Job` elegível de uma `queueName` específica para a qual o Agente/Worker está registrado para processar.
+        *   Armazena e atualiza o status dos `Jobs` (que incluem o `queue_name`), gerencia dependências (`depends_on_job_ids`, `parent_job_id`), e lida com prioridades.
+        *   Aplica `defaultJobOptions` (configuradas por `queueName`, se houver `QueueDefinition`) a menos que sobrescritas no `Job`.
+        *   Suporta retentativas configuráveis e agendamento de `Jobs`. Emite eventos sobre mudanças de status.
 
-*   **Worker & Worker Pool:** Um "Worker" conceitual representa o loop de processamento assíncrono individual de um Agente autônomo. O "Worker Pool" (ou Gerenciador de Agentes) é o componente que gerencia o ciclo de vida dessas instâncias de Agentes ativos e concorrentes.
-    *   **Responsabilidades Críticas:** Garantir que os `Jobs` na `Queue` sejam processados pelos Agentes corretos e gerenciar a concorrência e o ciclo de vida dos Agentes.
+*   **Worker & Worker Pool (Gerenciador de Agentes):** Um "Worker" conceitual representa o loop de processamento assíncrono individual de um Agente autônomo. O "Worker Pool" (ou Gerenciador de Agentes) é o componente que gerencia o ciclo de vida dessas instâncias de Agentes ativos e concorrentes, cada um potencialmente escutando uma ou mais `queue_name`(s) específicas.
+    *   **Responsabilidades Críticas:** Garantir que os `Jobs` nas diversas `queue_name`(s) da `Queue` sejam processados pelos Agentes/`Persona`s corretos e gerenciar a concorrência e o ciclo de vida dos Agentes.
     *   **Interações:**
         *   O `WorkerPool` instancia, monitora e finaliza Agentes conforme necessário.
-        *   Cada Agente (Worker) solicita ativamente seus `Jobs` à `Queue`.
-        *   O Agente (Worker) então executa o `Job` utilizando sua `PersonaCoreLogic`. Após a conclusão (sucesso ou falha), o Agente reporta o novo status à `Queue`. A concorrência do sistema vem de múltiplos Agentes operando em paralelo, cada um em seu loop.
+        *   Cada Agente (Worker) se registra no `QueueService` para processar `Jobs` de uma `queueName` e `jobName`(s) específicos. Ele então solicita ativamente seus `Jobs` (filtrando por `queueName`) à `Queue`.
+        *   O Agente (Worker) executa o `Job` utilizando sua `PersonaCoreLogic`. Após a conclusão (sucesso ou falha), o Agente reporta o novo status à `Queue`. A concorrência do sistema vem de múltiplos Agentes operando em paralelo.
 
 *   **Task Execution System:** Este é o mecanismo pelo qual um Agente, através de sua `PersonaCoreLogic`, formula e envia uma `Task` (um objetivo claro e contextualizado, ou seja, um prompt específico) para o LLM. Não se trata de executar uma sequência de passos pré-definidos no código do Agente, mas sim de preparar a consulta para que o LLM possa realizar o planejamento e a execução da lógica principal da `Task`.
     *   **Responsabilidades Críticas:** Transformar um objetivo de alto nível de um `Job` (ou um passo intermediário planejado pelo Agente) em um prompt eficaz para o LLM, fornecendo todo o contexto necessário.
@@ -148,14 +149,14 @@ sequenceDiagram
     activate AgentePersona
     AgentePersona->>LLM: Analisa solicitação do usuário (com seu AgentInternalState)
     LLM-->>AgentePersona: Sugere criar Job(s)
-    AgentePersona->>Fila: Cria e submete Job(s) para si (com detalhes, tipo, etc.)
+    AgentePersona->>Fila: Cria e submete Job(s) para si (queueName, jobName, dados, opts)
     deactivate AgentePersona
-    Fila-->>Dados: Armazena Job(s) (status pendente)
+    Fila-->>Dados: Armazena Job(s) com queueName (status pendente)
 
     %% Agente (Worker Loop) processando o Job
     activate AgentePersona
-    AgentePersona->>Fila: Solicita próximo Job de sua fila
-    Fila-->>AgentePersona: Entrega Job
+    AgentePersona->>Fila: Solicita próximo Job de sua fila (especificando queueName)
+    Fila-->>AgentePersona: Entrega Job (com queueName)
 
     AgentePersona->>Dados: Carrega/Atualiza AgentInternalState
     AgentePersona->>Dados: Carrega ActivityContext do Job
@@ -182,9 +183,9 @@ sequenceDiagram
     end
 ```
 
-1.  **Início da Interação e Criação do Job pelo Agente:** O usuário, através da UI (Frontend), descreve uma necessidade ou objetivo para uma `Persona` específica, geralmente no contexto de um `Project`. O Agente (utilizando a `Persona`) analisa a solicitação com o LLM e, se apropriado, decide criar um ou mais `Jobs` para si, definindo seus detalhes, incluindo o escopo da tarefa e como ela se encaixa no `Project` (ex: qual arquivo ou módulo na `working_directory` do projeto será afetado). Antes de prosseguir com a execução, o Agente pode apresentar um plano e uma "Definição de Pronto" ao usuário para aprovação. O Agente também criará um novo branch Git na `working_directory` do projeto para isolar as alterações deste `Job` ou conjunto de `Sub-Jobs`.
-2.  **Envio para a Fila:** Os `Jobs` criados pelo Agente são então submetidos por ele ao `Job/Activity Management System (Queue)` e persistidos em SQLite. A Fila gerencia o estado inicial (ex: "pendente" ou "aguardando dependências" de outros `Sub-Jobs` do mesmo Agente).
-3.  **Obtenção pelo Agente (Seu Próprio Worker Loop):** Cada Agente (atuando como seu próprio Worker) solicita ativamente à `Queue` um `Job` elegível de sua própria lista de responsabilidades. A elegibilidade considera as dependências (que o Agente pode ter definido entre seus próprios `Jobs`) e a prioridade.
+1.  **Início da Interação e Criação do Job pelo Agente:** O usuário, através da UI (Frontend), descreve uma necessidade ou objetivo para uma `Persona` específica, geralmente no contexto de um `Project`. O Agente (utilizando a `Persona`) analisa a solicitação com o LLM e, se apropriado, decide criar um ou mais `Jobs` para si, definindo seus detalhes, incluindo o `queue_name` apropriado para a tarefa, o escopo e como ela se encaixa no `Project`. Antes de prosseguir, o Agente apresenta um plano e uma "Definição de Pronto" ao usuário para aprovação e cria um novo branch Git na `working_directory` do projeto.
+2.  **Envio para a Fila:** Os `Jobs` criados pelo Agente (cada um com seu `queue_name`) são submetidos por ele ao `Job/Activity Management System (QueueService)` e persistidos em SQLite. A Fila gerencia o estado inicial.
+3.  **Obtenção pelo Agente (Seu Próprio Worker Loop):** Cada Agente (Worker) solicita ativamente à `QueueService` um `Job` elegível de uma `queueName` para a qual ele está registrado e que seja de sua responsabilidade. A elegibilidade considera dependências e prioridade.
 4.  **Carregamento de Contexto:** Ao obter um `Job`, o Agente carrega seu `AgentInternalState` (memória de longo prazo e conhecimentos gerais/específicos do projeto) e o `ActivityContext` específico do `Job` (histórico de interações da tarefa atual).
 5.  **Formulação da Task (Prompt):** O Agente, através de sua `Persona Core Logic`, formula uma `Task` (um prompt detalhado e contextualizado) para o `LLM`. Este prompt é construído usando o objetivo do `Job`, os dados do `ActivityContext` (incluindo histórico de conversas), informações relevantes do `AgentInternalState`, e é executado no contexto do branch Git previamente criado na `working_directory` do projeto.
 6.  **Processamento pelo LLM:** O `LLM` processa a `Task`. Com base na configuração da `Persona` e no prompt, o `LLM` pode planejar uma série de passos, decidir usar uma ou mais `Tools` disponíveis para coletar informações ou realizar ações, ou gerar uma resposta direta (ex: um trecho de código, um texto).

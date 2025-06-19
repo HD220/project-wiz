@@ -23,14 +23,14 @@ sequenceDiagram
     activate AgentePersona
     AgentePersona->>LLM: Analisa solicitação do usuário (com seu AgentInternalState)
     LLM-->>AgentePersona: Sugere criar Job(s)
-    AgentePersona->>Fila: Cria e submete Job(s) para si (com detalhes, tipo, etc.)
+    AgentePersona->>Fila: Cria e submete Job(s) para si (queueName, jobName, dados, opts)
     deactivate AgentePersona
-    Fila-->>Dados: Armazena Job(s) (status pendente)
+    Fila-->>Dados: Armazena Job(s) com queueName (status pendente)
 
     %% Agente (Worker Loop) processando o Job
     activate AgentePersona
-    AgentePersona->>Fila: Solicita próximo Job de sua fila
-    Fila-->>AgentePersona: Entrega Job
+    AgentePersona->>Fila: Solicita próximo Job de sua fila (especificando queueName)
+    Fila-->>AgentePersona: Entrega Job (com queueName)
 
     AgentePersona->>Dados: Carrega/Atualiza AgentInternalState
     AgentePersona->>Dados: Carrega ActivityContext do Job
@@ -68,7 +68,7 @@ graph TD
     end
 
     subgraph "Núcleo do Backend (Electron Main Process)"
-        Queue["Sistema de Fila de Jobs (Queue)"]
+        Queue["Sistema de Fila de Jobs (Queue - Múltiplas Filas Nomeadas)"]
         WorkerPool["Gerenciador de Agentes (Worker Pool)"]
         AgentLogic["Lógica do Agente (Persona Core Logic)"]
         TaskManager["Sistema de Execução de Tasks (Formula Prompts)"]
@@ -78,9 +78,9 @@ graph TD
     end
 
     UI -- "1. Interage com (via IPC)" --> AgentLogic
-    AgentLogic -- "2. Cria/Gerencia Jobs na" --> Queue
+    AgentLogic -- "2. Cria/Gerencia Jobs em Fila específica" --> Queue
     WorkerPool -- "3. Gerencia instâncias de" --> AgentLogic
-    AgentLogic -- "4. Solicita Jobs da" --> Queue
+    AgentLogic -- "4. Solicita Jobs de uma queueName específica da" --> Queue
     AgentLogic -- "5. Carrega/Salva Estado" --> StateManager
     AgentLogic -- "6. Usa para Raciocínio" --> LLMIntegration
     AgentLogic -- "7. Formula Task para" --> TaskManager

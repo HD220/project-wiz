@@ -49,7 +49,7 @@ Este documento detalha um cenário de uso para o Project Wiz, onde um usuário s
         *   Sub-Job 3: "Gerar Testes Unitários (`unittest`) para Funções Identificadas" (Depende de: Sub-Job 2)
         *   Sub-Job 4: "Executar e Validar Testes Unitários" (Depende de: Sub-Job 3)
         *   Sub-Job 5: "Commitar Alterações e Preparar Entrega" (Depende de: Sub-Job 4)
-        *   A PersonaDevSenior cria esses `Sub-Jobs` em sua Fila, com `parent_job_id` referenciando o Job principal e as `depends_on_job_ids` apropriadas.
+        *   A PersonaDevSenior cria esses `Sub-Jobs`, cada um com um `queueName` apropriado (ex: "refatoracao_python", "geracao_testes_python", "git_operations"), com `parent_job_id` referenciando o Job principal e as `depends_on_job_ids` apropriadas, e os submete à sua Fila (Queue).
 *   **Ponto de Verificação com Usuário:**
     *   **PersonaDevSenior (Chat):** "Entendido! Analisei o módulo `modulo.py` do branch Y. Meu plano é o seguinte:
         1.  Refatorar o código para conformidade com PEP 8.
