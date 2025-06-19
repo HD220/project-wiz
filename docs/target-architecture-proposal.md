@@ -77,6 +77,7 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
     *   Operam sobre múltiplas entidades ou coordenam comportamentos complexos do domínio.
     *   São stateless (sem estado próprio), e suas dependências (outros serviços, repositórios) são injetadas.
     *   Exemplo: Um serviço que determina a prioridade de um `Job` com base em múltiplas regras de negócio e no estado de outros `Jobs` ou `Projects`.
+*   **Processadores de Job (`job-processors/` dentro de `domain/use-cases` ou `domain/services`):** Lógica específica de como um `AIAgent` processa um determinado tipo de `Job`. Estas seriam as implementações dos `jobProcessor`s, contendo a interação com `ILLMService`, `IToolRegistry`, etc. Eles encapsulam a "inteligência" do agente para uma tarefa.
 
 ### 3.2. Camada de Aplicação (`src/application`) - Opcional
 Esta camada é opcional e, em muitos projetos, suas responsabilidades podem ser incorporadas pela camada de Domínio (especificamente pelos Casos de Uso) ou pela camada de Infraestrutura (no que tange à adaptação de dados para a UI). Se utilizada, ela serve como um intermediário e pode conter:
@@ -126,6 +127,7 @@ A camada de Infraestrutura contém todas as implementações concretas e detalhe
 *   **Configuração de Injeção de Dependência (`infrastructure/ioc/`):**
     *   `inversify.config.ts`: Arquivo central para configurar o container InversifyJS. Define todos os bindings (como interfaces mapeiam para classes concretas e seus escopos).
     *   `types.ts`: Define os símbolos (identificadores de tipo) usados para a injeção de dependências.
+        *   **Workers de Agentes (`infrastructure/workers/` ou dentro de `infrastructure/electron/`):** Implementações dos `Worker`s dedicados para cada `AIAgent`. Cada worker monitora uma fila específica, executa o `jobProcessor` do agente e gerencia o ciclo de vida dos jobs. A inicialização e o gerenciamento desses workers ocorrerão no processo principal do Electron.
 
 ### 3.4. Camada de Apresentação (`src/presentation`) - Opcional
 Esta camada atua como um intermediário entre os Casos de Uso (Domínio/Aplicação) e a UI (Infraestrutura). Sua principal responsabilidade é adaptar os dados do formato dos Casos de Uso para um formato que seja facilmente consumível pela UI, e vice-versa.
@@ -206,6 +208,25 @@ container.bind<CreateJobUseCase>(TYPES.CreateJobUseCase).to(CreateJobUseCase).in
 // import { JobHandlers } from '@/infrastructure/electron/ipc-handlers/job.handlers';
 // container.bind<JobHandlers>(TYPES.JobHandlers).to(JobHandlers).inSingletonScope();
 
+        // --- Bindings para Componentes dos Agentes ---
+        // Supondo que cada jobProcessor seja uma classe injetável
+        // import { TextGenerationJobProcessor } from '@/domain/job-processors/text-generation.processor';
+        // container.bind<TextGenerationJobProcessor>(TYPES.TextGenerationJobProcessor).to(TextGenerationJobProcessor).inTransientScope();
+
+        // Se os Workers forem classes injetáveis (eles podem ser instanciados programaticamente também)
+        // import { AgentWorker } from '@/infrastructure/workers/agent.worker';
+        // container.bind<AgentWorker>(TYPES.AgentWorker).to(AgentWorker).inTransientScope(); // Ou outro escopo se apropriado
+
+        // Fábrica para JobProcessors (uma abordagem avançada se muitos tipos de processadores)
+        // container.bind<interfaces.Factory<IJobProcessor>>(TYPES.JobProcessorFactory).toFactory<IJobProcessor>((context) => {
+        //   return (jobType: string) => {
+        //     if (jobType === 'textGeneration') {
+        //       return context.container.get<IJobProcessor>(TYPES.TextGenerationJobProcessor);
+        //     }
+        //     // ... outros tipos de job
+        //     throw new Error(`Unknown job type: ${jobType}`);
+        //   };
+        // });
 
 export { container };
 ```
@@ -252,6 +273,15 @@ const TYPES = {
 
   // Outras dependências específicas
   DatabaseConnection: Symbol.for('DatabaseConnection'), // Exemplo, se a conexão do DB for injetada
+  // Job Processors (se forem classes distintas injetáveis)
+  // TextGenerationJobProcessor: Symbol.for('TextGenerationJobProcessor'),
+  // CodeGenerationJobProcessor: Symbol.for('CodeGenerationJobProcessor'),
+
+  // Workers (se forem classes distintas injetáveis)
+  // AgentWorker: Symbol.for('AgentWorker'),
+
+  // Fábricas
+  // JobProcessorFactory: Symbol.for('JobProcessorFactory'),
 };
 
 export { TYPES };
@@ -634,6 +664,8 @@ export interface AIAgentProps {
   availableTools: string[]; // Array de IDs ou nomes de ferramentas que o agente pode usar
   isActive: boolean;
   // Outras configurações específicas do agente
+  // queueName: string; // Nome da fila dedicada a este agente
+  // jobProcessorIdentifier: string; // Identificador para o jobProcessor específico deste agente
 }
 
 export class AIAgent {
@@ -650,6 +682,8 @@ export class AIAgent {
     provider: string;
     temperature?: number;
     availableTools?: string[];
+    // queueName: string;
+    // jobProcessorIdentifier: string;
   }): AIAgent {
     const id = crypto.randomUUID(); // Gerar ID
     return new AIAgent({
@@ -661,6 +695,8 @@ export class AIAgent {
       temperature: params.temperature || 0.7,
       availableTools: params.availableTools || [],
       isActive: true,
+      // queueName: params.queueName,
+      // jobProcessorIdentifier: params.jobProcessorIdentifier,
     });
   }
 
@@ -779,6 +815,8 @@ export interface EnqueueJobInput {
   payload: any;
   projectId?: string;
   // Outros parâmetros como prioridade, delay, etc.
+  // targetAgentId?: string; // Para encontrar a queueName do agente
+  // queueName?: string; // Ou especificar diretamente a fila
 }
 
 export interface EnqueueJobOutput {
@@ -794,10 +832,12 @@ export class EnqueueJobUseCase {
   ) {}
 
   async execute(input: EnqueueJobInput): Promise<EnqueueJobOutput> {
+    // const determinedQueueName = input.queueName || await getQueueNameForAgent(input.targetAgentId);
     const job = Job.create({
       name: input.name,
       payload: input.payload,
       projectId: input.projectId,
+      // queueName: determinedQueueName, // queueName obtido a partir de targetAgentId ou fornecido diretamente
     });
 
     // Na Clean Architecture, o repositório geralmente lida com a persistência.
@@ -930,76 +970,133 @@ Durante a fase de investigação, identificamos duas principais áreas de lógic
 Ambas as áreas contêm conceitos valiosos, mas precisam ser refatoradas e integradas à nova arquitetura para garantir consistência, manutenibilidade e o uso de Injeção de Dependência.
 
 ### 8.1. Refatoração da Simulação de Agente PO/CTO
-A simulação de diálogo entre o Product Owner (PO) e o CTO, atualmente em `src/infrastructure/frameworks/electron/main/agent/`, demonstra a capacidade de interação com LLMs usando ferramentas. Para integrá-la à nova arquitetura, propomos as seguintes mudanças:
+A simulação de diálogo entre o Product Owner (PO) e o CTO, atualmente em `src/infrastructure/frameworks/electron/main/agent/`, serviu como um protótipo valioso para interações com LLMs e o uso de ferramentas. Com a nova arquitetura de Worker/Fila por Agente (descrita na Seção 8.2), essa lógica será reestruturada e integrada de forma mais genérica e robusta.
 
-*   **Transformar em Funcionalidade de "Chat com Agentes de IA":** Em vez de uma simulação hardcoded entre PO e CTO, essa lógica pode evoluir para uma funcionalidade onde o usuário interage com diferentes personas de Agentes de IA configuráveis.
+*   **Conceito Central Mantido:** A ideia de Agentes de IA com personalidades distintas (perfis), capazes de realizar tarefas complexas, interagir com ferramentas e manter um diálogo (seja com um usuário ou outro agente via jobs intermediários) é central para o "project-wiz".
+
+*   **Evolução da Simulação para `jobProcessor`s de Agentes:**
+    *   A lógica de interação com o LLM, incluindo a construção de prompts do sistema (baseados no perfil do agente), o gerenciamento do histórico da conversa (específico do job), a chamada ao `ILLMService`, o processamento de `tool-calls` e a formatação da resposta final, que estava na classe `Activity` e no loop de `agent/index.ts` da simulação, será encapsulada dentro das funções `jobProcessor` de agentes específicos.
+    *   Por exemplo, poderíamos ter um `TextGenerationAgentJobProcessor` ou um `CodeGenerationAgentJobProcessor`. Se a interação PO/CTO for uma funcionalidade desejada, ela poderia ser um tipo de job específico processado por agentes configurados com as personas de PO e CTO.
 
 *   **Entidade `AIAgent` no Domínio:**
-    *   A classe `AIAgent` (como esboçada anteriormente em 6.2) se tornará a representação central de um agente de IA. Ela definirá o perfil do agente (nome, papel, backstory, modelo LLM, ferramentas disponíveis, temperatura, etc.).
-    *   As instâncias de `AIAgent` seriam configuráveis e persistidas (talvez via um `IAIAgentRepository`).
+    *   A entidade `AIAgent` (esboçada em 6.2) continua crucial. Ela define o perfil do agente (nome, papel/backstory para o prompt, ID do modelo LLM, ferramentas que pode usar, temperatura, etc.).
+    *   Essas configurações do `AIAgent` serão carregadas e usadas pelo `jobProcessor` correspondente quando estiver processando um `Job`.
 
-*   **Caso de Uso para Interação (`InteractWithAIAgentUseCase`):**
-    *   Um novo caso de uso, por exemplo `InteractWithAIAgentUseCase`, seria criado no domínio.
-    *   **Entrada:** ID do `AIAgent`, mensagem do usuário, histórico da conversa (opcional).
-    *   **Dependências (Injetadas):**
-        *   `IAIAgentRepository`: Para carregar a configuração do `AIAgent`.
-        *   `ILLMService`: Para se comunicar com o modelo de linguagem (ex: DeepSeek).
-        *   `IToolRegistry` (ou similar): Um serviço para acessar e executar as ferramentas que o `AIAgent` específico pode usar. As ferramentas (`writeFile`, `readFile`, `thought`, `finalAnswer` do `tool-set.ts` atual) seriam refatoradas como classes/serviços injetáveis e registradas neste registry.
-    *   **Lógica:**
-        1.  Carrega o `AIAgent` especificado.
-        2.  Constrói o prompt do sistema com base no `AIAgent.roleDescription` e nas regras de interação (similar ao `activityPrompt()` atual).
-        3.  Chama o `ILLMService` com a mensagem do usuário, histórico, prompt do sistema e as ferramentas disponíveis para o agente.
-        4.  Processa a resposta do LLM, incluindo a execução de `tool-calls` através do `IToolRegistry`.
-        5.  Retorna a resposta do agente (e quaisquer resultados de ferramentas) para o chamador (provavelmente um Handler IPC).
+*   **Ferramentas como Serviços Injetáveis:**
+    *   As ferramentas (`writeFile`, `readFile`, `thought`, `finalAnswer` do `tool-set.ts` atual) serão refatoradas como classes/serviços que implementam uma interface comum `ITool` (ou interfaces mais específicas por tipo de ferramenta).
+    *   Essas ferramentas serão injetadas no `jobProcessor` (ou na classe de serviço que contém o `jobProcessor`) através de um `IToolRegistry` ou similar, gerenciado pelo container de DI.
+    *   Isso permite que diferentes agentes (`jobProcessor`s) tenham acesso a diferentes conjuntos de ferramentas, conforme definido em sua configuração de `AIAgent`.
 
-*   **Refatoração das Ferramentas:**
-    *   As ferramentas atuais (`writeFile`, `readFile`, `thought`, `finalAnswer` de `tool-set.ts`) seriam transformadas em classes/serviços que implementam uma interface comum `ITool`.
-    *   Elas seriam injetáveis e poderiam ter suas próprias dependências (ex: `FileSystemService` para `writeFile` e `readFile`).
-    *   O `IToolRegistry` seria responsável por disponibilizar as instâncias corretas das ferramentas para o `InteractWithAIAgentUseCase`.
+*   **Interação entre Agentes via Jobs:**
+    *   Se a interação direta entre dois agentes (como na simulação PO/CTO) for necessária, ela pode ser orquestrada através de `Job`s.
+    *   Por exemplo, o Agente A (PO), ao concluir seu processamento de um `Job1`, poderia ter como resultado a criação de um `Job2` para o Agente B (CTO), com o output do `Job1` como input para o `Job2`. O `EnqueueJobUseCase` seria usado para colocar o `Job2` na fila do Agente B.
 
-*   **Persistência das Conversas:**
-    *   O histórico da conversa (atualmente gerenciado na classe `Activity`) precisaria ser persistido, talvez associado a uma sessão de chat ou a um `Project`. Uma nova entidade `Conversation` ou `ChatMessage` poderia ser criada.
+*   **Lógica de Loop nos `Worker`s:**
+    *   O loop `while(true)` que existia na simulação (`agent/index.ts`) agora é responsabilidade de cada `Worker` dedicado, que constantemente verifica sua fila por novos `Job`s a serem processados pelo `jobProcessor` do seu agente.
 
-*   **Remoção da Lógica de Loop Hardcoded:** O loop `while(true)` em `agent/index.ts` seria removido. A interação seria orientada por eventos (ex: usuário envia mensagem via UI).
+*   **Persistência do Histórico da Conversa/Job:**
+    *   O histórico da interação (mensagens trocadas com o LLM, `tool-calls` e `tool-results` durante o processamento de um `Job`) deve ser persistido. Isso pode ser feito:
+        *   Serializando o histórico relevante no próprio `Job` (ex: em um campo `Job.executionLog` ou `Job.llmInteractionHistory`).
+        *   Utilizando uma entidade separada como `JobExecutionRecord` ou `LLMInteractionLog` associada ao `Job`.
+    *   Isso é crucial para depuração, auditoria e, potencialmente, para permitir que jobs de longa duração sejam resumidos ou que o LLM tenha contexto de interações passadas dentro do mesmo job. A classe `Activity` da simulação original tinha essa responsabilidade de manter o histórico para um "passo"; agora isso será parte do estado gerenciado durante a execução de um `jobProcessor`.
 
-Com essa refatoração, a funcionalidade de agente se torna mais genérica, configurável e alinhada com os princípios da Clean Architecture e DI.
+Ao refatorar a lógica da simulação desta maneira, ela deixa de ser um script isolado e se torna uma parte integral e reutilizável da capacidade do sistema de executar tarefas complexas através de Agentes de IA configuráveis e especializados, cada um operando dentro da robusta arquitetura de Worker/Fila.
 ### 8.2. Refatoração do Sistema WorkerService/Job
-O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original) é fundamental para processamento assíncrono e tarefas de longa duração. Sua refatoração focará em integrá-lo com a DI e a nova estrutura de domínio.
+O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e agora refinado com o feedback do usuário) é fundamental para o processamento assíncrono e a execução de tarefas pelos Agentes de IA. A refatoração focará em criar uma arquitetura robusta onde cada Agente de IA opera com sua própria fila e worker dedicado.
 
 *   **Entidade `Job` no Domínio:**
-    *   A entidade `Job` (como esboçada em 6.1) será a representação central de uma tarefa a ser executada.
+    *   A entidade `Job` (como esboçada em 6.1) continua sendo a representação central de uma tarefa a ser executada, contendo `id`, `name`, `payload`, `status`, `attempts`, etc.
 
-*   **Repositórios (`IJobRepository`, `IQueueRepository`):**
-    *   Manteremos a necessidade de persistir `Job`s e, possivelmente, `Queue`s (se o conceito de múltiplas filas nomeadas for mantido). As interfaces serão definidas no domínio, e as implementações Drizzle na infraestrutura.
+*   **Entidade `Queue` (ou `JobQueue`) no Domínio (Potencial):**
+    *   Poderíamos introduzir uma entidade `Queue` se precisarmos gerenciar metadados ou configurações específicas por fila (ex: nome da fila, prioridade da fila, tipo de jobs que aceita).
+    *   Alternativamente, uma fila pode ser simplesmente identificada por um `queueName` (string) associado a um `AIAgent`. A persistência dos jobs incluiria este `queueName`.
+
+*   **Repositórios (`IJobRepository`, `IQueueRepository` - se `Queue` for uma entidade):**
+    *   `IJobRepository`: Para salvar, buscar e atualizar `Job`s. Os métodos de busca incluiriam a capacidade de buscar jobs pendentes para um `queueName` específico.
+    *   `IQueueRepository`: Se `Queue` for uma entidade, este repositório gerenciaria sua persistência.
 
 *   **Caso de Uso para Enfileirar Jobs (`EnqueueJobUseCase`):**
-    *   Como esboçado em 6.4, este caso de uso criará uma instância de `Job` e a persistirá com o status `PENDING` (ou similar), efetivamente enfileirando-a.
-
-*   **Serviço de Processamento de Jobs (`JobProcessingService` ou `BackgroundWorkerService`):**
-    *   Este será um serviço na camada de aplicação ou infraestrutura, responsável por monitorar a "fila" de jobs pendentes.
-    *   **Dependências (Injetadas):**
-        *   `IJobRepository`: Para buscar jobs pendentes.
-        *   `Container` (InversifyJS): Para resolver dinamicamente o Caso de Uso ou Serviço específico necessário para processar um determinado tipo de job.
-        *   `IAIAgentRepository` e `ILLMService` (se jobs podem ser executados por Agentes de IA).
-        *   `IToolRegistry` (se jobs executam ferramentas).
+    *   Como esboçado em 6.4, este caso de uso será responsável por criar uma instância de `Job` e persisti-la com o status `PENDING` (ou similar) e associá-la ao `queueName` do `AIAgent` apropriado.
+    *   **Entrada:** `name`, `payload`, `targetAgentId` (ou `targetQueueName`), `priority`, etc.
     *   **Lógica:**
-        1.  Periodicamente (ou via algum mecanismo de notificação), busca por `Job`s com status `PENDING`.
-        2.  Para cada `Job` encontrado:
-            a.  Atualiza o status do `Job` para `ACTIVE` (via `job.startProcessing()` e `jobRepository.save(job)`).
-            b.  Com base no `job.name` ou `job.payload.taskType`, determina qual Caso de Uso ou Serviço específico deve ser executado. Isso pode ser feito através de um registro de "handlers de job" ou obtendo o executor do container de DI.
-            c.  Executa o Caso de Uso/Serviço, passando o `job.payload`.
-            d.  Se sucesso, chama `job.complete(result)` e salva.
-            e.  Se erro, chama `job.fail(errorInfo)`. Se `job.canRetry()`, marca para nova tentativa (`job.markAsPendingRetry()`) ou adia. Salva o job.
-    *   Este serviço rodaria em background no processo principal do Electron.
+        1.  Validar `targetAgentId` (verificar se o agente existe e está ativo, obter seu `queueName`).
+        2.  Criar a entidade `Job`.
+        3.  Salvar o `Job` usando `IJobRepository` (que o associará ao `queueName` correto).
 
-*   **Tipos de Job e Executores:**
-    *   Para diferentes tipos de `Job` (ex: "gerarCodigo", "analisarDocumento", "sumarizarTexto"), precisaremos de diferentes executores (Casos de Uso ou Serviços de Domínio/Aplicação).
-    *   O `JobProcessingService` precisará de uma estratégia para mapear um `Job` ao seu executor correto. Isso pode ser via convenção de nomenclatura, um campo `taskType` no payload do job, ou um registro explícito.
+*   **`Worker` Dedicado por `AIAgent`:**
+    *   Cada instância ou tipo de `AIAgent` terá um `Worker` associado. O `Worker` não é uma entidade de domínio, mas um componente da camada de infraestrutura ou aplicação.
+    *   **Responsabilidades do `Worker`:**
+        1.  **Monitoramento da Fila:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas para evitar busy-waiting) para verificar sua `Queue` designada por novos `Job`s com status `PENDING`.
+        2.  **Retirada de Jobs (Polling):** Obter o próximo `Job` da fila (considerando prioridade, se aplicável) usando `IJobRepository.findNextPending(queueName)`.
+        3.  **Gerenciamento de Estado do Job:** Antes de processar, atualizar o status do `Job` para `ACTIVE` (via `job.startProcessing()` e `jobRepository.save(job)`).
+        4.  **Execução do `jobProcessor`:** Invocar a função `jobProcessor` específica do agente, passando o `Job` (ou seu `payload`) como argumento.
+        5.  **Tratamento de Resultado/Erro:**
+            *   Se o `jobProcessor` for bem-sucedido, chamar `job.complete(result)` e salvar.
+            *   Se o `jobProcessor` falhar, chamar `job.fail(errorInfo)`. Se `job.canRetry()`, marcar para nova tentativa (`job.markAsPendingRetry()`) ou adiar. Salvar o job.
+        6.  **Ciclo de Vida:** O `Worker` deve ser iniciado quando a aplicação (ou o `AIAgent` correspondente) é ativado e parado graciosamente durante o desligamento da aplicação.
+    *   **Dependências do `Worker` (Injetadas):**
+        *   `queueName`: O nome da fila que este worker monitora.
+        *   `IJobRepository`: Para interagir com os jobs.
+        *   `jobProcessor`: A função específica que sabe como processar os jobs para o agente associado a este worker.
+        *   `LoggerService`: Para logging.
 
-*   **Integração com Agentes de IA:**
-    *   Se um `Job` deve ser executado por um `AIAgent`, o `JobProcessingService` obteria uma instância do `AIAgent` (talvez ocioso ou com as capacidades corretas), e usaria o `InteractWithAIAgentUseCase` (ou um similar focado em execução de tasks) para delegar o trabalho ao agente. O payload do `Job` seria a "mensagem" ou "tarefa" para o agente.
+*   **`jobProcessor(jobPayload: any): Promise<any>` (Função Específica do Agente):**
+    *   Esta função **contém a lógica real de como um `AIAgent` processa um tipo de tarefa**. Ela não é uma classe genérica, mas uma função (ou método de uma classe de serviço do agente) que é passada para o `Worker` durante sua configuração.
+    *   **Responsabilidades:**
+        1.  Interpretar o `jobPayload`.
+        2.  Interagir com o `ILLMService` para fazer chamadas ao modelo de linguagem, usando o perfil do `AIAgent` (prompt do sistema, modelo, temperatura).
+        3.  Utilizar `IToolRegistry` para executar ferramentas conforme instruído pelo LLM.
+        4.  Formatar o resultado final do processamento.
+    *   **Dependências do `jobProcessor` (ou da classe que o contém, via DI no momento da sua criação/configuração):**
+        *   `AIAgent` (ou suas propriedades relevantes: perfil, modelo, ferramentas permitidas).
+        *   `ILLMService`.
+        *   `IToolRegistry`.
+        *   Outros serviços de domínio ou aplicação necessários.
 
-Ao refatorar o sistema `WorkerService/Job` desta forma, ele se tornará uma parte robusta e bem integrada da arquitetura, capaz de lidar com diversas tarefas assíncronas de forma organizada e extensível. A lógica de `src/main.ts` (original) será, em grande parte, substituída por este novo serviço e pelos respectivos casos de uso.
+*   **Persistência da Fila:**
+    *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados que têm um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs.
+
+*   **Comunicação Externa Baseada em Eventos:**
+    *   Conforme o feedback do usuário, a comunicação do agente (ou seja, do seu `jobProcessor`) com "coisas externas" (UI, outros agentes) pode ser baseada em eventos. Por exemplo, ao concluir um job, o `jobProcessor` poderia emitir um evento `JobCompletedEvent` que outras partes do sistema poderiam ouvir. Isso pode ser implementado com um `EventEmitter` ou um sistema de mensageria mais robusto, se necessário.
+
+Esta arquitetura de worker/fila por agente permite um alto grau de isolamento e especialização. Cada agente pode ter seu próprio ritmo de processamento, conjunto de ferramentas e lógica de interação com LLM, gerenciados por seu `Worker` e `jobProcessor` dedicados. A lógica de `src/main.ts` (original) será, em grande parte, substituída por esta nova estrutura de `Worker`s e pelos respectivos `jobProcessor`s dos agentes.
+
+### 8.3. Gerenciamento de Workers e Filas de Agentes
+A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerenciar o ciclo de vida e a configuração desses componentes.
+
+*   **Configuração dos Agentes (`AIAgent`):**
+    *   Como mencionado, a entidade `AIAgent` (persistida via `IAIAgentRepository`) conterá a configuração de cada agente, incluindo:
+        *   Identificador do modelo LLM a ser usado.
+        *   Perfil do agente (prompt do sistema, persona).
+        *   Lista de ferramentas/capacidades disponíveis.
+        *   O `queueName` da fila de jobs dedicada a este agente.
+        *   Um identificador para o `jobProcessor` específico que este agente utiliza (ex: uma string tipo `text-generation-processor`, `code-analysis-processor`).
+
+*   **Inicialização dos Workers:**
+    *   No processo principal do Electron (`infrastructure/electron/main.ts`), durante a inicialização da aplicação (após a configuração do container DI), um `AgentLifecycleService` (ou similar) seria responsável por:
+        1.  Carregar todas as configurações ativas de `AIAgent` do `IAIAgentRepository`.
+        2.  Para cada `AIAgent` ativo:
+            a.  Instanciar um `Worker`. Isso pode ser feito diretamente ou através de uma fábrica (`AgentWorkerFactory`) se a construção do Worker for complexa.
+            b.  Configurar o `Worker` com:
+                *   O `queueName` obtido do `AIAgent`.
+                *   O `IJobRepository` (injetado).
+                *   O `jobProcessor` correto. A obtenção do `jobProcessor` pode ser feita usando o `jobProcessorIdentifier` do `AIAgent` para buscar a implementação correta no container DI (talvez usando uma fábrica de `jobProcessor`s ou um mapa de identificadores para instâncias/construtores de `jobProcessor`).
+            c.  Iniciar o loop de processamento do `Worker`.
+    *   Os `Worker`s seriam instâncias de uma classe `AgentWorker` (da camada de infraestrutura), que encapsula a lógica de polling da fila e chamada ao `jobProcessor`.
+
+*   **Criação e Gerenciamento de Filas (`Queues`):**
+    *   As "filas" são conceituais e representadas por `Job`s no banco de dados com um `queueName` específico. Não necessariamente exigem uma tabela separada para `Queues` no DB, a menos que precisemos armazenar metadados específicos da fila (além do que está no `AIAgent`).
+    *   Ao criar um novo `AIAgent`, um `queueName` único seria gerado (ex: `agent-${agentId}-queue`) e armazenado na configuração do `AIAgent`.
+    *   O `EnqueueJobUseCase` usaria o `targetAgentId` para buscar o `queueName` do `AIAgent` correspondente e associar o `Job` a essa fila.
+
+*   **Escalabilidade e Concorrência (Considerações Futuras):**
+    *   Inicialmente, cada `Worker` pode processar um job por vez para um determinado agente.
+    *   No futuro, se a concorrência por agente for necessária, um `AIAgent` poderia ter múltiplos `Worker`s associados à mesma `queueName`, ou o próprio `Worker` poderia ser capaz de executar múltiplos `jobProcessor`s em paralelo (usando, por exemplo, `Promise.all` ou `worker_threads` do Node.js se os `jobProcessor`s forem CPU-bound ou puderem se beneficiar de I/O não bloqueante de forma isolada). Isso adicionaria complexidade ao gerenciamento de estado dos jobs.
+
+*   **Parada Graciosa:**
+    *   O `AgentLifecycleService` também seria responsável por parar graciosamente todos os `Worker`s quando a aplicação Electron for encerrada, permitindo que jobs em processamento tentem finalizar antes de fechar. Cada `Worker` precisaria de um método `stop()` que sinalize seu loop para terminar após o job atual.
+
+Este sistema de gerenciamento garante que os agentes possam ser configurados dinamicamente e que seus workers e filas associados sejam corretamente instanciados e operados como parte do ciclo de vida da aplicação.
 
 ## 9. Comunicação UI-Backend (IPC)
 
@@ -1109,10 +1206,54 @@ Esta abordagem leva a um acoplamento mais forte e dificulta os testes e a manute
 
 Esta refatoração da camada de comunicação IPC alinhará a interação UI-Backend com os princípios de design da nova arquitetura, tornando-a mais robusta e fácil de manter.
 
+Para interações que envolvem tarefas assíncronas executadas pelos `Worker`s dos agentes (como solicitar a um agente para gerar um texto ou código), o fluxo seria:
+1. A UI, através de `window.api.invoke`, chamaria um Handler IPC (ex: `ipcMain.handle('agent:enqueue-task', ...)`).
+2. Este Handler IPC obteria uma instância do `EnqueueJobUseCase` (via DI).
+3. O `EnqueueJobUseCase` criaria um `Job` com o payload da tarefa e o `queueName` do agente alvo, salvando-o no repositório.
+4. O `Worker` dedicado àquele agente pegaria o `Job` de sua fila e executaria o `jobProcessor` correspondente.
+5. Para notificar a UI sobre a conclusão do `Job` (ou atualizações de progresso), o sistema de eventos mencionado na Seção 8.2 seria utilizado. O `jobProcessor` (ou o `Worker`) emitiria eventos (ex: `job-completed:${jobId}`, `job-progress:${jobId}`). O processo principal do Electron (nos Handlers IPC ou em um serviço dedicado) ouviria esses eventos internos e poderia encaminhá-los para a UI usando `mainWindow.webContents.send(channel, data)`. A UI, por sua vez, usaria `window.api.on(channel, listener)` para receber essas atualizações.
+
 ## 10. (Opcional) Plano de Transição/Refatoração Incremental
 
-*(A ser preenchido: Sugestões de como a refatoração pode ser abordada em etapas.)*
+A refatoração completa de um sistema é um esforço considerável. Embora o objetivo seja alcançar a arquitetura alvo descrita, uma abordagem incremental pode ser pragmática, dependendo dos recursos e do tempo disponíveis. Seguem algumas sugestões de como a transição poderia ser faseada:
+
+*   **Fase 1: Fundações e DI (Concluída em Design):**
+    *   Definição da arquitetura alvo (este documento).
+    *   Configuração do container InversifyJS (`infrastructure/ioc`).
+
+*   **Fase 2: Camada de Domínio e Persistência:**
+    *   Implementar as entidades de domínio principais (ex: `Job`, `Project`, `AIAgent`, `User`) com Value Objects e comportamentos, seguindo Object Calisthenics.
+    *   Definir as interfaces de repositório (`domain/repositories`).
+    *   Implementar os repositórios concretos na camada de persistência (`infrastructure/persistence/drizzle`) e registrar no container DI.
+
+*   **Fase 3: Casos de Uso e Lógica de Backend:**
+    *   Implementar os Casos de Uso chave, injetando os repositórios.
+    *   Refatorar os Handlers IPC (`infrastructure/electron/ipc-handlers`) para usar os Casos de Uso obtidos do container DI.
+    *   Implementar a arquitetura de Worker/Fila por Agente, incluindo a lógica dos `jobProcessor`s e o `AgentLifecycleService`.
+
+*   **Fase 4: Refatoração da UI (React):**
+    *   Conectar a UI aos novos Handlers IPC.
+    *   Refatorar componentes da UI para melhor alinhamento com os dados fornecidos pelos Casos de Uso (via DTOs, se usados).
+    *   Aplicar princípios de componentização e gerenciamento de estado conforme necessário na UI.
+
+*   **Fase 5: Iteração e Refinamento:**
+    *   Revisar o sistema refatorado, identificar gargalos ou áreas para melhoria.
+    *   Adicionar mais testes (se a decisão de não ter testes formais for reconsiderada).
+    *   Continuar aplicando os princípios de Object Calisthenics e Clean Architecture em novos desenvolvimentos.
+
+Esta abordagem permite entregar valor incrementalmente e gerenciar os riscos associados a uma grande refatoração. A priorização das fases pode ser ajustada conforme as necessidades do projeto.
 
 ## 11. Conclusão
 
-*(A ser preenchido: Resumo dos benefícios e próximos passos após a aprovação desta proposta.)*
+Esta proposta de arquitetura alvo para o "project-wiz" visa estabelecer uma base sólida, manutenível e escalável para o futuro do sistema. Ao adotar os princípios da Clean Architecture, Object Calisthenics e Injeção de Dependência com InversifyJS, esperamos alcançar melhorias significativas na Experiência do Desenvolvedor (DX), na qualidade do código e na capacidade de evoluir o software de forma eficiente.
+
+A estrutura em camadas, a clara separação de responsabilidades, o desacoplamento proporcionado pela DI e a ênfase em entidades de domínio ricas em comportamento permitirão que a equipe de desenvolvimento construa novas funcionalidades com maior confiança e menor atrito. A refatoração da lógica de backend existente para um sistema robusto de Worker/Fila por Agente pavimenta o caminho para um processamento assíncrono poderoso e especializado.
+
+**Próximos Passos:**
+
+1.  **Revisão e Aprovação:** A equipe e stakeholders devem revisar esta proposta e fornecer feedback.
+2.  **Planejamento da Implementação:** Detalhar o backlog de tarefas para a refatoração, possivelmente seguindo o plano de transição incremental sugerido.
+3.  **Execução da Refatoração:** Iniciar a implementação da nova arquitetura, começando pelas camadas de fundação (Domínio, Persistência, DI).
+4.  **Comunicação Contínua:** Manter a comunicação aberta durante todo o processo de refatoração para alinhar expectativas e resolver desafios.
+
+Acreditamos que o investimento nesta refatoração trará retornos significativos a longo prazo, resultando em um produto mais estável, flexível e agradável de se trabalhar.
