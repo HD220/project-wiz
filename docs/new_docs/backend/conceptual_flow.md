@@ -1,53 +1,54 @@
-# Backend Conceptual Flow: Job Lifecycle
+# Fluxo Conceitual do Backend: Ciclo de Vida de um Job
 
-This document describes the typical lifecycle of a Job (Activity) within Project Wiz, outlining how different backend components interact at a high level to process tasks. An "Agent" here refers to the autonomous logic that utilizes a "Persona" configuration to interact with an LLM.
+Este documento descreve o ciclo de vida típico de um `Job` (Atividade) dentro do Project Wiz, delineando como diferentes componentes do backend interagem em alto nível para processar tarefas. Um "Agente" aqui se refere à lógica autônoma que utiliza uma configuração de "Persona" para interagir com um LLM.
 
-1.  **Job Creation & Assignment:**
-    *   A user, through the frontend interface or other means, defines a new Job. This involves specifying its details, such as the task description, input parameters/data, any initial dependencies on other Jobs (`depends_on_job_ids`), and potentially a `parent_job_id` if it's a sub-task.
-    *   The user assigns this Job to a specific Agent (which will operate using a chosen Persona configuration).
+1.  **Interação do Usuário e Decisão de Criação de Job pelo Agente:**
+    *   O usuário interage com um Agente (atuando com uma configuração de `Persona`) através da interface frontend, descrevendo uma necessidade, objetivo ou solicitando uma tarefa complexa.
+    *   O Agente, utilizando sua `Persona Core Logic` em conjunto com o `LLM`, analisa a solicitação do usuário.
+    *   Com base nessa análise, o Agente decide se um ou mais `Jobs` são necessários para atender ao pedido. Se sim, o próprio Agente define os detalhes destes `Jobs` (ex: tipo de tarefa, `Input Data/Payload` inicial derivado da conversa, dependências potenciais com outros `Jobs` que ele gerencia, `parent_job_id` se for um sub-job de um Job maior do próprio Agente). O `Job` é atribuído ao próprio Agente que o criou.
 
-2.  **Queuing (Inspired by BullMQ):**
-    *   The newly created Job is submitted to the Job/Activity Management System (Queue).
-    *   The Queue, designed for robustness (e.g., with SQLite-based persistence), stores the Job with its full details. It sets the initial status (e.g., "pending" or "waiting" if dependencies exist).
-    *   The Queue manages Job dependencies, retentativas (retries), potential scheduling, and emits events on status changes. Priority can be influenced by Agents interacting with their own Jobs.
+2.  **Enfileiramento (Inspirado no BullMQ):**
+    *   O(s) `Job`(s) criado(s) pelo Agente são submetidos ao Sistema de Gerenciamento de Jobs/Atividades (`Queue`).
+    *   A `Queue`, projetada para robustez (ex: com persistência baseada em SQLite), armazena o `Job` com todos os seus detalhes. Define o status inicial (ex: "pendente" ou "aguardando" se existirem dependências).
+    *   A `Queue` gerencia dependências de `Jobs`, retentativas (retries), agendamento potencial e emite eventos sobre mudanças de status. A prioridade pode ser influenciada por Agentes interagindo com seus próprios `Jobs`.
 
-3.  **Agent (Worker) Processing Loop:**
-    *   Each Agent runs its own asynchronous processing loop (conceptually, its "Worker" instance). It queries the `Queue` for eligible Jobs assigned to it that are ready for execution (dependencies met, not delayed).
-    *   System-level concurrency is achieved by multiple Agents operating their loops simultaneously.
+3.  **Agente (Worker) Solicita Job da Fila:**
+    *   Cada Agente executa seu próprio loop de processamento assíncrono (sua instância "Worker"). Neste loop, o Agente ativamente solicita à `Queue` por `Jobs` que lhe foram atribuídos e que estão elegíveis para execução (dependências cumpridas, não agendados para futuro, etc.).
+    *   A concorrência em nível de sistema é alcançada através de múltiplos Agentes operando seus loops de forma independente e simultânea.
 
-4.  **Context Loading by Agent:**
-    *   Upon picking up a Job, the Agent loads:
-        *   **`AgentInternalState`:** Its global, persistent memory, including its overall goals, past learnings, a list of all its activities, and general knowledge.
-        *   **`ActivityContext`:** The specific context for *this* Job, including the initial input, history of messages/interactions for this task (e.g., `CoreMessages`), and any previously planned steps or partial results.
+4.  **Carregamento de Contexto pelo Agente:**
+    *   Ao receber um `Job` da Fila, o Agente carrega:
+        *   **`AgentInternalState`:** Sua memória global e persistente, incluindo seus objetivos gerais, aprendizados passados, uma lista de todas as suas atividades (`Jobs`), e conhecimento acumulado.
+        *   **`ActivityContext`:** O contexto específico para *este* `Job`, incluindo o input inicial, o histórico de mensagens/interações desta tarefa (ex: `CoreMessages`), e quaisquer passos de planejamento ou resultados parciais anteriores.
 
-5.  **Reasoning and Planning (LLM Interaction via Persona):**
-    *   The Agent, using its loaded `AgentInternalState` and the current Job's `ActivityContext`, formulates a prompt for the configured Persona. This prompt instructs the Large Language Model (LLM) associated with the Persona.
-    *   The LLM interaction aims to: understand the Job's goal, break it down into manageable steps (planning), define `validationCriteria` (Definition of Ready for the task), or decide the next immediate `Task` or `Tool` use.
+5.  **Raciocínio e Planejamento (Interação LLM via Persona):**
+    *   O Agente, utilizando seu `AgentInternalState` carregado e o `ActivityContext` do `Job` atual, formula um prompt para a `Persona` configurada. Este prompt instrui o Modelo de Linguagem Amplo (LLM) associado à `Persona`.
+    *   A interação com o LLM visa: entender o objetivo do `Job`, decompô-lo em passos gerenciáveis (planejamento), definir `validationCriteria` (Definição de Pronto para a tarefa), ou decidir a próxima `Task` ou uso de `Tool` imediato.
 
-6.  **Task/Tool Execution:**
-    *   Based on the LLM's response (shaped by the Persona), the Agent selects and triggers:
-        *   A **`Task`**: A specific objective or refined prompt directed to the LLM, which may involve further planning or direct Tool invocation by the LLM.
-        *   A **`Tool`**: A pre-developed capability (e.g., file access, code execution, communication with another Agent via a `SendMessageToAgentTool`).
-    *   If a Tool execution fails, this error is captured in the `ActivityContext`. The Agent may decide to retry, use an alternative Tool, or mark the Job as failed based on this.
+6.  **Execução de Task/Tool:**
+    *   Com base na resposta do LLM (moldada pela `Persona`), o Agente seleciona e aciona:
+        *   Uma **`Task`**: Um objetivo específico ou prompt refinado direcionado ao LLM, que pode envolver planejamento adicional ou invocação direta de `Tool` pelo LLM.
+        *   Uma **`Tool`**: Uma capacidade pré-desenvolvida (ex: acesso a arquivos, execução de código, comunicação com outro Agente através de uma `SendMessageToAgentTool`).
+    *   Se a execução de uma `Tool` falhar, este erro é capturado no `ActivityContext`. O Agente pode decidir tentar novamente, usar uma `Tool` alternativa ou marcar o `Job` como falho com base nisso.
 
-7.  **Context Update:**
-    *   After each Task/Tool execution (or attempted execution), the Agent updates the `ActivityContext` for the current Job.
-    *   This includes results, errors encountered, logs of actions taken, new information learned, and progress towards the Job's goal. This updated context, including the history of messages, is used for subsequent LLM interactions.
+7.  **Atualização de Contexto:**
+    *   Após cada execução (ou tentativa de execução) de `Task`/`Tool`, o Agente atualiza o `ActivityContext` para o `Job` atual.
+    *   Isso inclui resultados, erros encontrados, logs de ações tomadas, novas informações aprendidas e progresso em direção ao objetivo do `Job`. Este contexto atualizado, incluindo o histórico de mensagens, é usado para interações subsequentes com o LLM.
 
-8.  **Iteration & Replanning:**
-    *   The Agent evaluates the updated `ActivityContext` and its overall plan.
-    *   If the Job's main goal is not yet achieved, or if a step failed and a new approach is needed, the Agent repeats steps 5 (Reasoning/Planning), 6 (Task/Tool Execution), and 7 (Context Update). This iterative loop continues as the Agent works through its plan.
+8.  **Iteração e Replanejamento:**
+    *   O Agente avalia o `ActivityContext` atualizado e seu plano geral.
+    *   Se o objetivo principal do `Job` ainda não foi alcançado, ou se um passo falhou e uma nova abordagem é necessária, o Agente repete os passos 5 (Raciocínio/Planejamento), 6 (Execução de `Task`/`Tool`) e 7 (Atualização de Contexto). Este loop iterativo continua enquanto o Agente trabalha em seu plano.
 
 9.  **Auto-Validação (Self-Validation):**
-    *   Before considering a Job complete, the Agent (guided by its Persona/LLM) may perform a self-validation step using the `validationCriteria` defined in the `ActivityContext`.
-    *   The `validationResult` is recorded. If validation fails, the Agent might return to step 8 (Iteration & Replanning) to address the shortcomings.
+    *   Antes de considerar um `Job` completo, o Agente (guiado por sua `Persona`/LLM) pode realizar um passo de auto-validação usando os `validationCriteria` definidos no `ActivityContext`.
+    *   O `validationResult` é registrado. Se a validação falhar, o Agente pode retornar ao passo 8 (Iteração e Replanejamento) para corrigir as deficiências.
 
-10. **Job Completion/Status Update:**
-    *   Once the Agent determines that the Job's objectives have been met (and self-validation is successful), or if it encounters an unrecoverable error (e.g., max retries reached, critical Tool failure, unsolvable planning loop), it finalizes the Job.
-    *   The Agent updates the Job's final status in the `Queue` (e.g., "finished," "failed") and stores the detailed outcome, including any errors, in the `ActivityContext` and potentially logs.
+10. **Conclusão/Atualização de Status do Job:**
+    *   Uma vez que o Agente determina que os objetivos do `Job` foram atendidos (e a auto-validação foi bem-sucedida), ou se encontra um erro irrecuperável (ex: máximo de retentativas atingido, falha crítica de `Tool`, loop de planejamento insolúvel), ele finaliza o `Job`.
+    *   O Agente atualiza o status final do `Job` na `Queue` (ex: "finished", "failed") e armazena o resultado detalhado, incluindo quaisquer erros, no `ActivityContext` e potencialmente em logs.
 
-11. **Results Storage & Notification:**
-    *   The final output, artifacts, or results from the `ActivityContext` are made available.
-    *   The `Queue` emits an event for the Job's final status, which can trigger notifications to the user via the frontend or to other dependent systems/Agents.
+11. **Armazenamento de Resultados e Notificação:**
+    *   O output final, artefatos ou resultados do `ActivityContext` são disponibilizados.
+    *   A `Queue` emite um evento para o status final do `Job`, que pode acionar notificações para o usuário através do frontend ou para outros sistemas/Agentes dependentes.
 
-This lifecycle emphasizes an Agent-centric approach, where each Agent autonomously manages its workflow using its configured Persona to interact with LLMs and Tools, all orchestrated via a robust Job Queue.
+Este ciclo de vida enfatiza uma abordagem centrada no Agente, onde cada Agente gerencia autonomamente seu fluxo de trabalho usando sua `Persona` configurada para interagir com LLMs e `Tools`, tudo orquestrado através de uma robusta Fila de `Jobs`.

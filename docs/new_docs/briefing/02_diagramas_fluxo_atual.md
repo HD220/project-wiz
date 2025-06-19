@@ -6,88 +6,98 @@ Os diagramas a seguir representam o entendimento atual dos fluxos de processo e 
 
 ## 1. Diagrama de Sequência: Fluxo de Vida de um Job
 
-Este diagrama ilustra a sequência típica de interações desde a criação de um Job pelo usuário até sua conclusão pela Persona. Baseia-se fortemente no `docs/new_docs/backend/conceptual_flow.md`.
+Este diagrama ilustra a sequência típica de interações desde a solicitação de uma tarefa pelo usuário até sua conclusão por um Agente (atuando com uma Persona). Baseia-se fortemente no `docs/new_docs/backend/conceptual_flow.md`.
 
 ```mermaid
 sequenceDiagram
     participant Usuário
     participant Frontend as Interface Frontend
+    participant AgentePersona as Agente (usando Persona)
     participant Fila as Sistema de Fila (Queue)
-    participant Worker
-    participant Persona as Persona (Agente Autônomo)
     participant LLM as LLM (Modelo de Linguagem)
     participant Ferramentas as Sistema de Ferramentas
     participant Dados as Armazenamento (Contexto/Estado)
 
-    Usuário->>Frontend: Cria Job (dados, tipo, prioridade)
-    Frontend->>Fila: Submete Job
-    Fila-->>Dados: Armazena Job (status pendente)
+    Usuário->>Frontend: Descreve necessidade/objetivo
+    Frontend->>AgentePersona: Envia mensagem do Usuário (via IPC)
+    activate AgentePersona
+    AgentePersona->>LLM: Analisa solicitação do usuário (com seu AgentInternalState)
+    LLM-->>AgentePersona: Sugere criar Job(s)
+    AgentePersona->>Fila: Cria e submete Job(s) para si (com detalhes, tipo, etc.)
+    deactivate AgentePersona
+    Fila-->>Dados: Armazena Job(s) (status pendente)
 
-    Worker->>Fila: Obtém próximo Job pendente
-    Fila-->>Worker: Entrega Job
-    Worker->>Persona: Inicia processamento do Job
+    %% Agente (Worker Loop) processando o Job
+    activate AgentePersona
+    AgentePersona->>Fila: Solicita próximo Job de sua fila
+    Fila-->>AgentePersona: Entrega Job
 
-    Persona->>Dados: Carrega AgentInternalState
-    Persona->>Dados: Carrega ActivityContext do Job
+    AgentePersona->>Dados: Carrega/Atualiza AgentInternalState
+    AgentePersona->>Dados: Carrega ActivityContext do Job
 
     loop Ciclo de Raciocínio e Ação
-        Persona->>LLM: Solicita análise/plano (com contexto atual)
-        LLM-->>Persona: Retorna decisão/próxima ação/plano
+        AgentePersona->>LLM: Solicita análise/plano (com contexto atual)
+        LLM-->>AgentePersona: Retorna decisão/próxima ação/plano
 
         alt Escolhe usar Ferramenta/Task
-            Persona->>Ferramentas: Executa Ferramenta/Task (com argumentos necessários)
-            Ferramentas-->>Persona: Retorna resultado da Ferramenta/Task
+            AgentePersona->>Ferramentas: Executa Ferramenta/Task (com argumentos necessários)
+            Ferramentas-->>AgentePersona: Retorna resultado da Ferramenta/Task
         end
 
-        Persona->>Dados: Atualiza ActivityContext (progresso, resultados parciais, notas)
+        AgentePersona->>Dados: Atualiza ActivityContext (progresso, resultados parciais, notas)
     end
 
-    Persona->>Worker: Notifica conclusão do Job (sucesso/falha, resultado final)
-    Worker->>Fila: Atualiza status do Job na Fila
-    Worker->>Dados: Armazena resultado final do Job
+    AgentePersona->>Fila: Atualiza status do Job na Fila (Concluído/Falhou)
+    AgentePersona->>Dados: Armazena resultado final do Job
+    deactivate AgentePersona
 
     opt Notificação ao Usuário
-        Fila-->>Frontend: Notifica status do Job (via Worker ou diretamente)
+        Fila-->>Frontend: Notifica status do Job
         Frontend-->>Usuário: Exibe atualização do Job
     end
 ```
 
 ## 2. Diagrama de Blocos: Componentes Conceituais do Backend e suas Interações Principais
 
-Este diagrama de blocos visualiza os principais componentes conceituais do backend, conforme descrito em `docs/new_docs/backend/components.md`, e as suas relações primárias.
+Este diagrama de blocos visualiza os principais componentes conceituais do backend, conforme descrito em `docs/new_docs/backend/components.md`, e as suas relações primárias. Note que "Worker" é o loop do Agente.
 
 ```mermaid
 graph TD
-    subgraph Interação Usuário
-        UI[Interface Frontend]
+    subgraph "Usuário e Interface"
+        UI[Interface Frontend (React)]
     end
 
-    subgraph Núcleo do Backend
-        Queue[Job/Activity Management System (Queue)]
-        WorkerPool[Worker & Worker Pool]
-        PersonaLogic[Persona Core Logic / Autonomous Agent]
-        TaskManager[Task Execution System]
-        ToolRegistry[Tool Framework/Registry]
-        StateManager[State Management Subsystem]
-        LLMIntegration[LLM Integration Point]
+    subgraph "Núcleo do Backend (Electron Main Process)"
+        Queue["Sistema de Fila de Jobs (Queue)"]
+        WorkerPool["Gerenciador de Agentes (Worker Pool)"]
+        AgentLogic["Lógica do Agente (Persona Core Logic)"]
+        TaskManager["Sistema de Execução de Tasks (Formula Prompts)"]
+        ToolRegistry["Framework/Registro de Ferramentas (Tools)"]
+        StateManager["Subsistema de Gerenciamento de Estado (SQLite)"]
+        LLMIntegration["Ponto de Integração LLM (AI SDK)"]
     end
 
-    UI -- 1. Criação/Monitoramento de Jobs --> Queue
-    WorkerPool -- 2. Obtém Jobs da --> Queue
-    WorkerPool -- 3. Delega Job para --> PersonaLogic
-    PersonaLogic -- 4. Carrega/Salva Estado (AgentInternalState, ActivityContext) --> StateManager
-    PersonaLogic -- 5. Usa para Raciocínio e Decisão --> LLMIntegration
-    PersonaLogic -- 6. Decide e Executa --> TaskManager
-    TaskManager -- 7. Utiliza (descobre e invoca) --> ToolRegistry
-    TaskManager -- 8. Pode interagir diretamente para Tasks complexas --> LLMIntegration
-    PersonaLogic -- 9. Reporta Conclusão/Progresso do Job --> WorkerPool
-    WorkerPool -- 10. Atualiza Status na --> Queue
+    UI -- "1. Interage com (via IPC)" --> AgentLogic
+    AgentLogic -- "2. Cria/Gerencia Jobs na" --> Queue
+    WorkerPool -- "3. Gerencia instâncias de" --> AgentLogic
+    AgentLogic -- "4. Solicita Jobs da" --> Queue
+    AgentLogic -- "5. Carrega/Salva Estado" --> StateManager
+    AgentLogic -- "6. Usa para Raciocínio" --> LLMIntegration
+    AgentLogic -- "7. Formula Task para" --> TaskManager
+    TaskManager -- "Envia Prompt para" --> LLMIntegration
+    LLMIntegration -- "Retorna resposta do LLM para" --> AgentLogic
+    AgentLogic -- "LLM solicita uso de Tool via" --> ToolRegistry
+    ToolRegistry -- "Executa Tool e retorna para" --> AgentLogic
+    AgentLogic -- "8. Reporta Status para Atualizar" --> Queue
+    Queue -- "Notifica (via IPC)" --> UI
+
 
     %% Detalhes de interdependência dentro da PersonaLogic (não são fluxos sequenciais diretos, mas usos)
-    subgraph Detalhes da Lógica da Persona
-        PersonaLogic --- StateManager
-        PersonaLogic --- LLMIntegration
-        PersonaLogic --- TaskManager
+    subgraph "Detalhes da Lógica do Agente"
+        AgentLogic --- StateManager
+        AgentLogic --- LLMIntegration
+        AgentLogic --- TaskManager
+        AgentLogic --- ToolRegistry
     end
 ```
 
@@ -97,20 +107,23 @@ Este diagrama de atividade ilustra o fluxo de controle interno simplificado de u
 
 ```mermaid
 graph LR
-    A[Início do Processamento do Job pela Persona] --> B{Carregar Contextos?};
-    B -- Sucesso --> C[AgentInternalState + ActivityContext Carregados];
-    C --> D{Analisar Objetivo do Job e Planejar Próximos Passos com LLM};
-    D -- Plano/Ação Definida --> E{Selecionar Próxima Ação Concreta};
-    E -- Ação requer uma Task específica? --> F[Executar Task via Task Execution System];
-    E -- Ação requer uso direto de Tool? --> G[Executar Tool via Tool Framework/Registry];
-    F --> H[Atualizar ActivityContext com Resultado da Task];
-    G --> I[Atualizar ActivityContext com Resultado da Tool];
-    H --> J{Job Concluído?};
+    A["Início do Processamento do Job pelo Agente"] --> B{"Carregar Contextos (AgentInternalState + ActivityContext)?"};
+    B -- Sucesso --> C["Contextos Carregados"];
+    C --> D{"Analisar Objetivo do Job e Planejar Próximos Passos com LLM"};
+    D -- "Plano/Ação Definida" --> E{"Selecionar Próxima Ação Concreta"};
+    E -- "É uma Task específica?" --> F["Executar Task (Formular Prompt para LLM)"];
+    E -- "É uso direto de Tool?" --> G["Executar Tool via Framework"];
+    F --> H["Atualizar ActivityContext com Resultado da Task/LLM"];
+    G --> I["Atualizar ActivityContext com Resultado da Tool"];
+    H --> J{"Job Concluído?"};
     I --> J;
-    J -- Sim (Objetivo Alcançado ou Falha Final) --> K[Finalizar Job e Notificar Worker];
-    J -- Não (Mais Passos Necessários) --> C; %% Volta para carregar/reavaliar contexto atualizado ou direto para D
+    J -- Sim --> K["Finalizar Job e Notificar Sistema de Fila"];
+    J -- Não --> C; %% Volta para carregar/reavaliar contexto ou direto para D
 
-    B -- Falha ao Carregar --> Z[Erro Crítico: Impossível Carregar Contexto] --> K;
-    D -- Falha no Planejamento/LLM Irrecuperável --> Y[Registrar Falha de Raciocínio] --> K;
-    E -- Nenhuma ação válida pode ser selecionada --> X[Registrar Falha na Seleção de Ação] --> K;
+    B -- Falha --> Z["Erro Crítico: Impossível Carregar Contexto"];
+    Z --> K;
+    D -- "Falha no Planejamento/LLM" --> Y["Registrar Falha de Raciocínio"];
+    Y --> K;
+    E -- "Nenhuma ação válida" --> X["Registrar Falha na Seleção de Ação"];
+    X --> K;
 ```

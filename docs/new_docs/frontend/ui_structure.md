@@ -1,31 +1,31 @@
-# UI Structure
+# Estrutura da Interface do Usuário (UI)
 
-The Project Wiz application interface is designed for intuitive navigation and efficient workflow management, drawing inspiration from the familiar layout of platforms like Discord. It is generally organized into three main hierarchical areas:
+A interface da aplicação Project Wiz é projetada para navegação intuitiva e gerenciamento eficiente do fluxo de trabalho, inspirando-se no layout familiar de plataformas como o Discord. Geralmente, é organizada em três áreas hierárquicas principais:
 
-1.  **Projects/Servers Bar (Far Left):**
-    *   **Purpose:** This vertical bar, located on the extreme left edge of the application window, serves as the primary navigation tool for switching between different Projects. Each Project can be thought of as a "server" or a distinct workspace. Clicking on a Project icon in this bar will load its specific context into the subsequent interface areas.
+1.  **Barra de Projetos/Servidores (Extrema Esquerda):**
+    *   **Propósito:** Esta barra vertical, localizada na borda extrema esquerda da janela da aplicação, serve como a principal ferramenta de navegação para alternar entre diferentes `Projects` (Projetos). Cada `Project` pode ser pensado como um "servidor" ou um espaço de trabalho distinto. Clicar no ícone de um `Project` nesta barra carregará seu contexto específico nas áreas subsequentes da interface.
 
-2.  **Channels & Project Context Bar (Left of Main Content):**
-    *   **Purpose:** Situated to the right of the Projects/Servers Bar, this area dynamically updates based on the selected Project. Its primary role is to display Project-specific navigation and contextual information.
-    *   **Content Typically Includes:**
-        *   **Project Channels:** Similar to chat channels, these allow for focused communication, often with specific Personas or for particular aspects of the project (e.g., "dev-chat," "qa-updates," "general-discussion").
-        *   **Project Sections:** Direct links to different functional areas within the selected Project, such as:
-            *   Tasks (Job lists and management)
-            *   Documentation specific to the project
-            *   A project-specific Forum or discussion board
-            *   Project-specific analytics or dashboards
-            *   **Canais de Log:** Canais dedicados ou visualizações para acompanhar logs detalhados da atividade de uma Persona específica ou da execução de um Job.
-        *   **Active Personas:** A list or visual representation of Personas (AI Agents) currently active or assigned to the selected Project, potentially showing their status.
+2.  **Barra de Canais e Contexto do Projeto (À Esquerda do Conteúdo Principal):**
+    *   **Propósito:** Situada à direita da Barra de Projetos/Servidores, esta área é atualizada dinamicamente com base no `Project` selecionado. Seu papel primário é exibir navegação específica do projeto e informações contextuais.
+    *   **Conteúdo Típico Inclui:**
+        *   **Canais do Projeto:** Semelhantes a canais de chat, permitem comunicação focada, frequentemente com `Personas` específicas ou para aspectos particulares do projeto (ex: "dev-chat", "qa-updates", "general-discussion").
+        *   **Seções do Projeto:** Links diretos para diferentes áreas funcionais dentro do `Project` selecionado, tais como:
+            *   Tarefas (listas de `Jobs` e gerenciamento)
+            *   Documentação específica do projeto
+            *   Um Fórum ou painel de discussão específico do projeto
+            *   Painéis de análise (analytics) específicos do projeto
+            *   **Canais de Log:** Canais dedicados ou visualizações para acompanhar logs detalhados da atividade de uma `Persona` específica ou da execução de um `Job`.
+        *   **Personas Ativas:** Uma lista ou representação visual das `Personas` (Agentes de IA) atualmente ativas ou atribuídas ao `Project` selecionado, potencialmente mostrando seu status.
 
-3.  **Main Content Area (Center/Right):**
-    *   **Purpose:** This is the largest and most dynamic part of the interface. It displays the detailed content selected from either the Projects/Servers Bar or the Channels & Project Context Bar.
-    *   **Content Examples:**
-        *   **Chat Interface:** When a communication channel is selected, this area shows the conversation history and input fields for interacting with Personas or other users.
-        *   **Dashboards:** Displays global or project-specific dashboards with key metrics, charts, and summaries.
-        *   **Task Lists:** Shows detailed lists of Jobs, their statuses, assignees, and allows for interaction like creating new Jobs or viewing Job details.
-        *   **Settings Panels:** When accessing application or project settings, this area presents the various configuration options.
-        *   **Persona Interaction Views:** Specific interfaces for configuring Personas, monitoring their detailed activity, or reviewing their outputs.
-        *   **Documentation Views:** Renders project documentation or help content.
-        *   **Forum/Discussion Threads:** Displays discussion topics and replies.
+3.  **Área de Conteúdo Principal (Centro/Direita):**
+    *   **Propósito:** Esta é a maior e mais dinâmica parte da interface. Exibe o conteúdo detalhado selecionado tanto da Barra de Projetos/Servidores quanto da Barra de Canais e Contexto do Projeto.
+    *   **Exemplos de Conteúdo:**
+        *   **Interface de Chat:** Quando um canal de comunicação é selecionado, esta área mostra o histórico da conversa e campos de entrada para interagir com `Personas` ou outros usuários.
+        *   **Dashboards:** Exibe dashboards globais ou específicos do projeto com métricas chave, gráficos e resumos.
+        *   **Listas de Tarefas (Jobs):** Mostra listas detalhadas de `Jobs`, seus status, responsáveis (a `Persona` que o criou), e permite interações como visualizar detalhes do `Job`.
+        *   **Painéis de Configuração:** Ao acessar configurações da aplicação ou do projeto, esta área apresenta as várias opções de configuração.
+        *   **Visualizações de Interação com Persona:** Interfaces específicas para configurar `Personas`, monitorar sua atividade detalhada ou revisar seus resultados.
+        *   **Visualizações de Documentação:** Renderiza documentação do projeto ou conteúdo de ajuda.
+        *   **Tópicos de Fórum/Discussão:** Exibe tópicos de discussão e respostas.
 
-This three-tiered structure aims to provide a clear separation of concerns, allowing users to easily navigate between high-level projects, project-specific contexts, and detailed content views.
+Esta estrutura de três níveis visa fornecer uma clara separação de responsabilidades, permitindo que os usuários naveguem facilmente entre projetos de alto nível, contextos específicos de projetos e visualizações de conteúdo detalhado.

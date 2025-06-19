@@ -1,68 +1,68 @@
-# Backend Conceptual Components
+# Componentes Conceituais do Backend
 
-This document describes the key conceptual components of the Project Wiz backend, focusing on their primary responsibilities and functions in the autonomous software development process. These descriptions are high-level and do not delve into specific implementation technologies.
+Este documento descreve os principais componentes conceituais do backend do Project Wiz, focando em suas responsabilidades primárias e funções no processo de desenvolvimento de software autônomo. Estas descrições são de alto nível e não mergulham em tecnologias de implementação específicas.
 
--   **Persona Core Logic (Autonomous Agent):**
-    -   **Responsibility:** This is the core autonomous logic that *utilizes* a `Persona` configuration to instruct a Large Language Model (LLM) and manage the execution of assigned `Jobs` (Activities). It's responsible for the entire lifecycle of a Job, from understanding goals to planning, execution via Tools, and self-validation.
-    -   **Key Functions:**
-        -   Loads and synthesizes its long-term memory (`AgentInternalState`) with the specific, dynamic context of the current Job (`ActivityContext`, including conversational history like `CoreMessages`).
-        -   Interacts with LLMs (via the `LLM Integration Point`) using the configured Persona's system prompt, goals, and available Tools to reason, plan, solve problems, and generate content or code.
-        -   Dynamically defines `validationCriteria` (Definition of Done) for a Job as part of its planning phase.
-        -   Selects and triggers appropriate `Tasks` (i.e., formulates objectives/prompts for the LLM) or directly requests `Tool` execution.
-        -   Continuously updates the `ActivityContext` with progress, Tool results, LLM responses, errors, and logs. This includes promoting relevant learnings from `ActivityContext` to `AgentInternalState`.
-        -   Performs self-validation against `validationCriteria` before marking a Job as complete.
-        -   Determines Job completion (success or failure after retries/error handling).
-        -   Can communicate with other Agents or the user via specific `Tools` (e.g., `SendMessageToAgentTool`).
+-   **Lógica Central da Persona (Agente Autônomo) / `Persona Core Logic`:**
+    -   **Responsabilidade:** Esta é a lógica autônoma central que *utiliza* uma configuração de `Persona` para instruir um Modelo de Linguagem Amplo (LLM) e gerenciar a execução dos `Jobs` (Atividades) atribuídos. É responsável por todo o ciclo de vida de um `Job`, desde a compreensão dos objetivos até o planejamento, execução via `Tools` e auto-validação.
+    -   **Funções Chave:**
+        -   Carrega e sintetiza sua memória de longo prazo (`AgentInternalState`) com o contexto dinâmico e específico do `Job` atual (`ActivityContext`, incluindo histórico conversacional como `CoreMessages`).
+        -   Interage com LLMs (através do `LLM Integration Point`) usando o prompt de sistema da `Persona` configurada, seus objetivos e `Tools` disponíveis para raciocinar, planejar, resolver problemas e gerar conteúdo ou código.
+        -   Define dinamicamente `validationCriteria` (Definição de Pronto) para um `Job` como parte de sua fase de planejamento.
+        -   Seleciona e aciona `Tasks` apropriadas (ou seja, formula objetivos/prompts para o LLM) ou solicita diretamente a execução de `Tools`.
+        -   Atualiza continuamente o `ActivityContext` com progresso, resultados de `Tools`, respostas do LLM, erros e logs. Isso inclui promover aprendizados relevantes do `ActivityContext` para o `AgentInternalState`.
+        -   Realiza auto-validação contra `validationCriteria` antes de marcar um `Job` como concluído.
+        -   Determina a conclusão do `Job` (sucesso ou falha após retentativas/tratamento de erro).
+        -   Pode se comunicar com outros Agentes ou com o usuário através de `Tools` específicas (ex: `SendMessageToAgentTool`).
 
--   **Job/Activity Management System (Queue):**
-    -   **Responsibility:** Manages the lifecycle of `Jobs` with robust features inspired by systems like BullMQ, acting as a central task broker.
-    -   **Key Functions:**
-        -   Persists `Job` definitions (including input data, assigned Agent/Persona, dependencies, status) using SQLite.
-        -   Handles Job status transitions (e.g., `pending`, `waiting`, `executing`, `delayed`, `finished`, `failed`).
-        -   Manages Job dependencies (`depends_on_job_ids`) and `parent_job_id` relationships.
-        -   Supports configurable retry mechanisms for failed `Jobs`.
-        -   Allows for scheduled or delayed `Jobs`.
-        -   Emits events on status changes, enabling reactive components.
-        -   Agents query the `Queue` for their assigned `Jobs`; they can also use `Tools` to interact with `Jobs` on the `Queue` (e.g., to adjust sub-task priorities).
+-   **Sistema de Gerenciamento de Jobs/Atividades (Fila) / `Job/Activity Management System (Queue)`:**
+    -   **Responsabilidade:** Gerencia o ciclo de vida de `Jobs` com funcionalidades robustas inspiradas em sistemas como BullMQ, atuando como um intermediário central de tarefas.
+    -   **Funções Chave:**
+        -   Persiste definições de `Jobs` (incluindo dados de entrada, Agente/`Persona` atribuído, dependências, status) usando SQLite.
+        -   Lida com transições de status de `Jobs` (ex: `pending`, `waiting`, `executing`, `delayed`, `finished`, `failed`).
+        -   Gerencia dependências de `Jobs` (relações `depends_on_job_ids` e `parent_job_id`).
+        -   Suporta mecanismos de retentativa configuráveis para `Jobs` falhos.
+        -   Permite `Jobs` agendados ou atrasados.
+        -   Emite eventos sobre mudanças de status, permitindo que componentes reativos respondam.
+        -   Responde às solicitações dos Agentes (Workers), entregando o próximo `Job` elegível; os Agentes também podem usar `Tools` para interagir com `Jobs` na `Queue` (ex: para ajustar prioridades de sub-tasks).
 
--   **Worker & Worker Pool (Agent Concurrency Model):**
-    -   **Responsibility:** The "Worker Pool" represents the collection of active, concurrent Agents. Each individual "Worker" is effectively the main asynchronous processing loop of a single Agent.
-    -   **Key Functions (Agent as Worker):**
-        -   Fetches its next assigned `Job` from the `Queue`.
-        -   Invokes its `Persona Core Logic` to process the `Job`.
-        -   Manages the Job's lifecycle internally (context loading, LLM interaction, Tool use, validation, context update).
-        -   Reports the final status of the `Job` back to the `Queue`.
-    -   **Key Functions (Worker Pool):**
-        -   Manages the set of concurrently running Agents.
-        -   System-level throughput is achieved by having multiple Agents processing their respective Jobs in parallel, rather than a single Job being internally parallelized by multiple threads in the traditional sense.
+-   **Worker & Worker Pool (Modelo de Concorrência de Agentes):**
+    -   **Responsabilidade:** O "Worker Pool" representa a coleção de Agentes ativos e concorrentes. Cada "Worker" individual é efetivamente o principal loop de processamento assíncrono de um único Agente.
+    -   **Funções Chave (Agente como Worker):**
+        -   Solicita ativamente `Jobs` à `Queue` para processamento.
+        -   Invoca sua `Persona Core Logic` para processar o `Job`.
+        -   Gerencia o ciclo de vida do `Job` internamente (carregamento de contexto, interação com LLM, uso de `Tool`, validação, atualização de contexto).
+        -   Reporta o status final do `Job` de volta para a `Queue`.
+    -   **Funções Chave (Worker Pool):**
+        -   Gerencia o conjunto de Agentes em execução concorrente.
+        -   A vazão em nível de sistema é alcançada tendo múltiplos Agentes processando seus respectivos `Jobs` em paralelo, em vez de um único `Job` ser paralelizado internamente por múltiplos threads no sentido tradicional.
 
--   **Task Execution System:**
-    -   **Responsibility:** This is not a system for executing pre-coded task sequences, but rather the conceptual mechanism by which an Agent's `Persona Core Logic` formulates and dispatches specific objectives or focused prompts (defined as `Tasks`) to the LLM.
-    -   **Key Functions:**
-        -   Allows the Agent to dynamically create `Tasks` based on its ongoing reasoning and the Job's requirements.
-        -   A `Task` provides the LLM (as configured by the Persona) with a clear goal, relevant context (from `ActivityContext` and `AgentInternalState`), and access to `Tools`.
-        -   The LLM's attempt to fulfill the `Task` drives the Job forward.
+-   **Sistema de Execução de Tasks / `Task Execution System`:**
+    -   **Responsabilidade:** Este não é um sistema para executar sequências de tarefas pré-codificadas, mas sim o mecanismo conceitual pelo qual a `Persona Core Logic` de um Agente formula e despacha objetivos específicos ou prompts focados (definidos como `Tasks`) para o LLM.
+    -   **Funções Chave:**
+        -   Permite que o Agente crie `Tasks` dinamicamente com base em seu raciocínio contínuo e nos requisitos do `Job`.
+        -   Uma `Task` fornece ao LLM (conforme configurado pela `Persona`) um objetivo claro, contexto relevante (do `ActivityContext` e `AgentInternalState`) e acesso a `Tools`.
+        -   A tentativa do LLM de cumprir a `Task` impulsiona o `Job` para frente.
 
--   **Tool Framework/Registry:**
-    -   **Responsibility:** Provides a collection of pre-developed, well-defined `Tools` (functions within the application's source code) that are exposed to the LLM via an AI SDK, allowing the LLM (as directed by the Persona) to choose and request their execution.
-    -   **Key Functions:**
-        -   Makes `Tools` discoverable and usable by the LLM, typically by providing their descriptions, parameters, and expected output formats to the AI SDK.
-        -   Each `Tool` performs a specific, discrete action (e.g., `ReadFileTool`, `WriteToDBTool`, `SendMessageToAgentTool`, `PostToProjectChannelTool`).
-        -   The framework ensures that when an LLM requests a `Tool`, the corresponding application code is executed securely with the provided arguments.
+-   **Framework/Registro de Ferramentas (Tools) / `Tool Framework/Registry`:**
+    -   **Responsabilidade:** Fornece uma coleção de `Tools` pré-desenvolvidas e bem definidas (funções dentro do código fonte da aplicação) que são expostas ao LLM via um AI SDK, permitindo que o LLM (conforme direcionado pela `Persona`) escolha e solicite sua execução.
+    -   **Funções Chave:**
+        -   Torna as `Tools` descobríveis e utilizáveis pelo LLM, tipicamente fornecendo suas descrições, parâmetros e formatos de saída esperados para o AI SDK.
+        -   Cada `Tool` realiza uma ação específica e discreta (ex: `ReadFileTool`, `WriteToDBTool`, `SendMessageToAgentTool`, `PostToProjectChannelTool`).
+        -   O framework garante que, quando um LLM solicita uma `Tool`, o código da aplicação correspondente seja executado de forma segura com os argumentos fornecidos.
 
--   **State Management Subsystem:**
-    -   **Responsibility:** Handles robust persistence and retrieval of `AgentInternalState` (the Agent's long-term memory and evolving knowledge) and `ActivityContext` (the dynamic, per-Job conversational history and operational data), primarily using SQLite.
-    -   **Key Functions:**
-        -   Saves and loads the `AgentInternalState` for each Agent.
-        -   Saves and loads the `ActivityContext` (including message history, planned steps, validation criteria/results, and partial outputs) associated with each Job.
-        -   Ensures data integrity and availability for Agents when they pick up Jobs or resume operations.
+-   **Subsistema de Gerenciamento de Estado / `State Management Subsystem`:**
+    -   **Responsabilidade:** Lida com a persistência e recuperação robustas do `AgentInternalState` (a memória de longo prazo e conhecimento evolutivo do Agente) e do `ActivityContext` (o histórico conversacional dinâmico por `Job` e dados operacionais), primariamente usando SQLite.
+    -   **Funções Chave:**
+        -   Salva e carrega o `AgentInternalState` para cada Agente.
+        -   Salva e carrega o `ActivityContext` (incluindo histórico de mensagens, passos planejados, critérios/resultados de validação e saídas parciais) associado a cada `Job`.
+        -   Garante a integridade e disponibilidade dos dados para os Agentes quando eles pegam `Jobs` ou retomam operações.
 
--   **LLM Integration Point:**
-    -   **Responsibility:** Provides a standardized and managed interface for the `Persona Core Logic` to communicate with various Large Language Models, abstracting provider-specific details.
-    -   **Key Functions:**
-        -   Manages connections and authentication with different LLM providers (e.g., OpenAI, DeepSeek).
-        -   Applies user-defined configurations (specific model, embedding preferences, parameters like temperature) to LLM requests.
-        -   Formats prompts using the Persona's system prompt, `AgentInternalState`, current `ActivityContext` (including message history), and available `Tool` descriptions.
-        -   Manages the conversational history for LLM interactions to maintain context within a Job.
-        -   Receives responses from LLMs and passes them back to the Agent.
-        -   Handles LLM-specific errors and rate limits, potentially with retry logic.
+-   **Ponto de Integração LLM / `LLM Integration Point`:**
+    -   **Responsabilidade:** Fornece uma interface padronizada e gerenciada para a `Persona Core Logic` se comunicar com vários Modelos de Linguagem Amplos, abstraindo detalhes específicos do provedor.
+    -   **Funções Chave:**
+        -   Gerencia conexões e autenticação com diferentes provedores de LLM (ex: OpenAI, DeepSeek).
+        -   Aplica configurações definidas pelo usuário (modelo específico, preferências de embedding, parâmetros como temperatura) às requisições ao LLM.
+        -   Formata prompts usando o prompt de sistema da `Persona`, `AgentInternalState`, `ActivityContext` atual (incluindo histórico de mensagens) e descrições de `Tools` disponíveis.
+        -   Gerencia o histórico conversacional para interações com LLM para manter o contexto dentro de um `Job`.
+        -   Recebe respostas dos LLMs e as repassa de volta para o Agente.
+        -   Lida com erros específicos de LLM e limites de taxa (rate limits), potencialmente com lógica de retentativa.

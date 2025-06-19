@@ -19,193 +19,175 @@ Os diagramas a seguir são propostas e sugestões para refinar, detalhar ou expa
     sequenceDiagram
         participant Usuário
         participant Frontend as Interface Frontend
-        participant ValidadorJob as Validador de Job (Integrado à Fila)
+        participant AgentePersona as Agente (usando Persona)
         participant Fila as Sistema de Fila (Queue)
-        participant WorkerManager as Gerenciador de Workers (Pool)
-        participant Worker
-        participant Persona as Persona (Agente Autônomo)
         participant LLM as LLM (Modelo de Linguagem)
         participant Ferramentas as Sistema de Ferramentas
         participant Dados as Armazenamento (Contexto/Estado/Logs)
 
-        Usuário->>Frontend: Cria Job (dados, tipo, prioridade, dependências)
-        Frontend->>ValidadorJob: Submete Job para Validação e Enfileiramento
-        activate ValidadorJob
-        ValidadorJob->>Fila: Job validado e enfileirado (status pendente/aguardando)
-        ValidadorJob-->>Frontend: Confirmação de recebimento/validação do Job
-        deactivate ValidadorJob
-        Fila-->>Frontend: (Opcional) Notifica Job efetivamente enfileirado e pronto
+        Usuário->>Frontend: Descreve necessidade/objetivo para Agente
+        Frontend->>AgentePersona: Envia mensagem do Usuário (via IPC)
+        activate AgentePersona
+        AgentePersona->>LLM: Analisa solicitação (com AgentInternalState)
+        LLM-->>AgentePersona: Sugere criar Job(s) para atender solicitação
+        AgentePersona->>Fila: Cria e submete Job(s) para si (com detalhes, tipo, dependências)
+        Fila-->>Dados: Armazena Job(s) (status pendente/aguardando)
+        AgentePersona-->>Frontend: Confirmação de recebimento e Jobs criados (feedback inicial)
+        deactivate AgentePersona
 
-        Worker->>WorkerManager: Solicita novo Job disponível
-        activate WorkerManager
-        WorkerManager->>Fila: Obtém próximo Job elegível da Fila
-        Fila-->>WorkerManager: Entrega Job ao Gerenciador
-        WorkerManager-->>Worker: Atribui Job específico ao Worker
-        deactivate WorkerManager
+        Fila-->>Frontend: (Opcional) Notifica Job(s) enfileirado(s)
 
-        Worker->>Persona: Inicia processamento do Job atribuído
-        activate Persona
-        Persona-->>Frontend: (Opcional) Notifica usuário que o Job foi iniciado
+        %% Loop de processamento do Agente (Worker)
+        activate AgentePersona
+        AgentePersona->>Fila: Solicita seu próximo Job elegível
+        Fila-->>AgentePersona: Entrega Job
+        AgentePersona-->>Frontend: (Opcional) Notifica usuário que Job X foi iniciado
 
-        Persona->>Dados: Carrega AgentInternalState (conhecimento global da Persona)
-        Persona->>Dados: Carrega ActivityContext específico do Job (histórico, inputs)
+        AgentePersona->>Dados: Carrega/Atualiza AgentInternalState (conhecimento global)
+        AgentePersona->>Dados: Carrega ActivityContext específico do Job (histórico, inputs)
 
-        loop Ciclo de Raciocínio e Ação da Persona
-            Persona->>LLM: Consulta LLM para análise, planejamento ou decisão (com contexto atualizado)
+        loop Ciclo de Raciocínio e Ação da Persona (LLM + Tools)
+            AgentePersona->>LLM: Consulta LLM para análise, planejamento ou decisão (com contexto atualizado)
             activate LLM
-            LLM-->>Persona: Retorna insights, plano, próxima ação sugerida
+            LLM-->>AgentePersona: Retorna insights, plano, próxima ação sugerida
             deactivate LLM
 
-            alt Persona decide criar Sub-Job para decompor tarefa
-                Persona->>Fila: Submete Novo Sub-Job (com referência ao Job pai)
-                Fila-->>Dados: Armazena Sub-Job (que seguirá seu próprio ciclo)
-                Persona->>Dados: Atualiza ActivityContext do Job pai (ex: anotação sobre Sub-Job criado)
-            else Persona decide usar Ferramenta/Task
-                Persona->>Ferramentas: Executa Ferramenta/Task específica (com argumentos)
+            alt AgentePersona decide criar Sub-Job para decompor tarefa
+                AgentePersona->>Fila: Submete Novo Sub-Job (com referência ao Job pai)
+                Fila-->>Dados: Armazena Sub-Job
+                AgentePersona->>Dados: Atualiza ActivityContext do Job pai (ex: anotação sobre Sub-Job criado)
+            else AgentePersona decide usar Ferramenta/Task
+                AgentePersona->>Ferramentas: Executa Ferramenta/Task específica (com argumentos)
                 activate Ferramentas
                 alt Execução bem-sucedida da Ferramenta/Task
-                    Ferramentas-->>Persona: Retorna resultado da operação
+                    Ferramentas-->>AgentePersona: Retorna resultado da operação
                 else Falha na Ferramenta/Task
-                    Ferramentas-->>Persona: Retorna erro/exceção da operação
-                    Persona->>Dados: Loga erro específico da Ferramenta/Task no ActivityContext
-                    Persona-->>Worker: (Opcional) Reporta falha na ação (pode necessitar nova tentativa ou levar à falha do Job)
+                    Ferramentas-->>AgentePersona: Retorna erro/exceção da operação
+                    AgentePersona->>Dados: Loga erro específico da Ferramenta/Task no ActivityContext
+                    AgentePersona-->>AgentePersona: Reporta falha na ação (pode necessitar nova tentativa ou levar à falha do Job)
                 end
                 deactivate Ferramentas
-            else Persona não consegue progredir (ex: informação insuficiente, erro de lógica)
-                 Persona->>Dados: Loga impasse no ActivityContext
-                 Persona-->>Worker: Reporta impossibilidade de progresso (pode levar à falha do Job)
+            else AgentePersona não consegue progredir (ex: informação insuficiente, erro de lógica)
+                 AgentePersona->>Dados: Loga impasse no ActivityContext
+                 AgentePersona-->>AgentePersona: Reporta impossibilidade de progresso (pode levar à falha do Job)
             end
-            Persona->>Dados: Atualiza ActivityContext (progresso, resultados parciais, logs de decisão)
+            AgentePersona->>Dados: Atualiza ActivityContext (progresso, resultados parciais, logs de decisão)
         end
 
-        alt Job Concluído com Sucesso pela Persona
-            Persona->>Worker: Notifica conclusão bem-sucedida do Job (com resultado final)
-            deactivate Persona
-            Worker->>Fila: Atualiza status do Job na Fila para 'Concluído'
-            Worker->>Dados: Armazena resultado final e logs de sucesso do Job
+        alt Job Concluído com Sucesso pelo AgentePersona
+            AgentePersona->>Fila: Atualiza status do Job na Fila para 'Concluído'
+            AgentePersona->>Dados: Armazena resultado final e logs de sucesso do Job
             Fila-->>Frontend: Notifica Job concluído com sucesso
             Frontend-->>Usuário: Exibe Job concluído e disponibiliza resultados
         else Job Falhou (após retentativas esgotadas ou erro crítico irrecuperável)
-            Persona->>Worker: Notifica falha crítica do Job (com detalhes e logs do erro)
-            deactivate Persona
-            Worker->>Fila: Atualiza status do Job na Fila para 'Falhou'
-            Worker->>Dados: Armazena logs de erro detalhados do Job
+            AgentePersona->>Fila: Atualiza status do Job na Fila para 'Falhou'
+            AgentePersona->>Dados: Armazena logs de erro detalhados do Job
             Fila-->>Frontend: Notifica falha do Job
             Frontend-->>Usuário: Exibe falha do Job e informações de erro relevantes
         end
+        deactivate AgentePersona
     ```
 
 ## 2. Diagrama de Blocos Sugerido: Componentes Backend (com Orquestração e Monitoramento)
 
 *   **Racional das Sugestões:**
-    *   **Orquestrador de Agentes:** Formalizar um componente `Agent Orchestrator` poderia centralizar lógicas mais complexas, como a designação otimizada de `Jobs` para `Personas` com base em suas capacidades ou carga atual, ou até mesmo orquestrar a colaboração entre múltiplas `Personas` em `Jobs` mais complexos.
+    *   **Orquestrador de Agentes:** Formalizar um componente `Agent Orchestrator` ou `Agent Manager` (como parte do `WorkerPool`) poderia centralizar lógicas mais complexas, como a instanciação, o monitoramento de saúde e a designação otimizada de `Jobs` para `Agentes` (Personas) com base em suas capacidades ou carga atual.
     *   **Monitoramento e Logging Centralizado:** Um sistema dedicado de `Monitoring & Logging` é crucial para a observabilidade, depuração e análise de performance do sistema como um todo.
     *   **Interação do StateManager:** Explicitar que o `StateManager` também pode ser relevante para a `Queue` em si, caso a fila precise de persistência robusta de seu próprio estado interno (além dos Jobs).
 
 *   **Diagrama Proposto:**
     ```mermaid
     graph TD
-        subgraph Interação Usuário
-            UI[Interface Frontend]
+        subgraph "Interface do Usuário"
+            UI[Interface Frontend (React)]
         end
 
-        subgraph Núcleo do Backend
-            Queue[Job/Activity Management System (Queue)]
-            WorkerPool[Worker & Worker Pool]
-                WorkerManager["WorkerManager (dentro do Pool)"]
-                Worker["Worker (instância)"]
-            AgentOrchestrator[Agent Orchestrator]
-            PersonaLogic[Persona Core Logic / Autonomous Agent]
-            TaskManager[Task Execution System]
-            ToolRegistry[Tool Framework/Registry]
-            StateManager[State Management Subsystem]
-            LLMIntegration[LLM Integration Point]
-            MonitoringSystem[Monitoring & Logging System]
+        subgraph "Núcleo do Backend (Electron Main Process)"
+            Queue["Sistema de Fila de Jobs (Queue)"]
+            AgentManager["Gerenciador de Agentes (Worker Pool)"]
+            AgentLogic["Lógica do Agente (Persona Core Logic)"]
+            TaskManager["Sistema de Execução de Tasks (Formula Prompts)"]
+            ToolRegistry["Framework/Registro de Ferramentas (Tools)"]
+            StateManager["Subsistema de Gerenciamento de Estado (SQLite)"]
+            LLMIntegration["Ponto de Integração LLM (AI SDK)"]
+            MonitoringSystem["Sistema de Monitoramento e Logging"]
         end
 
-        UI -- 1. Criação/Monitoramento de Jobs --> Queue
+        UI -- "1. Interage com (via IPC)" --> AgentLogic %% Usuário conversa com um Agente
+        AgentLogic -- "2. Decide criar e submete Jobs para" --> Queue
 
-        AgentOrchestrator -- 2. Coordena com WorkerManager para atribuição --> WorkerManager
-        WorkerManager -- 3. Gerencia Workers e obtém Jobs da --> Queue
-        WorkerPool --- WorkerManager
-        WorkerPool --- Worker
+        AgentManager -- "3. Gerencia instâncias de Agentes" --- AgentLogic
+        AgentLogic -- "4. Solicita seus Jobs da" --> Queue
 
-        Worker -- 4. Delega Job para --> PersonaLogic
+        AgentLogic -- "5. Carrega/Salva Estado" --> StateManager
+        AgentLogic -- "6. Usa para Raciocínio" --> LLMIntegration
+        AgentLogic -- "7. Formula Task para" --> TaskManager
+        TaskManager -- "Envia Prompt para" --> LLMIntegration
+        LLMIntegration -- "Retorna resposta do LLM para" --> AgentLogic
+        AgentLogic -- "LLM solicita uso de Tool via" --> ToolRegistry
+        ToolRegistry -- "Executa Tool e retorna para" --> AgentLogic
+        AgentLogic -- "8. Reporta Status do Job para" --> Queue
 
-        PersonaLogic -- 5. Carrega/Salva Estado --> StateManager
-        PersonaLogic -- 6. Usa para Raciocínio --> LLMIntegration
-        PersonaLogic -- 7. Executa --> TaskManager
-
-        TaskManager -- 8. Utiliza --> ToolRegistry
-        TaskManager -- 9. Pode usar para Tasks complexas --> LLMIntegration
-
-        PersonaLogic -- 10. Reporta Status/Resultado --> Worker
-        Worker -- 11. Reporta para --> WorkerManager
-        WorkerManager -- 12. Atualiza Status na --> Queue
-
-        Queue -- Persistência do estado da fila --> StateManager
+        Queue -- "Notifica (via IPC) UI sobre status" --> UI
+        Queue -- "Persistência da fila e Jobs" --> StateManager
 
         %% Fluxos de Monitoramento e Logging
-        Queue -- Logs e Métricas --> MonitoringSystem
-        WorkerPool -- Logs e Métricas --> MonitoringSystem
-        AgentOrchestrator -- Logs e Métricas --> MonitoringSystem
-        PersonaLogic -- Logs e Métricas --> MonitoringSystem
-        StateManager -- Logs e Métricas --> MonitoringSystem
-        LLMIntegration -- Logs e Métricas --> MonitoringSystem
-
-        %% O AgentOrchestrator pode influenciar a seleção da Persona pela Worker com base em critérios
-        AgentOrchestrator -.-> PersonaLogic  %% Lógica de seleção/configuração avançada de Persona
+        Queue -- "Logs e Métricas" --> MonitoringSystem
+        AgentManager -- "Logs e Métricas" --> MonitoringSystem
+        AgentLogic -- "Logs e Métricas" --> MonitoringSystem
+        StateManager -- "Logs e Métricas" --> MonitoringSystem
+        LLMIntegration -- "Logs e Métricas" --> MonitoringSystem
     ```
 
 ## 3. Diagrama de Atividade Sugerido: Tomada de Decisão da Persona (com Tratamento de Incerteza e Aprendizado)
 
 *   **Racional das Sugestões:**
     A tomada de decisão de uma IA pode ser aprimorada com mecanismos para lidar com incertezas e com a capacidade de aprender com interações.
-    *   **Avaliação de Confiança:** Permitir que a `Persona` avalie a confiança de um plano ou decisão do `LLM`.
-    *   **Resolução de Baixa Confiança:** Se a confiança for baixa, a `Persona` poderia buscar esclarecimentos do usuário ou consultar uma base de conhecimento mais ampla.
-    *   **Registro de Aprendizado:** Após a conclusão de uma ação ou `Job`, a `Persona` poderia registrar aprendizados (positivos ou negativos) para refinar seu `AgentInternalState` e melhorar decisões futuras.
-    *   **Tratamento de Falha de Ferramentas:** Maior detalhe em como a `Persona` reage quando uma `Tool` específica falha, permitindo que ela tente alternativas ou reformule o plano.
+    *   **Avaliação de Confiança:** Permitir que a `Persona` (Agente) avalie a confiança de um plano ou decisão do `LLM`.
+    *   **Resolução de Baixa Confiança:** Se a confiança for baixa, o Agente poderia buscar esclarecimentos do usuário ou consultar uma base de conhecimento mais ampla.
+    *   **Registro de Aprendizado:** Após a conclusão de uma ação ou `Job`, o Agente poderia registrar aprendizados (positivos ou negativos) para refinar seu `AgentInternalState` e melhorar decisões futuras.
+    *   **Tratamento de Falha de Ferramentas:** Maior detalhe em como o Agente reage quando uma `Tool` específica falha, permitindo que ele tente alternativas ou reformule o plano.
 
 *   **Diagrama Proposto:**
     ```mermaid
     graph LR
-        A[Início do Processamento do Job pela Persona] --> B(Carregar AgentInternalState + ActivityContext);
-        B -- Sucesso --> C{Analisar Objetivo e Planejar com LLM};
-        B -- Falha ao Carregar --> X[Erro Crítico: Falha ao Carregar Contexto];
+        A["Início do Processamento do Job pelo Agente"] --> B("Carregar AgentInternalState + ActivityContext");
+        B -- Sucesso --> C{"Analisar Objetivo e Planejar com LLM"};
+        B -- "Falha ao Carregar" --> X["Erro Crítico: Falha ao Carregar Contexto"];
 
-        C -- Plano/Ação Definida --> D{Avaliar Confiança da Decisão/Plano do LLM};
-        C -- Falha no Planejamento/LLM Irrecuperável --> Y[Registrar Falha de Raciocínio];
+        C -- "Plano/Ação Definida" --> D{"Avaliar Confiança da Decisão/Plano do LLM"};
+        C -- "Falha no Planejamento/LLM Irrecuperável" --> Y["Registrar Falha de Raciocínio"];
 
-        D -- Confiança Alta --> F{Selecionar Próxima Ação Concreta (Task/Tool)};
-        D -- Confiança Baixa/Média --> E{Resolver Baixa Confiança};
+        D -- "Confiança Alta" --> F{"Selecionar Próxima Ação Concreta (Task/Tool)"};
+        D -- "Confiança Baixa/Média" --> E{"Resolver Baixa Confiança"};
 
-        E -- Tentar Esclarecimento --> E1[Solicitar Esclarecimento ao Usuário via Frontend];
-        E1 -- Informação Recebida --> C; %% Re-planejar com nova informação
-        E1 -- Sem Informação/Timeout --> F; %% Prosseguir com melhor decisão atual ou reportar impasse
-        E -- Consultar Base de Conhecimento --> E2[Consultar Base de Conhecimento Adicional/Memória Estendida];
-        E2 -- Conhecimento Encontrado --> C; %% Re-planejar com novo conhecimento
-        E2 -- Nada Encontrado --> F; %% Prosseguir com melhor decisão atual
+        E -- "Tentar Esclarecimento" --> E1["Solicitar Esclarecimento ao Usuário via Frontend"];
+        E1 -- "Informação Recebida" --> C; %% Re-planejar com nova informação
+        E1 -- "Sem Informação/Timeout" --> F; %% Prosseguir com melhor decisão atual ou reportar impasse
+        E -- "Consultar Base de Conhecimento" --> E2["Consultar Base de Conhecimento Adicional (AgentInternalState)"];
+        E2 -- "Conhecimento Encontrado" --> C; %% Re-planejar com novo conhecimento
+        E2 -- "Nada Encontrado" --> F; %% Prosseguir com melhor decisão atual
 
-        F -- Ação é uma Task específica --> G[Executar Task via Task Execution System];
-        F -- Ação é uso direto de Tool --> H[Executar Tool via Tool Framework/Registry];
-        F -- Nenhuma ação válida/Impasse --> Y;
+        F -- "Ação é uma Task (prompt para LLM)" --> G["Formular e Enviar Task para LLM"];
+        F -- "Ação é uso direto de Tool" --> H["Executar Tool via Framework"];
+        F -- "Nenhuma ação válida/Impasse" --> Y;
 
-        G -- Sucesso da Task --> I(Atualizar ActivityContext com Resultado da Task);
-        G -- Falha na Task --> G1{Tratar Falha da Task};
-        H -- Sucesso da Tool --> J(Atualizar ActivityContext com Resultado da Tool);
-        H -- Falha na Tool --> H1{Tratar Falha da Tool};
+        G -- "Sucesso da Task (LLM respondeu)" --> I("Atualizar ActivityContext com Resultado da Task/LLM");
+        G -- "Falha na Task (Erro do LLM)" --> G1{"Tratar Falha da Task/LLM"};
+        H -- "Sucesso da Tool" --> J("Atualizar ActivityContext com Resultado da Tool");
+        H -- "Falha na Tool" --> H1{"Tratar Falha da Tool"};
 
-        G1 -- Tentar Alternativa/Reprocessar? --> C;
-        G1 -- Erro Persistente --> Y;
-        H1 -- Tentar Alternativa/Reprocessar? --> C;
-        H1 -- Erro Persistente --> Y;
+        G1 -- "Tentar Alternativa/Reprocessar?" --> C;
+        G1 -- "Erro Persistente" --> Y;
+        H1 -- "Tentar Alternativa/Reprocessar?" --> C;
+        H1 -- "Erro Persistente" --> Y;
 
-        I --> K{Job Concluído?};
+        I --> K{"Job Concluído (Auto-Validação OK)?"};
         J --> K;
 
-        K -- Sim (Objetivo Alcançado ou Falha Finalizada) --> L[Registrar Aprendizado (Opcional, atualiza AgentInternalState)];
-        L --> M[Finalizar Job e Notificar Worker];
-        K -- Não (Mais Passos Necessários) --> C;
+        K -- Sim --> L["Registrar Aprendizado (Opcional, atualiza AgentInternalState)"];
+        L --> M["Finalizar Job e Notificar Sistema de Fila"];
+        K -- Não --> C;
 
         X --> M;
         Y --> M;

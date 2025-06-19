@@ -1,46 +1,45 @@
-# Project Wiz Application Overview
+# Visão Geral da Aplicação Project Wiz
 
-## Vision
+## Visão
 
-The long-term vision of Project Wiz is to **fundamentally transform the software development lifecycle through intelligent collaboration between humans and autonomous AI agents.** We aspire to create a platform where AI agents are integral, proactive members of development teams, capable of handling complex end-to-end tasks.
+A visão de longo prazo do Project Wiz é **transformar fundamentalmente o ciclo de vida do desenvolvimento de software através da colaboração inteligente entre humanos e Agentes de IA autônomos.** Aspiramos criar uma plataforma onde Agentes de IA sejam membros integrais e proativos das equipes de desenvolvimento, capazes de lidar com tarefas complexas de ponta a ponta.
 
-## Core Purpose
+## Propósito Central
 
-Project Wiz aims to be an **"autonomous software factory,"** functioning as a local desktop application with a user interface visually inspired by Discord. Its core purpose is to provide a platform where a single human user can manage, direct, and collaborate with AI Personas (specialized AI agents). These Personas then automate and enhance the software development process. The system is designed for this direct user-Persona interaction in managing and executing software development tasks, leveraging AI to bring a new level of efficiency and intelligence to the individual developer's workflow.
+O Project Wiz visa ser uma **"fábrica de software autônoma"**, funcionando como uma aplicação desktop local com uma interface de usuário visualmente inspirada no Discord. Seu propósito central é fornecer uma plataforma onde um único usuário humano possa gerenciar, direcionar e colaborar com Personas de IA (Agentes de IA especializados). Essas Personas então automatizam и aprimoram o processo de desenvolvimento de software. O sistema é projetado para esta interação direta usuário-Persona no gerenciamento e execução de tarefas de desenvolvimento de software, aproveitando a IA para trazer um novo nível de eficiência e inteligência para o fluxo de trabalho do desenvolvedor individual.
 
-## Key Objectives
+## Objetivos Chave
 
-The project strives to achieve several key objectives:
+O projeto se esforça para alcançar vários objetivos chave:
 
-*   **Enable AI Agents for Complex Tasks:** Develop AI Personas capable of performing a wide range of development tasks, including analysis, design, coding, testing, and documentation.
-*   **Intelligent Automation:** Move beyond simple scripting to implement intelligent automation across the development lifecycle, adapting to various project needs and technologies.
-*   **Empower Human Developers:** Free human developers from repetitive and time-consuming tasks, allowing them to focus on innovation, complex problem-solving, high-level architecture, and strategic decision-making.
-*   **Increase Development Speed and Efficiency:** Make the software development process significantly faster, more streamlined, and cost-effective.
+*   **Capacitar Agentes de IA para Tarefas Complexas:** Desenvolver Personas de IA capazes de realizar uma ampla gama de tarefas de desenvolvimento, incluindo análise, design, codificação, testes e documentação.
+*   **Automação Inteligente:** Ir além de scripts simples para implementar automação inteligente em todo o ciclo de vida do desenvolvimento, adaptando-se a várias necessidades e tecnologias de projeto.
+*   **Empoderar Desenvolvedores Humanos:** Liberar desenvolvedores humanos de tarefas repetitivas e demoradas, permitindo que eles se concentrem na inovação, resolução de problemas complexos, arquitetura de alto nível e tomada de decisões estratégicas.
+*   **Aumentar a Velocidade e Eficiência do Desenvolvimento:** Tornar o processo de desenvolvimento de software significativamente mais rápido, otimizado e econômico.
 
-## Target Audience
+## Público-Alvo
 
-Project Wiz is designed for a diverse audience within the software development ecosystem:
+O Project Wiz é projetado para um público diversificado dentro do ecossistema de desenvolvimento de software:
 
-*   **Developers and Development Teams:** Those looking to automate repetitive tasks, accelerate their workflows, and focus on more creative and strategic aspects of development.
-*   **Project Managers:** Individuals needing tools to orchestrate complex tasks, manage resources (including AI agents), and efficiently track project progress.
-*   **Software Companies:** Organizations aiming to boost the productivity of
-their development teams and optimize their overall development lifecycle.
-*   **AI Enthusiasts and Researchers:** Those interested in exploring and advancing the application of AI agents in practical software engineering contexts.
+*   **Desenvolvedores e Times de Desenvolvimento:** Aqueles que buscam automatizar tarefas repetitivas, acelerar seus fluxos de trabalho e focar em aspectos mais criativos e estratégicos do desenvolvimento.
+*   **Gerentes de Projeto:** Indivíduos que precisam de ferramentas para orquestrar tarefas complexas, gerenciar recursos (incluindo Agentes de IA) e acompanhar eficientemente o progresso do projeto.
+*   **Empresas de Software:** Organizações que visam aumentar a produtividade de suas equipes de desenvolvimento e otimizar seu ciclo de vida de desenvolvimento geral.
+*   **Entusiastas e Pesquisadores de IA:** Interessados em explorar e avançar a aplicação de Agentes de IA em contextos práticos de engenharia de software.
 
-## What Users Can Do
+## O Que os Usuários Podem Fazer
 
-Project Wiz offers users a range of functionalities to manage and automate their software development efforts:
+O Project Wiz oferece aos usuários uma gama de funcionalidades para gerenciar e automatizar seus esforços de desenvolvimento de software:
 
-*   **Manage Projects:** Centralize and oversee software projects within the application.
-*   **Create and Configure Personas:** Define, customize, and manage AI Personas (which configure how an underlying LLM will behave) with specific roles, goals, backstories, LLM settings, and enabled Tools.
-*   **Define and Assign Jobs:** Create tasks (Jobs) for Personas to execute, specifying details, assigning them to appropriate Personas, defining dependencies between Jobs, and indirectly influencing their priority through interaction and context.
-*   **Interact with Personas:** Communicate with Personas (and potentially witness inter-Persona communication) through a chat-style interface to provide instructions, clarify requirements, receive updates, and collaborate on tasks.
-*   **Monitor Progress:** Track the status of Jobs, review outputs, and monitor the performance of AI Personas and the overall system.
-*   **Configure LLMs:** Set parameters for the Large Language Models that power the Personas.
+*   **Gerenciar Projetos:** Centralizar e supervisionar projetos de software dentro da aplicação.
+*   **Criar e Configurar Personas:** Definir, personalizar e gerenciar Personas de IA (que configuram como um LLM subjacente se comportará) com papéis, objetivos, históricos (backstories), configurações de LLM e `Tools` habilitadas específicas.
+*   **Solicitar Tarefas e Projetos às Personas:** Iniciar trabalhos e delegar tarefas complexas através da interação conversacional com as Personas. Estas, por sua vez, criam e gerenciam seus próprios `Jobs` (unidades de trabalho internas) para atender às solicitações, podendo definir dependências entre eles e influenciar suas prioridades.
+*   **Interagir com Personas:** Comunicar-se com Personas (e potencialmente testemunhar a comunicação inter-Persona) através de uma interface de chat para fornecer instruções, esclarecer requisitos, receber atualizações e colaborar em tarefas.
+*   **Monitorar o Progresso:** Acompanhar o status dos `Jobs` criados pelas Personas, revisar os resultados e monitorar o desempenho das Personas de IA e do sistema como um todo.
+*   **Configurar LLMs:** Definir parâmetros para os Modelos de Linguagem Amplos (LLMs) que potencializam as Personas.
 
 ## Key Technologies
 
-This section provides a high-level overview of the key technologies and frameworks used in Project Wiz.
+Esta seção fornece uma visão geral de alto nível das principais tecnologias e frameworks utilizados no Project Wiz.
 
 *   **Electron:** Serves as the foundational framework for building Project Wiz as a cross-platform desktop application, enabling the use of web technologies for the user interface and application logic.
 *   **Vite:** A modern frontend build tool used to provide a fast and efficient development experience for the web-based parts of the application.
