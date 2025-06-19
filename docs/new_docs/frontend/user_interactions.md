@@ -9,7 +9,7 @@ A aplicação fornece várias visualizações primárias para os usuários acess
 *   **Home (Visão Geral Global):**
     *   Serve como o principal ponto de entrada, oferecendo uma visão consolidada de todos os projetos.
     *   **Acesso ao Dashboard Global:** Visualizar estatísticas de alto nível, status gerais de projetos e atividades recentes em todos os projetos.
-    *   **Gerenciamento Consolidado de Tarefas:** Visualizar e gerenciar `Jobs` (tarefas criadas por Personas) em andamento de todos os projetos de forma centralizada.
+    *   **Monitoramento Consolidado de Tarefas:** Visualizar e gerenciar o progresso dos `Jobs` (tarefas criadas e executadas pelas Personas) em andamento de todos os projetos de forma centralizada.
     *   **Gerenciamento de Personas:** Acessar a seção "Agentes (Personas) da Fábrica" para listar, criar, gerar e configurar todas as `Personas` disponíveis no sistema.
     *   **Integrações:** Configurar e gerenciar integrações em todo o sistema com ferramentas externas (ex: GitHub, Jira).
     *   **MCPs (Programas de Controle Mestre):** Configurar servidores MCP que habilitam e gerenciam o acesso das `Personas` às suas `Tools` (ferramentas).
@@ -19,7 +19,7 @@ A aplicação fornece várias visualizações primárias para os usuários acess
 *   **Visualização por Projeto (Contexto por Projeto):**
     *   Acessada selecionando um projeto específico na Barra de Projetos/Servidores.
     *   **Acesso ao Dashboard do Projeto:** Visualizar métricas, status e atividades recentes específicas do projeto selecionado.
-    *   **Gerenciamento de Tarefas Específico do Projeto:** Gerenciar e acompanhar `Jobs` atribuídos às `Personas` dentro do escopo deste projeto.
+    *   **Monitoramento de Tarefas do Projeto:** Acompanhar os `Jobs` que as `Personas` estão executando dentro do escopo deste projeto.
     *   **Fórum do Projeto:** Participar de discussões e colaborações relacionadas ao projeto.
     *   **Documentação do Projeto:** Acessar e gerenciar a documentação técnica e de negócios associada ao projeto.
     *   **Analytics do Projeto:** Revisar relatórios de desempenho e análises específicas do projeto.
@@ -62,42 +62,41 @@ Gerenciar `Personas` de IA é um aspecto central do Project Wiz:
     *   **Habilitar ou desabilitar `Tools` específicas** para controlar suas capacidades e permissões.
     *   Potencialmente fornecer **conhecimento específico ou contexto** relevante para suas tarefas (funcionalidade avançada planejada).
 
-## Gerenciamento de Jobs (Tarefas das Personas)
+## Iniciando e Acompanhando Trabalhos das Personas
 
-Usuários direcionam o trabalho das `Personas` principalmente através da interação, e então monitoram os `Jobs` que as `Personas` criam e executam:
+A principal forma de direcionar o trabalho no Project Wiz é através da interação com as `Personas`, que então criam e gerenciam seus próprios `Jobs` (unidades de trabalho internas). O usuário monitora esses `Jobs`.
 
-*   **Acessar Listas de Jobs:**
-    *   Visualizar uma lista consolidada de todos os `Jobs` (criados pelas Personas) na visão Home.
-    *   Visualizar `Jobs` específicos do projeto na seção "Tarefas" ou "Atividades" de uma Visualização de Projeto.
-*   **(Nota: A criação direta de Jobs por formulário pelo usuário foi removida. A criação de Jobs é uma ação da Persona em resposta a uma conversa/solicitação do usuário - ver "Interação com Personas" abaixo).**
-*   **Gerenciar Prioridade de Jobs:** Embora a prioridade detalhada seja gerenciada dinamicamente pela `Persona` para seus próprios `Jobs`, o usuário pode influenciar isso ao discutir a urgência de uma tarefa ou projeto em chat com a `Persona`.
+*   **Acessar Listas de Jobs (Criados pelas Personas):**
+    *   Visualizar uma lista consolidada de todos os `Jobs` ativos ou recentes na visão Home.
+    *   Visualizar `Jobs` específicos do projeto na seção "Tarefas" ou "Atividades" de uma Visualização de Projeto, permitindo entender o que cada `Persona` está fazendo.
+*   **Influenciar Prioridade de Jobs:** Embora a prioridade detalhada dos `Jobs` seja gerenciada dinamicamente pela `Persona` para seu próprio trabalho, o usuário pode influenciar isso ao discutir a urgência de uma tarefa maior ou de um projeto em chat com a `Persona`.
 *   **Monitorar Progresso e Detalhes de Jobs:**
     *   Visualizar o **Status** atual dos `Jobs` (ex: Pendente, Aguardando Dependência, Em Execução, Concluído, Falhou, Atrasado).
-    *   Acessar **Logs de Execução** (potencialmente em Canais de Log dedicados) para informações detalhadas passo a passo da `Persona`.
-    *   Revisar **Resultados/Artefatos** após a conclusão de um `Job`.
-    *   Visualizar **Dependências e Hierarquias:** Ver como os `Jobs` estão conectados, talvez através de listas nos detalhes do `Job`, um grafo visual ou uma visualização de linha do tempo.
-*   **Receber Notificações:** Receber alertas sobre mudanças significativas no status dos `Jobs` (ex: conclusão, falha, bloqueado por dependência).
+    *   Acessar **Logs de Execução** (potencialmente em Canais de Log dedicados) para informações detalhadas passo a passo sobre a atividade da `Persona` em um `Job`.
+    *   Revisar **Resultados/Artefatos** após a conclusão de um `Job` (ex: caminhos de arquivo, resumos, ou referências a branches Git).
+    *   Visualizar **Dependências e Hierarquias de Sub-Jobs:** Se uma `Persona` decompõe um trabalho complexo em `Sub-Jobs`, a UI pode oferecer formas de visualizar essas relações (ex: em uma árvore de tarefas ou campos nos detalhes do `Job`).
+*   **Receber Notificações:** Receber alertas sobre mudanças significativas no status dos `Jobs` (ex: conclusão, falha, necessidade de feedback ou aprovação).
 
 ## Interação com Personas
 
-A interação direta com as Personas (Agentes) é o principal meio de iniciar e gerenciar trabalho no Project Wiz:
+A interação direta com as Personas (Agentes) é o principal meio de iniciar, refinar e gerenciar o trabalho no Project Wiz:
 
 *   **Iniciando Trabalho via Chat (Criação Conversacional de Jobs):**
     *   O usuário descreve uma necessidade, um objetivo de projeto, ou uma tarefa específica em uma conversa (chat) com uma `Persona`.
     *   A `Persona`, utilizando seu LLM configurado, analisa a solicitação do usuário.
-    *   Com base nessa análise, a `Persona` pode decidir criar um ou mais `Jobs` para si mesma para atender ao pedido. Ela define os detalhes desses `Jobs`, como o tipo de tarefa, o "payload" (carga de dados) inicial (baseado na conversa), e possíveis dependências com outros `Jobs` que ela já esteja gerenciando.
+    *   Com base nessa análise, a `Persona` pode decidir criar um ou mais `Jobs` (e `Sub-Jobs`) para si mesma para atender ao pedido. Ela define os detalhes desses `Jobs`, como o `queueName` (sua própria fila), o tipo de tarefa (`jobName`), o "payload" (carga de dados) inicial (baseado na conversa), e possíveis dependências.
     *   A UI não apresenta um formulário tradicional de "Criar Job"; a criação é uma consequência da interação inteligente com a `Persona`.
-    *   **Aprovação de Planos:** Após a `Persona` analisar a solicitação e planejar sua abordagem (incluindo a "Definição de Pronto" e possíveis `Sub-Jobs`), ela apresentará este plano ao usuário via chat. O usuário pode então aprovar, rejeitar ou pedir modificações no plano antes que a `Persona` inicie a execução principal.
+    *   **Aprovação de Planos:** Após a `Persona` analisar a solicitação e planejar sua abordagem (incluindo a "Definição de Pronto" e possíveis `Sub-Jobs`), ela apresentará este plano ao usuário via chat. O usuário pode então aprovar, rejeitar ou pedir modificações no plano antes que a `Persona` inicie a execução principal dos `Jobs` criados.
 *   **Fornecendo Instruções e Contexto:**
     *   Dar instruções adicionais ou fornecer contexto para `Jobs` em andamento diretamente à `Persona` via chat.
     *   Pedir esclarecimentos sobre o progresso de um `Job` ou o plano de ação da `Persona`.
 *   **Recebendo Notificações e Resultados:**
     *   Receber notificações sobre o progresso, conclusão ou falha de `Jobs`.
-    *   Para `Jobs` que envolvem modificações em código gerenciado por Git, a `Persona` informará o nome do branch onde as alterações foram commitadas (na `working-directory` local e opcionalmente no repositório remoto).
+    *   Para `Jobs` que envolvem modificações em código gerenciado por Git, a `Persona` informará o nome do branch onde as alterações foram commitadas (na `working-directory` local do projeto e opcionalmente no repositório remoto).
     *   A `Persona` pode oferecer um resumo das alterações ou um `diff` textual via chat. O usuário pode então usar suas ferramentas Git padrão para revisar o branch e fazer o merge, se desejar.
 *   **Visibilidade da Comunicação Inter-Persona:** Usuários podem ter visibilidade (ex: em Canais de Projeto dedicados ou no Fórum do projeto) de comunicações relevantes entre diferentes `Personas`, caso elas estejam colaborando em tarefas complexas. As `Personas` utilizam `Tools` específicas para enviar mensagens a outros Agentes, postar em canais ou atualizar tópicos de fórum.
 *   **Respondendo a Solicitações da Persona:** `Personas` podem proativamente pedir ao usuário mais informações, clarificações sobre requisitos, ou aprovação para passos críticos durante a execução de um `Job`, tudo através da interface de chat.
-*   **Cancelando/Interrompendo Jobs:** O usuário pode, através de uma conversa com a `Persona` responsável ou por uma ação na UI (se disponível para `Jobs` em andamento), solicitar o cancelamento ou interrupção de um `Job`.
+*   **Cancelando/Interrompendo Jobs:** O usuário pode, através de uma conversa com a `Persona` responsável ou por uma ação na UI (se disponível para `Jobs` em andamento), solicitar o cancelamento ou interrupção de um `Job` ou `Sub-Job`.
 
 ## Monitoramento, Erros e Analytics
 
@@ -109,7 +108,7 @@ A interação direta com as Personas (Agentes) é o principal meio de iniciar e 
     *   As seções de "Analytics" (Global e Específico do Projeto) fornecem insights sobre:
         *   Taxas de conclusão de `Jobs`, tempos médios de execução, taxas de falha.
         *   Níveis de atividade das `Personas`, número de `Jobs` processados, `Tools` mais frequentemente usadas.
-        *   Estatísticas da `Queue` (Fila) (ex: número de `Jobs` pendentes, tempos de espera).
+        *   Estatísticas da `Queue` (Fila) por Agente (ex: número de `Jobs` pendentes, tempos de espera).
 *   **Status e Atividade da Persona:**
     *   Semelhante ao Discord, usuários podem ver o status atual de uma `Persona` (ex: Ativa, Ociosa, Processando Job X).
     *   O perfil da `Persona` ou uma visualização dedicada pode mostrar sua fila de `Jobs` atual/histórico de `Jobs` recentemente processados.
