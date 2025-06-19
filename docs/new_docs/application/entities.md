@@ -10,7 +10,8 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
         -   Um identificador único para o projeto.
         -   O nome do projeto.
         -   Uma descrição geral dos objetivos e escopo do projeto.
-        -   Informações sobre repositórios de código associados (ex: URLs Git).
+        -   Informações sobre repositórios de código associados (ex: URLs Git, branch principal).
+        -   `caminho_working_directory`: O caminho no sistema de arquivos local onde o código do projeto reside ou será clonado, servindo como diretório base para operações de arquivo e Git realizadas pelos Agentes.
         -   Uma lista de usuários humanos e Personas de IA que são membros ou estão atribuídos ao projeto.
 
 -   **Persona (configuração do Agente):**
@@ -36,7 +37,7 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
         -   Máximo de Tentativas, Tentativas Atuais para retentativas.
         -   `depends_on_job_ids`: Uma lista de IDs de outros `Jobs` dos quais este `Job` depende. Essencial para a execução ordenada de `Sub-Jobs` ou `Jobs` sequenciais.
         -   `parent_job_id`: O ID do `Job` principal se este for um `Sub-Job`, permitindo a rastreabilidade e o agrupamento de tarefas decompostas.
-        -   `working_directory_path` (Opcional): Caminho para um diretório de trabalho isolado que o `Agente` pode usar para este `Job` específico (ex: para checkout de código, criação de arquivos temporários).
+        -   (Nota: As operações de arquivo de um `Job` ocorrem dentro da `caminho_working_directory` do `Project` ao qual o `Job` pertence. Recomenda-se que a `Persona` utilize `GitTools` para criar/gerenciar branches específicos para cada `Job` ou conjunto de `Jobs` relacionados dentro desta `working_directory` para isolar as alterações.)
 
 -   **ActivityContext:**
     -   **Propósito:** Contém informações contextuais específicas e dinâmicas para uma única instância de `Job` ativa sendo processada por um `Agente`. Guia o LLM (através da configuração da `Persona`) em seu fluxo de execução e tomada de decisão para aquele `Job`. Este contexto é continuamente atualizado conforme o `Job` progride.
@@ -60,7 +61,7 @@ Este documento descreve as principais entidades de dados dentro do Project Wiz, 
         -   Uma lista ou referência a todas as `Activities` (`Jobs`) gerenciadas ou processadas por este `Agente`.
         -   Uma coleção de "promessas" ou compromissos feitos pelo `Agente`.
         -   **Conhecimento Geral:** Notas, heurísticas, aprendizados sobre processos, `Tools` eficazes para certos tipos de `Tasks`, etc., que são aplicáveis independentemente do projeto.
-        *   **Conhecimento por Projeto (`conocimientoPorProjeto: Map<ProjectId, ProjectKnowledge>`):** Um mapa onde a chave é o ID de um `Project` e o valor é um objeto (`ProjectKnowledge`) contendo informações específicas daquele projeto, como:
+        *   **Conhecimento por Projeto (`conhecimentoPorProjeto: Map<ProjectId, ProjectKnowledge>`):** Um mapa onde a chave é o ID de um `Project` e o valor é um objeto (`ProjectKnowledge`) contendo informações específicas daquele projeto, como:
             *   Arquitetura do projeto, tecnologias chave.
             *   Preferências de estilo de código específicas do projeto.
             *   Resumos de módulos ou arquivos importantes (ex: "o `modulo.py` lida com X e Y").
