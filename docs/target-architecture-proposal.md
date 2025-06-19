@@ -77,7 +77,9 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
     *   Operam sobre múltiplas entidades ou coordenam comportamentos complexos do domínio.
     *   São stateless (sem estado próprio), e suas dependências (outros serviços, repositórios) são injetadas.
     *   Exemplo: Um serviço que determina a prioridade de um `Job` com base em múltiplas regras de negócio e no estado de outros `Jobs` ou `Projects`.
-*   **Processadores de Job (`job-processors/` dentro de `domain/use-cases` ou `domain/services`):** Lógica específica de como um `AIAgent` processa um determinado tipo de `Job`. Estas seriam as implementações dos `jobProcessor`s, contendo a interação com `ILLMService`, `IToolRegistry`, etc. Eles encapsulam a "inteligência" do agente para uma tarefa.
+*   **Lógica de Processamento de Job do Agente (em `domain/services` ou `domain/entities`):** A lógica específica de como um `AIAgent` processa um `Job` (anteriormente concebida como "Processadores de Job" separados) residirá:
+              *   Primariamente como um método dentro da própria entidade `AIAgent` (ex: `AIAgent.processJob(job, dependencies)`), onde as dependências de infraestrutura (`ILLMService`, `IToolRegistry`) são passadas em tempo de execução pelo `Worker`.
+              *   Alternativamente, se a lógica se tornar muito complexa ou tiver muitas dependências de infraestrutura, ela pode ser encapsulada em um `AIAgentDomainService` (localizado em `domain/services/`). Este serviço seria injetável, receberia suas dependências via construtor, e operaria sobre instâncias/configurações de `AIAgent`.
 
 ### 3.2. Camada de Aplicação (`src/application`) - Opcional
 Esta camada é opcional e, em muitos projetos, suas responsabilidades podem ser incorporadas pela camada de Domínio (especificamente pelos Casos de Uso) ou pela camada de Infraestrutura (no que tange à adaptação de dados para a UI). Se utilizada, ela serve como um intermediário e pode conter:
@@ -128,7 +130,7 @@ A camada de Infraestrutura contém todas as implementações concretas e detalhe
 *   **Configuração de Injeção de Dependência (`infrastructure/ioc/`):**
     *   `inversify.config.ts`: Arquivo central para configurar o container InversifyJS. Define todos os bindings (como interfaces mapeiam para classes concretas e seus escopos).
     *   `types.ts`: Define os símbolos (identificadores de tipo) usados para a injeção de dependências.
-        *   **Workers de Agentes (`infrastructure/workers/` ou dentro de `infrastructure/electron/`):** Implementações dos `Worker`s dedicados para cada `AIAgent`. Cada worker monitora uma fila específica, executa o `jobProcessor` do agente e gerencia o ciclo de vida dos jobs. A inicialização e o gerenciamento desses workers ocorrerão no processo principal do Electron.
+        *   **Workers de Agentes (`infrastructure/workers/` ou dentro de `infrastructure/electron/`):** Implementações dos `Worker`s dedicados para cada `AIAgent`. Cada worker monitora uma fila específica, obtém as dependências necessárias do container DI (como `ILLMService`, `IToolRegistry`), carrega a configuração do `AIAgent` e invoca o método de processamento do job do agente (ex: `AIAgent.processJob()`, passando as dependências, ou um método em um `AIAgentDomainService`), e gerencia o ciclo de vida dos jobs. A inicialização e o gerenciamento desses workers ocorrerão no processo principal do Electron.
 
 ### 3.4. Camada de Apresentação (`src/presentation`) - Opcional
 Esta camada atua como um intermediário entre os Casos de Uso (Domínio/Aplicação) e a UI (Infraestrutura). Sua principal responsabilidade é adaptar os dados do formato dos Casos de Uso para um formato que seja facilmente consumível pela UI, e vice-versa.
@@ -210,24 +212,21 @@ container.bind<CreateJobUseCase>(TYPES.CreateJobUseCase).to(CreateJobUseCase).in
 // container.bind<JobHandlers>(TYPES.JobHandlers).to(JobHandlers).inSingletonScope();
 
         // --- Bindings para Componentes dos Agentes ---
-        // Supondo que cada jobProcessor seja uma classe injetável
-        // import { TextGenerationJobProcessor } from '@/domain/job-processors/text-generation.processor';
-        // container.bind<TextGenerationJobProcessor>(TYPES.TextGenerationJobProcessor).to(TextGenerationJobProcessor).inTransientScope();
+        // A lógica de processamento do job agora está primariamente em AIAgent.processJob() (Seção 6.2)
+        // ou potencialmente em um AIAgentDomainService.
 
-        // Se os Workers forem classes injetáveis (eles podem ser instanciados programaticamente também)
-        // import { AgentWorker } from '@/infrastructure/workers/agent.worker';
-        // container.bind<AgentWorker>(TYPES.AgentWorker).to(AgentWorker).inTransientScope(); // Ou outro escopo se apropriado
+        // Se a lógica de AIAgent.processJob() se tornar muito complexa e requerer muitas
+        // dependências de infraestrutura, ela pode ser movida para um AIAgentDomainService.
+        // Este AIAgentDomainService seria injetável e receberia suas dependências.
+        // Exemplo:
+        // import { AIAgentDomainService } from '@/domain/services/ai-agent-domain.service';
+        // container.bind<AIAgentDomainService>(TYPES.AIAgentDomainService).to(AIAgentDomainService).inTransientScope();
 
-        // Fábrica para JobProcessors (uma abordagem avançada se muitos tipos de processadores)
-        // container.bind<interfaces.Factory<IJobProcessor>>(TYPES.JobProcessorFactory).toFactory<IJobProcessor>((context) => {
-        //   return (jobType: string) => {
-        //     if (jobType === 'textGeneration') {
-        //       return context.container.get<IJobProcessor>(TYPES.TextGenerationJobProcessor);
-        //     }
-        //     // ... outros tipos de job
-        //     throw new Error(`Unknown job type: ${jobType}`);
-        //   };
-        // });
+        // Workers (`AgentWorker`) geralmente são instanciados programaticamente pelo AgentLifecycleService,
+        // e recebem suas dependências (como o container, ou serviços específicos) via construtor
+        // ou são configurados com instâncias de serviços obtidas do container.
+        // Portanto, um binding direto para AgentWorker pode não ser comum, a menos que
+        // o próprio AgentLifecycleService seja injetado com uma fábrica de workers.
 
 export { container };
 ```
@@ -274,15 +273,17 @@ const TYPES = {
 
   // Outras dependências específicas
   DatabaseConnection: Symbol.for('DatabaseConnection'), // Exemplo, se a conexão do DB for injetada
-  // Job Processors (se forem classes distintas injetáveis)
+  // Job Processors (Removidos ou comentados se a lógica está no AIAgent.processJob)
   // TextGenerationJobProcessor: Symbol.for('TextGenerationJobProcessor'),
   // CodeGenerationJobProcessor: Symbol.for('CodeGenerationJobProcessor'),
 
-  // Workers (se forem classes distintas injetáveis)
+  // Workers (Geralmente instanciados programaticamente, não injetados como tipo único)
   // AgentWorker: Symbol.for('AgentWorker'),
 
+  // Serviços de Domínio/Aplicação para Agentes
+  // AIAgentDomainService: Symbol.for('AIAgentDomainService'), // Se usado
   // Fábricas
-  // JobProcessorFactory: Symbol.for('JobProcessorFactory'),
+  // JobProcessorFactory: Symbol.for('JobProcessorFactory'), // Removido se job processors não são mais registrados individualmente
 };
 
 export { TYPES };
@@ -392,6 +393,103 @@ import { CreateJobUseCase } from '@/domain/use-cases/job/create-job.use-case';
 ```
 
 Seguindo esses padrões, o InversifyJS ajudará a criar um sistema bem estruturado, onde as dependências são claramente definidas e gerenciadas externamente, facilitando a evolução e o teste do software.
+
+**Cenário com `AIAgent.processJob` recebendo dependências:**
+
+Como discutido na Seção 6.2, o método `AIAgent.processJob(job, dependencies)` recebe suas dependências (`ILLMService`, `IToolRegistry`, etc.) como parâmetros. O componente `Worker` (da camada de infraestrutura), responsável por chamar este método, obteria essas dependências do container InversifyJS.
+
+```typescript
+// Exemplo conceitual do Worker obtendo dependências para passar ao AIAgent.processJob()
+// src/infrastructure/workers/agent.worker.ts (simplificado)
+// (Este Worker em si pode ou não ser gerenciado pelo InversifyJS; muitas vezes são instanciados programaticamente)
+
+// class AgentWorker {
+//   private llmService: ILLMService;
+//   private toolRegistry: IToolRegistry;
+//   private jobRepository: IJobRepository;
+//   private aiAgentRepository: IAIAgentRepository; // Para carregar o AIAgent
+//   private queueName: string;
+//   private agentId: string;
+
+//   constructor(
+//     agentId: string,
+//     queueName: string,
+//     container: Container // Passando o container ou obtendo dependências específicas
+//   ) {
+//     this.agentId = agentId;
+//     this.queueName = queueName;
+//     this.llmService = container.get<ILLMService>(TYPES.ILLMService);
+//     this.toolRegistry = container.get<IToolRegistry>(TYPES.IToolRegistry);
+//     this.jobRepository = container.get<IJobRepository>(TYPES.IJobRepository);
+//     this.aiAgentRepository = container.get<IAIAgentRepository>(TYPES.IAIAgentRepository);
+//   }
+
+//   async run() {
+//     // Loop para buscar jobs da this.queueName usando this.jobRepository
+//     const job = await this.jobRepository.findNextPending(this.queueName);
+//     if (job) {
+//       const agent = await this.aiAgentRepository.findById(this.agentId);
+//       if (agent) {
+//         await agent.processJob(job, {
+//           llmService: this.llmService,
+//           toolRegistry: this.toolRegistry
+//         });
+//         // ... Lógica de atualização do job (completar, falhar)
+//       }
+//     }
+//   }
+// }
+```
+
+**Cenário com `AIAgentDomainService`:**
+
+Se optarmos por um `AIAgentDomainService` para encapsular a lógica de processamento do job e suas dependências:
+
+```typescript
+// src/domain/services/ai-agent-domain.service.ts
+// import { injectable, inject } from 'inversify';
+// import { TYPES } from '@/infrastructure/ioc/types';
+// import { ILLMService } from './i-llm.service';
+// import { IToolRegistry } from './i-tool-registry.service';
+// import { AIAgent } from '@/domain/entities/ai-agent.entity';
+// import { Job } from '@/domain/entities/job.entity';
+
+// @injectable()
+// export class AIAgentDomainService {
+//   constructor(
+//     @inject(TYPES.ILLMService) private llmService: ILLMService,
+//     @inject(TYPES.IToolRegistry) private toolRegistry: IToolRegistry
+//   ) {}
+
+//   public async processJobForAgent(agent: AIAgent, job: Job): Promise<any> {
+//     // Lógica do que estava em AIAgent.processJob, usando this.llmService, this.toolRegistry
+//     // e as configurações de 'agent' (agent.modelId, agent.roleDescription, etc.)
+//     const taskDescription = job.payload.task;
+//     // ... construir mensagens
+//     // const llmResult = await this.llmService.streamText({ ... });
+//     // ... processar resultado, ferramentas, etc.
+//     return { success: true, data: "Job processed by AIAgentDomainService" };
+//   }
+// }
+
+// O Worker então seria injetado com o AIAgentDomainService:
+// class AgentWorker {
+//   constructor(
+//     private agent: AIAgent, // A configuração do agente
+//     private jobRepository: IJobRepository,
+//     private agentDomainService: AIAgentDomainService, // Injetado
+//     private queueName: string
+//   ) {}
+//   async run() {
+//     const job = await this.jobRepository.findNextPending(this.queueName);
+//     if (job) {
+//       await this.agentDomainService.processJobForAgent(this.agent, job);
+//       // ...
+//     }
+//   }
+// }
+```
+A escolha entre `AIAgent.processJob` com dependências passadas ou um `AIAgentDomainService` injetável dependerá da preferência por manter entidades mais "puras" versus a conveniência de ter serviços com suas dependências já resolvidas. A segunda abordagem (`AIAgentDomainService`) é geralmente mais alinhada com a separação de responsabilidades onde serviços orquestram e entidades contêm estado e lógica de negócio intrínseca.
 
 ## 5. Proposta de Organização de Diretórios Detalhada
 
@@ -666,7 +764,7 @@ export interface AIAgentProps {
   isActive: boolean;
   // Outras configurações específicas do agente
   // queueName: string; // Nome da fila dedicada a este agente
-  // jobProcessorIdentifier: string; // Identificador para o jobProcessor específico deste agente
+  // jobProcessorIdentifier: string; // REMOVIDO ou comentado
 }
 
 export class AIAgent {
@@ -684,7 +782,7 @@ export class AIAgent {
     temperature?: number;
     availableTools?: string[];
     // queueName: string;
-    // jobProcessorIdentifier: string;
+    // jobProcessorIdentifier: string; // REMOVIDO
   }): AIAgent {
     const id = crypto.randomUUID(); // Gerar ID
     return new AIAgent({
@@ -697,7 +795,7 @@ export class AIAgent {
       availableTools: params.availableTools || [],
       isActive: true,
       // queueName: params.queueName,
-      // jobProcessorIdentifier: params.jobProcessorIdentifier,
+      // jobProcessorIdentifier: params.jobProcessorIdentifier, // REMOVIDO
     });
   }
 
@@ -724,8 +822,68 @@ export class AIAgent {
     // Por exemplo, verificar se `job.requiredCapabilities` está contido em `this.props.availableTools`
     return this.props.isActive; // Simplificado
   }
+
+  // ... (outros métodos da classe AIAgent)
+
+    public async processJob(
+      job: Job, // Ou jobPayload: any, dependendo do que for passado pelo Worker
+      dependencies: {
+        llmService: ILLMService; // Interface para o serviço LLM
+        toolRegistry: IToolRegistry; // Interface para o registro de ferramentas
+        // Outras dependências que o processamento do job possa precisar
+      }
+    ): Promise<any> {
+      // 1. Interpretar o job.payload para entender a tarefa.
+      const taskDescription = job.payload.task || job.payload.goal; // Exemplo
+
+      // 2. Construir o histórico da conversa para o LLM (pode vir do Job ou ser iniciado aqui).
+      const messages: CoreMessage[] = [
+        // { role: 'system', content: this.props.roleDescription }, // O prompt do sistema pode ser configurado no llmService
+        { role: 'user', content: `Execute the following task: ${taskDescription}` }
+      ];
+      // Se houver um histórico anterior para este job, ele seria carregado e adicionado aqui.
+
+      // 3. Chamar o LLMService.
+      // O prompt do sistema (this.props.roleDescription), modelo (this.props.modelId),
+      // temperatura (this.props.temperature) e ferramentas (this.props.availableTools)
+      // seriam passados para o llmService aqui, ou o llmService os obteria
+      // da configuração do AIAgent (se o AIAgent.id fosse passado para o llmService).
+      const llmResult = await dependencies.llmService.streamText({ // ou um método executeTask
+        modelId: this.props.modelId, // Exemplo
+        systemPrompt: this.props.roleDescription,
+        temperature: this.props.temperature,
+        tools: dependencies.toolRegistry.getTools(this.props.availableTools), // Obter instâncias das ferramentas
+        messages: messages,
+        // ... outras configurações para o LLM
+      });
+
+      // 4. Processar o resultado do LLM, incluindo chamadas a ferramentas.
+      // Esta lógica seria similar à que estava na classe Activity ou no loop da simulação original.
+      // Exemplo simplificado:
+      let finalAnswer = '';
+      for await (const part of llmResult.fullStream) { // Supondo que fullStream exista
+        if (part.type === 'text-delta') {
+          finalAnswer += part.textDelta;
+        } else if (part.type === 'tool-call') {
+          const toolResult = await dependencies.toolRegistry.executeTool(part);
+          // Adicionar toolResult ao histórico de mensagens e potencialmente fazer outra chamada ao LLM
+          messages.push({ role: 'tool', content: JSON.stringify(toolResult) }); // Simplificado
+          // (Loop de execução de ferramenta-LLM omitido por brevidade)
+        }
+      }
+      // Em uma implementação real, haveria um loop de chamada de ferramenta -> LLM até uma resposta final.
+
+      // 5. Retornar o resultado final.
+      return { success: true, data: finalAnswer || "Task processed (final answer extraction logic TBD)" };
+    }
 }
 ```
+
+**Fornecimento de Dependências para `processJob`:**
+
+O método `processJob` requer dependências como `ILLMService` e `IToolRegistry` para executar suas tarefas. Estas dependências não são injetadas diretamente na entidade `AIAgent` para manter a entidade mais focada em seu estado e configuração. Em vez disso, o componente que chama `AIAgent.processJob()` (provavelmente o `Worker` dedicado ao agente) seria responsável por obter estas dependências do container de Injeção de Dependência (InversifyJS) e passá-las como argumentos para o método `processJob`.
+
+Isso mantém a entidade `AIAgent` mais limpa, enquanto ainda permite que sua lógica de processamento de job utilize serviços gerenciados por DI. Alternativamente, se a lógica de `processJob` se tornar muito complexa ou se o `AIAgent` começar a se assemelhar mais a um serviço, poderíamos introduzir uma classe `AIAgentService` (injetável) que conteria o método `processJob` e teria essas dependências injetadas diretamente em seu construtor. A entidade `AIAgent` seria então principalmente um objeto de dados/configuração passado para este serviço. A escolha entre essas duas abordagens dependerá da evolução da complexidade. Por ora, passar as dependências para o método `processJob` da entidade é uma abordagem viável.
 ### 6.3. Exemplo de Caso de Uso: `CreateProjectUseCase`
 Este caso de uso seria responsável por criar um novo projeto no sistema.
 
@@ -975,18 +1133,18 @@ A simulação de diálogo entre o Product Owner (PO) e o CTO, atualmente em `src
 
 *   **Conceito Central Mantido:** A ideia de Agentes de IA com personalidades distintas (perfis), capazes de realizar tarefas complexas, interagir com ferramentas e manter um diálogo (seja com um usuário ou outro agente via jobs intermediários) é central para o "project-wiz".
 
-*   **Evolução da Simulação para `jobProcessor`s de Agentes:**
-    *   A lógica de interação com o LLM, incluindo a construção de prompts do sistema (baseados no perfil do agente), o gerenciamento do histórico da conversa (específico do job), a chamada ao `ILLMService`, o processamento de `tool-calls` e a formatação da resposta final, que estava na classe `Activity` e no loop de `agent/index.ts` da simulação, será encapsulada dentro das funções `jobProcessor` de agentes específicos.
-    *   Por exemplo, poderíamos ter um `TextGenerationAgentJobProcessor` ou um `CodeGenerationAgentJobProcessor`. Se a interação PO/CTO for uma funcionalidade desejada, ela poderia ser um tipo de job específico processado por agentes configurados com as personas de PO e CTO.
+*   **Evolução da Simulação para Lógica no `AIAgent.processJob`:**
+    *   A lógica de interação com o LLM, incluindo a construção de prompts do sistema (baseados no perfil do agente), o gerenciamento do histórico da conversa (específico do job), a chamada ao `ILLMService`, o processamento de `tool-calls` e a formatação da resposta final, que estava na classe `Activity` e no loop de `agent/index.ts` da simulação, será encapsulada principalmente dentro do método `processJob` da entidade `AIAgent` (ou de um `AIAgentService` associado), utilizando as configurações específicas do agente (perfil, modelo, ferramentas), conforme descrito na Seção 6.2.
+    *   Se a interação PO/CTO for uma funcionalidade desejada, ela poderia ser um tipo de `Job` específico, e os `AIAgent`s configurados com as personas de PO e CTO executariam esses jobs usando seu método `processJob`.
 
 *   **Entidade `AIAgent` no Domínio:**
     *   A entidade `AIAgent` (esboçada em 6.2) continua crucial. Ela define o perfil do agente (nome, papel/backstory para o prompt, ID do modelo LLM, ferramentas que pode usar, temperatura, etc.).
-    *   Essas configurações do `AIAgent` serão carregadas e usadas pelo `jobProcessor` correspondente quando estiver processando um `Job`.
+    *   Essas configurações do `AIAgent` são fundamentais para o comportamento do método `processJob` ao lidar com um `Job`.
 
 *   **Ferramentas como Serviços Injetáveis:**
     *   As ferramentas (`writeFile`, `readFile`, `thought`, `finalAnswer` do `tool-set.ts` atual) serão refatoradas como classes/serviços que implementam uma interface comum `ITool` (ou interfaces mais específicas por tipo de ferramenta).
-    *   Essas ferramentas serão injetadas no `jobProcessor` (ou na classe de serviço que contém o `jobProcessor`) através de um `IToolRegistry` ou similar, gerenciado pelo container de DI.
-    *   Isso permite que diferentes agentes (`jobProcessor`s) tenham acesso a diferentes conjuntos de ferramentas, conforme definido em sua configuração de `AIAgent`.
+    *   Essas ferramentas serão injetadas no método `AIAgent.processJob` através do objeto de dependências (que inclui o `IToolRegistry`), gerenciado pelo container de DI e fornecido pelo `Worker`.
+    *   Isso permite que diferentes agentes, através de seu método `processJob`, tenham acesso a diferentes conjuntos de ferramentas, conforme definido em sua configuração de `AIAgent` e disponibilizado pelo `IToolRegistry`.
 
 *   **Interação entre Agentes via Jobs:**
     *   Se a interação direta entre dois agentes (como na simulação PO/CTO) for necessária, ela pode ser orquestrada através de `Job`s.
@@ -1003,6 +1161,7 @@ A simulação de diálogo entre o Product Owner (PO) e o CTO, atualmente em `src
 
 Ao refatorar a lógica da simulação desta maneira, ela deixa de ser um script isolado e se torna uma parte integral e reutilizável da capacidade do sistema de executar tarefas complexas através de Agentes de IA configuráveis e especializados, cada um operando dentro da robusta arquitetura de Worker/Fila.
 ### 8.2. Refatoração do Sistema WorkerService/Job
+A lógica de processamento de job, antes concebida como um `jobProcessor` separado, agora é entendida como um método dentro da própria entidade `AIAgent` (ou um serviço de agente associado), conforme detalhado na Seção 6.2.
 O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e agora refinado com o feedback do usuário) é fundamental para o processamento assíncrono e a execução de tarefas pelos Agentes de IA. A refatoração focará em criar uma arquitetura robusta onde cada Agente de IA opera com sua própria fila e worker dedicado.
 
 *   **Entidade `Job` no Domínio:**
@@ -1030,29 +1189,18 @@ O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e a
         1.  **Monitoramento da Fila:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas para evitar busy-waiting) para verificar sua `Queue` designada por novos `Job`s com status `PENDING`.
         2.  **Retirada de Jobs (Polling):** Obter o próximo `Job` da fila (considerando prioridade, se aplicável) usando `IJobRepository.findNextPending(queueName)`.
         3.  **Gerenciamento de Estado do Job:** Antes de processar, atualizar o status do `Job` para `ACTIVE` (via `job.startProcessing()` e `jobRepository.save(job)`).
-        4.  **Execução do `jobProcessor`:** Invocar a função `jobProcessor` específica do agente, passando o `Job` (ou seu `payload`) como argumento.
+        4.  **Execução do Processamento do Job:** Invocar o método `processJob` na instância do `AIAgent` correspondente (ou em um `AIAgentService` associado), passando o `Job` e as dependências necessárias (como `ILLMService`, `IToolRegistry`, que o Worker obteria do container DI).
         5.  **Tratamento de Resultado/Erro:**
-            *   Se o `jobProcessor` for bem-sucedido, chamar `job.complete(result)` e salvar.
-            *   Se o `jobProcessor` falhar, chamar `job.fail(errorInfo)`. Se `job.canRetry()`, marcar para nova tentativa (`job.markAsPendingRetry()`) ou adiar. Salvar o job.
+            *   Se o processamento do job for bem-sucedido, chamar `job.complete(result)` e salvar.
+            *   Se o processamento do job falhar, chamar `job.fail(errorInfo)`. Se `job.canRetry()`, marcar para nova tentativa (`job.markAsPendingRetry()`) ou adiar. Salvar o job.
         6.  **Ciclo de Vida:** O `Worker` deve ser iniciado quando a aplicação (ou o `AIAgent` correspondente) é ativado e parado graciosamente durante o desligamento da aplicação.
     *   **Dependências do `Worker` (Injetadas):**
         *   `queueName`: O nome da fila que este worker monitora.
         *   `IJobRepository`: Para interagir com os jobs.
-        *   `jobProcessor`: A função específica que sabe como processar os jobs para o agente associado a este worker.
+        *   `IAIAgentRepository` (ou `IAIAgentServiceFactory` / `Container`): Para obter a instância/configuração do `AIAgent` ou do `AIAgentService` que o Worker irá servir. Se for `IAIAgentRepository`, o Worker carregaria a entidade `AIAgent` e chamaria seu método `processJob`. Se for um `AIAgentService`, o Worker obteria a instância do serviço e chamaria um método nele.
+        *   `ILLMService` (ou acesso ao container para obtê-lo): Necessário para ser passado para o método `AIAgent.processJob()`.
+        *   `IToolRegistry` (ou acesso ao container para obtê-lo): Necessário para ser passado para o método `AIAgent.processJob()`.
         *   `LoggerService`: Para logging.
-
-*   **`jobProcessor(jobPayload: any): Promise<any>` (Função Específica do Agente):**
-    *   Esta função **contém a lógica real de como um `AIAgent` processa um tipo de tarefa**. Ela não é uma classe genérica, mas uma função (ou método de uma classe de serviço do agente) que é passada para o `Worker` durante sua configuração.
-    *   **Responsabilidades:**
-        1.  Interpretar o `jobPayload`.
-        2.  Interagir com o `ILLMService` para fazer chamadas ao modelo de linguagem, usando o perfil do `AIAgent` (prompt do sistema, modelo, temperatura).
-        3.  Utilizar `IToolRegistry` para executar ferramentas conforme instruído pelo LLM.
-        4.  Formatar o resultado final do processamento.
-    *   **Dependências do `jobProcessor` (ou da classe que o contém, via DI no momento da sua criação/configuração):**
-        *   `AIAgent` (ou suas propriedades relevantes: perfil, modelo, ferramentas permitidas).
-        *   `ILLMService`.
-        *   `IToolRegistry`.
-        *   Outros serviços de domínio ou aplicação necessários.
 
 *   **Persistência da Fila:**
     *   A "fila" em si é conceitualmente representada pelos `Job`s no banco de dados que têm um `queueName` específico e um status `PENDING`. O `IJobRepository` precisará de métodos eficientes para consultar esses jobs. Esta abordagem de persistência é parte da implementação do sistema de filas local customizado, inspirado nos conceitos do BullMQ mas sem dependências externas, como descrito na Seção 3.3.
@@ -1078,12 +1226,12 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
         1.  Carregar todas as configurações ativas de `AIAgent` do `IAIAgentRepository`.
         2.  Para cada `AIAgent` ativo:
             a.  Instanciar um `Worker`. Isso pode ser feito diretamente ou através de uma fábrica (`AgentWorkerFactory`) se a construção do Worker for complexa.
-            b.  Configurar o `Worker` com:
+            b.  Instanciar um `Worker` (da classe `AgentWorker` da infraestrutura). O `Worker` será configurado com:
                 *   O `queueName` obtido do `AIAgent`.
-                *   O `IJobRepository` (injetado).
-                *   O `jobProcessor` correto. A obtenção do `jobProcessor` pode ser feita usando o `jobProcessorIdentifier` do `AIAgent` para buscar a implementação correta no container DI (talvez usando uma fábrica de `jobProcessor`s ou um mapa de identificadores para instâncias/construtores de `jobProcessor`).
+                *   Referências a serviços essenciais que ele obterá do container DI para passar ao método de processamento do agente, como `ILLMService` e `IToolRegistry`.
+                *   Uma referência ao `IAIAgentRepository` (ou `IAIAgentServiceFactory` se aplicável) para carregar/acessar a instância/configuração do `AIAgent` e invocar seu método `processJob`, ou para obter a instância do `AIAgentDomainService` correspondente.
             c.  Iniciar o loop de processamento do `Worker`.
-    *   Os `Worker`s seriam instâncias de uma classe `AgentWorker` (da camada de infraestrutura), que encapsula a lógica de polling da fila e chamada ao `jobProcessor`.
+    *   Os `Worker`s seriam instâncias de uma classe `AgentWorker` (da camada de infraestrutura), que encapsula a lógica de polling da fila e chamada ao método de processamento do agente.
 
 *   **Criação e Gerenciamento de Filas (`Queues`):**
     *   As "filas" são conceituais e representadas por `Job`s no banco de dados com um `queueName` específico. Não necessariamente exigem uma tabela separada para `Queues` no DB, a menos que precisemos armazenar metadados específicos da fila (além do que está no `AIAgent`).
