@@ -26,6 +26,9 @@ A nova arquitetura será guiada pelos seguintes princípios fundamentais:
     *   **Independência de Banco de Dados:** O tipo de banco de dados pode ser trocado sem afetar as regras de negócio.
     *   **Regra de Dependência:** As dependências de código fonte só podem apontar para dentro. Nada em um círculo interno pode saber qualquer coisa sobre algo em um círculo externo.
 
+    **Nota sobre Camadas Adicionais (Camada de Aplicação):**
+    A arquitetura inicial foca em três camadas principais para clareza e simplicidade: Domínio (`src/domain`), Infraestrutura (`src/infrastructure`) e Compartilhada (`src/shared`). As responsabilidades que tradicionalmente pertencem a uma "Camada de Aplicação" (como DTOs específicos para casos de uso, orquestração de múltiplos casos de uso, ou regras de negócio que não são puramente do domínio nem detalhes de infraestrutura) são, neste momento, distribuídas (DTOs podem residir próximos aos seus casos de uso ou em `shared/dtos`, e a orquestração pode ser feita por casos de uso de nível mais alto no domínio). Conforme o sistema evoluir e a complexidade aumentar, uma camada `src/application` formal poderá ser introduzida para melhor organizar estas responsabilidades, seguindo os princípios da Clean Architecture.
+
 2.  **Object Calisthenics:**
     *   Um conjunto de 9 regras de "exercício" para design de código orientado a objetos que promovem código limpo, legível e de fácil manutenção. Essas regras serão detalhadas e exemplificadas no documento [`07-object-calisthenics.md`](./07-object-calisthenics.md). O foco é em classes pequenas, coesas e com responsabilidades bem definidas.
 
