@@ -73,38 +73,68 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
     *   Permitem que os Casos de Uso e Serviços de Domínio permaneçam independentes das tecnologias de banco de dados específicas. As implementações concretas residem na camada de Infraestrutura.
     *   **`IQueueRepository` (ex: `src/domain/repositories/i-queue.repository.ts`):** Esta interface é central para o sistema de filas. Ela define métodos para CRUD de `Job`s e para operações de estado da fila que exigem `workerToken` e gerenciamento de locks.
         ```typescript
-        // src/domain/repositories/i-queue.repository.ts
-        import { Job } from '../entities/job.entity';
-        import { JobStatusVO } from '../entities/value-objects/job-status.vo';
+     // src/domain/repositories/i-queue.repository.ts
+     import { Job } from '../entities/job.entity';
+     import { JobStatusVO } from '../entities/value-objects/job-status.vo'; // Supondo que JobStatusVO seja importável
 
-        export interface JobData { // Para o método updateJobData, se quisermos tipar
-          [key: string]: any;
-        }
+     export interface JobData {
+       [key: string]: any;
+     }
 
-        export interface IQueueRepository {
-          save(job: Job): Promise<void>; // Cria ou atualiza um job (estado, dados, etc.)
-          findById(jobId: string): Promise<Job | null>;
+     // Opções para backoff em caso de falha e retentativa
+     export interface BackoffOptions {
+        type: 'exponential' | 'fixed';
+        delay: number;
+     }
 
-          // Retorna o próximo job pendente para uma fila, aplicando um lock e retornando um token.
-          // O workerId é usado para registrar quem está pegando o job.
-          findNextPending(queueName: string, workerId: string): Promise<{ job: Job; lockToken: string } | null>;
+     export interface IQueueRepository {
+       // Cria um novo job na fila. Usado pelo EnqueueJobUseCase.
+       // Não lida com locks, pois o job é novo.
+       add(job: Job): Promise<void>;
 
-          // Métodos para o jobProcessor interagir com a fila, via workerToken
-          updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void>;
-          requestMoveToDelayed(jobId: string, workerToken: string, delayUntilTimestamp: number): Promise<void>;
-          requestMoveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean>; // true se movido, false se não há filhos
+       // Busca um job pelo ID.
+       findById(jobId: string): Promise<Job | null>;
 
-          // Métodos para o Worker finalizar um job, usando o workerToken
-          completeJob(jobId: string, result: any, workerToken: string): Promise<void>;
-          failJob(jobId: string, error: string, currentAttempts: number, workerToken: string): Promise<void>;
-          // currentAttempts é passado para o repositório decidir sobre novas tentativas/backoff
+       // Encontra o próximo job pendente (status PENDING ou DELAYED com delayUntil passado)
+       // para uma fila específica, aplica um lock, e retorna o job e um lockToken.
+       // workerId é registrado para identificar quem tem o lock.
+       findNextPending(queueName: string, workerId: string): Promise<{ job: Job; lockToken: string } | null>;
 
-          // (Opcional) Método explícito para liberar lock, embora possa ser implícito
-          // releaseLock(jobId: string, workerToken: string): Promise<void>;
+       // Persiste o estado ATIVO de um job após o Worker pegá-lo.
+       // Valida o lockToken.
+       markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string): Promise<void>;
 
-          // (Opcional) Outros métodos de consulta
-          // countJobsByStatus(queueName: string, status: JobStatusVO): Promise<number>;
-        }
+       // Atualiza o campo 'data' de um job. Chamado pelo jobProcessor.
+       // Valida o lockToken.
+       updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void>;
+
+       // Move um job para o estado DELAYED. Chamado pelo jobProcessor.
+       // Valida o lockToken, atualiza status, delayUntil, e libera o lock.
+       requestMoveToDelayed(jobId: string, workerToken: string, delayUntilTimestamp: number): Promise<void>;
+
+       // Move um job para o estado WAITING_CHILDREN. Chamado pelo jobProcessor.
+       // Valida o lockToken, atualiza status, e libera o lock.
+       // Retorna true se o job foi movido para espera, false se não há filhos pendentes (job pode ser completado).
+       requestMoveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean>;
+
+       // Marca um job como COMPLETED. Chamado pelo Worker.
+       // Valida o lockToken, atualiza status, result, finishedAt, e libera o lock.
+       completeJob(jobId: string, result: any, workerToken: string): Promise<void>;
+
+       // Marca um job como FAILED ou o re-enfileira para retentativa com backoff. Chamado pelo Worker.
+       // Valida o lockToken. Se houver retentativas, atualiza status para PENDING/DELAYED,
+       // calcula novo delayUntil com base na estratégia de backoff, e incrementa attempts.
+       // Se não houver mais tentativas, atualiza status para FAILED. Libera o lock.
+       // Retorna o novo estado do job (status, delayUntil, attempts) para o Worker atualizar sua instância em memória.
+       failJob(
+         jobId: string,
+         error: string,
+         currentAttempts: number,
+         maxAttempts: number,
+         backoffOptions: BackoffOptions | undefined, // Config de backoff do job
+         workerToken: string
+       ): Promise<{ newStatus: JobStatusVO; newDelayUntil?: Date; newAttempts: number }>;
+     }
         ```
 
 *   **Serviços de Domínio (`services/`):**
@@ -116,15 +146,14 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
         *   **`AIAgentExecutionService` (ex: `src/domain/services/agent/ai-agent-execution.service.ts`):**
             Este serviço é crucial para a funcionalidade dos Agentes de IA. Ele não é o `AIAgent` (que é uma entidade de configuração/perfil), mas o orquestrador que executa a lógica de um agente para processar um `Job`.
             **Responsabilidades:**
-            -   Fornecer a função `jobProcessor` que será executada pelos `Worker`s dedicados às filas de Agentes de IA.
-            -   Utilizar o `payload` do `Job` (ou `job.name` ou `job.data`) para identificar e carregar a configuração do `AIAgent` apropriado (via `IAIAgentRepository`).
+            -   Fornecer a função `jobProcessor` que será executada pelos `Worker`s dedicados às filas de Agentes de IA. Este serviço atua como a ponte entre a lógica de negócios específica dos agentes e o sistema de filas genérico.
+            -   Utilizar o `payload` do `Job` (ou `job.name`/`job.data`) para identificar e carregar a configuração do `AIAgent` apropriado (via `IAIAgentRepository`).
             -   Dentro da função `jobProcessor` que ele fornece:
                 -   Orquestrar a interação com o `ILLMService` (passando o perfil do agente, mensagens, ferramentas).
                 -   Executar ferramentas através do `IToolRegistry`.
-                -   Gerenciar o estado da tarefa do agente, utilizando o `queueClient` recebido para chamar `queueClient.updateJobDataInQueue(job.id, data, workerToken)`.
-                -   Interagir com o `queueClient` para operações avançadas na fila (ex: `moveJobToDelayedInQueue`), passando o `job.id` e o `workerToken`, e então lançando os erros apropriados (`DelayedError`, `WaitingChildrenError`) para sinalizar ao `Worker`.
+                -   Gerenciar o estado da tarefa do agente, chamando `job.updateJobData()` para modificar o estado do job em memória, e então usando o `queueClient` recebido (que é um parâmetro do `jobProcessor`) para chamar `queueClient.updateJobData(job.id, job.props.data, workerToken)` para persistir essas alterações de dados.
+                -   Para operações avançadas na fila (ex: adiar um job), o `jobProcessor` chamará primeiro um método de preparação na entidade `Job` (ex: `job.prepareForDelay(timestamp)`), que atualiza o estado do `Job` em memória. Em seguida, o `jobProcessor` lançará um erro específico (ex: `DelayedError`) para sinalizar essa intenção ao `Worker`. O `Worker` é então responsável por persistir o estado preparado do `Job` através do `queueClient`.
             **Dependências (Injetadas via Construtor no `AIAgentExecutionService`):** `ILLMService`, `IToolRegistry`, `IAIAgentRepository`.
-            (Nota: `IQueueRepository` não é injetada diretamente aqui se o `jobProcessor` recebe o `queueClient`.)
 
             **Função `jobProcessor` Fornecida pelo Serviço:**
             O `AIAgentExecutionService` teria um método que retorna (ou cujo corpo é) a função `jobProcessor`. Esta função teria a assinatura `async (job: Job, workerToken: string, queueClient: IQueueClient): Promise<any>`.
@@ -139,54 +168,73 @@ A camada de Domínio é o coração do software. Ela contém a lógica de negóc
             // ): Promise<any> {
             //   const agentId = job.payload.agentId || this.defaultAgentId;
             //   const agentProfile = await this.aiAgentRepository.findById(agentId);
-            //   if (!agentProfile) throw new Error(`AIAgent profile ${agentId} not found for job ${job.id}.`);
+            //   if (!agentProfile) {
+            //     // Se o perfil não for encontrado, o job deve falhar imediatamente.
+            //     // O Worker tratará essa exceção.
+            //     throw new Error(`AIAgent profile ${agentId} not found for job ${job.id}.`);
+            //   }
 
-            //   const taskInput = job.payload.taskInput;
-            //   let conversationHistory = job.data?.conversationHistory || [];
-            //   let currentStep = job.data?.currentStep || 'initial_processing';
+            //   const taskInput = job.payload.taskInput || job.payload.goal;
+            //   // job.data já conteria o estado salvo da última execução (se houver)
+            //   // A entidade Job já foi carregada pelo Worker via queueClient.getNextJob()
+
+            //   let conversationHistory = job.props.data?.conversationHistory || [];
+            //   let currentStep = job.props.data?.currentStep || 'initial_processing';
 
             //   console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}, Agent ${agentProfile.name}, Step ${currentStep}`);
 
             //   if (currentStep === 'initial_processing') {
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}: Executando etapa inicial.`);
             //     // ... lógica inicial, talvez uma chamada LLM ...
-            //     const llmResponse = "LLM output after initial step"; // Simulado
+            //     const llmResponse = `LLM output for initial step of '${taskInput}'`; // Simulado
+            //     conversationHistory.push({role: 'user', content: taskInput}); // Adiciona input do usuário ao histórico
             //     conversationHistory.push({role: 'assistant', content: llmResponse});
             //     currentStep = 'tool_execution';
 
-            //     // Atualizar dados do job via QueueClient
-            //     await queueClient.updateJobDataInQueue(job.id, { conversationHistory, currentStep }, workerToken);
+            //     // Atualizar dados do job em memória
+            //     job.updateJobData({ conversationHistory, currentStep });
+            //     // Persistir os dados atualizados via QueueClient
+            //     await queueClient.updateJobData(job.id, job.props.data, workerToken);
             //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} data updated, new step: ${currentStep}`);
             //   }
 
             //   if (currentStep === 'tool_execution') {
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id}: Executando etapa de ferramentas.`);
             //     // ... lógica de execução de ferramenta baseada na resposta do LLM ...
             //     // Exemplo: const toolResult = await this.toolRegistry.executeTool(...);
             //     // conversationHistory.push({role: 'tool', content: toolResult});
-            //     currentStep = 'final_processing';
+            //     currentStep = 'final_processing'; // Avança para a próxima etapa
 
             //     // Adiar o job antes da etapa final, como exemplo
             //     const delayUntil = Date.now() + 10000; // Adiar por 10 segundos
-            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} requesting delay until ${new Date(delayUntil).toISOString()}`);
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} preparando para adiamento até ${new Date(delayUntil).toISOString()}`);
 
-            //     // Atualiza os dados do job ANTES de solicitar o adiamento, se necessário
-            //     await queueClient.updateJobDataInQueue(job.id, { conversationHistory, currentStep, awaitingDelay: true }, workerToken);
+            //     // 1. Preparar o estado do Job em memória para o adiamento
+            //     job.prepareForDelay(new Date(delayUntil));
+            //     // 2. (Opcional) Atualizar os dados do job (que podem incluir o currentStep) ANTES de sinalizar o adiamento
+            //     job.updateJobData({ conversationHistory, currentStep, awaitingDelayConfirmation: true });
+            //     await queueClient.updateJobData(job.id, job.props.data, workerToken); // Persiste os dados antes do throw
 
-            //     // Solicita o adiamento através do QueueClient
-            //     await queueClient.moveJobToDelayedInQueue(job.id, delayUntil, workerToken);
-            //     throw new DelayedError('Job processing requires a delay before final step.'); // Sinaliza ao Worker
+            //     // 3. Lançar DelayedError para sinalizar ao Worker
+            //     throw new DelayedError('Job processing requires a delay before final step.');
             //   }
 
-            //   if (currentStep === 'final_processing') { // Esta etapa seria executada após o delay
-            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} resuming for final processing.`);
+            //   if (currentStep === 'final_processing') {
+            //     // Esta etapa seria executada APÓS o Worker re-enfileirar e processar o job adiado.
+            //     // O job.data.awaitingDelayConfirmation poderia ser verificado e removido.
+            //     console.log(`[AIAgentExecutionService/jobProcessor] Job ${job.id} resumindo para processamento final.`);
             //     // ... lógica final, talvez outra chamada LLM ...
-            //     const finalOutput = "Final output of the agent's task.";
-            //     conversationHistory.push({role: 'assistant', content: finalOutput});
+            //     const finalOutput = "Final output of the agent's task after all steps.";
+            //     // conversationHistory.push({role: 'assistant', content: finalOutput}); // Adicionar ao histórico
 
-            //     await queueClient.updateJobDataInQueue(job.id, { conversationHistory, currentStep, finalOutput }, workerToken);
+            //     // Atualizar dados finais do job
+            //     // job.updateJobData({ conversationHistory, currentStep, finalOutput, awaitingDelayConfirmation: undefined });
+            //     // await queueClient.updateJobData(job.id, job.props.data, workerToken); // Persistir dados finais
+
             //     return finalOutput; // Resultado final para o Worker marcar o job como COMPLETED
             //   }
 
-            //   // Se o job tiver um estado inesperado
+            //   // Se o job tiver um estado/etapa inesperado
             //   throw new Error(`Job ${job.id} is in an unexpected step: ${currentStep}`);
             // }
             ```
@@ -759,23 +807,22 @@ export class JobStatusVO {
 
 export interface JobProps {
   id: string; // Deveria ser JobIdVO
-  name: string; // Deveria ser JobNameVO ou similar se houver regras
+  name: string; // Tipo de job, usado para rotear para o jobProcessor correto
   queueName: string; // Nome da fila à qual o job pertence
-  payload: any;
-  data?: any; // Dados customizados atualizáveis
+  payload: any; // Dados específicos da tarefa, fornecidos pelo cliente da fila
+  data?: any; // Dados internos do jobProcessor, atualizáveis durante a execução
   status: JobStatusVO;
   attempts: number;
   maxAttempts: number;
   priority?: number;
-  delayUntil?: Date; // Para jobs que devem ser adiados antes da primeira execução
-  processedAt?: Date; // Quando o processamento iniciou
-  finishedAt?: Date; // Quando o processamento terminou (completado ou falhou)
+  delayUntil?: Date;
+  processedAt?: Date;
+  finishedAt?: Date;
   result?: any;
   error?: string;
   parentId?: string; // JobIdVO - Para jobs filhos
   createdAt: Date;
   updatedAt: Date;
-  // Outras props como backoffConfig poderiam ser adicionadas aqui ou gerenciadas pela infra da fila
 }
 
 export class Job {
@@ -787,15 +834,14 @@ export class Job {
 
   public static create(params: {
     id?: string;
-    name: string;
-    queueName: string; // Adicionado
-    payload: any;
-    projectId?: string; // Mantido para contexto, mas não diretamente em JobProps no exemplo
+    name: string; // Tipo de job
+    queueName: string;
+    payload: any; // Dados específicos da tarefa
     maxAttempts?: number;
     priority?: number;
-    delayUntil?: Date; // Usado pelo EnqueueJobUseCase para setar status DELAYED
+    delayUntil?: Date;
     parentId?: string;
-    initialData?: any;
+    initialData?: any; // Estado inicial para o campo 'data'
   }): Job {
     const now = new Date();
     const id = params.id || crypto.randomUUID(); // Usar UUID real
@@ -808,11 +854,12 @@ export class Job {
       attempts: 0,
       maxAttempts: params.maxAttempts || 3,
       priority: params.priority || 10,
-      delayUntil: params.delayUntil, // Armazenado para informação
+      delayUntil: params.delayUntil,
       parentId: params.parentId,
       data: params.initialData,
       createdAt: now,
       updatedAt: now,
+      // Certifique-se de que nenhum campo específico de domínio como projectId está sendo atribuído aqui
     });
   }
 
@@ -869,70 +916,79 @@ export class Job {
     this.props.updatedAt = new Date();
   }
 
-  // Outros métodos como assignToAgent, setPriority, etc.
+  // Outros métodos como assignToAgent, setPriority, etc., podem ser removidos se não forem genéricos.
+  // Os métodos prepareForDelay e prepareToWaitForChildren são mantidos como exemplos de como
+  // a entidade pode preparar seu estado internamente antes que o jobProcessor sinalize ao Worker.
+
+    public updateJobData(newData: any): void {
+      this.props.data = { ...(this.props.data || {}), ...newData };
+      this.props.updatedAt = new Date();
+      // Nenhuma chamada de persistência aqui.
+    }
+
+    public prepareForDelay(delayTargetTimestamp: Date): void {
+      if (!this.props.status.is('ACTIVE')) {
+        throw new Error('Job must be ACTIVE to be prepared for delay.');
+      }
+      this.props.status = JobStatusVO.create('DELAYED');
+      this.props.delayUntil = delayTargetTimestamp;
+      this.props.updatedAt = new Date();
+      // Nenhuma chamada de persistência ou uso de workerToken aqui.
+    }
+
+    public prepareToWaitForChildren(): void {
+      if (!this.props.status.is('ACTIVE')) {
+        throw new Error('Job must be ACTIVE to be prepared to wait for children.');
+      }
+      this.props.status = JobStatusVO.create('WAITING_CHILDREN');
+      this.props.updatedAt = new Date();
+      // Nenhuma chamada de persistência ou uso de workerToken aqui.
+    }
 }
 ```
 
-**Suporte a Funcionalidades Avançadas da Fila e Interação com `IJobQueueService`:**
+**Modificação do Estado do Job e Persistência via Worker/QueueClient:**
 
-A entidade `Job` é responsável por manter seu próprio estado e dados. Para funcionalidades avançadas da fila, como adiamento de jobs ou espera por jobs filhos, a entidade `Job` pode ter métodos para preparar seu estado interno. No entanto, a execução real dessas operações na fila (que envolvem lógica de persistência, `workerToken` e gerenciamento de locks) é responsabilidade de um serviço da camada de infraestrutura, o `IJobQueueService` (definido na Seção 3.3), que é invocado pelo `jobProcessor` (ex: a lógica dentro do `AIAgentExecutionService`).
+A entidade `Job` é responsável por manter seu estado e dados intrínsecos. Seus métodos permitem que o `jobProcessor` modifique este estado *em memória*. A persistência dessas alterações e a execução de operações de fila que requerem autorização (como adiar um job ou marcá-lo como esperando por filhos) são orquestradas pelo `Worker` através do `QueueClient`, utilizando o `workerToken`.
 
-*   **`updateJobData(newData: any): void`**
-    *   **Propósito:** Permitir que o `jobProcessor` atualize o campo `data` do job (em memória) para salvar progresso ou resultados parciais.
-    *   **Lógica na Entidade:**
+*   **`updateJobData(newData: any): void`** (Método na Entidade `Job`)
+    *   **Propósito:** Permitir que o `jobProcessor` modifique o campo `data` da instância do `Job` que está sendo processada (em memória).
+    *   **Lógica na Entidade (Reiterada):**
         ```typescript
         public updateJobData(newData: any): void {
           this.props.data = { ...(this.props.data || {}), ...newData };
           this.props.updatedAt = new Date();
-          // O chamador (jobProcessor) é responsável por persistir o Job atualizado
-          // chamando `IJobRepository.save(thisJobInstance)` após esta modificação.
         }
         ```
+    *   **Fluxo no `jobProcessor`:**
+        1.  `job.updateJobData(meusNovosDados);`
+        2.  (Opcional, mas recomendado) O `jobProcessor` pode então imediatamente solicitar a persistência desses dados se for um ponto de salvamento intermediário: `await queueClient.updateJobData(job.id, job.props.data, workerToken);` (Este método no `QueueClient` usaria o `IQueueRepository` para persistir os dados do `job`).
 
-*   **Preparando o Job para Mudanças de Estado na Fila:**
-    A entidade `Job` pode ter métodos que validam se uma transição de estado é permitida e atualizam o estado da entidade em memória. O `jobProcessor` chamaria esses métodos antes de invocar a `IQueueRepository` para efetivar a mudança de estado na fila.
+*   **Sinalizando Intenção de Adiar ou Esperar (Exemplo com `prepareForDelay`):**
+    O `jobProcessor` utiliza métodos na entidade `Job` para preparar o estado desejado em memória. Em seguida, lança um erro específico para sinalizar essa intenção ao `Worker`. O `Worker` então persiste o estado preparado do `Job` usando o `QueueClient`.
 
-    *   **Exemplo: Preparando para Adiar (`setToBeDelayed`)**
+    *   **Método na Entidade `Job` (Exemplo para Adiar - Reiterado):**
         ```typescript
-        public setToBeDelayed(delayTargetTimestamp: Date): void {
+        public prepareForDelay(delayTargetTimestamp: Date): void {
           if (!this.props.status.is('ACTIVE')) { // Só pode adiar um job ativo
-            throw new Error('Job must be ACTIVE to be set for delay.');
+            throw new Error('Job must be ACTIVE to be prepared for delay.');
           }
           // Validações adicionais podem ser aplicadas aqui.
           this.props.status = JobStatusVO.create('DELAYED'); // Muda o status em memória
           this.props.delayUntil = delayTargetTimestamp;
           this.props.updatedAt = new Date();
-          // O jobProcessor agora deve:
-          // 1. Chamar `queueRepository.save(thisJobInstance)` para persistir este novo estado pretendido.
-          // 2. Chamar `queueRepository.requestMoveToDelayed(this.id, workerToken, delayTargetTimestamp)`.
-          // 3. Se bem-sucedido, lançar `DelayedError`.
         }
         ```
+    *   **Lógica no `jobProcessor`:**
+        1.  Decide adiar o job e calcula `novoTimestamp`.
+        2.  Chama `job.prepareForDelay(novoTimestamp);` (atualiza o `job` em memória).
+        3.  Lança `new DelayedError("Job adiado pela lógica do processador");`.
+    *   **Lógica no `Worker` (ao capturar `DelayedError`):**
+        1.  `await this.queueClient.saveJob(job, lockToken);` (persiste o `job` que agora tem status `DELAYED` e `delayUntil` preenchidos). O `QueueClient` e `IQueueRepository` cuidam da lógica de lock e da atualização no DB. (Nota: `saveJob` é um método conceitual no `QueueClient` que internamente usaria `IQueueRepository.save(job)` e lidaria com o lock; ou o `Worker` usaria `queueClient.moveToDelayed(job.id, lockToken, job.props.delayUntil)` que já persistiria e atualizaria o estado.)
 
-    *   **Exemplo: Preparando para Esperar Filhos (`setToBeWaitingForChildren`)**
-        ```typescript
-        public setToBeWaitingForChildren(): void {
-          if (!this.props.status.is('ACTIVE')) {
-            throw new Error('Job must be ACTIVE to be set to wait for children.');
-          }
-          // Validações adicionais (ex: verificar se o job tem filhos definidos).
-          this.props.status = JobStatusVO.create('WAITING_CHILDREN'); // Muda o status em memória
-          this.props.updatedAt = new Date();
-          // O jobProcessor agora deve:
-          // 1. Chamar `IJobRepository.save(thisJobInstance)`.
-          // 2. Chamar `IJobQueueService.requestMoveToWaitingChildren(this.id, workerToken)`.
-          // 3. Se bem-sucedido (e o job foi movido para espera), lançar `WaitingChildrenError`.
-        }
-        ```
+    Um fluxo similar se aplica para `prepareToWaitForChildren()` e `WaitingChildrenError`.
 
-**Fluxo de Interação (no `jobProcessor`):**
-1.  O `jobProcessor` (ex: dentro do `AIAgentExecutionService`) decide que um job precisa ser adiado.
-2.  Ele chama `job.setToBeDelayed(newTimestamp)`.
-3.  Ele chama `jobRepository.save(job)` para persistir o novo status e `delayUntil` da entidade.
-4.  Ele chama `jobQueueService.requestMoveToDelayed(job.id, workerToken, newTimestamp)`. Este serviço da infraestrutura lida com a lógica de lock, verifica o `workerToken` e atualiza o registro do job na fila para refletir o estado `DELAYED` (pode ser redundante se o passo 3 já o fez, ou pode ser a única fonte de verdade para a mudança de estado na persistência da fila).
-5.  Se `requestMoveToDelayed` for bem-sucedido, o `jobProcessor` lança `DelayedError` para sinalizar ao `Worker`.
-
-Essa abordagem mantém a entidade `Job` focada em seu estado e regras de negócio, enquanto o `jobProcessor` orquestra a interação com os serviços de infraestrutura (`IJobRepository`, `IJobQueueService`) para operações que exigem conhecimento do `workerToken` ou da lógica específica da fila. A entidade `Job` em si permanece ignorante sobre `workerToken`s ou a mecânica exata da fila.
+Essa abordagem assegura que a entidade `Job` permaneça um objeto de domínio focado em seu estado, sem conhecimento de `workerToken`s ou da mecânica de persistência da fila. O `jobProcessor` manipula a instância do `Job` em memória, e o `Worker`, em coordenação com o `QueueClient`, gerencia a persistência e as operações de fila autorizadas.
 ### 6.2. Exemplo de Entidade: `AIAgent`
 A entidade `AIAgent` (ou um nome similar como `AIWorkerProfile`, `AIModelExecutor`) representaria a configuração e o estado de um agente de IA capaz de executar jobs ou tarefas.
 
@@ -1109,18 +1165,18 @@ Este caso de uso seria responsável por criar um novo `Job` e adicioná-lo a uma
 // src/domain/use-cases/job/enqueue-job.use-case.ts
 import { injectable, inject } from 'inversify';
 import { TYPES } from '@/infrastructure/ioc/types';
-import { IJobRepository } from '@/domain/repositories/i-job.repository';
+import { IQueueRepository } from '@/domain/repositories/i-queue.repository'; // Alterado
 import { Job } from '@/domain/entities/job.entity';
 
 export interface EnqueueJobInput {
   queueName: string; // Nome da fila de destino
-  jobName: string;   // Tipo/nome do job (para o processador saber o que fazer)
-  payload: any;
+  jobName: string;   // Tipo/nome do job (para Job.create e para o processador saber o que fazer)
+  taskPayload: any;  // Dados específicos da tarefa que irão para o Job.payload
   priority?: number;
   delayUntil?: Date;
   maxAttempts?: number;
-  parentId?: string; // Para jobs filhos
-  initialData?: any;
+  parentId?: string;
+  initialJobData?: any; // Dados iniciais para o campo Job.data (estado interno do processador)
 }
 
 export interface EnqueueJobOutput {
@@ -1132,7 +1188,7 @@ export interface EnqueueJobOutput {
 @injectable()
 export class EnqueueJobUseCase {
   constructor(
-    @inject(TYPES.IJobRepository) private jobRepository: IJobRepository
+    @inject(TYPES.IQueueRepository) private queueRepository: IQueueRepository // Alterado
   ) {}
 
   async execute(input: EnqueueJobInput): Promise<EnqueueJobOutput> {
@@ -1142,26 +1198,30 @@ export class EnqueueJobUseCase {
     if (!input.jobName || input.jobName.trim().length === 0) {
       throw new Error('Job name must be provided.');
     }
+    // O input.taskPayload é agora o que vai para o job.payload
+    if (input.taskPayload === undefined) {
+      // Permitir payload vazio (ex: {} ou null), mas não undefined se for obrigatório.
+      // Para este exemplo, vamos considerar que pode ser opcional ou que a validação é mais complexa.
+      // Se fosse obrigatório: throw new Error('Task payload must be provided.');
+    }
 
-    const job = Job.create({ // Usando o Job.create refinado da Seção 6.1
-      name: input.jobName,
+    const job = Job.create({
+      name: input.jobName,       // Usado para identificar o tipo de job/processador
       queueName: input.queueName,
-      payload: input.payload,
+      payload: input.taskPayload,  // Dados específicos da tarefa vão para o payload do Job
       priority: input.priority,
-      delayUntil: input.delayUntil, // Job.create define status como DELAYED se esta data for no futuro
+      delayUntil: input.delayUntil,
       maxAttempts: input.maxAttempts,
       parentId: input.parentId,
-      initialData: input.initialData,
+      initialData: input.initialJobData, // Para o campo 'data' do Job
     });
 
-    // A entidade Job (via Job.create) já deve ter definido o status inicial
-    // para PENDING ou DELAYED com base na presença e valor de delayUntil.
-    await this.jobRepository.save(job);
+    await this.queueRepository.save(job); // Usando save, assumindo que IQueueRepository.save() lida com criação.
 
     return {
       jobId: job.id,
-      status: job.status, // Retorna o status real do job após a criação
-      queueName: job.props.queueName, // Retorna o nome da fila
+      status: job.status,
+      queueName: job.props.queueName,
     };
   }
 }
@@ -1337,26 +1397,47 @@ O sistema de `WorkerService` e `Job` (identificado no `src/main.ts` original e a
         Um `Worker` é um componente da camada de infraestrutura (`infrastructure/workers/`) responsável por processar jobs de uma fila específica. Ele é configurado com uma instância de `IQueueClient` (que representa a conexão a uma única fila nomeada, veja Seção 8.3) e uma função `jobProcessor` genérica no momento de sua instanciação (geralmente pelo `AgentLifecycleService` ou um serviço similar de gerenciamento de workers).
 
         **Responsabilidades do `Worker`:**
-        1.  **Monitoramento e Retirada de Jobs da Fila Dedicada:** Executar um loop contínuo (`while(true)` ou similar, com pausas apropriadas) para verificar sua `IQueueClient` designada por novos `Job`s. Para retirar um job, o `Worker` chama `this.queueClient.getNextJob(this.workerId)`. Este método, implementado pelo `QueueClient`, é responsável por buscar um job pendente da fila correta (associada ao `QueueClient`), aplicar um lock e retornar o `Job` junto com um `lockToken`. O `this.workerId` é um identificador único para esta instância do Worker.
-        2.  **Atualização de Status para `ACTIVE`:** Antes de invocar o `jobProcessor`, o `Worker` chama `job.startProcessing()` (que atualiza o estado do `Job` em memória para `ACTIVE` e incrementa `attempts`). Esta mudança de estado é então persistida chamando `this.queueClient.updateJobDataInQueue(job.id, job.data, lockToken)` ou uma operação de save mais geral no `QueueClient` que também atualiza o status. (Nota: A entidade `Job` e o `QueueClient` precisam coordenar como o status `ACTIVE` e `attempts` são persistidos no início do processamento). Alternativamente, `getNextJob` poderia já retornar o job no estado `ACTIVE`. Para este documento, vamos assumir que `getNextJob` retorna o job como `PENDING` e o Worker é responsável por movê-lo para `ACTIVE` via `QueueClient`.
-            *   *Refinamento:* O `Worker` chama `job.startProcessing()`. Em seguida, o `Worker` chama um método no `this.queueClient` como `this.queueClient.markJobActive(job.id, job.attempts, lockToken)` para persistir o status `ACTIVE` e o incremento de `attempts`.
-        3.  **Execução do `jobProcessor`:** Invocar a função `jobProcessor` fornecida, passando a instância do `Job`, o `lockToken` (obtido de `getNextJob`), e a própria instância do `this.queueClient` (ou uma interface mais restrita `IQueueOperationsForProcessor` derivada dela) para que o `jobProcessor` possa realizar operações na fila.
+        1.  **Monitoramento e Retirada de Jobs da Fila Dedicada:**
+            *   Executar um loop contínuo para verificar sua `IQueueClient` designada por novos `Job`s.
+            *   Chamar `this.queueClient.getNextJob(this.workerId)` para obter o próximo `Job` pendente e um `lockToken` associado. Se nenhum job estiver disponível, o worker aguarda/pausa antes de tentar novamente.
+
+        2.  **Início do Processamento do Job:**
+            *   Uma vez que um `Job` é obtido:
+                a.  Chamar `job.startProcessing()` na instância do `Job` (para atualizar seu estado em memória para `ACTIVE`, incrementar `attempts`, setar `processedAt`).
+                b.  Persistir este estado `ACTIVE` imediatamente: `await this.queueClient.markJobActive(job.id, job.attempts, job.props.processedAt!, lockToken);`.
+
+        3.  **Execução do `jobProcessor`:**
+            *   Invocar a função `jobProcessor` configurada, passando a instância do `Job` (agora no estado `ACTIVE` e persistido), o `lockToken`, e a instância do `this.queueClient`.
             ```typescript
             // Exemplo da chamada dentro do Worker:
             // const jobProcessor = this.configuredJobProcessor;
             // try {
-            //   const result = await jobProcessor(job, lockToken, this.queueClient); // Passando queueClient
+            //   const result = await jobProcessor(job, lockToken, this.queueClient);
+            //   // Se chegou aqui, o jobProcessor concluiu sem lançar erros de controle de fluxo (DelayedError, etc.)
+            //   // O jobProcessor NÃO chama job.complete() diretamente. Ele retorna o resultado.
             //   await this.queueClient.completeJob(job.id, result, lockToken);
             // } catch (error) {
             //   // ... tratamento de erro detalhado abaixo ...
             // }
             ```
+
         4.  **Tratamento de Resultado/Erro do `jobProcessor`:**
-            *   **Conclusão Normal:** Se o `jobProcessor` retorna um valor sem lançar exceções especiais, o `Worker` considera o job bem-sucedido. Ele chama `await this.queueClient.completeJob(job.id, resultFromProcessor, lockToken)`.
-            *   **`DelayedError` Lançado pelo `jobProcessor`:** Indica que o `jobProcessor` já utilizou o `queueClient` (passado a ele) para invocar `queueClient.moveJobToDelayedInQueue(job.id, delayUntil, lockToken)`. O `Worker` apenas registra este evento e não tenta alterar o estado do job novamente.
-            *   **`WaitingChildrenError` Lançado pelo `jobProcessor`:** Similar ao `DelayedError`. O `jobProcessor` sinaliza que o job foi movido para `WAITING_CHILDREN` através do `queueClient`. O `Worker` apenas registra.
-            *   **Outras Exceções (Falhas Reais):** Se o `jobProcessor` lança qualquer outra exceção, o `Worker` considera uma falha. Ele chama `await this.queueClient.failJob(job.id, error.message, job.attempts, lockToken)`. A lógica de retentativa (com backoff) é gerenciada pela implementação do `failJob` no `QueueClient` (que por sua vez usa o `IQueueRepository`), que pode mover o job para `DELAYED` ou `PENDING` se mais tentativas forem permitidas, ou para `FAILED` permanentemente.
-        5.  **Ciclo de Vida:** O `Worker` deve ser iniciado e parado graciosamente.
+            *   **Conclusão Normal:** Se o `jobProcessor` retorna um valor (`resultFromProcessor`) sem lançar exceções de controle de fluxo:
+                1.  O `Worker` chama `await this.queueClient.completeJob(job.id, resultFromProcessor, lockToken)` para persistir o estado `COMPLETED`, o resultado, e liberar o lock.
+            *   **`DelayedError` Lançado pelo `jobProcessor`:**
+                1.  O `Worker` captura `DelayedError`.
+                2.  Isso sinaliza que o `jobProcessor` já utilizou `this.queueClient.moveToDelayed(...)` que, por sua vez, já persistiu o estado `DELAYED` e `delayUntil` do job e liberou o lock. O Worker apenas registra este evento.
+            *   **`WaitingChildrenError` Lançado pelo `jobProcessor`:**
+                1.  O `Worker` captura `WaitingChildrenError`.
+                2.  Similar ao `DelayedError`, o `jobProcessor` já utilizou `this.queueClient.moveToWaitingChildren(...)`. O Worker apenas registra.
+            *   **Outras Exceções (Falhas Reais):** Se o `jobProcessor` lança qualquer outra exceção:
+                1.  O `Worker` chama `job.fail(error.message)` para atualizar o estado da instância do `Job` em memória (principalmente para ter o log de erro e o status FAILED tentativo).
+                2.  O `Worker` então chama `await this.queueClient.failJob(job.id, error.message, job.attempts, job.props.maxAttempts, job.props.backoff, lockToken)`.
+                    A implementação de `failJob` no `QueueClient` (usando `IQueueRepository`) determinará se o job deve ser reenfileirado (com status `PENDING` ou `DELAYED` e `delayUntil` atualizado conforme backoff) ou movido para `FAILED` permanentemente, e liberará o lock. O `Worker` pode usar o resultado de `failJob` para atualizar sua instância `job` em memória, se necessário.
+
+        5.  **Liberação de Lock:** A responsabilidade de liberar o lock é primariamente dos métodos do `IQueueClient` (e por delegação, `IQueueRepository`) que finalizam um job (`completeJob`, `failJob`) ou o movem para um estado de espera (`moveToDelayed`, `moveToWaitingChildren`).
+
+        6.  **Ciclo de Vida:** O `Worker` deve ser iniciado e parado graciosamente.
 
         **Dependências do `Worker` (Fornecidas na Construção):**
         *   `workerId`: `string` (Um identificador único para esta instância do worker)
@@ -1382,43 +1463,43 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
        **Interface (Exemplo):**
        ```typescript
        // domain/repositories/i-queue.client.ts (ou similar)
-       import { Job } from '../entities/job.entity';
-       import { JobData } from './i-queue.repository'; // Supondo que JobData venha do IQueueRepository
+       import { Job } from '@/domain/entities/job.entity'; // Ajustar caminho
+       import { JobData, BackoffOptions, JobStatusVO } from './i-queue.repository'; // Ajustar caminho
 
        export interface IQueueClient {
          readonly queueName: string;
 
-         // Métodos para o Worker
+         // Métodos para o Worker obter e finalizar jobs
          getNextJob(workerId: string): Promise<{ job: Job; lockToken: string } | null>;
+         markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string): Promise<void>;
          completeJob(jobId: string, result: any, workerToken: string): Promise<void>;
-         failJob(jobId: string, error: string, jobAttempts: number, workerToken: string): Promise<void>;
-         // jobAttempts é o número atual de tentativas do job, para o IQueueRepository decidir sobre retentativas
+         failJob(
+            jobId: string,
+            error: string,
+            currentAttempts: number,
+            maxAttempts: number,
+            backoffOptions: BackoffOptions | undefined,
+            workerToken: string
+         ): Promise<{ newStatus: JobStatusVO; newDelayUntil?: Date; newAttempts: number }>;
 
-         // Métodos para o jobProcessor (passados através do Worker)
-         // Estes métodos são chamados pelo jobProcessor e usam o workerToken para autorização.
-         updateJobDataInQueue(jobId: string, data: JobData, workerToken: string): Promise<void>;
-         moveJobToDelayedInQueue(jobId: string, delayUntilTimestamp: number, workerToken: string): Promise<void>;
-         moveJobToWaitingChildrenInQueue(jobId: string, workerToken: string): Promise<boolean>;
+         // Métodos para o jobProcessor interagir com o job atual
+         updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void>;
+         moveToDelayed(jobId: string, delayUntilTimestamp: number, workerToken: string): Promise<void>;
+         moveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean>;
        }
        ```
 
        **Implementação Conceitual (`QueueClient`):**
        ```typescript
        // infrastructure/persistence/queue/queue.client.ts
-       import { IQueueClient } from '@/domain/repositories/i-queue.client';
-       import { IQueueRepository, JobData } from '@/domain/repositories/i-queue.repository';
-       import { Job } from '@/domain/entities/job.entity';
-       import { injectable, inject, named } from 'inversify'; // @injectable e @inject se for gerenciado por DI com params
-                                                       // ou instanciado programaticamente.
-
-       // @injectable() // Se for ser injetado com assistência para 'queueName'
+       // ... (importações como IQueueClient, IQueueRepository, Job, JobData, BackoffOptions, JobStatusVO) ...
        export class QueueClient implements IQueueClient {
          public readonly queueName: string;
          private queueRepository: IQueueRepository;
 
          constructor(
-           queueName: string, // Nome da fila específica
-           queueRepository: IQueueRepository // Instância do repositório geral
+           queueName: string,
+           queueRepository: IQueueRepository
          ) {
            this.queueName = queueName;
            this.queueRepository = queueRepository;
@@ -1428,28 +1509,34 @@ A arquitetura de Worker/Fila dedicada por agente requer um sistema para gerencia
            return this.queueRepository.findNextPending(this.queueName, workerId);
          }
 
+         async markJobActive(jobId: string, attempts: number, processedAt: Date, workerToken: string): Promise<void> {
+            return this.queueRepository.markJobActive(jobId, attempts, processedAt, workerToken);
+         }
+
          async completeJob(jobId: string, result: any, workerToken: string): Promise<void> {
-           // A entidade Job em si já teria sido atualizada para COMPLETED pelo Worker/jobProcessor.
-           // O queueRepository.save(job) já teria persistido isso.
-           // Este método aqui seria mais para liberar o lock e talvez uma atualização final de status.
-           // Ou, a lógica de job.complete() e save() poderia ser movida para cá.
-           // Por ora, vamos focar em que o IQueueRepository tem o método.
            return this.queueRepository.completeJob(jobId, result, workerToken);
          }
 
-         async failJob(jobId: string, error: string, jobAttempts: number, workerToken: string): Promise<void> {
-           return this.queueRepository.failJob(jobId, error, jobAttempts, workerToken);
+         async failJob(
+            jobId: string,
+            error: string,
+            currentAttempts: number,
+            maxAttempts: number,
+            backoffOptions: BackoffOptions | undefined,
+            workerToken: string
+         ): Promise<{ newStatus: JobStatusVO; newDelayUntil?: Date; newAttempts: number }> {
+           return this.queueRepository.failJob(jobId, error, currentAttempts, maxAttempts, backoffOptions, workerToken);
          }
 
-         async updateJobDataInQueue(jobId: string, data: JobData, workerToken: string): Promise<void> {
+         async updateJobData(jobId: string, data: JobData, workerToken: string): Promise<void> {
            return this.queueRepository.updateJobData(jobId, data, workerToken);
          }
 
-         async moveJobToDelayedInQueue(jobId: string, delayUntilTimestamp: number, workerToken: string): Promise<void> {
+         async moveToDelayed(jobId: string, delayUntilTimestamp: number, workerToken: string): Promise<void> {
            return this.queueRepository.requestMoveToDelayed(jobId, workerToken, delayUntilTimestamp);
          }
 
-         async moveJobToWaitingChildrenInQueue(jobId: string, workerToken: string): Promise<boolean> {
+         async moveToWaitingChildren(jobId: string, workerToken: string): Promise<boolean> {
            return this.queueRepository.requestMoveToWaitingChildren(jobId, workerToken);
          }
        }
