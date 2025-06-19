@@ -1,0 +1,57 @@
+appId: com.projectwiz.src2
+productName: ProjectWiz2
+directories:
+  output: release/${version}
+  buildResources: buildResources # pasta para assets como ícones
+files:
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
+  - "!{.idea,vite*,tsconfig*,eslint*,prettier*,*.iml}"
+  - "dist/electron/**/*" # Inclui main e preload processados
+  - "dist/renderer/**/*" # Inclui renderer processado
+  - "package.json"
+asarUnpack:
+  - "**/*.{node,dll}"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        # - ia32 # se precisar de 32-bit
+  icon: buildResources/icon.ico
+nsis:
+  artifactName: ${productName}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  category: public.app-category.developer-tools
+  icon: buildResources/icon.icns
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  maintainer: projectwiz.dev
+  category: Development
+  icon: buildResources/icon.png
+  # Configurações para deb
+  # desktop:
+  #   StartupWMClass: project-wiz-src2 # Garante que o ícone correto seja usado no dock/launcher
+publish: null # null para não publicar, ou configure para GitHub, etc.
+npmRebuild: false # Não é sempre necessário com Vite, mas pode ser útil
+# Extra Resources - se precisar copiar arquivos adicionais para dentro do app empacotado
+# extraResources:
+#   - from: "./path/to/extra/file"
+#     to: "file"
+#   - from: "./path/to/extra/folder"
+#     to: "folder"
+#     filter: ["**/*", "!**/README.md"]

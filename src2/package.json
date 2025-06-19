@@ -1,0 +1,50 @@
+{
+  "name": "project-wiz-src2",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build:renderer": "tsc -p tsconfig.app.json && vite build --config vite.renderer.config.ts",
+    "build:main": "tsc -p tsconfig.node.json && vite build --config vite.main.config.ts",
+    "build:preload": "tsc -p tsconfig.node.json && vite build --config vite.preload.config.ts",
+    "build": "npm run build:renderer && npm run build:main && npm run build:preload",
+    "start": "electron .",
+    "electron:dev": "cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "dev:electron": "vite --config vite.renderer.config.ts",
+    "app:dev": "concurrently \"npm run dev:electron\" \"wait-on http://127.0.0.1:5173 && npm run electron:dev\"",
+    "app:build": "npm run build && electron-builder",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "better-sqlite3": "^11.1.2",
+    "drizzle-orm": "^0.32.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react-swc": "^3.7.0",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.23.2",
+    "electron": "^31.3.0",
+    "electron-builder": "^25.0.3",
+    "eslint": "^9.25.0",
+    "globals": "^16.0.0",
+    "typescript": "~5.5.4",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^5.4.2",
+    "vitest": "^2.0.5",
+    "wait-on": "^8.0.3"
+  }
+}
