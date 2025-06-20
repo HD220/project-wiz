@@ -1,10 +1,11 @@
 // src/infrastructure/tools/execute-command.tool.ts
 import { injectable, inject } from 'inversify';
-import { ITool, ToolParameter } from '@/domain/services/i-tool-registry.service';
+import { ITool } from '@/domain/services/i-tool-registry.service'; // ITool now expects parametersSchema
 import { ILoggerService } from '@/domain/services/i-logger.service';
 import { TYPES } from '@/infrastructure/ioc/types';
 import { exec, ExecOptions } from 'child_process';
 import * as path from 'path';
+import { z } from 'zod'; // Added
 
 // This should be configured securely, e.g., per-job worktree or a designated workspace.
 // It MUST NOT be a general-purpose command execution tool without strict sandboxing.
@@ -15,12 +16,13 @@ const DEFAULT_WORKING_DIR = process.env.AGENT_COMMAND_WORKING_DIR || './agent_co
 export class ExecuteCommandTool implements ITool {
   readonly name = "execute_command";
   readonly description = "Executes a shell command in a sandboxed environment. Use with extreme caution.";
-  readonly parameters: ToolParameter[] = [
-    { name: "command", type: "string", description: "The shell command to execute.", required: true },
-    { name: "args", type: "array", description: "Array of arguments for the command.", required: false, schema: { type: "array", items: { type: "string" } } },
-    { name: "working_directory", type: "string", description: "Relative path for the command's working directory within the allowed workspace. Defaults to agent's root workspace.", required: false },
-    { name: "timeout", type: "number", description: "Timeout in milliseconds for the command execution.", required: false },
-  ];
+
+  readonly parametersSchema = z.object({
+    command: z.string().min(1, "Command is required."),
+    args: z.array(z.string()).optional().default([]), // Defaults to empty array if not provided
+    working_directory: z.string().optional(),
+    timeout: z.number().int().positive("Timeout must be a positive integer.").optional().default(60000), // Default 60s
+  });
 
   constructor(@inject(TYPES.ILoggerService) private logger: ILoggerService) {
     this.logger.info(`[ExecuteCommandTool] Initialized. Default working directory: ${path.resolve(DEFAULT_WORKING_DIR)}`);
@@ -46,7 +48,7 @@ export class ExecuteCommandTool implements ITool {
 
     // Ensure the directory exists
     try {
-        const fsPromises = require('fs/promises');
+        const fsPromises = require('fs/promises'); // Use require for fs/promises as well for consistency if needed
         await fsPromises.mkdir(finalDir, { recursive: true });
     } catch (e: any) {
         if (e.code !== 'EEXIST') throw e;
@@ -54,48 +56,40 @@ export class ExecuteCommandTool implements ITool {
     return finalDir;
   }
 
-  async execute(args: {
-    command: string;
-    args?: string[];
-    working_directory?: string;
-    timeout?: number;
-  }): Promise<any> {
-    if (!args.command) {
-      throw new Error("Command is required.");
-    }
+  // Updated execute method signature
+  async execute(args: z.infer<typeof this.parametersSchema>): Promise<any> {
+    // Command presence is validated by Zod if ToolRegistry parses first.
 
     // Security: Basic validation to prevent some obvious misuse.
     // This is NOT a comprehensive security solution.
-    // A more robust solution would involve allowlisting commands, using containers, etc.
     const forbiddenCommands = ['rm -rf /', 'mkfs', '>', '<', '|', '&&', ';']; // Very basic list
     if (forbiddenCommands.some(fc => args.command.includes(fc))) {
         this.logger.error(`[ExecuteCommandTool] Potentially dangerous command detected: ${args.command}`);
         throw new Error("Command contains potentially dangerous characters or patterns.");
     }
     // Further validation: disallow relative paths in command itself, e.g. `../some_script`
-    if (args.command.match(/\.\.|\//) && !args.command.startsWith("git")) { // Allow git commands that might have slashes
-        // This is a simplistic check. A proper path resolution and check against allowed paths is better.
-        // For now, we rely on the working_directory sandboxing.
-        // this.logger.error(`[ExecuteCommandTool] Command should not contain path elements: ${args.command}`);
-        // throw new Error("Command should not contain path elements. Use working_directory for context.");
-    }
-
+    // This check was commented out in the prompt, retaining that.
+    // if (args.command.match(/\.\.|\//) && !args.command.startsWith("git")) {
+    //     this.logger.error(`[ExecuteCommandTool] Command should not contain path elements: ${args.command}`);
+    //     throw new Error("Command should not contain path elements. Use working_directory for context.");
+    // }
 
     const safeWorkingDirectory = await this.resolveSafeWorkingDirectory(args.working_directory);
-    const commandToExecute = args.args ? `${args.command} ${args.args.join(' ')}` : args.command;
 
-    this.logger.info(`[ExecuteCommandTool] Executing command: "${commandToExecute}" in directory: "${safeWorkingDirectory}"`);
+    // args.args and args.timeout have defaults from Zod schema
+    const commandToExecute = args.args.length > 0 ? `${args.command} ${args.args.join(' ')}` : args.command;
+
+    this.logger.info(`[ExecuteCommandTool] Executing command: "${commandToExecute}" in directory: "${safeWorkingDirectory}" with timeout ${args.timeout}ms`);
 
     const execOptions: ExecOptions = {
       cwd: safeWorkingDirectory,
-      timeout: args.timeout || 60000, // Default timeout 60 seconds
+      timeout: args.timeout, // Use Zod-provided default if args.timeout was undefined
     };
 
     return new Promise((resolve, reject) => {
       exec(commandToExecute, execOptions, (error, stdout, stderr) => {
         if (error) {
           this.logger.error(`[ExecuteCommandTool] Error executing command: "${commandToExecute}". Code: ${error.code}. Stderr: ${stderr.trim()}`);
-          // Include stderr in the error passed to the LLM for better debugging
           reject(new Error(`Command failed with code ${error.code}: ${error.message}. Stderr: ${stderr.trim()}`));
           return;
         }
@@ -103,7 +97,6 @@ export class ExecuteCommandTool implements ITool {
         resolve({
           stdout: stdout.trim(),
           stderr: stderr.trim(),
-          // Potentially add exit code if needed, though error implies non-zero
         });
       });
     });

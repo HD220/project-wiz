@@ -1,58 +1,69 @@
 // src/domain/services/i-llm.service.ts
 
-// Based on common patterns, e.g., Vercel AI SDK or OpenAI's structure
-export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string | null; // Content is null if tool_calls are present for assistant
-  toolCalls?: { // For assistant messages requesting tool use
-    id: string; // Tool call ID
-    type: 'function'; // Currently, only 'function' is supported by many models
-    function: {
-      name: string;
-      arguments: string; // JSON string of arguments
-    };
-  }[];
-  toolCallId?: string; // For tool messages, the ID of the tool call being responded to
-  name?: string; // For tool messages, the name of the tool that was called
+// Base for tool invocation by assistant
+export interface ToolInvocation {
+  toolCallId: string; // Unique ID for this specific tool call instance
+  toolName: string;   // The name of the tool to be called
+  args: any;          // Arguments for the tool, ideally a structured object
 }
+
+// System Message
+export interface SystemMessage {
+  role: 'system';
+  content: string;
+}
+
+// User Message
+export interface UserMessage {
+  role: 'user';
+  content: string;
+  // Vercel AI SDK also allows `experimental_attachments` here
+}
+
+// Assistant Message
+export interface AssistantMessage {
+  role: 'assistant';
+  content: string | null; // Can be null if making tool calls
+  toolInvocations?: ToolInvocation[]; // Replaces old toolCalls, aligns with Vercel AI SDK
+  // Vercel AI SDK also has `ui` for assistant-provided UI elements
+}
+
+// Tool Message (response from a tool execution)
+export interface ToolMessage {
+  role: 'tool';
+  toolCallId: string; // The ID of the tool call this is a result for
+  toolName?: string;   // The name of the tool that was called (optional, but good for context)
+  content: string;    // The result of the tool execution, often stringified JSON
+}
+
+export type ChatMessage = SystemMessage | UserMessage | AssistantMessage | ToolMessage;
 
 export interface LLMToolDefinition {
   type: 'function';
   function: {
     name: string;
     description: string;
-    parameters: object; // JSON schema object for parameters
+    parameters: object; // JSON schema object
   };
 }
 
 export interface LLMStreamRequest {
-  modelId: string;
-  systemPrompt?: string; // Optional, can be part of messages array
+  modelId: string; // Now expected to be a provider-prefixed ID, e.g., "openai/gpt-4-turbo" or a registered custom model ID
+  systemPrompt?: string;
   messages: ChatMessage[];
   tools?: LLMToolDefinition[];
   temperature?: number;
   maxTokens?: number;
-  // Add other common parameters like topP, presencePenalty, frequencyPenalty etc.
+  // other params...
 }
 
-// Represents parts of a streamed response
-export type LLMStreamEvent =
+export type RevisedLLMStreamEvent =
   | { type: 'text-delta'; textDelta: string }
-  | { type: 'tool-call-delta'; toolCallId: string, toolName?: string, argsChunk?: string } // For streaming tool call arguments
-  | { type: 'tool-call'; toolCallId: string, toolName: string, args: string } // Complete tool call
+  | { type: 'tool-call'; toolInvocation: ToolInvocation }
   | { type: 'llm-error'; error: string }
-  | { type: 'stream-end'; finishReason?: string }; // e.g. 'stop', 'length', 'tool_calls'
+  | { type: 'stream-end'; finishReason?: string };
+
 
 export interface ILLMService {
-  /**
-   * Streams text and tool calls from an LLM based on the provided messages and configuration.
-   *
-   * @param params The parameters for the LLM request.
-   * @returns An AsyncIterable that yields LLMStreamEvents as they are received.
-   */
-  streamText(params: LLMStreamRequest): Promise<AsyncIterable<LLMStreamEvent>>;
-
-  // TODO: Consider adding a non-streaming variant if needed for simpler use cases,
-  // e.g., generateText(params: LLMTextRequest): Promise<LLMTextResponse>;
-  // For now, focusing on streaming as it's more versatile for agent interactions.
+  streamText(params: LLMStreamRequest): Promise<AsyncIterable<RevisedLLMStreamEvent>>;
 }

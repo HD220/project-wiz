@@ -33,22 +33,19 @@ export class AgentLifecycleService implements IAgentLifecycleService {
       this.logger.info(`[AgentLifecycleService] Found ${agents.length} agent(s) to initialize.`);
 
       for (const agent of agents) {
-        if (!agent.props.queueName) {
-          this.logger.error(`[AgentLifecycleService] Agent ${agent.id} (${agent.name}) has no queueName configured. Skipping.`);
-          continue;
-        }
+        // The check for agent.props.queueName is no longer needed.
+        // The agent's ID is guaranteed to exist.
         if (this.workers.has(agent.id)) {
             this.logger.warn(`[AgentLifecycleService] Worker for agent ${agent.id} (${agent.name}) is already initialized. Skipping.`);
             continue;
         }
 
-        this.logger.info(`[AgentLifecycleService] Initializing agent ${agent.id} (${agent.name}) for queue '${agent.props.queueName}'...`);
+        this.logger.info(`[AgentLifecycleService] Initializing agent ${agent.id} (${agent.name}) for its queue (id: '${agent.id}')...`);
 
-        const queueClient = new QueueClient(agent.props.queueName, this.jobRepository);
+        const queueClient = new QueueClient(agent.id, this.jobRepository, this.logger); // Use agent.id as queueName
         const jobProcessor = this.aiAgentExecutionService.getJobProcessorForAgent(agent.id);
 
-        // Worker ID can be more descriptive, e.g., linking to agent ID and queue name
-        const workerId = `agent-worker-${agent.id}-${agent.props.queueName}`;
+        const workerId = `agent-worker-${agent.id}`; // Worker ID can be simplified
 
         const worker = new GenericWorker(
           workerId,
@@ -61,7 +58,7 @@ export class AgentLifecycleService implements IAgentLifecycleService {
         try {
           worker.start();
           this.workers.set(agent.id, worker);
-          this.logger.info(`[AgentLifecycleService] Worker for agent ${agent.id} (${agent.name}) started successfully for queue '${agent.props.queueName}'.`);
+          this.logger.info(`[AgentLifecycleService] Worker for agent ${agent.id} (${agent.name}) started successfully for queue '${agent.id}'.`);
         } catch (startError: any) {
           this.logger.error(`[AgentLifecycleService] Failed to start worker for agent ${agent.id} (${agent.name}): ${startError.message}`, startError.stack);
         }

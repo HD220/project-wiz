@@ -1,5 +1,5 @@
 // src/domain/ports/queue/i-queue.client.ts
-import { Job } from '@/domain/entities/job.entity';
+import { Job, JobProps } from '@/domain/entities/job.entity'; // Ensure JobProps is imported or defined adequately for Omit
 
 export interface IQueueClient {
   readonly queueName: string;
@@ -21,4 +21,12 @@ export interface IQueueClient {
    * @param workerToken The lock token that the Worker holds for this job.
    */
   saveJobState(job: Job, workerToken: string): Promise<void>;
+
+  /**
+   * Enqueues a new job to the queue associated with this client.
+   * @param jobDetails Object containing details for the new job,
+   *                   excluding id, status, createdAt, updatedAt, attempts, and queueName (which is implicit).
+   * @returns A promise for the created Job entity.
+   */
+  enqueue(jobDetails: Omit<JobProps, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'attempts' | 'queueName'>): Promise<Job>;
 }

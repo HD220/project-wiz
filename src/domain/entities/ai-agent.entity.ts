@@ -6,11 +6,11 @@ export interface AIAgentProps {
   id: string;
   name: string;
   roleDescription: string; // For the system prompt
-  modelId: string; // e.g., 'deepseek-coder', 'gpt-4-turbo'
-  provider: string; // e.g., 'deepseek', 'openai'
+  modelId: string; // Provider-prefixed model ID, e.g., "openai/gpt-4-turbo", "anthropic/claude-3-opus". Also used for custom models registered with the provider registry.
+  provider: string; // DEPRECATED if modelId is provider-prefixed. Kept for now for compatibility or specific provider logic if needed.
   temperature?: number; // LLM temperature
   availableTools: string[]; // List of tool names available to this agent
-  queueName: string; // The specific queue this agent listens to
+  // queueName: string; // REMOVED - Agent ID will be used as queue name
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,20 +30,20 @@ export class AIAgent {
     provider: string;
     temperature?: number;
     availableTools?: string[];
-    queueName: string; // Must be provided during creation
+    // queueName: string; // REMOVED from params
   }): AIAgent {
     const now = new Date();
-    const id = params.id || `agent-${randomUUID()}`;
+    const id = params.id || `agent-${randomUUID()}`; // randomUUID needs to be imported
 
     return new AIAgent({
       id,
       name: params.name,
       roleDescription: params.roleDescription,
       modelId: params.modelId,
-      provider: params.provider,
+      provider: params.provider, // Keep or remove based on modelId strategy
       temperature: params.temperature ?? 0.7, // Default temperature
       availableTools: params.availableTools || [],
-      queueName: params.queueName,
+      // queueName: params.queueName, // REMOVED from props assignment
       createdAt: now,
       updatedAt: now,
     });
@@ -57,7 +57,7 @@ export class AIAgent {
   get provider(): string { return this.props.provider; }
   get temperature(): number | undefined { return this.props.temperature; }
   get availableTools(): string[] { return this.props.availableTools; }
-  get queueName(): string { return this.props.queueName; }
+  // get queueName(): string { return this.props.queueName; } // REMOVED
 
   // Example of a method to update certain properties, returning a new instance (immutable pattern)
   public updateSettings(params: {

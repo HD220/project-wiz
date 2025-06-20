@@ -9,6 +9,7 @@ import { ILoggerService } from '@/domain/services/i-logger.service';
 import { EnqueueJobUseCase, EnqueueJobInput } from '@/domain/use-cases/job/enqueue-job.use-case';
 import { IAIAgentRepository } from '@/domain/repositories/i-ai-agent.repository';
 import { AIAgent } from '@/domain/entities/ai-agent.entity';
+import { ChatMessage } from '@/domain/services/i-llm.service'; // Added for chat payload type
 
 let mainWindow: BrowserWindow | null = null;
 const logger = container.get<ILoggerService>(TYPES.ILoggerService);
@@ -88,6 +89,53 @@ function setupIPCHandlers() {
       return { success: true, data: result };
     } catch (error: any) {
       logger.error(`[IPC] Error handling 'enqueue-job': ${error.message}`, error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Handler for sending a message to an agent and initiating a stream
+  ipcMain.handle('chat:sendMessage', async (event, payload: { agentId: string; messages: ChatMessage[]; options?: Record<string, any> }) => {
+    const { agentId, messages, options } = payload;
+    logger.info(`[IPC] Received 'chat:sendMessage' for agent ${agentId}. Messages: ${messages.length}`);
+
+    try {
+      const agentRepo = container.get<IAIAgentRepository>(TYPES.IAIAgentRepository);
+      const agentProfile = await agentRepo.findById(agentId);
+      if (!agentProfile) {
+        logger.error(`[IPC] Agent ${agentId} not found for chat:sendMessage.`);
+        return { success: false, error: `Agent ${agentId} not found.` };
+      }
+
+      const enqueueJobUseCase = container.get<EnqueueJobUseCase>(TYPES.EnqueueJobUseCase);
+      const jobInput: EnqueueJobInput = {
+        queueName: agentProfile.id, // Use agentId as queueName (or agentProfile.props.queueName if distinct)
+        jobName: options?.jobName || `ProcessChatMessageStream-${agentId}`,
+        taskPayload: {
+          chatMessages: messages,
+          isStreamRequested: true,
+          // Include a way to identify the sender for stream routing if multiple windows/senders
+          // For simplicity, we assume stream events are broadcast or handled by a single main window context for now.
+          // A robust solution might involve senderId: event.sender.id (if available and useful)
+          ...(options || {})
+        },
+      };
+
+      const enqueueResult = await enqueueJobUseCase.execute(jobInput);
+      logger.info(`[IPC] Chat message enqueued as job ${enqueueResult.jobId} for agent ${agentId}.`);
+
+      // Conceptual: The AIAgentExecutionService for this job, upon receiving the stream from SdkLlmService,
+      // would need to send 'chat:streamEvent' events back to the renderer.
+      // This could be done if AIAgentExecutionService has access to `mainWindow.webContents.send` or similar.
+      // e.g., inside AIAgentExecutionService, after getting a stream part from SdkLlmService:
+      // if (mainWindow && job.payload.isStreamRequested) { // Check if stream is for this UI
+      //    mainWindow.webContents.send('chat:streamEvent', streamPart);
+      // }
+      // This is a simplification; a more robust system might use an event bus or dedicated IPC stream manager.
+
+      return { success: true, data: { jobId: enqueueResult.jobId, message: "Chat message enqueued, stream will follow on 'chat:streamEvent'." } };
+
+    } catch (error: any) {
+      logger.error(`[IPC] Error in 'chat:sendMessage': ${error.message}`, error);
       return { success: false, error: error.message };
     }
   });

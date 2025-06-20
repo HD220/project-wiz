@@ -1,8 +1,8 @@
 // src/domain/use-cases/job/enqueue-job.use-case.ts
 import { injectable, inject } from 'inversify';
 import { TYPES } from '@/infrastructure/ioc/types';
-import { IJobRepository } from '@/domain/repositories/i-job.repository';
-import { Job } from '@/domain/entities/job.entity'; // Adjusted path
+import { IQueueClientFactory } from '@/domain/ports/queue/i-queue-client.factory';
+import { Job } from '@/domain/entities/job.entity'; // Remains for EnqueueJobOutput type context
 
 export interface EnqueueJobInput {
   queueName: string;
@@ -24,7 +24,7 @@ export interface EnqueueJobOutput {
 @injectable()
 export class EnqueueJobUseCase {
   constructor(
-    @inject(TYPES.IJobRepository) private jobRepository: IJobRepository
+    @inject(TYPES.IQueueClientFactory) private queueClientFactory: IQueueClientFactory
   ) {}
 
   async execute(input: EnqueueJobInput): Promise<EnqueueJobOutput> {
@@ -34,27 +34,30 @@ export class EnqueueJobUseCase {
     if (!input.jobName || input.jobName.trim().length === 0) {
       throw new Error('Job name must be provided.');
     }
-    // In a real scenario, taskPayload might have stricter validation based on jobName
     if (input.taskPayload === undefined) {
       throw new Error('Task payload must be provided.');
     }
 
-    const job = Job.create({
+    const queueClient = this.queueClientFactory.getClient(input.queueName);
+
+    // Prepare details for the QueueClient's enqueue method
+    // It expects Omit<JobProps, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'attempts' | 'queueName'>
+    // which aligns with the parameters Job.create() takes (excluding queueName, which queueClient handles).
+    const jobDetailsToEnqueue = {
       name: input.jobName,
-      queueName: input.queueName,
-      payload: input.taskPayload, // Maps taskPayload from input to payload in Job entity
+      payload: input.taskPayload,
       priority: input.priority,
       delayUntil: input.delayUntil,
       maxAttempts: input.maxAttempts,
       parentId: input.parentId,
-      initialData: input.initialJobData, // Maps initialJobData from input to initialData in Job entity
-    });
+      initialData: input.initialJobData,
+    };
 
-    await this.jobRepository.add(job);
+    const job = await queueClient.enqueue(jobDetailsToEnqueue);
 
     return {
       jobId: job.id,
-      status: job.status, // Accesses the getter on the Job instance
+      status: job.status,
       queueName: job.props.queueName,
     };
   }

@@ -11,6 +11,9 @@ import { ILLMService } from '@/domain/services/i-llm.service'; // Corrected path
 import { IToolRegistry } from '@/domain/services/i-tool-registry.service'; // Corrected path from docs
 import { ILoggerService } from '@/domain/services/i-logger.service'; // Corrected path from docs
 import { IAgentLifecycleService } from '@/domain/services/i-agent-lifecycle.service';
+import { IQueueClientFactory } from '@/domain/ports/queue/i-queue-client.factory';
+import { ILLMProviderRegistry } from '@/infrastructure/services/llm/llm-provider.registry'; // Path to the new interface
+import { IEmbeddingService } from '@/domain/services/i-embedding.service';
 
 // --- Domain Layer Implementations (Use Cases are implementations) ---
 import { EnqueueJobUseCase } from '@/domain/use-cases/job/enqueue-job.use-case';
@@ -21,9 +24,13 @@ import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/repos
 import { InMemoryAIAgentRepository } from '@/infrastructure/persistence/in-memory/repositories/ai-agent.repository';
 import { InMemoryProjectRepository } from '@/infrastructure/persistence/in-memory/repositories/project.repository';
 import { AIAgentExecutionService } from '@/domain/services/agent/ai-agent-execution.service';
-import { DeepSeekLLMService } from '@/infrastructure/services/llm/deepseek.service';
+// import { DeepSeekLLMService } from '@/infrastructure/services/llm/deepseek.service'; // Old
+import { SdkLlmService } from '@/infrastructure/services/llm/sdk-llm.service'; // New
+import { SdkEmbeddingService } from '@/infrastructure/services/ai/sdk-embedding.service'; // New Embedding Service
 import { ToolRegistry } from '@/infrastructure/services/tool-registry/tool-registry';
 import { AgentLifecycleService } from '@/infrastructure/services/agent-lifecycle/agent-lifecycle.service';
+import { QueueClientFactory } from '@/infrastructure/queue/queue-client.factory';
+import { LLMProviderRegistryService } from '@/infrastructure/services/llm/llm-provider.registry'; // Path to the new service
 import { FileSystemTool } from '@/infrastructure/tools/filesystem.tool';
 import { ExecuteCommandTool } from '@/infrastructure/tools/execute-command.tool';
 // Placeholder/Dummy implementations for now, actual ones will be in later phases
@@ -48,10 +55,13 @@ container.bind<IProjectRepository>(TYPES.IProjectRepository).to(InMemoryProjectR
 container.bind<IAIAgentExecutionService>(TYPES.IAIAgentExecutionService).to(AIAgentExecutionService);
 
 // --- Bindings for Infrastructure Services ---
-container.bind<ILLMService>(TYPES.ILLMService).to(DeepSeekLLMService);
+container.bind<ILLMService>(TYPES.ILLMService).to(SdkLlmService).inSingletonScope(); // New
 container.bind<IToolRegistry>(TYPES.IToolRegistry).to(ToolRegistry);
 container.bind<ILoggerService>(TYPES.ILoggerService).to(ConsoleLoggerService);
 container.bind<IAgentLifecycleService>(TYPES.IAgentLifecycleService).to(AgentLifecycleService);
+container.bind<IQueueClientFactory>(TYPES.IQueueClientFactory).to(QueueClientFactory).inSingletonScope();
+container.bind<ILLMProviderRegistry>(TYPES.ILLMProviderRegistry).to(LLMProviderRegistryService).inSingletonScope();
+container.bind<IEmbeddingService>(TYPES.IEmbeddingService).to(SdkEmbeddingService).inSingletonScope();
 
 // --- Bindings for Use Cases ---
 // Use Cases are often better as transient if they have state or are short-lived operations.

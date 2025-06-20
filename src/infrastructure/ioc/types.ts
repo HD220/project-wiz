@@ -13,6 +13,9 @@ const TYPES = {
   IToolRegistry: Symbol.for('IToolRegistry'),
   ILoggerService: Symbol.for('ILoggerService'),
   IAgentLifecycleService: Symbol.for('IAgentLifecycleService'),
+  IQueueClientFactory: Symbol.for('IQueueClientFactory'),
+  ILLMProviderRegistry: Symbol.for('ILLMProviderRegistry'),
+  IEmbeddingService: Symbol.for('IEmbeddingService'),
   // IQueueClient is not globally injected, but instantiated with parameters.
 
   // Casos de Uso

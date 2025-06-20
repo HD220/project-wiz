@@ -1,10 +1,11 @@
 // src/infrastructure/tools/filesystem.tool.ts
 import { injectable, inject } from 'inversify';
-import { ITool, ToolParameter } from '@/domain/services/i-tool-registry.service';
+import { ITool } from '@/domain/services/i-tool-registry.service'; // ITool now expects parametersSchema
 import { ILoggerService } from '@/domain/services/i-logger.service';
 import { TYPES } from '@/infrastructure/ioc/types';
 import * as fs from 'fs/promises'; // Using fs/promises for async operations
 import * as path from 'path';
+import { z } from 'zod'; // Added
 
 // Define a base path to restrict operations, this is CRUCIAL for security.
 // This should be configured securely, e.g., per-job worktree or a designated workspace.
@@ -18,10 +19,9 @@ async function resolveSafely(unsafePath: string): Promise<string> {
   if (!resolvedPath.startsWith(path.resolve(SAFE_BASE_PATH))) {
     throw new Error(`Path traversal attempt detected. Access denied for path: ${unsafePath}`);
   }
-  // Create base directory if it doesn't exist (for write operations)
-  // This is a simplified way; more robust checks might be needed.
+  // Create base directory if it doesn't exist
   try {
-    await fs.mkdir(SAFE_BASE_PATH, { recursive: true });
+    await fs.mkdir(path.resolve(SAFE_BASE_PATH), { recursive: true });
   } catch (e: any) {
     if (e.code !== 'EEXIST') throw e; // Ignore if directory already exists
   }
@@ -33,50 +33,61 @@ async function resolveSafely(unsafePath: string): Promise<string> {
 export class FileSystemTool implements ITool {
   readonly name = "file_system_tool";
   readonly description = "Perform file system operations like reading, writing, and listing files/directories within a sandboxed environment.";
-  readonly parameters: ToolParameter[] = [
-    { name: "operation", type: "string", description: "The operation to perform: 'read', 'write', 'list', 'mkdir', 'delete_file', 'delete_dir'", required: true },
-    { name: "path", type: "string", description: "Relative path to the file or directory within the agent's workspace.", required: true },
-    { name: "content", type: "string", description: "Content to write (for 'write' operation). Base64 encoded for binary.", required: false },
-    { name: "recursive", type: "boolean", description: "Recursive operation (for 'list' or 'delete_dir').", required: false },
-    { name: "encoding", type: "string", description: "Encoding for read/write operations (e.g., 'utf8', 'base64'). Default: 'utf8'", required: false },
-  ];
+
+  // NEW Zod schema for parameters
+  readonly parametersSchema = z.object({
+    operation: z.enum(['read', 'write', 'list', 'mkdir', 'delete_file', 'delete_dir']),
+    path: z.string().min(1, "Path is required."), // Zod handles the non-empty check
+    content: z.string().optional(),
+    recursive: z.boolean().optional().default(false), // Default for optional booleans is good practice
+    encoding: z.custom<BufferEncoding>((val) => typeof val === 'string', { // Basic check for string
+        message: "Encoding must be a string if provided",
+    }).optional().default('utf8'),
+  });
 
   constructor(@inject(TYPES.ILoggerService) private logger: ILoggerService) {
     this.logger.info(`[FileSystemTool] Initialized. Base path: ${path.resolve(SAFE_BASE_PATH)}`);
   }
 
-  async execute(args: {
-    operation: 'read' | 'write' | 'list' | 'mkdir' | 'delete_file' | 'delete_dir';
-    path: string;
-    content?: string;
-    recursive?: boolean;
-    encoding?: BufferEncoding;
-  }): Promise<any> {
-    this.logger.info(`[FileSystemTool] Executing operation '${args.operation}' on path '${args.path}'`);
-    if (!args.path) throw new Error("Path is required.");
+  // Updated execute method signature
+  async execute(args: z.infer<typeof this.parametersSchema>): Promise<any> {
+    // Accessing args.encoding is safe due to .default('utf8') in schema
+    this.logger.info(`[FileSystemTool] Executing operation '${args.operation}' on path '${args.path}' with encoding '${args.encoding}'`);
+
+    // Path validation (non-empty) is now handled by Zod schema if ToolRegistry validates before calling.
+    // For safety, if called directly, args.path would be validated by Zod's inference.
 
     const safePath = await resolveSafely(args.path);
-    const encoding = args.encoding || 'utf8';
 
     switch (args.operation) {
       case 'read':
         try {
-          const content = await fs.readFile(safePath, { encoding });
+          const content = await fs.readFile(safePath, { encoding: args.encoding });
           return content;
         } catch (error: any) {
           this.logger.error(`[FileSystemTool] Error reading file ${safePath}: ${error.message}`);
-          throw error;
+          throw error; // Re-throw the original error for the caller to handle
         }
 
       case 'write':
-        if (args.content === undefined || args.content === null) throw new Error("Content is required for write operation.");
+        if (args.content === undefined) { // Content is optional in schema overall, but logically required for 'write'
+             this.logger.error("[FileSystemTool] Content is required for write operation but was not provided.");
+             throw new Error("Content is required for write operation.");
+        }
         try {
-          // Ensure parent directory exists
+          // Ensure parent directory exists within SAFE_BASE_PATH
           const parentDir = path.dirname(safePath);
-          if (parentDir !== SAFE_BASE_PATH && parentDir !== path.resolve(SAFE_BASE_PATH)) { // Avoid trying to create SAFE_BASE_PATH itself via dirname
+          if (parentDir.startsWith(path.resolve(SAFE_BASE_PATH)) && parentDir !== path.resolve(SAFE_BASE_PATH)) {
              await fs.mkdir(parentDir, { recursive: true });
+          } else if (!parentDir.startsWith(path.resolve(SAFE_BASE_PATH))) {
+            // This case should ideally be caught by resolveSafely if safePath itself is correct,
+            // but double-checking dirname is an extra layer if safePath is SAFE_BASE_PATH/file.txt
+            this.logger.error(`[FileSystemTool] Attempt to write to a directory structure outside sandbox: ${parentDir}`);
+            throw new Error("Cannot write to a directory structure outside the sandboxed environment.");
           }
-          await fs.writeFile(safePath, args.content, { encoding });
+          // If parentDir is SAFE_BASE_PATH, fs.mkdir would have ensured it exists or this call is fine.
+
+          await fs.writeFile(safePath, args.content, { encoding: args.encoding });
           return `File written successfully to ${args.path}`;
         } catch (error: any) {
           this.logger.error(`[FileSystemTool] Error writing file ${safePath}: ${error.message}`);
@@ -98,7 +109,7 @@ export class FileSystemTool implements ITool {
 
       case 'mkdir':
         try {
-          await fs.mkdir(safePath, { recursive: args.recursive ?? false });
+          await fs.mkdir(safePath, { recursive: args.recursive }); // args.recursive has default from Zod
           return `Directory created successfully at ${args.path}`;
         } catch (error: any) {
           this.logger.error(`[FileSystemTool] Error creating directory ${safePath}: ${error.message}`);
@@ -107,7 +118,7 @@ export class FileSystemTool implements ITool {
 
       case 'delete_file':
         try {
-          await fs.unlink(safePath); // fs.rm for files in newer Node, but unlink is common
+          await fs.unlink(safePath);
           return `File deleted successfully from ${args.path}`;
         } catch (error: any) {
           this.logger.error(`[FileSystemTool] Error deleting file ${safePath}: ${error.message}`);
@@ -116,26 +127,24 @@ export class FileSystemTool implements ITool {
 
       case 'delete_dir':
         try {
-          await fs.rmdir(safePath, { recursive: args.recursive ?? false }); // fs.rm in newer Node
+          // Using fs.rmdir for consistency with prompt, though fs.rm is more modern.
+          // args.recursive has its default from Zod.
+          await fs.rmdir(safePath, { recursive: args.recursive });
           return `Directory deleted successfully from ${args.path}`;
         } catch (error: any) {
           this.logger.error(`[FileSystemTool] Error deleting directory ${safePath}: ${error.message}`);
-          // Add specific check for ENOTEMPTY if not recursive and dir not empty
           if (error.code === 'ENOTEMPTY' && !args.recursive) {
-            throw new Error(`Directory ${args.path} is not empty. Use recursive option to delete.`);
+            throw new Error(`Directory '${args.path}' is not empty. Use recursive option to delete or ensure it's empty.`);
           }
           throw error;
         }
 
       default:
-        this.logger.warn(`[FileSystemTool] Unknown operation: ${args.operation}`);
-        throw new Error(`Unknown file system operation: ${args.operation}`);
+        // This case should ideally not be reached if the operation enum is exhaustive
+        // and Zod validation is performed by the caller (ToolRegistry).
+        const exhaustiveCheck: never = args.operation;
+        this.logger.error(`[FileSystemTool] Unknown operation encountered: ${exhaustiveCheck}`);
+        throw new Error(`Unknown file system operation: ${exhaustiveCheck}`);
     }
   }
 }
-
-// Ensure the tool is registered with the ToolRegistry.
-// This would typically be done in the inversify.config.ts or a similar setup file
-// by resolving the ToolRegistry and calling registerTool.
-// For now, the ToolRegistry auto-registers its dummy tools.
-// A more robust system would involve explicitly registering this FileSystemTool.

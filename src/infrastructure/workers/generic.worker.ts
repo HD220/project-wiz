@@ -28,7 +28,7 @@ export class GenericWorker {
   private logger: ILoggerService;
   private isRunning: boolean = false;
   private pollingInterval: number;
-  private processTimeout: NodeJS.Timeout | null = null;
+  // private processTimeout: NodeJS.Timeout | null = null; // Removed
 
   constructor(
     workerId: string | null, // Allow null for auto-generation
@@ -47,98 +47,97 @@ export class GenericWorker {
     this.logger = logger;
     this.pollingInterval = pollingIntervalMs;
 
-    this.logger.info(`Worker ${this.workerId} initialized for queue ${this.queueClient.queueName}. Polling interval: ${this.pollingInterval}ms.`);
+    this.logger.info(`[GenericWorker:${this.workerId}] Initialized for queue ${this.queueClient.queueName}. Polling interval: ${this.pollingInterval}ms.`);
   }
 
   start(): void {
     if (this.isRunning) {
-      this.logger.warn(`Worker ${this.workerId} is already running.`);
+      this.logger.warn(`[GenericWorker:${this.workerId}] is already running.`);
       return;
     }
     this.isRunning = true;
-    this.logger.info(`Worker ${this.workerId} started.`);
-    this.poll();
+    this.logger.info(`[GenericWorker:${this.workerId}] started.`);
+    this.runLoop().catch(err => {
+      this.logger.error(`[GenericWorker:${this.workerId}] Critical error in runLoop: ${err.message}`, err.stack);
+      // TODO: Handle critical loop failure, maybe try to restart or log prominently
+    });
   }
 
   async stop(): Promise<void> {
     this.isRunning = false;
-    if (this.processTimeout) {
-      clearTimeout(this.processTimeout);
-      this.processTimeout = null;
-    }
-    this.logger.info(`Worker ${this.workerId} stopping...`);
+    // Removed clearTimeout logic for processTimeout
+    this.logger.info(`[GenericWorker:${this.workerId}] stopping...`);
     // Potentially add logic here to wait for an active job to finish, with a timeout.
-    // For now, it just stops polling and new job processing.
   }
 
-  private async poll(): Promise<void> {
-    if (!this.isRunning) {
-      return;
-    }
-
-    try {
-      await this.processNextJob();
-    } catch (error: any) {
-      this.logger.error(`Worker ${this.workerId}: Error during poll/processNextJob: ${error.message}`, error.stack);
-    } finally {
-      if (this.isRunning) {
-        this.processTimeout = setTimeout(() => this.poll(), this.pollingInterval);
+  private async runLoop(): Promise<void> {
+    this.logger.info(`[GenericWorker:${this.workerId}] Run loop started.`);
+    while (this.isRunning) {
+      try {
+        const jobFoundAndAttempted = await this.processNextJob();
+        if (!jobFoundAndAttempted) {
+          // No job was found, wait before trying again
+          if (this.isRunning) { // Check isRunning again before sleep
+            this.logger.debug(`[GenericWorker:${this.workerId}] No job processed, sleeping for ${this.pollingInterval}ms.`);
+            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+          }
+        }
+        // If a job was found and attempted, loop immediately to check for the next one.
+      } catch (error: any) {
+        // This catch is for unexpected errors within processNextJob itself if it doesn't handle them internally
+        // or errors in the delay mechanism.
+        this.logger.error(`[GenericWorker:${this.workerId}] Error in runLoop's iteration: ${error.message}`, error.stack);
+        // Avoid fast error loops if the error is persistent
+        if (this.isRunning) {
+          await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+        }
       }
     }
+    this.logger.info(`[GenericWorker:${this.workerId}] Run loop stopped.`);
   }
 
-  private async processNextJob(): Promise<void> {
-    this.logger.debug(`Worker ${this.workerId}: Polling for jobs on queue '${this.queueClient.queueName}'.`);
+  private async processNextJob(): Promise<boolean> { // Return boolean: true if job found and processed, false otherwise
+    this.logger.debug(`[GenericWorker:${this.workerId}] Checking for jobs on queue '${this.queueClient.queueName}'.`);
     const result = await this.queueClient.getNextJob(this.workerId);
 
     if (!result) {
-      this.logger.debug(`Worker ${this.workerId}: No job found in queue '${this.queueClient.queueName}'.`);
-      return;
+      this.logger.debug(`[GenericWorker:${this.workerId}] No job found in queue '${this.queueClient.queueName}'.`);
+      return false; // No job found
     }
 
     const { job, lockToken } = result;
-    this.logger.info(`Worker ${this.workerId}: Picked up job ${job.id} (name: ${job.name}, attempts: ${job.props.attempts}) from queue '${job.queueName}'. Lock token: ${lockToken.substring(0,8)}...`);
+    this.logger.info(`[GenericWorker:${this.workerId}] Picked up job ${job.id} (name: ${job.name}, attempts: ${job.props.attempts}) from queue '${job.queueName}'. Lock token: ${lockToken.substring(0,8)}...`);
 
     try {
       job.startProcessing(); // Update job state in memory
       await this.queueClient.saveJobState(job, lockToken); // Persist ACTIVE state
-      this.logger.info(`Worker ${this.workerId}: Job ${job.id} marked as ACTIVE.`);
+      this.logger.info(`[GenericWorker:${this.workerId}] Job ${job.id} marked as ACTIVE.`);
 
       const processingResult = await this.jobProcessor(job);
 
-      // If jobProcessor completes without throwing a specific error (DelayedError, WaitingChildrenError)
-      // it's considered a successful completion.
       job.complete(processingResult);
-      this.logger.info(`Worker ${this.workerId}: Job ${job.id} completed successfully. Result: ${JSON.stringify(processingResult)}`);
+      this.logger.info(`[GenericWorker:${this.workerId}] Job ${job.id} completed successfully. Result: ${JSON.stringify(processingResult)}`);
 
     } catch (error: any) {
-      this.logger.warn(`Worker ${this.workerId}: Error while processing job ${job.id}. Error type: ${error.name}, message: ${error.message}`);
+      this.logger.warn(`[GenericWorker:${this.workerId}] Error while processing job ${job.id}. Error type: ${error.name}, message: ${error.message}`);
 
       if (error instanceof DelayedError) {
-        // Job was already prepared for delay by job.prepareForDelay() called within jobProcessor
-        this.logger.info(`Worker ${this.workerId}: Job ${job.id} signaled for delay. Current delayUntil: ${job.props.delayUntil}`);
-        // The job's state (DELAYED, delayUntil) is already set in memory by job.prepareForDelay()
+        this.logger.info(`[GenericWorker:${this.workerId}] Job ${job.id} signaled for delay. Current delayUntil: ${job.props.delayUntil}`);
       } else if (error instanceof WaitingChildrenError) {
-        // Job was already prepared by job.prepareToWaitForChildren()
-        this.logger.info(`Worker ${this.workerId}: Job ${job.id} signaled to wait for children.`);
-        // The job's state (WAITING_CHILDREN) is already set in memory
+        this.logger.info(`[GenericWorker:${this.workerId}] Job ${job.id} signaled to wait for children.`);
       } else {
-        // Generic error from jobProcessor or other issues
         job.fail(error.message || 'Unknown error during job processing');
-        this.logger.error(`Worker ${this.workerId}: Job ${job.id} failed. Error: ${error.message}`, error.stack);
+        this.logger.error(`[GenericWorker:${this.workerId}] Job ${job.id} failed. Error: ${error.message}`, error.stack);
       }
     } finally {
       // Always attempt to save the final state of the job
       try {
         await this.queueClient.saveJobState(job, lockToken);
-        this.logger.info(`Worker ${this.workerId}: Final state for job ${job.id} (status: ${job.status}) saved.`);
-        // The IJobRepository.save implementation is responsible for releasing the lock
-        // for terminal states (COMPLETED, FAILED without retries) or re-queued states (DELAYED, PENDING).
+        this.logger.info(`[GenericWorker:${this.workerId}] Final state for job ${job.id} (status: ${job.status}) saved.`);
       } catch (saveError: any) {
-        this.logger.error(`Worker ${this.workerId}: CRITICAL - Failed to save final state for job ${job.id}. Error: ${saveError.message}`, saveError.stack);
-        // This is a critical situation. The job might be stuck or processed multiple times.
-        // Implement further alerting or recovery logic here if necessary.
+        this.logger.error(`[GenericWorker:${this.workerId}] CRITICAL - Failed to save final state for job ${job.id}. Error: ${saveError.message}`, saveError.stack);
       }
     }
+    return true; // A job was found and processing was attempted
   }
 }

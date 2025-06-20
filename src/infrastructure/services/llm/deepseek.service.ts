@@ -4,9 +4,10 @@ import { injectable, inject } from 'inversify';
 import {
   ILLMService,
   LLMStreamRequest,
-  LLMStreamEvent,
-  ChatMessage,
+  RevisedLLMStreamEvent, // Changed from LLMStreamEvent
+  ChatMessage, // This type is now a discriminated union from i-llm.service.ts
   LLMToolDefinition,
+  ToolInvocation, // Imported for the new event structure
 } from '@/domain/services/i-llm.service';
 import { ILoggerService } from '@/domain/services/i-logger.service';
 import { TYPES } from '@/infrastructure/ioc/types';
@@ -30,7 +31,7 @@ export class DeepSeekLLMService implements ILLMService {
     }
   }
 
-  async *streamText(params: LLMStreamRequest): AsyncIterable<LLMStreamEvent> {
+  async *streamText(params: LLMStreamRequest): AsyncIterable<RevisedLLMStreamEvent> { // Changed return type
     this.logger.info(`[DeepSeekLLMService] streamText called with model ${params.modelId}. Messages count: ${params.messages.length}`);
     this.logger.debug(`[DeepSeekLLMService] Params: ${JSON.stringify(params, null, 2)}`);
 
@@ -61,11 +62,14 @@ export class DeepSeekLLMService implements ILLMService {
         const toolCallId = `tool_call_${Date.now()}`;
         this.logger.info(`[DeepSeekLLMService] Simulating tool call for: ${toolToCall.function.name}`);
 
-        yield {
-            type: 'tool-call',
+        const toolInvocation: ToolInvocation = {
             toolCallId: toolCallId,
             toolName: toolToCall.function.name,
-            args: JSON.stringify({ message: "Simulated arguments for " + toolToCall.function.name })
+            args: { message: "Simulated arguments for " + toolToCall.function.name } // args should be an object
+        };
+        yield {
+            type: 'tool-call',
+            toolInvocation: toolInvocation
         };
         await new Promise(resolve => setTimeout(resolve, 50));
         yield { type: 'stream-end', finishReason: 'tool_calls' };
