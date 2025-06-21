@@ -5,18 +5,35 @@ export type LLMModelConstructor = {
   name: LLMModelName;
   slug: LLMModelSlug;
 };
-export class LLMModel {
-  constructor(private readonly fields: LLMModelConstructor) {}
 
-  get id() {
+// TODO: OBJECT_CALISTHENICS_REFACTOR: This class is undergoing refactoring.
+// The `getProps()` method is a temporary measure for external consumers.
+// Ideally, direct state access will be replaced by more behavior-oriented methods.
+export class LLMModel {
+  constructor(private readonly fields: LLMModelConstructor) {
+    if (!fields.id || !fields.name || !fields.slug) {
+      throw new Error("LLMModel ID, Name, and Slug are mandatory.");
+    }
+  }
+
+  public id(): LLMModelId {
     return this.fields.id;
   }
 
-  get name() {
-    return this.fields.name;
+  public getProps(): Readonly<LLMModelConstructor> {
+    return { ...this.fields };
   }
 
-  get slug() {
-    return this.fields.slug;
+  // Individual getters name, slug removed. id getter replaced by id() method.
+
+  public equals(other?: LLMModel): boolean {
+    if (this === other) return true;
+    if (!other || !(other instanceof LLMModel)) return false;
+
+    return (
+      this.fields.id.equals(other.fields.id) &&
+      this.fields.name.equals(other.fields.name) &&
+      this.fields.slug.equals(other.fields.slug)
+    );
   }
 }

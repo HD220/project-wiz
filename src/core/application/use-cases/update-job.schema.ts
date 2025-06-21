@@ -31,8 +31,10 @@ export type UpdateJobUseCaseInput = z.infer<typeof UpdateJobInputSchema>;
 
 export const UpdateJobOutputSchema = z.object({
   id: z.string().uuid(),
-  status: jobStatusSchema, // Alterado para jobStatusSchema
+  name: z.string(), // Added name to output
+  status: jobStatusSchema,
   updatedAt: z.date(),
+  // Add other fields if they are part of the expected output
 });
 
 export type UpdateJobUseCaseOutput = z.infer<typeof UpdateJobOutputSchema>;

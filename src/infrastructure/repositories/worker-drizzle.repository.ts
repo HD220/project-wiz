@@ -1,130 +1,139 @@
-import { Result, ok, error } from "../../shared/result";
-import { Worker } from "../../core/domain/entities/worker/worker.entity";
-import { WorkerId } from "../../core/domain/entities/worker/value-objects/worker-id.vo";
-import { WorkerRepository } from "../../core/application/ports/worker-repository.interface";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import { workers } from "../../infrastructure/services/drizzle/schemas/workers";
-import { eq, sql } from "drizzle-orm";
-import { WorkerStatus } from "../../core/domain/entities/worker/value-objects/worker-status.vo";
+// src/infrastructure/repositories/worker-drizzle.repository.ts
+import { Result, ok, error } from '@/shared/result';
+import { IWorkerRepository } from '@/core/ports/repositories/worker.repository.interface';
+import { Worker, WorkerConstructor } from '@/core/domain/entities/worker/worker.entity';
+import {
+    WorkerId,
+    WorkerName,
+    WorkerStatus,
+    WorkerStatusType // Import enum for casting if needed
+} from '@/core/domain/entities/worker/value-objects';
+import { JobTimestamp } from '@/core/domain/entities/job/value-objects/job-timestamp.vo';
+import { workersTable, WorkerDbInsert, WorkerDbSelect } from '../services/drizzle/schemas/workers'; // Use workersTable
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { eq } from 'drizzle-orm';
+import { DomainError } from '@/core/common/errors';
 
-export class WorkerDrizzleRepository implements WorkerRepository {
-  constructor(
-    private readonly db: BetterSQLite3Database<Record<string, never>>
-  ) {}
+type DBSchema = { workersTable: typeof workersTable; /* ... other tables ... */ };
 
-  async create(worker: Worker): Promise<Result<Worker>> {
-    try {
-      await this.db.insert(workers).values({
-        id: sql`${worker.id.value}`,
-        name: sql`${worker.name}`,
-        status: sql`${worker.status.value}`,
-        created_at: sql`${worker.createdAt.toISOString()}`,
-        updated_at: worker.updatedAt
-          ? sql`${worker.updatedAt.toISOString()}`
-          : undefined,
-      });
+export class WorkerDrizzleRepository implements IWorkerRepository {
+    constructor(private readonly db: BetterSQLite3Database<DBSchema>) {}
 
-      return ok(worker);
-    } catch (err) {
-      return error(
-        `Failed to create worker: ${err instanceof Error ? err.message : String(err)}`
-      );
+    private toEntity(row: WorkerDbSelect): Worker {
+        const props: WorkerConstructor = {
+            id: WorkerId.create(row.id),
+            name: WorkerName.create(row.name),
+            status: WorkerStatus.create(row.status as WorkerStatusType), // Cast if status from DB is string
+            createdAt: JobTimestamp.create(new Date(row.createdAt)),
+            updatedAt: row.updatedAt ? JobTimestamp.create(new Date(row.updatedAt)) : undefined,
+        };
+        return Worker.create(props); // Use static create method of the Worker entity
     }
-  }
 
-  async findById(id: WorkerId): Promise<Result<Worker>> {
-    try {
-      const result = await this.db
-        .select()
-        .from(workers)
-        .where(eq(workers.id, sql`${id.value}`))
-        .get();
-
-      if (!result) {
-        return error("Worker not found");
-      }
-
-      const worker = new Worker({
-        id: new WorkerId(result.id),
-        name: result.name,
-        status: new WorkerStatus(result.status),
-        createdAt: new Date(result.created_at),
-        updatedAt: result.updated_at ? new Date(result.updated_at) : undefined,
-      });
-
-      return ok(worker);
-    } catch (err) {
-      return error(
-        `Failed to find worker: ${err instanceof Error ? err.message : String(err)}`
-      );
+    private toPersistence(worker: Worker): WorkerDbInsert {
+        const props = worker.getProps();
+        return {
+            id: worker.id().getValue(),
+            name: props.name.getValue(),
+            status: props.status.getValue(), // This is WorkerStatusType (string enum)
+            createdAt: props.createdAt.getValue(), // Drizzle handles Date to timestamp_ms
+            updatedAt: props.updatedAt?.getValue(),
+        };
     }
-  }
 
-  async update(worker: Worker): Promise<Result<Worker>> {
-    try {
-      const changes = await this.db
-        .update(workers)
-        .set({
-          name: worker.name,
-          status: sql`${worker.status.value}`,
-          updated_at: new Date().toISOString(),
-        })
-        .where(eq(workers.id, sql`${worker.id.value}`))
-        .run();
-
-      if (changes.changes === 0) {
-        return error("Worker not found or no changes made");
-      }
-
-      return ok(worker);
-    } catch (err) {
-      return error(
-        `Failed to update worker: ${err instanceof Error ? err.message : String(err)}`
-      );
+    async save(worker: Worker): Promise<Result<Worker>> {
+        try {
+            const data = this.toPersistence(worker);
+            await this.db.insert(workersTable).values(data)
+                .onConflictDoUpdate({ target: workersTable.id, set: data });
+            return ok(worker);
+        } catch (e) {
+            console.error("Error saving worker:", e);
+            return error(new DomainError("Failed to save worker.", e instanceof Error ? e : undefined));
+        }
     }
-  }
 
-  async delete(id: WorkerId): Promise<Result<void>> {
-    try {
-      const changes = await this.db
-        .delete(workers)
-        .where(eq(workers.id, sql`${id.value}`))
-        .run();
-
-      if (changes.changes === 0) {
-        return error("Worker not found");
-      }
-
-      return ok(undefined);
-    } catch (err) {
-      return error(
-        `Failed to delete worker: ${err instanceof Error ? err.message : String(err)}`
-      );
+    async load(id: WorkerId): Promise<Result<Worker | null>> {
+        try {
+            const results = await this.db.select().from(workersTable)
+                .where(eq(workersTable.id, id.getValue()))
+                .limit(1);
+            if (results.length === 0) {
+                return ok(null);
+            }
+            return ok(this.toEntity(results[0]));
+        } catch (e) {
+            console.error(`Error loading worker ${id.getValue()}:`, e);
+            return error(new DomainError("Failed to load worker.", e instanceof Error ? e : undefined));
+        }
     }
-  }
 
-  async list(): Promise<Result<Worker[]>> {
-    try {
-      const results = await this.db.select().from(workers).all();
-
-      const workersList = results.map(
-        (result) =>
-          new Worker({
-            id: new WorkerId(result.id),
-            name: result.name,
-            status: new WorkerStatus(result.status),
-            createdAt: new Date(result.created_at),
-            updatedAt: result.updated_at
-              ? new Date(result.updated_at)
-              : undefined,
-          })
-      );
-
-      return ok(workersList);
-    } catch (err) {
-      return error(
-        `Failed to list workers: ${err instanceof Error ? err.message : String(err)}`
-      );
+    async findFirstAvailable(): Promise<Result<Worker | null>> {
+        try {
+            const results = await this.db.select().from(workersTable)
+                .where(eq(workersTable.status, WorkerStatus.createAvailable().getValue())) // Compare with primitive status value
+                .limit(1);
+            if (results.length === 0) {
+                return ok(null);
+            }
+            return ok(this.toEntity(results[0]));
+        } catch (e) {
+            console.error("Error finding available worker:", e);
+            return error(new DomainError("Failed to find available worker.", e instanceof Error ? e : undefined));
+        }
     }
-  }
+
+    // Standard IRepository methods
+    async findById(id: WorkerId): Promise<Result<Worker | null>> {
+        return this.load(id);
+    }
+
+    async create(props: Omit<WorkerConstructor, "id">): Promise<Result<Worker>> {
+        try {
+            const id = WorkerId.create(); // Generate new ID
+            const fullProps: WorkerConstructor = {
+                id,
+                name: props.name, // Already WorkerName VO
+                status: props.status, // Already WorkerStatus VO
+                createdAt: props.createdAt, // Already JobTimestamp VO
+                updatedAt: props.updatedAt // Optional JobTimestamp VO
+            };
+            const worker = Worker.create(fullProps);
+            return this.save(worker);
+        } catch (e) {
+             console.error("Error creating worker via repository:", e);
+             return error(new DomainError("Failed to create worker via repository.", e instanceof Error ? e : undefined));
+        }
+    }
+
+    async update(worker: Worker): Promise<Result<Worker>> {
+        return this.save(worker);
+    }
+
+    async list(): Promise<Result<Worker[]>> {
+        try {
+            const results = await this.db.select().from(workersTable).all();
+            const workers = results.map(row => this.toEntity(row));
+            return ok(workers);
+        } catch (e) {
+            console.error("Error listing workers:", e);
+            return error(new DomainError("Failed to list workers.", e instanceof Error ? e : undefined));
+        }
+    }
+
+    async delete(id: WorkerId): Promise<Result<void>> {
+        try {
+            const result = await this.db.delete(workersTable)
+                .where(eq(workersTable.id, id.getValue()))
+                .returning({ id: workersTable.id });
+
+            if (result.length === 0) {
+                 return error(new DomainError(`Worker with id ${id.getValue()} not found for deletion.`));
+            }
+            return ok(undefined);
+        } catch (e) {
+            console.error(`Error deleting worker ${id.getValue()}:`, e);
+            return error(new DomainError("Failed to delete worker.", e instanceof Error ? e : undefined));
+        }
+    }
 }

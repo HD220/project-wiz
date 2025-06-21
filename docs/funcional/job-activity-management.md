@@ -6,7 +6,7 @@ Project Wiz uses a system of Jobs (which represent Activities, as per ADR 001) t
 
 - **Job/Activity Creation:**
     - The `CreateJobUseCase` allows the creation of new Jobs. Key input parameters include `activityType`, `context` (which holds the `ActivityContext`), `parentId` (for sub-tasks/jobs), and `relatedActivityIds`.
-    - The `Job` entity includes fields for `payload` (though `context` seems preferred for structured data like `ActivityContext`), `retryPolicy`, `priority`, and `dependsOn` (an array of Job IDs).
+    - The `Job` entity includes fields for `payload` (though `context` seems preferred for structured data like `ActivityContext`), `retryPolicy`, `priority`, and `dependsOn` (an array of Job IDs). A entidade `Job` no código é ainda mais rica, incluindo também `name` (um nome descritivo para o Job), `attempts` (número de tentativas de execução), `createdAt` e `updatedAt` (timestamps), `metadata` (para dados diversos não estruturados), `result` (para armazenar o resultado da execução do Job), `activityType` (para classificar o tipo de atividade), `parentId` (para encadear jobs hierarquicamente), e `relatedActivityIds` (para vincular atividades relacionadas).
     - `ActivityContext` is associated with each Job, typically within the `Job.context` field (as per `CreateJobUseCase` using `withContext`). It contains:
         - `messageContent`: Initial instruction or message.
         - `sender`: Origin of the message.
@@ -18,13 +18,14 @@ Project Wiz uses a system of Jobs (which represent Activities, as per ADR 001) t
         - `validationCriteria`: Criteria for successful completion.
         - `validationResult`: Outcome of validation.
         - `activityHistory`: Log of interactions and results within this Activity.
+        - O `ActivityContext` é um objeto dinâmico; por exemplo, novas entradas no `activityHistory` e `activityNotes` são adicionadas conforme o Job progride.
 - **Job Update:**
     - The `UpdateJobUseCase` allows for modification of existing Jobs. Updatable fields likely include status, context, payload, and potentially priority or retry counts.
 - **Job Cancellation:**
     - The `CancelJobUseCase` provides functionality to cancel a Job, presumably moving it to a `canceled` status and preventing further execution.
 
 - **Job Lifecycle and Queue Management:**
-    - **Status Management:** The `Job` entity has methods like `start()`, `complete()`, `fail()`, `markAsWaiting()`, `markAsPending()` to transition between statuses: `pending`, `executing`, `finished`, `failed`, `delayed`, `waiting`, `canceled`. The `JobQueue` service manages these transitions.
+    - **Status Management:** The `Job` entity has methods like `start()`, `complete()`, `fail()`, `toWaiting()`, `toPending()` to transition between statuses: `pending`, `executing`, `finished`, `failed`, `delayed`, `waiting`, `canceled`. The `JobQueue` service manages these transitions. A entidade `Job` também inclui lógica para garantir que as transições de status sejam válidas (e.g., não se pode passar de 'FINISHED' para 'EXECUTING').
     - **Retries:** The `Job` entity's `retryPolicy` (e.g., `maxRetries`, `currentAttempt`) and queue logic support retries for failed Jobs, typically with exponential backoff.
     - **Delays:** Jobs can be delayed; this is managed by the `JobQueue` and potentially a `runAt` field on the Job.
     - **Dependency Management:** The `Job` entity's `dependsOn` field stores IDs of prerequisite Jobs. The `JobQueue` is expected to manage these dependencies, holding Jobs in a `waiting` state until dependencies are met. The explicit logic for transitioning from `WAITING` to `PENDING` upon dependency completion (likely in `JobQueue.addJob` or a monitoring process) was not part of the direct tool review but is a core requirement (RF004).

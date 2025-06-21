@@ -5,9 +5,12 @@ import { ITool } from "@/core/application/tools/tool.interface";
 import { ILLM } from "@/core/application/llms/llm.interface";
 
 export abstract class BaseTask implements Task {
+import { TaskExecutionResult } from "@/core/ports/task.interface"; // Import the new result type
+
+export abstract class BaseTask implements Task {
   public abstract execute(
-    job: Job,
+    currentJob: Job, // Parameter name updated for clarity, matching interface
     tools?: ITool[],
     llm?: ILLM
-  ): Promise<Result<void>>;
+  ): Promise<Result<TaskExecutionResult>>; // Updated return type
 }

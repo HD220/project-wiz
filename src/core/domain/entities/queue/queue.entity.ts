@@ -1,59 +1,76 @@
 import { QueueId } from "./value-objects/queue-id.vo";
 import { QueueStatus } from "./value-objects/queue-status.vo";
 import { queueSchema } from "./queue.schema";
+import { QueueName } from "./value-objects/queue-name.vo"; // New VO
+import { JobTimestamp } from "../job/value-objects/job-timestamp.vo"; // Reused VO
+import { DomainError } from "@/core/common/errors";
 
+// Updated QueueProps
 type QueueProps = {
   id: QueueId;
-  name: string;
+  name: QueueName; // Changed
   status: QueueStatus;
-  createdAt: Date;
-  updatedAt?: Date;
+  createdAt: JobTimestamp; // Changed
+  updatedAt?: JobTimestamp; // Changed
 };
 
+// TODO: OBJECT_CALISTHENICS_REFACTOR: This class is undergoing refactoring.
+// The `getProps()` method is a temporary measure for external consumers.
+// Ideally, direct state access will be replaced by more behavior-oriented methods.
 export class Queue {
   constructor(private readonly fields: QueueProps) {
-    queueSchema.parse(fields);
+    if (!fields.id || !fields.name || !fields.status || !fields.createdAt) {
+      throw new DomainError("Queue ID, Name, Status, and CreatedAt are mandatory.");
+    }
+    // queueSchema.parse(fields); // TODO: Update queueSchema for VOs
   }
 
-  get id(): QueueId {
+  public id(): QueueId {
     return this.fields.id;
   }
 
-  get name(): string {
-    return this.fields.name;
+  public getProps(): Readonly<QueueProps> {
+    return { ...this.fields };
   }
 
-  get status(): QueueStatus {
-    return this.fields.status;
-  }
-
-  get createdAt(): Date {
-    return this.fields.createdAt;
-  }
-
-  get updatedAt(): Date | undefined {
-    return this.fields.updatedAt;
-  }
+  // Individual getters removed: name, status, createdAt, updatedAt
 
   activate(): Queue {
     return new QueueBuilder(this.fields)
-      .withStatus(new QueueStatus("ACTIVE"))
-      .withUpdatedAt(new Date())
+      .withStatus(QueueStatus.createActive()) // Use new static factory
+      .withUpdatedAt(JobTimestamp.now()) // Use JobTimestamp
       .build();
   }
 
   pause(): Queue {
     return new QueueBuilder(this.fields)
-      .withStatus(new QueueStatus("PAUSED"))
-      .withUpdatedAt(new Date())
+      .withStatus(QueueStatus.createPaused()) // Use new static factory
+      .withUpdatedAt(JobTimestamp.now()) // Use JobTimestamp
       .build();
   }
 
   drain(): Queue {
     return new QueueBuilder(this.fields)
-      .withStatus(new QueueStatus("DRAINING"))
-      .withUpdatedAt(new Date())
+      .withStatus(QueueStatus.createDraining()) // Use new static factory
+      .withUpdatedAt(JobTimestamp.now()) // Use JobTimestamp
       .build();
+  }
+
+  public equals(other?: Queue): boolean {
+    if (this === other) return true;
+    if (!other || !(other instanceof Queue)) return false;
+
+    const sameTimestamps = this.fields.updatedAt && other.fields.updatedAt
+      ? this.fields.updatedAt.equals(other.fields.updatedAt)
+      : this.fields.updatedAt === other.fields.updatedAt;
+
+    return (
+      this.fields.id.equals(other.fields.id) &&
+      this.fields.name.equals(other.fields.name) &&
+      this.fields.status.equals(other.fields.status) &&
+      this.fields.createdAt.equals(other.fields.createdAt) &&
+      sameTimestamps
+    );
   }
 }
 
@@ -62,6 +79,12 @@ export class QueueBuilder {
 
   constructor(fields?: Partial<QueueProps>) {
     this.fields = fields ? { ...fields } : {};
+    if (!this.fields.status) {
+      this.fields.status = QueueStatus.createPaused(); // Default to paused
+    }
+    if (!this.fields.createdAt) {
+      this.fields.createdAt = JobTimestamp.now(); // Default to now
+    }
   }
 
   withId(id: QueueId): QueueBuilder {
@@ -69,8 +92,8 @@ export class QueueBuilder {
     return this;
   }
 
-  withName(name: string): QueueBuilder {
-    this.fields.name = name;
+  withName(name: string): QueueBuilder { // Accepts primitive
+    this.fields.name = QueueName.create(name); // Creates VO
     return this;
   }
 
@@ -79,23 +102,31 @@ export class QueueBuilder {
     return this;
   }
 
-  withCreatedAt(createdAt: Date): QueueBuilder {
-    this.fields.createdAt = createdAt;
+  withCreatedAt(createdAt: Date): QueueBuilder { // Accepts primitive
+    this.fields.createdAt = JobTimestamp.create(createdAt); // Creates VO
     return this;
   }
 
-  withUpdatedAt(updatedAt: Date): QueueBuilder {
-    this.fields.updatedAt = updatedAt;
+  withUpdatedAt(updatedAt: Date): QueueBuilder { // Accepts primitive
+    this.fields.updatedAt = JobTimestamp.create(updatedAt); // Creates VO
     return this;
   }
 
   build(): Queue {
+    if (!this.fields.id) {
+      throw new DomainError("Queue ID is required to build a Queue.");
+    }
+    if (!this.fields.name) {
+      throw new DomainError("Queue Name is required to build a Queue.");
+    }
+    // Status and CreatedAt are defaulted by constructor.
+
     return new Queue({
-      id: this.fields.id!,
-      name: this.fields.name!,
-      status: this.fields.status!,
-      createdAt: this.fields.createdAt!,
-      updatedAt: this.fields.updatedAt,
+      id: this.fields.id as QueueId,
+      name: this.fields.name as QueueName,
+      status: this.fields.status as QueueStatus,
+      createdAt: this.fields.createdAt as JobTimestamp,
+      updatedAt: this.fields.updatedAt, // Already JobTimestamp | undefined
     });
   }
 }

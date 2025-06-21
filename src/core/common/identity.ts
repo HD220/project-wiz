@@ -5,16 +5,23 @@ export const identity = z.union([z.string().uuid(), z.number().int()]);
 export type IdentityType = z.infer<typeof identity>;
 
 export class Identity<T extends string | number> {
-  constructor(public readonly value: T) {
+  // Changed 'value' to '_value' and made it private
+  constructor(private readonly _value: T) {
     try {
-      identity.parse(value);
+      identity.parse(_value); // Validate _value
     } catch (error) {
       const validationError = error as ZodError;
       throw new DomainError(validationError.message, validationError.stack);
     }
   }
 
+  // Added getValue() method
+  public getValue(): T {
+    return this._value;
+  }
+
   equals(other: Identity<T>): boolean {
-    return this.value === other.value;
+    // Adjusted to use _value from both instances
+    return this._value === other._value;
   }
 }

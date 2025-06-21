@@ -21,6 +21,10 @@ export class JobStatus {
     return this.status;
   }
 
+  public is(statusValue: JobStatusType): boolean {
+    return this.status === statusValue;
+  }
+
   static create(status: JobStatusType): JobStatus {
     return new JobStatus(status);
   }

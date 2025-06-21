@@ -1,270 +1,205 @@
-import { Job } from "../../core/domain/entities/job/job.entity";
-import { JobId } from "../../core/domain/entities/job/value-objects/job-id.vo";
-import { ActivityType } from "../../core/domain/entities/job/value-objects/activity-type.vo";
-import { ActivityContext } from "../../core/domain/entities/job/value-objects/activity-context.vo";
-import {
-  JobStatus,
-  JobStatusType,
-} from "../../core/domain/entities/job/value-objects/job-status.vo";
-import { RetryPolicy } from "../../core/domain/entities/job/value-objects/retry-policy.vo";
-import { JobRepository } from "../../core/application/ports/job-repository.interface";
-import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import { eq, inArray, sql } from "drizzle-orm";
-import { jobs } from "../services/drizzle/schemas/jobs";
-import { Result, ok, error, Ok } from "../../shared/result";
-import { JobDependsOn } from "../../core/domain/entities/job/value-objects/job-depends-on.vo";
-import { JobPriority } from "../../core/domain/entities/job/value-objects/job-priority.vo";
+import { Result, ok, error } from '@/shared/result';
+import { IJobRepository } from '@/core/ports/repositories/job.repository.interface';
+import { Job } from '@/core/domain/entities/job/job.entity';
+import { JobBuilder } from '@/core/domain/entities/job/job-builder';
+import { DomainError } from '@/core/common/errors';
 
-class JobNotFoundError extends Error {
-  constructor(id: string) {
-    super(`Job with id ${id} not found`);
-    this.name = "JobNotFoundError";
-  }
-}
+// Value Object Imports
+import { JobId } from '@/core/domain/entities/job/value-objects/job-id.vo';
+import { JobName } from '@/core/domain/entities/job/value-objects/job-name.vo';
+import { JobStatus, JobStatusType } from '@/core/domain/entities/job/value-objects/job-status.vo';
+import { AttemptCount } from '@/core/domain/entities/job/value-objects/attempt-count.vo';
+import { JobTimestamp } from '@/core/domain/entities/job/value-objects/job-timestamp.vo';
+import { RetryPolicy, RetryPolicyParams } from '@/core/domain/entities/job/value-objects/retry-policy.vo';
+import { NoRetryPolicy } from '@/core/domain/entities/job/value-objects/no-retry-policy';
+import { IRetryPolicy } from '@/core/domain/entities/job/value-objects/retry-policy.interface';
+import { ActivityContext, ActivityContextPropsInput } from '@/core/domain/entities/job/value-objects/activity-context.vo';
+import { ActivityType } from '@/core/domain/entities/job/value-objects/activity-type.vo';
+import { JobPriority } from '@/core/domain/entities/job/value-objects/job-priority.vo';
+import { JobDependsOn } from '@/core/domain/entities/job/value-objects/job-depends-on.vo';
+import { RelatedActivityIds } from '@/core/domain/entities/job/value-objects/related-activity-ids.vo';
+import { AgentId } from '@/core/domain/entities/agent/value-objects/agent-id.vo';
+// Need these for reconstructing ActivityContext fully
+import { ActivityHistory } from '@/core/domain/entities/job/value-objects/activity-history.vo';
+import { ActivityHistoryEntry } from '@/core/domain/entities/job/value-objects/activity-history-entry.vo';
+import { ActivityNotes } from '@/core/domain/entities/job/value-objects/activity-notes.vo';
+import { ValidEntryRoles } from '@/core/domain/entities/job/value-objects/entry-role.vo';
+import { PlannedStepsCollection } from '@/core/domain/entities/job/value-objects/context-parts/planned-steps.collection';
+import { ValidationCriteriaCollection } from '@/core/domain/entities/job/value-objects/context-parts/validation-criteria.collection';
+import { ValidationStatus, ValidationStatusType } from '@/core/domain/entities/job/value-objects/context-parts/validation-status.vo';
 
-export class JobRepositoryDrizzle implements JobRepository {
-  constructor(
-    private readonly db: BetterSQLite3Database<Record<string, never>>
-  ) {}
 
-  private mapJobDataToEntity(jobData: typeof jobs.$inferSelect): Job {
-    return new Job({
-      id: new JobId(jobData.id),
-      name: jobData.name,
-      status: JobStatus.create(jobData.status as JobStatusType),
-      attempts: jobData.attempts,
-      retryPolicy: this.mapRetryPolicy(jobData),
-      createdAt: new Date(jobData.created_at),
-      updatedAt: this.mapUpdatedAt(jobData),
-      payload: this.parseJsonField(jobData.payload),
-      metadata: this.parseJsonField(jobData.data),
-      result: this.parseJsonField(jobData.result),
-      priority: this.mapPriority(jobData),
-      dependsOn: this.mapJobDependsOn(jobData),
-      activityType: this.mapActivityType(jobData),
-      context: this.mapActivityContext(jobData),
-      parentId: jobData.parent_id ? new JobId(jobData.parent_id) : undefined,
-      relatedActivityIds: this.mapRelatedActivityIds(jobData),
-    });
-  }
+import { jobsTable, JobDbInsert, JobDbSelect } from '../services/drizzle/schemas/jobs';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { eq, or, and, lte, asc } from 'drizzle-orm'; // Added Drizzle operators
 
-  private mapRetryPolicy(
-    jobData: typeof jobs.$inferSelect
-  ): RetryPolicy | undefined {
-    if (jobData.max_attempts === null || jobData.retry_delay === null) {
-      return undefined;
+type DBSchema = { jobsTable: typeof jobsTable; /* other tables */ };
+type DbTransaction = BetterSQLite3Database<DBSchema>; // Or the specific transaction type from Drizzle
+
+export class JobDrizzleRepository implements IJobRepository {
+    constructor(private readonly db: DbTransaction) {}
+
+    private toEntity(row: JobDbSelect): Job {
+        const props: JobProps = {
+            id: JobId.create(row.id),
+            name: JobName.create(row.name),
+            status: JobStatus.create(row.status as JobStatusType),
+            attempts: AttemptCount.create(row.attempts),
+            createdAt: JobTimestamp.create(new Date(row.createdAt)), // Drizzle returns Date for timestamp_ms
+            updatedAt: row.updatedAt ? JobTimestamp.create(new Date(row.updatedAt)) : undefined,
+
+            retryPolicy: row.retryPolicy ? RetryPolicy.create(row.retryPolicy as RetryPolicyParams) : NoRetryPolicy.create(),
+
+            payload: row.payload ? row.payload as Record<string, unknown> : undefined,
+            metadata: row.metadata ? row.metadata as Record<string, unknown> : undefined,
+            data: row.data ? row.data as Record<string, unknown> : undefined, // Assuming 'data' is a distinct field
+            result: row.result ? row.result : undefined,
+
+            priority: row.priority !== null && row.priority !== undefined ? JobPriority.create(row.priority) : undefined,
+
+            dependsOn: row.dependsOn ? JobDependsOn.create(row.dependsOn.map(idStr => JobId.create(idStr))) : undefined,
+
+            activityType: row.activityType ? ActivityType.create(row.activityType) : undefined,
+
+            context: row.context ? ActivityContext.create(row.context as ActivityContextPropsInput) : undefined,
+
+            parentId: row.parentId ? JobId.create(row.parentId) : undefined,
+
+            relatedActivityIds: row.relatedActivityIds
+                ? RelatedActivityIds.create(row.relatedActivityIds.map(idStr => JobId.create(idStr)))
+                : undefined,
+
+            agentId: row.agentId ? AgentId.create(row.agentId) : undefined,
+        };
+        return Job.create(props); // Use static create method of the Job entity
     }
-    return new RetryPolicy({
-      maxAttempts: jobData.max_attempts,
-      delayBetweenAttempts: jobData.retry_delay,
-    });
-  }
 
-  private mapUpdatedAt(jobData: typeof jobs.$inferSelect): Date | undefined {
-    return jobData.updated_at ? new Date(jobData.updated_at) : undefined;
-  }
+    private toPersistence(job: Job): JobDbInsert {
+        const props = job.getProps();
 
-  private parseJsonField(
-    json: string | null
-  ): Record<string, unknown> | undefined {
-    return json ? JSON.parse(json) : undefined;
-  }
+        let serializableRetryPolicy: RetryPolicyParams | null = null;
+        if (props.retryPolicy instanceof RetryPolicy) {
+             serializableRetryPolicy = {
+                 maxAttempts: props.retryPolicy.getMaxAttempts().getValue(),
+                 delayBetweenAttempts: props.retryPolicy.getDelayBetweenAttempts().getValue(),
+                 backoffType: props.retryPolicy.getBackoffType().getValue(), // Assumes BackoffTypeVO has getValue
+                 maxDelay: props.retryPolicy.getMaxDelay()?.getValue()
+             };
+        }
 
-  private mapPriority(
-    jobData: typeof jobs.$inferSelect
-  ): JobPriority | undefined {
-    return jobData.priority
-      ? (JobPriority.create(jobData.priority) as Ok<JobPriority>).value
-      : undefined;
-  }
-
-  private mapJobDependsOn(
-    jobData: typeof jobs.$inferSelect
-  ): JobDependsOn | undefined {
-    return jobData.depends_on
-      ? new JobDependsOn(
-          JSON.parse(jobData.depends_on).map((id: string) => new JobId(id))
-        )
-      : undefined;
-  }
-
-  private mapActivityType(
-    jobData: typeof jobs.$inferSelect
-  ): ActivityType | undefined {
-    return jobData.activity_type
-      ? (ActivityType.create(jobData.activity_type) as Ok<ActivityType>).value
-      : undefined;
-  }
-
-  private mapActivityContext(
-    jobData: typeof jobs.$inferSelect
-  ): ActivityContext | undefined {
-    return jobData.activity_context
-      ? ActivityContext.create(
-          jobData.activity_context as ActivityContext["value"]
-        )
-      : undefined;
-  }
-
-  private mapRelatedActivityIds(
-    jobData: typeof jobs.$inferSelect
-  ): RelatedActivityIds | undefined {
-    return jobData.related_activity_ids
-      ? RelatedActivityIds.create(
-          (jobData.related_activity_ids as string[]).map(
-            (id: string) => new JobId(id)
-          )
-        )
-      : undefined;
-  }
-
-  async create(job: Job): Promise<Result<Job>> {
-    try {
-      await this.db.insert(jobs).values({
-        id: job.id.value,
-        name: job.name,
-        status: job.status.value as JobStatusType,
-        attempts: job.attempts,
-        max_attempts: job.retryPolicy?.value.maxAttempts || 3,
-        retry_delay: job.retryPolicy?.value.delayBetweenAttempts || 1000,
-        payload: job.payload ? JSON.stringify(job.payload) : null,
-        data: job.metadata ? JSON.stringify(job.metadata) : null,
-        result: job.result ? JSON.stringify(job.result) : null,
-        priority: job.priority?.value ?? 0,
-        depends_on: job.dependsOn?.hasDependencies()
-          ? JSON.stringify(job.dependsOn.value.map((id) => id.value))
-          : null,
-        created_at: job.createdAt.toISOString(),
-        updated_at: job.updatedAt?.toISOString(),
-        activity_type: job.activityType?.value,
-        activity_context: job.context?.value,
-        parent_id: job.parentId?.value,
-        related_activity_ids: job.relatedActivityIds?.value?.map(
-          (id) => id.value
-        ),
-      });
-      return ok(job);
-    } catch (err) {
-      return error(
-        `Failed to create job: ${err instanceof Error ? err.message : String(err)}`
-      );
+        return {
+            id: job.id().getValue(),
+            name: props.name.getValue(),
+            status: props.status.getValue(),
+            attempts: props.attempts.getValue(),
+            createdAt: props.createdAt.getValue(),
+            updatedAt: props.updatedAt?.getValue(),
+            payload: props.payload || null,
+            retryPolicy: serializableRetryPolicy,
+            context: props.context ? (props.context.getProps() as ActivityContextPropsInput) : null, // Use getProps and cast
+            priority: props.priority?.getValue(),
+            dependsOn: props.dependsOn?.getValues().map(id => id.getValue()) || null,
+            activityType: props.activityType?.getValue(),
+            parentId: props.parentId?.getValue(),
+            relatedActivityIds: props.relatedActivityIds?.getValues().map(id => id.getValue()) || null,
+            agentId: props.agentId?.getValue(),
+            result: props.result || null,
+            metadata: props.metadata || null,
+            data: props.data || null, // Assuming 'data' is a distinct field
+        };
     }
-  }
 
-  async findById(id: JobId): Promise<Result<Job>> {
-    try {
-      const [jobData] = await this.db
-        .select()
-        .from(jobs)
-        .where(eq(jobs.id, id.value));
+    async save(job: Job): Promise<Result<Job>> {
+        try {
+            const jobData = this.toPersistence(job);
+            await this.db.insert(jobsTable).values(jobData)
+                .onConflictDoUpdate({ target: jobsTable.id, set: jobData });
+            return ok(job);
+        } catch (e) {
+            console.error("Error saving job to database:", e);
+            return error(new DomainError("Failed to save job to database.", e instanceof Error ? e : undefined));
+        }
+    }
 
-      if (!jobData) {
-        return error(new JobNotFoundError(id.value).message);
+    async load(id: JobId): Promise<Result<Job | null>> {
+        try {
+            const results = await this.db.select().from(jobsTable).where(eq(jobsTable.id, id.getValue())).limit(1);
+            if (results.length === 0) {
+                return ok(null);
+            }
+            const row = results[0] as JobDbSelect;
+            return ok(this.toEntity(row));
+        } catch (e) {
+            console.error(`Error loading job ${id.getValue()} from database:`, e);
+            return error(new DomainError(`Failed to load job from database. Id: ${id.getValue()}`, e instanceof Error ? e : undefined));
+        }
+    }
+
+    async findById(id: JobId): Promise<Result<Job | null>> { // Added findById for IRepository compatibility
+        return this.load(id);
+    }
+
+    async create(job: Job): Promise<Result<Job>> {
+      // Save handles create (upsert)
+      return this.save(job);
+    }
+
+    async update(job: Job): Promise<Result<Job>> {
+      // Save handles update (upsert)
+      return this.save(job);
+    }
+
+    async list(): Promise<Result<Job[]>> {
+      try {
+        const results = await this.db.select().from(jobsTable).all();
+        const jobs = results.map(row => this.toEntity(row as JobDbSelect));
+        return ok(jobs);
+      } catch (e) {
+        console.error("Error listing jobs from database:", e);
+        return error(new DomainError("Failed to list jobs from database.", e instanceof Error ? e : undefined));
       }
-
-      const job = this.mapJobDataToEntity(jobData);
-
-      return ok(job);
-    } catch (err) {
-      return error(this.formatErrorMessage("find job", err));
     }
-  }
 
-  async update(job: Job): Promise<Result<Job>> {
-    try {
-      const result = await this.db
-        .update(jobs)
-        .set({
-          name: job.name,
-          status: job.status.value as JobStatusType,
-          attempts: job.attempts,
-          max_attempts: job.retryPolicy?.value.maxAttempts,
-          retry_delay: job.retryPolicy?.value.delayBetweenAttempts,
-          payload: job.payload ? JSON.stringify(job.payload) : null,
-          data: job.metadata ? JSON.stringify(job.metadata) : null,
-          result: job.result ? JSON.stringify(job.result) : null,
-          priority: job.priority?.value ?? 0,
-          depends_on: job.dependsOn?.hasDependencies()
-            ? JSON.stringify(job.dependsOn.value.map((id) => id.value))
-            : null,
-          updated_at: new Date().toISOString(),
-          activity_type: job.activityType?.value,
-          activity_context: job.context?.value,
-          parent_id: job.parentId?.value,
-          related_activity_ids: job.relatedActivityIds?.value?.map(
-            (id) => id.value
-          ),
-        })
-        .where(eq(jobs.id, job.id.value));
-
-      if (result.changes === 0) {
-        return error(new JobNotFoundError(job.id.value).message);
+    async delete(id: JobId): Promise<Result<void>> {
+      try {
+        const result = await this.db.delete(jobsTable).where(eq(jobsTable.id, id.getValue())).returning();
+        if (result.length === 0) {
+            return error(new DomainError(`Job with id ${id.getValue()} not found for deletion.`));
+        }
+        return ok(undefined);
+      } catch (e) {
+        console.error(`Error deleting job ${id.getValue()} from database:`, e);
+        return error(new DomainError("Failed to delete job from database.", e instanceof Error ? e : undefined));
       }
-
-      return ok(job);
-    } catch (err) {
-      return error(this.formatErrorMessage("update job", err));
     }
-  }
 
-  async delete(id: JobId): Promise<Result<void>> {
-    try {
-      const result = await this.db.delete(jobs).where(eq(jobs.id, id.value));
+    async findNextProcessableJob(): Promise<Result<Job | null>> {
+        try {
+            const now = new Date();
+            // Query for PENDING jobs or DELAYED jobs whose updatedAt (acting as runAt) is in the past.
+            // Order by priority (lower number is higher priority) then by creation date.
+            // jobsTable.updatedAt is nullable, ensure lte handles nulls as "not ready" or filter them out.
+            // Assuming jobsTable.priority is also nullable and lower is better.
+            const results = await this.db.select().from(jobsTable)
+                .where(
+                    or(
+                        eq(jobsTable.status, JobStatus.create("PENDING").getValue()),
+                        and(
+                            eq(jobsTable.status, JobStatus.create("DELAYED").getValue()),
+                            jobsTable.updatedAt ? lte(jobsTable.updatedAt, now) : undefined // Only consider if updatedAt is not null
+                        )
+                    )
+                )
+                .orderBy(asc(jobsTable.priority), asc(jobsTable.createdAt))
+                .limit(1);
 
-      if (result.changes === 0) {
-        return error(new JobNotFoundError(id.value).message);
-      }
-
-      return ok(undefined);
-    } catch (err) {
-      return error(this.formatErrorMessage("delete job", err));
+            if (results.length === 0) {
+                return ok(null);
+            }
+            return ok(this.toEntity(results[0] as JobDbSelect));
+        } catch (e) {
+            console.error("Error in JobDrizzleRepository.findNextProcessableJob:", e);
+            return error(new DomainError("Failed to find next processable job.", e instanceof Error ? e : undefined));
+        }
     }
-  }
-
-  async list(): Promise<Result<Job[]>> {
-    try {
-      const jobsData = await this.db.select().from(jobs);
-
-      const jobsList = jobsData.map(this.mapJobDataToEntity);
-
-      return ok(jobsList);
-    } catch (err) {
-      return error(this.formatErrorMessage("list jobs", err));
-    }
-  }
-  async findByIds(ids: JobId[]): Promise<Result<Job[]>> {
-    try {
-      const jobIds = ids.map((id) => id.value);
-      const jobsData = await this.db
-        .select()
-        .from(jobs)
-        .where(inArray(jobs.id, jobIds));
-
-      const jobsList = jobsData.map(this.mapJobDataToEntity);
-
-      return ok(jobsList);
-    } catch (err) {
-      return error(this.formatErrorMessage("find jobs by ids", err));
-    }
-  }
-
-  async findDependentJobs(jobId: JobId): Promise<Result<Job[]>> {
-    try {
-      const jobsData = await this.db
-        .select()
-        .from(jobs)
-        .where(
-          sql`json_extract(${jobs.depends_on}, '$') LIKE '%"${jobId.value}"%'`
-        );
-
-      const jobsList = jobsData.map(this.mapJobDataToEntity);
-
-      return ok(jobsList);
-    } catch (err) {
-      return error(this.formatErrorMessage("find dependent jobs", err));
-    }
-  }
-  private formatErrorMessage(operation: string, err: unknown): string {
-    return `Failed to ${operation}: ${err instanceof Error ? err.message : String(err)}`;
-  }
 }

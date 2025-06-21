@@ -5,23 +5,51 @@ const workerStatusSchema = z.enum(["available", "busy", "offline"]);
 export type WorkerStatusType = z.infer<typeof workerStatusSchema>;
 
 export class WorkerStatus {
-  constructor(private readonly status: WorkerStatusType) {
-    workerStatusSchema.parse(status);
+  // Changed to private _status
+  private constructor(private readonly _status: WorkerStatusType) {
+    // Zod validation can be done in a static create method or assumed valid if constructor is private
+    // and only called by static factories that ensure valid type.
+    workerStatusSchema.parse(_status); // Keep validation if constructor can be called with arbitrary strings
   }
 
-  get value(): WorkerStatusType {
-    return this.status;
+  // getValue method added
+  public getValue(): WorkerStatusType {
+    return this._status;
   }
 
-  static available(): WorkerStatus {
+  // equals method added
+  public equals(other?: WorkerStatus): boolean {
+    return !!other && this._status === other._status;
+  }
+
+  // Static factory methods renamed and potentially a general create method
+  public static create(status: WorkerStatusType): WorkerStatus {
+    workerStatusSchema.parse(status); // Ensure the input string is a valid WorkerStatusType
+    return new WorkerStatus(status);
+  }
+
+  public static createAvailable(): WorkerStatus {
     return new WorkerStatus("available");
   }
 
-  static busy(): WorkerStatus {
+  public static createBusy(): WorkerStatus {
     return new WorkerStatus("busy");
   }
 
-  static offline(): WorkerStatus {
+  public static createOffline(): WorkerStatus {
     return new WorkerStatus("offline");
+  }
+
+  // Behavioral checks
+  public isAvailable(): boolean {
+    return this._status === "available";
+  }
+
+  public isBusy(): boolean {
+    return this._status === "busy";
+  }
+
+  public isOffline(): boolean {
+    return this._status === "offline";
   }
 }

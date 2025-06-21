@@ -4,7 +4,7 @@ import { Result } from "@/shared/result";
 
 import { IAgentService } from "./agent-service.interface";
 
-export interface ProcessJobService {
+export interface IProcessJobService { // Renamed
   process(job: Job, worker: Worker): Promise<Result<Job>>;
   executeJob(job: Job): Promise<Result<void>>;
 }
