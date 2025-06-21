@@ -17,6 +17,3 @@ Decompor a tarefa principal fornecida em subtarefas menores e gerenciáveis, bas
 5.  **Estrutura da Resposta:** Apresente a decomposição de forma clara, agrupando as subtarefas sob os componentes ou funcionalidades principais identificados na tarefa original.
 
 Por favor, siga rigorosamente estas instruções.
-
-
-Tool

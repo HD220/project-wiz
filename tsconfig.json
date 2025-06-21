@@ -25,6 +25,7 @@
       "@/application/*": ["./src/core/application/*"],
       "@/core/*": ["./src/core/*"],
       "@/shared/*": ["./src/shared/*"],
+      "@interfaces/*": ["./src/core/domain/entities/**/interfaces/*"],
       "@/core/common/result": ["./src/shared/result.ts"],
       "@/*": ["./src/*"]
     }
