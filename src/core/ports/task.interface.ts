@@ -1,15 +1,16 @@
-import { Result } from "../../shared/result";
-import { Job } from "../domain/entities/job/job.entity";
-import { ITool } from "../application/tools/tool.interface";
+// src/core/ports/task.interface.ts
 
-import { ILLM } from "../application/llms/llm.interface";
-
-export interface Task {
-  /**
-   * Executes the Task logic
-   * @param job Job data being processed
-   * @param tools Optional array of tools available to the task
-   * @returns void on success, undefined to reschedule, or throw Error for failure
-   */
-  execute(job: Job, tools?: ITool[], llm?: ILLM): Promise<Result<void>>;
+/**
+ * Defines the contract for a Task.
+ * A Task encapsulates the actual logic to be performed for a job,
+ * often involving interactions with external services like LLMs and using specific tools.
+ *
+ * The `execute` method should:
+ * - Return a value (of type `TOutput`) if the task is successfully completed.
+ * - Return `void` (or `undefined`/`null`) if the task is not yet complete
+ *   but did not encounter an error, indicating it needs to be re-run or continued.
+ * - Throw an error if the task processing fails.
+ */
+export interface ITask<TInput = any, TOutput = any, TTools = any> {
+  execute(payload: TInput, tools?: TTools): Promise<TOutput | void>;
 }

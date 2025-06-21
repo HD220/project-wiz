@@ -1,71 +1,44 @@
-import { randomUUID } from 'crypto'; // Or use 'node:crypto'
-import { sqliteTable, text, integer, unique } from 'drizzle-orm/sqlite-core';
-import { JobStatusValue } from '@/core/domain/entities/job/value-objects/job-status.vo'; // Import the new status type
+// src/infrastructure/services/drizzle/schema/jobs.ts
 
-// Define the enum for job statuses based on the JobStatusValue type
-// Ensure this list is comprehensive and matches JobStatus.vo.ts
-export const jobStatusEnumValues: [JobStatusValue, ...JobStatusValue[]] = [
-  'pending',
-  'waiting',
-  'active',
-  'delayed',
-  'completed',
-  'failed',
-  'cancelled',
-];
+import { text, integer, sqliteTable, blob } from 'drizzle-orm/sqlite-core';
+import { JobStatusType } from '../../../../core/domain/entities/jobs/job-status'; // Adjust path as needed
 
-export const jobs = sqliteTable('jobs', {
-  // Core Fields from JobId, JobName, JobStatus, JobPriority
-  id: text('id').primaryKey().$type<string>(), // Matches JobId.value (string UUID)
-  name: text('name').notNull(), // Matches JobName.value
+export const jobsTable = sqliteTable('jobs', {
+  id: text('id').primaryKey(),
+  queueId: text('queue_id').notNull(), // Assuming a foreign key relationship, but not enforcing it at DB level for simplicity now
+  name: text('name').notNull(),
 
-  status: text('status', { enum: jobStatusEnumValues }).notNull().$type<JobStatusValue>(),
-  priority: integer('priority').notNull(), // Matches JobPriority.value
+  // 'payload' and 'result' can be complex objects; storing as JSON strings (TEXT) or BLOB.
+  // Using TEXT for simplicity, assuming JSON.stringify and JSON.parse will be used in the repository.
+  // If binary data is needed, BLOB might be better with appropriate serialization.
+  payload: text('payload'), // Store as JSON string
+  data: text('data'), // Store as JSON string, for mutable data during job execution
+  result: text('result'), // Store as JSON string
 
-  // Fields from JobAttempts VO
-  currentAttempts: integer('current_attempts').notNull().default(0), // Renamed from 'attempts'
-  maxAttempts: integer('max_attempts').notNull().default(3),
+  maxAttempts: integer('max_attempts').notNull().default(1),
+  attempts: integer('attempts').notNull().default(0),
 
-  // Payload (input), Result (output), and Data (ActivityContext)
-  // ADR 001: Job.data stores ActivityContext. Payload and Result are separate.
-  payload: text('payload', { mode: 'json' }), // Storing as JSON string, can be null
-  result: text('result', { mode: 'json' }),   // Storing as JSON string, can be null
-  data: text('data', { mode: 'json' }).notNull(), // For ActivityContext, should not be null once job is more than just placeholder
+  maxRetryDelay: integer('max_retry_delay').notNull().default(60000), // milliseconds
+  retryDelay: integer('retry_delay').notNull().default(0), // milliseconds
+  delay: integer('delay').notNull().default(0), // milliseconds for DELAYED status
 
-  // Timestamps
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }) // Storing as milliseconds
-    .notNull()
-    .$defaultFn(() => Date.now()), // Default to current time in ms
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .$defaultFn(() => Date.now()),
-  executeAfter: integer('execute_after', { mode: 'timestamp_ms' }), // For scheduled/delayed jobs
+  priority: integer('priority').notNull().default(0), // Lower number = higher priority
 
-  // Optional fields from old schema, to be decided if kept:
-  // startedAt: integer('started_at', { mode: 'timestamp_ms' }),
-  // finishedAt: integer('finished_at', { mode: 'timestamp_ms' }),
-  failedReason: text('failed_reason'), // Could be part of 'result' for failed jobs
+  status: text('status').notNull().default(JobStatusType.WAITING), // Store JobStatusType as string
 
-  // Dependencies (simple array of text for now, assuming JobId strings)
-  // In a relational DB, this would be a join table. For SQLite, JSON array of IDs is common.
-  dependsOn: text('depends_on', { mode: 'json' }).$type<string[]>(), // Array of JobId strings
+  // 'dependsOn' could be a JSON array of job IDs stored as TEXT.
+  dependsOn: text('depends_on'), // Store as JSON string array of job IDs
 
-  // Optional: Add a unique constraint if job names should be unique, or other constraints
-  // Example: uniqueJobName: unique('unique_job_name_idx').on(jobs.name),
-}
-// Optional: Add Drizzle ORM indexes here if needed, e.g., on status and priority
-// (tableName, (columns) => ({
-//   statusIdx: index("status_idx").on(columns.status),
-//   priorityIdx: index("priority_idx").on(columns.priority),
-// }))
-);
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(new Date()),
 
-// Keep these for Drizzle Kit and repository usage, but they might need to be
-// updated if the schema changes significantly, or generated by Drizzle Kit.
-// For now, just ensure they exist. The actual types will be inferred by Drizzle.
-export type JobsInsert = typeof jobs.$inferInsert;
-export type JobsSelect = typeof jobs.$inferSelect;
-// Update/Delete types can be more complex if needed
-// export type JobsUpdate = Required<Pick<typeof jobs.$inferInsert, "id">> &
-//   Partial<Omit<typeof jobs.$inferInsert, "id">>; // Removed as not strictly needed by subtask
-// export type JobsDelete = Required<Pick<typeof jobs.$inferInsert, "id">>; // Removed
+  // Specific time after which the job should be executed
+  executeAfter: integer('execute_after', { mode: 'timestamp_ms' }),
+
+  // New fields for agent targeting
+  targetAgentRole: text('target_agent_role'),
+  requiredCapabilities: text('required_capabilities', { mode: 'json' }).$type<string[] | null>(),
+});
+
+export type InsertJob = typeof jobsTable.$inferInsert;
+export type SelectJob = typeof jobsTable.$inferSelect;
