@@ -1,12 +1,30 @@
 import { z } from "zod";
+import { DomainError } from "@/core/common/errors";
 
-const userEmailSchema = z.string().email();
+const userEmailSchema = z.string().email({ message: "Invalid email format." });
+
 export class UserEmail {
-  constructor(private readonly email: string) {
-    userEmailSchema.parse(email);
+  private constructor(private readonly _value: string) {
+    // Validation handled by Zod in the static create method
   }
 
-  get value() {
-    return this.email;
+  public static create(email: string): UserEmail {
+    try {
+      userEmailSchema.parse(email);
+      return new UserEmail(email);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new DomainError(`Invalid UserEmail: ${error.errors.map(e => e.message).join(', ')}`);
+      }
+      throw error;
+    }
+  }
+
+  public getValue(): string {
+    return this._value;
+  }
+
+  public equals(other?: UserEmail): boolean {
+    return !!other && this._value === other._value;
   }
 }

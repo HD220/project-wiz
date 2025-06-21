@@ -1,12 +1,11 @@
 import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
 
 export function TableContainer({
   className,
   ...props
-}: React.ComponentProps<"h3">) {
+}: React.ComponentProps<"div">) {
   return (
-    <div className={cn("my-6 w-full overflow-y-auto", className)} {...props} />
+    <div className={cn("my-6 w-full overflow-x-auto", className)} {...props} />
   );
 }
 

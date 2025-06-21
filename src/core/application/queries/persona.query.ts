@@ -1,27 +1,26 @@
 import { Executable } from "@/core/common/executable";
-import { NOK, OK, Result } from "@/shared/result";
+import { error, ok, Result } from "@/shared/result";
 import { IPersonaRepository } from "@/core/ports/repositories/persona.interface";
 
 export class PersonaQuery implements Executable<Input, Output> {
   constructor(private readonly personaRepository: IPersonaRepository) {}
 
-  async execute(data: Input): Promise<Result<Output>> {
+  async execute(_: Input): Promise<Result<Output>> {
     try {
       const personas = await this.personaRepository.list();
 
-      return OK({
+      return ok({
         data: personas.map((persona) => ({
           id: persona.id.value,
           name: persona.name.value,
           role: persona.role.value,
           goal: persona.goal.value,
           backstory: persona.backstory.value,
-          gender: persona.gender.value,
-          personality: persona.personality.value,
         })),
       });
-    } catch (error) {
-      return NOK(error as Error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      return error(errorMessage);
     }
   }
 }
@@ -34,7 +33,5 @@ type Output = {
     role: string;
     goal: string;
     backstory: string;
-    gender: string;
-    personality: string;
   }[];
 };

@@ -2,32 +2,41 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "lib": ["ES2024", "ES2022", "DOM", "DOM.Iterable"],
+    "outDir": "dist",
     "baseUrl": ".",
-    "paths": {
-      "*": ["types/*"]
-    },
-    "types": ["k6"],
-    "outDir": "./dist",
+
+    "noEmit": false,
+
+    //electron
+    "types": ["node", "electron", "vitest"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "jsx": "react-jsx",
+    "paths": {
+      "@/components/*": ["./src/infrastructure/frameworks/react/components/*"],
+      "@/lib/*": ["./src/infrastructure/frameworks/react/lib/*"],
+      "@/hooks/*": ["./src/infrastructure/frameworks/react/hooks/*"],
+      "@/ui/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
+      "@/application/*": ["./src/core/application/*"],
+      "@/core/*": ["./src/core/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/core/common/result": ["./src/shared/result.ts"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "src/**/*",
     "tests/**/*",
-    "types/**/*"
+    "drizzle.config.ts",
+    "forge.config.ts",
+    "forge.env.d.ts",
+    "lingui.config.ts",
+    "vitest.config.mts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "exclude": ["node_modules", "coverage"]
 }
