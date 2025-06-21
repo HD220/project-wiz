@@ -1,15 +1,22 @@
-// src/infrastructure/services/drizzle/schemas/queues.ts
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { randomUUID } from "crypto";
 
-export const queuesTable = sqliteTable('queues', {
-    id: text('id').primaryKey(), // From QueueId.getValue() (string UUID)
-    name: text('name').notNull().unique(), // From QueueName.getValue() (string)
-    status: text('status').notNull(), // From QueueStatus.getValue() (string enum: "ACTIVE", "PAUSED", "DRAINING")
-
-    // Using JobTimestamp, which stores Date. Drizzle handles Date to timestamp_ms (integer)
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
-    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }),
+export const queues = sqliteTable("queues", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  name: text("name").unique().notNull(),
+  concurrency: integer("concurrency").default(1).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
-export type QueueDbInsert = typeof queuesTable.$inferInsert;
-export type QueueDbSelect = typeof queuesTable.$inferSelect;
+export type QueuesInsert = typeof queues.$inferInsert;
+export type QueuesUpdate = Required<Pick<typeof queues.$inferInsert, "id">> &
+  Partial<Omit<typeof queues.$inferInsert, "id">>;
+export type QueuesSelect = typeof queues.$inferSelect;
+export type QueuesDelete = Required<Pick<typeof queues.$inferInsert, "id">>;

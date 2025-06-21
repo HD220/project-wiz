@@ -1,132 +1,138 @@
-import { QueueId } from "./value-objects/queue-id.vo";
-import { QueueStatus } from "./value-objects/queue-status.vo";
-import { queueSchema } from "./queue.schema";
-import { QueueName } from "./value-objects/queue-name.vo"; // New VO
-import { JobTimestamp } from "../job/value-objects/job-timestamp.vo"; // Reused VO
-import { DomainError } from "@/core/common/errors";
+import { Job } from "../jobs/job.entity";
+import { Result } from "../../../../shared/result";
 
-// Updated QueueProps
-type QueueProps = {
-  id: QueueId;
-  name: QueueName; // Changed
-  status: QueueStatus;
-  createdAt: JobTimestamp; // Changed
-  updatedAt?: JobTimestamp; // Changed
-};
-
-// TODO: OBJECT_CALISTHENICS_REFACTOR: This class is undergoing refactoring.
-// The `getProps()` method is a temporary measure for external consumers.
-// Ideally, direct state access will be replaced by more behavior-oriented methods.
 export class Queue {
-  constructor(private readonly fields: QueueProps) {
-    if (!fields.id || !fields.name || !fields.status || !fields.createdAt) {
-      throw new DomainError("Queue ID, Name, Status, and CreatedAt are mandatory.");
+  private id: string;
+  private name: string;
+  private jobs: Job[] = [];
+  private createdAt: Date;
+  private updatedAt: Date;
+
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
+
+  public getId(): string {
+    return this.id;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public getCreatedAt(): Date {
+    return this.createdAt;
+  }
+
+  public getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
+
+  public addJob(job: Job): Result<boolean> {
+    // Valida a prioridade do job antes de adicionar
+    if (job.getPriority() < 1 || job.getPriority() > 10) {
+      return {
+        success: false,
+        error: {
+          name: "InvalidPriority",
+          message: "Job priority must be between 1 and 10",
+        },
+      };
     }
-    // queueSchema.parse(fields); // TODO: Update queueSchema for VOs
+
+    this.jobs.push(job);
+    this.updatedAt = new Date();
+    return { success: true, data: true };
   }
 
-  public id(): QueueId {
-    return this.fields.id;
+  public getNextJob(): Result<Job | null> {
+    // Filtra jobs disponíveis e ordena por prioridade (maior primeiro)
+    const availableJobs = this.jobs
+      .filter(
+        (job) => job.getStatus().is("waiting") || job.getStatus().is("delayed")
+      )
+      .sort((a, b) => b.getPriority() - a.getPriority());
+
+    const nextJob = availableJobs[0] || null;
+    return { success: true, data: nextJob };
   }
 
-  public getProps(): Readonly<QueueProps> {
-    return { ...this.fields };
-  }
-
-  // Individual getters removed: name, status, createdAt, updatedAt
-
-  activate(): Queue {
-    return new QueueBuilder(this.fields)
-      .withStatus(QueueStatus.createActive()) // Use new static factory
-      .withUpdatedAt(JobTimestamp.now()) // Use JobTimestamp
-      .build();
-  }
-
-  pause(): Queue {
-    return new QueueBuilder(this.fields)
-      .withStatus(QueueStatus.createPaused()) // Use new static factory
-      .withUpdatedAt(JobTimestamp.now()) // Use JobTimestamp
-      .build();
-  }
-
-  drain(): Queue {
-    return new QueueBuilder(this.fields)
-      .withStatus(QueueStatus.createDraining()) // Use new static factory
-      .withUpdatedAt(JobTimestamp.now()) // Use JobTimestamp
-      .build();
-  }
-
-  public equals(other?: Queue): boolean {
-    if (this === other) return true;
-    if (!other || !(other instanceof Queue)) return false;
-
-    const sameTimestamps = this.fields.updatedAt && other.fields.updatedAt
-      ? this.fields.updatedAt.equals(other.fields.updatedAt)
-      : this.fields.updatedAt === other.fields.updatedAt;
-
-    return (
-      this.fields.id.equals(other.fields.id) &&
-      this.fields.name.equals(other.fields.name) &&
-      this.fields.status.equals(other.fields.status) &&
-      this.fields.createdAt.equals(other.fields.createdAt) &&
-      sameTimestamps
-    );
-  }
-}
-
-export class QueueBuilder {
-  private fields: Partial<QueueProps>;
-
-  constructor(fields?: Partial<QueueProps>) {
-    this.fields = fields ? { ...fields } : {};
-    if (!this.fields.status) {
-      this.fields.status = QueueStatus.createPaused(); // Default to paused
+  public markJobAsStarted(jobId: string): Result<boolean> {
+    const job = this.jobs.find((j) => j.getId() === jobId);
+    if (!job) {
+      return {
+        success: false,
+        error: {
+          name: "JobNotFound",
+          message: `Job with id ${jobId} not found in queue`,
+        },
+      };
     }
-    if (!this.fields.createdAt) {
-      this.fields.createdAt = JobTimestamp.now(); // Default to now
+
+    const result = job.start();
+    if (result.success) {
+      this.updatedAt = new Date();
     }
+    return result;
   }
 
-  withId(id: QueueId): QueueBuilder {
-    this.fields.id = id;
-    return this;
-  }
-
-  withName(name: string): QueueBuilder { // Accepts primitive
-    this.fields.name = QueueName.create(name); // Creates VO
-    return this;
-  }
-
-  withStatus(status: QueueStatus): QueueBuilder {
-    this.fields.status = status;
-    return this;
-  }
-
-  withCreatedAt(createdAt: Date): QueueBuilder { // Accepts primitive
-    this.fields.createdAt = JobTimestamp.create(createdAt); // Creates VO
-    return this;
-  }
-
-  withUpdatedAt(updatedAt: Date): QueueBuilder { // Accepts primitive
-    this.fields.updatedAt = JobTimestamp.create(updatedAt); // Creates VO
-    return this;
-  }
-
-  build(): Queue {
-    if (!this.fields.id) {
-      throw new DomainError("Queue ID is required to build a Queue.");
+  public markJobAsCompleted(jobId: string): Result<boolean> {
+    const job = this.jobs.find((j) => j.getId() === jobId);
+    if (!job) {
+      return {
+        success: false,
+        error: {
+          name: "JobNotFound",
+          message: `Job with id ${jobId} not found in queue`,
+        },
+      };
     }
-    if (!this.fields.name) {
-      throw new DomainError("Queue Name is required to build a Queue.");
-    }
-    // Status and CreatedAt are defaulted by constructor.
 
-    return new Queue({
-      id: this.fields.id as QueueId,
-      name: this.fields.name as QueueName,
-      status: this.fields.status as QueueStatus,
-      createdAt: this.fields.createdAt as JobTimestamp,
-      updatedAt: this.fields.updatedAt, // Already JobTimestamp | undefined
-    });
+    const result = job.complete();
+    if (result.success) {
+      this.updatedAt = new Date();
+    }
+    return result;
+  }
+
+  public markJobAsFailed(jobId: string): Result<boolean> {
+    const job = this.jobs.find((j) => j.getId() === jobId);
+    if (!job) {
+      return {
+        success: false,
+        error: {
+          name: "JobNotFound",
+          message: `Job with id ${jobId} not found in queue`,
+        },
+      };
+    }
+
+    const result = job.fail();
+    if (result.success) {
+      this.updatedAt = new Date();
+    }
+    return result;
+  }
+
+  public markJobAsDelayed(jobId: string): Result<boolean> {
+    const job = this.jobs.find((j) => j.getId() === jobId);
+    if (!job) {
+      return {
+        success: false,
+        error: {
+          name: "JobNotFound",
+          message: `Job with id ${jobId} not found in queue`,
+        },
+      };
+    }
+
+    const result = job.delay();
+    if (result.success) {
+      this.updatedAt = new Date();
+    }
+    return result;
   }
 }

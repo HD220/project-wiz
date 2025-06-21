@@ -1,11 +1,8 @@
-// src/core/ports/repositories/queue.interface.ts
+import { IRepository } from "@/core/common/repository";
+import { Queue } from "@/core/domain/entities/queue";
 
-import { Queue } from '../../domain/entities/queue/queue.entity';
-
-export interface IQueueRepository {
-  findById(id: string): Promise<Queue | null>;
-  findByName(name: string): Promise<Queue | null>;
-  save(queue: Queue): Promise<void>; // Should handle both create and update
-  // Optional: delete(id: string): Promise<void>;
-  // Optional: listAll(limit?: number, offset?: number): Promise<Queue[]>;
-}
+/**
+ * Interface para repositórios de fila de jobs
+ * Estende IRepository com operações específicas de fila
+ */
+export type IQueueRepository = IRepository<typeof Queue>;

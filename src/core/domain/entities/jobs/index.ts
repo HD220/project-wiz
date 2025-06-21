@@ -1,94 +1,139 @@
 import { z } from "zod";
+import { JobStatus, JobStatusValues } from "./job-status";
 
-export const JobStatus = {
-  WAITING: "waiting",
-  ACTIVE: "active",
-  COMPLETED: "completed",
-  FAILED: "failed",
-  DELAYED: "delayed",
-} as const;
-
-export type JobStatusType = (typeof JobStatus)[keyof typeof JobStatus];
-
-export interface JobOptions {
-  priority: number;
-  delay: number;
-  [key: string]: unknown;
-}
-
-const JobOptionsSchema = z
+export const jobOptionsSchema = z
   .object({
     priority: z.number().int().min(0).max(10),
     delay: z.number().int().min(0),
   })
   .passthrough();
 
-const JobDataSchema = z.record(z.unknown());
+export type JobOptions = z.infer<typeof jobOptionsSchema>;
 
-const JobSchema = z.object({
+const jobDataSchema = z.record(z.unknown());
+
+const jobSchema = z.object({
   id: z.string().uuid(),
+  queueId: z.string().uuid(),
   name: z.string().min(1),
-  data: JobDataSchema,
-  opts: JobOptionsSchema,
-  status: z.nativeEnum(JobStatus), // This should still work if JobStatus (value) is in scope for z.nativeEnum
-  priority: z.number().int().min(0).max(10),
-  delay: z.number().int().min(0),
-  updatedAt: z.date(),
-  startedAt: z.date().optional(),
-  finishedAt: z.date().optional(),
-  failedReason: z.string().optional(),
+  data: jobDataSchema,
+  opts: jobOptionsSchema,
+  status: z.instanceof(JobStatus),
+  delayedUntil: z.date().nullish(),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+  startedAt: z.date().nullish(),
+  finishedAt: z.date().nullish(),
+  failedReason: z.string().nullish(),
 });
 
-export type JobConstructor = z.infer<typeof JobSchema>;
+export type JobConstructor = z.infer<typeof jobSchema>;
 
 export class Job {
   private fields: JobConstructor;
 
   constructor(fields: JobConstructor) {
-    this.fields = JobSchema.parse(fields);
+    this.fields = jobSchema.parse(fields);
   }
 
-  complete(): Job {
-    return new Job({
-      ...this.fields,
-      status: JobStatus.COMPLETED, // This uses the JobStatus value, which is fine
-      finishedAt: new Date(),
-      updatedAt: new Date(),
-    });
+  // Getters para todos os campos
+  get id(): string {
+    return this.fields.id;
   }
 
-  fail(reason: string): Job {
-    return new Job({
-      ...this.fields,
-      status: JobStatus.FAILED, // This uses the JobStatus value, which is fine
-      failedReason: reason,
-      finishedAt: new Date(),
-      updatedAt: new Date(),
-    });
+  get queueId(): string {
+    return this.fields.queueId;
   }
 
-  delay(ms: number): Job {
-    return new Job({
-      ...this.fields,
-      status: JobStatus.DELAYED, // This uses the JobStatus value, which is fine
-      delay: ms,
-      updatedAt: new Date(),
-    });
+  get name(): string {
+    return this.fields.name;
   }
 
-  toJSON(): JobConstructor {
-    return {
-      id: this.fields.id,
-      name: this.fields.name,
-      data: this.fields.data,
-      opts: this.fields.opts,
-      status: this.fields.status,
-      priority: this.fields.priority,
-      delay: this.fields.delay,
-      updatedAt: this.fields.updatedAt,
-      startedAt: this.fields.startedAt,
-      finishedAt: this.fields.finishedAt,
-      failedReason: this.fields.failedReason,
-    };
+  get data(): Record<string, unknown> {
+    return this.fields.data;
+  }
+
+  get opts(): JobOptions {
+    return this.fields.opts;
+  }
+
+  get status(): JobStatus {
+    return this.fields.status;
+  }
+
+  get delayedUntil(): Date | null | undefined {
+    return this.fields.delayedUntil;
+  }
+
+  get createdAt(): Date {
+    return this.fields.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.fields.updatedAt;
+  }
+
+  get startedAt(): Date | null | undefined {
+    return this.fields.startedAt;
+  }
+
+  get finishedAt(): Date | null | undefined {
+    return this.fields.finishedAt;
+  }
+
+  get failedReason(): string | null | undefined {
+    return this.fields.failedReason;
+  }
+
+  isWaiting(): boolean {
+    return this.fields.status.is(JobStatusValues.WAITING);
+  }
+
+  isActive(): boolean {
+    return this.fields.status.is(JobStatusValues.ACTIVE);
+  }
+
+  isDelayCompleted(): boolean {
+    if (!this.fields.status.is(JobStatusValues.DELAYED)) return true;
+    if (!this.fields.delayedUntil) return true;
+    return new Date() >= this.fields.delayedUntil;
+  }
+
+  moveToWaiting(): boolean {
+    const success = this.fields.status.moveTo(JobStatusValues.WAITING);
+    if (success) this.fields.updatedAt = new Date();
+    return success;
+  }
+
+  moveToActive(): boolean {
+    const success = this.fields.status.moveTo(JobStatusValues.ACTIVE);
+    if (success) {
+      this.fields.startedAt = new Date();
+      this.fields.updatedAt = new Date();
+    }
+    return success;
+  }
+
+  moveToComplete(): void {
+    if (this.fields.status.moveTo(JobStatusValues.COMPLETED)) {
+      this.fields.finishedAt = new Date();
+      this.fields.updatedAt = new Date();
+    }
+  }
+
+  moveToFail(reason: string): void {
+    if (this.fields.status.moveTo(JobStatusValues.FAILED)) {
+      this.fields.failedReason = reason;
+      this.fields.finishedAt = new Date();
+      this.fields.updatedAt = new Date();
+    }
+  }
+
+  moveToDelay(ms?: number): void {
+    if (this.fields.status.moveTo(JobStatusValues.DELAYED)) {
+      const miliseconds = ms || this.opts.delay || 0;
+      this.fields.delayedUntil = new Date(Date.now() + miliseconds);
+      this.fields.updatedAt = new Date();
+    }
   }
 }

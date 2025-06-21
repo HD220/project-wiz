@@ -1,237 +1,168 @@
-// src/core/domain/services/worker.service.ts
+import { IQueueRepository } from "../../ports/repositories/iqueue-repository.interface";
+import { IProcessor } from "../../ports/queue/iprocessor.interface";
+import { Job } from "../entities/jobs/job.entity";
+import { Result } from "../../../shared/result";
+import { ILogger } from "../../ports/logger/ilogger.interface";
 
-import { IQueueRepository } from '../../ports/repositories/queue.interface';
-import { IJobRepository } from '../../ports/repositories/job.interface';
-// import { IProcessor } from '../../ports/queue/processor.interface'; // No longer used
-import { Job } from '../entities/jobs/job.entity';
-import { Queue } from '../entities/queue/queue.entity';
-import { JobStatusType } from '../entities/jobs/job-status';
-import { JobRuntimeData } from '../entities/jobs/job-runtime-data.interface'; // Updated import path
-import { IAgentExecutor, AgentExecutorResult } from '../../ports/agent/agent-executor.interface';
-import { ConfigurationError, NotFoundError, LLMError, ToolExecutionError, JobProcessingError, CoreError } from '../common/errors';
-import { logger } from '../../../infrastructure/services/logging';
-// import { AgentPersonaTemplate } from '../entities/agent/persona-template.types'; // No longer directly stored
-// import { toolRegistry, ToolRegistry } from '../../../infrastructure/tools/tool-registry'; // No longer used for construction
+/**
+ * Serviço responsável por orquestrar o processamento de jobs em background
+ * @template Input - Tipo de entrada do processador
+ * @template Output - Tipo de saída do processador
+ * @template Q - Tipo da entidade Queue
+ * @template J - Tipo da entidade Job (padrão: Job)
+ */
+export class WorkerService<Input, Output, Q, J extends Job = Job> {
+  private isRunning = false;
+  private currentJobs = new Set<string>();
 
-
-export class WorkerService { // Removed <PInput, POutput>
-  private queueRepository: IQueueRepository;
-  private jobRepository: IJobRepository;
-  // private processor: IProcessor<PInput, POutput>; // Remove this
-  private agentExecutor: IAgentExecutor; // Change to interface
-  private handlesRole: string; // Add this
-  private isRunning: boolean = false;
-  private activeJobs: number = 0;
-  private queueConfig: Queue | null = null;
-  private pollInterval: NodeJS.Timeout | null = null;
-  private readonly pollFrequencyMs: number = 5000; // Check for new jobs every 5 seconds
+  /**
+   * @param queueRepository - Repositório para acesso à fila de jobs
+   * @param processor - Processador para executar a lógica dos jobs
+   * @param options - Opções de configuração do worker
+   */
+  private readonly options: {
+    pollInterval: number;
+    maxRetries: number;
+  };
 
   constructor(
-    queueRepository: IQueueRepository,
-    jobRepository: IJobRepository,
-    agentExecutor: IAgentExecutor, // Inject the interface
-    handlesRole: string,          // Specify which role this worker instance handles
-    options?: { pollFrequencyMs?: number }
+    private readonly queueRepository: IQueueRepository<Q, J>,
+    private readonly processor: IProcessor<Input, Output>,
+    private readonly logger: ILogger,
+    options: {
+      pollInterval?: number;
+      maxRetries?: number;
+    } = {}
   ) {
-    this.queueRepository = queueRepository;
-    this.jobRepository = jobRepository;
-    this.agentExecutor = agentExecutor; // Store the injected executor
-    this.handlesRole = handlesRole;     // Store the role it handles
-    if (options?.pollFrequencyMs) {
-      this.pollFrequencyMs = options.pollFrequencyMs;
-    }
-    logger.info(`WorkerService initialized`, { handlesRole: this.handlesRole });
+    this.options = {
+      pollInterval: options.pollInterval ?? 1000,
+      maxRetries: options.maxRetries ?? 3,
+    };
   }
 
-  public async start(queueName: string): Promise<void> {
+  /**
+   * Inicia o worker para processar jobs continuamente
+   */
+  async start(): Promise<void> {
     if (this.isRunning) {
-      logger.warn(`WorkerService for queue already running`, { queueName, handlesRole: this.handlesRole });
       return;
-    }
-
-    this.queueConfig = await this.queueRepository.findByName(queueName);
-    if (!this.queueConfig) {
-      const errMsg = `Queue with name ${queueName} not found. WorkerService cannot start.`;
-      throw new NotFoundError(errMsg, 'Queue', queueName);
     }
 
     this.isRunning = true;
-    this.activeJobs = 0;
-    logger.info(`WorkerService started`, { queueName: this.queueConfig.name, queueId: this.queueConfig.id, concurrency: this.queueConfig.concurrency, handlesRole: this.handlesRole });
+    this.logger.info("WorkerService started", {
+      pollInterval: this.options.pollInterval,
+      maxRetries: this.options.maxRetries,
+    });
 
-    this.pollInterval = setInterval(() => this.poll(), this.pollFrequencyMs);
-    this.poll();
-  }
-
-  public stop(): void {
-    if (!this.isRunning) {
-      logger.warn('WorkerService is not running.', { queueName: this.queueConfig?.name, handlesRole: this.handlesRole });
-      return;
-    }
-    this.isRunning = false;
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
-    }
-    logger.info(`WorkerService stopped`, { queueName: this.queueConfig?.name, handlesRole: this.handlesRole });
-  }
-
-  private async poll(): Promise<void> {
-    if (!this.isRunning || !this.queueConfig) {
-      if (!this.queueConfig && this.isRunning) {
-          logger.error("WorkerService polling without queue configuration", undefined, { handlesRole: this.handlesRole });
-          this.stop();
+    while (this.isRunning) {
+      try {
+        await this.processNextJob();
+      } catch (error) {
+        console.error("Error in worker loop:", error);
       }
-      return;
-    }
 
-    if (this.activeJobs >= this.queueConfig.concurrency) {
-      return;
-    }
-
-    try {
-      const availableSlots = this.queueConfig.concurrency - this.activeJobs;
-      if (availableSlots <= 0) return;
-
-      const jobsForThisWorker = await this.jobRepository.findPendingByRole(
-        this.queueConfig.id,
-        this.handlesRole,
-        availableSlots
+      // Intervalo entre verificações de novos jobs
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.options.pollInterval)
       );
+    }
+  }
 
-      if (jobsForThisWorker.length === 0) {
-        // console.log(`WorkerService (${this.handlesRole}): No jobs found for role ${this.handlesRole} in this poll.`);
+  /**
+   * Para o worker graciosamente
+   */
+  stop(): void {
+    this.isRunning = false;
+    this.logger.info("WorkerService stopping...", {
+      activeJobs: this.currentJobs.size,
+    });
+  }
+
+  /**
+   * Processa o próximo job disponível na fila
+   */
+  private async processNextJob(): Promise<void> {
+    // O repositório já retorna o job com maior prioridade
+    const jobResult = await this.queueRepository.getNextJob();
+    if (!jobResult.success) {
+      this.logger.error("Failed to get next job", {
+        error: jobResult.error,
+      });
+      return;
+    }
+
+    if (!jobResult.data || !this.isRunning) {
+      return;
+    }
+
+    const job = jobResult.data;
+    if (this.currentJobs.has(job.getId())) {
+      return; // Evita processamento duplicado
+    }
+
+    this.currentJobs.add(job.getId());
+    try {
+      await this.processJob(job);
+    } finally {
+      this.currentJobs.delete(job.getId());
+    }
+  }
+
+  /**
+   * Processa um job individual com tratamento de erros e retry
+   * @param job - Job a ser processado
+   */
+  private async processJob(job: J): Promise<void> {
+    let retryCount = 0;
+    let lastError: Error | null = null;
+
+    // Marca o job como iniciado
+    await this.queueRepository.markJobAsStarted(job.getId());
+
+    while (retryCount < this.options.maxRetries && this.isRunning) {
+      try {
+        const input = job as unknown as Input; // Conversão segura já que Job é genérico
+        const result = await this.processor.process(job, input);
+
+        await this.queueRepository.markJobAsCompleted(job.getId(), result);
         return;
-      }
-      // console.log(`WorkerService (${this.handlesRole}): Found ${jobsForThisWorker.length} jobs for role ${this.handlesRole}.`);
+      } catch (error) {
+        lastError = error as Error;
+        retryCount++;
+        this.logger.error(
+          `Error processing job (attempt ${retryCount}/${this.options.maxRetries})`,
+          {
+            jobId: job.getId(),
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+            attempt: retryCount,
+            maxAttempts: this.options.maxRetries,
+          }
+        );
 
-
-      for (const job of jobsForThisWorker) {
-        if (this.activeJobs < this.queueConfig.concurrency) {
-          this.activeJobs++;
-          // Non-blocking call to processJob
-          this.processJob(job).catch(err => { // err is already an Error object or string
-            logger.error(`Unhandled error from processJob promise for job ID: ${job.id}`, err instanceof Error ? err : new Error(String(err)), { jobId: job.id, handlesRole: this.handlesRole });
-          });
-        } else {
-          break;
+        if (retryCount < this.options.maxRetries) {
+          const delayUntil = new Date(
+            Date.now() + this.calculateRetryDelay(retryCount)
+          );
+          await this.queueRepository.markJobAsDelayed(job.getId(), delayUntil);
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.calculateRetryDelay(retryCount))
+          );
         }
       }
-    } catch (error: any) {
-      logger.error(`Error during polling for queue`, error, { queueName: this.queueConfig?.name, handlesRole: this.handlesRole });
+    }
+
+    if (lastError) {
+      await this.queueRepository.markJobAsFailed(job.getId(), lastError);
     }
   }
 
-  private async processJob(job: Job<any, any>): Promise<void> {
-    const jobContext: LogContext = { jobId: job.id, jobName: job.name, handledRole: this.handlesRole, attempt: job.attempts + 1 };
-    try {
-      logger.info("Processing job", jobContext);
-
-      if (!job.status.is(JobStatusType.WAITING) && !job.status.is(JobStatusType.DELAYED)) {
-          logger.warn("Job not in processable state. Skipping.", { ...jobContext, currentStatus: job.status.value });
-          this.activeJobs--;
-          return;
-      }
-
-      if (!job.moveToActive()) {
-        logger.warn("Job could not be moved to ACTIVE.", { ...jobContext, currentStatus: job.status.value });
-        this.activeJobs--;
-        return;
-      }
-      // Save job as ACTIVE before processing
-      // Note: job.data might have been updated by a previous partial execution by GenericAgentExecutor
-      // So, using save() instead of update() to ensure full state persistence if job entity was re-fetched.
-      // However, if 'job' is the same instance that GenericAgentExecutor modified, update() is fine.
-      // For robustness with the new agentState in job.data, jobRepository.save is better.
-      await this.jobRepository.save(job);
-
-      const executorResult: AgentExecutorResult = await this.agentExecutor.processJob(job);
-
-      // IMPORTANT: GenericAgentExecutor modifies job.data directly.
-      // Now, WorkerService needs to persist this modified job object.
-
-      const finalizedJob = this._finalizeJobState(job, executorResult);
-      await this.jobRepository.save(finalizedJob);
-
-    } catch (error: any) {
-      // Ensure error is an instance of Error for consistent message/stack access
-      const currentError: Error = error instanceof Error ? error : new Error(String(error));
-      let jobFailureMessage = currentError.message; // Default message
-
-      // Log with more context based on error type
-      if (currentError instanceof ConfigurationError) {
-        logger.error(\`ConfigurationError processing job: \${currentError.message}\`, currentError, jobContext);
-        jobFailureMessage = `Configuration Error: ${currentError.message}`;
-      } else if (currentError instanceof LLMError) {
-        logger.error(\`LLMError processing job (Model: \${currentError.modelName}): \${currentError.message}\`, currentError.originalError || currentError, { ...jobContext, modelName: currentError.modelName, provider: currentError.provider });
-        jobFailureMessage = `LLM Error: ${currentError.message}`;
-      } else if (currentError instanceof ToolExecutionError) {
-        logger.error(\`ToolExecutionError processing job (Tool: \${currentError.toolName}): \${currentError.message}\`, currentError.originalError || currentError, { ...jobContext, toolName: currentError.toolName });
-        jobFailureMessage = `Tool Error (${currentError.toolName || 'unknown'}): ${currentError.message}`;
-      } else if (currentError instanceof JobProcessingError) {
-        logger.error(\`JobProcessingError for job (Agent: \${currentError.agentRole}): \${currentError.message}\`, currentError, { ...jobContext, agentRoleError: currentError.agentRole });
-        jobFailureMessage = `Job Processing Error: ${currentError.message}`;
-      } else { // Generic or unknown error
-        logger.error("Generic error processing job.", currentError, jobContext);
-        // jobFailureMessage remains currentError.message
-      }
-
-      // Store more detailed error info in job.data.error if possible
-      const errorForJobData = {
-        name: currentError.name,
-        message: currentError.message,
-        stack: currentError.stack,
-        // Add custom properties if available
-        ...(currentError instanceof LLMError && { modelName: currentError.modelName, provider: currentError.provider }),
-        ...(currentError instanceof ToolExecutionError && { toolName: currentError.toolName }),
-        ...(currentError instanceof JobProcessingError && { jobId: currentError.jobId, agentRole: currentError.agentRole }),
-        ...(currentError instanceof NotFoundError && { resourceType: currentError.resourceType, resourceId: currentError.resourceId }),
-      };
-
-      // Update job state (retry or fail)
-      if (job.status.is(JobStatusType.ACTIVE)) {
-          if (job.attempts < job.maxAttempts) {
-              const nextRetryDelay = job.calculateNextRetryDelay();
-              job.moveToDelayed(nextRetryDelay);
-              job.setData({ ...(job.data || {}), error: errorForJobData, lastFailureSummary: jobFailureMessage });
-              logger.info(\`Job failed, will retry\`, { ...jobContext, retryDelay: nextRetryDelay, error: jobFailureMessage });
-          } else {
-              job.moveToFailed(jobFailureMessage);
-              job.setData({ ...(job.data || {}), error: errorForJobData, lastFailureSummary: jobFailureMessage });
-              logger.warn(\`Job failed after max attempts\`, { ...jobContext, error: jobFailureMessage });
-          }
-          await this.jobRepository.save(job);
-      } else {
-          logger.error(\`Job was not in ACTIVE state when error occurred in worker.\`, currentError, { ...jobContext, currentStatus: job.status.value, originalErrorMsg: jobFailureMessage });
-      }
-    } finally {
-      this.activeJobs--;
-    }
-  }
-
-  private _finalizeJobState(job: Job<any, any>, executorResult: AgentExecutorResult): Job<any, any> {
-    // IMPORTANT: GenericAgentExecutor modifies job.data directly.
-    // This method receives the job potentially already modified by agentExecutor,
-    // and further modifies its status and other properties based on executorResult.
-
-    const jobContext = { jobId: job.id, agentRole: this.handlesRole };
-    switch (executorResult.status) {
-      case 'COMPLETED':
-        job.moveToCompleted(executorResult.output || { message: executorResult.message });
-        logger.info("Job COMPLETED by agent.", { ...jobContext, message: executorResult.message });
-        break;
-      case 'FAILED':
-        job.moveToFailed(executorResult.message);
-        logger.warn("Job FAILED execution by agent.", { ...jobContext, message: executorResult.message });
-        break;
-      case 'CONTINUE_PROCESSING':
-        job.moveToWaiting(); // Or job.moveToDelayed(500);
-        logger.info("Job requires CONTINUATION. Status updated.", { ...jobContext, message: executorResult.message });
-        break;
-      default:
-        logger.error(\`Unknown status from AgentExecutor for job\`, undefined, { ...jobContext, executorStatus: executorResult.status });
-        job.moveToFailed(\`Unknown executor status: \${executorResult.status}\`);
-    }
-    return job; // Return the modified job
+  /**
+   * Calcula o delay exponencial para retry
+   * @param retryCount - Número atual de tentativas
+   * @returns Tempo de espera em milissegundos
+   */
+  private calculateRetryDelay(retryCount: number): number {
+    return Math.min(1000 * 2 ** retryCount, 30000); // Exponencial com limite de 30s
   }
 }

@@ -1,31 +1,50 @@
-// src/core/domain/entities/jobs/job-status.ts
+import { z } from "zod";
 
-export enum JobStatusType {
-  WAITING = 'WAITING',
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  DELAYED = 'DELAYED',
-}
+export const JobStatusValues = {
+  WAITING: "waiting",
+  ACTIVE: "active",
+  COMPLETED: "completed",
+  FAILED: "failed",
+  DELAYED: "delayed",
+} as const;
+
+export type JobStatusType =
+  (typeof JobStatusValues)[keyof typeof JobStatusValues];
+
+export const jobStatusSchema = z.nativeEnum(JobStatusValues);
 
 export class JobStatus {
-  public readonly value: JobStatusType;
+  private value: JobStatusType;
 
-  constructor(status: JobStatusType) {
-    this.value = status;
+  constructor(value: JobStatusType) {
+    this.value = jobStatusSchema.parse(value);
   }
 
-  public is(status: JobStatusType): boolean {
+  get current(): JobStatusType {
+    return this.value;
+  }
+
+  is(status: JobStatusType): boolean {
     return this.value === status;
   }
 
-  public moveTo(newStatus: JobStatusType): JobStatus {
-    // Basic transition, can be expanded with validation rules later
-    // For example, check if the transition is valid from the current status.
-    return new JobStatus(newStatus);
-  }
+  moveTo(newStatus: JobStatusType): boolean {
+    const validTransitions: Record<JobStatusType, JobStatusType[]> = {
+      [JobStatusValues.WAITING]: [JobStatusValues.ACTIVE],
+      [JobStatusValues.ACTIVE]: [
+        JobStatusValues.COMPLETED,
+        JobStatusValues.FAILED,
+        JobStatusValues.DELAYED,
+      ],
+      [JobStatusValues.COMPLETED]: [],
+      [JobStatusValues.FAILED]: [],
+      [JobStatusValues.DELAYED]: [JobStatusValues.WAITING],
+    };
 
-  public static create(status: JobStatusType = JobStatusType.WAITING): JobStatus {
-    return new JobStatus(status);
+    if (validTransitions[this.value].includes(newStatus)) {
+      this.value = newStatus;
+      return true;
+    }
+    return false;
   }
 }

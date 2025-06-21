@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2024", "ES2022", "DOM", "DOM.Iterable"],
@@ -12,12 +12,9 @@
     //electron
     "types": ["node", "electron", "vitest"],
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-
-    "allowJs": true,
     "skipLibCheck": true,
-    "noImplicitAny": true,
-    "sourceMap": true,
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "paths": {
