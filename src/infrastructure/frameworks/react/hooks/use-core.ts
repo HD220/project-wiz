@@ -15,23 +15,24 @@ import {
   CreateLLMProviderConfigUseCaseInput,
   CreateLLMProviderConfigUseCaseOutput,
 } from "@/core/application/use-cases/llm-provider/create-llm-provider-config.usecase";
+import { AppErrorCode, createAppError } from "@/lib/error-mapping";
 
-export async function userQuery(data?: UserQueryInput) {
+export async function userQuery(_data?: UserQueryInput) {
   const result: Result<UserQueryOutput> =
     await window.api.invoke("query:get-user");
   const { success } = result;
-  if (!success) throw new Error("Usuário não localizado");
+  if (!success) throw createAppError(AppErrorCode.UserNotFound, result.error);
   const [user] = result.data;
 
-  if (!user) throw new Error("Usuário não localizado");
+  if (!user) throw createAppError(AppErrorCode.UserNotFound);
   return user;
 }
 
-export async function providersQuery(data?: LLMProviderQueryInput) {
+export async function providersQuery(_data?: LLMProviderQueryInput) {
   const providers: Result<LLMProviderQueryOutput> =
     await window.api.invoke("query:llm-provider");
-  if (!providers.success) return [];
-  return providers.data;
+  if (!providers.isOk()) return [];
+  return providers.value;
 }
 
 export async function createLLMProviderConfigUseCase(
@@ -46,9 +47,9 @@ export async function createLLMProviderConfigUseCase(
     });
 
   if (!providerConfig.success)
-    throw new Error("Não foi possivel salvar a configuração do provedor!");
+    throw createAppError(AppErrorCode.LLMProviderConfigSaveFailed, providerConfig.error);
 
-  return providerConfig.data;
+  return providerConfig.value;
 }
 
 export async function createUserUseCase(
@@ -65,7 +66,7 @@ export async function createUserUseCase(
       llmProviderConfigId: data.llmProviderConfigId,
     }
   );
-  if (!user.success) throw new Error("Não foi possivel criar o usuário!");
+  if (!user.success) throw createAppError(AppErrorCode.UserCreateFailed, user.error);
   return user.data;
 }
 

@@ -1,2 +1,2 @@
-export { AgentId } from "./agent-id.vo";
-export { AgentTemperature } from "./agent-temperature.vo";
+export * from './agent-id.vo';
+// Add other Agent-specific VOs here later if needed (e.g., AgentGoal, AgentNote)

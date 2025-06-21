@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react"; // Removido createContext, useContext
 import { Theme, ThemeProviderContext, ThemeProviderProps } from "./context";
 
 export function ThemeProvider({
@@ -36,8 +36,6 @@ export function ThemeProvider({
       setTheme(theme);
     },
   };
-
-  console.log(theme);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

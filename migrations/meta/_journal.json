@@ -5,43 +5,36 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1747155029936,
-      "tag": "0000_known_revanche",
+      "when": 1749990577962,
+      "tag": "0000_medical_sister_grimm",
       "breakpoints": true
     },
     {
-      "idx": 1,
+      "idx": 6,
       "version": "6",
-      "when": 1747155303202,
-      "tag": "0001_sticky_quasar",
+      "when": 1749323492000,
+      "tag": "0006_jobs_initial",
       "breakpoints": true
     },
     {
-      "idx": 2,
+      "idx": 6,
       "version": "6",
-      "when": 1747177648774,
-      "tag": "0002_complete_wildside",
+      "when": 1750082266886,
+      "tag": "0006_fluffy_nighthawk",
       "breakpoints": true
     },
     {
-      "idx": 3,
+      "idx": 7,
       "version": "6",
-      "when": 1747177938955,
-      "tag": "0003_classy_maggott",
+      "when": 1750085636025,
+      "tag": "0007_peaceful_mad_thinker",
       "breakpoints": true
     },
     {
-      "idx": 4,
+      "idx": 8,
       "version": "6",
-      "when": 1747261678976,
-      "tag": "0004_concerned_riptide",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1747266045107,
-      "tag": "0005_unknown_kang",
+      "when": 1750088650639,
+      "tag": "0008_faithful_raza",
       "breakpoints": true
     }
   ]
