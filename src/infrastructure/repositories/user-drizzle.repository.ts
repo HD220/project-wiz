@@ -1,58 +1,145 @@
-// All internal imports commented out (e.g., schema, drizzle functions)
-// import { dbType } from '@/infrastructure/services/drizzle';
-// import * as schema from '@/infrastructure/services/drizzle/schemas';
-// import { eq } from 'drizzle-orm';
-// import { User } from '@/core/domain/entities/user.entity';
-// import { UserId } from '@/core/domain/entities/user.vo';
-// import { Result, ok, error } from '@/shared/result';
-// import type { UserRepository } from '@/core/application/ports/user-repository.interface';
+// src/infrastructure/repositories/user-drizzle.repository.ts
+import { Result, ok, error } from '@/shared/result';
+import { IUserRepository } from '@/core/ports/repositories/user.interface';
+import { User, UserConstructor } from '@/core/domain/entities/user';
+import {
+    UserId,
+    UserNickname,
+    UserUsername,
+    UserEmail,
+    UserAvatar
+} from '@/core/domain/entities/user/value-objects';
+import { LLMProviderConfigId } from '@/core/domain/entities/llm-provider-config/value-objects';
+import { AgentId } from '@/core/domain/entities/agent/value-objects';
+import { usersTable, UserDbInsert, UserDbSelect } from '../services/drizzle/schemas/users';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { eq } from 'drizzle-orm';
+import { DomainError } from '@/core/common/errors';
 
-export class UserRepositoryDrizzle /* implements UserRepository */ {
-  constructor(private readonly db: any /* dbType */) {
-    console.log("Shell UserRepositoryDrizzle instantiated with db:", db ? "db instance" : "null db");
-  }
+// Define a type for the schema that the db instance will expect
+type DBSchema = { usersTable: typeof usersTable; /* ... other tables ... */ };
 
-  // Changed to list to match UserQuery shell's expectation
-  async list(): Promise<any /* Result<User[], Error> */> {
-    console.log("Shell UserRepositoryDrizzle list called");
-    return [];
-  }
+export class UserDrizzleRepository implements IUserRepository {
+    constructor(private readonly db: BetterSQLite3Database<DBSchema>) {}
 
-  async findById(id: any /* UserId */): Promise<any /* Result<User | null, Error> */> {
-    console.log("Shell UserRepositoryDrizzle findById called with id:", id);
-    return null;
-  }
+    private toEntity(row: UserDbSelect): User {
+        const props: UserConstructor = {
+            id: UserId.create(row.id),
+            nickname: UserNickname.create(row.nickname),
+            username: UserUsername.create(row.username),
+            email: UserEmail.create(row.email),
+            avatar: UserAvatar.create(row.avatarUrl),
+            defaultLLMProviderConfigId: LLMProviderConfigId.create(row.defaultLLMProviderConfigId),
+            assistantId: row.assistantId ? AgentId.create(row.assistantId) : undefined,
+            // TODO: Add createdAt/updatedAt if they become part of User entity and schema
+        };
+        return User.create(props); // Use the static create method of the User entity
+    }
 
-  async findByEmail(email: any /* UserEmail */): Promise<any /* Result<User | null, Error> */> {
-    console.log("Shell UserRepositoryDrizzle findByEmail called with email:", email);
-    return null;
-  }
+    private toPersistence(user: User): UserDbInsert {
+        const props = user.getProps();
+        return {
+            id: user.id().getValue(),
+            nickname: props.nickname.getValue(),
+            username: props.username.getValue(),
+            email: props.email.getValue(),
+            avatarUrl: props.avatar.getValue(),
+            defaultLLMProviderConfigId: props.defaultLLMProviderConfigId.getValue(),
+            assistantId: props.assistantId?.getValue(),
+            // TODO: Add createdAt/updatedAt if they become part of User entity and schema
+        };
+    }
 
-  async create(user: any /* User */): Promise<any /* Result<User, Error> */> {
-    console.log("Shell UserRepositoryDrizzle create called with user:", user);
-    const mockUser = user || {};
-    mockUser.id = mockUser.id || { value: 'shell-created-id'};
-    // Ensure all properties accessed by UserQuery shell are present if it maps deeply
-    return mockUser;
-  }
+    async save(user: User): Promise<Result<User>> {
+        try {
+            const data = this.toPersistence(user);
+            await this.db.insert(usersTable).values(data)
+                .onConflictDoUpdate({ target: usersTable.id, set: data });
+            return ok(user);
+        } catch (e) {
+            console.error("Error saving user:", e);
+            return error(new DomainError("Failed to save user.", e instanceof Error ? e : undefined));
+        }
+    }
 
-  async update(user: any /* User */): Promise<any /* Result<User, Error> */> {
-    console.log("Shell UserRepositoryDrizzle update called with user:", user);
-    return user;
-  }
+    async load(id: UserId): Promise<Result<User | null>> {
+        try {
+            const results = await this.db.select().from(usersTable)
+                .where(eq(usersTable.id, id.getValue()))
+                .limit(1);
+            if (results.length === 0) {
+                return ok(null);
+            }
+            return ok(this.toEntity(results[0]));
+        } catch (e) {
+            console.error(`Error loading user ${id.getValue()}:`, e);
+            return error(new DomainError("Failed to load user.", e instanceof Error ? e : undefined));
+        }
+    }
 
-  load(_id: any /* UserId */): Promise<any /* User */> {
-    console.log("Shell UserRepositoryDrizzle load called with id:", _id);
-    throw new Error("Shell method 'load' not implemented.");
-  }
+    async findById(id: UserId): Promise<Result<User | null>> {
+        return this.load(id);
+    }
 
-  save(_entity: any /* User */): Promise<any /* User */> {
-    console.log("Shell UserRepositoryDrizzle save called with entity:", _entity);
-    throw new Error("Shell method 'save' not implemented.");
-  }
+    async create(props: Omit<UserConstructor, "id" | "username"> & { username?: string } ): Promise<Result<User>> {
+        // Username logic (slugify nickname if username not provided) is in CreateUserUseCase.
+        // Here, we assume 'props' provides the VOs or data for them.
+        // For IRepository.create, it's simpler if it takes near-complete props.
+        // User.create already handles ensuring all mandatory fields are there.
+        try {
+            const idVo = UserId.create(); // Generate new ID
 
-  delete(_id: any /* UserId */): Promise<void> {
-    console.log("Shell UserRepositoryDrizzle delete called with id:", _id);
-    throw new Error("Shell method 'delete' not implemented.");
-  }
+            // Ensure all VOs are created before passing to User.create
+            // This is more aligned with how User.create expects its PersonaConstructor
+            // If props are already VOs (except id), then spread is fine.
+            // If props are primitives, then VOs must be created.
+            // The type Omit<UserConstructor, "id"> implies props contains VOs.
+
+            const fullProps: UserConstructor = {
+                id: idVo,
+                nickname: props.nickname, // UserNickname VO
+                username: props.username, // UserUsername VO
+                email: props.email,       // UserEmail VO
+                avatar: props.avatar,     // UserAvatar VO
+                defaultLLMProviderConfigId: props.defaultLLMProviderConfigId, // LLMProviderConfigId VO
+                assistantId: props.assistantId, // Optional AgentId VO
+            };
+            const user = User.create(fullProps);
+            return this.save(user);
+        } catch (e) {
+             console.error("Error creating user via repository:", e);
+             return error(new DomainError("Failed to create user via repository.", e instanceof Error ? e : undefined));
+        }
+    }
+
+    async update(user: User): Promise<Result<User>> {
+        return this.save(user);
+    }
+
+    async list(): Promise<Result<User[]>> {
+        try {
+            const results = await this.db.select().from(usersTable).all();
+            const users = results.map(row => this.toEntity(row));
+            return ok(users);
+        } catch (e) {
+            console.error("Error listing users:", e);
+            return error(new DomainError("Failed to list users.", e instanceof Error ? e : undefined));
+        }
+    }
+
+    async delete(id: UserId): Promise<Result<void>> {
+        try {
+            const result = await this.db.delete(usersTable)
+                .where(eq(usersTable.id, id.getValue()))
+                .returning({ id: usersTable.id });
+
+            if (result.length === 0) {
+                 return error(new DomainError(`User with id ${id.getValue()} not found for deletion.`));
+            }
+            return ok(undefined);
+        } catch (e) {
+            console.error(`Error deleting user ${id.getValue()}:`, e);
+            return error(new DomainError("Failed to delete user.", e instanceof Error ? e : undefined));
+        }
+    }
 }

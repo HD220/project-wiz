@@ -1,85 +1,86 @@
 import { Executable } from "../../../shared/executable";
-import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
+import { Result, ok, error } from "../../../shared/result";
+import {
+  RetryJobUseCaseInput,
+  RetryJobUseCaseOutput,
+  RetryJobInputSchema,
+} from "./retry-job.schema";
+import { IJobRepository } from "../ports/job-repository.interface";
+import { IJobQueue } from "../ports/job-queue.interface"; // Changed from WorkerPool
 import { Job } from "../../domain/entities/job/job.entity";
-import { RetryPolicy } from "../../domain/entities/job/value-objects/retry-policy.vo";
-import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
+import { JobId } from "../../domain/entities/job/value-objects/job-id.vo"; // Already imported in schema
+import { JobTimestamp } from "../../domain/entities/job/value-objects/job-timestamp.vo";
+import { DomainError } from "../../../core/common/errors";
 
-export interface JobRepository {
-  findById(id: JobId): Promise<Job | null>;
-  update(job: Job): Promise<void>;
-}
-
-export interface WorkerPool {
-  enqueue(job: Job): Promise<void>;
-}
-
-export type RetryJobUseCaseInput = {
-  jobId: JobId;
-};
-
-export type RetryJobUseCaseOutput = {
-  jobId: JobId;
-  attempts: number;
-  nextAttemptAt: Date;
-};
 
 export class RetryJobUseCase
-  implements Executable<RetryJobUseCaseInput, RetryJobUseCaseOutput>
+  implements Executable<RetryJobUseCaseInput, Result<RetryJobUseCaseOutput>>
 {
   constructor(
-    private readonly jobRepository: JobRepository,
-    private readonly workerPool: WorkerPool
+    private readonly jobRepository: IJobRepository,
+    private readonly jobQueue: IJobQueue // Changed from workerPool
   ) {}
 
-  async execute(input: RetryJobUseCaseInput): Promise<RetryJobUseCaseOutput> {
-    // 1. Buscar o job
-    const job = await this.jobRepository.findById(input.jobId);
-    if (!job) {
-      throw new Error("Job not found");
+  async execute(input: RetryJobUseCaseInput): Promise<Result<RetryJobUseCaseOutput>> {
+    const validationResult = RetryJobInputSchema.safeParse(input);
+    if (!validationResult.success) {
+      return error(validationResult.error.flatten().fieldErrors as any); // Cast for simplicity
     }
+    const validInput = validationResult.data; // validInput.jobId is JobId VO
 
-    // 2. Verificar se pode ser retentado
-    if (!job.retryPolicy) {
-      throw new Error("Job has no retry policy");
+    try {
+      const existingJobResult = await this.jobRepository.load(validInput.jobId);
+      if (existingJobResult.isError()) {
+        return error(new DomainError(`Failed to load job: ${existingJobResult.message}`));
+      }
+      const jobToRetry = existingJobResult.value;
+      if (!jobToRetry) {
+        return error(new DomainError(`Job with id ${validInput.jobId.getValue()} not found.`));
+      }
+
+      let retryOutcome: { updatedJob: Job; nextRunAt?: Date };
+      try {
+        // This method now throws DomainError if cannot be retried
+        retryOutcome = jobToRetry.recordFailedAttemptAndPrepareForRetry(JobTimestamp.now());
+      } catch (domainErr) {
+        if (domainErr instanceof DomainError) {
+          return error(domainErr); // Propagate DomainError (e.g., "cannot be retried")
+        }
+        // Re-throw other unexpected errors from within the domain method
+        console.error("Unexpected error during job.recordFailedAttemptAndPrepareForRetry:", domainErr);
+        throw domainErr;
+      }
+
+      const { updatedJob, nextRunAt } = retryOutcome;
+
+      const saveResult = await this.jobRepository.save(updatedJob);
+      if (saveResult.isError()) {
+         return error(new DomainError(`Failed to save updated job: ${saveResult.message}`));
+      }
+
+      if (updatedJob.isPending()) { // Use new entity method
+        const enqueueResult = await this.jobQueue.addJob(updatedJob);
+        if (enqueueResult.isError()) {
+          // Log this error, but the job state is already saved.
+          // Depending on requirements, this might be a critical error or just a warning.
+          console.warn(`Failed to re-enqueue job ${updatedJob.id().getValue()}: ${enqueueResult.message}`);
+          // For now, proceed to return success as job state was updated.
+        }
+      }
+
+      const finalProps = updatedJob.getProps();
+      return ok({
+        jobId: updatedJob.id().getValue(),
+        attempts: finalProps.attempts.getValue(),
+        status: finalProps.status.getValue(),
+        nextAttemptAt: nextRunAt,
+      });
+
+    } catch (err) {
+      console.error("Unexpected error in RetryJobUseCase:", err);
+      return error(new DomainError(err instanceof Error ? err.message : "Failed to retry job due to an unexpected error."));
     }
-
-    const retryPolicy = new RetryPolicy({
-      maxAttempts: job.retryPolicy.value.maxAttempts,
-      delayBetweenAttempts: job.retryPolicy.value.delayBetweenAttempts,
-    });
-
-    if (job.attempts >= retryPolicy.value.maxAttempts) {
-      throw new Error("Max retry attempts reached");
-    }
-
-    // 3. Calcular próximo attempt (backoff exponencial)
-    const nextAttemptDelay = this.calculateNextAttemptDelay(
-      job.attempts,
-      retryPolicy.value.delayBetweenAttempts
-    );
-    const nextAttemptAt = new Date(Date.now() + nextAttemptDelay);
-
-    // 4. Atualizar job com nova tentativa e status RETRYING
-    const updatedJob = job
-      .withAttempt(job.attempts + 1)
-      .updateStatus(JobStatus.create("DELAYED")); // Ou PENDING, dependendo da lógica
-
-    await this.jobRepository.update(updatedJob);
-
-    // 6. Reenfileirar
-    await this.workerPool.enqueue(updatedJob);
-
-    return {
-      jobId: job.id,
-      attempts: updatedJob.attempts,
-      nextAttemptAt,
-    };
   }
 
-  private calculateNextAttemptDelay(
-    attempts: number,
-    baseDelay: number
-  ): number {
-    return baseDelay * Math.pow(2, attempts);
-  }
+  // calculateNextAttemptDelay method removed as logic is now in Job.entity.ts
 }

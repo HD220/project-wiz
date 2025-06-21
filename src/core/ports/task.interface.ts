@@ -1,16 +1,29 @@
-// src/core/ports/task.interface.ts
+import { Result } from "../../shared/result";
+import { Job } from "../domain/entities/job/job.entity";
+import { ITool } from "../application/tools/tool.interface"; // Assuming ITool is defined
+import { ILLM } from "../application/llms/llm.interface";
+// Import input types for modifications
+import { ActivityContextPropsInput } from '../domain/entities/job/value-objects/activity-context.vo';
+import { AgentRuntimeStateCreateProps } from '../domain/entities/agent/agent-runtime-state.entity'; // Assuming this is the input type for AgentRuntimeState.create
 
-/**
- * Defines the contract for a Task.
- * A Task encapsulates the actual logic to be performed for a job,
- * often involving interactions with external services like LLMs and using specific tools.
- *
- * The `execute` method should:
- * - Return a value (of type `TOutput`) if the task is successfully completed.
- * - Return `void` (or `undefined`/`null`) if the task is not yet complete
- *   but did not encounter an error, indicating it needs to be re-run or continued.
- * - Throw an error if the task processing fails.
- */
-export interface ITask<TInput = any, TOutput = any, TTools = any> {
-  execute(payload: TInput, tools?: TTools): Promise<TOutput | void>;
+export interface TaskExecutionResult {
+    jobContextModifications?: Partial<ActivityContextPropsInput>;
+    runtimeStateModifications?: Partial<AgentRuntimeStateCreateProps>;
+    outputPayload: any;
+    statusOverride?: "FINISHED" | "FAILED" | "PENDING" | "DELAYED"; // JobStatusType values
+}
+
+export interface Task {
+  /**
+   * Executes the Task logic
+   * @param currentJob Job data being processed
+   * @param tools Optional array of tools available to the task
+   * @param llm Optional LLM interface for tasks that need direct LLM access
+   * @returns A Result containing TaskExecutionResult on success, or an error.
+   */
+  execute(
+    currentJob: Job,
+    tools?: ITool[],
+    llm?: ILLM
+  ): Promise<Result<TaskExecutionResult>>;
 }

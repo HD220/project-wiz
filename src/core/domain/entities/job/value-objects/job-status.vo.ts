@@ -19,15 +19,16 @@ const VALID_STATUSES: ReadonlyArray<JobStatusValue> = [
 ];
 
 export class JobStatus {
-  private readonly value: JobStatusValue;
+  protected constructor(private readonly status: JobStatusType) {
+    jobStatusSchema.parse(status);
+  }
 
-  private constructor(status: JobStatusValue) {
-    // Object Calisthenics: Rule 3 (Wrap Primitives).
-    // Validation is implicit via the type, but an explicit check is good.
-    if (!VALID_STATUSES.includes(status)) {
-      throw new Error(`Invalid job status: ${status}`);
-    }
-    this.value = status;
+  get value(): JobStatusType {
+    return this.status;
+  }
+
+  public is(statusValue: JobStatusType): boolean {
+    return this.status === statusValue;
   }
 
   public static create(status: JobStatusValue): JobStatus {

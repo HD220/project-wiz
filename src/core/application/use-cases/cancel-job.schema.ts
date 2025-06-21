@@ -14,9 +14,9 @@ export const CancelJobInputSchema = z.object({
 export type CancelJobUseCaseInput = z.infer<typeof CancelJobInputSchema>;
 
 export const CancelJobOutputSchema = z.object({
-  id: z.instanceof(JobId),
-  status: z.object({ value: jobStatusSchema }),
-  updatedAt: z.date(),
+  id: z.string().uuid(), // Changed to primitive
+  status: jobStatusSchema, // Use the Zod enum directly for primitive status string
+  updatedAt: z.date(),   // Primitive
 });
 
 export type CancelJobUseCaseOutput = z.infer<typeof CancelJobOutputSchema>;

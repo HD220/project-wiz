@@ -13,26 +13,60 @@ export type PersonaConstructor = {
   goal: PersonaGoal;
   backstory: PersonaBackstory;
 };
+
+// TODO: OBJECT_CALISTHENICS_REFACTOR: This class is undergoing refactoring.
+// The `getProps()` method is a temporary measure for external consumers.
+// Ideally, direct state access will be replaced by more behavior-oriented methods.
+// Consumers of the removed individual getters should be updated to use `persona.getProps().fieldName.getValue()`
+// or ideally, new behavioral methods on Persona or its VOs.
 export class Persona {
-  constructor(private readonly fields: PersonaConstructor) {}
-
-  get id() {
-    return this.fields.id;
+  private constructor(private readonly fields: PersonaConstructor) {
+    // VOs themselves are already validated.
+    // This constructor assumes valid VOs are passed.
   }
 
-  get name() {
-    return this.fields.name;
+  public static create(props: PersonaConstructor): Persona {
+    if (!props.id || !props.name || !props.role || !props.goal || !props.backstory) {
+      // Consider using DomainError from '@/core/common/errors'
+      throw new Error("Persona ID, Name, Role, Goal, and Backstory are mandatory to create a Persona.");
+    }
+    return new Persona(props);
   }
 
-  get role() {
-    return this.fields.role;
+  public getProps(): Readonly<PersonaConstructor> {
+    return { ...this.fields };
   }
 
-  get goal() {
-    return this.fields.goal;
-  }
+  // Individual getters removed
+  // get id() {
+  //   return this.fields.id;
+  // }
 
-  get backstory() {
-    return this.fields.backstory;
+  // get name() {
+  //   return this.fields.name;
+  // }
+
+  // get role() {
+  //   return this.fields.role;
+  // }
+
+  // get goal() {
+  //   return this.fields.goal;
+  // }
+
+  // get backstory() {
+  //   return this.fields.backstory;
+  // }
+
+  public equals(other: Persona): boolean {
+    if (this === other) return true;
+    if (!other) return false;
+    return (
+      this.fields.id.equals(other.fields.id) &&
+      this.fields.name.equals(other.fields.name) &&
+      this.fields.role.equals(other.fields.role) &&
+      this.fields.goal.equals(other.fields.goal) &&
+      this.fields.backstory.equals(other.fields.backstory)
+    );
   }
 }

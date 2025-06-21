@@ -1,105 +1,139 @@
+// src/infrastructure/repositories/worker-drizzle.repository.ts
+import { Result, ok, error } from '@/shared/result';
+import { IWorkerRepository } from '@/core/ports/repositories/worker.repository.interface';
+import { Worker, WorkerConstructor } from '@/core/domain/entities/worker/worker.entity';
+import {
+    WorkerId,
+    WorkerName,
+    WorkerStatus,
+    WorkerStatusType // Import enum for casting if needed
+} from '@/core/domain/entities/worker/value-objects';
+import { JobTimestamp } from '@/core/domain/entities/job/value-objects/job-timestamp.vo';
+import { workersTable, WorkerDbInsert, WorkerDbSelect } from '../services/drizzle/schemas/workers'; // Use workersTable
 import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { eq, asc } from 'drizzle-orm'; // Removed inArray as it's unused
-import { workers, WorkersSelect } from '../services/drizzle/schemas/workers'; // Import new schema and types
-import { IWorkerRepository } from '@/core/application/ports/worker-repository.interface';
-import { Worker, WorkerId, WorkerStatus } from '@/core/domain/entities/worker';
-import { AgentId } from '@/core/domain/entities/agent'; // For associatedAgentId
+import { eq } from 'drizzle-orm';
+import { DomainError } from '@/core/common/errors';
 
-// Optional: Define a specific error if needed
-export class WorkerNotFoundError extends Error {
-  constructor(id: WorkerId | string) {
-    super(`Worker with id ${typeof id === 'string' ? id : id.getValue()} not found`);
-    this.name = 'WorkerNotFoundError';
-  }
-}
+type DBSchema = { workersTable: typeof workersTable; /* ... other tables ... */ };
 
 export class WorkerDrizzleRepository implements IWorkerRepository {
-  constructor(
-    // Assuming the db instance passed here is compatible with all schemas
-    private readonly db: BetterSQLite3Database<typeof import('../services/drizzle/schemas')>
-  ) {}
+    constructor(private readonly db: BetterSQLite3Database<DBSchema>) {}
 
-  private mapRowToEntity(row: WorkersSelect): Worker {
-    const worker = Worker.create({
-      id: WorkerId.fromString(row.id),
-      associatedAgentId: row.associatedAgentId ? AgentId.fromString(row.associatedAgentId) : undefined,
-      status: WorkerStatus.create(row.status),
-      // Pass undefined for lastHeartbeatAt to let create() use its default initially, then override if DB has value
-    });
-    // Override createdAt and lastHeartbeatAt from DB row data after creation by static factory
-    // This is a common pattern if static create methods have defaults that shouldn't apply during hydration
-    const props = worker.props as any; // Use type assertion to modify readonly props post-creation for hydration
-    props.createdAt = new Date(row.createdAt);
-    if (row.lastHeartbeatAt) {
-      props.lastHeartbeatAt = new Date(row.lastHeartbeatAt);
+    private toEntity(row: WorkerDbSelect): Worker {
+        const props: WorkerConstructor = {
+            id: WorkerId.create(row.id),
+            name: WorkerName.create(row.name),
+            status: WorkerStatus.create(row.status as WorkerStatusType), // Cast if status from DB is string
+            createdAt: JobTimestamp.create(new Date(row.createdAt)),
+            updatedAt: row.updatedAt ? JobTimestamp.create(new Date(row.updatedAt)) : undefined,
+        };
+        return Worker.create(props); // Use static create method of the Worker entity
     }
-    return worker;
-  }
 
-  private mapEntityToDrizzle(worker: Worker): Omit<WorkersSelect, 'createdAt' | 'lastHeartbeatAt'> & { createdAt: number, lastHeartbeatAt: number } {
-    // This prepares an object that can be used for both insert and update's 'set'
-    // createdAt is handled by schema default on insert, not updated.
-    // lastHeartbeatAt is updated explicitly in 'save'.
-    return {
-      id: worker.id.getValue(),
-      associatedAgentId: worker.associatedAgentId ? worker.associatedAgentId.getValue() : null,
-      status: worker.status.getValue(),
-      // createdAt will be handled by DB default on insert
-      // lastHeartbeatAt will be set to Date.now() in save method for updates
-    };
-  }
-
-  async findById(id: WorkerId): Promise<Worker | null> {
-    const result = await this.db
-      .select()
-      .from(workers)
-      .where(eq(workers.id, id.getValue()))
-      .limit(1);
-
-    if (result.length === 0) {
-      return null;
+    private toPersistence(worker: Worker): WorkerDbInsert {
+        const props = worker.getProps();
+        return {
+            id: worker.id().getValue(),
+            name: props.name.getValue(),
+            status: props.status.getValue(), // This is WorkerStatusType (string enum)
+            createdAt: props.createdAt.getValue(), // Drizzle handles Date to timestamp_ms
+            updatedAt: props.updatedAt?.getValue(),
+        };
     }
-    return this.mapRowToEntity(result[0]);
-  }
 
-  async save(worker: Worker): Promise<void> {
-    const values = this.mapEntityToDrizzle(worker);
+    async save(worker: Worker): Promise<Result<Worker>> {
+        try {
+            const data = this.toPersistence(worker);
+            await this.db.insert(workersTable).values(data)
+                .onConflictDoUpdate({ target: workersTable.id, set: data });
+            return ok(worker);
+        } catch (e) {
+            console.error("Error saving worker:", e);
+            return error(new DomainError("Failed to save worker.", e instanceof Error ? e : undefined));
+        }
+    }
 
-    await this.db
-      .insert(workers)
-      .values({
-        ...values,
-        createdAt: worker.props.createdAt.getTime(), // Ensure createdAt is set for insert from entity
-        lastHeartbeatAt: worker.props.lastHeartbeatAt?.getTime() ?? Date.now(),
-      })
-      .onConflictDoUpdate({
-        target: workers.id,
-        set: {
-          associatedAgentId: values.associatedAgentId,
-          status: values.status,
-          lastHeartbeatAt: Date.now(), // Always update heartbeat on save/update
-        },
-      });
-  }
+    async load(id: WorkerId): Promise<Result<Worker | null>> {
+        try {
+            const results = await this.db.select().from(workersTable)
+                .where(eq(workersTable.id, id.getValue()))
+                .limit(1);
+            if (results.length === 0) {
+                return ok(null);
+            }
+            return ok(this.toEntity(results[0]));
+        } catch (e) {
+            console.error(`Error loading worker ${id.getValue()}:`, e);
+            return error(new DomainError("Failed to load worker.", e instanceof Error ? e : undefined));
+        }
+    }
 
-  async findIdleWorkers(limit: number): Promise<Worker[]> {
-    const idleStatus = WorkerStatus.idle().getValue();
-    const results = await this.db
-      .select()
-      .from(workers)
-      .where(eq(workers.status, idleStatus))
-      .orderBy(asc(workers.createdAt)) // Example: older idle workers first
-      .limit(limit);
+    async findFirstAvailable(): Promise<Result<Worker | null>> {
+        try {
+            const results = await this.db.select().from(workersTable)
+                .where(eq(workersTable.status, WorkerStatus.createAvailable().getValue())) // Compare with primitive status value
+                .limit(1);
+            if (results.length === 0) {
+                return ok(null);
+            }
+            return ok(this.toEntity(results[0]));
+        } catch (e) {
+            console.error("Error finding available worker:", e);
+            return error(new DomainError("Failed to find available worker.", e instanceof Error ? e : undefined));
+        }
+    }
 
-    return results.map(row => this.mapRowToEntity(row));
-  }
+    // Standard IRepository methods
+    async findById(id: WorkerId): Promise<Result<Worker | null>> {
+        return this.load(id);
+    }
 
-  async findByStatus(status: WorkerStatus): Promise<Worker[]> {
-    const results = await this.db
-      .select()
-      .from(workers)
-      .where(eq(workers.status, status.getValue()));
+    async create(props: Omit<WorkerConstructor, "id">): Promise<Result<Worker>> {
+        try {
+            const id = WorkerId.create(); // Generate new ID
+            const fullProps: WorkerConstructor = {
+                id,
+                name: props.name, // Already WorkerName VO
+                status: props.status, // Already WorkerStatus VO
+                createdAt: props.createdAt, // Already JobTimestamp VO
+                updatedAt: props.updatedAt // Optional JobTimestamp VO
+            };
+            const worker = Worker.create(fullProps);
+            return this.save(worker);
+        } catch (e) {
+             console.error("Error creating worker via repository:", e);
+             return error(new DomainError("Failed to create worker via repository.", e instanceof Error ? e : undefined));
+        }
+    }
 
-    return results.map(row => this.mapRowToEntity(row));
-  }
+    async update(worker: Worker): Promise<Result<Worker>> {
+        return this.save(worker);
+    }
+
+    async list(): Promise<Result<Worker[]>> {
+        try {
+            const results = await this.db.select().from(workersTable).all();
+            const workers = results.map(row => this.toEntity(row));
+            return ok(workers);
+        } catch (e) {
+            console.error("Error listing workers:", e);
+            return error(new DomainError("Failed to list workers.", e instanceof Error ? e : undefined));
+        }
+    }
+
+    async delete(id: WorkerId): Promise<Result<void>> {
+        try {
+            const result = await this.db.delete(workersTable)
+                .where(eq(workersTable.id, id.getValue()))
+                .returning({ id: workersTable.id });
+
+            if (result.length === 0) {
+                 return error(new DomainError(`Worker with id ${id.getValue()} not found for deletion.`));
+            }
+            return ok(undefined);
+        } catch (e) {
+            console.error(`Error deleting worker ${id.getValue()}:`, e);
+            return error(new DomainError("Failed to delete worker.", e instanceof Error ? e : undefined));
+        }
+    }
 }

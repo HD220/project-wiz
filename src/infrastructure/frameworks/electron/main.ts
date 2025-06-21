@@ -1,30 +1,17 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'node:path';
-import squirrelStartup from 'electron-squirrel-startup';
+import 'reflect-metadata'; // Added for InversifyJS
+import { app, BrowserWindow } from "electron";
+import path from "node:path";
+import started from "electron-squirrel-startup";
+import "./main/handlers";
+import { db } from "@/infrastructure/services/drizzle"; // This might be an issue if db is initialized before DI
+import { initializeDatabase } from "./main/seed";
+import { main } from "./main/agent";
 
-// Direct imports of handler registration functions
-import { registerJobHandlers } from './main/handlers/job-handlers';
-import { registerQueryHandlers } from './main/handlers/query-handlers';
-import { registerUsecaseHandlers } from './main/handlers/usecase-handlers';
-// registerServices function from services.ts is not strictly needed if main.ts imports instances.
+// InversifyJS Container and Worker Pool
+import { appContainer } from '../../../electron/dependency-injection/inversify.config';
+import { IWorkerPool } from '../../../../core/application/ports/worker-pool.interface';
+import { TYPES } from '../../../electron/dependency-injection/types';
 
-// Import required service instances from services.ts
-import {
-    ipcHandlerInstance, // This is new ElectronIpcHandler() from services.ts
-    userQuery,
-    llmProviderQuery,
-    createUserUseCase,
-    createLLMProviderConfigUseCase,
-    jobDefinitionService,
-    queueService,
-    jobRepository,         // For registerJobHandlers
-    processJobUseCase,   // Mocked in services.ts
-    workerService        // For starting the loop
-} from './main/handlers/services';
-
-// Commented out unused imports from "ultra-simplified" state
-// import { db } from "@/infrastructure/services/drizzle";
-// import { initializeDatabase } from "./main/seed";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -53,31 +40,49 @@ const createWindow = () => {
   // mainWindow.setMenu(null);
 };
 
-app.on('ready', async () => {
-  // await initializeDatabase(db); // Keep this commented for now
-
+app.on("ready", async () => {
+  // It's generally better to initialize DB via DI container if it's managed there.
+  // For now, assuming initializeDatabase and db are separate or will be integrated into DI later.
+  await initializeDatabase(db);
   createWindow();
 
-  // Use the ipcHandlerInstance exported from services.ts
-  registerQueryHandlers(ipcHandlerInstance, userQuery, llmProviderQuery);
-  registerUsecaseHandlers(ipcHandlerInstance, createUserUseCase, createLLMProviderConfigUseCase);
-  registerJobHandlers(ipcHandlerInstance, processJobUseCase, jobRepository, jobDefinitionService, queueService);
-
-  if (workerService && typeof workerService.startProcessingLoop === 'function') {
-    console.log("main.ts: Attempting to start WorkerService processing loop...");
-    workerService.startProcessingLoop(); // Uses default interval
-  } else {
-    console.error("main.ts: WorkerService or startProcessingLoop not available!");
+  // Start the WorkerPool
+  try {
+    console.log("Attempting to start worker pool...");
+    const workerPool = appContainer.get<IWorkerPool>(TYPES.IWorkerPool);
+    const startResult = await workerPool.start();
+    if (startResult.isError()) {
+        console.error("Failed to start worker pool:", startResult.message, startResult.error);
+    } else {
+        console.log("Worker pool started successfully.");
+    }
+  } catch (e) {
+      console.error("Error initializing/starting worker pool:", e);
   }
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    // Consider if shutdown logic is needed here or only in before-quit
     app.quit();
   }
 });
 
-app.on('activate', () => {
+app.on('before-quit', async (event) => {
+    event.preventDefault(); // Prevent immediate quit
+    console.log("Application before-quit: Shutting down worker pool...");
+    try {
+        const workerPool = appContainer.get<IWorkerPool>(TYPES.IWorkerPool);
+        await workerPool.shutdown();
+        console.log("Worker pool shutdown complete. Quitting application.");
+    } catch (e) {
+        console.error("Error shutting down worker pool:", e);
+    } finally {
+        app.exit(); // Force the quit after attempting the shutdown
+    }
+});
+
+app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }

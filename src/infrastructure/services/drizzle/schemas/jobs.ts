@@ -1,44 +1,40 @@
-// src/infrastructure/services/drizzle/schema/jobs.ts
+// src/infrastructure/services/drizzle/schemas/jobs.ts
+import { sqliteTable, text, integer, blob } from 'drizzle-orm/sqlite-core';
+import { JobStatusType } from '@/core/domain/entities/job/value-objects/job-status.vo'; // For status enum values if needed by Drizzle
+import { RetryPolicyParams } from '@/core/domain/entities/job/value-objects/retry-policy.vo';
+import { ActivityContextPropsInput } from '@/core/domain/entities/job/value-objects/activity-context.vo';
 
-import { text, integer, sqliteTable, blob } from 'drizzle-orm/sqlite-core';
-import { JobStatusType } from '../../../../core/domain/entities/jobs/job-status'; // Adjust path as needed
+// Note: Drizzle's text enum for sqlite is just `text().$type<EnumType>()`.
+// The actual constraint is at application/db level outside of this type definition.
+// We will store status as plain text matching JobStatusType values.
 
 export const jobsTable = sqliteTable('jobs', {
-  id: text('id').primaryKey(),
-  queueId: text('queue_id').notNull(), // Assuming a foreign key relationship, but not enforcing it at DB level for simplicity now
-  name: text('name').notNull(),
+    id: text('id').primaryKey(), // From JobId.getValue() (string UUID)
+    name: text('name').notNull(), // From JobName.getValue() (string)
+    status: text('status').notNull().$type<JobStatusType>(), // From JobStatus.getValue() (string enum)
+    attempts: integer('attempts').notNull().default(0), // From AttemptCount.getValue() (number)
 
-  // 'payload' and 'result' can be complex objects; storing as JSON strings (TEXT) or BLOB.
-  // Using TEXT for simplicity, assuming JSON.stringify and JSON.parse will be used in the repository.
-  // If binary data is needed, BLOB might be better with appropriate serialization.
-  payload: text('payload'), // Store as JSON string
-  data: text('data'), // Store as JSON string, for mutable data during job execution
-  result: text('result'), // Store as JSON string
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(), // From JobTimestamp.getValue().getTime()
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }), // From JobTimestamp.getValue().getTime()
 
-  maxAttempts: integer('max_attempts').notNull().default(1),
-  attempts: integer('attempts').notNull().default(0),
+    payload: blob('payload', { mode: 'json' }).$type<Record<string, unknown> | null | undefined>(),
+    retryPolicy: blob('retry_policy', { mode: 'json' }).$type<RetryPolicyParams | null | undefined>(),
+    context: blob('context', { mode: 'json' }).$type<ActivityContextPropsInput | null | undefined>(),
 
-  maxRetryDelay: integer('max_retry_delay').notNull().default(60000), // milliseconds
-  retryDelay: integer('retry_delay').notNull().default(0), // milliseconds
-  delay: integer('delay').notNull().default(0), // milliseconds for DELAYED status
+    priority: integer('priority'), // From JobPriority.getValue() (number), optional
+    dependsOn: blob('depends_on', { mode: 'json' }).$type<string[] | null | undefined>(), // string[] (JobId strings)
+    activityType: text('activity_type').$type<string | null | undefined>(), // From ActivityType.getValue() (string), optional
 
-  priority: integer('priority').notNull().default(0), // Lower number = higher priority
+    parentId: text('parent_id').$type<string | null | undefined>(), // From JobId.getValue() (string UUID), optional
+    relatedActivityIds: blob('related_activity_ids', { mode: 'json' }).$type<string[] | null | undefined>(),
 
-  status: text('status').notNull().default(JobStatusType.WAITING), // Store JobStatusType as string
+    agentId: text('agent_id').$type<string | null | undefined>(), // From AgentId.getValue() (string UUID), optional
 
-  // 'dependsOn' could be a JSON array of job IDs stored as TEXT.
-  dependsOn: text('depends_on'), // Store as JSON string array of job IDs
-
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(new Date()),
-
-  // Specific time after which the job should be executed
-  executeAfter: integer('execute_after', { mode: 'timestamp_ms' }),
-
-  // New fields for agent targeting
-  targetAgentRole: text('target_agent_role'),
-  requiredCapabilities: text('required_capabilities', { mode: 'json' }).$type<string[] | null>(),
+    result: blob('result', { mode: 'json' }).$type<unknown | null | undefined>(),
+    metadata: blob('metadata', { mode: 'json' }).$type<Record<string, unknown> | null | undefined>(),
+    // 'data' field from previous schema, kept for compatibility if used, maps to JobProps.data
+    data: blob('data', { mode: 'json' }).$type<Record<string, unknown> | null | undefined>(),
 });
 
-export type InsertJob = typeof jobsTable.$inferInsert;
-export type SelectJob = typeof jobsTable.$inferSelect;
+export type JobDbInsert = typeof jobsTable.$inferInsert;
+export type JobDbSelect = typeof jobsTable.$inferSelect;
