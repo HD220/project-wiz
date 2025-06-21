@@ -8,6 +8,7 @@ import {
 import { JobRepository } from "../ports/job-repository.interface";
 import { JobQueue } from "../ports/job-queue.interface";
 import { JobBuilder } from "../../domain/entities/job/job-builder"; // Corrigido o caminho do import
+import { Job } from "@/core/domain/entities/job/job.entity";
 import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
 import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";
 import { RetryPolicy } from "../../domain/entities/job/value-objects/retry-policy.vo";

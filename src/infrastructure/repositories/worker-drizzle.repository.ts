@@ -1,130 +1,105 @@
-import { Result, ok, error } from "../../shared/result";
-import { Worker } from "../../core/domain/entities/worker/worker.entity";
-import { WorkerId } from "../../core/domain/entities/worker/value-objects/worker-id.vo";
-import { WorkerRepository } from "../../core/application/ports/worker-repository.interface";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import { workers } from "../../infrastructure/services/drizzle/schemas/workers";
-import { eq, sql } from "drizzle-orm";
-import { WorkerStatus } from "../../core/domain/entities/worker/value-objects/worker-status.vo";
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { eq, asc } from 'drizzle-orm'; // Removed inArray as it's unused
+import { workers, WorkersSelect } from '../services/drizzle/schemas/workers'; // Import new schema and types
+import { IWorkerRepository } from '@/core/application/ports/worker-repository.interface';
+import { Worker, WorkerId, WorkerStatus } from '@/core/domain/entities/worker';
+import { AgentId } from '@/core/domain/entities/agent'; // For associatedAgentId
 
-export class WorkerDrizzleRepository implements WorkerRepository {
+// Optional: Define a specific error if needed
+export class WorkerNotFoundError extends Error {
+  constructor(id: WorkerId | string) {
+    super(`Worker with id ${typeof id === 'string' ? id : id.getValue()} not found`);
+    this.name = 'WorkerNotFoundError';
+  }
+}
+
+export class WorkerDrizzleRepository implements IWorkerRepository {
   constructor(
-    private readonly db: BetterSQLite3Database<Record<string, never>>
+    // Assuming the db instance passed here is compatible with all schemas
+    private readonly db: BetterSQLite3Database<typeof import('../services/drizzle/schemas')>
   ) {}
 
-  async create(worker: Worker): Promise<Result<Worker>> {
-    try {
-      await this.db.insert(workers).values({
-        id: sql`${worker.id.value}`,
-        name: sql`${worker.name}`,
-        status: sql`${worker.status.value}`,
-        created_at: sql`${worker.createdAt.toISOString()}`,
-        updated_at: worker.updatedAt
-          ? sql`${worker.updatedAt.toISOString()}`
-          : undefined,
+  private mapRowToEntity(row: WorkersSelect): Worker {
+    const worker = Worker.create({
+      id: WorkerId.fromString(row.id),
+      associatedAgentId: row.associatedAgentId ? AgentId.fromString(row.associatedAgentId) : undefined,
+      status: WorkerStatus.create(row.status),
+      // Pass undefined for lastHeartbeatAt to let create() use its default initially, then override if DB has value
+    });
+    // Override createdAt and lastHeartbeatAt from DB row data after creation by static factory
+    // This is a common pattern if static create methods have defaults that shouldn't apply during hydration
+    const props = worker.props as any; // Use type assertion to modify readonly props post-creation for hydration
+    props.createdAt = new Date(row.createdAt);
+    if (row.lastHeartbeatAt) {
+      props.lastHeartbeatAt = new Date(row.lastHeartbeatAt);
+    }
+    return worker;
+  }
+
+  private mapEntityToDrizzle(worker: Worker): Omit<WorkersSelect, 'createdAt' | 'lastHeartbeatAt'> & { createdAt: number, lastHeartbeatAt: number } {
+    // This prepares an object that can be used for both insert and update's 'set'
+    // createdAt is handled by schema default on insert, not updated.
+    // lastHeartbeatAt is updated explicitly in 'save'.
+    return {
+      id: worker.id.getValue(),
+      associatedAgentId: worker.associatedAgentId ? worker.associatedAgentId.getValue() : null,
+      status: worker.status.getValue(),
+      // createdAt will be handled by DB default on insert
+      // lastHeartbeatAt will be set to Date.now() in save method for updates
+    };
+  }
+
+  async findById(id: WorkerId): Promise<Worker | null> {
+    const result = await this.db
+      .select()
+      .from(workers)
+      .where(eq(workers.id, id.getValue()))
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+    return this.mapRowToEntity(result[0]);
+  }
+
+  async save(worker: Worker): Promise<void> {
+    const values = this.mapEntityToDrizzle(worker);
+
+    await this.db
+      .insert(workers)
+      .values({
+        ...values,
+        createdAt: worker.props.createdAt.getTime(), // Ensure createdAt is set for insert from entity
+        lastHeartbeatAt: worker.props.lastHeartbeatAt?.getTime() ?? Date.now(),
+      })
+      .onConflictDoUpdate({
+        target: workers.id,
+        set: {
+          associatedAgentId: values.associatedAgentId,
+          status: values.status,
+          lastHeartbeatAt: Date.now(), // Always update heartbeat on save/update
+        },
       });
-
-      return ok(worker);
-    } catch (err) {
-      return error(
-        `Failed to create worker: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
   }
 
-  async findById(id: WorkerId): Promise<Result<Worker>> {
-    try {
-      const result = await this.db
-        .select()
-        .from(workers)
-        .where(eq(workers.id, sql`${id.value}`))
-        .get();
+  async findIdleWorkers(limit: number): Promise<Worker[]> {
+    const idleStatus = WorkerStatus.idle().getValue();
+    const results = await this.db
+      .select()
+      .from(workers)
+      .where(eq(workers.status, idleStatus))
+      .orderBy(asc(workers.createdAt)) // Example: older idle workers first
+      .limit(limit);
 
-      if (!result) {
-        return error("Worker not found");
-      }
-
-      const worker = new Worker({
-        id: new WorkerId(result.id),
-        name: result.name,
-        status: new WorkerStatus(result.status),
-        createdAt: new Date(result.created_at),
-        updatedAt: result.updated_at ? new Date(result.updated_at) : undefined,
-      });
-
-      return ok(worker);
-    } catch (err) {
-      return error(
-        `Failed to find worker: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
+    return results.map(row => this.mapRowToEntity(row));
   }
 
-  async update(worker: Worker): Promise<Result<Worker>> {
-    try {
-      const changes = await this.db
-        .update(workers)
-        .set({
-          name: worker.name,
-          status: sql`${worker.status.value}`,
-          updated_at: new Date().toISOString(),
-        })
-        .where(eq(workers.id, sql`${worker.id.value}`))
-        .run();
+  async findByStatus(status: WorkerStatus): Promise<Worker[]> {
+    const results = await this.db
+      .select()
+      .from(workers)
+      .where(eq(workers.status, status.getValue()));
 
-      if (changes.changes === 0) {
-        return error("Worker not found or no changes made");
-      }
-
-      return ok(worker);
-    } catch (err) {
-      return error(
-        `Failed to update worker: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
-  }
-
-  async delete(id: WorkerId): Promise<Result<void>> {
-    try {
-      const changes = await this.db
-        .delete(workers)
-        .where(eq(workers.id, sql`${id.value}`))
-        .run();
-
-      if (changes.changes === 0) {
-        return error("Worker not found");
-      }
-
-      return ok(undefined);
-    } catch (err) {
-      return error(
-        `Failed to delete worker: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
-  }
-
-  async list(): Promise<Result<Worker[]>> {
-    try {
-      const results = await this.db.select().from(workers).all();
-
-      const workersList = results.map(
-        (result) =>
-          new Worker({
-            id: new WorkerId(result.id),
-            name: result.name,
-            status: new WorkerStatus(result.status),
-            createdAt: new Date(result.created_at),
-            updatedAt: result.updated_at
-              ? new Date(result.updated_at)
-              : undefined,
-          })
-      );
-
-      return ok(workersList);
-    } catch (err) {
-      return error(
-        `Failed to list workers: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
+    return results.map(row => this.mapRowToEntity(row));
   }
 }

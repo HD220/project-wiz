@@ -1,27 +1,21 @@
-import { z } from "zod";
-
-const workerStatusSchema = z.enum(["available", "busy", "offline"]);
-
-export type WorkerStatusType = z.infer<typeof workerStatusSchema>;
+export type WorkerStatusValue = 'idle' | 'busy' | 'offline' | 'error';
+const VALID_WORKER_STATUSES: ReadonlyArray<WorkerStatusValue> = ['idle', 'busy', 'offline', 'error'];
 
 export class WorkerStatus {
-  constructor(private readonly status: WorkerStatusType) {
-    workerStatusSchema.parse(status);
+  private readonly value: WorkerStatusValue;
+  private constructor(status: WorkerStatusValue) {
+    if (!VALID_WORKER_STATUSES.includes(status)) {
+      throw new Error(`Invalid worker status: ${status}`);
+    }
+    this.value = status;
   }
-
-  get value(): WorkerStatusType {
-    return this.status;
-  }
-
-  static available(): WorkerStatus {
-    return new WorkerStatus("available");
-  }
-
-  static busy(): WorkerStatus {
-    return new WorkerStatus("busy");
-  }
-
-  static offline(): WorkerStatus {
-    return new WorkerStatus("offline");
-  }
+  public static create(status: WorkerStatusValue): WorkerStatus { return new WorkerStatus(status); }
+  public static idle(): WorkerStatus { return new WorkerStatus('idle'); }
+  public static busy(): WorkerStatus { return new WorkerStatus('busy'); }
+  public static offline(): WorkerStatus { return new WorkerStatus('offline'); }
+  public static error(): WorkerStatus { return new WorkerStatus('error'); }
+  public getValue(): WorkerStatusValue { return this.value; }
+  public equals(other: WorkerStatus): boolean { return this.value === other.getValue(); }
+  public isIdle(): boolean { return this.value === 'idle'; }
+  public isBusy(): boolean { return this.value === 'busy'; }
 }

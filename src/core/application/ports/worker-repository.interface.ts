@@ -1,11 +1,8 @@
-import { Worker } from "../../domain/entities/worker/worker.entity";
-import { WorkerId } from "../../domain/entities/worker/value-objects/worker-id.vo";
-import { Result } from "../../../shared/result";
+import { Worker, WorkerId, WorkerStatus } from '@/core/domain/entities/worker'; // Adjust path
+import { IRepository } from './repository.interface';
 
-export interface WorkerRepository {
-  create(worker: Worker): Promise<Result<Worker>>;
-  findById(id: WorkerId): Promise<Result<Worker>>;
-  update(worker: Worker): Promise<Result<Worker>>;
-  delete(id: WorkerId): Promise<Result<void>>;
-  list(): Promise<Result<Worker[]>>;
+export interface IWorkerRepository extends IRepository<Worker, WorkerId> {
+  // Additional Worker-specific methods
+  findIdleWorkers(limit: number): Promise<Worker[]>;
+  findByStatus(status: WorkerStatus): Promise<Worker[]>;
 }

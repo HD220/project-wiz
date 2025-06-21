@@ -22,22 +22,43 @@ Essa estrutura torna o sistema mais fácil de testar, manter e evoluir, pois as 
 **Propósito:** O Domain Layer é o coração da aplicação, contendo as regras de negócio e a lógica essencial que não depende de frameworks ou tecnologias externas. É a camada mais interna e estável da arquitetura.
 
 **Componentes Principais:**
-- **Entidades:** Representam os conceitos de negócio com estado e comportamento. Possuem identidade e ciclo de vida (ex: Job, Worker, AgentInternalState). As entidades são projetadas com campos encapsulados (frequentemente em um objeto `fields`), com acesso primário via getters e modificações geralmente gerenciadas por meio de builders. A validação externa (ex: Zod schemas) é comum, e a minimização de setters públicos promove a imutabilidade onde aplicável.
-- **Value Objects:** Representam valores descritivos que não possuem identidade única. São imutáveis, definidos por seus atributos e devem possuir validação abrangente (ex: JobId, ActivityType). Lógica de comportamento complexa é geralmente evitada em VOs.
-- **Interfaces de Repositório:** Contratos que definem como os dados do domínio podem ser persistidos e recuperados. A implementação desses contratos reside na camada de Infraestrutura (ex: IJobRepository).
-- **Lógica de Negócio em Entidades vs. Serviços:** Um princípio de design adotado é que a lógica de negócio mais complexa, especialmente aquela que envolve transições de estado de entidades (como o status de uma Job) ou coordena múltiplas entidades, deve ser encapsulada em serviços na Camada de Aplicação, em vez de residir diretamente nos métodos das entidades do domínio. Isso mantém as entidades focadas em representar o estado e as regras intrínsecas, enquanto os serviços orquestram os processos.
+- **Entidades:** Representam os conceitos de negócio com estado e comportamento. Possuem identidade e ciclo de vida. As entidades centrais implementadas são:
+    - `Job`: Representa uma unidade de trabalho ou atividade, contendo um `ActivityContext` em seu campo `data` para armazenar o estado e histórico da atividade.
+    - `AgentInternalState`: Mantém o estado interno de um agente, como seu objetivo atual ou notas.
+    - `Worker`: Representa um executor de jobs, associado a um agente específico.
+- **Value Objects (VOs):** Representam valores descritivos que não possuem identidade única, garantindo validade e consistência. Principais VOs implementados incluem:
+    - Para Jobs: `JobId`, `JobStatus` (e.g., pending, waiting, active, completed, failed, cancelled), `JobName`, `JobPriority`, `JobAttempts`.
+    - Para Activities (dentro do Job): `ActivityType` (e.g., USER_REQUEST, AGENT_ACTION), `ActivityHistoryEntry`, `ActivityHistory`, `ActivityContext`.
+    - Para Agentes: `AgentId`.
+    - Para Workers: `WorkerId`, `WorkerStatus`.
+- **Interfaces de Repositório:** Contratos que definem como os dados do domínio podem ser persistidos e recuperados. A implementação desses contratos reside na camada de Infraestrutura. Interfaces definidas:
+    - `IJobRepository`
+    - `IAgentStateRepository`
+    - `IWorkerRepository`
+    - `IRepository` (interface genérica base).
+- **Lógica de Negócio:** A lógica de negócio mais complexa, especialmente transições de estado e coordenação entre entidades, é gerenciada por serviços na Camada de Aplicação, mantendo as entidades focadas em seu estado e regras intrínsecas.
 
 ### Application Layer (Casos de Uso)
 
-**Propósito:** O Application Layer contém a lógica de aplicação que orquestra as interações entre o Domain Layer e o Infrastructure Layer. Define os casos de uso da aplicação.
+**Propósito:** O Application Layer contém a lógica de aplicação que orquestra as interações entre o Domain Layer e o Infrastructure Layer. Define os casos de uso e os serviços que suportam as operações do sistema.
 
 **Componentes Principais:**
-- **Use Cases:** Classes que implementam fluxos de trabalho específicos (ex: CreateJobUseCase, ProcessJobUseCase), representando as operações centrais que o sistema pode realizar.
-- **Ports (Interfaces de Saída):** Definem contratos para comunicação com a camada de Infraestrutura (ex: `IJobQueue`, `IWorkerPool`), permitindo que as implementações concretas (adapters) sejam facilmente substituídas. A comunicação é primariamente baseada nestas interfaces.
-- **Serviços de Aplicação:** Componentes que coordenam a lógica de negócio e orquestram os Use Cases e Entidades (ex: `AutonomousAgent`, `ProcessJobService`, `QueueService`). Estes serviços visam responsabilidades bem definidas e utilizam consistentemente o tratamento de erros (e.g., padrão Result).
-- **Factories:** Componentes como `TaskFactory` são responsáveis pela criação de objetos complexos (e.g., diferentes tipos de `Tasks`), garantindo que sejam instanciados em um estado válido e com suas dependências corretamente resolvidas.
-- **Injeção de Dependência (DI):** A DI é um princípio central, utilizada sistematicamente para fornecer as dependências aos componentes (e.g., serviços, use cases). A configuração das dependências é geralmente centralizada (potencialmente através de um contêiner de DI dedicado ou módulos de fábrica), promovendo baixo acoplamento e alta testabilidade.
-- **Padrões de Projeto Adicionais:** Além do Factory, outros padrões como Strategy (para selecionar diferentes `Tasks` ou comportamentos) e Facade (para simplificar a interface de subsistemas complexos, como o `IAgentService` faz para o `AutonomousAgent`) são empregados para melhorar a estrutura e manutenibilidade.
+- **Serviços de Aplicação:** Componentes que coordenam a lógica de negócio e orquestram os Use Cases e Entidades. Serviços implementados incluem:
+    - `QueueService`: Gerencia a fila de jobs, incluindo adição, recuperação e atualização de status dos jobs.
+    - `JobDefinitionService`: Responsável por criar e definir novos jobs com base nas entradas do sistema.
+    - `AutonomousAgent`: Orquestra o processamento de uma atividade (job), utilizando LLMs e Tasks para atingir um objetivo.
+    - `WorkerService`: Gerencia o ciclo de vida dos workers, designando jobs para eles processarem através do `AutonomousAgent`.
+    - `TaskFactory`: Responsável por instanciar as `ITask`s corretas com base no tipo de tarefa a ser executada.
+- **Ports (Interfaces):** Definem contratos para comunicação com a camada de Infraestrutura (adapters) ou para definir os limites dos serviços da aplicação. Principais ports definidos:
+    - `IQueueService`
+    - `IJobDefinitionService`
+    - `IWorkerService`
+    - `IAgentServiceFacade` (para simplificar interações com o `AutonomousAgent`)
+    - `ILLMAdapter` (para abstrair a comunicação com diferentes Modelos de Linguagem)
+    - `ITask` (para definir a estrutura de uma tarefa executável)
+    - `ITool` (para definir a estrutura de uma ferramenta que uma `ITask` pode usar)
+- **Use Cases (Exemplos Futuros/Implícitos):** Embora alguns use cases (`CreateUserUseCase`, `CreateLLMProviderConfigUseCase`) tenham sido implementados para funcionalidades de usuário/configuração, os fluxos principais do sistema de jobs (como `ProcessJobUseCase`) são atualmente orquestrados pelos serviços de aplicação. `ProcessJobUseCase` foi explicitamente mockado durante a integração inicial.
+- **Injeção de Dependência (DI):** Utilizada para fornecer dependências aos serviços e outros componentes, promovendo baixo acoplamento e testabilidade.
 
 ### Infrastructure Layer (Implementações)
 
@@ -45,16 +66,20 @@ Essa estrutura torna o sistema mais fácil de testar, manter e evoluir, pois as 
 
 **Componentes Principais:**
 - **Repositórios e Persistência:**
-    - As implementações concretas das Interfaces de Repositório (definidas no Domain Layer) são responsáveis pela comunicação com o banco de dados. A principal tecnologia de persistência utilizada é o **Drizzle ORM com SQLite**.
-    - As entidades do domínio, como `Job` e `Worker`, possuem schemas Drizzle correspondentes que definem o mapeamento para as tabelas do banco de dados. Campos complexos ou do tipo JSON nas entidades (e.g., `payload`, `data`, `result` na `Job`) são geralmente armazenados como colunas TEXT no SQLite e serializados/desserializados pela aplicação.
-    - É crucial manter a consistência dos dados, especialmente para campos enumerados como `Job.status`, cujos valores podem ter variações históricas ou entre diferentes camadas (SQL DDL, Drizzle enum, lógica da entidade no domínio). Migrações de banco de dados e mapeamento cuidadoso são essenciais.
-    - O schema do banco de dados evolui; por exemplo, a entidade `Job` no Drizzle pode incluir campos como `activity_type`, `activity_context`, `parent_id`, e `related_activity_ids` que refletem a integração com o sistema de Activities dos agentes.
-    - Os repositórios implementam as interfaces da camada de Aplicação, garantindo o mapeamento completo dos campos da entidade e utilizando padrões como o `Result` para um tratamento de erros robusto.
-    - Para otimizar o desempenho, índices são aplicados a colunas frequentemente consultadas (ex: `jobs.status`, `jobs.priority`, `workers.status`).
-    - Considerações futuras para a camada de persistência podem incluir a implementação de caching para consultas frequentes e o uso do padrão Unit of Work para gerenciar transações complexas.
-- **Adapters:** Implementações concretas das interfaces de Ports da Aplicação para interagir com tecnologias externas (ex: OpenAILLMAdapter para LLMs, FileSystemToolAdapter para acesso a arquivos). Adaptam interfaces externas (como APIs de terceiros ou sistemas de arquivos) para que possam ser utilizadas pela camada de Aplicação através das Ports.
-- **Serviços de Infraestrutura:** Implementações concretas de serviços definidos nas Ports da camada de Aplicação (ex: serviço de envio de e-mail, serviço de mensageria, ChildProcessWorkerPoolService).
-- **Workers (Infraestrutura):** Processos ou threads que executam tarefas em segundo plano, muitas vezes interagindo com filas ou sistemas de mensageria. (Nota: Estes 'Workers' são um conceito geral da camada de infraestrutura, distintos dos 'Workers' específicos do sistema de Jobs detalhados posteriormente).
+    - **Drizzle ORM com SQLite:** É a principal tecnologia de persistência utilizada.
+    - Implementações concretas das Interfaces de Repositório:
+        - `JobDrizzleRepository`: Para persistência de `Job` entities.
+        - `AgentStateDrizzleRepository`: Para persistência de `AgentInternalState` entities.
+        - `WorkerDrizzleRepository`: Para persistência de `Worker` entities.
+    - Os schemas Drizzle correspondentes (`jobs.ts`, `agent-states.ts`, `workers.ts`) mapeiam as entidades do domínio para as tabelas do banco de dados SQLite. Campos complexos como `ActivityContext` (no `Job`) são serializados (provavelmente como JSON/TEXT).
+- **Adapters:**
+    - `MockLLMAdapter`: Uma implementação inicial e mockada da interface `ILLMAdapter`, usada para simular interações com um Modelo de Linguagem durante o desenvolvimento e testes.
+    - `ElectronIpcHandler`: Adapta a comunicação IPC do Electron para ser usada pelos handlers da aplicação.
+- **Ferramentas (Tools):**
+    - Implementações iniciais de `ITool` incluem `SimpleEchoTool` (para testes) e um mock de `FileSystemListTool`. Estas são usadas pelo `TaskFactory` e `AutonomousAgent`.
+- **Serviços de Infraestrutura:**
+    - O `db` (instância Drizzle) é configurado e fornecido como um serviço de infraestrutura.
+- **Workers (Infraestrutura):** O `WorkerService` da camada de aplicação interage com os `Worker` entities, mas a infraestrutura de execução real de workers em processos separados (e.g., `ChildProcessWorkerPoolService` mencionado anteriormente) ainda é um conceito a ser plenamente realizado e integrado com o `WorkerService` atual.
 
 O diagrama abaixo ilustra a estrutura de camadas e o fluxo de dependências:
 
@@ -104,174 +129,133 @@ Este é um ponto muito importante para evitar confusão. Cada tarefa (atividade)
 
 ## 4. Conceitos Fundamentais do Sistema de Jobs & Workers
 
-*   **Job**: A representação persistida de uma unidade de trabalho no sistema. É um registro de dados que descreve "o que" precisa ser feito. Uma Job é gerenciada exclusivamente pela Fila.
-*   **Task**: É a lógica de execução em memória para um tipo específico de trabalho. A Task sabe "como" interagir com serviços externos (incluindo LLMs) para realizar a parte computacional de uma Job. A Task não se preocupa com persistência ou status de fila e é geralmente instanciada e executada por um [Agente](./02-agent-framework.md).
-*   **Fila (Queue)**: O componente central responsável pelo gerenciamento do ciclo de vida das Jobs. Ela persiste o estado das Jobs, controla as transições de status, gerencia retentativas, atrasos e dependências.
-*   **Worker (do sistema de Jobs)**: Uma classe que monitora a Fila por Jobs atribuídos a um [Agente](./02-agent-framework.md) específico. O Worker é responsável por pegar Jobs da Fila, orquestrar sua execução pelo Agente e notificar a Fila sobre o desfecho.
-*   **Agente**: Refere-se à entidade lógica ([Persona](./02-agent-framework.md#1-conceito-de-agente-e-persona)) que executa a Task. A função de processamento que o Worker invoca é um método da classe do Agente, que por sua vez utiliza as [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) configuradas.
+*   **Job (ou Activity)**: Representa uma unidade de trabalho persistida no sistema, encapsulando uma "atividade" a ser realizada. Contém um `ActivityContext` que armazena o estado, histórico e o objetivo inicial da atividade. É gerenciada pelo `QueueService`.
+*   **Task (`ITask`)**: A lógica de execução em memória para um tipo específico de trabalho ou etapa dentro de uma Job/Activity. Uma `ITask` sabe "como" realizar uma ação específica, potencialmente interagindo com `ITool`s ou `ILLMAdapter`. Tasks são instanciadas pela `TaskFactory` e executadas pelo `AutonomousAgent`.
+*   **Fila (Queue)**: Gerenciada pelo `QueueService`, é responsável pelo ciclo de vida das Jobs, incluindo seu armazenamento, transições de status (e.g., pending, active, completed), e recuperação para processamento.
+*   **Worker**: Representado pela entidade `Worker` e orquestrado pelo `WorkerService`. Um Worker é uma entidade lógica que "pega" Jobs da fila e as atribui a um `AutonomousAgent` para processamento.
+*   **Agente (`AutonomousAgent`)**: O serviço responsável por processar uma Job/Activity. Utiliza o `ILLMAdapter` para raciocínio e tomada de decisão, e a `TaskFactory` para executar `ITask`s específicas que, por sua vez, podem usar `ITool`s para interagir com o ambiente ou realizar ações. O `AgentInternalState` armazena o estado de longo prazo do agente.
 
 ## 5. Entidade Job
 
-A entidade `Job` armazena todas as informações necessárias para o gerenciamento de uma unidade de trabalho pela Fila.
+A entidade `Job` (representando uma Activity) armazena todas as informações necessárias para o gerenciamento de uma unidade de trabalho pelo sistema. Suas propriedades (`JobProps`) incluem:
 
-*   `id`: Identificador único da Job.
-*   `name`: Nome descritivo da Job.
-*   `payload`: Dados de entrada para a Job, definidos no momento da criação e geralmente não alterados durante a execução.
-*   `data`: Um campo onde a Job pode armazenar informações dinâmicas durante sua execução (ex: resultados parciais, estado interno da Task).
-*   `result`: O resultado final da execução da Job.
-*   `max_attempts`: Número máximo de tentativas permitidas para a Job em caso de falha.
-*   `attempts`: Contador do número de tentativas já realizadas.
-*   `max_retry_delay`: O tempo máximo de espera entre as retentativas.
-*   `retry_delay`: O tempo de espera base para a próxima retentativa, geralmente aumentado exponencialmente: `((attempts+1) ** 2) * retry_delay`.
-*   `delay`: Tempo de espera adicional antes que uma Job no estado `delayed` seja movida para `waiting`.
-*   `priority`: Valor numérico que define a prioridade da Job na Fila. **Menor número significa MAIOR prioridade.**
-*   `status`: O estado atual da Job no ciclo de vida:
-    *   `waiting`: Aguardando para ser processada, seja por estar nova na fila ou após um `delay`.
-    *   `delayed`: Execução postergada, geralmente após uma falha com retentativa ou se a Job foi criada para iniciar em um momento futuro.
-    *   `success`: Concluída com sucesso.
-    *   `failed`: Concluída com erro após todas as tentativas.
-    *   `executing`: Atualmente sendo processada por um Worker/Agente.
-*   `depends_on`: Lista de `jobIds` dos quais esta Job depende. A Job só se tornará `waiting` (pronta para execução) quando todas as suas dependências estiverem com status `success`. O resultado das Jobs dependentes pode ser injetado no `payload` ou `data` desta Job.
+*   `id`: `JobId` - Identificador único da Job (UUID).
+*   `name`: `JobName` - Nome descritivo da Job.
+*   `status`: `JobStatus` - O estado atual da Job (e.g., `pending`, `waiting`, `active`, `completed`, `failed`, `cancelled`).
+*   `priority`: `JobPriority` - Valor numérico que define a prioridade.
+*   `attempts`: `JobAttempts` - Contador do número de tentativas já realizadas e o máximo permitido.
+*   `payload`: `Record<string, any>` (JSON) - Dados de entrada para a Job, definidos no momento da criação.
+*   `data`: `ActivityContext` (VO, serializado como JSON) - Contém o estado dinâmico da atividade, incluindo `activityType`, `goal`, `history`, `currentTask`, `notes`, etc.
+*   `result`: `Record<string, any>` (JSON) - O resultado final da execução da Job.
+*   `createdAt`: `Date` - Data de criação.
+*   `updatedAt`: `Date` - Data da última atualização.
+*   `executeAfter`: `Date | null` - Data e hora após a qual a job pode ser executada.
+*   `dependsOn`: `string[] | null` - Array de `JobId`s (como strings) dos quais esta Job depende.
+
+(O restante da seção 5 original, como `max_retry_delay`, `retry_delay`, `delay` não são propriedades diretas da `Job` entity em si, mas conceitos gerenciados pelo `QueueService` ou inferidos com base no `JobAttempts` e políticas de retentativa. A lista acima foca nas propriedades da entidade `Job` conforme definida no domínio.)
 
 ### 5.1. Transição de Status da Job (Fluxo Simplificado)
 
-O diagrama abaixo ilustra um fluxo simplificado das transições de status de uma Job. Para um diagrama de estado mais completo, consulte o [Ciclo de Vida de um Job no README principal](../../../README.md#ciclo-de-vida-de-um-job).
+O diagrama abaixo ilustra um fluxo simplificado das transições de status de uma Job. Os status aqui (`waiting`, `executing`, `success`, `failed`, `delayed`) correspondem aos valores definidos em `JobStatusValue`. Para um diagrama de estado mais completo, consulte o [Ciclo de Vida de um Job no README principal](../../../README.md#ciclo-de-vida-de-um-job).
 
 ```mermaid
 graph TD
     NewJob[Nova Job Adicionada] --> WaitingQueue{status: waiting};
-    WaitingQueue -- Worker Pega Job --> ExecutingJob[status: executing];
-    ExecutingJob -- Sucesso --> SuccessState[status: success];
+    WaitingQueue -- WorkerService Pega Job --> ExecutingJob[status: active];
+    ExecutingJob -- Sucesso --> SuccessState[status: completed];
     ExecutingJob -- Falha (com retentativas) --> DelayedState{status: delayed};
     ExecutingJob -- Falha (sem retentativas) --> FailedState[status: failed];
     DelayedState -- Após Delay --> WaitingQueue;
 ```
 
-*   **`new` (implícito) -> `waiting`**: Uma nova Job é adicionada à Fila.
-*   **`waiting` -> `executing`**: Um Worker ([Agente](./02-agent-framework.md)) pega a Job para processar.
-*   **`executing` -> `success`**: A Job é concluída com sucesso.
-*   **`executing` -> `delayed`**: Ocorre um erro, mas ainda há tentativas restantes. A Job é colocada em `delayed` antes de voltar para `waiting`.
-*   **`executing` -> `failed`**: Ocorre um erro e não há mais tentativas, ou a falha é definitiva.
-*   **`delayed` -> `waiting`**: Após o tempo de `delay`, a Job está pronta para ser re-executada.
-*   **Jobs com `depends_on`**: Ficam em `waiting` (ou um estado similar de espera) se suas dependências não estiverem `success`.
+*   **`new` (implícito) -> `waiting` ou `pending`**: Uma nova Job é adicionada à Fila pelo `JobDefinitionService` via `QueueService`.
+*   **`waiting` -> `active`**: O `WorkerService` pega a Job do `QueueService` para processar.
+*   **`active` -> `completed`**: A Job é concluída com sucesso pelo `AutonomousAgent`.
+*   **`active` -> `delayed`**: Ocorre um erro, mas ainda há tentativas restantes (`JobAttempts`). A Job é colocada em `delayed` pelo `QueueService`.
+*   **`active` -> `failed`**: Ocorre um erro e não há mais tentativas, ou a falha é definitiva.
+*   **`delayed` -> `waiting`**: Após o tempo de `delay`, o `QueueService` torna a Job elegível para `waiting` novamente.
+*   **Jobs com `depends_on`**: O `QueueService` gerencia o estado de espera dessas jobs até que suas dependências sejam `completed`.
 
 ## 6. Fluxos Operacionais e Ciclo de Vida
 
 ### 6.1. Fluxo de Dados e Controle do Sistema
 
-Descreve o fluxo geral de dados e controle de uma Activity no sistema de agentes autônomos, desde sua iniciação até sua conclusão ou re-agendamento, detalhando como os dados e o controle passam entre os principais componentes.
+Descreve o fluxo geral de dados e controle de uma Job (Activity) no sistema, desde sua iniciação até sua conclusão ou re-agendamento, detalhando como os dados e o controle passam entre os principais componentes.
 
 **Visão Geral do Fluxo**
 
-O fluxo de uma Activity começa com a sua criação, passa pelo enfileiramento, é processada por um Worker que interage com o AutonomousAgent, que por sua vez utiliza Tasks, Tools e LLMs. O resultado do processamento é então retornado para a fila, que atualiza o status da Activity.
+O fluxo de uma Job (Activity) começa com a sua criação pelo `JobDefinitionService`, passa pelo enfileiramento e gerenciamento pelo `QueueService`. O `WorkerService` obtém a job e a delega ao `AutonomousAgent`, que por sua vez utiliza `ILLMAdapter`, `TaskFactory` e `ITask`s (que podem usar `ITool`s). O resultado do processamento é então retornado ao `WorkerService`, que notifica o `QueueService` para atualizar o status da Job.
 
 **Diagrama do Fluxo de Dados e Controle**
 
 ```mermaid
 graph TD
     subgraph External
-        User[Usuário/Sistema Externo]
+        User[Usuário/Sistema Externo via UI]
     end
 
     subgraph Infrastructure
         IPC[Electron IPC Handlers]
         Drizzle[Drizzle/SQLite]
-        WorkerProcess[Worker Process]
-        ToolAdapters[Implementações de Tools]
-        LLMAdapters[Implementações de LLMs]
-        JobRepoImpl[JobRepository (Drizzle)]
-        AgentStateRepoImpl[AgentStateRepository (Drizzle)]
-        QueueImpl[Queue (Implementação)]
-        WorkerPoolImpl[WorkerPool (Implementação)]
+        MockLLMAdapterImpl[MockLLMAdapter]
+        ToolImpls[Implementações de ITool (e.g., SimpleEchoTool)]
+        JobDrizzleRepo[JobDrizzleRepository]
+        AgentStateDrizzleRepo[AgentStateDrizzleRepository]
+        WorkerDrizzleRepo[WorkerDrizzleRepository]
     end
 
     subgraph Application
-        ProcessJobService[ProcessJobService]
-        CreateJobUC[CreateJobUseCase]
-        ProcessJobUC[ProcessJobUseCase]
-        QueueInterface[JobQueue Interface]
-        WorkerPoolInterface[WorkerPool Interface]
-        AutonomousAgentService[AutonomousAgent Service]
-        IAgentServiceInterface[IAgentService Interface]
+        JobDefService[JobDefinitionService]
+        QueueService[QueueService]
+        WorkerService[WorkerService]
+        AutonomousAgent[AutonomousAgent]
+        IAgentServiceFacade[IAgentServiceFacade]
         TaskFactory[TaskFactory]
-        LLMInterface[LLM Interface]
-        ToolInterface[Tool Interface]
-        JobRepoInterface[JobRepository Interface]
-        AgentStateRepoInterface[AgentStateRepository Interface]
+        ILLMAdapterInterface[ILLMAdapter Interface]
+        IToolInterface[ITool Interface]
+        IJobRepositoryInterface[IJobRepository Interface]
+        IAgentStateRepositoryInterface[IAgentStateRepository Interface]
+        IWorkerRepositoryInterface[IWorkerRepository Interface]
+        ITaskInterface[ITask Interface]
     end
 
     subgraph Domain
-        JobEntity[Job/Activity Entity]
-        WorkerEntity[Worker Entity]
-        QueueEntity[Queue Entity]
+        JobEntity[Job Entity (com ActivityContext)]
         AgentStateEntity[AgentInternalState Entity]
-        ActivityContextVO[ActivityContext VO]
-        TaskInterface[Task Interface]
-        ToolInterfaceDomain[Tool Interface]
+        WorkerEntity[Worker Entity]
     end
 
-    User --> IPC
-    IPC --> ProcessJobService
-    ProcessJobService --> CreateJobUC
-    CreateJobUC --> JobEntity
-    CreateJobUC --> ActivityContextVO
-    CreateJobUC --> QueueInterface
-    QueueInterface --> QueueImpl
-    QueueImpl --> JobRepoInterface
-    JobRepoInterface --> JobRepoImpl
-    JobRepoImpl --> Drizzle
+    User -- Requisição --> IPC
+    IPC -- Chama handler que usa --> JobDefService
+    JobDefService -- Cria Job --> JobEntity
+    JobDefService -- Adiciona Job à fila via --> QueueService
+    QueueService -- Persiste Job via --> IJobRepositoryInterface
+    IJobRepositoryInterface -- implementado por --> JobDrizzleRepo
+    JobDrizzleRepo -- usa --> Drizzle
 
-    QueueImpl -- Notifica --> WorkerPoolInterface
-    WorkerPoolInterface --> WorkerPoolImpl
-    WorkerPoolImpl --> WorkerProcess
+    WorkerService -- Obtém Job da --> QueueService
+    WorkerService -- Designa Job para --> AutonomousAgent
+    AutonomousAgent -- Carrega/Salva estado via --> IAgentStateRepositoryInterface
+    IAgentStateRepositoryInterface -- implementado por --> AgentStateDrizzleRepo
+    AgentStateDrizzleRepo -- usa --> Drizzle
 
-    WorkerProcess --> QueueInterface: Get Job (Status PENDING -> EXECUTING)
-    QueueInterface --> QueueImpl
-    QueueImpl --> JobRepoInterface
-    JobRepoInterface --> JobRepoImpl
+    AutonomousAgent -- Usa --> ILLMAdapterInterface
+    ILLMAdapterInterface -- implementado por --> MockLLMAdapterImpl
 
-    WorkerProcess --> AutonomousAgentService: processActivity(Job)
-    AutonomousAgentService --> AgentStateRepoInterface: Load State
-    AgentStateRepoInterface --> AgentStateRepoImpl
-    AgentStateRepoImpl --> Drizzle
+    AutonomousAgent -- Usa --> IAgentServiceFacade
+    IAgentServiceFacade -- Usa --> TaskFactory
+    TaskFactory -- Cria --> ITaskInterface
+    ITaskInterface -- Pode usar --> IToolInterface
+    IToolInterface -- implementado por --> ToolImpls
 
-    AutonomousAgentService --> LLMInterface: Reason (with AgentState + ActivityContext)
-    LLMInterface --> LLMAdapters
+    AutonomousAgent -- Atualiza Job (ActivityContext) e retorna resultado para --> WorkerService
+    WorkerService -- Notifica resultado para --> QueueService
+    QueueService -- Atualiza status da Job via --> IJobRepositoryInterface
 
-    AutonomousAgentService -- Decides Task --> IAgentServiceInterface
-    IAgentServiceInterface --> TaskFactory
-    TaskFactory --> TaskInterface
-
-    TaskInterface --> ToolInterfaceDomain: Use Tool
-    ToolInterfaceDomain --> ToolInterface: Use Tool (Application Port)
-    ToolInterface --> ToolAdapters
-
-    TaskInterface --> LLMInterface: Use LLM
-    LLMInterface --> LLMAdapters
-
-    ToolAdapters --> WorkerProcess: Tool Result
-    LLMAdapters --> WorkerProcess: LLM Result
-
-    TaskInterface --> IAgentServiceInterface: Task Result
-    IAgentServiceInterface --> AutonomousAgentService: Task Result
-
-    AutonomousAgentService -- Updates --> JobEntity: Update ActivityContext
-    AutonomousAgentService -- Returns Result --> WorkerProcess
-
-    WorkerProcess --> QueueInterface: Notify Status (FINISHED/FAILED/DELAYED)
-    QueueInterface --> QueueImpl
-    QueueImpl --> JobRepoInterface
-    JobRepoInterface --> JobRepoImpl
-
-    JobEntity --> ActivityContextVO
-    JobEntity --> AgentStateEntity
-    JobEntity --> WorkerEntity
-    JobEntity --> QueueEntity
-
-    AgentStateEntity --> AgentStateRepoInterface
-    ActivityContextVO --> JobEntity
-    WorkerEntity --> WorkerPoolInterface
-    QueueEntity --> QueueInterface
+    WorkerService -- Gerencia --> WorkerEntity
+    WorkerEntity -- Persistido via --> IWorkerRepositoryInterface
+    IWorkerRepositoryInterface -- implementado por --> WorkerDrizzleRepo
+    WorkerDrizzleRepo -- usa --> Drizzle
 
     style Domain fill:#f9f,stroke:#333
     style Application fill:#bbf,stroke:#333
@@ -281,99 +265,78 @@ graph TD
 
 **Descrição Detalhada do Fluxo**
 
-1.  **Iniciação da Activity:**
+1.  **Criação da Job (Activity):**
     - Um evento externo (e.g., requisição do usuário via UI) é capturado pelos `Electron IPC Handlers` (Infrastructure).
-    - O `IPC Handler` invoca o `ProcessJobService` (Application).
-    - `ProcessJobService` usa o `CreateJobUseCase` (Application) para criar uma `Job` (Domain), representando a Activity, incluindo o `ActivityContext` inicial.
-    - `CreateJobUseCase` adiciona a `Job` à fila via `JobQueue Interface` (Application).
-    - `QueueImpl` (Infrastructure) persiste a `Job` (status `PENDING`) via `JobRepository` (Infrastructure).
+    - O `IPC Handler` invoca o `JobDefinitionService` (Application) para criar uma nova `Job` (Domain). O `JobDefinitionService` popula a `Job` com seu `ActivityContext` inicial.
+    - `JobDefinitionService` utiliza o `QueueService` (Application) para adicionar a nova `Job` à fila.
+    - `QueueService` persiste a `Job` (status inicial, e.g., `pending` ou `waiting`) utilizando a `IJobRepository` (Application port), implementada pela `JobDrizzleRepository` (Infrastructure).
 
-2.  **Consumo pela Fila e Worker:**
-    - `QueueImpl` notifica `WorkerPool Interface` (Application) sobre a nova `Job`.
-    - `WorkerPoolImpl` (Infrastructure) gerencia os `Worker Processes`.
-    - Um `Worker Process` (Infrastructure) obtém a `Job` da `QueueInterface`.
-    - `QueueImpl` atualiza o status da `Job` para `EXECUTING`.
+2.  **Processamento pelo WorkerService e AutonomousAgent:**
+    - O `WorkerService` (Application) possui um loop (`startProcessingLoop`) que periodicamente verifica o `QueueService` por jobs disponíveis.
+    - Ao encontrar uma job, `WorkerService` a marca como `active` (via `QueueService`) e invoca o `AutonomousAgent` (Application) para processar a job (activity).
+    - O `AutonomousAgent` carrega/salva seu `AgentInternalState` (Domain) via `IAgentStateRepository` (Application port).
+    - Para tomar decisões e gerar conteúdo, o `AutonomousAgent` interage com um `ILLMAdapter` (Application port), atualmente o `MockLLMAdapter` (Infrastructure).
 
-3.  **Processamento pelo AutonomousAgent:**
-    - `Worker Process` invoca `AutonomousAgent Service` (Application) com a `Job`.
-    - O agente carrega seu `AgentInternalState` (Domain) via `AgentStateRepository` (Application/Infrastructure).
-    - `AutonomousAgent Service` usa `LLM Interface` (Application) para interagir com o LLM, passando `AgentInternalState` e `ActivityContext`.
-    - `LLMAdapters` (Infrastructure) processam a requisição e retornam a resposta.
+3.  **Execução da Task (se o Agente decidir):**
+    - Com base na decisão do LLM, o `AutonomousAgent` pode precisar executar uma `ITask`.
+    - Ele utiliza a `IAgentServiceFacade` (Application port) que, por sua vez, usa a `TaskFactory` (Application) para instanciar a `ITask` apropriada (Domain).
+    - A `ITask` executa sua lógica, podendo utilizar `ITool`s (Application port) específicas (implementadas na Infrastructure).
+    - O resultado da `ITask` (sucesso, falha, dados de saída) é retornado ao `AutonomousAgent`.
 
-4.  **Execução da Task (se necessário):**
-    - Se o LLM decide executar uma Task, `AutonomousAgent Service` invoca `IAgentService Interface` (Application).
-    - `IAgentService` usa `TaskFactory` (Application) para instanciar a `Task` (Domain).
-    - A `Task` executa, podendo usar `Tools` (Domain/Application/Infrastructure) e/ou `LLMs`.
-    - O resultado da `Task` retorna ao `IAgentService Interface` e, em seguida, ao `AutonomousAgent Service`.
-
-5.  **Atualização da Activity e Continuação/Conclusão:**
-    - `AutonomousAgent Service` atualiza o `ActivityContext` na `Job` com o resultado/reflexões.
-    - Decide se a Activity concluiu. Se não, pode indicar re-agendamento (e.g., retornando `undefined`). Se sim, retorna o resultado final ao `Worker Process`.
-
-6.  **Conclusão ou Re-agendamento pela Fila:**
-    - `Worker Process` notifica `Queue Interface` sobre o status final (`FINISHED`, `FAILED`, `DELAYED`).
-    - `QueueImpl` atualiza o status da `Job`. Se `DELAYED`, a `Job` retorna a `PENDING` após o delay.
+4.  **Atualização da Job e Conclusão:**
+    - O `AutonomousAgent` atualiza o `ActivityContext` dentro da `Job` com o resultado da task, novas notas, ou mudanças no histórico.
+    - O `AutonomousAgent` retorna um `ProcessActivityResult` (indicando se a job está `completed`, `failed`, ou `in_progress`) para o `WorkerService`.
+    - O `WorkerService` notifica o `QueueService` sobre o resultado.
+    - `QueueService` atualiza o status final da `Job` (e.g., `completed`, `failed`) ou a mantém como `active` (ou a recoloca em `waiting` se for um `in_progress` que precise de um novo ciclo de polling pelo `WorkerService`).
 
 ### 6.2. O Loop do Agente Autônomo
 
-O Agente Autônomo opera em um ciclo contínuo, iterando sobre as atividades e adaptando-se às necessidades. O "Loop Agente" representa graficamente esse fluxo, mostrando como o agente processa as atividades sob sua responsabilidade, desde a obtenção da próxima atividade até a atualização de seu status e contexto.
+O Agente Autônomo (`AutonomousAgent.processActivity()`) opera em um ciclo para cada job que processa, iterando sobre as etapas necessárias e adaptando-se às necessidades da atividade. O "Loop Agente" representa graficamente esse fluxo, mostrando como o agente processa a atividade sob sua responsabilidade, desde a obtenção da atividade até a atualização de seu status e contexto.
 
 ```mermaid
 graph TD
-    A[Início / Lista de Atividades] --> B(Obtém Próxima Atividade)
+    A[Início / Job (Activity) Recebida] --> B(Carrega AgentInternalState)
 
-    B --> C{É uma Atividade Decomposta?}
+    B --> F[Analise Intenção/Próximo Passo com LLMAdapter]
 
-    C -- Não --> F[Analise Intenção]
+    F --> H{Decisão do LLM: Executar ITask?}
 
-    C -- Sim --> D[Pega Próxima Subtask da]
+    H -- Sim --> I[Usa IAgentServiceFacade & TaskFactory para executar ITask]
+    I -- ITask usa ITools --> IToolsExec[Execução de ITool(s)]
+    IToolsExec -- Resultado da ITool --> I
+    I -- Resultado da ITask --> K[Geração da Saída/Resultado da Etapa]
 
-    D --> E{É necessário contexto adicional?}
+    H -- Não (e.g., responder diretamente, finalizar) --> K
 
-    E -- Sim --> G[Coleta de Contexto]
-    G --> A % Retorna ao início para processar a atividade de coleta de contexto
+    K --> L[Atualiza ActivityContext da Job e AgentInternalState]
 
-    E -- Não --> F
-
-    F --> H[Transformar em itens acionáveis (Sub Atividade ou Atividades)]
-
-    H --> I[Processa Próxima SubAtividade Pendente]
-
-    I --> J{A Subtask Atual precisa ser dividida em subtasks?}
-
-    J -- Sim --> A % Novas subtasks são criadas, volta para a lista de atividades
-
-    J -- Não --> K[Geração da Saída]
-
-    K --> L[Atualização de Status/Contexto]
-
-    L --> A % Loop contínuo do agente
+    L --> M[Retorna ProcessActivityResult (status: completed, failed, in_progress)]
 ```
 
-**Etapas do Loop:**
+**Etapas do Loop (dentro de `AutonomousAgent.processActivity`):**
 
-- **Início / Lista de Atividades:** Observa todas as atividades gerenciadas pelo `ActivityManager`.
-- **Obtém Próxima Atividade:** Seleciona a atividade mais relevante/prioritária (guiado pelo LLM). Novas entradas externas tornam-se atividades de alta prioridade.
-- **É uma Atividade Decomposta?:** Se for uma solicitação de alto nível (e.g., `USER_REQUEST` inicial), vai para "Analise Intenção". Se já possui um plano/sub-tarefas, vai para "Pega Próxima Subtask".
-- **Pega Próxima Subtask:** Identifica o próximo passo no plano de execução.
-- **É necessário contexto adicional?:** Valida se possui informações/pré-requisitos. Se faltar, vai para "Coleta de Contexto". Senão, avança.
-- **Coleta de Contexto:** Planeja e executa ações para obter informações ausentes (nova interação com usuário, outro agente, ou ferramenta). Retorna ao "Início".
-- **Analise Intenção:** O LLM interpreta o propósito da atividade/sub-atividade, requisitos e resultados esperados, usando `activityHistory` e `activityNotes`.
-- **Transformar em itens acionáveis:** Planejamento concreto, quebrando o objetivo em passos executáveis (novas `subActivities` ou `plannedSteps` na `Activity` principal).
-- **Processa Próxima SubAtividade Pendente:** Executa a ação concreta (chamada de ferramenta, mensagem, atualização interna). Resultado adicionado ao `activityHistory`.
-- **A Subtask Atual precisa ser dividida?:** Reflete sobre o resultado. Se a sub-tarefa é complexa ou precisa de mais decomposição, novas sub-tarefas são geradas e o ciclo retorna ao "Início". Senão, vai para "Geração da Saída".
-- **Geração da Saída:** Formula e envia a saída final da etapa (mensagem, confirmação de ferramenta).
-- **Atualização de Status/Contexto:** Atualiza o status da atividade e o `AgentInternalState`.
-- **Fim / Loop Agente:** Retorna ao "Início" para a próxima atividade, mantendo operação contínua.
+- **Início / Job (Activity) Recebida:** O `AutonomousAgent` recebe a `Job` do `WorkerService`.
+- **Carrega AgentInternalState:** Recupera o estado persistido do agente.
+- **Analise Intenção/Próximo Passo com `ILLMAdapter`:** O `AutonomousAgent` interage com o `ILLMAdapter`, fornecendo o `ActivityContext` da Job e o `AgentInternalState` para determinar a próxima ação ou se a Job pode ser concluída.
+- **Decisão do LLM: Executar `ITask`?:**
+    - **Sim:** Se o LLM indica que uma tarefa específica precisa ser executada.
+        - **Usa `IAgentServiceFacade` & `TaskFactory` para executar `ITask`:** A `IAgentServiceFacade` é chamada, que utiliza a `TaskFactory` para criar e executar a `ITask` apropriada.
+        - **`ITask` usa `ITool`s:** A `ITask` executada pode, por sua vez, utilizar uma ou mais `ITool`s para interagir com o sistema ou realizar ações. O resultado da(s) `ITool`(s) volta para a `ITask`.
+        - **Resultado da `ITask`:** A `ITask` retorna seu resultado para o `AutonomousAgent` (via `IAgentServiceFacade`).
+    - **Não:** Se o LLM determina que pode responder diretamente, ou que a Job está completa, ou que falhou de forma irrecuperável.
+- **Geração da Saída/Resultado da Etapa:** O `AutonomousAgent` formula o resultado da etapa atual de processamento.
+- **Atualiza `ActivityContext` da Job e `AgentInternalState`:** O `ActivityContext` (no campo `data` da Job) é atualizado com o histórico da etapa, quaisquer novas notas ou alterações de estado. O `AgentInternalState` também pode ser atualizado.
+- **Retorna `ProcessActivityResult`:** O `AutonomousAgent` retorna um objeto `ProcessActivityResult` ao `WorkerService`, indicando o status (`completed`, `failed`, `in_progress`) e quaisquer dados de saída.
 
+Este loop ocorre para cada invocação de `processActivity`. Se o resultado for `in_progress`, o `WorkerService` pode optar por chamar `processActivity` novamente (num ciclo futuro) se a Job ainda estiver ativa e necessitar de mais processamento.
 
 ## 7. Componentes e Fluxo de Interação
 
-### 7.1. Fila (`Queue`)
+### 7.1. Fila (`QueueService`)
 
-*   **Responsabilidade Principal**: Gerenciamento de estado e ciclo de vida das **Jobs**. O `QueueService` associado à Fila é projetado para tratar adequadamente as dependências entre Jobs e utiliza o padrão Observer para notificar sobre eventos relevantes (e.g., novas Jobs prontas para processamento).
-*   **Persistência**: As Jobs são persistidas em SQLite (inicialmente), utilizando Drizzle ORM. As alterações de schema são gerenciadas através de **migrações versionadas**.
-*   **Funções**: A Fila é a **única** responsável por atualizar o `status` de uma Job, incrementar `attempts`, gerenciar `delay`, `depends_on`, e armazenar `result`. Ela recebe notificações do Worker sobre o desfecho da execução. A lógica de retentativa e a flexibilidade para suportar diferentes backends de fila são áreas de contínua atenção e desenvolvimento.
+*   **Responsabilidade Principal**: Gerenciamento de estado e ciclo de vida das **Jobs** (Activities). O `QueueService` (Application) é o principal responsável.
+*   **Persistência**: As Jobs são persistidas em SQLite, utilizando Drizzle ORM através da `IJobRepository` (Application port), implementada pela `JobDrizzleRepository` (Infrastructure). Alterações de schema são gerenciadas por migrações Drizzle.
+*   **Funções**: O `QueueService` é responsável por adicionar jobs à fila (via `JobDefinitionService`), recuperar jobs para processamento, atualizar o `status` de uma Job (e.g., `pending`, `waiting`, `active`, `completed`, `failed`, `cancelled`), gerenciar o `JobAttempts` VO, e armazenar `result` e `data` (que contém `ActivityContext`). Ele recebe notificações do `WorkerService` sobre o desfecho da execução da job para realizar essas atualizações.
 
 ### 7.2. Processos da Aplicação Electron e Integração IPC
 
@@ -391,46 +354,55 @@ O Project Wiz, sendo uma aplicação Electron, é dividido em processos principa
 
 A integração com o Electron e a comunicação Inter-processos (IPC) entre o Main Process e o Renderer Process são tratadas inteiramente na camada de **Infraestrutura** (conforme descrito na seção Clean Architecture). Isso garante que a lógica de negócio (Domain e Application) não tenha conhecimento sobre o ambiente Electron, mantendo-a portátil. Os handlers de IPC no Main Process (Infraestrutura) recebem requisições da interface (Renderer Process) e utilizam os Use Cases e Serviços da camada de Aplicação para realizar as operações.
 
-### 7.3. Worker (Orquestrador de Jobs do Agente)
+### 7.3. Worker (`WorkerService` e Entidade `Worker`)
 
-*   **Responsabilidade Principal**: Orquestrar a execução das Jobs por um [Agente](./02-agent-framework.md) específico. Os Workers são gerenciados por um `WorkerPool` (ex: `ChildProcessWorkerPool`), que é responsável pelo isolamento dos processos de worker, tratamento de seus eventos e gerenciamento da disponibilidade de workers.
+*   **Responsabilidade Principal**: Orquestrar a execução das Jobs. O `WorkerService` (Application) é o componente central para isso. Ele gerencia entidades `Worker` (Domain) que representam instâncias de processadores de jobs, cada uma associada a um `AgentId`.
 *   **Funcionamento**:
-    1.  Monitora a Fila por Jobs disponíveis que correspondem ao ID do Agente que ele serve (geralmente via `WorkerPool`).
-    2.  Recebe a função de processamento (um método da classe do [Agente](./02-agent-framework.md)) que será executada.
-    3.  Pega a **Job** da Fila (transacionando seu status para `executing`).
-    4.  Chama a função de processamento do [Agente](./02-agent-framework.md), passando a Job.
-    5.  **Captura exceções (`throw new Error`)** lançadas pela função de processamento do Agente.
-    6.  Com base no sucesso ou no erro capturado, o Worker notifica a Fila para que esta atualize o status da Job e armazene o resultado ou erro.
-    *Considerações para o `WorkerPool` incluem o gerenciamento do número de workers (atualmente fixo, com auto-scaling como possível melhoria) e a implementação de health checks para os workers individuais.*
+    1.  O `WorkerService` inicia um loop de processamento (`startProcessingLoop`) para cada `Worker` registrado ou ativo.
+    2.  Neste loop, ele consulta o `QueueService` por Jobs disponíveis que podem ser processadas pelo `AgentId` associado ao `Worker` (e.g., jobs no estado `waiting` ou `pending`).
+    3.  Para cada Job obtida, o `WorkerService` primeiro a marca como `active` (via `QueueService`).
+    4.  Em seguida, invoca o método `processActivity` do `AutonomousAgent`, passando a `Job` (com seu `ActivityContext`) e o `AgentId`.
+    5.  O `AutonomousAgent` executa a lógica da job (detalhada em 7.4).
+    6.  O `WorkerService` recebe o `ProcessActivityResult` do `AutonomousAgent`.
+    7.  Com base no resultado (`status` como `completed`, `failed`, ou `in_progress`), o `WorkerService` notifica o `QueueService` para atualizar o status da Job e persistir quaisquer dados de resultado ou contexto atualizado. Se `in_progress`, a job pode ser reavaliada em um ciclo futuro do `WorkerService` se ainda estiver `active`.
 
-### 7.4. Agente
+### 7.4. Agente (`AutonomousAgent`)
 
-*   **Responsabilidade Principal**: Executar a lógica da **Task** associada a uma Job, utilizando suas [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) e capacidades de IA.
-*   **Funcionamento**:
-    1.  Recebe uma **Job** do Worker.
-    2.  Instancia a classe **Task** apropriada (que sabe interagir com LLMs e outras ferramentas), usando os dados da Job e as [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) disponíveis para o Agente.
-    3.  Executa a `taskInstance`. O Agente em si não interage diretamente com a Fila ou gerencia o status da Job; essa é uma responsabilidade do Worker e da Fila.
+*   **Responsabilidade Principal**: Executar a lógica da `Job` (Activity), utilizando `ITask`s, `ITool`s, e o `ILLMAdapter` para alcançar o objetivo definido no `ActivityContext` da Job.
+*   **Componente Central**: O serviço `AutonomousAgent` (Application).
+*   **Dependências**:
+    - `IAgentServiceFacade` (Application Port): Para executar tasks através da `TaskFactory`.
+    - `ILLMAdapter` (Application Port): Para interagir com o modelo de linguagem (e.g., `MockLLMAdapter`).
+    - `IAgentStateRepository` (Application Port): Para persistir e carregar o `AgentInternalState`.
+*   **Funcionamento (`processActivity` method):**
+    1.  Recebe uma `Job` (com seu `ActivityContext`) e o `AgentId` do `WorkerService`.
+    2.  Carrega o `AgentInternalState` relevante para o `AgentId`.
+    3.  Interage com o `ILLMAdapter` para decidir o próximo passo (e.g., qual `ITask` executar, ou se a job pode ser concluída).
+    4.  Se uma `ITask` precisa ser executada, utiliza a `IAgentServiceFacade` (que usa a `TaskFactory`) para obter e executar a instância da `ITask`.
+    5.  A `ITask` retorna seu resultado (e.g. `TaskResult`).
+    6.  O `AutonomousAgent` atualiza o `ActivityContext` da Job (com histórico, notas, etc.) e o `AgentInternalState`.
+    7.  Retorna um `ProcessActivityResult` para o `WorkerService`, indicando o status (`completed`, `failed`, `in_progress`) e quaisquer dados relevantes.
 
-#### 7.4.1. Regras de Retorno do Agente (para o Worker)
+#### 7.4.1. Regras de Retorno do `AutonomousAgent` (para o `WorkerService`)
 
-*   **Retorno de Sucesso (retorna um valor):**
-    *   **Significado**: A Task concluiu seu trabalho para esta Job.
-    *   **Ação do Worker**: Notifica a Fila sobre o sucesso e o resultado. A Fila marca a **Job como `success`**.
-*   **Retorno Vazio (`return;` ou `return undefined/null`):**
-    *   **Significado**: A Task não concluiu, mas não houve um erro. Pode necessitar de mais passos ou ser uma tarefa de longa duração que será re-agendada.
-    *   **Ação do Worker**: Notifica a Fila sobre a necessidade de continuação. A Fila coloca a **Job em `delayed`** (e depois `waiting` se o delay for 0), para que possa ser retomada ou verificada posteriormente.
-*   **Lançamento de Erro (`throw new Error`):**
-    *   **Significado**: Ocorreu uma falha na execução da Task.
-    *   **Ação do Worker**: Captura a exceção e notifica a Fila sobre a falha. A Fila lida com as **retentativas** (se `attempts < max_attempts`, movendo para `delayed`) ou marca a Job como `failed`.
+O método `processActivity` do `AutonomousAgent` retorna um objeto `ProcessActivityResult`, que normalmente inclui:
+*   `status`: Um valor como `'completed'`, `'failed'`, ou `'in_progress'`, indicando o resultado do processamento da atividade naquela iteração.
+*   `updatedContext`: O `ActivityContext` atualizado, que será salvo no campo `data` da Job.
+*   `output`: Qualquer saída direta a ser registrada ou retornada ao usuário (se aplicável), que pode ser salva no campo `result` da Job se for o resultado final.
 
-### 7.5. Task
+O `WorkerService` usa esse `ProcessActivityResult` para notificar o `QueueService` sobre como atualizar a Job na fila.
 
-*   **Responsabilidade Principal**: Encapsular a lógica de interação com LLMs e o uso de [Tools](./02-agent-framework.md#tools) específicas para um tipo de Job.
-*   **Funcionamento**:
-    *   Recebe os dados da Job e as [Tools](./02-agent-framework.md#tools) injetadas pelo Agente.
-    *   Realiza chamadas à LLM usando o `ai-sdk` ou outras bibliotecas de IA.
-    *   A LLM pode solicitar a execução de [Tools](./02-agent-framework.md#tools) fornecidas.
-    *   O retorno da Task (ou a ausência dele) e o lançamento de erros seguem as regras definidas para o Agente.
+### 7.5. Task (`ITask` e `TaskFactory`)
+
+*   **Responsabilidade Principal**: Encapsular a lógica de execução para uma etapa específica ou tipo de trabalho dentro de uma `Job` (Activity). Uma `ITask` sabe "como" realizar uma ação particular.
+*   **Interface**: `ITask` (Application Port, embora conceitualmente próxima ao Domain) define o contrato para todas as tasks, tipicamente com um método `execute(activityContext: ActivityContext, taskSpecificParams?: any, tools?: ITool[]): Promise<TaskResult>`.
+*   **Criação**: Tasks são instanciadas pela `TaskFactory` (Application), que determina qual classe de Task concreta criar com base em um identificador de task (e.g., uma string como 'SimpleEchoTask').
+*   **Uso**: O `AutonomousAgent`, através da `IAgentServiceFacade`, solicita à `TaskFactory` a execução de uma task.
+*   **Funcionalidade**:
+    *   Recebe o `ActivityContext` atual e parâmetros específicos para sua execução.
+    *   Pode interagir com o `ILLMAdapter` (geralmente passado pelo `AutonomousAgent` ou `TaskFactory` durante a execução, ou acessado como dependência injetada).
+    *   Pode utilizar `ITool`s específicas para interagir com o sistema ou serviços externos. Atualmente, tasks como `EchoToolTask` podem instanciar suas próprias tools diretamente. Um sistema mais avançado de injeção de dependência de `ITool`s na `TaskFactory` ou na execução da task é uma área para desenvolvimento futuro.
+    *   Retorna um `TaskResult` (que pode incluir `success: boolean`, `output: any`, `updatedContext?: Partial<ActivityContext>`) que o `AutonomousAgent` usa para atualizar o `ActivityContext` da Job e decidir os próximos passos.
 
 ## 8. Mecanismos de Comunicação Adicionais
 
@@ -439,13 +411,19 @@ Além da interação com LLMs:
 *   **IPC Tipado:** A comunicação entre o processo Main do Electron e os processos Renderer é feita através de IPC, com um esforço para manter essa comunicação tipada, garantindo maior segurança e robustez no desenvolvimento. (Nota: Detalhes da integração IPC já movidos para a seção 7.2).
 *   **APIs Externas:** O sistema interage com APIs externas, como a API do GitHub (via Octokit), para funcionalidades como análise de repositórios e integração com issues/pull requests.
 
-## 9. Interação com LLMs e Tools (Dentro das Tasks)
+## 9. Interação com LLMs e Tools (Dentro das Tasks e pelo `AutonomousAgent`)
 
-*   As chamadas para LLMs são feitas primariamente dentro das Tasks, utilizando SDKs como `ai-sdk` (veja [Integração com LLMs](./04-llm-integration.md)).
-*   As [Tools](./02-agent-framework.md#4-ferramentas-do-agente-tools) são fornecidas à LLM durante essas chamadas, permitindo que o modelo solicite ações no sistema (ler arquivos, executar comandos, etc.).
-*   Uma "step" de execução de uma Job por uma Task pode envolver múltiplas interações com a LLM e suas Tools. Uma "step" geralmente termina quando a LLM invoca uma Tool especial como `finalAnswer` (ou similar) ou quando a Task decide que completou uma unidade lógica de trabalho.
-*   A Tool `finalAnswer` (ou um mecanismo similar) normalmente indica se a Task considera a Job como um todo concluída (`taskFinished: true`) ou se apenas uma etapa foi finalizada (`taskFinished: false`).
-*   As **Tools** são um conceito central e são detalhadas no documento [Estrutura do Agente (Agent Framework)](./02-agent-framework.md#4-ferramentas-do-agente-tools). Elas podem ser genéricas (disponíveis para muitos Agentes, como `FilesystemTool`) ou específicas de uma Task/Job.
+*   O `AutonomousAgent` (Application) é o principal consumidor do `ILLMAdapter` (Application Port) para tomada de decisões de alto nível, planejamento e geração de respostas, utilizando o `ActivityContext` da Job e o `AgentInternalState`.
+*   As implementações de `ITask` (Application Port / Domain) também podem interagir com o `ILLMAdapter` se sua lógica específica exigir mais raciocínio ou geração de linguagem (o adapter seria passado para o método `execute` da task ou injetado).
+*   As `ITool`s (Application Port) são interfaces que definem ações concretas que podem ser executadas.
+    *   O `AutonomousAgent` (baseado na decisão do `ILLMAdapter`) determina qual `ITask` executar.
+    *   A `ITask` selecionada, ao executar, pode então invocar uma ou mais `ITool`s para realizar suas funções. Por exemplo, uma task para "escrever um arquivo" usaria uma `FileSystemWriteTool` (conceitual).
+    *   Atualmente, a `TaskFactory` provê tasks, e algumas tasks (como `EchoToolTask` em testes) podem instanciar suas próprias tools. Um mecanismo mais robusto de descoberta e injeção de `ITool`s nas tasks (possivelmente através da `TaskFactory` ou da `IAgentServiceFacade`) é uma área de evolução.
+*   Uma "etapa" de processamento pelo `AutonomousAgent` para uma Job pode envolver:
+    1.  Chamada ao `ILLMAdapter` para análise e decisão sobre o próximo passo ou task.
+    2.  Se uma task é decidida, sua execução via `IAgentServiceFacade` -> `TaskFactory` -> `ITask`.
+    3.  A `ITask` pode, por sua vez, usar `ITool`s ou fazer mais chamadas ao `ILLMAdapter`.
+*   O `AutonomousAgent` avalia o resultado da task (ou da sua própria lógica direta) para determinar se a `Job` (Activity) está concluída, falhou, ou se precisa de mais etapas (in_progress), atualizando o `ActivityContext` e retornando o `ProcessActivityResult` ao `WorkerService`.
 
 ## 10. Build e Implantação
 
@@ -455,5 +433,3 @@ Além da interação com LLMs:
 ## 11. Conclusão
 
 A arquitetura do Project Wiz é projetada para ser flexível e robusta, permitindo a automação de tarefas complexas através de Agentes de IA e uma clara separação de responsabilidades entre os processos e componentes. A utilização de um sistema de Jobs e Fila, juntamente com a interação com LLMs e Tools, forma o núcleo da capacidade de automação. Futuras melhorias podem incluir diferentes implementações de Fila, estratégias de priorização mais avançadas e maior observabilidade do sistema.
-
-[end of docs/technical-documentation/01-architecture.md]

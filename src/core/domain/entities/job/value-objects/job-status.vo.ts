@@ -1,58 +1,59 @@
-import { z } from "zod";
+// Using a type for specific allowed statuses
+export type JobStatusValue =
+  | 'pending'   // Newly created, awaiting dependencies or initial processing
+  | 'waiting'   // Dependencies met, ready for worker pickup
+  | 'active'    // Picked up by a worker, currently being processed
+  | 'delayed'   // Execution postponed (e.g., after a retryable error, or scheduled for future)
+  | 'completed' // Successfully finished
+  | 'failed'    // Failed after all retry attempts or due to non-retryable error
+  | 'cancelled'; // Cancelled by user or system
 
-export const jobStatusSchema = z.enum([
-  "PENDING",
-  "WAITING",
-  "DELAYED",
-  "EXECUTING",
-  "FINISHED",
-  "FAILED",
-  "CANCELLED",
-]);
-
-export type JobStatusType = z.infer<typeof jobStatusSchema>;
+const VALID_STATUSES: ReadonlyArray<JobStatusValue> = [
+  'pending',
+  'waiting',
+  'active',
+  'delayed',
+  'completed',
+  'failed',
+  'cancelled'
+];
 
 export class JobStatus {
-  protected constructor(private readonly status: JobStatusType) {
-    jobStatusSchema.parse(status);
+  private readonly value: JobStatusValue;
+
+  private constructor(status: JobStatusValue) {
+    // Object Calisthenics: Rule 3 (Wrap Primitives).
+    // Validation is implicit via the type, but an explicit check is good.
+    if (!VALID_STATUSES.includes(status)) {
+      throw new Error(`Invalid job status: ${status}`);
+    }
+    this.value = status;
   }
 
-  get value(): JobStatusType {
-    return this.status;
-  }
-
-  static create(status: JobStatusType): JobStatus {
+  public static create(status: JobStatusValue): JobStatus {
     return new JobStatus(status);
   }
 
-  static createInitial(): JobStatus {
-    return new JobStatus("PENDING");
+  public static pending(): JobStatus { return new JobStatus('pending'); }
+  public static waiting(): JobStatus { return new JobStatus('waiting'); }
+  public static active(): JobStatus { return new JobStatus('active'); }
+  public static delayed(): JobStatus { return new JobStatus('delayed'); }
+  public static completed(): JobStatus { return new JobStatus('completed'); }
+  public static failed(): JobStatus { return new JobStatus('failed'); }
+  public static cancelled(): JobStatus { return new JobStatus('cancelled'); }
+
+  public getValue(): JobStatusValue {
+    return this.value;
   }
 
-  static createCancelled(): JobStatus {
-    return new JobStatus("CANCELLED");
+  public equals(other: JobStatus): boolean {
+    return this.value === other.getValue();
   }
 
-  canTransitionTo(newStatus: JobStatusType): boolean {
-    const validTransitions: Record<JobStatusType, JobStatusType[]> = {
-      PENDING: ["EXECUTING", "DELAYED", "CANCELLED"],
-      WAITING: ["PENDING", "CANCELLED"],
-      DELAYED: ["PENDING", "CANCELLED"],
-      EXECUTING: ["FINISHED", "FAILED", "DELAYED", "CANCELLED"],
-      FINISHED: [],
-      FAILED: ["DELAYED"],
-      CANCELLED: [],
-    };
-
-    return validTransitions[this.status].includes(newStatus);
-  }
-
-  transitionTo(newStatus: JobStatusType): JobStatus {
-    if (!this.canTransitionTo(newStatus)) {
-      throw new Error(
-        `Invalid status transition from ${this.status} to ${newStatus}`
-      );
-    }
-    return new JobStatus(newStatus);
-  }
+  public isPending(): boolean { return this.value === 'pending'; }
+  public isWaiting(): boolean { return this.value === 'waiting'; }
+  // Add other is... methods as needed
+  public isActive(): boolean { return this.value === 'active'; }
+  public isCompleted(): boolean { return this.value === 'completed'; }
+  public isFailed(): boolean { return this.value === 'failed'; }
 }

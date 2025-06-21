@@ -1,15 +1,12 @@
-import { Identity } from "../../../../../core/common/identity";
-import { Result, ok, error } from "../../../../../shared/result";
-
-export class JobPriority extends Identity<number> {
-  private constructor(value: number) {
-    super(value);
-  }
-
-  public static create(value: number): Result<JobPriority> {
-    if (value < 0 || !Number.isInteger(value)) {
-      return error("JobPriority must be a non-negative integer.");
+export class JobPriority {
+    private readonly value: number; // Lower number means higher priority
+    private constructor(priority: number) {
+        if (!Number.isInteger(priority) || priority < 0) { // Example validation
+            throw new Error("Job priority must be a non-negative integer.");
+        }
+        this.value = priority;
     }
-    return ok<JobPriority>(new JobPriority(value));
-  }
+    public static create(priority: number): JobPriority { return new JobPriority(priority); }
+    public getValue(): number { return this.value; }
+    public equals(other: JobPriority): boolean { return this.value === other.getValue(); }
 }
