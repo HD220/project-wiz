@@ -16,7 +16,7 @@ import { TYPES } from '../../../electron/dependency-injection/types';
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
-if (started) {
+if (squirrelStartup) {
   app.quit();
 }
 
@@ -25,7 +25,7 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
@@ -36,13 +36,8 @@ const createWindow = () => {
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
     );
   }
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
-  mainWindow.setMenu(null);
-  // mainWindow.removeMenu();
-
-  main().catch(console.error);
+  // mainWindow.webContents.openDevTools();
+  // mainWindow.setMenu(null);
 };
 
 app.on("ready", async () => {

@@ -1,8 +1,5 @@
-import { z } from "zod";
-
-const workerStatusSchema = z.enum(["available", "busy", "offline"]);
-
-export type WorkerStatusType = z.infer<typeof workerStatusSchema>;
+export type WorkerStatusValue = 'idle' | 'busy' | 'offline' | 'error';
+const VALID_WORKER_STATUSES: ReadonlyArray<WorkerStatusValue> = ['idle', 'busy', 'offline', 'error'];
 
 export class WorkerStatus {
   // Changed to private _status

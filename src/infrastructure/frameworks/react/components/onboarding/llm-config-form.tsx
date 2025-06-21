@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { llmProvidersPlaceholder, LLMModelPlaceholder } from "@/lib/placeholders"; // To be added to placeholders
+import { llmProvidersPlaceholder, type LLMModelPlaceholder, type LLMProviderPlaceholder } from "@/infrastructure/frameworks/react/lib/placeholders";
 import type { FormType } from "@/pages/(public)/onbording/index";
 import { Trans, t } from "@lingui/macro";
 

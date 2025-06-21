@@ -1,13 +1,9 @@
-import { Job } from "../../domain/entities/job/job.entity";
-import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
-import { Result } from "../../../shared/result";
+import { Job, JobId, JobStatus } from '@/core/domain/entities/job'; // Adjust path as needed
+import { IRepository } from './repository.interface';
 
-export interface JobRepository {
-  create(job: Job): Promise<Result<Job>>;
-  findById(id: JobId): Promise<Result<Job>>;
-  update(job: Job): Promise<Result<Job>>;
-  delete(id: JobId): Promise<Result<void>>;
-  list(): Promise<Result<Job[]>>;
-  findByIds(ids: JobId[]): Promise<Result<Job[]>>;
-  findDependentJobs(jobId: JobId): Promise<Result<Job[]>>;
+export interface IJobRepository extends IRepository<Job, JobId> {
+  // Additional Job-specific methods
+  findByStatus(status: JobStatus): Promise<Job[]>;
+  findPendingJobs(limit: number): Promise<Job[]>; // Example: for workers to pick up
+  // update(job: Job): Promise<void>; // 'save' can often handle create & update
 }

@@ -11,6 +11,7 @@ import { IJobRepository } from "../ports/job-repository.interface"; // Use inter
 import { IJobQueue } from "../ports/job-queue.interface"; // Use interface
 import { Job } from "../../domain/entities/job/job.entity"; // Import Job entity
 import { JobBuilder } from "../../domain/entities/job/job-builder";
+import { Job } from "@/core/domain/entities/job/job.entity";
 import { JobId } from "../../domain/entities/job/value-objects/job-id.vo";
 import { JobName } from "../../domain/entities/job/value-objects/job-name.vo"; // Import VO
 import { JobStatus } from "../../domain/entities/job/value-objects/job-status.vo";

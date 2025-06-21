@@ -1,32 +1,26 @@
-import { AbstractValueObject } from "@/core/common/value-objects/abstract.vo";
-import { error, ok, Result } from "@/shared/result";
+// Example: Could be an enum or a string with validation
+export type ActivityTypeValue = 'USER_REQUEST' | 'TOOL_CALL' | 'AGENT_SELF_REFLECTION' | 'PLAN_EXECUTION'; // Add more as needed
+const VALID_ACTIVITY_TYPES: ReadonlyArray<ActivityTypeValue> = ['USER_REQUEST', 'TOOL_CALL', 'AGENT_SELF_REFLECTION', 'PLAN_EXECUTION'];
 
-export enum ActivityTypes {
-  USER_REQUEST = "USER_REQUEST",
-  AGENT_REQUEST = "AGENT_REQUEST",
-  PLANNING = "PLANNING",
-  EXECUTION = "EXECUTION",
-  COMMUNICATION = "COMMUNICATION",
-  REFLECTION = "REFLECTION",
-  ERROR_HANDLING = "ERROR_HANDLING",
-  VALIDATION = "VALIDATION",
-  INFORMATION_GATHERING = "INFORMATION_GATHERING",
-}
+export class ActivityType {
+  private readonly value: ActivityTypeValue;
 
-export class ActivityType extends AbstractValueObject<ActivityTypes> {
-  private constructor(value: ActivityTypes) {
-    super(value);
+  private constructor(type: ActivityTypeValue) {
+    if (!VALID_ACTIVITY_TYPES.includes(type)) {
+      throw new Error(`Invalid activity type: ${type}`);
+    }
+    this.value = type;
   }
 
-  public static create(type: string): Result<ActivityType> {
-    if (!Object.values(ActivityTypes).includes(type as ActivityTypes)) {
-      return error(
-        `Invalid ActivityType: ${type}. Must be one of ${Object.values(
-          ActivityTypes
-        ).join(", ")}.`
-      );
-    }
+  public static create(type: ActivityTypeValue): ActivityType {
+    return new ActivityType(type);
+  }
 
-    return ok(new ActivityType(type as ActivityTypes));
+  public getValue(): ActivityTypeValue {
+    return this.value;
+  }
+
+  public equals(other: ActivityType): boolean {
+    return this.value === other.getValue();
   }
 }
