@@ -1,53 +1,42 @@
-import { AbstractValueObject } from "@/core/common/value-objects/abstract.vo";
-import { ActivityHistoryEntry } from "./activity-history-entry.vo";
-import { ActivityHistory } from "./activity-history.vo";
-import { ActivityNotes } from "./activity-notes.vo";
-import { DomainError } from "@/core/common/errors";
+import { ActivityType } from './activity-type.vo';
+import { ActivityHistory } from './activity-history.vo';
+// import { PlannedSteps } from './planned-steps.vo'; // Future VO
+// import { ActivityNotes } from './activity-notes.vo'; // Future VO
 
-interface ActivityContextProps {
-  messageContent?: string;
-  sender?: string;
-  toolName?: string;
-  toolArgs?: Record<string, unknown>;
-  goalToPlan?: string;
-  plannedSteps?: string[];
-  activityNotes?: ActivityNotes;
-  validationCriteria?: string[];
-  validationResult?: "PASSED" | "FAILED" | "PENDING";
-  activityHistory: ActivityHistory;
+export interface ActivityContextData {
+  type: ActivityType;
+  history: ActivityHistory;
+  currentGoal?: string; // Optional: Specific goal for this activity
+  // plannedSteps?: PlannedSteps; // Future
+  // notes?: ActivityNotes; // Future
+  // Add other context-specific fields
 }
 
-export class ActivityContext extends AbstractValueObject<ActivityContextProps> {
-  protected constructor(value: ActivityContextProps) {
-    super(value);
-    this.validateProps(value);
+export class ActivityContext {
+  private readonly data: Readonly<ActivityContextData>;
+
+  private constructor(data: ActivityContextData) {
+    // Add validation if needed
+    this.data = Object.freeze(data);
   }
 
-  private validateProps(props: ActivityContextProps): void {
-    if (!props.activityHistory) {
-      throw new DomainError("Activity history cannot be null.");
-    }
+  public static create(data: ActivityContextData): ActivityContext {
+    return new ActivityContext(data);
   }
 
-  public static create(props: ActivityContextProps): ActivityContext {
-    return new ActivityContext(props);
+  public getData(): Readonly<ActivityContextData> {
+    return this.data;
   }
 
-  public addHistoryEntry(entry: ActivityHistoryEntry): ActivityContext {
-    const updatedHistory = this.value.activityHistory.addEntry(entry);
-    return ActivityContext.create({
-      ...this.value,
-      activityHistory: updatedHistory,
-    });
+  public getType(): ActivityType {
+    return this.data.type;
   }
 
-  public addNote(note: string): ActivityContext {
-    const updatedNotes = (
-      this.value.activityNotes || ActivityNotes.create([])
-    ).addNote(note);
-    return ActivityContext.create({
-      ...this.value,
-      activityNotes: updatedNotes,
-    });
+  public getHistory(): ActivityHistory {
+    return this.data.history;
+  }
+
+  public updateHistory(newHistory: ActivityHistory): ActivityContext {
+    return new ActivityContext({ ...this.data, history: newHistory });
   }
 }

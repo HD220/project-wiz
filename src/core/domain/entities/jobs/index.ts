@@ -8,7 +8,7 @@ export const JobStatus = {
   DELAYED: "delayed",
 } as const;
 
-export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus];
+export type JobStatusType = (typeof JobStatus)[keyof typeof JobStatus];
 
 export interface JobOptions {
   priority: number;
@@ -30,7 +30,7 @@ const JobSchema = z.object({
   name: z.string().min(1),
   data: JobDataSchema,
   opts: JobOptionsSchema,
-  status: z.nativeEnum(JobStatus),
+  status: z.nativeEnum(JobStatus), // This should still work if JobStatus (value) is in scope for z.nativeEnum
   priority: z.number().int().min(0).max(10),
   delay: z.number().int().min(0),
   updatedAt: z.date(),
@@ -51,7 +51,7 @@ export class Job {
   complete(): Job {
     return new Job({
       ...this.fields,
-      status: JobStatus.COMPLETED,
+      status: JobStatus.COMPLETED, // This uses the JobStatus value, which is fine
       finishedAt: new Date(),
       updatedAt: new Date(),
     });
@@ -60,7 +60,7 @@ export class Job {
   fail(reason: string): Job {
     return new Job({
       ...this.fields,
-      status: JobStatus.FAILED,
+      status: JobStatus.FAILED, // This uses the JobStatus value, which is fine
       failedReason: reason,
       finishedAt: new Date(),
       updatedAt: new Date(),
@@ -70,7 +70,7 @@ export class Job {
   delay(ms: number): Job {
     return new Job({
       ...this.fields,
-      status: JobStatus.DELAYED,
+      status: JobStatus.DELAYED, // This uses the JobStatus value, which is fine
       delay: ms,
       updatedAt: new Date(),
     });

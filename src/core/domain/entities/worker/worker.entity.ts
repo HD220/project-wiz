@@ -1,98 +1,54 @@
-import { WorkerId } from "./value-objects/worker-id.vo";
-import { WorkerStatus } from "./value-objects/worker-status.vo";
-import { workerSchema } from "./worker.schema";
+import { WorkerId, WorkerStatus } from './value-objects';
+import { AgentId } from '../agent/value-objects'; // Assuming Worker is tied to an Agent type/config
 
-type WorkerProps = {
+export interface WorkerProps {
   id: WorkerId;
-  name: string;
+  // agentType: string; // Or perhaps AgentConfigId VO - specifies what kind of agent this worker can run
+  // For now, let's assume a worker might be pre-configured for a specific agent instance or type
+  // This is a simplification; a real system might have a more dynamic assignment.
+  // For this iteration, let's say a worker is associated with an AgentId it can process jobs for.
+  // This might change when WorkerPool and Agent assignment logic is detailed.
+  associatedAgentId?: AgentId; // The Agent persona this worker is configured to embody or serve
   status: WorkerStatus;
-  createdAt: Date;
-  updatedAt?: Date;
-};
-
-export class Worker {
-  constructor(private readonly fields: WorkerProps) {
-    workerSchema.parse(fields);
-  }
-
-  get id(): WorkerId {
-    return this.fields.id;
-  }
-
-  get name(): string {
-    return this.fields.name;
-  }
-
-  get status(): WorkerStatus {
-    return this.fields.status;
-  }
-
-  get createdAt(): Date {
-    return this.fields.createdAt;
-  }
-
-  get updatedAt(): Date | undefined {
-    return this.fields.updatedAt;
-  }
-
-  allocateToJob(): Worker {
-    return new WorkerBuilder(this.fields)
-      .withStatus(WorkerStatus.busy())
-      .withUpdatedAt(new Date())
-      .build();
-  }
-
-  release(): Worker {
-    return new WorkerBuilder(this.fields)
-      .withStatus(WorkerStatus.available())
-      .withUpdatedAt(new Date())
-      .build();
-  }
-
-  isAvailable(): boolean {
-    return this.fields.status.value === "available";
-  }
+  lastHeartbeatAt?: Date;
 }
 
-export class WorkerBuilder {
-  private fields: Partial<WorkerProps>;
+export class Worker {
+  private readonly props: Readonly<WorkerProps>;
 
-  constructor(fields?: Partial<WorkerProps>) {
-    this.fields = fields ? { ...fields } : {};
+  private constructor(props: WorkerProps) {
+    this.props = Object.freeze(props);
   }
 
-  withId(id: WorkerId): WorkerBuilder {
-    this.fields.id = id;
-    return this;
-  }
-
-  withName(name: string): WorkerBuilder {
-    this.fields.name = name;
-    return this;
-  }
-
-  withStatus(status: WorkerStatus): WorkerBuilder {
-    this.fields.status = status;
-    return this;
-  }
-
-  withCreatedAt(createdAt: Date): WorkerBuilder {
-    this.fields.createdAt = createdAt;
-    return this;
-  }
-
-  withUpdatedAt(updatedAt: Date): WorkerBuilder {
-    this.fields.updatedAt = updatedAt;
-    return this;
-  }
-
-  build(): Worker {
+  public static create(props: {
+    id?: WorkerId;
+    associatedAgentId?: AgentId;
+    status?: WorkerStatus;
+  }): Worker {
     return new Worker({
-      id: this.fields.id!,
-      name: this.fields.name!,
-      status: this.fields.status!,
-      createdAt: this.fields.createdAt!,
-      updatedAt: this.fields.updatedAt,
+      id: props.id || WorkerId.create(),
+      associatedAgentId: props.associatedAgentId,
+      status: props.status || WorkerStatus.idle(),
+      lastHeartbeatAt: new Date()
     });
+  }
+
+  public get id(): WorkerId { return this.props.id; }
+  public get associatedAgentId(): AgentId | undefined { return this.props.associatedAgentId; }
+  public get status(): WorkerStatus { return this.props.status; }
+  public get lastHeartbeatAt(): Date | undefined { return this.props.lastHeartbeatAt; }
+
+  public updateStatus(newStatus: WorkerStatus): Worker {
+    return new Worker({ ...this.props, status: newStatus, lastHeartbeatAt: new Date() });
+  }
+
+  public setBusy(agentIdBeingProcessed?: AgentId): Worker {
+     // If a worker can dynamically pick up different agents, store it.
+     // For now, associatedAgentId is more like its configured persona.
+    return this.updateStatus(WorkerStatus.busy());
+  }
+
+  public setIdle(): Worker {
+    return this.updateStatus(WorkerStatus.idle());
   }
 }

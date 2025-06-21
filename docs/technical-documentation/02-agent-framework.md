@@ -4,7 +4,7 @@ Este documento detalha o conceito de Agente (frequentemente referido como Person
 
 ## 1. Conceito de Agente e Persona
 
-No Project Wiz, o termo **Agente** refere-se à entidade técnica de backend responsável por executar Jobs e interagir com o sistema. É o "worker" inteligente que processa as tarefas.
+No Project Wiz, o termo **Agente** refere-se à entidade técnica de backend e aos serviços responsáveis por executar Jobs e interagir com o sistema. É o "worker" inteligente que processa as tarefas. O `AutonomousAgent` é o serviço central que implementa essa inteligência.
 
 O termo **Persona**, por outro lado, é como os Agentes são apresentados aos usuários na interface. Uma Persona possui atributos configuráveis como nome, papel (ex: Desenvolvedor, QA), objetivos e backstory, que ajudam a definir sua especialização e comportamento. Essencialmente, uma Persona é a configuração e a "personalidade" de um Agente técnico.
 
@@ -12,230 +12,166 @@ Para mais informações sobre como os usuários configuram e interagem com as Pe
 
 ## 2. Conceitos Chave do Framework de Agentes
 
-### Activity Context
+### Activity Context (`ActivityContextVO`)
 
-O `ActivityContext` é um componente fundamental no sistema de Agentes Autônomos, projetado para armazenar o estado e o contexto específico de uma **Activity** individual dentro de um **Job**. Ele reside no campo `data` da entidade `Job`, garantindo que cada Activity tenha seu próprio espaço isolado para gerenciar as informações relevantes para sua execução. Enquanto o `AgentInternalState` representa o estado global e persistente de um Agente, o `ActivityContext` é efêmero e específico para a execução de uma única Activity. Ele contém todas as informações que o Large Language Model (LLM) precisa para raciocinar e tomar decisões focadas na tarefa atual.
+O `ActivityContext` (implementado como `ActivityContextVO` encapsulando `ActivityContextData`) é um componente vital que armazena o estado e o contexto específico de uma **Activity** individual. No sistema atual, uma `Job` (entidade persistida) representa uma Activity, e o `ActivityContext` reside no campo `data` da entidade `Job`. Isso garante que cada Job/Activity tenha seu próprio espaço isolado para gerenciar as informações relevantes para sua execução pelo `AutonomousAgent`.
 
-Principais campos do `ActivityContext`:
-- `messageContent`: O conteúdo da mensagem ou instrução inicial.
-- `sender`: Identifica a origem da mensagem.
-- `toolName`: Nome da ferramenta utilizada ou sugerida.
-- `toolArgs`: Argumentos para a execução da ferramenta.
-- `activityNotes`: Notas relevantes geradas durante a execução.
-- `activityHistory`: Histórico de interações e resultados dentro desta Activity.
+Principais campos do `ActivityContextData`:
+- `activityType`: `ActivityTypeValue` - O tipo da atividade (e.g., `USER_REQUEST`, `AGENT_ACTION`, `SYSTEM_MESSAGE`).
+- `goal`: `string` - O objetivo principal que esta atividade visa alcançar.
+- `history`: `ActivityHistory` (VO) - Um registro cronológico de `ActivityHistoryEntry` (VOs), que podem incluir interações do usuário, ações do agente, resultados de tasks, ou observações.
+- `currentTask`: `string | null` - O nome ou identificador da tarefa (`ITask`) que está atualmente em foco ou foi a última executada.
+- `taskParameters`: `Record<string, any> | null` - Os parâmetros específicos para a `currentTask`.
+- `notes`: `string[] | null` - Notas ou pensamentos relevantes gerados pelo agente durante o processamento desta atividade.
+- `llmExecutionLog`: `Record<string, any>[] | null` - Um log das interações com o LLM (requisições, respostas, uso de ferramentas) específicas para esta atividade.
+- `originalUserInput`: `string | null` - A entrada original do usuário que iniciou esta atividade, se aplicável.
+- `status`: `string | null` - Um status interno da atividade, se necessário para lógica de processamento mais fina dentro do agente (diferente do `JobStatus` da Job).
 
-A gestão do `activityHistory` é um ponto de atenção, pois seu crescimento pode impactar o desempenho do LLM, exigindo estratégias como sumarização.
+### Job (anteriormente Activity)
 
-### Activity
+Uma **Job** é a representação persistida de uma unidade de trabalho ou "Activity" no sistema, gerenciada pelo `QueueService`. Cada `Job` encapsula o trabalho a ser feito, seu estado atual, e o contexto necessário para seu processamento.
 
-A **Activity** representa a unidade fundamental de trabalho para o Agente, sendo a menor porção de uma tarefa que o Agente processa. A **Job** é a representação persistida da Activity no sistema, contendo o `ActivityContext` no seu campo `data`.
+Principais atributos de uma `Job` (definidos em `JobProps`):
+- `id`: `JobId` (VO) - Identificador único.
+- `name`: `JobName` (VO) - Nome descritivo da Job.
+- `status`: `JobStatus` (VO) - Estado atual da Job na fila (e.g., `pending`, `waiting`, `active`, `completed`, `failed`, `cancelled`).
+- `priority`: `JobPriority` (VO) - Nível de prioridade.
+- `attempts`: `JobAttempts` (VO) - Contagem de tentativas de execução e máximo permitido.
+- `payload`: `Record<string, any>` - Dados de entrada iniciais para a Job.
+- `data`: `ActivityContext` (VO) - Contém o contexto dinâmico da atividade, incluindo o objetivo (`goal`), histórico (`history`), tarefa atual (`currentTask`), etc.
+- `result`: `Record<string, any>` - O resultado final da execução da Job.
+- `createdAt`, `updatedAt`: `Date` - Timestamps de criação e última atualização.
+- `executeAfter`: `Date | null` - Data para execução futura.
+- `dependsOn`: `string[] | null` - Lista de `JobId`s dos quais esta Job depende.
 
-Principais atributos de uma Activity:
-- `id`: Identificador único.
-- `type`: Categoria da Activity (ex: `USER_REQUEST`, `PLANNING`).
-- `description`: Descrição textual da tarefa.
-- `status`: Estado atual (ex: `PENDING`, `IN_PROGRESS`).
-- `priority`: Valor de urgência.
-- `createdAt` / `lastUpdatedAt`: Timestamps.
-- `context`: Objeto com dados específicos, incluindo `activityNotes` e `activityHistory`.
-- `parentId` / `relatedActivityIds`: Para relações hierárquicas ou de dependência.
+O `ActivityContext` (armazenado no campo `data`) é crucial para o `AutonomousAgent`, fornecendo o contexto isolado necessário para o processamento da Job/Activity.
 
-O `ActivityContext` (especialmente o `activityHistory`) é vital para o LLM, fornecendo contexto isolado para a Activity em processamento.
+### Agent Internal State (`AgentInternalState`)
 
-### Agent Internal State
+O `AgentInternalState` (entidade `AgentInternalState`, com propriedades definidas em `AgentInternalStateProps`) representa o estado de conhecimento e configuração de longo prazo de um `AutonomousAgent`. Diferente do `ActivityContext` (que é específico de uma Job/Activity), o `AgentInternalState` encapsula informações que o Agente acumula e mantém ao longo do tempo e através de múltiplas Jobs. Ele é persistido via `IAgentStateRepository`.
 
-O `AgentInternalState` representa o estado global de negócio de um Agente Autônomo. Diferente do `ActivityContext` (que é específico de uma Activity), o `AgentInternalState` encapsula informações de alto nível e conhecimento que o Agente acumula e mantém ao longo de seu ciclo de vida e através de múltiplas atividades. Ele é persistido separadamente para garantir a continuidade das operações do Agente.
+Principais campos do `AgentInternalStateProps`:
+- `id`: `AgentId` (VO) - Identificador único do estado do agente (e, por extensão, do agente).
+- `currentObjective`: `string | null` - O objetivo de alto nível ou foco principal atual do agente.
+- `longTermMemory`: `string[] | null` - Um espaço para armazenar aprendizados ou notas de longo prazo (conceitual, implementação de RAG etc. seria futura).
+- `preferences`: `Record<string, any> | null` - Preferências de comportamento ou configuração para o agente.
+- `createdAt`, `updatedAt`: `Date` - Timestamps.
 
-**Distinção:**
-- **AgentInternalState:** Contexto global de negócio do Agente (projeto focado, issue principal, objetivo de alto nível, notas gerais, promessas). Persistido centralmente para o Agente.
-- **Activity Context:** Contexto específico de uma Activity individual (histórico de mensagens da Activity, notas da Activity, passos planejados). Reside na Job.
+### Autonomous Agent (`AutonomousAgent` Service)
 
-Principais campos do `AgentInternalState`:
-- `agentId`: Identificador do Agente.
-- `generalNotes`: Notas gerais ou aprendizados do Agente.
-- `promisesMade`: Compromissos que o Agente fez.
+O `AutonomousAgent` é o serviço central na camada de aplicação responsável por processar uma `Job` (Activity). Ele utiliza o `ILLMAdapter` para raciocínio e tomada de decisões, e a `IAgentServiceFacade` (que por sua vez usa a `TaskFactory`) para executar `ITask`s quando ações concretas são necessárias.
 
-A persistência do `AgentInternalState` permite ao Agente manter foco, continuar raciocínio, cumprir compromissos e recuperar-se de falhas, complementando o `ActivityContext` para cada tarefa.
+Principais responsabilidades e características:
+- **Processamento de Atividades:** Seu método principal, `processActivity(job: Job, agentId: AgentId)`, recebe uma `Job` e o `AgentId` associado.
+- **Gerenciamento de Estado:** Carrega e atualiza o `AgentInternalState` (via `IAgentStateRepository`) e o `ActivityContext` (dentro da `Job`).
+- **Interação com LLM:** Comunica-se com um modelo de linguagem através da interface `ILLMAdapter` para analisar o `ActivityContext`, decidir os próximos passos, e determinar se uma `ITask` deve ser executada ou se a Job está concluída.
+- **Execução de Tasks:** Utiliza a `IAgentServiceFacade` para solicitar a execução de `ITask`s. A facade abstrai a `TaskFactory`.
+- **Retorno de Resultado:** Retorna um `ProcessActivityResult` indicando o status do processamento da Job (`completed`, `failed`, `in_progress`) e quaisquer atualizações ao `ActivityContext` ou resultados.
 
-### Autonomous Agent
+### `IAgentServiceFacade` e `TaskFactory`
 
-O `AutonomousAgent` é a classe central que implementa o "Loop Agente", responsável pelo raciocínio, tomada de decisões e orquestração de atividades. Opera de forma contínua e orientada a atividades, processando um backlog de atividades dinamicamente.
+A interface `IAgentService` (mencionada em versões anteriores da documentação) foi efetivamente substituída por uma combinação da `IAgentServiceFacade` e da `TaskFactory` na camada de aplicação.
 
-Principais responsabilidades:
-- **Raciocínio e Tomada de Decisão:** Utiliza um LLM com base no `AgentInternalState` (estado global) e no `ActivityContext` (contexto da tarefa específica).
-- **Gerenciamento de Activities:** Interage com a `Queue` (via `QueueService` ou `JobRepository`) para obter `Jobs` (Activities) e atualiza o `ActivityContext` na `Job`.
-- **Despacho de Tasks:** Utiliza uma interface (`IAgentService`) para despachar a execução de `Tasks` quando uma ação concreta é necessária.
-- **Gerenciamento de Estado Interno:** Atualiza seu `AgentInternalState` com informações relevantes.
+- **`IAgentServiceFacade`**: Esta interface define um contrato simplificado para o `AutonomousAgent` interagir com o subsistema de execução de tasks. Sua principal responsabilidade é receber uma solicitação para executar uma task (identificada por um nome e parâmetros) e orquestrar sua execução usando a `TaskFactory`.
+- **`TaskFactory`**: Este serviço é responsável por instanciar a implementação concreta de uma `ITask` com base em um identificador (nome da task). Ele garante que a task seja criada com as dependências necessárias (embora a injeção de dependências em tasks seja uma área para maior desenvolvimento).
 
-O `AutonomousAgent` é invocado por um `Worker` que lhe passa uma `Job` (Activity) da `Queue`. O Agente executa uma iteração do seu loop de raciocínio, decide a próxima ação e pode despachar `Tasks`.
+### `JobDefinitionService`
 
-### IAgentService
+O `JobDefinitionService` (localizado na camada de aplicação) é responsável pela criação e definição inicial de novas `Job`s. Ele recebe os dados de entrada para uma nova job (como nome, tipo de atividade, objetivo inicial, payload), valida essas informações, constrói uma nova entidade `Job` com seu `ActivityContext` inicial, e a registra no sistema utilizando o `QueueService` para enfileirá-la. Essencialmente, transforma uma requisição externa ou uma necessidade interna do sistema em uma `Job` válida e pronta para ser processada.
 
-O `IAgentService` é uma interface que permite ao `AutonomousAgent` despachar `Tasks` para execução por um `Worker`. Ele abstrai como a Task será executada, focando em expor a capacidade de "fazer" algo. O `IAgentService` foca em uma interface simples para o `AutonomousAgent` despachar tasks, utilizando o padrão Result para retornos. A assinatura e os métodos de gerenciamento de estado são projetados para suportar claramente este despacho.
+### Queue (`QueueService`)
 
-Quando o `AutonomousAgent` decide uma ação, ele invoca o `IAgentService`, que pode:
-1.  Criar novas `Jobs` (Activities) na fila para processamento assíncrono.
-2.  Encaminhar a `Job` (Activity) atual para um `TaskFactory` para instanciar e executar a `Task` correta.
-
-Após a execução da `Task`, o `IAgentService` retorna o resultado ao `AutonomousAgent`, permitindo que o Agente continue seu ciclo de raciocínio.
-
-### Job
-
-Uma **Job** é a representação persistida de uma unidade de trabalho, gerenciada pela **Queue**. No contexto dos Agentes Autônomos, a Job encapsula uma **Activity** completa, armazenando o `ActivityContext` em seu campo `data`.
-A entidade Job é projetada com campos encapsulados e modificações são tipicamente gerenciadas através do padrão Builder. A validação dos dados da Job é realizada externamente, por exemplo, utilizando schemas Zod. A lógica de transição de status é idealmente gerenciada por serviços dedicados na camada de aplicação.
-
-Principais atributos da Job:
-- `id`, `name`, `payload` (entrada inicial, não mutável internamente).
-- `data`: Armazena informações mutáveis, incluindo o `ActivityContext` e `activityHistory`.
-- `result`: Resultado final da Job.
-- `max_attempts`, `attempts`, `max_retry_delay`, `retry_delay`, `delay`.
-- `priority`: Menor número significa MAIOR prioridade.
-- `status`: Estado atual (`pending`, `waiting`, `delayed`, `finished`, `executing`, `failed`).
-- `depends_on`: Lista de `jobIds` dos quais esta Job depende.
-- `parentId`: ID da Job pai (opcional).
-
-Estados do Status da Job:
-- `pending`: Pronta para execução.
-- `waiting`: Aguardando dependências.
-- `delayed`: Atrasada (delay inicial ou retentativa).
-- `finished`: Concluída (sucesso ou erro final).
-- `executing`: Em processamento por um Worker.
-- `failed`: Erro após todas as tentativas.
-
-### Process Job Service
-
-O `ProcessJobService` é o ponto de entrada para a criação e iniciação de novas Jobs (ou Activities). Ele recebe a solicitação, valida os dados, cria uma nova entidade `Job` (que representa a Activity inicial) com status `pending` ou `waiting`, e a adiciona à `Queue` usando o `QueueService` ou `JobRepository`. A `Queue` então notifica os `Workers` disponíveis. Essencialmente, ele transforma uma requisição externa em uma `Job`/`Activity` válida e a enfileira para processamento.
-
-### Queue
-
-A **Queue** (Fila) gerencia o ciclo de vida das Jobs/Activities. É o componente central que armazena, organiza e controla as tarefas assíncronas.
+O `QueueService` (camada de aplicação) gerencia o ciclo de vida das `Job`s (Activities). É o componente central que armazena, organiza e controla as tarefas assíncronas.
 
 Principais Responsabilidades:
-1.  **Persistir Estado:** Salva e recupera o estado das Jobs/Activities (inicialmente em SQLite).
-2.  **Controlar Transições de Status:** Única entidade que altera o status persistido de uma Job/Activity (`pending`, `waiting`, `delayed`, `executing`, `finished`, `failed`).
-3.  **Gerenciar Retentativas e Atrasos:** Controla `attempts`, `retry_delay` (com backoff exponencial), e `delay`.
-4.  **Gerenciar Dependências (`depends_on`):** Coloca Jobs em `waiting` se dependências não estiverem `finished`, monitora e as move para `pending` quando concluídas.
+1.  **Persistir Estado:** Salva e recupera o estado das `Job`s utilizando a `IJobRepository` (que é implementada, por exemplo, pela `JobDrizzleRepository` para SQLite).
+2.  **Controlar Transições de Status:** Único serviço que altera o status de uma `Job` (e.g., `pending`, `waiting`, `active`, `delayed`, `completed`, `failed`, `cancelled`).
+3.  **Gerenciar Retentativas e Atrasos:** Controla o `JobAttempts` VO, e conceitualmente os delays para retentativas e execuções futuras (`executeAfter`).
+4.  **Gerenciar Dependências (`dependsOn`):** Assegura que jobs dependentes só se tornem ativas após a conclusão de suas dependências.
+5.  **Fornecer Jobs para Workers:** Permite que o `WorkerService` obtenha as próximas jobs a serem processadas.
 
-Interage com `WorkerPool` (notificando sobre novas Jobs) e `Workers` (recebendo Jobs e atualizando seu status após execução). A Queue garante a integridade do sistema de processamento assíncrono.
+### Task (`ITask` Interface)
 
-### Task
+Uma `ITask` (definida como uma interface na camada de aplicação, conceitualmente próxima ao domínio) representa a lógica de execução para uma ação ou etapa específica dentro do contexto de uma `Job` (Activity). Ela é responsável por realizar o trabalho concreto.
 
-Uma **Task** representa a lógica de execução em memória para um tipo específico de trabalho, encapsulando uma ação acionável dentro do contexto de uma Job/Activity. Ela interage com LLMs e Tools, operando em memória sem se preocupar com persistência ou filas. A Task recebe dados da Job (incluindo `ActivityContext`) e Tools injetadas pelo Agente. A implementação das Tasks geralmente adere a uma interface comum (por exemplo, `Task.interface.ts`) e pode herdar de uma classe base abstrata (como `BaseTask`) que pode fornecer funcionalidade ou estrutura comum. Exemplos de Tasks concretas incluem a execução de uma Tool específica (`CallToolTask`) ou a realização de um ciclo de raciocínio com o LLM (`LLMReasoningTask`).
+Características:
+- **Interface Comum:** Todas as tasks implementam a interface `ITask`, que tipicamente define um método `execute(activityContext: ActivityContext, taskParams?: any, tools?: ITool[]): Promise<TaskResult>`.
+- **Foco na Ação:** Cada task é especializada em uma ação particular (e.g., ecoar uma mensagem, interagir com uma ferramenta).
+- **Uso de Ferramentas:** Tasks podem utilizar `ITool`s para interagir com o sistema ou serviços externos.
+- **Retorno de Resultado:** Uma `ITask` retorna um `TaskResult`, que inclui um status de sucesso/falha, quaisquer dados de saída, e potencialmente um `ActivityContext` atualizado.
+- **Exemplos Implementados:**
+    - `SimpleEchoTask`: Uma task simples para testes que retorna uma mensagem de eco.
+    - `EchoToolTask`: Uma task que demonstra o uso de uma `ITool` (a `SimpleEchoTool`).
 
-Retornos da Task e suas consequências:
-1.  **Sucesso:** A Task concluiu. O Worker pode prosseguir ou finalizar a Job.
-2.  **Vazio/Re-agendamento:** A Task precisa ser re-executada. O Worker pode recolocar a Job na Queue.
-3.  **Erro (throw):** Falha na execução. O Worker trata conforme a política de retentativa da Job.
+### Tool (`ITool` Interface)
 
-### Tool
+As `ITool`s (interfaces definidas na camada de aplicação) representam capacidades específicas que uma `ITask` pode utilizar para interagir com o sistema, ambiente externo, ou realizar operações discretas.
 
-As **Tools** são as capacidades que um agente possui para interagir com o mundo externo e outros sistemas, permitindo ações concretas. São utilizadas pelas **Tasks** quando o LLM decide que uma ação externa é necessária.
+Características:
+- **Interface Definida:** Cada tool implementa a interface `ITool`, que inclui um método `execute(args: any): Promise<any>` e propriedades para `name` e `description` (usadas pelo LLM para entender seu propósito e como usá-la).
+- **Funcionalidade Encapsulada:** Uma tool encapsula uma ação bem definida (e.g., ler um arquivo, enviar uma mensagem).
+- **Utilização por Tasks:** `ITask`s podem receber ou instanciar `ITool`s para executar suas funções.
+- **Exemplos Implementados:**
+    - `SimpleEchoTool`: Uma tool de teste que ecoa seus argumentos.
+    - `FileSystemListTool` (Mock): Um mock inicial para uma ferramenta que listaria arquivos.
 
-Tipos de Tools:
-- **Tools do Agente:** Genéricas, úteis para diversos agentes e tarefas (ex: manipulação de arquivos).
-- **Tools da Task/Job:** Específicas para o contexto de uma Task ou tipo de Job. A classe `Task` define quais Tools específicas são acessíveis.
+### Worker (`WorkerService` e Entidade `Worker`)
 
-Tools bem definidas, com interfaces claras, são cruciais para que o LLM as utilize eficazmente. O design do sistema de Tools visa o registro dinâmico, descrições claras para consumo pelo LLM (essenciais para prompt engineering eficaz), e validação robusta dos inputs fornecidos às tools. Adicionalmente, os adaptadores que implementam as interfaces das tools devem ser projetados para resiliência, especialmente se interagirem com sistemas externos (e.g., aplicando Circuit Breakers para operações de FileSystem ou Terminal onde apropriado). A validação de parâmetros na fronteira do adaptador é essencial, assim como a observabilidade através de métricas e logs estruturados para operações críticas. Considera-se um sistema de plug-in para novos adaptadores de tools para facilitar a extensibilidade do framework.
+O `WorkerService` (camada de aplicação) é responsável por orquestrar o processamento de `Job`s. Ele gerencia entidades `Worker` (definidas no domínio).
 
-### Worker Pool
+- **Entidade `Worker`**: Representa uma instância de um processador de jobs, caracterizada por um `WorkerId` e um `WorkerStatus`. Cada `Worker` está conceitualmente associado a um `AgentId` para o qual ele processa jobs.
+- **`WorkerService`**:
+    1.  **Gerenciamento de Workers:** Cria e monitora o estado das entidades `Worker`.
+    2.  **Loop de Processamento:** Inicia um loop (`startProcessingLoop`) que busca por `Job`s disponíveis no `QueueService` que podem ser atribuídas a um `Worker` ativo.
+    3.  **Delegação ao `AutonomousAgent`:** Ao obter uma `Job`, o `WorkerService` a designa ao `AutonomousAgent` para processamento, passando a `Job` e o `AgentId` do `Worker`.
+    4.  **Atualização de Status:** Recebe o `ProcessActivityResult` do `AutonomousAgent` e notifica o `QueueService` para atualizar o status da `Job` e salvar quaisquer resultados ou contextos atualizados.
 
-O **WorkerPool** gerencia um conjunto de [Workers](#worker), orquestrando a execução concorrente de Jobs (Activities). Ele monitora a [Queue](#queue) por Jobs `pending` e as atribui a Workers ociosos. Suporta escalabilidade horizontal para lidar com aumento de carga de trabalho.
-
-### Worker
-
-O **Worker** orquestra a execução de Jobs (Activities), atuando como ponte entre a [Queue](#queue) e o `AutonomousAgent`. Ele não contém a lógica de negócio da tarefa, mas coordena sua execução.
-
-Funcionamento:
-1.  **Obter Job:** Conecta-se à `Queue` e solicita uma Job `pending`.
-2.  **Invocar Agente:** Recebe o ID do agente e a função de processamento. Invoca o `AutonomousAgent` com a Job.
-3.  **Notificar Queue:** Após a execução pelo Agente:
-    - Sucesso: Notifica a Queue para marcar Job como `finished`.
-    - Retorno Vazio (não concluído, sem erro): Notifica para marcar Job como `delayed` (re-agendamento).
-    - Exceção (erro): Captura e notifica a Queue.
-
-A `Queue` gerencia a política de retentativa. O Worker delega essa lógica à Queue, garantindo que falhas temporárias não interrompam o processamento permanentemente.
+O conceito de `WorkerPool` (um gerenciador de múltiplos processos/instâncias de `WorkerService` ou workers físicos) é mais um padrão de infraestrutura para escalabilidade, enquanto o `WorkerService` atual foca na lógica de orquestração de um fluxo de jobs para os agentes.
 
 ## 3. Comportamento do Agente e Execução de Jobs
 
-Um Agente no Project Wiz opera como um worker que processa Jobs de uma fila. Ele executa um "step" (passo) de um Job por vez. Entre a execução desses steps, o Agente pode ser interrompido para processar outros Jobs de maior prioridade, especialmente aqueles originados por mensagens de usuários ou outros Agentes.
+Um `AutonomousAgent` no Project Wiz opera como um processador inteligente que executa `Job`s (Activities) obtidas através do `WorkerService` a partir do `QueueService`. Ele processa uma `Job` focando em seu `ActivityContext` e utilizando seu `AgentInternalState` para orientação.
 
-Essa capacidade de interrupção e re-prioritização permite que o Agente reaja dinamicamente a novas informações ou instruções, como:
+A interação com o LLM permite que o Agente reaja dinamicamente a novas informações ou instruções dentro do contexto de uma Job:
 
-*   **Cancelar um Job:** Se um usuário envia uma mensagem pedindo para parar um Job, o Agente pode usar sua `TaskTool` para remover o Job da fila.
-*   **Modificar um Job em Andamento:** Se o usuário solicita uma alteração no escopo ou nos resultados esperados de um Job, o Agente pode atualizar o Job (ex: adicionando novos passos ou subtarefas).
-*   **Aprender com Novas Informações:** Se o Agente recebe uma informação relevante (ex: um novo padrão de codificação a ser seguido), ele pode registrar isso usando sua `AnnotationTool` ou `MemoryTool` e aplicar esse conhecimento aos Jobs subsequentes ou atuais.
+*   **Cancelar uma Job:** Se o objetivo de uma Job se tornar obsoleto, o `AutonomousAgent` pode decidir marcar a Job como `cancelled` (via `QueueService`), possivelmente após uma interação com o LLM.
+*   **Modificar um Job em Andamento:** Se o `ActivityContext` de uma Job for alterado (e.g., por uma nova entrada do usuário que é roteada para a mesma Job), o `AutonomousAgent` adaptará seu processamento na próxima vez que atuar sobre essa Job.
+*   **Aprender com Novas Informações:** O `AutonomousAgent` pode atualizar seu `AgentInternalState` ou as `notes` no `ActivityContext` de uma Job com base em aprendizados durante o processamento.
 
-Este comportamento é crucial para a flexibilidade e a capacidade de resposta dos Agentes dentro da "fábrica de software autônoma".
+Este comportamento é crucial para a flexibilidade e a capacidade de resposta dos Agentes.
 
 ### 3.1. Relação com a Arquitetura de Jobs & Workers
 
-O Agente é um componente central na [Arquitetura do Sistema de Processamento Assíncrono](./01-architecture.md). Conforme descrito nesse documento, um **Worker** monitora a fila de Jobs. Quando um Job é selecionado para um Agente específico, o Worker invoca os métodos apropriados do Agente para executar a **Task** associada ao Job. O Agente, então, utiliza suas capacidades de processamento de linguagem (LLM) e suas **Tools** para realizar o trabalho.
+O `AutonomousAgent` é um componente central na [Arquitetura do Sistema de Processamento Assíncrono](./01-architecture.md). Conforme descrito nesse documento, o `WorkerService` monitora o `QueueService` por Jobs. Quando uma Job é selecionada para um Agente específico (identificado por `AgentId`), o `WorkerService` invoca o `AutonomousAgent` para executar a lógica da `Job` (Activity). O `AutonomousAgent`, então, utiliza suas capacidades de processamento de linguagem (`ILLMAdapter`) e `ITask`s (via `IAgentServiceFacade` e `TaskFactory`), que podem usar `ITool`s, para realizar o trabalho.
 
-## 4. Ferramentas do Agente (Tools)
+## 4. Ferramentas do Agente (Tools - `ITool`)
 
-As Tools são a interface primária pela qual os Agentes interagem com o sistema Project Wiz, o ambiente de desenvolvimento, e fontes de informação externas. Elas capacitam os Agentes a realizar ações concretas para completar seus Jobs. Para detalhes sobre como desenvolver novas tools, consulte o [Guia de Desenvolvimento de Tools](./03-developing-tools.md).
+As `ITool`s são interfaces que definem capacidades específicas que uma `ITask` (executada pelo `AutonomousAgent`) pode utilizar para interagir com o sistema, ambiente externo, ou realizar operações discretas. Elas são cruciais para permitir que o agente execute ações concretas.
 
-A seguir, uma descrição das Tools disponíveis para os Agentes:
+### Princípios das `ITool`s:
+- **Interface Clara:** Cada `ITool` possui uma propriedade `name` e `description` (para o LLM entender seu propósito e como usá-la) e um método `execute(args: any): Promise<any>` para realizar sua ação.
+- **Consumo por `ITask`s:** As `ITask`s são as principais consumidoras de `ITool`s. Uma `ITask` pode ser projetada para usar uma ou mais tools específicas para cumprir seu objetivo.
+- **Descoberta e Injeção:** Idealmente, a `TaskFactory` ou o `AutonomousAgent` poderiam ser responsáveis por fornecer as instâncias de `ITool` necessárias para uma `ITask`. Atualmente, algumas tasks podem instanciar suas tools diretamente (e.g., `EchoToolTask` usa `SimpleEchoTool`).
 
-### 4.1. MemoryTool
+### Exemplos de `ITool`s Implementadas ou Conceituais:
 
-Permite ao Agente gerenciar uma memória de longo prazo, onde informações importantes podem ser armazenadas e recuperadas. Os dados são frequentemente acessados via técnicas de RAG (Retrieval Augmented Generation) para serem incluídos no contexto da LLM quando relevante.
+#### 4.1. `SimpleEchoTool` (Implementada)
+*   **Descrição:** Uma ferramenta de teste simples que recebe argumentos e os retorna.
+*   **Uso:** Usada pela `EchoToolTask` para demonstrar a mecânica de uma task utilizando uma tool.
 
-*   **Write:** Cria ou atualiza registros na memória do Agente.
-*   **Delete:** Remove informações específicas da memória, geralmente identificadas por um código ou chave.
+#### 4.2. `FileSystemListTool` (Mock Implementado)
+*   **Descrição:** Conceitualmente, listaria arquivos e diretórios em um caminho especificado. A implementação atual é um placeholder/mock.
+*   **Uso Futuro:** Permitiria ao agente explorar a estrutura de arquivos de um projeto através de uma `ITask` apropriada.
 
-### 4.2. TaskTool
+#### 4.3. Ferramentas Conceituais (Anteriormente Listadas, Funcionalidades Reatribuídas ou Futuras)
 
-Permite ao Agente gerenciar os Jobs em sua fila de execução. Tecnicamente, estes são "Jobs" na fila, que se tornam "Tasks" (a lógica de execução) quando o Agente os processa.
+Muitas das tools listadas em versões anteriores da documentação (`MemoryTool`, `TaskTool` para gerenciamento de jobs, `AnnotationTool`, `FilesystemTool` completa, `TerminalTool`, `ProjectTool`, `MessageTool`) representam funcionalidades importantes. No sistema refatorado:
+- **Gerenciamento de Jobs/Tasks:** É primariamente responsabilidade do `QueueService` (para jobs) e da orquestração do `AutonomousAgent` (para tasks e o ciclo de vida da Job em processamento). Uma `ITask` específica poderia ser criada para, por exemplo, "criar uma nova job", e ela internamente utilizaria o `JobDefinitionService`.
+- **Memória e Anotações:** São conceitos que seriam gerenciados pelo `AutonomousAgent` através de seu `AgentInternalState` ou `ActivityContext` (campo `notes`). Interações complexas com uma base de conhecimento vetorial (RAG) poderiam ser encapsuladas em `ITool`s dedicadas e usadas por `ITask`s específicas no futuro.
+- **Interações com Sistema de Arquivos, Terminal, etc.:** Seriam implementadas como `ITool`s específicas (e.g., `ReadFileTool`, `ExecuteCommandTool`) e usadas por `ITask`s apropriadas quando o `AutonomousAgent` (via LLM) decidir que tal ação é necessária.
 
-*   **View/List:** Lista os Jobs na fila do Agente, idealmente mostrando dependências e hierarquias.
-*   **Save:** Cria um novo Job ou atualiza um Job existente. Pode permitir a mesclagem de informações ou a substituição completa da estrutura do Job.
-*   **Remove:** Deleta um Job (e suas sub-Jobs/subtarefas dependentes) da fila.
-
-### 4.3. AnnotationTool
-
-Permite ao Agente criar anotações contextuais durante a execução de um Job. Essas anotações são tipicamente incluídas no prompt da LLM para Jobs subsequentes ou steps do mesmo Job, fornecendo contexto imediato. Elas também podem ser usadas para refinar buscas na `MemoryTool`.
-
-*   **View/List:** Lista as anotações ativas.
-*   **Save:** Cria ou atualiza uma anotação.
-*   **Remove:** Remove uma anotação.
-
-### 4.4. FilesystemTool
-
-Concede ao Agente a capacidade de interagir com o sistema de arquivos do projeto.
-
-*   **ReadFile:** Lê o conteúdo de um arquivo especificado.
-*   **WriteFile:** Escreve (ou sobrescreve) conteúdo em um arquivo.
-*   **MoveFile:** Move ou renomeia um arquivo.
-*   **RemoveFile:** Deleta um arquivo.
-*   **ListDirectory:** Lista o conteúdo (arquivos e subdiretórios) de um diretório.
-*   **CreateDirectory:** Cria um novo diretório.
-*   **MoveDirectory:** Move ou renomeia um diretório.
-*   **RemoveDirectory:** Deleta um diretório (geralmente se estiver vazio).
-
-### 4.5. TerminalTool
-
-Permite ao Agente executar comandos no terminal (shell) do sistema operacional onde o Project Wiz está rodando (dentro de limites de segurança apropriados).
-
-*   **ShellCommand:** Executa um comando shell especificado e retorna sua saída.
-
-### 4.6. ProjectTool
-
-Fornece ao Agente informações e capacidades de manipulação relacionadas à estrutura e metadados do projeto no qual ele está trabalhando dentro do Project Wiz.
-
-*   **Save:** Cria ou atualiza informações gerais de um projeto (ex: Nome, Descrição).
-*   **Channel:** Cria ou atualiza um canal de comunicação dentro de um projeto.
-*   **Forum:** Cria ou atualiza um tópico de discussão no fórum de um projeto.
-*   **Issue:** Cria ou atualiza uma issue (item de trabalho ou bug) associada ao projeto.
-
-### 4.7. MessageTool
-
-Permite ao Agente enviar mensagens, seja para notificar usuários sobre o progresso, fazer perguntas, ou comunicar-se com outros Agentes.
-
-*   **Direct:** Envia uma mensagem direta para um usuário específico.
-*   **Channel:** Envia uma mensagem para um canal específico de um projeto.
-*   **Forum:** Posta uma mensagem em um tópico de fórum de um projeto.
+A estratégia é ter um conjunto granular de `ITool`s que podem ser combinadas por `ITask`s mais complexas, sob a direção do `AutonomousAgent`.
 
 ## 5. Conclusão
 
-A estrutura do Agente no Project Wiz é projetada para fornecer um framework poderoso e flexível para automação de tarefas de desenvolvimento de software. Ao combinar capacidades de processamento de linguagem natural (via LLMs) com um conjunto robusto de Tools, os Agentes podem realizar uma ampla gama de atividades, contribuindo significativamente para a visão do Project Wiz como uma fábrica de software autônoma. A interação dinâmica com Jobs e a capacidade de usar diferentes personas configuráveis tornam este framework adaptável a diversas necessidades de desenvolvimento.
+A estrutura do Agente no Project Wiz é projetada para fornecer um framework poderoso e flexível para automação de tarefas. Ao combinar as capacidades de raciocínio do `AutonomousAgent` (utilizando um `ILLMAdapter`) com a execução estruturada de `ITask`s e `ITool`s, e o gerenciamento robusto de `Job`s pelo `QueueService` e `WorkerService`, o sistema pode realizar uma ampla gama de atividades. Esta arquitetura modular e centrada em responsabilidades claras é fundamental para a visão do Project Wiz como uma fábrica de software autônoma.
