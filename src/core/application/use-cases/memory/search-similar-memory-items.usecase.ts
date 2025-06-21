@@ -1,7 +1,8 @@
 // src/core/application/use-cases/memory/search-similar-memory-items.usecase.ts
 import { MemoryItem } from '../../../domain/entities/memory/memory.entity';
 import { IMemoryRepository } from '../../../../core/ports/repositories/memory.repository';
-import { IEmbeddingService } from '../../ports/services/embedding.interface';
+// TODO: Refactor to use IEmbeddingService (port) instead of concrete EmbeddingService (infra) for Clean Architecture.
+import { EmbeddingService } from '../../../infrastructure/services/ai/embedding.service';
 
 export interface SearchSimilarMemoryItemsDTO {
   queryText: string;
@@ -16,7 +17,7 @@ export interface ISearchSimilarMemoryItemsUseCase {
 export class SearchSimilarMemoryItemsUseCase implements ISearchSimilarMemoryItemsUseCase {
   constructor(
     private memoryRepository: IMemoryRepository,
-    private embeddingService: IEmbeddingService
+    private embeddingService: EmbeddingService // Injected
   ) {}
 
   async execute(dto: SearchSimilarMemoryItemsDTO): Promise<MemoryItem[]> {
@@ -30,7 +31,7 @@ export class SearchSimilarMemoryItemsUseCase implements ISearchSimilarMemoryItem
     console.log(\`SearchSimilarMemoryItemsUseCase: Searching for memories similar to "\${queryText.substring(0,50)}..." for agentId: \${agentId}\`);
 
     try {
-      const queryEmbedding = await this.embeddingService.generateEmbedding(queryText);
+      const { embedding: queryEmbedding } = await this.embeddingService.generateEmbedding(queryText);
 
       if (!queryEmbedding || queryEmbedding.length === 0) {
         console.warn(\`SearchSimilarMemoryItemsUseCase: Failed to generate embedding for query "\${queryText}". Returning empty array.\`);

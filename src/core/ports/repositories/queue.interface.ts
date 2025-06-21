@@ -1,21 +1,11 @@
-import { Result } from "../../../shared/result";
-import { Job } from "../../domain/entities/queue/job.entity";
-import { JobId } from "../../domain/entities/queue/value-objects/job-id.vo";
+// src/core/ports/repositories/queue.interface.ts
 
-export interface Queue {
-  add(job: Job): Promise<Result<void>>;
-  getNext(): Promise<Result<Job | null>>;
-  getById(id: JobId): Promise<Result<Job | null>>;
-  remove(id: JobId): Promise<Result<void>>;
-  prioritize(id: JobId): Promise<Result<void>>;
-  list(): Promise<Result<Job[]>>;
-  clear(): Promise<Result<void>>;
+import { Queue } from '../../domain/entities/queue/queue.entity';
+
+export interface IQueueRepository {
+  findById(id: string): Promise<Queue | null>;
+  findByName(name: string): Promise<Queue | null>;
+  save(queue: Queue): Promise<void>; // Should handle both create and update
+  // Optional: delete(id: string): Promise<void>;
+  // Optional: listAll(limit?: number, offset?: number): Promise<Queue[]>;
 }
-import { IRepository } from "@/core/common/repository";
-import { Queue } from "@/core/domain/entities/queue";
-
-/**
- * Interface para repositórios de fila de jobs
- * Estende IRepository com operações específicas de fila
- */
-export type IQueueRepository = IRepository<typeof Queue>;

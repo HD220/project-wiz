@@ -16,11 +16,7 @@ import { WorkerService } from '../core/domain/services/worker.service';
 import { DrizzleJobRepository } from '../infrastructure/repositories/drizzle/job.repository';
 import { DrizzleQueueRepository } from '../infrastructure/repositories/drizzle/queue.repository';
 import { FileSystemAgentPersonaTemplateRepository } from '../infrastructure/repositories/file-system-agent-persona-template.repository';
-import { DrizzleAnnotationRepository } from '../infrastructure/repositories/drizzle/annotation.repository';
-import { ListAnnotationsUseCase } from '../core/application/use-cases/annotation/list-annotations.usecase';
-import { SaveAnnotationUseCase } from '../core/application/use-cases/annotation/save-annotation.usecase';
-import { RemoveAnnotationUseCase } from '../core/application/use-cases/annotation/remove-annotation.usecase';
-import { AnnotationTool } from '../infrastructure/tools/annotation.tool';
+// import { DrizzleAnnotationRepository } from '../infrastructure/repositories/drizzle/annotation.repository'; // Needed if persona uses annotation tools that require it
 // import { DrizzleMemoryRepository } from '../infrastructure/repositories/drizzle/memory.repository'; // Needed if persona uses memory tools that require it
 
 // --- Tool & ToolRegistry Imports ---
@@ -50,7 +46,7 @@ async function mainDemo() {
   console.log(`Using database: ${process.env.DB_FILE_NAME}`);
 
   const CWD = process.cwd();
-  const demoOutputBasePath = path.join(CWD, 'fullstack_code_gen_demo_output');
+  const demoOutputBasePath = path.join(CWD, 'fullstack_agent_demo_output');
   try {
     await fs.promises.rm(demoOutputBasePath, { recursive: true, force: true }); // Clean up from previous runs
     await fs.promises.mkdir(demoOutputBasePath, { recursive: true });
@@ -63,7 +59,7 @@ async function mainDemo() {
   // --- 1. Instantiate Repositories ---
   const jobRepository = new DrizzleJobRepository(db);
   const queueRepository = new DrizzleQueueRepository(db);
-  const annotationRepository = new DrizzleAnnotationRepository(db);
+  // const annotationRepository = new DrizzleAnnotationRepository(db); // Instantiate if persona uses annotation tools
   // const memoryRepository = new DrizzleMemoryRepository(db); // Instantiate if persona uses memory tools
   const personaTemplateRepository = new FileSystemAgentPersonaTemplateRepository(); // Loads from config/personas/
   await personaTemplateRepository.init();
@@ -98,22 +94,11 @@ async function mainDemo() {
   }
   console.log("All required tools for the Fullstack Developer persona are registered.");
 
-  // --- 3. Instantiate UseCases & Internal Tools for Agent Executor ---
-  // Annotation UseCases (needed for internal AnnotationTool instance for GenericAgentExecutor)
-  const listAnnotationsUseCase = new ListAnnotationsUseCase(annotationRepository);
-  const saveAnnotationUseCase = new SaveAnnotationUseCase(annotationRepository);
-  const removeAnnotationUseCase = new RemoveAnnotationUseCase(annotationRepository);
-  console.log("Demo: Annotation UseCases instantiated.");
-
-  // AnnotationTool instance for GenericAgentExecutor's internal use
-  const annotationToolInstance = new AnnotationTool(listAnnotationsUseCase, saveAnnotationUseCase, removeAnnotationUseCase);
-  console.log("Demo: Internal AnnotationTool instance created.");
-
-  // --- 4. Instantiate Agent Executor for the Persona ---
-  const agentExecutor: IAgentExecutor = new GenericAgentExecutor(fullstackPersonaTemplate, toolRegistry, annotationToolInstance);
+  // --- 3. Instantiate Agent Executor for the Persona ---
+  const agentExecutor: IAgentExecutor = new GenericAgentExecutor(fullstackPersonaTemplate, toolRegistry);
   console.log(`GenericAgentExecutor instantiated for role: ${fullstackPersonaTemplate.role}`);
 
-  // --- 5. Queue Setup ---
+  // --- 4. Queue Setup ---
   const agentQueueName = "fullstack_developer_queue";
   let agentQueue = await queueRepository.findByName(agentQueueName);
   if (!agentQueue) {
@@ -130,19 +115,28 @@ async function mainDemo() {
   }
 
   // --- 5. Define and Enqueue Job ---
-  const ambiguousGoal = "Develop a user authentication feature for our new web application. It needs to be secure and user-friendly.";
+  const multiStepGoal = \`
+1. Create a new directory named 'my_ai_project' inside the path '\${demoOutputBasePath}'.
+2. Inside 'my_ai_project', create a file named 'main_logic.py' with the content '# Python script for AI logic\\nprint("AI logic initialized.")'.
+3. Execute the terminal command 'ls -la "\${demoOutputBasePath}/my_ai_project"'.
+4. Save a memory: 'Core AI project scaffolding complete: created main_logic.py and project directory.' with tags ['ai_project', 'scaffolding', 'python'].
+5. Save another memory: 'Best practices for Python projects include using virtual environments and a requirements.txt file.' with tags ['python', 'best_practices', 'environment'].
+6. Search memories with the natural language query: 'How was the AI project initialized?'
+7. Search memories with the query: 'Tips for python project setup.'
+8. Save an annotation: 'Fullstack Developer demo: AI project setup, memory save, and semantic search tests complete.'
+  \`;
 
   const jobPayload = {
-    goal: ambiguousGoal,
+    goal: multiStepGoal,
     initialContext: {
         // Optional: Provide specific context if agent needs it beyond the CWD of tools
         // For instance, if FileSystemTool's baseCWD was not the project root but a generic workspace.
     }
   };
 
-  const jobName = "AmbiguousAuthFeatureDemo";
+  const jobName = "FullstackAgentDemoTask"; // Updated job name
   const existingJobs = await jobRepository.findPendingByRole(agentQueue.id, fullstackPersonaTemplate.role, 20);
-  const jobAlreadyExists = existingJobs.some(j => j.name === jobName && j.payload.goal === ambiguousGoal);
+  const jobAlreadyExists = existingJobs.some(j => j.name === jobName && j.payload.goal === multiStepGoal);
 
   if (!jobAlreadyExists) {
     const demoJob = Job.create({
@@ -172,15 +166,17 @@ async function mainDemo() {
   await workerService.start(agentQueue.name);
   console.log(\`WorkerService started for queue '\${agentQueue.name}', handling role '\${fullstackPersonaTemplate.role}'. Monitoring for jobs...\`);
 
-  console.log("\n--- Goal for Fullstack Developer Agent (Ambiguous Task) ---");
-  console.log(ambiguousGoal);
-  console.log("\n--- Expected Outcomes (Verify in Agent Logs/ExecutionHistory & Annotations Table) ---");
-  console.log("- The agent should NOT attempt to write files or execute commands immediately.");
-  console.log("- The agent's primary response should be to ask clarifying questions about the authentication feature.");
-  console.log("- Check 'executionHistory' (logged by the demo when the job finishes or in agent logs if it's a long sequence) for an 'llm_event' with name 'clarification_questions_asked'.");
-  console.log("- An annotation should be saved containing these questions. It should be tagged with 'clarification_needed' and 'job:<JOB_ID>'. You might need to query your DB's 'annotations' table to see it, or look for logs from AnnotationTool.save().");
-  console.log("- The job should return with a status like 'CONTINUE_PROCESSING' and a message indicating questions were asked and user input is awaited.");
-  console.log("Run the demo and observe the console output for the agent's behavior.");
+  console.log("\n--- Goal for Fullstack Developer Agent ---");
+  console.log(multiStepGoal);
+  console.log("\n--- Expected Outcomes (Verify Manually) ---");
+  console.log(\`- Directory created: \${demoOutputBasePath}/my_ai_project\`);
+  console.log(\`- File created: \${demoOutputBasePath}/my_ai_project/main_logic.py with specific content.\`);
+  console.log("- Terminal command 'ls -la ...' executed (check agent's executionHistory for stdout in job.data.agentState).");
+  console.log("- Two memories saved (check agent's executionHistory for save parameters, or DB).");
+  console.log("- First semantic search for 'How was the AI project initialized?' should ideally return the first memory (check executionHistory for search results).");
+  console.log("- Second semantic search for 'Tips for python project setup.' should ideally return the second memory (check executionHistory for search results).");
+  console.log("- An annotation about completion saved (check agent's executionHistory or DB).");
+  console.log("Look for 'executionHistory' in the final job output (if COMPLETED) or agent logs to see tool call details and results.");
   console.log("Press Ctrl+C to stop the demo worker.");
 
   process.on('SIGINT', async () => {
@@ -189,7 +185,7 @@ async function mainDemo() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log('WorkerService stopped. Demo finished.');
     console.log(\`Demo output (if any) is in: \${demoOutputBasePath}.\`);
-    console.log("Consider running 'rm -rf " + demoOutputBasePath + "' to clean up."); // Path in message updated
+    console.log("Consider running 'rm -rf " + demoOutputBasePath + "' to clean up.");
     process.exit(0);
   });
 }

@@ -18,8 +18,8 @@ import {
   RepositoryId, // Import RepositoryId
   RepositoryPath,
 } from "@/core/domain/entities/source-code/value-objects";
-import { IFileSystem } from "@/core/application/ports/adapter/file-system.interface"; // Corrected path
-import { IVersionControlSystem } from "@/core/application/ports/adapter/version-control-system.interface"; // Corrected path
+import { IFileSystem } from "@/core/ports/adapter/file-system.interface";
+import { IVersionControlSystem } from "@/core/ports/adapter/version-control-system.interface";
 import { IProjectRepository } from "@/core/ports/repositories/project.interface";
 import { ISourceCodeRepository } from "@/core/ports/repositories/source-code.interface";
 import { DomainError } from "@/core/common/errors"; // Import DomainError

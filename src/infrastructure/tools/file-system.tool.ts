@@ -2,8 +2,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
-import { ToolExecutionError } from '../../core/common/errors';
-import { z } from 'zod';
 
 // Define Zod schemas for parameters for each method
 
@@ -53,129 +51,67 @@ export class FileSystemTool implements IFileSystemTool {
     const resolved = path.resolve(this.CWD, unsafePath);
     // Example of a very basic check (could be much more robust):
     if (!resolved.startsWith(this.CWD)) {
-        throw new ToolExecutionError(
-          `Path traversal detected. Attempted access outside of working directory: ${unsafePath}`,
-          'FileSystemTool.resolvePath'
-        );
+        throw new Error(`Path traversal detected. Attempted access outside of working directory: ${unsafePath}`);
     }
     return resolved;
   }
 
   async readFile(params: z.infer<typeof readFileParamsSchema>): Promise<string> {
     const safePath = this.resolvePath(params.filePath);
-    try {
-      console.log(`FileSystemTool.readFile: Reading ${safePath}`);
-      return await fs.readFile(safePath, 'utf-8');
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to read file '${params.filePath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.readFile',
-        e
-      );
-    }
+    console.log(`FileSystemTool.readFile: Reading ${safePath}`);
+    return fs.readFile(safePath, 'utf-8');
   }
 
   async writeFile(params: z.infer<typeof writeFileParamsSchema>): Promise<void> {
     const safePath = this.resolvePath(params.filePath);
-    try {
-      console.log(`FileSystemTool.writeFile: Writing to ${safePath}`);
-      await fs.mkdir(path.dirname(safePath), { recursive: true });
-      await fs.writeFile(safePath, params.content, 'utf-8');
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to write file '${params.filePath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.writeFile',
-        e
-      );
-    }
+    console.log(`FileSystemTool.writeFile: Writing to ${safePath}`);
+    // Ensure parent directory exists
+    await fs.mkdir(path.dirname(safePath), { recursive: true });
+    await fs.writeFile(safePath, params.content, 'utf-8');
   }
 
   async moveFile(params: z.infer<typeof moveFileParamsSchema>): Promise<void> {
     const safeSourcePath = this.resolvePath(params.sourcePath);
     const safeDestinationPath = this.resolvePath(params.destinationPath);
-    try {
-      console.log(`FileSystemTool.moveFile: Moving ${safeSourcePath} to ${safeDestinationPath}`);
-      await fs.mkdir(path.dirname(safeDestinationPath), { recursive: true });
-      await fs.rename(safeSourcePath, safeDestinationPath);
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to move file from '${params.sourcePath}' to '${params.destinationPath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.moveFile',
-        e
-      );
-    }
+    console.log(`FileSystemTool.moveFile: Moving ${safeSourcePath} to ${safeDestinationPath}`);
+    // Ensure parent directory of destination exists
+    await fs.mkdir(path.dirname(safeDestinationPath), { recursive: true });
+    await fs.rename(safeSourcePath, safeDestinationPath);
   }
 
   async removeFile(params: z.infer<typeof removeFileParamsSchema>): Promise<void> {
     const safePath = this.resolvePath(params.filePath);
-    try {
-      console.log(`FileSystemTool.removeFile: Removing ${safePath}`);
-      await fs.unlink(safePath);
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to remove file '${params.filePath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.removeFile',
-        e
-      );
-    }
+    console.log(`FileSystemTool.removeFile: Removing ${safePath}`);
+    await fs.unlink(safePath);
   }
 
   async listDirectory(params: z.infer<typeof listDirectoryParamsSchema>): Promise<string[]> {
     const safePath = this.resolvePath(params.dirPath);
-    try {
-      console.log(`FileSystemTool.listDirectory: Listing ${safePath}`);
-      return await fs.readdir(safePath);
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to list directory '${params.dirPath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.listDirectory',
-        e
-      );
-    }
+    console.log(`FileSystemTool.listDirectory: Listing ${safePath}`);
+    return fs.readdir(safePath);
   }
 
   async createDirectory(params: z.infer<typeof createDirectoryParamsSchema>): Promise<void> {
     const safePath = this.resolvePath(params.dirPath);
-    try {
-      console.log(`FileSystemTool.createDirectory: Creating ${safePath}`);
-      await fs.mkdir(safePath, { recursive: true });
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to create directory '${params.dirPath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.createDirectory',
-        e
-      );
-    }
+    console.log(`FileSystemTool.createDirectory: Creating ${safePath}`);
+    await fs.mkdir(safePath, { recursive: true });
   }
 
   async moveDirectory(params: z.infer<typeof moveDirectoryParamsSchema>): Promise<void> {
     const safeSourcePath = this.resolvePath(params.sourcePath);
     const safeDestinationPath = this.resolvePath(params.destinationPath);
-    try {
-      console.log(`FileSystemTool.moveDirectory: Moving directory ${safeSourcePath} to ${safeDestinationPath}`);
-      await fs.mkdir(path.dirname(safeDestinationPath), { recursive: true });
-      await fs.rename(safeSourcePath, safeDestinationPath);
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to move directory from '${params.sourcePath}' to '${params.destinationPath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.moveDirectory',
-        e
-      );
-    }
+    console.log(`FileSystemTool.moveDirectory: Moving directory ${safeSourcePath} to ${safeDestinationPath}`);
+    // fs.rename can move directories. Ensure destination parent exists.
+    await fs.mkdir(path.dirname(safeDestinationPath), { recursive: true });
+    await fs.rename(safeSourcePath, safeDestinationPath);
   }
 
   async removeDirectory(params: z.infer<typeof removeDirectoryParamsSchema>): Promise<void> {
     const safePath = this.resolvePath(params.dirPath);
-    try {
-      console.log(`FileSystemTool.removeDirectory: Removing directory ${safePath}`);
-      await fs.rm(safePath, { recursive: true, force: true });
-    } catch (e: any) {
-      throw new ToolExecutionError(
-        `Failed to remove directory '${params.dirPath}'. Error: ${e.message || String(e)}`,
-        'fileSystem.removeDirectory',
-        e
-      );
-    }
+    console.log(`FileSystemTool.removeDirectory: Removing directory ${safePath}`);
+    // fs.rm with recursive option for non-empty directories, or fs.rmdir for empty.
+    // Using fs.rm for robustness.
+    await fs.rm(safePath, { recursive: true, force: true }); // force true to not error if path doesn't exist
   }
 }
 

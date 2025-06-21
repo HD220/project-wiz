@@ -1,7 +1,8 @@
 // src/core/application/use-cases/memory/save-memory-item.usecase.ts
 import { MemoryItem, MemoryItemProps } from '../../../domain/entities/memory/memory.entity';
 import { IMemoryRepository } from '../../../../core/ports/repositories/memory.repository';
-import { IEmbeddingService } from '../../ports/services/embedding.interface';
+// TODO: Refactor to use IEmbeddingService (port) instead of concrete EmbeddingService (infra) for Clean Architecture.
+import { EmbeddingService } from '../../../infrastructure/services/ai/embedding.service';
 
 export type SaveMemoryItemDTO =
   Partial<Pick<MemoryItemProps, 'id' | 'tags' | 'source' | 'embedding' | 'agentId'>> &
@@ -14,7 +15,7 @@ export interface ISaveMemoryItemUseCase {
 export class SaveMemoryItemUseCase implements ISaveMemoryItemUseCase {
   constructor(
     private memoryRepository: IMemoryRepository,
-    private embeddingService: IEmbeddingService
+    private embeddingService: EmbeddingService // Added
   ) {}
 
   async execute(data: SaveMemoryItemDTO): Promise<MemoryItem> {
@@ -34,12 +35,12 @@ export class SaveMemoryItemUseCase implements ISaveMemoryItemUseCase {
 
         if (contentChanged && memoryItemToSave.content.trim() !== "") {
           console.log(\`SaveMemoryItemUseCase: Content changed for item \${memoryItemToSave.id}, regenerating embedding.\`);
-          const newEmbedding = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
+          const { embedding: newEmbedding } = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
           memoryItemToSave.embedding = newEmbedding;
         } else if (!memoryItemToSave.embedding && memoryItemToSave.content.trim() !== "") {
           // If embedding doesn't exist (e.g. old item) and content is present, generate it.
           console.log(\`SaveMemoryItemUseCase: Item \${memoryItemToSave.id} missing embedding, generating.\`);
-          const newEmbedding = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
+          const { embedding: newEmbedding } = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
           memoryItemToSave.embedding = newEmbedding;
         }
 
@@ -54,7 +55,7 @@ export class SaveMemoryItemUseCase implements ISaveMemoryItemUseCase {
           // embedding is not taken from data.embedding, will be generated next
         });
         if (memoryItemToSave.content.trim() !== "") {
-          const embedding = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
+          const { embedding } = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
           memoryItemToSave.embedding = embedding;
           console.log(\`SaveMemoryItemUseCase: Generated embedding for new item (with provided ID) \${memoryItemToSave.id}\`);
         }
@@ -69,7 +70,7 @@ export class SaveMemoryItemUseCase implements ISaveMemoryItemUseCase {
         // embedding is not taken from data.embedding, will be generated next
       });
       if (memoryItemToSave.content.trim() !== "") {
-        const embedding = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
+        const { embedding } = await this.embeddingService.generateEmbedding(memoryItemToSave.content);
         memoryItemToSave.embedding = embedding;
         console.log(\`SaveMemoryItemUseCase: Generated embedding for new item \${memoryItemToSave.id}\`);
       }

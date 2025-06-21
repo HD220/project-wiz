@@ -5,10 +5,13 @@ import { openai } from 'ai/providers'; // Using OpenAI provider as an example
 // import { deepseek } from '@ai-sdk/deepseek'; // If deepseek has an embed function like openai.embedding()
 // import { cohere } from 'ai/providers';
 
-import { EmbeddingResult } from '../../../core/domain/ai/embedding.types';
-import { IEmbeddingService } from '../../../core/ports/services/embedding.interface';
+// Define a type for the embedding result for clarity, though embed() result is structured.
+export interface EmbeddingResult {
+  embedding: number[];
+  usage: { promptTokens: number; totalTokens?: number }; // Based on ai-sdk structure
+}
 
-export class EmbeddingService implements IEmbeddingService {
+export class EmbeddingService {
   private embeddingModelName: string;
   public readonly dimensions: number; // Publicly accessible dimensions
 
@@ -29,11 +32,11 @@ export class EmbeddingService implements IEmbeddingService {
     // e.g. if (this.embeddingModelName.startsWith('deepseek-embed') && !process.env.DEEPSEEK_API_KEY) { ... }
   }
 
-  async generateEmbedding(textToEmbed: string): Promise<number[]> {
+  async generateEmbedding(textToEmbed: string): Promise<EmbeddingResult> {
     if (!textToEmbed || textToEmbed.trim() === '') {
-      console.warn("EmbeddingService: Attempted to embed empty or whitespace-only text. Returning empty embedding vector.");
+      console.warn("EmbeddingService: Attempted to embed empty or whitespace-only text. Returning empty embedding.");
       // Or throw error, depending on desired handling
-      return [];
+      return { embedding: [], usage: { promptTokens: 0 } };
     }
 
     try {
@@ -49,8 +52,8 @@ export class EmbeddingService implements IEmbeddingService {
         value: textToEmbed,
       });
 
-      console.log(\`EmbeddingService: Embedding generated. Usage: \${usage.promptTokens} prompt tokens. Returning only the embedding vector.\`);
-      return embedding;
+      console.log(\`EmbeddingService: Embedding generated. Usage: \${usage.promptTokens} prompt tokens.\`);
+      return { embedding, usage };
 
     } catch (error: any) {
       console.error("EmbeddingService: Error generating embedding:", error.message);
