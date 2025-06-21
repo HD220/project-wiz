@@ -1,19 +1,19 @@
-import { ChatInput } from "@/components/chat/chat-input";
-
-import { useScroll } from "@/hooks/use-scroll";
-import { H3 } from "@/components/typography/titles";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChatMessage, ChatMessageProps } from "@/components/chat/chat-message";
+import { ChatInput } from "@/components/chat/chat-input"
+import { useScroll } from "@/hooks/use-scroll"
+import { H3 } from "@/components/typography/titles"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ChatMessage } from "@/components/chat/chat-message"
+import { ChatMessage as ChatMessageType } from "@/infrastructure/ipc/chat.types"
 
 export function ChatThread({
   threadId,
   messages,
 }: {
-  threadId: string;
-  messages: ChatMessageProps[];
+  threadId: string
+  messages: ChatMessageType[]
 }) {
-  const ref = useScroll([threadId], { behavior: "instant" });
+  const ref = useScroll([threadId], { behavior: "instant" })
 
   return (
     <div className="h-screen flex flex-1 flex-col">
@@ -33,5 +33,5 @@ export function ChatThread({
       </div>
       <ChatInput />
     </div>
-  );
+  )
 }
