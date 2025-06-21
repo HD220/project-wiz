@@ -68,7 +68,8 @@ export class DrizzleQueueRepository implements IQueueRepository {
     if (result.length === 0) {
       return null;
     }
-    return dbToDomain(result[0]);
+
+    return queueEntity;
   }
 
   async save(queue: Queue): Promise<void> {

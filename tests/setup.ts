@@ -1,3 +1,8 @@
-import { vi } from 'vitest';
+import { setupTestDB } from "./setup/drizzle";
+import "reflect-metadata";
+import { vi } from "vitest";
 
-// Configurações globais de teste podem ser adicionadas aqui
+// Configuração global para testes
+if (process.env.VITEST_TEST_TYPE === "integration-db") {
+  setupTestDB();
+}

@@ -1,0 +1,17 @@
+{
+  "mainLLM": {
+    "provider": "deepseek",
+    "modelName": "deepseek-chat",
+    "apiKeyEnvVar": "DEEPSEEK_API_KEY"
+  },
+  "summarization": {
+    "maxHistoryMessagesBeforeSummary": 20,
+    "numMessagesToSummarizeChunk": 10,
+    "preserveInitialMessagesCount": 2,
+    "summarizationModel": {
+      "provider": "deepseek",
+      "modelName": "deepseek-chat",
+      "apiKeyEnvVar": "DEEPSEEK_API_KEY_SUMMARY"
+    }
+  }
+}

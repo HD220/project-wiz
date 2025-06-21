@@ -40,50 +40,58 @@ export class WorkerService { // Removed <PInput, POutput>
     console.log(`WorkerService initialized to handle role: ${this.handlesRole}`);
   }
 
-  public async start(queueName: string): Promise<void> {
+  /**
+   * Inicia o worker para processar jobs continuamente
+   */
+  async start(): Promise<void> {
     if (this.isRunning) {
-      console.warn(`WorkerService for queue ${queueName} is already running.`);
       return;
-    }
-
-    this.queueConfig = await this.queueRepository.findByName(queueName);
-    if (!this.queueConfig) {
-      const errMsg = `Queue with name ${queueName} not found. WorkerService cannot start.`;
-      console.error(errMsg);
-      throw new Error(errMsg);
     }
 
     this.isRunning = true;
-    this.activeJobs = 0;
-    console.log(`WorkerService started for queue: ${this.queueConfig.name} (ID: ${this.queueConfig.id}) with concurrency ${this.queueConfig.concurrency}`);
+    this.logger.info("WorkerService started", {
+      pollInterval: this.options.pollInterval,
+      maxRetries: this.options.maxRetries,
+    });
 
-    this.pollInterval = setInterval(() => this.poll(), this.pollFrequencyMs);
-    this.poll();
-  }
-
-  public stop(): void {
-    if (!this.isRunning) {
-      console.warn('WorkerService is not running.');
-      return;
-    }
-    this.isRunning = false;
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
-    }
-    console.log(`WorkerService stopped for queue: ${this.queueConfig?.name}`);
-  }
-
-  private async poll(): Promise<void> {
-    if (!this.isRunning || !this.queueConfig) {
-      if (!this.queueConfig && this.isRunning) {
-          console.error("WorkerService polling without queue configuration.");
-          this.stop();
+    while (this.isRunning) {
+      try {
+        await this.processNextJob();
+      } catch (error) {
+        console.error("Error in worker loop:", error);
       }
+
+      // Intervalo entre verificações de novos jobs
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.options.pollInterval)
+      );
+    }
+  }
+
+  /**
+   * Para o worker graciosamente
+   */
+  stop(): void {
+    this.isRunning = false;
+    this.logger.info("WorkerService stopping...", {
+      activeJobs: this.currentJobs.size,
+    });
+  }
+
+  /**
+   * Processa o próximo job disponível na fila
+   */
+  private async processNextJob(): Promise<void> {
+    // O repositório já retorna o job com maior prioridade
+    const jobResult = await this.queueRepository.getNextJob();
+    if (!jobResult.success) {
+      this.logger.error("Failed to get next job", {
+        error: jobResult.error,
+      });
       return;
     }
 
-    if (this.activeJobs >= this.queueConfig.concurrency) {
+    if (!jobResult.data || !this.isRunning) {
       return;
     }
 

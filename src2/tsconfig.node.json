@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2022", // Electron moderno suporta ES2022
+    "lib": ["ES2023"],
+    "module": "ESNext", // Vite lida com a modularização para CJS no build
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noEmit": false, // Permitir emit para tsc -p, embora Vite faça o build principal
+    "resolveJsonModule": true,
+    "isolatedModules": true, // Requerido por Vite em algumas configs
+    "esModuleInterop": true, // Comum para projetos Node/Electron
+    "outDir": "dist/electron" // Diretório de saída para main/preload
+  },
+  "include": [
+    "electron/**/*.ts", // Arquivos do processo principal e preload
+    "vite.main.config.ts",
+    "vite.preload.config.ts",
+    "vite.renderer.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -28,16 +28,12 @@ export interface JobProps<Input = any, Output = any> {
 export class Job<Input = any, Output = any> {
   public props: JobProps<Input, Output>; // Made public for easier access in SaveJobUseCase, consider implications
 
-  constructor(props: Omit<JobProps<Input, Output>, 'status' | 'attempts' | 'retryDelay' | 'createdAt' | 'updatedAt'> & { status?: JobStatusType, attempts?: number, retryDelay?: number, createdAt?: Date, updatedAt?: Date }) {
-    const now = new Date();
-    this.props = {
-      ...props,
-      attempts: props.attempts || 0,
-      status: new JobStatus(props.status || JobStatusType.WAITING),
-      retryDelay: props.retryDelay || 0, // Initial retry delay can be set based on a base value or config
-      createdAt: props.createdAt || now,
-      updatedAt: props.updatedAt || now,
-    };
+  constructor(id: string, status: JobStatus, priority = 0) {
+    this.id = id;
+    this.status = status;
+    this.setPriority(priority);
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
   }
 
   // Getters
@@ -78,45 +74,36 @@ export class Job<Input = any, Output = any> {
     return true;
   }
 
-  public moveToCompleted(result: Output): void {
-    this.props.status = this.props.status.moveTo(JobStatusType.COMPLETED);
-    this.props.result = result;
-    this.props.updatedAt = new Date();
+  public fail(): Result<boolean> {
+    if (this.status.moveTo("failed")) {
+      this.updatedAt = new Date();
+      return { success: true, data: true };
+    }
+    return {
+      success: false,
+      error: {
+        name: "InvalidStatusTransition",
+        message: `Cannot fail job from status ${this.status.current}`,
+      },
+    };
   }
 
-  public moveToFailed(error?: any): void { // Error can be Error object or serialized error
-    this.props.status = this.props.status.moveTo(JobStatusType.FAILED);
-    this.props.data = { ...(this.props.data || {}), error }; // Store error info in data
-    this.props.updatedAt = new Date();
+  public delay(): Result<boolean> {
+    if (this.status.moveTo("delayed")) {
+      this.updatedAt = new Date();
+      return { success: true, data: true };
+    }
+    return {
+      success: false,
+      error: {
+        name: "InvalidStatusTransition",
+        message: `Cannot delay job from status ${this.status.current}`,
+      },
+    };
   }
 
-  public moveToDelayed(delayDuration?: number): boolean {
-    // delayDuration in milliseconds
-    if (this.props.status.is(JobStatusType.DELAYED) && this.props.delay === delayDuration) return false;
-
-    this.props.status = this.props.status.moveTo(JobStatusType.DELAYED);
-    this.props.delay = delayDuration !== undefined ? delayDuration : this.calculateNextRetryDelay();
-    this.props.executeAfter = new Date(Date.now() + this.props.delay);
-    this.props.updatedAt = new Date();
-    return true;
-  }
-
-  public setRetryDelay(delay: number): void {
-    this.props.retryDelay = delay;
-    this.props.updatedAt = new Date();
-  }
-
-  public setData(data: any): void {
-    this.props.data = data;
-    this.props.updatedAt = new Date();
-  }
-
-  public calculateNextRetryDelay(initialRetryDelay: number = 1000): number {
-    // Example: exponential backoff ((attempts) ** 2) * initial_retry_delay
-    // Ensure attempts is at least 1 for calculation if it's 0 but we are retrying.
-    const currentAttempts = Math.max(1, this.props.attempts);
-    const nextDelay = Math.pow(currentAttempts, 2) * initialRetryDelay;
-    return Math.min(nextDelay, this.props.maxRetryDelay);
+  public getPriority(): number {
+    return this.priority;
   }
 
   public static create<I, O>(
