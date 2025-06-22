@@ -144,8 +144,57 @@ export class Job<PayloadType = any, ResultType = any> {
   public updateLastFailureSummary(summary?: string): Job<PayloadType, ResultType> {
     this.props.data = { ...this.props.data, lastFailureSummary: summary };
     this.touch();
-    return this;
+    return this; // Returning this as it's a mutable prop change, not creating new instance for this specific case.
+                 // For true immutability on data changes, a new instance would be needed.
+                 // Consider if data should be a VO itself.
   }
+
+  // --- Methods to update specific properties, returning new Job instance ---
+  public changeName(newName: JobName): Job<PayloadType, ResultType> {
+    if (this.props.name.equals(newName)) return this;
+    const newProps = { ...this.props, name: newName };
+    return new Job(this._id, { ...newProps, updatedAt: JobTimestamp.now() });
+  }
+
+  public updatePayload(newPayload: PayloadType): Job<PayloadType, ResultType> {
+    // For deep equality check on payload, a more sophisticated comparison might be needed if it's a complex object.
+    // For now, assuming direct comparison or that change is always intended.
+    // Freezing the new payload for immutability.
+    const newFrozenPayload = Object.freeze({ ...newPayload });
+    // Simple reference check might not be enough for objects.
+    // if (this.props.payload === newFrozenPayload) return this; // This won't work for object content change
+
+    // A more robust check would be JSON.stringify(this.props.payload) === JSON.stringify(newFrozenPayload)
+    // or a deep equal utility. For simplicity, assume if called, update is desired.
+    const newProps = { ...this.props, payload: newFrozenPayload };
+    return new Job(this._id, { ...newProps, updatedAt: JobTimestamp.now() });
+  }
+
+  public changePriority(newPriority: JobPriority): Job<PayloadType, ResultType> {
+    if (this.props.priority.equals(newPriority)) return this;
+    const newProps = { ...this.props, priority: newPriority };
+    return new Job(this._id, { ...newProps, updatedAt: JobTimestamp.now() });
+  }
+
+  public changeTargetAgentRole(newTargetAgentRole?: TargetAgentRole): Job<PayloadType, ResultType> {
+    if (this.props.targetAgentRole?.equals(newTargetAgentRole) || (this.props.targetAgentRole === undefined && newTargetAgentRole === undefined)) {
+      return this;
+    }
+    const newProps = { ...this.props, targetAgentRole: newTargetAgentRole };
+    return new Job(this._id, { ...newProps, updatedAt: JobTimestamp.now() });
+  }
+
+  public updateRetryPolicy(newRetryPolicy: RetryPolicy): Job<PayloadType, ResultType> {
+    if (this.props.retryPolicy.equals(newRetryPolicy)) return this;
+    // Also update maxAttempts if it's directly stored and derived from retryPolicy
+    const newProps = {
+      ...this.props,
+      retryPolicy: newRetryPolicy,
+      maxAttempts: newRetryPolicy.maxAttempts() // Ensure consistency
+    };
+    return new Job(this._id, { ...newProps, updatedAt: JobTimestamp.now() });
+  }
+
 
   // --- State Transition Methods (Behaviors) ---
   private touch(): void {
