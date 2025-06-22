@@ -81,7 +81,8 @@
     "vite": "^5.4.14",
     "vite-plugin-node-polyfills": "^0.23.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.1",
+    "vitest-mock-extended": "^3.1.0"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.2.14",
