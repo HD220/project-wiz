@@ -71,3 +71,17 @@ export class ToolError extends DomainError {
     this.originalError = originalError;
   }
 }
+
+/**
+ * Error thrown by queue operations.
+ */
+export class QueueError extends DomainError {
+  public readonly queueName?: string;
+  public readonly jobId?: string;
+
+  constructor(message: string, queueName?: string, jobId?: string) {
+    super(message);
+    this.queueName = queueName;
+    this.jobId = jobId;
+  }
+}
