@@ -2,62 +2,54 @@
 
 O Project Wiz é uma aplicação desktop (Electron) com uma interface de usuário (UI) construída em React. A experiência do usuário (UX) é projetada para ser intuitiva, inspirando-se em plataformas de comunicação modernas como o Discord, para facilitar a interação com Agentes IA e o gerenciamento de projetos e tarefas.
 
-## Funcionalidades e Componentes Chave da UI:
+## Funcionalidades e Componentes Chave da UI (Confirmados e Inferidos do Código):
 
 1.  **Aplicação Desktop Integrada:**
-    *   Sendo uma aplicação Electron, o Project Wiz combina a robustez de uma aplicação nativa (acesso ao sistema de arquivos, execução de processos locais) com tecnologias web modernas para a UI.
-    *   A comunicação entre o frontend (React, processo de renderização) e o backend (Node.js, processo principal do Electron) ocorre via IPC (Inter-Process Communication).
+    *   Electron com comunicação IPC entre o frontend (React, processo de renderização) e o backend (Node.js, processo principal).
 
 2.  **Interação Principal via Chat:**
-    *   A forma primária de interação do usuário com as Personas (Agentes IA) é através de uma interface de chat.
-    *   Usuários podem enviar mensagens de texto descrevendo suas necessidades, objetivos ou comandos.
+    *   Realizada através de componentes como `ChatThread` (encontrado em `src/infrastructure/frameworks/react/components/chat/chat-thread.tsx`) e a página de DM (`src/infrastructure/frameworks/react/pages/(logged)/user/dm/$id/index.tsx`).
     *   Agentes respondem no chat, apresentam planos, pedem aprovações, fornecem atualizações e resultados.
-    *   **Suporte a Markdown:** As mensagens no chat suportam renderização de Markdown para melhor formatação de texto, listas, blocos de código (com syntax highlighting), links, etc. O conteúdo Markdown é sanitizado para segurança.
+    *   **Suporte a Markdown:** As mensagens no chat suportam renderização de Markdown (componente `MarkdownRenderer` existe), com sanitização para segurança.
 
 3.  **Gerenciamento de Projetos:**
-    *   **Listagem e Criação:** UI para listar projetos existentes e criar novos projetos.
-    *   **Painel de Detalhes do Projeto:** Uma visualização detalhada para cada projeto, que pode incluir abas como:
-        *   Visão Geral do Projeto.
-        *   Tarefas/Jobs do Projeto.
-        *   Discussões/Canais do Projeto.
-        *   Configurações do Projeto.
-    *   Componentes visuais como `project-card.tsx` para resumos e `project-list-page.tsx`, `project-detail-page.tsx`.
+    *   **Listagem e Criação:** A página `src/infrastructure/frameworks/react/pages/(logged)/project/index.tsx` renderiza `ProjectListPage` (de `src/infrastructure/frameworks/react/components/projects/project-list-page.tsx`), que lida com a listagem. A criação é iniciada a partir desta interface, invocando `CreateProjectUseCase`.
+    *   **Painel de Detalhes do Projeto:** O componente `ProjectDetailPage` (em `src/infrastructure/frameworks/react/components/projects/project-detail-page.tsx`) exibe detalhes do projeto, possivelmente com abas para visão geral, tarefas, discussões, etc.
+    *   Componentes visuais como `project-card.tsx` são usados para resumos.
 
-4.  **Gerenciamento de Personas (Agentes IA):**
-    *   **Listagem e Configuração:** UI para listar Personas existentes.
-    *   Formulários para criar novas Personas e configurar seus atributos (nome, papel, objetivo, backstory, modelo LLM associado, `Tools` habilitadas).
-    *   Componentes como `persona-list.tsx`.
+4.  **Gerenciamento de Personas (Agentes IA) e Configuração de Agentes:**
+    *   **Listagem e Seleção de Personas:** O componente `PersonaList` (em `src/infrastructure/frameworks/react/components/onboarding/persona-list.tsx`) permite listar e selecionar `AgentPersonaTemplate`.
+    *   **Criação/Configuração:** Formulários para criar novos `AgentPersonaTemplate` (via `CreatePersonaUseCase`) e para criar/configurar instâncias de `Agent` (vinculando Persona a LLM Config via `CreateAgentUseCase`) são esperados.
 
 5.  **Configuração de LLM:**
-    *   Interface para configurar os provedores de LLM (ex: inserir chaves de API, selecionar modelos padrão).
-    *   Componentes como `llm-config-form.tsx`.
+    *   Interface para configurar os provedores de LLM (ex: inserir chaves de API). O componente `llm-config-form.tsx` (em `src/infrastructure/frameworks/react/components/onboarding/llm-config-form.tsx`) suporta isso, provavelmente usando `CreateLLMProviderConfigUseCase`.
 
 6.  **Acompanhamento de Jobs/Atividades:**
-    *   Visualizações para que o usuário possa acompanhar o status e o progresso dos Jobs e Sub-Jobs que os Agentes estão executando.
-    *   Pode incluir um painel de controle (`dashboard/user-dashboard.tsx`) com um feed de atividades recentes ou uma lista de Jobs por projeto ou Persona.
-    *   Componentes como `dashboard/activity-list-item.tsx`.
+    *   Visualizações para que o usuário possa acompanhar o status e o progresso dos Jobs.
+    *   O componente `activity-list-item.tsx` (em `src/infrastructure/frameworks/react/components/dashboard/activity-list-item.tsx`) é usado para exibir itens individuais em um feed de atividades ou lista de Jobs, provavelmente dentro do `user-dashboard.tsx`.
 
 7.  **Navegação e Layout Geral:**
-    *   A UI é inspirada no layout do Discord, potencialmente com:
-        *   **Sidebars:** Para navegação entre projetos, Personas, chats, configurações (ex: `sidebar/app-sidebar.tsx`, `sidebar/project-sidebar.tsx`).
+    *   A UI é inspirada no layout do Discord:
+        *   **Sidebars:** Componentes como `app-sidebar.tsx`, `project-sidebar.tsx`, `user-sidebar.tsx` (em `src/infrastructure/frameworks/react/components/sidebar/`) gerenciam a navegação.
         *   **Área de Conteúdo Principal:** Onde os detalhes do projeto, chat, ou configurações são exibidos.
-    *   **Navbar:** Para ações globais ou navegação de topo.
+    *   **Roteamento:** Gerenciado por TanStack Router (configurado em `src/infrastructure/frameworks/react/pages/__root.tsx` e arquivos de rota).
 
 8.  **Componentes de UI Reutilizáveis:**
-    *   Um conjunto de componentes de UI padrão e estilizados (ex: `button.tsx`, `input.tsx`, `modal.tsx`, `table.tsx`, `tab.tsx`, `spinner.tsx`, `tooltip.tsx`, `dropdown.tsx`) para construir as diversas telas e interações.
-    *   Construídos sobre ou inspirados por bibliotecas como Radix UI e estilizados com Tailwind CSS.
+    *   Um extenso conjunto de componentes de UI padrão e estilizados (ex: `button.tsx`, `input.tsx`, `card.tsx`, `modal.tsx`, `table.tsx`, `tabs.tsx`, `spinner.tsx`, `tooltip.tsx`, `dropdown-menu.tsx`) está presente em `src/infrastructure/frameworks/react/components/ui/`.
+    *   Construídos com Radix UI primitives e estilizados com Tailwind CSS, seguindo convenções ShadCN UI.
 
 9.  **Temas (Dark/Light Mode):**
-    *   Suporte para alternância entre tema claro e escuro (`mode-toggle.tsx`).
+    *   Suporte para alternância entre tema claro e escuro via `mode-toggle.tsx` e variáveis CSS em `globals.css`.
 
-10. **Autenticação de Usuário (Implícito):**
-    *   Com base na existência de `CreateUserUseCase` e componentes como `login-form.tsx`, `signup-form.tsx`, o sistema deve suportar autenticação de usuário.
+10. **Autenticação de Usuário:**
+    *   A existência de `CreateUserUseCase` e a estrutura de rotas com grupos `(logged)` e `(public)` implicam que o sistema suporta autenticação de usuário (provavelmente com formulários como `login-form.tsx`, `signup-form.tsx`, embora não analisados em detalhe).
+    *   Internacionalização (`i18n`) é suportada via LinguiJS.
 
 ## Foco na Experiência do Usuário:
 
 *   **Intuitividade:** Facilitar a compreensão e o uso das funcionalidades complexas de IA e automação.
-*   **Feedback Claro:** Fornecer feedback constante ao usuário sobre o que os Agentes estão fazendo, o status dos Jobs e quaisquer problemas ou necessidade de intervenção.
-*   **Controle do Usuário:** Embora os Agentes operem autonomamente, o usuário mantém o controle final, aprovando planos, revisando resultados e podendo intervir quando necessário.
+*   **Feedback Claro:** Fornecer feedback constante ao usuário sobre as ações dos Agentes e o status dos Jobs.
+*   **Controle do Usuário:** Embora os Agentes operem autonomamente, o usuário mantém o controle final.
 *   **Eficiência:** Ajudar o usuário a realizar tarefas de desenvolvimento de forma mais rápida e eficiente.
 
 A UI é a principal porta de entrada para o poder do Project Wiz, e sua clareza e usabilidade são cruciais para o sucesso da plataforma.
