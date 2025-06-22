@@ -20,16 +20,23 @@ Ao receber uma instrução genérica para continuar o trabalho, siga os passos a
         *   Uma vez aprovado, atualize o `.jules/TASKS.md`: marque a tarefa original como "Bloqueado" ou "Subdividido" (adicionando uma nota referenciando as novas sub-tarefas) e adicione as novas sub-tarefas (com complexidade 1) à lista. Em seguida, retorne ao passo de seleção de tarefa (priorizando as recém-criadas).
 
 3.  **Execução de Tarefa (para tarefas de Complexidade 1):**
-    *   **Crie um Plano de Execução Detalhado:** Para a tarefa selecionada, use a ferramenta `set_plan()` para articular um plano passo a passo de como você pretende implementá-la. Este plano deve ser específico e acionável.
+    *   **Revisão da Documentação Específica da Tarefa:** Antes de planejar a execução, releia as seções específicas da documentação (`docs/funcional`, `docs/tecnico`, etc., conforme detalhado em `AGENTS.md`) que são DIRETAMENTE relevantes para a tarefa em mãos. Certifique-se de que compreende completamente os requisitos e o contexto técnico.
+    *   **Crie um Plano de Execução Detalhado:** Para a tarefa selecionada, use a ferramenta `set_plan()` para articular um plano passo a passo de como você pretende implementá-la. Este plano deve ser específico, acionável e refletir seu entendimento da documentação.
     *   **Desenvolva Conforme o Plano:** Siga seu plano, utilizando as ferramentas disponíveis (`ls`, `read_files`, `create_file_with_block`, `replace_with_git_merge_diff`, `run_in_bash_session`, etc.).
     *   **Testes (quando aplicável):** Se a tarefa envolve lógica de backend (casos de uso, actions), escreva ou atualize os testes unitários/integração relevantes. Siga as diretrizes de teste em `AGENTS.md`.
     *   **Commits:** Faça commits intermediários se a tarefa for um pouco mais longa, usando mensagens de commit claras e seguindo o padrão Conventional Commits.
     *   **Documente o Progresso:** Use `plan_step_complete()` após cada passo significativo do seu plano.
 
 4.  **Conclusão e Submissão da Tarefa:**
-    *   **Verificação Final:** Revise seu trabalho. Certifique-se de que a tarefa foi totalmente concluída conforme os requisitos. Execute testes relevantes (`npm test` para lógica de backend).
+    *   **Revisão de Alinhamento com a Documentação:** Após a implementação principal e antes da verificação final, **releia novamente** as seções relevantes da documentação (`docs/funcional/`, `docs/tecnico/`, `requisitos.md`, etc.). Compare sua implementação com o que foi documentado. Verifique se:
+        *   Todos os requisitos funcionais (RFs) pertinentes foram atendidos.
+        *   A solução adere à arquitetura descrita (ex: Clean Architecture, camadas corretas).
+        *   Quaisquer fluxos de caso de uso relevantes foram implementados conforme especificado.
+        *   RNFs (Requisitos Não Funcionais), como Object Calisthenics, foram respeitados.
+        *   Se houver discrepâncias ou ambiguidades, documente-as e, se necessário, peça esclarecimentos ao usuário antes de submeter.
+    *   **Verificação Final:** Revise seu trabalho. Certifique-se de que a tarefa foi totalmente concluída conforme os requisitos E os achados da revisão de alinhamento. Execute testes relevantes (`npm test` para lógica de backend).
     *   **Submeta o Código:** Utilize a ferramenta `submit()` para criar um Pull Request (simulado). Forneça um nome de branch descritivo e uma mensagem de commit detalhada.
-    *   **Atualize `.jules/TASKS.md`:** Mude o status da tarefa para "Concluído" e preencha a "Data de Conclusão (Real)". Adicione notas relevantes, como o link para o commit ou PR.
+    *   **Atualize `.jules/TASKS.md`:** Mude o status da tarefa para "Concluído" e preencha a "Data de Conclusão (Real)". Adicione notas relevantes, como o link para o commit ou PR, e um breve resumo da revisão de alinhamento.
 
 5.  **Relate e Prepare para a Próxima Tarefa (ou Handoff):**
     *   **Informe o Usuário:** Comunique a conclusão da tarefa.
