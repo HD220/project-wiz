@@ -13,23 +13,33 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@/core": path.resolve(__dirname, "./src/core"),
-      "@/shared": path.resolve(__dirname, "./src/shared"),
-      "@/infrastructure": path.resolve(__dirname, "./src/infrastructure"),
-      "@/core/domain/entities/job/value-objects": path.resolve(
-        __dirname,
-        "./src/core/domain/entities/job/value-objects"
-      ),
-      "@/infrastructure/repositories": path.resolve(
-        __dirname,
-        "./src/infrastructure/repositories"
-      ),
-      "@/infrastructure/frameworks/electron": path.resolve(
-        __dirname,
-        "./src/infrastructure/frameworks/electron"
-      ),
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "src") },
+      { find: "@/core", replacement: path.resolve(__dirname, "src/core") },
+      { find: "@/shared", replacement: path.resolve(__dirname, "src/shared") },
+      { find: "@/infrastructure", replacement: path.resolve(__dirname, "src/infrastructure") },
+      {
+        find: "@/core/domain/entities/job/value-objects",
+        replacement: path.resolve(
+          __dirname,
+          "src/core/domain/entities/job/value-objects"
+        ),
+      },
+      {
+        find: "@/infrastructure/repositories",
+        replacement: path.resolve(
+          __dirname,
+          "src/infrastructure/repositories"
+        ),
+      },
+      {
+        find: "@/infrastructure/frameworks/electron",
+        replacement: path.resolve(
+          __dirname,
+          "src/infrastructure/frameworks/electron"
+        ),
+      },
+      { find: "@refactored", replacement: path.resolve(__dirname, "src_refactored") },
+    ],
   },
 });

@@ -17,6 +17,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "jsx": "react-jsx",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "@/components/*": ["./src/infrastructure/frameworks/react/components/*"],
       "@/lib/*": ["./src/infrastructure/frameworks/react/lib/*"],
@@ -25,19 +27,23 @@
       "@/application/*": ["./src/core/application/*"],
       "@/core/*": ["./src/core/*"],
       "@/shared/*": ["./src/shared/*"],
-      "@interfaces/*": ["./src/core/domain/entities/**/interfaces/*"],
+      "@interfaces/*": ["./src/core/domain/entities/*/interfaces/*"],
       "@/core/common/result": ["./src/shared/result.ts"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@refactored/*": ["./src_refactored/*"]
     }
   },
   "include": [
     "src/**/*",
+    "src_refactored/**/*",
     "tests/**/*",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
     "lingui.config.ts",
-    "vitest.config.mts"
+    "vitest.config.mts",
+    "vitest.config.ts",
+    "types/k6.d.ts"
   ],
   "exclude": ["node_modules", "coverage"]
 }
