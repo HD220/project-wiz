@@ -1,0 +1,1 @@
+# Core Ports Layer - Abstract interfaces for driving ports (e.g. external services) and driven ports (e.g. repositories if not in domain)
