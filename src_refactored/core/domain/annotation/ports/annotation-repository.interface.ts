@@ -53,6 +53,17 @@ export interface IAnnotationRepository {
    * @returns A Result containing void or a DomainError.
    */
   delete(id: AnnotationId): Promise<Result<void, DomainError>>;
+
+  /**
+   * Searches for annotations based on filters and pagination options.
+   * @param filters Optional filters (e.g., agentId, jobId).
+   * @param pagination Pagination options (page, pageSize).
+   * @returns A Result containing the paginated list of annotations or a DomainError.
+   */
+  search(
+    filters: Partial<AnnotationSearchFilters>,
+    pagination: PaginationOptions,
+  ): Promise<Result<PaginatedAnnotationsResult, DomainError>>;
 }
 
 export const IAnnotationRepositoryToken = Symbol('IAnnotationRepository');
