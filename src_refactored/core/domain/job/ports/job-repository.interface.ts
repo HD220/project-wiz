@@ -31,4 +31,10 @@ export interface IJobRepository {
 
   delete(id: JobId): Promise<Result<void>>;
   findAll(): Promise<Result<Job<any,any>[]>>; // For admin/debug purposes
+
+  // For listing/searching jobs with filters and pagination
+  search(
+    filters: Partial<JobSearchFilters>, // Use Partial if filters are optional
+    pagination: PaginationOptions,
+  ): Promise<Result<PaginatedJobsResult>>;
 }
