@@ -57,3 +57,17 @@ export class NotFoundError extends DomainError {
     this.resourceId = resourceId;
   }
 }
+
+/**
+ * Error thrown when an IAgentTool fails during its execution.
+ */
+export class ToolError extends DomainError {
+  public readonly toolName?: string;
+  public readonly originalError?: any; // To store the underlying error if any
+
+  constructor(message: string, toolName?: string, originalError?: any) {
+    super(message);
+    this.toolName = toolName;
+    this.originalError = originalError;
+  }
+}
