@@ -6,15 +6,17 @@ Bem-vindo, colega Agente LLM! Este documento é seu guia para entender e contrib
 
 O Project Wiz é uma aplicação desktop ElectronJS com frontend em React e backend/core em Node.js/TypeScript. Seu propósito é automatizar tarefas de desenvolvimento de software usando agentes de IA (como você!). Os agentes são configurados via "Personas" (`AgentPersonaTemplate`), processam "Jobs" (tarefas) de uma fila, e utilizam "Tools" (`IAgentTool`) para interagir com o sistema e o ambiente de desenvolvimento. O `GenericAgentExecutor` é o principal motor de processamento para os agentes.
 
-**Leia com Atenção:**
-*   **Documentação Funcional Canônica:** `docs/funcional/` - Descreve O QUE o sistema faz.
-*   **Documentação Técnica Principal:** `docs/tecnico/` - Descreve COMO o sistema é construído.
-    *   `docs/tecnico/arquitetura.md`: Detalha a Clean Architecture e as camadas.
-    *   `docs/tecnico/requisitos.md`: Lista os Requisitos Funcionais (RF) e Não Funcionais (RNF).
-    *   `docs/tecnico/guia_de_estilo_visual.md`: Para qualquer trabalho de frontend.
-    *   `docs/tecnico/casos-de-uso/`: Detalha os principais fluxos de interação.
-    *   `docs/tecnico/plano_refatoracao_codigo_fase5.md`: O plano que estamos seguindo para esta reescrita.
-*   **Este Arquivo (`AGENTS.md`):** Seu guia principal para desenvolvimento.
+**Leia com Atenção TODA A DOCUMENTAÇÃO RELEVANTE ANTES DE CADA TAREFA:**
+*   **Compreensão Holística do Sistema:** Antes de iniciar QUALQUER tarefa de desenvolvimento ou refatoração, é **obrigatório** que você revise CUIDADOSAMENTE toda a documentação relevante na pasta `docs/`. Isso inclui, mas não se limita a:
+    *   **Documentação Funcional Canônica:** `docs/funcional/` - Descreve O QUE o sistema faz. Entenda os objetivos de negócio e os fluxos de usuário.
+    *   **Documentação Técnica Principal:** `docs/tecnico/` - Descreve COMO o sistema é construído. Preste atenção especial a:
+        *   `docs/tecnico/arquitetura.md`: Detalha a Clean Architecture, camadas, e o fluxo de dependências.
+        *   `docs/tecnico/requisitos.md`: Lista os Requisitos Funcionais (RF) e Não Funcionais (RNF) que sua implementação deve atender.
+        *   `docs/tecnico/casos-de-uso/`: Detalha os principais fluxos de interação e como diferentes partes do sistema colaboram.
+        *   `docs/tecnico/plano_refatoracao_codigo_fase5.md`: O plano que estamos seguindo para esta reescrita (se aplicável à sua tarefa).
+    *   Outros documentos em `docs/` que possam ser pertinentes à sua tarefa específica (ex: ADRs em `docs/technical-documentation/adrs/`, guias de UI/UX se estiver trabalhando no frontend).
+*   **Este Arquivo (`AGENTS.md`):** Seu guia principal para desenvolvimento, contendo princípios e padrões mandatórios.
+*   **A Falha em Consultar a Documentação Adequadamente Resultará em Trabalho Desalinhado.** O objetivo desta leitura prévia é garantir que sua implementação esteja alinhada com os objetivos do sistema, a arquitetura definida, e os requisitos funcionais/não funcionais.
 
 ## 2. Princípios Arquiteturais Mandatórios
 
