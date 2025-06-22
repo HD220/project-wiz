@@ -4,72 +4,132 @@ Bem-vindo, colega Agente LLM! Este documento é seu guia para entender e contrib
 
 ## 1. Visão Geral do Projeto
 
-O Project Wiz é uma aplicação desktop ElectronJS com frontend em React e backend/core em Node.js/TypeScript. Seu propósito é automatizar tarefas de desenvolvimento de software usando agentes de IA (como você!). Os agentes são configurados via "Personas", processam "Jobs" (tarefas) de uma fila, e utilizam "Tools" para interagir com o sistema e o ambiente de desenvolvimento.
+O Project Wiz é uma aplicação desktop ElectronJS com frontend em React e backend/core em Node.js/TypeScript. Seu propósito é automatizar tarefas de desenvolvimento de software usando agentes de IA (como você!). Os agentes são configurados via "Personas" (`AgentPersonaTemplate`), processam "Jobs" (tarefas) de uma fila, e utilizam "Tools" (`IAgentTool`) para interagir com o sistema e o ambiente de desenvolvimento. O `GenericAgentExecutor` é o principal motor de processamento para os agentes.
 
 **Leia com Atenção:**
 *   **Documentação Funcional Canônica:** `docs/funcional/` - Descreve O QUE o sistema faz.
 *   **Documentação Técnica Principal:** `docs/tecnico/` - Descreve COMO o sistema é construído.
     *   `docs/tecnico/arquitetura.md`: Detalha a Clean Architecture e as camadas.
-    *   `docs/tecnico/requisitos.md`: Lista os Requisitos Funcionais e Não Funcionais.
+    *   `docs/tecnico/requisitos.md`: Lista os Requisitos Funcionais (RF) e Não Funcionais (RNF).
     *   `docs/tecnico/guia_de_estilo_visual.md`: Para qualquer trabalho de frontend.
     *   `docs/tecnico/casos-de-uso/`: Detalha os principais fluxos de interação.
     *   `docs/tecnico/plano_refatoracao_codigo_fase5.md`: O plano que estamos seguindo para esta reescrita.
+*   **Este Arquivo (`AGENTS.md`):** Seu guia principal para desenvolvimento.
 
 ## 2. Princípios Arquiteturais Mandatórios
 
 Aderência estrita aos seguintes princípios é crucial:
 
-*   **(Conteúdo Detalhado a Ser Adicionado Aqui)**
-    *   Clean Architecture
-    *   Object Calisthenics (Todas as 9 regras)
-    *   SOLID, DRY, KISS
+*   **Clean Architecture:** Conforme detalhado em `docs/tecnico/arquitetura.md`. As dependências devem sempre fluir para dentro (Infraestrutura -> Aplicação -> Domínio). O Domínio não conhece as camadas externas.
+*   **Object Calisthenics:** Todas as 9 regras devem ser aplicadas rigorosamente. Veja a seção "Object Calisthenics em Detalhe" abaixo. Este é um RNF chave (RNF-COD-002).
+*   **SOLID:**
+    *   **S**ingle Responsibility Principle: Classes e métodos devem ter uma única responsabilidade bem definida.
+    *   **O**pen/Closed Principle: Entidades devem ser abertas para extensão, mas fechadas para modificação.
+    *   **L**iskov Substitution Principle: Subtipos devem ser substituíveis por seus tipos base.
+    *   **I**nterface Segregation Principle: Clientes não devem depender de interfaces que não usam.
+    *   **D**ependency Inversion Principle: Dependa de abstrações (interfaces/portas), não de implementações concretas.
+*   **DRY (Don't Repeat Yourself):** Evite duplicação de código e lógica.
+*   **KISS (Keep It Simple, Stupid):** Prefira soluções mais simples quando possível, sem sacrificar a clareza ou os princípios arquiteturais.
 
-## 3. Estrutura do Código (`src_refactored/` durante a Fase 5, depois `src/`)
+## 3. Estrutura do Código (em `src_refactored/` durante a Fase 5, depois `src/`)
 
-*   **(Conteúdo Detalhado a Ser Adicionado Aqui)**
-    *   `core/domain/`: Entidades, Value Objects, Portas de Repositório.
-    *   `core/application/`: Casos de Uso, Serviços de Aplicação, DTOs, Portas para Adaptadores.
-    *   `infrastructure/`: Implementações de Portas (Repositórios Drizzle, Adaptadores de Tools, LLM, Fila, etc.), DI.
-    *   `presentation/` (ou `infrastructure/electron` e `infrastructure/frameworks/react`): Código da UI React, setup Electron, Handlers IPC.
-    *   `shared/`: Utilitários e tipos compartilhados (ex: `Result` type).
+Aderir à Clean Architecture:
+
+*   `src_refactored/core/domain/`: Contém entidades, Value Objects, serviços de domínio puros e as *interfaces* (portas) para os repositórios. Ex: `job.entity.ts`, `project-id.vo.ts`, `project-repository.interface.ts`.
+*   `src_refactored/core/application/`: Contém Casos de Uso (interactors), serviços de aplicação (que orquestram casos de uso ou lógica da aplicação), DTOs/schemas de entrada/saída (Zod), e as *interfaces* (portas) para adaptadores da camada de infraestrutura (ex: `IFileSystem`, `ILLMAdapter`). Ex: `create-project.use-case.ts`.
+*   `src_refactored/core/ports/`: Diretório para interfaces genéricas de portabilidade que podem ser usadas tanto pelo domínio quanto pela aplicação, ou que não se encaixam estritamente em um deles (ex: `IAgentTool` em `core/tools/`).
+*   `src_refactored/core/common/`: Utilitários e tipos base compartilhados pelas camadas do core (ex: `AbstractValueObject`, `Identity`, `DomainError`).
+*   `src_refactored/infrastructure/`: Implementações concretas das portas definidas no Core.
+    *   `persistence/drizzle/repositories/`: Implementações de repositórios (ex: `DrizzleProjectRepository`).
+    *   `persistence/drizzle/schemas/`: Schemas Drizzle para o banco de dados.
+    *   `tools/`: Implementações concretas de `IAgentTool` (ex: `FileSystemTool`, `TerminalTool`).
+    *   `llm/`: Adaptadores para interagir com LLMs (ex: `AiSdkLLMAdapter`).
+    *   `queue/`: Implementação da fila de Jobs.
+    *   `worker-pool/`: Implementação do pool de workers.
+    *   `ioc/`: Configuração de Injeção de Dependência (InversifyJS).
+    *   `frameworks/react/`: Código do frontend React (componentes, páginas, hooks, etc.).
+    *   `frameworks/electron/` (ou `presentation/electron`): Código específico do Electron (processo principal, preload, manipuladores IPC).
+*   `src_refactored/presentation/`: Pode conter elementos de nível superior da apresentação, como a configuração inicial do Electron e a orquestração da UI, se não estiver totalmente dentro de `infrastructure/frameworks/`.
+*   `src_refactored/shared/`: Utilitários e tipos que podem ser compartilhados entre o backend (Electron main) e o frontend (Electron renderer), ex: `Result` type, tipos IPC.
 
 ## 4. Tecnologias Chave
-
-*   **(Conteúdo Detalhado a Ser Adicionado Aqui - Referenciar `package.json` e `docs/tecnico/arquitetura.md`)**
+Consulte `package.json` e `docs/tecnico/arquitetura.md` para a lista completa. As principais incluem:
+*   **Linguagem:** TypeScript (configuração `strict`).
+*   **Backend/Core:** Node.js.
+*   **Desktop App:** ElectronJS.
+*   **Frontend UI:** React, Vite, Tailwind CSS, Radix UI, ShadCN UI conventions.
+*   **Roteamento (UI):** TanStack Router.
+*   **i18n (UI):** LinguiJS.
+*   **Formulários (UI):** React Hook Form + Zod.
+*   **DI (Backend):** InversifyJS.
+*   **Banco de Dados:** SQLite com Drizzle ORM.
+*   **AI/LLM:** `ai-sdk`.
+*   **Testes:** Vitest.
 
 ## 5. Fluxo de Trabalho de Desenvolvimento
-
-*   **(Conteúdo Detalhado a Ser Adicionado Aqui)**
-    *   Implementação orientada ao domínio.
-    *   TDD/Testes unitários e de integração (Vitest).
-    *   Commits pequenos e incrementais.
-    *   Linting (`npm run lint`).
+*   **Implementação Orientada ao Domínio:** Comece definindo entidades e VOs no domínio, depois as portas de repositório. Em seguida, crie os casos de uso na camada de aplicação e, finalmente, implemente os adaptadores na infraestrutura.
+*   **Testes Primeiro (TDD) ou Testes Imediatos:** Escreva testes unitários para VOs, entidades e casos de uso *antes* ou *imediatamente após* a implementação. Testes de integração para repositórios e serviços.
+*   **Commits Pequenos e Incrementais:** Faça commits atômicos com mensagens claras (padrão Conventional Commits é preferido: `feat: ...`, `fix: ...`, `refactor: ...`, `docs: ...`, `test: ...`).
+*   **Linting e Formatação:** Use `npm run lint` e `npm run format` (se configurado com Prettier) regularmente.
+*   **Reutilização do Código Legado:** Consulte `src/` e `src2/` para entender a lógica existente. Você PODE reutilizar trechos de código, especialmente VOs bem definidos ou algoritmos puros, DESDE QUE eles sejam refatorados para se alinharem 100% com a nova arquitetura e TODOS os princípios (especialmente Object Calisthenics e tipagem TypeScript estrita). A prioridade é a REESCRITA limpa.
 
 ## 6. Object Calisthenics em Detalhe (Como Aplicar)
 
-*   **(Conteúdo Detalhado e Exemplos a Serem Adicionados Aqui para cada uma das 9 regras)**
-    1.  Um Nível de Indentação por Método.
-    2.  Não Use a Palavra-Chave `else`.
-    3.  Encapsule Todos os Tipos Primitivos e Strings (Value Objects).
-    4.  Coleções de Primeira Classe.
-    5.  Apenas Um Ponto Por Linha (Lei de Demeter).
-    6.  Não Abrevie.
-    7.  Mantenha Todas as Entidades Pequenas.
-    8.  Nenhuma Classe Com Mais de Duas Variáveis de Instância.
-    9.  Sem Getters/Setters/Propriedades (para comportamento).
+As 9 regras são mandatórias. Aqui estão algumas diretrizes contextuais:
+
+1.  **Um Nível de Indentação por Método:**
+    *   Extraia blocos `if`, `for`, `while`, `try/catch` para métodos privados ou funções auxiliares.
+    *   Use guard clauses (retornos antecipados) para reduzir aninhamento.
+2.  **Não Use a Palavra-Chave `else`:**
+    *   Priorize guard clauses.
+    *   Para lógica condicional mais complexa, considere polimorfismo (Strategy Pattern, State Pattern) ou mapeamentos.
+3.  **Encapsule Todos os Tipos Primitivos e Strings:**
+    *   **Value Objects (VOs):** Use para qualquer primitivo que tenha significado de domínio, regras de validação, ou comportamento associado (ex: `ProjectId`, `EmailAddress`, `JobStatus`, `RetryDelay`).
+    *   **DTOs/Schemas Zod:** Para dados de entrada/saída de casos de uso e handlers IPC.
+    *   **Exceções:** Primitivos são aceitáveis para variáveis de loop locais, contadores simples, ou strings que são verdadeiramente apenas "dados brutos" sem semântica de domínio (raro).
+4.  **Coleções de Primeira Classe:**
+    *   Se uma classe gerencia uma coleção (array, map, set) e tem lógica de negócios em torno dessa coleção (adicionar, remover, filtrar com regras específicas), crie uma classe dedicada para essa coleção (ex: `ActivityHistory`, `ToolNames`).
+    *   A classe da coleção não deve ter outras variáveis de instância além da própria coleção.
+5.  **Apenas Um Ponto Por Linha (Lei de Demeter):**
+    *   Evite cadeias como `object.getA().getB().doC()`.
+    *   Em vez disso, peça ao colaborador direto para fazer o trabalho: `object.doSomethingRelatedToC()`.
+    *   Isso reduz o acoplamento. Cuidado especial em casos de uso orquestrando entidades.
+6.  **Não Abrevie:**
+    *   Use nomes completos e descritivos para classes, métodos, variáveis. `repository` em vez de `repo`. `index` é aceitável para contadores de loop.
+7.  **Mantenha Todas as Entidades Pequenas:**
+    *   **Classes:** Idealmente <50-100 linhas. Se maior, provavelmente tem múltiplas responsabilidades.
+    *   **Métodos:** Idealmente <5-10 linhas. Se maior, extraia para métodos privados.
+8.  **Nenhuma Classe Com Mais de Duas Variáveis de Instância:**
+    *   Esta é a regra mais desafiadora, especialmente com DI.
+    *   **Estratégias:**
+        *   Agrupe dependências que servem a um único propósito coeso em um objeto de configuração/contexto e injete esse objeto.
+        *   Se uma classe tem muitas dependências servindo a propósitos distintos, divida a classe em responsabilidades menores.
+        *   Entidades frequentemente têm um `_id` (identidade) e um `props` (estado). VOs têm seus `props`.
+9.  **Sem Getters/Setters/Propriedades (para comportamento):**
+    *   **Comportamento sobre Dados:** Objetos devem expor métodos que realizam ações ("Tell, Don't Ask"), em vez de apenas fornecer acesso direto a dados internos para manipulação externa.
+    *   **Value Objects:** Por convenção, VOs podem ter um método `value()` ou similar (ex: `idString()`, `nameString()`) para fornecer sua representação primitiva quando necessário para interagir com sistemas externos ou para persistência, mas o VO em si deve ser imutável. Isso não é um "getter" no sentido de expor estado interno para mutação arbitrária.
+    *   **Entidades:** O estado interno (`props`) é privado. Mutações de estado ocorrem através de métodos comportamentais que retornam uma *nova instância* da entidade (ou atualizam `updatedAt` e retornam `this` se a entidade for conceitualmente mutável mas suas props VOs forem imutáveis).
 
 ## 7. Tratamento de Erros
-
-*   **(Conteúdo Detalhado a Ser Adicionado Aqui - Uso do `Result` type, `DomainError`)**
+*   Use o tipo `Result<T, E extends Error>` (de `shared/result.ts`) para operações que podem falhar.
+*   Crie e use erros de domínio específicos (ex: `DomainError`, `ValidationError`, `NotFoundError`) que herdem de `Error`.
+*   Evite `try/catch` genéricos que ocultam a natureza do erro. Capture exceções específicas.
+*   A camada de Aplicação (Casos de Uso) é responsável por traduzir erros de domínio para erros de aplicação, se necessário.
 
 ## 8. Trabalhando com Código Legado (Durante a Fase 5)
-
-*   Consulte `src/` e `src2/` para entendimento da lógica existente.
-*   Implemente TODO o novo código em `src_refactored/`.
-*   Não copie código legado diretamente sem garantir que ele adere 100% à nova arquitetura e a TODOS os princípios (especialmente Object Calisthenics). Priorize a reescrita.
+*   O código legado em `src/` e `src2/` existe para consulta e entendimento.
+*   **NÃO MODIFIQUE O CÓDIGO LEGADO.**
+*   **TODO O NOVO CÓDIGO DEVE SER ESCRITO EM `src_refactored/`.**
+*   Se você encontrar um VO, entidade, ou função utilitária no código legado que seja de alta qualidade e se alinhe PERFEITAMENTE com os novos princípios (Clean Arch, OC), você pode adaptá-lo para `src_refactored/`. No entanto, a **reescrita é a norma**.
 
 ## 9. Commits e Submissão de Trabalho
+*   Siga o padrão de [Commits Convencionais](https://www.conventionalcommits.org/).
+    *   Exemplos: `feat(domain): Implement Project entity and VOs`
+    *   `fix(app): Correct error handling in CreateJobUseCase`
+    *   `docs(AGENTS): Add details on Object Calisthenics rule 8`
+    *   `refactor(infra): Improve DrizzleProjectRepository structure`
+    *   `test(domain): Add unit tests for ProjectName VO`
+*   Crie branches para features ou correções significativas (ex: `feat/refactor-phase5-domain-job`).
+*   Submeta o trabalho para revisão quando um conjunto lógico de funcionalidades estiver completo e testado.
 
-*   **(Conteúdo Detalhado a Ser Adicionado Aqui - Convenções de commit, branches)**
-
-*(Este guia será progressivamente detalhado.)*
+Lembre-se, o objetivo é criar uma base de código exemplar. Pense cuidadosamente sobre cada decisão de design e implementação. Se algo não estiver claro, peça esclarecimentos.
