@@ -213,6 +213,19 @@ export class Job<PayloadType = any, ResultType = any> {
   public moveToPending(): boolean { return this.changeStatus(JobStatusType.PENDING); }
   public moveToWaiting(): boolean { return this.changeStatus(JobStatusType.WAITING); }
 
+  public moveToCancelled(reason?: string): boolean { // Added reason parameter
+    if (this.props.status.isTerminal()) return false; // Cannot cancel if already in a terminal state
+
+    this.props = {
+        ...this.props,
+        status: JobStatus.cancelled(),
+        // Optionally store reason in data, if JobData schema supports it
+        // data: { ...this.props.data, cancellationReason: reason },
+    };
+    this.touch();
+    return true;
+  }
+
   public moveToActive(): boolean {
     if (this.props.status.is(JobStatusType.ACTIVE)) return false;
     // Only allow moving to active from processable states
@@ -291,5 +304,44 @@ export class Job<PayloadType = any, ResultType = any> {
     if (other === null || other === undefined) return false;
     if (!(other instanceof Job)) return false;
     return this._id.equals(other._id);
+  }
+
+  public prepareForNextAttempt(): Job<PayloadType, ResultType> {
+    if (!this.status().is(JobStatusType.FAILED) && !this.status().is(JobStatusType.ACTIVE)) {
+      // Typically retried from FAILED. Retrying an ACTIVE job might mean cancelling and retrying.
+      // For simplicity, allow retry from FAILED or if it was stuck in ACTIVE.
+      console.warn(`Job ${this.id().value()} is being prepared for retry from a non-FAILED/non-ACTIVE status: ${this.status().value()}`);
+      // Or throw new Error(`Job ${this.id().value()} cannot be prepared for retry from status ${this.status().value()}`);
+    }
+    if (!this.canRetry()) {
+      throw new DomainError(`Job ${this.id().value()} has reached max attempts and cannot be retried.`);
+    }
+
+    // Create a new state for the retried job
+    // Attempts will be incremented when moveToActive is called by the worker.
+    // Result and lastFailureSummary should be cleared.
+    const newPropsState: JobState<PayloadType, ResultType> = {
+      ...this.props,
+      result: undefined, // Clear previous result
+      data: {
+        ...this.props.data,
+        lastFailureSummary: undefined, // Clear last failure summary
+        // agentState might need to be reset or preserved depending on retry strategy.
+        // For now, preserve agentState.
+      },
+      // Status and executeAfter will be set by moveToDelayed/moveToPending below
+    };
+
+    // Calculate delay and set status. moveToDelayed handles transition to PENDING if delay is 0.
+    // We need to pass the current props to a new Job instance, then call moveToDelayed on it.
+    // This is a bit tricky as moveToDelayed modifies props in place then calls touch.
+    // A cleaner way might be for moveToDelayed to also return a new Job instance.
+    // For now, let's create a temporary instance to call moveToDelayed and then use its props.
+
+    let tempJobForStatus = new Job(this._id, newPropsState);
+    tempJobForStatus.moveToDelayed(); // This modifies tempJobForStatus.props
+
+    // Create the final new Job instance with the updated props from tempJobForStatus
+    return new Job(this._id, tempJobForStatus.props);
   }
 }
