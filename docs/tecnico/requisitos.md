@@ -1,122 +1,116 @@
-# Requisitos do Sistema
+# Requisitos do Sistema - Project Wiz
 
-Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) para o Project Wiz.
+Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) para o Project Wiz, com base na documentação funcional consolidada em `docs/funcional/`.
 
 ## 1. Requisitos Funcionais (RF)
 
-Os Requisitos Funcionais são derivados da documentação consolidada em `docs/funcional/`.
+### RF-GERAL: Visão Geral e Interação Principal (`docs/funcional/00_visao_geral_sistema.md`)
+*   **RF-GERAL-001:** O sistema deve permitir que usuários interajam com Agentes IA (configurados por Personas) através de uma interface de chat.
+*   **RF-GERAL-002:** Agentes IA devem ser capazes de analisar solicitações do usuário, elaborar planos de ação (Jobs/Sub-Jobs) e definir critérios de "Definição de Pronto" (`validationCriteria`).
+*   **RF-GERAL-003:** O sistema deve permitir que Agentes IA apresentem planos ao usuário para aprovação antes da execução.
+*   **RF-GERAL-004:** Agentes IA devem executar Jobs de forma autônoma usando LLMs e `Tools`.
+*   **RF-GERAL-005:** Agentes IA devem operar dentro de uma `working_directory` de projeto para tarefas de código, utilizando branches Git.
+*   **RF-GERAL-006:** Agentes IA devem realizar auto-validação dos resultados dos Jobs contra os `validationCriteria`.
+*   **RF-GERAL-007:** O sistema deve permitir que usuários acompanhem o progresso dos Jobs e recebam resultados.
 
-### 1.1. Gerenciamento de Projetos (`docs/funcional/project-management.md`)
-- **RF_PROJ_001:** O sistema deve permitir a criação de novos projetos.
-    - **RF_PROJ_001.1:** A criação de projeto deve incluir a definição de um nome para o projeto.
-    - **RF_PROJ_001.2:** A criação de projeto pode incluir uma descrição opcional.
-    - **RF_PROJ_001.3 (Code):** Na criação, o sistema deve preparar uma estrutura de pastas base no sistema de arquivos, incluindo subdiretórios para código fonte (`source-code`), documentação (`docs`), e worktrees.
-    - **RF_PROJ_001.4 (Code):** Na criação, o sistema deve inicializar um repositório Git no diretório `source-code` do projeto.
-- **RF_PROJ_002:** O sistema deve permitir a listagem e visualização dos projetos existentes. (Implied by UI components like `project-list-page.tsx`)
-- **RF_PROJ_003:** O sistema deve permitir a visualização dos detalhes de um projeto específico. (Implied by UI components like `project-detail-page.tsx`)
-- **RF_PROJ_004 (Agent via ProjectTool - Documented, Gap in Code):** O sistema deve permitir que um Agente (Persona) salve ou atualize informações gerais de um projeto (ex: Nome, Descrição).
-- **RF_PROJ_005 (Agent via ProjectTool - Documented, Gap in Code):** O sistema deve permitir que um Agente crie ou atualize canais de comunicação dentro de um projeto.
-- **RF_PROJ_006 (Agent via ProjectTool - Documented, Gap in Code):** O sistema deve permitir que um Agente crie ou atualize tópicos de discussão no fórum de um projeto.
-- **RF_PROJ_007 (Agent via ProjectTool - Documented, Gap in Code):** O sistema deve permitir que um Agente crie ou atualize issues (itens de trabalho, bugs) associadas a um projeto.
+### RF-PROJ: Gerenciamento de Projetos (`docs/funcional/01_gerenciamento_projetos.md`)
+*   **RF-PROJ-001:** O sistema deve permitir ao usuário criar novos projetos de software (com nome e descrição opcional).
+*   **RF-PROJ-002:** Na criação de um projeto, o sistema (via `CreateProjectUseCase`) deve:
+    *   Gerar um `ProjectId`.
+    *   Criar uma estrutura de pastas base (ex: `<ProjectId>/source-code/`, `<ProjectId>/source-code/docs/`, `<ProjectId>/worktrees/`).
+    *   Inicializar um repositório Git em `<ProjectId>/source-code/`.
+    *   Persistir uma entidade `Project` e uma entidade `SourceCode` associada.
+*   **RF-PROJ-003:** O sistema deve permitir a listagem e visualização dos projetos existentes e seus detalhes.
+*   **RF-PROJ-004:** O projeto ativo deve fornecer contexto (working directory, Git repo) para os Agentes IA.
+*   **RF-PROJ-005 (Futuro):** Agentes poderão interagir com metadados do projeto (issues internas, etc.) através de `Tools` específicas.
 
-### 1.2. Gerenciamento de Personas (Agentes AI) (`docs/funcional/persona-agent-management.md`)
-- **RF_PERSONA_001 (Code):** O sistema deve permitir a criação de novas Personas (Agentes AI).
-    - **RF_PERSONA_001.1 (Code):** A criação de Persona deve incluir nome, papel (role), objetivo (goal) e história de fundo (backstory).
-- **RF_PERSONA_002:** O sistema deve permitir a listagem e visualização das Personas existentes. (Implied by UI components like `persona-list.tsx`)
-- **RF_PERSONA_003:** Cada Persona deve manter um `AgentInternalState` persistido, contendo no mínimo: `agentId`, `currentProjectId` (opcional), `currentIssueId` (opcional), `currentGoal` (opcional), `generalNotes` (opcional), `promisesMade` (opcional).
+### RF-PERSONA: Gerenciamento de Personas e Agentes IA (`docs/funcional/02_gerenciamento_personas_agentes.md`)
+*   **RF-PERSONA-001:** O sistema deve permitir ao usuário criar templates de Persona (`AgentPersonaTemplate`) definindo Nome, Papel (Role), Objetivo (Goal), Backstory e `toolNames` permitidas (via `CreatePersonaUseCase`).
+*   **RF-PERSONA-002:** O sistema deve permitir a criação de instâncias de `Agent` executáveis, vinculando um `AgentPersonaTemplate` a uma `LLMProviderConfig` e `temperature` (via `CreateAgentUseCase`).
+*   **RF-PERSONA-003:** O sistema deve persistir `AgentPersonaTemplate` e `Agent`.
+*   **RF-PERSONA-004:** A UI deve permitir listar e selecionar `AgentPersonaTemplate`.
+*   **RF-PERSONA-005:** Cada `Agent` deve poder ter um `AgentInternalState` persistente para aprendizado e continuidade.
+*   **RF-PERSONA-006:** O sistema deve suportar um `AgentRuntimeState` para informações transitórias de um Agente em execução.
+*   **RF-PERSONA-007:** O sistema deve suportar a operação concorrente de múltiplos Agentes (via `WorkerService` por `role`).
 
-### 1.3. Gerenciamento de Jobs/Activities (`docs/funcional/job-activity-management.md`)
-- **RF_JOB_001 (Code):** O sistema deve permitir a criação de Jobs/Activities.
-    - **RF_JOB_001.1 (Code):** A criação de Job deve incluir um nome.
-    - **RF_JOB_001.2 (Code):** A criação de Job pode incluir um payload (dados de entrada), tipo de atividade, política de retentativa, `ActivityContext` inicial, ID do Job pai, e IDs de Jobs relacionados.
-- **RF_JOB_002 (Code):** O sistema deve gerenciar o ciclo de vida de um Job com os seguintes status: `PENDING`, `EXECUTING`, `FINISHED` (sucesso), `FAILED`, `DELAYED`, `WAITING`, `CANCELLED`. A entidade `Job` deve prover métodos para transitar entre esses estados.
-- **RF_JOB_003 (Code):** O sistema deve suportar políticas de retentativa para Jobs, incluindo número máximo de tentativas e cálculo de delay para a próxima tentativa (backoff).
-- **RF_JOB_004 (Code):** O sistema deve permitir que Jobs tenham dependências de outros Jobs. Um Job dependente não deve iniciar (`WAITING` status) até que todas as suas dependências estejam `FINISHED`.
-- **RF_JOB_005 (Code):** Um Worker Pool deve gerenciar Workers para processamento concorrente de Jobs.
-- **RF_JOB_006 (Code):** Um Worker deve obter Jobs da Queue, invocar a Persona (Agente) apropriada para processamento, e reportar o resultado (sucesso, falha, necessidade de delay) de volta à Queue.
-- **RF_JOB_007 (Code):** A Persona (Agente) designada deve carregar seu `AgentInternalState` e o `ActivityContext` do Job.
-- **RF_JOB_008 (Code):** A Persona (Agente) deve utilizar um LLM, junto com os contextos (`AgentInternalState` e `ActivityContext`), para decidir a próxima ação ou gerar conteúdo.
-- **RF_JOB_009 (Code):** A Persona (Agente) deve ser capaz de atualizar o `ActivityContext` do Job com progresso, notas e resultados durante o processamento.
-- **RF_JOB_010 (Code):** O estado dos Jobs/Activities e o `AgentInternalState` devem ser persistidos.
-- **RF_JOB_011 (Code):** O sistema deve permitir o cancelamento de um Job que não esteja em estado final (`FINISHED`, `FAILED`, `CANCELLED`).
-- **RF_JOB_012 (Code):** O sistema deve permitir a atualização de certos campos de um Job existente (ex: status, política de retentativa, contexto). Se o status for atualizado para `PENDING`, o Job deve ser adicionado à fila.
-- **RF_JOB_013 (Code):** O `ActivityContext` de um Job deve conter no mínimo: `messageContent`, `sender`, `toolName` (opcional), `toolArgs` (opcional), `goalToPlan` (opcional), `plannedSteps` (opcional), `activityNotes` (opcional), `validationCriteria` (opcional), `validationResult` (opcional), e `activityHistory`.
+### RF-AGENT-OP: Operação de Agentes IA (`docs/funcional/03_operacao_agentes_ia.md`)
+*   **RF-AGENT-OP-001:** O `GenericAgentExecutor` deve usar o LLM configurado para analisar solicitações e o `AgentInternalState` para contexto.
+*   **RF-AGENT-OP-002:** O Agente (via `GenericAgentExecutor` e `TaskManagerTool`) deve ser capaz de criar um Job principal e Sub-Jobs com dependências.
+*   **RF-AGENT-OP-003:** O Agente (via LLM) deve definir `validationCriteria` para Jobs, armazenados no `ActivityContext`.
+*   **RF-AGENT-OP-004:** O Agente (via LLM) deve poder apresentar planos ao usuário para aprovação via chat.
+*   **RF-AGENT-OP-005:** O `GenericAgentExecutor` deve processar Jobs, usando LLM e `Tools` do `ToolRegistry`.
+*   **RF-AGENT-OP-006:** Para tarefas de código, Agentes devem usar `TerminalTool` para Git e `FileSystemTool` para arquivos na `working_directory` do projeto.
+*   **RF-AGENT-OP-007:** O `GenericAgentExecutor` deve gerenciar `AgentJobState` (contendo `ActivityContext` com `conversationHistory` e `executionHistory`) dentro de `Job.data.agentState`.
+*   **RF-AGENT-OP-008:** O `GenericAgentExecutor` deve suportar sumarização de `conversationHistory` longa.
+*   **RF-AGENT-OP-009:** O `GenericAgentExecutor` deve suportar replanejamento em caso de erros significativos.
+*   **RF-AGENT-OP-010:** O Agente (via LLM) deve realizar auto-validação contra `validationCriteria`.
+*   **RF-AGENT-OP-011:** O Agente (via LLM e `MemoryTool`) deve poder atualizar seu conhecimento de longo prazo (`AgentInternalState` ou similar).
+*   **RF-AGENT-OP-012:** O `GenericAgentExecutor` deve lidar com erros de `Tools` e LLM, e o sistema de Jobs deve suportar retentativas.
 
-### 1.4. Capacidades do Agente (Tools)
+### RF-JOB: Sistema de Jobs, Atividades e Fila (`docs/funcional/04_sistema_jobs_atividades_fila.md`)
+*   **RF-JOB-001:** O sistema deve usar a entidade `Job` para representar unidades de trabalho, com atributos como ID, `targetAgentRole`, `name`, `payload`, `data` (para `agentState` contendo `ActivityContext`), `status`, `priority`, `dependsOnJobIds`, `parentJobId`, `RetryPolicy`, timestamps e `result`.
+*   **RF-JOB-002:** Agentes devem criar Jobs para si (Sub-Jobs) usando `TaskManagerTool` (que usa `CreateJobUseCase`).
+*   **RF-JOB-003:** O sistema deve suportar filas implícitas por `targetAgentRole`.
+*   **RF-JOB-004:** Jobs devem transitar por um ciclo de vida (`JobStatus` VO: `PENDING`, `ACTIVE`, `COMPLETED`, `FAILED`, `DELAYED`, `WAITING`).
+*   **RF-JOB-005:** Um `WorkerService` (configurado por `handlesRole`) deve buscar Jobs e entregá-los ao `GenericAgentExecutor` para processamento.
+*   **RF-JOB-006:** O sistema deve suportar priorização de Jobs (via atributo `priority` no `Job` e lógica no `IJobRepository`).
+*   **RF-JOB-007:** O sistema deve respeitar dependências entre Jobs (`dependsOnJobIds`). A lógica de verificação deve estar no `IJobRepository` ou serviço de processamento.
+*   **RF-JOB-008:** O sistema deve implementar um mecanismo de retentativa para Jobs falhos (`RetryPolicy` VO, gerenciado pelo `WorkerService`).
+*   **RF-JOB-009:** Jobs devem poder ser explicitamente atrasados (`executeAfter` timestamp, status `DELAYED`).
+*   **RF-JOB-010:** Todos os dados de Jobs devem ser persistidos em SQLite via Drizzle ORM (`IJobRepository`).
+*   **RF-JOB-011:** A UI deve permitir o monitoramento básico do status dos Jobs.
 
-#### 1.4.1. Interação com Memória (`docs/funcional/tool-memory-interaction.md`)
-- **RF_TOOL_MEM_001 (Documented, Gap in Code):** O Agente deve ser capaz de escrever (criar ou atualizar) registros em sua memória de longo prazo.
-- **RF_TOOL_MEM_002 (Documented, Gap in Code):** O Agente deve ser capaz de deletar informações específicas de sua memória de longo prazo.
+### RF-LLM: Integração com LLM (`docs/funcional/05_integracao_llm.md`)
+*   **RF-LLM-001:** O sistema deve permitir a configuração de múltiplos provedores de LLM (`LLMProviderConfig` entidade, `CreateLLMProviderConfigUseCase`).
+*   **RF-LLM-002:** Uma instância de `Agent` deve vincular um `AgentPersonaTemplate` a uma `LLMProviderConfig`.
+*   **RF-LLM-003:** O `GenericAgentExecutor` deve usar o LLM configurado para o Agente para todas as operações de IA.
+*   **RF-LLM-004:** Interações com LLM devem ser contextualizadas (prompt de sistema da Persona, `conversationHistory` do `ActivityContext`, descrição das `Tools`). Agentes podem usar `MemoryTool` para buscar contexto adicional do `AgentInternalState`.
+*   **RF-LLM-005:** O LLM, através do `GenericAgentExecutor` e `ai-sdk`, deve poder solicitar a execução de `Tools` registradas no `ToolRegistry`.
+*   **RF-LLM-006:** O sistema deve usar `ai-sdk` para abstrair a comunicação com diferentes APIs de LLM.
 
-#### 1.4.2. Manipulação de Tarefas/Jobs (`docs/funcional/tool-task-job-manipulation.md`)
-- **RF_TOOL_TASK_001 (Documented, Partially Covered by Use Cases):** O Agente deve ser capaz de visualizar/listar os Jobs em sua fila de execução.
-- **RF_TOOL_TASK_002 (Documented, Partially Covered by Use Cases):** O Agente deve ser capaz de criar um novo Job ou atualizar um Job existente em sua fila.
-- **RF_TOOL_TASK_003 (Documented, Partially Covered by Use Cases):** O Agente deve ser capaz de remover um Job (e suas sub-Jobs dependentes) de sua fila.
-*(Nota: Use cases `CreateJobUseCase`, `UpdateJobUseCase`, `CancelJobUseCase` existem, mas a funcionalidade como uma "Tool" para o agente gerenciar sua própria fila não foi encontrada implementada como tal.)*
+### RF-TOOL: Ferramentas de Agente (`docs/funcional/06_ferramentas_agente.md`)
+*   **RF-TOOL-001:** O sistema deve fornecer um `ToolRegistry` para registrar e executar `IAgentTool`s.
+*   **RF-TOOL-002:** Cada `IAgentTool` deve ter `name`, `description`, `parameters` (Zod schema) e `execute` método.
+*   **RF-TOOL-003 (Implícito):** Comunicação Agente-Usuário via chat da UI.
+*   **RF-TOOL-004 (Terminal):** Deve existir uma `TerminalTool` (`terminal.executeCommand`) para executar comandos de shell, incluindo operações Git.
+*   **RF-TOOL-005 (FileSystem):** Deve existir uma `FileSystemTool` com operações como `fileSystem.readFile`, `fileSystem.writeFile`, `fileSystem.listDirectory`, `fileSystem.createDirectory`, `fileSystem.removeDirectory`, `fileSystem.moveFile`, `fileSystem.moveDirectory`.
+*   **RF-TOOL-006 (Annotation):** Deve existir uma `AnnotationTool` (`annotation.save`, `annotation.list`, `annotation.remove`) para gerenciamento de anotações.
+*   **RF-TOOL-007 (Memory):** Deve existir uma `MemoryTool` (`memory.save`, `memory.search` com busca semântica, `memory.remove`) para persistência e recuperação de conhecimento do agente.
+*   **RF-TOOL-008 (TaskManager):** Deve existir uma `TaskManagerTool` (`taskManager.saveJob`, `taskManager.listJobs`, `taskManager.removeJob`) para agentes gerenciarem Jobs.
+*   **RF-TOOL-009 (Futuro):** `ProjectDataTool` para interação com metadados internos do Project Wiz.
+*   **RF-TOOL-010 (Futuro):** `SendMessageToAgentTool` para comunicação inter-agente.
 
-#### 1.4.3. Anotação Contextual (`docs/funcional/tool-contextual-annotation.md`)
-- **RF_TOOL_ANN_001 (Documented, Gap in Code):** O Agente deve ser capaz de visualizar/listar anotações contextuais ativas.
-- **RF_TOOL_ANN_002 (Documented, Partially Covered by ActivityContext):** O Agente deve ser capaz de criar ou atualizar uma anotação contextual. (`ActivityContext` possui `activityNotes`).
-- **RF_TOOL_ANN_003 (Documented, Gap in Code):** O Agente deve ser capaz de remover uma anotação contextual.
-*(Nota: `ActivityContext` inclui `activityNotes`. A funcionalidade como uma "Tool" discreta para o agente não foi encontrada.)*
-
-#### 1.4.4. Operações de Filesystem (`docs/funcional/tool-filesystem-operations.md`)
-- **RF_TOOL_FS_001 (Documented, Gap in Code):** O Agente deve ser capaz de ler o conteúdo de um arquivo especificado.
-- **RF_TOOL_FS_002 (Documented, Gap in Code):** O Agente deve ser capaz de escrever ou sobrescrever conteúdo em um arquivo especificado.
-- **RF_TOOL_FS_003 (Documented, Gap in Code):** O Agente deve ser capaz de mover ou renomear um arquivo.
-- **RF_TOOL_FS_004 (Documented, Gap in Code):** O Agente deve ser capaz de deletar um arquivo.
-- **RF_TOOL_FS_005 (Documented, Gap in Code):** O Agente deve ser capaz de listar o conteúdo (arquivos e subdiretórios) de um diretório especificado.
-- **RF_TOOL_FS_006 (Documented, Gap in Code):** O Agente deve ser capaz de criar um novo diretório.
-- **RF_TOOL_FS_007 (Documented, Gap in Code):** O Agente deve ser capaz de mover ou renomear um diretório.
-- **RF_TOOL_FS_008 (Documented, Gap in Code):** O Agente deve ser capaz de deletar um diretório.
-*(Nota: `CreateProjectUseCase` realiza algumas operações de criação de diretório, mas não como uma ferramenta genérica para agentes.)*
-
-#### 1.4.5. Comandos de Terminal (`docs/funcional/tool-terminal-commands.md`)
-- **RF_TOOL_TERM_001 (Documented, Gap in Code):** O Agente deve ser capaz de executar um comando shell especificado e receber sua saída.
-
-#### 1.4.6. Interação com Dados do Projeto (`docs/funcional/tool-project-data-interaction.md`)
-- (Estes são os mesmos RF_PROJ_004 a RF_PROJ_007, listados aqui para completude da seção de Tools)
-- **RF_TOOL_PROJ_001 (Documented, Gap in Code):** O Agente deve ser capaz de salvar ou atualizar informações gerais de um projeto (ex: Nome, Descrição) via `ProjectTool`.
-- **RF_TOOL_PROJ_002 (Documented, Gap in Code):** O Agente deve ser capaz de criar ou atualizar canais de comunicação dentro de um projeto via `ProjectTool`.
-- **RF_TOOL_PROJ_003 (Documented, Gap in Code):** O Agente deve ser capaz de criar ou atualizar tópicos de discussão no fórum de um projeto via `ProjectTool`.
-- **RF_TOOL_PROJ_004 (Documented, Gap in Code):** O Agente deve ser capaz de criar ou atualizar issues (itens de trabalho, bugs) associadas a um projeto via `ProjectTool`.
-
-#### 1.4.7. Mensagens (`docs/funcional/tool-messaging.md`)
-- **RF_TOOL_MSG_001 (Documented, Gap in Code):** O Agente deve ser capaz de enviar uma mensagem direta para um usuário específico.
-- **RF_TOOL_MSG_002 (Documented, Gap in Code):** O Agente deve ser capaz de enviar uma mensagem para um canal designado dentro de um projeto.
-- **RF_TOOL_MSG_003 (Documented, Gap in Code):** O Agente deve ser capaz de postar uma mensagem em um tópico específico no fórum de um projeto.
-
-#### 1.4.8. Busca (`SearchTool` - encontrada em código como placeholder)
-- **RF_TOOL_SEARCH_001 (Code - Placeholder):** O Agente deve ter acesso a uma ferramenta de busca (`SearchTool`). (A implementação atual é um placeholder).
-
-### 1.5. Integração com LLM (`docs/funcional/llm-integration.md`)
-- **RF_LLM_001 (Code):** O sistema deve permitir que Agentes utilizem LLMs para raciocínio e tomada de decisão, utilizando o `AgentInternalState` e o `ActivityContext`.
-- **RF_LLM_002 (Code):** Tarefas específicas executadas por Agentes devem poder interagir com LLMs para gerar conteúdo, analisar informações ou determinar passos.
-- **RF_LLM_003 (Documented, Partially Implemented):** O sistema deve permitir que o LLM solicite o uso de Tools disponíveis. O resultado da Tool deve ser retornado ao LLM. (A `AgentService` passa uma lista (atualmente hardcoded) de tools e um LLM para a task. O mecanismo detalhado de seleção e invocação pela LLM não foi totalmente explorado no código).
-- **RF_LLM_004 (Code - Found `CreateLLMProviderConfigUseCase`):** O sistema deve permitir a configuração de provedores de LLM (ex: API keys, modelos).
-
-### 1.6. Interface do Usuário (`docs/funcional/user-interface.md`)
-- **RF_UI_001 (Code):** A UI deve permitir a visualização, criação e gerenciamento de projetos.
-- **RF_UI_002 (Code):** A UI deve permitir a definição, configuração (onboarding) e listagem/monitoramento de Personas.
-- **RF_UI_003 (Code):** A UI deve permitir a criação, atribuição e acompanhamento do progresso de Jobs/Activities.
-- **RF_UI_004 (Code):** A UI deve fornecer meios para comunicação entre usuários e Personas (ex: chat).
-- **RF_UI_005 (Code):** A UI deve apresentar um tema inspirado no Discord, com modos claro e escuro. (Confirmado por `globals.css` e análise de componentes).
-
-### 1.7. Gerenciamento de Usuários (Baseado em `CreateUserUseCase`)
-- **RF_USER_001 (Code):** O sistema deve permitir a criação de usuários. (Detalhes do que constitui um "usuário" - e.g. apenas um ID, ou com profile - não foram explorados).
+### RF-UI: Interface de Usuário e UX (`docs/funcional/07_interface_usuario_ux.md`)
+*   **RF-UI-001:** O sistema deve ser uma aplicação desktop Electron com UI React.
+*   **RF-UI-002:** Interação primária com Agentes via interface de chat (`ChatThread`).
+*   **RF-UI-003:** Chat deve suportar renderização Markdown (`MarkdownRenderer`).
+*   **RF-UI-004:** UI para listar, criar e visualizar detalhes de Projetos (`ProjectListPage`, `ProjectDetailPage`).
+*   **RF-UI-005:** UI para listar e selecionar `AgentPersonaTemplate` (`PersonaList`).
+*   **RF-UI-006:** UI para configurar provedores de LLM (`llm-config-form.tsx`).
+*   **RF-UI-007:** UI para acompanhar status/progresso de Jobs (`activity-list-item.tsx`, `user-dashboard.tsx`).
+*   **RF-UI-008:** Layout inspirado no Discord (Sidebars, área de conteúdo principal).
+*   **RF-UI-009:** Suporte a temas claro/escuro.
+*   **RF-UI-010:** Suporte à autenticação de usuário.
+*   **RF-UI-011:** Suporte à internacionalização (i18n com LinguiJS).
 
 ## 2. Requisitos Não Funcionais (RNF)
 
-Estes são baseados nos RNF do `product-requirements.md` original e na natureza do projeto.
+*   **RNF-COD-001 (Qualidade de Código):** Todo o novo código deve ser escrito em TypeScript.
+*   **RNF-COD-002 (Object Calisthenics):** Todo o novo código deve aderir estritamente às 9 regras do Object Calisthenics (ADR-006).
+*   **RNF-COD-003 (Manutenibilidade):** A arquitetura deve ser modular (Clean Architecture) e em camadas para facilitar a manutenção e evolução. Utilizar Injeção de Dependência (InversifyJS) no backend.
+*   **RNF-COD-004 (Testabilidade):** O código deve ser altamente testável. Cobertura de testes unitários e de integração deve ser priorizada (Vitest).
+*   **RNF-SEC-001 (Segurança de Chaves):** Chaves de API de LLM e outras credenciais sensíveis devem ser armazenadas e gerenciadas de forma segura (ex: variáveis de ambiente, não hardcoded).
+*   **RNF-SEC-002 (Segurança de Terminal):** A `TerminalTool` deve ter considerações de segurança para prevenir abusos (ex: logging, operar dentro do CWD do projeto, sandboxing se possível).
+*   **RNF-SEC-003 (Segurança de Chat):** Conteúdo Markdown no chat deve ser sanitizado para prevenir XSS.
+*   **RNF-USA-001 (Usabilidade):** A interface do usuário deve ser intuitiva e fácil de usar.
+*   **RNF-USA-002 (Feedback ao Usuário):** O sistema deve fornecer feedback claro e constante ao usuário.
+*   **RNF-PER-001 (Performance da UI):** A interface do usuário deve ser responsiva e fluida.
+*   **RNF-PER-002 (Performance do Backend):** O processamento de Jobs e as interações com LLM devem ser eficientes. O sistema de filas e workers deve ser capaz de lidar com carga de trabalho razoável para uma aplicação desktop.
+*   **RNF-EXT-001 (Extensibilidade de Tools):** O framework de `Tools` deve facilitar a adição de novas `Tools`.
+*   **RNF-EXT-002 (Extensibilidade de Personas):** A configuração de `AgentPersonaTemplate` deve ser flexível.
+*   **RNF-I18N-001 (Internacionalização):** A UI deve suportar internacionalização (LinguiJS confirmado).
+*   **RNF-REL-001 (Confiabilidade da Fila):** O sistema de Jobs e Filas deve ser confiável, com persistência de estado em SQLite.
+*   **RNF-CMP-001 (Compatibilidade Visual):** A nova implementação do frontend deve ser visualmente idêntica à pré-implementação, conforme o `docs/tecnico/guia_de_estilo_visual.md`.
+*   **RNF-TEC-001 (Manutenção Tecnológica):** As tecnologias definidas no `package.json` são mandatórias e devem ser mantidas.
 
-- **RNF_PERF_001 (Performance):** O sistema deve processar um volume significativo de Jobs/Activities de forma eficiente, minimizando a latência na resposta da UI e na execução de tarefas dos agentes.
-- **RNF_REL_001 (Confiabilidade):** O sistema deve ser resiliente a falhas. Jobs devem ser processados corretamente ou marcados como falha após as retentativas configuradas. Deve haver integridade dos dados para estados de Jobs e Agentes.
-- **RNF_SCALE_001 (Escalabilidade):** A arquitetura deve permitir a escalabilidade do WorkerPool (potencialmente horizontal) para lidar com um aumento no número de Jobs e Agentes ativos.
-- **RNF_MAINT_001 (Manutenibilidade):** O código deve ser claro, modular, bem documentado (código e documentação externa) e seguir rigorosamente os princípios da Clean Architecture e Object Calisthenics para facilitar a manutenção e evolução.
-- **RNF_TEST_001 (Testabilidade):** A nova implementação deve ser projetada para ser facilmente testável em todas as camadas (unitário, integração, E2E onde aplicável). (Nota: ADR005 menciona que testes novos serão criados após a implementação da nova arquitetura).
-- **RNF_USAB_001 (Usabilidade):** A interface do usuário deve ser intuitiva e fácil de usar, especialmente para configurar Personas, gerenciar projetos e monitorar Jobs, minimizando a curva de aprendizado.
-- **RNF_SEC_001 (Segurança):**
-    - **RNF_SEC_001.1:** Dados sensíveis (ex: API keys para LLMs) devem ser armazenados e gerenciados de forma segura.
-    - **RNF_SEC_001.2:** Se Tools como `TerminalTool` ou `FilesystemTool` forem implementadas, devem operar dentro de limites de segurança apropriados para evitar ações maliciosas ou destrutivas.
-- **RNF_EXT_001 (Extensibilidade):** O sistema deve ser projetado para facilitar a adição de novas Tools para Agentes e, potencialmente, novos tipos de Agentes ou Tasks.
-- **RNF_RES_001 (Consumo de Recursos):** Sendo uma aplicação desktop (Electron), o consumo de recursos (CPU, memória) deve ser otimizado para não impactar negativamente a máquina do usuário.
+Estes requisitos servirão como base para o desenvolvimento e validação da nova implementação do Project Wiz.
