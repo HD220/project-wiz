@@ -85,3 +85,29 @@ export class QueueError extends DomainError {
     this.jobId = jobId;
   }
 }
+
+/**
+ * Error thrown by LLM interactions.
+ */
+export class LLMError extends DomainError {
+  public readonly modelId?: string;
+  public readonly provider?: string; // e.g., 'openai', 'anthropic'
+  public readonly statusCode?: number; // HTTP status code if applicable
+  public readonly originalError?: any;
+
+  constructor(
+    message: string,
+    details?: {
+      modelId?: string;
+      provider?: string;
+      statusCode?: number;
+      originalError?: any;
+    }
+  ) {
+    super(message);
+    this.modelId = details?.modelId;
+    this.provider = details?.provider;
+    this.statusCode = details?.statusCode;
+    this.originalError = details?.originalError;
+  }
+}
