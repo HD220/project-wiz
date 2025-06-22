@@ -9,12 +9,12 @@ Este documento rastreia o progresso da reescrita completa do código da Fase 5.
 *   Bloqueado
 *   Revisão
 
-**Complexidade:**
-*   1: Muito Simples (ex: criar um VO simples, uma interface pequena)
-*   2: Simples (ex: criar uma entidade pequena, um caso de uso CRUD básico)
-*   3: Médio (ex: criar uma entidade mais complexa com VOs, um caso de uso com alguma lógica)
-*   4: Complexo (ex: implementar um serviço com múltiplas interações, um componente de UI grande) -> Quebrar em sub-tarefas de complexidade <=2
-*   5: Muito Complexo (ex: integrar um subsistema inteiro) -> Quebrar em sub-tarefas de complexidade <=2
+**Complexidade (1-5):**
+*   1: Muito Baixa (ex: criar um VO simples, uma interface pequena, schema Zod)
+*   2: Baixa (ex: criar uma entidade pequena, um caso de uso CRUD básico)
+*   3: Média (ex: criar uma entidade mais complexa com VOs, um caso de uso com alguma lógica)
+*   4: Alta (ex: implementar um serviço com múltiplas interações, um componente de UI grande) -> Requer subdivisão em sub-tarefas de complexidade <= 2, idealmente 1.
+*   5: Muito Alta (ex: integrar um subsistema inteiro) -> Requer subdivisão em sub-tarefas de complexidade <= 2, idealmente 1.
 
 ---
 
