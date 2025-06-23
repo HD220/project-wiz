@@ -25,6 +25,9 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      // Ensure "@/refactored" is defined before "@" and other specific src aliases
+      "@/refactored": path.resolve(__dirname, "./src_refactored"),
+      // Aliases for original 'src' directory
       "@/components": path.resolve(
         __dirname,
         "./src/infrastructure/frameworks/react/components"
@@ -43,11 +46,8 @@ export default defineConfig({
       ),
       "@/application": path.resolve(__dirname, "./src/core/application"),
       "@/shared": path.resolve(__dirname, "./src/shared"),
-      "@": path.resolve(__dirname, "./src"),
-      // Updated for consistency
-      "@/refactored": path.resolve(__dirname, "./src_refactored"),
-      "@/refactored/core": path.resolve(__dirname, "./src_refactored/core"),
-      "@/refactored/shared": path.resolve(__dirname, "./src_refactored/shared"),
+      "@": path.resolve(__dirname, "./src"), // General alias for ./src
+      // Specific sub-aliases for @/refactored are removed as per instruction
     },
   },
 });

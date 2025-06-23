@@ -5,14 +5,13 @@ import path from "path"; // Import path
 export default defineConfig({
   resolve: {
     alias: {
-      // Updated for consistency
+      // Ensure "@/refactored" is defined before "@"
       "@/refactored": path.resolve(__dirname, "./src_refactored"),
-      "@/refactored/core": path.resolve(__dirname, "./src_refactored/core"),
-      "@/refactored/shared": path.resolve(__dirname, "./src_refactored/shared"),
-      // Also include existing aliases if preload scripts might use them from 'src'
+      // Aliases for original 'src' directory
       "@/core": path.resolve(__dirname, "./src/core"),
       "@/shared": path.resolve(__dirname, "./src/shared"),
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./src"), // General alias for ./src
+      // Specific sub-aliases for @/refactored are removed as per instruction
     },
   },
 });
