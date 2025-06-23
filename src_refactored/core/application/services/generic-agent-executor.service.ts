@@ -3,7 +3,8 @@ import { IAgentInternalStateRepository } from '@/refactored/core/domain/agent/po
 import { Job } from '@/refactored/core/domain/job/job.entity';
 import { AgentExecutorResult } from '@/refactored/core/domain/job/job-processing.types';
 import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
-import { Result } from '@/refactored/shared/result';
+// Corrected import: ok, error are named exports, Result is a type
+import { ok, error, Result } from '@/refactored/shared/result';
 import { DomainError } from '@/refactored/core/common/errors';
 import { ApplicationError } from '@/refactored/core/application/common/errors';
 import { IAgentExecutor } from '@/refactored/core/application/ports/services/i-agent-executor.interface';
@@ -41,7 +42,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
           undefined,
           { jobId: job.id.value },
         );
-        return Result.err(
+        return error( // Corrected: use error()
           new ApplicationError(
             `Job ${job.id.value} is missing activity context.`,
           ),
@@ -60,7 +61,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
           processingJobResult.error,
           { jobId: job.id.value },
         );
-        return Result.err(processingJobResult.error);
+        return error(processingJobResult.error); // Corrected: use error()
       }
 
       const updatedJob = processingJobResult.value;
@@ -73,7 +74,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
           { jobId: job.id.value },
         );
         // Potentially revert job status or handle inconsistency
-        return Result.err(saveResult.error);
+        return error(saveResult.error); // Corrected: use error()
       }
       this.logger.info(`Job ID: ${job.id.value} marked as PROCESSING and saved.`, {
         jobId: job.id.value,
@@ -84,7 +85,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
       // The history passed here would be the initial history.
       const initialAgentJobState = job.props.data || {}; // Or a more structured initial state
 
-      return Result.ok<AgentExecutorResult, DomainError | ApplicationError>({
+      return ok<AgentExecutorResult, DomainError | ApplicationError>({ // Corrected: use ok()
         jobId: job.id.value,
         status: initialAgentJobState.currentStatus || 'PENDING_LLM_RESPONSE', // Placeholder, actual status from job.props.data.currentStatus
         output: initialAgentJobState.lastMessage || { message: 'Job processing initiated.' },
@@ -99,7 +100,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
         err,
         { jobId: job.id.value },
       );
-      return Result.err(
+      return error( // Corrected: use error()
         new ApplicationError(
           `Unhandled error during execution: ${err.message}`,
         ),
