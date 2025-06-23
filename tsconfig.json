@@ -29,8 +29,8 @@
       "@/shared/*": ["./src/shared/*"],
       "@/interfaces/*": ["./src/core/domain/entities/*/interfaces/*"],
       "@/core/common/result": ["./src/shared/result.ts"],
-      "@/*": ["./src/*"],
-      "@/refactored/*": ["./src_refactored/*"]
+      "@/refactored/*": ["./src_refactored/*"], // Moved before "@/*"
+      "@/*": ["./src/*"]
     }
   },
   "include": [
