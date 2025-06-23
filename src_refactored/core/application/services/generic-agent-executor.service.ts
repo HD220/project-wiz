@@ -17,10 +17,19 @@ import { ActivityHistory } from '@/refactored/core/domain/job/value-objects/acti
 
 // Define LanguageModelMessage (standard for Vercel AI SDK)
 // TODO: Move to a shared types location if not already present
+interface LanguageModelMessageToolCall {
+  id: string;
+  type: 'function'; // Currently, only 'function' is common
+  function: {
+    name: string;
+    arguments: string; // JSON string
+  };
+}
+
 interface LanguageModelMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string;
-  tool_calls?: Array<{ id: string; type: 'function'; function: { name: string; arguments: string } }>; // For assistant role
+  content: string | null; // Content can be null, e.g., for assistant messages with only tool_calls
+  tool_calls?: LanguageModelMessageToolCall[]; // For assistant role
   tool_call_id?: string; // For tool role
 }
 

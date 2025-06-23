@@ -9,18 +9,28 @@ import { LLMGenerationOptions } from './llm-adapter.types';
  * This abstraction allows the application to interact with different LLM providers
  * or implementations through a consistent API.
  */
+import { Result } from '../../../shared/result';
+import { LLMError } from '../../common/errors';
+import { LLMGenerationOptions, LanguageModelMessage } from './llm-adapter.types';
+
+/**
+ * Interface for an LLM (Large Language Model) Adapter.
+ * This abstraction allows the application to interact with different LLM providers
+ * or implementations through a consistent API.
+ */
 export interface ILLMAdapter {
   /**
-   * Generates text based on a given prompt and options.
+   * Generates a language model response based on a sequence of messages.
+   * The response can include text content and/or tool calls.
    *
-   * @param prompt - The input string prompt for the LLM.
-   * @param options - Optional parameters to control the generation process (e.g., model, temperature).
-   * @returns A Promise that resolves to a Result containing the generated text string or an LLMError.
+   * @param messages - An array of LanguageModelMessage objects representing the conversation history.
+   * @param options - Optional parameters to control the generation process.
+   * @returns A Promise that resolves to a Result containing the assistant's LanguageModelMessage response or an LLMError.
    */
   generateText(
-    prompt: string,
+    messages: LanguageModelMessage[],
     options?: LLMGenerationOptions,
-  ): Promise<Result<string, LLMError>>;
+  ): Promise<Result<LanguageModelMessage, LLMError>>;
 
   /**
    * Generates structured output that conforms to a provided Zod schema.
