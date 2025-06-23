@@ -612,6 +612,79 @@ describe('GenericAgentExecutor', () => {
         expect(toolErrorEntry?.error).toContain('Argument parsing failed');
     });
 
+    describe('when LLM provides unusable responses (empty/short without tools)', () => {
+      const unusableResponse: LanguageModelMessage = { role: 'assistant', content: '...', tool_calls: [] };
+      const usableResponseGoalAchieved: LanguageModelMessage = { role: 'assistant', content: 'OK, task complete!', tool_calls: [] };
+
+      it('should attempt re-plan once then succeed if LLM provides usable response', async () => {
+        mockLlmAdapter.generateText
+          .mockResolvedValueOnce(ok(unusableResponse))    // 1st call - unusable
+          .mockResolvedValueOnce(ok(usableResponseGoalAchieved)); // 2nd call - usable & goal achieved
+
+        const result = await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+        const agentState = sampleJob.currentData().agentState!;
+
+        // Check for the re-plan system message in history
+        const replanMessageEntry = agentState.conversationHistory.entries().find(
+          e => e.role() === HistoryEntryRoleType.SYSTEM && e.content().includes("previous response was empty or too short")
+        );
+        expect(replanMessageEntry).toBeDefined();
+
+        // Verify the second call to LLM includes this replan message
+        const secondLlmCallArgs = mockLlmAdapter.generateText.mock.calls[1][0]; // Messages for 2nd call
+        const systemReplanInLlmCall = secondLlmCallArgs.find(m => m.role === 'system' && m.content === replanMessageEntry?.content());
+        // Note: The system message for persona is always first. The replan message would be later.
+        // The actual system message sent to LLM is the persona, our replan is added to history which convertActivityHistoryToLlmMessages will pick up.
+        // So, we verify it's in the history that was converted.
+        const finalHistoryForSecondCall = (executor as any).convertActivityHistoryToLlmMessages( // Cast to any to access private method for test verification
+            `You are ${sampleAgent.personaTemplate().name().value()}`, // simplified system prompt for test
+            agentState.conversationHistory // This history should contain the replan prompt before the 2nd assistant message
+        );
+        const replanInConvertedMessages = finalHistoryForSecondCall.find(m => m.role ==='system' && m.content === replanPrompt.content);
+        // This check is a bit complex. Easier to check the number of entries in history.
+        // Initial user + 1st assistant (unusable) + system replan + 2nd assistant (usable) = 4 entries from user onwards
+        // plus the fixed system prompt.
+        // Let's check if the replanPrompt's content is in the messages sent to the 2nd LLM call.
+        // The replan message is added as a USER message to ActivityHistory.
+        const replanMessageContent = "System Note: Your previous response was empty or too short. Please provide a more detailed answer or ask for clarification if the request is unclear. If you believe you completed the task, ensure your response clearly states 'task complete'.";
+
+        // Verify it's in ActivityHistory before the last assistant message
+        const historyEntries = agentState.conversationHistory.entries();
+        const replanEntryInActivityHistory = historyEntries[historyEntries.length - 2]; // Second to last
+        expect(replanEntryInActivityHistory.role()).toBe(HistoryEntryRoleType.USER);
+        expect(replanEntryInActivityHistory.content()).toBe(replanMessageContent);
+
+        // Verify it was sent to LLM in the second call
+        const replanInLlmCall = secondLlmCallArgs.find(m => m.role === 'user' && m.content === replanMessageContent);
+        expect(replanInLlmCall).toBeDefined();
+
+        expect(result.isOk()).toBe(true);
+        expect(result.value.status).toBe('SUCCESS');
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('was empty/too short. Attempting re-plan (1/1)'));
+      });
+
+      it('should exhaust re-plan attempts and then proceed (likely hitting max iterations)', async () => {
+        // MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE is 1
+        mockLlmAdapter.generateText
+          .mockResolvedValueOnce(ok(unusableResponse)) // 1st call - unusable, triggers re-plan attempt 1
+          .mockResolvedValueOnce(ok(unusableResponse)) // 2nd call - still unusable, re-plan attempts exhausted
+          .mockResolvedValueOnce(ok(unusableResponse)) // 3rd call
+          .mockResolvedValueOnce(ok(unusableResponse)) // 4th call
+          .mockResolvedValueOnce(ok(unusableResponse)); // 5th call (maxIterations)
+
+        const result = await executor.executeJob(sampleJob, sampleAgent);
+        expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(5); // 1 normal + 1 re-plan + 3 normal loop
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('was empty/too short. Attempting re-plan (1/1)'));
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('was empty/too short after 1 re-plan attempts. Proceeding'));
+
+        expect(result.isOk()).toBe(true);
+        expect(result.value.status).toBe('FAILURE_MAX_ITERATIONS');
+      });
+    });
+
       it('should add assistant message with tool_calls to ActivityHistory', async () => {
         await executor.executeJob(sampleJob, sampleAgent);
         const agentState = sampleJob.currentData().agentState;

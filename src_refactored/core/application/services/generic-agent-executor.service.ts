@@ -37,6 +37,9 @@ interface LanguageModelMessage {
 
 // @Injectable() // Assuming InversifyJS or similar will be used for DI
 export class GenericAgentExecutor implements IAgentExecutor {
+  private readonly MIN_USABLE_LLM_RESPONSE_LENGTH = 10;
+  private readonly MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE = 1;
+
   constructor(
     private readonly llmAdapter: ILLMAdapter,
     private readonly toolRegistryService: IToolRegistryService,
@@ -101,8 +104,9 @@ export class GenericAgentExecutor implements IAgentExecutor {
       let goalAchieved = false;
       let iterations = 0;
       const maxIterations = 5; // TODO: Make this configurable
-      let llmResponseText = 'No response yet.'; // Holds the latest textual response from LLM
+      let llmResponseText = 'No response yet.';
       let assistantMessage: LanguageModelMessage | null = null;
+      let replanAttemptsForEmptyResponse = 0;
 
 
       // Ensure initial user prompt is in history if it was empty
@@ -159,6 +163,25 @@ export class GenericAgentExecutor implements IAgentExecutor {
         assistantMessage = llmGenerationResult.value;
         llmResponseText = assistantMessage.content || '';
         this.logger.info(`LLM response (iteration ${iterations}) received for Job ID: ${job.id().value()}: ${llmResponseText.substring(0,100)}...`, { jobId: job.id().value() });
+
+        // Attempt re-plan for unusable LLM response
+        const replanResult = this.attemptReplanForUnusableResponse(
+          job,
+          assistantMessage,
+          llmResponseText,
+          currentActivityHistory, // Pass current instead of agentState.conversationHistory
+          agentState!, // Pass agentState for update
+          replanAttemptsForEmptyResponse,
+          iterations
+        );
+
+        if (replanResult.shouldReplan) {
+          currentActivityHistory = replanResult.updatedHistory!;
+          agentState = replanResult.updatedAgentState!;
+          replanAttemptsForEmptyResponse = replanResult.newReplanAttemptCount!;
+          continue; // Skip to next iteration
+        }
+        // If not replanning, proceed to add the original assistant message to history
 
         const assistantHistoryEntry = ActivityHistoryEntry.create(
         HistoryEntryRoleType.ASSISTANT,
