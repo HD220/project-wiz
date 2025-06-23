@@ -241,7 +241,7 @@ describe('GenericAgentExecutor', () => {
 
     it('should construct initial prompt with system and user message from job name if payload prompt missing and history empty', async () => {
       const jobWithoutPayloadPrompt = Job.create({
-        name: JobName.create('Job Name As Prompt').value,
+        name: JobName.create('Job Name As Prompt'), // Corrected: pass VO, not its value
         payload: {}, // No 'prompt' field in payload
       });
        // Ensure agentState is undefined or history is empty

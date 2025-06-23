@@ -78,19 +78,36 @@ describe('CreateAgentUseCase', () => {
     expect(mockAgentRepo.save).toHaveBeenCalledWith(expect.any(Agent));
     const savedAgent = (mockAgentRepo.save as vi.Mock).mock.calls[0][0] as Agent;
     expect(savedAgent.temperature().value()).toBe(0.5);
+    expect(savedAgent.maxIterations().value()).toBe(10); // Default maxIterations
   });
 
-  it('should use default temperature if not provided in input', async () => {
-    const inputWithoutTemp = { ...validInput };
-    delete inputWithoutTemp.temperature; // Remove temperature
+  it('should use default temperature and default maxIterations if not provided', async () => {
+    const inputWithoutOptional = {
+      personaTemplateId: testPersonaId.value(),
+      llmProviderConfigId: testLlmConfigId.value(),
+    };
 
-    const result = await useCase.execute(inputWithoutTemp);
+    const result = await useCase.execute(inputWithoutOptional);
 
     expect(result.isOk()).toBe(true);
     expect(mockAgentRepo.save).toHaveBeenCalledTimes(1);
     const savedAgent = (mockAgentRepo.save as vi.Mock).mock.calls[0][0] as Agent;
     expect(savedAgent.temperature().value()).toBe(0.7); // Default from AgentTemperature.default()
+    expect(savedAgent.maxIterations().value()).toBe(10); // Default from AgentMaxIterations.default()
   });
+
+  it('should use provided maxIterations value', async () => {
+    const inputWithMaxIterations: CreateAgentUseCaseInput = {
+      ...validInput,
+      maxIterations: 25,
+    };
+    const result = await useCase.execute(inputWithMaxIterations);
+    expect(result.isOk()).toBe(true);
+    const savedAgent = (mockAgentRepo.save as vi.Mock).mock.calls[0][0] as Agent;
+    expect(savedAgent.maxIterations().value()).toBe(25);
+    expect(savedAgent.temperature().value()).toBe(0.5); // Ensure others are still correct
+  });
+
 
   it('should return ZodError for invalid input schema (e.g., invalid UUID)', async () => {
     const invalidInput = { ...validInput, personaTemplateId: 'not-a-uuid' };
@@ -100,6 +117,29 @@ describe('CreateAgentUseCase', () => {
     if (result.isError()) {
       expect(result.value).toBeInstanceOf(ZodError);
       expect(result.value.errors[0].message).toBe("Persona Template ID must be a valid UUID.");
+    }
+  });
+
+  it('should return ZodError for invalid maxIterations value (e.g., negative)', async () => {
+    const invalidInput = { ...validInput, maxIterations: -5 };
+    const result = await useCase.execute(invalidInput);
+    expect(result.isError()).toBe(true);
+    if (result.isError()) {
+      expect(result.value).toBeInstanceOf(ZodError);
+      // Check for the specific error message from the schema
+      const maxIterationsError = result.value.errors.find(e => e.path.includes('maxIterations'));
+      expect(maxIterationsError?.message).toBe("Max iterations must be positive.");
+    }
+  });
+
+  it('should return ZodError for invalid maxIterations value (e.g., too large)', async () => {
+    const invalidInput = { ...validInput, maxIterations: 200 };
+    const result = await useCase.execute(invalidInput);
+    expect(result.isError()).toBe(true);
+    if (result.isError()) {
+      expect(result.value).toBeInstanceOf(ZodError);
+      const maxIterationsError = result.value.errors.find(e => e.path.includes('maxIterations'));
+      expect(maxIterationsError?.message).toBe("Max iterations must be no more than 100.");
     }
   });
 

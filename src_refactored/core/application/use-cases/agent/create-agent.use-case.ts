@@ -12,6 +12,7 @@ import { ILLMProviderConfigRepository } from '../../../../domain/llm-provider-co
 import { Agent } from '../../../../domain/agent/agent.entity';
 import { AgentId } from '../../../../domain/agent/value-objects/agent-id.vo';
 import { AgentTemperature } from '../../../../domain/agent/value-objects/agent-temperature.vo';
+import { AgentMaxIterations } from '../../../../domain/agent/value-objects/agent-max-iterations.vo'; // Added import
 import { PersonaId } from '../../../../domain/agent/value-objects/persona/persona-id.vo';
 import { LLMProviderConfigId } from '../../../../domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 import { Result, ok, error } from '../../../../../shared/result';
@@ -71,6 +72,11 @@ export class CreateAgentUseCase
         ? AgentTemperature.create(validInput.temperature)
         : AgentTemperature.default();
 
+      // 5.b Create AgentMaxIterations VO
+      const maxIterationsVo = validInput.maxIterations !== undefined
+        ? AgentMaxIterations.create(validInput.maxIterations)
+        : AgentMaxIterations.default();
+
       // 6. Generate AgentId
       const agentIdVo = AgentId.generate();
 
@@ -80,6 +86,7 @@ export class CreateAgentUseCase
         personaTemplate: personaTemplate,
         llmProviderConfig: llmProviderConfig,
         temperature: temperatureVo,
+        maxIterations: maxIterationsVo, // Added maxIterations
       });
 
       // 8. Save Agent Entity

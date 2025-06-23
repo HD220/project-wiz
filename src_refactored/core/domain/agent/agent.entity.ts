@@ -3,6 +3,7 @@ import { AgentId } from './value-objects/agent-id.vo';
 import { AgentTemperature } from './value-objects/agent-temperature.vo';
 import { AgentPersonaTemplate } from './agent-persona-template.vo';
 import { LLMProviderConfig } from '../llm-provider-config/llm-provider-config.entity';
+import { AgentMaxIterations } from './value-objects/agent-max-iterations.vo';
 
 // Properties an Agent entity holds.
 // For strict Object Calisthenics (max 2 instance vars), these are grouped.
@@ -10,6 +11,7 @@ interface AgentProps {
   personaTemplate: AgentPersonaTemplate;
   llmProviderConfig: LLMProviderConfig;
   temperature: AgentTemperature;
+  maxIterations: AgentMaxIterations;
   // Optional: Link to a persisted AgentInternalStateId if state is managed separately
   // agentInternalStateId?: AgentInternalStateId;
   // createdAt: Date;
@@ -30,9 +32,11 @@ export class Agent {
     personaTemplate: AgentPersonaTemplate;
     llmProviderConfig: LLMProviderConfig;
     temperature?: AgentTemperature;
+    maxIterations?: AgentMaxIterations;
   }): Agent {
     const agentId = createProps.id || AgentId.generate();
     const temperature = createProps.temperature || AgentTemperature.default();
+    const maxIterations = createProps.maxIterations || AgentMaxIterations.default();
 
     // Perform any validation specific to the combination of persona and LLM config if needed
     // For example, ensure tools required by persona are compatible with LLM or provider capabilities (future)
@@ -41,6 +45,7 @@ export class Agent {
       personaTemplate: createProps.personaTemplate,
       llmProviderConfig: createProps.llmProviderConfig,
       temperature: temperature,
+      maxIterations: maxIterations,
       // createdAt: new Date(),
       // updatedAt: new Date(),
     });
@@ -62,11 +67,23 @@ export class Agent {
     return this.props.temperature;
   }
 
+  public maxIterations(): AgentMaxIterations {
+    return this.props.maxIterations;
+  }
+
   // Behavior methods
   public changeTemperature(newTemperature: AgentTemperature): Agent {
     return new Agent(this._id, {
       ...this.props,
       temperature: newTemperature,
+      // updatedAt: new Date(),
+    });
+  }
+
+  public changeMaxIterations(newMaxIterations: AgentMaxIterations): Agent {
+    return new Agent(this._id, {
+      ...this.props,
+      maxIterations: newMaxIterations,
       // updatedAt: new Date(),
     });
   }

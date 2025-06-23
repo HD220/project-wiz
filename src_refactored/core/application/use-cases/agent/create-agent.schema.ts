@@ -19,6 +19,14 @@ export const CreateAgentUseCaseInputSchema = z.object({
     .optional()
     .describe("Optional temperature setting for the agent's LLM. Defaults to a standard value if not provided (e.g., 0.7)."),
 
+  maxIterations: z.number()
+    .int({ message: "Max iterations must be an integer." })
+    .positive({ message: "Max iterations must be positive." })
+    .min(1, { message: "Max iterations must be at least 1." })
+    .max(100, { message: "Max iterations must be no more than 100." }) // Consistent with VO
+    .optional()
+    .describe("Optional maximum number of iterations for the agent's main loop. Defaults to a standard value if not provided (e.g., 10)."),
+
   // customName: z.string().min(1).max(100).optional().describe("Optional custom name for this agent instance."),
 }).strict();
 

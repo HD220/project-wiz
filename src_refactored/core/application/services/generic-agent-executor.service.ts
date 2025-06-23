@@ -103,7 +103,10 @@ export class GenericAgentExecutor implements IAgentExecutor {
       // 3. Prepare for interaction loop
       let goalAchieved = false;
       let iterations = 0;
-      const maxIterations = 5; // TODO: Make this configurable
+      // Retrieve maxIterations from the agent entity
+      const maxIterations = agent.maxIterations().value;
+      this.logger.info(`Max iterations for Job ID: ${job.id().value()} set to ${maxIterations} from agent config.`, { jobId: job.id().value(), maxIterations });
+
       let llmResponseText = 'No response yet.';
       let assistantMessage: LanguageModelMessage | null = null;
       let replanAttemptsForEmptyResponse = 0;
