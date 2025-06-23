@@ -1,7 +1,8 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts
 import { Executable } from '../../common/executable';
 import { Result, ok, error as resultError, isSuccess } from '../../../../shared/result'; // Renamed 'error' to 'resultError' to avoid conflict
-import { DomainError, ApplicationError, ValueError } from '../../../common/errors';
+import { DomainError, ValueError } from '@/refactored/core/common/errors';
+import { ApplicationError } from '@/refactored/core/application/common/errors';
 import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
 import { IMemoryRepository, IMemoryRepositoryToken } from '../../../domain/memory/ports/memory-repository.interface';
 import { MemorySearchFilters, PaginationOptions, PaginatedMemoryItemsResult } from '../../../domain/memory/ports/memory-repository.types';

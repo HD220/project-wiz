@@ -69,51 +69,38 @@ describe('GenericAgentExecutor', () => {
       mockLogger,
     );
 
-    // Helper to unwrap Result or throw for test setup
-    const unwrapResult = <T, E extends Error>(result: Result<T, E>): T => {
-      if (result.isErr()) {
-        console.error("Unwrap failed:", result.error);
-        throw result.error;
-      }
-      return result.value;
-    };
-
     // Create a sample Job
     sampleJob = Job.create({
-      name: unwrapResult(JobName.create('Test Job Prompt')),
+      name: JobName.create('Test Job Prompt'), // Create methods throw on error
       payload: { initialPrompt: 'Initial user query for the job' },
     });
     vi.spyOn(sampleJob, 'moveToActive').mockReturnValue(true);
     vi.spyOn(sampleJob, 'updateAgentState').mockReturnThis();
 
     // Create a sample LLMProviderConfig
-    // For LLMProviderId, if 'openai' is not valid, this will throw.
-    // We need to ensure 'openai' is a valid enum member in LLMProviderId or mock its validation.
-    // Assuming 'openai' is valid for now to proceed.
-    const llmProviderId = unwrapResult(LLMProviderId.create('openai'));
+    const llmProviderId = LLMProviderId.create('openai');
 
-    const llmConfig = LLMProviderConfig.create({ // This create returns the instance or throws
+    const llmConfig = LLMProviderConfig.create({
         id: LLMProviderConfigId.generate(),
-        name: unwrapResult(LLMProviderConfigName.create('TestLLMConfig')),
+        name: LLMProviderConfigName.create('TestLLMConfig'),
         providerId: llmProviderId,
-        apiKey: unwrapResult(LLMApiKey.create('test-key')),
+        apiKey: LLMApiKey.create('test-key'),
     });
-    // No .isErr() check for llmConfig as its create method returns instance or throws
 
     // Create a sample Agent
-    const personaTemplate = AgentPersonaTemplate.create({ // This create returns instance or throws
+    const personaTemplate = AgentPersonaTemplate.create({
       id: PersonaId.generate(),
-      name: unwrapResult(PersonaName.create('Test Persona')),
-      role: unwrapResult(PersonaRole.create('Tester')),
-      goal: unwrapResult(PersonaGoal.create('Test things')),
-      backstory: unwrapResult(PersonaBackstory.create('Created for testing')),
-      toolNames: unwrapResult(ToolNames.create([])),
+      name: PersonaName.create('Test Persona'),
+      role: PersonaRole.create('Tester'),
+      goal: PersonaGoal.create('Test things'),
+      backstory: PersonaBackstory.create('Created for testing'), // Can be empty string
+      toolNames: ToolNames.create([]),
     });
 
-    sampleAgent = Agent.create({ // This create returns instance or throws
+    sampleAgent = Agent.create({
       personaTemplate: personaTemplate,
       llmProviderConfig: llmConfig,
-      temperature: unwrapResult(AgentTemperature.create(0.7)),
+      temperature: AgentTemperature.create(0.7),
     });
 
     mockJobRepository.save.mockResolvedValue(ok(undefined));
@@ -287,6 +274,7 @@ describe('GenericAgentExecutor', () => {
 
     it('should return Ok result with SUCCESS status on successful execution with "task complete"', async () => {
       const llmResponseContent = 'Successful task complete response'; // Contains "task complete"
+      const updateLastFailureSummarySpy = vi.spyOn(sampleJob, 'updateLastFailureSummary');
       mockLlmAdapter.generateText.mockResolvedValue(ok({
         role: 'assistant',
         content: llmResponseContent,
@@ -300,6 +288,7 @@ describe('GenericAgentExecutor', () => {
       expect(value.jobId).toBe(sampleJob.id().value);
       expect(value.output).toEqual({ message: llmResponseContent });
       expect(value.status).toBe('SUCCESS');
+      expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(null); // Cleared on success
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining(`LLM response (iteration 1) received for Job ID: ${sampleJob.id().value()}: ${llmResponseContent.substring(0,100)}...`),
         expect.anything()
@@ -307,6 +296,9 @@ describe('GenericAgentExecutor', () => {
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining(`Goal achieved for Job ID: ${sampleJob.id().value()}`)
       );
+      // Expect initial save (active) + final save (success)
+      expect(mockJobRepository.save).toHaveBeenCalledTimes(2);
+      expect(mockJobRepository.save).toHaveBeenLastCalledWith(sampleJob);
     });
 
     it('should return Error result if moveToActive fails', async () => {
@@ -357,6 +349,9 @@ describe('GenericAgentExecutor', () => {
       const llmErrorEntry = agentState?.executionHistory.find(e => e.type === 'llm_error');
       expect(llmErrorEntry).toBeDefined();
       expect(llmErrorEntry?.error).toBe(llmError.message);
+      // Expect initial save (active) + save on LLM error
+      expect(mockJobRepository.save).toHaveBeenCalledTimes(2);
+      expect(mockJobRepository.save).toHaveBeenLastCalledWith(sampleJob);
     });
 
     // --- New tests for tool call parsing and validation ---
@@ -548,6 +543,7 @@ describe('GenericAgentExecutor', () => {
         .mockResolvedValueOnce(ok(nonCompletingResponse))
         .mockResolvedValueOnce(ok(nonCompletingResponse))
         .mockResolvedValueOnce(ok(nonCompletingResponse));
+      const updateLastFailureSummarySpy = vi.spyOn(sampleJob, 'updateLastFailureSummary');
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
@@ -555,15 +551,20 @@ describe('GenericAgentExecutor', () => {
       const value = result.value;
       expect(value.status).toBe('FAILURE_MAX_ITERATIONS');
       expect(value.message).toContain('Max iterations (5) reached.');
+      expect(updateLastFailureSummarySpy).toHaveBeenCalledWith('Max iterations (5) reached without achieving goal.');
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining(`Max iterations reached for Job ID: ${sampleJob.id().value()}`)
       );
       expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(5);
+      // Expect initial save (active) + final save (max_iterations)
+      expect(mockJobRepository.save).toHaveBeenCalledTimes(2);
+      expect(mockJobRepository.save).toHaveBeenLastCalledWith(sampleJob);
     });
 
     it('should return Ok result with FAILURE_INTERNAL status on unhandled exception from LLM call', async () => {
       const internalError = new Error('Something unexpected broke!');
       mockLlmAdapter.generateText.mockRejectedValue(internalError);
+      const updateLastFailureSummarySpy = vi.spyOn(sampleJob, 'updateLastFailureSummary');
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
@@ -571,6 +572,7 @@ describe('GenericAgentExecutor', () => {
       const value = result.value;
       expect(value.status).toBe('FAILURE_INTERNAL');
       expect(value.message).toContain(`Unhandled error during execution: ${internalError.message}`);
+      expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(`Unhandled error: ${internalError.message}`);
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining(`Unhandled error during execution of Job ID: ${sampleJob.id().value()}`),
         internalError,
@@ -580,7 +582,9 @@ describe('GenericAgentExecutor', () => {
       const systemErrorEntry = agentState?.executionHistory.find(e => e.type === 'system_error');
       expect(systemErrorEntry).toBeDefined();
       expect(systemErrorEntry?.error).toBe(internalError.message);
-      expect(mockJobRepository.save).toHaveBeenCalledWith(sampleJob);
+      // Expect initial save (active) + save on internal error
+      expect(mockJobRepository.save).toHaveBeenCalledTimes(2);
+      expect(mockJobRepository.save).toHaveBeenLastCalledWith(sampleJob);
     });
 
     it('should return FAILURE_TOOL if max iterations reached and a tool error occurred previously', async () => {
@@ -610,6 +614,9 @@ describe('GenericAgentExecutor', () => {
         const toolErrorEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME && e.params?.originalArgs === "{invalid json");
         expect(toolErrorEntry).toBeDefined();
         expect(toolErrorEntry?.error).toContain('Argument parsing failed');
+        // Expect initial save (active) + final save (failure_tool)
+        expect(mockJobRepository.save).toHaveBeenCalledTimes(2);
+        expect(mockJobRepository.save).toHaveBeenLastCalledWith(sampleJob);
     });
 
     describe('when LLM provides unusable responses (empty/short without tools)', () => {
@@ -626,39 +633,31 @@ describe('GenericAgentExecutor', () => {
         expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
         const agentState = sampleJob.currentData().agentState!;
 
-        // Check for the re-plan system message in history
-        const replanMessageEntry = agentState.conversationHistory.entries().find(
-          e => e.role() === HistoryEntryRoleType.SYSTEM && e.content().includes("previous response was empty or too short")
-        );
-        expect(replanMessageEntry).toBeDefined();
-
-        // Verify the second call to LLM includes this replan message
-        const secondLlmCallArgs = mockLlmAdapter.generateText.mock.calls[1][0]; // Messages for 2nd call
-        const systemReplanInLlmCall = secondLlmCallArgs.find(m => m.role === 'system' && m.content === replanMessageEntry?.content());
-        // Note: The system message for persona is always first. The replan message would be later.
-        // The actual system message sent to LLM is the persona, our replan is added to history which convertActivityHistoryToLlmMessages will pick up.
-        // So, we verify it's in the history that was converted.
-        const finalHistoryForSecondCall = (executor as any).convertActivityHistoryToLlmMessages( // Cast to any to access private method for test verification
-            `You are ${sampleAgent.personaTemplate().name().value()}`, // simplified system prompt for test
-            agentState.conversationHistory // This history should contain the replan prompt before the 2nd assistant message
-        );
-        const replanInConvertedMessages = finalHistoryForSecondCall.find(m => m.role ==='system' && m.content === replanPrompt.content);
-        // This check is a bit complex. Easier to check the number of entries in history.
-        // Initial user + 1st assistant (unusable) + system replan + 2nd assistant (usable) = 4 entries from user onwards
-        // plus the fixed system prompt.
-        // Let's check if the replanPrompt's content is in the messages sent to the 2nd LLM call.
-        // The replan message is added as a USER message to ActivityHistory.
         const replanMessageContent = "System Note: Your previous response was empty or too short. Please provide a more detailed answer or ask for clarification if the request is unclear. If you believe you completed the task, ensure your response clearly states 'task complete'.";
 
-        // Verify it's in ActivityHistory before the last assistant message
+        // Verify the re-plan message is in ActivityHistory before the last assistant message
         const historyEntries = agentState.conversationHistory.entries();
-        const replanEntryInActivityHistory = historyEntries[historyEntries.length - 2]; // Second to last
+        // Expected sequence for this test:
+        // 1. Initial User Prompt (from job payload or name)
+        // 2. First Assistant Response (unusable)
+        // 3. User Re-plan Prompt (added by the executor)
+        // 4. Second Assistant Response (usable, goal achieved)
+        // So, the re-plan prompt should be the third entry (index 2), or second to last (length - 2)
+        const replanEntryInActivityHistory = historyEntries[historyEntries.length - 2];
         expect(replanEntryInActivityHistory.role()).toBe(HistoryEntryRoleType.USER);
         expect(replanEntryInActivityHistory.content()).toBe(replanMessageContent);
 
-        // Verify it was sent to LLM in the second call
-        const replanInLlmCall = secondLlmCallArgs.find(m => m.role === 'user' && m.content === replanMessageContent);
+        // Verify the re-plan message was sent to LLM in the second call
+        const secondLlmCallMessages = mockLlmAdapter.generateText.mock.calls[1][0]; // Messages for 2nd LLM call
+        const replanInLlmCall = secondLlmCallMessages.find(m => m.role === 'user' && m.content === replanMessageContent);
         expect(replanInLlmCall).toBeDefined();
+
+        // Verify that the original system prompt (persona) is still the first message in the second call
+        const persona = sampleAgent.personaTemplate();
+        const expectedSystemContent = `You are ${persona.name().value()}, a ${persona.role().value()}. Your goal is: ${persona.goal().value()}. Persona backstory: ${persona.backstory().value()}`;
+        expect(secondLlmCallMessages[0].role).toBe('system');
+        expect(secondLlmCallMessages[0].content).toBe(expectedSystemContent);
+
 
         expect(result.isOk()).toBe(true);
         expect(result.value.status).toBe('SUCCESS');
@@ -709,6 +708,52 @@ describe('GenericAgentExecutor', () => {
           `Tool '${MOCK_TOOL_NAME}' not found for Job ID: ${sampleJob.id().value()}`,
           expect.any(ToolNotFoundError), expect.anything()
         );
+      });
+
+      it('should return FAILURE_TOOL and stop processing if ToolNotFoundError occurs', async () => {
+        const toolCallId_notfound = 'tool_call_for_notfound_tool';
+        const assistantMessageRequestingNonExistentTool: LanguageModelMessage = {
+          role: 'assistant',
+          content: 'Requesting a tool that does not exist.',
+          tool_calls: [{
+            id: toolCallId_notfound,
+            type: 'function',
+            function: { name: 'non-existent-tool', arguments: JSON.stringify({ anyParam: 'anyValue' }) }
+          }]
+        };
+        mockLlmAdapter.generateText.mockResolvedValue(ok(assistantMessageRequestingNonExistentTool));
+        mockToolRegistryService.getTool.mockResolvedValue(error(new ToolNotFoundError('non-existent-tool')));
+        const updateLastFailureSummarySpy = vi.spyOn(sampleJob, 'updateLastFailureSummary');
+
+        const result = await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(1); // Should not loop again
+
+        const agentState = sampleJob.currentData().agentState;
+        const toolErrorEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === 'non-existent-tool');
+        expect(toolErrorEntry).toBeDefined();
+        expect(toolErrorEntry?.error).toContain("Tool 'non-existent-tool' not found");
+
+        expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(expect.stringContaining("Critical error: Tool 'non-existent-tool' not found."));
+
+        expect(result.isOk()).toBe(true);
+        const value = result.value;
+        expect(value.status).toBe('FAILURE_TOOL');
+        expect(value.message).toContain("Processing stopped due to critical tool error: Tool 'non-existent-tool' not found");
+
+        // Ensure it logged the error
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          `Tool 'non-existent-tool' not found for Job ID: ${sampleJob.id().value()}`,
+          expect.any(ToolNotFoundError),
+          expect.anything()
+        );
+         // Ensure the loop was indeed broken because of critical error
+        expect(mockLogger.info).not.toHaveBeenCalledWith(
+          expect.stringMatching(/LLM response \(iteration 2\)/) // No second iteration
+        );
+        // Expect initial save (active) + final save (failure_tool)
+        expect(mockJobRepository.save).toHaveBeenCalledTimes(2);
+        expect(mockJobRepository.save).toHaveBeenLastCalledWith(sampleJob);
       });
 
       it('should log tool_error if tool arguments are invalid JSON', async () => {

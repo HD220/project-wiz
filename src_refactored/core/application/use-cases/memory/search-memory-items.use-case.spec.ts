@@ -52,14 +52,20 @@ describe('SearchMemoryItemsUseCase', () => {
     vi.clearAllMocks();
   });
 
+  // Define some valid UUIDs for testing
+  const VALID_UUID_1 = '123e4567-e89b-12d3-a456-426614174000';
+  const VALID_UUID_2 = '987e6543-e21b-12d3-a456-426614174001';
+  const VALID_AGENT_ID_1 = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+
+
   const createMockMemoryItem = (id: string, content: string, agentId?: string | null, tags?: string[], source?: string | null): MemoryItem => {
     const itemProps = {
-      id: MemoryItemId.fromString(id), // Assumes valid ID for test data
-      content: MemoryItemContent.create(content), // Assumes valid content for test data
-      tags: MemoryItemTags.create(tags || []), // Assumes valid tags for test data
-      source: MemoryItemSource.create(source || null), // Assumes valid source for test data
-      embedding: MemoryItemEmbedding.create(null), // Default empty embedding
-      agentId: agentId === undefined ? undefined : (agentId === null ? null : Identity.create(agentId)), // Assumes valid agentId string for test data
+      id: MemoryItemId.fromString(id),
+      content: MemoryItemContent.create(content),
+      tags: MemoryItemTags.create(tags || []),
+      source: MemoryItemSource.create(source || null),
+      embedding: MemoryItemEmbedding.create(null),
+      agentId: agentId === undefined ? undefined : (agentId === null ? null : Identity.create(agentId)),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -74,7 +80,7 @@ describe('SearchMemoryItemsUseCase', () => {
       pageSize: 10,
     };
 
-    const mockItem1 = createMockMemoryItem('id1', 'This is a test content for item 1 related to query.', 'agentId1', ['tag1', 'tag2']);
+    const mockItem1 = createMockMemoryItem(VALID_UUID_1, 'This is a test content for item 1 related to query.', VALID_AGENT_ID_1, ['tag1', 'tag2']);
     const mockItems: MemoryItem[] = [mockItem1];
     const mockRepoResult: PaginatedMemoryItemsResult = {
       items: mockItems,
@@ -95,9 +101,9 @@ describe('SearchMemoryItemsUseCase', () => {
     expect(output.page).toBe(1);
     expect(output.pageSize).toBe(10);
     expect(output.totalPages).toBe(1);
-    expect(output.items[0].id).toBe('id1');
+    expect(output.items[0].id).toBe(VALID_UUID_1);
     expect(output.items[0].contentExcerpt).toBe('This is a test content for item 1 related to query.');
-    expect(output.items[0].agentId).toBe('agentId1');
+    expect(output.items[0].agentId).toBe(VALID_AGENT_ID_1);
     expect(output.items[0].tags).toEqual(['tag1', 'tag2']);
 
     expect(mockMemoryRepository.search).toHaveBeenCalledWith(
@@ -110,7 +116,7 @@ describe('SearchMemoryItemsUseCase', () => {
     const longContent = 'a'.repeat(CONTENT_EXCERPT_LENGTH + 50);
     const expectedExcerpt = 'a'.repeat(CONTENT_EXCERPT_LENGTH) + '...';
     const input: SearchMemoryItemsUseCaseInput = { page: 1, pageSize: 10 }; // Zod defaults will apply
-    const mockItem1 = createMockMemoryItem('id1', longContent);
+    const mockItem1 = createMockMemoryItem(VALID_UUID_1, longContent);
     const mockRepoResult: PaginatedMemoryItemsResult = {
       items: [mockItem1], totalCount: 1, page: 1, pageSize: 10, totalPages: 1,
     };
@@ -252,7 +258,7 @@ describe('SearchMemoryItemsUseCase', () => {
 
   it('should correctly map MemoryItem without agentId to MemoryListItem with null agentId', async () => {
     const input: SearchMemoryItemsUseCaseInput = { };
-    const mockItem = createMockMemoryItem('id1', 'content', undefined);
+    const mockItem = createMockMemoryItem(VALID_UUID_1, 'content', undefined);
     const mockRepoResult: PaginatedMemoryItemsResult = {
       items: [mockItem], totalCount: 1, page: 1, pageSize: 20, totalPages: 1,
     };
@@ -266,7 +272,7 @@ describe('SearchMemoryItemsUseCase', () => {
 
   it('should correctly map MemoryItem with null agentId to MemoryListItem with null agentId', async () => {
     const input: SearchMemoryItemsUseCaseInput = { };
-    const mockItem = createMockMemoryItem('id1', 'content', null);
+    const mockItem = createMockMemoryItem(VALID_UUID_1, 'content', null);
     const mockRepoResult: PaginatedMemoryItemsResult = {
       items: [mockItem], totalCount: 1, page: 1, pageSize: 20, totalPages: 1,
     };
@@ -280,7 +286,7 @@ describe('SearchMemoryItemsUseCase', () => {
 
   it('should handle empty tags and source in MemoryItem correctly, mapping to empty array and null respectively', async () => {
     const input: SearchMemoryItemsUseCaseInput = {};
-    const mockItem = createMockMemoryItem('id-empty-vals', 'content', 'agent1', [], null);
+    const mockItem = createMockMemoryItem(VALID_UUID_2, 'content', VALID_AGENT_ID_1, [], null);
      const mockRepoResult: PaginatedMemoryItemsResult = {
       items: [mockItem], totalCount: 1, page: 1, pageSize: 20, totalPages: 1,
     };

@@ -201,6 +201,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
 
       // Process tool_calls if present
+      let criticalErrorEncounteredThisTurn = false;
       const newExecutionHistoryEntries: ExecutionHistoryEntry[] = [];
       const toolResultActivityEntries: ActivityHistoryEntry[] = [];
 
@@ -210,6 +211,13 @@ export class GenericAgentExecutor implements IAgentExecutor {
         for (const toolCall of assistantMessage.tool_calls) {
           const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value(), agent.id().value());
           newExecutionHistoryEntries.push(executionEntry);
+
+          if (executionEntry.type === 'tool_error' && typeof executionEntry.error === 'string' && executionEntry.error.includes('Tool not found')) {
+            criticalErrorEncounteredThisTurn = true;
+            job.updateLastFailureSummary(`Critical: Tool '${executionEntry.name}' not found.`);
+            this.logger.error(`Critical tool error for Job ID ${job.id().value()}: Tool '${executionEntry.name}' not found. Halting agent processing for this turn.`);
+            // We will break out of the tool processing loop, then the main loop will terminate due to this.
+          }
 
           // Create ActivityHistoryEntry for the tool result
           let toolResultContent: string;
@@ -251,10 +259,19 @@ export class GenericAgentExecutor implements IAgentExecutor {
           };
         }
         job.updateAgentState(agentState); // Single update to agentState for this turn of tool processing
+
+        if (criticalErrorEncounteredThisTurn) {
+          goalAchieved = false; // Ensure goal is not marked as achieved
+          break; // Break from the main while loop
+        }
       } // End of if (assistantMessage.tool_calls)
 
       // Update goalAchieved based on the latest llmResponseText and if any tool calls were made
-      goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls); // Optional chaining
+      // Only if no critical error forced an early exit from tool processing.
+      if (!criticalErrorEncounteredThisTurn) {
+        goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls);
+      }
+
 
       if (goalAchieved) {
         this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${iterations}.`);
@@ -262,7 +279,6 @@ export class GenericAgentExecutor implements IAgentExecutor {
       }
       if (iterations >= maxIterations) {
         this.logger.info(`Max iterations reached for Job ID: ${job.id().value()}.`);
-        // Goal not achieved, but loop terminates.
       }
     } // End of while loop
 
@@ -271,28 +287,37 @@ export class GenericAgentExecutor implements IAgentExecutor {
     let finalMessage: string;
     let finalOutput: any = undefined;
 
-    // Check for critical tool errors that might have occurred and been logged but didn't stop the loop
-    const lastExecutionEntry = agentState?.executionHistory[agentState.executionHistory.length - 1];
-    const hasCriticalToolError = newExecutionHistoryEntries.some(e => e.type === 'tool_error'); // Check errors from THIS iteration's tool calls
+    // The criticalErrorEncounteredThisTurn flag is set if a tool_not_found error caused the loop to break.
+    // hasCriticalToolErrorInLoop checks if any tool error occurred during the last iteration's tool processing.
+    const hasToolErrorInLastProcessedBatch = newExecutionHistoryEntries.some(e => e.type === 'tool_error');
 
     if (goalAchieved) {
       finalStatus = 'SUCCESS';
       finalMessage = `Goal achieved. Last LLM response: ${llmResponseText}`;
       finalOutput = { message: llmResponseText };
+      job.updateLastFailureSummary(undefined); // Clear any previous summary on success
+    } else if (criticalErrorEncounteredThisTurn) { // This flag is set if loop broke due to critical tool error
+      finalStatus = 'FAILURE_TOOL';
+      // lastFailureSummary was already set when criticalErrorEncounteredThisTurn was set to true
+      finalMessage = job.currentData().lastFailureSummary || `Processing stopped due to a critical tool error after ${iterations} iterations. Last LLM response: ${llmResponseText}`;
     } else if (iterations >= maxIterations) {
       finalStatus = 'FAILURE_MAX_ITERATIONS';
       finalMessage = `Max iterations (${maxIterations}) reached. Goal not achieved. Last LLM response: ${llmResponseText}`;
-    } else if (hasCriticalToolError) {
-      // If loop ended before max_iterations and not goalAchieved, and there were tool errors in the last set of calls
+      job.updateLastFailureSummary(finalMessage);
+    } else if (hasToolErrorInLastProcessedBatch) {
+      // Loop ended (not by goal, not by max iterations), but last processed batch had tool errors.
+      // This implies the LLM might not have had a chance to react to these tool errors if the loop broke for other reasons after tools ran.
       finalStatus = 'FAILURE_TOOL';
       const lastToolError = newExecutionHistoryEntries.find(e => e.type === 'tool_error') ||
-                            agentState?.executionHistory.slice().reverse().find(e => e.type === 'tool_error');
-      finalMessage = `Processing stopped due to tool errors after ${iterations} iterations. Last tool error: ${JSON.stringify(lastToolError?.error)}. Last LLM response: ${llmResponseText}`;
-    }
-    else {
+                            agentState?.executionHistory.slice().reverse().find(e => e.type === 'tool_error'); // Fallback
+      finalMessage = `Processing ended after ${iterations} iterations with unresolved tool errors. Last tool error: ${JSON.stringify(lastToolError?.error)}. Last LLM response: ${llmResponseText}`;
+      job.updateLastFailureSummary(finalMessage);
+    } else {
+      // Default failure if loop terminates unexpectedly without achieving goal or hitting max iterations, and no specific error flagged.
       finalStatus = 'FAILURE_INTERNAL';
-      finalMessage = `Processing stopped after ${iterations} iterations without explicit goal achievement or max iterations. Last LLM response: ${llmResponseText}`;
+      finalMessage = `Processing stopped after ${iterations} iterations without explicit goal or max iterations. Last LLM response: ${llmResponseText}`;
       this.logger.warn(finalMessage, { jobId: job.id().value() });
+      job.updateLastFailureSummary(finalMessage);
     }
 
     return this.createFinalResult(job, finalStatus, finalMessage, finalOutput);
