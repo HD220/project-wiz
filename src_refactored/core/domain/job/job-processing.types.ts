@@ -33,8 +33,17 @@ export interface AgentJobState {
 }
 
 // Result from an IAgentExecutor.processJob call
+export type AgentExecutorStatus =
+  | 'SUCCESS'                     // Goal achieved
+  | 'FAILURE_MAX_ITERATIONS'    // Max iterations reached, goal not achieved
+  | 'FAILURE_LLM'               // LLM error during the loop that halted processing by the agent
+  | 'FAILURE_TOOL'              // Tool processing error during the loop that halted processing
+  | 'FAILURE_INTERNAL';         // Other internal errors within the agent executor logic
+
 export interface AgentExecutorResult {
-  status: 'COMPLETED' | 'FAILED' | 'CONTINUE_PROCESSING';
-  message: string;
-  output?: any; // Final output if COMPLETED
+  status: AgentExecutorStatus;
+  message: string; // Summary message of the outcome
+  output?: any; // Final output if SUCCESS or relevant data on failure
+  history?: ReadonlyArray<ActivityHistoryEntry>; // Keep history for context
+  errors?: ReadonlyArray<ExecutionHistoryEntry | string>; // Specific errors encountered
 }

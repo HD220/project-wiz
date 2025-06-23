@@ -285,12 +285,12 @@ describe('GenericAgentExecutor', () => {
       );
     });
 
-    it('should return Ok result with LLM response on successful execution (no tool calls)', async () => {
-      const llmResponseContent = 'Successful LLM response text';
+    it('should return Ok result with SUCCESS status on successful execution with "task complete"', async () => {
+      const llmResponseContent = 'Successful task complete response'; // Contains "task complete"
       mockLlmAdapter.generateText.mockResolvedValue(ok({
         role: 'assistant',
         content: llmResponseContent,
-        tool_calls: []
+        tool_calls: [] // No tool calls
       }));
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
@@ -299,10 +299,13 @@ describe('GenericAgentExecutor', () => {
       const value = result.value;
       expect(value.jobId).toBe(sampleJob.id().value);
       expect(value.output).toEqual({ message: llmResponseContent });
-      expect(value.status).toBe('PENDING_LLM_RESPONSE');
+      expect(value.status).toBe('SUCCESS');
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining(`LLM response received for Job ID: ${sampleJob.id().value()}: ${llmResponseContent.substring(0,100)}...`),
+        expect.stringContaining(`LLM response (iteration 1) received for Job ID: ${sampleJob.id().value()}: ${llmResponseContent.substring(0,100)}...`),
         expect.anything()
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining(`Goal achieved for Job ID: ${sampleJob.id().value()}`)
       );
     });
 
@@ -332,20 +335,28 @@ describe('GenericAgentExecutor', () => {
       expect(mockLlmAdapter.generateText).not.toHaveBeenCalled();
     });
 
-    it('should return Error result if LLM adapter fails', async () => {
-      const llmError = new LLMError('LLM generation failed');
+    it('should return Ok result with FAILURE_LLM status if LLM adapter fails during loop', async () => {
+      const llmError = new LLMError('LLM processing error');
       mockLlmAdapter.generateText.mockResolvedValue(error(llmError));
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
-      expect(result.isErr()).toBe(true);
-      expect(result.error).toBeInstanceOf(ApplicationError);
-      expect(result.error?.message).toContain('LLM generation failed: LLM generation failed');
+      expect(result.isOk()).toBe(true); // executeJob now catches this and returns Ok(AgentExecutorResult)
+      const value = result.value;
+      expect(value.status).toBe('FAILURE_LLM');
+      expect(value.message).toContain('LLM generation failed');
+      expect(value.message).toContain(llmError.message);
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `LLM generation failed for Job ID: ${sampleJob.id().value()}`,
+        expect.stringContaining(`LLM generation failed in iteration 1 for Job ID: ${sampleJob.id().value()}`),
         llmError,
-        { jobId: sampleJob.id().value() }
+        expect.anything()
       );
+      expect(mockJobRepository.save).toHaveBeenCalledWith(sampleJob); // Should save state on LLM failure
+      // Check if llm_error was added to executionHistory
+      const agentState = sampleJob.currentData().agentState;
+      const llmErrorEntry = agentState?.executionHistory.find(e => e.type === 'llm_error');
+      expect(llmErrorEntry).toBeDefined();
+      expect(llmErrorEntry?.error).toBe(llmError.message);
     });
 
     // --- New tests for tool call parsing and validation ---
@@ -524,6 +535,82 @@ describe('GenericAgentExecutor', () => {
         // expect(toolResultMessage?.name).toBe(toolName1); // If 'name' is added to 'tool' role LanguageModelMessage
       });
 
+
+    it('should return Ok result with FAILURE_MAX_ITERATIONS status if max iterations are reached', async () => {
+      const nonCompletingResponse: LanguageModelMessage = {
+        role: 'assistant',
+        content: 'Still working...',
+        tool_calls: []
+      };
+      mockLlmAdapter.generateText
+        .mockResolvedValueOnce(ok(nonCompletingResponse))
+        .mockResolvedValueOnce(ok(nonCompletingResponse))
+        .mockResolvedValueOnce(ok(nonCompletingResponse))
+        .mockResolvedValueOnce(ok(nonCompletingResponse))
+        .mockResolvedValueOnce(ok(nonCompletingResponse));
+
+      const result = await executor.executeJob(sampleJob, sampleAgent);
+
+      expect(result.isOk()).toBe(true);
+      const value = result.value;
+      expect(value.status).toBe('FAILURE_MAX_ITERATIONS');
+      expect(value.message).toContain('Max iterations (5) reached.');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining(`Max iterations reached for Job ID: ${sampleJob.id().value()}`)
+      );
+      expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(5);
+    });
+
+    it('should return Ok result with FAILURE_INTERNAL status on unhandled exception from LLM call', async () => {
+      const internalError = new Error('Something unexpected broke!');
+      mockLlmAdapter.generateText.mockRejectedValue(internalError);
+
+      const result = await executor.executeJob(sampleJob, sampleAgent);
+
+      expect(result.isOk()).toBe(true);
+      const value = result.value;
+      expect(value.status).toBe('FAILURE_INTERNAL');
+      expect(value.message).toContain(`Unhandled error during execution: ${internalError.message}`);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`Unhandled error during execution of Job ID: ${sampleJob.id().value()}`),
+        internalError,
+        expect.anything()
+      );
+      const agentState = sampleJob.currentData().agentState;
+      const systemErrorEntry = agentState?.executionHistory.find(e => e.type === 'system_error');
+      expect(systemErrorEntry).toBeDefined();
+      expect(systemErrorEntry?.error).toBe(internalError.message);
+      expect(mockJobRepository.save).toHaveBeenCalledWith(sampleJob);
+    });
+
+    it('should return FAILURE_TOOL if max iterations reached and a tool error occurred previously', async () => {
+        const toolCallId_err = 'tool_call_for_error_case';
+        const assistantMessageWithFailingToolCall: LanguageModelMessage = {
+            role: 'assistant', content: 'using a tool',
+            tool_calls: [{ id: toolCallId_err, type: 'function', function: { name: MOCK_TOOL_NAME, arguments: "{invalid json" } }]
+        };
+        const nonCompletingResponse: LanguageModelMessage = { role: 'assistant', content: 'Still working after tool error...', tool_calls: [] };
+
+        mockLlmAdapter.generateText
+            .mockResolvedValueOnce(ok(assistantMessageWithFailingToolCall))
+            .mockResolvedValueOnce(ok(nonCompletingResponse))
+            .mockResolvedValueOnce(ok(nonCompletingResponse))
+            .mockResolvedValueOnce(ok(nonCompletingResponse))
+            .mockResolvedValueOnce(ok(nonCompletingResponse));
+
+        const result = await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(result.isOk()).toBe(true);
+        const value = result.value;
+        expect(value.status).toBe('FAILURE_TOOL');
+        expect(value.message).toContain('Processing stopped due to tool errors');
+        expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(5);
+
+        const agentState = sampleJob.currentData().agentState;
+        const toolErrorEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME && e.params?.originalArgs === "{invalid json");
+        expect(toolErrorEntry).toBeDefined();
+        expect(toolErrorEntry?.error).toContain('Argument parsing failed');
+    });
 
       it('should add assistant message with tool_calls to ActivityHistory', async () => {
         await executor.executeJob(sampleJob, sampleAgent);
