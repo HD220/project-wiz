@@ -217,37 +217,40 @@ export class GenericAgentExecutor implements IAgentExecutor {
           };
         }
         job.updateAgentState(agentState); // Single update to agentState for this turn of tool processing
+      } // End of if (assistantMessage.tool_calls)
+
+      // Update goalAchieved based on the latest llmResponseText and if any tool calls were made
+      goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls); // Optional chaining
+
+      if (goalAchieved) {
+        this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${iterations}.`);
+        break; // Exit loop if goal is achieved
       }
-
-      goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage.tool_calls);
-      // If tool calls were made, goalAchieved is likely false, and we'd expect tool results next.
-      // This is handled by the updated isGoalAchievedByLlmResponse method.
-
-      return this.createFinalResult(job, llmResponseText, goalAchieved);
-
-    } catch (caughtError) {
-      const errorObject = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
-      // If tool calls were made, goalAchieved is likely false, and we'd expect tool results next.
-      if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
-        goalAchieved = false;
+      if (iterations >= maxIterations) {
+        this.logger.info(`Max iterations reached for Job ID: ${job.id().value()}.`);
+        // Goal not achieved, but loop terminates.
       }
+    } // End of while loop
 
-      return this.createFinalResult(job, llmResponseText, goalAchieved);
+    // This is the normal exit point after the loop
+    return this.createFinalResult(job, llmResponseText, goalAchieved);
 
-    } catch (caughtError) {
-      const errorObject = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
-      this.logger.error(
-        `Unhandled error during LLM interaction for Job ID: ${job.id().value()}.`,
-        errorObject,
-        { jobId: job.id.value },
-      );
-      return error(
-        new ApplicationError(
-          `Unhandled error during execution: ${errorObject.message}`,
-        ),
-      );
-    }
+  } catch (caughtError) { // This is the correct main catch block for the executeJob method
+    const errorObject = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+    this.logger.error(
+      `Unhandled error during execution of Job ID: ${job.id().value()}.`, // Updated log message
+      errorObject,
+      { jobId: job.id().value() },
+    );
+    return error(
+      new ApplicationError(
+        `Unhandled error during execution: ${errorObject.message}`,
+      ),
+    );
   }
+} // End of GenericAgentExecutor class (ensure this isn't the issue)
+
+// Ensure helper methods are part of the class or correctly defined if static/outside
 
   private updateJobToActiveStatus(job: Job): Result<void, ApplicationError> {
     if (job.moveToActive()) {
