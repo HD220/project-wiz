@@ -29,9 +29,9 @@ import { LLMProviderId } from '@/refactored/core/domain/llm-provider-config/valu
 import { LLMApiKey } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-api-key.vo';
 import { AgentTemperature } from '@/refactored/core/domain/agent/value-objects/agent-temperature.vo';
 import { JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
-import { LLMError } from '@/refactored/core/common/errors';
+import { LLMError, ToolError } from '@/refactored/core/common/errors';
 import { HistoryEntryRoleType, ActivityHistoryEntry } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
-import { IAgentTool } from '@/refactored/core/tools/tool.interface';
+import { IAgentTool, IToolExecutionContext } from '@/refactored/core/tools/tool.interface';
 import { ToolNotFoundError } from '@/refactored/core/application/ports/services/i-tool-registry.service';
 import { z } from 'zod';
 
@@ -361,11 +361,62 @@ describe('GenericAgentExecutor', () => {
         const toolCallEntry = agentState?.executionHistory.find(e => e.type === 'tool_call' && e.name === MOCK_TOOL_NAME);
         expect(toolCallEntry).toBeDefined();
         expect(toolCallEntry?.params).toEqual(JSON.parse(validToolArgsString));
+        // Further checks for tool execution will be in more specific tests below
+      });
+
+      it('should execute a valid tool call and record its successful result in ExecutionHistory', async () => {
+        const mockToolOutput = { someData: 'tool output' };
+        mockTool.execute.mockResolvedValue(ok(mockToolOutput));
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(mockTool.execute).toHaveBeenCalledWith(
+          JSON.parse(validToolArgsString),
+          expect.objectContaining({ agentId: sampleAgent.id().value(), jobId: sampleJob.id().value() })
+        );
+        const agentState = sampleJob.currentData().agentState;
+        const execEntry = agentState?.executionHistory.find(e => e.type === 'tool_call' && e.name === MOCK_TOOL_NAME);
+        expect(execEntry).toBeDefined();
+        expect(execEntry?.result).toEqual(mockToolOutput);
         expect(mockLogger.info).toHaveBeenCalledWith(
-          `Tool call validated: ${MOCK_TOOL_NAME} with args: ${JSON.stringify(JSON.parse(validToolArgsString))}`,
+          `Tool '${MOCK_TOOL_NAME}' executed successfully for Job ID: ${sampleJob.id().value()}`,
+          { result: mockToolOutput }
+        );
+      });
+
+      it('should record tool_error in ExecutionHistory if tool.execute returns an error', async () => {
+        const toolExecError = new ToolError('Tool execution failed');
+        mockTool.execute.mockResolvedValue(error(toolExecError));
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        const agentState = sampleJob.currentData().agentState;
+        const execEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
+        expect(execEntry).toBeDefined();
+        expect(execEntry?.error).toMatchObject({ message: 'Tool execution failed' });
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          `Tool '${MOCK_TOOL_NAME}' execution failed for Job ID: ${sampleJob.id().value()}. Error: ${toolExecError.message}`,
+          toolExecError
+        );
+      });
+
+      it('should record tool_error in ExecutionHistory if tool.execute throws an unexpected error', async () => {
+        const unexpectedError = new Error('Unexpected tool crash');
+        mockTool.execute.mockRejectedValue(unexpectedError);
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        const agentState = sampleJob.currentData().agentState;
+        const execEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
+        expect(execEntry).toBeDefined();
+        expect(execEntry?.error).toBe(`Unexpected error during tool '${MOCK_TOOL_NAME}' execution: ${unexpectedError.message}`);
+         expect(mockLogger.error).toHaveBeenCalledWith(
+          `Unexpected error during tool '${MOCK_TOOL_NAME}' execution: ${unexpectedError.message}`,
+          unexpectedError,
           expect.anything()
         );
       });
+
 
       it('should add assistant message with tool_calls to ActivityHistory', async () => {
         await executor.executeJob(sampleJob, sampleAgent);

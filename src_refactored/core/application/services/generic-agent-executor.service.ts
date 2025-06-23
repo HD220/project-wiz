@@ -6,9 +6,10 @@ import { AgentExecutorResult } from '@/refactored/core/domain/job/job-processing
 import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
 // Corrected import: ok, error are named exports, Result is a type
 import { ok, error, Result } from '@/refactored/shared/result';
-import { DomainError } from '@/refactored/core/common/errors';
+import { DomainError, ToolError } from '@/refactored/core/common/errors';
 import { HistoryEntryRoleType, ActivityHistoryEntry } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
 import { ApplicationError } from '@/refactored/core/application/common/errors';
+import { IToolExecutionContext } from '@/refactored/core/tools/tool.interface';
 import { IAgentExecutor } from '@/refactored/core/application/ports/services/i-agent-executor.interface';
 import { ILLMAdapter } from '@/refactored/core/application/ports/adapters/i-llm.adapter';
 import { IToolRegistryService } from '@/refactored/core/application/ports/services/i-tool-registry.service';
@@ -167,7 +168,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
       if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
         this.logger.info(`LLM requested ${assistantMessage.tool_calls.length} tool calls for Job ID: ${job.id().value()}`, { jobId: job.id().value() });
         for (const toolCall of assistantMessage.tool_calls) {
-          const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value());
+          const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value(), agent.id().value());
           newExecutionHistoryEntries.push(executionEntry);
         }
 
@@ -272,6 +273,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
   private async processAndValidateSingleToolCall(
     toolCall: LanguageModelMessageToolCall,
     jobIdForLogging: string,
+    agentIdForContext: string, // Added agentId
   ): Promise<ExecutionHistoryEntry> {
     const toolName = toolCall.function.name;
     const timestamp = new Date();
@@ -302,7 +304,44 @@ export class GenericAgentExecutor implements IAgentExecutor {
     }
 
     this.logger.info(`Tool call validated: ${toolName} with args: ${JSON.stringify(validationResult.data)}`, { jobId: jobIdForLogging, toolName });
-    return { timestamp, type: 'tool_call', name: toolName, params: validationResult.data };
+
+    // Execute the tool
+    const executionContext: IToolExecutionContext = {
+      agentId: agentIdForContext,
+      jobId: jobIdForLogging,
+      // projectId, userId could be added if available and needed by tools
+    };
+
+    try {
+      const toolExecResult = await tool.execute(validationResult.data, executionContext);
+
+      if (toolExecResult.isErr()) {
+        const toolError = toolExecResult.error;
+        this.logger.error(`Tool '${toolName}' execution failed for Job ID: ${jobIdForLogging}. Error: ${toolError.message}`, toolError);
+        return {
+          timestamp,
+          type: 'tool_error',
+          name: toolName,
+          params: validationResult.data,
+          error: { message: toolError.message, details: (toolError as any).details, stack: toolError.stack }
+        };
+      }
+
+      // Success path
+      this.logger.info(`Tool '${toolName}' executed successfully for Job ID: ${jobIdForLogging}`, { result: toolExecResult.value });
+      return {
+        timestamp,
+        type: 'tool_call',
+        name: toolName,
+        params: validationResult.data,
+        result: toolExecResult.value
+      };
+
+    } catch (execError) {
+      const errorMsg = `Unexpected error during tool '${toolName}' execution: ${(execError as Error).message}`;
+      this.logger.error(errorMsg, execError as Error, { jobId: jobIdForLogging, toolName });
+      return { timestamp, type: 'tool_error', name: toolName, error: errorMsg, params: validationResult.data };
+    }
   }
 
   private isGoalAchievedByLlmResponse(responseText: string, toolCalls?: LanguageModelMessageToolCall[]): boolean {
