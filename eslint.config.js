@@ -14,6 +14,8 @@ export default [
       "**/dist/**",
       "**/node_modules/**",
       "tests/test-setup.d.ts",
+      "**/k6/**",
+      "**/jslib.k6.io/**",
     ],
   },
   {
