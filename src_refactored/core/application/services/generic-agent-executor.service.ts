@@ -7,6 +7,7 @@ import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.reposit
 // Corrected import: ok, error are named exports, Result is a type
 import { ok, error, Result } from '@/refactored/shared/result';
 import { DomainError } from '@/refactored/core/common/errors';
+import { HistoryEntryRoleType, ActivityHistoryEntry } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
 import { ApplicationError } from '@/refactored/core/application/common/errors';
 import { IAgentExecutor } from '@/refactored/core/application/ports/services/i-agent-executor.interface';
 import { ILLMAdapter } from '@/refactored/core/application/ports/adapters/i-llm.adapter';
@@ -86,8 +87,24 @@ export class GenericAgentExecutor implements IAgentExecutor {
         attempts: job.attempts().value(),
       });
 
-      // 3. Construct initial messages for LLM
-      let conversationMessages = this.constructInitialLlmMessages(agent, job, currentActivityHistory);
+      // 3. Construct initial messages for LLM and update history if needed
+      const messageConstructionResult = this.constructInitialLlmMessagesAndUpdateHistory(
+        agent,
+        job,
+        currentActivityHistory
+      );
+      let conversationMessages = messageConstructionResult.messages;
+      currentActivityHistory = messageConstructionResult.updatedHistory; // Update history reference
+
+      // If history was updated (e.g., initial user prompt added), update agentState on Job
+      if (messageConstructionResult.historyWasUpdated) {
+        job.updateAgentState({
+           ...agentState!, // Non-null assertion safe due to earlier check/init
+           conversationHistory: currentActivityHistory
+        });
+        // Consider if a save is needed here or if it's batched later.
+        // For now, the instance of 'job' carries the updated state.
+      }
 
       // 4. Start interaction loop (simplified for this sub-task: one call)
       let goalAchieved = false; // Renamed from isGoalAchieved for consistency
@@ -116,9 +133,25 @@ export class GenericAgentExecutor implements IAgentExecutor {
       llmResponseText = llmGenerationResult.value;
       this.logger.info(`LLM response received for Job ID: ${job.id().value()}: ${llmResponseText.substring(0,100)}...`, { jobId: job.id().value() });
 
+      // Update history with LLM's response
+      const assistantEntry = ActivityHistoryEntry.create(
+        HistoryEntryRoleType.ASSISTANT,
+        llmResponseText
+      );
+      currentActivityHistory = currentActivityHistory.addEntry(assistantEntry);
+
+      // Update agentState on the job instance
+      // Note: agentState was already confirmed to exist earlier in the method.
+      job.updateAgentState({
+        ...agentState!, // Non-null assertion safe due to earlier check/init
+        conversationHistory: currentActivityHistory
+      });
+      // The job with updated agentState will be saved by the worker service after executeJob completes,
+      // or if further iterations/tool calls happen, it's saved before those.
+      // For this sub-task, we are not saving it here within the loop's first pass.
+
       goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText);
-      // History update will be in APP-SVC-001.2.2
-      // maxIterations--; // Loop is only one iteration for now.
+      // maxIterations--; // Loop is only one iteration for this sub-task and next.
 
       return this.createFinalResult(job, llmResponseText, goalAchieved);
 
@@ -154,11 +187,11 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return ok(undefined); // Already active, proceed.
   }
 
-  private constructInitialLlmMessages(
+  private constructInitialLlmMessagesAndUpdateHistory(
     agent: Agent,
     job: Job,
-    currentActivityHistory: ActivityHistory
-  ): LanguageModelMessage[] {
+    initialHistory: ActivityHistory,
+  ): { messages: LanguageModelMessage[]; updatedHistory: ActivityHistory; historyWasUpdated: boolean } {
     const persona = agent.personaTemplate();
     const personaName = persona.name().value();
     const personaRole = persona.role().value();
@@ -167,23 +200,31 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
     const systemMessageContent = `You are ${personaName}, a ${personaRole}. Your goal is: ${personaGoal}. Persona backstory: ${personaBackstory}`;
 
-    const conversation: LanguageModelMessage[] = [{ role: 'system', content: systemMessageContent }];
+    const messages: LanguageModelMessage[] = [{ role: 'system', content: systemMessageContent }];
+    let historyWasUpdated = false;
+    let workingHistory = initialHistory;
 
-    if (!currentActivityHistory.isEmpty()) {
-      currentActivityHistory.entries().forEach(entry => {
-        conversation.push({
+    if (!workingHistory.isEmpty()) {
+      workingHistory.entries().forEach(entry => {
+        messages.push({
           role: entry.role() as 'system' | 'user' | 'assistant' | 'tool',
           content: entry.content(),
         });
       });
-      return conversation;
+    } else {
+      const jobPayload = job.payload() as { prompt?: string; [key: string]: any };
+      const jobName = job.name().value();
+      const userPromptContent = jobPayload.prompt || `Based on your persona, please address the following task: ${jobName}`;
+
+      messages.push({ role: 'user', content: userPromptContent });
+
+      // Add this initial user prompt to the history
+      const userPromptEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.USER, userPromptContent);
+      workingHistory = workingHistory.addEntry(userPromptEntry);
+      historyWasUpdated = true;
     }
 
-    const jobPayload = job.payload() as { prompt?: string; [key: string]: any };
-    const jobName = job.name().value();
-    const userPrompt = jobPayload.prompt || `Based on your persona, please address the following task: ${jobName}`;
-    conversation.push({ role: 'user', content: userPrompt });
-    return conversation;
+    return { messages, updatedHistory: workingHistory, historyWasUpdated };
   }
 
   private isGoalAchievedByLlmResponse(responseText: string): boolean {

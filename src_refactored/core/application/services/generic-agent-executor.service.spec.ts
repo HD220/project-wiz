@@ -30,6 +30,7 @@ import { LLMApiKey } from '@/refactored/core/domain/llm-provider-config/value-ob
 import { AgentTemperature } from '@/refactored/core/domain/agent/value-objects/agent-temperature.vo';
 import { JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
 import { LLMError } from '@/refactored/core/common/errors';
+import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
 
 
 describe('GenericAgentExecutor', () => {
@@ -119,39 +120,127 @@ describe('GenericAgentExecutor', () => {
         expect.anything(),
       );
       expect(mockLlmAdapter.generateText).toHaveBeenCalled();
+      expect(sampleJob.updateAgentState).toHaveBeenCalled(); // Called for assistant response
     });
 
-    it('should initialize agentState if not present and save job', async () => {
-      // Create a job explicitly without agentState
-      const jobWithoutAgentState = Job.create({
+    it('should initialize agentState and add initial user prompt to history if not present, then save job and call LLM', async () => {
+      // Create a job explicitly without agentState or with empty history
+      const jobWithEmptyHistory = Job.create({
         name: JobName.create('Job needing agentState init').value,
         payload: { prompt: 'init me' },
       });
-      // Clear default agentState if any was set by Job.create for this test
-      (jobWithoutAgentState as any).props.data.agentState = undefined;
+      // Ensure agentState is undefined or history is empty to trigger initialization logic
+      const initialAgentState = jobWithEmptyHistory.currentData().agentState;
+      if (initialAgentState && !initialAgentState.conversationHistory.isEmpty()) {
+         // If Job.create already makes a non-empty history, clear it for this test.
+        (jobWithEmptyHistory as any).props.data.agentState.conversationHistory = ActivityHistory.create([]);
+      } else if (!initialAgentState) {
+        (jobWithEmptyHistory as any).props.data.agentState = undefined;
+      }
 
-      vi.spyOn(jobWithoutAgentState, 'moveToActive').mockReturnValue(true);
-      const updateAgentStateSpy = vi.spyOn(jobWithoutAgentState, 'updateAgentState').mockReturnThis();
 
-      mockLlmAdapter.generateText.mockResolvedValue(ok('LLM response after init'));
+      vi.spyOn(jobWithEmptyHistory, 'moveToActive').mockReturnValue(true);
+      const updateAgentStateSpy = vi.spyOn(jobWithEmptyHistory, 'updateAgentState').mockReturnThis();
 
-      await executor.executeJob(jobWithoutAgentState, sampleAgent);
+      const llmResponse = 'LLM response after init';
+      mockLlmAdapter.generateText.mockResolvedValue(ok(llmResponse));
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Job ID: ${jobWithoutAgentState.id().value()} is missing agentState or conversationHistory. Initializing.`,
-        { jobId: jobWithoutAgentState.id().value() },
-      );
-      expect(updateAgentStateSpy).toHaveBeenCalledWith(expect.objectContaining({
-        conversationHistory: expect.any(ActivityHistory),
-        executionHistory: [],
-      }));
-      expect(mockJobRepository.save).toHaveBeenCalledWith(jobWithoutAgentState);
+      await executor.executeJob(jobWithEmptyHistory, sampleAgent);
+
+      // First call to updateAgentState: Initializing agentState if it was undefined
+      // Second call (or first if agentState was defined but history empty): For adding initial user prompt
+      // Third call: For adding assistant's response
+      expect(updateAgentStateSpy).toHaveBeenCalledTimes(initialAgentState?.conversationHistory.isEmpty() || !initialAgentState ? 2 : 1);
+
+
+      const firstCallArgs = updateAgentStateSpy.mock.calls[0][0];
+      expect(firstCallArgs.conversationHistory.count()).toBe(1); // Initial user prompt
+      expect(firstCallArgs.conversationHistory.entries()[0].role()).toBe(HistoryEntryRoleType.USER);
+
+      const secondCallArgs = updateAgentStateSpy.mock.calls[1][0];
+      expect(secondCallArgs.conversationHistory.count()).toBe(2); // User + Assistant
+      expect(secondCallArgs.conversationHistory.entries()[1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(secondCallArgs.conversationHistory.entries()[1].content()).toBe(llmResponse);
+
+      expect(mockJobRepository.save).toHaveBeenCalledWith(jobWithEmptyHistory);
       expect(mockLlmAdapter.generateText).toHaveBeenCalled();
     });
 
-    it('should construct initial prompt with system and user message and call LLM', async () => {
+    it('should construct initial prompt with system message, existing history, and call LLM', async () => {
+      // Prepare a job with pre-existing history
+      const userEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.USER, 'Existing user message');
+      const assistantEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.ASSISTANT, 'Existing assistant response');
+      const preExistingHistory = ActivityHistory.create([userEntry, assistantEntry]);
+
+      sampleJob.updateAgentState({
+        conversationHistory: preExistingHistory,
+        executionHistory: [],
+      });
+      vi.spyOn(sampleJob, 'updateAgentState').mockReturnThis(); // Re-spy after manual update
+
       const persona = sampleAgent.personaTemplate();
       const expectedSystemContent = `You are ${persona.name().value()}, a ${persona.role().value()}. Your goal is: ${persona.goal().value()}. Persona backstory: ${persona.backstory().value()}`;
+
+      const expectedFullPrompt =
+        `system: ${expectedSystemContent}\n\n` +
+        `user: Existing user message\n\n` +
+        `assistant: Existing assistant response`;
+
+      mockLlmAdapter.generateText.mockResolvedValue(ok('New LLM Response')); // Ensure LLM mock for this path
+
+      await executor.executeJob(sampleJob, sampleAgent);
+
+      expect(mockLlmAdapter.generateText).toHaveBeenCalledWith(
+        expectedFullPrompt,
+        { temperature: sampleAgent.temperature().value() }
+      );
+
+      const updateAgentStateSpy = vi.mocked(sampleJob.updateAgentState); // Use vi.mocked to get typed spy
+      const lastCall = updateAgentStateSpy.mock.calls[updateAgentStateSpy.mock.calls.length - 1];
+      const lastCallArgs = lastCall[0];
+
+      expect(lastCallArgs.conversationHistory.count()).toBe(3); // user + assistant + new assistant
+      expect(lastCallArgs.conversationHistory.entries()[2].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(lastCallArgs.conversationHistory.entries()[2].content()).toBe('New LLM Response');
+    });
+
+    it('should add assistant response to history and update agent state', async () => {
+      const llmResponse = 'Test LLM response for history';
+      mockLlmAdapter.generateText.mockResolvedValue(ok(llmResponse));
+      // sampleJob by default has empty history from beforeEach
+      const updateAgentStateSpy = vi.mocked(sampleJob.updateAgentState);
+
+      await executor.executeJob(sampleJob, sampleAgent);
+
+      // Call 1: For initial user prompt (since history is empty)
+      // Call 2: For assistant's response
+      expect(updateAgentStateSpy).toHaveBeenCalledTimes(2);
+
+      const assistantResponseCallArgs = updateAgentStateSpy.mock.calls[1][0];
+      const historyInState = assistantResponseCallArgs.conversationHistory;
+
+      expect(historyInState.count()).toBe(2); // Initial User + Assistant
+      expect(historyInState.entries()[1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(historyInState.entries()[1].content()).toBe(llmResponse);
+    });
+
+    it('should construct initial prompt with system and user message from job name if payload prompt missing and history empty', async () => {
+      const jobWithoutPayloadPrompt = Job.create({
+        name: JobName.create('Job Name As Prompt').value,
+        payload: {}, // No 'prompt' field in payload
+      });
+       // Ensure agentState is undefined or history is empty
+      (jobWithoutPayloadPrompt as any).props.data.agentState = {
+        conversationHistory: ActivityHistory.create([]),
+        executionHistory: [],
+      };
+      vi.spyOn(jobWithoutPayloadPrompt, 'moveToActive').mockReturnValue(true);
+      vi.spyOn(jobWithoutPayloadPrompt, 'updateAgentState').mockReturnThis();
+
+
+      const persona = sampleAgent.personaTemplate();
+      const expectedSystemContent = `You are ${persona.name().value()}, a ${persona.role().value()}. Your goal is: ${persona.goal().value()}. Persona backstory: ${persona.backstory().value()}`;
+      const expectedUserContent = `Based on your persona, please address the following task: ${jobWithoutPayloadPrompt.name().value()}`;
       const jobPayload = sampleJob.payload() as { initialPrompt?: string };
       const expectedUserContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${sampleJob.name().value()}`;
 
