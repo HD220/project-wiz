@@ -405,9 +405,14 @@ export class GenericAgentExecutor implements IAgentExecutor {
     const toolResult = await this.toolRegistryService.getTool(toolName);
 
     if (toolResult.isErr()) {
-      const errorMsg = `Tool '${toolName}' not found. Error: ${toolResult.error.message}`;
-      this.logger.error(errorMsg, toolResult.error, { jobId: jobIdForLogging, toolName });
-      return { timestamp, type: 'tool_error', name: toolName, error: errorMsg };
+      const toolNotFoundError = new ToolError(
+        `Tool '${toolName}' not found. Error: ${toolResult.error.message}`,
+        toolName,
+        toolResult.error,
+        false, // Not recoverable
+      );
+      this.logger.error(toolNotFoundError.message, toolNotFoundError, { jobId: jobIdForLogging, toolName });
+      return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError };
     }
     const tool = toolResult.value;
 
@@ -415,16 +420,26 @@ export class GenericAgentExecutor implements IAgentExecutor {
     try {
       parsedArgs = JSON.parse(toolCall.function.arguments);
     } catch (parseError) {
-      const errorMsg = `Failed to parse arguments for tool '${toolName}'. Error: ${(parseError as Error).message}`;
-      this.logger.error(errorMsg, parseError as Error, { jobId: jobIdForLogging, toolName, args: toolCall.function.arguments });
-      return { timestamp, type: 'tool_error', name: toolName, error: errorMsg, params: { originalArgs: toolCall.function.arguments } };
+      const parsingToolError = new ToolError(
+        `Failed to parse arguments for tool '${toolName}'. Error: ${(parseError as Error).message}`,
+        toolName,
+        parseError as Error,
+        true, // Potentially recoverable by LLM
+      );
+      this.logger.error(parsingToolError.message, parsingToolError, { jobId: jobIdForLogging, toolName, args: toolCall.function.arguments });
+      return { timestamp, type: 'tool_error', name: toolName, error: parsingToolError, params: { originalArgs: toolCall.function.arguments } };
     }
 
     const validationResult = tool.parameters.safeParse(parsedArgs);
     if (!validationResult.success) {
-      const errorMsg = `Argument validation failed for tool '${toolName}'.`;
-      this.logger.error(errorMsg, validationResult.error.flatten(), { jobId: jobIdForLogging, toolName, issues: validationResult.error.flatten() });
-      return { timestamp, type: 'tool_error', name: toolName, error: { message: errorMsg, issues: validationResult.error.flatten() }, params: parsedArgs };
+      const validationToolError = new ToolError(
+        `Argument validation failed for tool '${toolName}'.`,
+        toolName,
+        validationResult.error, // Zod error as originalError
+        true, // Potentially recoverable by LLM
+      );
+      this.logger.error(validationToolError.message, validationToolError, { jobId: jobIdForLogging, toolName, issues: validationResult.error.flatten() });
+      return { timestamp, type: 'tool_error', name: toolName, error: validationToolError, params: parsedArgs };
     }
 
     this.logger.info(`Tool call validated: ${toolName} with args: ${JSON.stringify(validationResult.data)}`, { jobId: jobIdForLogging, toolName });
@@ -438,14 +453,16 @@ export class GenericAgentExecutor implements IAgentExecutor {
       const toolExecResult = await tool.execute(validationResult.data, executionContext);
 
       if (toolExecResult.isErr()) {
-        const toolError = toolExecResult.error;
-        this.logger.error(`Tool '${toolName}' execution failed for Job ID: ${jobIdForLogging}. Error: ${toolError.message}`, toolError);
+        // The toolError here is the ToolError instance returned by the tool's execute method.
+        // We assume it correctly sets its own `isRecoverable` flag.
+        const toolErrorFromTool = toolExecResult.error;
+        this.logger.error(`Tool '${toolName}' execution failed for Job ID: ${jobIdForLogging}. Error: ${toolErrorFromTool.message}`, toolErrorFromTool);
         return {
           timestamp,
           type: 'tool_error',
           name: toolName,
           params: validationResult.data,
-          error: { message: toolError.message, details: (toolError as any).details, stack: toolError.stack }
+          error: toolErrorFromTool, // Store the actual ToolError instance
         };
       }
 
@@ -459,9 +476,14 @@ export class GenericAgentExecutor implements IAgentExecutor {
       };
 
     } catch (execError) {
-      const errorMsg = `Unexpected error during tool '${toolName}' execution: ${(execError as Error).message}`;
-      this.logger.error(errorMsg, execError as Error, { jobId: jobIdForLogging, toolName });
-      return { timestamp, type: 'tool_error', name: toolName, error: errorMsg, params: validationResult.data };
+      const unexpectedToolError = new ToolError(
+        `Unexpected error during tool '${toolName}' execution: ${(execError as Error).message}`,
+        toolName,
+        execError as Error,
+        false, // Not recoverable
+      );
+      this.logger.error(unexpectedToolError.message, unexpectedToolError, { jobId: jobIdForLogging, toolName });
+      return { timestamp, type: 'tool_error', name: toolName, error: unexpectedToolError, params: validationResult.data };
     }
   }
 
@@ -665,13 +687,53 @@ export class GenericAgentExecutor implements IAgentExecutor {
           for (const toolCall of assistantMessage.tool_calls) {
             const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value(), agent.id().value());
             newExecutionHistoryEntries.push(executionEntry);
-            if (executionEntry.type === 'tool_error' && typeof executionEntry.error === 'string' && executionEntry.error.includes('Tool not found')) {
-              criticalErrorEncounteredThisTurn = true;
-              job.updateLastFailureSummary(`Critical: Tool '${executionEntry.name}' not found.`);
-              this.logger.error(`Critical tool error for Job ID ${job.id().value()}: Tool '${executionEntry.name}' not found. Halting agent processing for this turn.`);
-              break; // Break from tool processing loop
+
+            if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
+              const toolError = executionEntry.error;
+              // If a tool error is marked as not recoverable, it's considered a critical failure.
+              // This will halt further tool processing for this turn and lead to job failure.
+              if (!toolError.isRecoverable) {
+                criticalErrorEncounteredThisTurn = true;
+                const failureInfo: CriticalToolFailureInfo = {
+                  toolName: toolError.toolName || executionEntry.name,
+                  errorType: toolError.name, // e.g., 'ToolError', or could be a more specific subclass name
+                  message: toolError.message,
+                  details: toolError.originalError ? {
+                    name: (toolError.originalError as Error).name,
+                    message: (toolError.originalError as Error).message,
+                    stack: (toolError.originalError as Error).stack?.substring(0, 500) // Limit stack trace
+                  } : undefined,
+                  isRecoverable: false,
+                };
+                job.setCriticalToolFailureInfo(failureInfo);
+                job.updateLastFailureSummary(`Critical: Tool '${failureInfo.toolName}' failed non-recoverably: ${failureInfo.message}`);
+                this.logger.error(
+                  `Critical tool error for Job ID ${job.id().value()}: Tool '${failureInfo.toolName}' failed non-recoverably. Details: ${JSON.stringify(failureInfo)}`,
+                  toolError
+                );
+                break; // Break from tool processing loop
+              }
             }
-            let toolResultContent = executionEntry.type === 'tool_error' ? JSON.stringify(executionEntry.error || { message: 'Tool execution failed without details' }) : JSON.stringify(executionEntry.result);
+            // Constructing toolResultContent for ActivityHistoryEntry
+            let toolResultContent: string;
+            if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
+                // Serialize the ToolError object for content, or use a summary
+                toolResultContent = JSON.stringify({
+                    name: executionEntry.error.name,
+                    message: executionEntry.error.message,
+                    toolName: executionEntry.error.toolName,
+                    isRecoverable: executionEntry.error.isRecoverable,
+                    originalError: executionEntry.error.originalError ? {
+                        name: (executionEntry.error.originalError as Error).name,
+                        message: (executionEntry.error.originalError as Error).message,
+                    } : undefined,
+                });
+            } else if (executionEntry.type === 'tool_error') { // Fallback for non-ToolError errors
+                toolResultContent = JSON.stringify(executionEntry.error || { message: 'Tool execution failed without details' });
+            } else { // Successful tool call
+                toolResultContent = JSON.stringify(executionEntry.result);
+            }
+
             const toolResultActivityEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.TOOL_RESULT, toolResultContent, undefined, executionEntry.name, toolCall.id);
             toolResultActivityEntries.push(toolResultActivityEntry);
           }

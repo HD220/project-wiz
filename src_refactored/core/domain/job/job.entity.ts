@@ -15,9 +15,22 @@ import { DomainError } from '../../common/errors'; // Added DomainError
 
 // For the 'data' field of the Job, which holds agent-specific state.
 // This structure aligns with what GenericAgentExecutor expects in job.data.agentState.
+
+/**
+ * Interface for storing structured information about a critical tool failure.
+ */
+export interface CriticalToolFailureInfo {
+  toolName: string;
+  errorType: string; // e.g., 'ToolNotFound', 'ValidationError', 'ExecutionError', 'UnexpectedError'
+  message: string;
+  details?: any; // e.g., validation issues, stack trace snippet
+  isRecoverable: boolean; // From ToolError.isRecoverable
+}
+
 interface JobData {
   agentState?: AgentJobState;
   lastFailureSummary?: string; // Used by GenericAgentExecutor for re-planning context
+  criticalToolFailureInfo?: CriticalToolFailureInfo; // Structured info for critical tool errors
   executionResult?: { // Storing the outcome from AgentExecutor
     status: string; // AgentExecutorStatus
     message: string;
@@ -154,6 +167,16 @@ export class Job<PayloadType = any, ResultType = any> {
     return this; // Returning this as it's a mutable prop change, not creating new instance for this specific case.
                  // For true immutability on data changes, a new instance would be needed.
                  // Consider if data should be a VO itself.
+  }
+
+  /**
+   * Updates the structured information about a critical tool failure.
+   * @param info The critical tool failure information, or undefined to clear it.
+   */
+  public setCriticalToolFailureInfo(info?: CriticalToolFailureInfo): Job<PayloadType, ResultType> {
+    this.props.data = { ...this.props.data, criticalToolFailureInfo: info };
+    this.touch();
+    return this;
   }
 
   // --- Methods to update specific properties, returning new Job instance ---

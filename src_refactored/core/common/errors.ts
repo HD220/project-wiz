@@ -60,15 +60,24 @@ export class NotFoundError extends DomainError {
 
 /**
  * Error thrown when an IAgentTool fails during its execution.
+ * Includes a flag to indicate if the error is considered recoverable by the agent executor,
+ * potentially allowing the LLM to attempt a different approach.
  */
 export class ToolError extends DomainError {
   public readonly toolName?: string;
   public readonly originalError?: any; // To store the underlying error if any
+  public readonly isRecoverable: boolean;
 
-  constructor(message: string, toolName?: string, originalError?: any) {
+  constructor(
+    message: string,
+    toolName?: string,
+    originalError?: any,
+    isRecoverable: boolean = true, // Default to recoverable
+  ) {
     super(message);
     this.toolName = toolName;
     this.originalError = originalError;
+    this.isRecoverable = isRecoverable;
   }
 }
 
