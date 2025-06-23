@@ -1,6 +1,6 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-content.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../common/value-objects/base.vo';
-import { ValueError } from '../../../../common/errors';
+import { AbstractValueObject, ValueObjectProps } from '../../../common/value-objects/base.vo'; // Corrected path
+import { ValueError } from '../../../common/errors'; // Corrected path
 
 interface MemoryItemContentProps extends ValueObjectProps {
   value: string;

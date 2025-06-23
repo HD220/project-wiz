@@ -5,6 +5,11 @@ import { MemoryItem } from '../memory-item.entity';
 import { MemoryItemId } from '../value-objects/memory-item-id.vo';
 import { MemoryItemEmbedding } from '../value-objects/memory-item-embedding.vo';
 import { Identity } from '../../../common/value-objects/identity.vo'; // For AgentId
+import {
+  MemorySearchFilters,
+  PaginationOptions,
+  PaginatedMemoryItemsResult,
+} from './memory-repository.types';
 
 export interface IMemoryRepository {
   /**
@@ -58,6 +63,17 @@ export interface IMemoryRepository {
    * @returns A Result containing an array of memory items or a DomainError.
    */
   listAll(limit?: number, offset?: number): Promise<Result<MemoryItem[], DomainError>>;
+
+  /**
+   * Searches memory items based on filters and pagination.
+   * @param filters The filters to apply (agentId, queryText, tags, etc.).
+   * @param pagination The pagination options (page, pageSize).
+   * @returns A Result containing the paginated list of memory items or a DomainError.
+   */
+  search(
+    filters: MemorySearchFilters,
+    pagination: PaginationOptions,
+  ): Promise<Result<PaginatedMemoryItemsResult, DomainError>>;
 }
 
 export const IMemoryRepositoryToken = Symbol('IMemoryRepository');
