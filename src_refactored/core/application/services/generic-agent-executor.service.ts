@@ -488,7 +488,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     outputData?: any,
     // Pass execution history directly if needed, or rely on job.currentData()
     // For now, rely on job.currentData() to get the most up-to-date state.
-  ): Result<AgentExecutorResult, DomainError | ApplicationError> {
+  ): AgentExecutorResult { // Changed return type to be just AgentExecutorResult
     const agentState = job.currentData().agentState || {
       conversationHistory: ActivityHistory.create([]),
       executionHistory: []
@@ -498,14 +498,295 @@ export class GenericAgentExecutor implements IAgentExecutor {
     // Filter execution history for actual errors to populate the 'errors' field
     const executionErrorEntries = agentState.executionHistory.filter(e => e.type.endsWith('_error'));
 
-    return ok<AgentExecutorResult, DomainError | ApplicationError>({
+    // This method now directly returns the AgentExecutorResult object,
+    // as the Job's status and detailed result will be set by job.finalizeExecution.
+    return {
       jobId: jobIdVo.value(),
       status: statusToSet,
       message: finalMessage,
       output: outputData,
       history: agentState.conversationHistory.entries(),
       errors: executionErrorEntries, // Populate with actual errors from execution
-      nextAllowedToolCalls: null, // This might need to be determined by the last assistant message if status is not terminal
+      // nextAllowedToolCalls: null, // This might need to be determined by the last assistant message if status is not terminal
+      // This property is not defined in AgentExecutorResult type, removing for now.
+      // If needed, it should be added to the type definition.
+    };
+  }
+
+
+  // Main executeJob method adjusted to call finalizeExecution and save
+  public async executeJob(
+    job: Job,
+    agent: Agent,
+  ): Promise<Result<AgentExecutorResult, DomainError | ApplicationError>> {
+    this.logger.info(
+      `Executing Job ID: ${job.id.value} with Agent ID: ${agent.id.value}`,
+      { jobId: job.id.value, agentId: agent.id.value },
+    );
+
+    let agentExecutorResult: AgentExecutorResult;
+
+    try {
+      // 1. Ensure AgentState and ActivityHistory are initialized (existing logic)
+      let agentState = job.currentData().agentState;
+      if (!agentState || !agentState.conversationHistory) {
+        this.logger.info(
+          `Job ID: ${job.id().value()} is missing agentState or conversationHistory. Initializing.`,
+          { jobId: job.id().value() },
+        );
+        agentState = {
+          conversationHistory: ActivityHistory.create([]),
+          executionHistory: agentState?.executionHistory || [],
+        };
+        job.updateAgentState(agentState);
+      }
+      let currentActivityHistory = agentState.conversationHistory;
+
+      // 2. Update Job status to PROCESSING (or ACTIVE) (existing logic)
+      const jobStatusUpdateResult = this.updateJobToActiveStatus(job);
+      if (jobStatusUpdateResult.isErr()) {
+        // If status update fails, finalize with internal error before returning
+        agentExecutorResult = this.createFinalResult(job, 'FAILURE_INTERNAL', jobStatusUpdateResult.error.message);
+        job.finalizeExecution(agentExecutorResult);
+        // Attempt to save even if initial status update failed, to record the failure.
+        await this.jobRepository.save(job).catch(saveErr =>
+          this.logger.error(`Failed to save job during status update failure for Job ID: ${job.id().value()}`, saveErr)
+        );
+        return error(jobStatusUpdateResult.error);
+      }
+
+      // Save the job now that its state (potentially agentState and status) has been updated. (existing logic)
+      const initialSaveResult = await this.jobRepository.save(job);
+      if (initialSaveResult.isErr()) {
+        this.logger.error(
+          `Failed to save Job ID: ${job.id().value} after initial updates.`,
+          initialSaveResult.error,
+          { jobId: job.id().value() },
+        );
+         agentExecutorResult = this.createFinalResult(job, 'FAILURE_INTERNAL', `Initial save failed: ${initialSaveResult.error.message}`);
+         job.finalizeExecution(agentExecutorResult);
+         // Attempt to save again to record this failure in job.data.executionResult
+         await this.jobRepository.save(job).catch(saveErr =>
+            this.logger.error(`Failed to save job during initial save failure processing for Job ID: ${job.id().value()}`, saveErr)
+         );
+        return error(initialSaveResult.error);
+      }
+      this.logger.info(`Job ID: ${job.id().value()} is ACTIVE and saved. Attempt: ${job.attempts().value()}`, {
+        jobId: job.id().value(),
+        status: job.status().value(),
+        attempts: job.attempts().value(),
+      });
+
+      // 3. Prepare for interaction loop (existing logic)
+      let goalAchieved = false;
+      let iterations = 0;
+      const maxIterations = agent.maxIterations().value;
+      this.logger.info(`Max iterations for Job ID: ${job.id().value()} set to ${maxIterations} from agent config.`, { jobId: job.id().value(), maxIterations });
+      let llmResponseText = 'No response yet.';
+      let assistantMessage: LanguageModelMessage | null = null;
+      let replanAttemptsForEmptyResponse = 0;
+      let criticalErrorEncounteredThisTurn = false;
+      let newExecutionHistoryEntries: ExecutionHistoryEntry[] = [];
+
+
+      if (currentActivityHistory.isEmpty()) {
+         const jobPayload = job.payload() as { prompt?: string; [key: string]: any };
+         const jobName = job.name().value();
+         const userPromptContent = jobPayload.prompt || `Based on your persona, please address the following task: ${jobName}`;
+         const userPromptEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.USER, userPromptContent);
+         currentActivityHistory = currentActivityHistory.addEntry(userPromptEntry);
+         agentState = {...agentState!, conversationHistory: currentActivityHistory};
+         job.updateAgentState(agentState);
+      }
+
+      // 4. Start interaction loop (existing logic, slightly adapted)
+      while (iterations < maxIterations && !goalAchieved && !criticalErrorEncounteredThisTurn) {
+        iterations++;
+        this.logger.info(`Starting LLM interaction cycle ${iterations} for Job ID: ${job.id().value()}`, { jobId: job.id().value(), iteration: iterations });
+
+        const persona = agent.personaTemplate();
+        const systemMessageString = `You are ${persona.name().value()}, a ${persona.role().value()}. Your goal is: ${persona.goal().value()}. Persona backstory: ${persona.backstory().value()}`;
+        let conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, currentActivityHistory);
+
+        this.logLlmCall(job, conversationMessages);
+
+        const agentTemperature = agent.temperature();
+        const llmGenerationResult = await this.llmAdapter.generateText(
+            conversationMessages,
+            { temperature: agentTemperature.value() }
+        );
+
+        if (llmGenerationResult.isErr()) {
+          const llmError = llmGenerationResult.error;
+          const errorMessage = `LLM generation failed in iteration ${iterations} for Job ID: ${job.id().value()}. Error: ${llmError.message}`;
+          this.logger.error(errorMessage, llmError, { jobId: job.id().value() });
+          agentState = {
+            ...agentState!,
+            executionHistory: [...(agentState!.executionHistory || []), {
+              timestamp: new Date(), type: 'llm_error', name: 'LLM Generation', error: llmError.message
+            }]
+          };
+          job.updateAgentState(agentState);
+          agentExecutorResult = this.createFinalResult(job, 'FAILURE_LLM', errorMessage);
+          // Early exit from loop, proceed to finalize and save
+          criticalErrorEncounteredThisTurn = true; // Use this to break outer loop logic
+          break;
+        }
+
+        assistantMessage = llmGenerationResult.value;
+        llmResponseText = assistantMessage.content || '';
+        this.logger.info(`LLM response (iteration ${iterations}) received for Job ID: ${job.id().value()}: ${llmResponseText.substring(0,100)}...`, { jobId: job.id().value() });
+
+        const replanResult = this.attemptReplanForUnusableResponse(
+          job, assistantMessage, llmResponseText, currentActivityHistory, agentState!,
+          replanAttemptsForEmptyResponse, iterations
+        );
+
+        if (replanResult.shouldReplan) {
+          currentActivityHistory = replanResult.updatedHistory!;
+          agentState = replanResult.updatedAgentState!;
+          replanAttemptsForEmptyResponse = replanResult.newReplanAttemptCount!;
+          job.updateAgentState(agentState); // Save agent state after replan
+          continue;
+        }
+
+        const assistantHistoryEntry = ActivityHistoryEntry.create(
+          HistoryEntryRoleType.ASSISTANT, assistantMessage.content, undefined, undefined, undefined, assistantMessage.tool_calls
+        );
+        currentActivityHistory = currentActivityHistory.addEntry(assistantHistoryEntry);
+        agentState = { ...agentState!, conversationHistory: currentActivityHistory, executionHistory: [...(agentState!.executionHistory || [])] };
+        job.updateAgentState(agentState);
+
+        newExecutionHistoryEntries = []; // Reset for this turn
+        const toolResultActivityEntries: ActivityHistoryEntry[] = [];
+
+        if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+          this.logger.info(`LLM requested ${assistantMessage.tool_calls.length} tool calls for Job ID: ${job.id().value()}`, { jobId: job.id().value() });
+          for (const toolCall of assistantMessage.tool_calls) {
+            const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value(), agent.id().value());
+            newExecutionHistoryEntries.push(executionEntry);
+            if (executionEntry.type === 'tool_error' && typeof executionEntry.error === 'string' && executionEntry.error.includes('Tool not found')) {
+              criticalErrorEncounteredThisTurn = true;
+              job.updateLastFailureSummary(`Critical: Tool '${executionEntry.name}' not found.`);
+              this.logger.error(`Critical tool error for Job ID ${job.id().value()}: Tool '${executionEntry.name}' not found. Halting agent processing for this turn.`);
+              break; // Break from tool processing loop
+            }
+            let toolResultContent = executionEntry.type === 'tool_error' ? JSON.stringify(executionEntry.error || { message: 'Tool execution failed without details' }) : JSON.stringify(executionEntry.result);
+            const toolResultActivityEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.TOOL_RESULT, toolResultContent, undefined, executionEntry.name, toolCall.id);
+            toolResultActivityEntries.push(toolResultActivityEntry);
+          }
+
+          if (newExecutionHistoryEntries.length > 0) {
+            agentState = { ...agentState!, executionHistory: [...agentState!.executionHistory, ...newExecutionHistoryEntries] };
+          }
+          if (toolResultActivityEntries.length > 0) {
+            for(const entry of toolResultActivityEntries) { currentActivityHistory = currentActivityHistory.addEntry(entry); }
+            agentState = { ...agentState!, conversationHistory: currentActivityHistory };
+          }
+          job.updateAgentState(agentState);
+          if (criticalErrorEncounteredThisTurn) break; // Break from the main while loop
+        }
+        if (!criticalErrorEncounteredThisTurn) {
+          goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls);
+        }
+        if (goalAchieved) { this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${iterations}.`); break; }
+        if (iterations >= maxIterations) { this.logger.info(`Max iterations reached for Job ID: ${job.id().value()}.`); }
+      } // End of while loop
+
+      // Determine final status and message after loop (existing logic, slightly adapted)
+      let finalStatus: AgentExecutorStatus;
+      let finalMessage: string;
+      let finalOutput: any = undefined;
+      const hasToolErrorInLastProcessedBatch = newExecutionHistoryEntries.some(e => e.type === 'tool_error');
+
+      if (goalAchieved) {
+        finalStatus = 'SUCCESS';
+        finalMessage = `Goal achieved. Last LLM response: ${llmResponseText}`;
+        finalOutput = { message: llmResponseText };
+        job.updateLastFailureSummary(undefined);
+      } else if (criticalErrorEncounteredThisTurn) { // This now covers LLM errors or critical tool errors that broke the loop
+         finalStatus = agentState?.executionHistory.some(e => e.type === 'llm_error') ? 'FAILURE_LLM' : 'FAILURE_TOOL';
+         finalMessage = job.currentData().lastFailureSummary || `Processing stopped due to a critical error after ${iterations} iterations. Last LLM response: ${llmResponseText}`;
+      } else if (iterations >= maxIterations) {
+        finalStatus = 'FAILURE_MAX_ITERATIONS';
+        finalMessage = `Max iterations (${maxIterations}) reached. Goal not achieved. Last LLM response: ${llmResponseText}`;
+        job.updateLastFailureSummary(finalMessage);
+      } else if (hasToolErrorInLastProcessedBatch) {
+        finalStatus = 'FAILURE_TOOL';
+        const lastToolError = newExecutionHistoryEntries.find(e => e.type === 'tool_error') || agentState?.executionHistory.slice().reverse().find(e => e.type === 'tool_error');
+        finalMessage = `Processing ended after ${iterations} iterations with unresolved tool errors. Last tool error: ${JSON.stringify(lastToolError?.error)}. Last LLM response: ${llmResponseText}`;
+        job.updateLastFailureSummary(finalMessage);
+      } else {
+        finalStatus = 'FAILURE_INTERNAL'; // Default unexpected termination
+        finalMessage = `Processing stopped after ${iterations} iterations without explicit goal or max iterations. Last LLM response: ${llmResponseText}`;
+        this.logger.warn(finalMessage, { jobId: job.id().value() });
+        job.updateLastFailureSummary(finalMessage);
+      }
+      agentExecutorResult = this.createFinalResult(job, finalStatus, finalMessage, finalOutput);
+
+    } catch (caughtError) {
+      const errorObject = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+      const internalErrorMessage = `Unhandled error during execution of Job ID: ${job.id().value()}. Error: ${errorObject.message}`;
+      this.logger.error(internalErrorMessage, errorObject, { jobId: job.id().value() });
+
+      let currentAgentStateForError = job.currentData().agentState;
+      if (!currentAgentStateForError) { currentAgentStateForError = { conversationHistory: ActivityHistory.create([]), executionHistory: [] }; }
+      const updatedExecutionHistory = [...currentAgentStateForError.executionHistory, { timestamp: new Date(), type: 'system_error', name: 'UnhandledExecutorError', error: errorObject.message }];
+      job.updateAgentState({ ...currentAgentStateForError, executionHistory: updatedExecutionHistory });
+      agentExecutorResult = this.createFinalResult(job, 'FAILURE_INTERNAL', internalErrorMessage);
+    }
+
+    // **NEW PERSISTENCE LOGIC**
+    // Finalize the job entity with the determined AgentExecutorResult
+    job.finalizeExecution(agentExecutorResult);
+
+    // Persist the job with its final state
+    const finalSaveResult = await this.jobRepository.save(job);
+    if (finalSaveResult.isErr()) {
+      this.logger.error(
+        `CRITICAL: Failed to save final state of Job ID: ${job.id().value()}. Error: ${finalSaveResult.error.message}`,
+        finalSaveResult.error,
+        { jobId: job.id().value(), agentExecutorResult }
+      );
+      // If final save fails, the job state in DB might be stale.
+      // Return an error indicating this, wrapping the original executor result if it was a success,
+      // or compounding the error if it was already a failure.
+      const finalSaveError = new ApplicationError(
+        `Failed to persist final job state for job ${job.id().value()}: ${finalSaveResult.error.message}. Original status: ${agentExecutorResult.status}`,
+        finalSaveResult.error // Cause
+      );
+
+      // If the executor itself failed, return that error primarily. Otherwise, return the save error.
+      if (agentExecutorResult.status !== 'SUCCESS') {
+         // The job already failed, and saving it also failed. Return the original failure reason's error,
+         // but log the save failure critically.
+         // The AgentExecutorResult (which is 'ok' part of the Promise) will reflect the execution failure.
+         // The 'error' part of the Promise should reflect a system/application level error if the executor itself had issues.
+         // Here, the executor *completed* (even if job failed), but save failed.
+         // So, we convert the successful execution (of the executor) into a failure due to persistence.
+         return error(finalSaveError);
+      }
+      // If executor was successful but save failed, this is an ApplicationError.
+      return error(finalSaveError);
+    }
+
+    this.logger.info(`Job ID: ${job.id().value()} finalized with status: ${agentExecutorResult.status} and persisted successfully.`, {
+      jobId: job.id().value(),
+      finalStatus: agentExecutorResult.status,
     });
+
+    // If agentExecutorResult indicates an execution failure, return error(ApplicationError)
+    // Otherwise, return ok(agentExecutorResult)
+    if (agentExecutorResult.status !== 'SUCCESS') {
+        // Construct an appropriate error object from agentExecutorResult details
+        // For now, using a generic ApplicationError. This could be more specific.
+        const executionError = new ApplicationError(
+            `Job execution failed with status ${agentExecutorResult.status}: ${agentExecutorResult.message}`,
+            agentExecutorResult.errors // cause, if available
+        );
+        return error(executionError);
+    }
+
+    return ok(agentExecutorResult);
   }
 }

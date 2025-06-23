@@ -8,15 +8,22 @@ import { AttemptCount, MaxAttempts } from './value-objects/attempt-count.vo';
 import { RetryPolicy, NoRetryPolicy, RetryDelay } from './value-objects/retry-policy.vo';
 import { JobDependsOn } from './value-objects/job-depends-on.vo';
 import { TargetAgentRole } from './value-objects/target-agent-role.vo';
-import { AgentJobState, ExecutionHistoryEntry } from './job-processing.types';
+import { AgentJobState, ExecutionHistoryEntry, AgentExecutorResult, AgentExecutorStatus } from './job-processing.types'; // Added AgentExecutorResult, AgentExecutorStatus
 import { ActivityHistoryEntry, HistoryEntryRoleType } from './value-objects/activity-history-entry.vo';
 import { ActivityHistory } from './value-objects/activity-history.vo';
+import { DomainError } from '../../common/errors'; // Added DomainError
 
 // For the 'data' field of the Job, which holds agent-specific state.
 // This structure aligns with what GenericAgentExecutor expects in job.data.agentState.
 interface JobData {
   agentState?: AgentJobState;
   lastFailureSummary?: string; // Used by GenericAgentExecutor for re-planning context
+  executionResult?: { // Storing the outcome from AgentExecutor
+    status: string; // AgentExecutorStatus
+    message: string;
+    output?: any;
+    errors?: ReadonlyArray<ExecutionHistoryEntry | string>;
+  };
   [key: string]: any; // Allow other dynamic data
 }
 
@@ -326,6 +333,7 @@ export class Job<PayloadType = any, ResultType = any> {
       data: {
         ...this.props.data,
         lastFailureSummary: undefined, // Clear last failure summary
+        executionResult: undefined, // Clear previous execution result
         // agentState might need to be reset or preserved depending on retry strategy.
         // For now, preserve agentState.
       },
@@ -343,5 +351,58 @@ export class Job<PayloadType = any, ResultType = any> {
 
     // Create the final new Job instance with the updated props from tempJobForStatus
     return new Job(this._id, tempJobForStatus.props);
+  }
+
+  /**
+   * Finalizes the job's execution state based on the AgentExecutorResult.
+   * This method updates the job's status and stores the execution result details.
+   * It should be called before persisting the job after an execution attempt.
+   *
+   * @param executorResult The result from the agent executor.
+   */
+  public finalizeExecution(executorResult: AgentExecutorResult): void {
+    if (this.isTerminal()) {
+      // Potentially log a warning if trying to finalize an already terminal job.
+      // This might happen if save fails and executor is retried, but job was already finalized.
+      console.warn(`Job ${this.id().value()} is already in a terminal state (${this.status().value()}) and finalizeExecution was called.`);
+      // Still update executionResult in data, as it might contain more recent error details.
+    }
+
+    // Store the execution result in props.data
+    this.props.data = {
+      ...this.props.data,
+      executionResult: {
+        status: executorResult.status,
+        message: executorResult.message,
+        output: executorResult.output,
+        errors: executorResult.errors,
+      },
+    };
+
+    // Update job status based on executorResult.status
+    switch (executorResult.status) {
+      case 'SUCCESS':
+        this.props = { ...this.props, status: JobStatus.completed(), result: executorResult.output as ResultType };
+        break;
+      case 'FAILURE_MAX_ITERATIONS':
+      case 'FAILURE_LLM':
+      case 'FAILURE_TOOL':
+      case 'FAILURE_INTERNAL':
+        this.props = {
+          ...this.props,
+          status: JobStatus.failed(),
+          // Store a summary in the main 'result' for quick inspection, or the full executorResult.message.
+          // The detailed executionResult is in props.data.executionResult.
+          result: { error: executorResult.message, status: executorResult.status } as any,
+        };
+        break;
+      default:
+        // Should not happen if AgentExecutorStatus is exhaustive
+        console.error(`Job ${this.id().value()}: Unknown AgentExecutorStatus received: ${executorResult.status}`);
+        this.props = { ...this.props, status: JobStatus.failed() }; // Default to FAILED
+        break;
+    }
+
+    this.touch(); // Update 'updatedAt' timestamp
   }
 }
