@@ -165,22 +165,55 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
       // Process tool_calls if present
       const newExecutionHistoryEntries: ExecutionHistoryEntry[] = [];
+      const toolResultActivityEntries: ActivityHistoryEntry[] = [];
+
       if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
         this.logger.info(`LLM requested ${assistantMessage.tool_calls.length} tool calls for Job ID: ${job.id().value()}`, { jobId: job.id().value() });
+
         for (const toolCall of assistantMessage.tool_calls) {
           const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value(), agent.id().value());
           newExecutionHistoryEntries.push(executionEntry);
+
+          // Create ActivityHistoryEntry for the tool result
+          let toolResultContent: string;
+          if (executionEntry.type === 'tool_error') {
+            // Serialize the error object for content, or use a summary
+            toolResultContent = JSON.stringify(executionEntry.error || { message: 'Tool execution failed without details' });
+             this.logger.warn(`Tool execution for '${executionEntry.name}' resulted in an error. Content for history: ${toolResultContent}`, {jobId: job.id().value()});
+          } else {
+            toolResultContent = JSON.stringify(executionEntry.result);
+          }
+
+          const toolResultActivityEntry = ActivityHistoryEntry.create(
+            HistoryEntryRoleType.TOOL_RESULT,
+            toolResultContent,
+            undefined, // timestamp
+            executionEntry.name, // tool name from execution entry
+            toolCall.id          // IMPORTANT: tool_call_id from the original assistant message's tool_call
+          );
+          toolResultActivityEntries.push(toolResultActivityEntry);
         }
 
+        // Update agentState with new execution history entries
         if (newExecutionHistoryEntries.length > 0) {
           agentState = {
             ...agentState!,
-            executionHistory: [...agentState!.executionHistory, ...newExecutionHistoryEntries]
+            executionHistory: [...agentState!.executionHistory, ...newExecutionHistoryEntries],
           };
-          job.updateAgentState(agentState);
+          // Not updating conversationHistory here yet, will do it after adding toolResultActivityEntries
         }
-        // For APP-SVC-001.3.2, we stop after parsing and validation.
-        // The next step (tool execution) would involve calling tool.execute().
+
+        // Add all tool result activity entries to currentActivityHistory
+        if (toolResultActivityEntries.length > 0) {
+          for(const entry of toolResultActivityEntries) {
+            currentActivityHistory = currentActivityHistory.addEntry(entry);
+          }
+           agentState = { // Re-assign to ensure agentState has the latest currentActivityHistory
+            ...agentState!,
+            conversationHistory: currentActivityHistory,
+          };
+        }
+        job.updateAgentState(agentState); // Single update to agentState for this turn of tool processing
       }
 
       goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage.tool_calls);

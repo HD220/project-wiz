@@ -378,13 +378,15 @@ describe('GenericAgentExecutor', () => {
         const execEntry = agentState?.executionHistory.find(e => e.type === 'tool_call' && e.name === MOCK_TOOL_NAME);
         expect(execEntry).toBeDefined();
         expect(execEntry?.result).toEqual(mockToolOutput);
-        expect(mockLogger.info).toHaveBeenCalledWith(
-          `Tool '${MOCK_TOOL_NAME}' executed successfully for Job ID: ${sampleJob.id().value()}`,
-          { result: mockToolOutput }
-        );
+        // Also check ActivityHistory for TOOL_RESULT
+        const activityHistory = sampleJob.currentData().agentState!.conversationHistory;
+        const toolResultEntry = activityHistory.entries().find(e => e.role() === HistoryEntryRoleType.TOOL_RESULT && e.toolCallId() === toolCallId);
+        expect(toolResultEntry).toBeDefined();
+        expect(toolResultEntry?.content()).toBe(JSON.stringify(mockToolOutput));
+        expect(toolResultEntry?.toolName()).toBe(MOCK_TOOL_NAME);
       });
 
-      it('should record tool_error in ExecutionHistory if tool.execute returns an error', async () => {
+      it('should record tool_error in ExecutionHistory and add TOOL_RESULT with error to ActivityHistory if tool.execute returns an error', async () => {
         const toolExecError = new ToolError('Tool execution failed');
         mockTool.execute.mockResolvedValue(error(toolExecError));
 
@@ -394,13 +396,15 @@ describe('GenericAgentExecutor', () => {
         const execEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
         expect(execEntry).toBeDefined();
         expect(execEntry?.error).toMatchObject({ message: 'Tool execution failed' });
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          `Tool '${MOCK_TOOL_NAME}' execution failed for Job ID: ${sampleJob.id().value()}. Error: ${toolExecError.message}`,
-          toolExecError
-        );
+
+        const activityHistory = sampleJob.currentData().agentState!.conversationHistory;
+        const toolResultEntry = activityHistory.entries().find(e => e.role() === HistoryEntryRoleType.TOOL_RESULT && e.toolCallId() === toolCallId);
+        expect(toolResultEntry).toBeDefined();
+        expect(JSON.parse(toolResultEntry!.content()!)).toMatchObject({ message: 'Tool execution failed' });
+        expect(toolResultEntry?.toolName()).toBe(MOCK_TOOL_NAME);
       });
 
-      it('should record tool_error in ExecutionHistory if tool.execute throws an unexpected error', async () => {
+      it('should record tool_error in ExecutionHistory and add TOOL_RESULT with error to ActivityHistory if tool.execute throws an unexpected error', async () => {
         const unexpectedError = new Error('Unexpected tool crash');
         mockTool.execute.mockRejectedValue(unexpectedError);
 
@@ -410,13 +414,46 @@ describe('GenericAgentExecutor', () => {
         const execEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
         expect(execEntry).toBeDefined();
         expect(execEntry?.error).toBe(`Unexpected error during tool '${MOCK_TOOL_NAME}' execution: ${unexpectedError.message}`);
-         expect(mockLogger.error).toHaveBeenCalledWith(
-          `Unexpected error during tool '${MOCK_TOOL_NAME}' execution: ${unexpectedError.message}`,
-          unexpectedError,
-          expect.anything()
-        );
+
+        const activityHistory = sampleJob.currentData().agentState!.conversationHistory;
+        const toolResultEntry = activityHistory.entries().find(e => e.role() === HistoryEntryRoleType.TOOL_RESULT && e.toolCallId() === toolCallId);
+        expect(toolResultEntry).toBeDefined();
+        expect(toolResultEntry?.content()).toBe(JSON.stringify(`Unexpected error during tool '${MOCK_TOOL_NAME}' execution: ${unexpectedError.message}`));
+        expect(toolResultEntry?.toolName()).toBe(MOCK_TOOL_NAME);
       });
 
+      it('should handle multiple tool calls, adding all results to ActivityHistory', async () => {
+        const toolCallId2 = 'tool_call_456';
+        const mockToolOutput2 = { data: "second tool output" };
+        const assistantMessageWithMultipleToolCalls: LanguageModelMessage = {
+          role: 'assistant',
+          content: null,
+          tool_calls: [
+            { id: toolCallId, type: 'function', function: { name: MOCK_TOOL_NAME, arguments: validToolArgsString } },
+            { id: toolCallId2, type: 'function', function: { name: MOCK_TOOL_NAME, arguments: JSON.stringify({ param1: "another value" }) } }
+          ]
+        };
+        mockLlmAdapter.generateText.mockResolvedValue(ok(assistantMessageWithMultipleToolCalls));
+        mockTool.execute
+          .mockResolvedValueOnce(ok({ someData: 'tool output for call 1' }))
+          .mockResolvedValueOnce(ok(mockToolOutput2)); // Second call to execute
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        const agentState = sampleJob.currentData().agentState!;
+        const activityHistory = agentState.conversationHistory;
+
+        const toolResultEntries = activityHistory.entries().filter(e => e.role() === HistoryEntryRoleType.TOOL_RESULT);
+        expect(toolResultEntries.length).toBe(2);
+
+        expect(toolResultEntries[0].toolCallId()).toBe(toolCallId);
+        expect(toolResultEntries[0].content()).toBe(JSON.stringify({ someData: 'tool output for call 1' }));
+
+        expect(toolResultEntries[1].toolCallId()).toBe(toolCallId2);
+        expect(toolResultEntries[1].content()).toBe(JSON.stringify(mockToolOutput2));
+
+        expect(agentState.executionHistory.filter(e => e.type === 'tool_call').length).toBe(2);
+      });
 
       it('should add assistant message with tool_calls to ActivityHistory', async () => {
         await executor.executeJob(sampleJob, sampleAgent);
