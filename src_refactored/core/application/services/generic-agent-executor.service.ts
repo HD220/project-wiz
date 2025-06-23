@@ -215,97 +215,93 @@ export class GenericAgentExecutor implements IAgentExecutor {
           const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value(), agent.id().value());
           newExecutionHistoryEntries.push(executionEntry);
 
-          if (executionEntry.type === 'tool_error' && typeof executionEntry.error === 'string' && executionEntry.error.includes('Tool not found')) {
+            // Check if the tool execution entry indicates a critical error
+            if (executionEntry.type === 'tool_error' && executionEntry.isCritical) {
             criticalErrorEncounteredThisTurn = true;
-            job.updateLastFailureSummary(`Critical: Tool '${executionEntry.name}' not found.`);
-            this.logger.error(`Critical tool error for Job ID ${job.id().value()}: Tool '${executionEntry.name}' not found. Halting agent processing for this turn.`);
-            // We will break out of the tool processing loop, then the main loop will terminate due to this.
+              const toolError = executionEntry.error as ToolError; // Cast as we know it's a tool_error
+              const failureInfo: CriticalToolFailureInfo = {
+                toolName: executionEntry.name,
+                errorType: toolError.name || 'UnknownToolError',
+                message: toolError.message,
+                details: toolError.originalError ? {
+                  name: (toolError.originalError as Error).name,
+                  message: (toolError.originalError as Error).message,
+                  stack: (toolError.originalError as Error).stack?.substring(0, 500)
+                } : undefined,
+                isRecoverable: false, // It's critical, so not recoverable for this execution path
+              };
+              job.setCriticalToolFailureInfo(failureInfo);
+              job.updateLastFailureSummary(`Critical: Tool '${failureInfo.toolName}' failed non-recoverably: ${failureInfo.message}`);
+              this.logger.error(
+                `Critical tool error for Job ID ${job.id().value()}: Tool '${failureInfo.toolName}' failed non-recoverably. Details: ${JSON.stringify(failureInfo)}`,
+                toolError
+              );
+              // Do not add TOOL_RESULT for critical errors to history, or add a specific "CRITICAL_FAILURE" entry
+              // For now, we skip adding a TOOL_RESULT to history for critical errors.
+              // The error is logged in ExecutionHistory and CriticalToolFailureInfo.
+              break; // Break from processing further tool_calls in this turn
           }
 
-          // Create ActivityHistoryEntry for the tool result
+            // Create ActivityHistoryEntry for the tool result (only if not a critical error that broke the loop above)
           let toolResultContent: string;
-          if (executionEntry.type === 'tool_error') {
-            // Serialize the error object for content, or use a summary
-            toolResultContent = JSON.stringify(executionEntry.error || { message: 'Tool execution failed without details' });
-             this.logger.warn(`Tool execution for '${executionEntry.name}' resulted in an error. Content for history: ${toolResultContent}`, {jobId: job.id().value()});
-          } else {
-            toolResultContent = JSON.stringify(executionEntry.result);
+            if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
+                toolResultContent = JSON.stringify({
+                    name: executionEntry.error.name, message: executionEntry.error.message,
+                    toolName: executionEntry.error.toolName, isRecoverable: executionEntry.error.isRecoverable,
+                    originalError: executionEntry.error.originalError ? { name: (executionEntry.error.originalError as Error).name, message: (executionEntry.error.originalError as Error).message } : undefined,
+                });
+            } else if (executionEntry.type === 'tool_error') {
+                toolResultContent = JSON.stringify(executionEntry.error || { message: 'Tool execution failed without details' });
+            } else {
+                toolResultContent = JSON.stringify(executionEntry.result);
+            }
+
+            const toolResultActivityEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.TOOL_RESULT, toolResultContent, undefined, executionEntry.name, toolCall.id);
+            toolResultActivityEntries.push(toolResultActivityEntry);
+          } // End of for (const toolCall of assistantMessage.tool_calls)
+
+          // Update agentState with new execution history entries
+          if (newExecutionHistoryEntries.length > 0) {
+            agentState = { ...agentState!, executionHistory: [...agentState!.executionHistory, ...newExecutionHistoryEntries] };
           }
-
-          const toolResultActivityEntry = ActivityHistoryEntry.create(
-            HistoryEntryRoleType.TOOL_RESULT,
-            toolResultContent,
-            undefined, // timestamp
-            executionEntry.name, // tool name from execution entry
-            toolCall.id          // IMPORTANT: tool_call_id from the original assistant message's tool_call
-          );
-          toolResultActivityEntries.push(toolResultActivityEntry);
-        }
-
-        // Update agentState with new execution history entries
-        if (newExecutionHistoryEntries.length > 0) {
-          agentState = {
-            ...agentState!,
-            executionHistory: [...agentState!.executionHistory, ...newExecutionHistoryEntries],
-          };
-          // Not updating conversationHistory here yet, will do it after adding toolResultActivityEntries
-        }
-
-        // Add all tool result activity entries to currentActivityHistory
-        if (toolResultActivityEntries.length > 0) {
-          for(const entry of toolResultActivityEntries) {
-            currentActivityHistory = currentActivityHistory.addEntry(entry);
+          // Add all successful/non-critical tool result activity entries to currentActivityHistory
+          if (toolResultActivityEntries.length > 0) {
+            for(const entry of toolResultActivityEntries) { currentActivityHistory = currentActivityHistory.addEntry(entry); }
+            agentState = { ...agentState!, conversationHistory: currentActivityHistory };
           }
-           agentState = { // Re-assign to ensure agentState has the latest currentActivityHistory
-            ...agentState!,
-            conversationHistory: currentActivityHistory,
-          };
+          job.updateAgentState(agentState); // Single update to agentState for this turn of tool processing
+
+          if (criticalErrorEncounteredThisTurn) {
+            goalAchieved = false; // Ensure goal is not marked as achieved
+            break; // Break from the main while loop immediately
+          }
+        } // End of if (assistantMessage.tool_calls)
+
+        if (!criticalErrorEncounteredThisTurn) { // Only check goal if no critical error
+          goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls);
         }
-        job.updateAgentState(agentState); // Single update to agentState for this turn of tool processing
 
-        if (criticalErrorEncounteredThisTurn) {
-          goalAchieved = false; // Ensure goal is not marked as achieved
-          break; // Break from the main while loop
-        }
-      } // End of if (assistantMessage.tool_calls)
+        if (goalAchieved) { this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${iterations}.`); break; }
+        if (iterations >= maxIterations) { this.logger.info(`Max iterations reached for Job ID: ${job.id().value()}.`); }
+      } // End of while loop
 
-      // Update goalAchieved based on the latest llmResponseText and if any tool calls were made
-      // Only if no critical error forced an early exit from tool processing.
-      if (!criticalErrorEncounteredThisTurn) {
-        goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls);
-      }
-
+      // Determine final status and message after loop
+      let finalStatus: AgentExecutorStatus;
+      let finalMessage: string;
+      let finalOutput: any = undefined;
+      const hasToolErrorInLastProcessedBatch = newExecutionHistoryEntries.some(e => e.type === 'tool_error' && !e.isCritical); // Check for non-critical tool errors
 
       if (goalAchieved) {
-        this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${iterations}.`);
-        break; // Exit loop if goal is achieved
-      }
-      if (iterations >= maxIterations) {
-        this.logger.info(`Max iterations reached for Job ID: ${job.id().value()}.`);
-      }
-    } // End of while loop
-
-    // Determine final status and message after loop
-    let finalStatus: AgentExecutorStatus;
-    let finalMessage: string;
-    let finalOutput: any = undefined;
-
-    // The criticalErrorEncounteredThisTurn flag is set if a tool_not_found error caused the loop to break.
-    // hasCriticalToolErrorInLoop checks if any tool error occurred during the last iteration's tool processing.
-    const hasToolErrorInLastProcessedBatch = newExecutionHistoryEntries.some(e => e.type === 'tool_error');
-
-    if (goalAchieved) {
-      finalStatus = 'SUCCESS';
-      finalMessage = `Goal achieved. Last LLM response: ${llmResponseText}`;
-      finalOutput = { message: llmResponseText };
-      job.updateLastFailureSummary(undefined); // Clear any previous summary on success
-    } else if (criticalErrorEncounteredThisTurn) { // This flag is set if loop broke due to critical tool error
-      finalStatus = 'FAILURE_TOOL';
-      // lastFailureSummary was already set when criticalErrorEncounteredThisTurn was set to true
-      finalMessage = job.currentData().lastFailureSummary || `Processing stopped due to a critical tool error after ${iterations} iterations. Last LLM response: ${llmResponseText}`;
-    } else if (iterations >= maxIterations) {
-      finalStatus = 'FAILURE_MAX_ITERATIONS';
-      finalMessage = `Max iterations (${maxIterations}) reached. Goal not achieved. Last LLM response: ${llmResponseText}`;
+        finalStatus = 'SUCCESS';
+        finalMessage = `Goal achieved. Last LLM response: ${llmResponseText}`;
+        finalOutput = { message: llmResponseText };
+        job.updateLastFailureSummary(undefined);
+      } else if (criticalErrorEncounteredThisTurn) {
+         finalStatus = 'FAILURE_TOOL'; // Specifically a critical tool failure
+         finalMessage = job.currentData().lastFailureSummary || `Processing stopped due to a critical tool error after ${iterations} iterations.`;
+      } else if (iterations >= maxIterations) {
+        finalStatus = 'FAILURE_MAX_ITERATIONS';
+        finalMessage = `Max iterations (${maxIterations}) reached. Goal not achieved. Last LLM response: ${llmResponseText}`;
       job.updateLastFailureSummary(finalMessage);
     } else if (hasToolErrorInLastProcessedBatch) {
       // Loop ended (not by goal, not by max iterations), but last processed batch had tool errors.
@@ -409,10 +405,12 @@ export class GenericAgentExecutor implements IAgentExecutor {
         `Tool '${toolName}' not found. Error: ${toolResult.error.message}`,
         toolName,
         toolResult.error,
-        false, // Not recoverable
+        false, // Not recoverable by LLM re-planning for this specific error type
       );
       this.logger.error(toolNotFoundError.message, toolNotFoundError, { jobId: jobIdForLogging, toolName });
-      return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError };
+      // For "Tool not found", it's a critical, non-recoverable error for the current agent execution path.
+      // The error itself already has isRecoverable = false.
+      return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError, isCritical: true };
     }
     const tool = toolResult.value;
 
@@ -436,10 +434,11 @@ export class GenericAgentExecutor implements IAgentExecutor {
         `Argument validation failed for tool '${toolName}'.`,
         toolName,
         validationResult.error, // Zod error as originalError
-        true, // Potentially recoverable by LLM
+        true, // Potentially recoverable by LLM if it can correct its arguments
       );
       this.logger.error(validationToolError.message, validationToolError, { jobId: jobIdForLogging, toolName, issues: validationResult.error.flatten() });
-      return { timestamp, type: 'tool_error', name: toolName, error: validationToolError, params: parsedArgs };
+      // Argument validation failure is typically recoverable by the LLM, so not critical for the agent execution path.
+      return { timestamp, type: 'tool_error', name: toolName, error: validationToolError, params: parsedArgs, isCritical: false };
     }
 
     this.logger.info(`Tool call validated: ${toolName} with args: ${JSON.stringify(validationResult.data)}`, { jobId: jobIdForLogging, toolName });
@@ -463,6 +462,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
           name: toolName,
           params: validationResult.data,
           error: toolErrorFromTool, // Store the actual ToolError instance
+          isCritical: !toolErrorFromTool.isRecoverable, // Mark as critical if the tool itself says it's not recoverable
         };
       }
 
@@ -472,7 +472,8 @@ export class GenericAgentExecutor implements IAgentExecutor {
         type: 'tool_call',
         name: toolName,
         params: validationResult.data,
-        result: toolExecResult.value
+        result: toolExecResult.value,
+        // isCritical is not relevant for successful tool_call
       };
 
     } catch (execError) {
@@ -480,10 +481,10 @@ export class GenericAgentExecutor implements IAgentExecutor {
         `Unexpected error during tool '${toolName}' execution: ${(execError as Error).message}`,
         toolName,
         execError as Error,
-        false, // Not recoverable
+        false, // Unexpected errors are generally not recoverable by the LLM for this turn
       );
       this.logger.error(unexpectedToolError.message, unexpectedToolError, { jobId: jobIdForLogging, toolName });
-      return { timestamp, type: 'tool_error', name: toolName, error: unexpectedToolError, params: validationResult.data };
+      return { timestamp, type: 'tool_error', name: toolName, error: unexpectedToolError, params: validationResult.data, isCritical: true };
     }
   }
 
