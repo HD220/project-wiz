@@ -1,25 +1,25 @@
 import { mock, MockProxy } from 'vitest-mock-extended';
 import { GenericAgentExecutor } from './generic-agent-executor.service';
-import { ILLMAdapter } from '../ports/adapters/i-llm.adapter';
-import { IToolRegistryService } from '../ports/services/i-tool-registry.service';
-import { IJobRepository } from '@refactored/core/domain/job/ports/i-job.repository';
-import { IAgentInternalStateRepository } from '@refactored/core/domain/agent/ports/i-agent-internal-state.repository';
-import { ILogger } from '@refactored/core/common/services/i-logger.service';
-import { Job } from '@refactored/core/domain/job/job.entity';
-import { Agent } from '@refactored/core/domain/agent/agent.entity';
-import { JobId } from '@refactored/core/domain/job/value-objects/job-id.vo';
-import { JobName } from '@refactored/core/domain/job/value-objects/job-name.vo';
-import { AgentId } from '@refactored/core/domain/agent/value-objects/agent-id.vo';
-import { Result } from '@refactored/shared/result';
-import { ApplicationError } from '../common/errors';
-import { ActivityContext } from '@refactored/core/domain/job/value-objects/activity-context.vo';
-import { ActivityHistory } from '@refactored/core/domain/job/value-objects/activity-history.vo';
-import { AgentPersonaTemplate } from '@refactored/core/domain/agent/agent-persona-template.vo';
-import { PersonaId } from '@refactored/core/domain/agent/value-objects/persona/persona-id.vo';
-import { PersonaName } from '@refactored/core/domain/agent/value-objects/persona/persona-name.vo';
-import { PersonaRole } from '@refactored/core/domain/agent/value-objects/persona/persona-role.vo';
-import { PersonaGoal } from '@refactored/core/domain/agent/value-objects/persona/persona-goal.vo';
-import { LLMProviderConfigId } from '@refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+import { ILLMAdapter } from '@/refactored/core/application/ports/adapters/i-llm.adapter';
+import { IToolRegistryService } from '@/refactored/core/application/ports/services/i-tool-registry.service';
+import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
+import { IAgentInternalStateRepository } from '@/refactored/core/domain/agent/ports/i-agent-internal-state.repository';
+import { ILogger } from '@/refactored/core/common/services/i-logger.service';
+import { Job } from '@/refactored/core/domain/job/job.entity';
+import { Agent } from '@/refactored/core/domain/agent/agent.entity';
+import { JobId } from '@/refactored/core/domain/job/value-objects/job-id.vo';
+import { JobName } from '@/refactored/core/domain/job/value-objects/job-name.vo';
+import { AgentId } from '@/refactored/core/domain/agent/value-objects/agent-id.vo';
+import { Result } from '@/refactored/shared/result';
+import { ApplicationError } from '@/refactored/core/application/common/errors';
+import { ActivityContext } from '@/refactored/core/domain/job/value-objects/activity-context.vo';
+import { ActivityHistory } from '@/refactored/core/domain/job/value-objects/activity-history.vo';
+import { AgentPersonaTemplate } from '@/refactored/core/domain/agent/agent-persona-template.vo';
+import { PersonaId } from '@/refactored/core/domain/agent/value-objects/persona/persona-id.vo';
+import { PersonaName } from '@/refactored/core/domain/agent/value-objects/persona/persona-name.vo';
+import { PersonaRole } from '@/refactored/core/domain/agent/value-objects/persona/persona-role.vo';
+import { PersonaGoal } from '@/refactored/core/domain/agent/value-objects/persona/persona-goal.vo';
+import { LLMProviderConfigId } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 
 
 describe('GenericAgentExecutor', () => {

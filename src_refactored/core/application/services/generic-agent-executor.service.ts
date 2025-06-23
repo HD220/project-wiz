@@ -1,15 +1,15 @@
-import { Agent } from '../../domain/agent/agent.entity';
-import { IAgentInternalStateRepository } from '../../domain/agent/ports/i-agent-internal-state.repository';
-import { Job } from '../../domain/job/job.entity';
-import { AgentExecutorResult } from '../../domain/job/job-processing.types';
-import { IJobRepository } from '../../domain/job/ports/i-job.repository';
-import { Result } from '../../../shared/result';
-import { DomainError } from '../../common/errors';
-import { ApplicationError } from '../common/errors'; // This one is already relative-like from its perspective
-import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
-import { ILLMAdapter } from '../ports/adapters/i-llm.adapter';
-import { IToolRegistryService } from '../ports/services/i-tool-registry.service';
-import { ILogger } from '../../common/services/i-logger.service';
+import { Agent } from '@/refactored/core/domain/agent/agent.entity';
+import { IAgentInternalStateRepository } from '@/refactored/core/domain/agent/ports/i-agent-internal-state.repository';
+import { Job } from '@/refactored/core/domain/job/job.entity';
+import { AgentExecutorResult } from '@/refactored/core/domain/job/job-processing.types';
+import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
+import { Result } from '@/refactored/shared/result';
+import { DomainError } from '@/refactored/core/common/errors';
+import { ApplicationError } from '@/refactored/core/application/common/errors';
+import { IAgentExecutor } from '@/refactored/core/application/ports/services/i-agent-executor.interface';
+import { ILLMAdapter } from '@/refactored/core/application/ports/adapters/i-llm.adapter';
+import { IToolRegistryService } from '@/refactored/core/application/ports/services/i-tool-registry.service';
+import { ILogger } from '@/refactored/core/common/services/i-logger.service';
 
 // @Injectable() // Assuming InversifyJS or similar will be used for DI
 export class GenericAgentExecutor implements IAgentExecutor {

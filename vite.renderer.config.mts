@@ -44,6 +44,10 @@ export default defineConfig({
       "@/application": path.resolve(__dirname, "./src/core/application"),
       "@/shared": path.resolve(__dirname, "./src/shared"),
       "@": path.resolve(__dirname, "./src"),
+      // Updated for consistency
+      "@/refactored": path.resolve(__dirname, "./src_refactored"),
+      "@/refactored/core": path.resolve(__dirname, "./src_refactored/core"),
+      "@/refactored/shared": path.resolve(__dirname, "./src_refactored/shared"),
     },
   },
 });
