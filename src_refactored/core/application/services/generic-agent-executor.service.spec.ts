@@ -20,7 +20,16 @@ import { PersonaId } from '@/refactored/core/domain/agent/value-objects/persona/
 import { PersonaName } from '@/refactored/core/domain/agent/value-objects/persona/persona-name.vo';
 import { PersonaRole } from '@/refactored/core/domain/agent/value-objects/persona/persona-role.vo';
 import { PersonaGoal } from '@/refactored/core/domain/agent/value-objects/persona/persona-goal.vo';
+import { PersonaBackstory } from '@/refactored/core/domain/agent/value-objects/persona/persona-backstory.vo';
+import { ToolNames } from '@/refactored/core/domain/agent/value-objects/persona/tool-names.vo';
+import { LLMProviderConfig } from '@/refactored/core/domain/llm-provider-config/llm-provider-config.entity';
 import { LLMProviderConfigId } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+import { LLMProviderConfigName } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
+import { LLMProviderId } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-provider-id.vo';
+import { LLMApiKey } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-api-key.vo';
+import { AgentTemperature } from '@/refactored/core/domain/agent/value-objects/agent-temperature.vo';
+import { JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
+import { LLMError } from '@/refactored/core/common/errors';
 
 
 describe('GenericAgentExecutor', () => {
@@ -50,37 +59,45 @@ describe('GenericAgentExecutor', () => {
     );
 
     // Create a sample Job
-    const jobProps = {
-      name: JobName.create('Test Job').value as JobName,
-      payload: { instruction: 'Do something' },
-      // Initialize with a basic ActivityContext
-      data: {
-        context: ActivityContext.create({ history: ActivityHistory.create([]) })
-      }
-    };
-    sampleJob = Job.create(jobProps);
+    sampleJob = Job.create({
+      name: JobName.create('Test Job Prompt').value,
+      payload: { initialPrompt: 'Initial user query for the job' },
+    });
+    // Spy on job methods AFTER instance creation
+    vi.spyOn(sampleJob, 'moveToActive').mockReturnValue(true);
+    vi.spyOn(sampleJob, 'updateAgentState').mockReturnThis();
+
+
+    // Create a sample LLMProviderConfig
+    const llmConfig = LLMProviderConfig.create({
+        name: LLMProviderConfigName.create('TestLLMConfig').value,
+        providerId: LLMProviderId.create('test-provider').value,
+        apiKey: LLMApiKey.create('test-key').value,
+    });
 
     // Create a sample Agent
-     const personaTemplate = AgentPersonaTemplate.create({
+    const personaTemplateResult = AgentPersonaTemplate.create({
       id: PersonaId.generate(),
-      name: PersonaName.create('Test Persona').value as PersonaName,
-      role: PersonaRole.create('Tester').value as PersonaRole,
-      goal: PersonaGoal.create('Test things').value as PersonaGoal,
-      backstory: 'Created for testing',
-      toolNames: [],
-    }).value as AgentPersonaTemplate;
+      name: PersonaName.create('Test Persona').value,
+      role: PersonaRole.create('Tester').value,
+      goal: PersonaGoal.create('Test things').value,
+      backstory: PersonaBackstory.create('Created for testing').value,
+      toolNames: ToolNames.create([]).value,
+    });
+    if(personaTemplateResult.isErr()) throw personaTemplateResult.error; // Should not happen in test setup
 
     sampleAgent = Agent.create({
-      id: AgentId.generate(),
-      personaTemplate,
-      llmProviderConfigId: LLMProviderConfigId.generate(),
-    }).value as Agent;
+      personaTemplate: personaTemplateResult.value,
+      llmProviderConfig: llmConfig, // Use the created LLMProviderConfig
+      temperature: AgentTemperature.create(0.7).value,
+    });
 
-    // Mock job's markAsProcessing to return a successful Result with the job itself
-    // Vitest's `vi.spyOn` can be used if Job methods are not easily mockable directly
-    // For now, we assume the entity method works as expected or test it separately.
-    // We will mock the repository save method.
-    mockJobRepository.save.mockResolvedValue(ok(undefined)); // Corrected: use ok() - Assuming save returns void on success
+    mockJobRepository.save.mockResolvedValue(ok(undefined));
+    mockLlmAdapter.generateText.mockResolvedValue(ok('LLM initial response'));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -88,78 +105,123 @@ describe('GenericAgentExecutor', () => {
   });
 
   describe('executeJob', () => {
-    it('should log the start of job execution', async () => {
+    it('should log the start of job execution, set job to active, save job, and call LLM', async () => {
       await executor.executeJob(sampleJob, sampleAgent);
+
       expect(mockLogger.info).toHaveBeenCalledWith(
         `Executing Job ID: ${sampleJob.id().value} with Agent ID: ${sampleAgent.id().value}`,
         { jobId: sampleJob.id().value, agentId: sampleAgent.id().value },
       );
+      expect(sampleJob.moveToActive).toHaveBeenCalled();
+      expect(mockJobRepository.save).toHaveBeenCalledWith(sampleJob);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Job ID: ${sampleJob.id().value()} is ACTIVE and saved. Attempt: ${sampleJob.attempts().value()}`,
+        expect.anything(),
+      );
+      expect(mockLlmAdapter.generateText).toHaveBeenCalled();
     });
 
-    it('should return error if job is missing activity context', async () => {
-      const jobWithoutContextProps = {
-        name: JobName.create('Job Without Context').value as JobName,
-        payload: {},
-        data: {}, // No context
-      };
-      const jobWithoutContext = Job.create(jobWithoutContextProps);
+    it('should initialize agentState if not present and save job', async () => {
+      // Create a job explicitly without agentState
+      const jobWithoutAgentState = Job.create({
+        name: JobName.create('Job needing agentState init').value,
+        payload: { prompt: 'init me' },
+      });
+      // Clear default agentState if any was set by Job.create for this test
+      (jobWithoutAgentState as any).props.data.agentState = undefined;
 
-      const result = await executor.executeJob(jobWithoutContext, sampleAgent);
+      vi.spyOn(jobWithoutAgentState, 'moveToActive').mockReturnValue(true);
+      const updateAgentStateSpy = vi.spyOn(jobWithoutAgentState, 'updateAgentState').mockReturnThis();
 
-      expect(result.isErr()).toBe(true);
-      expect(result.error).toBeInstanceOf(ApplicationError);
-      expect(result.error?.message).toContain('missing its ActivityContext');
-      expect(mockLogger.error).toHaveBeenCalled();
+      mockLlmAdapter.generateText.mockResolvedValue(ok('LLM response after init'));
+
+      await executor.executeJob(jobWithoutAgentState, sampleAgent);
+
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Job ID: ${jobWithoutAgentState.id().value()} is missing agentState or conversationHistory. Initializing.`,
+        { jobId: jobWithoutAgentState.id().value() },
+      );
+      expect(updateAgentStateSpy).toHaveBeenCalledWith(expect.objectContaining({
+        conversationHistory: expect.any(ActivityHistory),
+        executionHistory: [],
+      }));
+      expect(mockJobRepository.save).toHaveBeenCalledWith(jobWithoutAgentState);
+      expect(mockLlmAdapter.generateText).toHaveBeenCalled();
     });
 
-    it('should mark job as PROCESSING and save it', async () => {
-      // Spy on the actual job's method to ensure it's called
-      const markAsProcessingSpy = vi.spyOn(sampleJob, 'markAsProcessing');
+    it('should construct initial prompt with system and user message and call LLM', async () => {
+      const persona = sampleAgent.personaTemplate();
+      const expectedSystemContent = `You are ${persona.name().value()}, a ${persona.role().value()}. Your goal is: ${persona.goal().value()}. Persona backstory: ${persona.backstory().value()}`;
+      const jobPayload = sampleJob.payload() as { initialPrompt?: string };
+      const expectedUserContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${sampleJob.name().value()}`;
+
+      const expectedFullPrompt = `system: ${expectedSystemContent}\n\nuser: ${expectedUserContent}`;
 
       await executor.executeJob(sampleJob, sampleAgent);
 
-      expect(markAsProcessingSpy).toHaveBeenCalled();
-      // Assuming markAsProcessing was successful and returned the (modified) job
-      expect(mockJobRepository.save).toHaveBeenCalledWith(sampleJob);
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Job ID: ${sampleJob.id().value} marked as PROCESSING and saved.`,
-        { jobId: sampleJob.id().value }
+      expect(mockLlmAdapter.generateText).toHaveBeenCalledWith(
+        expectedFullPrompt,
+        { temperature: sampleAgent.temperature().value() }
       );
-       markAsProcessingSpy.mockRestore();
     });
 
-    it('should return PENDING_LLM_RESPONSE on successful initialization', async () => {
+    it('should return Ok result with LLM response on successful execution', async () => {
+      const llmResponse = 'Successful LLM response';
+      mockLlmAdapter.generateText.mockResolvedValue(ok(llmResponse));
+
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
       expect(result.isOk()).toBe(true);
-      const SUT = result.value; // SUT (System Under Test) is the result value
-      expect(SUT.status).toBe('PENDING_LLM_RESPONSE');
-      expect(SUT.jobId).toBe(sampleJob.id().value);
-      expect(SUT.output?.message).toBe('Job processing initiated.');
-      expect(SUT.history).toEqual([]); // Initial history is empty
+      const value = result.value;
+      expect(value.jobId).toBe(sampleJob.id().value);
+      expect(value.output).toEqual({ message: llmResponse });
+      expect(value.status).toBe('PENDING_LLM_RESPONSE'); // Simplified status for now
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('LLM response received'),
+        expect.anything()
+      );
     });
 
-    it('should return error if job fails to be marked as PROCESSING', async () => {
-      const anError = new ApplicationError('Failed to mark as processing');
-      // Mock the job's method to return an error
-      vi.spyOn(sampleJob, 'markAsProcessing').mockReturnValue(error(anError)); // Corrected: use error()
+    it('should return Error result if moveToActive fails', async () => {
+      vi.spyOn(sampleJob, 'moveToActive').mockReturnValue(false);
+      // To ensure it doesn't proceed if already active, let's mock status
+      vi.spyOn(sampleJob, 'status').mockReturnValue(JobStatusType.PENDING);
+
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
       expect(result.isErr()).toBe(true);
-      expect(result.error).toBe(anError);
+      expect(result.error).toBeInstanceOf(ApplicationError);
+      expect(result.error?.message).toContain('could not be set to ACTIVE');
       expect(mockJobRepository.save).not.toHaveBeenCalled();
-      vi.restoreAllMocks(); // Clean up spy
+      expect(mockLlmAdapter.generateText).not.toHaveBeenCalled();
     });
 
-    it('should return error if job repository fails to save', async () => {
-      const repoError = new ApplicationError('DB save failed');
-      mockJobRepository.save.mockResolvedValue(error(repoError)); // Corrected: use error()
+    it('should return Error result if job repository save fails after moveToActive', async () => {
+      const dbError = new ApplicationError('DB save failed');
+      mockJobRepository.save.mockResolvedValue(error(dbError));
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
       expect(result.isErr()).toBe(true);
-      expect(result.error).toBe(repoError);
+      expect(result.error).toBe(dbError);
+      expect(mockLlmAdapter.generateText).not.toHaveBeenCalled();
+    });
+
+    it('should return Error result if LLM adapter fails', async () => {
+      const llmError = new LLMError('LLM generation failed');
+      mockLlmAdapter.generateText.mockResolvedValue(error(llmError));
+
+      const result = await executor.executeJob(sampleJob, sampleAgent);
+
+      expect(result.isErr()).toBe(true);
+      expect(result.error).toBeInstanceOf(ApplicationError);
+      expect(result.error?.message).toContain('LLM generation failed: LLM generation failed');
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        `LLM generation failed for Job ID: ${sampleJob.id().value()}`,
+        llmError,
+        { jobId: sampleJob.id().value() }
+      );
     });
   });
 });
