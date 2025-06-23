@@ -42,12 +42,15 @@ class HistoryEntryRole extends AbstractValueObject<HistoryEntryRoleProps> {
 }
 
 
+import { LanguageModelMessageToolCall } from '@/refactored/core/ports/adapters/llm-adapter.types'; // Import the type
+
 interface ActivityHistoryEntryProps extends ValueObjectProps {
   role: HistoryEntryRole;
-  content: EntryContent; // Could be string for messages, or structured object for tool calls/results
+  content: EntryContent;
   timestamp: JobTimestamp;
-  toolName?: string; // Optional: if role is TOOL_CALL or TOOL_RESULT
-  toolCallId?: string; // Optional: if role is TOOL_CALL or TOOL_RESULT, to match calls with results
+  toolName?: string;
+  toolCallId?: string;
+  tool_calls?: ReadonlyArray<LanguageModelMessageToolCall>; // For ASSISTANT role when making tool calls
 }
 
 export class ActivityHistoryEntry extends AbstractValueObject<ActivityHistoryEntryProps> {
@@ -57,22 +60,30 @@ export class ActivityHistoryEntry extends AbstractValueObject<ActivityHistoryEnt
 
   public static create(
     roleType: HistoryEntryRoleType,
-    contentValue: string, // Keep as string for simplicity, assume JSON.stringify for objects
+    contentValue: string | null, // Content can be null for assistant messages with tool_calls
     timestamp?: JobTimestamp,
     toolName?: string,
     toolCallId?: string,
+    tool_calls?: ReadonlyArray<LanguageModelMessageToolCall>
   ): ActivityHistoryEntry {
-    if ((roleType === HistoryEntryRoleType.TOOL_CALL || roleType === HistoryEntryRoleType.TOOL_RESULT) && !toolName) {
-        // throw new Error("Tool name is required for tool_call and tool_result history entries.");
-        // Allow for now, but good practice to require it.
+    if ((roleType === HistoryEntryRoleType.TOOL_CALL || roleType === HistoryEntryRoleType.TOOL_RESULT) && !toolName && roleType !== HistoryEntryRoleType.ASSISTANT) {
+      // Relaxed for ASSISTANT role as toolName is part of tool_calls.function.name
+      // throw new Error("Tool name is required for tool_call and tool_result history entries.");
     }
+    if (roleType === HistoryEntryRoleType.ASSISTANT && tool_calls && tool_calls.length > 0 && contentValue === null) {
+      // This is valid: assistant message that only calls tools.
+    } else if (contentValue === null && !(roleType === HistoryEntryRoleType.ASSISTANT && tool_calls && tool_calls.length > 0) ) {
+      throw new Error("Content cannot be null unless it's an assistant message with tool_calls.");
+    }
+
 
     const props: ActivityHistoryEntryProps = {
       role: HistoryEntryRole.create(roleType),
-      content: EntryContent.create(contentValue),
+      content: EntryContent.create(contentValue === null ? "" : contentValue), // Store empty string if null, actual content otherwise
       timestamp: timestamp || JobTimestamp.now(),
       toolName: toolName,
       toolCallId: toolCallId,
+      tool_calls: tool_calls ? Object.freeze([...tool_calls]) : undefined,
     };
     return new ActivityHistoryEntry(props);
   }

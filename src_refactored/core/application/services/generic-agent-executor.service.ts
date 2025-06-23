@@ -128,8 +128,9 @@ export class GenericAgentExecutor implements IAgentExecutor {
       this.logLlmCall(job, conversationMessages);
 
       const agentTemperature = agent.temperature();
+      // Adapting to the new ILLMAdapter.generateText signature
       const llmGenerationResult = await this.llmAdapter.generateText(
-          conversationMessages.map(m => `${m.role}: ${m.content}`).join('\n\n'),
+          conversationMessages, // Pass the array of messages
           { temperature: agentTemperature.value() }
       );
 
@@ -139,28 +140,60 @@ export class GenericAgentExecutor implements IAgentExecutor {
         return error(new ApplicationError(`LLM generation failed: ${llmError.message}`));
       }
 
-      llmResponseText = llmGenerationResult.value;
+      const assistantMessage = llmGenerationResult.value; // Now a LanguageModelMessage
+      llmResponseText = assistantMessage.content || ''; // Use content, or empty string if null
       this.logger.info(`LLM response received for Job ID: ${job.id().value()}: ${llmResponseText.substring(0,100)}...`, { jobId: job.id().value() });
 
-      // Update history with LLM's response
-      const assistantEntry = ActivityHistoryEntry.create(
+      // Add assistant's message (which might include text content and/or tool_calls) to history.
+      const assistantHistoryEntry = ActivityHistoryEntry.create(
         HistoryEntryRoleType.ASSISTANT,
-        llmResponseText
+        assistantMessage.content, // This can be null if only tool_calls are present
+        undefined, // timestamp will be set by create
+        undefined, // toolName (not for assistant's own message)
+        undefined, // toolCallId (not for assistant's own message)
+        assistantMessage.tool_calls // Pass the tool_calls here
       );
-      currentActivityHistory = currentActivityHistory.addEntry(assistantEntry);
+      currentActivityHistory = currentActivityHistory.addEntry(assistantHistoryEntry);
+      agentState = { // Ensure agentState is updated with the new history before processing tools
+        ...agentState!,
+        conversationHistory: currentActivityHistory,
+        executionHistory: [...(agentState!.executionHistory || [])] // Ensure executionHistory is an array
+      };
+      job.updateAgentState(agentState);
 
-      // Update agentState on the job instance
-      // Note: agentState was already confirmed to exist earlier in the method.
-      job.updateAgentState({
-        ...agentState!, // Non-null assertion safe due to earlier check/init
-        conversationHistory: currentActivityHistory
-      });
-      // The job with updated agentState will be saved by the worker service after executeJob completes,
-      // or if further iterations/tool calls happen, it's saved before those.
-      // For this sub-task, we are not saving it here within the loop's first pass.
 
-      goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText);
-      // maxIterations--; // Loop is only one iteration for this sub-task and next.
+      // Process tool_calls if present
+      const newExecutionHistoryEntries: ExecutionHistoryEntry[] = [];
+      if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+        this.logger.info(`LLM requested ${assistantMessage.tool_calls.length} tool calls for Job ID: ${job.id().value()}`, { jobId: job.id().value() });
+        for (const toolCall of assistantMessage.tool_calls) {
+          const executionEntry = await this.processAndValidateSingleToolCall(toolCall, job.id().value());
+          newExecutionHistoryEntries.push(executionEntry);
+        }
+
+        if (newExecutionHistoryEntries.length > 0) {
+          agentState = {
+            ...agentState!,
+            executionHistory: [...agentState!.executionHistory, ...newExecutionHistoryEntries]
+          };
+          job.updateAgentState(agentState);
+        }
+        // For APP-SVC-001.3.2, we stop after parsing and validation.
+        // The next step (tool execution) would involve calling tool.execute().
+      }
+
+      goalAchieved = this.isGoalAchievedByLlmResponse(llmResponseText, assistantMessage.tool_calls);
+      // If tool calls were made, goalAchieved is likely false, and we'd expect tool results next.
+      // This is handled by the updated isGoalAchievedByLlmResponse method.
+
+      return this.createFinalResult(job, llmResponseText, goalAchieved);
+
+    } catch (caughtError) {
+      const errorObject = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+      // If tool calls were made, goalAchieved is likely false, and we'd expect tool results next.
+      if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+        goalAchieved = false;
+      }
 
       return this.createFinalResult(job, llmResponseText, goalAchieved);
 
@@ -236,8 +269,48 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return { messages, updatedHistory: workingHistory, historyWasUpdated };
   }
 
-  private isGoalAchievedByLlmResponse(responseText: string): boolean {
-    // Basic placeholder for goal achievement
+  private async processAndValidateSingleToolCall(
+    toolCall: LanguageModelMessageToolCall,
+    jobIdForLogging: string,
+  ): Promise<ExecutionHistoryEntry> {
+    const toolName = toolCall.function.name;
+    const timestamp = new Date();
+
+    const toolResult = await this.toolRegistryService.getTool(toolName);
+
+    if (toolResult.isErr()) {
+      const errorMsg = `Tool '${toolName}' not found. Error: ${toolResult.error.message}`;
+      this.logger.error(errorMsg, toolResult.error, { jobId: jobIdForLogging, toolName });
+      return { timestamp, type: 'tool_error', name: toolName, error: errorMsg };
+    }
+    const tool = toolResult.value;
+
+    let parsedArgs: any;
+    try {
+      parsedArgs = JSON.parse(toolCall.function.arguments);
+    } catch (parseError) {
+      const errorMsg = `Failed to parse arguments for tool '${toolName}'. Error: ${(parseError as Error).message}`;
+      this.logger.error(errorMsg, parseError as Error, { jobId: jobIdForLogging, toolName, args: toolCall.function.arguments });
+      return { timestamp, type: 'tool_error', name: toolName, error: errorMsg, params: { originalArgs: toolCall.function.arguments } };
+    }
+
+    const validationResult = tool.parameters.safeParse(parsedArgs);
+    if (!validationResult.success) {
+      const errorMsg = `Argument validation failed for tool '${toolName}'.`;
+      this.logger.error(errorMsg, validationResult.error.flatten(), { jobId: jobIdForLogging, toolName, issues: validationResult.error.flatten() });
+      return { timestamp, type: 'tool_error', name: toolName, error: { message: errorMsg, issues: validationResult.error.flatten() }, params: parsedArgs };
+    }
+
+    this.logger.info(`Tool call validated: ${toolName} with args: ${JSON.stringify(validationResult.data)}`, { jobId: jobIdForLogging, toolName });
+    return { timestamp, type: 'tool_call', name: toolName, params: validationResult.data };
+  }
+
+  private isGoalAchievedByLlmResponse(responseText: string, toolCalls?: LanguageModelMessageToolCall[]): boolean {
+    // If there are tool calls, the goal is not yet achieved from this response alone.
+    if (toolCalls && toolCalls.length > 0) {
+      return false;
+    }
+    // Basic placeholder for goal achievement based on text content
     return responseText.toLowerCase().includes("task complete");
   }
 

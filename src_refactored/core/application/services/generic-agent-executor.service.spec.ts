@@ -30,7 +30,10 @@ import { LLMApiKey } from '@/refactored/core/domain/llm-provider-config/value-ob
 import { AgentTemperature } from '@/refactored/core/domain/agent/value-objects/agent-temperature.vo';
 import { JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
 import { LLMError } from '@/refactored/core/common/errors';
-import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
+import { HistoryEntryRoleType, ActivityHistoryEntry } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
+import { IAgentTool } from '@/refactored/core/tools/tool.interface';
+import { ToolNotFoundError } from '@/refactored/core/application/ports/services/i-tool-registry.service';
+import { z } from 'zod';
 
 
 describe('GenericAgentExecutor', () => {
@@ -94,7 +97,12 @@ describe('GenericAgentExecutor', () => {
     });
 
     mockJobRepository.save.mockResolvedValue(ok(undefined));
-    mockLlmAdapter.generateText.mockResolvedValue(ok('LLM initial response'));
+    // Default mock for generateText to return a simple assistant message without tool calls
+    mockLlmAdapter.generateText.mockResolvedValue(ok({
+      role: 'assistant',
+      content: 'LLM initial response',
+      tool_calls: []
+    }));
   });
 
   afterEach(() => {
@@ -244,29 +252,36 @@ describe('GenericAgentExecutor', () => {
       const jobPayload = sampleJob.payload() as { initialPrompt?: string };
       const expectedUserContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${sampleJob.name().value()}`;
 
-      const expectedFullPrompt = `system: ${expectedSystemContent}\n\nuser: ${expectedUserContent}`;
+      const expectedMessages = [
+        { role: 'system', content: expectedSystemContent },
+        { role: 'user', content: expectedUserContent }
+      ];
 
       await executor.executeJob(sampleJob, sampleAgent);
 
       expect(mockLlmAdapter.generateText).toHaveBeenCalledWith(
-        expectedFullPrompt,
+        expectedMessages,
         { temperature: sampleAgent.temperature().value() }
       );
     });
 
-    it('should return Ok result with LLM response on successful execution', async () => {
-      const llmResponse = 'Successful LLM response';
-      mockLlmAdapter.generateText.mockResolvedValue(ok(llmResponse));
+    it('should return Ok result with LLM response on successful execution (no tool calls)', async () => {
+      const llmResponseContent = 'Successful LLM response text';
+      mockLlmAdapter.generateText.mockResolvedValue(ok({
+        role: 'assistant',
+        content: llmResponseContent,
+        tool_calls: []
+      }));
 
       const result = await executor.executeJob(sampleJob, sampleAgent);
 
       expect(result.isOk()).toBe(true);
       const value = result.value;
       expect(value.jobId).toBe(sampleJob.id().value);
-      expect(value.output).toEqual({ message: llmResponse });
-      expect(value.status).toBe('PENDING_LLM_RESPONSE'); // Simplified status for now
+      expect(value.output).toEqual({ message: llmResponseContent });
+      expect(value.status).toBe('PENDING_LLM_RESPONSE');
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('LLM response received'),
+        expect.stringContaining(`LLM response received for Job ID: ${sampleJob.id().value()}: ${llmResponseContent.substring(0,100)}...`),
         expect.anything()
       );
     });
@@ -311,6 +326,113 @@ describe('GenericAgentExecutor', () => {
         llmError,
         { jobId: sampleJob.id().value() }
       );
+    });
+
+    // --- New tests for tool call parsing and validation ---
+    describe('when LLM response includes tool_calls', () => {
+      const toolCallId = 'tool_call_123';
+      const validToolArgsString = JSON.stringify({ param1: 'value1', param2: 42 });
+      const assistantMessageWithToolCall: LanguageModelMessage = {
+        role: 'assistant',
+        content: null,
+        tool_calls: [{
+          id: toolCallId,
+          type: 'function',
+          function: { name: MOCK_TOOL_NAME, arguments: validToolArgsString }
+        }]
+      };
+
+      beforeEach(() => {
+        // Setup mockTool and toolRegistryService for these specific tests
+        mockTool = mock<IAgentTool<any, any>>(); // Re-init to ensure clean mock for each test if needed
+        mockTool.name = MOCK_TOOL_NAME;
+        mockTool.parameters = mockToolSchema;
+        mockToolRegistryService.getTool.mockResolvedValue(ok(mockTool)); // Default successful lookup
+        mockLlmAdapter.generateText.mockResolvedValue(ok(assistantMessageWithToolCall));
+      });
+
+      it('should parse and validate valid tool call arguments', async () => {
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(mockToolRegistryService.getTool).toHaveBeenCalledWith(MOCK_TOOL_NAME);
+        // Zod's safeParse would have been called internally by the production code.
+        // We check the executionHistory for the 'tool_call' entry.
+        const agentState = sampleJob.currentData().agentState;
+        const toolCallEntry = agentState?.executionHistory.find(e => e.type === 'tool_call' && e.name === MOCK_TOOL_NAME);
+        expect(toolCallEntry).toBeDefined();
+        expect(toolCallEntry?.params).toEqual(JSON.parse(validToolArgsString));
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          `Tool call validated: ${MOCK_TOOL_NAME} with args: ${JSON.stringify(JSON.parse(validToolArgsString))}`,
+          expect.anything()
+        );
+      });
+
+      it('should add assistant message with tool_calls to ActivityHistory', async () => {
+        await executor.executeJob(sampleJob, sampleAgent);
+        const agentState = sampleJob.currentData().agentState;
+        const history = agentState!.conversationHistory;
+        const lastEntry = history.entries()[history.count() -1]; // Last entry is assistant's message
+
+        expect(lastEntry.role()).toBe(HistoryEntryRoleType.ASSISTANT);
+        expect(lastEntry.props.tool_calls).toEqual(assistantMessageWithToolCall.tool_calls);
+        expect(lastEntry.content()).toBe(''); // Since assistantMessage.content was null
+      });
+
+      it('should log tool_error if tool is not found', async () => {
+        mockToolRegistryService.getTool.mockResolvedValue(error(new ToolNotFoundError(MOCK_TOOL_NAME)));
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        const agentState = sampleJob.currentData().agentState;
+        const errorEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
+        expect(errorEntry).toBeDefined();
+        expect(errorEntry?.error).toContain('Tool not found');
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          `Tool '${MOCK_TOOL_NAME}' not found for Job ID: ${sampleJob.id().value()}`,
+          expect.any(ToolNotFoundError), expect.anything()
+        );
+      });
+
+      it('should log tool_error if tool arguments are invalid JSON', async () => {
+        const invalidArgsString = '{"param1": "value1", param2: 42}'; // Invalid JSON
+        mockLlmAdapter.generateText.mockResolvedValue(ok({
+          ...assistantMessageWithToolCall,
+          tool_calls: [{ ...assistantMessageWithToolCall.tool_calls![0], function: { ...assistantMessageWithToolCall.tool_calls![0].function, arguments: invalidArgsString }}]
+        }));
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        const agentState = sampleJob.currentData().agentState;
+        const errorEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
+        expect(errorEntry).toBeDefined();
+        expect(errorEntry?.error).toContain('Argument parsing failed');
+         expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining(`Failed to parse arguments for tool '${MOCK_TOOL_NAME}'`),
+          expect.any(Error), expect.anything()
+        );
+      });
+
+      it('should log tool_error if tool arguments fail Zod validation', async () => {
+        const invalidArgsObject = { param1: 123 }; // param1 should be string
+        mockLlmAdapter.generateText.mockResolvedValue(ok({
+          ...assistantMessageWithToolCall,
+          tool_calls: [{ ...assistantMessageWithToolCall.tool_calls![0], function: { ...assistantMessageWithToolCall.tool_calls![0].function, arguments: JSON.stringify(invalidArgsObject) }}]
+        }));
+        // Ensure the schema mock is used for safeParse
+        const safeParseSpy = vi.spyOn(mockToolSchema, 'safeParse');
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(safeParseSpy).toHaveBeenCalledWith(invalidArgsObject);
+        const agentState = sampleJob.currentData().agentState;
+        const errorEntry = agentState?.executionHistory.find(e => e.type === 'tool_error' && e.name === MOCK_TOOL_NAME);
+        expect(errorEntry).toBeDefined();
+        expect(errorEntry?.error).toMatchObject({ message: "Argument validation failed" });
+        expect(mockLogger.error).toHaveBeenCalledWith(
+           expect.stringContaining(`Argument validation failed for tool '${MOCK_TOOL_NAME}'`),
+          expect.anything(), expect.anything() // ZodError is complex to match exactly here
+        );
+      });
     });
   });
 });
