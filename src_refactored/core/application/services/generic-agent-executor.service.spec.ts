@@ -455,6 +455,56 @@ describe('GenericAgentExecutor', () => {
         expect(agentState.executionHistory.filter(e => e.type === 'tool_call').length).toBe(2);
       });
 
+      it('should send tool results back to LLM for a subsequent call', async () => {
+        const toolCallId1 = 'tc_001';
+        const toolName1 = MOCK_TOOL_NAME;
+        const toolArgs1 = { param1: "value for first call" };
+        const toolOutput1 = { result: "output from first tool" };
+
+        // First LLM call: requests one tool
+        const firstLlmResponse: LanguageModelMessage = {
+          role: 'assistant',
+          content: null,
+          tool_calls: [{ id: toolCallId1, type: 'function', function: { name: toolName1, arguments: JSON.stringify(toolArgs1) }}]
+        };
+
+        // Second LLM call: simple text response after getting tool result
+        const secondLlmResponse: LanguageModelMessage = {
+          role: 'assistant',
+          content: 'Final response after tool execution.',
+        };
+
+        mockLlmAdapter.generateText
+          .mockResolvedValueOnce(ok(firstLlmResponse))  // For first call
+          .mockResolvedValueOnce(ok(secondLlmResponse)); // For second call
+
+        mockTool.execute.mockResolvedValue(ok(toolOutput1)); // Mock tool execution
+
+        await executor.executeJob(sampleJob, sampleAgent);
+
+        expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+
+        // Verify messages for the second LLM call
+        const secondCallArgs = mockLlmAdapter.generateText.mock.calls[1][0];
+        expect(secondCallArgs).toBeInstanceOf(Array);
+
+        const systemMessage = secondCallArgs.find(m => m.role === 'system');
+        expect(systemMessage).toBeDefined();
+
+        const userMessage = secondCallArgs.find(m => m.role === 'user');
+        expect(userMessage).toBeDefined();
+
+        const assistantMessageWithToolCall = secondCallArgs.find(m => m.role === 'assistant' && m.tool_calls && m.tool_calls.length > 0);
+        expect(assistantMessageWithToolCall).toBeDefined();
+        expect(assistantMessageWithToolCall?.tool_calls?.[0].id).toBe(toolCallId1);
+
+        const toolResultMessage = secondCallArgs.find(m => m.role === 'tool' && m.tool_call_id === toolCallId1);
+        expect(toolResultMessage).toBeDefined();
+        expect(toolResultMessage?.content).toBe(JSON.stringify(toolOutput1));
+        // expect(toolResultMessage?.name).toBe(toolName1); // If 'name' is added to 'tool' role LanguageModelMessage
+      });
+
+
       it('should add assistant message with tool_calls to ActivityHistory', async () => {
         await executor.executeJob(sampleJob, sampleAgent);
         const agentState = sampleJob.currentData().agentState;

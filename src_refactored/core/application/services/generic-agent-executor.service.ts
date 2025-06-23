@@ -97,56 +97,59 @@ export class GenericAgentExecutor implements IAgentExecutor {
         attempts: job.attempts().value(),
       });
 
-      // 3. Construct initial messages for LLM and update history if needed
-      const messageConstructionResult = this.constructInitialLlmMessagesAndUpdateHistory(
-        agent,
-        job,
-        currentActivityHistory
-      );
-      let conversationMessages = messageConstructionResult.messages;
-      currentActivityHistory = messageConstructionResult.updatedHistory; // Update history reference
+      // 3. Prepare for interaction loop
+      let goalAchieved = false;
+      let iterations = 0;
+      const maxIterations = 5; // TODO: Make this configurable
+      let llmResponseText = 'No response yet.'; // Holds the latest textual response from LLM
+      let assistantMessage: LanguageModelMessage | null = null;
 
-      // If history was updated (e.g., initial user prompt added), update agentState on Job
-      if (messageConstructionResult.historyWasUpdated) {
-        job.updateAgentState({
-           ...agentState!, // Non-null assertion safe due to earlier check/init
-           conversationHistory: currentActivityHistory
-        });
-        // Consider if a save is needed here or if it's batched later.
-        // For now, the instance of 'job' carries the updated state.
+
+      // Ensure initial user prompt is in history if it was empty
+      if (currentActivityHistory.isEmpty()) {
+         const jobPayload = job.payload() as { prompt?: string; [key: string]: any };
+         const jobName = job.name().value();
+         const userPromptContent = jobPayload.prompt || `Based on your persona, please address the following task: ${jobName}`;
+         const userPromptEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.USER, userPromptContent);
+         currentActivityHistory = currentActivityHistory.addEntry(userPromptEntry);
+         agentState = {...agentState!, conversationHistory: currentActivityHistory};
+         job.updateAgentState(agentState);
+         // Note: a savepoint here might be good if the job is long-running.
       }
 
-      // 4. Start interaction loop (simplified for this sub-task: one call)
-      let goalAchieved = false; // Renamed from isGoalAchieved for consistency
-      let maxIterations = 5;
-      let llmResponseText = 'No response yet.';
 
-      if (maxIterations <= 0 || goalAchieved) {
-        // Should not happen with current simplified loop, but good check for future.
-         return this.createFinalResult(job, llmResponseText, goalAchieved);
-      }
+      // 4. Start interaction loop
+      while (iterations < maxIterations && !goalAchieved) {
+        iterations++;
+        this.logger.info(`Starting LLM interaction cycle ${iterations} for Job ID: ${job.id().value()}`, { jobId: job.id().value(), iteration: iterations });
 
-      this.logLlmCall(job, conversationMessages);
+        // Construct messages for LLM from the current full history
+        const persona = agent.personaTemplate();
+        const systemMessageString = `You are ${persona.name().value()}, a ${persona.role().value()}. Your goal is: ${persona.goal().value()}. Persona backstory: ${persona.backstory().value()}`;
+        conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, currentActivityHistory);
 
-      const agentTemperature = agent.temperature();
-      // Adapting to the new ILLMAdapter.generateText signature
-      const llmGenerationResult = await this.llmAdapter.generateText(
-          conversationMessages, // Pass the array of messages
-          { temperature: agentTemperature.value() }
-      );
+        this.logLlmCall(job, conversationMessages);
 
-      if (llmGenerationResult.isErr()) {
-        const llmError = llmGenerationResult.error;
-        this.logger.error(`LLM generation failed for Job ID: ${job.id().value()}`, llmError, { jobId: job.id().value() });
-        return error(new ApplicationError(`LLM generation failed: ${llmError.message}`));
-      }
+        const agentTemperature = agent.temperature();
+        const llmGenerationResult = await this.llmAdapter.generateText(
+            conversationMessages,
+            { temperature: agentTemperature.value() }
+        );
 
-      const assistantMessage = llmGenerationResult.value; // Now a LanguageModelMessage
-      llmResponseText = assistantMessage.content || ''; // Use content, or empty string if null
-      this.logger.info(`LLM response received for Job ID: ${job.id().value()}: ${llmResponseText.substring(0,100)}...`, { jobId: job.id().value() });
+        if (llmGenerationResult.isErr()) {
+          const llmError = llmGenerationResult.error;
+          this.logger.error(`LLM generation failed in iteration ${iterations} for Job ID: ${job.id().value()}`, llmError, { jobId: job.id().value() });
+          // Persist current state before returning error
+          job.updateAgentState(agentState!); // agentState should be up-to-date
+          await this.jobRepository.save(job);
+          return error(new ApplicationError(`LLM generation failed: ${llmError.message}`));
+        }
 
-      // Add assistant's message (which might include text content and/or tool_calls) to history.
-      const assistantHistoryEntry = ActivityHistoryEntry.create(
+        assistantMessage = llmGenerationResult.value;
+        llmResponseText = assistantMessage.content || '';
+        this.logger.info(`LLM response (iteration ${iterations}) received for Job ID: ${job.id().value()}: ${llmResponseText.substring(0,100)}...`, { jobId: job.id().value() });
+
+        const assistantHistoryEntry = ActivityHistoryEntry.create(
         HistoryEntryRoleType.ASSISTANT,
         assistantMessage.content, // This can be null if only tool_calls are present
         undefined, // timestamp will be set by create
@@ -263,44 +266,40 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return ok(undefined); // Already active, proceed.
   }
 
-  private constructInitialLlmMessagesAndUpdateHistory(
-    agent: Agent,
-    job: Job,
-    initialHistory: ActivityHistory,
-  ): { messages: LanguageModelMessage[]; updatedHistory: ActivityHistory; historyWasUpdated: boolean } {
-    const persona = agent.personaTemplate();
-    const personaName = persona.name().value();
-    const personaRole = persona.role().value();
-    const personaGoal = persona.goal().value();
-    const personaBackstory = persona.backstory().value();
+  // private constructInitialLlmMessagesAndUpdateHistory // This method is now obsolete and removed.
 
-    const systemMessageContent = `You are ${personaName}, a ${personaRole}. Your goal is: ${personaGoal}. Persona backstory: ${personaBackstory}`;
-
+  private convertActivityHistoryToLlmMessages(
+    systemMessageContent: string,
+    history: ActivityHistory
+  ): LanguageModelMessage[] {
     const messages: LanguageModelMessage[] = [{ role: 'system', content: systemMessageContent }];
-    let historyWasUpdated = false;
-    let workingHistory = initialHistory;
 
-    if (!workingHistory.isEmpty()) {
-      workingHistory.entries().forEach(entry => {
+    history.entries().forEach(entry => {
+      const role = entry.role();
+      const content = entry.content(); // Content is already a string (or empty string if was null)
+
+      if (role === HistoryEntryRoleType.USER) {
+        messages.push({ role: 'user', content });
+      } else if (role === HistoryEntryRoleType.ASSISTANT) {
         messages.push({
-          role: entry.role() as 'system' | 'user' | 'assistant' | 'tool',
-          content: entry.content(),
+          role: 'assistant',
+          content: content, // content might be "" if original was null
+          tool_calls: entry.props.tool_calls || undefined // Access via props as it's ReadonlyArray
         });
-      });
-    } else {
-      const jobPayload = job.payload() as { prompt?: string; [key: string]: any };
-      const jobName = job.name().value();
-      const userPromptContent = jobPayload.prompt || `Based on your persona, please address the following task: ${jobName}`;
-
-      messages.push({ role: 'user', content: userPromptContent });
-
-      // Add this initial user prompt to the history
-      const userPromptEntry = ActivityHistoryEntry.create(HistoryEntryRoleType.USER, userPromptContent);
-      workingHistory = workingHistory.addEntry(userPromptEntry);
-      historyWasUpdated = true;
-    }
-
-    return { messages, updatedHistory: workingHistory, historyWasUpdated };
+      } else if (role === HistoryEntryRoleType.TOOL_RESULT) {
+        messages.push({
+          role: 'tool',
+          tool_call_id: entry.toolCallId(),
+          // name: entry.toolName(), // Vercel SDK for 'tool' role might expect 'name' of the function.
+                                  // For now, tool_call_id and content are primary.
+                                  // If 'name' is needed, ActivityHistoryEntry or this mapping needs adjustment.
+          content: content, // This is the stringified tool result/error
+        });
+      }
+      // TOOL_CALL role from history is not directly sent back to LLM, only TOOL_RESULT
+      // SYSTEM messages from history (other than the primary one) are also not typically re-added here unless a specific strategy requires it.
+    });
+    return messages;
   }
 
   private async processAndValidateSingleToolCall(
