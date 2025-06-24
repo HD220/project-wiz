@@ -51,7 +51,8 @@ describe('GenericAgentExecutor', () => {
   let mockLlmAdapter: DeepMockProxy<ILLMAdapter>;
   let mockSuccessfulTool: DeepMockProxy<IAgentTool<any, any>>;
   let mockRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>;
-  let mockNonRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>; // Added
+  let mockNonRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>;
+  let mockValidationTestTool: DeepMockProxy<IAgentTool<any, any>>; // Added
   let mockToolRegistryService: DeepMockProxy<IToolRegistryService>;
   let mockJobRepository: DeepMockProxy<IJobRepository>;
   let mockAgentInternalStateRepository: DeepMockProxy<IAgentInternalStateRepository>;
@@ -103,6 +104,13 @@ describe('GenericAgentExecutor', () => {
         false // isRecoverable = false
     );
     mockNonRecoverableErrorTool.execute.mockResolvedValue(error(nonRecoverableError));
+
+    // Define Mock Validation Test Tool
+    mockValidationTestTool = mock<IAgentTool<any, any>>();
+    mockValidationTestTool.name = 'validationTestTool';
+    mockValidationTestTool.description = 'A mock tool with specific argument validation.';
+    mockValidationTestTool.parameters = z.object({ requiredParam: z.string().min(3) });
+    mockValidationTestTool.execute.mockResolvedValue(ok({ output: "should not be called if validation fails" }));
 
     mockJobRepository = mock<IJobRepository>();
     mockAgentInternalStateRepository = mock<IAgentInternalStateRepository>();
@@ -794,5 +802,103 @@ describe('GenericAgentExecutor', () => {
       expect.any(ToolError), // Executor should wrap this as a ToolError
       expect.anything()
     );
+  });
+
+  it('should handle tool argument validation failure, add error to history, and call LLM again', async () => {
+    // Arrange
+    const toolCallId = 'toolCallValFail1';
+    const toolName = 'validationTestTool';
+    const invalidToolArgsString = '{"requiredParam": "a"}'; // "a" is < min(3)
+    const invalidToolArgsObject = { requiredParam: "a" };
+
+    mockToolRegistryService.getTool.calledWith(toolName).mockResolvedValue(ok(mockValidationTestTool));
+    // mockValidationTestTool.execute should not be called.
+
+    mockLlmAdapter.generateText
+      .mockResolvedValueOnce( // First LLM call: requests the tool with invalid args
+        ok({
+          role: 'assistant',
+          content: null,
+          tool_calls: [{ id: toolCallId, type: 'function', function: { name: toolName, arguments: invalidToolArgsString } }],
+        }),
+      )
+      .mockResolvedValueOnce( // Second LLM call: after validation error, LLM "corrects" and job succeeds
+        ok({
+          role: 'assistant',
+          content: 'Goal achieved after LLM corrected tool arguments.',
+          tool_calls: [],
+        }),
+      );
+
+    // Spies
+    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+    const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
+
+    // Act
+    const result = await executor.executeJob(mockJob, mockAgent);
+
+    // Assert
+    // General Result
+    expect(result.isOk()).toBe(true);
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('SUCCESS'); // Assuming LLM corrects and succeeds
+    expect(executionResult.message).toContain('Goal achieved after LLM corrected tool arguments.');
+
+    // LLM Interaction
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+    const secondLlmCallArgs = mockLlmAdapter.generateText.mock.calls[1][0];
+    // The second call to LLM should contain the validation error information
+    const toolResultErrorMessage = secondLlmCallArgs.find(m => m.role === 'tool' && m.tool_call_id === toolCallId);
+    expect(toolResultErrorMessage).toBeDefined();
+    expect(toolResultErrorMessage?.content).toContain('Argument validation failed');
+    expect(toolResultErrorMessage?.content).toContain('String must contain at least 3 character(s)');
+
+
+    // Tool Interaction
+    expect(mockToolRegistryService.getTool).toHaveBeenCalledWith(toolName);
+    expect(mockValidationTestTool.execute).not.toHaveBeenCalled(); // Crucial: execute not called
+
+    // Job State
+    expect(mockJob.status().is(JobStatusType.COMPLETED)).toBe(true);
+    expect(updateCriticalToolFailureInfoSpy).not.toHaveBeenCalled(); // Validation error is recoverable
+
+    // ActivityHistory
+    const agentState = mockJob.currentData().agentState;
+    const history = agentState.conversationHistory.entries();
+    // Expected: User -> Assistant (tool_call) -> Tool Result (validation error) -> Assistant (final)
+    expect(history.length).toBe(4);
+    expect(history[1].role()).toBe(HistoryEntryRoleType.ASSISTANT); // Tool call request
+    expect(history[2].role()).toBe(HistoryEntryRoleType.TOOL_RESULT); // Validation error result
+    expect(history[2].toolCallId()).toBe(toolCallId);
+    expect(history[2].toolName()).toBe(toolName);
+    expect(history[2].content()).toContain("Argument validation failed for tool 'validationTestTool'. Issues: [{\"code\":\"too_small\",\"minimum\":3,\"type\":\"string\",\"inclusive\":true,\"exact\":false,\"message\":\"String must contain at least 3 character(s)\",\"path\":[\"requiredParam\"]}]");
+    expect(history[3].role()).toBe(HistoryEntryRoleType.ASSISTANT); // Replanned success
+
+    // ExecutionHistory
+    const execHistory = agentState.executionHistory;
+    const toolErrorEntry = execHistory.find(e => e.name === toolName && e.type === 'tool_error');
+    expect(toolErrorEntry).toBeDefined();
+    expect(toolErrorEntry?.params).toEqual(invalidToolArgsObject); // Original invalid params
+    // @ts-ignore
+    expect(toolErrorEntry?.error?.message).toContain("Argument validation failed");
+    // @ts-ignore
+    expect(toolErrorEntry?.error?.isRecoverable).toBe(true);
+    expect(toolErrorEntry?.isCritical).toBe(false);
+
+    // JobRepository Saves
+    expect(mockJobRepository.save).toHaveBeenCalled();
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop();
+    if (lastSaveCall) {
+        expect(lastSaveCall[0].status().is(JobStatusType.COMPLETED)).toBe(true);
+    }
+
+    // Logger Calls
+    expect(mockLogger.warn).toHaveBeenCalledWith( // Or info, depending on severity chosen for validation errors
+      expect.stringContaining(`Argument validation failed for tool '${toolName}'`),
+      expect.any(ToolError), // The ToolError created due to validation failure
+      expect.anything()
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Calling LLM for Job ID: ${mockJob.id().value()} (iteration 2)`), expect.anything());
   });
 });
