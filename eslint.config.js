@@ -65,6 +65,14 @@ export default [
       ],
       "import/no-unresolved": "error",
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/naming-convention": ["warn",
+        { "selector": "default", "format": ["camelCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
+        { "selector": "variable", "format": ["camelCase", "PascalCase", "UPPER_CASE"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
+        { "selector": "function", "format": ["camelCase", "PascalCase"] },
+        { "selector": "parameter", "format": ["camelCase"], "leadingUnderscore": "allow" },
+        { "selector": "typeLike", "format": ["PascalCase"] },
+        { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] }
+      ],
       "import/order": ["warn", {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
         "pathGroups": [
@@ -132,6 +140,14 @@ export default [
       ],
       "import/no-unresolved": "error",
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/naming-convention": ["warn",
+        { "selector": "default", "format": ["camelCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
+        { "selector": "variable", "format": ["camelCase", "PascalCase", "UPPER_CASE"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
+        { "selector": "function", "format": ["camelCase", "PascalCase"] },
+        { "selector": "parameter", "format": ["camelCase"], "leadingUnderscore": "allow" },
+        { "selector": "typeLike", "format": ["PascalCase"] },
+        { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] }
+      ],
       "import/order": ["warn", {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
         "pathGroups": [
