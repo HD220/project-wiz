@@ -65,6 +65,27 @@ export default [
       ],
       "import/no-unresolved": "error",
       "@typescript-eslint/no-explicit-any": "error",
+      "import/order": ["warn", {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
+        "pathGroups": [
+          { "pattern": "@nestjs/**", "group": "external", "position": "before" },
+          { "pattern": "@/refactored/**", "group": "internal", "position": "before" },
+          { "pattern": "@/application/**", "group": "internal", "position": "before" },
+          { "pattern": "@/core/**", "group": "internal", "position": "before" },
+          { "pattern": "@/domain/**", "group": "internal", "position": "before" },
+          { "pattern": "@/infrastructure/**", "group": "internal", "position": "before" },
+          { "pattern": "@/presentation/**", "group": "internal", "position": "before" },
+          { "pattern": "@/components/**", "group": "internal", "position": "before" },
+          { "pattern": "@/lib/**", "group": "internal", "position": "before" },
+          { "pattern": "@/hooks/**", "group": "internal", "position": "before" },
+          { "pattern": "@/ui/**", "group": "internal", "position": "before" },
+          { "pattern": "@/shared/**", "group": "internal", "position": "after" },
+          { "pattern": "@/*", "group": "internal", "position": "after" }
+        ],
+        "pathGroupsExcludedImportTypes": [],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }],
     },
     settings: {
       "import/resolver": {
@@ -111,6 +132,27 @@ export default [
       ],
       "import/no-unresolved": "error",
       "@typescript-eslint/no-explicit-any": "error",
+      "import/order": ["warn", {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
+        "pathGroups": [
+          { "pattern": "@nestjs/**", "group": "external", "position": "before" },
+          { "pattern": "@/refactored/**", "group": "internal", "position": "before" },
+          { "pattern": "@/application/**", "group": "internal", "position": "before" },
+          { "pattern": "@/core/**", "group": "internal", "position": "before" },
+          { "pattern": "@/domain/**", "group": "internal", "position": "before" },
+          { "pattern": "@/infrastructure/**", "group": "internal", "position": "before" },
+          { "pattern": "@/presentation/**", "group": "internal", "position": "before" },
+          { "pattern": "@/components/**", "group": "internal", "position": "before" },
+          { "pattern": "@/lib/**", "group": "internal", "position": "before" },
+          { "pattern": "@/hooks/**", "group": "internal", "position": "before" },
+          { "pattern": "@/ui/**", "group": "internal", "position": "before" },
+          { "pattern": "@/shared/**", "group": "internal", "position": "after" },
+          { "pattern": "@/*", "group": "internal", "position": "after" }
+        ],
+        "pathGroupsExcludedImportTypes": [],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }],
     },
     settings: {
       "import/resolver": {
