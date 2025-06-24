@@ -49,9 +49,33 @@ Aderir à Clean Architecture:
     *   `queue/`: Implementação da fila de Jobs.
     *   `worker-pool/`: Implementação do pool de workers.
     *   `ioc/`: Configuração de Injeção de Dependência (InversifyJS).
-    *   `frameworks/react/`: Código do frontend React (componentes, páginas, hooks, etc.).
-    *   `frameworks/electron/` (ou `presentation/electron`): Código específico do Electron (processo principal, preload, manipuladores IPC).
-*   `src_refactored/presentation/`: Pode conter elementos de nível superior da apresentação, como a configuração inicial do Electron e a orquestração da UI, se não estiver totalmente dentro de `infrastructure/frameworks/`.
+    *   (*Nota: As subpastas `frameworks/react/` e `frameworks/electron/` dentro de `infrastructure/` foram movidas e reestruturadas sob `src_refactored/presentation/` para melhor clareza da camada de apresentação.*)
+*   `src_refactored/presentation/`: Contém todo o código relacionado à apresentação ao usuário, incluindo a interface do usuário (UI) e a lógica específica da plataforma Electron.
+    *   `electron/`: Código específico da plataforma Electron.
+        *   `main/`: Lógica do Processo Principal do Electron (ponto de entrada, gerenciamento de janelas, configuração de IPC handlers, etc.).
+        *   `preload/`: Scripts de Preload do Electron, que fornecem uma ponte segura entre o Processo Principal e os Processos de Renderer.
+    *   `ui/`: Contém toda a aplicação frontend React.
+        *   `index.html`: Ponto de entrada HTML para a aplicação React (servido pelo Vite para o renderer do Electron).
+        *   `main.tsx`: Ponto de entrada TypeScript/React que inicializa a aplicação React, configura providers globais (Tema, Router, i18n, TanStack Query Client) e monta o componente raiz da UI no DOM.
+        *   `assets/`: Recursos estáticos como imagens, fontes, etc.
+        *   `components/`: Componentes React reutilizáveis:
+            *   `common/`: Componentes genéricos e pequenos, altamente reutilizáveis (ex: `LoadingSpinner`, `ErrorFallback`).
+            *   `layout/`: Componentes estruturais da UI (ex: `AppShell`, `MainSidebar`, `PageHeader`).
+            *   `ui/`: Componentes base do Shadcn/UI, adicionados via CLI e customizados conforme necessário.
+        *   `config/`: Configurações centrais da aplicação UI (ex: instância do TanStack Router, instância do QueryClient, setup do i18n).
+        *   `features/`: Módulos de funcionalidades específicas da UI. Cada feature agrupa:
+            *   `components/`: Componentes React reutilizáveis *dentro* daquela feature específica.
+            *   `hooks/`: Hooks React específicos para a lógica da feature.
+            *   `pages/`: Componentes de página completos para a feature.
+            *   `services.ts`: (Opcional) Funções que encapsulam chamadas IPC específicas da feature.
+            *   `types.ts`: (Opcional) Tipos TypeScript específicos da feature.
+        *   `hooks/`: Hooks React globais, reutilizáveis em múltiplas features.
+        *   `lib/`: Funções utilitárias puras (não-React) específicas do frontend.
+        *   `services/`: Camada de abstração para comunicação com o backend (IPC), como `coreService.ts`.
+        *   `store/`: Estado global do cliente não relacionado a servidor (ex: contextos de Tema, Autenticação).
+        *   `styles/`: Arquivos de estilo globais, como `globals.css` contendo variáveis de tema Tailwind.
+        *   `types/`: Definições de tipo TypeScript globais para o frontend.
+        *   `routeTree.gen.ts`: Arquivo gerado pelo plugin Vite do TanStack Router.
 *   `src_refactored/shared/`: Utilitários e tipos que podem ser compartilhados entre o backend (Electron main) e o frontend (Electron renderer), ex: `Result` type, tipos IPC.
 
 ## 4. Tecnologias Chave
