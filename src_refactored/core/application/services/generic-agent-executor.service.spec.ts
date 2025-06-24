@@ -193,4 +193,84 @@ describe('GenericAgentExecutor', () => {
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Goal achieved for Job ID: ${mockJob.id().value()}`), expect.anything());
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: SUCCESS and persisted successfully`), expect.anything());
   });
+
+  it('should finish with FAILURE_MAX_ITERATIONS when maxIterations is reached', async () => {
+    // Arrange
+    const maxIter = 3;
+    const lowIterationAgent = Agent.create({
+        id: AgentId.generate(),
+        personaTemplate: mockAgent.personaTemplate(),
+        llmProviderConfigId: mockAgent.llmProviderConfigId(),
+        temperature: AgentTemperature.create(0.7).unwrap(),
+        maxIterations: MaxIterations.create(maxIter).unwrap()
+    }).unwrap();
+
+    // Mock LLM to always return a non-conclusive response
+    mockLlmAdapter.generateText.mockResolvedValue(
+      ok({
+        role: 'assistant',
+        content: 'Still thinking...',
+        tool_calls: [],
+      }),
+    );
+
+    // Reset save mock calls for this specific test if needed, though new job instance might be cleaner
+    // For this test, we'll use the global mockJob but check its state after lowIterationAgent runs.
+    // It's important that mockJobRepository.save continues to work as in beforeEach.
+    // Spies
+    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // Already spied in previous test, ensure it's fresh or re-spy
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+    const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
+
+    // Act
+    const result = await executor.executeJob(mockJob, lowIterationAgent);
+
+    // Assert
+    // General Result
+    expect(result.isOk()).toBe(true); // Executor itself completes and reports the failure status
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('FAILURE_MAX_ITERATIONS');
+    expect(executionResult.message).toContain(`Max iterations (${maxIter}) reached. Goal not achieved.`);
+    expect(executionResult.output).toEqual({ message: `Max iterations (${maxIter}) reached. Goal not achieved. Last LLM response: Still thinking...` });
+
+
+    // LLM Interaction
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(maxIter);
+
+    // Job State
+    expect(mockJob.status().is(JobStatusType.FAILED)).toBe(true);
+    expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(expect.stringContaining(`Max iterations (${maxIter}) reached. Goal not achieved.`));
+    expect(finalizeExecutionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'FAILURE_MAX_ITERATIONS',
+        message: expect.stringContaining(`Max iterations (${maxIter}) reached`),
+      }),
+    );
+
+    // ActivityHistory
+    const agentState = mockJob.currentData().agentState;
+    const history = agentState.conversationHistory.entries();
+    // Expected: 1 initial user prompt + maxIter assistant responses
+    expect(history.length).toBe(1 + maxIter);
+    expect(history[0].role()).toBe(HistoryEntryRoleType.USER);
+    for (let i = 0; i < maxIter; i++) {
+      expect(history[i + 1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(history[i + 1].content()).toBe('Still thinking...');
+    }
+
+    // JobRepository Saves
+    // At least 2 (ACTIVE, FAILED). Potentially more if agentState is saved per iteration.
+    // For this test, we mainly care that the final save reflects the FAILED state.
+    expect(mockJobRepository.save).toHaveBeenCalled(); // General check
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop(); // Get the last call
+    expect(lastSaveCall).toBeDefined();
+    if (lastSaveCall) {
+        expect(lastSaveCall[0].status().is(JobStatusType.FAILED)).toBe(true);
+    }
+
+
+    // Logger Calls
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining(`Max iterations (${maxIter}) reached for Job ID: ${mockJob.id().value()}`), expect.anything());
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: FAILURE_MAX_ITERATIONS and persisted successfully`), expect.anything());
+  });
 });
