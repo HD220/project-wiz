@@ -1,7 +1,0 @@
-# Ignorar pasta scripts
-scripts/
-
-# Ignorar outros arquivos/diretórios conforme necessário
-dist/
-node_modules/
-.vite/
