@@ -39,6 +39,7 @@ import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects
 
 // Error Types
 import { ApplicationError } from '@/refactored/core/application/common/errors';
+import { ToolError } from '@/refactored/core/common/errors'; // Added ToolError
 
 // Tooling & Zod for mock tool
 import { z } from 'zod';
@@ -49,6 +50,7 @@ describe('GenericAgentExecutor', () => {
   // Variáveis para mocks e a instância do executor
   let mockLlmAdapter: DeepMockProxy<ILLMAdapter>;
   let mockSuccessfulTool: DeepMockProxy<IAgentTool<any, any>>;
+  let mockRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>; // Added
   let mockToolRegistryService: DeepMockProxy<IToolRegistryService>;
   let mockJobRepository: DeepMockProxy<IJobRepository>;
   let mockAgentInternalStateRepository: DeepMockProxy<IAgentInternalStateRepository>;
@@ -74,6 +76,19 @@ describe('GenericAgentExecutor', () => {
     // It's important to mock the specific method instance if it's to be checked by `toHaveBeenCalledWith`
     // or if its return value is critical per test. For a general mock setup:
     mockSuccessfulTool.execute.mockResolvedValue(ok({ toolOutput: "value from successful tool" }));
+
+    // Define Mock Recoverable Error Tool
+    mockRecoverableErrorTool = mock<IAgentTool<any, any>>();
+    mockRecoverableErrorTool.name = 'recoverableErrorTool';
+    mockRecoverableErrorTool.description = 'A mock tool that returns a recoverable error.';
+    mockRecoverableErrorTool.parameters = z.object({ data: z.string() });
+    const recoverableError = new ToolError(
+        "Simulated recoverable error from tool",
+        "recoverableErrorTool", // toolName
+        new Error("Original error detail for recoverable"), // originalError
+        true // isRecoverable = true
+    );
+    mockRecoverableErrorTool.execute.mockResolvedValue(error(recoverableError));
 
     mockJobRepository = mock<IJobRepository>();
     mockAgentInternalStateRepository = mock<IAgentInternalStateRepository>();
@@ -466,5 +481,111 @@ describe('GenericAgentExecutor', () => {
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Tool ${toolName} executed successfully for Job ID: ${mockJob.id().value()}`), expect.anything());
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Calling LLM for Job ID: ${mockJob.id().value()} (iteration 2)`), expect.anything()); // Iteration 2
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Goal achieved for Job ID: ${mockJob.id().value()}`), expect.anything());
+  });
+
+  it('should handle a recoverable ToolError, add error to history, and call LLM again for replanning', async () => {
+    // Arrange
+    const toolCallId = 'toolCallId456';
+    const toolName = 'recoverableErrorTool';
+    const toolArgsString = '{"data": "some input"}';
+    const toolArgsObject = { data: "some input" };
+    const recoverableErrorInst = new ToolError(
+        "Simulated recoverable error from tool",
+        toolName,
+        new Error("Original error detail for recoverable"),
+        true // isRecoverable = true
+    );
+    // Ensure the mock tool in beforeEach is set to return this specific error for this test if not already.
+    // The beforeEach already sets up mockRecoverableErrorTool.execute to return a specific error instance.
+    // We can rely on that or override here if needed for clarity or variation.
+    // For this test, we use the one from beforeEach.
+
+    mockToolRegistryService.getTool.calledWith(toolName).mockResolvedValue(ok(mockRecoverableErrorTool));
+
+    mockLlmAdapter.generateText
+      .mockResolvedValueOnce( // First LLM call: requests the tool
+        ok({
+          role: 'assistant',
+          content: null,
+          tool_calls: [{ id: toolCallId, type: 'function', function: { name: toolName, arguments: toolArgsString } }],
+        }),
+      )
+      .mockResolvedValueOnce( // Second LLM call: after tool error, LLM replans and succeeds
+        ok({
+          role: 'assistant',
+          content: 'Goal achieved after LLM replanned due to recoverable tool error.',
+          tool_calls: [],
+        }),
+      );
+
+    // Spies
+    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+    const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
+
+
+    // Act
+    const result = await executor.executeJob(mockJob, mockAgent);
+
+    // Assert
+    // General Result
+    expect(result.isOk()).toBe(true);
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('SUCCESS');
+    expect(executionResult.message).toContain('Goal achieved after LLM replanned');
+
+    // LLM Interaction
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+    const secondLlmCallArgs = mockLlmAdapter.generateText.mock.calls[1][0];
+    expect(secondLlmCallArgs).toEqual(expect.arrayContaining([
+        expect.objectContaining({ role: 'system' }),
+        expect.objectContaining({ role: 'user' }),
+        expect.objectContaining({ role: 'assistant', tool_calls: expect.arrayContaining([expect.objectContaining({ id: toolCallId})]) }),
+        expect.objectContaining({ role: 'tool', tool_call_id: toolCallId, content: JSON.stringify(recoverableErrorInst.toPlainObject()) }) // Error is stringified
+    ]));
+
+    // Tool Interaction
+    expect(mockToolRegistryService.getTool).toHaveBeenCalledWith(toolName);
+    expect(mockRecoverableErrorTool.execute).toHaveBeenCalledTimes(1);
+    expect(mockRecoverableErrorTool.execute).toHaveBeenCalledWith(toolArgsObject, expect.anything());
+
+    // Job State
+    expect(mockJob.status().is(JobStatusType.COMPLETED)).toBe(true);
+    expect(updateCriticalToolFailureInfoSpy).not.toHaveBeenCalled(); // Error was recoverable
+
+    // ActivityHistory
+    const agentState = mockJob.currentData().agentState;
+    const history = agentState.conversationHistory.entries();
+    // Expected: User -> Assistant (tool_call) -> Tool Result (error) -> Assistant (final)
+    expect(history.length).toBe(4);
+    expect(history[1].role()).toBe(HistoryEntryRoleType.ASSISTANT); // Tool call request
+    expect(history[2].role()).toBe(HistoryEntryRoleType.TOOL_RESULT); // Tool error result
+    expect(history[2].toolCallId()).toBe(toolCallId);
+    expect(history[2].toolName()).toBe(toolName);
+    expect(JSON.parse(history[2].content()!)).toEqual(recoverableErrorInst.toPlainObject());
+    expect(history[3].role()).toBe(HistoryEntryRoleType.ASSISTANT); // Replanned success
+
+    // ExecutionHistory
+    const execHistory = agentState.executionHistory;
+    const toolErrorEntry = execHistory.find(e => e.name === toolName && e.type === 'tool_error');
+    expect(toolErrorEntry).toBeDefined();
+    expect(toolErrorEntry?.params).toEqual(toolArgsObject);
+    expect(toolErrorEntry?.error).toEqual(recoverableErrorInst.toPlainObject()); // Check plain object representation
+    expect(toolErrorEntry?.isCritical).toBe(false);
+
+    // JobRepository Saves
+    expect(mockJobRepository.save).toHaveBeenCalled();
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop();
+    if (lastSaveCall) {
+        expect(lastSaveCall[0].status().is(JobStatusType.COMPLETED)).toBe(true);
+    }
+
+    // Logger Calls
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Tool ${toolName} execution failed for Job ID: ${mockJob.id().value()} but was recoverable. Error: ${recoverableErrorInst.message}`),
+        recoverableErrorInst, // The actual error instance
+        expect.anything()
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Calling LLM for Job ID: ${mockJob.id().value()} (iteration 2)`), expect.anything());
   });
 });
