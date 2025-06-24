@@ -712,4 +712,87 @@ describe('GenericAgentExecutor', () => {
     );
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: FAILURE_TOOL and persisted successfully`), expect.anything());
   });
+
+  it('should handle "Tool not found" error, populate criticalToolFailureInfo, and finish with FAILURE_TOOL', async () => {
+    // Arrange
+    const nonExistentToolName = 'nonExistentTool';
+    const toolCallId = 'toolCallNotFound789';
+    // The conceptual plan says DomainError, but the executor likely converts this to a ToolError internally.
+    // Let's mock getTool to return an error that the executor will then handle.
+    // The ToolNotFoundError (if used by ToolRegistryService) would be appropriate.
+    // For simplicity, if ToolRegistryService returns a generic error, GenericAgentExecutor should still create a critical ToolError.
+    // We'll assume the executor internally creates a ToolError with isRecoverable: false.
+    mockToolRegistryService.getTool.calledWith(nonExistentToolName).mockResolvedValue(error(new ApplicationError(`Tool '${nonExistentToolName}' not found in registry.`))); // Or a more specific error like ToolNotFoundError
+
+    mockLlmAdapter.generateText.mockResolvedValueOnce(
+      ok({
+        role: 'assistant',
+        content: null,
+        tool_calls: [{ id: toolCallId, type: 'function', function: { name: nonExistentToolName, arguments: '{}' } }],
+      }),
+    );
+
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+    const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
+    const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
+
+    // Act
+    const result = await executor.executeJob(mockJob, mockAgent);
+
+    // Assert
+    expect(result.isOk()).toBe(true);
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('FAILURE_TOOL');
+    // The exact message depends on how GenericAgentExecutor formats it.
+    expect(executionResult.message).toContain(`Critical: Tool '${nonExistentToolName}' failed non-recoverably: Tool '${nonExistentToolName}' not found`);
+
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(1);
+    expect(mockToolRegistryService.getTool).toHaveBeenCalledWith(nonExistentToolName);
+
+    expect(mockJob.status().is(JobStatusType.FAILED)).toBe(true);
+
+    expect(updateCriticalToolFailureInfoSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+            toolName: nonExistentToolName,
+            errorType: 'ToolError', // Executor should create a ToolError for this case
+            message: expect.stringContaining(`Tool '${nonExistentToolName}' not found`),
+            isRecoverable: false,
+        })
+    );
+    expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(
+      expect.stringContaining(`Critical: Tool '${nonExistentToolName}' failed non-recoverably: Tool '${nonExistentToolName}' not found`)
+    );
+    expect(finalizeExecutionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'FAILURE_TOOL',
+        message: expect.stringContaining(`Tool '${nonExistentToolName}' not found`),
+      }),
+    );
+
+    const agentState = mockJob.currentData().agentState;
+    const activityHistory = agentState.conversationHistory.entries();
+    expect(activityHistory.length).toBe(2); // User prompt + Assistant tool call
+
+    const execHistory = agentState.executionHistory;
+    const toolErrorEntry = execHistory.find(e => e.name === nonExistentToolName && e.type === 'tool_error');
+    expect(toolErrorEntry).toBeDefined();
+    expect(toolErrorEntry?.isCritical).toBe(true);
+    // @ts-ignore
+    expect(toolErrorEntry?.error?.message).toContain(`Tool '${nonExistentToolName}' not found`);
+    // @ts-ignore
+    expect(toolErrorEntry?.error?.isRecoverable).toBe(false);
+
+
+    expect(mockJobRepository.save).toHaveBeenCalledTimes(2); // ACTIVE and FAILED
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop();
+    if(lastSaveCall) {
+        expect(lastSaveCall[0].status().is(JobStatusType.FAILED)).toBe(true);
+    }
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`Tool ${nonExistentToolName} execution failed critically for Job ID: ${mockJob.id().value()}. Error: Tool '${nonExistentToolName}' not found`),
+      expect.any(ToolError), // Executor should wrap this as a ToolError
+      expect.anything()
+    );
+  });
 });
