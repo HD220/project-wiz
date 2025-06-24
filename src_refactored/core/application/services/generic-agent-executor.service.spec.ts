@@ -50,7 +50,8 @@ describe('GenericAgentExecutor', () => {
   // Variáveis para mocks e a instância do executor
   let mockLlmAdapter: DeepMockProxy<ILLMAdapter>;
   let mockSuccessfulTool: DeepMockProxy<IAgentTool<any, any>>;
-  let mockRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>; // Added
+  let mockRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>;
+  let mockNonRecoverableErrorTool: DeepMockProxy<IAgentTool<any, any>>; // Added
   let mockToolRegistryService: DeepMockProxy<IToolRegistryService>;
   let mockJobRepository: DeepMockProxy<IJobRepository>;
   let mockAgentInternalStateRepository: DeepMockProxy<IAgentInternalStateRepository>;
@@ -89,6 +90,19 @@ describe('GenericAgentExecutor', () => {
         true // isRecoverable = true
     );
     mockRecoverableErrorTool.execute.mockResolvedValue(error(recoverableError));
+
+    // Define Mock Non-Recoverable Error Tool
+    mockNonRecoverableErrorTool = mock<IAgentTool<any, any>>();
+    mockNonRecoverableErrorTool.name = 'nonRecoverableErrorTool';
+    mockNonRecoverableErrorTool.description = 'A mock tool that returns a non-recoverable error.';
+    mockNonRecoverableErrorTool.parameters = z.object({ criticalParam: z.string() });
+    const nonRecoverableError = new ToolError(
+        "Simulated CRITICAL non-recoverable error",
+        "nonRecoverableErrorTool", // toolName
+        new Error("Underlying cause of critical failure"), // originalError
+        false // isRecoverable = false
+    );
+    mockNonRecoverableErrorTool.execute.mockResolvedValue(error(nonRecoverableError));
 
     mockJobRepository = mock<IJobRepository>();
     mockAgentInternalStateRepository = mock<IAgentInternalStateRepository>();
@@ -587,5 +601,115 @@ describe('GenericAgentExecutor', () => {
         expect.anything()
     );
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Calling LLM for Job ID: ${mockJob.id().value()} (iteration 2)`), expect.anything());
+  });
+
+  it('should handle a non-recoverable (critical) ToolError, populate criticalToolFailureInfo, and finish with FAILURE_TOOL', async () => {
+    // Arrange
+    const toolCallId = 'toolCallCrit789';
+    const toolName = 'nonRecoverableErrorTool';
+    const toolArgsString = '{"criticalParam": "trigger"}';
+    const toolArgsObject = { criticalParam: "trigger" };
+    const nonRecoverableErrorInst = new ToolError(
+        "Simulated CRITICAL non-recoverable error",
+        toolName,
+        new Error("Underlying cause of critical failure"),
+        false // isRecoverable = false
+    );
+    // mockNonRecoverableErrorTool.execute is already set up in beforeEach to return this error.
+
+    mockToolRegistryService.getTool.calledWith(toolName).mockResolvedValue(ok(mockNonRecoverableErrorTool));
+
+    mockLlmAdapter.generateText.mockResolvedValueOnce( // LLM requests the tool
+      ok({
+        role: 'assistant',
+        content: null,
+        tool_calls: [{ id: toolCallId, type: 'function', function: { name: toolName, arguments: toolArgsString } }],
+      }),
+    );
+
+    // Spies
+    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+    const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
+    const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
+
+    // Act
+    const result = await executor.executeJob(mockJob, mockAgent);
+
+    // Assert
+    // General Result
+    expect(result.isOk()).toBe(true);
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('FAILURE_TOOL');
+    expect(executionResult.message).toContain(`Critical: Tool '${toolName}' failed non-recoverably: ${nonRecoverableErrorInst.message}`);
+    expect(executionResult.output).toEqual({ message: `Critical: Tool '${toolName}' failed non-recoverably: ${nonRecoverableErrorInst.message}` });
+
+
+    // LLM Interaction
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(1); // Should not call LLM again
+
+    // Tool Interaction
+    expect(mockToolRegistryService.getTool).toHaveBeenCalledWith(toolName);
+    expect(mockNonRecoverableErrorTool.execute).toHaveBeenCalledTimes(1);
+    expect(mockNonRecoverableErrorTool.execute).toHaveBeenCalledWith(toolArgsObject, expect.anything());
+
+    // Job State
+    expect(mockJob.status().is(JobStatusType.FAILED)).toBe(true);
+
+    expect(updateCriticalToolFailureInfoSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+            toolName: toolName,
+            errorType: 'ToolError',
+            message: nonRecoverableErrorInst.message,
+            isRecoverable: false,
+            details: expect.objectContaining({ message: "Underlying cause of critical failure" })
+        })
+    );
+    expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(
+      expect.stringContaining(`Critical: Tool '${toolName}' failed non-recoverably: ${nonRecoverableErrorInst.message}`)
+    );
+    expect(finalizeExecutionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'FAILURE_TOOL',
+        message: expect.stringContaining(`Critical: Tool '${toolName}' failed non-recoverably: ${nonRecoverableErrorInst.message}`),
+      }),
+    );
+
+    // ActivityHistory - As per conceptual plan, TOOL_RESULT for critical error might not be added to conversation history.
+    // Let's check the state to be sure. The current impl might add it before realizing it's critical.
+    // This depends on the exact sequence in GenericAgentExecutor.
+    // For now, let's assume it contains the initial user prompt and the assistant's tool call.
+    const agentState = mockJob.currentData().agentState;
+    const activityHistory = agentState.conversationHistory.entries();
+    // If TOOL_RESULT for critical error is NOT added to conversation history:
+    expect(activityHistory.length).toBe(2); // User prompt + Assistant tool call
+    expect(activityHistory[0].role()).toBe(HistoryEntryRoleType.USER);
+    expect(activityHistory[1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+    expect(activityHistory[1].props.tool_calls?.[0].function.name).toBe(toolName);
+
+
+    // ExecutionHistory
+    const execHistory = agentState.executionHistory;
+    const toolErrorEntry = execHistory.find(e => e.name === toolName && e.type === 'tool_error');
+    expect(toolErrorEntry).toBeDefined();
+    expect(toolErrorEntry?.params).toEqual(toolArgsObject);
+    expect(toolErrorEntry?.error).toEqual(nonRecoverableErrorInst.toPlainObject());
+    expect(toolErrorEntry?.isCritical).toBe(true);
+
+    // JobRepository Saves
+    expect(mockJobRepository.save).toHaveBeenCalledTimes(2); // ACTIVE and FAILED
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop();
+    expect(lastSaveCall).toBeDefined();
+    if(lastSaveCall) {
+        expect(lastSaveCall[0].status().is(JobStatusType.FAILED)).toBe(true);
+    }
+
+    // Logger Calls
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`Tool ${toolName} execution failed critically for Job ID: ${mockJob.id().value()}. Error: ${nonRecoverableErrorInst.message}`),
+      nonRecoverableErrorInst,
+      expect.anything()
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: FAILURE_TOOL and persisted successfully`), expect.anything());
   });
 });
