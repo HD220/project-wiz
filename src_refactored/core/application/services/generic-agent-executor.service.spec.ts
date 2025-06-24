@@ -37,6 +37,9 @@ import { Result, ok, error } from '@/refactored/shared/result'; // Result is use
 // Specific VOs for test assertions
 import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
 
+// Error Types
+import { ApplicationError } from '@/refactored/core/application/common/errors';
+
 describe('GenericAgentExecutor', () => {
   // Variáveis para mocks e a instância do executor
   let mockLlmAdapter: DeepMockProxy<ILLMAdapter>;
@@ -272,5 +275,70 @@ describe('GenericAgentExecutor', () => {
     // Logger Calls
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining(`Max iterations (${maxIter}) reached for Job ID: ${mockJob.id().value()}`), expect.anything());
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: FAILURE_MAX_ITERATIONS and persisted successfully`), expect.anything());
+  });
+
+  it('should finish with FAILURE_LLM when ILLMAdapter.generateText returns an error', async () => {
+    // Arrange
+    const simulatedError = new ApplicationError('Simulated LLM API Error'); // Using ApplicationError as per plan, will adjust if LLMError is more suitable
+    mockLlmAdapter.generateText.mockResolvedValueOnce(error(simulatedError));
+
+    // Spies
+    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+    const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
+
+
+    // Act
+    const result = await executor.executeJob(mockJob, mockAgent);
+
+    // Assert
+    // General Result
+    expect(result.isOk()).toBe(true); // Executor itself completes, result indicates job failure type
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('FAILURE_LLM');
+    expect(executionResult.message).toContain('LLM generation failed');
+    expect(executionResult.message).toContain('Simulated LLM API Error');
+    // As per conceptual plan, checking if errors array contains relevant info
+    // This depends on how GenericAgentExecutor packages errors into AgentExecutorResult
+    // Assuming errors might be part of the message or a separate property
+     expect(executionResult.output).toEqual({ message: 'LLM generation failed: Simulated LLM API Error' }); // Or similar based on actual output
+
+
+    // LLM Interaction
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(1);
+
+    // Job State
+    expect(mockJob.status().is(JobStatusType.FAILED)).toBe(true);
+    // Check if lastFailureSummary is updated (this might depend on how executor handles it)
+    // expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(expect.stringContaining('Simulated LLM API Error'));
+    expect(finalizeExecutionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'FAILURE_LLM',
+        message: expect.stringContaining('Simulated LLM API Error'),
+      }),
+    );
+
+    // ExecutionHistory
+    const agentState = mockJob.currentData().agentState;
+    const errorEntry = agentState.executionHistory.find(e => e.type === 'llm_error');
+    expect(errorEntry).toBeDefined();
+    expect(errorEntry?.name).toBe('LLM Generation'); // Assuming this is the name used internally
+    expect(errorEntry?.error).toContain('Simulated LLM API Error');
+
+    // JobRepository Saves
+    expect(mockJobRepository.save).toHaveBeenCalledTimes(2); // ACTIVE and FAILED
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop();
+    expect(lastSaveCall).toBeDefined();
+    if(lastSaveCall) {
+        expect(lastSaveCall[0].status().is(JobStatusType.FAILED)).toBe(true);
+    }
+
+    // Logger Calls
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('LLM generation failed in iteration 1 for Job ID:'), // Iteration number might vary if logic changes
+      simulatedError,
+      expect.anything()
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: FAILURE_LLM and persisted successfully`), expect.anything());
   });
 });
