@@ -40,9 +40,15 @@ import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects
 // Error Types
 import { ApplicationError } from '@/refactored/core/application/common/errors';
 
+// Tooling & Zod for mock tool
+import { z } from 'zod';
+import { IAgentTool } from '@/refactored/core/tools/tool.interface';
+
+
 describe('GenericAgentExecutor', () => {
   // Variáveis para mocks e a instância do executor
   let mockLlmAdapter: DeepMockProxy<ILLMAdapter>;
+  let mockSuccessfulTool: DeepMockProxy<IAgentTool<any, any>>;
   let mockToolRegistryService: DeepMockProxy<IToolRegistryService>;
   let mockJobRepository: DeepMockProxy<IJobRepository>;
   let mockAgentInternalStateRepository: DeepMockProxy<IAgentInternalStateRepository>;
@@ -55,9 +61,20 @@ describe('GenericAgentExecutor', () => {
   let mockPersonaTemplate: AgentPersonaTemplate;
   // let mockLlmProviderConfig: LLMProviderConfig; // Not needed as per conceptual plan
 
+
   beforeEach(() => {
     mockLlmAdapter = mock<ILLMAdapter>();
     mockToolRegistryService = mock<IToolRegistryService>();
+
+    // Define Mock Tool
+    mockSuccessfulTool = mock<IAgentTool<any, any>>();
+    mockSuccessfulTool.name = 'mockSuccessTool';
+    mockSuccessfulTool.description = 'A mock tool that always succeeds.';
+    mockSuccessfulTool.parameters = z.object({ param1: z.string().optional() });
+    // It's important to mock the specific method instance if it's to be checked by `toHaveBeenCalledWith`
+    // or if its return value is critical per test. For a general mock setup:
+    mockSuccessfulTool.execute.mockResolvedValue(ok({ toolOutput: "value from successful tool" }));
+
     mockJobRepository = mock<IJobRepository>();
     mockAgentInternalStateRepository = mock<IAgentInternalStateRepository>();
     mockLogger = mock<ILogger>();
@@ -340,5 +357,114 @@ describe('GenericAgentExecutor', () => {
       expect.anything()
     );
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Job ID: ${mockJob.id().value()} finalized with status: FAILURE_LLM and persisted successfully`), expect.anything());
+  });
+
+  it('should successfully execute a job with a successful tool_call and continue LLM interaction to completion', async () => {
+    // Arrange
+    const toolCallId = 'toolCallId123';
+    const toolName = 'mockSuccessTool';
+    const toolArgsString = '{"param1": "test"}';
+    const toolArgsObject = { param1: 'test' };
+    const toolOutput = { toolOutput: "value from successful tool" };
+
+    mockToolRegistryService.getTool.calledWith(toolName).mockResolvedValue(ok(mockSuccessfulTool));
+    // mockSuccessfulTool.execute is already mocked in beforeEach to return ok(toolOutput)
+
+    mockLlmAdapter.generateText
+      .mockResolvedValueOnce(
+        ok({
+          role: 'assistant',
+          content: null,
+          tool_calls: [{ id: toolCallId, type: 'function', function: { name: toolName, arguments: toolArgsString } }],
+        }),
+      )
+      .mockResolvedValueOnce(
+        ok({
+          role: 'assistant',
+          content: 'Goal achieved after using mockSuccessTool.',
+          tool_calls: [],
+        }),
+      );
+
+    // Spies
+    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+
+    // Act
+    const result = await executor.executeJob(mockJob, mockAgent);
+
+    // Assert
+    // General Result
+    expect(result.isOk()).toBe(true);
+    const executionResult = result.unwrap();
+    expect(executionResult.status).toBe('SUCCESS');
+    expect(executionResult.message).toContain('Goal achieved after using mockSuccessTool.');
+    expect(executionResult.output).toEqual({ message: 'Goal achieved after using mockSuccessTool.' });
+
+    // LLM Interaction
+    expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+    const firstLlmCallArgs = mockLlmAdapter.generateText.mock.calls[0][0];
+    expect(firstLlmCallArgs).toEqual(expect.arrayContaining([
+        expect.objectContaining({ role: 'system' }),
+        expect.objectContaining({ role: 'user', content: 'Test the executor setup.' })
+    ]));
+    const secondLlmCallArgs = mockLlmAdapter.generateText.mock.calls[1][0];
+    expect(secondLlmCallArgs).toEqual(expect.arrayContaining([
+        expect.objectContaining({ role: 'system' }),
+        expect.objectContaining({ role: 'user', content: 'Test the executor setup.' }),
+        expect.objectContaining({ role: 'assistant', tool_calls: expect.arrayContaining([expect.objectContaining({ id: toolCallId})]) }),
+        expect.objectContaining({ role: 'tool', tool_call_id: toolCallId, content: JSON.stringify(toolOutput) })
+    ]));
+
+
+    // Tool Interaction
+    expect(mockToolRegistryService.getTool).toHaveBeenCalledWith(toolName);
+    expect(mockSuccessfulTool.execute).toHaveBeenCalledTimes(1);
+    expect(mockSuccessfulTool.execute).toHaveBeenCalledWith(toolArgsObject, expect.objectContaining({ jobId: mockJob.id().value(), agentId: mockAgent.id().value() }));
+
+    // Job State
+    expect(mockJob.status().is(JobStatusType.COMPLETED)).toBe(true);
+    expect(finalizeExecutionSpy).toHaveBeenCalledWith(expect.objectContaining({ status: 'SUCCESS', message: 'Goal achieved after using mockSuccessTool.' }));
+
+    // ActivityHistory
+    const agentState = mockJob.currentData().agentState;
+    const history = agentState.conversationHistory.entries();
+    // Expected: User Prompt -> Assistant (tool_call) -> Tool Result -> Assistant (final)
+    expect(history.length).toBe(4);
+    expect(history[0].role()).toBe(HistoryEntryRoleType.USER);
+    expect(history[1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+    expect(history[1].props.tool_calls?.[0]?.function.name).toBe(toolName);
+    expect(history[2].role()).toBe(HistoryEntryRoleType.TOOL_RESULT);
+    expect(history[2].toolCallId()).toBe(toolCallId);
+    expect(history[2].toolName()).toBe(toolName);
+    expect(history[2].content()).toBe(JSON.stringify(toolOutput));
+    expect(history[3].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+    expect(history[3].content()).toBe('Goal achieved after using mockSuccessTool.');
+
+    // ExecutionHistory
+    const execHistory = agentState.executionHistory;
+    expect(execHistory.length).toBe(1);
+    const toolEntry = execHistory.find(e => e.name === toolName);
+    expect(toolEntry).toBeDefined();
+    expect(toolEntry?.type).toBe('tool_call');
+    expect(toolEntry?.params).toEqual(toolArgsObject);
+    expect(toolEntry?.result).toEqual(toolOutput);
+    expect(toolEntry?.error).toBeUndefined();
+
+    // JobRepository Saves (Initial ACTIVE, after tool_call result, final COMPLETED)
+    // The exact number can vary if agentState is saved more frequently.
+    // Key is that it's called, and the last call reflects COMPLETED.
+    expect(mockJobRepository.save).toHaveBeenCalled();
+    const lastSaveCall = vi.mocked(mockJobRepository.save).mock.calls.pop();
+    expect(lastSaveCall).toBeDefined();
+    if(lastSaveCall) {
+      expect(lastSaveCall[0].status().is(JobStatusType.COMPLETED)).toBe(true);
+    }
+
+    // Logger Calls
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Executing tool: ${toolName}`), expect.anything());
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Tool ${toolName} executed successfully for Job ID: ${mockJob.id().value()}`), expect.anything());
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Calling LLM for Job ID: ${mockJob.id().value()} (iteration 2)`), expect.anything()); // Iteration 2
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Goal achieved for Job ID: ${mockJob.id().value()}`), expect.anything());
   });
 });
