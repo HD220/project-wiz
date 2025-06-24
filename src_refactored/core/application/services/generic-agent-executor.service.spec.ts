@@ -901,4 +901,155 @@ describe('GenericAgentExecutor', () => {
     );
     expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining(`Calling LLM for Job ID: ${mockJob.id().value()} (iteration 2)`), expect.anything());
   });
+
+  describe('Replan Logic for Unusable LLM Responses', () => {
+    // Constants from GenericAgentExecutor (assuming they are private/not easily mockable, so using values)
+    const MIN_USABLE_LLM_RESPONSE_LENGTH = 10;
+    const MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE = 1;
+
+    it('should replan and succeed if initial LLM response is too short (less than MIN_USABLE_LLM_RESPONSE_LENGTH)', async () => {
+      // Arrange
+      const shortResponseContent = "Eh?"; // Length is 3, less than 10
+      const successResponseContent = "Goal achieved after replan with a longer, useful response.";
+
+      mockLlmAdapter.generateText
+        .mockResolvedValueOnce(ok({ role: 'assistant', content: shortResponseContent, tool_calls: [] }))
+        .mockResolvedValueOnce(ok({ role: 'assistant', content: successResponseContent, tool_calls: [] }));
+
+      const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+      // Spying on updateAgentState is useful to inspect history at each step if needed,
+      // but for this test, checking the final history might be sufficient.
+      // const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+
+
+      // Act
+      const result = await executor.executeJob(mockJob, mockAgent);
+
+      // Assert
+      expect(result.isOk()).toBe(true);
+      const executionResult = result.unwrap();
+      expect(executionResult.status).toBe('SUCCESS');
+      expect(executionResult.message).toContain(successResponseContent);
+
+      expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+
+      const agentState = mockJob.currentData().agentState;
+      const history = agentState.conversationHistory.entries();
+
+      // Expected history:
+      // 1. User: Initial prompt
+      // 2. Assistant: "Eh?"
+      // 3. User: "System Note: Your previous response was empty or too short..." (replan message)
+      // 4. Assistant: "Goal achieved after replan..."
+      expect(history.length).toBe(4);
+      expect(history[0].role()).toBe(HistoryEntryRoleType.USER);
+      expect(history[1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(history[1].content()).toBe(shortResponseContent);
+      expect(history[2].role()).toBe(HistoryEntryRoleType.USER);
+      expect(history[2].content()).toContain("System Note: Your previous response was empty or too short");
+      expect(history[3].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(history[3].content()).toBe(successResponseContent);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`LLM response for Job ID ${mockJob.id().value()} was empty/too short. Attempting re-plan (1/${MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE})`),
+        expect.anything()
+      );
+
+      expect(finalizeExecutionSpy).toHaveBeenCalledWith(expect.objectContaining({ status: 'SUCCESS' }));
+    });
+
+    it('should replan and succeed if initial LLM response has null content and no tool_calls', async () => {
+      // Arrange
+      const successResponseContent = "Goal achieved after replan from null content.";
+
+      mockLlmAdapter.generateText
+        .mockResolvedValueOnce(ok({ role: 'assistant', content: null, tool_calls: [] })) // content: null, no tool_calls
+        .mockResolvedValueOnce(ok({ role: 'assistant', content: successResponseContent, tool_calls: [] }));
+
+      const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+
+      // Act
+      const result = await executor.executeJob(mockJob, mockAgent);
+
+      // Assert
+      expect(result.isOk()).toBe(true);
+      const executionResult = result.unwrap();
+      expect(executionResult.status).toBe('SUCCESS');
+      expect(executionResult.message).toContain(successResponseContent);
+
+      expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(2);
+
+      const agentState = mockJob.currentData().agentState;
+      const history = agentState.conversationHistory.entries();
+
+      // Expected: User Prompt -> Assistant (null content) -> System/User (replan msg) -> Assistant (success)
+      expect(history.length).toBe(4);
+      expect(history[1].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(history[1].content()).toBe(""); // Null content becomes empty string in ActivityHistoryEntry
+      expect(history[2].role()).toBe(HistoryEntryRoleType.USER);
+      expect(history[2].content()).toContain("System Note: Your previous response was empty or too short");
+      expect(history[3].role()).toBe(HistoryEntryRoleType.ASSISTANT);
+      expect(history[3].content()).toBe(successResponseContent);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`LLM response for Job ID ${mockJob.id().value()} was empty/too short. Attempting re-plan (1/${MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE})`),
+        expect.anything()
+      );
+      expect(finalizeExecutionSpy).toHaveBeenCalledWith(expect.objectContaining({ status: 'SUCCESS' }));
+    });
+
+    it('should fail with FAILURE_LLM if LLM response remains unusable after max replan attempts', async () => {
+      // Arrange
+      // MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE is 1, so 1 original call + 1 replan = 2 total LLM calls
+      const shortResponse1 = "?";
+      const shortResponse2 = "??";
+
+      mockLlmAdapter.generateText
+        .mockResolvedValueOnce(ok({ role: 'assistant', content: shortResponse1, tool_calls: [] }))
+        .mockResolvedValueOnce(ok({ role: 'assistant', content: shortResponse2, tool_calls: [] }));
+
+      const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
+      const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
+
+      // Act
+      const result = await executor.executeJob(mockJob, mockAgent);
+
+      // Assert
+      expect(result.isOk()).toBe(true); // Executor itself completes
+      const executionResult = result.unwrap();
+      expect(executionResult.status).toBe('FAILURE_LLM');
+      expect(executionResult.message).toContain('Failed to get a usable response from LLM after maximum replan attempts');
+      expect(executionResult.output).toEqual({ message: `Failed to get a usable response from LLM after maximum replan attempts. Last LLM response: ${shortResponse2}` });
+
+
+      expect(mockLlmAdapter.generateText).toHaveBeenCalledTimes(1 + MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE); // e.g., 2 times
+
+      const agentState = mockJob.currentData().agentState;
+      const history = agentState.conversationHistory.entries();
+      // Expected: User -> Assistant (short1) -> User (replan) -> Assistant (short2)
+      expect(history.length).toBe(4);
+      expect(history[1].content()).toBe(shortResponse1);
+      expect(history[2].content()).toContain("System Note: Your previous response was empty or too short");
+      expect(history[3].content()).toBe(shortResponse2);
+
+      // ExecutionHistory might log these attempts
+      const unusableResponseEvents = agentState.executionHistory.filter(e => e.type === 'unusable_llm_response');
+      expect(unusableResponseEvents.length).toBe(2); // One for each unusable response after the first one that triggered replan. Or 1 if only the one triggering replan is logged.
+                                                      // The current generic-agent-executor logs it after the fact.
+                                                      // Let's check for the log warning.
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`LLM response for Job ID ${mockJob.id().value()} was empty/too short. Attempting re-plan (1/${MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE})`),
+        expect.anything()
+      );
+       expect(mockLogger.warn).toHaveBeenCalledWith( // This is the log after exhausting attempts
+        expect.stringContaining(`LLM response for Job ID ${mockJob.id().value()} was empty/too short after ${MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE} re-plan attempts. Proceeding with this response.`),
+        expect.anything()
+      );
+
+
+      expect(mockJob.status().is(JobStatusType.FAILED)).toBe(true);
+      expect(updateLastFailureSummarySpy).toHaveBeenCalledWith(expect.stringContaining('Failed to get a usable response from LLM after maximum replan attempts'));
+      expect(finalizeExecutionSpy).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE_LLM' }));
+    });
+  });
 });
