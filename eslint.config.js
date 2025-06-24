@@ -73,6 +73,12 @@ export default [
         { "selector": "typeLike", "format": ["PascalCase"] },
         { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] }
       ],
+      "max-depth": ["warn", { "max": 2 }],
+      "no-else-return": "warn",
+      "id-length": ["warn", { "min": 3, "exceptions": ["id", "db", "ui", "en", "pt", "i", "X", "Y", "Z", "x", "y", "z", "a", "b", "e", "fs", "vo"] }],
+      "max-lines-per-function": ["warn", { "max": 15, "skipBlankLines": true, "skipComments": true }],
+      "max-statements": ["warn", { "max": 10 }],
+      "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }],
       "import/order": ["warn", {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
         "pathGroups": [
@@ -148,6 +154,12 @@ export default [
         { "selector": "typeLike", "format": ["PascalCase"] },
         { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] }
       ],
+      "max-depth": ["warn", { "max": 2 }],
+      "no-else-return": "warn",
+      "id-length": ["warn", { "min": 3, "exceptions": ["id", "db", "ui", "en", "pt", "i", "X", "Y", "Z", "x", "y", "z", "a", "b", "e", "fs", "vo"] }],
+      "max-lines-per-function": ["warn", { "max": 15, "skipBlankLines": true, "skipComments": true }],
+      "max-statements": ["warn", { "max": 10 }],
+      "max-lines": ["warn", { "max": 250, "skipBlankLines": true, "skipComments": true }], // TSX specific max-lines
       "import/order": ["warn", {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
         "pathGroups": [
@@ -202,4 +214,11 @@ export default [
       ],
     },
   },
+  // Configuration for max-lines overrides for domain and application
+  {
+    files: ["src_refactored/core/domain/**/*.ts", "src_refactored/core/application/**/*.ts"],
+    rules: {
+      "max-lines": ["warn", { "max": 100, "skipBlankLines": true, "skipComments": true }]
+    }
+  }
 ];
