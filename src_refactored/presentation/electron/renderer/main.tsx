@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOMClient from 'react-dom/client';
 import '../../ui/styles/globals.css'; // Caminho ajustado
-import { detectLocale, dynamicActivate } from '../../ui/config/i18n'; // Caminho ajustado
+// import { detectLocale, dynamicActivate } from '../../ui/config/i18n'; // REMOVIDO
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from '../../ui/routeTree.gen'; // Caminho ajustado
 
@@ -20,10 +20,10 @@ if (!rootElement) {
 }
 const root = ReactDOMClient.createRoot(rootElement);
 
-dynamicActivate(detectLocale()).then(() => {
-  root.render(
-    <React.StrictMode> {/* Mantido StrictMode */}
-      <RouterProvider router={router} />
-    </React.StrictMode>
-  );
-});
+// dynamicActivate(detectLocale()).then(() => { // REMOVIDO
+root.render(
+  <React.StrictMode> {/* Mantido StrictMode */}
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);
+// }); // REMOVIDO
