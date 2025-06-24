@@ -145,3 +145,5 @@ Este documento rastreia o progresso da reescrita completa do código da Fase 5.
 | FE-CORE-IMPACT-REVIEW | Revisar todos os `Core Impact` identificados e garantir que tarefas correspondentes foram criadas para o backend. | Pendente    | Todas FE-*         | 2                  | Arquiteto   | N/A                                        |                            | Esta é uma tarefa de revisão/coordenação.                                                                                                    |
 
 ---
+
+[end of .jules/TASKS.md]
