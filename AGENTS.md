@@ -62,12 +62,13 @@ Aderir à Clean Architecture:
             *   `layout/`: Componentes estruturais da UI (ex: `AppShell`, `MainSidebar`, `PageHeader`).
             *   `ui/`: Componentes base do Shadcn/UI, adicionados via CLI e customizados conforme necessário.
         *   `config/`: Configurações centrais da aplicação UI (ex: instância do TanStack Router, instância do QueryClient, setup do i18n).
-        *   `features/`: Módulos de funcionalidades específicas da UI. Cada feature agrupa:
+        *   `features/` (será renomeado/refatorado para `app/` para rotas): Módulos de funcionalidades específicas da UI. Cada feature agrupa:
             *   `components/`: Componentes React reutilizáveis *dentro* daquela feature específica.
             *   `hooks/`: Hooks React específicos para a lógica da feature.
-            *   `pages/`: Componentes de página completos para a feature.
+            *   `pages/` (ou arquivos de rota como `index.tsx`, `about.tsx`): Componentes de página completos para a feature.
             *   `services.ts`: (Opcional) Funções que encapsulam chamadas IPC específicas da feature.
             *   `types.ts`: (Opcional) Tipos TypeScript específicos da feature.
+        *   `app/`: **Novo diretório raiz para o file-based routing do TanStack Router.**
         *   `hooks/`: Hooks React globais, reutilizáveis em múltiplas features.
         *   `lib/`: Funções utilitárias puras (não-React) específicas do frontend.
         *   `services/`: Camada de abstração para comunicação com o backend (IPC), como `coreService.ts`.
@@ -152,37 +153,46 @@ As 9 regras são mandatórias. Aqui estão algumas diretrizes contextuais:
 O trabalho neste projeto é rastreado através de um sistema de tarefas localizado em `/.jules/`.
 
 *   **Arquivo de Índice Principal (`/.jules/TASKS.md`):**
-    *   Este arquivo contém uma tabela de alto nível de todas as tarefas, com status, dependências, prioridade e um link para o arquivo de detalhe da tarefa.
-    *   Use este arquivo para obter uma visão geral do backlog e para identificar a próxima tarefa a ser trabalhada com base nas prioridades e dependências.
+    *   Contém uma tabela de alto nível de todas as tarefas, com status, dependências, prioridade e um link para o arquivo de detalhe da tarefa.
+    *   Use para visão geral do backlog e identificar a próxima tarefa.
 *   **Arquivos de Detalhes da Tarefa (`/.jules/tasks/TSK-[ID_DA_TAREFA].md`):**
-    *   Cada tarefa listada no índice possui um arquivo Markdown correspondente na subpasta `/.jules/tasks/`.
-    *   O nome do arquivo segue o padrão `TSK-[ID_DA_TAREFA].md`.
-    *   **Este arquivo de detalhe é a fonte canônica de informação para uma tarefa específica.** Ele contém a descrição completa, critérios de aceitação, notas de design, comentários e outros metadados relevantes.
-    *   **Sempre consulte o arquivo de detalhe da tarefa antes de iniciar a implementação.**
-*   **Seu Ciclo de Trabalho (Conforme `/.jules/AGENT_WORKFLOW.md`):**
+    *   Cada tarefa no índice tem um arquivo Markdown correspondente em `/.jules/tasks/`, nomeado `TSK-[ID_DA_TAREFA].md`.
+    *   Utilize o template `/.jules/templates/TASK_DETAIL_TEMPLATE.md` para criar novos arquivos de detalhe.
+    *   **Este arquivo é a fonte canônica de informação para a tarefa.** Contém descrição completa, critérios de aceitação, notas, comentários, status, link do commit de conclusão, etc.
+    *   **Leitura Obrigatória:** Sempre consulte e leia integralmente o arquivo de detalhe da tarefa relevante (`/.jules/tasks/TSK-[ID_TAREFA_ATUAL].md`) **antes** de iniciar qualquer trabalho de implementação ou desmembramento.
+    *   **Atualização Contínua:** Durante a execução da tarefa, adicione notas, decisões de design, ou observações relevantes diretamente neste arquivo (nas seções "Comentários" ou "Notas/Decisões de Design"). Ao concluir a tarefa, atualize seu status final, adicione o link do commit de conclusão e quaisquer notas finais.
+*   **Criação de Novas Tarefas (Descobertas/Imprevistos):**
+    *   Se, durante a execução de uma tarefa, você identificar uma necessidade não mapeada, um problema bloqueador que justifique uma sub-tarefa não planejada, ou um desvio significativo de escopo que não se encaixa na tarefa atual:
+        1.  **PARE** a execução da tarefa atual.
+        2.  Defina a nova tarefa: atribua um ID único (ex: `NEW-TSK-001` ou `TSK-[ID_PAI]-SUB-X`), título breve, descrição completa, prioridade, e estime sua complexidade.
+        3.  Crie o arquivo de detalhe para esta nova tarefa em `/.jules/tasks/` usando o template.
+        4.  Adicione a nova tarefa como uma nova linha no índice `/.jules/TASKS.md`, incluindo o link para seu arquivo de detalhe.
+        5.  Se aplicável, estabeleça dependências: a nova tarefa pode depender da atual, ou a atual pode passar a depender da nova. Atualize os campos de dependência no `TASKS.md` e nos arquivos de detalhe relevantes.
+        6.  Comunique a criação desta nova tarefa e seu impacto ao usuário através da ferramenta `message_user` ou `request_user_input`.
+        7.  Reavalie qual tarefa executar em seguida com base nas prioridades e dependências atualizadas.
+*   **Seu Ciclo de Trabalho (Conforme `/.jules/AGENT_WORKFLOW.md` - que também será atualizado com estas diretrizes):**
     1.  **Fase 1: Sincronização e Análise:**
-        *   Leia o `/.jules/TASKS.md` (arquivo de índice) para entender o estado atual do projeto.
+        *   Leia o `/.jules/TASKS.md` (índice) para entender o estado atual.
     2.  **Fase 2: Seleção da Próxima Ação:**
-        *   **Desmembrar Tarefas Complexas:** Procure a primeira tarefa `Pendente` no `TASKS.md` com `Complexidade > 1` (a complexidade estará no arquivo de detalhe da tarefa, mas pode ser inferida ou anotada brevemente no índice). Se encontrada, e suas dependências estiverem resolvidas, sua ação será desmembrá-la.
-            *   Para desmembrar, leia o arquivo de detalhe da tarefa mãe.
-            *   Crie novos arquivos de detalhe para cada sub-tarefa em `/.jules/tasks/`.
-            *   Atualize o `TASKS.md` principal: adicione as novas sub-tarefas como linhas no índice e marque o status da tarefa-mãe como "Bloqueado" ou "Subdividido".
-        *   **Executar Tarefa Simples:** Se não houver tarefas para desmembrar, procure a primeira tarefa `Pendente` no `TASKS.md` com `Complexidade < 2` (ver arquivo de detalhe) cujas `Dependências` estejam todas com o status `Concluído`.
-            *   Leia o arquivo de detalhe da tarefa selecionada em `/.jules/tasks/` para obter todas as especificações.
+        *   **Desmembrar Tarefas Complexas:** Priorize tarefas `Pendente` com `Complexidade > 1` (ver arquivo de detalhe).
+            *   Leia o detalhe da tarefa-mãe.
+            *   **Crie arquivos de detalhe para cada sub-tarefa** em `/.jules/tasks/` usando o template. Preencha todos os campos, incluindo dependência da tarefa-mãe.
+            *   Atualize o `TASKS.md` (índice): adicione sub-tarefas, marque a mãe como "Bloqueado" ou "Subdividido".
+            *   Atualize o arquivo de detalhe da tarefa-mãe.
+        *   **Executar Tarefa Simples:** Se não houver para desmembrar, procure tarefa `Pendente` com `Complexidade < 2` e dependências `Concluído`.
+            *   **Leia integralmente o arquivo de detalhe da tarefa selecionada (`/.jules/tasks/TSK-[ID].md`) antes de prosseguir.**
     3.  **Fase 3: Execução da Ação:**
-        *   **Se Desmembrar Tarefa:**
-            *   Para cada sub-tarefa definida, crie um novo arquivo de detalhe em `/.jules/tasks/TSK-[ID_SUBTAREFA].md` utilizando o template `/.jules/templates/TASK_DETAIL_TEMPLATE.md`. Preencha todos os campos relevantes (ID, Título, Descrição Completa, Status como "Pendente", Dependências incluindo o ID da tarefa-mãe, Prioridade, Responsável "Jules", Branch Git Proposta).
-            *   Atualize o `/.jules/TASKS.md` (índice principal):
-                *   Modifique o status da tarefa-mãe para "Bloqueado" ou "Subdividido".
-                *   Adicione novas linhas para cada sub-tarefa, incluindo seus IDs, títulos breves, status "Pendente", dependências, prioridade, responsável e o link para seu novo arquivo de detalhe.
-        *   **Se Executar Tarefa:**
-            *   Implemente a funcionalidade conforme o plano e os critérios de aceitação definidos no arquivo de detalhe da tarefa.
-            *   **Durante a execução:** Se identificar necessidades não mapeadas, problemas bloqueadores que exigem uma subtarefa, ou desvios significativos de escopo, **PARE** a execução da tarefa atual. Crie uma nova tarefa (com ID, título, descrição, etc.) no `/.jules/TASKS.md` e seu respectivo arquivo de detalhe em `/.jules/tasks/`. Adicione esta nova tarefa como dependência da tarefa atual se necessário, ou ajuste as prioridades. Comunique essa nova tarefa ao usuário. Só então retome a tarefa original se não estiver bloqueada.
-            *   **Após a conclusão da implementação da tarefa:**
-                *   Atualize o *arquivo de detalhe da tarefa* (`/.jules/tasks/TSK-[ID_CONCLUIDA].md`): Mude o `Status` para "Concluído", adicione o `Commit da Conclusão (Link)` (após o submit), e quaisquer `Notas/Decisões de Design` ou `Comentários` finais.
-                *   Atualize a linha correspondente no `/.jules/TASKS.md` (índice principal): Mude o `Status` para "Concluído" e adicione uma breve nota de conclusão ou o link do commit (se o formato do índice permitir).
+        *   **Se Desmembrar:** Conforme descrito acima (criação de arquivos de detalhe, atualização do índice e do detalhe da mãe).
+        *   **Se Executar:**
+            *   Implemente a tarefa.
+            *   **Documente continuamente no arquivo de detalhe da tarefa.**
+            *   **Crie novas tarefas para descobertas/bloqueios conforme descrito na seção "Criação de Novas Tarefas".**
+            *   Após a conclusão:
+                *   **Atualize o arquivo de detalhe da tarefa (`/.jules/tasks/TSK-[ID_CONCLUIDA].md`)**: Status para "Concluído", link do commit, notas.
+                *   **Atualize a linha no índice `/.jules/TASKS.md`**: Status para "Concluído", nota breve.
     4.  **Fase 4: Submissão:**
-        *   Submeta todas as alterações de código, os arquivos de detalhe de tarefas novos/atualizados, e o `/.jules/TASKS.md` atualizado.
-        *   **Pós-Submit:** Se o link do commit ainda não foi adicionado aos arquivos de detalhe das tarefas concluídas, faça isso como uma pequena atualização documental se possível, ou garanta que esteja na mensagem de commit.
+        *   Submeta todas as alterações (código, arquivos de detalhe de tarefas, índice `TASKS.md`).
+        *   **Pós-Submit:** Atualize os links de commit nos arquivos de detalhe, se necessário (pode exigir um commit de documentação adicional).
 
 Lembre-se, o objetivo é criar uma base de código exemplar e manter um rastreamento de tarefas impecável. Pense cuidadosamente sobre cada decisão de design e implementação. Se algo não estiver claro, peça esclarecimentos.
+```
