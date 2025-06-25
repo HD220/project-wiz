@@ -13,7 +13,7 @@ export default defineConfig({
     TanStackRouterVite({
       target: "react",
       autoCodeSplitting: true,
-      routesDirectory: path.resolve(__dirname, "./src_refactored/presentation/ui/features"), // CAMINHO ATUALIZADO
+      routesDirectory: path.resolve(__dirname, "./src_refactored/presentation/ui/app"), // CAMINHO ATUALIZADO PARA APP
       generatedRouteTree: path.resolve(__dirname, "./src_refactored/presentation/ui/routeTree.gen.ts"), // CAMINHO ATUALIZADO
     }),
     react({
