@@ -37,7 +37,7 @@
 | CLEANUP-001  | Remover arquivos/pastas não utilizados | Pendente | FASE-5-COMPLETA | P3 | Jules | [TSK-CLEANUP-001.md](./tasks/TSK-CLEANUP-001.md) |  |
 | LINT-CUSTOM-001 | Pesquisar/configurar plugin modularidade | Subdividido | CONFIG-ESLINT-001.2 | P2 | Jules | [TSK-LINT-CUSTOM-001.md](./tasks/TSK-LINT-CUSTOM-001.md) | Subdividido |
 | LINT-CUSTOM-001.1 | Pesquisar plugins ESLint modularidade | Concluído | LINT-CUSTOM-001 | P2 | Jules | [TSK-LINT-CUSTOM-001.1.md](./tasks/TSK-LINT-CUSTOM-001.1.md) |  |
-| LINT-CUSTOM-001.2 | Configurar plugin modularidade | Pendente | LINT-CUSTOM-001.1 | P2 | Jules | [TSK-LINT-CUSTOM-001.2.md](./tasks/TSK-LINT-CUSTOM-001.2.md) |  |
+| LINT-CUSTOM-001.2 | Configurar plugin modularidade | Concluído | LINT-CUSTOM-001.1 | P2 | Jules | [TSK-LINT-CUSTOM-001.2.md](./tasks/TSK-LINT-CUSTOM-001.2.md) | eslint-plugin-boundaries config inicial. Lint pendente (env). |
 | LINT-CUSTOM-001.3 | Validar/refinar config modularidade | Pendente | LINT-CUSTOM-001.2 | P2 | Jules | [TSK-LINT-CUSTOM-001.3.md](./tasks/TSK-LINT-CUSTOM-001.3.md) |  |
 | LINT-REACT-001  | Configurar regra eslint function-component-definition | Pendente | CONFIG-ESLINT-001.2 | P3 | Jules | [TSK-LINT-REACT-001.md](./tasks/TSK-LINT-REACT-001.md) |  |
 | LINT-IMPORT-001 | Refinar config import/order | Concluído | CONFIG-ESLINT-001.2 | P3 | Jules | [TSK-LINT-IMPORT-001.md](./tasks/TSK-LINT-IMPORT-001.md) |  |
