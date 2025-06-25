@@ -185,3 +185,17 @@
 - `(YYYY-MM-DD por @Autor): [Descrição da modificação]`
 
 [end of .jules/templates/TASK_DETAIL_TEMPLATE.md]
+
+[end of .jules/TASKS.md]
+
+[start of .jules/templates/TASK_INDEX_TEMPLATE.md]
+# Tabela Principal de Tarefas
+
+**Status:** Pendente, Em Andamento, Concluído, Bloqueado, Revisão, Cancelado
+**Prioridade (P0-P4):** P0 (Crítica), P1 (Alta), P2 (Média), P3 (Baixa), P4 (Muito Baixa)
+
+| ID da Tarefa | Título Breve da Tarefa | Status | Dependências (IDs) | Prioridade | Responsável | Link para Detalhes | Notas Breves |
+|--------------|------------------------|--------|--------------------|------------|-------------|--------------------|--------------|
+|              |                        |        |                    |            |             |                    |              |
+
+[end of .jules/templates/TASK_INDEX_TEMPLATE.md]

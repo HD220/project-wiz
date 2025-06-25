@@ -49,7 +49,6 @@ Aderir à Clean Architecture:
     *   `queue/`: Implementação da fila de Jobs.
     *   `worker-pool/`: Implementação do pool de workers.
     *   `ioc/`: Configuração de Injeção de Dependência (InversifyJS).
-    *   (*Nota: As subpastas `frameworks/react/` e `frameworks/electron/` dentro de `infrastructure/` foram movidas e reestruturadas sob `src_refactored/presentation/` para melhor clareza da camada de apresentação.*)
 *   `src_refactored/presentation/`: Contém todo o código relacionado à apresentação ao usuário, incluindo a interface do usuário (UI) e a lógica específica da plataforma Electron.
     *   `electron/`: Código específico da plataforma Electron.
         *   `main/`: Lógica do Processo Principal do Electron (ponto de entrada, gerenciamento de janelas, configuração de IPC handlers, etc.).
@@ -148,14 +147,31 @@ As 9 regras são mandatórias. Aqui estão algumas diretrizes contextuais:
 *   **TODO O NOVO CÓDIGO DEVE SER ESCRITO EM `src_refactored/`.**
 *   Se você encontrar um VO, entidade, ou função utilitária no código legado que seja de alta qualidade e se alinhe PERFEITAMENTE com os novos princípios (Clean Arch, OC), você pode adaptá-lo para `src_refactored/`. No entanto, a **reescrita é a norma**.
 
-## 9. Commits e Submissão de Trabalho
-*   Siga o padrão de [Commits Convencionais](https://www.conventionalcommits.org/).
-    *   Exemplos: `feat(domain): Implement Project entity and VOs`
-    *   `fix(app): Correct error handling in CreateJobUseCase`
-    *   `docs(AGENTS): Add details on Object Calisthenics rule 8`
-    *   `refactor(infra): Improve DrizzleProjectRepository structure`
-    *   `test(domain): Add unit tests for ProjectName VO`
-*   Crie branches para features ou correções significativas (ex: `feat/refactor-phase5-domain-job`).
-*   Submeta o trabalho para revisão quando um conjunto lógico de funcionalidades estiver completo e testado.
+## 9. Gerenciamento de Tarefas e Ciclo de Trabalho do Agente
+
+O trabalho neste projeto é rastreado através de um sistema de tarefas localizado em `/.jules/`.
+
+*   **Arquivo de Índice Principal (`/.jules/TASKS.md`):**
+    *   Este arquivo contém uma tabela de alto nível de todas as tarefas, com status, dependências, prioridade e um link para o arquivo de detalhe da tarefa.
+    *   Use este arquivo para obter uma visão geral do backlog e para identificar a próxima tarefa a ser trabalhada com base nas prioridades e dependências.
+*   **Arquivos de Detalhes da Tarefa (`/.jules/tasks/TSK-[ID_DA_TAREFA].md`):**
+    *   Cada tarefa listada no índice possui um arquivo Markdown correspondente na subpasta `/.jules/tasks/`.
+    *   O nome do arquivo segue o padrão `TSK-[ID_DA_TAREFA].md`.
+    *   **Este arquivo de detalhe é a fonte canônica de informação para uma tarefa específica.** Ele contém a descrição completa, critérios de aceitação, notas de design, comentários e outros metadados relevantes.
+    *   **Sempre consulte o arquivo de detalhe da tarefa antes de iniciar a implementação.**
+*   **Seu Ciclo de Trabalho (Conforme `/.jules/AGENT_WORKFLOW.md`):**
+    1.  **Fase 1: Sincronização e Análise:**
+        *   Leia o `/.jules/TASKS.md` (arquivo de índice) para entender o estado atual do projeto.
+    2.  **Fase 2: Seleção da Próxima Ação:**
+        *   **Desmembrar Tarefas Complexas:** Procure a primeira tarefa `Pendente` no `TASKS.md` com `Complexidade > 1` (a complexidade estará no arquivo de detalhe da tarefa, mas pode ser inferida ou anotada brevemente no índice). Se encontrada, e suas dependências estiverem resolvidas, sua ação será desmembrá-la.
+            *   Para desmembrar, leia o arquivo de detalhe da tarefa mãe.
+            *   Crie novos arquivos de detalhe para cada sub-tarefa em `/.jules/tasks/`.
+            *   Atualize o `TASKS.md` principal: adicione as novas sub-tarefas como linhas no índice e marque o status da tarefa-mãe como "Bloqueado" ou "Subdividido".
+        *   **Executar Tarefa Simples:** Se não houver tarefas para desmembrar, procure a primeira tarefa `Pendente` no `TASKS.md` com `Complexidade < 2` (ver arquivo de detalhe) cujas `Dependências` estejam todas com o status `Concluído`.
+            *   Leia o arquivo de detalhe da tarefa selecionada em `/.jules/tasks/` para obter todas as especificações.
+    3.  **Fase 3: Execução da Ação:**
+        *   **Se Desmembrar:** Crie os arquivos de detalhe para as sub-tarefas. Atualize o `TASKS.md` (índice).
+        *   **Se Executar:** Implemente a tarefa. Após a conclusão, atualize o *arquivo de detalhe da tarefa* (`/.jules/tasks/TSK-[ID].md`) com o status "Concluído", link do commit, notas, etc. Em seguida, atualize a linha correspondente no `TASKS.md` (índice) para "Concluído" e adicione o link do commit.
+    4.  **Fase 4: Submissão:** Submeta todas as alterações, incluindo novos arquivos de detalhe, `TASKS.md` atualizado, e quaisquer outros arquivos de código ou documentação modificados.
 
 Lembre-se, o objetivo é criar uma base de código exemplar. Pense cuidadosamente sobre cada decisão de design e implementação. Se algo não estiver claro, peça esclarecimentos.
