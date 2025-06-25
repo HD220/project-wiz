@@ -99,6 +99,10 @@
 | FE-PAGE-USER-DM  | Implementar Página de Mensagens Diretas | Pendente | FE-LAYOUT-004, FE-COMP-CHAT-THREAD | P1 | Frontend | [TSK-FE-PAGE-USER-DM.md](./tasks/TSK-FE-PAGE-USER-DM.md) |  |
 | FE-PAGE-USER-GUIDES| Implementar Página de Guias do Usuário | Pendente | FE-LAYOUT-004 | P2 | Frontend | [TSK-FE-PAGE-USER-GUIDES.md](./tasks/TSK-FE-PAGE-USER-GUIDES.md) |  |
 | FE-PAGE-ROOT-INDEX| Implementar index.tsx da raiz das páginas | Pendente | FE-SETUP-003 | P1 | Frontend | [TSK-FE-PAGE-ROOT-INDEX.md](./tasks/TSK-FE-PAGE-ROOT-INDEX.md) |  |
+| FE-FEAT-PROJ-LIST| Implementar lógica de exibição da Lista de Projetos | Pendente | FE-PAGE-PROJ-LIST, FE-SETUP-008 | P1 | Frontend | [TSK-FE-FEAT-PROJ-LIST.md](./tasks/TSK-FE-FEAT-PROJ-LIST.md) | |
+| FE-FEAT-PROJ-CREATE| Implementar fluxo de Criação de Projeto | Pendente | FE-PAGE-PROJ-LIST, FE-SETUP-002, FE-IPC-PROJ-CREATE | P1 | Frontend | [TSK-FE-FEAT-PROJ-CREATE.md](./tasks/TSK-FE-FEAT-PROJ-CREATE.md) | |
+| FE-FEAT-ONBOARD| Implementar lógica de submissão do Onboarding | Pendente | FE-PAGE-ONBOARD, FE-IPC-ONBOARD | P0 | Frontend | [TSK-FE-FEAT-ONBOARD.md](./tasks/TSK-FE-FEAT-ONBOARD.md) | |
+| FE-FEAT-CHAT   | Implementar funcionalidade de Chat | Pendente | FE-PAGE-USER-DM, FE-IPC-CHAT | P0 | Frontend | [TSK-FE-FEAT-CHAT.md](./tasks/TSK-FE-FEAT-CHAT.md) | Requer subdivisão |
 
 ---
 ## Tarefas Pendentes de Migração (Formato Antigo)
@@ -117,10 +121,6 @@
 | **SUB-FASE 5.F: REMOÇÃO DE CÓDIGO LEGADO E MIGRAÇÃO**                                                                              |               |                    |                    |                    |             |                                            |                            |                                                                                                                                              |
 | ...          | (Análise de `src/`, `src2/`, Exclusão, Movimentação de `src_refactored/` para `src/`, Ajustes finais)               | Pendente      | Todas anteriores   | ...                | Jules       |                                            |                            |                                                                                                                                              |
 |              | **Implementação de Funcionalidades Centrais (Conforme Análise 1.5 e 1.9)**                                         |               |                    |                    |             |                                            |                            |                                                                                                                                              |
-| FE-FEAT-PROJ-LIST| Implementar lógica de exibição da Lista de Projetos.                                                             | Pendente      | FE-PAGE-PROJ-LIST, FE-SETUP-008 | 2    | Frontend    | feat/fe-feature-project-list             |                            | Usar TanStack Query (`useQuery(['projects'], () => core.query.projects())`) e IPC para invalidar.                                          |
-| FE-FEAT-PROJ-CREATE| Implementar fluxo de Criação de Projeto.                                                                         | Pendente      | FE-PAGE-PROJ-LIST, FE-SETUP-002 (Shadcn base), FE-COMP-UI-003, FE-IPC-PROJ-CREATE | 3 | Frontend    | feat/fe-feature-project-create           |                            | Dialog, Formulário (Nome, Descrição), chamada IPC via `useCore().usecase.createProject`. Dependência FE-COMP-UI-003 é para Dialog Shadcn.      |
-| FE-FEAT-ONBOARD| Implementar lógica de submissão do Onboarding.                                                                   | Pendente      | FE-PAGE-ONBOARD, FE-IPC-ONBOARD | 2     | Frontend    | feat/fe-feature-onboarding-submit          |                            | Chamadas IPC para `createLLMProviderConfig` e `createUser` via `useCore()`.                                                                  |
-| FE-FEAT-CHAT   | Implementar funcionalidade de Chat (envio/recebimento de mensagens, streaming).                                      | Pendente      | FE-PAGE-USER-DM, FE-IPC-CHAT | 4         | Frontend    | feat/fe-feature-chat                       |                            | (Requer subdivisão)                                                                                                                        |
 | FE-FEAT-USER-PROFILE| Implementar gerenciamento de Perfil de Usuário (se houver UI dedicada além do onboarding).                     | Pendente      | FE-PAGE-USER-DASH  | 3                  | Frontend    | feat/fe-feature-user-profile               |                            | Visualização e edição de dados do usuário.                                                                                                   |
 | FE-FEAT-LLM-CONFIG| Implementar gerenciamento de Configurações LLM (se houver UI dedicada além do onboarding).                       | Pendente      | FE-SETUP-008       | 3                  | Frontend    | feat/fe-feature-llm-config                 |                            | CRUD para configurações de LLM.                                                                                                              |
 | FE-FEAT-CMD-PALETTE| Definir e implementar ações do Command Palette.                                                                  | Pendente      | FE-SETUP-002 (Shadcn base), FE-COMP-UI-008 (Command) | 3       | Frontend    | feat/fe-feature-command-palette            |                            | Conforme Task 1.9.1. Dependência FE-COMP-UI-008 é para Command Shadcn.                                                                       |
@@ -140,3 +140,50 @@
 | FE-TEST-UNIT   | Escrever testes unitários para componentes e hooks críticos.                                                         | Pendente      | Todas FE-COMP-*, FE-FEAT-* | 4    | Frontend    | test/fe-unit                               |                            | (Requer subdivisão)                                                                                                                        |
 | FE-TEST-INTEG  | Escrever testes de integração para fluxos de usuário chave.                                                          | Pendente      | Todas FE-PAGE-*, FE-FEAT-* | 4    | Frontend    | test/fe-integration                        |                            | (Requer subdivisão)                                                                                                                        |
 | FE-CORE-IMPACT-REVIEW | Revisar todos os `Core Impact` identificados e garantir que tarefas correspondentes foram criadas para o backend. | Pendente    | Todas FE-*         | 2                  | Arquiteto   | N/A                                        |                            | Esta é uma tarefa de revisão/coordenação.                                                                                                    |
+
+[end of .jules/TASKS.md]
+
+[start of .jules/templates/TASK_DETAIL_TEMPLATE.md]
+# Tarefa: [ID_DA_TAREFA] - [TÍTULO_BREVE_DA_TAREFA]
+
+**ID da Tarefa:** `[ID_DA_TAREFA]`
+**Título Breve:** `[TÍTULO_BREVE_DA_TAREFA]`
+**Descrição Completa:**
+`[DESCRIÇÃO_COMPLETA_DA_TAREFA]`
+
+---
+
+**Status:** `[STATUS_ATUAL]` (Pendente, Em Andamento, Concluído, Bloqueado, Revisão, Cancelado)
+**Dependências (IDs):** `[LISTA_DE_IDS_DE_DEPENDENCIA]` (ex: `APP-SVC-001, CONFIG-002`)
+**Complexidade (1-5):** `[NÍVEL_DE_COMPLEXIDADE]`
+**Prioridade (P0-P4):** `[NÍVEL_DE_PRIORIDADE]`
+**Responsável:** `[NOME_DO_RESPONSÁVEL]`
+**Branch Git Proposta:** `[BRANCH_GIT_SUGERIDA]`
+**Commit da Conclusão (Link):** `[LINK_PARA_COMMIT_DE_CONCLUSÃO]` (Preencher após conclusão)
+
+---
+
+## Critérios de Aceitação
+- `[CRITÉRIO_1]`
+- `[CRITÉRIO_2]`
+- ...
+
+---
+
+## Notas/Decisões de Design
+- `[NOTA_OU_DECISÃO_1]`
+- `[NOTA_OU_DECISÃO_2]`
+- ...
+
+---
+
+## Comentários
+- `[COMENTÁRIO_INICIAL_OU_DATA_DE_CRIAÇÃO]`
+- `(YYYY-MM-DD por @Autor): [Comentário adicional]`
+
+---
+
+## Histórico de Modificações da Tarefa (Opcional)
+- `(YYYY-MM-DD por @Autor): [Descrição da modificação]`
+
+[end of .jules/templates/TASK_DETAIL_TEMPLATE.md]
