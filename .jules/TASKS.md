@@ -66,7 +66,11 @@
 | FE-SETUP-002.4-REVISED| Ajustar `components.json` (Existente) para Nova Estrutura | Concluído | FE-SETUP-002.2-REVISED | P0 | Jules | [TSK-FE-SETUP-002.4.md](./tasks/TSK-FE-SETUP-002.4.md) | components.json recriado e ajustado |
 | RESEARCH-TAILWINDVITE-001 | Pesquisar necessidade de `tailwind.config.ts` com `@tailwindcss/vite` v4.x | Concluído | - | P0 | Jules | [TSK-RESEARCH-TAILWINDVITE-001.md](./tasks/TSK-RESEARCH-TAILWINDVITE-001.md) | Pesquisa concluída. Doc: [tailwind-vite-config-research.md](./docs/dev-notes/tailwind-vite-config-research.md) |
 | FE-SETUP-002.5-REVISED| Validar Integração Shadcn Pós-Migração | Concluído | FE-SETUP-002.3-REVISED, FE-SETUP-002.4-REVISED, RESEARCH-TAILWINDVITE-001 | P0 | Jules | [TSK-FE-SETUP-002.5.md](./tasks/TSK-FE-SETUP-002.5.md) | Concluído c/ observações (testes env) |
-| FE-SETUP-003 | Instalar/configurar Tanstack Router | Pendente | FE-SETUP-001.6 | P0 | Frontend | [TSK-FE-SETUP-003.md](./tasks/TSK-FE-SETUP-003.md) |  |
+| FE-SETUP-003 | Instalar/configurar Tanstack Router | Bloqueado | FE-SETUP-001.6 | P0 | Jules | [TSK-FE-SETUP-003.md](./tasks/TSK-FE-SETUP-003.md) | Subdividido |
+| FE-SETUP-003.1| Instalar Pacotes TanStack Router e Verificar Config Plugin Vite | Pendente | FE-SETUP-003, FE-SETUP-001.5.3 | P0 | Jules | [TSK-FE-SETUP-003.1.md](./tasks/TSK-FE-SETUP-003.1.md) | Instalar lib, checar config Vite |
+| FE-SETUP-003.2| Criar Estrutura Dir e Arquivo Raiz Rotas (`__root.tsx`) | Pendente | FE-SETUP-003.1 | P0 | Jules | [TSK-FE-SETUP-003.2.md](./tasks/TSK-FE-SETUP-003.2.md) | Criar `features/__root.tsx` |
+| FE-SETUP-003.3| Criar Rota Exemplo (Index) e Verificar `routeTree.gen.ts` | Pendente | FE-SETUP-003.2 | P0 | Jules | [TSK-FE-SETUP-003.3.md](./tasks/TSK-FE-SETUP-003.3.md) | Criar `features/index.tsx`, checar codegen |
+| FE-SETUP-003.4| Integrar RouterProvider no `main.tsx` e Teste Básico | Pendente | FE-SETUP-003.3 | P0 | Jules | [TSK-FE-SETUP-003.4.md](./tasks/TSK-FE-SETUP-003.4.md) | Usar RouterProvider, tentar type-check |
 | FE-SETUP-004 | Configurar LinguiJS para i18n (Reavaliar) | Pendente | FE-SETUP-001.6 | P3 | Frontend | [TSK-FE-SETUP-004.md](./tasks/TSK-FE-SETUP-004.md) |  |
 | FE-SETUP-005 | Configurar React Hook Form e Zod | Pendente | FE-SETUP-001.6 | P1 | Frontend | [TSK-FE-SETUP-005.md](./tasks/TSK-FE-SETUP-005.md) |  |
 | FE-SETUP-006 | Configurar ESLint, Prettier para novo FE | Pendente | FE-SETUP-001.6, CONFIG-ESLINT-001.2 | P1 | Frontend | [TSK-FE-SETUP-006.md](./tasks/TSK-FE-SETUP-006.md) |  |
