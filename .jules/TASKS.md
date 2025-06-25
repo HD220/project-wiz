@@ -60,7 +60,7 @@
 | FE-SETUP-001.5.3| Ajustar vite.renderer.config.mts - Plugin TanStack Router | Concluído | FE-SETUP-001.1 | P0 | Jules | [TSK-FE-SETUP-001.5.3.md](./tasks/TSK-FE-SETUP-001.5.3.md) |  |
 | FE-SETUP-001.6| Verificar Execução Básica Novo Renderer | Concluído | FE-SETUP-001.5 | P0 | Jules | [TSK-FE-SETUP-001.6.md](./tasks/TSK-FE-SETUP-001.6.md) |  |
 | FE-SETUP-002 | Instalar/configurar Shadcn/UI | Bloqueado | FE-SETUP-001.6, FE-SETUP-010 | P0 | Jules | [TSK-FE-SETUP-002.md](./tasks/TSK-FE-SETUP-002.md) | Subdividido - Reavaliar abordagem |
-| FE-SETUP-002.1-REVISED| Localizar e Analisar Config Shadcn/UI Existente | Pendente | FE-SETUP-002 | P0 | Jules | [TSK-FE-SETUP-002.1.md](./tasks/TSK-FE-SETUP-002.1.md) | Investigar `src/` |
+| FE-SETUP-002.1-REVISED| Localizar e Analisar Config Shadcn/UI Existente | Concluído | FE-SETUP-002 | P0 | Jules | [TSK-FE-SETUP-002.1.md](./tasks/TSK-FE-SETUP-002.1.md) | Análise concluída |
 | FE-SETUP-002.2-REVISED| Mover Componentes e Utils Shadcn/UI para `src_refactored` | Pendente | FE-SETUP-002.1-REVISED | P0 | Jules | [TSK-FE-SETUP-002.2.md](./tasks/TSK-FE-SETUP-002.2.md) | Migrar arquivos |
 | FE-SETUP-002.3-REVISED| Ajustar `tailwind.config.ts` (Existente) para Nova Estrutura | Pendente | FE-SETUP-002.2-REVISED | P0 | Jules | [TSK-FE-SETUP-002.3.md](./tasks/TSK-FE-SETUP-002.3.md) | Reconfigurar Tailwind |
 | FE-SETUP-002.4-REVISED| Ajustar `components.json` (Existente) para Nova Estrutura | Pendente | FE-SETUP-002.2-REVISED | P0 | Jules | [TSK-FE-SETUP-002.4.md](./tasks/TSK-FE-SETUP-002.4.md) | Reconfigurar Shadcn aliases |
