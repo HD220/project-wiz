@@ -170,8 +170,19 @@ O trabalho neste projeto é rastreado através de um sistema de tarefas localiza
         *   **Executar Tarefa Simples:** Se não houver tarefas para desmembrar, procure a primeira tarefa `Pendente` no `TASKS.md` com `Complexidade < 2` (ver arquivo de detalhe) cujas `Dependências` estejam todas com o status `Concluído`.
             *   Leia o arquivo de detalhe da tarefa selecionada em `/.jules/tasks/` para obter todas as especificações.
     3.  **Fase 3: Execução da Ação:**
-        *   **Se Desmembrar:** Crie os arquivos de detalhe para as sub-tarefas. Atualize o `TASKS.md` (índice).
-        *   **Se Executar:** Implemente a tarefa. Após a conclusão, atualize o *arquivo de detalhe da tarefa* (`/.jules/tasks/TSK-[ID].md`) com o status "Concluído", link do commit, notas, etc. Em seguida, atualize a linha correspondente no `TASKS.md` (índice) para "Concluído" e adicione o link do commit.
-    4.  **Fase 4: Submissão:** Submeta todas as alterações, incluindo novos arquivos de detalhe, `TASKS.md` atualizado, e quaisquer outros arquivos de código ou documentação modificados.
+        *   **Se Desmembrar Tarefa:**
+            *   Para cada sub-tarefa definida, crie um novo arquivo de detalhe em `/.jules/tasks/TSK-[ID_SUBTAREFA].md` utilizando o template `/.jules/templates/TASK_DETAIL_TEMPLATE.md`. Preencha todos os campos relevantes (ID, Título, Descrição Completa, Status como "Pendente", Dependências incluindo o ID da tarefa-mãe, Prioridade, Responsável "Jules", Branch Git Proposta).
+            *   Atualize o `/.jules/TASKS.md` (índice principal):
+                *   Modifique o status da tarefa-mãe para "Bloqueado" ou "Subdividido".
+                *   Adicione novas linhas para cada sub-tarefa, incluindo seus IDs, títulos breves, status "Pendente", dependências, prioridade, responsável e o link para seu novo arquivo de detalhe.
+        *   **Se Executar Tarefa:**
+            *   Implemente a funcionalidade conforme o plano e os critérios de aceitação definidos no arquivo de detalhe da tarefa.
+            *   **Durante a execução:** Se identificar necessidades não mapeadas, problemas bloqueadores que exigem uma subtarefa, ou desvios significativos de escopo, **PARE** a execução da tarefa atual. Crie uma nova tarefa (com ID, título, descrição, etc.) no `/.jules/TASKS.md` e seu respectivo arquivo de detalhe em `/.jules/tasks/`. Adicione esta nova tarefa como dependência da tarefa atual se necessário, ou ajuste as prioridades. Comunique essa nova tarefa ao usuário. Só então retome a tarefa original se não estiver bloqueada.
+            *   **Após a conclusão da implementação da tarefa:**
+                *   Atualize o *arquivo de detalhe da tarefa* (`/.jules/tasks/TSK-[ID_CONCLUIDA].md`): Mude o `Status` para "Concluído", adicione o `Commit da Conclusão (Link)` (após o submit), e quaisquer `Notas/Decisões de Design` ou `Comentários` finais.
+                *   Atualize a linha correspondente no `/.jules/TASKS.md` (índice principal): Mude o `Status` para "Concluído" e adicione uma breve nota de conclusão ou o link do commit (se o formato do índice permitir).
+    4.  **Fase 4: Submissão:**
+        *   Submeta todas as alterações de código, os arquivos de detalhe de tarefas novos/atualizados, e o `/.jules/TASKS.md` atualizado.
+        *   **Pós-Submit:** Se o link do commit ainda não foi adicionado aos arquivos de detalhe das tarefas concluídas, faça isso como uma pequena atualização documental se possível, ou garanta que esteja na mensagem de commit.
 
-Lembre-se, o objetivo é criar uma base de código exemplar. Pense cuidadosamente sobre cada decisão de design e implementação. Se algo não estiver claro, peça esclarecimentos.
+Lembre-se, o objetivo é criar uma base de código exemplar e manter um rastreamento de tarefas impecável. Pense cuidadosamente sobre cada decisão de design e implementação. Se algo não estiver claro, peça esclarecimentos.
