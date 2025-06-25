@@ -61,7 +61,7 @@
 | FE-SETUP-001.6| Verificar Execução Básica Novo Renderer | Concluído | FE-SETUP-001.5 | P0 | Jules | [TSK-FE-SETUP-001.6.md](./tasks/TSK-FE-SETUP-001.6.md) |  |
 | FE-SETUP-002 | Instalar/configurar Shadcn/UI | Bloqueado | FE-SETUP-001.6, FE-SETUP-010 | P0 | Jules | [TSK-FE-SETUP-002.md](./tasks/TSK-FE-SETUP-002.md) | Subdividido |
 | FE-SETUP-002.1| Executar `npx shadcn-ui@latest init` e configuração inicial | Concluído | FE-SETUP-002 | P0 | Jules | [TSK-FE-SETUP-002.1.md](./tasks/TSK-FE-SETUP-002.1.md) | Manual via CLI issues |
-| FE-SETUP-002.2| Validar e ajustar `components.json` (aliases) | Pendente | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.2.md](./tasks/TSK-FE-SETUP-002.2.md) | Configurar aliases |
+| FE-SETUP-002.2| Validar e ajustar `components.json` (aliases) | Concluído | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.2.md](./tasks/TSK-FE-SETUP-002.2.md) | Aliases validados |
 | FE-SETUP-002.3| Validar e ajustar `tailwind.config.ts` | Pendente | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.3.md](./tasks/TSK-FE-SETUP-002.3.md) | Assegurar config Tailwind |
 | FE-SETUP-002.4| Validar e ajustar `globals.css` com estilos base Shadcn/UI | Pendente | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.4.md](./tasks/TSK-FE-SETUP-002.4.md) | Incluir estilos base |
 | FE-SETUP-002.5| Adicionar e testar um componente Shadcn/UI (ex: Button) | Pendente | FE-SETUP-002.2, FE-SETUP-002.3, FE-SETUP-002.4 | P0 | Jules | [TSK-FE-SETUP-002.5.md](./tasks/TSK-FE-SETUP-002.5.md) | Teste integração |
