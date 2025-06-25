@@ -59,13 +59,13 @@
 | FE-SETUP-001.5.2| Ajustar vite.renderer.config.mts - Aliases | Concluído | FE-SETUP-001.1 | P0 | Jules | [TSK-FE-SETUP-001.5.2.md](./tasks/TSK-FE-SETUP-001.5.2.md) |  |
 | FE-SETUP-001.5.3| Ajustar vite.renderer.config.mts - Plugin TanStack Router | Concluído | FE-SETUP-001.1 | P0 | Jules | [TSK-FE-SETUP-001.5.3.md](./tasks/TSK-FE-SETUP-001.5.3.md) |  |
 | FE-SETUP-001.6| Verificar Execução Básica Novo Renderer | Concluído | FE-SETUP-001.5 | P0 | Jules | [TSK-FE-SETUP-001.6.md](./tasks/TSK-FE-SETUP-001.6.md) |  |
-| FE-SETUP-002 | Instalar/configurar Shadcn/UI | Bloqueado | FE-SETUP-001.6, FE-SETUP-010 | P0 | Jules | [TSK-FE-SETUP-002.md](./tasks/TSK-FE-SETUP-002.md) | Subdividido - Reavaliar abordagem |
+| FE-SETUP-002 | Instalar/configurar Shadcn/UI | Concluído | FE-SETUP-001.6, FE-SETUP-010 | P0 | Jules | [TSK-FE-SETUP-002.md](./tasks/TSK-FE-SETUP-002.md) | Migrado/Reconfigurado c/ observações (testes env) |
 | FE-SETUP-002.1-REVISED| Localizar e Analisar Config Shadcn/UI Existente | Concluído | FE-SETUP-002 | P0 | Jules | [TSK-FE-SETUP-002.1.md](./tasks/TSK-FE-SETUP-002.1.md) | Análise concluída |
 | FE-SETUP-002.2-REVISED| Mover Componentes e Utils Shadcn/UI para `src_refactored` | Concluído | FE-SETUP-002.1-REVISED | P0 | Jules | [TSK-FE-SETUP-002.2.md](./tasks/TSK-FE-SETUP-002.2.md) | Arquivos copiados (originais mantidos) |
 | FE-SETUP-002.3-REVISED| Ajustar `tailwind.config.ts` (Existente) para Nova Estrutura | Concluído | FE-SETUP-002.2-REVISED | P0 | Jules | [TSK-FE-SETUP-002.3.md](./tasks/TSK-FE-SETUP-002.3.md) | Tailwind.config.ts recriado e ajustado |
 | FE-SETUP-002.4-REVISED| Ajustar `components.json` (Existente) para Nova Estrutura | Concluído | FE-SETUP-002.2-REVISED | P0 | Jules | [TSK-FE-SETUP-002.4.md](./tasks/TSK-FE-SETUP-002.4.md) | components.json recriado e ajustado |
 | RESEARCH-TAILWINDVITE-001 | Pesquisar necessidade de `tailwind.config.ts` com `@tailwindcss/vite` v4.x | Concluído | - | P0 | Jules | [TSK-RESEARCH-TAILWINDVITE-001.md](./tasks/TSK-RESEARCH-TAILWINDVITE-001.md) | Pesquisa concluída. Doc: [tailwind-vite-config-research.md](./docs/dev-notes/tailwind-vite-config-research.md) |
-| FE-SETUP-002.5-REVISED| Validar Integração Shadcn Pós-Migração | Pendente | FE-SETUP-002.3-REVISED, FE-SETUP-002.4-REVISED, RESEARCH-TAILWINDVITE-001 | P0 | Jules | [TSK-FE-SETUP-002.5.md](./tasks/TSK-FE-SETUP-002.5.md) | Testar componente migrado |
+| FE-SETUP-002.5-REVISED| Validar Integração Shadcn Pós-Migração | Concluído | FE-SETUP-002.3-REVISED, FE-SETUP-002.4-REVISED, RESEARCH-TAILWINDVITE-001 | P0 | Jules | [TSK-FE-SETUP-002.5.md](./tasks/TSK-FE-SETUP-002.5.md) | Concluído c/ observações (testes env) |
 | FE-SETUP-003 | Instalar/configurar Tanstack Router | Pendente | FE-SETUP-001.6 | P0 | Frontend | [TSK-FE-SETUP-003.md](./tasks/TSK-FE-SETUP-003.md) |  |
 | FE-SETUP-004 | Configurar LinguiJS para i18n (Reavaliar) | Pendente | FE-SETUP-001.6 | P3 | Frontend | [TSK-FE-SETUP-004.md](./tasks/TSK-FE-SETUP-004.md) |  |
 | FE-SETUP-005 | Configurar React Hook Form e Zod | Pendente | FE-SETUP-001.6 | P1 | Frontend | [TSK-FE-SETUP-005.md](./tasks/TSK-FE-SETUP-005.md) |  |
