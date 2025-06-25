@@ -68,7 +68,7 @@
 | FE-SETUP-002.5-REVISED| Validar Integração Shadcn Pós-Migração | Concluído | FE-SETUP-002.3-REVISED, FE-SETUP-002.4-REVISED, RESEARCH-TAILWINDVITE-001 | P0 | Jules | [TSK-FE-SETUP-002.5.md](./tasks/TSK-FE-SETUP-002.5.md) | Concluído c/ observações (testes env) |
 | FE-SETUP-003 | Instalar/configurar Tanstack Router | Bloqueado | FE-SETUP-001.6 | P0 | Jules | [TSK-FE-SETUP-003.md](./tasks/TSK-FE-SETUP-003.md) | Subdividido |
 | FE-SETUP-003.1| Instalar Pacotes TanStack Router e Verificar Config Plugin Vite | Concluído | FE-SETUP-003, FE-SETUP-001.5.3 | P0 | Jules | [TSK-FE-SETUP-003.1.md](./tasks/TSK-FE-SETUP-003.1.md) | Deps e config Vite OK |
-| FE-SETUP-003.2| Criar Estrutura Dir e Arquivo Raiz Rotas (`__root.tsx`) | Pendente | FE-SETUP-003.1 | P0 | Jules | [TSK-FE-SETUP-003.2.md](./tasks/TSK-FE-SETUP-003.2.md) | Criar `features/__root.tsx` |
+| FE-SETUP-003.2| Criar Estrutura Dir e Arquivo Raiz Rotas (`__root.tsx`) | Concluído | FE-SETUP-003.1 | P0 | Jules | [TSK-FE-SETUP-003.2.md](./tasks/TSK-FE-SETUP-003.2.md) | `features/__root.tsx` criado |
 | FE-SETUP-003.3| Criar Rota Exemplo (Index) e Verificar `routeTree.gen.ts` | Pendente | FE-SETUP-003.2 | P0 | Jules | [TSK-FE-SETUP-003.3.md](./tasks/TSK-FE-SETUP-003.3.md) | Criar `features/index.tsx`, checar codegen |
 | FE-SETUP-003.4| Integrar RouterProvider no `main.tsx` e Teste Básico | Pendente | FE-SETUP-003.3 | P0 | Jules | [TSK-FE-SETUP-003.4.md](./tasks/TSK-FE-SETUP-003.4.md) | Usar RouterProvider, tentar type-check |
 | FE-SETUP-004 | Configurar LinguiJS para i18n (Reavaliar) | Pendente | FE-SETUP-001.6 | P3 | Frontend | [TSK-FE-SETUP-004.md](./tasks/TSK-FE-SETUP-004.md) |  |
