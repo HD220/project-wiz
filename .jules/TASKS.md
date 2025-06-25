@@ -70,7 +70,8 @@
 | FE-SETUP-003.1| Instalar Pacotes TanStack Router e Verificar Config Plugin Vite | Concluído | FE-SETUP-003, FE-SETUP-001.5.3 | P0 | Jules | [TSK-FE-SETUP-003.1.md](./tasks/TSK-FE-SETUP-003.1.md) | Deps e config Vite OK |
 | FE-SETUP-003.2| Criar Estrutura Dir e Arquivo Raiz Rotas (`__root.tsx`) | Concluído | FE-SETUP-003.1 | P0 | Jules | [TSK-FE-SETUP-003.2.md](./tasks/TSK-FE-SETUP-003.2.md) | `app/__root.tsx` criado. Vite config ajustado. |
 | FE-SETUP-003.3| Criar Rota Exemplo (Index) e Verificar `routeTree.gen.ts` | Concluído | FE-SETUP-003.2 | P0 | Jules | [TSK-FE-SETUP-003.3.md](./tasks/TSK-FE-SETUP-003.3.md) | `app/index.tsx` criado. routeTree.gen.ts pendente de build. |
-| FE-SETUP-003.4| Integrar RouterProvider no `main.tsx` e Teste Básico | Pendente | FE-SETUP-003.3 | P0 | Jules | [TSK-FE-SETUP-003.4.md](./tasks/TSK-FE-SETUP-003.4.md) | Usar RouterProvider, tentar type-check |
+| FE-SETUP-003.4| Integrar RouterProvider no `main.tsx` e Teste Básico | Concluído | FE-SETUP-003.3 | P0 | Jules | [TSK-FE-SETUP-003.4.md](./tasks/TSK-FE-SETUP-003.4.md) | `main.tsx` OK, type-check pendente (env) |
+| FE-SETUP-003 | Instalar/configurar Tanstack Router | Concluído | FE-SETUP-001.6 | P0 | Jules | [TSK-FE-SETUP-003.md](./tasks/TSK-FE-SETUP-003.md) | Concluído c/ obs. (type-check env) |
 | FE-SETUP-004 | Configurar LinguiJS para i18n (Reavaliar) | Pendente | FE-SETUP-001.6 | P3 | Frontend | [TSK-FE-SETUP-004.md](./tasks/TSK-FE-SETUP-004.md) |  |
 | FE-SETUP-005 | Configurar React Hook Form e Zod | Pendente | FE-SETUP-001.6 | P1 | Frontend | [TSK-FE-SETUP-005.md](./tasks/TSK-FE-SETUP-005.md) |  |
 | FE-SETUP-006 | Configurar ESLint, Prettier para novo FE | Pendente | FE-SETUP-001.6, CONFIG-ESLINT-001.2 | P1 | Frontend | [TSK-FE-SETUP-006.md](./tasks/TSK-FE-SETUP-006.md) |  |
