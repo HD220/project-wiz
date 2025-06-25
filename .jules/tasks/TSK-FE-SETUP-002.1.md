@@ -1,9 +1,9 @@
-# Tarefa: FE-SETUP-002.1 - Executar `npx shadcn-ui@latest init` e configuração inicial
+# Tarefa: FE-SETUP-002.1-REVISED - Localizar e Analisar Config Shadcn/UI Existente
 
-**ID da Tarefa:** `FE-SETUP-002.1`
-**Título Breve:** Executar `npx shadcn-ui@latest init` e configuração inicial
+**ID da Tarefa:** `FE-SETUP-002.1-REVISED`
+**Título Breve:** Localizar e Analisar Config Shadcn/UI Existente
 **Descrição Completa:**
-Esta tarefa envolve executar o comando `npx shadcn-ui@latest init` no terminal para iniciar a configuração da biblioteca Shadcn/UI. O desenvolvedor deverá responder aos prompts do CLI conforme as necessidades do projeto (ex: TypeScript, style, base color, globals.css location, tailwind.config.js location, aliases).
+Investigar a estrutura de diretórios `src/` para localizar a instalação pré-existente da biblioteca Shadcn/UI. Isso inclui encontrar os arquivos `components.json`, o arquivo de configuração do Tailwind CSS (provavelmente `tailwind.config.js` ou `tailwind.config.ts`), e o `globals.css` relevante. Analisar suas configurações atuais, especialmente os `content` paths do Tailwind, os aliases do `components.json` e o tema base, para planejar a migração para a nova estrutura em `src_refactored/presentation/ui/`.
 
 ---
 
@@ -12,30 +12,29 @@ Esta tarefa envolve executar o comando `npx shadcn-ui@latest init` no terminal p
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P0`
 **Responsável:** `Jules`
-**Branch Git Proposta:** `feat/fe-setup-shadcn`
+**Branch Git Proposta:** `feat/fe-migrate-shadcn`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- O comando `npx shadcn-ui@latest init` é executado com sucesso.
-- O arquivo `components.json` é criado na raiz do projeto.
-- O arquivo `tailwind.config.ts` (ou `.js`) é modificado/criado com as configurações base do Shadcn/UI.
-- O arquivo `globals.css` é modificado com os estilos base do Shadcn/UI.
-- As configurações escolhidas nos prompts são apropriadas para o projeto (ex: `src_refactored/presentation/ui/styles/globals.css` para CSS, `tailwind.config.ts`, aliases `@/*` para `src_refactored/presentation/ui/*`).
+- O arquivo `components.json` original é localizado dentro de `src/`.
+- O arquivo `tailwind.config.js` (ou `.ts`) original é localizado.
+- O arquivo `globals.css` utilizado pela configuração original do Tailwind é localizado.
+- As configurações chave (aliases, paths de conteúdo, tema base do Shadcn, versão do Tailwind) são documentadas/compreendidas.
 
 ---
 
 ## Notas/Decisões de Design
-- Esta é a primeira sub-tarefa para a instalação do Shadcn/UI.
-- Assegurar que os caminhos para `globals.css`, `tailwind.config.ts` e os aliases de componentes (`@/components`, `@/lib/utils`) estejam corretos e apontem para a nova estrutura em `src_refactored/presentation/ui/`.
+- Esta tarefa é o primeiro passo para reutilizar a configuração existente do Shadcn/UI, em vez de uma nova instalação.
+- Foco em entender como estava configurado para adaptar para `src_refactored/presentation/ui/`.
 
 ---
 
 ## Comentários
-- Criada como parte do desmembramento de `FE-SETUP-002`.
+- Tarefa revisada para focar na análise da configuração existente do Shadcn/UI após a instrução do usuário.
 
 ---
 
 ## Histórico de Modificações da Tarefa (Opcional)
--
+- (Data Atual) Revisada para análise e migração em vez de nova instalação.
