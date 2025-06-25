@@ -63,7 +63,7 @@
 | FE-SETUP-002.1| Executar `npx shadcn-ui@latest init` e configuração inicial | Concluído | FE-SETUP-002 | P0 | Jules | [TSK-FE-SETUP-002.1.md](./tasks/TSK-FE-SETUP-002.1.md) | Manual via CLI issues |
 | FE-SETUP-002.2| Validar e ajustar `components.json` (aliases) | Concluído | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.2.md](./tasks/TSK-FE-SETUP-002.2.md) | Aliases validados |
 | FE-SETUP-002.3| Validar e ajustar `tailwind.config.ts` | Concluído | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.3.md](./tasks/TSK-FE-SETUP-002.3.md) | Tailwind config validado |
-| FE-SETUP-002.4| Validar e ajustar `globals.css` com estilos base Shadcn/UI | Pendente | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.4.md](./tasks/TSK-FE-SETUP-002.4.md) | Incluir estilos base |
+| FE-SETUP-002.4| Validar e ajustar `globals.css` com estilos base Shadcn/UI | Concluído | FE-SETUP-002.1 | P0 | Jules | [TSK-FE-SETUP-002.4.md](./tasks/TSK-FE-SETUP-002.4.md) | globals.css validado |
 | FE-SETUP-002.5| Adicionar e testar um componente Shadcn/UI (ex: Button) | Pendente | FE-SETUP-002.2, FE-SETUP-002.3, FE-SETUP-002.4 | P0 | Jules | [TSK-FE-SETUP-002.5.md](./tasks/TSK-FE-SETUP-002.5.md) | Teste integração |
 | FE-SETUP-003 | Instalar/configurar Tanstack Router | Pendente | FE-SETUP-001.6 | P0 | Frontend | [TSK-FE-SETUP-003.md](./tasks/TSK-FE-SETUP-003.md) |  |
 | FE-SETUP-004 | Configurar LinguiJS para i18n (Reavaliar) | Pendente | FE-SETUP-001.6 | P3 | Frontend | [TSK-FE-SETUP-004.md](./tasks/TSK-FE-SETUP-004.md) |  |
