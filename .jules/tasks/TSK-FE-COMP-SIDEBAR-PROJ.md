@@ -7,13 +7,13 @@ Reimplementar o componente `ProjectSidebar` na nova estrutura do frontend. Esta 
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-002 (Shadcn base)` (Componentes Shadcn/UI como ScrollArea, Collapsible, Button, Separator são usados diretamente. Resizable functionality will depend on parent using ResizablePanel.)
 **Complexidade (1-5):** `3`
 **Prioridade (P0-P4):** `P1` (Navegação de projeto)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-project-sidebar`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-comp-project-sidebar após o push)`
 
 ---
 
@@ -37,7 +37,7 @@ Reimplementar o componente `ProjectSidebar` na nova estrutura do frontend. Esta 
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementada a estrutura básica do ProjectSidebar com placeholders, navegação e seções colapsáveis.`
+- `(Data Atual): Implementada e submetida a estrutura básica do ProjectSidebar com placeholders, navegação e seções colapsáveis.`
 
 ---
 
