@@ -87,7 +87,7 @@
 | FE-COMP-SIDEBAR-APP | Pendente | FE-SETUP-002, FE-COMP-UI-008 | P1 | Frontend | [TSK-FE-COMP-SIDEBAR-APP.md](./tasks/TSK-FE-COMP-SIDEBAR-APP.md) |
 | FE-COMP-SIDEBAR-PROJ| Em Andamento | FE-SETUP-002, FE-COMP-UI-008 | P1 | Jules | [TSK-FE-COMP-SIDEBAR-PROJ.md](./tasks/TSK-FE-COMP-SIDEBAR-PROJ.md) |
 | FE-COMP-SIDEBAR-USER| Em Andamento | FE-SETUP-002, FE-COMP-UI-008 | P1 | Jules | [TSK-FE-COMP-SIDEBAR-USER.md](./tasks/TSK-FE-COMP-SIDEBAR-USER.md) |
-| FE-COMP-CHAT-INPUT| Pendente | FE-SETUP-002, FE-COMP-UI-001, FE-COMP-UI-004 | P1 | Frontend | [TSK-FE-COMP-CHAT-INPUT.md](./tasks/TSK-FE-COMP-CHAT-INPUT.md) |
+| FE-COMP-CHAT-INPUT| Concluído | FE-SETUP-002, FE-COMP-UI-001, FE-COMP-UI-004 | P1 | Jules | [TSK-FE-COMP-CHAT-INPUT.md](./tasks/TSK-FE-COMP-CHAT-INPUT.md) |
 | FE-COMP-CHAT-MSG  | Pendente | FE-COMP-MARKDOWN | P1 | Frontend | [TSK-FE-COMP-CHAT-MSG.md](./tasks/TSK-FE-COMP-CHAT-MSG.md) |
 | FE-COMP-CHAT-THREAD| Pendente | FE-COMP-CHAT-INPUT, FE-COMP-CHAT-MSG | P1 | Frontend | [TSK-FE-COMP-CHAT-THREAD.md](./tasks/TSK-FE-COMP-CHAT-THREAD.md) |
 | FE-COMP-DASH-ACTIVITY| Pendente | FE-SETUP-002, FE-COMP-UI-002 | P2 | Frontend | [TSK-FE-COMP-DASH-ACTIVITY.md](./tasks/TSK-FE-COMP-DASH-ACTIVITY.md) |
@@ -125,6 +125,8 @@
 | FE-IPC-PROJ-CREATE| Pendente | FE-IPC-CORE-ABSTR | P1 | Frontend/Backend | [TSK-FE-IPC-PROJ-CREATE.md](./tasks/TSK-FE-IPC-PROJ-CREATE.md) |
 | FE-IPC-ONBOARD | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-ONBOARD.md](./tasks/TSK-FE-IPC-ONBOARD.md) |
 | FE-IPC-CHAT    | Concluído | FE-IPC-CORE-ABSTR | P0 | Jules | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) |
+| BE-UC-PROJ-CREATE-001 | Pendente | (Core Project Domain) | P1 | Jules | [TSK-BE-UC-PROJ-CREATE-001.md](./tasks/TSK-BE-UC-PROJ-CREATE-001.md) |
+| BE-UC-USER-MGMT-001 | Pendente | (Core User Domain) | P1 | Jules | [TSK-BE-UC-USER-MGMT-001.md](./tasks/TSK-BE-UC-USER-MGMT-001.md) |
 | --- | --- | --- | --- | --- | --- |
 | **FASE QSYS: Implementação do Novo Sistema de Filas** |  |  |  |  |  |  |
 | QSYS-1.1     | Concluído | -                   | P1         | Jules       | [TSK-QSYS-1.1.md](./tasks/TSK-QSYS-1.1.md) |
