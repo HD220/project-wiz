@@ -44,11 +44,12 @@ Implementar o caso de uso para criar novos projetos, localizado em `src_refactor
 
 ## Comentários
 - Esta tarefa foi criada para suprir a falta do `CreateProjectUseCase`, necessário para a funcionalidade de IPC `FE-IPC-PROJ-CREATE`.
-- `(Data Atual)`: Iniciada a implementação do `CreateProjectUseCase`.
+- `(Data Atual)`: Implementação do `CreateProjectUseCase` concluída.
 
 ---
 
 ## Histórico de Modificações da Tarefa (Opcional)
-- `(Data Atual)`: Tarefa criada e status alterado para "Em Andamento".
+- `(Data Anterior)`: Tarefa criada e status alterado para "Em Andamento".
+- `(Data Atual)`: Lógica do use case implementada.
 
 [end of .jules/tasks/TSK-BE-UC-PROJ-CREATE-001.md]
