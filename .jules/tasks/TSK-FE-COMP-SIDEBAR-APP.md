@@ -13,7 +13,7 @@ Reimplementar o componente `AppSidebar` na nova estrutura do frontend. Este comp
 **Prioridade (P0-P4):** `P1` (Navegação principal)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-app-sidebar`
-**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-comp-app-sidebar após o push)`
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-comp-app-sidebar)`
 
 ---
 
@@ -37,7 +37,7 @@ Reimplementar o componente `AppSidebar` na nova estrutura do frontend. Este comp
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementada e submetida a estrutura básica do AppSidebar com placeholders e navegação inicial.`
+- `(Data Atual): Implementada e submetida a estrutura básica do AppSidebar com placeholders e navegação inicial. Commit link a ser atualizado após push.`
 
 ---
 
