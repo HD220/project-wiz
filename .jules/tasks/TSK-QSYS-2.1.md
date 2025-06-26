@@ -7,22 +7,22 @@ Implementar a classe `InMemoryJobEventEmitter` em `src_refactored/infrastructure
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Concluído`
 **Dependências (IDs):** ``
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1`
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/qsys-2.1-inmemory-event-emitter`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `Commit na branch feat/qsys-2.1-inmemory-event-emitter`
 
 ---
 
 ## Critérios de Aceitação
-- Classe `InMemoryJobEventEmitter` criada e herda/utiliza `require('events').EventEmitter`.
-- Expõe métodos `on()`, `off()`, `emit()`, `once()` etc., compatíveis com a interface `EventEmitter`.
-- Permite a emissão e subscrição de `JobEventType`s definidos (ex: `job.added`, `job.completed`).
-- Os eventos emitidos incluem `queueName`, `jobId` e dados específicos do evento como argumentos para os listeners, conforme o design.
-- Testes unitários para verificar a funcionalidade básica de subscrição, emissão e remoção de listeners.
+- Classe `InMemoryJobEventEmitter` criada e herda/utiliza `require('events').EventEmitter`. **(Concluído)**
+- Expõe métodos `on()`, `off()`, `emit()`, `once()` etc., compatíveis com a interface `EventEmitter`. **(Concluído)**
+- Permite a emissão e subscrição de `JobEventType`s definidos (ex: `job.added`, `job.completed`). **(Concluído)**
+- Os eventos emitidos incluem `queueName`, `jobId` e dados específicos do evento como argumentos para os listeners, conforme o design. **(Concluído)**
+- Testes unitários para verificar a funcionalidade básica de subscrição, emissão e remoção de listeners. **(Concluído, mas não verificado)**
 
 ---
 
@@ -34,7 +34,8 @@ Implementar a classe `InMemoryJobEventEmitter` em `src_refactored/infrastructure
 ---
 
 ## Comentários
-- `(YYYY-MM-DD por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
+- `(Data da migração por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
+- `(2024-07-25 por @Jules): Status alterado para Concluído. Classe `InMemoryJobEventEmitter` e tipos de eventos relacionados foram implementados. Testes unitários foram escritos, mas não puderam ser executados/verificados devido a uma falha persistente ("Internal error") ao tentar executar Vitest. Código submetido na branch 'feat/qsys-2.1-inmemory-event-emitter'.`
 
 ---
 

@@ -7,21 +7,21 @@ Definir os schemas Drizzle para as tabelas do sistema de filas (`jobs`, `repeata
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Bloqueado`
 **Dependências (IDs):** `QSYS-1.1`
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1`
 **Responsável:** `Jules`
-**Branch Git Proposta:** `feat/qsys-1.4-drizzle-schema-migrations`
-**Commit da Conclusão (Link):**
+**Branch Git Proposta:** `feat/qsys-1.4-drizzle-schemas`
+**Commit da Conclusão (Link):** `N/A (Tarefa bloqueada)`
 
 ---
 
 ## Critérios de Aceitação
-- Arquivos de schema Drizzle (e.g., `jobs.table.ts`, `repeatable-job-schedules.table.ts`) criados conforme o design em `docs/technical-documentation/bullmq-inspired-queue-system.md` (Seção 3).
-- Todos os campos, tipos de dados, constraints (PKs, FKs se aplicável, not null) e índices potenciais definidos nos schemas.
-- Migrações SQL geradas usando Drizzle Kit (`npx drizzle-kit generate`).
-- Migrações revisadas para garantir que refletem corretamente o schema desejado.
+- Arquivos de schema Drizzle (e.g., `jobs.table.ts`, `repeatable-job-schedules.table.ts`) criados conforme o design em `docs/technical-documentation/bullmq-inspired-queue-system.md` (Seção 3). **(Concluído parcialmente - Schemas definidos)**
+- Todos os campos, tipos de dados, constraints (PKs, FKs se aplicável, not null) e índices potenciais definidos nos schemas. **(Concluído parcialmente - Schemas definidos)**
+- Migrações SQL geradas usando Drizzle Kit (`npx drizzle-kit generate`). **(Bloqueado)**
+- Migrações revisadas para garantir que refletem corretamente o schema desejado. **(Bloqueado)**
 
 ---
 
@@ -33,7 +33,8 @@ Definir os schemas Drizzle para as tabelas do sistema de filas (`jobs`, `repeata
 ---
 
 ## Comentários
-- `(YYYY-MM-DD por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
+- `(Data da migração por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
+- `(2024-07-25 por @Jules): Status alterado para Bloqueado. Os schemas Drizzle para 'jobs' e 'repeatable_job_schedules' foram definidos/atualizados em 'src/infrastructure/services/drizzle/schemas/'. No entanto, a geração de migrações SQL via Drizzle Kit (`npm run db:generate`) está falhando com "Internal error occurred when running command". As definições de schema foram submetidas no branch 'feat/qsys-1.4-drizzle-schemas'.`
 
 ---
 

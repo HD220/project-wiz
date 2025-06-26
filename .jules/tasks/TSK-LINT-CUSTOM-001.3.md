@@ -7,13 +7,13 @@ Após configurar as regras de modularidade em `eslint.config.js` (tarefa `LINT-C
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Bloqueado`
 **Dependências (IDs):** `LINT-CUSTOM-001.2`
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P2`
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/lint-custom-rules`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `N/A (Tarefa bloqueada)`
 
 ---
 
@@ -33,6 +33,7 @@ Após configurar as regras de modularidade em `eslint.config.js` (tarefa `LINT-C
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(2024-07-25 por @Jules): Status alterado para Bloqueado. A execução do ESLint (`npm run lint`) está falhando consistentemente com um "Internal error occurred when running command", impedindo a validação e o refinamento das regras de modularidade. A configuração inicial em eslint.config.js foi corrigida para um erro de chave inválida (`excludedFiles`), mas o erro de execução persiste.`
 
 ---
 

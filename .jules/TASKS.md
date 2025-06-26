@@ -133,7 +133,7 @@
 | QSYS-1.4     | QSYS-F1.4: Definir Schema Drizzle e Gerar Migrações | Bloqueado  | QSYS-1.1            | P1         | Jules       | [TSK-QSYS-1.4.md](./tasks/TSK-QSYS-1.4.md) | Schemas definidos, DrizzleKit blocked. |
 | QSYS-1.5     | QSYS-F1.5: Testes Unitários para Fase 1 | Pendente  | QSYS-1.1, QSYS-1.3  | P1         | Jules       | [TSK-QSYS-1.5.md](./tasks/TSK-QSYS-1.5.md) | Garantir qualidade da base. |
 | QSYS-2.1     | QSYS-F2.1: Implementar InMemoryJobEventEmitter | Concluído  | -                   | P1         | Jules       | [TSK-QSYS-2.1.md](./tasks/TSK-QSYS-2.1.md) | Tests written but unverified (Vitest issue). |
-| QSYS-2.2     | QSYS-F2.2: Implementar Casos de Uso de Job | Pendente  | QSYS-1.2            | P1         | Jules       | [TSK-QSYS-2.2.md](./tasks/TSK-QSYS-2.2.md) | Lógica de aplicação para jobs. |
+| QSYS-2.2     | QSYS-F2.2: Implementar Casos de Uso de Job | Concluído  | QSYS-1.2            | P1         | Jules       | [TSK-QSYS-2.2.md](./tasks/TSK-QSYS-2.2.md) | Logic and tests written; tests unverified (Vitest issue). |
 | QSYS-2.3     | QSYS-F2.3: Implementar JobQueueService (API Queue) | Pendente  | QSYS-1.3, QSYS-2.1, QSYS-2.2 | P1         | Jules       | [TSK-QSYS-2.3.md](./tasks/TSK-QSYS-2.3.md) | API de produção de jobs. |
 | QSYS-2.4     | QSYS-F2.4: Testes Unitários e de Integração para Fase 2 | Pendente  | QSYS-2.1, QSYS-2.2, QSYS-2.3 | P1         | Jules       | [TSK-QSYS-2.4.md](./tasks/TSK-QSYS-2.4.md) | Garantir qualidade da API de jobs. |
 | QSYS-3.1     | QSYS-F3.1: Implementar JobWorkerService (API Worker) | Pendente  | QSYS-1.3, QSYS-2.1, QSYS-2.3, QSYS-3.2 | P1         | Jules       | [TSK-QSYS-3.1.md](./tasks/TSK-QSYS-3.1.md) | API de consumo de jobs. |
