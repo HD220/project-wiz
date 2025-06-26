@@ -120,11 +120,11 @@
 | FE-FEAT-SIDEBAR-DYNAMIC| Pendente | FE-COMP-SIDEBAR-PROJ, FE-COMP-SIDEBAR-USER, FE-SETUP-008 | P1 | Frontend | [TSK-FE-FEAT-SIDEBAR-DYNAMIC.md](./tasks/TSK-FE-FEAT-SIDEBAR-DYNAMIC.md) |
 | FE-FEAT-TODO-ACTIONS| Pendente | Várias FE-COMP-* | P2 | Frontend | [TSK-FE-FEAT-TODO-ACTIONS.md](./tasks/TSK-FE-FEAT-TODO-ACTIONS.md) |
 | FE-FEAT-DOC-FEATURES| Pendente | FE-LAYOUT-001+ | P2 | Frontend | [TSK-FE-FEAT-DOC-FEATURES.md](./tasks/TSK-FE-FEAT-DOC-FEATURES.md) |
-| FE-IPC-CORE-ABSTR| Em Andamento | FE-SETUP-001 | P0 | Jules | [TSK-FE-IPC-CORE-ABSTR.md](./tasks/TSK-FE-IPC-CORE-ABSTR.md) |
+| FE-IPC-CORE-ABSTR| Concluído | FE-SETUP-001 | P0 | Jules | [TSK-FE-IPC-CORE-ABSTR.md](./tasks/TSK-FE-IPC-CORE-ABSTR.md) |
 | FE-IPC-PROJ-LIST| Pendente | FE-IPC-CORE-ABSTR | P1 | Frontend/Backend | [TSK-FE-IPC-PROJ-LIST.md](./tasks/TSK-FE-IPC-PROJ-LIST.md) |
 | FE-IPC-PROJ-CREATE| Pendente | FE-IPC-CORE-ABSTR | P1 | Frontend/Backend | [TSK-FE-IPC-PROJ-CREATE.md](./tasks/TSK-FE-IPC-PROJ-CREATE.md) |
 | FE-IPC-ONBOARD | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-ONBOARD.md](./tasks/TSK-FE-IPC-ONBOARD.md) |
-| FE-IPC-CHAT    | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) |
+| FE-IPC-CHAT    | Em Andamento | FE-IPC-CORE-ABSTR | P0 | Jules | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) |
 | --- | --- | --- | --- | --- | --- |
 | **FASE QSYS: Implementação do Novo Sistema de Filas** |  |  |  |  |  |  |
 | QSYS-1.1     | Concluído | -                   | P1         | Jules       | [TSK-QSYS-1.1.md](./tasks/TSK-QSYS-1.1.md) |

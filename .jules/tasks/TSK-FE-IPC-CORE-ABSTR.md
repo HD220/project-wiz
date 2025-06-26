@@ -7,13 +7,13 @@ Implementar uma camada de abstração no frontend, similar ao hook `useCore()` e
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-001` (Estrutura básica do frontend)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P0` (Fundamental para a comunicação FE-BE)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-ipc-core-abstraction`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-ipc-core-abstraction após o push)`
 
 ---
 
@@ -39,7 +39,7 @@ Implementar uma camada de abstração no frontend, similar ao hook `useCore()` e
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Iniciada a implementação da camada de abstração IPC. Definida a interface, serviço e hook.`
+- `(Data Atual): Implementação da camada de abstração IPC concluída e submetida. Definida a interface, serviço e hook.`
 
 ---
 
