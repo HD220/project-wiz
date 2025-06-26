@@ -17,6 +17,10 @@ export const IPCChannel {
 
   // Generic/App level (example)
   // APP_GET_VERSION: 'app:getVersion',
+
+  // Project Feature
+  PROJECT_LIST_QUERY: 'project:list', // Renderer -> Main (Query)
+  // PROJECT_CREATE_COMMAND: 'project:create', // Example for another task
 } as const;
 
 // Helper type to extract channel values

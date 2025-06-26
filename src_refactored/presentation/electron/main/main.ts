@@ -1,7 +1,8 @@
 // src_refactored/presentation/electron/main/main.ts
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import { registerChatIPCHandlers } from './ipc-chat.handlers'; // Adjust path if needed
+import { registerChatIPCHandlers } from './ipc-chat.handlers';
+import { registerProjectIPCHandlers } from './ipc-project.handlers'; // Import project handlers
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -45,7 +46,8 @@ const createWindow = () => {
 app.on('ready', () => {
   // Register IPC handlers
   registerChatIPCHandlers();
-  // Register other IPC handlers here (e.g., for onboarding, projects, etc.)
+  registerProjectIPCHandlers(); // Register project handlers
+  // Register other IPC handlers here (e.g., for onboarding, etc.)
 
   createWindow();
 });
@@ -80,7 +82,9 @@ app.on('activate', () => {
 
 // Handle IPC unregistration on quit (optional, good practice if handlers hold resources)
 app.on('will-quit', () => {
-  // Example: unregisterChatIPCHandlers();
+  // Example:
+  // unregisterChatIPCHandlers();
+  // unregisterProjectIPCHandlers(); // Example if unregistration is needed
 });
 
 // Expose a simple function for preload to check if running in dev

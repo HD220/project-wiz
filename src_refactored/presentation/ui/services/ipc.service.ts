@@ -161,6 +161,15 @@ class IPCService {
     // meaning it calls the listener with only the data payload.
     return this.on(IPCChannel.CHAT_STREAM_EVENT, listener as (...args: any[]) => void);
   }
+  // --- Project Specific Methods ---
+
+  /**
+   * Fetches the list of projects from the main process.
+   * @returns A promise that resolves with an IPCResult containing ProjectListItem[] or an error.
+   */
+  public async listProjects(): Promise<IPCResult<ProjectListItem[]>> {
+    return this.invoke<ProjectListItem[]>(IPCChannel.PROJECT_LIST_QUERY);
+  }
 }
 
 export const ipcService = new IPCService();
