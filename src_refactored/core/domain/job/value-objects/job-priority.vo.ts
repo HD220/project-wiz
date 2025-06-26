@@ -1,6 +1,6 @@
 // src_refactored/core/domain/job/value-objects/job-priority.vo.ts
-import { AbstractValueObject } from '../../../common/value-objects/abstract.vo';
-import { ValueError } from '../../../common/errors';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/domain/common/errors';
 
 // BullMQ priorities: lower number = higher priority. Default is effectively 0 if not specified.
 // Let's define a reasonable range, e.g., 1 (highest) to 10 (lowest), with a default.

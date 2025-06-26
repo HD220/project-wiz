@@ -1,6 +1,6 @@
 // src_refactored/core/domain/user/value-objects/user-avatar.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../common/value-objects/base.vo';
-import { ValueError } from '../../../../common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/domain/common/errors';
 
 interface UserAvatarProps extends ValueObjectProps {
   value: string | null; // Avatar can be optional, represented by null

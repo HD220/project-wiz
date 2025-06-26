@@ -4,7 +4,7 @@ import { IJobRepository, IJobRepository as JobRepositorySymbol } from '@/domain/
 import { JobEntity, JobEntityConstructionProps } from '@/domain/job/job.entity';
 import { CreateJobRequestDTO, CreateJobResponseDTO } from '../dtos'; // This relative path might be okay or could use an alias if dtos are central
 import { Result, ok as Ok, error as Err } from '@/shared/result'; // Use exported ok and error
-import { ValueError } from '@/core/common/errors'; // Corrected path
+import { ValueError } from '@/domain/common/errors'; // Corrected path
 // import { Inject, Injectable } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming an IoC container might be used
 
 // @Injectable() // Decorator if an IoC container like InversifyJS is used

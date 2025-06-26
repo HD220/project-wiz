@@ -1,6 +1,6 @@
 // src_refactored/core/domain/job/value-objects/job-execution-log-entry.vo.ts
-import { AbstractValueObject } from '../../../common/value-objects/abstract.vo';
-import { ValueError } from '../../../common/errors';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/domain/common/errors';
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 

@@ -1,18 +1,18 @@
 // src_refactored/core/application/use-cases/annotation/list-annotations.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 import {
   ListAnnotationsUseCaseInput,
   ListAnnotationsUseCaseInputSchema,
   ListAnnotationsUseCaseOutput,
   AnnotationListItem,
 } from './list-annotations.schema';
-import { IAnnotationRepository } from '../../../../domain/annotation/ports/annotation-repository.interface';
-import { AnnotationSearchFilters, PaginationOptions } from '../../../../domain/annotation/ports/annotation-repository.types';
-import { Identity } from '../../../../common/value-objects/identity.vo';
-import { Annotation } from '../../../../domain/annotation/annotation.entity';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
+import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
+import { AnnotationSearchFilters, PaginationOptions } from '@/domain/annotation/ports/annotation-repository.types';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { Annotation } from '@/domain/annotation/annotation.entity';
+import { Result, ok, error } from '@/shared/result';
+import { DomainError, ValueError } from '@/domain/common/errors';
 
 export class ListAnnotationsUseCase
   implements

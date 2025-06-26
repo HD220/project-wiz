@@ -1,5 +1,5 @@
 // src_refactored/core/domain/user/value-objects/user-id.vo.ts
-import { Identity } from '../../../../common/value-objects/identity.vo';
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class UserId extends Identity {
   private constructor(value: string) {

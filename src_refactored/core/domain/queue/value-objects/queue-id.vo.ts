@@ -1,5 +1,5 @@
 // src_refactored/core/domain/queue/value-objects/queue-id.vo.ts
-import { Identity } from '../../../../common/value-objects/identity.vo';
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class QueueId extends Identity {
   private constructor(value: string) {

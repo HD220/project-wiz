@@ -1,21 +1,21 @@
 // src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
 import { z, ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 import {
   CreatePersonaTemplateUseCaseInput,
   CreatePersonaTemplateUseCaseInputSchema,
   CreatePersonaTemplateUseCaseOutput,
 } from './create-persona-template.schema';
-import { IAgentPersonaTemplateRepository } from '../../../../domain/agent/ports/agent-persona-template-repository.interface';
-import { AgentPersonaTemplate } from '../../../../domain/agent/agent-persona-template.vo';
-import { PersonaId } from '../../../../domain/agent/value-objects/persona/persona-id.vo';
-import { PersonaName } from '../../../../domain/agent/value-objects/persona/persona-name.vo';
-import { PersonaRole } from '../../../../domain/agent/value-objects/persona/persona-role.vo';
-import { PersonaGoal } from '../../../../domain/agent/value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from '../../../../domain/agent/value-objects/persona/persona-backstory.vo';
-import { ToolNames } from '../../../../domain/agent/value-objects/persona/tool-names.vo';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
+import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
+import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
+import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
+import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
+import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
+import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
+import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
+import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
+import { Result, ok, error } from '@/shared/result';
+import { DomainError, ValueError } from '@/domain/common/errors';
 
 export class CreatePersonaTemplateUseCase
   implements
