@@ -17,13 +17,13 @@
 | APP-SVC-001.8.8.IMPL| Testes erro "Tool not found" | Concluído | APP-SVC-001.8.8 | P1 | Jules | [TSK-APP-SVC-001.8.8.IMPL.md](./tasks/TSK-APP-SVC-001.8.8.IMPL.md) | Testes não executados |
 | APP-SVC-001.8.9.IMPL| Testes falha validação args de ferramenta | Concluído | APP-SVC-001.8.9 | P1 | Jules | [TSK-APP-SVC-001.8.9.IMPL.md](./tasks/TSK-APP-SVC-001.8.9.IMPL.md) | Testes não executados |
 | APP-SVC-001.8.10.IMPL| Testes lógica de re-planejamento | Concluído | APP-SVC-001.8.10 | P1 | Jules | [TSK-APP-SVC-001.8.10.IMPL.md](./tasks/TSK-APP-SVC-001.8.10.IMPL.md) | Testes não executados |
-| APP-SVC-002  | Implementar WorkerService | Bloqueado | DOM-JOB-011, APP-SVC-001.8, APP-PORT-003 | P1 | Jules | [TSK-APP-SVC-002.md](./tasks/TSK-APP-SVC-002.md) | Subdividido |
-| APP-SVC-002.1| Definir interface IWorkerService | Pendente | APP-SVC-002, DOM-JOB-011, APP-PORT-003 | P1 | Jules | [TSK-APP-SVC-002.1.md](./tasks/TSK-APP-SVC-002.1.md) |  |
-| APP-SVC-002.2| Implementar estrutura básica WorkerService | Pendente | APP-SVC-002.1 | P1 | Jules | [TSK-APP-SVC-002.2.md](./tasks/TSK-APP-SVC-002.2.md) |  |
-| APP-SVC-002.3| Integrar WorkerService com IAgentExecutor | Pendente | APP-SVC-002.2, APP-SVC-001.8 | P1 | Jules | [TSK-APP-SVC-002.3.md](./tasks/TSK-APP-SVC-002.3.md) |  |
-| APP-SVC-002.4| Integrar WorkerService com Fila | Pendente | APP-SVC-002.2, APP-PORT-003 | P1 | Jules | [TSK-APP-SVC-002.4.md](./tasks/TSK-APP-SVC-002.4.md) |  |
-| APP-SVC-002.5| Tratar resultados/erros dos workers | Pendente | APP-SVC-002.2 | P1 | Jules | [TSK-APP-SVC-002.5.md](./tasks/TSK-APP-SVC-002.5.md) |  |
-| APP-SVC-002.6| Testes unitários para WorkerService | Pendente | APP-SVC-002.1, ..., APP-SVC-002.5 | P1 | Jules | [TSK-APP-SVC-002.6.md](./tasks/TSK-APP-SVC-002.6.md) |  |
+| APP-SVC-002  | Implementar WorkerService | Cancelado | DOM-JOB-011, APP-SVC-001.8, APP-PORT-003 | P1 | Jules | [TSK-APP-SVC-002.md](./tasks/TSK-APP-SVC-002.md) | Substituída por novo design de filas |
+| APP-SVC-002.1| Definir interface IWorkerService | Cancelado | APP-SVC-002, DOM-JOB-011, APP-PORT-003 | P1 | Jules | [TSK-APP-SVC-002.1.md](./tasks/TSK-APP-SVC-002.1.md) | Substituída por novo design de filas |
+| APP-SVC-002.2| Implementar estrutura básica WorkerService | Cancelado | APP-SVC-002.1 | P1 | Jules | [TSK-APP-SVC-002.2.md](./tasks/TSK-APP-SVC-002.2.md) | Substituída por novo design de filas |
+| APP-SVC-002.3| Integrar WorkerService com IAgentExecutor | Cancelado | APP-SVC-002.2, APP-SVC-001.8 | P1 | Jules | [TSK-APP-SVC-002.3.md](./tasks/TSK-APP-SVC-002.3.md) | Substituída por novo design de filas |
+| APP-SVC-002.4| Integrar WorkerService com Fila | Cancelado | APP-SVC-002.2, APP-PORT-003 | P1 | Jules | [TSK-APP-SVC-002.4.md](./tasks/TSK-APP-SVC-002.4.md) | Substituída por novo design de filas |
+| APP-SVC-002.5| Tratar resultados/erros dos workers | Cancelado | APP-SVC-002.2 | P1 | Jules | [TSK-APP-SVC-002.5.md](./tasks/TSK-APP-SVC-002.5.md) | Substituída por novo design de filas |
+| APP-SVC-002.6| Testes unitários para WorkerService | Cancelado | APP-SVC-002.1, ..., APP-SVC-002.5 | P1 | Jules | [TSK-APP-SVC-002.6.md](./tasks/TSK-APP-SVC-002.6.md) | Substituída por novo design de filas |
 | CONFIG-ESLINT-001| Consolidar config ESLint | Concluído | - | P2 | Jules | [TSK-CONFIG-ESLINT-001.md](./tasks/TSK-CONFIG-ESLINT-001.md) | Subdividido |
 | CONFIG-ESLINT-001.2| Migrar ignorePatterns para eslint.config.js | Concluído | CONFIG-ESLINT-001.1 | P2 | Jules | [TSK-CONFIG-ESLINT-001.2.md](./tasks/TSK-CONFIG-ESLINT-001.2.md) |  |
 | LINT-FIX-001 | Corrigir todos os erros de lint | Bloqueado | CONFIG-ESLINT-001.2 | P2 | Jules | [TSK-LINT-FIX-001.md](./tasks/TSK-LINT-FIX-001.md) | Subdividido |
@@ -125,6 +125,27 @@
 | FE-IPC-PROJ-CREATE| Definir/implementar IPC usecase:create-project | Pendente | FE-IPC-CORE-ABSTR | P1 | Frontend/Backend | [TSK-FE-IPC-PROJ-CREATE.md](./tasks/TSK-FE-IPC-PROJ-CREATE.md) | |
 | FE-IPC-ONBOARD | Definir/implementar IPCs para Onboarding | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-ONBOARD.md](./tasks/TSK-FE-IPC-ONBOARD.md) | |
 | FE-IPC-CHAT    | Definir/implementar IPCs para Chat | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) | |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **FASE QSYS: Implementação do Novo Sistema de Filas** |  |  |  |  |  |  | Design: [docs/.../bullmq-inspired-queue-system.md](./docs/technical-documentation/bullmq-inspired-queue-system.md) |
+| QSYS-1.1     | QSYS-F1.1: Refinar/Augmentar Job Entity e VOs | Pendente  | -                   | P1         | Jules       | [TSK-QSYS-1.1.md](./tasks/TSK-QSYS-1.1.md) | Prioridade para fundação do domínio. |
+| QSYS-1.2     | QSYS-F1.2: Definir/Confirmar Interface IJobRepository | Pendente  | QSYS-1.1            | P1         | Jules       | [TSK-QSYS-1.2.md](./tasks/TSK-QSYS-1.2.md) | Essencial para persistência. |
+| QSYS-1.3     | QSYS-F1.3: Implementar DrizzleJobRepository | Pendente  | QSYS-1.2, QSYS-1.4  | P1         | Jules       | [TSK-QSYS-1.3.md](./tasks/TSK-QSYS-1.3.md) | Implementação da persistência. |
+| QSYS-1.4     | QSYS-F1.4: Definir Schema Drizzle e Gerar Migrações | Pendente  | QSYS-1.1            | P1         | Jules       | [TSK-QSYS-1.4.md](./tasks/TSK-QSYS-1.4.md) | Estrutura do banco de dados. |
+| QSYS-1.5     | QSYS-F1.5: Testes Unitários para Fase 1 | Pendente  | QSYS-1.1, QSYS-1.3  | P1         | Jules       | [TSK-QSYS-1.5.md](./tasks/TSK-QSYS-1.5.md) | Garantir qualidade da base. |
+| QSYS-2.1     | QSYS-F2.1: Implementar InMemoryJobEventEmitter | Pendente  | -                   | P1         | Jules       | [TSK-QSYS-2.1.md](./tasks/TSK-QSYS-2.1.md) | Base para eventos. |
+| QSYS-2.2     | QSYS-F2.2: Implementar Casos de Uso de Job | Pendente  | QSYS-1.2            | P1         | Jules       | [TSK-QSYS-2.2.md](./tasks/TSK-QSYS-2.2.md) | Lógica de aplicação para jobs. |
+| QSYS-2.3     | QSYS-F2.3: Implementar JobQueueService (API Queue) | Pendente  | QSYS-1.3, QSYS-2.1, QSYS-2.2 | P1         | Jules       | [TSK-QSYS-2.3.md](./tasks/TSK-QSYS-2.3.md) | API de produção de jobs. |
+| QSYS-2.4     | QSYS-F2.4: Testes Unitários e de Integração para Fase 2 | Pendente  | QSYS-2.1, QSYS-2.2, QSYS-2.3 | P1         | Jules       | [TSK-QSYS-2.4.md](./tasks/TSK-QSYS-2.4.md) | Garantir qualidade da API de jobs. |
+| QSYS-3.1     | QSYS-F3.1: Implementar JobWorkerService (API Worker) | Pendente  | QSYS-1.3, QSYS-2.1, QSYS-2.3, QSYS-3.2 | P1         | Jules       | [TSK-QSYS-3.1.md](./tasks/TSK-QSYS-3.1.md) | API de consumo de jobs. |
+| QSYS-3.2     | QSYS-F3.2: Refinar Job Entity/Interface para contexto do Worker | Pendente  | QSYS-1.1, QSYS-1.3, QSYS-2.1 | P1         | Jules       | [TSK-QSYS-3.2.md](./tasks/TSK-QSYS-3.2.md) | Funcionalidades do job no worker. |
+| QSYS-3.3     | QSYS-F3.3: Testes Unitários e de Integração para Fase 3 | Pendente  | QSYS-3.1, QSYS-3.2  | P1         | Jules       | [TSK-QSYS-3.3.md](./tasks/TSK-QSYS-3.3.md) | Garantir qualidade dos workers. |
+| QSYS-4.1     | QSYS-F4.1: Implementar QueueSchedulerService | Pendente  | QSYS-1.3, QSYS-2.1  | P1         | Jules       | [TSK-QSYS-4.1.md](./tasks/TSK-QSYS-4.1.md) | Gerenciamento de jobs agendados/parados. |
+| QSYS-4.2     | QSYS-F4.2: Testes Unitários e de Integração para Fase 4 | Pendente  | QSYS-4.1            | P1         | Jules       | [TSK-QSYS-4.2.md](./tasks/TSK-QSYS-4.2.md) | Garantir qualidade do scheduler. |
+| QSYS-5.1     | QSYS-F5.1: Configurar Injeção de Dependência para Fila | Pendente  | QSYS-1.3, QSYS-2.1, QSYS-2.3, QSYS-3.1, QSYS-4.1 | P1 | Jules | [TSK-QSYS-5.1.md](./tasks/TSK-QSYS-5.1.md) | Setup de DI. |
+| QSYS-5.2     | QSYS-F5.2: Integrar JobQueueService com TaskManagerTool | Pendente  | QSYS-2.3, QSYS-5.1  | P1         | Jules       | [TSK-QSYS-5.2.md](./tasks/TSK-QSYS-5.2.md) | Integração com produtores existentes. |
+| QSYS-5.3     | QSYS-F5.3: Adaptar GenericAgentExecutor para JobWorkerService | Pendente  | QSYS-3.1, QSYS-5.1, APP-SVC-001 | P1         | Jules       | [TSK-QSYS-5.3.md](./tasks/TSK-QSYS-5.3.md) | Integração com consumidores existentes. |
+| QSYS-5.4     | QSYS-F5.4: Testes End-to-End para fluxos de jobs | Pendente  | QSYS-5.1, QSYS-5.2, QSYS-5.3 | P1         | Jules       | [TSK-QSYS-5.4.md](./tasks/TSK-QSYS-5.4.md) | Testes completos do sistema. |
+| QSYS-5.5     | QSYS-F5.5: Atualizar Documentação do Projeto | Pendente  | QSYS-5.4            | P2         | Jules       | [TSK-QSYS-5.5.md](./tasks/TSK-QSYS-5.5.md) | Manter documentação atualizada. |
 
 ---
 ## Tarefas Pendentes de Migração (Formato Antigo)

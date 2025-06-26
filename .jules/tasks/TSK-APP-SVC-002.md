@@ -7,7 +7,7 @@ Implementar o `WorkerService`, responsável por gerenciar o ciclo de vida de wor
 
 ---
 
-**Status:** `Bloqueado`
+**Status:** `Cancelado`
 **Dependências (IDs):** `DOM-JOB-011, APP-SVC-001.8, APP-PORT-003`
 **Complexidade (1-5):** `3`
 **Prioridade (P0-P4):** `P1`
@@ -30,6 +30,7 @@ Implementar o `WorkerService`, responsável por gerenciar o ciclo de vida de wor
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(YYYY-MM-DD por @Jules): Cancelada. Substituída pelo novo plano de implementação do sistema de filas genérico (ver docs/technical-documentation/queue-system-integration-plan.md).`
 
 ---
 

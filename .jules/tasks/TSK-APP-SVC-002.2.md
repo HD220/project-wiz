@@ -1,38 +1,37 @@
-# Tarefa: APP-SVC-002.2 - Implementar a estrutura básica do WorkerService (registrar, iniciar, parar workers).
+# Tarefa: APP-SVC-002.2 - Implementar estrutura básica WorkerService
 
 **ID da Tarefa:** `APP-SVC-002.2`
-**Título Breve:** Implementar a estrutura básica do `WorkerService` (registrar, iniciar, parar workers).
+**Título Breve:** Implementar estrutura básica `WorkerService`
 **Descrição Completa:**
-Implementar a funcionalidade central do `WorkerService`, incluindo a lógica para registrar novos workers, iniciar workers existentes e parar workers em execução.
+Implementar a estrutura de classes e métodos básicos para o `WorkerService`, sem a lógica completa de cada método.
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Cancelado`
 **Dependências (IDs):** `APP-SVC-002.1`
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1`
 **Responsável:** `Jules`
-**Branch Git Proposta:** `feature/app-worker-service-core` (Sugestão)
+**Branch Git Proposta:** `feature/app-worker-service-base`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- Implementação da classe `WorkerService` que adere à interface `IWorkerService`.
-- Lógica para adicionar um worker a um pool ou registro.
-- Lógica para iniciar a execução de um worker (ex: spawn de processo, criação de thread).
-- Lógica para solicitar a parada graciosa de um worker.
+- Arquivo `WorkerService.ts` criado com a classe e métodos definidos na interface.
+- Construtor e inicialização básica implementados.
+- Métodos principais existem, mas podem ter implementações placeholder.
 
 ---
 
 ## Notas/Decisões de Design
-- Considerar como os workers serão gerenciados (pool de workers, etc.).
-- Definir como o estado de cada worker (ocioso, ocupado, erro) será rastreado.
+- Focar na estrutura e não na lógica detalhada nesta fase.
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(YYYY-MM-DD por @Jules): Cancelada. Substituída pelo novo plano de implementação do sistema de filas genérico (ver docs/technical-documentation/queue-system-integration-plan.md).`
 
 ---
 

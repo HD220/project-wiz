@@ -7,7 +7,7 @@ Definir a interface para `WorkerService` (`IWorkerService`) e seus Data Transfer
 
 ---
 
-**Status:** `Concluído`
+**Status:** `Cancelado`
 **Dependências (IDs):** `APP-SVC-002, DOM-JOB-011, APP-PORT-003`
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1`
@@ -40,6 +40,7 @@ Definir a interface para `WorkerService` (`IWorkerService`) e seus Data Transfer
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
 - `(YYYY-MM-DD por @Jules): Interface IWorkerService e DTOs definidos conforme plano. A interpretação dos critérios de aceitação "inicialização" e "submissão de jobs" está detalhada nas Notas/Decisões de Design.`
+- `(YYYY-MM-DD por @Jules): Cancelada. Substituída pelo novo plano de implementação do sistema de filas genérico (ver docs/technical-documentation/queue-system-integration-plan.md). O trabalho anterior nesta tarefa, embora concluído, não se alinha com o novo design BullMQ-inspired.`
 
 ---
 

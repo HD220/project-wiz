@@ -1,38 +1,38 @@
-# Tarefa: APP-SVC-002.5 - Implementar tratamento de resultados/erros dos workers no WorkerService.
+# Tarefa: APP-SVC-002.5 - Tratar resultados/erros dos workers
 
 **ID da Tarefa:** `APP-SVC-002.5`
-**Título Breve:** Implementar tratamento de resultados/erros dos workers no `WorkerService`.
+**Título Breve:** Tratar resultados/erros dos workers
 **Descrição Completa:**
-Implementar a lógica no `WorkerService` para receber os resultados (sucesso ou falha) da execução de um job por um worker e tomar as ações apropriadas, como atualizar o status do job ou registrar erros.
+Implementar no `WorkerService` a lógica para lidar com os resultados (sucesso, falha) do processamento de jobs pelos workers/executores.
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Cancelado`
 **Dependências (IDs):** `APP-SVC-002.2`
-**Complexidade (1-5):** `1`
+**Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1`
 **Responsável:** `Jules`
-**Branch Git Proposta:** `feature/app-worker-service-results` (Sugestão)
+**Branch Git Proposta:** `feature/app-worker-results-handling`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- `WorkerService` recebe notificações de conclusão de job de seus workers.
-- Resultados de sucesso são processados (ex: log, notificação para outro sistema).
-- Erros na execução de jobs são capturados, registrados.
-- Status do job original é atualizado conforme o resultado da execução.
+- Status do job atualizado para "Concluído" em caso de sucesso.
+- Status do job atualizado para "Falhou" em caso de erro.
+- Lógica de retentativas (retry) implementada conforme política do job.
+- Resultados e erros são armazenados adequadamente.
 
 ---
 
 ## Notas/Decisões de Design
-- Definir como os workers comunicarão os resultados/erros de volta ao `WorkerService`.
-- Estratégia de logging para resultados e erros.
+- Definir como a política de retry será configurada e aplicada.
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(YYYY-MM-DD por @Jules): Cancelada. Substituída pelo novo plano de implementação do sistema de filas genérico (ver docs/technical-documentation/queue-system-integration-plan.md).`
 
 ---
 
