@@ -7,13 +7,13 @@ Implementar a página inicial pública da aplicação, que geralmente é a prime
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-LAYOUT-005` (Layout Público)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P2`
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-page-home-public`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-page-home-public)`
 
 ---
 
@@ -34,7 +34,7 @@ Implementar a página inicial pública da aplicação, que geralmente é a prime
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementada a página Home Pública com conteúdo placeholder.`
+- `(Data Atual): Implementada e submetida a página Home Pública com conteúdo placeholder. Commit link a ser atualizado após push.`
 
 ---
 

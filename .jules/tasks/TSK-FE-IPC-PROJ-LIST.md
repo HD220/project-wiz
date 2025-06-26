@@ -13,7 +13,7 @@ Definir e implementar o canal de comunicação entre processos (IPC) e o handler
 **Prioridade (P0-P4):** `P1` (Necessário para listar projetos)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-ipc-get-projects`
-**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-ipc-get-projects após o push)`
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-ipc-get-projects)`
 
 ---
 
@@ -37,7 +37,7 @@ Definir e implementar o canal de comunicação entre processos (IPC) e o handler
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementado e submetido o IPC para listar projetos, incluindo definições de canal/tipo, handler no main e método no serviço IPC do frontend.`
+- `(Data Atual): Implementado e submetido o IPC para listar projetos, incluindo definições de canal/tipo, handler no main e método no serviço IPC do frontend. O link do commit será atualizado após o push efetivo.`
 
 ---
 
