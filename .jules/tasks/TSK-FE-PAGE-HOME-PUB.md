@@ -7,31 +7,34 @@ Implementar a página inicial pública da aplicação, que geralmente é a prime
 
 ---
 
-**Status:** `Pendente`
-**Dependências (IDs):** `FE-LAYOUT-005` (Layout Público, se aplicável, ou FE-LAYOUT-001 se usar o layout raiz)
+**Status:** `Em Andamento`
+**Dependências (IDs):** `FE-LAYOUT-005` (Layout Público)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P2`
-**Responsável:** `Frontend`
+**Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-page-home-public`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- Componente de página `HomePublicPage.tsx` (ou similar, ex: `routes/(public)/home/index.tsx`) criado.
-- Conteúdo placeholder ou inicial da página home pública implementado.
-- A página é acessível através da rota `/home` (ou rota pública definida).
-- Utiliza o layout público (`FE-LAYOUT-005`) se um foi definido, caso contrário, o layout raiz.
+- Componente de página `HomePublicPageComponent` criado em `src_refactored/presentation/ui/routes/(public)/home/index.tsx`. **(Concluído)**
+- Conteúdo placeholder ou inicial da página home pública implementado (título, tagline, botão para onboarding). **(Concluído)**
+- A página é acessível através da rota `/home` e utiliza o layout do grupo `(public)`. **(Concluído)**
+- Utiliza o layout público (`FE-LAYOUT-005` - `src_refactored/presentation/ui/routes/(public)/_layout.tsx`). **(Concluído)**
 
 ---
 
 ## Notas/Decisões de Design
-- O conteúdo específico e design desta página podem precisar de mais detalhamento do Product Owner ou UX Designer.
+- O conteúdo específico e design desta página são placeholders e podem precisar de mais detalhamento do Product Owner ou UX Designer.
+- Inclui um link para `/onboarding`.
+- Exportado usando `createFileRoute('/(public)/home/')` para o TanStack Router.
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(Data Atual): Implementada a página Home Pública com conteúdo placeholder.`
 
 ---
 

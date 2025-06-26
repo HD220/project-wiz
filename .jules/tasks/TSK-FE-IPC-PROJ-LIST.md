@@ -7,13 +7,13 @@ Definir e implementar o canal de comunicação entre processos (IPC) e o handler
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-IPC-CORE-ABSTR` (Camada de abstração IPC no frontend), (Backend) `ListProjectsUseCase` e suas dependências (repositório de projetos).
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1` (Necessário para listar projetos)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-ipc-get-projects`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-ipc-get-projects após o push)`
 
 ---
 
@@ -37,7 +37,7 @@ Definir e implementar o canal de comunicação entre processos (IPC) e o handler
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementado o IPC para listar projetos, incluindo definições de canal/tipo, handler no main e método no serviço IPC do frontend.`
+- `(Data Atual): Implementado e submetido o IPC para listar projetos, incluindo definições de canal/tipo, handler no main e método no serviço IPC do frontend.`
 
 ---
 
