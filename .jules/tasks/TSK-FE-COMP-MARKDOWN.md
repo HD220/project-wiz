@@ -7,34 +7,40 @@ Reimplementar um componente `MarkdownRenderer` que seja capaz de renderizar stri
 
 ---
 
-**Status:** `Pendente`
-**Dependências (IDs):** `-` (Pode depender da instalação de `react-markdown` e plugins relacionados, se ainda não estiverem no projeto)
+**Status:** `Em Andamento`
+**Dependências (IDs):** `-` (Dependencies `react-markdown`, `remark-gfm`, `rehype-sanitize`, `rehype-highlight` confirmed in `package.json`)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1` (Essencial para exibir conteúdo formatado, como mensagens de chat)
-**Responsável:** `Frontend`
+**Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-markdown`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- Componente `MarkdownRenderer.tsx` criado em `src_refactored/presentation/ui/components/common/` (ou local apropriado).
-- Utiliza `react-markdown` para renderizar conteúdo Markdown.
-- Configurado com plugins `rehype` (ex: `rehype-sanitize` para segurança, `rehype-raw` se for necessário renderizar HTML dentro do markdown com cuidado) e `remark` (ex: `remark-gfm`) conforme necessário.
-- Sanitização de HTML robusta implementada para prevenir XSS.
-- Suporte para elementos comuns de Markdown (cabeçalhos, listas, links, imagens, blocos de código, ênfase, etc.).
-- (Opcional) Syntax highlighting para blocos de código configurado (ex: usando `react-syntax-highlighter` com `rehype-highlight` ou similar).
+- Componente `MarkdownRenderer.tsx` criado em `src_refactored/presentation/ui/components/common/MarkdownRenderer.tsx`. **(Concluído)**
+- Utiliza `react-markdown` para renderizar conteúdo Markdown. **(Concluído)**
+- Configurado com plugins `rehype-sanitize`, `rehype-highlight` e `remark-gfm`. **(Concluído)**
+- Sanitização de HTML robusta implementada para prevenir XSS usando `rehype-sanitize` com schema estendido para permitir classes para highlighting. **(Concluído)**
+- Suporte para elementos comuns de Markdown. **(Concluído via plugins)**
+- Syntax highlighting para blocos de código configurado com `rehype-highlight`. **(Concluído - CSS de tema para highlight.js é uma consideração externa)**
 
 ---
 
 ## Notas/Decisões de Design
-- Usar `react-markdown` e plugins de `rehype`/`remark` conforme `package.json`. Garantir sanitização. (Nota original da tarefa)
-- A segurança (sanitização) é um aspecto crítico deste componente.
+- Utilizou `react-markdown` v10.1.0.
+- Plugins:
+    - `remark-gfm` para GitHub Flavored Markdown.
+    - `rehype-sanitize` para segurança XSS. O schema padrão foi estendido para permitir `className`/`class` em elementos `code`, `span`, `pre` para suportar classes adicionadas por `rehype-highlight`.
+    - `rehype-highlight` para sintaxe highlighting em blocos de código. A estilização visual dos blocos de código dependerá de um tema CSS de `highlight.js` (ex: `github.css` ou `atom-one-dark.css`) ser importado globalmente ou estar disponível via Tailwind.
+- Aplicada classe base `prose dark:prose-invert max-w-none` da Tailwind Typography para estilização padrão do conteúdo Markdown.
+- O componente aceita a string markdown como `children` e um `className` opcional para o contêiner.
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(Data Atual): Implementado o componente MarkdownRenderer.`
 
 ---
 

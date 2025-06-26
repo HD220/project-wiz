@@ -7,13 +7,13 @@ Implementar o arquivo `index.tsx` na raiz do diretório de rotas (ex: `src_refac
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-003` (Configuração do TanStack Router)
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1` (Comportamento de entrada na aplicação)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-page-root-index`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-page-root-index após o push)`
 
 ---
 
@@ -36,7 +36,7 @@ Implementar o arquivo `index.tsx` na raiz do diretório de rotas (ex: `src_refac
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementada a página raiz de índice com lógica de redirecionamento básica.`
+- `(Data Atual): Implementada e submetida a página raiz de índice com lógica de redirecionamento básica.`
 
 ---
 
