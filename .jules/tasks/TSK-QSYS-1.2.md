@@ -7,7 +7,7 @@ Revisar e finalizar a interface `IJobRepository` em `src_refactored/core/domain/
 
 ---
 
-**Status:** `Concluído`
+**Status:** `Pendente`
 **Dependências (IDs):** `QSYS-1.1`
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1`
