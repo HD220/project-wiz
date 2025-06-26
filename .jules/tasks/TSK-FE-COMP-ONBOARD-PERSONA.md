@@ -7,34 +7,39 @@ Reimplementar o componente `PersonaList` usado durante o processo de onboarding.
 
 ---
 
-**Status:** `Pendente`
-**Dependências (IDs):** `FE-SETUP-002 (Shadcn base), FE-COMP-UI-002` (Nota: FE-COMP-UI-002 foi cancelada; a dependência real é no componente Card do Shadcn/UI ou similar para listar itens)
+**Status:** `Em Andamento`
+**Dependências (IDs):** `FE-SETUP-002 (Shadcn base)` (Componentes Shadcn/UI como Card, ScrollArea são usados diretamente)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1` (Parte do fluxo de onboarding)
-**Responsável:** `Frontend`
+**Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-onboard-persona`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- Componente `PersonaList.tsx` criado em `src_refactored/presentation/ui/features/onboarding/components/` (ou local apropriado).
-- Exibe uma lista de personas, cada uma possivelmente com um nome, descrição e ícone/avatar.
-- Permite ao usuário selecionar uma persona da lista.
-- A seleção de uma persona chama uma função de callback com a persona selecionada.
-- Utiliza componentes Shadcn/UI para a apresentação da lista (ex: `Card` para cada item, `ScrollArea` se a lista for longa).
+- Componente `PersonaList.tsx` criado em `src_refactored/presentation/ui/features/onboarding/components/PersonaList.tsx`. **(Concluído)**
+- Exibe uma lista de personas (usando dados placeholder), cada uma com nome, descrição, tags e placeholder para ícone. **(Concluído)**
+- Permite ao usuário selecionar uma persona da lista clicando no card. **(Concluído)**
+- A seleção de uma persona chama uma função de callback `onSelectPersona` com o ID da persona selecionada. **(Concluído)**
+- Utiliza componentes Shadcn/UI (`Card`, `ScrollArea`) para a apresentação da lista. **(Concluído)**
+- Estilização para indicar a persona selecionada (borda, anel, ícone de marca de seleção). **(Concluído)**
 
 ---
 
 ## Notas/Decisões de Design
-- Exibe lista de personas para seleção. (Nota original da tarefa)
-- A fonte de dados das personas será tratada em outra tarefa. Este componente foca na apresentação.
-- A dependência original `FE-COMP-UI-002` foi cancelada; usar componentes Shadcn/UI diretamente.
+- O componente `PersonaList` recebe uma lista de personas e uma função de callback para lidar com a seleção.
+- Utiliza dados placeholder para as personas; a integração com dados reais será uma tarefa separada.
+- Cada persona é renderizada como um `Card` clicável.
+- A seleção é indicada visualmente com uma borda colorida, um anel e um ícone `CheckCircle2`.
+- A lista é envolta em uma `ScrollArea` para lidar com um número potencialmente grande de personas.
+- O layout da lista é uma grade responsiva (1, 2 ou 3 colunas dependendo do tamanho da tela).
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(Data Atual): Implementado o componente PersonaList para o fluxo de onboarding.`
 
 ---
 

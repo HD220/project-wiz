@@ -7,13 +7,13 @@ Reimplementar o componente `UserSidebar` na nova estrutura do frontend. Esta bar
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-002 (Shadcn base)` (Componentes Shadcn/UI como ScrollArea, Button, Avatar, Separator são usados diretamente. Resizable functionality will depend on parent using ResizablePanel.)
 **Complexidade (1-5):** `3`
 **Prioridade (P0-P4):** `P1` (Navegação da seção do usuário)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-user-sidebar`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-comp-user-sidebar após o push)`
 
 ---
 
@@ -38,7 +38,7 @@ Reimplementar o componente `UserSidebar` na nova estrutura do frontend. Esta bar
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementada a estrutura básica do UserSidebar com placeholders, navegação e lista de DMs, seguindo um estilo Discord-like.`
+- `(Data Atual): Implementada e submetida a estrutura básica do UserSidebar com placeholders, navegação e lista de DMs, seguindo um estilo Discord-like.`
 
 ---
 
