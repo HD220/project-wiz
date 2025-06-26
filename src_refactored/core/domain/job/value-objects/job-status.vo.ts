@@ -1,89 +1,55 @@
 // src_refactored/core/domain/job/value-objects/job-status.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject } from '../../../common/value-objects/abstract.vo';
+import { ValueError } from '../../../common/errors';
 
-export enum JobStatusType {
-  PENDING = 'PENDING',     // Newly created, ready to be picked up if no dependencies or delay
-  WAITING = 'WAITING',     // Waiting for dependencies to complete or for a specific time (after delay)
-  ACTIVE = 'ACTIVE',       // Currently being processed by a worker
-  COMPLETED = 'COMPLETED', // Successfully processed
-  FAILED = 'FAILED',       // Failed processing after all retries or due to critical error
-  DELAYED = 'DELAYED',     // Execution postponed (e.g., for retry backoff or scheduled future execution)
-  // CANCELLED = 'CANCELLED', // Possible future status
+export enum JobStatusEnum {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  DELAYED = 'DELAYED',
+  WAITING_CHILDREN = 'WAITING_CHILDREN', // Job is waiting for dependent (child) jobs to complete
+  // STALLED is not an explicit status jobs are set to, but a condition identified by the scheduler.
+  // A stalled job would typically be moved back to PENDING or FAILED.
+  // CANCELLED could be added if explicit cancellation is a feature.
 }
 
-interface JobStatusProps extends ValueObjectProps {
-  value: JobStatusType;
-}
+const VALID_JOB_STATUSES = Object.values(JobStatusEnum);
 
-export class JobStatus extends AbstractValueObject<JobStatusProps> {
-  private constructor(value: JobStatusType) {
-    super({ value });
+export class JobStatusVO extends AbstractValueObject<JobStatusEnum> {
+  private constructor(value: JobStatusEnum) {
+    super(value);
   }
 
-  private static isValidTransition(current: JobStatusType, next: JobStatusType): boolean {
-    // Define valid state transitions
-    // Example:
-    // if (current === JobStatusType.PENDING && (next === JobStatusType.ACTIVE || next === JobStatusType.WAITING)) return true;
-    // if (current === JobStatusType.WAITING && next === JobStatusType.ACTIVE) return true;
-    // ... more transitions
-    // For now, allow any transition but this should be tightened.
-    // The entity or service using this VO would typically enforce transition logic.
-    // This VO's role is to represent a valid status.
-    return true; // Simplified for now
-  }
-
-  public static create(value: JobStatusType): JobStatus {
-    if (!Object.values(JobStatusType).includes(value)) {
-      throw new Error(`Invalid JobStatusType: ${value}`);
+  public static create(value: string | JobStatusEnum): JobStatusVO {
+    const upperValue = typeof value === 'string' ? value.toUpperCase() : value;
+    if (!VALID_JOB_STATUSES.includes(upperValue as JobStatusEnum)) {
+      throw new ValueError(`Invalid JobStatus: ${value}. Must be one of ${VALID_JOB_STATUSES.join(', ')}.`);
     }
-    return new JobStatus(value);
+    return new JobStatusVO(upperValue as JobStatusEnum);
   }
 
-  public static pending(): JobStatus {
-    return new JobStatus(JobStatusType.PENDING);
+  public static pending(): JobStatusVO { return new JobStatusVO(JobStatusEnum.PENDING); }
+  public static active(): JobStatusVO { return new JobStatusVO(JobStatusEnum.ACTIVE); }
+  public static completed(): JobStatusVO { return new JobStatusVO(JobStatusEnum.COMPLETED); }
+  public static failed(): JobStatusVO { return new JobStatusVO(JobStatusEnum.FAILED); }
+  public static delayed(): JobStatusVO { return new JobStatusVO(JobStatusEnum.DELAYED); }
+  public static waitingChildren(): JobStatusVO { return new JobStatusVO(JobStatusEnum.WAITING_CHILDREN); }
+
+  public get value(): JobStatusEnum {
+    return this.props;
   }
 
-  public static waiting(): JobStatus {
-    return new JobStatus(JobStatusType.WAITING);
-  }
-
-  public static active(): JobStatus {
-    return new JobStatus(JobStatusType.ACTIVE);
-  }
-
-  public static completed(): JobStatus {
-    return new JobStatus(JobStatusType.COMPLETED);
-  }
-
-  public static failed(): JobStatus {
-    return new JobStatus(JobStatusType.FAILED);
-  }
-
-  public static delayed(): JobStatus {
-    return new JobStatus(JobStatusType.DELAYED);
-  }
-
-  public value(): JobStatusType {
-    return this.props.value;
-  }
-
-  public is(statusType: JobStatusType): boolean {
-    return this.props.value === statusType;
+  public is(status: JobStatusEnum): boolean {
+    return this.props === status;
   }
 
   public isTerminal(): boolean {
-    return this.props.value === JobStatusType.COMPLETED || this.props.value === JobStatusType.FAILED;
+    return this.props === JobStatusEnum.COMPLETED || this.props === JobStatusEnum.FAILED;
   }
 
   public isProcessable(): boolean {
-    return this.props.value === JobStatusType.PENDING || this.props.value === JobStatusType.WAITING;
-  }
-
-  // moveTo method removed as state transitions should be handled by the Job entity
-  // to ensure all related properties (like timestamps, attempts) are updated consistently.
-  // The Job entity will use JobStatus.create(JobStatusType.NEW_STATUS).
-
-  public toString(): string {
-    return this.props.value;
+    return this.props === JobStatusEnum.PENDING; // Only PENDING is directly processable by a worker poll
+                                               // DELAYED needs promotion, WAITING_CHILDREN needs deps met.
   }
 }

@@ -1,46 +1,45 @@
 // src_refactored/core/domain/job/value-objects/job-priority.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject } from '../../../common/value-objects/abstract.vo';
+import { ValueError } from '../../../common/errors';
 
-interface JobPriorityProps extends ValueObjectProps {
-  value: number; // Lower number means higher priority
-}
+// BullMQ priorities: lower number = higher priority. Default is effectively 0 if not specified.
+// Let's define a reasonable range, e.g., 1 (highest) to 10 (lowest), with a default.
+const MIN_PRIORITY = 1;
+const MAX_PRIORITY = 10; // Arbitrary max, can be adjusted. BullMQ uses a much larger range.
+const DEFAULT_PRIORITY = 5;
 
-export class JobPriority extends AbstractValueObject<JobPriorityProps> {
-  public static readonly HIGHEST = 0;
-  public static readonly HIGH = 5;
-  public static readonly NORMAL = 10;
-  public static readonly LOW = 15;
-  public static readonly LOWEST = 20;
-
+export class JobPriorityVO extends AbstractValueObject<number> {
   private constructor(value: number) {
-    super({ value });
+    super(value);
   }
 
-  private static validate(priority: number): void {
-    if (!Number.isInteger(priority) || priority < 0) {
-      throw new Error(`Job priority must be a non-negative integer. Received: ${priority}`);
+  public static create(value?: number | null): JobPriorityVO {
+    const priority = value === undefined || value === null ? DEFAULT_PRIORITY : value;
+    if (typeof priority !== 'number' || !Number.isInteger(priority) || priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
+      throw new ValueError(
+        `Invalid JobPriority: ${priority}. Must be an integer between ${MIN_PRIORITY} and ${MAX_PRIORITY}.`
+      );
     }
-    // Could add a max practical limit if desired, e.g., 100.
+    return new JobPriorityVO(priority);
   }
 
-  public static create(priority: number): JobPriority {
-    this.validate(priority);
-    return new JobPriority(priority);
+  public static default(): JobPriorityVO {
+    return new JobPriorityVO(DEFAULT_PRIORITY);
   }
 
-  public static default(): JobPriority {
-    return new JobPriority(this.NORMAL);
+  public static highest(): JobPriorityVO {
+    return new JobPriorityVO(MIN_PRIORITY);
   }
 
-  public value(): number {
-    return this.props.value;
+  public static lowest(): JobPriorityVO {
+    return new JobPriorityVO(MAX_PRIORITY);
   }
 
-  public isHigherThan(otherPriority: JobPriority): boolean {
-    return this.props.value < otherPriority.value();
+  public get value(): number {
+    return this.props;
   }
 
-  public toString(): string {
-    return String(this.props.value);
+  public isHigherThan(other: JobPriorityVO): boolean {
+    return this.props < other.props; // Lower number means higher priority
   }
 }

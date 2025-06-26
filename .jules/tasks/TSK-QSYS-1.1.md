@@ -7,7 +7,7 @@ Revisar a entidade `Job` existente em `src_refactored/core/domain/job/job.entity
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Concluído`
 **Dependências (IDs):** ``
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1`
@@ -29,13 +29,28 @@ Revisar a entidade `Job` existente em `src_refactored/core/domain/job/job.entity
 
 ## Notas/Decisões de Design
 - Referenciar `docs/technical-documentation/bullmq-inspired-queue-system.md` (Seções 2.1, 3.1, 4.1).
-- A entidade `Job` deve permanecer rica, encapsulando sua lógica de estado e validação.
-- Os métodos `updateProgress` e `log` na entidade `Job` devem apenas modificar o estado interno do objeto. A persistência dessas alterações será responsabilidade do `IJobRepository.save()`.
+- **Abordagem de Reescrever:** Conforme instrução do usuário, a entidade `Job` e seus VOs foram reescritos do zero para alinhar com o design genérico do sistema de filas, em vez de aumentar a entidade `Job` pré-existente. Arquivos antigos em `src_refactored/core/domain/job/` foram deletados.
+- **Generalidade da Entidade `Job`:** A nova `JobEntity` é genérica. Dados específicos de domínio (como o `agentState` anterior) devem ser parte do `payload` do job, não atributos diretos da `JobEntity` do sistema de filas.
+- **VOs Criados:**
+    - `JobIdVO`: Para IDs de job (UUID).
+    - `JobStatusVO`: Enum para estados (`PENDING`, `ACTIVE`, `COMPLETED`, `FAILED`, `DELAYED`, `WAITING_CHILDREN`).
+    - `JobPriorityVO`: Para prioridade numérica (menor = maior prioridade).
+    - `JobOptionsVO`: Agrega opções como `delay`, `attempts`, `retryStrategy`, `lifo`, `removeOnComplete/Fail`, `repeat`, `dependsOnJobIds`, `parentId`, `timeout`.
+    - `JobProgressVO`: Para progresso numérico (0-100) ou objeto de detalhes.
+    - `JobExecutionLogEntryVO`: Para entradas de log individuais (timestamp, message, level, details).
+    - `JobExecutionLogsVO`: Coleção de `JobExecutionLogEntryVO`.
+- **Atributos da `JobEntity`:** Inclui `id`, `queueName` (string), `jobName` (string), `payload` (genérico), `opts` (`JobOptionsVO`), `status` (`JobStatusVO`), `priority` (`JobPriorityVO`), `progress` (`JobProgressVO`), `returnValue`, `failedReason`, `attemptsMade`, timestamps (`createdAt`, `updatedAt`, `processAt`, `startedAt`, `finishedAt` - como epoch ms), `executionLogs` (`JobExecutionLogsVO`), `lockedByWorkerId`, `lockExpiresAt`, `repeatJobKey`.
+- **Métodos da Entidade `Job`:**
+    - `JobEntity.create()`: Fábrica estática para novas instâncias.
+    - `setProgress()` e `addLog()`: Modificam o estado interno. Persistência e emissão de eventos são responsabilidade de serviços externos (Worker/Repository).
+    - Métodos de transição de estado (`moveToActive`, `moveToCompleted`, etc.) atualizam o status e timestamps relevantes.
+- **Timestamps:** Armazenados como epoch milliseconds nas props da entidade para facilitar a persistência e queries, mas os accessors retornam objetos `Date`.
 
 ---
 
 ## Comentários
 - `(YYYY-MM-DD por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
+- `(YYYY-MM-DD por @Jules): Implementação da `JobEntity` e VOs essenciais concluída. Adotada abordagem de reescrita completa para garantir um design de sistema de filas genérico. Arquivos antigos em `core/domain/job/` foram removidos.`
 
 ---
 
