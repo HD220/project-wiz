@@ -7,13 +7,13 @@ Implementar um layout para as seções públicas da aplicação, como a página 
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-LAYOUT-001` (Layout Raiz)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P2`
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-layout-public`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-layout-public após o push)`
 
 ---
 
@@ -35,7 +35,7 @@ Implementar um layout para as seções públicas da aplicação, como a página 
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementado o layout público básico.`
+- `(Data Atual): Implementado e submetido o layout público básico.`
 
 ---
 
