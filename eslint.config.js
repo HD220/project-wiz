@@ -36,7 +36,7 @@ export default [
   // Configuração Global (para .ts e .tsx, exceto testes e específicos)
   {
     files: ["**/*.ts", "**/*.tsx"], // Aplicar a TS e TSX
-    excludedFiles: ["**/*.spec.ts", "**/*.test.ts"], // Excluir arquivos de teste desta config global
+    // excludedFiles: ["**/*.spec.ts", "**/*.test.ts"], // Excluir arquivos de teste desta config global --> This key is invalid here. Test files are handled in a separate config object.
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
