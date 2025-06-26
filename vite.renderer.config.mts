@@ -26,21 +26,27 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      // Main alias for the new UI root
       "@/": path.resolve(__dirname, "./src_refactored/presentation/ui"),
+
+      // Aliases for subdirectories within src_refactored/presentation/ui/
+      "@/app": path.resolve(__dirname, "./src_refactored/presentation/ui/app"), // Changed from @/features to @/app
       "@/assets": path.resolve(__dirname, "./src_refactored/presentation/ui/assets"),
+      "@/components": path.resolve(__dirname, "./src_refactored/presentation/ui/components"), // General components alias
       "@/components/common": path.resolve(__dirname, "./src_refactored/presentation/ui/components/common"),
       "@/components/layout": path.resolve(__dirname, "./src_refactored/presentation/ui/components/layout"),
-      "@/components/ui": path.resolve(__dirname, "./src_refactored/presentation/ui/components/ui"),
+      "@/components/ui": path.resolve(__dirname, "./src_refactored/presentation/ui/components/ui"), // Shadcn components
       "@/config": path.resolve(__dirname, "./src_refactored/presentation/ui/config"),
-      "@/features": path.resolve(__dirname, "./src_refactored/presentation/ui/features"),
       "@/hooks": path.resolve(__dirname, "./src_refactored/presentation/ui/hooks"),
       "@/lib": path.resolve(__dirname, "./src_refactored/presentation/ui/lib"),
       "@/services": path.resolve(__dirname, "./src_refactored/presentation/ui/services"),
       "@/store": path.resolve(__dirname, "./src_refactored/presentation/ui/store"),
       "@/styles": path.resolve(__dirname, "./src_refactored/presentation/ui/styles"),
       "@/types": path.resolve(__dirname, "./src_refactored/presentation/ui/types"),
-      // Manter o alias @/shared para src/shared, pois pode conter tipos úteis.
-      "@/shared": path.resolve(__dirname, "./src/shared"),
+
+      // Keep shared alias if still used, but ensure it doesn't conflict with new @/ pattern
+      // This @/shared points to the old src/shared.
+      "@/shared_old": path.resolve(__dirname, "./src/shared"), // Renamed to avoid ambiguity if @/shared is needed for new structure
     },
   },
   // Adicionar a configuração de build para que o output vá para um local que o Electron Forge possa pegar

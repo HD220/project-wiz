@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOMClient from 'react-dom/client';
-import './styles/globals.css'; // Caminho ajustado para o novo local
-// import { detectLocale, dynamicActivate } from './config/i18n'; // Caminho ajustado se i18n for re-adicionado aqui
+import '@/styles/globals.css'; // Usando alias @/styles/
+// import { detectLocale, dynamicActivate } from '@/config/i18n'; // Usando alias @/config/ se i18n for re-adicionado
 import { createRouter, RouterProvider } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen'; // Caminho ajustado para o novo local
+import { routeTree } from '@/routeTree.gen'; // Usando alias @/
 
 // Declaração de módulo para o TanStack Router (mantida)
 declare module '@tanstack/react-router' {
