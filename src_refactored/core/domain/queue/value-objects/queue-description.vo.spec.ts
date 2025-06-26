@@ -42,7 +42,7 @@ describe('QueueDescription', () => {
   it('should correctly compare two QueueDescriptions with the same value', () => {
     const description = 'General purpose queue.';
     const vo1 = QueueDescription.create(description);
-    const vo2 = QueueDescription.create(\` \${description} \`);
+    const vo2 = QueueDescription.create(` ${description} `);
     expect(vo1.equals(vo2)).toBe(true);
   });
 

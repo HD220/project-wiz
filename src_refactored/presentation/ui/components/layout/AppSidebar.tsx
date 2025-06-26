@@ -33,6 +33,7 @@ function NavLink({ to, children, icon: Icon, onClick }: NavLinkProps) {
 
 
 export function AppSidebar({ className /*, isMobileOpen */ }: AppSidebarProps) {
+  console.log('LINT TEST'); // Added for testing if file changes are picked up
   // Placeholder data
   const projects = [
     { id: '1', name: 'Project Phoenix' },
@@ -52,20 +53,22 @@ export function AppSidebar({ className /*, isMobileOpen */ }: AppSidebarProps) {
   // };
 
   return (
+    // Basic responsiveness: fixed for potential mobile overlay, static for desktop
+    // For fixed mobile overlay: inset-y-0 left-0 z-50
+    // Example for mobile: ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+    // This would be controlled by a parent component and state.
+    // For now, it will be hidden on small screens by default if not explicitly shown by a parent.
+    // To make it simpler for now: hidden on mobile, shown on md+
+    // This means a parent component would need to provide a toggle for mobile.
+    // For this isolated component, let's assume it's part of a layout that handles mobile toggling.
+    // The `hidden md:flex` approach is common for this.
     <aside
       className={`
         flex flex-col h-full bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800
-        fixed md:static md:translate-x-0 // Basic responsiveness: fixed for potential mobile overlay, static for desktop
-        inset-y-0 left-0 z-50 // For fixed mobile overlay
+        fixed md:static md:translate-x-0
+        inset-y-0 left-0 z-50
         w-64 transition-transform duration-300 ease-in-out
         ${className || ''}
-        // Example for mobile: ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        // This would be controlled by a parent component and state.
-        // For now, it will be hidden on small screens by default if not explicitly shown by a parent.
-        // To make it simpler for now: hidden on mobile, shown on md+
-        // This means a parent component would need to provide a toggle for mobile.
-        // For this isolated component, let's assume it's part of a layout that handles mobile toggling.
-        // The `hidden md:flex` approach is common for this.
       `}
     >
       {/* User/Workspace Info */}

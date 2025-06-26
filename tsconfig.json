@@ -35,28 +35,42 @@
 
       // Existing Aliases (may need review/cleanup later, kept for now to avoid breaking old code)
       "@/components.old/*": ["./src/infrastructure/frameworks/react/components/*"], // Renamed to avoid conflict
-      "@/lib.old/*": ["./src/infrastructure/frameworks/react/lib/*"], // Renamed to avoid conflict
-      "@/hooks.old/*": ["./src/infrastructure/frameworks/react/hooks/*"], // Renamed to avoid conflict
-      "@/ui.old/*": ["./src/infrastructure/frameworks/react/components/ui/*"], // Renamed to avoid conflict
-      "@/application/*": ["./src/core/application/*"],
-      "@/core/*": ["./src/core/*"],
-      "@/shared/*": ["./src/shared/*"],
-      "@/interfaces/*": ["./src/core/domain/entities/*/interfaces/*"],
-      "@/core/common/result": ["./src/shared/result.ts"],
+      // Renamed .old to .legacy for consistency
+      "@/components.legacy/*": ["./src/infrastructure/frameworks/react/components/*"],
+      "@/lib.legacy/*": ["./src/infrastructure/frameworks/react/lib/*"],
+      "@/hooks.legacy/*": ["./src/infrastructure/frameworks/react/hooks/*"],
+      "@/ui.legacy/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
+
+      // Aliases for src_refactored general structure (ensure these are comprehensive)
+      "@/application/*": ["./src_refactored/core/application/*"],
+      "@/core/*": ["./src_refactored/core/*"],
+      "@/domain/*": ["./src_refactored/core/domain/*"],
+      "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
+      "@/presentation/*": ["./src_refactored/presentation/*"], // General presentation
+      "@/shared/*": ["./src_refactored/shared/*"],
       "@/refactored/*": ["./src_refactored/*"],
-      "@/src/*": ["./src/*"] // More generic fallback for old src structure if needed
+
+      // Legacy Aliases from 'src' (original structure)
+      "@/application.legacy/*": ["./src/core/application/*"],
+      "@/core.legacy/*": ["./src/core/*"],
+      // "@/domain.legacy/*" was not explicitly present, but interfaces.legacy might cover it
+      "@/interfaces.legacy/*": ["./src/core/domain/entities/*/interfaces/*"], // Potentially covers old domain model interfaces
+      "@/shared.legacy/*": ["./src/shared/*"], // If there was a top-level shared in old src
+      "@/core/common/result.legacy": ["./src/shared/result.ts"], // Specific shared utility
+      "@/src.legacy/*": ["./src/*"] // Broad legacy alias
     }
   },
   "include": [
-    "src/**/*",
     "src_refactored/**/*",
     "tests/**/*",
+    // "src/**/*", // Keep src commented out to ensure focus on src_refactored
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
     "lingui.config.ts",
     "vitest.config.mts",
     "vitest.config.ts",
+    "tailwind.config.ts", // Added here
     "types/k6.d.ts"
   ],
   "exclude": ["node_modules", "coverage"]

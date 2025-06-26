@@ -28,7 +28,7 @@ describe('MemoryItemTags', () => {
   });
 
   it('should throw ValueError if too many tags are provided', () => {
-    const tooManyTags = Array.from({ length: 21 }, (_, i) => \`tag\${i}\`); // MAX_TAGS = 20
+    const tooManyTags = Array.from({ length: 21 }, (_, i) => `tag${i}`); // MAX_TAGS = 20
     expect(() => MemoryItemTags.create(tooManyTags)).toThrow(ValueError);
     expect(() => MemoryItemTags.create(tooManyTags)).toThrow('A memory item cannot have more than 20 tags.');
   });
@@ -47,7 +47,7 @@ describe('MemoryItemTags', () => {
   it('should throw ValueError if a tag is too long', () => {
     const longTag = 'a'.repeat(51); // MAX_TAG_LENGTH = 50
     expect(() => MemoryItemTags.create(['tag1', longTag])).toThrow(ValueError);
-    expect(() => MemoryItemTags.create(['tag1', longTag])).toThrow(\`Tag "\${longTag}" is too long. Maximum length is 50.\`);
+    expect(() => MemoryItemTags.create(['tag1', longTag])).toThrow(`Tag "${longTag}" is too long. Maximum length is 50.`);
   });
 
   it('should throw ValueError for duplicate tags after cleaning', () => {

@@ -1,11 +1,11 @@
 // src_refactored/core/application/queue/use-cases/create-job.use-case.ts
-import { IUseCase } from '../../common/ports/use-case.interface';
-import { IJobRepository, IJobRepository as JobRepositorySymbol } from '../../../domain/job/ports/job-repository.interface';
-import { JobEntity, JobEntityConstructionProps } from '../../../domain/job/job.entity';
-import { CreateJobRequestDTO, CreateJobResponseDTO } from '../dtos';
-import { Result, ok as Ok, error as Err } from '../../../../shared/result'; // Use exported ok and error
-import { ValueError } from '../../../domain/common/errors'; // Assuming ValueError is here or in a common error location
-// import { Inject, Injectable } from '../../common/ioc/dependency-injection.decorators'; // Assuming an IoC container might be used
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+import { IJobRepository, IJobRepository as JobRepositorySymbol } from '@/domain/job/ports/job-repository.interface';
+import { JobEntity, JobEntityConstructionProps } from '@/domain/job/job.entity';
+import { CreateJobRequestDTO, CreateJobResponseDTO } from '../dtos'; // This relative path might be okay or could use an alias if dtos are central
+import { Result, ok as Ok, error as Err } from '@/shared/result'; // Use exported ok and error
+import { ValueError } from '@/core/common/errors'; // Corrected path
+// import { Inject, Injectable } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming an IoC container might be used
 
 // @Injectable() // Decorator if an IoC container like InversifyJS is used
 export class CreateJobUseCase<TData = any, TResult = any>

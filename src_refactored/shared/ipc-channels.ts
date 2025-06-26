@@ -4,7 +4,7 @@
  * Defines standardized channel names for Electron IPC communication
  * throughout the refactored application.
  */
-export const IPCChannel {
+export const IPCChannel = {
   // Chat Feature
   CHAT_SEND_MESSAGE: 'chat:sendMessage', // Renderer -> Main
   CHAT_STREAM_EVENT: 'chat:streamEvent', // Main -> Renderer (for streaming responses)

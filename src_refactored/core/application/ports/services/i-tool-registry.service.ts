@@ -1,6 +1,6 @@
-import { IAgentTool } from '@/src_refactored/core/tools/tool.interface';
-import { Result } from '@/src_refactored/shared/result';
-import { ApplicationError } from '../../common/errors';
+import { IAgentTool } from '@/refactored/core/tools/tool.interface';
+import { Result } from '@/refactored/shared/result';
+import { ApplicationError } from '@/application/common/errors';
 
 /**
  * @class ToolNotFoundError

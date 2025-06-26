@@ -14,21 +14,13 @@ export default [
       "**/coverage/**",
       "**/dist/**",
       "**/node_modules/**",
-      "tests/test-setup.d.ts",
+      // "tests/test-setup.d.ts", // Covered by "tests/**"
+      "tests/**", // Ignore root tests folder
       "**/k6/**",
       "**/jslib.k6.io/**",
       "backup/**",
-      "src2/**",
-      // Mantendo ignores para src original por enquanto
-      "src/core/**",
-      "src/domain/**",
-      "src/electron/**",
-      "src/examples/**",
-      "src/infrastructure/**",
-      "src/main.ts",
-      "src/modules/**",
-      "src/presentation/**",
-      "src/shared/**",
+      "src/**", // Ignore all of src
+      "src2/**", // Ignore all of src2
       "scripts/**",
       ".vite/**",
     ],
@@ -88,18 +80,26 @@ export default [
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
         "pathGroups": [
           { "pattern": "@nestjs/**", "group": "external", "position": "before" },
-          { "pattern": "@/**", "group": "internal" }, // Grupo genérico para @/
-          { "pattern": "@/refactored/**", "group": "internal", "position": "before" },
-          { "pattern": "@/application/**", "group": "internal", "position": "before" },
-          { "pattern": "@/core/**", "group": "internal", "position": "before" },
-          { "pattern": "@/domain/**", "group": "internal", "position": "before" },
-          { "pattern": "@/infrastructure/**", "group": "internal", "position": "before" },
-          { "pattern": "@/presentation/**", "group": "internal", "position": "before" },
+          // Updated path groups for src_refactored
+          { "pattern": "@/app/**", "group": "internal", "position": "before" },
+          { "pattern": "@/assets/**", "group": "internal", "position": "before" },
           { "pattern": "@/components/**", "group": "internal", "position": "before" },
-          { "pattern": "@/lib/**", "group": "internal", "position": "before" },
+          { "pattern": "@/config/**", "group": "internal", "position": "before" },
           { "pattern": "@/hooks/**", "group": "internal", "position": "before" },
-          { "pattern": "@/ui/**", "group": "internal", "position": "before" },
-          { "pattern": "@/shared/**", "group": "internal", "position": "after" },
+          { "pattern": "@/lib/**", "group": "internal", "position": "before" },
+          { "pattern": "@/services/**", "group": "internal", "position": "before" },
+          { "pattern": "@/store/**", "group": "internal", "position": "before" },
+          { "pattern": "@/styles/**", "group": "internal", "position": "before" },
+          { "pattern": "@/types/**", "group": "internal", "position": "before" },
+          { "pattern": "@/*", "group": "internal" }, // Main alias for src_refactored/presentation/ui
+          // Aliases for src_refactored/core and src_refactored/infrastructure etc.
+          { "pattern": "@/core/**", "group": "internal", "position": "before" },
+          { "pattern": "@/domain/**", "group": "internal", "position": "before" }, // Assuming domain is part of core
+          { "pattern": "@/application/**", "group": "internal", "position": "before" }, // Assuming application is part of core
+          { "pattern": "@/infrastructure/**", "group": "internal", "position": "before" },
+          { "pattern": "@/presentation/**", "group": "internal", "position": "before" }, // General presentation if not UI specific
+          { "pattern": "@/shared/**", "group": "internal", "position": "after" }, // Shared for src_refactored
+          { "pattern": "@/refactored/**", "group": "internal", "position": "before" }, // General refactored alias
         ],
         "pathGroupsExcludedImportTypes": [],
         "newlines-between": "always",
@@ -130,31 +130,23 @@ export default [
       "import/resolver": {
         typescript: {
           alwaysTryTypes: true,
-          project: "./tsconfig.json",
-        },
+          project: ["./tsconfig.json"]
+          // Relying on eslint-import-resolver-typescript to pick up paths from tsconfig.json
+        }
       },
       "boundaries/elements": [
-        { type: "domain", pattern: "src_refactored/core/domain" }, // modo 'folder' é default
+        { type: "domain", pattern: "src_refactored/core/domain" },
         { type: "application", pattern: "src_refactored/core/application" },
         { type: "infrastructure", pattern: "src_refactored/infrastructure" },
-        { type: "presentation", pattern: "src_refactored/presentation" }, // Camada geral de apresentação
+        { type: "presentation", pattern: "src_refactored/presentation" },
         { type: "shared", pattern: "src_refactored/shared" },
-        // Tipos mais granulares para a UI dentro de presentation
         { type: "ui-components", pattern: "src_refactored/presentation/ui/components" },
-        { type: "ui-features", pattern: "src_refactored/presentation/ui/app" }, // Diretório de rotas/features da UI
+        { type: "ui-features", pattern: "src_refactored/presentation/ui/app" }, // Adjusted from "ui-features" to match common usage
         { type: "ui-lib", pattern: "src_refactored/presentation/ui/lib" },
         { type: "ui-hooks", pattern: "src_refactored/presentation/ui/hooks" },
-        // { type: "ui-styles", pattern: "src_refactored/presentation/ui/styles" }, // Geralmente não importado
-        // { type: "ui-main", pattern: "src_refactored/presentation/ui/main.tsx", mode: "file" },
-        // { type: "ui-app-comp", pattern: "src_refactored/presentation/ui/App.tsx", mode: "file" }
       ],
-      "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"], // Ignorar arquivo gerado
-       "boundaries/alias": { // Para ajudar o plugin a resolver os aliases do tsconfig
-        "@/": "./src_refactored/presentation/ui/", // Principal alias da UI
-        "@/components/*": "./src_refactored/presentation/ui/components/*",
-        "@/lib/*": "./src_refactored/presentation/ui/lib/*",
-        "@/hooks/*": "./src_refactored/presentation/ui/hooks/*",
-      }
+      "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"],
+      // "boundaries/alias" is removed as per deprecation warning. Aliases are now handled by "import/resolver".
     },
   },
   // Configuração específica para arquivos de teste

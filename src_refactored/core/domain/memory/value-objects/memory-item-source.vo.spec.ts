@@ -39,7 +39,7 @@ describe('MemoryItemSource', () => {
   it('should correctly compare two MemoryItemSources with the same value', () => {
     const source = 'external_api';
     const vo1 = MemoryItemSource.create(source);
-    const vo2 = MemoryItemSource.create(\` \${source} \`); // Test trimming with comparison
+    const vo2 = MemoryItemSource.create(` ${source} `); // Test trimming with comparison
     expect(vo1.equals(vo2)).toBe(true);
   });
 
