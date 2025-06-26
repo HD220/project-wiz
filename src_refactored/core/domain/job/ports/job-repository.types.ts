@@ -17,7 +17,7 @@ export interface JobSearchFilters {
 export interface PaginationOptions {
   page?: number; // 1-indexed page number
   limit?: number; // Number of items per page
-  sortBy?: keyof JobEntityProps<any,any> | string; // Field to sort by, string for flexibility with custom sort keys
+  sortBy?: string; // Field to sort by (implementation will map to valid column names)
   sortOrder?: 'ASC' | 'DESC';
 }
 

@@ -7,7 +7,7 @@ Revisar e finalizar a interface `IJobRepository` em `src_refactored/core/domain/
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Concluído`
 **Dependências (IDs):** `QSYS-1.1`
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1`
@@ -49,6 +49,7 @@ Revisar e finalizar a interface `IJobRepository` em `src_refactored/core/domain/
 ## Comentários
 - `(YYYY-MM-DD por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
 - `(YYYY-MM-DD por @Jules): Interface IJobRepository e tipos auxiliares definidos e documentados. O método de busca de jobs processáveis foi nomeado `findAndLockProcessableJobs` para refletir sua responsabilidade de bloqueio.`
+- `(YYYY-MM-DD por @Jules): Interface e tipos auxiliares revisados e confirmados. Ajustado 'sortBy' em PaginationOptions para string. Documentação TSDoc confirmada.`
 
 ---
 

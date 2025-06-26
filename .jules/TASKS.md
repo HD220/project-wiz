@@ -128,7 +128,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | **FASE QSYS: Implementação do Novo Sistema de Filas** |  |  |  |  |  |  | Design: [docs/.../bullmq-inspired-queue-system.md](./docs/technical-documentation/bullmq-inspired-queue-system.md) |
 | QSYS-1.1     | QSYS-F1.1: Refinar/Augmentar Job Entity e VOs | Concluído | -                   | P1         | Jules       | [TSK-QSYS-1.1.md](./tasks/TSK-QSYS-1.1.md) | Nova JobEntity e VOs genéricos criados. |
-| QSYS-1.2     | QSYS-F1.2: Definir/Confirmar Interface IJobRepository | Pendente  | QSYS-1.1            | P1         | Jules       | [TSK-QSYS-1.2.md](./tasks/TSK-QSYS-1.2.md) | Essencial para persistência. |
+| QSYS-1.2     | QSYS-F1.2: Definir/Confirmar Interface IJobRepository | Concluído | QSYS-1.1            | P1         | Jules       | [TSK-QSYS-1.2.md](./tasks/TSK-QSYS-1.2.md) | Interface do repositório de jobs definida e revisada. |
 | QSYS-1.3     | QSYS-F1.3: Implementar DrizzleJobRepository | Pendente  | QSYS-1.2, QSYS-1.4  | P1         | Jules       | [TSK-QSYS-1.3.md](./tasks/TSK-QSYS-1.3.md) | Implementação da persistência. |
 | QSYS-1.4     | QSYS-F1.4: Definir Schema Drizzle e Gerar Migrações | Pendente  | QSYS-1.1            | P1         | Jules       | [TSK-QSYS-1.4.md](./tasks/TSK-QSYS-1.4.md) | Estrutura do banco de dados. |
 | QSYS-1.5     | QSYS-F1.5: Testes Unitários para Fase 1 | Pendente  | QSYS-1.1, QSYS-1.3  | P1         | Jules       | [TSK-QSYS-1.5.md](./tasks/TSK-QSYS-1.5.md) | Garantir qualidade da base. |
