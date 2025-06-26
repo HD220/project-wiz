@@ -7,13 +7,13 @@ Reimplementar o componente `PersonaList` usado durante o processo de onboarding.
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-002 (Shadcn base)` (Componentes Shadcn/UI como Card, ScrollArea são usados diretamente)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1` (Parte do fluxo de onboarding)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-onboard-persona`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-comp-onboard-persona após o push)`
 
 ---
 
@@ -39,7 +39,7 @@ Reimplementar o componente `PersonaList` usado durante o processo de onboarding.
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementado o componente PersonaList para o fluxo de onboarding.`
+- `(Data Atual): Implementado e submetido o componente PersonaList para o fluxo de onboarding.`
 
 ---
 
