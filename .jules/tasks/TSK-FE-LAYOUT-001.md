@@ -7,13 +7,13 @@ Implementar o layout raiz para o TanStack Router (ex: `__root.tsx`). Este compon
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-002` (Shadcn/UI para possíveis componentes de layout base), `FE-SETUP-003` (TanStack Router configurado), `ARCH-FE-UI-STRUCT-001` (estrutura de pastas definida)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P0` (Estrutura fundamental da UI)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-layout-root`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-layout-root após o push)`
 
 ---
 
@@ -35,7 +35,7 @@ Implementar o layout raiz para o TanStack Router (ex: `__root.tsx`). Este compon
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Iniciada a implementação. Criado __root.tsx com ThemeProvider e QueryClientProvider. ThemeProvider básico implementado.`
+- `(Data Atual): Implementação concluída e submetida. Criado __root.tsx com ThemeProvider e QueryClientProvider. ThemeProvider básico implementado.`
 
 ---
 
