@@ -7,13 +7,13 @@ Reimplementar um componente `MarkdownRenderer` que seja capaz de renderizar stri
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `-` (Dependencies `react-markdown`, `remark-gfm`, `rehype-sanitize`, `rehype-highlight` confirmed in `package.json`)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P1` (Essencial para exibir conteúdo formatado, como mensagens de chat)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-comp-markdown`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-comp-markdown após o push)`
 
 ---
 
@@ -40,7 +40,7 @@ Reimplementar um componente `MarkdownRenderer` que seja capaz de renderizar stri
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Implementado o componente MarkdownRenderer.`
+- `(Data Atual): Implementado e submetido o componente MarkdownRenderer.`
 
 ---
 
