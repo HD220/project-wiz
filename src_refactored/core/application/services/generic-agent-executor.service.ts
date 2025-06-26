@@ -2,11 +2,11 @@ import { Agent } from '@/refactored/core/domain/agent/agent.entity';
 import { IAgentInternalStateRepository } from '@/refactored/core/domain/agent/ports/i-agent-internal-state.repository';
 import { Job } from '@/refactored/core/domain/job/job.entity';
 import { JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
-import { AgentExecutorResult } from '@/refactored/core/domain/job/job-processing.types';
+import { AgentExecutorResult, CriticalToolFailureInfo, ExecutionHistoryEntry } from '@/refactored/core/domain/job/job-processing.types'; // Added CriticalToolFailureInfo and ExecutionHistoryEntry
 import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
 // Corrected import: ok, error are named exports, Result is a type
 import { ok, error, Result } from '@/refactored/shared/result';
-import { DomainError, ToolError } from '@/refactored/core/common/errors';
+import { DomainError, ToolError } from '@/refactored/core/domain/common/errors'; // Updated path for DomainError/ToolError
 import { HistoryEntryRoleType, ActivityHistoryEntry } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
 import { ApplicationError } from '@/refactored/core/application/common/errors';
 import { IToolExecutionContext } from '@/refactored/core/tools/tool.interface';

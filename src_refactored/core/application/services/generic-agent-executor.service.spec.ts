@@ -6,8 +6,8 @@ import { mock, DeepMockProxy } from 'vitest-mock-extended';
 import { GenericAgentExecutor } from './generic-agent-executor.service';
 
 // Domain Entities & VOs
-import { Job } from '@/refactored/core/domain/job/entities/job.entity';
-import { Agent } from '@/refactored/core/domain/agent/entities/agent.entity';
+import { Job } from '@/refactored/core/domain/job/job.entity';
+import { Agent } from '@/refactored/core/domain/agent/agent.entity';
 import { AgentPersonaTemplate } from '@/refactored/core/domain/agent/value-objects/agent-persona-template.vo';
 import { LLMProviderConfigId } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 // import { JobId } from '@/refactored/core/domain/job/value-objects/job-id.vo'; // Not directly used in mockJob creation in conceptual plan
@@ -39,7 +39,7 @@ import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects
 
 // Error Types
 import { ApplicationError } from '@/refactored/core/application/common/errors';
-import { ToolError } from '@/refactored/core/common/errors'; // Added ToolError
+import { ToolError } from '@/refactored/core/domain/common/errors'; // Added ToolError, updated path
 
 // Tooling & Zod for mock tool
 import { z } from 'zod';

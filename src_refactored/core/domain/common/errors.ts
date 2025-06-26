@@ -1,4 +1,4 @@
-// src_refactored/core/common/errors.ts
+// src_refactored/core/domain/common/errors.ts
 
 /**
  * Base class for custom domain errors.
