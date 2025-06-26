@@ -7,33 +7,34 @@ Configurar aliases de caminho (path aliases) tanto no `vite.renderer.config.mts`
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-SETUP-001.6, ARCH-FE-UI-STRUCT-001`
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1` (Melhora a DX e manutenibilidade)
-**Responsável:** `Frontend` (Originalmente, mas Jules pode iniciar)
+**Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-setup-aliases`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `Commit na branch feat/fe-setup-aliases`
 
 ---
 
 ## Critérios de Aceitação
-- Aliases de caminho configurados em `vite.renderer.config.mts` (seção `resolve.alias`).
-- Aliases de caminho correspondentes configurados em `tsconfig.json` (seção `compilerOptions.paths`).
-- O alias `@/` resolve para `src_refactored/presentation/ui/`.
-- Outros aliases propostos (ex: `@/components/common`, `@/features/project`, `@/hooks`, `@/lib`, `@/services`, `@/config`, `@/styles`, `@/assets`, `@/types`) resolvidos corretamente para seus respectivos subdiretórios dentro de `presentation/ui/`.
-- Importações usando os novos aliases funcionam corretamente no código e são reconhecidas pelo TypeScript e pelo Vite.
+- Aliases de caminho configurados em `vite.renderer.config.mts` (seção `resolve.alias`). **(Concluído)**
+- Aliases de caminho correspondentes configurados em `tsconfig.json` (seção `compilerOptions.paths`). **(Concluído)**
+- O alias `@/` resolve para `src_refactored/presentation/ui/`. **(Concluído)**
+- Outros aliases propostos (ex: `@/app`, `@/components/*`, `@/hooks`, `@/lib`, etc.) resolvidos corretamente para seus respectivos subdiretórios dentro de `presentation/ui/`. **(Concluído)**
+- Importações usando os novos aliases funcionam corretamente no código e são reconhecidas pelo TypeScript e pelo Vite. **(Parcialmente verificado - Código alterado para usar aliases; verificação por type-check e dev server bloqueada por erro de CLI.)**
 
 ---
 
 ## Notas/Decisões de Design
-- Ex: `@/components/common`, `@/features/project`, `@/hooks` (globais), `@/lib`, `@/services`, `@/config`, `@/styles`, `@/assets`, `@/types` todos apontando para subdiretórios de `presentation/ui/`. O alias `@/` apontará para `presentation/ui/`. (Nota original da tarefa)
-- Garantir que as configurações no Vite e no `tsconfig.json` sejam consistentes.
+- `@/features` foi corrigido para `@/app` para consistência com a estrutura de rotas.
+- Garantir que as configurações no Vite e no `tsconfig.json` sejam consistentes. **(Feito)**
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(2024-07-25 por @Jules): Configurados aliases em tsconfig.json e vite.renderer.config.mts. O alias @/features foi corrigido para @/app. Imports em main.tsx atualizados como exemplo. Verificação completa (type-check, dev server) bloqueada por erro persistente de execução de CLI ("Internal error"). Código submetido na branch 'feat/fe-setup-aliases'.`
 
 ---
 

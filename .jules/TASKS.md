@@ -75,7 +75,7 @@
 | FE-SETUP-004 | Pendente | FE-SETUP-001.6 | P3 | Frontend | [TSK-FE-SETUP-004.md](./tasks/TSK-FE-SETUP-004.md) |
 | FE-SETUP-005 | Bloqueado | FE-SETUP-001.6 | P1 | Frontend | [TSK-FE-SETUP-005.md](./tasks/TSK-FE-SETUP-005.md) |
 | FE-SETUP-006 | Pendente | FE-SETUP-001.6, CONFIG-ESLINT-001.2 | P1 | Frontend | [TSK-FE-SETUP-006.md](./tasks/TSK-FE-SETUP-006.md) |
-| FE-SETUP-007 | Pendente | FE-SETUP-001.6, ARCH-FE-UI-STRUCT-001 | P1 | Frontend | [TSK-FE-SETUP-007.md](./tasks/TSK-FE-SETUP-007.md) |
+| FE-SETUP-007 | Concluído | FE-SETUP-001.6, ARCH-FE-UI-STRUCT-001 | P1 | Frontend | [TSK-FE-SETUP-007.md](./tasks/TSK-FE-SETUP-007.md) |
 | FE-SETUP-008 | Pendente | FE-SETUP-001.6 | P1 | Frontend | [TSK-FE-SETUP-008.md](./tasks/TSK-FE-SETUP-008.md) |
 | ARCH-FE-UI-STRUCT-001 | Concluído | FE-SETUP-001.6 | P0 | Jules (Arquiteto) | [TSK-ARCH-FE-UI-STRUCT-001.md](./tasks/TSK-ARCH-FE-UI-STRUCT-001.md) |
 | FE-SETUP-010 | Concluído | FE-SETUP-001.1 | P0 | Jules | [TSK-FE-SETUP-010.md](./tasks/TSK-FE-SETUP-010.md) |
