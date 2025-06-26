@@ -7,32 +7,35 @@ Implementar o layout raiz para o TanStack Router (ex: `__root.tsx`). Este compon
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Em Andamento`
 **Dependências (IDs):** `FE-SETUP-002` (Shadcn/UI para possíveis componentes de layout base), `FE-SETUP-003` (TanStack Router configurado), `ARCH-FE-UI-STRUCT-001` (estrutura de pastas definida)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P0` (Estrutura fundamental da UI)
-**Responsável:** `Frontend` (Originalmente, mas Jules pode iniciar)
+**Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-layout-root`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- Arquivo de layout raiz (ex: `src_refactored/presentation/ui/routes/__root.tsx`) criado.
-- O layout raiz inclui o componente `<Outlet />` do TanStack Router para renderizar rotas filhas.
-- Provedores globais essenciais (ex: `ThemeProvider` do Shadcn/UI, `QueryClientProvider` do TanStack Query) são configurados neste layout ou no `main.tsx` se mais apropriado (decidir e documentar).
-- (Opcional) Pode incluir elementos de layout persistentes muito básicos, se houver (embora mais comum em layouts aninhados).
+- Arquivo de layout raiz (ex: `src_refactored/presentation/ui/routes/__root.tsx`) criado. **(Concluído)**
+- O layout raiz inclui o componente `<Outlet />` do TanStack Router para renderizar rotas filhas. **(Concluído)**
+- Provedores globais essenciais (ex: `ThemeProvider` do Shadcn/UI, `QueryClientProvider` do TanStack Query) são configurados neste layout. **(Concluído)**
+- (Opcional) Pode incluir elementos de layout persistentes muito básicos, se houver (embora mais comum em layouts aninhados). (Não incluído nesta etapa)
 
 ---
 
 ## Notas/Decisões de Design
 - Define a estrutura visual global com `<Outlet/>`.
-- Providers globais (Theme, QueryClient, etc.) são configurados em `presentation/ui/main.tsx` ou aqui. A nota original indica `main.tsx` para providers, o que é uma prática comum. O `__root.tsx` focaria mais na estrutura visual e no `<Outlet />`.
+- Providers globais (`ThemeProvider`, `QueryClientProvider`) foram configurados diretamente no `__root.tsx` para encapsular todas as rotas.
+- Um novo componente `ThemeProvider` foi criado em `src_refactored/presentation/ui/components/common/theme-provider.tsx` para gerenciar temas light/dark/system e interagir com `localStorage` e classes CSS no `<html>` element.
+- O `main.tsx` não necessitou de alterações, pois o `routeTree.gen.ts` (gerado pelo TanStack Router) é esperado para incorporar o `__root.tsx` automaticamente.
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(Data Atual): Iniciada a implementação. Criado __root.tsx com ThemeProvider e QueryClientProvider. ThemeProvider básico implementado.`
 
 ---
 

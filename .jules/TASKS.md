@@ -79,7 +79,7 @@
 | FE-SETUP-008 | Pendente | FE-SETUP-001.6 | P1 | Frontend | [TSK-FE-SETUP-008.md](./tasks/TSK-FE-SETUP-008.md) |
 | ARCH-FE-UI-STRUCT-001 | Concluído | FE-SETUP-001.6 | P0 | Jules (Arquiteto) | [TSK-ARCH-FE-UI-STRUCT-001.md](./tasks/TSK-ARCH-FE-UI-STRUCT-001.md) |
 | FE-SETUP-010 | Concluído | FE-SETUP-001.1 | P0 | Jules | [TSK-FE-SETUP-010.md](./tasks/TSK-FE-SETUP-010.md) |
-| FE-LAYOUT-001| Pendente | FE-SETUP-002, FE-SETUP-003, ARCH-FE-UI-STRUCT-001 | P0 | Frontend | [TSK-FE-LAYOUT-001.md](./tasks/TSK-FE-LAYOUT-001.md) |
+| FE-LAYOUT-001| Em Andamento | FE-SETUP-002, FE-SETUP-003, ARCH-FE-UI-STRUCT-001 | P0 | Jules | [TSK-FE-LAYOUT-001.md](./tasks/TSK-FE-LAYOUT-001.md) |
 | FE-LAYOUT-002| Pendente | FE-LAYOUT-001, FE-COMP-SIDEBAR-APP | P1 | Frontend | [TSK-FE-LAYOUT-002.md](./tasks/TSK-FE-LAYOUT-002.md) |
 | FE-LAYOUT-003| Pendente | FE-LAYOUT-002, FE-COMP-SIDEBAR-PROJ | P1 | Frontend | [TSK-FE-LAYOUT-003.md](./tasks/TSK-FE-LAYOUT-003.md) |
 | FE-LAYOUT-004| Pendente | FE-LAYOUT-002, FE-COMP-SIDEBAR-USER | P1 | Frontend | [TSK-FE-LAYOUT-004.md](./tasks/TSK-FE-LAYOUT-004.md) |
