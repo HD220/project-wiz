@@ -146,6 +146,7 @@
 | QSYS-5.3     | QSYS-F5.3: Adaptar GenericAgentExecutor para JobWorkerService | Pendente  | QSYS-3.1, QSYS-5.1, APP-SVC-001 | P1         | Jules       | [TSK-QSYS-5.3.md](./tasks/TSK-QSYS-5.3.md) | Integração com consumidores existentes. |
 | QSYS-5.4     | QSYS-F5.4: Testes End-to-End para fluxos de jobs | Pendente  | QSYS-5.1, QSYS-5.2, QSYS-5.3 | P1         | Jules       | [TSK-QSYS-5.4.md](./tasks/TSK-QSYS-5.4.md) | Testes completos do sistema. |
 | QSYS-5.5     | QSYS-F5.5: Atualizar Documentação do Projeto | Pendente  | QSYS-5.4            | P2         | Jules       | [TSK-QSYS-5.5.md](./tasks/TSK-QSYS-5.5.md) | Manter documentação atualizada. |
+| REFACTOR-NAMING-001 | Padronizar Nomes de Arquivos para kebab-case | Pendente  | -                   | P3         | Jules       | [TSK-REFACTOR-NAMING-001.md](./tasks/TSK-REFACTOR-NAMING-001.md) | Refatoração de nomes de arquivos. |
 
 ---
 ## Tarefas Pendentes de Migração (Formato Antigo)
