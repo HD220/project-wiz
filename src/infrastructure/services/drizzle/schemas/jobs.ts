@@ -1,41 +1,45 @@
-// src/infrastructure/services/drizzle/schema/jobs.ts
-
+// src/infrastructure/services/drizzle/schemas/jobs.ts
 import { text, integer, sqliteTable, blob } from 'drizzle-orm/sqlite-core';
-import { JobStatusType } from '../../../../core/domain/entities/jobs/job-status'; // Adjust path as needed
+// Corrected path to JobStatusEnum from the refactored domain
+import { JobStatusEnum } from '../../../../src_refactored/core/domain/job/value-objects/job-status.vo';
 
 export const jobsTable = sqliteTable('jobs', {
-  id: text('id').primaryKey(),
-  queueId: text('queue_id').notNull(), // Assuming a foreign key relationship, but not enforcing it at DB level for simplicity now
-  name: text('name').notNull(),
+  id: text('id').primaryKey(), // UUID, from JobIdVO
+  queueName: text('queue_name').notNull(), // Renamed from queueId, aligns with JobEntity and Design Doc
+  jobName: text('job_name').notNull(), // Renamed from name, aligns with JobEntity and Design Doc
 
-  // 'payload' and 'result' can be complex objects; storing as JSON strings (TEXT) or BLOB.
-  // Using TEXT for simplicity, assuming JSON.stringify and JSON.parse will be used in the repository.
-  // If binary data is needed, BLOB might be better with appropriate serialization.
-  payload: text('payload'), // Store as JSON string
-  data: text('data'), // Store as JSON string, for mutable data during job execution
-  result: text('result'), // Store as JSON string
+  payload: blob('payload', { mode: 'json' }), // Job data/input, stored as JSON blob, aligns with Design Doc & JobEntity
 
-  maxAttempts: integer('max_attempts').notNull().default(1),
-  attempts: integer('attempts').notNull().default(0),
+  // returnValue replaces result, stored as JSON blob
+  returnValue: blob('return_value', { mode: 'json' }),
+  failedReason: text('failed_reason'), // Error message or stack trace for failed jobs
 
-  maxRetryDelay: integer('max_retry_delay').notNull().default(60000), // milliseconds
-  retryDelay: integer('retry_delay').notNull().default(0), // milliseconds
-  delay: integer('delay').notNull().default(0), // milliseconds for DELAYED status
+  status: text('status').$type<JobStatusEnum>().notNull().default(JobStatusEnum.PENDING), // JobStatusEnum, default PENDING
+  priority: integer('priority').notNull().default(0), // Lower numbers are higher priority, aligns with Design Doc
 
-  priority: integer('priority').notNull().default(0), // Lower number = higher priority
+  attemptsMade: integer('attempts_made').notNull().default(0), // Renamed from attempts, aligns with JobEntity
+  maxAttempts: integer('max_attempts').notNull().default(1), // Max attempts, aligns with Design Doc
 
-  status: text('status').notNull().default(JobStatusType.WAITING), // Store JobStatusType as string
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(), // App logic handles default
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(), // App logic handles default
+  processAt: integer('process_at', { mode: 'timestamp_ms' }),      // For DELAYED jobs: when it should be processed
+  startedAt: integer('started_at', { mode: 'timestamp_ms' }),      // Timestamp when processing started
+  completedAt: integer('completed_at', { mode: 'timestamp_ms' }),  // Timestamp when job completed successfully
+  failedAt: integer('failed_at', { mode: 'timestamp_ms' }),        // Timestamp when job finally failed
 
-  // 'dependsOn' could be a JSON array of job IDs stored as TEXT.
-  dependsOn: text('depends_on'), // Store as JSON string array of job IDs
+  progress: integer('progress').notNull().default(0), // Progress percentage (0-100), aligns with Design Doc
 
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(new Date()),
+  repeatJobKey: text('repeat_job_key'), // Identifier for the repeatable job configuration
+  dependsOnJobIds: blob('depends_on_job_ids', { mode: 'json' }), // JSON array of job IDs as strings
+  parentId: text('parent_id'), // ID of a parent job in a flow
 
-  // Specific time after which the job should be executed
-  executeAfter: integer('execute_after', { mode: 'timestamp_ms' }),
+  lockedByWorkerId: text('locked_by_worker_id'),
+  lockExpiresAt: integer('lock_expires_at', { mode: 'timestamp_ms' }), // Timestamp when the lock expires
 
-  // New fields for agent targeting
+  jobOptions: blob('job_options', { mode: 'json' }), // Store the original job options for reference or complex logic
+  executionLogs: blob('execution_logs', { mode: 'json' }), // JSON array of log entries
+
+  // Fields kept from original schema, potentially for specific app logic outside generic queue
   targetAgentRole: text('target_agent_role'),
   requiredCapabilities: text('required_capabilities', { mode: 'json' }).$type<string[] | null>(),
 });
