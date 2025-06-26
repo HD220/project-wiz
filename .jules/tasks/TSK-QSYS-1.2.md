@@ -7,7 +7,7 @@ Revisar e finalizar a interface `IJobRepository` em `src_refactored/core/domain/
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Concluído`
 **Dependências (IDs):** `QSYS-1.1`
 **Complexidade (1-5):** `1`
 **Prioridade (P0-P4):** `P1`
@@ -38,12 +38,17 @@ Revisar e finalizar a interface `IJobRepository` em `src_refactored/core/domain/
 ## Notas/Decisões de Design
 - Referenciar `docs/technical-documentation/bullmq-inspired-queue-system.md` (Seção 4.1 para `IJobRepository` e Seção 7.1 para queries do Scheduler).
 - A interface deve ser agnóstica à implementação específica (Drizzle).
-- O método `findProcessableJobs` é crítico e sua assinatura deve ser cuidadosamente considerada para suportar o bloqueio atômico de jobs. Pode precisar retornar informações suficientes para que o chamador (Worker) possa tentar um bloqueio otimista, ou o próprio método pode tentar o bloqueio.
+- O método `findProcessableJobs` foi renomeado para `findAndLockProcessableJobs` para maior clareza sobre sua responsabilidade de bloqueio atômico. Sua assinatura inclui `workerId`, `nowTimestampMs` e `lockDurationMs` para suportar essa funcionalidade.
+- Datas nos parâmetros de métodos (ex: `nowTimestampMs`, `lockExpiresAtBefore`, `olderThanTimestampMs`) são especificadas como `number` (epoch ms) para facilitar a passagem para queries de banco de dados que comparam com timestamps armazenados no mesmo formato.
+- Tipos auxiliares (`JobSearchFilters`, `PaginationOptions`, `PaginatedJobsResult`, `JobCountsByStatus`) foram definidos em `job-repository.types.ts` para manter a interface principal mais limpa.
+- Todos os métodos retornam `Promise<Result<T, Error>>`.
+- A interface foi criada em `src_refactored/core/domain/job/ports/job-repository.interface.ts`.
 
 ---
 
 ## Comentários
 - `(YYYY-MM-DD por @Jules): Tarefa criada como parte do novo plano de implementação do sistema de filas.`
+- `(YYYY-MM-DD por @Jules): Interface IJobRepository e tipos auxiliares definidos e documentados. O método de busca de jobs processáveis foi nomeado `findAndLockProcessableJobs` para refletir sua responsabilidade de bloqueio.`
 
 ---
 
