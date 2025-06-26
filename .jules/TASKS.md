@@ -83,7 +83,7 @@
 | FE-LAYOUT-002| Pendente | FE-LAYOUT-001, FE-COMP-SIDEBAR-APP | P1 | Frontend | [TSK-FE-LAYOUT-002.md](./tasks/TSK-FE-LAYOUT-002.md) |
 | FE-LAYOUT-003| Pendente | FE-LAYOUT-002, FE-COMP-SIDEBAR-PROJ | P1 | Frontend | [TSK-FE-LAYOUT-003.md](./tasks/TSK-FE-LAYOUT-003.md) |
 | FE-LAYOUT-004| Pendente | FE-LAYOUT-002, FE-COMP-SIDEBAR-USER | P1 | Frontend | [TSK-FE-LAYOUT-004.md](./tasks/TSK-FE-LAYOUT-004.md) |
-| FE-LAYOUT-005| Pendente | FE-LAYOUT-001 | P2 | Frontend | [TSK-FE-LAYOUT-005.md](./tasks/TSK-FE-LAYOUT-005.md) |
+| FE-LAYOUT-005| Em Andamento | FE-LAYOUT-001 | P2 | Jules | [TSK-FE-LAYOUT-005.md](./tasks/TSK-FE-LAYOUT-005.md) |
 | FE-COMP-SIDEBAR-APP | Pendente | FE-SETUP-002, FE-COMP-UI-008 | P1 | Frontend | [TSK-FE-COMP-SIDEBAR-APP.md](./tasks/TSK-FE-COMP-SIDEBAR-APP.md) |
 | FE-COMP-SIDEBAR-PROJ| Pendente | FE-SETUP-002, FE-COMP-UI-008 | P1 | Frontend | [TSK-FE-COMP-SIDEBAR-PROJ.md](./tasks/TSK-FE-COMP-SIDEBAR-PROJ.md) |
 | FE-COMP-SIDEBAR-USER| Pendente | FE-SETUP-002, FE-COMP-UI-008 | P1 | Frontend | [TSK-FE-COMP-SIDEBAR-USER.md](./tasks/TSK-FE-COMP-SIDEBAR-USER.md) |
@@ -124,7 +124,7 @@
 | FE-IPC-PROJ-LIST| Pendente | FE-IPC-CORE-ABSTR | P1 | Frontend/Backend | [TSK-FE-IPC-PROJ-LIST.md](./tasks/TSK-FE-IPC-PROJ-LIST.md) |
 | FE-IPC-PROJ-CREATE| Pendente | FE-IPC-CORE-ABSTR | P1 | Frontend/Backend | [TSK-FE-IPC-PROJ-CREATE.md](./tasks/TSK-FE-IPC-PROJ-CREATE.md) |
 | FE-IPC-ONBOARD | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-ONBOARD.md](./tasks/TSK-FE-IPC-ONBOARD.md) |
-| FE-IPC-CHAT    | Em Andamento | FE-IPC-CORE-ABSTR | P0 | Jules | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) |
+| FE-IPC-CHAT    | Concluído | FE-IPC-CORE-ABSTR | P0 | Jules | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) |
 | --- | --- | --- | --- | --- | --- |
 | **FASE QSYS: Implementação do Novo Sistema de Filas** |  |  |  |  |  |  |
 | QSYS-1.1     | Concluído | -                   | P1         | Jules       | [TSK-QSYS-1.1.md](./tasks/TSK-QSYS-1.1.md) |

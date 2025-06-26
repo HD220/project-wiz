@@ -7,32 +7,35 @@ Implementar um layout para as seções públicas da aplicação, como a página 
 
 ---
 
-**Status:** `Pendente`
+**Status:** `Em Andamento`
 **Dependências (IDs):** `FE-LAYOUT-001` (Layout Raiz)
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P2`
-**Responsável:** `Frontend` (Originalmente, mas Jules pode iniciar)
+**Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-layout-public`
 **Commit da Conclusão (Link):**
 
 ---
 
 ## Critérios de Aceitação
-- Análise realizada para determinar se um layout público separado é necessário.
-- Se necessário, arquivo de layout para seções públicas criado (ex: `src_refactored/presentation/ui/routes/(public)/_layout.tsx`).
-- O layout público contém os elementos visuais e estruturais apropriados para páginas não autenticadas.
+- Análise realizada para determinar se um layout público separado é necessário. **(Concluído - Decidido criar layout separado)**
+- Se necessário, arquivo de layout para seções públicas criado (ex: `src_refactored/presentation/ui/routes/(public)/_layout.tsx`). **(Concluído)**
+- O layout público contém os elementos visuais e estruturais apropriados para páginas não autenticadas. **(Concluído - Implementado layout simples centrado)**
 - Se não for necessário um layout separado, esta decisão é documentada nas notas da tarefa.
 
 ---
 
 ## Notas/Decisões de Design
-- Analisar se `src/` possui um layout específico para rotas públicas ou se usam o `__root.tsx` diretamente. (Nota original da tarefa)
-- Se um layout público for criado, ele será aplicado a rotas como `/home` e `/onboarding`.
+- Decidido criar um layout público separado em `src_refactored/presentation/ui/routes/(public)/_layout.tsx` para flexibilidade futura, mesmo que a implementação inicial seja simples.
+- O layout público implementado é um container flex que centraliza o conteúdo, adequado para páginas de onboarding ou landing pages simples.
+- Este layout herda os providers globais (ThemeProvider, QueryClientProvider) do `__root.tsx` layout.
+- O layout foi exportado usando `createFileRoute` para integração com TanStack Router.
 
 ---
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
+- `(Data Atual): Implementado o layout público básico.`
 
 ---
 

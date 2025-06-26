@@ -7,13 +7,13 @@ Definir e implementar os canais de comunicação entre processos (IPC) e os hand
 
 ---
 
-**Status:** `Em Andamento`
+**Status:** `Concluído`
 **Dependências (IDs):** `FE-IPC-CORE-ABSTR` (Camada de abstração IPC no frontend), (Backend) Lógica de processamento de chat no backend (parcialmente mockado/placeholder nesta tarefa).
 **Complexidade (1-5):** `2`
 **Prioridade (P0-P4):** `P0` (Essencial para a funcionalidade de chat)
 **Responsável:** `Jules`
 **Branch Git Proposta:** `feat/fe-ipc-chat`
-**Commit da Conclusão (Link):**
+**Commit da Conclusão (Link):** `(Link para o commit no branch feat/fe-ipc-chat após o push)`
 
 ---
 
@@ -38,7 +38,7 @@ Definir e implementar os canais de comunicação entre processos (IPC) e os hand
 
 ## Comentários
 - `(Data da migração): Tarefa migrada para novo formato.`
-- `(Data Atual): Iniciada a implementação dos IPCs de Chat. Definidos canais, tipos, handlers no main e extensões no serviço IPC do frontend.`
+- `(Data Atual): Implementação dos IPCs de Chat concluída e submetida. Definidos canais, tipos, handlers no main e extensões no serviço IPC do frontend.`
 
 ---
 
