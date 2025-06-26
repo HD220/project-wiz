@@ -126,7 +126,7 @@
 | FE-IPC-ONBOARD | Pendente | FE-IPC-CORE-ABSTR | P0 | Frontend/Backend | [TSK-FE-IPC-ONBOARD.md](./tasks/TSK-FE-IPC-ONBOARD.md) |
 | FE-IPC-CHAT    | Concluído | FE-IPC-CORE-ABSTR | P0 | Jules | [TSK-FE-IPC-CHAT.md](./tasks/TSK-FE-IPC-CHAT.md) |
 | BE-UC-PROJ-CREATE-001 | Em Andamento | (Core Project Domain) | P1 | Jules | [TSK-BE-UC-PROJ-CREATE-001.md](./tasks/TSK-BE-UC-PROJ-CREATE-001.md) |
-| BE-UC-USER-MGMT-001 | Pendente | (Core User Domain) | P1 | Jules | [TSK-BE-UC-USER-MGMT-001.md](./tasks/TSK-BE-UC-USER-MGMT-001.md) |
+| BE-UC-USER-MGMT-001 | Em Andamento | (Core User Domain) | P1 | Jules | [TSK-BE-UC-USER-MGMT-001.md](./tasks/TSK-BE-UC-USER-MGMT-001.md) |
 | --- | --- | --- | --- | --- | --- |
 | **FASE QSYS: Implementação do Novo Sistema de Filas** |  |  |  |  |  |  |
 | QSYS-1.1     | Concluído | -                   | P1         | Jules       | [TSK-QSYS-1.1.md](./tasks/TSK-QSYS-1.1.md) |
