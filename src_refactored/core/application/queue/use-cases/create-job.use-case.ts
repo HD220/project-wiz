@@ -1,12 +1,12 @@
 // src_refactored/core/application/queue/use-cases/create-job.use-case.ts
 import { ValueError } from '@/domain/common/errors'; // Corrected path
 import { JobEntity, JobEntityConstructionProps } from '@/domain/job/job.entity';
-import { IJobRepository, IJobRepository as JobRepositorySymbol } from '@/domain/job/ports/job-repository.interface';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 
 import { IUseCase } from '@/application/common/ports/use-case.interface';
 // import { Inject, Injectable } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming an IoC container might be used
 
-import { Result, ok as Ok, error as Err } from '@/shared/result'; // Use exported ok and error
+import { ok as Ok, error as Err } from '@/shared/result'; // Use exported ok and error
 
 import { CreateJobRequestDTO, CreateJobResponseDTO } from '../dtos'; // This relative path might be okay or could use an alias if dtos are central
 

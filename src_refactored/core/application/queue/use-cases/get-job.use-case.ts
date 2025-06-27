@@ -1,13 +1,13 @@
 // src_refactored/core/application/queue/use-cases/get-job.use-case.ts
 import { ValueError } from '@/domain/common/errors';
 import { JobEntity } from '@/domain/job/job.entity';
-import { IJobRepository, IJobRepository as JobRepositorySymbol } from '@/domain/job/ports/job-repository.interface';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
 
 import { IUseCase } from '@/application/common/ports/use-case.interface';
 // import { Inject, Injectable } from '../../common/ioc/dependency-injection.decorators';
 
-import { Result, ok as Ok, error as Err } from '@/shared/result';
+import { ok as Ok, error as Err } from '@/shared/result';
 
 import { GetJobRequestDTO, GetJobResponseDTO } from '../dtos';
 

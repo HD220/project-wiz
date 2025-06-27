@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 
 import { ILogger } from '@/core/common/services/i-logger.service';
-import { ILLMAdapter, LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.interface'; // Corrected path
+import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface'; // Corrected path, removed LanguageModelMessage
 import { IAgentTool } from '@/core/tools/tool.interface';
 
 import { Agent } from '@/domain/agent/agent.entity';
@@ -33,7 +33,7 @@ import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/
 import { ApplicationError } from '@/application/common/errors';
 import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
 
-import { Result, ok, error } from '@/shared/result';
+import { ok, error } from '@/shared/result';
 
 // Core Service (relative import)
 import { GenericAgentExecutor } from './generic-agent-executor.service';
@@ -176,7 +176,7 @@ describe('GenericAgentExecutor', () => {
     );
 
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
 
 
@@ -268,7 +268,7 @@ describe('GenericAgentExecutor', () => {
     // For this test, we'll use the global mockJob but check its state after lowIterationAgent runs.
     // It's important that mockJobRepository.save continues to work as in beforeEach.
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // Already spied in previous test, ensure it's fresh or re-spy
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy // Already spied in previous test, ensure it's fresh or re-spy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
     const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
 
@@ -330,7 +330,7 @@ describe('GenericAgentExecutor', () => {
     mockLlmAdapter.generateText.mockResolvedValueOnce(error(simulatedError));
 
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
     const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
 
@@ -417,7 +417,7 @@ describe('GenericAgentExecutor', () => {
       );
 
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
 
     // Act
@@ -534,7 +534,7 @@ describe('GenericAgentExecutor', () => {
       );
 
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
     const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
 
@@ -629,7 +629,7 @@ describe('GenericAgentExecutor', () => {
     );
 
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
     const updateLastFailureSummarySpy = vi.spyOn(mockJob, 'updateLastFailureSummary');
     const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
@@ -824,7 +824,7 @@ describe('GenericAgentExecutor', () => {
       );
 
     // Spies
-    const updateAgentStateSpy = vi.spyOn(mockJob, 'updateAgentState').mockReturnThis();
+    vi.spyOn(mockJob, 'updateAgentState').mockReturnThis(); // _updateAgentStateSpy
     const finalizeExecutionSpy = vi.spyOn(mockJob, 'finalizeExecution');
     const updateCriticalToolFailureInfoSpy = vi.spyOn(mockJob, 'updateCriticalToolFailureInfo');
 
@@ -897,7 +897,7 @@ describe('GenericAgentExecutor', () => {
 
   describe('Replan Logic for Unusable LLM Responses', () => {
     // Constants from GenericAgentExecutor (assuming they are private/not easily mockable, so using values)
-    const MIN_USABLE_LLM_RESPONSE_LENGTH = 10;
+    const _MIN_USABLE_LLM_RESPONSE_LENGTH = 10; // Prefixed as it's unused in this describe block directly
     const MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE = 1;
 
     it('should replan and succeed if initial LLM response is too short (less than MIN_USABLE_LLM_RESPONSE_LENGTH)', async () => {

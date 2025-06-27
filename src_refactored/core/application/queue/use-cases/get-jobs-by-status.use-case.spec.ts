@@ -10,7 +10,7 @@ import { JobOptionsVO } from '@/domain/job/value-objects/job-options.vo';
 import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
 import { JobProgressVO } from '@/domain/job/value-objects/job-progress.vo';
 import { JobStatusEnum, JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
-import { Result, ok, error } from '@/shared/result';
+import { ok, error } from '@/shared/result';
 
 import { GetJobsByStatusRequestDTO } from '../dtos';
 import { GetJobsByStatusUseCase } from './get-jobs-by-status.use-case';

@@ -16,7 +16,7 @@ import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo'; // M
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
 
-import { ok, error } from '@/shared/result';
+import { ok } from '@/shared/result';
 
 import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
 import { WorkerService } from './worker.service';

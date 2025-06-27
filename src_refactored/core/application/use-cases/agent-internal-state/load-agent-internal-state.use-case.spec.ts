@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError } from '@/application/common/errors'; // Assuming ApplicationError context or DomainError if it's from domain
+import { DomainError } from '@/application/common/errors'; // Assuming ApplicationError context or DomainError if it's from domain
 
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';

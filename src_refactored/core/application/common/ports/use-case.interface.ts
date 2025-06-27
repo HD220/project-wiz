@@ -1,7 +1,7 @@
 // src_refactored/core/application/common/ports/use-case.interface.ts
-import { Result } from '@/shared/result';
-import { DomainError } from '@/domain/common/errors';
 import { ApplicationError } from '@/application/common/errors';
+import { DomainError } from '@/domain/common/errors';
+
 import { Executable } from '../executable';
 
 /**
