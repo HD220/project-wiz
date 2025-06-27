@@ -217,31 +217,58 @@ describe('JobEntity', () => {
     });
 
     it('promoteToPending should change WAITING_CHILDREN job to PENDING', () => {
-      // Manually set to WAITING_CHILDREN for test, as create() doesn't directly set it
-      const props = { ...job['props'], status: JobStatusVO.waitingChildren() };
-      const waitingJob = new (JobEntity as any)(job.id, props); // Use 'any' to bypass private constructor for test
+      const anId = JobIdVO.generate();
+      const currentOpts = JobOptionsVO.create(baseProps.opts);
+
+      const waitingProps: JobEntityProps<any> = {
+        id: anId,
+        queueName: baseProps.queueName,
+        jobName: baseProps.jobName,
+        payload: baseProps.payload,
+        opts: currentOpts,
+        status: JobStatusVO.waitingChildren(),
+        priority: JobPriorityVO.create(currentOpts.priority),
+        progress: JobProgressVO.initial(),
+        attemptsMade: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        executionLogs: JobExecutionLogsVO.empty(),
+      };
+      const waitingJob = new (JobEntity as any)(waitingProps);
+
+
+      // Verify status is set before calling promoteToPending
+      expect(waitingJob.status).toBeInstanceOf(JobStatusVO);
+      expect(waitingJob.status.is(JobStatusEnum.WAITING_CHILDREN)).toBe(true);
 
       vi.advanceTimersByTime(100);
-      const result = waitingJob.promoteToPending();
-      expect(result).toBe(true);
-      expect(waitingJob.status.is(JobStatusEnum.PENDING)).toBe(true);
+      const result = waitingJob.promoteToPending(); // Call the method under test
+
+      expect(result).toBe(true); // Should successfully transition
+      expect(waitingJob.status.is(JobStatusEnum.PENDING)).toBe(true); // Check new status
       expect(waitingJob.updatedAt.getTime()).toBe(Date.now());
     });
   });
 
   describe('isProcessable', () => {
     it('should be processable if PENDING and no processAt or processAt is past', () => {
-      const job = JobEntity.create(baseProps); // PENDING, no processAt
-      expect(job.isProcessable(Date.now())).toBe(true);
+      const jobToTest = JobEntity.create(baseProps); // PENDING, no processAt
+      expect(jobToTest.isProcessable(Date.now())).toBe(true);
 
-      job['props'].processAt = Date.now() - 1000; // Manually set past processAt for PENDING job
-      expect(job.isProcessable(Date.now())).toBe(true);
+      const pastProcessAtProps = {
+        ...baseProps,
+      };
+      const jobWithPastProcessAt = JobEntity.create(pastProcessAtProps);
+      (jobWithPastProcessAt as any)['props'].processAt = Date.now() - 1000;
+       expect(jobWithPastProcessAt.isProcessable(Date.now())).toBe(true);
+
+
     });
 
     it('should not be processable if PENDING but processAt is in future', () => {
-      const job = JobEntity.create(baseProps);
-      job['props'].processAt = Date.now() + 10000; // Manually set future processAt
-      expect(job.isProcessable(Date.now())).toBe(false);
+      const jobToTest = JobEntity.create(baseProps);
+      (jobToTest as any)['props'].processAt = Date.now() + 10000; // Manually set future processAt
+      expect(jobToTest.isProcessable(Date.now())).toBe(false);
     });
 
     it('should not be processable if status is not PENDING', () => {
