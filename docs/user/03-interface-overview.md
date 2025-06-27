@@ -4,6 +4,8 @@ Bem-vindo à Visão Geral da Interface do Usuário do Project Wiz!
 
 Este documento descreve as principais seções e elementos que você encontrará ao navegar pela aplicação. A interface do Project Wiz é projetada para ser familiar e intuitiva, seguindo um layout similar ao Discord.
 
+*(Nota: Esta visão geral descreve a interface planejada para o Project Wiz, incluindo funcionalidades que podem estar em desenvolvimento ou programadas para versões futuras. A interface atual pode variar.)*
+
 ## Estrutura Principal
 
 A interface é geralmente dividida em três áreas principais:
@@ -55,6 +57,6 @@ Esta seção é dedicada às configurações globais que afetam toda a aplicaç�
 
 Esta visão geral fornece um mapa básico da interface do Project Wiz. Cada seção mencionada possui funcionalidades ricas que serão exploradas em detalhes em outros guias.
 
-Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-quick-start.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](./04-managing-projects.md).
+Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-getting-started.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](../user/core-concepts/projects.md) (a ser criado).
 
 Este documento será expandido e atualizado conforme a interface do usuário evolui.
