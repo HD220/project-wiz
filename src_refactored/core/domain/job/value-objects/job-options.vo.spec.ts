@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './job-options.vo';
 import { JobPriorityVO } from './job-priority.vo'; // For default priority value
-import { ValueError } from '../../../common/errors';
 
 describe('JobOptionsVO', () => {
   const defaultOpts: Readonly<IJobOptions> = {

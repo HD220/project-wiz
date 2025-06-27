@@ -1,8 +1,8 @@
 // src_refactored/core/domain/llm-provider-config/llm-provider-config.entity.ts
+import { LLMApiKey } from './value-objects/llm-api-key.vo';
 import { LLMProviderConfigId } from './value-objects/llm-provider-config-id.vo';
 import { LLMProviderConfigName } from './value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from './value-objects/llm-provider-id.vo';
-import { LLMApiKey } from './value-objects/llm-api-key.vo';
 
 // Interface for optional base URL, could be a VO too if complex validation needed.
 export class BaseUrl {

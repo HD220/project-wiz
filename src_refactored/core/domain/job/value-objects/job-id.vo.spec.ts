@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { JobIdVO } from './job-id.vo';
-import { ValueError } from '../../../common/errors';
 
 describe('JobIdVO', () => {
   it('should create a JobIdVO with a valid UUID', () => {

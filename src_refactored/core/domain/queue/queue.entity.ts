@@ -1,10 +1,11 @@
 // src_refactored/core/domain/queue/queue.entity.ts
-import { AbstractEntity, EntityProps } from '../../../core/common/base.entity';
-import { QueueId } from './value-objects/queue-id.vo';
-import { QueueName } from './value-objects/queue-name.vo';
+import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+import { EntityError, ValueError } from '@/core/common/errors';
+
 import { QueueConcurrency } from './value-objects/queue-concurrency.vo';
 import { QueueDescription } from './value-objects/queue-description.vo';
-import { EntityError, ValueError } from '../../../core/common/errors';
+import { QueueId } from './value-objects/queue-id.vo';
+import { QueueName } from './value-objects/queue-name.vo';
 
 export interface QueueProps {
   id: QueueId;

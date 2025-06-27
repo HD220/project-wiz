@@ -1,6 +1,6 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-embedding.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../common/value-objects/base.vo'; // Corrected path
-import { ValueError } from '../../../common/errors'; // Corrected path
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo'; // Corrected path
+import { ValueError } from '@/domain/common/errors'; // Corrected path
 
 interface MemoryItemEmbeddingProps extends ValueObjectProps {
   value: number[] | null; // Embedding can be null

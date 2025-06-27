@@ -1,10 +1,10 @@
 // src_refactored/core/domain/project/project.entity.ts
-import { ProjectId } from './value-objects/project-id.vo';
-import { ProjectName } from './value-objects/project-name.vo';
-import { ProjectDescription } from './value-objects/project-description.vo';
-
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
 import { EntityError } from '@/domain/common/errors';
+
+import { ProjectDescription } from './value-objects/project-description.vo';
+import { ProjectId } from './value-objects/project-id.vo';
+import { ProjectName } from './value-objects/project-name.vo';
 
 interface ProjectConstructorProps { // Renamed to avoid conflict with internal props type name
   id?: ProjectId; // Optional at creation, will be generated if not provided

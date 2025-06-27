@@ -1,7 +1,9 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-content.vo.spec.ts
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { MemoryItemContent } from './memory-item-content.vo';
-import { ValueError } from '../../../../common/errors';
 
 describe('MemoryItemContent', () => {
   it('should create a MemoryItemContent with valid content', () => {

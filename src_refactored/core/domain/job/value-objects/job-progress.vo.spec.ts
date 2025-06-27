@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { JobProgressVO, JobProgressData } from './job-progress.vo';
-import { ValueError } from '../../../common/errors';
 
 describe('JobProgressVO', () => {
   it('should create with a valid percentage number', () => {

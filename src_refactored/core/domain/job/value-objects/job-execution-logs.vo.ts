@@ -1,5 +1,6 @@
 // src_refactored/core/domain/job/value-objects/job-execution-logs.vo.ts
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+
 import { JobExecutionLogEntryVO, JobExecutionLogEntryProps } from './job-execution-log-entry.vo'; // Assuming LogLevel is also exported or defined here
 
 export class JobExecutionLogsVO extends AbstractValueObject<ReadonlyArray<JobExecutionLogEntryVO>> {

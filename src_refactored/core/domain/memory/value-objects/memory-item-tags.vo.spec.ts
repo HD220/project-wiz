@@ -1,7 +1,9 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-tags.vo.spec.ts
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { MemoryItemTags } from './memory-item-tags.vo';
-import { ValueError } from '../../../../common/errors';
 
 describe('MemoryItemTags', () => {
   it('should create MemoryItemTags with a valid list of tags', () => {

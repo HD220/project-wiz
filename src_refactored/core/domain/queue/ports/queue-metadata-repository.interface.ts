@@ -1,6 +1,7 @@
 // src_refactored/core/domain/queue/ports/queue-metadata-repository.interface.ts
-import { Result } from '../../../../shared/result';
-import { DomainError } from '../../../common/errors';
+import { DomainError } from '@/domain/common/errors';
+import { Result } from '@/shared/result';
+
 import { Queue } from '../queue.entity';
 import { QueueId } from '../value-objects/queue-id.vo';
 import { QueueName } from '../value-objects/queue-name.vo';

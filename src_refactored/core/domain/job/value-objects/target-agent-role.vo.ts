@@ -1,6 +1,6 @@
-import { ValueObject } from '@/refactored/core/common/value-objects/base.vo';
-import { Result, ok, error } from '@/refactored/shared/result';
-import { DomainError, ValueError } from '@/refactored/core/common/errors';
+import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { DomainError, ValueError } from '@/domain/common/errors';
+import { Result, ok, error } from '@/shared/result';
 
 interface TargetAgentRoleProps {
   value: string;

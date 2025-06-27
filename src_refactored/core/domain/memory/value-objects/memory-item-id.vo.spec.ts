@@ -1,7 +1,8 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-id.vo.spec.ts
-import { describe, it, expect } from 'vitest';
-import { MemoryItemId } from './memory-item-id.vo';
 import { randomUUID } from 'crypto';
+import { describe, it, expect } from 'vitest';
+
+import { MemoryItemId } from './memory-item-id.vo';
 
 describe('MemoryItemId', () => {
   it('should create a MemoryItemId from a valid UUID string', () => {

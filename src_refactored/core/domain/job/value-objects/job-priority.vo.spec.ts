@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { JobPriorityVO } from './job-priority.vo';
-import { ValueError } from '../../../common/errors';
 
 describe('JobPriorityVO', () => {
   it('should create a JobPriorityVO with a valid priority number', () => {

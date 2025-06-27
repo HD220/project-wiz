@@ -1,10 +1,12 @@
 // src_refactored/core/domain/memory/ports/memory-repository.interface.ts
-import { Result } from '../../../../shared/result';
-import { DomainError } from '../../../common/errors';
+import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId
+import { DomainError } from '@/domain/common/errors';
+import { Result } from '@/shared/result';
+
 import { MemoryItem } from '../memory-item.entity';
-import { MemoryItemId } from '../value-objects/memory-item-id.vo';
 import { MemoryItemEmbedding } from '../value-objects/memory-item-embedding.vo';
-import { Identity } from '../../../common/value-objects/identity.vo'; // For AgentId
+import { MemoryItemId } from '../value-objects/memory-item-id.vo';
+
 import {
   MemorySearchFilters,
   PaginationOptions,

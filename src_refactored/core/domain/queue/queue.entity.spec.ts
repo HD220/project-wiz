@@ -1,11 +1,13 @@
 // src_refactored/core/domain/queue/queue.entity.spec.ts
 import { describe, it, expect, beforeEach } from 'vitest';
+
+import { EntityError, ValueError } from '@/core/common/errors';
+
 import { Queue, QueueProps } from './queue.entity';
-import { QueueId } from './value-objects/queue-id.vo';
-import { QueueName } from './value-objects/queue-name.vo';
 import { QueueConcurrency } from './value-objects/queue-concurrency.vo';
 import { QueueDescription } from './value-objects/queue-description.vo';
-import { EntityError, ValueError } from '../../../core/common/errors';
+import { QueueId } from './value-objects/queue-id.vo';
+import { QueueName } from './value-objects/queue-name.vo';
 
 describe('Queue Entity', () => {
   let validProps: QueueProps;

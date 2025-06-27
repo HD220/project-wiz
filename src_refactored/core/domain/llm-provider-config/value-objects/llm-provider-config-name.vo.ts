@@ -1,5 +1,5 @@
 // src_refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-name.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface LLMProviderConfigNameProps extends ValueObjectProps {
   value: string;

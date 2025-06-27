@@ -1,6 +1,6 @@
 // src_refactored/core/domain/queue/value-objects/queue-concurrency.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/domain/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface QueueConcurrencyProps extends ValueObjectProps {
   value: number;

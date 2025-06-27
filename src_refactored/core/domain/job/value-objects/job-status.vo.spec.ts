@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { JobStatusVO, JobStatusEnum } from './job-status.vo';
-import { ValueError } from '../../../common/errors';
 
 describe('JobStatusVO', () => {
   it('should create a JobStatusVO with a valid status string', () => {

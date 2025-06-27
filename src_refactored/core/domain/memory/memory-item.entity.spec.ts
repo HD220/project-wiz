@@ -1,13 +1,15 @@
 // src_refactored/core/domain/memory/memory-item.entity.spec.ts
 import { describe, it, expect, beforeEach } from 'vitest';
+
+import { EntityError, ValueError } from '@/core/common/errors';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { MemoryItem, MemoryItemProps } from './memory-item.entity';
-import { MemoryItemId } from './value-objects/memory-item-id.vo';
 import { MemoryItemContent } from './value-objects/memory-item-content.vo';
-import { MemoryItemTags } from './value-objects/memory-item-tags.vo';
-import { MemoryItemSource } from './value-objects/memory-item-source.vo';
 import { MemoryItemEmbedding } from './value-objects/memory-item-embedding.vo';
-import { Identity } from '../../../core/common/value-objects/identity.vo';
-import { EntityError, ValueError } from '../../../core/common/errors';
+import { MemoryItemId } from './value-objects/memory-item-id.vo';
+import { MemoryItemSource } from './value-objects/memory-item-source.vo';
+import { MemoryItemTags } from './value-objects/memory-item-tags.vo';
 
 describe('MemoryItem Entity', () => {
   let validProps: MemoryItemProps;

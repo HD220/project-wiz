@@ -1,7 +1,9 @@
 // src_refactored/core/domain/queue/value-objects/queue-description.vo.spec.ts
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { QueueDescription } from './queue-description.vo';
-import { ValueError } from '../../../../common/errors';
 
 describe('QueueDescription', () => {
   it('should create QueueDescription with a valid description string', () => {

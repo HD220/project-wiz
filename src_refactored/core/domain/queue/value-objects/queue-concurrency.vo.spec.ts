@@ -1,7 +1,9 @@
 // src_refactored/core/domain/queue/value-objects/queue-concurrency.vo.spec.ts
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { QueueConcurrency } from './queue-concurrency.vo';
-import { ValueError } from '../../../../common/errors';
 
 describe('QueueConcurrency', () => {
   it('should create a QueueConcurrency with a valid integer value', () => {

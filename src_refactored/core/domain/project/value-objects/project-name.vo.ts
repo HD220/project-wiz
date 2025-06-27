@@ -1,5 +1,5 @@
 // src_refactored/core/domain/project/value-objects/project-name.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface ProjectNameProps extends ValueObjectProps {
   value: string;

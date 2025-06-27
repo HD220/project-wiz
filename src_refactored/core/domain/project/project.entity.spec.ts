@@ -1,10 +1,12 @@
 // src_refactored/core/domain/project/project.entity.spec.ts
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+import { EntityError } from '@/core/common/errors';
+
 import { Project } from './project.entity';
+import { ProjectDescription } from './value-objects/project-description.vo';
 import { ProjectId } from './value-objects/project-id.vo';
 import { ProjectName } from './value-objects/project-name.vo';
-import { ProjectDescription } from './value-objects/project-description.vo';
-import { EntityError } from '../../../../core/common/errors';
 
 describe('Project Entity', () => {
   let defaultProps: {

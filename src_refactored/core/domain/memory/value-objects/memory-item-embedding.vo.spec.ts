@@ -1,7 +1,9 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-embedding.vo.spec.ts
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors';
+
 import { MemoryItemEmbedding } from './memory-item-embedding.vo';
-import { ValueError } from '../../../../common/errors';
 
 describe('MemoryItemEmbedding', () => {
   it('should create MemoryItemEmbedding with a valid array of numbers', () => {
