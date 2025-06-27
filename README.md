@@ -21,15 +21,12 @@ For more details, see our [Vision and Goals](./docs/project-overview/vision-and-
 *   **Discord-Inspired UI:** Offers an intuitive and familiar user experience.
 *   **Project Management:** Centralized environment for managing software projects.
 *   **Customizable AI Agents (Personas):** Create and configure specialized AI agents for different roles and tasks.
-*   **Job-Based Task Execution:** Define, assign, and track tasks (Jobs) for Personas.
 *   **LLM Integration:** Supports integration with various Large Language Models.
 *   **Extensible Tooling System:** Agents use tools to interact with files, code, and external systems.
-*   **Workflow Automation:** Define and automate complex development workflows.
 
 ## Core Concepts
 
 *   **Personas:** AI agents you define with specific roles, goals, and capabilities. They are like virtual team members that execute tasks. Learn more in the [Personas Guide](./docs/user-guide/05-personas-agents.md).
-*   **Jobs:** Specific tasks assigned to Personas, ranging from code generation and analysis to documentation and testing. Jobs are the fundamental units of work in Project Wiz. Learn more in the [Jobs Guide](./docs/user-guide/06-jobs-automation.md).
 *   **Tools:** Capabilities or functions that Personas can use to perform their jobs, such as file system operations, terminal commands, or code analysis.
 
 ## Who is this for?
