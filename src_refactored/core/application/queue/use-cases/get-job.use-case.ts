@@ -1,12 +1,14 @@
 // src_refactored/core/application/queue/use-cases/get-job.use-case.ts
-import { IUseCase } from '../../common/ports/use-case.interface';
-import { IJobRepository, IJobRepository as JobRepositorySymbol } from '../../../domain/job/ports/job-repository.interface';
-import { JobEntity } from '../../../domain/job/job.entity';
-import { JobIdVO } from '../../../domain/job/value-objects/job-id.vo';
-import { GetJobRequestDTO, GetJobResponseDTO } from '../dtos';
-import { Result, ok as Ok, error as Err } from '../../../../shared/result';
-import { ValueError } from '../../../domain/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+import { ValueError } from '@/domain/common/errors';
+import { JobEntity } from '@/domain/job/job.entity';
+import { IJobRepository, IJobRepository as JobRepositorySymbol } from '@/domain/job/ports/job-repository.interface';
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
 // import { Inject, Injectable } from '../../common/ioc/dependency-injection.decorators';
+import { Result, ok as Ok, error as Err } from '@/shared/result';
+
+import { GetJobRequestDTO, GetJobResponseDTO } from '../dtos';
+
 
 // @Injectable()
 export class GetJobUseCase<TData = any, TResult = any>

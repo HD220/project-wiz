@@ -1,14 +1,16 @@
 // src_refactored/core/application/use-cases/memory/remove-memory-item.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RemoveMemoryItemUseCase } from './remove-memory-item.use-case';
-import { IMemoryRepository, IMemoryRepositoryToken } from '../../../../domain/memory/ports/memory-repository.interface';
-import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
-import { RemoveMemoryItemUseCaseInput } from './remove-memory-item.schema';
-import { Result, ok, error as resultError, isSuccess, isError } from '../../../../../shared/result';
-import { ApplicationError, DomainError, ValueError } from '../../../../common/errors';
-import { MemoryItemId } from '../../../../domain/memory/value-objects/memory-item-id.vo';
 import { Container } from 'inversify';
 import 'reflect-metadata'; // Required for Inversify
+
+import { RemoveMemoryItemUseCase } from './remove-memory-item.use-case';
+import { RemoveMemoryItemUseCaseInput } from './remove-memory-item.schema';
+
+import { ApplicationError, DomainError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
 
 // Mock implementations
 const mockLoggerService: ILoggerService = {

@@ -1,6 +1,7 @@
 // src_refactored/core/domain/annotation/ports/annotation-repository.types.ts
+import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId, JobId
+
 import { Annotation } from '../annotation.entity';
-import { Identity } from '../../../common/value-objects/identity.vo'; // For AgentId, JobId
 
 export interface AnnotationSearchFilters {
   agentId?: Identity;

@@ -1,21 +1,23 @@
 // src_refactored/core/application/use-cases/job/update-job.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+
+import { Executable } from '@/core/common/executable';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobId } from '@/domain/job/value-objects/job-id.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
+import { BackoffType, NoRetryPolicy, RetryPolicy } from '@/domain/job/value-objects/retry-policy.vo';
+import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   UpdateJobUseCaseInput,
   UpdateJobUseCaseInputSchema,
   UpdateJobUseCaseOutput,
 } from './update-job.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { Job } from '../../../../domain/job/job.entity';
-import { JobId } from '../../../../domain/job/value-objects/job-id.vo';
-import { JobName } from '../../../../domain/job/value-objects/job-name.vo';
-import { JobPriority } from '../../../../domain/job/value-objects/job-priority.vo';
-import { TargetAgentRole } from '../../../../domain/job/value-objects/target-agent-role.vo';
-import { RetryPolicy, NoRetryPolicy, BackoffType } from '../../../../domain/job/value-objects/retry-policy.vo';
-import { MaxAttempts } from '../../../../domain/job/value-objects/attempt-count.vo';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError, ValueError } from '../../../../common/errors';
 
 export class UpdateJobUseCase
   implements

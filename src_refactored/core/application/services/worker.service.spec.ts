@@ -1,21 +1,24 @@
 // src_refactored/core/application/services/worker.service.spec.ts
 import { vi, describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest';
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
+
 import { WorkerService } from './worker.service';
-import { IJobRepository } from '../../../domain/job/ports/i-job.repository';
-import { IAgentRepository } from '../../../domain/agent/ports/i-agent-repository.interface';
 import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
-import { ILogger } from '../../../common/services/i-logger.service';
-import { TargetAgentRoleVO } from '../../../domain/job/value-objects/target-agent-role.vo';
-import { Job } from '../../../domain/job/entities/job.entity';
-import { Agent } from '../../../domain/agent/entities/agent.entity';
-import { JobStatusVO } from '../../../domain/job/value-objects/job-status.vo';
-import { AgentExecutorResult } from '../../../domain/job/job-processing.types';
-import { ok, error } from '@/refactored/shared/result';
-import { JobName } from '../../../domain/job/value-objects/job-name.vo';
-import { AgentIdVO } from '../../../domain/agent/value-objects/agent-id.vo';
-import { RetryPolicyVO } from '../../../domain/job/value-objects/retry-policy.vo';
-import { AttemptCountVO } from '../../../domain/job/value-objects/attempt-count.vo';
+
+import { ILogger } from '@/core/common/services/i-logger.service';
+import { Agent } from '@/domain/agent/entities/agent.entity';
+import { IAgentRepository } from '@/domain/agent/ports/i-agent-repository.interface';
+import { AgentIdVO } from '@/domain/agent/value-objects/agent-id.vo';
+import { Job } from '@/domain/job/entities/job.entity';
+import { AgentExecutorResult } from '@/domain/job/job-processing.types';
+import { IJobRepository } from '@/domain/job/ports/i-job.repository';
+import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo';
+import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
+import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
+import { ok, error } from '@/shared/result';
+
 
 describe('WorkerService', () => {
   let workerService: WorkerService;

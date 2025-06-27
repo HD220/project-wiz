@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'; // Added afterEach
+
+import { ValueError } from '@/domain/common/errors';
+
 import { JobExecutionLogEntryVO, LogLevel } from './job-execution-log-entry.vo';
-import { ValueError } from '../../../common/errors';
 
 describe('JobExecutionLogEntryVO', () => {
   beforeEach(() => {

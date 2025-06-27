@@ -1,12 +1,14 @@
 // src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { CreateLLMProviderConfigUseCase } from './create-llm-provider-config.use-case';
 import { CreateLLMProviderConfigUseCaseInput } from './create-llm-provider-config.schema';
-import { ILLMProviderConfigRepository } from '../../../../domain/llm-provider-config/ports/llm-provider-config-repository.interface';
-import { LLMProviderConfig } from '../../../../domain/llm-provider-config/llm-provider-config.entity';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
+
+import { DomainError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
+import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
+import { ok, error } from '@/shared/result';
 
 // Mock Repository
 const mockRepo: ILLMProviderConfigRepository = {

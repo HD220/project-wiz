@@ -1,5 +1,6 @@
 // src_refactored/core/application/use-cases/memory/search-similar-memory-items.schema.ts
 import { z } from 'zod';
+
 import { MemoryListItemSchema } from './search-memory-items.schema'; // Reuse for base structure
 
 /**

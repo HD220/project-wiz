@@ -1,8 +1,10 @@
 // src_refactored/core/domain/job/ports/job-repository.interface.ts
-import { Result } from '../../../shared/result';
+import { Result } from '@/shared/result';
+
 import { JobEntity } from '../job.entity';
 import { JobIdVO } from '../value-objects/job-id.vo';
 import { JobStatusVO, JobStatusEnum } from '../value-objects/job-status.vo'; // Assuming JobStatusType is JobStatusEnum
+
 import {
   JobSearchFilters,
   PaginationOptions,

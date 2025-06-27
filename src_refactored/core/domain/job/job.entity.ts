@@ -1,13 +1,14 @@
 // src_refactored/core/domain/job/job.entity.ts
-import { AbstractEntity, EntityProps } from '../../common/base.entity';
-import { DomainError, ValueError } from '../../common/errors';
-import { JobIdVO } from './value-objects/job-id.vo';
-import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
-import { JobPriorityVO } from './value-objects/job-priority.vo';
-import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './value-objects/job-options.vo';
-import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
-import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
+import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+import { DomainError, ValueError } from '@/domain/common/errors';
+
 import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';
+import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
+import { JobIdVO } from './value-objects/job-id.vo';
+import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './value-objects/job-options.vo';
+import { JobPriorityVO } from './value-objects/job-priority.vo';
+import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
+import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
 
 
 // Interface for properties required to construct a JobEntity

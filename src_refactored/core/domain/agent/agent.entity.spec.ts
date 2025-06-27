@@ -1,21 +1,23 @@
 // src_refactored/core/domain/agent/agent.entity.spec.ts
 import { describe, it, expect, vi } from 'vitest';
-import { Agent } from './agent.entity';
-import { AgentId } from './value-objects/agent-id.vo';
-import { AgentTemperature } from './value-objects/agent-temperature.vo';
-import { AgentMaxIterations } from './value-objects/agent-max-iterations.vo';
-import { AgentPersonaTemplate } from './agent-persona-template.vo';
+
 import { LLMProviderConfig } from '../llm-provider-config/llm-provider-config.entity';
-import { PersonaId } from './value-objects/persona/persona-id.vo';
-import { PersonaName } from './value-objects/persona/persona-name.vo';
-import { PersonaRole } from './value-objects/persona/persona-role.vo';
-import { PersonaGoal } from './value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from './value-objects/persona/persona-backstory.vo';
-import { ToolNames } from './value-objects/persona/tool-names.vo';
+import { LLMApiKey } from '../llm-provider-config/value-objects/llm-api-key.vo';
 import { LLMProviderConfigId } from '../llm-provider-config/value-objects/llm-provider-config-id.vo';
 import { LLMProviderConfigName } from '../llm-provider-config/value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from '../llm-provider-config/value-objects/llm-provider-id.vo';
-import { LLMApiKey } from '../llm-provider-config/value-objects/llm-api-key.vo';
+
+import { AgentPersonaTemplate } from './agent-persona-template.vo';
+import { Agent } from './agent.entity';
+import { AgentId } from './value-objects/agent-id.vo';
+import { AgentMaxIterations } from './value-objects/agent-max-iterations.vo';
+import { AgentTemperature } from './value-objects/agent-temperature.vo';
+import { PersonaBackstory } from './value-objects/persona/persona-backstory.vo';
+import { PersonaGoal } from './value-objects/persona/persona-goal.vo';
+import { PersonaId } from './value-objects/persona/persona-id.vo';
+import { PersonaName } from './value-objects/persona/persona-name.vo';
+import { PersonaRole } from './value-objects/persona/persona-role.vo';
+import { ToolNames } from './value-objects/persona/tool-names.vo';
 
 describe('Agent Entity', () => {
   const mockPersonaTemplate = AgentPersonaTemplate.create({

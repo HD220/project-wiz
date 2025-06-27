@@ -1,9 +1,12 @@
 // src_refactored/core/domain/annotation/ports/annotation-repository.interface.ts
-import { Result } from '../../../../shared/result';
-import { DomainError } from '../../../common/errors';
+import { Result } from '@/shared/result';
+import { DomainError } from '@/domain/common/errors'; // Assuming DomainError is from domain context
+import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId, JobId
+
 import { Annotation } from '../annotation.entity';
 import { AnnotationId } from '../value-objects/annotation-id.vo';
-import { Identity } from '../../../common/value-objects/identity.vo'; // For AgentId, JobId
+// Import AnnotationSearchFilters, PaginationOptions, PaginatedAnnotationsResult from types file
+import { AnnotationSearchFilters, PaginationOptions, PaginatedAnnotationsResult } from './annotation-repository.types';
 
 export interface IAnnotationRepository {
   /**

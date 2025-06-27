@@ -1,17 +1,19 @@
 import { injectable, inject } from 'inversify';
-import { Result } from '../../../../shared/result';
-import { IUseCase } from '../../common/ports/use-case.interface';
+
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
+import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { Identity } from '@/core/common/value-objects/identity.vo'; // For LLMProviderConfigId and AgentId
+import { UserEntity, UserProps } from '@/domain/user/user.entity';
+import { IUserRepository, UserRepositoryToken } from '@/domain/user/ports/user-repository.interface';
+import { UserAvatar } from '@/domain/user/value-objects/user-avatar.vo';
+import { UserEmail } from '@/domain/user/value-objects/user-email.vo';
+import { UserId } from '@/domain/user/value-objects/user-id.vo';
+import { UserNickname } from '@/domain/user/value-objects/user-nickname.vo';
+import { UserUsername } from '@/domain/user/value-objects/user-username.vo';
+import { Result } from '@/shared/result';
+
 import { CreateUserInput, CreateUserOutput, CreateUserInputSchema } from './create-user.schema';
-import { UserEntity, UserProps } from '../../../domain/user/user.entity';
-import { UserId } from '../../../domain/user/value-objects/user-id.vo';
-import { UserUsername } from '../../../domain/user/value-objects/user-username.vo';
-import { UserEmail } from '../../../domain/user/value-objects/user-email.vo';
-import { UserNickname } from '../../../domain/user/value-objects/user-nickname.vo';
-import { UserAvatar } from '../../../domain/user/value-objects/user-avatar.vo';
-import { Identity } from '../../../common/value-objects/identity.vo'; // For LLMProviderConfigId and AgentId
-import { IUserRepository, UserRepositoryToken } from '../../../domain/user/ports/user-repository.interface';
-import { LoggerServiceToken, ILoggerService } from '../../../common/services/i-logger.service';
-import { DomainError, ValidationError, ApplicationError } from '../../../common/errors';
 // TODO: Import or define a HashingService if password hashing is to be done in the use case.
 // For now, password is not explicitly handled by UserEntity for hashing.
 

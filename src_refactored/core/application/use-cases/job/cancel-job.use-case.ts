@@ -1,17 +1,19 @@
 // src_refactored/core/application/use-cases/job/cancel-job.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+
+import { Executable } from '@/core/common/executable';
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // For potential queue interaction
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { JobId } from '@/domain/job/value-objects/job-id.vo';
+import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   CancelJobUseCaseInput,
   CancelJobUseCaseInputSchema,
   CancelJobUseCaseOutputSchema, // Corrected type name
 } from './cancel-job.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { IJobQueue } from '../../../../core/ports/adapters/job-queue.interface'; // For potential queue interaction
-import { JobId } from '../../../../domain/job/value-objects/job-id.vo';
-import { JobStatusType } from '../../../../domain/job/value-objects/job-status.vo';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError, ValueError } from '../../../../common/errors';
 
 export class CancelJobUseCase
   implements

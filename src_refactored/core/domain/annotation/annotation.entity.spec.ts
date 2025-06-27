@@ -1,10 +1,12 @@
 // src_refactored/core/domain/annotation/annotation.entity.spec.ts
 import { describe, it, expect, beforeEach } from 'vitest';
+
+import { EntityError, ValueError } from '@/core/common/errors';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { Annotation, AnnotationProps } from './annotation.entity';
 import { AnnotationId } from './value-objects/annotation-id.vo';
 import { AnnotationText } from './value-objects/annotation-text.vo';
-import { Identity } from '../../../core/common/value-objects/identity.vo';
-import { EntityError, ValueError } from '../../../core/common/errors';
 
 describe('Annotation Entity', () => {
   let validProps: AnnotationProps;

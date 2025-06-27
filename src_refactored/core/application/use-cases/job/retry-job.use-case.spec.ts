@@ -1,19 +1,21 @@
 // src_refactored/core/application/use-cases/job/retry-job.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { RetryJobUseCase } from './retry-job.use-case';
 import { RetryJobUseCaseInput } from './retry-job.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { IJobQueue } from '../../../../core/ports/adapters/job-queue.interface';
-import { Job } from '../../../../domain/job/job.entity';
-import { JobId } from '../../../../domain/job/value-objects/job-id.vo';
-import { JobName } from '../../../../domain/job/value-objects/job-name.vo';
-import { JobStatus, JobStatusType } from '../../../../domain/job/value-objects/job-status.vo';
-import { RetryPolicy, BackoffType } from '../../../../domain/job/value-objects/retry-policy.vo';
-import { MaxAttempts, AttemptCount } from '../../../../domain/job/value-objects/attempt-count.vo';
-import { JobTimestamp } from '../../../../domain/job/value-objects/job-timestamp.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError } from '../../../../common/errors';
+
+import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { MaxAttempts, AttemptCount } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobId } from '@/domain/job/value-objects/job-id.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { RetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo';
+import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo';
+import { ok, error } from '@/shared/result';
 
 const mockJobRepository: IJobRepository = {
   findById: vi.fn(),

@@ -1,20 +1,22 @@
 // src_refactored/core/application/use-cases/memory/search-similar-memory-items.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SearchSimilarMemoryItemsUseCase } from './search-similar-memory-items.use-case';
-import { IMemoryRepository, IMemoryRepositoryToken } from '../../../../domain/memory/ports/memory-repository.interface';
-import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
-import { SearchSimilarMemoryItemsUseCaseInput } from './search-similar-memory-items.schema';
-import { MemoryItem } from '../../../../domain/memory/memory-item.entity';
-import { MemoryItemId } from '../../../../domain/memory/value-objects/memory-item-id.vo';
-import { MemoryItemContent } from '../../../../domain/memory/value-objects/memory-item-content.vo';
-import { MemoryItemTags } from '../../../../domain/memory/value-objects/memory-item-tags.vo';
-import { MemoryItemSource } from '../../../../domain/memory/value-objects/memory-item-source.vo';
-import { MemoryItemEmbedding } from '../../../../domain/memory/value-objects/memory-item-embedding.vo';
-import { Identity } from '../../../../common/value-objects/identity.vo';
-import { Result, ok, error as resultError, isSuccess, isError } from '../../../../../shared/result';
-import { ApplicationError, DomainError, ValueError } from '../../../../common/errors';
 import { Container } from 'inversify';
 import 'reflect-metadata';
+
+import { SearchSimilarMemoryItemsUseCase } from './search-similar-memory-items.use-case';
+import { SearchSimilarMemoryItemsUseCaseInput } from './search-similar-memory-items.schema';
+
+import { ApplicationError, DomainError, ValueError } from '@/application/common/errors';
+import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { MemoryItem } from '@/domain/memory/memory-item.entity';
+import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { MemoryItemContent } from '@/domain/memory/value-objects/memory-item-content.vo';
+import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
+import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
+import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
 
 // Mock implementations
 const mockLoggerService: ILoggerService = {

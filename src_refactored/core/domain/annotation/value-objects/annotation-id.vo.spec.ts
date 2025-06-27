@@ -1,7 +1,8 @@
 // src_refactored/core/domain/annotation/value-objects/annotation-id.vo.spec.ts
-import { describe, it, expect } from 'vitest';
-import { AnnotationId } from './annotation-id.vo';
 import { randomUUID } from 'crypto';
+import { describe, it, expect } from 'vitest';
+
+import { AnnotationId } from './annotation-id.vo';
 
 describe('AnnotationId', () => {
   it('should create an AnnotationId from a valid UUID string', () => {

@@ -1,14 +1,16 @@
 // src_refactored/core/application/use-cases/project/list-projects.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { ListProjectsUseCase } from './list-projects.use-case';
 import { ListProjectsUseCaseInput } from './list-projects.schema';
-import { IProjectRepository } from '../../../../domain/project/ports/project-repository.interface';
-import { Project } from '../../../../domain/project/project.entity';
-import { ProjectId } from '../../../../domain/project/value-objects/project-id.vo';
-import { ProjectName } from '../../../../domain/project/value-objects/project-name.vo';
-import { ProjectDescription } from '../../../../domain/project/value-objects/project-description.vo';
-import { ok, error, Result } from '../../../../../shared/result';
-import { DomainError } from '../../../../common/errors';
+
+import { DomainError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { Project } from '@/domain/project/project.entity';
+import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
+import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
+import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
+import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
+import { ok, error, Result } from '@/shared/result';
 
 // Mock IProjectRepository
 const mockProjectRepository: IProjectRepository = {

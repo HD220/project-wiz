@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/agent-temperature.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface AgentTemperatureProps extends ValueObjectProps {
   value: number;

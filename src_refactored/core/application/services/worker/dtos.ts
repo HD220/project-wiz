@@ -1,4 +1,4 @@
-import { JobId } from '../../../domain/job/job.value-objects';
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
 
 /**
  * @fileoverview Data Transfer Objects (DTOs) for the IWorkerService interface.
@@ -57,7 +57,7 @@ export interface WorkerDetailsDTO {
   /** Timestamp of the last time the worker was seen or reported activity. */
   lastSeenAt: Date;
   /** The ID of the job the worker is currently processing, if any. */
-  currentJobId?: JobId | null;
+  currentJobId?: JobIdVO | null;
   /** Specific capabilities or skills this worker possesses. */
   capabilities?: string[];
    /** The host where the worker is running, if applicable. */
@@ -73,7 +73,7 @@ export interface UpdateWorkerStatusParams {
   /** The current operational status of the worker. */
   status: WorkerStatusValue;
   /** The ID of the job the worker is currently processing, if status is 'BUSY'. */
-  currentJobId?: JobId | null;
+  currentJobId?: JobIdVO | null;
   /** Optional error message if the status is 'ERROR'. */
   error?: string;
 }
@@ -98,7 +98,7 @@ export interface WorkerHeartbeatParams {
   /** The current operational status of the worker. */
   status: WorkerStatusValue;
   /** The ID of the job the worker is currently processing, if status is 'BUSY'. */
-  currentJobId?: JobId | null;
+  currentJobId?: JobIdVO | null;
 }
 
 /**
@@ -106,7 +106,7 @@ export interface WorkerHeartbeatParams {
  * This might be used if the WorkerService orchestrates job completion reporting.
  */
 export interface JobProcessResultDTO {
-  jobId: JobId;
+  jobId: JobIdVO;
   status: 'COMPLETED' | 'FAILED' | 'CANCELLED'; // Simplified job outcomes
   output?: any; // Output of the job, if any
   error?: string; // Error message if the job failed

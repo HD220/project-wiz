@@ -1,21 +1,23 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SearchMemoryItemsUseCase } from './search-memory-items.use-case';
-import { IMemoryRepository, IMemoryRepositoryToken } from '../../../domain/memory/ports/memory-repository.interface';
-import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
-import { MemoryItem } from '../../../domain/memory/memory-item.entity';
-import { MemoryItemId } from '../../../domain/memory/value-objects/memory-item-id.vo';
-import { MemoryItemContent } from '../../../domain/memory/value-objects/memory-item-content.vo';
-import { MemoryItemTags } from '../../../domain/memory/value-objects/memory-item-tags.vo';
-import { MemoryItemSource } from '../../../domain/memory/value-objects/memory-item-source.vo';
-import { MemoryItemEmbedding } from '../../../domain/memory/value-objects/memory-item-embedding.vo';
-import { Identity } from '../../../common/value-objects/identity.vo';
-import { PaginatedMemoryItemsResult } from '../../../domain/memory/ports/memory-repository.types';
-import { SearchMemoryItemsUseCaseInput } from './search-memory-items.schema';
-import { Result, ok, error as resultError, isSuccess, isError } from '../../../../shared/result'; // Updated imports
-import { ApplicationError, DomainError, ValueError } from '../../../common/errors'; // Added ValueError
 import { Container } from 'inversify';
 import 'reflect-metadata'; // Required for Inversify
+
+import { SearchMemoryItemsUseCase } from './search-memory-items.use-case';
+import { SearchMemoryItemsUseCaseInput } from './search-memory-items.schema';
+
+import { ApplicationError, DomainError, ValueError } from '@/application/common/errors'; // Added ValueError
+import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { MemoryItem } from '@/domain/memory/memory-item.entity';
+import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.types';
+import { MemoryItemContent } from '@/domain/memory/value-objects/memory-item-content.vo';
+import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
+import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
+import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result'; // Updated imports
 
 const CONTENT_EXCERPT_LENGTH = 200;
 

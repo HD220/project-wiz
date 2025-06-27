@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/persona/persona-goal.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface PersonaGoalProps extends ValueObjectProps {
   value: string;

@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/persona/persona-role.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface PersonaRoleProps extends ValueObjectProps {
   value: string;

@@ -1,20 +1,22 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts
-import { Executable } from '../../common/executable';
-import { Result, ok, error as resultError, isSuccess } from '../../../../shared/result'; // Renamed 'error' to 'resultError' to avoid conflict
-import { DomainError, ValueError } from '@/refactored/core/common/errors';
-import { ApplicationError } from '@/refactored/core/application/common/errors';
-import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
-import { IMemoryRepository, IMemoryRepositoryToken } from '../../../domain/memory/ports/memory-repository.interface';
-import { MemorySearchFilters, PaginationOptions, PaginatedMemoryItemsResult } from '../../../domain/memory/ports/memory-repository.types';
-import { MemoryItem } from '../../../domain/memory/memory-item.entity';
-import { Identity } from '../../../common/value-objects/identity.vo';
+import { inject, injectable } from 'inversify';
+
+import { ApplicationError } from '@/application/common/errors';
+import { Executable } from '@/core/common/executable';
+import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { DomainError, ValueError } from '@/domain/common/errors';
+import { MemoryItem } from '@/domain/memory/memory-item.entity';
+import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { MemorySearchFilters, PaginationOptions, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.types';
+import { Result, ok, error as resultError, isSuccess } from '@/shared/result'; // Renamed 'error' to 'resultError' to avoid conflict
+
 import {
   SearchMemoryItemsUseCaseInput,
   SearchMemoryItemsUseCaseInputSchema,
   SearchMemoryItemsUseCaseOutput,
   MemoryListItem,
 } from './search-memory-items.schema';
-import { inject, injectable } from 'inversify';
 
 const CONTENT_EXCERPT_LENGTH = 200;
 

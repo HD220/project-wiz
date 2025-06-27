@@ -1,14 +1,16 @@
 // src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { CreatePersonaTemplateUseCase } from './create-persona-template.use-case';
 import { CreatePersonaTemplateUseCaseInput } from './create-persona-template.schema';
-import { IAgentPersonaTemplateRepository } from '../../../../domain/agent/ports/agent-persona-template-repository.interface';
-import { AgentPersonaTemplate } from '../../../../domain/agent/agent-persona-template.vo';
-import { PersonaName } from '../../../../domain/agent/value-objects/persona/persona-name.vo';
+
+import { DomainError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
+import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
+import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
 // Import other VOs if specific error cases for them are tested, for now, we'll rely on Zod for input field validation
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
+import { ok, error } from '@/shared/result';
 
 // Mock Repository
 const mockRepo: IAgentPersonaTemplateRepository = {

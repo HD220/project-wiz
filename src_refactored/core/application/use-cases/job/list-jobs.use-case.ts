@@ -1,18 +1,20 @@
 // src_refactored/core/application/use-cases/job/list-jobs.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+
+import { Executable } from '@/core/common/executable';
+import { DomainError, ValueError } from '@/domain/common/errors';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types';
+import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   ListJobsUseCaseInput,
   ListJobsUseCaseInputSchema,
   ListJobsUseCaseOutput,
   JobListItem,
 } from './list-jobs.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { JobSearchFilters, PaginationOptions } from '../../../../domain/job/ports/job-repository.types';
-import { TargetAgentRole } from '../../../../domain/job/value-objects/target-agent-role.vo';
-import { Job } from '../../../../domain/job/job.entity';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
 
 export class ListJobsUseCase
   implements

@@ -1,6 +1,6 @@
 // src_refactored/core/domain/agent/value-objects/agent-max-iterations.vo.ts
-import { AbstractValueObject } from '@/refactored/core/common/value-objects/base.vo';
-import { DomainError } from '@/refactored/core/common/errors';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+import { DomainError } from '@/domain/common/errors';
 
 const MIN_ITERATIONS = 1;
 const MAX_ITERATIONS = 100; // Arbitrary reasonable upper limit

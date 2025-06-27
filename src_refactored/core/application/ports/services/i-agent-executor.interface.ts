@@ -1,8 +1,9 @@
 import { Agent } from '@/core/domain/agent/agent.entity';
 import { Job } from '@/core/domain/job/job.entity';
+
 import { AgentExecutorResult } from '@/core/domain/job/job-processing.types';
 import { Result } from '@/shared/result';
-import { DomainError } from '@/core/common/errors';
+import { DomainError } from '@/domain/common/errors';
 import { ApplicationError } from '@/application/common/errors';
 
 /**

@@ -1,19 +1,21 @@
 // src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
+
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
+import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
+import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
+import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
+import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
+import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-state/general-notes.collection';
+import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   SaveAgentInternalStateUseCaseInput,
   SaveAgentInternalStateUseCaseInputSchema,
   SaveAgentInternalStateUseCaseOutput,
 } from './save-agent-internal-state.schema';
-import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
-import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
-import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
-import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
-import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
-import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-state/general-notes.collection';
-import { Result, ok, error } from '@/shared/result';
-import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
 
 export class SaveAgentInternalStateUseCase
   implements

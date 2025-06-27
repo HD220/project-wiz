@@ -1,13 +1,15 @@
 import { injectable, inject } from 'inversify';
-import { Result } from '../../../../shared/result';
-import { IUseCase } from '../../common/ports/use-case.interface';
+
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+import { ApplicationError, DomainError, NotFoundError, ValidationError } from '@/application/common/errors';
+import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { UserEntity } from '@/domain/user/user.entity';
+import { IUserRepository, UserRepositoryToken } from '@/domain/user/ports/user-repository.interface';
+import { UserEmail } from '@/domain/user/value-objects/user-email.vo';
+import { UserId } from '@/domain/user/value-objects/user-id.vo';
+import { Result } from '@/shared/result';
+
 import { GetUserInput, GetUserOutput, GetUserInputSchema } from './get-user.schema';
-import { UserEntity } from '../../../domain/user/user.entity';
-import { UserId } from '../../../domain/user/value-objects/user-id.vo';
-import { UserEmail } from '../../../domain/user/value-objects/user-email.vo';
-import { IUserRepository, UserRepositoryToken } from '../../../domain/user/ports/user-repository.interface';
-import { LoggerServiceToken, ILoggerService } from '../../../common/services/i-logger.service';
-import { DomainError, ValidationError, ApplicationError, NotFoundError } from '../../../common/errors';
 
 @injectable()
 export class GetUserUseCase implements IUseCase<GetUserInput, Promise<Result<GetUserOutput | null, DomainError>>> {

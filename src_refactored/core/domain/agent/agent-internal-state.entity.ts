@@ -1,7 +1,7 @@
 // src_refactored/core/domain/agent/agent-internal-state.entity.ts
-import { AgentId } from '../value-objects/agent-id.vo';
-import { CurrentProjectId } from './value-objects/internal-state/current-project-id.vo';
+import { AgentId } from './value-objects/agent-id.vo';
 import { CurrentGoal } from './value-objects/internal-state/current-goal.vo';
+import { CurrentProjectId } from './value-objects/internal-state/current-project-id.vo';
 import { GeneralNotesCollection } from './value-objects/internal-state/general-notes.collection'; // Corrected path
 // import { JobTimestamp } from '../../job/value-objects/job-timestamp.vo'; // For createdAt/updatedAt
 

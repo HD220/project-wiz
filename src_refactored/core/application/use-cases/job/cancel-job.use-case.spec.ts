@@ -1,16 +1,18 @@
 // src_refactored/core/application/use-cases/job/cancel-job.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { CancelJobUseCase } from './cancel-job.use-case';
 import { CancelJobUseCaseInput } from './cancel-job.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { IJobQueue } from '../../../../core/ports/adapters/job-queue.interface';
-import { Job } from '../../../../domain/job/job.entity';
-import { JobId } from '../../../../domain/job/value-objects/job-id.vo';
-import { JobName } from '../../../../domain/job/value-objects/job-name.vo';
-import { JobStatus, JobStatusType } from '../../../../domain/job/value-objects/job-status.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError } from '../../../../common/errors';
+
+import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { JobId } from '@/domain/job/value-objects/job-id.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { ok, error } from '@/shared/result';
 
 // Mocks
 const mockJobRepository: IJobRepository = {

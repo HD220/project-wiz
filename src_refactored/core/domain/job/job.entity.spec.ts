@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+
+import { ValueError, DomainError } from '@/domain/common/errors';
+
 import { JobEntity, JobEntityConstructionProps } from './job.entity';
-import { JobIdVO } from './value-objects/job-id.vo';
-import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
-import { JobPriorityVO } from './value-objects/job-priority.vo';
-import { JobOptionsVO, IJobOptions } from './value-objects/job-options.vo';
-import { JobProgressVO } from './value-objects/job-progress.vo';
 import { JobExecutionLogsVO, JobExecutionLogEntryVO, LogLevel } from './value-objects/job-execution-logs.vo';
-import { ValueError, DomainError } from '../../common/errors';
+import { JobIdVO } from './value-objects/job-id.vo';
+import { JobOptionsVO, IJobOptions } from './value-objects/job-options.vo';
+import { JobPriorityVO } from './value-objects/job-priority.vo';
+import { JobProgressVO } from './value-objects/job-progress.vo';
+import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
 
 describe('JobEntity', () => {
   let baseProps: JobEntityConstructionProps<{ task: string }>;

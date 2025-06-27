@@ -15,7 +15,7 @@ export default [
       "**/coverage/**",
       "**/dist/**",
       "**/node_modules/**",
-      "tests/**", // Ignoring all tests outside src_refactored for now
+      "tests/**",
       "**/k6/**",
       "**/jslib.k6.io/**",
       "backup/**",
@@ -23,17 +23,33 @@ export default [
       "src2/**",
       "scripts/**",
       ".vite/**",
+      // Files outside src_refactored that might be picked up by broad patterns
+      "*.config.js", // e.g. eslint.config.js itself, lingui.config.js
+      "*.config.ts", // e.g. tailwind.config.ts, drizzle.config.ts
+      "*.config.cts", // e.g. forge.config.cts
+      "*.mts", // e.g. vitest.config.mts
+      "index.html",
+      "main.ts",
+      "preload.ts",
+      // Explicitly ignore top-level directories that are not src_refactored
+      "docs/**",
+      "migrations/**",
+      "public/**",
+      ".jules/**",
+      ".roo/**",
+      "types/**"
     ],
   },
-  // Single, comprehensive configuration for all TypeScript files (.ts, .tsx)
+  // Configuration for files within src_refactored
   {
-    files: ["**/*.ts", "**/*.tsx"], // This will include drizzle.config.ts, tailwind.config.ts etc.
+    files: ["src_refactored/**/*.ts", "src_refactored/**/*.tsx"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
       parser: tsParser,
       parserOptions: {
-        project: "./tsconfig.json", // Ensure this tsconfig includes all files ESLint will see
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname, // Ensures ESLint resolves tsconfig.json correctly
         ecmaFeatures: {
           jsx: true,
         },

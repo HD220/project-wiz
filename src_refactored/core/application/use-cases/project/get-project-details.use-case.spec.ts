@@ -1,19 +1,21 @@
 // src_refactored/core/application/use-cases/project/get-project-details.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { GetProjectDetailsUseCase } from './get-project-details.use-case';
 import { GetProjectDetailsUseCaseInput } from './get-project-details.schema';
-import { IProjectRepository } from '../../../../domain/project/ports/project-repository.interface';
-import { ISourceCodeRepository } from '../../../../domain/source-code/ports/source-code-repository.interface';
-import { Project } from '../../../../domain/project/project.entity';
-import { SourceCode } from '../../../../domain/source-code/source-code.entity';
-import { ProjectId } from '../../../../domain/project/value-objects/project-id.vo';
-import { ProjectName } from '../../../../domain/project/value-objects/project-name.vo';
-import { ProjectDescription } from '../../../../domain/project/value-objects/project-description.vo';
-import { RepositoryId } from '../../../../domain/source-code/value-objects/repository-id.vo';
-import { RepositoryPath } from '../../../../domain/source-code/value-objects/repository-path.vo';
-import { RepositoryDocsPath } from '../../../../domain/source-code/value-objects/repository-docs-path.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError } from '../../../../common/errors';
+
+import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { Project } from '@/domain/project/project.entity';
+import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
+import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
+import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
+import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
+import { SourceCode } from '@/domain/source-code/source-code.entity';
+import { ISourceCodeRepository } from '@/domain/source-code/ports/source-code-repository.interface';
+import { RepositoryDocsPath } from '@/domain/source-code/value-objects/repository-docs-path.vo';
+import { RepositoryId } from '@/domain/source-code/value-objects/repository-id.vo';
+import { RepositoryPath } from '@/domain/source-code/value-objects/repository-path.vo';
+import { ok, error } from '@/shared/result';
 
 // Mocks
 const mockProjectRepository: IProjectRepository = {

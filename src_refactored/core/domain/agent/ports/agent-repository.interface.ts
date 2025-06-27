@@ -1,5 +1,6 @@
 // src_refactored/core/domain/agent/ports/agent-repository.interface.ts
-import { Result } from '../../../../shared/result';
+import { Result } from '@/shared/result';
+
 import { Agent } from '../agent.entity';
 import { AgentId } from '../value-objects/agent-id.vo';
 import { PersonaId } from '../value-objects/persona/persona-id.vo';

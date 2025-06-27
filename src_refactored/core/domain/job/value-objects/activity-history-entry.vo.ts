@@ -1,7 +1,7 @@
 // src_refactored/core/domain/job/value-objects/activity-history-entry.vo.ts
-import { ValueObject } from '@/refactored/core/common/value-objects/base.vo';
-import { Result, ok, error } from '@/refactored/shared/result';
-import { DomainError, ValueError } from '@/refactored/core/common/errors';
+import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { DomainError, ValueError } from '@/domain/common/errors';
+import { Result, ok, error } from '@/shared/result';
 
 // Based on usage in generic-agent-executor.service.ts
 // LanguageModelMessageToolCall is defined in generic-agent-executor.service.ts,

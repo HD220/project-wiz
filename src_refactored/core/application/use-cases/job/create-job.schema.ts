@@ -1,6 +1,7 @@
 // src_refactored/core/application/use-cases/job/create-job.schema.ts
 import { z } from 'zod';
-import { BackoffType } from '../../../../core/domain/job/value-objects/retry-policy.vo'; // Import enum
+
+import { BackoffType } from '@/domain/job/value-objects/retry-policy.vo'; // Import enum
 
 /**
  * Input schema for CreateJobUseCase.

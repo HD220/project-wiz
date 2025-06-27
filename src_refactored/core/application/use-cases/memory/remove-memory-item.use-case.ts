@@ -1,17 +1,19 @@
 // src_refactored/core/application/use-cases/memory/remove-memory-item.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
-import { Executable } from '../../../common/executable';
+import { ZodError } from 'zod';
+
+import { Executable } from '@/core/common/executable';
+import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ApplicationError, DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
+
 import {
   RemoveMemoryItemUseCaseInput,
   RemoveMemoryItemUseCaseInputSchema,
   RemoveMemoryItemUseCaseOutput,
 } from './remove-memory-item.schema';
-import { IMemoryRepository, IMemoryRepositoryToken } from '../../../../domain/memory/ports/memory-repository.interface';
-import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
-import { MemoryItemId } from '../../../../domain/memory/value-objects/memory-item-id.vo';
-import { Result, ok, error as resultError, isSuccess } from '../../../../../shared/result';
-import { ApplicationError, DomainError, NotFoundError, ValueError } from '../../../../common/errors';
 
 @injectable()
 export class RemoveMemoryItemUseCase

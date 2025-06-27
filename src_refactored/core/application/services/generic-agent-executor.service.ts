@@ -1,20 +1,19 @@
-import { Agent } from '@/refactored/core/domain/agent/agent.entity';
-import { IAgentInternalStateRepository } from '@/refactored/core/domain/agent/ports/i-agent-internal-state.repository';
-import { Job } from '@/refactored/core/domain/job/job.entity';
-import { JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
-import { AgentExecutorResult, CriticalToolFailureInfo, ExecutionHistoryEntry } from '@/refactored/core/domain/job/job-processing.types'; // Added CriticalToolFailureInfo and ExecutionHistoryEntry
-import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
-// Corrected import: ok, error are named exports, Result is a type
-import { ok, error, Result } from '@/refactored/shared/result';
-import { DomainError, ToolError } from '@/refactored/core/domain/common/errors'; // Updated path for DomainError/ToolError
-import { HistoryEntryRoleType, ActivityHistoryEntry } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
-import { ApplicationError } from '@/refactored/core/application/common/errors';
-import { IToolExecutionContext } from '@/refactored/core/tools/tool.interface';
-import { IAgentExecutor } from '@/refactored/core/application/ports/services/i-agent-executor.interface';
-import { ILLMAdapter } from '@/refactored/core/application/ports/adapters/i-llm.adapter';
-import { IToolRegistryService } from '@/refactored/core/application/ports/services/i-tool-registry.service';
-import { ILogger } from '@/refactored/core/common/services/i-logger.service';
-import { ActivityHistory } from '@/refactored/core/domain/job/value-objects/activity-history.vo';
+import { Agent } from '@/domain/agent/agent.entity';
+import { IAgentInternalStateRepository } from '@/domain/agent/ports/i-agent-internal-state.repository';
+import { ApplicationError } from '@/application/common/errors';
+import { ILLMAdapter } from '@/application/ports/adapters/i-llm.adapter';
+import { IAgentExecutor } from '@/application/ports/services/i-agent-executor.interface';
+import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
+import { ILogger } from '@/core/common/services/i-logger.service';
+import { IToolExecutionContext } from '@/core/tools/tool.interface';
+import { DomainError, ToolError } from '@/domain/common/errors';
+import { Job } from '@/domain/job/job.entity';
+import { AgentExecutorResult, CriticalToolFailureInfo, ExecutionHistoryEntry } from '@/domain/job/job-processing.types';
+import { IJobRepository } from '@/domain/job/ports/i-job.repository';
+import { ActivityHistoryEntry, HistoryEntryRoleType } from '@/domain/job/value-objects/activity-history-entry.vo';
+import { ActivityHistory } from '@/domain/job/value-objects/activity-history.vo';
+import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { ok, error, Result } from '@/shared/result';
 
 // Define LanguageModelMessage (standard for Vercel AI SDK)
 // TODO: Move to a shared types location if not already present

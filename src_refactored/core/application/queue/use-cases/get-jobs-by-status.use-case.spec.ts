@@ -1,17 +1,20 @@
 // src_refactored/core/application/queue/use-cases/get-jobs-by-status.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { GetJobsByStatusUseCase } from './get-jobs-by-status.use-case';
-import { IJobRepository } from '../../../domain/job/ports/job-repository.interface';
-import { JobEntity } from '../../../domain/job/job.entity';
 import { GetJobsByStatusRequestDTO } from '../dtos';
-import { Result, ok, error } from '../../../../shared/result';
-import { JobStatusEnum, JobStatusVO } from '../../../domain/job/value-objects/job-status.vo';
-import { JobIdVO } from '../../../domain/job/value-objects/job-id.vo';
-import { JobOptionsVO } from '../../../domain/job/value-objects/job-options.vo';
-import { JobPriorityVO } from '../../../domain/job/value-objects/job-priority.vo';
-import { JobProgressVO } from '../../../domain/job/value-objects/job-progress.vo';
-import { JobExecutionLogsVO } from '../../../domain/job/value-objects/job-execution-logs.vo';
-import { PaginatedJobsResult, JobSearchFilters, PaginationOptions } from '../../../domain/job/ports/job-repository.types';
+
+import { JobEntity } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { PaginatedJobsResult, JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types';
+import { JobExecutionLogsVO } from '@/domain/job/value-objects/job-execution-logs.vo';
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobOptionsVO } from '@/domain/job/value-objects/job-options.vo';
+import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
+import { JobProgressVO } from '@/domain/job/value-objects/job-progress.vo';
+import { JobStatusEnum, JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
+import { Result, ok, error } from '@/shared/result';
+
 
 describe('GetJobsByStatusUseCase', () => {
   let mockJobRepository: IJobRepository;

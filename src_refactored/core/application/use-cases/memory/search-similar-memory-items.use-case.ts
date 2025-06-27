@@ -1,20 +1,22 @@
 // src_refactored/core/application/use-cases/memory/search-similar-memory-items.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
-import { Executable } from '../../../common/executable';
+import { ZodError } from 'zod';
+
+import { ApplicationError, DomainError, ValueError } from '@/application/common/errors';
+import { Executable } from '@/core/common/executable';
+import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { MemoryItem } from '@/domain/memory/memory-item.entity';
+import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
+import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
+
 import {
   SearchSimilarMemoryItemsUseCaseInput,
   SearchSimilarMemoryItemsUseCaseInputSchema,
   SearchSimilarMemoryItemsUseCaseOutput,
   SimilarMemoryListItem,
 } from './search-similar-memory-items.schema';
-import { IMemoryRepository, IMemoryRepositoryToken } from '../../../../domain/memory/ports/memory-repository.interface';
-import { ILoggerService, ILoggerServiceToken } from '../../../common/services/i-logger.service';
-import { MemoryItemEmbedding } from '../../../../domain/memory/value-objects/memory-item-embedding.vo';
-import { Identity } from '../../../../common/value-objects/identity.vo';
-import { MemoryItem } from '../../../../domain/memory/memory-item.entity';
-import { Result, ok, error as resultError, isSuccess } from '../../../../../shared/result';
-import { ApplicationError, DomainError, ValueError } from '../../../../common/errors';
 
 @injectable()
 export class SearchSimilarMemoryItemsUseCase

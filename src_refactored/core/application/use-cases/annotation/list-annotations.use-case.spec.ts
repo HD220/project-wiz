@@ -1,16 +1,18 @@
 // src_refactored/core/application/use-cases/annotation/list-annotations.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { ListAnnotationsUseCase } from './list-annotations.use-case';
 import { ListAnnotationsUseCaseInput } from './list-annotations.schema';
-import { IAnnotationRepository } from '../../../../domain/annotation/ports/annotation-repository.interface';
-import { AnnotationSearchFilters, PaginationOptions, PaginatedAnnotationsResult } from '../../../../domain/annotation/ports/annotation-repository.types';
-import { Annotation } from '../../../../domain/annotation/annotation.entity';
-import { AnnotationId } from '../../../../domain/annotation/value-objects/annotation-id.vo';
-import { AnnotationText } from '../../../../domain/annotation/value-objects/annotation-text.vo';
-import { Identity } from '../../../../common/value-objects/identity.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError } from '../../../../common/errors';
+
+import { DomainError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { Annotation } from '@/domain/annotation/annotation.entity';
+import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
+import { AnnotationSearchFilters, PaginationOptions, PaginatedAnnotationsResult } from '@/domain/annotation/ports/annotation-repository.types';
+import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
+import { AnnotationText } from '@/domain/annotation/value-objects/annotation-text.vo';
+import { ok, error } from '@/shared/result';
 
 const mockAnnotationRepository: IAnnotationRepository = {
   search: vi.fn(),

@@ -1,10 +1,11 @@
 // src_refactored/core/domain/agent/agent-persona-template.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { PersonaBackstory } from './value-objects/persona/persona-backstory.vo';
+import { PersonaGoal } from './value-objects/persona/persona-goal.vo';
 import { PersonaId } from './value-objects/persona/persona-id.vo';
 import { PersonaName } from './value-objects/persona/persona-name.vo';
 import { PersonaRole } from './value-objects/persona/persona-role.vo';
-import { PersonaGoal } from './value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from './value-objects/persona/persona-backstory.vo';
 import { ToolNames } from './value-objects/persona/tool-names.vo';
 
 // This interface matches the structure loaded from JSON by FileSystemAgentPersonaTemplateRepository

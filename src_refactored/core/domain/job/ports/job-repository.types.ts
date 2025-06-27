@@ -1,7 +1,7 @@
 // src_refactored/core/domain/job/ports/job-repository.types.ts
 import { JobEntity } from '../job.entity';
-import { JobStatusEnum } from '../value-objects/job-status.vo';
 import { JobIdVO } from '../value-objects/job-id.vo';
+import { JobStatusEnum } from '../value-objects/job-status.vo';
 
 export interface JobSearchFilters {
   queueName?: string;

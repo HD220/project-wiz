@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/internal-state/general-notes.collection.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 // Re-using a simple string wrapper for individual notes
 class NoteEntry extends AbstractValueObject<{value: string}> {

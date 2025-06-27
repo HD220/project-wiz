@@ -1,26 +1,28 @@
 // src_refactored/core/application/use-cases/agent/create-agent.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { CreateAgentUseCase } from './create-agent.use-case';
 import { CreateAgentUseCaseInput } from './create-agent.schema';
-import { IAgentRepository } from '../../../../domain/agent/ports/agent-repository.interface';
-import { IAgentPersonaTemplateRepository } from '../../../../domain/agent/ports/agent-persona-template-repository.interface';
-import { ILLMProviderConfigRepository } from '../../../../domain/llm-provider-config/ports/llm-provider-config-repository.interface';
-import { Agent } from '../../../../domain/agent/agent.entity';
-import { AgentPersonaTemplate } from '../../../../domain/agent/agent-persona-template.vo';
-import { LLMProviderConfig } from '../../../../domain/llm-provider-config/llm-provider-config.entity';
-import { PersonaId } from '../../../../domain/agent/value-objects/persona/persona-id.vo';
-import { LLMProviderConfigId } from '../../../../domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
-import { PersonaName } from '../../../../domain/agent/value-objects/persona/persona-name.vo';
-import { PersonaRole } from '../../../../domain/agent/value-objects/persona/persona-role.vo';
-import { PersonaGoal } from '../../../../domain/agent/value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from '../../../../domain/agent/value-objects/persona/persona-backstory.vo';
-import { ToolNames } from '../../../../domain/agent/value-objects/persona/tool-names.vo';
-import { LLMProviderConfigName } from '../../../../domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
-import { LLMProviderId } from '../../../../domain/llm-provider-config/value-objects/llm-provider-id.vo';
-import { LLMApiKey } from '../../../../domain/llm-provider-config/value-objects/llm-api-key.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError, ValueError } from '../../../../common/errors';
+
+import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { Agent } from '@/domain/agent/agent.entity';
+import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
+import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
+import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
+import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
+import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
+import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
+import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
+import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
+import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
+import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
+import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
+import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';
+import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+import { LLMProviderConfigName } from '@/domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
+import { LLMProviderId } from '@/domain/llm-provider-config/value-objects/llm-provider-id.vo';
+import { ok, error } from '@/shared/result';
 
 // Mocks
 const mockAgentRepo: IAgentRepository = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), delete: vi.fn() };

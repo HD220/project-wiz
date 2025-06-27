@@ -1,21 +1,24 @@
 // src_refactored/core/application/queue/use-cases/create-job.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { CreateJobUseCase } from './create-job.use-case';
-import { IJobRepository } from '../../../domain/job/ports/job-repository.interface';
-import { JobEntity, JobEntityConstructionProps } from '../../../domain/job/job.entity';
 import { CreateJobRequestDTO } from '../dtos';
-import { Result, ok, error } from '../../../../shared/result';
-import { JobIdVO } from '../../../domain/job/value-objects/job-id.vo';
-import { JobStatusVO, JobStatusEnum } from '../../../domain/job/value-objects/job-status.vo';
-import { JobOptionsVO } from '../../../domain/job/value-objects/job-options.vo';
-import { JobPriorityVO } from '../../../domain/job/value-objects/job-priority.vo';
-import { JobProgressVO } from '../../../domain/job/value-objects/job-progress.vo';
-import { JobExecutionLogsVO } from '../../../domain/job/value-objects/job-execution-logs.vo';
-import { ValueError } from '../../../domain/common/errors';
+
+import { JobEntity, JobEntityConstructionProps } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { JobExecutionLogsVO } from '@/domain/job/value-objects/job-execution-logs.vo';
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobOptionsVO } from '@/domain/job/value-objects/job-options.vo';
+import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
+import { JobProgressVO } from '@/domain/job/value-objects/job-progress.vo';
+import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+import { ValueError } from '@/domain/common/errors';
+import { Result, ok, error } from '@/shared/result';
+
 
 // Mock JobEntity.create
-vi.mock('../../../domain/job/job.entity', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../domain/job/job.entity')>();
+vi.mock('@/domain/job/job.entity', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/domain/job/job.entity')>();
   return {
     ...actual,
     JobEntity: {

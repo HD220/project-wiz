@@ -1,18 +1,20 @@
 // src_refactored/core/application/use-cases/job/update-job.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { UpdateJobUseCase } from './update-job.use-case';
 import { UpdateJobUseCaseInput } from './update-job.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { Job } from '../../../../domain/job/job.entity';
-import { JobId } from '../../../../domain/job/value-objects/job-id.vo';
-import { JobName } from '../../../../domain/job/value-objects/job-name.vo';
-import { JobPriority } from '../../../../domain/job/value-objects/job-priority.vo';
-import { TargetAgentRole } from '../../../../domain/job/value-objects/target-agent-role.vo';
-import { RetryPolicy, NoRetryPolicy, BackoffType } from '../../../../domain/job/value-objects/retry-policy.vo';
-import { MaxAttempts } from '../../../../domain/job/value-objects/attempt-count.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError, ValueError } from '../../../../common/errors';
+
+import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobId } from '@/domain/job/value-objects/job-id.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
+import { RetryPolicy, NoRetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo';
+import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+import { ok, error } from '@/shared/result';
 
 const mockJobRepository: IJobRepository = {
   findById: vi.fn(),

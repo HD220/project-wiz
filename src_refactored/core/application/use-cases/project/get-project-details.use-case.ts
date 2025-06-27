@@ -1,15 +1,16 @@
 // src_refactored/core/application/use-cases/project/get-project-details.use-case.ts
-import { Executable } from '../../../common/executable';
+import { Executable } from '@/core/common/executable';
+import { DomainError, NotFoundError } from '@/domain/common/errors';
+import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
+import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
+import { ISourceCodeRepository } from '@/domain/source-code/ports/source-code-repository.interface';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   GetProjectDetailsUseCaseInput,
   GetProjectDetailsUseCaseOutput,
   SourceCodeDetails,
 } from './get-project-details.schema';
-import { IProjectRepository } from '../../../../domain/project/ports/project-repository.interface';
-import { ProjectId } from '../../../../domain/project/value-objects/project-id.vo';
-import { ISourceCodeRepository } from '../../../../domain/source-code/ports/source-code-repository.interface';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError } from '../../../../common/errors';
 
 export class GetProjectDetailsUseCase
   implements

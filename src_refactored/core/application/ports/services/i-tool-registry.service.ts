@@ -1,5 +1,6 @@
-import { IAgentTool } from '@/refactored/core/tools/tool.interface';
-import { Result } from '@/refactored/shared/result';
+import { IAgentTool } from '@/core/tools/tool.interface';
+import { Result } from '@/shared/result';
+
 import { ApplicationError } from '@/application/common/errors';
 
 /**

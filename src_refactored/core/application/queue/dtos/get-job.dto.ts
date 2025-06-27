@@ -1,6 +1,7 @@
 // src_refactored/core/application/queue/dtos/get-job.dto.ts
-import { JobEntity } from '../../../domain/job/job.entity';
-import { Result } from '../../../../shared/result';
+import { Result } from '@/shared/result';
+import { JobEntity } from '@/domain/job/job.entity';
+
 
 export interface GetJobRequestDTO {
   jobId: string;

@@ -1,13 +1,17 @@
 // src_refactored/core/application/services/worker.service.ts
-import { IJobRepository } from '../../../domain/job/ports/i-job.repository';
-import { IAgentRepository } from '../../../domain/agent/ports/i-agent-repository.interface';
+import { ILogger } from '@/core/common/services/i-logger.service';
+import { Agent } from '@/domain/agent/entities/agent.entity'; // Added for type hint
+import { IAgentRepository } from '@/domain/agent/ports/i-agent-repository.interface';
+import { AgentIdVO } from '@/domain/agent/value-objects/agent-id.vo';
+import { Job } from '@/domain/job/entities/job.entity'; // Needed for type hint in _processNextJobCycle
+import { IJobRepository } from '@/domain/job/ports/i-job.repository';
+import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
+import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
-import { ILogger } from '../../../common/services/i-logger.service';
 import { IWorkerService } from '../ports/services/i-worker.service';
-import { TargetAgentRoleVO } from '../../../domain/job/value-objects/target-agent-role.vo';
-// import { JobIdVO } from '../../../domain/job/value-objects/job-id.vo'; // Not directly used yet
-import { AgentIdVO } from '../../../domain/agent/value-objects/agent-id.vo'; // Added
-import { JobStatusVO } from '../../../domain/job/value-objects/job-status.vo'; // Added
+// import { JobIdVO } from '@/domain/job/value-objects/job-id.vo'; // Not directly used yet
+
 
 // Using NodeJS.Timeout for type, adjust if in a different environment (e.g., browser)
 // For Node.js, it's better to import Timeout type directly:

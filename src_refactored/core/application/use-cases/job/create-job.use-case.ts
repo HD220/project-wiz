@@ -1,31 +1,33 @@
 // src_refactored/core/application/use-cases/job/create-job.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+
+import { Executable } from '@/core/common/executable';
+import { DomainError, ValueError } from '@/domain/common/errors';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobDependsOn } from '@/domain/job/value-objects/job-depends-on.vo';
+import { JobId } from '@/domain/job/value-objects/job-id.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
+import {
+  BackoffType,
+  NoRetryPolicy,
+  RetryDelay, // Only for type, creation via RetryPolicy.create
+  RetryPolicy,
+} from '@/domain/job/value-objects/retry-policy.vo';
+import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo';
+import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   CreateJobUseCaseInput,
   CreateJobUseCaseInputSchema,
   CreateJobUseCaseOutput,
 } from './create-job.schema';
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { IJobQueue } from '../../../../core/ports/adapters/job-queue.interface';
-import { Job } from '../../../../domain/job/job.entity';
-import { JobId } from '../../../../domain/job/value-objects/job-id.vo';
-import { JobName } from '../../../../domain/job/value-objects/job-name.vo';
-import { TargetAgentRole } from '../../../../domain/job/value-objects/target-agent-role.vo';
-import { JobPriority } from '../../../../domain/job/value-objects/job-priority.vo';
-import { JobStatusType } from '../../../../domain/job/value-objects/job-status.vo';
-import { JobTimestamp } from '../../../../domain/job/value-objects/job-timestamp.vo';
-import { JobDependsOn } from '../../../../domain/job/value-objects/job-depends-on.vo';
-import {
-  RetryPolicy,
-  NoRetryPolicy,
-  BackoffType,
-  RetryDelay // Only for type, creation via RetryPolicy.create
-} from '../../../../domain/job/value-objects/retry-policy.vo';
-import { MaxAttempts } from '../../../../domain/job/value-objects/attempt-count.vo';
 // ActivityContext is initialized by Job.create internally within job.data.agentState
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
 
 export class CreateJobUseCase
   implements

@@ -1,7 +1,9 @@
 // src_refactored/core/domain/annotation/value-objects/annotation-text.vo.spec.ts
 import { describe, it, expect } from 'vitest';
+
+import { ValueError } from '@/domain/common/errors'; // Assuming ValueError is in domain/common
+
 import { AnnotationText } from './annotation-text.vo';
-import { ValueError } from '../../../../common/errors';
 
 describe('AnnotationText', () => {
   it('should create an AnnotationText with valid text', () => {

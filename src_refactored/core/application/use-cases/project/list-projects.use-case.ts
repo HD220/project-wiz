@@ -1,14 +1,15 @@
 // src_refactored/core/application/use-cases/project/list-projects.use-case.ts
-import { Executable } from '../../../common/executable';
+import { Executable } from '@/core/common/executable';
+import { DomainError } from '@/domain/common/errors'; // Using DomainError as a general error type from repo
+import { Project } from '@/domain/project/project.entity';
+import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   ListProjectsUseCaseInput,
   ListProjectsUseCaseOutput,
   ProjectListItem, // Explicitly import if needed for mapping, though output type implies it
 } from './list-projects.schema';
-import { IProjectRepository } from '../../../../domain/project/ports/project-repository.interface';
-import { Project } from '../../../../domain/project/project.entity';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError } from '../../../../common/errors'; // Using DomainError as a general error type from repo
 
 // Assuming IProjectRepositoryToken would be defined alongside IProjectRepository
 // For now, direct constructor injection without DI framework specifics.

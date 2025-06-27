@@ -1,6 +1,7 @@
 // src_refactored/core/application/use-cases/job/list-jobs.schema.ts
 import { z } from 'zod';
-import { JobStatusType } from '../../../../core/domain/job/value-objects/job-status.vo';
+
+import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
 
 /**
  * Input schema for ListJobsUseCase, allowing filtering and pagination.

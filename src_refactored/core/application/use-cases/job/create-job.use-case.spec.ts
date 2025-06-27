@@ -1,16 +1,20 @@
 // src_refactored/core/application/use-cases/job/create-job.use-case.spec.ts
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ZodError } from 'zod';
+
 import { CreateJobUseCase } from './create-job.use-case';
 import { CreateJobUseCaseInput } from './create-job.schema';
-import { Job } from '../../../../domain/job/job.entity';
-import { JobStatusType } from '../../../../domain/job/value-objects/job-status.vo';
-import { NoRetryPolicy, RetryPolicy, BackoffType } from '../../../../domain/job/value-objects/retry-policy.vo';
-import { JobPriority } from '../../../../domain/job/value-objects/job-priority.vo';
-import { ValueError, DomainError } from '../../../../common/errors';
 
-import { IJobRepository } from '../../../../domain/job/ports/job-repository.interface';
-import { IJobQueue } from '../../../../core/ports/adapters/job-queue.interface';
+import { ValueError, DomainError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { JobId } from '@/domain/job/value-objects/job-id.vo'; // Added for dependsOnJobIds
+import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
+import { NoRetryPolicy, RetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo';
+import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Added for mocking
+import { ok, error } from '@/shared/result'; // Added for mocking repo/queue calls
 
 // Mock Repositories and Queue
 const mockJobRepository: IJobRepository = {

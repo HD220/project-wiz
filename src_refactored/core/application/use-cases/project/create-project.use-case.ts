@@ -1,14 +1,16 @@
 import { injectable, inject } from 'inversify';
-import { Result } from '../../../../shared/result';
-import { IUseCase } from '../../common/ports/use-case.interface';
+
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
+import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ProjectEntity, ProjectProps } from '@/domain/project/project.entity';
+import { IProjectRepository, ProjectRepositoryToken } from '@/domain/project/ports/project-repository.interface';
+import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
+import { ProjectId } from '@/domain/project/value-objects/project-id.vo'; // For generating new ID
+import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
+import { Result } from '@/shared/result';
+
 import { CreateProjectInput, CreateProjectOutput, CreateProjectInputSchema } from './create-project.schema';
-import { ProjectEntity, ProjectProps } from '../../../domain/project/project.entity';
-import { ProjectName } from '../../../domain/project/value-objects/project-name.vo';
-import { ProjectDescription } from '../../../domain/project/value-objects/project-description.vo';
-import { IProjectRepository, ProjectRepositoryToken } from '../../../domain/project/ports/project-repository.interface';
-import { LoggerServiceToken, ILoggerService } from '../../../common/services/i-logger.service';
-import { DomainError, ValidationError, ApplicationError } from '../../../common/errors';
-import { ProjectId } from '../../../domain/project/value-objects/project-id.vo'; // For generating new ID
 
 @injectable()
 export class CreateProjectUseCase implements IUseCase<CreateProjectInput, Promise<Result<CreateProjectOutput, DomainError>>> {

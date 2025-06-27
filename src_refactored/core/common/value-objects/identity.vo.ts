@@ -1,5 +1,6 @@
 // src_refactored/core/common/value-objects/identity.vo.ts
 import { randomUUID } from 'crypto';
+
 import { AbstractValueObject, ValueObjectProps } from './base.vo';
 
 // Define Zod schema for UUID validation

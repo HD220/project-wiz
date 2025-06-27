@@ -1,8 +1,9 @@
 // src_refactored/core/domain/job/value-objects/activity-history.vo.ts
-import { ValueObject } from '@/refactored/core/common/value-objects/base.vo';
+import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/domain/common/errors';
+import { Result, ok, error } from '@/shared/result';
+
 import { ActivityHistoryEntry, ActivityHistoryEntryProps } from './activity-history-entry.vo'; // Assuming .vo extension
-import { Result, ok, error } from '@/refactored/shared/result';
-import { ValueError } from '@/refactored/core/common/errors';
 
 export interface ActivityHistoryProps {
   readonly entries: ReadonlyArray<ActivityHistoryEntry>;

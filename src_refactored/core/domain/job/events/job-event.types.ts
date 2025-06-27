@@ -1,8 +1,7 @@
 // src_refactored/core/domain/job/events/job-event.types.ts
-
 import { JobEntity } from '../job.entity';
-import { JobProgressData } from '../value-objects/job-progress.vo';
 import { JobExecutionLogEntryProps } from '../value-objects/job-execution-log-entry.vo'; // For JobLog structure
+import { JobProgressData } from '../value-objects/job-progress.vo';
 
 // Re-export JobId for convenience if it's just a string, or define it.
 // Assuming JobIdVO.value is used, which is string.

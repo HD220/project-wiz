@@ -1,21 +1,23 @@
 // src_refactored/core/application/use-cases/memory/save-memory-item.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+
+import { Executable } from '@/core/common/executable';
+import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+import { MemoryItem } from '@/domain/memory/memory-item.entity';
+import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
+import { MemoryItemContent } from '@/domain/memory/value-objects/memory-item-content.vo';
+import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
+import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
+import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+import { Result, ok, error } from '@/shared/result';
+
 import {
   SaveMemoryItemUseCaseInput,
   SaveMemoryItemUseCaseInputSchema,
   SaveMemoryItemUseCaseOutput,
 } from './save-memory-item.schema';
-import { IMemoryRepository } from '../../../../domain/memory/ports/memory-repository.interface';
-import { MemoryItem } from '../../../../domain/memory/memory-item.entity';
-import { MemoryItemId } from '../../../../domain/memory/value-objects/memory-item-id.vo';
-import { MemoryItemContent } from '../../../../domain/memory/value-objects/memory-item-content.vo';
-import { MemoryItemTags } from '../../../../domain/memory/value-objects/memory-item-tags.vo';
-import { MemoryItemSource } from '../../../../domain/memory/value-objects/memory-item-source.vo';
-import { MemoryItemEmbedding } from '../../../../domain/memory/value-objects/memory-item-embedding.vo';
-import { Identity } from '../../../../common/value-objects/identity.vo'; // For AgentId
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError, ValueError } from '../../../../common/errors';
 
 // Optional: Define IEmbeddingService if embedding generation is part of this use case
 // export interface IEmbeddingService {

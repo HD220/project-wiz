@@ -1,12 +1,14 @@
 // src_refactored/core/application/use-cases/annotation/remove-annotation.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
+
 import { RemoveAnnotationUseCase } from './remove-annotation.use-case';
 import { RemoveAnnotationUseCaseInput } from './remove-annotation.schema';
-import { IAnnotationRepository } from '../../../../domain/annotation/ports/annotation-repository.interface';
-import { AnnotationId } from '../../../../domain/annotation/value-objects/annotation-id.vo';
-import { ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError } from '../../../../common/errors'; // Assuming NotFoundError might be used by repo
+
+import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
+import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
+import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
+import { ok, error } from '@/shared/result';
 
 const mockAnnotationRepository: IAnnotationRepository = {
   delete: vi.fn(),

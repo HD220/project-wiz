@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/persona/persona-backstory.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface PersonaBackstoryProps extends ValueObjectProps {
   value: string;

@@ -1,49 +1,39 @@
 // Vitest
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
+import { z } from 'zod';
 
 // Core Service
 import { GenericAgentExecutor } from './generic-agent-executor.service';
 
 // Domain Entities & VOs
-import { Job } from '@/refactored/core/domain/job/job.entity';
-import { Agent } from '@/refactored/core/domain/agent/agent.entity';
-import { AgentPersonaTemplate } from '@/refactored/core/domain/agent/value-objects/agent-persona-template.vo';
-import { LLMProviderConfigId } from '@/refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
-// import { JobId } from '@/refactored/core/domain/job/value-objects/job-id.vo'; // Not directly used in mockJob creation in conceptual plan
-import { JobName } from '@/refactored/core/domain/job/value-objects/job-name.vo';
-import { JobStatus, JobStatusType } from '@/refactored/core/domain/job/value-objects/job-status.vo';
-import { TargetAgentRole } from '@/refactored/core/domain/job/value-objects/target-agent-role.vo';
-import { AgentId } from '@/refactored/core/domain/agent/value-objects/agent-id.vo';
-import { AgentTemperature } from '@/refactored/core/domain/agent/value-objects/agent-temperature.vo';
-import { MaxIterations } from '@/refactored/core/domain/agent/value-objects/max-iterations.vo';
-import { PersonaId } from '@/refactored/core/domain/agent/value-objects/persona/persona-id.vo';
-import { PersonaName } from '@/refactored/core/domain/agent/value-objects/persona/persona-name.vo';
-import { PersonaRole } from '@/refactored/core/domain/agent/value-objects/persona/persona-role.vo';
-import { PersonaGoal } from '@/refactored/core/domain/agent/value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from '@/refactored/core/domain/agent/value-objects/persona/persona-backstory.vo';
-import { ToolNames } from '@/refactored/core/domain/agent/value-objects/persona/tool-names.vo';
-
-// Ports (Interfaces for Dependencies)
-import { ILLMAdapter, LanguageModelMessage } from '@/refactored/core/application/ports/adapters/i-llm.adapter'; // Added LanguageModelMessage
-import { IToolRegistryService } from '@/refactored/core/application/ports/services/i-tool-registry.service';
-import { IJobRepository } from '@/refactored/core/domain/job/ports/i-job.repository';
-import { IAgentInternalStateRepository } from '@/refactored/core/domain/agent/ports/i-agent-internal-state.repository';
-import { ILogger } from '@/refactored/core/common/services/i-logger.service';
-
-// Shared Utilities
-import { Result, ok, error } from '@/refactored/shared/result'; // Result is used by mockResolvedValue(ok(...))
-
-// Specific VOs for test assertions
-import { HistoryEntryRoleType } from '@/refactored/core/domain/job/value-objects/activity-history-entry.vo';
-
-// Error Types
-import { ApplicationError } from '@/refactored/core/application/common/errors';
-import { ToolError } from '@/refactored/core/domain/common/errors'; // Added ToolError, updated path
-
-// Tooling & Zod for mock tool
-import { z } from 'zod';
-import { IAgentTool } from '@/refactored/core/tools/tool.interface';
+import { Agent } from '@/domain/agent/agent.entity';
+import { IAgentInternalStateRepository } from '@/domain/agent/ports/i-agent-internal-state.repository';
+import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
+import { AgentPersonaTemplate } from '@/domain/agent/value-objects/agent-persona-template.vo';
+import { MaxIterations } from '@/domain/agent/value-objects/max-iterations.vo';
+import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
+import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
+import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
+import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
+import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
+import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
+import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
+import { ApplicationError } from '@/application/common/errors';
+import { ILLMAdapter, LanguageModelMessage } from '@/application/ports/adapters/i-llm.adapter';
+import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
+import { ILogger } from '@/core/common/services/i-logger.service';
+import { ToolError } from '@/domain/common/errors';
+import { Job } from '@/domain/job/job.entity';
+import { IJobRepository } from '@/domain/job/ports/i-job.repository';
+import { HistoryEntryRoleType } from '@/domain/job/value-objects/activity-history-entry.vo';
+// import { JobId } from '@/domain/job/value-objects/job-id.vo'; // Not directly used
+import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+import { Result, ok, error } from '@/shared/result';
+import { IAgentTool } from '@/core/tools/tool.interface';
 
 
 describe('GenericAgentExecutor', () => {

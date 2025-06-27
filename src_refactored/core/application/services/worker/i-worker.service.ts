@@ -1,4 +1,7 @@
-import { Result } from '../../../../shared/result';
+import { Result } from '@/shared/result';
+// Assuming JobIdVO is needed for some return types or context from DTOs, but not directly used in this interface yet.
+// import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+
 import {
   RegisterWorkerParams,
   WorkerDetailsDTO,
@@ -9,7 +12,6 @@ import {
   // StartWorkerProcessingParams, // Implicitly handled by worker registration and job availability
   // StopWorkerProcessingParams, // Covered by unregister or a more generic shutdown
 } from './dtos';
-import { JobId } from '../../../domain/job/job.value-objects'; // Assuming JobId is needed for some return types or context
 
 /**
  * @fileoverview Interface for the WorkerService.
