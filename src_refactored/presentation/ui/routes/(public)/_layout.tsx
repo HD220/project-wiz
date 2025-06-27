@@ -1,5 +1,5 @@
-import React from 'react';
 import { Outlet, createFileRoute } from '@tanstack/react-router';
+import React from 'react';
 
 function PublicLayoutComponent() {
   return (

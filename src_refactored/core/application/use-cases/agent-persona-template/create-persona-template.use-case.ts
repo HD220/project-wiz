@@ -1,8 +1,8 @@
 // src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
 import { ZodError } from 'zod';
 
-import { DomainError, ValueError } from '@/domain/common/errors';
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+import { ILoggerService } from '@/core/common/services/i-logger.service';
+
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
@@ -11,10 +11,13 @@ import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
 import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
 import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
 import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
+import { DomainError, ValueError } from '@/domain/common/errors';
+
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 // Removed duplicate import of DomainError, ValueError
 
 import { Result, ok, error } from '@/shared/result';
-import { ILoggerService } from '@/core/common/services/i-logger.service';
+
 
 import {
   CreatePersonaTemplateUseCaseInput,

@@ -1,21 +1,24 @@
 // src_refactored/core/application/use-cases/project/get-project-details.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { GetProjectDetailsUseCase } from './get-project-details.use-case';
-import { GetProjectDetailsUseCaseInput } from './get-project-details.schema';
 
-import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
-import { Project } from '@/domain/project/project.entity';
 import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
+import { Project } from '@/domain/project/project.entity';
 import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
 import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
 import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
-import { SourceCode } from '@/domain/source-code/source-code.entity';
 import { ISourceCodeRepository } from '@/domain/source-code/ports/source-code-repository.interface';
+import { SourceCode } from '@/domain/source-code/source-code.entity';
 import { RepositoryDocsPath } from '@/domain/source-code/value-objects/repository-docs-path.vo';
 import { RepositoryId } from '@/domain/source-code/value-objects/repository-id.vo';
 import { RepositoryPath } from '@/domain/source-code/value-objects/repository-path.vo';
+
+import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { ok, error } from '@/shared/result';
+
+import { GetProjectDetailsUseCaseInput } from './get-project-details.schema';
+import { GetProjectDetailsUseCase } from './get-project-details.use-case';
 
 // Mocks
 const mockProjectRepository: IProjectRepository = {

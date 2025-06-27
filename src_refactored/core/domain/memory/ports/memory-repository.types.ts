@@ -1,7 +1,7 @@
 // src_refactored/core/domain/memory/ports/memory-repository.types.ts
 import { Identity } from '../../../common/value-objects/identity.vo';
-import { MemoryItem } from '../memory-item.entity';
 import { PaginationOptions as CommonPaginationOptions } from '../../job/ports/job-repository.types'; // Reusing from Job
+import { MemoryItem } from '../memory-item.entity';
 
 export interface MemorySearchFilters {
   agentId?: Identity | null; // Allow null to explicitly search for unassigned

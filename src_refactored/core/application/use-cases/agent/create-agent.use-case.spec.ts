@@ -2,18 +2,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { Agent } from '@/domain/agent/agent.entity';
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
+import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
 import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
 import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
 import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
 import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
-import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';

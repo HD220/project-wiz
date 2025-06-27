@@ -1,5 +1,6 @@
 // src_refactored/infrastructure/events/in-memory-job-event-emitter.ts
 import { EventEmitter } from 'events';
+
 import {
   JobEventType,
   JobEventPayloadMap,

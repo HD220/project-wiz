@@ -1,9 +1,11 @@
 // src_refactored/core/application/use-cases/project/get-project-details.use-case.ts
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Corrected import
 import { DomainError, NotFoundError } from '@/domain/common/errors';
 import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
 import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
 import { ISourceCodeRepository } from '@/domain/source-code/ports/source-code-repository.interface';
+
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Corrected import
+
 import { Result, ok, error } from '@/shared/result';
 
 import {

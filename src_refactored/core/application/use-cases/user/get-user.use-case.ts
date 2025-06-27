@@ -1,12 +1,15 @@
 import { injectable, inject } from 'inversify';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-import { ApplicationError, DomainError, NotFoundError, ValidationError } from '@/application/common/errors';
 import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
-import { UserEntity } from '@/domain/user/user.entity';
+
 import { IUserRepository, UserRepositoryToken } from '@/domain/user/ports/user-repository.interface';
+import { UserEntity } from '@/domain/user/user.entity';
 import { UserEmail } from '@/domain/user/value-objects/user-email.vo';
 import { UserId } from '@/domain/user/value-objects/user-id.vo';
+
+import { ApplicationError, DomainError, NotFoundError, ValidationError } from '@/application/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { Result } from '@/shared/result';
 
 import { GetUserInput, GetUserOutput, GetUserInputSchema } from './get-user.schema';

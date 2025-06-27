@@ -3,6 +3,7 @@ import ReactDOMClient from 'react-dom/client';
 import '@ui/styles/globals.css'; // Usando alias @ui/styles/
 // import { detectLocale, dynamicActivate } from '@/config/i18n'; // Usando alias @/config/ se i18n for re-adicionado
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+
 import { routeTree } from '@ui/routeTree.gen'; // Usando alias @ui/
 
 // Declaração de módulo para o TanStack Router (mantida)

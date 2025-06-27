@@ -1,6 +1,6 @@
 // src_refactored/infrastructure/persistence/drizzle/drizzle.client.ts
-import { drizzle, LibSQLDatabase } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
+import { drizzle, LibSQLDatabase } from 'drizzle-orm/libsql';
 // import * as schema from './schema'; // Assuming schema definitions are in schema.ts or similar
 
 // Placeholder for schema. In a real app, this would import your actual table definitions.

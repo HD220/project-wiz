@@ -2,7 +2,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
 
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
@@ -13,6 +12,8 @@ import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-e
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
 import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+
+import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
 
 import { ok, error } from '@/shared/result';
 

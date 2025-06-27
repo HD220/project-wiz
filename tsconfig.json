@@ -20,46 +20,17 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      // UI specific aliases (prefixed with @ui/ for clarity)
-      "@ui/app/*": ["./src_refactored/presentation/ui/app/*"],
-      "@ui/assets/*": ["./src_refactored/presentation/ui/assets/*"],
-      "@ui/components/*": ["./src_refactored/presentation/ui/components/*"],
-      "@ui/config/*": ["./src_refactored/presentation/ui/config/*"],
-      "@ui/hooks/*": ["./src_refactored/presentation/ui/hooks/*"],
-      "@ui/lib/*": ["./src_refactored/presentation/ui/lib/*"],
-      "@ui/services/*": ["./src_refactored/presentation/ui/services/*"],
-      "@ui/store/*": ["./src_refactored/presentation/ui/store/*"],
-      "@ui/styles/*": ["./src_refactored/presentation/ui/styles/*"],
-      "@ui/types/*": ["./src_refactored/presentation/ui/types/*"],
-      "@ui/*": ["./src_refactored/presentation/ui/*"], // Catch-all for UI
-
-      // Aliases for src_refactored general structure (these should be distinct now)
       "@/application/*": ["./src_refactored/core/application/*"],
       "@/core/*": ["./src_refactored/core/*"],
       "@/domain/*": ["./src_refactored/core/domain/*"],
       "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
-      "@/presentation/*": ["./src_refactored/presentation/*"], // For non-UI presentation files
+      "@/presentation/*": ["./src_refactored/presentation/*"],
       "@/shared/*": ["./src_refactored/shared/*"],
-      "@/refactored/*": ["./src_refactored/*"], // Broadest non-UI alias
-
-      // Legacy Aliases (remains the same, ensure they don't conflict)
-      "@/components.old/*": ["./src/infrastructure/frameworks/react/components/*"],
-      "@/components.legacy/*": ["./src/infrastructure/frameworks/react/components/*"],
-      "@/lib.legacy/*": ["./src/infrastructure/frameworks/react/lib/*"],
-      "@/hooks.legacy/*": ["./src/infrastructure/frameworks/react/hooks/*"],
-      "@/ui.legacy/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
-      "@/application.legacy/*": ["./src/core/application/*"],
-      "@/core.legacy/*": ["./src/core/*"],
-      "@/interfaces.legacy/*": ["./src/core/domain/entities/*/interfaces/*"],
-      "@/shared.legacy/*": ["./src/shared/*"],
-      "@/core/common/result.legacy": ["./src/shared/result.ts"],
-      "@/src.legacy/*": ["./src/*"]
+      "@/*": ["./src_refactored/*"]
     }
   },
   "include": [
     "src_refactored/**/*",
-    "tests/**/*",
-    // "src/**/*",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
@@ -67,7 +38,6 @@
     "vitest.config.mts",
     "vitest.config.ts",
     "tailwind.config.ts",
-    "types/k6.d.ts"
   ],
   "exclude": ["node_modules", "coverage"]
 }

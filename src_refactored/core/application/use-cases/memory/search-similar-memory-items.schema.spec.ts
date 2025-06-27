@@ -1,5 +1,6 @@
 // src_refactored/core/application/use-cases/memory/search-similar-memory-items.schema.spec.ts
 import { describe, it, expect } from 'vitest';
+
 import {
   SearchSimilarMemoryItemsUseCaseInputSchema,
   SearchSimilarMemoryItemsUseCaseOutputSchema,

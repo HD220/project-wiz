@@ -1,10 +1,12 @@
 // src_refactored/core/application/use-cases/annotation/remove-annotation.use-case.ts
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {

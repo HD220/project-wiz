@@ -1,7 +1,9 @@
 // src_refactored/core/tools/tool.interface.ts
 import { z } from 'zod';
-import { Result } from '../../shared/result'; // Assuming Result type is in shared
+
 import { ToolError } from '@/core/common/errors'; // To be created in the next step
+
+import { Result } from '../../shared/result'; // Assuming Result type is in shared
 
 /**
  * Optional context passed to tool execution.

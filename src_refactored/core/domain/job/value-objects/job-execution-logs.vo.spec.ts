@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { JobExecutionLogsVO } from './job-execution-logs.vo';
+
 import { JobExecutionLogEntryVO, LogLevel } from './job-execution-log-entry.vo';
+import { JobExecutionLogsVO } from './job-execution-logs.vo';
 
 describe('JobExecutionLogsVO', () => {
   beforeEach(() => {

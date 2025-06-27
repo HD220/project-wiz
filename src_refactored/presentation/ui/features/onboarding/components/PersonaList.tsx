@@ -1,9 +1,10 @@
+import { CheckCircle2 } from 'lucide-react'; // Icon for selected state
 import React from 'react';
+
+import { Button } from '@/presentation/ui/components/ui/button'; // Will be used if "Select" button per card is desired
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/presentation/ui/components/ui/card';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Button } from '@/presentation/ui/components/ui/button'; // Will be used if "Select" button per card is desired
 import { cn } from '@/presentation/ui/lib/utils'; // For conditional class names
-import { CheckCircle2 } from 'lucide-react'; // Icon for selected state
 
 // Define the Persona type
 export interface Persona {

@@ -1,14 +1,17 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts
 import { inject, injectable } from 'inversify';
 
-import { ApplicationError } from '@/application/common/errors';
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
 import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { DomainError, ValueError } from '@/domain/common/errors';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { MemorySearchFilters, PaginationOptions, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.types';
+
+import { ApplicationError } from '@/application/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+
 import { Result, ok, error as resultError, isSuccess } from '@/shared/result'; // Renamed 'error' to 'resultError' to avoid conflict
 
 import {

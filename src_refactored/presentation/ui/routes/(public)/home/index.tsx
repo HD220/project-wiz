@@ -1,7 +1,9 @@
-import React from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
-import { Button } from '@/presentation/ui/components/ui/button';
 import { Zap } from 'lucide-react'; // Example Icon
+import React from 'react';
+
+import { Button } from '@/presentation/ui/components/ui/button';
+
 
 function HomePublicPageComponent() {
   return (

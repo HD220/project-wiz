@@ -4,8 +4,8 @@ import { ZodError } from 'zod';
 
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
-import { DomainError, ValueError } from '@/domain/common/errors';
 import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
+import { DomainError, ValueError } from '@/domain/common/errors';
 // Import other VOs if specific error cases for them are tested, for now, we'll rely on Zod for input field validation
 
 import { ok, error } from '@/shared/result';

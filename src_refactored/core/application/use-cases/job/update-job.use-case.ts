@@ -1,6 +1,8 @@
 // src_refactored/core/application/use-cases/job/update-job.use-case.ts
 import { ZodError } from 'zod';
 
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
+
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity'; // Keep Job as it's used
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
@@ -10,9 +12,10 @@ import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
 import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
 import { BackoffTypeEnum, NoRetryPolicyVO, RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { Result, ok, error } from '@/shared/result';
-import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
 
 import {
   UpdateJobUseCaseInput,

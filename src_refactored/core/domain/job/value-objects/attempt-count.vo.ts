@@ -1,7 +1,8 @@
 // src_refactored/core/domain/job/value-objects/attempt-count.vo.ts
 import { z } from 'zod';
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/core/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 const attemptCountSchema = z.number()
   .int({ message: "Attempt count must be an integer." })

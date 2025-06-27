@@ -1,5 +1,6 @@
 // src_refactored/core/application/common/ports/use-case.interface.ts
 import { DomainError } from '@/domain/common/errors';
+
 import { ApplicationError } from '@/application/common/errors';
 
 import { Executable } from '../executable';

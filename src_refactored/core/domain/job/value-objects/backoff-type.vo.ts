@@ -1,15 +1,20 @@
 // src_refactored/core/domain/job/value-objects/backoff-type.vo.ts
 import { z } from 'zod';
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/core/common/errors';
-import { BackoffStrategyType } from './backoff-strategy-type.enum';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+
 import { IBackoffStrategy } from '../ports/i-backoff-strategy.interface';
-import { DelayMillisecondsVO } from './delay-milliseconds.vo';
+
 // AttemptCountVO no longer needed directly here as strategies are imported
 
 import { ExponentialBackoffStrategy } from '../strategies/exponential-backoff.strategy';
-import { LinearBackoffStrategy } from '../strategies/linear-backoff.strategy';
 import { FixedBackoffStrategy } from '../strategies/fixed-backoff.strategy';
+import { LinearBackoffStrategy } from '../strategies/linear-backoff.strategy';
+
+import { BackoffStrategyType } from './backoff-strategy-type.enum';
+import { DelayMillisecondsVO } from './delay-milliseconds.vo';
 
 const backoffTypeSchema = z.nativeEnum(BackoffStrategyType);
 

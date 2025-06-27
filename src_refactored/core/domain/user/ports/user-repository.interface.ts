@@ -1,9 +1,10 @@
 // src_refactored/core/domain/user/ports/user-repository.interface.ts
-import { Result } from '../../../../shared/result';
 import { DomainError } from '@/core/common/errors';
+
+import { Result } from '../../../../shared/result';
 import { User } from '../user.entity';
-import { UserId } from '../value-objects/user-id.vo';
 import { UserEmail } from '../value-objects/user-email.vo';
+import { UserId } from '../value-objects/user-id.vo';
 import { UserUsername } from '../value-objects/user-username.vo';
 
 export interface IUserRepository {

@@ -1,5 +1,6 @@
 // src_refactored/core/domain/memory/value-objects/memory-item-id.vo.spec.ts
 import { randomUUID } from 'crypto';
+
 import { describe, it, expect } from 'vitest';
 
 import { MemoryItemId } from './memory-item-id.vo';

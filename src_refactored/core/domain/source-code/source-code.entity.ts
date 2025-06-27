@@ -1,8 +1,9 @@
 // src_refactored/core/domain/source-code/source-code.entity.ts
 import { ProjectId } from '../project/value-objects/project-id.vo';
+
+import { RepositoryDocsPath } from './value-objects/repository-docs-path.vo';
 import { RepositoryId } from './value-objects/repository-id.vo';
 import { RepositoryPath } from './value-objects/repository-path.vo';
-import { RepositoryDocsPath } from './value-objects/repository-docs-path.vo';
 
 interface SourceCodeProps {
   id: RepositoryId;

@@ -1,6 +1,8 @@
 // src_refactored/core/domain/job/value-objects/activity-history-entry.vo.ts
 import { ValueObject } from '@/core/common/value-objects/base.vo';
+
 import { DomainError, ValueError } from '@/domain/common/errors';
+
 import { Result, ok, error } from '@/shared/result';
 
 // Based on usage in generic-agent-executor.service.ts

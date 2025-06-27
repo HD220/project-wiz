@@ -1,15 +1,17 @@
 // src_refactored/core/domain/job/value-objects/retry-policy.vo.ts
 import { z } from 'zod';
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/core/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { IBackoffStrategy } from '../ports/i-backoff-strategy.interface';
+import { IRetryPolicy } from '../ports/i-retry-policy.interface';
 
 import { AttemptCountVO } from './attempt-count.vo';
-import { MaxAttemptsVO } from './max-attempts.vo';
-import { DelayMillisecondsVO } from './delay-milliseconds.vo';
-import { BackoffTypeVO } from './backoff-type.vo';
 import { BackoffStrategyType } from './backoff-strategy-type.enum';
-import { IRetryPolicy } from '../ports/i-retry-policy.interface';
-import { IBackoffStrategy } from '../ports/i-backoff-strategy.interface';
+import { BackoffTypeVO } from './backoff-type.vo';
+import { DelayMillisecondsVO } from './delay-milliseconds.vo';
+import { MaxAttemptsVO } from './max-attempts.vo';
 
 
 export const retryPolicyParamsSchema = z.object({

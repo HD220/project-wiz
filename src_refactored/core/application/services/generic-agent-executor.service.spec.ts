@@ -6,11 +6,12 @@ import { z } from 'zod';
 import { ILogger } from '@/core/common/services/i-logger.service';
 import { ILLMAdapter, LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.interface';
 import { IAgentTool } from '@/core/tools/tool.interface';
+
+import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { MaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo';
-import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
 import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
@@ -26,8 +27,10 @@ import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
 import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+
 import { ApplicationError } from '@/application/common/errors';
 import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
+
 import { ok, error } from '@/shared/result';
 
 // Core Service (relative import)

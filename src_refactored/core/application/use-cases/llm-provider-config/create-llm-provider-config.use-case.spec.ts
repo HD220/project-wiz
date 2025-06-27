@@ -2,10 +2,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
 
 import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
+
+import { DomainError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
 
 import { ok, error } from '@/shared/result';
 

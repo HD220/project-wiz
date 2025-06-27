@@ -1,14 +1,12 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.spec.ts
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Container } from 'inversify';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import 'reflect-metadata'; // Required for Inversify
 
-import { SearchMemoryItemsUseCase } from './search-memory-items.use-case';
-import { SearchMemoryItemsUseCaseInput } from './search-memory-items.schema';
 
-import { ApplicationError, DomainError, ValueError } from '@/application/common/errors'; // Added ValueError
 import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.types';
@@ -17,7 +15,13 @@ import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-e
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
 import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+
+import { ApplicationError, DomainError, ValueError } from '@/application/common/errors'; // Added ValueError
+
 import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result'; // Updated imports
+
+import { SearchMemoryItemsUseCaseInput } from './search-memory-items.schema';
+import { SearchMemoryItemsUseCase } from './search-memory-items.use-case';
 
 const CONTENT_EXCERPT_LENGTH = 200;
 

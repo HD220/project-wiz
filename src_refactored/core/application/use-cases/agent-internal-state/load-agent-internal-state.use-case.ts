@@ -1,12 +1,16 @@
 // src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added import for ILogger
+
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
 import { Result, ok, error } from '@/shared/result';
-import { ILogger } from '@/core/common/services/i-logger.service'; // Added import for ILogger
+
 // Removed unused import for Inject: import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
 
 import {

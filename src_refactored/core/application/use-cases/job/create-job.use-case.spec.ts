@@ -2,18 +2,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ZodError } from 'zod';
 
-import { CreateJobUseCase } from './create-job.use-case';
-import { CreateJobUseCaseInput } from './create-job.schema';
-import { ValueError, DomainError } from '@/domain/common/errors';
 import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+
+import { ValueError, DomainError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
 import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
 import { NoRetryPolicyVO, RetryPolicyVO, BackoffTypeEnum } from '@/domain/job/value-objects/retry-policy.vo';
+
 // import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo'; // Not directly used, but for context
-import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
 import { ok, error } from '@/shared/result';
+
+import { CreateJobUseCaseInput } from './create-job.schema';
+import { CreateJobUseCase } from './create-job.use-case';
 
 // Mock Repositories and Queue
 const mockJobRepository: IJobRepository = {

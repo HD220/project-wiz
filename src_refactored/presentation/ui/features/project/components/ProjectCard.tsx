@@ -1,6 +1,9 @@
-import React from 'react';
 import { Link }
   from '@tanstack/react-router';
+import { ExternalLink, Star, GitFork, CalendarDays } from 'lucide-react'; // Example icons
+import React from 'react';
+
+import { Badge } from '@/presentation/ui/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -9,9 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/presentation/ui/components/ui/card';
-import { Badge } from '@/presentation/ui/components/ui/badge';
 import { cn } from '@/presentation/ui/lib/utils';
-import { ExternalLink, Star, GitFork, CalendarDays } from 'lucide-react'; // Example icons
+
 
 // Define the ProjectSummary type/interface
 export interface ProjectSummary {

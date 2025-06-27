@@ -1,7 +1,8 @@
 // src_refactored/core/domain/job/value-objects/job-name.vo.ts
 import { z } from 'zod';
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/core/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 const jobNameSchema = z.string()
   .min(1, { message: "Job name cannot be empty." })

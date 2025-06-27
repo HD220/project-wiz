@@ -1,6 +1,7 @@
 // src_refactored/core/domain/job/value-objects/job-progress.vo.ts
-import { ValueError } from '@/domain/common/errors';
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors';
 
 // Progress can be a simple percentage or a more complex object.
 export type JobProgressData = number | Record<string, any>;

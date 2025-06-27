@@ -1,7 +1,9 @@
 // src_refactored/core/domain/user/value-objects/user-nickname.vo.spec.ts
 import { describe, it, expect } from 'vitest';
-import { UserNickname } from './user-nickname.vo';
+
 import { ValueError } from '@/core/common/errors';
+
+import { UserNickname } from './user-nickname.vo';
 
 describe('UserNickname', () => {
   it('should create a UserNickname with a valid nickname', () => {

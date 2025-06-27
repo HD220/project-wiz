@@ -2,14 +2,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
+import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { Annotation } from '@/domain/annotation/annotation.entity';
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationSearchFilters, PaginatedAnnotationsResult } from '@/domain/annotation/ports/annotation-repository.types';
 // import { PaginationOptions } from '@/domain/annotation/ports/annotation-repository.types'; // Not directly used here, but by the use case
-import { DomainError } from '@/domain/common/errors';
-import { Identity } from '@/core/common/value-objects/identity.vo';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
 import { AnnotationText } from '@/domain/annotation/value-objects/annotation-text.vo';
+import { DomainError } from '@/domain/common/errors';
 
 import { ok, error } from '@/shared/result';
 

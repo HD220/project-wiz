@@ -1,14 +1,20 @@
 // src_refactored/presentation/electron/main/ipc-project.handlers.ts
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
+
+import { ListProjectsUseCase } from '@/core/application/use-cases/project/list-projects.use-case';
+import { LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ProjectRepositoryToken } from '@/core/domain/project/ports/project-repository.interface';
+
+import { appContainer } from '@/infrastructure/ioc/inversify.config'; // Assuming DI container
+import { db, schema } from '@/infrastructure/persistence/drizzle/drizzle.client'; // Example db client and schema
+import { DrizzleProjectRepository } from '@/infrastructure/persistence/drizzle/repositories/project.repository'; // Example concrete repo
+import { ConsoleLoggerService } from '@/infrastructure/services/logger/console-logger.service'; // Example Logger
+
 import { IPCChannel } from '@/shared/ipc-channels';
 import { ProjectListItem } from '@/shared/ipc-project.types'; // Ensure this path is correct
-import { ListProjectsUseCase } from '@/core/application/use-cases/project/list-projects.use-case';
-import { appContainer } from '@/infrastructure/ioc/inversify.config'; // Assuming DI container
-import { ProjectRepositoryToken } from '@/core/domain/project/ports/project-repository.interface';
-import { DrizzleProjectRepository } from '@/infrastructure/persistence/drizzle/repositories/project.repository'; // Example concrete repo
-import { db, schema } from '@/infrastructure/persistence/drizzle/drizzle.client'; // Example db client and schema
-import { ConsoleLoggerService } from '@/infrastructure/services/logger/console-logger.service'; // Example Logger
-import { LoggerServiceToken } from '@/core/common/services/i-logger.service';
+
+
+
 
 // Placeholder for actual ProjectRepository implementation if DI is not fully set up for main process
 // This is a simplified setup for demonstration. A real app would use DI.
@@ -72,10 +78,10 @@ export function registerProjectIPCHandlers(): void {
         }));
         console.log(`[IPC Project Handler] Sending ${projectListItems.length} projects.`);
         return { success: true, data: projectListItems };
-      } else {
+      } 
         console.error('[IPC Project Handler] Error listing projects:', result.error);
         return { success: false, error: { message: result.error.message, name: result.error.name } };
-      }
+      
     } catch (error: any) {
       console.error('[IPC Project Handler] Exception in project:list handler:', error);
       return { success: false, error: { message: error.message || 'An unexpected error occurred while listing projects.' } };

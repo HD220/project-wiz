@@ -1,5 +1,6 @@
 // src_refactored/core/domain/user/value-objects/user-email.vo.ts
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/domain/common/errors';
 
 interface UserEmailProps extends ValueObjectProps {

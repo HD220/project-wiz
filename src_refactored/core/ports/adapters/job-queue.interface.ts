@@ -1,10 +1,11 @@
 // src_refactored/core/ports/adapters/job-queue.interface.ts
+import { QueueError } from '@/core/common/errors';
+
 import { Result } from '../../../shared/result';
 import { Job } from '../../domain/job/job.entity';
 import { JobId } from '../../domain/job/value-objects/job-id.vo';
 // Assuming TargetAgentRole is a VO that might be string-based or more complex
 import { TargetAgentRole } from '../../domain/job/value-objects/target-agent-role.vo';
-import { QueueError } from '@/core/common/errors';
 
 export interface FailDetails {
   message: string;

@@ -1,6 +1,5 @@
 // src_refactored/presentation/ui/services/ipc.service.ts
 
-import { IElectronIPC, IPCResult } from './ipc.types';
 import { IPCChannel } from '@/shared/ipc-channels';
 import {
   ChatSendMessagePayload,
@@ -9,6 +8,8 @@ import {
   ChatStreamEndPayload,
 } from '@/shared/ipc-chat.types';
 import { ProjectListItem } from '@/shared/ipc-project.types'; // Assuming this file and type exist
+
+import { IElectronIPC, IPCResult } from './ipc.types';
 
 const electronIPC = window.electronIPC;
 

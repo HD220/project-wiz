@@ -1,7 +1,10 @@
 // src_refactored/core/ports/adapters/llm-adapter.interface.ts
 import { z } from 'zod';
-import { Result } from '../../../shared/result';
+
 import { LLMError } from '@/core/common/errors';
+
+import { Result } from '../../../shared/result';
+
 import { LLMGenerationOptions, LanguageModelMessage } from './llm-adapter.types';
 
 /**

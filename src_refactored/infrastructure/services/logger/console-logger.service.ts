@@ -1,5 +1,6 @@
 // src_refactored/infrastructure/services/logger/console-logger.service.ts
 import { injectable, unmanaged } from 'inversify';
+
 import { ILoggerService } from '@/core/common/services/i-logger.service';
 
 @injectable()

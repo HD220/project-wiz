@@ -1,14 +1,17 @@
 // src_refactored/core/application/use-cases/job/list-jobs.use-case.ts
 import { ZodError } from 'zod';
 
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
+
 import { DomainError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo'; // Corrected: TargetAgentRole to TargetAgentRoleVO
+
 import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { Result, ok, error } from '@/shared/result';
-import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
 
 import {
   ListJobsUseCaseInput,

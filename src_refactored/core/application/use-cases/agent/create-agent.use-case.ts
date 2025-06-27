@@ -1,8 +1,8 @@
 // src_refactored/core/application/use-cases/agent/create-agent.use-case.ts
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+import { ILoggerService } from '@/core/common/services/i-logger.service';
+
 import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
@@ -10,12 +10,15 @@ import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { AgentMaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo'; // Added import
 import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 // Removed duplicate import of DomainError, NotFoundError, ValueError
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
 import { Result, ok, error } from '@/shared/result';
-import { ILoggerService } from '@/core/common/services/i-logger.service';
+
 
 import {
   CreateAgentUseCaseInput,

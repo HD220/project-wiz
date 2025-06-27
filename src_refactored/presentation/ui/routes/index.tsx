@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
 import { Navigate, useRouter, createFileRoute } from '@tanstack/react-router';
+import React, { useEffect } from 'react';
 
 function RootIndexPageComponent() {
   // Placeholder for authentication logic

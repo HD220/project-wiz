@@ -2,13 +2,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError } from '@/domain/common/errors';
 import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+
+import { DomainError, NotFoundError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
 import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
 import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+
 import { ok, error } from '@/shared/result';
 
 import { CancelJobUseCaseInput } from './cancel-job.schema';

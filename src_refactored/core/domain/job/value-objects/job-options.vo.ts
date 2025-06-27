@@ -1,5 +1,6 @@
 // src_refactored/core/domain/job/value-objects/job-options.vo.ts
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/domain/common/errors';
 
 import { JobIdVO } from './job-id.vo';

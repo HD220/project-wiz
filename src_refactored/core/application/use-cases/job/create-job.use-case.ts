@@ -1,6 +1,9 @@
 // src_refactored/core/application/use-cases/job/create-job.use-case.ts
 import { ZodError } from 'zod';
 
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+
 import { DomainError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
@@ -18,10 +21,11 @@ import {
 // import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo'; // Corrected: JobStatusType to JobStatusEnum - Not directly used
 // import { JobTimestampVO } from '@/domain/job/value-objects/job-timestamp.vo'; // Corrected: JobTimestamp to JobTimestampVO - Not directly used
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo'; // Corrected: TargetAgentRole to TargetAgentRoleVO
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+
 import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { Result, ok, error } from '@/shared/result';
-import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
+
 
 import {
   CreateJobUseCaseInput,

@@ -1,7 +1,9 @@
 // src_refactored/core/domain/queue/value-objects/queue-id.vo.spec.ts
-import { describe, it, expect } from 'vitest';
-import { QueueId } from './queue-id.vo';
 import { randomUUID } from 'crypto';
+
+import { describe, it, expect } from 'vitest';
+
+import { QueueId } from './queue-id.vo';
 
 describe('QueueId', () => {
   it('should create a QueueId from a valid UUID string', () => {

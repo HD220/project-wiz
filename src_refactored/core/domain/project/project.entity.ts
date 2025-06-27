@@ -1,5 +1,6 @@
 // src_refactored/core/domain/project/project.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+
 import { EntityError } from '@/domain/common/errors';
 
 import { ProjectDescription } from './value-objects/project-description.vo';

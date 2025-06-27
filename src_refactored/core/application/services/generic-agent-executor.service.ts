@@ -1,11 +1,12 @@
 
 import { ILogger } from '@/core/common/services/i-logger.service';
 // Corrected path for ILLMAdapter, was trying to import from @/application before
+import { AgentExecutorStatus } from '@/core/domain/job/job-processing.types'; // Added import
 import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface';
+import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types'; // Assuming this path
 import { IToolExecutionContext } from '@/core/tools/tool.interface';
 
 import { Agent } from '@/domain/agent/agent.entity';
-import { AgentExecutorStatus } from '@/core/domain/job/job-processing.types'; // Added import
 // Corrected filename for IAgentInternalStateRepository
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { DomainError, ToolError } from '@/domain/common/errors';
@@ -23,7 +24,6 @@ import { IToolRegistryService } from '@/application/ports/services/i-tool-regist
 
 import { ok, error, Result } from '@/shared/result';
 
-import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types'; // Assuming this path
 
 // @Injectable() // Assuming InversifyJS or similar will be used for DI
 export class GenericAgentExecutor implements IAgentExecutor {

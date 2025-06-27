@@ -2,13 +2,16 @@
 import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
-import { ApplicationError, DomainError, ValueError } from '@/application/common/errors';
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
 import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
+
+import { ApplicationError, DomainError, ValueError } from '@/application/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+
 import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
 
 import {

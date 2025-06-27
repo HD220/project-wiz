@@ -1,10 +1,11 @@
-import React from 'react';
 import { Link, useParams } from '@tanstack/react-router';
+import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Folder, Hash, Plus } from 'lucide-react';
+import React from 'react';
+
 import { Button } from '@/presentation/ui/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/presentation/ui/components/ui/collapsible';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
 import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/presentation/ui/components/ui/collapsible';
-import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Folder, Hash, Plus } from 'lucide-react';
 
 // Helper for NavLink, similar to AppSidebar but might have different base paths or active states
 interface ProjectNavLinkProps {

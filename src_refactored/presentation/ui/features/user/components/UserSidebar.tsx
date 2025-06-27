@@ -1,10 +1,12 @@
-import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { User, MessageSquare, Settings, Plus, Users, Search } from 'lucide-react'; // Added Users, Search, Plus
+import React from 'react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
 import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
-import { User, MessageSquare, Settings, Plus, Users, Search } from 'lucide-react'; // Added Users, Search, Plus
+
 
 // Helper for NavLink
 interface UserNavLinkProps {

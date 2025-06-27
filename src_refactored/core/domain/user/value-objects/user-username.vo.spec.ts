@@ -1,7 +1,9 @@
 // src_refactored/core/domain/user/value-objects/user-username.vo.spec.ts
 import { describe, it, expect } from 'vitest';
-import { UserUsername } from './user-username.vo';
+
 import { ValueError } from '@/core/common/errors';
+
+import { UserUsername } from './user-username.vo';
 
 describe('UserUsername', () => {
   it('should create a UserUsername with a valid username and convert to lowercase', () => {

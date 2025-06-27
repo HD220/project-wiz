@@ -1,8 +1,10 @@
 // src_refactored/core/domain/job/value-objects/exponential-backoff.vo.ts
 import { z } from 'zod';
+
+import { ValueError } from '@/core/common/errors';
+
 import { AttemptCountVO } from './attempt-count.vo';
 import { DelayMillisecondsVO } from './delay-milliseconds.vo';
-import { ValueError } from '@/core/common/errors';
 
 const multiplierSchema = z.number().positive({ message: "Multiplier must be a positive number." });
 

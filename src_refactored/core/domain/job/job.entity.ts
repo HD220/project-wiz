@@ -1,5 +1,6 @@
 // src_refactored/core/domain/job/job.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+
 import { DomainError, ValueError } from '@/domain/common/errors';
 
 import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';

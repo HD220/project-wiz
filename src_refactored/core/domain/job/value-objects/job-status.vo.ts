@@ -1,6 +1,7 @@
 // src_refactored/core/domain/job/value-objects/job-status.vo.ts
-import { ValueError } from '@/domain/common/errors';
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors';
 
 export enum JobStatusEnum {
   PENDING = 'PENDING',

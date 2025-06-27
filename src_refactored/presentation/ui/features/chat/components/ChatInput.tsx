@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
-import { Button } from '@/presentation/ui/components/ui/button';
 import { SendHorizontal, Paperclip, Mic } from 'lucide-react'; // Example icons
+import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
+
+import { Button } from '@/presentation/ui/components/ui/button';
+import { Textarea } from '@/presentation/ui/components/ui/textarea';
 import { cn } from '@/presentation/ui/lib/utils';
 
 export interface ChatInputProps {

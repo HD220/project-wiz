@@ -1,16 +1,19 @@
 import { injectable, inject } from 'inversify';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
 import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo'; // For LLMProviderConfigId and AgentId
-import { UserEntity, UserProps } from '@/domain/user/user.entity';
+
 import { IUserRepository, UserRepositoryToken } from '@/domain/user/ports/user-repository.interface';
+import { UserEntity, UserProps } from '@/domain/user/user.entity';
 import { UserAvatar } from '@/domain/user/value-objects/user-avatar.vo';
 import { UserEmail } from '@/domain/user/value-objects/user-email.vo';
 import { UserId } from '@/domain/user/value-objects/user-id.vo';
 import { UserNickname } from '@/domain/user/value-objects/user-nickname.vo';
 import { UserUsername } from '@/domain/user/value-objects/user-username.vo';
+
+import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { Result } from '@/shared/result';
 
 import { CreateUserInput, CreateUserOutput, CreateUserInputSchema } from './create-user.schema';

@@ -1,9 +1,11 @@
-import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { Home, Briefcase, Settings, PlusCircle, GripHorizontal } from 'lucide-react';
+import React from 'react';
+
 import { Button } from '@/presentation/ui/components/ui/button';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
 import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Home, Briefcase, Settings, PlusCircle, GripHorizontal } from 'lucide-react';
+
 
 interface AppSidebarProps {
   className?: string;

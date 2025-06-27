@@ -1,6 +1,7 @@
-import React from 'react';
-import { Outlet } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Outlet } from '@tanstack/react-router';
+import React from 'react';
+
 import { ThemeProvider } from '@/presentation/ui/components/common/theme-provider';
 
 const queryClient = new QueryClient();

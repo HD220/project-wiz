@@ -1,5 +1,6 @@
 // src_refactored/core/domain/queue/ports/queue-metadata-repository.interface.ts
 import { DomainError } from '@/domain/common/errors';
+
 import { Result } from '@/shared/result';
 
 import { Queue } from '../queue.entity';

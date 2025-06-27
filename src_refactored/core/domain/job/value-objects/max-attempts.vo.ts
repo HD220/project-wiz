@@ -1,7 +1,8 @@
 // src_refactored/core/domain/job/value-objects/max-attempts.vo.ts
 import { z } from 'zod';
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/core/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 const maxAttemptsSchema = z.number()
   .int({ message: "Max attempts must be an integer." })

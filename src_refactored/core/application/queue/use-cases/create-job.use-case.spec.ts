@@ -10,9 +10,11 @@ import { JobOptionsVO } from '@/domain/job/value-objects/job-options.vo';
 import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
 import { JobProgressVO } from '@/domain/job/value-objects/job-progress.vo';
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo'; // Keep JobStatusEnum here
+
 import { ok, error } from '@/shared/result';
 
 import { CreateJobRequestDTO } from '../dtos';
+
 import { CreateJobUseCase } from './create-job.use-case';
 
 // Mock JobEntity.create

@@ -1,5 +1,6 @@
 // src_refactored/core/domain/job/value-objects/job-depends-on.vo.ts
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
 import { JobIdVO } from './job-id.vo'; // This file will need to be created
 
 export interface JobDependsOnProps extends ValueObjectProps {

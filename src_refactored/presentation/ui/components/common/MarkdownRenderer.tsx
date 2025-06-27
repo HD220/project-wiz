@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import remarkGfm from 'remark-gfm';
 // Note: To make rehype-highlight work, you might need to import a stylesheet for your chosen theme,
 // e.g., import 'highlight.js/styles/github.css'; or 'highlight.js/styles/atom-one-dark.css';
 // This should ideally be done globally or scoped to where the markdown is rendered.

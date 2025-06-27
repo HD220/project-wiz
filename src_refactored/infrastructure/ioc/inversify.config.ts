@@ -1,37 +1,25 @@
 // src_refactored/infrastructure/ioc/inversify.config.ts
 import 'reflect-metadata'; // Must be imported once at the application's entry point
 import { Container } from 'inversify';
-import { TYPES } from './types';
+
 
 // --- Domain Layer Ports (Interfaces) ---
-import { IAgentInternalStateRepository } from '@/core/domain/agent/ports/agent-internal-state-repository.interface';
-import { IAgentPersonaTemplateRepository } from '@/core/domain/agent/ports/agent-persona-template-repository.interface';
-import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface';
-import { IAnnotationRepository } from '@/core/domain/annotation/ports/annotation-repository.interface';
-import { IJobRepository } from '@/core/domain/job/ports/job-repository.interface';
-import { ILLMProviderConfigRepository } from '@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
-import { IMemoryRepository } from '@/core/domain/memory/ports/memory-repository.interface';
-import { IProjectRepository } from '@/core/domain/project/ports/project-repository.interface';
+import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
+import { IEmbeddingService } from '@/core/application/ports/services/i-embedding.service';
+import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service';
+import { IWorkerService } from '@/core/application/ports/services/i-worker.service';
+import { GenericAgentExecutor } from '@/core/application/services/generic-agent-executor.service';
+import { CreateAgentUseCase } from '@/core/application/use-cases/agent/create-agent.use-case';
 // import { IQueueMetadataRepository } from '@/core/domain/queue/ports/queue-metadata-repository.interface'; // If needed
-import { ISourceCodeRepository } from '@/core/domain/source-code/ports/source-code-repository.interface';
-import { IUserRepository } from '@/core/domain/user/ports/user-repository.interface';
 
 // --- Service Interfaces (Domain, Application, Infrastructure) ---
-import { ILoggerService } from '@/core/common/services/i-logger.service';
-import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service';
-import { IEmbeddingService } from '@/core/application/ports/services/i-embedding.service';
-import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
-import { IWorkerService } from '@/core/application/ports/services/i-worker.service';
 // import { IQueueService } from '@/core/application/ports/services/i-queue.service'; // If a high-level queue service exists
 
 // --- Adapter Interfaces ---
-import { IJobQueueAdapter } from '@/core/ports/adapters/job-queue.interface';
-import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface';
 // import { IFileSystemAdapter } from '@/core/ports/adapters/file-system.adapter.interface'; // If defined
 // import { IVersionControlAdapter } from '@/core/ports/adapters/version-control.adapter.interface'; // If defined
 
 // --- Use Cases ---
-import { CreateAgentUseCase } from '@/core/application/use-cases/agent/create-agent.use-case';
 import { LoadAgentInternalStateUseCase } from '@/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case';
 import { SaveAgentInternalStateUseCase } from '@/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case';
 import { CreatePersonaTemplateUseCase } from '@/core/application/use-cases/agent-persona-template/create-persona-template.use-case';
@@ -54,25 +42,39 @@ import { GetProjectDetailsUseCase as GetProjectDetailsAppUseCase } from '@/core/
 import { ListProjectsUseCase as ListProjectsAppUseCase } from '@/core/application/use-cases/project/list-projects.use-case';
 import { CreateUserUseCase } from '@/core/application/use-cases/user/create-user.use-case';
 import { GetUserUseCase } from '@/core/application/use-cases/user/get-user.use-case';
+import { ILoggerService } from '@/core/common/services/i-logger.service';
+import { IAgentInternalStateRepository } from '@/core/domain/agent/ports/agent-internal-state-repository.interface';
+import { IAgentPersonaTemplateRepository } from '@/core/domain/agent/ports/agent-persona-template-repository.interface';
+import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface';
+import { IAnnotationRepository } from '@/core/domain/annotation/ports/annotation-repository.interface';
+import { IJobRepository } from '@/core/domain/job/ports/job-repository.interface';
+import { ILLMProviderConfigRepository } from '@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
+import { IMemoryRepository } from '@/core/domain/memory/ports/memory-repository.interface';
+import { IProjectRepository } from '@/core/domain/project/ports/project-repository.interface';
+import { ISourceCodeRepository } from '@/core/domain/source-code/ports/source-code-repository.interface';
+import { IUserRepository } from '@/core/domain/user/ports/user-repository.interface';
+import { IJobQueueAdapter } from '@/core/ports/adapters/job-queue.interface';
+import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface';
 
 
 // --- Infrastructure Layer Implementations ---
 // Persistence
+import { db, schema } from '../persistence/drizzle/drizzle.client'; // Assuming this file exists and exports db and schema
 import { DrizzleJobRepository } from '../persistence/drizzle/repositories/job.repository';
-import { InMemoryAgentRepository } from '../persistence/in-memory/repositories/agent.repository'; // Example
-import { InMemoryProjectRepository } from '../persistence/in-memory/repositories/project.repository'; // Example
 import { InMemoryAgentInternalStateRepository } from '../persistence/in-memory/repositories/agent-internal-state.repository'; // Example
 import { InMemoryAgentPersonaTemplateRepository } from '../persistence/in-memory/repositories/agent-persona-template.repository'; // Example
+import { InMemoryAgentRepository } from '../persistence/in-memory/repositories/agent.repository'; // Example
 import { InMemoryAnnotationRepository } from '../persistence/in-memory/repositories/annotation.repository'; // Example
 import { InMemoryLLMProviderConfigRepository } from '../persistence/in-memory/repositories/llm-provider-config.repository'; // Example
 import { InMemoryMemoryRepository } from '../persistence/in-memory/repositories/memory.repository'; // Example
+import { InMemoryProjectRepository } from '../persistence/in-memory/repositories/project.repository'; // Example
 import { InMemorySourceCodeRepository } from '../persistence/in-memory/repositories/source-code.repository'; // Example
 import { InMemoryUserRepository } from '../persistence/in-memory/repositories/user.repository'; // Example
 
 // Services
 import { ConsoleLoggerService } from '../services/logger/console-logger.service';
 import { ToolRegistryService } from '../services/tool-registry/tool-registry.service';
-import { GenericAgentExecutor } from '@/core/application/services/generic-agent-executor.service';
+
 // import { WorkerService } from '@/core/application/services/worker.service'; // Assuming this is the one to bind
 // import { SdkEmbeddingService } from '../services/ai/sdk-embedding.service'; // Example
 // import { SdkLLMAdapter } from '../adapters/llm/sdk-llm.adapter'; // Example
@@ -83,7 +85,7 @@ import { FileSystemTool } from '../tools/file-system.tool';
 // import { ExecuteCommandTool } from '../tools/execute-command.tool'; // Example
 
 // Drizzle Client (example, may need actual setup)
-import { db, schema } from '../persistence/drizzle/drizzle.client'; // Assuming this file exists and exports db and schema
+import { TYPES } from './types';
 
 
 // Create the container

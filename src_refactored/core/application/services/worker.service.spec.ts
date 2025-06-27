@@ -3,20 +3,23 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
 
 import { ILogger } from '@/core/common/services/i-logger.service';
+
 import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
 import { AgentIdVO } from '@/domain/agent/value-objects/agent-id.vo';
-import { Job } from '@/domain/job/job.entity';
 import { AgentExecutorResult } from '@/domain/job/job-processing.types';
+import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo';
 import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
-import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo';
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
+import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { ok } from '@/shared/result';
 
 import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
+
 import { WorkerService } from './worker.service';
 
 describe('WorkerService', () => {

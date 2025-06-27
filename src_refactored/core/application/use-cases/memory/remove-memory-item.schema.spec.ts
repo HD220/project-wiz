@@ -1,5 +1,6 @@
 // src_refactored/core/application/use-cases/memory/remove-memory-item.schema.spec.ts
 import { describe, it, expect } from 'vitest';
+
 import {
   RemoveMemoryItemUseCaseInputSchema,
   RemoveMemoryItemUseCaseOutputSchema,

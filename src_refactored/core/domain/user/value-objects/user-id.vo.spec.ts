@@ -1,7 +1,9 @@
 // src_refactored/core/domain/user/value-objects/user-id.vo.spec.ts
-import { describe, it, expect } from 'vitest';
-import { UserId } from './user-id.vo';
 import { randomUUID } from 'crypto';
+
+import { describe, it, expect } from 'vitest';
+
+import { UserId } from './user-id.vo';
 
 describe('UserId', () => {
   it('should create a UserId from a valid UUID string', () => {

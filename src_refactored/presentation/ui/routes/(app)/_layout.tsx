@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
 import { Outlet, createFileRoute } from '@tanstack/react-router';
+import React, { useState } from 'react';
+
 import { AppSidebar } from '@/presentation/ui/components/layout/AppSidebar';
 // import { Button } from '@/presentation/ui/components/ui/button'; // For potential mobile toggle
 // import { Menu } from 'lucide-react'; // For potential mobile toggle icon

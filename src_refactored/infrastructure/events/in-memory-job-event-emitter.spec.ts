@@ -1,9 +1,11 @@
 // src_refactored/infrastructure/events/in-memory-job-event-emitter.spec.ts
 import { describe, it, expect, vi } from 'vitest';
-import { InMemoryJobEventEmitter, IJobEventEmitter } from './in-memory-job-event-emitter';
+
 import { JobEventPayloadMap, JobId, QueueName, WorkerId } from '../../core/domain/job/events/job-event.types';
 import { JobEntity } from '../../core/domain/job/job.entity';
 import { JobExecutionLogEntryProps } from '../../core/domain/job/value-objects/job-execution-log-entry.vo';
+
+import { InMemoryJobEventEmitter, IJobEventEmitter } from './in-memory-job-event-emitter';
 
 describe('InMemoryJobEventEmitter', () => {
   let eventEmitter: IJobEventEmitter;

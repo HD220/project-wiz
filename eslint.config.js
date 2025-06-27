@@ -80,6 +80,7 @@ export default [
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/naming-convention": ["warn",
         { "selector": "default", "format": ["camelCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
+        { "selector": "import", "format": ["camelCase", "PascalCase", "UPPER_CASE"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
         { "selector": "variable", "format": ["camelCase", "PascalCase", "UPPER_CASE"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
         { "selector": "function", "format": ["camelCase", "PascalCase"] },
         { "selector": "parameter", "format": ["camelCase"], "leadingUnderscore": "allow" },
@@ -88,7 +89,7 @@ export default [
       ],
       "max-depth": ["warn", { "max": 4 }],
       "no-else-return": "warn",
-      "id-length": ["warn", { "min": 2, "exceptions": ["id", "db", "ui", "en", "pt", "i", "X", "Y", "Z", "x", "y", "z", "a", "b", "e", "fs", "vo", "to"] }],
+      "id-length": ["warn", { "min": 2 }],
       "max-lines-per-function": ["warn", { "max": 100, "skipBlankLines": true, "skipComments": true }], // Default increased
       "max-statements": ["warn", { "max": 25 }], // Default increased
       "max-lines": ["warn", { "max": 500, "skipBlankLines": true, "skipComments": true }], // Default increased

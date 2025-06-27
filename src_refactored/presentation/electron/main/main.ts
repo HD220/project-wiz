@@ -1,6 +1,8 @@
 // src_refactored/presentation/electron/main/main.ts
-import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+
+import { app, BrowserWindow, ipcMain } from 'electron';
+
 import { registerChatIPCHandlers } from './ipc-chat.handlers';
 import { registerProjectIPCHandlers } from './ipc-project.handlers'; // Import project handlers
 

@@ -2,15 +2,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // import { ZodError } from 'zod'; // Not used directly in this spec
 
-import { DomainError, NotFoundError } from '@/domain/common/errors';
 import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+
+import { DomainError, NotFoundError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo';
 import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
 import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
-import { RetryPolicyVO, BackoffTypeEnum } from '@/domain/job/value-objects/retry-policy.vo';
 import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+import { RetryPolicyVO, BackoffTypeEnum } from '@/domain/job/value-objects/retry-policy.vo';
 // import { JobTimestampVO } from '@/domain/job/value-objects/job-timestamp.vo'; // Not used
 
 import { ok, error } from '@/shared/result';

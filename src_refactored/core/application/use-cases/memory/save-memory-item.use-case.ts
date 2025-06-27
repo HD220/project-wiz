@@ -1,8 +1,8 @@
 // src_refactored/core/application/use-cases/memory/save-memory-item.use-case.ts
 import { ZodError } from 'zod';
 
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface'; // Corrected import
 import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId
+
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
@@ -11,6 +11,9 @@ import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-e
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
 import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface'; // Corrected import
+
 import { Result, ok, error } from '@/shared/result';
 
 import {

@@ -1,6 +1,7 @@
 // src_refactored/core/domain/annotation/value-objects/annotation-text.vo.ts
-import { ValueError } from '@/domain/common/errors';
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors';
 
 interface AnnotationTextProps extends ValueObjectProps {
   value: string;

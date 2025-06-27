@@ -1,7 +1,9 @@
 // src_refactored/core/domain/queue/value-objects/queue-name.vo.spec.ts
 import { describe, it, expect } from 'vitest';
-import { QueueName } from './queue-name.vo';
+
 import { ValueError } from '../../../../common/errors';
+
+import { QueueName } from './queue-name.vo';
 
 describe('QueueName', () => {
   it('should create a QueueName with a valid name and convert to lowercase', () => {

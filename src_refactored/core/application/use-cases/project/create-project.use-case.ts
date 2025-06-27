@@ -1,13 +1,16 @@
 import { injectable, inject } from 'inversify';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
 import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
-import { ProjectEntity, ProjectProps } from '@/domain/project/project.entity';
+
 import { IProjectRepository, ProjectRepositoryToken } from '@/domain/project/ports/project-repository.interface';
+import { ProjectEntity, ProjectProps } from '@/domain/project/project.entity';
 import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
 import { ProjectId } from '@/domain/project/value-objects/project-id.vo'; // For generating new ID
 import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
+
+import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { Result } from '@/shared/result';
 
 import { CreateProjectInput, CreateProjectOutput, CreateProjectInputSchema } from './create-project.schema';
