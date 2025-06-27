@@ -4,21 +4,25 @@ import { v4 as uuidv4 } from 'uuid';
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/domain/common/errors';
 
-export class JobIdVO extends AbstractValueObject<string> {
+export class JobIdVO extends AbstractValueObject<{ value: string }> {
   private constructor(value: string) {
-    super(value);
+    super({ value });
   }
 
   public static create(value?: string): JobIdVO {
     const id = value || uuidv4();
-    if (!this.isValidUUID(id)) {
+    if (!JobIdVO.isValidUUID(id)) {
       throw new ValueError('Invalid Job ID format. Must be a valid UUID.');
     }
     return new JobIdVO(id);
   }
 
   public static generate(): JobIdVO {
-    return new JobIdVO(uuidv4());
+    const newId = uuidv4();
+    if (!JobIdVO.isValidUUID(newId)) {
+      throw new Error('Generated UUID is invalid, which is unexpected.');
+    }
+    return new JobIdVO(newId);
   }
 
   private static isValidUUID(id: string): boolean {
@@ -27,6 +31,6 @@ export class JobIdVO extends AbstractValueObject<string> {
   }
 
   public get value(): string {
-    return this.props;
+    return this.props.value;
   }
 }
