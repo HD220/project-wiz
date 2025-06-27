@@ -1,15 +1,12 @@
 // src_refactored/core/application/use-cases/annotation/list-annotations.use-case.ts
 import { ZodError } from 'zod';
 
+import { DomainError, ValueError } from '@/domain/common/errors';
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
 import { Identity } from '@/core/common/value-objects/identity.vo';
-
 import { Annotation } from '@/domain/annotation/annotation.entity';
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationSearchFilters, PaginationOptions } from '@/domain/annotation/ports/annotation-repository.types';
-import { DomainError, ValueError } from '@/domain/common/errors';
-
 import { Result, ok, error } from '@/shared/result';
 
 import {
@@ -78,13 +75,13 @@ export class ListAnnotationsUseCase
         pageSize: paginatedData.pageSize,
         totalPages: paginatedData.totalPages,
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) { // Changed err: any to e: unknown
+      if (e instanceof ZodError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error(`[ListAnnotationsUseCase] Unexpected error:`, err);
-      return error(new DomainError(`Unexpected error listing annotations: ${err.message || err}`));
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[ListAnnotationsUseCase] Unexpected error: ${message}`, { error: e }); // Added logger
+      return error(new DomainError(`Unexpected error listing annotations: ${message}`));
     }
   }
 }

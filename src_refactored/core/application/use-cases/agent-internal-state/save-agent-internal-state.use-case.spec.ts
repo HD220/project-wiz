@@ -2,10 +2,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
-
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
+import { DomainError, ValueError } from '@/domain/common/errors';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
@@ -190,6 +189,7 @@ describe('SaveAgentInternalStateUseCase', () => {
     // This test assumes Zod validation for length might be different or bypassed for some reason to test VO error.
     // For this specific case, Zod will catch it. A better test for VO error would be if VO had a rule Zod doesn't.
     // Let's assume Zod's max is higher for this test's purpose or mock CurrentGoal.create to throw.
+    // const invalidGoalInput = { ...baseInput, currentGoal: "g".repeat(501) }; // Unused variable
 
     const originalGoalCreate = CurrentGoal.create;
     CurrentGoal.create = vi.fn().mockImplementation(() => { throw new ValueError("Mocked CurrentGoal creation error"); });

@@ -13,14 +13,13 @@ import { GetJobRequestDTO, GetJobResponseDTO } from '../dtos';
 
 
 // @Injectable()
-export class GetJobUseCase<TData = any, TResult = any>
+export class GetJobUseCase<TData = unknown, TResult = unknown>
   implements IUseCase<GetJobRequestDTO, GetJobResponseDTO<TData, TResult>> {
-
   private readonly jobRepository: IJobRepository;
 
   constructor(
     // @Inject(JobRepositorySymbol)
-    jobRepository: IJobRepository
+    jobRepository: IJobRepository,
   ) {
     this.jobRepository = jobRepository;
   }
@@ -39,12 +38,12 @@ export class GetJobUseCase<TData = any, TResult = any>
       }
       // findResult.value will be JobEntity | null
       return Ok(findResult.value as JobEntity<TData, TResult> | null);
-
-    } catch (err: any) {
-      if (err instanceof ValueError) {
-        return Err(err); // From JobIdVO.create()
+    } catch (e: unknown) {
+      if (e instanceof ValueError) {
+        return Err(e); // From JobIdVO.create()
       }
-      return Err(new Error(`An unexpected error occurred while getting the job: ${err.message}`));
+      const message = e instanceof Error ? e.message : String(e);
+      return Err(new Error(`An unexpected error occurred while getting the job: ${message}`));
     }
   }
 }

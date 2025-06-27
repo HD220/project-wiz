@@ -1,13 +1,13 @@
 // src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
 
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
-
 import { Result, ok, error } from '@/shared/result';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added import for ILogger
+import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
 
 import {
   LoadAgentInternalStateUseCaseInput,
@@ -24,7 +24,10 @@ export class LoadAgentInternalStateUseCase
     >
 {
   constructor(
-    private stateRepository: IAgentInternalStateRepository,
+    // @Inject(IAgentInternalStateRepositorySymbol) // Example for IoC
+    private readonly stateRepository: IAgentInternalStateRepository,
+    // @Inject(ILoggerSymbol) // Example for IoC
+    private readonly logger: ILogger,
   ) {}
 
   async execute(
@@ -48,26 +51,24 @@ export class LoadAgentInternalStateUseCase
       const stateEntity = stateResult.value;
 
       if (!stateEntity) {
-        // It's a valid case for state to not exist, return ok with null.
-        // If it should be an error, return error(new NotFoundError(...))
         return ok(null);
       }
 
       const output: LoadAgentInternalStateUseCaseOutput = {
         agentId: stateEntity.agentId().value(),
         currentProjectId: stateEntity.currentProjectId()?.value() || null,
-        currentGoal: stateEntity.currentGoal()?.value() || null, // Handles empty string from VO correctly
+        currentGoal: stateEntity.currentGoal()?.value() || null,
         generalNotes: stateEntity.generalNotes().list(),
       };
 
       return ok(output);
-
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof NotFoundError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) {
+      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}:`, err);
-      return error(new DomainError(`Unexpected error loading agent state: ${err.message || err}`));
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { error: e });
+      return error(new DomainError(`Unexpected error loading agent state: ${message}`));
     }
   }
 }

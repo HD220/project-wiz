@@ -1,8 +1,8 @@
 // src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
 import { ZodError } from 'zod';
 
+import { DomainError, ValueError } from '@/domain/common/errors';
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
@@ -65,7 +65,6 @@ export class CreatePersonaTemplateUseCase
       });
 
       // 4. Save Entity/VO
-      // Assuming repository's save method handles AgentPersonaTemplate
       const saveResult = await this.templateRepository.save(personaTemplate);
       if (saveResult.isError()) {
         return error(new DomainError(`Failed to save persona template: ${saveResult.value.message}`, saveResult.value));
@@ -75,18 +74,18 @@ export class CreatePersonaTemplateUseCase
       return ok({
         personaTemplateId: personaTemplate.id().value(),
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError) {
-        return error(err);
+    } catch (e: unknown) {
+      if (e instanceof ZodError) {
+        return error(e);
       }
-      if (err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+      if (e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error('[CreatePersonaTemplateUseCase] Unexpected error:', err);
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, { error: e });
       return error(
         new DomainError(
-          `An unexpected error occurred while creating the persona template: ${err.message || err}`,
+          `An unexpected error occurred while creating the persona template: ${message}`,
         ),
       );
     }

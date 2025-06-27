@@ -2,10 +2,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
-
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
+import { DomainError } from '@/domain/common/errors'; // Corrected path, NotFoundError not used here
 
 import { ok, error } from '@/shared/result';
 

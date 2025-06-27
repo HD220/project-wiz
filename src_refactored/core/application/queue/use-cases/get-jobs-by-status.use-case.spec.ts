@@ -1,9 +1,10 @@
 // src_refactored/core/application/queue/use-cases/get-jobs-by-status.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { JobEntity } from '@/domain/job/job.entity';
+import { JobEntity, JobEntityProps } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { PaginatedJobsResult, JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types';
+import { PaginatedJobsResult } from '@/domain/job/ports/job-repository.types';
+// import { JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types'; // Not used directly in this spec
 import { JobExecutionLogsVO } from '@/domain/job/value-objects/job-execution-logs.vo';
 import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
 import { JobOptionsVO } from '@/domain/job/value-objects/job-options.vo';
@@ -15,7 +16,6 @@ import { ok, error } from '@/shared/result';
 import { GetJobsByStatusRequestDTO } from '../dtos';
 import { GetJobsByStatusUseCase } from './get-jobs-by-status.use-case';
 
-
 describe('GetJobsByStatusUseCase', () => {
   let mockJobRepository: IJobRepository;
   let getJobsByStatusUseCase: GetJobsByStatusUseCase;
@@ -23,16 +23,33 @@ describe('GetJobsByStatusUseCase', () => {
   const mockJobId1 = JobIdVO.generate();
   const mockJobId2 = JobIdVO.generate();
   const mockJob1 = new (JobEntity as any)({
-    id: mockJobId1, queueName: 'q1', jobName: 'j1', payload: {}, opts: JobOptionsVO.default(),
-    status: JobStatusVO.pending(), priority: JobPriorityVO.default(), progress: JobProgressVO.initial(),
-    attemptsMade: 0, createdAt: Date.now(), updatedAt: Date.now(), executionLogs: JobExecutionLogsVO.empty()
-  }) as JobEntity;
+    id: mockJobId1,
+    queueName: 'q1',
+    jobName: 'j1',
+    payload: {},
+    opts: JobOptionsVO.default(),
+    status: JobStatusVO.pending(),
+    priority: JobPriorityVO.default(),
+    progress: JobProgressVO.initial(),
+    attemptsMade: 0,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    executionLogs: JobExecutionLogsVO.empty(),
+  } as JobEntityProps) as JobEntity;
   const mockJob2 = new (JobEntity as any)({
-    id: mockJobId2, queueName: 'q1', jobName: 'j2', payload: {}, opts: JobOptionsVO.default(),
-    status: JobStatusVO.active(), priority: JobPriorityVO.default(), progress: JobProgressVO.initial(),
-    attemptsMade: 1, createdAt: Date.now(), updatedAt: Date.now(), executionLogs: JobExecutionLogsVO.empty()
-  }) as JobEntity;
-
+    id: mockJobId2,
+    queueName: 'q1',
+    jobName: 'j2',
+    payload: {},
+    opts: JobOptionsVO.default(),
+    status: JobStatusVO.active(),
+    priority: JobPriorityVO.default(),
+    progress: JobProgressVO.initial(),
+    attemptsMade: 1,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    executionLogs: JobExecutionLogsVO.empty(),
+  } as JobEntityProps) as JobEntity;
 
   beforeEach(() => {
     mockJobRepository = {
@@ -51,8 +68,12 @@ describe('GetJobsByStatusUseCase', () => {
       statuses: [JobStatusEnum.PENDING, JobStatusEnum.ACTIVE],
       paginationOptions: { page: 1, limit: 10 },
     };
-    const paginatedResult: PaginatedJobsResult = {
-      jobs: [mockJob1, mockJob2], totalItems: 2, totalPages: 1, currentPage: 1, itemsPerPage: 10,
+    const paginatedResult: PaginatedJobsResult<unknown, unknown> = {
+      jobs: [mockJob1, mockJob2],
+      totalItems: 2,
+      totalPages: 1,
+      currentPage: 1,
+      itemsPerPage: 10,
     };
     (mockJobRepository.search as vi.Mock).mockResolvedValue(ok(paginatedResult));
 
@@ -60,7 +81,7 @@ describe('GetJobsByStatusUseCase', () => {
 
     expect(mockJobRepository.search).toHaveBeenCalledWith(
       { queueName: 'q1', status: [JobStatusEnum.PENDING, JobStatusEnum.ACTIVE] },
-      { page: 1, limit: 10 }
+      { page: 1, limit: 10 },
     );
     expect(result.success).toBe(true);
     if (result.success) {
@@ -73,8 +94,12 @@ describe('GetJobsByStatusUseCase', () => {
       queueName: 'q1',
       statuses: [JobStatusEnum.COMPLETED],
     };
-     const paginatedResult: PaginatedJobsResult = {
-      jobs: [], totalItems: 0, totalPages: 0, currentPage: 1, itemsPerPage: 20, // Default limit
+    const paginatedResult: PaginatedJobsResult<unknown, unknown> = {
+      jobs: [],
+      totalItems: 0,
+      totalPages: 0,
+      currentPage: 1,
+      itemsPerPage: 20, // Default limit
     };
     (mockJobRepository.search as vi.Mock).mockResolvedValue(ok(paginatedResult));
 
@@ -82,7 +107,7 @@ describe('GetJobsByStatusUseCase', () => {
 
     expect(mockJobRepository.search).toHaveBeenCalledWith(
       { queueName: 'q1', status: [JobStatusEnum.COMPLETED] },
-      { page: 1, limit: 20 } // Default pagination
+      { page: 1, limit: 20 }, // Default pagination
     );
   });
 

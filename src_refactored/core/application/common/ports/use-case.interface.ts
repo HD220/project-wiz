@@ -1,6 +1,6 @@
 // src_refactored/core/application/common/ports/use-case.interface.ts
-import { ApplicationError } from '@/application/common/errors';
 import { DomainError } from '@/domain/common/errors';
+import { ApplicationError } from '@/application/common/errors';
 
 import { Executable } from '../executable';
 
@@ -13,8 +13,12 @@ import { Executable } from '../executable';
  * @template TResponse The type of the successful output from the use case.
  * @template TError The type of the error output from the use case. Defaults to DomainError or ApplicationError.
  */
-export interface IUseCase<TRequest, TResponse, TError extends Error = DomainError | ApplicationError>
-  extends Executable<TRequest, TResponse, TError> {
-  // IUseCase might define additional methods or properties specific to use cases in the future,
-  // but for now, it primarily inherits the execute method from Executable.
+export interface IUseCase<
+  TRequest,
+  TResponse,
+  TError extends Error = DomainError | ApplicationError,
+> extends Executable<TRequest, TResponse, TError> {
+  // This interface is intentionally kept lean, primarily inheriting from Executable.
+  // Future enhancements or specific use case methods can be added here.
+  // For now, it serves as a clear marker for use case implementations.
 }

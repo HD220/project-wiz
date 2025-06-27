@@ -23,4 +23,4 @@ export const CancelJobUseCaseOutputSchema = z.object({
   finalStatus: z.string().describe("The final status of the job after the cancellation attempt (e.g., 'CANCELLED', or its previous status if cancellation failed or was not applicable)."),
 });
 
-export type CancelJobUseCaseOutputSchema = z.infer<typeof CancelJobUseCaseOutputSchema>;
+export type CancelJobUseCaseOutput = z.infer<typeof CancelJobUseCaseOutputSchema>;

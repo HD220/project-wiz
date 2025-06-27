@@ -1,26 +1,23 @@
 // src_refactored/core/application/services/worker.service.spec.ts
-import { vi, describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest'; // Mocked might be unused
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
 
 import { ILogger } from '@/core/common/services/i-logger.service';
-
-import { Agent } from '@/domain/agent/entities/agent.entity'; // Might be unresolved
-import { IAgentRepository } from '@/domain/agent/ports/i-agent-repository.interface'; // Might be unresolved
+import { Agent } from '@/domain/agent/agent.entity';
+import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
 import { AgentIdVO } from '@/domain/agent/value-objects/agent-id.vo';
-import { Job } from '@/domain/job/entities/job.entity'; // Might be unresolved
+import { Job } from '@/domain/job/job.entity';
 import { AgentExecutorResult } from '@/domain/job/job-processing.types';
-import { IJobRepository } from '@/domain/job/ports/i-job.repository'; // Might be unresolved
-import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo'; // Might be unresolved
-import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Might be unresolved
-import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo'; // Might be unresolved
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
+import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
+import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo';
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
-
 import { ok } from '@/shared/result';
 
 import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
 import { WorkerService } from './worker.service';
-
 
 describe('WorkerService', () => {
   let workerService: WorkerService;
@@ -29,7 +26,7 @@ describe('WorkerService', () => {
   let mockAgentExecutor: DeepMockProxy<IAgentExecutor>;
   let mockLogger: DeepMockProxy<ILogger>;
 
-  let sampleJob: DeepMockProxy<Job>;
+  let sampleJob: DeepMockProxy<Job<unknown, unknown>>;
   let sampleAgent: DeepMockProxy<Agent>;
   let sampleRole: TargetAgentRoleVO;
 
@@ -40,7 +37,6 @@ describe('WorkerService', () => {
     mockAgentExecutor = mock<IAgentExecutor>();
     mockLogger = mock<ILogger>();
 
-    // Mock logger methods to prevent actual console output during tests
     mockLogger.info.mockReturnValue();
     mockLogger.warn.mockReturnValue();
     mockLogger.error.mockReturnValue();
@@ -55,25 +51,23 @@ describe('WorkerService', () => {
 
     sampleRole = TargetAgentRoleVO.create('test-role').unwrap();
 
-    // Create mock Job and Agent with spies/mocks for their methods
-    sampleJob = mock<Job>();
-    sampleJob.id = JobName.create('test-job-id').unwrap() as any; // Simplified ID for mocking
-    sampleJob.name = JobName.create('Test Job').unwrap();
+    sampleJob = mock<Job<unknown, unknown>>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sampleJob.id = JobNameVO.create('test-job-id').unwrap() as any;
+    sampleJob.name = JobNameVO.create('Test Job').unwrap();
     sampleJob.targetAgentRole.mockReturnValue(sampleRole);
     sampleJob.status.mockReturnValue(JobStatusVO.pending());
     sampleJob.attempts.mockReturnValue(AttemptCountVO.create(0).unwrap());
-    sampleJob.retryPolicy.mockReturnValue(RetryPolicyVO.default()); // Non-retryable by default for simple failure test
+    sampleJob.retryPolicy.mockReturnValue(RetryPolicyVO.default());
     sampleJob.setExecutionResult.mockReturnThis();
     sampleJob.setStatus.mockReturnThis();
     sampleJob.updateLastFailureSummary.mockReturnThis();
 
-
     sampleAgent = mock<Agent>();
     sampleAgent.id = AgentIdVO.create('test-agent-id').unwrap();
 
-
-    mockJobRepository.findNextProcessableByRole.mockResolvedValue(ok(null)); // Default: no job
-    mockJobRepository.save.mockResolvedValue(ok(sampleJob as Job));
+    mockJobRepository.findNextProcessableByRole.mockResolvedValue(ok(null));
+    mockJobRepository.save.mockResolvedValue(ok(sampleJob as Job<unknown, unknown>));
     mockAgentRepository.findById.mockResolvedValue(ok(sampleAgent as Agent));
   });
 

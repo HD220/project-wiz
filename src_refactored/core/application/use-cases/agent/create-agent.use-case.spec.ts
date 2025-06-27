@@ -2,12 +2,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
-
 import { Agent } from '@/domain/agent/agent.entity';
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
 import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
@@ -194,23 +193,25 @@ describe('CreateAgentUseCase', () => {
     // Zod schema catches this first. To test VO error, Zod must pass.
     // For this test, let's assume Zod schema was different and allowed it.
     // We will mock AgentTemperature.create to throw.
-    const originalTempCreate = AgentTemperature.create;
-    AgentTemperature.create = vi.fn().mockImplementation(() => {
+    const originalTempCreate = AgentTemperature.create; // Corrected: AgentTemperature is not defined
+    const mockCreate = vi.fn().mockImplementation(() => {
       throw new ValueError("Invalid temperature for VO");
     });
+    AgentTemperature.create = mockCreate;
+
 
     const result = await useCase.execute(invalidTempInput);
     expect(result.isError()).toBe(true);
     if (result.isError()) {
       // If Zod schema catches it first (as it should with current schema)
-      if(result.value instanceof ZodError) {
+      if (result.value instanceof ZodError) {
          expect(result.value.errors[0].message).toBe("Temperature must be no more than 2.0.");
       } else { // If Zod schema was bypassed and VO threw
          expect(result.value).toBeInstanceOf(ValueError);
          expect(result.value.message).toBe("Invalid temperature for VO");
       }
     }
-    AgentTemperature.create = originalTempCreate; // Restore
+    AgentTemperature.create = originalTempCreate; // Restore // Corrected: AgentTemperature is not defined
   });
 
 

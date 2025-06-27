@@ -10,14 +10,13 @@ import { ok as Ok, error as Err } from '@/shared/result';
 import { GetJobsByStatusRequestDTO, GetJobsByStatusResponseDTO } from '../dtos';
 
 // @Injectable()
-export class GetJobsByStatusUseCase<TData = any, TResult = any>
+export class GetJobsByStatusUseCase<TData = unknown, TResult = unknown>
   implements IUseCase<GetJobsByStatusRequestDTO, GetJobsByStatusResponseDTO<TData, TResult>> {
-
   private readonly jobRepository: IJobRepository;
 
   constructor(
     // @Inject(JobRepositorySymbol)
-    jobRepository: IJobRepository
+    jobRepository: IJobRepository,
   ) {
     this.jobRepository = jobRepository;
   }
@@ -45,15 +44,15 @@ export class GetJobsByStatusUseCase<TData = any, TResult = any>
         return Err(searchResult.error);
       }
 
-      // The result from repository search is already PaginatedJobsResult<any, any>
+      // The result from repository search is already PaginatedJobsResult<unknown, unknown>
       // We cast it here to the specific TData, TResult of this use case instance.
       // This assumes the underlying data in JobEntity instances within PaginatedJobsResult
       // is compatible or that consumers will handle potential type differences if TData/TResult vary.
       return Ok(searchResult.value as PaginatedJobsResult<TData, TResult>);
-
-    } catch (err: any) {
+    } catch (e: unknown) {
       // Catch any unexpected errors during filter/pagination setup or if repository.search itself throws
-      return Err(new Error(`An unexpected error occurred while getting jobs by status: ${err.message}`));
+      const message = e instanceof Error ? e.message : String(e);
+      return Err(new Error(`An unexpected error occurred while getting jobs by status: ${message}`));
     }
   }
 }

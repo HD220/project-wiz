@@ -2,13 +2,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError } from '@/application/common/errors'; // Or @/domain/common/errors
-
-import { Identity } from '@/core/common/value-objects/identity.vo';
-
 import { Annotation } from '@/domain/annotation/annotation.entity';
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
-import { AnnotationSearchFilters, PaginationOptions, PaginatedAnnotationsResult } from '@/domain/annotation/ports/annotation-repository.types';
+import { AnnotationSearchFilters, PaginatedAnnotationsResult } from '@/domain/annotation/ports/annotation-repository.types';
+// import { PaginationOptions } from '@/domain/annotation/ports/annotation-repository.types'; // Not directly used here, but by the use case
+import { DomainError } from '@/domain/common/errors';
+import { Identity } from '@/core/common/value-objects/identity.vo';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
 import { AnnotationText } from '@/domain/annotation/value-objects/annotation-text.vo';
 
@@ -105,9 +104,9 @@ describe('ListAnnotationsUseCase', () => {
 
   it('should return ZodError for invalid input (e.g., invalid UUID for agentId)', async () => {
     const input = { agentId: "not-a-uuid" };
-    const result = await useCase.execute(input as any);
+    const result = await useCase.execute(input as ListAnnotationsUseCaseInput); // Cast to expected type
     expect(result.isError()).toBe(true);
-    if(result.isError()) {
+    if (result.isError()) {
         expect(result.value).toBeInstanceOf(ZodError);
         expect(result.value.errors[0].message).toBe("Agent ID must be a valid UUID if provided.");
     }
@@ -115,11 +114,11 @@ describe('ListAnnotationsUseCase', () => {
 
   it('should return DomainError if repository search fails', async () => {
     const repoError = new DomainError('DB search failed for annotations');
-    (mockAnnotationRepository.search as vi.Mock).mockResolvedValue(error(repoError));
+    (mockAnnotationRepository.search as vi.Mock).mockResolvedValue(error(repoError as Error)); // Cast to Error
     const input: ListAnnotationsUseCaseInput = {};
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
-    if(result.isError()) {
+    if (result.isError()) {
         expect(result.value).toBeInstanceOf(DomainError);
         expect(result.value.message).toContain('Failed to list annotations');
     }

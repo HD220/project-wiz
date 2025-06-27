@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { ValueError } from '@/domain/common/errors';
-import { JobEntity } from '@/domain/job/job.entity';
+import { JobEntity, JobEntityProps } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobExecutionLogsVO } from '@/domain/job/value-objects/job-execution-logs.vo';
 import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
@@ -10,19 +10,17 @@ import { JobOptionsVO } from '@/domain/job/value-objects/job-options.vo';
 import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
 import { JobProgressVO } from '@/domain/job/value-objects/job-progress.vo';
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
-
 import { ok, error } from '@/shared/result';
 
 import { GetJobRequestDTO } from '../dtos';
 import { GetJobUseCase } from './get-job.use-case';
-
 
 describe('GetJobUseCase', () => {
   let mockJobRepository: IJobRepository;
   let getJobUseCase: GetJobUseCase;
 
   const mockJobId = JobIdVO.generate();
-  const mockDefaultJobProps = {
+  const mockDefaultJobProps: JobEntityProps = {
     id: mockJobId,
     queueName: 'test-queue',
     jobName: 'test-job',
@@ -35,7 +33,8 @@ describe('GetJobUseCase', () => {
     createdAt: Date.now(),
     updatedAt: Date.now(),
     executionLogs: JobExecutionLogsVO.empty(),
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any; // Cast to any to satisfy the JobEntity constructor in tests
 
   beforeEach(() => {
     mockJobRepository = {
@@ -102,7 +101,7 @@ describe('GetJobUseCase', () => {
   it('should return an error if jobRepository.findById fails', async () => {
     const request: GetJobRequestDTO = { jobId: mockJobId.value };
     const repoError = new Error('Database connection error');
-    (mockJobRepository.findById as vi.Mock).mockResolvedValue(error(repoError));
+    (mockJobRepository.findById as vi.Mock).mockResolvedValue(error(repoError as Error));
 
     const result = await getJobUseCase.execute(request);
 

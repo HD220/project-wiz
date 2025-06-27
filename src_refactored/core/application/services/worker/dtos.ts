@@ -108,7 +108,7 @@ export interface WorkerHeartbeatParams {
 export interface JobProcessResultDTO {
   jobId: JobIdVO;
   status: 'COMPLETED' | 'FAILED' | 'CANCELLED'; // Simplified job outcomes
-  output?: any; // Output of the job, if any
+  output?: unknown; // Output of the job, if any; changed from any to unknown
   error?: string; // Error message if the job failed
 }
 
@@ -116,6 +116,7 @@ export interface JobProcessResultDTO {
  * Parameters for telling a worker to start processing jobs for its role.
  * This might be relevant if workers are explicitly started/stopped by the service.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface StartWorkerProcessingParams {
   // Currently no specific parameters, workerId is the primary identifier.
   // Could include things like concurrency settings for the worker in the future.

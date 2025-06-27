@@ -12,14 +12,13 @@ import { CreateJobRequestDTO, CreateJobResponseDTO } from '../dtos'; // This rel
 
 
 // @Injectable() // Decorator if an IoC container like InversifyJS is used
-export class CreateJobUseCase<TData = any, TResult = any>
+export class CreateJobUseCase<TData = unknown, TResult = unknown>
   implements IUseCase<CreateJobRequestDTO<TData>, CreateJobResponseDTO<TData, TResult>> {
-
   private readonly jobRepository: IJobRepository;
 
   constructor(
     // @Inject(JobRepositorySymbol) // Example if Symbol is used as token
-    jobRepository: IJobRepository
+    jobRepository: IJobRepository,
   ) {
     this.jobRepository = jobRepository;
   }
@@ -41,19 +40,21 @@ export class CreateJobUseCase<TData = any, TResult = any>
       // Persist the job entity
       const saveResult = await this.jobRepository.save(jobEntity);
 
-      if (saveResult.success === false) { // Check using success property
+      if (saveResult.success === false) {
+        // Check using success property
         // Propagate repository error
         return Err(saveResult.error);
       }
 
       return Ok(jobEntity);
-    } catch (err: any) {
+    } catch (e: unknown) {
       // Catch errors from JobEntity.create() or other unexpected issues
-      if (err instanceof ValueError) {
-         return Err(err); // Propagate ValueError
+      if (e instanceof ValueError) {
+        return Err(e); // Propagate ValueError
       }
       // For other errors, wrap them in a generic Error or a specific AppError if defined
-      return Err(new Error(`An unexpected error occurred while creating the job: ${err.message}`));
+      const message = e instanceof Error ? e.message : String(e);
+      return Err(new Error(`An unexpected error occurred while creating the job: ${message}`));
     }
   }
 }

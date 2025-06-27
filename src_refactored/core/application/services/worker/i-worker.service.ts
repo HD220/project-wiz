@@ -19,7 +19,7 @@ import {
  * that process jobs based on their roles.
  */
 
-export const IWorkerService = Symbol('IWorkerService');
+export const WorkerServiceSymbol = Symbol('IWorkerService');
 
 export interface IWorkerService {
   /**

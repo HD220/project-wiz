@@ -1,8 +1,8 @@
 // src_refactored/core/application/use-cases/agent/create-agent.use-case.ts
 import { ZodError } from 'zod';
 
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
 import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
@@ -87,10 +87,10 @@ export class CreateAgentUseCase
       // 7. Create Agent Entity
       const agentEntity = Agent.create({
         id: agentIdVo,
-        personaTemplate: personaTemplate,
-        llmProviderConfig: llmProviderConfig,
+        personaTemplate, // Shorthand property
+        llmProviderConfig, // Shorthand property
         temperature: temperatureVo,
-        maxIterations: maxIterationsVo, // Added maxIterations
+        maxIterations: maxIterationsVo,
       });
 
       // 8. Save Agent Entity
@@ -103,18 +103,18 @@ export class CreateAgentUseCase
       return ok({
         agentId: agentEntity.id().value(),
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError) { // Should be caught by safeParse earlier
-        return error(err);
+    } catch (e: unknown) {
+      if (e instanceof ZodError) {
+        return error(e);
       }
-      if (err instanceof NotFoundError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err); // Errors from VO creation or explicit NotFoundErrors
+      if (e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error('[CreateAgentUseCase] Unexpected error:', err);
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[CreateAgentUseCase] Unexpected error: ${message}`, { error: e }); // Added logger
       return error(
         new DomainError(
-          `An unexpected error occurred while creating the agent: ${err.message || err}`,
+          `An unexpected error occurred while creating the agent: ${message}`,
         ),
       );
     }
