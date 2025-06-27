@@ -27,7 +27,7 @@ import {
 
 export class SaveMemoryItemUseCase
   implements
-    IUseCase< // Changed Executable to IUseCase
+    Executable< // Changed IUseCase back to Executable to match import alias
       SaveMemoryItemUseCaseInput,
       SaveMemoryItemUseCaseOutput,
       DomainError | ZodError | ValueError | NotFoundError

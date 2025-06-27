@@ -1,10 +1,10 @@
 // src_refactored/presentation/electron/main/ipc-chat.handlers.ts
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
-import { IPCChannel } from '../../../shared/ipc-channels'; // Adjust path as necessary
-import { ChatSendMessagePayload, ChatStreamEventPayload, ChatStreamTokenPayload, ChatStreamEndPayload, ChatStreamErrorPayload } from '../../../shared/ipc-chat.types'; // Adjust path
-import { LanguageModelMessage } from '../../../core/ports/adapters/llm-adapter.types'; // Adjust path
-import { ILLMAdapter, ILLMAdapterToken } from '../../../core/ports/adapters/llm-adapter.interface'; // Adjust path
-import { appContainer } from '../../../infrastructure/ioc/inversify.config'; // Assuming DI container is set up
+import { IPCChannel } from '@/shared/ipc-channels'; // Adjust path as necessary
+import { ChatSendMessagePayload, ChatStreamEventPayload, ChatStreamTokenPayload, ChatStreamEndPayload, ChatStreamErrorPayload } from '@/shared/ipc-chat.types'; // Adjust path
+import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types'; // Adjust path
+import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface'; // Adjust path
+import { appContainer } from '@/infrastructure/ioc/inversify.config'; // Assuming DI container is set up
 
 // Placeholder for a more sophisticated ChatService
 // For now, this handler will directly use the ILLMAdapter.

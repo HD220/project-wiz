@@ -1,16 +1,7 @@
 // src_refactored/core/ports/adapters/llm-adapter.interface.ts
 import { z } from 'zod';
 import { Result } from '../../../shared/result';
-import { LLMError } from '../../common/errors';
-import { LLMGenerationOptions } from './llm-adapter.types';
-
-/**
- * Interface for an LLM (Large Language Model) Adapter.
- * This abstraction allows the application to interact with different LLM providers
- * or implementations through a consistent API.
- */
-import { Result } from '../../../shared/result';
-import { LLMError } from '../../common/errors';
+import { LLMError } from '@/core/common/errors';
 import { LLMGenerationOptions, LanguageModelMessage } from './llm-adapter.types';
 
 /**

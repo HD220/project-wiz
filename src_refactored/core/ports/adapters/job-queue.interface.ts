@@ -4,7 +4,7 @@ import { Job } from '../../domain/job/job.entity';
 import { JobId } from '../../domain/job/value-objects/job-id.vo';
 // Assuming TargetAgentRole is a VO that might be string-based or more complex
 import { TargetAgentRole } from '../../domain/job/value-objects/target-agent-role.vo';
-import { QueueError } from '../../common/errors';
+import { QueueError } from '@/core/common/errors';
 
 export interface FailDetails {
   message: string;

@@ -9,9 +9,10 @@ import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
 import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-state/general-notes.collection';
-import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
+// Removed duplicate import of DomainError, ValueError, NotFoundError
 
 import { Result, ok, error } from '@/shared/result';
+import { ILoggerService } from '@/core/common/services/i-logger.service';
 
 import {
   SaveAgentInternalStateUseCaseInput,
@@ -29,7 +30,7 @@ export class SaveAgentInternalStateUseCase
 {
   constructor(
     private readonly stateRepository: IAgentInternalStateRepository,
-    private readonly logger: ILogger, // Added logger dependency
+    private readonly logger: ILoggerService, // Added logger dependency
   ) {}
 
   async execute(

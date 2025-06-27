@@ -48,7 +48,6 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
     >
       <Card className="h-full flex flex-col"> {/* Ensure card itself takes full height of Link */}
         {project.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={project.imageUrl}
             alt={`${project.name} preview`}
@@ -60,7 +59,6 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
           {project.owner && (
             <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1">
               {project.owner.avatarUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img src={project.owner.avatarUrl} alt={project.owner.name} className="w-4 h-4 rounded-full mr-1.5" />
               )}
               <span>{project.owner.name}</span>

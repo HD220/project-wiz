@@ -1,7 +1,7 @@
 // src_refactored/core/domain/user/value-objects/user-email.vo.spec.ts
 import { describe, it, expect } from 'vitest';
 import { UserEmail } from './user-email.vo';
-import { ValueError } from '../../../../common/errors';
+import { ValueError } from '@/core/common/errors';
 
 describe('UserEmail', () => {
   it('should create a UserEmail with a valid email and convert to lowercase', () => {

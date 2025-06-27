@@ -11,9 +11,10 @@ import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
 import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
 import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
 import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
-import { DomainError, ValueError } from '@/domain/common/errors';
+// Removed duplicate import of DomainError, ValueError
 
 import { Result, ok, error } from '@/shared/result';
+import { ILoggerService } from '@/core/common/services/i-logger.service';
 
 import {
   CreatePersonaTemplateUseCaseInput,
@@ -29,11 +30,10 @@ export class CreatePersonaTemplateUseCase
       DomainError | ZodError | ValueError
     >
 {
-  private templateRepository: IAgentPersonaTemplateRepository;
-
-  constructor(templateRepository: IAgentPersonaTemplateRepository) {
-    this.templateRepository = templateRepository;
-  }
+  constructor(
+    private readonly templateRepository: IAgentPersonaTemplateRepository,
+    private readonly logger: ILoggerService,
+  ) {}
 
   async execute(
     input: CreatePersonaTemplateUseCaseInput,

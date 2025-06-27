@@ -1,14 +1,14 @@
 // src_refactored/presentation/electron/main/ipc-project.handlers.ts
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
-import { IPCChannel } from '../../../shared/ipc-channels';
-import { ProjectListItem } from '../../../shared/ipc-project.types'; // Ensure this path is correct
-import { ListProjectsUseCase } from '../../../core/application/use-cases/project/list-projects.use-case';
-import { appContainer } from '../../../infrastructure/ioc/inversify.config'; // Assuming DI container
-import { ProjectRepositoryToken } from '../../../core/domain/project/ports/project-repository.interface';
-import { DrizzleProjectRepository } from '../../../infrastructure/persistence/drizzle/repositories/project.repository'; // Example concrete repo
-import { db, schema } from '../../../infrastructure/persistence/drizzle/drizzle.client'; // Example db client and schema
-import { ConsoleLoggerService } from '../../../infrastructure/services/logger/console-logger.service'; // Example Logger
-import { LoggerServiceToken } from '../../../core/common/services/i-logger.service';
+import { IPCChannel } from '@/shared/ipc-channels';
+import { ProjectListItem } from '@/shared/ipc-project.types'; // Ensure this path is correct
+import { ListProjectsUseCase } from '@/core/application/use-cases/project/list-projects.use-case';
+import { appContainer } from '@/infrastructure/ioc/inversify.config'; // Assuming DI container
+import { ProjectRepositoryToken } from '@/core/domain/project/ports/project-repository.interface';
+import { DrizzleProjectRepository } from '@/infrastructure/persistence/drizzle/repositories/project.repository'; // Example concrete repo
+import { db, schema } from '@/infrastructure/persistence/drizzle/drizzle.client'; // Example db client and schema
+import { ConsoleLoggerService } from '@/infrastructure/services/logger/console-logger.service'; // Example Logger
+import { LoggerServiceToken } from '@/core/common/services/i-logger.service';
 
 // Placeholder for actual ProjectRepository implementation if DI is not fully set up for main process
 // This is a simplified setup for demonstration. A real app would use DI.

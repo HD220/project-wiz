@@ -1,7 +1,7 @@
 // src_refactored/core/domain/user/value-objects/user-avatar.vo.spec.ts
 import { describe, it, expect } from 'vitest';
 import { UserAvatar } from './user-avatar.vo';
-import { ValueError } from '../../../../common/errors';
+import { ValueError } from '@/core/common/errors';
 
 describe('UserAvatar', () => {
   it('should create a UserAvatar with a valid URL', () => {

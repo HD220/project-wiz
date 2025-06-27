@@ -1,6 +1,6 @@
 // src_refactored/core/domain/user/ports/user-repository.interface.ts
 import { Result } from '../../../../shared/result';
-import { DomainError } from '../../../common/errors';
+import { DomainError } from '@/core/common/errors';
 import { User } from '../user.entity';
 import { UserId } from '../value-objects/user-id.vo';
 import { UserEmail } from '../value-objects/user-email.vo';

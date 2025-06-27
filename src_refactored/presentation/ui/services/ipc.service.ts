@@ -2,7 +2,13 @@
 
 import { IElectronIPC, IPCResult } from './ipc.types';
 import { IPCChannel } from '@/shared/ipc-channels';
-import { ChatSendMessagePayload, ChatStreamEventPayload } from '@/shared/ipc-chat.types';
+import {
+  ChatSendMessagePayload,
+  ChatStreamEventPayload,
+  ChatStreamTokenPayload,
+  ChatStreamEndPayload,
+} from '@/shared/ipc-chat.types';
+import { ProjectListItem } from '@/shared/ipc-project.types'; // Assuming this file and type exist
 
 const electronIPC = window.electronIPC;
 

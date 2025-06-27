@@ -2,7 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
-import { ValueError } from '@/domain/common/errors';
+import { ValueError } from '@/core/common/errors';
 
 export class JobIdVO extends AbstractValueObject<{ value: string }> {
   private constructor(value: string) {

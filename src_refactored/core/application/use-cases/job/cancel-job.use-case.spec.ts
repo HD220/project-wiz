@@ -122,7 +122,7 @@ describe('CancelJobUseCase', () => {
   it('should return DomainError if repository findById fails', async () => {
     const repoError = new DomainError('DB find error');
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(error(repoError));
-    const input: CancelJobUseCaseInput = { jobId: testJobId.value() };
+    const input: CancelJobUseCaseInput = { jobId: testJobIdVo.value }; // Changed testJobId to testJobIdVo
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) {
@@ -135,7 +135,7 @@ describe('CancelJobUseCase', () => {
     const repoSaveError = new DomainError('DB save error');
     (mockJobRepository.save as vi.Mock).mockResolvedValue(error(repoSaveError));
 
-    const input: CancelJobUseCaseInput = { jobId: testJobId.value() };
+    const input: CancelJobUseCaseInput = { jobId: testJobIdVo.value }; // Changed testJobId to testJobIdVo
     const result = await useCase.execute(input);
 
     expect(result.isError()).toBe(true);

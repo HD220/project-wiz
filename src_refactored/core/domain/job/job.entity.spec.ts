@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 import { ValueError, DomainError } from '@/domain/common/errors';
 
-import { JobEntity, JobEntityConstructionProps } from './job.entity';
+import { JobEntity, JobEntityConstructionProps, JobEntityProps } from './job.entity';
 import { JobExecutionLogsVO, JobExecutionLogEntryVO, LogLevel } from './value-objects/job-execution-logs.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
 import { JobOptionsVO, IJobOptions } from './value-objects/job-options.vo';

@@ -123,7 +123,7 @@ export class WorkerService implements IWorkerService {
         if (agentResult.status === 'SUCCESS') {
           job.setStatus(JobStatusVO.completed());
         } else {
-          this._handleJobExecutionFailure(job, agentResultData.message);
+          this._handleJobExecutionFailure(job, agentResult.message);
         }
       } else {
         const errorMessage = `AgentExecutor critical failure: ${executionResult.error.message}`;

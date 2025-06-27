@@ -13,6 +13,7 @@ import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
 import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
 import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
 import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
+import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';

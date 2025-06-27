@@ -6,8 +6,8 @@ import { UserNickname } from './value-objects/user-nickname.vo';
 import { UserUsername } from './value-objects/user-username.vo';
 import { UserEmail } from './value-objects/user-email.vo';
 import { UserAvatar } from './value-objects/user-avatar.vo';
-import { Identity } from '../../../core/common/value-objects/identity.vo';
-import { EntityError, ValueError } from '../../../core/common/errors';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { EntityError, ValueError } from '@/core/common/errors';
 
 describe('User Entity', () => {
   let validProps: UserProps;

@@ -7,7 +7,7 @@ import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-intern
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { Result, ok, error } from '@/shared/result';
 import { ILogger } from '@/core/common/services/i-logger.service'; // Added import for ILogger
-import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
+// Removed unused import for Inject: import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
 
 import {
   LoadAgentInternalStateUseCaseInput,

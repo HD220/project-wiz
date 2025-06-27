@@ -10,11 +10,12 @@ import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { AgentMaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo'; // Added import
 import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+// Removed duplicate import of DomainError, NotFoundError, ValueError
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 
 import { Result, ok, error } from '@/shared/result';
+import { ILoggerService } from '@/core/common/services/i-logger.service';
 
 import {
   CreateAgentUseCaseInput,
@@ -31,9 +32,10 @@ export class CreateAgentUseCase
     >
 {
   constructor(
-    private agentRepository: IAgentRepository,
-    private personaTemplateRepository: IAgentPersonaTemplateRepository,
-    private llmConfigRepository: ILLMProviderConfigRepository,
+    private readonly agentRepository: IAgentRepository,
+    private readonly personaTemplateRepository: IAgentPersonaTemplateRepository,
+    private readonly llmConfigRepository: ILLMProviderConfigRepository,
+    private readonly logger: ILoggerService,
   ) {}
 
   async execute(
