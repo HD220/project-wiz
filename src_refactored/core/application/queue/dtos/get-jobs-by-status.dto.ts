@@ -1,7 +1,7 @@
 // src_refactored/core/application/queue/dtos/get-jobs-by-status.dto.ts
-import { Result } from '@/shared/result';
-import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
 import { PaginationOptions, PaginatedJobsResult } from '@/domain/job/ports/job-repository.types';
+import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+import { Result } from '@/shared/result';
 
 
 export interface GetJobsByStatusRequestDTO {

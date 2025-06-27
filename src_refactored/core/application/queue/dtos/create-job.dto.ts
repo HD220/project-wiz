@@ -1,8 +1,7 @@
+import { DomainError, ValueError } from '@/domain/common/errors';
 import { JobEntity } from '@/domain/job/job.entity';
 import { IJobOptions } from '@/domain/job/value-objects/job-options.vo'; // Assuming IJobOptions is the correct type for opts
-
 import { Result } from '@/shared/result';
-import { DomainError, ValueError } from '@/domain/common/errors';
 
 // Based on JobEntityConstructionProps from create-job.use-case.ts
 export interface CreateJobRequestDTO<TData = any> {
