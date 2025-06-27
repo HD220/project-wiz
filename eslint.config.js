@@ -151,32 +151,26 @@ export default [
         {
           alias: {
             map: [
-              // General UI alias, careful if @ is used for more specific things higher up
-              // For now, let's assume @ primarily refers to src_refactored for ESLint context here.
-              // The tsconfig uses @ui/ for these, but code uses @/.
-              // This map will bridge that for ESLint.
-              ["@", "./src_refactored"], // General fallback for @ if needed for some paths
-              ["@/components", "./src_refactored/presentation/ui/components"],
-              ["@/lib", "./src_refactored/presentation/ui/lib"],
-              ["@/hooks", "./src_refactored/presentation/ui/hooks"],
-              ["@/styles", "./src_refactored/presentation/ui/styles"], // Example, if used
-              // Core aliases, ensuring they are correctly mapped for ESLint.
-              // These should align with tsconfig.json paths.
+              // General @ fallback.
+              ["@", "./src_refactored"],
+              // Core aliases. These use @/ in tsconfig.json and in the code.
               ["@/application", "./src_refactored/core/application"],
               ["@/core", "./src_refactored/core"],
               ["@/domain", "./src_refactored/core/domain"],
               ["@/infrastructure", "./src_refactored/infrastructure"],
-              ["@/presentation", "./src_refactored/presentation"], // General presentation, distinct from UI components
+              ["@/presentation", "./src_refactored/presentation"],
               ["@/shared", "./src_refactored/shared"],
+              // UI Aliases are handled by eslint-import-resolver-typescript using tsconfig.json paths,
+              // which expect imports like '@ui/components/...'.
+              // Thus, manual aliases for '@ui/components' or conflicting '@components' are removed here.
             ],
             extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
           }
         },
         {
           typescript: {
-            alwaysTryTypes: true,
+            alwaysTryTypes: true, // Important for TypeScript path resolution
             project: "./tsconfig.json",
-            // extensions are often implicitly handled by the typescript resolver itself or inherited
           }
         }
       ],

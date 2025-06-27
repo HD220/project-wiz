@@ -5,25 +5,25 @@ import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
+import { useIsMobile } from "@ui/hooks/use-mobile" // Corrected path
+import { cn } from "@ui/lib/utils" // Corrected path
+import { Button } from "@ui/components/ui/button" // Corrected path
+import { Input } from "@ui/components/ui/input" // Corrected path
+import { Separator } from "@ui/components/ui/separator" // Corrected path
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@ui/components/ui/sheet" // Corrected path
+import { Skeleton } from "@ui/components/ui/skeleton" // Corrected path
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@ui/components/ui/tooltip" // Corrected path
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

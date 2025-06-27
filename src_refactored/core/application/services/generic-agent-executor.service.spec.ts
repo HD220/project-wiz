@@ -3,8 +3,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
 import { z } from 'zod';
 
-import { ApplicationError } from '@/application/common/errors';
-import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
 
 import { ILogger } from '@/core/common/services/i-logger.service';
 import { ILLMAdapter, LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.interface'; // Corrected path
@@ -14,9 +12,9 @@ import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface'; // Corrected path & filename
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 // Corrected filename for AgentPersonaTemplate - it's agent-persona-template.vo.ts but exports AgentPersonaTemplate
+import { MaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo'; // Corrected filename
 import { AgentPersonaTemplate } from '@/domain/agent/value-objects/agent-persona-template.vo';
 import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
-import { MaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo'; // Corrected filename
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
 import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
@@ -31,6 +29,9 @@ import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Might be un
 import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
 import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+
+import { ApplicationError } from '@/application/common/errors';
+import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
 
 import { Result, ok, error } from '@/shared/result';
 
