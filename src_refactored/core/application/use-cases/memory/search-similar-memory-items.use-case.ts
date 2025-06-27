@@ -3,7 +3,7 @@ import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
 import { ApplicationError, DomainError, ValueError } from '@/application/common/errors';
-import { Executable } from '@/core/common/executable';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
 import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
@@ -21,7 +21,7 @@ import {
 @injectable()
 export class SearchSimilarMemoryItemsUseCase
   implements
-    Executable<
+    IUseCase< // Changed Executable to IUseCase
       SearchSimilarMemoryItemsUseCaseInput,
       SearchSimilarMemoryItemsUseCaseOutput,
       ApplicationError | ZodError

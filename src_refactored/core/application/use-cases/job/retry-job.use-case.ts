@@ -1,13 +1,15 @@
 // src_refactored/core/application/use-cases/job/retry-job.use-case.ts
 import { ZodError } from 'zod';
 
-import { Executable } from '@/core/common/executable';
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // Unresolved
+
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobId } from '@/domain/job/value-objects/job-id.vo';
 import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {
@@ -18,7 +20,7 @@ import {
 
 export class RetryJobUseCase
   implements
-    Executable<
+    IUseCase< // Changed Executable to IUseCase
       RetryJobUseCaseInput,
       RetryJobUseCaseOutput,
       DomainError | ZodError | NotFoundError | ValueError

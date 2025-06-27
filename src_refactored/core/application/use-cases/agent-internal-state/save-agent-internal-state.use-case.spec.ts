@@ -2,17 +2,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { SaveAgentInternalStateUseCase } from './save-agent-internal-state.use-case';
-import { SaveAgentInternalStateUseCaseInput } from './save-agent-internal-state.schema';
-
 import { DomainError, ValueError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
 import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-state/general-notes.collection';
+
 import { ok, error } from '@/shared/result';
+
+import { SaveAgentInternalStateUseCaseInput } from './save-agent-internal-state.schema';
+import { SaveAgentInternalStateUseCase } from './save-agent-internal-state.use-case';
 
 // Mock Repository
 const mockStateRepo: IAgentInternalStateRepository = {

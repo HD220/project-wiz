@@ -2,6 +2,7 @@
 import { ZodError } from 'zod';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
@@ -11,6 +12,7 @@ import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.v
 import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
 import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
 import { DomainError, ValueError } from '@/domain/common/errors';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {

@@ -2,8 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { LoadAgentInternalStateUseCase } from './load-agent-internal-state.use-case';
-import { LoadAgentInternalStateUseCaseInput } from './load-agent-internal-state.schema';
+import { DomainError, NotFoundError } from '@/application/common/errors'; // Assuming ApplicationError context or DomainError if it's from domain
 
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
@@ -11,8 +10,11 @@ import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
 import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-state/general-notes.collection';
-import { DomainError, NotFoundError } from '@/application/common/errors'; // Assuming ApplicationError context or DomainError if it's from domain
+
 import { ok, error } from '@/shared/result';
+
+import { LoadAgentInternalStateUseCaseInput } from './load-agent-internal-state.schema';
+import { LoadAgentInternalStateUseCase } from './load-agent-internal-state.use-case';
 
 // Mock Repository
 const mockStateRepo: IAgentInternalStateRepository = {

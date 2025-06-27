@@ -2,9 +2,11 @@
 import { ZodError } from 'zod';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {

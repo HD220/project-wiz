@@ -1,16 +1,18 @@
 // src_refactored/core/application/use-cases/job/update-job.use-case.ts
 import { ZodError } from 'zod';
 
-import { Executable } from '@/core/common/executable';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo';
+import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo'; // Unresolved
 import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved
 import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
-import { BackoffType, NoRetryPolicy, RetryPolicy } from '@/domain/job/value-objects/retry-policy.vo';
+import { BackoffType, NoRetryPolicy, RetryPolicy } from '@/domain/job/value-objects/retry-policy.vo'; // Unresolved
 import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {
@@ -21,7 +23,7 @@ import {
 
 export class UpdateJobUseCase
   implements
-    Executable<
+    IUseCase< // Changed Executable to IUseCase
       UpdateJobUseCaseInput,
       UpdateJobUseCaseOutput,
       DomainError | ZodError | ValueError | NotFoundError

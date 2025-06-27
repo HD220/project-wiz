@@ -1,9 +1,6 @@
 // src_refactored/core/application/queue/use-cases/get-job.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { GetJobUseCase } from './get-job.use-case';
-import { GetJobRequestDTO } from '../dtos';
-
 import { ValueError } from '@/domain/common/errors';
 import { JobEntity } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
@@ -14,6 +11,9 @@ import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
 import { JobProgressVO } from '@/domain/job/value-objects/job-progress.vo';
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
 import { Result, ok, error } from '@/shared/result';
+
+import { GetJobRequestDTO } from '../dtos';
+import { GetJobUseCase } from './get-job.use-case';
 
 
 describe('GetJobUseCase', () => {

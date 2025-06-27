@@ -1,7 +1,7 @@
 // src_refactored/core/domain/annotation/annotation.entity.spec.ts
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityError, ValueError } from '@/core/common/errors';
+import { EntityError, ValueError, DomainError, NotFoundError } from '@/domain/common/errors'; // Added EntityError
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
 import { Annotation, AnnotationProps } from './annotation.entity';

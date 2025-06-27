@@ -2,7 +2,7 @@
 import { inject, injectable } from 'inversify';
 
 import { ApplicationError } from '@/application/common/errors';
-import { Executable } from '@/core/common/executable';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
 import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
 import { DomainError, ValueError } from '@/domain/common/errors';
@@ -22,7 +22,7 @@ const CONTENT_EXCERPT_LENGTH = 200;
 
 @injectable()
 export class SearchMemoryItemsUseCase
-  implements Executable<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput, ApplicationError>
+  implements IUseCase<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput, ApplicationError> // Changed Executable to IUseCase
 {
   constructor(
     @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,

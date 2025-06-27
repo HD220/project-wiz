@@ -2,17 +2,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { CancelJobUseCase } from './cancel-job.use-case';
-import { CancelJobUseCaseInput } from './cancel-job.schema';
-
 import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // Unresolved path likely
+
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved path likely
 import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { CancelJobUseCaseInput } from './cancel-job.schema';
+import { CancelJobUseCase } from './cancel-job.use-case';
 
 // Mocks
 const mockJobRepository: IJobRepository = {

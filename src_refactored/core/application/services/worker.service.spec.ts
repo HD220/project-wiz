@@ -1,23 +1,25 @@
 // src_refactored/core/application/services/worker.service.spec.ts
-import { vi, describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach, Mocked } from 'vitest'; // Mocked might be unused
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
 
-import { WorkerService } from './worker.service';
-import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
-
 import { ILogger } from '@/core/common/services/i-logger.service';
-import { Agent } from '@/domain/agent/entities/agent.entity';
-import { IAgentRepository } from '@/domain/agent/ports/i-agent-repository.interface';
+
+import { Agent } from '@/domain/agent/entities/agent.entity'; // Might be unresolved
+import { IAgentRepository } from '@/domain/agent/ports/i-agent-repository.interface'; // Might be unresolved
 import { AgentIdVO } from '@/domain/agent/value-objects/agent-id.vo';
-import { Job } from '@/domain/job/entities/job.entity';
+import { Job } from '@/domain/job/entities/job.entity'; // Might be unresolved
 import { AgentExecutorResult } from '@/domain/job/job-processing.types';
-import { IJobRepository } from '@/domain/job/ports/i-job.repository';
-import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
-import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo';
+import { IJobRepository } from '@/domain/job/ports/i-job.repository'; // Might be unresolved
+import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo'; // Might be unresolved
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Might be unresolved
+import { RetryPolicyVO } from '@/domain/job/value-objects/retry-policy.vo'; // Might be unresolved
 import { JobStatusVO } from '@/domain/job/value-objects/job-status.vo';
 import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { IAgentExecutor } from '../ports/services/i-agent-executor.interface';
+import { WorkerService } from './worker.service';
 
 
 describe('WorkerService', () => {

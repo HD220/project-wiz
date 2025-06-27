@@ -1,7 +1,8 @@
 // src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.ts
 import { ZodError } from 'zod';
 
-import { Executable } from '@/core/common/executable';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+
 import { DomainError, ValueError } from '@/domain/common/errors'; // ValueError for VO creation issues
 import {
   LLMProviderConfig,
@@ -12,6 +13,7 @@ import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-ke
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 import { LLMProviderConfigName } from '@/domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from '@/domain/llm-provider-config/value-objects/llm-provider-id.vo';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {
@@ -23,7 +25,7 @@ import {
 
 export class CreateLLMProviderConfigUseCase
   implements
-    Executable<
+    IUseCase< // Changed Executable to IUseCase
       CreateLLMProviderConfigUseCaseInput,
       CreateLLMProviderConfigUseCaseOutput,
       DomainError | ZodError | ValueError

@@ -1,5 +1,5 @@
 // src_refactored/core/application/use-cases/project/list-projects.use-case.ts
-import { Executable } from '@/core/common/executable';
+import { IUseCase } from '@/application/common/ports/use-case.interface'; // Corrected import
 import { DomainError } from '@/domain/common/errors'; // Using DomainError as a general error type from repo
 import { Project } from '@/domain/project/project.entity';
 import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
@@ -16,7 +16,7 @@ import {
 
 export class ListProjectsUseCase
   implements
-    Executable<
+    IUseCase< // Changed Executable to IUseCase
       ListProjectsUseCaseInput,
       ListProjectsUseCaseOutput,
       DomainError // Errors from repository are likely DomainErrors

@@ -1,39 +1,41 @@
-// Vitest
+// Vitest & external
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { mock, DeepMockProxy } from 'vitest-mock-extended';
 import { z } from 'zod';
 
-// Core Service
-import { GenericAgentExecutor } from './generic-agent-executor.service';
+import { ApplicationError } from '@/application/common/errors';
+import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
 
-// Domain Entities & VOs
+import { ILogger } from '@/core/common/services/i-logger.service';
+import { ILLMAdapter, LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.interface'; // Corrected path
+import { IAgentTool } from '@/core/tools/tool.interface';
+
 import { Agent } from '@/domain/agent/agent.entity';
-import { IAgentInternalStateRepository } from '@/domain/agent/ports/i-agent-internal-state.repository';
+import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface'; // Corrected path & filename
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
+// Corrected filename for AgentPersonaTemplate - it's agent-persona-template.vo.ts but exports AgentPersonaTemplate
 import { AgentPersonaTemplate } from '@/domain/agent/value-objects/agent-persona-template.vo';
-import { MaxIterations } from '@/domain/agent/value-objects/max-iterations.vo';
+import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
+import { MaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo'; // Corrected filename
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
 import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
 import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
 import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
 import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
-import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
-import { ApplicationError } from '@/application/common/errors';
-import { ILLMAdapter, LanguageModelMessage } from '@/application/ports/adapters/i-llm.adapter';
-import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
-import { ILogger } from '@/core/common/services/i-logger.service';
 import { ToolError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
-import { IJobRepository } from '@/domain/job/ports/i-job.repository';
+import { IJobRepository } from '@/domain/job/ports/i-job.repository'; // Might be unresolved
 import { HistoryEntryRoleType } from '@/domain/job/value-objects/activity-history-entry.vo';
-// import { JobId } from '@/domain/job/value-objects/job-id.vo'; // Not directly used
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Might be unresolved
 import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
 import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
+
 import { Result, ok, error } from '@/shared/result';
-import { IAgentTool } from '@/core/tools/tool.interface';
+
+// Core Service (relative import)
+import { GenericAgentExecutor } from './generic-agent-executor.service';
 
 
 describe('GenericAgentExecutor', () => {

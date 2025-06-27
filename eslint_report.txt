@@ -1,0 +1,1682 @@
+
+> project-wiz@1.0.0 lint
+> eslint --ext .ts,.tsx . src_refactored/**/*.{ts,tsx}
+
+
+/app/src_refactored/core/application/common/errors.ts
+  32:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/ports/services/i-agent-executor.interface.ts
+  5:1  warning  There should be at least one empty line between import groups                                import/order
+  6:1  warning  There should be at least one empty line between import groups                                import/order
+  6:1  warning  `@/domain/common/errors` import should occur before import of `@/application/common/errors`  import/order
+
+/app/src_refactored/core/application/ports/services/i-tool-registry.service.ts
+   1:1   warning  There should be at least one empty line between import groups                                     import/order
+   2:1   warning  There should be at least one empty line between import groups                                     import/order
+   2:1   warning  `@/core/tools/tool.interface` import should occur before import of `@/application/common/errors`  import/order
+  32:33  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  32:38  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  43:56  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  43:61  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  53:42  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  53:47  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/dtos/create-job.dto.ts
+   3:1   warning  There should be at least one empty line between import groups  import/order
+   7:46  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  14:42  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  14:57  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/dtos/get-job.dto.ts
+   2:1   warning  There should be at least one empty line between import groups  import/order
+  11:39  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  11:54  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/dtos/get-jobs-by-status.dto.ts
+   3:1   warning  There should be at least one empty line between import groups  import/order
+  15:48  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  15:63  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/use-cases/create-job.use-case.spec.ts
+    4:1   warning  There should be at least one empty line between import groups                                                    import/order
+    4:1   warning  `./create-job.use-case` import should occur after import of `@/shared/result`                                    import/order
+    5:1   warning  `../dtos` import should occur after import of `@/shared/result`                                                  import/order
+    7:1   warning  `@/domain/job/job.entity` import should occur after import of `@/domain/common/errors`                           import/order
+    7:21  warning  'JobEntityConstructionProps' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+    8:1   warning  `@/domain/job/ports/job-repository.interface` import should occur after import of `@/domain/common/errors`       import/order
+    9:1   warning  `@/domain/job/value-objects/job-execution-logs.vo` import should occur after import of `@/domain/common/errors`  import/order
+   10:1   warning  `@/domain/job/value-objects/job-id.vo` import should occur after import of `@/domain/common/errors`              import/order
+   11:1   warning  `@/domain/job/value-objects/job-options.vo` import should occur after import of `@/domain/common/errors`         import/order
+   12:1   warning  `@/domain/job/value-objects/job-priority.vo` import should occur after import of `@/domain/common/errors`        import/order
+   13:1   warning  `@/domain/job/value-objects/job-progress.vo` import should occur after import of `@/domain/common/errors`        import/order
+   14:1   warning  `@/domain/job/value-objects/job-status.vo` import should occur after import of `@/domain/common/errors`          import/order
+   14:23  warning  'JobStatusEnum' is defined but never used. Allowed unused vars must match /^_/u                                  @typescript-eslint/no-unused-vars
+   15:1   warning  There should be at least one empty line between import groups                                                    import/order
+   16:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                         @typescript-eslint/no-unused-vars
+   24:5   warning  Object Literal Property name `JobEntity` must match one of the following formats: camelCase                      @typescript-eslint/naming-convention
+   80:45  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+  127:45  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/use-cases/create-job.use-case.ts
+   2:1   warning  There should be at least one empty line between import groups                                                                      import/order
+   2:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/job/ports/job-repository.interface`  import/order
+   5:1   warning  There should be at least one empty line between import groups                                                                      import/order
+   5:44  warning  'JobRepositorySymbol' is defined but never used. Allowed unused vars must match /^_/u                                              @typescript-eslint/no-unused-vars
+   7:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                                           @typescript-eslint/no-unused-vars
+  13:39  error    Unexpected any. Specify a different type                                                                                           @typescript-eslint/no-explicit-any
+  13:54  error    Unexpected any. Specify a different type                                                                                           @typescript-eslint/no-explicit-any
+  48:19  error    Unexpected any. Specify a different type                                                                                           @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/use-cases/get-job.use-case.spec.ts
+   4:1   warning  There should be at least one empty line between import groups               import/order
+   4:1   warning  `./get-job.use-case` import should occur after import of `@/shared/result`  import/order
+   5:1   warning  `../dtos` import should occur after import of `@/shared/result`             import/order
+  15:1   warning  There should be at least one empty line between import groups               import/order
+  16:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  61:45  error    Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/use-cases/get-job.use-case.ts
+   2:1   warning  There should be at least one empty line between import groups                                                               import/order
+   2:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/job/value-objects/job-id.vo`  import/order
+   5:44  warning  'JobRepositorySymbol' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+   6:1   warning  There should be at least one empty line between import groups                                                               import/order
+   8:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                                    @typescript-eslint/no-unused-vars
+  14:36  error    Unexpected any. Specify a different type                                                                                    @typescript-eslint/no-explicit-any
+  14:51  error    Unexpected any. Specify a different type                                                                                    @typescript-eslint/no-explicit-any
+  41:19  error    Unexpected any. Specify a different type                                                                                    @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/use-cases/get-jobs-by-status.use-case.spec.ts
+   4:1   warning  There should be at least one empty line between import groups                          import/order
+   4:1   warning  `./get-jobs-by-status.use-case` import should occur after import of `@/shared/result`  import/order
+   5:1   warning  `../dtos` import should occur after import of `@/shared/result`                        import/order
+   9:31  warning  'JobSearchFilters' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   9:49  warning  'PaginationOptions' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  15:1   warning  There should be at least one empty line between import groups                          import/order
+  16:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  25:38  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  30:38  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/queue/use-cases/get-jobs-by-status.use-case.ts
+   2:1   warning  There should be at least one empty line between import groups                                                                  import/order
+   2:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/job/ports/job-repository.types`  import/order
+   3:44  warning  'JobRepositorySymbol' is defined but never used. Allowed unused vars must match /^_/u                                          @typescript-eslint/no-unused-vars
+   4:1   warning  There should be at least one empty line between import groups                                                                  import/order
+   6:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                                       @typescript-eslint/no-unused-vars
+  11:45  error    Unexpected any. Specify a different type                                                                                       @typescript-eslint/no-explicit-any
+  11:60  error    Unexpected any. Specify a different type                                                                                       @typescript-eslint/no-explicit-any
+  52:19  error    Unexpected any. Specify a different type                                                                                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/services/generic-agent-executor.service.spec.ts
+    7:1   warning  `./generic-agent-executor.service` import should occur after import of `@/core/tools/tool.interface`                                      import/order
+   10:1   warning  `@/domain/agent/agent.entity` import should occur after import of `@/core/tools/tool.interface`                                           import/order
+   11:1   warning  `@/domain/agent/ports/i-agent-internal-state.repository` import should occur after import of `@/core/tools/tool.interface`                import/order
+   11:47  error    Unable to resolve path to module '@/domain/agent/ports/i-agent-internal-state.repository'                                                 import/no-unresolved
+   12:1   warning  `@/domain/agent/value-objects/agent-id.vo` import should occur after import of `@/core/tools/tool.interface`                              import/order
+   13:1   warning  `@/domain/agent/value-objects/agent-persona-template.vo` import should occur after import of `@/core/tools/tool.interface`                import/order
+   13:38  error    Unable to resolve path to module '@/domain/agent/value-objects/agent-persona-template.vo'                                                 import/no-unresolved
+   14:1   warning  `@/domain/agent/value-objects/max-iterations.vo` import should occur after import of `@/core/tools/tool.interface`                        import/order
+   14:31  error    Unable to resolve path to module '@/domain/agent/value-objects/max-iterations.vo'                                                         import/no-unresolved
+   15:1   warning  `@/domain/agent/value-objects/persona/persona-backstory.vo` import should occur after import of `@/core/tools/tool.interface`             import/order
+   16:1   warning  `@/domain/agent/value-objects/persona/persona-goal.vo` import should occur after import of `@/core/tools/tool.interface`                  import/order
+   17:1   warning  `@/domain/agent/value-objects/persona/persona-id.vo` import should occur after import of `@/core/tools/tool.interface`                    import/order
+   18:1   warning  `@/domain/agent/value-objects/persona/persona-name.vo` import should occur after import of `@/core/tools/tool.interface`                  import/order
+   19:1   warning  `@/domain/agent/value-objects/persona/persona-role.vo` import should occur after import of `@/core/tools/tool.interface`                  import/order
+   20:1   warning  `@/domain/agent/value-objects/persona/tool-names.vo` import should occur after import of `@/core/tools/tool.interface`                    import/order
+   21:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   21:1   warning  `@/domain/agent/value-objects/agent-temperature.vo` import should occur after import of `@/core/tools/tool.interface`                     import/order
+   22:1   warning  `@/application/common/errors` import should occur after import of `@/core/tools/tool.interface`                                           import/order
+   23:1   warning  `@/application/ports/adapters/i-llm.adapter` import should occur after import of `@/core/tools/tool.interface`                            import/order
+   23:23  warning  'LanguageModelMessage' is defined but never used. Allowed unused vars must match /^_/u                                                    @typescript-eslint/no-unused-vars
+   23:51  error    Unable to resolve path to module '@/application/ports/adapters/i-llm.adapter'                                                             import/no-unresolved
+   24:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   24:1   warning  `@/application/ports/services/i-tool-registry.service` import should occur after import of `@/core/tools/tool.interface`                  import/order
+   25:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   26:1   warning  `@/domain/common/errors` import should occur after import of `@/core/tools/tool.interface`                                                import/order
+   27:1   warning  `@/domain/job/job.entity` import should occur after import of `@/core/tools/tool.interface`                                               import/order
+   28:1   warning  `@/domain/job/ports/i-job.repository` import should occur after import of `@/core/tools/tool.interface`                                   import/order
+   28:32  error    Unable to resolve path to module '@/domain/job/ports/i-job.repository'                                                                    import/no-unresolved
+   29:1   warning  `@/domain/job/value-objects/activity-history-entry.vo` import should occur after import of `@/core/tools/tool.interface`                  import/order
+   31:1   warning  `@/domain/job/value-objects/job-name.vo` import should occur after import of `@/core/tools/tool.interface`                                import/order
+   31:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                                                 import/no-unresolved
+   32:1   warning  `@/domain/job/value-objects/job-status.vo` import should occur after import of `@/core/tools/tool.interface`                              import/order
+   33:1   warning  `@/domain/job/value-objects/target-agent-role.vo` import should occur after import of `@/core/tools/tool.interface`                       import/order
+   34:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   34:1   warning  `@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo` import should occur after import of `@/core/tools/tool.interface`  import/order
+   35:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   35:1   warning  `@/shared/result` import should occur after import of `@/core/tools/tool.interface`                                                       import/order
+   35:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                                                  @typescript-eslint/no-unused-vars
+   42:52  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   42:57  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   43:58  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   43:63  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   44:61  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   44:66  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   45:56  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   45:61  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   64:42  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   64:47  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   73:48  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   73:53  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   86:51  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   86:56  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   99:46  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   99:51  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  171:9   warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  176:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  260:9   warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  268:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  330:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  332:11  warning  'updateLastFailureSummarySpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                    @typescript-eslint/no-unused-vars
+  405:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  412:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  417:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  442:54  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  443:49  warning  Object Literal Property name `tool_call_id` must match one of the following formats: camelCase                                            @typescript-eslint/naming-convention
+  522:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  529:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  534:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  535:11  warning  'finalizeExecutionSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                           @typescript-eslint/no-unused-vars
+  555:54  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  556:49  warning  Object Literal Property name `tool_call_id` must match one of the following formats: camelCase                                            @typescript-eslint/naming-convention
+  624:9   warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  629:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  729:9   warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  730:1   warning  File has too many lines (713). Maximum allowed is 500                                                                                     max-lines
+  778:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                       @typescript-eslint/ban-ts-comment
+  780:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                       @typescript-eslint/ban-ts-comment
+  812:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  819:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  824:11  warning  'updateAgentStateSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+  825:11  warning  'finalizeExecutionSpy' is assigned a value but never used. Allowed unused vars must match /^_/u                                           @typescript-eslint/no-unused-vars
+  842:59  warning  Identifier name 'm' is too short (< 2)                                                                                                    id-length
+  873:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                       @typescript-eslint/ban-ts-comment
+  875:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                       @typescript-eslint/ban-ts-comment
+  897:11  warning  'MIN_USABLE_LLM_RESPONSE_LENGTH' is assigned a value but never used. Allowed unused vars must match /^_/u                                 @typescript-eslint/no-unused-vars
+  906:87  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  907:89  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  956:71  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  957:89  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  998:81  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  999:81  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+
+/app/src_refactored/core/application/services/generic-agent-executor.service.ts
+    1:1   warning  `@/domain/agent/agent.entity` import should occur after import of `@/core/tools/tool.interface`                                           import/order
+    2:1   warning  There should be at least one empty line between import groups                                                                             import/order
+    2:1   warning  `@/domain/agent/ports/i-agent-internal-state.repository` import should occur after import of `@/core/tools/tool.interface`                import/order
+    2:47  error    Unable to resolve path to module '@/domain/agent/ports/i-agent-internal-state.repository'                                                 import/no-unresolved
+    3:1   warning  `@/application/common/errors` import should occur after import of `@/domain/job/value-objects/job-status.vo`                              import/order
+    4:1   warning  `@/application/ports/adapters/i-llm.adapter` import should occur after import of `@/domain/job/value-objects/job-status.vo`               import/order
+    4:29  error    Unable to resolve path to module '@/application/ports/adapters/i-llm.adapter'                                                             import/no-unresolved
+    5:1   warning  `@/application/ports/services/i-agent-executor.interface` import should occur after import of `@/domain/job/value-objects/job-status.vo`  import/order
+    6:1   warning  There should be at least one empty line between import groups                                                                             import/order
+    6:1   warning  `@/application/ports/services/i-tool-registry.service` import should occur after import of `@/domain/job/value-objects/job-status.vo`     import/order
+    8:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   10:1   warning  `@/domain/job/job.entity` import should occur after import of `@/domain/job/job-processing.types`                                         import/order
+   12:32  error    Unable to resolve path to module '@/domain/job/ports/i-job.repository'                                                                    import/no-unresolved
+   15:1   warning  There should be at least one empty line between import groups                                                                             import/order
+   32:3   warning  Type Property name `tool_calls` must match one of the following formats: camelCase                                                        @typescript-eslint/naming-convention
+   33:3   warning  Type Property name `tool_call_id` must match one of the following formats: camelCase                                                      @typescript-eslint/naming-convention
+   39:20  warning  Class Property name `MIN_USABLE_LLM_RESPONSE_LENGTH` must match one of the following formats: camelCase                                   @typescript-eslint/naming-convention
+   40:20  warning  Class Property name `MAX_REPLAN_ATTEMPTS_FOR_EMPTY_RESPONSE` must match one of the following formats: camelCase                           @typescript-eslint/naming-convention
+   50:3   warning  Async method 'executeJob' has too many lines (235). Maximum allowed is 100                                                                max-lines-per-function
+   50:26  warning  Async method 'executeJob' has too many statements (138). Maximum allowed is 25                                                            max-statements
+  116:80  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  218:13  warning  Blocks are nested too deeply (5). Maximum allowed is 4                                                                                    max-depth
+  246:13  warning  Blocks are nested too deeply (5). Maximum allowed is 4                                                                                    max-depth
+  288:24  error    'AgentExecutorStatus' is not defined                                                                                                      no-undef
+  290:24  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  291:48  error    'newExecutionHistoryEntries' is not defined                                                                                               no-undef
+  298:18  error    'criticalErrorEncounteredThisTurn' is not defined                                                                                         no-undef
+  309:29  error    'newExecutionHistoryEntries' is not defined                                                                                               no-undef
+  379:11  warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  384:11  warning  Object Literal Property name `tool_call_id` must match one of the following formats: camelCase                                            @typescript-eslint/naming-convention
+  392:49  warning  Async method 'processAndValidateSingleToolCall' has too many statements (32). Maximum allowed is 25                                       max-statements
+  416:21  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  502:30  warning  Identifier name 'm' is too short (< 2)                                                                                                    id-length
+  508:18  error    'AgentExecutorStatus' is not defined                                                                                                      no-undef
+  510:18  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  540:3   error    Duplicate name 'executeJob'                                                                                                               no-dupe-class-members
+  540:3   warning  Async method 'executeJob' has too many lines (251). Maximum allowed is 100                                                                max-lines-per-function
+  540:26  warning  Async method 'executeJob' has too many statements (155). Maximum allowed is 25                                                            max-statements
+  615:80  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  626:1   warning  File has too many lines (682). Maximum allowed is 500                                                                                     max-lines
+  691:13  warning  Blocks are nested too deeply (5). Maximum allowed is 4                                                                                    max-depth
+  695:15  warning  Blocks are nested too deeply (6). Maximum allowed is 4                                                                                    max-depth
+  719:13  warning  Blocks are nested too deeply (5). Maximum allowed is 4                                                                                    max-depth
+  759:24  error    'AgentExecutorStatus' is not defined                                                                                                      no-undef
+  761:24  error    Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/services/worker.service.spec.ts
+   2:59  warning  'Mocked' is defined but never used. Allowed unused vars must match /^_/u                                                     @typescript-eslint/no-unused-vars
+   5:1   warning  There should be at least one empty line between import groups                                                                import/order
+   5:1   warning  `./worker.service` import should occur after import of `@/shared/result`                                                     import/order
+   6:1   warning  `../ports/services/i-agent-executor.interface` import should occur after import of `@/shared/result`                         import/order
+   8:1   warning  There should be at least one empty line between import groups                                                                import/order
+   9:23  error    Unable to resolve path to module '@/domain/agent/entities/agent.entity'                                                      import/no-unresolved
+  10:34  error    Unable to resolve path to module '@/domain/agent/ports/i-agent-repository.interface'                                         import/no-unresolved
+  12:21  error    Unable to resolve path to module '@/domain/job/entities/job.entity'                                                          import/no-unresolved
+  14:32  error    Unable to resolve path to module '@/domain/job/ports/i-job.repository'                                                       import/no-unresolved
+  15:32  error    Unable to resolve path to module '@/domain/job/value-objects/attempt-count.vo'                                               import/no-unresolved
+  16:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                                    import/no-unresolved
+  17:1   warning  `@/domain/job/value-objects/retry-policy.vo` import should occur after import of `@/domain/job/value-objects/job-status.vo`  import/order
+  17:31  error    Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'                                                import/no-unresolved
+  19:1   warning  There should be at least one empty line between import groups                                                                import/order
+  20:14  warning  'error' is defined but never used. Allowed unused vars must match /^_/u                                                      @typescript-eslint/no-unused-vars
+  58:62  error    Unexpected any. Specify a different type                                                                                     @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/services/worker.service.ts
+   2:1   warning  There should be at least one empty line between import groups                            import/order
+   3:10  warning  'Agent' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   3:23  error    Unable to resolve path to module '@/domain/agent/entities/agent.entity'                  import/no-unresolved
+   4:34  error    Unable to resolve path to module '@/domain/agent/ports/i-agent-repository.interface'     import/no-unresolved
+   6:21  error    Unable to resolve path to module '@/domain/job/entities/job.entity'                      import/no-unresolved
+   7:32  error    Unable to resolve path to module '@/domain/job/ports/i-job.repository'                   import/no-unresolved
+  88:37  warning  Async method '_processNextJobCycle' has too many statements (54). Maximum allowed is 25  max-statements
+
+/app/src_refactored/core/application/services/worker/dtos.ts
+  111:12  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-explicit-any
+  119:18  error  An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+/app/src_refactored/core/application/services/worker/i-worker.service.ts
+  24:18  error  'IWorkerService' is already defined  no-redeclare
+
+/app/src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.spec.ts
+   5:1   warning  `./load-agent-internal-state.use-case` import should occur after import of `@/shared/result`  import/order
+   6:1   warning  `./load-agent-internal-state.schema` import should occur after import of `@/shared/result`    import/order
+  13:1   warning  There should be at least one empty line between import groups                                 import/order
+  14:1   warning  There should be at least one empty line between import groups                                 import/order
+  14:23  warning  'NotFoundError' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups                                                 import/order
+   4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/common/errors`  import/order
+   7:1   warning  There should be at least one empty line between import groups                                                 import/order
+  63:19  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.spec.ts
+    5:1   warning  `./save-agent-internal-state.use-case` import should occur after import of `@/shared/result`                                              import/order
+    6:1   warning  `./save-agent-internal-state.schema` import should occur after import of `@/shared/result`                                                import/order
+    8:1   warning  There should be at least one empty line between import groups                                                                             import/order
+    8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/agent/value-objects/internal-state/general-notes.collection`  import/order
+    8:35  warning  'NotFoundError' is defined but never used. Allowed unused vars must match /^_/u                                                           @typescript-eslint/no-unused-vars
+   14:1   warning  There should be at least one empty line between import groups                                                                             import/order
+  186:11  warning  'invalidGoalInput' is assigned a value but never used. Allowed unused vars must match /^_/u                                               @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts
+    4:1   warning  There should be at least one empty line between import groups                                                 import/order
+    4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/common/errors`  import/order
+   11:1   warning  There should be at least one empty line between import groups                                                 import/order
+   32:16  warning  Async method 'execute' has too many statements (42). Maximum allowed is 25                                    max-statements
+   99:14  warning  'updated' is assigned a value but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+  114:19  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.spec.ts
+   5:1  warning  `./create-persona-template.use-case` import should occur after import of `@/shared/result`                                import/order
+   6:1  warning  `./create-persona-template.schema` import should occur after import of `@/shared/result`                                  import/order
+   8:1  warning  There should be at least one empty line between import groups                                                             import/order
+   8:1  warning  `@/application/common/errors` import should occur after import of `@/domain/agent/value-objects/persona/persona-name.vo`  import/order
+  11:1  warning  There should be at least one empty line between import groups                                                             import/order
+
+/app/src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups                                                 import/order
+   4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/common/errors`  import/order
+  13:1   warning  There should be at least one empty line between import groups                                                 import/order
+  77:19  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/agent/create-agent.use-case.spec.ts
+    5:1   warning  `./create-agent.use-case` import should occur after import of `@/shared/result`                                                    import/order
+    6:1   warning  `./create-agent.schema` import should occur after import of `@/shared/result`                                                      import/order
+    8:1   warning  There should be at least one empty line between import groups                                                                      import/order
+    8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/llm-provider-config/value-objects/llm-provider-id.vo`  import/order
+    9:1   warning  `@/domain/agent/agent.entity` import should occur after import of `@/domain/agent/agent-persona-template.vo`                       import/order
+   24:1   warning  There should be at least one empty line between import groups                                                                      import/order
+  195:32  error    'AgentTemperature' is not defined                                                                                                  no-undef
+  196:5   error    'AgentTemperature' is not defined                                                                                                  no-undef
+  211:5   error    'AgentTemperature' is not defined                                                                                                  no-undef
+
+/app/src_refactored/core/application/use-cases/agent/create-agent.use-case.ts
+    4:1   warning  There should be at least one empty line between import groups                                                                                               import/order
+    4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo`  import/order
+   14:1   warning  There should be at least one empty line between import groups                                                                                               import/order
+   37:16  warning  Async method 'execute' has too many statements (33). Maximum allowed is 25                                                                                  max-statements
+  105:19  error    Unexpected any. Specify a different type                                                                                                                    @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/annotation/list-annotations.use-case.spec.ts
+    5:1   warning  `./list-annotations.use-case` import should occur after import of `@/shared/result`                                       import/order
+    6:1   warning  `./list-annotations.schema` import should occur after import of `@/shared/result`                                         import/order
+    8:1   warning  There should be at least one empty line between import groups                                                             import/order
+    8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/annotation/value-objects/annotation-text.vo`  import/order
+    9:1   warning  There should be at least one empty line between import groups                                                             import/order
+   12:35  warning  'PaginationOptions' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+   14:1   warning  There should be at least one empty line between import groups                                                             import/order
+  105:51  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/annotation/list-annotations.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups                                                 import/order
+   4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/common/errors`  import/order
+   5:1   warning  There should be at least one empty line between import groups                                                 import/order
+   9:1   warning  There should be at least one empty line between import groups                                                 import/order
+  79:19  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/annotation/remove-annotation.use-case.spec.ts
+   5:1   warning  `./remove-annotation.use-case` import should occur after import of `@/shared/result`                                    import/order
+   6:1   warning  `./remove-annotation.schema` import should occur after import of `@/shared/result`                                      import/order
+   8:1   warning  There should be at least one empty line between import groups                                                           import/order
+   8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/annotation/value-objects/annotation-id.vo`  import/order
+   8:23  warning  'NotFoundError' is defined but never used. Allowed unused vars must match /^_/u                                         @typescript-eslint/no-unused-vars
+  10:1   warning  There should be at least one empty line between import groups                                                           import/order
+
+/app/src_refactored/core/application/use-cases/annotation/remove-annotation.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups                                                 import/order
+   4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/common/errors`  import/order
+   7:1   warning  There should be at least one empty line between import groups                                                 import/order
+  65:19  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/annotation/save-annotation.use-case.spec.ts
+   5:1  warning  `./save-annotation.use-case` import should occur after import of `@/shared/result`                                        import/order
+   6:1  warning  `./save-annotation.schema` import should occur after import of `@/shared/result`                                          import/order
+   8:1  warning  There should be at least one empty line between import groups                                                             import/order
+   8:1  warning  `@/application/common/errors` import should occur after import of `@/domain/annotation/value-objects/annotation-text.vo`  import/order
+   9:1  warning  There should be at least one empty line between import groups                                                             import/order
+  13:1  warning  There should be at least one empty line between import groups                                                             import/order
+
+/app/src_refactored/core/application/use-cases/annotation/save-annotation.use-case.ts
+    4:1   warning  There should be at least one empty line between import groups                                                 import/order
+    4:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/common/errors`  import/order
+    5:1   warning  There should be at least one empty line between import groups                                                 import/order
+   10:1   warning  There should be at least one empty line between import groups                                                 import/order
+   29:16  warning  Async method 'execute' has too many statements (40). Maximum allowed is 25                                    max-statements
+   62:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object                                     no-prototype-builtins
+   68:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object                                     no-prototype-builtins
+   71:13  warning  'updated' is assigned a value but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+  110:19  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/cancel-job.schema.ts
+  26:13  error  'CancelJobUseCaseOutputSchema' is already defined  no-redeclare
+
+/app/src_refactored/core/application/use-cases/job/cancel-job.use-case.spec.ts
+   5:1   warning  `./cancel-job.use-case` import should occur after import of `@/shared/result`                                 import/order
+   6:1   warning  `./cancel-job.schema` import should occur after import of `@/shared/result`                                   import/order
+   8:1   warning  There should be at least one empty line between import groups                                                 import/order
+   8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/job/value-objects/job-status.vo`  import/order
+   9:1   warning  There should be at least one empty line between import groups                                                 import/order
+  13:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                     import/no-unresolved
+  14:1   warning  There should be at least one empty line between import groups                                                 import/order
+
+/app/src_refactored/core/application/use-cases/job/cancel-job.use-case.ts
+   4:28  error    Unable to resolve path to module '@/core/common/executable'                      import/no-unresolved
+   5:1   warning  There should be at least one empty line between import groups                    import/order
+   9:1   warning  There should be at least one empty line between import groups                    import/order
+   9:10  warning  'JobStatusType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  87:19  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/create-job.schema.ts
+  4:29  error  Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'  import/no-unresolved
+
+/app/src_refactored/core/application/use-cases/job/create-job.use-case.spec.ts
+    5:1   warning  `./create-job.use-case` import should occur after import of `@/shared/result`                                              import/order
+    6:1   warning  `./create-job.schema` import should occur after import of `@/shared/result`                                                import/order
+    8:1   warning  There should be at least one empty line between import groups                                                              import/order
+    8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/job/value-objects/job-name.vo`                 import/order
+    9:1   warning  There should be at least one empty line between import groups                                                              import/order
+   13:1   warning  `@/domain/job/value-objects/job-priority.vo` import should occur after import of `@/domain/job/value-objects/job-name.vo`  import/order
+   14:1   warning  `@/domain/job/value-objects/retry-policy.vo` import should occur after import of `@/domain/job/value-objects/job-name.vo`  import/order
+   14:57  error    Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'                                              import/no-unresolved
+   15:1   warning  `@/domain/job/value-objects/job-status.vo` import should occur after import of `@/domain/job/value-objects/job-name.vo`    import/order
+   15:10  warning  'JobStatusType' is defined but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+   16:1   warning  There should be at least one empty line between import groups                                                              import/order
+   16:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                                  import/no-unresolved
+   77:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+   88:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+   99:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  109:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  119:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  129:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  168:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  185:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+  246:69  error    Unexpected any. Specify a different type                                                                                   @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/create-job.use-case.ts
+    4:1   warning  There should be at least one empty line between import groups                                                                    import/order
+    4:28  error    Unable to resolve path to module '@/core/common/executable'                                                                      import/no-unresolved
+    8:29  error    Unable to resolve path to module '@/domain/job/value-objects/attempt-count.vo'                                                   import/no-unresolved
+    9:30  error    Unable to resolve path to module '@/domain/job/value-objects/job-depends-on.vo'                                                  import/no-unresolved
+   11:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                                        import/no-unresolved
+   16:3   warning  'RetryDelay' is defined but never used. Allowed unused vars must match /^_/u                                                     @typescript-eslint/no-unused-vars
+   18:8   error    Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'                                                    import/no-unresolved
+   19:1   warning  `@/domain/job/value-objects/job-status.vo` import should occur before import of `@/domain/job/value-objects/retry-policy.vo`     import/order
+   19:10  warning  'JobStatusType' is defined but never used. Allowed unused vars must match /^_/u                                                  @typescript-eslint/no-unused-vars
+   20:1   warning  `@/domain/job/value-objects/job-timestamp.vo` import should occur before import of `@/domain/job/value-objects/retry-policy.vo`  import/order
+   20:10  warning  'JobTimestamp' is defined but never used. Allowed unused vars must match /^_/u                                                   @typescript-eslint/no-unused-vars
+   20:30  error    Unable to resolve path to module '@/domain/job/value-objects/job-timestamp.vo'                                                   import/no-unresolved
+   21:1   warning  There should be at least one empty line between import groups                                                                    import/order
+   22:1   warning  There should be at least one empty line between import groups                                                                    import/order
+   22:1   warning  `@/core/ports/adapters/job-queue.interface` import should occur before import of `@/domain/common/errors`                        import/order
+   51:16  warning  Async method 'execute' has too many statements (31). Maximum allowed is 25                                                       max-statements
+  137:19  error    Unexpected any. Specify a different type                                                                                         @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/list-jobs.use-case.spec.ts
+   5:1   warning  `./list-jobs.use-case` import should occur after import of `@/shared/result`                                         import/order
+   6:1   warning  `./list-jobs.schema` import should occur after import of `@/shared/result`                                           import/order
+   8:1   warning  There should be at least one empty line between import groups                                                        import/order
+   8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/job/value-objects/target-agent-role.vo`  import/order
+  11:28  warning  'PaginationOptions' is defined but never used. Allowed unused vars must match /^_/u                                  @typescript-eslint/no-unused-vars
+  13:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                            import/no-unresolved
+  16:30  error    Unable to resolve path to module '@/domain/job/value-objects/job-timestamp.vo'                                       import/no-unresolved
+  17:1   warning  There should be at least one empty line between import groups                                                        import/order
+  99:51  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/list-jobs.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups  import/order
+   4:28  error    Unable to resolve path to module '@/core/common/executable'    import/no-unresolved
+   9:1   warning  There should be at least one empty line between import groups  import/order
+  81:19  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/retry-job.use-case.spec.ts
+   3:10  warning  'ZodError' is defined but never used. Allowed unused vars must match /^_/u                                                      @typescript-eslint/no-unused-vars
+   5:1   warning  `./retry-job.use-case` import should occur after import of `@/shared/result`                                                    import/order
+   6:1   warning  `./retry-job.schema` import should occur after import of `@/shared/result`                                                      import/order
+   8:1   warning  There should be at least one empty line between import groups                                                                   import/order
+   8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/job/value-objects/job-timestamp.vo`                 import/order
+   9:1   warning  There should be at least one empty line between import groups                                                                   import/order
+  12:23  warning  'AttemptCount' is defined but never used. Allowed unused vars must match /^_/u                                                  @typescript-eslint/no-unused-vars
+  12:43  error    Unable to resolve path to module '@/domain/job/value-objects/attempt-count.vo'                                                  import/no-unresolved
+  14:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                                       import/no-unresolved
+  15:1   warning  `@/domain/job/value-objects/retry-policy.vo` import should occur after import of `@/domain/job/value-objects/job-timestamp.vo`  import/order
+  15:42  error    Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'                                                   import/no-unresolved
+  16:10  warning  'JobStatus' is defined but never used. Allowed unused vars must match /^_/u                                                     @typescript-eslint/no-unused-vars
+  17:1   warning  There should be at least one empty line between import groups                                                                   import/order
+  17:10  warning  'JobTimestamp' is defined but never used. Allowed unused vars must match /^_/u                                                  @typescript-eslint/no-unused-vars
+  17:30  error    Unable to resolve path to module '@/domain/job/value-objects/job-timestamp.vo'                                                  import/no-unresolved
+  56:69  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/retry-job.use-case.ts
+    4:28  error    Unable to resolve path to module '@/core/common/executable'                 import/no-unresolved
+    5:1   warning  There should be at least one empty line between import groups               import/order
+    7:10  warning  'Job' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   10:1   warning  There should be at least one empty line between import groups               import/order
+   32:16  warning  Async method 'execute' has too many statements (29). Maximum allowed is 25  max-statements
+  103:19  error    Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/update-job.schema.ts
+  4:29  error  Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'  import/no-unresolved
+
+/app/src_refactored/core/application/use-cases/job/update-job.use-case.spec.ts
+    5:1   warning  `./update-job.use-case` import should occur after import of `@/shared/result`                                        import/order
+    6:1   warning  `./update-job.schema` import should occur after import of `@/shared/result`                                          import/order
+    8:1   warning  There should be at least one empty line between import groups                                                        import/order
+    8:1   warning  `@/application/common/errors` import should occur after import of `@/domain/job/value-objects/target-agent-role.vo`  import/order
+   11:10  warning  'MaxAttempts' is defined but never used. Allowed unused vars must match /^_/u                                        @typescript-eslint/no-unused-vars
+   11:29  error    Unable to resolve path to module '@/domain/job/value-objects/attempt-count.vo'                                       import/no-unresolved
+   13:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'                                            import/no-unresolved
+   15:10  warning  'RetryPolicy' is defined but never used. Allowed unused vars must match /^_/u                                        @typescript-eslint/no-unused-vars
+   15:57  error    Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'                                        import/no-unresolved
+   16:1   warning  There should be at least one empty line between import groups                                                        import/order
+  124:51  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/job/update-job.use-case.ts
+    4:1   warning  There should be at least one empty line between import groups                   import/order
+    4:28  error    Unable to resolve path to module '@/core/common/executable'                     import/no-unresolved
+    6:10  warning  'Job' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+    8:29  error    Unable to resolve path to module '@/domain/job/value-objects/attempt-count.vo'  import/no-unresolved
+   10:25  error    Unable to resolve path to module '@/domain/job/value-objects/job-name.vo'       import/no-unresolved
+   12:57  error    Unable to resolve path to module '@/domain/job/value-objects/retry-policy.vo'   import/no-unresolved
+   13:1   warning  There should be at least one empty line between import groups                   import/order
+   32:16  warning  Async method 'execute' has too many statements (49). Maximum allowed is 25      max-statements
+  120:19  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.spec.ts
+   5:1  warning  `./create-llm-provider-config.use-case` import should occur after import of `@/shared/result`                                                    import/order
+   6:1  warning  `./create-llm-provider-config.schema` import should occur after import of `@/shared/result`                                                      import/order
+   8:1  warning  There should be at least one empty line between import groups                                                                                    import/order
+   8:1  warning  `@/application/common/errors` import should occur after import of `@/domain/llm-provider-config/ports/llm-provider-config-repository.interface`  import/order
+  10:1  warning  There should be at least one empty line between import groups                                                                                    import/order
+
+/app/src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups  import/order
+   4:28  error    Unable to resolve path to module '@/core/common/executable'    import/no-unresolved
+  14:1   warning  There should be at least one empty line between import groups  import/order
+  87:19  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/memory/remove-memory-item.schema.spec.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/application/use-cases/memory/remove-memory-item.use-case.spec.ts
+   2:1   warning  `vitest` import should occur after import of `inversify`                                                             import/order
+   6:1   warning  `./remove-memory-item.use-case` import should occur after import of `@/shared/result`                                import/order
+   7:1   warning  `./remove-memory-item.schema` import should occur after import of `@/shared/result`                                  import/order
+   9:1   warning  There should be at least one empty line between import groups                                                        import/order
+   9:1   warning  `@/application/common/errors` import should occur after import of `@/domain/memory/value-objects/memory-item-id.vo`  import/order
+  10:1   warning  There should be at least one empty line between import groups                                                        import/order
+  12:1   warning  There should be at least one empty line between import groups                                                        import/order
+  13:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                             @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/application/use-cases/memory/remove-memory-item.use-case.ts
+  5:28  error    Unable to resolve path to module '@/core/common/executable'                                                          import/no-unresolved
+  6:1   warning  There should be at least one empty line between import groups                                                        import/order
+  7:1   warning  There should be at least one empty line between import groups                                                        import/order
+  7:1   warning  `@/application/common/errors` import should occur after import of `@/domain/memory/value-objects/memory-item-id.vo`  import/order
+  7:28  warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u                                        @typescript-eslint/no-unused-vars
+  7:41  warning  'NotFoundError' is defined but never used. Allowed unused vars must match /^_/u                                      @typescript-eslint/no-unused-vars
+  9:1   warning  There should be at least one empty line between import groups                                                        import/order
+
+/app/src_refactored/core/application/use-cases/memory/save-memory-item.use-case.spec.ts
+   5:1  warning  `./save-memory-item.use-case` import should occur after import of `@/shared/result`                                    import/order
+   6:1  warning  `./save-memory-item.schema` import should occur after import of `@/shared/result`                                      import/order
+   8:1  warning  There should be at least one empty line between import groups                                                          import/order
+   8:1  warning  `@/application/common/errors` import should occur after import of `@/domain/memory/value-objects/memory-item-tags.vo`  import/order
+   9:1  warning  There should be at least one empty line between import groups                                                          import/order
+  16:1  warning  There should be at least one empty line between import groups                                                          import/order
+
+/app/src_refactored/core/application/use-cases/memory/save-memory-item.use-case.ts
+    4:28  error    Unable to resolve path to module '@/core/common/executable'                         import/no-unresolved
+    5:1   warning  There should be at least one empty line between import groups                       import/order
+   13:1   warning  There should be at least one empty line between import groups                       import/order
+   41:16  warning  Async method 'execute' has too many statements (51). Maximum allowed is 25          max-statements
+   91:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object           no-prototype-builtins
+   97:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object           no-prototype-builtins
+  103:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object           no-prototype-builtins
+  109:24  error    Do not access Object.prototype method 'hasOwnProperty' from target object           no-prototype-builtins
+  112:17  warning  'updated' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  147:19  error    Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/memory/search-memory-items.use-case.spec.ts
+   2:1   warning  `vitest` import should occur after import of `inversify`                                                               import/order
+   6:1   warning  `./search-memory-items.use-case` import should occur after import of `@/shared/result`                                 import/order
+   7:1   warning  `./search-memory-items.schema` import should occur after import of `@/shared/result`                                   import/order
+   9:1   warning  There should be at least one empty line between import groups                                                          import/order
+   9:1   warning  `@/application/common/errors` import should occur after import of `@/domain/memory/value-objects/memory-item-tags.vo`  import/order
+   9:41  warning  'ValueError' is defined but never used. Allowed unused vars must match /^_/u                                           @typescript-eslint/no-unused-vars
+  11:1   warning  There should be at least one empty line between import groups                                                          import/order
+  19:1   warning  There should be at least one empty line between import groups                                                          import/order
+  20:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                               @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts
+   4:1   warning  There should be at least one empty line between import groups                                                      import/order
+   4:1   warning  `@/application/common/errors` import should occur after import of `@/domain/memory/ports/memory-repository.types`  import/order
+   5:28  error    Unable to resolve path to module '@/core/common/executable'                                                        import/no-unresolved
+   7:1   warning  There should be at least one empty line between import groups                                                      import/order
+   8:10  warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u                                      @typescript-eslint/no-unused-vars
+  11:1   warning  There should be at least one empty line between import groups                                                      import/order
+
+/app/src_refactored/core/application/use-cases/memory/search-similar-memory-items.schema.spec.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/application/use-cases/memory/search-similar-memory-items.use-case.spec.ts
+    2:1   warning  `vitest` import should occur after import of `inversify`                                                               import/order
+    6:1   warning  `./search-similar-memory-items.use-case` import should occur after import of `@/shared/result`                         import/order
+    7:1   warning  `./search-similar-memory-items.schema` import should occur after import of `@/shared/result`                           import/order
+    9:1   warning  There should be at least one empty line between import groups                                                          import/order
+    9:1   warning  `@/application/common/errors` import should occur after import of `@/domain/memory/value-objects/memory-item-tags.vo`  import/order
+   11:1   warning  There should be at least one empty line between import groups                                                          import/order
+   18:1   warning  There should be at least one empty line between import groups                                                          import/order
+   19:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                               @typescript-eslint/no-unused-vars
+  117:18  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/memory/search-similar-memory-items.use-case.ts
+   5:1   warning  There should be at least one empty line between import groups                                                               import/order
+   5:1   warning  `@/application/common/errors` import should occur after import of `@/domain/memory/value-objects/memory-item-embedding.vo`  import/order
+   5:28  warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u                                               @typescript-eslint/no-unused-vars
+   6:28  error    Unable to resolve path to module '@/core/common/executable'                                                                 import/no-unresolved
+   8:1   warning  There should be at least one empty line between import groups                                                               import/order
+  11:1   warning  There should be at least one empty line between import groups                                                               import/order
+  53:23  warning  Async method 'execute' has too many statements (26). Maximum allowed is 25                                                  max-statements
+
+/app/src_refactored/core/application/use-cases/project/create-project.use-case.ts
+   3:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/project/value-objects/project-name.vo`  import/order
+   4:1   warning  There should be at least one empty line between import groups                                                                         import/order
+   4:1   warning  `@/application/common/errors` import should occur after import of `@/domain/project/value-objects/project-name.vo`                    import/order
+   5:1   warning  There should be at least one empty line between import groups                                                                         import/order
+   6:1   warning  `@/domain/project/project.entity` import should occur after import of `@/domain/project/ports/project-repository.interface`           import/order
+  10:1   warning  There should be at least one empty line between import groups                                                                         import/order
+  22:16  warning  Async method 'execute' has too many statements (33). Maximum allowed is 25                                                            max-statements
+  85:21  error    Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/project/get-project-details.use-case.spec.ts
+   4:1  warning  `./get-project-details.use-case` import should occur after import of `@/shared/result`                                                       import/order
+   5:1  warning  `./get-project-details.schema` import should occur after import of `@/shared/result`                                                         import/order
+   7:1  warning  There should be at least one empty line between import groups                                                                                import/order
+   7:1  warning  `@/application/common/errors` import should occur after import of `@/domain/source-code/value-objects/repository-path.vo`                    import/order
+   8:1  warning  `@/domain/project/project.entity` import should occur after import of `@/domain/project/ports/project-repository.interface`                  import/order
+  13:1  warning  `@/domain/source-code/source-code.entity` import should occur after import of `@/domain/source-code/ports/source-code-repository.interface`  import/order
+  17:1  warning  There should be at least one empty line between import groups                                                                                import/order
+
+/app/src_refactored/core/application/use-cases/project/get-project-details.use-case.ts
+   2:1   warning  There should be at least one empty line between import groups  import/order
+   2:28  error    Unable to resolve path to module '@/core/common/executable'    import/no-unresolved
+   6:1   warning  There should be at least one empty line between import groups  import/order
+  83:19  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/project/list-projects.use-case.spec.ts
+   4:1   warning  `./list-projects.use-case` import should occur after import of `@/shared/result`                                             import/order
+   5:1   warning  `./list-projects.schema` import should occur after import of `@/shared/result`                                               import/order
+   7:1   warning  There should be at least one empty line between import groups                                                                import/order
+   7:1   warning  `@/application/common/errors` import should occur after import of `@/domain/project/value-objects/project-name.vo`           import/order
+   8:1   warning  `@/domain/project/project.entity` import should occur after import of `@/domain/project/ports/project-repository.interface`  import/order
+  12:1   warning  There should be at least one empty line between import groups                                                                import/order
+  13:21  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                                                     @typescript-eslint/no-unused-vars
+  92:11  warning  'now' is assigned a value but never used. Allowed unused vars must match /^_/u                                               @typescript-eslint/no-unused-vars
+  98:10  error    Unexpected any. Specify a different type                                                                                     @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/project/list-projects.use-case.ts
+   2:1   warning  There should be at least one empty line between import groups                                                                 import/order
+   2:28  error    Unable to resolve path to module '@/core/common/executable'                                                                   import/no-unresolved
+   5:1   warning  There should be at least one empty line between import groups                                                                 import/order
+   5:1   warning  `@/domain/project/ports/project-repository.interface` import should occur before import of `@/domain/project/project.entity`  import/order
+  61:19  error    Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/user/create-user.use-case.ts
+    3:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/user/value-objects/user-username.vo`  import/order
+    4:1   warning  There should be at least one empty line between import groups                                                                       import/order
+    4:1   warning  `@/application/common/errors` import should occur after import of `@/domain/user/value-objects/user-username.vo`                    import/order
+    6:1   warning  There should be at least one empty line between import groups                                                                       import/order
+    7:1   warning  `@/domain/user/user.entity` import should occur after import of `@/domain/user/ports/user-repository.interface`                     import/order
+   13:1   warning  There should be at least one empty line between import groups                                                                       import/order
+   28:16  warning  Async method 'execute' has too many statements (43). Maximum allowed is 25                                                          max-statements
+  118:21  error    Unexpected any. Specify a different type                                                                                            @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/application/use-cases/user/get-user.use-case.ts
+   3:1   warning  `@/application/common/ports/use-case.interface` import should occur after import of `@/domain/user/value-objects/user-id.vo`  import/order
+   4:1   warning  There should be at least one empty line between import groups                                                                 import/order
+   4:1   warning  `@/application/common/errors` import should occur after import of `@/domain/user/value-objects/user-id.vo`                    import/order
+   5:1   warning  There should be at least one empty line between import groups                                                                 import/order
+   6:1   warning  `@/domain/user/user.entity` import should occur after import of `@/domain/user/ports/user-repository.interface`               import/order
+   9:1   warning  There should be at least one empty line between import groups                                                                 import/order
+  21:16  warning  Async method 'execute' has too many statements (33). Maximum allowed is 25                                                    max-statements
+  80:21  error    Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/common/services/i-logger.service.ts
+  13:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/common/value-objects/base.vo.ts
+  4:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/agent/agent.entity.spec.ts
+  2:32  warning  'vi' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/domain/agent/ports/agent-repository.interface.ts
+  6:10  warning  'PersonaId' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/domain/agent/value-objects/agent-max-iterations.vo.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/agent/value-objects/agent-temperature.vo.ts
+   9:27  warning  Class Property name `MIN_VALUE` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  10:27  warning  Class Property name `MAX_VALUE` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/agent/value-objects/internal-state/current-goal.vo.ts
+  9:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/agent/value-objects/internal-state/general-notes.collection.ts
+  51:47  warning  Identifier name '_' is too short (< 2)  id-length
+
+/app/src_refactored/core/domain/agent/value-objects/persona/persona-backstory.vo.ts
+  9:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/agent/value-objects/persona/persona-goal.vo.ts
+   9:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/agent/value-objects/persona/persona-name.vo.ts
+   9:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/agent/value-objects/persona/persona-role.vo.ts
+   9:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/annotation/annotation.entity.spec.ts
+   4:41  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+  59:72  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  60:74  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  87:50  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/annotation/annotation.entity.ts
+  3:41  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+
+/app/src_refactored/core/domain/annotation/ports/annotation-repository.interface.ts
+  2:1  warning  There should be at least one empty line between import groups                                     import/order
+  3:1  warning  There should be at least one empty line between import groups                                     import/order
+  3:1  warning  `@/domain/common/errors` import should occur before import of `@/shared/result`                   import/order
+  4:1  warning  `@/core/common/value-objects/identity.vo` import should occur before import of `@/shared/result`  import/order
+  7:1  warning  There should be at least one empty line between import groups                                     import/order
+
+/app/src_refactored/core/domain/annotation/value-objects/annotation-id.vo.spec.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/annotation/value-objects/annotation-text.vo.spec.ts
+  33:48  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:53  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:3   warning  Test has no assertions                    vitest/expect-expect
+
+/app/src_refactored/core/domain/annotation/value-objects/annotation-text.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                                        import/order
+   3:1   warning  `@/core/common/value-objects/base.vo` import should occur before import of `@/domain/common/errors`  import/order
+  10:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase                  @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase                  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/common/errors.ts
+   13:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   14:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   25:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   74:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/events/job-event.types.ts
+   41:18  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   41:23  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   47:18  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   47:23  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   50:48  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   54:19  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   61:19  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   61:24  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  117:3   warning  Type Property name `job.added` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  118:3   warning  Type Property name `job.active` must match one of the following formats: camelCase     @typescript-eslint/naming-convention
+  119:3   warning  Type Property name `job.completed` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  119:40  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  120:3   warning  Type Property name `job.failed` must match one of the following formats: camelCase     @typescript-eslint/naming-convention
+  121:3   warning  Type Property name `job.progress` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  122:3   warning  Type Property name `job.stalled` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  123:3   warning  Type Property name `job.delayed` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  124:3   warning  Type Property name `job.promoted` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  125:3   warning  Type Property name `job.removed` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  126:3   warning  Type Property name `job.log_added` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  127:3   warning  Type Property name `queue.paused` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  128:3   warning  Type Property name `queue.resumed` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  129:3   warning  Type Property name `worker.error` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/job/job-processing.types.ts
+  37:3   warning  Type Property name `tool_calls` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  38:3   warning  Type Property name `tool_call_id` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  49:12  error    Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  50:12  error    Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  51:11  error    Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  63:12  error    Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  75:15  error    Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/job.entity.spec.ts
+    3:22  warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+    6:30  warning  'JobExecutionLogEntryVO' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+    6:54  warning  'LogLevel' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+    8:24  warning  'IJobOptions' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   71:41  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+   77:41  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+   83:59  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  105:13  warning  'initialUpdatedAt' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  223:27  error    'JobEntityProps' is not defined                                                              no-undef
+  223:42  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  237:44  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  262:32  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+  270:21  error    Unexpected any. Specify a different type                                                     @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/job.entity.ts
+    2:1    warning  There should be at least one empty line between import groups                           import/order
+    3:10   warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+    8:37   warning  'RetryStrategyOptions' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+    8:59   warning  'RepeatOptions' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   15:53   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+   26:41   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+   26:56   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+   58:32   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+   58:47   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+   63:28   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+   63:37   error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  143:111  error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/ports/job-repository.interface.ts
+    6:10  warning  'JobStatusVO' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+    6:23  warning  'JobStatusEnum' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   17:18  error    'IJobRepository' is already defined                                              no-redeclare
+   22:23  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   22:28  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   27:51  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   27:56  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   33:55  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   33:60  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   52:31  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   52:36  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   64:31  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   64:36  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   76:31  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   76:36  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   84:31  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   84:36  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   89:67  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+   89:72  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  128:41  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  128:46  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/ports/job-repository.types.ts
+  24:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/value-objects/activity-history-entry.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                                 import/order
+   3:1   warning  There should be at least one empty line between import groups                                 import/order
+   3:10  warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  32:12  warning  Type Property name `tool_calls` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+  46:5   warning  Parameter name `tool_calls` must match one of the following formats: camelCase                @typescript-eslint/naming-convention
+  71:7   warning  Object Literal Property name `tool_calls` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  96:3   warning  Class Method name `tool_calls` must match one of the following formats: camelCase             @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/job/value-objects/activity-history.vo.ts
+  2:1   warning  There should be at least one empty line between import groups                                import/order
+  3:1   warning  There should be at least one empty line between import groups                                import/order
+  3:10  warning  'ValueError' is defined but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+  4:10  warning  'Result' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  4:18  warning  'ok' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+  4:22  warning  'error' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+  6:32  warning  'ActivityHistoryEntryProps' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/domain/job/value-objects/job-execution-log-entry.vo.spec.ts
+   5:34  warning  'LogLevel' is defined but never used. Allowed unused vars must match /^_/u                                           @typescript-eslint/no-unused-vars
+  42:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  58:77  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/value-objects/job-execution-log-entry.vo.ts
+   2:1   warning  There should be at least one empty line between import groups  import/order
+  11:37  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  22:30  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  46:33  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/value-objects/job-execution-logs.vo.spec.ts
+   1:1   warning  There should be at least one empty line between import groups                                                        import/order
+   3:1   warning  `./job-execution-log-entry.vo` import should occur before import of `./job-execution-logs.vo`                        import/order
+   3:34  warning  'LogLevel' is defined but never used. Allowed unused vars must match /^_/u                                           @typescript-eslint/no-unused-vars
+  72:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/app/src_refactored/core/domain/job/value-objects/job-execution-logs.vo.ts
+  32:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/value-objects/job-id.vo.spec.ts
+  39:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/value-objects/job-id.vo.ts
+  4:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/job/value-objects/job-options.vo.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/job/value-objects/job-priority.vo.spec.ts
+  62:11  warning  Variable name `p3_1` must match one of the following formats: camelCase, PascalCase, UPPER_CASE  @typescript-eslint/naming-convention
+  63:11  warning  Variable name `p3_2` must match one of the following formats: camelCase, PascalCase, UPPER_CASE  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/job/value-objects/job-priority.vo.ts
+  2:1  warning  There should be at least one empty line between import groups                                        import/order
+  3:1  warning  `@/core/common/value-objects/base.vo` import should occur before import of `@/domain/common/errors`  import/order
+
+/app/src_refactored/core/domain/job/value-objects/job-progress.vo.spec.ts
+  33:52  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  34:47  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  40:47  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  47:47  error    Unexpected any. Specify a different type                                                          @typescript-eslint/no-explicit-any
+  52:11  warning  Variable name `p50_1` must match one of the following formats: camelCase, PascalCase, UPPER_CASE  @typescript-eslint/naming-convention
+  53:11  warning  Variable name `p50_2` must match one of the following formats: camelCase, PascalCase, UPPER_CASE  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/job/value-objects/job-progress.vo.ts
+  2:1   warning  There should be at least one empty line between import groups                                        import/order
+  3:1   warning  `@/core/common/value-objects/base.vo` import should occur before import of `@/domain/common/errors`  import/order
+  6:55  error    Unexpected any. Specify a different type                                                             @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/job/value-objects/job-status.vo.ts
+  2:1  warning  There should be at least one empty line between import groups                                        import/order
+  3:1  warning  `@/core/common/value-objects/base.vo` import should occur before import of `@/domain/common/errors`  import/order
+
+/app/src_refactored/core/domain/job/value-objects/target-agent-role.vo.ts
+   1:1   warning  There should be at least one empty line between import groups                        import/order
+   2:1   warning  There should be at least one empty line between import groups                        import/order
+   2:10  warning  'DomainError' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  10:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/llm-provider-config/llm-provider-config.entity.ts
+  14:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u   @typescript-eslint/no-unused-vars
+  48:13  warning  'id' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-name.vo.ts
+   9:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/memory/memory-item.entity.spec.ts
+   4:41  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+  46:10  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  56:72  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  57:77  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  75:47  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/memory/memory-item.entity.ts
+  3:41  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+
+/app/src_refactored/core/domain/memory/ports/memory-repository.interface.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+  3:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/memory/ports/memory-repository.types.ts
+  4:1  warning  `../../job/ports/job-repository.types` import should occur before import of `../memory-item.entity`  import/order
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-content.vo.spec.ts
+  17:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-content.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                        import/order
+  10:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-embedding.vo.spec.ts
+  31:69  error  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+  36:3   error  Remove commented out tests. You may want to use `skip` or `only` instead  vitest/no-commented-out-tests
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-embedding.vo.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-id.vo.spec.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-source.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                        import/order
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-tags.vo.spec.ts
+  33:53  warning  Identifier name '_' is too short (< 2)    id-length
+  39:57  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:57  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/memory/value-objects/memory-item-tags.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                            import/order
+  10:27  warning  Class Property name `MAX_TAGS` must match one of the following formats: camelCase        @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_TAG_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  12:27  warning  Class Property name `MIN_TAG_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/project/project.entity.spec.ts
+    4:29  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+   51:75  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+   57:61  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+   82:45  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+   83:50  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  105:52  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  106:57  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/project/project.entity.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/project/value-objects/project-description.vo.ts
+  9:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/project/value-objects/project-name.vo.ts
+   9:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/queue/ports/queue-metadata-repository.interface.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/queue/queue.entity.spec.ts
+    4:41  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+   41:10  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+   48:67  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+   49:69  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+   50:76  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+  103:49  error  Unexpected any. Specify a different type                 @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/queue/queue.entity.ts
+  3:41  error  Unable to resolve path to module '@/core/common/errors'  import/no-unresolved
+
+/app/src_refactored/core/domain/queue/value-objects/queue-concurrency.vo.spec.ts
+  17:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/queue/value-objects/queue-concurrency.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                                        import/order
+   3:1   warning  `@/core/common/value-objects/base.vo` import should occur before import of `@/domain/common/errors`  import/order
+  10:27  warning  Class Property name `MIN_VALUE` must match one of the following formats: camelCase                   @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_VALUE` must match one of the following formats: camelCase                   @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/queue/value-objects/queue-description.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                                        import/order
+   3:1   warning  `@/core/common/value-objects/base.vo` import should occur before import of `@/domain/common/errors`  import/order
+  10:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase                  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/queue/value-objects/queue-id.vo.spec.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+  3:1  warning  There should be at least one empty line between import groups  import/order
+  4:1  warning  `crypto` import should occur before import of `vitest`         import/order
+
+/app/src_refactored/core/domain/queue/value-objects/queue-name.vo.spec.ts
+   2:1   warning  There should be at least one empty line between import groups                       import/order
+   3:1   warning  There should be at least one empty line between import groups                       import/order
+   4:1   warning  `../../../../common/errors` import should occur before import of `./queue-name.vo`  import/order
+   4:28  error    Unable to resolve path to module '../../../../common/errors'                        import/no-unresolved
+  21:43  error    Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  22:48  error    Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/queue/value-objects/queue-name.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                              import/order
+  10:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase        @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase        @typescript-eslint/naming-convention
+  14:27  warning  Class Property name `QUEUE_NAME_REGEX` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/source-code/ports/source-code-repository.interface.ts
+  5:1  warning  `../../project/value-objects/project-id.vo` import should occur before import of `../source-code.entity`  import/order
+
+/app/src_refactored/core/domain/source-code/source-code.entity.ts
+   2:1   warning  There should be at least one empty line between import groups                                                      import/order
+   5:1   warning  `./value-objects/repository-docs-path.vo` import should occur before import of `./value-objects/repository-id.vo`  import/order
+  22:13  warning  'id' is assigned a value but never used. Allowed unused vars must match /^_/u                                      @typescript-eslint/no-unused-vars
+
+/app/src_refactored/core/domain/user/ports/user-repository.interface.ts
+  3:29  error    Unable to resolve path to module '../../../common/errors'                                            import/no-unresolved
+  6:1   warning  `../value-objects/user-email.vo` import should occur before import of `../value-objects/user-id.vo`  import/order
+
+/app/src_refactored/core/domain/user/user.entity.spec.ts
+    2:1   warning  There should be at least one empty line between import groups                                          import/order
+    7:1   warning  `./value-objects/user-email.vo` import should occur before import of `./value-objects/user-id.vo`      import/order
+    8:1   warning  There should be at least one empty line between import groups                                          import/order
+    8:1   warning  `./value-objects/user-avatar.vo` import should occur before import of `./value-objects/user-id.vo`     import/order
+    9:1   warning  `../../../core/common/value-objects/identity.vo` import should occur before import of `./user.entity`  import/order
+   10:1   warning  `../../../core/common/errors` import should occur before import of `./user.entity`                     import/order
+   10:41  error    Unable to resolve path to module '../../../core/common/errors'                                         import/no-unresolved
+   56:66  error    Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+   57:72  error    Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+  103:45  error    Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+  123:48  error    Unexpected any. Specify a different type                                                               @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/user/user.entity.ts
+  2:1   warning  There should be at least one empty line between import groups                                                       import/order
+  6:1   warning  `./value-objects/user-email.vo` import should occur before import of `./value-objects/user-id.vo`                   import/order
+  7:1   warning  There should be at least one empty line between import groups                                                       import/order
+  7:1   warning  `./value-objects/user-avatar.vo` import should occur before import of `./value-objects/user-id.vo`                  import/order
+  8:1   warning  `../../../core/common/value-objects/identity.vo` import should occur before import of `./value-objects/user-id.vo`  import/order
+  9:1   warning  `../../../core/common/errors` import should occur before import of `./value-objects/user-id.vo`                     import/order
+  9:41  error    Unable to resolve path to module '../../../core/common/errors'                                                      import/no-unresolved
+
+/app/src_refactored/core/domain/user/value-objects/user-avatar.vo.spec.ts
+  2:1   warning  There should be at least one empty line between import groups                        import/order
+  3:1   warning  There should be at least one empty line between import groups                        import/order
+  4:1   warning  `../../../../common/errors` import should occur before import of `./user-avatar.vo`  import/order
+  4:28  error    Unable to resolve path to module '../../../../common/errors'                         import/no-unresolved
+
+/app/src_refactored/core/domain/user/value-objects/user-avatar.vo.ts
+  2:1  warning  There should be at least one empty line between import groups  import/order
+
+/app/src_refactored/core/domain/user/value-objects/user-email.vo.spec.ts
+  2:1   warning  There should be at least one empty line between import groups                       import/order
+  3:1   warning  There should be at least one empty line between import groups                       import/order
+  4:1   warning  `../../../../common/errors` import should occur before import of `./user-email.vo`  import/order
+  4:28  error    Unable to resolve path to module '../../../../common/errors'                        import/no-unresolved
+
+/app/src_refactored/core/domain/user/value-objects/user-email.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                         import/order
+  14:27  warning  Class Property name `EMAIL_REGEX` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/user/value-objects/user-id.vo.spec.ts
+   2:1   warning  There should be at least one empty line between import groups  import/order
+   3:1   warning  There should be at least one empty line between import groups  import/order
+   4:1   warning  `crypto` import should occur before import of `vitest`         import/order
+  41:34  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  42:39  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/domain/user/value-objects/user-nickname.vo.spec.ts
+  2:1   warning  There should be at least one empty line between import groups                          import/order
+  3:1   warning  There should be at least one empty line between import groups                          import/order
+  4:1   warning  `../../../../common/errors` import should occur before import of `./user-nickname.vo`  import/order
+  4:28  error    Unable to resolve path to module '../../../../common/errors'                           import/no-unresolved
+
+/app/src_refactored/core/domain/user/value-objects/user-nickname.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                        import/order
+  10:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/domain/user/value-objects/user-username.vo.spec.ts
+  2:1   warning  There should be at least one empty line between import groups                          import/order
+  3:1   warning  There should be at least one empty line between import groups                          import/order
+  4:1   warning  `../../../../common/errors` import should occur before import of `./user-username.vo`  import/order
+  4:28  error    Unable to resolve path to module '../../../../common/errors'                           import/no-unresolved
+
+/app/src_refactored/core/domain/user/value-objects/user-username.vo.ts
+   2:1   warning  There should be at least one empty line between import groups                            import/order
+  10:27  warning  Class Property name `MIN_LENGTH` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  11:27  warning  Class Property name `MAX_LENGTH` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  14:27  warning  Class Property name `USERNAME_REGEX` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/ports/adapters/job-queue.interface.ts
+   7:1   warning  `../../common/errors` import should occur before import of `../../domain/job/job.entity`  import/order
+   7:28  error    Unable to resolve path to module '../../common/errors'                                    import/no-unresolved
+  44:39  error    Unexpected any. Specify a different type                                                  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/core/ports/adapters/llm-adapter.interface.ts
+   2:1   warning  There should be at least one empty line between import groups                        import/order
+   4:1   warning  There should be at least one empty line between import groups                        import/order
+   4:26  error    Unable to resolve path to module '../../common/errors'                               import/no-unresolved
+  12:1   warning  `../../../shared/result` import should occur before import of `../../common/errors`  import/order
+  12:10  error    'Result' is already defined                                                          no-redeclare
+  13:1   warning  There should be at least one empty line between import groups                        import/order
+  13:1   warning  `../../common/errors` import should occur before import of `./llm-adapter.types`     import/order
+  13:10  error    'LLMError' is already defined                                                        no-redeclare
+  13:26  error    Unable to resolve path to module '../../common/errors'                               import/no-unresolved
+  14:10  error    'LLMGenerationOptions' is already defined                                            no-redeclare
+
+/app/src_refactored/core/ports/adapters/llm-adapter.types.ts
+  26:3  warning  Type Property name `tool_calls` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  27:3  warning  Type Property name `tool_call_id` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/core/tools/tool.interface.ts
+   2:1   warning  There should be at least one empty line between import groups  import/order
+   4:27  error    Unable to resolve path to module '../common/errors'            import/no-unresolved
+  27:13  error    Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+/app/src_refactored/infrastructure/events/in-memory-job-event-emitter.spec.ts
+   2:1   warning  There should be at least one empty line between import groups                                                                         import/order
+   3:1   warning  There should be at least one empty line between import groups                                                                         import/order
+   3:1   warning  `./in-memory-job-event-emitter` import should occur after import of `../../core/domain/job/value-objects/job-execution-log-entry.vo`  import/order
+  21:65  error    Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+  21:70  error    Unexpected any. Specify a different type                                                                                              @typescript-eslint/no-explicit-any
+
+/app/src_refactored/infrastructure/events/in-memory-job-event-emitter.ts
+   2:1   warning  There should be at least one empty line between import groups                import/order
+   6:3   warning  'QueueName' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   7:3   warning  'JobId' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+   8:3   warning  'WorkerId' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  53:43  error    Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  61:44  error    Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+  69:45  error    Unexpected any. Specify a different type                                     @typescript-eslint/no-explicit-any
+
+/app/src_refactored/presentation/electron/main/ipc-chat.handlers.ts
+   2:1   warning  There should be at least one empty line between import groups                                                             import/order
+   5:1   warning  `../../../core/ports/adapters/llm-adapter.types` import should occur before import of `../../../shared/ipc-channels`      import/order
+   5:10  warning  'LanguageModelMessage' is defined but never used. Allowed unused vars must match /^_/u                                    @typescript-eslint/no-unused-vars
+   6:1   warning  `../../../core/ports/adapters/llm-adapter.interface` import should occur before import of `../../../shared/ipc-channels`  import/order
+   7:1   warning  `../../../infrastructure/ioc/inversify.config` import should occur before import of `../../../shared/ipc-channels`        import/order
+   7:30  error    Unable to resolve path to module '../../../infrastructure/ioc/inversify.config'                                           import/no-unresolved
+  14:48  warning  Async arrow function has too many statements (42). Maximum allowed is 25                                                  max-statements
+  56:56  warning  Identifier name 'm' is too short (< 2)                                                                                    id-length
+  79:25  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/presentation/electron/main/ipc-project.handlers.ts
+   2:1   warning  There should be at least one empty line between import groups                                                                                      import/order
+   5:1   warning  `../../../core/application/use-cases/project/list-projects.use-case` import should occur before import of `../../../shared/ipc-channels`           import/order
+   6:1   warning  `../../../infrastructure/ioc/inversify.config` import should occur before import of `../../../shared/ipc-channels`                                 import/order
+   6:30  error    Unable to resolve path to module '../../../infrastructure/ioc/inversify.config'                                                                    import/no-unresolved
+   7:1   warning  `../../../core/domain/project/ports/project-repository.interface` import should occur before import of `../../../shared/ipc-channels`              import/order
+   8:1   warning  `../../../infrastructure/persistence/drizzle/repositories/project.repository` import should occur before import of `../../../shared/ipc-channels`  import/order
+   8:42  error    Unable to resolve path to module '../../../infrastructure/persistence/drizzle/repositories/project.repository'                                     import/no-unresolved
+   9:1   warning  `../../../infrastructure/persistence/drizzle/drizzle.client` import should occur before import of `../../../shared/ipc-channels`                   import/order
+   9:28  error    Unable to resolve path to module '../../../infrastructure/persistence/drizzle/drizzle.client'                                                      import/no-unresolved
+  10:1   warning  `../../../infrastructure/services/logger/console-logger.service` import should occur before import of `../../../shared/ipc-channels`               import/order
+  10:38  error    Unable to resolve path to module '../../../infrastructure/services/logger/console-logger.service'                                                  import/no-unresolved
+  11:1   warning  `../../../core/common/services/i-logger.service` import should occur before import of `../../../shared/ipc-channels`                               import/order
+  48:56  warning  'event' is defined but never used. Allowed unused args must match /^_/u                                                                            @typescript-eslint/no-unused-vars
+  75:14  warning  Unnecessary 'else' after 'return'                                                                                                                  no-else-return
+  79:21  error    Unexpected any. Specify a different type                                                                                                           @typescript-eslint/no-explicit-any
+
+/app/src_refactored/presentation/electron/main/main.ts
+   2:1   warning  There should be at least one empty line between import groups  import/order
+   3:1   warning  There should be at least one empty line between import groups  import/order
+   3:1   warning  `path` import should occur before import of `electron`         import/order
+   8:5   error    A `require()` style import is forbidden                        @typescript-eslint/no-require-imports
+  27:7   error    'MAIN_WINDOW_VITE_DEV_SERVER_URL' is not defined               no-undef
+  28:24  error    'MAIN_WINDOW_VITE_DEV_SERVER_URL' is not defined               no-undef
+  30:61  error    'MAIN_WINDOW_VITE_NAME' is not defined                         no-undef
+  34:49  error    'MAIN_WINDOW_VITE_DEV_SERVER_URL' is not defined               no-undef
+  92:56  error    'MAIN_WINDOW_VITE_DEV_SERVER_URL' is not defined               no-undef
+
+/app/src_refactored/presentation/ui/App.tsx
+  1:8   warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:24  error    Unable to resolve path to module '@/components/ui/button'               import/no-unresolved
+
+/app/src_refactored/presentation/ui/app/__root.tsx
+  2:8  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/app/index.tsx
+  2:8  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/common/MarkdownRenderer.tsx
+  1:8  warning  Import name `React` must match one of the following formats: camelCase          @typescript-eslint/naming-convention
+  2:8  warning  Import name `ReactMarkdown` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  4:1  warning  `rehype-sanitize` import should occur before import of `remark-gfm`             import/order
+  5:1  warning  `rehype-highlight` import should occur before import of `remark-gfm`            import/order
+
+/app/src_refactored/presentation/ui/components/common/theme-provider.tsx
+   1:8   warning  Import name `React` must match one of the following formats: camelCase        @typescript-eslint/naming-convention
+  30:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+  51:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/src_refactored/presentation/ui/components/layout/AppSidebar.tsx
+   1:8   warning  Import name `React` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+   2:1   warning  There should be at least one empty line between import groups             import/order
+   2:1   warning  `@tanstack/react-router` import should occur before import of `react`     import/order
+   5:1   warning  There should be at least one empty line between import groups             import/order
+   6:1   warning  `lucide-react` import should occur before import of `react`               import/order
+  20:40  warning  Parameter name `Icon` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/accordion.tsx
+  1:1   warning  `react` import should occur after import of `lucide-react`                           import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase               @typescript-eslint/naming-convention
+  2:13  warning  Import name `AccordionPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                                       import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/alert-dialog.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase                 @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-alert-dialog` import should occur before import of `react`            import/order
+  4:13  warning  Import name `AlertDialogPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                         import/no-unresolved
+  7:1   warning  `@/components/ui/button` import should occur before import of `@/lib/utils`            import/order
+  7:32  error    Unable to resolve path to module '@/components/ui/button'                              import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/alert.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  2:1   warning  `class-variance-authority` import should occur before import of `react`  import/order
+  4:20  error    Unable to resolve path to module '@/lib/utils'                           import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/aspect-ratio.tsx
+  1:13  warning  Import name `AspectRatioPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/avatar.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-avatar` import should occur before import of `react`             import/order
+  4:13  warning  Import name `AvatarPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                    import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/badge.tsx
+  1:1   warning  `react` import should occur after import of `class-variance-authority`  import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/breadcrumb.tsx
+  1:1   warning  `react` import should occur after import of `lucide-react`              import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/button.tsx
+  1:1   warning  `react` import should occur after import of `class-variance-authority`  import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/calendar.tsx
+    3:13  warning  Import name `React` must match one of the following formats: camelCase                                @typescript-eslint/naming-convention
+    4:1   warning  `lucide-react` import should occur before import of `react`                                           import/order
+   11:20  error    Unable to resolve path to module '@/lib/utils'                                                        import/no-unresolved
+   12:1   warning  `@/components/ui/button` import should occur before import of `@/lib/utils`                           import/order
+   12:40  error    Unable to resolve path to module '@/components/ui/button'                                             import/no-unresolved
+   14:1   warning  Function 'Calendar' has too many lines (154). Maximum allowed is 100                                  max-lines-per-function
+   54:9   warning  Object Literal Property name `button_previous` must match one of the following formats: camelCase     @typescript-eslint/naming-convention
+   59:9   warning  Object Literal Property name `button_next` must match one of the following formats: camelCase         @typescript-eslint/naming-convention
+   64:9   warning  Object Literal Property name `month_caption` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+   72:9   warning  Object Literal Property name `dropdown_root` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+   77:9   warning  Object Literal Property name `caption_label` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+   91:9   warning  Object Literal Property name `week_number_header` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+   95:9   warning  Object Literal Property name `week_number` must match one of the following formats: camelCase         @typescript-eslint/naming-convention
+  103:9   warning  Object Literal Property name `range_start` must match one of the following formats: camelCase         @typescript-eslint/naming-convention
+  107:9   warning  Object Literal Property name `range_middle` must match one of the following formats: camelCase        @typescript-eslint/naming-convention
+  108:9   warning  Object Literal Property name `range_end` must match one of the following formats: camelCase           @typescript-eslint/naming-convention
+  125:9   warning  Object Literal Method name `Root` must match one of the following formats: camelCase                  @typescript-eslint/naming-convention
+  135:9   warning  Object Literal Method name `Chevron` must match one of the following formats: camelCase               @typescript-eslint/naming-convention
+  155:9   warning  Object Literal Property name `DayButton` must match one of the following formats: camelCase           @typescript-eslint/naming-convention
+  156:9   warning  Object Literal Method name `WeekNumber` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/card.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/carousel.tsx
+   3:1   warning  `react` import should occur after import of `lucide-react`                  import/order
+   3:13  warning  Import name `React` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+   9:1   warning  `@/lib/utils` import should occur after import of `@/components/ui/button`  import/order
+   9:20  error    Unable to resolve path to module '@/lib/utils'                              import/no-unresolved
+  10:24  error    Unable to resolve path to module '@/components/ui/button'                   import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/chart.tsx
+    1:13  warning  Import name `React` must match one of the following formats: camelCase                                                             @typescript-eslint/naming-convention
+    2:13  warning  Import name `RechartsPrimitive` must match one of the following formats: camelCase                                                 @typescript-eslint/naming-convention
+    4:20  error    Unable to resolve path to module '@/lib/utils'                                                                                     import/no-unresolved
+   82:9   warning  Object Literal Property name `__html` trimmed as `_html` must match one of the following formats: camelCase                        @typescript-eslint/naming-convention
+  105:1   warning  Function 'ChartTooltipContent' has too many lines (134). Maximum allowed is 100                                                    max-lines-per-function
+  205:29  warning  Object Literal Property name `h-2.5 w-2.5` must match one of the following formats: camelCase                                      @typescript-eslint/naming-convention
+  206:29  warning  Object Literal Property name `w-1` must match one of the following formats: camelCase                                              @typescript-eslint/naming-convention
+  207:29  warning  Object Literal Property name `w-0 border-[1.5px] border-dashed bg-transparent` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  209:29  warning  Object Literal Property name `my-0.5` must match one of the following formats: camelCase                                           @typescript-eslint/naming-convention
+  214:29  warning  Object Literal Property name `--color-bg` must match one of the following formats: camelCase                                       @typescript-eslint/naming-convention
+  215:29  warning  Object Literal Property name `--color-border` must match one of the following formats: camelCase                                   @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/checkbox.tsx
+  3:1   warning  `react` import should occur after import of `lucide-react`                          import/order
+  3:13  warning  Import name `React` must match one of the following formats: camelCase              @typescript-eslint/naming-convention
+  4:13  warning  Import name `CheckboxPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  7:20  error    Unable to resolve path to module '@/lib/utils'                                      import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/collapsible.tsx
+  1:13  warning  Import name `CollapsiblePrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/command.tsx
+   3:1   warning  `react` import should occur after import of `lucide-react`                  import/order
+   3:13  warning  Import name `React` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+   7:1   warning  `@/lib/utils` import should occur after import of `@/components/ui/dialog`  import/order
+   7:20  error    Unable to resolve path to module '@/lib/utils'                              import/no-unresolved
+  14:8   error    Unable to resolve path to module '@/components/ui/dialog'                   import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/context-menu.tsx
+  3:1   warning  `react` import should occur after import of `lucide-react`                             import/order
+  3:13  warning  Import name `React` must match one of the following formats: camelCase                 @typescript-eslint/naming-convention
+  4:13  warning  Import name `ContextMenuPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  7:20  error    Unable to resolve path to module '@/lib/utils'                                         import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/dialog.tsx
+  1:1   warning  `react` import should occur after import of `lucide-react`                        import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+  2:13  warning  Import name `DialogPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                                    import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/drawer.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  4:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/dropdown-menu.tsx
+  3:1   warning  `react` import should occur after import of `lucide-react`                              import/order
+  3:13  warning  Import name `React` must match one of the following formats: camelCase                  @typescript-eslint/naming-convention
+  4:13  warning  Import name `DropdownMenuPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  7:20  error    Unable to resolve path to module '@/lib/utils'                                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/form.tsx
+   1:1   warning  `react` import should occur after import of `@radix-ui/react-slot`               import/order
+   1:13  warning  Import name `React` must match one of the following formats: camelCase           @typescript-eslint/naming-convention
+   2:13  warning  Import name `LabelPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  14:1   warning  `@/lib/utils` import should occur after import of `@/components/ui/label`        import/order
+  14:20  error    Unable to resolve path to module '@/lib/utils'                                   import/no-unresolved
+  15:23  error    Unable to resolve path to module '@/components/ui/label'                         import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/hover-card.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase               @typescript-eslint/naming-convention
+  2:1   warning  `@radix-ui/react-hover-card` import should occur before import of `react`            import/order
+  2:13  warning  Import name `HoverCardPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  4:20  error    Unable to resolve path to module '@/lib/utils'                                       import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/input-otp.tsx
+  3:1   warning  `react` import should occur after import of `lucide-react`              import/order
+  3:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  7:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/input.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/label.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase           @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-label` import should occur before import of `react`             import/order
+  4:13  warning  Import name `LabelPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                   import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/navigation-menu.tsx
+  1:1   warning  `react` import should occur after import of `lucide-react`                                import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase                    @typescript-eslint/naming-convention
+  2:13  warning  Import name `NavigationMenuPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                            import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/pagination.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+  2:1   warning  `lucide-react` import should occur before import of `react`                  import/order
+  8:20  error    Unable to resolve path to module '@/lib/utils'                               import/no-unresolved
+  9:1   warning  `@/components/ui/button` import should occur before import of `@/lib/utils`  import/order
+  9:40  error    Unable to resolve path to module '@/components/ui/button'                    import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/popover.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase             @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-popover` import should occur before import of `react`             import/order
+  4:13  warning  Import name `PopoverPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                     import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/progress.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase              @typescript-eslint/naming-convention
+  2:1   warning  `@radix-ui/react-progress` import should occur before import of `react`             import/order
+  2:13  warning  Import name `ProgressPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  4:20  error    Unable to resolve path to module '@/lib/utils'                                      import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/radio-group.tsx
+  3:1   warning  `react` import should occur after import of `lucide-react`                            import/order
+  3:13  warning  Import name `React` must match one of the following formats: camelCase                @typescript-eslint/naming-convention
+  4:13  warning  Import name `RadioGroupPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  7:20  error    Unable to resolve path to module '@/lib/utils'                                        import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/resizable.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase               @typescript-eslint/naming-convention
+  2:1   warning  `lucide-react` import should occur before import of `react`                          import/order
+  3:13  warning  Import name `ResizablePrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                                       import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/scroll-area.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase                @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-scroll-area` import should occur before import of `react`            import/order
+  4:13  warning  Import name `ScrollAreaPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                        import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/select.tsx
+  1:1   warning  `react` import should occur after import of `lucide-react`                        import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+  2:13  warning  Import name `SelectPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                                    import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/separator.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase               @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-separator` import should occur before import of `react`             import/order
+  4:13  warning  Import name `SeparatorPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                       import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/sheet.tsx
+  1:1   warning  `react` import should occur after import of `lucide-react`                       import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase           @typescript-eslint/naming-convention
+  2:13  warning  Import name `SheetPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                                   import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/sidebar.tsx
+    3:1   warning  `react` import should occur after import of `lucide-react`                                              import/order
+    3:13  warning  Import name `React` must match one of the following formats: camelCase                                  @typescript-eslint/naming-convention
+    8:1   warning  `@/hooks/use-mobile` import should occur after import of `@/components/ui/tooltip`                      import/order
+    8:29  error    Unable to resolve path to module '@/hooks/use-mobile'                                                   import/no-unresolved
+    9:1   warning  `@/lib/utils` import should occur after import of `@/components/ui/tooltip`                             import/order
+    9:20  error    Unable to resolve path to module '@/lib/utils'                                                          import/no-unresolved
+   10:24  error    Unable to resolve path to module '@/components/ui/button'                                               import/no-unresolved
+   11:23  error    Unable to resolve path to module '@/components/ui/input'                                                import/no-unresolved
+   12:27  error    Unable to resolve path to module '@/components/ui/separator'                                            import/no-unresolved
+   19:8   error    Unable to resolve path to module '@/components/ui/sheet'                                                import/no-unresolved
+   20:26  error    Unable to resolve path to module '@/components/ui/skeleton'                                             import/no-unresolved
+   26:8   error    Unable to resolve path to module '@/components/ui/tooltip'                                              import/no-unresolved
+  136:15  warning  Object Literal Property name `--sidebar-width` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+  137:15  warning  Object Literal Property name `--sidebar-width-icon` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  193:15  warning  Object Literal Property name `--sidebar-width` must match one of the following formats: camelCase       @typescript-eslint/naming-convention
+  555:1   warning  File has too many lines (661). Maximum allowed is 500                                                   max-lines
+  632:13  warning  Object Literal Property name `--skeleton-width` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/skeleton.tsx
+  1:20  error  Unable to resolve path to module '@/lib/utils'  import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/slider.tsx
+   3:13  warning  Import name `React` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+   4:1   warning  `@radix-ui/react-slider` import should occur before import of `react`             import/order
+   4:13  warning  Import name `SliderPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+   6:20  error    Unable to resolve path to module '@/lib/utils'                                    import/no-unresolved
+  52:48  warning  Identifier name '_' is too short (< 2)                                            id-length
+
+/app/src_refactored/presentation/ui/components/ui/sonner.tsx
+  13:11  warning  Object Literal Property name `--normal-bg` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  14:11  warning  Object Literal Property name `--normal-text` must match one of the following formats: camelCase    @typescript-eslint/naming-convention
+  15:11  warning  Object Literal Property name `--normal-border` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/app/src_refactored/presentation/ui/components/ui/switch.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-switch` import should occur before import of `react`             import/order
+  4:13  warning  Import name `SwitchPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                    import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/table.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/tabs.tsx
+  3:13  warning  Import name `React` must match one of the following formats: camelCase          @typescript-eslint/naming-convention
+  4:1   warning  `@radix-ui/react-tabs` import should occur before import of `react`             import/order
+  4:13  warning  Import name `TabsPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  6:20  error    Unable to resolve path to module '@/lib/utils'                                  import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/textarea.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:20  error    Unable to resolve path to module '@/lib/utils'                          import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/toggle-group.tsx
+  3:1   warning  `react` import should occur after import of `class-variance-authority`                 import/order
+  3:13  warning  Import name `React` must match one of the following formats: camelCase                 @typescript-eslint/naming-convention
+  4:13  warning  Import name `ToggleGroupPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  7:1   warning  `@/lib/utils` import should occur after import of `@/components/ui/toggle`             import/order
+  7:20  error    Unable to resolve path to module '@/lib/utils'                                         import/no-unresolved
+  8:32  error    Unable to resolve path to module '@/components/ui/toggle'                              import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/toggle.tsx
+  1:1   warning  `react` import should occur after import of `class-variance-authority`            import/order
+  1:13  warning  Import name `React` must match one of the following formats: camelCase            @typescript-eslint/naming-convention
+  2:13  warning  Import name `TogglePrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  5:20  error    Unable to resolve path to module '@/lib/utils'                                    import/no-unresolved
+
+/app/src_refactored/presentation/ui/components/ui/tooltip.tsx
+  1:13  warning  Import name `React` must match one of the following formats: camelCase             @typescript-eslint/naming-convention
+  2:1   warning  `@radix-ui/react-tooltip` import should occur before import of `react`             import/order
+  2:13  warning  Import name `TooltipPrimitive` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  4:20  error    Unable to resolve path to module '@/lib/utils'                                     import/no-unresolved
+
+/app/src_refactored/presentation/ui/features/chat/components/ChatInput.tsx
+  1:1  warning  There should be at least one empty line between import groups                                                             import/order
+  1:8  warning  Import name `React` must match one of the following formats: camelCase                                                    @typescript-eslint/naming-convention
+  3:1  warning  There should be at least one empty line between import groups                                                             import/order
+  3:1  warning  `@/presentation/ui/components/ui/button` import should occur before import of `@/presentation/ui/components/ui/textarea`  import/order
+  4:1  warning  There should be at least one empty line between import groups                                                             import/order
+  4:1  warning  `lucide-react` import should occur before import of `react`                                                               import/order
+
+/app/src_refactored/presentation/ui/features/onboarding/components/PersonaList.tsx
+  1:1   warning  There should be at least one empty line between import groups                                                         import/order
+  1:8   warning  Import name `React` must match one of the following formats: camelCase                                                @typescript-eslint/naming-convention
+  4:1   warning  `@/presentation/ui/components/ui/button` import should occur before import of `@/presentation/ui/components/ui/card`  import/order
+  4:10  warning  'Button' is defined but never used. Allowed unused vars must match /^_/u                                              @typescript-eslint/no-unused-vars
+  5:1   warning  There should be at least one empty line between import groups                                                         import/order
+  6:1   warning  `lucide-react` import should occur before import of `react`                                                           import/order
+
+/app/src_refactored/presentation/ui/features/project/components/ProjectCard.tsx
+   1:8   warning  Import name `React` must match one of the following formats: camelCase                                               @typescript-eslint/naming-convention
+   2:1   warning  There should be at least one empty line between import groups                                                        import/order
+   2:1   warning  `@tanstack/react-router` import should occur before import of `react`                                                import/order
+  12:1   warning  `@/presentation/ui/components/ui/badge` import should occur before import of `@/presentation/ui/components/ui/card`  import/order
+  13:1   warning  There should be at least one empty line between import groups                                                        import/order
+  14:1   warning  `lucide-react` import should occur before import of `react`                                                          import/order
+  14:10  warning  'ExternalLink' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+  51:11  error    Definition for rule '@next/next/no-img-element' was not found                                                        @next/next/no-img-element
+  63:17  error    Definition for rule '@next/next/no-img-element' was not found                                                        @next/next/no-img-element
+
+/app/src_refactored/presentation/ui/features/project/components/ProjectSidebar.tsx
+   1:8   warning  Import name `React` must match one of the following formats: camelCase                                                            @typescript-eslint/naming-convention
+   2:1   warning  There should be at least one empty line between import groups                                                                     import/order
+   2:1   warning  `@tanstack/react-router` import should occur before import of `react`                                                             import/order
+   2:16  warning  'useParams' is defined but never used. Allowed unused vars must match /^_/u                                                       @typescript-eslint/no-unused-vars
+   6:1   warning  There should be at least one empty line between import groups                                                                     import/order
+   6:1   warning  `@/presentation/ui/components/ui/collapsible` import should occur before import of `@/presentation/ui/components/ui/scroll-area`  import/order
+   7:1   warning  `lucide-react` import should occur before import of `react`                                                                       import/order
+   7:90  warning  'Folder' is defined but never used. Allowed unused vars must match /^_/u                                                          @typescript-eslint/no-unused-vars
+  18:57  warning  Parameter name `Icon` must match one of the following formats: camelCase                                                          @typescript-eslint/naming-convention
+  18:63  warning  'exact' is assigned a value but never used. Allowed unused args must match /^_/u                                                  @typescript-eslint/no-unused-vars
+  22:23  error    Unexpected any. Specify a different type                                                                                          @typescript-eslint/no-explicit-any
+
+/app/src_refactored/presentation/ui/features/user/components/UserSidebar.tsx
+    1:8   warning  Import name `React` must match one of the following formats: camelCase                                                  @typescript-eslint/naming-convention
+    2:1   warning  There should be at least one empty line between import groups                                                           import/order
+    2:1   warning  `@tanstack/react-router` import should occur before import of `react`                                                   import/order
+    5:10  warning  'Separator' is defined but never used. Allowed unused vars must match /^_/u                                             @typescript-eslint/no-unused-vars
+    6:1   warning  There should be at least one empty line between import groups                                                           import/order
+    6:1   warning  `@/presentation/ui/components/ui/avatar` import should occur before import of `@/presentation/ui/components/ui/button`  import/order
+    7:1   warning  `lucide-react` import should occur before import of `react`                                                             import/order
+    7:10  warning  'User' is defined but never used. Allowed unused vars must match /^_/u                                                  @typescript-eslint/no-unused-vars
+   17:44  warning  Parameter name `Icon` must match one of the following formats: camelCase                                                @typescript-eslint/naming-convention
+   24:23  error    Unexpected any. Specify a different type                                                                                @typescript-eslint/no-explicit-any
+   44:42  warning  Identifier name 'n' is too short (< 2)                                                                                  id-length
+  123:62  warning  Identifier name 'n' is too short (< 2)                                                                                  id-length
+
+/app/src_refactored/presentation/ui/hooks/useIPC.ts
+  4:10  warning  'IElectronIPC' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/app/src_refactored/presentation/ui/main.tsx
+  1:8   warning  Import name `React` must match one of the following formats: camelCase           @typescript-eslint/naming-convention
+  2:8   warning  Import name `ReactDOMClient` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  3:8   error    Unable to resolve path to module '@/styles/globals.css'                          import/no-unresolved
+  5:1   warning  There should be at least one empty line between import groups                    import/order
+  5:1   warning  `@tanstack/react-router` import should occur before import of `react`            import/order
+  6:27  error    Unable to resolve path to module '@/routeTree.gen'                               import/no-unresolved
+
+/app/src_refactored/presentation/ui/routes/(app)/_layout.tsx
+  1:8   warning  Import name `React` must match one of the following formats: camelCase      @typescript-eslint/naming-convention
+  1:17  warning  'useState' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  2:1   warning  There should be at least one empty line between import groups               import/order
+  2:1   warning  `@tanstack/react-router` import should occur before import of `react`       import/order
+
+/app/src_refactored/presentation/ui/routes/(public)/_layout.tsx
+  1:8  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  2:1  warning  `@tanstack/react-router` import should occur before import of `react`   import/order
+
+/app/src_refactored/presentation/ui/routes/(public)/home/index.tsx
+  1:8  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  2:1  warning  There should be at least one empty line between import groups           import/order
+  2:1  warning  `@tanstack/react-router` import should occur before import of `react`   import/order
+  3:1  warning  There should be at least one empty line between import groups           import/order
+  4:1  warning  `lucide-react` import should occur before import of `react`             import/order
+
+/app/src_refactored/presentation/ui/routes/__root.tsx
+  1:8   warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  2:1   warning  `@tanstack/react-router` import should occur before import of `react`   import/order
+  3:1   warning  There should be at least one empty line between import groups           import/order
+  3:1   warning  `@tanstack/react-query` import should occur before import of `react`    import/order
+  3:50  error    Unable to resolve path to module '@tanstack/react-query'                import/no-unresolved
+
+/app/src_refactored/presentation/ui/routes/index.tsx
+  1:8  warning  Import name `React` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+  2:1  warning  `@tanstack/react-router` import should occur before import of `react`   import/order
+
+/app/src_refactored/presentation/ui/services/ipc.service.ts
+    3:1   warning  There should be at least one empty line between import groups                               import/order
+    3:1   warning  `./ipc.types` import should occur after import of `@/shared/ipc-chat.types`                 import/order
+   33:60  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   37:29  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   42:58  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   46:71  error    'ChatStreamTokenPayload' is not defined                                                     no-undef
+   47:72  error    'ChatStreamTokenPayload' is not defined                                                     no-undef
+   48:54  error    'ChatStreamEndPayload' is not defined                                                       no-undef
+   55:49  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   72:31  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   74:14  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   82:21  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+   95:50  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  107:41  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  149:11  warning  'wrappedListener' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  149:38  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  162:72  error    Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  170:50  error    'ProjectListItem' is not defined                                                            no-undef
+  171:24  error    'ProjectListItem' is not defined                                                            no-undef
+
+/app/src_refactored/presentation/ui/services/ipc.types.ts
+  15:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  73:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src_refactored/shared/ipc-channels.ts
+   9:3  warning  Object Literal Property name `CHAT_SEND_MESSAGE` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  10:3  warning  Object Literal Property name `CHAT_STREAM_EVENT` must match one of the following formats: camelCase   @typescript-eslint/naming-convention
+  22:3  warning  Object Literal Property name `PROJECT_LIST_QUERY` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+✖ 1232 problems (405 errors, 827 warnings)
+  0 errors and 476 warnings potentially fixable with the `--fix` option.

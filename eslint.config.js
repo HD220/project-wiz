@@ -147,39 +147,39 @@ export default [
       // For now, we rely on the fact that these rules are off in the dedicated test block below.
     },
     settings: {
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
-          project: "./tsconfig.json",
-          extensions: [".ts", ".tsx", ".js", ".jsx", ".json"], // Explicitly added extensions
+      "import/resolver": [ // Changed to an array format
+        {
+          alias: {
+            map: [
+              // General UI alias, careful if @ is used for more specific things higher up
+              // For now, let's assume @ primarily refers to src_refactored for ESLint context here.
+              // The tsconfig uses @ui/ for these, but code uses @/.
+              // This map will bridge that for ESLint.
+              ["@", "./src_refactored"], // General fallback for @ if needed for some paths
+              ["@/components", "./src_refactored/presentation/ui/components"],
+              ["@/lib", "./src_refactored/presentation/ui/lib"],
+              ["@/hooks", "./src_refactored/presentation/ui/hooks"],
+              ["@/styles", "./src_refactored/presentation/ui/styles"], // Example, if used
+              // Core aliases, ensuring they are correctly mapped for ESLint.
+              // These should align with tsconfig.json paths.
+              ["@/application", "./src_refactored/core/application"],
+              ["@/core", "./src_refactored/core"],
+              ["@/domain", "./src_refactored/core/domain"],
+              ["@/infrastructure", "./src_refactored/infrastructure"],
+              ["@/presentation", "./src_refactored/presentation"], // General presentation, distinct from UI components
+              ["@/shared", "./src_refactored/shared"],
+            ],
+            extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
+          }
+        },
+        {
+          typescript: {
+            alwaysTryTypes: true,
+            project: "./tsconfig.json",
+            // extensions are often implicitly handled by the typescript resolver itself or inherited
+          }
         }
-        // The alias map below is commented out to rely solely on eslint-import-resolver-typescript
-        /*
-        alias: {
-          map: [
-            ["@", "./src_refactored/presentation/ui"],
-            ["@/app", "./src_refactored/presentation/ui/app"],
-            ["@/assets", "./src_refactored/presentation/ui/assets"],
-            ["@/components", "./src_refactored/presentation/ui/components"],
-            ["@/config", "./src_refactored/presentation/ui/config"],
-            ["@/hooks", "./src_refactored/presentation/ui/hooks"],
-            ["@/lib", "./src_refactored/presentation/ui/lib"],
-            ["@/services", "./src_refactored/presentation/ui/services"],
-            ["@/store", "./src_refactored/presentation/ui/store"],
-            ["@/styles", "./src_refactored/presentation/ui/styles"],
-            ["@/types", "./src_refactored/presentation/ui/types"],
-            ["@/application", "./src_refactored/core/application"],
-            ["@/core", "./src_refactored/core"],
-            ["@/domain", "./src_refactored/core/domain"],
-            ["@/infrastructure", "./src_refactored/infrastructure"],
-            ["@/presentation", "./src_refactored/presentation"],
-            ["@/shared", "./src_refactored/shared"],
-            ["@/refactored", "./src_refactored"]
-          ],
-          extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
-        }
-        */
-      },
+      ],
       "boundaries/elements": [
         { type: "domain", pattern: "src_refactored/core/domain" },
         { type: "application", pattern: "src_refactored/core/application" },

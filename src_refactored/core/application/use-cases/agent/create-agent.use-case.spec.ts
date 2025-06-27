@@ -2,10 +2,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { CreateAgentUseCase } from './create-agent.use-case';
-import { CreateAgentUseCaseInput } from './create-agent.schema';
-
 import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { Agent } from '@/domain/agent/agent.entity';
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
@@ -22,7 +20,11 @@ import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-ke
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 import { LLMProviderConfigName } from '@/domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from '@/domain/llm-provider-config/value-objects/llm-provider-id.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { CreateAgentUseCaseInput } from './create-agent.schema';
+import { CreateAgentUseCase } from './create-agent.use-case';
 
 // Mocks
 const mockAgentRepo: IAgentRepository = { save: vi.fn(), findById: vi.fn(), findAll: vi.fn(), delete: vi.fn() };

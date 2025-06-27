@@ -2,20 +2,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { ListJobsUseCase } from './list-jobs.use-case';
-import { ListJobsUseCaseInput } from './list-jobs.schema';
-
 import { DomainError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions, PaginatedJobsResult } from '@/domain/job/ports/job-repository.types';
 import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved path likely
 import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
 import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo';
+import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo'; // Unresolved path likely
 import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { ListJobsUseCaseInput } from './list-jobs.schema';
+import { ListJobsUseCase } from './list-jobs.use-case';
 
 const mockJobRepository: IJobRepository = {
   search: vi.fn(),

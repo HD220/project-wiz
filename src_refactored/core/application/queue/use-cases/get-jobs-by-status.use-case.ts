@@ -1,8 +1,10 @@
 // src_refactored/core/application/queue/use-cases/get-jobs-by-status.use-case.ts
-import { IUseCase } from '@/application/common/ports/use-case.interface';
 import { IJobRepository, IJobRepository as JobRepositorySymbol } from '@/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions, PaginatedJobsResult } from '@/domain/job/ports/job-repository.types';
+
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 // import { Inject, Injectable } from '../../common/ioc/dependency-injection.decorators';
+
 import { Result, ok as Ok, error as Err } from '@/shared/result';
 
 import { GetJobsByStatusRequestDTO, GetJobsByStatusResponseDTO } from '../dtos';

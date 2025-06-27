@@ -1,17 +1,20 @@
 // src_refactored/core/application/common/ports/use-case.interface.ts
+import { Result } from '@/shared/result';
+import { DomainError } from '@/domain/common/errors';
+import { ApplicationError } from '@/application/common/errors';
+import { Executable } from '../executable';
 
 /**
  * Defines the basic contract for a use case.
  * A use case executes a specific piece of business logic.
+ * It extends the generic Executable interface.
  *
  * @template TRequest The type of the request object that the use case accepts.
- * @template TResponse The type of the response (or Result) that the use case returns.
+ * @template TResponse The type of the successful output from the use case.
+ * @template TError The type of the error output from the use case. Defaults to DomainError or ApplicationError.
  */
-export interface IUseCase<TRequest, TResponse> {
-  /**
-   * Executes the use case with the given request object.
-   * @param request The request object for the use case.
-   * @returns A Promise that resolves to the response of the use case execution.
-   */
-  execute(request: TRequest): Promise<TResponse>;
+export interface IUseCase<TRequest, TResponse, TError extends Error = DomainError | ApplicationError>
+  extends Executable<TRequest, TResponse, TError> {
+  // IUseCase might define additional methods or properties specific to use cases in the future,
+  // but for now, it primarily inherits the execute method from Executable.
 }

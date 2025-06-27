@@ -2,11 +2,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { SaveMemoryItemUseCase } from './save-memory-item.use-case';
-import { SaveMemoryItemUseCaseInput } from './save-memory-item.schema';
-
 import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemContent } from '@/domain/memory/value-objects/memory-item-content.vo';
@@ -14,7 +13,11 @@ import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-e
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
 import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { SaveMemoryItemUseCaseInput } from './save-memory-item.schema';
+import { SaveMemoryItemUseCase } from './save-memory-item.use-case';
 
 const mockMemoryRepository: IMemoryRepository = {
   save: vi.fn(),

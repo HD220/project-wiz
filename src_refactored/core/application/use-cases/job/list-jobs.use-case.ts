@@ -1,12 +1,14 @@
 // src_refactored/core/application/use-cases/job/list-jobs.use-case.ts
 import { ZodError } from 'zod';
 
-import { Executable } from '@/core/common/executable';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
+
 import { DomainError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types';
 import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { Result, ok, error } from '@/shared/result';
 
 import {
@@ -18,7 +20,7 @@ import {
 
 export class ListJobsUseCase
   implements
-    Executable<
+    IUseCase<
       ListJobsUseCaseInput,
       ListJobsUseCaseOutput,
       DomainError | ZodError | ValueError

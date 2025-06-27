@@ -1,18 +1,24 @@
-import { Agent } from '@/domain/agent/agent.entity';
-import { IAgentInternalStateRepository } from '@/domain/agent/ports/i-agent-internal-state.repository';
 import { ApplicationError } from '@/application/common/errors';
-import { ILLMAdapter } from '@/application/ports/adapters/i-llm.adapter';
 import { IAgentExecutor } from '@/application/ports/services/i-agent-executor.interface';
 import { IToolRegistryService } from '@/application/ports/services/i-tool-registry.service';
+
 import { ILogger } from '@/core/common/services/i-logger.service';
+// Corrected path for ILLMAdapter, was trying to import from @/application before
+import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface';
 import { IToolExecutionContext } from '@/core/tools/tool.interface';
+
+import { Agent } from '@/domain/agent/agent.entity';
+// Corrected filename for IAgentInternalStateRepository
+import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { DomainError, ToolError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { AgentExecutorResult, CriticalToolFailureInfo, ExecutionHistoryEntry } from '@/domain/job/job-processing.types';
-import { IJobRepository } from '@/domain/job/ports/i-job.repository';
+// Corrected filename for IJobRepository
+import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { ActivityHistoryEntry, HistoryEntryRoleType } from '@/domain/job/value-objects/activity-history-entry.vo';
 import { ActivityHistory } from '@/domain/job/value-objects/activity-history.vo';
 import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
+
 import { ok, error, Result } from '@/shared/result';
 
 // Define LanguageModelMessage (standard for Vercel AI SDK)

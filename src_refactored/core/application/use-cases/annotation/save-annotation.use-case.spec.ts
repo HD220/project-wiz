@@ -2,16 +2,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { SaveAnnotationUseCase } from './save-annotation.use-case';
-import { SaveAnnotationUseCaseInput } from './save-annotation.schema';
-
 import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { Annotation } from '@/domain/annotation/annotation.entity';
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
 import { AnnotationText } from '@/domain/annotation/value-objects/annotation-text.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { SaveAnnotationUseCaseInput } from './save-annotation.schema';
+import { SaveAnnotationUseCase } from './save-annotation.use-case';
 
 const mockAnnotationRepository: IAnnotationRepository = {
   save: vi.fn(),

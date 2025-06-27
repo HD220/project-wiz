@@ -2,19 +2,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { UpdateJobUseCase } from './update-job.use-case';
-import { UpdateJobUseCaseInput } from './update-job.schema';
-
 import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
+
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo';
+import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo'; // Unresolved
 import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
+import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved
 import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
-import { RetryPolicy, NoRetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo';
+import { RetryPolicy, NoRetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo'; // Unresolved
 import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+
 import { ok, error } from '@/shared/result';
+
+import { UpdateJobUseCaseInput } from './update-job.schema';
+import { UpdateJobUseCase } from './update-job.use-case';
 
 const mockJobRepository: IJobRepository = {
   findById: vi.fn(),
