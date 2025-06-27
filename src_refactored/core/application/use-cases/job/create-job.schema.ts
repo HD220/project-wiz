@@ -1,7 +1,6 @@
 // src_refactored/core/application/use-cases/job/create-job.schema.ts
 import { z } from 'zod';
-
-// import { BackoffType } from '@/domain/job/value-objects/retry-policy.vo'; // Import enum - Path will be fixed
+import { BackoffStrategyType } from '@/core/domain/job/value-objects/backoff-strategy-type.enum';
 
 /**
  * Input schema for CreateJobUseCase.
@@ -48,9 +47,9 @@ export const CreateJobUseCaseInputSchema = z.object({
       .min(0, { message: "Initial delay cannot be negative."})
       .optional()
       .describe("Initial delay in seconds before the first retry. Used for FIXED backoff or as base for EXPONENTIAL."),
-    backoffType: z.enum([BackoffType.FIXED, BackoffType.EXPONENTIAL])
+    backoffType: z.nativeEnum(BackoffStrategyType) // Use nativeEnum for TypeScript enums
       .optional()
-      .describe("Backoff strategy for retries: 'FIXED' or 'EXPONENTIAL'."),
+      .describe("Backoff strategy for retries: 'FIXED', 'LINEAR', or 'EXPONENTIAL'."),
     maxDelaySeconds: z.number()
       .int({ message: "Max delay must be an integer."})
       .min(0, { message: "Max delay cannot be negative."})

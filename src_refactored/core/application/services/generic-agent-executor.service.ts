@@ -5,6 +5,7 @@ import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface';
 import { IToolExecutionContext } from '@/core/tools/tool.interface';
 
 import { Agent } from '@/domain/agent/agent.entity';
+import { AgentExecutorStatus } from '@/core/domain/job/job-processing.types'; // Added import
 // Corrected filename for IAgentInternalStateRepository
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { DomainError, ToolError } from '@/domain/common/errors';

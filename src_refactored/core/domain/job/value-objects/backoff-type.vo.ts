@@ -5,27 +5,11 @@ import { ValueError } from '@/core/common/errors';
 import { BackoffStrategyType } from './backoff-strategy-type.enum';
 import { IBackoffStrategy } from '../ports/i-backoff-strategy.interface';
 import { DelayMillisecondsVO } from './delay-milliseconds.vo';
-import { AttemptCountVO } from './attempt-count.vo'; // Needed for stubbing strategy
+// AttemptCountVO no longer needed directly here as strategies are imported
 
-// --- Temporary Stubs for Concrete Strategies ---
-class ExponentialBackoffStrategy implements IBackoffStrategy {
-  constructor(baseDelay: DelayMillisecondsVO, maxDelay?: DelayMillisecondsVO, multiplier?: number) {}
-  calculate(baseDelay: DelayMillisecondsVO, attempts: AttemptCountVO, maxDelay?: DelayMillisecondsVO): DelayMillisecondsVO {
-    return DelayMillisecondsVO.zero(); // Stub
-  }
-}
-class LinearBackoffStrategy implements IBackoffStrategy {
-  calculate(baseDelay: DelayMillisecondsVO, attempts: AttemptCountVO, maxDelay?: DelayMillisecondsVO): DelayMillisecondsVO {
-    return DelayMillisecondsVO.zero(); // Stub
-  }
-}
-class FixedBackoffStrategy implements IBackoffStrategy {
-  calculate(baseDelay: DelayMillisecondsVO, attempts: AttemptCountVO, maxDelay?: DelayMillisecondsVO): DelayMillisecondsVO {
-    return DelayMillisecondsVO.zero(); // Stub
-  }
-}
-// --- End Temporary Stubs ---
-
+import { ExponentialBackoffStrategy } from '../strategies/exponential-backoff.strategy';
+import { LinearBackoffStrategy } from '../strategies/linear-backoff.strategy';
+import { FixedBackoffStrategy } from '../strategies/fixed-backoff.strategy';
 
 const backoffTypeSchema = z.nativeEnum(BackoffStrategyType);
 

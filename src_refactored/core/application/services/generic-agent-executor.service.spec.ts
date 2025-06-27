@@ -10,7 +10,7 @@ import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { MaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo';
-import { AgentPersonaTemplate } from '@/domain/agent/value-objects/agent-persona-template.vo';
+import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
 import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
