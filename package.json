@@ -11,7 +11,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --fix --output-file eslint_report.txt --ext .ts,.tsx .",
+    "lint": "eslint --fix --ext .ts,.tsx .",
     "type-check": "tsc --noEmit",
     "extract": "lingui extract",
     "compile": "lingui compile --typescript",
