@@ -20,57 +20,53 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      // New UI Aliases for src_refactored/presentation/ui/
-      "@/app/*": ["./src_refactored/presentation/ui/app/*"],
-      "@/assets/*": ["./src_refactored/presentation/ui/assets/*"],
-      "@/components/*": ["./src_refactored/presentation/ui/components/*"],
-      "@/config/*": ["./src_refactored/presentation/ui/config/*"],
-      "@/hooks/*": ["./src_refactored/presentation/ui/hooks/*"],
-      "@/lib/*": ["./src_refactored/presentation/ui/lib/*"],
-      "@/services/*": ["./src_refactored/presentation/ui/services/*"],
-      "@/store/*": ["./src_refactored/presentation/ui/store/*"],
-      "@/styles/*": ["./src_refactored/presentation/ui/styles/*"],
-      "@/types/*": ["./src_refactored/presentation/ui/types/*"],
-      "@/*": ["./src_refactored/presentation/ui/*"], // Main alias for the new UI, should take precedence for this path
+      // UI specific aliases (prefixed with @ui/ for clarity)
+      "@ui/app/*": ["./src_refactored/presentation/ui/app/*"],
+      "@ui/assets/*": ["./src_refactored/presentation/ui/assets/*"],
+      "@ui/components/*": ["./src_refactored/presentation/ui/components/*"],
+      "@ui/config/*": ["./src_refactored/presentation/ui/config/*"],
+      "@ui/hooks/*": ["./src_refactored/presentation/ui/hooks/*"],
+      "@ui/lib/*": ["./src_refactored/presentation/ui/lib/*"],
+      "@ui/services/*": ["./src_refactored/presentation/ui/services/*"],
+      "@ui/store/*": ["./src_refactored/presentation/ui/store/*"],
+      "@ui/styles/*": ["./src_refactored/presentation/ui/styles/*"],
+      "@ui/types/*": ["./src_refactored/presentation/ui/types/*"],
+      "@ui/*": ["./src_refactored/presentation/ui/*"], // Catch-all for UI
 
-      // Existing Aliases (may need review/cleanup later, kept for now to avoid breaking old code)
-      "@/components.old/*": ["./src/infrastructure/frameworks/react/components/*"], // Renamed to avoid conflict
-      // Renamed .old to .legacy for consistency
-      "@/components.legacy/*": ["./src/infrastructure/frameworks/react/components/*"],
-      "@/lib.legacy/*": ["./src/infrastructure/frameworks/react/lib/*"],
-      "@/hooks.legacy/*": ["./src/infrastructure/frameworks/react/hooks/*"],
-      "@/ui.legacy/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
-
-      // Aliases for src_refactored general structure (ensure these are comprehensive)
+      // Aliases for src_refactored general structure (these should be distinct now)
       "@/application/*": ["./src_refactored/core/application/*"],
       "@/core/*": ["./src_refactored/core/*"],
       "@/domain/*": ["./src_refactored/core/domain/*"],
       "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
-      "@/presentation/*": ["./src_refactored/presentation/*"], // General presentation
+      "@/presentation/*": ["./src_refactored/presentation/*"], // For non-UI presentation files
       "@/shared/*": ["./src_refactored/shared/*"],
-      "@/refactored/*": ["./src_refactored/*"],
+      "@/refactored/*": ["./src_refactored/*"], // Broadest non-UI alias
 
-      // Legacy Aliases from 'src' (original structure)
+      // Legacy Aliases (remains the same, ensure they don't conflict)
+      "@/components.old/*": ["./src/infrastructure/frameworks/react/components/*"],
+      "@/components.legacy/*": ["./src/infrastructure/frameworks/react/components/*"],
+      "@/lib.legacy/*": ["./src/infrastructure/frameworks/react/lib/*"],
+      "@/hooks.legacy/*": ["./src/infrastructure/frameworks/react/hooks/*"],
+      "@/ui.legacy/*": ["./src/infrastructure/frameworks/react/components/ui/*"],
       "@/application.legacy/*": ["./src/core/application/*"],
       "@/core.legacy/*": ["./src/core/*"],
-      // "@/domain.legacy/*" was not explicitly present, but interfaces.legacy might cover it
-      "@/interfaces.legacy/*": ["./src/core/domain/entities/*/interfaces/*"], // Potentially covers old domain model interfaces
-      "@/shared.legacy/*": ["./src/shared/*"], // If there was a top-level shared in old src
-      "@/core/common/result.legacy": ["./src/shared/result.ts"], // Specific shared utility
-      "@/src.legacy/*": ["./src/*"] // Broad legacy alias
+      "@/interfaces.legacy/*": ["./src/core/domain/entities/*/interfaces/*"],
+      "@/shared.legacy/*": ["./src/shared/*"],
+      "@/core/common/result.legacy": ["./src/shared/result.ts"],
+      "@/src.legacy/*": ["./src/*"]
     }
   },
   "include": [
     "src_refactored/**/*",
     "tests/**/*",
-    // "src/**/*", // Keep src commented out to ensure focus on src_refactored
+    // "src/**/*",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
     "lingui.config.ts",
     "vitest.config.mts",
     "vitest.config.ts",
-    "tailwind.config.ts", // Added here
+    "tailwind.config.ts",
     "types/k6.d.ts"
   ],
   "exclude": ["node_modules", "coverage"]

@@ -1,9 +1,9 @@
-import { Agent } from '@/refactored/core/domain/agent/agent.entity';
-import { Job } from '@/refactored/core/domain/job/job.entity';
-import { AgentExecutorResult } from '@/refactored/core/domain/job/job-processing.types';
-import { Result } from '@/refactored/shared/result';
-import { DomainError } from '@/refactored/core/common/errors';
-import { ApplicationError } from '@/refactored/core/application/common/errors';
+import { Agent } from '@/core/domain/agent/agent.entity';
+import { Job } from '@/core/domain/job/job.entity';
+import { AgentExecutorResult } from '@/core/domain/job/job-processing.types';
+import { Result } from '@/shared/result';
+import { DomainError } from '@/core/common/errors';
+import { ApplicationError } from '@/application/common/errors';
 
 /**
  * @interface IAgentExecutor

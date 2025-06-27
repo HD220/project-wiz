@@ -1,7 +1,7 @@
-import { JobEntity } from '@/refactored/core/domain/job/job.entity';
-import { IJobOptions } from '@/refactored/core/domain/job/value-objects/job-options.vo'; // Assuming IJobOptions is the correct type for opts
-import { Result } from '@/refactored/shared/result';
-import { DomainError, ValueError } from '@/refactored/core/common/errors';
+import { JobEntity } from '@/core/domain/job/job.entity';
+import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo'; // Assuming IJobOptions is the correct type for opts
+import { Result } from '@/shared/result';
+import { DomainError, ValueError } from '@/core/common/errors';
 
 // Based on JobEntityConstructionProps from create-job.use-case.ts
 export interface CreateJobRequestDTO<TData = any> {
