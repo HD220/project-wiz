@@ -4,7 +4,6 @@ const config = {
   darkMode: ['class','string'],
   content: [
     './src_refactored/presentation/ui/**/*.{ts,tsx,html,js}',
-    './src_refactored/presentation/ui/index.html',
   ],
   prefix: '',
   theme: {
