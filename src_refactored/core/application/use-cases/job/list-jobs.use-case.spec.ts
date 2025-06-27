@@ -2,17 +2,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError } from '@/application/common/errors'; // Or @/domain/common/errors
-
+import { DomainError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { JobSearchFilters, PaginationOptions, PaginatedJobsResult } from '@/domain/job/ports/job-repository.types';
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved path likely
-import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
-import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo'; // Unresolved path likely
-import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+import { JobSearchFilters, PaginatedJobsResult } from '@/domain/job/ports/job-repository.types';
+// import { PaginationOptions } from '@/domain/job/ports/job-repository.types'; // Not directly used in spec
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
+import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
+import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+import { JobTimestampVO } from '@/domain/job/value-objects/job-timestamp.vo';
+import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
 
 import { ok, error } from '@/shared/result';
 
@@ -29,16 +29,16 @@ describe('ListJobsUseCase', () => {
   let useCase: ListJobsUseCase;
   const now = new Date();
   const jobEntity1 = Job.create({
-    id: JobId.generate(), name: JobName.create('Job One'), payload: {},
-    status: JobStatus.pending(), priority: JobPriority.default(),
-    createdAt: JobTimestamp.create(now), updatedAt: JobTimestamp.create(now)
-  });
+    id: JobIdVO.generate(), name: JobNameVO.create('Job One').unwrap(), payload: {},
+    status: JobStatusVO.pending(), priority: JobPriorityVO.default(),
+    createdAt: JobTimestampVO.create(now).unwrap(), updatedAt: JobTimestampVO.create(now).unwrap(),
+  }).unwrap();
   const jobEntity2 = Job.create({
-    id: JobId.generate(), name: JobName.create('Job Two (coder)'), payload: {},
-    status: JobStatus.active(), targetAgentRole: TargetAgentRole.create('coder_agent'),
-    priority: JobPriority.create(JobPriority.HIGH),
-    createdAt: JobTimestamp.create(now), updatedAt: JobTimestamp.create(now)
-  });
+    id: JobIdVO.generate(), name: JobNameVO.create('Job Two (coder)').unwrap(), payload: {},
+    status: JobStatusVO.active(), targetAgentRole: TargetAgentRoleVO.create('coder_agent').unwrap(),
+    priority: JobPriorityVO.create(JobPriorityVO.HIGH).unwrap(),
+    createdAt: JobTimestampVO.create(now).unwrap(), updatedAt: JobTimestampVO.create(now).unwrap(),
+  }).unwrap();
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -76,7 +76,7 @@ describe('ListJobsUseCase', () => {
     };
     (mockJobRepository.search as vi.Mock).mockResolvedValue(ok(paginatedResult));
     const input: ListJobsUseCaseInput = {
-      status: [JobStatusType.ACTIVE],
+      status: [JobStatusEnum.ACTIVE], // Use JobStatusEnum
       targetAgentRole: 'coder_agent',
       nameContains: 'Two',
       page: 2,
@@ -86,30 +86,30 @@ describe('ListJobsUseCase', () => {
 
     expect(mockJobRepository.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: [JobStatusType.ACTIVE],
-        targetAgentRole: expect.any(TargetAgentRole), // Checks if VO is created
+        status: [JobStatusEnum.ACTIVE], // Use JobStatusEnum
+        targetAgentRole: expect.any(TargetAgentRoleVO), // Use TargetAgentRoleVO
         nameContains: 'Two',
       }),
-      { page: 2, pageSize: 10 }
+      { page: 2, pageSize: 10 },
     );
     const calledFilters = (mockJobRepository.search as vi.Mock).mock.calls[0][0] as JobSearchFilters;
-    expect(calledFilters.targetAgentRole?.value()).toBe('coder_agent');
+    expect(calledFilters.targetAgentRole?.value).toBe('coder_agent');
   });
 
   it('should return ZodError for invalid input (e.g., negative page size)', async () => {
     const input = { pageSize: -5 };
-    const result = await useCase.execute(input as any); // Cast for test
+    const result = await useCase.execute(input as ListJobsUseCaseInput); // Cast to expected type
     expect(result.isError()).toBe(true);
-    if(result.isError()) expect(result.value).toBeInstanceOf(ZodError);
+    if (result.isError()) expect(result.value).toBeInstanceOf(ZodError);
   });
 
   it('should return DomainError if repository search fails', async () => {
     const repoError = new DomainError('DB search failed');
-    (mockJobRepository.search as vi.Mock).mockResolvedValue(error(repoError));
+    (mockJobRepository.search as vi.Mock).mockResolvedValue(error(repoError as Error)); // Cast to Error
     const input: ListJobsUseCaseInput = {};
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
-    if(result.isError()) {
+    if (result.isError()) {
         expect(result.value).toBeInstanceOf(DomainError);
         expect(result.value.message).toContain('Failed to list jobs');
     }

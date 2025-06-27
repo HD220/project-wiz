@@ -1,26 +1,27 @@
 // src_refactored/core/application/use-cases/job/create-job.use-case.ts
 import { ZodError } from 'zod';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized
 import { DomainError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo';
-import { JobDependsOn } from '@/domain/job/value-objects/job-depends-on.vo';
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo';
-import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
+import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo'; // Corrected: MaxAttempts to AttemptCountVO
+import { JobDependsOnVO } from '@/domain/job/value-objects/job-depends-on.vo'; // Corrected: JobDependsOn to JobDependsOnVO
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo'; // Corrected: JobId to JobIdVO
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo'; // Corrected: JobName to JobNameVO
+import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo'; // Corrected: JobPriority to JobPriorityVO
 import {
-  BackoffType,
-  NoRetryPolicy,
-  RetryDelay,
-  RetryPolicy,
+  BackoffTypeEnum, // Corrected: BackoffType to BackoffTypeEnum
+  NoRetryPolicyVO, // Corrected: NoRetryPolicy to NoRetryPolicyVO
+  // RetryDelayVO, // Corrected: RetryDelay to RetryDelayVO - Not directly used, part of RetryPolicyVO logic
+  RetryPolicyVO, // Corrected: RetryPolicy to RetryPolicyVO
 } from '@/domain/job/value-objects/retry-policy.vo';
-import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo';
-import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // This path might still be an issue
+// import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo'; // Corrected: JobStatusType to JobStatusEnum - Not directly used
+// import { JobTimestampVO } from '@/domain/job/value-objects/job-timestamp.vo'; // Corrected: JobTimestamp to JobTimestampVO - Not directly used
+import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo'; // Corrected: TargetAgentRole to TargetAgentRoleVO
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 import { Result, ok, error } from '@/shared/result';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
 
 import {
   CreateJobUseCaseInput,
@@ -30,22 +31,17 @@ import {
 
 export class CreateJobUseCase
   implements
-    IUseCase< // Standardized
+    IUseCase<
       CreateJobUseCaseInput,
       CreateJobUseCaseOutput,
       DomainError | ZodError | ValueError
     >
 {
-  private jobRepository: IJobRepository;
-  private jobQueue: IJobQueue;
-
   constructor(
-    jobRepository: IJobRepository,
-    jobQueue: IJobQueue,
-  ) {
-    this.jobRepository = jobRepository;
-    this.jobQueue = jobQueue;
-  }
+    private readonly jobRepository: IJobRepository,
+    private readonly jobQueue: IJobQueue,
+    private readonly logger: ILogger, // Added logger
+  ) {}
 
   async execute(
     input: CreateJobUseCaseInput,
@@ -57,35 +53,35 @@ export class CreateJobUseCase
     const validInput = validationResult.data;
 
     try {
-      const nameVo = JobName.create(validInput.name);
+      const nameVo = JobNameVO.create(validInput.name); // Use JobNameVO
       const targetAgentRoleVo = validInput.targetAgentRole
-        ? TargetAgentRole.create(validInput.targetAgentRole)
+        ? TargetAgentRoleVO.create(validInput.targetAgentRole) // Use TargetAgentRoleVO
         : undefined;
 
       const priorityVo = validInput.priority !== undefined
-        ? JobPriority.create(validInput.priority)
-        : JobPriority.default();
+        ? JobPriorityVO.create(validInput.priority) // Use JobPriorityVO
+        : JobPriorityVO.default();
 
       const dependsOnJobIdsVo = validInput.dependsOnJobIds
-        ? JobDependsOn.create(validInput.dependsOnJobIds.map(id => JobId.fromString(id)))
-        : JobDependsOn.create([]);
+        ? JobDependsOnVO.create(validInput.dependsOnJobIds.map(id => JobIdVO.fromString(id))) // Use JobDependsOnVO, JobIdVO
+        : JobDependsOnVO.create([]);
 
-      let retryPolicyVo: RetryPolicy;
+      let retryPolicyVo: RetryPolicyVO | NoRetryPolicyVO; // Corrected type
       if (!validInput.retryPolicy || validInput.retryPolicy.maxAttempts === undefined || validInput.retryPolicy.maxAttempts <= 1) {
-        retryPolicyVo = NoRetryPolicy.create();
+        retryPolicyVo = NoRetryPolicyVO.create(); // Use NoRetryPolicyVO
       } else {
-        const maxAttemptsVo = MaxAttempts.create(validInput.retryPolicy.maxAttempts);
+        const maxAttemptsVo = AttemptCountVO.create(validInput.retryPolicy.maxAttempts); // Use AttemptCountVO
         const initialDelayMs = (validInput.retryPolicy.initialDelaySeconds || 0) * 1000;
-        const backoffType = validInput.retryPolicy.backoffType || BackoffType.FIXED;
+        const backoffType = validInput.retryPolicy.backoffType || BackoffTypeEnum.FIXED; // Use BackoffTypeEnum
         const maxDelayMs = validInput.retryPolicy.maxDelaySeconds !== undefined
           ? validInput.retryPolicy.maxDelaySeconds * 1000
           : undefined;
 
-        retryPolicyVo = RetryPolicy.create({
+        retryPolicyVo = RetryPolicyVO.create({ // Use RetryPolicyVO
           maxAttempts: maxAttemptsVo,
-          backoffType: backoffType,
-          initialDelayMs: initialDelayMs,
-          maxDelayMs: maxDelayMs,
+          backoffType, // Use corrected enum
+          initialDelayMs,
+          maxDelayMs,
         });
       }
 
@@ -109,18 +105,18 @@ export class CreateJobUseCase
       }
 
       return ok({ jobId: jobEntity.id().value() });
-
-    } catch (err: any) {
-      if (err instanceof ZodError) {
-        return error(err);
+    } catch (e: unknown) { // Changed err: any to e: unknown
+      if (e instanceof ZodError) {
+        return error(e);
       }
-      if (err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+      if (e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error('[CreateJobUseCase] Unexpected error:', err);
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[CreateJobUseCase] Unexpected error: ${message}`, { error: e }); // Added logger
       return error(
         new DomainError(
-          `An unexpected error occurred while preparing the job: ${err.message || err}`,
+          `An unexpected error occurred while preparing the job: ${message}`,
         ),
       );
     }

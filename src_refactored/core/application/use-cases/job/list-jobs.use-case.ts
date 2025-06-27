@@ -1,15 +1,14 @@
 // src_refactored/core/application/use-cases/job/list-jobs.use-case.ts
 import { ZodError } from 'zod';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-
 import { DomainError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions } from '@/domain/job/ports/job-repository.types';
-import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
-
+import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo'; // Corrected: TargetAgentRole to TargetAgentRoleVO
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 import { Result, ok, error } from '@/shared/result';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
 
 import {
   ListJobsUseCaseInput,
@@ -26,7 +25,10 @@ export class ListJobsUseCase
       DomainError | ZodError | ValueError
     >
 {
-  constructor(private jobRepository: IJobRepository) {}
+  constructor(
+    private readonly jobRepository: IJobRepository,
+    private readonly logger: ILogger, // Added logger
+  ) {}
 
   async execute(
     input: ListJobsUseCaseInput,
@@ -43,7 +45,7 @@ export class ListJobsUseCase
         filters.status = validInput.status;
       }
       if (validInput.targetAgentRole) {
-        filters.targetAgentRole = TargetAgentRole.create(validInput.targetAgentRole);
+        filters.targetAgentRole = TargetAgentRoleVO.create(validInput.targetAgentRole); // Use TargetAgentRoleVO
       }
       if (validInput.nameContains) {
         filters.nameContains = validInput.nameContains;
@@ -61,7 +63,7 @@ export class ListJobsUseCase
 
       const paginatedData = searchResult.value;
 
-      const jobListItems: JobListItem[] = paginatedData.jobs.map((jobEntity: Job) => ({
+      const jobListItems: JobListItem[] = paginatedData.jobs.map((jobEntity: Job<unknown, unknown>) => ({ // Specify Job generic type
         id: jobEntity.id().value(),
         name: jobEntity.name().value(),
         status: jobEntity.status().value(),
@@ -79,13 +81,13 @@ export class ListJobsUseCase
         pageSize: paginatedData.pageSize,
         totalPages: paginatedData.totalPages,
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) { // Changed err: any to e: unknown
+      if (e instanceof ZodError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error(`[ListJobsUseCase] Unexpected error:`, err);
-      return error(new DomainError(`Unexpected error listing jobs: ${err.message || err}`));
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[ListJobsUseCase] Unexpected error: ${message}`, { error: e }); // Added logger
+      return error(new DomainError(`Unexpected error listing jobs: ${message}`));
     }
   }
 }

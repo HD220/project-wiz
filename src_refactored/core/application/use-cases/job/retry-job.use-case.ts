@@ -1,16 +1,15 @@
 // src_refactored/core/application/use-cases/job/retry-job.use-case.ts
 import { ZodError } from 'zod';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // Unresolved
-
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
-import { Job } from '@/domain/job/job.entity';
+// import { Job } from '@/domain/job/job.entity'; // Not directly used
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 import { Result, ok, error } from '@/shared/result';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
 
 import {
   RetryJobUseCaseInput,
@@ -20,15 +19,16 @@ import {
 
 export class RetryJobUseCase
   implements
-    IUseCase< // Changed Executable to IUseCase
+    IUseCase<
       RetryJobUseCaseInput,
       RetryJobUseCaseOutput,
       DomainError | ZodError | NotFoundError | ValueError
     >
 {
   constructor(
-    private jobRepository: IJobRepository,
-    private jobQueue: IJobQueue,
+    private readonly jobRepository: IJobRepository,
+    private readonly jobQueue: IJobQueue,
+    private readonly logger: ILogger, // Added logger
   ) {}
 
   async execute(
@@ -41,21 +41,20 @@ export class RetryJobUseCase
     const validInput = validationResult.data;
 
     try {
-      const jobIdVo = JobId.fromString(validInput.jobId);
+      const jobIdVo = JobIdVO.fromString(validInput.jobId); // Use JobIdVO
 
       const jobResult = await this.jobRepository.findById(jobIdVo);
       if (jobResult.isError()) {
         return error(new DomainError(`Failed to fetch job for retry: ${jobResult.value.message}`, jobResult.value));
       }
-      let jobEntity = jobResult.value;
+      const jobEntity = jobResult.value; // jobEntity is now correctly typed Job<unknown, unknown> | null
 
       if (!jobEntity) {
         return error(new NotFoundError(`Job with ID ${validInput.jobId} not found for retry.`));
       }
 
-      // Check if job is in a retryable state (typically FAILED)
-      if (!jobEntity.status().is(JobStatusType.FAILED) && !jobEntity.status().is(JobStatusType.ACTIVE) /* allow retry of stuck ACTIVE */) {
-        return ok({ // Not an error, but retry wasn't applicable or successful in changing state
+      if (!jobEntity.status().is(JobStatusEnum.FAILED) && !jobEntity.status().is(JobStatusEnum.ACTIVE)) { // Use JobStatusEnum
+        return ok({
           success: false,
           jobId: jobEntity.id().value(),
           newStatus: jobEntity.status().value(),
@@ -68,28 +67,20 @@ export class RetryJobUseCase
         return ok({
           success: false,
           jobId: jobEntity.id().value(),
-          newStatus: jobEntity.status().value(), // Status remains FAILED
+          newStatus: jobEntity.status().value(),
           executeAfter: jobEntity.executeAfter()?.toISOString() || null,
-          message: `Job has reached maximum retry attempts (${jobEntity.maxAttempts().value()}).`,
+          message: `Job has reached maximum retry attempts (${jobEntity.maxAttempts().value}).`,
         });
       }
 
-      // Prepare the job for the next attempt (clears result, resets status via moveToDelayed/Pending)
-      // This method now returns a new Job instance.
       const retriedJobEntity = jobEntity.prepareForNextAttempt();
-
-      // Persist the changes
       const saveResult = await this.jobRepository.save(retriedJobEntity);
       if (saveResult.isError()) {
         return error(new DomainError(`Failed to save job state for retry: ${saveResult.value.message}`, saveResult.value));
       }
 
-      // If the job is now PENDING (meaning delay was 0), explicitly add to queue.
-      // If it's DELAYED, the queue implementation might pick it up based on executeAfter,
-      // but an explicit add/update notification to the queue might be safer depending on queue design.
-      // For now, let's re-add to queue if it's processable.
-      if (retriedJobEntity.isProcessableNow() || retriedJobEntity.status().is(JobStatusType.DELAYED)) {
-        const enqueueResult = await this.jobQueue.add(retriedJobEntity); // `add` should handle existing jobs (idempotency or update)
+      if (retriedJobEntity.isProcessableNow() || retriedJobEntity.status().is(JobStatusEnum.DELAYED)) { // Use JobStatusEnum
+        const enqueueResult = await this.jobQueue.add(retriedJobEntity);
         if (enqueueResult.isError()) {
           return error(new DomainError(`Failed to re-enqueue job after preparing for retry: ${enqueueResult.value.message}`, enqueueResult.value));
         }
@@ -101,13 +92,13 @@ export class RetryJobUseCase
         newStatus: retriedJobEntity.status().value(),
         executeAfter: retriedJobEntity.executeAfter()?.toISOString() || null,
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof NotFoundError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) { // Changed err: any to e: unknown
+      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error(`[RetryJobUseCase] Unexpected error for job ID ${input.jobId}:`, err);
-      return error(new DomainError(`Unexpected error retrying job: ${err.message || err}`));
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[RetryJobUseCase] Unexpected error for job ID ${input.jobId}: ${message}`, { error: e }); // Added logger
+      return error(new DomainError(`Unexpected error retrying job: ${message}`));
     }
   }
 }

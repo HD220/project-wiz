@@ -1,19 +1,17 @@
 // src_refactored/core/application/use-cases/job/retry-job.use-case.spec.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ZodError } from 'zod';
+// import { ZodError } from 'zod'; // Not used directly in this spec
 
-import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
-
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // Unresolved
-
+import { DomainError, NotFoundError } from '@/domain/common/errors';
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { MaxAttempts, AttemptCount } from '@/domain/job/value-objects/attempt-count.vo'; // Unresolved
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved
-import { RetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo'; // Unresolved
-import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-import { JobTimestamp } from '@/domain/job/value-objects/job-timestamp.vo'; // Unresolved
+import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo';
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
+import { RetryPolicyVO, BackoffTypeEnum } from '@/domain/job/value-objects/retry-policy.vo';
+import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
+// import { JobTimestampVO } from '@/domain/job/value-objects/job-timestamp.vo'; // Not used
 
 import { ok, error } from '@/shared/result';
 
@@ -31,32 +29,30 @@ const mockJobQueue: IJobQueue = {
 
 describe('RetryJobUseCase', () => {
   let useCase: RetryJobUseCase;
-  const testJobId = JobId.generate();
-  let jobToRetry: Job;
+  const testJobIdVo = JobIdVO.generate(); // Use JobIdVO
+  let jobToRetry: Job<unknown, unknown>; // Specify Job generic types
 
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.useFakeTimers(); // Control time for executeAfter calculations
+    vi.useFakeTimers();
     useCase = new RetryJobUseCase(mockJobRepository, mockJobQueue);
 
-    // Default job setup: FAILED and can be retried
-    const retryPolicy = RetryPolicy.create({
-      maxAttempts: MaxAttempts.create(3),
-      initialDelayMs: 1000, // 1s
-      backoffType: BackoffType.FIXED,
-    });
+    const retryPolicy = RetryPolicyVO.create({ // Use RetryPolicyVO
+      maxAttempts: AttemptCountVO.create(3).unwrap(), // Use AttemptCountVO
+      initialDelayMs: 1000,
+      backoffType: BackoffTypeEnum.FIXED, // Use BackoffTypeEnum
+    }).unwrap();
     jobToRetry = Job.create({
-      id: testJobId,
-      name: JobName.create('Retryable Job'),
+      id: testJobIdVo,
+      name: JobNameVO.create('Retryable Job').unwrap(), // Use JobNameVO
       payload: {},
-      retryPolicy: retryPolicy,
-    });
-    // Simulate it having failed once
-    jobToRetry.moveToActive(); // Increments attempts to 1
-    jobToRetry.moveToFailed('First failure'); // Status FAILED, attempts 1
+      retryPolicy,
+    }).unwrap();
+    jobToRetry.moveToActive();
+    jobToRetry.moveToFailed('First failure');
 
-    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined));
-    (mockJobQueue.add as vi.Mock).mockResolvedValue(ok(undefined as any)); // Assuming Job or void
+    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined as void));
+    (mockJobQueue.add as vi.Mock).mockResolvedValue(ok(undefined as void));
   });
 
   afterEach(() => {
@@ -64,59 +60,64 @@ describe('RetryJobUseCase', () => {
   });
 
   it('should successfully retry a FAILED job that can be retried (moves to DELAYED)', async () => {
-    vi.setSystemTime(new Date(2024, 0, 1, 12, 0, 0)); // Fix current time
+    vi.setSystemTime(new Date(2024, 0, 1, 12, 0, 0));
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToRetry));
 
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(true);
-      expect(result.value.jobId).toBe(testJobId.value());
-      expect(result.value.newStatus).toBe(JobStatusType.DELAYED); // Due to fixed 1s delay
+      expect(result.value.jobId).toBe(testJobIdVo.value);
+      expect(result.value.newStatus).toBe(JobStatusEnum.DELAYED); // Use JobStatusEnum
       expect(new Date(result.value.executeAfter!)).toEqual(new Date(Date.now() + 1000));
     }
     expect(mockJobRepository.save).toHaveBeenCalledTimes(1);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.status().is(JobStatusType.DELAYED)).toBe(true);
-    expect(savedJob.attempts().value()).toBe(1); // Attempts not incremented by retry use case itself
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.status().is(JobStatusEnum.DELAYED)).toBe(true); // Use JobStatusEnum
+    expect(savedJob.attempts().value).toBe(1); // Job entity handles attempt increment
     expect(mockJobQueue.add).toHaveBeenCalledWith(savedJob);
   });
 
   it('should retry a FAILED job and move to PENDING if delay is 0', async () => {
-    const noDelayRetryPolicy = RetryPolicy.create({
-      maxAttempts: MaxAttempts.create(3),
+    const noDelayRetryPolicy = RetryPolicyVO.create({ // Use RetryPolicyVO
+      maxAttempts: AttemptCountVO.create(3).unwrap(), // Use AttemptCountVO
       initialDelayMs: 0,
-      backoffType: BackoffType.FIXED,
-    });
-    jobToRetry = Job.create({ id: testJobId, name: JobName.create('No Delay Retry Job'), payload: {}, retryPolicy: noDelayRetryPolicy });
+      backoffType: BackoffTypeEnum.FIXED, // Use BackoffTypeEnum
+    }).unwrap();
+    jobToRetry = Job.create({
+      id: testJobIdVo,
+      name: JobNameVO.create('No Delay Retry Job').unwrap(), // Use JobNameVO
+      payload: {},
+      retryPolicy: noDelayRetryPolicy,
+    }).unwrap();
     jobToRetry.moveToActive(); jobToRetry.moveToFailed('Failure');
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToRetry));
 
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(true);
-      expect(result.value.newStatus).toBe(JobStatusType.PENDING);
-      expect(result.value.executeAfter).toBeNull(); // or a date very close to now if entity sets it
+      expect(result.value.newStatus).toBe(JobStatusEnum.PENDING); // Use JobStatusEnum
+      expect(result.value.executeAfter).toBeNull();
     }
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.status().is(JobStatusType.PENDING)).toBe(true);
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.status().is(JobStatusEnum.PENDING)).toBe(true); // Use JobStatusEnum
   });
 
   it('should return success:false if job is not in FAILED or ACTIVE state', async () => {
-    jobToRetry.moveToPending(); // Change to a non-retryable state for this test
+    jobToRetry.moveToPending();
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToRetry));
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(false);
-      expect(result.value.newStatus).toBe(JobStatusType.PENDING);
+      expect(result.value.newStatus).toBe(JobStatusEnum.PENDING); // Use JobStatusEnum
       expect(result.value.message).toContain('not in a FAILED or ACTIVE state');
     }
     expect(mockJobRepository.save).not.toHaveBeenCalled();
@@ -124,27 +125,33 @@ describe('RetryJobUseCase', () => {
 
   it('should return success:false if job has reached max attempts', async () => {
     const jobMaxedRetries = Job.create({
-      id: testJobId, name: JobName.create('Maxed Retries Job'), payload: {},
-      retryPolicy: RetryPolicy.create({ maxAttempts: MaxAttempts.create(1), initialDelayMs: 0, backoffType: BackoffType.FIXED })
-    });
-    jobMaxedRetries.moveToActive(); // Attempt 1
-    jobMaxedRetries.moveToFailed('Failure 1'); // Status FAILED, attempts 1, maxAttempts 1
+      id: testJobIdVo,
+      name: JobNameVO.create('Maxed Retries Job').unwrap(), // Use JobNameVO
+      payload: {},
+      retryPolicy: RetryPolicyVO.create({ // Use RetryPolicyVO
+        maxAttempts: AttemptCountVO.create(1).unwrap(), // Use AttemptCountVO
+        initialDelayMs: 0,
+        backoffType: BackoffTypeEnum.FIXED, // Use BackoffTypeEnum
+      }).unwrap(),
+    }).unwrap();
+    jobMaxedRetries.moveToActive();
+    jobMaxedRetries.moveToFailed('Failure 1');
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobMaxedRetries));
 
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(false);
-      expect(result.value.newStatus).toBe(JobStatusType.FAILED);
+      expect(result.value.newStatus).toBe(JobStatusEnum.FAILED); // Use JobStatusEnum
       expect(result.value.message).toContain('maximum retry attempts');
     }
   });
 
   it('should return NotFoundError if job to retry is not found', async () => {
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(null));
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) expect(result.value).toBeInstanceOf(NotFoundError);
@@ -152,8 +159,8 @@ describe('RetryJobUseCase', () => {
 
   it('should return DomainError if repository save fails', async () => {
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToRetry));
-    (mockJobRepository.save as vi.Mock).mockResolvedValue(error(new DomainError('DB save error')));
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    (mockJobRepository.save as vi.Mock).mockResolvedValue(error(new DomainError('DB save error') as Error)); // Cast
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) expect(result.value.message).toContain('Failed to save job state for retry');
@@ -161,9 +168,9 @@ describe('RetryJobUseCase', () => {
 
   it('should return DomainError if jobQueue.add fails', async () => {
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToRetry));
-    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined));
-    (mockJobQueue.add as vi.Mock).mockResolvedValue(error(new DomainError('Queue add error')));
-    const input: RetryJobUseCaseInput = { jobId: testJobId.value() };
+    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined as void));
+    (mockJobQueue.add as vi.Mock).mockResolvedValue(error(new DomainError('Queue add error') as Error)); // Cast
+    const input: RetryJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) expect(result.value.message).toContain('Failed to re-enqueue job');

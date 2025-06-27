@@ -2,16 +2,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError } from '@/application/common/errors'; // Or @/domain/common/errors
-
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // Unresolved path likely
-
+import { DomainError, NotFoundError } from '@/domain/common/errors';
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved path likely
-import { JobStatus, JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
+import { JobStatusVO, JobStatusEnum } from '@/domain/job/value-objects/job-status.vo';
 import { ok, error } from '@/shared/result';
 
 import { CancelJobUseCaseInput } from './cancel-job.schema';
@@ -30,68 +27,74 @@ const mockJobQueue: IJobQueue = { // Mock IJobQueue, though not heavily used yet
 
 describe('CancelJobUseCase', () => {
   let useCase: CancelJobUseCase;
-  const testJobId = JobId.generate();
-  let jobToCancel: Job;
+  const testJobIdVo = JobIdVO.generate(); // Use JobIdVO
+  let jobToCancel: Job<unknown, unknown>; // Specify Job generic types
 
   beforeEach(() => {
     vi.resetAllMocks();
     useCase = new CancelJobUseCase(mockJobRepository, mockJobQueue);
 
-    jobToCancel = Job.create({ // A job in a cancellable state (e.g., PENDING)
-      id: testJobId,
-      name: JobName.create('Cancellable Job'),
+    // Assuming Job.create can handle JobIdVO and JobNameVO directly
+    jobToCancel = Job.create({
+      id: testJobIdVo,
+      name: JobNameVO.create('Cancellable Job').unwrap(), // Use JobNameVO
       payload: {},
-      status: JobStatus.pending(), // Explicitly set to PENDING
-    });
+      status: JobStatusVO.pending(), // Use JobStatusVO
+      // Add other required props if Job.create expects them
+    }).unwrap(); // unwrap if Job.create returns Result
   });
 
   it('should successfully cancel a job that is in a cancellable state', async () => {
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToCancel));
-    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined));
+    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined as void)); // Specify void for ok
 
-    const input: CancelJobUseCaseInput = { jobId: testJobId.value(), reason: 'User request' };
+    const input: CancelJobUseCaseInput = { jobId: testJobIdVo.value, reason: 'User request' };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(true);
-      expect(result.value.jobId).toBe(testJobId.value());
-      expect(result.value.finalStatus).toBe(JobStatusType.CANCELLED);
+      expect(result.value.jobId).toBe(testJobIdVo.value);
+      expect(result.value.finalStatus).toBe(JobStatusEnum.CANCELLED); // Use JobStatusEnum
     }
     expect(mockJobRepository.save).toHaveBeenCalledTimes(1);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.status().is(JobStatusType.CANCELLED)).toBe(true);
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.status().is(JobStatusEnum.CANCELLED)).toBe(true); // Use JobStatusEnum
   });
 
   it('should return success:false if job is already in a terminal state (e.g., COMPLETED)', async () => {
-    const completedJob = Job.create({ id: testJobId, name: JobName.create('Completed Job'), payload: {} });
-    completedJob.moveToCompleted({ result: 'done' }); // Move to COMPLETED
+    const completedJob = Job.create({
+      id: testJobIdVo,
+      name: JobNameVO.create('Completed Job').unwrap(),
+      payload: {},
+    }).unwrap();
+    completedJob.moveToCompleted({ result: 'done' });
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(completedJob));
 
-    const input: CancelJobUseCaseInput = { jobId: testJobId.value() };
+    const input: CancelJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(false);
-      expect(result.value.jobId).toBe(testJobId.value());
-      expect(result.value.finalStatus).toBe(JobStatusType.COMPLETED);
+      expect(result.value.jobId).toBe(testJobIdVo.value);
+      expect(result.value.finalStatus).toBe(JobStatusEnum.COMPLETED); // Use JobStatusEnum
       expect(result.value.message).toContain('already in a terminal state');
     }
     expect(mockJobRepository.save).not.toHaveBeenCalled();
   });
 
   it('should return success:false if job is already CANCELLED', async () => {
-    jobToCancel.moveToCancelled(); // Pre-cancel it
+    jobToCancel.moveToCancelled();
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(jobToCancel));
 
-    const input: CancelJobUseCaseInput = { jobId: testJobId.value() };
+    const input: CancelJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value.success).toBe(false);
-      expect(result.value.finalStatus).toBe(JobStatusType.CANCELLED);
+      expect(result.value.finalStatus).toBe(JobStatusEnum.CANCELLED); // Use JobStatusEnum
     }
     expect(mockJobRepository.save).not.toHaveBeenCalled();
   });
@@ -99,7 +102,7 @@ describe('CancelJobUseCase', () => {
 
   it('should return NotFoundError if job to cancel is not found', async () => {
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(null));
-    const input: CancelJobUseCaseInput = { jobId: testJobId.value() };
+    const input: CancelJobUseCaseInput = { jobId: testJobIdVo.value };
     const result = await useCase.execute(input);
 
     expect(result.isError()).toBe(true);

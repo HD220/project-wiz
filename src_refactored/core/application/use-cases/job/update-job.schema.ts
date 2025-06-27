@@ -1,7 +1,7 @@
 // src_refactored/core/application/use-cases/job/update-job.schema.ts
 import { z } from 'zod';
 
-import { BackoffType } from '@/domain/job/value-objects/retry-policy.vo';
+// import { BackoffTypeEnum } from '@/domain/job/value-objects/retry-policy.vo'; // Corrected name and path will be fixed
 
 /**
  * Input schema for UpdateJobUseCase.

@@ -2,16 +2,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ZodError } from 'zod';
 
-import { DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
-
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { Job } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { MaxAttempts } from '@/domain/job/value-objects/attempt-count.vo'; // Unresolved
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobName } from '@/domain/job/value-objects/job-name.vo'; // Unresolved
-import { JobPriority } from '@/domain/job/value-objects/job-priority.vo';
-import { RetryPolicy, NoRetryPolicy, BackoffType } from '@/domain/job/value-objects/retry-policy.vo'; // Unresolved
-import { TargetAgentRole } from '@/domain/job/value-objects/target-agent-role.vo';
+// import { AttemptCountVO } from '@/domain/job/value-objects/attempt-count.vo'; // MaxAttempts not used directly here
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+import { JobNameVO } from '@/domain/job/value-objects/job-name.vo';
+import { JobPriorityVO } from '@/domain/job/value-objects/job-priority.vo';
+import { NoRetryPolicyVO, BackoffTypeEnum } from '@/domain/job/value-objects/retry-policy.vo'; // RetryPolicyVO might be needed if testing updates to it
+import { TargetAgentRoleVO } from '@/domain/job/value-objects/target-agent-role.vo';
 
 import { ok, error } from '@/shared/result';
 
@@ -32,24 +31,23 @@ const mockJobRepository: IJobRepository = {
 
 describe('UpdateJobUseCase', () => {
   let useCase: UpdateJobUseCase;
-  const testJobId = JobId.generate();
-  let existingJob: Job;
+  const testJobIdVo = JobIdVO.generate(); // Use JobIdVO
+  let existingJob: Job<unknown, unknown>; // Specify Job generic types
 
   beforeEach(() => {
     vi.resetAllMocks();
     useCase = new UpdateJobUseCase(mockJobRepository);
 
-    // Create a base job entity for tests
     existingJob = Job.create({
-      id: testJobId,
-      name: JobName.create('Original Job Name'),
+      id: testJobIdVo,
+      name: JobNameVO.create('Original Job Name').unwrap(), // Use JobNameVO
       payload: { originalData: 'value' },
-      priority: JobPriority.create(JobPriority.NORMAL),
-      targetAgentRole: TargetAgentRole.create('general_worker'),
-      retryPolicy: NoRetryPolicy.create(),
-    });
+      priority: JobPriorityVO.create(JobPriorityVO.NORMAL).unwrap(), // Use JobPriorityVO
+      targetAgentRole: TargetAgentRoleVO.create('general_worker').unwrap(), // Use TargetAgentRoleVO
+      retryPolicy: NoRetryPolicyVO.create().unwrap(), // Use NoRetryPolicyVO
+    }).unwrap();
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(existingJob));
-    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined)); // Assume save is void or returns the entity
+    (mockJobRepository.save as vi.Mock).mockResolvedValue(ok(undefined as void));
   });
 
   afterEach(() => {
@@ -57,56 +55,55 @@ describe('UpdateJobUseCase', () => {
   });
 
   it('should successfully update job name', async () => {
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), name: 'Updated Job Name' };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, name: 'Updated Job Name' };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     expect(mockJobRepository.save).toHaveBeenCalledTimes(1);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.name().value()).toBe('Updated Job Name');
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.name().value).toBe('Updated Job Name'); // Access .value for VOs
     if (result.isOk()) expect(result.value.updatedAt).not.toBe(existingJob.updatedAt().toISOString());
   });
 
   it('should successfully update job payload', async () => {
     const newPayload = { newData: 'new value' };
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), payload: newPayload };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, payload: newPayload };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
     expect(mockJobRepository.save).toHaveBeenCalledTimes(1);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
     expect(savedJob.payload()).toEqual(newPayload);
   });
 
   it('should successfully update job priority', async () => {
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), priority: JobPriority.HIGH };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, priority: JobPriorityVO.HIGH }; // Use JobPriorityVO
     const result = await useCase.execute(input);
     expect(result.isOk()).toBe(true);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.priority().value()).toBe(JobPriority.HIGH);
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.priority().value).toBe(JobPriorityVO.HIGH); // Access .value
   });
 
   it('should successfully update targetAgentRole', async () => {
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), targetAgentRole: 'special_worker' };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, targetAgentRole: 'special_worker' };
     const result = await useCase.execute(input);
     expect(result.isOk()).toBe(true);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.targetAgentRole()?.value()).toBe('special_worker');
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.targetAgentRole()?.value).toBe('special_worker'); // Access .value
   });
 
   it('should successfully update retryPolicy', async () => {
-    const newRetryPolicyInput = { maxAttempts: 5, initialDelaySeconds: 30, backoffType: BackoffType.EXPONENTIAL };
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), retryPolicy: newRetryPolicyInput };
+    const newRetryPolicyInput = { maxAttempts: 5, initialDelaySeconds: 30, backoffType: BackoffTypeEnum.EXPONENTIAL }; // Use BackoffTypeEnum
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, retryPolicy: newRetryPolicyInput };
     const result = await useCase.execute(input);
 
     expect(result.isOk()).toBe(true);
-    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job;
-    expect(savedJob.retryPolicy().maxAttempts().value()).toBe(5);
-    // Further checks on retry policy details if needed
+    const savedJob = (mockJobRepository.save as vi.Mock).mock.calls[0][0] as Job<unknown, unknown>;
+    expect(savedJob.retryPolicy().maxAttempts().value).toBe(5); // Access .value
   });
 
   it('should not call save if no actual changes are made', async () => {
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), name: existingJob.name().value() };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, name: existingJob.name().value }; // Access .value
     const result = await useCase.execute(input);
     expect(result.isOk()).toBe(true);
     expect(mockJobRepository.save).not.toHaveBeenCalled();
@@ -115,7 +112,7 @@ describe('UpdateJobUseCase', () => {
 
   it('should return NotFoundError if job to update is not found', async () => {
     (mockJobRepository.findById as vi.Mock).mockResolvedValue(ok(null));
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), name: 'New Name' };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, name: 'New Name' };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) expect(result.value).toBeInstanceOf(NotFoundError);
@@ -123,15 +120,15 @@ describe('UpdateJobUseCase', () => {
 
   it('should return ZodError for invalid input (e.g., invalid jobId)', async () => {
     const input = { jobId: 'not-a-uuid', name: 'New Name' };
-    const result = await useCase.execute(input as any); // Cast to bypass TS error for test
+    const result = await useCase.execute(input as UpdateJobUseCaseInput); // Cast
     expect(result.isError()).toBe(true);
     if (result.isError()) expect(result.value).toBeInstanceOf(ZodError);
   });
 
   it('should return DomainError if repository findById fails', async () => {
     const repoError = new DomainError('DB find error');
-    (mockJobRepository.findById as vi.Mock).mockResolvedValue(error(repoError));
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), name: 'New Name' };
+    (mockJobRepository.findById as vi.Mock).mockResolvedValue(error(repoError as Error)); // Cast
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, name: 'New Name' };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) {
@@ -141,8 +138,8 @@ describe('UpdateJobUseCase', () => {
 
   it('should return DomainError if repository save fails', async () => {
     const repoError = new DomainError('DB save error');
-    (mockJobRepository.save as vi.Mock).mockResolvedValue(error(repoError));
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), name: 'New Name' };
+    (mockJobRepository.save as vi.Mock).mockResolvedValue(error(repoError as Error)); // Cast
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, name: 'New Name' };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) {
@@ -151,16 +148,16 @@ describe('UpdateJobUseCase', () => {
   });
 
   it('should return ValueError if a VO creation fails during update', async () => {
-    const originalJobNameCreate = JobName.create;
-    JobName.create = vi.fn().mockImplementation(() => { throw new ValueError("Mocked JobName error"); });
+    const originalJobNameCreate = JobNameVO.create; // Use JobNameVO
+    JobNameVO.create = vi.fn().mockImplementation(() => { throw new ValueError("Mocked JobName error"); }); // Use JobNameVO
 
-    const input: UpdateJobUseCaseInput = { jobId: testJobId.value(), name: "Trigger VO Error" };
+    const input: UpdateJobUseCaseInput = { jobId: testJobIdVo.value, name: "Trigger VO Error" };
     const result = await useCase.execute(input);
     expect(result.isError()).toBe(true);
     if (result.isError()) {
         expect(result.value).toBeInstanceOf(ValueError);
         expect(result.value.message).toBe("Mocked JobName error");
     }
-    JobName.create = originalJobNameCreate; // Restore
+    JobNameVO.create = originalJobNameCreate; // Restore with JobNameVO
   });
 });

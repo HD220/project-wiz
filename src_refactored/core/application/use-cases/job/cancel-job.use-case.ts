@@ -1,39 +1,38 @@
 // src_refactored/core/application/use-cases/job/cancel-job.use-case.ts
 import { ZodError } from 'zod';
 
-import { IJobQueue } from '@/core/ports/adapters/job-queue.interface'; // Unresolved path likely
-
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
-import { JobId } from '@/domain/job/value-objects/job-id.vo';
-import { JobStatusType } from '@/domain/job/value-objects/job-status.vo';
-
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
-
+import { JobIdVO } from '@/domain/job/value-objects/job-id.vo';
+// import { JobStatusEnum } from '@/domain/job/value-objects/job-status.vo'; // Not directly used, but good for context
+import { IJobQueue } from '@/core/ports/adapters/job-queue.interface';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 import { Result, ok, error } from '@/shared/result';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Added ILogger
 
 import {
   CancelJobUseCaseInput,
   CancelJobUseCaseInputSchema,
-  CancelJobUseCaseOutputSchema, // Corrected type name
+  CancelJobUseCaseOutput, // Use the corrected type name
 } from './cancel-job.schema';
 
 export class CancelJobUseCase
   implements
     IUseCase<
       CancelJobUseCaseInput,
-      CancelJobUseCaseOutputSchema, // Use the OutputSchema type from Zod
+      CancelJobUseCaseOutput, // Use the corrected type name
       DomainError | ZodError | NotFoundError | ValueError
     >
 {
   constructor(
-    private jobRepository: IJobRepository,
-    private jobQueue: IJobQueue, // Injected, though not used in this simplified version
+    private readonly jobRepository: IJobRepository,
+    private readonly jobQueue: IJobQueue,
+    private readonly logger: ILogger, // Added logger
   ) {}
 
   async execute(
     input: CancelJobUseCaseInput,
-  ): Promise<Result<CancelJobUseCaseOutputSchema, DomainError | ZodError | NotFoundError | ValueError>> {
+  ): Promise<Result<CancelJobUseCaseOutput, DomainError | ZodError | NotFoundError | ValueError>> {
     const validationResult = CancelJobUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
       return error(validationResult.error);
@@ -41,7 +40,7 @@ export class CancelJobUseCase
     const validInput = validationResult.data;
 
     try {
-      const jobIdVo = JobId.fromString(validInput.jobId);
+      const jobIdVo = JobIdVO.fromString(validInput.jobId); // Use JobIdVO
 
       const jobResult = await this.jobRepository.findById(jobIdVo);
       if (jobResult.isError()) {
@@ -54,45 +53,38 @@ export class CancelJobUseCase
       }
 
       const originalStatus = jobEntity.status().value();
-
-      // Check if job can be cancelled (e.g., not already in a terminal state like COMPLETED or FAILED permanently)
-      // The moveToCancelled method in entity now checks isTerminal()
       const wasCancelled = jobEntity.moveToCancelled(validInput.reason);
 
       if (!wasCancelled) {
-        // Job was already in a terminal state or already cancelled
         return ok({
-          success: false, // Or true, depending on idempotency definition. Let's say false if no state change.
+          success: false,
           jobId: jobEntity.id().value(),
-          finalStatus: originalStatus, // No change in status
+          finalStatus: originalStatus,
           message: `Job ${jobEntity.id().value()} was already in a terminal state (${originalStatus}) or could not be cancelled.`,
         });
       }
 
-      // Persist the change
       const saveResult = await this.jobRepository.save(jobEntity);
       if (saveResult.isError()) {
-        // Potentially revert status change in memory if save fails? Or rely on transactional outbox for queue.
-        // For now, simple error propagation.
         return error(new DomainError(`Failed to save cancelled job status: ${saveResult.value.message}`, saveResult.value));
       }
 
-      // TODO: Future - Interact with IJobQueue if needed
-      // e.g., this.jobQueue.remove(jobIdVo) or similar to pull from an active processing queue.
-      // For now, assumes queue implementation polls DB status or is handled by other mechanisms.
+      // TODO: Interact with IJobQueue if needed (e.g., this.jobQueue.remove(jobIdVo))
+      this.logger.info(`Job ${jobIdVo.value} cancelled successfully. Reason: ${validInput.reason || 'No reason provided'}.`);
+
 
       return ok({
         success: true,
         jobId: jobEntity.id().value(),
-        finalStatus: jobEntity.status().value(), // Should be CANCELLED
+        finalStatus: jobEntity.status().value(),
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof NotFoundError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) { // Changed err: any to e: unknown
+      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error(`[CancelJobUseCase] Unexpected error for job ID ${input.jobId}:`, err);
-      return error(new DomainError(`Unexpected error cancelling job: ${err.message || err}`));
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[CancelJobUseCase] Unexpected error for job ID ${input.jobId}: ${message}`, { error: e });
+      return error(new DomainError(`Unexpected error cancelling job: ${message}`));
     }
   }
 }
