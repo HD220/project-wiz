@@ -1,16 +1,20 @@
-import { BarChart2, ListChecks, MessageSquareText, BookText, Settings2, Users, GitBranch } from 'lucide-react';
+import { Link, Outlet, useRouter, useParams } from '@tanstack/react-router';
+// Removed ListChecks, GitBranch as these tabs were removed
+import { BarChart2, MessageSquareText, BookText, Settings2, Users } from 'lucide-react';
 import React from 'react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/presentation/ui/components/ui/tabs';
+// Removed TabsContent as Outlet will handle content rendering for child routes
+import { Tabs, TabsList, TabsTrigger } from '@/presentation/ui/components/ui/tabs';
+import { cn } from '@/presentation/ui/lib/utils';
 
-import { Project } from './ProjectListItem'; // Reusing the Project type
+import { Project } from './ProjectListItem';
 
 interface ProjectDetailViewProps {
-  project: Project;
+  project: Project; // Project data might still be useful for the OverviewTabContent
 }
 
-// Placeholder components for tab content
+// OverviewTabContent remains as it's the default/index content for the $projectId route
 const OverviewTabContent = ({ project }: { project: Project }) => (
   <div className="space-y-6">
     <Card>
@@ -32,8 +36,8 @@ const OverviewTabContent = ({ project }: { project: Project }) => (
           <p className="text-sm text-slate-700 dark:text-slate-300">{project.agentCount}</p>
         </div>
         <div>
-          <h4 className="font-medium mb-1">Total de Tarefas</h4>
-          <p className="text-sm text-slate-700 dark:text-slate-300">{project.taskCount} (ativas/planejadas)</p>
+          <h4 className="font-medium mb-1">Total de Tarefas (Conceitual)</h4>
+          <p className="text-sm text-slate-700 dark:text-slate-300">{project.taskCount}</p>
         </div>
         <div className="md:col-span-2">
           <h4 className="font-medium mb-1">Descrição Completa</h4>
@@ -56,90 +60,59 @@ const OverviewTabContent = ({ project }: { project: Project }) => (
   </div>
 );
 
-const TasksTabContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Gerenciamento de Tarefas (Jobs)</CardTitle>
-      <CardDescription>Visualize e gerencie todas as tarefas associadas a este projeto.</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Lista de tarefas (jobs), filtros, e opções de criação de novas tarefas aparecerão aqui...
-      </p>
-    </CardContent>
-  </Card>
-);
-
-const ChatTabContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Canais de Comunicação / Chat do Projeto</CardTitle>
-      <CardDescription>Interaja com agentes e colaboradores nos canais deste projeto.</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Interface de chat com canais (#geral, #desenvolvimento, #logs-agentes) aparecerá aqui...
-      </p>
-    </CardContent>
-  </Card>
-);
-
-const DocsTabContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Documentação do Projeto</CardTitle>
-      <CardDescription>Acesse e gerencie a documentação técnica e de negócios.</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Visualizador de arquivos Markdown, estrutura de pastas da documentação, e opções de edição aparecerão aqui...
-      </p>
-    </CardContent>
-  </Card>
-);
-
-const ProjectSettingsTabContent = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Configurações do Projeto</CardTitle>
-      <CardDescription>Ajuste as configurações específicas deste projeto.</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Opções para editar nome, descrição, repositório Git associado, membros/agentes do projeto, etc., aparecerão aqui...
-      </p>
-    </CardContent>
-  </Card>
-);
-
+// ProjectSettingsTabContent is removed as its content is now directly rendered by the route
+// '/(app)/projects/$projectId/settings/' which will be a child of the $projectId layout.
 
 export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   const tabs = [
-    { value: 'overview', label: 'Visão Geral', icon: BarChart2, content: <OverviewTabContent project={project} /> },
-    { value: 'tasks', label: 'Tarefas', icon: ListChecks, content: <TasksTabContent /> },
-    { value: 'chat', label: 'Chat/Canais', icon: MessageSquareText, content: <ChatTabContent /> },
-    { value: 'docs', label: 'Documentação', icon: BookText, content: <DocsTabContent /> },
-    { value: 'members', label: 'Membros & Agentes', icon: Users, content: <p>Gerenciamento de membros e agentes...</p> },
-    { value: 'vcs', label: 'Controle de Versão', icon: GitBranch, content: <p>Status do Git, branches, commits...</p> },
-    { value: 'settings', label: 'Configurações', icon: Settings2, content: <ProjectSettingsTabContent /> },
+    { value: 'overview', label: 'Visão Geral', icon: BarChart2, to: './' }, // Relative to current $projectId path
+    { value: 'chat', label: 'Chat/Canais', icon: MessageSquareText, to: './chat' },
+    { value: 'docs', label: 'Documentação', icon: BookText, to: './docs' },
+    { value: 'members', label: 'Membros & Agentes', icon: Users, to: './members' },
+    { value: 'settings', label: 'Configurações', icon: Settings2, to: './settings' },
   ];
+  const router = useRouter();
+  const params = useParams({ from: '/(app)/projects/$projectId' });
+
+  const currentPath = router.state.location.pathname;
+  // Simplified active tab logic: check if the current path ends with the tab's 'to' path,
+  // or if it's the base path for the 'overview' tab.
+  const activeTabValue = tabs.find(tab => {
+    if (tab.to === './') { // Overview tab
+      return currentPath === `/projects/${params.projectId}` || currentPath === `/projects/${params.projectId}/`;
+    }
+    return currentPath.endsWith(tab.to.substring(1)); // Remove leading './' for comparison
+  })?.value || 'overview';
+
 
   return (
-    <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-1 h-auto flex-wrap justify-start mb-4">
+    <Tabs value={activeTabValue} className="w-full">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 h-auto flex-wrap justify-start mb-4">
         {tabs.map(tab => (
-          <TabsTrigger key={tab.value} value={tab.value} className="flex-col sm:flex-row sm:justify-start h-auto py-2 px-3 data-[state=active]:shadow-sm">
-            <tab.icon className="h-4 w-4 mb-1 sm:mb-0 sm:mr-2" />
-            {tab.label}
-          </TabsTrigger>
+          <Link
+            key={tab.value}
+            // The 'to' prop for Link should be relative to its closest Route,
+            // which is the $projectId route. So, './settings' is correct.
+            to={tab.to}
+            params={{ projectId: params.projectId }} // Ensure projectId is always passed for context
+            resetScroll={false}
+            // activeProps and className for active state are good for visual feedback
+            activeProps={{ className: "text-primary font-semibold" }}
+            className="[&.active]:text-primary [&.active]:font-semibold"
+          >
+            <TabsTrigger value={tab.value} className={cn("w-full flex-col sm:flex-row sm:justify-start h-auto py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary")}>
+              <tab.icon className="h-4 w-4 mb-1 sm:mb-0 sm:mr-2" />
+              {tab.label}
+            </TabsTrigger>
+          </Link>
         ))}
       </TabsList>
 
-      {tabs.map(tab => (
-        <TabsContent key={tab.value} value={tab.value} className="mt-0">
-          {tab.content}
-        </TabsContent>
-      ))}
+      <Outlet />
+      {/* Render OverviewTabContent only if current path is exactly the project's base path */}
+      {(currentPath === `/projects/${params.projectId}` || currentPath === `/projects/${params.projectId}/`) && (
+        <OverviewTabContent project={project} />
+      )}
     </Tabs>
   );
 }
