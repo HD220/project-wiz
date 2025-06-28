@@ -22,7 +22,7 @@ interface AppSidebarItemProps extends Omit<LinkProps, 'children' | 'title'> {
 
 function AppSidebarItem({
   tooltip,
-  icon: Icon,
+  icon: IconElement, // Renomeado para IconElement para satisfazer o ESLint
   isAvatar = false,
   avatarSrc,
   avatarFallback,
@@ -38,7 +38,7 @@ function AppSidebarItem({
       </AvatarFallback>
     </Avatar>
   ) : (
-    <Icon className="h-6 w-6" />
+    <IconElement className="h-6 w-6" /> // Usar IconElement
   );
 
   const commonButtonClasses = cn(
@@ -90,17 +90,17 @@ const mockUserProjects = [
 
 
 export function AppSidebar() {
-  // Rota para onde o botão "Home" levará - pode ser /user/conversations ou /user/dashboard
-  const userHomeRoute = '/chat'; // Ajustado para /chat como exemplo de DMs
+  // Rota para onde o botão "Home" levará, ajustado para /user/
+  const userHomeRoute = '/user/';
 
   return (
     <aside className="w-16 flex-shrink-0 h-screen flex flex-col items-center gap-2 py-3 bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
       {/* Botão Inicial/Home */}
       <AppSidebarItem
-        to={userHomeRoute}
-        tooltip="Início / Conversas"
-        icon={Home} // Pode ser um logo da aplicação também
-        avatarFallback="U" // Não usado se isAvatar=false
+        to={userHomeRoute} // Atualizado para /user/
+        tooltip="Área do Usuário / DMs" // Tooltip atualizado
+        icon={Home}
+        avatarFallback="U"
       />
 
       <Separator className="my-1 w-3/4" />
