@@ -111,8 +111,32 @@ O trabalho neste projeto é rastreado através de um sistema de tarefas localiza
         6. Comunique a criação desta nova tarefa e seu impacto ao usuário.
         7. Reavalie qual tarefa executar em seguida com base nas prioridades e dependências atualizadas.
 
+* **Geração Automática de Tarefas a Partir do Lint:**
+  * Um script foi criado para automatizar a criação de tarefas com base nos problemas reportados pelo ESLint.
+  * **Pré-requisito:** `jq` deve estar instalado (`sudo apt-get install jq` ou similar).
+  * **Preparação:**
+    1. Execute o comando de lint para gerar a saída em formato JSON:
+       ```bash
+       npm run lint --silent -- --format json > lint_output.json
+       ```
+       O `--silent` é importante para suprimir saídas do npm que não sejam JSON. Salve este arquivo como `lint_output.json` na raiz do repositório.
+  * **Execução:**
+    1. Navegue até a raiz do repositório.
+    2. Execute o script:
+       ```bash
+       ./scripts/generate_lint_tasks.sh
+       ```
+  * **Funcionamento:**
+    * O script lê `lint_output.json`.
+    * Para cada problema de lint, ele:
+        * Gera um ID de tarefa único (prefixo `LINT-`).
+        * Cria um arquivo de detalhe da tarefa em `/.jules/tasks/TSK-[ID_DA_TAREFA].md` usando o template `TASK_DETAIL_TEMPLATE.md`. O arquivo de detalhe incluirá o caminho do arquivo, número da linha, regra do lint e a mensagem do erro.
+        * Adiciona uma nova entrada no arquivo de índice principal `/.jules/TASKS.md`.
+    * O script é idempotente: se executado novamente com o mesmo `lint_output.json`, ele não criará tarefas duplicadas (nem arquivos de detalhe, nem entradas no índice). Ele verificará se um ID de tarefa já existe no índice ou se um arquivo de detalhe correspondente já existe.
+
 * **Seu Ciclo de Trabalho:**
     1. **Fase 1: Sincronização e Análise:**
+        * Se houver novos problemas de lint a serem processados, use o script `generate_lint_tasks.sh` conforme descrito acima para criar as tarefas correspondentes.
         * Leia o `/.jules/TASKS.md` (índice) para entender o estado atual.
     2. **Fase 2: Seleção da Próxima Ação:**
         * **Desmembrar Tarefas Complexas:** Priorize tarefas `Pendente` com `Complexidade > 1` (ver arquivo de detalhe).
