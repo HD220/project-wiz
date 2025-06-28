@@ -1,8 +1,9 @@
 // src_refactored/core/domain/job/value-objects/job-id.vo.ts
 import { v4 as uuidv4 } from 'uuid';
 
-import { ValueError } from '@/core/common/errors';
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors'; // Corrected alias path
 
 export class JobIdVO extends AbstractValueObject<{ value: string }> {
   private constructor(value: string) {

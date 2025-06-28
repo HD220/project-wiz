@@ -89,6 +89,9 @@ const TYPES = {
 
   // Worker Pool (if managed via DI)
   IWorkerPool: Symbol.for('IWorkerPool'),
+
+  // Chat Service
+  IChatService: Symbol.for('IChatService'),
 };
 
 export { TYPES };

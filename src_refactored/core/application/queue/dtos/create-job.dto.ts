@@ -6,8 +6,8 @@ import { Result } from '@/shared/result';
 
 // Based on JobEntityConstructionProps from create-job.use-case.ts
 export interface CreateJobRequestDTO<TData = unknown> {
-  queueName?: string;
-  jobName?: string;
+  queueName: string; // Made mandatory
+  jobName: string; // Made mandatory
   payload: TData;
   opts?: IJobOptions;
 }

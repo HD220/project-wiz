@@ -91,25 +91,25 @@ export class SaveMemoryItemUseCase
           // If content changes, embedding might need recalculation if not provided
           // if (!validInput.embedding && this.embeddingService) { /* ... regenerate ... */ }
         }
-        if (validInput.hasOwnProperty('agentId')) {
+        if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
           if (!memoryItemEntity.agentId()?.equals(agentIdVo) && (memoryItemEntity.agentId() || agentIdVo)) {
             memoryItemEntity = memoryItemEntity.assignAgent(agentIdVo);
             updated = true;
           }
         }
-        if (validInput.hasOwnProperty('tags')) {
+        if (Object.prototype.hasOwnProperty.call(validInput, 'tags')) {
            if (!memoryItemEntity.tags().equals(tagsVo)){
             memoryItemEntity = memoryItemEntity.updateTags(tagsVo);
             updated = true;
            }
         }
-        if (validInput.hasOwnProperty('source')) {
+        if (Object.prototype.hasOwnProperty.call(validInput, 'source')) {
           if (!memoryItemEntity.source().equals(sourceVo)){
             memoryItemEntity = memoryItemEntity.updateSource(sourceVo);
             updated = true;
           }
         }
-        if (validInput.hasOwnProperty('embedding')) { // Check if embedding was part of input
+        if (Object.prototype.hasOwnProperty.call(validInput, 'embedding')) { // Check if embedding was part of input
             if(!memoryItemEntity.embedding().equals(embeddingVo)){
                 memoryItemEntity = memoryItemEntity.setEmbedding(embeddingVo);
                 updated = true;

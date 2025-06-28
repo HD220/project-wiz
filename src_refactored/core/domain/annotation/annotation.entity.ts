@@ -1,7 +1,8 @@
 // src_refactored/core/domain/annotation/annotation.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
-import { EntityError, ValueError } from '@/core/common/errors';
 import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId and JobId
+
+import { EntityError, ValueError } from '@/domain/common/errors'; // Corrected alias path
 
 import { AnnotationId } from './value-objects/annotation-id.vo';
 import { AnnotationText } from './value-objects/annotation-text.vo';

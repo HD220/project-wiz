@@ -1,7 +1,7 @@
 // src_refactored/core/ports/adapters/llm-adapter.interface.ts
 import { z } from 'zod';
 
-import { LLMError } from '@/core/common/errors';
+import { LLMError } from '@/domain/common/errors'; // Corrected alias path
 
 import { Result } from '../../../shared/result';
 
