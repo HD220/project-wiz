@@ -5,3 +5,5 @@
 
 | ID da Tarefa | Status | Dependências (IDs) | Prioridade | Complexidade | Link para Detalhes |
 |--------------|--------|--------------------|------------|--------------|--------------------|
+| LINT-FILE-src_refactored_core_applicatio-80a06caa | Pendente |  | P3 | 1 | [Link](./tasks/TSK-LINT-FILE-src_refactored_core_applicatio-80a06caa.md) |
+| LINT-FILE-src_refactored_core_applicatio-94b8771b | Pendente |  | P3 | 1 | [Link](./tasks/TSK-LINT-FILE-src_refactored_core_applicatio-94b8771b.md) |
