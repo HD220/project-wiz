@@ -1,67 +1,65 @@
 // src_refactored/core/domain/job/job.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
 
-import { DomainError, ValueError } from '@/domain/common/errors';
+import { ValueError } from '@/domain/common/errors'; // DomainError removed as it's unused
 
 import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';
 import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
-import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './value-objects/job-options.vo';
+// RetryStrategyOptions and RepeatOptions are part of IJobOptions, so they are used indirectly.
+// Linter might not pick this up if IJobOptions is not destructured in a way that shows their usage here.
+// However, they are essential for the structure of JobOptionsVO.
+import { JobOptionsVO, IJobOptions } from './value-objects/job-options.vo';
 import { JobPriorityVO } from './value-objects/job-priority.vo';
 import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
 import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
 
 
 // Interface for properties required to construct a JobEntity
-export interface JobEntityConstructionProps<TData = any> {
-  id?: string | JobIdVO; // Optional: if not provided, one will be generated
+export interface JobEntityConstructionProps<TData = unknown> { // Changed any to unknown
+  id?: string | JobIdVO;
   queueName: string;
-  jobName: string; // Name/type of the job
+  jobName: string;
   payload: TData;
-  opts?: IJobOptions; // Uses the interface for flexibility in creation
+  opts?: IJobOptions;
 }
 
 // Interface for the internal state of JobEntity
-// All complex types are VOs. Timestamps are stored as numbers (epoch ms) for DB compatibility
-// but can be wrapped by Date or a TimestampVO on access if needed by domain logic.
-export interface JobEntityProps<TData = any, TResult = any> extends EntityProps<JobIdVO> {
+export interface JobEntityProps<TData = unknown, TResult = unknown> extends EntityProps<JobIdVO> { // Changed any to unknown
   queueName: string;
   jobName: string;
   payload: Readonly<TData>;
   opts: JobOptionsVO;
 
   status: JobStatusVO;
-  priority: JobPriorityVO; // Derived from opts, but stored for direct access/querying
+  priority: JobPriorityVO;
 
   progress: JobProgressVO;
   returnValue?: Readonly<TResult>;
-  failedReason?: string; // Primary error message for failure
+  failedReason?: string;
 
   attemptsMade: number;
-  // maxAttempts is part of opts.retryStrategy
 
-  createdAt: number; // Store as epoch milliseconds
-  updatedAt: number; // Store as epoch milliseconds
-  processAt?: number; // For DELAYED jobs: when it should be processed (epoch ms)
-  startedAt?: number; // Timestamp when processing started (epoch ms)
-  finishedAt?: number; // Timestamp when job completed or finally failed (epoch ms)
+  createdAt: number;
+  updatedAt: number;
+  processAt?: number;
+  startedAt?: number;
+  finishedAt?: number;
 
   executionLogs: JobExecutionLogsVO;
 
-  // Worker locking mechanism
   lockedByWorkerId?: string;
-  lockExpiresAt?: number; // Epoch ms
+  lockExpiresAt?: number;
 
-  // For repeatable jobs (key derived from repeat options)
   repeatJobKey?: string;
 }
 
-export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
+export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> { // Changed any to unknown
   private constructor(props: JobEntityProps<TData, TResult>) {
     super(props);
   }
 
-  public static create<D = any, R = any>(
+  public static create<D = unknown, R = unknown>( // Changed any to unknown
     constructProps: JobEntityConstructionProps<D>,
   ): JobEntity<D, R> {
     if (!constructProps.queueName || constructProps.queueName.trim() === '') {
@@ -104,6 +102,31 @@ export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdV
     return new JobEntity<D, R>(props);
   }
 
+  /**
+   * Rehydrates a JobEntity from persistence.
+   * This method is intended for use by repositories.
+   * It bypasses some of the creation logic (like default status setting based on delay)
+   * as the persisted props already reflect the job's state.
+   */
+  public static fromPersistence<D = any, R = any>(
+    props: JobEntityProps<D, R>,
+  ): JobEntity<D, R> {
+    // Basic validation: ensure ID and critical VOs are valid instances.
+    // Repositories are responsible for ensuring the props are valid structurally.
+    if (!(props.id instanceof JobIdVO)) {
+      throw new ValueError('Cannot rehydrate JobEntity without a valid JobIdVO instance for id.');
+    }
+    if (!(props.opts instanceof JobOptionsVO)) {
+      throw new ValueError('Cannot rehydrate JobEntity without a valid JobOptionsVO instance for opts.');
+    }
+    if (!(props.status instanceof JobStatusVO)) {
+      throw new ValueError('Cannot rehydrate JobEntity without a valid JobStatusVO instance for status.');
+    }
+    // Add other critical VO checks if necessary (priority, progress, executionLogs)
+
+    return new JobEntity<D, R>(props);
+  }
+
   // --- Accessors ---
   get queueName(): string { return this.props.queueName; }
   get jobName(): string { return this.props.jobName; }
@@ -141,7 +164,7 @@ export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdV
     // Event 'job.progress' should be emitted by the service calling this, after saving.
   }
 
-  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, any>): void {
+  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): void { // Changed any to unknown
     this.props.executionLogs = this.props.executionLogs.addLog(message, level, details);
     this.touch();
     // Event 'job.log_added' should be emitted by the service calling this, after saving.

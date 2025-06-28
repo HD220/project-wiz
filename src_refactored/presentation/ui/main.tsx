@@ -1,11 +1,10 @@
 import React from 'react';
 import ReactDOMClient from 'react-dom/client';
-import '@/styles/globals.css'; // Corrigido: Usando alias @/styles/
+import '@ui/styles/globals.css'; // Usando alias @ui/styles/
 // import { detectLocale, dynamicActivate } from '@/config/i18n'; // Usando alias @/config/ se i18n for re-adicionado
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 
-// Usando caminho relativo para routeTree.gen.ts para evitar problemas com alias e tempo de geração
-import { routeTree } from './routeTree.gen';
+import { routeTree } from '@ui/routeTree.gen'; // Usando alias @ui/
 
 // Declaração de módulo para o TanStack Router (mantida)
 declare module '@tanstack/react-router' {

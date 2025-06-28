@@ -3,7 +3,7 @@ import { Result } from '@/shared/result';
 
 import { JobEntity } from '../job.entity';
 import { JobIdVO } from '../value-objects/job-id.vo';
-import { JobStatusVO, JobStatusEnum } from '../value-objects/job-status.vo'; // Assuming JobStatusType is JobStatusEnum
+import { JobStatusEnum } from '../value-objects/job-status.vo'; // JobStatusVO removed
 
 import {
   JobSearchFilters,
@@ -12,25 +12,25 @@ import {
   JobCountsByStatus
 } from './job-repository.types';
 
-export const IJobRepository = Symbol('IJobRepository');
+export const JOB_REPOSITORY_TOKEN = Symbol('IJobRepository');
 
 export interface IJobRepository {
   /**
    * Saves a job (creates if new, updates if existing based on ID).
    * Implementations must handle upsert logic.
    */
-  save(job: JobEntity<any, any>): Promise<Result<void, Error>>;
+  save(job: JobEntity<unknown, unknown>): Promise<Result<void, Error>>; // any to unknown
 
   /**
    * Finds a job by its ID.
    */
-  findById(id: JobIdVO): Promise<Result<JobEntity<any, any> | null, Error>>;
+  findById(id: JobIdVO): Promise<Result<JobEntity<unknown, unknown> | null, Error>>; // any to unknown
 
   /**
    * Finds multiple jobs by their IDs.
    * Returns only found jobs. Order may not be guaranteed unless specified.
    */
-  findByIds(ids: JobIdVO[]): Promise<Result<JobEntity<any, any>[], Error>>;
+  findByIds(ids: JobIdVO[]): Promise<Result<JobEntity<unknown, unknown>[], Error>>; // any to unknown
 
   /**
    * Finds processable jobs for a given queue.
@@ -49,7 +49,7 @@ export interface IJobRepository {
     limit: number,
     nowTimestampMs: number, // Pass as epoch ms for direct DB comparison
     lockDurationMs: number,
-  ): Promise<Result<JobEntity<any, any>[], Error>>;
+  ): Promise<Result<JobEntity<unknown, unknown>[], Error>>; // any to unknown
 
   /**
    * Finds active jobs whose lock has expired (stalled jobs).
@@ -61,7 +61,7 @@ export interface IJobRepository {
     lockExpiresAtBefore: number, // Epoch ms
     limit: number,
     queueName?: string,
-  ): Promise<Result<JobEntity<any, any>[], Error>>;
+  ): Promise<Result<JobEntity<unknown, unknown>[], Error>>; // any to unknown
 
   /**
    * Finds delayed jobs that are ready to be promoted to pending.
@@ -73,7 +73,7 @@ export interface IJobRepository {
     nowTimestampMs: number, // Epoch ms
     limit: number,
     queueName?: string,
-  ): Promise<Result<JobEntity<any, any>[], Error>>;
+  ): Promise<Result<JobEntity<unknown, unknown>[], Error>>; // any to unknown
 
   /**
    * Finds all jobs associated with a specific repeat key.
@@ -81,12 +81,12 @@ export interface IJobRepository {
   findJobsByRepeatKey(
     queueName: string,
     repeatKey: string
-  ): Promise<Result<JobEntity<any, any>[], Error>>;
+  ): Promise<Result<JobEntity<unknown, unknown>[], Error>>; // any to unknown
 
   /**
    * Finds all jobs that have a specific parent job ID.
    */
-  findJobsByParentId(parentId: JobIdVO): Promise<Result<JobEntity<any, any>[], Error>>;
+  findJobsByParentId(parentId: JobIdVO): Promise<Result<JobEntity<unknown, unknown>[], Error>>; // any to unknown
 
   /**
    * Gets counts of jobs grouped by status for a given queue.
@@ -125,7 +125,18 @@ export interface IJobRepository {
   search(
     filters: JobSearchFilters,
     pagination: PaginationOptions,
-  ): Promise<Result<PaginatedJobsResult<any, any>, Error>>;
+  ): Promise<Result<PaginatedJobsResult<unknown, unknown>, Error>>; // any to unknown
+
+  /**
+   * Deletes jobs from a specific queue, optionally filtered by statuses.
+   * @param queueName The name of the queue.
+   * @param statuses Optional array of statuses to delete. If undefined, all jobs in the queue are targeted.
+   * @returns The number of jobs deleted.
+   */
+  deleteJobsByQueue(
+    queueName: string,
+    statuses?: JobStatusEnum[],
+  ): Promise<Result<{ count: number }, Error>>;
 
   // Potentially more specific update methods if needed for performance,
   // though `save` should handle general updates.

@@ -1,6 +1,7 @@
 // src_refactored/core/domain/queue/queue.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
-import { EntityError, ValueError } from '@/core/common/errors';
+
+import { ValueError, EntityError } from '@/domain/common/errors'; // Corrected alias path
 
 import { QueueConcurrency } from './value-objects/queue-concurrency.vo';
 import { QueueDescription } from './value-objects/queue-description.vo';

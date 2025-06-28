@@ -1,7 +1,8 @@
 // src_refactored/core/domain/memory/memory-item.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
-import { EntityError, ValueError } from '@/core/common/errors';
 import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId
+
+import { EntityError, ValueError } from '@/domain/common/errors'; // Corrected alias path
 
 import { MemoryItemContent } from './value-objects/memory-item-content.vo';
 import { MemoryItemEmbedding } from './value-objects/memory-item-embedding.vo';

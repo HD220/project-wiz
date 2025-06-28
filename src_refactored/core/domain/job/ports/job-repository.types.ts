@@ -21,7 +21,7 @@ export interface PaginationOptions {
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface PaginatedJobsResult<TData = any, TResult = any> {
+export interface PaginatedJobsResult<TData = unknown, TResult = unknown> { // any to unknown
   jobs: JobEntity<TData, TResult>[];
   totalItems: number;
   totalPages: number;
