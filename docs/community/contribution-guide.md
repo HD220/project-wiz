@@ -103,7 +103,7 @@ Se você deseja contribuir com código, siga estes passos:
     *   Escreva mensagens de commit claras, descritivas e em inglês. Siga o padrão de [Commits Semânticos](https://www.conventionalcommits.org/) se possível (ex: `feat: Adiciona nova Tool X`, `fix: Corrige problema de login ao usar Y`).
 *   **Comentários:** Comente código complexo ou não óbvio, mas evite comentários desnecessários para código autoexplicativo. Escreva comentários em inglês.
 
-**Para um conjunto mais abrangente de diretrizes de desenvolvimento, incluindo boas práticas gerais, de arquitetura e específicas de tecnologias utilizadas no projeto, consulte o documento: [Padrões de Código e Diretrizes de Desenvolvimento](../developer/02-coding-standards.md) e o detalhado [Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md).** (Estes links serão válidos após a reestruturação completa da documentação).
+**Para um conjunto mais abrangente de diretrizes de desenvolvimento, incluindo boas práticas gerais, de arquitetura e específicas de tecnologias utilizadas no projeto, consulte o documento: [Padrões de Código e Diretrizes de Desenvolvimento](../developer/02-coding-standards.md) e o detalhado [Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md).**
 
 ## Documentação e Decisões de Arquitetura
 
@@ -114,7 +114,7 @@ Se você deseja contribuir com código, siga estes passos:
 
 *   Novas funcionalidades devem ser acompanhadas de testes unitários e/ou de integração.
 *   Correções de bugs devem, idealmente, incluir um teste que demonstre o bug e verifique a correção.
-*   Consulte o [Guia de Testes](../developer/03-testing-guide.md) para mais detalhes. (Este link será válido após a criação/movimentação do guia de testes).
+*   Consulte o [Guia de Testes](../developer/03-testing-guide.md) para mais detalhes.
 
 ## Comunicação
 

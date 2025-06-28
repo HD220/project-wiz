@@ -13,7 +13,7 @@ No Project Wiz, nos esforçamos para seguir princípios de desenvolvimento de so
 
 Para uma discussão aprofundada sobre estes e outros princípios gerais, bem como diretrizes de arquitetura (Clean Architecture, Object Calisthenics) e práticas específicas para as tecnologias que usamos (Electron, React, TypeScript, Vite, Zod), consulte o nosso documento principal de Boas Práticas:
 
-*   **[Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md)** (Este link será válido após a reestruturação da seção de referência).
+*   **[Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md)**.
 
 ## Padrões de Estilo de Código
 
@@ -53,7 +53,7 @@ Os seguintes padrões de estilo são extraídos do nosso [Guia de Contribuição
 
 ## Qualidade do Código e Refatoração
 
-*   **Testes:** Novas funcionalidades devem ser acompanhadas de testes unitários e/ou de integração. Correções de bugs devem, idealmente, incluir um teste que demonstre o bug e verifique a correção. Consulte o [Guia de Testes](./03-testing-guide.md) (a ser criado/movido).
+*   **Testes:** Novas funcionalidades devem ser acompanhadas de testes unitários e/ou de integração. Correções de bugs devem, idealmente, incluir um teste que demonstre o bug e verifique a correção. Consulte o [Guia de Testes](./03-testing-guide.md).
 *   **Revisão de Código:** Todos os Pull Requests devem ser revisados por pelo menos um outro desenvolvedor.
 *   **Refatoração Contínua:** Dedique tempo para refatorar o código e reduzir o débito técnico.
 
