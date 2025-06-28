@@ -201,7 +201,8 @@ npm run coverage:report
 
 ## Referências
 
-- [Guia Prático de Testes](./03.1-practical-testing-examples.md)
+- [Padrões Consolidados de Teste](/.roo/rules/Consolidated-Test-Standards.md)
+- [Guia de Testes](/docs/testing-guide.md)
 - [Vitest Documentation](https://vitest.dev/)
 - [Drizzle ORM Testing](https://orm.drizzle.team/docs/tests)
 

@@ -56,4 +56,4 @@ O tratamento de exceções é fundamental para lidar com erros inesperados ou co
 
 Uma estratégia consistente de validação de dados com Zod e um tratamento de exceções cuidadoso são essenciais para construir um Project Wiz confiável e fácil de manter. Ao validar entradas e gerenciar erros de forma proativa, podemos melhorar a experiência do usuário e a estabilidade geral do sistema.
 
-Consulte também as [Diretrizes de Segurança](./security-guidelines.md) para aspectos relacionados à validação de inputs.
+Consulte também as [Diretrizes de Segurança](./security-guidelines.md) para aspectos relacionados à validação de inputs (este link será válido após a movimentação do arquivo de diretrizes de segurança para esta pasta `reference`).
