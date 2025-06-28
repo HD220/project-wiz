@@ -4,7 +4,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 
 ## 1. Requisitos Funcionais (RF)
 
-### RF-GERAL: Visão Geral e Interação Principal (`docs/funcional/00_visao_geral_sistema.md`)
+### RF-GERAL: Visão Geral e Interação Principal ([Introdução ao Project Wiz](../../user/01-introduction.md))
 *   **RF-GERAL-001:** O sistema deve permitir que usuários interajam com Agentes IA (configurados por Personas) através de uma interface de chat.
 *   **RF-GERAL-002:** Agentes IA devem ser capazes de analisar solicitações do usuário, elaborar planos de ação (Jobs/Sub-Jobs) e definir critérios de "Definição de Pronto" (`validationCriteria`).
 *   **RF-GERAL-003:** O sistema deve permitir que Agentes IA apresentem planos ao usuário para aprovação antes da execução.
@@ -13,7 +13,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-GERAL-006:** Agentes IA devem realizar auto-validação dos resultados dos Jobs contra os `validationCriteria`.
 *   **RF-GERAL-007:** O sistema deve permitir que usuários acompanhem o progresso dos Jobs e recebam resultados.
 
-### RF-PROJ: Gerenciamento de Projetos (`docs/funcional/01_gerenciamento_projetos.md`)
+### RF-PROJ: Gerenciamento de Projetos ([Core Concept: Gerenciando Projetos](../../user/core-concepts/projects.md))
 *   **RF-PROJ-001:** O sistema deve permitir ao usuário criar novos projetos de software (com nome e descrição opcional).
 *   **RF-PROJ-002:** Na criação de um projeto, o sistema (via `CreateProjectUseCase`) deve:
     *   Gerar um `ProjectId`.
@@ -24,7 +24,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-PROJ-004:** O projeto ativo deve fornecer contexto (working directory, Git repo) para os Agentes IA.
 *   **RF-PROJ-005 (Futuro):** Agentes poderão interagir com metadados do projeto (issues internas, etc.) através de `Tools` específicas.
 
-### RF-PERSONA: Gerenciamento de Personas e Agentes IA (`docs/funcional/02_gerenciamento_personas_agentes.md`)
+### RF-PERSONA: Gerenciamento de Personas e Agentes IA ([Core Concept: Personas e Agentes IA](../../user/core-concepts/personas-and-agents.md))
 *   **RF-PERSONA-001:** O sistema deve permitir ao usuário criar templates de Persona (`AgentPersonaTemplate`) definindo Nome, Papel (Role), Objetivo (Goal), Backstory e `toolNames` permitidas (via `CreatePersonaUseCase`).
 *   **RF-PERSONA-002:** O sistema deve permitir a criação de instâncias de `Agent` executáveis, vinculando um `AgentPersonaTemplate` a uma `LLMProviderConfig` e `temperature` (via `CreateAgentUseCase`).
 *   **RF-PERSONA-003:** O sistema deve persistir `AgentPersonaTemplate` e `Agent`.
@@ -33,7 +33,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-PERSONA-006:** O sistema deve suportar um `AgentRuntimeState` para informações transitórias de um Agente em execução.
 *   **RF-PERSONA-007:** O sistema deve suportar a operação concorrente de múltiplos Agentes (via `WorkerService` por `role`).
 
-### RF-AGENT-OP: Operação de Agentes IA (`docs/funcional/03_operacao_agentes_ia.md`)
+### RF-AGENT-OP: Operação de Agentes IA ([Agent Operation Internals](./03-agent-operation-internals.md))
 *   **RF-AGENT-OP-001:** O `GenericAgentExecutor` deve usar o LLM configurado para analisar solicitações e o `AgentInternalState` para contexto.
 *   **RF-AGENT-OP-002:** O Agente (via `GenericAgentExecutor` e `TaskManagerTool`) deve ser capaz de criar um Job principal e Sub-Jobs com dependências.
 *   **RF-AGENT-OP-003:** O Agente (via LLM) deve definir `validationCriteria` para Jobs, armazenados no `ActivityContext`.
@@ -47,7 +47,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-AGENT-OP-011:** O Agente (via LLM e `MemoryTool`) deve poder atualizar seu conhecimento de longo prazo (`AgentInternalState` ou similar).
 *   **RF-AGENT-OP-012:** O `GenericAgentExecutor` deve lidar com erros de `Tools` e LLM, e o sistema de Jobs deve suportar retentativas.
 
-### RF-JOB: Sistema de Jobs, Atividades e Fila (`docs/funcional/04_sistema_jobs_atividades_fila.md`)
+### RF-JOB: Sistema de Jobs, Atividades e Fila ([Core Concept: Jobs e Automação](../../user/core-concepts/jobs-and-automation.md))
 *   **RF-JOB-001:** O sistema deve usar a entidade `Job` para representar unidades de trabalho, com atributos como ID, `targetAgentRole`, `name`, `payload`, `data` (para `agentState` contendo `ActivityContext`), `status`, `priority`, `dependsOnJobIds`, `parentJobId`, `RetryPolicy`, timestamps e `result`.
 *   **RF-JOB-002:** Agentes devem criar Jobs para si (Sub-Jobs) usando `TaskManagerTool` (que usa `CreateJobUseCase`).
 *   **RF-JOB-003:** O sistema deve suportar filas implícitas por `targetAgentRole`.
@@ -60,7 +60,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-JOB-010:** Todos os dados de Jobs devem ser persistidos em SQLite via Drizzle ORM (`IJobRepository`).
 *   **RF-JOB-011:** A UI deve permitir o monitoramento básico do status dos Jobs.
 
-### RF-LLM: Integração com LLM (`docs/funcional/05_integracao_llm.md`)
+### RF-LLM: Integração com LLM ([LLM Integration](./04-llm-integration.md))
 *   **RF-LLM-001:** O sistema deve permitir a configuração de múltiplos provedores de LLM (`LLMProviderConfig` entidade, `CreateLLMProviderConfigUseCase`).
 *   **RF-LLM-002:** Uma instância de `Agent` deve vincular um `AgentPersonaTemplate` a uma `LLMProviderConfig`.
 *   **RF-LLM-003:** O `GenericAgentExecutor` deve usar o LLM configurado para o Agente para todas as operações de IA.
@@ -68,7 +68,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-LLM-005:** O LLM, através do `GenericAgentExecutor` e `ai-sdk`, deve poder solicitar a execução de `Tools` registradas no `ToolRegistry`.
 *   **RF-LLM-006:** O sistema deve usar `ai-sdk` para abstrair a comunicação com diferentes APIs de LLM.
 
-### RF-TOOL: Ferramentas de Agente (`docs/funcional/06_ferramentas_agente.md`)
+### RF-TOOL: Ferramentas de Agente ([Agent Tools](./05-agent-tools.md))
 *   **RF-TOOL-001:** O sistema deve fornecer um `ToolRegistry` para registrar e executar `IAgentTool`s.
 *   **RF-TOOL-002:** Cada `IAgentTool` deve ter `name`, `description`, `parameters` (Zod schema) e `execute` método.
 *   **RF-TOOL-003 (Implícito):** Comunicação Agente-Usuário via chat da UI.
@@ -80,7 +80,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-TOOL-009 (Futuro):** `ProjectDataTool` para interação com metadados internos do Project Wiz.
 *   **RF-TOOL-010 (Futuro):** `SendMessageToAgentTool` para comunicação inter-agente.
 
-### RF-UI: Interface de Usuário e UX (`docs/funcional/07_interface_usuario_ux.md`)
+### RF-UI: Interface de Usuário e UX ([Visão Geral da Interface do Usuário](../../user/03-interface-overview.md))
 *   **RF-UI-001:** O sistema deve ser uma aplicação desktop Electron com UI React.
 *   **RF-UI-002:** Interação primária com Agentes via interface de chat (`ChatThread`).
 *   **RF-UI-003:** Chat deve suportar renderização Markdown (`MarkdownRenderer`).
@@ -110,7 +110,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RNF-EXT-002 (Extensibilidade de Personas):** A configuração de `AgentPersonaTemplate` deve ser flexível.
 *   **RNF-I18N-001 (Internacionalização):** A UI deve suportar internacionalização (LinguiJS confirmado).
 *   **RNF-REL-001 (Confiabilidade da Fila):** O sistema de Jobs e Filas deve ser confiável, com persistência de estado em SQLite.
-*   **RNF-CMP-001 (Compatibilidade Visual):** A nova implementação do frontend deve ser visualmente idêntica à pré-implementação, conforme o `docs/tecnico/guia_de_estilo_visual.md`.
+*   **RNF-CMP-001 (Compatibilidade Visual):** A nova implementação do frontend deve ser visualmente idêntica à pré-implementação, conforme o [Guia de Estilo Visual](../../developer/04-visual-style-guide.md).
 *   **RNF-TEC-001 (Manutenção Tecnológica):** As tecnologias definidas no `package.json` são mandatórias e devem ser mantidas.
 
 Estes requisitos servirão como base para o desenvolvimento e validação da nova implementação do Project Wiz.
