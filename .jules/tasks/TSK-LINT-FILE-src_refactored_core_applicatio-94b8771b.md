@@ -1,15 +1,16 @@
-# Tarefa: LINT-FILE-src_refactored_core_applicatio-94b8771b - Fix all 1 lint issues in src_refactored/core/application/use-cases/project/create-project.use-case.ts
+# Tarefa: LINT-FILE-src_refactored_core_applicatio-94b8771b - Fix all 2 lint issues in src_refactored/core/application/use-cases/project/create-project.use-case.ts
 
 **ID da Tarefa:** `[ID_DA_TAREFA]`
 **Título Breve:** `[TÍTULO_BREVE_DA_TAREFA]`
 **Descrição Completa:**
 `**File:** `src_refactored/core/application/use-cases/project/create-project.use-case.ts`
-**Total Issues:** 1 (Errors: 0, Warnings: 1)
+**Total Issues:** 2 (Errors: 1, Warnings: 1)
 
 **Lint Messages:**
 
 ```text
 - Line 25:16 (max-statements) - Async method 'execute' has too many statements (33). Maximum allowed is 25.
+- Line 88:21 (@typescript-eslint/no-explicit-any) - Unexpected any. Specify a different type.
 ````
 
 ---
@@ -17,7 +18,7 @@
 **Status:** `Pendente` (Pendente, Em Andamento, Concluído, Bloqueado, Revisão, Cancelado)
 **Dependências (IDs):** `` (ex: `APP-SVC-001, CONFIG-002`)
 **Complexidade (1-5):** `1`
-**Prioridade (P0-P4):** `P3`
+**Prioridade (P0-P4):** `P2`
 **Responsável:** `Jules (Automated)`
 **Branch Git Proposta:** `fix/lint-file-LINT-FILE-src_refactored_core_applicatio-94b8771b`
 **Commit da Conclusão (Link):** `` (Preencher após conclusão)
@@ -39,7 +40,7 @@
 ---
 
 ## Comentários
-- `2025-06-28 13:24:00 - Task automatically generated for lint issues in file.`
+- `2025-06-28 13:43:03 - Task automatically generated for lint issues in file.`
 - `(YYYY-MM-DD por @Autor): [Comentário adicional]`
 
 ---
