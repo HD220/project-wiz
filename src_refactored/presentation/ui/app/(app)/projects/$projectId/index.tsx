@@ -1,9 +1,11 @@
 import { createFileRoute, Outlet, useParams, Link, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, Settings, Edit3, Trash2, Play, Pause, CheckCircle, Clock, AlertTriangle, LayoutDashboard } from 'lucide-react'; // Added LayoutDashboard for main AppSidebar link
+// Edit3, Trash2, LayoutDashboard, Separator are not directly used here or are part of children. ChevronDown is needed.
+import { ArrowLeft, Settings, Play, Pause, CheckCircle, Clock, AlertTriangle, ChevronDown } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,14 +13,61 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/ui/components/ui/dropdown-menu';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-// ProjectDetailView is removed as its functionality (Tabs with Outlet) is now integrated here.
-// We will create ProjectContextSidebar and the main content area with Outlet here.
 import { ProjectContextSidebar } from '@/presentation/ui/features/project/components/layout/ProjectContextSidebar';
-import { OverviewTabContent } from '@/presentation/ui/features/project/components/ProjectDetailView';
+import { ProjectParticipantsSidebar } from '@/presentation/ui/features/project/components/layout/ProjectParticipantsSidebar'; // Import the new sidebar
 import { Project } from '@/presentation/ui/features/project/components/ProjectListItem';
-// OverviewTabContent will be rendered by this page if it's the index route.
+// OverviewTabContent is now locally defined or imported from a new location.
+// For this correction, I'll assume it's defined below or in its own file and imported.
+// If it was in ProjectDetailView.tsx, and that's deleted, it needs a new home.
+// For now, let's assume it's correctly available (e.g. defined in this file or imported).
+// We'll define it locally for this fix.
 
+
+// Copied from previous ProjectDetailView.tsx for now
+const OverviewTabContent = ({ project }: { project: Project }) => (
+  <div className="space-y-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Resumo do Projeto</CardTitle>
+        <CardDescription>Informações chave e estatísticas sobre "{project.name}".</CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4 md:grid-cols-2">
+        <div>
+          <h4 className="font-medium mb-1">Status Atual</h4>
+          <p className="text-sm text-slate-700 dark:text-slate-300">{project.status}</p>
+        </div>
+        <div>
+          <h4 className="font-medium mb-1">Última Atividade</h4>
+          <p className="text-sm text-slate-700 dark:text-slate-300">{project.lastActivity}</p>
+        </div>
+        <div>
+          <h4 className="font-medium mb-1">Agentes Envolvidos</h4>
+          <p className="text-sm text-slate-700 dark:text-slate-300">{project.agentCount}</p>
+        </div>
+        <div>
+          <h4 className="font-medium mb-1">Total de Tarefas (Conceitual)</h4>
+          <p className="text-sm text-slate-700 dark:text-slate-300">{project.taskCount}</p>
+        </div>
+        <div className="md:col-span-2">
+          <h4 className="font-medium mb-1">Descrição Completa</h4>
+          <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line">
+            {project.description || "Nenhuma descrição detalhada fornecida."}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader>
+        <CardTitle>Atividade Recente (Placeholder)</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Feed de atividades recentes do projeto aparecerá aqui...
+        </p>
+      </CardContent>
+    </Card>
+  </div>
+);
 
 // Mock data - replace with actual data fetching
 const mockProjectsData: Record<string, Project> = {
@@ -84,9 +133,10 @@ function ProjectDetailLayoutPage() {
   // This page will have its own ProjectContextSidebar and the main content area with Outlet
   return (
     <div className="flex h-full"> {/* Occupy full height from parent (app)_layout's main content area */}
-      <ProjectContextSidebar project={project} currentPath={currentPath} className="h-full" /> {/* Pass currentPath */}
+      <ProjectContextSidebar project={project} className="h-full" /> {/* currentPath removed */}
 
-      <main className="flex-1 flex flex-col overflow-hidden">
+      {/* Central Content Area (includes header and Outlet) */}
+      <div className="flex-1 flex flex-col overflow-hidden"> {/* Renamed main to div for clarity, as it's a wrapper */}
         {/* Header specific to the project, shown above the Outlet/tab content */}
         <header className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -104,14 +154,14 @@ function ProjectDetailLayoutPage() {
             </div>
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" asChild>
-                 <Link to="/projects/$projectId/settings" params={{projectId: project.id}}>
-                    <Settings className="mr-1.5 h-3.5 w-3.5" /> Editar Projeto
+                 <Link to="./settings" params={{projectId: project.id}}>
+                    <Settings className="mr-1.5 h-3.5 w-3.5" /> Configurações
                  </Link>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    Ações <ArrowLeft className="ml-2 h-3.5 w-3.5 rotate-[-90deg]" /> {/* ChevronDown was not imported */}
+                    Ações <ChevronDown className="ml-2 h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -122,7 +172,7 @@ function ProjectDetailLayoutPage() {
                     <Pause className="mr-2 h-4 w-4" /> Pausar Projeto
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-500 focus:text-red-600">
+                  <DropdownMenuItem className="text-red-500 focus:text-red-600 dark:focus:text-red-500 dark:focus:bg-red-900/50">
                     <Trash2 className="mr-2 h-4 w-4" /> Excluir Projeto
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -139,7 +189,10 @@ function ProjectDetailLayoutPage() {
                 <Outlet />
             )}
         </div>
-      </main>
+      </div>
+
+      {/* Right Sidebar for Participants */}
+      <ProjectParticipantsSidebar className="h-full" />
     </div>
   );
 }

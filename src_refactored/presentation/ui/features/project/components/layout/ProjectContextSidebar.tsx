@@ -1,8 +1,9 @@
-import { Link, useParams } from '@tanstack/react-router';
-import { BarChart2, MessageSquareText, BookText, Settings2, Users, ChevronDown, GripVertical } from 'lucide-react';
+import { Link, useParams } from '@tanstack/react-router'; // Removed useRouter as it's not used here
+import { BarChart2, MessageSquareText, BookText, Settings2, Users, ChevronDown, Hash, PlusCircle } from 'lucide-react';
 import React from 'react';
+// Added Hash and PlusCircle to imports, removed GripVertical as it's not used
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/presentation/ui/components/ui/avatar'; // Removed AvatarImage
 import { Button } from '@/presentation/ui/components/ui/button';
 import {
   DropdownMenu,
@@ -26,64 +27,75 @@ interface Project {
 }
 
 interface ProjectSectionLinkProps {
-  to: string; // This will be relative to the project's base path, e.g., './overview' or './settings'
+  to: string;
   label: string;
-  icon: React.ElementType;
-  isActive?: boolean; // Parent will determine this based on current route
+  icon: React.ElementType; // Renamed prop from 'icon' to 'IconElement' in implementation
   projectId: string;
+  // isActive prop removed as Link component handles active state
 }
 
-function ProjectSectionLink({ to, label, icon: Icon, isActive, projectId }: ProjectSectionLinkProps) {
+function ProjectSectionLink({ to, label, icon: IconElement, projectId }: ProjectSectionLinkProps) { // Renamed icon to IconElement
   return (
     <Link
       to={to}
-      params={{ projectId }} // Ensure projectId is passed for route matching
+      params={{ projectId }}
       resetScroll={false}
       className={cn(
         "flex items-center space-x-2.5 px-3 py-2 text-sm rounded-md transition-colors",
-        isActive
-          ? "bg-sky-100 dark:bg-sky-700/60 text-sky-700 dark:text-sky-200 font-medium"
-          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+        "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/60" // Base classes
       )}
-      activeProps={{ className: "!bg-sky-100 dark:!bg-sky-700/60 !text-sky-700 dark:!text-sky-200 font-medium" }} // More specific active props
+      activeProps={{
+        // Classes to apply when the link is active
+        className: "!bg-sky-100 dark:!bg-sky-700/60 !text-sky-700 dark:!text-sky-200 font-medium"
+      }}
     >
-      <Icon className="h-4 w-4" />
-      <span>{label}</span>
+      <IconElement className="h-4 w-4 flex-shrink-0" /> {/* Ensure icon is flex-shrink-0 if space is tight */}
+      <span className="truncate">{label}</span>
     </Link>
   );
 }
 
 
 interface ProjectContextSidebarProps {
-  project: Project | null; // Can be null if project data is still loading
+  project: Project | null;
   className?: string;
-  currentPath?: string; // To help determine active link
+  // currentPath prop removed as it's not used for active state determination anymore
 }
 
-export function ProjectContextSidebar({ project, className, currentPath }: ProjectContextSidebarProps) {
-  const params = useParams({ from: '/(app)/projects/$projectId' }); // Ensure this matches a route where projectId is a param
+export function ProjectContextSidebar({ project, className }: ProjectContextSidebarProps) {
+  // const params = useParams({ from: '/(app)/projects/$projectId' }); // Not strictly needed if projectId comes from props
 
   if (!project) {
-    return (
+    return ( // Skeleton loader
       <aside className={cn("w-60 flex-shrink-0 bg-slate-100 dark:bg-slate-800/70 p-4 border-r border-slate-200 dark:border-slate-700", className)}>
         <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-4"></div>
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-8 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-2"></div>
+        {[...Array(5)].map((_item, index) => ( // Renamed _ to _item, i to index
+          <div key={index} className="h-8 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-2"></div>
         ))}
       </aside>
     );
   }
 
+  // For TanStack Router links from within a layout for a parameterized route (e.g., /projects/$projectId),
+  // relative links like './settings' are often preferred for child routes.
+  // Absolute paths need to include the dynamic params correctly.
   const sections = [
-    { value: 'overview', label: 'Visão Geral', icon: BarChart2, to: '/(app)/projects/$projectId/' }, // Points to the project's index route
-    { value: 'chat', label: 'Chat/Canais', icon: MessageSquareText, to: '/(app)/projects/$projectId/chat' },
-    { value: 'docs', label: 'Documentação', icon: BookText, to: '/(app)/projects/$projectId/docs' },
-    { value: 'members', label: 'Membros & Agentes', icon: Users, to: '/(app)/projects/$projectId/members' },
-    { value: 'settings', label: 'Configurações', icon: Settings2, to: '/(app)/projects/$projectId/settings' },
+    { value: 'overview', label: 'Visão Geral', icon: BarChart2, to: `/projects/${project.id}/` }, // Trailing slash for index
+    { value: 'chat', label: 'Chat/Canais', icon: MessageSquareText, to: `/projects/${project.id}/chat` },
+    { value: 'docs', label: 'Documentação', icon: BookText, to: `/projects/${project.id}/docs` },
+    { value: 'members', label: 'Membros & Agentes', icon: Users, to: `/projects/${project.id}/members` },
+    { value: 'settings', label: 'Configurações', icon: Settings2, to: `/projects/${project.id}/settings` },
+  ];
+
+  // Placeholder for mock channels
+  const mockChannels = [
+    { id: 'ch_geral', name: 'geral', to: `/projects/${project.id}/chat/geral`}, // Example channel route
+    { id: 'ch_dev', name: 'desenvolvimento', to: `/projects/${project.id}/chat/dev`},
+    { id: 'ch_bugs', name: 'bugs', to: `/projects/${project.id}/chat/bugs`},
   ];
 
   return (
-    <aside className={cn("w-60 flex-shrink-0 bg-slate-100 dark:bg-slate-800/70 flex flex-col border-r border-slate-200 dark:border-slate-700", className)}>
+    <aside className={cn("w-60 flex-shrink-0 bg-slate-100 dark:bg-slate-800/70 flex flex-col border-r border-slate-200 dark:border-slate-700 h-full", className)}>
       {/* Project Header */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-700">
         <DropdownMenu>
@@ -107,9 +119,12 @@ export function ProjectContextSidebar({ project, className, currentPath }: Proje
             <DropdownMenuLabel>Ações do Projeto</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Convidar Membros (N/I)</DropdownMenuItem>
-            <DropdownMenuItem>Configurações do Projeto</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              {/* Link to project settings using its relative path from $projectId */}
+              <Link to={`/projects/${project.id}/settings`} params={{projectId: project.id}}>Configurações do Projeto</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 focus:text-red-500">Arquivar Projeto (N/I)</DropdownMenuItem>
+            <DropdownMenuItem className="text-red-500 focus:text-red-500 dark:focus:text-red-500">Arquivar Projeto (N/I)</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -123,8 +138,6 @@ export function ProjectContextSidebar({ project, className, currentPath }: Proje
               label={section.label}
               icon={section.icon}
               projectId={project.id}
-              // Active state will be handled by TanStack Router's Link `activeProps`
-              // isActive={currentPath?.startsWith(`/projects/${project.id}${section.to.substring(1)}`)} // Basic active check
             />
           ))}
         </nav>
@@ -134,22 +147,32 @@ export function ProjectContextSidebar({ project, className, currentPath }: Proje
             <Separator className="my-2"/>
             <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 mb-1.5 flex justify-between items-center">
                 <span>Canais</span>
-                <Button variant="ghost" size="icon" className="h-5 w-5"><PlusCircle className="h-3.5 w-3.5"/></Button>
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => alert("Novo canal (N/I)")}>
+                    <PlusCircle className="h-3.5 w-3.5"/>
+                </Button>
             </h4>
             <div className="space-y-0.5">
-                <ProjectSectionLink to="#" label="# geral" icon={Hash} projectId={project.id} />
-                <ProjectSectionLink to="#" label="# desenvolvimento" icon={Hash} projectId={project.id} />
-                <ProjectSectionLink to="#" label="# bugs" icon={Hash} projectId={project.id} />
+                {mockChannels.map(channel => (
+                     <ProjectSectionLink
+                        key={channel.id}
+                        to={channel.to} // Use the defined channel route
+                        label={`# ${channel.name}`}
+                        icon={Hash}
+                        projectId={project.id}
+                    />
+                ))}
             </div>
         </div>
       </ScrollArea>
 
-      {/* Optional Footer for the project sidebar */}
+      {/* Optional Footer for the project sidebar - Removed GripVertical as it's not imported and purpose unclear here */}
+      {/*
       <div className="p-2 border-t border-slate-200 dark:border-slate-700">
         <Button variant="ghost" size="sm" className="w-full justify-start text-xs">
-            <GripVertical className="mr-2 h-4 w-4"/> Menu do Projeto
+            Menu do Projeto
         </Button>
       </div>
+      */}
     </aside>
   );
 }
