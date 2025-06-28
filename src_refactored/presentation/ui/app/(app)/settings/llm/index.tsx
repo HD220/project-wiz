@@ -56,9 +56,7 @@ function LLMConfigurationPage() {
 
 
   const handleEdit = (configId: string) => {
-    // Navigate to an edit page (not yet created in this plan)
-    // router.navigate({ to: `/settings/llm/edit/${configId}` });
-    toast.info(`Edição da configuração ${configId} (ainda não implementado).`);
+    router.navigate({ to: '/settings/llm/$configId/edit', params: { configId } });
   };
 
   const handleDelete = (config: LLMConfig) => {

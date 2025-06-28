@@ -1,29 +1,55 @@
 import React from 'react';
+import { toast } from 'sonner';
 
-// import { LLMConfigForm } from '@/presentation/ui/features/llm/components/LLMConfigForm';
+import { LLMConfigForm, LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm';
 
-export function InitialConfigStep() {
+interface InitialConfigStepProps {
+  onConfigSaved: (data: LLMConfigFormData) => void; // Callback when LLM config is successfully "saved"
+  isSubmitting?: boolean; // Optional: if parent controls submission state
+  setIsSubmitting?: (isSubmitting: boolean) => void; // Optional: to let this component control parent's state
+}
+
+export function InitialConfigStep({ onConfigSaved, isSubmitting: parentIsSubmitting, setIsSubmitting: parentSetIsSubmitting }: InitialConfigStepProps) {
+  // Use local submitting state if parent doesn't provide one
+  const [internalIsSubmitting, internalSetIsSubmitting] = React.useState(false);
+  const isSubmitting = parentIsSubmitting ?? internalIsSubmitting;
+  const setIsSubmitting = parentSetIsSubmitting ?? internalSetIsSubmitting;
+
+
+  const handleSubmit = async (data: LLMConfigFormData) => {
+    setIsSubmitting(true);
+    console.log('LLM Config data from Onboarding:', data);
+
+    // Simulate saving the LLM configuration
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // In a real app, you'd call an IPC handler here.
+    // For now, we assume success and call the callback.
+
+    // Important: Add the new config to the mock DB or a global store if other parts of the app need it immediately
+    // For example, if mockLlmConfigsDb is accessible (e.g. via a Zustand store or by passing it down):
+    // const newConfigId = `config-${Date.now()}`;
+    // mockLlmConfigsDb[newConfigId] = { ...data, id: newConfigId };
+
+    toast.success(`Configuração LLM "${data.name}" salva com sucesso (simulado)!`);
+    onConfigSaved(data); // Notify parent that config is "saved"
+    setIsSubmitting(false);
+  };
+
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-2">Configuração Inicial Essencial</h3>
-      <p className="text-slate-700 dark:text-slate-300 mb-4">
-        Para que os Agentes IA do Project Wiz funcionem, eles precisam de acesso a um
-        Provedor de Modelo de Linguagem (LLM). Por favor, configure seu primeiro provedor.
-      </p>
-      {/*
-        Quando LLMConfigForm estiver pronto e funcional, ele será integrado aqui.
-        Por agora, um placeholder:
-      */}
-      <div className="p-4 border border-dashed border-slate-300 dark:border-slate-700 rounded-md">
-        <p className="text-center text-slate-500 dark:text-slate-400">
-          (Placeholder para o Formulário de Configuração de LLM)
-        </p>
-        <p className="mt-2 text-xs text-center text-slate-400 dark:text-slate-500">
-          Você poderá adicionar um nome para esta configuração, selecionar o provedor (ex: OpenAI, DeepSeek),
-          e inserir sua Chave de API.
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-xl font-semibold mb-1">Configuração Inicial Essencial</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          Para que os Agentes IA do Project Wiz funcionem, eles precisam de acesso a um
+          Provedor de Modelo de Linguagem (LLM). Por favor, configure seu primeiro provedor.
         </p>
       </div>
-       <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+      <LLMConfigForm
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        submitButtonText="Salvar Configuração LLM e Continuar"
+      />
+       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
         Você poderá adicionar mais provedores ou modificar esta configuração posteriormente
         na seção de "Configurações" da aplicação.
       </p>

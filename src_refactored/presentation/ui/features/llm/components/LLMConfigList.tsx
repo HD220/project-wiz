@@ -24,8 +24,8 @@ export interface LLMConfig {
 
 interface LLMConfigListProps {
   configs: LLMConfig[];
-  onEdit: (configId: string) => void;
-  onDelete: (configId: string) => void;
+  onEdit: (configId: string) => void; // Will navigate to /settings/llm/$configId/edit
+  onDelete: (config: LLMConfig) => void; // Pass full config object for delete confirmation
 }
 
 const providerDisplayNames: Record<string, string> = {
@@ -67,11 +67,11 @@ export function LLMConfigList({ configs, onEdit, onDelete }: LLMConfigListProps)
               </TableCell>
               <TableCell>{config.baseUrl || 'N/A'}</TableCell>
               <TableCell className="text-right space-x-2">
-                <Button variant="ghost" size="icon" onClick={() => onEdit(config.id)} title="Editar">
+                <Button variant="ghost" size="icon" onClick={() => onEdit(config.id)} title="Editar Configuração">
                   <Pencil className="h-4 w-4" />
                   <span className="sr-only">Editar</span>
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => onDelete(config.id)} title="Excluir">
+                <Button variant="ghost" size="icon" onClick={() => onDelete(config)} title="Excluir Configuração">
                   <Trash2 className="h-4 w-4 text-destructive" />
                   <span className="sr-only">Excluir</span>
                 </Button>

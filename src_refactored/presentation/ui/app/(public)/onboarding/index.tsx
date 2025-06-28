@@ -1,16 +1,35 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
-import React from 'react';
+import React, { useState } from 'react'; // Added useState
+import { toast } from 'sonner'; // For feedback on LLM save
 
+import { LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm'; // Import type
 import { InitialConfigStep } from '@/presentation/ui/features/onboarding/components/InitialConfigStep';
 import { OnboardingWizard } from '@/presentation/ui/features/onboarding/components/OnboardingWizard';
 import { WelcomeStep } from '@/presentation/ui/features/onboarding/components/WelcomeStep';
 
 function OnboardingPageComponent() {
   const router = useRouter();
+  const [isLLMConfigSaved, setIsLLMConfigSaved] = useState(false);
+  const [isSubmittingLLM, setIsSubmittingLLM] = useState(false);
+
+
+  const handleLLMConfigSaved = (data: LLMConfigFormData) => {
+    // This callback is triggered by InitialConfigStep when its form is submitted successfully
+    console.log("LLM Config saved during onboarding:", data);
+    // No toast here, as InitialConfigStep already shows one.
+    setIsLLMConfigSaved(true);
+    // The OnboardingWizard will typically handle navigation to the next step
+    // or this component can trigger it if the wizard is controlled.
+    // For now, we assume the wizard's "Next" button will become active or change behavior.
+  };
 
   const handleFinishOnboarding = () => {
-    // Navigate to a default authenticated route, e.g., '/dashboard'
-    // This assumes '/dashboard' will be created and accessible after onboarding.
+    if (!isLLMConfigSaved) {
+      toast.error("Por favor, salve uma configuração LLM para continuar.");
+      // Optionally, force navigation to the LLM config step if the wizard is complex
+      // setCurrentStep('initial-config'); // This would require more state management in OnboardingWizard
+      return;
+    }
     router.navigate({ to: '/dashboard', replace: true });
   };
 
@@ -24,18 +43,30 @@ function OnboardingPageComponent() {
     {
       id: 'initial-config',
       title: 'Configuração Inicial Essencial',
-      content: <InitialConfigStep />, // Placeholder for now
+      content: (
+        <InitialConfigStep
+            onConfigSaved={handleLLMConfigSaved}
+            isSubmitting={isSubmittingLLM}
+            setIsSubmitting={setIsSubmittingLLM}
+        />
+      ),
     },
     {
-      id: 'summary', // A final summary/confirmation step
+      id: 'summary',
       title: 'Pronto para Começar!',
       content: (
-        <div>
+        <div className="text-center">
           <h3 className="text-xl font-semibold mb-2">Configuração Concluída!</h3>
           <p className="text-slate-700 dark:text-slate-300">
-            Você está pronto para explorar o Project Wiz. Clique em "Finalizar" para
-            ir ao seu dashboard.
+            {isLLMConfigSaved
+              ? "Sua configuração LLM foi salva. Você está pronto para explorar o Project Wiz!"
+              : "Quase lá! Complete a configuração do LLM para finalizar."}
           </p>
+          {!isLLMConfigSaved && (
+            <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-2">
+                A configuração do LLM é necessária para prosseguir.
+            </p>
+          )}
         </div>
       ),
     },
@@ -43,11 +74,15 @@ function OnboardingPageComponent() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-slate-100 dark:bg-slate-900">
-      <div className="w-full max-w-xl"> {/* Increased max-width for better content fit */}
+      <div className="w-full max-w-xl lg:max-w-2xl"> {/* Increased max-width for LLM form */}
         <OnboardingWizard
           steps={onboardingSteps}
           onFinish={handleFinishOnboarding}
           wizardTitle="Configuração do Project Wiz"
+          // Pass a prop to disable "Next" on LLM step if not saved, or "Finish" on summary
+          // This logic would need to be added to OnboardingWizard component itself.
+          // For simplicity now, the summary step message and onFinish check handle it.
+          isStepBlocked={ (stepId: string) => stepId === 'summary' && !isLLMConfigSaved }
         />
       </div>
     </div>

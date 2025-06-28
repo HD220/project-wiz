@@ -17,7 +17,9 @@ import { Route as appPersonasIndexRouteImport } from './app/(app)/personas/index
 import { Route as appDashboardIndexRouteImport } from './app/(app)/dashboard/index'
 import { Route as appChatIndexRouteImport } from './app/(app)/chat/index'
 import { Route as appAgentsIndexRouteImport } from './app/(app)/agents/index'
+import { Route as appSettingsProfileIndexRouteImport } from './app/(app)/settings/profile/index'
 import { Route as appSettingsLlmIndexRouteImport } from './app/(app)/settings/llm/index'
+import { Route as appSettingsAppearanceIndexRouteImport } from './app/(app)/settings/appearance/index'
 import { Route as appProjectsNewIndexRouteImport } from './app/(app)/projects/new/index'
 import { Route as appProjectsProjectIdIndexRouteImport } from './app/(app)/projects/$projectId/index'
 import { Route as appPersonasNewIndexRouteImport } from './app/(app)/personas/new/index'
@@ -28,6 +30,7 @@ import { Route as appSettingsLlmNewIndexRouteImport } from './app/(app)/settings
 import { Route as appProjectsProjectIdSettingsIndexRouteImport } from './app/(app)/projects/$projectId/settings/index'
 import { Route as appPersonasTemplateIdEditIndexRouteImport } from './app/(app)/personas/$templateId/edit/index'
 import { Route as appAgentsAgentIdEditIndexRouteImport } from './app/(app)/agents/$agentId/edit/index'
+import { Route as appSettingsLlmConfigIdEditIndexRouteImport } from './app/(app)/settings/llm/$configId/edit/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -69,11 +72,22 @@ const appAgentsIndexRoute = appAgentsIndexRouteImport.update({
   path: '/agents/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appSettingsProfileIndexRoute = appSettingsProfileIndexRouteImport.update({
+  id: '/(app)/settings/profile/',
+  path: '/settings/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const appSettingsLlmIndexRoute = appSettingsLlmIndexRouteImport.update({
   id: '/(app)/settings/llm/',
   path: '/settings/llm/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appSettingsAppearanceIndexRoute =
+  appSettingsAppearanceIndexRouteImport.update({
+    id: '/(app)/settings/appearance/',
+    path: '/settings/appearance/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const appProjectsNewIndexRoute = appProjectsNewIndexRouteImport.update({
   id: '/(app)/projects/new/',
   path: '/projects/new/',
@@ -129,6 +143,12 @@ const appAgentsAgentIdEditIndexRoute =
     path: '/agents/$agentId/edit/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const appSettingsLlmConfigIdEditIndexRoute =
+  appSettingsLlmConfigIdEditIndexRouteImport.update({
+    id: '/(app)/settings/llm/$configId/edit/',
+    path: '/settings/llm/$configId/edit/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,11 +165,14 @@ export interface FileRoutesByFullPath {
   '/personas/new': typeof appPersonasNewIndexRoute
   '/projects/$projectId': typeof appProjectsProjectIdIndexRoute
   '/projects/new': typeof appProjectsNewIndexRoute
+  '/settings/appearance': typeof appSettingsAppearanceIndexRoute
   '/settings/llm': typeof appSettingsLlmIndexRoute
+  '/settings/profile': typeof appSettingsProfileIndexRoute
   '/agents/$agentId/edit': typeof appAgentsAgentIdEditIndexRoute
   '/personas/$templateId/edit': typeof appPersonasTemplateIdEditIndexRoute
   '/projects/$projectId/settings': typeof appProjectsProjectIdSettingsIndexRoute
   '/settings/llm/new': typeof appSettingsLlmNewIndexRoute
+  '/settings/llm/$configId/edit': typeof appSettingsLlmConfigIdEditIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,11 +189,14 @@ export interface FileRoutesByTo {
   '/personas/new': typeof appPersonasNewIndexRoute
   '/projects/$projectId': typeof appProjectsProjectIdIndexRoute
   '/projects/new': typeof appProjectsNewIndexRoute
+  '/settings/appearance': typeof appSettingsAppearanceIndexRoute
   '/settings/llm': typeof appSettingsLlmIndexRoute
+  '/settings/profile': typeof appSettingsProfileIndexRoute
   '/agents/$agentId/edit': typeof appAgentsAgentIdEditIndexRoute
   '/personas/$templateId/edit': typeof appPersonasTemplateIdEditIndexRoute
   '/projects/$projectId/settings': typeof appProjectsProjectIdSettingsIndexRoute
   '/settings/llm/new': typeof appSettingsLlmNewIndexRoute
+  '/settings/llm/$configId/edit': typeof appSettingsLlmConfigIdEditIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -188,11 +214,14 @@ export interface FileRoutesById {
   '/(app)/personas/new/': typeof appPersonasNewIndexRoute
   '/(app)/projects/$projectId/': typeof appProjectsProjectIdIndexRoute
   '/(app)/projects/new/': typeof appProjectsNewIndexRoute
+  '/(app)/settings/appearance/': typeof appSettingsAppearanceIndexRoute
   '/(app)/settings/llm/': typeof appSettingsLlmIndexRoute
+  '/(app)/settings/profile/': typeof appSettingsProfileIndexRoute
   '/(app)/agents/$agentId/edit/': typeof appAgentsAgentIdEditIndexRoute
   '/(app)/personas/$templateId/edit/': typeof appPersonasTemplateIdEditIndexRoute
   '/(app)/projects/$projectId/settings/': typeof appProjectsProjectIdSettingsIndexRoute
   '/(app)/settings/llm/new/': typeof appSettingsLlmNewIndexRoute
+  '/(app)/settings/llm/$configId/edit/': typeof appSettingsLlmConfigIdEditIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,11 +240,14 @@ export interface FileRouteTypes {
     | '/personas/new'
     | '/projects/$projectId'
     | '/projects/new'
+    | '/settings/appearance'
     | '/settings/llm'
+    | '/settings/profile'
     | '/agents/$agentId/edit'
     | '/personas/$templateId/edit'
     | '/projects/$projectId/settings'
     | '/settings/llm/new'
+    | '/settings/llm/$configId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,11 +264,14 @@ export interface FileRouteTypes {
     | '/personas/new'
     | '/projects/$projectId'
     | '/projects/new'
+    | '/settings/appearance'
     | '/settings/llm'
+    | '/settings/profile'
     | '/agents/$agentId/edit'
     | '/personas/$templateId/edit'
     | '/projects/$projectId/settings'
     | '/settings/llm/new'
+    | '/settings/llm/$configId/edit'
   id:
     | '__root__'
     | '/'
@@ -253,11 +288,14 @@ export interface FileRouteTypes {
     | '/(app)/personas/new/'
     | '/(app)/projects/$projectId/'
     | '/(app)/projects/new/'
+    | '/(app)/settings/appearance/'
     | '/(app)/settings/llm/'
+    | '/(app)/settings/profile/'
     | '/(app)/agents/$agentId/edit/'
     | '/(app)/personas/$templateId/edit/'
     | '/(app)/projects/$projectId/settings/'
     | '/(app)/settings/llm/new/'
+    | '/(app)/settings/llm/$configId/edit/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,11 +313,14 @@ export interface RootRouteChildren {
   appPersonasNewIndexRoute: typeof appPersonasNewIndexRoute
   appProjectsProjectIdIndexRoute: typeof appProjectsProjectIdIndexRoute
   appProjectsNewIndexRoute: typeof appProjectsNewIndexRoute
+  appSettingsAppearanceIndexRoute: typeof appSettingsAppearanceIndexRoute
   appSettingsLlmIndexRoute: typeof appSettingsLlmIndexRoute
+  appSettingsProfileIndexRoute: typeof appSettingsProfileIndexRoute
   appAgentsAgentIdEditIndexRoute: typeof appAgentsAgentIdEditIndexRoute
   appPersonasTemplateIdEditIndexRoute: typeof appPersonasTemplateIdEditIndexRoute
   appProjectsProjectIdSettingsIndexRoute: typeof appProjectsProjectIdSettingsIndexRoute
   appSettingsLlmNewIndexRoute: typeof appSettingsLlmNewIndexRoute
+  appSettingsLlmConfigIdEditIndexRoute: typeof appSettingsLlmConfigIdEditIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -340,11 +381,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAgentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/settings/profile/': {
+      id: '/(app)/settings/profile/'
+      path: '/settings/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof appSettingsProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/settings/llm/': {
       id: '/(app)/settings/llm/'
       path: '/settings/llm'
       fullPath: '/settings/llm'
       preLoaderRoute: typeof appSettingsLlmIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/settings/appearance/': {
+      id: '/(app)/settings/appearance/'
+      path: '/settings/appearance'
+      fullPath: '/settings/appearance'
+      preLoaderRoute: typeof appSettingsAppearanceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/projects/new/': {
@@ -417,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAgentsAgentIdEditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/settings/llm/$configId/edit/': {
+      id: '/(app)/settings/llm/$configId/edit/'
+      path: '/settings/llm/$configId/edit'
+      fullPath: '/settings/llm/$configId/edit'
+      preLoaderRoute: typeof appSettingsLlmConfigIdEditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -435,12 +497,15 @@ const rootRouteChildren: RootRouteChildren = {
   appPersonasNewIndexRoute: appPersonasNewIndexRoute,
   appProjectsProjectIdIndexRoute: appProjectsProjectIdIndexRoute,
   appProjectsNewIndexRoute: appProjectsNewIndexRoute,
+  appSettingsAppearanceIndexRoute: appSettingsAppearanceIndexRoute,
   appSettingsLlmIndexRoute: appSettingsLlmIndexRoute,
+  appSettingsProfileIndexRoute: appSettingsProfileIndexRoute,
   appAgentsAgentIdEditIndexRoute: appAgentsAgentIdEditIndexRoute,
   appPersonasTemplateIdEditIndexRoute: appPersonasTemplateIdEditIndexRoute,
   appProjectsProjectIdSettingsIndexRoute:
     appProjectsProjectIdSettingsIndexRoute,
   appSettingsLlmNewIndexRoute: appSettingsLlmNewIndexRoute,
+  appSettingsLlmConfigIdEditIndexRoute: appSettingsLlmConfigIdEditIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
