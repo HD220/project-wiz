@@ -1,30 +1,30 @@
 // src_refactored/core/domain/job/job.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
 
-import { DomainError, ValueError } from '@/domain/common/errors';
+import { ValueError } from '@/domain/common/errors';
 
 import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';
 import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
-import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './value-objects/job-options.vo';
+import { JobOptionsVO, IJobOptionsData } from './value-objects/job-options.vo';
 import { JobPriorityVO } from './value-objects/job-priority.vo';
 import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
 import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
 
 
 // Interface for properties required to construct a JobEntity
-export interface JobEntityConstructionProps<TData = any> {
+export interface JobEntityConstructionProps<TData = unknown> {
   id?: string | JobIdVO; // Optional: if not provided, one will be generated
   queueName: string;
   jobName: string; // Name/type of the job
   payload: TData;
-  opts?: IJobOptions; // Uses the interface for flexibility in creation
+  opts?: IJobOptionsData; // Uses the interface for flexibility in creation
 }
 
 // Interface for the internal state of JobEntity
 // All complex types are VOs. Timestamps are stored as numbers (epoch ms) for DB compatibility
 // but can be wrapped by Date or a TimestampVO on access if needed by domain logic.
-export interface JobEntityProps<TData = any, TResult = any> extends EntityProps<JobIdVO> {
+export interface JobEntityProps<TData = unknown, TResult = unknown> extends EntityProps<JobIdVO> {
   queueName: string;
   jobName: string;
   payload: Readonly<TData>;
@@ -54,14 +54,18 @@ export interface JobEntityProps<TData = any, TResult = any> extends EntityProps<
 
   // For repeatable jobs (key derived from repeat options)
   repeatJobKey?: string;
+
+  // Dependencies and parent-child relationships
+  dependsOnJobIds?: JobIdVO[];
+  parentId?: JobIdVO;
 }
 
-export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
+export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
   private constructor(props: JobEntityProps<TData, TResult>) {
     super(props);
   }
 
-  public static create<D = any, R = any>(
+  public static create<D = unknown, R = unknown>(
     constructProps: JobEntityConstructionProps<D>,
   ): JobEntity<D, R> {
     if (!constructProps.queueName || constructProps.queueName.trim() === '') {
@@ -78,11 +82,26 @@ export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdV
     const jobOptions = JobOptionsVO.create(constructProps.opts);
     const nowMs = Date.now();
 
-    let initialStatus = JobStatusVO.pending();
+    let initialStatus: JobStatusVO;
     let processAt: number | undefined = undefined;
-    if (jobOptions.delay > 0) {
+
+    const dependsOnJobIdsVO = jobOptions.dependsOnJobIds?.map(jobIdStr => JobIdVO.create(jobIdStr));
+    const parentIdVO = jobOptions.parentId ? JobIdVO.create(jobOptions.parentId) : undefined;
+
+    if (dependsOnJobIdsVO && dependsOnJobIdsVO.length > 0) {
+      initialStatus = JobStatusVO.waitingChildren();
+      // If it has dependencies, it might also have a delay.
+      // The job will be WAITING_CHILDREN. Once dependencies are met,
+      // it will be promoted. If processAt is set, it will become DELAYED.
+      // Otherwise, PENDING.
+      if (jobOptions.delay > 0) {
+        processAt = nowMs + jobOptions.delay;
+      }
+    } else if (jobOptions.delay > 0) {
       initialStatus = JobStatusVO.delayed();
       processAt = nowMs + jobOptions.delay;
+    } else {
+      initialStatus = JobStatusVO.pending();
     }
 
     const props: JobEntityProps<D, R> = {
@@ -99,6 +118,9 @@ export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdV
       updatedAt: nowMs,
       processAt: processAt,
       executionLogs: JobExecutionLogsVO.empty(),
+      dependsOnJobIds: dependsOnJobIdsVO,
+      parentId: parentIdVO,
+      // repeatJobKey will be set by scheduler service when creating instances of repeatable jobs
     };
 
     return new JobEntity<D, R>(props);
@@ -127,6 +149,8 @@ export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdV
   get lockedByWorkerId(): string | undefined { return this.props.lockedByWorkerId; }
   get lockExpiresAt(): Date | undefined { return this.props.lockExpiresAt ? new Date(this.props.lockExpiresAt) : undefined; }
   get repeatJobKey(): string | undefined { return this.props.repeatJobKey; }
+  get dependsOnJobIds(): JobIdVO[] | undefined { return this.props.dependsOnJobIds; }
+  get parentId(): JobIdVO | undefined { return this.props.parentId; }
 
 
   // --- Mutators (internal state changes, persistence handled by repository) ---
@@ -141,7 +165,7 @@ export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdV
     // Event 'job.progress' should be emitted by the service calling this, after saving.
   }
 
-  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, any>): void {
+  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): void {
     this.props.executionLogs = this.props.executionLogs.addLog(message, level, details);
     this.touch();
     // Event 'job.log_added' should be emitted by the service calling this, after saving.

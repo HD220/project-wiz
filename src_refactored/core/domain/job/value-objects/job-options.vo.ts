@@ -5,6 +5,7 @@ import { ValueError } from '@/domain/common/errors';
 
 import { JobIdVO } from './job-id.vo';
 import { JobPriorityVO } from './job-priority.vo';
+import { RepeatOptionsVO, RepeatOptionsProps } from './repeat-options.vo';
 
 // Define interfaces for sub-options first, as they are part of JobOptions properties
 export interface RetryStrategyOptions {
@@ -15,19 +16,10 @@ export interface RetryStrategyOptions {
   backoff?: { type: 'fixed' | 'exponential'; delayMs: number } | false; // false means no automatic retry delay
 }
 
-export interface RepeatOptions {
-  cron?: string; // Standard cron string
-  every?: number; // Interval in milliseconds
-  limit?: number; // Max number of repetitions
-  startDate?: Date;
-  endDate?: Date;
-  tz?: string; // Timezone for cron e.g. 'America/New_York'
-  // immediate?: boolean; // Whether to run immediately upon adding a repeatable job (handled at Queue.add)
-}
-
 // This interface mirrors the JobOptions defined in the API design document (Section 4.1)
 // It's used for constructing the JobOptionsVO.
-export interface IJobOptions {
+// RepeatOptionsProps is used for construction, but JobOptionsVO will hold a RepeatOptionsVO instance.
+export interface IJobOptionsData {
   jobId?: string; // Custom Job ID
   priority?: number;
   delay?: number; // Initial delay in milliseconds
@@ -36,58 +28,78 @@ export interface IJobOptions {
   lifo?: boolean; // Process LIFO instead of FIFO
   removeOnComplete?: boolean | number; // True to remove, or number of jobs to keep
   removeOnFail?: boolean | number;    // True to remove, or number of jobs to keep
-  repeat?: RepeatOptions;
+  repeat?: RepeatOptionsProps; // Use Props for construction
   dependsOnJobIds?: string[]; // Array of Job IDs
   parentId?: string;
   timeout?: number; // Max processing time in ms for a single attempt by a worker
 }
 
+// Properties stored within JobOptionsVO, including the actual VO for repeat.
+export interface JobOptionsVOProps {
+  jobId?: string;
+  priority: number;
+  delay: number;
+  attempts: number; // Effective max attempts
+  retryStrategy: RetryStrategyOptions;
+  lifo: boolean;
+  removeOnComplete: boolean | number;
+  removeOnFail: boolean | number;
+  repeat?: RepeatOptionsVO; // Store the VO instance
+  dependsOnJobIds?: string[];
+  parentId?: string;
+  timeout: number;
+}
+
+
 // The actual Value Object
-export class JobOptionsVO extends AbstractValueObject<Readonly<IJobOptions>> {
-  private constructor(props: Readonly<IJobOptions>) {
+export class JobOptionsVO extends AbstractValueObject<Readonly<JobOptionsVOProps>> {
+  private constructor(props: Readonly<JobOptionsVOProps>) {
     super(props);
   }
 
-  public static create(options?: IJobOptions): JobOptionsVO {
-    const defaults: IJobOptions = {
-      priority: JobPriorityVO.default().value,
-      delay: 0,
-      attempts: 1,
-      retryStrategy: { maxAttempts: 1, backoff: false },
-      lifo: false,
-      removeOnComplete: false, // Default: keep completed jobs
-      removeOnFail: false,     // Default: keep failed jobs
-      timeout: 0, // 0 means no timeout
-    };
-
-    const mergedOptions = { ...defaults, ...options };
-
-    // Validate specific options
+  private static validateBaseOptions(options: IJobOptionsData, mergedOptions: IJobOptionsData & { priority: number, delay: number, timeout: number }): void {
     if (mergedOptions.jobId && !JobIdVO.isValidUUID(mergedOptions.jobId)) {
       throw new ValueError('Custom JobId in options is not a valid UUID.');
     }
-    if (mergedOptions.priority) { // Validate if provided
-      JobPriorityVO.create(mergedOptions.priority); // Will throw ValueError if invalid
-    }
-    if (mergedOptions.delay && mergedOptions.delay < 0) {
+    JobPriorityVO.create(mergedOptions.priority); // Will throw ValueError if invalid
+
+    if (mergedOptions.delay < 0) {
       throw new ValueError('JobOptions delay cannot be negative.');
     }
-    if (mergedOptions.attempts && mergedOptions.attempts < 1) {
-      throw new ValueError('JobOptions attempts must be at least 1.');
-    }
-    if (mergedOptions.retryStrategy) {
-      if (mergedOptions.retryStrategy.maxAttempts < 1) {
-        throw new ValueError('JobOptions retryStrategy.maxAttempts must be at least 1.');
-      }
-      if (mergedOptions.retryStrategy.backoff && mergedOptions.retryStrategy.backoff.delayMs < 0) {
-        throw new ValueError('JobOptions retryStrategy.backoff.delayMs cannot be negative.');
-      }
-    }
-    if (mergedOptions.timeout && mergedOptions.timeout < 0) {
+    if (mergedOptions.timeout < 0) {
       throw new ValueError('JobOptions timeout cannot be negative.');
     }
+  }
+
+  private static determineRetryStrategy(
+    options?: IJobOptionsData,
+    defaults?: { attempts: number; retryStrategy: RetryStrategyOptions },
+  ): { effectiveAttempts: number; finalRetryStrategy: RetryStrategyOptions } {
+    let effectiveAttempts = defaults?.attempts ?? 1;
+    let finalRetryStrategy = defaults?.retryStrategy ?? { maxAttempts: 1, backoff: false };
+
+    if (options?.retryStrategy) {
+      if (options.retryStrategy.maxAttempts < 1) {
+        throw new ValueError('JobOptions retryStrategy.maxAttempts must be at least 1.');
+      }
+      if (options.retryStrategy.backoff && options.retryStrategy.backoff.delayMs < 0) {
+        throw new ValueError('JobOptions retryStrategy.backoff.delayMs cannot be negative.');
+      }
+      finalRetryStrategy = options.retryStrategy;
+      effectiveAttempts = options.retryStrategy.maxAttempts;
+    } else if (options?.attempts) {
+      if (options.attempts < 1) {
+        throw new ValueError('JobOptions attempts must be at least 1.');
+      }
+      effectiveAttempts = options.attempts;
+      finalRetryStrategy = { maxAttempts: options.attempts, backoff: false };
+    }
+    return { effectiveAttempts, finalRetryStrategy };
+  }
+
+  private static validateDependencies(mergedOptions: IJobOptionsData): void {
     if (mergedOptions.dependsOnJobIds) {
-      mergedOptions.dependsOnJobIds.forEach(id => {
+      mergedOptions.dependsOnJobIds.forEach((id: string) => {
         if (!JobIdVO.isValidUUID(id)) {
           throw new ValueError(`Invalid JobId in dependsOnJobIds: ${id}`);
         }
@@ -96,41 +108,64 @@ export class JobOptionsVO extends AbstractValueObject<Readonly<IJobOptions>> {
     if (mergedOptions.parentId && !JobIdVO.isValidUUID(mergedOptions.parentId)) {
       throw new ValueError('Invalid JobId for parentId.');
     }
-    // Further validation for repeat options (cron syntax, etc.) could be added here or in RepeatOptionsVO if created.
+  }
 
-    // If 'attempts' is provided directly, ensure it aligns with retryStrategy or sets a default one.
-    if (options?.attempts && !options?.retryStrategy) {
-      mergedOptions.retryStrategy = { maxAttempts: options.attempts, backoff: false };
-    } else if (options?.attempts && options?.retryStrategy && options.attempts !== options.retryStrategy.maxAttempts) {
-      // If both are provided, retryStrategy.maxAttempts takes precedence, or we could throw an error for inconsistency.
-      // For now, let's assume options.attempts is a shorthand for retryStrategy.maxAttempts if retryStrategy.backoff is not defined.
-      // If retryStrategy is fully defined, its maxAttempts should be used.
-       mergedOptions.retryStrategy = { ...mergedOptions.retryStrategy, maxAttempts: options.attempts };
-    }
+  public static create(options?: IJobOptionsData): JobOptionsVO {
+    const defaults = {
+      priority: JobPriorityVO.default().value,
+      delay: 0,
+      attempts: 1, // This will be the effective attempts based on logic below
+      retryStrategy: { maxAttempts: 1, backoff: false } as RetryStrategyOptions,
+      lifo: false,
+      removeOnComplete: false,
+      removeOnFail: false,
+      timeout: 0,
+    };
 
+    // Ensure mergedOptions has the types from defaults for validation functions
+    const mergedOptions: IJobOptionsData & typeof defaults = { ...defaults, ...options };
 
-    return new JobOptionsVO(Object.freeze(mergedOptions));
+    JobOptionsVO.validateBaseOptions(options ?? {}, mergedOptions);
+    const { effectiveAttempts, finalRetryStrategy } = JobOptionsVO.determineRetryStrategy(options, defaults);
+    JobOptionsVO.validateDependencies(mergedOptions);
+
+    const repeatVO = mergedOptions.repeat ? RepeatOptionsVO.create(mergedOptions.repeat) : undefined;
+
+    const voProps: JobOptionsVOProps = {
+      jobId: mergedOptions.jobId,
+      priority: mergedOptions.priority,
+      delay: mergedOptions.delay,
+      attempts: effectiveAttempts,
+      retryStrategy: finalRetryStrategy,
+      lifo: mergedOptions.lifo,
+      removeOnComplete: mergedOptions.removeOnComplete,
+      removeOnFail: mergedOptions.removeOnFail,
+      repeat: repeatVO,
+      dependsOnJobIds: mergedOptions.dependsOnJobIds,
+      parentId: mergedOptions.parentId,
+      timeout: mergedOptions.timeout,
+    };
+
+    return new JobOptionsVO(Object.freeze(voProps));
   }
 
   public static default(): JobOptionsVO {
     return JobOptionsVO.create({});
   }
 
-  // Accessors for convenience, though direct access to props.value is also possible
+  // Accessors for convenience
   get jobId(): string | undefined { return this.props.jobId; }
-  get priority(): number { return this.props.priority!; } // Non-null assertion due to default
-  get delay(): number { return this.props.delay!; }
-  get attempts(): number {
-    return this.props.retryStrategy?.maxAttempts || this.props.attempts || 1;
-  }
-  get retryStrategy(): RetryStrategyOptions | undefined { return this.props.retryStrategy; }
-  get lifo(): boolean { return this.props.lifo!; }
-  get removeOnComplete(): boolean | number { return this.props.removeOnComplete!; }
-  get removeOnFail(): boolean | number { return this.props.removeOnFail!; }
-  get repeat(): RepeatOptions | undefined { return this.props.repeat; }
+  get priority(): number { return this.props.priority; }
+  get delay(): number { return this.props.delay; }
+  get attempts(): number { return this.props.attempts; }
+  get retryStrategy(): RetryStrategyOptions { return this.props.retryStrategy; }
+  get lifo(): boolean { return this.props.lifo; }
+  get removeOnComplete(): boolean | number { return this.props.removeOnComplete; }
+  get removeOnFail(): boolean | number { return this.props.removeOnFail; }
+  get repeat(): RepeatOptionsVO | undefined { return this.props.repeat; }
   get dependsOnJobIds(): string[] | undefined { return this.props.dependsOnJobIds; }
   get parentId(): string | undefined { return this.props.parentId; }
-  get timeout(): number { return this.props.timeout!; }
+  get timeout(): number { return this.props.timeout; }
 
   // equals method from AbstractValueObject will do a deep comparison of props
 }
