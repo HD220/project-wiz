@@ -1,7 +1,10 @@
 // src_refactored/core/domain/job/value-objects/activity-history.vo.ts
 import { ValueObject } from '@/core/common/value-objects/base.vo';
+
 import { ValueError } from '@/domain/common/errors'; // Corrected path
+
 import { Result, ok, error } from '@/shared/result';
+
 import { ActivityHistoryEntry, ActivityHistoryEntryProps } from './activity-history-entry.vo';
 
 export interface ActivityHistoryPropsVO { // Renamed to avoid conflict with ActivityHistoryEntryProps

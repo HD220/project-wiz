@@ -3,8 +3,9 @@ import {
   eq, and, or, inArray, sql, lte, lt, gte, desc, asc, isNull, count, SQL, isNotNull,
 } from 'drizzle-orm'; // Added isNotNull
 import { inject, injectable } from 'inversify';
-import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
+
+import { ActivityHistory, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types'; // Added ExecutionHistoryEntry
 import { JobEntity, JobEntityProps, AgentState } from '@/core/domain/job/job.entity'; // Import AgentState
 import { IJobRepository } from '@/core/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions, PaginatedJobsResult, JobCountsByStatus } from '@/core/domain/job/ports/job-repository.types';
@@ -16,12 +17,14 @@ import { JobOptionsVO, IJobOptions } from '@/core/domain/job/value-objects/job-o
 import { JobPriorityVO } from '@/core/domain/job/value-objects/job-priority.vo';
 import { JobProgressVO } from '@/core/domain/job/value-objects/job-progress.vo';
 import { JobStatusEnum, JobStatusVO } from '@/core/domain/job/value-objects/job-status.vo';
+
 import { Result, Ok, Err } from '@/shared/result';
-import { ActivityHistory, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types'; // Added ExecutionHistoryEntry
 
 
 // Import the actual Drizzle table schema
 import { jobsTable, JobSelect, JobInsert } from '../schema'; // Using schema index
+
+import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 // Helper to map Drizzle's JobSelect to JobEntity
 function mapRowToJobEntity<TData = unknown, TResult = unknown>(row: JobSelect): JobEntity<TData, TResult> {
