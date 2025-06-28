@@ -68,9 +68,17 @@ Conforme o `package.json` e as configurações do projeto:
 
 ## 5. Executando os Testes
 
-Consulte o [Guia de Configuração do Ambiente de Desenvolvimento](./06-development-setup.md#8-executando-testes) para os comandos exatos (`npm run test`, `npm run test:watch`, `npm run test:coverage`).
+Consulte o [Guia de Configuração do Ambiente de Desenvolvimento](./01-development-setup.md#8-executando-testes) para os comandos exatos (`npm run test`, `npm run test:watch`, `npm run test:coverage`).
 
-## 6. Melhores Práticas e Diretrizes
+## 6. Guias de Teste Detalhados
+
+Para informações mais específicas e exemplos práticos, consulte os seguintes guias:
+
+*   **[Exemplos Práticos de Testes](./03.1-practical-testing-examples.md):** Contém exemplos de código para testes unitários, de integração, de stress e transações.
+*   **[Arquitetura e Configuração de Testes](./03.2-test-architecture-and-setup.md):** Detalha a estrutura de configuração dos testes, incluindo `setup.ts` e o uso de classes base.
+*   **[Workshop de Testes](./03.3-testing-workshop.md):** Um guia prático com exercícios para aprender a escrever testes no Project Wiz.
+
+## 7. Melhores Práticas e Diretrizes
 
 *   **Escreva testes para novo código:** Sempre que adicionar uma nova funcionalidade ou corrigir um bug, adicione testes correspondentes.
 *   **Testes devem ser independentes:** A falha ou sucesso de um teste não deve afetar outros.

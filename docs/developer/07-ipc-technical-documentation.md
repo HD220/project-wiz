@@ -1,7 +1,7 @@
 # Documentação Técnica do Sistema IPC
 
 ## 1. Visão Geral
-O sistema IPC (Inter-Process Communication) é responsável pela comunicação entre os processos Main (Node.js) e Renderer (Browser) na aplicação Electron. Segue uma arquitetura padronizada conforme [ADR-003](docs/adr/003-ipc-architecture.md).
+O sistema IPC (Inter-Process Communication) é responsável pela comunicação entre os processos Main (Node.js) e Renderer (Browser) na aplicação Electron. Segue uma arquitetura padronizada conforme [ADR-003: Arquitetura IPC](../../reference/adrs/ADR-003-ipc-architecture.md) (Nota: Link para ADR específico a ser confirmado/localizado).
 
 ## 2. Diagrama de Fluxo
 
@@ -107,5 +107,5 @@ ipcManager.registerHandler(
 ```
 
 ## 7. Referências
-- [ADR-003: Arquitetura IPC](docs/adr/003-ipc-architecture.md)
+- [ADR-003: Arquitetura IPC](../../reference/adrs/ADR-003-ipc-architecture.md) (Nota: Link para ADR específico a ser confirmado/localizado)
 - [Código Fonte IPC](src/infrastructure/ipc/)

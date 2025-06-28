@@ -46,7 +46,7 @@ Se você deseja contribuir com código, siga estes passos:
         ```
 
 4.  **Configure o Ambiente de Desenvolvimento:**
-    *   Siga as instruções em [Configurando o Ambiente de Desenvolvimento](../technical-documentation/06-development-setup.md).
+    *   Siga as instruções em [Configurando o Ambiente de Desenvolvimento](../developer/01-development-setup.md).
 
 5.  **Faça suas Alterações:**
     *   Escreva seu código, seguindo os padrões de estilo e as convenções do projeto (veja abaixo).
@@ -101,9 +101,9 @@ Se você deseja contribuir com código, siga estes passos:
 *   **Controle de Versão (Git):**
     *   Faça commits pequenos e atômicos.
     *   Escreva mensagens de commit claras, descritivas e em inglês. Siga o padrão de [Commits Semânticos](https://www.conventionalcommits.org/) se possível (ex: `feat: Adiciona nova Tool X`, `fix: Corrige problema de login ao usar Y`).
-*   **Comentários:** Comente código complexo ou não óbvio, mas evite comentários desnecessários para código autoexplicativo.
+*   **Comentários:** Comente código complexo ou não óbvio, mas evite comentários desnecessários para código autoexplicativo. Escreva comentários em inglês.
 
-**Para um conjunto mais abrangente de diretrizes de desenvolvimento, incluindo boas práticas gerais, de arquitetura e específicas de tecnologias utilizadas no projeto, consulte o documento: [Boas Práticas e Diretrizes de Desenvolvimento](../technical-documentation/08-best-practices-and-guidelines.md).**
+**Para um conjunto mais abrangente de diretrizes de desenvolvimento, incluindo boas práticas gerais, de arquitetura e específicas de tecnologias utilizadas no projeto, consulte o documento: [Padrões de Código e Diretrizes de Desenvolvimento](../developer/02-coding-standards.md) e o detalhado [Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md).**
 
 ## Documentação e Decisões de Arquitetura
 
@@ -114,7 +114,7 @@ Se você deseja contribuir com código, siga estes passos:
 
 *   Novas funcionalidades devem ser acompanhadas de testes unitários e/ou de integração.
 *   Correções de bugs devem, idealmente, incluir um teste que demonstre o bug e verifique a correção.
-*   Consulte a [Estratégia de Testes](../technical-documentation/07-testing-strategy.md) para mais detalhes.
+*   Consulte o [Guia de Testes](../developer/03-testing-guide.md) para mais detalhes.
 
 ## Comunicação
 

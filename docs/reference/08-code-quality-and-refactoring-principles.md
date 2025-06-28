@@ -99,7 +99,7 @@ Object Calisthenics provides a set of rules that, when followed, tend to lead to
 *   **Commenting and Documentation:**
     *   Use JSDoc/TSDoc for all public classes, methods, interfaces, and complex functions.
     *   Add inline comments for non-obvious logic or important decisions.
-    *   Keep Markdown documentation in `docs/` (like this guide and `autonomous-agent-architecture.md`) current.
+    *   Keep Markdown documentation in `docs/` (like this guide and `./01-software-architecture.md`) current.
 
 ## 5. Code Organization & Structure
 
