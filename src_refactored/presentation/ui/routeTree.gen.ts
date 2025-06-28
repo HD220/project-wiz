@@ -15,6 +15,7 @@ import { Route as appSettingsIndexRouteImport } from './app/(app)/settings/index
 import { Route as appProjectsIndexRouteImport } from './app/(app)/projects/index'
 import { Route as appPersonasIndexRouteImport } from './app/(app)/personas/index'
 import { Route as appDashboardIndexRouteImport } from './app/(app)/dashboard/index'
+import { Route as appChatIndexRouteImport } from './app/(app)/chat/index'
 import { Route as appAgentsIndexRouteImport } from './app/(app)/agents/index'
 import { Route as appSettingsLlmIndexRouteImport } from './app/(app)/settings/llm/index'
 import { Route as appProjectsNewIndexRouteImport } from './app/(app)/projects/new/index'
@@ -51,6 +52,11 @@ const appPersonasIndexRoute = appPersonasIndexRouteImport.update({
 const appDashboardIndexRoute = appDashboardIndexRouteImport.update({
   id: '/(app)/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appChatIndexRoute = appChatIndexRouteImport.update({
+  id: '/(app)/chat/',
+  path: '/chat/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appAgentsIndexRoute = appAgentsIndexRouteImport.update({
@@ -93,6 +99,7 @@ const appSettingsLlmNewIndexRoute = appSettingsLlmNewIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof appAgentsIndexRoute
+  '/chat': typeof appChatIndexRoute
   '/dashboard': typeof appDashboardIndexRoute
   '/personas': typeof appPersonasIndexRoute
   '/projects': typeof appProjectsIndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof appAgentsIndexRoute
+  '/chat': typeof appChatIndexRoute
   '/dashboard': typeof appDashboardIndexRoute
   '/personas': typeof appPersonasIndexRoute
   '/projects': typeof appProjectsIndexRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(app)/agents/': typeof appAgentsIndexRoute
+  '/(app)/chat/': typeof appChatIndexRoute
   '/(app)/dashboard/': typeof appDashboardIndexRoute
   '/(app)/personas/': typeof appPersonasIndexRoute
   '/(app)/projects/': typeof appProjectsIndexRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agents'
+    | '/chat'
     | '/dashboard'
     | '/personas'
     | '/projects'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agents'
+    | '/chat'
     | '/dashboard'
     | '/personas'
     | '/projects'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/(app)/agents/'
+    | '/(app)/chat/'
     | '/(app)/dashboard/'
     | '/(app)/personas/'
     | '/(app)/projects/'
@@ -187,6 +199,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   appAgentsIndexRoute: typeof appAgentsIndexRoute
+  appChatIndexRoute: typeof appChatIndexRoute
   appDashboardIndexRoute: typeof appDashboardIndexRoute
   appPersonasIndexRoute: typeof appPersonasIndexRoute
   appProjectsIndexRoute: typeof appProjectsIndexRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/chat/': {
+      id: '/(app)/chat/'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof appChatIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/agents/': {
       id: '/(app)/agents/'
       path: '/agents'
@@ -299,6 +319,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   appAgentsIndexRoute: appAgentsIndexRoute,
+  appChatIndexRoute: appChatIndexRoute,
   appDashboardIndexRoute: appDashboardIndexRoute,
   appPersonasIndexRoute: appPersonasIndexRoute,
   appProjectsIndexRoute: appProjectsIndexRoute,
