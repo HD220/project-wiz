@@ -1,6 +1,8 @@
 // src_refactored/core/domain/job/job.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+
 import { ValueError } from '@/domain/common/errors';
+
 import { IJobRepository } from './ports/job-repository.interface';
 
 // Removed IJobEventEmitter and application event payload imports from here

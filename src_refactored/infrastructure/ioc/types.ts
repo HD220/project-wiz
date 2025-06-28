@@ -92,6 +92,9 @@ const TYPES = {
 
   // Chat Service
   IChatService: Symbol.for('IChatService'),
+
+  // Queue Scheduler Service
+  QueueSchedulerService: Symbol.for('QueueSchedulerService'),
 };
 
 export { TYPES };

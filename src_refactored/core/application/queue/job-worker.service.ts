@@ -1,7 +1,8 @@
 // src_refactored/core/application/queue/job-worker.service.ts
+import { Timeout } from 'node:timers'; // Import Timeout
+
 import { injectable, inject } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import { Timeout } from 'node:timers'; // Import Timeout
 
 import { IJobEventEmitter, JOB_EVENT_EMITTER_TOKEN } from '@/core/application/ports/events/i-job-event-emitter.interface';
 import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
