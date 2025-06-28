@@ -47,23 +47,22 @@ No Project Wiz, você conta com um **Assistente Pessoal IA** para ajudá-lo a da
     *   Você terá a oportunidade de **revisar e customizar** as características do Agente proposto (seja ele novo ou baseado em uma Persona Personalizada). Isso inclui seu nome, papel, objetivo, backstory (contexto para o LLM) e as capacidades permitidas.
     *   Você também definirá qual modelo de LLM o Agente usará e outros parâmetros (como a "temperatura").
     *   Configurações que você aprova podem ser **salvas como uma nova "Persona Personalizada"** ou atualizar uma existente.
-*   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para receber [Jobs (tarefas)](./core-concepts/jobs-and-automation.md).
+*   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para auxiliar na realização dos seus objetivos.
 *   **Saiba Mais:**
     *   Para um mergulho profundo na interação com o Assistente Pessoal e no gerenciamento de suas Personas Personalizadas e Agentes IA, veja [Personas Personalizadas e Agentes IA](./core-concepts/personas-and-agents.md).
 
-## 6. Atribuindo seu Primeiro Job
+## 6. Delegando sua Primeira Tarefa de Alto Nível
 
-Jobs são as tarefas que você atribui aos seus Agentes IA (sejam eles Personas Personalizadas que você configurou ou agentes especializados gerados dinamicamente para uma tarefa).
+Com o Project Wiz, você não se preocupa em criar "jobs" ou "tarefas" pequenas e detalhadas diretamente. Em vez disso, você delega objetivos de mais alto nível ao seu Assistente Pessoal IA.
 
-*   **O que é um Job?** Um Job é a unidade fundamental de trabalho no Project Wiz. Ele geralmente inclui:
-    *   **Nome:** Um nome descritivo para o Job.
-    *   **Payload/Dados de Entrada:** A informação que o Agente precisa para realizar a tarefa, mais comumente um "objetivo" claro (ex: "Implementar a função X", "Revisar o arquivo Y para erros de lógica").
-    *   **Persona/Papel Alvo:** Você direcionará o Job para um papel específico, e um Agente configurado para aquele papel o selecionará.
-*   **Ciclo de Vida de um Job:**
-    *   Os Jobs passam por diferentes status, como `PENDENTE`, `ATIVO`, `COMPLETADO` ou `FALHOU`.
-    *   Os Jobs podem depender de outros Jobs, significando que só começarão após seus pré-requisitos serem concluídos.
-*   **Explorando Jobs:**
-    *   Para aprender tudo sobre como criar, gerenciar e monitorar Jobs, consulte [Jobs e Automação](./core-concepts/jobs-and-automation.md).
+*   **Como Delegar:**
+    *   Inicie uma conversa com seu **Assistente Pessoal IA**.
+    *   Descreva claramente o que você deseja alcançar (ex: "Refatorar o sistema de login para aumentar a segurança", "Gerar a documentação inicial para o novo módulo de pagamentos", "Analisar o código em busca de gargalos de performance").
+*   **O que Acontece em Seguida:**
+    *   O Assistente Pessoal, junto com outros Agentes IA especializados (sejam eles configurados por você ou gerados dinamicamente), analisará sua solicitação.
+    *   Internamente, eles definirão as atividades e etapas necessárias para atingir seu objetivo.
+    *   Você poderá acompanhar o progresso geral da sua solicitação e interagir com os agentes para fornecer feedback ou esclarecimentos, conforme descrito na [Introdução ao Project Wiz](./01-introduction.md#como-funciona-a-interação-principal).
+*   **Foco no Objetivo:** Seu foco principal é comunicar claramente seus objetivos de alto nível; o Project Wiz e seus agentes cuidam da decomposição e execução das tarefas detalhadas.
 
 ## Próximos Passos
 

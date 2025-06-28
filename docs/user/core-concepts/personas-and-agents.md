@@ -13,11 +13,11 @@ Este guia explica como os Agentes são gerados e como você pode gerenciá-los.
         *   Propor a geração de um novo Agente IA Especializado, cujas características são definidas dinamicamente por um LLM com base na tarefa.
 
 *   **Agente IA Especializado (Instância `Agent`):**
-    *   Seja originado de uma Persona Personalizada ou gerado dinamicamente, é este Agente (uma instância da entidade `Agent`) que efetivamente processa os [Jobs (tarefas)](./jobs-and-automation.md).
+    *   Seja originado de uma Persona Personalizada ou gerado dinamicamente, é este Agente (uma instância da entidade `Agent`) que efetivamente processa as tarefas delegadas.
     *   Ele utiliza sua configuração específica (papel, objetivos, capacidades, LLM) para realizar o trabalho.
 
 **Principais Funções dos Agentes IA Especializados:**
-*   Executar **Jobs** de forma autônoma ou semi-autônoma.
+*   Executar **tarefas delegadas** de forma autônoma ou semi-autônoma.
 *   Utilizar um conjunto de **capacidades e conhecimentos** para interagir com o sistema.
 *   Colaborar no ciclo de vida do desenvolvimento de software.
 
@@ -29,7 +29,7 @@ Existem duas formas principais de ter Agentes IA prontos para o trabalho:
 Este é frequentemente o fluxo inicial para novas ou tarefas únicas:
 *   **Sua Solicitação:** Você descreve a tarefa ao Assistente Pessoal (ex: "Preciso de um script Python para analisar dados de um CSV e gerar um gráfico").
 *   **Análise e Proposta:** O Assistente Pessoal, com auxílio de um LLM, analisa a necessidade e pode propor as características de um Agente IA ideal para a tarefa (papel, objetivo, capacidades necessárias, etc.).
-*   **Geração e Uso Imediato:** Se você concordar, um Agente IA com essas características é configurado dinamicamente para realizar o Job.
+*   **Geração e Uso Imediato:** Se você concordar, um Agente IA com essas características é configurado dinamicamente para realizar a tarefa.
 
 ### 2. Personas Personalizadas (Agentes Configurados pelo Usuário)
 Você tem a flexibilidade de refinar, salvar e criar suas próprias configurações de Agentes reutilizáveis:
@@ -46,8 +46,8 @@ Você tem a flexibilidade de refinar, salvar e criar suas próprias configuraç�
 
 Você geralmente gerenciará suas Personas Personalizadas em uma seção dedicada na interface do Project Wiz.
 
-## Instanciando um Agente para um Job
-Independentemente de ser uma Persona Personalizada ou uma configuração gerada dinamicamente, quando um Job precisa ser executado, uma instância de `Agent` é utilizada. Esta instância combina o perfil da Persona (papel, objetivos, capacidades definidas) com a configuração do LLM.
+## Instanciando um Agente para uma Tarefa
+Independentemente de ser uma Persona Personalizada ou uma configuração gerada dinamicamente, quando uma tarefa precisa ser executada, uma instância de `Agent` é utilizada. Esta instância combina o perfil da Persona (papel, objetivos, capacidades definidas) com a configuração do LLM.
 
 ## Estado e Aprendizado do Agente (Conceitos Avançados)
 Mesmo que a *configuração* de uma Persona seja dinâmica ou personalizada, os Agentes em execução podem interagir com sistemas de memória:
@@ -55,13 +55,12 @@ Mesmo que a *configuração* de uma Persona seja dinâmica ou personalizada, os 
 *   **`AgentJobState` (Estado do Job/Memória de Curto Prazo):** Contexto específico da tarefa atual.
 
 ## Interagindo com Agentes IA
-*   **Via Assistente Pessoal:** Sua interface principal para delegar tarefas.
-*   **Atribuindo Jobs:** O Assistente Pessoal (ou o sistema) direciona Jobs para Agentes IA especializados (sejam eles baseados em suas Personas Personalizadas ou gerados dinamicamente).
-*   *(Planejado)* **Chat Interativo Direto:** Possibilidade de interações diretas com os Agentes especializados.
+*   **Via Assistente Pessoal:** Sua interface principal para delegar objetivos e tarefas de alto nível.
+*   **Delegação de Tarefas:** O Assistente Pessoal (ou o sistema sob sua direção) direciona esses objetivos para Agentes IA especializados (sejam eles baseados em suas Personas Personalizadas ou gerados dinamicamente). Os agentes então internamente gerenciam suas próprias atividades e "jobs" para cumprir o objetivo.
+*   *(Planejado)* **Chat Interativo Direto:** Possibilidade de interações diretas com os Agentes especializados durante a execução de suas atividades.
 
 ## Próximos Passos
-*   **Jobs e Automação:** [Jobs e Automação](./jobs-and-automation.md).
-*   **Gerenciando Projetos:** [Projetos](./projects.md).
-*   **Visão Geral da Interface:** [Interface do Usuário](../03-interface-overview.md).
+*   **Gerenciando Projetos:** Entenda como os [Projetos](./projects.md) fornecem o contexto para o trabalho dos Agentes.
+*   **Visão Geral da Interface:** Se ainda não o fez, familiarize-se com a [Interface do Usuário](../03-interface-overview.md) do Project Wiz.
 
 Este guia será atualizado conforme as funcionalidades evoluem.

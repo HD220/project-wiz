@@ -141,23 +141,26 @@ This organization aims for:
     *   **Agents (`GenericAgentExecutor`, `AutonomousAgent`):** The intelligent entities (configured by `AgentPersonaTemplate` and instantiated as `Agent`) that perform the work of a Job.
     *   **Tools (`IAgentTool` / `ITool`):** Capabilities used by Agents/Tasks to interact with the environment. (Este framework de Tools está em fase de pesquisa).
 
-## 5. Data Flow Example (Simplified: Creating and Processing a Job)
+## 5. Data Flow Example (Simplified: User Goal leading to Job Processing)
 
-> **Nota:** O fluxo a seguir descreve a criação e processamento de um Job. As etapas 5 e 6, que detalham a invocação e operação interna de um `GenericAgentExecutor` ou `AgentServiceImpl`, referem-se a componentes cujo design detalhado para a execução do agente ainda está em pesquisa. O sistema de Jobs, Filas e Workers (etapas 1-4 e 7) está definido.
+> **Nota:** O fluxo a seguir descreve como um objetivo de alto nível do usuário pode levar à criação e processamento de um Job interno. As etapas relativas à invocação e operação interna de um `GenericAgentExecutor` ou `AgentServiceImpl` (aproximadamente etapas 5 e 6 do fluxo original aqui descrito) referem-se a componentes cujo design detalhado para a execução do agente ainda está em pesquisa. O sistema de Jobs, Filas e Workers (criação interna do Job, enfileiramento, e processamento pelo Worker) está definido.
 
-1.  **UI/External Trigger:** User action in the React UI (Infrastructure - specifically `presentation/ui/`) initiates a request, possibly via a form handled by React Hook Form.
-2.  **IPC:** Request is sent to the Electron Main Process via IPC (Infrastructure - via `presentation/electron/preload/` and `presentation/ui/services/`).
-3.  **IPC Handler (Main Process - `presentation/electron/main/` or `infrastructure/ipc/`):** Receives the request. Resolves the appropriate Application layer Use Case (e.g., `CreateJobUseCase`) using the DI container (InversifyJS).
-4.  **Use Case (`CreateJobUseCase` - `core/application/`):**
-    *   Validates input (e.g., using a Zod schema).
-    *   Creates a `Job` entity (`core/domain/`).
-    *   Uses `IJobRepository` (Domain interface, implemented in `infrastructure/persistence/`) to persist the `Job`.
-    *   Uses `IJobQueue` (Application port, implemented in `infrastructure/queue/`) to add the `Job` to the queue.
-5.  **Worker (`WorkerService` / Worker Process - `core/application/` or `infrastructure/worker-pool/`):**
+1.  **User Interaction (Goal Delegation via UI):** User interacts with the Personal Assistant AI via the React UI, describing a high-level goal or task.
+2.  **IPC to Main Process:** The request (user's goal) is sent to the Electron Main Process via IPC.
+3.  **Goal Handling (Main Process/Application Layer):** An IPC Handler receives the user's goal. This handler might invoke an application service or use case responsible for interpreting the goal with the Personal Assistant AI's logic (potentially involving an LLM).
+4.  **Internal Task Formulation & Job Creation (by Agent/Assistant logic):**
+    *   The Personal Assistant AI (or a specialized agent it delegates to) analyzes the user's goal.
+    *   Internamente, ele formula um ou mais `Jobs` específicos necessários para alcançar o objetivo do usuário.
+    *   This internal process would then use a `CreateJobUseCase` (Camada de Aplicação):
+        *   Validates the formulated Job data (e.g., using a Zod schema).
+        *   Creates a `Job` entity (`core/domain/`).
+        *   Uses `IJobRepository` (Domain interface, implemented in `infrastructure/persistence/`) to persist the `Job`.
+        *   Uses `IJobQueue` (Application port, implementada em `infrastructure/queue/`) para adicionar o `Job` à fila apropriada.
+5.  **Worker (`WorkerService` / Worker Process - `core/application/` ou `infrastructure/worker-pool/`):** (Este passo e os seguintes descrevem o processamento do Job interno)
     *   Monitors the `IJobQueue`.
     *   Dequeues a pending `Job`.
-    *   Invokes the `GenericAgentExecutor` or `AgentServiceImpl` (Application service) with the `Job`.
-6.  **Agent (`GenericAgentExecutor` / `AgentServiceImpl` - `core/application/`):**
+    *   Invokes the `GenericAgentExecutor` or `AgentServiceImpl` (Application service - conceito em pesquisa para execução detalhada) with the `Job`.
+6.  **Agent Execution (Conceptual - `GenericAgentExecutor` / `AgentServiceImpl` - `core/application/`):**
     *   Loads its `AgentInternalState` (`core/domain/`) via `IAgentRepository` or `IAgentStateRepository`.
     *   Uses LLM (via `ILLM` port) with `AgentInternalState` and `Job.data.agentState.activityContext` or `Job.context` (`core/domain/`) to decide the action.
     *   If a Task is needed, uses `ITaskFactory` (Application) to get an `ITask` instance.

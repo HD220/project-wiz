@@ -33,7 +33,7 @@ Esta é a tela inicial ou painel principal que oferece uma visão agregada de to
 *   **Tarefas Consolidadas:** Permite visualizar e gerenciar tarefas (Jobs) em andamento de todos os projetos de forma centralizada.
 *   **Agentes (Personas) da Fábrica:** Área para listar e gerenciar todas as Personas disponíveis na sua instância do Project Wiz. Aqui você poderá cadastrar ou gerar novas Personas.
 *   **Integrações:** Permite configurar e gerenciar integrações com sistemas externos como GitHub, Confluence, Jira, etc., para toda a aplicação.
-*   **MCPs (Master Control Programs):** Configuração de servidores MCP que habilitam e gerenciam o acesso das Personas às suas Tools (ferramentas).
+*   **MCP (Model Context Protocol):** (Planejado/Pesquisa) Refere-se a um protocolo conceitual, como o Model Context Protocol da Anthropic, para habilitar e gerenciar o acesso de LLMs a ferramentas e capacidades. Detalhes específicos para o Project Wiz estão em definição.
 *   **Analytics Globais:** Exibe relatórios e análises sobre a produtividade geral, desempenho dos agentes e progresso dos projetos de forma consolidada.
 *   **Chat Global:** Funcionalidade de chat para interagir com Personas específicas fora do contexto de um projeto, ou para comunicações gerais do sistema.
 

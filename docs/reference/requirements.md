@@ -12,8 +12,8 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-GERAL-003:** O sistema deve permitir que Agentes IA apresentem planos ao usuário para aprovação antes da execução.
 *   **RF-GERAL-004:** Agentes IA devem executar Jobs de forma autônoma usando LLMs e `Tools`.
 *   **RF-GERAL-005:** Agentes IA devem operar dentro de uma `working_directory` de projeto para tarefas de código, utilizando branches Git.
-*   **RF-GERAL-006:** Agentes IA devem realizar auto-validação dos resultados dos Jobs contra os `validationCriteria`.
-*   **RF-GERAL-007:** O sistema deve permitir que usuários acompanhem o progresso dos Jobs e recebam resultados.
+*   **RF-GERAL-006:** Agentes IA devem realizar auto-validação dos resultados de suas atividades internas contra os `validationCriteria`.
+*   **RF-GERAL-007:** O sistema deve permitir que usuários acompanhem o progresso de suas solicitações de alto nível (que podem envolver Jobs internos dos agentes) e recebam resultados.
 
 ### RF-PROJ: Gerenciamento de Projetos ([Core Concept: Gerenciando Projetos](../../user/core-concepts/projects.md))
 *   **RF-PROJ-001:** O sistema deve permitir ao usuário criar novos projetos de software (com nome e descrição opcional).
@@ -51,9 +51,9 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-AGENT-OP-011:** O Agente (via LLM e uma ferramenta de memória proposta) deveria poder atualizar seu conhecimento de longo prazo (`AgentInternalState` ou similar).
 *   **RF-AGENT-OP-012:** O `GenericAgentExecutor` (conceito em pesquisa) deveria lidar com erros de ferramentas/capacidades e LLM. O sistema de Jobs (existente) suporta retentativas.
 
-### RF-JOB: Sistema de Jobs, Atividades e Fila ([Core Concept: Jobs e Automação](../../user/core-concepts/jobs-and-automation.md))
-*   **RF-JOB-001:** O sistema deve usar a entidade `Job` para representar unidades de trabalho, com atributos como ID, `targetAgentRole`, `name`, `payload`, `data` (para `agentState` contendo `ActivityContext`), `status`, `priority`, `dependsOnJobIds`, `parentJobId`, `RetryPolicy`, timestamps e `result`.
-*   **RF-JOB-002:** Agentes devem criar Jobs para si (Sub-Jobs) usando `TaskManagerTool` (que usa `CreateJobUseCase`).
+### RF-JOB: Sistema Interno de Jobs, Atividades e Fila
+*   **RF-JOB-001:** O sistema deve usar a entidade `Job` para representar unidades de trabalho internas dos agentes, com atributos como ID, `targetAgentRole`, `name`, `payload`, `data` (para `agentState` contendo `ActivityContext`), `status`, `priority`, `dependsOnJobIds`, `parentJobId`, `RetryPolicy`, timestamps e `result`.
+*   **RF-JOB-002:** Agentes (internamente) devem ser capazes de criar Jobs para si (Sub-Jobs), potencialmente através de uma capacidade de gerenciamento de tarefas (conceito que usa internamente algo como um `CreateJobUseCase`).
 *   **RF-JOB-003:** O sistema deve suportar filas implícitas por `targetAgentRole`.
 *   **RF-JOB-004:** Jobs devem transitar por um ciclo de vida (`JobStatus` VO: `PENDING`, `ACTIVE`, `COMPLETED`, `FAILED`, `DELAYED`, `WAITING`).
 *   **RF-JOB-005:** Um `WorkerService` (configurado por `handlesRole`) deve buscar Jobs e entregá-los ao `GenericAgentExecutor` para processamento.
@@ -62,7 +62,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-JOB-008:** O sistema deve implementar um mecanismo de retentativa para Jobs falhos (`RetryPolicy` VO, gerenciado pelo `WorkerService`).
 *   **RF-JOB-009:** Jobs devem poder ser explicitamente atrasados (`executeAfter` timestamp, status `DELAYED`).
 *   **RF-JOB-010:** Todos os dados de Jobs devem ser persistidos em SQLite via Drizzle ORM (`IJobRepository`).
-*   **RF-JOB-011:** A UI deve permitir o monitoramento básico do status dos Jobs.
+*   **RF-JOB-011:** A UI deve permitir o monitoramento básico do status das atividades dos agentes ou do progresso das solicitações do usuário (que podem corresponder a Jobs internos dos agentes).
 
 ### RF-LLM: Integração com LLM ([LLM Integration](./04-llm-integration.md))
 *   **RF-LLM-001:** O sistema deve permitir a configuração de múltiplos provedores de LLM (`LLMProviderConfig` entidade, `CreateLLMProviderConfigUseCase`).
@@ -90,9 +90,9 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-UI-002:** Interação primária com Agentes via interface de chat (`ChatThread`).
 *   **RF-UI-003:** Chat deve suportar renderização Markdown (`MarkdownRenderer`).
 *   **RF-UI-004:** UI para listar, criar e visualizar detalhes de Projetos (`ProjectListPage`, `ProjectDetailPage`).
-*   **RF-UI-005:** UI para listar e selecionar `AgentPersonaTemplate` (`PersonaList`).
+*   **RF-UI-005:** UI para listar e selecionar `AgentPersonaTemplate` (`PersonaList`) (configurações de persona salvas pelo usuário).
 *   **RF-UI-006:** UI para configurar provedores de LLM (`llm-config-form.tsx`).
-*   **RF-UI-007:** UI para acompanhar status/progresso de Jobs (`activity-list-item.tsx`, `user-dashboard.tsx`).
+*   **RF-UI-007:** UI para acompanhar status/progresso das atividades dos agentes ou solicitações do usuário (ex: `activity-list-item.tsx`, `user-dashboard.tsx`).
 *   **RF-UI-008:** Layout inspirado no Discord (Sidebars, área de conteúdo principal).
 *   **RF-UI-009:** Suporte a temas claro/escuro.
 *   **RF-UI-010:** Suporte à autenticação de usuário.
