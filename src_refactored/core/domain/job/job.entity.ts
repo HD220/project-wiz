@@ -1,22 +1,26 @@
 // src_refactored/core/domain/job/job.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+import { ValueError } from '@/domain/common/errors';
+import { IJobRepository } from './ports/job-repository.interface';
 
-import { ValueError } from '@/domain/common/errors'; // DomainError removed as it's unused
+// Removed IJobEventEmitter and application event payload imports from here
 
-import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';
+import { JobExecutionLogEntryProps, JobExecutionLogEntryVO } from './value-objects/job-execution-log-entry.vo';
 import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
-// RetryStrategyOptions and RepeatOptions are part of IJobOptions, so they are used indirectly.
-// Linter might not pick this up if IJobOptions is not destructured in a way that shows their usage here.
-// However, they are essential for the structure of JobOptionsVO.
 import { JobOptionsVO, IJobOptions } from './value-objects/job-options.vo';
 import { JobPriorityVO } from './value-objects/job-priority.vo';
 import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
 import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
 
+// Forward declare IJobEventEmitter to satisfy _setActiveContext signature if needed by other parts,
+// but JobEntity itself will not use it to emit.
+interface IForwardDeclaredJobEventEmitter {
+  // emit(event: string, payload: any): boolean; // Not strictly needed if entity won't emit
+}
 
-// Interface for properties required to construct a JobEntity
-export interface JobEntityConstructionProps<TData = unknown> { // Changed any to unknown
+
+export interface JobEntityConstructionProps<TData = unknown> {
   id?: string | JobIdVO;
   queueName: string;
   jobName: string;
@@ -24,42 +28,38 @@ export interface JobEntityConstructionProps<TData = unknown> { // Changed any to
   opts?: IJobOptions;
 }
 
-// Interface for the internal state of JobEntity
-export interface JobEntityProps<TData = unknown, TResult = unknown> extends EntityProps<JobIdVO> { // Changed any to unknown
+export interface JobEntityProps<TData = unknown, TResult = unknown> extends EntityProps<JobIdVO> {
   queueName: string;
   jobName: string;
   payload: Readonly<TData>;
   opts: JobOptionsVO;
-
   status: JobStatusVO;
   priority: JobPriorityVO;
-
   progress: JobProgressVO;
   returnValue?: Readonly<TResult>;
   failedReason?: string;
-
   attemptsMade: number;
-
   createdAt: number;
   updatedAt: number;
   processAt?: number;
   startedAt?: number;
   finishedAt?: number;
-
   executionLogs: JobExecutionLogsVO;
-
   lockedByWorkerId?: string;
   lockExpiresAt?: number;
-
   repeatJobKey?: string;
+
+  _repository?: IJobRepository;
+  _eventEmitter?: IForwardDeclaredJobEventEmitter; // Kept for signature, but won't be used by entity to emit
 }
 
-export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> { // Changed any to unknown
-  private constructor(props: JobEntityProps<TData, TResult>) {
+export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
+
+  public constructor(props: JobEntityProps<TData, TResult>) {
     super(props);
   }
 
-  public static create<D = unknown, R = unknown>( // Changed any to unknown
+  public static create<D = unknown, R = unknown>(
     constructProps: JobEntityConstructionProps<D>,
   ): JobEntity<D, R> {
     if (!constructProps.queueName || constructProps.queueName.trim() === '') {
@@ -87,7 +87,7 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
       id,
       queueName: constructProps.queueName,
       jobName: constructProps.jobName,
-      payload: Object.freeze(constructProps.payload) as Readonly<D>, // Ensure payload is immutable
+      payload: Object.freeze(constructProps.payload) as Readonly<D>,
       opts: jobOptions,
       status: initialStatus,
       priority: JobPriorityVO.create(jobOptions.priority),
@@ -102,17 +102,9 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
     return new JobEntity<D, R>(props);
   }
 
-  /**
-   * Rehydrates a JobEntity from persistence.
-   * This method is intended for use by repositories.
-   * It bypasses some of the creation logic (like default status setting based on delay)
-   * as the persisted props already reflect the job's state.
-   */
-  public static fromPersistence<D = any, R = any>(
+  public static fromPersistence<D = unknown, R = unknown>(
     props: JobEntityProps<D, R>,
   ): JobEntity<D, R> {
-    // Basic validation: ensure ID and critical VOs are valid instances.
-    // Repositories are responsible for ensuring the props are valid structurally.
     if (!(props.id instanceof JobIdVO)) {
       throw new ValueError('Cannot rehydrate JobEntity without a valid JobIdVO instance for id.');
     }
@@ -122,12 +114,22 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
     if (!(props.status instanceof JobStatusVO)) {
       throw new ValueError('Cannot rehydrate JobEntity without a valid JobStatusVO instance for status.');
     }
-    // Add other critical VO checks if necessary (priority, progress, executionLogs)
-
     return new JobEntity<D, R>(props);
   }
 
-  // --- Accessors ---
+  public _setActiveContext(
+    repository: IJobRepository,
+    _eventEmitter?: IForwardDeclaredJobEventEmitter, // Emitter no longer used by entity for its methods
+  ): void {
+    this.props._repository = repository;
+    this.props._eventEmitter = _eventEmitter; // Store it, but internal methods won't use it to emit.
+  }
+
+  public _clearActiveContext(): void {
+    this.props._repository = undefined;
+    this.props._eventEmitter = undefined;
+  }
+
   get queueName(): string { return this.props.queueName; }
   get jobName(): string { return this.props.jobName; }
   get payload(): Readonly<TData> { return this.props.payload; }
@@ -138,7 +140,7 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
   get returnValue(): Readonly<TResult> | undefined { return this.props.returnValue; }
   get failedReason(): string | undefined { return this.props.failedReason; }
   get attemptsMade(): number { return this.props.attemptsMade; }
-  get maxAttempts(): number { return this.opts.attempts; } // From JobOptionsVO
+  get maxAttempts(): number { return this.opts.attempts; }
 
   get createdAt(): Date { return new Date(this.props.createdAt); }
   get updatedAt(): Date { return new Date(this.props.updatedAt); }
@@ -151,32 +153,52 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
   get lockExpiresAt(): Date | undefined { return this.props.lockExpiresAt ? new Date(this.props.lockExpiresAt) : undefined; }
   get repeatJobKey(): string | undefined { return this.props.repeatJobKey; }
 
-
-  // --- Mutators (internal state changes, persistence handled by repository) ---
-
   private touch(): void {
     this.props.updatedAt = Date.now();
   }
 
-  public setProgress(progressData: JobProgressData): void {
+  // Synchronous state update methods
+  public setProgress(progressData: JobProgressData): void { // Renamed from setProgressInternal
     this.props.progress = JobProgressVO.create(progressData);
     this.touch();
-    // Event 'job.progress' should be emitted by the service calling this, after saving.
   }
 
-  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): void { // Changed any to unknown
-    this.props.executionLogs = this.props.executionLogs.addLog(message, level, details);
+  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): void { // Renamed from addLogInternal
+    const newLogEntry = JobExecutionLogEntryVO.create(message, level, details, new Date());
+    this.props.executionLogs = this.props.executionLogs.addEntry(newLogEntry);
     this.touch();
-    // Event 'job.log_added' should be emitted by the service calling this, after saving.
   }
 
-  // --- State Transition Methods ---
-  // These methods only update the in-memory state of the entity.
-  // The repository is responsible for persisting these changes atomically.
+  // Async methods for processor interaction that require persistence
+  public async updateProgress(progressData: JobProgressData): Promise<void> {
+    this.setProgress(progressData); // Use the public synchronous version
+    if (this.props._repository) {
+      const saveResult = await this.props._repository.save(this);
+      if (saveResult.isError()) {
+        console.error(`Job ${this.id.value}: Failed to save progress to repository`, saveResult.error);
+        // Consider how to propagate this error if critical for the processor
+      }
+      // Event emission for 'job.progress' will be handled by JobWorkerService if needed after this call.
+    } else {
+      console.warn(`Job ${this.id.value}: updateProgress called without active repository context. State updated in memory only.`);
+    }
+  }
+
+  public async addLogToExecution(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): Promise<void> {
+    this.addLog(message, level, details); // Use the public synchronous version
+    if (this.props._repository) {
+      const saveResult = await this.props._repository.save(this);
+       if (saveResult.isError()) {
+        console.error(`Job ${this.id.value}: Failed to save log to repository`, saveResult.error);
+      }
+      // Event emission for 'job.log_added' will be handled by JobWorkerService if needed.
+    } else {
+       console.warn(`Job ${this.id.value}: addLogToExecution called without active repository context. State updated in memory only.`);
+    }
+  }
 
   public moveToActive(workerId: string, lockDurationMs: number): boolean {
     if (!this.status.is(JobStatusEnum.PENDING) && !this.status.is(JobStatusEnum.DELAYED)) {
-      // DELAYED jobs should be promoted to PENDING by scheduler first
       console.warn(`Job ${this.id.value} cannot be moved to ACTIVE from status ${this.status.value}`);
       return false;
     }
@@ -201,13 +223,12 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
 
   public moveToCompleted(resultValue: TResult): boolean {
     if (!this.status.is(JobStatusEnum.ACTIVE)) {
-      // Potentially log warning if trying to complete a non-active job
       return false;
     }
     this.props.status = JobStatusVO.completed();
     this.props.returnValue = Object.freeze(resultValue) as Readonly<TResult>;
     this.props.finishedAt = Date.now();
-    this.props.progress = JobProgressVO.create(100); // Mark as 100% on completion
+    this.props.progress = JobProgressVO.create(100);
     this.clearLock();
     this.touch();
     return true;
@@ -216,10 +237,11 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
   private clearLock(): void {
     this.props.lockedByWorkerId = undefined;
     this.props.lockExpiresAt = undefined;
+    this._clearActiveContext();
   }
 
   public moveToFailed(reason: string): boolean {
-     if (this.status.isTerminal()) return false; // Already completed or failed
+     if (this.status.isTerminal()) return false;
 
     this.props.status = JobStatusVO.failed();
     this.props.failedReason = reason;
@@ -234,18 +256,17 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
 
     this.props.status = JobStatusVO.delayed();
     this.props.processAt = newProcessAtMs;
-    this.clearLock(); // If it was active and is being re-delayed for retry
+    this.clearLock();
     this.touch();
     return true;
   }
 
   public promoteToPending(): boolean {
     if (!this.status.is(JobStatusEnum.DELAYED) && !this.status.is(JobStatusEnum.WAITING_CHILDREN)) {
-      // Only DELAYED or WAITING_CHILDREN jobs can be directly promoted to PENDING by scheduler
       return false;
     }
     this.props.status = JobStatusVO.pending();
-    this.props.processAt = undefined; // Clear processAt if it was delayed
+    this.props.processAt = undefined;
     this.touch();
     return true;
   }
