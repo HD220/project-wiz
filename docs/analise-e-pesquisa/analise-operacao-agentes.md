@@ -4,6 +4,8 @@
 
 Propõe-se que os Agentes de IA (configurados por especificações de persona e instanciados como entidades `Agent`) no Project Wiz operem de forma autônoma para analisar solicitações, planejar e executar tarefas (representadas por entidades `Job`). Um motor principal proposto para esta operação é o `GenericAgentExecutor`.
 
+Esta proposta de design para a operação de agentes segue a decisão arquitetural chave (anteriormente ADR 007) de que um componente central do agente (aqui chamado `GenericAgentExecutor`) é o principal responsável por orquestrar o processamento de um Job individual. Isso significa que o `WorkerService` tem um papel mais simples de buscar Jobs da fila e delegá-los, enquanto a lógica de raciocínio, planejamento, execução de capacidades (anteriormente chamadas de "Tools") e gerenciamento do ciclo de vida da tarefa residem primariamente no agente.
+
 ## Ciclo de Operação e Capacidades Propostas:
 
 1.  **Análise da Solicitação do Usuário:**
