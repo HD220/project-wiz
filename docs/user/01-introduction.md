@@ -32,7 +32,6 @@ Com o Project Wiz, você poderá:
     *   Geração de documentação
     *   Análise de issues (planejado)
 *   Configurar parâmetros dos modelos de linguagem utilizados pelas Personas.
-*   Definir fluxos de trabalho de automação.
 *   Acompanhar o progresso das tarefas e a performance dos seus agentes.
 *   Interagir com as Personas através de uma interface de chat.
 *   E muito mais à medida que o projeto evolui!

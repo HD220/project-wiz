@@ -30,7 +30,7 @@ A seguir, detalhamos as funcionalidades encontradas nas principais visualizaçõ
 Esta é a tela inicial ou painel principal que oferece uma visão agregada de todos os seus projetos e atividades.
 
 *   **Dashboard Global:** Apresenta um overview de todos os projetos ativos, status geral e atividades recentes em toda a "fábrica de software".
-*   **Tarefas Consolidadas:** Permite visualizar e gerenciar tarefas (Jobs) em andamento de todos os projetos de forma centralizada.
+*   **Tarefas Globais/Consolidadas:** Permite visualizar e gerenciar tarefas de alto nível (semelhantes a issues ou épicos) de todos os projetos de forma centralizada. Estas são as tarefas que os usuários definem para orientar o trabalho dos agentes.
 *   **Agentes (Personas) da Fábrica:** Área para listar e gerenciar todas as Personas disponíveis na sua instância do Project Wiz. Aqui você poderá cadastrar ou gerar novas Personas.
 *   **Integrações:** Permite configurar e gerenciar integrações com sistemas externos como GitHub, Confluence, Jira, etc., para toda a aplicação.
 *   **MCP (Model Context Protocol):** (Planejado/Pesquisa) Refere-se a um protocolo conceitual, como o Model Context Protocol da Anthropic, para habilitar e gerenciar o acesso de LLMs a ferramentas e capacidades. Detalhes específicos para o Project Wiz estão em definição.
@@ -42,7 +42,7 @@ Esta é a tela inicial ou painel principal que oferece uma visão agregada de to
 Quando você seleciona um projeto específico, a interface se adapta para fornecer informações e ferramentas contextuais a esse projeto.
 
 *   **Dashboard do Projeto:** Overview com métricas, status e atividades recentes específicas do projeto selecionado.
-*   **Tarefas do Projeto:** Gerenciamento detalhado das tarefas (Jobs) atribuídas às Personas dentro do escopo do projeto.
+*   **Tarefas do Projeto:** Gerenciamento das tarefas de alto nível definidas pelo usuário para o projeto (ex: funcionalidades a serem desenvolvidas, bugs a serem corrigidos, documentação a ser escrita). Similar a um sistema de issues, futuramente podendo ser integrado com plataformas como GitHub Issues ou Jira. Estas tarefas guiam os objetivos delegados aos Agentes IA.
 *   **Fórum do Projeto:** Espaço dedicado para discussões, troca de ideias e colaboração entre usuários e Personas relacionadas ao projeto.
 *   **Documentação do Projeto:** Acesso e gerenciamento da documentação técnica e de negócios associada ao projeto.
 *   **Analytics do Projeto:** Relatórios e análises de desempenho específicos do projeto.
