@@ -3,7 +3,7 @@ import { Result } from '@/shared/result';
 
 import { JobEntity } from '../job.entity';
 import { JobIdVO } from '../value-objects/job-id.vo';
-import { JobStatusVO, JobStatusEnum } from '../value-objects/job-status.vo'; // Assuming JobStatusType is JobStatusEnum
+import { JobStatusEnum } from '../value-objects/job-status.vo'; // JobStatusVO removed
 
 import {
   JobSearchFilters,

@@ -331,7 +331,7 @@ export class DrizzleJobRepository implements IJobRepository {
     limit: number,
     queueName?: string,
   ): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
         eq(table.status, JobStatusEnum.DELAYED),
@@ -358,7 +358,7 @@ export class DrizzleJobRepository implements IJobRepository {
     queueName: string,
     repeatKey: string
   ): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const resultRows: JobDbRow[] = await this.db
         .select()
@@ -375,7 +375,7 @@ export class DrizzleJobRepository implements IJobRepository {
   }
 
   async findJobsByParentId(parentIdVo: JobIdVO): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const resultRows: JobDbRow[] = await this.db
         .select()
@@ -389,7 +389,7 @@ export class DrizzleJobRepository implements IJobRepository {
   }
 
   async getJobCountsByStatus(queueName: string): Promise<Result<JobCountsByStatus, Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const resultStats: { status: JobStatusEnum; count: number }[] = await this.db
         .select({
@@ -415,7 +415,7 @@ export class DrizzleJobRepository implements IJobRepository {
   }
 
   async delete(idVo: JobIdVO): Promise<Result<void, Error>> { // Renamed id to idVo
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       await this.db.delete(table).where(eq(table.id, idVo.value)); // Use idVo
       return Ok(undefined);
@@ -429,7 +429,7 @@ export class DrizzleJobRepository implements IJobRepository {
     olderThanTimestampMs?: number,
     limit?: number,
   ): Promise<Result<number, Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
         eq(table.queueName, queueName),
@@ -466,7 +466,7 @@ export class DrizzleJobRepository implements IJobRepository {
     olderThanTimestampMs?: number,
     limit?: number,
   ): Promise<Result<number, Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
         eq(table.queueName, queueName),
@@ -501,7 +501,7 @@ export class DrizzleJobRepository implements IJobRepository {
     filters: JobSearchFilters,
     pagination: PaginationOptions,
   ): Promise<Result<PaginatedJobsResult<any, any>, Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [];
       if (filters.queueName) conditions.push(eq(table.queueName, filters.queueName));
@@ -572,7 +572,7 @@ export class DrizzleJobRepository implements IJobRepository {
     queueName: string,
     statuses?: JobStatusEnum[],
   ): Promise<Result<{ count: number }, Error>> {
-    const table = this.jobsTable as any;
+    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [eq(table.queueName, queueName)];
       if (statuses && statuses.length > 0) {
