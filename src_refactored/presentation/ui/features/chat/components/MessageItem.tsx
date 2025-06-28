@@ -1,7 +1,9 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
-import { cn } from '@/presentation/ui/lib/utils'; // For conditional class names
+import { cn } from '@/presentation/ui/lib/utils';
 
 // Definindo a interface aqui temporariamente, idealmente viria de um arquivo de tipos compartilhado
 export interface ChatMessageSender {
@@ -74,11 +76,12 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
             {senderName}
           </p>
         )}
-        {/* TODO: Implement Markdown rendering for message.content */}
-        <p className="text-sm whitespace-pre-wrap break-words">
-          {message.content}
-          {message.type === 'error' && <span className="text-red-500 dark:text-red-400 ml-1">(Erro)</span>}
-        </p>
+        <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-blockquote:my-1 prose-pre:my-1 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:text-xs break-words">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {message.content}
+          </ReactMarkdown>
+          {message.type === 'error' && <span className="text-red-500 dark:text-red-400 ml-1 text-xs">(Erro)</span>}
+        </div>
         <p className={cn(
             "text-xs mt-1 text-right",
             isCurrentUser ? "text-sky-200/80" : "text-slate-400 dark:text-slate-500"

@@ -21,8 +21,13 @@ import { Route as appSettingsLlmIndexRouteImport } from './app/(app)/settings/ll
 import { Route as appProjectsNewIndexRouteImport } from './app/(app)/projects/new/index'
 import { Route as appProjectsProjectIdIndexRouteImport } from './app/(app)/projects/$projectId/index'
 import { Route as appPersonasNewIndexRouteImport } from './app/(app)/personas/new/index'
+import { Route as appPersonasTemplateIdIndexRouteImport } from './app/(app)/personas/$templateId/index'
 import { Route as appAgentsNewIndexRouteImport } from './app/(app)/agents/new/index'
+import { Route as appAgentsAgentIdIndexRouteImport } from './app/(app)/agents/$agentId/index'
 import { Route as appSettingsLlmNewIndexRouteImport } from './app/(app)/settings/llm/new/index'
+import { Route as appProjectsProjectIdSettingsIndexRouteImport } from './app/(app)/projects/$projectId/settings/index'
+import { Route as appPersonasTemplateIdEditIndexRouteImport } from './app/(app)/personas/$templateId/edit/index'
+import { Route as appAgentsAgentIdEditIndexRouteImport } from './app/(app)/agents/$agentId/edit/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,9 +90,20 @@ const appPersonasNewIndexRoute = appPersonasNewIndexRouteImport.update({
   path: '/personas/new/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appPersonasTemplateIdIndexRoute =
+  appPersonasTemplateIdIndexRouteImport.update({
+    id: '/(app)/personas/$templateId/',
+    path: '/personas/$templateId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const appAgentsNewIndexRoute = appAgentsNewIndexRouteImport.update({
   id: '/(app)/agents/new/',
   path: '/agents/new/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appAgentsAgentIdIndexRoute = appAgentsAgentIdIndexRouteImport.update({
+  id: '/(app)/agents/$agentId/',
+  path: '/agents/$agentId/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appSettingsLlmNewIndexRoute = appSettingsLlmNewIndexRouteImport.update({
@@ -95,6 +111,24 @@ const appSettingsLlmNewIndexRoute = appSettingsLlmNewIndexRouteImport.update({
   path: '/settings/llm/new/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appProjectsProjectIdSettingsIndexRoute =
+  appProjectsProjectIdSettingsIndexRouteImport.update({
+    id: '/(app)/projects/$projectId/settings/',
+    path: '/projects/$projectId/settings/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appPersonasTemplateIdEditIndexRoute =
+  appPersonasTemplateIdEditIndexRouteImport.update({
+    id: '/(app)/personas/$templateId/edit/',
+    path: '/personas/$templateId/edit/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appAgentsAgentIdEditIndexRoute =
+  appAgentsAgentIdEditIndexRouteImport.update({
+    id: '/(app)/agents/$agentId/edit/',
+    path: '/agents/$agentId/edit/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -105,11 +139,16 @@ export interface FileRoutesByFullPath {
   '/projects': typeof appProjectsIndexRoute
   '/settings': typeof appSettingsIndexRoute
   '/onboarding': typeof publicOnboardingIndexRoute
+  '/agents/$agentId': typeof appAgentsAgentIdIndexRoute
   '/agents/new': typeof appAgentsNewIndexRoute
+  '/personas/$templateId': typeof appPersonasTemplateIdIndexRoute
   '/personas/new': typeof appPersonasNewIndexRoute
   '/projects/$projectId': typeof appProjectsProjectIdIndexRoute
   '/projects/new': typeof appProjectsNewIndexRoute
   '/settings/llm': typeof appSettingsLlmIndexRoute
+  '/agents/$agentId/edit': typeof appAgentsAgentIdEditIndexRoute
+  '/personas/$templateId/edit': typeof appPersonasTemplateIdEditIndexRoute
+  '/projects/$projectId/settings': typeof appProjectsProjectIdSettingsIndexRoute
   '/settings/llm/new': typeof appSettingsLlmNewIndexRoute
 }
 export interface FileRoutesByTo {
@@ -121,11 +160,16 @@ export interface FileRoutesByTo {
   '/projects': typeof appProjectsIndexRoute
   '/settings': typeof appSettingsIndexRoute
   '/onboarding': typeof publicOnboardingIndexRoute
+  '/agents/$agentId': typeof appAgentsAgentIdIndexRoute
   '/agents/new': typeof appAgentsNewIndexRoute
+  '/personas/$templateId': typeof appPersonasTemplateIdIndexRoute
   '/personas/new': typeof appPersonasNewIndexRoute
   '/projects/$projectId': typeof appProjectsProjectIdIndexRoute
   '/projects/new': typeof appProjectsNewIndexRoute
   '/settings/llm': typeof appSettingsLlmIndexRoute
+  '/agents/$agentId/edit': typeof appAgentsAgentIdEditIndexRoute
+  '/personas/$templateId/edit': typeof appPersonasTemplateIdEditIndexRoute
+  '/projects/$projectId/settings': typeof appProjectsProjectIdSettingsIndexRoute
   '/settings/llm/new': typeof appSettingsLlmNewIndexRoute
 }
 export interface FileRoutesById {
@@ -138,11 +182,16 @@ export interface FileRoutesById {
   '/(app)/projects/': typeof appProjectsIndexRoute
   '/(app)/settings/': typeof appSettingsIndexRoute
   '/(public)/onboarding/': typeof publicOnboardingIndexRoute
+  '/(app)/agents/$agentId/': typeof appAgentsAgentIdIndexRoute
   '/(app)/agents/new/': typeof appAgentsNewIndexRoute
+  '/(app)/personas/$templateId/': typeof appPersonasTemplateIdIndexRoute
   '/(app)/personas/new/': typeof appPersonasNewIndexRoute
   '/(app)/projects/$projectId/': typeof appProjectsProjectIdIndexRoute
   '/(app)/projects/new/': typeof appProjectsNewIndexRoute
   '/(app)/settings/llm/': typeof appSettingsLlmIndexRoute
+  '/(app)/agents/$agentId/edit/': typeof appAgentsAgentIdEditIndexRoute
+  '/(app)/personas/$templateId/edit/': typeof appPersonasTemplateIdEditIndexRoute
+  '/(app)/projects/$projectId/settings/': typeof appProjectsProjectIdSettingsIndexRoute
   '/(app)/settings/llm/new/': typeof appSettingsLlmNewIndexRoute
 }
 export interface FileRouteTypes {
@@ -156,11 +205,16 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/onboarding'
+    | '/agents/$agentId'
     | '/agents/new'
+    | '/personas/$templateId'
     | '/personas/new'
     | '/projects/$projectId'
     | '/projects/new'
     | '/settings/llm'
+    | '/agents/$agentId/edit'
+    | '/personas/$templateId/edit'
+    | '/projects/$projectId/settings'
     | '/settings/llm/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,11 +226,16 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/onboarding'
+    | '/agents/$agentId'
     | '/agents/new'
+    | '/personas/$templateId'
     | '/personas/new'
     | '/projects/$projectId'
     | '/projects/new'
     | '/settings/llm'
+    | '/agents/$agentId/edit'
+    | '/personas/$templateId/edit'
+    | '/projects/$projectId/settings'
     | '/settings/llm/new'
   id:
     | '__root__'
@@ -188,11 +247,16 @@ export interface FileRouteTypes {
     | '/(app)/projects/'
     | '/(app)/settings/'
     | '/(public)/onboarding/'
+    | '/(app)/agents/$agentId/'
     | '/(app)/agents/new/'
+    | '/(app)/personas/$templateId/'
     | '/(app)/personas/new/'
     | '/(app)/projects/$projectId/'
     | '/(app)/projects/new/'
     | '/(app)/settings/llm/'
+    | '/(app)/agents/$agentId/edit/'
+    | '/(app)/personas/$templateId/edit/'
+    | '/(app)/projects/$projectId/settings/'
     | '/(app)/settings/llm/new/'
   fileRoutesById: FileRoutesById
 }
@@ -205,11 +269,16 @@ export interface RootRouteChildren {
   appProjectsIndexRoute: typeof appProjectsIndexRoute
   appSettingsIndexRoute: typeof appSettingsIndexRoute
   publicOnboardingIndexRoute: typeof publicOnboardingIndexRoute
+  appAgentsAgentIdIndexRoute: typeof appAgentsAgentIdIndexRoute
   appAgentsNewIndexRoute: typeof appAgentsNewIndexRoute
+  appPersonasTemplateIdIndexRoute: typeof appPersonasTemplateIdIndexRoute
   appPersonasNewIndexRoute: typeof appPersonasNewIndexRoute
   appProjectsProjectIdIndexRoute: typeof appProjectsProjectIdIndexRoute
   appProjectsNewIndexRoute: typeof appProjectsNewIndexRoute
   appSettingsLlmIndexRoute: typeof appSettingsLlmIndexRoute
+  appAgentsAgentIdEditIndexRoute: typeof appAgentsAgentIdEditIndexRoute
+  appPersonasTemplateIdEditIndexRoute: typeof appPersonasTemplateIdEditIndexRoute
+  appProjectsProjectIdSettingsIndexRoute: typeof appProjectsProjectIdSettingsIndexRoute
   appSettingsLlmNewIndexRoute: typeof appSettingsLlmNewIndexRoute
 }
 
@@ -299,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appPersonasNewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/personas/$templateId/': {
+      id: '/(app)/personas/$templateId/'
+      path: '/personas/$templateId'
+      fullPath: '/personas/$templateId'
+      preLoaderRoute: typeof appPersonasTemplateIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/agents/new/': {
       id: '/(app)/agents/new/'
       path: '/agents/new'
@@ -306,11 +382,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAgentsNewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/agents/$agentId/': {
+      id: '/(app)/agents/$agentId/'
+      path: '/agents/$agentId'
+      fullPath: '/agents/$agentId'
+      preLoaderRoute: typeof appAgentsAgentIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/settings/llm/new/': {
       id: '/(app)/settings/llm/new/'
       path: '/settings/llm/new'
       fullPath: '/settings/llm/new'
       preLoaderRoute: typeof appSettingsLlmNewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/projects/$projectId/settings/': {
+      id: '/(app)/projects/$projectId/settings/'
+      path: '/projects/$projectId/settings'
+      fullPath: '/projects/$projectId/settings'
+      preLoaderRoute: typeof appProjectsProjectIdSettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/personas/$templateId/edit/': {
+      id: '/(app)/personas/$templateId/edit/'
+      path: '/personas/$templateId/edit'
+      fullPath: '/personas/$templateId/edit'
+      preLoaderRoute: typeof appPersonasTemplateIdEditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/agents/$agentId/edit/': {
+      id: '/(app)/agents/$agentId/edit/'
+      path: '/agents/$agentId/edit'
+      fullPath: '/agents/$agentId/edit'
+      preLoaderRoute: typeof appAgentsAgentIdEditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -325,11 +429,17 @@ const rootRouteChildren: RootRouteChildren = {
   appProjectsIndexRoute: appProjectsIndexRoute,
   appSettingsIndexRoute: appSettingsIndexRoute,
   publicOnboardingIndexRoute: publicOnboardingIndexRoute,
+  appAgentsAgentIdIndexRoute: appAgentsAgentIdIndexRoute,
   appAgentsNewIndexRoute: appAgentsNewIndexRoute,
+  appPersonasTemplateIdIndexRoute: appPersonasTemplateIdIndexRoute,
   appPersonasNewIndexRoute: appPersonasNewIndexRoute,
   appProjectsProjectIdIndexRoute: appProjectsProjectIdIndexRoute,
   appProjectsNewIndexRoute: appProjectsNewIndexRoute,
   appSettingsLlmIndexRoute: appSettingsLlmIndexRoute,
+  appAgentsAgentIdEditIndexRoute: appAgentsAgentIdEditIndexRoute,
+  appPersonasTemplateIdEditIndexRoute: appPersonasTemplateIdEditIndexRoute,
+  appProjectsProjectIdSettingsIndexRoute:
+    appProjectsProjectIdSettingsIndexRoute,
   appSettingsLlmNewIndexRoute: appSettingsLlmNewIndexRoute,
 }
 export const routeTree = rootRouteImport

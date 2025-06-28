@@ -115,6 +115,6 @@ function EditPersonaTemplatePage() {
   );
 }
 
-export const Route = createFileRoute('/(app)/personas/$templateId/edit')({
+export const Route = createFileRoute('/(app)/personas/$templateId/edit/')({
   component: EditPersonaTemplatePage,
 });
