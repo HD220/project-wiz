@@ -5,6 +5,3 @@
 
 | ID da Tarefa | Status | Dependências (IDs) | Prioridade | Complexidade | Link para Detalhes |
 |--------------|--------|--------------------|------------|--------------|--------------------|
-| LINT-max-lines-per-function_-b12708d0 | Pendente |  | P3 | 1 | [Link](./tasks/TSK-LINT-max-lines-per-function_-b12708d0.md) |
-| LINT-id-length_-32a7e374 | Pendente |  | P3 | 1 | [Link](./tasks/TSK-LINT-id-length_-32a7e374.md) |
-| LINT-max-statements_-bfc9baf6 | Pendente |  | P3 | 1 | [Link](./tasks/TSK-LINT-max-statements_-bfc9baf6.md) |
