@@ -1,7 +1,4 @@
 // src_refactored/core/application/queue/use-cases/create-job.use-case.ts
-import { IJobEventEmitter } from '@/core/application/ports/events/i-job-event-emitter.interface';
-import { JobAddedPayload } from '@/core/application/queue/events/job-event.types';
-
 import { ValueError } from '@/domain/common/errors'; // Corrected path
 import { JobEntity, JobEntityConstructionProps } from '@/domain/job/job.entity';
 import { IJobRepository } from '@/domain/job/ports/job-repository.interface';
@@ -18,15 +15,12 @@ import { CreateJobRequestDTO, CreateJobResponseDTO } from '../dtos'; // This rel
 export class CreateJobUseCase<TData = unknown, TResult = unknown>
   implements IUseCase<CreateJobRequestDTO<TData>, CreateJobResponseDTO<TData, TResult>> {
   private readonly jobRepository: IJobRepository;
-  private readonly jobEventEmitter: IJobEventEmitter; // Added
 
   constructor(
     // @Inject(JobRepositorySymbol) // Example if Symbol is used as token
     jobRepository: IJobRepository,
-    jobEventEmitter: IJobEventEmitter, // Added
   ) {
     this.jobRepository = jobRepository;
-    this.jobEventEmitter = jobEventEmitter; // Added
   }
 
   async execute(
@@ -51,14 +45,6 @@ export class CreateJobUseCase<TData = unknown, TResult = unknown>
         // Propagate repository error
         return Err(saveResult.error);
       }
-
-      // Emit job.added event
-      const eventPayload: JobAddedPayload = {
-        queueName: jobEntity.queueName,
-        jobId: jobEntity.id.value,
-        job: jobEntity, // Emitting the full entity as per current JobAddedPayload type
-      };
-      this.jobEventEmitter.emit('job.added', eventPayload);
 
       return Ok(jobEntity);
     } catch (e: unknown) {

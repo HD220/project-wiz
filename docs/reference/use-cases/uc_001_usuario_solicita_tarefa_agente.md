@@ -5,7 +5,7 @@
 **Ator Principal:** Usuário
 **Nível:** Usuário-Meta (User Goal)
 **Prioridade:** Alta
-**Referência Funcional:** `docs/funcional/00_visao_geral_sistema.md`, `docs/funcional/03_operacao_agentes_ia.md`
+**Referência Funcional:** [Introdução ao Project Wiz](../../../user/01-introduction.md), [Agent Operation Internals](../03-agent-operation-internals.md)
 
 ## Descrição Breve:
 Este caso de uso descreve como um usuário interage com um Agente IA (configurado por um `AgentPersonaTemplate` e instanciado como `Agent`) para solicitar a execução de uma tarefa. O Agente IA analisa a solicitação, planeja a execução (potencialmente criando Jobs e Sub-Jobs), e pode pedir aprovação do usuário antes de iniciar o trabalho.

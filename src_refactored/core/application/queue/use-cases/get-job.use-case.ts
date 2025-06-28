@@ -38,11 +38,11 @@ export class GetJobUseCase<TData = unknown, TResult = unknown>
       }
       // findResult.value will be JobEntity | null
       return Ok(findResult.value as JobEntity<TData, TResult> | null);
-    } catch (error: unknown) { // Renamed e to error
-      if (error instanceof ValueError) {
-        return Err(error); // From JobIdVO.create()
+    } catch (e: unknown) {
+      if (e instanceof ValueError) {
+        return Err(e); // From JobIdVO.create()
       }
-      const message = error instanceof Error ? error.message : String(error);
+      const message = e instanceof Error ? e.message : String(e);
       return Err(new Error(`An unexpected error occurred while getting the job: ${message}`));
     }
   }

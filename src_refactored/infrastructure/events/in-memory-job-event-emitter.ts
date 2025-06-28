@@ -1,18 +1,38 @@
 // src_refactored/infrastructure/events/in-memory-job-event-emitter.ts
 import { EventEmitter } from 'events';
-import { injectable } from 'inversify';
 
-import { IJobEventEmitter } from '@/core/application/ports/events/i-job-event-emitter.interface';
 import {
   JobEventType,
   JobEventPayloadMap,
-  // QueueName, // Removed
-  // JobId, // Removed
-  // WorkerId, // Removed
-} from '@/core/application/queue/events/job-event.types';
+  QueueName,
+  JobId,
+  WorkerId,
+} from '../../core/domain/job/events/job-event.types';
+
+// Interface for the event emitter to allow for different implementations later if needed
+export interface IJobEventEmitter {
+  emit<K extends JobEventType>(event: K, payload: JobEventPayloadMap[K]): boolean;
+
+  on<K extends JobEventType>(
+    event: K,
+    listener: (payload: JobEventPayloadMap[K]) => void,
+  ): this;
+
+  off<K extends JobEventType>(
+    event: K,
+    listener: (payload: JobEventPayloadMap[K]) => void,
+  ): this;
+
+  once<K extends JobEventType>(
+    event: K,
+    listener: (payload: JobEventPayloadMap[K]) => void,
+  ): this;
+
+  removeAllListeners(event?: JobEventType): this;
+  listenerCount(event: JobEventType): number;
+}
 
 
-@injectable()
 export class InMemoryJobEventEmitter extends EventEmitter implements IJobEventEmitter {
   constructor() {
     super();
@@ -23,6 +43,7 @@ export class InMemoryJobEventEmitter extends EventEmitter implements IJobEventEm
   // Provide strongly-typed wrappers
 
   public emit<K extends JobEventType>(event: K, payload: JobEventPayloadMap[K]): boolean {
+    // The payload itself contains queueName, jobId etc. as per JobEventPayloadMap definitions
     return super.emit(event, payload);
   }
 
@@ -30,7 +51,7 @@ export class InMemoryJobEventEmitter extends EventEmitter implements IJobEventEm
     event: K,
     listener: (payload: JobEventPayloadMap[K]) => void,
   ): this {
-    super.on(event, listener as (...args: any[]) => void);
+    super.on(event, listener as (...args: any[]) => void); // Cast listener for compatibility
     return this;
   }
 
@@ -38,7 +59,7 @@ export class InMemoryJobEventEmitter extends EventEmitter implements IJobEventEm
     event: K,
     listener: (payload: JobEventPayloadMap[K]) => void,
   ): this {
-    super.off(event, listener as (...args: any[]) => void);
+    super.off(event, listener as (...args: any[]) => void); // Cast listener
     return this;
   }
 
@@ -46,7 +67,16 @@ export class InMemoryJobEventEmitter extends EventEmitter implements IJobEventEm
     event: K,
     listener: (payload: JobEventPayloadMap[K]) => void,
   ): this {
-    super.once(event, listener as (...args: any[]) => void);
+    super.once(event, listener as (...args: any[]) => void); // Cast listener
     return this;
   }
+
+  // removeAllListeners and listenerCount can be inherited directly if their
+  // signature matches EventEmitter's and is acceptable.
+  // EventEmitter's removeAllListeners([eventName]) and listenerCount(eventName) are fine.
 }
+
+// Optional: Export a default instance if it's to be used as a singleton directly
+// export const globalJobEventEmitter = new InMemoryJobEventEmitter();
+// However, it's often better to let DI handle singleton creation and injection.
+// For now, just exporting the class.
