@@ -14,11 +14,11 @@ Este guia explica como os Agentes são gerados e como você pode gerenciá-los.
 
 *   **Agente IA Especializado (Instância `Agent`):**
     *   Seja originado de uma Persona Personalizada ou gerado dinamicamente, é este Agente (uma instância da entidade `Agent`) que efetivamente processa os [Jobs (tarefas)](./jobs-and-automation.md).
-    *   Ele utiliza sua configuração específica (papel, objetivos, ferramentas, LLM) para realizar o trabalho.
+    *   Ele utiliza sua configuração específica (papel, objetivos, capacidades, LLM) para realizar o trabalho.
 
 **Principais Funções dos Agentes IA Especializados:**
 *   Executar **Jobs** de forma autônoma ou semi-autônoma.
-*   Utilizar **Ferramentas (Tools)** para interagir com o sistema.
+*   Utilizar um conjunto de **capacidades e conhecimentos** para interagir com o sistema.
 *   Colaborar no ciclo de vida do desenvolvimento de software.
 
 ## Criação e Configuração de Agentes IA Especializados
@@ -28,7 +28,7 @@ Existem duas formas principais de ter Agentes IA prontos para o trabalho:
 ### 1. Geração Dinâmica Assistida (via Assistente Pessoal)
 Este é frequentemente o fluxo inicial para novas ou tarefas únicas:
 *   **Sua Solicitação:** Você descreve a tarefa ao Assistente Pessoal (ex: "Preciso de um script Python para analisar dados de um CSV e gerar um gráfico").
-*   **Análise e Proposta:** O Assistente Pessoal, com auxílio de um LLM, analisa a necessidade e pode propor as características de um Agente IA ideal para a tarefa (papel, objetivo, ferramentas, etc.).
+*   **Análise e Proposta:** O Assistente Pessoal, com auxílio de um LLM, analisa a necessidade e pode propor as características de um Agente IA ideal para a tarefa (papel, objetivo, capacidades necessárias, etc.).
 *   **Geração e Uso Imediato:** Se você concordar, um Agente IA com essas características é configurado dinamicamente para realizar o Job.
 
 ### 2. Personas Personalizadas (Agentes Configurados pelo Usuário)
@@ -41,13 +41,13 @@ Você tem a flexibilidade de refinar, salvar e criar suas próprias configuraç�
     *   **Papel (Role):** A especialização principal (ex: `Developer`, `QA Tester`, `Technical Writer`).
     *   **Objetivo (Goal):** O objetivo geral que Agentes com esta configuração devem buscar.
     *   **Backstory/Contexto:** Informações de fundo para guiar o LLM.
-    *   **Nomes das Ferramentas (`toolNames`):** As ferramentas específicas que este tipo de Agente pode usar.
+    *   **Capacidades Necessárias:** O tipo de acesso ao sistema ou habilidades que o agente precisará (ex: capacidade de interagir com arquivos, executar comandos, ou pesquisar informações).
     *   **Configuração de LLM:** Associar um provedor de LLM, modelo e parâmetros (ex: temperatura).
 
 Você geralmente gerenciará suas Personas Personalizadas em uma seção dedicada na interface do Project Wiz.
 
 ## Instanciando um Agente para um Job
-Independentemente de ser uma Persona Personalizada ou uma configuração gerada dinamicamente, quando um Job precisa ser executado, uma instância de `Agent` é utilizada. Esta instância combina o perfil da Persona (papel, objetivos, ferramentas) com a configuração do LLM.
+Independentemente de ser uma Persona Personalizada ou uma configuração gerada dinamicamente, quando um Job precisa ser executado, uma instância de `Agent` é utilizada. Esta instância combina o perfil da Persona (papel, objetivos, capacidades definidas) com a configuração do LLM.
 
 ## Estado e Aprendizado do Agente (Conceitos Avançados)
 Mesmo que a *configuração* de uma Persona seja dinâmica ou personalizada, os Agentes em execução podem interagir com sistemas de memória:

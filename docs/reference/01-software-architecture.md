@@ -9,6 +9,8 @@ This document describes the software architecture for Project Wiz. The architect
 *   **SOLID, DRY, KISS:** Standard software design principles like SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion), DRY (Don't Repeat Yourself), and KISS (Keep It Simple, Stupid) are to be followed.
 *   **Modularity and Separation of Concerns:** Each component and layer has well-defined responsibilities.
 
+> **Nota sobre Componentes em Pesquisa:** As seções a seguir descrevem a arquitetura do sistema, incluindo componentes para a execução detalhada de Agentes IA (como `GenericAgentExecutor`, `ActivityContext`, o framework de `Tools` e `Tasks`). É importante notar que, enquanto o sistema de Jobs/Filas e Workers está definido e em implementação, os mecanismos internos específicos para a execução de agentes, suas ferramentas e gerenciamento de estado detalhado (além do Job em si) ainda estão em fase de análise e pesquisa. Portanto, as descrições desses componentes específicos representam o modelo conceitual e podem evoluir.
+
 ## 2. Key Technologies
 
 *   **Application Framework:** ElectronJS (for desktop application structure).
@@ -137,9 +139,11 @@ This organization aims for:
     *   **Queue (`IJobQueue` / `SqliteJobQueue`):** Manages the lifecycle of Jobs (pending, executing, delayed, finished, failed), including retries and dependencies.
     *   **Workers (`WorkerService`, `IWorkerPool`, `job-processor.worker.ts`):** Processes that pick up Jobs from the Queue. The `WorkerService` (domain) might use an `IAgentExecutor`. The `job-processor.worker.ts` (infrastructure) is a child process worker that uses IPC-based services.
     *   **Agents (`GenericAgentExecutor`, `AutonomousAgent`):** The intelligent entities (configured by `AgentPersonaTemplate` and instantiated as `Agent`) that perform the work of a Job.
-    *   **Tools (`IAgentTool` / `ITool`):** Capabilities used by Agents/Tasks to interact with the environment.
+    *   **Tools (`IAgentTool` / `ITool`):** Capabilities used by Agents/Tasks to interact with the environment. (Este framework de Tools está em fase de pesquisa).
 
 ## 5. Data Flow Example (Simplified: Creating and Processing a Job)
+
+> **Nota:** O fluxo a seguir descreve a criação e processamento de um Job. As etapas 5 e 6, que detalham a invocação e operação interna de um `GenericAgentExecutor` ou `AgentServiceImpl`, referem-se a componentes cujo design detalhado para a execução do agente ainda está em pesquisa. O sistema de Jobs, Filas e Workers (etapas 1-4 e 7) está definido.
 
 1.  **UI/External Trigger:** User action in the React UI (Infrastructure - specifically `presentation/ui/`) initiates a request, possibly via a form handled by React Hook Form.
 2.  **IPC:** Request is sent to the Electron Main Process via IPC (Infrastructure - via `presentation/electron/preload/` and `presentation/ui/services/`).

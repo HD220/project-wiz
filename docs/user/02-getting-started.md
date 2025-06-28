@@ -41,10 +41,10 @@ No Project Wiz, você conta com um **Assistente Pessoal IA** para ajudá-lo a da
     *   Comece conversando com seu Assistente Pessoal IA. Descreva a tarefa que você precisa realizar (ex: "Preciso criar testes unitários para o módulo de autenticação").
 *   **Geração ou Seleção do Agente:**
     *   O Assistente Pessoal, com auxílio de um LLM, analisará sua solicitação.
-    *   Ele poderá **sugerir uma configuração para um novo Agente IA especializado**, detalhando o papel (ex: "QA Tester"), objetivo, e as ferramentas que ele usaria.
+    *   Ele poderá **sugerir uma configuração para um novo Agente IA especializado**, detalhando o papel (ex: "QA Tester"), objetivo, e as capacidades que ele usaria.
     *   Se você já tiver **"Personas Personalizadas" salvas** que se encaixem, o assistente poderá sugerir o uso de uma delas.
 *   **Customização e Configuração:**
-    *   Você terá a oportunidade de **revisar e customizar** as características do Agente proposto (seja ele novo ou baseado em uma Persona Personalizada). Isso inclui seu nome, papel, objetivo, backstory (contexto para o LLM) e as ferramentas permitidas.
+    *   Você terá a oportunidade de **revisar e customizar** as características do Agente proposto (seja ele novo ou baseado em uma Persona Personalizada). Isso inclui seu nome, papel, objetivo, backstory (contexto para o LLM) e as capacidades permitidas.
     *   Você também definirá qual modelo de LLM o Agente usará e outros parâmetros (como a "temperatura").
     *   Configurações que você aprova podem ser **salvas como uma nova "Persona Personalizada"** ou atualizar uma existente.
 *   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para receber [Jobs (tarefas)](./core-concepts/jobs-and-automation.md).
