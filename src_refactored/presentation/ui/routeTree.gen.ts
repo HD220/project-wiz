@@ -28,6 +28,9 @@ import { Route as appAgentsNewIndexRouteImport } from './app/(app)/agents/new/in
 import { Route as appAgentsAgentIdIndexRouteImport } from './app/(app)/agents/$agentId/index'
 import { Route as appSettingsLlmNewIndexRouteImport } from './app/(app)/settings/llm/new/index'
 import { Route as appProjectsProjectIdSettingsIndexRouteImport } from './app/(app)/projects/$projectId/settings/index'
+import { Route as appProjectsProjectIdMembersIndexRouteImport } from './app/(app)/projects/$projectId/members/index'
+import { Route as appProjectsProjectIdDocsIndexRouteImport } from './app/(app)/projects/$projectId/docs/index'
+import { Route as appProjectsProjectIdChatIndexRouteImport } from './app/(app)/projects/$projectId/chat/index'
 import { Route as appPersonasTemplateIdEditIndexRouteImport } from './app/(app)/personas/$templateId/edit/index'
 import { Route as appAgentsAgentIdEditIndexRouteImport } from './app/(app)/agents/$agentId/edit/index'
 import { Route as appSettingsLlmConfigIdEditIndexRouteImport } from './app/(app)/settings/llm/$configId/edit/index'
@@ -131,6 +134,24 @@ const appProjectsProjectIdSettingsIndexRoute =
     path: '/projects/$projectId/settings/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const appProjectsProjectIdMembersIndexRoute =
+  appProjectsProjectIdMembersIndexRouteImport.update({
+    id: '/(app)/projects/$projectId/members/',
+    path: '/projects/$projectId/members/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appProjectsProjectIdDocsIndexRoute =
+  appProjectsProjectIdDocsIndexRouteImport.update({
+    id: '/(app)/projects/$projectId/docs/',
+    path: '/projects/$projectId/docs/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const appProjectsProjectIdChatIndexRoute =
+  appProjectsProjectIdChatIndexRouteImport.update({
+    id: '/(app)/projects/$projectId/chat/',
+    path: '/projects/$projectId/chat/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const appPersonasTemplateIdEditIndexRoute =
   appPersonasTemplateIdEditIndexRouteImport.update({
     id: '/(app)/personas/$templateId/edit/',
@@ -170,6 +191,9 @@ export interface FileRoutesByFullPath {
   '/settings/profile': typeof appSettingsProfileIndexRoute
   '/agents/$agentId/edit': typeof appAgentsAgentIdEditIndexRoute
   '/personas/$templateId/edit': typeof appPersonasTemplateIdEditIndexRoute
+  '/projects/$projectId/chat': typeof appProjectsProjectIdChatIndexRoute
+  '/projects/$projectId/docs': typeof appProjectsProjectIdDocsIndexRoute
+  '/projects/$projectId/members': typeof appProjectsProjectIdMembersIndexRoute
   '/projects/$projectId/settings': typeof appProjectsProjectIdSettingsIndexRoute
   '/settings/llm/new': typeof appSettingsLlmNewIndexRoute
   '/settings/llm/$configId/edit': typeof appSettingsLlmConfigIdEditIndexRoute
@@ -194,6 +218,9 @@ export interface FileRoutesByTo {
   '/settings/profile': typeof appSettingsProfileIndexRoute
   '/agents/$agentId/edit': typeof appAgentsAgentIdEditIndexRoute
   '/personas/$templateId/edit': typeof appPersonasTemplateIdEditIndexRoute
+  '/projects/$projectId/chat': typeof appProjectsProjectIdChatIndexRoute
+  '/projects/$projectId/docs': typeof appProjectsProjectIdDocsIndexRoute
+  '/projects/$projectId/members': typeof appProjectsProjectIdMembersIndexRoute
   '/projects/$projectId/settings': typeof appProjectsProjectIdSettingsIndexRoute
   '/settings/llm/new': typeof appSettingsLlmNewIndexRoute
   '/settings/llm/$configId/edit': typeof appSettingsLlmConfigIdEditIndexRoute
@@ -219,6 +246,9 @@ export interface FileRoutesById {
   '/(app)/settings/profile/': typeof appSettingsProfileIndexRoute
   '/(app)/agents/$agentId/edit/': typeof appAgentsAgentIdEditIndexRoute
   '/(app)/personas/$templateId/edit/': typeof appPersonasTemplateIdEditIndexRoute
+  '/(app)/projects/$projectId/chat/': typeof appProjectsProjectIdChatIndexRoute
+  '/(app)/projects/$projectId/docs/': typeof appProjectsProjectIdDocsIndexRoute
+  '/(app)/projects/$projectId/members/': typeof appProjectsProjectIdMembersIndexRoute
   '/(app)/projects/$projectId/settings/': typeof appProjectsProjectIdSettingsIndexRoute
   '/(app)/settings/llm/new/': typeof appSettingsLlmNewIndexRoute
   '/(app)/settings/llm/$configId/edit/': typeof appSettingsLlmConfigIdEditIndexRoute
@@ -245,6 +275,9 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/agents/$agentId/edit'
     | '/personas/$templateId/edit'
+    | '/projects/$projectId/chat'
+    | '/projects/$projectId/docs'
+    | '/projects/$projectId/members'
     | '/projects/$projectId/settings'
     | '/settings/llm/new'
     | '/settings/llm/$configId/edit'
@@ -269,6 +302,9 @@ export interface FileRouteTypes {
     | '/settings/profile'
     | '/agents/$agentId/edit'
     | '/personas/$templateId/edit'
+    | '/projects/$projectId/chat'
+    | '/projects/$projectId/docs'
+    | '/projects/$projectId/members'
     | '/projects/$projectId/settings'
     | '/settings/llm/new'
     | '/settings/llm/$configId/edit'
@@ -293,6 +329,9 @@ export interface FileRouteTypes {
     | '/(app)/settings/profile/'
     | '/(app)/agents/$agentId/edit/'
     | '/(app)/personas/$templateId/edit/'
+    | '/(app)/projects/$projectId/chat/'
+    | '/(app)/projects/$projectId/docs/'
+    | '/(app)/projects/$projectId/members/'
     | '/(app)/projects/$projectId/settings/'
     | '/(app)/settings/llm/new/'
     | '/(app)/settings/llm/$configId/edit/'
@@ -318,6 +357,9 @@ export interface RootRouteChildren {
   appSettingsProfileIndexRoute: typeof appSettingsProfileIndexRoute
   appAgentsAgentIdEditIndexRoute: typeof appAgentsAgentIdEditIndexRoute
   appPersonasTemplateIdEditIndexRoute: typeof appPersonasTemplateIdEditIndexRoute
+  appProjectsProjectIdChatIndexRoute: typeof appProjectsProjectIdChatIndexRoute
+  appProjectsProjectIdDocsIndexRoute: typeof appProjectsProjectIdDocsIndexRoute
+  appProjectsProjectIdMembersIndexRoute: typeof appProjectsProjectIdMembersIndexRoute
   appProjectsProjectIdSettingsIndexRoute: typeof appProjectsProjectIdSettingsIndexRoute
   appSettingsLlmNewIndexRoute: typeof appSettingsLlmNewIndexRoute
   appSettingsLlmConfigIdEditIndexRoute: typeof appSettingsLlmConfigIdEditIndexRoute
@@ -458,6 +500,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appProjectsProjectIdSettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/projects/$projectId/members/': {
+      id: '/(app)/projects/$projectId/members/'
+      path: '/projects/$projectId/members'
+      fullPath: '/projects/$projectId/members'
+      preLoaderRoute: typeof appProjectsProjectIdMembersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/projects/$projectId/docs/': {
+      id: '/(app)/projects/$projectId/docs/'
+      path: '/projects/$projectId/docs'
+      fullPath: '/projects/$projectId/docs'
+      preLoaderRoute: typeof appProjectsProjectIdDocsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/projects/$projectId/chat/': {
+      id: '/(app)/projects/$projectId/chat/'
+      path: '/projects/$projectId/chat'
+      fullPath: '/projects/$projectId/chat'
+      preLoaderRoute: typeof appProjectsProjectIdChatIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(app)/personas/$templateId/edit/': {
       id: '/(app)/personas/$templateId/edit/'
       path: '/personas/$templateId/edit'
@@ -502,6 +565,9 @@ const rootRouteChildren: RootRouteChildren = {
   appSettingsProfileIndexRoute: appSettingsProfileIndexRoute,
   appAgentsAgentIdEditIndexRoute: appAgentsAgentIdEditIndexRoute,
   appPersonasTemplateIdEditIndexRoute: appPersonasTemplateIdEditIndexRoute,
+  appProjectsProjectIdChatIndexRoute: appProjectsProjectIdChatIndexRoute,
+  appProjectsProjectIdDocsIndexRoute: appProjectsProjectIdDocsIndexRoute,
+  appProjectsProjectIdMembersIndexRoute: appProjectsProjectIdMembersIndexRoute,
   appProjectsProjectIdSettingsIndexRoute:
     appProjectsProjectIdSettingsIndexRoute,
   appSettingsLlmNewIndexRoute: appSettingsLlmNewIndexRoute,
