@@ -1,58 +1,52 @@
 // src_refactored/infrastructure/ioc/inversify.config.ts
 import 'reflect-metadata';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'; // Added import
 import { Container } from 'inversify';
 
-// --- Domain Layer Ports (Interfaces) ---
-import { IJobEventEmitter } from '@/core/application/ports/events/i-job-event-emitter.interface'; // Added
-import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
-import { IChatService } from '@/core/application/ports/services/i-chat.service';
-import { IEmbeddingService } from '@/core/application/ports/services/i-embedding.service';
-import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service';
-import { IWorkerService } from '@/core/application/ports/services/i-worker.service';
-import { QueueSchedulerService } from '@/core/application/queue/queue-scheduler.service'; // Added
+// --- Core Application Ports ---
+import { IJobEventEmitter, JOB_EVENT_EMITTER_TOKEN } from '@/core/application/ports/events/i-job-event-emitter.interface';
+import { IAgentExecutor, AGENT_EXECUTOR_TOKEN } from '@/core/application/ports/services/i-agent-executor.interface';
+import { IChatService, CHAT_SERVICE_TOKEN } from '@/core/application/ports/services/i-chat.service';
+import { IEmbeddingService, EMBEDDING_SERVICE_TOKEN } from '@/core/application/ports/services/i-embedding.service';
+import { IToolRegistryService, TOOL_REGISTRY_SERVICE_TOKEN } from '@/core/application/ports/services/i-tool-registry.service';
+// IWorkerService might be bound later if specific worker instances are managed by DI beyond direct instantiation.
+
+// --- Core Application Services ---
+import { JobQueueService } from '@/core/application/queue/job-queue.service';
+import { JobWorkerService } from '@/core/application/queue/job-worker.service'; // For type annotation if bound directly
+import { QueueSchedulerService } from '@/core/application/queue/queue-scheduler.service';
+import { CreateJobUseCase } from '@/core/application/queue/use-cases/create-job.use-case';
+import { GetJobUseCase } from '@/core/application/queue/use-cases/get-job.use-case';
 import { ChatService } from '@/core/application/services/chat.service';
 import { GenericAgentExecutor } from '@/core/application/services/generic-agent-executor.service';
-import { CreateAgentUseCase } from '@/core/application/use-cases/agent/create-agent.use-case';
 
-// --- Use Cases ---
-import { LoadAgentInternalStateUseCase } from '@/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case';
-import { SaveAgentInternalStateUseCase } from '@/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case';
-import { CreatePersonaTemplateUseCase } from '@/core/application/use-cases/agent-persona-template/create-persona-template.use-case';
-import { ListAnnotationsUseCase } from '@/core/application/use-cases/annotation/list-annotations.use-case';
-import { RemoveAnnotationUseCase } from '@/core/application/use-cases/annotation/remove-annotation.use-case';
-import { SaveAnnotationUseCase } from '@/core/application/use-cases/annotation/save-annotation.use-case';
-import { CancelJobUseCase } from '@/core/application/use-cases/job/cancel-job.use-case';
-import { CreateJobUseCase } from '@/core/application/use-cases/job/create-job.use-case';
-import { ListJobsUseCase } from '@/core/application/use-cases/job/list-jobs.use-case';
-import { RetryJobUseCase } from '@/core/application/use-cases/job/retry-job.use-case';
-import { UpdateJobUseCase } from '@/core/application/use-cases/job/update-job.use-case';
-import { CreateLLMProviderConfigUseCase } from '@/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case';
-import { RemoveMemoryItemUseCase } from '@/core/application/use-cases/memory/remove-memory-item.use-case';
-import { SaveMemoryItemUseCase } from '@/core/application/use-cases/memory/save-memory-item.use-case';
-import { SearchMemoryItemsUseCase } from '@/core/application/use-cases/memory/search-memory-items.use-case';
-import { SearchSimilarMemoryItemsUseCase } from '@/core/application/use-cases/memory/search-similar-memory-items.use-case';
-import { CreateProjectUseCase } from '@/core/application/use-cases/project/create-project.use-case';
-import { GetProjectDetailsUseCase as GetProjectDetailsAppUseCase } from '@/core/application/use-cases/project/get-project-details.use-case';
-import { ListProjectsUseCase as ListProjectsAppUseCase } from '@/core/application/use-cases/project/list-projects.use-case';
-import { CreateUserUseCase } from '@/core/application/use-cases/user/create-user.use-case';
-import { GetUserUseCase } from '@/core/application/use-cases/user/get-user.use-case';
-import { ILoggerService } from '@/core/common/services/i-logger.service';
-import { IAgentInternalStateRepository } from '@/core/domain/agent/ports/agent-internal-state-repository.interface';
-import { IAgentPersonaTemplateRepository } from '@/core/domain/agent/ports/agent-persona-template-repository.interface';
-import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface';
-import { IAnnotationRepository } from '@/core/domain/annotation/ports/annotation-repository.interface';
-import { IJobRepository } from '@/core/domain/job/ports/job-repository.interface';
-import { ILLMProviderConfigRepository } from '@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
-import { IMemoryRepository } from '@/core/domain/memory/ports/memory-repository.interface';
-import { IProjectRepository } from '@/core/domain/project/ports/project-repository.interface';
-import { ISourceCodeRepository } from '@/core/domain/source-code/ports/source-code-repository.interface';
-import { IUserRepository } from '@/core/domain/user/ports/user-repository.interface';
-// import { IJobQueueAdapter } from '@/core/ports/adapters/job-queue.interface'; // Not used for now
-// import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface'; // Not used for now
+// --- Core Domain Ports (Repositories) ---
+import { ILoggerService, LOGGER_SERVICE_TOKEN } from '@/core/common/services/i-logger.service';
+import { IAgentInternalStateRepository, AGENT_INTERNAL_STATE_REPOSITORY_TOKEN } from '@/core/domain/agent/ports/agent-internal-state-repository.interface';
+import { IAgentPersonaTemplateRepository, AGENT_PERSONA_TEMPLATE_REPOSITORY_TOKEN } from '@/core/domain/agent/ports/agent-persona-template-repository.interface';
+import { IAgentRepository, AGENT_REPOSITORY_TOKEN } from '@/core/domain/agent/ports/agent-repository.interface';
+import { IAnnotationRepository, ANNOTATION_REPOSITORY_TOKEN } from '@/core/domain/annotation/ports/annotation-repository.interface';
+import { AgentExecutionPayload, AgentExecutorResult } from '@/core/domain/job/job-processing.types';
+import { IJobRepository, JOB_REPOSITORY_TOKEN } from '@/core/domain/job/ports/job-repository.interface';
+import { ILLMProviderConfigRepository, LLM_PROVIDER_CONFIG_REPOSITORY_TOKEN } from '@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
+import { IMemoryRepository, MEMORY_REPOSITORY_TOKEN } from '@/core/domain/memory/ports/memory-repository.interface';
+import { IProjectRepository, PROJECT_REPOSITORY_TOKEN } from '@/core/domain/project/ports/project-repository.interface';
+import { ISourceCodeRepository, SOURCE_CODE_REPOSITORY_TOKEN } from '@/core/domain/source-code/ports/source-code-repository.interface';
+import { IUserRepository, USER_REPOSITORY_TOKEN } from '@/core/domain/user/ports/user-repository.interface';
+
+// --- Core Domain Entities/Types (for payload typing) ---
+
+// --- Core Common Services ---
+
+// --- Core Ports (Adapters) ---
+import { ILLMAdapter, LLM_ADAPTER_TOKEN } from '@/core/ports/adapters/llm-adapter.interface';
+
+// --- Use Cases (Example, bind as needed) ---
 
 
 // --- Infrastructure Layer Implementations ---
-import { InMemoryJobEventEmitter } from '../events/in-memory-job-event-emitter'; // Added
+import { MockLLMAdapter } from '../adapters/llm/mock-llm.adapter'; // Added MockLLMAdapter
+import { InMemoryJobEventEmitter } from '../events/in-memory-job-event-emitter';
 import { db, schema } from '../persistence/drizzle/drizzle.client';
 import { DrizzleJobRepository } from '../persistence/drizzle/job/drizzle-job.repository';
 import { InMemoryAgentInternalStateRepository } from '../persistence/in-memory/repositories/agent-internal-state.repository.ts';
@@ -67,87 +61,104 @@ import { InMemoryUserRepository } from '../persistence/in-memory/repositories/us
 import { ConsoleLoggerService } from '../services/logger/console-logger.service.ts';
 import { ToolRegistryService } from '../services/tool-registry/tool-registry.service.ts';
 import { FileSystemTool } from '../tools/file-system.tool.ts';
+// import { TaskTool } from '../../../src/infrastructure/tools/task.tool'; // Path to old TaskTool if binding it
 
-import { TYPES } from './types';
+import { TYPES } from './types'; // Contains all symbols
 
+export const AGENT_EXECUTION_QUEUE_NAME = 'agent-execution-queue';
 
 const appContainer = new Container({ defaultScope: 'Singleton' });
 
 // === Bindings ===
-appContainer.bind<ILoggerService>(TYPES.ILoggerService).to(ConsoleLoggerService);
-appContainer.bind(TYPES.DrizzleClient).toConstantValue({ db, schema });
-appContainer.bind<IJobEventEmitter>(TYPES.IJobEventEmitter).to(InMemoryJobEventEmitter); // Added
+appContainer.bind<ILoggerService>(LOGGER_SERVICE_TOKEN).to(ConsoleLoggerService);
+// Bind the db instance directly for DrizzleClient token
+appContainer.bind<BetterSQLite3Database<typeof schema>>(TYPES.DrizzleClient).toConstantValue(db);
+appContainer.bind<IJobEventEmitter>(JOB_EVENT_EMITTER_TOKEN).to(InMemoryJobEventEmitter);
 
 // Repositories
-appContainer.bind<IAgentInternalStateRepository>(TYPES.IAgentInternalStateRepository).to(InMemoryAgentInternalStateRepository);
-appContainer.bind<IAgentPersonaTemplateRepository>(TYPES.IAgentPersonaTemplateRepository).to(InMemoryAgentPersonaTemplateRepository);
-appContainer.bind<IAgentRepository>(TYPES.IAgentRepository).to(InMemoryAgentRepository);
-appContainer.bind<IAnnotationRepository>(TYPES.IAnnotationRepository).to(InMemoryAnnotationRepository);
-appContainer.bind<IJobRepository>(TYPES.IJobRepository).to(DrizzleJobRepository);
-appContainer.bind<ILLMProviderConfigRepository>(TYPES.ILLMProviderConfigRepository).to(InMemoryLLMProviderConfigRepository);
-appContainer.bind<IMemoryRepository>(TYPES.IMemoryRepository).to(InMemoryMemoryRepository);
-appContainer.bind<IProjectRepository>(TYPES.IProjectRepository).to(InMemoryProjectRepository);
-appContainer.bind<ISourceCodeRepository>(TYPES.ISourceCodeRepository).to(InMemorySourceCodeRepository);
-appContainer.bind<IUserRepository>(TYPES.IUserRepository).to(InMemoryUserRepository);
+appContainer.bind<IAgentInternalStateRepository>(AGENT_INTERNAL_STATE_REPOSITORY_TOKEN).to(InMemoryAgentInternalStateRepository);
+appContainer.bind<IAgentPersonaTemplateRepository>(AGENT_PERSONA_TEMPLATE_REPOSITORY_TOKEN).to(InMemoryAgentPersonaTemplateRepository);
+appContainer.bind<IAgentRepository>(AGENT_REPOSITORY_TOKEN).to(InMemoryAgentRepository);
+appContainer.bind<IAnnotationRepository>(ANNOTATION_REPOSITORY_TOKEN).to(InMemoryAnnotationRepository);
+appContainer.bind<IJobRepository>(JOB_REPOSITORY_TOKEN).to(DrizzleJobRepository);
+appContainer.bind<ILLMProviderConfigRepository>(LLM_PROVIDER_CONFIG_REPOSITORY_TOKEN).to(InMemoryLLMProviderConfigRepository);
+appContainer.bind<IMemoryRepository>(MEMORY_REPOSITORY_TOKEN).to(InMemoryMemoryRepository);
+appContainer.bind<IProjectRepository>(PROJECT_REPOSITORY_TOKEN).to(InMemoryProjectRepository);
+appContainer.bind<ISourceCodeRepository>(SOURCE_CODE_REPOSITORY_TOKEN).to(InMemorySourceCodeRepository);
+appContainer.bind<IUserRepository>(USER_REPOSITORY_TOKEN).to(InMemoryUserRepository);
 
 // Infrastructure Services & Adapters
-appContainer.bind<IToolRegistryService>(TYPES.IToolRegistryService).to(ToolRegistryService);
+appContainer.bind<IToolRegistryService>(TOOL_REGISTRY_SERVICE_TOKEN).to(ToolRegistryService);
+appContainer.bind<ILLMAdapter>(LLM_ADAPTER_TOKEN).to(MockLLMAdapter); // Bind Mock LLM Adapter
 
 // Application Services
-appContainer.bind<IAgentExecutor>(TYPES.IAgentExecutor).to(GenericAgentExecutor);
-appContainer.bind<IChatService>(TYPES.IChatService).to(ChatService);
-appContainer.bind<QueueSchedulerService>(TYPES.QueueSchedulerService).to(QueueSchedulerService); // Added binding
+appContainer.bind<IAgentExecutor>(AGENT_EXECUTOR_TOKEN).to(GenericAgentExecutor);
+appContainer.bind<IChatService>(CHAT_SERVICE_TOKEN).to(ChatService);
+appContainer.bind<QueueSchedulerService>(TYPES.QueueSchedulerService).to(QueueSchedulerService);
 
-// Use Cases
+// JobQueueService for Agent Execution (example of a named queue service)
+appContainer.bind<JobQueueService<AgentExecutionPayload, AgentExecutorResult>>(TYPES.AgentJobQueueService)
+  .toDynamicValue(context => new JobQueueService<AgentExecutionPayload, AgentExecutorResult>(
+    AGENT_EXECUTION_QUEUE_NAME,
+    context.container.get<IJobRepository>(JOB_REPOSITORY_TOKEN),
+    context.container.get<IJobEventEmitter>(JOB_EVENT_EMITTER_TOKEN)
+  )).inSingletonScope();
+
+// Use Cases (typically transient)
+// Bind them using their class name as symbol or dedicated symbols from TYPES
+appContainer.bind<CreateJobUseCase<unknown, unknown>>(TYPES.CreateJobUseCase).to(CreateJobUseCase).inTransientScope();
+appContainer.bind<GetJobUseCase<unknown, unknown>>(TYPES.GetJobDetailsUseCase).to(GetJobUseCase).inTransientScope(); // Assuming GetJobDetailsUseCase is the token for GetJobUseCase
+// ... Bind other use cases from TYPES ...
 appContainer.bind<CreateAgentUseCase>(TYPES.CreateAgentUseCase).to(CreateAgentUseCase).inTransientScope();
 appContainer.bind<LoadAgentInternalStateUseCase>(TYPES.LoadAgentInternalStateUseCase).to(LoadAgentInternalStateUseCase).inTransientScope();
-// ... other use case bindings ...
 appContainer.bind<SaveAgentInternalStateUseCase>(TYPES.SaveAgentInternalStateUseCase).to(SaveAgentInternalStateUseCase).inTransientScope();
-appContainer.bind<CreatePersonaTemplateUseCase>(TYPES.CreatePersonaTemplateUseCase).to(CreatePersonaTemplateUseCase).inTransientScope();
-appContainer.bind<ListAnnotationsUseCase>(TYPES.ListAnnotationsUseCase).to(ListAnnotationsUseCase).inTransientScope();
-appContainer.bind<RemoveAnnotationUseCase>(TYPES.RemoveAnnotationUseCase).to(RemoveAnnotationUseCase).inTransientScope();
-appContainer.bind<SaveAnnotationUseCase>(TYPES.SaveAnnotationUseCase).to(SaveAnnotationUseCase).inTransientScope();
-appContainer.bind<CancelJobUseCase>(TYPES.CancelJobUseCase).to(CancelJobUseCase).inTransientScope();
-appContainer.bind<CreateJobUseCase>(TYPES.CreateJobUseCase).to(CreateJobUseCase).inTransientScope();
-appContainer.bind<ListJobsUseCase>(TYPES.ListJobsUseCase).to(ListJobsUseCase).inTransientScope();
-appContainer.bind<RetryJobUseCase>(TYPES.RetryJobUseCase).to(RetryJobUseCase).inTransientScope();
-appContainer.bind<UpdateJobUseCase>(TYPES.UpdateJobUseCase).to(UpdateJobUseCase).inTransientScope();
-appContainer.bind<CreateLLMProviderConfigUseCase>(TYPES.CreateLLMProviderConfigUseCase).to(CreateLLMProviderConfigUseCase).inTransientScope();
-appContainer.bind<RemoveMemoryItemUseCase>(TYPES.RemoveMemoryItemUseCase).to(RemoveMemoryItemUseCase).inTransientScope();
-appContainer.bind<SaveMemoryItemUseCase>(TYPES.SaveMemoryItemUseCase).to(SaveMemoryItemUseCase).inTransientScope();
-appContainer.bind<SearchMemoryItemsUseCase>(TYPES.SearchMemoryItemsUseCase).to(SearchMemoryItemsUseCase).inTransientScope();
-appContainer.bind<SearchSimilarMemoryItemsUseCase>(TYPES.SearchSimilarMemoryItemsUseCase).to(SearchSimilarMemoryItemsUseCase).inTransientScope();
-appContainer.bind<CreateProjectUseCase>(TYPES.CreateProjectUseCase).to(CreateProjectUseCase).inTransientScope();
-appContainer.bind<GetProjectDetailsAppUseCase>(TYPES.GetProjectDetailsAppUseCase).to(GetProjectDetailsAppUseCase).inTransientScope();
-appContainer.bind<ListProjectsAppUseCase>(TYPES.ListProjectsAppUseCase).to(ListProjectsAppUseCase).inTransientScope();
-appContainer.bind<CreateUserUseCase>(TYPES.CreateUserUseCase).to(CreateUserUseCase).inTransientScope();
-appContainer.bind<GetUserUseCase>(TYPES.GetUserUseCase).to(GetUserUseCase).inTransientScope();
-
+// ... and so on for all use cases listed in TYPES
 
 // Tools
 appContainer.bind<FileSystemTool>(TYPES.FileSystemTool).to(FileSystemTool).inSingletonScope();
 
-// --- Post-build setup: Register tools & Start Services ---
-const toolRegistryInstance = appContainer.get<IToolRegistryService>(TYPES.IToolRegistryService);
-const loggerForTools = appContainer.get<ILoggerService>(TYPES.ILoggerService);
+// --- Eagerly instantiate services that need to start running ---
+const logger = appContainer.get<ILoggerService>(LOGGER_SERVICE_TOKEN); // Get logger once
 
-try {
-  const fileSystemToolInstance = appContainer.get<FileSystemTool>(TYPES.FileSystemTool);
-  toolRegistryInstance.registerTool(fileSystemToolInstance);
-  loggerForTools.info('[InversifyConfig] FileSystemTool registered with ToolRegistryService.');
-} catch (error) {
-  const err = error instanceof Error ? error : new Error(String(error));
-  loggerForTools.error('[InversifyConfig] CRITICAL: Failed to register FileSystemTool:', err);
-}
-
-// Instantiate QueueSchedulerService to start its cycle
 try {
     appContainer.get<QueueSchedulerService>(TYPES.QueueSchedulerService);
-    loggerForTools.info('[InversifyConfig] QueueSchedulerService started.');
+    logger.info('[InversifyConfig] QueueSchedulerService started.');
 } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
-    loggerForTools.error('[InversifyConfig] CRITICAL: Failed to start QueueSchedulerService:', err);
+    logger.error('[InversifyConfig] CRITICAL: Failed to start QueueSchedulerService:', err);
 }
 
+try {
+    const agentExecutor = appContainer.get<GenericAgentExecutor>(AGENT_EXECUTOR_TOKEN);
+    const agentJobWorker = new JobWorkerService<AgentExecutionPayload, AgentExecutorResult>(
+        AGENT_EXECUTION_QUEUE_NAME,
+        agentExecutor.process.bind(agentExecutor),
+        { concurrency: 2 }, // Example options
+        appContainer.get<IJobRepository>(JOB_REPOSITORY_TOKEN),
+        appContainer.get<IJobEventEmitter>(JOB_EVENT_EMITTER_TOKEN),
+        logger.getSubLogger({ name: 'AgentWorker' })
+    );
+    // agentJobWorker.run(); // Already starts due to autorun:true default
+    logger.info(`[InversifyConfig] AgentJobWorkerService started for queue: ${AGENT_EXECUTION_QUEUE_NAME}`);
+    // If JobWorkerService needs to be injectable itself and managed by container:
+    // appContainer.bind<JobWorkerService<AgentExecutionPayload, AgentExecutorResult>>(TYPES.AgentJobWorkerService)
+    //   .toConstantValue(agentJobWorker);
+    // Then other services could depend on TYPES.AgentJobWorkerService if needed.
+} catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error('[InversifyConfig] CRITICAL: Failed to start AgentJobWorkerService:', err);
+}
+
+
+// Tool Registration (example)
+try {
+  const toolRegistryInstance = appContainer.get<IToolRegistryService>(TOOL_REGISTRY_SERVICE_TOKEN);
+  const fileSystemToolInstance = appContainer.get<FileSystemTool>(TYPES.FileSystemTool);
+  toolRegistryInstance.registerTool(fileSystemToolInstance);
+  logger.info('[InversifyConfig] FileSystemTool registered with ToolRegistryService.');
+} catch (error) {
+  const err = error instanceof Error ? error : new Error(String(error));
+  logger.error('[InversifyConfig] CRITICAL: Failed to register FileSystemTool:', err);
+}
 
 export { appContainer };

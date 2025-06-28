@@ -1,5 +1,5 @@
 // src_refactored/core/application/queue/queue-scheduler.service.ts
-import { Timeout } from 'node:timers'; // Ensure Timeout is imported if NodeJS.Timeout is not global for linter
+import { Timeout } from 'node:timers';
 
 import { injectable, inject } from 'inversify';
 
@@ -17,7 +17,7 @@ const DEFAULT_PROCESSING_LIMIT_PER_CYCLE = 50;
 
 @injectable()
 export class QueueSchedulerService {
-  private intervalId?: Timeout; // Changed NodeJS.Timeout to Timeout
+  private intervalId?: Timeout;
   private isRunning: boolean = false;
   private processingLimit: number;
 
@@ -68,7 +68,7 @@ export class QueueSchedulerService {
       await this.handleStalledJobs(now);
       await this.processRepeatableJobs(now);
       await this.checkJobDependencies(now);
-    } catch (error: unknown) { // Single try-catch for the whole cycle
+    } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error('[QueueSchedulerService] Error during runCycle:', err);
     }

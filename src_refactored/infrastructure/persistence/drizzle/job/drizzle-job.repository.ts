@@ -1,34 +1,14 @@
 // src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts
 import {
-  eq,
-  and,
-  or,
-  inArray,
-  sql,
-  lte,
-  lt,
-  gte,
-  desc,
-  asc,
-  isNull,
-  count,
-  SQL, // Added SQL type import
+  eq, and, or, inArray, sql, lte, lt, gte, desc, asc, isNull, count, SQL,
 } from 'drizzle-orm';
 import { inject, injectable } from 'inversify';
 
-import {
-  JobEntity,
-  JobEntityProps,
-} from '@/core/domain/job/job.entity';
-import {
-  IJobRepository,
-} from '@/core/domain/job/ports/job-repository.interface';
-import {
-  JobSearchFilters,
-  PaginationOptions,
-  PaginatedJobsResult,
-  JobCountsByStatus,
-} from '@/core/domain/job/ports/job-repository.types';
+import { ActivityHistory } from '@/core/domain/job/job-processing.types';
+import { JobEntity, JobEntityProps } from '@/core/domain/job/job.entity';
+import { AgentState } from '@/core/domain/job/job.entity'; // Import AgentState
+import { IJobRepository } from '@/core/domain/job/ports/job-repository.interface';
+import { JobSearchFilters, PaginationOptions, PaginatedJobsResult, JobCountsByStatus } from '@/core/domain/job/ports/job-repository.types';
 import { JobExecutionLogEntryVO } from '@/core/domain/job/value-objects/job-execution-log-entry.vo';
 import { JobExecutionLogsVO } from '@/core/domain/job/value-objects/job-execution-logs.vo';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
@@ -39,112 +19,77 @@ import { JobStatusEnum, JobStatusVO } from '@/core/domain/job/value-objects/job-
 
 import { Result, Ok, Err } from '@/shared/result';
 
+// Import the actual Drizzle table schema
+import { jobsTable, JobSelect, JobInsert } from '../schema/jobs.table'; // Adjust path as needed
+
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 
-type PlaceholderColumn = { name: string; উদাহরণ?: any }; // Using a non-English character to avoid linting 'any' temporarily
-type PlaceholderTable = {
-  [key: string]: PlaceholderColumn | any; // Allow 'any' for non-core columns during placeholder phase
-  id: PlaceholderColumn; queueName: PlaceholderColumn; jobName: PlaceholderColumn; payload: PlaceholderColumn;
-  status: PlaceholderColumn; priority: PlaceholderColumn; attemptsMade: PlaceholderColumn; maxAttempts: PlaceholderColumn;
-  createdAt: PlaceholderColumn; updatedAt: PlaceholderColumn; processAt: PlaceholderColumn; startedAt: PlaceholderColumn;
-  completedAt: PlaceholderColumn; failedAt: PlaceholderColumn; returnValue: PlaceholderColumn; failedReason: PlaceholderColumn;
-  progress: PlaceholderColumn; repeatJobKey: PlaceholderColumn; parentId: PlaceholderColumn; lockedByWorkerId: PlaceholderColumn;
-  lockExpiresAt: PlaceholderColumn; jobOptions: PlaceholderColumn; executionLogs: PlaceholderColumn;
-};
 
-const _jobsTablePlaceholder: PlaceholderTable = { // Renamed with underscore
-  id: { name: 'id' },
-  queueName: { name: 'queue_name' },
-  jobName: { name: 'job_name' },
-  payload: { name: 'payload' },
-  status: { name: 'status' },
-  priority: { name: 'priority' },
-  attemptsMade: { name: 'attempts_made' },
-  maxAttempts: { name: 'max_attempts' },
-  createdAt: { name: 'created_at' },
-  updatedAt: { name: 'updated_at' },
-  processAt: { name: 'process_at' },
-  startedAt: { name: 'started_at' },
-  completedAt: { name: 'completed_at' },
-  failedAt: { name: 'failed_at' },
-  returnValue: { name: 'return_value' },
-  failedReason: { name: 'failed_reason' },
-  progress: { name: 'progress' },
-  repeatJobKey: { name: 'repeat_job_key' },
-  parentId: { name: 'parent_id' },
-  lockedByWorkerId: { name: 'locked_by_worker_id' },
-  lockExpiresAt: { name: 'lock_expires_at' },
-  jobOptions: { name: 'job_options' },
-  executionLogs: { name: 'execution_logs' },
-};
+// Helper to map Drizzle's JobSelect to JobEntity
+function mapRowToJobEntity<TData = unknown, TResult = unknown>(row: JobSelect): JobEntity<TData, TResult> {
+  // Drizzle's JSON blobs are already parsed into objects/arrays by default with better-sqlite3 driver.
+  // We just need to cast them to the expected types.
+  const jobOptionsFromDb = row.jobOptions as IJobOptions;
+  const payloadFromDb = row.payload as TData;
+  const returnValueFromDb = row.returnValue as TResult;
+  const progressFromDb = row.progress as number | Record<string, unknown>;
+  const executionLogsFromDb = (row.executionLogs || []) as Array<{ timestamp: number; message: string; level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'; details?: Record<string, unknown> }>;
+  const agentStateFromDb = row.agentState as AgentState | null; // agentState column added to schema
 
-interface JobDbRow {
-  id: string;
-  queueName: string;
-  jobName: string;
-  payload: any;
-  jobOptions: IJobOptions;
-  status: JobStatusEnum;
-  priority: number;
-  progress: any;
-  returnValue: any;
-  failedReason?: string | null;
-  attemptsMade: number;
-  createdAt: number;
-  updatedAt: number;
-  processAt?: number | null;
-  startedAt?: number | null;
-  completedAt?: number | null;
-  failedAt?: number | null;
-  executionLogs: Array<{ message: string; level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'; details?: Record<string, unknown>; timestamp: number }> | null;
-  lockedByWorkerId?: string | null;
-  lockExpiresAt?: number | null;
-  repeatJobKey?: string | null;
-  parentId?: string | null;
-  maxAttempts: number;
-}
-
-function mapRowToJobEntity<TData = any, TResult = any>(row: JobDbRow): JobEntity<TData, TResult> {
-  const rehydratedProps: JobEntityProps<TData, TResult> = {
+  const entityProps: JobEntityProps<TData, TResult> = {
     id: JobIdVO.create(row.id),
     queueName: row.queueName,
     jobName: row.jobName,
-    payload: row.payload as TData,
-    opts: JobOptionsVO.create(row.jobOptions),
-    status: JobStatusVO.create(row.status),
+    payload: payloadFromDb,
+    opts: JobOptionsVO.create(jobOptionsFromDb),
+    status: JobStatusVO.create(row.status as JobStatusEnum), // Ensure status is valid JobStatusEnum
     priority: JobPriorityVO.create(row.priority),
-    progress: JobProgressVO.create(row.progress),
-    returnValue: row.returnValue as TResult,
+    progress: JobProgressVO.create(progressFromDb),
+    returnValue: returnValueFromDb,
     failedReason: row.failedReason ?? undefined,
     attemptsMade: row.attemptsMade,
-    createdAt: row.createdAt,
+    createdAt: row.createdAt, // Already number (timestamp_ms)
     updatedAt: row.updatedAt,
     processAt: row.processAt ?? undefined,
     startedAt: row.startedAt ?? undefined,
     finishedAt: (row.completedAt || row.failedAt) ?? undefined,
     executionLogs: JobExecutionLogsVO.create(
-      (row.executionLogs || []).map(log =>
+      executionLogsFromDb.map(log =>
         JobExecutionLogEntryVO.create(log.message, log.level, log.details, new Date(log.timestamp))
       )
     ),
     lockedByWorkerId: row.lockedByWorkerId ?? undefined,
     lockExpiresAt: row.lockExpiresAt ?? undefined,
     repeatJobKey: row.repeatJobKey ?? undefined,
+    parentId: row.parentId ?? undefined,
+    agentState: agentStateFromDb ? { // Rehydrate AgentState
+        conversationHistory: ActivityHistory.create(
+            agentStateFromDb.conversationHistory.entries().map(entryProps => ActivityHistoryEntry.create(
+                entryProps.role(),
+                entryProps.content(),
+                entryProps.props.timestamp,
+                entryProps.props.toolName,
+                entryProps.props.toolCallId,
+                entryProps.props.tool_calls
+            ))
+        ),
+        executionHistory: agentStateFromDb.executionHistory
+    } : undefined,
+    // _repository and _eventEmitter are transient, not mapped from DB row
   };
-  return JobEntity.fromPersistence(rehydratedProps);
+  return JobEntity.fromPersistence(entityProps);
 }
 
-type JobDbInsertData = ReturnType<typeof mapJobEntityToDbRow>;
-
-function mapJobEntityToDbRow(job: JobEntity<any, any>): JobDbInsertData {
-  const props = (job as any).props as JobEntityProps<any, any>;
+// Helper to map JobEntity to Drizzle's JobInsert
+function mapJobEntityToDbRow(job: JobEntity<any, any>): JobInsert {
+  const props = job.props; // Access public props
   return {
     id: props.id.value,
     queueName: props.queueName,
     jobName: props.jobName,
     payload: props.payload,
-    opts: props.opts.props,
+    jobOptions: props.opts.props,
     status: props.status.value,
     priority: props.priority.value,
     progress: props.progress.value,
@@ -156,8 +101,8 @@ function mapJobEntityToDbRow(job: JobEntity<any, any>): JobDbInsertData {
     updatedAt: props.updatedAt,
     processAt: props.processAt,
     startedAt: props.startedAt,
-    completedAt: props.status.is(JobStatusEnum.COMPLETED) ? props.finishedAt : undefined,
-    failedAt: props.status.is(JobStatusEnum.FAILED) ? props.finishedAt : undefined,
+    completedAt: props.status.is(JobStatusEnum.COMPLETED) ? props.finishedAt : null, // Use null for DB
+    failedAt: props.status.is(JobStatusEnum.FAILED) ? props.finishedAt : null, // Use null for DB
     executionLogs: props.executionLogs.entries.map(log => ({
         message: log.message,
         level: log.level,
@@ -168,29 +113,32 @@ function mapJobEntityToDbRow(job: JobEntity<any, any>): JobDbInsertData {
     lockExpiresAt: props.lockExpiresAt,
     repeatJobKey: props.repeatJobKey,
     parentId: props.opts.parentId,
+    agentState: props.agentState ? { // Persist agentState
+        conversationHistory: props.agentState.conversationHistory.toPersistence(), // Assuming toPersistence returns serializable format
+        executionHistory: props.agentState.executionHistory
+    } : null,
   };
 }
 
+
 @injectable()
 export class DrizzleJobRepository implements IJobRepository {
-  private _jobsTable: PlaceholderTable; // Renamed class member
+  // Use the imported jobsTable directly
+  private readonly table = jobsTable;
 
   constructor(
-    @inject('DrizzleClient') private db: BaseSQLiteDatabase<"async", any>,
-    @inject('DrizzleSchema') schema: { jobs: PlaceholderTable }
-  ) {
-    this._jobsTable = schema.jobs; // Use renamed member
-  }
+    @inject('DrizzleClient') private db: BaseSQLiteDatabase<"async", any, any>, // More specific type if possible
+    // Schema object is not directly needed if we import tables directly
+  ) {}
 
   async save(job: JobEntity<any, any>): Promise<Result<void, Error>> {
     try {
       const rowToSave = mapJobEntityToDbRow(job);
-      const table = this._jobsTable as any; // Use renamed member
       await this.db
-        .insert(table)
+        .insert(this.table)
         .values(rowToSave)
         .onConflictDoUpdate({
-          target: table.id,
+          target: this.table.id,
           set: Object.fromEntries(Object.entries(rowToSave).filter(([key]) => key !== 'id')),
         });
       return Ok(undefined);
@@ -199,13 +147,12 @@ export class DrizzleJobRepository implements IJobRepository {
     }
   }
 
-  async findById(idVo: JobIdVO): Promise<Result<JobEntity<any, any> | null, Error>> { // Renamed id to idVo
+  async findById(idVo: JobIdVO): Promise<Result<JobEntity<any, any> | null, Error>> {
     try {
-      const table = this._jobsTable as any; // Use renamed member
-      const resultRows: JobDbRow[] = await this.db
+      const resultRows: JobSelect[] = await this.db
         .select()
-        .from(table)
-        .where(eq(table.id, idVo.value)) // Use idVo
+        .from(this.table)
+        .where(eq(this.table.id, idVo.value))
         .limit(1);
 
       if (resultRows.length === 0) {
@@ -213,21 +160,20 @@ export class DrizzleJobRepository implements IJobRepository {
       }
       return Ok(mapRowToJobEntity(resultRows[0]));
     } catch (error: unknown) {
-      return Err(new Error(`Failed to find job by id ${idVo.value}: ${error instanceof Error ? error.message : String(error)}`)); // Use idVo
+      return Err(new Error(`Failed to find job by id ${idVo.value}: ${error instanceof Error ? error.message : String(error)}`));
     }
   }
 
   async findByIds(ids: JobIdVO[]): Promise<Result<JobEntity<any, any>[], Error>> {
     if (ids.length === 0) return Ok([]);
     try {
-      const table = this._jobsTable as any; // Use renamed member
       const jobIds = ids.map(idVo => idVo.value);
-      const resultRows: JobDbRow[] = await this.db
+      const resultRows: JobSelect[] = await this.db
         .select()
-        .from(table)
-        .where(inArray(table.id, jobIds));
+        .from(this.table)
+        .where(inArray(this.table.id, jobIds));
 
-      return Ok(resultRows.map(mapRowToJobEntity));
+      return Ok(resultRows.map(row => mapRowToJobEntity(row)));
     } catch (error: unknown) {
       return Err(new Error(`Failed to find jobs by ids: ${error instanceof Error ? error.message : String(error)}`));
     }
@@ -240,23 +186,24 @@ export class DrizzleJobRepository implements IJobRepository {
     nowTimestampMs: number,
     lockDurationMs: number,
   ): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
-      const candidateJobRows: JobDbRow[] = await this.db
+      // Note: LIFO/FIFO based on job.opts.lifo is complex for a single query.
+      // This implementation primarily sorts by priority then createdAt (FIFO).
+      const candidateJobRows: JobSelect[] = await this.db
         .select()
-        .from(table)
+        .from(this.table)
         .where(
           and(
-            eq(table.queueName, queueName),
-            eq(table.status, JobStatusEnum.PENDING),
+            eq(this.table.queueName, queueName),
+            eq(this.table.status, JobStatusEnum.PENDING),
             or(
-              isNull(table.processAt),
-              lte(table.processAt, nowTimestampMs)
+              isNull(this.table.processAt),
+              lte(this.table.processAt, nowTimestampMs)
             )
           )
         )
-        .orderBy(asc(table.priority), asc(table.createdAt))
-        .limit(limit * 2);
+        .orderBy(asc(this.table.priority), asc(this.table.createdAt))
+        .limit(limit * 2); // Over-fetch slightly to handle potential race conditions if not in transaction
 
       if (candidateJobRows.length === 0) {
         return Ok([]);
@@ -268,25 +215,29 @@ export class DrizzleJobRepository implements IJobRepository {
       for (const candidateRow of candidateJobRows) {
         if (lockedJobEntities.length >= limit) break;
 
-        const updateResult = await this.db.update(table)
+        // Atomic update to lock the job
+        const updateResult = await this.db.update(this.table)
           .set({
             status: JobStatusEnum.ACTIVE,
             lockedByWorkerId: workerId,
             lockExpiresAt: newLockExpiresAt,
             startedAt: nowTimestampMs,
-            updatedAt: nowTimestampMs,
-            attemptsMade: sql`${table.attemptsMade} + 1`,
+            updatedAt: nowTimestampMs, // Touch updatedAt
+            attemptsMade: sql`${this.table.attemptsMade} + 1`,
           })
           .where(and(
-            eq(table.id, candidateRow.id),
-            eq(table.status, JobStatusEnum.PENDING)
+            eq(this.table.id, candidateRow.id),
+            eq(this.table.status, JobStatusEnum.PENDING) // Ensure it's still pending
           ));
 
-        if ((updateResult as { rowsAffected?: number }).rowsAffected ?? 0 > 0) {
+        // Check if update was successful (e.g., 1 row affected)
+        // Drizzle's rowsAffected might vary by driver. For better-sqlite3, it's usually available.
+        if ((updateResult as any).rowsAffected > 0) {
+          // Re-fetch the now locked job to get its full state
           const lockedJobResult = await this.findById(JobIdVO.create(candidateRow.id));
           if (lockedJobResult.isOk() && lockedJobResult.value) {
-            if (lockedJobResult.value.status.is(JobStatusEnum.ACTIVE) &&
-                lockedJobResult.value.lockedByWorkerId === workerId) {
+            // Final check to ensure it's the one we locked
+            if (lockedJobResult.value.lockedByWorkerId === workerId && lockedJobResult.value.status.is(JobStatusEnum.ACTIVE)) {
               lockedJobEntities.push(lockedJobResult.value);
             }
           }
@@ -303,24 +254,23 @@ export class DrizzleJobRepository implements IJobRepository {
     limit: number,
     queueName?: string,
   ): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
-        eq(table.status, JobStatusEnum.ACTIVE),
-        lt(table.lockExpiresAt, lockExpiresAtBefore),
+        eq(this.table.status, JobStatusEnum.ACTIVE),
+        lt(this.table.lockExpiresAt, lockExpiresAtBefore),
       ];
       if (queueName) {
-        conditions.push(eq(table.queueName, queueName));
+        conditions.push(eq(this.table.queueName, queueName));
       }
 
-      const resultRows: JobDbRow[] = await this.db
+      const resultRows: JobSelect[] = await this.db
         .select()
-        .from(table)
+        .from(this.table)
         .where(and(...conditions))
-        .orderBy(asc(table.lockExpiresAt))
+        .orderBy(asc(this.table.lockExpiresAt))
         .limit(limit);
 
-      return Ok(resultRows.map(mapRowToJobEntity));
+      return Ok(resultRows.map(row => mapRowToJobEntity(row)));
     } catch (error: unknown) {
       return Err(new Error(`Failed to find stalled jobs: ${error instanceof Error ? error.message : String(error)}`));
     }
@@ -331,24 +281,23 @@ export class DrizzleJobRepository implements IJobRepository {
     limit: number,
     queueName?: string,
   ): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
-        eq(table.status, JobStatusEnum.DELAYED),
-        lte(table.processAt, nowTimestampMs),
+        eq(this.table.status, JobStatusEnum.DELAYED),
+        lte(this.table.processAt, nowTimestampMs),
       ];
       if (queueName) {
-        conditions.push(eq(table.queueName, queueName));
+        conditions.push(eq(this.table.queueName, queueName));
       }
 
-      const resultRows: JobDbRow[] = await this.db
+      const resultRows: JobSelect[] = await this.db
         .select()
-        .from(table)
+        .from(this.table)
         .where(and(...conditions))
-        .orderBy(asc(table.processAt))
+        .orderBy(asc(this.table.processAt))
         .limit(limit);
 
-      return Ok(resultRows.map(mapRowToJobEntity));
+      return Ok(resultRows.map(row => mapRowToJobEntity(row)));
     } catch (error: unknown) {
       return Err(new Error(`Failed to find delayed jobs to promote: ${error instanceof Error ? error.message : String(error)}`));
     }
@@ -358,47 +307,44 @@ export class DrizzleJobRepository implements IJobRepository {
     queueName: string,
     repeatKey: string
   ): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
-      const resultRows: JobDbRow[] = await this.db
+      const resultRows: JobSelect[] = await this.db
         .select()
-        .from(table)
+        .from(this.table)
         .where(and(
-          eq(table.queueName, queueName),
-          eq(table.repeatJobKey, repeatKey)
+          eq(this.table.queueName, queueName),
+          eq(this.table.repeatJobKey, repeatKey)
         ))
-        .orderBy(desc(table.createdAt));
-      return Ok(resultRows.map(mapRowToJobEntity));
+        .orderBy(desc(this.table.createdAt));
+      return Ok(resultRows.map(row => mapRowToJobEntity(row)));
     } catch (error: unknown) {
       return Err(new Error(`Failed to find jobs by repeat key ${repeatKey} in queue ${queueName}: ${error instanceof Error ? error.message : String(error)}`));
     }
   }
 
   async findJobsByParentId(parentIdVo: JobIdVO): Promise<Result<JobEntity<any, any>[], Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
-      const resultRows: JobDbRow[] = await this.db
+      const resultRows: JobSelect[] = await this.db
         .select()
-        .from(table)
-        .where(eq(table.parentId, parentIdVo.value))
-        .orderBy(asc(table.createdAt));
-      return Ok(resultRows.map(mapRowToJobEntity));
+        .from(this.table)
+        .where(eq(this.table.parentId, parentIdVo.value))
+        .orderBy(asc(this.table.createdAt));
+      return Ok(resultRows.map(row => mapRowToJobEntity(row)));
     } catch (error: unknown) {
       return Err(new Error(`Failed to find jobs by parent ID ${parentIdVo.value}: ${error instanceof Error ? error.message : String(error)}`));
     }
   }
 
   async getJobCountsByStatus(queueName: string): Promise<Result<JobCountsByStatus, Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
       const resultStats: { status: JobStatusEnum; count: number }[] = await this.db
         .select({
-          status: table.status,
-          count: count(table.id),
+          status: this.table.status,
+          count: count(this.table.id),
         })
-        .from(table)
-        .where(eq(table.queueName, queueName))
-        .groupBy(table.status);
+        .from(this.table)
+        .where(eq(this.table.queueName, queueName))
+        .groupBy(this.table.status);
 
       const counts: JobCountsByStatus = { total: 0 };
       resultStats.forEach(record => {
@@ -414,13 +360,12 @@ export class DrizzleJobRepository implements IJobRepository {
     }
   }
 
-  async delete(idVo: JobIdVO): Promise<Result<void, Error>> { // Renamed id to idVo
-    const table = this._jobsTable as any; // Use renamed member
+  async delete(idVo: JobIdVO): Promise<Result<void, Error>> {
     try {
-      await this.db.delete(table).where(eq(table.id, idVo.value)); // Use idVo
+      await this.db.delete(this.table).where(eq(this.table.id, idVo.value));
       return Ok(undefined);
     } catch (error: unknown) {
-      return Err(new Error(`Failed to delete job ${idVo.value}: ${error instanceof Error ? error.message : String(error)}`)); // Use idVo
+      return Err(new Error(`Failed to delete job ${idVo.value}: ${error instanceof Error ? error.message : String(error)}`));
     }
   }
 
@@ -429,21 +374,21 @@ export class DrizzleJobRepository implements IJobRepository {
     olderThanTimestampMs?: number,
     limit?: number,
   ): Promise<Result<number, Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
-        eq(table.queueName, queueName),
-        eq(table.status, JobStatusEnum.COMPLETED),
+        eq(this.table.queueName, queueName),
+        eq(this.table.status, JobStatusEnum.COMPLETED),
       ];
       if (olderThanTimestampMs !== undefined) {
-        conditions.push(lt(table.completedAt, olderThanTimestampMs));
+        // Ensure completedAt is not null for this comparison
+        conditions.push(and(isNotNull(this.table.completedAt), lt(this.table.completedAt, olderThanTimestampMs)));
       }
 
       const idsToDeleteQuery = this.db
-        .select({ id: table.id })
-        .from(table)
+        .select({ id: this.table.id })
+        .from(this.table)
         .where(and(...conditions))
-        .orderBy(asc(table.completedAt));
+        .orderBy(asc(this.table.completedAt));
 
       if (limit !== undefined) {
         idsToDeleteQuery.limit(limit);
@@ -453,7 +398,7 @@ export class DrizzleJobRepository implements IJobRepository {
       if (rowsToDelete.length === 0) return Ok(0);
 
       const ids = rowsToDelete.map((record: {id: string}) => record.id);
-      const deleteResult = await this.db.delete(table).where(inArray(table.id, ids));
+      const deleteResult = await this.db.delete(this.table).where(inArray(this.table.id, ids));
 
       return Ok((deleteResult as { rowsAffected?: number }).rowsAffected ?? ids.length);
     } catch (error: unknown) {
@@ -466,21 +411,20 @@ export class DrizzleJobRepository implements IJobRepository {
     olderThanTimestampMs?: number,
     limit?: number,
   ): Promise<Result<number, Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [
-        eq(table.queueName, queueName),
-        eq(table.status, JobStatusEnum.FAILED),
+        eq(this.table.queueName, queueName),
+        eq(this.table.status, JobStatusEnum.FAILED),
       ];
       if (olderThanTimestampMs !== undefined) {
-        conditions.push(lt(table.failedAt, olderThanTimestampMs));
+        conditions.push(and(isNotNull(this.table.failedAt), lt(this.table.failedAt, olderThanTimestampMs)));
       }
 
       const idsToDeleteQuery = this.db
-        .select({ id: table.id })
-        .from(table)
+        .select({ id: this.table.id })
+        .from(this.table)
         .where(and(...conditions))
-        .orderBy(asc(table.failedAt));
+        .orderBy(asc(this.table.failedAt));
 
       if (limit !== undefined) {
         idsToDeleteQuery.limit(limit);
@@ -490,7 +434,7 @@ export class DrizzleJobRepository implements IJobRepository {
       if (rowsToDelete.length === 0) return Ok(0);
 
       const ids = rowsToDelete.map((record: {id: string}) => record.id);
-      const deleteResult = await this.db.delete(table).where(inArray(table.id, ids));
+      const deleteResult = await this.db.delete(this.table).where(inArray(this.table.id, ids));
       return Ok((deleteResult as { rowsAffected?: number }).rowsAffected ?? ids.length);
     } catch (error: unknown) {
       return Err(new Error(`Failed to remove failed jobs: ${error instanceof Error ? error.message : String(error)}`));
@@ -501,45 +445,40 @@ export class DrizzleJobRepository implements IJobRepository {
     filters: JobSearchFilters,
     pagination: PaginationOptions,
   ): Promise<Result<PaginatedJobsResult<any, any>, Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
       const conditions: SQL[] = [];
-      if (filters.queueName) conditions.push(eq(table.queueName, filters.queueName));
-      if (filters.jobName) conditions.push(eq(table.jobName, filters.jobName));
+      if (filters.queueName) conditions.push(eq(this.table.queueName, filters.queueName));
+      if (filters.jobName) conditions.push(eq(this.table.jobName, filters.jobName));
       if (filters.status) {
         if (Array.isArray(filters.status)) {
-          conditions.push(inArray(table.status, filters.status));
+          conditions.push(inArray(this.table.status, filters.status));
         } else {
-          conditions.push(eq(table.status, filters.status));
+          conditions.push(eq(this.table.status, filters.status));
         }
       }
       if (filters.parentId) {
-        conditions.push(eq(table.parentId, typeof filters.parentId === 'string' ? filters.parentId : filters.parentId.value));
+        conditions.push(eq(this.table.parentId, typeof filters.parentId === 'string' ? filters.parentId : filters.parentId.value));
       }
-      if (filters.repeatJobKey) conditions.push(eq(table.repeatJobKey, filters.repeatJobKey));
-      if (filters.createdAtFrom) conditions.push(gte(table.createdAt, filters.createdAtFrom.getTime()));
-      if (filters.createdAtTo) conditions.push(lte(table.createdAt, filters.createdAtTo.getTime()));
-
+      if (filters.repeatJobKey) conditions.push(eq(this.table.repeatJobKey, filters.repeatJobKey));
+      if (filters.createdAtFrom) conditions.push(gte(this.table.createdAt, filters.createdAtFrom.getTime()));
+      if (filters.createdAtTo) conditions.push(lte(this.table.createdAt, filters.createdAtTo.getTime()));
 
       const page = pagination.page || 1;
       const limitVal = pagination.limit || 10;
       const offset = (page - 1) * limitVal;
 
-      let orderByColumn;
-      // Ensure table[pagination.sortBy] is a valid column object before using it
-      const sortByIsValidColumn = pagination.sortBy && Object.prototype.hasOwnProperty.call(table, pagination.sortBy);
-
-      if (sortByIsValidColumn) {
-        orderByColumn = table[pagination.sortBy!]; // Non-null assertion as it's checked
+      let orderByClause;
+      const sortByField = pagination.sortBy ? (this.table as any)[pagination.sortBy] : this.table.createdAt;
+      if (sortByField) {
+          const sortOrderFunc = pagination.sortOrder === 'DESC' ? desc : asc;
+          orderByClause = sortOrderFunc(sortByField);
       } else {
-        orderByColumn = table.createdAt;
+          orderByClause = desc(this.table.createdAt);
       }
-      const sortOrderFunc = pagination.sortOrder === 'DESC' ? desc : asc;
-      const orderByClause = sortOrderFunc(orderByColumn);
 
       const resultsQuery = this.db
         .select()
-        .from(table)
+        .from(this.table)
         .where(conditions.length > 0 ? and(...conditions) : undefined)
         .orderBy(orderByClause)
         .limit(limitVal)
@@ -547,16 +486,16 @@ export class DrizzleJobRepository implements IJobRepository {
 
       const countResultPromise = this.db
         .select({ total: count() })
-        .from(table)
+        .from(this.table)
         .where(conditions.length > 0 ? and(...conditions) : undefined);
 
-      const [jobRows, countResult]: [JobDbRow[], {total: number}[]] = await Promise.all([resultsQuery, countResultPromise]);
+      const [jobRows, countResult]: [JobSelect[], {total: number}[]] = await Promise.all([resultsQuery, countResultPromise]);
 
       const totalItems = countResult[0]?.total || 0;
       const totalPages = Math.ceil(totalItems / limitVal);
 
       return Ok({
-        jobs: jobRows.map(mapRowToJobEntity),
+        jobs: jobRows.map(row => mapRowToJobEntity(row)),
         totalItems,
         totalPages,
         currentPage: page,
@@ -572,14 +511,13 @@ export class DrizzleJobRepository implements IJobRepository {
     queueName: string,
     statuses?: JobStatusEnum[],
   ): Promise<Result<{ count: number }, Error>> {
-    const table = this._jobsTable as any; // Use renamed member
     try {
-      const conditions: SQL[] = [eq(table.queueName, queueName)];
+      const conditions: SQL[] = [eq(this.table.queueName, queueName)];
       if (statuses && statuses.length > 0) {
-        conditions.push(inArray(table.status, statuses));
+        conditions.push(inArray(this.table.status, statuses));
       }
 
-      const result = await this.db.delete(table).where(and(...conditions));
+      const result = await this.db.delete(this.table).where(and(...conditions));
 
       const numAffected = (result as { rowsAffected?: number }).rowsAffected ?? -1;
       return Ok({ count: numAffected });

@@ -3,10 +3,9 @@ import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
 
 import { ValueError } from '@/domain/common/errors';
 
+import { ActivityHistory } from './job-processing.types'; // Added
+import { ExecutionHistoryEntry } from './job-processing.types'; // Added
 import { IJobRepository } from './ports/job-repository.interface';
-
-// Removed IJobEventEmitter and application event payload imports from here
-
 import { JobExecutionLogEntryProps, JobExecutionLogEntryVO } from './value-objects/job-execution-log-entry.vo';
 import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
@@ -15,12 +14,14 @@ import { JobPriorityVO } from './value-objects/job-priority.vo';
 import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
 import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
 
-// Forward declare IJobEventEmitter to satisfy _setActiveContext signature if needed by other parts,
-// but JobEntity itself will not use it to emit.
 interface IForwardDeclaredJobEventEmitter {
-  // emit(event: string, payload: any): boolean; // Not strictly needed if entity won't emit
+  // emit(event: string, payload: any): boolean;
 }
 
+export interface AgentState { // Defined AgentState type
+  conversationHistory: ActivityHistory;
+  executionHistory: ExecutionHistoryEntry[];
+}
 
 export interface JobEntityConstructionProps<TData = unknown> {
   id?: string | JobIdVO;
@@ -28,12 +29,13 @@ export interface JobEntityConstructionProps<TData = unknown> {
   jobName: string;
   payload: TData;
   opts?: IJobOptions;
+  agentState?: AgentState; // Optional initial agent state
 }
 
 export interface JobEntityProps<TData = unknown, TResult = unknown> extends EntityProps<JobIdVO> {
   queueName: string;
   jobName: string;
-  payload: Readonly<TData>;
+  payload: Readonly<TData>; // This is the primary job input, distinct from agentState
   opts: JobOptionsVO;
   status: JobStatusVO;
   priority: JobPriorityVO;
@@ -50,9 +52,10 @@ export interface JobEntityProps<TData = unknown, TResult = unknown> extends Enti
   lockedByWorkerId?: string;
   lockExpiresAt?: number;
   repeatJobKey?: string;
+  agentState?: AgentState; // Persisted agent state
 
   _repository?: IJobRepository;
-  _eventEmitter?: IForwardDeclaredJobEventEmitter; // Kept for signature, but won't be used by entity to emit
+  _eventEmitter?: IForwardDeclaredJobEventEmitter;
 }
 
 export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
@@ -70,9 +73,9 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
     if (!constructProps.jobName || constructProps.jobName.trim() === '') {
       throw new ValueError('Job creation requires a jobName.');
     }
-    if (constructProps.payload === undefined) {
-      throw new ValueError('Job creation requires a payload.');
-    }
+    // Payload can be anything, including undefined if the job type doesn't require it
+    // However, the GenericAgentExecutor expects AgentExecutionPayload.
+    // This create method is generic.
 
     const id = constructProps.id instanceof JobIdVO ? constructProps.id : JobIdVO.create(constructProps.id);
     const jobOptions = JobOptionsVO.create(constructProps.opts);
@@ -99,6 +102,10 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
       updatedAt: nowMs,
       processAt: processAt,
       executionLogs: JobExecutionLogsVO.empty(),
+      agentState: constructProps.agentState || { // Initialize agentState
+        conversationHistory: ActivityHistory.create([]),
+        executionHistory: [],
+      },
     };
 
     return new JobEntity<D, R>(props);
@@ -116,15 +123,35 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
     if (!(props.status instanceof JobStatusVO)) {
       throw new ValueError('Cannot rehydrate JobEntity without a valid JobStatusVO instance for status.');
     }
+    // Ensure agentState is properly rehydrated if it contains VOs
+    if (props.agentState) {
+        props.agentState.conversationHistory = ActivityHistory.create(
+            props.agentState.conversationHistory.entries().map(entryProps => ActivityHistoryEntry.create(
+                entryProps.role(),
+                entryProps.content(),
+                entryProps.props.timestamp, // Pass raw props for rehydration
+                entryProps.props.toolName,
+                entryProps.props.toolCallId,
+                entryProps.props.tool_calls
+            ))
+        );
+        // executionHistory is assumed to be plain objects for now
+    } else {
+        props.agentState = {
+            conversationHistory: ActivityHistory.create([]),
+            executionHistory: [],
+        };
+    }
+
     return new JobEntity<D, R>(props);
   }
 
   public _setActiveContext(
     repository: IJobRepository,
-    _eventEmitter?: IForwardDeclaredJobEventEmitter, // Emitter no longer used by entity for its methods
+    _eventEmitter?: IForwardDeclaredJobEventEmitter,
   ): void {
     this.props._repository = repository;
-    this.props._eventEmitter = _eventEmitter; // Store it, but internal methods won't use it to emit.
+    this.props._eventEmitter = _eventEmitter;
   }
 
   public _clearActiveContext(): void {
@@ -134,7 +161,19 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
 
   get queueName(): string { return this.props.queueName; }
   get jobName(): string { return this.props.jobName; }
-  get payload(): Readonly<TData> { return this.props.payload; }
+  get payload(): Readonly<TData> { return this.props.payload; } // This is the primary input
+  get agentState(): AgentState | undefined { return this.props.agentState; } // Getter for agentState
+
+  // Method to update agentState
+  public setAgentState(newAgentState: AgentState): void {
+    this.props.agentState = newAgentState;
+    this.touch();
+    // Consider if saving should happen here or be managed by the executor/worker
+    // If this is called frequently, immediate save might be too much.
+    // For now, it just updates in-memory state. Worker will save the whole job.
+  }
+
+
   get opts(): JobOptionsVO { return this.props.opts; }
   get status(): JobStatusVO { return this.props.status; }
   get priority(): JobPriorityVO { return this.props.priority; }
@@ -159,41 +198,36 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
     this.props.updatedAt = Date.now();
   }
 
-  // Synchronous state update methods
-  public setProgress(progressData: JobProgressData): void { // Renamed from setProgressInternal
+  public setProgress(progressData: JobProgressData): void {
     this.props.progress = JobProgressVO.create(progressData);
     this.touch();
   }
 
-  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): void { // Renamed from addLogInternal
+  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): void {
     const newLogEntry = JobExecutionLogEntryVO.create(message, level, details, new Date());
     this.props.executionLogs = this.props.executionLogs.addEntry(newLogEntry);
     this.touch();
   }
 
-  // Async methods for processor interaction that require persistence
   public async updateProgress(progressData: JobProgressData): Promise<void> {
-    this.setProgress(progressData); // Use the public synchronous version
+    this.setProgress(progressData);
     if (this.props._repository) {
       const saveResult = await this.props._repository.save(this);
       if (saveResult.isError()) {
         console.error(`Job ${this.id.value}: Failed to save progress to repository`, saveResult.error);
-        // Consider how to propagate this error if critical for the processor
       }
-      // Event emission for 'job.progress' will be handled by JobWorkerService if needed after this call.
     } else {
       console.warn(`Job ${this.id.value}: updateProgress called without active repository context. State updated in memory only.`);
     }
   }
 
   public async addLogToExecution(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, unknown>): Promise<void> {
-    this.addLog(message, level, details); // Use the public synchronous version
+    this.addLog(message, level, details);
     if (this.props._repository) {
       const saveResult = await this.props._repository.save(this);
        if (saveResult.isError()) {
         console.error(`Job ${this.id.value}: Failed to save log to repository`, saveResult.error);
       }
-      // Event emission for 'job.log_added' will be handled by JobWorkerService if needed.
     } else {
        console.warn(`Job ${this.id.value}: addLogToExecution called without active repository context. State updated in memory only.`);
     }

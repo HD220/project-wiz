@@ -13,23 +13,22 @@ export type AgentExecutorStatus =
   | 'FAILURE_TOOL'
   | 'FAILURE_MAX_ITERATIONS'
   | 'FAILURE_INTERNAL'
-  | 'PENDING_REPLAN'; // Added based on replan logic
+  | 'PENDING_REPLAN';
 
 /**
  * Represents a call to a tool made by the language model.
  */
 export interface LanguageModelMessageToolCall {
   id: string;
-  type: 'function'; // Currently, only 'function' is common
+  type: 'function';
   function: {
     name: string;
-    arguments: string; // JSON string
+    arguments: string;
   };
 }
 
 /**
  * Represents a message in the conversation with the language model.
- * Standard structure, e.g., compatible with Vercel AI SDK.
  */
 export interface LanguageModelMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
@@ -40,17 +39,27 @@ export interface LanguageModelMessage {
 
 /**
  * Represents an entry in the execution history of an agent for a job.
- * This logs significant events, tool calls, and errors during the execution.
  */
 export interface ExecutionHistoryEntry {
   timestamp: Date;
-  type: 'llm_error' | 'tool_error' | 'system_error' | 'tool_call' | 'replan_attempt' | string; // string for future extensibility
-  name: string; // e.g., 'LLM Generation', tool name, 'UnhandledExecutorError', 'ReplanAttempt'
-  params?: any; // For tool_call, or context for replan
-  result?: any; // For tool_call
-  error?: any; // Could be Error object, string, or structured error representation
-  isCritical?: boolean; // For tool_error, indicates if it stopped execution
-  message?: string; // For replan_attempt or other informational entries
+  type: 'llm_error' | 'tool_error' | 'system_error' | 'tool_call' | 'replan_attempt' | string;
+  name: string;
+  params?: unknown;
+  result?: unknown;
+  error?: unknown;
+  isCritical?: boolean;
+  message?: string;
+}
+
+/**
+ * Defines the payload for a job that is to be executed by an agent.
+ */
+export interface AgentExecutionPayload {
+  agentId: string;
+  initialPrompt?: string;
+  projectId?: string;
+  userId?: string;
+  // Any other relevant data to kick off the agent execution for this job
 }
 
 /**
@@ -60,9 +69,9 @@ export interface AgentExecutorResult {
   jobId: string;
   status: AgentExecutorStatus;
   message: string;
-  output?: any; // Final output of the job, if any
-  history: ReadonlyArray<ActivityHistoryEntry>; // Conversation history
-  errors: ReadonlyArray<ExecutionHistoryEntry>; // Execution errors encountered
+  output?: unknown; // Final output of the job, if any
+  history: ReadonlyArray<ActivityHistoryEntry>;
+  errors: ReadonlyArray<ExecutionHistoryEntry>;
 }
 
 /**
@@ -72,6 +81,6 @@ export interface CriticalToolFailureInfo {
     toolName: string;
     errorType: string;
     message: string;
-    details?: any;
-    isRecoverable: boolean; // Should typically be false if critical
+    details?: unknown; // Changed from any
+    isRecoverable: boolean;
 }

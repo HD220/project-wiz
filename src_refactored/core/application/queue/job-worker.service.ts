@@ -21,6 +21,11 @@ const DEFAULT_WORKER_OPTIONS: Required<WorkerOptions> = {
   autorun: true,
 };
 
+const DEFAULT_POLL_INTERVAL_MS = 1000;
+const DEFAULT_ERROR_POLL_INTERVAL_MS = 5000;
+const SHORT_CONCURRENCY_WAIT_MS = 200;
+
+
 @injectable()
 export class JobWorkerService<TData = unknown, TResult = unknown> {
   public readonly id: string;
@@ -96,16 +101,18 @@ export class JobWorkerService<TData = unknown, TResult = unknown> {
                 this.logger.debug(`[${this.id}] Slot ${slotIndex} finished job ${job.id.value}, active jobs: ${this.activeJobs}`);
               });
             } else {
-              await new Promise(resolve => setTimeout(resolve, 1000 + (slotIndex * 50)));
+              // No job found, wait before polling again for this slot
+              await new Promise(resolve => setTimeout(resolve, DEFAULT_POLL_INTERVAL_MS + (slotIndex * 50)));
             }
           } catch (errorInPoll) {
             const err = errorInPoll instanceof Error ? errorInPoll : new Error(String(errorInPoll));
             this.logger.error(`[${this.id}] Critical error in polling/job acquisition for slot ${slotIndex}:`, err);
             this.jobEventEmitter.emit('worker.error', { queueName: this.queueName, workerId: this.id, error: err });
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, DEFAULT_ERROR_POLL_INTERVAL_MS));
           }
         } else {
-          await new Promise(resolve => setTimeout(resolve, 200 + (slotIndex * 20)));
+          // Max concurrency for this worker instance reached, wait a bit for this slot
+          await new Promise(resolve => setTimeout(resolve, SHORT_CONCURRENCY_WAIT_MS + (slotIndex * 20)));
         }
         if (this.isRunning && !this.isClosing) {
             setTimeout(pollFn, 0);
