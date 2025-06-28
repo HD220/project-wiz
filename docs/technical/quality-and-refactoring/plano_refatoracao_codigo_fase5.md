@@ -4,8 +4,8 @@ Este documento detalha o plano iterativo para a reescrita completa do código da
 
 ## Objetivos Principais da Fase 5:
 1.  Reescrever toda a aplicação a partir do zero em `src_refactored/`.
-2.  Garantir que a nova implementação do frontend seja visualmente idêntica à original, seguindo `../../developer/04-visual-style-guide.md`.
-3.  Assegurar que todo o código siga estritamente a arquitetura definida em `./01-software-architecture.md`.
+2.  Garantir que a nova implementação do frontend seja visualmente idêntica à original, seguindo `docs/tecnico/guia_de_estilo_visual.md`.
+3.  Assegurar que todo o código siga estritamente a arquitetura definida em `docs/tecnico/arquitetura.md`.
 4.  Aplicar rigorosamente todas as 9 regras do Object Calisthenics e boas práticas gerais (SOLID, DRY, KISS, Código Limpo).
 5.  Desenvolver testes unitários e de integração para garantir a correção e manutenibilidade do novo código.
 6.  Após a conclusão e verificação da nova implementação, remover o código legado de `src/` e `src2/`.

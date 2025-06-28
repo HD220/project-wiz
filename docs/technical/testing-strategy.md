@@ -68,7 +68,7 @@ Conforme o `package.json` e as configurações do projeto:
 
 ## 5. Executando os Testes
 
-Consulte o [Guia de Configuração do Ambiente de Desenvolvimento](./01-development-setup.md#8-executando-testes) para os comandos exatos (`npm run test`, `npm run test:watch`, `npm run test:coverage`).
+Consulte o [Guia de Configuração do Ambiente de Desenvolvimento](./06-development-setup.md#8-executando-testes) para os comandos exatos (`npm run test`, `npm run test:watch`, `npm run test:coverage`).
 
 ## 6. Melhores Práticas e Diretrizes
 
