@@ -124,23 +124,19 @@ export class JobEntity<TData = unknown, TResult = unknown> extends AbstractEntit
       throw new ValueError('Cannot rehydrate JobEntity without a valid JobStatusVO instance for status.');
     }
     // Ensure agentState is properly rehydrated if it contains VOs
-    if (props.agentState) {
+    // Ensure agentState and its conversationHistory are properly rehydrated
+    if (props.agentState && props.agentState.conversationHistory) {
+        // Assuming props.agentState.conversationHistory from DB is ActivityHistoryEntryProps[]
+        // The create method of ActivityHistory now handles this.
         props.agentState.conversationHistory = ActivityHistory.create(
-            props.agentState.conversationHistory.entries().map(entryProps => ActivityHistoryEntry.create(
-                entryProps.role(),
-                entryProps.content(),
-                entryProps.props.timestamp, // Pass raw props for rehydration
-                entryProps.props.toolName,
-                entryProps.props.toolCallId,
-                entryProps.props.tool_calls
-            ))
+            props.agentState.conversationHistory as unknown as ActivityHistoryEntryProps[]
         );
-        // executionHistory is assumed to be plain objects for now
     } else {
-        props.agentState = {
-            conversationHistory: ActivityHistory.create([]),
-            executionHistory: [],
-        };
+      // Ensure agentState and its components are initialized if not present from DB
+      props.agentState = {
+        conversationHistory: ActivityHistory.create([]),
+        executionHistory: props.agentState?.executionHistory || [], // Preserve executionHistory if only conversationHistory was missing
+      };
     }
 
     return new JobEntity<D, R>(props);

@@ -1,14 +1,14 @@
 // src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts
 import {
-  eq, and, or, inArray, sql, lte, lt, gte, desc, asc, isNull, count, SQL,
-} from 'drizzle-orm';
+  eq, and, or, inArray, sql, lte, lt, gte, desc, asc, isNull, count, SQL, isNotNull,
+} from 'drizzle-orm'; // Added isNotNull
 import { inject, injectable } from 'inversify';
+import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
-import { ActivityHistory } from '@/core/domain/job/job-processing.types';
-import { JobEntity, JobEntityProps } from '@/core/domain/job/job.entity';
-import { AgentState } from '@/core/domain/job/job.entity'; // Import AgentState
+import { JobEntity, JobEntityProps, AgentState } from '@/core/domain/job/job.entity'; // Import AgentState
 import { IJobRepository } from '@/core/domain/job/ports/job-repository.interface';
 import { JobSearchFilters, PaginationOptions, PaginatedJobsResult, JobCountsByStatus } from '@/core/domain/job/ports/job-repository.types';
+import { ActivityHistoryEntry, ActivityHistoryEntryProps } from '@/core/domain/job/value-objects/activity-history-entry.vo'; // Added ActivityHistoryEntryProps
 import { JobExecutionLogEntryVO } from '@/core/domain/job/value-objects/job-execution-log-entry.vo';
 import { JobExecutionLogsVO } from '@/core/domain/job/value-objects/job-execution-logs.vo';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
@@ -16,26 +16,22 @@ import { JobOptionsVO, IJobOptions } from '@/core/domain/job/value-objects/job-o
 import { JobPriorityVO } from '@/core/domain/job/value-objects/job-priority.vo';
 import { JobProgressVO } from '@/core/domain/job/value-objects/job-progress.vo';
 import { JobStatusEnum, JobStatusVO } from '@/core/domain/job/value-objects/job-status.vo';
-
 import { Result, Ok, Err } from '@/shared/result';
+import { ActivityHistory, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types'; // Added ExecutionHistoryEntry
+
 
 // Import the actual Drizzle table schema
-import { jobsTable, JobSelect, JobInsert } from '../schema/jobs.table'; // Adjust path as needed
-
-import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
-
-
+import { jobsTable, JobSelect, JobInsert } from '../schema'; // Using schema index
 
 // Helper to map Drizzle's JobSelect to JobEntity
 function mapRowToJobEntity<TData = unknown, TResult = unknown>(row: JobSelect): JobEntity<TData, TResult> {
-  // Drizzle's JSON blobs are already parsed into objects/arrays by default with better-sqlite3 driver.
-  // We just need to cast them to the expected types.
   const jobOptionsFromDb = row.jobOptions as IJobOptions;
   const payloadFromDb = row.payload as TData;
   const returnValueFromDb = row.returnValue as TResult;
   const progressFromDb = row.progress as number | Record<string, unknown>;
   const executionLogsFromDb = (row.executionLogs || []) as Array<{ timestamp: number; message: string; level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'; details?: Record<string, unknown> }>;
-  const agentStateFromDb = row.agentState as AgentState | null; // agentState column added to schema
+
+  const agentStateFromDb = row.agentState as ({ conversationHistory: ActivityHistoryEntryProps[], executionHistory: ExecutionHistoryEntry[] } | null);
 
   const entityProps: JobEntityProps<TData, TResult> = {
     id: JobIdVO.create(row.id),
@@ -43,13 +39,13 @@ function mapRowToJobEntity<TData = unknown, TResult = unknown>(row: JobSelect): 
     jobName: row.jobName,
     payload: payloadFromDb,
     opts: JobOptionsVO.create(jobOptionsFromDb),
-    status: JobStatusVO.create(row.status as JobStatusEnum), // Ensure status is valid JobStatusEnum
+    status: JobStatusVO.create(row.status as JobStatusEnum),
     priority: JobPriorityVO.create(row.priority),
     progress: JobProgressVO.create(progressFromDb),
     returnValue: returnValueFromDb,
     failedReason: row.failedReason ?? undefined,
     attemptsMade: row.attemptsMade,
-    createdAt: row.createdAt, // Already number (timestamp_ms)
+    createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     processAt: row.processAt ?? undefined,
     startedAt: row.startedAt ?? undefined,
@@ -63,27 +59,17 @@ function mapRowToJobEntity<TData = unknown, TResult = unknown>(row: JobSelect): 
     lockExpiresAt: row.lockExpiresAt ?? undefined,
     repeatJobKey: row.repeatJobKey ?? undefined,
     parentId: row.parentId ?? undefined,
-    agentState: agentStateFromDb ? { // Rehydrate AgentState
-        conversationHistory: ActivityHistory.create(
-            agentStateFromDb.conversationHistory.entries().map(entryProps => ActivityHistoryEntry.create(
-                entryProps.role(),
-                entryProps.content(),
-                entryProps.props.timestamp,
-                entryProps.props.toolName,
-                entryProps.props.toolCallId,
-                entryProps.props.tool_calls
-            ))
-        ),
+    agentState: agentStateFromDb ? {
+        conversationHistory: ActivityHistory.create(agentStateFromDb.conversationHistory), // ActivityHistory.create now handles props[]
         executionHistory: agentStateFromDb.executionHistory
     } : undefined,
-    // _repository and _eventEmitter are transient, not mapped from DB row
   };
   return JobEntity.fromPersistence(entityProps);
 }
 
 // Helper to map JobEntity to Drizzle's JobInsert
 function mapJobEntityToDbRow(job: JobEntity<any, any>): JobInsert {
-  const props = job.props; // Access public props
+  const props = job.props;
   return {
     id: props.id.value,
     queueName: props.queueName,
@@ -101,20 +87,20 @@ function mapJobEntityToDbRow(job: JobEntity<any, any>): JobInsert {
     updatedAt: props.updatedAt,
     processAt: props.processAt,
     startedAt: props.startedAt,
-    completedAt: props.status.is(JobStatusEnum.COMPLETED) ? props.finishedAt : null, // Use null for DB
-    failedAt: props.status.is(JobStatusEnum.FAILED) ? props.finishedAt : null, // Use null for DB
-    executionLogs: props.executionLogs.entries.map(log => ({
-        message: log.message,
-        level: log.level,
-        timestamp: log.timestamp.getTime(),
-        details: log.details,
+    completedAt: props.status.is(JobStatusEnum.COMPLETED) ? props.finishedAt : null,
+    failedAt: props.status.is(JobStatusEnum.FAILED) ? props.finishedAt : null,
+    executionLogs: props.executionLogs.entries().map(log => ({ // Changed from entries to entries()
+        message: log.message(), // Changed from log.message
+        level: log.level(), // Changed from log.level
+        timestamp: log.timestamp().getTime(), // Changed from log.timestamp
+        details: log.details(), // Changed from log.details
     })),
     lockedByWorkerId: props.lockedByWorkerId,
     lockExpiresAt: props.lockExpiresAt,
     repeatJobKey: props.repeatJobKey,
     parentId: props.opts.parentId,
-    agentState: props.agentState ? { // Persist agentState
-        conversationHistory: props.agentState.conversationHistory.toPersistence(), // Assuming toPersistence returns serializable format
+    agentState: props.agentState ? {
+        conversationHistory: props.agentState.conversationHistory.toPersistence(),
         executionHistory: props.agentState.executionHistory
     } : null,
   };
@@ -123,12 +109,10 @@ function mapJobEntityToDbRow(job: JobEntity<any, any>): JobInsert {
 
 @injectable()
 export class DrizzleJobRepository implements IJobRepository {
-  // Use the imported jobsTable directly
   private readonly table = jobsTable;
 
   constructor(
-    @inject('DrizzleClient') private db: BaseSQLiteDatabase<"async", any, any>, // More specific type if possible
-    // Schema object is not directly needed if we import tables directly
+    @inject('DrizzleClient') private db: BetterSQLite3Database<typeof schema>,  // Use imported schema from client
   ) {}
 
   async save(job: JobEntity<any, any>): Promise<Result<void, Error>> {
@@ -187,8 +171,6 @@ export class DrizzleJobRepository implements IJobRepository {
     lockDurationMs: number,
   ): Promise<Result<JobEntity<any, any>[], Error>> {
     try {
-      // Note: LIFO/FIFO based on job.opts.lifo is complex for a single query.
-      // This implementation primarily sorts by priority then createdAt (FIFO).
       const candidateJobRows: JobSelect[] = await this.db
         .select()
         .from(this.table)
@@ -203,7 +185,7 @@ export class DrizzleJobRepository implements IJobRepository {
           )
         )
         .orderBy(asc(this.table.priority), asc(this.table.createdAt))
-        .limit(limit * 2); // Over-fetch slightly to handle potential race conditions if not in transaction
+        .limit(limit * 2);
 
       if (candidateJobRows.length === 0) {
         return Ok([]);
@@ -215,28 +197,23 @@ export class DrizzleJobRepository implements IJobRepository {
       for (const candidateRow of candidateJobRows) {
         if (lockedJobEntities.length >= limit) break;
 
-        // Atomic update to lock the job
         const updateResult = await this.db.update(this.table)
           .set({
             status: JobStatusEnum.ACTIVE,
             lockedByWorkerId: workerId,
             lockExpiresAt: newLockExpiresAt,
             startedAt: nowTimestampMs,
-            updatedAt: nowTimestampMs, // Touch updatedAt
+            updatedAt: nowTimestampMs,
             attemptsMade: sql`${this.table.attemptsMade} + 1`,
           })
           .where(and(
             eq(this.table.id, candidateRow.id),
-            eq(this.table.status, JobStatusEnum.PENDING) // Ensure it's still pending
+            eq(this.table.status, JobStatusEnum.PENDING)
           ));
 
-        // Check if update was successful (e.g., 1 row affected)
-        // Drizzle's rowsAffected might vary by driver. For better-sqlite3, it's usually available.
-        if ((updateResult as any).rowsAffected > 0) {
-          // Re-fetch the now locked job to get its full state
+        if ((updateResult as { rowsAffected?: number }).rowsAffected ?? 0 > 0) {
           const lockedJobResult = await this.findById(JobIdVO.create(candidateRow.id));
           if (lockedJobResult.isOk() && lockedJobResult.value) {
-            // Final check to ensure it's the one we locked
             if (lockedJobResult.value.lockedByWorkerId === workerId && lockedJobResult.value.status.is(JobStatusEnum.ACTIVE)) {
               lockedJobEntities.push(lockedJobResult.value);
             }
@@ -380,8 +357,7 @@ export class DrizzleJobRepository implements IJobRepository {
         eq(this.table.status, JobStatusEnum.COMPLETED),
       ];
       if (olderThanTimestampMs !== undefined) {
-        // Ensure completedAt is not null for this comparison
-        conditions.push(and(isNotNull(this.table.completedAt), lt(this.table.completedAt, olderThanTimestampMs)));
+        conditions.push(and(isNotNull(this.table.completedAt), lt(this.table.completedAt!, olderThanTimestampMs)));
       }
 
       const idsToDeleteQuery = this.db
@@ -417,7 +393,7 @@ export class DrizzleJobRepository implements IJobRepository {
         eq(this.table.status, JobStatusEnum.FAILED),
       ];
       if (olderThanTimestampMs !== undefined) {
-        conditions.push(and(isNotNull(this.table.failedAt), lt(this.table.failedAt, olderThanTimestampMs)));
+        conditions.push(and(isNotNull(this.table.failedAt), lt(this.table.failedAt!, olderThanTimestampMs)));
       }
 
       const idsToDeleteQuery = this.db
@@ -468,13 +444,11 @@ export class DrizzleJobRepository implements IJobRepository {
       const offset = (page - 1) * limitVal;
 
       let orderByClause;
-      const sortByField = pagination.sortBy ? (this.table as any)[pagination.sortBy] : this.table.createdAt;
-      if (sortByField) {
-          const sortOrderFunc = pagination.sortOrder === 'DESC' ? desc : asc;
-          orderByClause = sortOrderFunc(sortByField);
-      } else {
-          orderByClause = desc(this.table.createdAt);
-      }
+      const sortByIsValidColumn = pagination.sortBy && Object.prototype.hasOwnProperty.call(this.table, pagination.sortBy);
+      const sortByColumn = sortByIsValidColumn ? (this.table as any)[pagination.sortBy!] : this.table.createdAt;
+
+      const sortOrderFunc = pagination.sortOrder === 'DESC' ? desc : asc;
+      orderByClause = sortOrderFunc(sortByColumn);
 
       const resultsQuery = this.db
         .select()
