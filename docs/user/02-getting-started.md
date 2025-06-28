@@ -33,23 +33,27 @@ Com o Project Wiz, você pode gerenciar seus projetos de software de forma centr
 *   **Próximos Passos com Projetos:**
     *   Para mais detalhes sobre como gerenciar e configurar seus projetos, consulte o guia [Gerenciando Projetos](./core-concepts/projects.md).
 
-## 5. Criando sua Primeira Persona
+## 5. Solicitando seu Primeiro Agente IA Especializado (Persona)
 
-As Personas no Project Wiz são templates para seus Agentes de IA. Elas definem como um Agente deve se comportar e quais são suas capacidades.
+No Project Wiz, você conta com um **Assistente Pessoal IA** para ajudá-lo a dar o pontapé inicial nas suas tarefas. Para tarefas que exigem habilidades específicas, este assistente pode facilitar a criação de **Agentes IA Especializados**. Você também terá a capacidade de customizar e salvar as configurações desses agentes como "Personas Personalizadas" para uso futuro.
 
-*   **Definindo uma Persona:** Ao criar um template de Persona, você configurará:
-    *   **Nome:** Um nome descritivo para o template (ex: "Desenvolvedor Frontend Júnior", "Revisor de Código Detalhista").
-    *   **Papel (Role):** A especialização principal do Agente (ex: "Developer", "QA Tester", "Documentation Writer").
-    *   **Objetivo (Goal):** O objetivo de alto nível que Agentes baseados neste template buscarão alcançar.
-    *   **Backstory/Contexto:** Informações de fundo que ajudam a definir a personalidade e o conhecimento do Agente, usadas para construir o prompt de sistema para o LLM.
-    *   **Ferramentas (Tools):** Uma lista das ferramentas específicas que o Agente terá permissão para usar (ex: acesso ao sistema de arquivos, terminal, ferramentas de busca).
-*   **De Template para Agente:** Estes templates de Persona são então usados para criar instâncias de Agentes IA que efetivamente realizarão os trabalhos, combinando o template com configurações específicas de LLM (como qual modelo usar e sua temperatura).
+*   **Descrevendo sua Necessidade:**
+    *   Comece conversando com seu Assistente Pessoal IA. Descreva a tarefa que você precisa realizar (ex: "Preciso criar testes unitários para o módulo de autenticação").
+*   **Geração ou Seleção do Agente:**
+    *   O Assistente Pessoal, com auxílio de um LLM, analisará sua solicitação.
+    *   Ele poderá **sugerir uma configuração para um novo Agente IA especializado**, detalhando o papel (ex: "QA Tester"), objetivo, e as ferramentas que ele usaria.
+    *   Se você já tiver **"Personas Personalizadas" salvas** que se encaixem, o assistente poderá sugerir o uso de uma delas.
+*   **Customização e Configuração:**
+    *   Você terá a oportunidade de **revisar e customizar** as características do Agente proposto (seja ele novo ou baseado em uma Persona Personalizada). Isso inclui seu nome, papel, objetivo, backstory (contexto para o LLM) e as ferramentas permitidas.
+    *   Você também definirá qual modelo de LLM o Agente usará e outros parâmetros (como a "temperatura").
+    *   Configurações que você aprova podem ser **salvas como uma nova "Persona Personalizada"** ou atualizar uma existente.
+*   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para receber [Jobs (tarefas)](./core-concepts/jobs-and-automation.md).
 *   **Saiba Mais:**
-    *   Para um mergulho profundo na criação e utilização de Personas e Agentes, veja [Personas e Agentes IA](./core-concepts/personas-and-agents.md).
+    *   Para um mergulho profundo na interação com o Assistente Pessoal e no gerenciamento de suas Personas Personalizadas e Agentes IA, veja [Personas Personalizadas e Agentes IA](./core-concepts/personas-and-agents.md).
 
 ## 6. Atribuindo seu Primeiro Job
 
-Jobs são as tarefas que você atribui às suas Personas (ou mais precisamente, aos Agentes IA criados a partir dos templates de Persona).
+Jobs são as tarefas que você atribui aos seus Agentes IA (sejam eles Personas Personalizadas que você configurou ou agentes especializados gerados dinamicamente para uma tarefa).
 
 *   **O que é um Job?** Um Job é a unidade fundamental de trabalho no Project Wiz. Ele geralmente inclui:
     *   **Nome:** Um nome descritivo para o Job.

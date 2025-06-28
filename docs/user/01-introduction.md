@@ -6,7 +6,7 @@ Este guia é destinado a ajudar você, usuário, a compreender o que é o Projec
 
 ## O que é o Project Wiz?
 
-O Project Wiz é uma aplicação desktop inovadora, com uma interface inspirada no Discord, projetada para funcionar como uma **fábrica de software autônoma**. Seu núcleo é composto por Agentes de Inteligência Artificial, chamados [Personas](./05-personas-agents.md), que colaboram e auxiliam no processo de desenvolvimento de software.
+O Project Wiz é uma aplicação desktop inovadora, com uma interface inspirada no Discord, projetada para funcionar como uma **fábrica de software autônoma**. Seu núcleo é composto pelo seu **Assistente Pessoal IA** e uma equipe de Agentes de Inteligência Artificial especializados ([Personas](./core-concepts/personas-and-agents.md)) que podem ser configurados por você ou gerados dinamicamente para colaborar e auxiliar no processo de desenvolvimento de software.
 
 O objetivo é automatizar diversas etapas do ciclo de vida de desenvolvimento, desde a análise e design até a implementação, testes e deployment, tornando o processo mais eficiente e inteligente.
 
@@ -24,8 +24,8 @@ O Project Wiz é ideal para:
 Com o Project Wiz, você poderá:
 
 *   [Gerenciar seus projetos de software](./core-concepts/projects.md) em um ambiente centralizado.
-*   Criar e configurar [Personas (Agentes de IA)](./core-concepts/personas-and-agents.md) especializadas para diferentes papéis.
-*   Definir e atribuir [Jobs (tarefas)](./core-concepts/jobs-and-automation.md) para suas Personas executarem, abrangendo atividades como:
+*   Contar com [Agentes de IA (Personas)](./core-concepts/personas-and-agents.md) especializados para diferentes papéis, seja utilizando configurações sugeridas dinamicamente pelo sistema, personalizando-as, ou definindo as suas próprias.
+*   Definir e atribuir [Jobs (tarefas)](./core-concepts/jobs-and-automation.md) para seus Agentes IA executarem, abrangendo atividades como:
     *   Geração de código
     *   Análise de código
     *   Criação de pull requests (planejado)
@@ -41,8 +41,8 @@ Com o Project Wiz, você poderá:
 
 A interação típica com o Project Wiz e seus Agentes de IA segue um fluxo como este:
 
-1.  **Conversa e Delegação:** Você interage com um Agente IA (uma instância de uma [Persona](./core-concepts/personas-and-agents.md) configurada) através de uma interface de chat, descrevendo uma necessidade ou objetivo no contexto de um [Projeto](./core-concepts/projects.md).
-2.  **Planejamento pelo Agente:** O Agente, utilizando seu Modelo de Linguagem Grande (LLM) e lógica interna, analisa seu pedido. Ele elabora um plano de ação, que pode incluir a decomposição da tarefa em [Jobs e Sub-Jobs](./core-concepts/jobs-and-automation.md), e define critérios de "Definição de Pronto" para o trabalho.
+1.  **Conversa e Delegação com o Assistente Pessoal:** Você interage com seu **Assistente Pessoal IA** através de uma interface de chat, descrevendo uma necessidade ou objetivo no contexto de um [Projeto](./core-concepts/projects.md). O Assistente Pessoal pode então delegar a tarefa a um Agente IA especializado existente (uma [Persona](./core-concepts/personas-and-agents.md) que você configurou/salvou anteriormente) ou facilitar a criação dinâmica de um novo Agente IA sob medida para a tarefa.
+2.  **Planejamento pelo Agente (Especializado):** O Agente IA designado (seja ele um pré-configurado ou um novo), utilizando seu Modelo de Linguagem Grande (LLM) e lógica interna, analisa o pedido. Ele elabora um plano de ação, que pode incluir a decomposição da tarefa em [Jobs e Sub-Jobs](./core-concepts/jobs-and-automation.md), e define critérios de "Definição de Pronto" para o trabalho.
 3.  **Aprovação do Usuário (Ponto de Verificação Opcional):** Para tarefas mais complexas, o Agente pode ser instruído a apresentar o plano e a "Definição de Pronto" para sua aprovação antes de iniciar o trabalho principal.
 4.  **Execução Autônoma:** Após a aprovação (ou se não for um passo requerido para a tarefa), o Agente começa a processar os Jobs. Ele utiliza sua inteligência (LLM) e Ferramentas disponíveis (como acesso ao sistema de arquivos, terminal, etc.) para executar as etapas. Para tarefas de código, o Agente opera dentro do diretório de trabalho do projeto, geralmente em um branch Git específico.
 5.  **Auto-Validação (Orientada pelo Agente):** O Agente pode realizar uma auto-validação interna, comparando os resultados com os critérios de "Definição de Pronto" estabelecidos, para garantir que os resultados atendam ao esperado.
