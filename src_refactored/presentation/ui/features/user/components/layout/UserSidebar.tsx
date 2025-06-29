@@ -1,5 +1,5 @@
 import { Link, useRouter } from '@tanstack/react-router';
-import { Settings, UserCircle, MessageSquarePlus, Search, Users, Palette, Bot } from 'lucide-react'; // Added Bot for agent DMs
+import { Settings, UserCircle, MessageSquarePlus, Search, Palette, Bot as BotIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
@@ -14,18 +14,16 @@ import {
 } from '@/presentation/ui/components/ui/dropdown-menu';
 import { Input } from '@/presentation/ui/components/ui/input';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
 import { cn } from '@/presentation/ui/lib/utils';
 
-// Mock data, similar to ConversationList but specific to DMs
-interface DirectMessageItem {
-  id: string; // Could be userId or agentId or a specific conversationId
+export interface DirectMessageItem {
+  id: string;
   name: string;
   avatarUrl?: string;
   lastMessage?: string;
   timestamp?: string;
   unreadCount?: number;
-  type: 'user' | 'agent'; // To differentiate user DMs from agent DMs
+  type: 'user' | 'agent';
 }
 
 const mockDirectMessages: DirectMessageItem[] = [
@@ -35,33 +33,31 @@ const mockDirectMessages: DirectMessageItem[] = [
   { id: 'agent002', name: 'TestMaster-7000', avatarUrl: '/avatars/agent-qa.png', lastMessage: "Testes concluídos.", timestamp: "Segunda", type: 'agent', unreadCount: 0 },
 ];
 
-// Mock current user
 const currentUserMock = {
   name: 'J. Doe',
   email: 'j.doe@example.com',
-  avatarUrl: '/avatars/user-main.png', // Placeholder for current user avatar
+  avatarUrl: '/avatars/user-main.png',
 };
-
 
 export function UserSidebar() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  // This would come from a global store or context
-  const [selectedDmId, setSelectedDmId] = useState<string | null>(mockDirectMessages[0]?.id || null);
-
+  const [selectedDmId, setSelectedDmId] = useState<string | null>(() => {
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const dmPathMatch = currentPath.match(/\/user\/dm\/([^/]+)/);
+    return dmPathMatch ? dmPathMatch[1] : (mockDirectMessages[0]?.id || null);
+  });
 
   const filteredDMs = mockDirectMessages.filter(dm =>
     dm.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleNewDm = () => {
-    // Placeholder: In a real app, this would open a modal to select a user/agent
     alert("Funcionalidade 'Nova Mensagem Direta' ainda não implementada.");
   };
 
   return (
     <aside className="w-72 flex-shrink-0 bg-slate-100 dark:bg-slate-800/70 flex flex-col border-r border-slate-200 dark:border-slate-700 h-full">
-      {/* User Info Header & Quick Actions Dropdown */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-700">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -74,7 +70,6 @@ export function UserSidebar() {
                 <p className="text-sm font-semibold truncate text-slate-800 dark:text-slate-100">{currentUserMock.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{currentUserMock.email}</p>
               </div>
-              {/* <ChevronDown className="h-4 w-4 text-slate-500 dark:text-slate-400 ml-auto" /> */}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 ml-1" align="start" side="bottom">
@@ -90,15 +85,13 @@ export function UserSidebar() {
               <Settings className="mr-2 h-4 w-4" /> Todas Configurações
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 focus:text-red-500">
-              {/* <LogOut className="mr-2 h-4 w-4" /> Sair (Logout) */}
+            <DropdownMenuItem className="text-red-500 focus:text-red-500 dark:focus:text-red-500">
               Sair (Logout - N/I)
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* DM Actions & Search */}
       <div className="p-3 space-y-2 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
         <Button variant="outline" size="sm" className="w-full" onClick={handleNewDm}>
           <MessageSquarePlus className="mr-2 h-4 w-4" /> Nova Mensagem Direta
@@ -110,20 +103,17 @@ export function UserSidebar() {
             placeholder="Buscar DMs ou iniciar nova..."
             className="h-8 pl-9"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(event) => setSearchTerm(event.target.value)}
           />
         </div>
       </div>
 
-      {/* DM List */}
       <ScrollArea className="flex-1">
         <nav className="p-2 space-y-0.5">
           {filteredDMs.length > 0 ? (
             filteredDMs.map(dm => (
               <Link
                 key={dm.id}
-                // TODO: Adjust DM route, maybe /user/dm/$id or reuse /chat?
-                // For now, using a placeholder that would need a $conversationId param
                 to="/user/dm/$conversationId"
                 params={{ conversationId: dm.id }}
                 className={cn(
@@ -132,7 +122,7 @@ export function UserSidebar() {
                     ? "bg-sky-100 dark:bg-sky-700/60 text-sky-700 dark:text-sky-200 font-medium"
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/50"
                 )}
-                onClick={() => setSelectedDmId(dm.id)} // Update selected DM on click
+                onClick={() => setSelectedDmId(dm.id)}
                 activeProps={{ className: "!bg-sky-100 dark:!bg-sky-700/60 !text-sky-700 dark:!text-sky-200 font-medium" }}
               >
                 <Avatar className="h-7 w-7 text-xs flex-shrink-0">
@@ -141,7 +131,7 @@ export function UserSidebar() {
                     "text-white",
                     dm.type === 'agent' ? "bg-emerald-500" : "bg-purple-500"
                   )}>
-                    {dm.type === 'agent' ? <Bot size={14}/> : dm.name.substring(0,1).toUpperCase()}
+                    {dm.type === 'agent' ? <BotIcon size={14}/> : dm.name.substring(0,1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
