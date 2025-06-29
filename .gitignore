@@ -103,6 +103,8 @@ src/locales/**/*.ts
 out
 
 *.db
+*.db-*
+*.sqlite*
 
 # Build output
 dist

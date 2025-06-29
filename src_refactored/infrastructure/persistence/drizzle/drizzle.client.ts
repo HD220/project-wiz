@@ -33,7 +33,7 @@ export const db: BetterSQLite3Database<typeof schema> = drizzle(sqlite, { schema
 // Migration logic
 try {
   console.log('[DrizzleClient] Running migrations...');
-  const migrationsFolder = path.join(__dirname, './migrations'); // Correctly point to the migrations folder relative to this file
+    const migrationsFolder = path.resolve(process.cwd(), 'src_refactored/infrastructure/persistence/drizzle/migrations');
   // Note: __dirname might behave differently based on ES Modules vs CommonJS and bundlers.
   // A more robust path might be needed if bundling affects __dirname.
   // For Electron, __dirname usually points to the current file's directory in the packaged app.

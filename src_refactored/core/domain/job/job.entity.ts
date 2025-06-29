@@ -1,5 +1,5 @@
 // src_refactored/core/domain/job/job.entity.ts
-import { BaseEntity } from '@/core/common/base.entity';
+import { AbstractEntity } from '@/core/common/base.entity';
 import { DomainError } from '@/core/domain/common/errors';
 
 import { JobIdVO } from './value-objects/job-id.vo';
@@ -44,7 +44,7 @@ export interface JobEntityProps<P = unknown, R = unknown> {
   // parentId?: JobIdVO; // For job dependencies/flows - future
 }
 
-export class JobEntity<P = unknown, R = unknown> extends BaseEntity<JobEntityProps<P, R>> {
+export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<P, R>> {
   private _progressChanged: boolean = false;
   private _logsChanged: boolean = false;
 
@@ -272,11 +272,12 @@ export class JobEntity<P = unknown, R = unknown> extends BaseEntity<JobEntityPro
     }
   }
 
-  public toPersistence(): Omit<JobEntityProps<P, R>, 'options'> & { options: IJobOptions } {
+    public toPersistence(): Omit<JobEntityProps<P, R>, 'id' | 'options'> & { id: string, options: IJobOptions } {
     // Convert VOs back to plain objects for persistence if necessary
     // For JobOptionsVO, we defined toPersistence() on it.
     return {
       ...this.props,
+      id: this.props.id.value,
       options: this.props.options.toPersistence(),
     };
   }

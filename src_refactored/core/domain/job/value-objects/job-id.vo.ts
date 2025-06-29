@@ -1,14 +1,14 @@
 // src_refactored/core/domain/job/value-objects/job-id.vo.ts
 import { randomUUID } from 'node:crypto'; // Use native crypto module
 
-import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { DomainError } from '@/core/domain/common/errors';
 
 interface JobIdProps {
   value: string;
 }
 
-export class JobIdVO extends ValueObject<JobIdProps> {
+export class JobIdVO extends AbstractValueObject<JobIdProps> {
   private constructor(props: JobIdProps) {
     super(props);
   }

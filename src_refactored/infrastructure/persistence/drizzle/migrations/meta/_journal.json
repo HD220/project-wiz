@@ -8,6 +8,13 @@
       "when": 1751213998595,
       "tag": "0000_queue_initial_setup",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1751217258646,
+      "tag": "0001_free_baron_strucker",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 // src_refactored/core/domain/job/value-objects/job-options.vo.ts
 
-import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { DomainError } from '@/core/domain/common/errors';
 
 /**
@@ -45,7 +45,7 @@ export interface IJobOptions {
   // TODO: Add `repeat?: IRepeatOptions` in the future if needed (align with BullMQ's new Job Schedulers)
 }
 
-export class JobOptionsVO extends ValueObject<IJobOptions> {
+export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   private constructor(props: IJobOptions) {
     super(JobOptionsVO.sanitize(props));
   }
