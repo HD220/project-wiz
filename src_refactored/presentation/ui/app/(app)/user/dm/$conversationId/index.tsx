@@ -1,106 +1,149 @@
-import { createFileRoute, useParams, useRouter, Link } from '@tanstack/react-router';
-import { ArrowLeft } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { createFileRoute, useParams, useRouter } from '@tanstack/react-router';
+import { ArrowLeft, Loader2, ServerCrash } from 'lucide-react';
+import React, { useMemo } from 'react'; // Removed useEffect, useState as they are no longer directly used
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
 import { ChatWindow } from '@/presentation/ui/features/chat/components/ChatWindow';
-import { ChatMessage } from '@/presentation/ui/features/chat/components/MessageItem';
-// Using DirectMessageItem for the conversation details from UserSidebar context
-import { DirectMessageItem } from '@/presentation/ui/features/user/components/layout/UserSidebar';
+import { useIpcMutation } from '@/presentation/ui/hooks/ipc/useIpcMutation'; // Import useIpcMutation
+import { useIpcQuery } from '@/presentation/ui/hooks/ipc/useIpcQuery';
+import { useIpcSubscription } from '@/presentation/ui/hooks/ipc/useIpcSubscription';
 
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+// ChatMessage is used in handleSendMessage
+// DirectMessageItem is used for conversationDetails type
+import type {
+  DirectMessageItem,
+  ChatMessage,
+  GetDMMessagesRequest,
+  GetDMMessagesResponseData,
+  DMMessageReceivedEventPayload,
+  GetDMConversationsListResponseData,
+  SendDMMessageRequest, // Import request type for sending message
+  SendDMMessageResponseData, // Import response type for sending message
+  IPCResponse // For the mutation's expected response structure
+} from '@/shared/ipc-types';
 
-// --- Mock Data ---
-// This data would typically be fetched based on conversationId or managed in a global store/cache.
-// For now, we'll use a simplified version of mockConversations and mockMessages.
-
-// This type is for the data structure ChatWindow expects for a conversation.
-// It might be simpler than DirectMessageItem if DirectMessageItem has extra UI-specific fields.
-interface ChatWindowConversation {
+// This type is for the data structure ChatWindow expects for a conversation header.
+interface ChatWindowConversationHeader {
   id: string;
   name: string;
-  type: 'dm' | 'channel' | 'agent'; // ChatWindow might handle these types slightly differently in its header
+  type: 'dm' | 'channel' | 'agent';
   avatarUrl?: string;
-  participants?: number;
 }
 
-
-const mockDMConversationsDbForPage: Record<string, DirectMessageItem> = {
-  userAlice: { id: 'userAlice', name: 'Alice (Designer)', type: 'user', avatarUrl: '/avatars/01.png', lastMessage: "Você viu o novo layout?", timestamp: "Ontem" },
-  agent001: { id: 'agent001', name: 'CoderBot-Alpha', type: 'agent', avatarUrl: '/avatars/agent-coder.png', lastMessage: "Script finalizado.", timestamp: "09:15" },
-  userBob: { id: 'userBob', name: 'Bob (Backend Dev)', type: 'user', avatarUrl: '/avatars/02.png', lastMessage: "Ajuda com API!" , timestamp: "Terça"},
-  agent002: { id: 'agent002', name: 'TestMaster-7000', type: 'agent', avatarUrl: '/avatars/agent-qa.png', lastMessage: "All green!", timestamp: "Segunda" },
-};
-
-const mockDmMessagesDbForPage: Record<string, ChatMessage[]> = {
-  userAlice: [
-    { id: 'dm_m1', sender: {id: 'userJdoe', name: 'J.Doe', type: 'user'}, content: "Oi Alice, tudo bem?", timestamp: "Ontem 14:30" },
-    { id: 'dm_m2', sender: {id: 'userAlice', name: 'Alice (Designer)', type: 'user', avatarUrl: '/avatars/01.png'}, content: "Tudo sim! E com você? Viu o novo layout?", timestamp: "Ontem 14:32" },
-    { id: 'dm_m3', sender: {id: 'userJdoe', name: 'J.Doe', type: 'user'}, content: "Vi sim, ficou ótimo!", timestamp: "Ontem 14:35" },
-  ],
-  agent001: [
-    { id: 'dm_ag_m1', sender: { id: 'userJdoe', name: 'J.Doe', type: 'user' }, content: 'Preciso de um script que automatize X, Y e Z.', timestamp: '10:28' },
-    { id: 'dm_ag_m2', sender: { id: 'agent001', name: 'CoderBot-Alpha', type: 'agent', avatarUrl: '/avatars/agent-coder.png' }, content: 'Entendido. Posso começar a trabalhar nisso agora. Alguma preferência de linguagem?', timestamp: '10:29' },
-    { id: 'dm_ag_m3', sender: { id: 'userJdoe', name: 'J.Doe', type: 'user' }, content: 'Python seria ideal.', timestamp: '10:30' },
-    { id: 'dm_ag_m4', sender: { id: 'agent001', name: 'CoderBot-Alpha', type: 'agent', avatarUrl: '/avatars/agent-coder.png' }, content: 'Perfeito. Script finalizado e enviado para seu repositório.', timestamp: '11:15' },
-  ],
-  userBob: [],
-  agent002: [],
-};
-// --- End Mock Data ---
-
+// Mock current user ID - this would ideally come from a global user context/store
+const currentUserId = "userJdoe";
 
 function DirectMessagePage() {
   const params = useParams({ from: '/(app)/user/dm/$conversationId/' });
   const conversationId = params.conversationId;
   const router = useRouter();
 
-  const [conversationDetails, setConversationDetails] = useState<DirectMessageItem | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: dmConversations, isLoading: isLoadingConvList, error: convListError } = useIpcQuery<null, GetDMConversationsListResponseData>(
+    IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST,
+    null,
+    { staleTime: 5 * 60 * 1000 }
+  );
 
-  const currentUserId = "userJdoe"; // Mock current user ID
+  const conversationDetails: DirectMessageItem | null = useMemo(() => {
+    if (!dmConversations) return null;
+    return dmConversations.find(conv => conv.id === conversationId) || null;
+  }, [dmConversations, conversationId]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const foundConversation = mockDMConversationsDbForPage[conversationId];
-      const foundMessages = mockDmMessagesDbForPage[conversationId] || [];
-
-      if (foundConversation) {
-        setConversationDetails(foundConversation);
-        setMessages(foundMessages);
-      } else {
-        toast.error(`Conversa DM com ID "${conversationId}" não encontrada.`);
+  const { data: messages, isLoading: isLoadingMessages, error: messagesError } = useIpcSubscription<
+    GetDMMessagesRequest,
+    GetDMMessagesResponseData,
+    DMMessageReceivedEventPayload
+  >(
+    IPC_CHANNELS.GET_DM_MESSAGES,
+    { conversationId },
+    IPC_CHANNELS.DM_MESSAGE_RECEIVED_EVENT,
+    {
+      getSnapshot: (prevMessages, eventPayload) => {
+        if (eventPayload.conversationId === conversationId) {
+          if (prevMessages?.find(msg => msg.id === eventPayload.message.id)) {
+            return prevMessages;
+          }
+          return [...(prevMessages || []), eventPayload.message];
+        }
+        return prevMessages || [];
+      },
+      onError: (err) => { // This onError is for the subscription part
+        toast.error(`Erro na subscrição de mensagens: ${err.message}`);
       }
-      setIsLoading(false);
-    }, 300);
-  }, [conversationId]);
+    }
+  );
+
+  const sendMessageMutation = useIpcMutation<
+    SendDMMessageRequest,
+    IPCResponse<SendDMMessageResponseData>
+  >(
+    IPC_CHANNELS.SEND_DM_MESSAGE,
+    {
+      onSuccess: (response) => {
+        if (response.success && response.data) {
+          // Message sent successfully.
+          // The DM_MESSAGE_RECEIVED_EVENT should update the message list via useIpcSubscription.
+          // No need to manually add the message here if the event system is working.
+          console.log('Message sent, response data:', response.data);
+        } else {
+          // This case should ideally be handled by onError if IPCResponse wrapper is consistent
+          toast.error(`Falha ao enviar mensagem: ${response.error?.message || 'Erro desconhecido retornando sucesso.'}`);
+        }
+      },
+      onError: (error) => {
+        toast.error(`Falha ao enviar mensagem: ${error.message}`);
+      },
+    }
+  );
 
   const handleSendMessage = (content: string) => {
-    if (!conversationDetails) return;
-
-    const newMessage: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      sender: { id: currentUserId, name: 'J.Doe', type: 'user' },
-      content,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages(prevMessages => [...prevMessages, newMessage]);
-
-    const currentMockConvMessages = mockDmMessagesDbForPage[conversationDetails.id] || [];
-    mockDmMessagesDbForPage[conversationDetails.id] = [...currentMockConvMessages, newMessage];
+    if (!conversationDetails) {
+      toast.error("Detalhes da conversa não encontrados para enviar mensagem.");
+      return;
+    }
+    if (sendMessageMutation.isLoading) {
+      toast.info("Aguarde o envio da mensagem anterior.");
+      return;
+    }
+    // No local optimistic update here; relying on DM_MESSAGE_RECEIVED_EVENT
+    // after successful IPC call from main process.
+    sendMessageMutation.mutate({ conversationId, content });
   };
 
+  const isLoading = isLoadingMessages || isLoadingConvList;
+  const combinedError = messagesError || convListError; // Prioritize messagesError if both exist
+
   if (isLoading) {
-    return <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">Carregando conversa...</div>;
+    return <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900"><Loader2 className="h-8 w-8 animate-spin text-sky-500"/> Carregando conversa...</div>;
+  }
+
+  if (combinedError) {
+    // Determine which error to show, or show a generic one.
+    // The individual hooks might already show toasts.
+    const errorToShow = messagesError || convListError;
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-red-50 dark:bg-red-900/10 rounded-lg">
+        <ServerCrash className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
+        <h2 className="text-xl font-semibold text-red-700 dark:text-red-300 mb-2">Erro ao Carregar Conversa</h2>
+        <p className="text-sm text-red-600 dark:text-red-400 mb-1">{errorToShow?.message}</p>
+        <Button onClick={() => router.navigate({ to: "/user/"})} variant="destructive" className="mt-4">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para DMs
+        </Button>
+      </div>
+    );
   }
 
   if (!conversationDetails) {
+    // This case might occur if dmConversations loaded but the specific conversationId was not found
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900">
+        <ServerCrash className="h-12 w-12 text-slate-500 dark:text-slate-400 mb-4" />
         <h2 className="text-xl font-semibold mb-2">Conversa não encontrada</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          Não foi possível encontrar detalhes para a conversa com ID: {conversationId}.
+        </p>
         <Button onClick={() => router.navigate({ to: "/user/"})} variant="outline" className="mt-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para DMs
         </Button>
@@ -108,23 +151,20 @@ function DirectMessagePage() {
     );
   }
 
-  // Adapt DirectMessageItem to ChatWindowConversation for ChatWindow component
-  const chatWindowConversation: ChatWindowConversation = {
+  const chatWindowConversationHeader: ChatWindowConversationHeader = {
       id: conversationDetails.id,
       name: conversationDetails.name,
-      // ChatWindow expects 'dm' or 'channel'. 'agent' type from DirectMessageItem can be mapped to 'dm'.
       type: conversationDetails.type === 'agent' ? 'dm' : conversationDetails.type,
       avatarUrl: conversationDetails.avatarUrl,
-      // participants: undefined, // DMs typically don't show participant count in header like channels
   };
 
   return (
     <div className="flex flex-col flex-1 h-full overflow-hidden">
         <ChatWindow
-        conversation={chatWindowConversation}
-        messages={messages}
+        conversation={chatWindowConversationHeader}
+        messages={messages || []}
         onSendMessage={handleSendMessage}
-        isLoading={false}
+        isLoading={isLoadingMessages} // Pass message-specific loading to ChatWindow
         currentUserId={currentUserId}
         />
     </div>
