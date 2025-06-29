@@ -14,7 +14,7 @@ Após iniciar a aplicação conforme as instruções de desenvolvimento, a janel
 
 ## 3. Conhecendo a Interface Principal
 
-Recomendamos que você se familiarize com as principais áreas da interface. O documento [Visão Geral da Interface](./03-interface-overview.md) fornece um mapa detalhado. (Este documento será criado em breve).
+Recomendamos que você se familiarize com as principais áreas da interface. O documento [Visão Geral da Interface](./03-interface-overview.md) fornece um mapa detalhado.
 
 ## 4. Seu Primeiro Projeto
 
@@ -31,35 +31,38 @@ Com o Project Wiz, você pode gerenciar seus projetos de software de forma centr
         *   `worktrees/`: Áreas de trabalho que os Agentes IA podem usar.
     *   Um repositório Git é inicializado automaticamente na pasta `source-code/`, permitindo o controle de versão desde o início.
 *   **Próximos Passos com Projetos:**
-    *   Para mais detalhes sobre como gerenciar e configurar seus projetos, consulte o guia [Gerenciando Projetos](../user/core-concepts/projects.md). (Este documento será criado em breve).
+    *   Para mais detalhes sobre como gerenciar e configurar seus projetos, consulte o guia [Gerenciando Projetos](./core-concepts/projects.md).
 
-## 5. Criando sua Primeira Persona
+## 5. Solicitando seu Primeiro Agente IA Especializado (Persona)
 
-As Personas no Project Wiz são templates para seus Agentes de IA. Elas definem como um Agente deve se comportar e quais são suas capacidades.
+No Project Wiz, você conta com um **Assistente Pessoal IA** para ajudá-lo a dar o pontapé inicial nas suas tarefas. Para tarefas que exigem habilidades específicas, este assistente pode facilitar a criação de **Agentes IA Especializados**. Você também terá a capacidade de customizar e salvar as configurações desses agentes como "Personas Personalizadas" para uso futuro.
 
-*   **Definindo uma Persona:** Ao criar um template de Persona, você configurará:
-    *   **Nome:** Um nome descritivo para o template (ex: "Desenvolvedor Frontend Júnior", "Revisor de Código Detalhista").
-    *   **Papel (Role):** A especialização principal do Agente (ex: "Developer", "QA Tester", "Documentation Writer").
-    *   **Objetivo (Goal):** O objetivo de alto nível que Agentes baseados neste template buscarão alcançar.
-    *   **Backstory/Contexto:** Informações de fundo que ajudam a definir a personalidade e o conhecimento do Agente, usadas para construir o prompt de sistema para o LLM.
-    *   **Ferramentas (Tools):** Uma lista das ferramentas específicas que o Agente terá permissão para usar (ex: acesso ao sistema de arquivos, terminal, ferramentas de busca).
-*   **De Template para Agente:** Estes templates de Persona são então usados para criar instâncias de Agentes IA que efetivamente realizarão os trabalhos, combinando o template com configurações específicas de LLM (como qual modelo usar e sua temperatura).
+*   **Descrevendo sua Necessidade:**
+    *   Comece conversando com seu Assistente Pessoal IA. Descreva a tarefa que você precisa realizar (ex: "Preciso criar testes unitários para o módulo de autenticação").
+*   **Geração ou Seleção do Agente:**
+    *   O Assistente Pessoal, com auxílio de um LLM, analisará sua solicitação.
+    *   Ele poderá **sugerir uma configuração para um novo Agente IA especializado**, detalhando o papel (ex: "QA Tester"), objetivo, e as capacidades que ele usaria.
+    *   Se você já tiver **"Personas Personalizadas" salvas** que se encaixem, o assistente poderá sugerir o uso de uma delas.
+*   **Customização e Configuração:**
+    *   Você terá a oportunidade de **revisar e customizar** as características do Agente proposto (seja ele novo ou baseado em uma Persona Personalizada). Isso inclui seu nome, papel, objetivo, backstory (contexto para o LLM) e as capacidades permitidas.
+    *   Você também definirá qual modelo de LLM o Agente usará e outros parâmetros (como a "temperatura").
+    *   Configurações que você aprova podem ser **salvas como uma nova "Persona Personalizada"** ou atualizar uma existente.
+*   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para auxiliar na realização dos seus objetivos.
 *   **Saiba Mais:**
-    *   Para um mergulho profundo na criação e utilização de Personas e Agentes, veja [Personas e Agentes IA](../user/core-concepts/personas-and-agents.md). (Este documento será criado em breve).
+    *   Para um mergulho profundo na interação com o Assistente Pessoal e no gerenciamento de suas Personas Personalizadas e Agentes IA, veja [Personas Personalizadas e Agentes IA](./core-concepts/personas-and-agents.md).
 
-## 6. Atribuindo seu Primeiro Job
+## 6. Delegando sua Primeira Tarefa de Alto Nível
 
-Jobs são as tarefas que você atribui às suas Personas (ou mais precisamente, aos Agentes IA criados a partir dos templates de Persona).
+Com o Project Wiz, você não se preocupa em criar "jobs" ou "tarefas" pequenas e detalhadas diretamente. Em vez disso, você delega objetivos de mais alto nível ao seu Assistente Pessoal IA.
 
-*   **O que é um Job?** Um Job é a unidade fundamental de trabalho no Project Wiz. Ele geralmente inclui:
-    *   **Nome:** Um nome descritivo para o Job.
-    *   **Payload/Dados de Entrada:** A informação que o Agente precisa para realizar a tarefa, mais comumente um "objetivo" claro (ex: "Implementar a função X", "Revisar o arquivo Y para erros de lógica").
-    *   **Persona/Papel Alvo:** Você direcionará o Job para um papel específico, e um Agente configurado para aquele papel o selecionará.
-*   **Ciclo de Vida de um Job:**
-    *   Os Jobs passam por diferentes status, como `PENDENTE`, `ATIVO`, `COMPLETADO` ou `FALHOU`.
-    *   Os Jobs podem depender de outros Jobs, significando que só começarão após seus pré-requisitos serem concluídos.
-*   **Explorando Jobs:**
-    *   Para aprender tudo sobre como criar, gerenciar e monitorar Jobs, consulte [Jobs e Automação](../user/core-concepts/jobs-and-automation.md). (Este documento será criado em breve).
+*   **Como Delegar:**
+    *   Inicie uma conversa com seu **Assistente Pessoal IA**.
+    *   Descreva claramente o que você deseja alcançar (ex: "Refatorar o sistema de login para aumentar a segurança", "Gerar a documentação inicial para o novo módulo de pagamentos", "Analisar o código em busca de gargalos de performance").
+*   **O que Acontece em Seguida:**
+    *   O Assistente Pessoal, junto com outros Agentes IA especializados (sejam eles configurados por você ou gerados dinamicamente), analisará sua solicitação.
+    *   Internamente, eles definirão as atividades e etapas necessárias para atingir seu objetivo.
+    *   Você poderá acompanhar o progresso geral da sua solicitação e interagir com os agentes para fornecer feedback ou esclarecimentos, conforme descrito na [Introdução ao Project Wiz](./01-introduction.md#como-funciona-a-interação-principal).
+*   **Foco no Objetivo:** Seu foco principal é comunicar claramente seus objetivos de alto nível; o Project Wiz e seus agentes cuidam da decomposição e execução das tarefas detalhadas.
 
 ## Próximos Passos
 
