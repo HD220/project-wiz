@@ -36,7 +36,7 @@ Para um detalhamento completo da arquitetura, componentes de cada camada, tecnol
 Aderência estrita aos seguintes princípios é crucial:
 
 *   **Clean Architecture:** Conforme descrito acima e detalhado em `docs/reference/01-software-architecture.md`.
-*   **Object Calisthenics:** Todas as 9 regras devem ser aplicadas rigorosamente. Veja a seção "3. Object Calisthenics em Detalhe" abaixo. Este é um requisito não funcional chave.
+*   **Object Calisthenics:** Todas as 9 regras devem ser aplicadas rigorosamente. Para um detalhamento completo de cada regra e como aplicá-la neste projeto, consulte a seção "3. Object Calisthenics for This Project" em `docs/reference/08-code-quality-and-refactoring-principles.md`. Este é um requisito não funcional chave.
 *   **SOLID:**
     *   **S**ingle Responsibility Principle: Classes e métodos devem ter uma única responsabilidade bem definida.
     *   **O**pen/Closed Principle: Entidades devem ser abertas para extensão, mas fechadas para modificação.
@@ -49,48 +49,11 @@ Aderência estrita aos seguintes princípios é crucial:
 Consulte também:
 *   `docs/developer/02-coding-standards.md` para padrões de formatação, nomenclatura, etc.
 *   `docs/reference/02-best-practices.md` para uma visão mais ampla de boas práticas.
-*   `docs/reference/08-code-quality-and-refactoring-principles.md` para diretrizes sobre qualidade.
+*   `docs/reference/08-code-quality-and-refactoring-principles.md` para diretrizes sobre qualidade e a aplicação detalhada de Object Calisthenics.
 
-## 3. Object Calisthenics em Detalhe (Como Aplicar)
+## 3. Tecnologias Chave
 
-As 9 regras são mandatórias. Aqui estão algumas diretrizes contextuais:
-
-1. **Um Nível de Indentação por Método:**
-    * Extraia blocos `if`, `for`, `while`, `try/catch` para métodos privados ou funções auxiliares.
-    * Use guard clauses (retornos antecipados) para reduzir aninhamento.
-2. **Não Use a Palavra-Chave `else`:**
-    * Priorize guard clauses.
-    * Para lógica condicional mais complexa, considere polimorfismo (Strategy Pattern, State Pattern) ou mapeamentos.
-3. **Encapsule Todos os Tipos Primitivos e Strings:**
-    * **Value Objects (VOs):** Use para qualquer primitivo que tenha significado de domínio, regras de validação, ou comportamento associado (ex: `ProjectId`, `EmailAddress`, `JobStatus`, `RetryDelay`).
-    * **DTOs/Schemas Zod:** Para dados de entrada/saída de casos de uso e handlers IPC.
-    * **Exceções:** Primitivos são aceitáveis para variáveis de loop locais, contadores simples, ou strings que são verdadeiramente apenas "dados brutos" sem semântica de domínio (raro).
-4. **Coleções de Primeira Classe:**
-    * Se uma classe gerencia uma coleção (array, map, set) e tem lógica de negócios em torno dessa coleção (adicionar, remover, filtrar com regras específicas), crie uma classe dedicada para essa coleção (ex: `ActivityHistory`, `ToolNames`).
-    * A classe da coleção não deve ter outras variáveis de instância além da própria coleção.
-5. **Apenas Um Ponto Por Linha (Lei de Demeter):**
-    * Evite cadeias como `object.getA().getB().doC()`.
-    * Em vez disso, peça ao colaborador direto para fazer o trabalho: `object.doSomethingRelatedToC()`.
-    * Isso reduz o acoplamento. Cuidado especial em casos de uso orquestrando entidades.
-6. **Não Abrevie:**
-    * Use nomes completos e descritivos para classes, métodos, variáveis. `repository` em vez de `repo`. `index` é aceitável para contadores de loop.
-7. **Mantenha Todas as Entidades Pequenas:**
-    * **Classes:** Idealmente <50-100 linhas. Se maior, provavelmente tem múltiplas responsabilidades.
-    * **Métodos:** Idealmente <5-10 linhas. Se maior, extraia para métodos privados.
-8. **Nenhuma Classe Com Mais de Duas Variáveis de Instância:**
-    * Esta é a regra mais desafiadora, especialmente com DI.
-    * **Estratégias:**
-        * Agrupe dependências que servem a um único propósito coeso em um objeto de configuração/contexto e injete esse objeto.
-        * Se uma classe tem muitas dependências servindo a propósitos distintos, divida a classe em responsabilidades menores.
-        * Entidades frequentemente têm um `_id` (identidade) e um `props` (estado). VOs têm seus `props`.
-9. **Sem Getters/Setters/Propriedades (para comportamento):**
-    * **Comportamento sobre Dados:** Objetos devem expor métodos que realizam ações ("Tell, Don't Ask"), em vez de apenas fornecer acesso direto a dados internos para manipulação externa.
-    * **Value Objects:** Por convenção, VOs podem ter um método `value()` ou similar (ex: `idString()`, `nameString()`) para fornecer sua representação primitiva quando necessário para interagir com sistemas externos ou para persistência, mas o VO em si deve ser imutável. Isso não é um "getter" no sentido de expor estado interno para mutação arbitrária.
-    * **Entidades:** O estado interno (`props`) é privado. Mutações de estado ocorrem através de métodos comportamentais que retornam uma *nova instância* da entidade (ou atualizam `updatedAt` e retornam `this` se a entidade for conceitualmente mutável mas suas props VOs forem imutáveis).
-
-## 4. Tecnologias Chave
-
-Consulte `package.json` e `docs/tecnico/arquitetura.md` para a lista completa. As principais incluem:
+Consulte `package.json` e `docs/reference/01-software-architecture.md` (substituindo a referência legada `docs/tecnico/arquitetura.md`) para a lista completa. As principais incluem:
 
 * **Linguagem:** TypeScript (configuração `strict`).
 * **Backend/Core:** Node.js.
@@ -104,7 +67,8 @@ Consulte `package.json` e `docs/tecnico/arquitetura.md` para a lista completa. A
 * **AI/LLM:** `ai-sdk`.
 * **Testes:** Vitest.
 
-## 5. Modificações Controladas: Dependências, Configurações e Organização do Código
+## 4. Modificações Controladas: Dependências, Configurações e Organização do Código
+## 4. Modificações Controladas: Dependências, Configurações e Organização do Código
 
 Qualquer proposta de adição de novas dependências (pacotes npm, bibliotecas), alterações significativas em configurações existentes (ex: `tsconfig.json`, `vite.config.ts`, configurações de CI/CD) ou mudanças estruturais na organização do código (ex: mover pastas principais, alterar significativamente a estrutura de módulos) deve seguir um processo formal de aprovação.
 
@@ -131,14 +95,14 @@ Qualquer proposta de adição de novas dependências (pacotes npm, bibliotecas),
 
 Este processo garante que todas as mudanças significativas sejam bem ponderadas, documentadas e alinhadas com os objetivos de longo prazo do projeto.
 
-## 6. Trabalhando com Código Legado (Durante a Fase 5)
+## 5. Trabalhando com Código Legado (Durante a Fase 5)
 
 * O código legado em `src/` e `src2/` existe para consulta e entendimento.
 * **NÃO MODIFIQUE O CÓDIGO LEGADO.**
 * **TODO O NOVO CÓDIGO DEVE SER ESCRITO EM `src_refactored/`.**
 * Se você encontrar um VO, entidade, ou função utilitária no código legado que seja de alta qualidade e se alinhe PERFEITAMENTE com os novos princípios (Clean Arch, OC), você pode adaptá-lo para `src_refactored/`. No entanto, a **reescrita é a norma**.
 
-## 7. Gerenciamento de Tarefas e Ciclo de Trabalho do Agente
+## 6. Gerenciamento de Tarefas e Ciclo de Trabalho do Agente
 
 O trabalho neste projeto é rastreado através de um sistema de tarefas localizado em `/.jules/`.
 
