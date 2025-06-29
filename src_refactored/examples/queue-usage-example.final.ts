@@ -1,9 +1,10 @@
 // src_refactored/examples/queue-usage-example.final.ts
+import { WorkerService } from '@/core/application/worker/worker.service';
+import { JobEntity } from '@/core/domain/job/job.entity';
+
 import { db } from '@/infrastructure/persistence/drizzle/drizzle.client';
 import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/job/drizzle-job.repository';
 import { QueueService } from '@/infrastructure/queue/drizzle/queue.service';
-import { WorkerService } from '@/core/application/worker/worker.service';
-import { JobEntity } from '@/core/domain/job/job.entity';
 
 async function main() {
   const jobRepository = new DrizzleJobRepository(db);
@@ -14,11 +15,11 @@ async function main() {
     process.stdout.write(`[Worker] Processing job ${job.id.value} (attempt ${job.attemptsMade}) for email: ${job.payload.email}\n`);
 
     // Simulate work with progress updates
-    for (let i = 0; i <= 100; i += 25) {
+    for (let progressValue = 0; progressValue <= 100; progressValue += 25) { // Renamed i to progressValue
       await new Promise(resolve => setTimeout(resolve, 500));
-      job.updateProgress(i);
-      job.addLog(`Progress updated to ${i}%`);
-      process.stdout.write(`[Worker] Job ${job.id.value} progress: ${i}%\n`);
+      job.updateProgress(progressValue);
+      job.addLog(`Progress updated to ${progressValue}%`);
+      process.stdout.write(`[Worker] Job ${job.id.value} progress: ${progressValue}%\n`);
     }
 
     // Simulate retry logic: fail twice, then succeed

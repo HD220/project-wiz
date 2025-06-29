@@ -1,29 +1,36 @@
-import { WorkerService, WorkerOptions, ProcessorFunction } from '../worker.service';
+import EventEmitter from 'events';
+// Removed: import { randomUUID } from 'node:crypto';
+import { vi, describe, it, expect, beforeEach, Mock, afterEach } from 'vitest';
+
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
+import { IJobRepository } from '@/core/application/ports/job-repository.interface'; // For MockQueue
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
-import { vi, describe, it, expect, beforeEach, Mock, afterEach } from 'vitest';
-import EventEmitter from 'events';
+import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo'; // For MockQueue
+import { WorkerService, WorkerOptions } from '../worker.service';
+
 
 // Mock AbstractQueue
 class MockQueue<P, R> extends EventEmitter implements AbstractQueue<P, R> {
   queueName: string;
-  jobRepository: any; // Not used directly by WorkerService, can be minimal
-  defaultJobOptions: any;
+  jobRepository: Partial<IJobRepository>; // Use Partial if not all methods are needed/mocked
+  defaultJobOptions: Partial<IJobOptions>; // Use Partial
 
   constructor(name: string) {
     super();
     this.queueName = name;
+    this.jobRepository = {}; // Initialize with empty object or specific mocks if needed
+    this.defaultJobOptions = {};
   }
 
-  add = vi.fn() as Mock<any[], Promise<JobEntity<P, R>>>;
-  addBulk = vi.fn() as Mock<any[], Promise<Array<JobEntity<P, R>>>>;
+  add = vi.fn() as Mock<[string, P, IJobOptions?], Promise<JobEntity<P, R>>>;
+  addBulk = vi.fn() as Mock<[Array<{ name: string; data: P; opts?: IJobOptions; }>], Promise<Array<JobEntity<P, R>>>>;
   getJob = vi.fn() as Mock<[string | JobIdVO], Promise<JobEntity<P, R> | null>>;
-  getJobsByStatus = vi.fn() as Mock<any[], Promise<Array<JobEntity<P, R>>>>;
-  countJobsByStatus = vi.fn() as Mock<any[], Promise<Partial<Record<JobStatus, number>>>>;
+  getJobsByStatus = vi.fn() as Mock<[JobStatus[], number?, number?, boolean?], Promise<Array<JobEntity<P, R>>>>;
+  countJobsByStatus = vi.fn() as Mock<[JobStatus[]?], Promise<Partial<Record<JobStatus, number>>>>;
   pause = vi.fn() as Mock<[], Promise<void>>;
   resume = vi.fn() as Mock<[], Promise<void>>;
-  clean = vi.fn() as Mock<any[], Promise<number>>;
+  clean = vi.fn() as Mock<[number, number, JobStatus?], Promise<number>>;
   close = vi.fn() as Mock<[], Promise<void>>;
 
   fetchNextJobAndLock = vi.fn() as Mock<[string, number], Promise<JobEntity<P, R> | null>>;
@@ -191,9 +198,9 @@ import { randomUUID } from 'node:crypto';
       const job = createMockJob('progress', { data: 'progress data' });
       mockQueue.fetchNextJobAndLock.mockResolvedValueOnce(job);
 
-      mockProcessor.mockImplementationOnce(async (j) => {
-        j.updateProgress(50); // This should call queue.updateJobProgress via the bound method
-        j.addLog('Processor log 1', 'INFO'); // This should call queue.addJobLog
+      mockProcessor.mockImplementationOnce(async (jobCtx) => { // Renamed j to jobCtx
+        jobCtx.updateProgress(50); // This should call queue.updateJobProgress via the bound method
+        jobCtx.addLog('Processor log 1', 'INFO'); // This should call queue.addLog
         return { status: 'progress_done' };
       });
 
@@ -270,9 +277,9 @@ import { randomUUID } from 'node:crypto';
       mockQueue.fetchNextJobAndLock.mockResolvedValueOnce(job1);
 
       // job1 takes 2 seconds to process
-      mockProcessor.mockImplementationOnce(async (j) => {
+      mockProcessor.mockImplementationOnce(async (jobCtx) => { // Renamed j to jobCtx
         await new Promise(resolve => setTimeout(resolve, 2000));
-        return { status: `closed_${j.id.value}` };
+        return { status: `closed_${jobCtx.id.value}` };
       });
 
       workerService.run();
@@ -330,4 +337,74 @@ import { randomUUID } from 'node:crypto';
 
   // TODO: Test for 'worker.error' event if the queue itself throws an error during operations.
   // This might require making the mockQueue.fetchNextJobAndLock throw an error.
+
+  it('should emit worker.error if queue.fetchNextJobAndLock throws and continues polling', async () => {
+    const fetchError = new Error('Failed to fetch from queue');
+    mockQueue.fetchNextJobAndLock.mockRejectedValueOnce(fetchError);
+
+    // Spy on the poll method to ensure it's called again
+    const pollSpy = vi.spyOn(workerService as any, 'poll');
+
+    workerService.run();
+    // Advance timers enough for the poll to execute and the error to be processed
+    await vi.advanceTimersByTimeAsync(100);
+
+
+    expect(workerService.emit).toHaveBeenCalledWith('worker.error', fetchError);
+    expect(pollSpy).toHaveBeenCalledTimes(1); // Initial call that errored
+
+    // Ensure it continues polling for the next cycle
+    mockQueue.fetchNextJobAndLock.mockResolvedValueOnce(null); // Next attempt finds no job
+    await vi.advanceTimersByTimeAsync(1000 + 50); // Default poll interval + buffer
+
+    expect(mockQueue.fetchNextJobAndLock).toHaveBeenCalledTimes(2); // fetch called again
+    expect(pollSpy.mock.calls.length).toBeGreaterThanOrEqual(2); // poll() itself was called again
+    pollSpy.mockRestore();
+  });
+
+  it('should emit worker.job.interrupted if closed during processing and not call complete/fail on queue', async () => {
+    const job = createMockJob('interrupted', { data: 'interrupt me' });
+    mockQueue.fetchNextJobAndLock.mockResolvedValueOnce(job);
+
+    const processorPromiseCtrl = {
+      resolve: () => {},
+      reject: () => {},
+    };
+    const processorPromise = new Promise<TestResult>((resolve, reject) => {
+      processorPromiseCtrl.resolve = resolve;
+      processorPromiseCtrl.reject = reject;
+    });
+
+    mockProcessor.mockImplementationOnce(() => {
+      // Simulate work is about to start or in progress
+      // Then worker is closed externally before this promise resolves
+      return processorPromise;
+    });
+
+    workerService.run();
+    await vi.advanceTimersByTimeAsync(50); // Job picked up, processor called
+
+    expect(workerService.emit).toHaveBeenCalledWith('worker.job.active', job);
+    expect(mockProcessor).toHaveBeenCalledWith(job);
+
+    // Now, close the worker while the job is notionally "processing"
+    // (i.e., processorPromise has not resolved)
+    const closePromise = workerService.close();
+
+    // Since close is called, the worker should not wait for the processorPromise to complete.
+    // Instead, it should proceed with shutdown.
+    // We need to ensure that the internal logic of processJob correctly identifies this scenario.
+
+    // Resolve the processor's promise *after* close has been initiated to simulate job "finishing" work
+    // but the worker is already shutting down.
+    processorPromiseCtrl.resolve({ status: 'finished_but_worker_closed' });
+
+    await vi.runAllTimersAsync(); // Allow all timers (polling, lock renewal, close loop) to run
+    await closePromise; // Ensure close completes
+
+    expect(workerService.isClosed).toBe(true);
+    expect(workerService.emit).toHaveBeenCalledWith('worker.job.interrupted', job);
+    expect(mockQueue.markJobAsCompleted).not.toHaveBeenCalled();
+    expect(mockQueue.markJobAsFailed).not.toHaveBeenCalled();
+  });
 });

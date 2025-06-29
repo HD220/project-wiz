@@ -1,6 +1,7 @@
 // src_refactored/core/domain/job/job.entity.ts
 import { AbstractEntity } from '@/core/common/base.entity';
 import { DomainError } from '@/core/domain/common/errors';
+// Removed: import type { JobSelect } from '@/infrastructure/persistence/drizzle/schema/jobs.schema';
 
 import { JobIdVO } from './value-objects/job-id.vo';
 import { IJobOptions, JobOptionsVO } from './value-objects/job-options.vo';
@@ -44,6 +45,33 @@ export interface JobEntityProps<P = unknown, R = unknown> {
   // parentId?: JobIdVO; // For job dependencies/flows - future
 }
 
+// This type defines the shape of data JobEntity.fromPersistence expects.
+// It's a contract for the infrastructure layer (repository) to fulfill.
+export type JobPersistenceData<P = unknown, R = unknown> = {
+  id: string;
+  queueName: string;
+  name: string;
+  payload: P; // Should be already parsed if JSON by the repository before calling fromPersistence
+  options: IJobOptions; // Should be already parsed if JSON by the repository
+  status: JobStatus; // Should be a valid JobStatus string
+  attemptsMade: number;
+  progress: number | object; // Should be already parsed if JSON by the repository
+  logs: Array<{ message: string; level: string; timestamp: number }>; // Timestamps as numbers from DB
+  createdAt: number; // Timestamp number from DB
+  updatedAt: number; // Timestamp number from DB
+  // priority is part of options, so not explicitly here in JobEntityProps mapping, but is in IJobOptions
+  processedOn?: number | null; // Timestamp number from DB or null
+  finishedOn?: number | null; // Timestamp number from DB or null
+  delayUntil?: number | null; // Timestamp number from DB or null
+  lockUntil?: number | null; // Timestamp number from DB or null
+  workerId?: string | null;
+  returnValue?: R | null; // Should be already parsed if JSON by the repository
+  failedReason?: string | null;
+  stacktrace?: string[] | null; // Should be already parsed if JSON by the repository
+  // Fields like repeatJobKey, parentId from schema are not part of core JobEntityProps yet.
+  // If they become part of JobEntityProps, they should be added here for the repository to map.
+};
+
 export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<P, R>> {
   private _progressChanged: boolean = false;
   private _logsChanged: boolean = false;
@@ -82,28 +110,35 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
     return new JobEntity<P, R>(props);
   }
 
-  // This is the single, corrected fromPersistence method
   public static fromPersistence<P, R>(
-    persistedData: Omit<JobEntityProps<P,R>, 'id'|'options'|'logs'|'createdAt'|'updatedAt'|'processedOn'|'finishedOn'|'delayUntil'|'lockUntil'> &
-                  { id: string; options: IJobOptions; logs: Array<{message: string, level: string, timestamp: number}>; createdAt: number; updatedAt: number; processedOn?: number; finishedOn?: number; delayUntil?: number; lockUntil?: number; }
+    data: JobPersistenceData<P, R> // Use the domain-defined DTO
   ): JobEntity<P, R> {
-    const propsWithVOOptions: JobEntityProps<P, R> = {
-        ...persistedData, // Spread first
-        id: JobIdVO.create(persistedData.id), // Create VO from string id
-        options: JobOptionsVO.create(persistedData.options), // Create VO from raw options
-        // Ensure dates are Date objects
-        createdAt: new Date(persistedData.createdAt),
-        updatedAt: new Date(persistedData.updatedAt),
-        processedOn: persistedData.processedOn ? new Date(persistedData.processedOn) : undefined,
-        finishedOn: persistedData.finishedOn ? new Date(persistedData.finishedOn) : undefined,
-        delayUntil: persistedData.delayUntil ? new Date(persistedData.delayUntil) : undefined,
-        lockUntil: persistedData.lockUntil ? new Date(persistedData.lockUntil) : undefined,
-        logs: persistedData.logs ? persistedData.logs.map(logEntry => ({...logEntry, timestamp: new Date(logEntry.timestamp)})) : [],
+    const entityProps: JobEntityProps<P, R> = {
+      id: JobIdVO.create(data.id),
+      queueName: data.queueName,
+      name: data.name,
+      payload: data.payload, // Assumes P is already the correct type
+      options: JobOptionsVO.create(data.options), // data.options is IJobOptions
+      status: data.status, // data.status is JobStatus
+      attemptsMade: data.attemptsMade,
+      progress: data.progress, // Assumes progress is already correct type
+      logs: (data.logs || []).map(log => ({
+        ...log,
+        timestamp: new Date(log.timestamp), // Convert number timestamp back to Date
+      })),
+      createdAt: new Date(data.createdAt), // Convert number timestamp back to Date
+      updatedAt: new Date(data.updatedAt), // Convert number timestamp back to Date
+      processedOn: data.processedOn ? new Date(data.processedOn) : undefined,
+      finishedOn: data.finishedOn ? new Date(data.finishedOn) : undefined,
+      delayUntil: data.delayUntil ? new Date(data.delayUntil) : undefined,
+      lockUntil: data.lockUntil ? new Date(data.lockUntil) : undefined,
+      workerId: data.workerId ?? undefined,
+      returnValue: data.returnValue ?? undefined,
+      failedReason: data.failedReason ?? undefined,
+      stacktrace: data.stacktrace ?? undefined,
     };
-    return new JobEntity<P, R>(propsWithVOOptions);
+    return new JobEntity<P, R>(entityProps);
   }
-
-  // Removed the first fromPersistence method and the JobPersistenceLoadPropsType getter.
 
   get id(): JobIdVO { return this.props.id; }
   get queueName(): string { return this.props.queueName; }

@@ -2,37 +2,73 @@
 import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
-import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
-import type { JobPersistenceLoadProps } from '@/core/domain/job/job.entity'; // Import type for casting
+import { JobEntity, JobStatus, JobPersistenceData } from '@/core/domain/job/job.entity';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
-
-// Import 'db' from drizzle.client for the constructor type, but instance will be passed.
+import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
+import * as schema from '../schema'; // Moved schema import up
 import type { db as DbType } from '../drizzle.client';
-import * as schema from '../schema';
-// No need to import JobSelect if we use Parameters<typeof JobEntity.fromPersistence>[0]
 
 export class DrizzleJobRepository implements IJobRepository {
-  constructor(private readonly drizzleDbInstance: typeof DbType) {} // Renamed db to drizzleDbInstance
+  constructor(private readonly drizzleDbInstance: typeof DbType) {}
+
+  // Helper to map Drizzle's JobSelect to domain's JobPersistenceData
+  private mapToPersistenceData<P, R>(jobData: schema.JobSelect): JobPersistenceData<P, R> {
+    // Ensure JSON fields are properly cast/parsed if necessary.
+    // Drizzle's db.query often auto-parses JSON, but db.select might not.
+    // For db.query results, direct assignment is usually fine.
+    const options = jobData.options as IJobOptions; // Drizzle query should parse this
+    const logs = (jobData.logs as Array<{ message: string; level: string; timestamp: number }>) || [];
+    const payload = jobData.payload as P;
+    const returnValue = jobData.returnValue as R | null;
+    const progress = jobData.progress as number | object;
+    const stacktrace = jobData.stacktrace as string[] | null;
+
+    return {
+      id: jobData.id,
+      queueName: jobData.queueName,
+      name: jobData.name,
+      payload: payload,
+      options: options,
+      status: jobData.status as JobStatus, // Schema status is string, cast to enum
+      attemptsMade: jobData.attemptsMade,
+      progress: progress,
+      logs: logs, // Logs in schema are already {ts: number} via JobEntity.toPersistence mapping
+      createdAt: jobData.createdAt.getTime(), // Convert Date to number
+      updatedAt: jobData.updatedAt.getTime(), // Convert Date to number
+      processedOn: jobData.processedOn ? jobData.processedOn.getTime() : null,
+      finishedOn: jobData.finishedOn ? jobData.finishedOn.getTime() : null,
+      delayUntil: jobData.delayUntil ? jobData.delayUntil.getTime() : null,
+      lockUntil: jobData.lockUntil ? jobData.lockUntil.getTime() : null,
+      workerId: jobData.workerId,
+      returnValue: returnValue,
+      failedReason: jobData.failedReason,
+      stacktrace: stacktrace,
+      // priority is part of options, not separate here
+      // repeatJobKey and parentId are not in JobPersistenceData yet
+    };
+  }
 
   async save(job: JobEntity<unknown, unknown>): Promise<void> {
     const data = job.toPersistence();
-        await this.drizzleDbInstance.insert(schema.jobsTable).values(data).onConflictDoUpdate({ target: schema.jobsTable.id, set: data });
+    // Drizzle handles Date -> number for timestamp_ms fields during insert/update
+    await this.drizzleDbInstance.insert(schema.jobsTable).values(data as any).onConflictDoUpdate({ target: schema.jobsTable.id, set: data as any });
   }
 
   async update(job: JobEntity<unknown, unknown>): Promise<void> {
     const data = job.toPersistence();
-    await this.drizzleDbInstance.update(schema.jobsTable).set(data).where(eq(schema.jobsTable.id, data.id));
+    // Drizzle handles Date -> number for timestamp_ms fields during insert/update
+    await this.drizzleDbInstance.update(schema.jobsTable).set(data as any).where(eq(schema.jobsTable.id, data.id));
   }
 
   async findById(id: JobIdVO): Promise<JobEntity<unknown, unknown> | null> {
     const result = await this.drizzleDbInstance.query.jobsTable.findFirst({ where: eq(schema.jobsTable.id, id.value) });
     if (!result) return null;
-    return JobEntity.fromPersistence(result as JobPersistenceLoadProps<unknown, unknown>);
+    return JobEntity.fromPersistence(this.mapToPersistenceData(result));
   }
 
   async findNextJobsToProcess(queueName: string, limit: number): Promise<Array<JobEntity<unknown, unknown>>> {
     const now = new Date();
-    const results = await this.db.query.jobsTable.findMany({
+    const results = await this.drizzleDbInstance.query.jobsTable.findMany({ // Corrected: use this.drizzleDbInstance
       where: and(
         eq(schema.jobsTable.queueName, queueName),
         // Job is either WAITING or it was DELAYED and its time has come
@@ -47,7 +83,7 @@ export class DrizzleJobRepository implements IJobRepository {
       orderBy: [ascDrizzle(schema.jobsTable.priority), ascDrizzle(schema.jobsTable.createdAt)],
       limit,
     });
-    return results.map(jobData => JobEntity.fromPersistence(jobData as JobPersistenceLoadProps<unknown, unknown>));
+    return results.map(jobData => JobEntity.fromPersistence(this.mapToPersistenceData(jobData)));
   }
 
   async acquireLock(jobId: JobIdVO, workerId: string, lockUntil: Date): Promise<boolean> {
@@ -72,7 +108,7 @@ export class DrizzleJobRepository implements IJobRepository {
       ),
       limit,
     });
-    return results.map(jobData => JobEntity.fromPersistence(jobData as JobPersistenceLoadProps<unknown, unknown>));
+    return results.map(jobData => JobEntity.fromPersistence(this.mapToPersistenceData(jobData)));
   }
 
   async remove(jobId: JobIdVO): Promise<void> {
@@ -87,13 +123,13 @@ export class DrizzleJobRepository implements IJobRepository {
     asc: boolean = false,
   ): Promise<Array<JobEntity<unknown, unknown>>> {
     // Parameter 'end' is used as 'count' or 'limit' based on typical usage patterns and UI calls.
-    const results = await this.db.query.jobsTable.findMany({
+    const results = await this.drizzleDbInstance.query.jobsTable.findMany({ // Corrected: use this.drizzleDbInstance
       where: and(eq(schema.jobsTable.queueName, queueName), inArray(schema.jobsTable.status, statuses)),
       orderBy: [asc ? ascDrizzle(schema.jobsTable.createdAt) : desc(schema.jobsTable.createdAt)],
       offset: start,
       limit: end, // 'end' here is the count/limit of items to fetch
     });
-    return results.map(jobData => JobEntity.fromPersistence(jobData as JobPersistenceLoadProps<unknown, unknown>));
+    return results.map(jobData => JobEntity.fromPersistence(this.mapToPersistenceData(jobData)));
   }
 
   async countJobsByStatus(queueName: string, statuses?: JobStatus[]): Promise<Partial<Record<JobStatus, number>>> {

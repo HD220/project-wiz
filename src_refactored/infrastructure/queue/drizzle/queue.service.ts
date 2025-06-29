@@ -1,4 +1,6 @@
 // src_refactored/infrastructure/queue/drizzle/queue.service.ts
+import { Timeout } from 'node:timers'; // Correct import for NodeJS.Timeout
+
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
@@ -6,7 +8,7 @@ import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
 
 export class QueueService<P, R> extends AbstractQueue<P, R> {
-  private stalledJobsManager: NodeJS.Timeout | null = null;
+  private stalledJobsManager: Timeout | null = null; // Use Timeout type
 
   constructor(
     queueName: string,
@@ -24,7 +26,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   }
 
   async addBulk(jobs: Array<{ name: string; data: P; opts?: IJobOptions }>): Promise<Array<JobEntity<P, R>>> {
-    const jobEntities = jobs.map(j => JobEntity.create<P, R>({ queueName: this.queueName, name: j.name, payload: j.data, options: { ...this.defaultJobOptions.toPersistence(), ...j.opts } }));
+    const jobEntities = jobs.map(jobDef => JobEntity.create<P, R>({ queueName: this.queueName, name: jobDef.name, payload: jobDef.data, options: { ...this.defaultJobOptions.toPersistence(), ...jobDef.opts } }));
     for (const job of jobEntities) {
       await this.jobRepository.save(job);
       this.emit('job.added', job);
@@ -102,20 +104,24 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     }
   }
 
-  async markJobAsCompleted(jobId: string | JobIdVO, workerId: string, result: R, jobInstanceWithChanges: JobEntity<P, R>): Promise<void> {
+  async markJobAsCompleted(jobId: string | JobIdVO, workerId: string, result: R, _jobInstanceWithChanges?: JobEntity<P, R>): Promise<void> { // Param removed/ignored
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId) {
+    if (job && job.workerId === workerId) { // Ensure job is still locked by this worker
+      // It's possible the job was marked stalled and lock released by maintenance
+      // Or completed/failed by another process if logic allows (though typically not)
+      // For robustness, one might re-check job.status before marking completed.
+      // However, JobEntity.markAsCompleted already logs a warning if not ACTIVE.
       job.markAsCompleted(result);
       await this.jobRepository.update(job);
       this.emit('job.completed', job);
     }
   }
 
-  async markJobAsFailed(jobId: string | JobIdVO, workerId: string, error: Error, jobInstanceWithChanges: JobEntity<P, R>): Promise<void> {
+  async markJobAsFailed(jobId: string | JobIdVO, workerId: string, error: Error, _jobInstanceWithChanges?: JobEntity<P, R>): Promise<void> { // Param removed/ignored
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId) {
+    if (job && job.workerId === workerId) { // Ensure job is still locked by this worker
       if (job.attemptsMade < job.maxAttempts) {
         const delay = job.options.backoff?.delay || 1000;
         const backoff = job.options.backoff?.type === 'exponential' ? delay * Math.pow(2, job.attemptsMade - 1) : delay;

@@ -1,19 +1,21 @@
-import { QueueService } from '../queue.service';
-import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
-import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
-import { IJobRepository } from '@/core/application/ports/job-repository.interface';
-import { IJobOptions, BackoffType } from '@/core/domain/job/value-objects/job-options.vo';
 import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 
+import { IJobRepository } from '@/core/application/ports/job-repository.interface';
+import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
+import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
+import { IJobOptions, BackoffType } from '@/core/domain/job/value-objects/job-options.vo';
+
+import { QueueService } from '../queue.service';
+
 // Mock JobRepository
-const mockJobRepository: IJobRepository = {
+const mockJobRepository: Partial<IJobRepository> = { // Changed to Partial<IJobRepository>
   save: vi.fn(),
   findById: vi.fn(),
   update: vi.fn(),
-  delete: vi.fn(),
+  remove: vi.fn(),
   findNextJobsToProcess: vi.fn(),
   acquireLock: vi.fn(),
-  releaseLock: vi.fn(),
+  extendLock: vi.fn(),
   findStalledJobs: vi.fn(),
   getJobsByStatus: vi.fn(),
   countJobsByStatus: vi.fn(),
@@ -27,7 +29,8 @@ describe('QueueService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    queueService = new QueueService(queueName, mockJobRepository, defaultJobOpts);
+    // Ensure all mocked methods are implemented or cast mockJobRepository to full IJobRepository if confident
+    queueService = new QueueService(queueName, mockJobRepository as IJobRepository, defaultJobOpts);
     // Spy on event emitter
     vi.spyOn(queueService, 'emit');
   });
@@ -37,7 +40,7 @@ describe('QueueService', () => {
       const jobData = { email: 'test@example.com' };
       const jobName = 'send-welcome-email';
 
-      (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<any,any>) => job);
+      (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<unknown,unknown>) => job);
 
       const job = await queueService.add(jobName, jobData);
 
@@ -56,7 +59,7 @@ describe('QueueService', () => {
       const jobName = 'custom-options-job';
       const customOpts: IJobOptions = { attempts: 5, delay: 5000, priority: 1, jobId: 'custom123' };
 
-      (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<any,any>) => job);
+      (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<unknown,unknown>) => job);
 
       const job = await queueService.add(jobName, jobData, customOpts);
 
@@ -76,7 +79,7 @@ describe('QueueService', () => {
         { name: 'bulk2', data: { email: 'b2@example.com' }, opts: { priority: 1 } },
       ];
 
-      (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<any,any>) => job);
+      (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<unknown,unknown>) => job);
 
       const addedJobs = await queueService.addBulk(jobsToAdd);
 
@@ -151,7 +154,7 @@ describe('QueueService', () => {
       const availableJob = JobEntity.create({ queueName, name: 'job2', payload: {email: 'e2@example.com'} });
       (mockJobRepository.findNextJobsToProcess as Mock).mockResolvedValue([availableJob]);
       (mockJobRepository.acquireLock as Mock).mockResolvedValue(true); // Lock acquisition succeeds
-      (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<any,any>) => jobEntity);
+      (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
 
 
       const job = await queueService.fetchNextJobAndLock(workerId, lockDurationMs);
@@ -179,7 +182,7 @@ describe('QueueService', () => {
         jobToExtend = JobEntity.create({ id: jobId, queueName, name: 'extend-me', payload: {data: 'payload'} });
         jobToExtend.moveToActive(workerId, new Date(Date.now() + 10000)); // Initial lock
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToExtend);
-        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<any,any>) => jobEntity);
+        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
     });
 
     it('should extend lock for an active job owned by the worker', async () => {
@@ -228,7 +231,7 @@ describe('QueueService', () => {
         jobToComplete = JobEntity.create({ id: jobId, queueName, name: 'complete-me', payload: {email: 'c@ex.com'} });
         jobToComplete.moveToActive(workerId, new Date(Date.now() + 10000));
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToComplete);
-        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<any,any>) => jobEntity);
+        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
     });
 
     it('should mark job as completed, update, and emit event', async () => {
@@ -291,7 +294,7 @@ describe('QueueService', () => {
         });
         jobToFail.moveToActive(workerId, new Date(Date.now() + 10000)); // attemptsMade becomes 1
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToFail);
-        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<any,any>) => jobEntity);
+        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
     });
 
     it('should mark job as FAILED if attempts exhausted, update, and emit event', async () => {
@@ -341,13 +344,13 @@ describe('QueueService', () => {
   describe('updateJobProgress', () => {
     const jobId = JobIdVO.create('progress-job-id');
     const workerId = 'worker-progress';
-    let jobToUpdate: JobEntity<any,any>;
+    let jobToUpdate: JobEntity<unknown,unknown>; // Changed any to unknown
 
     beforeEach(() => {
         jobToUpdate = JobEntity.create({id: jobId, queueName, name: 'progress-me', payload: {}});
         jobToUpdate.moveToActive(workerId, new Date(Date.now() + 10000));
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToUpdate);
-        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<any,any>) => jobEntity);
+        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
     });
 
     it('should update progress, save, and emit event', async () => {
@@ -367,13 +370,13 @@ describe('QueueService', () => {
   describe('addJobLog', () => {
     const jobId = JobIdVO.create('log-job-id');
     const workerId = 'worker-log';
-    let jobToLogTo: JobEntity<any,any>;
+    let jobToLogTo: JobEntity<unknown,unknown>; // Changed any to unknown
 
      beforeEach(() => {
         jobToLogTo = JobEntity.create({id: jobId, queueName, name: 'log-me', payload: {}});
         jobToLogTo.moveToActive(workerId, new Date(Date.now() + 10000));
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToLogTo);
-        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<any,any>) => jobEntity);
+        (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
     });
 
     it('should add log, save, and emit event', async () => {
@@ -396,59 +399,115 @@ describe('QueueService', () => {
     });
 
     it('should periodically check for stalled jobs and handle them', async () => {
-        const stalledJob1 = JobEntity.create({ queueName, name: 'stalled1', payload: {}, options: {maxStalledCount: 1} });
-        stalledJob1.moveToActive('w-stall', new Date(Date.now() - 1000)); // Lock already expired
-        stalledJob1.status = JobStatus.ACTIVE; // Simulate it was active
+        // This job should fail permanently after being stalled, as its maxAttempts is 1
+        const stalledJob1 = JobEntity.create({ queueName, name: 'stalled1', payload: {}, options: { attempts: 1 } });
+        stalledJob1.moveToActive('w-stall', new Date(Date.now() - 100000)); // Mark as active, attemptsMade is now 1. Lock already expired.
+        // Manually set status to ACTIVE if moveToActive doesn't persist it for the mock.
+        // In a real scenario, it would be ACTIVE in DB. For this test, ensure entity state is ACTIVE before stall processing.
+        stalledJob1.props.status = JobStatus.ACTIVE;
 
-        const stalledJob2 = JobEntity.create({ queueName, name: 'stalled2', payload: {}, options: {maxStalledCount: 2} });
-        stalledJob2.moveToActive('w-stall2', new Date(Date.now() - 1000)); // Lock expired
-        stalledJob2.status = JobStatus.ACTIVE;
 
+        // This job should be re-queued as WAITING after being stalled, as it has attempts remaining
+        const stalledJob2 = JobEntity.create({ queueName, name: 'stalled2', payload: {}, options: { attempts: 2 } });
+        stalledJob2.moveToActive('w-stall2', new Date(Date.now() - 100000)); // Mark as active, attemptsMade is now 1. Lock expired.
+        stalledJob2.props.status = JobStatus.ACTIVE;
 
         (mockJobRepository.findStalledJobs as Mock)
-            .mockResolvedValueOnce([stalledJob1, stalledJob2]) // First call
+            .mockResolvedValueOnce([stalledJob1, stalledJob2]) // First call to findStalledJobs
             .mockResolvedValueOnce([]); // Subsequent calls find no more
 
-        (mockJobRepository.update as Mock).mockImplementation(async (job: JobEntity<any,any>) => job);
+        (mockJobRepository.update as Mock).mockImplementation(async (job: JobEntity<unknown,unknown>) => { // Changed any to unknown
+            // Simulate the update reflecting on the job instance for assertion purposes
+            if (job.id.value === stalledJob1.id.value) Object.assign(stalledJob1.props, job.props);
+            if (job.id.value === stalledJob2.id.value) Object.assign(stalledJob2.props, job.props);
+            return job;
+        });
 
         queueService.startMaintenance();
-
-        // First job (stalledJob1)
-        // 1st stall: markAsStalled -> shouldFail=false (maxStalledCount=1, currentStalled=0 -> 1), status -> WAITING
-        // (In test, entity's markAsStalled will increment count then check. So it becomes 1, 1 <= 1 is true for shouldFail)
-        // Actually, job.entity.markAsStalled() returns true if job.stalledCount >= job.options.maxStalledCount
-        // So, if maxStalledCount = 1.
-        // 1. moveToActive (stalledCount=0)
-        // 2. findStalledJobs finds it. Call job.markAsStalled(). stalledCount becomes 1. 1 >= 1 is true. shouldFail = true.
-        // 3. job.markAsFailed()
-
-        // Second job (stalledJob2)
-        // 1st stall: markAsStalled -> shouldFail=false (maxStalledCount=2, currentStalled=0 -> 1), status -> WAITING
-
-        await vi.advanceTimersByTimeAsync(15000); // Trigger interval
+        await vi.advanceTimersByTimeAsync(15000); // Trigger interval for StalledJobsManager
 
         expect(mockJobRepository.findStalledJobs).toHaveBeenCalledWith(queueName, expect.any(Date), 10);
 
-        // For stalledJob1 (maxStalledCount = 1)
-        expect(stalledJob1.status).toBe(JobStatus.FAILED); // Should be marked FAILED
+        // Assertions for stalledJob1
+        // attemptsMade (1) >= maxAttempts (1) is true. job.markAsStalled() returns true and sets status to FAILED.
+        expect(stalledJob1.status).toBe(JobStatus.FAILED);
         expect(stalledJob1.failedReason).toContain('Job failed after becoming stalled');
-        expect(stalledJob1.stalledCount).toBe(1);
         expect(queueService.emit).toHaveBeenCalledWith('job.stalled', stalledJob1);
         expect(mockJobRepository.update).toHaveBeenCalledWith(stalledJob1);
 
-        // For stalledJob2 (maxStalledCount = 2)
-        expect(stalledJob2.status).toBe(JobStatus.WAITING); // Should be re-queued
-        expect(stalledJob2.stalledCount).toBe(1);
+        // Assertions for stalledJob2
+        // attemptsMade (1) >= maxAttempts (2) is false. job.markAsStalled() returns false. QueueService calls job.moveToWaiting().
+        expect(stalledJob2.status).toBe(JobStatus.WAITING);
         expect(queueService.emit).toHaveBeenCalledWith('job.stalled', stalledJob2);
         expect(mockJobRepository.update).toHaveBeenCalledWith(stalledJob2);
 
-
         await vi.advanceTimersByTimeAsync(15000); // Trigger interval again
-        expect(mockJobRepository.findStalledJobs).toHaveBeenCalledTimes(2); // Second call returns []
+        expect(mockJobRepository.findStalledJobs).toHaveBeenCalledTimes(2);
 
-        await queueService.close(); // Clears interval
+        queueService.close(); // Clears interval
     });
   });
 
   // TODO: Tests for pause, resume, clean, countJobsByStatus, getJobsByStatus
+  // Pause/Resume only emit events, so tests would be simple event checks.
+  // clean, countJobsByStatus, getJobsByStatus directly call repository methods,
+  // so tests would verify the repository method is called with correct args and returns mapped results.
+
+  describe('pause', () => {
+    it('should emit queue.paused event', async () => {
+      await queueService.pause();
+      expect(queueService.emit).toHaveBeenCalledWith('queue.paused');
+    });
+  });
+
+  describe('resume', () => {
+    it('should emit queue.resumed event', async () => {
+      await queueService.resume();
+      expect(queueService.emit).toHaveBeenCalledWith('queue.resumed');
+    });
+  });
+
+  describe('clean', () => {
+    it('should call jobRepository.clean and return the count', async () => {
+      const gracePeriodMs = 60000;
+      const limit = 10;
+      const status = JobStatus.COMPLETED;
+      (mockJobRepository.clean as Mock).mockResolvedValue(5);
+
+      const cleanedCount = await queueService.clean(gracePeriodMs, limit, status);
+
+      expect(mockJobRepository.clean).toHaveBeenCalledWith(queueName, gracePeriodMs, limit, status);
+      expect(cleanedCount).toBe(5);
+    });
+  });
+
+  describe('countJobsByStatus', () => {
+    it('should call jobRepository.countJobsByStatus and return the counts', async () => {
+      const statuses = [JobStatus.WAITING, JobStatus.FAILED];
+      const counts = { [JobStatus.WAITING]: 3, [JobStatus.FAILED]: 2 };
+      (mockJobRepository.countJobsByStatus as Mock).mockResolvedValue(counts);
+
+      const result = await queueService.countJobsByStatus(statuses);
+
+      expect(mockJobRepository.countJobsByStatus).toHaveBeenCalledWith(queueName, statuses);
+      expect(result).toEqual(counts);
+    });
+  });
+
+  describe('getJobsByStatus', () => {
+    it('should call jobRepository.getJobsByStatus and return mapped jobs', async () => {
+      const statuses = [JobStatus.COMPLETED];
+      const mockJobs = [
+        JobEntity.create({ queueName, name: 'job1', payload: {} }),
+        JobEntity.create({ queueName, name: 'job2', payload: {} }),
+      ];
+      (mockJobRepository.getJobsByStatus as Mock).mockResolvedValue(mockJobs);
+
+      const result = await queueService.getJobsByStatus(statuses, 0, 10, true);
+
+      expect(mockJobRepository.getJobsByStatus).toHaveBeenCalledWith(queueName, statuses, 0, 10, true);
+      expect(result).toEqual(mockJobs);
+      expect(result.length).toBe(2);
+    });
+  });
 });
