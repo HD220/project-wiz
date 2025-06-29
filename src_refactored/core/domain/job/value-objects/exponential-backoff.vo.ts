@@ -1,7 +1,7 @@
 // src_refactored/core/domain/job/value-objects/exponential-backoff.vo.ts
 import { z } from 'zod';
 
-import { ValueError } from '@/core/common/errors';
+import { ValueError } from '@/domain/common/errors'; // Corrected alias path
 
 import { AttemptCountVO } from './attempt-count.vo';
 import { DelayMillisecondsVO } from './delay-milliseconds.vo';
@@ -24,11 +24,11 @@ export class ExponentialBackoffVO {
     if (multiplier !== undefined) {
       try {
         multiplierSchema.parse(multiplier);
-      } catch (e) {
-        if (e instanceof z.ZodError) {
-          throw new ValueError(`Invalid multiplier: ${e.errors.map(err => err.message).join(', ')}`);
+      } catch (error) { // Renamed e to error
+        if (error instanceof z.ZodError) {
+          throw new ValueError(`Invalid multiplier: ${error.errors.map(err => err.message).join(', ')}`);
         }
-        throw e;
+        throw error; // Re-throw error
       }
     }
     if (maxDelay && baseDelay.value > maxDelay.value) {
@@ -66,9 +66,4 @@ export class ExponentialBackoffVO {
 
     return DelayMillisecondsVO.create(delayValue);
   }
-
-  // No .equals method as this VO has behavior and identity might matter if we cache instances,
-  // or it's simply used as a calculator. If value-based equality is needed,
-  // an explicit .equals could be added comparing all properties.
-  // For now, it acts more as a configured calculator/strategy parameters holder.
 }

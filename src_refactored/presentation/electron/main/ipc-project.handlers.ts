@@ -2,13 +2,14 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 
 import { ListProjectsUseCase } from '@/core/application/use-cases/project/list-projects.use-case';
-import { LoggerServiceToken } from '@/core/common/services/i-logger.service';
-import { ProjectRepositoryToken } from '@/core/domain/project/ports/project-repository.interface';
+// LoggerServiceToken and ProjectRepositoryToken are used by the use case, not directly here.
 
-import { appContainer } from '@/infrastructure/ioc/inversify.config'; // Assuming DI container
-import { db, schema } from '@/infrastructure/persistence/drizzle/drizzle.client'; // Example db client and schema
-import { DrizzleProjectRepository } from '@/infrastructure/persistence/drizzle/repositories/project.repository'; // Example concrete repo
-import { ConsoleLoggerService } from '@/infrastructure/services/logger/console-logger.service'; // Example Logger
+import { appContainer } from '@/infrastructure/ioc/inversify.config'; // This import is the source of the boundary violation.
+// We will keep it for now, but ideally, the use case is passed to this handler's registration.
+// Removing direct infra imports:
+// import { db, schema } from '@/infrastructure/persistence/drizzle/drizzle.client';
+// import { DrizzleProjectRepository } from '@/infrastructure/persistence/drizzle/repositories/project.repository';
+// import { ConsoleLoggerService } from '@/infrastructure/services/logger/console-logger.service';
 
 import { IPCChannel } from '@/shared/ipc-channels';
 import { ProjectListItem } from '@/shared/ipc-project.types'; // Ensure this path is correct
@@ -24,41 +25,31 @@ function initializeUseCases() {
     if (appContainer.isBound(ListProjectsUseCase)) {
         listProjectsUseCase = appContainer.get(ListProjectsUseCase);
     } else {
-        console.warn("[IPC Project Handler] ListProjectsUseCase not bound in DI. Attempting manual instantiation (may be incomplete).");
-        // Manual instantiation as a fallback (less ideal)
-        // This requires knowing all dependencies of ListProjectsUseCase and its own dependencies.
-        // This is a common issue when DI isn't fully integrated into the Electron main process early.
-        let projectRepo;
-        if (appContainer.isBound(ProjectRepositoryToken)) {
-            projectRepo = appContainer.get(ProjectRepositoryToken);
-        } else {
-            console.warn("[IPC Project Handler] ProjectRepositoryToken not bound in DI for ListProjectsUseCase. Using direct DrizzleProjectRepository.");
-            // This is highly simplified and likely won't work without a proper DB connection configured for main process
-            // and potentially migrations run.
-            projectRepo = new DrizzleProjectRepository(db, schema, new ConsoleLoggerService('DrizzleProjectRepo'));
-        }
-        let logger;
-        if(appContainer.isBound(LoggerServiceToken)) {
-            logger = appContainer.get(LoggerServiceToken);
-        } else {
-            logger = new ConsoleLoggerService('ListProjectsUseCase');
-        }
-        listProjectsUseCase = new ListProjectsUseCase(projectRepo, logger);
+        // Fallback manual instantiation removed.
+        // If ListProjectsUseCase is not bound, an error should occur or be handled by DI setup.
+        console.error("[IPC Project Handler] CRITICAL: ListProjectsUseCase not bound in DI container. Cannot proceed with manual instantiation.");
+        // listProjectsUseCase remains undefined or null, which will be caught below.
     }
 }
 
 
 export function registerProjectIPCHandlers(): void {
-  initializeUseCases(); // Initialize use case (DI or manual)
+  initializeUseCases();
 
   ipcMain.handle(IPCChannel.PROJECT_LIST_QUERY, async (event: IpcMainInvokeEvent) => {
     console.log(`[IPC Project Handler] Received ${IPCChannel.PROJECT_LIST_QUERY}`);
     try {
       if (!listProjectsUseCase) {
-        // Re-initialize if it wasn't ready on first call (e.g. async DI setup)
-        initializeUseCases();
-        if (!listProjectsUseCase) {
-          throw new Error("ListProjectsUseCase could not be initialized.");
+        // Attempt re-initialization or throw if still not available.
+        // initializeUseCases(); // Calling it again might not solve if the root issue is DI setup.
+        // Forcing re-check:
+        if (!appContainer.isBound(ListProjectsUseCase)) {
+             console.error("[IPC Project Handler] ListProjectsUseCase is NOT BOUND on demand. Check DI config.");
+             throw new Error("ListProjectsUseCase could not be initialized - not bound in DI container.");
+        }
+        listProjectsUseCase = appContainer.get(ListProjectsUseCase); // Try to get it again
+        if (!listProjectsUseCase) { // Should not happen if isBound is true and get doesn't throw
+             throw new Error("ListProjectsUseCase could not be initialized even after re-check.");
         }
       }
 

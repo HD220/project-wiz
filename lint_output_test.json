@@ -1,0 +1,57 @@
+[
+  {
+    "filePath": "src_refactored/core/application/services/generic-agent-executor.service.ts",
+    "messages": [
+      {
+        "ruleId": "max-lines-per-function",
+        "severity": 1,
+        "message": "Async method 'executeJob' has too many lines (221). Maximum allowed is 100.",
+        "line": 41,
+        "column": 3,
+        "nodeType": "MethodDefinition",
+        "messageId": "exceed",
+        "endLine": 287,
+        "endColumn": 4
+      },
+      {
+        "ruleId": "id-length",
+        "severity": 1,
+        "message": "Identifier name 'e' is too short (< 2).",
+        "line": 230,
+        "column": 80,
+        "nodeType": "Identifier",
+        "messageId": "tooShort",
+        "endLine": 230,
+        "endColumn": 81
+      }
+    ],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 2,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0
+  },
+  {
+    "filePath": "src_refactored/core/application/use-cases/project/create-project.use-case.ts",
+    "messages": [
+      {
+        "ruleId": "max-statements",
+        "severity": 1,
+        "message": "Async method 'execute' has too many statements (33). Maximum allowed is 25.",
+        "line": 25,
+        "column": 16,
+        "nodeType": "FunctionExpression",
+        "messageId": "exceed",
+        "endLine": 92,
+        "endColumn": 4
+      }
+    ],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 1,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0
+  }
+]

@@ -1,8 +1,9 @@
 // src_refactored/core/domain/job/value-objects/job-timestamp.vo.ts
 import { z } from 'zod';
 
-import { ValueError } from '@/core/common/errors';
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors'; // Corrected alias path
 
 // Timestamps are stored as epoch milliseconds
 const jobTimestampSchema = z.number()

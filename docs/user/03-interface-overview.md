@@ -64,6 +64,10 @@ Esta seção é dedicada às configurações globais que afetam toda a aplicaç�
 
 Esta visão geral fornece um mapa básico da interface do Project Wiz. Cada seção mencionada possui funcionalidades ricas que serão exploradas em detalhes em outros guias.
 
+<<<<<<< HEAD
 Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-getting-started.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](./core-concepts/projects.md).
+=======
+Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-getting-started.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](../user/core-concepts/projects.md) (a ser criado).
+>>>>>>> lint-tests
 
 Este documento será expandido e atualizado conforme a interface do usuário evolui.

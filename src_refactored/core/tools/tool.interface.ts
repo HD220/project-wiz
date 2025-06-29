@@ -1,7 +1,7 @@
 // src_refactored/core/tools/tool.interface.ts
 import { z } from 'zod';
 
-import { ToolError } from '@/core/common/errors'; // To be created in the next step
+import { ToolError } from '@/domain/common/errors'; // Corrected alias path
 
 import { Result } from '../../shared/result'; // Assuming Result type is in shared
 
@@ -26,7 +26,7 @@ export interface IToolExecutionContext {
 export interface IAgentTool<
   InputSchema extends z.ZodTypeAny,
   // Using TOutput for the successful data type, ToolError for the error type in Result
-  TOutput = any,
+  TOutput = unknown, // Changed any to unknown
 > {
   /**
    * A unique name for the tool, typically in 'namespace.action' format.

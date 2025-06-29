@@ -5,9 +5,11 @@ import { Container } from 'inversify';
 
 // --- Domain Layer Ports (Interfaces) ---
 import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
+import { IChatService } from '@/core/application/ports/services/i-chat.service'; // Added IChatService
 import { IEmbeddingService } from '@/core/application/ports/services/i-embedding.service';
 import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service';
 import { IWorkerService } from '@/core/application/ports/services/i-worker.service';
+import { ChatService } from '@/core/application/services/chat.service'; // Added ChatService
 import { GenericAgentExecutor } from '@/core/application/services/generic-agent-executor.service';
 import { CreateAgentUseCase } from '@/core/application/use-cases/agent/create-agent.use-case';
 // import { IQueueMetadataRepository } from '@/core/domain/queue/ports/queue-metadata-repository.interface'; // If needed
@@ -60,28 +62,30 @@ import { ILLMAdapter } from '@/core/ports/adapters/llm-adapter.interface';
 // --- Infrastructure Layer Implementations ---
 // Persistence
 import { db, schema } from '../persistence/drizzle/drizzle.client'; // Assuming this file exists and exports db and schema
-import { DrizzleJobRepository } from '../persistence/drizzle/repositories/job.repository';
-import { InMemoryAgentInternalStateRepository } from '../persistence/in-memory/repositories/agent-internal-state.repository'; // Example
-import { InMemoryAgentPersonaTemplateRepository } from '../persistence/in-memory/repositories/agent-persona-template.repository'; // Example
-import { InMemoryAgentRepository } from '../persistence/in-memory/repositories/agent.repository'; // Example
-import { InMemoryAnnotationRepository } from '../persistence/in-memory/repositories/annotation.repository'; // Example
-import { InMemoryLLMProviderConfigRepository } from '../persistence/in-memory/repositories/llm-provider-config.repository'; // Example
-import { InMemoryMemoryRepository } from '../persistence/in-memory/repositories/memory.repository'; // Example
-import { InMemoryProjectRepository } from '../persistence/in-memory/repositories/project.repository'; // Example
-import { InMemorySourceCodeRepository } from '../persistence/in-memory/repositories/source-code.repository'; // Example
-import { InMemoryUserRepository } from '../persistence/in-memory/repositories/user.repository'; // Example
+import { DrizzleJobRepository } from '../persistence/drizzle/job/drizzle-job.repository'; // Corrected path
+import { InMemoryAgentInternalStateRepository } from '../persistence/in-memory/repositories/agent-internal-state.repository.ts'; // Added .ts
+import { InMemoryAgentPersonaTemplateRepository } from '../persistence/in-memory/repositories/agent-persona-template.repository.ts'; // Added .ts
+import { InMemoryAgentRepository } from '../persistence/in-memory/repositories/agent.repository.ts'; // Added .ts
+import { InMemoryAnnotationRepository } from '../persistence/in-memory/repositories/annotation.repository.ts'; // Added .ts
+import { InMemoryLLMProviderConfigRepository } from '../persistence/in-memory/repositories/llm-provider-config.repository.ts'; // Added .ts
+import { InMemoryMemoryRepository } from '../persistence/in-memory/repositories/memory.repository.ts'; // Added .ts
+import { InMemoryProjectRepository } from '../persistence/in-memory/repositories/project.repository.ts'; // Added .ts
+import { InMemorySourceCodeRepository } from '../persistence/in-memory/repositories/source-code.repository.ts'; // Added .ts
+import { InMemoryUserRepository } from '../persistence/in-memory/repositories/user.repository.ts'; // Added .ts
 
 // Services
-import { ConsoleLoggerService } from '../services/logger/console-logger.service';
-import { ToolRegistryService } from '../services/tool-registry/tool-registry.service';
+import { ConsoleLoggerService } from '../services/logger/console-logger.service.ts'; // Added .ts
+import { ToolRegistryService } from '../services/tool-registry/tool-registry.service.ts'; // Added .ts
 
 // import { WorkerService } from '@/core/application/services/worker.service'; // Assuming this is the one to bind
 // import { SdkEmbeddingService } from '../services/ai/sdk-embedding.service'; // Example
 // import { SdkLLMAdapter } from '../adapters/llm/sdk-llm.adapter'; // Example
 // import { BullMQJobQueueAdapter } from '../queue/bullmq/bullmq-job-queue.adapter'; // Example
 
+// Application Services
+
 // Tools
-import { FileSystemTool } from '../tools/file-system.tool';
+import { FileSystemTool } from '../tools/file-system.tool.ts'; // Added .ts
 // import { ExecuteCommandTool } from '../tools/execute-command.tool'; // Example
 
 // Drizzle Client (example, may need actual setup)
@@ -122,6 +126,7 @@ appContainer.bind<IToolRegistryService>(TYPES.IToolRegistryService).to(ToolRegis
 
 // Application Services
 appContainer.bind<IAgentExecutor>(TYPES.IAgentExecutor).to(GenericAgentExecutor);
+appContainer.bind<IChatService>(TYPES.IChatService).to(ChatService); // Added ChatService binding
 // appContainer.bind<IWorkerService>(TYPES.IWorkerService).to(WorkerService); // Assuming WorkerService is in core/application
 
 // Use Cases (typically transient, unless stateless and all deps are singletons)

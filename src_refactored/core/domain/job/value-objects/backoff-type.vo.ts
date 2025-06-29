@@ -1,8 +1,9 @@
 // src_refactored/core/domain/job/value-objects/backoff-type.vo.ts
 import { z } from 'zod';
 
-import { ValueError } from '@/core/common/errors';
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors'; // Corrected alias path
 
 
 import { IBackoffStrategy } from '../ports/i-backoff-strategy.interface';
@@ -30,11 +31,11 @@ export class BackoffTypeVO extends AbstractValueObject<BackoffTypeProps> {
   public static create(type: BackoffStrategyType): BackoffTypeVO {
     try {
       backoffTypeSchema.parse(type);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        throw new ValueError(`Invalid backoff type: ${e.errors.map(err => err.message).join(', ')}`);
+    } catch (error) { // Renamed e to error
+      if (error instanceof z.ZodError) {
+        throw new ValueError(`Invalid backoff type: ${error.errors.map(err => err.message).join(', ')}`);
       }
-      throw e;
+      throw error; // Re-throw error
     }
     return new BackoffTypeVO({ value: type });
   }

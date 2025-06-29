@@ -1,5 +1,5 @@
 // src_refactored/core/domain/user/ports/user-repository.interface.ts
-import { DomainError } from '@/core/common/errors';
+import { DomainError } from '@/domain/common/errors'; // Corrected alias path
 
 import { Result } from '../../../../shared/result';
 import { User } from '../user.entity';
