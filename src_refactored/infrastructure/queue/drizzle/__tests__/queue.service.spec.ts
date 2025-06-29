@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
@@ -57,13 +58,14 @@ describe('QueueService', () => {
     it('should apply custom options when adding a job', async () => {
       const jobData = { email: 'custom@example.com' };
       const jobName = 'custom-options-job';
-      const customOpts: IJobOptions = { attempts: 5, delay: 5000, priority: 1, jobId: 'custom123' };
+      const validCustomJobId = randomUUID(); // Generate a valid UUID from node:crypto (needs import at top)
+      const customOpts: IJobOptions = { attempts: 5, delay: 5000, priority: 1, jobId: validCustomJobId };
 
       (mockJobRepository.save as Mock).mockImplementation(async (job: JobEntity<unknown,unknown>) => job);
 
       const job = await queueService.add(jobName, jobData, customOpts);
 
-      expect(job.id.value).toBe('custom123');
+      expect(job.id.value).toBe(validCustomJobId);
       expect(job.options.attempts).toBe(5);
       expect(job.options.delay).toBe(5000);
       expect(job.options.priority).toBe(1);
@@ -109,7 +111,7 @@ describe('QueueService', () => {
       expect(foundJob).toBe(mockJob);
     });
      it('should accept string id for getJob', async () => {
-      const jobIdStr = 'string-id-123';
+      const jobIdStr = '7f6c2f5a-303c-4891-8947-7080d026c368'; // Valid UUID
       const mockJob = JobEntity.create({ id: JobIdVO.create(jobIdStr), queueName, name: 'find-me-str', payload: { email: 'find@me.com' } });
       (mockJobRepository.findById as Mock).mockResolvedValue(mockJob);
 
@@ -173,12 +175,13 @@ describe('QueueService', () => {
   });
 
   describe('extendJobLock', () => {
-    const jobId = JobIdVO.create('lock-job-id');
+    let jobId: JobIdVO; // Changed to be set in beforeEach
     const workerId = 'worker-extend';
     const lockDurationMs = 15000;
     let jobToExtend: JobEntity<{data: string}, {res: string}>;
 
     beforeEach(() => {
+        jobId = JobIdVO.create(); // Generate fresh valid UUID for each test run
         jobToExtend = JobEntity.create({ id: jobId, queueName, name: 'extend-me', payload: {data: 'payload'} });
         jobToExtend.moveToActive(workerId, new Date(Date.now() + 10000)); // Initial lock
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToExtend);
@@ -222,12 +225,13 @@ describe('QueueService', () => {
   });
 
   describe('markJobAsCompleted', () => {
-    const jobId = JobIdVO.create('complete-job-id');
+    let jobId: JobIdVO; // Changed
     const workerId = 'worker-complete';
     const result = { status: 'Email Sent!' };
     let jobToComplete: JobEntity<{email: string}, {status: string}>;
 
     beforeEach(() => {
+        jobId = JobIdVO.create(); // Generate fresh valid UUID
         jobToComplete = JobEntity.create({ id: jobId, queueName, name: 'complete-me', payload: {email: 'c@ex.com'} });
         jobToComplete.moveToActive(workerId, new Date(Date.now() + 10000));
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToComplete);
@@ -279,28 +283,46 @@ describe('QueueService', () => {
   });
 
   describe('markJobAsFailed', () => {
-    const jobId = JobIdVO.create('fail-job-id');
+    let jobId: JobIdVO; // Changed
     const workerId = 'worker-fail';
     const error = new Error('Test Job Failed');
     let jobToFail: JobEntity<{email: string}, {status: string}>;
+    let jobToFailWithRetries: JobEntity<{email: string}, {status: string}>; // For retry test
 
     beforeEach(() => {
+        jobId = JobIdVO.create(); // Generate fresh valid UUID
+        // Job that should fail permanently on the first try
         jobToFail = JobEntity.create({
-            id: jobId,
+            id: jobId, // Use the same jobId for simplicity in mocking findById for this specific job instance
             queueName,
-            name: 'fail-me',
-            payload: {email: 'f@ex.com'},
-            options: { attempts: 3, backoff: { type: BackoffType.EXPONENTIAL, delay: 100 } }
+            name: 'fail-me-permanently',
+            payload: {email: 'f-perm@ex.com'},
+            options: { attempts: 1 } // Max 1 attempt
         });
         jobToFail.moveToActive(workerId, new Date(Date.now() + 10000)); // attemptsMade becomes 1
-        (mockJobRepository.findById as Mock).mockResolvedValue(jobToFail);
+
+        // Job that should retry
+        jobToFailWithRetries = JobEntity.create({
+             // id: JobIdVO.create(), // Different ID for this one
+            queueName,
+            name: 'fail-me-with-retries',
+            payload: {email: 'f-retry@ex.com'},
+            options: { attempts: 3, backoff: { type: 'exponential', delay: 100 } }
+        });
+        jobToFailWithRetries.moveToActive(workerId, new Date(Date.now() + 10000));
+
+
+        // Default mock for findById returns the job that should fail permanently
+        (mockJobRepository.findById as Mock).mockImplementation(async (idToFind: JobIdVO) => {
+            if (idToFind.value === jobToFail.id.value) return jobToFail;
+            if (idToFind.value === jobToFailWithRetries.id.value) return jobToFailWithRetries;
+            return null;
+        });
         (mockJobRepository.update as Mock).mockImplementation(async (jobEntity: JobEntity<unknown,unknown>) => jobEntity);
     });
 
     it('should mark job as FAILED if attempts exhausted, update, and emit event', async () => {
-        jobToFail.options.attempts = 1; // Ensure it fails on this attempt
-        // jobToFail.moveToActive(workerId, new Date()); // already did in beforeEach, attemptsMade is 1
-
+        // jobToFail is already configured with attempts: 1 and attemptsMade is 1 after moveToActive
         const jobInstanceFromWorker = JobEntity.fromPersistence(jobToFail.toPersistence());
 
         await queueService.markJobAsFailed(jobId, workerId, error, jobInstanceFromWorker);
@@ -314,39 +336,40 @@ describe('QueueService', () => {
     });
 
     it('should mark job as DELAYED if retries are pending, update, and emit event', async () => {
-        // jobToFail.options.attempts = 3; // Default from its creation
-        // jobToFail.moveToActive(workerId, new Date()); // attemptsMade becomes 1 in beforeEach
+        const jobInstanceFromWorker = JobEntity.fromPersistence(jobToFailWithRetries.toPersistence());
+        // Use the ID of jobToFailWithRetries for this test
+        await queueService.markJobAsFailed(jobToFailWithRetries.id, workerId, error, jobInstanceFromWorker);
 
-        const jobInstanceFromWorker = JobEntity.fromPersistence(jobToFail.toPersistence());
-        await queueService.markJobAsFailed(jobId, workerId, error, jobInstanceFromWorker);
-
-        expect(mockJobRepository.findById).toHaveBeenCalledWith(jobId);
-        expect(jobToFail.status).toBe(JobStatus.DELAYED);
-        expect(jobToFail.failedReason).toBe(error.message); // Previous error
-        expect(jobToFail.delayUntil).toBeInstanceOf(Date);
+        expect(mockJobRepository.findById).toHaveBeenCalledWith(jobToFailWithRetries.id);
+        expect(jobToFailWithRetries.status).toBe(JobStatus.DELAYED);
+        expect(jobToFailWithRetries.failedReason).toBe(error.message); // Previous error
+        expect(jobToFailWithRetries.delayUntil).toBeInstanceOf(Date);
         // attemptsMade was 1 from moveToActive. It's not incremented by markJobAsFailed/moveToDelayed itself.
         // The backoff calculation in QueueService uses job.attemptsMade which is 1. So backoff is 100 * 2^(1-1) = 100ms
-        expect(jobToFail.delayUntil!.getTime()).toBeGreaterThanOrEqual(Date.now() + 90); // Approx 100ms
-        expect(jobToFail.attemptsMade).toBe(1); // Remains 1, as this is the first failure processing
+        expect(jobToFailWithRetries.delayUntil!.getTime()).toBeGreaterThanOrEqual(Date.now() + 90); // Approx 100ms
+        expect(jobToFailWithRetries.attemptsMade).toBe(1); // Remains 1, as this is the first failure processing
 
-        expect(mockJobRepository.update).toHaveBeenCalledWith(jobToFail);
-        expect(queueService.emit).toHaveBeenCalledWith('job.failed', jobToFail); // Event is still 'job.failed' even if delayed
+        expect(mockJobRepository.update).toHaveBeenCalledWith(jobToFailWithRetries);
+        expect(queueService.emit).toHaveBeenCalledWith('job.failed', jobToFailWithRetries); // Event is still 'job.failed' even if delayed
     });
 
     it('should accept string job ID for markJobAsFailed', async () => {
+        // This test will use jobToFail (which fails permanently)
         const jobInstanceFromWorker = JobEntity.fromPersistence(jobToFail.toPersistence());
-        await queueService.markJobAsFailed(jobId.value, workerId, error, jobInstanceFromWorker);
-        expect(mockJobRepository.findById).toHaveBeenCalledWith(expect.objectContaining({ value: jobId.value }));
-        expect(mockJobRepository.update).toHaveBeenCalled();
+        await queueService.markJobAsFailed(jobToFail.id.value, workerId, error, jobInstanceFromWorker);
+        expect(mockJobRepository.findById).toHaveBeenCalledWith(expect.objectContaining({ value: jobToFail.id.value }));
+        expect(mockJobRepository.update).toHaveBeenCalledWith(jobToFail); // Check it was updated
+        expect(jobToFail.status).toBe(JobStatus.FAILED); // Verify it failed as expected
     });
   });
 
   describe('updateJobProgress', () => {
-    const jobId = JobIdVO.create('progress-job-id');
+    let jobId: JobIdVO; // Changed
     const workerId = 'worker-progress';
-    let jobToUpdate: JobEntity<unknown,unknown>; // Changed any to unknown
+    let jobToUpdate: JobEntity<unknown,unknown>;
 
     beforeEach(() => {
+        jobId = JobIdVO.create(); // Generate fresh valid UUID
         jobToUpdate = JobEntity.create({id: jobId, queueName, name: 'progress-me', payload: {}});
         jobToUpdate.moveToActive(workerId, new Date(Date.now() + 10000));
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToUpdate);
@@ -368,11 +391,12 @@ describe('QueueService', () => {
   });
 
   describe('addJobLog', () => {
-    const jobId = JobIdVO.create('log-job-id');
+    let jobId: JobIdVO; // Changed
     const workerId = 'worker-log';
-    let jobToLogTo: JobEntity<unknown,unknown>; // Changed any to unknown
+    let jobToLogTo: JobEntity<unknown,unknown>;
 
      beforeEach(() => {
+        jobId = JobIdVO.create(); // Generate fresh valid UUID
         jobToLogTo = JobEntity.create({id: jobId, queueName, name: 'log-me', payload: {}});
         jobToLogTo.moveToActive(workerId, new Date(Date.now() + 10000));
         (mockJobRepository.findById as Mock).mockResolvedValue(jobToLogTo);

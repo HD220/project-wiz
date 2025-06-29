@@ -89,12 +89,13 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
       options?: IJobOptions; // Accepts raw options, will be converted to VO
     },
   ): JobEntity<P, R> {
-    const jobId = params.id || JobIdVO.create();
-    const jobOptions = JobOptionsVO.create(params.options);
+    const jobOptions = JobOptionsVO.create(params.options); // Create options first to get potential jobId
+    const idFromOptions = jobOptions.jobId;
+    const finalJobId = params.id || (idFromOptions ? JobIdVO.create(idFromOptions) : JobIdVO.create());
     const now = new Date();
 
     const props: JobEntityProps<P, R> = {
-      id: jobId,
+      id: finalJobId,
       queueName: params.queueName,
       name: params.name,
       payload: params.payload,

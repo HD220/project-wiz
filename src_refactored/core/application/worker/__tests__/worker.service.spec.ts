@@ -71,7 +71,7 @@ describe('WorkerService', () => {
     vi.useRealTimers();
   });
 
-import { randomUUID } from 'node:crypto';
+// Removed misplaced import of randomUUID
 
 // ... (other imports)
 
@@ -80,14 +80,30 @@ import { randomUUID } from 'node:crypto';
     // Or, just use randomUUID directly if the suffix isn't strictly for ID.
     // For this case, let's make the ID a valid UUID. The suffix can be for logging/tracking in tests.
     const job = JobEntity.create<TestPayload, TestResult>({
-      id: JobIdVO.create(randomUUID()), // Generate valid UUID
+      // id: JobIdVO.create(randomUUID()), // Generate valid UUID - randomUUID was removed, JobIdVO.create() handles it
+      id: JobIdVO.create(), // Correct: let JobIdVO handle UUID generation
       queueName: mockQueue.queueName,
       name: `test-job-${idSuffix}`, // Keep suffix in name for easier test identification
       payload,
+      // Options can be passed here if specific initial states like DELAYED are needed
+      // For ACTIVE status, it will be handled below.
     });
-    job.status = status; // manually set for testing different scenarios
+
     if (status === JobStatus.ACTIVE) {
-        job.moveToActive(`worker-${idSuffix}`, new Date(Date.now() + workerOptions.lockDuration));
+      // If a job is intended to be tested as already active,
+      // we simulate it having been moved to active.
+      // This sets workerId, lockUntil, processedOn, and increments attemptsMade.
+      job.moveToActive(`worker-${idSuffix}`, new Date(Date.now() + workerOptions.lockDuration!));
+      // Note: moveToActive increments attemptsMade. If the test expects attemptsMade = 0 for an active job,
+      // this helper would need further adjustment or tests need to account for attemptsMade = 1.
+      // For most tests, an active job implying one attempt has started is fine.
+    } else if (status !== job.status) {
+      // For other statuses that might be set for specific test conditions (e.g., COMPLETED, FAILED by mock)
+      // and are not the default status from create. This is risky as it bypasses entity logic.
+      // Prefer creating jobs that naturally reach these states or mocking repository returns.
+      // For now, to fix the immediate test error, we allow direct prop setting for non-ACTIVE, non-default states.
+      // This should be used sparingly and with understanding of implications.
+      job.props.status = status;
     }
     return job;
   };
@@ -179,7 +195,12 @@ import { randomUUID } from 'node:crypto';
       });
 
       workerService.run();
-      await vi.advanceTimersByTimeAsync(100); // Poll and pick up job1 & job2
+      await vi.advanceTimersByTimeAsync(50); // Allow first poll to pick up job1
+      expect(mockQueue.fetchNextJobAndLock).toHaveBeenCalledTimes(1);
+      expect(workerService.activeJobCount).toBe(1);
+
+      await vi.advanceTimersByTimeAsync(1000 + 50); // Allow second poll to pick up job2 (poll interval + buffer)
+
 
       expect(mockQueue.fetchNextJobAndLock).toHaveBeenCalledTimes(2); // Fetched two jobs due to concurrency
       expect(workerService.activeJobCount).toBe(2);
@@ -289,8 +310,8 @@ import { randomUUID } from 'node:crypto';
       expect(workerService.isRunning).toBe(true);
 
       const closePromise = workerService.close(); // Initiate close
-      expect(workerService.isClosing).toBe(true);
-      expect(workerService.isRunning).toBe(false); // Should stop polling loop immediately
+      // expect(workerService.isClosing).toBe(true); // isClosing is not a property, isClosed becomes true after close completes
+      expect(workerService.isRunning).toBe(false); // isRunning should be set to false immediately
 
       // At this point, fetchNextJobAndLock should not be called again even if polling interval hits
       mockQueue.fetchNextJobAndLock.mockClear(); // Clear previous calls
