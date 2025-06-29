@@ -111,8 +111,38 @@ O trabalho neste projeto é rastreado através de um sistema de tarefas localiza
         6. Comunique a criação desta nova tarefa e seu impacto ao usuário.
         7. Reavalie qual tarefa executar em seguida com base nas prioridades e dependências atualizadas.
 
+* **Geração Automática de Tarefas a Partir do Lint:**
+  * Um script (`scripts/generate_lint_tasks.sh`) foi criado para automatizar a criação de tarefas com base nos problemas reportados pelo ESLint.
+  * **Estratégia:** O script cria **uma tarefa por arquivo** que contém problemas de lint. Isso ajuda a focar os esforços de correção em um arquivo por vez.
+  * **Pré-requisito:** `jq` deve estar instalado (`sudo apt-get install jq` ou similar).
+  * **Preparação:**
+    1. Execute o comando de lint para gerar a saída em formato JSON:
+       ```bash
+       npm run lint --silent -- --format json > lint_output.json
+       ```
+       O `--silent` é importante para suprimir saídas do npm que não sejam JSON. Salve este arquivo como `lint_output.json` na raiz do repositório.
+  * **Execução:**
+    1. Navegue até a raiz do repositório.
+    2. Certifique-se que o script é executável: `chmod +x scripts/generate_lint_tasks.sh`.
+    3. Execute o script:
+       ```bash
+       ./scripts/generate_lint_tasks.sh
+       ```
+  * **Funcionamento:**
+    * O script lê `lint_output.json`.
+    * Para cada arquivo listado no JSON que contém um ou mais problemas de lint:
+        * Gera um ID de tarefa único para o arquivo (prefixo `LINT-FILE-`).
+        * Cria um único arquivo de detalhe da tarefa em `/.jules/tasks/TSK-[ID_DA_TAREFA_DO_ARQUIVO].md` usando o template `TASK_DETAIL_TEMPLATE.md`.
+        * O título da tarefa será "Fix all lint errors in [CAMINHO_DO_ARQUIVO]".
+        * A descrição da tarefa listará todos os problemas de lint individuais (linha, coluna, regra, mensagem) para aquele arquivo específico, formatados dentro de um bloco de código.
+        * A complexidade da tarefa é estimada (1-3) com base no número total de problemas no arquivo.
+        * A prioridade é definida como P2 se houver erros, P3 caso contrário.
+        * Adiciona uma nova entrada no arquivo de índice principal `/.jules/TASKS.md` para o arquivo.
+    * O script é idempotente: se executado novamente, ele não criará tarefas duplicadas para arquivos que já foram processados (verifica por ID da tarefa no índice e existência do arquivo de detalhe).
+
 * **Seu Ciclo de Trabalho:**
     1. **Fase 1: Sincronização e Análise:**
+        * Se houver novos problemas de lint a serem processados em arquivos ainda não rastreados, use o script `generate_lint_tasks.sh` conforme descrito acima para criar as tarefas correspondentes (uma por arquivo).
         * Leia o `/.jules/TASKS.md` (índice) para entender o estado atual.
     2. **Fase 2: Seleção da Próxima Ação:**
         * **Desmembrar Tarefas Complexas:** Priorize tarefas `Pendente` com `Complexidade > 1` (ver arquivo de detalhe).
