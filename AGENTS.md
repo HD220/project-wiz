@@ -68,7 +68,6 @@ Consulte `package.json` e `docs/reference/01-software-architecture.md` (substitu
 * **Testes:** Vitest.
 
 ## 4. Modificações Controladas: Dependências, Configurações e Organização do Código
-## 4. Modificações Controladas: Dependências, Configurações e Organização do Código
 
 Qualquer proposta de adição de novas dependências (pacotes npm, bibliotecas), alterações significativas em configurações existentes (ex: `tsconfig.json`, `vite.config.ts`, configurações de CI/CD) ou mudanças estruturais na organização do código (ex: mover pastas principais, alterar significativamente a estrutura de módulos) deve seguir um processo formal de aprovação.
 
