@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useParams, Link, useRouter } from '@tanstack/react-router';
 // Edit3, Trash2, LayoutDashboard, Separator are not directly used here or are part of children. ChevronDown is needed.
-import { ArrowLeft, Settings, Play, Pause, CheckCircle, Clock, AlertTriangle, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Settings, Play, Pause, CheckCircle, Clock, AlertTriangle, ChevronDown, Trash2 } from 'lucide-react'; // Ensured Trash2 is imported
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
