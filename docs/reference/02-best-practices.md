@@ -156,15 +156,58 @@ class Product {
 
 This rule set enforces the Object Calisthenics principles to promote highly modular, testable, and maintainable code, focusing on object-oriented design best practices. Adherence to these principles is actively monitored through code reviews and refactoring processes, aiming for continuous improvement in code quality and maintainability.
 
-*   **One Level of Indentation Per Method:** Limit each method/function to a single level of indentation. Refactor complex logic into smaller, well-named helper methods to reduce nesting.
-*   **Don't Use the ELSE Keyword:** Avoid else blocks. Utilize guard clauses, polymorphism, or strategy patterns to eliminate conditional branches.
-*   **Wrap All Primitives and Strings:** Encapsulate primitive types (e.g., string, number, boolean) and strings within meaningful domain objects to avoid 'primitive obsession'.
-*   **First Class Collections:** Encapsulate any collection (Array, Map, Set) within a custom class. This class should expose domain-specific methods, not just proxy the collection's methods.
-*   **One Dot Per Line:** Limit method chaining to a single dot per line (obj.methodA().methodB()). Break down complex chains to promote smaller objects and adhere to the Law of Demeter.
-*   **Don't Abbreviate:** Use full, descriptive names for classes, variables, and methods. Avoid abbreviations that obscure meaning (e.g., usr -> user).
-*   **Keep All Entities Small:** Keep classes and functions small. Aim for classes with no more than 50 lines and functions with no more than 10-15 lines, promoting single responsibility.
-*   **No Classes With More Than Two Instance Variables:** Limit each class to a maximum of two instance variables (fields/properties). Consider composition if more are needed.
-*   **No Getters/Setters/Properties:** Avoid public getters and setters that expose internal state directly. Provide methods that describe *what* an object does, favoring command-query separation.
+1.  **Only One Level of Indentation Per Method.**
+    *   **Intent:** Promotes small, focused methods by discouraging deep nesting of conditional logic or loops.
+    *   **Application:** Extract complex conditional blocks or loop bodies into separate, well-named private methods or helper functions. Single `if` statements or simple loops are generally acceptable.
+    *   *Project Relevance:* Methods like `GenericAgentExecutor.processJob` and `WorkerService.processJob` should be reviewed for opportunities to reduce indentation by extracting helper methods.
+
+2.  **Don’t Use the ELSE Keyword.**
+    *   **Intent:** Encourages clearer conditional logic through early returns (guard clauses), polymorphism, or state patterns, reducing nesting.
+    *   **Application:** Prioritize guard clauses for preconditions. For more complex state-dependent logic, consider if a State pattern or strategy pattern could eliminate complex `if/else if/else` chains.
+    *   *Project Relevance:* Review complex conditional structures in agent logic and service methods.
+
+3.  **Wrap All Primitives and Strings.**
+    *   **Intent:** Avoid "Primitive Obsession." If a primitive type (string, number, boolean) has inherent rules, constraints, or behavior associated with it, it should be encapsulated in a dedicated class or type (Value Object).
+    *   **Application:**
+        *   IDs (e.g., `JobId`, `PersonaId`): Currently UUID strings. This is acceptable, but if they start acquiring specific validation or formatting logic beyond simple string, consider wrapping.
+        *   Domain-specific concepts passed as strings or numbers (e.g., status strings, priorities, configuration values like timeouts) could be candidates for wrapping if they have associated business rules or a constrained set of values (enums are a good TypeScript feature for this).
+        *   `job.payload` and `job.data`: `job.data` has been improved with `AgentJobState`. `job.payload` should ideally use specific DTOs for different job types rather than `any`.
+        *   Tool parameters defined by Zod schemas already provide a strong form of "wrapping" with validation.
+
+4.  **First Class Collections.**
+    *   **Intent:** A class that contains a collection should ideally not have other instance variables. The collection and its operations should be encapsulated within its own class.
+    *   **Application:**
+        *   `GenericAgentExecutor.agentState.conversationHistory` and `executionHistory`: If the logic for managing these histories (e.g., adding entries, summarizing, querying specific parts) becomes complex, they could be extracted into their own classes (e.g., `ConversationHistoryManager`, `ExecutionLog`).
+        *   `ToolRegistry` is a good example of this rule applied.
+    *   *Project Relevance:* Monitor the complexity of collection management within `GenericAgentExecutor`.
+
+5.  **One Dot Per Line (Law of Demeter).**
+    *   **Intent:** Reduce coupling by limiting method calls to direct collaborators. Avoid long chains like `object.getA().getB().doSomething()`.
+    *   **Application:** If such chains are found, consider if the intermediate objects are exposing too much internal state, or if a method should be added to the direct collaborator to provide the needed information or perform the action.
+    *   *Project Relevance:* Review interactions between services, use cases, and entities. For example, instead of `job.getData().getAgentState().getHistory()`, perhaps `job.getMostRecentHistoryEvent()` if that's a common need.
+
+6.  **Don’t Abbreviate.**
+    *   **Intent:** Use clear, explicit, and unambiguous names for variables, functions, classes, and files.
+    *   **Application:** Maintain this practice. Avoid overly short or cryptic names. Standard industry abbreviations (like `CWD`, `DTO`, `ID`) are generally acceptable if widely understood in context.
+    *   *Project Relevance:* Current naming is generally good. Continue vigilance.
+
+7.  **Keep All Entities Small.**
+    *   **Intent:** Classes should be small (e.g., <100 lines, ideally <50) and methods even smaller (e.g., <15 lines, ideally <5-10). This promotes Single Responsibility.
+    *   **Application:** This is a key area for review.
+    *   *Project Relevance:* `GenericAgentExecutor.ts` (especially `processJob`) and `WorkerService.ts` are prime candidates for refactoring into smaller, more focused methods and potentially helper classes/services if responsibilities can be further delineated.
+
+8.  **No Classes With More Than Two Instance Variables.**
+    *   **Intent:** A very strict rule to promote high cohesion and enforce SRP. Classes with many instance variables might be doing too much or could have their variables grouped into meaningful domain objects.
+    *   **Application:** This is often the most challenging Calisthenics rule to apply strictly, especially with Dependency Injection where classes collaborate with several services/repositories.
+    *   **Pragmatic Adaptation:** Focus on whether the instance variables represent a cohesive set of responsibilities. If a class's dependencies seem to serve multiple distinct high-level purposes, consider splitting the class. For `GenericAgentExecutor`, its core dependencies (`personaTemplate`, `toolRegistryInstance`, `internalAnnotationTool`) are all fundamental to its role of executing a job for a persona. Further decomposition here would need careful thought to avoid over-fragmentation.
+    *   *Project Relevance:* Review classes like `GenericAgentExecutor` and `WorkerService`. Are all constructor-injected dependencies strictly necessary for *all* its public methods, or could some responsibilities be split?
+
+9.  **No Getters/Setters/Properties (for direct state access/mutation).**
+    *   **Intent:** Objects should expose behavior ("Tell, Don't Ask") rather than just raw data. State changes should occur as side effects of behavior methods.
+    *   **Application:**
+        *   **Entities (`Job`, `MemoryItem`, `Annotation`):** These currently have public `props` or individual getters, which is common for data-centric entities that need to be serialized/deserialized or read by other layers. They also have behavioral methods for state transitions (e.g., `Job.moveToActive()`, `MemoryItem.updateContent()`). This balance is often pragmatic. The goal is to ensure that *business rules* related to state changes are encapsulated in methods, not handled by external clients setting properties. Avoid public setters where a behavioral method is more appropriate.
+        *   **DTOs and Config Objects:** These are primarily data containers and will naturally have properties.
+    *   *Project Relevance:* Continue to favor behavioral methods on entities for state changes. Review if any current public property access could be better encapsulated by a method representing an operation.
 
 ### Examples (Object Calisthenics)
 

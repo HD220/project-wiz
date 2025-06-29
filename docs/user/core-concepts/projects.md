@@ -10,7 +10,7 @@ Dentro de um projeto, você pode:
 
 *   **Definir o Escopo:** Clarificar os objetivos e limites do trabalho de desenvolvimento.
 *   **Atribuir Personas:** Designar Agentes de IA específicos para realizar tarefas dentro do contexto do projeto.
-*   **Gerenciar Jobs:** Criar, monitorar e gerenciar tarefas (Jobs) que as Personas executarão.
+*   **Acompanhar o Trabalho dos Agentes:** Monitorar as atividades e o progresso dos Agentes IA em relação aos objetivos delegados.
 *   **Estrutura Organizada:** Cada projeto tem sua própria estrutura de arquivos gerenciada pelo Project Wiz, incluindo áreas para código-fonte, documentação e arquivos de trabalho dos agentes.
 *   **Controle de Versão:** Projetos são inicializados com um repositório Git, facilitando o rastreamento de mudanças desde o início.
 *   *(Planejado)* **Colaboração:** Funcionalidades futuras podem incluir espaços para discussão (Fórum) e acompanhamento de progresso (Analytics) específicos do projeto.
@@ -28,7 +28,7 @@ Ao criar um novo projeto:
     *   No seu sistema de arquivos, estabelece uma estrutura de pastas base dentro de um diretório nomeado com o `ID de Projeto`. Essa estrutura geralmente inclui:
         *   `source-code/`: Para o código-fonte principal do seu software.
         *   `source-code/docs/`: Para a documentação específica do código do projeto (diferente da documentação do Project Wiz em si).
-        *   `worktrees/`: Para áreas de trabalho temporárias ou específicas que os Agentes utilizam ao executar Jobs.
+        *   `worktrees/`: Para áreas de trabalho temporárias ou específicas que os Agentes utilizam ao realizar suas atividades.
     *   Inicializa um repositório Git dentro da pasta `source-code/`.
     *   Registra informações sobre os caminhos do código-fonte e da documentação do projeto.
 
@@ -56,8 +56,7 @@ Os Agentes operam no código-fonte e outros artefatos dentro da estrutura defini
 
 ## Próximos Passos
 
-*   **Personas e Agentes IA:** Aprenda a criar e configurar os [Agentes de IA (Personas)](./personas-and-agents.md) que darão vida ao seu projeto.
-*   **Jobs e Automação:** Descubra como definir e delegar trabalho através do sistema de [Jobs e Automação](./jobs-and-automation.md).
-*   **Visão Geral da Interface:** Se ainda não o fez, familiarize-se com a [Interface do Usuário](../03-interface-overview.md) do Project Wiz.
+*   **Personas e Agentes IA:** Aprenda como o [Assistente Pessoal e os Agentes IA Especializados](./personas-and-agents.md) podem dar vida ao seu projeto.
+*   **Visão Geral da Interface:** Se ainda não o fez, familiarize-se com a [Interface do Usuário](../03-interface-overview.md) do Project Wiz para entender como interagir com o sistema.
 
 Este guia será atualizado à medida que as funcionalidades de gerenciamento de projetos forem evoluindo.
