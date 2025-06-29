@@ -1,8 +1,11 @@
 // src_refactored/core/application/worker/worker.service.ts
-import EventEmitter from 'node:events';
 import { randomUUID } from 'node:crypto';
+import EventEmitter from 'node:events';
+import { Timeout } from 'node:timers'; // Added import
+
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
 import { JobEntity } from '@/core/domain/job/job.entity';
+
 import { ProcessorFunction, WorkerOptions } from './worker.types';
 
 export class WorkerService<P, R> extends EventEmitter {
@@ -10,7 +13,7 @@ export class WorkerService<P, R> extends EventEmitter {
   private _isRunning: boolean = false;
   private _isClosed: boolean = false;
   private _activeJobs: number = 0;
-  private lockRenewTimers: Map<string, NodeJS.Timeout> = new Map();
+  private lockRenewTimers: Map<string, Timeout> = new Map(); // Changed type
 
   constructor(
     protected readonly queue: AbstractQueue<P, R>,
