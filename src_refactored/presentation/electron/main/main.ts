@@ -4,8 +4,16 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup'; // ES6 import
 
-import { registerChatIPCHandlers } from './ipc-chat.handlers';
-import { registerProjectIPCHandlers } from './ipc-project.handlers'; // Import project handlers
+import { registerChatIPCHandlers } from './ipc-chat.handlers'; // Legacy?
+import { registerProjectIPCHandlers as registerLegacyProjectIPCHandlers } from './ipc-project.handlers'; // Legacy? Renamed to avoid conflict
+
+// New Handlers
+import { registerProjectHandlers } from './handlers/project.handlers';
+import { registerPersonaTemplateHandlers } from './handlers/persona-template.handlers';
+import { registerAgentInstanceHandlers } from './handlers/agent-instance.handlers';
+import { registerLLMConfigHandlers } from './handlers/llm-config.handlers';
+import { registerUserHandlers } from './handlers/user.handlers';
+import { registerDMHandlers } from './handlers/dm.handlers';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (squirrelStartup) { // Check the imported value
@@ -48,9 +56,26 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   // Register IPC handlers
+  console.log('[Main Process] Registering IPC Handlers...');
+  // Legacy handlers (if still needed)
   registerChatIPCHandlers();
-  registerProjectIPCHandlers(); // Register project handlers
-  // Register other IPC handlers here (e.g., for onboarding, etc.)
+  registerLegacyProjectIPCHandlers();
+
+  // New refactored handlers
+  registerProjectHandlers();
+  console.log('[Main Process] Project handlers registered.');
+  registerPersonaTemplateHandlers();
+  console.log('[Main Process] Persona Template handlers registered.');
+  registerAgentInstanceHandlers();
+  console.log('[Main Process] Agent Instance handlers registered.');
+  registerLLMConfigHandlers();
+  console.log('[Main Process] LLM Config handlers registered.');
+  registerUserHandlers();
+  console.log('[Main Process] User handlers registered.');
+  registerDMHandlers();
+  console.log('[Main Process] DM handlers registered.');
+
+  console.log('[Main Process] All IPC Handlers registered.');
 
   createWindow();
 });
