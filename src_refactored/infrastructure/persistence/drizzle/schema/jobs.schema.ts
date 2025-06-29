@@ -1,7 +1,8 @@
 // src_refactored/infrastructure/persistence/drizzle/schema/jobs.schema.ts
 import { relations } from 'drizzle-orm';
 import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
-import { JobStatusEnum } from '@/core/domain/job/value-objects/job-status.vo';
+
+import { JobStatus } from '@/core/domain/job/job.entity'; // Changed import
 
 export const jobsTable = sqliteTable('jobs', {
   id: text('id').primaryKey(),
@@ -13,7 +14,7 @@ export const jobsTable = sqliteTable('jobs', {
   logs: text('logs', { mode: 'json' }).notNull(), // Consolidated from 'executionLogs'
   progress: text('progress', { mode: 'json' }).notNull(),
 
-  status: text('status').$type<JobStatusEnum>().notNull(),
+  status: text('status').$type<JobStatus>().notNull(), // Changed type
   priority: integer('priority').default(0).notNull(),
 
   attemptsMade: integer('attempts_made').default(0).notNull(),

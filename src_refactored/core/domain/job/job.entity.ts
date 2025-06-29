@@ -82,26 +82,28 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
     return new JobEntity<P, R>(props);
   }
 
+  // This is the single, corrected fromPersistence method
   public static fromPersistence<P, R>(
-    persistedData: JobEntityProps<P, R> & { options: IJobOptions } // Raw options from DB
+    persistedData: Omit<JobEntityProps<P,R>, 'id'|'options'|'logs'|'createdAt'|'updatedAt'|'processedOn'|'finishedOn'|'delayUntil'|'lockUntil'> &
+                  { id: string; options: IJobOptions; logs: Array<{message: string, level: string, timestamp: number}>; createdAt: number; updatedAt: number; processedOn?: number; finishedOn?: number; delayUntil?: number; lockUntil?: number; }
   ): JobEntity<P, R> {
-    // Ensure options is a VO when rehydrating
-    const optionsVO = JobOptionsVO.create(persistedData.options);
     const propsWithVOOptions: JobEntityProps<P, R> = {
-        ...persistedData,
-        id: JobIdVO.create(persistedData.id as any), // Re-create JobIdVO from string
-        options: optionsVO,
-        // Ensure dates are Date objects if they are stored as numbers/strings
+        ...persistedData, // Spread first
+        id: JobIdVO.create(persistedData.id), // Create VO from string id
+        options: JobOptionsVO.create(persistedData.options), // Create VO from raw options
+        // Ensure dates are Date objects
         createdAt: new Date(persistedData.createdAt),
         updatedAt: new Date(persistedData.updatedAt),
         processedOn: persistedData.processedOn ? new Date(persistedData.processedOn) : undefined,
         finishedOn: persistedData.finishedOn ? new Date(persistedData.finishedOn) : undefined,
         delayUntil: persistedData.delayUntil ? new Date(persistedData.delayUntil) : undefined,
         lockUntil: persistedData.lockUntil ? new Date(persistedData.lockUntil) : undefined,
-        logs: persistedData.logs ? persistedData.logs.map(log => ({...log, timestamp: new Date(log.timestamp)})) : [],
+        logs: persistedData.logs ? persistedData.logs.map(logEntry => ({...logEntry, timestamp: new Date(logEntry.timestamp)})) : [],
     };
     return new JobEntity<P, R>(propsWithVOOptions);
   }
+
+  // Removed the first fromPersistence method and the JobPersistenceLoadPropsType getter.
 
   get id(): JobIdVO { return this.props.id; }
   get queueName(): string { return this.props.queueName; }
@@ -142,19 +144,19 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
 
   public updateProgress(progress: number | object): void {
     if (this.status === JobStatus.COMPLETED || this.status === JobStatus.FAILED) {
-      // Maybe log a warning: Cannot update progress of a finalized job
+      console.warn(`[JobEntity] Cannot update progress for job ${this.id.value} as it is already in status ${this.status}.`);
       return;
     }
     this.props.progress = progress;
     this.props.updatedAt = new Date();
-    this._progressChanged = true;
+    this._progressChanged = true; // Though this flag is not currently used by repo for partial updates
   }
 
   public addLog(message: string, level: string = 'INFO'): void {
-     if (this.status === JobStatus.COMPLETED || this.status === JobStatus.FAILED) {
-      // Maybe log a warning: Cannot add logs to a finalized job
-      // return; // Or allow adding logs even after completion/failure for audit? For now, let's allow.
-    }
+    // Allow adding logs even after completion/failure for audit purposes.
+    // if (this.status === JobStatus.COMPLETED || this.status === JobStatus.FAILED) {
+    //   console.warn(`[JobEntity] Adding log to job ${this.id.value} which is already in status ${this.status}.`);
+    // }
     this.props.logs.push({ message, level, timestamp: new Date() });
     this.props.updatedAt = new Date();
     this._logsChanged = true;
@@ -286,27 +288,41 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
     }
   }
 
-    public toPersistence(): Omit<JobEntityProps<P, R>, 'id' | 'options'> & { id: string, options: IJobOptions } {
-    // Convert VOs back to plain objects for persistence if necessary
-    // For JobOptionsVO, we defined toPersistence() on it.
-    const persistedProps = { ...this.props } as any; // Cast to any to handle date conversions
-
-    persistedProps.createdAt = this.props.createdAt.getTime();
-    persistedProps.updatedAt = this.props.updatedAt.getTime();
-    if (this.props.processedOn) persistedProps.processedOn = this.props.processedOn.getTime();
-    if (this.props.finishedOn) persistedProps.finishedOn = this.props.finishedOn.getTime();
-    if (this.props.delayUntil) persistedProps.delayUntil = this.props.delayUntil.getTime();
-    if (this.props.lockUntil) persistedProps.lockUntil = this.props.lockUntil.getTime();
-
-    persistedProps.logs = this.props.logs.map(log => ({
-      ...log,
-      timestamp: log.timestamp.getTime(),
-    }));
-
+  // Removed the JobPersistenceSavePropsType getter.
+  public toPersistence(): {
+      id: string; queueName: string; name: string; payload: P; options: IJobOptions;
+      status: JobStatus; attemptsMade: number; progress: number | object;
+      logs: Array<{ message: string; level: string; timestamp: number }>; // Log timestamps are numbers for JSON
+      createdAt: Date; updatedAt: Date; priority: number; // Core dates are Date objects
+      processedOn?: Date; finishedOn?: Date; delayUntil?: Date; lockUntil?: Date; // Optional dates are Date objects
+      workerId?: string; returnValue?: R; failedReason?: string; stacktrace?: string[];
+    } {
     return {
-      ...persistedProps,
       id: this.props.id.value,
-      options: this.props.options.toPersistence(),
+      queueName: this.props.queueName,
+      name: this.props.name,
+      payload: this.props.payload,
+      options: this.props.options.toPersistence(), // This is IJobOptions
+      status: this.props.status,
+      attemptsMade: this.props.attemptsMade,
+      progress: this.props.progress,
+      logs: this.props.logs.map(logEntry => ({ // Log timestamps are numbers for JSON
+        ...logEntry,
+        timestamp: logEntry.timestamp.getTime(),
+      })),
+      createdAt: this.props.createdAt, // Pass Date object
+      updatedAt: this.props.updatedAt, // Pass Date object
+      priority: this.props.options.priority,
+
+      // Optional fields: Pass Date objects directly
+      ...(this.props.processedOn && { processedOn: this.props.processedOn }),
+      ...(this.props.finishedOn && { finishedOn: this.props.finishedOn }),
+      ...(this.props.delayUntil && { delayUntil: this.props.delayUntil }),
+      ...(this.props.lockUntil && { lockUntil: this.props.lockUntil }),
+      ...(this.props.workerId && { workerId: this.props.workerId }),
+      ...(this.props.returnValue !== undefined && { returnValue: this.props.returnValue }),
+      ...(this.props.failedReason && { failedReason: this.props.failedReason }),
+      ...(this.props.stacktrace && { stacktrace: this.props.stacktrace }),
     };
   }
 }

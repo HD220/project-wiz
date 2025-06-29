@@ -1,9 +1,9 @@
 // src_refactored/infrastructure/queue/drizzle/queue.service.ts
+import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
-import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
-import { IJobRepository } from '@/core/application/ports/job-repository.interface';
+import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
 
 export class QueueService<P, R> extends AbstractQueue<P, R> {
   private stalledJobsManager: NodeJS.Timeout | null = null;
@@ -85,10 +85,10 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
       await this.jobRepository.update(job);
       this.emit('job.active', job);
       return job;
-    } else {
+    }
       console.log(`[QueueService] Failed to acquire lock for job ${job.id.value}.`);
       return null;
-    }
+
   }
 
   async extendJobLock(jobId: string | JobIdVO, workerId: string, lockDurationMs: number): Promise<void> {
