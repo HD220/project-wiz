@@ -1,8 +1,10 @@
 // src_refactored/core/application/queue/abstract-queue.ts
 import EventEmitter from 'node:events';
+
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
-import { IJobOptions, JobOptionsVO } from '@/core/domain/job/value-objects/job-options.vo';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
+import { IJobOptions, JobOptionsVO } from '@/core/domain/job/value-objects/job-options.vo';
+
 import { IJobRepository } from '../ports/job-repository.interface';
 
 export const QUEUE_SERVICE_TOKEN_PREFIX = 'QueueService:';
