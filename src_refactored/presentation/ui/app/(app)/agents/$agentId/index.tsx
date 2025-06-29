@@ -1,68 +1,64 @@
 import { createFileRoute, useParams, Link, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, Edit3, MessageSquare, Bot, Zap, AlertTriangle, Thermometer, Briefcase, Cpu, ListChecks, Activity } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { ArrowLeft, Edit3, MessageSquare, Bot, Zap, AlertTriangle, Thermometer, Briefcase, Cpu, ListChecks, Activity, Loader2, ServerCrash } from 'lucide-react'; // Added Loader2, ServerCrash
+import React from 'react'; // Removed useEffect, useState
 import { toast } from 'sonner';
 
 import { Badge } from '@/presentation/ui/components/ui/badge';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { AgentInstance } from '@/presentation/ui/features/agent/components/AgentInstanceListItem'; // Reusing the type
-import { LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList';
-import { PersonaTemplate } from '@/presentation/ui/features/persona/components/PersonaTemplateListItem';
+// import { Separator } from '@/presentation/ui/components/ui/separator'; // Not used directly in the refactored version yet
+import { useIpcQuery } from '@/presentation/ui/hooks/ipc/useIpcQuery';
+import { cn } from '@/presentation/ui/lib/utils'; // For conditional classes
 
-// --- Mock Data ---
-const mockPersonaTemplates: Record<string, Pick<PersonaTemplate, 'id' | 'name' | 'role'>> = {
-  templateId1: { id: '1', name: 'Engenheiro de Software Sênior', role: 'Desenvolvedor especialista...' },
-  templateId2: { id: '2', name: 'Analista de QA Detalhista', role: 'Especialista em testes...' },
-};
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import type { AgentInstance, GetAgentInstanceDetailsRequest, GetAgentInstanceDetailsResponseData } from '@/shared/ipc-types'; // Adjusted imports
 
-const mockLlmConfigs: Record<string, Pick<LLMConfig, 'id' | 'name' | 'providerId'>> = {
-  configId1: { id: '1', name: 'OpenAI Pessoal', providerId: 'openai' },
-  configId2: { id: '2', name: 'Ollama Local', providerId: 'ollama' },
-};
-
-const mockAgentInstances: Record<string, AgentInstance> = {
-  'agent-001': { id: 'agent-001', agentName: 'CoderBot-Alpha', personaTemplateId: 'templateId1', llmProviderConfigId: 'configId1', temperature: 0.7, status: 'idle', currentJobId: null, lastActivity: '5 minutos atrás' },
-  'agent-002': { id: 'agent-002', agentName: 'TestMaster-7000', personaTemplateId: 'templateId2', llmProviderConfigId: 'configId1', temperature: 0.5, status: 'running', currentJobId: 'job-123', lastActivity: 'Agora mesmo' },
-  'agent-003': { id: 'agent-003', personaTemplateId: 'templateId1', llmProviderConfigId: 'configId2', temperature: 0.8, status: 'error', currentJobId: 'job-120', lastActivity: '1 hora atrás' },
-};
-
+// Kept statusDisplayMap as it's UI specific display logic
 const statusDisplayMap: Record<AgentInstance['status'], { label: string; icon: React.ElementType; colorClasses: string }> = {
   idle: { label: 'Ocioso', icon: Zap, colorClasses: 'bg-slate-500 text-slate-50' },
   running: { label: 'Executando', icon: Zap, colorClasses: 'bg-sky-500 text-sky-50 animate-pulse' },
-  paused: { label: 'Pausado', icon: Zap, colorClasses: 'bg-yellow-500 text-yellow-50' }, // Assuming Zap for paused too, could change
+  paused: { label: 'Pausado', icon: Zap, colorClasses: 'bg-yellow-500 text-yellow-50' },
   error: { label: 'Erro', icon: AlertTriangle, colorClasses: 'bg-red-500 text-red-50' },
   completed: { label: 'Concluído (Job)', icon: Zap, colorClasses: 'bg-green-500 text-green-50' },
 };
-// --- End Mock Data ---
 
 function AgentInstanceDetailPage() {
   const params = useParams({ from: '/(app)/agents/$agentId/' });
   const agentId = params.agentId;
-  const [instance, setInstance] = useState<AgentInstance & { personaName?: string; llmName?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const foundInstance = mockAgentInstances[agentId];
-      if (foundInstance) {
-        setInstance({
-          ...foundInstance,
-          personaName: mockPersonaTemplates[foundInstance.personaTemplateId]?.name || 'Desconhecida',
-          llmName: mockLlmConfigs[foundInstance.llmProviderConfigId]?.name || 'Desconhecida',
-        });
-      } else {
-        toast.error(`Instância de Agente com ID "${agentId}" não encontrada.`);
+  const { data: instance, isLoading, error } = useIpcQuery<GetAgentInstanceDetailsRequest, GetAgentInstanceDetailsResponseData>(
+    IPC_CHANNELS.GET_AGENT_INSTANCE_DETAILS,
+    { agentId },
+    {
+      // staleTime: 5 * 60 * 1000, // Example: Cache for 5 minutes
+      // refetchOnWindowFocus: true,
+      onError: (err) => {
+        toast.error(`Erro ao buscar detalhes do agente: ${err.message}`);
       }
-      setIsLoading(false);
-    }, 300);
-  }, [agentId]);
+    }
+  );
 
   if (isLoading) {
-    return <div className="p-8 text-center">Carregando detalhes da instância do agente...</div>;
+    return (
+      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <Loader2 className="h-10 w-10 animate-spin text-sky-500 mb-4" />
+        <p className="text-lg text-slate-600 dark:text-slate-400">Carregando detalhes da instância do agente...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px] bg-red-50 dark:bg-red-900/10 rounded-lg">
+        <ServerCrash className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
+        <h2 className="text-xl font-semibold text-red-700 dark:text-red-300 mb-2">Falha ao carregar dados</h2>
+        <p className="text-sm text-red-600 dark:text-red-400 mb-4">{error.message}</p>
+        <Button onClick={() => router.navigate({ to: '/agents' })} variant="destructive" className="mt-4">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes
+        </Button>
+      </div>
+    );
   }
 
   if (!instance) {
@@ -76,7 +72,7 @@ function AgentInstanceDetailPage() {
     );
   }
 
-  const statusInfo = statusDisplayMap[instance.status] || statusDisplayMap.idle;
+  const statusInfo = statusDisplayMap[instance.status] || statusDisplayMap.idle; // Fallback to idle if status is unexpected
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
@@ -88,13 +84,13 @@ function AgentInstanceDetailPage() {
         </Button>
         <div className="flex items-center space-x-2">
             <Button variant="default" asChild>
-            <Link to="/agents/$agentId/edit" params={{ agentId: instance.id }}>
+              {/* Ensure instance.id is used for params */}
+              <Link to="/agents/$agentId/edit" params={{ agentId: instance.id }}>
                 <Edit3 className="mr-2 h-4 w-4" /> Editar Instância
-            </Link>
+              </Link>
             </Button>
             <Button variant="outline" className="bg-sky-500 hover:bg-sky-600 text-white dark:bg-sky-600 dark:hover:bg-sky-700" asChild>
-                {/* This could navigate to /chat with agentId as a param, or open a dedicated chat modal */}
-                <Link to="/chat" search={{ conversationId: `agent-${instance.id}` }}>
+                <Link to="/chat" search={{ conversationId: `agent-${instance.id}` }}> {/* Ensure instance.id is used */}
                     <MessageSquare className="mr-2 h-4 w-4"/> Conversar
                 </Link>
             </Button>
@@ -106,21 +102,24 @@ function AgentInstanceDetailPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Bot className="h-16 w-16 text-emerald-500 dark:text-emerald-400 flex-shrink-0 sm:mt-1" />
             <div className="flex-1">
-              <CardTitle className="text-2xl lg:text-3xl mb-1">{instance.agentName || `Agente (Base: ${instance.personaName})`}</CardTitle>
+              {/* Use personaTemplateName from the enriched data */}
+              <CardTitle className="text-2xl lg:text-3xl mb-1">{instance.agentName || `Agente (Base: ${instance.personaTemplateName || 'N/D'})`}</CardTitle>
               <div className="flex items-center space-x-2">
                 <Badge className={cn("text-xs", statusInfo.colorClasses)}>
                   <statusInfo.icon className="h-3.5 w-3.5 mr-1.5" />
                   {statusInfo.label}
                 </Badge>
+                {/* Use lastActivity from the enriched data */}
                 <span className="text-xs text-slate-500 dark:text-slate-400">Última atividade: {instance.lastActivity || 'N/D'}</span>
               </div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
-          <InfoItem icon={Briefcase} label="Persona Base" value={instance.personaName} />
-          <InfoItem icon={Cpu} label="Configuração LLM" value={instance.llmName} />
-          <InfoItem icon={Thermometer} label="Temperatura" value={instance.temperature.toFixed(1)} />
+          {/* Use personaTemplateName and llmConfigName */}
+          <InfoItem icon={Briefcase} label="Persona Base" value={instance.personaTemplateName || 'Não definida'} />
+          <InfoItem icon={Cpu} label="Configuração LLM" value={instance.llmConfigName || 'Não definida'} />
+          <InfoItem icon={Thermometer} label="Temperatura" value={instance.temperature?.toFixed(1) || 'N/D'} />
           {instance.currentJobId && <InfoItem icon={ListChecks} label="Job Atual" value={instance.currentJobId} className="font-mono text-sky-600 dark:text-sky-400" />}
         </CardContent>
       </Card>
@@ -147,15 +146,17 @@ function AgentInstanceDetailPage() {
   );
 }
 
-const InfoItem = ({icon: Icon, label, value, className}: {icon: React.ElementType, label: string, value: string | number, className?: string}) => (
+const InfoItem = ({icon: itemIcon, label, value, className}: {icon: React.ElementType, label: string, value: string | number | undefined, className?: string}) => {
+  const IconComponent = itemIcon; // Alias to use as a component
+  return (
     <div>
         <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center mb-0.5">
-            <Icon className="h-3.5 w-3.5 mr-1.5 text-slate-400 dark:text-slate-500"/> {label}
+            <IconComponent className="h-3.5 w-3.5 mr-1.5 text-slate-400 dark:text-slate-500"/> {label}
         </h4>
-        <p className={cn("text-sm text-slate-700 dark:text-slate-200", className)}>{value}</p>
+        <p className={cn("text-sm text-slate-700 dark:text-slate-200", className)}>{value !== undefined ? value : 'N/D'}</p>
     </div>
-);
-
+  );
+}
 
 export const Route = createFileRoute('/(app)/agents/$agentId/')({
   component: AgentInstanceDetailPage,
