@@ -2,10 +2,12 @@
 import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
-import { JobEntity, JobStatus, JobPersistenceData } from '@/core/domain/job/job.entity';
+import { JobEntity, JobStatus, JobPersistenceData, JobPersistence } from '@/core/domain/job/job.entity'; // Added JobPersistence
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
+
 import * as schema from '../schema'; // Moved schema import up
+
 import type { db as DbType } from '../drizzle.client';
 
 export class DrizzleJobRepository implements IJobRepository {
@@ -48,16 +50,33 @@ export class DrizzleJobRepository implements IJobRepository {
     };
   }
 
+  // Helper to map JobPersistence (domain) to Drizzle input type
+  private mapToDrizzleInput(data: JobPersistence): typeof schema.jobsTable.$inferInsert {
+    return {
+      ...data,
+      // Convert numeric timestamps from JobPersistence back to Date objects for Drizzle
+      createdAt: new Date(data.createdAt),
+      updatedAt: new Date(data.updatedAt),
+      processedOn: data.processedOn ? new Date(data.processedOn) : null,
+      finishedOn: data.finishedOn ? new Date(data.finishedOn) : null,
+      delayUntil: data.delayUntil ? new Date(data.delayUntil) : null,
+      lockUntil: data.lockUntil ? new Date(data.lockUntil) : null,
+      // payload, options, logs, progress, returnValue, stacktrace are JsonValue.
+      // Drizzle's jsonb type should handle these directly.
+      // status is already JobStatus enum, which is a string, compatible with schema's text type for status.
+    };
+  }
+
   async save(job: JobEntity<unknown, unknown>): Promise<void> {
-    const data = job.toPersistence();
-    // Drizzle handles Date -> number for timestamp_ms fields during insert/update
-    await this.drizzleDbInstance.insert(schema.jobsTable).values(data as any).onConflictDoUpdate({ target: schema.jobsTable.id, set: data as any });
+    const persistenceData = job.toPersistence();
+    const drizzleInput = this.mapToDrizzleInput(persistenceData);
+    await this.drizzleDbInstance.insert(schema.jobsTable).values(drizzleInput).onConflictDoUpdate({ target: schema.jobsTable.id, set: drizzleInput });
   }
 
   async update(job: JobEntity<unknown, unknown>): Promise<void> {
-    const data = job.toPersistence();
-    // Drizzle handles Date -> number for timestamp_ms fields during insert/update
-    await this.drizzleDbInstance.update(schema.jobsTable).set(data as any).where(eq(schema.jobsTable.id, data.id));
+    const persistenceData = job.toPersistence();
+    const drizzleInput = this.mapToDrizzleInput(persistenceData);
+    await this.drizzleDbInstance.update(schema.jobsTable).set(drizzleInput).where(eq(schema.jobsTable.id, drizzleInput.id));
   }
 
   async findById(id: JobIdVO): Promise<JobEntity<unknown, unknown> | null> {

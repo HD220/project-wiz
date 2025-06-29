@@ -8,7 +8,10 @@ import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
 
 export class QueueService<P, R> extends AbstractQueue<P, R> {
-  private stalledJobsManager: Timeout | null = null; // Use Timeout type
+  // private stalledJobsManager: Timeout | null = null; // Use Timeout type - Replaced by new mechanism
+  private _isMaintenanceRunning: boolean = false;
+  private maintenanceLoopPromise: Promise<void> | null = null;
+  private readonly maintenanceIntervalMs: number = 15000;
 
   constructor(
     queueName: string,
@@ -61,10 +64,23 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     return await this.jobRepository.clean(this.queueName, gracePeriodMs, limit, status);
   }
 
-  async close(): Promise<void> {
-    if (this.stalledJobsManager) {
-      clearInterval(this.stalledJobsManager);
+  public async stopMaintenance(): Promise<void> {
+    if (!this._isMaintenanceRunning && !this.maintenanceLoopPromise) {
+      return;
     }
+    this._isMaintenanceRunning = false;
+    if (this.maintenanceLoopPromise) {
+      try {
+        await this.maintenanceLoopPromise;
+      } catch (error) {
+         this.emit('queue.error', new Error(`Error during maintenance loop stop: ${error instanceof Error ? error.message : String(error)}`));
+      }
+    }
+    this.maintenanceLoopPromise = null;
+  }
+
+  public async close(): Promise<void> {
+    await this.stopMaintenance();
     this.emit('queue.closed');
   }
 
@@ -154,20 +170,49 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     }
   }
 
-  startMaintenance(): void {
-    if (this.stalledJobsManager) return;
-    this.stalledJobsManager = setInterval(async () => {
-      const stalledJobs = await this.jobRepository.findStalledJobs(this.queueName, new Date(), 10);
-      for (const job of stalledJobs) {
-        const shouldFail = job.markAsStalled();
-        if (shouldFail) {
-          job.markAsFailed('Job failed after becoming stalled and exceeding max attempts.');
-        } else {
-          job.moveToWaiting();
+  public startMaintenance(): void { // Made public for consistency
+    if (this._isMaintenanceRunning) return;
+    this._isMaintenanceRunning = true;
+    this.maintenanceLoopPromise = this.runMaintenanceLoop();
+    // console.log('[QueueService] Maintenance loop started.');
+  }
+
+  private async runMaintenanceLoop(): Promise<void> {
+    while (this._isMaintenanceRunning) {
+      try {
+        // console.log('[QueueService] Running stalled job check...');
+        const stalledJobs = await this.jobRepository.findStalledJobs(this.queueName, new Date(), 10);
+        if (stalledJobs.length > 0) {
+            // console.log(`[QueueService] Found ${stalledJobs.length} stalled jobs.`);
         }
-        await this.jobRepository.update(job);
-        this.emit('job.stalled', job);
+        for (const job of stalledJobs) {
+          const jobEntity = job as JobEntity<P,R>; // Cast for type safety with entity methods
+          // console.log(`[QueueService] Processing stalled job ${jobEntity.id.value}, status: ${jobEntity.status}, attempts: ${jobEntity.attemptsMade}`);
+          const wasAlreadyFailedByStallLogic = jobEntity.markAsStalled();
+
+          if (!wasAlreadyFailedByStallLogic) {
+            jobEntity.moveToWaiting();
+            // console.log(`[QueueService] Stalled job ${jobEntity.id.value} moved to WAITING.`);
+          } else {
+            // markAsStalled already set it to FAILED
+            // console.log(`[QueueService] Stalled job ${jobEntity.id.value} marked as FAILED by entity logic.`);
+          }
+          await this.jobRepository.update(jobEntity);
+          this.emit('job.stalled', jobEntity);
+        }
+      } catch (error) {
+        console.error('[QueueService] Error during stalled job maintenance:', error);
+        this.emit('queue.error', new Error(`Stalled job maintenance error: ${error instanceof Error ? error.message : String(error)}`));
       }
-    }, 15000);
+
+      if (this._isMaintenanceRunning) { // Check again before sleeping
+        try {
+            await new Promise(resolve => setTimeout(resolve, this.maintenanceIntervalMs));
+        } catch (error) { // Should not happen with setTimeout
+            console.error('[QueueService] Error during maintenance sleep:', error);
+        }
+      }
+    }
+    // console.log('[QueueService] Maintenance loop stopped.');
   }
 }

@@ -9,71 +9,102 @@ import { JobEntity } from '@/core/domain/job/job.entity';
 import { ProcessorFunction, WorkerOptions } from './worker.types';
 
 export class WorkerService<P, R> extends EventEmitter {
-  public readonly workerId: string; // Made public for easier testing if needed, though not strictly necessary
+  public readonly workerId: string;
   private _isRunning: boolean = false;
   private _isClosed: boolean = false;
-  private _activeJobs: number = 0;
-  private lockRenewTimers: Map<string, Timeout> = new Map(); // Changed type
+  private _activeJobs: number = 0; // Still useful for graceful close
+  private lockRenewTimers: Map<string, Timeout> = new Map();
+  private pollLoopPromise: Promise<void> | null = null;
+  private readonly pollingIntervalMs: number = 1000; // Configurable polling interval
 
   constructor(
     protected readonly queue: AbstractQueue<P, R>,
     protected readonly processor: ProcessorFunction<P, R>,
-    protected readonly opts: WorkerOptions = { concurrency: 1, lockDuration: 30000 },
+    protected readonly opts: WorkerOptions = { lockDuration: 30000 }, // Concurrency option is now managed internally to 1
   ) {
     super();
     this.workerId = randomUUID();
+    // Concurrency is effectively 1 due to sequential processing logic in poll()
+    // this.opts.concurrency = 1; // Explicitly set or just rely on logic
+    if (opts.concurrency && opts.concurrency > 1) {
+        console.warn(`[WorkerService] Concurrency option > 1 is not supported in this sequential version. Effective concurrency is 1.`);
+    }
   }
 
   get isRunning(): boolean { return this._isRunning; }
   get isClosed(): boolean { return this._isClosed; }
-  get activeJobCount(): number { return this._activeJobs; }
-
+  get activeJobCount(): number { return this._activeJobs; } // Indicates if a job is currently processing
 
   public run(): void {
     if (this._isRunning || this._isClosed) return;
     this._isRunning = true;
-    this.poll();
+    this.pollLoopPromise = this.poll(); // Start the polling loop
   }
 
   public async close(): Promise<void> {
     if (this._isClosed) return;
-    this._isRunning = false; // Stop polling for new jobs
-    this._isClosed = true;   // Mark as closed
 
-    // Wait for active jobs to finish
-    // A more robust solution might involve a Promise that resolves when all jobs are done.
-    while (this._activeJobs > 0) {
-      await new Promise(resolve => setTimeout(resolve, 50)); // Check more frequently
+    this._isRunning = false; // Signal the poll loop to stop
+    this._isClosed = true;   // Mark as closed to prevent new operations
+
+    // Wait for the current polling loop iteration to finish if it's running
+    if (this.pollLoopPromise) {
+        try {
+            await this.pollLoopPromise;
+        } catch (error) {
+            // In case the poll loop itself had an unhandled rejection during shutdown
+            this.emit('worker.error', new Error(`Error during poll loop shutdown: ${error instanceof Error ? error.message : String(error)}`));
+        }
     }
+
+    // Wait for any active job to finish (activeJobs should be 0 or 1)
+    const gracefulShutdownTimeout = this.opts.lockDuration ? this.opts.lockDuration * 2 : 60000; // Max wait time
+    const startTime = Date.now();
+    while (this._activeJobs > 0 && (Date.now() - startTime < gracefulShutdownTimeout)) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    if (this._activeJobs > 0) {
+        this.emit('worker.error', new Error(`Worker closed with ${this._activeJobs} active job(s) still running after timeout.`));
+    }
+
     this.lockRenewTimers.forEach(timer => clearInterval(timer));
     this.lockRenewTimers.clear();
     this.emit('worker.closed');
   }
 
   private async poll(): Promise<void> {
-    if (!this._isRunning || this._isClosed) return;
-
-    if (this._activeJobs < this.opts.concurrency) {
-      try {
-        const job = await this.queue.fetchNextJobAndLock(this.workerId, this.opts.lockDuration);
-        if (job) {
-          if (!this._isRunning || this._isClosed) { // Re-check in case worker was closed while fetching
-            // If closed, try to release the lock or move job back to waiting.
-            // This is a complex scenario; for now, we might just ignore processing.
-            // Or better, the queue should handle this if a worker takes a job and dies.
-            // For now, we'll assume if a job is fetched, it's processed unless an error occurs.
-            return;
-          }
-          this._activeJobs++;
-          this.processJob(job); // Do not await, let it run concurrently
-        }
-      } catch (error) {
-        this.emit('worker.error', error); // Error fetching job
+    while (this._isRunning && !this._isClosed) {
+      if (this._activeJobs !== 0) { // Se um job já estiver ativo (salvaguarda, ou aguardando ciclo anterior)
+        await new Promise(resolve => setTimeout(resolve, this.pollingIntervalMs));
+        continue; // Pula para a próxima iteração do while
       }
-    }
 
-    if (this._isRunning && !this._isClosed) {
-      setTimeout(() => this.poll(), 1000); // Poll every second
+      try {
+        const job = await this.queue.fetchNextJobAndLock(this.workerId, this.opts.lockDuration ?? 30000);
+
+        if (!job) { // Se nenhum job foi encontrado
+          await new Promise(resolve => setTimeout(resolve, this.pollingIntervalMs));
+          continue; // Pula para a próxima iteração do while
+        }
+
+        // Job encontrado, verificar status do worker antes de processar
+        if (!this._isRunning || this._isClosed) {
+          console.warn(`[WorkerService] Worker stopped while job ${job.id.value} was fetched. Job may become stalled.`);
+          // Idealmente, tentar devolver o job para a fila ou liberar o lock.
+          // Por agora, o job pode se tornar 'stalled' e ser pego pela manutenção.
+          break; // Sai do loop de polling
+        }
+
+        this._activeJobs = 1; // Marca um job como ativo
+        await this.processJob(job); // Aguarda o processamento para execução sequencial
+        // O bloco finally de processJob definirá _activeJobs = 0
+
+      } catch (error) {
+        this.emit('worker.error', error); // Erro ao buscar ou durante processJob (se não capturado pelo try/catch de processJob)
+        // Espera antes de tentar o poll novamente para evitar loops rápidos de erro
+        await new Promise(resolve => setTimeout(resolve, this.pollingIntervalMs * 2));
+      }
     }
   }
 
@@ -84,13 +115,19 @@ export class WorkerService<P, R> extends EventEmitter {
     const originalUpdateProgress = job.updateProgress.bind(job);
     job.updateProgress = (progress: number | object) => {
       originalUpdateProgress(progress);
-      this.queue.updateJobProgress(job.id, this.workerId, progress);
+      // Not awaiting these queue calls to prevent blocking the processor,
+      // but they should handle errors internally or be fire-and-forget.
+      this.queue.updateJobProgress(job.id, this.workerId, progress).catch(err => {
+          this.emit('worker.error', new Error(`Failed to update progress for job ${job.id.value}: ${err instanceof Error ? err.message : String(err)}`));
+      });
     };
 
     const originalAddLog = job.addLog.bind(job);
     job.addLog = (message: string, level?: string) => {
       originalAddLog(message, level);
-      this.queue.addJobLog(job.id, this.workerId, message, level);
+      this.queue.addJobLog(job.id, this.workerId, message, level).catch(err => {
+          this.emit('worker.error', new Error(`Failed to add log for job ${job.id.value}: ${err instanceof Error ? err.message : String(err)}`));
+      });
     };
 
     this.emit('worker.job.active', job);
@@ -98,13 +135,12 @@ export class WorkerService<P, R> extends EventEmitter {
 
     try {
       const result = await this.processor(job); // User's processing logic
-      if (this._isClosed && !job.finishedOn) { // If worker closed during processing
-         this.emit('worker.job.interrupted', job); // A new event to indicate this state
-         // Job was not completed nor failed from processor's perspective due to shutdown
-         // The Queue's stalled job mechanism should eventually pick this up if lock expires.
-         // Or, QueueService.markJobAsFailed could be called with a specific "interrupted" error.
-         // For now, we rely on lock expiration and stalled job handling.
-      } else {
+
+      // If worker was closed while processor was running, but before completion call to queue
+      if (this._isClosed && !job.finishedOn) {
+         this.emit('worker.job.interrupted', job);
+         // Rely on lock expiration and stalled job handling by the queue.
+      } else if (!this._isClosed) { // Only attempt to mark as completed if not closing
         await this.queue.markJobAsCompleted(job.id, this.workerId, result, job);
         this.emit('worker.job.processed', job, result);
       }
@@ -116,9 +152,11 @@ export class WorkerService<P, R> extends EventEmitter {
         this.emit('worker.job.interrupted', job, error); // Error during processing, but worker was closing
       }
     } finally {
-      this._activeJobs--;
+      // This is critical: ensure activeJobs is decremented even if processor throws unhandled error
+      // or if queue operations (markJobAsCompleted/Failed) throw errors not caught above.
+      this._activeJobs = 0; // Set to 0 as only one job is processed at a time.
       this.clearLockRenewal(job.id.value);
-      // Restore original methods if necessary, though job instance is typically short-lived here
+      // Restore original methods on job entity to prevent issues if the entity instance is reused (though typically not)
       job.updateProgress = originalUpdateProgress;
       job.addLog = originalAddLog;
     }

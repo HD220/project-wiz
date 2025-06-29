@@ -167,4 +167,10 @@ export abstract class AbstractQueue<P = unknown, R = unknown> extends EventEmitt
    * Should be idempotent.
    */
   abstract startMaintenance(): void;
+
+  /**
+   * Stops any internal maintenance tasks.
+   * Should be idempotent and wait for the current maintenance cycle to finish.
+   */
+  abstract stopMaintenance(): Promise<void>;
 }
