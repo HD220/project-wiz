@@ -1,19 +1,25 @@
 // src/infrastructure/tools/task.tool.ts
-import { Job } from '../../core/domain/entities/jobs/job.entity';
 import {
   IListJobsUseCase,
-  ListJobsUseCase // Assuming this will be injected, or its interface
+  // ListJobsUseCase
 } from '../../core/application/use-cases/job/list-jobs.usecase';
-import {
-  ISaveJobUseCase,
-  SaveJobDTO,
-  SaveJobUseCase // Assuming this will be injected
-} from '../../core/application/use-cases/job/save-job.usecase';
+// import {
+//   ISaveJobUseCase,
+//   SaveJobDTO,
+//   // SaveJobUseCase
+// } from '../../core/application/use-cases/job/save-job.usecase'; // REMOVED
 import {
   IRemoveJobUseCase,
-  RemoveJobUseCase // Assuming this will be injected
+  // RemoveJobUseCase
 } from '../../core/application/use-cases/job/remove-job.usecase';
-import { z } from 'zod'; // For ai-sdk tool parameter validation
+import { z } from 'zod';
+
+// Imports from src_refactored
+import { JobQueueService } from '@/src_refactored/core/application/queue/job-queue.service';
+import { IJobOptions } from '@/src_refactored/core/domain/job/value-objects/job-options.vo';
+import { JobEntity } from '@/src_refactored/core/domain/job/job.entity';
+import { AgentExecutionPayload } from '@/src_refactored/core/domain/job/job-processing.types';
+
 
 // Schemas for AI SDK tool parameters
 const listParamsSchema = z.object({
@@ -21,101 +27,155 @@ const listParamsSchema = z.object({
   limit: z.number().optional().describe("Maximum number of jobs to return."),
 });
 
-// Define a Zod schema for SaveJobDTO to be used with AI SDK
-// This needs to match the structure of SaveJobDTO closely.
-// Job.payload and Job.data can be complex, using z.record(z.string(), z.any()) or z.stringified(z.json())
 const saveParamsSchema = z.object({
-  id: z.string().optional().describe("The ID of the job to update. Omit for new job."),
-  queueId: z.string().describe("The ID of the queue this job belongs to."),
-  name: z.string().describe("The name of the job."),
-  payload: z.record(z.string(), z.any()).optional().describe("The input payload for the job."), // Or z.any() if truly flexible
-  data: z.record(z.string(), z.any()).optional().describe("Mutable data associated with the job."), // Or z.any()
-  priority: z.number().optional().describe("Job priority (lower is higher)."),
-  delay: z.number().optional().describe("Delay in milliseconds before the job is active."),
+  queueId: z.string().describe("The ID of the queue this job belongs to. Must match the TaskTool's configured queue if different."),
+  name: z.string().describe("The name/type of the job."),
+  // Payload for AgentExecutionJobs should conform to AgentExecutionPayload
+  payload: z.object({
+    agentId: z.string(),
+    initialPrompt: z.string().optional(),
+    projectId: z.string().optional(),
+    userId: z.string().optional(),
+  }).describe("The input payload for the agent execution job.").passthrough(), // Allow other props in payload
+  priority: z.number().optional().describe("Job priority."),
+  delay: z.number().optional().describe("Delay in milliseconds."),
   maxAttempts: z.number().optional().describe("Maximum number of attempts."),
-  targetAgentRole: z.string().optional().describe("The role of the agent best suited for this job."),
-  requiredCapabilities: z.array(z.string()).optional().describe("List of capabilities/tool names required for this job."),
-  // Add other fields from SaveJobDTO as needed by the agent's capabilities
-}).describe("Parameters for creating or updating a job.");
+  // TODO: Add dependsOnJobIds, parentId to schema if needed by agents
+  // dependsOnJobIds: z.array(z.string()).optional().describe("Job IDs this job depends on."),
+  // parentId: z.string().optional().describe("Parent job ID for flows."),
+}).describe("Parameters for creating a new agent execution job.");
 
 
 const removeParamsSchema = z.object({
   jobId: z.string().describe("The ID of the job to remove."),
 });
 
+// Interface for old Job structure for list method compatibility (if needed temporarily)
+interface OldJob<P, R> { id: { value: string }; name: () => { value: string }; props: any; }
+
+
 export interface ITaskTool {
-  list(params: z.infer<typeof listParamsSchema>): Promise<Job<any, any>[]>; // Consider returning simplified job DTOs
-  save(params: z.infer<typeof saveParamsSchema>): Promise<Job<any, any>>; // Consider returning simplified job DTO
+  list(params: z.infer<typeof listParamsSchema>): Promise<OldJob<any, any>[]>;
+  save(params: z.infer<typeof saveParamsSchema>): Promise<JobEntity<AgentExecutionPayload, any>>; // Return new JobEntity
   remove(params: z.infer<typeof removeParamsSchema>): Promise<void>;
 }
 
 export class TaskTool implements ITaskTool {
   constructor(
-    private listJobsUseCase: IListJobsUseCase,
-    private saveJobUseCase: ISaveJobUseCase,
-    private removeJobUseCase: IRemoveJobUseCase
+    private listJobsUseCase: IListJobsUseCase, // Keep for now
+    private removeJobUseCase: IRemoveJobUseCase, // Keep for now
+    private jobQueueService: JobQueueService<AgentExecutionPayload, any>, // Injected, specific to a queue
   ) {}
 
-  // Method for AI SDK: list jobs
-  async list(params: z.infer<typeof listParamsSchema>): Promise<Job<any, any>[]> {
+  async list(params: z.infer<typeof listParamsSchema>): Promise<OldJob<any, any>[]> {
     console.log(`TaskTool.list: Called with queueId=${params.queueId}, limit=${params.limit}`);
-    // Input validation is handled by Zod when used with ai-sdk's tool system
-    return this.listJobsUseCase.execute(params.queueId, params.limit);
+    if (params.queueId !== this.jobQueueService.name) {
+        console.warn(`TaskTool.list called for queue '${params.queueId}' but tool is configured for '${this.jobQueueService.name}'. Listing from configured queue.`);
+    }
+    // This ListJobsUseCase is from the old system. It would need to be refactored
+    // or JobQueueService needs a getJobs method. For now, this will likely fail or return old job types.
+    // This part needs more significant refactoring if listJobs is to use the new system.
+    // Returning empty array as placeholder for this method's refactor.
+    console.warn("TaskTool.list is using old ListJobsUseCase. Needs refactoring to use new queue system.");
+    // return this.listJobsUseCase.execute(this.jobQueueService.name, params.limit);
+    return Promise.resolve([]);
   }
 
-  // Method for AI SDK: save (create or update) a job
-  async save(params: z.infer<typeof saveParamsSchema>): Promise<Job<any, any>> {
-    console.log(`TaskTool.save: Called for job name ${params.name}`);
-    // The 'params' object should conform to SaveJobDTO or be adaptable.
-    // This assumes direct compatibility for simplicity here.
-    // A mapping layer might be needed if Zod schema diverges significantly from SaveJobDTO.
-    const jobData: SaveJobDTO = {
-        id: params.id,
-        queueId: params.queueId,
-        name: params.name,
-        payload: params.payload,
-        data: params.data,
-        priority: params.priority,
-        delay: params.delay,
-        maxAttempts: params.maxAttempts,
-        targetAgentRole: params.targetAgentRole,
-        requiredCapabilities: params.requiredCapabilities,
-        // Ensure all required fields by SaveJobDTO are covered or are optional
+  async save(params: z.infer<typeof saveParamsSchema>): Promise<JobEntity<AgentExecutionPayload, any>> {
+    console.log(`TaskTool.save: Called for job name ${params.name} on queue ${this.jobQueueService.name}`);
+
+    if (params.queueId && params.queueId !== this.jobQueueService.name) {
+        const warningMsg = `TaskTool attempting to save to queue '${params.queueId}' but is configured for queue '${this.jobQueueService.name}'. Using configured queue: '${this.jobQueueService.name}'.`;
+        console.warn(warningMsg);
+        // Potentially, this tool could add a log to the job about this redirection if job has logging before save.
+    }
+
+    const jobOptions: IJobOptions = {
+      priority: params.priority,
+      delay: params.delay,
+      attempts: params.maxAttempts,
+      // dependsOnJobIds: params.dependsOnJobIds, // Add if part of schema
+      // parentId: params.parentId, // Add if part of schema
     };
-    return this.saveJobUseCase.execute(jobData);
+
+    // Payload needs to be AgentExecutionPayload
+    const payload: AgentExecutionPayload = {
+        agentId: params.payload.agentId,
+        initialPrompt: params.payload.initialPrompt,
+        projectId: params.payload.projectId,
+        userId: params.payload.userId,
+        ...params.payload // include any other passthrough properties
+    };
+
+    const result = await this.jobQueueService.add(
+      params.name,
+      payload,
+      jobOptions
+    );
+
+    if (result.isError()) {
+      console.error(`TaskTool.save: Failed to add job via JobQueueService:`, result.error);
+      // Convert to a generic error or re-throw. ToolError might be suitable.
+      throw new Error(`Failed to save job using new queue service: ${result.error.message}`);
+    }
+    return result.value;
   }
 
-  // Method for AI SDK: remove a job
   async remove(params: z.infer<typeof removeParamsSchema>): Promise<void> {
-    console.log(`TaskTool.remove: Called for jobId ${params.jobId}`);
-    await this.removeJobUseCase.execute(params.jobId);
-    // Note: RemoveJobUseCase currently has a placeholder for actual deletion.
-    // This tool method will reflect that limitation until the use case is fully implemented.
+    console.log(`TaskTool.remove: Called for jobId ${params.jobId} on queue ${this.jobQueueService.name}`);
+    // This removeJobUseCase is from the old system.
+    // JobQueueService needs a removeJob method.
+    console.warn("TaskTool.remove is using old RemoveJobUseCase. Needs refactoring to use new queue system.");
+    // await this.removeJobUseCase.execute(params.jobId);
+    return Promise.resolve();
   }
 }
 
-// New function to generate tool definitions for an instance
-import { IAgentTool } from '../../core/tools/tool.interface';
+// Tool definition generation part needs to be updated if IAgentTool is from src_refactored
+import { IAgentTool as IRefactoredAgentTool } from '@/src_refactored/core/tools/tool.interface';
 
-export function getTaskToolDefinitions(taskToolInstance: TaskTool): IAgentTool[] {
+// This function now needs to align with IRefactoredAgentTool if that's the target.
+// The execute methods for list and remove will need significant changes to work with JobQueueService.
+export function getTaskToolDefinitions(taskToolInstance: TaskTool): IRefactoredAgentTool<any, any>[] {
   return [
     {
-      name: 'taskManager.listJobs', // Renamed for clarity, was taskTool.list
-      description: 'Lists jobs in a specified queue.',
-      parameters: listParamsSchema, // Already defined in this file
-      execute: async (params) => taskToolInstance.list(params),
+      name: 'taskManager.saveJob',
+      description: 'Creates a new agent execution job in the configured queue.',
+      parameters: saveParamsSchema,
+      execute: async (params, execContext) => {
+        // Note: The execute function for IRefactoredAgentTool expects Result<Output, ToolError>
+        // The TaskTool.save currently throws on error or returns JobEntity.
+        // This needs an adapter or TaskTool.save needs to return Result.
+        console.log("[TaskToolDefinition] taskManager.saveJob called with params:", params, "Context:", execContext);
+        try {
+            const jobEntity = await taskToolInstance.save(params as z.infer<typeof saveParamsSchema>);
+            // Convert JobEntity to a simpler output if necessary, or return its ID.
+            return Ok({ jobId: jobEntity.id.value, status: jobEntity.status.value });
+        } catch (error) {
+            const err = error instanceof Error ? error : new Error(String(error));
+            return Err(new ToolError(err.message, 'taskManager.saveJob', err));
+        }
+      },
     },
-    {
-      name: 'taskManager.saveJob', // Renamed for clarity
-      description: 'Creates a new job or updates an existing one. Use this to schedule sub-tasks or modify existing ones.',
-      parameters: saveParamsSchema, // Already defined in this file
-      execute: async (params) => taskToolInstance.save(params),
-    },
-    {
-      name: 'taskManager.removeJob', // Renamed for clarity
-      description: 'Removes a job by its ID.',
-      parameters: removeParamsSchema, // Already defined in this file
-      execute: async (params) => taskToolInstance.remove(params),
-    }
+    // {
+    //   name: 'taskManager.listJobs',
+    //   description: 'Lists jobs in a specified queue. (Currently placeholder - needs refactor)',
+    //   parameters: listParamsSchema,
+    //   execute: async (params) => {
+    //     // const jobs = await taskToolInstance.list(params);
+    //     // return Ok(jobs.map(j => ({id: j.id.value, name: j.name().value, status: j.props.status.value() })));
+    //     return Ok([]);
+    //   },
+    // },
+    // {
+    //   name: 'taskManager.removeJob',
+    //   description: 'Removes a job by its ID. (Currently placeholder - needs refactor)',
+    //   parameters: removeParamsSchema,
+    //   execute: async (params) => {
+    //     // await taskToolInstance.remove(params);
+    //     // return Ok({ message: `Job ${params.jobId} removal process initiated.` });
+    //     return Ok({});
+    //   },
+    // }
   ];
 }

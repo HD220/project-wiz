@@ -1,16 +1,16 @@
 // src_refactored/infrastructure/persistence/drizzle/repositories/project.repository.ts
 import { injectable, inject } from 'inversify';
 
+import { ILoggerService } from '@/core/common/services/i-logger.service'; // Corrected path for ILoggerService
 import { IProjectRepository } from '@/core/domain/project/ports/project-repository.interface';
 import { Project } from '@/core/domain/project/project.entity';
 import { ProjectId } from '@/core/domain/project/value-objects/project-id.vo';
 
-import { DomainError, NotFoundError } from '@/domain/common/errors';
-import { ILoggerService } from '@/domain/services/i-logger.service';
+import { DomainError, NotFoundError } from '@/domain/common/errors'; // Corrected path for DomainError
 
-import { Result, ok, error } from '@/shared/result';
+import { Result, ok, error as errResult } from '@/shared/result'; // aliased error to errResult to avoid conflict
 
-import { TYPES } from '../../ioc/types'; // Assuming TYPES is in the new ioc directory
+import { TYPES } from '../../ioc/types';
 
 // Placeholder for Drizzle schema and db client type
 // import { LibSQLDatabase } from 'drizzle-orm/libsql';

@@ -1,136 +1,137 @@
 // src_refactored/core/domain/job/value-objects/job-options.vo.ts
+
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+import { DomainError } from '@/core/domain/common/errors';
 
-import { ValueError } from '@/domain/common/errors';
-
-import { JobIdVO } from './job-id.vo';
-import { JobPriorityVO } from './job-priority.vo';
-
-// Define interfaces for sub-options first, as they are part of JobOptions properties
-export interface RetryStrategyOptions {
-  maxAttempts: number; // Total number of attempts (1 means no retries)
-  // Defines delay in ms for next attempt. Can be fixed or exponential.
-  // If 'exponential', baseDelay is used: delay = baseDelay * (2 ** (attemptsMade -1))
-  // If 'custom', a custom function name or identifier could be stored, logic handled by worker/scheduler.
-  backoff?: { type: 'fixed' | 'exponential'; delayMs: number } | false; // false means no automatic retry delay
+/**
+ * Options for how a job should be retried in case of failure.
+ * `type` can be 'fixed' (retry after a fixed delay) or 'exponential' (delay increases exponentially).
+ * `delay` is the base delay in milliseconds.
+ * `jitter` is an optional percentage (0.0 to 1.0) to randomize the delay.
+ */
+export interface IJobBackoffOptions {
+  type: 'fixed' | 'exponential';
+  delay: number; // in milliseconds
+  jitter?: number; // percentage (0.0 to 1.0)
 }
 
-export interface RepeatOptions {
-  cron?: string; // Standard cron string
-  every?: number; // Interval in milliseconds
-  limit?: number; // Max number of repetitions
-  startDate?: Date;
-  endDate?: Date;
-  tz?: string; // Timezone for cron e.g. 'America/New_York'
-  // immediate?: boolean; // Whether to run immediately upon adding a repeatable job (handled at Queue.add)
-}
+/**
+ * A function that determines the backoff delay for a job.
+ * @param attemptsMade The number of attempts already made for the job.
+ * @param error The error that caused the last failure.
+ * @returns The delay in milliseconds, or -1 to indicate no further retries.
+ */
+export type JobBackoffStrategyFn = (attemptsMade: number, error: Error) => number;
 
-// This interface mirrors the JobOptions defined in the API design document (Section 4.1)
-// It's used for constructing the JobOptionsVO.
+/**
+ * Options for removing a job automatically after completion or failure.
+ * `age` is the maximum age in seconds for jobs to keep.
+ * `count` is the maximum number of jobs to keep. (0 means keep all, -1 means keep none of the specified type)
+ * If both age and count are specified, the criteria that is met first will trigger the removal.
+ */
+export interface IJobRemovalOptions {
+  age?: number; // Maximum age in seconds for jobs to keep.
+  count?: number; // Maximum number of jobs to keep. 0 means keep all (of this type), -1 means keep none.
+}
 export interface IJobOptions {
-  jobId?: string; // Custom Job ID
-  priority?: number;
-  delay?: number; // Initial delay in milliseconds
-  attempts?: number; // Max attempts (shortcut, preferred to use retryStrategy.maxAttempts)
-  retryStrategy?: RetryStrategyOptions; // More detailed retry config
-  lifo?: boolean; // Process LIFO instead of FIFO
-  removeOnComplete?: boolean | number; // True to remove, or number of jobs to keep
-  removeOnFail?: boolean | number;    // True to remove, or number of jobs to keep
-  repeat?: RepeatOptions;
-  dependsOnJobIds?: string[]; // Array of Job IDs
-  parentId?: string;
-  timeout?: number; // Max processing time in ms for a single attempt by a worker
+  priority?: number; // Lower numbers have higher priority
+  delay?: number; // Delay in milliseconds before the job can be processed
+  attempts?: number; // Total number of attempts to try the job until it completes
+  backoff?: IJobBackoffOptions | JobBackoffStrategyFn; // Backoff strategy for retries
+  removeOnComplete?: boolean | IJobRemovalOptions; // If true, remove job when successfully completed. If object, specifies retention rules.
+  removeOnFail?: boolean | IJobRemovalOptions; // If true, remove job when it fails after all attempts. If object, specifies retention rules.
+  jobId?: string; // Optional custom job ID
+  // TODO: Add `dependsOn?: string[] | { jobId: string; status: 'completed' | 'failed' }[]` in the future if needed
+  // TODO: Add `repeat?: IRepeatOptions` in the future if needed (align with BullMQ's new Job Schedulers)
 }
 
-// The actual Value Object
-export class JobOptionsVO extends AbstractValueObject<Readonly<IJobOptions>> {
-  private constructor(props: Readonly<IJobOptions>) {
-    super(props);
+export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
+  private constructor(props: IJobOptions) {
+    super(JobOptionsVO.sanitize(props));
   }
 
   public static create(options?: IJobOptions): JobOptionsVO {
     const defaults: IJobOptions = {
-      priority: JobPriorityVO.default().value,
+      priority: 0,
       delay: 0,
       attempts: 1,
-      retryStrategy: { maxAttempts: 1, backoff: false },
-      lifo: false,
-      removeOnComplete: false, // Default: keep completed jobs
-      removeOnFail: false,     // Default: keep failed jobs
-      timeout: 0, // 0 means no timeout
+      removeOnComplete: true, // Default to remove on complete
+      removeOnFail: false,    // Default to keep on fail for inspection
     };
-
-    const mergedOptions = { ...defaults, ...options };
-
-    // Validate specific options
-    if (mergedOptions.jobId && !JobIdVO.isValidUUID(mergedOptions.jobId)) {
-      throw new ValueError('Custom JobId in options is not a valid UUID.');
-    }
-    if (mergedOptions.priority) { // Validate if provided
-      JobPriorityVO.create(mergedOptions.priority); // Will throw ValueError if invalid
-    }
-    if (mergedOptions.delay && mergedOptions.delay < 0) {
-      throw new ValueError('JobOptions delay cannot be negative.');
-    }
-    if (mergedOptions.attempts && mergedOptions.attempts < 1) {
-      throw new ValueError('JobOptions attempts must be at least 1.');
-    }
-    if (mergedOptions.retryStrategy) {
-      if (mergedOptions.retryStrategy.maxAttempts < 1) {
-        throw new ValueError('JobOptions retryStrategy.maxAttempts must be at least 1.');
-      }
-      if (mergedOptions.retryStrategy.backoff && mergedOptions.retryStrategy.backoff.delayMs < 0) {
-        throw new ValueError('JobOptions retryStrategy.backoff.delayMs cannot be negative.');
-      }
-    }
-    if (mergedOptions.timeout && mergedOptions.timeout < 0) {
-      throw new ValueError('JobOptions timeout cannot be negative.');
-    }
-    if (mergedOptions.dependsOnJobIds) {
-      mergedOptions.dependsOnJobIds.forEach(id => {
-        if (!JobIdVO.isValidUUID(id)) {
-          throw new ValueError(`Invalid JobId in dependsOnJobIds: ${id}`);
-        }
-      });
-    }
-    if (mergedOptions.parentId && !JobIdVO.isValidUUID(mergedOptions.parentId)) {
-      throw new ValueError('Invalid JobId for parentId.');
-    }
-    // Further validation for repeat options (cron syntax, etc.) could be added here or in RepeatOptionsVO if created.
-
-    // If 'attempts' is provided directly, ensure it aligns with retryStrategy or sets a default one.
-    if (options?.attempts && !options?.retryStrategy) {
-      mergedOptions.retryStrategy = { maxAttempts: options.attempts, backoff: false };
-    } else if (options?.attempts && options?.retryStrategy && options.attempts !== options.retryStrategy.maxAttempts) {
-      // If both are provided, retryStrategy.maxAttempts takes precedence, or we could throw an error for inconsistency.
-      // For now, let's assume options.attempts is a shorthand for retryStrategy.maxAttempts if retryStrategy.backoff is not defined.
-      // If retryStrategy is fully defined, its maxAttempts should be used.
-       mergedOptions.retryStrategy = { ...mergedOptions.retryStrategy, maxAttempts: options.attempts };
-    }
-
-
-    return new JobOptionsVO(Object.freeze(mergedOptions));
+    return new JobOptionsVO({ ...defaults, ...(options || {}) });
   }
 
-  public static default(): JobOptionsVO {
-    return JobOptionsVO.create({});
+  private static sanitize(props: IJobOptions): IJobOptions {
+    const sanitized: IJobOptions = { ...props };
+
+    sanitized.priority = Math.max(0, props.priority || 0);
+    sanitized.delay = Math.max(0, props.delay || 0);
+    sanitized.attempts = Math.max(1, props.attempts || 1); // At least 1 attempt
+
+    if (props.backoff && typeof props.backoff === 'object') {
+      if (props.backoff.delay <= 0) {
+        throw new DomainError('Backoff delay must be greater than 0.');
+      }
+      if (props.backoff.jitter && (props.backoff.jitter < 0 || props.backoff.jitter > 1)) {
+        throw new DomainError('Backoff jitter must be between 0 and 1.');
+      }
+    }
+
+    // Sanitize removeOnComplete
+    if (typeof props.removeOnComplete === 'object') {
+      if (props.removeOnComplete.age !== undefined && props.removeOnComplete.age < 0) {
+        throw new DomainError('removeOnComplete.age cannot be negative.');
+      }
+      if (props.removeOnComplete.count !== undefined && props.removeOnComplete.count < -1) {
+        throw new DomainError('removeOnComplete.count cannot be less than -1.');
+      }
+    } else if (typeof props.removeOnComplete !== 'boolean' && props.removeOnComplete !== undefined) {
+      throw new DomainError('removeOnComplete must be a boolean or an IJobRemovalOptions object.');
+    }
+
+    // Sanitize removeOnFail
+    if (typeof props.removeOnFail === 'object') {
+      if (props.removeOnFail.age !== undefined && props.removeOnFail.age < 0) {
+        throw new DomainError('removeOnFail.age cannot be negative.');
+      }
+      if (props.removeOnFail.count !== undefined && props.removeOnFail.count < -1) {
+        throw new DomainError('removeOnFail.count cannot be less than -1.');
+      }
+    } else if (typeof props.removeOnFail !== 'boolean' && props.removeOnFail !== undefined) {
+      throw new DomainError('removeOnFail must be a boolean or an IJobRemovalOptions object.');
+    }
+
+    return sanitized;
   }
 
-  // Accessors for convenience, though direct access to props.value is also possible
-  get jobId(): string | undefined { return this.props.jobId; }
-  get priority(): number { return this.props.priority!; } // Non-null assertion due to default
+  get priority(): number { return this.props.priority!; }
   get delay(): number { return this.props.delay!; }
-  get attempts(): number {
-    return this.props.retryStrategy?.maxAttempts || this.props.attempts || 1;
-  }
-  get retryStrategy(): RetryStrategyOptions | undefined { return this.props.retryStrategy; }
-  get lifo(): boolean { return this.props.lifo!; }
-  get removeOnComplete(): boolean | number { return this.props.removeOnComplete!; }
-  get removeOnFail(): boolean | number { return this.props.removeOnFail!; }
-  get repeat(): RepeatOptions | undefined { return this.props.repeat; }
-  get dependsOnJobIds(): string[] | undefined { return this.props.dependsOnJobIds; }
-  get parentId(): string | undefined { return this.props.parentId; }
-  get timeout(): number { return this.props.timeout!; }
+  get attempts(): number { return this.props.attempts!; }
+  get backoff(): IJobBackoffOptions | JobBackoffStrategyFn | undefined { return this.props.backoff; }
+  get removeOnComplete(): boolean | IJobRemovalOptions { return this.props.removeOnComplete!; }
+  get removeOnFail(): boolean | IJobRemovalOptions { return this.props.removeOnFail!; }
+  get jobId(): string | undefined { return this.props.jobId; }
 
-  // equals method from AbstractValueObject will do a deep comparison of props
+  public toPersistence(): IJobOptions {
+    // For a custom backoff function, we might need to store its name or a reference
+    // if it's not directly serializable. For now, assume it's handled or not persisted if function.
+    // For simplicity, this example directly returns props, but in a real scenario,
+    // you might transform function references or other non-serializable parts.
+    const persistenceProps = { ...this.props };
+    if (typeof persistenceProps.backoff === 'function') {
+        // Decide how to handle function persistence.
+        // Option 1: Store a well-known name of the strategy
+        // Option 2: Do not persist the function itself (rely on code for custom strategies)
+        // For now, let's remove it if it's a function to avoid serialization issues with simple JSON.
+        // The application layer would need to reconstruct it if 'custom' type is indicated.
+        // Or, better, the IJobBackoffOptions would have a 'type: "custom"' and a 'name?: string'
+        // This VO is more about runtime validation and defaults.
+        // Let's assume for now the 'backoff' field in the DB will store the IJobBackoffOptions object
+        // and custom functions are applied at runtime by the worker based on some other config or job name.
+        // So, if it's a function, it won't be directly part of the serialized options in this simple model.
+        // A more advanced system would handle this more gracefully.
+        // For this iteration, we'll allow the object form to be persisted.
+    }
+    return persistenceProps;
+  }
 }

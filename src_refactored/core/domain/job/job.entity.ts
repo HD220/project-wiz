@@ -1,234 +1,285 @@
 // src_refactored/core/domain/job/job.entity.ts
-import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
+import { AbstractEntity } from '@/core/common/base.entity';
+import { DomainError } from '@/core/domain/common/errors';
 
-import { DomainError, ValueError } from '@/domain/common/errors';
-
-import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';
-import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
-import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './value-objects/job-options.vo';
-import { JobPriorityVO } from './value-objects/job-priority.vo';
-import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
-import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
+import { IJobOptions, JobOptionsVO } from './value-objects/job-options.vo';
 
-
-// Interface for properties required to construct a JobEntity
-export interface JobEntityConstructionProps<TData = any> {
-  id?: string | JobIdVO; // Optional: if not provided, one will be generated
-  queueName: string;
-  jobName: string; // Name/type of the job
-  payload: TData;
-  opts?: IJobOptions; // Uses the interface for flexibility in creation
+export enum JobStatus {
+  WAITING = 'waiting',   // Job is waiting in the queue to be processed
+  ACTIVE = 'active',     // Job is currently being processed by a worker
+  COMPLETED = 'completed', // Job has been processed successfully
+  FAILED = 'failed',     // Job has failed after all attempts
+  DELAYED = 'delayed',   // Job is scheduled to be processed at a later time
+  PAUSED = 'paused',     // Queue is paused, job will not be processed until resumed
+  // TODO: Consider STALLED if we implement active lock expiration checks.
 }
 
-// Interface for the internal state of JobEntity
-// All complex types are VOs. Timestamps are stored as numbers (epoch ms) for DB compatibility
-// but can be wrapped by Date or a TimestampVO on access if needed by domain logic.
-export interface JobEntityProps<TData = any, TResult = any> extends EntityProps<JobIdVO> {
+export interface JobLogEntry {
+  message: string;
+  level: string; // e.g., INFO, ERROR, DEBUG
+  timestamp: Date;
+}
+
+export interface JobEntityProps<P = unknown, R = unknown> {
+  id: JobIdVO;
   queueName: string;
-  jobName: string;
-  payload: Readonly<TData>;
-  opts: JobOptionsVO;
-
-  status: JobStatusVO;
-  priority: JobPriorityVO; // Derived from opts, but stored for direct access/querying
-
-  progress: JobProgressVO;
-  returnValue?: Readonly<TResult>;
-  failedReason?: string; // Primary error message for failure
-
+  name: string; // Name of the job (e.g., 'sendWelcomeEmail')
+  payload: P;
+  options: JobOptionsVO;
+  status: JobStatus;
   attemptsMade: number;
-  // maxAttempts is part of opts.retryStrategy
-
-  createdAt: number; // Store as epoch milliseconds
-  updatedAt: number; // Store as epoch milliseconds
-  processAt?: number; // For DELAYED jobs: when it should be processed (epoch ms)
-  startedAt?: number; // Timestamp when processing started (epoch ms)
-  finishedAt?: number; // Timestamp when job completed or finally failed (epoch ms)
-
-  executionLogs: JobExecutionLogsVO;
-
-  // Worker locking mechanism
-  lockedByWorkerId?: string;
-  lockExpiresAt?: number; // Epoch ms
-
-  // For repeatable jobs (key derived from repeat options)
-  repeatJobKey?: string;
+  progress: number | object; // Can be a percentage (0-100) or an object
+  logs: JobLogEntry[];
+  createdAt: Date;
+  updatedAt: Date; // Timestamp of the last update to the job
+  processedOn?: Date; // Timestamp when processing started for the last attempt
+  finishedOn?: Date; // Timestamp when the job finally completed or failed
+  delayUntil?: Date; // If status is DELAYED, this is when it should become WAITING
+  lockUntil?: Date; // If status is ACTIVE, worker holds a lock until this time
+  workerId?: string; // ID of the worker currently processing/locking the job
+  returnValue?: R; // Result of a successfully completed job
+  failedReason?: string; // Error message if the job failed
+  stacktrace?: string[]; // Stacktrace if the job failed
+  // parentId?: JobIdVO; // For job dependencies/flows - future
 }
 
-export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
-  private constructor(props: JobEntityProps<TData, TResult>) {
+export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO, JobEntityProps<P, R>> {
+  private _progressChanged: boolean = false;
+  private _logsChanged: boolean = false;
+
+  private constructor(props: JobEntityProps<P, R>) {
     super(props);
   }
 
-  public static create<D = any, R = any>(
-    constructProps: JobEntityConstructionProps<D>,
-  ): JobEntity<D, R> {
-    if (!constructProps.queueName || constructProps.queueName.trim() === '') {
-      throw new ValueError('Job creation requires a queueName.');
-    }
-    if (!constructProps.jobName || constructProps.jobName.trim() === '') {
-      throw new ValueError('Job creation requires a jobName.');
-    }
-    if (constructProps.payload === undefined) {
-      throw new ValueError('Job creation requires a payload.');
-    }
+  public static create<P, R>(
+    params: {
+      id?: JobIdVO;
+      queueName: string;
+      name: string;
+      payload: P;
+      options?: IJobOptions; // Accepts raw options, will be converted to VO
+    },
+  ): JobEntity<P, R> {
+    const jobId = params.id || JobIdVO.create();
+    const jobOptions = JobOptionsVO.create(params.options);
+    const now = new Date();
 
-    const id = constructProps.id instanceof JobIdVO ? constructProps.id : JobIdVO.create(constructProps.id);
-    const jobOptions = JobOptionsVO.create(constructProps.opts);
-    const nowMs = Date.now();
-
-    let initialStatus = JobStatusVO.pending();
-    let processAt: number | undefined = undefined;
-    if (jobOptions.delay > 0) {
-      initialStatus = JobStatusVO.delayed();
-      processAt = nowMs + jobOptions.delay;
-    }
-
-    const props: JobEntityProps<D, R> = {
-      id,
-      queueName: constructProps.queueName,
-      jobName: constructProps.jobName,
-      payload: Object.freeze(constructProps.payload) as Readonly<D>, // Ensure payload is immutable
-      opts: jobOptions,
-      status: initialStatus,
-      priority: JobPriorityVO.create(jobOptions.priority),
-      progress: JobProgressVO.initial(),
+    const props: JobEntityProps<P, R> = {
+      id: jobId,
+      queueName: params.queueName,
+      name: params.name,
+      payload: params.payload,
+      options: jobOptions,
+      status: jobOptions.delay && jobOptions.delay > 0 ? JobStatus.DELAYED : JobStatus.WAITING,
       attemptsMade: 0,
-      createdAt: nowMs,
-      updatedAt: nowMs,
-      processAt: processAt,
-      executionLogs: JobExecutionLogsVO.empty(),
+      progress: 0,
+      logs: [],
+      createdAt: now,
+      updatedAt: now,
+      delayUntil: jobOptions.delay && jobOptions.delay > 0 ? new Date(now.getTime() + jobOptions.delay) : undefined,
     };
-
-    return new JobEntity<D, R>(props);
+    return new JobEntity<P, R>(props);
   }
 
-  // --- Accessors ---
+  public static fromPersistence<P, R>(
+    persistedData: JobEntityProps<P, R> & { options: IJobOptions } // Raw options from DB
+  ): JobEntity<P, R> {
+    // Ensure options is a VO when rehydrating
+    const optionsVO = JobOptionsVO.create(persistedData.options);
+    const propsWithVOOptions: JobEntityProps<P, R> = {
+        ...persistedData,
+        id: JobIdVO.create(persistedData.id as any), // Re-create JobIdVO from string
+        options: optionsVO,
+        // Ensure dates are Date objects if they are stored as numbers/strings
+        createdAt: new Date(persistedData.createdAt),
+        updatedAt: new Date(persistedData.updatedAt),
+        processedOn: persistedData.processedOn ? new Date(persistedData.processedOn) : undefined,
+        finishedOn: persistedData.finishedOn ? new Date(persistedData.finishedOn) : undefined,
+        delayUntil: persistedData.delayUntil ? new Date(persistedData.delayUntil) : undefined,
+        lockUntil: persistedData.lockUntil ? new Date(persistedData.lockUntil) : undefined,
+        logs: persistedData.logs ? persistedData.logs.map(log => ({...log, timestamp: new Date(log.timestamp)})) : [],
+    };
+    return new JobEntity<P, R>(propsWithVOOptions);
+  }
+
+  get id(): JobIdVO { return this.props.id; }
   get queueName(): string { return this.props.queueName; }
-  get jobName(): string { return this.props.jobName; }
-  get payload(): Readonly<TData> { return this.props.payload; }
-  get opts(): JobOptionsVO { return this.props.opts; }
-  get status(): JobStatusVO { return this.props.status; }
-  get priority(): JobPriorityVO { return this.props.priority; }
-  get progress(): JobProgressVO { return this.props.progress; }
-  get returnValue(): Readonly<TResult> | undefined { return this.props.returnValue; }
-  get failedReason(): string | undefined { return this.props.failedReason; }
+  get name(): string { return this.props.name; }
+  get payload(): P { return this.props.payload; }
+  get options(): JobOptionsVO { return this.props.options; }
+  get status(): JobStatus { return this.props.status; }
   get attemptsMade(): number { return this.props.attemptsMade; }
-  get maxAttempts(): number { return this.opts.attempts; } // From JobOptionsVO
+  get maxAttempts(): number { return this.props.options.attempts; }
+  get progress(): number | object { return this.props.progress; }
+  get logs(): ReadonlyArray<JobLogEntry> { return this.props.logs; }
+  get createdAt(): Date { return this.props.createdAt; }
+  get updatedAt(): Date { return this.props.updatedAt; }
+  get processedOn(): Date | undefined { return this.props.processedOn; }
+  get finishedOn(): Date | undefined { return this.props.finishedOn; }
+  get delayUntil(): Date | undefined { return this.props.delayUntil; }
+  get lockUntil(): Date | undefined { return this.props.lockUntil; }
+  get workerId(): string | undefined { return this.props.workerId; }
+  get returnValue(): R | undefined { return this.props.returnValue; }
+  get failedReason(): string | undefined { return this.props.failedReason; }
+  get stacktrace(): string[] | undefined { return this.props.stacktrace; }
 
-  get createdAt(): Date { return new Date(this.props.createdAt); }
-  get updatedAt(): Date { return new Date(this.props.updatedAt); }
-  get processAt(): Date | undefined { return this.props.processAt ? new Date(this.props.processAt) : undefined; }
-  get startedAt(): Date | undefined { return this.props.startedAt ? new Date(this.props.startedAt) : undefined; }
-  get finishedAt(): Date | undefined { return this.props.finishedAt ? new Date(this.props.finishedAt) : undefined; }
+  get progressChanged(): boolean { return this._progressChanged; }
+  get logsChanged(): boolean { return this._logsChanged; }
 
-  get executionLogs(): JobExecutionLogsVO { return this.props.executionLogs; }
-  get lockedByWorkerId(): string | undefined { return this.props.lockedByWorkerId; }
-  get lockExpiresAt(): Date | undefined { return this.props.lockExpiresAt ? new Date(this.props.lockExpiresAt) : undefined; }
-  get repeatJobKey(): string | undefined { return this.props.repeatJobKey; }
-
-
-  // --- Mutators (internal state changes, persistence handled by repository) ---
-
-  private touch(): void {
-    this.props.updatedAt = Date.now();
-  }
-
-  public setProgress(progressData: JobProgressData): void {
-    this.props.progress = JobProgressVO.create(progressData);
-    this.touch();
-    // Event 'job.progress' should be emitted by the service calling this, after saving.
-  }
-
-  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, any>): void {
-    this.props.executionLogs = this.props.executionLogs.addLog(message, level, details);
-    this.touch();
-    // Event 'job.log_added' should be emitted by the service calling this, after saving.
-  }
-
-  // --- State Transition Methods ---
-  // These methods only update the in-memory state of the entity.
-  // The repository is responsible for persisting these changes atomically.
-
-  public moveToActive(workerId: string, lockDurationMs: number): boolean {
-    if (!this.status.is(JobStatusEnum.PENDING) && !this.status.is(JobStatusEnum.DELAYED)) {
-      // DELAYED jobs should be promoted to PENDING by scheduler first
-      console.warn(`Job ${this.id.value} cannot be moved to ACTIVE from status ${this.status.value}`);
-      return false;
+  public updateProgress(progress: number | object): void {
+    if (this.status === JobStatus.COMPLETED || this.status === JobStatus.FAILED) {
+      // Maybe log a warning: Cannot update progress of a finalized job
+      return;
     }
-    this.props.status = JobStatusVO.active();
+    this.props.progress = progress;
+    this.props.updatedAt = new Date();
+    this._progressChanged = true;
+  }
+
+  public addLog(message: string, level: string = 'INFO'): void {
+     if (this.status === JobStatus.COMPLETED || this.status === JobStatus.FAILED) {
+      // Maybe log a warning: Cannot add logs to a finalized job
+      // return; // Or allow adding logs even after completion/failure for audit? For now, let's allow.
+    }
+    this.props.logs.push({ message, level, timestamp: new Date() });
+    this.props.updatedAt = new Date();
+    this._logsChanged = true;
+  }
+
+  public clearChangeFlags(): void {
+    this._progressChanged = false;
+    this._logsChanged = false;
+  }
+
+  // --- Methods to be called by QueueService/WorkerService to manage lifecycle ---
+
+  public moveToActive(workerId: string, lockUntil: Date): void {
+    if (this.status !== JobStatus.WAITING && this.status !== JobStatus.PAUSED && this.status !== JobStatus.DELAYED) {
+      // DELAYED jobs become WAITING first, then ACTIVE. This check might be redundant if StalledJobManager handles it.
+      // Or if fetchNextJob in QueueService correctly filters only WAITING.
+      throw new DomainError(`Job ${this.id.value} cannot be moved to active from status ${this.status}`);
+    }
+    this.props.status = JobStatus.ACTIVE;
+    this.props.workerId = workerId;
+    this.props.lockUntil = lockUntil;
+    this.props.processedOn = new Date(); // Mark start of this processing attempt
+    this.props.updatedAt = new Date();
     this.props.attemptsMade += 1;
-    this.props.startedAt = Date.now();
-    this.props.lockedByWorkerId = workerId;
-    this.props.lockExpiresAt = Date.now() + lockDurationMs;
-    this.touch();
-    return true;
   }
 
-  public renewLock(newLockExpiresAtMs: number, workerId: string): boolean {
-    if (!this.status.is(JobStatusEnum.ACTIVE) || this.props.lockedByWorkerId !== workerId) {
-      console.warn(`Job ${this.id.value} lock cannot be renewed. Status: ${this.status.value}, LockedBy: ${this.props.lockedByWorkerId}`);
-      return false;
+  public extendLock(newLockUntil: Date, workerId: string): void {
+    if (this.props.status !== JobStatus.ACTIVE || this.props.workerId !== workerId) {
+      throw new DomainError(`Cannot extend lock for job ${this.id.value}: not active by worker ${workerId}.`);
     }
-    this.props.lockExpiresAt = newLockExpiresAtMs;
-    this.touch();
-    return true;
+    this.props.lockUntil = newLockUntil;
+    this.props.updatedAt = new Date();
   }
 
-  public moveToCompleted(resultValue: TResult): boolean {
-    if (!this.status.is(JobStatusEnum.ACTIVE)) {
-      // Potentially log warning if trying to complete a non-active job
-      return false;
+  public markAsCompleted(returnValue: R): void {
+    if (this.props.status !== JobStatus.ACTIVE) {
+      // This might happen if a job is marked as stalled and then the original worker tries to complete it.
+      // Or if it's already completed/failed.
+      // Log a warning, or decide on a stricter policy.
+      console.warn(`Job ${this.id.value} attempted to complete but was not in ACTIVE state (current: ${this.props.status}).`);
+      // For now, we'll allow it to proceed to ensure the final state is captured if possible,
+      // but the repository should handle potential race conditions if status changed.
     }
-    this.props.status = JobStatusVO.completed();
-    this.props.returnValue = Object.freeze(resultValue) as Readonly<TResult>;
-    this.props.finishedAt = Date.now();
-    this.props.progress = JobProgressVO.create(100); // Mark as 100% on completion
-    this.clearLock();
-    this.touch();
-    return true;
+    this.props.status = JobStatus.COMPLETED;
+    this.props.returnValue = returnValue;
+    this.props.finishedOn = new Date();
+    this.props.updatedAt = this.props.finishedOn;
+    this.props.failedReason = undefined;
+    this.props.stacktrace = undefined;
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined;
   }
 
-  private clearLock(): void {
-    this.props.lockedByWorkerId = undefined;
-    this.props.lockExpiresAt = undefined;
-  }
-
-  public moveToFailed(reason: string): boolean {
-     if (this.status.isTerminal()) return false; // Already completed or failed
-
-    this.props.status = JobStatusVO.failed();
+  public markAsFailed(reason: string, stacktrace?: string[]): void {
+     if (this.props.status !== JobStatus.ACTIVE) {
+      console.warn(`Job ${this.id.value} attempted to fail but was not in ACTIVE state (current: ${this.props.status}).`);
+    }
+    this.props.status = JobStatus.FAILED;
     this.props.failedReason = reason;
-    this.props.finishedAt = Date.now();
-    this.clearLock();
-    this.touch();
-    return true;
+    this.props.stacktrace = stacktrace;
+    this.props.finishedOn = new Date();
+    this.props.updatedAt = this.props.finishedOn;
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined;
   }
 
-  public moveToDelayed(newProcessAtMs: number): boolean {
-    if (this.status.isTerminal()) return false;
-
-    this.props.status = JobStatusVO.delayed();
-    this.props.processAt = newProcessAtMs;
-    this.clearLock(); // If it was active and is being re-delayed for retry
-    this.touch();
-    return true;
-  }
-
-  public promoteToPending(): boolean {
-    if (!this.status.is(JobStatusEnum.DELAYED) && !this.status.is(JobStatusEnum.WAITING_CHILDREN)) {
-      // Only DELAYED or WAITING_CHILDREN jobs can be directly promoted to PENDING by scheduler
-      return false;
+  public moveToDelayed(delayUntil: Date, originalError?: Error): void {
+    // This is typically called after a failed attempt if retries are remaining
+    this.props.status = JobStatus.DELAYED;
+    this.props.delayUntil = delayUntil;
+    this.props.updatedAt = new Date();
+    this.props.processedOn = undefined; // Reset for the next attempt
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined;
+    if (originalError) {
+        this.props.failedReason = originalError.message; // Keep last error reason for the delay
+        // Do not clear stacktrace yet, it might be useful for the final failure
     }
-    this.props.status = JobStatusVO.pending();
-    this.props.processAt = undefined; // Clear processAt if it was delayed
-    this.touch();
-    return true;
   }
 
-  public isProcessable(currentTimeMs: number = Date.now()): boolean {
-    return this.status.is(JobStatusEnum.PENDING) &&
-           (!this.props.processAt || this.props.processAt <= currentTimeMs);
+  public moveToWaiting(): void {
+    // Called when a delayed job is ready or a stalled job is re-queued
+    if (this.status !== JobStatus.DELAYED && this.status !== JobStatus.PAUSED /* && this.status !== JobStatus.STALLED - if we add it */) {
+        // Potentially log a warning if moving from an unexpected state
+    }
+    this.props.status = JobStatus.WAITING;
+    this.props.delayUntil = undefined;
+    this.props.processedOn = undefined;
+    this.props.updatedAt = new Date();
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined;
+  }
+
+  public markAsStalled(_maxAttemptsForStalled?: number): boolean { // Returns true if it should be failed permanently
+    // _maxAttemptsForStalled might be used by the caller (StalledJobsManager) to decide the next step,
+    // but the entity itself primarily records the event.
+    this.addLog(`Job marked as stalled (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`, 'WARN');
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined; // Release the worker
+    this.props.processedOn = undefined; // Reset for next attempt
+    this.props.updatedAt = new Date();
+
+    if (this.props.attemptsMade >= this.maxAttempts) {
+        this.props.status = JobStatus.FAILED;
+        this.props.failedReason = this.props.failedReason || 'Job failed after becoming stalled and exceeding max attempts.';
+        this.props.finishedOn = new Date();
+        return true; // Should be marked as FAILED
+    }
+    // If not, it will be moved to WAITING or DELAYED by the StalledJobsManager
+    // For now, the StalledJobsManager will decide the next state (WAITING or DELAYED if backoff applies)
+    return false;
+  }
+
+  public pause(): void {
+    if (this.status === JobStatus.WAITING || this.status === JobStatus.DELAYED) {
+      this.props.status = JobStatus.PAUSED;
+      this.props.updatedAt = new Date();
+    } else {
+      throw new DomainError(`Cannot pause job ${this.id.value} in status ${this.status}.`);
+    }
+  }
+
+  public resume(): void {
+    if (this.props.status === JobStatus.PAUSED) {
+      this.props.status = this.props.delayUntil && this.props.delayUntil > new Date() ? JobStatus.DELAYED : JobStatus.WAITING;
+      this.props.updatedAt = new Date();
+    } else {
+      throw new DomainError(`Cannot resume job ${this.id.value} in status ${this.status}.`);
+    }
+  }
+
+    public toPersistence(): Omit<JobEntityProps<P, R>, 'id' | 'options'> & { id: string, options: IJobOptions } {
+    // Convert VOs back to plain objects for persistence if necessary
+    // For JobOptionsVO, we defined toPersistence() on it.
+    return {
+      ...this.props,
+      id: this.props.id.value,
+      options: this.props.options.toPersistence(),
+    };
   }
 }

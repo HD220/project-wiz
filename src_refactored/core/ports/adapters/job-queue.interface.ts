@@ -1,5 +1,5 @@
 // src_refactored/core/ports/adapters/job-queue.interface.ts
-import { QueueError } from '@/core/common/errors';
+import { QueueError } from '@/domain/common/errors'; // Corrected alias path
 
 import { Result } from '../../../shared/result';
 import { Job } from '../../domain/job/job.entity';
@@ -42,7 +42,7 @@ export interface IJobQueue {
    * @param resultData Optional data representing the outcome or result of the job.
    * @returns A Result indicating success (void) or a QueueError.
    */
-  complete(jobId: JobId, resultData?: any): Promise<Result<void, QueueError>>;
+  complete(jobId: JobId, resultData?: unknown): Promise<Result<void, QueueError>>; // Changed any to unknown
 
   /**
    * Marks a job as failed.

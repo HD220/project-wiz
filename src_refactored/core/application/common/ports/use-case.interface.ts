@@ -14,6 +14,7 @@ import { Executable } from '../executable';
  * @template TResponse The type of the successful output from the use case.
  * @template TError The type of the error output from the use case. Defaults to DomainError or ApplicationError.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IUseCase<
   TRequest,
   TResponse,

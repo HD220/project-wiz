@@ -85,11 +85,24 @@ export default [
         { "selector": "function", "format": ["camelCase", "PascalCase"] },
         { "selector": "parameter", "format": ["camelCase"], "leadingUnderscore": "allow" },
         { "selector": "typeLike", "format": ["PascalCase"] },
-        { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] }
+        { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] },
+        // Added rule for objectLiteralProperty
+        {
+          "selector": "objectLiteralProperty",
+          "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"],
+          "leadingUnderscore": "allow",
+          "trailingUnderscore": "allow"
+        },
+        // Added rule for static readonly class properties
+        {
+          "selector": "classProperty",
+          "modifiers": ["static", "readonly"],
+          "format": ["UPPER_CASE", "camelCase", "PascalCase"]
+        }
       ],
       "max-depth": ["warn", { "max": 4 }],
       "no-else-return": "warn",
-      "id-length": ["warn", { "min": 2 }],
+      "id-length": ["warn", { "min": 2, "exceptions": ["_"] }], // Added "_" to exceptions
       "max-lines-per-function": ["warn", { "max": 100, "skipBlankLines": true, "skipComments": true }], // Default increased
       "max-statements": ["warn", { "max": 25 }], // Default increased
       "max-lines": ["warn", { "max": 500, "skipBlankLines": true, "skipComments": true }], // Default increased
@@ -148,33 +161,16 @@ export default [
       // For now, we rely on the fact that these rules are off in the dedicated test block below.
     },
     settings: {
-      "import/resolver": [ // Changed to an array format
-        {
-          alias: {
-            map: [
-              // General @ fallback.
-              ["@", "./src_refactored"],
-              // Core aliases. These use @/ in tsconfig.json and in the code.
-              ["@/application", "./src_refactored/core/application"],
-              ["@/core", "./src_refactored/core"],
-              ["@/domain", "./src_refactored/core/domain"],
-              ["@/infrastructure", "./src_refactored/infrastructure"],
-              ["@/presentation", "./src_refactored/presentation"],
-              ["@/shared", "./src_refactored/shared"],
-              // UI Aliases are handled by eslint-import-resolver-typescript using tsconfig.json paths,
-              // which expect imports like '@ui/components/...'.
-              // Thus, manual aliases for '@ui/components' or conflicting '@components' are removed here.
-            ],
-            extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
-          }
-        },
-        {
-          typescript: {
-            alwaysTryTypes: true, // Important for TypeScript path resolution
-            project: "./tsconfig.json",
-          }
+      "import/resolver": { // Keep as an object, typescript resolver first or only
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
         }
-      ],
+        // The explicit 'alias' block can be removed if tsconfig.json handles all aliases robustly.
+        // For safety during this transition, we can keep a minimal alias block if needed,
+        // or remove it and rely purely on the typescript resolver.
+        // Let's try removing it to enforce tsconfig as the single source of truth.
+      },
       "boundaries/elements": [
         { type: "domain", pattern: "src_refactored/core/domain" },
         { type: "application", pattern: "src_refactored/core/application" },
