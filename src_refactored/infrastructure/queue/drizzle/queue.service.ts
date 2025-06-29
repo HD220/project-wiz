@@ -1,80 +1,87 @@
 // src_refactored/infrastructure/queue/drizzle/queue.service.ts
+// src_refactored/infrastructure/queue/drizzle/queue.service.ts
 import { injectable, inject } from 'inversify';
 
 import { IJobRepository, JOB_REPOSITORY_TOKEN } from '@/core/application/ports/job-repository.interface';
-import { AbstractQueue } from '@/core/application/queue/abstract-queue';
-import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
-import { calculateBackoff } from '@/core/domain/job/utils/calculate-backoff'; // Assuming this utility exists
+import { AbstractQueue, QueueEvents } from '@/core/application/queue/abstract-queue';
+import { JobEntity, JobStatus, JobLogEntry } from '@/core/domain/job/job.entity';
+import { calculateBackoff } from '@/core/domain/job/utils/calculate-backoff';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 import { IJobOptions, JobOptionsVO } from '@/core/domain/job/value-objects/job-options.vo';
+import { DomainError } from '@/core/domain/common/errors';
 
 const DEFAULT_STALLED_CHECK_INTERVAL_MS = 15 * 1000; // 15 seconds
 const DEFAULT_STALLED_JOB_OLDER_THAN_MS = 30 * 1000; // 30 seconds, should be > typical lockDuration
-const DEFAULT_LOCK_DURATION_MS = 30 * 1000; // Default lock duration for jobs fetched by this queue service
-                                           // This might be overridden by worker options.
+const DEFAULT_LOCK_DURATION_MS = 30 * 1000;
 
-export interface QueueServiceOptions {
+export interface DrizzleQueueServiceOptions {
   defaultJobOptions?: IJobOptions;
   stalledJobs?: {
     checkIntervalMs?: number;
-    olderThanMs?: number; // How old a lock must be to be considered stalled
-    limitPerCheck?: number; // Max stalled jobs to process per check
+    olderThanMs?: number;
+    limitPerCheck?: number;
   };
 }
 
 @injectable()
 export class DrizzleQueueService<P = unknown, R = unknown> extends AbstractQueue<P, R> {
-  private stalledJobsCheckInterval: ReturnType<typeof setTimeout> | null = null;
-  private readonly stalledCheckIntervalMs: number;
-  private readonly stalledOlderThanMs: number;
-  private readonly stalledLimitPerCheck: number;
-  private isPaused: boolean = false;
+  private stalledJobsCheckIntervalId: ReturnType<typeof setInterval> | null = null;
+  private readonly _stalledCheckIntervalMs: number;
+  private readonly _stalledOlderThanMs: number;
+  private readonly _stalledLimitPerCheck: number;
+  private _isPaused: boolean = false;
+  private _isClosed: boolean = false;
 
   constructor(
     queueName: string,
     @inject(JOB_REPOSITORY_TOKEN) jobRepository: IJobRepository,
-    options?: QueueServiceOptions,
+    options?: DrizzleQueueServiceOptions,
   ) {
     super(queueName, jobRepository, options?.defaultJobOptions);
-    this.stalledCheckIntervalMs = options?.stalledJobs?.checkIntervalMs ?? DEFAULT_STALLED_CHECK_INTERVAL_MS;
-    this.stalledOlderThanMs = options?.stalledJobs?.olderThanMs ?? DEFAULT_STALLED_JOB_OLDER_THAN_MS;
-    this.stalledLimitPerCheck = options?.stalledJobs?.limitPerCheck ?? 10;
+    this._stalledCheckIntervalMs = options?.stalledJobs?.checkIntervalMs ?? DEFAULT_STALLED_CHECK_INTERVAL_MS;
+    this._stalledOlderThanMs = options?.stalledJobs?.olderThanMs ?? DEFAULT_STALLED_JOB_OLDER_THAN_MS;
+    this._stalledLimitPerCheck = options?.stalledJobs?.limitPerCheck ?? 10;
   }
 
-  async add(jobName: string, data: P, opts?: IJobOptions): Promise<JobEntity<P, R>> {
+  // Type-safe emit
+  protected emit<K extends keyof QueueEvents<P, R>>(event: K, data: QueueEvents<P, R>[K]): boolean {
+    return super.emit(event, data);
+  }
+
+
+  async add(jobName: string, payload: P, opts?: IJobOptions): Promise<JobEntity<P, R>> {
+    if (this._isClosed) throw new DomainError('Queue is closed. Cannot add new jobs.');
     const mergedOptions = this.defaultJobOptions.merge(JobOptionsVO.create(opts));
-    const job = JobEntity.create<P, R>(
-      this.queueName,
-      jobName,
-      data,
-      mergedOptions,
-    );
+    const job = JobEntity.create<P, R>({
+      queueName: this.queueName,
+      name: jobName,
+      payload: payload,
+      options: mergedOptions.toPersistence(), // Pass raw options for JobEntity creation
+    });
     await this.jobRepository.save(job as JobEntity<unknown, unknown>);
-    this.emit('job.added', { jobId: job.id.value, name: job.name, queueName: this.queueName });
+    this.emit('job.added', { jobId: job.id.value, name: job.name, queueName: this.queueName, job });
     return job;
   }
 
-  async addBulk(jobs: Array<{ name: string; data: P; opts?: IJobOptions }>): Promise<Array<JobEntity<P, R>>> {
+  async addBulk(jobs: Array<{ name: string; payload: P; opts?: IJobOptions }>): Promise<Array<JobEntity<P, R>>> {
+    if (this._isClosed) throw new DomainError('Queue is closed. Cannot add new jobs.');
     const jobEntities: Array<JobEntity<P, R>> = [];
     for (const jobDef of jobs) {
       const mergedOptions = this.defaultJobOptions.merge(JobOptionsVO.create(jobDef.opts));
-      const job = JobEntity.create<P, R>(
-        this.queueName,
-        jobDef.name,
-        jobDef.data,
-        mergedOptions,
-      );
+      const job = JobEntity.create<P, R>({
+        queueName: this.queueName,
+        name: jobDef.name,
+        payload: jobDef.payload,
+        options: mergedOptions.toPersistence(),
+      });
       jobEntities.push(job);
-      // Not saving one by one here to potentially optimize for bulk insert if repo supports it.
-      // Current DrizzleJobRepository.save uses onConflictDoUpdate which is one by one effectively.
-      // A true bulk insert would need a different method in IJobRepository.
     }
 
-    // For now, save one by one as the repository's `save` is designed for single entities.
-    // A future optimization could be a `saveBulk` method in the repository.
+    // Assuming jobRepository.save can handle single or multiple if optimized later.
+    // For now, loop and save individually.
     for (const job of jobEntities) {
       await this.jobRepository.save(job as JobEntity<unknown, unknown>);
-      this.emit('job.added', { jobId: job.id.value, name: job.name, queueName: this.queueName });
+      this.emit('job.added', { jobId: job.id.value, name: job.name, queueName: this.queueName, job });
     }
     return jobEntities;
   }
@@ -100,50 +107,58 @@ export class DrizzleQueueService<P = unknown, R = unknown> extends AbstractQueue
   }
 
   async pause(): Promise<void> {
-    this.isPaused = true;
+    if (this._isClosed) return;
+    this._isPaused = true;
     this.emit('queue.paused', { queueName: this.queueName });
-    // console.log(`Queue ${this.queueName} paused.`);
   }
 
   async resume(): Promise<void> {
-    this.isPaused = false;
+    if (this._isClosed) return;
+    this._isPaused = false;
     this.emit('queue.resumed', { queueName: this.queueName });
-    // console.log(`Queue ${this.queueName} resumed.`);
   }
 
   async clean(gracePeriodMs: number, limit: number, status?: JobStatus): Promise<number> {
     const count = await this.jobRepository.clean(this.queueName, gracePeriodMs, limit, status);
-    this.emit('queue.cleaned', { queueName: this.queueName, count });
+    this.emit('queue.cleaned', { queueName: this.queueName, count, status });
     return count;
   }
 
   async close(): Promise<void> {
-    if (this.stalledJobsCheckInterval) {
-      clearInterval(this.stalledJobsCheckInterval);
-      this.stalledJobsCheckInterval = null;
+    if (this._isClosed) return;
+    this._isClosed = true;
+    if (this.stalledJobsCheckIntervalId) {
+      clearInterval(this.stalledJobsCheckIntervalId);
+      this.stalledJobsCheckIntervalId = null;
     }
     this.emit('queue.closed', { queueName: this.queueName });
-    // console.log(`Queue ${this.queueName} closed.`);
+    super.removeAllListeners(); // Clean up listeners
   }
 
   async fetchNextJobAndLock(workerId: string, lockDurationMs: number = DEFAULT_LOCK_DURATION_MS): Promise<JobEntity<P, R> | null> {
-    if (this.isPaused) {
+    if (this._isPaused || this._isClosed) {
       return null;
     }
 
-    // This is a simplified fetch. A real implementation might involve multiple attempts or more complex queries.
-    const potentialJobs = await this.jobRepository.findNextJobsToProcess(this.queueName, 10); // Fetch a small batch
+    const potentialJobs = await this.jobRepository.findNextJobsToProcess(this.queueName, 10);
     if (potentialJobs.length === 0) {
       return null;
     }
 
     for (const job of potentialJobs) {
-      const lockAcquired = await this.jobRepository.acquireLock(job.id, workerId, new Date(Date.now() + lockDurationMs));
+      const typedJob = job as JobEntity<P, R>; // Cast early
+      const newLockUntil = new Date(Date.now() + lockDurationMs);
+      const lockAcquired = await this.jobRepository.acquireLock(typedJob.id, workerId, newLockUntil);
       if (lockAcquired) {
-        const lockedJob = await this.jobRepository.findById(job.id); // Re-fetch to get updated state (status, lockUntil, startedAt)
+        // Instead of re-fetching, update the instance in memory and assume DB is consistent
+        // The repository's acquireLock should have updated the job's status, workerId, lockUntil, attemptsMade, processedOn
+        // We need to ensure the DrizzleJobRepository.acquireLock correctly updates these and returns the *updated* entity or enough info.
+        // For simplicity, let's assume acquireLock in repo updates the job and returns the *updated* entity or true/false.
+        // If it returns true, we re-fetch to ensure we have the latest state.
+        const lockedJob = await this.jobRepository.findById(typedJob.id);
         if (lockedJob) {
-             this.emit('job.locked', { jobId: lockedJob.id.value, workerId, queueName: this.queueName });
-             return lockedJob as JobEntity<P,R>;
+          this.emit('job.locked', { jobId: lockedJob.id.value, workerId, queueName: this.queueName, job: lockedJob as JobEntity<P,R> });
+          return lockedJob as JobEntity<P, R>;
         }
       }
     }
@@ -151,194 +166,177 @@ export class DrizzleQueueService<P = unknown, R = unknown> extends AbstractQueue
   }
 
   async extendJobLock(jobId: string | JobIdVO, workerId: string, lockDurationMs: number): Promise<void> {
+    if (this._isClosed) throw new DomainError('Queue is closed.');
     const id = typeof jobId === 'string' ? JobIdVO.create(jobId) : jobId;
     const job = await this.getJob(id);
-    if (!job || job.workerId !== workerId || job.status !== JobStatus.ACTIVE) {
-      throw new Error(`Cannot extend lock for job ${id.value}: not active or not locked by worker ${workerId}`);
+    if (!job) throw new DomainError(`Job ${id.value} not found.`);
+    if (job.workerId !== workerId || job.status !== JobStatus.ACTIVE) {
+      throw new DomainError(`Cannot extend lock for job ${id.value}: not active or not locked by worker ${workerId}`);
     }
     const newLockUntil = new Date(Date.now() + lockDurationMs);
+    // Passar workerId para o repositório para que ele possa verificar se o worker que está tentando estender é o mesmo que detém o lock.
     await this.jobRepository.extendLock(id, workerId, newLockUntil);
-    this.emit('job.lock_extended', { jobId: id.value, workerId, newLockUntil, queueName: this.queueName });
+    job.extendLock(newLockUntil, workerId); // Update entity state
+    this.emit('job.lock_extended', { jobId: id.value, workerId, newLockUntil, queueName: this.queueName, job });
   }
 
   async markJobAsCompleted(
     jobId: string | JobIdVO,
     workerId: string,
-    result: R,
-    jobInstanceWithChanges: JobEntity<P,R>
+    returnValue: R,
+    jobInstanceWithChanges: JobEntity<P,R> // This instance has progress/logs from worker
   ): Promise<void> {
+    if (this._isClosed) return; // Or throw?
     const id = typeof jobId === 'string' ? JobIdVO.create(jobId) : jobId;
-    const job = jobInstanceWithChanges ?? await this.getJob(id); // Prefer instance with in-memory changes
+    const job = jobInstanceWithChanges; // Trust the instance passed by the worker
 
-    if (!job) {
-      this.emit('job.error', {jobId: id.value, error: `Job ${id.value} not found to mark as completed.`, queueName: this.queueName });
-      // console.error(`Job ${id.value} not found to mark as completed.`);
-      return;
+    if (job.id.value !== id.value) {
+         this.emit('queue.error', { queueName: this.queueName, error: `Job ID mismatch: ${id.value} vs ${job.id.value}` });
+         return;
     }
+
     if (job.workerId !== workerId && job.status === JobStatus.ACTIVE) {
-        this.emit('job.error', {jobId: id.value, error: `Job ${id.value} is locked by another worker ${job.workerId}, cannot be completed by ${workerId}.`, queueName: this.queueName });
-        // console.warn(`Job ${id.value} is locked by another worker ${job.workerId}, cannot be completed by ${workerId}.`);
-        // Potentially allow completion if job is not ACTIVE (e.g. if it was stalled and recovered by a different logic)
-        // For now, strict check.
+        this.emit('job.error', { jobId: id.value, error: `Job ${id.value} is locked by another worker ${job.workerId}, cannot be completed by ${workerId}.`, queueName: this.queueName, job });
         return;
     }
 
-    job.markAsCompleted(result); // This updates logs, progress from jobInstanceWithChanges if provided
+    job.markAsCompleted(returnValue);
     await this.jobRepository.update(job as JobEntity<unknown, unknown>);
-    this.emit('job.completed', { jobId: id.value, result, queueName: this.queueName });
+    this.emit('job.completed', { jobId: id.value, returnValue, queueName: this.queueName, job });
   }
 
   async markJobAsFailed(
     jobId: string | JobIdVO,
     workerId: string,
     error: Error,
-    jobInstanceWithChanges: JobEntity<P,R>
+    jobInstanceWithChanges: JobEntity<P,R> // This instance has progress/logs from worker
   ): Promise<void> {
+    if (this._isClosed) return;
     const id = typeof jobId === 'string' ? JobIdVO.create(jobId) : jobId;
-    const job = jobInstanceWithChanges ?? await this.getJob(id);
+    const job = jobInstanceWithChanges;
 
-    if (!job) {
-      this.emit('job.error', {jobId: id.value, error: `Job ${id.value} not found to mark as failed.`, queueName: this.queueName });
-      // console.error(`Job ${id.value} not found to mark as failed.`);
-      return;
+    if (job.id.value !== id.value) {
+         this.emit('queue.error', { queueName: this.queueName, error: `Job ID mismatch: ${id.value} vs ${job.id.value}` });
+         return;
     }
-     if (job.workerId !== workerId && job.status === JobStatus.ACTIVE) {
-        this.emit('job.error', {jobId: id.value, error: `Job ${id.value} is locked by another worker ${job.workerId}, cannot be failed by ${workerId}.`, queueName: this.queueName });
-        // console.warn(`Job ${id.value} is locked by another worker ${job.workerId}, cannot be failed by ${workerId}.`);
+
+    if (job.workerId !== workerId && job.status === JobStatus.ACTIVE) {
+        this.emit('job.error', { jobId: id.value, error: `Job ${id.value} is locked by another worker ${job.workerId}, cannot be failed by ${workerId}.`, queueName: this.queueName, job });
         return;
     }
 
-    job.addLog(`Attempt ${job.attempts + 1} failed. Error: ${error.message}`, 'ERROR', new Date());
-    if (job.options.stackTraceLimit && error.stack) {
-        job.addLog(`Stack trace: ${error.stack.substring(0, job.options.stackTraceLimit)}`, 'DEBUG', new Date());
-    }
+    // Logs for this attempt are already in jobInstanceWithChanges from worker
+    // job.addLog(`Attempt ${job.attemptsMade} failed. Error: ${error.message}`, 'ERROR'); // attemptsMade is already incremented by moveToActive
 
-    const shouldRetry = job.attempts < (job.options.attempts ?? 0);
-    if (shouldRetry) {
-      const backoffStrategy = job.options.backoff;
-      const delay = calculateBackoff(job.attempts + 1, backoffStrategy);
-      job.markAsDelayed(new Date(Date.now() + delay), error);
-      this.emit('job.retrying', { jobId: id.value, delay, attempt: job.attempts, queueName: this.queueName });
+    const maxAttempts = job.options.attempts;
+    if (job.attemptsMade >= maxAttempts) {
+      job.markAsFailed(error.message, error.stack?.split('\n'));
+      await this.jobRepository.update(job as JobEntity<unknown, unknown>);
+      this.emit('job.failed', { jobId: id.value, error: error.message, queueName: this.queueName, job });
     } else {
-      job.markAsFailed(error);
-      this.emit('job.failed', { jobId: id.value, error: error.message, queueName: this.queueName });
+      const delay = calculateBackoff(job.attemptsMade, job.options.backoff);
+      job.moveToDelayed(new Date(Date.now() + delay), error.message);
+      await this.jobRepository.update(job as JobEntity<unknown, unknown>);
+      this.emit('job.retrying', { jobId: id.value, delay, attempt: job.attemptsMade, error: error.message, queueName: this.queueName, job });
     }
-    await this.jobRepository.update(job as JobEntity<unknown, unknown>);
   }
 
   async updateJobProgress(jobId: string | JobIdVO, workerId: string, progress: number | object): Promise<void> {
+    if (this._isClosed) return;
     const id = typeof jobId === 'string' ? JobIdVO.create(jobId) : jobId;
-    const job = await this.getJob(id);
+    const job = await this.getJob(id); // Fetch fresh to avoid race conditions on progress if not sent via jobInstance
     if (!job) {
-      // console.warn(`Job ${id.value} not found to update progress.`);
+      this.emit('queue.error', { queueName: this.queueName, error: `Job ${id.value} not found to update progress.` });
       return;
     }
     if (job.workerId !== workerId || job.status !== JobStatus.ACTIVE) {
-      // console.warn(`Cannot update progress for job ${id.value}: not active or not locked by worker ${workerId}`);
+      this.emit('queue.error', { queueName: this.queueName, error: `Cannot update progress for job ${id.value}: not active or not locked by worker ${workerId}.`, job });
       return;
     }
     job.updateProgress(progress);
-    await this.jobRepository.update(job as JobEntity<unknown, unknown>); // Could optimize to only update progress field
-    this.emit('job.progress', { jobId: id.value, progress, queueName: this.queueName });
+    // TODO: Implement IJobRepository.updateProgress for efficiency. Using full update for now.
+    await this.jobRepository.update(job as JobEntity<unknown, unknown>);
+    this.emit('job.progress', { jobId: id.value, progress, queueName: this.queueName, job });
   }
 
-  async addJobLog(jobId: string | JobIdVO, workerId: string, message: string, level: string = 'INFO'): Promise<void> {
+  async addJobLog(jobId: string | JobIdVO, workerId: string, logEntry: JobLogEntry): Promise<void> {
+    if (this._isClosed) return;
     const id = typeof jobId === 'string' ? JobIdVO.create(jobId) : jobId;
     const job = await this.getJob(id);
     if (!job) {
-      // console.warn(`Job ${id.value} not found to add log.`);
+       this.emit('queue.error', { queueName: this.queueName, error: `Job ${id.value} not found to add log.` });
       return;
     }
-     // Allow logs even if not locked by this worker, e.g. system logs about the job.
-     // However, typically logs come from the active worker.
-    // if (job.workerId !== workerId || job.status !== JobStatus.ACTIVE) {
-    //   // console.warn(`Cannot add log for job ${id.value}: not active or not locked by worker ${workerId}`);
-    //   return;
-    // }
-    job.addLog(message, level, new Date());
-    await this.jobRepository.update(job as JobEntity<unknown, unknown>); // Could optimize to only update logs field
-    this.emit('job.log_added', { jobId: id.value, message, level, queueName: this.queueName });
+    // Worker check might be too strict if system wants to add logs. For now, assume logs come from active worker.
+    if (job.status === JobStatus.ACTIVE && job.workerId !== workerId) {
+         this.emit('queue.error', { queueName: this.queueName, error: `Cannot add log for job ${id.value} by worker ${workerId}, locked by ${job.workerId}.`, job });
+        return;
+    }
+    job.addLog(logEntry.message, logEntry.level, logEntry.timestamp);
+    // TODO: Implement IJobRepository.addLog for efficiency. Using full update for now.
+    await this.jobRepository.update(job as JobEntity<unknown, unknown>);
+    this.emit('job.log_added', { jobId: id.value, logEntry, queueName: this.queueName, job });
   }
 
   public startMaintenance(): void {
-    if (this.stalledJobsCheckInterval) {
-      // console.log(`Stalled jobs manager for queue ${this.queueName} already running.`);
+    if (this._isClosed || this.stalledJobsCheckIntervalId) {
       return;
     }
-    this.stalledJobsCheckInterval = setInterval(
+    this.stalledJobsCheckIntervalId = setInterval(
       () => this.checkForStalledJobs().catch(err => {
-        this.emit('queue.error', { queueName: this.queueName, error: `Error in stalled job check: ${err.message}` });
-        // console.error(`Error in stalled job check for queue ${this.queueName}:`, err)
+        this.emit('queue.error', { queueName: this.queueName, error: `Error in stalled job check: ${err.message || err}` });
       }),
-      this.stalledCheckIntervalMs,
+      this._stalledCheckIntervalMs,
     );
-    // console.log(`Stalled jobs manager started for queue ${this.queueName}. Interval: ${this.stalledCheckIntervalMs}ms`);
+    this.emit('queue.maintenance.started', { queueName: this.queueName, interval: this._stalledCheckIntervalMs });
   }
 
   private async checkForStalledJobs(): Promise<void> {
-    if (this.isPaused) return;
+    if (this._isPaused || this._isClosed) return;
 
-    const olderThan = new Date(Date.now() - this.stalledOlderThanMs);
+    const olderThan = new Date(Date.now() - this._stalledOlderThanMs);
     const stalledJobs = await this.jobRepository.findStalledJobs(
       this.queueName,
       olderThan,
-      this.stalledLimitPerCheck,
+      this._stalledLimitPerCheck,
     );
 
     if (stalledJobs.length > 0) {
-        this.emit('queue.stalled_check', { queueName: this.queueName, count: stalledJobs.length });
-        // console.log(`Found ${stalledJobs.length} stalled jobs in queue ${this.queueName}.`);
+        this.emit('queue.stalled_check', { queueName: this.queueName, count: stalledJobs.length, olderThan });
     }
 
     for (const job of stalledJobs) {
-      const originalJob = job as JobEntity<P, R>; // Cast for type safety with P,R
-      this.emit('job.stalled', { jobId: originalJob.id.value, workerId: originalJob.workerId, queueName: this.queueName });
+      const typedJob = job as JobEntity<P, R>;
+      const originalWorkerId = typedJob.workerId;
+      this.emit('job.stalled', { jobId: typedJob.id.value, workerId: originalWorkerId, queueName: this.queueName, job: typedJob });
 
-      const shouldFailPermanently = originalJob.markAsStalled(); // Increments stalled count, checks against maxStalledCount from options
+      const shouldFailPermanently = typedJob.markAsStalled(); // This method should handle attempt counting for stalls if applicable
 
       if (shouldFailPermanently) {
-        originalJob.markAsFailed(new Error(`Job stalled too many times (max ${originalJob.options.maxStalledCount})`));
-        this.emit('job.failed', { jobId: originalJob.id.value, error: 'Job stalled too many times', queueName: this.queueName });
+        // markAsStalled already set status to FAILED if it's permanent
+        this.emit('job.failed', { jobId: typedJob.id.value, error: typedJob.failedReason || 'Job failed after being marked as stalled and exceeding limits.', queueName: this.queueName, job: typedJob });
       } else {
-        // Try to re-queue or mark as delayed with backoff
-        const backoffStrategy = originalJob.options.backoff; // Use job's specific backoff
-        const delay = calculateBackoff(originalJob.attempts +1, backoffStrategy, true); // true for stalled related backoff
-
-        if (delay > 0 && originalJob.options.attempts > originalJob.attempts) { // Ensure it can be retried
-            originalJob.markAsDelayed(new Date(Date.now() + delay), new Error('Job stalled and will be retried after delay'));
-            this.emit('job.retrying', { jobId: originalJob.id.value, delay, attempt: originalJob.attempts, reason: 'stalled', queueName: this.queueName });
+        // If not failed permanently by markAsStalled, decide next step:
+        // Check if it has attempts left for normal processing
+        if (typedJob.attemptsMade < typedJob.maxAttempts) {
+            // It can be retried. Calculate backoff for the stall.
+            const delay = calculateBackoff(typedJob.attemptsMade, typedJob.options.backoff, true); // true for stalled
+            if (delay > 0) {
+                typedJob.moveToDelayed(new Date(Date.now() + delay), 'Job recovered from stall, will retry after delay.');
+                this.emit('job.retrying', { jobId: typedJob.id.value, delay, attempt: typedJob.attemptsMade, error: 'stalled', queueName: this.queueName, job: typedJob });
+            } else {
+                // No delay, move to WAITING
+                typedJob.moveToWaiting();
+                this.emit('job.requeued_after_stall', { jobId: typedJob.id.value, queueName: this.queueName, job: typedJob });
+            }
         } else {
-            // If no more attempts or no backoff, put back to WAITING to be picked up immediately
-            // Or, if no attempts left, it should have been failed by markAsStalled logic.
-            // This path means it can be retried but no specific delay from backoff (e.g. backoff type 'fixed' with 0 delay)
-            originalJob.status = JobStatus.WAITING;
-            originalJob.workerId = undefined;
-            originalJob.lockUntil = undefined;
-            // Do not increment attempts here, as it wasn't a processing failure.
-            // Or, consider if a stall should count as an attempt. Current JobEntity.markAsStalled does not increment attempts.
-            this.emit('job.requeued_after_stall', { jobId: originalJob.id.value, queueName: this.queueName });
+            // No attempts left, should have been caught by markAsStalled.
+            // If somehow it reaches here, mark as failed.
+            typedJob.markAsFailed('Job stalled and has no attempts left.');
+            this.emit('job.failed', { jobId: typedJob.id.value, error: typedJob.failedReason, queueName: this.queueName, job: typedJob });
         }
       }
-      await this.jobRepository.update(originalJob as JobEntity<unknown, unknown>);
+      await this.jobRepository.update(typedJob as JobEntity<unknown, unknown>);
     }
   }
 }
-
-// Helper function placeholder - ensure this is implemented correctly, possibly within JobEntity or as a standalone utility.
-// import { BackoffOptions, BackoffType } from '@/core/domain/job/value-objects/job-options.vo';
-// function calculateBackoff(attempt: number, strategy?: BackoffOptions | BackoffType, isStalled: boolean = false): number {
-//   if (!strategy) return 0;
-
-//   const options = typeof strategy === 'string' ? { type: strategy } : strategy;
-//   const baseDelay = options.delay || 1000; // Default 1s for exponential/fixed if not provided
-
-//   switch (options.type) {
-//     case 'exponential':
-//       return Math.min(options.maxDelay || 60000, baseDelay * Math.pow(2, attempt -1));
-//     case 'fixed':
-//       return baseDelay;
-//     // Add other strategies like 'linear' if needed
-//     default:
-//       return 0;
-//   }
-// }

@@ -1,5 +1,13 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1751213998595,
+      "tag": "0000_queue_initial_setup",
+      "breakpoints": true
+    }
+  ]
 }

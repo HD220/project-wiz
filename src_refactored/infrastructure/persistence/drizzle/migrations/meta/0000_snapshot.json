@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "50fb2988-ed3d-4abd-bc5b-86505724f919",
+  "id": "89787522-66bf-44ed-a3a8-97eee7d01c79",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "jobs": {
@@ -28,13 +28,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "payload": {
           "name": "payload",
           "type": "text",
@@ -46,18 +39,26 @@
           "name": "options",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "return_value": {
-          "name": "return_value",
+        "status": {
+          "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "error": {
-          "name": "error",
+        "attempts_made": {
+          "name": "attempts_made",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "progress": {
+          "name": "progress",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -65,13 +66,6 @@
         },
         "logs": {
           "name": "logs",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "progress": {
-          "name": "progress",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -91,15 +85,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "started_at": {
-          "name": "started_at",
+        "processed_on": {
+          "name": "processed_on",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "finished_at": {
-          "name": "finished_at",
+        "finished_on": {
+          "name": "finished_on",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -112,16 +106,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "attempts": {
-          "name": "attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "max_attempts": {
-          "name": "max_attempts",
+        "lock_until": {
+          "name": "lock_until",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -134,28 +120,71 @@
           "notNull": false,
           "autoincrement": false
         },
-        "lock_until": {
-          "name": "lock_until",
-          "type": "integer",
+        "return_value": {
+          "name": "return_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "failed_reason": {
+          "name": "failed_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "stacktrace": {
+          "name": "stacktrace",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         }
       },
       "indexes": {
-        "queue_name_idx": {
-          "name": "queue_name_idx",
+        "jobs_queue_name_idx": {
+          "name": "jobs_queue_name_idx",
           "columns": [
             "queue_name"
           ],
-          "isUnique": true
+          "isUnique": false
         },
-        "status_idx": {
-          "name": "status_idx",
+        "jobs_status_idx": {
+          "name": "jobs_status_idx",
           "columns": [
             "status"
           ],
-          "isUnique": true
+          "isUnique": false
+        },
+        "jobs_delay_until_idx": {
+          "name": "jobs_delay_until_idx",
+          "columns": [
+            "delay_until"
+          ],
+          "isUnique": false
+        },
+        "jobs_queue_status_idx": {
+          "name": "jobs_queue_status_idx",
+          "columns": [
+            "queue_name",
+            "status"
+          ],
+          "isUnique": false
+        },
+        "jobs_worker_id_idx": {
+          "name": "jobs_worker_id_idx",
+          "columns": [
+            "worker_id"
+          ],
+          "isUnique": false
+        },
+        "jobs_lock_until_idx": {
+          "name": "jobs_lock_until_idx",
+          "columns": [
+            "lock_until"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {},
