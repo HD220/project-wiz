@@ -89,6 +89,7 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
     const optionsVO = JobOptionsVO.create(persistedData.options);
     const propsWithVOOptions: JobEntityProps<P, R> = {
         ...persistedData,
+        id: JobIdVO.create(persistedData.id as any), // Re-create JobIdVO from string
         options: optionsVO,
         // Ensure dates are Date objects if they are stored as numbers/strings
         createdAt: new Date(persistedData.createdAt),

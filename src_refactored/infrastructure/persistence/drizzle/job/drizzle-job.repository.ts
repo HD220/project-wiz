@@ -1,5 +1,5 @@
 // src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts
-import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt } from 'drizzle-orm';
+import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
@@ -16,7 +16,7 @@ export class DrizzleJobRepository implements IJobRepository {
 
   async update(job: JobEntity<unknown, unknown>): Promise<void> {
     const data = job.toPersistence();
-    await this.db.update(schema.jobsTable).set(data).where(eq(schema.jobsTable.id, data.id.value));
+    await this.db.update(schema.jobsTable).set(data).where(eq(schema.jobsTable.id, data.id));
   }
 
   async findById(id: JobIdVO): Promise<JobEntity<unknown, unknown> | null> {
@@ -30,8 +30,16 @@ export class DrizzleJobRepository implements IJobRepository {
     const results = await this.db.query.jobsTable.findMany({
       where: and(
         eq(schema.jobsTable.queueName, queueName),
-        inArray(schema.jobsTable.status, [JobStatus.WAITING, JobStatus.DELAYED]),
-        lt(schema.jobsTable.delayUntil, now)
+        or(
+          and(
+            eq(schema.jobsTable.status, JobStatus.WAITING),
+            isNull(schema.jobsTable.delayUntil)
+          ),
+          and(
+            eq(schema.jobsTable.status, JobStatus.DELAYED),
+            lt(schema.jobsTable.delayUntil, now)
+          )
+        )
       ),
             orderBy: [ascDrizzle(schema.jobsTable.createdAt)],
       limit,
@@ -42,7 +50,7 @@ export class DrizzleJobRepository implements IJobRepository {
   async acquireLock(jobId: JobIdVO, workerId: string, lockUntil: Date): Promise<boolean> {
     const result = await this.db.update(schema.jobsTable)
       .set({ workerId, lockUntil, status: JobStatus.ACTIVE })
-      .where(and(eq(schema.jobsTable.id, jobId.value), isNull(schema.jobsTable.lockUntil)))
+      .where(and(eq(schema.jobsTable.id, jobId.value), or(isNull(schema.jobsTable.workerId), lt(schema.jobsTable.lockUntil, new Date()))))
     return result.changes > 0;
   }
 

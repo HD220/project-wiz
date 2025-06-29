@@ -67,20 +67,28 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   }
 
   async fetchNextJobAndLock(workerId: string, lockDurationMs: number): Promise<JobEntity<P, R> | null> {
+    console.log(`[QueueService] Attempting to fetch next job for worker ${workerId}...`);
     const jobs = await this.jobRepository.findNextJobsToProcess(this.queueName, 1);
-    if (jobs.length === 0) return null;
+    if (jobs.length === 0) {
+      console.log(`[QueueService] No jobs found for worker ${workerId}.`);
+      return null;
+    }
 
     const job = jobs[0] as JobEntity<P, R>;
+    console.log(`[QueueService] Found job ${job.id.value}. Attempting to acquire lock...`);
     const lockUntil = new Date(Date.now() + lockDurationMs);
     const locked = await this.jobRepository.acquireLock(job.id, workerId, lockUntil);
 
     if (locked) {
+      console.log(`[QueueService] Lock acquired for job ${job.id.value}. Moving to active.`);
       job.moveToActive(workerId, lockUntil);
       await this.jobRepository.update(job);
       this.emit('job.active', job);
       return job;
+    } else {
+      console.log(`[QueueService] Failed to acquire lock for job ${job.id.value}.`);
+      return null;
     }
-    return null;
   }
 
   async extendJobLock(jobId: string | JobIdVO, workerId: string, lockDurationMs: number): Promise<void> {
