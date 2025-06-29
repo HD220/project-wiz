@@ -2,12 +2,13 @@
 import path from 'path';
 
 import { app, BrowserWindow, ipcMain } from 'electron';
+import squirrelStartup from 'electron-squirrel-startup'; // ES6 import
 
 import { registerChatIPCHandlers } from './ipc-chat.handlers';
 import { registerProjectIPCHandlers } from './ipc-project.handlers'; // Import project handlers
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
+if (squirrelStartup) { // Check the imported value
   app.quit();
 }
 

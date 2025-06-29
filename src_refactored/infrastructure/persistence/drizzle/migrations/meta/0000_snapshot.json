@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "846ce2ca-7e66-4fa3-9b53-ecf73ad19fca",
+  "id": "89787522-66bf-44ed-a3a8-97eee7d01c79",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "jobs": {
@@ -21,8 +21,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "job_name": {
-          "name": "job_name",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -30,35 +30,14 @@
         },
         "payload": {
           "name": "payload",
-          "type": "blob",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "job_options": {
-          "name": "job_options",
-          "type": "blob",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "return_value": {
-          "name": "return_value",
-          "type": "blob",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "execution_logs": {
-          "name": "execution_logs",
-          "type": "blob",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "progress": {
-          "name": "progress",
-          "type": "blob",
+        "options": {
+          "name": "options",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -70,14 +49,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "priority": {
-          "name": "priority",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
         "attempts_made": {
           "name": "attempts_made",
           "type": "integer",
@@ -86,13 +57,19 @@
           "autoincrement": false,
           "default": 0
         },
-        "max_attempts": {
-          "name": "max_attempts",
-          "type": "integer",
+        "progress": {
+          "name": "progress",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
+          "notNull": false,
+          "autoincrement": false
+        },
+        "logs": {
+          "name": "logs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
@@ -108,30 +85,44 @@
           "notNull": true,
           "autoincrement": false
         },
-        "process_at": {
-          "name": "process_at",
+        "processed_on": {
+          "name": "processed_on",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "started_at": {
-          "name": "started_at",
+        "finished_on": {
+          "name": "finished_on",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "completed_at": {
-          "name": "completed_at",
+        "delay_until": {
+          "name": "delay_until",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "failed_at": {
-          "name": "failed_at",
+        "lock_until": {
+          "name": "lock_until",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "worker_id": {
+          "name": "worker_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "return_value": {
+          "name": "return_value",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -143,218 +134,55 @@
           "notNull": false,
           "autoincrement": false
         },
-        "repeat_job_key": {
-          "name": "repeat_job_key",
+        "stacktrace": {
+          "name": "stacktrace",
           "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "locked_by_worker_id": {
-          "name": "locked_by_worker_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lock_expires_at": {
-          "name": "lock_expires_at",
-          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         }
       },
       "indexes": {
-        "idx_jobs_queue_status_process_at_priority": {
-          "name": "idx_jobs_queue_status_process_at_priority",
+        "jobs_queue_name_idx": {
+          "name": "jobs_queue_name_idx",
           "columns": [
-            "queue_name",
-            "status",
-            "process_at",
-            "priority"
+            "queue_name"
           ],
           "isUnique": false
         },
-        "idx_jobs_status": {
-          "name": "idx_jobs_status",
+        "jobs_status_idx": {
+          "name": "jobs_status_idx",
           "columns": [
             "status"
           ],
           "isUnique": false
         },
-        "idx_jobs_repeat_key": {
-          "name": "idx_jobs_repeat_key",
+        "jobs_delay_until_idx": {
+          "name": "jobs_delay_until_idx",
           "columns": [
-            "repeat_job_key"
+            "delay_until"
           ],
           "isUnique": false
         },
-        "idx_jobs_locked_worker_id": {
-          "name": "idx_jobs_locked_worker_id",
+        "jobs_queue_status_idx": {
+          "name": "jobs_queue_status_idx",
           "columns": [
-            "locked_by_worker_id"
+            "queue_name",
+            "status"
           ],
           "isUnique": false
         },
-        "idx_jobs_parent_id": {
-          "name": "idx_jobs_parent_id",
+        "jobs_worker_id_idx": {
+          "name": "jobs_worker_id_idx",
           "columns": [
-            "parent_id"
+            "worker_id"
           ],
           "isUnique": false
         },
-        "idx_jobs_queue_name": {
-          "name": "idx_jobs_queue_name",
+        "jobs_lock_until_idx": {
+          "name": "jobs_lock_until_idx",
           "columns": [
-            "queue_name"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "repeatable_job_schedules": {
-      "name": "repeatable_job_schedules",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "queue_name": {
-          "name": "queue_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "job_name": {
-          "name": "job_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "cron_pattern": {
-          "name": "cron_pattern",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "every": {
-          "name": "every",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "job_data": {
-          "name": "job_data",
-          "type": "blob",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "job_options": {
-          "name": "job_options",
-          "type": "blob",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "timezone": {
-          "name": "timezone",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'UTC'"
-        },
-        "limit": {
-          "name": "limit",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "start_date": {
-          "name": "start_date",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "end_date": {
-          "name": "end_date",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "next_run_at": {
-          "name": "next_run_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_run_job_id": {
-          "name": "last_run_job_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "is_enabled": {
-          "name": "is_enabled",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        }
-      },
-      "indexes": {
-        "idx_repeatable_schedules_enabled_next_run": {
-          "name": "idx_repeatable_schedules_enabled_next_run",
-          "columns": [
-            "is_enabled",
-            "next_run_at"
-          ],
-          "isUnique": false
-        },
-        "idx_repeatable_schedules_queue_name": {
-          "name": "idx_repeatable_schedules_queue_name",
-          "columns": [
-            "queue_name"
+            "lock_until"
           ],
           "isUnique": false
         }

@@ -92,6 +92,14 @@ const TYPES = {
 
   // Chat Service
   IChatService: Symbol.for('IChatService'),
+
+  // Queue Scheduler Service
+  QueueSchedulerService: Symbol.for('QueueSchedulerService'),
+
+  // Specific Queue Services & Workers
+  AgentJobQueueService: Symbol.for('AgentJobQueueService'),
+  AgentJobWorkerService: Symbol.for('AgentJobWorkerService'),
+  TaskTool: Symbol.for('TaskTool'), // For binding the (old) TaskTool
 };
 
 export { TYPES };

@@ -3,7 +3,7 @@ import { EmbeddingError } from '@/domain/common/errors'; // Assuming EmbeddingEr
 
 import { Result } from '@/shared/result';
 
-export interface EmbeddingVector extends Array<number> {}
+export type EmbeddingVector = number[]; // Changed to type alias
 
 export interface IEmbeddingService {
   /**
