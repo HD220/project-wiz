@@ -12,7 +12,7 @@ export interface IElectronIPC {
    * @param args Arguments to send to the main process.
    * @returns A Promise that resolves with the result from the IPC handler.
    */
-  invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>;
+  invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<T>;
 
   /**
    * Subscribes to an IPC channel for messages sent from the main process.
@@ -21,7 +21,7 @@ export interface IElectronIPC {
    *                 The listener receives `(event, ...args)`.
    * @returns A function to unsubscribe the listener from the channel.
    */
-  on: (channel: string, listener: (...args: any[]) => void) => () => void;
+  on: (channel: string, listener: (...args: unknown[]) => void) => () => void;
 
   /**
    * Sends a message to the main process via `ipcRenderer.send`. This is typically
@@ -29,7 +29,7 @@ export interface IElectronIPC {
    * @param channel The IPC channel to send the message on.
    * @param args Arguments to send to the main process.
    */
-  send: (channel: string, ...args: any[]) => void;
+  send: (channel: string, ...args: unknown[]) => void;
 
   /**
    * Removes a specific listener for an IPC channel.
@@ -39,7 +39,7 @@ export interface IElectronIPC {
    * @param channel The IPC channel.
    * @param listener The exact listener function that was subscribed.
    */
-  removeListener?: (channel: string, listener: (...args: any[]) => void) => void;
+  removeListener?: (channel: string, listener: (...args: unknown[]) => void) => void;
 
   /**
    * Removes all listeners for a specific IPC channel.
@@ -70,7 +70,7 @@ declare global {
 // }
 
 // Placeholder for IPC result structure, can be expanded.
-export interface IPCResult<T = any> {
+export interface IPCResult<T = unknown> { // Default T to unknown
   success: boolean;
   data?: T;
   error?: {

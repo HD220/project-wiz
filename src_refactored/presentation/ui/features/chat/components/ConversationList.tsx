@@ -57,7 +57,7 @@ export function ConversationList({
           placeholder="Buscar conversas..."
           className="mt-2 h-8"
           value={internalSearchTerm}
-          onChange={(e) => setInternalSearchTerm(e.target.value)}
+          onChange={(event) => setInternalSearchTerm(event.target.value)}
         />
       </header>
       <ScrollArea className="flex-1">

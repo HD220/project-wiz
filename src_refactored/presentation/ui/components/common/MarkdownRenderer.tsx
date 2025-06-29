@@ -39,11 +39,12 @@ export function MarkdownRenderer({
 
   // Default component overrides, can be merged with or overridden by `customComponents` prop
   const defaultComponents: Options['components'] = {
-    a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />, // Open links in new tab
+    // eslint-disable-next-line id-length
+    a: ({node: _node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />, // Open links in new tab
 
     // Custom styling for code blocks (pre > code)
     // This is a basic version. For syntax highlighting, you'd integrate react-syntax-highlighter here.
-    code({ node, className: langClassName, children, ...props }) {
+    code({ node, className: langClassName, children, ...props }) { // `node` is used here, so no underscore
       const match = /language-(\w+)/.exec(langClassName || '');
       const language = match ? match[1] : null;
 

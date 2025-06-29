@@ -3,7 +3,7 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 import * as React from "react"
 
-import { cn } from "@ui/lib/utils" // Corrected path
+import { cn } from "@/ui/lib/utils" // Corrected path
 
 function Avatar({
   className,

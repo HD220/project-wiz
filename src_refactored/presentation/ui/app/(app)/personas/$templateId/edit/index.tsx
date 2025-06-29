@@ -18,6 +18,91 @@ import type {
   IPCResponse
 } from '@/shared/ipc-types';
 
+// Helper for loading/error states
+interface EditPersonaTemplateLoadingErrorDisplayProps {
+  isLoading: boolean;
+  error: Error | null | undefined;
+  // templateId: string; // For context in error messages or links - REMOVED as unused
+}
+function EditPersonaTemplateLoadingErrorDisplay({ isLoading, error }: EditPersonaTemplateLoadingErrorDisplayProps) { // removed templateId
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <Loader2 className="h-10 w-10 animate-spin text-sky-500 mb-4" />
+        <p className="text-lg text-slate-600 dark:text-slate-400">Carregando dados do template...</p>
+      </div>
+    );
+  }
+  if (error) {
+     return (
+      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px] bg-red-50 dark:bg-red-900/10 rounded-lg">
+        <ServerCrash className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
+        <h2 className="text-xl font-semibold text-red-700 dark:text-red-300 mb-2">Falha ao carregar template</h2>
+        <p className="text-sm text-red-600 dark:text-red-400 mb-4">{error.message}</p>
+        <Button variant="outline" className="mt-4" asChild>
+            {/* Link back to the list, as the specific template might not exist or be accessible */}
+            <Link to="/personas"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas</Link>
+        </Button>
+      </div>
+    );
+  }
+  return null;
+}
+
+// Helper for rendering the form
+interface EditPersonaTemplateFormRendererProps {
+  templateId: string;
+  personaTemplate: GetPersonaTemplateDetailsResponseData; // Non-null asserted by caller
+  handleSubmit: (formData: PersonaTemplateFormData) => Promise<void>;
+  isSubmitting: boolean;
+}
+function EditPersonaTemplateFormRenderer({templateId, personaTemplate, handleSubmit, isSubmitting}: EditPersonaTemplateFormRendererProps) {
+   if (!personaTemplate) { // Should ideally be caught by the page component before calling this renderer
+    return (
+      <div className="p-8 text-center">
+        <p>Template de Persona com ID "{templateId}" não encontrado.</p>
+         <Button variant="outline" className="mt-4" asChild>
+            <Link to="/personas"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const initialValues: Partial<PersonaTemplateFormData> = {
+    name: personaTemplate.name,
+    role: personaTemplate.role,
+    goal: personaTemplate.goal,
+    backstory: personaTemplate.backstory,
+    toolNames: personaTemplate.toolNames || [],
+  };
+
+  return (
+    <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
+       <Button variant="outline" size="sm" className="mb-4" asChild>
+          <Link to="/personas/$templateId" params={{templateId}}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Detalhes
+          </Link>
+        </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Editar Template de Persona: {personaTemplate.name}</CardTitle>
+          <CardDescription>
+            Modifique as características base deste template de Agente IA.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PersonaTemplateForm
+            onSubmit={handleSubmit}
+            initialValues={initialValues}
+            isSubmitting={isSubmitting}
+            submitButtonText="Salvar Alterações"
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 
 function EditPersonaTemplatePage() {
   const router = useRouter();
@@ -65,32 +150,17 @@ function EditPersonaTemplatePage() {
     updatePersonaMutation.mutate({ templateId, data: formData });
   };
 
-  if (isLoadingTemplate) {
-    return (
-      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
-        <Loader2 className="h-10 w-10 animate-spin text-sky-500 mb-4" />
-        <p className="text-lg text-slate-600 dark:text-slate-400">Carregando dados do template...</p>
-      </div>
-    );
+  const loadingOrError = EditPersonaTemplateLoadingErrorDisplay({isLoading: isLoadingTemplate, error: templateError, templateId});
+  if (loadingOrError) {
+    return loadingOrError;
   }
 
-  if (templateError) {
-     return (
-      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px] bg-red-50 dark:bg-red-900/10 rounded-lg">
-        <ServerCrash className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
-        <h2 className="text-xl font-semibold text-red-700 dark:text-red-300 mb-2">Falha ao carregar template</h2>
-        <p className="text-sm text-red-600 dark:text-red-400 mb-4">{templateError.message}</p>
-        <Button variant="outline" className="mt-4" asChild>
-            <Link to="/personas"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista</Link>
-        </Button>
-      </div>
-    );
-  }
-
+  // If personaTemplate is null after loading without error, it means not found.
   if (!personaTemplate) {
     return (
       <div className="p-8 text-center">
-        <p>Template de Persona não encontrado.</p>
+         <ServerCrash className="h-12 w-12 text-slate-500 dark:text-slate-400 mb-4" />
+        <p className="text-lg">Template de Persona com ID "{templateId}" não encontrado.</p>
          <Button variant="outline" className="mt-4" asChild>
             <Link to="/personas"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas</Link>
         </Button>
@@ -98,39 +168,13 @@ function EditPersonaTemplatePage() {
     );
   }
 
-  // Prepare initialValues for the form once personaTemplate data is available
-  const initialValues: Partial<PersonaTemplateFormData> = {
-    name: personaTemplate.name,
-    role: personaTemplate.role,
-    goal: personaTemplate.goal,
-    backstory: personaTemplate.backstory,
-    toolNames: personaTemplate.toolNames || [],
-  };
-
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
-       <Button variant="outline" size="sm" className="mb-4" asChild>
-          <Link to="/personas/$templateId" params={{templateId}}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Detalhes
-          </Link>
-        </Button>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Editar Template de Persona: {personaTemplate.name}</CardTitle>
-          <CardDescription>
-            Modifique as características base deste template de Agente IA.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PersonaTemplateForm
-            onSubmit={handleSubmit}
-            initialValues={initialValues}
-            isSubmitting={updatePersonaMutation.isLoading}
-            submitButtonText="Salvar Alterações"
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <EditPersonaTemplateFormRenderer
+      templateId={templateId}
+      personaTemplate={personaTemplate}
+      handleSubmit={handleSubmit}
+      isSubmitting={updatePersonaMutation.isLoading}
+    />
   );
 }
 

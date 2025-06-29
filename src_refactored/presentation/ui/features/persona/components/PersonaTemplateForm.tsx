@@ -4,8 +4,8 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Badge } from '@/ui/components/ui/badge';
+import { Button } from '@/ui/components/ui/button';
 import {
   Form,
   FormControl,
@@ -14,12 +14,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
+} from '@/ui/components/ui/form';
+import { Input } from '@/ui/components/ui/input';
+import { Textarea } from '@/ui/components/ui/textarea';
 // Para um multi-select mais robusto, poderia usar ShadCN Combobox com modo múltiplo,
 // ou uma lib como react-select. Por simplicidade, faremos um input de texto para tools.
-// import { Checkbox } from "@/presentation/ui/components/ui/checkbox" // Exemplo se fosse usar checkboxes
+// import { Checkbox } from "@/ui/components/ui/checkbox" // Exemplo se fosse usar checkboxes
 
 // Lista de ferramentas disponíveis (exemplo, poderia vir de uma config ou API)
 const AVAILABLE_TOOLS = [

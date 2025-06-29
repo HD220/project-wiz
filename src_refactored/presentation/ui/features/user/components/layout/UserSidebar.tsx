@@ -1,10 +1,10 @@
 import { Link, useRouter } from '@tanstack/react-router';
-import { Settings, UserCircle, MessageSquarePlus, Search, Palette, Bot as BotIcon, Loader2, AlertTriangle } from 'lucide-react'; // Added Loader2, AlertTriangle
-import React, { useState, useMemo } from 'react'; // Added useMemo
+import { Settings, UserCircle, MessageSquarePlus, Search, Palette, Bot as BotIcon, Loader2, AlertTriangle } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/ui/components/ui/avatar'; // CHANGED
+import { Button } from '@/ui/components/ui/button'; // CHANGED
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,24 +12,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/presentation/ui/components/ui/dropdown-menu';
-import { Input } from '@/presentation/ui/components/ui/input';
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { useIpcSubscription } from '@/presentation/ui/hooks/ipc/useIpcSubscription';
-import { cn } from '@/presentation/ui/lib/utils';
+} from '@/ui/components/ui/dropdown-menu'; // CHANGED
+import { Input } from '@/ui/components/ui/input'; // CHANGED
+import { ScrollArea } from '@/ui/components/ui/scroll-area'; // CHANGED
+import { useIpcSubscription } from '@/ui/hooks/ipc/useIpcSubscription'; // ALREADY @/ui
+import { cn } from '@/ui/lib/utils'; // CHANGED
 
-import { IPC_CHANNELS } from '@/shared/ipc-channels';
-import type { DirectMessageItem, GetDMConversationsListResponseData, DMConversationsUpdatedEventPayload } from '@/shared/ipc-types'; // Using types from shared
+import { IPC_CHANNELS } from '@/shared/ipc-channels'; // This is correct, as shared is not under /ui
+import type { DirectMessageItem, GetDMConversationsListResponseData, DMConversationsUpdatedEventPayload } from '@/shared/ipc-types'; // This is correct
 
-
-// const mockDirectMessages: DirectMessageItem[] = [
-//   { id: 'userAlice', name: 'Alice (Designer)', avatarUrl: '/avatars/01.png', lastMessage: "Hey! Viu o novo design?", timestamp: "10:30", type: 'user', unreadCount: 2 },
-//   { id: 'agent001', name: 'CoderBot-Alpha', avatarUrl: '/avatars/agent-coder.png', lastMessage: "Script finalizado.", timestamp: "09:15", type: 'agent' },
-//   { id: 'userBob', name: 'Bob (Backend Dev)', avatarUrl: '/avatars/02.png', lastMessage: "Preciso de ajuda com a API.", timestamp: "Ontem", type: 'user' },
-//   { id: 'agent002', name: 'TestMaster-7000', avatarUrl: '/avatars/agent-qa.png', lastMessage: "Testes concluídos.", timestamp: "Segunda", type: 'agent', unreadCount: 0 },
-// ];
-
-const currentUserMock = { // This can remain as it's UI specific for current user display
+const currentUserMock = {
   name: 'J. Doe',
   email: 'j.doe@example.com',
   avatarUrl: '/avatars/user-main.png',
@@ -40,19 +32,14 @@ export function UserSidebar() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: dmConversations, isLoading, error } = useIpcSubscription<
-    null, // No args for initial fetch
-    GetDMConversationsListResponseData, // Type for initial data
-    DMConversationsUpdatedEventPayload // Type for event payload
+    null,
+    GetDMConversationsListResponseData,
+    DMConversationsUpdatedEventPayload
   >(
     IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST,
-    null, // Args for initial fetch
+    null,
     IPC_CHANNELS.DM_CONVERSATION_UPDATED_EVENT,
     {
-      // getSnapshot: (currentData, eventPayload) => eventPayload, // Replace current data with payload
-      // For more granular updates, one might merge or update specific items.
-      // For now, assuming eventPayload is the new full list as per shared/ipc-types.ts comment.
-      // If eventPayload is a single item, the getSnapshot logic would need to change.
-      // Let's assume payload is the full list:
       getSnapshot: (_prevData, eventPayload) => eventPayload,
       onError: (err) => {
         toast.error(`Erro ao carregar DMs: ${err.message}`);
@@ -63,24 +50,21 @@ export function UserSidebar() {
   const [selectedDmId, setSelectedDmId] = useState<string | null>(() => {
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     const dmPathMatch = currentPath.match(/\/user\/dm\/([^/]+)/);
-    // Set selectedDmId based on current route, fallback to first DM if available after loading
     return dmPathMatch ? dmPathMatch[1] : null;
   });
 
-  // Update selectedDmId if the current selection is no longer in the list or if nothing is selected and list is available
   React.useEffect(() => {
     if (dmConversations && dmConversations.length > 0) {
       const currentSelectionExists = dmConversations.some(dm => dm.id === selectedDmId);
-      if (!currentSelectionExists && !selectedDmId) { // if nothing selected and list is there
+      if (!currentSelectionExists && !selectedDmId) {
         setSelectedDmId(dmConversations[0].id);
-      } else if (!currentSelectionExists && selectedDmId) { // if current selection disappeared
-         setSelectedDmId(dmConversations[0].id); // select first one
+      } else if (!currentSelectionExists && selectedDmId) {
+         setSelectedDmId(dmConversations[0].id);
       }
     } else if (dmConversations && dmConversations.length === 0) {
-        setSelectedDmId(null); // No DMs, nothing to select
+        setSelectedDmId(null);
     }
   }, [dmConversations, selectedDmId]);
-
 
   const filteredDMs = useMemo(() => {
     if (!dmConversations) return [];
@@ -90,7 +74,6 @@ export function UserSidebar() {
   }, [dmConversations, searchTerm]);
 
   const handleNewDm = () => {
-    // This would ideally open a modal to select a user/agent or navigate to a "new DM" page
     toast.info("Funcionalidade 'Nova Mensagem Direta' ainda não implementada.");
   };
 
@@ -109,8 +92,6 @@ export function UserSidebar() {
          <div className="flex flex-col items-center justify-center p-4 text-xs text-red-600 dark:text-red-400 h-full">
           <AlertTriangle className="h-6 w-6 mb-2" />
           <span>Erro ao carregar DMs.</span>
-          {/* The hook itself already shows a toast, so a retry button might be more useful here if desired */}
-          {/* <Button variant="link" size="sm" className="mt-1 text-xs" onClick={() => { /* TODO: refetch logic if hook supports it *\/ }}>Tentar novamente</Button> */}
         </div>
       );
     }
@@ -123,7 +104,7 @@ export function UserSidebar() {
       );
     }
 
-    return filteredDMs.map((dm: DirectMessageItem) => (
+    return filteredDMs.map((dm: DirectMessageItem) => ( // DirectMessageItem is from shared/ipc-types
       <Link
         key={dm.id}
         to="/user/dm/$conversationId"
@@ -166,7 +147,6 @@ export function UserSidebar() {
 
   return (
     <aside className="w-72 flex-shrink-0 bg-slate-100 dark:bg-slate-800/70 flex flex-col border-r border-slate-200 dark:border-slate-700 h-full">
-      {/* User Profile Dropdown */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-700">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -201,7 +181,6 @@ export function UserSidebar() {
         </DropdownMenu>
       </div>
 
-      {/* Search and New DM Button */}
       <div className="p-3 space-y-2 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
         <Button variant="outline" size="sm" className="w-full" onClick={handleNewDm}>
           <MessageSquarePlus className="mr-2 h-4 w-4" /> Nova Mensagem Direta
@@ -218,7 +197,6 @@ export function UserSidebar() {
         </div>
       </div>
 
-      {/* DM List Area */}
       <ScrollArea className="flex-1">
         <nav className="p-2 space-y-0.5">
           {renderDmList()}

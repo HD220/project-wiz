@@ -1,11 +1,11 @@
-import { Link, useParams } from '@tanstack/react-router';
-import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Folder, Hash, Plus } from 'lucide-react';
+import { Link } from '@tanstack/react-router'; // Removed useParams
+import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Hash, Plus } from 'lucide-react'; // Removed Folder
 import React from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/presentation/ui/components/ui/collapsible';
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
+import { Button } from '@/ui/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/components/ui/collapsible';
+import { ScrollArea } from '@/ui/components/ui/scroll-area';
+import { Separator } from '@/ui/components/ui/separator';
 
 // Helper for NavLink, similar to AppSidebar but might have different base paths or active states
 interface ProjectNavLinkProps {
@@ -13,19 +13,20 @@ interface ProjectNavLinkProps {
   basePath: string; // e.g., /projects/$projectId
   children: React.ReactNode;
   icon?: React.ElementType;
-  exact?: boolean; // For matching exact paths
+  // exact?: boolean; // For matching exact paths - REMOVED as unused by Link's activeProps
 }
 
-function ProjectNavLink({ to, basePath, children, icon: Icon, exact = false }: ProjectNavLinkProps) {
+function ProjectNavLink({ to, basePath, children, icon: iconProp }: ProjectNavLinkProps) { // Removed exact
+  const IconComponent = iconProp; // Alias for JSX
   const fullPath = `${basePath}${to.startsWith('/') ? to : `/${to}`}`;
   return (
     <Link
-      to={fullPath as any} // Cast to any if `to` for Link has stricter types not matching dynamic string
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      to={fullPath as any} // Cast to any for dynamically constructed paths in this mock setup
       className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50' }}
-      // exact={exact} // `exact` prop might not be available or needed depending on router version / setup for activeProps
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {IconComponent && <IconComponent className="h-4 w-4" />}
       <span>{children}</span>
     </Link>
   );

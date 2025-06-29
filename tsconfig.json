@@ -24,16 +24,11 @@
       "@/core/*": ["./src_refactored/core/*"],
       "@/domain/*": ["./src_refactored/core/domain/*"],
       "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
-      "@/presentation/*": ["./src_refactored/presentation/*"],
+      "@/presentation/*": ["./src_refactored/presentation/*"], // Keep this for general presentation if needed
       "@/shared/*": ["./src_refactored/shared/*"],
-      "@/*": ["./src_refactored/*"],
-      "@ui/*": ["./src_refactored/presentation/ui/*"],
-      "@ui/components/*": ["./src_refactored/presentation/ui/components/*"],
-      "@ui/lib/*": ["./src_refactored/presentation/ui/lib/*"],
-      "@ui/hooks/*": ["./src_refactored/presentation/ui/hooks/*"],
-      "@ui/features/*": ["./src_refactored/presentation/ui/features/*"], // Adjusted from /app to /features based on typical structure
-      "@ui/styles/*": ["./src_refactored/presentation/ui/styles/*"],
-      "@ui/routeTree.gen": ["./src_refactored/presentation/ui/routeTree.gen.ts"] // For specific file alias
+      "@/ui/*": ["./src_refactored/presentation/ui/*"], // Correct alias for @/ui/...
+      "@/*": ["./src_refactored/*"] // Base @/ alias, ensure it doesn't conflict if @/ui is more specific
+      // Removed old @ui/* (no slash) and specific @ui/components, @ui/lib etc. aliases
     }
   },
   "include": [

@@ -26,18 +26,18 @@ const mockProjects: Project[] = [
 
 
 function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>(mockProjects); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [projects] = useState<Project[]>(mockProjects); // Removed setProjects, eslint-disable-line no longer needed for it
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // TODO: Implement filtering and sorting based on searchTerm and sortOrder
-  const filteredAndSortedProjects = projects.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.description.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => {
-    if (sortOrder === 'name-asc') return a.name.localeCompare(b.name);
-    if (sortOrder === 'name-desc') return b.name.localeCompare(a.name);
+  const filteredAndSortedProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.description.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((projectA, projectB) => {
+    if (sortOrder === 'name-asc') return projectA.name.localeCompare(projectB.name);
+    if (sortOrder === 'name-desc') return projectB.name.localeCompare(projectA.name);
     // Add more sort options (e.g., by lastActivity)
     return 0;
   });
@@ -67,7 +67,7 @@ function ProjectsPage() {
         <Input
           placeholder="Buscar projetos..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(event) => setSearchTerm(event.target.value)}
           className="flex-grow sm:flex-grow-0 sm:w-auto md:min-w-[250px]"
         />
         <Select value={sortOrder} onValueChange={setSortOrder}>

@@ -1,19 +1,20 @@
 import { Link } from '@tanstack/react-router';
-import { UserSquare, Edit3, Trash2, MoreVertical, Settings, Zap, Brain } from 'lucide-react'; // Added more icons
+// Removed FolderCog, TerminalSquare, SearchCode, TestTubeDiagonal, Bug, Palette, ListChecks, Presentation, Camera
+import { UserSquare, Edit3, Trash2, MoreVertical, Settings, Zap, Brain, MessageSquare, BookText } from 'lucide-react';
 import React from 'react';
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
+import { Badge } from '@/ui/components/ui/badge';
+import { Button } from '@/ui/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/presentation/ui/components/ui/dropdown-menu';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/ui/components/ui/tooltip';
+} from '@/ui/components/ui/dropdown-menu';
+import { Separator } from '@/ui/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/components/ui/tooltip';
 
 
 export interface PersonaTemplate {
@@ -34,22 +35,22 @@ interface PersonaTemplateListItemProps {
 
 // A simple map for tool icons (extend as needed)
 const toolIconMap: Record<string, React.ElementType> = {
-  filesystem: Settings, // Placeholder, actual icon might be FolderCog or similar
-  terminal: Settings, // Placeholder, actual icon might be TerminalSquare
-  'code-editor': Edit3,
-  search: Settings, // Placeholder, actual icon might be SearchCode
-  'test-runner': Zap,
-  'issue-tracker': Settings, // Placeholder
-  'browser-dev-tools': Settings, // Placeholder
-  'task-manager': Settings, // Placeholder
-  'gantt-chart': Settings, // Placeholder
-  'communication-tools': MessageSquare, // Placeholder
-  'markdown-editor': Edit3,
-  'documentation-generator': BookText, // Placeholder
-  'screenshot-tool': Settings, // Placeholder
-  default: Brain, // Default icon for unknown tools
+  filesystem: Settings,
+  terminal: Settings,
+  codeEditor: Edit3, // Was 'code-editor'
+  search: Settings,
+  testRunner: Zap, // Was 'test-runner'
+  issueTracker: Settings, // Was 'issue-tracker'
+  browserDevTools: Settings, // Was 'browser-dev-tools'
+  taskManager: Settings, // Was 'task-manager'
+  ganttChart: Settings, // Was 'gantt-chart'
+  communicationTools: MessageSquare, // Was 'communication-tools'
+  markdownEditor: Edit3, // Was 'markdown-editor'
+  documentationGenerator: BookText, // Was 'documentation-generator'
+  screenshotTool: Settings, // Was 'screenshot-tool'
+  default: Brain,
 };
-
+// Removed eslint-disable comments
 
 export function PersonaTemplateListItem({ template, onEdit, onDelete, onCreateAgent }: PersonaTemplateListItemProps) {
   return (
@@ -114,7 +115,8 @@ export function PersonaTemplateListItem({ template, onEdit, onDelete, onCreateAg
             <div className="flex flex-wrap gap-1.5">
               <TooltipProvider delayDuration={100}>
                 {template.toolNames.slice(0, 5).map(toolName => {
-                  const IconComponent = toolIconMap[toolName] || toolIconMap.default;
+                  const lookupKey = toolName.replace(/-/g, ''); // Normalize toolName from data
+                  const IconComponent = toolIconMap[lookupKey] || toolIconMap.default; // Use normalized key for lookup
                   return (
                     <Tooltip key={toolName}>
                       <TooltipTrigger asChild>

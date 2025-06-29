@@ -3,8 +3,8 @@ import { BarChart2, MessageSquareText, BookText, Settings2, Users, ChevronDown, 
 import React from 'react';
 // Added Hash and PlusCircle to imports, removed GripVertical as it's not used
 
-import { Avatar, AvatarFallback } from '@/presentation/ui/components/ui/avatar'; // Removed AvatarImage
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Avatar, AvatarFallback } from '@/ui/components/ui/avatar'; // Removed AvatarImage
+import { Button } from '@/ui/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +12,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/presentation/ui/components/ui/dropdown-menu";
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { cn } from '@/presentation/ui/lib/utils';
+} from "@/ui/components/ui/dropdown-menu";
+import { ScrollArea } from '@/ui/components/ui/scroll-area';
+import { Separator } from '@/ui/components/ui/separator';
+import { cn } from '@/ui/lib/utils';
 
 
 // Re-using Project type, assuming it's available or defined similarly elsewhere

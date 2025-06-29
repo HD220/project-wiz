@@ -37,16 +37,18 @@ class IPCService {
   }
 
   private createMockAPI(): IElectronIPC {
-    const mockInvoke = async <T>(channel: string, ...args: any[]): Promise<T> => {
+    const mockInvoke = async <T>(channel: string, ...args: unknown[]): Promise<T> => {
       console.warn(`[MockIPC] Invoke: '${channel}' with args:`, args);
       if (channel === IPCChannel.CHAT_SEND_MESSAGE) {
         // Simulate sending message, no specific data needed for void promise
-        return undefined as any;
+        return undefined as unknown as T; // Use unknown
       }
-      throw new Error(`MockIPC: Channel '${channel}' not implemented.`);
+      // For other channels, you might want to return specific mock data based on the channel
+      // For example: if (channel === 'app:get-version') return { version: 'mock-0.1.0' } as unknown as T;
+      throw new Error(`MockIPC: Channel '${channel}' not implemented for invoke.`);
     };
 
-    const mockOn = (channel: string, listener: (...args: any[]) => void): (() => void) => {
+    const mockOn = (channel: string, listener: (...args: unknown[]) => void): (() => void) => {
       console.warn(`[MockIPC] Listener registered for channel: '${channel}'`, listener);
       if (channel === IPCChannel.CHAT_STREAM_EVENT) {
         // Simulate some stream events for chat for testing purposes
@@ -54,12 +56,13 @@ class IPCService {
         setTimeout(() => listener({ type: 'token', data: ' world' } as ChatStreamTokenPayload), 200);
         setTimeout(() => listener({ type: 'end' } as ChatStreamEndPayload), 300);
       }
+      // Add more mock event emissions here if needed for other channels during development without Electron
       return () => {
         console.warn(`[MockIPC] Listener removed for channel: '${channel}'`, listener);
       };
     };
 
-    const mockSend = (channel: string, ...args: any[]): void => {
+    const mockSend = (channel: string, ...args: unknown[]): void => {
       console.warn(`[MockIPC] Send: '${channel}' with args:`, args);
     };
 
@@ -67,7 +70,7 @@ class IPCService {
       invoke: mockInvoke,
       on: mockOn,
       send: mockSend,
-      removeListener: (channel: string, listener) => {
+      removeListener: (channel: string, listener: (...args: unknown[]) => void) => { // listener args to unknown[]
         console.warn(`[MockIPC] removeListener called for '${channel}'`, listener);
       },
       removeAllListeners: (channel: string) => {
@@ -76,42 +79,45 @@ class IPCService {
     };
   }
 
-  public async invoke<TData = any>(
+  public async invoke<TData = unknown>( // Default TData to unknown
     channel: string,
-    ...args: any[]
+    ...args: unknown[] // Args to unknown[]
   ): Promise<IPCResult<TData>> {
     if (!this.api) {
       return { success: false, error: { message: 'IPC API not available' } };
     }
     try {
+      // Assuming this.api.invoke is correctly typed or we trust its behavior
       const result = await this.api.invoke<TData>(channel, ...args);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error: unknown) { // Catch error as unknown
       console.error(`[IPCService] Error invoking channel '${channel}':`, error);
+      const typedError = error as Error; // Type assertion
       return {
         success: false,
         error: {
-          message: error.message || 'An unknown IPC error occurred',
-          name: error.name,
-          stack: error.stack,
+          message: typedError.message || 'An unknown IPC error occurred',
+          name: typedError.name,
+          stack: typedError.stack,
         },
       };
     }
   }
 
-  public on(channel: string, listener: (...args: any[]) => void): () => void {
+  public on(channel: string, listener: (...args: unknown[]) => void): () => void { // listener args to unknown[]
     if (!this.api || !this.api.on) {
       console.error('[IPCService] API not initialized for on.');
       return () => { /* no-op */ };
     }
-    // Assuming the listener passed to preload's `on` will handle the (event, ...data) signature
-    // and call our listener with just the data. If not, this wrapper is needed:
-    // const wrappedListener = (event: any, ...data: any[]) => listener(...data);
-    // For now, assume direct pass-through or that preload handles it.
-    return this.api.on(channel, listener);
+    // The type of listener in IElectronIPC is `(...args: any[]) => void`.
+    // Casting our more specific `(...args: unknown[]) => void` to `any` here is acceptable
+    // as `unknown[]` can be spread into `any[]`.
+    // Ideally, IElectronIPC would also use `unknown[]`.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.api.on(channel, listener as (...args: any[]) => void);
   }
 
-  public send(channel: string, ...args: any[]): void {
+  public send(channel: string, ...args: unknown[]): void { // Args to unknown[]
     if (!this.api || !this.api.send) {
       console.error('[IPCService] API not initialized for send.');
       return;
@@ -153,12 +159,12 @@ class IPCService {
     //
     // The current IElectronIPC.on is typed as: (channel: string, listener: (...args: any[]) => void).
     // To be safe and ensure our typed listener gets the correct payload, we wrap it.
-    const wrappedListener = (_event: any, payload: ChatStreamEventPayload) => {
-      // This assumes the main process sends the payload as the first argument after the event.
-      // If the main process sends multiple arguments, this would need to be adjusted.
-      // For chat stream, it's typical to send a single payload object.
-      listener(payload);
-    };
+    // const wrappedListener = (_event: unknown, payload: ChatStreamEventPayload) => { // REMOVED - Unused
+    //   // This assumes the main process sends the payload as the first argument after the event.
+    //   // If the main process sends multiple arguments, this would need to be adjusted.
+    //   // For chat stream, it's typical to send a single payload object.
+    //   listener(payload);
+    // };
 
     // If the `this.api.on` is already designed to pass only the payload, then `listener` can be passed directly.
     // Given the generic nature of `this.api.on`, a wrapper is safer until preload is defined.
@@ -166,6 +172,7 @@ class IPCService {
     // then our `listener` here would correctly receive just `data`.
     // Let's assume the preload script will be written to simplify this for the renderer,
     // meaning it calls the listener with only the data payload.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.on(IPCChannel.CHAT_STREAM_EVENT, listener as (...args: any[]) => void);
   }
   // --- Project Specific Methods ---

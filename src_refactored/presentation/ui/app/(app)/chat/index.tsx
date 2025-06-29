@@ -1,16 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { MessageSquare, Bot, Hash, Info } from 'lucide-react'; // Users, Settings removed
+import { Bot, Hash } from 'lucide-react'; // Removed MessageSquare, Info, Users, Settings
 import React, { useState } from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button'; // Button imported
-
+// Button removed as it's not used
 // Placeholder components - these will be created in subsequent steps
 import { ChatWindow } from '@/presentation/ui/features/chat/components/ChatWindow';
-import { ConversationList, ConversationItem } from '@/presentation/ui/features/chat/components/ConversationList'; // Import ConversationList and its type
+import { ConversationItem } from '@/presentation/ui/features/chat/components/ConversationList'; // Removed ConversationList as it's not used
 
 // Mock data for conversations/agents
 // Renamed MockConversation to ConversationItem to match the type from ConversationList.tsx
-interface ConversationItemUIData extends ConversationItem { // Keep this, ChatWindow might use a more detailed type later
+interface ConversationItemUIData extends ConversationItem {
   id: string;
   name: string;
   type: 'dm' | 'channel'; // Direct Message or Project Channel
@@ -31,22 +30,22 @@ interface MockMessage {
 }
 
 const mockMessages: Record<string, MockMessage[]> = {
-  'agent-001': [
+  agent001: [
     { id: 'm1', sender: { name: 'J.Doe', type: 'user' }, content: 'Olá CoderBot, pode me ajudar com um script Python?', timestamp: '10:28' },
     { id: 'm2', sender: { name: 'CoderBot-Alpha', type: 'agent', avatarUrl: '/avatars/agent-coder.png' }, content: 'Claro! Qual é o problema ou requisito?', timestamp: '10:29' },
     { id: 'm3', sender: { name: 'CoderBot-Alpha', type: 'agent', avatarUrl: '/avatars/agent-coder.png' }, content: 'Ok, estou analisando o código agora...', timestamp: '10:30' },
   ],
-  'proj-phoenix-general': [
+  projPhoenixGeneral: [
      { id: 'm4', sender: { name: 'Alice', type: 'user', avatarUrl: '/avatars/01.png' }, content: 'Reunião de planejamento às 14h.', timestamp: '09:15' },
   ]
 };
 
 
-const mockConversations: MockConversation[] = [
-  { id: 'agent-001', name: 'CoderBot-Alpha', type: 'dm', avatarUrl: '/avatars/agent-coder.png', lastMessage: "Ok, estou analisando o código agora...", timestamp: "10:30", unreadCount: 1 },
+const mockConversations: ConversationItemUIData[] = [ // Changed MockConversation to ConversationItemUIData
+  { id: 'agent001', name: 'CoderBot-Alpha', type: 'dm', avatarUrl: '/avatars/agent-coder.png', lastMessage: "Ok, estou analisando o código agora...", timestamp: "10:30", unreadCount: 1 },
   { id: 'user-alice', name: 'Alice (Designer)', type: 'dm', avatarUrl: '/avatars/01.png', lastMessage: "Você viu o novo layout?", timestamp: "Ontem" },
-  { id: 'proj-phoenix-general', name: '# geral (Projeto Phoenix)', type: 'channel', lastMessage: "Reunião de planejamento às 14h.", timestamp: "09:15", participants: 12 },
-  { id: 'agent-002', name: 'TestMaster-7000', type: 'dm', avatarUrl: '/avatars/agent-qa.png', lastMessage: "Todos os testes passaram!", timestamp: "08:50" },
+  { id: 'projPhoenixGeneral', name: '# geral (Projeto Phoenix)', type: 'channel', lastMessage: "Reunião de planejamento às 14h.", timestamp: "09:15", participants: 12 },
+  { id: 'agent002', name: 'TestMaster-7000', type: 'dm', avatarUrl: '/avatars/agent-qa.png', lastMessage: "Todos os testes passaram!", timestamp: "08:50" },
   { id: 'proj-quimera-dev', name: '# dev (Operação Quimera)', type: 'channel', lastMessage: "Nova PR aberta para o microsserviço X.", timestamp: "Segunda", participants: 5 },
 ];
 

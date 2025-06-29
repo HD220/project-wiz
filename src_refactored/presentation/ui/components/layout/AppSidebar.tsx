@@ -22,14 +22,15 @@ interface AppSidebarItemProps extends Omit<LinkProps, 'children' | 'title'> {
 
 function AppSidebarItem({
   tooltip,
-  icon: IconElement, // Renomeado para IconElement para satisfazer o ESLint
+  icon: iconProp,
   isAvatar = false,
   avatarSrc,
   avatarFallback,
   action,
   className,
-  ...linkProps // Resto das props são para o Link do TanStack Router
+  ...linkProps
 }: AppSidebarItemProps) {
+  const IconComponent = iconProp; // Alias for JSX
   const content = isAvatar ? (
     <Avatar className="h-9 w-9 text-sm">
       {avatarSrc && <AvatarImage src={avatarSrc} alt={tooltip} />}
@@ -38,7 +39,7 @@ function AppSidebarItem({
       </AvatarFallback>
     </Avatar>
   ) : (
-    <IconElement className="h-6 w-6" /> // Usar IconElement
+    <IconComponent className="h-6 w-6" />
   );
 
   const commonButtonClasses = cn(

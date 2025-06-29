@@ -31,13 +31,13 @@ function EditLLMConfigPage() {
     // Simulate fetching config data
     setTimeout(() => {
       // Find by string ID from mock, as configId from URL is string
-      const foundConfig = Object.values(mockLlmConfigsDb).find(c => c.id === configId);
+      const foundConfig = Object.values(mockLlmConfigsDb).find(config => config.id === configId);
 
       if (foundConfig) {
         setInitialValues({
           name: foundConfig.name,
           providerId: foundConfig.providerId as LLMConfigFormData['providerId'], // Cast if necessary
-          apiKey: (foundConfig as any).apiKey || '', // apiKey might not be on LLMConfig type for list
+          apiKey: foundConfig.apiKey || '', // Directly access apiKey, it's optional on LLMConfig
           baseUrl: foundConfig.baseUrl || '',
         });
         setConfigName(foundConfig.name);
@@ -53,7 +53,7 @@ function EditLLMConfigPage() {
     console.log('Dados atualizados da configuração LLM:', configId, data);
 
     await new Promise(resolve => setTimeout(resolve, 1000));
-    const configToUpdate = Object.values(mockLlmConfigsDb).find(c => c.id === configId);
+    const configToUpdate = Object.values(mockLlmConfigsDb).find(config => config.id === configId);
 
     if (configToUpdate) {
       // Update the "DB" entry; find the actual key of the object to update

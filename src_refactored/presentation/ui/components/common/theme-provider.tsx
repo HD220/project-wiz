@@ -27,9 +27,9 @@ export function ThemeProvider({
         return storedTheme;
       }
       return defaultTheme;
-    } catch (e) {
+    } catch (_error) {
       // localStorage is not available (e.g., SSR or restricted environment)
-      // console.warn('localStorage not available for theme persistence:', e);
+      // console.warn('localStorage not available for theme persistence:', _error);
       return defaultTheme;
     }
   });
@@ -48,9 +48,9 @@ export function ThemeProvider({
     try {
       // Store the raw theme value (could be 'system')
       localStorage.setItem(storageKey, theme);
-    } catch (e) {
+    } catch (_error) {
       // Ignore localStorage errors if persistence fails
-      // console.warn('Failed to persist theme to localStorage:', e);
+      // console.warn('Failed to persist theme to localStorage:', _error);
     }
   }, [theme, storageKey]);
 

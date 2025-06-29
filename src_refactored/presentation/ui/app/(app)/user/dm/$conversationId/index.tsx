@@ -10,10 +10,11 @@ import { useIpcQuery } from '@/presentation/ui/hooks/ipc/useIpcQuery';
 import { useIpcSubscription } from '@/presentation/ui/hooks/ipc/useIpcSubscription';
 
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
-// ChatMessage is used in handleSendMessage
+// ChatMessage is type-imported for clarity in generic arguments, even if not directly annotating a var.
 // DirectMessageItem is used for conversationDetails type
 import type {
   DirectMessageItem,
+
   ChatMessage,
   GetDMMessagesRequest,
   GetDMMessagesResponseData,
@@ -34,6 +35,12 @@ interface ChatWindowConversationHeader {
 
 // Mock current user ID - this would ideally come from a global user context/store
 const currentUserId = "userJdoe";
+
+// --- Unused Sub-components Removed ---
+// DirectMessagePageLoadingErrorDisplay was here
+// DirectMessageChatView was here
+// --- End Unused Sub-components ---
+
 
 function DirectMessagePage() {
   const params = useParams({ from: '/(app)/user/dm/$conversationId/' });

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
 import { ChatMessage, MessageItem } from './MessageItem'; // Assuming ChatMessage is also exported from MessageItem.tsx
 

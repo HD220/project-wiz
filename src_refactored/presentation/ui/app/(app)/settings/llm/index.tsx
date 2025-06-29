@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 import { PlusCircle } from 'lucide-react';
-import React, { useState, useEffect } from 'react'; // Added useState, useEffect
+import React, { useState } from 'react'; // Removed useEffect
 // import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // For real data fetching
-
 import { toast } from 'sonner'; // For notifications
 
 import {
@@ -68,7 +67,7 @@ function LLMConfigurationPage() {
     // TODO: Implement actual deletion via IPC and TanStack Mutation
     // mutation.mutate(showDeleteConfirm.id, { ... });
     toast.success(`Configuração "${showDeleteConfirm.name}" excluída (simulado).`);
-    setLlmConfigs(prev => prev.filter(c => c.id !== showDeleteConfirm.id)); // Optimistic update for UI
+    setLlmConfigs(prev => prev.filter(config => config.id !== showDeleteConfirm.id)); // Optimistic update for UI
     setShowDeleteConfirm(null);
   };
 

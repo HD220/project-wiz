@@ -2,7 +2,7 @@ import * as AccordionPrimitive from "@radix-ui/react-accordion"
 import { ChevronDownIcon } from "lucide-react"
 import * as React from "react"
 
-import { cn } from "@ui/lib/utils" // Corrected path
+import { cn } from "@/ui/lib/utils" // Corrected path
 
 function Accordion({
   ...props

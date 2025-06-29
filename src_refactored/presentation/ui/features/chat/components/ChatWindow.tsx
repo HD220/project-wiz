@@ -1,7 +1,7 @@
 import { Info, Bot, Hash, MessageSquare } from 'lucide-react'; // Paperclip and Send are now in MessageInput
 import React from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Button } from '@/ui/components/ui/button';
 
 import { MessageInput } from './MessageInput'; // Import MessageInput
 import { ChatMessage } from './MessageItem';
@@ -25,7 +25,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ conversation, messages, onSendMessage, isLoading, currentUserId }: ChatWindowProps) {
-  const [inputValue, setInputValue] = React.useState('');
+  // const [inputValue, setInputValue] = React.useState(''); // Removed, MessageInput handles its own state
 
   if (!conversation) {
     return (
@@ -39,17 +39,7 @@ export function ChatWindow({ conversation, messages, onSendMessage, isLoading, c
     );
   }
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-  };
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (inputValue.trim()) {
-      onSendMessage(inputValue.trim());
-      setInputValue('');
-    }
-  };
+  // Removed handleInputChange and handleFormSubmit as MessageInput component now handles this logic.
 
   return (
     <div className="flex flex-col h-full">

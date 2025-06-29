@@ -3,7 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Button } from '@/ui/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,12 +12,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/ui/components/ui/select';
-import { Slider } from '@/presentation/ui/components/ui/slider';
-import { LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList';
-import { PersonaTemplate } from '@/presentation/ui/features/persona/components/PersonaTemplateListItem';
+} from '@/ui/components/ui/form';
+import { Input } from '@/ui/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/components/ui/select';
+import { Slider } from '@/ui/components/ui/slider';
+import { LLMConfig } from '@/ui/features/llm/components/LLMConfigList';
+import { PersonaTemplate } from '@/ui/features/persona/components/PersonaTemplateListItem';
 
 
 const agentInstanceFormSchema = z.object({

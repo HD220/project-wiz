@@ -2,17 +2,17 @@ import { Link } from '@tanstack/react-router';
 import { Briefcase, MoreHorizontal, Trash2, Edit3, PlayCircle, PauseCircle } from 'lucide-react'; // Added Play/Pause
 import React from 'react';
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
+import { Badge } from '@/ui/components/ui/badge';
+import { Button } from '@/ui/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/presentation/ui/components/ui/dropdown-menu';
-import { Separator } from '@/presentation/ui/components/ui/separator';
+} from '@/ui/components/ui/dropdown-menu';
+import { Separator } from '@/ui/components/ui/separator';
 
 export interface Project {
   id: string;
@@ -44,9 +44,9 @@ const statusMap: Record<Project['status'], { label: string; color: string; icon?
 export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleStatus }: ProjectListItemProps) {
   const projectStatus = statusMap[project.status] || statusMap.planning;
 
-  const handleToggleStatus = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation if button is inside a Link
-    e.stopPropagation();
+  const handleToggleStatus = (event: React.MouseEvent) => {
+    event.preventDefault(); // Prevent link navigation if button is inside a Link
+    event.stopPropagation();
     onToggleStatus?.(project.id, project.status);
   }
 
@@ -54,13 +54,13 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-7 w-7 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} // Prevent card click
+          onClick={(event) => { event.preventDefault(); event.stopPropagation(); }} // Prevent card click
         >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Mais opções</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+      <DropdownMenuContent align="end" onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}>
         {onEdit && <DropdownMenuItem onClick={() => onEdit(project.id)}>
           <Edit3 className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
           Editar

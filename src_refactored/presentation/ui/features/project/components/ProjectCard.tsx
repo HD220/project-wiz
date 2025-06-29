@@ -1,6 +1,6 @@
 import { Link }
   from '@tanstack/react-router';
-import { ExternalLink, Star, GitFork, CalendarDays } from 'lucide-react'; // Example icons
+import { Star, GitFork, CalendarDays } from 'lucide-react'; // Example icons, removed ExternalLink
 import React from 'react';
 
 import { Badge } from '@/presentation/ui/components/ui/badge';

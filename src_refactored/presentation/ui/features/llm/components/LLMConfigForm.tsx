@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner'; // Assuming sonner is used for toasts
 import { z } from 'zod';
 
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Button } from '@/ui/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,9 +13,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/ui/components/ui/select';
+} from '@/ui/components/ui/form';
+import { Input } from '@/ui/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/components/ui/select';
 
 // Schema for form validation using Zod
 const llmConfigSchema = z.object({

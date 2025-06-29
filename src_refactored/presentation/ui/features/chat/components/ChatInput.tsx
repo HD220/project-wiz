@@ -63,7 +63,7 @@ export function ChatInput({
       <Textarea
         ref={textareaRef}
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={(event) => setMessage(event.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="flex-1 resize-none border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 focus:ring-sky-500 dark:focus:ring-sky-500 focus:border-sky-500 dark:focus:border-sky-500 min-h-[40px] max-h-[120px] overflow-y-auto rounded-lg px-3 py-2 text-sm"

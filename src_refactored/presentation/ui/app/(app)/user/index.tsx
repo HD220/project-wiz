@@ -139,7 +139,8 @@ function UserIndexPage() {
                                 <div>
                                 <Link
                                     to={activity.linkTo}
-                                    params={activity.params as any} // Using 'as any' here to bypass strict param typing for demo
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    params={activity.params as any} // Using 'as any' here for mock data demo, real params are typed
                                     className="hover:underline text-sm text-slate-700 dark:text-slate-200"
                                 >
                                     {activity.text}

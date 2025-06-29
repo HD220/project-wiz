@@ -5,27 +5,25 @@ import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 import * as React from "react"
 
-import { Button } from "@ui/components/ui/button" // Corrected path
-import { Input } from "@ui/components/ui/input" // Corrected path
-import { Separator } from "@ui/components/ui/separator" // Corrected path
+import { Button } from "@/ui/components/ui/button" // Corrected path
+import { Input } from "@/ui/components/ui/input" // Corrected path
+import { Separator } from "@/ui/components/ui/separator" // Corrected path
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@ui/components/ui/sheet" // Corrected path
-import { Skeleton } from "@ui/components/ui/skeleton" // Corrected path
+} from "@/ui/components/ui/sheet" // Corrected path
+import { Skeleton } from "@/ui/components/ui/skeleton" // Corrected path
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@ui/components/ui/tooltip" // Corrected path
-
-import { useIsMobile } from "@ui/hooks/use-mobile" // Corrected path
-
-import { cn } from "@ui/lib/utils" // Corrected path
+} from "@/ui/components/ui/tooltip" // Corrected path
+import { useIsMobile } from "@/ui/hooks/use-mobile" // Corrected path
+import { cn } from "@/ui/lib/utils" // Corrected path
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

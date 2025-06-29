@@ -1,7 +1,7 @@
 import { CheckCircle2 } from 'lucide-react'; // Icon for selected state
 import React from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button'; // Will be used if "Select" button per card is desired
+// Button import removed as it's not used
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/presentation/ui/components/ui/card';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
 import { cn } from '@/presentation/ui/lib/utils'; // For conditional class names

@@ -13,25 +13,25 @@ export function ProjectList({ projects, viewMode }: ProjectListProps) {
   const handleDeleteProject = (projectId: string) => {
     // Placeholder for actual delete logic
     // e.g., call an IPC method, then refetch or update local state
-    const project = projects.find(p => p.id === projectId);
-    toast.warning(`Exclusão do projeto "${project?.name}" (simulado).`, {
+    const currentProject = projects.find(project => project.id === projectId);
+    toast.warning(`Exclusão do projeto "${currentProject?.name}" (simulado).`, {
       description: "Esta funcionalidade ainda não está conectada ao backend.",
     });
-    // Example: setProjects(prev => prev.filter(p => p.id !== projectId));
+    // Example: setProjects(prev => prev.filter(project => project.id !== projectId));
   };
 
   const handleEditProject = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    toast.info(`Edição do projeto "${project?.name}" (simulado).`, {
+    const currentProject = projects.find(project => project.id === projectId);
+    toast.info(`Edição do projeto "${currentProject?.name}" (simulado).`, {
       description: "Redirecionamento para formulário de edição (a ser implementado).",
     });
     // Example: router.navigate({ to: `/projects/${projectId}/edit` });
   };
 
   const handleToggleProjectStatus = (projectId: string, currentStatus: Project['status']) => {
-    const project = projects.find(p => p.id === projectId);
+    const currentProject = projects.find(project => project.id === projectId);
     const newStatus = currentStatus === 'active' ? 'pausado' : 'ativo';
-    toast.info(`Status do projeto "${project?.name}" alterado para ${newStatus} (simulado).`, {
+    toast.info(`Status do projeto "${currentProject?.name}" alterado para ${newStatus} (simulado).`, {
        description: "Esta funcionalidade ainda não está conectada ao backend.",
     });
     // Example: Update project status via API and refetch or update local state

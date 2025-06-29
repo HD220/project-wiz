@@ -5,10 +5,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/ui/components/ui/avatar';
+import { Button } from '@/ui/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/ui/components/ui/form';
+import { Input } from '@/ui/components/ui/input';
+
 import { UserProfile, UserProfileFormData } from '@/shared/ipc-types'; // Import from shared types
 
 interface UserProfileFormProps {
@@ -116,9 +117,9 @@ export function UserProfileForm({ initialData, onSubmit, isSubmitting }: UserPro
                             <Input
                                 placeholder="https://example.com/avatar.png"
                                 {...field}
-                                onChange={(e) => {
-                                    field.onChange(e); // RHF internal update
-                                    handleAvatarUrlChange(e); // Custom handler for preview
+                                onChange={(event) => {
+                                    field.onChange(event); // RHF internal update
+                                    handleAvatarUrlChange(event); // Custom handler for preview
                                 }}
                             />
                         </FormControl>

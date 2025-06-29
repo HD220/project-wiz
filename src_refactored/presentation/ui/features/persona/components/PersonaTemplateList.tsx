@@ -10,24 +10,24 @@ interface PersonaTemplateListProps {
 export function PersonaTemplateList({ templates }: PersonaTemplateListProps) {
 
   const handleDeleteTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    toast.warning(`Exclusão do template "${template?.name}" (simulado).`, {
+    const currentTemplate = templates.find(template => template.id === templateId);
+    toast.warning(`Exclusão do template "${currentTemplate?.name}" (simulado).`, {
       description: "Esta funcionalidade ainda não está conectada ao backend.",
     });
-    // Example: setTemplates(prev => prev.filter(t => t.id !== templateId));
+    // Example: setTemplates(prev => prev.filter(template => template.id !== templateId));
   };
 
   const handleEditTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    toast.info(`Edição do template "${template?.name}" (simulado).`, {
+    const currentTemplate = templates.find(template => template.id === templateId);
+    toast.info(`Edição do template "${currentTemplate?.name}" (simulado).`, {
       description: "Redirecionamento para formulário de edição (a ser implementado).",
     });
     // Example: router.navigate({ to: `/personas/${templateId}/edit` });
   };
 
   const handleCreateAgentFromTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    toast.info(`Criar agente com template "${template?.name}" (simulado).`, {
+    const currentTemplate = templates.find(template => template.id === templateId);
+    toast.info(`Criar agente com template "${currentTemplate?.name}" (simulado).`, {
       description: "Redirecionamento para formulário de criação de agente (a ser implementado).",
     });
     // Example: router.navigate({ to: `/agents/new?templateId=${templateId}` });

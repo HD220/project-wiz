@@ -197,4 +197,11 @@ export default [
        // Other test-specific rule adjustments can go here
     },
   },
+  // New config block to ignore naming-convention for ShadCN UI components
+  {
+    files: ["src_refactored/presentation/ui/components/ui/**/*.tsx"], // Target only .tsx files in this directory
+    rules: {
+      "@typescript-eslint/naming-convention": "off"
+    }
+  }
 ];
