@@ -123,6 +123,6 @@ function DirectMessagePage() {
   );
 }
 
-export const Route = createFileRoute('/(app)/user/dm/$conversationId')({
+export const Route = createFileRoute('/(app)/user/dm/$conversationId/')({
   component: DirectMessagePage,
 });
