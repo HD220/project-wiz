@@ -1,7 +1,8 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
+// import ReactMarkdown from 'react-markdown'; // Replaced by MarkdownRenderer
+// import remarkGfm from 'remark-gfm'; // Handled by MarkdownRenderer
+import { MarkdownRenderer } from '@/presentation/ui/components/common/MarkdownRenderer'; // Import new renderer
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { cn } from '@/presentation/ui/lib/utils';
 
@@ -76,12 +77,16 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
             {senderName}
           </p>
         )}
-        <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-blockquote:my-1 prose-pre:my-1 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:text-xs break-words">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {message.content}
-          </ReactMarkdown>
-          {message.type === 'error' && <span className="text-red-500 dark:text-red-400 ml-1 text-xs">(Erro)</span>}
-        </div>
+        {/* Use the new MarkdownRenderer component */}
+        {/* Pass specific prose classes if needed for chat context, or rely on MarkdownRenderer's defaults */}
+        <MarkdownRenderer
+          content={message.content}
+          // Example of adjusting prose for chat: tighter paragraph margins
+          proseClassName="prose-p:my-0.5"
+        />
+        {message.type === 'error' && (
+          <span className="text-red-500 dark:text-red-400 ml-1 text-xs inline-block mt-0.5">(Erro)</span>
+        )}
         <p className={cn(
             "text-xs mt-1 text-right",
             isCurrentUser ? "text-sky-200/80" : "text-slate-400 dark:text-slate-500"

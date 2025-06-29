@@ -1,9 +1,10 @@
-import { createFileRoute, useParams } from '@tanstack/react-router'; // Corrected: Only one import
+import { createFileRoute } from '@tanstack/react-router'; // useParams removed as it's not used
 import { Folder, FileText, Edit } from 'lucide-react';
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
+// import ReactMarkdown from 'react-markdown'; // Replaced by MarkdownRenderer
+// import remarkGfm from 'remark-gfm'; // Handled by MarkdownRenderer
+import { MarkdownRenderer } from '@/presentation/ui/components/common/MarkdownRenderer'; // Import new renderer
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
@@ -66,7 +67,7 @@ type DocEntry = DocFile | DocFolder;
 
 
 function ProjectDocsPage() {
-  const params = useParams({ from: '/(app)/projects/$projectId/docs' }); // Keep useParams as projectId might be used later
+  // const params = useParams({ from: '/(app)/projects/$projectId/docs' }); // params not used, commented out
   // const projectId = params.projectId;
   const [selectedFilePath, setSelectedFilePath] = React.useState<string[]>(['readmeMd']);
 
@@ -150,10 +151,12 @@ function ProjectDocsPage() {
               <Button variant="outline" size="sm"><Edit size={14} className="mr-1.5"/> Editar (N/I)</Button>
             </CardHeader>
             <Separator/>
-            <CardContent className="pt-6 prose dark:prose-invert max-w-none prose-sm prose-p:my-1 prose-headings:mb-2 prose-headings:mt-4">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {currentFileContent}
-              </ReactMarkdown>
+            {/* Use the new MarkdownRenderer component */}
+            {/* The prose classes are now handled by MarkdownRenderer by default,
+                but can be overridden with proseClassName if needed.
+                The CardContent can provide padding if MarkdownRenderer itself doesn't. */}
+            <CardContent className="pt-6">
+              <MarkdownRenderer content={currentFileContent} />
             </CardContent>
           </Card>
         ) : (
