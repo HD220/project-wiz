@@ -154,8 +154,8 @@ export function PersonaTemplateForm({
             <Input
               placeholder="Digite o nome de uma ferramenta (ex: filesystem)"
               value={currentToolInput}
-              onChange={(event) => setCurrentToolInput(event.target.value)} // e to event
-              onKeyDown={(event) => { // e to event
+              onChange={(event) => setCurrentToolInput(event.target.value)}
+              onKeyDown={(event) => {
                 if (event.key === 'Enter' && currentToolInput.trim() !== '') {
                   event.preventDefault();
                   handleAddTool();
@@ -169,7 +169,7 @@ export function PersonaTemplateForm({
           </div>
           <FormDescription>
             Liste as ferramentas que esta persona poderá utilizar (pressione Enter ou clique Adicionar).
-            Exemplos: {AVAILABLE_TOOLS.slice(0,3).map(tool => tool.id).join(', ')}... {/* t to tool */}
+            Exemplos: {AVAILABLE_TOOLS.slice(0,3).map(tool => tool.id).join(', ')}...
           </FormDescription>
           <Controller
             control={form.control}
