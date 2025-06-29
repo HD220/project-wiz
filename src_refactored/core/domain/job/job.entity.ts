@@ -124,6 +124,19 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
   get failedReason(): string | undefined { return this.props.failedReason; }
   get stacktrace(): string[] | undefined { return this.props.stacktrace; }
 
+  get isRetry(): boolean {
+    // A job is considered a retry if it's being attempted more than once.
+    // attemptsMade is incremented just before an attempt starts (in moveToActive).
+    // So, if attemptsMade > 1, it's a retry.
+    // If it's WAITING/DELAYED and attemptsMade > 0, it means it has failed before and is pending retry.
+    if (this.props.status === JobStatus.ACTIVE) {
+      return this.props.attemptsMade > 1;
+    }
+    return this.props.attemptsMade > 0 &&
+           (this.props.status === JobStatus.WAITING || this.props.status === JobStatus.DELAYED) &&
+           this.props.failedReason !== undefined;
+  }
+
   get progressChanged(): boolean { return this._progressChanged; }
   get logsChanged(): boolean { return this._logsChanged; }
 
@@ -276,8 +289,22 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
     public toPersistence(): Omit<JobEntityProps<P, R>, 'id' | 'options'> & { id: string, options: IJobOptions } {
     // Convert VOs back to plain objects for persistence if necessary
     // For JobOptionsVO, we defined toPersistence() on it.
+    const persistedProps = { ...this.props } as any; // Cast to any to handle date conversions
+
+    persistedProps.createdAt = this.props.createdAt.getTime();
+    persistedProps.updatedAt = this.props.updatedAt.getTime();
+    if (this.props.processedOn) persistedProps.processedOn = this.props.processedOn.getTime();
+    if (this.props.finishedOn) persistedProps.finishedOn = this.props.finishedOn.getTime();
+    if (this.props.delayUntil) persistedProps.delayUntil = this.props.delayUntil.getTime();
+    if (this.props.lockUntil) persistedProps.lockUntil = this.props.lockUntil.getTime();
+
+    persistedProps.logs = this.props.logs.map(log => ({
+      ...log,
+      timestamp: log.timestamp.getTime(),
+    }));
+
     return {
-      ...this.props,
+      ...persistedProps,
       id: this.props.id.value,
       options: this.props.options.toPersistence(),
     };

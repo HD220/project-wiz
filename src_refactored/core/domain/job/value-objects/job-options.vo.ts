@@ -42,7 +42,9 @@ export interface IJobOptions {
   removeOnFail?: boolean | IJobRemovalOptions; // If true, remove job when it fails after all attempts. If object, specifies retention rules.
   jobId?: string; // Optional custom job ID
   // TODO: Add `dependsOn?: string[] | { jobId: string; status: 'completed' | 'failed' }[]` in the future if needed
-  // TODO: Add `repeat?: IRepeatOptions` in the future if needed (align with BullMQ's new Job Schedulers)
+  // TODO: Add `repeat?: IRepeatOptions` in thefuture if needed (align with BullMQ's new Job Schedulers)
+  timeout?: number; // Optional: max time in ms for a job to run
+  maxStalledCount?: number; // Optional: max times a job can be stalled before failing
 }
 
 export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
@@ -57,6 +59,7 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
       attempts: 1,
       removeOnComplete: true, // Default to remove on complete
       removeOnFail: false,    // Default to keep on fail for inspection
+      maxStalledCount: 3,     // Default max stalled count
     };
     return new JobOptionsVO({ ...defaults, ...(options || {}) });
   }
@@ -67,6 +70,7 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
     sanitized.priority = Math.max(0, props.priority || 0);
     sanitized.delay = Math.max(0, props.delay || 0);
     sanitized.attempts = Math.max(1, props.attempts || 1); // At least 1 attempt
+    sanitized.maxStalledCount = Math.max(0, props.maxStalledCount || 0); // Default or provided
 
     if (props.backoff && typeof props.backoff === 'object') {
       if (props.backoff.delay <= 0) {
@@ -111,6 +115,9 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   get removeOnComplete(): boolean | IJobRemovalOptions { return this.props.removeOnComplete!; }
   get removeOnFail(): boolean | IJobRemovalOptions { return this.props.removeOnFail!; }
   get jobId(): string | undefined { return this.props.jobId; }
+  get timeout(): number | undefined { return this.props.timeout; }
+  get maxStalledCount(): number { return this.props.maxStalledCount!; }
+
 
   public toPersistence(): IJobOptions {
     // For a custom backoff function, we might need to store its name or a reference
