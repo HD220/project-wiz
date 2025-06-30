@@ -2,7 +2,8 @@
 import {
   JobEventType,
   JobEventPayloadMap
-} from '@/core/application/queue/events/job-event.types'; // Corrected path
+} from '@/core/application/queue/events/job-event.types';
+// Corrected path
 
 export const JOB_EVENT_EMITTER_TOKEN = Symbol('IJobEventEmitter');
 
