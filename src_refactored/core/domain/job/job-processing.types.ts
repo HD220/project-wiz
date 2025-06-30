@@ -7,9 +7,8 @@ import { JobEntity } from './job.entity';
  * This is a placeholder and can be extended based on specific agent requirements.
  */
 export interface JobProcessingOutput<R = unknown> {
-  job: JobEntity<unknown, R>; // The job that was processed
-  result: R;                 // The final result/output from the agent
-  // Add other relevant fields like status, logs summary, etc. if needed
+  job: JobEntity<unknown, R>;
+  result: R;
 }
 
 /**
@@ -18,7 +17,7 @@ export interface JobProcessingOutput<R = unknown> {
  */
 export interface AgentThought {
   type: 'thought' | 'observation' | 'tool_call' | 'tool_result' | 'llm_response' | 'error' | 'info';
-  content: string | object; // Structured content depending on the type
+  content: string | object;
   timestamp: Date;
 }
 
@@ -28,8 +27,8 @@ export interface AgentThought {
 export interface ToolExecutionOutput {
   toolName: string;
   toolInput: unknown;
-  output: unknown; // Can be any type, string, object, etc.
-  error?: string; // If the tool execution resulted in an error
+  output: unknown;
+  error?: string;
   timestamp: Date;
 }
 
@@ -38,19 +37,16 @@ export interface ToolExecutionOutput {
  * This could be a collection of thoughts, tool calls, and observations.
  */
 export interface AgentActivityHistory {
-  entries: AgentThought[]; // Chronological list of agent activities
+  entries: AgentThought[];
 }
-
-// --- Types for GenericAgentExecutorService ---
 
 /**
  * Payload for initiating an agent execution job.
  */
 export interface AgentExecutionPayload {
-  agentId: string; // VO string representation
+  agentId: string;
   initialPrompt?: string;
-  userId?: string; // Optional: for user-specific context or permissions
-  // Potentially add other context like project ID, specific data sources, etc.
+  userId?: string;
 }
 
 /**
@@ -60,11 +56,11 @@ export interface AgentExecutionPayload {
 export interface ExecutionHistoryEntry {
   timestamp: Date;
   type: 'llm_call' | 'llm_response' | 'llm_error' | 'tool_call' | 'tool_result' | 'tool_error' | 'unusable_llm_response' | 'agent_error' | 'info';
-  name: string; // e.g., LLM model name, tool name, or event description
-  params?: unknown; // e.g., LLM params, tool input args
-  result?: unknown; // e.g., LLM response object, tool output
-  error?: unknown; // Error object or message
-  isCritical?: boolean; // For tool errors, indicates if it's a non-recoverable error
+  name: string;
+  params?: unknown;
+  result?: unknown;
+  error?: unknown;
+  isCritical?: boolean;
 }
 
 
@@ -73,13 +69,12 @@ export interface ExecutionHistoryEntry {
  * This is distinct from JobStatus, which tracks the overall job lifecycle.
  */
 export enum AgentExecutorStatus {
-  SUCCESS = 'SUCCESS', // Agent believes it has achieved the goal.
-  FAILURE_MAX_ITERATIONS = 'FAILURE_MAX_ITERATIONS', // Max iterations reached without achieving goal.
-  FAILURE_TOOL = 'FAILURE_TOOL', // A critical tool error occurred.
-  FAILURE_LLM = 'FAILURE_LLM', // A critical LLM error occurred.
-  FAILURE_VALIDATION = 'FAILURE_VALIDATION', // Input/output validation failed critically.
-  FAILURE_INTERNAL = 'FAILURE_INTERNAL', // An unexpected internal error in the executor.
-  // RUNNING status might be implicit while the promise is not resolved.
+  SUCCESS = 'SUCCESS',
+  FAILURE_MAX_ITERATIONS = 'FAILURE_MAX_ITERATIONS',
+  FAILURE_TOOL = 'FAILURE_TOOL',
+  FAILURE_LLM = 'FAILURE_LLM',
+  FAILURE_VALIDATION = 'FAILURE_VALIDATION',
+  FAILURE_INTERNAL = 'FAILURE_INTERNAL',
 }
 
 /**
@@ -88,13 +83,12 @@ export enum AgentExecutorStatus {
  * If a critical error occurs that prevents a structured result, the promise should reject.
  */
 export interface AgentExecutorResult<O = unknown> {
-  jobId: string; // Corresponds to JobEntity.id.value
+  jobId: string;
   status: AgentExecutorStatus;
-  message: string; // Summary message of the execution outcome
-  output?: O; // The final structured output from the agent, if any
-  history?: unknown[]; // Could be ActivityHistoryEntryVO[] or a simplified version for the result
-  errors?: ExecutionHistoryEntry[]; // List of non-critical errors encountered
-  // criticalToolFailureInfo?: CriticalToolFailureInfo; // If a critical tool failure occurred
+  message: string;
+  output?: O;
+  history?: unknown[];
+  errors?: ExecutionHistoryEntry[];
 }
 
 /**
@@ -102,9 +96,5 @@ export interface AgentExecutorResult<O = unknown> {
  */
 export interface CriticalToolFailureInfo {
   toolName: string;
-  error: string; // Error message or serialized error
-  // Potentially include input that caused the failure
+  error: string;
 }
-
-
-// TODO: Define more specific types as needed for different kinds of agent outputs or processing details.
