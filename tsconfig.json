@@ -26,9 +26,7 @@
       "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
       "@/components/*": ["./src_refactored/presentation/ui/components/*"],
       "@/shared/*": ["./src_refactored/shared/*"],
-      // Simplified @ui path
       "@/ui/*": ["./src_refactored/presentation/ui/*"],
-      // General fallback
       "@/*": ["./src_refactored/*"]
     }
   },
