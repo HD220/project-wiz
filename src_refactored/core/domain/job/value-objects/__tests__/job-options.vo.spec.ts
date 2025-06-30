@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { JobOptionsVO, IJobOptions, BackoffOptions } from './job-options.vo';
+import { JobOptionsVO, IJobOptions, BackoffOptions } from '../job-options.vo';
 
 describe('JobOptionsVO', () => {
   // This const is for comparing against partial inputs, not for VO's internal defaults.

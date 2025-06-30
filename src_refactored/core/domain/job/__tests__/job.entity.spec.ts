@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto';
+
+import { DomainError } from '@/core/domain/common/errors'; // Corrected path
+
 import { JobEntity, JobStatus } from '../job.entity';
 import { JobIdVO } from '../value-objects/job-id.vo';
 import { JobOptionsVO, IJobBackoffOptions, IJobRemovalOptions } from '../value-objects/job-options.vo'; // Added IJobRemovalOptions
-import { DomainError } from '@/core/common/errors'; // Changed to alias path
-import { randomUUID } from 'node:crypto';
 
 describe('JobEntity', () => {
   const 기본JobData = {

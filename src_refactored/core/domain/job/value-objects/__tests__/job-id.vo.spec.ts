@@ -1,7 +1,7 @@
 import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { describe, it, expect } from 'vitest';
 
-import { JobIdVO } from './job-id.vo';
+import { JobIdVO } from '../job-id.vo';
 
 describe('JobIdVO', () => {
   it('should create a JobIdVO with a valid UUID v4 if no id is provided', () => {

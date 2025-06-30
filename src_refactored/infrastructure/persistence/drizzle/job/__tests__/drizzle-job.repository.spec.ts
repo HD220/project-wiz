@@ -1,8 +1,8 @@
 import BetterSqlite3 from 'better-sqlite3';
 import BetterSqlite3 from 'better-sqlite3';
+import { sql } from 'drizzle-orm'; // Added sql import
 import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
-import { sql } from 'drizzle-orm'; // Added sql import
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
 
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';

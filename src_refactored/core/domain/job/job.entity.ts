@@ -3,6 +3,8 @@ import { AbstractEntity } from '@/core/common/base.entity';
 import { DomainError } from '@/core/domain/common/errors';
 // Removed: import type { JobSelect } from '@/infrastructure/persistence/drizzle/schema/jobs.schema';
 
+import { ExecutionHistoryEntry } from './job-processing.types'; // Added import
+import { ActivityHistoryVO } from './value-objects/activity-history.vo'; // Added import
 import { JobIdVO } from './value-objects/job-id.vo';
 import { IJobOptions, JobOptionsVO } from './value-objects/job-options.vo';
 
@@ -43,6 +45,7 @@ export interface JobEntityProps<P = unknown, R = unknown> {
   failedReason?: string; // Error message if the job failed
   stacktrace?: string[]; // Stacktrace if the job failed
   // parentId?: JobIdVO; // For job dependencies/flows - future
+
 }
 
 // This type defines the shape of data JobEntity.fromPersistence expects.
@@ -76,8 +79,14 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
   private _progressChanged: boolean = false;
   private _logsChanged: boolean = false;
 
-  private constructor(props: JobEntityProps<P, R>) {
+  // Encapsulated agent processing state
+  private _conversationHistory: ActivityHistoryVO;
+  private _executionHistory: ExecutionHistoryEntry[];
+
+  private constructor(props: JobEntityProps<P, R>, initialConversationHistory?: ActivityHistoryVO, initialExecutionHistory?: ExecutionHistoryEntry[]) {
     super(props);
+    this._conversationHistory = initialConversationHistory || ActivityHistoryVO.create();
+    this._executionHistory = initialExecutionHistory || [];
   }
 
   public static create<P, R>(
@@ -108,11 +117,13 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
       updatedAt: now,
       delayUntil: jobOptions.delay && jobOptions.delay > 0 ? new Date(now.getTime() + jobOptions.delay) : undefined,
     };
-    return new JobEntity<P, R>(props);
+    // Agent processing state is initialized empty for new jobs
+    return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
   }
 
   public static fromPersistence<P, R>(
     data: JobPersistenceData<P, R> // Use the domain-defined DTO
+    // agentProcessingState?: { conversationHistory: ActivityHistoryVO; executionHistory: ExecutionHistoryEntry[] } // If we decide to persist this
   ): JobEntity<P, R> {
     const entityProps: JobEntityProps<P, R> = {
       id: JobIdVO.create(data.id),
@@ -138,7 +149,10 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
       failedReason: data.failedReason ?? undefined,
       stacktrace: data.stacktrace ?? undefined,
     };
-    return new JobEntity<P, R>(entityProps);
+    // For now, agent processing state is not hydrated from persistence
+    // If it were, we'd pass it to the constructor here:
+    // return new JobEntity<P, R>(entityProps, agentProcessingState?.conversationHistory, agentProcessingState?.executionHistory);
+    return new JobEntity<P, R>(entityProps, ActivityHistoryVO.create(), []); // Initialized empty for now
   }
 
   get id(): JobIdVO { return this.props.id; }
@@ -360,5 +374,34 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<JobIdVO,
       ...(this.props.failedReason && { failedReason: this.props.failedReason }),
       ...(this.props.stacktrace && { stacktrace: this.props.stacktrace }),
     };
+  }
+
+  // --- Agent Processing State Management ---
+
+  public getConversationHistory(): ActivityHistoryVO {
+    return this._conversationHistory;
+  }
+
+  public addConversationEntry(entry: ActivityHistoryEntryVO): void {
+    this._conversationHistory = this._conversationHistory.addEntry(entry);
+    // Note: This does not automatically update JobEntity's `updatedAt` or mark it for persistence change.
+    // This state is currently considered transient for a single run unless explicitly persisted.
+  }
+
+  public getExecutionHistory(): ReadonlyArray<ExecutionHistoryEntry> {
+    return Object.freeze([...this._executionHistory]); // Return a copy
+  }
+
+  public addExecutionHistoryEntry(entry: ExecutionHistoryEntry): void {
+    this._executionHistory.push(entry);
+    // Similar to conversation history, this is transient for now.
+  }
+
+  public setConversationHistory(history: ActivityHistoryVO): void {
+    this._conversationHistory = history;
+  }
+
+  public setExecutionHistory(history: ExecutionHistoryEntry[]): void {
+    this._executionHistory = history;
   }
 }

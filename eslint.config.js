@@ -161,28 +161,29 @@ export default [
       // For now, we rely on the fact that these rules are off in the dedicated test block below.
     },
     settings: {
-      "import/resolver": { // Keep as an object, typescript resolver first or only
+      "import/resolver": {
         typescript: {
-          alwaysTryTypes: true,
+          alwaysTryTypes: true, // Rproperty of the typescript resolver
           project: "./tsconfig.json",
-        }
-        // The explicit 'alias' block can be removed if tsconfig.json handles all aliases robustly.
-        // For safety during this transition, we can keep a minimal alias block if needed,
-        // or remove it and rely purely on the typescript resolver.
-        // Let's try removing it to enforce tsconfig as the single source of truth.
+        },
+        // Potentially add node resolver if you have issues with built-in modules, though typescript resolver should handle most cases.
+        // node: {
+        //   extensions: [".js", ".jsx", ".ts", ".tsx"]
+        // }
       },
       "boundaries/elements": [
-        { type: "domain", pattern: "src_refactored/core/domain" },
-        { type: "application", pattern: "src_refactored/core/application" },
-        { type: "infrastructure", pattern: "src_refactored/infrastructure" },
-        { type: "presentation", pattern: "src_refactored/presentation" },
-        { type: "shared", pattern: "src_refactored/shared" },
-        { type: "ui-components", pattern: "src_refactored/presentation/ui/components" },
-        { type: "ui-features", pattern: "src_refactored/presentation/ui/app" },
-        { type: "ui-lib", pattern: "src_refactored/presentation/ui/lib" },
-        { type: "ui-hooks", pattern: "src_refactored/presentation/ui/hooks" },
+        // Relative to the "files" glob, which is "src_refactored/**"
+        { type: "domain", pattern: "core/domain" },
+        { type: "application", pattern: "core/application" },
+        { type: "infrastructure", pattern: "infrastructure" },
+        { type: "presentation", pattern: "presentation" },
+        { type: "shared", pattern: "shared" },
+        { type: "ui-components", pattern: "presentation/ui/components" },
+        { type: "ui-features", pattern: "presentation/ui/app" }, // Assuming 'app' is where features reside
+        { type: "ui-lib", pattern: "presentation/ui/lib" },
+        { type: "ui-hooks", pattern: "presentation/ui/hooks" },
       ],
-      "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"],
+      "boundaries/ignore": ["presentation/ui/routeTree.gen.ts"], // Adjusted to be relative
     },
   },
   // Config specific to test files within src_refactored

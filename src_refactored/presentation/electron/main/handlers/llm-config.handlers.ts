@@ -1,15 +1,10 @@
 import { ipcMain } from 'electron';
+
 import {
   GET_AVAILABLE_LLMS_CHANNEL,
   GET_USER_LLM_CONFIGS_CHANNEL,
   UPDATE_USER_LLM_CONFIG_CHANNEL,
 } from '../../../../shared/ipc-channels';
-import {
-  mockAvailableLLMs,
-  // mockUserLLMConfigs, // Not directly used, access via getLLMConfigWithDefaults or updateUserLLMConfig
-  updateUserLLMConfig,
-  getLLMConfigWithDefaults
-} from '../mocks/llm-config.mocks';
 import {
   GetAvailableLLMsResponse,
   GetUserLLMConfigsResponse,
@@ -17,6 +12,12 @@ import {
   UpdateUserLLMConfigResponse
 } from '../../../../shared/ipc-types/llm-config';
 import { AgentLLM, LLMConfig } from '../../../../shared/types/entities';
+import {
+  mockAvailableLLMs,
+  // mockUserLLMConfigs, // Not directly used, access via getLLMConfigWithDefaults or updateUserLLMConfig
+  updateUserLLMConfig,
+  getLLMConfigWithDefaults
+} from '../mocks/llm-config.mocks';
 
 export function registerLLMConfigHandlers() {
   ipcMain.handle(GET_AVAILABLE_LLMS_CHANNEL, async (): Promise<GetAvailableLLMsResponse> => {

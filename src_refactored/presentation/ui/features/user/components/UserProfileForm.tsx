@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/component
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/presentation/ui/components/ui/form';
 import { Input } from '@/presentation/ui/components/ui/input';
+
 import { UserProfile, UserProfileFormData } from '@/shared/ipc-types'; // Import from shared types
 
 interface UserProfileFormProps {
