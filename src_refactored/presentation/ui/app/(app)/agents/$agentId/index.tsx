@@ -1,17 +1,16 @@
 import { createFileRoute, useParams, Link, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, Edit3, MessageSquare, Bot, Zap, AlertTriangle, Thermometer, Briefcase, Cpu, ListChecks, Activity, Loader2, ServerCrash } from 'lucide-react'; // Added Loader2, ServerCrash
-import React from 'react'; // Removed useEffect, useState
+import { ArrowLeft, Edit3, MessageSquare, Bot, Zap, AlertTriangle, Thermometer, Briefcase, Cpu, ListChecks, Activity, Loader2, ServerCrash } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/presentation/ui/components/ui/badge';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
-// import { Separator } from '@/presentation/ui/components/ui/separator'; // Not used directly in the refactored version yet
 import { useIpcQuery } from '@/presentation/ui/hooks/ipc/useIpcQuery';
-import { cn } from '@/presentation/ui/lib/utils'; // For conditional classes
+import { cn } from '@/presentation/ui/lib/utils';
 
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
-import type { AgentInstance, GetAgentInstanceDetailsRequest, GetAgentInstanceDetailsResponseData } from '@/shared/ipc-types'; // Adjusted imports
+import type { AgentInstance, GetAgentInstanceDetailsRequest, GetAgentInstanceDetailsResponseData } from '@/shared/ipc-types';
 
 // Kept statusDisplayMap as it's UI specific display logic
 const statusDisplayMap: Record<AgentInstance['status'], { label: string; icon: React.ElementType; colorClasses: string }> = {
@@ -22,8 +21,7 @@ const statusDisplayMap: Record<AgentInstance['status'], { label: string; icon: R
   completed: { label: 'Concluído (Job)', icon: Zap, colorClasses: 'bg-green-500 text-green-50' },
 };
 
-// InfoItem component (already defined, can be kept as is or moved if preferred)
-const InfoItem = ({icon: itemIcon, label, value, className}: {icon: React.ElementType, label: string, value: string | number | undefined, className?: string}) => {
+const InfoItem = ({icon: itemIcon, label, value, className}: {icon: React.ElementType, label: string, value: string | number | undefined, className?: string}): JSX.Element => {
   const IconComponent = itemIcon;
   return (
     <div>
@@ -41,7 +39,7 @@ interface AgentDetailHeaderProps {
   instance: AgentInstance;
   statusInfo: { label: string; icon: React.ElementType; colorClasses: string };
 }
-function AgentDetailHeader({ instance, statusInfo }: AgentDetailHeaderProps) {
+function AgentDetailHeader({ instance, statusInfo }: AgentDetailHeaderProps): JSX.Element {
   return (
     <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -65,7 +63,7 @@ function AgentDetailHeader({ instance, statusInfo }: AgentDetailHeaderProps) {
 interface AgentDetailContentProps {
   instance: AgentInstance;
 }
-function AgentDetailContent({ instance }: AgentDetailContentProps) {
+function AgentDetailContent({ instance }: AgentDetailContentProps): JSX.Element {
   return (
     <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
       <InfoItem icon={Briefcase} label="Persona Base" value={instance.personaTemplateName || 'Não definida'} />
@@ -77,7 +75,7 @@ function AgentDetailContent({ instance }: AgentDetailContentProps) {
 }
 
 // Sub-component for Activity Log Card
-function AgentActivityLogCard() {
+function AgentActivityLogCard(): JSX.Element {
   return (
     <Card>
       <CardHeader>
@@ -99,7 +97,7 @@ function AgentActivityLogCard() {
 }
 
 
-function AgentInstanceDetailPage() {
+function AgentInstanceDetailPage(): JSX.Element {
   const params = useParams({ from: '/(app)/agents/$agentId/' });
   const agentId = params.agentId;
   const router = useRouter();
@@ -108,7 +106,8 @@ function AgentInstanceDetailPage() {
     IPC_CHANNELS.GET_AGENT_INSTANCE_DETAILS,
     { agentId },
     {
-      // staleTime: 5 * 60 * 1000, // Example: Cache for 5 minutes
+      // staleTime: 5 * 60 * 1000,
+      // Example: Cache for 5 minutes
       // refetchOnWindowFocus: true,
       onError: (err) => {
         toast.error(`Erro ao buscar detalhes do agente: ${err.message}`);
@@ -161,13 +160,13 @@ function AgentInstanceDetailPage() {
         </Button>
         <div className="flex items-center space-x-2">
             <Button variant="default" asChild>
-              {/* Ensure instance.id is used for params */}
               <Link to="/agents/$agentId/edit" params={{ agentId: instance.id }}>
                 <Edit3 className="mr-2 h-4 w-4" /> Editar Instância
               </Link>
             </Button>
             <Button variant="outline" className="bg-sky-500 hover:bg-sky-600 text-white dark:bg-sky-600 dark:hover:bg-sky-700" asChild>
-                <Link to="/chat" search={{ conversationId: `agent-${instance.id}` }}> {/* Ensure instance.id is used */}
+                <Link to="/chat" search={{ conversationId: `agent-${instance.id}` }}>
+                {/* Ensure instance.id is used */}
                     <MessageSquare className="mr-2 h-4 w-4"/> Conversar
                 </Link>
             </Button>

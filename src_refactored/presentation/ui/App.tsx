@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Button } from "@/ui/components/ui/button";
 
-function App() {
+function App(): JSX.Element {
   return (
     <div style={{ fontFamily: 'sans-serif', textAlign: 'center', paddingTop: '50px' }}>
       <h1>Project Wiz - Refactored Frontend</h1>

@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
-import React from 'react'; // Removed useState
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -14,7 +14,7 @@ function NewPersonaTemplatePage() {
   const router = useRouter();
 
   const createPersonaMutation = useIpcMutation<
-    CreatePersonaTemplateRequest, // This is PersonaTemplateFormData
+    CreatePersonaTemplateRequest,
     IPCResponse<CreatePersonaTemplateResponseData>
   >(
     IPC_CHANNELS.CREATE_PERSONA_TEMPLATE,
@@ -22,7 +22,6 @@ function NewPersonaTemplatePage() {
       onSuccess: (response) => {
         if (response.success && response.data) {
           toast.success(`Template de Persona "${response.data.name}" criado com sucesso!`);
-          // Navigate to the new persona template's detail page or list
           router.navigate({ to: '/personas/$templateId', params: { templateId: response.data.id }, replace: true });
         } else {
           toast.error(`Falha ao criar o template: ${response.error?.message || 'Erro desconhecido.'}`);

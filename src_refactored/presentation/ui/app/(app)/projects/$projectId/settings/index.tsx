@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter, useParams } from '@tanstack/react-router';
 import { Loader2, ServerCrash } from 'lucide-react';
-import React from 'react'; // Removed useEffect, useState
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -32,7 +32,7 @@ function ProjectSettingsPage() {
     IPC_CHANNELS.GET_PROJECT_DETAILS,
     { projectId },
     {
-      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      staleTime: 5 * 60 * 1000,
       onError: (err) => {
         toast.error(`Erro ao buscar detalhes do projeto: ${err.message}`);
       }
@@ -48,9 +48,7 @@ function ProjectSettingsPage() {
       onSuccess: (response) => {
         if (response.success && response.data) {
           toast.success(`Projeto "${response.data.name}" atualizado com sucesso!`);
-          refetch(); // Refetch project details to update the form/header if needed
-          // Optionally navigate or just show success
-          // router.navigate({ to: '/projects/$projectId', params: { projectId: response.data.id } });
+          refetch();
         } else {
           toast.error(`Falha ao atualizar o projeto: ${response.error?.message || 'Erro desconhecido'}`);
         }

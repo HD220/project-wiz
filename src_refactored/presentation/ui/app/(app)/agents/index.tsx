@@ -1,24 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { PlusCircle, Bot, Search } from 'lucide-react'; // Bot for Agent icon
+import { PlusCircle, Bot, Search } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Input } from '@/presentation/ui/components/ui/input';
 import { AgentInstanceList } from '@/presentation/ui/features/agent/components/AgentInstanceList';
-import { AgentInstance } from '@/presentation/ui/features/agent/components/AgentInstanceListItem'; // Assuming type is exported
-import { LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList'; // For mock data
-import { PersonaTemplate } from '@/presentation/ui/features/persona/components/PersonaTemplateListItem'; // For mock data
+import { AgentInstance } from '@/presentation/ui/features/agent/components/AgentInstanceListItem';
+import { LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList';
+import { PersonaTemplate } from '@/presentation/ui/features/persona/components/PersonaTemplateListItem';
 
 // Mock Data - Persona Templates (abbreviated)
 const mockPersonaTemplates: Record<string, Pick<PersonaTemplate, 'id' | 'name'>> = {
-  templateId1: { id: '1', name: 'Engenheiro de Software Sênior' }, // Key changed for ESLint
-  templateId2: { id: '2', name: 'Analista de QA Detalhista' },   // Key changed for ESLint
+  templateId1: { id: '1', name: 'Engenheiro de Software Sênior' },
+  templateId2: { id: '2', name: 'Analista de QA Detalhista' },
 };
 
 // Mock Data - LLM Configs (abbreviated)
 const mockLlmConfigs: Record<string, Pick<LLMConfig, 'id' | 'name' | 'providerId'>> = {
-  configId1: { id: '1', name: 'OpenAI Pessoal', providerId: 'openai' }, // Key changed for ESLint
-  configId2: { id: '2', name: 'Ollama Local', providerId: 'ollama' },   // Key changed for ESLint
+  configId1: { id: '1', name: 'OpenAI Pessoal', providerId: 'openai' },
+  configId2: { id: '2', name: 'Ollama Local', providerId: 'ollama' },
 };
 
 
@@ -30,11 +30,11 @@ const mockAgentInstances: AgentInstance[] = [
 ];
 
 
-function AgentInstancesPage() {
+function AgentInstancesPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const getPersonaName = (templateId: string) => mockPersonaTemplates[templateId]?.name || 'Desconhecido';
-  const getLlmConfigName = (configId: string) => mockLlmConfigs[configId]?.name || 'Desconhecido';
+  const getPersonaName = (templateId: string): string => mockPersonaTemplates[templateId]?.name || 'Desconhecido';
+  const getLlmConfigName = (configId: string): string => mockLlmConfigs[configId]?.name || 'Desconhecido';
 
   const enrichedAgentInstances = mockAgentInstances.map(agent => ({
     ...agent,

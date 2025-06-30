@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
-import React from 'react'; // Removed useState
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -15,18 +15,16 @@ function NewProjectPage() {
   const router = useRouter();
 
   const createProjectMutation = useIpcMutation<
-    CreateProjectRequest, // Request type is ProjectFormData
-    IPCResponse<CreateProjectResponseData> // Expected response structure
+    CreateProjectRequest,
+    IPCResponse<CreateProjectResponseData>
   >(
     IPC_CHANNELS.CREATE_PROJECT,
     {
       onSuccess: (response) => {
         if (response.success && response.data) {
           toast.success(`Projeto "${response.data.name}" criado com sucesso!`);
-          // Navigate to the newly created project's detail page
           router.navigate({ to: '/projects/$projectId', params: { projectId: response.data.id }, replace: true });
         } else {
-          // This case should ideally be handled by onError if the IPCResponse wrapper is consistent
           toast.error(`Falha ao criar o projeto: ${response.error?.message || 'Erro desconhecido retornando sucesso.'}`);
         }
       },

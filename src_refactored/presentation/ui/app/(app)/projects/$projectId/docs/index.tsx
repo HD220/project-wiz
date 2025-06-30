@@ -1,10 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'; // useParams removed as it's not used
+import { createFileRoute } from '@tanstack/react-router';
 import { Folder, FileText, Edit } from 'lucide-react';
 import React from 'react';
 
-// import ReactMarkdown from 'react-markdown'; // Replaced by MarkdownRenderer
-// import remarkGfm from 'remark-gfm'; // Handled by MarkdownRenderer
-import { MarkdownRenderer } from '@/presentation/ui/components/common/MarkdownRenderer'; // Import new renderer
+import { MarkdownRenderer } from '@/presentation/ui/components/common/MarkdownRenderer';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
@@ -13,7 +11,7 @@ import { Separator } from '@/presentation/ui/components/ui/separator';
 
 // Mock documentation structure and content
 const mockDocsFileSystem = {
-  readmeMd: { // Key changed
+  readmeMd: {
     type: 'file',
     content: `# Documentação do Projeto X
 
@@ -32,27 +30,27 @@ function greet(name: string): string {
 \`\`\`
 `,
   },
-  arquiteturaDir: { // Key changed
+  arquiteturaDir: {
     type: 'folder',
-    nameOverride: 'arquitetura/', // Keep original name for display if needed
+    nameOverride: 'arquitetura/',
     children: {
-      visaoGeralMd: { // Key changed
+      visaoGeralMd: {
         nameOverride: 'visao-geral.md',
         type: 'file',
         content: '## Visão Geral da Arquitetura\n\nO sistema é modular...'
       },
-      componentesMd: { // Key changed
+      componentesMd: {
         nameOverride: 'componentes.md',
         type: 'file',
         content: '### Componentes Principais\n\n- Módulo A\n- Módulo B'
       }
     }
   },
-  guiasDir: { // Key changed
+  guiasDir: {
     type: 'folder',
     nameOverride: 'guias/',
     children: {
-      instalacaoMd: { // Key changed
+      instalacaoMd: {
         nameOverride: 'instalacao.md',
         type: 'file',
         content: '## Guia de Instalação\n\nSiga os passos...'
@@ -76,12 +74,12 @@ function ProjectDocsPage() {
     for (const segment of pathSegments) {
         if (!currentEntry) return null;
 
-        if (typeof currentEntry === 'object' && 'children' in currentEntry && currentEntry.children) { // It's a DocFolder with children
+        if (typeof currentEntry === 'object' && 'children' in currentEntry && currentEntry.children) {
             currentEntry = currentEntry.children[segment];
-        } else if (typeof currentEntry === 'object' && !( 'type' in currentEntry) && segment in currentEntry) { // It's the root mockDocsFileSystem or similar Record
+        } else if (typeof currentEntry === 'object' && !( 'type' in currentEntry) && segment in currentEntry) {
             currentEntry = (currentEntry as Record<string, DocEntry>)[segment];
         } else {
-            return null; // Path segment not found or trying to access child of a file
+            return null;
         }
     }
     return (currentEntry && typeof currentEntry === 'object' && 'type' in currentEntry && currentEntry.type === 'file') ? currentEntry.content : null;
@@ -92,9 +90,9 @@ function ProjectDocsPage() {
   const renderFileTree = (tree: Record<string, DocEntry>, currentPath: string[] = []) => {
     return (
       <ul className="space-y-1 pl-3">
-        {Object.entries(tree).map(([key, entry]) => { // Use key from object, and entry.nameOverride or key for display
+        {Object.entries(tree).map(([key, entry]) => {
           const displayName = entry.nameOverride || key;
-          const newPath = [...currentPath, key]; // Use key for actual path segment
+          const newPath = [...currentPath, key];
           const isSelected = newPath.join('/') === selectedFilePath.join('/');
           if (entry.type === 'folder') {
             return (
@@ -128,8 +126,7 @@ function ProjectDocsPage() {
 
 
   return (
-    <div className="flex h-[calc(100vh-var(--header-height,150px))]"> {/* Adjust var(--header-height) based on actual header */}
-      {/* Sidebar para Navegação de Arquivos */}
+    <div className="flex h-[calc(100vh-var(--header-height,150px))]">
       <aside className="w-64 flex-shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30">
         <div className="p-3 border-b border-slate-200 dark:border-slate-700">
           <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Arquivos de Documentação</h3>

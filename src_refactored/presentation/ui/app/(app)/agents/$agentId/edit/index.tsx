@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter, useParams, Link } from '@tanstack/react-router';
-import { ArrowLeft, Loader2, ServerCrash } from 'lucide-react'; // Added Loader2, ServerCrash
-import React from 'react'; // Removed useEffect, useState
+import { ArrowLeft, Loader2, ServerCrash } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -18,8 +18,8 @@ import type {
   UpdateAgentInstanceRequest,
   UpdateAgentInstanceResponseData,
   IPCResponse,
-  PersonaTemplate, // For form props
-  LLMConfig        // For form props
+  PersonaTemplate,
+  LLMConfig
 } from '@/shared/ipc-types';
 
 // Helper component for loading/error states
@@ -32,7 +32,7 @@ interface DataLoadingOrErrorDisplayProps {
   router: ReturnType<typeof useRouter>;
 }
 
-function DataLoadingOrErrorDisplay({ isLoadingAll, anyError, agentError, personasError, llmsError, router }: DataLoadingOrErrorDisplayProps) {
+function DataLoadingOrErrorDisplay({ isLoadingAll, anyError, agentError, personasError, llmsError, router }: DataLoadingOrErrorDisplayProps): JSX.Element | null {
   if (isLoadingAll) {
     return (
       <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
@@ -43,7 +43,7 @@ function DataLoadingOrErrorDisplay({ isLoadingAll, anyError, agentError, persona
   }
 
   if (anyError) {
-    let errorMessages = [];
+    const errorMessages = [];
     if (agentError) errorMessages.push(`Detalhes do Agente: ${agentError.message}`);
     if (personasError) errorMessages.push(`Templates de Persona: ${personasError.message}`);
     if (llmsError) errorMessages.push(`Configurações LLM: ${llmsError.message}`);
@@ -80,8 +80,9 @@ function EditAgentFormRenderer({
   llmConfigs,
   handleSubmit,
   isSubmitting,
-}: EditAgentFormRendererProps) {
-  if (!agentInstance) { // Should not happen if DataLoadingOrErrorDisplay is used before this
+}: EditAgentFormRendererProps): JSX.Element {
+  if (!agentInstance) {
+    // Should not happen if DataLoadingOrErrorDisplay is used before this
     return (
       <div className="p-8 text-center">
         <p>Instância de Agente não encontrada.</p>
@@ -129,7 +130,7 @@ function EditAgentFormRenderer({
 }
 
 
-function EditAgentInstancePage() {
+function EditAgentInstancePage(): JSX.Element {
   const router = useRouter();
   const params = useParams({ from: '/(app)/agents/$agentId/edit/' });
   const agentId = params.agentId;
@@ -157,11 +158,12 @@ function EditAgentInstancePage() {
   >(
     IPC_CHANNELS.UPDATE_AGENT_INSTANCE,
     {
-      onSuccess: (response) => {
+      onSuccess: (response): void => {
         if (response.success && response.data) {
           const agentDisplayName = response.data.agentName || `Agente (ID: ${response.data.id.substring(0,6)})`;
           toast.success(`Instância de Agente "${agentDisplayName}" atualizada com sucesso!`);
-          refetchAgent(); // Refetch agent details
+          refetchAgent();
+          // Refetch agent details
           // Navigate back to the agent's detail page
           router.navigate({ to: '/agents/$agentId', params: { agentId: response.data.id }, replace: true });
         } else {
@@ -174,7 +176,7 @@ function EditAgentInstancePage() {
     }
   );
 
-  const handleSubmit = async (formData: AgentInstanceFormData) => {
+  const handleSubmit = async (formData: AgentInstanceFormData): Promise<void> => {
     console.log('Dados atualizados da instância de agente:', agentId, formData);
     updateAgentMutation.mutate({ agentId, data: formData });
   };

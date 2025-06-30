@@ -1,12 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Activity, Briefcase, Zap } from 'lucide-react'; // Icons for cards, removed Users
+import { Activity, Briefcase, Zap } from 'lucide-react';
 import React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar'; // For recent activity
+import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/presentation/ui/components/ui/card';
 
 function DashboardPage() {
-  // Placeholder data
   const stats = {
     activeProjects: 3,
     runningAgents: 5,
@@ -75,7 +74,7 @@ function DashboardPage() {
       </div>
 
       {/* Recent Activity Section */}
-      <div className="grid gap-4 md:grid-cols-1"> {/* Changed to 1 column for activity list */}
+      <div className="grid gap-4 md:grid-cols-1">
         <Card>
           <CardHeader>
             <CardTitle>Atividade Recente</CardTitle>

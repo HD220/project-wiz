@@ -5,6 +5,7 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import vitestPlugin from "eslint-plugin-vitest";
 import * as importPlugin from "eslint-plugin-import";
 import boundariesPlugin from "eslint-plugin-boundaries";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 import globals from "globals";
 
 export default [
@@ -63,11 +64,14 @@ export default [
       import: importPlugin,
       vitest: vitestPlugin,
       boundaries: boundariesPlugin,
+      "react-hooks": reactHooksPlugin,
     },
     rules: {
       ...js.configs.recommended.rules,
       ...tsPlugin.configs.recommended.rules,
       ...vitestPlugin.configs.recommended.rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
 
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "import/no-unresolved": "error",

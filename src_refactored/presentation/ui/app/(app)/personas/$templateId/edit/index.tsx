@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter, useParams, Link } from '@tanstack/react-router';
-import { ArrowLeft, Loader2, ServerCrash } from 'lucide-react'; // Added Loader2, ServerCrash
-import React from 'react'; // Removed useEffect, useState
+import { ArrowLeft, Loader2, ServerCrash } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -22,9 +22,8 @@ import type {
 interface EditPersonaTemplateLoadingErrorDisplayProps {
   isLoading: boolean;
   error: Error | null | undefined;
-  // templateId: string; // For context in error messages or links - REMOVED as unused
 }
-function EditPersonaTemplateLoadingErrorDisplay({ isLoading, error }: EditPersonaTemplateLoadingErrorDisplayProps) { // removed templateId
+function EditPersonaTemplateLoadingErrorDisplay({ isLoading, error }: EditPersonaTemplateLoadingErrorDisplayProps) {
   if (isLoading) {
     return (
       <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
@@ -52,12 +51,13 @@ function EditPersonaTemplateLoadingErrorDisplay({ isLoading, error }: EditPerson
 // Helper for rendering the form
 interface EditPersonaTemplateFormRendererProps {
   templateId: string;
-  personaTemplate: GetPersonaTemplateDetailsResponseData; // Non-null asserted by caller
+  personaTemplate: GetPersonaTemplateDetailsResponseData;
   handleSubmit: (formData: PersonaTemplateFormData) => Promise<void>;
   isSubmitting: boolean;
 }
 function EditPersonaTemplateFormRenderer({templateId, personaTemplate, handleSubmit, isSubmitting}: EditPersonaTemplateFormRendererProps) {
-   if (!personaTemplate) { // Should ideally be caught by the page component before calling this renderer
+   if (!personaTemplate) {
+    // Should ideally be caught by the page component before calling this renderer
     return (
       <div className="p-8 text-center">
         <p>Template de Persona com ID "{templateId}" não encontrado.</p>
@@ -116,7 +116,7 @@ function EditPersonaTemplatePage() {
     IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS,
     { templateId },
     {
-      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      staleTime: 5 * 60 * 1000,
       onError: (err) => {
         toast.error(`Erro ao buscar detalhes do template: ${err.message}`);
       }
@@ -132,7 +132,8 @@ function EditPersonaTemplatePage() {
       onSuccess: (response) => {
         if (response.success && response.data) {
           toast.success(`Template "${response.data.name}" atualizado com sucesso!`);
-          refetch(); // Refetch to update initialValues and header name
+          refetch();
+          // Refetch to update initialValues and header name
           // Navigate back to the details page
           router.navigate({ to: '/personas/$templateId', params: { templateId: response.data.id }, replace: true });
         } else {

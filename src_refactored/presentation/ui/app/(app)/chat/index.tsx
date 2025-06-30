@@ -39,7 +39,7 @@ const CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL = IPC_CHANNELS.DM_MESSAGE_RECE
 const GET_SIDEBAR_CONVERSATIONS_CHANNEL = IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST;
 
 
-function ChatPage() {
+function ChatPage(): JSX.Element {
   const navigate = useNavigate({ from: Route.fullPath });
   const { conversationId: selectedConversationIdFromSearch } = Route.useSearch();
 
@@ -103,7 +103,7 @@ function ChatPage() {
     }
   );
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = (content: string): void => {
     if (!selectedConversationId) {
       toast.error("Nenhuma conversa selecionada.");
       return;
@@ -115,7 +115,7 @@ function ChatPage() {
     sendMessageMutation.mutate({ conversationId: selectedConversationId, content });
   };
 
-  const handleSelectConversation = (convId: string) => {
+  const handleSelectConversation = (convId: string): void => {
     navigate({ search: (prev) => ({ ...prev, conversationId: convId }), replace: true });
   };
 
@@ -166,7 +166,7 @@ function ChatPageContent({
   onSendMessage,
   currentUserId,
   selectedConversationId,
-}: ChatPageContentProps) {
+}: ChatPageContentProps): JSX.Element {
   return (
     <main className="flex-1 flex flex-col overflow-hidden">
       {messagesError && !isLoadingMessages && selectedConversationId && (

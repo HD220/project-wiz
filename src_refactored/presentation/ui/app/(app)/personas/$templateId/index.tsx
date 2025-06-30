@@ -12,9 +12,9 @@ import { PersonaTemplate } from '@/presentation/ui/features/persona/components/P
 
 // Mock Data - Reuse from Persona list page or define a more detailed one here if needed
 const mockPersonaTemplates: Record<string, PersonaTemplate> = {
-  templateId1: { id: '1', name: 'Engenheiro de Software Sênior', role: 'Desenvolvedor especialista em arquiteturas complexas e refatoração de código.', goal: 'Escrever código limpo, eficiente, bem documentado e testado. Mentorar desenvolvedores juniores.', backstory: '15 anos de experiência em diversas linguagens e paradigmas. Contribuidor ativo de projetos open-source e palestrante em conferências de tecnologia. Prefere abordagens pragmáticas e baseadas em dados para resolução de problemas.', toolNames: ['filesystem', 'terminal', 'codeEditor', 'search', 'gitClient', 'debugger'] }, // Keys changed for ESLint
-  templateId2: { id: '2', name: 'Analista de QA Detalhista', role: 'Especialista em testes de software, focado em encontrar bugs críticos e garantir a qualidade.', goal: 'Garantir que o software atenda aos mais altos padrões de qualidade antes do lançamento. Criar planos de teste abrangentes e automatizar cenários de regressão.', backstory: 'Apaixonado por qualidade e processos de teste desde o início da carreira. Certificado em ISTQB Advanced Level.', toolNames: ['testRunner', 'issueTracker', 'browserDevTools', 'apiClient'] }, // Keys changed
-  templateId3: { id: '3', name: 'Gerente de Projetos Ágil', role: 'Facilitador de equipes ágeis, focado em entregas de valor e comunicação eficiente.', goal: 'Manter o projeto nos trilhos, remover impedimentos, gerenciar o backlog e garantir a satisfação do cliente e da equipe.', backstory: 'Experiência como Scrum Master e Product Owner em startups e grandes corporações. Forte habilidade em comunicação e resolução de conflitos.', toolNames: ['taskManager', 'ganttChart', 'communicationTools', 'reportingTool'] }, // Keys changed
+  templateId1: { id: '1', name: 'Engenheiro de Software Sênior', role: 'Desenvolvedor especialista em arquiteturas complexas e refatoração de código.', goal: 'Escrever código limpo, eficiente, bem documentado e testado. Mentorar desenvolvedores juniores.', backstory: '15 anos de experiência em diversas linguagens e paradigmas. Contribuidor ativo de projetos open-source e palestrante em conferências de tecnologia. Prefere abordagens pragmáticas e baseadas em dados para resolução de problemas.', toolNames: ['filesystem', 'terminal', 'codeEditor', 'search', 'gitClient', 'debugger'] },
+  templateId2: { id: '2', name: 'Analista de QA Detalhista', role: 'Especialista em testes de software, focado em encontrar bugs críticos e garantir a qualidade.', goal: 'Garantir que o software atenda aos mais altos padrões de qualidade antes do lançamento. Criar planos de teste abrangentes e automatizar cenários de regressão.', backstory: 'Apaixonado por qualidade e processos de teste desde o início da carreira. Certificado em ISTQB Advanced Level.', toolNames: ['testRunner', 'issueTracker', 'browserDevTools', 'apiClient'] },
+  templateId3: { id: '3', name: 'Gerente de Projetos Ágil', role: 'Facilitador de equipes ágeis, focado em entregas de valor e comunicação eficiente.', goal: 'Manter o projeto nos trilhos, remover impedimentos, gerenciar o backlog e garantir a satisfação do cliente e da equipe.', backstory: 'Experiência como Scrum Master e Product Owner em startups e grandes corporações. Forte habilidade em comunicação e resolução de conflitos.', toolNames: ['taskManager', 'ganttChart', 'communicationTools', 'reportingTool'] },
 };
 
 // Tooltip Icon Map (consistent with PersonaTemplateListItem)
@@ -22,7 +22,7 @@ const toolIconMap: Record<string, React.ElementType> = {
   filesystem: FolderCog, terminal: TerminalSquare, codeEditor: Edit3, search: SearchCode,
   testRunner: TestTubeDiagonal, issueTracker: Bug, browserDevTools: Palette, taskManager: ListChecks,
   ganttChart: Presentation, communicationTools: MessageSquare, markdownEditor: FileText,
-  documentationGenerator: BookText, screenshotTool: Camera, gitClient: Settings, // Placeholder for Git
+  documentationGenerator: BookText, screenshotTool: Camera, gitClient: Settings,
   debugger: Settings, apiClient: Settings, reportingTool: Settings, default: Brain,
 };
 
@@ -155,8 +155,7 @@ function PersonaTemplateDetailPage() {
       <Card className="overflow-hidden">
         <TemplateHeader name={template.name} role={template.role} />
         <CardContent className="p-6 space-y-5">
-          {/* Render a base section for "Objetivo Principal" without a preceding Separator if it's the first one */}
-          <div className="pt-1"> {/* Adjusted pt-1 to avoid a jump if it's the first, matching TemplateSection's potential separator */}
+          <div className="pt-1">
             <h3 className="text-md font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Objetivo Principal</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line">{template.goal}</p>
           </div>
@@ -167,10 +166,9 @@ function PersonaTemplateDetailPage() {
             <TemplateTools toolNames={template.toolNames} />
           </TemplateSection>
 
-          {/* Ensure a separator before the final button if content was rendered above */}
           {(template.backstory || (template.toolNames && template.toolNames.length > 0)) && <Separator />}
 
-          <div className="flex justify-end pt-1"> {/* Added pt-1 to maintain spacing */}
+          <div className="flex justify-end pt-1">
             <Button variant="default" size="lg" className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600" asChild>
                 <Link to="/agents/new" search={{ templateId: template.id }}>
                     <Zap className="mr-2 h-4 w-4"/> Criar Agente com este Template

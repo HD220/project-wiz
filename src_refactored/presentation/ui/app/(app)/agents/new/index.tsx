@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { Loader2, ServerCrash } from 'lucide-react';
-import React from 'react'; // Removed useState
+import React from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -13,24 +13,24 @@ import { IPC_CHANNELS } from '@/shared/ipc-channels';
 import type {
   GetPersonaTemplatesListResponseData,
   GetLLMConfigsListResponseData,
-  CreateAgentInstanceRequest, // This is AgentInstanceFormData
+  CreateAgentInstanceRequest,
   CreateAgentInstanceResponseData,
   IPCResponse,
-  PersonaTemplate, // Ensure these types are available for the form props
+  PersonaTemplate,
   LLMConfig
 } from '@/shared/ipc-types';
 
 
-function NewAgentInstancePage() {
+function NewAgentInstancePage(): JSX.Element {
   const router = useRouter();
 
   const { data: personaTemplates, isLoading: isLoadingPersonas, error: personasError } = useIpcQuery<
-    null, // No request args for list
+    null,
     GetPersonaTemplatesListResponseData
   >(IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST, null, { staleTime: 5 * 60 * 1000 });
 
   const { data: llmConfigs, isLoading: isLoadingLLMConfigs, error: llmConfigsError } = useIpcQuery<
-    null, // No request args for list
+    null,
     GetLLMConfigsListResponseData
   >(IPC_CHANNELS.GET_LLM_CONFIGS_LIST, null, { staleTime: 5 * 60 * 1000 });
 
@@ -40,7 +40,7 @@ function NewAgentInstancePage() {
   >(
     IPC_CHANNELS.CREATE_AGENT_INSTANCE,
     {
-      onSuccess: (response) => {
+      onSuccess: (response): void => {
         if (response.success && response.data) {
           const agentDisplayName = response.data.agentName || `Agente (ID: ${response.data.id.substring(0,6)})`;
           toast.success(`Instância de Agente "${agentDisplayName}" criada com sucesso!`);
@@ -55,7 +55,7 @@ function NewAgentInstancePage() {
     }
   );
 
-  const handleSubmit = async (data: AgentInstanceFormData) => {
+  const handleSubmit = async (data: AgentInstanceFormData): Promise<void> => {
     console.log('Dados da nova instância de agente:', data);
     createAgentMutation.mutate(data);
   };

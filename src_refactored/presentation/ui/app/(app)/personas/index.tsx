@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Input } from '@/presentation/ui/components/ui/input';
 import { PersonaTemplateList } from '@/presentation/ui/features/persona/components/PersonaTemplateList';
-import { PersonaTemplate } from '@/presentation/ui/features/persona/components/PersonaTemplateListItem'; // Assuming type is exported
+import { PersonaTemplate } from '@/presentation/ui/features/persona/components/PersonaTemplateListItem';
 
 // Mock Data
 const mockPersonaTemplates: PersonaTemplate[] = [

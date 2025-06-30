@@ -1,5 +1,5 @@
 import { createFileRoute, useParams } from '@tanstack/react-router';
-import { UserPlus, Mail, ShieldCheck, Bot as BotIcon, Trash2 } from 'lucide-react'; // BotIcon to avoid conflict
+import { UserPlus, Mail, ShieldCheck, Bot as BotIcon, Trash2 } from 'lucide-react';
 import { MoreHorizontal } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -24,7 +24,7 @@ interface Member {
   role: 'Admin' | 'Membro' | 'Editor' | 'Visualizador';
   avatarUrl?: string;
   type: 'human' | 'agent';
-  agentPersona?: string; // If type is 'agent'
+  agentPersona?: string;
 }
 
 const mockMembers: Member[] = [
@@ -38,7 +38,7 @@ const mockMembers: Member[] = [
 // --- Sub-components for ProjectMembersPage ---
 
 interface InviteMemberFormSectionProps {
-  projectId: string; // Passed to alert for now
+  projectId: string;
 }
 function InviteMemberFormSection({ projectId }: InviteMemberFormSectionProps) {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -155,7 +155,7 @@ function MembersTableSection({ members }: MembersTableSectionProps) {
 function ProjectMembersPage() {
   const params = useParams({ from: '/(app)/projects/$projectId/members' });
 
-  const [members] = useState<Member[]>(mockMembers); // Removed setMembers
+  const [members] = useState<Member[]>(mockMembers);
 
   return (
     <div className="space-y-6">
