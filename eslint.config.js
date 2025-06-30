@@ -5,6 +5,7 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import vitestPlugin from "eslint-plugin-vitest";
 import * as importPlugin from "eslint-plugin-import";
 import boundariesPlugin from "eslint-plugin-boundaries";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 import globals from "globals";
 
 export default [
@@ -23,15 +24,11 @@ export default [
       "src2/**",
       "scripts/**",
       ".vite/**",
-      // Files outside src_refactored that might be picked up by broad patterns
-      "*.config.js", // e.g. eslint.config.js itself, lingui.config.js
-      "*.config.ts", // e.g. tailwind.config.ts, drizzle.config.ts
-      "*.config.cts", // e.g. forge.config.cts
-      "*.mts", // e.g. vitest.config.mts
+      "*.config.js",
+      "*.config.ts",
+      "*.config.cts",
+      "*.mts",
       "index.html",
-      "main.ts",
-      "preload.ts",
-      // Explicitly ignore top-level directories that are not src_refactored
       "docs/**",
       "migrations/**",
       "public/**",
@@ -40,7 +37,7 @@ export default [
       "types/**"
     ],
   },
-  // Configuration for files within src_refactored
+  // Base Configuration for files within src_refactored
   {
     files: ["src_refactored/**/*.ts", "src_refactored/**/*.tsx"],
     languageOptions: {
@@ -49,13 +46,13 @@ export default [
       parser: tsParser,
       parserOptions: {
         project: "./tsconfig.json",
-        tsconfigRootDir: import.meta.dirname, // Ensures ESLint resolves tsconfig.json correctly
+        tsconfigRootDir: import.meta.dirname,
         ecmaFeatures: {
           jsx: true,
         },
       },
       globals: {
-        ...vitestPlugin.environments.env.globals, // For Vitest globals in test files
+        ...vitestPlugin.environments.env.globals,
         ...globals.node,
         ...globals.browser,
         window: "readonly",
@@ -65,16 +62,17 @@ export default [
     plugins: {
       "@typescript-eslint": tsPlugin,
       import: importPlugin,
-      vitest: vitestPlugin, // Keep for test files, won't harm non-test files
+      vitest: vitestPlugin,
       boundaries: boundariesPlugin,
+      "react-hooks": reactHooksPlugin,
     },
     rules: {
-      // Base recommended rules
       ...js.configs.recommended.rules,
       ...tsPlugin.configs.recommended.rules,
-      ...vitestPlugin.configs.recommended.rules, // Apply test rules, will only affect test files due to context
+      ...vitestPlugin.configs.recommended.rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
 
-      // Custom rules from the original config (applied globally now)
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "import/no-unresolved": "error",
       "@typescript-eslint/no-explicit-any": "error",
@@ -86,31 +84,29 @@ export default [
         { "selector": "parameter", "format": ["camelCase"], "leadingUnderscore": "allow" },
         { "selector": "typeLike", "format": ["PascalCase"] },
         { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] },
-        // Added rule for objectLiteralProperty
-        {
-          "selector": "objectLiteralProperty",
-          "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"],
-          "leadingUnderscore": "allow",
-          "trailingUnderscore": "allow"
-        },
-        // Added rule for static readonly class properties
-        {
-          "selector": "classProperty",
-          "modifiers": ["static", "readonly"],
-          "format": ["UPPER_CASE", "camelCase", "PascalCase"]
-        }
+        { "selector": "objectLiteralProperty", "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
+        { "selector": "classProperty", "modifiers": ["static", "readonly"], "format": ["UPPER_CASE", "camelCase", "PascalCase"] }
       ],
       "max-depth": ["warn", { "max": 4 }],
       "no-else-return": "warn",
-      "id-length": ["warn", { "min": 2, "exceptions": ["_"] }], // Added "_" to exceptions
-      "max-lines-per-function": ["warn", { "max": 100, "skipBlankLines": true, "skipComments": true }], // Default increased
-      "max-statements": ["warn", { "max": 25 }], // Default increased
-      "max-lines": ["warn", { "max": 500, "skipBlankLines": true, "skipComments": true }], // Default increased
+      "id-length": ["warn", { "min": 2, "exceptions": ["_"] }],
+      "max-statements": ["warn", { "max": 25 }],
+      "max-lines-per-function": ["error", { "max": 50, "skipBlankLines": true, "skipComments": true }],
+      "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }],
+      // Comment Rules
+      "@typescript-eslint/ban-ts-comment": ["error", {
+        "ts-expect-error": "allow-with-description",
+        "ts-ignore": true, // Ban @ts-ignore
+        "ts-nocheck": true, // Ban @ts-nocheck
+        "ts-check": false,  // Allow @ts-check
+        "minimumDescriptionLength": 3
+      }],
+      "no-inline-comments": "error", // Disallow comments on the same line as code
+
       "import/order": ["warn", {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
         "pathGroups": [
           { "pattern": "@nestjs/**", "group": "external", "position": "before" },
-          // Updated UI paths
           { "pattern": "@ui/app/**", "group": "internal", "position": "before" },
           { "pattern": "@ui/assets/**", "group": "internal", "position": "before" },
           { "pattern": "@ui/components/**", "group": "internal", "position": "before" },
@@ -122,12 +118,11 @@ export default [
           { "pattern": "@ui/styles/**", "group": "internal", "position": "before" },
           { "pattern": "@ui/types/**", "group": "internal", "position": "before" },
           { "pattern": "@ui/*", "group": "internal" },
-          // Core paths remain the same
           { "pattern": "@/core/**", "group": "internal", "position": "before" },
           { "pattern": "@/domain/**", "group": "internal", "position": "before" },
           { "pattern": "@/application/**", "group": "internal", "position": "before" },
           { "pattern": "@/infrastructure/**", "group": "internal", "position": "before" },
-          { "pattern": "@/presentation/**", "group": "internal", "position": "before" }, // General presentation
+          { "pattern": "@/presentation/**", "group": "internal", "position": "before" },
           { "pattern": "@/shared/**", "group": "internal", "position": "after" },
           { "pattern": "@/refactored/**", "group": "internal", "position": "before" },
         ],
@@ -150,52 +145,80 @@ export default [
           ],
         },
       ],
-      // Specific overrides for test files (can be moved to a separate block if needed, but fine here for simplicity)
-      "vitest/expect-expect": "warn", // Example: warn instead of error for expect-expect
-      "@typescript-eslint/ban-ts-comment": ["error", {"ts-expect-error": "allow-with-description"}],
-
-       // Turn off max lines/statements for test files (using a more specific glob pattern here)
-      // This is a common pattern: have a global rule, then override for specific file types.
-      // However, ESLint flat config processes arrays. A later object can override an earlier one if files match.
-      // For simplicity, I'm keeping rules here, but for test-specific overrides, a separate block is cleaner.
-      // For now, we rely on the fact that these rules are off in the dedicated test block below.
+      "vitest/expect-expect": "warn",
     },
     settings: {
       "import/resolver": {
         typescript: {
-          alwaysTryTypes: true, // Rproperty of the typescript resolver
+          alwaysTryTypes: true,
           project: "./tsconfig.json",
-        },
-        // Potentially add node resolver if you have issues with built-in modules, though typescript resolver should handle most cases.
-        // node: {
-        //   extensions: [".js", ".jsx", ".ts", ".tsx"]
-        // }
+        }
       },
       "boundaries/elements": [
-        // Relative to the "files" glob, which is "src_refactored/**"
-        { type: "domain", pattern: "core/domain" },
-        { type: "application", pattern: "core/application" },
-        { type: "infrastructure", pattern: "infrastructure" },
-        { type: "presentation", pattern: "presentation" },
-        { type: "shared", pattern: "shared" },
-        { type: "ui-components", pattern: "presentation/ui/components" },
-        { type: "ui-features", pattern: "presentation/ui/app" }, // Assuming 'app' is where features reside
-        { type: "ui-lib", pattern: "presentation/ui/lib" },
-        { type: "ui-hooks", pattern: "presentation/ui/hooks" },
+        { type: "domain", pattern: "src_refactored/core/domain" },
+        { type: "application", pattern: "src_refactored/core/application" },
+        { type: "infrastructure", pattern: "src_refactored/infrastructure" },
+        { type: "presentation", pattern: "src_refactored/presentation" },
+        { type: "shared", pattern: "src_refactored/shared" },
+        { type: "ui-components", pattern: "src_refactored/presentation/ui/components" },
+        { type: "ui-features", pattern: "src_refactored/presentation/ui/app" },
+        { type: "ui-lib", pattern: "src_refactored/presentation/ui/lib" },
+        { type: "ui-hooks", pattern: "src_refactored/presentation/ui/hooks" },
       ],
-      "boundaries/ignore": ["presentation/ui/routeTree.gen.ts"], // Adjusted to be relative
+      "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"],
     },
   },
-  // Config specific to test files within src_refactored
+  // Override for Application .tsx AND ALL Test files (.ts and .tsx) for line limits
   {
-    files: ["src_refactored/**/*.spec.ts", "src_refactored/**/*.test.ts", "src_refactored/**/*.spec.tsx", "src_refactored/**/*.test.tsx"],
-    // No need to repeat languageOptions if covered by the global one, unless overriding parser/globals
+    files: [
+      "src_refactored/**/*.tsx",
+      "src_refactored/**/*.spec.ts",
+      "src_refactored/**/*.test.ts",
+      "src_refactored/**/*.spec.tsx",
+      "src_refactored/**/*.test.tsx"
+    ],
+    ignores: [
+      "src_refactored/presentation/ui/components/ui/**/*.tsx"
+    ],
     rules: {
-      // Disable or relax rules for test files
+      "max-lines-per-function": ["error", { "max": 100, "skipBlankLines": true, "skipComments": true }],
+      "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }],
+    }
+  },
+  // Config specific to test files for relaxing OTHER rules (e.g., max-statements)
+  {
+    files: [
+      "src_refactored/**/*.spec.ts",
+      "src_refactored/**/*.test.ts",
+      "src_refactored/**/*.spec.tsx",
+      "src_refactored/**/*.test.tsx"
+    ],
+    rules: {
+      // Line limits are inherited from the block above (100/200).
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_", vars: "all", args: "after-used", ignoreRestSiblings: true }],
-      "max-lines-per-function": "off",
       "max-statements": "off",
-       // Other test-specific rule adjustments can go here
+      // Allow inline comments in test files if necessary for describe/it blocks or specific test explanations
+      "no-inline-comments": "off",
+      // Test files might use ts-expect-error more liberally for testing error conditions
+      "@typescript-eslint/ban-ts-comment": ["error", {
+        "ts-expect-error": "allow-with-description", // or "off" if too restrictive for tests
+        "ts-ignore": true,
+        "ts-nocheck": true,
+        "ts-check": false,
+        "minimumDescriptionLength": 3
+      }],
     },
   },
+  // Config block to specifically turn OFF rules for ShadCN UI components
+  {
+    files: ["src_refactored/presentation/ui/components/ui/**/*.tsx"],
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
+      "max-lines-per-function": "off",
+      "max-lines": "off",
+      "max-statements": "off",
+      "no-inline-comments": "off", // Also allow inline comments in shadcn/ui
+      "@typescript-eslint/ban-ts-comment": "off", // Turn off ts-comment bans for shadcn/ui
+    }
+  }
 ];

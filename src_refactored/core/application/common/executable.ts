@@ -12,7 +12,8 @@ import { Result } from '@/shared/result';
 export interface Executable<
   InputType,
   SuccessData,
-  ErrorType extends Error = Error, // Default error type
+  ErrorType extends Error = Error,
+  // Default error type
 > {
   /**
    * Executes the command or use case.
