@@ -132,6 +132,8 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
     *   If a comment is *absolutely necessary* (e.g., to explain complex business logic that cannot be simplified, or a temporary workaround for an external issue), it should explain the *why* of the logic, not just the *what*.
     *   Write comments in English.
     *   **Do not use comments to disable code (commented-out lines).** If the code is not needed, remove it. Git history maintains previous versions.
+    *   **Do not include a comment at the start of a file indicating its path.** File paths are evident from the IDE and version control.
+    *   **Do not include a comment at the end of a file indicating something like `[end of file]` or `[end of X]`.** These are unnecessary and add clutter.
 
 #### 2.2.5. Technology/Tool - Specific Best Practices
 
@@ -232,4 +234,3 @@ This process ensures that all significant changes are well-considered, documente
 *   If you find a VO, entity, or utility function in the legacy code that is of high quality and PERFECTLY aligns with the new principles (Clean Arch, OC), you may adapt it for `src_refactored/`. However, **rewriting is the norm**.
 
 Remember, the goal is to create an exemplary codebase. Think carefully about each design and implementation decision. If anything is unclear, ask for clarification.
-[end of AGENTS.md]
