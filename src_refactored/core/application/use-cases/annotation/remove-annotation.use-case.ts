@@ -12,7 +12,8 @@ import { Result, ok, error } from '@/shared/result';
 import {
   RemoveAnnotationUseCaseInput,
   RemoveAnnotationUseCaseInputSchema,
-  RemoveAnnotationUseCaseOutput, // Output type from schema
+  // Output type from schema
+  RemoveAnnotationUseCaseOutput,
 } from './remove-annotation.schema';
 
 export class RemoveAnnotationUseCase
@@ -20,7 +21,8 @@ export class RemoveAnnotationUseCase
     Executable<
       RemoveAnnotationUseCaseInput,
       RemoveAnnotationUseCaseOutput,
-      DomainError | ZodError | ValueError | NotFoundError // Removed NotFoundError from success type
+      // Removed NotFoundError from success type
+      DomainError | ZodError | ValueError | NotFoundError
     >
 {
   constructor(private annotationRepository: IAnnotationRepository) {}
@@ -43,12 +45,12 @@ export class RemoveAnnotationUseCase
         return error(new DomainError(`Failed to delete annotation: ${deleteResult.value.message}`, deleteResult.value));
       }
       return ok({ success: true, annotationId: validInput.annotationId });
-    } catch (e: unknown) {
-      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
-        return error(e);
+    } catch (errorValue: unknown) {
+      if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
+        return error(errorValue);
       }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[RemoveAnnotationUseCase] Unexpected error for annotation ID ${input.annotationId}: ${message}`, { error: e });
+      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+      // this.logger.error(`[RemoveAnnotationUseCase] Unexpected error for annotation ID ${input.annotationId}: ${message}`, { error: errorValue });
       return error(new DomainError(`Unexpected error removing annotation: ${message}`));
     }
   }
