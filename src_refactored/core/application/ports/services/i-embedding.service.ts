@@ -1,9 +1,11 @@
 // src_refactored/core/application/ports/services/i-embedding.service.ts
-import { EmbeddingError } from '@/domain/common/errors'; // Assuming EmbeddingError will be in domain/common/errors
+// Assuming EmbeddingError will be in domain/common/errors
+import { EmbeddingError } from '@/domain/common/errors';
 
 import { Result } from '@/shared/result';
 
-export type EmbeddingVector = number[]; // Changed to type alias
+// Changed to type alias
+export type EmbeddingVector = number[];
 
 export interface IEmbeddingService {
   /**
