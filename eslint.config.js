@@ -1,7 +1,4 @@
-// eslint.config.js
 // @ts-check
-
-// --- ESLint Plugins and Core Imports ---
 import js from "@eslint/js";
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
@@ -47,29 +44,16 @@ const typeScriptSpecificRules = {
 };
 
 const reactSpecificRules = {
-  "react/react-in-jsx-scope": "off", // Not needed with new JSX transform
+  "react/react-in-jsx-scope": "off",
   "react-hooks/rules-of-hooks": "error",
   "react-hooks/exhaustive-deps": "warn",
 };
 
 const importAndBoundaryRules = {
   "import/no-unresolved": "error",
-  // "import/no-relative-parent-imports": "error", // Kept commented as per original
-  // "import/no-restricted-paths": ["error", { /* ... */ }], // Kept commented
   "import/order": ["warn", {
     groups: ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
     pathGroups: [
-      { pattern: "@nestjs/**", group: "external", position: "before" },
-      { pattern: "@ui/app/**", group: "internal", position: "before" },
-      { pattern: "@ui/assets/**", group: "internal", position: "before" },
-      { pattern: "@ui/components/**", group: "internal", position: "before" },
-      { pattern: "@ui/config/**", group: "internal", position: "before" },
-      { pattern: "@ui/hooks/**", group: "internal", position: "before" },
-      { pattern: "@ui/lib/**", group: "internal", position: "before" },
-      { pattern: "@ui/services/**", group: "internal", position: "before" },
-      { pattern: "@ui/store/**", group: "internal", position: "before" },
-      { pattern: "@ui/styles/**", group: "internal", position: "before" },
-      { pattern: "@ui/types/**", group: "internal", position: "before" },
       { pattern: "@ui/*", group: "internal" },
       { pattern: "@/core/**", group: "internal", position: "before" },
       { pattern: "@/domain/**", group: "internal", position: "before" },
@@ -77,7 +61,6 @@ const importAndBoundaryRules = {
       { pattern: "@/infrastructure/**", group: "internal", position: "before" },
       { pattern: "@/presentation/**", group: "internal", position: "before" },
       { pattern: "@/shared/**", group: "internal", position: "after" },
-      { pattern: "@/refactored/**", group: "internal", position: "before" },
     ],
     pathGroupsExcludedImportTypes: [],
     "newlines-between": "always",
@@ -202,7 +185,6 @@ export default [
     rules: {
       // Relaxed line limits for .tsx and test files
       "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
-      // max-lines is inherited from codeStyleAndQualityRules (200 lines)
     }
   },
 
