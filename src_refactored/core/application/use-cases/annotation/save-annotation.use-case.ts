@@ -2,7 +2,8 @@
 import { ZodError } from 'zod';
 
 import { ILoggerService } from '@/core/common/services/i-logger.service';
-import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId, JobId
+// For AgentId, JobId
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 // import { IUseCase as Executable } from '@/application/common/ports/use-case.interface'; // Duplicate
 import { Annotation } from '@/domain/annotation/annotation.entity';
@@ -33,7 +34,8 @@ export class SaveAnnotationUseCase
 {
   constructor(
     private readonly annotationRepository: IAnnotationRepository,
-    private readonly logger: ILoggerService, // Added logger
+    // Added logger
+    private readonly logger: ILoggerService,
   ) {}
 
   async execute(
@@ -46,50 +48,12 @@ export class SaveAnnotationUseCase
     const validInput = validationResult.data;
 
     try {
-      const textVo = AnnotationText.create(validInput.text);
-      const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : null;
-      const jobIdVo = validInput.jobId ? Identity.fromString(validInput.jobId) : null;
+      const annotationEntity = validInput.id
+        ? await this._updateAnnotation(validInput)
+        : this._createAnnotation(validInput);
 
-      let annotationEntity: Annotation;
-      // let updated = false; // This variable is unused
-
-      if (validInput.id) {
-        const annotationIdVo = AnnotationId.fromString(validInput.id);
-        const existingResult = await this.annotationRepository.findById(annotationIdVo);
-        if (existingResult.isError()) {
-          return error(new DomainError(`Failed to fetch annotation for update: ${existingResult.value.message}`, existingResult.value));
-        }
-        const existingAnnotation = existingResult.value;
-        if (!existingAnnotation) {
-          return error(new NotFoundError(`Annotation with ID ${validInput.id} not found for update.`));
-        }
-        annotationEntity = existingAnnotation;
-
-        if (!annotationEntity.text().equals(textVo)) {
-          annotationEntity = annotationEntity.updateText(textVo);
-          // updated = true;
-        }
-        if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
-          if (!annotationEntity.agentId()?.equals(agentIdVo) && (annotationEntity.agentId() || agentIdVo)) {
-            annotationEntity = annotationEntity.assignAgent(agentIdVo);
-            // updated = true;
-          }
-        }
-        if (Object.prototype.hasOwnProperty.call(validInput, 'jobId')) {
-          if (!annotationEntity.jobId()?.equals(jobIdVo) && (annotationEntity.jobId() || jobIdVo)) {
-            annotationEntity = annotationEntity.assignJob(jobIdVo);
-            // updated = true;
-          }
-        }
-      } else {
-        const newAnnotationId = AnnotationId.generate();
-        annotationEntity = Annotation.create({
-          id: newAnnotationId,
-          text: textVo,
-          agentId: agentIdVo,
-          jobId: jobIdVo,
-        });
-        // updated = true; // It's a new entity, so it's "updated" from non-existence
+      if (annotationEntity instanceof DomainError || annotationEntity instanceof NotFoundError) {
+        return error(annotationEntity);
       }
 
       const saveResult = await this.annotationRepository.save(annotationEntity);
@@ -102,13 +66,65 @@ export class SaveAnnotationUseCase
         createdAt: annotationEntity.createdAt().toISOString(),
         updatedAt: annotationEntity.updatedAt().toISOString(),
       });
-    } catch (e: unknown) {
-      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
-        return error(e);
-      }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[SaveAnnotationUseCase] Unexpected error: ${message}`, { error: e });
-      return error(new DomainError(`Unexpected error saving annotation: ${message}`));
+    } catch (errValue: unknown) {
+      return this._handleUseCaseError(errValue);
     }
+  }
+
+  private _createAnnotation(validInput: SaveAnnotationUseCaseInput): Annotation {
+    const textVo = AnnotationText.create(validInput.text);
+    const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : null;
+    const jobIdVo = validInput.jobId ? Identity.fromString(validInput.jobId) : null;
+    const newAnnotationId = AnnotationId.generate();
+
+    return Annotation.create({
+      id: newAnnotationId,
+      text: textVo,
+      agentId: agentIdVo,
+      jobId: jobIdVo,
+    });
+  }
+
+  private async _updateAnnotation(validInput: SaveAnnotationUseCaseInput): Promise<Annotation | DomainError | NotFoundError> {
+    const annotationIdVo = AnnotationId.fromString(validInput.id!);
+    const existingResult = await this.annotationRepository.findById(annotationIdVo);
+
+    if (existingResult.isError()) {
+      return new DomainError(`Failed to fetch annotation for update: ${existingResult.value.message}`, existingResult.value);
+    }
+    const existingAnnotation = existingResult.value;
+    if (!existingAnnotation) {
+      return new NotFoundError(`Annotation with ID ${validInput.id} not found for update.`);
+    }
+
+    let annotationEntity = existingAnnotation;
+    const textVo = AnnotationText.create(validInput.text);
+    if (!annotationEntity.text().equals(textVo)) {
+      annotationEntity = annotationEntity.updateText(textVo);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
+      const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : null;
+      if (!annotationEntity.agentId()?.equals(agentIdVo) && (annotationEntity.agentId() || agentIdVo)) {
+        annotationEntity = annotationEntity.assignAgent(agentIdVo);
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(validInput, 'jobId')) {
+      const jobIdVo = validInput.jobId ? Identity.fromString(validInput.jobId) : null;
+      if (!annotationEntity.jobId()?.equals(jobIdVo) && (annotationEntity.jobId() || jobIdVo)) {
+        annotationEntity = annotationEntity.assignJob(jobIdVo);
+      }
+    }
+    return annotationEntity;
+  }
+
+  private _handleUseCaseError(errorValue: unknown): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
+    if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
+      return error(errorValue);
+    }
+    const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+    this.logger.error(`[SaveAnnotationUseCase] Unexpected error: ${message}`, { error: errorValue });
+    return error(new DomainError(`Unexpected error saving annotation: ${message}`));
   }
 }
