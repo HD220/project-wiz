@@ -22,7 +22,7 @@ const OverviewTabContent = ({ project }: { project: Project }) => (
     <Card>
       <CardHeader>
         <CardTitle>Resumo do Projeto</CardTitle>
-        <CardDescription>Informações chave e estatísticas sobre "{project.name}".</CardDescription>
+        <CardDescription>Informações chave e estatísticas sobre &quot;{project.name}&quot;.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-2">
         <div>
