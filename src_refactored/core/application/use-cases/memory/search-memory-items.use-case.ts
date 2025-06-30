@@ -4,15 +4,18 @@ import { inject, injectable } from 'inversify';
 import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
-import { DomainError, ValueError } from '@/domain/common/errors';
+// DomainError is not used
+import { ValueError } from '@/domain/common/errors';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { MemorySearchFilters, PaginationOptions, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.types';
 
 import { ApplicationError } from '@/application/common/errors';
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+// Standardized to IUseCase
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 
-import { Result, ok, error as resultError, isSuccess } from '@/shared/result'; // Renamed 'error' to 'resultError' to avoid conflict
+// Renamed 'error' to 'resultError' to avoid conflict
+import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
 
 import {
   SearchMemoryItemsUseCaseInput,
@@ -25,7 +28,8 @@ const CONTENT_EXCERPT_LENGTH = 200;
 
 @injectable()
 export class SearchMemoryItemsUseCase
-  implements IUseCase<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput, ApplicationError> // Changed Executable to IUseCase
+  // Changed Executable to IUseCase
+  implements IUseCase<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput, ApplicationError>
 {
   constructor(
     @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,
@@ -74,9 +78,9 @@ export class SearchMemoryItemsUseCase
       this.logger.debug('SearchMemoryItemsUseCase: Execution successful.');
       return ok(output);
 
-    } catch (err) { // Changed variable name from error to err
-      this.logger.error('SearchMemoryItemsUseCase: Unhandled error during execution.', err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
+    } catch (errorValue) {
+      this.logger.error('SearchMemoryItemsUseCase: Unhandled error during execution.', errorValue);
+      const errorMessage = errorValue instanceof Error ? errorValue.message : String(errorValue);
       return resultError(new ApplicationError(`An unexpected error occurred: ${errorMessage}`));
     }
   }
@@ -84,10 +88,11 @@ export class SearchMemoryItemsUseCase
   private validateInput(input: SearchMemoryItemsUseCaseInput): Result<SearchMemoryItemsUseCaseInput, ApplicationError> {
     const parseResult = SearchMemoryItemsUseCaseInputSchema.safeParse(input);
     if (!parseResult.success) {
-      const errorMessages = parseResult.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+      const errorMessages = parseResult.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
       return resultError(new ApplicationError(`Invalid input: ${errorMessages}`));
     }
-    return ok(parseResult.data); // parseResult.data contains input with defaults applied by Zod
+    // parseResult.data contains input with defaults applied by Zod
+    return ok(parseResult.data);
   }
 
   private buildSearchFilters(validatedInput: SearchMemoryItemsUseCaseInput): Result<MemorySearchFilters, ApplicationError> {
@@ -110,14 +115,15 @@ export class SearchMemoryItemsUseCase
         tags: validatedInput.tags,
       };
       return ok(filters);
-    } catch (e) {
-      if (e instanceof ValueError) {
-        this.logger.warn(`SearchMemoryItemsUseCase: Error building search filters - ${e.message}`);
-        return resultError(new ApplicationError(`Invalid filter parameter: ${e.message}`));
+    } catch (errorValue) {
+      if (errorValue instanceof ValueError) {
+        this.logger.warn(`SearchMemoryItemsUseCase: Error building search filters - ${errorValue.message}`);
+        return resultError(new ApplicationError(`Invalid filter parameter: ${errorValue.message}`));
       }
-      this.logger.error('SearchMemoryItemsUseCase: Unexpected error building search filters.', e);
+      this.logger.error('SearchMemoryItemsUseCase: Unexpected error building search filters.', errorValue);
       // Fallback for unexpected errors during filter building that are not ValueError
-      return resultError(new ApplicationError(`Unexpected error building filters: ${e instanceof Error ? e.message : String(e)}`));
+      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+      return resultError(new ApplicationError(`Unexpected error building filters: ${message}`));
     }
   }
 
