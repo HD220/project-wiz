@@ -1,12 +1,11 @@
 import { ipcMain, BrowserWindow } from 'electron';
+
 import {
   GET_DMS_CHANNEL,
   GET_DM_DETAILS_CHANNEL,
   SEND_DM_MESSAGE_CHANNEL,
   DM_MESSAGE_RECEIVED_CHANNEL, // For notifying renderer about new messages
 } from '../../../../shared/ipc-channels';
-import { mockDMs, addMessageToMockDM } from '../mocks/dm.mocks';
-import { Message } from '../../../../shared/types/entities';
 import {
   GetDMsResponse,
   GetDMDetailsRequest,
@@ -15,6 +14,8 @@ import {
   SendDMMessageResponse,
   DMMessageReceivedPayload,
 } from '../../../../shared/ipc-types/dm';
+import { Message } from '../../../../shared/types/entities';
+import { mockDMs, addMessageToMockDM } from '../mocks/dm.mocks';
 
 // Helper to send messages to all renderer windows
 function notifyAllWindows(channel: string, payload: any) {
@@ -40,9 +41,9 @@ export function registerDMHandlers() {
     const dm = mockDMs.find(d => d.id === req.dmId);
     if (dm) {
       return { dm };
-    } else {
-      return { dm: undefined, error: 'DM not found' };
     }
+      return { dm: undefined, error: 'DM not found' };
+
   });
 
   ipcMain.handle(SEND_DM_MESSAGE_CHANNEL, async (_event, req: SendDMMessageRequest): Promise<SendDMMessageResponse> => {
@@ -93,8 +94,8 @@ export function registerDMHandlers() {
       }
 
       return { success: true, message: newMessage };
-    } else {
-      return { success: false, error: 'DM not found or failed to send message' };
     }
+      return { success: false, error: 'DM not found or failed to send message' };
+
   });
 }

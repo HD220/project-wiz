@@ -1,12 +1,11 @@
 import { ipcMain } from 'electron';
+
 import {
   GET_PERSONA_TEMPLATES_CHANNEL,
   GET_PERSONA_TEMPLATE_DETAILS_CHANNEL,
   CREATE_PERSONA_TEMPLATE_CHANNEL,
   UPDATE_PERSONA_TEMPLATE_CHANNEL,
 } from '../../../../shared/ipc-channels';
-import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
-import { PersonaTemplate } from '../../../../shared/types/entities';
 import {
   GetPersonaTemplatesResponse,
   GetPersonaTemplateDetailsRequest,
@@ -16,6 +15,8 @@ import {
   UpdatePersonaTemplateRequest,
   UpdatePersonaTemplateResponse,
 } from '../../../../shared/ipc-types/persona-template';
+import { PersonaTemplate } from '../../../../shared/types/entities';
+import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
 
 export function registerPersonaTemplateHandlers() {
   ipcMain.handle(GET_PERSONA_TEMPLATES_CHANNEL, async (): Promise<GetPersonaTemplatesResponse> => {
@@ -28,9 +29,9 @@ export function registerPersonaTemplateHandlers() {
     const template = mockPersonaTemplates.find(pt => pt.id === req.templateId);
     if (template) {
       return { personaTemplate: template };
-    } else {
-      return { personaTemplate: undefined, error: 'Persona Template not found' };
     }
+      return { personaTemplate: undefined, error: 'Persona Template not found' };
+
   });
 
   ipcMain.handle(CREATE_PERSONA_TEMPLATE_CHANNEL, async (_event, req: CreatePersonaTemplateRequest): Promise<CreatePersonaTemplateResponse> => {
@@ -57,8 +58,8 @@ export function registerPersonaTemplateHandlers() {
       const updatedTemplate = { ...mockPersonaTemplates[templateIndex], ...req.updates, updatedAt: new Date().toISOString() };
       mockPersonaTemplates[templateIndex] = updatedTemplate;
       return { personaTemplate: updatedTemplate };
-    } else {
-      return { personaTemplate: undefined, error: 'Persona Template not found for update' };
     }
+      return { personaTemplate: undefined, error: 'Persona Template not found for update' };
+
   });
 }

@@ -1,14 +1,15 @@
 import { ipcMain } from 'electron';
+
 import {
   GET_USER_PROFILE_CHANNEL,
   UPDATE_USER_PROFILE_CHANNEL,
 } from '../../../../shared/ipc-channels';
-import { mockUserProfile, updateMockUserProfile } from '../mocks/user.mocks';
 import {
   GetUserProfileResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
 } from '../../../../shared/ipc-types/user';
+import { mockUserProfile, updateMockUserProfile } from '../mocks/user.mocks';
 
 export function registerUserHandlers() {
   ipcMain.handle(GET_USER_PROFILE_CHANNEL, async (): Promise<GetUserProfileResponse> => {

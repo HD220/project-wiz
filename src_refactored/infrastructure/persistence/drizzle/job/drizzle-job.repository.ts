@@ -1,8 +1,10 @@
 // src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts
 import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
+
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
+
 import { db } from '../drizzle.client';
 import * as schema from '../schema';
 

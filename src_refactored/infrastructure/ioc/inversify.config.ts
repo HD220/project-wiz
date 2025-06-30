@@ -1,10 +1,12 @@
 // src_refactored/infrastructure/ioc/inversify.config.ts
 import 'reflect-metadata';
 import { Container } from 'inversify';
-import { db } from '@/infrastructure/persistence/drizzle/drizzle.client';
+
 import { IJobRepository, JOB_REPOSITORY_TOKEN } from '@/core/application/ports/job-repository.interface';
-import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/job/drizzle-job.repository';
 import { AbstractQueue, getQueueServiceToken } from '@/core/application/queue/abstract-queue';
+
+import { db } from '@/infrastructure/persistence/drizzle/drizzle.client';
+import { DrizzleJobRepository } from '@/infrastructure/persistence/drizzle/job/drizzle-job.repository';
 import { QueueService } from '@/infrastructure/queue/drizzle/queue.service';
 
 export const appContainer = new Container();

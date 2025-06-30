@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron';
+
 import {
   GET_AGENT_INSTANCES_CHANNEL,
   GET_AGENT_INSTANCE_DETAILS_CHANNEL,
@@ -6,8 +7,6 @@ import {
   UPDATE_AGENT_INSTANCE_CHANNEL,
   GET_AGENT_INSTANCES_BY_PROJECT_CHANNEL,
 } from '../../../../shared/ipc-channels';
-import { mockAgentInstances } from '../mocks/agent-instance.mocks';
-import { AgentInstance } from '../../../../shared/types/entities';
 import {
   GetAgentInstancesResponse,
   GetAgentInstanceDetailsRequest,
@@ -19,7 +18,9 @@ import {
   GetAgentInstancesByProjectRequest,
   GetAgentInstancesByProjectResponse,
 } from '../../../../shared/ipc-types/agent-instance';
+import { AgentInstance } from '../../../../shared/types/entities';
 import { AgentLLM } from '../../../../shared/types/entities'; // Import AgentLLM
+import { mockAgentInstances } from '../mocks/agent-instance.mocks';
 
 export function registerAgentInstanceHandlers() {
   ipcMain.handle(GET_AGENT_INSTANCES_CHANNEL, async (): Promise<GetAgentInstancesResponse> => {
@@ -38,9 +39,9 @@ export function registerAgentInstanceHandlers() {
     const instance = mockAgentInstances.find(ai => ai.id === req.instanceId);
     if (instance) {
       return { agentInstance: instance };
-    } else {
-      return { agentInstance: undefined, error: 'Agent Instance not found' };
     }
+      return { agentInstance: undefined, error: 'Agent Instance not found' };
+
   });
 
   ipcMain.handle(CREATE_AGENT_INSTANCE_CHANNEL, async (_event, req: CreateAgentInstanceRequest): Promise<CreateAgentInstanceResponse> => {
@@ -81,8 +82,8 @@ export function registerAgentInstanceHandlers() {
       };
       mockAgentInstances[instanceIndex] = updatedInstance;
       return { agentInstance: updatedInstance };
-    } else {
-      return { agentInstance: undefined, error: 'Agent Instance not found for update' };
     }
+      return { agentInstance: undefined, error: 'Agent Instance not found for update' };
+
   });
 }

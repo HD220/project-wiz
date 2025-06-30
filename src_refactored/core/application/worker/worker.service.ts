@@ -1,8 +1,10 @@
 // src_refactored/core/application/worker/worker.service.ts
-import EventEmitter from 'node:events';
 import { randomUUID } from 'node:crypto';
+import EventEmitter from 'node:events';
+
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
 import { JobEntity } from '@/core/domain/job/job.entity';
+
 import { ProcessorFunction, WorkerOptions } from './worker.types';
 
 export class WorkerService<P, R> extends EventEmitter {

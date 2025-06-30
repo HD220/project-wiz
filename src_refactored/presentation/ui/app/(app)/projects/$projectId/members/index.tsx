@@ -154,7 +154,7 @@ function MembersTableSection({ members }: MembersTableSectionProps) {
 
 function ProjectMembersPage() {
   const params = useParams({ from: '/(app)/projects/$projectId/members' });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [members] = useState<Member[]>(mockMembers); // Removed setMembers
 
   return (
