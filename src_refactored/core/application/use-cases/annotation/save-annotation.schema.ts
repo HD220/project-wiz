@@ -13,17 +13,20 @@ export const SaveAnnotationUseCaseInputSchema = z.object({
   text: z.string()
     .trim()
     .min(1, { message: "Annotation text cannot be empty." })
-    .max(5000, { message: "Annotation text must be no more than 5000 characters long." }) // Aligned with AnnotationText VO
+    // Aligned with AnnotationText VO
+    .max(5000, { message: "Annotation text must be no more than 5000 characters long." })
     .describe("The content of the annotation."),
 
   agentId: z.string().uuid({ message: "Agent ID must be a valid UUID if provided." })
     .optional()
-    .nullable() // Allow explicitly unsetting or not providing
+    // Allow explicitly unsetting or not providing
+    .nullable()
     .describe("Optional ID of the agent associated with this annotation."),
 
   jobId: z.string().uuid({ message: "Job ID must be a valid UUID if provided." })
     .optional()
-    .nullable() // Allow explicitly unsetting or not providing
+    // Allow explicitly unsetting or not providing
+    .nullable()
     .describe("Optional ID of the job this annotation is related to."),
 }).strict();
 
