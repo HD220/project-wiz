@@ -12,7 +12,8 @@ export const SaveMemoryItemUseCaseInputSchema = z.object({
   content: z.string()
     .trim()
     .min(1, { message: "Memory content cannot be empty." })
-    .max(10000, { message: "Memory content must be no more than 10000 characters long." }) // Aligned with MemoryItemContent VO
+    // Aligned with MemoryItemContent VO
+    .max(10000, { message: "Memory content must be no more than 10000 characters long." })
     .describe("The textual content of the memory item."),
 
   agentId: z.string().uuid({ message: "Agent ID must be a valid UUID if provided." })
@@ -27,18 +28,21 @@ export const SaveMemoryItemUseCaseInputSchema = z.object({
         .max(50, { message: "Individual tag must be no more than 50 characters." })
     )
     .max(20, { message: "A memory item can have a maximum of 20 tags." })
-    .optional() // If not provided, existing tags (on update) might be kept or cleared depending on use case logic. Default to empty for create.
+    // If not provided, existing tags (on update) might be kept or cleared depending on use case logic. Default to empty for create.
+    .optional()
     .describe("Optional array of tags for categorization. Max 20 tags, each 1-50 chars."),
 
   source: z.string()
     .trim()
-    .min(1, { message: "Source cannot be empty if provided."}) // VO makes it nullable, so empty string if provided implies intent to clear
+    // VO makes it nullable, so empty string if provided implies intent to clear
+    .min(1, { message: "Source cannot be empty if provided."})
     .max(100, { message: "Source must be no more than 100 characters long." })
     .optional()
     .nullable()
     .describe("Optional source of this memory item (e.g., 'user_interaction', 'file_analysis')."),
 
-  embedding: z.array(z.number()) // Basic validation, more specific (e.g. dimension) could be added if needed
+  // Basic validation, more specific (e.g. dimension) could be added if needed
+  embedding: z.array(z.number())
     .optional()
     .nullable()
     .refine(val => val === null || val === undefined || val.length > 0, {
