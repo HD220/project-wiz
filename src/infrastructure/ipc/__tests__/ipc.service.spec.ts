@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { IpcService } from "./ipc.service";
-import { OK, NOK, Result } from "../../shared/result";
-import { JsonLogger } from "../services/logger/json-logger.service";
+import { IpcService } from "../ipc.service";
+import { OK, NOK, Result } from "../../../shared/result";
+import { JsonLogger } from "../../../services/logger/json-logger.service";
 
 describe("IpcService", () => {
   const mockIpcRenderer = {

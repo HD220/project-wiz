@@ -1,19 +1,19 @@
-import { QueueService } from "./queue.service";
-import { Job } from "../../core/domain/entities/job/job.entity";
-import { JobId } from "../../core/domain/entities/job/value-objects/job-id.vo";
-import { JobStatus } from "../../core/domain/entities/job/value-objects/job-status.vo";
+import { QueueService } from "../queue.service";
+import { Job } from "../../../core/domain/entities/job/job.entity";
+import { JobId } from "../../../core/domain/entities/job/value-objects/job-id.vo";
+import { JobStatus } from "../../../core/domain/entities/job/value-objects/job-status.vo";
 import {
   BackoffType,
   RetryPolicy,
-} from "../../core/domain/entities/job/value-objects/retry-policy.vo";
-import { Worker } from "../../core/domain/entities/worker/worker.entity";
-import { WorkerId } from "../../core/domain/entities/worker/value-objects/worker-id.vo";
-import { WorkerStatus } from "../../core/domain/entities/worker/value-objects/worker-status.vo";
-import { ok, error, Ok } from "../../shared/result";
-import { JobPriority } from "../../core/domain/entities/job/value-objects/job-priority.vo";
-import { JobDependsOn } from "../../core/domain/entities/job/value-objects/job-depends-on.vo";
-import { JobRepository } from "../../core/application/ports/job-repository.interface";
-import { ProcessJobService } from "../../core/application/ports/process-job-service.interface";
+} from "../../../core/domain/entities/job/value-objects/retry-policy.vo";
+import { Worker } from "../../../core/domain/entities/worker/worker.entity";
+import { WorkerId } from "../../../core/domain/entities/worker/value-objects/worker-id.vo";
+import { WorkerStatus } from "../../../core/domain/entities/worker/value-objects/worker-status.vo";
+import { ok, error, Ok } from "../../../shared/result";
+import { JobPriority } from "../../../core/domain/entities/job/value-objects/job-priority.vo";
+import { JobDependsOn } from "../../../core/domain/entities/job/value-objects/job-depends-on.vo";
+import { JobRepository } from "../../../core/application/ports/job-repository.interface";
+import { ProcessJobService } from "../../../core/application/ports/process-job-service.interface";
 
 describe("QueueService", () => {
   let queueService: QueueService;
