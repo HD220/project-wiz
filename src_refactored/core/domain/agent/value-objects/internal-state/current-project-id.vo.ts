@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/internal-state/current-project-id.vo.ts
-import { Identity } from '../../../../../core/common/value-objects/identity.vo'; // Assuming it's a UUID
+import { Identity } from '../../../../../core/common/value-objects/identity.vo';
 
 // This represents the ID of the project the agent is currently focused on,
 // stored within its internal state. It might or might not directly map to

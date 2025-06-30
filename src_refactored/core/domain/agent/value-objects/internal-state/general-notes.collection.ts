@@ -48,7 +48,7 @@ export class GeneralNotesCollection extends AbstractValueObject<GeneralNotesColl
     if (index < 0 || index >= this.props.notes.length) {
       throw new Error("Index out of bounds for removing note.");
     }
-    const newNotes = this.props.notes.filter((_, i) => i !== index);
+    const newNotes = this.props.notes.filter((_, noteIndex) => noteIndex !== index);
     return new GeneralNotesCollection(newNotes);
   }
 

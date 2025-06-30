@@ -10,7 +10,7 @@ export interface IAgentPersonaTemplateRepository {
   save(template: AgentPersonaTemplate): Promise<Result<void>>;
 
   findById(id: PersonaId): Promise<Result<AgentPersonaTemplate | null>>;
-  findByRole(role: PersonaRole): Promise<Result<AgentPersonaTemplate | null>>; // Assuming role is unique for templates
+  findByRole(role: PersonaRole): Promise<Result<AgentPersonaTemplate | null>>;
   findAll(): Promise<Result<AgentPersonaTemplate[]>>;
 
   // Delete might not be applicable for file-based templates managed outside the app's direct DB.

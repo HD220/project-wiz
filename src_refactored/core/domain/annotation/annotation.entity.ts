@@ -1,8 +1,8 @@
 // src_refactored/core/domain/annotation/annotation.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
-import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId and JobId
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
-import { EntityError, ValueError } from '@/domain/common/errors'; // Corrected alias path
+import { EntityError, ValueError } from '@/domain/common/errors';
 
 import { AnnotationId } from './value-objects/annotation-id.vo';
 import { AnnotationText } from './value-objects/annotation-text.vo';
@@ -60,16 +60,15 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
       throw new ValueError('New text cannot be null or undefined for update.');
     }
     if (this.props.text.equals(newText)) {
-      return this; // No change
+      return this;
     }
     const newProps = { ...this.props, text: newText, updatedAt: new Date() };
     return new Annotation(newProps);
   }
 
-  // Optional: methods to update agentId or jobId if they can be changed post-creation
   public assignAgent(agentId: Identity | null): Annotation {
     if (this.props.agentId === agentId || (this.props.agentId?.equals(agentId))) {
-        return this; // No change
+        return this;
     }
     const newProps = { ...this.props, agentId: agentId, updatedAt: new Date() };
     return new Annotation(newProps);
@@ -77,7 +76,7 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
 
   public assignJob(jobId: Identity | null): Annotation {
     if (this.props.jobId === jobId || (this.props.jobId?.equals(jobId))) {
-        return this; // No change
+        return this;
     }
     const newProps = { ...this.props, jobId: jobId, updatedAt: new Date() };
     return new Annotation(newProps);

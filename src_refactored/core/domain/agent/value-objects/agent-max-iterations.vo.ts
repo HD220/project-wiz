@@ -4,7 +4,7 @@ import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { DomainError } from '@/domain/common/errors';
 
 const MIN_ITERATIONS = 1;
-const MAX_ITERATIONS = 100; // Arbitrary reasonable upper limit
+const MAX_ITERATIONS = 100;
 const DEFAULT_ITERATIONS = 10;
 
 export class AgentMaxIterationsError extends DomainError {

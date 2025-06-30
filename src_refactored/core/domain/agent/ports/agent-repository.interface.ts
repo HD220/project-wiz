@@ -3,7 +3,6 @@ import { Result } from '@/shared/result';
 
 import { Agent } from '../agent.entity';
 import { AgentId } from '../value-objects/agent-id.vo';
-import { PersonaId } from '../value-objects/persona/persona-id.vo';
 
 export interface IAgentRepository {
   save(agent: Agent): Promise<Result<void>>;

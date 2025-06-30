@@ -4,7 +4,7 @@ import { IProjectRepository } from '@/domain/project/ports/project-repository.in
 import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
 import { ISourceCodeRepository } from '@/domain/source-code/ports/source-code-repository.interface';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Corrected import
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 
 import { Result, ok, error } from '@/shared/result';
 
@@ -16,10 +16,10 @@ import {
 
 export class GetProjectDetailsUseCase
   implements
-    IUseCase< // Changed Executable to IUseCase
+    IUseCase<
       GetProjectDetailsUseCaseInput,
       GetProjectDetailsUseCaseOutput,
-      DomainError | NotFoundError // Possible error types
+      DomainError | NotFoundError
     >
 {
   private projectRepository: IProjectRepository;
@@ -39,42 +39,35 @@ export class GetProjectDetailsUseCase
     try {
       const projectIdVo = ProjectId.fromString(input.projectId);
 
-      // 1. Fetch Project
       const projectResult = await this.projectRepository.findById(projectIdVo);
       if (projectResult.isError()) {
-        return error(projectResult.value); // Propagate repository error
+        return error(projectResult.value);
       }
       const project = projectResult.value;
       if (!project) {
         return error(new NotFoundError(`Project with ID ${input.projectId} not found.`));
       }
 
-      // 2. Fetch SourceCode
       let sourceCodeDetails: SourceCodeDetails | null = null;
       const sourceCodeResult = await this.sourceCodeRepository.findByProjectId(projectIdVo);
 
       if (sourceCodeResult.isError()) {
-        // Log this error but don't necessarily fail the whole use case if project exists
-        // Or, decide if this should be a hard failure. For now, let's allow project details without source code details on error.
         console.warn(`[GetProjectDetailsUseCase] Error fetching source code for project ${input.projectId}: ${sourceCodeResult.value.message}`);
-        // If SourceCode must exist or its fetch error is critical, uncomment below:
-        // return error(new DomainError(`Failed to fetch source code details: ${sourceCodeResult.value.message}`));
       } else {
         const sourceCodeEntity = sourceCodeResult.value;
         if (sourceCodeEntity) {
           sourceCodeDetails = {
             id: sourceCodeEntity.id().value(),
-            repositoryPath: sourceCodeEntity.path().value(), // path() is RepositoryPath, then .value() for string
-            docsPath: sourceCodeEntity.docsPath()?.value() || null, // docsPath() is RepositoryDocsPath | undefined
+            repositoryPath: sourceCodeEntity.path().value(),
+            docsPath: sourceCodeEntity.docsPath()?.value() || null,
           };
         }
       }
 
-      // 3. Map to Output DTO
       const output: GetProjectDetailsUseCaseOutput = {
         id: project.id().value(),
         name: project.name().value(),
-        description: project.description().value(), // ProjectDescription.value() returns string
+        description: project.description().value(),
         createdAt: project.createdAt().toISOString(),
         updatedAt: project.updatedAt().toISOString(),
         sourceCode: sourceCodeDetails,
@@ -82,12 +75,12 @@ export class GetProjectDetailsUseCase
 
       return ok(output);
 
-    } catch (err: any) {
-      // Catch unexpected errors (e.g., VO creation if input.projectId is malformed, though Zod should catch it before)
+    } catch (err: unknown) {
       console.error(`[GetProjectDetailsUseCase] Unexpected error for project ID ${input.projectId}:`, err);
+      const message = err instanceof Error ? err.message : String(err);
       return error(
         new DomainError(
-          `An unexpected error occurred while fetching details for project ${input.projectId}: ${err.message || err}`,
+          `An unexpected error occurred while fetching details for project ${input.projectId}: ${message}`,
         ),
       );
     }

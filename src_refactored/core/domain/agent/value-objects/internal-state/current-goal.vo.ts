@@ -21,7 +21,7 @@ export class CurrentGoal extends AbstractValueObject<CurrentGoalProps> {
 
   public static create(goal: string): CurrentGoal {
     this.validate(goal);
-    return new CurrentGoal(goal); // Not trimming, to preserve formatting
+    return new CurrentGoal(goal);
   }
 
   public value(): string {
