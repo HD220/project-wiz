@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from '@tanstack/react-router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Button } from '@/presentation/ui/components/ui/button';
@@ -15,6 +17,10 @@ import {
 } from '@/presentation/ui/components/ui/form';
 import { Input } from '@/presentation/ui/components/ui/input';
 import { Textarea } from '@/presentation/ui/components/ui/textarea';
+import { useIpcMutation } from '@/presentation/ui/hooks/ipc/useIpcMutation';
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import type { CreateProjectRequest, CreateProjectResponse, Project, UpdateProjectRequest, UpdateProjectResponse } from '@/shared/ipc-types';
 
 // Esquema de validação com Zod
 const projectFormSchema = z.object({
@@ -23,38 +29,82 @@ const projectFormSchema = z.object({
     .max(100, 'O nome do projeto não pode exceder 100 caracteres.'),
   description: z.string()
     .max(500, 'A descrição não pode exceder 500 caracteres.')
-    .optional(),
+    .optional()
+    .transform(val => val === '' ? undefined : val), // Ensure empty string becomes undefined
   // Adicionar mais campos conforme necessário (ex: template, repositório Git inicial)
 });
 
 export type ProjectFormData = z.infer<typeof projectFormSchema>;
 
 interface ProjectFormProps {
-  onSubmit: (data: ProjectFormData) => Promise<void> | void;
-  initialValues?: Partial<ProjectFormData>;
-  isSubmitting?: boolean;
-  submitButtonText?: string;
+  project?: Project; // Pass existing project for editing
+  onSuccess?: (data: Project) => void; // Optional: callback on successful submission
 }
 
-export function ProjectForm({
-  onSubmit,
-  initialValues,
-  isSubmitting = false,
-  submitButtonText
-}: ProjectFormProps) {
+export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
+  const router = useRouter();
+  const isEditing = !!project;
+
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      name: initialValues?.name || '',
-      description: initialValues?.description || '',
+      name: project?.name || '',
+      description: project?.description || '',
     },
   });
 
-  const effectiveSubmitButtonText = submitButtonText || (initialValues ? 'Salvar Alterações' : 'Criar Projeto');
+  const createProjectMutation = useIpcMutation<CreateProjectRequest, CreateProjectResponse>(
+    IPC_CHANNELS.CREATE_PROJECT,
+    {
+      onSuccess: (response) => {
+        if (response.success && response.data) {
+          toast.success(`Projeto "${response.data.name}" criado com sucesso!`);
+          onSuccess?.(response.data);
+          router.navigate({ to: '/projects/$projectId', params: { projectId: response.data.id } });
+        } else {
+          toast.error(response.error || 'Falha ao criar o projeto.');
+        }
+      },
+      onError: (error) => {
+        toast.error(`Erro ao criar projeto: ${error.message}`);
+      },
+    }
+  );
+
+  const updateProjectMutation = useIpcMutation<UpdateProjectRequest, UpdateProjectResponse>(
+    IPC_CHANNELS.UPDATE_PROJECT,
+    {
+      onSuccess: (response) => {
+        if (response.success && response.data) {
+          toast.success(`Projeto "${response.data.name}" atualizado com sucesso!`);
+          onSuccess?.(response.data);
+          // Optionally, refresh data or navigate
+          router.invalidate(); // Invalidate current route data to refetch if on detail page
+        } else {
+          toast.error(response.error || 'Falha ao atualizar o projeto.');
+        }
+      },
+      onError: (error) => {
+        toast.error(`Erro ao atualizar projeto: ${error.message}`);
+      },
+    }
+  );
+
+  const isSubmitting = createProjectMutation.isLoading || updateProjectMutation.isLoading;
+
+  const handleSubmit = (data: ProjectFormData) => {
+    if (isEditing && project) {
+      updateProjectMutation.mutate({ id: project.id, ...data });
+    } else {
+      createProjectMutation.mutate(data);
+    }
+  };
+
+  const effectiveSubmitButtonText = isEditing ? 'Salvar Alterações' : 'Criar Projeto';
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -100,7 +150,7 @@ export function ProjectForm({
         */}
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isSubmitting || !form.formState.isDirty && !initialValues}>
+          <Button type="submit" disabled={isSubmitting || (isEditing && !form.formState.isDirty) }>
             {isSubmitting ? 'Salvando...' : effectiveSubmitButtonText}
           </Button>
         </div>

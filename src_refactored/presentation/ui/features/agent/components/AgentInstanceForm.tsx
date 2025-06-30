@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import { useRouter } from '@tanstack/react-router';
+import React from 'react'; // Keep React for useState if needed for complex forms, though not used here
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Button } from '@/ui/components/ui/button';
+import { Button } from '@/presentation/ui/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,51 +14,103 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/ui/components/ui/form';
-import { Input } from '@/ui/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/components/ui/select';
-import { Slider } from '@/ui/components/ui/slider';
-import { LLMConfig } from '@/ui/features/llm/components/LLMConfigList';
-import { PersonaTemplate } from '@/ui/features/persona/components/PersonaTemplateListItem';
+} from '@/presentation/ui/components/ui/form';
+import { Input } from '@/presentation/ui/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/ui/components/ui/select';
+import { Slider } from '@/presentation/ui/components/ui/slider';
+import { useIpcMutation } from '@/presentation/ui/hooks/ipc/useIpcMutation';
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import type { CreateAgentInstanceRequest, CreateAgentInstanceResponse, AgentInstance, UpdateAgentInstanceRequest, UpdateAgentInstanceResponse, PersonaTemplate, LLMConfig } from '@/shared/ipc-types'; // Adjusted imports
 
 
+// Schema definition remains the same
 const agentInstanceFormSchema = z.object({
-  agentName: z.string().max(100, 'Nome muito longo.').optional(),
+  agentName: z.string().max(100, 'Nome muito longo.').optional().transform(val => val === '' ? undefined : val),
   personaTemplateId: z.string({ required_error: 'Selecione um Template de Persona.' }),
   llmProviderConfigId: z.string({ required_error: 'Selecione uma Configuração de LLM.' }),
-  temperature: z.number().min(0).max(2).step(0.1),
+  temperature: z.number().min(0).max(2).step(0.1).default(0.7),
 });
 
 export type AgentInstanceFormData = z.infer<typeof agentInstanceFormSchema>;
 
 interface AgentInstanceFormProps {
-  onSubmit: (data: AgentInstanceFormData) => Promise<void> | void;
-  initialValues?: Partial<AgentInstanceFormData>;
-  isSubmitting?: boolean;
-  personaTemplates: Pick<PersonaTemplate, 'id' | 'name'>[];
-  llmConfigs: Pick<LLMConfig, 'id' | 'name' | 'providerId'>[];
+  agentInstance?: AgentInstance; // Pass existing instance for editing
+  personaTemplates: Pick<PersonaTemplate, 'id' | 'name'>[]; // Assuming these are fetched separately or passed down
+  llmConfigs: Pick<LLMConfig, 'id' | 'name' | 'providerName'>[]; // Adjusted to providerName as per mock
+  onSuccess?: (data: AgentInstance) => void;
 }
 
 export function AgentInstanceForm({
-  onSubmit,
-  initialValues,
-  isSubmitting = false,
+  agentInstance,
   personaTemplates,
   llmConfigs,
+  onSuccess,
 }: AgentInstanceFormProps) {
+  const router = useRouter();
+  const isEditing = !!agentInstance;
+
   const form = useForm<AgentInstanceFormData>({
     resolver: zodResolver(agentInstanceFormSchema),
     defaultValues: {
-      agentName: initialValues?.agentName || '',
-      personaTemplateId: initialValues?.personaTemplateId || undefined,
-      llmProviderConfigId: initialValues?.llmProviderConfigId || undefined,
-      temperature: initialValues?.temperature ?? 0.7, // Default to 0.7 if not provided
+      agentName: agentInstance?.agentName || '',
+      personaTemplateId: agentInstance?.personaTemplateId || undefined,
+      llmProviderConfigId: agentInstance?.llmConfigId || undefined, // Corrected: llmConfigId from AgentInstance
+      temperature: agentInstance?.temperature ?? 0.7,
     },
   });
 
+  const createAgentMutation = useIpcMutation<CreateAgentInstanceRequest, CreateAgentInstanceResponse>(
+    IPC_CHANNELS.CREATE_AGENT_INSTANCE,
+    {
+      onSuccess: (response) => {
+        if (response.success && response.data) {
+          toast.success(`Agente "${response.data.agentName || response.data.id}" criado com sucesso!`);
+          onSuccess?.(response.data);
+          router.navigate({ to: '/agents/$agentId', params: { agentId: response.data.id } });
+        } else {
+          toast.error(response.error || 'Falha ao criar o agente.');
+        }
+      },
+      onError: (error) => {
+        toast.error(`Erro ao criar agente: ${error.message}`);
+      },
+    }
+  );
+
+  const updateAgentMutation = useIpcMutation<UpdateAgentInstanceRequest, UpdateAgentInstanceResponse>(
+    IPC_CHANNELS.UPDATE_AGENT_INSTANCE,
+    {
+      onSuccess: (response) => {
+        if (response.success && response.data) {
+          toast.success(`Agente "${response.data.agentName || response.data.id}" atualizado com sucesso!`);
+          onSuccess?.(response.data);
+          router.invalidate(); // Invalidate to refetch data on the details page
+        } else {
+          toast.error(response.error || 'Falha ao atualizar o agente.');
+        }
+      },
+      onError: (error) => {
+        toast.error(`Erro ao atualizar agente: ${error.message}`);
+      },
+    }
+  );
+
+  const isSubmitting = createAgentMutation.isLoading || updateAgentMutation.isLoading;
+
+  const handleSubmit = (data: AgentInstanceFormData) => {
+    if (isEditing && agentInstance) {
+      updateAgentMutation.mutate({ id: agentInstance.id, ...data });
+    } else {
+      createAgentMutation.mutate(data);
+    }
+  };
+
+  const effectiveSubmitButtonText = isEditing ? 'Atualizar Agente' : 'Criar Agente';
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="agentName"
@@ -115,7 +169,7 @@ export function AgentInstanceForm({
                 <SelectContent>
                   {llmConfigs.map(config => (
                     <SelectItem key={config.id} value={config.id}>
-                      {config.name} ({config.providerId})
+                      {config.name} ({config.providerName})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -154,8 +208,8 @@ export function AgentInstanceForm({
         />
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Criando Agente...' : (initialValues?.agentName ? 'Atualizar Agente' : 'Criar Agente')}
+          <Button type="submit" disabled={isSubmitting || (isEditing && !form.formState.isDirty)}>
+            {isSubmitting ? (isEditing ? 'Atualizando Agente...' : 'Criando Agente...') : effectiveSubmitButtonText}
           </Button>
         </div>
       </form>
