@@ -1,7 +1,6 @@
 // src_refactored/core/application/worker/worker.service.ts
 import { randomUUID } from 'node:crypto';
 import EventEmitter from 'node:events';
-import { Timeout } from 'node:timers';
 
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
 import { JobEntity } from '@/core/domain/job/job.entity';

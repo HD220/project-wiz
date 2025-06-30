@@ -1,9 +1,11 @@
-import { SendHorizontal, Paperclip, Mic } from 'lucide-react'; // Example icons
+// Example icons
+import { SendHorizontal, Paperclip, Mic } from 'lucide-react';
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
 import { cn } from '@/presentation/ui/lib/utils';
+
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 export interface ChatInputProps {
   onSubmit: (message: string) => void;
@@ -26,7 +28,8 @@ export function ChatInput({
   // Auto-resize textarea height based on content
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'; // Reset height
+      // Reset height
+      textareaRef.current.style.height = 'auto';
       const scrollHeight = textareaRef.current.scrollHeight;
       // Max height for textarea, e.g., 5 lines. Adjust as needed.
       // Assuming line height of ~20-24px. 5 lines ~ 100-120px.
@@ -63,11 +66,12 @@ export function ChatInput({
       <Textarea
         ref={textareaRef}
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={(event) => setMessage(event.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="flex-1 resize-none border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 focus:ring-sky-500 dark:focus:ring-sky-500 focus:border-sky-500 dark:focus:border-sky-500 min-h-[40px] max-h-[120px] overflow-y-auto rounded-lg px-3 py-2 text-sm"
-        rows={1} // Start with 1 row, auto-expands
+        // Start with 1 row, auto-expands
+        rows={1}
         disabled={isLoading}
       />
 

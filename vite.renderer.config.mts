@@ -26,16 +26,15 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@/": path.resolve(projectRoot, "src_refactored/presentation/ui/"), // Trailing slash is important for prefix replacement
+      // Specific alias for @/ui to point to the presentation/ui directory
+      "@/ui": path.resolve(projectRoot, "src_refactored/presentation/ui"),
+      // Alias for @/components to point to the presentation/ui/components directory
       "@/components": path.resolve(projectRoot, "src_refactored/presentation/ui/components"),
-      "@/features": path.resolve(projectRoot, "src_refactored/presentation/ui/features"),
-      "@/hooks": path.resolve(projectRoot, "src_refactored/presentation/ui/hooks"),
-      "@/lib": path.resolve(projectRoot, "src_refactored/presentation/ui/lib"),
-      "@/services": path.resolve(projectRoot, "src_refactored/presentation/ui/services"),
-      "@/styles": path.resolve(projectRoot, "src_refactored/presentation/ui/styles"),
-      "@/app": path.resolve(projectRoot, "src_refactored/presentation/ui/app"),
-      "@/ui": path.resolve(projectRoot, "src_refactored/presentation/ui/components/ui"),
+      // Alias for @/shared for shared types and utilities
       "@/shared": path.resolve(projectRoot, "src_refactored/shared"),
+      // Add other specific @/ aliases if the renderer needs them from other parts of src_refactored
+      // For example, if it directly imported from @/core (though unlikely for renderer)
+      // "@/core": path.resolve(projectRoot, "src_refactored/core"),
     },
   },
 });

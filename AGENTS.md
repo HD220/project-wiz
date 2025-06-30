@@ -1,178 +1,236 @@
-# 1. Visão Geral do Projeto
+# AGENT INSTRUCTIONS FOR PROJECT WIZ
 
-O Project Wiz é uma aplicação desktop ElectronJS com frontend em React e backend/core em Node.js/TypeScript.
+## 1. Project Overview
 
-**Instrução Fundamental: Leitura Prévia da Documentação**
+Project Wiz is an ElectronJS desktop application with a React frontend and a Node.js/TypeScript backend/core.
 
-Antes de iniciar QUALQUER tarefa de desenvolvimento, refatoração ou análise que envolva modificações no código ou na sua estrutura, é **obrigatório** que você revise CUIDADOSAMENTE toda a documentação relevante. O seu entendimento do sistema depende disso.
+**Fundamental Instruction: Internalize These Guidelines**
 
-*   **Documentação de Referência Principal:** Localizada em `docs/reference/`.
-    *   **Arquitetura do Software (`docs/reference/01-software-architecture.md`):** Este é o documento primário para entender a arquitetura do sistema. Ele detalha a Clean Architecture, as camadas (Domínio, Aplicação, Infraestrutura), o fluxo de dependências, e os componentes chave. **A leitura e compreensão deste documento são cruciais.**
-    *   **Boas Práticas e Diretrizes de Desenvolvimento (`docs/reference/02-best-practices.md`):** Contém discussões aprofundadas sobre princípios gerais e específicos das tecnologias que usamos.
-    *   **Princípios de Qualidade de Código e Refatoração (`docs/reference/08-code-quality-and-refactoring-principles.md`):** Foca em como manter a qualidade do código e as abordagens para refatoração.
-*   **Documentação do Desenvolvedor:** Localizada em `docs/developer/`.
-    *   **Padrões de Código (`docs/developer/02-coding-standards.md`):** Especifica os padrões de estilo de código, formatação, linting e convenções de nomenclatura.
-*   **Outros Documentos:** Conforme a necessidade da tarefa, explore outros documentos em `docs/` (ex: `docs/analise-e-pesquisa/` para ADRs e pesquisas, `docs/tecnico/` para artefatos legados ou específicos se ainda relevantes).
+Before starting ANY development, refactoring, or analysis task that involves modifications to the code or its structure, it is **mandatory** that you CAREFULLY review all sections of this document. Your understanding of the system and the quality of your work depend on it.
 
-A falha em consultar a documentação adequadamente resultará em trabalho desalinhado com os objetivos e a estrutura do projeto.
+Failure to follow these guidelines will result in work that is misaligned with the project's objectives and structure.
 
-## 2. Arquitetura do Software e Princípios Mandatórios
+## 2. Software Architecture and Mandatory Principles
 
-### 2.1. Arquitetura Geral
+### 2.1. General Architecture
 
-O Project Wiz adota a **Clean Architecture**. Esta abordagem organiza o código em camadas concêntricas, com um fluxo de dependência estrito para o interior:
+Project Wiz adopts **Clean Architecture**. This approach organizes code into concentric layers with a strict inward flow of dependencies:
 
-*   **Camada de Domínio (Domain):** Contém a lógica de negócios central e as entidades. É a camada mais interna e não depende de nenhuma outra camada.
-*   **Camada de Aplicação (Application):** Orquestra os casos de uso da aplicação. Contém a lógica específica da aplicação e depende apenas da camada de Domínio.
-*   **Camada de Infraestrutura (Infrastructure):** Lida com detalhes externos como frameworks, bancos de dados, APIs de terceiros e a interface do usuário (UI). Esta camada depende da camada de Aplicação (através de portas e adaptadores).
+*   **Domain Layer:** Contains the core business logic and entities. It is the innermost layer and does not depend on any other layer.
+*   **Application Layer:** Orchestrates the application's use cases. It contains application-specific logic and depends only on the Domain layer.
+*   **Infrastructure Layer:** Deals with external details such as frameworks, databases, third-party APIs, and the user interface (UI). This layer depends on the Application layer (through ports and adapters).
 
-**O fluxo de dependência é sempre: Infraestrutura -> Aplicação -> Domínio.**
+**The dependency flow is always: Infrastructure -> Application -> Domain.**
 
-Para um detalhamento completo da arquitetura, componentes de cada camada, tecnologias chave e fluxos de dados, consulte **obrigatoriamente** o documento:
-*   `docs/reference/01-software-architecture.md`
+For a complete detailing of the architecture, components of each layer, key technologies, and data flows, you **must** consult the document:
+*   `docs/reference/01-software-architecture.md` (This is the primary document for understanding the system architecture. It details Clean Architecture, layers (Domain, Application, Infrastructure), dependency flows, and key components. **Reading and understanding this document is crucial.**)
 
-### 2.2. Princípios de Design e Codificação
+### 2.2. Design and Coding Principles
 
-Aderência estrita aos seguintes princípios é crucial:
+Strict adherence to the following principles is crucial:
 
-*   **Clean Architecture:** Conforme descrito acima e detalhado em `docs/reference/01-software-architecture.md`.
-*   **Object Calisthenics:** Todas as 9 regras devem ser aplicadas rigorosamente. Para um detalhamento completo de cada regra e como aplicá-la neste projeto, consulte a seção "3. Object Calisthenics for This Project" em `docs/reference/08-code-quality-and-refactoring-principles.md`. Este é um requisito não funcional chave.
+#### 2.2.1. Clean Architecture Principles
+
+This rule promotes strict adherence to Clean Architecture principles, ensuring the development of robust, testable, and scalable applications by clearly defining layer responsibilities and dependency rules.
+
+*   **Dependency Rule:** Strictly enforce the Dependency Rule: dependencies must always point inwards. Inner circles (Entities, Use Cases) must not know anything about outer circles (Adapters, Frameworks/Drivers).
+*   **Layer Separation:** Maintain clear separation between the four main layers:
+    *   **Entities:** Core business rules, data structures, and enterprise-wide business rules. Pure domain objects.
+    *   **Use Cases (Interactors):** Application-specific business rules. Orchestrates the flow of data to and from entities.
+    *   **Adapters (Controllers, Gateways, Presenters):** Convert data from inner layers to outer layers (and vice-versa). Bridges between use cases and external frameworks/drivers.
+    *   **Frameworks & Drivers (Web, DB, UI):** The outermost layer, dealing with specific technologies and external systems.
+*   **Inversion of Control (IoC):** Utilize the Dependency Inversion Principle. Inner layers define interfaces (abstractions), and outer layers implement them. Dependencies are injected from the outside in.
+*   **Testability:** Prioritize testability. Each layer, especially Entities and Use Cases, should be independently testable without reliance on external frameworks or databases.
+*   **No Direct Framework Imports in Core:** Core business logic (Entities, Use Cases) must have zero direct imports or dependencies on any external framework (e.g., React, Express, Database ORMs).
+*   **Data Flow:** Define explicit data flow between layers. Use simple data structures (Plain Old JavaScript Objects/interfaces) for input and output across layer boundaries.
+*   **Well-Defined Interfaces:** Define clear interfaces (ports) between layers to describe communication contracts. Avoid implicit dependencies.
+*   **Persistence Ignorance:** Entities and Use Cases should be unaware of how data is persisted. This concern belongs to the Gateway or Repository adapters.
+*   **Avoid Global State:** Minimize or avoid global state where possible, especially in core layers. Pass data explicitly between components and layers.
+*   **Error Handling:** Define a consistent error handling strategy across all layers. Errors should be passed inwards, but their handling and presentation can be adapted outwards.
+
+#### 2.2.2. Object Calisthenics
+
+All 9 Object Calisthenics principles must be strictly applied. This is a key non-functional requirement.
+
+1.  **Only One Level of Indentation Per Method.**
+    *   **Intent:** Promotes small, focused methods by discouraging deep nesting of conditional logic or loops.
+    *   **Application:** Extract complex conditional blocks or loop bodies into separate, well-named private methods or helper functions. Single `if` statements or simple loops are generally acceptable.
+2.  **Don’t Use the ELSE Keyword.**
+    *   **Intent:** Encourages clearer conditional logic through early returns (guard clauses), polymorphism, or state patterns, reducing nesting.
+    *   **Application:** Prioritize guard clauses for preconditions. For more complex state-dependent logic, consider if a State pattern or Strategy pattern could eliminate complex `if/else if/else` chains.
+3.  **Wrap All Primitives and Strings.**
+    *   **Intent:** Avoid "Primitive Obsession." If a primitive type (string, number, boolean) has inherent rules, constraints, or behavior associated with it, it should be encapsulated in a dedicated class or type (Value Object).
+    *   **Application:** IDs (e.g., `JobId`), domain-specific concepts passed as strings or numbers (e.g., status, priorities) can be candidates for wrapping if they have associated business rules or a constrained set of values (TypeScript enums are good for this). Tool parameters defined by Zod schemas already provide a strong form of "wrapping" with validation.
+4.  **First Class Collections.**
+    *   **Intent:** A class that contains a collection should ideally not have other instance variables. The collection and its operations should be encapsulated in its own class.
+    *   **Application:** If the logic for managing collections (e.g., adding entries, summarizing, querying specific parts) becomes complex, they could be extracted into their own classes.
+5.  **One Dot Per Line (Law of Demeter).**
+    *   **Intent:** Reduce coupling by limiting method calls to direct collaborators. Avoid long chains like `object.getA().getB().doSomething()`.
+    *   **Application:** If such chains are found, consider if the intermediate objects are exposing too much internal state, or if a method should be added to the direct collaborator to provide the needed information or perform the action.
+6.  **Don’t Abbreviate.**
+    *   **Intent:** Use clear, explicit, and unambiguous names for variables, functions, classes, and files.
+    *   **Application:** Maintain this practice. Avoid overly short or cryptic names. Standard industry abbreviations (like `CWD`, `DTO`, `ID`) are generally acceptable if widely understood in context.
+7.  **Keep All Entities Small.**
+    *   **Intent:** Classes should be small (e.g., <100 lines, ideally <50) and methods even smaller (e.g., <15 lines, ideally <5-10). This promotes Single Responsibility.
+    *   **Application:** This is a key area for review. Long functions and classes must be refactored.
+8.  **No Classes With More Than Two Instance Variables.**
+    *   **Intent:** A very strict rule to promote high cohesion and enforce SRP. Classes with many instance variables might be doing too much or could have their variables grouped into meaningful domain objects.
+    *   **Application:** Focus on whether the instance variables represent a cohesive set of responsibilities. If a class's dependencies seem to serve multiple distinct high-level purposes, consider splitting the class.
+9.  **No Getters/Setters/Properties (for direct state access/mutation).**
+    *   **Intent:** Objects should expose behavior ("Tell, Don't Ask") rather than just raw data. State changes should occur as side effects of behavior methods.
+    *   **Application:** Entities may have public `props` or individual getters, which is common for data-centric entities that need to be serialized/deserialized or read by other layers. They should also have behavioral methods for state transitions. The goal is to ensure that *business rules* related to state changes are encapsulated in methods, not handled by external clients setting properties. Avoid public setters where a behavioral method is more appropriate. DTOs and configuration objects are primarily data containers and will naturally have properties.
+
+#### 2.2.3. Other Design and Coding Principles (SOLID, DRY, KISS, YAGNI)
+
 *   **SOLID:**
-    *   **S**ingle Responsibility Principle: Classes e métodos devem ter uma única responsabilidade bem definida.
-    *   **O**pen/Closed Principle: Entidades devem ser abertas para extensão, mas fechadas para modificação.
-    *   **L**iskov Substitution Principle: Subtipos devem ser substituíveis por seus tipos base.
-    *   **I**nterface Segregation Principle: Clientes não devem depender de interfaces que não usam.
-    *   **D**ependency Inversion Principle: Dependa de abstrações (interfaces/portas), não de implementações concretas.
-*   **DRY (Don't Repeat Yourself):** Evite duplicação de código e lógica.
-*   **KISS (Keep It Simple, Stupid):** Prefira soluções mais simples quando possível, sem sacrificar a clareza ou os princípios arquiteturais.
+    *   **S**ingle Responsibility Principle: Classes and methods should have a single, well-defined responsibility.
+    *   **O**pen/Closed Principle: Entities should be open for extension but closed for modification.
+    *   **L**iskov Substitution Principle: Subtypes should be substitutable for their base types.
+    *   **I**nterface Segregation Principle: Clients should not depend on interfaces they do not use.
+    *   **D**ependency Inversion Principle: Depend on abstractions (interfaces/ports), not concrete implementations.
+*   **DRY (Don't Repeat Yourself):** Eliminate code duplication. Abstract common logic into reusable functions, classes, or modules instead of copying and pasting.
+*   **KISS (Keep It Simple, Stupid):** Design solutions that are as simple as possible, but no simpler. Avoid unnecessary complexity.
+*   **YAGNI (You Aren't Gonna Need It):** Implement only the functionality that is currently required. Avoid adding features or abstractions speculatively for future needs.
+*   **Descriptive Naming:** Use clear, unambiguous, and descriptive names for variables, functions, classes, and files. Names should convey intent and purpose.
+*   **Fail Fast:** Detect errors as early as possible and exit gracefully. Validate inputs at the earliest opportunity to prevent the propagation of invalid states.
+*   **Consistent Formatting:** Adhere to a consistent code formatting style (e.g., Prettier, ESLint rules). Maintain uniform indentation, spacing, and bracket placement.
+*   **Comprehensive Testing:** Write automated tests (unit, integration, end-to-end) for all critical paths and business logic. Aim for high test coverage.
+*   **Idempotent Operations:** Design operations to be idempotent where applicable, meaning executing them multiple times has the same effect as executing them once.
+*   **Immutable Data:** Prefer immutable data structures when possible. Avoid modifying objects or arrays in place; instead, create new instances with updated values.
+*   **Version Control Discipline:** Commit small, atomic changes with clear and descriptive commit messages. Use feature branches and pull requests for collaboration.
+*   **Dependency Management:** Manage project dependencies explicitly (e.g., package.json). Keep dependencies updated and monitor for vulnerabilities.
+*   **Error Handling:** Implement robust error handling mechanisms. Catch and log errors, provide meaningful error messages, and handle exceptions gracefully to prevent crashes.
+*   **Performance Awareness:** Consider the performance impacts of code choices. Optimize critical paths, reduce unnecessary computations, and minimize resource consumption.
+*   **Security Best Practices:** Be mindful of security vulnerabilities. Sanitize all user inputs, avoid hardcoding sensitive information, and follow secure coding guidelines.
+*   **Refactoring Regularly:** Continuously refactor code to improve its design, readability, and maintainability. Don't defer technical debt indefinitely.
+*   **Avoid Magic Numbers/Strings:** Replace hardcoded numbers or strings with named constants or configuration variables to improve readability and maintainability.
+*   **Loose Coupling, High Cohesion:** Design modules to be loosely coupled (minimize dependencies between them) and highly cohesive (elements within a module are functionally related).
+*   **Code Reviews:** Participate in and conduct thorough code reviews to catch errors, share knowledge, and improve code quality.
 
-Consulte também:
-*   `docs/developer/02-coding-standards.md` para padrões de formatação, nomenclatura, etc.
-*   `docs/reference/02-best-practices.md` para uma visão mais ampla de boas práticas.
-*   `docs/reference/08-code-quality-and-refactoring-principles.md` para diretrizes sobre qualidade e a aplicação detalhada de Object Calisthenics.
+#### 2.2.4. Code and Style Standards
 
-## 3. Tecnologias Chave
+*   **Main Language:** TypeScript.
+    *   We use the `strict` configuration activated (`noImplicitAny`, `strictNullChecks`) for greater type safety.
+    *   Path aliases like `@/components`, `@/lib` are used to facilitate imports.
+    *   Prioritize strong typing; avoid `any` whenever possible and justify its use if strictly necessary.
+*   **Formatting (Prettier):**
+    *   The project uses Prettier to ensure consistency in code formatting.
+    *   Main settings: 2-space indentation, single quotes (`singleQuote: true`), semicolons at the end of statements (`semi: true`).
+    *   Configure your editor to format on save or run `npm run format`.
+*   **Linting (ESLint):**
+    *   ESLint is used for static code analysis and to enforce standards.
+    *   The base configuration extends from presets like `eslint:recommended`, `@typescript-eslint/recommended`, and `import/recommended`.
+    *   **Crucial Instruction:** After creating or modifying a file, **ALWAYS run ESLint (`npx eslint path/to/your/file.tsx --fix` or the project script `npm run lint`) and perform ALL necessary adjustments and refactorings to eliminate errors and warnings.** Do not proceed until the file is clean of linting issues.
+*   **Naming Conventions:**
+    *   Use clear, descriptive names in **English** for variables, functions, classes, files, and folders.
+    *   Folders should be named in English.
+*   **Version Control (Git):**
+    *   Make small, atomic commits.
+    *   Write clear, descriptive commit messages in English. Follow the [Semantic Commits](https://www.conventionalcommits.org/) pattern (e.g., `feat: Add new Tool X`, `fix: Correct login issue when using Y`).
+*   **Comments:**
+    *   **Avoid comments as much as possible.** The code should be self-explanatory.
+    *   If a comment is *absolutely necessary* (e.g., to explain complex business logic that cannot be simplified, or a temporary workaround for an external issue), it should explain the *why* of the logic, not just the *what*.
+    *   Write comments in English.
+    *   **Do not use comments to disable code (commented-out lines).** If the code is not needed, remove it. Git history maintains previous versions.
+    *   **Do not include a comment at the start of a file indicating its path.** File paths are evident from the IDE and version control.
+    *   **Do not include a comment at the end of a file indicating something like `[end of file]` or `[end of X]`.** These are unnecessary and add clutter.
 
-Consulte `package.json` e `docs/reference/01-software-architecture.md` (substituindo a referência legada `docs/tecnico/arquitetura.md`) para a lista completa. As principais incluem:
+#### 2.2.5. Technology/Tool - Specific Best Practices
 
-* **Linguagem:** TypeScript (configuração `strict`).
-* **Backend/Core:** Node.js.
-* **Desktop App:** ElectronJS.
-* **Frontend UI:** React, Vite, Tailwind CSS, Radix UI, ShadCN UI conventions.
-* **Roteamento (UI):** TanStack Router.
-* **i18n (UI):** LinguiJS.
-* **Formulários (UI):** React Hook Form + Zod.
-* **DI (Backend):** InversifyJS.
-* **Banco de Dados:** SQLite com Drizzle ORM.
-* **AI/LLM:** `ai-sdk`.
-* **Testes:** Vitest.
+##### Electron.js
+*   **Separate Main and Renderer Processes:** Strictly separate logic. The main process handles app lifecycle and native APIs. Renderer processes handle the UI. Avoid mixing concerns.
+*   **IPC Communication:** Use `ipcMain` and `ipcRenderer` for all communication between main and renderer processes. Define clear, descriptive channel names and send only necessary data.
+*   **Security Best Practices:** Implement strict security: enable `contextIsolation`, disable `nodeIntegration` in renderer processes, and use preload scripts to expose only safe APIs via `contextBridge`.
+*   **Preload Scripts:** All inter-process communication (IPC) for renderer processes must be handled via a secure preload script. Do not expose Node.js APIs directly to the renderer.
+*   **Context Bridge Usage:** Expose only specific, safe functions and objects from the main process to the renderer via `contextBridge` in the preload script. Avoid exposing `ipcRenderer` directly.
+*   **Resource Handling:** Manage application resources (files, database connections) primarily in the main process. Renderers should request these resources via IPC.
+*   **Performance Considerations:** Optimize startup time and resource usage. Lazy-load modules, minimize synchronous operations, and manage memory efficiently, especially for multiple windows.
+*   **Error Handling and Logging:** Implement robust error handling across both processes. Centralize logging for main and renderer errors to facilitate debugging.
+*   **Native Module Integration:** When using native Node.js modules, ensure they are correctly rebuilt for Electron and handled exclusively in the main process.
 
-## 4. Modificações Controladas: Dependências, Configurações e Organização do Código
+##### React
+*   **Functional Components & Hooks:** Always use functional components and React Hooks (useState, useEffect, useContext, useCallback, useMemo, etc.) for state management and side effects. Avoid class components.
+*   **Component Structure:** Organize components logically (e.g., Atomic Design). Each component should ideally adhere to the Single Responsibility Principle, doing one thing well. Break down complex components.
+*   **Prop Drilling Avoidance:** Minimize prop drilling. For deeply nested data, consider `useContext` or a dedicated state management library.
+*   **Memoization for Performance:** Use `React.memo`, `useCallback`, and `useMemo` judiciously to prevent unnecessary re-renders of components, functions, and expensive calculations.
+*   **Key Prop for Lists:** Always provide a stable, unique `key` prop when rendering lists of elements. The key should ideally be derived from the item's ID, not its index.
+*   **Accessibility (A11y):** Prioritize web accessibility. Use semantic HTML, `aria-*` attributes where necessary, and ensure keyboard navigation and screen reader compatibility.
+*   **Conditional Rendering:** Use clear and readable conditional rendering techniques.
+*   **State Management:** Manage component local state with `useState`. For shared or global state, evaluate `useContext` or a state management library.
+*   **Custom Hooks for Logic Reuse:** Extract reusable, stateful logic into custom Hooks. Name them starting with `use`.
+*   **Side Effects with useEffect:** Handle all side effects (data fetching, subscriptions, DOM manipulations) within `useEffect` hooks. Ensure correct dependency arrays to prevent infinite loops or stale closures.
 
-Qualquer proposta de adição de novas dependências (pacotes npm, bibliotecas), alterações significativas em configurações existentes (ex: `tsconfig.json`, `vite.config.ts`, configurações de CI/CD) ou mudanças estruturais na organização do código (ex: mover pastas principais, alterar significativamente a estrutura de módulos) deve seguir um processo formal de aprovação.
+##### TypeScript
+*   **Type Safety Enforcement:** Explicitly define types for all variables, function arguments, and return values. Avoid `any` unless absolutely necessary and justified.
+*   **Interface/Type Definition:** Use `interface` or `type` for object shapes and complex types.
+*   **Readonly Properties:** Apply `readonly` to properties that should not be reassigned after initialization.
+*   **Enums vs. Union Types:** Prefer union types (`'value1' | 'value2'`) for simple literal sets. Use `enum` for distinct sets of related constants with symbolic names.
+*   **Generics for Reusability:** Employ generics to create reusable components and functions that maintain type safety across different types.
+*   **Null and Undefined Handling:** Explicitly handle `null` or `undefined` values using optional chaining (`?.`), nullish coalescing (`??`), or type guards.
+*   **ESM Modules:** Always prefer ES module syntax (`import`/`export`).
+*   **Strict Compiler Options:** Assume strict TypeScript compiler options (e.g., `strict: true`) are enabled and write code compatible with them.
 
-**Processo Mandatório:**
+##### Vite.js
+*   **Vite Native Features:** Utilize Vite's native ES module imports for fast Hot Module Replacement (HMR) and development server.
+*   **Configuration (vite.config.ts):** Keep `vite.config.ts` clean and minimal. Use plugins for extended functionality.
+*   **Asset Handling:** Manage static assets using Vite's built-in asset handling. Use the `public` folder for static assets that need to be served directly.
+*   **Environment Variables:** Use `import.meta.env` for accessing environment variables, following Vite's convention (prefix `VITE_`).
 
-1.  **Análise e Pesquisa Prévias:**
-    *   Antes de propor qualquer alteração das mencionadas acima, você deve realizar uma pesquisa e análise detalhada.
-    *   Identifique a necessidade da mudança e os problemas que ela visa resolver.
-    *   Se for uma nova dependência, compare alternativas, considerando fatores como popularidade, manutenção, licença, impacto no tamanho do bundle, segurança e alinhamento com a arquitetura existente.
-    *   Para alterações de configuração ou organização, avalie os prós e contras da mudança e o impacto potencial no restante do sistema.
+##### Zod
+*   **Schema First Approach:** Always define a Zod schema for input validation before processing any external data.
+*   **Strict Object Schemas:** Prefer `z.object().strict()` for object schemas to disallow unknown keys by default.
+*   **Type Inference:** Utilize Zod's `z.infer<typeof yourSchema>` to derive TypeScript types directly from your schemas.
+*   **Refinement for Complex Logic:** Use `z.refine()` or `z.superRefine()` for complex validation logic.
+*   **Error Message Customization:** Provide descriptive custom error messages.
+*   **Optional and Nullable Fields:** Clearly distinguish between optional (`z.optional()`), nullable (`z.nullable()`), and default (`z.default()`) fields.
+*   **Transformations (`.transform()`):** Use `.transform()` for data transformations *after* validation.
+*   **Validation in API Endpoints/Entry Points:** Perform Zod validation at the earliest possible entry point for external data.
 
-2.  **Criação de um ADR (Architecture Decision Record):**
-    *   Documente os resultados da sua análise e pesquisa em um novo arquivo ADR.
-    *   Utilize um template padrão para ADRs (se não existir, crie um simples com seções para Contexto, Decisão Proposta, Alternativas Consideradas, Prós, Contras, e Justificativa).
-    *   Salve o ADR na pasta `docs/analise-e-pesquisa/` com um nome descritivo (ex: `adr-XXX-uso-nova-biblioteca-graficos.md` ou `adr-XXX-reestruturacao-pasta-servicos.md`).
+## 3. Key Technologies
 
-3.  **Solicitação de Aprovação:**
-    *   Informe ao usuário (seu supervisor humano) sobre o novo ADR criado e solicite uma revisão e aprovação.
-    *   Aponte claramente qual o problema que está sendo resolvido e por que a solução proposta (nova dependência, mudança de configuração, etc.) é a melhor opção.
+Consult `package.json` and `docs/reference/01-software-architecture.md` for the complete list. Key technologies include:
 
-4.  **Implementação Somente Após Aprovação:**
-    *   **Você NÃO DEVE instalar novas dependências, aplicar alterações de configuração significativas ou realizar reorganizações estruturais de código sem a aprovação explícita do ADR correspondente pelo usuário.**
-    *   Uma vez que o ADR seja aprovado, você poderá prosseguir com a implementação da decisão documentada.
+*   **Language:** TypeScript (`strict` configuration).
+*   **Backend/Core:** Node.js.
+*   **Desktop App:** ElectronJS.
+*   **Frontend UI:** React, Vite, Tailwind CSS, Radix UI, ShadCN UI conventions.
+*   **Routing (UI):** TanStack Router.
+*   **i18n (UI):** LinguiJS.
+*   **Forms (UI):** React Hook Form + Zod.
+*   **DI (Backend):** InversifyJS.
+*   **Database:** SQLite with Drizzle ORM.
+*   **AI/LLM:** `ai-sdk`.
+*   **Testing:** Vitest.
 
-Este processo garante que todas as mudanças significativas sejam bem ponderadas, documentadas e alinhadas com os objetivos de longo prazo do projeto.
+## 4. Controlled Modifications: Dependencies, Configurations, and Code Organization
 
-## 5. Trabalhando com Código Legado (Durante a Fase 5)
+Any proposal to add new dependencies (npm packages, libraries), significant changes to existing configurations (e.g., `tsconfig.json`, `vite.config.ts`, CI/CD settings), or structural changes in code organization (e.g., moving main folders, significantly altering module structure) must follow a formal approval process.
 
-* O código legado em `src/` e `src2/` existe para consulta e entendimento.
-* **NÃO MODIFIQUE O CÓDIGO LEGADO.**
-* **TODO O NOVO CÓDIGO DEVE SER ESCRITO EM `src_refactored/`.**
-* Se você encontrar um VO, entidade, ou função utilitária no código legado que seja de alta qualidade e se alinhe PERFEITAMENTE com os novos princípios (Clean Arch, OC), você pode adaptá-lo para `src_refactored/`. No entanto, a **reescrita é a norma**.
+**Mandatory Process:**
 
-## 6. Gerenciamento de Tarefas e Ciclo de Trabalho do Agente
+1.  **Prior Analysis and Research:**
+    *   Before proposing any of the above changes, you must conduct detailed research and analysis.
+    *   Identify the need for the change and the problems it aims to solve.
+    *   If it's a new dependency, compare alternatives, considering factors like popularity, maintenance, licensing, impact on bundle size, security, and alignment with the existing architecture.
+    *   For configuration or organizational changes, evaluate the pros and cons of the change and the potential impact on the rest of the system.
+2.  **Creation of an ADR (Architecture Decision Record):**
+    *   Document the results of your analysis and research in a new ADR file.
+    *   Use a standard ADR template (if one doesn't exist, create a simple one with sections for Context, Proposed Decision, Considered Alternatives, Pros, Cons, and Justification).
+    *   Save the ADR in the `docs/analise-e-pesquisa/` folder with a descriptive name (e.g., `adr-XXX-use-new-graphics-library.md` or `adr-XXX-restructure-services-folder.md`).
+3.  **Request for Approval:**
+    *   Inform the user (your human supervisor) about the new ADR created and request a review and approval.
+    *   Clearly point out the problem being solved and why the proposed solution (new dependency, configuration change, etc.) is the best option.
+4.  **Implementation Only After Approval:**
+    *   **You MUST NOT install new dependencies, apply significant configuration changes, or perform structural code reorganizations without explicit approval of the corresponding ADR by the user.**
+    *   Once the ADR is approved, you may proceed with implementing the documented decision.
 
-O trabalho neste projeto é rastreado através de um sistema de tarefas localizado em `/.jules/`.
+This process ensures that all significant changes are well-considered, documented, and aligned with the project's long-term goals.
 
-* **Arquivo de Índice Principal (`/.jules/TASKS.md`):**
-  * Contém uma tabela de alto nível de todas as tarefas, com status, dependências, prioridade e um link para o arquivo de detalhe da tarefa.
-  * Use para visão geral do backlog e identificar a próxima tarefa.
-* **Arquivos de Detalhes da Tarefa (`/.jules/tasks/TSK-[ID_DA_TAREFA].md`):**
-  * Cada tarefa no índice tem um arquivo Markdown correspondente em `/.jules/tasks/`, nomeado `TSK-[ID_DA_TAREFA].md`.
-  * Utilize o template `/.jules/templates/TASK_DETAIL_TEMPLATE.md` para criar novos arquivos de detalhe.
-  * **Este arquivo é a fonte canônica de informação para a tarefa.** Contém descrição completa, critérios de aceitação, notas, comentários, status, link do commit de conclusão, etc.
-  * **Leitura Obrigatória:** Sempre consulte e leia integralmente o arquivo de detalhe da tarefa relevante (`/.jules/tasks/TSK-[ID_TAREFA_ATUAL].md`) **antes** de iniciar qualquer trabalho de implementação ou desmembramento.
-  * **Atualização Contínua:** Durante a execução da tarefa, adicione notas, decisões de design, ou observações relevantes diretamente neste arquivo (nas seções "Comentários" ou "Notas/Decisões de Design"). Ao concluir a tarefa, atualize seu status final, adicione o link do commit de conclusão e quaisquer notas finais.
-* **Criação de Novas Tarefas (Descobertas/Imprevistos):**
-  * Se, durante a execução de uma tarefa, você identificar uma necessidade não mapeada, um problema bloqueador que justifique uma sub-tarefa não planejada, ou um desvio significativo de escopo que não se encaixa na tarefa atual:
-        1. **PARE** a execução da tarefa atual.
-        2. Defina a nova tarefa: atribua um ID único (ex: `NEW-TSK-001` ou `TSK-[ID_PAI]-SUB-X`), título breve, descrição completa, prioridade, e estime sua complexidade.
-        3. Crie o arquivo de detalhe para esta nova tarefa em `/.jules/tasks/` usando o template.
-        4. Adicione a nova tarefa como uma nova linha no índice `/.jules/TASKS.md`, incluindo o link para seu arquivo de detalhe.
-        5. Se aplicável, estabeleça dependências: a nova tarefa pode depender da atual, ou a atual pode passar a depender da nova. Atualize os campos de dependência no `TASKS.md` e nos arquivos de detalhe relevantes.
-        6. Comunique a criação desta nova tarefa e seu impacto ao usuário.
-        7. Reavalie qual tarefa executar em seguida com base nas prioridades e dependências atualizadas.
+## 5. Working with Legacy Code (During Phase 5)
 
-* **Geração Automática de Tarefas a Partir do Lint:**
-  * Um script (`scripts/generate_lint_tasks.sh`) foi criado para automatizar a criação de tarefas com base nos problemas reportados pelo ESLint.
-  * **Estratégia:** O script cria **uma tarefa por arquivo** que contém problemas de lint. Isso ajuda a focar os esforços de correção em um arquivo por vez.
-  * **Pré-requisito:** `jq` deve estar instalado (`sudo apt-get install jq` ou similar).
-  * **Preparação:**
-    1. Execute o comando de lint para gerar a saída em formato JSON:
-       ```bash
-       npm run lint --silent -- --format json > lint_output.json
-       ```
-       O `--silent` é importante para suprimir saídas do npm que não sejam JSON. Salve este arquivo como `lint_output.json` na raiz do repositório.
-  * **Execução:**
-    1. Navegue até a raiz do repositório.
-    2. Certifique-se que o script é executável: `chmod +x scripts/generate_lint_tasks.sh`.
-    3. Execute o script:
-       ```bash
-       ./scripts/generate_lint_tasks.sh
-       ```
-  * **Funcionamento:**
-    * O script lê `lint_output.json`.
-    * Para cada arquivo listado no JSON que contém um ou mais problemas de lint:
-        * Gera um ID de tarefa único para o arquivo (prefixo `LINT-FILE-`).
-        * Cria um único arquivo de detalhe da tarefa em `/.jules/tasks/TSK-[ID_DA_TAREFA_DO_ARQUIVO].md` usando o template `TASK_DETAIL_TEMPLATE.md`.
-        * O título da tarefa será "Fix all lint errors in [CAMINHO_DO_ARQUIVO]".
-        * A descrição da tarefa listará todos os problemas de lint individuais (linha, coluna, regra, mensagem) para aquele arquivo específico, formatados dentro de um bloco de código.
-        * A complexidade da tarefa é estimada (1-3) com base no número total de problemas no arquivo.
-        * A prioridade é definida como P2 se houver erros, P3 caso contrário.
-        * Adiciona uma nova entrada no arquivo de índice principal `/.jules/TASKS.md` para o arquivo.
-    * O script é idempotente: se executado novamente, ele não criará tarefas duplicadas para arquivos que já foram processados (verifica por ID da tarefa no índice e existência do arquivo de detalhe).
+*   Legacy code in `src/` and `src2/` exists for consultation and understanding.
+*   **DO NOT MODIFY LEGACY CODE.**
+*   **ALL NEW CODE MUST BE WRITTEN IN `src_refactored/`.**
+*   If you find a VO, entity, or utility function in the legacy code that is of high quality and PERFECTLY aligns with the new principles (Clean Arch, OC), you may adapt it for `src_refactored/`. However, **rewriting is the norm**.
 
-* **Seu Ciclo de Trabalho:**
-    1. **Fase 1: Sincronização e Análise:**
-        * Se houver novos problemas de lint a serem processados em arquivos ainda não rastreados, use o script `generate_lint_tasks.sh` conforme descrito acima para criar as tarefas correspondentes (uma por arquivo).
-        * Leia o `/.jules/TASKS.md` (índice) para entender o estado atual.
-    2. **Fase 2: Seleção da Próxima Ação:**
-        * **Desmembrar Tarefas Complexas:** Priorize tarefas `Pendente` com `Complexidade > 1` (ver arquivo de detalhe).
-            * Leia o detalhe da tarefa.
-            * **Crie arquivos de detalhe para cada sub-tarefa** em `/.jules/tasks/` usando o template. Preencha todos os campos, incluindo dependência da tarefa-mãe.
-            * Atualize o `TASKS.md` (índice): adicione sub-tarefas, marque a mãe como "Bloqueado" ou "Subdividido".
-            * Atualize o arquivo de detalhe da tarefa-mãe.
-        * **Executar Tarefa Simples:** Se não houver para desmembrar, procure tarefa `Pendente` com `Complexidade = 1` e dependências `Concluído`.
-            * **Leia integralmente o arquivo de detalhe da tarefa selecionada (`/.jules/tasks/TSK-[ID].md`) e qualquer outra documentação ou código antes de prosseguir.**
-    3. **Fase 3: Execução da Ação:**
-        * **Se Desmembrar:** Conforme descrito acima (criação de arquivos de detalhe, atualização do índice e do detalhe da mãe).
-        * **Se Executar:**
-            * Implemente a tarefa.
-            * **Documente continuamente no arquivo de detalhe da tarefa.**
-            * **Crie novas tarefas para descobertas/bloqueios conforme descrito na seção "Criação de Novas Tarefas".**
-            * Após a conclusão:
-                * **Atualize o arquivo de detalhe da tarefa (`/.jules/tasks/TSK-[ID_CONCLUIDA].md`)**: Status para "Concluído", link do commit, notas.
-                * **Atualize a linha no índice `/.jules/TASKS.md`**.
-
-Lembre-se, o objetivo é criar uma base de código exemplar e manter um rastreamento de tarefas impecável. Pense cuidadosamente sobre cada decisão de design e implementação. Se algo não estiver claro, peça esclarecimentos.
+Remember, the goal is to create an exemplary codebase. Think carefully about each design and implementation decision. If anything is unclear, ask for clarification.

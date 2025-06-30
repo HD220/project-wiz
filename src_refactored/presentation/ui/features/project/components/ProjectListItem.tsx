@@ -1,18 +1,19 @@
 import { Link } from '@tanstack/react-router';
-import { Briefcase, MoreHorizontal, Trash2, Edit3, PlayCircle, PauseCircle } from 'lucide-react'; // Added Play/Pause
+// Added Play/Pause
+import { Briefcase, MoreHorizontal, Trash2, Edit3, PlayCircle, PauseCircle } from 'lucide-react';
 import React from 'react';
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
+import { Badge } from '@/ui/components/ui/badge';
+import { Button } from '@/ui/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/presentation/ui/components/ui/dropdown-menu';
-import { Separator } from '@/presentation/ui/components/ui/separator';
+} from '@/ui/components/ui/dropdown-menu';
+import { Separator } from '@/ui/components/ui/separator';
 
 export interface Project {
   id: string;
@@ -22,45 +23,31 @@ export interface Project {
   status: 'active' | 'paused' | 'planning' | 'completed' | 'archived';
   agentCount: number;
   taskCount: number;
-  // imageUrl?: string; // Optional image for the project card
+  // Optional image for the project card
+  // imageUrl?: string;
 }
 
-interface ProjectListItemProps {
+interface ProjectActionsDropdownProps {
   project: Project;
-  viewMode: 'grid' | 'list';
-  onDelete?: (projectId: string) => void; // Optional delete handler
-  onEdit?: (projectId: string) => void;   // Optional edit handler
-  onToggleStatus?: (projectId: string, currentStatus: Project['status']) => void; // Optional status toggle
+  onEdit?: (projectId: string) => void;
+  onDelete?: (projectId: string) => void;
+  onToggleStatus?: (projectId: string, currentStatus: Project['status']) => void;
+  handleToggleStatus: (event: React.MouseEvent) => void;
 }
 
-const statusMap: Record<Project['status'], { label: string; color: string; icon?: React.ElementType }> = {
-  active: { label: 'Ativo', color: 'bg-green-500 dark:bg-green-400' },
-  paused: { label: 'Pausado', color: 'bg-yellow-500 dark:bg-yellow-400' },
-  planning: { label: 'Planejamento', color: 'bg-blue-500 dark:bg-blue-400' },
-  completed: { label: 'Concluído', color: 'bg-slate-500 dark:bg-slate-400' },
-  archived: { label: 'Arquivado', color: 'bg-slate-700 dark:bg-slate-600' },
-};
-
-export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleStatus }: ProjectListItemProps) {
-  const projectStatus = statusMap[project.status] || statusMap.planning;
-
-  const handleToggleStatus = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation if button is inside a Link
-    e.stopPropagation();
-    onToggleStatus?.(project.id, project.status);
-  }
-
-  const projectActions = (
+function ProjectActionsDropdown({ project, onEdit, onDelete, onToggleStatus, handleToggleStatus }: ProjectActionsDropdownProps) {
+  return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Prevent card click */}
         <Button variant="ghost" size="icon" className="h-7 w-7 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} // Prevent card click
+          onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}
         >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Mais opções</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+      <DropdownMenuContent align="end" onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}>
         {onEdit && <DropdownMenuItem onClick={() => onEdit(project.id)}>
           <Edit3 className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
           Editar
@@ -79,7 +66,38 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
 
+
+interface ProjectListItemProps {
+  project: Project;
+  viewMode: 'grid' | 'list';
+  // Optional delete handler
+  onDelete?: (projectId: string) => void;
+  // Optional edit handler
+  onEdit?: (projectId: string) => void;
+  // Optional status toggle
+  onToggleStatus?: (projectId: string, currentStatus: Project['status']) => void;
+}
+
+const statusMap: Record<Project['status'], { label: string; color: string; icon?: React.ElementType }> = {
+  active: { label: 'Ativo', color: 'bg-green-500 dark:bg-green-400' },
+  paused: { label: 'Pausado', color: 'bg-yellow-500 dark:bg-yellow-400' },
+  planning: { label: 'Planejamento', color: 'bg-blue-500 dark:bg-blue-400' },
+  completed: { label: 'Concluído', color: 'bg-slate-500 dark:bg-slate-400' },
+  // Default or fallback status
+  archived: { label: 'Arquivado', color: 'bg-slate-700 dark:bg-slate-600' },
+};
+
+export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleStatus }: ProjectListItemProps) {
+  const projectStatus = statusMap[project.status] || statusMap.planning;
+
+  const handleToggleStatus = (event: React.MouseEvent) => {
+    // Prevent link navigation if button is inside a Link
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleStatus?.(project.id, project.status);
+  }
 
   if (viewMode === 'list') {
     return (
@@ -106,7 +124,13 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
              <Badge style={{ backgroundColor: projectStatus.color }} className="text-xs text-white dark:text-black font-medium">
                 {projectStatus.label}
              </Badge>
-            {projectActions}
+            <ProjectActionsDropdown
+              project={project}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onToggleStatus={onToggleStatus}
+              handleToggleStatus={handleToggleStatus}
+            />
           </div>
         </div>
       </Link>
@@ -146,7 +170,13 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Última atividade: {project.lastActivity}
         </p>
-        {projectActions}
+        <ProjectActionsDropdown
+          project={project}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onToggleStatus={onToggleStatus}
+          handleToggleStatus={handleToggleStatus}
+        />
       </CardFooter>
     </Card>
   );

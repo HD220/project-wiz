@@ -24,20 +24,17 @@
       "@/core/*": ["./src_refactored/core/*"],
       "@/domain/*": ["./src_refactored/core/domain/*"],
       "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
-      "@/presentation/*": ["./src_refactored/presentation/*"],
+      "@/components/*": ["./src_refactored/presentation/ui/components/*"],
       "@/shared/*": ["./src_refactored/shared/*"],
-      "@/*": ["./src_refactored/*"],
-      "@ui/*": ["./src_refactored/presentation/ui/*"],
-      "@ui/components/*": ["./src_refactored/presentation/ui/components/*"],
-      "@ui/lib/*": ["./src_refactored/presentation/ui/lib/*"],
-      "@ui/hooks/*": ["./src_refactored/presentation/ui/hooks/*"],
-      "@ui/features/*": ["./src_refactored/presentation/ui/features/*"], // Adjusted from /app to /features based on typical structure
-      "@ui/styles/*": ["./src_refactored/presentation/ui/styles/*"],
-      "@ui/routeTree.gen": ["./src_refactored/presentation/ui/routeTree.gen.ts"] // For specific file alias
+      // Simplified @ui path
+      "@/ui/*": ["./src_refactored/presentation/ui/*"],
+      // General fallback
+      "@/*": ["./src_refactored/*"]
     }
   },
   "include": [
     "src_refactored/**/*",
+    "src_refactored/presentation/ui/global.d.ts",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",

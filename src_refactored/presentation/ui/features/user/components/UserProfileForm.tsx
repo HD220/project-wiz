@@ -7,10 +7,14 @@ import { z } from 'zod';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { Button } from '@/presentation/ui/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+// FormControl, etc. are used by sub-components
+import { Form } from '@/presentation/ui/components/ui/form';
 
-import { UserProfile, UserProfileFormData } from '@/shared/ipc-types'; // Import from shared types
+import type { UserProfile, UserProfileFormData } from '@/shared/ipc-types';
+
+import { AvatarUrlField } from './fields/AvatarUrlField';
+import { DisplayNameField } from './fields/DisplayNameField';
+import { EmailDisplayField } from './fields/EmailDisplayField';
 
 interface UserProfileFormProps {
   initialData: UserProfile | null;
@@ -20,8 +24,7 @@ interface UserProfileFormProps {
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.').max(50, 'O nome não pode exceder 50 caracteres.'),
-  // email: z.string().email('Email inválido.').optional(), // Email usually not editable by user
-  avatarUrl: z.string().url('URL do avatar inválida.').optional().or(z.literal('')), // For URL input, or handle File for upload
+  avatarUrl: z.string().url('URL do avatar inválida.').optional().or(z.literal('')),
 });
 
 
@@ -48,21 +51,20 @@ export function UserProfileForm({ initialData, onSubmit, isSubmitting }: UserPro
 
 
   const handleFormSubmit = async (data: UserProfileFormData) => {
-    // If handling file upload, a different logic would be needed here.
-    // For now, assuming avatarUrl is a string URL input.
     await onSubmit(data);
   };
 
   const handleAvatarUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const url = event.target.value;
-    form.setValue('avatarUrl', url, {shouldDirty: true, shouldValidate: true});
+    // The form value itself is updated by the field component via field.onChange
     if (profileFormSchema.shape.avatarUrl.safeParse(url).success) {
         setCurrentAvatarPreview(url);
     } else {
-        setCurrentAvatarPreview(initialData?.avatarUrl || null); // Revert if URL is invalid immediately
+        // Revert to original avatar if new URL is immediately invalid and an empty string was not intended.
+        // If an empty string is typed, it's valid for optional URL, so clear preview.
+        setCurrentAvatarPreview(url === '' ? null : initialData?.avatarUrl || null);
     }
   };
-
 
   return (
     <div className="space-y-6">
@@ -73,7 +75,6 @@ export function UserProfileForm({ initialData, onSubmit, isSubmitting }: UserPro
                 {form.watch('displayName')?.substring(0, 1).toUpperCase() || <UserCircle size={40}/>}
               </AvatarFallback>
             </Avatar>
-            {/* This button is a placeholder for a more complex file upload UI */}
             <Button variant="outline" size="sm" className="relative" onClick={() => toast.info("Upload de avatar via seleção de arquivo não implementado. Insira uma URL.")}>
                <UploadCloud className="mr-2 h-4 w-4" />
               Alterar Avatar (URL)
@@ -81,61 +82,17 @@ export function UserProfileForm({ initialData, onSubmit, isSubmitting }: UserPro
         </div>
 
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-            <FormField
-            control={form.control}
-            name="displayName"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Nome de Exibição</FormLabel>
-                <FormControl>
-                    <Input placeholder="Seu nome" {...field} />
-                </FormControl>
-                <FormDescription>Como seu nome aparecerá na aplicação.</FormDescription>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-
-            {initialData?.email && ( // Only show email if it exists, and make it read-only
-                 <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                    <Input type="email" value={initialData.email} disabled readOnly />
-                    </FormControl>
-                    <FormDescription>Seu endereço de email (não pode ser alterado).</FormDescription>
-                </FormItem>
-            )}
-
-            <FormField
-                control={form.control}
-                name="avatarUrl"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>URL do Avatar (Opcional)</FormLabel>
-                        <FormControl>
-                            <Input
-                                placeholder="https://example.com/avatar.png"
-                                {...field}
-                                onChange={(e) => {
-                                    field.onChange(e); // RHF internal update
-                                    handleAvatarUrlChange(e); // Custom handler for preview
-                                }}
-                            />
-                        </FormControl>
-                        <FormDescription>Insira a URL para sua imagem de avatar.</FormDescription>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+            <DisplayNameField control={form.control} />
+            <EmailDisplayField email={initialData?.email} />
+            <AvatarUrlField control={form.control} onUrlChange={handleAvatarUrlChange} />
 
             <div className="flex justify-end pt-2">
             <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
                 {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
             </div>
-        </form>
+          </form>
         </Form>
     </div>
   );

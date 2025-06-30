@@ -1,14 +1,12 @@
 // src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts
-import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'; // Added sql
+import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { JobEntity, JobStatus, JobPersistenceData, JobPersistence } from '@/core/domain/job/job.entity'; // Added JobPersistence
 import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
-import { IJobOptions } from '@/core/domain/job/value-objects/job-options.vo';
 
-import * as schema from '../schema'; // Moved schema import up
-
-import type { db as DbType } from '../drizzle.client';
+import { db } from '../drizzle.client';
+import * as schema from '../schema';
 
 export class DrizzleJobRepository implements IJobRepository {
   constructor(private readonly drizzleDbInstance: typeof DbType) {}

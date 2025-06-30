@@ -1,6 +1,3 @@
-// src_refactored/infrastructure/queue/drizzle/queue.service.ts
-import { Timeout } from 'node:timers'; // Correct import for NodeJS.Timeout
-
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { AbstractQueue } from '@/core/application/queue/abstract-queue';
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';

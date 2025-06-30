@@ -38,7 +38,8 @@ export function useIpcMutation<TResponse, TRequest = undefined>(
 
     setIsLoading(true);
     setError(null);
-    setData(null); // Reset previous data on new mutation
+    // Reset previous data on new mutation
+    setData(null);
 
     try {
       // console.log(`useIpcMutation: Invoking channel ${channel} with params:`, params);

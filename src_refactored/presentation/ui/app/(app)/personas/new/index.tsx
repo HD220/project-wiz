@@ -5,36 +5,41 @@ import { toast } from 'sonner';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import { PersonaTemplateForm, PersonaTemplateFormData } from '@/presentation/ui/features/persona/components/PersonaTemplateForm';
-// import { useIPC } from '@/presentation/ui/hooks/useIPC'; // Uncomment when IPC is ready
+import { useIpcMutation } from '@/presentation/ui/hooks/ipc/useIpcMutation';
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import type { CreatePersonaTemplateRequest, CreatePersonaTemplateResponseData, IPCResponse } from '@/shared/ipc-types';
 
 function NewPersonaTemplatePage() {
   const router = useRouter();
-  // const ipc = useIPC(); // Uncomment when IPC is ready
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const createPersonaMutation = useIpcMutation<
+    CreatePersonaTemplateRequest,
+    IPCResponse<CreatePersonaTemplateResponseData>
+  >(
+    IPC_CHANNELS.CREATE_PERSONA_TEMPLATE,
+    {
+      onSuccess: (response) => {
+        if (response.success && response.data) {
+          toast.success(`Template de Persona "${response.data.name}" criado com sucesso!`);
+          router.navigate({ to: '/personas/$templateId', params: { templateId: response.data.id }, replace: true });
+        } else {
+          toast.error(`Falha ao criar o template: ${response.error?.message || 'Erro desconhecido.'}`);
+        }
+      },
+      onError: (error) => {
+        toast.error(`Falha ao criar o template: ${error.message}`);
+      },
+    }
+  );
 
   const handleSubmit = async (data: PersonaTemplateFormData) => {
-    setIsSubmitting(true);
     console.log('Dados do novo template de persona:', data);
-
-    // Simulação de chamada IPC
-    // const result = await ipc.invoke('persona:create-template', data);
-    // if (result.success && result.data) {
-    //   toast.success(`Template de Persona "${data.name}" criado com sucesso!`);
-    //   router.navigate({ to: '/personas', replace: true });
-    // } else {
-    //   toast.error(`Falha ao criar o template: ${result.error?.message || 'Erro desconhecido'}`);
-    //   setIsSubmitting(false);
-    // }
-
-    // Simulação de sucesso após um breve delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast.success(`Template de Persona "${data.name}" criado com sucesso (simulado)!`);
-    router.navigate({ to: '/personas', replace: true });
-    setIsSubmitting(false);
+    createPersonaMutation.mutate(data);
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto"> {/* Increased max-width */}
+    <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Criar Novo Template de Persona</CardTitle>
@@ -45,11 +50,12 @@ function NewPersonaTemplatePage() {
         <CardContent>
           <PersonaTemplateForm
             onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
+            isSubmitting={createPersonaMutation.isLoading}
+            // submitButtonText is handled by PersonaTemplateForm default
           />
         </CardContent>
       </Card>
-      <Button variant="link" onClick={() => router.history.back()} className="mt-4">
+      <Button variant="link" onClick={() => router.history.back()} className="mt-4" disabled={createPersonaMutation.isLoading}>
         Cancelar e Voltar
       </Button>
     </div>

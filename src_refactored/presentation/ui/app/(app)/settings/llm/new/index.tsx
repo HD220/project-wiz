@@ -8,7 +8,8 @@ import { LLMConfigForm } from '@/presentation/ui/features/llm/components/LLMConf
 // This would typically be derived from a Zod schema used by the form.
 export interface LLMConfigFormData {
   name: string;
-  providerId: 'openai' | 'deepseek' | string; // Extend as more providers are added
+  // Extend as more providers are added
+  providerId: 'openai' | 'deepseek' | string;
   apiKey: string;
   baseUrl?: string;
 }

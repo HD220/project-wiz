@@ -1,17 +1,20 @@
-import { CheckCircle2 } from 'lucide-react'; // Icon for selected state
+// Icon for selected state
+import { CheckCircle2 } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button'; // Will be used if "Select" button per card is desired
+// Button import removed as it's not used
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/presentation/ui/components/ui/card';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { cn } from '@/presentation/ui/lib/utils'; // For conditional class names
+// For conditional class names
+import { cn } from '@/presentation/ui/lib/utils';
 
 // Define the Persona type
 export interface Persona {
   id: string;
   name: string;
   description: string;
-  icon?: React.ElementType; // Placeholder for an icon component or URL string for an image
+  // Placeholder for an icon component or URL string for an image
+  icon?: React.ElementType;
   tags?: string[];
 }
 
@@ -31,7 +34,8 @@ const placeholderPersonas: Persona[] = [
     name: 'Software Developer',
     description: 'Helps with coding tasks, debugging, and software design.',
     tags: ['Coding', 'Debugging', 'Development'],
-    // icon: Code, // Example if using lucide-react icons directly
+    // icon: Code,
+    // Example if using lucide-react icons directly
   },
   {
     id: 'writer',
@@ -58,14 +62,16 @@ const placeholderPersonas: Persona[] = [
 
 
 export function PersonaList({
-  personas = placeholderPersonas, // Use placeholder if no personas prop is provided
+  // Use placeholder if no personas prop is provided
+  personas = placeholderPersonas,
   selectedPersonaId,
   onSelectPersona,
   className,
   cardClassName,
 }: PersonaListProps) {
   return (
-    <ScrollArea className={cn("h-[400px] w-full", className)}> {/* Default height, can be overridden */}
+    // Default height, can be overridden
+    <ScrollArea className={cn("h-[400px] w-full", className)}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-1">
         {/* Content for rendering persona items will be added in the next step */}
         {personas.map((persona) => (
@@ -103,7 +109,8 @@ export function PersonaList({
                 </div>
               )}
             </CardContent>
-            {/* Optionally, a select button within the card if preferred over clicking the whole card
+            {/*
+            Optionally, a select button within the card if preferred over clicking the whole card
             <CardFooter>
               <Button
                 variant={selectedPersonaId === persona.id ? "default" : "outline"}

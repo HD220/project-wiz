@@ -1,8 +1,11 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
-import React, { useState } from 'react'; // Added useState
-import { toast } from 'sonner'; // For feedback on LLM save
+// Added useState
+import React, { useState } from 'react';
+// For feedback on LLM save
+import { toast } from 'sonner';
 
-import { LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm'; // Import type
+// Import type
+import { LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm';
 import { InitialConfigStep } from '@/presentation/ui/features/onboarding/components/InitialConfigStep';
 import { OnboardingWizard } from '@/presentation/ui/features/onboarding/components/OnboardingWizard';
 import { WelcomeStep } from '@/presentation/ui/features/onboarding/components/WelcomeStep';
@@ -27,7 +30,8 @@ function OnboardingPageComponent() {
     if (!isLLMConfigSaved) {
       toast.error("Por favor, salve uma configuração LLM para continuar.");
       // Optionally, force navigation to the LLM config step if the wizard is complex
-      // setCurrentStep('initial-config'); // This would require more state management in OnboardingWizard
+      // setCurrentStep('initial-config');
+      // This would require more state management in OnboardingWizard
       return;
     }
     router.navigate({ to: '/dashboard', replace: true });
@@ -74,7 +78,8 @@ function OnboardingPageComponent() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-slate-100 dark:bg-slate-900">
-      <div className="w-full max-w-xl lg:max-w-2xl"> {/* Increased max-width for LLM form */}
+      {/* Increased max-width for LLM form */}
+      <div className="w-full max-w-xl lg:max-w-2xl">
         <OnboardingWizard
           steps={onboardingSteps}
           onFinish={handleFinishOnboarding}
@@ -82,6 +87,7 @@ function OnboardingPageComponent() {
           // Pass a prop to disable "Next" on LLM step if not saved, or "Finish" on summary
           // This logic would need to be added to OnboardingWizard component itself.
           // For simplicity now, the summary step message and onFinish check handle it.
+          // This logic would need to be added to OnboardingWizard component itself.
           isStepBlocked={ (stepId: string) => stepId === 'summary' && !isLLMConfigSaved }
         />
       </div>

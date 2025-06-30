@@ -14,7 +14,8 @@ interface OnboardingWizardProps {
   steps: OnboardingStep[];
   onFinish: () => void;
   wizardTitle?: string;
-  isStepBlocked?: (stepId: string, currentStepIndex: number) => boolean; // Optional: to block next/finish
+  isStepBlocked?: (stepId: string, currentStepIndex: number) => boolean;
+  // Optional: to block next/finish
 }
 
 export function OnboardingWizard({
@@ -32,7 +33,8 @@ export function OnboardingWizard({
   const isBlocked = isStepBlocked ? isStepBlocked(currentStep.id, currentStepIndex) : false;
 
   const goToNextStep = () => {
-    if (isBlocked && currentStepIndex < steps.length - 1) { // Check if current step is blocked for "Next"
+    // Check if current step is blocked for "Next"
+    if (isBlocked && currentStepIndex < steps.length - 1) {
         // Optionally show a message, but parent component (OnboardingPage) shows toast for LLM
         return;
     }
@@ -44,7 +46,8 @@ export function OnboardingWizard({
   };
 
   const handleFinishClick = () => {
-    if (isBlocked) { // Check if current step (likely summary) is blocked for "Finish"
+    // Check if current step (likely summary) is blocked for "Finish"
+    if (isBlocked) {
          // Parent (OnboardingPage) handles the specific toast message for LLM config not saved
         return;
     }
@@ -69,7 +72,8 @@ export function OnboardingWizard({
         <CardTitle className="text-2xl">{wizardTitle}</CardTitle>
         <CardDescription>{currentStep.title} (Etapa {currentStepIndex + 1} de {steps.length})</CardDescription>
       </CardHeader>
-      <CardContent className="min-h-[250px] md:min-h-[300px] py-6 flex flex-col justify-center"> {/* Increased min-height */}
+      {/* Increased min-height */}
+      <CardContent className="min-h-[250px] md:min-h-[300px] py-6 flex flex-col justify-center">
         {currentStep.content}
       </CardContent>
       <CardFooter className="flex flex-col items-center space-y-4 pt-6">

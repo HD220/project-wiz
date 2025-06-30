@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 import { PlusCircle } from 'lucide-react';
-import React, { useState, useEffect } from 'react'; // Added useState, useEffect
+// Removed useEffect
+import React, { useState } from 'react';
 // import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // For real data fetching
-
-import { toast } from 'sonner'; // For notifications
+// For notifications
+import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -17,7 +18,8 @@ import {
 } from "@/presentation/ui/components/ui/alert-dialog";
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
-import { LLMConfigList, LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList'; // Assuming LLMConfig type is exported
+// Assuming LLMConfig type is exported
+import { LLMConfigList, LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList';
 // import { useIPC } from '@/presentation/ui/hooks/useIPC'; // For IPC calls
 
 
@@ -68,7 +70,8 @@ function LLMConfigurationPage() {
     // TODO: Implement actual deletion via IPC and TanStack Mutation
     // mutation.mutate(showDeleteConfirm.id, { ... });
     toast.success(`Configuração "${showDeleteConfirm.name}" excluída (simulado).`);
-    setLlmConfigs(prev => prev.filter(c => c.id !== showDeleteConfirm.id)); // Optimistic update for UI
+    // Optimistic update for UI
+    setLlmConfigs(prev => prev.filter(config => config.id !== showDeleteConfirm.id));
     setShowDeleteConfirm(null);
   };
 
@@ -124,7 +127,7 @@ function LLMConfigurationPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja excluir a configuração LLM "{showDeleteConfirm.name}"?
+                Tem certeza que deseja excluir a configuração LLM &quot;{showDeleteConfirm.name}&quot;?
                 Esta ação não pode ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>

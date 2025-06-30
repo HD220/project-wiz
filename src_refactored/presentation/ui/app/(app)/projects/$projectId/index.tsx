@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, useParams, Link, useRouter } from '@tanstack/react-router';
-// Edit3, Trash2, LayoutDashboard, Separator are not directly used here or are part of children. ChevronDown is needed.
-import { ArrowLeft, Settings, Play, Pause, CheckCircle, Clock, AlertTriangle, ChevronDown, Trash2 } from 'lucide-react'; // Ensured Trash2 is imported
+import { ArrowLeft, Settings, Play, Pause, CheckCircle, Clock, AlertTriangle, ChevronDown, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -14,22 +13,16 @@ import {
   DropdownMenuTrigger,
 } from '@/presentation/ui/components/ui/dropdown-menu';
 import { ProjectContextSidebar } from '@/presentation/ui/features/project/components/layout/ProjectContextSidebar';
-import { ProjectParticipantsSidebar } from '@/presentation/ui/features/project/components/layout/ProjectParticipantsSidebar'; // Import the new sidebar
+import { ProjectParticipantsSidebar } from '@/presentation/ui/features/project/components/layout/ProjectParticipantsSidebar';
 import { Project } from '@/presentation/ui/features/project/components/ProjectListItem';
-// OverviewTabContent is now locally defined or imported from a new location.
-// For this correction, I'll assume it's defined below or in its own file and imported.
-// If it was in ProjectDetailView.tsx, and that's deleted, it needs a new home.
-// For now, let's assume it's correctly available (e.g. defined in this file or imported).
-// We'll define it locally for this fix.
 
 
-// Copied from previous ProjectDetailView.tsx for now
 const OverviewTabContent = ({ project }: { project: Project }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
         <CardTitle>Resumo do Projeto</CardTitle>
-        <CardDescription>Informações chave e estatísticas sobre "{project.name}".</CardDescription>
+        <CardDescription>Informações chave e estatísticas sobre &quot;{project.name}&quot;.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-2">
         <div>
@@ -86,7 +79,7 @@ const statusDetails: Record<Project['status'], { label: string; icon: React.Elem
 
 // This component now acts as the LAYOUT for /projects/$projectId and its children (tabs)
 function ProjectDetailLayoutPage() {
-  const params = useParams({ from: '/(app)/projects/$projectId/' }); // Ensure this matches the TanStack route definition
+  const params = useParams({ from: '/(app)/projects/$projectId/' });
   const projectId = params.projectId;
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,12 +125,10 @@ function ProjectDetailLayoutPage() {
   // The main AppSidebar is already part of the (app)/_layout.tsx
   // This page will have its own ProjectContextSidebar and the main content area with Outlet
   return (
-    <div className="flex h-full"> {/* Occupy full height from parent (app)_layout's main content area */}
-      <ProjectContextSidebar project={project} className="h-full" /> {/* currentPath removed */}
+    <div className="flex h-full">
+      <ProjectContextSidebar project={project} className="h-full" />
 
-      {/* Central Content Area (includes header and Outlet) */}
-      <div className="flex-1 flex flex-col overflow-hidden"> {/* Renamed main to div for clarity, as it's a wrapper */}
-        {/* Header specific to the project, shown above the Outlet/tab content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         <header className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div>

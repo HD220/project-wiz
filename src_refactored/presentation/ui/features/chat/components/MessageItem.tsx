@@ -1,12 +1,9 @@
 import React from 'react';
 
-// import ReactMarkdown from 'react-markdown'; // Replaced by MarkdownRenderer
-// import remarkGfm from 'remark-gfm'; // Handled by MarkdownRenderer
-import { MarkdownRenderer } from '@/presentation/ui/components/common/MarkdownRenderer'; // Import new renderer
+import { MarkdownRenderer } from '@/presentation/ui/components/common/MarkdownRenderer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { cn } from '@/presentation/ui/lib/utils';
 
-// Definindo a interface aqui temporariamente, idealmente viria de um arquivo de tipos compartilhado
 export interface ChatMessageSender {
   id: string;
   name: string;
@@ -17,14 +14,18 @@ export interface ChatMessage {
   id: string;
   sender: ChatMessageSender;
   content: string;
-  timestamp: string | Date; // Pode ser string formatada ou objeto Date
-  type?: 'text' | 'tool_call' | 'tool_response' | 'error' | 'system'; // Adicionado 'system'
-  isContinuation?: boolean; // Para agrupar mensagens do mesmo sender
+  // Pode ser string formatada ou objeto Date
+  timestamp: string | Date;
+  // Adicionado 'system'
+  type?: 'text' | 'tool_call' | 'tool_response' | 'error' | 'system';
+  // Para agrupar mensagens do mesmo sender
+  isContinuation?: boolean;
 }
 
 interface MessageItemProps {
   message: ChatMessage;
-  isCurrentUser: boolean; // Para alinhar a mensagem
+  // Para alinhar a mensagem
+  isCurrentUser: boolean;
 }
 
 export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
@@ -47,7 +48,8 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
       className={cn(
         "flex items-end gap-2",
         isCurrentUser ? "justify-end" : "justify-start",
-        message.isContinuation ? "mt-1" : "mt-3" // Less margin if it's a continuation
+        // Less margin if it's a continuation
+        message.isContinuation ? "mt-1" : "mt-3"
       )}
     >
       {!isCurrentUser && !message.isContinuation && (
@@ -56,8 +58,9 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
           <AvatarFallback>{message.sender.name.substring(0, 1).toUpperCase()}</AvatarFallback>
         </Avatar>
       )}
+      {/* Spacer for alignment */}
       {!isCurrentUser && message.isContinuation && (
-        <div className="w-7 h-7 flex-shrink-0" /> // Spacer for alignment
+        <div className="w-7 h-7 flex-shrink-0" />
       )}
 
       <div
@@ -77,8 +80,6 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
             {senderName}
           </p>
         )}
-        {/* Use the new MarkdownRenderer component */}
-        {/* Pass specific prose classes if needed for chat context, or rely on MarkdownRenderer's defaults */}
         <MarkdownRenderer
           content={message.content}
           // Example of adjusting prose for chat: tighter paragraph margins
@@ -104,8 +105,9 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
           </AvatarFallback>
         </Avatar>
       )}
+      {/* Spacer for alignment */}
        {isCurrentUser && message.isContinuation && (
-        <div className="w-7 h-7 flex-shrink-0" /> // Spacer for alignment
+        <div className="w-7 h-7 flex-shrink-0" />
       )}
     </div>
   );

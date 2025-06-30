@@ -1,7 +1,9 @@
-import { Pencil, Trash2 } from 'lucide-react'; // Icons for edit/delete
+// Icons for edit/delete
+import { Pencil, Trash2 } from 'lucide-react';
 import React from 'react';
 
-import { Badge } from '@/presentation/ui/components/ui/badge'; // To display provider type
+// To display provider type
+import { Badge } from '@/presentation/ui/components/ui/badge';
 import { Button } from '@/presentation/ui/components/ui/button';
 import {
   Table,
@@ -16,16 +18,21 @@ import {
 export interface LLMConfig {
   id: string;
   name: string;
-  providerId: string; // e.g., 'openai', 'deepseek', 'ollama'
-  // apiKey: string; // Sensitive, usually not displayed directly
+  providerId: string;
+  // e.g., 'openai', 'deepseek', 'ollama'
+  // apiKey: string;
+  // Sensitive, usually not displayed directly
   baseUrl?: string;
-  // createdAt: string; // Or Date object
+  // createdAt: string;
+  // Or Date object
 }
 
 interface LLMConfigListProps {
   configs: LLMConfig[];
-  onEdit: (configId: string) => void; // Will navigate to /settings/llm/$configId/edit
-  onDelete: (config: LLMConfig) => void; // Pass full config object for delete confirmation
+  onEdit: (configId: string) => void;
+  // Will navigate to /settings/llm/$configId/edit
+  onDelete: (config: LLMConfig) => void;
+  // Pass full config object for delete confirmation
 }
 
 const providerDisplayNames: Record<string, string> = {

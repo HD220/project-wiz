@@ -1,7 +1,7 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import React from 'react';
 
-import { AppSidebar } from '@/presentation/ui/components/layout/AppSidebar';
+import { AppSidebar } from '@/components/layout/AppSidebar';
 
 function AppLayoutComponent() {
   return (

@@ -6,38 +6,110 @@ import vitestPlugin from "eslint-plugin-vitest";
 import * as importPlugin from "eslint-plugin-import";
 import boundariesPlugin from "eslint-plugin-boundaries";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import reactPlugin from "eslint-plugin-react";
+import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 import globals from "globals";
 
+// --- Thematic Rule Group Constants ---
+
+const baseRecommendedRules = {
+  ...js.configs.recommended.rules,
+  ...tsPlugin.configs.recommended.rules,
+  ...vitestPlugin.configs.recommended.rules,
+  ...reactPlugin.configs.recommended.rules,
+  ...jsxA11yPlugin.configs.recommended.rules,
+};
+
+const typeScriptSpecificRules = {
+  "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
+  "@typescript-eslint/no-explicit-any": "error",
+  "@typescript-eslint/naming-convention": ["warn",
+    { selector: "default", format: ["camelCase"], leadingUnderscore: "allow", trailingUnderscore: "allow" },
+    { selector: "import", format: ["camelCase", "PascalCase", "UPPER_CASE"], leadingUnderscore: "allow", trailingUnderscore: "allow" },
+    { selector: "variable", format: ["camelCase", "PascalCase", "UPPER_CASE"], leadingUnderscore: "allow", trailingUnderscore: "allow" },
+    { selector: "function", format: ["camelCase", "PascalCase"] },
+    { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
+    { selector: "typeLike", format: ["PascalCase"] },
+    { selector: "enumMember", format: ["PascalCase", "UPPER_CASE"] },
+    { selector: "objectLiteralProperty", format: ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"], leadingUnderscore: "allow", trailingUnderscore: "allow" },
+    { selector: "classProperty", modifiers: ["static", "readonly"], format: ["UPPER_CASE", "camelCase", "PascalCase"] }
+  ],
+  "@typescript-eslint/ban-ts-comment": ["error", {
+    "ts-expect-error": "allow-with-description",
+    "ts-ignore": true,
+    "ts-nocheck": true,
+    "ts-check": false,
+    "minimumDescriptionLength": 3
+  }],
+};
+
+const reactSpecificRules = {
+  "react/react-in-jsx-scope": "off",
+  "react-hooks/rules-of-hooks": "error",
+  "react-hooks/exhaustive-deps": "warn",
+};
+
+const importAndBoundaryRules = {
+  "import/no-unresolved": "error",
+  "import/order": ["warn", {
+    groups: ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
+    pathGroups: [
+      { pattern: "@ui/*", group: "internal" },
+      { pattern: "@/core/**", group: "internal", position: "before" },
+      { pattern: "@/domain/**", group: "internal", position: "before" },
+      { pattern: "@/application/**", group: "internal", position: "before" },
+      { pattern: "@/infrastructure/**", group: "internal", position: "before" },
+      { pattern: "@/presentation/**", group: "internal", position: "before" },
+      { pattern: "@/shared/**", group: "internal", position: "after" },
+    ],
+    pathGroupsExcludedImportTypes: [],
+    "newlines-between": "always",
+    alphabetize: { order: "asc", caseInsensitive: true }
+  }],
+  "boundaries/element-types": [ "error", {
+      default: "allow",
+      rules: [
+        { from: ["domain"], disallow: ["application", "infrastructure", "presentation"], message: "DOMAIN: Proibido importar de ${dependency.type}." },
+        { from: ["application"], allow: ["domain", "shared"], disallow: ["infrastructure", "presentation"], message: "APPLICATION: Proibido importar de ${dependency.type} (permitido: domain, shared)." },
+        { from: ["infrastructure"], allow: ["domain", "application", "shared"], disallow: ["presentation"], message: "INFRA: Proibido importar de ${dependency.type} (permitido: domain, application, shared)." },
+        { from: ["presentation"], allow: ["domain", "application", "shared", "ui-components", "ui-lib", "ui-hooks", "ui-features"], disallow: ["infrastructure"], message: "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, shared, ui/*)." },
+        { from: ["shared"], disallow: ["domain", "application", "infrastructure", "presentation", "ui-components", "ui-lib", "ui-hooks", "ui-features"], message: "SHARED: Proibido importar de camadas específicas (${dependency.type})." },
+        { from: ["ui-components"], allow: ["ui-lib", "shared"], disallow: ["domain", "application", "infrastructure", "presentation", "ui-features"], message: "UI-COMPONENTS: Violação de dependência com ${dependency.type}." },
+        { from: ["ui-features"], allow: ["ui-components", "ui-lib", "ui-hooks", "application", "domain", "shared"], disallow: ["infrastructure", "presentation"], message: "UI-FEATURES: Violação de dependência com ${dependency.type}." },
+        { from: ["ui-lib"], allow: ["shared"], disallow: ["domain", "application", "infrastructure", "presentation", "ui-components", "ui-features", "ui-hooks"], message: "UI-LIB: Violação de dependência com ${dependency.type}." },
+        { from: ["ui-hooks"], allow: ["ui-lib", "application", "domain", "shared"], disallow: ["infrastructure", "presentation", "ui-components", "ui-features"], message: "UI-HOOKS: Violação de dependência com ${dependency.type}." },
+      ],
+    },
+  ],
+};
+
+const codeStyleAndQualityRules = {
+  "max-depth": ["warn", { max: 4 }],
+  "no-else-return": "warn",
+  "id-length": ["warn", { min: 2, exceptions: ["_"] }],
+  "max-statements": ["warn", { max: 25 }],
+  "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
+  "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
+  "no-inline-comments": "error",
+};
+
+const testingSpecificRules = {
+   "vitest/expect-expect": "warn",
+};
+
+// --- Main ESLint Configuration Array ---
 export default [
+  // 1. Global Ignores
   {
-    // Universal ignores
     ignores: [
-      "**/_old/**",
-      "**/coverage/**",
-      "**/dist/**",
-      "**/node_modules/**",
-      "tests/**",
-      "**/k6/**",
-      "**/jslib.k6.io/**",
-      "backup/**",
-      "src/**",
-      "src2/**",
-      "scripts/**",
-      ".vite/**",
-      "*.config.js",
-      "*.config.ts",
-      "*.config.cts",
-      "*.mts",
-      "index.html",
-      "docs/**",
-      "migrations/**",
-      "public/**",
-      ".jules/**",
-      ".roo/**",
-      "types/**"
+      "**/_old/**", "**/coverage/**", "**/dist/**", "**/node_modules/**",
+      "tests/**", "**/k6/**", "**/jslib.k6.io/**", "backup/**",
+      "src/**", "src2/**", "scripts/**", ".vite/**",
+      "*.config.js", "*.config.ts", "*.config.cts", "*.mts",
+      "index.html", "docs/**", "migrations/**", "public/**",
+      ".jules/**", ".roo/**", "types/**"
     ],
   },
-  // Base Configuration for files within src_refactored
   {
     files: ["src_refactored/**/*.ts", "src_refactored/**/*.tsx"],
     languageOptions: {
@@ -47,105 +119,30 @@ export default [
       parserOptions: {
         project: "./tsconfig.json",
         tsconfigRootDir: import.meta.dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
       },
       globals: {
         ...vitestPlugin.environments.env.globals,
         ...globals.node,
         ...globals.browser,
         window: "readonly",
-        React: "readonly",
       },
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
-      import: importPlugin,
-      vitest: vitestPlugin,
-      boundaries: boundariesPlugin,
+      "import": importPlugin,
+      "vitest": vitestPlugin,
+      "boundaries": boundariesPlugin,
       "react-hooks": reactHooksPlugin,
+      "react": reactPlugin,
+      "jsx-a11y": jsxA11yPlugin,
     },
     rules: {
-      ...js.configs.recommended.rules,
-      ...tsPlugin.configs.recommended.rules,
-      ...vitestPlugin.configs.recommended.rules,
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
-
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
-      "import/no-unresolved": "error",
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/naming-convention": ["warn",
-        { "selector": "default", "format": ["camelCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
-        { "selector": "import", "format": ["camelCase", "PascalCase", "UPPER_CASE"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
-        { "selector": "variable", "format": ["camelCase", "PascalCase", "UPPER_CASE"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
-        { "selector": "function", "format": ["camelCase", "PascalCase"] },
-        { "selector": "parameter", "format": ["camelCase"], "leadingUnderscore": "allow" },
-        { "selector": "typeLike", "format": ["PascalCase"] },
-        { "selector": "enumMember", "format": ["PascalCase", "UPPER_CASE"] },
-        { "selector": "objectLiteralProperty", "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
-        { "selector": "classProperty", "modifiers": ["static", "readonly"], "format": ["UPPER_CASE", "camelCase", "PascalCase"] }
-      ],
-      "max-depth": ["warn", { "max": 4 }],
-      "no-else-return": "warn",
-      "id-length": ["warn", { "min": 2, "exceptions": ["_"] }],
-      "max-statements": ["warn", { "max": 25 }],
-      "max-lines-per-function": ["error", { "max": 50, "skipBlankLines": true, "skipComments": true }],
-      "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }],
-      // Comment Rules
-      "@typescript-eslint/ban-ts-comment": ["error", {
-        "ts-expect-error": "allow-with-description",
-        "ts-ignore": true, // Ban @ts-ignore
-        "ts-nocheck": true, // Ban @ts-nocheck
-        "ts-check": false,  // Allow @ts-check
-        "minimumDescriptionLength": 3
-      }],
-      "no-inline-comments": "error", // Disallow comments on the same line as code
-
-      "import/order": ["warn", {
-        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type", "object"],
-        "pathGroups": [
-          { "pattern": "@nestjs/**", "group": "external", "position": "before" },
-          { "pattern": "@ui/app/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/assets/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/components/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/config/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/hooks/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/lib/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/services/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/store/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/styles/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/types/**", "group": "internal", "position": "before" },
-          { "pattern": "@ui/*", "group": "internal" },
-          { "pattern": "@/core/**", "group": "internal", "position": "before" },
-          { "pattern": "@/domain/**", "group": "internal", "position": "before" },
-          { "pattern": "@/application/**", "group": "internal", "position": "before" },
-          { "pattern": "@/infrastructure/**", "group": "internal", "position": "before" },
-          { "pattern": "@/presentation/**", "group": "internal", "position": "before" },
-          { "pattern": "@/shared/**", "group": "internal", "position": "after" },
-          { "pattern": "@/refactored/**", "group": "internal", "position": "before" },
-        ],
-        "pathGroupsExcludedImportTypes": [],
-        "newlines-between": "always",
-        "alphabetize": { "order": "asc", "caseInsensitive": true }
-      }],
-      "boundaries/element-types": [ "error", {
-          default: "allow",
-          rules: [
-            { from: ["domain"], disallow: ["application", "infrastructure", "presentation"], message: "DOMAIN: Proibido importar de ${dependency.type}." },
-            { from: ["application"], allow: ["domain", "shared"], disallow: ["infrastructure", "presentation"], message: "APPLICATION: Proibido importar de ${dependency.type} (permitido: domain, shared)." },
-            { from: ["infrastructure"], allow: ["domain", "application", "shared"], disallow: ["presentation"], message: "INFRA: Proibido importar de ${dependency.type} (permitido: domain, application, shared)." },
-            { from: ["presentation"], allow: ["domain", "application", "shared", "ui-components", "ui-lib", "ui-hooks", "ui-features"], disallow: ["infrastructure"], message: "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, shared, ui/*)." },
-            { from: ["shared"], disallow: ["domain", "application", "infrastructure", "presentation", "ui-components", "ui-lib", "ui-hooks", "ui-features"], message: "SHARED: Proibido importar de camadas específicas (${dependency.type})." },
-            { from: ["ui-components"], allow: ["ui-lib", "shared"], disallow: ["domain", "application", "infrastructure", "presentation", "ui-features"], message: "UI-COMPONENTS: Violação de dependência com ${dependency.type}." },
-            { from: ["ui-features"], allow: ["ui-components", "ui-lib", "ui-hooks", "application", "domain", "shared"], disallow: ["infrastructure", "presentation"], message: "UI-FEATURES: Violação de dependência com ${dependency.type}." },
-            { from: ["ui-lib"], allow: ["shared"], disallow: ["domain", "application", "infrastructure", "presentation", "ui-components", "ui-features", "ui-hooks"], message: "UI-LIB: Violação de dependência com ${dependency.type}." },
-            { from: ["ui-hooks"], allow: ["ui-lib", "application", "domain", "shared"], disallow: ["infrastructure", "presentation", "ui-components", "ui-features"], message: "UI-HOOKS: Violação de dependência com ${dependency.type}." },
-          ],
-        },
-      ],
-      "vitest/expect-expect": "warn",
+      ...baseRecommendedRules,
+      ...typeScriptSpecificRules,
+      ...reactSpecificRules,
+      ...importAndBoundaryRules,
+      ...codeStyleAndQualityRules,
+      ...testingSpecificRules,
     },
     settings: {
       "import/resolver": {
@@ -166,42 +163,48 @@ export default [
         { type: "ui-hooks", pattern: "src_refactored/presentation/ui/hooks" },
       ],
       "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"],
+      "react": {
+        version: "detect",
+      },
     },
   },
-  // Override for Application .tsx AND ALL Test files (.ts and .tsx) for line limits
+
+  // 3. Override for Application .tsx AND ALL Test files for line limits
+  //    (Excluding ShadCN UI components)
   {
     files: [
       "src_refactored/**/*.tsx",
-      "src_refactored/**/*.spec.ts",
-      "src_refactored/**/*.test.ts",
-      "src_refactored/**/*.spec.tsx",
-      "src_refactored/**/*.test.tsx"
+      "src_refactored/**/*.spec.ts", "src_refactored/**/*.test.ts",
+      "src_refactored/**/*.spec.tsx", "src_refactored/**/*.test.tsx"
     ],
     ignores: [
       "src_refactored/presentation/ui/components/ui/**/*.tsx"
     ],
     rules: {
-      "max-lines-per-function": ["error", { "max": 100, "skipBlankLines": true, "skipComments": true }],
-      "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }],
+      // Relaxed line limits for .tsx and test files
+      "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
     }
   },
-  // Config specific to test files for relaxing OTHER rules (e.g., max-statements)
+
+  // 4. Override for Test files (relaxing other specific rules)
   {
     files: [
-      "src_refactored/**/*.spec.ts",
-      "src_refactored/**/*.test.ts",
-      "src_refactored/**/*.spec.tsx",
-      "src_refactored/**/*.test.tsx"
+      "src_refactored/**/*.spec.ts", "src_refactored/**/*.test.ts",
+      "src_refactored/**/*.spec.tsx", "src_refactored/**/*.test.tsx"
     ],
     rules: {
-      // Line limits are inherited from the block above (100/200).
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_", vars: "all", args: "after-used", ignoreRestSiblings: true }],
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        vars: "all",
+        args: "after-used",
+        ignoreRestSiblings: true
+      }],
       "max-statements": "off",
-      // Allow inline comments in test files if necessary for describe/it blocks or specific test explanations
-      "no-inline-comments": "off",
-      // Test files might use ts-expect-error more liberally for testing error conditions
+      "no-inline-comments": "off", // Allow inline comments in test files
       "@typescript-eslint/ban-ts-comment": ["error", {
-        "ts-expect-error": "allow-with-description", // or "off" if too restrictive for tests
+        "ts-expect-error": "allow-with-description", // More lenient for testing error conditions
         "ts-ignore": true,
         "ts-nocheck": true,
         "ts-check": false,
@@ -209,7 +212,8 @@ export default [
       }],
     },
   },
-  // Config block to specifically turn OFF rules for ShadCN UI components
+
+  // 5. Override for ShadCN UI components
   {
     files: ["src_refactored/presentation/ui/components/ui/**/*.tsx"],
     rules: {
@@ -217,8 +221,9 @@ export default [
       "max-lines-per-function": "off",
       "max-lines": "off",
       "max-statements": "off",
-      "no-inline-comments": "off", // Also allow inline comments in shadcn/ui
-      "@typescript-eslint/ban-ts-comment": "off", // Turn off ts-comment bans for shadcn/ui
+      "no-inline-comments": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "react/prop-types": "off",
     }
   }
 ];

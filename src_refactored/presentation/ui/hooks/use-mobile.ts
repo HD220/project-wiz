@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-const MOBILE_WIDTH_THRESHOLD = 768; // Example threshold for mobile devices
+// Example threshold for mobile devices
+const MOBILE_WIDTH_THRESHOLD = 768;
 
 export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = React.useState(false);

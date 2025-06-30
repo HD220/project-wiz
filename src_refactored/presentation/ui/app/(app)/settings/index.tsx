@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { User, Cpu, Palette, Bell, ShieldCheck } from 'lucide-react'; // Icons for sections
+// Icons for sections
+import { User, Cpu, Palette, Bell, ShieldCheck } from 'lucide-react';
 import React from 'react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
@@ -13,7 +14,8 @@ interface SettingsSectionProps {
   disabled?: boolean;
 }
 
-function SettingsSectionLink({ to, icon: Icon, title, description, disabled }: SettingsSectionProps) {
+// Renamed icon prop to satisfy convention
+function SettingsSectionLink({ to, icon: iconProp, title, description, disabled }: SettingsSectionProps) {
   const content = (
     <div className={`flex items-start space-x-4 p-4 rounded-lg transition-colors ${
       disabled
@@ -21,7 +23,7 @@ function SettingsSectionLink({ to, icon: Icon, title, description, disabled }: S
         : 'hover:bg-slate-100 dark:hover:bg-slate-800/50'
     }`}>
       <div className={`mt-1 p-2 rounded-md ${disabled ? 'bg-slate-200 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
-        <Icon className={`h-6 w-6 ${disabled ? 'text-slate-400 dark:text-slate-500' : 'text-slate-600 dark:text-slate-300'}`} />
+        {iconProp && React.createElement(iconProp, { className: `h-6 w-6 ${disabled ? 'text-slate-400 dark:text-slate-500' : 'text-slate-600 dark:text-slate-300'}` })}
       </div>
       <div>
         <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h3>
@@ -49,7 +51,8 @@ function SettingsPage() {
       icon: User,
       title: 'Perfil',
       description: 'Gerencie suas informações de perfil e preferências pessoais.',
-      disabled: true, // Placeholder until page is created
+      // Placeholder until page is created
+      disabled: true,
     },
     {
       to: '/settings/llm',
@@ -62,21 +65,24 @@ function SettingsPage() {
       icon: Palette,
       title: 'Aparência',
       description: 'Personalize o tema e a aparência da aplicação.',
-      disabled: true, // Placeholder
+      // Placeholder
+      disabled: true,
     },
     {
       to: '/settings/notifications',
       icon: Bell,
       title: 'Notificações',
       description: 'Defina suas preferências de notificação.',
-      disabled: true, // Placeholder
+      // Placeholder
+      disabled: true,
     },
      {
       to: '/settings/security',
       icon: ShieldCheck,
       title: 'Segurança & Conta',
       description: 'Gerencie configurações de segurança, autenticação e dados da conta.',
-      disabled: true, // Placeholder
+      // Placeholder
+      disabled: true,
     },
   ];
 
@@ -98,7 +104,8 @@ function SettingsPage() {
             Navegue pelas diferentes seções para ajustar suas preferências.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0"> {/* Remove default padding to let links handle it */}
+        {/* Remove default padding to let links handle it */}
+        <CardContent className="p-0">
           <div className="grid grid-cols-1">
             {settingsSections.map((section, index) => (
               <React.Fragment key={section.to}>

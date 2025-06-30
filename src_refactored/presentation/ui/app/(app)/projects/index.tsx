@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { PlusCircle, LayoutGrid, List } from 'lucide-react';
-import React, { useState } from 'react'; // Assuming useState for mock data or future filters
+import React, { useState } from 'react';
 
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Input } from '@/presentation/ui/components/ui/input';
@@ -13,9 +13,8 @@ import {
 } from "@/presentation/ui/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/presentation/ui/components/ui/toggle-group";
 import { ProjectList } from '@/presentation/ui/features/project/components/ProjectList';
-import { Project } from '@/presentation/ui/features/project/components/ProjectListItem'; // Assuming Project type is exported
+import { Project } from '@/presentation/ui/features/project/components/ProjectListItem';
 
-// Mock Data - Replace with API call and TanStack Query later
 const mockProjects: Project[] = [
   { id: '1', name: 'Projeto Phoenix', description: 'Reconstrução da plataforma principal com foco em escalabilidade e IA.', lastActivity: '2 horas atrás', status: 'active', agentCount: 5, taskCount: 23 },
   { id: '2', name: 'Operação Quimera', description: 'Integração de múltiplos serviços legados em uma nova arquitetura de microfrontends.', lastActivity: '1 dia atrás', status: 'paused', agentCount: 2, taskCount: 8 },
@@ -26,18 +25,17 @@ const mockProjects: Project[] = [
 
 
 function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>(mockProjects); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [projects] = useState<Project[]>(mockProjects);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // TODO: Implement filtering and sorting based on searchTerm and sortOrder
-  const filteredAndSortedProjects = projects.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.description.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => {
-    if (sortOrder === 'name-asc') return a.name.localeCompare(b.name);
-    if (sortOrder === 'name-desc') return b.name.localeCompare(a.name);
+  const filteredAndSortedProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.description.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((projectA, projectB) => {
+    if (sortOrder === 'name-asc') return projectA.name.localeCompare(projectB.name);
+    if (sortOrder === 'name-desc') return projectB.name.localeCompare(projectA.name);
     // Add more sort options (e.g., by lastActivity)
     return 0;
   });
@@ -67,7 +65,7 @@ function ProjectsPage() {
         <Input
           placeholder="Buscar projetos..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(event) => setSearchTerm(event.target.value)}
           className="flex-grow sm:flex-grow-0 sm:w-auto md:min-w-[250px]"
         />
         <Select value={sortOrder} onValueChange={setSortOrder}>

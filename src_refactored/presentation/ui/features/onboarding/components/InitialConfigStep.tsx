@@ -4,9 +4,12 @@ import { toast } from 'sonner';
 import { LLMConfigForm, LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm';
 
 interface InitialConfigStepProps {
-  onConfigSaved: (data: LLMConfigFormData) => void; // Callback when LLM config is successfully "saved"
-  isSubmitting?: boolean; // Optional: if parent controls submission state
-  setIsSubmitting?: (isSubmitting: boolean) => void; // Optional: to let this component control parent's state
+  onConfigSaved: (data: LLMConfigFormData) => void;
+  // Callback when LLM config is successfully "saved"
+  isSubmitting?: boolean;
+  // Optional: if parent controls submission state
+  setIsSubmitting?: (isSubmitting: boolean) => void;
+  // Optional: to let this component control parent's state
 }
 
 export function InitialConfigStep({ onConfigSaved, isSubmitting: parentIsSubmitting, setIsSubmitting: parentSetIsSubmitting }: InitialConfigStepProps) {
@@ -31,7 +34,8 @@ export function InitialConfigStep({ onConfigSaved, isSubmitting: parentIsSubmitt
     // mockLlmConfigsDb[newConfigId] = { ...data, id: newConfigId };
 
     toast.success(`Configuração LLM "${data.name}" salva com sucesso (simulado)!`);
-    onConfigSaved(data); // Notify parent that config is "saved"
+    // Notify parent that config is "saved"
+    onConfigSaved(data);
     setIsSubmitting(false);
   };
 
@@ -51,7 +55,7 @@ export function InitialConfigStep({ onConfigSaved, isSubmitting: parentIsSubmitt
       />
        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
         Você poderá adicionar mais provedores ou modificar esta configuração posteriormente
-        na seção de "Configurações" da aplicação.
+        na seção de &quot;Configurações&quot; da aplicação.
       </p>
     </div>
   );

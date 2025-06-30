@@ -1,12 +1,14 @@
 import { Loader2 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 
-import { ChatMessage, MessageItem } from './MessageItem'; // Assuming ChatMessage is also exported from MessageItem.tsx
+// Assuming ChatMessage is also exported from MessageItem.tsx
+import { ChatMessage, MessageItem } from './MessageItem';
 
 interface MessageListProps {
   messages: ChatMessage[];
   isLoading?: boolean;
-  currentUserId: string; // To determine if a message is from the current user
+  // To determine if a message is from the current user
+  currentUserId: string;
 }
 
 export function MessageList({ messages, isLoading, currentUserId }: MessageListProps) {
@@ -16,9 +18,11 @@ export function MessageList({ messages, isLoading, currentUserId }: MessageListP
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => { // Removed underscore from callback parameter
+  // Removed underscore from callback parameter
+  useEffect(() => {
     scrollToBottom();
-  }, [messages]); // Scroll to bottom when new messages arrive
+  // Scroll to bottom when new messages arrive
+  }, [messages]);
 
   // Pre-process messages to add `isContinuation` flag
   const processedMessages = messages.map((message, index, array) => {
@@ -50,7 +54,8 @@ export function MessageList({ messages, isLoading, currentUserId }: MessageListP
   }
 
   return (
-    <div className="flex-1 space-y-1 pr-1"> {/* Reduced space-y for tighter packing with continuations */}
+    // Reduced space-y for tighter packing with continuations
+    <div className="flex-1 space-y-1 pr-1">
       {processedMessages.map((message) => (
         <MessageItem
           key={message.id}
@@ -58,7 +63,8 @@ export function MessageList({ messages, isLoading, currentUserId }: MessageListP
           isCurrentUser={message.sender.id === currentUserId}
         />
       ))}
-      <div ref={messagesEndRef} /> {/* Anchor for scrolling to bottom */}
+      {/* Anchor for scrolling to bottom */}
+      <div ref={messagesEndRef} />
       {/* Optional: Show a "typing..." indicator here if isLoading is more granular */}
     </div>
   );
