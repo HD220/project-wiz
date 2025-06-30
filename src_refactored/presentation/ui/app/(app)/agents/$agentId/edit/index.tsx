@@ -3,16 +3,17 @@ import { ArrowLeft, Loader2, ServerCrash } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 
-// Internal - Shared
-import { IPC_CHANNELS } from '@/shared/ipc-channels';
-
 // Internal - Features, Hooks, Components (alphabetical within logical groups)
 import { AgentInstanceForm, AgentInstanceFormData } from '@/presentation/ui/features/agent/components/AgentInstanceForm';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useIpcMutation } from '@/presentation/ui/hooks/ipc/useIpcMutation';
 import { useIpcQuery } from '@/presentation/ui/hooks/ipc/useIpcQuery';
 
+// UI Components
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+// Internal - Shared
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
 // Type Imports
 import type {
   GetPersonaTemplatesListResponseData,

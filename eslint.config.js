@@ -7,6 +7,7 @@ import * as importPlugin from "eslint-plugin-import";
 import boundariesPlugin from "eslint-plugin-boundaries";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import reactPlugin from "eslint-plugin-react";
+import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 import globals from "globals";
 
 export default [
@@ -63,12 +64,14 @@ export default [
       boundaries: boundariesPlugin,
       "react-hooks": reactHooksPlugin,
       react: reactPlugin,
+      "jsx-a11y": jsxA11yPlugin,
     },
     rules: {
       ...js.configs.recommended.rules,
       ...tsPlugin.configs.recommended.rules,
       ...vitestPlugin.configs.recommended.rules,
       ...reactPlugin.configs.recommended.rules,
+      ...jsxA11yPlugin.configs.recommended.rules,
       "react/react-in-jsx-scope": "off", // Not needed with new JSX transform
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
@@ -234,6 +237,7 @@ export default [
       "max-statements": "off",
       "no-inline-comments": "off", // Also allow inline comments in shadcn/ui
       "@typescript-eslint/ban-ts-comment": "off", // Turn off ts-comment bans for shadcn/ui
+      "react/prop-types": "off" // Disable prop-types validation for ShadCN UI components
     }
   }
 ];

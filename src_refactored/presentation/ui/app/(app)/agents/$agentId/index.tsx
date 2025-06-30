@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
-
 import type { AgentInstance, GetAgentInstanceDetailsRequest, GetAgentInstanceDetailsResponseData } from '@/shared/ipc-types';
 
 // Kept statusDisplayMap as it's UI specific display logic

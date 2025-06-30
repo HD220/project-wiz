@@ -1,11 +1,13 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { MessageSquareText, Settings, UserCircle, Activity, Users, Bot as BotIcon } from 'lucide-react';
+import { createFileRoute } from '@tanstack/react-router';
+import { MessageSquareText, Users, Bot as BotIcon } from 'lucide-react';
 import React from 'react';
 
 // AvatarImage not used in this version
-import { Avatar, AvatarFallback } from '@/presentation/ui/components/ui/avatar';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
+// Link, Settings, UserCircle, Activity from lucide-react were unused
+// RecentActivityLink and ActivityLinkParams types were unused
+// import { Avatar, AvatarFallback } from '@/presentation/ui/components/ui/avatar';
+// import { Button } from '@/presentation/ui/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 
 // Mock data for quick stats or recent activity (can be expanded)
 const userStatsMock = {
@@ -17,44 +19,13 @@ const userStatsMock = {
   projectsInvolved: 3,
 };
 
-// Define a more specific type for Link 'to' props for type safety with TanStack Router
-type RecentActivityLink =
-  | '/user/dm/$conversationId'
-  | '/projects/$projectId'
-  | '/settings/llm'
-  | '/settings/appearance'
-  | '/settings/profile'
-  | '/settings';
-
-// Define a more specific type for the `params` prop of the Link component
-// This helps satisfy the `no-explicit-any` ESLint rule.
-// It's a union of possible parameter objects for the links in recentUserActivityMock.
-type ActivityLinkParams =
-  | { conversationId: string }
-  | { projectId: string }
-  // For links that don't have params like /settings/appearance
-  | undefined;
-
-const recentUserActivityMock: {id: string, text: string, time: string, type: string, linkTo: RecentActivityLink, icon: React.ElementType, params?: ActivityLinkParams}[] = [
-    {id: '1', text: "Nova mensagem de CoderBot-Alpha.", time: "5m atrás", type: "dm", linkTo: "/user/dm/$conversationId", params: {conversationId: 'agent001'}, icon: BotIcon},
-    {id: '2', text: "Alice (Designer) enviou uma nova mensagem.", time: "10m atrás", type: "dm", linkTo: "/user/dm/$conversationId", params: {conversationId: 'userAlice'}, icon: UserCircle},
-    // No params needed
-    {id: '3', text: "Você atualizou suas configurações de Aparência.", time: "3h atrás", type: "settings", linkTo: "/settings/appearance", icon: Settings},
-    {id: '4', text: "Nova atividade no Projeto Phoenix.", time: "1d atrás", type: "project", linkTo: "/projects/$projectId", params: {projectId: 'mockId1'}, icon: Activity},
-];
-
-function UserPageHeader() {
-  return (
-    <header className="mb-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
-        Sua Área Pessoal
-      </h1>
-      <p className="text-slate-600 dark:text-slate-400 mt-1">
-        Bem-vindo! Gerencie suas conversas diretas, acompanhe atividades e acesse suas configurações.
-      </p>
-    </header>
-  );
-}
+// const recentUserActivityMock: {id: string, text: string, time: string, type: string, linkTo: any, icon: React.ElementType, params?: any}[] = [
+//     {id: '1', text: "Nova mensagem de CoderBot-Alpha.", time: "5m atrás", type: "dm", linkTo: "/user/dm/$conversationId", params: {conversationId: 'agent001'}, icon: BotIcon},
+//     {id: '2', text: "Alice (Designer) enviou uma nova mensagem.", time: "10m atrás", type: "dm", linkTo: "/user/dm/$conversationId", params: {conversationId: 'userAlice'}, icon: UserCircle},
+//     // No params needed
+//     {id: '3', text: "Você atualizou suas configurações de Aparência.", time: "3h atrás", type: "settings", linkTo: "/settings/appearance", icon: Settings},
+//     {id: '4', text: "Nova atividade no Projeto Phoenix.", time: "1d atrás", type: "project", linkTo: "/projects/$projectId", params: {projectId: 'mockId1'}, icon: Activity},
+// ];
 
 function UserPageHeader() {
   return (
@@ -116,10 +87,10 @@ function UserIndexPage() {
       <UserPageHeader />
       <UserQuickStats />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <UserQuickAccess />
         <UserRecentActivity />
-      </div>
+      </div> */}
 
       <div className="mt-12 text-center">
         <p className="text-sm text-slate-500 dark:text-slate-400">

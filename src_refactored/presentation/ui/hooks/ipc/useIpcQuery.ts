@@ -24,7 +24,8 @@ export function useIpcQuery<TResponse, TRequest = undefined>(
   options: { enabled?: boolean } = { enabled: true }
 ): IpcQueryState<TResponse> {
   const [data, setData] = useState<TResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(options.enabled || false); // Start loading if enabled
+  // Start loading if enabled
+  const [isLoading, setIsLoading] = useState<boolean>(options.enabled || false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -52,17 +53,20 @@ export function useIpcQuery<TResponse, TRequest = undefined>(
       } else {
         setError(new Error(String(err || 'An unknown error occurred')));
       }
-      setData(null); // Clear data on error
+      // Clear data on error
+      setData(null);
     } finally {
       setIsLoading(false);
     }
-  }, [channel, params]); // `params` are part of dependencies to refetch if they change
+  // `params` are part of dependencies to refetch if they change
+  }, [channel, params]);
 
   useEffect(() => {
     if (options.enabled) {
       fetchData();
     }
-  }, [fetchData, options.enabled]); // Rerun if fetchData (channel/params) or enabled status changes
+  // Rerun if fetchData (channel/params) or enabled status changes
+  }, [fetchData, options.enabled]);
 
   const refetch = useCallback(() => {
     fetchData();

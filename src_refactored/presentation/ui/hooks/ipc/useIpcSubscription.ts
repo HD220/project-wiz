@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore, useMemo } from 'react';
 import { toast } from 'sonner';
 
 interface IpcSubscriptionOptions<InitialData, EventPayload> {
   getSnapshot: (prevData: InitialData | null, eventPayload: EventPayload) => InitialData | null;
   onError?: (error: Error) => void;
   initialData?: InitialData | null;
-  enabled?: boolean; // To enable/disable the subscription
+  // To enable/disable the subscription
+  enabled?: boolean;
 }
 
 // Helper hook for initial data fetching
@@ -16,13 +17,19 @@ function useInitialIpcData<Args, InitialData>(
   providedInitialData: InitialData | null = null,
   enabled: boolean = true
 ) {
-  const [isLoading, setIsLoading] = useState(enabled); // Only load if enabled
+  // Only load if enabled
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
   const [dataStore, setDataStore] = useState<{ data: InitialData | null }>({ data: providedInitialData });
 
+  // Memoize fetchArgs to prevent unnecessary re-renders if it's an object/array
+  // const fetchArgsString = JSON.stringify(fetchArgs); // Original attempt
+  const memoizedFetchArgs = useMemo(() => fetchArgs, [fetchArgs]);
+
   useEffect(() => {
     if (!enabled) {
-      setIsLoading(false); // If not enabled, set loading to false and don't fetch
+      // If not enabled, set loading to false and don't fetch
+      setIsLoading(false);
       // Reset data if it was previously fetched and now disabled? Optional.
       // setDataStore({ data: providedInitialData });
       return;
@@ -36,11 +43,12 @@ function useInitialIpcData<Args, InitialData>(
       const errMsg = 'Electron IPC bridge not found.';
       setError(new Error(errMsg));
       setIsLoading(false);
+      // else toast.error(errMsg);
       if (optionsOnError) optionsOnError(new Error(errMsg)); else toast.error(errMsg);
       return;
     }
 
-    window.electronIPC.invoke(fetchChannel, fetchArgs)
+    window.electronIPC.invoke(fetchChannel, memoizedFetchArgs)
       .then(response => {
         if (!isMounted) return;
         if (response.success) {
@@ -61,7 +69,7 @@ function useInitialIpcData<Args, InitialData>(
       });
 
     return () => { isMounted = false; };
-  }, [fetchChannel, JSON.stringify(fetchArgs), optionsOnError, enabled, providedInitialData]);
+  }, [fetchChannel, memoizedFetchArgs, optionsOnError, enabled, providedInitialData]);
 
   return { isLoading, error, dataStore, setDataStore };
 }
@@ -78,25 +86,31 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
   const {
     isLoading: initialLoading,
     error: initialError,
-    dataStore: store, // store from initial fetch will be the base for subscription
-    setDataStore: setStore // setStore will be used by the subscription handler
+    // store from initial fetch will be the base for subscription
+    dataStore: store,
+    // setStore will be used by the subscription handler
+    setDataStore: setStore
   } = useInitialIpcData(initialFetchChannel, initialFetchArgs, optionsOnError, providedInitialData, enabled);
 
   // Subscription logic for useSyncExternalStore
   const subscribe = useCallback((onStoreChange: () => void) => {
     if (!enabled || !window.electronIPC) {
+        // Warn if IPC is not available but was expected (enabled)
         if (!window.electronIPC && enabled) console.warn('IPC bridge not available for subscription.');
         return () => {};
     }
+    // This check is somewhat redundant due to the one above, but kept for clarity.
     if (!window.electronIPC) {
         console.warn('IPC bridge not available for subscription in useIpcSubscription.');
-        return () => {}; // No-op unsubscribe
+        // No-op unsubscribe
+        return () => {};
     }
 
     const handler = (eventPayload: EventPayload) => {
       console.log(`useIpcSubscription: Event received on ${eventChannel}:`, eventPayload);
       setStore(prevStore => ({ data: getSnapshot(prevStore.data, eventPayload) }));
-      onStoreChange(); // Notify useSyncExternalStore of the change
+      // Notify useSyncExternalStore of the change
+      onStoreChange();
     };
 
     console.log(`useIpcSubscription: Subscribing to ${eventChannel}`);
@@ -104,13 +118,15 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
 
     return () => {
       console.log(`useIpcSubscription: Unsubscribing from ${eventChannel}`);
-      if (unsubscribeFn) { // It might be null if window.electronIPC.on is not fully implemented or returns void
+      // It might be null if window.electronIPC.on is not fully implemented or returns void
+      if (unsubscribeFn) {
         unsubscribeFn();
-      } else if (window.electronIPC.off) { // Fallback if `on` doesn't return unsubscribe but `off` exists
+      // Fallback if `on` doesn't return unsubscribe but `off` exists
+      } else if (window.electronIPC.off) {
         window.electronIPC.off(eventChannel, handler);
       }
     };
-  }, [eventChannel, getSnapshot]);
+  }, [eventChannel, getSnapshot, enabled, setStore]);
 
   // Getter for useSyncExternalStore
   const getStoreSnapshot = useCallback(() => store.data, [store]);

@@ -54,8 +54,9 @@ export interface IElectronIPC {
  */
 declare global {
   interface Window {
-    electronIPC?: IElectronIPC; // Or 'api', 'coreAPI', etc. Matching the preload script.
-                                // Using 'electronIPC' as a placeholder name for the refactored version.
+    // Or 'api', 'coreAPI', etc. Matching the preload script.
+    // Using 'electronIPC' as a placeholder name for the refactored version.
+    electronIPC?: IElectronIPC;
   }
 }
 
@@ -70,7 +71,8 @@ declare global {
 // }
 
 // Placeholder for IPC result structure, can be expanded.
-export interface IPCResult<T = unknown> { // Default T to unknown
+// Default T to unknown
+export interface IPCResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: {

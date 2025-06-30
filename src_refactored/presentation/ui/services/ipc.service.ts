@@ -7,7 +7,8 @@ import {
   ChatStreamTokenPayload,
   ChatStreamEndPayload,
 } from '@/shared/ipc-chat.types';
-import { ProjectListItem } from '@/shared/ipc-project.types'; // Assuming this file and type exist
+// Assuming this file and type exist
+import { ProjectListItem } from '@/shared/ipc-project.types';
 
 import { IElectronIPC, IPCResult } from './ipc.types';
 
@@ -41,7 +42,8 @@ class IPCService {
       console.warn(`[MockIPC] Invoke: '${channel}' with args:`, args);
       if (channel === IPCChannel.CHAT_SEND_MESSAGE) {
         // Simulate sending message, no specific data needed for void promise
-        return undefined as unknown as T; // Use unknown
+        // Use unknown
+        return undefined as unknown as T;
       }
       // For other channels, you might want to return specific mock data based on the channel
       // For example: if (channel === 'app:get-version') return { version: 'mock-0.1.0' } as unknown as T;
@@ -70,7 +72,8 @@ class IPCService {
       invoke: mockInvoke,
       on: mockOn,
       send: mockSend,
-      removeListener: (channel: string, listener: (...args: unknown[]) => void) => { // listener args to unknown[]
+      // listener args to unknown[]
+      removeListener: (channel: string, listener: (...args: unknown[]) => void) => {
         console.warn(`[MockIPC] removeListener called for '${channel}'`, listener);
       },
       removeAllListeners: (channel: string) => {
@@ -79,9 +82,11 @@ class IPCService {
     };
   }
 
-  public async invoke<TData = unknown>( // Default TData to unknown
+  // Default TData to unknown
+  public async invoke<TData = unknown>(
     channel: string,
-    ...args: unknown[] // Args to unknown[]
+    // Args to unknown[]
+    ...args: unknown[]
   ): Promise<IPCResult<TData>> {
     if (!this.api) {
       return { success: false, error: { message: 'IPC API not available' } };
@@ -90,9 +95,11 @@ class IPCService {
       // Assuming this.api.invoke is correctly typed or we trust its behavior
       const result = await this.api.invoke<TData>(channel, ...args);
       return { success: true, data: result };
-    } catch (error: unknown) { // Catch error as unknown
+    } catch (error: unknown) {
+      // Catch error as unknown
       console.error(`[IPCService] Error invoking channel '${channel}':`, error);
-      const typedError = error as Error; // Type assertion
+      // Type assertion
+      const typedError = error as Error;
       return {
         success: false,
         error: {
@@ -104,10 +111,12 @@ class IPCService {
     }
   }
 
-  public on(channel: string, listener: (...args: unknown[]) => void): () => void { // listener args to unknown[]
+  // listener args to unknown[]
+  public on(channel: string, listener: (...args: unknown[]) => void): () => void {
     if (!this.api || !this.api.on) {
       console.error('[IPCService] API not initialized for on.');
-      return () => { /* no-op */ };
+      // no-op
+      return () => {};
     }
     // The type of listener in IElectronIPC is `(...args: any[]) => void`.
     // Casting our more specific `(...args: unknown[]) => void` to `any` here is acceptable
@@ -117,7 +126,8 @@ class IPCService {
     return this.api.on(channel, listener as (...args: any[]) => void);
   }
 
-  public send(channel: string, ...args: unknown[]): void { // Args to unknown[]
+  // Args to unknown[]
+  public send(channel: string, ...args: unknown[]): void {
     if (!this.api || !this.api.send) {
       console.error('[IPCService] API not initialized for send.');
       return;

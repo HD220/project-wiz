@@ -27,9 +27,9 @@ function ProjectNavLink({ to, basePath, children, icon: iconProp }: ProjectNavLi
   const fullPath = `${basePath}${to.startsWith('/') ? to : `/${to}`}`;
   return (
     <Link
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // Cast to any for dynamically constructed paths in this mock setup
-      to={fullPath as any}
+      // Cast to string for dynamically constructed paths.
+      // Consider using a more specific type if possible, or ensure paths are validated.
+      to={fullPath as string}
       className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50' }}
     >
