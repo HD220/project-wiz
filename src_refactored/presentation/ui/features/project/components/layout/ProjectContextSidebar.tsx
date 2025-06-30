@@ -1,4 +1,4 @@
-import { Link, useParams } from '@tanstack/react-router'; // Removed useRouter as it's not used here
+import { Link } from '@tanstack/react-router'; // Removed useParams and useRouter as they are not used here
 import { BarChart2, MessageSquareText, BookText, Settings2, Users, ChevronDown, Hash, PlusCircle } from 'lucide-react';
 import React from 'react';
 // Added Hash and PlusCircle to imports, removed GripVertical as it's not used
@@ -34,7 +34,7 @@ interface ProjectSectionLinkProps {
   // isActive prop removed as Link component handles active state
 }
 
-function ProjectSectionLink({ to, label, icon: IconElement, projectId }: ProjectSectionLinkProps) { // Renamed icon to IconElement
+function ProjectSectionLink({ to, label, icon: iconComponent, projectId }: ProjectSectionLinkProps) { // Renamed icon to iconComponent for convention
   return (
     <Link
       to={to}
@@ -49,7 +49,7 @@ function ProjectSectionLink({ to, label, icon: IconElement, projectId }: Project
         className: "!bg-sky-100 dark:!bg-sky-700/60 !text-sky-700 dark:!text-sky-200 font-medium"
       }}
     >
-      <IconElement className="h-4 w-4 flex-shrink-0" /> {/* Ensure icon is flex-shrink-0 if space is tight */}
+      {iconComponent && React.createElement(iconComponent, { className: "h-4 w-4 flex-shrink-0" })} {/* Ensure icon is flex-shrink-0 if space is tight */}
       <span className="truncate">{label}</span>
     </Link>
   );

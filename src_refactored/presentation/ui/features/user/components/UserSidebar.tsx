@@ -1,33 +1,33 @@
 import { Link } from '@tanstack/react-router';
-import { User, MessageSquare, Settings, Plus, Users, Search } from 'lucide-react'; // Added Users, Search, Plus
+import { MessageSquare, Settings, Plus, Users, Search } from 'lucide-react'; // Removed User import
 import React from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
+// Separator import removed
 
 
 // Helper for NavLink
 interface UserNavLinkProps {
   to: string;
   children: React.ReactNode;
-  icon?: React.ElementType;
+  icon?: React.ElementType; // Prop name changed from 'Icon' to 'icon'
   // Add other props like exact if needed for active state matching
 }
 
-function UserNavLink({ to, children, icon: Icon }: UserNavLinkProps) {
+function UserNavLink({ to, children, icon: iconComponent }: UserNavLinkProps) { // Parameter name changed for convention
   // Assuming user-specific routes might be prefixed, e.g., /user/profile
   // For now, direct paths as passed.
   const fullPath = to.startsWith('/') ? to : `/user/${to}`;
 
   return (
     <Link
-      to={fullPath as any}
+      to={fullPath} // Removed 'as any'
       className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50 font-semibold' }}
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {iconComponent && React.createElement(iconComponent, { className: "h-4 w-4" })}
       <span>{children}</span>
     </Link>
   );
@@ -43,7 +43,7 @@ interface DirectMessageItemProps {
 
 function DirectMessageItem({ id, name, avatarUrl, status = 'offline', isActive }: DirectMessageItemProps) {
     const basePath = '/user/dms'; // Placeholder base path for DMs
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    const initials = name.split(' ').map(namePart => namePart[0]).join('').substring(0,2).toUpperCase();
     return (
         <Link
             to={`${basePath}/${id}`}
@@ -122,7 +122,7 @@ export function UserSidebar({ className }: UserSidebarProps) {
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-            <AvatarFallback>{currentUser.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{currentUser.name.split(' ').map(namePart => namePart[0]).join('').substring(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1 truncate">
             <p className="text-sm font-medium truncate">{currentUser.name}</p>

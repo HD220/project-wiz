@@ -1,28 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from '@tanstack/react-router';
 import React from 'react';
+// Control removed as it's now in field components
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Button } from '@/presentation/ui/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
+// Other Form components are used by fields
+import { Form } from '@/presentation/ui/components/ui/form';
 import { useIpcMutation } from '@/presentation/ui/hooks/ipc/useIpcMutation';
 
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
 import type { CreateProjectRequest, CreateProjectResponse, Project, UpdateProjectRequest, UpdateProjectResponse } from '@/shared/ipc-types';
 
-// Esquema de validação com Zod
+import { ProjectDescriptionField } from './fields/ProjectDescriptionField';
+import { ProjectNameField } from './fields/ProjectNameField';
+
 const projectFormSchema = z.object({
   name: z.string()
     .min(3, 'O nome do projeto deve ter pelo menos 3 caracteres.')
@@ -30,15 +24,14 @@ const projectFormSchema = z.object({
   description: z.string()
     .max(500, 'A descrição não pode exceder 500 caracteres.')
     .optional()
-    .transform(val => val === '' ? undefined : val), // Ensure empty string becomes undefined
-  // Adicionar mais campos conforme necessário (ex: template, repositório Git inicial)
+    .transform(val => val === '' ? undefined : val),
 });
 
 export type ProjectFormData = z.infer<typeof projectFormSchema>;
 
 interface ProjectFormProps {
-  project?: Project; // Pass existing project for editing
-  onSuccess?: (data: Project) => void; // Optional: callback on successful submission
+  project?: Project;
+  onSuccess?: (data: Project) => void;
 }
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
@@ -62,7 +55,7 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
           onSuccess?.(response.data);
           router.navigate({ to: '/projects/$projectId', params: { projectId: response.data.id } });
         } else {
-          toast.error(response.error || 'Falha ao criar o projeto.');
+          toast.error(response.error?.message || 'Falha ao criar o projeto.');
         }
       },
       onError: (error) => {
@@ -78,10 +71,9 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
         if (response.success && response.data) {
           toast.success(`Projeto "${response.data.name}" atualizado com sucesso!`);
           onSuccess?.(response.data);
-          // Optionally, refresh data or navigate
-          router.invalidate(); // Invalidate current route data to refetch if on detail page
+          router.invalidate();
         } else {
-          toast.error(response.error || 'Falha ao atualizar o projeto.');
+          toast.error(response.error?.message || 'Falha ao atualizar o projeto.');
         }
       },
       onError: (error) => {
@@ -105,49 +97,10 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Projeto</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Minha Nova Aplicação Web" {...field} />
-              </FormControl>
-              <FormDescription>
-                O nome principal do seu projeto. Seja claro e conciso.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <ProjectNameField control={form.control} />
+        <ProjectDescriptionField control={form.control} />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição do Projeto (Opcional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descreva brevemente o objetivo e o escopo deste projeto..."
-                  className="resize-y min-h-[100px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Um resumo do que se trata o projeto.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Futuros campos podem ser adicionados aqui, como:
-            - Seleção de template de projeto
-            - URL de repositório Git existente
-            - Configurações de visibilidade
-        */}
+        {/* Futuros campos podem ser adicionados aqui */}
 
         <div className="flex justify-end pt-2">
           <Button type="submit" disabled={isSubmitting || (isEditing && !form.formState.isDirty) }>

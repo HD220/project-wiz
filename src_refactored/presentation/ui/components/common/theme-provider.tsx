@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'light' | 'dark' | 'system'; // Added 'system' as a valid theme type
+// Added 'system' as a valid theme type
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeProviderState {
-  theme: Theme; // This will store 'light' or 'dark' after resolving 'system'
+  // This will store 'light' or 'dark' after resolving 'system'
+  theme: Theme;
   setTheme: (theme: Theme) => void;
 }
 

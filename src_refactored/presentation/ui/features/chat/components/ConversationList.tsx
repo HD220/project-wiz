@@ -1,9 +1,11 @@
-import { Bot, Hash, UserCircle2, PlusCircle } from 'lucide-react'; // UserCircle2 for generic user, PlusCircle for new chat
+// UserCircle2 for generic user, PlusCircle for new chat
+import { Bot, Hash, UserCircle2, PlusCircle } from 'lucide-react';
 import React from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { Button } from '@/presentation/ui/components/ui/button';
-import { Input } from '@/presentation/ui/components/ui/input'; // For potential search within conversations
+// For potential search within conversations
+import { Input } from '@/presentation/ui/components/ui/input';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
 import { cn } from '@/presentation/ui/lib/utils';
 
@@ -11,19 +13,22 @@ import { cn } from '@/presentation/ui/lib/utils';
 export interface ConversationItem {
   id: string;
   name: string;
-  type: 'dm' | 'channel' | 'agent'; // Added 'agent' type for clarity
+  // Added 'agent' type for clarity
+  type: 'dm' | 'channel' | 'agent';
   avatarUrl?: string;
   lastMessage?: string;
   timestamp?: string;
   unreadCount?: number;
-  isActive?: boolean; // To highlight the selected conversation
+  // To highlight the selected conversation
+  isActive?: boolean;
 }
 
 interface ConversationListProps {
   conversations: ConversationItem[];
   selectedConversationId: string | null;
   onSelectConversation: (conversationId: string) => void;
-  onNewConversation?: () => void; // Optional: Handler for starting a new chat/conversation
+  // Optional: Handler for starting a new chat/conversation
+  onNewConversation?: () => void;
   // Placeholder for search functionality state if managed outside
   // searchTerm?: string;
   // onSearchTermChange?: (term: string) => void;
@@ -60,8 +65,9 @@ export function ConversationList({
           onChange={(event) => setInternalSearchTerm(event.target.value)}
         />
       </header>
+      {/* Reduced space-y for tighter packing */}
       <ScrollArea className="flex-1">
-        <nav className="p-2 space-y-0.5"> {/* Reduced space-y for tighter packing */}
+        <nav className="p-2 space-y-0.5">
           {filteredConversations.length > 0 ? (
             filteredConversations.map(conv => (
               <button
@@ -84,7 +90,8 @@ export function ConversationList({
                      "text-white",
                      conv.type === 'agent' ? "bg-emerald-500" :
                      conv.type === 'dm' ? "bg-purple-500" :
-                     "bg-slate-400 dark:bg-slate-600" // Channel or default
+                     // Channel or default
+                     "bg-slate-400 dark:bg-slate-600"
                   )}>
                     {conv.type === 'channel' ? <Hash size={14} /> :
                      conv.type === 'agent' ? <Bot size={14} /> :

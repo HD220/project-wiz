@@ -2,8 +2,10 @@ import { Link, LinkProps } from '@tanstack/react-router';
 import { Home, PlusCircle, Archive, Briefcase, Settings, LogOut, LucideIcon } from 'lucide-react';
 import React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar'; // Added Avatar components
-import { Button, buttonVariants } from '@/presentation/ui/components/ui/button'; // Added buttonVariants
+// Added Avatar components
+import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
+// Added buttonVariants
+import { Button, buttonVariants } from '@/presentation/ui/components/ui/button';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
 import { Separator } from '@/presentation/ui/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/ui/components/ui/tooltip';
@@ -13,10 +15,13 @@ import { cn } from '@/presentation/ui/lib/utils';
 interface AppSidebarItemProps extends Omit<LinkProps, 'children' | 'title'> {
   tooltip: string;
   icon: LucideIcon;
-  isAvatar?: boolean; // Para itens de projeto que podem usar Avatar
+  // Para itens de projeto que podem usar Avatar
+  isAvatar?: boolean;
   avatarSrc?: string;
-  avatarFallback: string; // Obrigatório para consistência
-  action?: () => void; // Para botões que não são links
+  // Obrigatório para consistência
+  avatarFallback: string;
+  // Para botões que não são links
+  action?: () => void;
   className?: string;
 }
 
@@ -30,7 +35,8 @@ function AppSidebarItem({
   className,
   ...linkProps
 }: AppSidebarItemProps) {
-  const IconComponent = iconProp; // Alias for JSX
+  // Alias for JSX
+  const IconComponent = iconProp;
   const content = isAvatar ? (
     <Avatar className="h-9 w-9 text-sm">
       {avatarSrc && <AvatarImage src={avatarSrc} alt={tooltip} />}
@@ -43,12 +49,16 @@ function AppSidebarItem({
   );
 
   const commonButtonClasses = cn(
-    buttonVariants({ variant: 'ghost', size: 'icon' }), // Usar 'ghost' para melhor adaptação à sidebar fina
-    "h-12 w-12 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700", // Estilo base
-    className // Permite override de classes
+    // Usar 'ghost' para melhor adaptação à sidebar fina
+    buttonVariants({ variant: 'ghost', size: 'icon' }),
+    // Estilo base
+    "h-12 w-12 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700",
+    // Permite override de classes
+    className
   );
 
-  const activeLinkClasses = "!bg-sky-600 text-white dark:!bg-sky-500"; // Estilo para link ativo
+  // Estilo para link ativo
+  const activeLinkClasses = "!bg-sky-600 text-white dark:!bg-sky-500";
 
   return (
     <TooltipProvider delayDuration={100}>
@@ -98,8 +108,9 @@ export function AppSidebar() {
     <aside className="w-16 flex-shrink-0 h-screen flex flex-col items-center gap-2 py-3 bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
       {/* Botão Inicial/Home */}
       <AppSidebarItem
-        to={userHomeRoute} // Atualizado para /user/
-        tooltip="Área do Usuário / DMs" // Tooltip atualizado
+        // Tooltip atualizado
+        to={userHomeRoute}
+        tooltip="Área do Usuário / DMs"
         icon={Home}
         avatarFallback="U"
       />
@@ -110,14 +121,18 @@ export function AppSidebar() {
       <AppSidebarItem
         tooltip="Adicionar Novo Projeto"
         icon={PlusCircle}
-        to="/projects/new" // Link direto para a página de novo projeto
-        avatarFallback="+" // Não usado
+        // Link direto para a página de novo projeto
+        to="/projects/new"
+        // Não usado
+        avatarFallback="+"
       />
       <AppSidebarItem
         tooltip="Projetos Arquivados"
         icon={Archive}
-        to="/projects/archived" // Rota placeholder
-        avatarFallback="A" // Não usado
+        // Rota placeholder
+        to="/projects/archived"
+        // Não usado
+        avatarFallback="A"
       />
 
       <Separator className="my-1 w-3/4" />
@@ -131,8 +146,10 @@ export function AppSidebar() {
               to="/projects/$projectId"
               params={{ projectId: project.id }}
               tooltip={project.name}
-              icon={Briefcase} // Ícone padrão se não for avatar
-              isAvatar={true} // Usar Avatar para projetos
+              // Ícone padrão se não for avatar
+              icon={Briefcase}
+              // Usar Avatar para projetos
+              isAvatar={true}
               avatarSrc={project.iconUrl}
               avatarFallback={project.initials}
             />
@@ -148,13 +165,16 @@ export function AppSidebar() {
             to="/settings"
             tooltip="Configurações"
             icon={Settings}
-            avatarFallback="S" // Não usado
+            // Não usado
+            avatarFallback="S"
         />
         <AppSidebarItem
             tooltip="Sair (Logout)"
             icon={LogOut}
-            action={() => { console.log("Logout action triggered (simulated)"); alert("Logout (simulado)"); }} // Ação simulada
-            avatarFallback="L" // Não usado
+            // Ação simulada
+            action={() => { console.log("Logout action triggered (simulated)"); alert("Logout (simulado)"); }}
+            // Não usado
+            avatarFallback="L"
         />
       </div>
     </aside>

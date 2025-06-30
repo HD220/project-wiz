@@ -1,11 +1,71 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
-import {toast} from 'sonner'; // Assuming sonner is used project-wide for toasts
+import { toast } from 'sonner';
 
 interface IpcSubscriptionOptions<InitialData, EventPayload> {
   getSnapshot: (prevData: InitialData | null, eventPayload: EventPayload) => InitialData | null;
   onError?: (error: Error) => void;
-  initialData?: InitialData | null; // Optional initial data before first fetch
+  initialData?: InitialData | null;
+  enabled?: boolean; // To enable/disable the subscription
 }
+
+// Helper hook for initial data fetching
+function useInitialIpcData<Args, InitialData>(
+  fetchChannel: string,
+  fetchArgs: Args,
+  optionsOnError?: (error: Error) => void,
+  providedInitialData: InitialData | null = null,
+  enabled: boolean = true
+) {
+  const [isLoading, setIsLoading] = useState(enabled); // Only load if enabled
+  const [error, setError] = useState<Error | null>(null);
+  const [dataStore, setDataStore] = useState<{ data: InitialData | null }>({ data: providedInitialData });
+
+  useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false); // If not enabled, set loading to false and don't fetch
+      // Reset data if it was previously fetched and now disabled? Optional.
+      // setDataStore({ data: providedInitialData });
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoading(true);
+    setError(null);
+
+    if (!window.electronIPC) {
+      const errMsg = 'Electron IPC bridge not found.';
+      setError(new Error(errMsg));
+      setIsLoading(false);
+      if (optionsOnError) optionsOnError(new Error(errMsg)); else toast.error(errMsg);
+      return;
+    }
+
+    window.electronIPC.invoke(fetchChannel, fetchArgs)
+      .then(response => {
+        if (!isMounted) return;
+        if (response.success) {
+          setDataStore({ data: response.data as InitialData });
+        } else {
+          const err = new Error(response.error?.message || `Failed to fetch initial data from ${fetchChannel}`);
+          setError(err);
+          if (optionsOnError) optionsOnError(err); else toast.error(err.message);
+        }
+      })
+      .catch(err => {
+        if (!isMounted) return;
+        setError(err);
+        if (optionsOnError) optionsOnError(err); else toast.error(err.message);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, [fetchChannel, JSON.stringify(fetchArgs), optionsOnError, enabled, providedInitialData]);
+
+  return { isLoading, error, dataStore, setDataStore };
+}
+
 
 export function useIpcSubscription<Args, InitialData, EventPayload>(
   initialFetchChannel: string,
@@ -13,63 +73,21 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
   eventChannel: string,
   options: IpcSubscriptionOptions<InitialData, EventPayload>
 ) {
-  const { getSnapshot, onError: optionsOnError, initialData: providedInitialData = null } = options;
+  const { getSnapshot, onError: optionsOnError, initialData: providedInitialData = null, enabled = true } = options;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  // Store for useSyncExternalStore
-  // Holds the actual data being subscribed to
-  const [store, setStore] = useState<{ data: InitialData | null }>({ data: providedInitialData });
-
-  // Fetch initial data
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-    setError(null);
-
-    if (!window.electronIPC) {
-      const errMsg = 'Electron IPC bridge not found on window object. Ensure preload script is configured correctly.';
-      console.error(errMsg);
-      setError(new Error(errMsg));
-      setIsLoading(false);
-      if(optionsOnError) optionsOnError(new Error(errMsg)); else toast.error(errMsg);
-      return;
-    }
-
-    console.log(`useIpcSubscription: Invoking ${initialFetchChannel} with args:`, initialFetchArgs);
-    window.electronIPC.invoke(initialFetchChannel, initialFetchArgs)
-      .then(response => {
-        if (!isMounted) return;
-        console.log(`useIpcSubscription: Response from ${initialFetchChannel}:`, response);
-        if (response.success) {
-          setStore({ data: response.data as InitialData });
-        } else {
-          const err = new Error(response.error?.message || `Failed to fetch initial data from ${initialFetchChannel}`);
-          console.error(`Error fetching initial data from ${initialFetchChannel}:`, response.error);
-          setError(err);
-          if(optionsOnError) optionsOnError(err); else toast.error(err.message);
-        }
-      })
-      .catch(err => {
-        if (!isMounted) return;
-        console.error(`Catch: Error fetching initial data from ${initialFetchChannel}:`, err);
-        setError(err);
-        if(optionsOnError) optionsOnError(err); else toast.error(err.message);
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [initialFetchChannel, JSON.stringify(initialFetchArgs), optionsOnError]); // Stringify args for dependency array
+  const {
+    isLoading: initialLoading,
+    error: initialError,
+    dataStore: store, // store from initial fetch will be the base for subscription
+    setDataStore: setStore // setStore will be used by the subscription handler
+  } = useInitialIpcData(initialFetchChannel, initialFetchArgs, optionsOnError, providedInitialData, enabled);
 
   // Subscription logic for useSyncExternalStore
   const subscribe = useCallback((onStoreChange: () => void) => {
+    if (!enabled || !window.electronIPC) {
+        if (!window.electronIPC && enabled) console.warn('IPC bridge not available for subscription.');
+        return () => {};
+    }
     if (!window.electronIPC) {
         console.warn('IPC bridge not available for subscription in useIpcSubscription.');
         return () => {}; // No-op unsubscribe
@@ -100,5 +118,6 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
   // useSyncExternalStore to manage the data from the event channel
   const data = useSyncExternalStore(subscribe, getStoreSnapshot, getStoreSnapshot);
 
-  return { data, isLoading, error };
+  // The main hook's isLoading and error now correctly come from the initial data fetch.
+  return { data, isLoading: initialLoading, error: initialError };
 }

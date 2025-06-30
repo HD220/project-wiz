@@ -13,7 +13,7 @@ interface SettingsSectionProps {
   disabled?: boolean;
 }
 
-function SettingsSectionLink({ to, icon: IconComponent, title, description, disabled }: SettingsSectionProps) {
+function SettingsSectionLink({ to, icon: iconProp, title, description, disabled }: SettingsSectionProps) { // Renamed icon prop to satisfy convention
   const content = (
     <div className={`flex items-start space-x-4 p-4 rounded-lg transition-colors ${
       disabled
@@ -21,7 +21,7 @@ function SettingsSectionLink({ to, icon: IconComponent, title, description, disa
         : 'hover:bg-slate-100 dark:hover:bg-slate-800/50'
     }`}>
       <div className={`mt-1 p-2 rounded-md ${disabled ? 'bg-slate-200 dark:bg-slate-700' : 'bg-slate-100 dark:bg-slate-800'}`}>
-        <IconComponent className={`h-6 w-6 ${disabled ? 'text-slate-400 dark:text-slate-500' : 'text-slate-600 dark:text-slate-300'}`} />
+        {iconProp && React.createElement(iconProp, { className: `h-6 w-6 ${disabled ? 'text-slate-400 dark:text-slate-500' : 'text-slate-600 dark:text-slate-300'}` })}
       </div>
       <div>
         <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h3>

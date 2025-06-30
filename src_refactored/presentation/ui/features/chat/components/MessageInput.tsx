@@ -1,22 +1,28 @@
-import { Paperclip, Send, CornerDownLeft } from 'lucide-react';
+import { SendHorizontal, Paperclip, CornerDownLeft } from 'lucide-react';
+// KeyboardEvent type from React namespace is used below (React.KeyboardEvent)
 import React, { useState, useRef, useEffect } from 'react';
 
 import { Button } from '@/presentation/ui/components/ui/button';
-import { Textarea } from '@/presentation/ui/components/ui/textarea'; // Usando Textarea para multi-linha
+import { Textarea } from '@/presentation/ui/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/ui/components/ui/tooltip';
+import { cn } from '@/presentation/ui/lib/utils';
 
-interface MessageInputProps {
-  onSendMessage: (content: string) => void;
+export interface MessageInputProps {
+  onSubmit: (message: string) => void;
   isLoading?: boolean;
   placeholder?: string;
+  className?: string;
+  initialValue?: string;
 }
 
 export function MessageInput({
-  onSendMessage,
+  onSubmit,
   isLoading = false,
-  placeholder = "Digite sua mensagem ou use / para comandos..."
+  placeholder = "Digite sua mensagem ou use / para comandos...",
+  className,
+  initialValue = '',
 }: MessageInputProps) {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -26,15 +32,14 @@ export function MessageInput({
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'; // Reset height
+      textareaRef.current.style.height = 'auto';
       const scrollHeight = textareaRef.current.scrollHeight;
-      // Max height for textarea, e.g., 5 lines of text (approx 20px per line for base font size)
-      const maxHeight = 5 * 24; // Assuming line-height or effective line height is around 24px
+      // Max height for textarea, e.g., 5 lines of text
+      const maxHeight = 5 * 24;
       textareaRef.current.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
     }
   };
 
-  // Adjust height on initial render and when inputValue changes (e.g. pasting multi-line text)
   useEffect(() => {
     adjustTextareaHeight();
   }, [inputValue]);
@@ -43,9 +48,8 @@ export function MessageInput({
   const handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
     if (inputValue.trim()) {
-      onSendMessage(inputValue.trim());
+      onSubmit(inputValue.trim());
       setInputValue('');
-      // After sending, reset height, browser might not do it if content is cleared programmatically
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
@@ -57,11 +61,10 @@ export function MessageInput({
       event.preventDefault();
       handleSubmit();
     }
-    // Allow Shift+Enter for new line, which Textarea handles by default
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2 p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+    <form onSubmit={handleSubmit} className={cn("flex items-end gap-2 p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50", className)}>
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -82,7 +85,7 @@ export function MessageInput({
         value={inputValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        rows={1} // Start with a single row
+        rows={1}
         className="flex-1 resize-none overflow-y-auto bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 focus-visible:ring-1 focus-visible:ring-sky-500 focus-visible:ring-offset-0"
         disabled={isLoading}
       />
@@ -90,7 +93,7 @@ export function MessageInput({
         <Tooltip>
           <TooltipTrigger asChild>
              <Button type="submit" size="icon" disabled={isLoading || !inputValue.trim()} className="flex-shrink-0">
-                <Send className="h-5 w-5" />
+                <SendHorizontal className="h-5 w-5" />
                 <span className="sr-only">Enviar</span>
               </Button>
           </TooltipTrigger>

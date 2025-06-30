@@ -1,9 +1,11 @@
-import { Info, Bot, Hash, MessageSquare } from 'lucide-react'; // Paperclip and Send are now in MessageInput
+// Paperclip and Send are now in MessageInput
+import { Info, Bot, Hash, MessageSquare } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@/ui/components/ui/button';
+import { Button } from '@/presentation/ui/components/ui/button';
 
-import { MessageInput } from './MessageInput'; // Import MessageInput
+// Import MessageInput
+import { MessageInput } from './MessageInput';
 import { ChatMessage } from './MessageItem';
 import { MessageList } from './MessageList';
 
@@ -13,19 +15,23 @@ interface Conversation {
   name: string;
   type: 'dm' | 'channel';
   avatarUrl?: string;
-  participants?: number; // Para canais
+  // Para canais
+  participants?: number;
 }
 
 interface ChatWindowProps {
   conversation: Conversation | null;
-  messages: ChatMessage[]; // Usar ChatMessage de MessageItem
+  // Usar ChatMessage de MessageItem
+  messages: ChatMessage[];
   onSendMessage: (content: string) => void;
   isLoading?: boolean;
-  currentUserId: string; // Necessário para MessageList e MessageItem
+  // Necessário para MessageList e MessageItem
+  currentUserId: string;
 }
 
 export function ChatWindow({ conversation, messages, onSendMessage, isLoading, currentUserId }: ChatWindowProps) {
-  // const [inputValue, setInputValue] = React.useState(''); // Removed, MessageInput handles its own state
+  // Removed, MessageInput handles its own state
+  // const [inputValue, setInputValue] = React.useState('');
 
   if (!conversation) {
     return (
