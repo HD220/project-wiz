@@ -1,9 +1,11 @@
-import { Link } from '@tanstack/react-router'; // Removed useParams and useRouter as they are not used here
+// Removed useParams and useRouter as they are not used here
+import { Link } from '@tanstack/react-router';
 import { BarChart2, MessageSquareText, BookText, Settings2, Users, ChevronDown, Hash, PlusCircle } from 'lucide-react';
 import React from 'react';
-// Added Hash and PlusCircle to imports, removed GripVertical as it's not used
 
-import { Avatar, AvatarFallback } from '@/ui/components/ui/avatar'; // Removed AvatarImage
+// Added Hash and PlusCircle to imports, removed GripVertical as it's not used
+// Removed AvatarImage
+import { Avatar, AvatarFallback } from '@/ui/components/ui/avatar';
 import { Button } from '@/ui/components/ui/button';
 import {
   DropdownMenu,
@@ -29,12 +31,14 @@ interface Project {
 interface ProjectSectionLinkProps {
   to: string;
   label: string;
-  icon: React.ElementType; // Renamed prop from 'icon' to 'IconElement' in implementation
+  // Renamed prop from 'icon' to 'IconElement' in implementation
+  icon: React.ElementType;
   projectId: string;
   // isActive prop removed as Link component handles active state
 }
 
-function ProjectSectionLink({ to, label, icon: iconComponent, projectId }: ProjectSectionLinkProps) { // Renamed icon to iconComponent for convention
+// Renamed icon to iconComponent for convention
+function ProjectSectionLink({ to, label, icon: iconComponent, projectId }: ProjectSectionLinkProps) {
   return (
     <Link
       to={to}
@@ -42,14 +46,16 @@ function ProjectSectionLink({ to, label, icon: iconComponent, projectId }: Proje
       resetScroll={false}
       className={cn(
         "flex items-center space-x-2.5 px-3 py-2 text-sm rounded-md transition-colors",
-        "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/60" // Base classes
+        // Base classes
+        "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/60"
       )}
       activeProps={{
         // Classes to apply when the link is active
         className: "!bg-sky-100 dark:!bg-sky-700/60 !text-sky-700 dark:!text-sky-200 font-medium"
       }}
     >
-      {iconComponent && React.createElement(iconComponent, { className: "h-4 w-4 flex-shrink-0" })} {/* Ensure icon is flex-shrink-0 if space is tight */}
+      {/* Ensure icon is flex-shrink-0 if space is tight */}
+      {iconComponent && React.createElement(iconComponent, { className: "h-4 w-4 flex-shrink-0" })}
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -63,13 +69,16 @@ interface ProjectContextSidebarProps {
 }
 
 export function ProjectContextSidebar({ project, className }: ProjectContextSidebarProps) {
-  // const params = useParams({ from: '/(app)/projects/$projectId' }); // Not strictly needed if projectId comes from props
+  // Not strictly needed if projectId comes from props
+  // const params = useParams({ from: '/(app)/projects/$projectId' });
 
+  // Skeleton loader
   if (!project) {
-    return ( // Skeleton loader
+    return (
       <aside className={cn("w-60 flex-shrink-0 bg-slate-100 dark:bg-slate-800/70 p-4 border-r border-slate-200 dark:border-slate-700", className)}>
         <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-4"></div>
-        {[...Array(5)].map((_item, index) => ( // Renamed _ to _item, i to index
+        {/* Renamed _ to _item, i to index */}
+        {[...Array(5)].map((_item, index) => (
           <div key={index} className="h-8 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-2"></div>
         ))}
       </aside>
@@ -80,7 +89,8 @@ export function ProjectContextSidebar({ project, className }: ProjectContextSide
   // relative links like './settings' are often preferred for child routes.
   // Absolute paths need to include the dynamic params correctly.
   const sections = [
-    { value: 'overview', label: 'Visão Geral', icon: BarChart2, to: `/projects/${project.id}/` }, // Trailing slash for index
+    // Trailing slash for index
+    { value: 'overview', label: 'Visão Geral', icon: BarChart2, to: `/projects/${project.id}/` },
     { value: 'chat', label: 'Chat/Canais', icon: MessageSquareText, to: `/projects/${project.id}/chat` },
     { value: 'docs', label: 'Documentação', icon: BookText, to: `/projects/${project.id}/docs` },
     { value: 'members', label: 'Membros & Agentes', icon: Users, to: `/projects/${project.id}/members` },
@@ -89,7 +99,8 @@ export function ProjectContextSidebar({ project, className }: ProjectContextSide
 
   // Placeholder for mock channels
   const mockChannels = [
-    { id: 'ch_geral', name: 'geral', to: `/projects/${project.id}/chat/geral`}, // Example channel route
+    // Example channel route
+    { id: 'ch_geral', name: 'geral', to: `/projects/${project.id}/chat/geral`},
     { id: 'ch_dev', name: 'desenvolvimento', to: `/projects/${project.id}/chat/dev`},
     { id: 'ch_bugs', name: 'bugs', to: `/projects/${project.id}/chat/bugs`},
   ];
@@ -155,7 +166,8 @@ export function ProjectContextSidebar({ project, className }: ProjectContextSide
                 {mockChannels.map(channel => (
                      <ProjectSectionLink
                         key={channel.id}
-                        to={channel.to} // Use the defined channel route
+                        // Use the defined channel route
+                        to={channel.to}
                         label={`# ${channel.name}`}
                         icon={Hash}
                         projectId={project.id}
@@ -165,8 +177,9 @@ export function ProjectContextSidebar({ project, className }: ProjectContextSide
         </div>
       </ScrollArea>
 
-      {/* Optional Footer for the project sidebar - Removed GripVertical as it's not imported and purpose unclear here */}
       {/*
+      Optional Footer for the project sidebar
+      Removed GripVertical as it's not imported and purpose unclear here
       <div className="p-2 border-t border-slate-200 dark:border-slate-700">
         <Button variant="ghost" size="sm" className="w-full justify-start text-xs">
             Menu do Projeto
