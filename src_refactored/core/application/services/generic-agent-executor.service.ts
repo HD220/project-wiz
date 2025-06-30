@@ -7,23 +7,42 @@ import { IToolRegistryService, TOOL_REGISTRY_SERVICE_TOKEN } from '@/core/applic
 import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
 import { Agent } from '@/core/domain/agent/agent.entity';
 import { IAgentRepository, AGENT_REPOSITORY_TOKEN } from '@/core/domain/agent/ports/agent-repository.interface';
-import { AgentIdVO } from '@/core/domain/agent/value-objects/agent-id.vo'; // Added import
-import { DomainError, ToolError, ValueError } from '@/core/domain/common/errors';
+import { AgentIdVO } from '@/core/domain/agent/value-objects/agent-id.vo';
+// DomainError, ValueError not used
+import { ToolError } from '@/core/domain/common/errors';
+// Renamed from AgentExecutorResult
 import {
-  JobProcessingOutput, // Renamed from AgentExecutorResult
+  JobProcessingOutput,
   AgentExecutionPayload,
   ExecutionHistoryEntry,
   AgentExecutorStatus,
-  CriticalToolFailureInfo, // Make sure this is defined or remove if not used
+  // Make sure this is defined or remove if not used
+  // CriticalToolFailureInfo, // Not used
 } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
-import { ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history-entry.vo'; // Renamed types
-import { ActivityHistoryVO } from '@/core/domain/job/value-objects/activity-history.vo'; // Renamed type
+// Renamed types
+import { ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history-entry.vo';
+// Renamed type
+import { ActivityHistoryVO } from '@/core/domain/job/value-objects/activity-history.vo';
 import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface';
 import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 import { IToolExecutionContext, IAgentTool } from '@/core/tools/tool.interface';
+import { z } from 'zod';
 
-import { Result, ok, error } from '@/shared/result'; // Result might not be needed for return type if throwing errors
+// Result might not be needed for return type if throwing errors
+// import { Result, ok, error } from '@/shared/result'; // Not used
+
+interface ExecutionState {
+  goalAchieved: boolean;
+  iterations: number;
+  maxIterations: number;
+  llmResponseText: string;
+  assistantMessage: LanguageModelMessage | null;
+  replanAttemptsForEmptyResponse: number;
+  criticalErrorEncounteredThisTurn: boolean;
+  activityHistory: ActivityHistoryVO;
+  executionHistory: ExecutionHistoryEntry[];
+}
 
 @injectable()
 export class GenericAgentExecutor implements IAgentExecutor {
@@ -41,212 +60,271 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
   // Changed signature to be a ProcessorFunction for JobWorkerService
   public async process(
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput> // JobEntity with specific payload
-  ): Promise<JobProcessingOutput> { // Returns JobProcessingOutput directly, throws on critical failure
+    // JobEntity with specific payload
+    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>
+    // Returns JobProcessingOutput directly, throws on critical failure
+  ): Promise<JobProcessingOutput> {
     const jobPayload = job.payload;
     const agentId = jobPayload.agentId;
-    const jobId = job.id; // JobIdVO
+    const jobId = job.id;
 
-    this.logger.info(
-      `Processing Job ID: ${jobId.value} with Agent ID: ${agentId}`,
-      { jobId: jobId.value, agentId: agentId },
-    );
+    this.logger.info(`Processing Job ID: ${jobId.value} with Agent ID: ${agentId}`, { jobId: jobId.value, agentId });
 
-    const agentResult = await this.agentRepository.findById(AgentIdVO.create(agentId)); // Use AgentIdVO
+    const agent = await this._fetchAgent(agentId, job);
+    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, jobPayload);
+
+    this.logger.info(`Job ID: ${jobId.value} processing attempt: ${job.attemptsMade}`);
+    job.updateProgress(10);
+
+    const executionState = {
+      goalAchieved: false,
+      iterations: 0,
+      maxIterations: agent.maxIterations.value,
+      llmResponseText: 'No response yet.',
+      assistantMessage: null as LanguageModelMessage | null,
+      replanAttemptsForEmptyResponse: 0,
+      criticalErrorEncounteredThisTurn: false,
+      activityHistory: currentActivityHistory,
+      executionHistory: currentExecutionHistory,
+    };
+
+    this.logger.info(`Max iterations for Job ID: ${jobId.value} set to ${executionState.maxIterations}`);
+
+    await this._executionLoop(job, agent, executionState);
+
+    return this._constructFinalResult(job, executionState);
+  }
+
+  private async _executionLoop(
+    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    agent: Agent,
+    executionState: ExecutionState
+  ): Promise<void> {
+    while (executionState.iterations < executionState.maxIterations && !executionState.goalAchieved && !executionState.criticalErrorEncounteredThisTurn) {
+      executionState.iterations++;
+      this.logger.info(`Starting LLM interaction cycle ${executionState.iterations} for Job ID: ${job.id.value}`);
+      job.updateProgress(10 + (80 * executionState.iterations / executionState.maxIterations));
+
+      await this._performLlmInteraction(job, agent, executionState);
+
+      if (executionState.criticalErrorEncounteredThisTurn) break;
+
+      this._checkGoalAchieved(executionState);
+
+      if (executionState.goalAchieved) {
+        this.logger.info(`Goal achieved for Job ID: ${job.id.value} in iteration ${executionState.iterations}.`);
+        break;
+      }
+      if (executionState.iterations >= executionState.maxIterations) {
+        this.logger.info(`Max iterations reached for Job ID: ${job.id.value}.`);
+      }
+    }
+  }
+
+  private async _fetchAgent(agentId: string, job: JobEntity<AgentExecutionPayload, JobProcessingOutput>) {
+    const agentResult = await this.agentRepository.findById(AgentIdVO.create(agentId));
     if (agentResult.isError() || !agentResult.value) {
       const message = `Agent with ID ${agentId} not found or error fetching.`;
       this.logger.error(message, agentResult.isError() ? agentResult.error : undefined);
-      job.addLog(message, 'ERROR'); // Use existing addLog method
-      throw new ApplicationError(message); // Worker will catch this and fail the job
+      job.addLog(message, 'ERROR');
+      throw new ApplicationError(message);
     }
-    const agent = agentResult.value;
+    return agentResult.value;
+  }
 
-    const agent = agentResult.value;
-
-    // Initialize histories from JobEntity
-    let currentActivityHistory = job.getConversationHistory();
-    let currentExecutionHistory = [...job.getExecutionHistory()]; // Get a mutable copy
-
-    // Ensure conversation history is initialized
-    if (currentActivityHistory.length === 0) {
+  private _initializeHistories(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, jobPayload: AgentExecutionPayload) {
+    let activityHistory = job.getConversationHistory();
+    if (activityHistory.length === 0) {
       const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.name}`;
       const userPromptEntry = ActivityHistoryEntryVO.create(ActivityEntryType.USER, userPromptContent);
       job.addConversationEntry(userPromptEntry);
-      currentActivityHistory = job.getConversationHistory(); // Re-fetch after adding
+      activityHistory = job.getConversationHistory();
+    }
+    return { currentActivityHistory: activityHistory, currentExecutionHistory: [...job.getExecutionHistory()] };
+  }
+
+  private async _performLlmInteraction(
+    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    agent: Agent,
+    state: ExecutionState
+  ) {
+    const persona = agent.personaTemplate;
+    const systemMessageString = `You are ${persona.name.value}, a ${persona.role.value}. Your goal is: ${persona.goal.value}. Persona backstory: ${persona.backstory.value()}`;
+    const conversationMessages = this._convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
+
+    this._logLlmCall(job.id.value, job.attemptsMade, conversationMessages);
+    job.addLog(`Calling LLM (iteration ${state.iterations})`, 'DEBUG', {
+      messages: conversationMessages.map(message => ({ role: message.role, content: message.content ? String(message.content).substring(0, 50) + '...' : null }))
+    });
+
+    const llmGenerationResult = await this.llmAdapter.generateText(conversationMessages, { temperature: agent.temperature.value });
+
+    if (llmGenerationResult.isError()) {
+      const llmError = llmGenerationResult.error;
+      const errorMessage = `LLM generation failed in iteration ${state.iterations}. Error: ${llmError.message}`;
+      this.logger.error(errorMessage, llmError, { jobId: job.id.value });
+      job.addExecutionHistoryEntry({ timestamp: new Date(), type: 'llm_error', name: 'LLM Generation', error: llmError.message });
+      throw new ApplicationError(errorMessage, llmError);
     }
 
-    // Job status is managed by JobWorkerService. Log current attempt.
-    this.logger.info(`Job ID: ${jobId.value} processing attempt: ${job.attemptsMade}`);
-    job.updateProgress(10); // Example: initial progress
+    state.assistantMessage = llmGenerationResult.value;
+    state.llmResponseText = state.assistantMessage.content || '';
+    this.logger.info(`LLM response (iteration ${state.iterations}) for Job ID: ${job.id.value}: ${state.llmResponseText.substring(0, 100)}...`);
+    job.addLog(`LLM Response (iteration ${state.iterations}): ${state.llmResponseText.substring(0, 100)}...`, 'DEBUG');
 
-    let goalAchieved = false;
-    let iterations = 0;
-    const maxIterations = agent.maxIterations.value; // Assuming maxIterations is a VO
-    this.logger.info(`Max iterations for Job ID: ${jobId.value} set to ${maxIterations}`);
-    let llmResponseText = 'No response yet.';
-    let assistantMessage: LanguageModelMessage | null = null;
-    let replanAttemptsForEmptyResponse = 0;
-    let criticalErrorEncounteredThisTurn = false;
-    let newExecutionHistoryEntries: ExecutionHistoryEntry[] = [];
+    // Inlined _attemptReplanForUnusableResponse
+    if ((!state.llmResponseText || state.llmResponseText.length < this.minUsableLlmResponseLength) && (!state.assistantMessage.tool_calls || state.assistantMessage.tool_calls.length === 0)) {
+      if (state.replanAttemptsForEmptyResponse < this.maxReplanAttemptsForEmptyResponse) {
+        this.logger.warn(`LLM response for Job ID ${job.id.value} was empty/too short. Attempting re-plan (${state.replanAttemptsForEmptyResponse + 1}/${this.maxReplanAttemptsForEmptyResponse})`);
+        const systemNote = ActivityHistoryEntryVO.create(ActivityEntryType.USER, `System Note: Your previous response was empty or too short (received: "${state.llmResponseText}"). Please provide a more detailed response or use a tool.`);
+        const updatedHistory = state.activityHistory.addEntry(systemNote);
+        const updatedExecutionHistory = [...state.executionHistory, { timestamp: new Date(), type: 'unusable_llm_response' as ExecutionHistoryEntry['type'], name: 'LLM Replan Trigger', error: `Empty/short response: ${state.llmResponseText}` }];
 
-    while (iterations < maxIterations && !goalAchieved && !criticalErrorEncounteredThisTurn) {
-      iterations++;
-      this.logger.info(`Starting LLM interaction cycle ${iterations} for Job ID: ${jobId.value}`);
-      job.updateProgress(10 + (80 * iterations / maxIterations)); // Update progress
-
-      const persona = agent.personaTemplate;
-      const systemMessageString = `You are ${persona.name.value}, a ${persona.role.value}. Your goal is: ${persona.goal.value}. Persona backstory: ${persona.backstory.value()}`;
-      const conversationMessages = this._convertActivityHistoryToLlmMessages(systemMessageString, currentActivityHistory);
-
-      this._logLlmCall(jobId.value, job.attemptsMade, conversationMessages);
-      job.addLog(`Calling LLM (iteration ${iterations})`, 'DEBUG', { // Use job.addLog
-        messages: conversationMessages.map(m => ({ role: m.role, content: m.content ? String(m.content).substring(0, 50) + '...' : null}))
-      });
-
-      const llmGenerationResult = await this.llmAdapter.generateText(
-        conversationMessages,
-        { temperature: agent.temperature.value },
-      );
-
-      if (llmGenerationResult.isError()) {
-        const llmError = llmGenerationResult.error;
-        const errorMessage = `LLM generation failed in iteration ${iterations}. Error: ${llmError.message}`;
-        this.logger.error(errorMessage, llmError, { jobId: jobId.value });
-        job.addExecutionHistoryEntry({ timestamp: new Date(), type: 'llm_error', name: 'LLM Generation', error: llmError.message });
-        throw new ApplicationError(errorMessage, llmError);
+        job.setConversationHistory(updatedHistory);
+        job.setExecutionHistory(updatedExecutionHistory);
+        state.activityHistory = job.getConversationHistory();
+        state.executionHistory = [...job.getExecutionHistory()];
+        state.replanAttemptsForEmptyResponse++;
+        job.addLog(`LLM response was unusable. Re-planning (attempt ${state.replanAttemptsForEmptyResponse}).`, 'WARN');
+        return; // Skip tool processing for this iteration
       }
+      this.logger.warn(`LLM response for Job ID ${job.id.value} was empty/too short after ${state.replanAttemptsForEmptyResponse} re-plan attempts. Proceeding with this response.`);
+    }
 
-      assistantMessage = llmGenerationResult.value;
-      llmResponseText = assistantMessage.content || '';
-      this.logger.info(`LLM response (iteration ${iterations}) for Job ID: ${jobId.value}: ${llmResponseText.substring(0, 100)}...`);
-      job.addLog(`LLM Response (iteration ${iterations}): ${llmResponseText.substring(0,100)}...`, 'DEBUG');
+    const assistantHistoryEntry = ActivityHistoryEntryVO.create(ActivityEntryType.ASSISTANT, state.assistantMessage.content || '', { tool_calls: state.assistantMessage.tool_calls as LanguageModelMessageToolCall[] | undefined });
+    job.addConversationEntry(assistantHistoryEntry);
+    state.activityHistory = job.getConversationHistory();
 
-      const replanResult = this._attemptReplanForUnusableResponse(
-        jobId.value, assistantMessage, llmResponseText, currentActivityHistory, currentExecutionHistory, // Pass currentExecutionHistory
-        replanAttemptsForEmptyResponse
-      );
+    // newExecutionHistoryEntries = []; // Not used
+    // const toolResultActivityEntries: ActivityHistoryEntryVO[] = []; // Not used
 
-      if (replanResult.shouldReplan) {
-        job.setConversationHistory(replanResult.updatedHistory!);
-        job.setExecutionHistory(replanResult.updatedExecutionHistory!);
-        currentActivityHistory = job.getConversationHistory();
-        currentExecutionHistory = [...job.getExecutionHistory()];
-        replanAttemptsForEmptyResponse = replanResult.newReplanAttemptCount!;
-        job.addLog(`LLM response was unusable. Re-planning (attempt ${replanAttemptsForEmptyResponse}).`, 'WARN');
-        continue;
-      }
+    await this._handleToolCallsIfPresent(job, agent, state);
+  }
 
-      const assistantHistoryEntry = ActivityHistoryEntryVO.create(
-        ActivityEntryType.ASSISTANT,
-        assistantMessage.content || '',
-        { tool_calls: assistantMessage.tool_calls as LanguageModelMessageToolCall[] | undefined }
-      );
-      job.addConversationEntry(assistantHistoryEntry);
-      currentActivityHistory = job.getConversationHistory();
+  private async _handleToolCallsIfPresent(
+    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    agent: Agent,
+    state: ExecutionState
+  ) {
+    if (state.assistantMessage?.tool_calls && state.assistantMessage.tool_calls.length > 0) {
+      await this._processToolCalls(job, agent, state);
+    }
+  }
 
-      newExecutionHistoryEntries = [];
-      const toolResultActivityEntries: ActivityHistoryEntryVO[] = [];
+  private async _processToolCalls(
+    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    agent: Agent,
+    state: ExecutionState
+  ) {
+    this.logger.info(`LLM requested ${state.assistantMessage.tool_calls.length} tool calls for Job ID: ${job.id.value}`);
+    job.addLog(`LLM requesting ${state.assistantMessage.tool_calls.length} tool calls.`, 'DEBUG');
 
-      if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
-        this.logger.info(`LLM requested ${assistantMessage.tool_calls.length} tool calls for Job ID: ${jobId.value}`);
-        job.addLog(`LLM requesting ${assistantMessage.tool_calls.length} tool calls.`, 'DEBUG');
+    for (const toolCall of state.assistantMessage.tool_calls) {
+      const executionContext: IToolExecutionContext = { agentId: agent.id.value, jobId: job.id.value, userId: job.payload.userId };
+      const executionEntry = await this._processAndValidateSingleToolCall(toolCall, executionContext);
+      job.addExecutionHistoryEntry(executionEntry);
+      // Keep local copy in sync
+      state.executionHistory.push(executionEntry);
 
-        for (const toolCall of assistantMessage.tool_calls) {
-          const executionContext: IToolExecutionContext = { agentId: agent.id.value, jobId: jobId.value, userId: jobPayload.userId };
-          const executionEntry = await this._processAndValidateSingleToolCall(toolCall, executionContext);
-          job.addExecutionHistoryEntry(executionEntry); // Add to job's history
-          // newExecutionHistoryEntries.push(executionEntry); // Not needed if directly adding to job
-
-          if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
-            const toolError = executionEntry.error;
-            job.addLog(`Tool '${toolError.toolName || executionEntry.name}' error: ${toolError.message}`, 'ERROR', { isRecoverable: toolError.isRecoverable });
-            if (!toolError.isRecoverable) {
-              criticalErrorEncounteredThisTurn = true;
-              this.logger.error(`Critical tool error for Job ID ${jobId.value}: Tool '${toolError.toolName || executionEntry.name}' failed non-recoverably.`, toolError);
-              break;
-            }
-          }
-          let toolResultContent: string | object;
-          if (executionEntry.type === 'tool_error' && executionEntry.error) {
-            const errDetails = executionEntry.error instanceof ToolError ?
-              { name: executionEntry.error.name, message: executionEntry.error.message, toolName: executionEntry.error.toolName, isRecoverable: executionEntry.error.isRecoverable } :
-              { message: String(executionEntry.error) };
-            toolResultContent = errDetails;
-          } else {
-            toolResultContent = executionEntry.result as object;
-          }
-          const toolResultActivityEntry = ActivityHistoryEntryVO.create(ActivityEntryType.TOOL_RESULT, toolResultContent, { toolName: executionEntry.name, toolCallId: toolCall.id });
-          // toolResultActivityEntries.push(toolResultActivityEntry); // Accumulate locally before adding all at once
-          job.addConversationEntry(toolResultActivityEntry); // Add directly to job's conversation history
+      if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
+        const toolError = executionEntry.error;
+        job.addLog(`Tool '${toolError.toolName || executionEntry.name}' error: ${toolError.message}`, 'ERROR', { isRecoverable: toolError.isRecoverable });
+        if (!toolError.isRecoverable) {
+          state.criticalErrorEncounteredThisTurn = true;
+          this.logger.error(`Critical tool error for Job ID ${job.id.value}: Tool '${toolError.toolName || executionEntry.name}' failed non-recoverably.`, toolError);
+          break;
         }
-        currentActivityHistory = job.getConversationHistory(); // Re-fetch after potential updates
-        currentExecutionHistory = [...job.getExecutionHistory()]; // Re-fetch
-
-        if (criticalErrorEncounteredThisTurn) break;
       }
-
-      if (!criticalErrorEncounteredThisTurn) {
-        goalAchieved = this._isGoalAchievedByLlmResponse(llmResponseText, assistantMessage?.tool_calls as LanguageModelMessageToolCall[] | undefined);
+      let toolResultContent: string | object;
+      if (executionEntry.type === 'tool_error' && executionEntry.error) {
+        const errDetails = executionEntry.error instanceof ToolError ? { name: executionEntry.error.name, message: executionEntry.error.message, toolName: executionEntry.error.toolName, isRecoverable: executionEntry.error.isRecoverable } : { message: String(executionEntry.error) };
+        toolResultContent = errDetails;
+      } else {
+        toolResultContent = executionEntry.result as object;
       }
-
-      if (goalAchieved) { this.logger.info(`Goal achieved for Job ID: ${jobId.value} in iteration ${iterations}.`); break; }
-      if (iterations >= maxIterations) { this.logger.info(`Max iterations reached for Job ID: ${jobId.value}.`); }
-    } // End of while loop
-
-    currentExecutionHistory = [...job.getExecutionHistory()]; // Ensure it's latest before constructing result
-
-    // Construct the final result
-    let finalStatus: AgentExecutorStatus;
-    let finalMessage: string;
-    let finalOutput: unknown = undefined;
-
-    if (goalAchieved) {
-      finalStatus = AgentExecutorStatus.SUCCESS;
-      finalMessage = `Goal achieved. Last LLM response: ${llmResponseText}`;
-      finalOutput = { message: llmResponseText, history: job.getConversationHistory().entries.map(e => e.toPersistence ? e.toPersistence() : e.props) };
-      job.updateProgress(100);
-    } else if (criticalErrorEncounteredThisTurn) {
-      const lastErrorEntry = currentExecutionHistory.slice().reverse().find(e => e.type.endsWith('_error'));
-      finalStatus = lastErrorEntry?.type === 'llm_error' ? AgentExecutorStatus.FAILURE_LLM : AgentExecutorStatus.FAILURE_TOOL;
-      finalMessage = `Processing stopped due to a critical error after ${iterations} iterations. Error: ${lastErrorEntry?.error ? String(lastErrorEntry.error) : 'Unknown critical error'}`;
-      job.addLog(finalMessage, 'ERROR');
-      throw new ApplicationError(finalMessage);
-    } else if (iterations >= maxIterations) {
-      finalStatus = AgentExecutorStatus.FAILURE_MAX_ITERATIONS;
-      finalMessage = `Max iterations (${maxIterations}) reached. Goal not achieved. Last LLM response: ${llmResponseText}`;
-      job.addLog(finalMessage, 'WARN');
-      throw new ApplicationError(finalMessage);
-    } else {
-      finalStatus = AgentExecutorStatus.FAILURE_INTERNAL;
-      finalMessage = `Processing stopped unexpectedly after ${iterations} iterations. Last LLM response: ${llmResponseText}`;
-      this.logger.warn(finalMessage, { jobId: jobId.value });
-      job.addLog(finalMessage, 'ERROR');
-      throw new ApplicationError(finalMessage);
+      const toolResultActivityEntry = ActivityHistoryEntryVO.create(ActivityEntryType.TOOL_RESULT, toolResultContent, { toolName: executionEntry.name, toolCallId: toolCall.id });
+      job.addConversationEntry(toolResultActivityEntry);
     }
+    // Re-fetch after potential updates
+    state.activityHistory = job.getConversationHistory();
+  }
 
+  private _checkGoalAchieved(state: ExecutionState) {
+    if (!state.criticalErrorEncounteredThisTurn) {
+      state.goalAchieved = this._isGoalAchievedByLlmResponse(state.llmResponseText, state.assistantMessage?.tool_calls as LanguageModelMessageToolCall[] | undefined);
+    }
+  }
+
+  private _constructFinalResult(
+    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    state: ExecutionState
+  ): JobProcessingOutput {
+    if (state.goalAchieved) {
+      return this._createSuccessResult(job, state);
+    }
+    if (state.criticalErrorEncounteredThisTurn) {
+      return this._createCriticalErrorResult(job, state);
+    }
+    if (state.iterations >= state.maxIterations) {
+      return this._createMaxIterationsResult(job, state);
+    }
+    return this._createInternalErrorResult(job, state);
+  }
+
+  private _createSuccessResult(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, state: ExecutionState): JobProcessingOutput {
+    const finalMessage = `Goal achieved. Last LLM response: ${state.llmResponseText}`;
+    const finalOutput = { message: state.llmResponseText, history: job.getConversationHistory().entries.map(entry => entry.toPersistence ? entry.toPersistence() : entry.props) };
+    job.updateProgress(100);
     return {
-      jobId: jobId.value,
-      status: finalStatus,
+      jobId: job.id.value,
+      status: AgentExecutorStatus.SUCCESS,
       message: finalMessage,
       output: finalOutput,
-      history: job.getConversationHistory().entries.map(e => e.toPersistence ? e.toPersistence() : e.props),
-      errors: currentExecutionHistory.filter(e => e.type.endsWith('_error')),
+      history: job.getConversationHistory().entries.map(entry => entry.toPersistence ? entry.toPersistence() : entry.props),
+      errors: state.executionHistory.filter((errorEntry: ExecutionHistoryEntry) => errorEntry.type.endsWith('_error')),
     };
+  }
+
+  private _createCriticalErrorResult(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, state: ExecutionState): JobProcessingOutput {
+    const lastErrorEntry = state.executionHistory.slice().reverse().find((errorEntry: ExecutionHistoryEntry) => errorEntry.type.endsWith('_error'));
+    // const finalStatus = lastErrorEntry?.type === 'llm_error' ? AgentExecutorStatus.FAILURE_LLM : AgentExecutorStatus.FAILURE_TOOL; // Not used
+    const finalMessage = `Processing stopped due to a critical error after ${state.iterations} iterations. Error: ${lastErrorEntry?.error ? String(lastErrorEntry.error) : 'Unknown critical error'}`;
+    job.addLog(finalMessage, 'ERROR');
+    throw new ApplicationError(finalMessage);
+  }
+
+  private _createMaxIterationsResult(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, state: ExecutionState): JobProcessingOutput {
+    const finalMessage = `Max iterations (${state.maxIterations}) reached. Goal not achieved. Last LLM response: ${state.llmResponseText}`;
+    job.addLog(finalMessage, 'WARN');
+    throw new ApplicationError(finalMessage);
+  }
+
+  private _createInternalErrorResult(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, state: ExecutionState): JobProcessingOutput {
+    const finalMessage = `Processing stopped unexpectedly after ${state.iterations} iterations. Last LLM response: ${state.llmResponseText}`;
+    this.logger.warn(finalMessage, { jobId: job.id.value });
+    job.addLog(finalMessage, 'ERROR');
+    throw new ApplicationError(finalMessage);
   }
 
   private _convertActivityHistoryToLlmMessages(systemMessageContent: string, history: ActivityHistoryVO): LanguageModelMessage[] {
     const messages: LanguageModelMessage[] = [{ role: 'system', content: systemMessageContent }];
-    history.entries.forEach(entry => { // Access entries directly
-      const role = entry.type; // Use type
-      const content = typeof entry.content === 'string' ? entry.content : JSON.stringify(entry.content); // Ensure string content
+    // Access entries directly
+    history.entries.forEach(entry => {
+      // Use type
+      const role = entry.type;
+      // Ensure string content
+      const content = typeof entry.content === 'string' ? entry.content : JSON.stringify(entry.content);
       const toolCalls = entry.metadata?.tool_calls as LanguageModelMessageToolCall[] | undefined;
       const toolCallId = entry.metadata?.toolCallId as string | undefined;
 
-      if (role === ActivityEntryType.USER) { // Use ActivityEntryType
+      // Use ActivityEntryType
+      if (role === ActivityEntryType.USER) {
         messages.push({ role: 'user', content });
-      } else if (role === ActivityEntryType.ASSISTANT) { // Use ActivityEntryType
+        // Use ActivityEntryType
+      } else if (role === ActivityEntryType.ASSISTANT) {
         messages.push({ role: 'assistant', content, tool_calls: toolCalls });
-      } else if (role === ActivityEntryType.TOOL_RESULT) { // Use ActivityEntryType
+        // Use ActivityEntryType
+      } else if (role === ActivityEntryType.TOOL_RESULT) {
         if (toolCallId) {
             messages.push({ role: 'tool', tool_call_id: toolCallId, content });
         } else {
@@ -264,48 +342,64 @@ export class GenericAgentExecutor implements IAgentExecutor {
     const toolName = toolCall.function.name;
     const timestamp = new Date();
 
-    const toolInstance = this.toolRegistryService.getTool(toolName); // Renamed toolResult to toolInstance
-
+    const toolInstance = this.toolRegistryService.getTool(toolName);
     if (!toolInstance) {
-      const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, toolName, undefined, false);
-      this.logger.error(toolNotFoundError.message, { toolName, jobId: executionContext.jobId });
-      return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError, isCritical: true };
-    }
-    // const tool = toolInstance; // No need to reassign
-
-    let parsedArgs: unknown;
-    try {
-      parsedArgs = JSON.parse(toolCall.function.arguments);
-    } catch (error: unknown) {
-      const parseError = error instanceof Error ? error : new Error(String(error));
-      const parsingToolError = new ToolError(`Failed to parse arguments for tool '${toolName}'. Error: ${parseError.message}`, toolName, parseError, true); // Typically recoverable
-      this.logger.error(parsingToolError.message, { toolName, args: toolCall.function.arguments, jobId: executionContext.jobId });
-      return { timestamp, type: 'tool_error', name: toolName, error: parsingToolError, params: { originalArgs: toolCall.function.arguments }, isCritical: false }; // Mark as not critical
+      return this._createToolNotFoundError(toolName, timestamp, executionContext.jobId);
     }
 
-    const validationResult = toolInstance.parameters.safeParse(parsedArgs); // Use toolInstance
+    const parsedArgs = this._parseToolArguments(toolCall, toolName, timestamp, executionContext.jobId);
+    if (parsedArgs.error) {
+      return parsedArgs.error;
+    }
+
+    const validationResult = toolInstance.parameters.safeParse(parsedArgs.value);
     if (!validationResult.success) {
-      const validationToolError = new ToolError(`Argument validation failed for tool '${toolName}'.`, toolName, validationResult.error, true); // Typically recoverable
-      this.logger.error(validationToolError.message, { toolName, issues: validationResult.error.flatten(), jobId: executionContext.jobId });
-      return { timestamp, type: 'tool_error', name: toolName, error: validationToolError, params: parsedArgs, isCritical: false }; // Mark as not critical
+      return this._createToolValidationError(toolName, timestamp, validationResult.error, parsedArgs.value, executionContext.jobId);
     }
 
     this.logger.info(`Tool call validated: ${toolName} with args: ${JSON.stringify(validationResult.data)}`, { toolName, jobId: executionContext.jobId });
+    return this._executeTool(toolInstance, validationResult.data, timestamp, executionContext);
+  }
 
+  private _createToolNotFoundError(toolName: string, timestamp: Date, jobId: string): ExecutionHistoryEntry {
+    const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, toolName, undefined, false);
+    this.logger.error(toolNotFoundError.message, { toolName, jobId });
+    return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError, isCritical: true };
+  }
+
+  private _parseToolArguments(toolCall: LanguageModelMessageToolCall, toolName: string, timestamp: Date, jobId: string): { value?: unknown; error?: ExecutionHistoryEntry } {
     try {
-      const toolExecResult = await toolInstance.execute(validationResult.data, executionContext); // Use toolInstance
+      return { value: JSON.parse(toolCall.function.arguments) };
+    } catch (error: unknown) {
+      const parseError = error instanceof Error ? error : new Error(String(error));
+      const parsingToolError = new ToolError(`Failed to parse arguments for tool '${toolName}'. Error: ${parseError.message}`, toolName, parseError, true);
+      this.logger.error(parsingToolError.message, { toolName, args: toolCall.function.arguments, jobId });
+      return { error: { timestamp, type: 'tool_error', name: toolName, error: parsingToolError, params: { originalArgs: toolCall.function.arguments }, isCritical: false } };
+    }
+  }
+
+  private _createToolValidationError(toolName: string, timestamp: Date, validationError: z.ZodError, parsedArgs: unknown, jobId: string): ExecutionHistoryEntry {
+    const validationToolError = new ToolError(`Argument validation failed for tool '${toolName}'.`, toolName, validationError, true);
+    this.logger.error(validationToolError.message, { toolName, issues: validationError.flatten(), jobId });
+    return { timestamp, type: 'tool_error', name: toolName, error: validationToolError, params: parsedArgs, isCritical: false };
+  }
+
+  private async _executeTool(toolInstance: IAgentTool, validatedArgs: unknown, timestamp: Date, executionContext: IToolExecutionContext): Promise<ExecutionHistoryEntry> {
+    const toolName = toolInstance.name; // Assuming toolInstance has a name property
+    try {
+      const toolExecResult = await toolInstance.execute(validatedArgs, executionContext);
       if (toolExecResult.isError()) {
         const toolErrorFromTool = toolExecResult.error;
         this.logger.error(`Tool '${toolName}' execution failed: ${toolErrorFromTool.message}`, { toolError: toolErrorFromTool, jobId: executionContext.jobId });
-        return { timestamp, type: 'tool_error', name: toolName, params: validationResult.data, error: toolErrorFromTool, isCritical: !toolErrorFromTool.isRecoverable };
+        return { timestamp, type: 'tool_error', name: toolName, params: validatedArgs, error: toolErrorFromTool, isCritical: !toolErrorFromTool.isRecoverable };
       }
       this.logger.info(`Tool '${toolName}' executed successfully.`, { result: toolExecResult.value, jobId: executionContext.jobId });
-      return { timestamp, type: 'tool_result', name: toolName, params: validationResult.data, result: toolExecResult.value }; // Changed type to 'tool_result'
+      return { timestamp, type: 'tool_result', name: toolName, params: validatedArgs, result: toolExecResult.value };
     } catch (error: unknown) {
       const execError = error instanceof Error ? error : new Error(String(error));
       const unexpectedToolError = new ToolError(`Unexpected error during tool '${toolName}' execution: ${execError.message}`, toolName, execError, false);
       this.logger.error(unexpectedToolError.message, { error: unexpectedToolError, jobId: executionContext.jobId });
-      return { timestamp, type: 'tool_error', name: toolName, error: unexpectedToolError, params: validationResult.data, isCritical: true };
+      return { timestamp, type: 'tool_error', name: toolName, error: unexpectedToolError, params: validatedArgs, isCritical: true };
     }
   }
 
@@ -317,38 +411,11 @@ export class GenericAgentExecutor implements IAgentExecutor {
   private _logLlmCall(jobId: string, attempt: number, messages: LanguageModelMessage[]): void {
     this.logger.info(`Calling LLM for Job ID: ${jobId}. Attempt ${attempt}`, {
       jobId: jobId,
-      messages: messages.map(m => ({ role: m.role, content: m.content ? String(m.content).substring(0, 100) + '...' : null, tool_calls: m.tool_calls })),
+      messages: messages.map(message => ({ role: message.role, content: message.content ? String(message.content).substring(0, 100) + '...' : null, tool_calls: message.tool_calls })),
     });
   }
 
   // This method is no longer part of this service's responsibility.
   // JobWorkerService handles final job state.
   // private _createFinalResult(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, statusToSet: AgentExecutorStatus, finalMessage: string, outputData?: unknown): JobProcessingOutput { ... }
-
-
-  private _attemptReplanForUnusableResponse(
-    jobId: string,
-    assistantMessage: LanguageModelMessage,
-    llmResponseText: string,
-    currentActivityHistory: ActivityHistoryVO,
-    currentExecutionHistory: ExecutionHistoryEntry[], // Pass execution history
-    replanAttempts: number,
-  ): {
-    shouldReplan: boolean;
-    updatedHistory?: ActivityHistoryVO;
-    updatedExecutionHistory?: ExecutionHistoryEntry[]; // Return updated execution history
-    newReplanAttemptCount?: number;
-  } {
-    if ((!llmResponseText || llmResponseText.length < this.minUsableLlmResponseLength) && (!assistantMessage.tool_calls || assistantMessage.tool_calls.length === 0)) {
-      if (replanAttempts < this.maxReplanAttemptsForEmptyResponse) {
-        this.logger.warn(`LLM response for Job ID ${jobId} was empty/too short. Attempting re-plan (${replanAttempts + 1}/${this.maxReplanAttemptsForEmptyResponse})`);
-        const systemNote = ActivityHistoryEntryVO.create(ActivityEntryType.USER, `System Note: Your previous response was empty or too short (received: "${llmResponseText}"). Please provide a more detailed response or use a tool.`);
-        const updatedHistory = currentActivityHistory.addEntry(systemNote);
-        const updatedExecutionHistory = [...currentExecutionHistory, { timestamp: new Date(), type: 'unusable_llm_response' as ExecutionHistoryEntry['type'], name: 'LLM Replan Trigger', error: `Empty/short response: ${llmResponseText}` }];
-        return { shouldReplan: true, updatedHistory, updatedExecutionHistory, newReplanAttemptCount: replanAttempts + 1 };
-      }
-      this.logger.warn(`LLM response for Job ID ${jobId} was empty/too short after ${replanAttempts} re-plan attempts. Proceeding with this response.`);
-    }
-    return { shouldReplan: false, updatedExecutionHistory: currentExecutionHistory, newReplanAttemptCount: replanAttempts }; // Return currentExecutionHistory
-  }
 }
