@@ -60,7 +60,7 @@ function EditPersonaTemplateFormRenderer({templateId, personaTemplate, handleSub
     // Should ideally be caught by the page component before calling this renderer
     return (
       <div className="p-8 text-center">
-        <p>Template de Persona com ID "{templateId}" não encontrado.</p>
+        <p>Template de Persona com ID &quot;{templateId}&quot; não encontrado.</p>
          <Button variant="outline" className="mt-4" asChild>
             <Link to="/personas"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas</Link>
         </Button>
@@ -161,7 +161,7 @@ function EditPersonaTemplatePage() {
     return (
       <div className="p-8 text-center">
          <ServerCrash className="h-12 w-12 text-slate-500 dark:text-slate-400 mb-4" />
-        <p className="text-lg">Template de Persona com ID "{templateId}" não encontrado.</p>
+        <p className="text-lg">Template de Persona com ID &quot;{templateId}&quot; não encontrado.</p>
          <Button variant="outline" className="mt-4" asChild>
             <Link to="/personas"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas</Link>
         </Button>
