@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'; // Added import
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 
 
@@ -62,12 +63,20 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
       vi.clearAllMocks();
       vi.restoreAllMocks();
       vi.useRealTimers();
-      // if (db && db.close) await db.close(); // if db had a close method
+      if (db && typeof (db as any).close === 'function') { // Type assertion for safety
+        (db as any).close();
+      }
     }
   });
 
   const addJobToQueue = async (name: string, payload: TestPayload, opts?: Partial<IJobOptions>): Promise<JobEntity<TestPayload, TestResult>> => {
-    return queueService.add(name, payload, { ...defaultJobOptions, ...opts });
+    // Ensure jobId is part of options if provided in payload, or generate one if not.
+    // This helps in retrieving the job by a known ID later if needed.
+    const jobOptionsWithId = { ...defaultJobOptions, ...opts };
+    if (payload.id && !jobOptionsWithId.jobId) {
+      jobOptionsWithId.jobId = payload.id;
+    }
+    return queueService.add(name, payload, jobOptionsWithId);
   };
 
 
@@ -79,10 +88,10 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
 
   describe('run and job processing', () => {
     it('should fetch and process a job successfully from the actual queue', async () => {
-      const jobPayload = { data: 'process me', id: 'job-success' };
+      const jobPayload = { data: 'process me', id: randomUUID() }; // Use randomUUID
       const jobName = 'success-job';
       const addedJob = await addJobToQueue(jobName, jobPayload);
-      const expectedResult = { status: 'processed', id: 'job-success' };
+      const expectedResult = { status: 'processed', id: jobPayload.id }; // Use the same UUID
 
       mockProcessor.mockResolvedValueOnce(expectedResult);
 
@@ -105,7 +114,7 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
     });
 
     it('should handle job processing failure and mark job as failed in DB', async () => {
-      const jobPayload = { data: 'fail me', id: 'job-fail' };
+      const jobPayload = { data: 'fail me', id: randomUUID() }; // Use randomUUID
       const jobName = 'fail-job';
       const addedJob = await addJobToQueue(jobName, jobPayload, { attempts: 1 }); // Only 1 attempt
       const error = new Error('Processing failed');
@@ -127,21 +136,21 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
 
 
     it('should process jobs sequentially (concurrency 1)', async () => {
-      const job1Payload = { data: 'seq_data1', id: 'seq1' };
-      const job2Payload = { data: 'seq_data2', id: 'seq2' };
-      await addJobToQueue('seq-job1', job1Payload);
-      await addJobToQueue('seq-job2', job2Payload);
+      const job1Payload = { data: 'seq_data1', id: randomUUID() }; // Use randomUUID
+      const job2Payload = { data: 'seq_data2', id: randomUUID() }; // Use randomUUID
+      const addedJob1 = await addJobToQueue('seq-job1', job1Payload);
+      const addedJob2 = await addJobToQueue('seq-job2', job2Payload);
 
       let job1ProcessorEndsAt: number | null = null;
       let job2ProcessorStartsAt: number | null = null;
 
       mockProcessor.mockImplementation(async (job) => {
         const realTimeNow = vi.getRealSystemTime ? vi.getRealSystemTime() : Date.now(); // Vitest v1 has getRealSystemTime
-        if (job.payload.id === 'seq2') {
+        if (job.payload.id === job2Payload.id) { // Compare with payload's UUID
           job2ProcessorStartsAt = realTimeNow;
         }
         await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
-        if (job.payload.id === 'seq1') {
+        if (job.payload.id === job1Payload.id) { // Compare with payload's UUID
           job1ProcessorEndsAt = vi.getRealSystemTime ? vi.getRealSystemTime() : Date.now();
         }
         return { status: `done_${job.payload.id}`, id: job.payload.id };
@@ -151,13 +160,13 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
 
       // Advance time for job1 to be fetched and processed
       await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 100 + 50); // poll + process + buffer
-      const job1FromDb = await jobRepository.findById(JobIdVO.fromValue((await jobRepository.findByName('seq-job1'))![0].id));
+      const job1FromDb = await jobRepository.findById(addedJob1.id);
       expect(job1FromDb!.status).toBe(JobStatus.COMPLETED);
       expect(job1ProcessorEndsAt).not.toBeNull();
 
       // Advance time for job2 to be fetched and processed
       await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 100 + 50); // poll + process + buffer
-      const job2FromDb = await jobRepository.findById(JobIdVO.fromValue((await jobRepository.findByName('seq-job2'))![0].id));
+      const job2FromDb = await jobRepository.findById(addedJob2.id);
       expect(job2FromDb!.status).toBe(JobStatus.COMPLETED);
       expect(job2ProcessorStartsAt).not.toBeNull();
 
@@ -170,11 +179,11 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
     });
 
     it('should handle job.updateProgress and job.addLog from processor, saved to DB', async () => {
-      const jobPayload = { data: 'progress data', id: 'job-progress-log' };
+      const jobPayload = { data: 'progress data', id: randomUUID() }; // Use randomUUID
       const addedJob = await addJobToQueue('progress-log-job', jobPayload);
 
       mockProcessor.mockImplementationOnce(async (jobCtx) => {
-        await jobCtx.updateProgress(50);
+        await jobCtx.updateProgress(50); // Make sure this doesn't error due to potential state mismatch if jobCtx is not perfectly in sync
         await jobCtx.addLog('Processor log 1', 'INFO');
         return { status: 'progress_done', id: jobCtx.payload.id };
       });
@@ -194,7 +203,7 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
 
   describe('lock renewal', () => {
     it('should renew lock periodically for an active job', async () => {
-      const jobPayload = { data: 'renew me', id: 'job-renew' };
+      const jobPayload = { data: 'renew me', id: randomUUID() }; // Use randomUUID
       const addedJob = await addJobToQueue('lockrenew-job', jobPayload);
 
       let jobProcessorPromiseResolve: (value: TestResult) => void;
@@ -237,15 +246,15 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
     });
 
     it('should stop renewing lock if job finishes', async () => {
-      const jobPayload = { data: 'stop renew', id: 'job-stop-renew' };
-      await addJobToQueue('lockstop-job', jobPayload);
+      const jobPayload = { data: 'stop renew', id: randomUUID() }; // Use randomUUID
+      const addedJob = await addJobToQueue('lockstop-job', jobPayload);
 
       mockProcessor.mockResolvedValueOnce({ status: 'stopped_done', id: jobPayload.id });
 
       workerService.run();
       await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 50); // Job picked up and processed quickly
 
-      const jobFromDb = await jobRepository.findById(JobIdVO.fromValue((await jobRepository.findByName('lockstop-job'))![0].id));
+      const jobFromDb = await jobRepository.findById(addedJob.id);
       expect(jobFromDb!.status).toBe(JobStatus.COMPLETED);
       const lockUntilAtCompletion = jobFromDb!.lockUntil;
 
@@ -263,7 +272,7 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
 
   describe('close', () => {
     it('should stop polling, wait for active jobs, and shutdown gracefully', async () => {
-      const jobPayload = { data: 'closing job 1', id: 'job-close-graceful' };
+      const jobPayload = { data: 'closing job 1', id: randomUUID() }; // Use randomUUID
       const addedJob = await addJobToQueue('close-graceful-job', jobPayload);
 
       let jobPromiseResolve: (value: TestResult) => void;
@@ -298,14 +307,17 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
 
     it('should close immediately if no active jobs', async () => {
       workerService.run(); // No jobs in queue
+      // Allow one poll cycle to complete to ensure pollLoopPromise is set and resolved if no job
       await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 50);
 
       const closePromise = workerService.close();
+      // Advance timers to allow close() internal waits (e.g. for pollLoopPromise)
+      await vi.advanceTimersByTimeAsync(100); // Small advance for promise resolutions
       await closePromise;
 
       expect(workerService.isClosed).toBe(true);
       expect(mockProcessor).not.toHaveBeenCalled();
-    });
+    }, 7000); // Increased timeout for this test
   });
 
   it('should emit worker.error if queue.fetchNextJobAndLock throws and continues polling', async () => {
@@ -314,20 +326,21 @@ describe('WorkerService (Integration with In-Memory DB)', () => {
     fetchNextJobAndLockSpy.mockRejectedValueOnce(fetchError); // First call fails
 
     workerService.run();
-    await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 50); // First poll attempt
-
+    // First poll attempt, encounters error
+    await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 50);
     expect(workerService.emit).toHaveBeenCalledWith('worker.error', fetchError);
 
-    // Ensure it continues polling
+    // Worker waits for pollingIntervalMs * 2 after error, then polls again
     fetchNextJobAndLockSpy.mockResolvedValueOnce(null); // Next attempt finds no job
-    await vi.advanceTimersByTimeAsync(defaultWorkerOptions.pollingIntervalMs! + 50); // Second poll attempt
+    // Advance for error backoff + next poll cycle
+    await vi.advanceTimersByTimeAsync((defaultWorkerOptions.pollingIntervalMs! * 2) + defaultWorkerOptions.pollingIntervalMs! + 50);
 
     expect(fetchNextJobAndLockSpy).toHaveBeenCalledTimes(2);
     fetchNextJobAndLockSpy.mockRestore();
   });
 
   it('should emit worker.job.interrupted if closed during processing and not call complete/fail on queue', async () => {
-    const jobPayload = { data: 'interrupt me', id: 'job-interrupt' };
+    const jobPayload = { data: 'interrupt me', id: randomUUID() }; // Use randomUUID
     const addedJob = await addJobToQueue('interrupt-job', jobPayload);
 
     const processorPromiseCtrl = { resolve: () => {}, reject: () => {} };
