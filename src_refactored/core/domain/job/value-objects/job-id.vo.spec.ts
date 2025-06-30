@@ -20,7 +20,7 @@ describe('JobIdVO', () => {
 
   it('should throw an error if a provided id is not a valid UUID', () => {
     const invalidUuid = 'invalid-uuid';
-    expect(() => JobIdVO.create(invalidUuid)).toThrow('Invalid Job ID: Must be a valid UUID.');
+     expect(() => JobIdVO.create(invalidUuid)).toThrow('Invalid Job ID format (must be a valid UUID v4).'); // Corrected message
   });
 
   it('equals should return true for JobIdVOs with the same id', () => {

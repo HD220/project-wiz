@@ -1,5 +1,5 @@
 // src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts
-import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc as ascDrizzle, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'; // Added sql
 
 import { IJobRepository } from '@/core/application/ports/job-repository.interface';
 import { JobEntity, JobStatus, JobPersistenceData, JobPersistence } from '@/core/domain/job/job.entity'; // Added JobPersistence

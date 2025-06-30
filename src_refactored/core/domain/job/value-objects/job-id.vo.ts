@@ -30,7 +30,10 @@ export class JobIdVO extends AbstractValueObject<JobIdProps> {
     return new JobIdVO({ value: jobId });
   }
 
-  public equals(other: JobIdVO): boolean {
+  public equals(other?: JobIdVO | null): boolean { // Make other optional and nullable
+    if (other === null || other === undefined) {
+      return false;
+    }
     return this.props.value === other.props.value;
   }
 }

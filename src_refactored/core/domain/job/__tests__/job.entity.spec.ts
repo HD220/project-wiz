@@ -1,6 +1,7 @@
 import { JobEntity, JobStatus } from '../job.entity';
 import { JobIdVO } from '../value-objects/job-id.vo';
-import { JobOptionsVO, IJobBackoffOptions } from '../value-objects/job-options.vo'; // Removed BackoffType, added IJobBackoffOptions for clarity
+import { JobOptionsVO, IJobBackoffOptions, IJobRemovalOptions } from '../value-objects/job-options.vo'; // Added IJobRemovalOptions
+import { DomainError } from '@/core/common/errors'; // Changed to alias path
 import { randomUUID } from 'node:crypto';
 
 describe('JobEntity', () => {
@@ -48,10 +49,10 @@ describe('JobEntity', () => {
       backoff: { type: 'exponential', delay: 500 }, // Use string literal
       jobId: testJobId, // Use generated UUID
       removeOnComplete: true,
-      removeOnFail: 5,
+      removeOnFail: { count: 5 }, // Corrected to IJobRemovalOptions
       timeout: 30000,
     };
-    const job = JobEntity.create({ ...기본JobData, options: customOptions });
+    const job = JobEntity.create({ ...기본JobData, options: customOptions as any }); // Use 'as any' for partial options to satisfy create
 
     expect(job.id.value).toBe(testJobId);
     expect(job.options.attempts).toBe(5);
@@ -59,7 +60,7 @@ describe('JobEntity', () => {
     expect(job.options.priority).toBe(10);
     expect(job.options.backoff).toEqual({ type: 'exponential', delay: 500 }); // Use string literal
     expect(job.options.removeOnComplete).toBe(true);
-    expect(job.options.removeOnFail).toBe(5);
+    expect(job.options.removeOnFail).toEqual({ count: 5 }); // Corrected assertion
     expect(job.options.timeout).toBe(30000);
     expect(job.status).toBe(JobStatus.DELAYED); // Because delay > 0
     expect(job.delayUntil).toBeInstanceOf(Date);
@@ -85,7 +86,12 @@ describe('JobEntity', () => {
     let job: JobEntity<{ data: string }, { result: string }>;
 
     beforeEach(() => {
+      vi.useFakeTimers(); // Use fake timers for this describe block
       job = JobEntity.create(기본JobData);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers(); // Restore real timers
     });
 
     it('should transition to ACTIVE', () => {
@@ -309,13 +315,13 @@ describe('JobEntity', () => {
       expect(persistenceObject.progress).toBe(50);
       expect(persistenceObject.logs.length).toBe(1);
       expect(persistenceObject.logs[0].message).toBe('Persistence log 1');
-      expect(persistenceObject.createdAt).toEqual(job.createdAt.getTime());
-      expect(persistenceObject.updatedAt).toEqual(job.updatedAt.getTime());
-      expect(persistenceObject.processedOn).toEqual(job.processedOn!.getTime());
+      expect(persistenceObject.createdAt).toEqual(job.createdAt); // Compare Date objects
+      expect(persistenceObject.updatedAt).toEqual(job.updatedAt); // Compare Date objects
+      expect(persistenceObject.processedOn).toEqual(job.processedOn); // Compare Date objects
       expect(persistenceObject.finishedOn).toBeUndefined();
       // delayUntil was for initial scheduling, job is now active
-      expect(persistenceObject.delayUntil).toEqual(job.delayUntil!.getTime());
-      expect(persistenceObject.lockUntil).toEqual(lockUntil.getTime());
+      expect(persistenceObject.delayUntil).toEqual(job.delayUntil); // Compare Date objects
+      expect(persistenceObject.lockUntil).toEqual(lockUntil); // Compare Date objects
       expect(persistenceObject.workerId).toBe('worker-p');
       expect(persistenceObject.returnValue).toBeUndefined();
       expect(persistenceObject.failedReason).toBeUndefined();
@@ -331,7 +337,7 @@ describe('JobEntity', () => {
 
       expect(persistenceObject.status).toBe(JobStatus.COMPLETED);
       expect(persistenceObject.returnValue).toEqual({ done: true });
-      expect(persistenceObject.finishedOn).toEqual(job.finishedOn!.getTime());
+      expect(persistenceObject.finishedOn).toEqual(job.finishedOn); // Compare Date objects
       expect(persistenceObject.lockUntil).toBeUndefined();
       expect(persistenceObject.workerId).toBeUndefined();
     });
@@ -364,7 +370,7 @@ describe('JobOptionsVO', () => {
       priority: 3,
       jobId: testJobIdString, // Use UUID string
       removeOnComplete: true,
-      removeOnFail: 10,
+      removeOnFail: { count: 10 }, // Corrected to IJobRemovalOptions
       timeout: 5000,
       backoff: backoff,
       maxStalledCount: 5,
@@ -374,7 +380,7 @@ describe('JobOptionsVO', () => {
     expect(opts.priority).toBe(3);
     expect(opts.jobId).toBe(testJobIdString); // Expect the string
     expect(opts.removeOnComplete).toBe(true);
-    expect(opts.removeOnFail).toBe(10);
+    expect(opts.removeOnFail).toEqual({ count: 10 }); // Corrected assertion
     expect(opts.timeout).toBe(5000);
     expect(opts.backoff).toEqual(backoff);
     expect(opts.maxStalledCount).toBe(5);
@@ -388,7 +394,7 @@ describe('JobOptionsVO', () => {
       priority: 3,
       jobId: testJobIdForPersistence, // Use UUID string
       removeOnComplete: true,
-      removeOnFail: 10,
+      removeOnFail: { count: 10 }, // Corrected to IJobRemovalOptions
       timeout: 5000,
       backoff: { type: 'exponential', delay: 1000 }, // Use string literal
       maxStalledCount: 2,

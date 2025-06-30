@@ -34,8 +34,12 @@ describe('QueueService (Integration with In-Memory DB)', () => {
     vi.spyOn(queueService, 'emit'); // Spy on event emitter
   });
 
-  afterEach(() => {
+  afterEach(async () => { // Made async
+    if (queueService) {
+      await queueService.close(); // Stop maintenance loop
+    }
     vi.restoreAllMocks(); // Restore any spies
+    // Consider if db needs explicit closing if not in-memory for all tests, but helper uses memory for now.
   });
 
   // afterAll(async () => {
@@ -453,22 +457,32 @@ describe('QueueService (Integration with In-Memory DB)', () => {
 
     it('should periodically check for stalled jobs in DB and handle them', async () => {
       const stalledJob1Id = JobIdVO.create();
-      await jobRepository.create(JobEntity.create({
-        id: stalledJob1Id, queueName, name: 'stalled1', payload: { email: 's1@ex.com' },
-        options: { attempts: 1 }, status: JobStatus.ACTIVE, workerId: 'stalled-worker',
-        lockUntil: new Date(Date.now() - 100000), // Expired lock
-        processedOn: new Date(Date.now() - 100001),
-        attemptsMade: 1 // This means next stall will exceed max attempts
-      }));
+      let job1 = JobEntity.create({
+        // id: stalledJob1Id, // JobEntity.create will use jobId from options or generate one. Let's provide it in options.
+        queueName, name: 'stalled1', payload: { email: 's1@ex.com' },
+        options: { attempts: 1, jobId: stalledJob1Id.value }
+      });
+      // Manually set properties to simulate a stalled job already in the DB
+      job1.props.status = JobStatus.ACTIVE;
+      job1.props.workerId = 'stalled-worker';
+      job1.props.lockUntil = new Date(Date.now() - 100000); // Expired lock
+      job1.props.processedOn = new Date(Date.now() - 100001);
+      job1.props.attemptsMade = 1; // This means next stall will exceed max attempts
+      await jobRepository.save(job1);
+
 
       const stalledJob2Id = JobIdVO.create();
-      await jobRepository.create(JobEntity.create({
-        id: stalledJob2Id, queueName, name: 'stalled2', payload: { email: 's2@ex.com' },
-        options: { attempts: 2 }, status: JobStatus.ACTIVE, workerId: 'stalled-worker-2',
-        lockUntil: new Date(Date.now() - 100000), // Expired lock
-        processedOn: new Date(Date.now() - 100001),
-        attemptsMade: 1 // Has one more attempt
-      }));
+      let job2 = JobEntity.create({
+        queueName, name: 'stalled2', payload: { email: 's2@ex.com' },
+        options: { attempts: 2, jobId: stalledJob2Id.value }
+      });
+      // Manually set properties
+      job2.props.status = JobStatus.ACTIVE;
+      job2.props.workerId = 'stalled-worker-2';
+      job2.props.lockUntil = new Date(Date.now() - 100000); // Expired lock
+      job2.props.processedOn = new Date(Date.now() - 100001);
+      job2.props.attemptsMade = 1; // Has one more attempt
+      await jobRepository.save(job2);
 
       queueService.startMaintenance();
 

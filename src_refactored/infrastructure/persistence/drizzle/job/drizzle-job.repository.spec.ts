@@ -1,7 +1,9 @@
 import BetterSqlite3 from 'better-sqlite3';
+import BetterSqlite3 from 'better-sqlite3';
 import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
-import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest'; // afterEach removed as it was unused
+import { sql } from 'drizzle-orm'; // Added sql import
+import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
 
 import { JobEntity, JobStatus } from '@/core/domain/job/job.entity';
 // JobIdVO and IJobOptions are not directly used in this spec's scope, only within JobEntity.create.
