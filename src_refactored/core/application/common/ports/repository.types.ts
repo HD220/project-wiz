@@ -66,5 +66,6 @@ export interface PaginatedResult<T> {
  * Can be extended by specific repositories for more complex filtering.
  */
 export interface BaseQueryFilters {
-  [key: string]: unknown; // Allows for arbitrary filter keys
+  // Allows for arbitrary filter keys
+  [key: string]: unknown;
 }
