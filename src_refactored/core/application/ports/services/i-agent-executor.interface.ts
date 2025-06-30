@@ -1,7 +1,10 @@
 import { Agent } from '@/core/domain/agent/agent.entity';
-import { DomainError } from '@/core/domain/common/errors'; // Corrected path
-import { JobProcessingOutput } from '@/core/domain/job/job-processing.types'; // Corrected type
-import { JobEntity } from '@/core/domain/job/job.entity'; // Corrected type
+// Corrected path
+import { DomainError } from '@/core/domain/common/errors';
+// Corrected type
+import { JobProcessingOutput } from '@/core/domain/job/job-processing.types';
+// Corrected type
+import { JobEntity } from '@/core/domain/job/job.entity';
 
 
 import { ApplicationError } from '@/application/common/errors';
@@ -27,7 +30,9 @@ export interface IAgentExecutor {
    *          On failure, it contains a DomainError or ApplicationError.
    */
   executeJob(
-    job: JobEntity, // Corrected type
+    // Corrected type
+    job: JobEntity,
     agent: Agent
-  ): Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>; // Corrected type
+    // Corrected type
+  ): Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>;
 }
