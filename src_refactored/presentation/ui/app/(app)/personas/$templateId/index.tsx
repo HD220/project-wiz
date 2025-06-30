@@ -1,5 +1,6 @@
 import { createFileRoute, useParams, Link, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, Edit3, UserSquare, Settings, Zap, Brain, MessageSquare, BookText, FolderCog, TerminalSquare, SearchCode, TestTubeDiagonal, Bug, Presentation, Palette, FileText, Camera, ListChecks } from 'lucide-react'; // Added more icons
+// Added more icons
+import { ArrowLeft, Edit3, UserSquare, Settings, Zap, Brain, MessageSquare, BookText, FolderCog, TerminalSquare, SearchCode, TestTubeDiagonal, Bug, Presentation, Palette, FileText, Camera, ListChecks } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 

@@ -39,7 +39,7 @@ const CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL = IPC_CHANNELS.DM_MESSAGE_RECE
 const GET_SIDEBAR_CONVERSATIONS_CHANNEL = IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST;
 
 
-function ChatPage(): JSX.Element {
+function ChatPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { conversationId: selectedConversationIdFromSearch } = Route.useSearch();
 
@@ -166,7 +166,7 @@ function ChatPageContent({
   onSendMessage,
   currentUserId,
   selectedConversationId,
-}: ChatPageContentProps): JSX.Element {
+}: ChatPageContentProps) {
   return (
     <main className="flex-1 flex flex-col overflow-hidden">
       {messagesError && !isLoadingMessages && selectedConversationId && (

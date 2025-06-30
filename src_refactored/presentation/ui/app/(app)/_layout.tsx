@@ -3,7 +3,7 @@ import React from 'react';
 
 import { AppSidebar } from '@/presentation/ui/components/layout/AppSidebar';
 
-function AppLayoutComponent(): JSX.Element {
+function AppLayoutComponent() {
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* AppSidebar fina, sempre visível */}

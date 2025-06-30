@@ -6,6 +6,7 @@ import vitestPlugin from "eslint-plugin-vitest";
 import * as importPlugin from "eslint-plugin-import";
 import boundariesPlugin from "eslint-plugin-boundaries";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import reactPlugin from "eslint-plugin-react";
 import globals from "globals";
 
 export default [
@@ -47,16 +48,12 @@ export default [
       parserOptions: {
         project: "./tsconfig.json",
         tsconfigRootDir: import.meta.dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
       },
       globals: {
         ...vitestPlugin.environments.env.globals,
         ...globals.node,
         ...globals.browser,
         window: "readonly",
-        React: "readonly",
       },
     },
     plugins: {
@@ -65,11 +62,14 @@ export default [
       vitest: vitestPlugin,
       boundaries: boundariesPlugin,
       "react-hooks": reactHooksPlugin,
+      react: reactPlugin,
     },
     rules: {
       ...js.configs.recommended.rules,
       ...tsPlugin.configs.recommended.rules,
       ...vitestPlugin.configs.recommended.rules,
+      ...reactPlugin.configs.recommended.rules,
+      "react/react-in-jsx-scope": "off", // Not needed with new JSX transform
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
 
@@ -166,6 +166,9 @@ export default [
         { type: "ui-hooks", pattern: "src_refactored/presentation/ui/hooks" },
       ],
       "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"],
+      react: { // Add React version setting here
+        version: "detect",
+      },
     },
   },
   // Override for Application .tsx AND ALL Test files (.ts and .tsx) for line limits

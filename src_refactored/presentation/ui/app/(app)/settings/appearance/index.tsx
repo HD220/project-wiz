@@ -2,7 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { ArrowLeft, Sun, Moon, MonitorSmartphone } from 'lucide-react';
 import React from 'react';
 
-import { useTheme } from '@/presentation/ui/components/common/theme-provider'; // Import useTheme
+// Import useTheme
+import { useTheme } from '@/presentation/ui/components/common/theme-provider';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import { Label } from '@/presentation/ui/components/ui/label';
@@ -57,7 +58,7 @@ function AppearanceSettingsPage() {
               ))}
             </RadioGroup>
             <p className="text-xs text-muted-foreground mt-3">
-              Selecionar "Sistema" usará a preferência de tema do seu sistema operacional.
+              Selecionar &quot;Sistema&quot; usará a preferência de tema do seu sistema operacional.
             </p>
           </div>
 

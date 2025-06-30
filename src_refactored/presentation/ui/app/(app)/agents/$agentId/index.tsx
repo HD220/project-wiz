@@ -21,7 +21,7 @@ const statusDisplayMap: Record<AgentInstance['status'], { label: string; icon: R
   completed: { label: 'Concluído (Job)', icon: Zap, colorClasses: 'bg-green-500 text-green-50' },
 };
 
-const InfoItem = ({icon: itemIcon, label, value, className}: {icon: React.ElementType, label: string, value: string | number | undefined, className?: string}): JSX.Element => {
+const InfoItem = ({icon: itemIcon, label, value, className}: {icon: React.ElementType, label: string, value: string | number | undefined, className?: string}) => {
   const IconComponent = itemIcon;
   return (
     <div>
@@ -39,7 +39,7 @@ interface AgentDetailHeaderProps {
   instance: AgentInstance;
   statusInfo: { label: string; icon: React.ElementType; colorClasses: string };
 }
-function AgentDetailHeader({ instance, statusInfo }: AgentDetailHeaderProps): JSX.Element {
+function AgentDetailHeader({ instance, statusInfo }: AgentDetailHeaderProps) {
   return (
     <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -63,7 +63,7 @@ function AgentDetailHeader({ instance, statusInfo }: AgentDetailHeaderProps): JS
 interface AgentDetailContentProps {
   instance: AgentInstance;
 }
-function AgentDetailContent({ instance }: AgentDetailContentProps): JSX.Element {
+function AgentDetailContent({ instance }: AgentDetailContentProps) {
   return (
     <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
       <InfoItem icon={Briefcase} label="Persona Base" value={instance.personaTemplateName || 'Não definida'} />
@@ -75,7 +75,7 @@ function AgentDetailContent({ instance }: AgentDetailContentProps): JSX.Element 
 }
 
 // Sub-component for Activity Log Card
-function AgentActivityLogCard(): JSX.Element {
+function AgentActivityLogCard() {
   return (
     <Card>
       <CardHeader>
@@ -87,9 +87,9 @@ function AgentActivityLogCard(): JSX.Element {
               (Placeholder: Lista de logs de atividade do agente, como início/fim de jobs, ferramentas usadas, erros, etc.)
           </p>
           <ul className="mt-3 space-y-2 text-xs">
-              <li className="flex items-start"><span className="font-mono text-slate-500 dark:text-slate-400 mr-2">[10:35:02]</span> Job 'task-abc-123' iniciado.</li>
-              <li className="flex items-start"><span className="font-mono text-slate-500 dark:text-slate-400 mr-2">[10:35:05]</span> Ferramenta 'filesystem.readFile' executada com sucesso.</li>
-              <li className="flex items-start"><span className="font-mono text-red-500 dark:text-red-400 mr-2">[10:36:12]</span> Erro ao processar 'subtask-xyz': Timeout.</li>
+              <li className="flex items-start"><span className="font-mono text-slate-500 dark:text-slate-400 mr-2">[10:35:02]</span> Job &apos;task-abc-123&apos; iniciado.</li>
+              <li className="flex items-start"><span className="font-mono text-slate-500 dark:text-slate-400 mr-2">[10:35:05]</span> Ferramenta &apos;filesystem.readFile&apos; executada com sucesso.</li>
+              <li className="flex items-start"><span className="font-mono text-red-500 dark:text-red-400 mr-2">[10:36:12]</span> Erro ao processar &apos;subtask-xyz&apos;: Timeout.</li>
           </ul>
       </CardContent>
     </Card>
@@ -97,7 +97,7 @@ function AgentActivityLogCard(): JSX.Element {
 }
 
 
-function AgentInstanceDetailPage(): JSX.Element {
+function AgentInstanceDetailPage() {
   const params = useParams({ from: '/(app)/agents/$agentId/' });
   const agentId = params.agentId;
   const router = useRouter();
@@ -148,7 +148,8 @@ function AgentInstanceDetailPage(): JSX.Element {
     );
   }
 
-  const statusInfo = statusDisplayMap[instance.status] || statusDisplayMap.idle; // Fallback to idle if status is unexpected
+  // Fallback to idle if status is unexpected
+  const statusInfo = statusDisplayMap[instance.status] || statusDisplayMap.idle;
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">

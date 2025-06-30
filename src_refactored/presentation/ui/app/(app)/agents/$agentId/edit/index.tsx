@@ -32,7 +32,7 @@ interface DataLoadingOrErrorDisplayProps {
   router: ReturnType<typeof useRouter>;
 }
 
-function DataLoadingOrErrorDisplay({ isLoadingAll, anyError, agentError, personasError, llmsError, router }: DataLoadingOrErrorDisplayProps): JSX.Element | null {
+function DataLoadingOrErrorDisplay({ isLoadingAll, anyError, agentError, personasError, llmsError, router }: DataLoadingOrErrorDisplayProps) {
   if (isLoadingAll) {
     return (
       <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
@@ -80,7 +80,7 @@ function EditAgentFormRenderer({
   llmConfigs,
   handleSubmit,
   isSubmitting,
-}: EditAgentFormRendererProps): JSX.Element {
+}: EditAgentFormRendererProps) {
   if (!agentInstance) {
     // Should not happen if DataLoadingOrErrorDisplay is used before this
     return (
@@ -130,7 +130,7 @@ function EditAgentFormRenderer({
 }
 
 
-function EditAgentInstancePage(): JSX.Element {
+function EditAgentInstancePage() {
   const router = useRouter();
   const params = useParams({ from: '/(app)/agents/$agentId/edit/' });
   const agentId = params.agentId;
@@ -205,7 +205,7 @@ function EditAgentInstancePage(): JSX.Element {
     return (
       <div className="p-8 text-center">
         <ServerCrash className="h-12 w-12 text-slate-500 dark:text-slate-400 mb-4" />
-        <p className="text-lg">Instância de Agente com ID "{agentId}" não encontrada.</p>
+        <p className="text-lg">Instância de Agente com ID &quot;{agentId}&quot; não encontrada.</p>
          <Button variant="outline" className="mt-4" asChild>
             <Link to="/agents"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes</Link>
         </Button>

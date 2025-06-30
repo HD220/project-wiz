@@ -21,7 +21,7 @@ import type {
 } from '@/shared/ipc-types';
 
 
-function NewAgentInstancePage(): JSX.Element {
+function NewAgentInstancePage() {
   const router = useRouter();
 
   const { data: personaTemplates, isLoading: isLoadingPersonas, error: personasError } = useIpcQuery<

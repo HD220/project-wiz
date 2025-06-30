@@ -33,6 +33,7 @@
   },
   "include": [
     "src_refactored/**/*",
+    "src_refactored/presentation/ui/global.d.ts",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",

@@ -30,7 +30,7 @@ const mockAgentInstances: AgentInstance[] = [
 ];
 
 
-function AgentInstancesPage(): JSX.Element {
+function AgentInstancesPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const getPersonaName = (templateId: string): string => mockPersonaTemplates[templateId]?.name || 'Desconhecido';

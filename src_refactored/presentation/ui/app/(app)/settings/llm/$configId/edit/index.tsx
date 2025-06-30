@@ -6,7 +6,8 @@ import { toast } from 'sonner';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import { LLMConfigForm, LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm';
-import { LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList'; // For mock data type
+// For mock data type
+import { LLMConfig } from '@/presentation/ui/features/llm/components/LLMConfigList';
 
 // Simulating a "database" of LLM configurations
 // In a real app, this would be fetched and updated via IPC/API
@@ -36,8 +37,10 @@ function EditLLMConfigPage() {
       if (foundConfig) {
         setInitialValues({
           name: foundConfig.name,
-          providerId: foundConfig.providerId as LLMConfigFormData['providerId'], // Cast if necessary
-          apiKey: foundConfig.apiKey || '', // Directly access apiKey, it's optional on LLMConfig
+          // Cast if necessary
+          providerId: foundConfig.providerId as LLMConfigFormData['providerId'],
+          // Directly access apiKey, it's optional on LLMConfig
+          apiKey: foundConfig.apiKey || '',
           baseUrl: foundConfig.baseUrl || '',
         });
         setConfigName(foundConfig.name);
@@ -62,7 +65,8 @@ function EditLLMConfigPage() {
         mockLlmConfigsDb[dbKey] = {
             ...mockLlmConfigsDb[dbKey],
             ...data,
-            id: configId // ensure id remains the same
+            // ensure id remains the same
+            id: configId
         };
       }
       setConfigName(data.name);
