@@ -52,7 +52,8 @@ export function MarkdownRenderer({
   const defaultComponents: Options['components'] = {
 
     // Open links in new tab
-    a: ({node: _node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />,
+    // eslint-disable-next-line jsx-a11y/anchor-has-content
+    a: ({ node: _node, ...anchorProps }) => <a {...anchorProps} target="_blank" rel="noopener noreferrer" />,
 
     // Custom styling for code blocks (pre > code)
     // This is a basic version. For syntax highlighting, you'd integrate react-syntax-highlighter here.
