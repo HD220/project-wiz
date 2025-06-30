@@ -43,7 +43,8 @@ const statusIndicatorMap: Record<Required<Participant>['status'], { color: strin
 
 interface ProjectParticipantsSidebarProps {
   className?: string;
-  // projectId?: string; // Se precisar buscar participantes específicos do projeto
+  // projectId?: string;
+  // Se precisar buscar participantes específicos do projeto
 }
 
 export function ProjectParticipantsSidebar({ className }: ProjectParticipantsSidebarProps) {
@@ -55,8 +56,10 @@ export function ProjectParticipantsSidebar({ className }: ProjectParticipantsSid
     (participant.roleOrPersona || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const humanParticipants = filteredParticipants.filter(person => person.type === 'human'); // p to person
-  const agentParticipants = filteredParticipants.filter(agent => agent.type === 'agent'); // p to agent
+  // p to person
+  const humanParticipants = filteredParticipants.filter(person => person.type === 'human');
+  // p to agent
+  const agentParticipants = filteredParticipants.filter(agent => agent.type === 'agent');
 
   const renderParticipant = (participant: Participant) => {
     const statusInfo = participant.status ? statusIndicatorMap[participant.status] : null;
