@@ -20,8 +20,8 @@ interface AgentProps {
 }
 
 export class Agent {
-  private readonly _id: AgentId; // Instance variable 1: Identity
-  private readonly props: Readonly<AgentProps>; // Instance variable 2: Other properties
+  private readonly _id: AgentId;
+  private readonly props: Readonly<AgentProps>;
 
   private constructor(id: AgentId, props: AgentProps) {
     this._id = id;

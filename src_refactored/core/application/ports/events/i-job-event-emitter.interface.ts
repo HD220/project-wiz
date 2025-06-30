@@ -2,9 +2,10 @@
 import {
   JobEventType,
   JobEventPayloadMap
-} from '@/core/application/queue/events/job-event.types'; // This path is now correct
+} from '@/core/application/queue/events/job-event.types';
+// Corrected path
 
-export const JOB_EVENT_EMITTER_TOKEN = Symbol('IJobEventEmitter'); // Renamed Symbol
+export const JOB_EVENT_EMITTER_TOKEN = Symbol('IJobEventEmitter');
 
 export interface IJobEventEmitter {
   emit<K extends JobEventType>(event: K, payload: JobEventPayloadMap[K]): boolean;

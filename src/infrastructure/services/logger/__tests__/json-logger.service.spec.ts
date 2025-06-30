@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { JsonLogger } from "./json-logger.service";
+import { JsonLogger } from "../json-logger.service";
 import { Job } from "@/core/domain/entities/jobs/job.entity";
 
 describe("JsonLogger", () => {

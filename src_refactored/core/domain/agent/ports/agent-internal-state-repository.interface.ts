@@ -4,7 +4,7 @@ import { AgentInternalState } from '../agent-internal-state.entity';
 import { AgentId } from '../value-objects/agent-id.vo';
 
 export interface IAgentInternalStateRepository {
-  save(state: AgentInternalState): Promise<Result<void>>; // Handles create and update
+  save(state: AgentInternalState): Promise<Result<void>>;
   findByAgentId(agentId: AgentId): Promise<Result<AgentInternalState | null>>;
-  deleteByAgentId(agentId: AgentId): Promise<Result<void>>; // If state can be deleted
+  deleteByAgentId(agentId: AgentId): Promise<Result<void>>;
 }

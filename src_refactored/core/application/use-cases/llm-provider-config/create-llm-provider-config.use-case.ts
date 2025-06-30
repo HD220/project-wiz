@@ -1,11 +1,12 @@
 // src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.ts
 import { ZodError } from 'zod';
 
-
-import { DomainError, ValueError } from '@/domain/common/errors'; // ValueError for VO creation issues
+// ValueError for VO creation issues
+import { DomainError, ValueError } from '@/domain/common/errors';
 import {
   LLMProviderConfig,
-  BaseUrl // BaseUrl is defined within llm-provider-config.entity.ts
+  // BaseUrl is defined within llm-provider-config.entity.ts
+  BaseUrl
 } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';
@@ -13,7 +14,8 @@ import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/
 import { LLMProviderConfigName } from '@/domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from '@/domain/llm-provider-config/value-objects/llm-provider-id.vo';
 
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+// Standardized to IUseCase
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 
 import { Result, ok, error } from '@/shared/result';
 
@@ -26,7 +28,8 @@ import {
 
 export class CreateLLMProviderConfigUseCase
   implements
-    IUseCase< // Changed Executable to IUseCase
+    // Changed Executable to IUseCase
+    IUseCase<
       CreateLLMProviderConfigUseCaseInput,
       CreateLLMProviderConfigUseCaseOutput,
       DomainError | ZodError | ValueError
@@ -87,17 +90,20 @@ export class CreateLLMProviderConfigUseCase
         llmProviderConfigId: llmConfigEntity.id().value(),
       });
 
-    } catch (err: any) {
-      if (err instanceof ZodError) { // Should be caught by safeParse, but as a safeguard
-        return error(err);
+    } catch (errorValue: unknown) {
+      // Should be caught by safeParse, but as a safeguard
+      if (errorValue instanceof ZodError) {
+        return error(errorValue);
       }
-      if (err instanceof DomainError || err instanceof ValueError) { // Catch errors from VO creation
-        return error(err);
+      // Catch errors from VO creation
+      if (errorValue instanceof DomainError || errorValue instanceof ValueError) {
+        return error(errorValue);
       }
-      console.error('[CreateLLMProviderConfigUseCase] Unexpected error:', err);
+      console.error('[CreateLLMProviderConfigUseCase] Unexpected error:', errorValue);
+      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
       return error(
         new DomainError(
-          `An unexpected error occurred while creating the LLM provider configuration: ${err.message || err}`,
+          `An unexpected error occurred while creating the LLM provider configuration: ${message}`,
         ),
       );
     }

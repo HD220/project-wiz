@@ -1,7 +1,8 @@
 // src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
 
-import { ILogger } from '@/core/common/services/i-logger.service'; // Added import for ILogger
+// Added import for ILogger
+import { ILogger } from '@/core/common/services/i-logger.service';
 
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
@@ -23,7 +24,8 @@ export class LoadAgentInternalStateUseCase
   implements
     Executable<
       LoadAgentInternalStateUseCaseInput,
-      LoadAgentInternalStateUseCaseOutput | null, // Output can be null if state not found
+      // Output can be null if state not found
+      LoadAgentInternalStateUseCaseOutput | null,
       DomainError | ZodError | ValueError | NotFoundError
     >
 {
@@ -66,12 +68,12 @@ export class LoadAgentInternalStateUseCase
       };
 
       return ok(output);
-    } catch (e: unknown) {
-      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
-        return error(e);
+    } catch (errorValue: unknown) {
+      if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
+        return error(errorValue);
       }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { error: e });
+      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { error: errorValue });
       return error(new DomainError(`Unexpected error loading agent state: ${message}`));
     }
   }

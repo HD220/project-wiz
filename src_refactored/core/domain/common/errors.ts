@@ -10,7 +10,9 @@ export class DomainError extends Error {
     this.name = this.constructor.name;
 
     // Capture stack trace in V8 environments (Node.js, Chrome)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof (Error as any).captureStackTrace === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (Error as any).captureStackTrace(this, this.constructor);
     }
   }
@@ -20,11 +22,10 @@ export class DomainError extends Error {
  * Error thrown when a Value Object validation fails.
  */
 export class ValueError extends DomainError {
-  // Optionally, include the field and value that caused the error
   public readonly field?: string;
-  public readonly value?: any;
+  public readonly value?: unknown;
 
-  constructor(message: string, field?: string, value?: any) {
+  constructor(message: string, field?: string, value?: unknown) {
     super(message);
     this.field = field;
     this.value = value;
@@ -35,7 +36,6 @@ export class ValueError extends DomainError {
  * Error thrown when an Entity-specific business rule is violated.
  */
 export class EntityError extends DomainError {
-  // Optionally, include the entity ID or related info
   public readonly entityId?: string;
 
   constructor(message: string, entityId?: string) {
@@ -65,14 +65,14 @@ export class NotFoundError extends DomainError {
  */
 export class ToolError extends DomainError {
   public readonly toolName?: string;
-  public readonly originalError?: any; // To store the underlying error if any
+  public readonly originalError?: unknown;
   public readonly isRecoverable: boolean;
 
   constructor(
     message: string,
     toolName?: string,
-    originalError?: any,
-    isRecoverable: boolean = true, // Default to recoverable
+    originalError?: unknown,
+    isRecoverable: boolean = true,
   ) {
     super(message);
     this.toolName = toolName;
@@ -100,9 +100,9 @@ export class QueueError extends DomainError {
  */
 export class LLMError extends DomainError {
   public readonly modelId?: string;
-  public readonly provider?: string; // e.g., 'openai', 'anthropic'
-  public readonly statusCode?: number; // HTTP status code if applicable
-  public readonly originalError?: any;
+  public readonly provider?: string;
+  public readonly statusCode?: number;
+  public readonly originalError?: unknown;
 
   constructor(
     message: string,
@@ -110,7 +110,7 @@ export class LLMError extends DomainError {
       modelId?: string;
       provider?: string;
       statusCode?: number;
-      originalError?: any;
+      originalError?: unknown;
     }
   ) {
     super(message);

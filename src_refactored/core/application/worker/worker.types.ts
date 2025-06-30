@@ -35,7 +35,7 @@ export interface WorkerOptions {
    * A value of 0 would mean renewing just before expiry, a value of 1 would mean renewing immediately after acquiring.
    * @default (lockDuration / 2) or a fixed buffer like 5000ms if lockDuration is very short.
    */
-  lockRenewTimeBuffer?: number; // Could also be a fixed time in ms, e.g., renew 5s before expiry.
+  lockRenewTimeBuffer?: number;
 
   /**
    * The maximum number of times a job can be marked as stalled before it is failed permanently.

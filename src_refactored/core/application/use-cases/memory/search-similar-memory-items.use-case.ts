@@ -9,8 +9,8 @@ import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
 
-import { ApplicationError, DomainError, ValueError } from '@/application/common/errors';
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+import { ApplicationError, ValueError } from '@/application/common/errors';
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 
 import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
 
@@ -24,7 +24,7 @@ import {
 @injectable()
 export class SearchSimilarMemoryItemsUseCase
   implements
-    IUseCase< // Changed Executable to IUseCase
+    IUseCase<
       SearchSimilarMemoryItemsUseCaseInput,
       SearchSimilarMemoryItemsUseCaseOutput,
       ApplicationError | ZodError
@@ -37,7 +37,6 @@ export class SearchSimilarMemoryItemsUseCase
 
   private mapEntityToSimilarListItem(entity: MemoryItem, score?: number): SimilarMemoryListItem {
     const fullContent = entity.content().value();
-    // Consistent excerpt logic with SearchMemoryItemsUseCase (e.g., 200 chars)
     const excerptLength = 200;
     const excerpt = fullContent.length > excerptLength ? fullContent.substring(0, excerptLength - 3) + '...' : fullContent;
 
@@ -49,7 +48,7 @@ export class SearchSimilarMemoryItemsUseCase
       source: entity.source().value(),
       createdAt: entity.createdAt().toISOString(),
       updatedAt: entity.updatedAt().toISOString(),
-      relevanceScore: score, // Score might come from repository or be calculated
+      relevanceScore: score,
     };
   }
 
@@ -58,35 +57,21 @@ export class SearchSimilarMemoryItemsUseCase
   ): Promise<Result<SearchSimilarMemoryItemsUseCaseOutput, ApplicationError | ZodError>> {
     this.logger.debug('SearchSimilarMemoryItemsUseCase: Starting execution with input:', input);
 
-    const validationResult = SearchSimilarMemoryItemsUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      this.logger.warn('SearchSimilarMemoryItemsUseCase: Input validation failed.', validationResult.error);
-      return resultError(validationResult.error); // ZodError
+    const validationResult = this._validateInput(input);
+    if (validationResult.isError()) {
+      return resultError(validationResult.error);
     }
-    const validInput = validationResult.data;
+    const validInput = validationResult.value;
 
-    let embeddingVo: MemoryItemEmbedding;
-    let agentIdVo: Identity | undefined; // Undefined if not provided or null
-
-    try {
-      embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding);
-      if (validInput.agentId) { // Only create if agentId is a non-empty string
-        agentIdVo = Identity.fromString(validInput.agentId);
-      }
-      // If validInput.agentId is null or undefined, agentIdVo remains undefined, which is fine for the repository call.
-    } catch (e) {
-      if (e instanceof ValueError) {
-        this.logger.warn(`SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${e.message}`, e);
-        return resultError(new ApplicationError(`Invalid input parameter: ${e.message}`, e));
-      }
-      this.logger.error('SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.', e);
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      return resultError(new ApplicationError(`Unexpected error processing input: ${errorMessage}`, e as Error));
+    const voCreationResult = this._createValueObjects(validInput);
+    if (voCreationResult.isError()) {
+      return resultError(voCreationResult.error);
     }
+    const { embeddingVo, agentIdVo } = voCreationResult.value;
 
     const repoResult = await this.memoryRepository.searchSimilar(
       embeddingVo,
-      agentIdVo, // Will be undefined if agentId was null or not provided in input
+      agentIdVo,
       validInput.limit,
     );
 
@@ -104,14 +89,39 @@ export class SearchSimilarMemoryItemsUseCase
       return resultError(appError);
     }
 
-    // The repository's searchSimilar currently returns MemoryItem[].
-    // If it were to return items with scores, the mapping would need to handle that.
-    // For now, relevanceScore will be undefined in the output items.
     const similarItems = repoResult.value.map(entity => this.mapEntityToSimilarListItem(entity));
 
     this.logger.debug('SearchSimilarMemoryItemsUseCase: Execution successful.');
     return ok({
       items: similarItems,
     });
+  }
+
+  private _validateInput(input: SearchSimilarMemoryItemsUseCaseInput): Result<SearchSimilarMemoryItemsUseCaseInput, ZodError> {
+    const validationResult = SearchSimilarMemoryItemsUseCaseInputSchema.safeParse(input);
+    if (!validationResult.success) {
+      this.logger.warn('SearchSimilarMemoryItemsUseCase: Input validation failed.', validationResult.error);
+      return resultError(validationResult.error);
+    }
+    return ok(validationResult.data);
+  }
+
+  private _createValueObjects(validInput: SearchSimilarMemoryItemsUseCaseInput): Result<{ embeddingVo: MemoryItemEmbedding; agentIdVo?: Identity }, ApplicationError> {
+    try {
+      const embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding);
+      let agentIdVo: Identity | undefined;
+      if (validInput.agentId) {
+        agentIdVo = Identity.fromString(validInput.agentId);
+      }
+      return ok({ embeddingVo, agentIdVo });
+    } catch (exception) {
+      if (exception instanceof ValueError) {
+        this.logger.warn(`SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${exception.message}`, exception);
+        return resultError(new ApplicationError(`Invalid input parameter: ${exception.message}`, exception));
+      }
+      this.logger.error('SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.', exception);
+      const errorMessage = exception instanceof Error ? exception.message : String(exception);
+      return resultError(new ApplicationError(`Unexpected error processing input: ${errorMessage}`, exception as Error));
+    }
   }
 }

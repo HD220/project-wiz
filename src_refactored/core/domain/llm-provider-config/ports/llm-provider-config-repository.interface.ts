@@ -7,7 +7,7 @@ import { LLMProviderId } from '../value-objects/llm-provider-id.vo';
 export interface ILLMProviderConfigRepository {
   save(config: LLMProviderConfig): Promise<Result<void>>;
   findById(id: LLMProviderConfigId): Promise<Result<LLMProviderConfig | null>>;
-  findByProviderId(providerId: LLMProviderId): Promise<Result<LLMProviderConfig[]>>; // A provider might have multiple named configs
+  findByProviderId(providerId: LLMProviderId): Promise<Result<LLMProviderConfig[]>>;
   findAll(): Promise<Result<LLMProviderConfig[]>>;
   delete(id: LLMProviderConfigId): Promise<Result<void>>;
 }

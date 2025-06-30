@@ -39,19 +39,8 @@ export class ListAnnotationsUseCase
     const validInput = validationResult.data;
 
     try {
-      const filters: Partial<AnnotationSearchFilters> = {};
-      if (validInput.agentId) {
-        filters.agentId = Identity.fromString(validInput.agentId);
-      }
-      if (validInput.jobId) {
-        filters.jobId = Identity.fromString(validInput.jobId);
-      }
-      // Add other filters like textContains here if implemented
-
-      const pagination: PaginationOptions = {
-        page: validInput.page,
-        pageSize: validInput.pageSize,
-      };
+      const filters = this._buildSearchFilters(validInput);
+      const pagination = this._buildPaginationOptions(validInput);
 
       const searchResult = await this.annotationRepository.search(filters, pagination);
       if (searchResult.isError()) {
@@ -59,17 +48,7 @@ export class ListAnnotationsUseCase
       }
 
       const paginatedData = searchResult.value;
-
-      const annotationListItems: AnnotationListItem[] = paginatedData.annotations.map(
-        (annotationEntity: Annotation): AnnotationListItem => ({
-          id: annotationEntity.id().value(),
-          text: annotationEntity.text().value(),
-          agentId: annotationEntity.agentId()?.value() || null,
-          jobId: annotationEntity.jobId()?.value() || null,
-          createdAt: annotationEntity.createdAt().toISOString(),
-          updatedAt: annotationEntity.updatedAt().toISOString(),
-        }),
-      );
+      const annotationListItems = this._mapAnnotationsToOutput(paginatedData.annotations);
 
       return ok({
         annotations: annotationListItems,
@@ -78,13 +57,48 @@ export class ListAnnotationsUseCase
         pageSize: paginatedData.pageSize,
         totalPages: paginatedData.totalPages,
       });
-    } catch (e: unknown) { // Changed err: any to e: unknown
-      if (e instanceof ZodError || e instanceof DomainError || e instanceof ValueError) {
-        return error(e);
-      }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[ListAnnotationsUseCase] Unexpected error: ${message}`, { error: e }); // Added logger
-      return error(new DomainError(`Unexpected error listing annotations: ${message}`));
+    } catch (errValue: unknown) {
+      return this._handleUseCaseError(errValue);
     }
+  }
+
+  private _buildSearchFilters(validInput: ListAnnotationsUseCaseInput): Partial<AnnotationSearchFilters> {
+    const filters: Partial<AnnotationSearchFilters> = {};
+    if (validInput.agentId) {
+      filters.agentId = Identity.fromString(validInput.agentId);
+    }
+    if (validInput.jobId) {
+      filters.jobId = Identity.fromString(validInput.jobId);
+    }
+    // Add other filters like textContains here if implemented
+    return filters;
+  }
+
+  private _buildPaginationOptions(validInput: ListAnnotationsUseCaseInput): PaginationOptions {
+    return {
+      page: validInput.page,
+      pageSize: validInput.pageSize,
+    };
+  }
+
+  private _mapAnnotationsToOutput(annotations: Annotation[]): AnnotationListItem[] {
+    return annotations.map(
+      (annotationEntity: Annotation): AnnotationListItem => ({
+        id: annotationEntity.id().value(),
+        text: annotationEntity.text().value(),
+        agentId: annotationEntity.agentId()?.value() || null,
+        jobId: annotationEntity.jobId()?.value() || null,
+        createdAt: annotationEntity.createdAt().toISOString(),
+        updatedAt: annotationEntity.updatedAt().toISOString(),
+      }),
+    );
+  }
+
+  private _handleUseCaseError(errorValue: unknown): Result<never, DomainError | ZodError | ValueError> {
+    if (errorValue instanceof ZodError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
+      return error(errorValue);
+    }
+    const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+    return error(new DomainError(`Unexpected error listing annotations: ${message}`));
   }
 }

@@ -15,11 +15,11 @@ async function main() {
     process.stdout.write(`[Worker] Processing job ${job.id.value} (attempt ${job.attemptsMade}) for email: ${job.payload.email}\n`);
 
     // Simulate work with progress updates
-    for (let i = 0; i <= 100; i += 25) {
+    for (let progressValue = 0; progressValue <= 100; progressValue += 25) { // Renamed i to progressValue
       await new Promise(resolve => setTimeout(resolve, 500));
-      job.updateProgress(i);
-      job.addLog(`Progress updated to ${i}%`);
-      process.stdout.write(`[Worker] Job ${job.id.value} progress: ${i}%\n`);
+      job.updateProgress(progressValue);
+      job.addLog(`Progress updated to ${progressValue}%`);
+      process.stdout.write(`[Worker] Job ${job.id.value} progress: ${progressValue}%\n`);
     }
 
     // Simulate retry logic: fail twice, then succeed
@@ -77,4 +77,18 @@ async function main() {
   }, 60000); // Run for 60 seconds
 }
 
-main().catch(console.error);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Application specific logging, throwing an error, or other logic here
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Application specific logging, throwing an error, or other logic here
+  process.exit(1); // It's generally recommended to exit on uncaught exceptions
+});
+
+main().catch(err => {
+  console.error("Error in main execution:", err);
+  process.exit(1);
+});

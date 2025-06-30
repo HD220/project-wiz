@@ -1,6 +1,6 @@
 // src_refactored/core/domain/memory/ports/memory-repository.types.ts
-import { Identity } from '../../../common/value-objects/identity.vo';
-import { PaginationOptions as CommonPaginationOptions } from '../../job/ports/job-repository.types'; // Reusing from Job
+import { Identity } from '@/core/common/value-objects/identity.vo'; // Corrected alias
+import { PageOptions, PaginatedResult } from '@/core/application/common/ports/repository.types'; // Use new common types
 import { MemoryItem } from '../memory-item.entity';
 
 export interface MemorySearchFilters {
@@ -14,12 +14,5 @@ export interface MemorySearchFilters {
 }
 
 // Re-exporting PaginationOptions if it's generic enough, or define specific if needed
-export type PaginationOptions = CommonPaginationOptions;
-
-export interface PaginatedMemoryItemsResult {
-  items: MemoryItem[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+export type MemoryPaginationOptions = PageOptions; // Use PageOptions from common
+export type PaginatedMemoryItemsResult = PaginatedResult<MemoryItem>; // Use PaginatedResult from common

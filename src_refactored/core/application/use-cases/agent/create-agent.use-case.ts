@@ -7,7 +7,8 @@ import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
-import { AgentMaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo'; // Added import
+// Added import
+import { AgentMaxIterations } from '@/domain/agent/value-objects/agent-max-iterations.vo';
 import { AgentTemperature } from '@/domain/agent/value-objects/agent-temperature.vo';
 import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
@@ -52,76 +53,72 @@ export class CreateAgentUseCase
     const validInput = validationResult.data;
 
     try {
-      // 2. Convert IDs to VOs
-      const personaTemplateIdVo = PersonaId.fromString(validInput.personaTemplateId);
-      const llmConfigIdVo = LLMProviderConfigId.fromString(validInput.llmProviderConfigId);
+      const { personaTemplate, llmProviderConfig } = await this._fetchPrerequisites(validInput);
+      const { temperatureVo, maxIterationsVo, agentIdVo } = this._createAgentValueObjects(validInput);
 
-      // 3. Fetch AgentPersonaTemplate
-      const templateResult = await this.personaTemplateRepository.findById(personaTemplateIdVo);
-      if (templateResult.isError()) {
-        return error(new DomainError(`Failed to fetch persona template: ${templateResult.value.message}`, templateResult.value));
-      }
-      const personaTemplate = templateResult.value;
-      if (!personaTemplate) {
-        return error(new NotFoundError(`AgentPersonaTemplate with ID ${validInput.personaTemplateId} not found.`));
-      }
-
-      // 4. Fetch LLMProviderConfig
-      const llmConfigResult = await this.llmConfigRepository.findById(llmConfigIdVo);
-      if (llmConfigResult.isError()) {
-        return error(new DomainError(`Failed to fetch LLM provider config: ${llmConfigResult.value.message}`, llmConfigResult.value));
-      }
-      const llmProviderConfig = llmConfigResult.value;
-      if (!llmProviderConfig) {
-        return error(new NotFoundError(`LLMProviderConfig with ID ${validInput.llmProviderConfigId} not found.`));
-      }
-
-      // 5. Create AgentTemperature VO
-      const temperatureVo = validInput.temperature !== undefined
-        ? AgentTemperature.create(validInput.temperature)
-        : AgentTemperature.default();
-
-      // 5.b Create AgentMaxIterations VO
-      const maxIterationsVo = validInput.maxIterations !== undefined
-        ? AgentMaxIterations.create(validInput.maxIterations)
-        : AgentMaxIterations.default();
-
-      // 6. Generate AgentId
-      const agentIdVo = AgentId.generate();
-
-      // 7. Create Agent Entity
       const agentEntity = Agent.create({
         id: agentIdVo,
-        personaTemplate, // Shorthand property
-        llmProviderConfig, // Shorthand property
+        personaTemplate,
+        llmProviderConfig,
         temperature: temperatureVo,
         maxIterations: maxIterationsVo,
       });
 
-      // 8. Save Agent Entity
       const saveResult = await this.agentRepository.save(agentEntity);
       if (saveResult.isError()) {
         return error(new DomainError(`Failed to save agent: ${saveResult.value.message}`, saveResult.value));
       }
 
-      // 9. Return Output
-      return ok({
-        agentId: agentEntity.id().value(),
-      });
-    } catch (e: unknown) {
-      if (e instanceof ZodError) {
-        return error(e);
-      }
-      if (e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
-        return error(e);
-      }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[CreateAgentUseCase] Unexpected error: ${message}`, { error: e }); // Added logger
-      return error(
-        new DomainError(
-          `An unexpected error occurred while creating the agent: ${message}`,
-        ),
-      );
+      return ok({ agentId: agentEntity.id().value() });
+    } catch (errorValue: unknown) {
+      return this._handleUseCaseError(errorValue);
     }
+  }
+
+  private async _fetchPrerequisites(validInput: CreateAgentUseCaseInput) {
+    const personaTemplateIdVo = PersonaId.fromString(validInput.personaTemplateId);
+    const llmConfigIdVo = LLMProviderConfigId.fromString(validInput.llmProviderConfigId);
+
+    const templateResult = await this.personaTemplateRepository.findById(personaTemplateIdVo);
+    if (templateResult.isError()) {
+      throw new DomainError(`Failed to fetch persona template: ${templateResult.value.message}`, templateResult.value);
+    }
+    const personaTemplate = templateResult.value;
+    if (!personaTemplate) {
+      throw new NotFoundError(`AgentPersonaTemplate with ID ${validInput.personaTemplateId} not found.`);
+    }
+
+    const llmConfigResult = await this.llmConfigRepository.findById(llmConfigIdVo);
+    if (llmConfigResult.isError()) {
+      throw new DomainError(`Failed to fetch LLM provider config: ${llmConfigResult.value.message}`, llmConfigResult.value);
+    }
+    const llmProviderConfig = llmConfigResult.value;
+    if (!llmProviderConfig) {
+      throw new NotFoundError(`LLMProviderConfig with ID ${validInput.llmProviderConfigId} not found.`);
+    }
+    return { personaTemplate, llmProviderConfig };
+  }
+
+  private _createAgentValueObjects(validInput: CreateAgentUseCaseInput) {
+    const temperatureVo = validInput.temperature !== undefined
+      ? AgentTemperature.create(validInput.temperature)
+      : AgentTemperature.default();
+    const maxIterationsVo = validInput.maxIterations !== undefined
+      ? AgentMaxIterations.create(validInput.maxIterations)
+      : AgentMaxIterations.default();
+    const agentIdVo = AgentId.generate();
+    return { temperatureVo, maxIterationsVo, agentIdVo };
+  }
+
+  private _handleUseCaseError(errorValue: unknown): Result<never, DomainError | NotFoundError | ZodError | ValueError> {
+    if (errorValue instanceof ZodError) {
+      return error(errorValue);
+    }
+    if (errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
+      return error(errorValue);
+    }
+    const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+    this.logger.error(`[CreateAgentUseCase] Unexpected error: ${message}`, { error: errorValue });
+    return error(new DomainError(`An unexpected error occurred while creating the agent: ${message}`));
   }
 }

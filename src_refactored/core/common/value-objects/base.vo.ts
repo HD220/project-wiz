@@ -1,7 +1,7 @@
 // src_refactored/core/common/value-objects/base.vo.ts
 
 export interface ValueObjectProps {
-  [index: string]: any;
+  [index: string]: unknown;
 }
 
 /**

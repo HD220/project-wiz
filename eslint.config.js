@@ -110,8 +110,6 @@ export default [
       ".jules/**", ".roo/**", "types/**"
     ],
   },
-
-  // 2. Base Configuration for `src_refactored` files
   {
     files: ["src_refactored/**/*.ts", "src_refactored/**/*.tsx"],
     languageOptions: {
