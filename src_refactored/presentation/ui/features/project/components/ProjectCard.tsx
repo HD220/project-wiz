@@ -1,6 +1,7 @@
 import { Link }
   from '@tanstack/react-router';
-import { Star, GitFork, CalendarDays } from 'lucide-react'; // Example icons, removed ExternalLink
+// Example icons, removed ExternalLink
+import { Star, GitFork, CalendarDays } from 'lucide-react';
 import React from 'react';
 
 import { Badge } from '@/presentation/ui/components/ui/badge';
@@ -20,9 +21,11 @@ export interface ProjectSummary {
   id: string;
   name: string;
   description: string;
-  lastUpdatedAt?: string | Date; // Could be string or Date object
+  // Could be string or Date object
+  lastUpdatedAt?: string | Date;
   tags?: string[];
-  imageUrl?: string; // Optional image for the card
+  // Optional image for the card
+  imageUrl?: string;
   // Example additional fields for a more "discord-like" project card feel
   starCount?: number;
   forkCount?: number;
@@ -44,11 +47,13 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
 
   return (
     <Link
-      to="/projects/$projectId" // TanStack Router v1 style path param
+      // TanStack Router v1 style path param
+      to="/projects/$projectId"
       params={{ projectId: project.id }}
       className={cn("block hover:shadow-lg transition-shadow duration-200 rounded-lg", className)}
     >
-      <Card className="h-full flex flex-col"> {/* Ensure card itself takes full height of Link */}
+      {/* Ensure card itself takes full height of Link */}
+      <Card className="h-full flex flex-col">
         {project.imageUrl && (
           <img
             src={project.imageUrl}
