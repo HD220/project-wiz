@@ -8,8 +8,10 @@ import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-lo
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 
-import { ApplicationError, DomainError, NotFoundError, ValueError } from '@/application/common/errors'; // Or @/domain/common/errors
-import { IUseCase } from '@/application/common/ports/use-case.interface'; // Standardized to IUseCase
+// Or @/domain/common/errors
+import { ApplicationError, ValueError } from '@/application/common/errors';
+// Standardized to IUseCase
+import { IUseCase } from '@/application/common/ports/use-case.interface';
 
 import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
 
@@ -22,7 +24,8 @@ import {
 @injectable()
 export class RemoveMemoryItemUseCase
   implements
-    IUseCase< // Changed Executable to IUseCase
+    // Changed Executable to IUseCase
+    IUseCase<
       RemoveMemoryItemUseCaseInput,
       RemoveMemoryItemUseCaseOutput,
       ApplicationError | ZodError
@@ -41,21 +44,22 @@ export class RemoveMemoryItemUseCase
     const validationResult = RemoveMemoryItemUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
       this.logger.warn('RemoveMemoryItemUseCase: Input validation failed.', validationResult.error);
-      return resultError(validationResult.error); // ZodError
+      // ZodError
+      return resultError(validationResult.error);
     }
     const validatedInput = validationResult.data;
 
     let itemIdVo: MemoryItemId;
     try {
       itemIdVo = MemoryItemId.fromString(validatedInput.memoryItemId);
-    } catch (e) {
-      if (e instanceof ValueError) {
-        this.logger.warn(`RemoveMemoryItemUseCase: Invalid MemoryItemId format - ${e.message}`, e);
-        return resultError(new ApplicationError(`Invalid memory item ID format: ${e.message}`, e));
+    } catch (errorValue) {
+      if (errorValue instanceof ValueError) {
+        this.logger.warn(`RemoveMemoryItemUseCase: Invalid MemoryItemId format - ${errorValue.message}`, errorValue);
+        return resultError(new ApplicationError(`Invalid memory item ID format: ${errorValue.message}`, errorValue));
       }
-      this.logger.error('RemoveMemoryItemUseCase: Unexpected error creating MemoryItemId VO.', e);
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      return resultError(new ApplicationError(`Unexpected error with memory item ID: ${errorMessage}`, e as Error));
+      this.logger.error('RemoveMemoryItemUseCase: Unexpected error creating MemoryItemId VO.', errorValue);
+      const errorMessage = errorValue instanceof Error ? errorValue.message : String(errorValue);
+      return resultError(new ApplicationError(`Unexpected error with memory item ID: ${errorMessage}`, errorValue as Error));
     }
 
     // Optional: Check if item exists first if specific "Not Found" behavior is critical for the output's 'success' field
@@ -83,7 +87,8 @@ export class RemoveMemoryItemUseCase
         ? deleteResult.error
         : new ApplicationError(
             `Failed to delete memory item: ${deleteResult.error.message}`,
-            deleteResult.error, // Original error as cause
+            // Original error as cause
+            deleteResult.error,
           );
       return resultError(appError);
     }
@@ -91,7 +96,8 @@ export class RemoveMemoryItemUseCase
     this.logger.info(`RemoveMemoryItemUseCase: Memory item ${validatedInput.memoryItemId} processed for deletion.`);
     return ok({
       memoryItemId: validatedInput.memoryItemId,
-      success: true, // True if repository.delete() did not return an error
+      // True if repository.delete() did not return an error
+      success: true,
     });
   }
 }
