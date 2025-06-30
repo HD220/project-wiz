@@ -1,8 +1,11 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
-import React, { useState } from 'react'; // Added useState
-import { toast } from 'sonner'; // For feedback on LLM save
+// Added useState
+import React, { useState } from 'react';
+// For feedback on LLM save
+import { toast } from 'sonner';
 
-import { LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm'; // Import type
+// Import type
+import { LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm';
 import { InitialConfigStep } from '@/presentation/ui/features/onboarding/components/InitialConfigStep';
 import { OnboardingWizard } from '@/presentation/ui/features/onboarding/components/OnboardingWizard';
 import { WelcomeStep } from '@/presentation/ui/features/onboarding/components/WelcomeStep';
@@ -82,6 +85,7 @@ function OnboardingPageComponent() {
           // Pass a prop to disable "Next" on LLM step if not saved, or "Finish" on summary
           // This logic would need to be added to OnboardingWizard component itself.
           // For simplicity now, the summary step message and onFinish check handle it.
+          // This logic would need to be added to OnboardingWizard component itself.
           isStepBlocked={ (stepId: string) => stepId === 'summary' && !isLLMConfigSaved }
         />
       </div>

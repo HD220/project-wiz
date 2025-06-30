@@ -1,7 +1,9 @@
-import { Pencil, Trash2 } from 'lucide-react'; // Icons for edit/delete
+// Icons for edit/delete
+import { Pencil, Trash2 } from 'lucide-react';
 import React from 'react';
 
-import { Badge } from '@/presentation/ui/components/ui/badge'; // To display provider type
+// To display provider type
+import { Badge } from '@/presentation/ui/components/ui/badge';
 import { Button } from '@/presentation/ui/components/ui/button';
 import {
   Table,

@@ -1,7 +1,8 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import React from 'react';
 
-import { UserSidebar } from '@/presentation/ui/features/user/components/layout/UserSidebar'; // Import actual UserSidebar
+// Import actual UserSidebar
+import { UserSidebar } from '@/presentation/ui/features/user/components/layout/UserSidebar';
 
 // Temporary UserSidebar placeholder for layout structure - REMOVED
 // const UserSidebarPlaceholder = () => (
@@ -21,7 +22,8 @@ function UserLayoutComponent() {
   return (
     // This div takes flex-1 and h-full from its parent in (app)/_layout.tsx
     <div className="flex flex-1 h-full overflow-hidden">
-      <UserSidebar /> {/* Use actual UserSidebar */}
+      {/* Use actual UserSidebar */}
+      <UserSidebar />
 
       {/* Main Content Area for DMs, User Settings (if routed here), etc. */}
       <main className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-slate-900">

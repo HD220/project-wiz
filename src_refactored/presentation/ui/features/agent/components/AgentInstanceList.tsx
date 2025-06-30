@@ -4,7 +4,8 @@ import { toast } from 'sonner';
 import { AgentInstance, AgentInstanceListItem } from './AgentInstanceListItem';
 
 interface AgentInstanceListProps {
-  instances: AgentInstance[]; // Expecting enriched instances with names
+  // Expecting enriched instances with names
+  instances: AgentInstance[];
 }
 
 export function AgentInstanceList({ instances }: AgentInstanceListProps) {

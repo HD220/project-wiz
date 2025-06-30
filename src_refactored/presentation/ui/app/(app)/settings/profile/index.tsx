@@ -14,7 +14,8 @@ import { Input } from '@/presentation/ui/components/ui/input';
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.').max(50, 'O nome não pode exceder 50 caracteres.'),
-  email: z.string().email('Email inválido.').optional(), // Email geralmente não é editável pelo usuário diretamente
+  // Email geralmente não é editável pelo usuário diretamente
+  email: z.string().email('Email inválido.').optional(),
   // avatarFile: z.instanceof(File).optional(), // Para upload de arquivo real
 });
 
@@ -24,13 +25,15 @@ type ProfileFormData = z.infer<typeof profileFormSchema>;
 const mockUser = {
   displayName: 'J. Doe',
   email: 'j.doe@example.com',
-  avatarUrl: '/avatars/01.png', // Placeholder avatar
+  // Placeholder avatar
+  avatarUrl: '/avatars/01.png',
 };
 
 function UserProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [currentAvatar, setCurrentAvatar] = useState<string | null>(mockUser.avatarUrl); // Para exibir o avatar
+  // Para exibir o avatar
+  const [currentAvatar, setCurrentAvatar] = useState<string | null>(mockUser.avatarUrl);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -45,7 +48,8 @@ function UserProfilePage() {
     console.log('Dados do perfil submetidos:', data);
     // Simular salvamento
     await new Promise(resolve => setTimeout(resolve, 1000));
-    mockUser.displayName = data.displayName; // Atualizar mock (apenas para demo)
+    // Atualizar mock (apenas para demo)
+    mockUser.displayName = data.displayName;
     // Se houvesse upload de avatar, aqui seria o local para processá-lo
     toast.success('Perfil atualizado com sucesso (simulado)!');
     setIsSubmitting(false);

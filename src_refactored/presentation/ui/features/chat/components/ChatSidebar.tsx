@@ -3,6 +3,7 @@ import { Bot, Hash, Loader2, ServerCrash, ArrowLeft } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/presentation/ui/components/ui/button';
+
 import type { DirectMessageItem } from '@/shared/ipc-types';
 
 interface ChatSidebarProps {

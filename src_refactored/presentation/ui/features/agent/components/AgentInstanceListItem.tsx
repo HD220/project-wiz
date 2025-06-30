@@ -18,13 +18,17 @@ import { Separator } from '@/presentation/ui/components/ui/separator';
 
 export interface AgentInstance {
   id: string;
-  agentName?: string; // Optional custom name for the instance
+  // Optional custom name for the instance
+  agentName?: string;
   personaTemplateId: string;
-  personaTemplateName?: string; // Denormalized for display
+  // Denormalized for display
+  personaTemplateName?: string;
   llmProviderConfigId: string;
-  llmConfigName?: string; // Denormalized for display
+  // Denormalized for display
+  llmConfigName?: string;
   temperature: number;
-  status: 'idle' | 'running' | 'paused' | 'error' | 'completed'; // Expanded status
+  // Expanded status
+  status: 'idle' | 'running' | 'paused' | 'error' | 'completed';
   currentJobId?: string | null;
   lastActivity?: string;
 }
@@ -34,7 +38,8 @@ interface AgentInstanceListItemProps {
   onEdit?: (instanceId: string) => void;
   onDelete?: (instanceId: string) => void;
   onToggleStatus?: (instanceId: string, currentStatus: AgentInstance['status']) => void;
-  onViewChat?: (instanceId: string) => void; // Action to view/start chat with this agent
+  // Action to view/start chat with this agent
+  onViewChat?: (instanceId: string) => void;
 }
 
 const statusMap: Record<AgentInstance['status'], { label: string; color: string; icon: React.ElementType }> = {
@@ -42,7 +47,8 @@ const statusMap: Record<AgentInstance['status'], { label: string; color: string;
   running: { label: 'Executando', color: 'bg-sky-500 dark:bg-sky-400', icon: PlayCircle },
   paused: { label: 'Pausado', color: 'bg-yellow-500 dark:bg-yellow-400', icon: PauseCircle },
   error: { label: 'Erro', color: 'bg-red-500 dark:bg-red-400', icon: AlertTriangle },
-  completed: { label: 'Concluído (Job)', color: 'bg-green-500 dark:bg-green-400', icon: Zap }, // Assuming completed refers to last job
+  // Assuming completed refers to last job
+  completed: { label: 'Concluído (Job)', color: 'bg-green-500 dark:bg-green-400', icon: Zap },
 };
 
 export function AgentInstanceListItem({ instance, onEdit, onDelete, onToggleStatus, onViewChat }: AgentInstanceListItemProps) {
