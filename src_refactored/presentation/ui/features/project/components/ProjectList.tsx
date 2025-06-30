@@ -1,7 +1,8 @@
 import React from 'react';
 import { toast } from 'sonner';
 
-import { Project, ProjectListItem } from './ProjectListItem'; // Assuming Project type is exported
+// Assuming Project type is exported
+import { Project, ProjectListItem } from './ProjectListItem';
 
 interface ProjectListProps {
   projects: Project[];
@@ -41,7 +42,8 @@ export function ProjectList({ projects, viewMode }: ProjectListProps) {
   if (viewMode === 'list') {
     return (
       <div className="flow-root">
-        <div className="-my-2 sm:-my-4"> {/* Negative margins to align with parent padding if needed */}
+        {/* Negative margins to align with parent padding if needed */}
+        <div className="-my-2 sm:-my-4">
           <div className="divide-y divide-slate-200 dark:divide-slate-700">
             {projects.map((project) => (
               <ProjectListItem
