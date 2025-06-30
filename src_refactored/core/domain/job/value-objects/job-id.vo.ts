@@ -1,5 +1,5 @@
 // src_refactored/core/domain/job/value-objects/job-id.vo.ts
-import { randomUUID } from 'node:crypto'; // Use native crypto module
+import { randomUUID } from 'node:crypto';
 
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { DomainError } from '@/core/domain/common/errors';
@@ -30,7 +30,7 @@ export class JobIdVO extends AbstractValueObject<JobIdProps> {
     return new JobIdVO({ value: jobId });
   }
 
-  public equals(other?: JobIdVO | null): boolean { // Make other optional and nullable
+  public equals(other?: JobIdVO | null): boolean {
     if (other === null || other === undefined) {
       return false;
     }

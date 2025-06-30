@@ -1,8 +1,8 @@
 // src_refactored/core/domain/memory/memory-item.entity.ts
 import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
-import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
-import { EntityError, ValueError } from '@/domain/common/errors'; // Corrected alias path
+import { EntityError, ValueError } from '@/domain/common/errors';
 
 import { MemoryItemContent } from './value-objects/memory-item-content.vo';
 import { MemoryItemEmbedding } from './value-objects/memory-item-embedding.vo';
@@ -13,9 +13,9 @@ import { MemoryItemTags } from './value-objects/memory-item-tags.vo';
 export interface MemoryItemProps {
   id: MemoryItemId;
   content: MemoryItemContent;
-  tags: MemoryItemTags; // Should be initialized even if empty
-  source: MemoryItemSource; // Should be initialized even if null
-  embedding: MemoryItemEmbedding; // Should be initialized even if null
+  tags: MemoryItemTags;
+  source: MemoryItemSource;
+  embedding: MemoryItemEmbedding;
   agentId?: Identity | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -41,9 +41,9 @@ export class MemoryItem extends AbstractEntity<MemoryItemId, InternalMemoryItemP
     const internalProps: InternalMemoryItemProps = {
       id: props.id,
       content: props.content,
-      tags: props.tags || MemoryItemTags.create(null), // Ensure VO instance
-      source: props.source || MemoryItemSource.create(null), // Ensure VO instance
-      embedding: props.embedding || MemoryItemEmbedding.create(null), // Ensure VO instance
+      tags: props.tags || MemoryItemTags.create(null),
+      source: props.source || MemoryItemSource.create(null),
+      embedding: props.embedding || MemoryItemEmbedding.create(null),
       agentId: props.agentId === undefined ? null : props.agentId,
       createdAt: props.createdAt || now,
       updatedAt: props.updatedAt || now,
@@ -73,7 +73,7 @@ export class MemoryItem extends AbstractEntity<MemoryItemId, InternalMemoryItemP
   }
 
   public updateTags(newTags: MemoryItemTags): MemoryItem {
-    if (!newTags) throw new ValueError('New tags cannot be null or undefined.'); // Though VO might handle empty array
+    if (!newTags) throw new ValueError('New tags cannot be null or undefined.');
     if (this.props.tags.equals(newTags)) return this;
     return new MemoryItem({ ...this.props, tags: newTags, updatedAt: new Date() });
   }

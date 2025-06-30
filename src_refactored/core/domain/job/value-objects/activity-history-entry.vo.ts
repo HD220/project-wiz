@@ -1,6 +1,6 @@
 // src_refactored/core/domain/job/value-objects/activity-history-entry.vo.ts
-import { ValueObject } from '@/core/common/value-objects/base.vo'; // Assuming a base VO class exists
-import { ValueError } from '@/core/domain/common/errors'; // Removed DomainError
+import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
 
 export enum ActivityEntryType {
   THOUGHT = 'thought',
@@ -16,8 +16,8 @@ export enum ActivityEntryType {
 export interface ActivityHistoryEntryProps {
   type: ActivityEntryType;
   timestamp: Date;
-  content: string | object; // Could be simple text or structured data (e.g., tool call details)
-  metadata?: Record<string, unknown>; // Optional metadata
+  content: string | object;
+  metadata?: Record<string, unknown>;
 }
 
 export class ActivityHistoryEntryVO extends ValueObject<ActivityHistoryEntryProps> {

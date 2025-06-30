@@ -1,19 +1,9 @@
 import { describe, it, expect } from 'vitest';
 
-import { JobOptionsVO, IJobOptions, BackoffOptions } from '../job-options.vo';
+import { JobOptionsVO, IJobOptions, IJobBackoffOptions } from '../job-options.vo';
 
-describe('JobOptionsVO', () => {
-  // This const is for comparing against partial inputs, not for VO's internal defaults.
-  const testSpecificBaseOptions: IJobOptions = {
-    priority: 0, // VO default
-    delay: 0,    // VO default
-    attempts: 1, // VO default
-    backoff: undefined,
-    removeOnComplete: true, // VO default
-    removeOnFail: false,    // VO default
-    maxStalledCount: 3,     // VO default
-  };
 
+describe('JobOptionsVO - Creation and Defaults', () => {
   it('should create JobOptionsVO with default values if no options are provided', () => {
     const jobOptions = JobOptionsVO.create();
     expect(jobOptions).toBeInstanceOf(JobOptionsVO);
@@ -56,25 +46,27 @@ describe('JobOptionsVO', () => {
     expect(jobOptions.priority).toBe(partial.priority);
     expect(jobOptions.delay).toBe(0); // Actual VO default
     expect(jobOptions.attempts).toBe(partial.attempts);
-    expect(jobOptions.backoff).toBeUndefined(); // Actual VO default
+    expect(jobOptions.backoff).toBeUndefined();
   });
+});
 
+describe('JobOptionsVO - Validation Logic', () => {
   it('should validate priority (must be integer >= 0)', () => {
     expect(JobOptionsVO.create({ priority: -1 }).priority).toBe(0);
-    expect(JobOptionsVO.create({ priority: 1.5 }).priority).toBe(1.5);
+    expect(JobOptionsVO.create({ priority: 1.5 }).priority).toBe(1.5); // Assuming float priorities are allowed by sanitize
     const valid = JobOptionsVO.create({ priority: 0 });
     expect(valid.priority).toBe(0);
   });
 
   it('should validate delay (must be integer >= 0)', () => {
     expect(JobOptionsVO.create({ delay: -100 }).delay).toBe(0);
-    expect(JobOptionsVO.create({ delay: 50.5 }).delay).toBe(50.5);
+    expect(JobOptionsVO.create({ delay: 50.5 }).delay).toBe(50.5); // Assuming float delays
   });
 
   it('should validate attempts (must be integer >= 1)', () => {
     expect(JobOptionsVO.create({ attempts: 0 }).attempts).toBe(1);
     expect(JobOptionsVO.create({ attempts: -1 }).attempts).toBe(1);
-    expect(JobOptionsVO.create({ attempts: 1.5 }).attempts).toBe(1.5);
+    expect(JobOptionsVO.create({ attempts: 1.5 }).attempts).toBe(1.5); // Assuming float attempts are sanitized to int or allowed
   });
 
   it('should validate backoff options if provided', () => {
@@ -82,26 +74,30 @@ describe('JobOptionsVO', () => {
     expect(() => JobOptionsVO.create({ backoff: { type: 'fixed', delay: 0 } })).toThrow('Backoff delay must be greater than 0.');
     expect(() => JobOptionsVO.create({ backoff: { type: 'fixed', delay: 100, jitter: 1.1 } })).toThrow('Backoff jitter must be between 0 and 1.');
     expect(() => JobOptionsVO.create({ backoff: { type: 'fixed', delay: 100, jitter: -0.1 } })).toThrow('Backoff jitter must be between 0 and 1.');
-    // Invalid backoff type is not checked by current sanitize function, so no test for it.
 
-    const validBackoff: IJobBackoffOptions = { type: 'exponential', delay: 100 };
-    const optsWithBackoff = JobOptionsVO.create({ backoff: validBackoff });
+    const validBackoff: IJobOptions['backoff'] = { type: 'exponential', delay: 100 };
+    const optsWithBackoff = JobOptionsVO.create({ backoff: validBackoff as IJobBackoffOptions });
     expect(optsWithBackoff.backoff).toEqual(validBackoff);
   });
+});
 
-  it('toPersistence should return the raw IJobOptions', () => {
-    const rawOpts: IJobOptions = { priority: 1, delay: 10, attempts: 2 }; // Removed storePayload
+describe('JobOptionsVO - Serialization', () => {
+  it('toPersistence should return the raw IJobOptions after defaults are applied', () => {
+    const rawOpts: IJobOptions = { priority: 1, delay: 10, attempts: 2 };
     const vo = JobOptionsVO.create(rawOpts);
     const persisted = vo.toPersistence();
-    // Check a few key properties, defaults will fill others
+
     expect(persisted.priority).toBe(rawOpts.priority);
     expect(persisted.delay).toBe(rawOpts.delay);
     expect(persisted.attempts).toBe(rawOpts.attempts);
-    // expect(persisted.storePayload).toBe(rawOpts.storePayload); // Removed
-    // Ensure all defaults are there if not provided in rawOpts
-    expect(persisted.removeOnComplete).toBe(true); // VO's internal default
+    // Check defaults for non-provided fields
+    expect(persisted.removeOnComplete).toBe(true);
+    expect(persisted.removeOnFail).toBe(false);
+    expect(persisted.maxStalledCount).toBe(3);
   });
+});
 
+describe('JobOptionsVO - Equality', () => {
   it('equals should return true for JobOptionsVOs with the same options', () => {
     const opts1 = JobOptionsVO.create({ priority: 1, attempts: 3 });
     const opts2 = JobOptionsVO.create({ priority: 1, attempts: 3 });
@@ -120,7 +116,7 @@ describe('JobOptionsVO', () => {
 
   it('equals should return false when compared to null or undefined', () => {
     const opts = JobOptionsVO.create();
-    expect(opts.equals(null)).toBe(false); // Removed 'as any'
-    expect(opts.equals(undefined)).toBe(false); // Removed 'as any'
+    expect(opts.equals(null)).toBe(false);
+    expect(opts.equals(undefined)).toBe(false);
   });
 });
