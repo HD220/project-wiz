@@ -2,7 +2,7 @@
 import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
 
 interface ToolNamesProps extends ValueObjectProps {
-  value: ReadonlyArray<string>; // Ensure the array itself is readonly after creation
+  value: ReadonlyArray<string>;
 }
 
 export class ToolNames extends AbstractValueObject<ToolNamesProps> {

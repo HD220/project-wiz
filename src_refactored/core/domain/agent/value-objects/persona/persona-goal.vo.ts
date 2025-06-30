@@ -6,7 +6,7 @@ interface PersonaGoalProps extends ValueObjectProps {
 }
 
 export class PersonaGoal extends AbstractValueObject<PersonaGoalProps> {
-  private static readonly MIN_LENGTH = 10; // Goals should be somewhat descriptive
+  private static readonly MIN_LENGTH = 10;
   private static readonly MAX_LENGTH = 500;
 
   private constructor(value: string) {

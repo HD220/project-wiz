@@ -4,8 +4,8 @@ import Database from 'better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { randomUUID } from 'crypto';
 
-import { JobDrizzleRepository } from './JobDrizzleRepository';
-import { jobsTable, projectsTable, type NewJob, type Job, type NewProject, type Project } from '../../core/domain/schemas';
+import { JobDrizzleRepository } from '../JobDrizzleRepository';
+import { jobsTable, projectsTable, type NewJob, type Job, type NewProject, type Project } from '../../../core/domain/schemas';
 import { eq } from 'drizzle-orm';
 
 describe('JobDrizzleRepository', () => {

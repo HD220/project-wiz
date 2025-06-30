@@ -11,8 +11,8 @@ import { DomainError } from '@/core/domain/common/errors';
  */
 export interface IJobBackoffOptions {
   type: 'fixed' | 'exponential';
-  delay: number; // in milliseconds
-  jitter?: number; // percentage (0.0 to 1.0)
+  delay: number;
+  jitter?: number;
 }
 
 /**
@@ -30,19 +30,19 @@ export type JobBackoffStrategyFn = (attemptsMade: number, error: Error) => numbe
  * If both age and count are specified, the criteria that is met first will trigger the removal.
  */
 export interface IJobRemovalOptions {
-  age?: number; // Maximum age in seconds for jobs to keep.
-  count?: number; // Maximum number of jobs to keep. 0 means keep all (of this type), -1 means keep none.
+  age?: number;
+  count?: number;
 }
 export interface IJobOptions {
-  priority?: number; // Lower numbers have higher priority
-  delay?: number; // Delay in milliseconds before the job can be processed
-  attempts?: number; // Total number of attempts to try the job until it completes
-  backoff?: IJobBackoffOptions | JobBackoffStrategyFn; // Backoff strategy for retries
-  removeOnComplete?: boolean | IJobRemovalOptions; // If true, remove job when successfully completed. If object, specifies retention rules.
-  removeOnFail?: boolean | IJobRemovalOptions; // If true, remove job when it fails after all attempts. If object, specifies retention rules.
-  jobId?: string; // Optional custom job ID
-  // TODO: Add `dependsOn?: string[] | { jobId: string; status: 'completed' | 'failed' }[]` in the future if needed
-  // TODO: Add `repeat?: IRepeatOptions` in the future if needed (align with BullMQ's new Job Schedulers)
+  priority?: number;
+  delay?: number;
+  attempts?: number;
+  backoff?: IJobBackoffOptions | JobBackoffStrategyFn;
+  removeOnComplete?: boolean | IJobRemovalOptions;
+  removeOnFail?: boolean | IJobRemovalOptions;
+  jobId?: string;
+  timeout?: number;
+  maxStalledCount?: number;
 }
 
 export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
@@ -55,8 +55,9 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
       priority: 0,
       delay: 0,
       attempts: 1,
-      removeOnComplete: true, // Default to remove on complete
-      removeOnFail: false,    // Default to keep on fail for inspection
+      removeOnComplete: true,
+      removeOnFail: false,
+      maxStalledCount: 3,
     };
     return new JobOptionsVO({ ...defaults, ...(options || {}) });
   }
@@ -66,7 +67,8 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
 
     sanitized.priority = Math.max(0, props.priority || 0);
     sanitized.delay = Math.max(0, props.delay || 0);
-    sanitized.attempts = Math.max(1, props.attempts || 1); // At least 1 attempt
+    sanitized.attempts = Math.max(1, props.attempts || 1);
+    sanitized.maxStalledCount = Math.max(0, props.maxStalledCount || 0);
 
     if (props.backoff && typeof props.backoff === 'object') {
       if (props.backoff.delay <= 0) {
@@ -111,6 +113,9 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   get removeOnComplete(): boolean | IJobRemovalOptions { return this.props.removeOnComplete!; }
   get removeOnFail(): boolean | IJobRemovalOptions { return this.props.removeOnFail!; }
   get jobId(): string | undefined { return this.props.jobId; }
+  get timeout(): number | undefined { return this.props.timeout; }
+  get maxStalledCount(): number { return this.props.maxStalledCount!; }
+
 
   public toPersistence(): IJobOptions {
     // For a custom backoff function, we might need to store its name or a reference

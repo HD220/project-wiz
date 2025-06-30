@@ -35,10 +35,9 @@ export abstract class AbstractEntity<IdType extends Identity, PropsType extends 
     if (this === other) {
       return true;
     }
-    if (!(other instanceof AbstractEntity)) { // Check if it's an entity at all
+    if (!(other instanceof AbstractEntity)) {
       return false;
     }
-    // Compare by ID if the other object is an entity
     return this._id.equals(other._id);
   }
 }

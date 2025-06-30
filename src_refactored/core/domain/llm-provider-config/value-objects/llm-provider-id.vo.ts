@@ -2,11 +2,10 @@
 import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
 
 interface LLMProviderIdProps extends ValueObjectProps {
-  value: string; // e.g., "openai", "deepseek"
+  value: string;
 }
 
-// Could be extended to be an enum in the future if providers are fixed
-const ALLOWED_PROVIDER_IDS = ['openai', 'deepseek', 'anthropic', 'ollama', 'mock']; // Example list
+const ALLOWED_PROVIDER_IDS = ['openai', 'deepseek', 'anthropic', 'ollama', 'mock'];
 
 export class LLMProviderId extends AbstractValueObject<LLMProviderIdProps> {
   private constructor(value: string) {

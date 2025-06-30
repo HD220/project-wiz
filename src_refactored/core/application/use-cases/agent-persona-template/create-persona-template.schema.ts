@@ -37,7 +37,8 @@ export const CreatePersonaTemplateUseCaseInputSchema = z.object({
         // No max length for individual tool names in Zod, VO doesn't specify.
         // Could add regex for format e.g. namespace.action later.
     )
-    .max(20, { message: "A persona template can have a maximum of 20 tools."}) // Arbitrary limit for the array size
+    // Arbitrary limit for the array size
+    .max(20, { message: "A persona template can have a maximum of 20 tools."})
     .describe("An array of tool names available to this persona (e.g., ['fileSystem.readFile', 'terminal.executeCommand']). Can be empty."),
 
 }).strict();

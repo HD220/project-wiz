@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import React from 'react';
 import { Activity, Briefcase, Users, Zap } from 'lucide-react'; // Icons for cards
+import React from 'react';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/presentation/ui/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar'; // For recent activity
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/presentation/ui/components/ui/card';
 
 function DashboardPage() {
   // Placeholder data

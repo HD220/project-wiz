@@ -9,7 +9,7 @@ export const CreateUserInputSchema = z.object({
   // For now, let's assume a plain text password is provided for the use case.
   // Hashing should occur before storage, ideally via a HashingService or within the domain if UserPassword VO existed.
   password: z.string().min(8, 'Password must be at least 8 characters long.'),
-  avatarUrl: z.string().url('Invalid URL for avatar.').optional(), // Optional avatar URL
+  avatarUrl: z.string().url('Invalid URL for avatar.').optional(),
   defaultLLMProviderConfigId: z.string().uuid('Invalid UUID for default LLM provider config ID.'),
   assistantId: z.string().uuid('Invalid UUID for assistant ID.').optional().nullable(),
 });
@@ -25,8 +25,8 @@ export const CreateUserOutputSchema = z.object({
   avatarUrl: z.string().url().optional().nullable(),
   defaultLLMProviderConfigId: z.string().uuid(),
   assistantId: z.string().uuid().optional().nullable(),
-  createdAt: z.string().datetime(), // ISO string
-  updatedAt: z.string().datetime(), // ISO string
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export type CreateUserOutput = z.infer<typeof CreateUserOutputSchema>;

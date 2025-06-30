@@ -19,7 +19,8 @@ export const SearchMemoryItemsUseCaseInputSchema = z.object({
   tags: z.array(
       z.string().trim().min(1, { message: "Individual tag cannot be empty."})
     )
-    .min(1, { message: "Tags array cannot be empty if provided to filter by tags."}) // If tags array is present, it must have items
+    // If tags array is present, it must have items
+    .min(1, { message: "Tags array cannot be empty if provided to filter by tags."})
     .optional()
     .describe("Optional array of tags to filter memories. Behavior might be AND or OR for multiple tags (to be defined by repository implementation)."),
 
@@ -49,7 +50,8 @@ export type SearchMemoryItemsUseCaseInput = z.infer<typeof SearchMemoryItemsUseC
  */
 export const MemoryListItemSchema = z.object({
   id: z.string().uuid().describe("MemoryItem ID."),
-  contentExcerpt: z.string().describe("An excerpt or summary of the memory content (actual content may be longer)."), // Or full content if preferred
+  // Or full content if preferred
+  contentExcerpt: z.string().describe("An excerpt or summary of the memory content (actual content may be longer)."),
   // For full content: content: z.string().describe("Full text content of the memory item."),
   agentId: z.string().uuid().nullable().describe("Associated Agent ID, or null."),
   tags: z.array(z.string()).describe("Tags associated with the memory item."),

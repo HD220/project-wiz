@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron';
+
 import {
   GET_PROJECTS_CHANNEL,
   GET_PROJECT_DETAILS_CHANNEL,
@@ -6,8 +7,6 @@ import {
   UPDATE_PROJECT_CHANNEL,
   // DELETE_PROJECT_CHANNEL, // Example for later
 } from '../../../../shared/ipc-channels';
-import { mockProjects, addMockProject, updateMockProject } from '../mocks/project.mocks';
-import { Project } from '../../../../shared/types/entities';
 import {
   GetProjectDetailsRequest,
   GetProjectDetailsResponse,
@@ -17,7 +16,9 @@ import {
   UpdateProjectRequest,
   UpdateProjectResponse,
 } from '../../../../shared/ipc-types/project';
+import { Project } from '../../../../shared/types/entities';
 import { AgentLLM } from '../../../../shared/types/entities'; // Import AgentLLM
+import { mockProjects, addMockProject, updateMockProject } from '../mocks/project.mocks';
 
 export function registerProjectHandlers() {
   ipcMain.handle(GET_PROJECTS_CHANNEL, async (): Promise<GetProjectsResponse> => {
@@ -31,11 +32,11 @@ export function registerProjectHandlers() {
     const project = mockProjects.find(p => p.id === req.projectId);
     if (project) {
       return { project };
-    } else {
+    }
       // In a real app, you'd throw an error that the client can catch
       // For now, returning undefined or an error structure
       return { project: undefined, error: 'Project not found' };
-    }
+
   });
 
   ipcMain.handle(CREATE_PROJECT_CHANNEL, async (_event, req: CreateProjectRequest): Promise<CreateProjectResponse> => {
@@ -69,9 +70,9 @@ export function registerProjectHandlers() {
     const updatedProject = updateMockProject(req.projectId, req.updates);
     if (updatedProject) {
       return { project: updatedProject };
-    } else {
-      return { project: undefined, error: 'Project not found for update' };
     }
+      return { project: undefined, error: 'Project not found for update' };
+
   });
 
   // Example for a delete operation (not in current plan phase, but for illustration)

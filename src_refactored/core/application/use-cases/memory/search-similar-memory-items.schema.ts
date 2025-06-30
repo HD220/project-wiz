@@ -1,7 +1,8 @@
 // src_refactored/core/application/use-cases/memory/search-similar-memory-items.schema.ts
 import { z } from 'zod';
 
-import { MemoryListItemSchema } from './search-memory-items.schema'; // Reuse for base structure
+// Reuse for base structure
+import { MemoryListItemSchema } from './search-memory-items.schema';
 
 /**
  * Input schema for SearchSimilarMemoryItemsUseCase.
@@ -19,7 +20,8 @@ export const SearchSimilarMemoryItemsUseCaseInputSchema = z.object({
   limit: z.number()
     .int({ message: "Limit must be an integer." })
     .positive({ message: "Limit must be positive." })
-    .max(50, { message: "Limit cannot exceed 50 for similarity search." }) // Sensible default max for similarity
+    // Sensible default max for similarity
+    .max(50, { message: "Limit cannot exceed 50 for similarity search." })
     .optional()
     .default(10)
     .describe("Optional maximum number of similar items to return."),

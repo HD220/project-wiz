@@ -3,7 +3,7 @@ import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class AnnotationId extends Identity {
   private constructor(value: string) {
-    super(value); // Identity constructor calls its own static validate
+    super(value);
   }
 
   public static generate(): AnnotationId {
@@ -11,10 +11,6 @@ export class AnnotationId extends Identity {
   }
 
   public static fromString(value: string): AnnotationId {
-    // Validation is handled by the Identity constructor via super(value)
     return new AnnotationId(value);
   }
-
-  // The `value()` method is inherited from Identity
-  // The `equals()` method is inherited from AbstractValueObject via Identity
 }

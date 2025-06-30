@@ -55,7 +55,8 @@ export class CreatePersonaTemplateUseCase
       const goalVo = PersonaGoal.create(validInput.goal);
       const backstoryVo = PersonaBackstory.create(validInput.backstory);
       const toolNamesVo = ToolNames.create(validInput.toolNames);
-      const personaIdVo = PersonaId.generate(); // Generate ID for the new template
+      // Generate ID for the new template
+      const personaIdVo = PersonaId.generate();
 
       // 3. Create AgentPersonaTemplate VO
       const personaTemplate = AgentPersonaTemplate.create({
@@ -77,15 +78,15 @@ export class CreatePersonaTemplateUseCase
       return ok({
         personaTemplateId: personaTemplate.id().value(),
       });
-    } catch (e: unknown) {
-      if (e instanceof ZodError) {
-        return error(e);
+    } catch (errorValue: unknown) {
+      if (errorValue instanceof ZodError) {
+        return error(errorValue);
       }
-      if (e instanceof DomainError || e instanceof ValueError) {
-        return error(e);
+      if (errorValue instanceof DomainError || errorValue instanceof ValueError) {
+        return error(errorValue);
       }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, { error: e });
+      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
+      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, { error: errorValue });
       return error(
         new DomainError(
           `An unexpected error occurred while creating the persona template: ${message}`,

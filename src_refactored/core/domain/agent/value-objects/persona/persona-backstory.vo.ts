@@ -6,7 +6,7 @@ interface PersonaBackstoryProps extends ValueObjectProps {
 }
 
 export class PersonaBackstory extends AbstractValueObject<PersonaBackstoryProps> {
-  private static readonly MAX_LENGTH = 2000; // Allow for a more detailed backstory
+  private static readonly MAX_LENGTH = 2000;
 
   private constructor(value: string) {
     super({ value });
@@ -21,7 +21,7 @@ export class PersonaBackstory extends AbstractValueObject<PersonaBackstoryProps>
 
   public static create(backstory: string): PersonaBackstory {
     this.validate(backstory);
-    return new PersonaBackstory(backstory); // Not trimming, to preserve formatting if any
+    return new PersonaBackstory(backstory);
   }
 
   public value(): string {

@@ -23,7 +23,8 @@ export const CreateAgentUseCaseInputSchema = z.object({
     .int({ message: "Max iterations must be an integer." })
     .positive({ message: "Max iterations must be positive." })
     .min(1, { message: "Max iterations must be at least 1." })
-    .max(100, { message: "Max iterations must be no more than 100." }) // Consistent with VO
+    // Consistent with VO
+    .max(100, { message: "Max iterations must be no more than 100." })
     .optional()
     .describe("Optional maximum number of iterations for the agent's main loop. Defaults to a standard value if not provided (e.g., 10)."),
 

@@ -1,7 +1,7 @@
 // src_refactored/core/domain/annotation/ports/annotation-repository.interface.ts
-import { Identity } from '@/core/common/value-objects/identity.vo'; // For AgentId, JobId
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
-import { DomainError } from '@/domain/common/errors'; // Assuming DomainError is from domain context
+import { DomainError } from '@/domain/common/errors';
 
 import { Result } from '@/shared/result';
 

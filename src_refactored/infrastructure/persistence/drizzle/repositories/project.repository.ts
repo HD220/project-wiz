@@ -6,11 +6,11 @@ import { IProjectRepository } from '@/core/domain/project/ports/project-reposito
 import { Project } from '@/core/domain/project/project.entity';
 import { ProjectId } from '@/core/domain/project/value-objects/project-id.vo';
 
-import { DomainError, NotFoundError } from '@/domain/common/errors'; // Corrected path for DomainError
+import { DomainError, NotFoundError } from '@/core/domain/common/errors'; // Corrected path for DomainError
 
 import { Result, ok, error as errResult } from '@/shared/result'; // aliased error to errResult to avoid conflict
 
-import { TYPES } from '../../ioc/types';
+import { TYPES } from '@/infrastructure/ioc/types'; // Using alias
 
 // Placeholder for Drizzle schema and db client type
 // import { LibSQLDatabase } from 'drizzle-orm/libsql';

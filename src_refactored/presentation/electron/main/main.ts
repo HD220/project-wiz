@@ -4,16 +4,16 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup'; // ES6 import
 
+import { registerAgentInstanceHandlers } from './handlers/agent-instance.handlers';
+import { registerDMHandlers } from './handlers/dm.handlers';
+import { registerLLMConfigHandlers } from './handlers/llm-config.handlers';
+import { registerPersonaTemplateHandlers } from './handlers/persona-template.handlers';
+import { registerProjectHandlers } from './handlers/project.handlers';
+import { registerUserHandlers } from './handlers/user.handlers';
 import { registerChatIPCHandlers } from './ipc-chat.handlers'; // Legacy?
 import { registerProjectIPCHandlers as registerLegacyProjectIPCHandlers } from './ipc-project.handlers'; // Legacy? Renamed to avoid conflict
 
 // New Handlers
-import { registerProjectHandlers } from './handlers/project.handlers';
-import { registerPersonaTemplateHandlers } from './handlers/persona-template.handlers';
-import { registerAgentInstanceHandlers } from './handlers/agent-instance.handlers';
-import { registerLLMConfigHandlers } from './handlers/llm-config.handlers';
-import { registerUserHandlers } from './handlers/user.handlers';
-import { registerDMHandlers } from './handlers/dm.handlers';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (squirrelStartup) { // Check the imported value

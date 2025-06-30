@@ -8,11 +8,10 @@ import { LLMProviderId } from './value-objects/llm-provider-id.vo';
 export class BaseUrl {
   private readonly _value: string;
   private constructor(value: string) {
-    // Basic validation for URL format
     try {
       new URL(value);
-    } catch (e) {
-      throw new Error('Invalid Base URL format.');
+    } catch (error) {
+      throw new Error(`Invalid Base URL format: ${ (error instanceof Error) ? error.message : String(error) }`);
     }
     this._value = value;
   }
@@ -31,12 +30,9 @@ export class BaseUrl {
 interface LLMProviderConfigProps {
   id: LLMProviderConfigId;
   name: LLMProviderConfigName;
-  providerId: LLMProviderId; // e.g., 'openai', 'deepseek'
+  providerId: LLMProviderId;
   apiKey: LLMApiKey;
-  baseUrl?: BaseUrl; // Optional custom base URL for the API
-  // otherOptions?: Record<string, any>; // For provider-specific settings
-  // createdAt: Date;
-  // updatedAt: Date;
+  baseUrl?: BaseUrl;
 }
 
 export class LLMProviderConfig {
@@ -45,6 +41,7 @@ export class LLMProviderConfig {
 
   private constructor(props: LLMProviderConfigProps) {
     this._id = props.id;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...otherProps } = props;
     this.props = Object.freeze(otherProps);
   }
@@ -55,18 +52,14 @@ export class LLMProviderConfig {
     providerId: LLMProviderId;
     apiKey: LLMApiKey;
     baseUrl?: BaseUrl;
-    // otherOptions?: Record<string, any>;
   }): LLMProviderConfig {
     const configId = props.id || LLMProviderConfigId.generate();
     return new LLMProviderConfig({
       id: configId,
       name: props.name,
       providerId: props.providerId,
-      apiKey: props.apiKey, // The APIKey VO is passed directly
+      apiKey: props.apiKey,
       baseUrl: props.baseUrl,
-      // otherOptions: props.otherOptions || {},
-      // createdAt: new Date(),
-      // updatedAt: new Date(),
     });
   }
 
@@ -82,10 +75,8 @@ export class LLMProviderConfig {
     return this.props.providerId;
   }
 
-  // This method allows controlled access to the API key for internal use by LLM adapters/services.
-  // It should not be called casually.
   public apiKeyForAdapter(): string {
-    return this.props.apiKey.forHeader(); // Use the controlled access method from LLMApiKey
+    return this.props.apiKey.forHeader();
   }
 
   public baseUrl(): BaseUrl | undefined {

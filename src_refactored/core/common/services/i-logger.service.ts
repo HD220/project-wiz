@@ -8,31 +8,31 @@ export interface ILogger {
   /**
    * Logs an informational message.
    * @param {string} message - The message to log.
-   * @param {Record<string, any>=} metadata - Optional metadata to include with the log.
+   * @param {Record<string, unknown>=} metadata - Optional metadata to include with the log.
    */
-  info(message: string, metadata?: Record<string, any>): void;
+  info(message: string, metadata?: Record<string, unknown>): void;
 
   /**
    * Logs a warning message.
    * @param {string} message - The message to log.
-   * @param {Record<string, any>=} metadata - Optional metadata to include with the log.
+   * @param {Record<string, unknown>=} metadata - Optional metadata to include with the log.
    */
-  warn(message: string, metadata?: Record<string, any>): void;
+  warn(message: string, metadata?: Record<string, unknown>): void;
 
   /**
    * Logs an error message.
    * @param {string} message - The message to log.
    * @param {Error=} error - Optional error object to associate with the log.
-   * @param {Record<string, any>=} metadata - Optional metadata to include with the log.
+   * @param {Record<string, unknown>=} metadata - Optional metadata to include with the log.
    */
-  error(message: string, error?: Error, metadata?: Record<string, any>): void;
+  error(message: string, error?: Error, metadata?: Record<string, unknown>): void;
 
   /**
    * Logs a debug message. Typically used for detailed diagnostic information.
    * @param {string} message - The message to log.
-   * @param {Record<string, any>=} metadata - Optional metadata to include with the log.
+   * @param {Record<string, unknown>=} metadata - Optional metadata to include with the log.
    */
-  debug(message: string, metadata?: Record<string, any>): void;
+  debug(message: string, metadata?: Record<string, unknown>): void;
 }
 
 /**
