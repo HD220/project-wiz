@@ -1,5 +1,7 @@
-import { Link } from '@tanstack/react-router'; // Removed useParams
-import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Hash, Plus } from 'lucide-react'; // Removed Folder
+// Removed useParams
+import { Link } from '@tanstack/react-router';
+// Removed Folder
+import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Hash, Plus } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/ui/components/ui/button';
@@ -10,19 +12,24 @@ import { Separator } from '@/ui/components/ui/separator';
 // Helper for NavLink, similar to AppSidebar but might have different base paths or active states
 interface ProjectNavLinkProps {
   to: string;
-  basePath: string; // e.g., /projects/$projectId
+  // e.g., /projects/$projectId
+  basePath: string;
   children: React.ReactNode;
   icon?: React.ElementType;
-  // exact?: boolean; // For matching exact paths - REMOVED as unused by Link's activeProps
+  // For matching exact paths - REMOVED as unused by Link's activeProps
+  // exact?: boolean;
 }
 
-function ProjectNavLink({ to, basePath, children, icon: iconProp }: ProjectNavLinkProps) { // Removed exact
-  const IconComponent = iconProp; // Alias for JSX
+// Removed exact
+function ProjectNavLink({ to, basePath, children, icon: iconProp }: ProjectNavLinkProps) {
+  // Alias for JSX
+  const IconComponent = iconProp;
   const fullPath = `${basePath}${to.startsWith('/') ? to : `/${to}`}`;
   return (
     <Link
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      to={fullPath as any} // Cast to any for dynamically constructed paths in this mock setup
+      // Cast to any for dynamically constructed paths in this mock setup
+      to={fullPath as any}
       className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50' }}
     >
@@ -40,9 +47,11 @@ interface ProjectSidebarProps {
 
 export function ProjectSidebar({ className }: ProjectSidebarProps) {
   // In a real scenario, projectId would come from router params or props.
-  // const params = useParams(); // if used in a route component
+  // if used in a route component
+  // const params = useParams();
   // const projectId = params.projectId;
-  const projectId = "{projectId}"; // Placeholder
+  // Placeholder
+  const projectId = "{projectId}";
 
   // Placeholder data
   const project = {
@@ -111,10 +120,12 @@ export function ProjectSidebar({ className }: ProjectSidebarProps) {
         </nav>
       </ScrollArea>
 
-      {/* Optional Footer for sidebar actions */}
-      {/* <div className="p-2 mt-auto border-t border-slate-200 dark:border-slate-700">
+      {/*
+      Optional Footer for sidebar actions
+      <div className="p-2 mt-auto border-t border-slate-200 dark:border-slate-700">
         <Button variant="ghost" size="sm" className="w-full justify-start">Some Action</Button>
-      </div> */}
+      </div>
+      */}
     </div>
   );
 }
