@@ -232,4 +232,3 @@ This process ensures that all significant changes are well-considered, documente
 *   If you find a VO, entity, or utility function in the legacy code that is of high quality and PERFECTLY aligns with the new principles (Clean Arch, OC), you may adapt it for `src_refactored/`. However, **rewriting is the norm**.
 
 Remember, the goal is to create an exemplary codebase. Think carefully about each design and implementation decision. If anything is unclear, ask for clarification.
-[end of AGENTS.md]
