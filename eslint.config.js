@@ -75,6 +75,18 @@ export default [
 
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "import/no-unresolved": "error",
+      // "import/no-relative-parent-imports": "error", // Commented out as per user's working config
+      // "import/no-restricted-paths": ["error", { // Commented out as per user's working config
+      //   "zones": [
+      //     {
+      //       "target": "./src_refactored/**/*",
+      //       "from": "./src_refactored/**/*",
+      //       "except": ["./index"],
+      //       "message": "Use path aliases (e.g., '@/module/file') instead of relative './' or '../' imports within src_refactored."
+      //     }
+      //   ],
+      //   "basePath": "./"
+      // }],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/naming-convention": ["warn",
         { "selector": "default", "format": ["camelCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow" },
@@ -151,7 +163,7 @@ export default [
       "import/resolver": {
         typescript: {
           alwaysTryTypes: true,
-          project: "./tsconfig.json",
+          project: "./tsconfig.json" // Reverted to string, tsconfigRootDir removed from this resolver setting
         }
       },
       "boundaries/elements": [

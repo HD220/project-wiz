@@ -24,11 +24,9 @@
       "@/core/*": ["./src_refactored/core/*"],
       "@/domain/*": ["./src_refactored/core/domain/*"],
       "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
-      "@/presentation/*": ["./src_refactored/presentation/*"], // Keep this for general presentation if needed
+      "@/components/*": ["./src_refactored/presentation/ui/components/*"],
       "@/shared/*": ["./src_refactored/shared/*"],
-      "@/ui/*": ["./src_refactored/presentation/ui/*"], // Correct alias for @/ui/...
-      "@/*": ["./src_refactored/*"] // Base @/ alias, ensure it doesn't conflict if @/ui is more specific
-      // Removed old @ui/* (no slash) and specific @ui/components, @ui/lib etc. aliases
+      "@/*": ["./src_refactored/*"]
     }
   },
   "include": [

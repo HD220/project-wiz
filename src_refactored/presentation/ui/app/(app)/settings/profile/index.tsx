@@ -31,9 +31,8 @@ const mockUser = {
 
 function UserProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // Para exibir o avatar
-  const [currentAvatar, setCurrentAvatar] = useState<string | null>(mockUser.avatarUrl);
+  const [currentAvatar, _setCurrentAvatar] = useState<string | null>(mockUser.avatarUrl);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),

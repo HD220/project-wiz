@@ -28,6 +28,8 @@ export default defineConfig({
     alias: {
       // Specific alias for @/ui to point to the presentation/ui directory
       "@/ui": path.resolve(projectRoot, "src_refactored/presentation/ui"),
+      // Alias for @/components to point to the presentation/ui/components directory
+      "@/components": path.resolve(projectRoot, "src_refactored/presentation/ui/components"),
       // Alias for @/shared for shared types and utilities
       "@/shared": path.resolve(projectRoot, "src_refactored/shared"),
       // Add other specific @/ aliases if the renderer needs them from other parts of src_refactored

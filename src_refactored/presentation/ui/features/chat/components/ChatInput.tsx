@@ -2,9 +2,10 @@
 import { SendHorizontal, Paperclip, Mic } from 'lucide-react';
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
 import { cn } from '@/presentation/ui/lib/utils';
+
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 export interface ChatInputProps {
   onSubmit: (message: string) => void;

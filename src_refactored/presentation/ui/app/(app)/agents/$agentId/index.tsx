@@ -3,13 +3,15 @@ import { ArrowLeft, Edit3, MessageSquare, Bot, Zap, AlertTriangle, Thermometer, 
 import React from 'react';
 import { toast } from 'sonner';
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
 import { useIpcQuery } from '@/presentation/ui/hooks/ipc/useIpcQuery';
 import { cn } from '@/presentation/ui/lib/utils';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
+
 import type { AgentInstance, GetAgentInstanceDetailsRequest, GetAgentInstanceDetailsResponseData } from '@/shared/ipc-types';
 
 // Kept statusDisplayMap as it's UI specific display logic
