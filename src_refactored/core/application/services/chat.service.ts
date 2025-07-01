@@ -13,7 +13,8 @@ import {
   ChatStreamEndPayload,
   ChatStreamErrorPayload
 } from '@/shared/ipc-chat.types';
-import { Result, ok, error as resultError } from '@/shared/result'; // Corrected import names
+// Corrected import names
+import { Result, ok, error as resultError } from '@/shared/result';
 
 import { IChatService, IChatServiceSendMessageResponse } from '../ports/services/i-chat.service';
 

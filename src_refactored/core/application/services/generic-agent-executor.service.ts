@@ -5,9 +5,8 @@ import { ApplicationError } from '@/core/application/common/errors';
 import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Agent } from '@/core/domain/agent/agent.entity';
-import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface'; // Removed AGENT_REPOSITORY_TOKEN
+import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface';
 import { AgentIdVO } from '@/core/domain/agent/value-objects/agent-id.vo';
-import { TYPES } from '@/infrastructure/ioc/types'; // Added import for TYPES
 import {
   JobProcessingOutput,
   AgentExecutionPayload,
@@ -18,11 +17,14 @@ import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO } from '@/core/domain/job/value-objects/activity-history.vo';
 import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
 
+// eslint-disable-next-line boundaries/element-types
+import { TYPES } from '@/infrastructure/ioc/types';
+import { Result, ok, error as resultError, isError } from '@/shared/result';
+
 import { AgentInteractionService } from './agent-interaction.service';
 import { AgentStateService } from './agent-state.service';
 import { AgentToolService } from './agent-tool.service';
 
-// Keep ExecutionState here as it's central to this orchestrator
 interface ExecutionState {
   goalAchieved: boolean;
   iterations: number;
@@ -38,7 +40,7 @@ interface ExecutionState {
 @injectable()
 export class GenericAgentExecutor implements IAgentExecutor {
   constructor(
-    @inject(TYPES.IAgentRepository) private readonly agentRepository: IAgentRepository, // Corrected token
+    @inject(TYPES.IAgentRepository) private readonly agentRepository: IAgentRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
     @inject(AgentInteractionService) private readonly agentInteractionService: AgentInteractionService,
     @inject(AgentToolService) private readonly agentToolService: AgentToolService,
@@ -54,8 +56,17 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
     this.logger.info(`Processing Job ID: ${jobId.value} with Agent ID: ${agentId}`, { jobId: jobId.value, agentId });
 
-    const agent = await this._fetchAgent(agentId, job);
-    // Use AgentStateService to initialize
+    const agentFetchResult = await this._fetchAgent(agentId, job);
+    if (isError(agentFetchResult)) {
+        const appError = agentFetchResult.error instanceof ApplicationError
+            ? agentFetchResult.error
+            : new ApplicationError(agentFetchResult.error.message, agentFetchResult.error);
+        this.logger.error(`[GenericAgentExecutor] Critical error fetching agent ${agentId}: ${appError.message}`, { originalError: appError.cause });
+        job.addLog(`Critical error fetching agent: ${appError.message}`, 'ERROR');
+        throw appError;
+    }
+    const agent = agentFetchResult.value;
+
     const executionState = this.agentStateService.initializeExecutionState(job, agent);
 
     this.logger.info(`Job ID: ${jobId.value} processing attempt: ${job.attemptsMade}`);
@@ -77,19 +88,16 @@ export class GenericAgentExecutor implements IAgentExecutor {
       this.logger.info(`Starting LLM interaction cycle ${executionState.iterations} for Job ID: ${job.id.value}`);
       job.updateProgress(10 + (80 * executionState.iterations) / executionState.maxIterations);
 
-      // Delegate to AgentInteractionService
       await this.agentInteractionService.performLlmInteraction(job, agent, executionState);
 
       if (executionState.criticalErrorEncounteredThisTurn) break;
 
-      // Delegate to AgentToolService if there are tool calls
       if (executionState.assistantMessage?.tool_calls && executionState.assistantMessage.tool_calls.length > 0) {
         await this.agentToolService.handleToolCallsIfPresent(job, agent, executionState);
       }
 
       if (executionState.criticalErrorEncounteredThisTurn) break;
 
-      // Delegate to AgentStateService
       this.agentStateService.checkGoalAchieved(executionState);
 
       if (this._handleEndOfLoopConditions(job, executionState)) break;
@@ -112,15 +120,33 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return false;
   }
 
-  private async _fetchAgent(agentId: string, job: JobEntity<AgentExecutionPayload, JobProcessingOutput>) {
-    const agentResult = await this.agentRepository.findById(AgentIdVO.create(agentId));
-    if (agentResult.isError() || !agentResult.value) {
-      const message = `Agent with ID ${agentId} not found or error fetching.`;
-      this.logger.error(message, agentResult.isError() ? agentResult.error : undefined);
+  private async _fetchAgent(agentIdString: string, job: JobEntity<AgentExecutionPayload, JobProcessingOutput>): Promise<Result<Agent, ApplicationError>> {
+    try {
+      const agentIdVo = AgentIdVO.create(agentIdString);
+      const agentResult = await this.agentRepository.findById(agentIdVo);
+
+      if (isError(agentResult)) {
+        const message = `Error fetching agent ${agentIdString} from repository.`;
+        this.logger.error(message, { originalError: agentResult.error });
+        job.addLog(message, 'ERROR');
+        const cause = agentResult.error instanceof Error ? agentResult.error : new Error(String(agentResult.error));
+        return resultError(new ApplicationError(message, cause));
+      }
+
+      if (!agentResult.value) {
+        const message = `Agent with ID ${agentIdString} not found.`;
+        this.logger.error(message);
+        job.addLog(message, 'ERROR');
+        return resultError(new ApplicationError(message));
+      }
+      return ok(agentResult.value);
+    } catch (caughtError) {
+      const message = `Invalid Agent ID format for ${agentIdString}.`;
+      const err = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+      this.logger.error(message, { originalError: err });
       job.addLog(message, 'ERROR');
-      throw new ApplicationError(message);
+      return resultError(new ApplicationError(message, err));
     }
-    return agentResult.value;
   }
 
   private _constructFinalResult(
