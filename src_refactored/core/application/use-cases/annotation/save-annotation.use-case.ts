@@ -1,7 +1,7 @@
 // src_refactored/core/application/use-cases/annotation/save-annotation.use-case.ts
 import { ZodError } from 'zod';
 
-import { ILoggerService } from '@/core/common/services/i-logger.service';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Corrected import
 // For AgentId, JobId
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
@@ -35,7 +35,7 @@ export class SaveAnnotationUseCase
   constructor(
     private readonly annotationRepository: IAnnotationRepository,
     // Added logger
-    private readonly logger: ILoggerService,
+    private readonly logger: ILogger, // Corrected type
   ) {}
 
   async execute(

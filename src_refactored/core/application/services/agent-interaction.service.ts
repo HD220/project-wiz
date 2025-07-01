@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 
 import { ApplicationError } from '@/core/application/common/errors';
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Agent } from '@/core/domain/agent/agent.entity';
 import { AgentExecutionPayload, JobProcessingOutput, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
@@ -28,7 +28,7 @@ export class AgentInteractionService {
 
   constructor(
     @inject(ILLMAdapterToken) private readonly llmAdapter: ILLMAdapter,
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   public async performLlmInteraction(

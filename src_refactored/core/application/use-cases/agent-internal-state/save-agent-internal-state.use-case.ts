@@ -1,7 +1,7 @@
 // src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
 
-import { ILoggerService } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
 
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
@@ -34,7 +34,7 @@ export class SaveAgentInternalStateUseCase
   constructor(
     private readonly stateRepository: IAgentInternalStateRepository,
     // Added logger dependency
-    private readonly logger: ILoggerService,
+    private readonly logger: ILogger, // Corrected type
   ) {}
 
   async execute(

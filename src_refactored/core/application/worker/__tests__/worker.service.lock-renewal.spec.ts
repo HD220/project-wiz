@@ -8,12 +8,10 @@ import { DrizzleJobRepository } from '../../../../infrastructure/persistence/dri
 import { TestDb, createTestDbClient, runMigrations } from '../../../../infrastructure/queue/drizzle/__tests__/test-db.helper';
 // eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
 import { DrizzleQueueFacade as QueueService } from '../../../../infrastructure/queue/drizzle/drizzle-queue.facade';
-// eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
-import { QueueServiceCore } from '../../../../infrastructure/queue/drizzle/queue-service-core';
-// eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
-import { JobProcessingService } from '../../../../infrastructure/queue/drizzle/job-processing.service';
-// eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
-import { QueueMaintenanceService } from '../../../../infrastructure/queue/drizzle/queue-maintenance.service';
+// Unused imports: QueueServiceCore, JobProcessingService, QueueMaintenanceService
+// import { QueueServiceCore } from '../../../../infrastructure/queue/drizzle/queue-service-core';
+// import { JobProcessingService } from '../../../../infrastructure/queue/drizzle/job-processing.service';
+// import { QueueMaintenanceService } from '../../../../infrastructure/queue/drizzle/queue-maintenance.service';
 import { JobEntity } from '../../../domain/job/job.entity';
 import { IJobOptions } from '../../../domain/job/value-objects/job-options.vo';
 import { WorkerService } from '../worker.service';

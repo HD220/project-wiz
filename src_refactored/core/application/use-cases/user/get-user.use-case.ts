@@ -1,6 +1,6 @@
 import { injectable, inject } from 'inversify';
 
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
 
 import { IUserRepository, UserRepositoryToken } from '@/domain/user/ports/user-repository.interface';
 import { UserEntity } from '@/domain/user/user.entity';
@@ -18,7 +18,7 @@ import { GetUserInput, GetUserOutput, GetUserInputSchema } from './get-user.sche
 export class GetUserUseCase implements IUseCase<GetUserInput, Promise<Result<GetUserOutput | null, DomainError>>> {
   constructor(
     @inject(UserRepositoryToken) private readonly userRepository: IUserRepository,
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger, // Corrected token and type
   ) {}
 
   async execute(input: GetUserInput): Promise<Result<GetUserOutput | null, DomainError>> {

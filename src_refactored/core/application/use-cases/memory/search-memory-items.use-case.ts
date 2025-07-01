@@ -1,7 +1,7 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts
 import { inject, injectable } from 'inversify';
 
-import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
 // DomainError is not used
@@ -33,7 +33,7 @@ export class SearchMemoryItemsUseCase
 {
   constructor(
     @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,
-    @inject(ILoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger, // Corrected token and type
   ) {}
 
   public async execute(

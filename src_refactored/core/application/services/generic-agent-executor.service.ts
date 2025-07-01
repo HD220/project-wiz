@@ -3,10 +3,11 @@ import { injectable, inject } from 'inversify';
 
 import { ApplicationError } from '@/core/application/common/errors';
 import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Agent } from '@/core/domain/agent/agent.entity';
-import { IAgentRepository, AGENT_REPOSITORY_TOKEN } from '@/core/domain/agent/ports/agent-repository.interface';
+import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface'; // Removed AGENT_REPOSITORY_TOKEN
 import { AgentIdVO } from '@/core/domain/agent/value-objects/agent-id.vo';
+import { TYPES } from '@/infrastructure/ioc/types'; // Added import for TYPES
 import {
   JobProcessingOutput,
   AgentExecutionPayload,
@@ -37,8 +38,8 @@ interface ExecutionState {
 @injectable()
 export class GenericAgentExecutor implements IAgentExecutor {
   constructor(
-    @inject(AGENT_REPOSITORY_TOKEN) private readonly agentRepository: IAgentRepository,
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(TYPES.IAgentRepository) private readonly agentRepository: IAgentRepository, // Corrected token
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
     @inject(AgentInteractionService) private readonly agentInteractionService: AgentInteractionService,
     @inject(AgentToolService) private readonly agentToolService: AgentToolService,
     @inject(AgentStateService) private readonly agentStateService: AgentStateService,

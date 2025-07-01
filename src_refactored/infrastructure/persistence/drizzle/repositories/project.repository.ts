@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
 
-import { ILoggerService } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service"; // Corrected import
 import { DomainError, NotFoundError } from "@/core/domain/common/errors";
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { Project } from "@/core/domain/project/project.entity";
@@ -17,7 +17,7 @@ export type DrizzleDB = unknown;
 export class DrizzleProjectRepository implements IProjectRepository {
   constructor(
     @inject(TYPES.DrizzleClient) private readonly db: DrizzleDB,
-    @inject(TYPES.ILoggerService) private readonly logger: ILoggerService
+    @inject(TYPES.ILogger) private readonly logger: ILogger // Corrected token and type
   ) {
     this.logger.info("[DrizzleProjectRepository] initialized");
   }

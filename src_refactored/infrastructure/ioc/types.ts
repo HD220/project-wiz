@@ -20,7 +20,7 @@ const TYPES = {
   IWorkerService: Symbol.for("IWorkerService"),
 
   // Infrastructure Layer Services (Interfaces)
-  ILoggerService: Symbol.for("ILoggerService"),
+  ILogger: Symbol.for("ILogger"), // Corrected to match interface and symbol in i-logger.service.ts
   IToolRegistryService: Symbol.for("IToolRegistryService"),
   IQueueService: Symbol.for("IQueueService"),
   IEmbeddingService: Symbol.for("IEmbeddingService"),

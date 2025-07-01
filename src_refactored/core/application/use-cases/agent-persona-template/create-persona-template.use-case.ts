@@ -1,7 +1,7 @@
 // src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
 import { ZodError } from 'zod';
 
-import { ILoggerService } from '@/core/common/services/i-logger.service';
+import { ILogger } from '@/core/common/services/i-logger.service'; // Corrected import
 
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
@@ -35,7 +35,7 @@ export class CreatePersonaTemplateUseCase
 {
   constructor(
     private readonly templateRepository: IAgentPersonaTemplateRepository,
-    private readonly logger: ILoggerService,
+    private readonly logger: ILogger, // Corrected type
   ) {}
 
   async execute(

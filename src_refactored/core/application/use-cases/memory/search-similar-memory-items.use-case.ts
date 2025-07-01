@@ -2,7 +2,7 @@
 import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
-import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
@@ -32,7 +32,7 @@ export class SearchSimilarMemoryItemsUseCase
 {
   constructor(
     @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,
-    @inject(ILoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger, // Corrected token and type
   ) {}
 
   private mapEntityToSimilarListItem(entity: MemoryItem, score?: number): SimilarMemoryListItem {

@@ -3,7 +3,7 @@ import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
 
-import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
 
 import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
@@ -33,7 +33,7 @@ export class RemoveMemoryItemUseCase
 {
   constructor(
     @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,
-    @inject(ILoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger, // Corrected token and type
   ) {}
 
   public async execute(

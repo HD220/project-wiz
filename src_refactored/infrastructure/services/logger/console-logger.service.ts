@@ -1,9 +1,9 @@
 import { injectable, unmanaged } from "inversify";
 
-import { ILoggerService } from "@/core/common/services/i-logger.service";
+import { ILogger } from "@/core/common/services/i-logger.service"; // Corrected import
 
 @injectable()
-export class ConsoleLoggerService implements ILoggerService {
+export class ConsoleLoggerService implements ILogger { // Corrected interface
   private context?: string;
 
   constructor(@unmanaged() context?: string) {

@@ -14,9 +14,9 @@ import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo";
 import { IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo";
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";
 import { DrizzleQueueFacade as QueueService } from "../drizzle-queue.facade";
-import { QueueServiceCore } from "../queue-service-core";
 import { JobProcessingService } from "../job-processing.service";
 import { QueueMaintenanceService } from "../queue-maintenance.service";
+import { QueueServiceCore } from "../queue-service-core";
 
 import {
   TestDb,

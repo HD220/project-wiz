@@ -2,8 +2,8 @@ import { injectable, inject } from "inversify";
 import { z } from "zod";
 
 import {
-  ILoggerService,
-  LoggerServiceToken,
+  ILogger, // Corrected import
+  LOGGER_INTERFACE_TYPE, // Corrected import
 } from "@/core/common/services/i-logger.service";
 import { LLMError } from "@/core/domain/common/errors";
 import { ILLMAdapter } from "@/core/ports/adapters/llm-adapter.interface";
@@ -12,12 +12,12 @@ import {
   LanguageModelMessage,
 } from "@/core/ports/adapters/llm-adapter.types";
 
-import { Result, Ok, Err } from "@/shared/result";
+import { Result, ok, error as resultError } from "@/shared/result"; // Corrected import names
 
 @injectable()
 export class MockLLMAdapter implements ILLMAdapter {
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger // Corrected token and type
   ) {
     this.logger.info("[MockLLMAdapter] Initialized");
   }
@@ -37,7 +37,7 @@ export class MockLLMAdapter implements ILLMAdapter {
 
     // Simulate tool call if prompt asks for it
     if (lastUserMessage?.content?.toLowerCase().includes("use tool")) {
-      return Ok({
+      return ok({ // Corrected usage
         role: "assistant",
         content: null,
         tool_calls: [
@@ -55,7 +55,7 @@ export class MockLLMAdapter implements ILLMAdapter {
       });
     }
 
-    return Ok({
+    return ok({ // Corrected usage
       role: "assistant",
       content: responseContent,
     });
@@ -89,26 +89,26 @@ export class MockLLMAdapter implements ILLMAdapter {
           }
         }
         const validation = schema.safeParse(mockData);
-        if (validation.success) return Ok(validation.data);
-        return Err(
+        if (validation.success) return ok(validation.data); // Corrected usage
+        return resultError( // Corrected usage
           new LLMError(
             "Failed to generate mock structured output matching schema.",
-            validation.error
+            { originalError: validation.error } // Wrapped ZodError in details object
           )
         );
       }
       // Renamed e to error
     } catch (error) {
-      return Err(
+      return resultError( // Corrected usage
         new LLMError(
           "Error generating mock structured output for schema.",
-          error instanceof Error ? error : undefined
+          { originalError: error instanceof Error ? error : new Error(String(error)) } // Wrapped error in details object
         )
       );
     }
-    return Err(
+    return resultError( // Corrected usage
       new LLMError(
-        "Mock structured output for this schema type not implemented."
+        "Mock structured output for this schema type not implemented." // No second arg here is fine
       )
     );
   }
@@ -122,7 +122,7 @@ export class MockLLMAdapter implements ILLMAdapter {
     const words = response.split(" ");
     for (const word of words) {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      yield Ok(word + " ");
+      yield ok(word + " "); // Corrected usage
     }
   }
 }

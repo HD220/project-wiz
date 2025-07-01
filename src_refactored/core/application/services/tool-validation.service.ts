@@ -1,9 +1,10 @@
 import { injectable, inject } from 'inversify';
 import { z } from 'zod';
 
-import { IToolRegistryService, TOOL_REGISTRY_SERVICE_TOKEN } from '@/core/application/ports/services/i-tool-registry.service';
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service'; // Removed TOOL_REGISTRY_SERVICE_TOKEN
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { ToolError } from '@/core/domain/common/errors';
+import { TYPES } from '@/infrastructure/ioc/types'; // Added import for TYPES
 import { ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 import { IToolExecutionContext, IAgentTool } from '@/core/tools/tool.interface';
@@ -11,8 +12,8 @@ import { IToolExecutionContext, IAgentTool } from '@/core/tools/tool.interface';
 @injectable()
 export class ToolValidationService {
   constructor(
-    @inject(TOOL_REGISTRY_SERVICE_TOKEN) private readonly toolRegistryService: IToolRegistryService,
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(TYPES.IToolRegistryService) private readonly toolRegistryService: IToolRegistryService, // Corrected token
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   public async processAndValidateSingleToolCall(
