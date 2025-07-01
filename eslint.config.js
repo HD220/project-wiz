@@ -87,7 +87,7 @@ const importAndBoundaryRules = {
 const codeStyleAndQualityRules = {
   "max-depth": ["warn", { max: 4 }],
   "no-else-return": "warn",
-  "id-length": ["warn", { min: 2, exceptions: ["_"] }],
+  "id-length": ["warn", { min: 2, exceptions: ["_", "a", "b"] }], // Added 'a' for ReactMarkdown components, 'b' as common generic
   "max-statements": ["warn", { max: 25 }],
   "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
   "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],

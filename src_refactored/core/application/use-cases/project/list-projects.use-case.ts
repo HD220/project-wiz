@@ -28,8 +28,7 @@ export class ListProjectsUseCase
   }
 
   async execute(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    input: ListProjectsUseCaseInput,
+    _input: ListProjectsUseCaseInput,
   ): Promise<Result<ListProjectsUseCaseOutput, DomainError>> {
     try {
       const projectsResult = await this.projectRepository.findAll();

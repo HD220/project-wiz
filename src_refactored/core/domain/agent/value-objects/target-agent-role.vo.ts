@@ -1,12 +1,12 @@
 // src_refactored/core/domain/agent/value-objects/target-agent-role.vo.ts
-import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/core/domain/common/errors';
 
 interface TargetAgentRoleProps {
   value: string;
 }
 
-export class TargetAgentRoleVO extends ValueObject<TargetAgentRoleProps> {
+export class TargetAgentRoleVO extends AbstractValueObject<TargetAgentRoleProps> {
   private constructor(props: TargetAgentRoleProps) {
     super(props);
   }

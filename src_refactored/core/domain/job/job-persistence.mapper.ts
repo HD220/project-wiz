@@ -1,9 +1,10 @@
 // src_refactored/core/domain/job/job-persistence.mapper.ts
+import { JobEntity } from './job.entity';
 // JobEntity no longer needed directly, JobPersistenceData from .types
 import { JobEntityProps } from './job.types';
 // Added JobStatus if needed, JobPersistenceData from here
-import { JobPersistenceData } from './job.types'; // JobStatus removed as it's not directly used
-import { JobEntity } from './job.entity';
+// JobStatus removed as it's not directly used
+import { JobPersistenceData } from './job.types';
 import { ActivityHistoryVO } from './value-objects/activity-history.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
 import { JobOptionsVO } from './value-objects/job-options.vo';

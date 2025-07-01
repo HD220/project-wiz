@@ -1,5 +1,5 @@
 // src_refactored/core/domain/job/value-objects/activity-history.vo.ts
-import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { DomainError } from '@/core/domain/common/errors';
 
 import { ActivityHistoryEntryVO, ActivityEntryType } from './activity-history-entry.vo';
@@ -9,7 +9,7 @@ export interface ActivityHistoryProps {
   maxEntries?: number;
 }
 
-export class ActivityHistoryVO extends ValueObject<ActivityHistoryProps> {
+export class ActivityHistoryVO extends AbstractValueObject<ActivityHistoryProps> {
   public static readonly DEFAULT_MAX_ENTRIES = 1000;
 
   private constructor(props: ActivityHistoryProps) {

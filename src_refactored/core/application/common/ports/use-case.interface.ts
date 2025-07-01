@@ -14,13 +14,14 @@ import { Executable } from '../executable';
  * @template TResponse The type of the successful output from the use case.
  * @template TError The type of the error output from the use case. Defaults to DomainError or ApplicationError.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface IUseCase<
+export type IUseCase<
   TRequest,
   TResponse,
   TError extends Error = DomainError | ApplicationError,
-> extends Executable<TRequest, TResponse, TError> {
-  // This interface is intentionally kept lean, primarily inheriting from Executable.
-  // Future enhancements or specific use case methods can be added here.
-  // For now, it serves as a clear marker for use case implementations.
-}
+> = Executable<TRequest, TResponse, TError>;
+
+// Note: Previously, IUseCase was an empty interface extending Executable.
+// It has been changed to a type alias as per ESLint's recommendation
+// (@typescript-eslint/no-empty-object-type), since an interface
+// declaring no new members is equivalent to its supertype.
+// The type alias still serves as a clear marker for use case implementations.

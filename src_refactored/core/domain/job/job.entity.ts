@@ -181,3 +181,6 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
     this._stateMutator.setExecutionHistory(history);
   }
 }
+
+// Re-export relevant types
+export { JobStatus, type JobEntityProps };

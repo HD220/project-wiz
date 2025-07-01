@@ -11,7 +11,7 @@ import {
   // afterAll, // Removed as unused
 } from "vitest";
 
-import { JobEntity, JobStatus } from "../../../../core/domain/job/job.entity";
+import { JobStatus } from "../../../../core/domain/job/job.entity"; // JobEntity removed as unused
 // import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo"; // Removed as unused
 import { type IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo";
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";

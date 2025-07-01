@@ -1,5 +1,5 @@
 // src_refactored/core/domain/job/value-objects/activity-history-entry.vo.ts
-import { ValueObject } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/core/domain/common/errors';
 
 export enum ActivityEntryType {
@@ -20,7 +20,7 @@ export interface ActivityHistoryEntryProps {
   metadata?: Record<string, unknown>;
 }
 
-export class ActivityHistoryEntryVO extends ValueObject<ActivityHistoryEntryProps> {
+export class ActivityHistoryEntryVO extends AbstractValueObject<ActivityHistoryEntryProps> {
   private constructor(props: ActivityHistoryEntryProps) {
     super(props);
   }

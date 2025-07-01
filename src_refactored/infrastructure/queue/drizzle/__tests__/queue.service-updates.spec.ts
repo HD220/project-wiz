@@ -13,6 +13,9 @@ import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo";
 import { IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo";
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";
 import { DrizzleQueueFacade as QueueService } from "../drizzle-queue.facade";
+import { QueueServiceCore } from "../queue-service-core";
+import { JobProcessingService } from "../job-processing.service";
+import { QueueMaintenanceService } from "../queue-maintenance.service";
 // import { JobEntity } from "../../../../core/domain/job/job.entity"; // Might be needed for some expect.objectContaining
 
 import {
@@ -46,7 +49,30 @@ beforeEach(async () => {
   await clearDatabaseTables(db);
 
   jobRepository = new DrizzleJobRepository(db);
-  queueService = new QueueService(queueName, jobRepository, defaultJobOpts);
+  const coreService = new QueueServiceCore<{ email: string }, { status: string }>(
+    queueName,
+    jobRepository,
+    defaultJobOpts
+  );
+  const processingService = new JobProcessingService<{ email: string }, { status: string }>(
+    jobRepository,
+    coreService, // Use coreService as the EventEmitter
+    queueName
+  );
+  const maintenanceService = new QueueMaintenanceService<{ email: string }, { status: string }>(
+    jobRepository,
+    coreService, // Use coreService as the EventEmitter
+    queueName
+  );
+
+  queueService = new QueueService<{ email: string }, { status: string }>(
+    queueName,
+    jobRepository,
+    defaultJobOpts,
+    coreService,
+    processingService,
+    maintenanceService
+  );
   vi.spyOn(queueService, "emit");
 });
 

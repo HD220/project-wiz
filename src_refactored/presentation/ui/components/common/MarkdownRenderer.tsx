@@ -50,10 +50,18 @@ export function MarkdownRenderer({
 
   // Default component overrides, can be merged with or overridden by `customComponents` prop
   const defaultComponents: Options['components'] = {
-
-    // Open links in new tab
-    // eslint-disable-next-line jsx-a11y/anchor-has-content
-    anchorElement: ({ node: _node, ...anchorProps }) => <a {...anchorProps} target="_blank" rel="noopener noreferrer" />,
+    // Ensure links open in a new tab and have accessible content.
+    // The key 'a' correctly overrides the default anchor tag rendering.
+    a: ({ node: _node, children, href, ...props }) => {
+      // Use children if available, otherwise use href as content for accessibility.
+      // This ensures the anchor is not empty.
+      const anchorContent = children || href;
+      return (
+        <a href={href} {...props} target="_blank" rel="noopener noreferrer">
+          {anchorContent}
+        </a>
+      );
+    },
 
     // Custom styling for code blocks (pre > code)
     // This is a basic version. For syntax highlighting, you'd integrate react-syntax-highlighter here.

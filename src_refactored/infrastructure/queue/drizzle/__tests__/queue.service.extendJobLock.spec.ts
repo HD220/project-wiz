@@ -9,7 +9,7 @@ import {
   afterEach,
 } from "vitest";
 
-import { JobEntity } from "../../../../core/domain/job/job.entity"; // JobStatus removed
+// JobStatus removed, JobEntity was also unused
 import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo";
 import { type IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo";
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";

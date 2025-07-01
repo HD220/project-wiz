@@ -8,6 +8,12 @@ import { DrizzleJobRepository } from '../../../../infrastructure/persistence/dri
 import { TestDb, createTestDbClient, runMigrations } from '../../../../infrastructure/queue/drizzle/__tests__/test-db.helper';
 // eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
 import { DrizzleQueueFacade as QueueService } from '../../../../infrastructure/queue/drizzle/drizzle-queue.facade';
+// eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
+import { QueueServiceCore } from '../../../../infrastructure/queue/drizzle/queue-service-core';
+// eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
+import { JobProcessingService } from '../../../../infrastructure/queue/drizzle/job-processing.service';
+// eslint-disable-next-line boundaries/element-types -- Integration test needs access to infrastructure
+import { QueueMaintenanceService } from '../../../../infrastructure/queue/drizzle/queue-maintenance.service';
 import { JobEntity, JobStatus } from '../../../domain/job/job.entity';
 import { IJobOptions } from '../../../domain/job/value-objects/job-options.vo';
 import { WorkerService } from '../worker.service';
@@ -35,7 +41,32 @@ describe('WorkerService - Error Handling and Edge Cases', () => {
     db = createTestDbClient({ memory: true });
     await runMigrations(db);
     jobRepository = new DrizzleJobRepository(db);
-    queueService = new QueueService<TestPayload, TestResult>(QUEUE_NAME, jobRepository, defaultJobOptions);
+
+    const coreService = new QueueServiceCore<TestPayload, TestResult>(
+      QUEUE_NAME,
+      jobRepository,
+      defaultJobOptions
+    );
+    const processingService = new JobProcessingService<TestPayload, TestResult>(
+      jobRepository,
+      coreService, // Use coreService as the EventEmitter
+      QUEUE_NAME
+    );
+    const maintenanceService = new QueueMaintenanceService<TestPayload, TestResult>(
+      jobRepository,
+      coreService, // Use coreService as the EventEmitter
+      QUEUE_NAME
+    );
+
+    queueService = new QueueService<TestPayload, TestResult>(
+      QUEUE_NAME,
+      jobRepository,
+      defaultJobOptions,
+      coreService,
+      processingService,
+      maintenanceService
+    );
+
     mockProcessor = vi.fn();
     workerService = new WorkerService(queueService, mockProcessor, defaultWorkerOptions);
     vi.spyOn(workerService, 'emit');
