@@ -17,12 +17,12 @@ import {
   UpdateAgentInstanceResponse,
   GetAgentInstancesByProjectRequest,
   GetAgentInstancesByProjectResponse,
-} from "../../../../shared/ipc-types"; // Corrected path
+} from "../../../../shared/ipc-types";
 import { AgentInstance } from "../../../../shared/types/entities";
 import { AgentLLM } from "../../../../shared/types/entities";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
-function _registerQueryAgentInstanceHandlers() {
+function registerQueryAgentInstanceHandlers() {
   ipcMain.handle(
     GET_AGENT_INSTANCES_CHANNEL,
     async (): Promise<GetAgentInstancesResponse> => {
@@ -63,7 +63,7 @@ function _registerQueryAgentInstanceHandlers() {
   );
 }
 
-function _registerMutationAgentInstanceHandlers() {
+function registerCreateAgentInstanceHandler() {
   ipcMain.handle(
     CREATE_AGENT_INSTANCE_CHANNEL,
     async (
@@ -89,7 +89,9 @@ function _registerMutationAgentInstanceHandlers() {
       return { agentInstance: newInstance };
     }
   );
+}
 
+function registerUpdateAgentInstanceHandler() {
   ipcMain.handle(
     UPDATE_AGENT_INSTANCE_CHANNEL,
     async (
@@ -127,6 +129,7 @@ function _registerMutationAgentInstanceHandlers() {
 }
 
 export function registerAgentInstanceHandlers() {
-  _registerQueryAgentInstanceHandlers();
-  _registerMutationAgentInstanceHandlers();
+  registerQueryAgentInstanceHandlers();
+  registerCreateAgentInstanceHandler();
+  registerUpdateAgentInstanceHandler();
 }

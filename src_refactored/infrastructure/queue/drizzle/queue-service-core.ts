@@ -1,32 +1,33 @@
 // src_refactored/infrastructure/queue/drizzle/queue-service-core.ts
+import EventEmitter from 'node:events';
+
 import { IJobRepository } from "@/core/application/ports/job-repository.interface";
-import { AbstractQueue } from "@/core/application/queue/abstract-queue";
+// AbstractQueue import removed
 import { JobEntity, JobStatus } from "@/core/domain/job/job.entity";
 import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
-import { IJobOptions } from "@/core/domain/job/value-objects/job-options.vo"; // JobOptionsVO removed
+// JobOptionsVO class needed for JobOptionsVO.create
+import { IJobOptions, JobOptionsVO } from "@/core/domain/job/value-objects/job-options.vo";
 
-// Forward declaration for IQueueMaintenanceService to break circular dependency if needed for close()
-interface IQueueMaintenanceService {
-  stopMaintenance(): Promise<void>;
-}
+// IQueueMaintenanceService forward declaration no longer needed here
 
-export class QueueServiceCore<P, R> extends AbstractQueue<P, R> {
-  // Maintenance service can be optional or injected if close needs to call it
-  private maintenanceService?: IQueueMaintenanceService;
+export class QueueServiceCore<P, R> extends EventEmitter {
+  public readonly queueName: string;
+  protected readonly jobRepository: IJobRepository;
+  protected readonly defaultJobOptions: JobOptionsVO;
 
   constructor(
     queueName: string,
     jobRepository: IJobRepository,
-    defaultJobOptions?: IJobOptions,
-    maintenanceService?: IQueueMaintenanceService
+    defaultJobOptions?: IJobOptions
   ) {
-    super(queueName, jobRepository, defaultJobOptions);
-    this.maintenanceService = maintenanceService;
+    // Call EventEmitter constructor
+    super();
+    this.queueName = queueName;
+    this.jobRepository = jobRepository;
+    this.defaultJobOptions = JobOptionsVO.create(defaultJobOptions);
   }
 
-  public setMaintenanceService(service: IQueueMaintenanceService): void {
-    this.maintenanceService = service;
-  }
+  // setMaintenanceService method removed
 
   async add(
     jobName: string,
@@ -112,42 +113,12 @@ export class QueueServiceCore<P, R> extends AbstractQueue<P, R> {
   }
 
   public async close(): Promise<void> {
-    if (this.maintenanceService) {
-      await this.maintenanceService.stopMaintenance();
-    }
+    // Specific cleanup for QueueServiceCore, if any, would go here.
+    // For example, ensuring any in-memory state is cleared or persisted if necessary.
+    // Stopping maintenance is now handled by the Facade.
     this.emit("queue.closed");
-    // Add any other core cleanup logic here (e.g., database connections if managed directly)
+    // Add any other core cleanup logic here
   }
 
-  // Methods from AbstractQueue that will be implemented by other services
-  // These will need to be handled, possibly by changing AbstractQueue or by composition.
-  // For now, to make QueueServiceCore a valid extension of AbstractQueue (if it were complete),
-  // these would need to be abstract or throw errors.
-  // However, the goal is that QueueServiceCore *won't* be the sole implementer of AbstractQueue.
-
-  // These parameters will be flagged as unused by ESLint. This is acceptable for these stubs.
-  async fetchNextJobAndLock(workerId: string, lockDurationMs: number): Promise<JobEntity<P, R> | null> {
-    throw new Error("Method not implemented in QueueServiceCore. See JobProcessingService.");
-  }
-  async extendJobLock(jobId: string | JobIdVO, workerId: string, lockDurationMs: number): Promise<void> {
-    throw new Error("Method not implemented in QueueServiceCore. See JobProcessingService.");
-  }
-  async markJobAsCompleted(jobId: string | JobIdVO, workerId: string, result: R, jobInstanceWithChanges: JobEntity<P,R>): Promise<void> {
-    throw new Error("Method not implemented in QueueServiceCore. See JobProcessingService.");
-  }
-  async markJobAsFailed(jobId: string | JobIdVO, workerId: string, error: Error, jobInstanceWithChanges: JobEntity<P,R>): Promise<void> {
-    throw new Error("Method not implemented in QueueServiceCore. See JobProcessingService.");
-  }
-  async updateJobProgress(jobId: string | JobIdVO, workerId: string, progress: number | object): Promise<void> {
-    throw new Error("Method not implemented in QueueServiceCore. See JobProcessingService.");
-  }
-  async addJobLog(jobId: string | JobIdVO, workerId: string, message: string, level?: string): Promise<void> {
-    throw new Error("Method not implemented in QueueServiceCore. See JobProcessingService.");
-  }
-  startMaintenance(): void {
-    throw new Error("Method not implemented in QueueServiceCore. See QueueMaintenanceService.");
-  }
-  async stopMaintenance(): Promise<void> {
-    throw new Error("Method not implemented in QueueServiceCore. See QueueMaintenanceService.");
-  }
+  // Placeholder methods for AbstractQueue are removed as this class no longer extends it directly.
 }

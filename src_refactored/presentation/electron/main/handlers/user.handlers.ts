@@ -8,7 +8,7 @@ import {
   GetUserProfileResponse,
   UpdateUserProfileRequest,
   UpdateUserProfileResponse,
-} from '../../../../shared/ipc-types'; // Corrected path
+} from '../../../../shared/ipc-types';
 import { mockUserProfile, updateMockUserProfile } from '../mocks/user.mocks';
 
 export function registerUserHandlers() {

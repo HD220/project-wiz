@@ -12,16 +12,19 @@ import { TYPES } from "@/infrastructure/ioc/types";
 
 import { Result, Ok, Err } from "@/shared/result";
 
-const _ReadFileParamsSchema = z.object({ // Prefixed
+// Prefixed because these are internal schema details, not part of the public tool parameters interface
+const _ReadFileParamsSchema = z.object({
   filePath: z.string().describe("The path to the file to read."),
 });
 
-const _WriteFileParamsSchema = z.object({ // Prefixed
+// Prefixed
+const _WriteFileParamsSchema = z.object({
   filePath: z.string().describe("The path to the file to write."),
   content: z.string().describe("The content to write to the file."),
 });
 
-const _ListFilesParamsSchema = z.object({ // Prefixed
+// Prefixed
+const _ListFilesParamsSchema = z.object({
   directoryPath: z
     .string()
     .describe("The path to the directory to list files from."),
@@ -84,9 +87,12 @@ export class FileSystemTool implements IAgentTool<ZodAny, unknown> {
           return this._handleListFiles(params.directoryPath);
         }
         default: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const action = (params as any).action;
-          return Err(new ToolError(`Unknown fileSystem action: ${action}`));
+          // This case should ideally be unreachable if Zod validation is exhaustive
+          // and all enum members are handled in the switch.
+          // params.action is 'never' here. For logging, we might need to cast params itself.
+          // However, a generic error message is safest if truly unreachable.
+          const actionValue = (params as Record<string, unknown>).action;
+          return Err(new ToolError(`Unknown fileSystem action received: ${String(actionValue)}`));
         }
       }
     } catch (error: unknown) {

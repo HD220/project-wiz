@@ -21,12 +21,24 @@ export function registerProjectIPCHandlers(
   }
   internalListProjectsUseCase = listProjectsUseCaseInstance;
 
-  ipcMain.handle(IPCChannel.PROJECT_LIST_QUERY, _handleProjectListQuery);
+  ipcMain.handle(IPCChannel.PROJECT_LIST_QUERY, handleProjectListQuery);
 
   console.log("[IPC Project Handler] Project IPC handlers registered.");
 }
 
-async function _handleProjectListQuery(_event: IpcMainInvokeEvent) {
+function mapProjectsToProjectListItems(projects: Project[]): ProjectListItem[] {
+  return projects.map((project) => ({
+    id: project.id.value,
+    name: project.name.value,
+    description: project.description?.value,
+    createdAt: project.createdAt.toISOString(),
+    updatedAt: project.updatedAt.toISOString(),
+    // ownerName: project.owner?.name.value, // Example, if Project entity has owner
+    // thumbnailUrl: project.thumbnailUrl?.value, // Example
+  }));
+}
+
+async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
   console.log(
     `[IPC Project Handler] Received ${IPCChannel.PROJECT_LIST_QUERY}`
   );
@@ -45,17 +57,7 @@ async function _handleProjectListQuery(_event: IpcMainInvokeEvent) {
 
     if (result.isSuccess()) {
       const projects = result.value;
-      const projectListItems: ProjectListItem[] = projects.map(
-        (project) => ({
-          id: project.id.value,
-          name: project.name.value,
-          description: project.description?.value,
-          createdAt: project.createdAt.toISOString(),
-          updatedAt: project.updatedAt.toISOString(),
-          // ownerName: project.owner?.name.value, // Example, if Project entity has owner
-          // thumbnailUrl: project.thumbnailUrl?.value, // Example
-        })
-      );
+      const projectListItems = mapProjectsToProjectListItems(projects);
       console.log(
         `[IPC Project Handler] Sending ${projectListItems.length} projects.`
       );
@@ -89,6 +91,7 @@ async function _handleProjectListQuery(_event: IpcMainInvokeEvent) {
 
 export function unregisterProjectIPCHandlers(): void {
   ipcMain.removeHandler(IPCChannel.PROJECT_LIST_QUERY);
-  internalListProjectsUseCase = null; // Clear the reference
+  // Clear the reference
+  internalListProjectsUseCase = null;
   console.log("[IPC Project Handler] Project IPC handlers unregistered.");
 }

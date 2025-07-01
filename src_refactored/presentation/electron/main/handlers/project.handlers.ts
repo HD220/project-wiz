@@ -15,7 +15,7 @@ import {
   CreateProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse,
-} from "../../../../shared/ipc-types"; // Corrected path
+} from "../../../../shared/ipc-types";
 import { Project } from "../../../../shared/types/entities";
 import { AgentLLM } from "../../../../shared/types/entities";
 import {
@@ -24,7 +24,7 @@ import {
   updateMockProject,
 } from "../mocks/project.mocks";
 
-function _registerQueryProjectHandlers() {
+function registerQueryProjectHandlers() {
   ipcMain.handle(
     GET_PROJECTS_CHANNEL,
     async (): Promise<GetProjectsResponse> => {
@@ -51,7 +51,7 @@ function _registerQueryProjectHandlers() {
   );
 }
 
-function _registerMutationProjectHandlers() {
+function registerMutationProjectHandlers() {
   ipcMain.handle(
     CREATE_PROJECT_CHANNEL,
     async (
@@ -101,6 +101,6 @@ function _registerMutationProjectHandlers() {
 }
 
 export function registerProjectHandlers() {
-  _registerQueryProjectHandlers();
-  _registerMutationProjectHandlers();
+  registerQueryProjectHandlers();
+  registerMutationProjectHandlers();
 }

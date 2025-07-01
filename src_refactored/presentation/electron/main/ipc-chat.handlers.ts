@@ -2,7 +2,6 @@ import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import {
   IChatService,
-  IChatService,
   // CHAT_SERVICE_TOKEN, // No longer used directly here
 } from "@/core/application/ports/services/i-chat.service";
 
@@ -26,12 +25,12 @@ export function registerChatIPCHandlers(chatServiceInstance: IChatService): void
   }
   internalChatService = chatServiceInstance;
 
-  ipcMain.handle(IPCChannel.CHAT_SEND_MESSAGE, _handleChatSendMessage);
+  ipcMain.handle(IPCChannel.CHAT_SEND_MESSAGE, handleChatSendMessage);
 
   console.log("[IPC Chat Handler] Chat IPC handlers registered.");
 }
 
-async function _handleChatSendMessage(
+async function handleChatSendMessage(
   event: IpcMainInvokeEvent,
   payload: ChatSendMessagePayload
 ) {
@@ -87,6 +86,7 @@ async function _handleChatSendMessage(
 
 export function unregisterChatIPCHandlers(): void {
   ipcMain.removeHandler(IPCChannel.CHAT_SEND_MESSAGE);
-  internalChatService = null; // Clear the internal reference
+  // Clear the internal reference
+  internalChatService = null;
   console.log("[IPC Chat Handler] Chat IPC handlers unregistered.");
 }

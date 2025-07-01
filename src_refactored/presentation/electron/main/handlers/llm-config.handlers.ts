@@ -10,7 +10,7 @@ import {
   GetUserLLMConfigsResponse,
   UpdateUserLLMConfigRequest,
   UpdateUserLLMConfigResponse
-} from '../../../../shared/ipc-types/llm-config';
+} from '../../../../shared/ipc-types';
 import { AgentLLM, LLMConfig } from '../../../../shared/types/entities';
 import {
   mockAvailableLLMs,
