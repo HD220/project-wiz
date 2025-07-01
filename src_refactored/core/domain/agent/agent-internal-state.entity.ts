@@ -94,6 +94,10 @@ export class AgentInternalState {
     return this.touchAndUpdate({ currentProjectId: undefined });
   }
 
+  public setGeneralNotes(newNotes: GeneralNotesCollection): AgentInternalState {
+    return this.touchAndUpdate({ generalNotes: newNotes });
+  }
+
   public equals(other?: AgentInternalState): boolean {
     if (other === null || other === undefined) {
       return false;

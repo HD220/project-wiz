@@ -14,7 +14,7 @@ import { UserUsername } from '@/domain/user/value-objects/user-username.vo';
 import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
 
-import { Result } from '@/shared/result';
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result'; // Import helpers
 
 import { CreateUserInput, CreateUserOutput, CreateUserInputSchema } from './create-user.schema';
 // TODO: Import or define a HashingService if password hashing is to be done in the use case.

@@ -65,39 +65,38 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectInput, Promis
   }
 
   private _createProjectEntity(validatedInput: CreateProjectInput): Result<ProjectEntity, DomainError> {
-    const projectNameResult = ProjectName.create(validatedInput.name);
-    // Assuming ProjectName.create returns a Result compatible type or needs similar isError check
-    if (isError(projectNameResult)) { // Corrected usage, assuming ProjectName.create returns Result
-      this.logger.warn(`[CreateProjectUseCase] Invalid project name: ${validatedInput.name}`, projectNameResult.error);
-      return resultError(projectNameResult.error); // Corrected usage
-    }
+    try {
+      const projectName = ProjectName.create(validatedInput.name);
 
-    let projectDescription: ProjectDescription | undefined;
-    if (validatedInput.description !== undefined && validatedInput.description !== null) {
-      const projectDescriptionResult = ProjectDescription.create(validatedInput.description);
-      // Assuming ProjectDescription.create returns a Result compatible type
-      if (isError(projectDescriptionResult)) { // Corrected usage
-        this.logger.warn(`[CreateProjectUseCase] Invalid project description`, projectDescriptionResult.error);
-        return resultError(projectDescriptionResult.error); // Corrected usage
+      let projectDescription: ProjectDescription | undefined;
+      if (validatedInput.description !== undefined && validatedInput.description !== null) {
+        // Ensure description is not just empty string before creating, or let VO handle empty string if that's valid
+        if (validatedInput.description.trim() !== "") {
+          projectDescription = ProjectDescription.create(validatedInput.description);
+        }
       }
-      projectDescription = projectDescriptionResult.value;
-    }
 
-    const projectProps: ProjectProps = {
-      id: ProjectId.create(),
-      name: projectNameResult.value, // Access value after check
-      description: projectDescription,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      const projectProps: ProjectProps = {
+        id: ProjectId.create(),
+        name: projectName,
+        description: projectDescription,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    const projectEntityResult = ProjectEntity.create(projectProps);
-     // Assuming ProjectEntity.create returns a Result compatible type
-    if (isError(projectEntityResult)) { // Corrected usage
-      this.logger.error('[CreateProjectUseCase] Failed to create project entity', projectEntityResult.error);
-      return resultError(projectEntityResult.error); // Corrected usage
+      const projectEntity = ProjectEntity.create(projectProps);
+      return ok(projectEntity);
+
+    } catch (e: unknown) {
+      // Catch errors from ProjectName.create, ProjectDescription.create, ProjectEntity.create
+      if (e instanceof DomainError || e instanceof ValueError || e instanceof EntityError) {
+        this.logger.warn(`[CreateProjectUseCase] Domain error creating project entity parts: ${e.message}`, { error: e });
+        return resultError(e);
+      }
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[CreateProjectUseCase] Unexpected error creating project entity parts: ${message}`, { error: e });
+      return resultError(new DomainError(`Unexpected error creating project entity parts: ${message}`));
     }
-    return ok(projectEntityResult.value); // Corrected usage
   }
 
   private _mapToOutput(projectEntity: ProjectEntity): CreateProjectOutput {

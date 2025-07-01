@@ -10,14 +10,14 @@ import { ProjectName } from "./value-objects/project-name.vo";
 interface ProjectConstructorProps {
   id?: ProjectId;
   name: ProjectName;
-  description: ProjectDescription;
+  description?: ProjectDescription; // Made optional
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 interface InternalProjectProps extends EntityProps<ProjectId> {
   name: ProjectName;
-  description: ProjectDescription;
+  description?: ProjectDescription; // Made optional
 }
 
 export class Project extends AbstractEntity<ProjectId, InternalProjectProps> {
@@ -27,8 +27,8 @@ export class Project extends AbstractEntity<ProjectId, InternalProjectProps> {
 
   public static create(props: ProjectConstructorProps): Project {
     if (!props.name) throw new EntityError("Project name is required.");
-    if (!props.description)
-      throw new EntityError("Project description is required.");
+    // Description is now optional, so no check needed here if it's undefined.
+    // If it's provided, it should be a valid ProjectDescription instance.
 
     const now = new Date();
     const projectId = props.id || ProjectId.generate();
