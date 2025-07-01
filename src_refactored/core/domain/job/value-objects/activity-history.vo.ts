@@ -4,6 +4,9 @@ import { DomainError } from '@/core/domain/common/errors';
 
 import { ActivityHistoryEntryVO, ActivityEntryType } from './activity-history-entry.vo';
 
+// Re-export for convenience if other modules import primarily from this VO file
+export { ActivityHistoryEntryVO, ActivityEntryType };
+
 export interface ActivityHistoryProps {
   entries: ReadonlyArray<ActivityHistoryEntryVO>;
   maxEntries?: number;
