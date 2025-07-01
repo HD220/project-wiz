@@ -1,19 +1,26 @@
 // src_refactored/core/application/use-cases/annotation/list-annotations.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+import { injectable, inject } from 'inversify';
+
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+import { Identity } from '@/core/common/value-objects/identity.vo';
+import { Annotation } from '@/domain/annotation/annotation.entity';
+import { IAnnotationRepository, PaginatedAnnotationsResult, AnnotationSearchFilters } from '@/domain/annotation/ports/annotation-repository.interface';
+import { DomainError, ValueError } from '@/domain/common/errors';
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+import { TYPES } from '@/infrastructure/ioc/types';
+import { PaginationOptions } from '@/core/common/ports/repository.types';
+
+
 import {
   ListAnnotationsUseCaseInput,
   ListAnnotationsUseCaseInputSchema,
   ListAnnotationsUseCaseOutput,
   AnnotationListItem,
 } from './list-annotations.schema';
-import { IAnnotationRepository } from '../../../../domain/annotation/ports/annotation-repository.interface';
-import { AnnotationSearchFilters, PaginationOptions } from '../../../../domain/annotation/ports/annotation-repository.types';
-import { Identity } from '../../../../common/value-objects/identity.vo';
-import { Annotation } from '../../../../domain/annotation/annotation.entity';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
 
+@injectable()
 export class ListAnnotationsUseCase
   implements
     Executable<
@@ -22,64 +29,87 @@ export class ListAnnotationsUseCase
       DomainError | ZodError | ValueError
     >
 {
-  constructor(private annotationRepository: IAnnotationRepository) {}
+  constructor(
+    @inject(TYPES.IAnnotationRepository) private readonly annotationRepository: IAnnotationRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
+  ) {}
 
   async execute(
     input: ListAnnotationsUseCaseInput,
   ): Promise<Result<ListAnnotationsUseCaseOutput, DomainError | ZodError | ValueError>> {
     const validationResult = ListAnnotationsUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
-      return error(validationResult.error);
+      return resultError(validationResult.error);
     }
     const validInput = validationResult.data;
 
     try {
-      const filters: Partial<AnnotationSearchFilters> = {};
-      if (validInput.agentId) {
-        filters.agentId = Identity.fromString(validInput.agentId);
-      }
-      if (validInput.jobId) {
-        filters.jobId = Identity.fromString(validInput.jobId);
-      }
-      // Add other filters like textContains here if implemented
+      const filters = this._buildSearchFilters(validInput); // This can throw ValueError
+      const pagination = this._buildPaginationOptions(validInput);
 
-      const pagination: PaginationOptions = {
-        page: validInput.page,
-        pageSize: validInput.pageSize,
-      };
+      const repoResult = await this.annotationRepository.search(filters, pagination);
 
-      const searchResult = await this.annotationRepository.search(filters, pagination);
-      if (searchResult.isError()) {
-        return error(new DomainError(`Failed to list annotations: ${searchResult.value.message}`, searchResult.value));
+      if (isError(repoResult)) {
+        const err = repoResult.error instanceof DomainError ? repoResult.error : new DomainError('Failed to list annotations', repoResult.error);
+        this.logger.error(`[ListAnnotationsUseCase] Repository error: ${err.message}`, { originalError: repoResult.error });
+        return resultError(err);
       }
 
-      const paginatedData = searchResult.value;
+      const paginatedData = repoResult.value;
 
-      const annotationListItems: AnnotationListItem[] = paginatedData.annotations.map(
-        (annotationEntity: Annotation): AnnotationListItem => ({
-          id: annotationEntity.id().value(),
-          text: annotationEntity.text().value(),
-          agentId: annotationEntity.agentId()?.value() || null,
-          jobId: annotationEntity.jobId()?.value() || null,
-          createdAt: annotationEntity.createdAt().toISOString(),
-          updatedAt: annotationEntity.updatedAt().toISOString(),
-        }),
-      );
-
-      return ok({
-        annotations: annotationListItems,
+      const output: ListAnnotationsUseCaseOutput = {
+        items: paginatedData.items.map(this._mapToListItem),
         totalCount: paginatedData.totalCount,
         page: paginatedData.page,
         pageSize: paginatedData.pageSize,
         totalPages: paginatedData.totalPages,
-      });
+      };
+      return ok(output);
 
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) {
+      if (e instanceof ValueError) { // Catch ValueError from _buildSearchFilters
+         this.logger.warn(`[ListAnnotationsUseCase] Value error during filter build: ${e.message}`, { error: e });
+        return resultError(e);
       }
-      console.error(`[ListAnnotationsUseCase] Unexpected error:`, err);
-      return error(new DomainError(`Unexpected error listing annotations: ${err.message || err}`));
+      // Catch any other unexpected errors (ZodError should have been caught earlier)
+      const message = e instanceof Error ? e.message : String(e);
+      const logError = e instanceof Error ? e : new Error(message); // Ensure it's an Error type
+      this.logger.error(`[ListAnnotationsUseCase] Unexpected error: ${message}`, { originalError: logError });
+      // Wrap in DomainError if it's not already one of the declared error types
+      if (e instanceof DomainError || e instanceof ZodError) { // ZodError unlikely here but for completeness
+          return resultError(e);
+      }
+      return resultError(new DomainError(`Unexpected error listing annotations: ${message}`, logError));
     }
+  }
+
+  private _buildSearchFilters(validInput: ListAnnotationsUseCaseInput): Partial<AnnotationSearchFilters> {
+    // This method can throw ValueError if Identity.fromString fails
+    const filters: Partial<AnnotationSearchFilters> = {};
+    if (validInput.agentId) {
+      filters.agentId = Identity.fromString(validInput.agentId);
+    }
+    if (validInput.jobId) {
+      filters.jobId = Identity.fromString(validInput.jobId);
+    }
+    return filters;
+  }
+
+  private _buildPaginationOptions(validInput: ListAnnotationsUseCaseInput): PaginationOptions {
+    return {
+      page: validInput.page,
+      pageSize: validInput.pageSize,
+    };
+  }
+
+  private _mapToListItem(annotation: Annotation): AnnotationListItem {
+    return {
+      id: annotation.id().value(),
+      text: annotation.text().value(),
+      agentId: annotation.agentId()?.value() || null,
+      jobId: annotation.jobId()?.value() || null,
+      createdAt: annotation.createdAt().toISOString(),
+      updatedAt: annotation.updatedAt().toISOString(),
+    };
   }
 }

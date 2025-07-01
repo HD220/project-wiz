@@ -1,6 +1,10 @@
-import React from 'react';
 import { Link }
   from '@tanstack/react-router';
+// Example icons, removed ExternalLink
+import { Star, GitFork, CalendarDays } from 'lucide-react';
+import React from 'react';
+
+import { Badge } from '@/presentation/ui/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -9,18 +13,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/presentation/ui/components/ui/card';
-import { Badge } from '@/presentation/ui/components/ui/badge';
 import { cn } from '@/presentation/ui/lib/utils';
-import { ExternalLink, Star, GitFork, CalendarDays } from 'lucide-react'; // Example icons
+
 
 // Define the ProjectSummary type/interface
 export interface ProjectSummary {
   id: string;
   name: string;
   description: string;
-  lastUpdatedAt?: string | Date; // Could be string or Date object
+  // Could be string or Date object
+  lastUpdatedAt?: string | Date;
   tags?: string[];
-  imageUrl?: string; // Optional image for the card
+  // Optional image for the card
+  imageUrl?: string;
   // Example additional fields for a more "discord-like" project card feel
   starCount?: number;
   forkCount?: number;
@@ -42,13 +47,14 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
 
   return (
     <Link
-      to="/projects/$projectId" // TanStack Router v1 style path param
+      // TanStack Router v1 style path param
+      to="/projects/$projectId"
       params={{ projectId: project.id }}
       className={cn("block hover:shadow-lg transition-shadow duration-200 rounded-lg", className)}
     >
-      <Card className="h-full flex flex-col"> {/* Ensure card itself takes full height of Link */}
+      {/* Ensure card itself takes full height of Link */}
+      <Card className="h-full flex flex-col">
         {project.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={project.imageUrl}
             alt={`${project.name} preview`}
@@ -60,7 +66,6 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
           {project.owner && (
             <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1">
               {project.owner.avatarUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img src={project.owner.avatarUrl} alt={project.owner.name} className="w-4 h-4 rounded-full mr-1.5" />
               )}
               <span>{project.owner.name}</span>

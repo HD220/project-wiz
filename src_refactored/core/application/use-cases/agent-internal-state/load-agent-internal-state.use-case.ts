@@ -1,26 +1,39 @@
 // src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+
+// Added import for ILogger
+import { ILogger } from '@/core/common/services/i-logger.service';
+
+import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
+import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
+import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
+import { Result, ok, error } from '@/shared/result';
+
+// Removed unused import for Inject: import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
+
 import {
   LoadAgentInternalStateUseCaseInput,
   LoadAgentInternalStateUseCaseInputSchema,
   LoadAgentInternalStateUseCaseOutput,
 } from './load-agent-internal-state.schema';
-import { IAgentInternalStateRepository } from '../../../../domain/agent/ports/agent-internal-state-repository.interface';
-import { AgentId } from '../../../../domain/agent/value-objects/agent-id.vo';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, NotFoundError, ValueError } from '../../../../common/errors';
 
 export class LoadAgentInternalStateUseCase
   implements
     Executable<
       LoadAgentInternalStateUseCaseInput,
-      LoadAgentInternalStateUseCaseOutput | null, // Output can be null if state not found
+      // Output can be null if state not found
+      LoadAgentInternalStateUseCaseOutput | null,
       DomainError | ZodError | ValueError | NotFoundError
     >
 {
   constructor(
-    private stateRepository: IAgentInternalStateRepository,
+    // @Inject(IAgentInternalStateRepositorySymbol) // Example for IoC
+    private readonly stateRepository: IAgentInternalStateRepository,
+    // @Inject(ILoggerSymbol) // Example for IoC
+    private readonly logger: ILogger,
   ) {}
 
   async execute(
@@ -37,33 +50,35 @@ export class LoadAgentInternalStateUseCase
 
       const stateResult = await this.stateRepository.findByAgentId(agentIdVo);
 
-      if (stateResult.isError()) {
-        return error(new DomainError(`Failed to load internal state for agent ${validInput.agentId}: ${stateResult.value.message}`, stateResult.value));
+      if (isError(stateResult)) { // Corrected: Use type guard
+        // Access .error property when it's an error
+        return error(new DomainError(`Failed to load internal state for agent ${validInput.agentId}: ${stateResult.error.message}`, stateResult.error));
       }
 
+      // If it's not an error, it's a success, so stateResult.value is safe to access
       const stateEntity = stateResult.value;
 
       if (!stateEntity) {
-        // It's a valid case for state to not exist, return ok with null.
-        // If it should be an error, return error(new NotFoundError(...))
         return ok(null);
       }
 
       const output: LoadAgentInternalStateUseCaseOutput = {
         agentId: stateEntity.agentId().value(),
         currentProjectId: stateEntity.currentProjectId()?.value() || null,
-        currentGoal: stateEntity.currentGoal()?.value() || null, // Handles empty string from VO correctly
+        currentGoal: stateEntity.currentGoal()?.value() || null,
         generalNotes: stateEntity.generalNotes().list(),
       };
 
       return ok(output);
-
-    } catch (err: any) {
-      if (err instanceof ZodError || err instanceof NotFoundError || err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+    } catch (e: unknown) { // Changed errorValue to e to avoid conflict
+      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      console.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}:`, err);
-      return error(new DomainError(`Unexpected error loading agent state: ${err.message || err}`));
+      const message = e instanceof Error ? e.message : String(e);
+      // For logger, ensure the second argument is an Error instance if the logger expects it, or pass as metadata
+      const logError = e instanceof Error ? e : new Error(message);
+      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { originalError: logError }); // Pass error in metadata
+      return error(new DomainError(`Unexpected error loading agent state: ${message}`, logError));
     }
   }
 }

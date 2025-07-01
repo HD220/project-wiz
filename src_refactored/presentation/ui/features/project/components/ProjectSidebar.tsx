@@ -1,30 +1,39 @@
+// Removed useParams
+import { Link } from '@tanstack/react-router';
+// Removed Folder
+import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Hash, Plus } from 'lucide-react';
 import React from 'react';
-import { Link, useParams } from '@tanstack/react-router';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/presentation/ui/components/ui/collapsible';
-import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Folder, Hash, Plus } from 'lucide-react';
+
+import { Button } from '@/ui/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/components/ui/collapsible';
+import { ScrollArea } from '@/ui/components/ui/scroll-area';
+import { Separator } from '@/ui/components/ui/separator';
 
 // Helper for NavLink, similar to AppSidebar but might have different base paths or active states
 interface ProjectNavLinkProps {
   to: string;
-  basePath: string; // e.g., /projects/$projectId
+  // e.g., /projects/$projectId
+  basePath: string;
   children: React.ReactNode;
   icon?: React.ElementType;
-  exact?: boolean; // For matching exact paths
+  // For matching exact paths - REMOVED as unused by Link's activeProps
+  // exact?: boolean;
 }
 
-function ProjectNavLink({ to, basePath, children, icon: Icon, exact = false }: ProjectNavLinkProps) {
+// Removed exact
+function ProjectNavLink({ to, basePath, children, icon: iconProp }: ProjectNavLinkProps) {
+  // Alias for JSX
+  const IconComponent = iconProp;
   const fullPath = `${basePath}${to.startsWith('/') ? to : `/${to}`}`;
   return (
     <Link
-      to={fullPath as any} // Cast to any if `to` for Link has stricter types not matching dynamic string
+      // Cast to string for dynamically constructed paths.
+      // Consider using a more specific type if possible, or ensure paths are validated.
+      to={fullPath as string}
       className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50' }}
-      // exact={exact} // `exact` prop might not be available or needed depending on router version / setup for activeProps
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {IconComponent && <IconComponent className="h-4 w-4" />}
       <span>{children}</span>
     </Link>
   );
@@ -38,9 +47,11 @@ interface ProjectSidebarProps {
 
 export function ProjectSidebar({ className }: ProjectSidebarProps) {
   // In a real scenario, projectId would come from router params or props.
-  // const params = useParams(); // if used in a route component
+  // if used in a route component
+  // const params = useParams();
   // const projectId = params.projectId;
-  const projectId = "{projectId}"; // Placeholder
+  // Placeholder
+  const projectId = "{projectId}";
 
   // Placeholder data
   const project = {
@@ -109,10 +120,12 @@ export function ProjectSidebar({ className }: ProjectSidebarProps) {
         </nav>
       </ScrollArea>
 
-      {/* Optional Footer for sidebar actions */}
-      {/* <div className="p-2 mt-auto border-t border-slate-200 dark:border-slate-700">
+      {/*
+      Optional Footer for sidebar actions
+      <div className="p-2 mt-auto border-t border-slate-200 dark:border-slate-700">
         <Button variant="ghost" size="sm" className="w-full justify-start">Some Action</Button>
-      </div> */}
+      </div>
+      */}
     </div>
   );
 }

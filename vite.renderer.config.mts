@@ -2,55 +2,39 @@ import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import { lingui } from "@lingui/vite-plugin";
 import react from "@vitejs/plugin-react-swc";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
 
-// https://vitejs.dev/config
+const projectRoot = path.resolve(__dirname); 
+
 export default defineConfig({
-  // Adicionar a configuração de 'root' para o Vite encontrar o index.html
-  root: path.resolve(__dirname, "./src_refactored/presentation/ui"), // NOVA CONFIGURAÇÃO DE ROOT
+  root: path.resolve(projectRoot, "src_refactored/presentation/ui"), // Corrected root
   plugins: [
-    TanStackRouterVite({
+    tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
-      routesDirectory: path.resolve(__dirname, "./src_refactored/presentation/ui/app"), // CAMINHO ATUALIZADO PARA APP
-      generatedRouteTree: path.resolve(__dirname, "./src_refactored/presentation/ui/routeTree.gen.ts"), // CAMINHO ATUALIZADO
+      routesDirectory: path.resolve(projectRoot, "src_refactored/presentation/ui/app"),
+      generatedRouteTree: path.resolve(projectRoot, "src_refactored/presentation/ui/routeTree.gen.ts"),
     }),
     react({
-      plugins: [["@lingui/swc-plugin", {}]], // Manter, mas a configuração do LinguiJS (FE-SETUP-004) precisará ser reavaliada
+      plugins: [["@lingui/swc-plugin", {}]],
     }),
-    tailwindcss(), // Manter, mas o config do tailwind precisará apontar para os novos arquivos em src_refactored
-    lingui({ // Manter, mas a configuração do LinguiJS (FE-SETUP-004) precisará ser reavaliada
-      configPath: "./lingui.config.ts", // Este caminho pode precisar ser ajustado se o lingui.config.ts for movido ou se referir a paths relativos
+    tailwindcss(),
+    lingui({
+      configPath: path.resolve(projectRoot, "lingui.config.ts"), // Make absolute from projectRoot
     }),
   ],
   resolve: {
     alias: {
-      // Main alias for the new UI root
-      "@/": path.resolve(__dirname, "./src_refactored/presentation/ui"),
-
-      // Aliases for subdirectories within src_refactored/presentation/ui/
-      "@/app": path.resolve(__dirname, "./src_refactored/presentation/ui/app"), // Changed from @/features to @/app
-      "@/assets": path.resolve(__dirname, "./src_refactored/presentation/ui/assets"),
-      "@/components": path.resolve(__dirname, "./src_refactored/presentation/ui/components"), // General components alias
-      "@/components/common": path.resolve(__dirname, "./src_refactored/presentation/ui/components/common"),
-      "@/components/layout": path.resolve(__dirname, "./src_refactored/presentation/ui/components/layout"),
-      "@/components/ui": path.resolve(__dirname, "./src_refactored/presentation/ui/components/ui"), // Shadcn components
-      "@/config": path.resolve(__dirname, "./src_refactored/presentation/ui/config"),
-      "@/hooks": path.resolve(__dirname, "./src_refactored/presentation/ui/hooks"),
-      "@/lib": path.resolve(__dirname, "./src_refactored/presentation/ui/lib"),
-      "@/services": path.resolve(__dirname, "./src_refactored/presentation/ui/services"),
-      "@/store": path.resolve(__dirname, "./src_refactored/presentation/ui/store"),
-      "@/styles": path.resolve(__dirname, "./src_refactored/presentation/ui/styles"),
-      "@/types": path.resolve(__dirname, "./src_refactored/presentation/ui/types"),
-
-      // Keep shared alias if still used, but ensure it doesn't conflict with new @/ pattern
-      // This @/shared points to the old src/shared.
-      "@/shared_old": path.resolve(__dirname, "./src/shared"), // Renamed to avoid ambiguity if @/shared is needed for new structure
+      // Specific alias for @/ui to point to the presentation/ui directory
+      "@/ui": path.resolve(projectRoot, "src_refactored/presentation/ui"),
+      // Alias for @/components to point to the presentation/ui/components directory
+      "@/components": path.resolve(projectRoot, "src_refactored/presentation/ui/components"),
+      // Alias for @/shared for shared types and utilities
+      "@/shared": path.resolve(projectRoot, "src_refactored/shared"),
+      // Add other specific @/ aliases if the renderer needs them from other parts of src_refactored
+      // For example, if it directly imported from @/core (though unlikely for renderer)
+      // "@/core": path.resolve(projectRoot, "src_refactored/core"),
     },
   },
-  // Adicionar a configuração de build para que o output vá para um local que o Electron Forge possa pegar
-  build: {
-    outDir: path.resolve(__dirname, ".vite/renderer/main_window"), // Diretório de saída padrão do Electron Forge Vite plugin
-  }
 });

@@ -1,232 +1,186 @@
-// src_refactored/core/domain/job/job.entity.ts
-import { AbstractEntity, EntityProps } from '../../common/base.entity';
-import { DomainError, ValueError } from '../../common/errors';
-import { JobIdVO } from './value-objects/job-id.vo';
-import { JobStatusVO, JobStatusEnum } from './value-objects/job-status.vo';
-import { JobPriorityVO } from './value-objects/job-priority.vo';
-import { JobOptionsVO, IJobOptions, RetryStrategyOptions, RepeatOptions } from './value-objects/job-options.vo';
-import { JobProgressVO, JobProgressData } from './value-objects/job-progress.vo';
-import { JobExecutionLogsVO } from './value-objects/job-execution-logs.vo';
-import { JobExecutionLogEntryProps } from './value-objects/job-execution-log-entry.vo';
+import { AbstractEntity } from "@/core/common/base.entity";
 
+import { ExecutionHistoryEntry } from "./job-processing.types";
+import { JobStateMutator } from "./job-state.mutator";
+import {
+  JobStatus,
+  // JobLogEntry, // No longer directly used in this file
+  JobEntityProps,
+  // JobPersistenceData, // Not used directly in this file after refactor
+} from "./job.types";
+import {
+  ActivityHistoryVO,
+  ActivityHistoryEntryVO,
+} from "./value-objects/activity-history.vo";
+import { JobIdVO } from "./value-objects/job-id.vo";
+import { IJobOptions, JobOptionsVO } from "./value-objects/job-options.vo";
 
-// Interface for properties required to construct a JobEntity
-export interface JobEntityConstructionProps<TData = any> {
-  id?: string | JobIdVO; // Optional: if not provided, one will be generated
-  queueName: string;
-  jobName: string; // Name/type of the job
-  payload: TData;
-  opts?: IJobOptions; // Uses the interface for flexibility in creation
-}
+export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
+  JobIdVO,
+  JobEntityProps<P, R>
+> {
+  private _progressChanged: boolean = false;
+  private _logsChanged: boolean = false;
+  private _stateMutator: JobStateMutator<P, R>;
 
-// Interface for the internal state of JobEntity
-// All complex types are VOs. Timestamps are stored as numbers (epoch ms) for DB compatibility
-// but can be wrapped by Date or a TimestampVO on access if needed by domain logic.
-export interface JobEntityProps<TData = any, TResult = any> extends EntityProps<JobIdVO> {
-  queueName: string;
-  jobName: string;
-  payload: Readonly<TData>;
-  opts: JobOptionsVO;
-
-  status: JobStatusVO;
-  priority: JobPriorityVO; // Derived from opts, but stored for direct access/querying
-
-  progress: JobProgressVO;
-  returnValue?: Readonly<TResult>;
-  failedReason?: string; // Primary error message for failure
-
-  attemptsMade: number;
-  // maxAttempts is part of opts.retryStrategy
-
-  createdAt: number; // Store as epoch milliseconds
-  updatedAt: number; // Store as epoch milliseconds
-  processAt?: number; // For DELAYED jobs: when it should be processed (epoch ms)
-  startedAt?: number; // Timestamp when processing started (epoch ms)
-  finishedAt?: number; // Timestamp when job completed or finally failed (epoch ms)
-
-  executionLogs: JobExecutionLogsVO;
-
-  // Worker locking mechanism
-  lockedByWorkerId?: string;
-  lockExpiresAt?: number; // Epoch ms
-
-  // For repeatable jobs (key derived from repeat options)
-  repeatJobKey?: string;
-}
-
-export class JobEntity<TData = any, TResult = any> extends AbstractEntity<JobIdVO, JobEntityProps<TData, TResult>> {
-  private constructor(props: JobEntityProps<TData, TResult>) {
+  private constructor(
+    props: JobEntityProps<P, R>,
+    initialConversationHistory?: ActivityHistoryVO,
+    initialExecutionHistory?: ExecutionHistoryEntry[]
+  ) {
     super(props);
+    this._stateMutator = new JobStateMutator(
+      this.props,
+      initialConversationHistory,
+      initialExecutionHistory
+    );
   }
 
-  public static create<D = any, R = any>(
-    constructProps: JobEntityConstructionProps<D>,
-  ): JobEntity<D, R> {
-    if (!constructProps.queueName || constructProps.queueName.trim() === '') {
-      throw new ValueError('Job creation requires a queueName.');
-    }
-    if (!constructProps.jobName || constructProps.jobName.trim() === '') {
-      throw new ValueError('Job creation requires a jobName.');
-    }
-    if (constructProps.payload === undefined) {
-      throw new ValueError('Job creation requires a payload.');
-    }
+  public static create<P, R>(params: {
+    id?: JobIdVO;
+    queueName: string;
+    name: string;
+    payload: P;
+    options?: IJobOptions;
+  }): JobEntity<P, R> {
+    const jobOptions = JobOptionsVO.create(params.options);
+    const idFromOptions = jobOptions.jobId;
+    const finalJobId =
+      params.id ||
+      (idFromOptions ? JobIdVO.create(idFromOptions) : JobIdVO.create());
+    const now = new Date();
 
-    const id = constructProps.id instanceof JobIdVO ? constructProps.id : JobIdVO.create(constructProps.id);
-    const jobOptions = JobOptionsVO.create(constructProps.opts);
-    const nowMs = Date.now();
-
-    let initialStatus = JobStatusVO.pending();
-    let processAt: number | undefined = undefined;
-    if (jobOptions.delay > 0) {
-      initialStatus = JobStatusVO.delayed();
-      processAt = nowMs + jobOptions.delay;
-    }
-
-    const props: JobEntityProps<D, R> = {
-      id,
-      queueName: constructProps.queueName,
-      jobName: constructProps.jobName,
-      payload: Object.freeze(constructProps.payload) as Readonly<D>, // Ensure payload is immutable
-      opts: jobOptions,
-      status: initialStatus,
-      priority: JobPriorityVO.create(jobOptions.priority),
-      progress: JobProgressVO.initial(),
+    const props: JobEntityProps<P, R> = {
+      id: finalJobId,
+      queueName: params.queueName,
+      name: params.name,
+      payload: params.payload,
+      options: jobOptions,
+      status: (jobOptions.delay && jobOptions.delay > 0) ? JobStatus.DELAYED : JobStatus.WAITING,
       attemptsMade: 0,
-      createdAt: nowMs,
-      updatedAt: nowMs,
-      processAt: processAt,
-      executionLogs: JobExecutionLogsVO.empty(),
+      progress: 0,
+      logs: [],
+      createdAt: now,
+      updatedAt: now,
+      delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : undefined,
     };
-
-    return new JobEntity<D, R>(props);
+    return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
   }
 
-  // --- Accessors ---
-  get queueName(): string { return this.props.queueName; }
-  get jobName(): string { return this.props.jobName; }
-  get payload(): Readonly<TData> { return this.props.payload; }
-  get opts(): JobOptionsVO { return this.props.opts; }
-  get status(): JobStatusVO { return this.props.status; }
-  get priority(): JobPriorityVO { return this.props.priority; }
-  get progress(): JobProgressVO { return this.props.progress; }
-  get returnValue(): Readonly<TResult> | undefined { return this.props.returnValue; }
-  get failedReason(): string | undefined { return this.props.failedReason; }
-  get attemptsMade(): number { return this.props.attemptsMade; }
-  get maxAttempts(): number { return this.opts.attempts; } // From JobOptionsVO
-
-  get createdAt(): Date { return new Date(this.props.createdAt); }
-  get updatedAt(): Date { return new Date(this.props.updatedAt); }
-  get processAt(): Date | undefined { return this.props.processAt ? new Date(this.props.processAt) : undefined; }
-  get startedAt(): Date | undefined { return this.props.startedAt ? new Date(this.props.startedAt) : undefined; }
-  get finishedAt(): Date | undefined { return this.props.finishedAt ? new Date(this.props.finishedAt) : undefined; }
-
-  get executionLogs(): JobExecutionLogsVO { return this.props.executionLogs; }
-  get lockedByWorkerId(): string | undefined { return this.props.lockedByWorkerId; }
-  get lockExpiresAt(): Date | undefined { return this.props.lockExpiresAt ? new Date(this.props.lockExpiresAt) : undefined; }
-  get repeatJobKey(): string | undefined { return this.props.repeatJobKey; }
-
-
-  // --- Mutators (internal state changes, persistence handled by repository) ---
-
-  private touch(): void {
-    this.props.updatedAt = Date.now();
+  // Expose props directly or through a single getter as per AGENTS.md for data-rich entities
+  public getProps(): Readonly<JobEntityProps<P, R>> {
+    return this.props;
   }
 
-  public setProgress(progressData: JobProgressData): void {
-    this.props.progress = JobProgressVO.create(progressData);
-    this.touch();
-    // Event 'job.progress' should be emitted by the service calling this, after saving.
+  // Keep getters with logic
+  get maxAttempts(): number {
+    return this.props.options.attempts;
   }
 
-  public addLog(message: string, level: JobExecutionLogEntryProps['level'] = 'INFO', details?: Record<string, any>): void {
-    this.props.executionLogs = this.props.executionLogs.addLog(message, level, details);
-    this.touch();
-    // Event 'job.log_added' should be emitted by the service calling this, after saving.
-  }
-
-  // --- State Transition Methods ---
-  // These methods only update the in-memory state of the entity.
-  // The repository is responsible for persisting these changes atomically.
-
-  public moveToActive(workerId: string, lockDurationMs: number): boolean {
-    if (!this.status.is(JobStatusEnum.PENDING) && !this.status.is(JobStatusEnum.DELAYED)) {
-      // DELAYED jobs should be promoted to PENDING by scheduler first
-      console.warn(`Job ${this.id.value} cannot be moved to ACTIVE from status ${this.status.value}`);
-      return false;
+  get isRetry(): boolean {
+    if (this.props.status === JobStatus.ACTIVE) {
+      return this.props.attemptsMade > 1;
     }
-    this.props.status = JobStatusVO.active();
-    this.props.attemptsMade += 1;
-    this.props.startedAt = Date.now();
-    this.props.lockedByWorkerId = workerId;
-    this.props.lockExpiresAt = Date.now() + lockDurationMs;
-    this.touch();
-    return true;
+    return (
+      this.props.attemptsMade > 0 &&
+      (this.props.status === JobStatus.WAITING ||
+        this.props.status === JobStatus.DELAYED) &&
+      this.props.failedReason !== undefined
+    );
   }
 
-  public renewLock(newLockExpiresAtMs: number, workerId: string): boolean {
-    if (!this.status.is(JobStatusEnum.ACTIVE) || this.props.lockedByWorkerId !== workerId) {
-      console.warn(`Job ${this.id.value} lock cannot be renewed. Status: ${this.status.value}, LockedBy: ${this.props.lockedByWorkerId}`);
-      return false;
+  get progressChanged(): boolean {
+    return this._progressChanged;
+  }
+  get logsChanged(): boolean {
+    return this._logsChanged;
+  }
+
+  public updateProgress(progress: number | object): void {
+    if (
+      this.props.status === JobStatus.COMPLETED ||
+      this.props.status === JobStatus.FAILED
+    ) {
+      console.warn(`[JobEntity] Cannot update progress for job ${this.props.id.value} as it is already in status ${this.props.status}.`);
+      return;
     }
-    this.props.lockExpiresAt = newLockExpiresAtMs;
-    this.touch();
-    return true;
+    this.props.progress = progress;
+    this.props.updatedAt = new Date();
+    this._progressChanged = true;
   }
 
-  public moveToCompleted(resultValue: TResult): boolean {
-    if (!this.status.is(JobStatusEnum.ACTIVE)) {
-      // Potentially log warning if trying to complete a non-active job
-      return false;
+  public addLog(message: string, level: string = "INFO"): void {
+    this.props.logs.push({ message, level, timestamp: new Date() });
+    this.props.updatedAt = new Date();
+    this._logsChanged = true;
+  }
+
+  public clearChangeFlags(): void {
+    this._progressChanged = false;
+    this._logsChanged = false;
+  }
+
+  public moveToActive(workerId: string, lockUntil: Date): void {
+    this._stateMutator.moveToActive(workerId, lockUntil);
+  }
+  public extendLock(newLockUntil: Date, workerId: string): void {
+    this._stateMutator.extendLock(newLockUntil, workerId);
+  }
+  public markAsCompleted(returnValue: R): void {
+    this._stateMutator.markAsCompleted(returnValue);
+  }
+  public markAsFailed(reason: string, stacktrace?: string[]): void {
+    this._stateMutator.markAsFailed(reason, stacktrace);
+  }
+  public moveToDelayed(delayUntil: Date, originalError?: Error): void {
+    this._stateMutator.moveToDelayed(delayUntil, originalError);
+  }
+  public moveToWaiting(): void {
+    this._stateMutator.moveToWaiting();
+  }
+
+  public markAsStalled(): boolean {
+    const shouldFail = this._stateMutator.markAsStalled();
+    if (shouldFail) {
+      this.addLog(`Job failed after becoming stalled and exceeding max attempts. (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`, "ERROR");
+    } else {
+      this.addLog(`Job marked as stalled (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`, "WARN");
     }
-    this.props.status = JobStatusVO.completed();
-    this.props.returnValue = Object.freeze(resultValue) as Readonly<TResult>;
-    this.props.finishedAt = Date.now();
-    this.props.progress = JobProgressVO.create(100); // Mark as 100% on completion
-    this.clearLock();
-    this.touch();
-    return true;
+    return shouldFail;
+  }
+  public pause(): void {
+    this._stateMutator.pause();
+  }
+  public resume(): void {
+    this._stateMutator.resume();
   }
 
-  private clearLock(): void {
-    this.props.lockedByWorkerId = undefined;
-    this.props.lockExpiresAt = undefined;
+  // toPersistence() method is now removed and handled by JobPersistenceMapper.
+
+  public getConversationHistory(): ActivityHistoryVO {
+    return this._stateMutator.getConversationHistory();
   }
 
-  public moveToFailed(reason: string): boolean {
-     if (this.status.isTerminal()) return false; // Already completed or failed
-
-    this.props.status = JobStatusVO.failed();
-    this.props.failedReason = reason;
-    this.props.finishedAt = Date.now();
-    this.clearLock();
-    this.touch();
-    return true;
+  public addConversationEntry(entry: ActivityHistoryEntryVO): void {
+    this._stateMutator.addConversationEntry(entry);
   }
 
-  public moveToDelayed(newProcessAtMs: number): boolean {
-    if (this.status.isTerminal()) return false;
-
-    this.props.status = JobStatusVO.delayed();
-    this.props.processAt = newProcessAtMs;
-    this.clearLock(); // If it was active and is being re-delayed for retry
-    this.touch();
-    return true;
+  public getExecutionHistory(): ReadonlyArray<ExecutionHistoryEntry> {
+    return this._stateMutator.getExecutionHistory();
   }
 
-  public promoteToPending(): boolean {
-    if (!this.status.is(JobStatusEnum.DELAYED) && !this.status.is(JobStatusEnum.WAITING_CHILDREN)) {
-      // Only DELAYED or WAITING_CHILDREN jobs can be directly promoted to PENDING by scheduler
-      return false;
-    }
-    this.props.status = JobStatusVO.pending();
-    this.props.processAt = undefined; // Clear processAt if it was delayed
-    this.touch();
-    return true;
+  public addExecutionHistoryEntry(entry: ExecutionHistoryEntry): void {
+    this._stateMutator.addExecutionHistoryEntry(entry);
   }
 
-  public isProcessable(currentTimeMs: number = Date.now()): boolean {
-    return this.status.is(JobStatusEnum.PENDING) &&
-           (!this.props.processAt || this.props.processAt <= currentTimeMs);
+  public setConversationHistory(history: ActivityHistoryVO): void {
+    this._stateMutator.setConversationHistory(history);
+  }
+
+  public setExecutionHistory(history: ExecutionHistoryEntry[]): void {
+    this._stateMutator.setExecutionHistory(history);
   }
 }
+
+// Re-export relevant types
+export { JobStatus, type JobEntityProps };

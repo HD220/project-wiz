@@ -10,7 +10,7 @@ export const ListProjectsUseCaseInputSchema = z.object({
   // Example for future pagination:
   // limit: z.number().int().positive().optional(),
   // offset: z.number().int().nonnegative().optional(),
-}).strict(); // Use .strict() to prevent unknown keys
+}).strict();
 
 export type ListProjectsUseCaseInput = z.infer<typeof ListProjectsUseCaseInputSchema>;
 

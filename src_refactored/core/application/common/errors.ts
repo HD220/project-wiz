@@ -29,7 +29,7 @@ export class ServiceNotFoundError extends ApplicationError {
  * @description Specific error for data validation failures at the application layer (e.g., invalid input to a use case).
  */
 export class ApplicationValidationError extends ApplicationError {
-  constructor(message: string, public details?: Record<string, any>) {
+  constructor(message: string, public details?: Record<string, unknown>) {
     super(message);
     this.name = this.constructor.name;
   }

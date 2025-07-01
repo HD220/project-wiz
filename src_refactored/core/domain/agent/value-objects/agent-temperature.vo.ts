@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/agent-temperature.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface AgentTemperatureProps extends ValueObjectProps {
   value: number;
@@ -7,7 +7,7 @@ interface AgentTemperatureProps extends ValueObjectProps {
 
 export class AgentTemperature extends AbstractValueObject<AgentTemperatureProps> {
   private static readonly MIN_VALUE = 0.0;
-  private static readonly MAX_VALUE = 2.0; // Common range for LLM temperature
+  private static readonly MAX_VALUE = 2.0;
 
   private constructor(value: number) {
     super({ value });
@@ -27,7 +27,7 @@ export class AgentTemperature extends AbstractValueObject<AgentTemperatureProps>
   }
 
   public static default(): AgentTemperature {
-    return new AgentTemperature(0.7); // A common default temperature
+    return new AgentTemperature(0.7);
   }
 
   public value(): number {
@@ -35,6 +35,6 @@ export class AgentTemperature extends AbstractValueObject<AgentTemperatureProps>
   }
 
   public toString(): string {
-    return this.props.value.toFixed(1); // Format to one decimal place
+    return this.props.value.toFixed(1);
   }
 }

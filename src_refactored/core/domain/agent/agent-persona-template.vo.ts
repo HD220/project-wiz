@@ -1,21 +1,22 @@
 // src_refactored/core/domain/agent/agent-persona-template.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { PersonaBackstory } from './value-objects/persona/persona-backstory.vo';
+import { PersonaGoal } from './value-objects/persona/persona-goal.vo';
 import { PersonaId } from './value-objects/persona/persona-id.vo';
 import { PersonaName } from './value-objects/persona/persona-name.vo';
 import { PersonaRole } from './value-objects/persona/persona-role.vo';
-import { PersonaGoal } from './value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from './value-objects/persona/persona-backstory.vo';
 import { ToolNames } from './value-objects/persona/tool-names.vo';
 
 // This interface matches the structure loaded from JSON by FileSystemAgentPersonaTemplateRepository
 // and the type definition in the old persona-template.types.ts
 interface AgentPersonaTemplateProps extends ValueObjectProps {
   id: PersonaId;
-  name: PersonaName; // Changed from simple string to PersonaName VO
+  name: PersonaName;
   role: PersonaRole;
   goal: PersonaGoal;
   backstory: PersonaBackstory;
-  toolNames: ToolNames; // Changed from string[] to ToolNames VO
+  toolNames: ToolNames;
 }
 
 // AgentPersonaTemplate can be considered a complex Value Object or a Data Transfer Object (DTO)

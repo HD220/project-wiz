@@ -2,11 +2,10 @@
 import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
 
 interface LLMApiKeyProps extends ValueObjectProps {
-  value: string; // The API key itself
+  value: string;
 }
 
 export class LLMApiKey extends AbstractValueObject<LLMApiKeyProps> {
-  // Marked as private to ensure it's only constructed via `create`
   private constructor(value: string) {
     super({ value });
   }
@@ -21,7 +20,7 @@ export class LLMApiKey extends AbstractValueObject<LLMApiKeyProps> {
 
   public static create(apiKey: string): LLMApiKey {
     this.validate(apiKey);
-    return new LLMApiKey(apiKey); // Store the actual key
+    return new LLMApiKey(apiKey);
   }
 
   // To comply with "No Getters" for sensitive data like API keys,
@@ -41,11 +40,9 @@ export class LLMApiKey extends AbstractValueObject<LLMApiKeyProps> {
     return this.props.value;
   }
 
-  // toString should also not reveal the key.
   public toString(): string {
-    return 'LLMApiKey(**********)'; // Masked
+    return 'LLMApiKey(**********)';
   }
 
-  // equals method is inherited. It will compare actual key values, which is fine
   // for determining if two LLMApiKey objects represent the same key.
 }

@@ -1,9 +1,15 @@
-import { Agent } from '@/src_refactored/core/domain/agent/agent.entity';
-import { Job } from '@/src_refactored/core/domain/job/job.entity';
-import { AgentExecutorResult } from '@/src_refactored/core/domain/job/job-processing.types';
-import { Result } from '@/src_refactored/shared/result';
-import { DomainError } from '@/src_refactored/core/common/errors';
-import { ApplicationError } from '@/src_refactored/core/application/common/errors';
+import { Agent } from '@/core/domain/agent/agent.entity';
+// Corrected path
+import { DomainError } from '@/core/domain/common/errors';
+// Corrected type
+import { JobProcessingOutput } from '@/core/domain/job/job-processing.types';
+// Corrected type
+import { JobEntity } from '@/core/domain/job/job.entity';
+
+
+import { ApplicationError } from '@/application/common/errors';
+
+import { Result } from '@/shared/result';
 
 /**
  * @interface IAgentExecutor
@@ -16,15 +22,17 @@ export interface IAgentExecutor {
    * The executor will manage the interaction loop with an LLM,
    * tool invocations, history management, and state updates for the job.
    *
-   * @param {Job} job - The job entity to be processed.
+   * @param {JobEntity} job - The job entity to be processed.
    * @param {Agent} agent - The agent entity that will process the job.
-   * @returns {Promise<Result<AgentExecutorResult, DomainError | ApplicationError>>}
+   * @returns {Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>}
    *          A promise that resolves with a Result object.
-   *          On success, it contains the AgentExecutorResult.
+   *          On success, it contains the JobProcessingOutput.
    *          On failure, it contains a DomainError or ApplicationError.
    */
   executeJob(
-    job: Job,
+    // Corrected type
+    job: JobEntity,
     agent: Agent
-  ): Promise<Result<AgentExecutorResult, DomainError | ApplicationError>>;
+    // Corrected type
+  ): Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>;
 }

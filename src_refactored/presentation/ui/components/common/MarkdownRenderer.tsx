@@ -1,67 +1,109 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Options } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
-import rehypeHighlight from 'rehype-highlight';
-// Note: To make rehype-highlight work, you might need to import a stylesheet for your chosen theme,
-// e.g., import 'highlight.js/styles/github.css'; or 'highlight.js/styles/atom-one-dark.css';
-// This should ideally be done globally or scoped to where the markdown is rendered.
-// For now, we'll rely on Tailwind or default browser styles for pre/code if no global HLJS CSS is present.
+// import rehypeRaw from 'rehype-raw'; // Optional: if you need to render raw HTML from markdown
+// For syntax highlighting:
+// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Choose a theme
+
+import { cn } from '@/presentation/ui/lib/utils';
 
 interface MarkdownRendererProps {
-  children: string; // The markdown content as a string
-  className?: string; // Optional className for the wrapper div
+  content: string | null | undefined;
+  // Custom classes for the wrapper div
+  className?: string;
+  // Custom classes specifically for Tailwind Prose
+  proseClassName?: string;
+  // Allow overriding default HTML element rendering
+  components?: Options['components'];
 }
 
-/**
- * A component to render Markdown content securely with GFM support and syntax highlighting.
- * It uses react-markdown with remark-gfm for GitHub Flavored Markdown,
- * rehype-sanitize for XSS protection, and rehype-highlight for code block syntax highlighting.
- */
-export function MarkdownRenderer({ children, className }: MarkdownRendererProps) {
-  // Customize the sanitization schema if needed.
-  // For example, to allow iframes from specific domains or add custom tags.
-  // The defaultSchema is generally good for security.
-  // Here, we extend it to ensure `className` is allowed on `code` elements for highlighting.
-  const schema = {
-    ...defaultSchema,
-    attributes: {
-      ...defaultSchema.attributes,
-      code: [...(defaultSchema.attributes?.code || []), 'className', 'class'], // class for hljs
-      span: [...(defaultSchema.attributes?.span || []), 'className', 'class'], // class for hljs
-      pre: [...(defaultSchema.attributes?.pre || []), 'className', 'class'], // class for hljs
+export function MarkdownRenderer({
+  content,
+  className,
+  proseClassName,
+  components: customComponents,
+}: MarkdownRendererProps) {
+  if (content === null || content === undefined) {
+    return null;
+  }
+
+  // Base prose classes for Tailwind Typography. Can be extended or overridden by `proseClassName`.
+  const defaultProseSetup = cn(
+    // General styling
+    "prose prose-sm dark:prose-invert max-w-none",
+    // Spacing for common elements
+    "prose-p:my-1.5 prose-headings:my-3 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5",
+    // Blockquotes
+    "prose-blockquote:my-2 prose-blockquote:not-italic prose-blockquote:border-l-4 prose-blockquote:pl-3 prose-blockquote:text-slate-600 dark:prose-blockquote:text-slate-400",
+    // Reset <pre> for custom code block styling or syntax highlighter
+    "prose-pre:my-2 prose-pre:p-0 prose-pre:bg-transparent prose-pre:rounded-md",
+    // Inline code
+    "prose-code:px-1 prose-code:py-0.5 prose-code:text-xs prose-code:font-mono prose-code:rounded prose-code:bg-slate-100 dark:prose-code:bg-slate-800",
+    // Links
+    "prose-a:text-sky-600 hover:prose-a:text-sky-700 dark:prose-a:text-sky-400 dark:hover:prose-a:text-sky-300 hover:prose-a:underline",
+    // Tables
+    "prose-table:my-2 prose-table:text-sm prose-thead:border-b prose-th:px-2 prose-th:py-1 prose-th:font-semibold prose-td:px-2 prose-td:py-1 prose-tr:border-b",
+    // Allow parent to provide additional/override prose classes
+    proseClassName,
+  );
+
+  // Default component overrides, can be merged with or overridden by `customComponents` prop
+  const defaultComponents: Options['components'] = {
+    // Ensure links open in a new tab and have accessible content.
+    // The key 'a' correctly overrides the default anchor tag rendering.
+    a: ({ node: _node, children, href, ...props }) => {
+      // Use children if available, otherwise use href as content for accessibility.
+      // This ensures the anchor is not empty.
+      const anchorContent = children || href;
+      return (
+        <a href={href} {...props} target="_blank" rel="noopener noreferrer">
+          {anchorContent}
+        </a>
+      );
+    },
+
+    // Custom styling for code blocks (pre > code)
+    // This is a basic version. For syntax highlighting, you'd integrate react-syntax-highlighter here.
+    // `node` is used here, so no underscore
+    code({ node, className: langClassName, children, ...props }) {
+      const match = /language-(\w+)/.exec(langClassName || '');
+      const language = match ? match[1] : null;
+
+      // Fenced code block
+      if (node?.parentElement?.tagName === 'pre') {
+        return (
+          <div className="my-2 bg-slate-100 dark:bg-slate-800 rounded-md overflow-hidden text-xs">
+            {language && (
+              <div className="px-3 py-1 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                {language}
+              </div>
+            )}
+            <pre className="p-3 overflow-x-auto"><code className={cn("font-mono", langClassName)} {...props}>{children}</code></pre>
+          </div>
+        );
+      }
+
+      // Inline code (already styled by prose-code:)
+      return (
+        <code className={langClassName} {...props}>
+          {children}
+        </code>
+      );
     },
   };
 
+  const mergedComponents = { ...defaultComponents, ...customComponents };
+
   return (
-    <ReactMarkdown
-      className={`prose dark:prose-invert max-w-none ${className || ''}`} // Basic prose styling with Tailwind Typography
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[
-        [rehypeSanitize, schema],
-        [rehypeHighlight, { detect: true, ignoreMissing: true }], // detect will try to guess language, ignoreMissing prevents errors
-      ]}
-      // Optionally, provide custom components for rendering specific HTML elements
-      // components={{
-      //   a: ({node, ...props}) => <a target="_blank" rel="noopener noreferrer" {...props} />,
-      //   // Example: Custom styling for code blocks if rehype-highlight is not enough
-      //   code({node, inline, className, children, ...props}) {
-      //     const match = /language-(\w+)/.exec(className || '')
-      //     return !inline && match ? (
-      //       <SyntaxHighlighter style={atomDark} language={match[1]} PreTag="div" {...props}>
-      //         {String(children).replace(/\n$/, '')}
-      //       </SyntaxHighlighter>
-      //     ) : (
-      //       <code className={className} {...props}>
-      //         {children}
-      //       </code>
-      //     )
-      //   }
-      // }}
-    >
-      {children}
-    </ReactMarkdown>
+    <div className={cn(defaultProseSetup, className)}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        // rehypePlugins={[rehypeRaw]} // Uncomment if rendering raw HTML from markdown is needed and trusted
+        components={mergedComponents}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   );
 }
-
-export default MarkdownRenderer;

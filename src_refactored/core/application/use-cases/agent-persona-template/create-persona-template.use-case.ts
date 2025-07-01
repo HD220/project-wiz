@@ -1,21 +1,28 @@
 // src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
-import { z, ZodError } from 'zod';
-import { Executable } from '../../../common/executable';
+import { ZodError } from 'zod';
+
+import { ILogger } from '@/core/common/services/i-logger.service';
+
+import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
+import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
+import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
+import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
+import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
+import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
+import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
+import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
+import { DomainError, ValueError } from '@/domain/common/errors';
+
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+
+
 import {
   CreatePersonaTemplateUseCaseInput,
   CreatePersonaTemplateUseCaseInputSchema,
   CreatePersonaTemplateUseCaseOutput,
 } from './create-persona-template.schema';
-import { IAgentPersonaTemplateRepository } from '../../../../domain/agent/ports/agent-persona-template-repository.interface';
-import { AgentPersonaTemplate } from '../../../../domain/agent/agent-persona-template.vo';
-import { PersonaId } from '../../../../domain/agent/value-objects/persona/persona-id.vo';
-import { PersonaName } from '../../../../domain/agent/value-objects/persona/persona-name.vo';
-import { PersonaRole } from '../../../../domain/agent/value-objects/persona/persona-role.vo';
-import { PersonaGoal } from '../../../../domain/agent/value-objects/persona/persona-goal.vo';
-import { PersonaBackstory } from '../../../../domain/agent/value-objects/persona/persona-backstory.vo';
-import { ToolNames } from '../../../../domain/agent/value-objects/persona/tool-names.vo';
-import { Result, ok, error } from '../../../../../shared/result';
-import { DomainError, ValueError } from '../../../../common/errors';
 
 export class CreatePersonaTemplateUseCase
   implements
@@ -25,11 +32,10 @@ export class CreatePersonaTemplateUseCase
       DomainError | ZodError | ValueError
     >
 {
-  private templateRepository: IAgentPersonaTemplateRepository;
-
-  constructor(templateRepository: IAgentPersonaTemplateRepository) {
-    this.templateRepository = templateRepository;
-  }
+  constructor(
+    private readonly templateRepository: IAgentPersonaTemplateRepository,
+    private readonly logger: ILogger,
+  ) {}
 
   async execute(
     input: CreatePersonaTemplateUseCaseInput,
@@ -37,20 +43,20 @@ export class CreatePersonaTemplateUseCase
     // 1. Validate Input Schema
     const validationResult = CreatePersonaTemplateUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
-      return error(validationResult.error);
+      return resultError(validationResult.error);
     }
     const validInput = validationResult.data;
 
     try {
-      // 2. Create Value Objects
+      // 2. Create Value Objects (these throw on error)
       const nameVo = PersonaName.create(validInput.name);
       const roleVo = PersonaRole.create(validInput.role);
       const goalVo = PersonaGoal.create(validInput.goal);
       const backstoryVo = PersonaBackstory.create(validInput.backstory);
       const toolNamesVo = ToolNames.create(validInput.toolNames);
-      const personaIdVo = PersonaId.generate(); // Generate ID for the new template
+      const personaIdVo = PersonaId.generate();
 
-      // 3. Create AgentPersonaTemplate VO
+      // 3. Create AgentPersonaTemplate VO (this throws on error)
       const personaTemplate = AgentPersonaTemplate.create({
         id: personaIdVo,
         name: nameVo,
@@ -61,28 +67,29 @@ export class CreatePersonaTemplateUseCase
       });
 
       // 4. Save Entity/VO
-      // Assuming repository's save method handles AgentPersonaTemplate
       const saveResult = await this.templateRepository.save(personaTemplate);
-      if (saveResult.isError()) {
-        return error(new DomainError(`Failed to save persona template: ${saveResult.value.message}`, saveResult.value));
+      if (isError(saveResult)) {
+        return resultError(new DomainError(`Failed to save persona template: ${saveResult.error.message}`, saveResult.error));
       }
 
       // 5. Return Output
       return ok({
         personaTemplateId: personaTemplate.id().value(),
       });
-
-    } catch (err: any) {
-      if (err instanceof ZodError) {
-        return error(err);
+    } catch (e: unknown) {
+      if (e instanceof ZodError) {
+        return resultError(e);
       }
-      if (err instanceof DomainError || err instanceof ValueError) {
-        return error(err);
+      if (e instanceof DomainError || e instanceof ValueError) {
+        return resultError(e);
       }
-      console.error('[CreatePersonaTemplateUseCase] Unexpected error:', err);
-      return error(
+      const message = e instanceof Error ? e.message : String(e);
+      const logError = e instanceof Error ? e : new Error(message);
+      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, { originalError: logError });
+      return resultError(
         new DomainError(
-          `An unexpected error occurred while creating the persona template: ${err.message || err}`,
+          `An unexpected error occurred while creating the persona template: ${message}`,
+          logError
         ),
       );
     }

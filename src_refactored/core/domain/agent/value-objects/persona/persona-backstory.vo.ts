@@ -1,12 +1,12 @@
 // src_refactored/core/domain/agent/value-objects/persona/persona-backstory.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface PersonaBackstoryProps extends ValueObjectProps {
   value: string;
 }
 
 export class PersonaBackstory extends AbstractValueObject<PersonaBackstoryProps> {
-  private static readonly MAX_LENGTH = 2000; // Allow for a more detailed backstory
+  private static readonly MAX_LENGTH = 2000;
 
   private constructor(value: string) {
     super({ value });
@@ -21,7 +21,7 @@ export class PersonaBackstory extends AbstractValueObject<PersonaBackstoryProps>
 
   public static create(backstory: string): PersonaBackstory {
     this.validate(backstory);
-    return new PersonaBackstory(backstory); // Not trimming, to preserve formatting if any
+    return new PersonaBackstory(backstory);
   }
 
   public value(): string {

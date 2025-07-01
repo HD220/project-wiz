@@ -1,9 +1,10 @@
 // src_refactored/core/domain/agent/agent.entity.ts
-import { AgentId } from './value-objects/agent-id.vo';
-import { AgentTemperature } from './value-objects/agent-temperature.vo';
-import { AgentPersonaTemplate } from './agent-persona-template.vo';
 import { LLMProviderConfig } from '../llm-provider-config/llm-provider-config.entity';
+
+import { AgentPersonaTemplate } from './agent-persona-template.vo';
+import { AgentId } from './value-objects/agent-id.vo';
 import { AgentMaxIterations } from './value-objects/agent-max-iterations.vo';
+import { AgentTemperature } from './value-objects/agent-temperature.vo';
 
 // Properties an Agent entity holds.
 // For strict Object Calisthenics (max 2 instance vars), these are grouped.
@@ -19,8 +20,8 @@ interface AgentProps {
 }
 
 export class Agent {
-  private readonly _id: AgentId; // Instance variable 1: Identity
-  private readonly props: Readonly<AgentProps>; // Instance variable 2: Other properties
+  private readonly _id: AgentId;
+  private readonly props: Readonly<AgentProps>;
 
   private constructor(id: AgentId, props: AgentProps) {
     this._id = id;

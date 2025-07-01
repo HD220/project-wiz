@@ -24,7 +24,8 @@ export const CreateLLMProviderConfigUseCaseInputSchema = z.object({
   baseUrl: z.string()
     .url({ message: "Base URL must be a valid URL." })
     .optional()
-    .nullable() // Allows explicit null if the provider doesn't use a separate base URL (e.g., for some local models)
+    // Allows explicit null if the provider doesn't use a separate base URL (e.g., for some local models)
+    .nullable()
     .describe("Optional custom base URL for the LLM provider API (e.g., for proxies or self-hosted models)."),
 
   // Future considerations:

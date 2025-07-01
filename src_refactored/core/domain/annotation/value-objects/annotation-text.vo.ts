@@ -1,6 +1,7 @@
 // src_refactored/core/domain/annotation/value-objects/annotation-text.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../common/value-objects/base.vo';
-import { ValueError } from '../../../../common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+
+import { ValueError } from '@/domain/common/errors';
 
 interface AnnotationTextProps extends ValueObjectProps {
   value: string;
@@ -8,7 +9,7 @@ interface AnnotationTextProps extends ValueObjectProps {
 
 export class AnnotationText extends AbstractValueObject<AnnotationTextProps> {
   private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 5000; // Arbitrary max length, can be adjusted
+  private static readonly MAX_LENGTH = 5000;
 
   private constructor(props: AnnotationTextProps) {
     super(props);

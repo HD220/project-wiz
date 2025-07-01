@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/internal-state/current-goal.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface CurrentGoalProps extends ValueObjectProps {
   value: string;
@@ -21,7 +21,7 @@ export class CurrentGoal extends AbstractValueObject<CurrentGoalProps> {
 
   public static create(goal: string): CurrentGoal {
     this.validate(goal);
-    return new CurrentGoal(goal); // Not trimming, to preserve formatting
+    return new CurrentGoal(goal);
   }
 
   public value(): string {

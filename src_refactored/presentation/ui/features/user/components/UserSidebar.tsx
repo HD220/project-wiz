@@ -1,31 +1,37 @@
-import React from 'react';
 import { Link } from '@tanstack/react-router';
+// Removed User import
+import { MessageSquare, Settings, Plus, Users, Search } from 'lucide-react';
+import React from 'react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
 import { Button } from '@/presentation/ui/components/ui/button';
 import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
-import { User, MessageSquare, Settings, Plus, Users, Search } from 'lucide-react'; // Added Users, Search, Plus
+// Separator import removed
+
 
 // Helper for NavLink
 interface UserNavLinkProps {
   to: string;
   children: React.ReactNode;
+  // Prop name changed from 'Icon' to 'icon'
   icon?: React.ElementType;
   // Add other props like exact if needed for active state matching
 }
 
-function UserNavLink({ to, children, icon: Icon }: UserNavLinkProps) {
+// Parameter name changed for convention
+function UserNavLink({ to, children, icon: iconComponent }: UserNavLinkProps) {
   // Assuming user-specific routes might be prefixed, e.g., /user/profile
   // For now, direct paths as passed.
   const fullPath = to.startsWith('/') ? to : `/user/${to}`;
 
   return (
     <Link
-      to={fullPath as any}
+      // Removed 'as any'
+      to={fullPath}
       className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50 font-semibold' }}
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {iconComponent && React.createElement(iconComponent, { className: "h-4 w-4" })}
       <span>{children}</span>
     </Link>
   );
@@ -35,13 +41,16 @@ interface DirectMessageItemProps {
   id: string;
   name: string;
   avatarUrl?: string;
-  status?: 'online' | 'offline' | 'idle'; // Example status
-  isActive?: boolean; // Example if this DM is currently active
+  // Example status
+  status?: 'online' | 'offline' | 'idle';
+  // Example if this DM is currently active
+  isActive?: boolean;
 }
 
 function DirectMessageItem({ id, name, avatarUrl, status = 'offline', isActive }: DirectMessageItemProps) {
-    const basePath = '/user/dms'; // Placeholder base path for DMs
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    // Placeholder base path for DMs
+    const basePath = '/user/dms';
+    const initials = name.split(' ').map(namePart => namePart[0]).join('').substring(0,2).toUpperCase();
     return (
         <Link
             to={`${basePath}/${id}`}
@@ -73,7 +82,8 @@ export function UserSidebar({ className }: UserSidebarProps) {
   // Placeholder data
   const currentUser = {
     name: 'Jules Agent',
-    avatarUrl: 'https://github.com/shadcn.png', // Example avatar
+    // Example avatar
+    avatarUrl: 'https://github.com/shadcn.png',
     status: 'online',
   };
 
@@ -88,7 +98,8 @@ export function UserSidebar({ className }: UserSidebarProps) {
       {/* Top section (e.g., Search DMs or "Find or start a conversation") */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-700">
         <Button variant="secondary" className="w-full justify-start text-sm text-slate-500 dark:text-slate-400">
-            <Search className="h-4 w-4 mr-2"/> Find or start a conversation
+            <Search className="h-4 w-4 mr-2"/>
+            Find or start a conversation
         </Button>
       </div>
 
@@ -96,7 +107,8 @@ export function UserSidebar({ className }: UserSidebarProps) {
         <nav className="space-y-0.5">
           <UserNavLink to="/friends" icon={Users}>Friends</UserNavLink>
           {/* <UserNavLink to="/nitro" icon={Zap}>Nitro</UserNavLink> Placeholder */}
-          <UserNavLink to="/shop" icon={MessageSquare}>Shop</UserNavLink> {/* Using MessageSquare as placeholder */}
+          {/* Using MessageSquare as placeholder */}
+          <UserNavLink to="/shop" icon={MessageSquare}>Shop</UserNavLink>
         </nav>
 
         <div className="mt-3 px-1">
@@ -120,7 +132,7 @@ export function UserSidebar({ className }: UserSidebarProps) {
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-            <AvatarFallback>{currentUser.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{currentUser.name.split(' ').map(namePart => namePart[0]).join('').substring(0,2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1 truncate">
             <p className="text-sm font-medium truncate">{currentUser.name}</p>

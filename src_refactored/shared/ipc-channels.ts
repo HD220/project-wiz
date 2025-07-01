@@ -1,27 +1,47 @@
-// src_refactored/shared/ipc-channels.ts
+export const IPC_CHANNELS = {
+  // --- Project Management ---
+  GET_PROJECTS_LIST: "projects:get-list",
+  GET_PROJECT_DETAILS: "projects:get-details",
+  CREATE_PROJECT: "projects:create",
+  UPDATE_PROJECT: "projects:update",
+  DELETE_PROJECT: "projects:delete",
+  PROJECTS_UPDATED_EVENT: "projects:updated-event",
 
-/**
- * Defines standardized channel names for Electron IPC communication
- * throughout the refactored application.
- */
-export const IPCChannel {
-  // Chat Feature
-  CHAT_SEND_MESSAGE: 'chat:sendMessage', // Renderer -> Main
-  CHAT_STREAM_EVENT: 'chat:streamEvent', // Main -> Renderer (for streaming responses)
+  // --- Persona Templates ---
+  GET_PERSONA_TEMPLATES_LIST: "persona-templates:get-list",
+  GET_PERSONA_TEMPLATE_DETAILS: "persona-templates:get-details",
+  CREATE_PERSONA_TEMPLATE: "persona-templates:create",
+  UPDATE_PERSONA_TEMPLATE: "persona-templates:update",
+  DELETE_PERSONA_TEMPLATE: "persona-templates:delete",
+  PERSONA_TEMPLATES_UPDATED_EVENT: "persona-templates:updated-event",
 
-  // Onboarding Feature (example, to be defined in TSK-FE-IPC-ONBOARD if/when unblocked)
-  // ONBOARDING_GET_USER: 'onboarding:getUser',
-  // ONBOARDING_CREATE_USER: 'onboarding:createUser',
-  // ONBOARDING_GET_LLM_PROVIDERS: 'onboarding:getLlmProviders',
-  // ONBOARDING_CREATE_LLM_CONFIG: 'onboarding:createLlmConfig',
+  // --- Agent Instances ---
+  GET_AGENT_INSTANCES_LIST: "agent-instances:get-list",
+  GET_AGENT_INSTANCE_DETAILS: "agent-instances:get-details",
+  CREATE_AGENT_INSTANCE: "agent-instances:create",
+  UPDATE_AGENT_INSTANCE: "agent-instances:update",
+  DELETE_AGENT_INSTANCE: "agent-instances:delete",
+  AGENT_INSTANCES_UPDATED_EVENT: "agent-instances:updated-event",
 
-  // Generic/App level (example)
-  // APP_GET_VERSION: 'app:getVersion',
+  // --- LLM Configurations ---
+  GET_LLM_CONFIGS_LIST: "llm-configs:get-list",
+  GET_LLM_CONFIG_DETAILS: "llm-configs:get-details",
+  CREATE_LLM_CONFIG: "llm-configs:create",
+  UPDATE_LLM_CONFIG: "llm-configs:update",
+  DELETE_LLM_CONFIG: "llm-configs:delete",
+  LLM_CONFIGS_UPDATED_EVENT: "llm-configs:updated-event",
 
-  // Project Feature
-  PROJECT_LIST_QUERY: 'project:list', // Renderer -> Main (Query)
-  // PROJECT_CREATE_COMMAND: 'project:create', // Example for another task
-} as const;
+  // --- User Profile & Settings ---
+  GET_USER_PROFILE: "user:get-profile",
+  UPDATE_USER_PROFILE: "user:update-profile",
+  GET_APP_SETTINGS: "app:get-settings",
+  UPDATE_APP_SETTINGS: "app:update-settings",
+  APP_SETTINGS_UPDATED_EVENT: "app:settings-updated-event",
 
-// Helper type to extract channel values
-export type IPCChannelValue = typeof IPCChannel[keyof typeof IPCChannel];
+  // --- Direct Messages (DMs) & Chat ---
+  GET_DM_CONVERSATIONS_LIST: "dms:get-list",
+  GET_DM_MESSAGES: "dms:get-messages",
+  SEND_DM_MESSAGE: "dms:send-message",
+  DM_MESSAGE_RECEIVED_EVENT: "dms:message-received-event",
+  DM_CONVERSATION_UPDATED_EVENT: "dms:conversation-updated-event",
+};

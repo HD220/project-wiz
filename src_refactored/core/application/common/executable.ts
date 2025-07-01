@@ -1,5 +1,5 @@
 // src_refactored/core/application/common/executable.ts
-import { Result } from '../../../shared/result';
+import { Result } from '@/shared/result';
 
 /**
  * Represents a command or use case that can be executed.
@@ -12,7 +12,8 @@ import { Result } from '../../../shared/result';
 export interface Executable<
   InputType,
   SuccessData,
-  ErrorType extends Error = Error, // Default error type
+  ErrorType extends Error = Error,
+  // Default error type
 > {
   /**
    * Executes the command or use case.

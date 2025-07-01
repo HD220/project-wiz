@@ -20,44 +20,28 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      // New UI Aliases for src_refactored/presentation/ui/
-      "@/app/*": ["./src_refactored/presentation/ui/app/*"],
-      "@/assets/*": ["./src_refactored/presentation/ui/assets/*"],
+      "@/application/*": ["./src_refactored/core/application/*"],
+      "@/core/*": ["./src_refactored/core/*"],
+      "@/domain/*": ["./src_refactored/core/domain/*"],
+      "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
       "@/components/*": ["./src_refactored/presentation/ui/components/*"],
-      "@/config/*": ["./src_refactored/presentation/ui/config/*"],
-      "@/hooks/*": ["./src_refactored/presentation/ui/hooks/*"],
-      "@/lib/*": ["./src_refactored/presentation/ui/lib/*"],
-      "@/services/*": ["./src_refactored/presentation/ui/services/*"],
-      "@/store/*": ["./src_refactored/presentation/ui/store/*"],
-      "@/styles/*": ["./src_refactored/presentation/ui/styles/*"],
-      "@/types/*": ["./src_refactored/presentation/ui/types/*"],
-      "@/*": ["./src_refactored/presentation/ui/*"], // Main alias for the new UI, should take precedence for this path
-
-      // Existing Aliases (may need review/cleanup later, kept for now to avoid breaking old code)
-      "@/components.old/*": ["./src/infrastructure/frameworks/react/components/*"], // Renamed to avoid conflict
-      "@/lib.old/*": ["./src/infrastructure/frameworks/react/lib/*"], // Renamed to avoid conflict
-      "@/hooks.old/*": ["./src/infrastructure/frameworks/react/hooks/*"], // Renamed to avoid conflict
-      "@/ui.old/*": ["./src/infrastructure/frameworks/react/components/ui/*"], // Renamed to avoid conflict
-      "@/application/*": ["./src/core/application/*"],
-      "@/core/*": ["./src/core/*"],
-      "@/shared/*": ["./src/shared/*"],
-      "@/interfaces/*": ["./src/core/domain/entities/*/interfaces/*"],
-      "@/core/common/result": ["./src/shared/result.ts"],
-      "@/refactored/*": ["./src_refactored/*"],
-      "@/src/*": ["./src/*"] // More generic fallback for old src structure if needed
+      "@/shared/*": ["./src_refactored/shared/*"],
+      // Simplified @ui path
+      "@/ui/*": ["./src_refactored/presentation/ui/*"],
+      // General fallback
+      "@/*": ["./src_refactored/*"]
     }
   },
   "include": [
-    "src/**/*",
     "src_refactored/**/*",
-    "tests/**/*",
+    "src_refactored/presentation/ui/global.d.ts",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
     "lingui.config.ts",
     "vitest.config.mts",
     "vitest.config.ts",
-    "types/k6.d.ts"
+    "tailwind.config.ts",
   ],
   "exclude": ["node_modules", "coverage"]
 }

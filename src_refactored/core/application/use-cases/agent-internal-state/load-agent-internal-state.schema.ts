@@ -21,7 +21,8 @@ export const LoadAgentInternalStateUseCaseOutputSchema = z.object({
   currentProjectId: z.string().uuid().nullable()
     .describe("ID of the project the agent is currently focused on, or null if none."),
 
-  currentGoal: z.string().nullable() // CurrentGoal VO allows empty string, DTO represents as string or null.
+  // CurrentGoal VO allows empty string, DTO represents as string or null.
+  currentGoal: z.string().nullable()
     .describe("Current goal or task the agent is working on, or null if none."),
 
   generalNotes: z.array(z.string())

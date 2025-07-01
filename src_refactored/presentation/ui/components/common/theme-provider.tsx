@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'light' | 'dark' | 'system'; // Added 'system' as a valid theme type
+// Added 'system' as a valid theme type
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeProviderState {
-  theme: Theme; // This will store 'light' or 'dark' after resolving 'system'
+  // This will store 'light' or 'dark' after resolving 'system'
+  theme: Theme;
   setTheme: (theme: Theme) => void;
 }
 
@@ -27,9 +29,9 @@ export function ThemeProvider({
         return storedTheme;
       }
       return defaultTheme;
-    } catch (e) {
+    } catch (_error) {
       // localStorage is not available (e.g., SSR or restricted environment)
-      // console.warn('localStorage not available for theme persistence:', e);
+      // console.warn('localStorage not available for theme persistence:', _error);
       return defaultTheme;
     }
   });
@@ -48,9 +50,9 @@ export function ThemeProvider({
     try {
       // Store the raw theme value (could be 'system')
       localStorage.setItem(storageKey, theme);
-    } catch (e) {
+    } catch (_error) {
       // Ignore localStorage errors if persistence fails
-      // console.warn('Failed to persist theme to localStorage:', e);
+      // console.warn('Failed to persist theme to localStorage:', _error);
     }
   }, [theme, storageKey]);
 

@@ -1,12 +1,10 @@
 // src_refactored/core/domain/agent/agent-internal-state.entity.ts
-import { AgentId } from '../value-objects/agent-id.vo';
-import { CurrentProjectId } from './value-objects/internal-state/current-project-id.vo';
+import { AgentId } from './value-objects/agent-id.vo';
 import { CurrentGoal } from './value-objects/internal-state/current-goal.vo';
-import { GeneralNotesCollection } from './value-objects/internal-state/general-notes.collection'; // Corrected path
-// import { JobTimestamp } from '../../job/value-objects/job-timestamp.vo'; // For createdAt/updatedAt
+import { CurrentProjectId } from './value-objects/internal-state/current-project-id.vo';
+import { GeneralNotesCollection } from './value-objects/internal-state/general-notes.collection';
 
 interface AgentInternalStateProps {
-  // id: AgentInternalStateId; // Or use AgentId if state is 1:1 with an Agent instance
   currentProjectId?: CurrentProjectId;
   currentGoal?: CurrentGoal;
   generalNotes: GeneralNotesCollection;
@@ -15,9 +13,8 @@ interface AgentInternalStateProps {
 }
 
 export class AgentInternalState {
-  // The AgentId to which this state belongs serves as its effective identifier.
-  private readonly _agentId: AgentId; // Instance variable 1
-  private readonly props: Readonly<AgentInternalStateProps>; // Instance variable 2
+  private readonly _agentId: AgentId;
+  private readonly props: Readonly<AgentInternalStateProps>;
 
   private constructor(agentId: AgentId, props: AgentInternalStateProps) {
     this._agentId = agentId;
@@ -26,9 +23,9 @@ export class AgentInternalState {
 
   public static create(createProps: {
     agentId: AgentId;
-    currentProjectId?: CurrentProjectId; // Can be string then wrapped, or VO
-    currentGoal?: CurrentGoal;           // Can be string then wrapped, or VO
-    generalNotes?: GeneralNotesCollection; // Can be string[] then wrapped, or VO
+    currentProjectId?: CurrentProjectId;
+    currentGoal?: CurrentGoal;
+    generalNotes?: GeneralNotesCollection;
   }): AgentInternalState {
     if (!createProps.agentId) {
       throw new Error("AgentId is required to create AgentInternalState.");
@@ -95,6 +92,10 @@ export class AgentInternalState {
 
   public clearCurrentProject(): AgentInternalState {
     return this.touchAndUpdate({ currentProjectId: undefined });
+  }
+
+  public setGeneralNotes(newNotes: GeneralNotesCollection): AgentInternalState {
+    return this.touchAndUpdate({ generalNotes: newNotes });
   }
 
   public equals(other?: AgentInternalState): boolean {

@@ -1,12 +1,12 @@
 // src_refactored/core/domain/agent/value-objects/persona/persona-goal.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../../core/common/value-objects/base.vo';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 
 interface PersonaGoalProps extends ValueObjectProps {
   value: string;
 }
 
 export class PersonaGoal extends AbstractValueObject<PersonaGoalProps> {
-  private static readonly MIN_LENGTH = 10; // Goals should be somewhat descriptive
+  private static readonly MIN_LENGTH = 10;
   private static readonly MAX_LENGTH = 500;
 
   private constructor(value: string) {

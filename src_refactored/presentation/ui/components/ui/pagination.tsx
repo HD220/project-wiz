@@ -1,12 +1,12 @@
-import * as React from "react"
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MoreHorizontalIcon,
 } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/ui/components/ui/button" // Corrected path
+import { cn } from "@/ui/lib/utils" // Corrected path
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -46,12 +46,17 @@ function PaginationLink({
   className,
   isActive,
   size = "icon",
+  children,
+  href,
   ...props
 }: PaginationLinkProps) {
+  // Ensure there is content for accessibility. Fallback to href if children are not provided.
+  const anchorContent = children || href;
   return (
     <a
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
+      href={href} // Explicitly include href
       data-active={isActive}
       className={cn(
         buttonVariants({
@@ -61,8 +66,10 @@ function PaginationLink({
         className
       )}
       {...props}
-    />
-  )
+    >
+      {anchorContent}
+    </a>
+  );
 }
 
 function PaginationPrevious({

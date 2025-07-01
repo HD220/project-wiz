@@ -7,7 +7,7 @@ export const GetUserInputSchema = z.object({
   email: z.string().email().optional(),
 }).refine(data => data.userId || data.email, {
   message: "Either userId or email must be provided to get a user.",
-  path: ["userId", "email"], // Path to highlight for the error
+  path: ["userId", "email"],
 });
 
 export type GetUserInput = z.infer<typeof GetUserInputSchema>;
@@ -21,8 +21,8 @@ export const GetUserOutputSchema = z.object({
   avatarUrl: z.string().url().optional().nullable(),
   defaultLLMProviderConfigId: z.string().uuid(),
   assistantId: z.string().uuid().optional().nullable(),
-  createdAt: z.string().datetime(), // ISO string
-  updatedAt: z.string().datetime(), // ISO string
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
