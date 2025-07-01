@@ -4,7 +4,7 @@ import { ExecutionHistoryEntry } from "./job-processing.types";
 import { JobStateMutator } from "./job-state.mutator";
 import {
   JobStatus,
-  JobLogEntry,
+  // JobLogEntry, // No longer directly used in this file
   JobEntityProps,
   // JobPersistenceData, // Not used directly in this file after refactor
 } from "./job.types";
@@ -56,82 +56,25 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
       name: params.name,
       payload: params.payload,
       options: jobOptions,
-      status:
-        jobOptions.delay && jobOptions.delay > 0
-          ? JobStatus.DELAYED
-          : JobStatus.WAITING,
+      status: (jobOptions.delay && jobOptions.delay > 0) ? JobStatus.DELAYED : JobStatus.WAITING,
       attemptsMade: 0,
       progress: 0,
       logs: [],
       createdAt: now,
       updatedAt: now,
-      delayUntil:
-        jobOptions.delay && jobOptions.delay > 0
-          ? new Date(now.getTime() + jobOptions.delay)
-          : undefined,
+      delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : undefined,
     };
     return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
   }
 
-  get id(): JobIdVO {
-    return this.props.id;
+  // Expose props directly or through a single getter as per AGENTS.md for data-rich entities
+  public getProps(): Readonly<JobEntityProps<P, R>> {
+    return this.props;
   }
-  get queueName(): string {
-    return this.props.queueName;
-  }
-  get name(): string {
-    return this.props.name;
-  }
-  get payload(): P {
-    return this.props.payload;
-  }
-  get options(): JobOptionsVO {
-    return this.props.options;
-  }
-  get status(): JobStatus {
-    return this.props.status;
-  }
-  get attemptsMade(): number {
-    return this.props.attemptsMade;
-  }
+
+  // Keep getters with logic
   get maxAttempts(): number {
     return this.props.options.attempts;
-  }
-  get progress(): number | object {
-    return this.props.progress;
-  }
-  get logs(): ReadonlyArray<JobLogEntry> {
-    return this.props.logs;
-  }
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-  get processedOn(): Date | undefined {
-    return this.props.processedOn;
-  }
-  get finishedOn(): Date | undefined {
-    return this.props.finishedOn;
-  }
-  get delayUntil(): Date | undefined {
-    return this.props.delayUntil;
-  }
-  get lockUntil(): Date | undefined {
-    return this.props.lockUntil;
-  }
-  get workerId(): string | undefined {
-    return this.props.workerId;
-  }
-  get returnValue(): R | undefined {
-    return this.props.returnValue;
-  }
-  get failedReason(): string | undefined {
-    return this.props.failedReason;
-  }
-  get stacktrace(): string[] | undefined {
-    return this.props.stacktrace;
   }
 
   get isRetry(): boolean {
@@ -155,12 +98,10 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
 
   public updateProgress(progress: number | object): void {
     if (
-      this.status === JobStatus.COMPLETED ||
-      this.status === JobStatus.FAILED
+      this.props.status === JobStatus.COMPLETED ||
+      this.props.status === JobStatus.FAILED
     ) {
-      console.warn(
-        `[JobEntity] Cannot update progress for job ${this.id.value} as it is already in status ${this.status}.`
-      );
+      console.warn(`[JobEntity] Cannot update progress for job ${this.props.id.value} as it is already in status ${this.props.status}.`);
       return;
     }
     this.props.progress = progress;
@@ -201,15 +142,9 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
   public markAsStalled(): boolean {
     const shouldFail = this._stateMutator.markAsStalled();
     if (shouldFail) {
-      this.addLog(
-        `Job failed after becoming stalled and exceeding max attempts. (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`,
-        "ERROR"
-      );
+      this.addLog(`Job failed after becoming stalled and exceeding max attempts. (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`, "ERROR");
     } else {
-      this.addLog(
-        `Job marked as stalled (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`,
-        "WARN"
-      );
+      this.addLog(`Job marked as stalled (worker: ${this.props.workerId}, lock expired: ${this.props.lockUntil})`, "WARN");
     }
     return shouldFail;
   }
@@ -220,57 +155,7 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
     this._stateMutator.resume();
   }
 
-  public toPersistence(): {
-    id: string;
-    queueName: string;
-    name: string;
-    payload: P;
-    options: IJobOptions;
-    status: JobStatus;
-    attemptsMade: number;
-    progress: number | object;
-    logs: Array<{ message: string; level: string; timestamp: number }>;
-    createdAt: Date;
-    updatedAt: Date;
-    priority: number;
-    processedOn?: Date;
-    finishedOn?: Date;
-    delayUntil?: Date;
-    lockUntil?: Date;
-    workerId?: string;
-    returnValue?: R;
-    failedReason?: string;
-    stacktrace?: string[];
-  } {
-    return {
-      id: this.props.id.value,
-      queueName: this.props.queueName,
-      name: this.props.name,
-      payload: this.props.payload,
-      options: this.props.options.toPersistence(),
-      status: this.props.status,
-      attemptsMade: this.props.attemptsMade,
-      progress: this.props.progress,
-      logs: this.props.logs.map((logEntry) => ({
-        ...logEntry,
-        timestamp: logEntry.timestamp.getTime(),
-      })),
-      createdAt: this.props.createdAt,
-      updatedAt: this.props.updatedAt,
-      priority: this.props.options.priority,
-
-      ...(this.props.processedOn && { processedOn: this.props.processedOn }),
-      ...(this.props.finishedOn && { finishedOn: this.props.finishedOn }),
-      ...(this.props.delayUntil && { delayUntil: this.props.delayUntil }),
-      ...(this.props.lockUntil && { lockUntil: this.props.lockUntil }),
-      ...(this.props.workerId && { workerId: this.props.workerId }),
-      ...(this.props.returnValue !== undefined && {
-        returnValue: this.props.returnValue,
-      }),
-      ...(this.props.failedReason && { failedReason: this.props.failedReason }),
-      ...(this.props.stacktrace && { stacktrace: this.props.stacktrace }),
-    };
-  }
+  // toPersistence() method is now removed and handled by JobPersistenceMapper.
 
   public getConversationHistory(): ActivityHistoryVO {
     return this._stateMutator.getConversationHistory();

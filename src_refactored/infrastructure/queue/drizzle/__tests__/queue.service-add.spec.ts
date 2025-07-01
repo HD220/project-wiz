@@ -1,5 +1,6 @@
 // src_refactored/infrastructure/queue/drizzle/__tests__/queue.service-add.spec.ts
 import { randomUUID } from "node:crypto";
+
 import {
   vi,
   describe,
@@ -10,12 +11,14 @@ import {
   afterEach,
 } from "vitest";
 
+// Newline for import group separation
 import { JobEntity, JobStatus } from "../../../../core/domain/job/job.entity";
 import { IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo"; // Corrected: Use as value
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";
 import { QueueService } from "../queue.service";
 // import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo"; // Not directly used in this snippet, but likely needed
 
+// Newline for import group separation
 import {
   TestDb,
   createTestDbClient,
@@ -64,20 +67,22 @@ describe("QueueService - add", () => {
     const jobName = "send-welcome-email";
 
     const createdJob = await queueService.add(jobName, jobData);
+    const createdJobProps = createdJob.getProps();
 
     expect(createdJob).toBeInstanceOf(JobEntity);
-    expect(createdJob.name).toBe(jobName);
-    expect(createdJob.payload).toEqual(jobData);
-    expect(createdJob.queueName).toBe(queueName);
-    expect(createdJob.options.attempts).toBe(defaultJobOpts.attempts);
+    expect(createdJobProps.name).toBe(jobName);
+    expect(createdJobProps.payload).toEqual(jobData);
+    expect(createdJobProps.queueName).toBe(queueName);
+    expect(createdJobProps.options.attempts).toBe(defaultJobOpts.attempts);
     expect(queueService.emit).toHaveBeenCalledWith("job.added", createdJob);
 
     // Verify job is in the database
-    const jobFromDb = await jobRepository.findById(createdJob.id);
+    const jobFromDb = await jobRepository.findById(createdJobProps.id);
     expect(jobFromDb).not.toBeNull();
-    expect(jobFromDb!.id.value).toBe(createdJob.id.value);
-    expect(jobFromDb!.name).toBe(jobName);
-    expect(jobFromDb!.payload).toEqual(jobData);
+    const jobFromDbProps = jobFromDb!.getProps();
+    expect(jobFromDbProps.id.value).toBe(createdJobProps.id.value);
+    expect(jobFromDbProps.name).toBe(jobName);
+    expect(jobFromDbProps.payload).toEqual(jobData);
   });
 
   it("should apply custom options when adding a job, and save to DB", async () => {
@@ -92,17 +97,19 @@ describe("QueueService - add", () => {
     };
 
     const createdJob = await queueService.add(jobName, jobData, customOpts);
+    const createdJobProps = createdJob.getProps();
 
-    expect(createdJob.id.value).toBe(validCustomJobId);
-    expect(createdJob.options.attempts).toBe(5);
-    expect(createdJob.options.delay).toBe(5000);
-    expect(createdJob.options.priority).toBe(1);
-    expect(createdJob.status).toBe(JobStatus.DELAYED);
+    expect(createdJobProps.id.value).toBe(validCustomJobId);
+    expect(createdJobProps.options.attempts).toBe(5);
+    expect(createdJobProps.options.delay).toBe(5000);
+    expect(createdJobProps.options.priority).toBe(1);
+    expect(createdJobProps.status).toBe(JobStatus.DELAYED);
 
-    const jobFromDb = await jobRepository.findById(createdJob.id);
+    const jobFromDb = await jobRepository.findById(createdJobProps.id);
     expect(jobFromDb).not.toBeNull();
-    expect(jobFromDb!.id.value).toBe(validCustomJobId);
-    expect(jobFromDb!.options.priority).toBe(1);
+    const jobFromDbProps = jobFromDb!.getProps();
+    expect(jobFromDbProps.id.value).toBe(validCustomJobId);
+    expect(jobFromDbProps.options.priority).toBe(1);
   });
 });
 
@@ -122,16 +129,18 @@ describe("QueueService - addBulk", () => {
     expect(addedJobs.length).toBe(2);
     expect(queueService.emit).toHaveBeenCalledTimes(2);
 
-    const job1FromDb = await jobRepository.findById(addedJobs[0].id);
+    const job1FromDb = await jobRepository.findById(addedJobs[0].getProps().id);
     expect(job1FromDb).not.toBeNull();
-    expect(job1FromDb!.name).toBe("bulk1");
-    expect(job1FromDb!.payload).toEqual({ email: "b1@example.com" });
+    const job1FromDbProps = job1FromDb!.getProps();
+    expect(job1FromDbProps.name).toBe("bulk1");
+    expect(job1FromDbProps.payload).toEqual({ email: "b1@example.com" });
     expect(queueService.emit).toHaveBeenCalledWith("job.added", addedJobs[0]);
 
-    const job2FromDb = await jobRepository.findById(addedJobs[1].id);
+    const job2FromDb = await jobRepository.findById(addedJobs[1].getProps().id);
     expect(job2FromDb).not.toBeNull();
-    expect(job2FromDb!.name).toBe("bulk2");
-    expect(job2FromDb!.options.priority).toBe(1);
+    const job2FromDbProps = job2FromDb!.getProps();
+    expect(job2FromDbProps.name).toBe("bulk2");
+    expect(job2FromDbProps.options.priority).toBe(1);
     expect(queueService.emit).toHaveBeenCalledWith("job.added", addedJobs[1]);
   });
 });

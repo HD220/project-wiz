@@ -74,7 +74,8 @@ export class MockLLMAdapter implements ILLMAdapter {
     // Try to return a mock object that somewhat fits common schemas, or a default based on schema type
     try {
       if (schema instanceof z.ZodObject) {
-        const mockData: Record<string, unknown> = {}; // Replaced any with Record<string, unknown>
+        // Replaced any with Record<string, unknown>
+        const mockData: Record<string, unknown> = {};
         for (const key in schema.shape) {
           const fieldSchema = schema.shape[key];
           if (fieldSchema instanceof z.ZodString) {
@@ -96,7 +97,8 @@ export class MockLLMAdapter implements ILLMAdapter {
           )
         );
       }
-    } catch (error) { // Renamed e to error
+      // Renamed e to error
+    } catch (error) {
       return Err(
         new LLMError(
           "Error generating mock structured output for schema.",

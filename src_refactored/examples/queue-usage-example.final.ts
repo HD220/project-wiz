@@ -15,8 +15,9 @@ function setupProcessor(): (
   return async (
     job: JobEntity<EmailJobPayload, EmailJobResult>
   ): Promise<EmailJobResult> => {
+    const props = job.getProps();
     process.stdout.write(
-      `[Worker] Processing job ${job.id.value} (attempt ${job.attemptsMade}) for email: ${job.payload.email}\n`
+      `[Worker] Processing job ${props.id.value} (attempt ${props.attemptsMade}) for email: ${props.payload.email}\n`
     );
 
     for (let progressValue = 0; progressValue <= 100; progressValue += 25) {
@@ -24,29 +25,29 @@ function setupProcessor(): (
       job.updateProgress(progressValue);
       job.addLog(`Progress updated to ${progressValue}%`);
       process.stdout.write(
-        `[Worker] Job ${job.id.value} progress: ${progressValue}%\n`
+        `[Worker] Job ${props.id.value} progress: ${progressValue}%\n`
       );
     }
 
-    if (job.attemptsMade < 3 && job.payload.email === "retry@example.com") {
+    if (props.attemptsMade < 3 && props.payload.email === "retry@example.com") {
       job.addLog("Simulating transient failure for retry job.", "ERROR");
       process.stdout.write(
-        `[Worker] Job ${job.id.value} (retry job) failed. Attempts made: ${job.attemptsMade}\n`
+        `[Worker] Job ${props.id.value} (retry job) failed. Attempts made: ${props.attemptsMade}\n`
       );
       throw new Error("Simulated transient error");
     }
 
-    if (job.payload.email === "fail@example.com") {
+    if (props.payload.email === "fail@example.com") {
       job.addLog("Simulating permanent failure.", "ERROR");
       process.stdout.write(
-        `[Worker] Job ${job.id.value} (fail job) failed permanently.\n`
+        `[Worker] Job ${props.id.value} (fail job) failed permanently.\n`
       );
       throw new Error("Simulated permanent error");
     }
 
     job.addLog("Job completed successfully.", "INFO");
     process.stdout.write(
-      `[Worker] Job ${job.id.value} completed successfully.\n`
+      `[Worker] Job ${props.id.value} completed successfully.\n`
     );
     return { status: "Email sent" };
   };
@@ -58,49 +59,49 @@ function setupEventListeners(
 ): void {
   queue.on("job.added", (job) =>
     process.stdout.write(
-      `[Queue] Job added: ${job.id.value} (Name: ${job.name}, Status: ${job.status})\n`
+      `[Queue] Job added: ${job.getProps().id.value} (Name: ${job.getProps().name}, Status: ${job.getProps().status})\n`
     )
   );
   queue.on("job.completed", (job) =>
     process.stdout.write(
-      `[Queue] Job completed: ${job.id.value} (Result: ${JSON.stringify(job.returnValue)})\n`
+      `[Queue] Job completed: ${job.getProps().id.value} (Result: ${JSON.stringify(job.getProps().returnValue)})\n`
     )
   );
   queue.on("job.failed", (job) =>
     process.stdout.write(
-      `[Queue] Job failed: ${job.id.value} (Reason: ${job.failedReason}, Attempts: ${job.attemptsMade})\n`
+      `[Queue] Job failed: ${job.getProps().id.value} (Reason: ${job.getProps().failedReason}, Attempts: ${job.getProps().attemptsMade})\n`
     )
   );
-  queue.on("job.active", (job) =>
-    process.stdout.write(`[Queue] Job ${job.id.value} is now active.\n`)
-  );
+  // Condensing this handler to help with max-lines-per-function
+  queue.on("job.active", (job) => process.stdout.write(`[Queue] Job ${job.getProps().id.value} is now active.\n`));
   queue.on("job.stalled", (job) =>
-    process.stdout.write(`[Queue] Job ${job.id.value} stalled and re-queued.\n`)
+    process.stdout.write(`[Queue] Job ${job.getProps().id.value} stalled and re-queued.\n`)
   );
   queue.on("job.progress", (job) =>
     process.stdout.write(
-      `[Queue] Job ${job.id.value} progress updated to ${job.progress}\n`
+      `[Queue] Job ${job.getProps().id.value} progress updated to ${job.getProps().progress}\n`
     )
   );
-  queue.on("job.log", (job) =>
+  queue.on("job.log", (job) => {
+    const logs = job.getProps().logs;
     process.stdout.write(
-      `[Queue] Job ${job.id.value} log: ${job.logs[job.logs.length - 1].message}\n`
+      `[Queue] Job ${job.getProps().id.value} log: ${logs.length > 0 ? logs[logs.length - 1].message : "N/A"}\n`
     )
-  );
+  });
 
   worker.on("worker.job.active", (job) =>
     process.stdout.write(
-      `[Worker] Worker started processing job: ${job.id.value}\n`
+      `[Worker] Worker started processing job: ${job.getProps().id.value}\n`
     )
   );
   worker.on("worker.job.processed", (job) =>
     process.stdout.write(
-      `[Worker] Worker finished processing job: ${job.id.value}\n`
+      `[Worker] Worker finished processing job: ${job.getProps().id.value}\n`
     )
   );
   worker.on("worker.job.errored", (job, error) =>
     process.stdout.write(
-      `[Worker] Worker encountered error for job ${job.id.value}: ${error.message}\n`
+      `[Worker] Worker encountered error for job ${job.getProps().id.value}: ${error.message}\n`
     )
   );
 }
@@ -135,7 +136,8 @@ async function addJobsAndRun(
     await queue.close();
     process.stdout.write("Worker and queue closed. Exiting.\n");
     process.exit(0);
-  }, 60000); // Keep alive for 60 seconds
+    // Keep alive for 60 seconds
+  }, 60000);
 }
 
 async function main() {

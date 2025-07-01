@@ -1,6 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { validate as uuidValidate } from "uuid";
+import { validate as cryptoUuidValidate } from "node:crypto";
 
+import { describe, it, expect } from "vitest";
+
+// Separate internal imports
+// Ensuring newline before this block due to import/order rule
 import { JobIdVO } from "../job-id.vo";
 
 describe("JobIdVO", () => {
@@ -46,6 +49,6 @@ describe("JobIdVO", () => {
     // This test is more about ensuring the VO doesn't strictly depend on the 'uuid' library's specific output
     // if node:crypto is the fallback or primary. Both generate valid UUIDs.
     const cryptoGeneratedId = JobIdVO.create(); // Uses node:crypto.randomUUID() internally
-    expect(uuidValidate(cryptoGeneratedId.value)).toBe(true);
+    expect(cryptoUuidValidate(cryptoGeneratedId.value)).toBe(true);
   });
 });

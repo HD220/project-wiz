@@ -107,12 +107,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
       try {
         await this.maintenanceLoopPromise;
       } catch (error) {
-        this.emit(
-          "queue.error",
-          new Error(
-            `Error during maintenance loop stop: ${error instanceof Error ? error.message : String(error)}`
-          )
-        );
+        this.emit("queue.error", new Error(`Maintenance loop stop error: ${error instanceof Error ? error.message : String(error)}`));
       }
     }
     this.maintenanceLoopPromise = null;
@@ -127,41 +122,30 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     workerId: string,
     lockDurationMs: number
   ): Promise<JobEntity<P, R> | null> {
-    console.log(
-      `[QueueService] Attempting to fetch next job for worker ${workerId}...`
-    );
     const jobs = await this.jobRepository.findNextJobsToProcess(
       this.queueName,
       1
     );
     if (jobs.length === 0) {
-      console.log(`[QueueService] No jobs found for worker ${workerId}.`);
       return null;
     }
 
     const job = jobs[0] as JobEntity<P, R>;
-    console.log(
-      `[QueueService] Found job ${job.id.value}. Attempting to acquire lock...`
-    );
+    const jobProps = job.getProps();
     const lockUntil = new Date(Date.now() + lockDurationMs);
     const locked = await this.jobRepository.acquireLock(
-      job.id,
+      jobProps.id, // Use JobIdVO from props
       workerId,
       lockUntil
     );
 
     if (locked) {
-      console.log(
-        `[QueueService] Lock acquired for job ${job.id.value}. Moving to active.`
-      );
       job.moveToActive(workerId, lockUntil);
       await this.jobRepository.update(job);
       this.emit("job.active", job);
       return job;
     }
-    console.log(
-      `[QueueService] Failed to acquire lock for job ${job.id.value}.`
-    );
+    // console.log(`[QueueService] Failed to acquire lock for job ${jobProps.id.value}.`);
     return null;
   }
 
@@ -172,7 +156,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId && job.status === JobStatus.ACTIVE) {
+    if (job && job.getProps().workerId === workerId && job.getProps().status === JobStatus.ACTIVE) {
       const newLockUntil = new Date(Date.now() + lockDurationMs);
       job.extendLock(newLockUntil, workerId);
       await this.jobRepository.update(job);
@@ -189,7 +173,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     // Param removed/ignored
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId) {
+    if (job && job.getProps().workerId === workerId) {
       job.markAsCompleted(result);
       await this.jobRepository.update(job);
       this.emit("job.completed", job);
@@ -205,7 +189,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     // Param removed/ignored
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId) {
+    if (job && job.getProps().workerId === workerId) {
       this._handleFailedJobRetryOrPermanentFail(job, error);
       await this.jobRepository.update(job);
       this.emit("job.failed", job);
@@ -213,19 +197,21 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   }
 
   private _handleFailedJobRetryOrPermanentFail(job: JobEntity<P,R>, error: Error): void {
-    if (job.attemptsMade < job.maxAttempts) {
-      const delay = job.options.backoff?.delay || 1000; // Default to 1s
+    const jobProps = job.getProps();
+    if (jobProps.attemptsMade < job.maxAttempts) { // maxAttempts is a getter on JobEntity, uses jobProps internally
+      // Default to 1s
+      const delay = jobProps.options.backoff?.delay || 1000;
       let backoffDelay = delay;
-      if (job.options.backoff?.type === "exponential") {
-        // Ensure attemptsMade is at least 1 for exponential calculation if it's 0-indexed internally before this point
-        const currentAttemptForBackoff = Math.max(1, job.attemptsMade);
-        backoffDelay = delay * Math.pow(2, currentAttemptForBackoff -1);
+      if (jobProps.options.backoff?.type === "exponential") {
+        // Ensure attemptsMade is at least 1 for exponential calculation
+        const currentAttemptForBackoff = Math.max(1, jobProps.attemptsMade);
+        backoffDelay = delay * Math.pow(2, currentAttemptForBackoff - 1);
       }
       // Cap backoff delay to a reasonable maximum, e.g., 1 hour
-      const maxBackoff = job.options.backoff?.maxDelay || 60 * 60 * 1000;
+      const maxBackoff = jobProps.options.backoff?.maxDelay || 60 * 60 * 1000;
       backoffDelay = Math.min(backoffDelay, maxBackoff);
 
-      job.moveToDelayed(new Date(Date.now() + backoffDelay), error);
+      job.moveToDelayed(new Date(Date.now() + backoffDelay), error); // moveToDelayed is a method on JobEntity
     } else {
       job.markAsFailed(error.message, error.stack?.split("\n"));
     }
@@ -238,7 +224,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId) {
+    if (job && job.getProps().workerId === workerId) {
       job.updateProgress(progress);
       await this.jobRepository.update(job);
       this.emit("job.progress", job);
@@ -253,7 +239,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
-    if (job && job.workerId === workerId) {
+    if (job && job.getProps().workerId === workerId) {
       job.addLog(message, level);
       await this.jobRepository.update(job);
       this.emit("job.log", job);
@@ -270,10 +256,11 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   private async runMaintenanceLoop(): Promise<void> {
     while (this._isMaintenanceRunning) {
       try {
+        // Limit fetching to 10 stalled jobs per cycle
         const stalledJobs = await this.jobRepository.findStalledJobs(
           this.queueName,
           new Date(),
-          10 // Limit fetching to 10 stalled jobs per cycle
+          10
         );
         for (const job of stalledJobs) {
           await this._processStalledJob(job as JobEntity<P, R>);
@@ -283,12 +270,7 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
           "[QueueService] Error during stalled job maintenance:",
           error
         );
-        this.emit(
-          "queue.error",
-          new Error(
-            `Stalled job maintenance error: ${error instanceof Error ? error.message : String(error)}`
-          )
-        );
+        this.emit("queue.error", new Error(`Stalled job maintenance: ${error instanceof Error ? error.message : String(error)}`));
       }
 
       if (this._isMaintenanceRunning) {
@@ -308,14 +290,10 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
   }
 
   private async _processStalledJob(jobEntity: JobEntity<P, R>): Promise<void> {
-    // console.log(`[QueueService] Processing stalled job ${jobEntity.id.value}, status: ${jobEntity.status}, attempts: ${jobEntity.attemptsMade}`);
     const wasAlreadyFailedByStallLogic = jobEntity.markAsStalled();
 
     if (!wasAlreadyFailedByStallLogic) {
       jobEntity.moveToWaiting();
-      // console.log(`[QueueService] Stalled job ${jobEntity.id.value} moved to WAITING.`);
-    } else {
-      // console.log(`[QueueService] Stalled job ${jobEntity.id.value} marked as FAILED by entity logic.`);
     }
     await this.jobRepository.update(jobEntity);
     this.emit("job.stalled", jobEntity);

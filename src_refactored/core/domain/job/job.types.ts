@@ -43,7 +43,8 @@ export type JobPersistenceData<P = unknown, R = unknown> = {
   queueName: string;
   name: string;
   payload: P;
-  options: IJobOptions;
+  options: IJobOptions; // This includes priority
+  priority: number; // Explicitly adding for top-level access in persistence if needed by consumers
   status: JobStatus;
   attemptsMade: number;
   progress: number | object;

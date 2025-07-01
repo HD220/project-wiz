@@ -10,31 +10,29 @@ import {
 } from "drizzle-orm";
 
 import { IJobRepository } from "@/core/application/ports/job-repository.interface";
+import { JobPersistenceMapper } from "@/core/domain/job/job-persistence.mapper";
 import {
   JobEntity,
   JobStatus,
-  JobPersistence, // Correctly from job.entity.ts
+  // JobPersistence, // No longer used directly by repo, mapper handles it
 } from "@/core/domain/job/job.entity";
-import {
-  IJobOptions,
-  JobPersistenceData, // Correctly from job.types.ts
-} from "@/core/domain/job/job.types";
+// Unused type imports from job.types are already commented out or removed
 import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 
-// Import 'db' type for constructor injection
+// Import 'db' type for constructor injection (relative path - new group)
 import { type db as DbType } from "../drizzle.client";
 import * as schema from "../schema";
+
 import {
   mapToDrizzleInput,
   mapToPersistenceData,
 } from "./drizzle-job.mapper";
 
-
 export class DrizzleJobRepository implements IJobRepository {
   constructor(private readonly drizzleDbInstance: DbType) {}
 
   async save(job: JobEntity<unknown, unknown>): Promise<void> {
-    const persistenceData = job.toPersistence();
+    const persistenceData = JobPersistenceMapper.toPersistence(job.getProps());
     const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
       .insert(schema.jobsTable)
@@ -43,8 +41,9 @@ export class DrizzleJobRepository implements IJobRepository {
   }
 
   async update(job: JobEntity<unknown, unknown>): Promise<void> {
-    const persistenceData = job.toPersistence();
-    const drizzleInput = this.mapToDrizzleInput(persistenceData);
+    const persistenceData = JobPersistenceMapper.toPersistence(job.getProps());
+    // mapToDrizzleInput now accepts JobPersistenceData from the updated mapper
+    const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
       .update(schema.jobsTable)
       .set(drizzleInput)
@@ -65,16 +64,7 @@ export class DrizzleJobRepository implements IJobRepository {
   ): Promise<Array<JobEntity<unknown, unknown>>> {
     const now = new Date();
     const results = await this.drizzleDbInstance.query.jobsTable.findMany({
-      where: and(
-        eq(schema.jobsTable.queueName, queueName),
-        or(
-          eq(schema.jobsTable.status, JobStatus.WAITING),
-          and(
-            eq(schema.jobsTable.status, JobStatus.DELAYED),
-            lt(schema.jobsTable.delayUntil, now)
-          )
-        )
-      ),
+      where: and(eq(schema.jobsTable.queueName, queueName), or(eq(schema.jobsTable.status, JobStatus.WAITING), and(eq(schema.jobsTable.status, JobStatus.DELAYED), lt(schema.jobsTable.delayUntil, now)))),
       orderBy: [
         ascDrizzle(schema.jobsTable.priority),
         ascDrizzle(schema.jobsTable.createdAt),
@@ -94,15 +84,7 @@ export class DrizzleJobRepository implements IJobRepository {
     const result = await this.drizzleDbInstance
       .update(schema.jobsTable)
       .set({ workerId, lockUntil, status: JobStatus.ACTIVE })
-      .where(
-        and(
-          eq(schema.jobsTable.id, jobId.value),
-          or(
-            isNull(schema.jobsTable.workerId),
-            lt(schema.jobsTable.lockUntil, new Date())
-          )
-        )
-      );
+      .where(and(eq(schema.jobsTable.id, jobId.value), or(isNull(schema.jobsTable.workerId), lt(schema.jobsTable.lockUntil, new Date()))));
     return result.changes > 0;
   }
 
@@ -114,12 +96,7 @@ export class DrizzleJobRepository implements IJobRepository {
     await this.drizzleDbInstance
       .update(schema.jobsTable)
       .set({ lockUntil })
-      .where(
-        and(
-          eq(schema.jobsTable.id, jobId.value),
-          eq(schema.jobsTable.workerId, workerId)
-        )
-      );
+      .where(and(eq(schema.jobsTable.id, jobId.value), eq(schema.jobsTable.workerId, workerId)));
   }
 
   async findStalledJobs(
@@ -128,11 +105,7 @@ export class DrizzleJobRepository implements IJobRepository {
     limit: number
   ): Promise<Array<JobEntity<unknown, unknown>>> {
     const results = await this.drizzleDbInstance.query.jobsTable.findMany({
-      where: and(
-        eq(schema.jobsTable.queueName, queueName),
-        eq(schema.jobsTable.status, JobStatus.ACTIVE),
-        lt(schema.jobsTable.lockUntil, olderThan)
-      ),
+      where: and(eq(schema.jobsTable.queueName, queueName), eq(schema.jobsTable.status, JobStatus.ACTIVE), lt(schema.jobsTable.lockUntil, olderThan)),
       limit,
     });
     return results.map((jobData) =>
@@ -154,10 +127,7 @@ export class DrizzleJobRepository implements IJobRepository {
     asc: boolean = false
   ): Promise<Array<JobEntity<unknown, unknown>>> {
     const results = await this.drizzleDbInstance.query.jobsTable.findMany({
-      where: and(
-        eq(schema.jobsTable.queueName, queueName),
-        inArray(schema.jobsTable.status, statuses)
-      ),
+      where: and(eq(schema.jobsTable.queueName, queueName), inArray(schema.jobsTable.status, statuses)),
       orderBy: [
         asc
           ? ascDrizzle(schema.jobsTable.createdAt)
@@ -181,12 +151,7 @@ export class DrizzleJobRepository implements IJobRepository {
         count: schema.sql`count(*)`.mapWith(Number),
       })
       .from(schema.jobsTable)
-      .where(
-        and(
-          eq(schema.jobsTable.queueName, queueName),
-          statuses ? inArray(schema.jobsTable.status, statuses) : undefined
-        )
-      )
+      .where(and(eq(schema.jobsTable.queueName, queueName), statuses ? inArray(schema.jobsTable.status, statuses) : undefined))
       .groupBy(schema.jobsTable.status);
 
     const results = await query;
@@ -211,18 +176,11 @@ export class DrizzleJobRepository implements IJobRepository {
     const jobsToDeleteIdsQuery = this.drizzleDbInstance
       .select({ id: schema.jobsTable.id })
       .from(schema.jobsTable)
-      .where(
-        and(
-          eq(schema.jobsTable.queueName, queueName),
-          status
-            ? eq(schema.jobsTable.status, status)
-            : or(
-                eq(schema.jobsTable.status, JobStatus.COMPLETED),
-                eq(schema.jobsTable.status, JobStatus.FAILED)
-              ),
-          lt(schema.jobsTable.finishedOn, finishedOlderThan)
-        )
-      )
+      .where(and(
+        eq(schema.jobsTable.queueName, queueName),
+        status ? eq(schema.jobsTable.status, status) : or(eq(schema.jobsTable.status, JobStatus.COMPLETED), eq(schema.jobsTable.status, JobStatus.FAILED)),
+        lt(schema.jobsTable.finishedOn, finishedOlderThan)
+      ))
       .orderBy(ascDrizzle(schema.jobsTable.finishedOn))
       .limit(limit);
 

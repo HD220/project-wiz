@@ -63,11 +63,11 @@ describe("QueueService - getJob", () => {
     const jobName = "find-me";
     // Need to add a job first to get it
     const addedJob = await queueService.add(jobName, jobData);
-    const foundJob = await queueService.getJob(addedJob.id);
+    const foundJob = await queueService.getJob(addedJob.getProps().id);
 
     expect(foundJob).not.toBeNull();
-    expect(foundJob!.id.value).toBe(addedJob.id.value);
-    expect(foundJob!.name).toBe(jobName);
+    expect(foundJob!.getProps().id.value).toBe(addedJob.getProps().id.value);
+    expect(foundJob!.getProps().name).toBe(jobName);
   });
 
   it("should retrieve a job from DB by string ID", async () => {
@@ -75,9 +75,9 @@ describe("QueueService - getJob", () => {
     const jobName = "find-me-str";
     // Need to add a job first to get it
     const addedJob = await queueService.add(jobName, jobData);
-    const foundJob = await queueService.getJob(addedJob.id.value);
+    const foundJob = await queueService.getJob(addedJob.getProps().id.value);
 
     expect(foundJob).not.toBeNull();
-    expect(foundJob!.id.value).toBe(addedJob.id.value);
+    expect(foundJob!.getProps().id.value).toBe(addedJob.getProps().id.value);
   });
 });

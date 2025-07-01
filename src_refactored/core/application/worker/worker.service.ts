@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import EventEmitter from "node:events";
-import { clearTimeout, setInterval, clearInterval, setTimeout } from "node:timers";
+import { setInterval, clearInterval, setTimeout, Timeout } from "node:timers";
 
 import { AbstractQueue } from "@/core/application/queue/abstract-queue";
 import { JobEntity } from "@/core/domain/job/job.entity";
@@ -24,9 +24,7 @@ export class WorkerService<P, R> extends EventEmitter {
     super();
     this.workerId = randomUUID();
     if (opts.concurrency && opts.concurrency > 1) {
-      console.warn(
-        `[WorkerService] Concurrency option > 1 is not supported in this sequential version. Effective concurrency is 1.`
-      );
+      console.warn(`[WorkerService] Concurrency option > 1 is not supported in this sequential version. Effective concurrency is 1.`);
     }
   }
 
@@ -56,15 +54,18 @@ export class WorkerService<P, R> extends EventEmitter {
       try {
         await this.pollLoopPromise;
       } catch (error) {
-        this.emit(
-          "worker.error",
-          new Error(
-            `Error during poll loop shutdown: ${error instanceof Error ? error.message : String(error)}`
-          )
-        );
+        this.emit("worker.error", new Error(`Error during poll loop shutdown: ${error instanceof Error ? error.message : String(error)}`));
       }
     }
 
+    await this._gracefulShutdown();
+
+    this.lockRenewTimers.forEach((timer) => clearInterval(timer));
+    this.lockRenewTimers.clear();
+    this.emit("worker.closed");
+  }
+
+  private async _gracefulShutdown(): Promise<void> {
     const gracefulShutdownTimeout = this.opts.lockDuration
       ? this.opts.lockDuration * 2
       : 60000;
@@ -77,55 +78,58 @@ export class WorkerService<P, R> extends EventEmitter {
     }
 
     if (this._activeJobs > 0) {
-      this.emit(
-        "worker.error",
-        new Error(
-          `Worker closed with ${this._activeJobs} active job(s) still running after timeout.`
-        )
+      this.emit("worker.error", new Error(`Worker closed with ${this._activeJobs} active job(s) still running after timeout.`));
+    }
+  }
+
+  private async _pollIteration(): Promise<boolean> {
+    if (this._activeJobs !== 0) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.pollingIntervalMs)
       );
+      // Continue polling
+      return true;
     }
 
-    this.lockRenewTimers.forEach((timer) => clearInterval(timer));
-    this.lockRenewTimers.clear();
-    this.emit("worker.closed");
+    try {
+      const job = await this.queue.fetchNextJobAndLock(
+        this.workerId,
+        this.opts.lockDuration ?? 30000
+      );
+
+      if (!job) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.pollingIntervalMs)
+        );
+        // Continue polling
+        return true;
+      }
+
+      if (!this._isRunning || this._isClosed) {
+        console.warn(
+          `[WorkerService] Worker stopped while job ${job.id.value} was fetched. Job may become stalled.`
+        );
+        // Stop polling
+        return false;
+      }
+
+      this._activeJobs = 1;
+      await this.processJob(job);
+    } catch (error) {
+      this.emit("worker.error", error);
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.pollingIntervalMs * 2)
+      );
+    }
+    // Continue polling
+    return true;
   }
 
   private async poll(): Promise<void> {
     while (this._isRunning && !this._isClosed) {
-      if (this._activeJobs !== 0) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, this.pollingIntervalMs)
-        );
-        continue;
-      }
-
-      try {
-        const job = await this.queue.fetchNextJobAndLock(
-          this.workerId,
-          this.opts.lockDuration ?? 30000
-        );
-
-        if (!job) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, this.pollingIntervalMs)
-          );
-          continue;
-        }
-
-        if (!this._isRunning || this._isClosed) {
-          console.warn(
-            `[WorkerService] Worker stopped while job ${job.id.value} was fetched. Job may become stalled.`
-          );
-          break;
-        }
-
-        this._activeJobs = 1;
-        await this.processJob(job);
-      } catch (error) {
-        this.emit("worker.error", error);
-        await new Promise((resolve) =>
-          setTimeout(resolve, this.pollingIntervalMs * 2)
-        );
+      const shouldContinue = await this._pollIteration();
+      if (!shouldContinue) {
+        break;
       }
     }
   }
@@ -139,14 +143,7 @@ export class WorkerService<P, R> extends EventEmitter {
       originalUpdateProgress(progress);
       this.queue
         .updateJobProgress(job.id, this.workerId, progress)
-        .catch((err) => {
-          this.emit(
-            "worker.error",
-            new Error(
-              `Failed to update progress for job ${job.id.value}: ${err instanceof Error ? err.message : String(err)}`
-            )
-          );
-        });
+        .catch((err) => this._emitJobUpdateError(job.id.value, "update progress", err));
     };
 
     const originalAddLog = job.addLog.bind(job);
@@ -154,16 +151,18 @@ export class WorkerService<P, R> extends EventEmitter {
       originalAddLog(message, level);
       this.queue
         .addJobLog(job.id, this.workerId, message, level)
-        .catch((err) => {
-          this.emit(
-            "worker.error",
-            new Error(
-              `Failed to add log for job ${job.id.value}: ${err instanceof Error ? err.message : String(err)}`
-            )
-          );
-        });
+        .catch((err) => this._emitJobUpdateError(job.id.value, "add log", err));
     };
     return { originalUpdateProgress, originalAddLog };
+  }
+
+  private _emitJobUpdateError(jobId: string, action: string, error: unknown): void {
+    this.emit(
+      "worker.error",
+      new Error(
+        `Failed to ${action} for job ${jobId}: ${error instanceof Error ? error.message : String(error)}`
+      )
+    );
   }
 
   private async _executeProcessor(job: JobEntity<P, R>): Promise<void> {
