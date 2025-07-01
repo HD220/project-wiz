@@ -1,17 +1,21 @@
 // src_refactored/core/application/use-cases/annotation/save-annotation.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
+import { ZodError } from 'zod';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { Annotation } from '@/domain/annotation/annotation.entity';
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
 import { AnnotationText } from '@/domain/annotation/value-objects/annotation-text.vo';
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+
 import { TYPES } from '@/infrastructure/ioc/types';
+
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
 
 import {
   SaveAnnotationUseCaseInput,

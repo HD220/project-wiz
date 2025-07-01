@@ -5,8 +5,8 @@ import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.
 import { Agent } from '@/core/domain/agent/agent.entity';
 import { AgentExecutionPayload, JobProcessingOutput, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
-import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo'; // Import JobIdVO
 import { ActivityHistoryVO, ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history.vo';
+import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo'; // Import JobIdVO
 import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface';
 import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 

@@ -1,10 +1,11 @@
 // src_refactored/core/application/use-cases/agent/create-agent.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
+import { ZodError } from 'zod';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
-import { Agent } from '@/domain/agent/agent.entity';
+
 import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
+import { Agent } from '@/domain/agent/agent.entity';
 import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
 import { IAgentRepository } from '@/domain/agent/ports/agent-repository.interface';
 import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
@@ -15,8 +16,11 @@ import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
-import { TYPES } from '@/infrastructure/ioc/types';
+
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+
+import { TYPES } from '@/infrastructure/ioc/types';
+
 import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
 
 import {

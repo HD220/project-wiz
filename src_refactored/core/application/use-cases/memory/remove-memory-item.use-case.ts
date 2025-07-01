@@ -3,13 +3,17 @@ import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+
+import { ValueError, DomainError } from '@/domain/common/errors';
 import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+
 import { ApplicationError } from '@/application/common/errors';
-import { ValueError, DomainError } from '@/domain/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
-import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
+
 import { TYPES } from '@/infrastructure/ioc/types';
+
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
 
 import {
   RemoveMemoryItemUseCaseInput,

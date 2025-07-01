@@ -1,14 +1,18 @@
 // src_refactored/core/application/use-cases/annotation/remove-annotation.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
+import { ZodError } from 'zod';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+
 import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
 import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
+
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-import { Result, ok, error as resultError, isError } from '@/shared/result'; // Added isError, aliased error
+
 import { TYPES } from '@/infrastructure/ioc/types';
+
+import { Result, ok, error as resultError, isError } from '@/shared/result'; // Added isError, aliased error
 
 import {
   RemoveAnnotationUseCaseInput,

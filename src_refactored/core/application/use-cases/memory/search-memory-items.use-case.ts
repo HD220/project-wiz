@@ -2,16 +2,20 @@
 import { inject, injectable } from 'inversify';
 import { ZodError } from 'zod';
 
+import { PaginationOptions } from '@/core/common/ports/repository.types'; // Corrected path for PaginationOptions
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { ValueError, DomainError } from '@/domain/common/errors'; // Corrected import for ValueError
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository, MemorySearchFilters, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.interface'; // Removed IMemoryRepositoryToken
-import { PaginationOptions } from '@/core/common/ports/repository.types'; // Corrected path for PaginationOptions
+
 import { ApplicationError } from '@/application/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
-import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
+
 import { TYPES } from '@/infrastructure/ioc/types';
+
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
 
 import {
   SearchMemoryItemsUseCaseInput,

@@ -1,9 +1,11 @@
 // src_refactored/core/application/use-cases/memory/save-memory-item.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
+import { ZodError } from 'zod';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
+import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemContent } from '@/domain/memory/value-objects/memory-item-content.vo';
@@ -11,10 +13,12 @@ import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-e
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
 import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
-import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
+
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+
 import { TYPES } from '@/infrastructure/ioc/types';
+
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
 
 import {
   SaveMemoryItemUseCaseInput,

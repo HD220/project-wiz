@@ -4,10 +4,11 @@ import { z } from 'zod';
 import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service'; // Removed TOOL_REGISTRY_SERVICE_TOKEN
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { ToolError } from '@/core/domain/common/errors';
-import { TYPES } from '@/infrastructure/ioc/types'; // Added import for TYPES
 import { ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 import { IToolExecutionContext, IAgentTool } from '@/core/tools/tool.interface';
+
+import { TYPES } from '@/infrastructure/ioc/types'; // Added import for TYPES
 
 @injectable()
 export class ToolValidationService {

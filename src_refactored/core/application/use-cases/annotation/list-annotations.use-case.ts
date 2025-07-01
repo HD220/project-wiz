@@ -1,16 +1,20 @@
 // src_refactored/core/application/use-cases/annotation/list-annotations.use-case.ts
-import { ZodError } from 'zod';
 import { injectable, inject } from 'inversify';
+import { ZodError } from 'zod';
 
+import { PaginationOptions } from '@/core/common/ports/repository.types';
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
+
 import { Annotation } from '@/domain/annotation/annotation.entity';
 import { IAnnotationRepository, PaginatedAnnotationsResult, AnnotationSearchFilters } from '@/domain/annotation/ports/annotation-repository.interface';
 import { DomainError, ValueError } from '@/domain/common/errors';
+
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+
 import { TYPES } from '@/infrastructure/ioc/types';
-import { PaginationOptions } from '@/core/common/ports/repository.types';
+
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
 
 
 import {

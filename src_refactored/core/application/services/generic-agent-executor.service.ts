@@ -19,6 +19,7 @@ import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
 
 // eslint-disable-next-line boundaries/element-types
 import { TYPES } from '@/infrastructure/ioc/types';
+
 import { Result, ok, error as resultError, isError } from '@/shared/result';
 
 import { AgentInteractionService } from './agent-interaction.service';
