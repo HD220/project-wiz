@@ -1,6 +1,9 @@
 // src_refactored/core/domain/job/job-persistence.mapper.ts
-import { JobEntityProps } from './job.types'; // JobEntity no longer needed directly, JobPersistenceData from .types
-import { JobPersistenceData, JobStatus } from './job.types'; // Added JobStatus if needed, JobPersistenceData from here
+// JobEntity no longer needed directly, JobPersistenceData from .types
+import { JobEntityProps } from './job.types';
+// Added JobStatus if needed, JobPersistenceData from here
+import { JobPersistenceData } from './job.types'; // JobStatus removed as it's not directly used
+import { JobEntity } from './job.entity';
 import { ActivityHistoryVO } from './value-objects/activity-history.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
 import { JobOptionsVO } from './value-objects/job-options.vo';
@@ -74,8 +77,10 @@ export class JobPersistenceMapper {
       queueName: props.queueName,
       name: props.name,
       payload: props.payload,
-      options: props.options.toPersistence(), // IJobOptions
-      priority: props.options.priority, // Added top-level priority
+      // IJobOptions
+      options: props.options.toPersistence(),
+      // Added top-level priority
+      priority: props.options.priority,
       status: props.status,
       attemptsMade: props.attemptsMade,
       progress: props.progress,
@@ -83,8 +88,10 @@ export class JobPersistenceMapper {
         ...logEntry,
         timestamp: logEntry.timestamp.getTime(),
       })),
-      createdAt: props.createdAt.getTime(), // map Date to number
-      updatedAt: props.updatedAt.getTime(), // map Date to number
+      // map Date to number
+      createdAt: props.createdAt.getTime(),
+      // map Date to number
+      updatedAt: props.updatedAt.getTime(),
       // priority is part of options, so props.options.priority is correct if toPersistence() on JobOptionsVO includes it.
       // JobPersistenceData from job.entity.ts does not list priority, but DrizzleJobRepository uses it.
       // This suggests JobPersistenceData might need an update or there's an intermediate type.

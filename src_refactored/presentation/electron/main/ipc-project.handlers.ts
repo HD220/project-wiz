@@ -1,6 +1,7 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import { ListProjectsUseCase } from "@/core/application/use-cases/project/list-projects.use-case";
+import { ProjectEntity } from "@/core/domain/project/project.entity";
 
 // import { appContainer } from "@/infrastructure/ioc/inversify.config"; // Removed import
 
@@ -26,7 +27,7 @@ export function registerProjectIPCHandlers(
   console.log("[IPC Project Handler] Project IPC handlers registered.");
 }
 
-function mapProjectsToProjectListItems(projects: Project[]): ProjectListItem[] {
+function mapProjectsToProjectListItems(projects: ProjectEntity[]): ProjectListItem[] {
   return projects.map((project) => ({
     id: project.id.value,
     name: project.name.value,

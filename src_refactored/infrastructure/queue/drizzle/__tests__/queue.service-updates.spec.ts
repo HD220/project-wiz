@@ -12,7 +12,7 @@ import {
 import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo";
 import { IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo";
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";
-import { QueueService } from "../queue.service";
+import { DrizzleQueueFacade as QueueService } from "../drizzle-queue.facade";
 // import { JobEntity } from "../../../../core/domain/job/job.entity"; // Might be needed for some expect.objectContaining
 
 import {

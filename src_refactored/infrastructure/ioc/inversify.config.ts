@@ -1,5 +1,8 @@
 import "reflect-metadata";
 
+// Needed for new services
+import EventEmitter from 'node:events';
+
 import { Container } from "inversify";
 
 import {
@@ -14,11 +17,10 @@ import {
 import { db } from "@/infrastructure/persistence/drizzle/drizzle.client";
 import { DrizzleJobRepository } from "@/infrastructure/persistence/drizzle/job/drizzle-job.repository";
 // Old QueueService replaced by new classes
-import { QueueServiceCore } from "@/infrastructure/queue/drizzle/queue-service-core";
+import { DrizzleQueueFacade } from "@/infrastructure/queue/drizzle/drizzle-queue.facade";
 import { JobProcessingService } from "@/infrastructure/queue/drizzle/job-processing.service";
 import { QueueMaintenanceService } from "@/infrastructure/queue/drizzle/queue-maintenance.service";
-import { DrizzleQueueFacade } from "@/infrastructure/queue/drizzle/drizzle-queue.facade";
-import EventEmitter from 'node:events'; // Needed for new services
+import { QueueServiceCore } from "@/infrastructure/queue/drizzle/queue-service-core";
 
 export const appContainer = new Container();
 
@@ -30,7 +32,8 @@ appContainer
   .bind<AbstractQueue<unknown, unknown>>(getQueueServiceToken("default"))
   .toDynamicValue((context) => {
     const jobRepository = context.container.get<IJobRepository>(JOB_REPOSITORY_TOKEN);
-    const queueName = "default"; // Or derive from token if more queues are added
+    // Or derive from token if more queues are added
+    const queueName = "default";
 
     // Create a shared EventEmitter instance for this queue setup
     // Or, if AbstractQueue (and thus Facade) is the primary emitter, pass `facade` itself if services need to emit through it.
@@ -81,13 +84,15 @@ appContainer
 
     const processingService = new JobProcessingService(
       jobRepository,
-      new EventEmitter(), // Placeholder, facade will emit AbstractQueue events
+      // Placeholder, facade will emit AbstractQueue events
+      new EventEmitter(),
       queueName
     );
 
     const maintenanceService = new QueueMaintenanceService(
       jobRepository,
-      new EventEmitter(), // Placeholder, facade will emit AbstractQueue events
+      // Placeholder, facade will emit AbstractQueue events
+      new EventEmitter(),
       queueName
     );
 
@@ -100,7 +105,8 @@ appContainer
     const facade = new DrizzleQueueFacade(
       queueName,
       jobRepository,
-      undefined, // defaultJobOptions
+      // defaultJobOptions
+      undefined,
       coreService,
       processingService,
       maintenanceService
@@ -108,7 +114,8 @@ appContainer
 
     // If QueueServiceCore needs to call stopMaintenance, it needs a reference.
     // The current QueueServiceCore has `setMaintenanceService`. The Facade could call this.
-    // (coreService as any).setMaintenanceService(maintenanceService); // Hacky, better if Facade handles it.
+    // // Hacky, better if Facade handles it.
+    // (coreService as any).setMaintenanceService(maintenanceService);
     // The Facade's close() now calls maintenanceService.stopMaintenance(), so coreService doesn't need it.
 
     return facade;

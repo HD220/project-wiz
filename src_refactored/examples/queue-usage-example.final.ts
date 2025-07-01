@@ -4,7 +4,7 @@ import { JobEntity } from "@/core/domain/job/job.entity";
 
 import { db } from "@/infrastructure/persistence/drizzle/drizzle.client";
 import { DrizzleJobRepository } from "@/infrastructure/persistence/drizzle/job/drizzle-job.repository";
-import { QueueService } from "@/infrastructure/queue/drizzle/queue.service";
+import { DrizzleQueueFacade as QueueService } from "@/infrastructure/queue/drizzle/drizzle-queue.facade";
 
 type EmailJobPayload = { email: string };
 type EmailJobResult = { status: string };

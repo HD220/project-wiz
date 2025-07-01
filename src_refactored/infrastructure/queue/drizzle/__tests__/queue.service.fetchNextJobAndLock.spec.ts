@@ -15,7 +15,7 @@ import { JobEntity, JobStatus } from "../../../../core/domain/job/job.entity";
 // import { JobIdVO } from "../../../../core/domain/job/value-objects/job-id.vo"; // Removed as unused
 import { type IJobOptions } from "../../../../core/domain/job/value-objects/job-options.vo";
 import { DrizzleJobRepository } from "../../../persistence/drizzle/job/drizzle-job.repository";
-import { QueueService } from "../queue.service";
+import { DrizzleQueueFacade as QueueService } from "../drizzle-queue.facade";
 
 // Newline for import group separation
 import {
