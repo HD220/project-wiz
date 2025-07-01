@@ -1,7 +1,7 @@
 import {
   PageOptions,
   PaginatedResult,
-} from "@/core/application/common/ports/repository.types";
+} from "@/core/common/ports/repository.types";
 import { Identity } from "@/core/common/value-objects/identity.vo";
 
 import { MemoryItem } from "../memory-item.entity";

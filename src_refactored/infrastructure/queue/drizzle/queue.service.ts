@@ -206,18 +206,28 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = await this.getJob(id);
     if (job && job.workerId === workerId) {
-      if (job.attemptsMade < job.maxAttempts) {
-        const delay = job.options.backoff?.delay || 1000;
-        const backoff =
-          job.options.backoff?.type === "exponential"
-            ? delay * Math.pow(2, job.attemptsMade - 1)
-            : delay;
-        job.moveToDelayed(new Date(Date.now() + backoff), error);
-      } else {
-        job.markAsFailed(error.message, error.stack?.split("\n"));
-      }
+      this._handleFailedJobRetryOrPermanentFail(job, error);
       await this.jobRepository.update(job);
       this.emit("job.failed", job);
+    }
+  }
+
+  private _handleFailedJobRetryOrPermanentFail(job: JobEntity<P,R>, error: Error): void {
+    if (job.attemptsMade < job.maxAttempts) {
+      const delay = job.options.backoff?.delay || 1000; // Default to 1s
+      let backoffDelay = delay;
+      if (job.options.backoff?.type === "exponential") {
+        // Ensure attemptsMade is at least 1 for exponential calculation if it's 0-indexed internally before this point
+        const currentAttemptForBackoff = Math.max(1, job.attemptsMade);
+        backoffDelay = delay * Math.pow(2, currentAttemptForBackoff -1);
+      }
+      // Cap backoff delay to a reasonable maximum, e.g., 1 hour
+      const maxBackoff = job.options.backoff?.maxDelay || 60 * 60 * 1000;
+      backoffDelay = Math.min(backoffDelay, maxBackoff);
+
+      job.moveToDelayed(new Date(Date.now() + backoffDelay), error);
+    } else {
+      job.markAsFailed(error.message, error.stack?.split("\n"));
     }
   }
 
@@ -263,24 +273,10 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
         const stalledJobs = await this.jobRepository.findStalledJobs(
           this.queueName,
           new Date(),
-          10
+          10 // Limit fetching to 10 stalled jobs per cycle
         );
-        if (stalledJobs.length > 0) {
-          // console.log(`[QueueService] Found ${stalledJobs.length} stalled jobs.`);
-        }
         for (const job of stalledJobs) {
-          const jobEntity = job as JobEntity<P, R>;
-          // console.log(`[QueueService] Processing stalled job ${jobEntity.id.value}, status: ${jobEntity.status}, attempts: ${jobEntity.attemptsMade}`);
-          const wasAlreadyFailedByStallLogic = jobEntity.markAsStalled();
-
-          if (!wasAlreadyFailedByStallLogic) {
-            jobEntity.moveToWaiting();
-            // console.log(`[QueueService] Stalled job ${jobEntity.id.value} moved to WAITING.`);
-          } else {
-            // console.log(`[QueueService] Stalled job ${jobEntity.id.value} marked as FAILED by entity logic.`);
-          }
-          await this.jobRepository.update(jobEntity);
-          this.emit("job.stalled", jobEntity);
+          await this._processStalledJob(job as JobEntity<P, R>);
         }
       } catch (error) {
         console.error(
@@ -309,5 +305,19 @@ export class QueueService<P, R> extends AbstractQueue<P, R> {
       }
     }
     // console.log('[QueueService] Maintenance loop stopped.');
+  }
+
+  private async _processStalledJob(jobEntity: JobEntity<P, R>): Promise<void> {
+    // console.log(`[QueueService] Processing stalled job ${jobEntity.id.value}, status: ${jobEntity.status}, attempts: ${jobEntity.attemptsMade}`);
+    const wasAlreadyFailedByStallLogic = jobEntity.markAsStalled();
+
+    if (!wasAlreadyFailedByStallLogic) {
+      jobEntity.moveToWaiting();
+      // console.log(`[QueueService] Stalled job ${jobEntity.id.value} moved to WAITING.`);
+    } else {
+      // console.log(`[QueueService] Stalled job ${jobEntity.id.value} marked as FAILED by entity logic.`);
+    }
+    await this.jobRepository.update(jobEntity);
+    this.emit("job.stalled", jobEntity);
   }
 }

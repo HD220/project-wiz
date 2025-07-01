@@ -41,7 +41,7 @@ export function registerLLMConfigHandlers() {
   ipcMain.handle(UPDATE_USER_LLM_CONFIG_CHANNEL, async (_event, req: UpdateUserLLMConfigRequest): Promise<UpdateUserLLMConfigResponse> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const { llm, config } = req;
-    updateUserLLMConfig(llm, config); /
+    updateUserLLMConfig(llm, config);
     const updatedConfig = getLLMConfigWithDefaults(llm);
     return { updatedConfig: updatedConfig };
   });

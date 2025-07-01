@@ -30,7 +30,9 @@ export class MockLLMAdapter implements ILLMAdapter {
       messages,
       options,
     });
-    const lastUserMessage = messages.filter((m) => m.role === "user").pop();
+    const lastUserMessage = messages
+      .filter((message) => message.role === "user")
+      .pop();
     const responseContent = `Mock response to: ${lastUserMessage?.content || "your request"}. Options: ${JSON.stringify(options || {})}`;
 
     // Simulate tool call if prompt asks for it
@@ -72,14 +74,18 @@ export class MockLLMAdapter implements ILLMAdapter {
     // Try to return a mock object that somewhat fits common schemas, or a default based on schema type
     try {
       if (schema instanceof z.ZodObject) {
-        const mockData: any = {};
+        const mockData: Record<string, unknown> = {}; // Replaced any with Record<string, unknown>
         for (const key in schema.shape) {
           const fieldSchema = schema.shape[key];
-          if (fieldSchema instanceof z.ZodString)
+          if (fieldSchema instanceof z.ZodString) {
             mockData[key] = `mock string for ${key}`;
-          else if (fieldSchema instanceof z.ZodNumber) mockData[key] = 123;
-          else if (fieldSchema instanceof z.ZodBoolean) mockData[key] = true;
-          else mockData[key] = null;
+          } else if (fieldSchema instanceof z.ZodNumber) {
+            mockData[key] = 123;
+          } else if (fieldSchema instanceof z.ZodBoolean) {
+            mockData[key] = true;
+          } else {
+            mockData[key] = null;
+          }
         }
         const validation = schema.safeParse(mockData);
         if (validation.success) return Ok(validation.data);
@@ -90,11 +96,11 @@ export class MockLLMAdapter implements ILLMAdapter {
           )
         );
       }
-    } catch (e) {
+    } catch (error) { // Renamed e to error
       return Err(
         new LLMError(
           "Error generating mock structured output for schema.",
-          e instanceof Error ? e : undefined
+          error instanceof Error ? error : undefined
         )
       );
     }

@@ -19,7 +19,7 @@ export class SourceCode {
 
   private constructor(props: SourceCodeProps) {
     this._id = props.id;
-    const { id, ...otherProps } = props;
+    const { id: _id, ...otherProps } = props; // _id is unused, props.id is used for this._id
     this.props = Object.freeze(otherProps);
   }
 

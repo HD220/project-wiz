@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import EventEmitter from "node:events";
+import { clearTimeout, setInterval, clearInterval, setTimeout } from "node:timers";
 
 import { AbstractQueue } from "@/core/application/queue/abstract-queue";
 import { JobEntity } from "@/core/domain/job/job.entity";
@@ -129,7 +130,10 @@ export class WorkerService<P, R> extends EventEmitter {
     }
   }
 
-  private async processJob(job: JobEntity<P, R>): Promise<void> {
+  private _instrumentJobForWorker(job: JobEntity<P, R>): {
+    originalUpdateProgress: JobEntity<P, R>["updateProgress"];
+    originalAddLog: JobEntity<P, R>["addLog"];
+  } {
     const originalUpdateProgress = job.updateProgress.bind(job);
     job.updateProgress = (progress: number | object) => {
       originalUpdateProgress(progress);
@@ -159,13 +163,12 @@ export class WorkerService<P, R> extends EventEmitter {
           );
         });
     };
+    return { originalUpdateProgress, originalAddLog };
+  }
 
-    this.emit("worker.job.active", job);
-    this.setupLockRenewal(job);
-
+  private async _executeProcessor(job: JobEntity<P, R>): Promise<void> {
     try {
       const result = await this.processor(job);
-
       if (this._isClosed && !job.finishedOn) {
         this.emit("worker.job.interrupted", job);
       } else if (!this._isClosed) {
@@ -184,6 +187,18 @@ export class WorkerService<P, R> extends EventEmitter {
       } else {
         this.emit("worker.job.interrupted", job, error);
       }
+    }
+  }
+
+  private async processJob(job: JobEntity<P, R>): Promise<void> {
+    const { originalUpdateProgress, originalAddLog } =
+      this._instrumentJobForWorker(job);
+
+    this.emit("worker.job.active", job);
+    this.setupLockRenewal(job);
+
+    try {
+      await this._executeProcessor(job);
     } finally {
       this._activeJobs = 0;
       this.clearLockRenewal(job.id.value);

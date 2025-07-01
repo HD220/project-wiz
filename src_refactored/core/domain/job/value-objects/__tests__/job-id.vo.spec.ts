@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { validate as uuidValidate } from "uuid";
 
 import { JobIdVO } from "../job-id.vo";
 

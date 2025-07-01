@@ -13,72 +13,29 @@ import { IJobRepository } from "@/core/application/ports/job-repository.interfac
 import {
   JobEntity,
   JobStatus,
-  JobPersistenceData,
-  JobPersistence,
+  JobPersistence, // Correctly from job.entity.ts
 } from "@/core/domain/job/job.entity";
+import {
+  IJobOptions,
+  JobPersistenceData, // Correctly from job.types.ts
+} from "@/core/domain/job/job.types";
 import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 
-import { db } from "../drizzle.client";
+// Import 'db' type for constructor injection
+import { type db as DbType } from "../drizzle.client";
 import * as schema from "../schema";
+import {
+  mapToDrizzleInput,
+  mapToPersistenceData,
+} from "./drizzle-job.mapper";
+
 
 export class DrizzleJobRepository implements IJobRepository {
-  constructor(private readonly drizzleDbInstance: typeof DbType) {}
-
-  private mapToPersistenceData<P, R>(
-    jobData: schema.JobSelect
-  ): JobPersistenceData<P, R> {
-    const options = jobData.options as IJobOptions;
-    const logs =
-      (jobData.logs as Array<{
-        message: string;
-        level: string;
-        timestamp: number;
-      }>) || [];
-    const payload = jobData.payload as P;
-    const returnValue = jobData.returnValue as R | null;
-    const progress = jobData.progress as number | object;
-    const stacktrace = jobData.stacktrace as string[] | null;
-
-    return {
-      id: jobData.id,
-      queueName: jobData.queueName,
-      name: jobData.name,
-      payload: payload,
-      options: options,
-      status: jobData.status as JobStatus,
-      attemptsMade: jobData.attemptsMade,
-      progress: progress,
-      logs: logs,
-      createdAt: jobData.createdAt.getTime(),
-      updatedAt: jobData.updatedAt.getTime(),
-      processedOn: jobData.processedOn ? jobData.processedOn.getTime() : null,
-      finishedOn: jobData.finishedOn ? jobData.finishedOn.getTime() : null,
-      delayUntil: jobData.delayUntil ? jobData.delayUntil.getTime() : null,
-      lockUntil: jobData.lockUntil ? jobData.lockUntil.getTime() : null,
-      workerId: jobData.workerId,
-      returnValue: returnValue,
-      failedReason: jobData.failedReason,
-      stacktrace: stacktrace,
-    };
-  }
-
-  private mapToDrizzleInput(
-    data: JobPersistence
-  ): typeof schema.jobsTable.$inferInsert {
-    return {
-      ...data,
-      createdAt: new Date(data.createdAt),
-      updatedAt: new Date(data.updatedAt),
-      processedOn: data.processedOn ? new Date(data.processedOn) : null,
-      finishedOn: data.finishedOn ? new Date(data.finishedOn) : null,
-      delayUntil: data.delayUntil ? new Date(data.delayUntil) : null,
-      lockUntil: data.lockUntil ? new Date(data.lockUntil) : null,
-    };
-  }
+  constructor(private readonly drizzleDbInstance: DbType) {}
 
   async save(job: JobEntity<unknown, unknown>): Promise<void> {
     const persistenceData = job.toPersistence();
-    const drizzleInput = this.mapToDrizzleInput(persistenceData);
+    const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
       .insert(schema.jobsTable)
       .values(drizzleInput)
@@ -99,7 +56,7 @@ export class DrizzleJobRepository implements IJobRepository {
       where: eq(schema.jobsTable.id, id.value),
     });
     if (!result) return null;
-    return JobEntity.fromPersistence(this.mapToPersistenceData(result));
+    return JobEntity.fromPersistence(mapToPersistenceData(result));
   }
 
   async findNextJobsToProcess(
@@ -125,7 +82,7 @@ export class DrizzleJobRepository implements IJobRepository {
       limit,
     });
     return results.map((jobData) =>
-      JobEntity.fromPersistence(this.mapToPersistenceData(jobData))
+      JobEntity.fromPersistence(mapToPersistenceData(jobData))
     );
   }
 
@@ -179,7 +136,7 @@ export class DrizzleJobRepository implements IJobRepository {
       limit,
     });
     return results.map((jobData) =>
-      JobEntity.fromPersistence(this.mapToPersistenceData(jobData))
+      JobEntity.fromPersistence(mapToPersistenceData(jobData))
     );
   }
 
@@ -210,7 +167,7 @@ export class DrizzleJobRepository implements IJobRepository {
       limit: end,
     });
     return results.map((jobData) =>
-      JobEntity.fromPersistence(this.mapToPersistenceData(jobData))
+      JobEntity.fromPersistence(mapToPersistenceData(jobData))
     );
   }
 

@@ -6,21 +6,20 @@ import { db } from "@/infrastructure/persistence/drizzle/drizzle.client";
 import { DrizzleJobRepository } from "@/infrastructure/persistence/drizzle/job/drizzle-job.repository";
 import { QueueService } from "@/infrastructure/queue/drizzle/queue.service";
 
-async function main() {
-  const jobRepository = new DrizzleJobRepository(db);
-  const queue = new QueueService("default", jobRepository);
+type EmailJobPayload = { email: string };
+type EmailJobResult = { status: string };
 
-  // Job processor function
-  const processor = async (
-    job: JobEntity<{ email: string }, { status: string }>
-  ): Promise<{ status: string }> => {
+function setupProcessor(): (
+  job: JobEntity<EmailJobPayload, EmailJobResult>
+) => Promise<EmailJobResult> {
+  return async (
+    job: JobEntity<EmailJobPayload, EmailJobResult>
+  ): Promise<EmailJobResult> => {
     process.stdout.write(
       `[Worker] Processing job ${job.id.value} (attempt ${job.attemptsMade}) for email: ${job.payload.email}\n`
     );
 
-    // Simulate work with progress updates
     for (let progressValue = 0; progressValue <= 100; progressValue += 25) {
-      // Renamed i to progressValue
       await new Promise((resolve) => setTimeout(resolve, 500));
       job.updateProgress(progressValue);
       job.addLog(`Progress updated to ${progressValue}%`);
@@ -29,7 +28,6 @@ async function main() {
       );
     }
 
-    // Simulate retry logic: fail twice, then succeed
     if (job.attemptsMade < 3 && job.payload.email === "retry@example.com") {
       job.addLog("Simulating transient failure for retry job.", "ERROR");
       process.stdout.write(
@@ -38,7 +36,6 @@ async function main() {
       throw new Error("Simulated transient error");
     }
 
-    // Simulate permanent failure for a specific job
     if (job.payload.email === "fail@example.com") {
       job.addLog("Simulating permanent failure.", "ERROR");
       process.stdout.write(
@@ -53,14 +50,12 @@ async function main() {
     );
     return { status: "Email sent" };
   };
+}
 
-  const worker = new WorkerService(queue, processor, {
-    concurrency: 2,
-    lockDuration: 15000,
-    lockRenewTimeBuffer: 5000,
-  });
-
-  // Event listeners for queue and worker
+function setupEventListeners(
+  queue: QueueService<EmailJobPayload, EmailJobResult>,
+  worker: WorkerService<EmailJobPayload, EmailJobResult>
+): void {
   queue.on("job.added", (job) =>
     process.stdout.write(
       `[Queue] Job added: ${job.id.value} (Name: ${job.name}, Status: ${job.status})\n`
@@ -108,8 +103,12 @@ async function main() {
       `[Worker] Worker encountered error for job ${job.id.value}: ${error.message}\n`
     )
   );
+}
 
-  // Add various job scenarios
+async function addJobsAndRun(
+  queue: QueueService<EmailJobPayload, EmailJobResult>,
+  worker: WorkerService<EmailJobPayload, EmailJobResult>
+): Promise<void> {
   await queue.add("send-email", { email: "success@example.com" });
   await queue.add(
     "send-email",
@@ -130,14 +129,30 @@ async function main() {
     "Queue and Worker started. Waiting for jobs to complete...\n"
   );
 
-  // Keep the process alive for a while to observe job processing
   setTimeout(async () => {
     process.stdout.write("Shutting down worker and queue...\n");
     await worker.close();
     await queue.close();
     process.stdout.write("Worker and queue closed. Exiting.\n");
     process.exit(0);
-  }, 60000);
+  }, 60000); // Keep alive for 60 seconds
+}
+
+async function main() {
+  const jobRepository = new DrizzleJobRepository(db);
+  const queue = new QueueService<EmailJobPayload, EmailJobResult>(
+    "default",
+    jobRepository
+  );
+  const processor = setupProcessor();
+  const worker = new WorkerService(queue, processor, {
+    concurrency: 2,
+    lockDuration: 15000,
+    lockRenewTimeBuffer: 5000,
+  });
+
+  setupEventListeners(queue, worker);
+  await addJobsAndRun(queue, worker);
 }
 
 process.on("unhandledRejection", (reason, promise) => {

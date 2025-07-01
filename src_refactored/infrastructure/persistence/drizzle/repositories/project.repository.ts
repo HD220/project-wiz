@@ -8,7 +8,7 @@ import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 
 import { TYPES } from "@/infrastructure/ioc/types";
 
-import { Result, ok, error as errResult } from "@/shared/result";
+import { Result, ok, error as _errResult } from "@/shared/result";
 
 export type DrizzleSchema = unknown;
 export type DrizzleDB = unknown;

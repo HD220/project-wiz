@@ -15,7 +15,7 @@ import {
   CreateProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse,
-} from "../../../../shared/ipc-types/project";
+} from "../../../../shared/ipc-types"; // Corrected path
 import { Project } from "../../../../shared/types/entities";
 import { AgentLLM } from "../../../../shared/types/entities";
 import {
@@ -24,7 +24,7 @@ import {
   updateMockProject,
 } from "../mocks/project.mocks";
 
-export function registerProjectHandlers() {
+function _registerQueryProjectHandlers() {
   ipcMain.handle(
     GET_PROJECTS_CHANNEL,
     async (): Promise<GetProjectsResponse> => {
@@ -40,14 +40,18 @@ export function registerProjectHandlers() {
       req: GetProjectDetailsRequest
     ): Promise<GetProjectDetailsResponse> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const project = mockProjects.find((p) => p.id === req.projectId);
-      if (project) {
-        return { project };
+      const projectDetails = mockProjects.find(
+        (project) => project.id === req.projectId
+      );
+      if (projectDetails) {
+        return { project: projectDetails };
       }
       return { project: undefined, error: "Project not found" };
     }
   );
+}
 
+function _registerMutationProjectHandlers() {
   ipcMain.handle(
     CREATE_PROJECT_CHANNEL,
     async (
@@ -94,4 +98,9 @@ export function registerProjectHandlers() {
       return { project: undefined, error: "Project not found for update" };
     }
   );
+}
+
+export function registerProjectHandlers() {
+  _registerQueryProjectHandlers();
+  _registerMutationProjectHandlers();
 }

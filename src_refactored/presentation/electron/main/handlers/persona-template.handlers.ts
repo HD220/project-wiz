@@ -14,7 +14,7 @@ import {
   CreatePersonaTemplateResponse,
   UpdatePersonaTemplateRequest,
   UpdatePersonaTemplateResponse,
-} from '../../../../shared/ipc-types/persona-template';
+} from '../../../../shared/ipc-types'; // Corrected path
 import { PersonaTemplate } from '../../../../shared/types/entities';
 import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
 

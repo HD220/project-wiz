@@ -3,70 +3,17 @@ import { AbstractEntity } from "@/core/common/base.entity";
 import { ExecutionHistoryEntry } from "./job-processing.types";
 import { JobStateMutator } from "./job-state.mutator";
 import {
+  JobStatus,
+  JobLogEntry,
+  JobEntityProps,
+  // JobPersistenceData, // Not used directly in this file after refactor
+} from "./job.types";
+import {
   ActivityHistoryVO,
   ActivityHistoryEntryVO,
 } from "./value-objects/activity-history.vo";
 import { JobIdVO } from "./value-objects/job-id.vo";
 import { IJobOptions, JobOptionsVO } from "./value-objects/job-options.vo";
-
-export enum JobStatus {
-  WAITING = "waiting",
-  ACTIVE = "active",
-  COMPLETED = "completed",
-  FAILED = "failed",
-  DELAYED = "delayed",
-  PAUSED = "paused",
-}
-
-export interface JobLogEntry {
-  message: string;
-  level: string;
-  timestamp: Date;
-}
-
-export interface JobEntityProps<P = unknown, R = unknown> {
-  id: JobIdVO;
-  queueName: string;
-  name: string;
-  payload: P;
-  options: JobOptionsVO;
-  status: JobStatus;
-  attemptsMade: number;
-  progress: number | object;
-  logs: JobLogEntry[];
-  createdAt: Date;
-  updatedAt: Date;
-  processedOn?: Date;
-  finishedOn?: Date;
-  delayUntil?: Date;
-  lockUntil?: Date;
-  workerId?: string;
-  returnValue?: R;
-  failedReason?: string;
-  stacktrace?: string[];
-}
-
-export type JobPersistenceData<P = unknown, R = unknown> = {
-  id: string;
-  queueName: string;
-  name: string;
-  payload: P;
-  options: IJobOptions;
-  status: JobStatus;
-  attemptsMade: number;
-  progress: number | object;
-  logs: Array<{ message: string; level: string; timestamp: number }>;
-  createdAt: number;
-  updatedAt: number;
-  processedOn?: number | null;
-  finishedOn?: number | null;
-  delayUntil?: number | null;
-  lockUntil?: number | null;
-  workerId?: string | null;
-  returnValue?: R | null;
-  failedReason?: string | null;
-  stacktrace?: string[] | null;
-};
 
 export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
   JobIdVO,

@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 import { ISourceCodeRepository } from "@/core/domain/source-code/ports/source-code-repository.interface";
 import { SourceCode } from "@/core/domain/source-code/source-code.entity";
-import { SourceCodeId } from "@/core/domain/source-code/value-objects/source-code-id.vo";
+import { RepositoryIdVO as SourceCodeId } from "@/core/domain/source-code/value-objects/repository-id.vo"; // Corrected import
 
 import { Result, Ok, Err } from "@/shared/result";
 

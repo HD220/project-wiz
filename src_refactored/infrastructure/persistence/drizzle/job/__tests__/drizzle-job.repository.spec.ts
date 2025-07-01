@@ -5,9 +5,9 @@ import { describe, it, expect, beforeEach, beforeAll, afterAll } from "vitest";
 
 import { JobEntity, JobStatus } from "@/core/domain/job/job.entity";
 
-import * as schema from "../schema";
+import * as schema from "../../schema"; // Adjusted path to be two levels up
 
-import { DrizzleJobRepository } from "./drizzle-job.repository";
+import { DrizzleJobRepository } from "../drizzle-job.repository"; // Adjusted path to be one level up
 
 // Define more specific types for payload and result for these tests
 interface TestJobPayload {
@@ -35,33 +35,33 @@ const createTestJob = (
   });
 };
 
-describe("DrizzleJobRepository Integration Tests", () => {
-  let testDb: BetterSQLite3Database<typeof schema>;
-  let sqliteInstance: BetterSqlite3.Database;
-  let repository: DrizzleJobRepository;
+// Variables for shared test context
+let testDb: BetterSQLite3Database<typeof schema>;
+let sqliteInstance: BetterSqlite3.Database;
+let repository: DrizzleJobRepository;
 
-  beforeAll(() => {
-    sqliteInstance = new BetterSqlite3(":memory:");
-    testDb = drizzle(sqliteInstance, { schema });
-    migrate(testDb, {
-      migrationsFolder:
-        "./src_refactored/infrastructure/persistence/drizzle/migrations",
-    });
+beforeAll(() => {
+  sqliteInstance = new BetterSqlite3(":memory:");
+  testDb = drizzle(sqliteInstance, { schema });
+  migrate(testDb, {
+    migrationsFolder:
+      "./src_refactored/infrastructure/persistence/drizzle/migrations",
   });
+});
 
-  afterAll(() => {
-    sqliteInstance.close();
-  });
+afterAll(() => {
+  sqliteInstance.close();
+});
 
-  beforeEach(async () => {
-    repository = new DrizzleJobRepository(testDb);
-    // Clean database before each test
-    await testDb.delete(schema.jobsTable);
-  });
+beforeEach(async () => {
+  // Ensure repository is new for each test, and tables are clean
+  repository = new DrizzleJobRepository(testDb);
+  await testDb.delete(schema.jobsTable);
+});
 
-  describe("save and findById", () => {
-    it("should save a new job and find it by ID", async () => {
-      const job = createTestJob();
+describe("DrizzleJobRepository - save and findById", () => {
+  it("should save a new job and find it by ID", async () => {
+    const job = createTestJob();
       await repository.save(job);
 
       const foundJob = await repository.findById(job.id);
@@ -365,4 +365,4 @@ describe("DrizzleJobRepository Integration Tests", () => {
       expect(await repository.findById(jobWaiting.id)).not.toBeNull();
     });
   });
-});
+// Removed the all-encompassing describe block, tests are now top-level describes
