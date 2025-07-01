@@ -1,7 +1,9 @@
-// src_refactored/core/domain/memory/value-objects/memory-item-content.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo'; // Corrected path
+import {
+  AbstractValueObject,
+  ValueObjectProps,
+} from "@/core/common/value-objects/base.vo";
 
-import { ValueError } from '@/domain/common/errors'; // Corrected path
+import { ValueError } from "@/domain/common/errors";
 
 interface MemoryItemContentProps extends ValueObjectProps {
   value: string;
@@ -9,7 +11,7 @@ interface MemoryItemContentProps extends ValueObjectProps {
 
 export class MemoryItemContent extends AbstractValueObject<MemoryItemContentProps> {
   private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 10000; // Max length for memory content, adjustable
+  private static readonly MAX_LENGTH = 10000;
 
   private constructor(props: MemoryItemContentProps) {
     super(props);
@@ -22,14 +24,18 @@ export class MemoryItemContent extends AbstractValueObject<MemoryItemContentProp
 
   private static validate(content: string): void {
     if (content === null || content === undefined) {
-      throw new ValueError('Memory item content cannot be null or undefined.');
+      throw new ValueError("Memory item content cannot be null or undefined.");
     }
     const trimmedContent = content.trim();
     if (trimmedContent.length < this.MIN_LENGTH) {
-      throw new ValueError(`Memory item content must be at least ${this.MIN_LENGTH} character long (after trimming).`);
+      throw new ValueError(
+        `Memory item content must be at least ${this.MIN_LENGTH} character long (after trimming).`
+      );
     }
     if (trimmedContent.length > this.MAX_LENGTH) {
-      throw new ValueError(`Memory item content must be no more than ${this.MAX_LENGTH} characters long (after trimming).`);
+      throw new ValueError(
+        `Memory item content must be no more than ${this.MAX_LENGTH} characters long (after trimming).`
+      );
     }
   }
 

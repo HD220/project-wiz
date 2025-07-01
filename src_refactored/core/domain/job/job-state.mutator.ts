@@ -1,8 +1,9 @@
 // src_refactored/core/domain/job/job-state.mutator.ts
 import { DomainError } from '@/core/domain/common/errors';
+
 import { ExecutionHistoryEntry } from './job-processing.types';
-import { ActivityHistoryVO, ActivityHistoryEntryVO } from './value-objects/activity-history.vo';
 import { JobEntityProps, JobStatus } from './job.entity';
+import { ActivityHistoryVO, ActivityHistoryEntryVO } from './value-objects/activity-history.vo';
 
 export class JobStateMutator<P, R> {
   private props: JobEntityProps<P, R>;

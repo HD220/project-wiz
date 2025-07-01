@@ -1,15 +1,15 @@
-// src_refactored/infrastructure/persistence/in-memory/repositories/agent-internal-state.repository.ts
-import { injectable } from 'inversify';
+import { injectable } from "inversify";
 
-import { AgentInternalState } from '@/core/domain/agent/agent-internal-state.entity';
-import { IAgentInternalStateRepository } from '@/core/domain/agent/ports/agent-internal-state-repository.interface';
-import { AgentId } from '@/core/domain/agent/value-objects/agent-id.vo';
+import { AgentInternalState } from "@/core/domain/agent/agent-internal-state.entity";
+import { IAgentInternalStateRepository } from "@/core/domain/agent/ports/agent-internal-state-repository.interface";
+import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 
-import { Result, Ok, Err } from '@/shared/result';
-
+import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
-export class InMemoryAgentInternalStateRepository implements IAgentInternalStateRepository {
+export class InMemoryAgentInternalStateRepository
+  implements IAgentInternalStateRepository
+{
   private readonly states: Map<string, AgentInternalState> = new Map();
 
   async save(state: AgentInternalState): Promise<Result<void, Error>> {
@@ -17,10 +17,11 @@ export class InMemoryAgentInternalStateRepository implements IAgentInternalState
     return Ok(undefined);
   }
 
-  async findByAgentId(agentId: AgentId): Promise<Result<AgentInternalState | null, Error>> {
-    // This assumes one state per agentId, might need adjustment if agentId is not the primary key of state
+  async findByAgentId(
+    agentId: AgentId
+  ): Promise<Result<AgentInternalState | null, Error>> {
     for (const state of this.states.values()) {
-      if (state.agentId.equals(agentId)) { // Assuming AgentInternalState has an agentId property
+      if (state.agentId.equals(agentId)) {
         return Ok(state);
       }
     }
@@ -30,7 +31,7 @@ export class InMemoryAgentInternalStateRepository implements IAgentInternalState
   async deleteByAgentId(agentId: AgentId): Promise<Result<void, Error>> {
     let found = false;
     for (const [key, state] of this.states) {
-      if (state.agentId.equals(agentId)) { // Assuming AgentInternalState has an agentId property
+      if (state.agentId.equals(agentId)) {
         this.states.delete(key);
         found = true;
         break;

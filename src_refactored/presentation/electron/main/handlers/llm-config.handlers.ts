@@ -33,7 +33,7 @@ export function registerLLMConfigHandlers() {
       const key = llmKey as AgentLLM;
       acc[key] = getLLMConfigWithDefaults(key);
       return acc;
-    }, {} as Record<AgentLLM, LLMConfig>); // Corrected type here
+    }, {} as Record<AgentLLM, LLMConfig>); 
 
     return { userLLMConfigs: fullUserConfigs };
   });
@@ -41,7 +41,7 @@ export function registerLLMConfigHandlers() {
   ipcMain.handle(UPDATE_USER_LLM_CONFIG_CHANNEL, async (_event, req: UpdateUserLLMConfigRequest): Promise<UpdateUserLLMConfigResponse> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const { llm, config } = req;
-    updateUserLLMConfig(llm, config); // config includes apiKey here
+    updateUserLLMConfig(llm, config); /
     const updatedConfig = getLLMConfigWithDefaults(llm);
     return { updatedConfig: updatedConfig };
   });

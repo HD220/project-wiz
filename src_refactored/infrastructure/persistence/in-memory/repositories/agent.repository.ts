@@ -1,12 +1,10 @@
-// src_refactored/infrastructure/persistence/in-memory/repositories/agent.repository.ts
-import { injectable } from 'inversify';
+import { injectable } from "inversify";
 
-import { Agent } from '@/core/domain/agent/agent.entity';
-import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface';
-import { AgentId } from '@/core/domain/agent/value-objects/agent-id.vo';
-import { PersonaIdVO } from '@/core/domain/agent/value-objects/persona/persona-id.vo'; // Corrected path
+import { Agent } from "@/core/domain/agent/agent.entity";
+import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
+import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 
-import { Result, Ok, Err } from '@/shared/result';
+import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
 export class InMemoryAgentRepository implements IAgentRepository {
@@ -35,7 +33,9 @@ export class InMemoryAgentRepository implements IAgentRepository {
   }
 
   async findByPersonaId(personaId: PersonaId): Promise<Result<Agent[], Error>> {
-    const foundAgents = Array.from(this.agents.values()).filter(agent => agent.personaId.equals(personaId));
+    const foundAgents = Array.from(this.agents.values()).filter((agent) =>
+      agent.personaId.equals(personaId)
+    );
     return Ok(foundAgents);
   }
 }

@@ -1,13 +1,12 @@
-// src_refactored/infrastructure/persistence/in-memory/repositories/project.repository.ts
-import { injectable } from 'inversify';
+import { injectable } from "inversify";
 
-import { IProjectRepository } from '@/core/domain/project/ports/project-repository.interface';
-import { Project } from '@/core/domain/project/project.entity';
-import { ProjectId } from '@/core/domain/project/value-objects/project-id.vo';
+import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
+import { Project } from "@/core/domain/project/project.entity";
+import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 
-import { DomainError, NotFoundError } from '@/domain/common/errors';
+import { DomainError, NotFoundError } from "@/domain/common/errors";
 
-import { Result, Ok, Err } from '@/shared/result';
+import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
 export class InMemoryProjectRepository implements IProjectRepository {
@@ -25,7 +24,7 @@ export class InMemoryProjectRepository implements IProjectRepository {
 
   async findByName(name: string): Promise<Result<Project | null, DomainError>> {
     for (const project of this.projects.values()) {
-      if (project.name.value === name) { // Assuming name is a VO with a value property
+      if (project.name.value === name) {
         return Ok(project);
       }
     }
@@ -36,7 +35,9 @@ export class InMemoryProjectRepository implements IProjectRepository {
     return Ok(Array.from(this.projects.values()));
   }
 
-  async delete(id: ProjectId): Promise<Result<void, DomainError | NotFoundError>> {
+  async delete(
+    id: ProjectId
+  ): Promise<Result<void, DomainError | NotFoundError>> {
     if (!this.projects.has(id.value)) {
       return Err(new NotFoundError(`Project with ID ${id.value} not found.`));
     }

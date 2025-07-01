@@ -1,15 +1,14 @@
-// src_refactored/infrastructure/persistence/in-memory/repositories/user.repository.ts
-import { injectable } from 'inversify';
+import { injectable } from "inversify";
 
-import { IUserRepository } from '@/core/domain/user/ports/user-repository.interface';
-import { User } from '@/core/domain/user/user.entity';
-import { UserEmail } from '@/core/domain/user/value-objects/user-email.vo';
-import { UserId } from '@/core/domain/user/value-objects/user-id.vo';
-import { UserUsername } from '@/core/domain/user/value-objects/user-username.vo';
+import { IUserRepository } from "@/core/domain/user/ports/user-repository.interface";
+import { User } from "@/core/domain/user/user.entity";
+import { UserEmail } from "@/core/domain/user/value-objects/user-email.vo";
+import { UserId } from "@/core/domain/user/value-objects/user-id.vo";
+import { UserUsername } from "@/core/domain/user/value-objects/user-username.vo";
 
-import { DomainError, NotFoundError } from '@/domain/common/errors';
+import { DomainError, NotFoundError } from "@/domain/common/errors";
 
-import { Result, Ok, Err } from '@/shared/result';
+import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
 export class InMemoryUserRepository implements IUserRepository {
@@ -25,18 +24,23 @@ export class InMemoryUserRepository implements IUserRepository {
     return Ok(user || null);
   }
 
-  async findByEmail(email: UserEmail): Promise<Result<User | null, DomainError>> {
+  async findByEmail(
+    email: UserEmail
+  ): Promise<Result<User | null, DomainError>> {
     for (const user of this.users.values()) {
-      if (user.email().equals(email)) { // Assuming email() getter returns UserEmail VO
+      if (user.email().equals(email)) {
         return Ok(user);
       }
     }
     return Ok(null);
   }
 
-  async findByUsername(username: UserUsername): Promise<Result<User | null, DomainError>> {
+  async findByUsername(
+    username: UserUsername
+  ): Promise<Result<User | null, DomainError>> {
     for (const user of this.users.values()) {
-      if (user.username().equals(username)) { // Assuming username() getter returns UserUsername VO
+      if (user.username().equals(username)) {
+        // Assuming username() getter returns UserUsername VO
         return Ok(user);
       }
     }

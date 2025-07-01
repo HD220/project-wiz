@@ -1,12 +1,11 @@
-// src_refactored/infrastructure/persistence/in-memory/repositories/annotation.repository.ts
-import { injectable } from 'inversify';
+import { injectable } from "inversify";
 
-import { Annotation } from '@/core/domain/annotation/annotation.entity';
-import { IAnnotationRepository } from '@/core/domain/annotation/ports/annotation-repository.interface';
-import { AnnotationId } from '@/core/domain/annotation/value-objects/annotation-id.vo';
-import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo'; // Assuming JobId is needed for findByJobId
+import { Annotation } from "@/core/domain/annotation/annotation.entity";
+import { IAnnotationRepository } from "@/core/domain/annotation/ports/annotation-repository.interface";
+import { AnnotationId } from "@/core/domain/annotation/value-objects/annotation-id.vo";
+import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 
-import { Result, Ok, Err } from '@/shared/result';
+import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
 export class InMemoryAnnotationRepository implements IAnnotationRepository {
@@ -23,8 +22,9 @@ export class InMemoryAnnotationRepository implements IAnnotationRepository {
   }
 
   async findByJobId(jobId: JobIdVO): Promise<Result<Annotation[], Error>> {
-    const foundAnnotations = Array.from(this.annotations.values())
-      .filter(ann => ann.jobId()?.equals(jobId)); // Use ann.jobId() which returns Identity | null | undefined
+    const foundAnnotations = Array.from(this.annotations.values()).filter(
+      (ann) => ann.jobId()?.equals(jobId)
+    );
     return Ok(foundAnnotations);
   }
 

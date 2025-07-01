@@ -1,10 +1,12 @@
-// src_refactored/core/domain/memory/value-objects/memory-item-source.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo'; // Corrected path
+import {
+  AbstractValueObject,
+  ValueObjectProps,
+} from "@/core/common/value-objects/base.vo";
 
-import { ValueError } from '@/domain/common/errors'; // Corrected path
+import { ValueError } from "@/domain/common/errors";
 
 interface MemoryItemSourceProps extends ValueObjectProps {
-  value: string | null; // Source can be optional
+  value: string | null;
 }
 
 export class MemoryItemSource extends AbstractValueObject<MemoryItemSourceProps> {
@@ -15,7 +17,7 @@ export class MemoryItemSource extends AbstractValueObject<MemoryItemSourceProps>
   }
 
   public static create(source: string | null | undefined): MemoryItemSource {
-    if (source === null || source === undefined || source.trim() === '') {
+    if (source === null || source === undefined || source.trim() === "") {
       return new MemoryItemSource({ value: null });
     }
     this.validate(source);
@@ -25,9 +27,10 @@ export class MemoryItemSource extends AbstractValueObject<MemoryItemSourceProps>
   private static validate(source: string): void {
     const trimmedSource = source.trim();
     if (trimmedSource.length > this.MAX_LENGTH) {
-      throw new ValueError(`Memory item source must be no more than ${this.MAX_LENGTH} characters long.`);
+      throw new ValueError(
+        `Memory item source must be no more than ${this.MAX_LENGTH} characters long.`
+      );
     }
-    // Optional: Add regex for allowed characters if needed
   }
 
   public value(): string | null {

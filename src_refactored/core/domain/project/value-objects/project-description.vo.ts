@@ -1,12 +1,14 @@
-// src_refactored/core/domain/project/value-objects/project-description.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import {
+  AbstractValueObject,
+  ValueObjectProps,
+} from "@/core/common/value-objects/base.vo";
 
 interface ProjectDescriptionProps extends ValueObjectProps {
   value: string;
 }
 
 export class ProjectDescription extends AbstractValueObject<ProjectDescriptionProps> {
-  private static readonly MAX_LENGTH = 500; // Example max length
+  private static readonly MAX_LENGTH = 500;
 
   private constructor(value: string) {
     super({ value });
@@ -14,9 +16,10 @@ export class ProjectDescription extends AbstractValueObject<ProjectDescriptionPr
 
   private static validate(description: string): void {
     if (description.length > this.MAX_LENGTH) {
-      throw new Error(`Project description must be at most ${this.MAX_LENGTH} characters long.`);
+      throw new Error(
+        `Project description must be at most ${this.MAX_LENGTH} characters long.`
+      );
     }
-    // Add other validation rules if necessary
   }
 
   public static create(description: string): ProjectDescription {

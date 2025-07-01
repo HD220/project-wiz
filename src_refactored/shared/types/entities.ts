@@ -1,12 +1,10 @@
-// src_refactored/shared/types/entities.ts
-
 // --- Project Types ---
 export interface Project {
   id: string;
   name: string;
-  description: string; // Tornando obrigatório para consistência, pode ser string vazia
-  lastActivity: string; // Idealmente seria Date, mas string para simplicidade IPC inicial
-  status: 'active' | 'paused' | 'planning' | 'completed' | 'archived';
+  description: string;
+  lastActivity: string;
+  status: "active" | "paused" | "planning" | "completed" | "archived";
   agentCount: number;
   taskCount: number;
   // imageUrl?: string;
@@ -40,13 +38,13 @@ export interface AgentInstance {
   id: string;
   agentName?: string;
   personaTemplateId: string;
-  personaTemplateName?: string; // Denormalized for display convenience
+  personaTemplateName?: string;
   llmProviderConfigId: string;
-  llmConfigName?: string; // Denormalized for display convenience
+  llmConfigName?: string;
   temperature: number;
-  status: 'idle' | 'running' | 'paused' | 'error' | 'completed';
+  status: "idle" | "running" | "paused" | "error" | "completed";
   currentJobId?: string | null;
-  lastActivity?: string; // Idealmente Date
+  lastActivity?: string;
 }
 
 export interface AgentInstanceFormData {
@@ -60,23 +58,23 @@ export interface AgentInstanceFormData {
 export interface LLMConfig {
   id: string;
   name: string;
-  providerId: string; // e.g., 'openai', 'deepseek', 'ollama'
+  providerId: string;
   baseUrl?: string;
-  apiKey?: string; // Importante: gerenciar com segurança, não expor desnecessariamente
+  apiKey?: string;
 }
 
 export interface LLMConfigFormData {
   name: string;
-  providerId: 'openai' | 'deepseek' | 'ollama' | string; // string for extensibility
+  providerId: "openai" | "deepseek" | "ollama" | string;
   apiKey?: string;
   baseUrl?: string;
 }
 
 // --- Chat & DM Types ---
 export interface ChatMessageSender {
-  id: string; // userId or agentId
+  id: string;
   name: string;
-  type: 'user' | 'agent';
+  type: "user" | "agent";
   avatarUrl?: string;
 }
 
@@ -84,19 +82,19 @@ export interface ChatMessage {
   id: string;
   sender: ChatMessageSender;
   content: string;
-  timestamp: string | Date; // string for display, Date for manipulation
-  type?: 'text' | 'tool_call' | 'tool_response' | 'error' | 'system';
+  timestamp: string | Date;
+  type?: "text" | "tool_call" | "tool_response" | "error" | "system";
   isContinuation?: boolean;
 }
 
-export interface DirectMessageItem { // For UserSidebar DM list
-  id: string; // conversationId (could be with a user or an agent)
-  name: string; // Name of the other user or agent
+export interface DirectMessageItem {
+  id: string;
+  name: string;
   avatarUrl?: string;
   lastMessage?: string;
   timestamp?: string;
   unreadCount?: number;
-  type: 'user' | 'agent'; // Type of the other participant
+  type: "user" | "agent";
 }
 
 // --- User Profile & Settings Types ---
@@ -109,10 +107,10 @@ export interface UserProfile {
 
 export interface UserProfileFormData {
   displayName: string;
-  avatarUrl?: string; // Path or new URL
+  avatarUrl?: string;
 }
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = "light" | "dark" | "system";
 
 export interface AppSettings {
   theme: Theme;
