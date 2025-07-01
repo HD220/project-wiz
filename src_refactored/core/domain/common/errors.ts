@@ -120,3 +120,23 @@ export class LLMError extends DomainError {
     this.originalError = details?.originalError;
   }
 }
+
+/**
+ * Error thrown by embedding generation services.
+ */
+export class EmbeddingError extends DomainError {
+  public readonly modelId?: string;
+  public readonly originalError?: unknown;
+
+  constructor(
+    message: string,
+    details?: {
+      modelId?: string;
+      originalError?: unknown;
+    }
+  ) {
+    super(message);
+    this.modelId = details?.modelId;
+    this.originalError = details?.originalError;
+  }
+}

@@ -2,17 +2,16 @@
 import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
-import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
-
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
-import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
+import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-embedding.vo';
-
-import { ApplicationError, ValueError } from '@/application/common/errors';
+import { ApplicationError } from '@/application/common/errors';
+import { ValueError, DomainError } from '@/domain/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
-
-import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
+import { TYPES } from '@/infrastructure/ioc/types';
 
 import {
   SearchSimilarMemoryItemsUseCaseInput,
@@ -27,12 +26,12 @@ export class SearchSimilarMemoryItemsUseCase
     IUseCase<
       SearchSimilarMemoryItemsUseCaseInput,
       SearchSimilarMemoryItemsUseCaseOutput,
-      ApplicationError | ZodError
+      ApplicationError | ZodError | ValueError // Added ValueError
     >
 {
   constructor(
-    @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,
-    @inject(ILoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(TYPES.IMemoryRepository) private readonly memoryRepository: IMemoryRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   private mapEntityToSimilarListItem(entity: MemoryItem, score?: number): SimilarMemoryListItem {
@@ -43,7 +42,7 @@ export class SearchSimilarMemoryItemsUseCase
     return {
       id: entity.id().value(),
       contentExcerpt: excerpt,
-      agentId: entity.agentId() ? entity.agentId()!.value() : null,
+      agentId: entity.agentId()?.value() || null,
       tags: entity.tags().value() || [],
       source: entity.source().value(),
       createdAt: entity.createdAt().toISOString(),
@@ -54,74 +53,82 @@ export class SearchSimilarMemoryItemsUseCase
 
   public async execute(
     input: SearchSimilarMemoryItemsUseCaseInput,
-  ): Promise<Result<SearchSimilarMemoryItemsUseCaseOutput, ApplicationError | ZodError>> {
-    this.logger.debug('SearchSimilarMemoryItemsUseCase: Starting execution with input:', input);
+  ): Promise<Result<SearchSimilarMemoryItemsUseCaseOutput, ApplicationError | ZodError | ValueError>> {
+    this.logger.debug('SearchSimilarMemoryItemsUseCase: Starting execution with input:', { input });
 
     const validationResult = this._validateInput(input);
-    if (validationResult.isError()) {
+    if (isError(validationResult)) {
       return resultError(validationResult.error);
     }
     const validInput = validationResult.value;
 
-    const voCreationResult = this._createValueObjects(validInput);
-    if (voCreationResult.isError()) {
-      return resultError(voCreationResult.error);
-    }
-    const { embeddingVo, agentIdVo } = voCreationResult.value;
+    try {
+      const voCreationResult = this._createValueObjects(validInput);
+      if (isError(voCreationResult)) {
+        // Error from _createValueObjects is ApplicationError (wrapping ValueError) or ValueError directly
+        return resultError(voCreationResult.error);
+      }
+      const { embeddingVo, agentIdVo } = voCreationResult.value;
 
-    const repoResult = await this.memoryRepository.searchSimilar(
-      embeddingVo,
-      agentIdVo,
-      validInput.limit,
-    );
-
-    if (!isSuccess(repoResult)) {
-      this.logger.error(
-        `SearchSimilarMemoryItemsUseCase: Repository failed to search similar memory items.`,
-        repoResult.error,
+      const repoResult = await this.memoryRepository.searchSimilar(
+        embeddingVo,
+        agentIdVo,
+        validInput.limit,
       );
-      const appError = repoResult.error instanceof ApplicationError
-        ? repoResult.error
-        : new ApplicationError(
-            `Failed to search similar memory items: ${repoResult.error.message}`,
-            repoResult.error,
-          );
-      return resultError(appError);
+
+      if (isError(repoResult)) {
+        const cause = repoResult.error;
+        this.logger.error(
+          `SearchSimilarMemoryItemsUseCase: Repository failed to search similar memory items.`,
+          { originalError: cause },
+        );
+        const appError = cause instanceof ApplicationError
+          ? cause
+          : new ApplicationError(`Failed to search similar memory items: ${cause.message}`, cause instanceof Error ? cause : undefined);
+        return resultError(appError);
+      }
+
+      const similarItems = repoResult.value.map(item => this.mapEntityToSimilarListItem(item.item, item.score));
+
+      this.logger.debug('SearchSimilarMemoryItemsUseCase: Execution successful.');
+      return ok({
+        items: similarItems,
+      });
+    } catch (e: unknown) { // Should ideally not be reached if VOs and repo return Results or throw specific handled errors
+        const message = e instanceof Error ? e.message : String(e);
+        const logError = e instanceof Error ? e : new Error(message);
+        this.logger.error(`[SearchSimilarMemoryItemsUseCase] Unexpected error: ${message}`, { originalError: logError });
+        if (e instanceof ZodError || e instanceof ValueError) return resultError(e);
+        return resultError(new ApplicationError(`Unexpected error searching similar memory items: ${message}`, logError));
     }
-
-    const similarItems = repoResult.value.map(entity => this.mapEntityToSimilarListItem(entity));
-
-    this.logger.debug('SearchSimilarMemoryItemsUseCase: Execution successful.');
-    return ok({
-      items: similarItems,
-    });
   }
 
   private _validateInput(input: SearchSimilarMemoryItemsUseCaseInput): Result<SearchSimilarMemoryItemsUseCaseInput, ZodError> {
-    const validationResult = SearchSimilarMemoryItemsUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      this.logger.warn('SearchSimilarMemoryItemsUseCase: Input validation failed.', validationResult.error);
-      return resultError(validationResult.error);
+    const parseResult = SearchSimilarMemoryItemsUseCaseInputSchema.safeParse(input);
+    if (!parseResult.success) {
+      this.logger.warn('SearchSimilarMemoryItemsUseCase: Input validation failed.', { error: parseResult.error.flatten()});
+      return resultError(parseResult.error);
     }
-    return ok(validationResult.data);
+    return ok(parseResult.data);
   }
 
-  private _createValueObjects(validInput: SearchSimilarMemoryItemsUseCaseInput): Result<{ embeddingVo: MemoryItemEmbedding; agentIdVo?: Identity }, ApplicationError> {
+  private _createValueObjects(validInput: SearchSimilarMemoryItemsUseCaseInput): Result<{ embeddingVo: MemoryItemEmbedding; agentIdVo?: Identity }, ApplicationError | ValueError> {
     try {
-      const embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding);
+      const embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding); // Can throw ValueError
       let agentIdVo: Identity | undefined;
       if (validInput.agentId) {
-        agentIdVo = Identity.fromString(validInput.agentId);
+        agentIdVo = Identity.fromString(validInput.agentId); // Can throw ValueError
       }
       return ok({ embeddingVo, agentIdVo });
-    } catch (exception) {
-      if (exception instanceof ValueError) {
-        this.logger.warn(`SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${exception.message}`, exception);
-        return resultError(new ApplicationError(`Invalid input parameter: ${exception.message}`, exception));
+    } catch (e) {
+      if (e instanceof ValueError) {
+         this.logger.warn(`SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${e.message}`, {error: e});
+        return resultError(e);
       }
-      this.logger.error('SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.', exception);
-      const errorMessage = exception instanceof Error ? exception.message : String(exception);
-      return resultError(new ApplicationError(`Unexpected error processing input: ${errorMessage}`, exception as Error));
+      const message = e instanceof Error ? e.message : String(e);
+      const logError = e instanceof Error ? e : new Error(message);
+      this.logger.error('SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.', { originalError: logError });
+      return resultError(new ApplicationError(`Unexpected error processing input: ${message}`, logError));
     }
   }
 }

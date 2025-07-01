@@ -31,7 +31,8 @@ const typeScriptSpecificRules = {
     { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
     { selector: "typeLike", format: ["PascalCase"] },
     { selector: "enumMember", format: ["PascalCase", "UPPER_CASE"] },
-    { selector: "objectLiteralProperty", format: ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"], leadingUnderscore: "allow", trailingUnderscore: "allow" },
+    // Added 'property' to allow snake_case for interface/type properties (e.g. for external APIs)
+    { selector: ["objectLiteralProperty", "property"], format: ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"], leadingUnderscore: "allow", trailingUnderscore: "allow" },
     { selector: "classProperty", modifiers: ["static", "readonly"], format: ["UPPER_CASE", "camelCase", "PascalCase"] }
   ],
   "@typescript-eslint/ban-ts-comment": ["error", {
@@ -86,7 +87,7 @@ const importAndBoundaryRules = {
 const codeStyleAndQualityRules = {
   "max-depth": ["warn", { max: 4 }],
   "no-else-return": "warn",
-  "id-length": ["warn", { min: 2, exceptions: ["_"] }],
+  "id-length": ["warn", { min: 2, exceptions: ["_", "a", "b"] }], // Added 'a' for ReactMarkdown components, 'b' as common generic
   "max-statements": ["warn", { max: 25 }],
   "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
   "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],

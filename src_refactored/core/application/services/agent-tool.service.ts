@@ -1,6 +1,6 @@
 import { injectable, inject } from 'inversify';
 
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Agent } from '@/core/domain/agent/agent.entity';
 import { ToolError } from '@/core/domain/common/errors';
 import { AgentExecutionPayload, JobProcessingOutput, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
@@ -26,7 +26,7 @@ interface ExecutionState {
 @injectable()
 export class AgentToolService {
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
     @inject(ToolValidationService) private readonly toolValidationService: ToolValidationService,
   ) {}
 

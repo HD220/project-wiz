@@ -1,6 +1,6 @@
 import { injectable, inject } from 'inversify';
 
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
 
 import { IProjectRepository, ProjectRepositoryToken } from '@/domain/project/ports/project-repository.interface';
 import { ProjectEntity, ProjectProps } from '@/domain/project/project.entity';
@@ -11,7 +11,7 @@ import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
 import { ApplicationError, DomainError, ValidationError } from '@/application/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
 
-import { Result } from '@/shared/result';
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result'; // Import helpers
 
 import { CreateProjectInput, CreateProjectOutput, CreateProjectInputSchema } from './create-project.schema';
 
@@ -19,38 +19,38 @@ import { CreateProjectInput, CreateProjectOutput, CreateProjectInputSchema } fro
 export class CreateProjectUseCase implements IUseCase<CreateProjectInput, Promise<Result<CreateProjectOutput, DomainError>>> {
   constructor(
     @inject(ProjectRepositoryToken) private readonly projectRepository: IProjectRepository,
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger, // Corrected token and type
   ) {}
 
   async execute(input: CreateProjectInput): Promise<Result<CreateProjectOutput, DomainError>> {
     this.logger.info(`[CreateProjectUseCase] Attempting to create project with name: ${input.name}`);
 
     const validationResult = this._validateInput(input);
-    if (validationResult.isFailure()) {
-      return Result.fail(validationResult.error);
+    if (isError(validationResult)) { // Corrected usage
+      return resultError(validationResult.error); // Corrected usage
     }
     const validatedInput = validationResult.value;
 
     try {
       const projectEntityResult = this._createProjectEntity(validatedInput);
-      if (projectEntityResult.isFailure()) {
-        return Result.fail(projectEntityResult.error);
+      if (isError(projectEntityResult)) { // Corrected usage
+        return resultError(projectEntityResult.error); // Corrected usage
       }
       const projectEntity = projectEntityResult.value;
 
       const saveResult = await this.projectRepository.save(projectEntity);
-      if (saveResult.isFailure()) {
+      if (isError(saveResult)) { // Corrected usage
         this.logger.error('[CreateProjectUseCase] Failed to save project to repository', saveResult.error);
-        return Result.fail(saveResult.error);
+        return resultError(saveResult.error); // Corrected usage
       }
 
       this.logger.info(`[CreateProjectUseCase] Project created successfully: ${projectEntity.id.value}`);
-      return Result.ok(this._mapToOutput(projectEntity));
+      return ok(this._mapToOutput(projectEntity)); // Corrected usage
 
-    } catch (error: unknown) {
-      this.logger.error('[CreateProjectUseCase] Unexpected error while creating project', error);
-      const message = error instanceof Error ? error.message : String(error);
-      return Result.fail(new ApplicationError(`An unexpected error occurred: ${message}`));
+    } catch (err: unknown) { // Changed 'error' to 'err' to avoid conflict with imported 'error'
+      this.logger.error('[CreateProjectUseCase] Unexpected error while creating project', err);
+      const message = err instanceof Error ? err.message : String(err);
+      return resultError(new ApplicationError(`An unexpected error occurred: ${message}`)); // Corrected usage
     }
   }
 
@@ -59,42 +59,44 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectInput, Promis
     if (!validationResult.success) {
       const errorMessage = 'Invalid input for CreateProjectUseCase';
       this.logger.error(`[CreateProjectUseCase] ${errorMessage}`, validationResult.error.flatten());
-      return Result.fail(new ValidationError(errorMessage, validationResult.error.flatten().fieldErrors));
+      return resultError(new ValidationError(errorMessage, validationResult.error.flatten().fieldErrors)); // Corrected usage
     }
-    return Result.ok(validationResult.data);
+    return ok(validationResult.data); // Corrected usage
   }
 
   private _createProjectEntity(validatedInput: CreateProjectInput): Result<ProjectEntity, DomainError> {
-    const projectNameResult = ProjectName.create(validatedInput.name);
-    if (projectNameResult.isFailure()) {
-      this.logger.warn(`[CreateProjectUseCase] Invalid project name: ${validatedInput.name}`, projectNameResult.error);
-      return Result.fail(projectNameResult.error);
-    }
+    try {
+      const projectName = ProjectName.create(validatedInput.name);
 
-    let projectDescription: ProjectDescription | undefined;
-    if (validatedInput.description !== undefined && validatedInput.description !== null) {
-      const projectDescriptionResult = ProjectDescription.create(validatedInput.description);
-      if (projectDescriptionResult.isFailure()) {
-        this.logger.warn(`[CreateProjectUseCase] Invalid project description`, projectDescriptionResult.error);
-        return Result.fail(projectDescriptionResult.error);
+      let projectDescription: ProjectDescription | undefined;
+      if (validatedInput.description !== undefined && validatedInput.description !== null) {
+        // Ensure description is not just empty string before creating, or let VO handle empty string if that's valid
+        if (validatedInput.description.trim() !== "") {
+          projectDescription = ProjectDescription.create(validatedInput.description);
+        }
       }
-      projectDescription = projectDescriptionResult.value;
-    }
 
-    const projectProps: ProjectProps = {
-      id: ProjectId.create(),
-      name: projectNameResult.value,
-      description: projectDescription,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      const projectProps: ProjectProps = {
+        id: ProjectId.create(),
+        name: projectName,
+        description: projectDescription,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    const projectEntityResult = ProjectEntity.create(projectProps);
-    if (projectEntityResult.isFailure()) {
-      this.logger.error('[CreateProjectUseCase] Failed to create project entity', projectEntityResult.error);
-      return Result.fail(projectEntityResult.error);
+      const projectEntity = ProjectEntity.create(projectProps);
+      return ok(projectEntity);
+
+    } catch (e: unknown) {
+      // Catch errors from ProjectName.create, ProjectDescription.create, ProjectEntity.create
+      if (e instanceof DomainError || e instanceof ValueError || e instanceof EntityError) {
+        this.logger.warn(`[CreateProjectUseCase] Domain error creating project entity parts: ${e.message}`, { error: e });
+        return resultError(e);
+      }
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error(`[CreateProjectUseCase] Unexpected error creating project entity parts: ${message}`, { error: e });
+      return resultError(new DomainError(`Unexpected error creating project entity parts: ${message}`));
     }
-    return Result.ok(projectEntityResult.value);
   }
 
   private _mapToOutput(projectEntity: ProjectEntity): CreateProjectOutput {

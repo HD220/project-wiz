@@ -1,5 +1,10 @@
 // src_refactored/core/domain/job/job-persistence.mapper.ts
-import { JobEntity, JobEntityProps, JobPersistenceData } from './job.entity';
+import { JobEntity } from './job.entity';
+// JobEntity no longer needed directly, JobPersistenceData from .types
+import { JobEntityProps } from './job.types';
+// Added JobStatus if needed, JobPersistenceData from here
+// JobStatus removed as it's not directly used
+import { JobPersistenceData } from './job.types';
 import { ActivityHistoryVO } from './value-objects/activity-history.vo';
 import { JobIdVO } from './value-objects/job-id.vo';
 import { JobOptionsVO } from './value-objects/job-options.vo';
@@ -63,5 +68,51 @@ export class JobPersistenceMapper {
     // (job as any)._stateMutator = new JobStateMutator(entityProps);
 
     return job;
+  }
+
+  public static toPersistence<P, R>(
+    props: JobEntityProps<P, R>
+  ): JobPersistenceData<P, R> {
+    return {
+      id: props.id.value,
+      queueName: props.queueName,
+      name: props.name,
+      payload: props.payload,
+      // IJobOptions
+      options: props.options.toPersistence(),
+      // Added top-level priority
+      priority: props.options.priority,
+      status: props.status,
+      attemptsMade: props.attemptsMade,
+      progress: props.progress,
+      logs: props.logs.map((logEntry) => ({
+        ...logEntry,
+        timestamp: logEntry.timestamp.getTime(),
+      })),
+      // map Date to number
+      createdAt: props.createdAt.getTime(),
+      // map Date to number
+      updatedAt: props.updatedAt.getTime(),
+      // priority is part of options, so props.options.priority is correct if toPersistence() on JobOptionsVO includes it.
+      // JobPersistenceData from job.entity.ts does not list priority, but DrizzleJobRepository uses it.
+      // This suggests JobPersistenceData might need an update or there's an intermediate type.
+      // For now, matching JobEntity's original toPersistence structure which returned it directly.
+      // However, JobPersistenceData as imported from job.entity.ts does *not* include priority.
+      // Let's assume options.toPersistence() handles priority correctly if it's part of IJobOptions.
+      // The original JobEntity.toPersistence() explicitly added `priority: this.props.options.priority`.
+      // This implies that `JobPersistenceData` type itself might be incomplete or used inconsistently.
+      // The `DrizzleJobRepository` uses `job.toPersistence()` which includes this priority.
+      // Let's stick to what JobEntity was doing for the direct return object structure for now.
+      // This part of the type definition might need revisiting across files.
+
+      processedOn: props.processedOn ? props.processedOn.getTime() : undefined,
+      finishedOn: props.finishedOn ? props.finishedOn.getTime() : undefined,
+      delayUntil: props.delayUntil ? props.delayUntil.getTime() : undefined,
+      lockUntil: props.lockUntil ? props.lockUntil.getTime() : undefined,
+      workerId: props.workerId ?? undefined,
+      returnValue: props.returnValue ?? undefined,
+      failedReason: props.failedReason ?? undefined,
+      stacktrace: props.stacktrace ?? undefined,
+    };
   }
 }

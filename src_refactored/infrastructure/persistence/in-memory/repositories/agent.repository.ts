@@ -3,6 +3,7 @@ import { injectable } from "inversify";
 import { Agent } from "@/core/domain/agent/agent.entity";
 import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
+import { PersonaIdVO } from "@/core/domain/agent/value-objects/persona/persona-id.vo";
 
 import { Result, Ok, Err } from "@/shared/result";
 
@@ -32,7 +33,7 @@ export class InMemoryAgentRepository implements IAgentRepository {
     return Ok(undefined);
   }
 
-  async findByPersonaId(personaId: PersonaId): Promise<Result<Agent[], Error>> {
+  async findByPersonaId(personaId: PersonaIdVO): Promise<Result<Agent[], Error>> {
     const foundAgents = Array.from(this.agents.values()).filter((agent) =>
       agent.personaId.equals(personaId)
     );

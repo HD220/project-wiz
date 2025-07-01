@@ -1,10 +1,9 @@
 // src_refactored/core/application/use-cases/memory/save-memory-item.use-case.ts
 import { ZodError } from 'zod';
+import { injectable, inject } from 'inversify';
 
-// For AgentId
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
-
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
 import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
 import { MemoryItemContent } from '@/domain/memory/value-objects/memory-item-content.vo';
@@ -12,11 +11,10 @@ import { MemoryItemEmbedding } from '@/domain/memory/value-objects/memory-item-e
 import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
 import { MemoryItemSource } from '@/domain/memory/value-objects/memory-item-source.vo';
 import { MemoryItemTags } from '@/domain/memory/value-objects/memory-item-tags.vo';
-
-// Corrected import
+import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
-import { Result, ok, error } from '@/shared/result';
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+import { TYPES } from '@/infrastructure/ioc/types';
 
 import {
   SaveMemoryItemUseCaseInput,
@@ -24,15 +22,9 @@ import {
   SaveMemoryItemUseCaseOutput,
 } from './save-memory-item.schema';
 
-// Optional: Define IEmbeddingService if embedding generation is part of this use case
-// export interface IEmbeddingService {
-//   generateEmbedding(text: string): Promise<Result<number[], Error>>;
-// }
-// export const IEmbeddingServiceToken = Symbol('IEmbeddingService');
-
+@injectable()
 export class SaveMemoryItemUseCase
   implements
-    // Changed IUseCase back to Executable to match import alias
     Executable<
       SaveMemoryItemUseCaseInput,
       SaveMemoryItemUseCaseOutput,
@@ -40,8 +32,8 @@ export class SaveMemoryItemUseCase
     >
 {
   constructor(
-    private memoryRepository: IMemoryRepository,
-    // private embeddingService?: IEmbeddingService, // Optional: if generating embeddings
+    @inject(TYPES.IMemoryRepository) private readonly memoryRepository: IMemoryRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   async execute(
@@ -49,131 +41,129 @@ export class SaveMemoryItemUseCase
   ): Promise<Result<SaveMemoryItemUseCaseOutput, DomainError | ZodError | ValueError | NotFoundError>> {
     const validationResult = SaveMemoryItemUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
-      return error(validationResult.error);
+      return resultError(validationResult.error);
     }
     const validInput = validationResult.data;
 
     try {
-      const memoryItemEntity = validInput.id
-        ? await this._updateMemoryItem(validInput)
-        : this._createMemoryItem(validInput);
-
-      if (memoryItemEntity instanceof DomainError || memoryItemEntity instanceof NotFoundError) {
-        return error(memoryItemEntity);
+      let memoryItemEntityResult: Result<MemoryItem, DomainError | NotFoundError | ValueError>;
+      if (validInput.id) {
+        memoryItemEntityResult = await this._updateMemoryItem(validInput);
+      } else {
+        memoryItemEntityResult = this._createMemoryItem(validInput);
       }
 
-      const saveResult = await this.memoryRepository.save(memoryItemEntity);
-      if (saveResult.isError()) {
-        return error(new DomainError(`Failed to save memory item: ${saveResult.value.message}`, saveResult.value));
+      if (isError(memoryItemEntityResult)) {
+        // Log the specific error before returning it
+        this.logger.warn(`[SaveMemoryItemUseCase] Error creating/updating memory item entity: ${memoryItemEntityResult.error.message}`, { error: memoryItemEntityResult.error });
+        return resultError(memoryItemEntityResult.error);
+      }
+      const memoryItemEntity = memoryItemEntityResult.value;
+
+      const saveRepoResult = await this.memoryRepository.save(memoryItemEntity);
+
+      if (isError(saveRepoResult)) {
+        const cause = saveRepoResult.error;
+        // Ensure cause is an Error instance for DomainError constructor
+        const errorCause = cause instanceof Error ? cause : new Error(String(cause));
+        const err = cause instanceof DomainError ? cause : new DomainError(`Failed to save memory item: ${errorCause.message}`, errorCause);
+        this.logger.error(`[SaveMemoryItemUseCase] Repository error: ${err.message}`, { originalError: cause });
+        return resultError(err);
       }
 
-      const finalEntity = saveResult.isOk() && saveResult.value instanceof MemoryItem ? saveResult.value : memoryItemEntity;
+      const finalMemoryItem = (isSuccess(saveRepoResult) && saveRepoResult.value instanceof MemoryItem)
+                              ? saveRepoResult.value
+                              : memoryItemEntity;
 
       return ok({
-        memoryItemId: finalEntity.id().value(),
-        createdAt: finalEntity.createdAt().toISOString(),
-        updatedAt: finalEntity.updatedAt().toISOString(),
+        id: finalMemoryItem.id().value(),
+        content: finalMemoryItem.content().value(),
+        agentId: finalMemoryItem.agentId()?.value() || null,
+        tags: finalMemoryItem.tags().value() || [],
+        source: finalMemoryItem.source().value(),
+        embedding: finalMemoryItem.embedding()?.value() || null,
+        createdAt: finalMemoryItem.createdAt().toISOString(),
+        updatedAt: finalMemoryItem.updatedAt().toISOString(),
       });
-
-    } catch (errValue: unknown) {
-      return this._handleUseCaseError(errValue);
+    } catch (e: unknown) {
+      return this._handleUseCaseError(e, validInput.id);
     }
   }
 
-  private _createMemoryItem(validInput: SaveMemoryItemUseCaseInput): MemoryItem {
-    const contentVo = MemoryItemContent.create(validInput.content);
-    const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : null;
-    const tagsVo = MemoryItemTags.create(validInput.tags || []);
-    const sourceVo = MemoryItemSource.create(validInput.source);
-    const embeddingVo = MemoryItemEmbedding.create(validInput.embedding);
-    const newItemId = MemoryItemId.generate();
-
-    return MemoryItem.create({
-      id: newItemId,
-      content: contentVo,
-      agentId: agentIdVo,
-      tags: tagsVo,
-      source: sourceVo,
-      embedding: embeddingVo,
-    });
-  }
-
-  private async _updateMemoryItem(validInput: SaveMemoryItemUseCaseInput): Promise<MemoryItem | DomainError | NotFoundError> {
-    const itemIdVo = MemoryItemId.fromString(validInput.id!);
-    const existingResult = await this.memoryRepository.findById(itemIdVo);
-
-    if (existingResult.isError()) {
-      return new DomainError(`Failed to fetch memory item for update: ${existingResult.value.message}`, existingResult.value);
-    }
-    const existingItem = existingResult.value;
-    if (!existingItem) {
-      return new NotFoundError(`MemoryItem with ID ${validInput.id} not found for update.`);
-    }
-
-    let memoryItemEntity = existingItem;
-
-    memoryItemEntity = this._updateContentIfChanged(memoryItemEntity, validInput.content);
-    memoryItemEntity = this._updateAgentIdIfChanged(memoryItemEntity, validInput);
-    memoryItemEntity = this._updateTagsIfChanged(memoryItemEntity, validInput);
-    memoryItemEntity = this._updateSourceIfChanged(memoryItemEntity, validInput);
-    memoryItemEntity = this._updateEmbeddingIfChanged(memoryItemEntity, validInput);
-
-    return memoryItemEntity;
-  }
-
-  private _updateContentIfChanged(entity: MemoryItem, newContent: string): MemoryItem {
-    const contentVo = MemoryItemContent.create(newContent);
-    if (!entity.content().equals(contentVo)) {
-      return entity.updateContent(contentVo);
-    }
-    return entity;
-  }
-
-  private _updateAgentIdIfChanged(entity: MemoryItem, validInput: SaveMemoryItemUseCaseInput): MemoryItem {
-    if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
-      const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : null;
-      if (!entity.agentId()?.equals(agentIdVo) && (entity.agentId() || agentIdVo)) {
-        return entity.assignAgent(agentIdVo);
-      }
-    }
-    return entity;
-  }
-
-  private _updateTagsIfChanged(entity: MemoryItem, validInput: SaveMemoryItemUseCaseInput): MemoryItem {
-    if (Object.prototype.hasOwnProperty.call(validInput, 'tags')) {
+  private _createMemoryItem(validInput: SaveMemoryItemUseCaseInput): Result<MemoryItem, ValueError> {
+    try {
+      const contentVo = MemoryItemContent.create(validInput.content);
+      const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : undefined;
       const tagsVo = MemoryItemTags.create(validInput.tags || []);
-      if (!entity.tags().equals(tagsVo)) {
-        return entity.updateTags(tagsVo);
-      }
+      const sourceVo = MemoryItemSource.create(validInput.source || '');
+      const embeddingVo = validInput.embedding ? MemoryItemEmbedding.create(validInput.embedding) : undefined;
+      const newId = MemoryItemId.generate();
+
+      const memoryItem = MemoryItem.create({
+        id: newId,
+        content: contentVo,
+        agentId: agentIdVo,
+        tags: tagsVo,
+        source: sourceVo,
+        embedding: embeddingVo,
+      });
+      return ok(memoryItem);
+    } catch (e) {
+      if (e instanceof ValueError) return resultError(e);
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.warn(`[SaveMemoryItemUseCase/_createMemoryItem] Error: ${message}`, { error: e }); // Consider e as originalError
+      return resultError(new ValueError(`Error creating memory item value objects: ${message}`));
     }
-    return entity;
   }
 
-  private _updateSourceIfChanged(entity: MemoryItem, validInput: SaveMemoryItemUseCaseInput): MemoryItem {
-    if (Object.prototype.hasOwnProperty.call(validInput, 'source')) {
-      const sourceVo = MemoryItemSource.create(validInput.source);
-      if (!entity.source().equals(sourceVo)) {
-        return entity.updateSource(sourceVo);
+  private async _updateMemoryItem(validInput: SaveMemoryItemUseCaseInput): Promise<Result<MemoryItem, DomainError | NotFoundError | ValueError>> {
+    try {
+      const itemIdVo = MemoryItemId.fromString(validInput.id!);
+      const existingResult = await this.memoryRepository.findById(itemIdVo);
+
+      if (isError(existingResult)) {
+        return resultError(new DomainError(`Failed to fetch memory item for update: ${existingResult.error.message}`, existingResult.error));
       }
+      const existingItem = existingResult.value;
+      if (!existingItem) {
+        return resultError(new NotFoundError(`MemoryItem with ID ${validInput.id} not found for update.`));
+      }
+
+      let updatedItem = existingItem;
+
+      // These VO creations and entity updates are expected to throw on error
+      if (validInput.content) { // Only update if content is provided
+        updatedItem = updatedItem.updateContent(MemoryItemContent.create(validInput.content));
+      }
+      if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
+        updatedItem = updatedItem.assignAgent(validInput.agentId ? Identity.fromString(validInput.agentId) : undefined);
+      }
+      if (validInput.tags) {
+        updatedItem = updatedItem.updateTags(MemoryItemTags.create(validInput.tags));
+      }
+      if (Object.prototype.hasOwnProperty.call(validInput, 'source')) {
+        updatedItem = updatedItem.updateSource(MemoryItemSource.create(validInput.source || ''));
+      }
+      if (validInput.embedding) {
+        updatedItem = updatedItem.updateEmbedding(MemoryItemEmbedding.create(validInput.embedding));
+      }
+
+      return ok(updatedItem);
+    } catch (e) {
+      if (e instanceof ValueError) return resultError(e);
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.warn(`[SaveMemoryItemUseCase/_updateMemoryItem] Error: ${message}`, { error: e });
+      return resultError(new DomainError(`Error updating memory item: ${message}`, e instanceof Error ? e : undefined));
     }
-    return entity;
   }
 
-  private _updateEmbeddingIfChanged(entity: MemoryItem, validInput: SaveMemoryItemUseCaseInput): MemoryItem {
-    if (Object.prototype.hasOwnProperty.call(validInput, 'embedding')) {
-      const embeddingVo = MemoryItemEmbedding.create(validInput.embedding);
-      if (!entity.embedding().equals(embeddingVo)) {
-        return entity.setEmbedding(embeddingVo);
-      }
+  private _handleUseCaseError(e: unknown, idBeingProcessed?: string): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
+    if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+      return resultError(e);
     }
-    return entity;
-  }
-
-  private _handleUseCaseError(errorValue: unknown): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
-    if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
-      return error(errorValue);
-    }
-    const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
-    return error(new DomainError(`Unexpected error saving memory item: ${message}`));
+    const message = e instanceof Error ? e.message : String(e);
+    const logError = e instanceof Error ? e : new Error(message);
+    this.logger.error(`[SaveMemoryItemUseCase] Unexpected error for memory item ID ${idBeingProcessed || 'new'}: ${message}`, { originalError: logError });
+    return resultError(new DomainError(`Unexpected error saving memory item: ${message}`, logError));
   }
 }

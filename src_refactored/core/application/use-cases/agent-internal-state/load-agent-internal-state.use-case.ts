@@ -50,10 +50,12 @@ export class LoadAgentInternalStateUseCase
 
       const stateResult = await this.stateRepository.findByAgentId(agentIdVo);
 
-      if (stateResult.isError()) {
-        return error(new DomainError(`Failed to load internal state for agent ${validInput.agentId}: ${stateResult.value.message}`, stateResult.value));
+      if (isError(stateResult)) { // Corrected: Use type guard
+        // Access .error property when it's an error
+        return error(new DomainError(`Failed to load internal state for agent ${validInput.agentId}: ${stateResult.error.message}`, stateResult.error));
       }
 
+      // If it's not an error, it's a success, so stateResult.value is safe to access
       const stateEntity = stateResult.value;
 
       if (!stateEntity) {
@@ -68,13 +70,15 @@ export class LoadAgentInternalStateUseCase
       };
 
       return ok(output);
-    } catch (errorValue: unknown) {
-      if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
-        return error(errorValue);
+    } catch (e: unknown) { // Changed errorValue to e to avoid conflict
+      if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        return error(e);
       }
-      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
-      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { error: errorValue });
-      return error(new DomainError(`Unexpected error loading agent state: ${message}`));
+      const message = e instanceof Error ? e.message : String(e);
+      // For logger, ensure the second argument is an Error instance if the logger expects it, or pass as metadata
+      const logError = e instanceof Error ? e : new Error(message);
+      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { originalError: logError }); // Pass error in metadata
+      return error(new DomainError(`Unexpected error loading agent state: ${message}`, logError));
     }
   }
 }

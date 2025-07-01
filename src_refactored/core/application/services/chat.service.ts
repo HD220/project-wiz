@@ -2,7 +2,7 @@
 import { injectable, inject } from 'inversify';
 
 // Assuming a logger is useful
-import { ILoggerService, LoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface';
 // import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types'; // Not used
 
@@ -13,7 +13,8 @@ import {
   ChatStreamEndPayload,
   ChatStreamErrorPayload
 } from '@/shared/ipc-chat.types';
-import { Result, Ok, Err } from '@/shared/result';
+// Corrected import names
+import { Result, ok, error as resultError } from '@/shared/result';
 
 import { IChatService, IChatServiceSendMessageResponse } from '../ports/services/i-chat.service';
 
@@ -21,7 +22,7 @@ import { IChatService, IChatServiceSendMessageResponse } from '../ports/services
 export class ChatService implements IChatService {
   constructor(
     @inject(ILLMAdapterToken) private readonly llmAdapter: ILLMAdapter,
-    @inject(LoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   async handleSendMessageStream(
@@ -46,19 +47,19 @@ export class ChatService implements IChatService {
   private _handleMissingAdapter(sendStreamEventCallback: (event: ChatStreamEventPayload) => void): Result<IChatServiceSendMessageResponse, Error> {
     this.logger.error('[ChatService] LLMAdapter not available.');
     this.sendMockStream(sendStreamEventCallback, "LLMAdapter not configured. Mock response enabled.");
-    return Ok({ message: "Message received, mock streaming started due to no LLM adapter." });
+    return ok({ message: "Message received, mock streaming started due to no LLM adapter." });
   }
 
   private _handleEmptyMessages(sendStreamEventCallback: (event: ChatStreamEventPayload) => void): Result<IChatServiceSendMessageResponse, Error> {
     this.logger.warn('[ChatService] No messages in payload. Sending generic mock response.');
     this.sendMockStream(sendStreamEventCallback, "No messages provided. Here's a mock reply.");
-    return Ok({ message: "No messages in payload, mock streaming started." });
+    return ok({ message: "No messages in payload, mock streaming started." });
   }
 
   private _handleUnsupportedStream(sendStreamEventCallback: (event: ChatStreamEventPayload) => void): Result<IChatServiceSendMessageResponse, Error> {
     this.logger.error('[ChatService] LLMAdapter does not support streamText method.');
     this.sendMockStream(sendStreamEventCallback, "LLMAdapter does not support streaming. Mock response.");
-    return Ok({ message: "LLMAdapter does not support streaming, mock streaming started." });
+    return ok({ message: "LLMAdapter does not support streaming, mock streaming started." });
   }
 
   private async _processLLMStream(
@@ -87,7 +88,7 @@ export class ChatService implements IChatService {
       const endPayload: ChatStreamEndPayload = { type: 'end' };
       sendStreamEventCallback(endPayload);
 
-      return Ok({ message: "Message received, streaming started." });
+      return ok({ message: "Message received, streaming started." });
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error('[ChatService] Error processing stream with LLMAdapter:', err);
@@ -95,7 +96,7 @@ export class ChatService implements IChatService {
       sendStreamEventCallback(errorPayload);
       const endPayload: ChatStreamEndPayload = { type: 'end' };
       sendStreamEventCallback(endPayload);
-      return Err(new Error(`Failed to process stream with LLMAdapter: ${err.message}`));
+      return resultError(new Error(`Failed to process stream with LLMAdapter: ${err.message}`));
     }
   }
 

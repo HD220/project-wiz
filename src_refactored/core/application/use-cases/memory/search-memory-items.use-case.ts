@@ -1,21 +1,17 @@
 // src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts
 import { inject, injectable } from 'inversify';
+import { ZodError } from 'zod';
 
-import { ILoggerService, ILoggerServiceToken } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
-
-// DomainError is not used
-import { ValueError } from '@/domain/common/errors';
+import { ValueError, DomainError } from '@/domain/common/errors'; // Corrected import for ValueError
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
-import { IMemoryRepository, IMemoryRepositoryToken } from '@/domain/memory/ports/memory-repository.interface';
-import { MemorySearchFilters, PaginationOptions, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.types';
-
+import { IMemoryRepository, MemorySearchFilters, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.interface'; // Removed IMemoryRepositoryToken
+import { PaginationOptions } from '@/core/common/ports/repository.types'; // Corrected path for PaginationOptions
 import { ApplicationError } from '@/application/common/errors';
-// Standardized to IUseCase
 import { IUseCase } from '@/application/common/ports/use-case.interface';
-
-// Renamed 'error' to 'resultError' to avoid conflict
-import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
+import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
+import { TYPES } from '@/infrastructure/ioc/types';
 
 import {
   SearchMemoryItemsUseCaseInput,
@@ -28,86 +24,88 @@ const CONTENT_EXCERPT_LENGTH = 200;
 
 @injectable()
 export class SearchMemoryItemsUseCase
-  // Changed Executable to IUseCase
-  implements IUseCase<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput, ApplicationError>
+  implements IUseCase<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput, ApplicationError | ZodError | ValueError>
 {
   constructor(
-    @inject(IMemoryRepositoryToken) private readonly memoryRepository: IMemoryRepository,
-    @inject(ILoggerServiceToken) private readonly logger: ILoggerService,
+    @inject(TYPES.IMemoryRepository) private readonly memoryRepository: IMemoryRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   public async execute(
     input: SearchMemoryItemsUseCaseInput,
-  ): Promise<Result<SearchMemoryItemsUseCaseOutput, ApplicationError>> {
-    this.logger.debug('SearchMemoryItemsUseCase: Starting execution with input:', input);
+  ): Promise<Result<SearchMemoryItemsUseCaseOutput, ApplicationError | ZodError | ValueError>> {
+    this.logger.debug('SearchMemoryItemsUseCase: Starting execution with input:', { input });
 
-    const validationResult = this.validateInput(input);
-    if (!isSuccess(validationResult)) {
-      this.logger.warn('SearchMemoryItemsUseCase: Input validation failed.', validationResult.error);
-      return resultError(validationResult.error);
+    const validationResult = this._validateInput(input);
+    if (isError(validationResult)) {
+      this.logger.warn('SearchMemoryItemsUseCase: Input validation failed.', { error: validationResult.error });
+      // Assuming validationResult.error is ZodError or compatible with ApplicationError's cause
+      const appError = validationResult.error instanceof ApplicationError
+        ? validationResult.error
+        : new ApplicationError("Input validation failed", validationResult.error instanceof Error ? validationResult.error : undefined);
+      return resultError(appError);
     }
     const validatedInput = validationResult.value;
 
-    const filtersResult = this.buildSearchFilters(validatedInput);
-    if (!isSuccess(filtersResult)) {
-        this.logger.warn('SearchMemoryItemsUseCase: Failed to build search filters.', filtersResult.error);
-        return resultError(filtersResult.error);
-    }
-    const searchFilters = filtersResult.value;
-
-    const paginationOptions: PaginationOptions = {
-      page: validatedInput.page,
-      pageSize: validatedInput.pageSize,
-    };
-
     try {
-      // Type assertion for repoResult.value needed if PaginatedMemoryItemsResult is not directly returned by IMemoryRepository.search
+      const filtersResult = this._buildSearchFilters(validatedInput);
+      if (isError(filtersResult)) {
+          this.logger.warn('SearchMemoryItemsUseCase: Failed to build search filters.', { error: filtersResult.error });
+          const appError = filtersResult.error instanceof ApplicationError ? filtersResult.error : new ApplicationError("Filter building failed", filtersResult.error);
+          return resultError(appError);
+      }
+      const searchFilters = filtersResult.value;
+
+      const paginationOptions: PaginationOptions = {
+        page: validatedInput.page,
+        pageSize: validatedInput.pageSize,
+      };
+
       const repoResult = await this.memoryRepository.search(searchFilters, paginationOptions);
 
-      if (!isSuccess(repoResult)) {
-        this.logger.error('SearchMemoryItemsUseCase: Repository search failed.', repoResult.error);
-        const appError = repoResult.error instanceof ApplicationError
-          ? repoResult.error
-          : new ApplicationError(`Search operation failed: ${repoResult.error.message}`);
+      if (isError(repoResult)) {
+        this.logger.error('SearchMemoryItemsUseCase: Repository search failed.', { originalError: repoResult.error });
+        const cause = repoResult.error;
+        const appError = cause instanceof ApplicationError
+          ? cause
+          : new ApplicationError(`Search operation failed: ${cause.message}`, cause instanceof Error ? cause : undefined);
         return resultError(appError);
       }
 
-      const paginatedMemoryItems = repoResult.value as PaginatedMemoryItemsResult;
-      const output = this.mapToOutput(paginatedMemoryItems);
+      // repoResult.value is PaginatedMemoryItemsResult
+      const paginatedMemoryItems = repoResult.value;
+      const output = this._mapToOutput(paginatedMemoryItems);
 
       this.logger.debug('SearchMemoryItemsUseCase: Execution successful.');
       return ok(output);
 
-    } catch (errorValue) {
-      this.logger.error('SearchMemoryItemsUseCase: Unhandled error during execution.', errorValue);
-      const errorMessage = errorValue instanceof Error ? errorValue.message : String(errorValue);
-      return resultError(new ApplicationError(`An unexpected error occurred: ${errorMessage}`));
+    } catch (e: unknown) { // Catch errors from _buildSearchFilters if Identity.fromString throws (now wrapped)
+      // Or other truly unexpected errors
+      const message = e instanceof Error ? e.message : String(e);
+      const logError = e instanceof Error ? e : new Error(message);
+      this.logger.error('SearchMemoryItemsUseCase: Unhandled error during execution.', { originalError: logError });
+      // Ensure the error type matches the use case's declared error types
+      if (e instanceof ZodError || e instanceof ValueError) return resultError(e);
+      return resultError(new ApplicationError(`An unexpected error occurred: ${message}`, logError));
     }
   }
 
-  private validateInput(input: SearchMemoryItemsUseCaseInput): Result<SearchMemoryItemsUseCaseInput, ApplicationError> {
+  private _validateInput(input: SearchMemoryItemsUseCaseInput): Result<SearchMemoryItemsUseCaseInput, ZodError | ApplicationError> {
     const parseResult = SearchMemoryItemsUseCaseInputSchema.safeParse(input);
     if (!parseResult.success) {
       const errorMessages = parseResult.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
-      return resultError(new ApplicationError(`Invalid input: ${errorMessages}`));
+      // Return ZodError directly, or wrap if ApplicationError is preferred for all validation issues
+      return resultError(parseResult.error);
     }
-    // parseResult.data contains input with defaults applied by Zod
     return ok(parseResult.data);
   }
 
-  private buildSearchFilters(validatedInput: SearchMemoryItemsUseCaseInput): Result<MemorySearchFilters, ApplicationError> {
-    let agentIdVO: Identity | null | undefined = undefined;
+  private _buildSearchFilters(validatedInput: SearchMemoryItemsUseCaseInput): Result<MemorySearchFilters, ValueError> {
     try {
-      if (validatedInput.agentId !== undefined) {
-          if (validatedInput.agentId === null) {
-              agentIdVO = null;
-          } else {
-              agentIdVO = Identity.create(validatedInput.agentId);
-          }
+      let agentIdVO: Identity | undefined = undefined; // Use undefined for optional VOs
+      if (validatedInput.agentId !== undefined && validatedInput.agentId !== null) { // Check for null explicitly if schema allows
+          agentIdVO = Identity.fromString(validatedInput.agentId);
       }
-
-      // Future: Wrap validatedInput.queryText and validatedInput.tags in VOs here if they have complex validation
-      // For now, they are passed as primitives/simple arrays as per MemorySearchFilters interface.
 
       const filters: MemorySearchFilters = {
         agentId: agentIdVO,
@@ -115,22 +113,21 @@ export class SearchMemoryItemsUseCase
         tags: validatedInput.tags,
       };
       return ok(filters);
-    } catch (errorValue) {
-      if (errorValue instanceof ValueError) {
-        this.logger.warn(`SearchMemoryItemsUseCase: Error building search filters - ${errorValue.message}`);
-        return resultError(new ApplicationError(`Invalid filter parameter: ${errorValue.message}`));
+    } catch (e: unknown) {
+      if (e instanceof ValueError) {
+        this.logger.warn(`SearchMemoryItemsUseCase: Error building search filters - ${e.message}`, {error: e});
+        return resultError(e);
       }
-      this.logger.error('SearchMemoryItemsUseCase: Unexpected error building search filters.', errorValue);
-      // Fallback for unexpected errors during filter building that are not ValueError
-      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
-      return resultError(new ApplicationError(`Unexpected error building filters: ${message}`));
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.error('SearchMemoryItemsUseCase: Unexpected error building search filters.', { error: e });
+      return resultError(new ValueError(`Unexpected error building filters: ${message}`));
     }
   }
 
-  private mapToOutput(
+  private _mapToOutput(
     paginatedResult: PaginatedMemoryItemsResult
   ): SearchMemoryItemsUseCaseOutput {
-    const memoryListItems = paginatedResult.items.map(item => this.mapMemoryItemToListItem(item));
+    const memoryListItems = paginatedResult.items.map(item => this._mapMemoryItemToListItem(item));
 
     return {
       items: memoryListItems,
@@ -141,25 +138,24 @@ export class SearchMemoryItemsUseCase
     };
   }
 
-  private mapMemoryItemToListItem(item: MemoryItem): MemoryListItem {
+  private _mapMemoryItemToListItem(item: MemoryItem): MemoryListItem {
     const contentValue = item.content().value();
     const excerpt = contentValue.length > CONTENT_EXCERPT_LENGTH
       ? `${contentValue.substring(0, CONTENT_EXCERPT_LENGTH)}...`
       : contentValue;
 
-    const agentIdValue = item.agentId() ? item.agentId()!.value : null;
-    // Ensure tags and source are presented correctly if their VOs might return null/undefined for empty values
-    const tagsValue = item.tags().value() ? item.tags().value() : [];
-    const sourceValue = item.source().value() ? item.source().value() : null;
+    const agentIdValue = item.agentId() ? item.agentId()!.value() : null;
+    const tagsValue = item.tags().value() || [];
+    const sourceValue = item.source().value() || null; // Assuming source() returns a VO with value()
 
     return {
-      id: item.id.value,
+      id: item.id().value(), // Assuming id is Identity or similar VO with value()
       contentExcerpt: excerpt,
       agentId: agentIdValue,
       tags: tagsValue,
       source: sourceValue,
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString(),
+      createdAt: item.createdAt().toISOString(), // Assuming createdAt is a VO or Date
+      updatedAt: item.updatedAt().toISOString(), // Assuming updatedAt is a VO or Date
     };
   }
 }

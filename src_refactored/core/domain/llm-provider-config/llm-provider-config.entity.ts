@@ -41,8 +41,8 @@ export class LLMProviderConfig {
 
   private constructor(props: LLMProviderConfigProps) {
     this._id = props.id;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...otherProps } = props;
+    // Rename destructured 'id' to '_id' as it's not used
+    const { id: _id, ...otherProps } = props;
     this.props = Object.freeze(otherProps);
   }
 

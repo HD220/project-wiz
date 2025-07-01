@@ -19,7 +19,9 @@ export class SourceCode {
 
   private constructor(props: SourceCodeProps) {
     this._id = props.id;
-    const { id, ...otherProps } = props;
+    // _id is unused from the destructuring, as this.props should not contain 'id'.
+    // this._id is correctly assigned from props.id.
+    const { id: _id, ...otherProps } = props;
     this.props = Object.freeze(otherProps);
   }
 

@@ -46,13 +46,17 @@ function PaginationLink({
   className,
   isActive,
   size = "icon",
+  children,
+  href,
   ...props
 }: PaginationLinkProps) {
+  // Ensure there is content for accessibility. Fallback to href if children are not provided.
+  const anchorContent = children || href;
   return (
-    // eslint-disable-next-line jsx-a11y/anchor-has-content
     <a
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
+      href={href} // Explicitly include href
       data-active={isActive}
       className={cn(
         buttonVariants({
@@ -62,7 +66,9 @@ function PaginationLink({
         className
       )}
       {...props}
-    />
+    >
+      {anchorContent}
+    </a>
   );
 }
 

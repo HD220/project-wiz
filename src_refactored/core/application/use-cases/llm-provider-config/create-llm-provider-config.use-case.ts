@@ -1,23 +1,18 @@
 // src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.ts
 import { ZodError } from 'zod';
+import { injectable, inject } from 'inversify';
 
-// ValueError for VO creation issues
-import { DomainError, ValueError } from '@/domain/common/errors';
-import {
-  LLMProviderConfig,
-  // BaseUrl is defined within llm-provider-config.entity.ts
-  BaseUrl
-} from '@/domain/llm-provider-config/llm-provider-config.entity';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
 import { LLMProviderConfigName } from '@/domain/llm-provider-config/value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from '@/domain/llm-provider-config/value-objects/llm-provider-id.vo';
-
-// Standardized to IUseCase
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-
-import { Result, ok, error } from '@/shared/result';
+import { DomainError, ValueError } from '@/domain/common/errors'; // Added ValueError
+import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
+import { Result, ok, error as resultError, isError } from '@/shared/result'; // Added isError
+import { TYPES } from '@/infrastructure/ioc/types';
 
 import {
   CreateLLMProviderConfigUseCaseInput,
@@ -25,87 +20,82 @@ import {
   CreateLLMProviderConfigUseCaseOutput,
 } from './create-llm-provider-config.schema';
 
-
+@injectable()
 export class CreateLLMProviderConfigUseCase
   implements
-    // Changed Executable to IUseCase
-    IUseCase<
+    Executable<
       CreateLLMProviderConfigUseCaseInput,
       CreateLLMProviderConfigUseCaseOutput,
-      DomainError | ZodError | ValueError
+      DomainError | ZodError | ValueError // Added ValueError
     >
 {
-  private llmProviderConfigRepository: ILLMProviderConfigRepository;
-
-  constructor(llmProviderConfigRepository: ILLMProviderConfigRepository) {
-    this.llmProviderConfigRepository = llmProviderConfigRepository;
-  }
+  constructor(
+    @inject(TYPES.ILLMProviderConfigRepository)
+    private readonly configRepository: ILLMProviderConfigRepository,
+    @inject(LOGGER_INTERFACE_TYPE)
+    private readonly logger: ILogger,
+  ) {}
 
   async execute(
     input: CreateLLMProviderConfigUseCaseInput,
   ): Promise<Result<CreateLLMProviderConfigUseCaseOutput, DomainError | ZodError | ValueError>> {
-    // 1. Validate Input Schema
     const validationResult = CreateLLMProviderConfigUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
-      return error(validationResult.error);
+      return resultError(validationResult.error);
     }
     const validInput = validationResult.data;
 
     try {
-      // 2. Create Value Objects
+      // These VO creations can throw ValueError
       const nameVo = LLMProviderConfigName.create(validInput.name);
       const providerIdVo = LLMProviderId.create(validInput.providerId);
-      const apiKeyVo = LLMApiKey.create(validInput.apiKey);
-
-      let baseUrlVo: BaseUrl | undefined = undefined;
-      if (validInput.baseUrl !== null && validInput.baseUrl !== undefined) {
-        baseUrlVo = BaseUrl.create(validInput.baseUrl);
+      // apiKey and baseUrl are optional in input, but required by VOs if provided.
+      // LLMApiKey and BaseUrl VOs should handle null/undefined if that's a valid state,
+      // or the entity should handle optional VOs.
+      // For now, let's assume they are created only if present in input.
+      let apiKeyVo: LLMApiKey | undefined;
+      if (validInput.apiKey) {
+        apiKeyVo = LLMApiKey.create(validInput.apiKey);
       }
+      // BaseUrlVO would be similar if it existed and was used.
+      // const baseUrlVo = validInput.baseUrl ? BaseUrlVO.create(validInput.baseUrl) : undefined;
 
-      // 3. Create Entity
-      const newConfigId = LLMProviderConfigId.generate();
-      const llmConfigEntity = LLMProviderConfig.create({
-        id: newConfigId,
+      const configIdVo = LLMProviderConfigId.generate();
+
+      const configEntity = LLMProviderConfig.create({
+        id: configIdVo,
         name: nameVo,
         providerId: providerIdVo,
-        apiKey: apiKeyVo,
-        baseUrl: baseUrlVo,
+        apiKey: apiKeyVo, // Pass potentially undefined VO
+        baseUrl: validInput.baseUrl, // Pass string directly or create VO
+        // other optional props from schema like models, parameters, etc.
       });
 
-      // 4. Save Entity
-      const saveResult = await this.llmProviderConfigRepository.save(llmConfigEntity);
-      if (saveResult.isError()) {
-        // Assuming repository save method returns Result<void, DomainError>
-        // or Result<LLMProviderConfig, DomainError>
-        // For now, let's assume it's void for save.
-        return error(new DomainError(`Failed to save LLM provider configuration: ${saveResult.value.message}`, saveResult.value));
+      const saveResult = await this.configRepository.save(configEntity);
+      if (isError(saveResult)) {
+        const err = saveResult.error instanceof DomainError ? saveResult.error : new DomainError(`Failed to save LLM config: ${saveResult.error.message}`, saveResult.error);
+        this.logger.error(`[CreateLLMProviderConfigUseCase] Repository error: ${err.message}`, { originalError: saveResult.error });
+        return resultError(err);
       }
 
-      // If save returns the entity, can use:
-      // if (saveResult.isError()) return error(saveResult.value);
-      // const savedEntity = saveResult.value;
-
-      // 5. Return Output
       return ok({
-        llmProviderConfigId: llmConfigEntity.id().value(),
+        id: configEntity.id().value(),
+        name: configEntity.name().value(),
+        providerId: configEntity.providerId().value(),
       });
-
-    } catch (errorValue: unknown) {
-      // Should be caught by safeParse, but as a safeguard
-      if (errorValue instanceof ZodError) {
-        return error(errorValue);
+    } catch (e: unknown) {
+      if (e instanceof ValueError || (e instanceof DomainError && !(e instanceof ZodError))) {
+        this.logger.warn(`[CreateLLMProviderConfigUseCase] Value/Domain error: ${e.message}`, { error: e });
+        return resultError(e);
       }
-      // Catch errors from VO creation
-      if (errorValue instanceof DomainError || errorValue instanceof ValueError) {
-        return error(errorValue);
+      const message = e instanceof Error ? e.message : String(e);
+      const logError = e instanceof Error ? e : new Error(message);
+      this.logger.error(`[CreateLLMProviderConfigUseCase] Unexpected error: ${message}`, { originalError: logError });
+      // Wrap in DomainError if not already a ZodError (which is a DomainError)
+      if (e instanceof ZodError) {
+          return resultError(e);
       }
-      console.error('[CreateLLMProviderConfigUseCase] Unexpected error:', errorValue);
-      const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
-      return error(
-        new DomainError(
-          `An unexpected error occurred while creating the LLM provider configuration: ${message}`,
-        ),
-      );
+      return resultError(new DomainError(`Unexpected error creating LLM config: ${message}`, logError));
     }
   }
 }

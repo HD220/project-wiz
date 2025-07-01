@@ -134,8 +134,13 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
     *   **Do not use comments to disable code (commented-out lines).** If the code is not needed, remove it. Git history maintains previous versions.
     *   **Do not include a comment at the start of a file indicating its path.** File paths are evident from the IDE and version control.
     *   **Do not include a comment at the end of a file indicating something like `[end of file]` or `[end of X]`.** These are unnecessary and add clutter.
+    *   **REMOVE ALL EXPLANATORY COMMENTS FOR CODE MODIFICATIONS:** After any change, review and remove any comments added to explain the change itself (e.g., 'fixed X', 'added Y'). Git history serves this purpose. Comments are only permissible to explain the *why* of complex logic that cannot be simplified, never the *what*.
 
-#### 2.2.5. Technology/Tool - Specific Best Practices
+#### 2.2.5. Prioritize Clarity Over Comments
+
+*   **Strive for Self-Documenting Code:** Instead of commenting on a confusing section of code, dedicate time to refactor it until it becomes self-explanatory. Well-chosen variable, function, and class names are always preferable to comments. Code should clearly communicate its intent.
+
+#### 2.2.6. Technology/Tool - Specific Best Practices
 
 ##### Electron.js
 *   **Separate Main and Renderer Processes:** Strictly separate logic. The main process handles app lifecycle and native APIs. Renderer processes handle the UI. Avoid mixing concerns.

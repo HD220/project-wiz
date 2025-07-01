@@ -1,4 +1,4 @@
-// src_refactored/core/application/common/ports/repository.types.ts
+// src_refactored/core/common/ports/repository.types.ts
 
 /**
  * Options for pagination.

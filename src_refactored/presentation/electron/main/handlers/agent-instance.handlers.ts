@@ -17,12 +17,12 @@ import {
   UpdateAgentInstanceResponse,
   GetAgentInstancesByProjectRequest,
   GetAgentInstancesByProjectResponse,
-} from "../../../../shared/ipc-types/agent-instance";
+} from "../../../../shared/ipc-types";
 import { AgentInstance } from "../../../../shared/types/entities";
 import { AgentLLM } from "../../../../shared/types/entities";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
-export function registerAgentInstanceHandlers() {
+function registerQueryAgentInstanceHandlers() {
   ipcMain.handle(
     GET_AGENT_INSTANCES_CHANNEL,
     async (): Promise<GetAgentInstancesResponse> => {
@@ -61,7 +61,9 @@ export function registerAgentInstanceHandlers() {
       return { agentInstance: undefined, error: "Agent Instance not found" };
     }
   );
+}
 
+function registerCreateAgentInstanceHandler() {
   ipcMain.handle(
     CREATE_AGENT_INSTANCE_CHANNEL,
     async (
@@ -87,7 +89,9 @@ export function registerAgentInstanceHandlers() {
       return { agentInstance: newInstance };
     }
   );
+}
 
+function registerUpdateAgentInstanceHandler() {
   ipcMain.handle(
     UPDATE_AGENT_INSTANCE_CHANNEL,
     async (
@@ -122,4 +126,10 @@ export function registerAgentInstanceHandlers() {
       };
     }
   );
+}
+
+export function registerAgentInstanceHandlers() {
+  registerQueryAgentInstanceHandlers();
+  registerCreateAgentInstanceHandler();
+  registerUpdateAgentInstanceHandler();
 }
