@@ -87,7 +87,7 @@ export class CreatePersonaTemplateUseCase
       const logError = e instanceof Error ? e : new Error(message);
       this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, {
         error: logError,
-        input, // Log the original input for context
+        input,
         useCase: 'CreatePersonaTemplateUseCase',
       });
       return resultError(

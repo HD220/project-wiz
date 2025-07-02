@@ -6,13 +6,12 @@ import { Agent } from '@/core/domain/agent/agent.entity';
 import { AgentExecutionPayload, JobProcessingOutput, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO, ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history.vo';
-import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo'; // Import JobIdVO
+import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface';
 import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 
 import { isError } from '@/shared/result';
 
-// Re-define ExecutionState or import if it becomes a shared type
 interface ExecutionState {
   goalAchieved: boolean;
   iterations: number;
@@ -36,7 +35,7 @@ export class AgentInteractionService {
   ) {}
 
   public async performLlmInteraction(
-    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
     agent: Agent,
     state: ExecutionState,
   ): Promise<void> {
@@ -47,8 +46,6 @@ export class AgentInteractionService {
     const conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
 
     this.logLlmCall(job.id().value(), job.getProps().attemptsMade, conversationMessages);
-    // Temporarily removing the third argument from addLog as it's not expected by the method signature.
-    // The structured message details might need a different logging approach or method.
     job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id().value()} (attempt ${job.getProps().attemptsMade + 1})`, 'DEBUG');
     // TODO: Consider how to log the detailed message content if necessary, perhaps via logger.debug directly.
 
@@ -68,7 +65,7 @@ export class AgentInteractionService {
 
     state.assistantMessage = llmGenerationResult.value;
     state.llmResponseText = state.assistantMessage.content || '';
-    const currentJobIdVal = job.id().value; // Store in a variable to see if it helps TS
+    const currentJobIdVal = job.id().value;
     this.logger.info(
       `LLM response (iteration ${state.iterations}) for Job ID: ${currentJobIdVal}: ${state.llmResponseText.substring(0, 100)}...`,
     );
@@ -77,7 +74,6 @@ export class AgentInteractionService {
     if (this._isUnusableResponse(state)) {
       if (this._canReplan(state)) {
         this._attemptReplan(job, state);
-        // Indicate that a replan was attempted and the current interaction should yield
         return;
       }
       this.logger.warn(
@@ -101,13 +97,13 @@ export class AgentInteractionService {
     return state.replanAttemptsForEmptyResponse < this.maxReplanAttemptsForEmptyResponse;
   }
 
-  private _attemptReplan(job: JobEntity<AgentExecutionPayload, unknown>, state: ExecutionState): void { // R changed to unknown
+  private _attemptReplan(job: JobEntity<AgentExecutionPayload, unknown>, state: ExecutionState): void {
     this.logger.warn(
       `LLM response for Job ID ${job.id().value()} was empty/too short. Attempting re-plan (${state.replanAttemptsForEmptyResponse +
         1}/${this.maxReplanAttemptsForEmptyResponse})`,
     );
     const systemNote = ActivityHistoryEntryVO.create(
-      ActivityEntryType.SYSTEM_MESSAGE, // Changed from USER
+      ActivityEntryType.SYSTEM_MESSAGE,
       `System Note: Your previous response was empty or too short (received: "${state.llmResponseText}"). Please provide a more detailed response or use a tool.`,
     );
     const updatedHistory = state.activityHistory.addEntry(systemNote);
@@ -133,14 +129,11 @@ export class AgentInteractionService {
     const messages: LanguageModelMessage[] = [{ role: 'system', content: systemMessageContent }];
     history.entries.forEach((entry: ActivityHistoryEntryVO) => {
       const role = entry.type;
-      // Content can be an object for tool calls/results, ensure it's stringified if not already a string.
       const content = typeof entry.content === 'string' ? entry.content : JSON.stringify(entry.content);
       const toolCalls = entry.metadata?.tool_calls as LanguageModelMessageToolCall[] | undefined;
       const toolCallId = entry.metadata?.toolCallId as string | undefined;
 
-      // Map ActivityEntryType to LanguageModelMessage roles
       if (role === ActivityEntryType.SYSTEM_MESSAGE || role === ActivityEntryType.LLM_REQUEST || role === ActivityEntryType.OBSERVATION || role === ActivityEntryType.THOUGHT) {
-        // Assuming these types represent input from the 'user' or 'system' side to the LLM
         messages.push({ role: 'user', content });
       } else if (role === ActivityEntryType.LLM_RESPONSE) {
         messages.push({ role: 'assistant', content, tool_calls: toolCalls });
@@ -151,13 +144,11 @@ export class AgentInteractionService {
           this.logger.warn('Tool result entry missing toolCallId, skipping conversion to LLM message.');
         }
       }
-      // Other ActivityEntryType like ERROR might not be directly passed to LLM or handled differently
     });
     return messages;
   }
 
   public logLlmCall(jobIdValue: string, attempt: number, messages: LanguageModelMessage[]): void {
-    // attemptsMade is 0-indexed from job props, so logging attempt + 1 for 1-indexed human-readable log
     this.logger.info(`Calling LLM for Job ID: ${jobIdValue}. Attempt ${attempt + 1}`, {
       jobId: jobIdValue,
       messages: messages.map((message: LanguageModelMessage) => ({

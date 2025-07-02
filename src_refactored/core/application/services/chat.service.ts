@@ -1,10 +1,8 @@
 // src_refactored/core/application/services/chat.service.ts
 import { injectable, inject } from 'inversify';
 
-// Assuming a logger is useful
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface';
-// import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types'; // Not used
 
 import {
   ChatSendMessagePayload,
@@ -13,8 +11,7 @@ import {
   ChatStreamEndPayload,
   ChatStreamErrorPayload
 } from '@/shared/ipc-chat.types';
-// Corrected import names
-import { Result, ok, error as resultError, isSuccess } from '@/shared/result'; // Added isSuccess here
+import { Result, ok, error as resultError, isSuccess } from '@/shared/result';
 
 import { IChatService, IChatServiceSendMessageResponse } from '../ports/services/i-chat.service';
 
@@ -29,7 +26,6 @@ export class ChatService implements IChatService {
     payload: ChatSendMessagePayload,
     sendStreamEventCallback: (event: ChatStreamEventPayload) => void,
   ): Promise<Result<IChatServiceSendMessageResponse, Error>> {
-    // payload.sessionId does not exist on ChatSendMessagePayload, removing from log or using a placeholder
     this.logger.info(`[ChatService] Handling send message stream.`);
 
     if (!this.llmAdapter) {
@@ -41,7 +37,6 @@ export class ChatService implements IChatService {
     if (typeof this.llmAdapter.streamText !== 'function') {
       return this._handleUnsupportedStream(sendStreamEventCallback);
     }
-    // Assign to a const to help TypeScript's control flow analysis
     const streamTextFn = this.llmAdapter.streamText;
 
     return this._processLLMStream(payload, sendStreamEventCallback, streamTextFn);
@@ -68,7 +63,7 @@ export class ChatService implements IChatService {
   private async _processLLMStream(
     payload: ChatSendMessagePayload,
     sendStreamEventCallback: (event: ChatStreamEventPayload) => void,
-    streamTextFn: (prompt: string, options?: any) => AsyncGenerator<Result<string, any>> // Added streamTextFn param
+    streamTextFn: (prompt: string, options?: any) => AsyncGenerator<Result<string, any>>
   ): Promise<Result<IChatServiceSendMessageResponse, Error>> {
     try {
       let effectiveMessages = payload.messages;
@@ -77,16 +72,13 @@ export class ChatService implements IChatService {
       }
 
       const simplePrompt = effectiveMessages.map(message => `${message.role}: ${message.content}`).join('\n');
-      // payload.options does not exist on ChatSendMessagePayload.
-      // streamText options are LLMGenerationOptions, not from payload.
-      // Calling without options for now, or define default/specific options if needed.
-      const stream = streamTextFn!(simplePrompt /*, pass LLMGenerationOptions here if needed */); // Use passed function with non-null assertion
+      const stream = streamTextFn!(simplePrompt);
 
       for await (const result of stream) {
-        if (isSuccess(result)) { // Use type guard isSuccess
+        if (isSuccess(result)) {
           const tokenPayload: ChatStreamTokenPayload = { type: 'token', data: result.value };
           sendStreamEventCallback(tokenPayload);
-        } else { // result is Failure<LLMError>
+        } else {
           this.logger.error('[ChatService] Error from LLM stream', result.error, { service: 'ChatService', operation: '_processLLMStream' });
           const errorPayload: ChatStreamErrorPayload = { type: 'error', error: { message: result.error.message, name: result.error.name }};
           sendStreamEventCallback(errorPayload);

@@ -5,10 +5,13 @@ import EventEmitter from 'node:events';
 
 import { Container } from "inversify";
 
+// Bind IToolRegistryService
+import { APPLICATION_TYPES } from "@/core/application/common/types";
 import {
   IJobRepository,
   JOB_REPOSITORY_TOKEN,
 } from "@/core/application/ports/job-repository.interface";
+import { IToolRegistryService } from "@/core/application/ports/services/i-tool-registry.service";
 import {
   AbstractQueue,
   getQueueServiceToken,
@@ -21,6 +24,7 @@ import { DrizzleQueueFacade } from "@/infrastructure/queue/drizzle/drizzle-queue
 import { JobProcessingService } from "@/infrastructure/queue/drizzle/job-processing.service";
 import { QueueMaintenanceService } from "@/infrastructure/queue/drizzle/queue-maintenance.service";
 import { QueueServiceCore } from "@/infrastructure/queue/drizzle/queue-service-core";
+import { ToolRegistryService } from "@/infrastructure/services/tool-registry/tool-registry.service";
 
 export const appContainer = new Container();
 
@@ -28,6 +32,10 @@ export const appContainer = new Container();
 appContainer
   .bind<IJobRepository>(JOB_REPOSITORY_TOKEN)
   .toConstantValue(new DrizzleJobRepository(db));
+
+// Tool Registry Service binding
+appContainer.bind<IToolRegistryService>(APPLICATION_TYPES.IToolRegistryService).to(ToolRegistryService).inSingletonScope();
+
 appContainer
   .bind<AbstractQueue<unknown, unknown>>(getQueueServiceToken("default"))
   .toDynamicValue((context) => {

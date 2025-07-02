@@ -7,11 +7,11 @@ import { AgentExecutionPayload, JobProcessingOutput, ExecutionHistoryEntry } fro
 import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO, ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history.vo';
 import { LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
+import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
 import { IToolExecutionContext } from '@/core/tools/tool.interface';
 
 import { ToolValidationService } from './tool-validation.service';
 
-import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
 
 interface ExecutionState {
   goalAchieved: boolean;
@@ -33,7 +33,7 @@ export class AgentToolService {
   ) {}
 
   public async handleToolCallsIfPresent(
-    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
     agent: Agent,
     state: ExecutionState,
   ): Promise<void> {
@@ -43,7 +43,7 @@ export class AgentToolService {
   }
 
   private async processToolCalls(
-    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
     agent: Agent,
     state: ExecutionState,
     toolCalls: LanguageModelMessageToolCall[],
@@ -67,25 +67,23 @@ export class AgentToolService {
   private async _executeSingleToolCall(
     toolCall: LanguageModelMessageToolCall,
     agent: Agent,
-    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
   ): Promise<ExecutionHistoryEntry> {
     const executionContext: IToolExecutionContext = {
       agentId: agent.id().value(),
       jobId: job.id().value(),
       userId: job.getProps().payload.userId,
     };
-    // Delegate to ToolValidationService
     return this.toolValidationService.processAndValidateSingleToolCall(toolCall, executionContext);
   }
 
   private _isCriticalToolError(
     executionEntry: ExecutionHistoryEntry,
     state: ExecutionState,
-    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
   ): boolean {
     if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
       const toolError = executionEntry.error;
-      // Metadata for isRecoverable is logged via this.logger.error context; job.addLog takes only message and level.
       job.addLog(`Tool '${toolError.toolName || executionEntry.name}' error: ${toolError.message}. Recoverable: ${toolError.isRecoverable}`, 'ERROR');
       if (!toolError.isRecoverable) {
         state.criticalErrorEncounteredThisTurn = true;
@@ -101,7 +99,7 @@ export class AgentToolService {
   }
 
   private _addToolResultToConversation(
-    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
     executionEntry: ExecutionHistoryEntry,
     toolCall: LanguageModelMessageToolCall,
   ): void {

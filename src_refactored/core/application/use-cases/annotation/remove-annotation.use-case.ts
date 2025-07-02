@@ -12,7 +12,7 @@ import { IUseCase as Executable } from '@/application/common/ports/use-case.inte
 
 import { TYPES } from '@/infrastructure/ioc/types';
 
-import { Result, ok, error as resultError, isError } from '@/shared/result'; // Added isError, aliased error
+import { Result, ok, error as resultError, isError } from '@/shared/result';
 
 import {
   RemoveAnnotationUseCaseInput,
@@ -44,7 +44,7 @@ export class RemoveAnnotationUseCase
     const validInput = validationResult.data;
 
     try {
-      const annotationIdVo = AnnotationId.fromString(validInput.annotationId); // Can throw ValueError
+      const annotationIdVo = AnnotationId.fromString(validInput.annotationId);
 
       const deleteResult = await this.annotationRepository.delete(annotationIdVo);
 
@@ -59,12 +59,9 @@ export class RemoveAnnotationUseCase
         return resultError(err);
       }
 
-      // If deleteResult is success, its value is void, so no need to check it.
-      // The problem description implies success if no error.
       return ok({ success: true, annotationId: validInput.annotationId });
 
     } catch (e: unknown) {
-      // Catch errors from AnnotationId.fromString
       if (e instanceof ValueError) {
         this.logger.warn(
           `[RemoveAnnotationUseCase] Invalid annotation ID: ${e.message}`,
@@ -72,11 +69,7 @@ export class RemoveAnnotationUseCase
         );
         return resultError(e)
       }
-      // Catch other specific errors if necessary, or fall through to generic handling
-      // For the instanceof DomainError issue, let's assume it's a temporary glitch or needs other files to be fixed first.
-      // We will proceed cautiously.
       if (e instanceof ZodError || e instanceof NotFoundError || (e instanceof Error && e.constructor.name === 'DomainError')) {
-        // Using constructor.name as a temporary workaround for the instanceof DomainError issue if it persists
         return resultError(e as ZodError | NotFoundError | DomainError);
       }
       const message = e instanceof Error ? e.message : String(e);

@@ -4,8 +4,7 @@ import { ZodError } from 'zod';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 
-import { DomainError, ValueError } from '@/domain/common/errors'; // Added ValueError
-// Import BaseUrl along with LLMProviderConfig
+import { DomainError, ValueError } from '@/domain/common/errors';
 import { LLMProviderConfig, BaseUrl } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';
@@ -17,7 +16,7 @@ import { IUseCase as Executable } from '@/application/common/ports/use-case.inte
 
 import { TYPES } from '@/infrastructure/ioc/types';
 
-import { Result, ok, error as resultError, isError } from '@/shared/result'; // Added isError
+import { Result, ok, error as resultError, isError } from '@/shared/result';
 
 import {
   CreateLLMProviderConfigUseCaseInput,
@@ -31,7 +30,7 @@ export class CreateLLMProviderConfigUseCase
     Executable<
       CreateLLMProviderConfigUseCaseInput,
       CreateLLMProviderConfigUseCaseOutput,
-      DomainError | ZodError | ValueError // Added ValueError
+      DomainError | ZodError | ValueError
     >
 {
   constructor(
@@ -51,21 +50,14 @@ export class CreateLLMProviderConfigUseCase
     const validInput = validationResult.data;
 
     try {
-      // These VO creations can throw ValueError
       const nameVo = LLMProviderConfigName.create(validInput.name);
       const providerIdVo = LLMProviderId.create(validInput.providerId);
-      // apiKey and baseUrl are optional in input, but required by VOs if provided.
-      // LLMApiKey and BaseUrl VOs should handle null/undefined if that's a valid state,
-      // or the entity should handle optional VOs.
-      // For now, let's assume they are created only if present in input.
       const apiKeyVo = validInput.apiKey ? LLMApiKey.create(validInput.apiKey) : undefined;
 
       let baseUrlVo: BaseUrl | undefined;
       if (validInput.baseUrl && typeof validInput.baseUrl === 'string') {
-        // BaseUrl.create will throw if the URL is invalid. This is caught by the try-catch block.
         baseUrlVo = BaseUrl.create(validInput.baseUrl);
       }
-      // If validInput.baseUrl is null or undefined, baseUrlVo remains undefined, which is correct for the entity.
 
       const configIdVo = LLMProviderConfigId.generate();
 
@@ -74,8 +66,7 @@ export class CreateLLMProviderConfigUseCase
         name: nameVo,
         providerId: providerIdVo,
         apiKey: apiKeyVo,
-        baseUrl: baseUrlVo, // Pass the VO or undefined
-        // other optional props from schema like models, parameters, etc.
+        baseUrl: baseUrlVo,
       });
 
       const saveResult = await this.configRepository.save(configEntity);
@@ -88,7 +79,6 @@ export class CreateLLMProviderConfigUseCase
         return resultError(err);
       }
 
-      // Ensure the output matches CreateLLMProviderConfigUseCaseOutput
       return ok({
         llmProviderConfigId: configEntity.id().value(),
       });
@@ -106,7 +96,6 @@ export class CreateLLMProviderConfigUseCase
         `[CreateLLMProviderConfigUseCase] Unexpected error: ${message}`,
         { error: logError, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
       );
-      // Wrap in DomainError if not already a ZodError (which is a DomainError)
       if (e instanceof ZodError) {
           return resultError(e);
       }

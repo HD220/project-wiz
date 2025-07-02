@@ -1,7 +1,6 @@
 // src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
 
-// Added import for ILogger
 import { ILogger } from '@/core/common/services/i-logger.service';
 
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
@@ -10,9 +9,7 @@ import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 
-import { Result, ok, error, isError } from '@/shared/result'; // Added isError
-
-// Removed unused import for Inject: import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
+import { Result, ok, error, isError } from '@/shared/result';
 
 import {
   LoadAgentInternalStateUseCaseInput,
@@ -24,15 +21,12 @@ export class LoadAgentInternalStateUseCase
   implements
     Executable<
       LoadAgentInternalStateUseCaseInput,
-      // Output can be null if state not found
       LoadAgentInternalStateUseCaseOutput | null,
       DomainError | ZodError | ValueError | NotFoundError
     >
 {
   constructor(
-    // @Inject(IAgentInternalStateRepositorySymbol) // Example for IoC
     private readonly stateRepository: IAgentInternalStateRepository,
-    // @Inject(ILoggerSymbol) // Example for IoC
     private readonly logger: ILogger,
   ) {}
 
@@ -54,8 +48,8 @@ export class LoadAgentInternalStateUseCase
         const errorMessage = `Failed to load internal state for agent ${validInput.agentId}: ${stateResult.error.message}`;
         this.logger.error(
           errorMessage,
-          stateResult.error, // Error instance as second argument
-          { // Metadata as third argument
+          stateResult.error,
+          {
             agentId: validInput.agentId,
             useCase: 'LoadAgentInternalStateUseCase',
           }
@@ -73,7 +67,7 @@ export class LoadAgentInternalStateUseCase
         agentId: stateEntity.agentId().value(),
         currentProjectId: stateEntity.currentProjectId()?.value() || null,
         currentGoal: stateEntity.currentGoal()?.value() || null,
-        generalNotes: [...stateEntity.generalNotes().list()], // Ensure mutable array
+        generalNotes: [...stateEntity.generalNotes().list()],
       };
 
       return ok(output);
@@ -91,8 +85,8 @@ export class LoadAgentInternalStateUseCase
       const errorToLog = e instanceof Error ? e : new Error(message);
       this.logger.error(
         `[LoadAgentInternalStateUseCase] Unexpected error for agent ${agentIdForLog}: ${message}`,
-        errorToLog, // Error instance as second argument
-        { // Metadata as third argument
+        errorToLog,
+        {
           agentId: agentIdForLog,
           useCase: 'LoadAgentInternalStateUseCase',
         }

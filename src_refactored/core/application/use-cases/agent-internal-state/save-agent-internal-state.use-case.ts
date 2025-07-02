@@ -1,7 +1,7 @@
 // src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts
 import { ZodError } from 'zod';
 
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
 import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
@@ -12,9 +12,8 @@ import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-st
 import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-// Removed duplicate import of DomainError, ValueError, NotFoundError
 
-import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result'; // Import helpers
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
 
 
 import {
@@ -33,8 +32,7 @@ export class SaveAgentInternalStateUseCase
 {
   constructor(
     private readonly stateRepository: IAgentInternalStateRepository,
-    // Added logger dependency
-    private readonly logger: ILogger, // Corrected type
+    private readonly logger: ILogger,
   ) {}
 
   async execute(
@@ -42,40 +40,36 @@ export class SaveAgentInternalStateUseCase
   ): Promise<Result<SaveAgentInternalStateUseCaseOutput, DomainError | ZodError | ValueError | NotFoundError>> {
     const validationResult = SaveAgentInternalStateUseCaseInputSchema.safeParse(input);
     if (!validationResult.success) {
-      return resultError(validationResult.error); // Corrected
+      return resultError(validationResult.error);
     }
     const validInput = validationResult.data;
 
     try {
-      const agentIdVo = AgentId.fromString(validInput.agentId); // Assumes this throws on error
+      const agentIdVo = AgentId.fromString(validInput.agentId);
       const existingStateResult = await this.stateRepository.findByAgentId(agentIdVo);
 
-      if (isError(existingStateResult)) { // Corrected
-        // Pass existingStateResult.error which is already an Error instance
+      if (isError(existingStateResult)) {
         return this._handleRepositoryError(validInput.agentId, 'check existing state', existingStateResult.error);
       }
 
-      // If not an error, existingStateResult.value is AgentInternalState | null
       const stateEntity = existingStateResult.value
-        ? this._updateExistingState(existingStateResult.value, validInput) // Assumes these throw on error
-        : this._createNewState(agentIdVo, validInput); // Assumes these throw on error
+        ? this._updateExistingState(existingStateResult.value, validInput)
+        : this._createNewState(agentIdVo, validInput);
 
       const isNewState = !existingStateResult.value;
       const saveResult = await this.stateRepository.save(stateEntity);
 
-      if (isError(saveResult)) { // Corrected
-         // Pass saveResult.error which is already an Error instance
+      if (isError(saveResult)) {
         return this._handleRepositoryError(validInput.agentId, `save agent internal state (new: ${isNewState})`, saveResult.error);
       }
 
       return ok({ success: true });
-    } catch (e: unknown) { // Changed errValue to e
+    } catch (e: unknown) {
       return this._handleUnexpectedError(input.agentId, e);
     }
   }
 
   private _createNewState(agentIdVo: AgentId, validInput: SaveAgentInternalStateUseCaseInput): AgentInternalState {
-    // These VOs/Entity static methods are expected to throw on failure.
     const currentProjectIdVo = validInput.currentProjectId ? CurrentProjectId.fromString(validInput.currentProjectId) : undefined;
     const currentGoalVo = validInput.currentGoal !== null && validInput.currentGoal !== undefined ? CurrentGoal.create(validInput.currentGoal) : undefined;
     const generalNotesVo = GeneralNotesCollection.create(validInput.generalNotes || []);
@@ -83,7 +77,6 @@ export class SaveAgentInternalStateUseCase
   }
 
   private _updateExistingState(stateEntity: AgentInternalState, validInput: SaveAgentInternalStateUseCaseInput): AgentInternalState {
-    // These VOs/Entity methods are expected to throw on failure or return updated entity.
     let updatedEntity = stateEntity;
     if (Object.prototype.hasOwnProperty.call(validInput, 'currentProjectId')) {
       const newProjectIdVo = validInput.currentProjectId ? CurrentProjectId.fromString(validInput.currentProjectId) : undefined;
@@ -95,15 +88,14 @@ export class SaveAgentInternalStateUseCase
     }
     if (Object.prototype.hasOwnProperty.call(validInput, 'generalNotes')) {
       const newNotesVo = GeneralNotesCollection.create(validInput.generalNotes || []);
-      updatedEntity = updatedEntity.setGeneralNotes(newNotesVo); // Use the new method
+      updatedEntity = updatedEntity.setGeneralNotes(newNotesVo);
     }
     return updatedEntity;
   }
 
   private _handleRepositoryError(agentId: string, action: string, repoError: Error): Result<never, DomainError> {
     const errorMessage = `Failed to ${action} for agent ${agentId}: ${repoError.message}`;
-    this.logger.error(`[SaveAgentInternalStateUseCase] ${errorMessage}`, {
-      error: repoError,
+    this.logger.error(`[SaveAgentInternalStateUseCase] ${errorMessage}`, repoError, {
       agentId,
       action,
       useCase: 'SaveAgentInternalStateUseCase',
@@ -113,18 +105,17 @@ export class SaveAgentInternalStateUseCase
 
   private _handleUnexpectedError(agentId: string, errorValue: unknown): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
     if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
-      // Log known error types before returning for better traceability if needed
-      this.logger.warn(`[SaveAgentInternalStateUseCase] Known error type occurred for agent ${agentId}: ${errorValue.message}`, {
-        error: errorValue,
+      this.logger.warn(`[SaveAgentInternalStateUseCase] Known error type occurred for agent ${agentId}: ${errorValue.message}`, { // Metadata for warn doesn't take Error as 2nd param
         agentId,
         useCase: 'SaveAgentInternalStateUseCase',
+        // Optionally, serialize parts of errorValue if needed and not too verbose:
+        // errorName: (errorValue as Error).name,
       });
       return resultError(errorValue);
     }
     const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
     const logError = errorValue instanceof Error ? errorValue : new Error(message);
-    this.logger.error(`[SaveAgentInternalStateUseCase] Unexpected error for agent ${agentId}: ${message}`, {
-      error: logError,
+    this.logger.error(`[SaveAgentInternalStateUseCase] Unexpected error for agent ${agentId}: ${message}`, logError, {
       agentId,
       useCase: 'SaveAgentInternalStateUseCase',
     });

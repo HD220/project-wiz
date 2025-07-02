@@ -1,13 +1,17 @@
 // src_refactored/core/application/use-cases/project/get-project-details.use-case.ts
 import { injectable, inject } from 'inversify'; // Added for IoC
+
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Added ILogger
+
 import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors'; // Added ValueError
 import { IProjectRepository } from '@/domain/project/ports/project-repository.interface';
 import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
 import { ISourceCodeRepository } from '@/domain/source-code/ports/source-code-repository.interface';
-import { TYPES } from '@/infrastructure/ioc/types'; // Added IoC TYPES
 
 import { IUseCase } from '@/application/common/ports/use-case.interface';
+
+import { TYPES } from '@/infrastructure/ioc/types'; // Added IoC TYPES
+
 
 // Import isSuccess and isError type guards
 import { Result, ok, error, isSuccess, isError } from '@/shared/result';

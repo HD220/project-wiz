@@ -2,7 +2,7 @@ import { Agent } from '@/core/domain/agent/agent.entity';
 // Corrected path
 import { DomainError } from '@/core/domain/common/errors';
 // Corrected type
-import { AgentExecutionPayload, AgentExecutorResult, SuccessfulAgentOutput } from '@/core/domain/job/job-processing.types'; // Added AgentExecutorResult, SuccessfulAgentOutput
+import { AgentExecutionPayload, AgentExecutorResult, SuccessfulAgentOutput } from '@/core/domain/job/job-processing.types';
 // Corrected type
 import { JobEntity } from '@/core/domain/job/job.entity';
 
@@ -30,6 +30,6 @@ export interface IAgentExecutor {
    *          Errors are expected to be thrown.
    */
   process(
-    job: JobEntity<AgentExecutionPayload, unknown> // R (Job's own return type) is unknown to the executor's process output
+    job: JobEntity<AgentExecutionPayload, unknown>
   ): Promise<AgentExecutorResult<SuccessfulAgentOutput>>;
 }

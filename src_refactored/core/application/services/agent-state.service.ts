@@ -7,7 +7,6 @@ import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO, ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history.vo';
 import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 
-// Re-define ExecutionState or import if it becomes a shared type
 interface ExecutionState {
   goalAchieved: boolean;
   iterations: number;
@@ -26,7 +25,7 @@ export class AgentStateService {
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  public initializeExecutionState(job: JobEntity<AgentExecutionPayload, unknown>, agent: Agent): ExecutionState { // Changed R to unknown
+  public initializeExecutionState(job: JobEntity<AgentExecutionPayload, unknown>, agent: Agent): ExecutionState {
     const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.getProps().payload);
     return {
       goalAchieved: false,
@@ -41,7 +40,7 @@ export class AgentStateService {
     };
   }
 
-  private _initializeHistories(job: JobEntity<AgentExecutionPayload, unknown>, jobPayload: AgentExecutionPayload): { currentActivityHistory: ActivityHistoryVO; currentExecutionHistory: ExecutionHistoryEntry[] } { // Changed R to unknown
+  private _initializeHistories(job: JobEntity<AgentExecutionPayload, unknown>, jobPayload: AgentExecutionPayload): { currentActivityHistory: ActivityHistoryVO; currentExecutionHistory: ExecutionHistoryEntry[] } {
     let activityHistory = job.getConversationHistory();
     if (activityHistory.length === 0) {
       const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.getProps().name}`;

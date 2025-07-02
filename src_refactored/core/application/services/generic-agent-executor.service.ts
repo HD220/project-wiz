@@ -8,12 +8,11 @@ import { Agent } from '@/core/domain/agent/agent.entity';
 import { IAgentRepository } from '@/core/domain/agent/ports/agent-repository.interface';
 import { AgentId } from '@/core/domain/agent/value-objects/agent-id.vo';
 import {
-  JobProcessingOutput, // Will be removed from process method return type
   AgentExecutionPayload,
   ExecutionHistoryEntry,
   AgentExecutorStatus,
-  AgentExecutorResult, // Added
-  SuccessfulAgentOutput, // Added
+  AgentExecutorResult,
+  SuccessfulAgentOutput,
 } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO } from '@/core/domain/job/value-objects/activity-history.vo';
@@ -50,33 +49,29 @@ export class GenericAgentExecutor implements IAgentExecutor {
     @inject(AgentStateService) private readonly agentStateService: AgentStateService,
   ) {}
 
-  // Removed erroneous import and class re-declaration that was here
-
   public async process(
-    job: JobEntity<AgentExecutionPayload, unknown> // Changed R to unknown
-  ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> { // Changed return type
+    job: JobEntity<AgentExecutionPayload, unknown>
+  ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> {
     const jobPayload = job.getProps().payload;
     const agentId = jobPayload.agentId;
-    const jobId = job.id(); // Get the JobIdVO instance
+    const jobId = job.id();
 
     this.logger.info(`Processing Job ID: ${jobId.value()} with Agent ID: ${agentId}`, { jobId: jobId.value(), agentId });
 
     const agentFetchResult = await this._fetchAgent(agentId, job);
     if (isError(agentFetchResult)) {
-        // agentFetchResult.error is already ApplicationError due to _fetchAgent's return type
         const appError: ApplicationError = agentFetchResult.error;
         const errorMessage = appError.message || `Failed to fetch agent ${String(agentId)}`;
         this.logger.error(
             `[GenericAgentExecutor] Critical error fetching agent ${String(agentId)}: ${errorMessage}`,
-            appError.cause, // Pass cause as second arg
-            { component: 'GenericAgentExecutor', operation: '_fetchAgent', agentId: String(agentId), jobId: jobId.value() } // Meta
+            appError.cause,
+            { component: 'GenericAgentExecutor', operation: '_fetchAgent', agentId: String(agentId), jobId: jobId.value() }
         );
         job.addLog(`Critical error fetching agent: ${errorMessage}`, 'ERROR');
         throw appError;
     }
     const agent = agentFetchResult.value;
 
-    // job's R type is unknown here, which is compatible with initializeExecutionState's expected input after its signature change
     const executionState = this.agentStateService.initializeExecutionState(job, agent);
 
     this.logger.info(`Job ID: ${jobId.value()} processing attempt: ${job.getProps().attemptsMade}`);
@@ -89,7 +84,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
   }
 
   private async _executionLoop(
-    job: JobEntity<AgentExecutionPayload, unknown>, // Changed R to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
     agent: Agent,
     executionState: ExecutionState
   ): Promise<void> {
@@ -118,7 +113,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return state.iterations < state.maxIterations && !state.goalAchieved && !state.criticalErrorEncounteredThisTurn;
   }
 
-  private _handleEndOfLoopConditions(job: JobEntity<AgentExecutionPayload, unknown>, executionState: ExecutionState): boolean { // Changed R to unknown
+  private _handleEndOfLoopConditions(job: JobEntity<AgentExecutionPayload, unknown>, executionState: ExecutionState): boolean {
     if (executionState.goalAchieved) {
       this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${executionState.iterations}.`);
       return true;
@@ -130,9 +125,9 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return false;
   }
 
-  private async _fetchAgent(agentIdString: string, job: JobEntity<AgentExecutionPayload, unknown>): Promise<Result<Agent, ApplicationError>> { // Changed R to unknown
+  private async _fetchAgent(agentIdString: string, job: JobEntity<AgentExecutionPayload, unknown>): Promise<Result<Agent, ApplicationError>> {
     try {
-      const agentIdVo = AgentId.fromString(agentIdString); // Changed from create to fromString
+      const agentIdVo = AgentId.fromString(agentIdString);
       const agentResult = await this.agentRepository.findById(agentIdVo);
 
       if (isError(agentResult)) {
@@ -145,7 +140,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
       if (!agentResult.value) {
         const message = `Agent with ID ${agentIdString} not found.`;
-        this.logger.error(message); // No error object to pass as cause
+        this.logger.error(message);
         job.addLog(message, 'ERROR');
         return resultError(new ApplicationError(message));
       }
@@ -162,7 +157,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
   private _constructFinalResult(
     job: JobEntity<AgentExecutionPayload, unknown>,
     state: ExecutionState,
-  ): AgentExecutorResult<SuccessfulAgentOutput> { // Changed return type
+  ): AgentExecutorResult<SuccessfulAgentOutput> {
     if (state.goalAchieved) {
       return this._createJobProcessingOutput(job, state, AgentExecutorStatus.SUCCESS, `Goal achieved. Last LLM response: ${state.llmResponseText}`);
     }
@@ -186,11 +181,11 @@ export class GenericAgentExecutor implements IAgentExecutor {
   }
 
   private _createJobProcessingOutput(
-    job: JobEntity<AgentExecutionPayload, unknown>, // R type changed to unknown
+    job: JobEntity<AgentExecutionPayload, unknown>,
     state: ExecutionState,
     status: AgentExecutorStatus,
     message: string,
-  ): AgentExecutorResult<SuccessfulAgentOutput> { // Return type changed
+  ): AgentExecutorResult<SuccessfulAgentOutput> {
     let successfulOutput: SuccessfulAgentOutput | undefined;
     if (status === AgentExecutorStatus.SUCCESS) {
       job.updateProgress(100);
@@ -209,9 +204,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     };
   }
 
-  private _getSerializableHistory(job: JobEntity<AgentExecutionPayload, unknown>) { // R type changed
-    // ActivityHistoryVO.toPersistence() returns an object like { entries: SerializedEntry[], maxEntries?: number }
-    // We want just the array of serialized entries.
+  private _getSerializableHistory(job: JobEntity<AgentExecutionPayload, unknown>) {
     return job.getConversationHistory().toPersistence().entries;
   }
 }

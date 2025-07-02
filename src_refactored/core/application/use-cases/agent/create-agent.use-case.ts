@@ -84,7 +84,7 @@ export class CreateAgentUseCase
 
       return ok({ agentId: agentEntity.id().value() });
     } catch (e: unknown) {
-      return this._handleUseCaseError(e, validInput); // Pass validInput here
+      return this._handleUseCaseError(e, validInput);
     }
   }
 

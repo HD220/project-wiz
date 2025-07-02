@@ -47,7 +47,6 @@ export class SaveAnnotationUseCase
     const validInput = validationResult.data;
 
     try {
-      // _createAnnotation and _updateAnnotation now return Result types
       let annotationEntityResult: Result<Annotation, DomainError | NotFoundError | ValueError>;
       if (validInput.id) {
         annotationEntityResult = await this._updateAnnotation(validInput);
@@ -56,7 +55,6 @@ export class SaveAnnotationUseCase
       }
 
       if (isError(annotationEntityResult)) {
-        // Log the specific error before returning it
         this.logger.warn(`[SaveAnnotationUseCase] Error creating/updating annotation entity: ${annotationEntityResult.error.message}`, { error: annotationEntityResult.error });
         return resultError(annotationEntityResult.error);
       }
@@ -83,8 +81,6 @@ export class SaveAnnotationUseCase
         updatedAt: finalEntity.updatedAt().toISOString(),
       });
     } catch (e: unknown) {
-      // This catch block is now primarily for truly unexpected errors,
-      // as VO/Entity creation errors should be wrapped in Results by helper methods.
       return this._handleUseCaseError(e, validInput, validInput.id);
     }
   }
@@ -99,8 +95,8 @@ export class SaveAnnotationUseCase
       const annotation = Annotation.create({
         id: newAnnotationId,
         text: textVo,
-        agentId: agentIdVo === undefined ? null : agentIdVo, // Handle undefined for entity
-        jobId: jobIdVo === undefined ? null : jobIdVo,       // Handle undefined for entity
+        agentId: agentIdVo === undefined ? null : agentIdVo,
+        jobId: jobIdVo === undefined ? null : jobIdVo,
       });
       return ok(annotation);
     } catch (e) {
@@ -173,9 +169,7 @@ export class SaveAnnotationUseCase
   }
 
   private _handleUseCaseError(e: unknown, input: SaveAnnotationUseCaseInput, idBeingProcessed?: string): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
-    // Reverted the workaround for DomainError to use instanceof directly
     if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
-      // Log known error types before returning for better traceability if needed
       this.logger.warn(`[SaveAnnotationUseCase] Known error type occurred for annotation ID ${idBeingProcessed || 'new'}: ${e.message}`, {
         error: e,
         useCase: 'SaveAnnotationUseCase',

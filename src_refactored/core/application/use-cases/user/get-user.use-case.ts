@@ -1,24 +1,25 @@
 import { injectable, inject } from 'inversify';
 
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service'; // Corrected import
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 
-import { IUserRepository, UserRepositoryToken } from '@/domain/user/ports/user-repository.interface';
-import { UserEntity } from '@/domain/user/user.entity';
-import { UserEmail } from '@/domain/user/value-objects/user-email.vo';
-import { UserId } from '@/domain/user/value-objects/user-id.vo';
+import { IUserRepository, IUserRepositoryToken } from '@/core/domain/user/ports/user-repository.interface';
+import { User } from '@/core/domain/user/user.entity';
+import { UserEmail } from '@/core/domain/user/value-objects/user-email.vo';
+import { UserId } from '@/core/domain/user/value-objects/user-id.vo';
 
-import { ApplicationError, DomainError, NotFoundError, ValidationError } from '@/application/common/errors';
+import { ApplicationError, ApplicationValidationError } from '@/core/application/common/errors';
+import { DomainError, NotFoundError } from '@/core/domain/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
 
-import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result'; // Import helpers
+import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
 
 import { GetUserInput, GetUserOutput, GetUserInputSchema } from './get-user.schema';
 
 @injectable()
 export class GetUserUseCase implements IUseCase<GetUserInput, Promise<Result<GetUserOutput | null, DomainError>>> {
   constructor(
-    @inject(UserRepositoryToken) private readonly userRepository: IUserRepository,
-    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger, // Corrected token and type
+    @inject(IUserRepositoryToken) private readonly userRepository: IUserRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
   async execute(input: GetUserInput): Promise<Result<GetUserOutput | null, DomainError>> {
