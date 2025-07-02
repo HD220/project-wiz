@@ -26,12 +26,12 @@ export class AgentStateService {
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  public initializeExecutionState(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, agent: Agent): ExecutionState {
-    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.payload);
+  public initializeExecutionState(job: JobEntity<AgentExecutionPayload, unknown>, agent: Agent): ExecutionState { // Changed R to unknown
+    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.getProps().payload);
     return {
       goalAchieved: false,
       iterations: 0,
-      maxIterations: agent.maxIterations.value,
+      maxIterations: agent.maxIterations().value,
       llmResponseText: 'No response yet.',
       assistantMessage: null,
       replanAttemptsForEmptyResponse: 0,
@@ -41,11 +41,11 @@ export class AgentStateService {
     };
   }
 
-  private _initializeHistories(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, jobPayload: AgentExecutionPayload): { currentActivityHistory: ActivityHistoryVO; currentExecutionHistory: ExecutionHistoryEntry[] } {
+  private _initializeHistories(job: JobEntity<AgentExecutionPayload, unknown>, jobPayload: AgentExecutionPayload): { currentActivityHistory: ActivityHistoryVO; currentExecutionHistory: ExecutionHistoryEntry[] } { // Changed R to unknown
     let activityHistory = job.getConversationHistory();
     if (activityHistory.length === 0) {
-      const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.name}`;
-      const userPromptEntry = ActivityHistoryEntryVO.create(ActivityEntryType.USER, userPromptContent);
+      const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.getProps().name}`;
+      const userPromptEntry = ActivityHistoryEntryVO.create(ActivityEntryType.LLM_REQUEST, userPromptContent);
       job.addConversationEntry(userPromptEntry);
       activityHistory = job.getConversationHistory();
     }

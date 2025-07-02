@@ -82,13 +82,18 @@ export enum AgentExecutorStatus {
  * This is what the IAgentExecutor.executeJob method should resolve to on success.
  * If a critical error occurs that prevents a structured result, the promise should reject.
  */
-export interface AgentExecutorResult<O = unknown> {
-  jobId: string;
+export interface AgentExecutorResult<SuccessfulOutput = unknown> {
+  jobId: string; // This should be string, not JobIdVO, for serialization
   status: AgentExecutorStatus;
   message: string;
-  output?: O;
-  history?: unknown[];
+  output?: SuccessfulOutput; // Changed O to SuccessfulOutput for clarity
   errors?: ExecutionHistoryEntry[];
+}
+
+export interface SuccessfulAgentOutput {
+  message: string;
+  // Consider making history more specific if possible, e.g., serializable activity entries
+  history: unknown[];
 }
 
 /**

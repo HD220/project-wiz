@@ -66,7 +66,10 @@ export class SaveAnnotationUseCase
 
       if (isError(saveRepoResult)) {
         const err = saveRepoResult.error instanceof DomainError ? saveRepoResult.error : new DomainError(`Failed to save annotation: ${saveRepoResult.error.message}`, saveRepoResult.error);
-        this.logger.error(`[SaveAnnotationUseCase] Repository error: ${err.message}`, { originalError: saveRepoResult.error });
+        this.logger.error(
+          `[SaveAnnotationUseCase] Repository error: ${err.message}`,
+          { error: saveRepoResult.error, useCase: 'SaveAnnotationUseCase', input: validInput },
+        );
         return resultError(err);
       }
 
@@ -82,7 +85,7 @@ export class SaveAnnotationUseCase
     } catch (e: unknown) {
       // This catch block is now primarily for truly unexpected errors,
       // as VO/Entity creation errors should be wrapped in Results by helper methods.
-      return this._handleUseCaseError(e, validInput.id);
+      return this._handleUseCaseError(e, validInput, validInput.id);
     }
   }
 
@@ -96,14 +99,18 @@ export class SaveAnnotationUseCase
       const annotation = Annotation.create({
         id: newAnnotationId,
         text: textVo,
-        agentId: agentIdVo,
-        jobId: jobIdVo,
+        agentId: agentIdVo === undefined ? null : agentIdVo, // Handle undefined for entity
+        jobId: jobIdVo === undefined ? null : jobIdVo,       // Handle undefined for entity
       });
       return ok(annotation);
     } catch (e) {
       if (e instanceof ValueError) return resultError(e);
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.warn(`[SaveAnnotationUseCase/_createAnnotation] Error: ${message}`, { error: e });
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.warn(
+        `[SaveAnnotationUseCase/_createAnnotation] Error: ${message}`,
+        { error: errorToLog, useCase: 'SaveAnnotationUseCase', method: '_createAnnotation', input: validInput },
+      );
       return resultError(new ValueError(`Error creating annotation value objects: ${message}`));
     }
   }
@@ -114,7 +121,6 @@ export class SaveAnnotationUseCase
       const existingResult = await this.annotationRepository.findById(annotationIdVo);
 
       if (isError(existingResult)) {
-        // Ensure the error passed to DomainError is an Error instance
         const cause = existingResult.error instanceof Error ? existingResult.error : new Error(String(existingResult.error));
         return resultError(new DomainError(`Failed to fetch annotation for update: ${cause.message}`, cause));
       }
@@ -125,43 +131,64 @@ export class SaveAnnotationUseCase
 
       let annotationEntity = existingAnnotation;
 
-      const textVo = AnnotationText.create(validInput.text); // Can throw ValueError
+      const textVo = AnnotationText.create(validInput.text);
       if (!annotationEntity.text().equals(textVo)) {
         annotationEntity = annotationEntity.updateText(textVo);
       }
 
       if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
-        const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : undefined; // Can throw ValueError
+        const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : undefined;
         const currentAgentId = annotationEntity.agentId();
-        if ((currentAgentId && !currentAgentId.equals(agentIdVo)) || (!currentAgentId && agentIdVo) || (currentAgentId && agentIdVo && !currentAgentId.equals(agentIdVo))) {
-          annotationEntity = annotationEntity.assignAgent(agentIdVo);
+        const newAgentIdForEntity = agentIdVo === undefined ? null : agentIdVo;
+        if ((currentAgentId && !currentAgentId.equals(newAgentIdForEntity)) ||
+            (!currentAgentId && newAgentIdForEntity !== null) ||
+            (currentAgentId && newAgentIdForEntity === null) ||
+            (currentAgentId && newAgentIdForEntity && !currentAgentId.equals(newAgentIdForEntity))) {
+          annotationEntity = annotationEntity.assignAgent(newAgentIdForEntity);
         }
       }
 
       if (Object.prototype.hasOwnProperty.call(validInput, 'jobId')) {
-        const jobIdVo = validInput.jobId ? Identity.fromString(validInput.jobId) : undefined; // Can throw ValueError
+        const jobIdVo = validInput.jobId ? Identity.fromString(validInput.jobId) : undefined;
         const currentJobId = annotationEntity.jobId();
-         if ((currentJobId && !currentJobId.equals(jobIdVo)) || (!currentJobId && jobIdVo) || (currentJobId && jobIdVo && !currentJobId.equals(jobIdVo))) {
-          annotationEntity = annotationEntity.assignJob(jobIdVo);
+        const newJobIdForEntity = jobIdVo === undefined ? null : jobIdVo;
+         if ((currentJobId && !currentJobId.equals(newJobIdForEntity)) ||
+             (!currentJobId && newJobIdForEntity !== null) ||
+             (currentJobId && newJobIdForEntity === null) ||
+             (currentJobId && newJobIdForEntity && !currentJobId.equals(newJobIdForEntity))) {
+          annotationEntity = annotationEntity.assignJob(newJobIdForEntity);
         }
       }
       return ok(annotationEntity);
     } catch (e) {
       if (e instanceof ValueError) return resultError(e);
-      // DomainError from findById is already a Result, so this catch is for VOs mainly
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.warn(`[SaveAnnotationUseCase/_updateAnnotation] Error: ${message}`, { error: e }); // Consider e as originalError
-      return resultError(new DomainError(`Error updating annotation: ${message}`, e instanceof Error ? e : undefined));
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.warn(
+        `[SaveAnnotationUseCase/_updateAnnotation] Error: ${message}`,
+        { error: errorToLog, useCase: 'SaveAnnotationUseCase', method: '_updateAnnotation', input: validInput },
+      );
+      return resultError(new DomainError(`Error updating annotation: ${message}`, errorToLog));
     }
   }
 
-  private _handleUseCaseError(e: unknown, idBeingProcessed?: string): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
+  private _handleUseCaseError(e: unknown, input: SaveAnnotationUseCaseInput, idBeingProcessed?: string): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
+    // Reverted the workaround for DomainError to use instanceof directly
     if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+      // Log known error types before returning for better traceability if needed
+      this.logger.warn(`[SaveAnnotationUseCase] Known error type occurred for annotation ID ${idBeingProcessed || 'new'}: ${e.message}`, {
+        error: e,
+        useCase: 'SaveAnnotationUseCase',
+        input,
+      });
       return resultError(e);
     }
     const message = e instanceof Error ? e.message : String(e);
     const logError = e instanceof Error ? e : new Error(message);
-    this.logger.error(`[SaveAnnotationUseCase] Unexpected error for annotation ID ${idBeingProcessed || 'new'}: ${message}`, { originalError: logError });
+    this.logger.error(
+      `[SaveAnnotationUseCase] Unexpected error for annotation ID ${idBeingProcessed || 'new'}: ${message}`,
+      { error: logError, useCase: 'SaveAnnotationUseCase', input },
+    );
     return resultError(new DomainError(`Unexpected error saving annotation: ${message}`, logError));
   }
 }

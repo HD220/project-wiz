@@ -84,7 +84,7 @@ export class CreateAgentUseCase
 
       return ok({ agentId: agentEntity.id().value() });
     } catch (e: unknown) {
-      return this._handleUseCaseError(e);
+      return this._handleUseCaseError(e, validInput); // Pass validInput here
     }
   }
 
@@ -118,8 +118,13 @@ export class CreateAgentUseCase
     } catch (e: unknown) {
       if (e instanceof ValueError) return resultError(e);
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`[CreateAgentUseCase/_fetchPrerequisites] Error: ${message}`, { error: e }); // Using original error for context
-      return resultError(new DomainError(`Error fetching prerequisites: ${message}`, e instanceof Error ? e : undefined));
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.error(
+        `[CreateAgentUseCase/_fetchPrerequisites] Error: ${message}`,
+        errorToLog,
+        { useCase: 'CreateAgentUseCase', method: '_fetchPrerequisites', input: validInput },
+      );
+      return resultError(new DomainError(`Error fetching prerequisites: ${message}`, errorToLog));
     }
   }
 
@@ -140,14 +145,18 @@ export class CreateAgentUseCase
       return ok({ temperatureVo, maxIterationsVo, agentIdVo });
     } catch (e: unknown) {
       if (e instanceof ValueError) return resultError(e);
-      // Should not happen if VOs only throw ValueError, but as a safeguard:
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.warn(`[CreateAgentUseCase/_createAgentValueObjects] Unexpected error: ${message}`, { error: e });
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.warn(
+        `[CreateAgentUseCase/_createAgentValueObjects] Unexpected error: ${message}`,
+        errorToLog,
+        { useCase: 'CreateAgentUseCase', method: '_createAgentValueObjects', input: validInput },
+      );
       return resultError(new ValueError(`Error creating agent value objects: ${message}`));
     }
   }
 
-  private _handleUseCaseError(e: unknown): Result<never, DomainError | NotFoundError | ZodError | ValueError> {
+  private _handleUseCaseError(e: unknown, input?: CreateAgentUseCaseInput): Result<never, DomainError | NotFoundError | ZodError | ValueError> {
     if (e instanceof ZodError) {
       return resultError(e);
     }
@@ -155,8 +164,12 @@ export class CreateAgentUseCase
       return resultError(e);
     }
     const message = e instanceof Error ? e.message : String(e);
-    const logError = e instanceof Error ? e : new Error(message); // Ensure it's an Error type
-    this.logger.error(`[CreateAgentUseCase] Unexpected error: ${message}`, { originalError: logError });
+    const logError = e instanceof Error ? e : new Error(message);
+    this.logger.error(
+      `[CreateAgentUseCase] Unexpected error: ${message}`,
+      logError,
+      { useCase: 'CreateAgentUseCase', input: input ?? 'Unknown input' },
+    );
     return resultError(new DomainError(`An unexpected error occurred while creating the agent: ${message}`, logError));
   }
 }

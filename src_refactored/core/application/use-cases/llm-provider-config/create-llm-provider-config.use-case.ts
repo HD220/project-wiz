@@ -5,7 +5,8 @@ import { ZodError } from 'zod';
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 
 import { DomainError, ValueError } from '@/domain/common/errors'; // Added ValueError
-import { LLMProviderConfig } from '@/domain/llm-provider-config/llm-provider-config.entity';
+// Import BaseUrl along with LLMProviderConfig
+import { LLMProviderConfig, BaseUrl } from '@/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from '@/domain/llm-provider-config/ports/llm-provider-config-repository.interface';
 import { LLMApiKey } from '@/domain/llm-provider-config/value-objects/llm-api-key.vo';
 import { LLMProviderConfigId } from '@/domain/llm-provider-config/value-objects/llm-provider-config-id.vo';
@@ -57,12 +58,14 @@ export class CreateLLMProviderConfigUseCase
       // LLMApiKey and BaseUrl VOs should handle null/undefined if that's a valid state,
       // or the entity should handle optional VOs.
       // For now, let's assume they are created only if present in input.
-      let apiKeyVo: LLMApiKey | undefined;
-      if (validInput.apiKey) {
-        apiKeyVo = LLMApiKey.create(validInput.apiKey);
+      const apiKeyVo = validInput.apiKey ? LLMApiKey.create(validInput.apiKey) : undefined;
+
+      let baseUrlVo: BaseUrl | undefined;
+      if (validInput.baseUrl && typeof validInput.baseUrl === 'string') {
+        // BaseUrl.create will throw if the URL is invalid. This is caught by the try-catch block.
+        baseUrlVo = BaseUrl.create(validInput.baseUrl);
       }
-      // BaseUrlVO would be similar if it existed and was used.
-      // const baseUrlVo = validInput.baseUrl ? BaseUrlVO.create(validInput.baseUrl) : undefined;
+      // If validInput.baseUrl is null or undefined, baseUrlVo remains undefined, which is correct for the entity.
 
       const configIdVo = LLMProviderConfigId.generate();
 
@@ -70,31 +73,39 @@ export class CreateLLMProviderConfigUseCase
         id: configIdVo,
         name: nameVo,
         providerId: providerIdVo,
-        apiKey: apiKeyVo, // Pass potentially undefined VO
-        baseUrl: validInput.baseUrl, // Pass string directly or create VO
+        apiKey: apiKeyVo,
+        baseUrl: baseUrlVo, // Pass the VO or undefined
         // other optional props from schema like models, parameters, etc.
       });
 
       const saveResult = await this.configRepository.save(configEntity);
       if (isError(saveResult)) {
         const err = saveResult.error instanceof DomainError ? saveResult.error : new DomainError(`Failed to save LLM config: ${saveResult.error.message}`, saveResult.error);
-        this.logger.error(`[CreateLLMProviderConfigUseCase] Repository error: ${err.message}`, { originalError: saveResult.error });
+        this.logger.error(
+          `[CreateLLMProviderConfigUseCase] Repository error: ${err.message}`,
+          { error: saveResult.error, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
+        );
         return resultError(err);
       }
 
+      // Ensure the output matches CreateLLMProviderConfigUseCaseOutput
       return ok({
-        id: configEntity.id().value(),
-        name: configEntity.name().value(),
-        providerId: configEntity.providerId().value(),
+        llmProviderConfigId: configEntity.id().value(),
       });
     } catch (e: unknown) {
       if (e instanceof ValueError || (e instanceof DomainError && !(e instanceof ZodError))) {
-        this.logger.warn(`[CreateLLMProviderConfigUseCase] Value/Domain error: ${e.message}`, { error: e });
+        this.logger.warn(
+          `[CreateLLMProviderConfigUseCase] Value/Domain error: ${e.message}`,
+          { error: e, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
+        );
         return resultError(e);
       }
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error(`[CreateLLMProviderConfigUseCase] Unexpected error: ${message}`, { originalError: logError });
+      this.logger.error(
+        `[CreateLLMProviderConfigUseCase] Unexpected error: ${message}`,
+        { error: logError, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
+      );
       // Wrap in DomainError if not already a ZodError (which is a DomainError)
       if (e instanceof ZodError) {
           return resultError(e);

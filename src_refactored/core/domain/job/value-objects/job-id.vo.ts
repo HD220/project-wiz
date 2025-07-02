@@ -13,7 +13,7 @@ export class JobIdVO extends AbstractValueObject<JobIdProps> {
     super(props);
   }
 
-  public get value(): string {
+  public value(): string {
     return this.props.value;
   }
 

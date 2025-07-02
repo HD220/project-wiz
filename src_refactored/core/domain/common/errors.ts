@@ -5,9 +5,11 @@
  * Ensures that the error name is set correctly and captures the stack trace.
  */
 export class DomainError extends Error {
-  constructor(message: string) {
+  public readonly cause?: Error;
+  constructor(message: string, cause?: Error) { // Added optional cause
     super(message);
     this.name = this.constructor.name;
+    this.cause = cause;
 
     // Capture stack trace in V8 environments (Node.js, Chrome)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,6 +20,23 @@ export class DomainError extends Error {
   }
 }
 
+// Kept the more specific NotFoundError and removed the duplicate.
+export class NotFoundError extends DomainError {
+  constructor(entityType: string, id: string, cause?: Error) {
+    super(`${entityType} with ID '${id}' not found.`, cause);
+    this.name = "NotFoundError";
+  }
+}
+
+export class ToolNotFoundError extends NotFoundError {
+  public readonly toolName: string;
+  constructor(toolName: string, cause?: Error) {
+    super("Tool", toolName, cause);
+    this.name = this.constructor.name;
+    this.toolName = toolName;
+  }
+}
+
 /**
  * Error thrown when a Value Object validation fails.
  */
@@ -25,8 +44,8 @@ export class ValueError extends DomainError {
   public readonly field?: string;
   public readonly value?: unknown;
 
-  constructor(message: string, field?: string, value?: unknown) {
-    super(message);
+  constructor(message: string, field?: string, value?: unknown, cause?: Error) {
+    super(message, cause);
     this.field = field;
     this.value = value;
   }
@@ -38,25 +57,13 @@ export class ValueError extends DomainError {
 export class EntityError extends DomainError {
   public readonly entityId?: string;
 
-  constructor(message: string, entityId?: string) {
-    super(message);
+  constructor(message: string, entityId?: string, cause?: Error) {
+    super(message, cause);
     this.entityId = entityId;
   }
 }
 
-/**
- * Error thrown when a requested resource or entity is not found.
- */
-export class NotFoundError extends DomainError {
-  public readonly resourceType?: string;
-  public readonly resourceId?: string | number;
-
-  constructor(message: string, resourceType?: string, resourceId?: string | number) {
-    super(message);
-    this.resourceType = resourceType;
-    this.resourceId = resourceId;
-  }
-}
+// Duplicate NotFoundError removed. The one above is now the single source.
 
 /**
  * Error thrown when an IAgentTool fails during its execution.

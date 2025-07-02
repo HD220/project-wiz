@@ -15,7 +15,7 @@ export interface MemoryItemProps {
   content: MemoryItemContent;
   tags: MemoryItemTags;
   source: MemoryItemSource;
-  embedding: MemoryItemEmbedding;
+  embedding?: MemoryItemEmbedding; // Made embedding optional
   agentId?: Identity | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -25,7 +25,7 @@ interface InternalMemoryItemProps extends EntityProps<MemoryItemId> {
   content: MemoryItemContent;
   tags: MemoryItemTags;
   source: MemoryItemSource;
-  embedding: MemoryItemEmbedding;
+  embedding?: MemoryItemEmbedding; // Made embedding optional here too for consistency
   agentId?: Identity | null;
 }
 
@@ -41,9 +41,9 @@ export class MemoryItem extends AbstractEntity<MemoryItemId, InternalMemoryItemP
     const internalProps: InternalMemoryItemProps = {
       id: props.id,
       content: props.content,
-      tags: props.tags || MemoryItemTags.create(null),
-      source: props.source || MemoryItemSource.create(null),
-      embedding: props.embedding || MemoryItemEmbedding.create(null),
+      tags: props.tags || MemoryItemTags.create(null), // Assuming create(null) makes a default/empty
+      source: props.source || MemoryItemSource.create(null), // Assuming create(null) makes a default/empty
+      embedding: props.embedding, // Pass props.embedding directly, it's now optional
       agentId: props.agentId === undefined ? null : props.agentId,
       createdAt: props.createdAt || now,
       updatedAt: props.updatedAt || now,
@@ -62,7 +62,7 @@ export class MemoryItem extends AbstractEntity<MemoryItemId, InternalMemoryItemP
   public content(): MemoryItemContent { return this.props.content; }
   public tags(): MemoryItemTags { return this.props.tags; }
   public source(): MemoryItemSource { return this.props.source; }
-  public embedding(): MemoryItemEmbedding { return this.props.embedding; }
+  public embedding(): MemoryItemEmbedding | undefined { return this.props.embedding; } // Added undefined
   public agentId(): Identity | null | undefined { return this.props.agentId; }
 
   // --- Update Methods ---

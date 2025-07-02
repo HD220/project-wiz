@@ -85,7 +85,11 @@ export class CreatePersonaTemplateUseCase
       }
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, { originalError: logError });
+      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, {
+        error: logError,
+        input, // Log the original input for context
+        useCase: 'CreatePersonaTemplateUseCase',
+      });
       return resultError(
         new DomainError(
           `An unexpected error occurred while creating the persona template: ${message}`,

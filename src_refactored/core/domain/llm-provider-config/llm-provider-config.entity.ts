@@ -31,7 +31,7 @@ interface LLMProviderConfigProps {
   id: LLMProviderConfigId;
   name: LLMProviderConfigName;
   providerId: LLMProviderId;
-  apiKey: LLMApiKey;
+  apiKey?: LLMApiKey; // Made apiKey optional
   baseUrl?: BaseUrl;
 }
 
@@ -50,7 +50,7 @@ export class LLMProviderConfig {
     id?: LLMProviderConfigId;
     name: LLMProviderConfigName;
     providerId: LLMProviderId;
-    apiKey: LLMApiKey;
+    apiKey?: LLMApiKey; // Made apiKey optional here too
     baseUrl?: BaseUrl;
   }): LLMProviderConfig {
     const configId = props.id || LLMProviderConfigId.generate();
@@ -76,7 +76,7 @@ export class LLMProviderConfig {
   }
 
   public apiKeyForAdapter(): string {
-    return this.props.apiKey.forHeader();
+    return this.props.apiKey ? this.props.apiKey.forHeader() : ''; // Handle optional apiKey
   }
 
   public baseUrl(): BaseUrl | undefined {

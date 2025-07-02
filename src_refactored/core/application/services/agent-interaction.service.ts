@@ -36,7 +36,7 @@ export class AgentInteractionService {
   ) {}
 
   public async performLlmInteraction(
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
     agent: Agent,
     state: ExecutionState,
   ): Promise<void> {
@@ -46,10 +46,10 @@ export class AgentInteractionService {
     }. Your goal is: ${personaTemplate.goal().value()}. Persona backstory: ${personaTemplate.backstory().value()}`;
     const conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
 
-    this.logLlmCall(job.id().value, job.getProps().attemptsMade, conversationMessages);
+    this.logLlmCall(job.id().value(), job.getProps().attemptsMade, conversationMessages);
     // Temporarily removing the third argument from addLog as it's not expected by the method signature.
     // The structured message details might need a different logging approach or method.
-    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id().value} (attempt ${job.getProps().attemptsMade + 1})`, 'DEBUG');
+    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id().value()} (attempt ${job.getProps().attemptsMade + 1})`, 'DEBUG');
     // TODO: Consider how to log the detailed message content if necessary, perhaps via logger.debug directly.
 
     const llmGenerationResult = await this.llmAdapter.generateText(conversationMessages, {
@@ -60,7 +60,7 @@ export class AgentInteractionService {
       const llmError = llmGenerationResult.error;
       const errorMessage = `LLM generation failed in iteration ${state.iterations}. Error: ${llmError.message}`;
       const jobIdVo: JobIdVO = job.id();
-      this.logger.error(errorMessage, llmError, { jobId: jobIdVo.value });
+      this.logger.error(errorMessage, llmError, { jobId: jobIdVo.value() });
       const historyEntry: ExecutionHistoryEntry = { timestamp: new Date(), type: 'llm_error', name: 'LLM Generation', error: llmError.message };
       job.addExecutionHistoryEntry(historyEntry);
       throw new ApplicationError(errorMessage, llmError);
@@ -81,7 +81,7 @@ export class AgentInteractionService {
         return;
       }
       this.logger.warn(
-        `LLM response for Job ID ${job.id.value} was empty/too short after ${state.replanAttemptsForEmptyResponse} re-plan attempts. Proceeding with this response.`,
+        `LLM response for Job ID ${job.id().value()} was empty/too short after ${state.replanAttemptsForEmptyResponse} re-plan attempts. Proceeding with this response.`,
       );
     }
 
@@ -101,9 +101,9 @@ export class AgentInteractionService {
     return state.replanAttemptsForEmptyResponse < this.maxReplanAttemptsForEmptyResponse;
   }
 
-  private _attemptReplan(job: JobEntity<AgentExecutionPayload, JobProcessingOutput>, state: ExecutionState): void {
+  private _attemptReplan(job: JobEntity<AgentExecutionPayload, unknown>, state: ExecutionState): void { // R changed to unknown
     this.logger.warn(
-      `LLM response for Job ID ${job.id().value} was empty/too short. Attempting re-plan (${state.replanAttemptsForEmptyResponse +
+      `LLM response for Job ID ${job.id().value()} was empty/too short. Attempting re-plan (${state.replanAttemptsForEmptyResponse +
         1}/${this.maxReplanAttemptsForEmptyResponse})`,
     );
     const systemNote = ActivityHistoryEntryVO.create(

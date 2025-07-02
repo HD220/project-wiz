@@ -16,6 +16,6 @@ export interface MemorySearchFilters {
   // createdAtTo?: Date;
 }
 
-// Re-exporting PaginationOptions if it's generic enough, or define specific if needed
-export type MemoryPaginationOptions = PageOptions;
+// Using PaginationOptions as the consistent name, aliasing PageOptions from common types
+export type PaginationOptions = PageOptions;
 export type PaginatedMemoryItemsResult = PaginatedResult<MemoryItem>;

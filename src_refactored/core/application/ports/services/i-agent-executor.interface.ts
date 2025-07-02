@@ -2,7 +2,7 @@ import { Agent } from '@/core/domain/agent/agent.entity';
 // Corrected path
 import { DomainError } from '@/core/domain/common/errors';
 // Corrected type
-import { JobProcessingOutput } from '@/core/domain/job/job-processing.types';
+import { AgentExecutionPayload, AgentExecutorResult, SuccessfulAgentOutput } from '@/core/domain/job/job-processing.types'; // Added AgentExecutorResult, SuccessfulAgentOutput
 // Corrected type
 import { JobEntity } from '@/core/domain/job/job.entity';
 
@@ -27,12 +27,9 @@ export interface IAgentExecutor {
    * @returns {Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>}
    *          A promise that resolves with a Result object.
    *          On success, it contains the JobProcessingOutput.
-   *          On failure, it contains a DomainError or ApplicationError.
+   *          Errors are expected to be thrown.
    */
-  executeJob(
-    // Corrected type
-    job: JobEntity,
-    agent: Agent
-    // Corrected type
-  ): Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>;
+  process(
+    job: JobEntity<AgentExecutionPayload, unknown> // R (Job's own return type) is unknown to the executor's process output
+  ): Promise<AgentExecutorResult<SuccessfulAgentOutput>>;
 }

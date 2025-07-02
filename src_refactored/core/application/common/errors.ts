@@ -5,9 +5,11 @@
  * from domain errors or infrastructure errors.
  */
 export class ApplicationError extends Error {
-  constructor(message: string) {
+  public readonly cause?: Error;
+  constructor(message: string, cause?: Error) {
     super(message);
     this.name = this.constructor.name;
+    this.cause = cause;
     // This is important for proper prototype chain in environments like Node.js
     Object.setPrototypeOf(this, new.target.prototype);
   }

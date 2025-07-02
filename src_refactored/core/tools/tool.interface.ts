@@ -6,6 +6,7 @@ import { Result } from "../../shared/result";
 
 export interface IToolExecutionContext {
   agentId?: string;
+  jobId?: string;
   projectId?: string;
   userId?: string;
 }

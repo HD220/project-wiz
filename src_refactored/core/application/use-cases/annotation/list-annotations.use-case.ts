@@ -2,12 +2,18 @@
 import { injectable, inject } from 'inversify';
 import { ZodError } from 'zod';
 
-import { PaginationOptions } from '@/core/common/ports/repository.types';
+// Removed incorrect import of PaginationOptions from common repository.types
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
 import { Annotation } from '@/domain/annotation/annotation.entity';
-import { IAnnotationRepository, PaginatedAnnotationsResult, AnnotationSearchFilters } from '@/domain/annotation/ports/annotation-repository.interface';
+// Import directly from annotation-repository.types.ts
+import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
+import {
+  PaginatedAnnotationsResult,
+  AnnotationSearchFilters,
+  PaginationOptions, // This one is also from annotation-repository.types.ts
+} from '@/domain/annotation/ports/annotation-repository.types';
 import { DomainError, ValueError } from '@/domain/common/errors';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
@@ -55,14 +61,17 @@ export class ListAnnotationsUseCase
 
       if (isError(repoResult)) {
         const err = repoResult.error instanceof DomainError ? repoResult.error : new DomainError('Failed to list annotations', repoResult.error);
-        this.logger.error(`[ListAnnotationsUseCase] Repository error: ${err.message}`, { originalError: repoResult.error });
+        this.logger.error(
+          `[ListAnnotationsUseCase] Repository error: ${err.message}`,
+          { error: repoResult.error, useCase: 'ListAnnotationsUseCase', input: validInput },
+        );
         return resultError(err);
       }
 
       const paginatedData = repoResult.value;
 
       const output: ListAnnotationsUseCaseOutput = {
-        items: paginatedData.items.map(this._mapToListItem),
+        items: paginatedData.annotations.map(this._mapToListItem), // Changed from items to annotations
         totalCount: paginatedData.totalCount,
         page: paginatedData.page,
         pageSize: paginatedData.pageSize,
@@ -72,13 +81,16 @@ export class ListAnnotationsUseCase
 
     } catch (e: unknown) {
       if (e instanceof ValueError) { // Catch ValueError from _buildSearchFilters
-         this.logger.warn(`[ListAnnotationsUseCase] Value error during filter build: ${e.message}`, { error: e });
+         this.logger.warn(`[ListAnnotationsUseCase] Value error during filter build: ${e.message}`, { error: e, useCase: 'ListAnnotationsUseCase', input: validInput });
         return resultError(e);
       }
       // Catch any other unexpected errors (ZodError should have been caught earlier)
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message); // Ensure it's an Error type
-      this.logger.error(`[ListAnnotationsUseCase] Unexpected error: ${message}`, { originalError: logError });
+      this.logger.error(
+        `[ListAnnotationsUseCase] Unexpected error: ${message}`,
+        { error: logError, useCase: 'ListAnnotationsUseCase', input: validInput },
+      );
       // Wrap in DomainError if it's not already one of the declared error types
       if (e instanceof DomainError || e instanceof ZodError) { // ZodError unlikely here but for completeness
           return resultError(e);

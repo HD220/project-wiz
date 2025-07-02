@@ -84,7 +84,7 @@ export class SearchSimilarMemoryItemsUseCase
         const cause = repoResult.error;
         this.logger.error(
           `SearchSimilarMemoryItemsUseCase: Repository failed to search similar memory items.`,
-          { originalError: cause },
+          { error: cause, useCase: 'SearchSimilarMemoryItemsUseCase', input: validInput },
         );
         const appError = cause instanceof ApplicationError
           ? cause
@@ -92,16 +92,21 @@ export class SearchSimilarMemoryItemsUseCase
         return resultError(appError);
       }
 
-      const similarItems = repoResult.value.map(item => this.mapEntityToSimilarListItem(item.item, item.score));
+      // Assuming repoResult.value is MemoryItem[] as per IMemoryRepository.searchSimilar
+      // If scores are intended, the repository interface and implementation must change.
+      const similarItems = repoResult.value.map(item => this.mapEntityToSimilarListItem(item));
 
       this.logger.debug('SearchSimilarMemoryItemsUseCase: Execution successful.');
       return ok({
         items: similarItems,
       });
-    } catch (e: unknown) { // Should ideally not be reached if VOs and repo return Results or throw specific handled errors
+    } catch (e: unknown) {
         const message = e instanceof Error ? e.message : String(e);
         const logError = e instanceof Error ? e : new Error(message);
-        this.logger.error(`[SearchSimilarMemoryItemsUseCase] Unexpected error: ${message}`, { originalError: logError });
+        this.logger.error(
+            `[SearchSimilarMemoryItemsUseCase] Unexpected error: ${message}`,
+            { error: logError, useCase: 'SearchSimilarMemoryItemsUseCase', input }
+        );
         if (e instanceof ZodError || e instanceof ValueError) return resultError(e);
         return resultError(new ApplicationError(`Unexpected error searching similar memory items: ${message}`, logError));
     }
@@ -110,7 +115,10 @@ export class SearchSimilarMemoryItemsUseCase
   private _validateInput(input: SearchSimilarMemoryItemsUseCaseInput): Result<SearchSimilarMemoryItemsUseCaseInput, ZodError> {
     const parseResult = SearchSimilarMemoryItemsUseCaseInputSchema.safeParse(input);
     if (!parseResult.success) {
-      this.logger.warn('SearchSimilarMemoryItemsUseCase: Input validation failed.', { error: parseResult.error.flatten()});
+      this.logger.warn(
+        'SearchSimilarMemoryItemsUseCase: Input validation failed.',
+        { error: parseResult.error.flatten(), useCase: 'SearchSimilarMemoryItemsUseCase', input }
+      );
       return resultError(parseResult.error);
     }
     return ok(parseResult.data);
@@ -118,21 +126,26 @@ export class SearchSimilarMemoryItemsUseCase
 
   private _createValueObjects(validInput: SearchSimilarMemoryItemsUseCaseInput): Result<{ embeddingVo: MemoryItemEmbedding; agentIdVo?: Identity }, ApplicationError | ValueError> {
     try {
-      const embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding); // Can throw ValueError
+      const embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding);
       let agentIdVo: Identity | undefined;
       if (validInput.agentId) {
-        agentIdVo = Identity.fromString(validInput.agentId); // Can throw ValueError
+        agentIdVo = Identity.fromString(validInput.agentId);
       }
       return ok({ embeddingVo, agentIdVo });
     } catch (e) {
+      const errorToLog = e instanceof Error ? e : new Error(String(e));
       if (e instanceof ValueError) {
-         this.logger.warn(`SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${e.message}`, {error: e});
+         this.logger.warn(
+            `SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${e.message}`,
+            { error: errorToLog, useCase: 'SearchSimilarMemoryItemsUseCase', method: '_createValueObjects', input: validInput }
+        );
         return resultError(e);
       }
-      const message = e instanceof Error ? e.message : String(e);
-      const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error('SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.', { originalError: logError });
-      return resultError(new ApplicationError(`Unexpected error processing input: ${message}`, logError));
+      this.logger.error(
+        'SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.',
+        { error: errorToLog, useCase: 'SearchSimilarMemoryItemsUseCase', method: '_createValueObjects', input: validInput }
+      );
+      return resultError(new ApplicationError(`Unexpected error processing input: ${errorToLog.message}`, errorToLog));
     }
   }
 }

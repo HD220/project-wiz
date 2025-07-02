@@ -2,13 +2,18 @@
 import { inject, injectable } from 'inversify';
 import { ZodError } from 'zod';
 
-import { PaginationOptions } from '@/core/common/ports/repository.types'; // Corrected path for PaginationOptions
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Identity } from '@/core/common/value-objects/identity.vo';
 
-import { ValueError, DomainError } from '@/domain/common/errors'; // Corrected import for ValueError
+import { ValueError, DomainError } from '@/domain/common/errors';
 import { MemoryItem } from '@/domain/memory/memory-item.entity';
-import { IMemoryRepository, MemorySearchFilters, PaginatedMemoryItemsResult } from '@/domain/memory/ports/memory-repository.interface'; // Removed IMemoryRepositoryToken
+import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
+// Import supporting types directly from memory-repository.types.ts
+import {
+  MemorySearchFilters,
+  PaginatedMemoryItemsResult,
+  PaginationOptions // Now correctly sourced
+} from '@/domain/memory/ports/memory-repository.types';
 
 import { ApplicationError } from '@/application/common/errors';
 import { IUseCase } from '@/application/common/ports/use-case.interface';
@@ -68,27 +73,30 @@ export class SearchMemoryItemsUseCase
       const repoResult = await this.memoryRepository.search(searchFilters, paginationOptions);
 
       if (isError(repoResult)) {
-        this.logger.error('SearchMemoryItemsUseCase: Repository search failed.', { originalError: repoResult.error });
         const cause = repoResult.error;
+        this.logger.error(
+          'SearchMemoryItemsUseCase: Repository search failed.',
+          { error: cause, useCase: 'SearchMemoryItemsUseCase', input: validatedInput },
+        );
         const appError = cause instanceof ApplicationError
           ? cause
           : new ApplicationError(`Search operation failed: ${cause.message}`, cause instanceof Error ? cause : undefined);
         return resultError(appError);
       }
 
-      // repoResult.value is PaginatedMemoryItemsResult
       const paginatedMemoryItems = repoResult.value;
       const output = this._mapToOutput(paginatedMemoryItems);
 
       this.logger.debug('SearchMemoryItemsUseCase: Execution successful.');
       return ok(output);
 
-    } catch (e: unknown) { // Catch errors from _buildSearchFilters if Identity.fromString throws (now wrapped)
-      // Or other truly unexpected errors
+    } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error('SearchMemoryItemsUseCase: Unhandled error during execution.', { originalError: logError });
-      // Ensure the error type matches the use case's declared error types
+      this.logger.error(
+        'SearchMemoryItemsUseCase: Unhandled error during execution.',
+        { error: logError, useCase: 'SearchMemoryItemsUseCase', input },
+      );
       if (e instanceof ZodError || e instanceof ValueError) return resultError(e);
       return resultError(new ApplicationError(`An unexpected error occurred: ${message}`, logError));
     }
@@ -97,8 +105,7 @@ export class SearchMemoryItemsUseCase
   private _validateInput(input: SearchMemoryItemsUseCaseInput): Result<SearchMemoryItemsUseCaseInput, ZodError | ApplicationError> {
     const parseResult = SearchMemoryItemsUseCaseInputSchema.safeParse(input);
     if (!parseResult.success) {
-      const errorMessages = parseResult.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
-      // Return ZodError directly, or wrap if ApplicationError is preferred for all validation issues
+      // ZodError is suitable for returning directly as per use case error types
       return resultError(parseResult.error);
     }
     return ok(parseResult.data);
@@ -106,32 +113,39 @@ export class SearchMemoryItemsUseCase
 
   private _buildSearchFilters(validatedInput: SearchMemoryItemsUseCaseInput): Result<MemorySearchFilters, ValueError> {
     try {
-      let agentIdVO: Identity | undefined = undefined; // Use undefined for optional VOs
-      if (validatedInput.agentId !== undefined && validatedInput.agentId !== null) { // Check for null explicitly if schema allows
+      let agentIdVO: Identity | undefined = undefined;
+      if (validatedInput.agentId !== undefined && validatedInput.agentId !== null) {
           agentIdVO = Identity.fromString(validatedInput.agentId);
       }
 
       const filters: MemorySearchFilters = {
-        agentId: agentIdVO,
+        agentId: agentIdVO, // Pass null if agentId is null, undefined if not provided
         queryText: validatedInput.queryText,
         tags: validatedInput.tags,
       };
       return ok(filters);
     } catch (e: unknown) {
+      const errorToLog = e instanceof Error ? e : new Error(String(e));
       if (e instanceof ValueError) {
-        this.logger.warn(`SearchMemoryItemsUseCase: Error building search filters - ${e.message}`, {error: e});
+        this.logger.warn(
+          `SearchMemoryItemsUseCase: Error building search filters - ${e.message}`,
+          { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput },
+        );
         return resultError(e);
       }
-      const message = e instanceof Error ? e.message : String(e);
-      this.logger.error('SearchMemoryItemsUseCase: Unexpected error building search filters.', { error: e });
-      return resultError(new ValueError(`Unexpected error building filters: ${message}`));
+      this.logger.error(
+        'SearchMemoryItemsUseCase: Unexpected error building search filters.',
+        { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput },
+      );
+      return resultError(new ValueError(`Unexpected error building filters: ${errorToLog.message}`));
     }
   }
 
   private _mapToOutput(
     paginatedResult: PaginatedMemoryItemsResult
   ): SearchMemoryItemsUseCaseOutput {
-    const memoryListItems = paginatedResult.items.map(item => this._mapMemoryItemToListItem(item));
+    // Changed paginatedResult.items to paginatedResult.data
+    const memoryListItems = paginatedResult.data.map(item => this._mapMemoryItemToListItem(item));
 
     return {
       items: memoryListItems,

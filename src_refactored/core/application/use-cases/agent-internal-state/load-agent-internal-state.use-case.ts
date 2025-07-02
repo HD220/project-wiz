@@ -10,7 +10,7 @@ import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 
-import { Result, ok, error } from '@/shared/result';
+import { Result, ok, error, isError } from '@/shared/result'; // Added isError
 
 // Removed unused import for Inject: import { Inject } from '@/application/common/ioc/dependency-injection.decorators'; // Assuming IoC
 
@@ -50,12 +50,19 @@ export class LoadAgentInternalStateUseCase
 
       const stateResult = await this.stateRepository.findByAgentId(agentIdVo);
 
-      if (isError(stateResult)) { // Corrected: Use type guard
-        // Access .error property when it's an error
-        return error(new DomainError(`Failed to load internal state for agent ${validInput.agentId}: ${stateResult.error.message}`, stateResult.error));
+      if (isError(stateResult)) {
+        const errorMessage = `Failed to load internal state for agent ${validInput.agentId}: ${stateResult.error.message}`;
+        this.logger.error(
+          errorMessage,
+          stateResult.error, // Error instance as second argument
+          { // Metadata as third argument
+            agentId: validInput.agentId,
+            useCase: 'LoadAgentInternalStateUseCase',
+          }
+        );
+        return error(new DomainError(errorMessage, stateResult.error));
       }
 
-      // If it's not an error, it's a success, so stateResult.value is safe to access
       const stateEntity = stateResult.value;
 
       if (!stateEntity) {
@@ -66,19 +73,31 @@ export class LoadAgentInternalStateUseCase
         agentId: stateEntity.agentId().value(),
         currentProjectId: stateEntity.currentProjectId()?.value() || null,
         currentGoal: stateEntity.currentGoal()?.value() || null,
-        generalNotes: stateEntity.generalNotes().list(),
+        generalNotes: [...stateEntity.generalNotes().list()], // Ensure mutable array
       };
 
       return ok(output);
-    } catch (e: unknown) { // Changed errorValue to e to avoid conflict
+    } catch (e: unknown) {
+      const agentIdForLog = input?.agentId ?? 'unknown';
       if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+        this.logger.warn(
+          `[LoadAgentInternalStateUseCase] Known error for agent ${agentIdForLog}: ${e.message}`,
+          { agentId: agentIdForLog, error: e },
+        );
         return error(e);
       }
+
       const message = e instanceof Error ? e.message : String(e);
-      // For logger, ensure the second argument is an Error instance if the logger expects it, or pass as metadata
-      const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error(`[LoadAgentInternalStateUseCase] Unexpected error for agent ${input.agentId}: ${message}`, { originalError: logError }); // Pass error in metadata
-      return error(new DomainError(`Unexpected error loading agent state: ${message}`, logError));
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.error(
+        `[LoadAgentInternalStateUseCase] Unexpected error for agent ${agentIdForLog}: ${message}`,
+        errorToLog, // Error instance as second argument
+        { // Metadata as third argument
+          agentId: agentIdForLog,
+          useCase: 'LoadAgentInternalStateUseCase',
+        }
+      );
+      return error(new DomainError(`Unexpected error loading agent state: ${message}`, errorToLog));
     }
   }
 }

@@ -102,18 +102,32 @@ export class SaveAgentInternalStateUseCase
 
   private _handleRepositoryError(agentId: string, action: string, repoError: Error): Result<never, DomainError> {
     const errorMessage = `Failed to ${action} for agent ${agentId}: ${repoError.message}`;
-    // Ensure repoError is passed correctly to the logger if it expects an Error object
-    this.logger.error(`[SaveAgentInternalStateUseCase] ${errorMessage}`, { originalError: repoError });
-    return resultError(new DomainError(errorMessage, repoError)); // Corrected
+    this.logger.error(`[SaveAgentInternalStateUseCase] ${errorMessage}`, {
+      error: repoError,
+      agentId,
+      action,
+      useCase: 'SaveAgentInternalStateUseCase',
+    });
+    return resultError(new DomainError(errorMessage, repoError));
   }
 
   private _handleUnexpectedError(agentId: string, errorValue: unknown): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
     if (errorValue instanceof ZodError || errorValue instanceof NotFoundError || errorValue instanceof DomainError || errorValue instanceof ValueError) {
-      return resultError(errorValue); // Corrected
+      // Log known error types before returning for better traceability if needed
+      this.logger.warn(`[SaveAgentInternalStateUseCase] Known error type occurred for agent ${agentId}: ${errorValue.message}`, {
+        error: errorValue,
+        agentId,
+        useCase: 'SaveAgentInternalStateUseCase',
+      });
+      return resultError(errorValue);
     }
     const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
     const logError = errorValue instanceof Error ? errorValue : new Error(message);
-    this.logger.error(`[SaveAgentInternalStateUseCase] Unexpected error for agent ${agentId}: ${message}`, { originalError: logError });
-    return resultError(new DomainError(`Unexpected error saving agent state: ${message}`, logError)); // Corrected
+    this.logger.error(`[SaveAgentInternalStateUseCase] Unexpected error for agent ${agentId}: ${message}`, {
+      error: logError,
+      agentId,
+      useCase: 'SaveAgentInternalStateUseCase',
+    });
+    return resultError(new DomainError(`Unexpected error saving agent state: ${message}`, logError));
   }
 }

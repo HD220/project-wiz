@@ -68,10 +68,12 @@ export class SaveMemoryItemUseCase
 
       if (isError(saveRepoResult)) {
         const cause = saveRepoResult.error;
-        // Ensure cause is an Error instance for DomainError constructor
         const errorCause = cause instanceof Error ? cause : new Error(String(cause));
         const err = cause instanceof DomainError ? cause : new DomainError(`Failed to save memory item: ${errorCause.message}`, errorCause);
-        this.logger.error(`[SaveMemoryItemUseCase] Repository error: ${err.message}`, { originalError: cause });
+        this.logger.error(
+          `[SaveMemoryItemUseCase] Repository error: ${err.message}`,
+          { error: cause, useCase: 'SaveMemoryItemUseCase', input: validInput },
+        );
         return resultError(err);
       }
 
@@ -79,18 +81,14 @@ export class SaveMemoryItemUseCase
                               ? saveRepoResult.value
                               : memoryItemEntity;
 
+      // Match SaveMemoryItemUseCaseOutput
       return ok({
-        id: finalMemoryItem.id().value(),
-        content: finalMemoryItem.content().value(),
-        agentId: finalMemoryItem.agentId()?.value() || null,
-        tags: finalMemoryItem.tags().value() || [],
-        source: finalMemoryItem.source().value(),
-        embedding: finalMemoryItem.embedding()?.value() || null,
+        memoryItemId: finalMemoryItem.id().value(),
         createdAt: finalMemoryItem.createdAt().toISOString(),
         updatedAt: finalMemoryItem.updatedAt().toISOString(),
       });
     } catch (e: unknown) {
-      return this._handleUseCaseError(e, validInput.id);
+      return this._handleUseCaseError(e, validInput, validInput.id);
     }
   }
 
@@ -106,16 +104,20 @@ export class SaveMemoryItemUseCase
       const memoryItem = MemoryItem.create({
         id: newId,
         content: contentVo,
-        agentId: agentIdVo,
+        agentId: agentIdVo === undefined ? null : agentIdVo, // undefined -> null
         tags: tagsVo,
         source: sourceVo,
-        embedding: embeddingVo,
+        embedding: embeddingVo, // This is now fine as entity prop is optional
       });
       return ok(memoryItem);
     } catch (e) {
       if (e instanceof ValueError) return resultError(e);
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.warn(`[SaveMemoryItemUseCase/_createMemoryItem] Error: ${message}`, { error: e }); // Consider e as originalError
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.warn(
+        `[SaveMemoryItemUseCase/_createMemoryItem] Error: ${message}`,
+        { error: errorToLog, useCase: 'SaveMemoryItemUseCase', method: '_createMemoryItem', input: validInput },
+      );
       return resultError(new ValueError(`Error creating memory item value objects: ${message}`));
     }
   }
@@ -126,7 +128,9 @@ export class SaveMemoryItemUseCase
       const existingResult = await this.memoryRepository.findById(itemIdVo);
 
       if (isError(existingResult)) {
-        return resultError(new DomainError(`Failed to fetch memory item for update: ${existingResult.error.message}`, existingResult.error));
+        // Ensure the error passed to DomainError is an Error instance
+        const cause = existingResult.error instanceof Error ? existingResult.error : new Error(String(existingResult.error));
+        return resultError(new DomainError(`Failed to fetch memory item for update: ${cause.message}`, cause));
       }
       const existingItem = existingResult.value;
       if (!existingItem) {
@@ -135,12 +139,12 @@ export class SaveMemoryItemUseCase
 
       let updatedItem = existingItem;
 
-      // These VO creations and entity updates are expected to throw on error
-      if (validInput.content) { // Only update if content is provided
+      if (validInput.content) {
         updatedItem = updatedItem.updateContent(MemoryItemContent.create(validInput.content));
       }
       if (Object.prototype.hasOwnProperty.call(validInput, 'agentId')) {
-        updatedItem = updatedItem.assignAgent(validInput.agentId ? Identity.fromString(validInput.agentId) : undefined);
+        const agentIdVo = validInput.agentId ? Identity.fromString(validInput.agentId) : undefined;
+        updatedItem = updatedItem.assignAgent(agentIdVo === undefined ? null : agentIdVo); // undefined -> null
       }
       if (validInput.tags) {
         updatedItem = updatedItem.updateTags(MemoryItemTags.create(validInput.tags));
@@ -149,25 +153,36 @@ export class SaveMemoryItemUseCase
         updatedItem = updatedItem.updateSource(MemoryItemSource.create(validInput.source || ''));
       }
       if (validInput.embedding) {
-        updatedItem = updatedItem.updateEmbedding(MemoryItemEmbedding.create(validInput.embedding));
+        updatedItem = updatedItem.setEmbedding(MemoryItemEmbedding.create(validInput.embedding)); // Changed to setEmbedding
       }
 
       return ok(updatedItem);
     } catch (e) {
       if (e instanceof ValueError) return resultError(e);
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.warn(`[SaveMemoryItemUseCase/_updateMemoryItem] Error: ${message}`, { error: e });
-      return resultError(new DomainError(`Error updating memory item: ${message}`, e instanceof Error ? e : undefined));
+      const errorToLog = e instanceof Error ? e : new Error(message);
+      this.logger.warn(
+        `[SaveMemoryItemUseCase/_updateMemoryItem] Error: ${message}`,
+        { error: errorToLog, useCase: 'SaveMemoryItemUseCase', method: '_updateMemoryItem', input: validInput },
+      );
+      return resultError(new DomainError(`Error updating memory item: ${message}`, errorToLog));
     }
   }
 
-  private _handleUseCaseError(e: unknown, idBeingProcessed?: string): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
+  private _handleUseCaseError(e: unknown, input: SaveMemoryItemUseCaseInput, idBeingProcessed?: string): Result<never, DomainError | ZodError | ValueError | NotFoundError> {
     if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
+       this.logger.warn(
+        `[SaveMemoryItemUseCase] Known error: ${e.message}`,
+        { error: e, useCase: 'SaveMemoryItemUseCase', input, idBeingProcessed },
+      );
       return resultError(e);
     }
     const message = e instanceof Error ? e.message : String(e);
     const logError = e instanceof Error ? e : new Error(message);
-    this.logger.error(`[SaveMemoryItemUseCase] Unexpected error for memory item ID ${idBeingProcessed || 'new'}: ${message}`, { originalError: logError });
+    this.logger.error(
+      `[SaveMemoryItemUseCase] Unexpected error for memory item ID ${idBeingProcessed || 'new'}: ${message}`,
+      { error: logError, useCase: 'SaveMemoryItemUseCase', input, idBeingProcessed },
+    );
     return resultError(new DomainError(`Unexpected error saving memory item: ${message}`, logError));
   }
 }

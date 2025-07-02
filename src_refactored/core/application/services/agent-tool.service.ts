@@ -11,12 +11,14 @@ import { IToolExecutionContext } from '@/core/tools/tool.interface';
 
 import { ToolValidationService } from './tool-validation.service';
 
+import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
+
 interface ExecutionState {
   goalAchieved: boolean;
   iterations: number;
   maxIterations: number;
   llmResponseText: string;
-  assistantMessage: LanguageModelMessageToolCall | null;
+  assistantMessage: LanguageModelMessage | null;
   replanAttemptsForEmptyResponse: number;
   criticalErrorEncounteredThisTurn: boolean;
   activityHistory: ActivityHistoryVO;
@@ -31,7 +33,7 @@ export class AgentToolService {
   ) {}
 
   public async handleToolCallsIfPresent(
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
     agent: Agent,
     state: ExecutionState,
   ): Promise<void> {
@@ -41,12 +43,12 @@ export class AgentToolService {
   }
 
   private async processToolCalls(
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
     agent: Agent,
     state: ExecutionState,
     toolCalls: LanguageModelMessageToolCall[],
   ): Promise<void> {
-    this.logger.info(`LLM requested ${toolCalls.length} tool calls for Job ID: ${job.id.value}`);
+    this.logger.info(`LLM requested ${toolCalls.length} tool calls for Job ID: ${job.id().value()}`);
     job.addLog(`LLM requesting ${toolCalls.length} tool calls.`, 'DEBUG');
 
     for (const toolCall of toolCalls) {
@@ -65,12 +67,12 @@ export class AgentToolService {
   private async _executeSingleToolCall(
     toolCall: LanguageModelMessageToolCall,
     agent: Agent,
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
   ): Promise<ExecutionHistoryEntry> {
     const executionContext: IToolExecutionContext = {
-      agentId: agent.id.value,
-      jobId: job.id.value,
-      userId: job.payload.userId,
+      agentId: agent.id().value(),
+      jobId: job.id().value(),
+      userId: job.getProps().payload.userId,
     };
     // Delegate to ToolValidationService
     return this.toolValidationService.processAndValidateSingleToolCall(toolCall, executionContext);
@@ -79,17 +81,16 @@ export class AgentToolService {
   private _isCriticalToolError(
     executionEntry: ExecutionHistoryEntry,
     state: ExecutionState,
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
   ): boolean {
     if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
       const toolError = executionEntry.error;
-      job.addLog(`Tool '${toolError.toolName || executionEntry.name}' error: ${toolError.message}`, 'ERROR', {
-        isRecoverable: toolError.isRecoverable,
-      });
+      // Metadata for isRecoverable is logged via this.logger.error context; job.addLog takes only message and level.
+      job.addLog(`Tool '${toolError.toolName || executionEntry.name}' error: ${toolError.message}. Recoverable: ${toolError.isRecoverable}`, 'ERROR');
       if (!toolError.isRecoverable) {
         state.criticalErrorEncounteredThisTurn = true;
         this.logger.error(
-          `Critical tool error for Job ID ${job.id.value}: Tool '${toolError.toolName ||
+          `Critical tool error for Job ID ${job.id().value()}: Tool '${toolError.toolName ||
             executionEntry.name}' failed non-recoverably.`,
           toolError,
         );
@@ -100,7 +101,7 @@ export class AgentToolService {
   }
 
   private _addToolResultToConversation(
-    job: JobEntity<AgentExecutionPayload, JobProcessingOutput>,
+    job: JobEntity<AgentExecutionPayload, unknown>, // R changed to unknown
     executionEntry: ExecutionHistoryEntry,
     toolCall: LanguageModelMessageToolCall,
   ): void {
