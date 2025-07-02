@@ -1,39 +1,49 @@
 // src_refactored/core/domain/common/errors.ts
 
+import { CoreError } from '../../../shared/errors/core.error';
+
 /**
  * Base class for custom domain errors.
- * Ensures that the error name is set correctly and captures the stack trace.
+ * Inherits from CoreError to provide consistent error structure.
  */
-export class DomainError extends Error {
-  public readonly cause?: Error;
-  constructor(message: string, cause?: Error) { // Added optional cause
-    super(message);
-    this.name = this.constructor.name;
-    this.cause = cause;
-
-    // Capture stack trace in V8 environments (Node.js, Chrome)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (typeof (Error as any).captureStackTrace === 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (Error as any).captureStackTrace(this, this.constructor);
-    }
+export class DomainError extends CoreError {
+  constructor(
+    message: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data
+    options?: { code?: string; details?: any; cause?: Error },
+  ) {
+    super(message, options);
+    // CoreError's constructor already sets this.name = this.constructor.name;
   }
 }
 
 // Kept the more specific NotFoundError and removed the duplicate.
 export class NotFoundError extends DomainError {
   constructor(entityType: string, id: string, cause?: Error) {
-    super(`${entityType} with ID '${id}' not found.`, cause);
-    this.name = "NotFoundError";
+    super(`${entityType} with ID '${id}' not found.`, {
+      code: `${entityType.toUpperCase()}_NOT_FOUND`,
+      // `details` type is `any` from DomainError -> CoreError
+      details: { entityType, id },
+      cause,
+    });
+    // Explicitly set name for clarity, though CoreError's constructor handles it.
+    this.name = 'NotFoundError';
   }
 }
 
 export class ToolNotFoundError extends NotFoundError {
-  public readonly toolName: string;
   constructor(toolName: string, cause?: Error) {
-    super("Tool", toolName, cause);
-    this.name = this.constructor.name;
-    this.toolName = toolName;
+    // NotFoundError's constructor sets code and details, using toolName as the 'id'.
+    super('Tool', toolName, cause);
+    this.name = 'ToolNotFoundError';
+    // Ensure toolName is explicitly in details for this specific error type.
+    // `this.details` is inherited and might be undefined if not set by super,
+    // so we ensure it's an object before assigning to it.
+    this.details = {
+      ...(this.details && typeof this.details === 'object' ? this.details : {}),
+      toolName,
+      // id: toolName, // already set by NotFoundError as details.id
+    };
   }
 }
 
@@ -41,13 +51,14 @@ export class ToolNotFoundError extends NotFoundError {
  * Error thrown when a Value Object validation fails.
  */
 export class ValueError extends DomainError {
-  public readonly field?: string;
-  public readonly value?: unknown;
-
   constructor(message: string, field?: string, value?: unknown, cause?: Error) {
-    super(message, cause);
-    this.field = field;
-    this.value = value;
+    super(message, {
+      code: 'VALUE_ERROR',
+      // `details` type is `any` from DomainError -> CoreError
+      details: { field, value },
+      cause,
+    });
+    // Properties 'field' and 'value' are now in this.details.
   }
 }
 
@@ -55,15 +66,19 @@ export class ValueError extends DomainError {
  * Error thrown when an Entity-specific business rule is violated.
  */
 export class EntityError extends DomainError {
-  public readonly entityId?: string;
-
   constructor(message: string, entityId?: string, cause?: Error) {
-    super(message, cause);
-    this.entityId = entityId;
+    super(message, {
+      code: 'ENTITY_ERROR',
+      // `details` type is `any` from DomainError -> CoreError
+      details: { entityId },
+      cause,
+    });
+    // Property 'entityId' is now in this.details.
   }
 }
 
-// Duplicate NotFoundError removed. The one above is now the single source.
+// Duplicate NotFoundError removed.
+// The one above is now the single source.
 
 /**
  * Error thrown when an IAgentTool fails during its execution.
@@ -71,20 +86,26 @@ export class EntityError extends DomainError {
  * potentially allowing the LLM to attempt a different approach.
  */
 export class ToolError extends DomainError {
-  public readonly toolName?: string;
-  public readonly originalError?: unknown;
-  public readonly isRecoverable: boolean;
-
   constructor(
     message: string,
     toolName?: string,
     originalError?: unknown,
     isRecoverable: boolean = true,
   ) {
-    super(message);
-    this.toolName = toolName;
-    this.originalError = originalError;
-    this.isRecoverable = isRecoverable;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data
+    const opts: { code?: string; details?: any; cause?: Error } = {
+      code: 'TOOL_ERROR',
+      details: { toolName, isRecoverable },
+    };
+    // This can be mapped to 'cause' if it's an Error instance
+    if (originalError instanceof Error) {
+      opts.cause = originalError;
+    } else if (originalError !== undefined) {
+      // If originalError is not an Error but exists, add it to details
+      opts.details.originalError = originalError;
+    }
+    super(message, opts);
+    // Properties toolName, originalError, isRecoverable are now in this.details or this.cause.
   }
 }
 
@@ -92,13 +113,13 @@ export class ToolError extends DomainError {
  * Error thrown by queue operations.
  */
 export class QueueError extends DomainError {
-  public readonly queueName?: string;
-  public readonly jobId?: string;
-
-  constructor(message: string, queueName?: string, jobId?: string) {
-    super(message);
-    this.queueName = queueName;
-    this.jobId = jobId;
+  constructor(message: string, queueName?: string, jobId?: string, cause?: Error) {
+    super(message, {
+      code: 'QUEUE_ERROR',
+      // `details` type is `any` from DomainError -> CoreError
+      details: { queueName, jobId },
+      cause,
+    });
   }
 }
 
@@ -106,25 +127,30 @@ export class QueueError extends DomainError {
  * Error thrown by LLM interactions.
  */
 export class LLMError extends DomainError {
-  public readonly modelId?: string;
-  public readonly provider?: string;
-  public readonly statusCode?: number;
-  public readonly originalError?: unknown;
-
   constructor(
     message: string,
-    details?: {
+    // Renamed 'details' to 'errorDetails' to avoid conflict with CoreError options
+    errorDetailsProp?: {
       modelId?: string;
       provider?: string;
       statusCode?: number;
+      // This can be mapped to 'cause' if it's an Error instance
       originalError?: unknown;
     }
   ) {
-    super(message);
-    this.modelId = details?.modelId;
-    this.provider = details?.provider;
-    this.statusCode = details?.statusCode;
-    this.originalError = details?.originalError;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data
+    const opts: { code?: string; details?: any; cause?: Error } = {
+      code: 'LLM_ERROR',
+      // Copy all provided details, `details` type is `any`
+      details: { ...errorDetailsProp },
+    };
+    if (errorDetailsProp?.originalError instanceof Error) {
+      opts.cause = errorDetailsProp.originalError;
+      // Avoid duplication if it's moved to cause
+      delete opts.details.originalError;
+    }
+    // If originalError is not an Error but exists, it remains in opts.details
+    super(message, opts);
   }
 }
 
@@ -132,18 +158,25 @@ export class LLMError extends DomainError {
  * Error thrown by embedding generation services.
  */
 export class EmbeddingError extends DomainError {
-  public readonly modelId?: string;
-  public readonly originalError?: unknown;
-
   constructor(
     message: string,
-    details?: {
+    // Renamed 'details' to 'errorDetails'
+    errorDetailsProp?: {
       modelId?: string;
+      // This can be mapped to 'cause' if it's an Error instance
       originalError?: unknown;
     }
   ) {
-    super(message);
-    this.modelId = details?.modelId;
-    this.originalError = details?.originalError;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data
+    const opts: { code?: string; details?: any; cause?: Error } = {
+      code: 'EMBEDDING_ERROR',
+      // `details` type is `any`
+      details: { ...errorDetailsProp },
+    };
+    if (errorDetailsProp?.originalError instanceof Error) {
+      opts.cause = errorDetailsProp.originalError;
+      delete opts.details.originalError;
+    }
+    super(message, opts);
   }
 }

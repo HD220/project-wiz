@@ -27,6 +27,7 @@ export interface IUseCaseErrorDetails {
    * For instance, for a validation error, this could contain
    * an object mapping field names to error messages (e.g., ZodError.flatten()).
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Flexibility needed for diverse error details.
   readonly details?: any;
 
   /**
@@ -40,11 +41,12 @@ export interface IUseCaseErrorDetails {
  * Defines a standardized structure for use case responses.
  * It can represent either a successful outcome with data, or a failed outcome with error details.
  *
- * @template TOutput The type of data returned on a successful execution. Defaults to `void` if no data is returned.
+ * @template TOutput The type of data returned on a successful execution. Defaults to `void`.
  * @template TErrorDetails The type of error details returned on a failed execution. Defaults to `IUseCaseErrorDetails`.
  */
 export interface IUseCaseResponse<
   TOutput = void,
+
   TErrorDetails = IUseCaseErrorDetails,
 > {
   /**
@@ -72,10 +74,13 @@ export interface IUseCaseResponse<
  */
 export type SuccessUseCaseResponse<TOutput = void> = IUseCaseResponse<
   TOutput,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Forcing error to be undefined in success types.
   any
 > & {
   success: true;
-  data: TOutput; // data is explicitly required for success, even if void
+  // data is explicitly required for success, even if TOutput is void.
+  // For void TOutput, it means `data: undefined` is acceptable and expected.
+  data: TOutput;
   error?: never;
 };
 
@@ -83,6 +88,7 @@ export type SuccessUseCaseResponse<TOutput = void> = IUseCaseResponse<
  * Utility type for a failed use case response.
  */
 export type ErrorUseCaseResponse<TErrorDetails = IUseCaseErrorDetails> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Forcing data to be 'never' (or typed as 'any' then 'never') in error responses.
   IUseCaseResponse<any, TErrorDetails> & {
     success: false;
     data?: never;
