@@ -46,7 +46,7 @@ This rule promotes strict adherence to Clean Architecture principles, ensuring t
 *   **Well-Defined Interfaces:** Define clear interfaces (ports) between layers to describe communication contracts. Avoid implicit dependencies.
 *   **Persistence Ignorance:** Entities and Use Cases should be unaware of how data is persisted. This concern belongs to the Gateway or Repository adapters.
 *   **Avoid Global State:** Minimize or avoid global state where possible, especially in core layers. Pass data explicitly between components and layers.
-*   **Error Handling:** Define a consistent error handling strategy across all layers. Errors should be passed inwards, but their handling and presentation can be adapted outwards.
+*   **Error Handling:** Define a consistent error handling strategy across all layers. Errors should be passed inwards, but their handling and presentation can be adapted outwards. (See ADR-008 for Use Case error handling).
 
 #### 2.2.2. Object Calisthenics
 
@@ -116,10 +116,24 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
 *   **Use Case Reliance on Domain Validation:**
     *   Application Layer Use Cases will continue to use Zod for validating the shape and presence of their input DTOs.
     *   However, for business rule validation and the internal consistency of domain objects, use cases will rely on the validation performed by the VOs and Entities themselves.
-    *   If a VO or Entity creation/update fails within a use case due to a validation error thrown by the domain object, the use case should catch this `ValueError`, `EntityError`, or `DomainError` and typically wrap or return it within a `Result.error()`.
+    *   If a VO or Entity creation/update fails within a use case due to a validation error thrown by the domain object, the use case should catch this `ValueError`, `EntityError`, or `DomainError`. The use case will then map this error to the standard error DTO and return it as part of the `IUseCaseResponse` (see section 2.2.5).
 *   **Benefits:** This approach centralizes business rule validation within the domain objects themselves, making the domain richer and more robust. It reduces validation logic duplication in use cases and ensures that domain objects cannot exist in an invalid state.
 
-#### 2.2.5. Code and Style Standards
+#### 2.2.5. Use Case Response and Error Handling Standard
+
+*   **Standardized Response DTO:** All Application Layer Use Cases (`src_refactored/application/use-cases/`) must return a standardized response object conforming to the `IUseCaseResponse<TOutput, TErrorDetails>` interface (defined in `src_refactored/shared/application/use-case-response.dto.ts`).
+    *   This DTO includes a `success: boolean` flag, an optional `data: TOutput` field (for successful responses), and an optional `error: TErrorDetails` field (for failed responses).
+    *   `TErrorDetails` is an object containing `name`, `message`, and optionally `code` and `details` for the error.
+*   **No Direct Exception Propagation from Use Cases:** Use Cases should not let exceptions propagate to the calling layer (e.g., Infrastructure). Instead, they must implement `try/catch` blocks to handle any exceptions that occur during their execution (e.g., errors from domain validation, repository operations, or other services).
+*   **Error Mapping:** Within the `catch` block, the Use Case is responsible for:
+    1.  Logging the original error with its full context (including stack trace).
+    2.  Mapping the caught exception to the `IUseCaseErrorDetails` structure.
+    3.  Returning an `IUseCaseResponse` with `success: false` and the populated `error` field.
+*   **Success Response:** If the execution completes without errors, the Use Case returns an `IUseCaseResponse` with `success: true` and the relevant `data`.
+*   **ADR Reference:** This pattern is formally documented in **ADR-008: Padrão de Tratamento de Erros e Resposta para Casos de Uso**. Adherence to this ADR is mandatory.
+*   **Benefits:** This provides a consistent and predictable contract for Use Case consumers, simplifies error handling in higher layers, and ensures that errors are properly logged and contextualized at the Use Case level.
+
+#### 2.2.6. Code and Style Standards
 
 *   **Main Language:** TypeScript.
     *   We use the `strict` configuration activated (`noImplicitAny`, `strictNullChecks`) for greater type safety.
