@@ -1,7 +1,7 @@
 # ADR-007: Domain Layer Validation with Zod
 
 **Date:** 2024-07-24
-**Status:** Proposed
+**Status:** Accepted
 
 ## Context
 
