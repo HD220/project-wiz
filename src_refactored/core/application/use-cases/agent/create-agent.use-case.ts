@@ -149,8 +149,13 @@ export class CreateAgentUseCase
       const errorToLog = e instanceof Error ? e : new Error(message);
       this.logger.warn(
         `[CreateAgentUseCase/_createAgentValueObjects] Unexpected error: ${message}`,
-        errorToLog,
-        { useCase: 'CreateAgentUseCase', method: '_createAgentValueObjects', input: validInput },
+        {
+          errorName: errorToLog.name,
+          errorMessage: errorToLog.message,
+          useCase: 'CreateAgentUseCase',
+          method: '_createAgentValueObjects',
+          input: validInput
+        },
       );
       return resultError(new ValueError(`Error creating agent value objects: ${message}`));
     }

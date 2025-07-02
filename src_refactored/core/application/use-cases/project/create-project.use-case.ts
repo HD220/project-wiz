@@ -59,7 +59,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
       const errorToLog = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
       this.logger.error(
         '[CreateProjectUseCase] Unexpected error while creating project',
-        { error: errorToLog, useCase: 'CreateProjectUseCase', input }
+        { meta: { error: errorToLog, useCase: 'CreateProjectUseCase', input } }
       );
       return resultError(new ApplicationError(`An unexpected error occurred: ${errorToLog.message}`, errorToLog));
     }
@@ -72,7 +72,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
       // Log the ZodError directly for more details if needed by the logger
       this.logger.error(
         `[CreateProjectUseCase] ${errorMessage}`,
-        { error: validationResult.error, details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input }
+        { meta: { error: validationResult.error, details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input } }
       );
       return resultError(new ApplicationValidationError(errorMessage, validationResult.error.flatten().fieldErrors));
     }
@@ -104,13 +104,13 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
       if (errorCreatingEntity instanceof DomainError || errorCreatingEntity instanceof ValueError || errorCreatingEntity instanceof EntityError) {
         this.logger.warn(
           `[CreateProjectUseCase] Domain error creating project entity parts: ${errorToLog.message}`,
-          { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput }
+          { meta: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
         );
         return resultError(errorCreatingEntity as DomainError | ValueError | EntityError); // Cast for type safety
       }
       this.logger.error(
         `[CreateProjectUseCase] Unexpected error creating project entity parts: ${errorToLog.message}`,
-        { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput }
+        { meta: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
       );
       return resultError(new DomainError(`Unexpected error creating project entity parts: ${errorToLog.message}`, errorToLog));
     }

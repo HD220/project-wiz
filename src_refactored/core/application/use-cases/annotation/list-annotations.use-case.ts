@@ -61,7 +61,8 @@ export class ListAnnotationsUseCase
         const err = repoResult.error instanceof DomainError ? repoResult.error : new DomainError('Failed to list annotations', repoResult.error);
         this.logger.error(
           `[ListAnnotationsUseCase] Repository error: ${err.message}`,
-          { error: repoResult.error, useCase: 'ListAnnotationsUseCase', input: validInput },
+          repoResult.error, // Pass the error instance as the second argument
+          { useCase: 'ListAnnotationsUseCase', input: validInput },
         );
         return resultError(err);
       }
@@ -79,14 +80,15 @@ export class ListAnnotationsUseCase
 
     } catch (e: unknown) {
       if (e instanceof ValueError) {
-         this.logger.warn(`[ListAnnotationsUseCase] Value error during filter build: ${e.message}`, { error: e, useCase: 'ListAnnotationsUseCase', input: validInput });
+         this.logger.warn(`[ListAnnotationsUseCase] Value error during filter build: ${e.message}`, { errorName: e.name, errorMessage: e.message, useCase: 'ListAnnotationsUseCase', input: validInput });
         return resultError(e);
       }
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message);
       this.logger.error(
         `[ListAnnotationsUseCase] Unexpected error: ${message}`,
-        { error: logError, useCase: 'ListAnnotationsUseCase', input: validInput },
+        logError,
+        { useCase: 'ListAnnotationsUseCase', input: validInput },
       );
       if (e instanceof DomainError || e instanceof ZodError) {
           return resultError(e);

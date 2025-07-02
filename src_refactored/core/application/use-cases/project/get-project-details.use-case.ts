@@ -48,7 +48,7 @@ export class GetProjectDetailsUseCase
       if (isError(projectResult)) { // Use type guard
         this.logger.error(
             `[GetProjectDetailsUseCase] Error fetching project ${input.projectId}`,
-            { error: projectResult.error, useCase: 'GetProjectDetailsUseCase', input }
+            { meta: { error: projectResult.error, useCase: 'GetProjectDetailsUseCase', input } }
         );
         // Ensure returned error is one of the declared types
         return error(projectResult.error instanceof DomainError ? projectResult.error : new DomainError('Failed to fetch project', projectResult.error));
@@ -64,7 +64,7 @@ export class GetProjectDetailsUseCase
       if (isError(sourceCodeResult)) { // Use type guard
         this.logger.warn(
             `[GetProjectDetailsUseCase] Error fetching source code for project ${input.projectId}`,
-            { error: sourceCodeResult.error, useCase: 'GetProjectDetailsUseCase', input }
+            { meta: { error: sourceCodeResult.error, useCase: 'GetProjectDetailsUseCase', input } }
         );
         // Do not return error here, source code is optional
       } else {
@@ -92,12 +92,12 @@ export class GetProjectDetailsUseCase
     } catch (e: unknown) {
       const errorToLog = e instanceof Error ? e : new Error(String(e));
       if (e instanceof ValueError) { // Catch ValueError from ProjectId.fromString
-          this.logger.warn(`[GetProjectDetailsUseCase] Invalid project ID format: ${input.projectId}`, { error: errorToLog, useCase: 'GetProjectDetailsUseCase', input });
+          this.logger.warn(`[GetProjectDetailsUseCase] Invalid project ID format: ${input.projectId}`, { meta: { error: errorToLog, useCase: 'GetProjectDetailsUseCase', input } });
           return error(e);
       }
       this.logger.error(
         `[GetProjectDetailsUseCase] Unexpected error for project ID ${input.projectId}`,
-        { error: errorToLog, useCase: 'GetProjectDetailsUseCase', input }
+        { meta: { error: errorToLog, useCase: 'GetProjectDetailsUseCase', input } }
       );
       // Ensure returned error is one of the declared types
       return error(new DomainError(`An unexpected error occurred: ${errorToLog.message}`, errorToLog));

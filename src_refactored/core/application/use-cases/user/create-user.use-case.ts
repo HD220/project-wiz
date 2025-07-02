@@ -69,7 +69,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       if (isError(saveResult)) { // Use isError type guard
         this.logger.error(
             '[CreateUserUseCase] Failed to save user to repository',
-            { error: saveResult.error, useCase: 'CreateUserUseCase', username: input.username }
+            { meta: { error: saveResult.error, useCase: 'CreateUserUseCase', username: input.username } }
         );
         return resultError(saveResult.error); // Error from repo should be DomainError
       }
@@ -81,7 +81,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       const errorToLog = e instanceof Error ? e : new Error(String(e));
       this.logger.error(
         '[CreateUserUseCase] Unexpected error while creating user',
-        { error: errorToLog, useCase: 'CreateUserUseCase', username: input.username }
+        { meta: { error: errorToLog, useCase: 'CreateUserUseCase', username: input.username } }
       );
       // Ensure returned error is one of the declared types
       if (e instanceof DomainError || e instanceof ApplicationError || e instanceof ApplicationValidationError) {
@@ -97,7 +97,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       const errorMessage = 'Invalid input for CreateUserUseCase';
       this.logger.error(
         `[CreateUserUseCase] Validation Error: ${errorMessage}`,
-        { error: validationParseResult.error, details: validationParseResult.error.flatten().fieldErrors, useCase: 'CreateUserUseCase', input }
+        { meta: { error: validationParseResult.error, details: validationParseResult.error.flatten().fieldErrors, useCase: 'CreateUserUseCase', input } }
       );
       return resultError(new ApplicationValidationError(errorMessage, validationParseResult.error.flatten().fieldErrors));
     }
@@ -110,7 +110,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       const existingByUsernameResult = await this.userRepository.findByUsername(usernameVo);
       if (isError(existingByUsernameResult)) {
         // Log and return as ApplicationError or pass DomainError up if appropriate
-        this.logger.warn(`[CreateUserUseCase] Error checking username ${validatedInput.username}`, {error: existingByUsernameResult.error});
+        this.logger.warn(`[CreateUserUseCase] Error checking username ${validatedInput.username}`, { meta: { error: existingByUsernameResult.error } });
         return resultError(new ApplicationError(`Error checking username: ${existingByUsernameResult.error.message}`, existingByUsernameResult.error));
       }
       if (existingByUsernameResult.value) {
@@ -120,7 +120,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       const emailVo = UserEmail.create(validatedInput.email);
       const existingByEmailResult = await this.userRepository.findByEmail(emailVo);
       if (isError(existingByEmailResult)) {
-        this.logger.warn(`[CreateUserUseCase] Error checking email ${validatedInput.email}`, {error: existingByEmailResult.error});
+        this.logger.warn(`[CreateUserUseCase] Error checking email ${validatedInput.email}`, { meta: { error: existingByEmailResult.error } });
         return resultError(new ApplicationError(`Error checking email: ${existingByEmailResult.error.message}`, existingByEmailResult.error));
       }
       if (existingByEmailResult.value) {
@@ -129,7 +129,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       return ok(undefined);
     } catch (voError: unknown) { // Catch errors from UserUsername.create or UserEmail.create
         const errorToLog = voError instanceof Error ? voError : new Error(String(voError));
-        this.logger.warn(`[CreateUserUseCase] Error creating VOs for user check: ${errorToLog.message}`, {error: errorToLog});
+        this.logger.warn(`[CreateUserUseCase] Error creating VOs for user check: ${errorToLog.message}`, { meta: { error: errorToLog } });
         return resultError(new ApplicationError(`Invalid username or email format: ${errorToLog.message}`, errorToLog));
     }
   }
@@ -161,7 +161,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
 
     } catch (e: unknown) {
       const errorToLog = e instanceof Error ? e : new Error(String(e));
-      this.logger.warn('[CreateUserUseCase] Error creating user value objects', { error: errorToLog, input: validatedInput });
+      this.logger.warn('[CreateUserUseCase] Error creating user value objects', { meta: { error: errorToLog, input: validatedInput } });
       if (e instanceof ValueError || e instanceof DomainError) { // DomainError could be from Identity if its internal error is a DomainError
         return resultError(e);
       }
@@ -195,7 +195,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
       return ok(userEntity);
     } catch (e:unknown) {
       const errorToLog = e instanceof Error ? e : new Error(String(e));
-       this.logger.error('[CreateUserUseCase] Failed to create user entity', { error: errorToLog });
+       this.logger.error('[CreateUserUseCase] Failed to create user entity', { meta: { error: errorToLog } });
       if (e instanceof EntityError || e instanceof DomainError) { // If User.create throws EntityError
         return resultError(e);
       }

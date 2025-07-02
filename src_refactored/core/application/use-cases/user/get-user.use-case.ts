@@ -16,7 +16,7 @@ import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/r
 import { GetUserInput, GetUserOutput, GetUserInputSchema } from './get-user.schema';
 
 @injectable()
-export class GetUserUseCase implements IUseCase<GetUserInput, Promise<Result<GetUserOutput | null, DomainError>>> {
+export class GetUserUseCase implements IUseCase<GetUserInput, GetUserOutput | null, DomainError> {
   constructor(
     @inject(IUserRepositoryToken) private readonly userRepository: IUserRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
@@ -46,19 +46,24 @@ export class GetUserUseCase implements IUseCase<GetUserInput, Promise<Result<Get
       const userEntity = userResult.value;
       if (!userEntity) { // This check remains, as Result<UserEntity | null> allows null in success
         this.logger.info(`[GetUserUseCase] User not found after successful fetch: ${JSON.stringify(validatedInput)}`);
-        return resultError(new NotFoundError('User not found.')); // Corrected
+        return resultError(new NotFoundError('User not found.'));
       }
 
-      this.logger.info(`[GetUserUseCase] User found: ${userEntity.id.value}`);
-      return ok(this._mapToOutput(userEntity)); // Corrected
+      this.logger.info(`[GetUserUseCase] User found: ${userEntity.id().value()}`);
+      return ok(this._mapToOutput(userEntity));
 
-    } catch (err: unknown) { // Changed 'error' to 'err'
-      this.logger.error('[GetUserUseCase] Unexpected error while getting user', err);
-      if (err instanceof DomainError) {
-        return resultError(err); // Corrected
+    } catch (err: unknown) {
+      const errorInstance = err instanceof Error ? err : new Error(String(err));
+      this.logger.error(
+        '[GetUserUseCase] Unexpected error while getting user',
+        errorInstance,
+        { input }
+      );
+      if (errorInstance instanceof DomainError) {
+        return resultError(errorInstance);
       }
-      const message = err instanceof Error ? err.message : String(err);
-      return resultError(new ApplicationError(`An unexpected error occurred: ${message}`)); // Corrected
+      // For other errors, wrap in ApplicationError
+      return resultError(new ApplicationError(`An unexpected error occurred: ${errorInstance.message}`, errorInstance));
     }
   }
 
@@ -67,35 +72,36 @@ export class GetUserUseCase implements IUseCase<GetUserInput, Promise<Result<Get
     if (!validationResult.success) {
       const errorMessage = 'Invalid input for GetUserUseCase';
       this.logger.error(`[GetUserUseCase] Validation Error: ${errorMessage}`, validationResult.error.flatten());
-      return resultError(new ValidationError(errorMessage, validationResult.error.flatten().fieldErrors)); // Corrected
+      return resultError(new ApplicationValidationError(errorMessage, validationResult.error.flatten().fieldErrors));
     }
-    return ok(validationResult.data); // Corrected
+    return ok(validationResult.data);
   }
 
-  private async _fetchUser(validatedInput: GetUserInput): Promise<Result<UserEntity | null, DomainError>> {
+  private async _fetchUser(validatedInput: GetUserInput): Promise<Result<User | null, DomainError>> {
     const { userId, email } = validatedInput;
-    // Assuming UserId.create and UserEmail.create throw on error, caught by the main try/catch
+    // Assuming UserEmail.create might throw ValueError, caught by the main try/catch
     // And repository methods return Result
     try {
       if (userId) {
-        const userIdVo = UserId.create(userId);
+        const userIdVo = UserId.fromString(userId); // Assuming this is safe or throws ValueError
         return this.userRepository.findById(userIdVo);
       } else if (email) {
-        const emailVo = UserEmail.create(email);
+        const emailVo = UserEmail.create(email); // Can throw ValueError
         return this.userRepository.findByEmail(emailVo);
       }
-      // This path should ideally not be reached due to Zod validation, but included for robustness
-      return resultError(new ValidationError('Either userId or email must be provided.')); // Corrected
+      // This path should ideally not be reached due to Zod validation
+      return resultError(new ApplicationValidationError('Either userId or email must be provided.'));
     } catch (e) {
-        const err = e instanceof DomainError ? e : new DomainError(e instanceof Error ? e.message : String(e));
-        this.logger.warn(`[GetUserUseCase] Error creating VO in _fetchUser: ${err.message}`, err);
+        // Catch ValueError from UserEmail.create or UserId.fromString (if it throws)
+        const err = e instanceof DomainError ? e : new DomainError(e instanceof Error ? e.message : String(e), e instanceof Error ? e : undefined);
+        this.logger.warn(`[GetUserUseCase] Error creating VO in _fetchUser: ${err.message}`, { errorName: err.name, errorMessage: err.message, originalError: e });
         return resultError(err);
     }
   }
 
-  private _mapToOutput(userEntity: UserEntity): GetUserOutput {
+  private _mapToOutput(userEntity: User): GetUserOutput {
     return {
-      id: userEntity.id.value,
+      id: userEntity.id().value(),
       username: userEntity.username().value,
       email: userEntity.email().value,
       nickname: userEntity.nickname().value,

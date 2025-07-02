@@ -44,7 +44,7 @@ export class ListProjectsUseCase
       if (isError(projectsResult)) { // Use type guard
         this.logger.error(
             '[ListProjectsUseCase] Error fetching all projects',
-            { error: projectsResult.error, useCase: 'ListProjectsUseCase' }
+            { meta: { error: projectsResult.error, useCase: 'ListProjectsUseCase' } }
         );
         // Ensure returned error is DomainError
         return error(projectsResult.error instanceof DomainError ? projectsResult.error : new DomainError('Failed to list projects', projectsResult.error));
@@ -71,7 +71,7 @@ export class ListProjectsUseCase
       const errorToLog = e instanceof Error ? e : new Error(String(e));
       this.logger.error(
         '[ListProjectsUseCase] Unexpected error',
-        { error: errorToLog, useCase: 'ListProjectsUseCase' }
+        { meta: { error: errorToLog, useCase: 'ListProjectsUseCase' } }
       );
       return error(new DomainError(`An unexpected error occurred while listing projects: ${errorToLog.message}`, errorToLog));
     }

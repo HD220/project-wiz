@@ -70,7 +70,7 @@ const importAndBoundaryRules = {
   "boundaries/element-types": [ "error", {
       default: "allow",
       rules: [
-        { from: ["domain"], disallow: ["application", "infrastructure", "presentation"], message: "DOMAIN: Proibido importar de ${dependency.type}." },
+        { from: ["domain"], allow: ["shared", "zod-lib"], disallow: ["application", "infrastructure", "presentation"], message: "DOMAIN: Proibido importar de ${dependency.type} (permitido: shared, zod-lib)." },
         { from: ["application"], allow: ["domain", "shared"], disallow: ["infrastructure", "presentation"], message: "APPLICATION: Proibido importar de ${dependency.type} (permitido: domain, shared)." },
         { from: ["infrastructure"], allow: ["domain", "application", "shared"], disallow: ["presentation"], message: "INFRA: Proibido importar de ${dependency.type} (permitido: domain, application, shared)." },
         { from: ["presentation"], allow: ["domain", "application", "shared", "ui-components", "ui-lib", "ui-hooks", "ui-features"], disallow: ["infrastructure"], message: "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, shared, ui/*)." },
@@ -158,6 +158,7 @@ export default [
         { type: "infrastructure", pattern: "src_refactored/infrastructure" },
         { type: "presentation", pattern: "src_refactored/presentation" },
         { type: "shared", pattern: "src_refactored/shared" },
+        { type: "zod-lib", pattern: "zod" }, // Added for Zod
         { type: "ui-components", pattern: "src_refactored/presentation/ui/components" },
         { type: "ui-features", pattern: "src_refactored/presentation/ui/app" },
         { type: "ui-lib", pattern: "src_refactored/presentation/ui/lib" },

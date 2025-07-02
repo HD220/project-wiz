@@ -74,7 +74,7 @@ export class CreateLLMProviderConfigUseCase
         const err = saveResult.error instanceof DomainError ? saveResult.error : new DomainError(`Failed to save LLM config: ${saveResult.error.message}`, saveResult.error);
         this.logger.error(
           `[CreateLLMProviderConfigUseCase] Repository error: ${err.message}`,
-          { error: saveResult.error, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
+          { meta: { error: saveResult.error, useCase: 'CreateLLMProviderConfigUseCase', input: validInput } }
         );
         return resultError(err);
       }
@@ -86,7 +86,7 @@ export class CreateLLMProviderConfigUseCase
       if (e instanceof ValueError || (e instanceof DomainError && !(e instanceof ZodError))) {
         this.logger.warn(
           `[CreateLLMProviderConfigUseCase] Value/Domain error: ${e.message}`,
-          { error: e, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
+          { meta: { error: e, useCase: 'CreateLLMProviderConfigUseCase', input: validInput } }
         );
         return resultError(e);
       }
@@ -94,7 +94,7 @@ export class CreateLLMProviderConfigUseCase
       const logError = e instanceof Error ? e : new Error(message);
       this.logger.error(
         `[CreateLLMProviderConfigUseCase] Unexpected error: ${message}`,
-        { error: logError, useCase: 'CreateLLMProviderConfigUseCase', input: validInput }
+        { meta: { error: logError, useCase: 'CreateLLMProviderConfigUseCase', input: validInput } }
       );
       if (e instanceof ZodError) {
           return resultError(e);

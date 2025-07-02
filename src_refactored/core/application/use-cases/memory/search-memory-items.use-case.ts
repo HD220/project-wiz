@@ -76,7 +76,7 @@ export class SearchMemoryItemsUseCase
         const cause = repoResult.error;
         this.logger.error(
           'SearchMemoryItemsUseCase: Repository search failed.',
-          { error: cause, useCase: 'SearchMemoryItemsUseCase', input: validatedInput },
+          { meta: { error: cause, useCase: 'SearchMemoryItemsUseCase', input: validatedInput } },
         );
         const appError = cause instanceof ApplicationError
           ? cause
@@ -95,7 +95,7 @@ export class SearchMemoryItemsUseCase
       const logError = e instanceof Error ? e : new Error(message);
       this.logger.error(
         'SearchMemoryItemsUseCase: Unhandled error during execution.',
-        { error: logError, useCase: 'SearchMemoryItemsUseCase', input },
+        { meta: { error: logError, useCase: 'SearchMemoryItemsUseCase', input } },
       );
       if (e instanceof ZodError || e instanceof ValueError) return resultError(e);
       return resultError(new ApplicationError(`An unexpected error occurred: ${message}`, logError));
@@ -129,13 +129,13 @@ export class SearchMemoryItemsUseCase
       if (e instanceof ValueError) {
         this.logger.warn(
           `SearchMemoryItemsUseCase: Error building search filters - ${e.message}`,
-          { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput },
+          { meta: { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput } },
         );
         return resultError(e);
       }
       this.logger.error(
         'SearchMemoryItemsUseCase: Unexpected error building search filters.',
-        { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput },
+        { meta: { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput } },
       );
       return resultError(new ValueError(`Unexpected error building filters: ${errorToLog.message}`));
     }

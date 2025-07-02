@@ -107,7 +107,19 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
 *   **Loose Coupling, High Cohesion:** Design modules to be loosely coupled (minimize dependencies between them) and highly cohesive (elements within a module are functionally related).
 *   **Code Reviews:** Participate in and conduct thorough code reviews to catch errors, share knowledge, and improve code quality.
 
-#### 2.2.4. Code and Style Standards
+#### 2.2.4. Domain Layer Validation (Entities and Value Objects)
+
+*   **Self-Validation:** Entities and Value Objects (VOs) in the Domain Layer (`src_refactored/core/domain/`) are responsible for ensuring their own internal consistency and ahering to business invariants. They must validate their data upon creation or significant state changes.
+*   **Zod for Domain Validation:** Zod is the standard library for defining validation schemas within the Domain Layer.
+    *   VOs should use Zod schemas in their `create` factory methods (or constructors, if direct instantiation is allowed) to validate input data. Upon validation failure, a `ValueError` (from `@/domain/common/errors`) should be thrown, ideally containing the flattened Zod error details.
+    *   Entities should also use Zod schemas in their `create` factory methods to validate the initial set of VOs and any primitive props. For state-changing methods, entities should ensure that the new state is valid according to its invariants, potentially using Zod for complex rule validation. Validation failures at the entity level should result in an `EntityError` or a more specific `DomainError` being thrown.
+*   **Use Case Reliance on Domain Validation:**
+    *   Application Layer Use Cases will continue to use Zod for validating the shape and presence of their input DTOs.
+    *   However, for business rule validation and the internal consistency of domain objects, use cases will rely on the validation performed by the VOs and Entities themselves.
+    *   If a VO or Entity creation/update fails within a use case due to a validation error thrown by the domain object, the use case should catch this `ValueError`, `EntityError`, or `DomainError` and typically wrap or return it within a `Result.error()`.
+*   **Benefits:** This approach centralizes business rule validation within the domain objects themselves, making the domain richer and more robust. It reduces validation logic duplication in use cases and ensures that domain objects cannot exist in an invalid state.
+
+#### 2.2.5. Code and Style Standards
 
 *   **Main Language:** TypeScript.
     *   We use the `strict` configuration activated (`noImplicitAny`, `strictNullChecks`) for greater type safety.

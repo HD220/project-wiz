@@ -59,7 +59,7 @@ export class SaveMemoryItemUseCase
 
       if (isError(memoryItemEntityResult)) {
         // Log the specific error before returning it
-        this.logger.warn(`[SaveMemoryItemUseCase] Error creating/updating memory item entity: ${memoryItemEntityResult.error.message}`, { error: memoryItemEntityResult.error });
+        this.logger.warn(`[SaveMemoryItemUseCase] Error creating/updating memory item entity: ${memoryItemEntityResult.error.message}`, { meta: { error: memoryItemEntityResult.error } });
         return resultError(memoryItemEntityResult.error);
       }
       const memoryItemEntity = memoryItemEntityResult.value;
@@ -72,7 +72,7 @@ export class SaveMemoryItemUseCase
         const err = cause instanceof DomainError ? cause : new DomainError(`Failed to save memory item: ${errorCause.message}`, errorCause);
         this.logger.error(
           `[SaveMemoryItemUseCase] Repository error: ${err.message}`,
-          { error: cause, useCase: 'SaveMemoryItemUseCase', input: validInput },
+          { meta: { error: cause, useCase: 'SaveMemoryItemUseCase', input: validInput } },
         );
         return resultError(err);
       }
@@ -116,7 +116,7 @@ export class SaveMemoryItemUseCase
       const errorToLog = e instanceof Error ? e : new Error(message);
       this.logger.warn(
         `[SaveMemoryItemUseCase/_createMemoryItem] Error: ${message}`,
-        { error: errorToLog, useCase: 'SaveMemoryItemUseCase', method: '_createMemoryItem', input: validInput },
+        { meta: { error: errorToLog, useCase: 'SaveMemoryItemUseCase', method: '_createMemoryItem', input: validInput } },
       );
       return resultError(new ValueError(`Error creating memory item value objects: ${message}`));
     }
@@ -163,7 +163,7 @@ export class SaveMemoryItemUseCase
       const errorToLog = e instanceof Error ? e : new Error(message);
       this.logger.warn(
         `[SaveMemoryItemUseCase/_updateMemoryItem] Error: ${message}`,
-        { error: errorToLog, useCase: 'SaveMemoryItemUseCase', method: '_updateMemoryItem', input: validInput },
+        { meta: { error: errorToLog, useCase: 'SaveMemoryItemUseCase', method: '_updateMemoryItem', input: validInput } },
       );
       return resultError(new DomainError(`Error updating memory item: ${message}`, errorToLog));
     }
@@ -173,7 +173,7 @@ export class SaveMemoryItemUseCase
     if (e instanceof ZodError || e instanceof NotFoundError || e instanceof DomainError || e instanceof ValueError) {
        this.logger.warn(
         `[SaveMemoryItemUseCase] Known error: ${e.message}`,
-        { error: e, useCase: 'SaveMemoryItemUseCase', input, idBeingProcessed },
+        { meta: { error: e, useCase: 'SaveMemoryItemUseCase', input, idBeingProcessed } },
       );
       return resultError(e);
     }
@@ -181,7 +181,7 @@ export class SaveMemoryItemUseCase
     const logError = e instanceof Error ? e : new Error(message);
     this.logger.error(
       `[SaveMemoryItemUseCase] Unexpected error for memory item ID ${idBeingProcessed || 'new'}: ${message}`,
-      { error: logError, useCase: 'SaveMemoryItemUseCase', input, idBeingProcessed },
+      { meta: { error: logError, useCase: 'SaveMemoryItemUseCase', input, idBeingProcessed } },
     );
     return resultError(new DomainError(`Unexpected error saving memory item: ${message}`, logError));
   }

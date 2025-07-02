@@ -54,7 +54,8 @@ export class RemoveAnnotationUseCase
             : new DomainError(`Failed to delete annotation: ${deleteResult.error.message}`, deleteResult.error);
         this.logger.error(
           `[RemoveAnnotationUseCase] Repository error: ${err.message}`,
-          { error: deleteResult.error, useCase: 'RemoveAnnotationUseCase', input: validInput },
+          deleteResult.error,
+          { useCase: 'RemoveAnnotationUseCase', input: validInput },
         );
         return resultError(err);
       }
@@ -65,7 +66,7 @@ export class RemoveAnnotationUseCase
       if (e instanceof ValueError) {
         this.logger.warn(
           `[RemoveAnnotationUseCase] Invalid annotation ID: ${e.message}`,
-          { error: e, useCase: 'RemoveAnnotationUseCase', input: validInput },
+          { errorName: e.name, errorMessage: e.message, useCase: 'RemoveAnnotationUseCase', input: validInput },
         );
         return resultError(e)
       }
@@ -76,7 +77,8 @@ export class RemoveAnnotationUseCase
       const logError = e instanceof Error ? e : new Error(message);
       this.logger.error(
         `[RemoveAnnotationUseCase] Unexpected error for annotation ID ${input.annotationId}: ${message}`,
-        { error: logError, useCase: 'RemoveAnnotationUseCase', input },
+        logError,
+        { useCase: 'RemoveAnnotationUseCase', input },
       );
       return resultError(new DomainError(`Unexpected error removing annotation: ${message}`, logError));
     }
