@@ -1,6 +1,6 @@
 # ADR-008: Padrão de Tratamento de Erros e Resposta para Casos de Uso
 
-**Status:** Proposto
+**Status:** Aceito
 
 **Contexto:**
 
@@ -43,50 +43,61 @@ type SuccessUseCaseResponse<TOutput = void> = IUseCaseResponse<TOutput, any> & {
 type ErrorUseCaseResponse<TErrorDetails = IUseCaseErrorDetails> = IUseCaseResponse<any, TErrorDetails> & { success: false; data?: never; error: TErrorDetails; };
 ```
 
-**Mecanismo de Tratamento de Erros nos Casos de Uso:**
+**Mecanismo de Tratamento de Erros e Implementação com Decorator:**
 
-1.  **Captura de Exceções:** Dentro do método `execute` de um caso de uso, todo o código que pode lançar exceções (interações com o domínio, repositórios, serviços externos) será envolvido em blocos `try/catch`.
-2.  **Mapeamento para `IUseCaseErrorDetails`:**
-    *   No bloco `catch`, a exceção capturada será analisada.
-    *   Informações relevantes da exceção (ex: `error.name`, `error.message`, `error.cause`, detalhes de `ZodError`) serão mapeadas para a estrutura `IUseCaseErrorDetails`.
-    *   É crucial loggar a exceção original completa (incluindo stack trace) para fins de depuração antes de retornar a resposta mapeada.
-3.  **Retorno do `IUseCaseResponse`:**
-    *   Se a execução for bem-sucedida, o caso de uso retornará `successUseCaseResponse(data)`.
-    *   Se uma exceção for capturada, o caso de uso retornará `errorUseCaseResponse(errorDetails)`, onde `errorDetails` é o objeto `IUseCaseErrorDetails` populado.
+Para aplicar este padrão de forma consistente e evitar repetição de código (DRY), a abordagem preferencial é utilizar um Decorator (`UseCaseWrapper`) que envolve a execução do caso de uso real.
 
-**Exemplo de Implementação em um Caso de Uso:**
+1.  **Caso de Uso Concreto (Lógica de Negócio Pura):**
+    *   A classe do caso de uso concreto foca exclusivamente na lógica de negócio e na orquestração do fluxo principal.
+    *   Ela valida o DTO de entrada (ex: com Zod, podendo lançar `ZodError`).
+    *   Ela interage com entidades de domínio e repositórios (que podem lançar `CoreError`s como `DomainError`, `NotFoundError`, `ValueError`, `EntityError`).
+    *   Em caso de sucesso, retorna diretamente `successUseCaseResponse(data)`.
+    *   **Importante:** O caso de uso concreto *não* implementa o bloco `try/catch` para mapeamento de erro para `IUseCaseResponse`. Ele lança exceções diretamente.
+
+2.  **`UseCaseWrapper` (Decorator):**
+    *   Esta classe envolve uma instância do caso de uso concreto e uma instância de `ILogger`.
+    *   O método `execute` do wrapper chama o `execute` do caso de uso concreto dentro de um bloco `try/catch`.
+    *   **Captura e Mapeamento de Exceções:** No bloco `catch` do wrapper:
+        *   A exceção original é logada com detalhes (nome do caso de uso, input, stack trace).
+        *   A exceção é analisada (ex: `instanceof ZodError`, `instanceof CoreError`, `instanceof Error`).
+        *   Com base no tipo de erro, um objeto `IUseCaseErrorDetails` é populado com `name`, `message`, `code`, `details` e `cause`.
+        *   O wrapper retorna `errorUseCaseResponse(errorDetails)`.
+    *   Se o caso de uso concreto completar sem exceções, o wrapper repassa a resposta de sucesso.
+
+3.  **Injeção de Dependência:**
+    *   O container de DI (ex: InversifyJS) é configurado para que, ao solicitar uma interface de caso de uso (ex: `IUseCase<Input, Output>`), ele forneça uma instância do `UseCaseWrapper`, que por sua vez tem o caso de uso concreto e o logger injetados.
+
+Esta abordagem com Decorator centraliza a lógica de tratamento de erros e logging, mantendo os casos de uso concretos limpos, focados em suas responsabilidades e mais fáceis de testar.
+
+**Hierarquia de Erros Base:**
+
+Para facilitar o mapeamento no `UseCaseWrapper`, será definida uma classe base `CoreError` (`src_refactored/shared/errors/core.error.ts`) da qual herdarão os erros específicos de domínio (`DomainError`, `EntityError`, `ValueError`) e aplicação (`ApplicationError`, `NotFoundError` quando referente à lógica de aplicação). Erros de validação de entrada (`ZodError`) e erros genéricos (`Error`) também são tratados especificamente pelo wrapper.
+
+**Exemplo de Implementação (Conceitual do Wrapper):**
 
 ```typescript
 // imports ...
-// IMyUseCaseInput, IMyUseCaseOutput, IMyRepository, DomainEntity, CustomDomainError, etc.
-// IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse, IUseCaseErrorDetails
+// imports ...
+// IUseCase, IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse, IUseCaseErrorDetails
+// ILogger, ZodError, CoreError, ConcreteUseCase, ConcreteUseCaseInput, ConcreteUseCaseOutput
 
-class MyUseCase implements IUseCase<IMyUseCaseInput, IUseCaseResponse<IMyUseCaseOutput>> {
-  constructor(private readonly repository: IMyRepository, private readonly logger: ILogger) {}
+/**
+ * Conceptual example of UseCaseWrapper
+ */
+class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, TOutput> {
+  constructor(
+    private readonly decoratedUseCase: IUseCase<TInput, TOutput>,
+    private readonly logger: ILogger,
+  ) {}
 
-  async execute(input: IMyUseCaseInput): Promise<IUseCaseResponse<IMyUseCaseOutput>> {
+  async execute(input: TInput): Promise<IUseCaseResponse<TOutput>> {
     try {
-      // 1. Validar input (pode ser com Zod, gerando ZodError)
-      // const validatedInput = MyUseCaseInputSchema.parse(input);
-
-      // 2. Lógica de negócio, criação/busca de entidades
-      // const entity = await this.repository.findById(validatedInput.id);
-      // if (!entity) {
-      //   throw new NotFoundError(`Entity with id ${validatedInput.id} not found.`);
-      // }
-      // entity.doSomethingImportant(validatedInput.someValue);
-
-      // 3. Persistir alterações (se houver)
-      // await this.repository.save(entity);
-
-      // 4. Preparar dados de output
-      // const output: IMyUseCaseOutput = { result: entity.getResult() };
-      const output: IMyUseCaseOutput = { result: "some data" }; // Placeholder
-
-      return successUseCaseResponse(output);
-
+      return await this.decoratedUseCase.execute(input);
     } catch (err: any) {
-      this.logger.error(`Error in MyUseCase: ${err.message}`, { error: err, stack: err.stack, input });
+      this.logger.error(
+        `Error in UseCase ${this.decoratedUseCase.constructor.name} with input: ${JSON.stringify(input)}`,
+        { errorName: err.name, errorMessage: err.message, errorStack: err.stack, cause: err.cause }
+      );
 
       let errorDetails: IUseCaseErrorDetails;
 
@@ -94,27 +105,60 @@ class MyUseCase implements IUseCase<IMyUseCaseInput, IUseCaseResponse<IMyUseCase
         errorDetails = {
           name: 'ValidationError',
           message: 'Input validation failed.',
+          code: 'VALIDATION_ERROR',
           details: err.flatten().fieldErrors,
           cause: err,
         };
-      } else if (err instanceof DomainError || err instanceof NotFoundError || err instanceof ValueError) { // Supondo essas classes de erro customizadas
+      } else if (err instanceof CoreError) {
         errorDetails = {
           name: err.name,
           message: err.message,
-          code: err.code, // Se seus erros customizados tiverem um 'code'
+          code: err.code || `CORE_${err.name.toUpperCase()}`,
+          details: err.details,
           cause: err,
         };
-      } else {
-        // Erro inesperado
+      } else if (err instanceof Error) { // Fallback for generic errors
         errorDetails = {
-          name: 'ApplicationError',
-          message: 'An unexpected internal server error occurred.',
-          // Não expor detalhes de erros desconhecidos diretamente
+          name: err.name || 'SystemError',
+          message: 'An unexpected system error occurred.',
+          code: 'UNEXPECTED_SYSTEM_ERROR',
           cause: err,
+        };
+      } else { // Non-Error exceptions
+        errorDetails = {
+          name: 'UnknownError',
+          message: 'An unknown error occurred.',
+          code: 'UNKNOWN_ERROR',
+          details: err,
         };
       }
       return errorUseCaseResponse(errorDetails);
     }
+  }
+}
+
+/**
+ * Conceptual example of a Concrete Use Case (no try/catch for IUseCaseResponse mapping)
+ */
+class MyConcreteUseCase implements IUseCase<IMyUseCaseInput, IMyUseCaseOutput> {
+  constructor(private readonly repository: IMyRepository) {}
+
+  async execute(input: IMyUseCaseInput): Promise<IUseCaseResponse<IMyUseCaseOutput>> {
+    // 1. Validate input (e.g., MyUseCaseInputSchema.parse(input))
+    //    This can throw ZodError.
+
+    // 2. Business logic
+    //    This can throw CoreError (e.g., NotFoundError, DomainError).
+    //    Example:
+    //    const entity = await this.repository.findById(input.id);
+    //    if (!entity) {
+    //      throw new NotFoundError(`Entity with id ${input.id} not found.`);
+    //    }
+    //    entity.doSomethingOrThrow();
+
+    // 3. Prepare output
+    const output: IMyUseCaseOutput = { result: "some data" }; // Placeholder
+    return successUseCaseResponse(output); // Return success directly
   }
 }
 ```
@@ -122,16 +166,18 @@ class MyUseCase implements IUseCase<IMyUseCaseInput, IUseCaseResponse<IMyUseCase
 **Consequências:**
 
 *   **Positivas:**
-    *   **Contrato Claro:** As camadas chamadoras sempre esperam um `IUseCaseResponse` e podem inspecionar a propriedade `success` para determinar o resultado.
-    *   **Tratamento de Erro Centralizado (no Use Case):** Os casos de uso se tornam responsáveis por capturar, logar e mapear erros, evitando que exceções "vazem" para camadas superiores de forma não controlada.
-    *   **Melhor Experiência do Desenvolvedor:** Simplifica o consumo dos casos de uso, pois não é necessário envolver cada chamada em `try/catch` pela camada de apresentação (a menos que a própria camada de apresentação queira tratar falhas de comunicação, etc.).
-    *   **Consistência:** Todos os casos de uso seguirão o mesmo padrão de retorno.
-    *   **Facilidade de Teste:** Os testes podem verificar o objeto de resposta, incluindo os detalhes do erro, de forma estruturada.
+    *   **Contrato Claro:** As camadas chamadoras sempre esperam um `IUseCaseResponse`.
+    *   **Tratamento de Erro Centralizado (no `UseCaseWrapper`):** A lógica de captura, logging e mapeamento de erros é centralizada, seguindo o princípio DRY.
+    *   **Casos de Uso Limpos (SRP):** Os casos de uso concretos focam apenas na lógica de negócio, lançando exceções quando necessário, sem se preocupar com a formatação da resposta de erro.
+    *   **Melhor Experiência do Desenvolvedor:** Simplifica a criação e o consumo dos casos de uso.
+    *   **Consistência:** Garante que todos os casos de uso sigam rigorosamente o mesmo padrão de resposta e tratamento de erro.
+    *   **Facilidade de Teste:**
+        *   Casos de uso concretos podem ser testados verificando se lançam as exceções corretas.
+        *   O `UseCaseWrapper` pode ser testado isoladamente para garantir que mapeia corretamente diferentes tipos de erro.
 
 *   **Negativas/Desafios:**
-    *   **Overhead de Mapeamento:** Haverá um pequeno overhead ao mapear exceções para `IUseCaseErrorDetails` em cada bloco `catch`.
-    *   **Disciplina Necessária:** Requer disciplina dos desenvolvedores para implementar corretamente os blocos `try/catch` e o mapeamento em todos os casos de uso.
-    *   **Refatoração:** Casos de uso existentes que usam o `Result` helper ou lançam exceções diretamente precisarão ser refatorados.
+    *   **Configuração da DI:** A configuração da injeção de dependência para o Decorator pode adicionar uma pequena complexidade inicial.
+    *   **Refatoração:** Casos de uso existentes precisarão ser adaptados para não mais implementarem o `try/catch` de mapeamento de erro e para lançarem exceções diretamente.
 
 **Alternativas Consideradas:**
 

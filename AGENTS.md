@@ -124,14 +124,16 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
 *   **Standardized Response DTO:** All Application Layer Use Cases (`src_refactored/application/use-cases/`) must return a standardized response object conforming to the `IUseCaseResponse<TOutput, TErrorDetails>` interface (defined in `src_refactored/shared/application/use-case-response.dto.ts`).
     *   This DTO includes a `success: boolean` flag, an optional `data: TOutput` field (for successful responses), and an optional `error: TErrorDetails` field (for failed responses).
     *   `TErrorDetails` is an object containing `name`, `message`, and optionally `code` and `details` for the error.
-*   **No Direct Exception Propagation from Use Cases:** Use Cases should not let exceptions propagate to the calling layer (e.g., Infrastructure). Instead, they must implement `try/catch` blocks to handle any exceptions that occur during their execution (e.g., errors from domain validation, repository operations, or other services).
-*   **Error Mapping:** Within the `catch` block, the Use Case is responsible for:
-    1.  Logging the original error with its full context (including stack trace).
-    2.  Mapping the caught exception to the `IUseCaseErrorDetails` structure.
-    3.  Returning an `IUseCaseResponse` with `success: false` and the populated `error` field.
-*   **Success Response:** If the execution completes without errors, the Use Case returns an `IUseCaseResponse` with `success: true` and the relevant `data`.
-*   **ADR Reference:** This pattern is formally documented in **ADR-008: Padrão de Tratamento de Erros e Resposta para Casos de Uso**. Adherence to this ADR is mandatory.
-*   **Benefits:** This provides a consistent and predictable contract for Use Case consumers, simplifies error handling in higher layers, and ensures that errors are properly logged and contextualized at the Use Case level.
+*   **Implementation via `UseCaseWrapper` (Decorator):** This pattern is implemented centrally by a `UseCaseWrapper` decorator.
+    *   Concrete Use Case classes should focus solely on business logic and orchestration. They should throw exceptions (e.g., `ZodError` for input validation, `CoreError` subtypes for business/domain errors) when operations cannot proceed as expected.
+    *   Concrete Use Cases return `successUseCaseResponse(data)` directly upon successful completion.
+    *   The `UseCaseWrapper` is responsible for:
+        1.  Executing the concrete Use Case within a `try/catch` block.
+        2.  Logging any caught error with its full context.
+        3.  Mapping the caught exception (e.g., `ZodError`, `CoreError`, generic `Error`) to the `IUseCaseErrorDetails` structure.
+        4.  Returning an `IUseCaseResponse` with `success: false` and the populated `error` field, or forwarding the success response from the concrete Use Case.
+*   **ADR Reference:** This pattern, including the `UseCaseWrapper` implementation strategy and the `CoreError` hierarchy, is formally documented in **ADR-008: Padrão de Tratamento de Erros e Resposta para Casos de Uso**. Adherence to this ADR is mandatory.
+*   **Benefits:** This approach ensures DRY, promotes SRP by keeping Use Cases clean of boilerplate error handling, provides a consistent contract for consumers, and centralizes error logging and mapping logic.
 
 #### 2.2.6. Code and Style Standards
 
