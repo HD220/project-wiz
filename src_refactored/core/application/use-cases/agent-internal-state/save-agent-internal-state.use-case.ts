@@ -99,14 +99,6 @@ export class SaveAgentInternalStateUseCase
         // errorName: (errorValue as Error).name,
       });
       return errorUseCaseResponse(errorValue.toUseCaseErrorDetails());
-    } else if (errorValue instanceof ZodError) {
-      return errorUseCaseResponse({
-        name: 'ValidationError',
-        message: 'Invalid input data.',
-        code: 'VALIDATION_ERROR',
-        details: errorValue.flatten().fieldErrors,
-        cause: errorValue,
-      });
     }
     const message = errorValue instanceof Error ? errorValue.message : String(errorValue);
     const logError = errorValue instanceof Error ? errorValue : new Error(message);

@@ -3,6 +3,7 @@ import React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/ui/lib/utils";
+
 import { ConversationItem } from "./ConversationList";
 
 interface ConversationListItemProps {

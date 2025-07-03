@@ -1,10 +1,11 @@
 import { UserCircle, UploadCloud } from "lucide-react";
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ProfileFormData } from "@/ui/app/app/settings/profile";
+
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ProfileFormData } from "@/ui/app/app/settings/profile";
 
 interface UserProfileAvatarProps {
   currentAvatar: string | null;

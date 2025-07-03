@@ -3,13 +3,13 @@ import { injectable, inject } from "inversify";
 import { LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
 import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
-
+import { LLMProviderConfig } from '@/core/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
+import { BaseUrl } from "@/core/domain/llm-provider-config/value-objects/base-url.vo";
 import { LLMApiKey } from "@/core/domain/llm-provider-config/value-objects/llm-api-key.vo";
 import { LLMProviderConfigId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo";
 import { LLMProviderConfigName } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-name.vo";
 import { LLMProviderId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-id.vo";
-import { BaseUrl } from "@/core/domain/llm-provider-config/value-objects/base-url.vo";
 
 import {
   IUseCaseResponse,
@@ -67,7 +67,7 @@ export class CreateLLMProviderConfigUseCase
     const savedConfig = await this.configRepository.save(configEntity);
 
     return successUseCaseResponse({
-      llmProviderConfigId: savedConfig.id.value(),
+      llmProviderConfigId: savedConfig.id.value,
     });
   }
 }

@@ -4,13 +4,13 @@ import { AGENT_REPOSITORY_INTERFACE_TYPE, LLM_PROVIDER_CONFIG_REPOSITORY_INTERFA
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
 import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
 import { Agent } from "@/core/domain/agent/agent.entity";
-import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
 import { IPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
+import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 import { AgentMaxIterations } from "@/core/domain/agent/value-objects/agent-max-iterations.vo";
 import { AgentTemperature } from "@/core/domain/agent/value-objects/agent-temperature.vo";
-import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
 import { NotFoundError } from "@/core/domain/common/errors";
+import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
 
 import { IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse } from "@/shared/application/use-case-response.dto";
 

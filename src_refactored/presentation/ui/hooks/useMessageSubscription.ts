@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 import { useIpcSubscription } from "@/ui/hooks/ipc/useIpcSubscription";
+
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetDMMessagesRequest,

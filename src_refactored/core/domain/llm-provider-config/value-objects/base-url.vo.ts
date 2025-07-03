@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { AbstractValueObject } from '@/core/common/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/core/domain/common/errors';
 
 interface BaseUrlProps {

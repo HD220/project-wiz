@@ -53,6 +53,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     job: JobEntity<AgentExecutionPayload, unknown>
   ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> {
     const jobId = job.id.value;
+    const agentId = job.payload.agentId;
 
     this.logger.info(`Processing Job ID: ${jobId} with Agent ID: ${agentId}`, { jobId, agentId });
 
@@ -177,3 +178,4 @@ export class GenericAgentExecutor implements IAgentExecutor {
   private _getSerializableHistory(job: JobEntity<AgentExecutionPayload, unknown>) {
     return job.getConversationHistory().toPersistence().entries;
   }
+}

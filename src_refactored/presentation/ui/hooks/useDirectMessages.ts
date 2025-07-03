@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { toast } from "sonner";
 
 import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 import { useMessageSending } from "@/ui/hooks/useMessageSending";

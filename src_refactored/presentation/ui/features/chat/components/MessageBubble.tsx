@@ -2,6 +2,7 @@ import React from "react";
 
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer";
 import { cn } from "@/ui/lib/utils";
+
 import { ChatMessage } from "./MessageItem";
 
 interface MessageBubbleProps {

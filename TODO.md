@@ -135,9 +135,17 @@ This document outlines the comprehensive plan for refactoring the core of Projec
 - [ ] **Remove `Result` Type Usage:**
   - *Action:* Systematically replace all instances of `Result`, `ok`, and `error` (from `@/shared/result`) with `IUseCaseResponse`, `successUseCaseResponse`, and `errorUseCaseResponse` (from `@/shared/application/use-case-response.dto.ts`) in all non-test files.
   - *Verification:* Run `npx tsc --noEmit` to catch any lingering `Result` type errors.
+- [ ] **Address `no-unused-vars` Warnings:**
+    - *Action:* Systematically go through all files reporting `no-unused-vars` warnings and remove the unused imports or variables.
+- [ ] **Refactor Large Files/Functions (`max-lines`, `max-lines-per-function`):**
+    - *Action:* Identify files and functions exceeding the `max-lines` and `max-lines-per-function` limits. Break them down into smaller, more focused units, adhering to Object Calisthenics principles (especially "Keep All Entities Small" and "Only One Level of Indentation Per Method"). This will likely involve creating new files, helper functions, or extracting components.
+    - *Verification:* Re-run linting and type-checking after each significant refactoring.
 - [ ] **Final Lint and Type-Check:**
   - *Action:* Run `npx eslint --fix src_refactored/` (full lint) and `npx tsc --noEmit` (full type-check).
   - *Verification:* Ensure zero errors or warnings.
+- [ ] **Review and Update Documentation:**
+    - *Action:* Review all relevant documentation (`README.md`, `GEMINI.md`, `docs/reference/*.md`) to ensure it accurately reflects the refactored codebase.
+    - *Verification:* Manual review.
 
 ## Current Progress and Next Steps
 
@@ -174,3 +182,7 @@ This document outlines the comprehensive plan for refactoring the core of Projec
 4.  **Final Lint and Type-Check:**
     *   *Action:* Run `npx eslint --fix src_refactored/` (full lint) and `npx tsc --noEmit` (full type-check).
     *   *Verification:* Ensure zero errors or warnings.
+
+5.  **Review and Update Documentation:**
+    *   *Action:* Review all relevant documentation (`README.md`, `GEMINI.md`, `docs/reference/*.md`) to ensure it accurately reflects the refactored codebase.
+    *   *Verification:* Manual review.

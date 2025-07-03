@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   SendDMMessageRequest,

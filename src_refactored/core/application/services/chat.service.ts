@@ -5,6 +5,7 @@ import {
   ILogger,
   LOGGER_INTERFACE_TYPE,
 } from '@/core/common/services/i-logger.service';
+import { LLMError } from '@/core/domain/common/errors';
 import {
   ILLMAdapter,
   ILLMAdapterToken,

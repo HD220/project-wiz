@@ -1,8 +1,8 @@
+import { useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, ServerCrash } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "@tanstack/react-router";
 
 interface DirectMessageLoadingErrorDisplayProps {
   isLoading: boolean;

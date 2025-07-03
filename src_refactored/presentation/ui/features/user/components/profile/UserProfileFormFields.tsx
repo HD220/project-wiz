@@ -1,6 +1,6 @@
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ProfileFormData } from "@/ui/app/app/settings/profile";
+
 
 import {
   FormControl,
@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ProfileFormData } from "@/ui/app/app/settings/profile";
 
 interface UserProfileFormFieldsProps {
   form: UseFormReturn<ProfileFormData>;

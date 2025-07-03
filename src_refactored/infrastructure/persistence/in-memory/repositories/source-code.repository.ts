@@ -1,40 +1,36 @@
-import { injectable } from "inversify";
+import { injectable } from 'inversify';
 
-import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
-import { ISourceCodeRepository } from "@/core/domain/source-code/ports/source-code-repository.interface";
-import { SourceCode } from "@/core/domain/source-code/source-code.entity";
-import { RepositoryIdVO as SourceCodeId } from "@/core/domain/source-code/value-objects/repository-id.vo";
+import { ProjectId } from '@/core/domain/project/value-objects/project-id.vo';
+import { ISourceCodeRepository } from '@/core/domain/source-code/ports/source-code-repository.interface';
+import { SourceCode } from '@/core/domain/source-code/source-code.entity';
+import { RepositoryIdVO as SourceCodeId } from '@/core/domain/source-code/value-objects/repository-id.vo';
 
-import { Result, Ok, Err } from "@/shared/result";
+import { NotFoundError } from '@/shared/errors/core.error';
 
 @injectable()
 export class InMemorySourceCodeRepository implements ISourceCodeRepository {
   private readonly sourceCodes: Map<string, SourceCode> = new Map();
 
-  async save(sourceCode: SourceCode): Promise<Result<void, Error>> {
+  async save(sourceCode: SourceCode): Promise<void> {
     this.sourceCodes.set(sourceCode.id.value, sourceCode);
-    return Ok(undefined);
   }
 
-  async findById(id: SourceCodeId): Promise<Result<SourceCode | null, Error>> {
+  async findById(id: SourceCodeId): Promise<SourceCode | null> {
     const sourceCode = this.sourceCodes.get(id.value);
-    return Ok(sourceCode || null);
+    return sourceCode || null;
   }
 
-  async findByProjectId(
-    projectId: ProjectId
-  ): Promise<Result<SourceCode[], Error>> {
+  async findByProjectId(projectId: ProjectId): Promise<SourceCode[]> {
     const found = Array.from(this.sourceCodes.values()).filter((sc) =>
-      sc.projectId.equals(projectId)
+      sc.projectId.equals(projectId),
     );
-    return Ok(found);
+    return found;
   }
 
-  async delete(id: SourceCodeId): Promise<Result<void, Error>> {
+  async delete(id: SourceCodeId): Promise<void> {
     if (!this.sourceCodes.has(id.value)) {
-      return Err(new Error(`SourceCode with ID ${id.value} not found.`));
+      throw new NotFoundError(`SourceCode with ID ${id.value} not found.`);
     }
     this.sourceCodes.delete(id.value);
-    return Ok(undefined);
   }
 }
