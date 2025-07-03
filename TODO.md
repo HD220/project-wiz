@@ -83,7 +83,7 @@ This document outlines the comprehensive plan for refactoring the core of Projec
 
 **For each Use Case in `src_refactored/core/application/use-cases/**/*.ts`:**
 
-- [ ] **Standardize Input Validation and Error Handling (ADR-008):**
+- [x] **Standardize Input Validation and Error Handling (ADR-008):**
   - *Action:* Validate input DTO with Zod. Remove manual `try/catch` for `Result` types. Use cases should *throw* `ZodError` or `CoreError` subtypes. `execute` method returns `Promise<IUseCaseResponse<TOutput>>` and returns `successUseCaseResponse(data)` on success.
   - *Verification:* Run `npx eslint --fix <path/to/use-case.ts>` and `npx tsc --noEmit --pretty <path/to/use-case.ts>` to ensure no linting or type errors.
 - [x] **Update Domain Object Access (ADR-009):**
@@ -123,13 +123,13 @@ This document outlines the comprehensive plan for refactoring the core of Projec
 
 **For each Repository in `src_refactored/infrastructure/persistence/**/*.ts`:**
 
-- [ ] **Update Return Types and Domain Object Access:**
+- [x] **Update Return Types and Domain Object Access:**
   - *Action:* Modify repository methods to return `Promise<IUseCaseResponse<TOutput>>`. Replace `ok(data)` with `successUseCaseResponse(data)`. Replace `err(error)` with `errorUseCaseResponse(error.toUseCaseErrorDetails())` (or manual mapping). Update all calls to domain objects to use `entity.id.value`.
   - *Verification:* Run `npx eslint --fix <path/to/repository.ts>` and `npx tsc --noEmit --pretty <path/to/repository.ts>` to ensure no linting or type errors.
 
 ## Phase 3: Global Verification & Cleanup
 
-- [ ] **Update `AGENTS.md`:**
+- [x] **Update `AGENTS.md`:**
   - *Action:* Modify the "Object Calisthenics" section to reflect the approved ADR-009, specifically updating Rule 9 to allow public `readonly` properties/getters for data access.
   - *Verification:* Manual review.
 - [ ] **Remove `Result` Type Usage:**
@@ -147,13 +147,45 @@ This document outlines the comprehensive plan for refactoring the core of Projec
 - All Entities in `Phase 1` have been refactored to use `get` accessors and Zod validation.
 - The `CoreError` constructor and its direct subclasses (`ValueError`, `EntityError`, `DomainError`, `ApplicationError`, `NotFoundError`) in `src_refactored/shared/errors/core.error.ts` have been refactored to consistently use the `options` object for `code`, `details`, and `cause`.
 - All instances of `().value()` have been replaced with `.value` in non-test files within `src_refactored/core/application/services/` and `src_refactored/core/application/use-cases/`.
+- All Use Cases in `Phase 2` have been refactored to standardize input validation and error handling (ADR-008) and update domain object access (ADR-009).
+- All Services in `Phase 2` have been refactored to update domain object access (ADR-009).
+- All Repository interfaces have been updated to remove `Result` types and use direct returns.
+- `AGENTS.md` has been updated to reflect ADR-009.
 
 ### Remaining Tasks:
 
-1.  **Standardize Input Validation and Error Handling (ADR-008) for remaining Use Cases.**
-2.  **Update Domain Object Access (ADR-009) for remaining Use Cases.**
-3.  **Update Domain Object Access (ADR-009) for remaining Services.**
-4.  **Update Return Types and Domain Object Access for all Repositories.**
-5.  **Update `AGENTS.md`:** Modify the "Object Calisthenics" section to reflect the approved ADR-009, specifically updating Rule 9 to allow public `readonly` properties/getters for data access.
-6.  **Remove `Result` Type Usage:** Systematically replace all instances of `Result`, `ok`, and `error` (from `@/shared/result`) with `IUseCaseResponse`, `successUseCaseResponse`, and `errorUseCaseResponse` (from `@/shared/application/use-case-response.dto.ts`) in all non-test files.
-7.  **Final Lint and Type-Check:** Perform full project linting and type-checking to ensure zero errors or warnings.
+1.  **Remove `Result` Type Usage:** Systematically replace all instances of `Result`, `ok`, and `error` (from `@/shared/result`) with `IUseCaseResponse`, `successUseCaseResponse`, and `errorUseCaseResponse` (from `@/shared/application/use-case-response.dto.ts`) in all non-test files. This includes:
+    *   `src_refactored/core/application/ports/services/i-agent-executor.interface.ts` (already done)
+    *   `src_refactored/core/application/ports/services/i-chat.service.ts` (already done)
+    *   `src_refactored/core/application/ports/services/i-embedding.service.ts` (already done)
+    *   `src_refactored/core/application/ports/services/i-tool-registry.service.ts` (already done)
+    *   `src_refactored/core/application/services/agent-interaction.service.ts` (already done)
+    *   `src_refactored/core/application/services/chat.service.ts` (already done)
+    *   `src_refactored/core/application/services/generic-agent-executor.service.ts` (already done)
+    *   `src_refactored/core/application/services/tool-validation.service.ts` (already done)
+    *   `src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/agent/create-agent.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/annotation/list-annotations.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/annotation/remove-annotation.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/annotation/save-annotation.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/llm-provider-config/create-llm-provider-config.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/memory/remove-memory-item.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/memory/save-memory-item.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/memory/search-memory-items.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/memory/search-similar-memory-items.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/project/create-project.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/project/get-project-details.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/project/list-projects.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/user/create-user.use-case.ts` (already done)
+    *   `src_refactored/core/application/use-cases/user/get-user.use-case.ts` (already done)
+    *   `src_refactored/core/domain/agent/ports/agent-repository.interface.ts` (already done)
+    *   `src_refactored/core/domain/annotation/ports/annotation-repository.interface.ts` (already done)
+    *   `src_refactored/core/domain/memory/ports/memory-repository.interface.ts` (already done)
+    *   `src_refactored/infrastructure/persistence/in-memory/repositories/memory.repository.ts` (done)
+    *   `src_refactored/infrastructure/persistence/drizzle/repositories/project.repository.ts` (pending)
+    *   `src_refactored/infrastructure/services/tool-registry/tool-registry.service.ts` (pending)
+    *   `src_refactored/infrastructure/adapters/llm/mock-llm.adapter.ts` (pending)
+2.  **Final Lint and Type-Check:** Perform full project linting and type-checking to ensure zero errors or warnings.
+

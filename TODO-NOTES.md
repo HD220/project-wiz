@@ -29,3 +29,9 @@ This document serves as a running log of observations, challenges, and strategie
 
 - **Problem:** Initially, Value Objects had a `value()` method to access their underlying value. After refactoring to `get value()` accessors, some parts of the codebase were still calling `value()` as a method.
 - **Solution:** Systematically replaced all instances of `.value()` with `.value` in the codebase.
+
+## `Result` Type Removal
+
+- **Problem:** The codebase heavily relied on the `Result` type for error handling, which is being replaced by `IUseCaseResponse` and direct error throwing.
+- **Solution:** Systematically replaced `Result` with `IUseCaseResponse` in all Use Cases, Services, and Repository interfaces. This involved updating import statements, method signatures, and error handling logic to throw `CoreError` subtypes directly and return `successUseCaseResponse` or `errorUseCaseResponse`.
+- **Observation:** This refactoring often leads to `no-undef` ESLint errors and `boundaries/element-types` violations due to incorrect import paths or lingering `Result` related code. These are being addressed iteratively.

@@ -4,29 +4,26 @@ import { injectable } from 'inversify';
 import { MemoryItem } from '@/core/domain/memory/memory-item.entity';
 import { IMemoryRepository, SearchFilters, SearchOptions } from '@/core/domain/memory/ports/memory-repository.interface';
 import { MemoryItemId } from '@/core/domain/memory/value-objects/memory-item-id.vo';
-
-import { Result, Ok, Err } from '@/shared/result';
+import { NotFoundError } from '@/shared/errors/core.error';
 
 
 @injectable()
 export class InMemoryMemoryRepository implements IMemoryRepository {
   private readonly items: Map<string, MemoryItem> = new Map();
 
-  async save(item: MemoryItem): Promise<Result<void, Error>> {
+  async save(item: MemoryItem): Promise<void> {
     this.items.set(item.id.value, item);
-    return Ok(undefined);
   }
 
-  async findById(id: MemoryItemId): Promise<Result<MemoryItem | null, Error>> {
-    const item = this.items.get(id.value);
-    return Ok(item || null);
+  async findById(id: MemoryItemId): Promise<MemoryItem | null> {
+    return this.items.get(id.value) || null;
   }
 
-  async search(filters: SearchFilters, options: SearchOptions): Promise<Result<MemoryItem[], Error>> {
+  async search(filters: SearchFilters, options: SearchOptions): Promise<MemoryItem[]> {
     // Basic placeholder for search - does not implement actual filtering or embedding search
     let results = Array.from(this.items.values());
     if (filters.agentId) {
-      results = results.filter(item => item.agentId()?.equals(filters.agentId!));
+      results = results.filter(item => item.agentId?.equals(filters.agentId!));
     }
     if (filters.tags && filters.tags.length > 0) {
       results = results.filter(item =>
@@ -34,14 +31,13 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
       );
     }
     // Does not implement options.limit, options.offset, or embedding search
-    return Ok(results.slice(0, options.limit || results.length));
+    return results.slice(0, options.limit || results.length);
   }
 
-  async delete(id: MemoryItemId): Promise<Result<void, Error>> {
+  async delete(id: MemoryItemId): Promise<void> {
     if (!this.items.has(id.value)) {
-      return Err(new Error(`MemoryItem with ID ${id.value} not found.`));
+      throw new NotFoundError(`MemoryItem with ID ${id.value} not found.`);
     }
     this.items.delete(id.value);
-    return Ok(undefined);
   }
 }
