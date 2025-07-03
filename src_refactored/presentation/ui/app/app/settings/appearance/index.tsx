@@ -34,7 +34,7 @@ function AppearanceSettingsPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto">
       <Button variant="outline" size="sm" className="mb-4" asChild>
-        <Link to="/settings">
+        <Link to="/app/settings">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Configurações
         </Link>
       </Button>

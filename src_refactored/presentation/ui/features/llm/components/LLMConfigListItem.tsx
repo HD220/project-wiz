@@ -54,7 +54,7 @@ export function LLMConfigListItem({
       <div className="flex-shrink-0 ml-4 space-x-1">
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           onClick={() => onEdit(config.id)}
           title="Editar Configuração"
         >
@@ -63,7 +63,7 @@ export function LLMConfigListItem({
         </Button>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           onClick={() => onDelete(config.id)}
           title="Excluir Configuração"
         >

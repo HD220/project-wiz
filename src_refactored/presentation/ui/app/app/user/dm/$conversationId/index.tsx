@@ -11,14 +11,14 @@ import type {
 interface ChatWindowConversationHeader {
   id: string;
   name: string;
-  type: "dm" | "channel" | "agent";
+  type: "user" | "agent" | "dm" | "channel";
   avatarUrl?: string;
 }
 
 const currentUserId = "userJdoe";
 
 function DirectMessagePage() {
-  const params = useParams({ from: "/(app)/user/dm/$conversationId/" });
+  const params = useParams({ from: "/app/user/dm/$conversationId/" });
   const conversationId = params.conversationId;
 
   const {

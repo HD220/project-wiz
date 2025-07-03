@@ -11,7 +11,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './app/__root'
-import { Route as AppIndexRouteImport } from './app/app/index'
+import { Route as IndexRouteImport } from './app/index'
 import { Route as AppLayoutRouteImport } from './app/app/_layout'
 import { Route as AppUserIndexRouteImport } from './app/app/user/index'
 import { Route as AppSettingsIndexRouteImport } from './app/app/settings/index'
@@ -49,14 +49,14 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppUserRoute = AppUserRouteImport.update({
   id: '/user',
   path: '/user',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLayoutRoute = AppLayoutRouteImport.update({
@@ -210,8 +210,8 @@ const AppSettingsLlmConfigIdEditIndexRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/app': typeof AppLayoutRoute
-  '/app/': typeof AppIndexRoute
   '/app/user': typeof AppUserLayoutRoute
   '/onboarding': typeof publicOnboardingIndexRoute
   '/app/agents': typeof AppAgentsIndexRoute
@@ -241,7 +241,8 @@ export interface FileRoutesByFullPath {
   '/app/settings/llm/$configId/edit': typeof AppSettingsLlmConfigIdEditIndexRoute
 }
 export interface FileRoutesByTo {
-  '/app': typeof AppIndexRoute
+  '/': typeof IndexRoute
+  '/app': typeof AppLayoutRoute
   '/app/user': typeof AppUserIndexRoute
   '/onboarding': typeof publicOnboardingIndexRoute
   '/app/agents': typeof AppAgentsIndexRoute
@@ -271,9 +272,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/_layout': typeof AppLayoutRoute
-  '/app/': typeof AppIndexRoute
   '/app/user': typeof AppUserRouteWithChildren
   '/app/user/_layout': typeof AppUserLayoutRoute
   '/(public)/onboarding/': typeof publicOnboardingIndexRoute
@@ -306,8 +307,8 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/app'
-    | '/app/'
     | '/app/user'
     | '/onboarding'
     | '/app/agents'
@@ -337,6 +338,7 @@ export interface FileRouteTypes {
     | '/app/settings/llm/$configId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/app'
     | '/app/user'
     | '/onboarding'
@@ -366,9 +368,9 @@ export interface FileRouteTypes {
     | '/app/settings/llm/$configId/edit'
   id:
     | '__root__'
+    | '/'
     | '/app'
     | '/app/_layout'
-    | '/app/'
     | '/app/user'
     | '/app/user/_layout'
     | '/(public)/onboarding/'
@@ -400,6 +402,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   publicOnboardingIndexRoute: typeof publicOnboardingIndexRoute
 }
@@ -413,18 +416,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/user': {
       id: '/app/user'
       path: '/user'
       fullPath: '/app/user'
       preLoaderRoute: typeof AppUserRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/': {
-      id: '/app/'
-      path: '/'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/_layout': {
@@ -643,7 +646,6 @@ const AppUserRouteWithChildren =
 
 interface AppRouteChildren {
   AppLayoutRoute: typeof AppLayoutRoute
-  AppIndexRoute: typeof AppIndexRoute
   AppUserRoute: typeof AppUserRouteWithChildren
   AppAgentsIndexRoute: typeof AppAgentsIndexRoute
   AppChatIndexRoute: typeof AppChatIndexRoute
@@ -672,7 +674,6 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppLayoutRoute: AppLayoutRoute,
-  AppIndexRoute: AppIndexRoute,
   AppUserRoute: AppUserRouteWithChildren,
   AppAgentsIndexRoute: AppAgentsIndexRoute,
   AppChatIndexRoute: AppChatIndexRoute,
@@ -703,6 +704,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   publicOnboardingIndexRoute: publicOnboardingIndexRoute,
 }

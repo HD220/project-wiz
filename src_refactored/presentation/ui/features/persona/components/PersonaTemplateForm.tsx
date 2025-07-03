@@ -52,6 +52,7 @@ export type PersonaTemplateFormData = z.infer<typeof personaTemplateFormSchema>;
 interface PersonaTemplateFormProps {
   template?: PersonaTemplate;
   onSuccess?: (data: PersonaTemplate) => void;
+  submitButtonText?: string;
 }
 
 export function PersonaTemplateForm({

@@ -43,7 +43,7 @@ function LLMConfigurationPage() {
 
   const handleEdit = (configId: string) => {
     router.navigate({
-      to: "/settings/llm/$configId/edit",
+      to: "/app/settings/llm/$configId/edit",
       params: { configId },
     });
   };
@@ -76,7 +76,7 @@ function LLMConfigurationPage() {
             </CardDescription>
           </div>
           <Button asChild size="sm">
-            <Link to="/settings/llm/new">
+            <Link to="/app/settings/llm/new">
               <PlusCircle className="mr-2 h-4 w-4" />
               Nova Configuração
             </Link>

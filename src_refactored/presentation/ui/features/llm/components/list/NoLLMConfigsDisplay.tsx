@@ -30,7 +30,7 @@ export function NoLLMConfigsDisplay() {
       </p>
       <div className="mt-6">
         <Button asChild variant="outline">
-          <Link to="/settings/llm/new">
+          <Link to="/app/settings/llm/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             Criar Configuração
           </Link>

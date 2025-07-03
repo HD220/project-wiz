@@ -101,7 +101,7 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
 
   if (viewMode === 'list') {
     return (
-      <Link to="/projects/$projectId" params={{ projectId: project.id }} className="block hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg">
+      <Link to="/app/projects/$projectId" params={{ projectId: project.id }} className="block hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg">
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
             <div className={`p-2 rounded-md hidden sm:block ${projectStatus.color} opacity-20`}>
@@ -140,7 +140,7 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
   // Grid View (Card)
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-200">
-      <Link to="/projects/$projectId" params={{ projectId: project.id }} className="flex flex-col flex-grow">
+      <Link to="/app/projects/$projectId" params={{ projectId: project.id }} className="flex flex-col flex-grow">
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between">
             <div className={`p-2 rounded-md ${projectStatus.color} opacity-20`}>

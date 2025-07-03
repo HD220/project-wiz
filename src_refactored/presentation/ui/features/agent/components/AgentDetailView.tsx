@@ -23,13 +23,13 @@ export function AgentDetailView({
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" asChild>
-          <Link to="/agents">
+          <Link to="/app/agents">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista
           </Link>
         </Button>
         <div className="flex items-center space-x-2">
           <Button variant="default" asChild>
-            <Link to="/agents/$agentId/edit" params={{ agentId: instance.id }}>
+            <Link to="/app/agents/$agentId/edit" params={{ agentId: instance.id }}>
               <Edit3 className="mr-2 h-4 w-4" /> Editar Instância
             </Link>
           </Button>
@@ -39,7 +39,7 @@ export function AgentDetailView({
             asChild
           >
             <Link
-              to="/chat"
+              to="/app/chat"
               search={{ conversationId: `agent-${instance.id}` }}
             >
               <MessageSquare className="mr-2 h-4 w-4" /> Conversar

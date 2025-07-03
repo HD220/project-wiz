@@ -32,6 +32,10 @@ export function EditPersonaTemplateFormRenderer({
   handleSubmit,
   isSubmitting,
 }: EditPersonaTemplateFormRendererProps) {
+  if (!personaTemplate) {
+    return null; // Or render a loading/error state
+  }
+
   const initialValues: Partial<PersonaTemplateFormData> = {
     name: personaTemplate.name,
     role: personaTemplate.role,

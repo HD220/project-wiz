@@ -20,7 +20,7 @@ import type {
 
 function ProjectSettingsPage() {
   const router = useRouter();
-  const params = useParams({ from: "/(app)/projects/$projectId/settings/" });
+  const params = useParams({ from: "/app/projects/$projectId/settings/" }) as { projectId: string };
   const projectId = params.projectId;
 
   const {

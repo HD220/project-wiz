@@ -62,7 +62,6 @@ export function InitialConfigStep({
       <LLMConfigForm
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
-        submitButtonText="Salvar Configuração LLM e Continuar"
       />
       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
         Você poderá adicionar mais provedores ou modificar esta configuração

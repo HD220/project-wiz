@@ -40,6 +40,7 @@ export type ProjectFormData = z.infer<typeof projectFormSchema>;
 interface ProjectFormProps {
   project?: Project;
   onSuccess?: (data: Project) => void;
+  submitButtonText?: string;
 }
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {

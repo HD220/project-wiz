@@ -70,7 +70,7 @@ export function ChatSidebar({
             className={`w-full flex items-center space-x-3 p-2 rounded-md text-left hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-colors
               ${selectedConversationId === conv.id ? "bg-sky-100 dark:bg-sky-700/50 text-sky-700 dark:text-sky-300 font-medium" : "text-slate-700 dark:text-slate-300"}`}
           >
-            {conv.type === "dm" ? (
+            {conv.type === "agent" ? (
               conv.avatarUrl ? (
                 <img
                   src={conv.avatarUrl}

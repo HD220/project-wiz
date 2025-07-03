@@ -34,7 +34,7 @@ function NewProjectPage() {
       if (response.success && response.data) {
         toast.success(`Projeto "${response.data.name}" criado com sucesso!`);
         router.navigate({
-          to: "/projects/$projectId",
+          to: "/app/projects/$projectId",
           params: { projectId: response.data.id },
           replace: true,
         });
@@ -51,7 +51,10 @@ function NewProjectPage() {
 
   const handleSubmit = async (data: ProjectFormData) => {
     console.log("Dados do novo projeto:", data);
-    createProjectMutation.mutate(data);
+    createProjectMutation.mutate({
+      name: data.name,
+      description: data.description,
+    });
   };
 
   return (

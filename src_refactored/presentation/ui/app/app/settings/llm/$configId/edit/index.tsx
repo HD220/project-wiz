@@ -111,7 +111,7 @@ function EditLLMConfigPage() {
       toast.success(
         `Configuração LLM "${data.name}" atualizada com sucesso (simulado)!`,
       );
-      router.navigate({ to: "/settings/llm", replace: true });
+            router.navigate({ to: "/app/settings/llm", replace: true });
     } else {
       toast.error("Falha ao encontrar a configuração para atualizar.");
     }

@@ -27,7 +27,7 @@ interface AgentFormFieldProps {
 }
 
 interface AgentLLMConfigSelectFieldProps extends AgentFormFieldProps {
-  llmConfigs: Pick<LLMConfig, "id" | "name" | "providerName">[];
+  llmConfigs: Pick<LLMConfig, "id" | "name" | "providerId">[];
 }
 
 export function AgentLLMConfigSelectField({
@@ -50,7 +50,7 @@ export function AgentLLMConfigSelectField({
             <SelectContent>
               {llmConfigs.map((config) => (
                 <SelectItem key={config.id} value={config.id}>
-                  {config.name} ({config.providerName})
+                  {config.name} ({config.providerId})
                 </SelectItem>
               ))}
             </SelectContent>

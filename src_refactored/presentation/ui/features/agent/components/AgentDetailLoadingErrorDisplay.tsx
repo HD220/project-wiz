@@ -38,7 +38,7 @@ export function AgentDetailLoadingErrorDisplay({
           {error.message}
         </p>
         <Button
-          onClick={() => router.navigate({ to: "/agents" })}
+          onClick={() => router.navigate({ to: "/app/agents" })}
           variant="destructive"
           className="mt-4"
         >

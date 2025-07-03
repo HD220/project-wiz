@@ -71,9 +71,9 @@ function PersonaTemplatesPage() {
           </p>
         </div>
         <Button asChild>
-          <Link to="/personas/new">
+          <Link to="/app/personas/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Novo Template de Persona
+            Nova Persona
           </Link>
         </Button>
       </header>
@@ -82,7 +82,7 @@ function PersonaTemplatesPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 dark:text-slate-400" />
         <Input
           type="search"
-          placeholder="Buscar templates por nome ou papel..."
+          placeholder="Buscar por nome da persona, papel ou objetivo..."
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
           className="pl-10 w-full md:w-1/2 lg:w-1/3"
@@ -93,23 +93,25 @@ function PersonaTemplatesPage() {
         <PersonaTemplateList templates={filteredTemplates} />
       ) : (
         <div className="text-center py-10 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg mt-6">
-          <UserSquare className="mx-auto h-12 w-12 text-slate-400" />
+          <Bot className="mx-auto h-12 w-12 text-slate-400" />
           <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-50">
             {searchTerm
-              ? "Nenhum template encontrado"
-              : "Nenhum template de persona criado"}
+              ? "Nenhuma persona encontrada"
+              : "Nenhuma persona criada"
+            }
           </h3>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {searchTerm
               ? "Tente ajustar seus termos de busca."
-              : "Comece criando seu primeiro template de persona."}
+              : "Comece criando sua primeira persona."
+            }
           </p>
           {!searchTerm && (
             <div className="mt-6">
               <Button asChild variant="outline">
-                <Link to="/personas/new">
+                <Link to="/app/personas/new">
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Criar Novo Template
+                  Criar Nova Persona
                 </Link>
               </Button>
             </div>

@@ -47,7 +47,7 @@ const mockProjectsData: Record<string, Project> = {
 };
 
 function ProjectDetailLayoutPage() {
-  const params = useParams({ from: '/(app)/projects/$projectId/' });
+  const params = useParams({ from: '/app/projects/$projectId/' });
   const projectId = params.projectId;
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);

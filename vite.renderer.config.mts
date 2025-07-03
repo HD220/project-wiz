@@ -5,16 +5,25 @@ import react from "@vitejs/plugin-react-swc";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
 
-const projectRoot = path.resolve(__dirname); 
+const projectRoot = path.resolve(__dirname);
 
 export default defineConfig({
   root: path.resolve(projectRoot, "src_refactored/presentation/ui"), // Corrected root
+  // build: {
+  //   outDir: `./vite/renderer/`,
+  // },
   plugins: [
     tanstackRouter({
       target: "react",
-      autoCodeSplitting: true,
-      routesDirectory: path.resolve(projectRoot, "src_refactored/presentation/ui/app"),
-      generatedRouteTree: path.resolve(projectRoot, "src_refactored/presentation/ui/routeTree.gen.ts"),
+      // autoCodeSplitting: true,
+      routesDirectory: path.resolve(
+        projectRoot,
+        "src_refactored/presentation/ui/app"
+      ),
+      generatedRouteTree: path.resolve(
+        projectRoot,
+        "src_refactored/presentation/ui/routeTree.gen.ts"
+      ),
     }),
     react({
       plugins: [["@lingui/swc-plugin", {}]],
@@ -29,7 +38,10 @@ export default defineConfig({
       // Specific alias for @/ui to point to the presentation/ui directory
       "@/ui": path.resolve(projectRoot, "src_refactored/presentation/ui"),
       // Alias for @/components to point to the presentation/ui/components directory
-      "@/components": path.resolve(projectRoot, "src_refactored/presentation/ui/components"),
+      "@/components": path.resolve(
+        projectRoot,
+        "src_refactored/presentation/ui/components"
+      ),
       // Alias for @/shared for shared types and utilities
       "@/shared": path.resolve(projectRoot, "src_refactored/shared"),
       // Add other specific @/ aliases if the renderer needs them from other parts of src_refactored

@@ -13,7 +13,7 @@ import { MessageList } from "./MessageList";
 interface Conversation {
   id: string;
   name: string;
-  type: "dm" | "channel";
+  type: "dm" | "channel" | "agent";
   avatarUrl?: string;
   // Para canais
   participants?: number;
@@ -97,7 +97,7 @@ export function ChatWindow({
       </div>
 
       {/* Message Input Area */}
-      <MessageInput onSendMessage={onSendMessage} isLoading={isLoading} />
+      <MessageInput onSubmit={onSendMessage} isLoading={isLoading} />
     </div>
   );
 }

@@ -5,12 +5,22 @@ import { Button } from "@/components/ui/button";
 import { DataLoadingOrErrorDisplay } from "@/ui/components/DataLoadingOrErrorDisplay";
 import { useAgentInstanceData } from "@/ui/hooks/useAgentInstanceData";
 import { useUpdateAgentInstance } from "@/ui/hooks/useUpdateAgentInstance";
-
-import { EditAgentFormRenderer } from "./EditAgentFormRenderer";
+import { EditAgentFormRenderer } from "@/ui/features/agent/components/EditAgentFormRenderer";
 
 function EditAgentInstancePage() {
   const router = useRouter();
-  const { agentId, agentInstance, personaTemplates, llmConfigs, isLoadingAll, anyError, agentError, personasError, llmsError, refetchAgent } = useAgentInstanceData();
+  const {
+    agentId,
+    agentInstance,
+    personaTemplates,
+    llmConfigs,
+    isLoadingAll,
+    anyError,
+    agentError,
+    personasError,
+    llmsError,
+    refetchAgent,
+  } = useAgentInstanceData();
 
   const { handleSubmit, isSubmitting } = useUpdateAgentInstance({
     agentId,

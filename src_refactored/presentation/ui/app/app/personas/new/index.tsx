@@ -36,7 +36,7 @@ function NewPersonaTemplatePage() {
           `Template de Persona "${response.data.name}" criado com sucesso!`
         );
         router.navigate({
-          to: "/personas/$templateId",
+          to: "/app/personas/$templateId",
           params: { templateId: response.data.id },
           replace: true,
         });
@@ -53,7 +53,13 @@ function NewPersonaTemplatePage() {
 
   const handleSubmit = async (data: PersonaTemplateFormData) => {
     console.log("Dados do novo template de persona:", data);
-    createPersonaMutation.mutate(data);
+    createPersonaMutation.mutate({
+      name: data.name,
+      role: data.role,
+      goal: data.goal,
+      backstory: data.backstory,
+      toolNames: data.toolNames,
+    });
   };
 
   return (

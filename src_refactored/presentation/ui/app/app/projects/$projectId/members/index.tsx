@@ -64,7 +64,7 @@ const mockMembers: Member[] = [
 ];
 
 function ProjectMembersPage() {
-  const params = useParams({ from: "/(app)/projects/$projectId/members" });
+  const params = useParams({ from: "/app/projects/$projectId/members" }) as { projectId: string };
 
   const [members] = useState<Member[]>(mockMembers);
 

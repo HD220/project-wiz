@@ -36,7 +36,7 @@ export function EditPersonaTemplateLoadingErrorDisplay({
           {error.message}
         </p>
         <Button variant="outline" className="mt-4" asChild>
-          <Link to="/personas">
+          <Link to="/app/personas">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas
           </Link>
         </Button>
@@ -51,7 +51,7 @@ export function EditPersonaTemplateLoadingErrorDisplay({
           Template de Persona com ID &quot;{templateId}&quot; não encontrado.
         </p>
         <Button variant="outline" className="mt-4" asChild>
-          <Link to="/personas">
+          <Link to="/app/personas">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas
           </Link>
         </Button>

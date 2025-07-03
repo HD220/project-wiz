@@ -13,10 +13,7 @@ import {
   AgentInstanceFormData,
 } from "@/ui/features/agent/components/AgentInstanceForm";
 
-import type {
-  PersonaTemplate,
-  LLMConfig,
-} from "@/shared/ipc-types";
+import type { PersonaTemplate, LLMConfig } from "@/shared/ipc-types";
 
 interface NewAgentFormRendererProps {
   personaTemplates: PersonaTemplate[] | null | undefined;

@@ -39,7 +39,7 @@ export function EditPersonaTemplateFormRenderer({
           Template de Persona com ID &quot;{templateId}&quot; não encontrado.
         </p>
         <Button variant="outline" className="mt-4" asChild>
-          <Link to="/personas">
+          <Link to="/app/personas">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas
           </Link>
         </Button>
@@ -58,7 +58,7 @@ export function EditPersonaTemplateFormRenderer({
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
       <Button variant="outline" size="sm" className="mb-4" asChild>
-        <Link to="/personas/$templateId" params={{ templateId }}>
+        <Link to="/app/personas/$templateId" params={{ templateId }}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Detalhes
         </Link>
       </Button>

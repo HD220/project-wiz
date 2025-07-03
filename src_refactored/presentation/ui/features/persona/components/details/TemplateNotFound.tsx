@@ -11,7 +11,7 @@ export function TemplateNotFound() {
         Template de Persona não encontrado
       </h2>
       <Button asChild variant="outline" className="mt-4">
-        <Link to="/personas">
+        <Link to="/app/personas">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas
         </Link>
       </Button>

@@ -15,8 +15,8 @@ import { LLMConfigForm } from "@/ui/features/llm/components/LLMConfigForm";
 export interface LLMConfigFormData {
   name: string;
   // Extend as more providers are added
-  providerId: "openai" | "deepseek" | string;
-  apiKey: string;
+  providerId: "openai" | "deepseek" | "ollama";
+  apiKey?: string;
   baseUrl?: string;
 }
 
@@ -38,7 +38,7 @@ function NewLLMConfigPage() {
       `Dados do formulário (simulado):\n${JSON.stringify(data, null, 2)}\n\nRedirecionando para a lista...`
     );
     // For now, simulate success and navigate back
-    router.navigate({ to: "/settings/llm", replace: true });
+    router.navigate({ to: "/app/settings/llm", replace: true });
   };
 
   return (

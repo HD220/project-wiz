@@ -11,11 +11,10 @@ import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
-  CreateAgentInstanceRequest,
-  CreateAgentInstanceResponse,
+  CreateAgentInstanceResponseData,
   AgentInstance,
   UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponse,
+  UpdateAgentInstanceResponseData,
   PersonaTemplate,
   LLMConfig,
 } from "@/shared/ipc-types";
@@ -47,7 +46,7 @@ export type AgentInstanceFormData = z.infer<typeof agentInstanceFormSchema>;
 interface AgentInstanceFormProps {
   agentInstance?: AgentInstance;
   personaTemplates: Pick<PersonaTemplate, "id" | "name">[];
-  llmConfigs: Pick<LLMConfig, "id" | "name" | "providerName">[];
+  llmConfigs: Pick<LLMConfig, "id" | "name" | "providerId">[];
   onSuccess?: (data: AgentInstance) => void;
 }
 
@@ -65,7 +64,7 @@ export function AgentInstanceForm({
     defaultValues: {
       agentName: agentInstance?.agentName || "",
       personaTemplateId: agentInstance?.personaTemplateId || undefined,
-      llmProviderConfigId: agentInstance?.llmConfigId || undefined,
+      llmProviderConfigId: agentInstance?.llmProviderConfigId || undefined,
       temperature: agentInstance?.temperature ?? 0.7,
     },
   });

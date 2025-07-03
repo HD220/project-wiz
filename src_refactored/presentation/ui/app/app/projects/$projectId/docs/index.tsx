@@ -7,7 +7,7 @@ import { DocViewer } from "@/ui/features/project/components/docs/DocViewer";
 // Mock documentation structure and content
 const mockDocsFileSystem = {
   readmeMd: {
-    type: "file",
+    type: "file" as const,
     content: `# Documentação do Projeto X
 
 Bem-vindo à documentação oficial do Projeto X. Este documento serve como ponto de partida para entender a arquitetura, configuração e funcionalidades chave.
@@ -20,34 +20,34 @@ Bem-vindo à documentação oficial do Projeto X. Este documento serve como pont
 ### Exemplo de Código
 \`\`\`typescript
 function greet(name: string): string {
-  return \`Hello, \${name}!\`;
+  return \`Hello, ${name}!\`;
 }
 \`\`\`
 `,
   },
   arquiteturaDir: {
-    type: "folder",
+    type: "folder" as const,
     nameOverride: "arquitetura/",
     children: {
       visaoGeralMd: {
         nameOverride: "visao-geral.md",
-        type: "file",
+        type: "file" as const,
         content: "## Visão Geral da Arquitetura\n\nO sistema é modular...",
       },
       componentesMd: {
         nameOverride: "componentes.md",
-        type: "file",
+        type: "file" as const,
         content: "### Componentes Principais\n\n- Módulo A\n- Módulo B",
       },
     },
   },
   guiasDir: {
-    type: "folder",
+    type: "folder" as const,
     nameOverride: "guias/",
     children: {
       instalacaoMd: {
         nameOverride: "instalacao.md",
-        type: "file",
+        type: "file" as const,
         content: "## Guia de Instalação\n\nSiga os passos...",
       },
     },
@@ -84,7 +84,7 @@ function ProjectDocsPage() {
         !("type" in currentEntry) &&
         segment in currentEntry
       ) {
-        currentEntry = (currentEntry as Record<string, DocEntry>)[segment];
+        currentEntry = (currentEntry as DocFolder).children[segment];
       } else {
         return null;
       }

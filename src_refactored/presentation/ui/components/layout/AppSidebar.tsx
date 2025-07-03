@@ -124,7 +124,7 @@ const mockUserProjects = [
 
 export function AppSidebar() {
   // Rota para onde o botão "Home" levará, ajustado para /user/
-  const userHomeRoute = "/user/";
+  const userHomeRoute = "/app/user/";
 
   return (
     <aside className="w-16 flex-shrink-0 h-screen flex flex-col items-center gap-2 py-3 bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
@@ -144,7 +144,7 @@ export function AppSidebar() {
         tooltip="Adicionar Novo Projeto"
         icon={PlusCircle}
         // Link direto para a página de novo projeto
-        to="/projects/new"
+        to="/app/projects/new"
         // Não usado
         avatarFallback="+"
       />
@@ -152,7 +152,7 @@ export function AppSidebar() {
         tooltip="Projetos Arquivados"
         icon={Archive}
         // Rota placeholder
-        to="/projects/archived"
+        to="/app/projects/archived"
         // Não usado
         avatarFallback="A"
       />
@@ -165,7 +165,7 @@ export function AppSidebar() {
           {mockUserProjects.map((project) => (
             <AppSidebarItem
               key={project.id}
-              to="/projects/$projectId"
+              to="/app/projects/$projectId"
               params={{ projectId: project.id }}
               tooltip={project.name}
               // Ícone padrão se não for avatar
@@ -184,7 +184,7 @@ export function AppSidebar() {
       {/* Ações no Rodapé */}
       <div className="mt-auto flex flex-col items-center gap-2">
         <AppSidebarItem
-          to="/settings"
+          to="/app/settings"
           tooltip="Configurações"
           icon={Settings}
           // Não usado

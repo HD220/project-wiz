@@ -11,7 +11,7 @@ import {
 // import { ChatWindow } from '@/ui/features/chat/components/ChatWindow'; // Future integration
 
 function ProjectChatPage() {
-  const params = useParams({ from: "/(app)/projects/$projectId/chat" });
+  const params = useParams({ from: "/app/projects/$projectId/chat/" });
   // const projectId = params.projectId; // Available if needed
 
   // TODO: Fetch project-specific chat channels and messages based on projectId
