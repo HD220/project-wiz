@@ -23,7 +23,7 @@ import type {
 
 function EditPersonaTemplatePage() {
   const router = useRouter();
-  const params = useParams({ from: "/(app)/personas/$templateId/edit/" });
+  const params = useParams({ from: "/app/personas/$templateId/edit/" });
   const templateId = params.templateId;
 
   const {
@@ -56,7 +56,7 @@ function EditPersonaTemplatePage() {
         );
         refetch();
         router.navigate({
-          to: "/personas/$templateId",
+          to: "/app/personas/$templateId",
           params: { templateId: response.data.id },
           replace: true,
         });

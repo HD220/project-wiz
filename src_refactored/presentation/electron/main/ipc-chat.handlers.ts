@@ -2,12 +2,11 @@ import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import {
   IChatService,
-  // CHAT_SERVICE_TOKEN, // No longer used directly here
 } from "@/core/application/ports/services/i-chat.service";
 
-// import { appContainer } from "@/infrastructure/ioc/inversify.config"; // Removed import
-
-import { IPCChannel } from "@/shared/ipc-channels";
+import {
+  IPC_CHANNELS
+} from "@/shared/ipc-channels";
 import {
   ChatSendMessagePayload,
   ChatStreamEventPayload,
@@ -25,7 +24,7 @@ export function registerChatIPCHandlers(chatServiceInstance: IChatService): void
   }
   internalChatService = chatServiceInstance;
 
-  ipcMain.handle(IPCChannel.CHAT_SEND_MESSAGE, handleChatSendMessage);
+  ipcMain.handle(IPC_CHANNELS.CHAT_SEND_MESSAGE, handleChatSendMessage);
 
   console.log("[IPC Chat Handler] Chat IPC handlers registered.");
 }
@@ -35,7 +34,7 @@ async function handleChatSendMessage(
   payload: ChatSendMessagePayload
 ) {
   console.log(
-    `[IPC Chat Handler] Received ${IPCChannel.CHAT_SEND_MESSAGE} for session: ${payload.sessionId}`
+    `[IPC Chat Handler] Received ${IPC_CHANNELS.CHAT_SEND_MESSAGE}`
   );
 
   if (!internalChatService) {
@@ -50,11 +49,11 @@ async function handleChatSendMessage(
       },
     };
     if (!event.sender.isDestroyed()) {
-      event.sender.send(IPCChannel.CHAT_STREAM_EVENT, errorEvent);
+      event.sender.send(IPC_CHANNELS.CHAT_STREAM_EVENT, errorEvent);
     }
     const endEvent: ChatStreamEventPayload = { type: "end" };
     if (!event.sender.isDestroyed()) {
-      event.sender.send(IPCChannel.CHAT_STREAM_EVENT, endEvent);
+      event.sender.send(IPC_CHANNELS.CHAT_STREAM_EVENT, endEvent);
     }
     return {
       success: false,
@@ -66,7 +65,7 @@ async function handleChatSendMessage(
     streamPayload: ChatStreamEventPayload
   ) => {
     if (!event.sender.isDestroyed()) {
-      event.sender.send(IPCChannel.CHAT_STREAM_EVENT, streamPayload);
+      event.sender.send(IPC_CHANNELS.CHAT_STREAM_EVENT, streamPayload);
     }
   };
 
@@ -75,17 +74,17 @@ async function handleChatSendMessage(
     sendStreamEventCallback
   );
 
-  if (result.isSuccess()) {
-    return { success: true, data: result.value };
+  if (result.success) {
+    return { success: true, data: result.data };
   }
   return {
     success: false,
-    error: { message: result.error.message, name: result.error.name },
+    error: { message: result.error!.message, name: result.error!.name },
   };
 }
 
 export function unregisterChatIPCHandlers(): void {
-  ipcMain.removeHandler(IPCChannel.CHAT_SEND_MESSAGE);
+  ipcMain.removeHandler(IPC_CHANNELS.CHAT_SEND_MESSAGE);
   // Clear the internal reference
   internalChatService = null;
   console.log("[IPC Chat Handler] Chat IPC handlers unregistered.");

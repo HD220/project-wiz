@@ -1,8 +1,8 @@
-// src_refactored/infrastructure/persistence/in-memory/repositories/memory.repository.ts
 import { injectable } from 'inversify';
 
 import { MemoryItem } from '@/core/domain/memory/memory-item.entity';
-import { IMemoryRepository, SearchFilters, SearchOptions } from '@/core/domain/memory/ports/memory-repository.interface';
+import { IMemoryRepository } from '@/core/domain/memory/ports/memory-repository.interface';
+import { SearchFilters, SearchOptions } from '@/core/domain/memory/ports/memory-repository.types';
 import { MemoryItemId } from '@/core/domain/memory/value-objects/memory-item-id.vo';
 
 import { NotFoundError } from '@/shared/errors/core.error';
@@ -12,8 +12,9 @@ import { NotFoundError } from '@/shared/errors/core.error';
 export class InMemoryMemoryRepository implements IMemoryRepository {
   private readonly items: Map<string, MemoryItem> = new Map();
 
-  async save(item: MemoryItem): Promise<void> {
+  async save(item: MemoryItem): Promise<MemoryItem> {
     this.items.set(item.id.value, item);
+    return item;
   }
 
   async findById(id: MemoryItemId): Promise<MemoryItem | null> {

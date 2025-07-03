@@ -1,20 +1,17 @@
 import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from "electron";
 
 import {
-  GET_DMS_CHANNEL,
-  GET_DM_DETAILS_CHANNEL,
-  SEND_DM_MESSAGE_CHANNEL,
-  DM_MESSAGE_RECEIVED_CHANNEL,
+  IPC_CHANNELS
 } from "../../../../shared/ipc-channels";
 import {
-  GetDMsResponse,
+  GetDMConversationsListResponseData,
   GetDMDetailsRequest,
-  GetDMDetailsResponse,
+  GetDMDetailsResponseData,
   SendDMMessageRequest,
-  SendDMMessageResponse,
-  DMMessageReceivedPayload,
+  SendDMMessageResponseData,
+  DMMessageReceivedEventPayload,
 } from "../../../../shared/ipc-types";
-import { Message } from "../../../../shared/types/entities";
+import { ChatMessage } from "../../../../shared/types/entities";
 import { mockDMs, addMessageToMockDM } from "../mocks/dm.mocks";
 
 function notifyAllWindows(channel: string, payload: unknown) {
@@ -39,7 +36,7 @@ function simulateAgentReply(dmId: string, originalContent: string, updatedDM: { 
       const agentReplyContent = `Got it! You said: "${originalContent.substring(0, 30)}${
         originalContent.length > 30 ? "..." : ""
       }"`;
-      const agentReply: Message = {
+      const agentReply: ChatMessage = {
         id: `msg-agent-${Date.now()}`,
         conversationId: dmId,
         // Assuming agent's ID is 'agent-1'
@@ -50,12 +47,12 @@ function simulateAgentReply(dmId: string, originalContent: string, updatedDM: { 
       };
       const finalDM = addMessageToMockDM(dmId, agentReply);
       if (finalDM) {
-        const agentNotificationPayload: DMMessageReceivedPayload = {
+        const agentNotificationPayload: DMMessageReceivedEventPayload = {
           dmId: dmId,
           message: agentReply,
         };
         notifyAllWindows(
-          DM_MESSAGE_RECEIVED_CHANNEL,
+          IPC_CHANNELS.DM_MESSAGE_RECEIVED,
           agentNotificationPayload
         );
       }
@@ -66,11 +63,11 @@ function simulateAgentReply(dmId: string, originalContent: string, updatedDM: { 
 async function handleSendDMMessage(
   _event: IpcMainInvokeEvent,
   req: SendDMMessageRequest
-): Promise<SendDMMessageResponse> {
+): Promise<SendDMMessageResponseData> {
   await new Promise((resolve) => setTimeout(resolve, 50));
   const { dmId, content, senderId } = req;
 
-  const newMessage: Message = {
+  const newMessage: ChatMessage = {
     id: `msg-${Date.now()}`,
     conversationId: dmId,
     senderId: senderId,
@@ -82,11 +79,11 @@ async function handleSendDMMessage(
   const updatedDM = addMessageToMockDM(dmId, newMessage);
 
   if (updatedDM) {
-    const notificationPayload: DMMessageReceivedPayload = {
+    const notificationPayload: DMMessageReceivedEventPayload = {
       dmId: dmId,
       message: newMessage,
     };
-    notifyAllWindows(DM_MESSAGE_RECEIVED_CHANNEL, notificationPayload);
+    notifyAllWindows(IPC_CHANNELS.DM_MESSAGE_RECEIVED, notificationPayload);
 
     // Simulate agent reply only if sender is not the agent
     if (senderId !== "agent-1") {
@@ -102,17 +99,17 @@ async function handleSendDMMessage(
 
 
 function registerQueryDMHandlers() {
-  ipcMain.handle(GET_DMS_CHANNEL, async (): Promise<GetDMsResponse> => {
+  ipcMain.handle(IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST, async (): Promise<GetDMConversationsListResponseData> => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     return { dms: mockDMs };
   });
 
   ipcMain.handle(
-    GET_DM_DETAILS_CHANNEL,
+    IPC_CHANNELS.GET_DM_DETAILS,
     async (
       _event: IpcMainInvokeEvent,
       req: GetDMDetailsRequest
-    ): Promise<GetDMDetailsResponse> => {
+    ): Promise<GetDMDetailsResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const dm = mockDMs.find((dmEntry) => dmEntry.id === req.dmId);
       if (dm) {
@@ -125,5 +122,5 @@ function registerQueryDMHandlers() {
 
 export function registerDMHandlers() {
   registerQueryDMHandlers();
-  ipcMain.handle(SEND_DM_MESSAGE_CHANNEL, handleSendDMMessage);
+  ipcMain.handle(IPC_CHANNELS.SEND_DM_MESSAGE, handleSendDMMessage);
 }

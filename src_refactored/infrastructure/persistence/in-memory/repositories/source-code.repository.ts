@@ -3,7 +3,7 @@ import { injectable } from 'inversify';
 import { ProjectId } from '@/core/domain/project/value-objects/project-id.vo';
 import { ISourceCodeRepository } from '@/core/domain/source-code/ports/source-code-repository.interface';
 import { SourceCode } from '@/core/domain/source-code/source-code.entity';
-import { RepositoryIdVO as SourceCodeId } from '@/core/domain/source-code/value-objects/repository-id.vo';
+import { RepositoryId as SourceCodeId } from '@/core/domain/source-code/value-objects/repository-id.vo';
 
 import { NotFoundError } from '@/shared/errors/core.error';
 
@@ -11,8 +11,9 @@ import { NotFoundError } from '@/shared/errors/core.error';
 export class InMemorySourceCodeRepository implements ISourceCodeRepository {
   private readonly sourceCodes: Map<string, SourceCode> = new Map();
 
-  async save(sourceCode: SourceCode): Promise<void> {
+  async save(sourceCode: SourceCode): Promise<SourceCode> {
     this.sourceCodes.set(sourceCode.id.value, sourceCode);
+    return sourceCode;
   }
 
   async findById(id: SourceCodeId): Promise<SourceCode | null> {

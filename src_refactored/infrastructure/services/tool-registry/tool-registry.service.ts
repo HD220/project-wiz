@@ -3,7 +3,7 @@ import { ZodAny } from "zod";
 
 import { IToolRegistryService } from "@/core/application/ports/services/i-tool-registry.service";
 import { ILogger } from "@/core/common/services/i-logger.service";
-import { IAgentTool } from "@/core/tools/tool.interface.ts";
+import { IAgentTool } from "@/core/tools/tool.interface";
 
 import { TYPES } from "@/infrastructure/ioc/types";
 
@@ -18,7 +18,7 @@ export class ToolRegistryService implements IToolRegistryService {
     this.logger.info("[ToolRegistryService] initialized");
   }
 
-  registerTool(tool: IAgentTool<ZodAny, unknown>): void {
+  async registerTool(tool: IAgentTool<ZodAny, unknown>): Promise<void> {
     if (this.tools.has(tool.name)) {
       this.logger.warn(
         `[ToolRegistryService] Tool with name '${tool.name}' is already registered. Overwriting.`

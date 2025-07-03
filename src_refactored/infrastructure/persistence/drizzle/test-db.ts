@@ -18,7 +18,7 @@ export function setupTestDatabase() {
 
 export async function clearDatabase(
   db: ReturnType<typeof drizzle>,
-  _sqliteInstance: Database
+  _sqliteInstance: typeof Database
 ) {
   await db.delete(schema.jobsTable).execute();
 }

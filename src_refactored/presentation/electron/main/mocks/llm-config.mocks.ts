@@ -67,22 +67,20 @@ export const mockAvailableLLMs: LLMSettings[] = [
 // This could represent user-saved global LLM configurations/credentials
 export let mockUserLLMConfigs: Record<
   AgentLLM,
-  Partial<LLMConfig> & { apiKey?: string }
+  Partial<LLMConfig>
 > = {
   [AgentLLM.OPENAI_GPT_4_TURBO]: {
     apiKey: "sk-mockOpenAIKey123",
-    temperature: 0.7,
   },
   [AgentLLM.ANTHROPIC_CLAUDE_3_OPUS]: {
     apiKey: "sk-mockAnthropicKey456",
-    temperature: 0.8,
   },
   // User might not have configured all LLMs
 };
 
 export const updateUserLLMConfig = (
   llm: AgentLLM,
-  config: Partial<LLMConfig> & { apiKey?: string }
+  config: Partial<LLMConfig>
 ) => {
   if (!mockUserLLMConfigs[llm]) {
     mockUserLLMConfigs[llm] = {};
@@ -95,15 +93,10 @@ export const getLLMConfigWithDefaults = (llm: AgentLLM): LLMConfig => {
   const modelDetails = mockAvailableLLMs.find((model) => model.model === llm);
 
   return {
-    llm: llm,
-    temperature: userConfig.temperature || 0.7,
-    maxTokens: userConfig.maxTokens || 2048,
-    topP: userConfig.topP || 1.0,
-    topK: userConfig.topK,
-    frequencyPenalty: userConfig.frequencyPenalty || 0,
-    presencePenalty: userConfig.presencePenalty || 0,
-    stopSequences: userConfig.stopSequences || [],
+    id: modelDetails?.id || `mock-id-${llm}`,
+    name: modelDetails?.name || `Mock LLM ${llm}`,
+    providerId: modelDetails?.provider || 'unknown',
+    baseUrl: modelDetails?.apiUrl,
     apiKey: userConfig.apiKey,
-    apiBaseUrl: modelDetails?.apiUrl,
   };
 };

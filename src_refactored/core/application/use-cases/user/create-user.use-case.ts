@@ -19,16 +19,16 @@ import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/u
 
 
 
-import { CreateUserUseCaseInput, CreateUserUseCaseOutput, CreateUserInputSchema } from "./create-user.schema";
+import { CreateUserInput, CreateUserOutput, CreateUserInputSchema } from "./create-user.schema";
 
 @injectable()
-export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, CreateUserUseCaseOutput> {
+export class CreateUserUseCase implements IUseCase<CreateUserInput, CreateUserOutput> {
   constructor(
     @inject(USER_REPOSITORY_INTERFACE_TYPE) private readonly userRepository: IUserRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  async execute(input: CreateUserUseCaseInput): Promise<IUseCaseResponse<CreateUserUseCaseOutput>> {
+  async execute(input: CreateUserInput): Promise<IUseCaseResponse<CreateUserOutput>> {
     this.logger.info(`[CreateUserUseCase] Attempting to create user with username: ${input.username}`);
 
     const validatedInput = CreateUserInputSchema.parse(input);
@@ -41,11 +41,11 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
 
     const savedUser = await this.userRepository.save(userEntity);
 
-    this.logger.info(`[CreateUserUseCase] User created successfully: ${savedUser.id.value()}`);
+    this.logger.info(`[CreateUserUseCase] User created successfully: ${savedUser.id.value}`);
     return successUseCaseResponse(this._mapToOutput(savedUser));
   }
 
-  private async _checkExistingUser(validatedInput: CreateUserUseCaseInput): Promise<void> {
+  private async _checkExistingUser(validatedInput: CreateUserInput): Promise<void> {
     const usernameVo = UserUsername.create(validatedInput.username);
     const existingByUsername = await this.userRepository.findByUsername(usernameVo);
     if (existingByUsername) {
@@ -59,7 +59,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
     }
   }
 
-  private _createValueObjects(validatedInput: CreateUserUseCaseInput): {
+  private _createValueObjects(validatedInput: CreateUserInput): {
     username: UserUsername;
     email: UserEmail;
     nickname: UserNickname;
@@ -104,15 +104,15 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
     return userEntity;
   }
 
-  private _mapToOutput(userEntity: User): CreateUserUseCaseOutput {
+  private _mapToOutput(userEntity: User): CreateUserOutput {
     return {
-      id: userEntity.id.value(),
-      username: userEntity.username.value(),
-      email: userEntity.email.value(),
-      nickname: userEntity.nickname.value(),
-      avatarUrl: userEntity.avatar.value(),
-      defaultLLMProviderConfigId: userEntity.defaultLLMProviderConfigId.value(),
-      assistantId: userEntity.assistantId?.value() ?? null,
+      id: userEntity.id.value,
+      username: userEntity.username.value,
+      email: userEntity.email.value,
+      nickname: userEntity.nickname.value,
+      avatarUrl: userEntity.avatar.value,
+      defaultLLMProviderConfigId: userEntity.defaultLLMProviderConfigId.value,
+      assistantId: userEntity.assistantId?.value ?? null,
       createdAt: userEntity.createdAt.toISOString(),
       updatedAt: userEntity.updatedAt.toISOString(),
     };

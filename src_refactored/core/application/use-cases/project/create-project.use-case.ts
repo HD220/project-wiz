@@ -33,7 +33,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
 
     const savedProject = await this.projectRepository.save(projectEntity);
 
-    this.logger.info(`[CreateProjectUseCase] Project created successfully: ${savedProject.id.value()}`);
+    this.logger.info(`[CreateProjectUseCase] Project created successfully: ${savedProject.id.value}`);
     return successUseCaseResponse(this._mapToOutput(savedProject));
   }
 
@@ -43,7 +43,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
       const errorMessage = 'Invalid input for CreateProjectUseCase';
       this.logger.error(
         `[CreateProjectUseCase] ${errorMessage}`,
-        { meta: { error: validationResult.error, details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input } }
+        { error: validationResult.error, details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input }
       );
       throw new ZodError(validationResult.error.errors);
     }
@@ -70,7 +70,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
 
   private _mapToOutput(projectEntity: Project): CreateProjectUseCaseOutput {
     return {
-      projectId: projectEntity.id.value(),
+      projectId: projectEntity.id.value,
     };
   }
 }

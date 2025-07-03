@@ -61,7 +61,7 @@ const mockPersonaTemplates: Record<string, PersonaTemplate> = {
 };
 
 function PersonaTemplateDetailPage() {
-  const params = useParams({ from: '/(app)/personas/$templateId/' });
+  const params = useParams({ from: '/app/personas/$templateId/' });
   const templateId = params.templateId;
   const [template, setTemplate] = useState<PersonaTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,13 +92,13 @@ function PersonaTemplateDetailPage() {
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" asChild>
-          <Link to="/personas">
+          <Link to="/app/personas">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista
           </Link>
         </Button>
         <Button variant="default" asChild>
           <Link
-            to="/personas/$templateId/edit"
+            to="/app/personas/$templateId/edit"
             params={{ templateId: template.id }}
           >
             <Edit3 className="mr-2 h-4 w-4" /> Editar Template
@@ -139,7 +139,7 @@ function PersonaTemplateDetailPage() {
               className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
               asChild
             >
-              <Link to="/agents/new" search={{ templateId: template.id }}>
+              <Link to="/app/agents/new" search={{ templateId: template.id }}>
                 <Zap className="mr-2 h-4 w-4" /> Criar Agente com este Template
               </Link>
             </Button>

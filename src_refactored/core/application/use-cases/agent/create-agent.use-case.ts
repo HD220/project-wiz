@@ -1,10 +1,10 @@
 import { injectable, inject } from "inversify";
 
-import { AGENT_REPOSITORY_INTERFACE_TYPE, LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE, PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
+import { AGENT_REPOSITORY_INTERFACE_TYPE, AGENT_PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE, LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
 import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
 import { Agent } from "@/core/domain/agent/agent.entity";
-import { IPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
+import { IAgentPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
 import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 import { AgentMaxIterations } from "@/core/domain/agent/value-objects/agent-max-iterations.vo";
@@ -48,7 +48,7 @@ export class CreateAgentUseCase
       return errorUseCaseResponse(new NotFoundError("PersonaTemplate", validInput.personaTemplateId));
     }
 
-    const llmProviderConfig = await this.llmProviderConfigRepository.findById(validInput.llmProviderConfigId);
+    const llmProviderConfig = await this.llmProviderConfigRepository.findById(LLMProviderConfigId.create(validInput.llmProviderConfigId));
     if (!llmProviderConfig) {
       return errorUseCaseResponse(new NotFoundError("LLMProviderConfig", validInput.llmProviderConfigId));
     }
@@ -63,7 +63,7 @@ export class CreateAgentUseCase
 
     const savedAgent = await this.agentRepository.save(agentEntity);
 
-    return successUseCaseResponse({ agentId: savedAgent.id.value() });
+    return successUseCaseResponse({ agentId: savedAgent.id.value });
   }
 
   private _createAgentValueObjects(validInput: CreateAgentUseCaseInput): {

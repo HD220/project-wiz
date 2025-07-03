@@ -30,7 +30,7 @@ const _ListFilesParamsSchema = z.object({
 });
 
 @injectable()
-export class FileSystemTool implements IAgentTool<ZodAny, unknown> {
+export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototype.parameters, unknown> {
   public readonly name = 'fileSystem';
   public readonly description =
     'A tool for interacting with the file system, like reading, writing, and listing files.';

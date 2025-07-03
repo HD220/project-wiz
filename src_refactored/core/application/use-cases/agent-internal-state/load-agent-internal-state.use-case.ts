@@ -44,9 +44,9 @@ export class LoadAgentInternalStateUseCase
     }
 
     const output: LoadAgentInternalStateUseCaseOutput = {
-      agentId: stateEntity.id.value,
-      currentProjectId: stateEntity.currentProjectId?.value || null,
-      currentGoal: stateEntity.currentGoal?.value || null,
+      agentId: stateEntity.agentId.value,
+      currentProjectId: stateEntity.currentProjectId?.value ?? null,
+      currentGoal: stateEntity.currentGoal?.value ?? null,
       generalNotes: [...stateEntity.generalNotes.list()],
     };
 

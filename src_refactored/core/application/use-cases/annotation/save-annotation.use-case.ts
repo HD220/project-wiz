@@ -59,7 +59,7 @@ export class SaveAnnotationUseCase
     );
 
     return successUseCaseResponse({
-      annotationId: finalAnnotation.id.value(),
+      annotationId: finalAnnotation.id.value,
       createdAt: finalAnnotation.createdAt.toISOString(),
       updatedAt: finalAnnotation.updatedAt.toISOString(),
     });

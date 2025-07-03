@@ -52,7 +52,7 @@ export class ListAnnotationsUseCase
     );
 
     const output: ListAnnotationsUseCaseOutput = {
-      items: paginatedData.items.map(this._mapToListItem),
+      annotations: paginatedData.annotations.map(this._mapToListItem),
       totalCount: paginatedData.totalCount,
       page: paginatedData.page,
       pageSize: paginatedData.pageSize,
@@ -85,10 +85,10 @@ export class ListAnnotationsUseCase
 
   private _mapToListItem(annotation: Annotation): AnnotationListItem {
     return {
-      id: annotation.id.value(),
-      text: annotation.text.value(),
-      agentId: annotation.agentId?.value() || null,
-      jobId: annotation.jobId?.value() || null,
+      id: annotation.id.value,
+      text: annotation.text.value,
+      agentId: annotation.agentId?.value ?? null,
+      jobId: annotation.jobId?.value ?? null,
       createdAt: annotation.createdAt.toISOString(),
       updatedAt: annotation.updatedAt.toISOString(),
     };

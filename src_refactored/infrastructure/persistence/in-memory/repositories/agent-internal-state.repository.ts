@@ -20,6 +20,10 @@ export class InMemoryAgentInternalStateRepository
   }
 
   async save(state: AgentInternalState): Promise<void> {
-    this.states.set(state.agentId.value, state);
+    this.states.set(state.id.value, state);
+  }
+
+  async deleteByAgentId(agentId: AgentId): Promise<void> {
+    this.states.delete(agentId.value);
   }
 }

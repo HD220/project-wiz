@@ -98,7 +98,7 @@ function AgentInstancesPage() {
           </p>
         </div>
         <Button asChild>
-          <Link to="/agents/new">
+          <Link to="/app/agents/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             Nova Instância de Agente
           </Link>
@@ -134,7 +134,7 @@ function AgentInstancesPage() {
           {!searchTerm && (
             <div className="mt-6">
               <Button asChild variant="outline">
-                <Link to="/agents/new">
+                <Link to="/app/agents/new">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Criar Nova Instância
                 </Link>

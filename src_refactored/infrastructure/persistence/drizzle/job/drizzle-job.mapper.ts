@@ -1,9 +1,8 @@
 import { JobStatus } from "@/core/domain/job/job.entity";
 import {
-  IJobOptions,
   JobPersistenceData,
 } from "@/core/domain/job/job.types";
-// import { JobPersistence } from "@/core/domain/job/job.entity"; // No longer needed
+import { IJobOptions } from "@/core/domain/job/value-objects/job-options.vo";
 
 import * as schema from "../schema";
 
@@ -28,6 +27,7 @@ export function mapToPersistenceData<P, R>(
     name: jobData.name,
     payload: payload,
     options: options,
+    priority: options.priority,
     status: jobData.status as JobStatus,
     attemptsMade: jobData.attemptsMade,
     progress: progress,

@@ -35,7 +35,7 @@ function EditAgentInstancePage() {
       <div className="p-8 text-center">
         <p>Instância de Agente com ID &quot;{agentId}&quot; não encontrada.</p>
         <Button variant="outline" className="mt-4" asChild>
-          <Link to="/agents">
+          <Link to="/app/agents">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes
           </Link>
         </Button>

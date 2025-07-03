@@ -7,6 +7,7 @@ import {
   isNull,
   lt,
   or,
+  sql,
 } from "drizzle-orm";
 
 import { IJobRepository } from "@/core/application/ports/job-repository.interface";
@@ -29,10 +30,10 @@ import {
 } from "./drizzle-job.mapper";
 
 export class DrizzleJobRepository implements IJobRepository {
-  constructor(private readonly drizzleDbInstance: DbType) {}
+  constructor(private readonly drizzleDbInstance: typeof DbType) {}
 
   async save(job: JobEntity<unknown, unknown>): Promise<void> {
-    const persistenceData = JobPersistenceMapper.toPersistence(job.getProps());
+    const persistenceData = JobPersistenceMapper.toPersistence(job.toPersistence());
     const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
       .insert(schema.jobsTable)
@@ -41,7 +42,7 @@ export class DrizzleJobRepository implements IJobRepository {
   }
 
   async update(job: JobEntity<unknown, unknown>): Promise<void> {
-    const persistenceData = JobPersistenceMapper.toPersistence(job.getProps());
+    const persistenceData = JobPersistenceMapper.toPersistence(job.toPersistence());
     // mapToDrizzleInput now accepts JobPersistenceData from the updated mapper
     const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
@@ -55,7 +56,7 @@ export class DrizzleJobRepository implements IJobRepository {
       where: eq(schema.jobsTable.id, id.value),
     });
     if (!result) return null;
-    return JobEntity.fromPersistence(mapToPersistenceData(result));
+    return JobEntity.fromPersistenceData(mapToPersistenceData(result));
   }
 
   async findNextJobsToProcess(
@@ -71,8 +72,8 @@ export class DrizzleJobRepository implements IJobRepository {
       ],
       limit,
     });
-    return results.map((jobData) =>
-      JobEntity.fromPersistence(mapToPersistenceData(jobData))
+    return results.map((jobData: typeof schema.jobsTable.$inferSelect) =>
+      JobEntity.fromPersistenceData(mapToPersistenceData(jobData))
     );
   }
 
@@ -108,8 +109,8 @@ export class DrizzleJobRepository implements IJobRepository {
       where: and(eq(schema.jobsTable.queueName, queueName), eq(schema.jobsTable.status, JobStatus.ACTIVE), lt(schema.jobsTable.lockUntil, olderThan)),
       limit,
     });
-    return results.map((jobData) =>
-      JobEntity.fromPersistence(mapToPersistenceData(jobData))
+    return results.map((jobData: typeof schema.jobsTable.$inferSelect) =>
+      JobEntity.fromPersistenceData(mapToPersistenceData(jobData))
     );
   }
 
@@ -136,8 +137,8 @@ export class DrizzleJobRepository implements IJobRepository {
       offset: start,
       limit: end,
     });
-    return results.map((jobData) =>
-      JobEntity.fromPersistence(mapToPersistenceData(jobData))
+    return results.map((jobData: typeof schema.jobsTable.$inferSelect) =>
+      JobEntity.fromPersistenceData(mapToPersistenceData(jobData))
     );
   }
 
@@ -156,8 +157,8 @@ export class DrizzleJobRepository implements IJobRepository {
 
     const results = await query;
     return results.reduce(
-      (acc, row) => {
-        acc[row.status as JobStatus] = row.count as number;
+      (acc: Partial<Record<JobStatus, number>>, row: { status: JobStatus; count: number }) => {
+        acc[row.status] = row.count;
         return acc;
       },
       {} as Partial<Record<JobStatus, number>>

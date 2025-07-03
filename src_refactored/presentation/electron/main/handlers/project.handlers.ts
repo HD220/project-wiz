@@ -1,46 +1,42 @@
 import { ipcMain } from "electron";
 
 import {
-  GET_PROJECTS_CHANNEL,
-  GET_PROJECT_DETAILS_CHANNEL,
-  CREATE_PROJECT_CHANNEL,
-  UPDATE_PROJECT_CHANNEL,
-  // DELETE_PROJECT_CHANNEL, // Example for later
+  IPC_CHANNELS
 } from "../../../../shared/ipc-channels";
 import {
   GetProjectDetailsRequest,
-  GetProjectDetailsResponse,
-  GetProjectsResponse,
+  GetProjectDetailsResponseData,
+  GetProjectsListResponseData,
   CreateProjectRequest,
-  CreateProjectResponse,
+  CreateProjectResponseData,
   UpdateProjectRequest,
-  UpdateProjectResponse,
+  UpdateProjectResponseData,
 } from "../../../../shared/ipc-types";
 import { Project } from "../../../../shared/types/entities";
-import { AgentLLM } from "../../../../shared/types/entities";
+import { AgentLLM, LLMConfig } from "../../../../shared/types/entities";
 import {
-  mockProjects,
+  mockProjectsDb,
   addMockProject,
   updateMockProject,
 } from "../mocks/project.mocks";
 
 function registerQueryProjectHandlers() {
   ipcMain.handle(
-    GET_PROJECTS_CHANNEL,
-    async (): Promise<GetProjectsResponse> => {
+    IPC_CHANNELS.GET_PROJECTS_LIST,
+    async (): Promise<GetProjectsListResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { projects: mockProjects };
+      return { projects: mockProjectsDb };
     }
   );
 
   ipcMain.handle(
-    GET_PROJECT_DETAILS_CHANNEL,
+    IPC_CHANNELS.GET_PROJECT_DETAILS,
     async (
       _event,
       req: GetProjectDetailsRequest
-    ): Promise<GetProjectDetailsResponse> => {
+    ): Promise<GetProjectDetailsResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const projectDetails = mockProjects.find(
+      const projectDetails = mockProjectsDb.find(
         (project) => project.id === req.projectId
       );
       if (projectDetails) {
@@ -53,25 +49,25 @@ function registerQueryProjectHandlers() {
 
 function registerMutationProjectHandlers() {
   ipcMain.handle(
-    CREATE_PROJECT_CHANNEL,
+    IPC_CHANNELS.CREATE_PROJECT,
     async (
       _event,
       req: CreateProjectRequest
-    ): Promise<CreateProjectResponse> => {
+    ): Promise<CreateProjectResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const newProject: Project = {
         id: `proj-${Date.now()}`,
         name: req.name,
-        description: req.description,
-        platformUrl: req.platformUrl,
+        description: req.description ?? undefined,
+        platformUrl: req.platformUrl ?? undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         projectManager: "user-123",
         teamMembers: ["user-123"],
         status: "active",
         version: "1.0.0",
-        repositoryUrl: req.repositoryUrl,
-        tags: req.tags || [],
+        repositoryUrl: req.repositoryUrl ?? undefined,
+        tags: req.tags ?? [],
         llmConfig: req.llmConfig || {
           llm: AgentLLM.OPENAI_GPT_4_TURBO,
           temperature: 0.7,
@@ -85,11 +81,11 @@ function registerMutationProjectHandlers() {
   );
 
   ipcMain.handle(
-    UPDATE_PROJECT_CHANNEL,
+    IPC_CHANNELS.UPDATE_PROJECT,
     async (
       _event,
       req: UpdateProjectRequest
-    ): Promise<UpdateProjectResponse> => {
+    ): Promise<UpdateProjectResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const updatedProject = updateMockProject(req.projectId, req.updates);
       if (updatedProject) {

@@ -37,13 +37,13 @@ export class AgentInteractionService {
     agent: Agent,
     state: ExecutionState,
   ): Promise<void> {
-    const systemMessageString = `You are ${agent.personaTemplate.name.value()}, a ${
-      agent.personaTemplate.role.value()
-    }. Your goal is: ${agent.personaTemplate.goal.value()}. Persona backstory: ${agent.personaTemplate.backstory.value()}`;
+    const systemMessageString = `You are ${agent.personaTemplate.name.value}, a ${
+      agent.personaTemplate.role.value
+    }. Your goal is: ${agent.personaTemplate.goal.value}. Persona backstory: ${agent.personaTemplate.backstory.value}`;
     const conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
 
-    this.logLlmCall(job.id.value, job.getAttemptsMade(), conversationMessages);
-    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id.value} (attempt ${job.getAttemptsMade() + 1})`, 'DEBUG');
+    this.logLlmCall(job.id.value, job.attemptsMade, conversationMessages);
+    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id.value} (attempt ${job.attemptsMade + 1})`, 'DEBUG');
 
     const llmGenerationResponse = await this.llmAdapter.generateText(conversationMessages, {
       temperature: agent.temperature.value,
@@ -61,7 +61,7 @@ export class AgentInteractionService {
     }
 
     state.assistantMessage = llmGenerationResponse.data;
-    state.llmResponseText = state.assistantMessage?.content || '';
+    state.llmResponseText = state.assistantMessage?.content ?? '';
     const currentJobIdVal = job.id.value;
     this.logger.info(
       `LLM response (iteration ${state.iterations}) for Job ID: ${currentJobIdVal}: ${state.llmResponseText.substring(0, 100)}...`,
@@ -78,11 +78,11 @@ export class AgentInteractionService {
       );
     }
 
-    const assistantHistoryEntry = ActivityHistoryEntryVO.create(ActivityEntryType.LLM_RESPONSE, state.assistantMessage?.content || '', {
+    const assistantHistoryEntry = ActivityHistoryEntryVO.create(ActivityEntryType.LLM_RESPONSE, state.assistantMessage?.content ?? '', {
       tool_calls: state.assistantMessage?.tool_calls as LanguageModelMessageToolCall[] | undefined,
     });
     job.addConversationEntry(assistantHistoryEntry);
-    state.activityHistory = job.getConversationHistory();
+    state.activityHistory = job.conversationHistory;
   }
 
   private _isUnusableResponse(state: ExecutionState): boolean {
@@ -105,7 +105,7 @@ export class AgentInteractionService {
     );
     const updatedHistory = state.activityHistory.addEntry(systemNote);
     const updatedExecutionHistory = [
-      ...job.getExecutionHistory(),
+      ...job.executionHistory,
       {
         timestamp: new Date(),
         type: 'unusable_llm_response' as ExecutionHistoryEntry['type'],
@@ -116,8 +116,8 @@ export class AgentInteractionService {
 
     job.setConversationHistory(updatedHistory);
     job.setExecutionHistory(updatedExecutionHistory);
-    state.activityHistory = job.getConversationHistory();
-    state.executionHistory = [...job.getExecutionHistory()];
+    state.activityHistory = job.conversationHistory;
+    state.executionHistory = [...job.executionHistory];
     state.replanAttemptsForEmptyResponse++;
     job.addLog(`LLM response was unusable. Re-planning (attempt ${state.replanAttemptsForEmptyResponse}).`, 'WARN');
   }
@@ -137,9 +137,9 @@ export class AgentInteractionService {
       } else if (role === ActivityEntryType.TOOL_RESULT) {
         if (toolCallId) {
           messages.push({ role: 'tool', tool_call_id: toolCallId, content });
-        } else {
-          this.logger.warn('Tool result entry missing toolCallId, skipping conversion to LLM message.');
         }
+      } else {
+        this.logger.warn('Tool result entry missing toolCallId, skipping conversion to LLM message.');
       }
     });
     return messages;

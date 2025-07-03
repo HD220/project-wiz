@@ -76,7 +76,7 @@ export class SearchMemoryItemsUseCase
   private _mapToOutput(
     paginatedResult: PaginatedMemoryItemsResult
   ): SearchMemoryItemsUseCaseOutput {
-    const memoryListItems = paginatedResult.items.map(item => this._mapMemoryItemToListItem(item));
+    const memoryListItems = paginatedResult.data.map(item => this._mapMemoryItemToListItem(item));
 
     return {
       items: memoryListItems,
@@ -93,12 +93,12 @@ export class SearchMemoryItemsUseCase
       ? `${contentValue.substring(0, CONTENT_EXCERPT_LENGTH)}...`
       : contentValue;
 
-    const agentIdValue = item.agentId ? item.agentId.value() : null;
-    const tagsValue = item.tags.value() || [];
-    const sourceValue = item.source.value() || null;
+    const agentIdValue = item.agentId?.value ?? null;
+    const tagsValue = item.tags.value ?? [];
+    const sourceValue = item.source.value ?? null;
 
     return {
-      id: item.id.value(),
+      id: item.id.value,
       contentExcerpt: excerpt,
       agentId: agentIdValue,
       tags: tagsValue,

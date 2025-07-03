@@ -46,7 +46,7 @@ export function EditAgentFormRenderer({
       <div className="p-8 text-center">
         <p>Instância de Agente não encontrada.</p>
         <Button variant="outline" className="mt-4" asChild>
-          <Link to="/agents">
+          <Link to="/app/agents">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes
           </Link>
         </Button>
@@ -67,7 +67,7 @@ export function EditAgentFormRenderer({
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto">
       <Button variant="outline" size="sm" className="mb-4" asChild>
-        <Link to="/agents/$agentId" params={{ agentId }}>
+        <Link to="/app/agents/$agentId" params={{ agentId }}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Detalhes do Agente
         </Link>
       </Button>

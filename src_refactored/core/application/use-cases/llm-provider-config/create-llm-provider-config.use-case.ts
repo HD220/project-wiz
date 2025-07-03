@@ -61,7 +61,7 @@ export class CreateLLMProviderConfigUseCase
       name: nameVo,
       providerId: providerIdVo,
       apiKey: apiKeyVo,
-      baseUrl: baseUrlVo,
+      baseUrl: baseUrlVo?.value,
     });
 
     const savedConfig = await this.configRepository.save(configEntity);

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 interface AgentDetailLoadingErrorDisplayProps {
   isLoading: boolean;
   error: Error | null;
+  agentId: string;
 }
 
 export function AgentDetailLoadingErrorDisplay({

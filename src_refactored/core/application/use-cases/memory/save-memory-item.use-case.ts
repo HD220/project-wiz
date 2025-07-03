@@ -52,7 +52,7 @@ export class SaveMemoryItemUseCase
     const finalMemoryItem = await this.memoryRepository.save(memoryItemEntity);
 
     return successUseCaseResponse({
-      memoryItemId: finalMemoryItem.id.value(),
+      memoryItemId: finalMemoryItem.id.value,
       createdAt: finalMemoryItem.createdAt.toISOString(),
       updatedAt: finalMemoryItem.updatedAt.toISOString(),
     });

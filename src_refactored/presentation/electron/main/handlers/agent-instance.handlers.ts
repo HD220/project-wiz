@@ -1,42 +1,37 @@
 import { ipcMain } from "electron";
 
 import {
-  GET_AGENT_INSTANCES_CHANNEL,
-  GET_AGENT_INSTANCE_DETAILS_CHANNEL,
-  CREATE_AGENT_INSTANCE_CHANNEL,
-  UPDATE_AGENT_INSTANCE_CHANNEL,
-  GET_AGENT_INSTANCES_BY_PROJECT_CHANNEL,
+  IPC_CHANNELS
 } from "../../../../shared/ipc-channels";
 import {
-  GetAgentInstancesResponse,
+  GetAgentInstancesListResponseData,
   GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponse,
+  GetAgentInstanceDetailsResponseData,
   CreateAgentInstanceRequest,
-  CreateAgentInstanceResponse,
+  CreateAgentInstanceResponseData,
   UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponse,
-  GetAgentInstancesByProjectRequest,
-  GetAgentInstancesByProjectResponse,
+  UpdateAgentInstanceResponseData,
+  GetAgentInstancesListRequest,
+  GetAgentInstancesListResponseData as GetAgentInstancesByProjectResponse,
 } from "../../../../shared/ipc-types";
-import { AgentInstance } from "../../../../shared/types/entities";
-import { AgentLLM } from "../../../../shared/types/entities";
+import { AgentInstance, AgentLLM, LLMConfig } from "../../../../shared/types/entities";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
 function registerQueryAgentInstanceHandlers() {
   ipcMain.handle(
-    GET_AGENT_INSTANCES_CHANNEL,
-    async (): Promise<GetAgentInstancesResponse> => {
+    IPC_CHANNELS.GET_AGENT_INSTANCES_LIST,
+    async (): Promise<GetAgentInstancesListResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       return { agentInstances: mockAgentInstances };
     }
   );
 
   ipcMain.handle(
-    GET_AGENT_INSTANCES_BY_PROJECT_CHANNEL,
+    IPC_CHANNELS.GET_AGENT_INSTANCES_BY_PROJECT,
     async (
       _event,
-      req: GetAgentInstancesByProjectRequest
-    ): Promise<GetAgentInstancesByProjectResponse> => {
+      req: GetAgentInstancesListRequest
+    ): Promise<GetAgentInstancesListResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instances = mockAgentInstances.filter(
         (ai) => ai.projectId === req.projectId
@@ -46,11 +41,11 @@ function registerQueryAgentInstanceHandlers() {
   );
 
   ipcMain.handle(
-    GET_AGENT_INSTANCE_DETAILS_CHANNEL,
+    IPC_CHANNELS.GET_AGENT_INSTANCE_DETAILS,
     async (
       _event,
       req: GetAgentInstanceDetailsRequest
-    ): Promise<GetAgentInstanceDetailsResponse> => {
+    ): Promise<GetAgentInstanceDetailsResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instance = mockAgentInstances.find(
         (ai) => ai.id === req.instanceId
@@ -65,15 +60,14 @@ function registerQueryAgentInstanceHandlers() {
 
 function registerCreateAgentInstanceHandler() {
   ipcMain.handle(
-    CREATE_AGENT_INSTANCE_CHANNEL,
+    IPC_CHANNELS.CREATE_AGENT_INSTANCE,
     async (
       _event,
       req: CreateAgentInstanceRequest
-    ): Promise<CreateAgentInstanceResponse> => {
+    ): Promise<CreateAgentInstanceResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const newInstance: AgentInstance = {
         id: `agent-${Date.now()}`,
-        name: req.name,
         personaTemplateId: req.personaTemplateId,
         projectId: req.projectId,
         llmConfig: req.llmConfig || {
@@ -93,11 +87,11 @@ function registerCreateAgentInstanceHandler() {
 
 function registerUpdateAgentInstanceHandler() {
   ipcMain.handle(
-    UPDATE_AGENT_INSTANCE_CHANNEL,
+    IPC_CHANNELS.UPDATE_AGENT_INSTANCE,
     async (
       _event,
       req: UpdateAgentInstanceRequest
-    ): Promise<UpdateAgentInstanceResponse> => {
+    ): Promise<UpdateAgentInstanceResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instanceIndex = mockAgentInstances.findIndex(
         (ai) => ai.id === req.instanceId

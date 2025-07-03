@@ -120,7 +120,7 @@ export class ChatService implements IChatService {
         if (result.success) {
           const tokenPayload: ChatStreamTokenPayload = {
             type: 'token',
-            data: result.data.content!,
+            data: result.data?.content ?? '',
           };
           sendStreamEventCallback(tokenPayload);
         } else {

@@ -61,7 +61,7 @@ export class AgentToolService {
       }
       this._addToolResultToConversation(job, executionEntry, toolCall);
     }
-    state.activityHistory = job.getConversationHistory();
+    state.activityHistory = job.conversationHistory;
   }
 
   private async _executeSingleToolCall(
@@ -72,7 +72,7 @@ export class AgentToolService {
     const executionContext: IToolExecutionContext = {
       agentId: agent.id.value,
       jobId: job.id.value,
-      userId: job.getPayload().userId,
+      userId: job.payload.userId,
     };
     return this.toolValidationService.processAndValidateSingleToolCall(toolCall, executionContext);
   }
@@ -84,12 +84,14 @@ export class AgentToolService {
   ): boolean {
     if (executionEntry.type === 'tool_error' && executionEntry.error instanceof ToolError) {
       const toolError = executionEntry.error;
-      job.addLog(`Tool '${toolError.toolName || executionEntry.name}' error: ${toolError.message}. Recoverable: ${toolError.isRecoverable}`, 'ERROR');
-      if (!toolError.isRecoverable) {
+      const toolName = (toolError.details as { toolName?: string })?.toolName || executionEntry.name;
+      const isRecoverable = (toolError.details as { isRecoverable?: boolean })?.isRecoverable;
+
+      job.addLog(`Tool '${toolName}' error: ${toolError.message}. Recoverable: ${isRecoverable}`, 'ERROR');
+      if (!isRecoverable) {
         state.criticalErrorEncounteredThisTurn = true;
         this.logger.error(
-          `Critical tool error for Job ID ${job.id.value}: Tool '${toolError.toolName ||
-            executionEntry.name}' failed non-recoverably.`,
+          `Critical tool error for Job ID ${job.id.value}: Tool '${toolName}' failed non-recoverably.`,
           toolError,
         );
         return true;
@@ -110,8 +112,8 @@ export class AgentToolService {
           ? {
               name: executionEntry.error.name,
               message: executionEntry.error.message,
-              toolName: executionEntry.error.toolName,
-              isRecoverable: executionEntry.error.isRecoverable,
+              toolName: (executionEntry.error.details as { toolName?: string })?.toolName,
+              isRecoverable: (executionEntry.error.details as { isRecoverable?: boolean })?.isRecoverable,
             }
           : { message: String(executionEntry.error) };
       toolResultContent = errDetails;

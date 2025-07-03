@@ -31,7 +31,7 @@ export class JobProcessingService<P, R> {
     }
 
     const job = jobs[0] as JobEntity<P, R>;
-    const jobProps = job.getProps();
+    const jobProps = job.toPersistence();
     const lockUntil = new Date(Date.now() + lockDurationMs);
     const locked = await this.jobRepository.acquireLock(
       jobProps.id,
@@ -75,7 +75,7 @@ export class JobProcessingService<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.getProps().workerId === workerId) {
+    if (job && job.workerId === workerId) {
       job.markAsCompleted(result);
       await this.jobRepository.update(job);
       this.eventEmitter.emit("job.completed", job);
@@ -92,7 +92,7 @@ export class JobProcessingService<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.getProps().workerId === workerId) {
+    if (job && job.workerId === workerId) {
       this._handleFailedJobRetryOrPermanentFail(job, error);
       await this.jobRepository.update(job);
       this.eventEmitter.emit("job.failed", job);
@@ -124,7 +124,7 @@ export class JobProcessingService<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.getProps().workerId === workerId) {
+    if (job && job.workerId === workerId) {
       job.updateProgress(progress);
       await this.jobRepository.update(job);
       this.eventEmitter.emit("job.progress", job);
@@ -140,7 +140,7 @@ export class JobProcessingService<P, R> {
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
     const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.getProps().workerId === workerId) {
+    if (job && job.workerId === workerId) {
       job.addLog(message, level);
       await this.jobRepository.update(job);
       this.eventEmitter.emit("job.log", job);

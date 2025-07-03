@@ -61,7 +61,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
     const executionState = this.agentStateService.initializeExecutionState(job, agent);
 
-    this.logger.info(`Job ID: ${jobId} processing attempt: ${job.getAttemptsMade()}`);
+    this.logger.info(`Job ID: ${jobId} processing attempt: ${job.attemptsMade}`);
     job.updateProgress(10);
     this.logger.info(`Max iterations for Job ID: ${jobId} set to ${executionState.maxIterations}`);
 
@@ -176,6 +176,6 @@ export class GenericAgentExecutor implements IAgentExecutor {
   }
 
   private _getSerializableHistory(job: JobEntity<AgentExecutionPayload, unknown>) {
-    return job.getConversationHistory().toPersistence().entries;
+    return job.conversationHistory.toPersistence().entries;
   }
 }

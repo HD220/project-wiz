@@ -43,8 +43,8 @@ export class ListProjectsUseCase
         const createdAtDate = project.createdAt;
 
         return {
-          id: project.id.value(),
-          name: project.name.value(),
+          id: project.id.value,
+          name: project.name.value,
           createdAt: createdAtDate.toISOString(),
         };
       },

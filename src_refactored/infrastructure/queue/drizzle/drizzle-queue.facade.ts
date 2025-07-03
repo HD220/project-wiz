@@ -15,11 +15,11 @@ export class DrizzleQueueFacade<P, R> extends AbstractQueue<P, R> {
     queueName: string,
     // jobRepository is also used by core, processor, maintenance
     jobRepository: IJobRepository,
-    defaultJobOptions?: IJobOptions,
     // Composed services
     private readonly coreService: QueueServiceCore<P, R>,
     private readonly processingService: JobProcessingService<P, R>,
-    private readonly maintenanceService: QueueMaintenanceService<P, R>
+    private readonly maintenanceService: QueueMaintenanceService<P, R>,
+    defaultJobOptions?: IJobOptions,
   ) {
     super(queueName, jobRepository, defaultJobOptions);
     // Ensure composed services also have the emitter from AbstractQueue (this.emit)

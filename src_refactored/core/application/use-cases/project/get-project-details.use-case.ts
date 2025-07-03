@@ -52,16 +52,16 @@ export class GetProjectDetailsUseCase
 
     if (sourceCodeEntity) {
       sourceCodeDetails = {
-        id: sourceCodeEntity.id.value(),
-        repositoryPath: sourceCodeEntity.path.value(),
-        docsPath: sourceCodeEntity.docsPath?.value() || null,
+        id: sourceCodeEntity.id.value,
+        repositoryPath: sourceCodeEntity.path.value,
+        docsPath: sourceCodeEntity.docsPath?.value ?? null,
       };
     }
 
     const output: GetProjectDetailsUseCaseOutput = {
-      id: project.id.value(),
-      name: project.name.value(),
-      description: project.description?.value() || null,
+      id: project.id.value,
+      name: project.name.value,
+      description: project.description?.value ?? null,
       createdAt: project.createdAt.toISOString(),
       updatedAt: project.updatedAt.toISOString(),
       sourceCode: sourceCodeDetails,

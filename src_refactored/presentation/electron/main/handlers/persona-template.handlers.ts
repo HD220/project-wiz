@@ -1,30 +1,27 @@
 import { ipcMain } from 'electron';
 
 import {
-  GET_PERSONA_TEMPLATES_CHANNEL,
-  GET_PERSONA_TEMPLATE_DETAILS_CHANNEL,
-  CREATE_PERSONA_TEMPLATE_CHANNEL,
-  UPDATE_PERSONA_TEMPLATE_CHANNEL,
+  IPC_CHANNELS
 } from '../../../../shared/ipc-channels';
 import {
-  GetPersonaTemplatesResponse,
+  GetPersonaTemplatesListResponseData,
   GetPersonaTemplateDetailsRequest,
-  GetPersonaTemplateDetailsResponse,
+  GetPersonaTemplateDetailsResponseData,
   CreatePersonaTemplateRequest,
-  CreatePersonaTemplateResponse,
+  CreatePersonaTemplateResponseData,
   UpdatePersonaTemplateRequest,
-  UpdatePersonaTemplateResponse,
+  UpdatePersonaTemplateResponseData,
 } from '../../../../shared/ipc-types';
 import { PersonaTemplate } from '../../../../shared/types/entities';
 import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
 
 export function registerPersonaTemplateHandlers() {
-  ipcMain.handle(GET_PERSONA_TEMPLATES_CHANNEL, async (): Promise<GetPersonaTemplatesResponse> => {
+  ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST, async (): Promise<GetPersonaTemplatesListResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     return { personaTemplates: mockPersonaTemplates };
   });
 
-  ipcMain.handle(GET_PERSONA_TEMPLATE_DETAILS_CHANNEL, async (_event, req: GetPersonaTemplateDetailsRequest): Promise<GetPersonaTemplateDetailsResponse> => {
+  ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS, async (_event, req: GetPersonaTemplateDetailsRequest): Promise<GetPersonaTemplateDetailsResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const template = mockPersonaTemplates.find(pt => pt.id === req.templateId);
     if (template) {
@@ -34,15 +31,15 @@ export function registerPersonaTemplateHandlers() {
 
   });
 
-  ipcMain.handle(CREATE_PERSONA_TEMPLATE_CHANNEL, async (_event, req: CreatePersonaTemplateRequest): Promise<CreatePersonaTemplateResponse> => {
+  ipcMain.handle(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, async (_event, req: CreatePersonaTemplateRequest): Promise<CreatePersonaTemplateResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const newTemplate: PersonaTemplate = {
       id: `pt-${Date.now()}`,
       name: req.name,
-      description: req.description,
+      description: req.description ?? undefined,
       systemPrompt: req.systemPrompt,
-      visionEnabled: req.visionEnabled || false,
-      exampleConversations: req.exampleConversations || [],
+      visionEnabled: req.visionEnabled ?? false,
+      exampleConversations: req.exampleConversations ?? [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -51,7 +48,7 @@ export function registerPersonaTemplateHandlers() {
     return { personaTemplate: newTemplate };
   });
 
-  ipcMain.handle(UPDATE_PERSONA_TEMPLATE_CHANNEL, async (_event, req: UpdatePersonaTemplateRequest): Promise<UpdatePersonaTemplateResponse> => {
+  ipcMain.handle(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, async (_event, req: UpdatePersonaTemplateRequest): Promise<UpdatePersonaTemplateResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const templateIndex = mockPersonaTemplates.findIndex(pt => pt.id === req.templateId);
     if (templateIndex !== -1) {

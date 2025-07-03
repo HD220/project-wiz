@@ -1,11 +1,9 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import { ListProjectsUseCase } from "@/core/application/use-cases/project/list-projects.use-case";
-import { ProjectEntity } from "@/core/domain/project/project.entity";
+import { Project } from "@/core/domain/project/project.entity";
 
-// import { appContainer } from "@/infrastructure/ioc/inversify.config"; // Removed import
-
-import { IPCChannel } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { ProjectListItem } from "@/shared/ipc-project.types";
 
 let internalListProjectsUseCase: ListProjectsUseCase | null = null;
@@ -22,12 +20,12 @@ export function registerProjectIPCHandlers(
   }
   internalListProjectsUseCase = listProjectsUseCaseInstance;
 
-  ipcMain.handle(IPCChannel.PROJECT_LIST_QUERY, handleProjectListQuery);
+  ipcMain.handle(IPC_CHANNELS.PROJECT_LIST_QUERY, handleProjectListQuery);
 
   console.log("[IPC Project Handler] Project IPC handlers registered.");
 }
 
-function mapProjectsToProjectListItems(projects: ProjectEntity[]): ProjectListItem[] {
+function mapProjectsToProjectListItems(projects: Project[]): ProjectListItem[] {
   return projects.map((project) => ({
     id: project.id.value,
     name: project.name.value,
@@ -41,7 +39,7 @@ function mapProjectsToProjectListItems(projects: ProjectEntity[]): ProjectListIt
 
 async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
   console.log(
-    `[IPC Project Handler] Received ${IPCChannel.PROJECT_LIST_QUERY}`
+    `[IPC Project Handler] Received ${IPC_CHANNELS.PROJECT_LIST_QUERY}`
   );
   try {
     if (!internalListProjectsUseCase) {
@@ -56,8 +54,8 @@ async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
 
     const result = await internalListProjectsUseCase.execute();
 
-    if (result.isSuccess()) {
-      const projects = result.value;
+    if (result.success) {
+      const projects = result.data;
       const projectListItems = mapProjectsToProjectListItems(projects);
       console.log(
         `[IPC Project Handler] Sending ${projectListItems.length} projects.`
@@ -70,7 +68,7 @@ async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
     );
     return {
       success: false,
-      error: { message: result.error.message, name: result.error.name },
+      error: { message: result.error!.message, name: result.error!.name },
     };
   } catch (error: unknown) {
     console.error(
@@ -91,7 +89,7 @@ async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
 }
 
 export function unregisterProjectIPCHandlers(): void {
-  ipcMain.removeHandler(IPCChannel.PROJECT_LIST_QUERY);
+  ipcMain.removeHandler(IPC_CHANNELS.PROJECT_LIST_QUERY);
   // Clear the reference
   internalListProjectsUseCase = null;
   console.log("[IPC Project Handler] Project IPC handlers unregistered.");

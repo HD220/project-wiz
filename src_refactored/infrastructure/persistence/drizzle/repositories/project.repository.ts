@@ -8,13 +8,6 @@ import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 
 import { TYPES } from "@/infrastructure/ioc/types";
 
-
-
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
-
 export type DrizzleSchema = unknown;
 export type DrizzleDB = unknown;
 
@@ -27,44 +20,40 @@ export class DrizzleProjectRepository implements IProjectRepository {
     this.logger.info("[DrizzleProjectRepository] initialized");
   }
 
-  async save(
-    project: Project
-  ): Promise<IUseCaseResponse<Project, DomainError>> {
+  async save(project: Project): Promise<Project> {
     this.logger.info(
       `[DrizzleProjectRepository] save called for project ID: ${project.id.value}`
     );
-    return successUseCaseResponse(project);
+    // Implement actual save logic here
+    return project;
   }
 
-  async findById(
-    id: ProjectId
-  ): Promise<IUseCaseResponse<Project | null, DomainError>> {
+  async findById(id: ProjectId): Promise<Project | null> {
     this.logger.info(
       `[DrizzleProjectRepository] findById called for project ID: ${id.value}`
     );
-    return successUseCaseResponse(null);
+    // Implement actual findById logic here
+    return null;
   }
 
-  async findByName(
-    name: string
-  ): Promise<IUseCaseResponse<Project | null, DomainError>> {
+  async findByName(name: string): Promise<Project | null> {
     this.logger.info(
       `[DrizzleProjectRepository] findByName called for name: ${name}`
     );
-    return successUseCaseResponse(null);
+    // Implement actual findByName logic here
+    return null;
   }
 
-  async listAll(): Promise<IUseCaseResponse<Project[], DomainError>> {
-    this.logger.info(`[DrizzleProjectRepository] listAll called`);
-    return successUseCaseResponse([]);
+  async findAll(): Promise<Project[]> {
+    this.logger.info(`[DrizzleProjectRepository] findAll called`);
+    // Implement actual findAll logic here
+    return [];
   }
 
-  async delete(
-    id: ProjectId
-  ): Promise<IUseCaseResponse<void, DomainError | NotFoundError>> {
+  async delete(id: ProjectId): Promise<void> {
     this.logger.info(
       `[DrizzleProjectRepository] delete called for project ID: ${id.value}`
     );
-    return successUseCaseResponse(undefined);
+    // Implement actual delete logic here
   }
 }

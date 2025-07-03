@@ -3,6 +3,8 @@ import { z } from "zod";
 import { JobIdVO } from "./value-objects/job-id.vo";
 import { IJobOptions, JobOptionsVO } from "./value-objects/job-options.vo";
 
+export { IJobOptions } from "./value-objects/job-options.vo";
+
 export enum JobStatus {
   WAITING = "waiting",
   ACTIVE = "active",

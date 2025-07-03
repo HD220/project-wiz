@@ -37,16 +37,16 @@ export class SearchSimilarMemoryItemsUseCase
   ) {}
 
   private mapEntityToSimilarListItem(entity: MemoryItem, score?: number): SimilarMemoryListItem {
-    const fullContent = entity.content.value();
+    const fullContent = entity.content.value;
     const excerptLength = 200;
     const excerpt = fullContent.length > excerptLength ? fullContent.substring(0, excerptLength - 3) + "..." : fullContent;
 
     return {
-      id: entity.id.value(),
+      id: entity.id.value,
       contentExcerpt: excerpt,
-      agentId: entity.agentId?.value() || null,
-      tags: entity.tags.value() || [],
-      source: entity.source.value(),
+      agentId: entity.agentId?.value ?? null,
+      tags: entity.tags.value ?? [],
+      source: entity.source.value ?? null,
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
       relevanceScore: score,

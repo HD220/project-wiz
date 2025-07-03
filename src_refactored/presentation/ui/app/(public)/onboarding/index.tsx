@@ -33,7 +33,7 @@ function OnboardingPageComponent() {
       // This would require more state management in OnboardingWizard
       return;
     }
-    router.navigate({ to: "/dashboard", replace: true });
+    router.navigate({ to: "/app/dashboard", replace: true });
   };
 
   // Define the steps for the wizard

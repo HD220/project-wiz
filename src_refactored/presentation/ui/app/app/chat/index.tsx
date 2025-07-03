@@ -9,7 +9,7 @@ export const Route = createFileRoute('/app/chat/')({
 });
 
 export function ChatPage() {
-  const { conversationId: selectedConversationIdFromSearch } = Route.useSearch();
+  const { conversationId: selectedConversationIdFromSearch = undefined } = Route.useSearch();
 
   const {
     selectedConversationId,
