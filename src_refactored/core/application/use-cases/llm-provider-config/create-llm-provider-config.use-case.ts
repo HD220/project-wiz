@@ -80,7 +80,7 @@ export class CreateLLMProviderConfigUseCase
       }
 
       return ok({
-        llmProviderConfigId: configEntity.id().value(),
+        llmProviderConfigId: configEntity.id.value,
       });
     } catch (e: unknown) {
       if (e instanceof ValueError || (e instanceof DomainError && !(e instanceof ZodError))) {

@@ -6,7 +6,7 @@ export class UserId extends Identity {
   }
 
   public static generate(): UserId {
-    return new UserId(super.generate().value());
+    return new UserId(super.generate().value);
   }
 
   public static fromString(value: string): UserId {

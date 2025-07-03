@@ -48,7 +48,7 @@ export class AgentToolService {
     state: ExecutionState,
     toolCalls: LanguageModelMessageToolCall[],
   ): Promise<void> {
-    this.logger.info(`LLM requested ${toolCalls.length} tool calls for Job ID: ${job.id().value()}`);
+    this.logger.info(`LLM requested ${toolCalls.length} tool calls for Job ID: ${job.id.value}`);
     job.addLog(`LLM requesting ${toolCalls.length} tool calls.`, 'DEBUG');
 
     for (const toolCall of toolCalls) {
@@ -70,9 +70,9 @@ export class AgentToolService {
     job: JobEntity<AgentExecutionPayload, unknown>,
   ): Promise<ExecutionHistoryEntry> {
     const executionContext: IToolExecutionContext = {
-      agentId: agent.id().value(),
-      jobId: job.id().value(),
-      userId: job.getProps().payload.userId,
+      agentId: agent.id,
+      jobId: job.id.value,
+      userId: job.payload.userId,
     };
     return this.toolValidationService.processAndValidateSingleToolCall(toolCall, executionContext);
   }
@@ -88,7 +88,7 @@ export class AgentToolService {
       if (!toolError.isRecoverable) {
         state.criticalErrorEncounteredThisTurn = true;
         this.logger.error(
-          `Critical tool error for Job ID ${job.id().value()}: Tool '${toolError.toolName ||
+          `Critical tool error for Job ID ${job.id.value}: Tool '${toolError.toolName ||
             executionEntry.name}' failed non-recoverably.`,
           toolError,
         );

@@ -64,10 +64,10 @@ export class LoadAgentInternalStateUseCase
       }
 
       const output: LoadAgentInternalStateUseCaseOutput = {
-        agentId: stateEntity.agentId().value(),
-        currentProjectId: stateEntity.currentProjectId()?.value() || null,
-        currentGoal: stateEntity.currentGoal()?.value() || null,
-        generalNotes: [...stateEntity.generalNotes().list()],
+        agentId: stateEntity.id.value,
+        currentProjectId: stateEntity.currentProjectId?.value || null,
+        currentGoal: stateEntity.currentGoal?.value || null,
+        generalNotes: [...stateEntity.generalNotes.list()],
       };
 
       return ok(output);

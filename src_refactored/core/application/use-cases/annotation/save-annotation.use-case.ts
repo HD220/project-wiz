@@ -87,7 +87,7 @@ export class SaveAnnotationUseCase
       const finalAnnotation = (isSuccess(saveResult) && saveResult.value) ? saveResult.value : annotationEntity;
 
       return ok({
-        annotationId: finalAnnotation.id().value(),
+        annotationId: finalAnnotation.id.value,
         createdAt: finalAnnotation.createdAt().toISOString(),
         updatedAt: finalAnnotation.updatedAt().toISOString(),
       });

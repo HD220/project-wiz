@@ -1,11 +1,12 @@
-// src_refactored/core/domain/annotation/annotation.entity.ts
-import { AbstractEntity, EntityProps } from '@/core/common/base.entity';
-import { Identity } from '@/core/common/value-objects/identity.vo';
+import { z } from "zod";
 
-import { EntityError, ValueError } from '@/domain/common/errors';
+import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
+import { Identity } from "@/core/common/value-objects/identity.vo";
 
-import { AnnotationId } from './value-objects/annotation-id.vo';
-import { AnnotationText } from './value-objects/annotation-text.vo';
+import { EntityError } from "@/domain/common/errors";
+
+import { AnnotationId } from "./value-objects/annotation-id.vo";
+import { AnnotationText } from "./value-objects/annotation-text.vo";
 
 export interface AnnotationProps {
   id: AnnotationId;
@@ -16,10 +17,21 @@ export interface AnnotationProps {
   updatedAt?: Date;
 }
 
+const AnnotationPropsSchema = z.object({
+  id: z.custom<AnnotationId>((val) => val instanceof AnnotationId),
+  text: z.custom<AnnotationText>((val) => val instanceof AnnotationText),
+  agentId: z.custom<Identity | null | undefined>((val) => val === null || val === undefined || val instanceof Identity).optional(),
+  jobId: z.custom<Identity | null | undefined>((val) => val === null || val === undefined || val instanceof Identity).optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
 interface InternalAnnotationProps extends EntityProps<AnnotationId> {
   text: AnnotationText;
   agentId?: Identity | null;
   jobId?: Identity | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationProps> {
@@ -28,7 +40,12 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
   }
 
   public static create(props: AnnotationProps): Annotation {
-    this.validateProps(props);
+    const validationResult = AnnotationPropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid Annotation props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
 
     const now = new Date();
     const internalProps: InternalAnnotationProps = {
@@ -43,23 +60,13 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
     return new Annotation(internalProps);
   }
 
-  private static validateProps(props: AnnotationProps): void {
-    if (!props.id) throw new EntityError('Annotation ID is required.');
-    if (!props.text) throw new EntityError('Annotation text is required.');
-    // agentId and jobId are optional
-  }
-
-  // --- Getters for VOs ---
-  public text(): AnnotationText { return this.props.text; }
-  public agentId(): Identity | null | undefined { return this.props.agentId; }
-  public jobId(): Identity | null | undefined { return this.props.jobId; }
+  public get text(): AnnotationText { return this.props.text; }
+  public get agentId(): Identity | null | undefined { return this.props.agentId; }
+  public get jobId(): Identity | null | undefined { return this.props.jobId; }
 
   // --- Update Methods ---
   public updateText(newText: AnnotationText): Annotation {
-    if (!newText) {
-      throw new ValueError('New text cannot be null or undefined for update.');
-    }
-    if (this.props.text.equals(newText)) {
+    if (this.text.equals(newText)) {
       return this;
     }
     const newProps = { ...this.props, text: newText, updatedAt: new Date() };
@@ -67,7 +74,7 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
   }
 
   public assignAgent(agentId: Identity | null): Annotation {
-    if (this.props.agentId === agentId || (this.props.agentId?.equals(agentId))) {
+    if (this.agentId === agentId || (this.agentId?.equals(agentId))) {
         return this;
     }
     const newProps = { ...this.props, agentId: agentId, updatedAt: new Date() };
@@ -75,7 +82,7 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
   }
 
   public assignJob(jobId: Identity | null): Annotation {
-    if (this.props.jobId === jobId || (this.props.jobId?.equals(jobId))) {
+    if (this.jobId === jobId || (this.jobId?.equals(jobId))) {
         return this;
     }
     const newProps = { ...this.props, jobId: jobId, updatedAt: new Date() };

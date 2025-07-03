@@ -82,7 +82,7 @@ export class CreateAgentUseCase
         return resultError(err);
       }
 
-      return ok({ agentId: agentEntity.id().value() });
+      return ok({ agentId: agentEntity.id.value });
     } catch (e: unknown) {
       return this._handleUseCaseError(e, validInput);
     }

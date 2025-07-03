@@ -1,110 +1,102 @@
 // src_refactored/core/domain/agent/agent.entity.ts
-import { LLMProviderConfig } from '../llm-provider-config/llm-provider-config.entity';
+import { z } from "zod";
 
-import { AgentPersonaTemplate } from './agent-persona-template.vo';
-import { AgentId } from './value-objects/agent-id.vo';
-import { AgentMaxIterations } from './value-objects/agent-max-iterations.vo';
-import { AgentTemperature } from './value-objects/agent-temperature.vo';
+import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
 
-// Properties an Agent entity holds.
-// For strict Object Calisthenics (max 2 instance vars), these are grouped.
-interface AgentProps {
+import { EntityError } from "@/domain/common/errors";
+
+import { LLMProviderConfig } from "../llm-provider-config/llm-provider-config.entity";
+
+import { AgentPersonaTemplate } from "./agent-persona-template.vo";
+import { AgentId } from "./value-objects/agent-id.vo";
+import { AgentMaxIterations } from "./value-objects/agent-max-iterations.vo";
+import { AgentTemperature } from "./value-objects/agent-temperature.vo";
+
+export interface AgentProps {
+  id: AgentId;
   personaTemplate: AgentPersonaTemplate;
   llmProviderConfig: LLMProviderConfig;
   temperature: AgentTemperature;
   maxIterations: AgentMaxIterations;
-  // Optional: Link to a persisted AgentInternalStateId if state is managed separately
-  // agentInternalStateId?: AgentInternalStateId;
-  // createdAt: Date;
-  // updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export class Agent {
-  private readonly _id: AgentId;
-  private readonly props: Readonly<AgentProps>;
+const AgentPropsSchema = z.object({
+  id: z.custom<AgentId>((val) => val instanceof AgentId),
+  personaTemplate: z.custom<AgentPersonaTemplate>((val) => val instanceof AgentPersonaTemplate),
+  llmProviderConfig: z.custom<LLMProviderConfig>((val) => val instanceof LLMProviderConfig),
+  temperature: z.custom<AgentTemperature>((val) => val instanceof AgentTemperature),
+  maxIterations: z.custom<AgentMaxIterations>((val) => val instanceof AgentMaxIterations),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
 
-  private constructor(id: AgentId, props: AgentProps) {
-    this._id = id;
-    this.props = Object.freeze(props);
+interface InternalAgentProps extends EntityProps<AgentId> {
+  personaTemplate: AgentPersonaTemplate;
+  llmProviderConfig: LLMProviderConfig;
+  temperature: AgentTemperature;
+  maxIterations: AgentMaxIterations;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class Agent extends AbstractEntity<AgentId, InternalAgentProps> {
+  private constructor(props: InternalAgentProps) {
+    super(props);
   }
 
-  public static create(createProps: {
-    id?: AgentId;
-    personaTemplate: AgentPersonaTemplate;
-    llmProviderConfig: LLMProviderConfig;
-    temperature?: AgentTemperature;
-    maxIterations?: AgentMaxIterations;
-  }): Agent {
-    const agentId = createProps.id || AgentId.generate();
-    const temperature = createProps.temperature || AgentTemperature.default();
-    const maxIterations = createProps.maxIterations || AgentMaxIterations.default();
+  public static create(props: AgentProps): Agent {
+    const validationResult = AgentPropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid Agent props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
 
-    // Perform any validation specific to the combination of persona and LLM config if needed
-    // For example, ensure tools required by persona are compatible with LLM or provider capabilities (future)
+    const now = new Date();
+    const internalProps: InternalAgentProps = {
+      id: props.id || AgentId.generate(),
+      personaTemplate: props.personaTemplate,
+      llmProviderConfig: props.llmProviderConfig,
+      temperature: props.temperature || AgentTemperature.default(),
+      maxIterations: props.maxIterations || AgentMaxIterations.default(),
+      createdAt: props.createdAt || now,
+      updatedAt: props.updatedAt || now,
+    };
 
-    return new Agent(agentId, {
-      personaTemplate: createProps.personaTemplate,
-      llmProviderConfig: createProps.llmProviderConfig,
-      temperature: temperature,
-      maxIterations: maxIterations,
-      // createdAt: new Date(),
-      // updatedAt: new Date(),
-    });
+    return new Agent(internalProps);
   }
 
-  public id(): AgentId {
-    return this._id;
-  }
-
-  public personaTemplate(): AgentPersonaTemplate {
+  public get personaTemplate(): AgentPersonaTemplate {
     return this.props.personaTemplate;
   }
 
-  public llmProviderConfig(): LLMProviderConfig {
+  public get llmProviderConfig(): LLMProviderConfig {
     return this.props.llmProviderConfig;
   }
 
-  public temperature(): AgentTemperature {
+  public get temperature(): AgentTemperature {
     return this.props.temperature;
   }
 
-  public maxIterations(): AgentMaxIterations {
+  public get maxIterations(): AgentMaxIterations {
     return this.props.maxIterations;
   }
 
   // Behavior methods
   public changeTemperature(newTemperature: AgentTemperature): Agent {
-    return new Agent(this._id, {
-      ...this.props,
-      temperature: newTemperature,
-      // updatedAt: new Date(),
-    });
+    const newProps = { ...this.props, temperature: newTemperature, updatedAt: new Date() };
+    return new Agent(newProps);
   }
 
   public changeMaxIterations(newMaxIterations: AgentMaxIterations): Agent {
-    return new Agent(this._id, {
-      ...this.props,
-      maxIterations: newMaxIterations,
-      // updatedAt: new Date(),
-    });
+    const newProps = { ...this.props, maxIterations: newMaxIterations, updatedAt: new Date() };
+    return new Agent(newProps);
   }
 
-  // Potentially, a method to update the LLMProviderConfig if that's a dynamic behavior
   public assignNewLLMConfig(newConfig: LLMProviderConfig): Agent {
-     return new Agent(this._id, {
-      ...this.props,
-      llmProviderConfig: newConfig,
-      // updatedAt: new Date(),
-    });
-  }
-
-  public equals(other?: Agent): boolean {
-    if (other === null || other === undefined) {
-      return false;
-    }
-    if (!(other instanceof Agent)) {
-      return false;
-    }
-    return this._id.equals(other._id);
+    const newProps = { ...this.props, llmProviderConfig: newConfig, updatedAt: new Date() };
+    return new Agent(newProps);
   }
 }

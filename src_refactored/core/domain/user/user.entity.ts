@@ -75,22 +75,22 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
     return new User(internalProps);
   }
 
-  public nickname(): UserNickname {
+  public get nickname(): UserNickname {
     return this.props.nickname;
   }
-  public username(): UserUsername {
+  public get username(): UserUsername {
     return this.props.username;
   }
-  public email(): UserEmail {
+  public get email(): UserEmail {
     return this.props.email;
   }
-  public avatar(): UserAvatar {
+  public get avatar(): UserAvatar {
     return this.props.avatar;
   }
-  public defaultLLMProviderConfigId(): Identity {
+  public get defaultLLMProviderConfigId(): Identity {
     return this.props.defaultLLMProviderConfigId;
   }
-  public assistantId(): Identity | null | undefined {
+  public get assistantId(): Identity | null | undefined {
     return this.props.assistantId;
   }
 
@@ -101,11 +101,11 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
     const newProps = { ...this.props };
     let updated = false;
 
-    if (params.nickname && !this.nickname().equals(params.nickname)) {
+    if (params.nickname && !this.nickname.equals(params.nickname)) {
       newProps.nickname = params.nickname;
       updated = true;
     }
-    if (params.avatar && !this.avatar().equals(params.avatar)) {
+    if (params.avatar && !this.avatar.equals(params.avatar)) {
       newProps.avatar = params.avatar;
       updated = true;
     }
@@ -120,7 +120,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
   public changeEmail(newEmail: UserEmail): User {
     if (!newEmail)
       throw new ValueError("New email cannot be null or undefined.");
-    if (this.email().equals(newEmail)) {
+    if (this.email.equals(newEmail)) {
       return this;
     }
     const newProps = { ...this.props, email: newEmail, updatedAt: new Date() };
@@ -130,7 +130,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
   public changeUsername(newUsername: UserUsername): User {
     if (!newUsername)
       throw new ValueError("New username cannot be null or undefined.");
-    if (this.username().equals(newUsername)) {
+    if (this.username.equals(newUsername)) {
       return this;
     }
     const newProps = {
@@ -146,7 +146,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
       throw new ValueError(
         "LLM Provider Config ID cannot be null or undefined."
       );
-    if (this.defaultLLMProviderConfigId().equals(configId)) {
+    if (this.defaultLLMProviderConfigId.equals(configId)) {
       return this;
     }
     const newProps = {
@@ -159,8 +159,8 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
 
   public assignAssistant(assistantId: Identity | null): User {
     if (
-      this.assistantId() === assistantId ||
-      this.assistantId()?.equals(assistantId)
+      this.assistantId === assistantId ||
+      this.assistantId?.equals(assistantId)
     ) {
       return this;
     }

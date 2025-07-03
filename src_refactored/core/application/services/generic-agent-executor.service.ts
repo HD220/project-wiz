@@ -52,11 +52,11 @@ export class GenericAgentExecutor implements IAgentExecutor {
   public async process(
     job: JobEntity<AgentExecutionPayload, unknown>
   ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> {
-    const jobPayload = job.getProps().payload;
+    const jobPayload = job.payload;
     const agentId = jobPayload.agentId;
-    const jobId = job.id();
+    const jobId = job.id;
 
-    this.logger.info(`Processing Job ID: ${jobId.value()} with Agent ID: ${agentId}`, { jobId: jobId.value(), agentId });
+    this.logger.info(`Processing Job ID: ${jobId.value} with Agent ID: ${agentId}`, { jobId: jobId.value, agentId });
 
     const agentFetchResult = await this._fetchAgent(agentId, job);
     if (isError(agentFetchResult)) {
@@ -65,7 +65,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
         this.logger.error(
             `[GenericAgentExecutor] Critical error fetching agent ${String(agentId)}: ${errorMessage}`,
             appError.cause,
-            { component: 'GenericAgentExecutor', operation: '_fetchAgent', agentId: String(agentId), jobId: jobId.value() }
+            { component: 'GenericAgentExecutor', operation: '_fetchAgent', agentId: String(agentId), jobId: jobId.value }
         );
         job.addLog(`Critical error fetching agent: ${errorMessage}`, 'ERROR');
         throw appError;
@@ -74,7 +74,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
     const executionState = this.agentStateService.initializeExecutionState(job, agent);
 
-    this.logger.info(`Job ID: ${jobId.value()} processing attempt: ${job.getProps().attemptsMade}`);
+    this.logger.info(`Job ID: ${jobId.value} processing attempt: ${job.attemptsMade}`);
     job.updateProgress(10);
     this.logger.info(`Max iterations for Job ID: ${jobId.value} set to ${executionState.maxIterations}`);
 
@@ -90,7 +90,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
   ): Promise<void> {
     while (this._shouldContinueExecution(executionState)) {
       executionState.iterations++;
-      this.logger.info(`Starting LLM interaction cycle ${executionState.iterations} for Job ID: ${job.id().value()}`);
+      this.logger.info(`Starting LLM interaction cycle ${executionState.iterations} for Job ID: ${job.id.value}`);
       job.updateProgress(10 + (80 * executionState.iterations) / executionState.maxIterations);
 
       await this.agentInteractionService.performLlmInteraction(job, agent, executionState);
@@ -115,11 +115,11 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
   private _handleEndOfLoopConditions(job: JobEntity<AgentExecutionPayload, unknown>, executionState: ExecutionState): boolean {
     if (executionState.goalAchieved) {
-      this.logger.info(`Goal achieved for Job ID: ${job.id().value()} in iteration ${executionState.iterations}.`);
+      this.logger.info(`Goal achieved for Job ID: ${job.id.value} in iteration ${executionState.iterations}.`);
       return true;
     }
     if (executionState.iterations >= executionState.maxIterations) {
-      this.logger.info(`Max iterations reached for Job ID: ${job.id().value()}.`);
+      this.logger.info(`Max iterations reached for Job ID: ${job.id.value}.`);
       return true;
     }
     return false;
@@ -175,7 +175,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     }
 
     const finalMessage = `Processing stopped unexpectedly after ${state.iterations} iterations. Last LLM response: ${state.llmResponseText}`;
-    this.logger.warn(finalMessage, { jobId: job.id().value() });
+    this.logger.warn(finalMessage, { jobId: job.id.value });
     job.addLog(finalMessage, 'ERROR');
     throw new ApplicationError(finalMessage);
   }
@@ -196,7 +196,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     }
 
     return {
-      jobId: job.id().value(),
+      jobId: job.id.value,
       status,
       message,
       output: successfulOutput,
@@ -205,6 +205,6 @@ export class GenericAgentExecutor implements IAgentExecutor {
   }
 
   private _getSerializableHistory(job: JobEntity<AgentExecutionPayload, unknown>) {
-    return job.getConversationHistory().toPersistence().entries;
+    return job.conversationHistory.toPersistence().entries;
   }
 }

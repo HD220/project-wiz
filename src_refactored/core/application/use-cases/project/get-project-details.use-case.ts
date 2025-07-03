@@ -71,19 +71,19 @@ export class GetProjectDetailsUseCase
         const sourceCodeEntity = sourceCodeResult.value; // Access value if success
         if (sourceCodeEntity) {
           sourceCodeDetails = {
-            id: sourceCodeEntity.id().value(),
-            repositoryPath: sourceCodeEntity.path().value(),
-            docsPath: sourceCodeEntity.docsPath()?.value() || null,
+            id: sourceCodeEntity.id.value,
+            repositoryPath: sourceCodeEntity.path.value,
+            docsPath: sourceCodeEntity.docsPath?.value || null,
           };
         }
       }
 
       const output: GetProjectDetailsUseCaseOutput = {
-        id: project.id().value(),
-        name: project.name().value(),
-        description: project.description()?.value() || null, // Handle potentially undefined description
-        createdAt: project.createdAt().toISOString(),
-        updatedAt: project.updatedAt().toISOString(),
+        id: project.id.value,
+        name: project.name.value,
+        description: project.description?.value || null, // Handle potentially undefined description
+        createdAt: project.createdAt.toISOString(),
+        updatedAt: project.updatedAt.toISOString(),
         sourceCode: sourceCodeDetails,
       };
 

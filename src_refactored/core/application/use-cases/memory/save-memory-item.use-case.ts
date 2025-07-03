@@ -83,7 +83,7 @@ export class SaveMemoryItemUseCase
 
       // Match SaveMemoryItemUseCaseOutput
       return ok({
-        memoryItemId: finalMemoryItem.id().value(),
+        memoryItemId: finalMemoryItem.id.value,
         createdAt: finalMemoryItem.createdAt().toISOString(),
         updatedAt: finalMemoryItem.updatedAt().toISOString(),
       });

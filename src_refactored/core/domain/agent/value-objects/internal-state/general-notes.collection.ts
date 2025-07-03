@@ -14,7 +14,7 @@ class NoteEntry extends AbstractValueObject<{value: string}> {
         }
         return new NoteEntry(text);
     }
-    public value(): string { return this.props.value; }
+    public get value(): string { return this.props.value; }
 }
 
 interface GeneralNotesCollectionProps extends ValueObjectProps {
@@ -35,7 +35,7 @@ export class GeneralNotesCollection extends AbstractValueObject<GeneralNotesColl
   }
 
   public list(): ReadonlyArray<string> {
-    return this.props.notes.map(note => note.value());
+    return this.props.notes.map(note => note.value);
   }
 
   public addNote(note: string): GeneralNotesCollection {

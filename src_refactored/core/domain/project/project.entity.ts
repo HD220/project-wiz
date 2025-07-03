@@ -1,4 +1,5 @@
-// src_refactored/core/domain/project/project.entity.ts
+import { z } from "zod";
+
 import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
 
 import { EntityError } from "@/domain/common/errors";
@@ -7,17 +8,27 @@ import { ProjectDescription } from "./value-objects/project-description.vo";
 import { ProjectId } from "./value-objects/project-id.vo";
 import { ProjectName } from "./value-objects/project-name.vo";
 
-interface ProjectConstructorProps {
-  id?: ProjectId;
+export interface ProjectProps {
+  id: ProjectId;
   name: ProjectName;
-  description?: ProjectDescription; // Made optional
+  description?: ProjectDescription | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
+const ProjectPropsSchema = z.object({
+  id: z.custom<ProjectId>((val) => val instanceof ProjectId),
+  name: z.custom<ProjectName>((val) => val instanceof ProjectName),
+  description: z.custom<ProjectDescription | null | undefined>((val) => val === null || val === undefined || val instanceof ProjectDescription).optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
 interface InternalProjectProps extends EntityProps<ProjectId> {
   name: ProjectName;
-  description?: ProjectDescription; // Made optional
+  description?: ProjectDescription | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class Project extends AbstractEntity<ProjectId, InternalProjectProps> {
@@ -25,18 +36,19 @@ export class Project extends AbstractEntity<ProjectId, InternalProjectProps> {
     super(props);
   }
 
-  public static create(props: ProjectConstructorProps): Project {
-    if (!props.name) throw new EntityError("Project name is required.");
-    // Description is now optional, so no check needed here if it's undefined.
-    // If it's provided, it should be a valid ProjectDescription instance.
+  public static create(props: ProjectProps): Project {
+    const validationResult = ProjectPropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid Project props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
 
     const now = new Date();
-    const projectId = props.id || ProjectId.generate();
-
     const internalProps: InternalProjectProps = {
-      id: projectId,
+      id: props.id || ProjectId.generate(),
       name: props.name,
-      description: props.description,
+      description: props.description === undefined ? null : props.description,
       createdAt: props.createdAt || now,
       updatedAt: props.updatedAt || now,
     };
@@ -44,35 +56,21 @@ export class Project extends AbstractEntity<ProjectId, InternalProjectProps> {
     return new Project(internalProps);
   }
 
-  public name(): ProjectName {
+  public get name(): ProjectName {
     return this.props.name;
   }
 
-  public description(): ProjectDescription {
+  public get description(): ProjectDescription | null | undefined {
     return this.props.description;
   }
 
   public changeName(newName: ProjectName): Project {
-    if (!newName)
-      throw new EntityError(
-        "New name cannot be null or undefined for Project."
-      );
-    return new Project({
-      ...this.props,
-      name: newName,
-      updatedAt: new Date(),
-    });
+    const newProps = { ...this.props, name: newName, updatedAt: new Date() };
+    return new Project(newProps);
   }
 
   public changeDescription(newDescription: ProjectDescription): Project {
-    if (!newDescription)
-      throw new EntityError(
-        "New description cannot be null or undefined for Project."
-      );
-    return new Project({
-      ...this.props,
-      description: newDescription,
-      updatedAt: new Date(),
-    });
+    const newProps = { ...this.props, description: newDescription, updatedAt: new Date() };
+    return new Project(newProps);
   }
 }

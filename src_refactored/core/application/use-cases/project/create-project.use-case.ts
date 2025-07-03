@@ -7,7 +7,7 @@ import { DomainError, ValueError, EntityError } from '@/core/domain/common/error
 
 import { IProjectRepository } from '@/domain/project/ports/project-repository.interface'; // Removed ProjectRepositoryToken
 // Use Project and ProjectConstructorProps from project.entity
-import { Project, ProjectConstructorProps } from '@/domain/project/project.entity';
+import { Project, ProjectProps } from '@/domain/project/project.entity';
 import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
 import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
 import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
@@ -52,7 +52,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
         return resultError(saveResult.error);
       }
 
-      this.logger.info(`[CreateProjectUseCase] Project created successfully: ${projectEntity.id().value()}`); // Use id()
+      this.logger.info(`[CreateProjectUseCase] Project created successfully: ${projectEntity.id.value}`); // Use id()
       return ok(this._mapToOutput(projectEntity));
 
     } catch (caughtError: unknown) {
@@ -82,21 +82,19 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
   private _createProjectEntity(validatedInput: CreateProjectUseCaseInput): Result<Project, DomainError> {
     try {
       const projectName = ProjectName.create(validatedInput.name);
-      let projectDescription: ProjectDescription | undefined;
+      let projectDescription: ProjectDescription | null = null;
 
       if (validatedInput.description && validatedInput.description.trim() !== "") {
         projectDescription = ProjectDescription.create(validatedInput.description);
       }
 
-      // Use ProjectConstructorProps and ProjectId.generate()
-      const projectProps: ProjectConstructorProps = {
-        id: ProjectId.generate(), // Changed from ProjectId.create()
+      const projectProps: ProjectProps = {
+        id: ProjectId.generate(),
         name: projectName,
         description: projectDescription,
-        // createdAt and updatedAt are handled by the entity's create method
       };
 
-      const projectEntity = Project.create(projectProps); // Use Project.create
+      const projectEntity = Project.create(projectProps);
       return ok(projectEntity);
 
     } catch (errorCreatingEntity: unknown) {
@@ -104,13 +102,13 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
       if (errorCreatingEntity instanceof DomainError || errorCreatingEntity instanceof ValueError || errorCreatingEntity instanceof EntityError) {
         this.logger.warn(
           `[CreateProjectUseCase] Domain error creating project entity parts: ${errorToLog.message}`,
-          { meta: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
+          { details: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
         );
-        return resultError(errorCreatingEntity as DomainError | ValueError | EntityError); // Cast for type safety
+        return resultError(errorCreatingEntity as DomainError | ValueError | EntityError);
       }
       this.logger.error(
         `[CreateProjectUseCase] Unexpected error creating project entity parts: ${errorToLog.message}`,
-        { meta: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
+        { details: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
       );
       return resultError(new DomainError(`Unexpected error creating project entity parts: ${errorToLog.message}`, errorToLog));
     }
@@ -121,14 +119,7 @@ export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput,
     // and entity's id(), name(), description() return VOs with a value() method.
     // Also assuming entity's createdAt, updatedAt are Date objects.
     return {
-      projectId: projectEntity.id().value(),
-      // The schema output was projectId, not the full entity details.
-      // If full details are needed, CreateProjectOutputSchema must be updated.
-      // For now, sticking to the schema:
-      // name: projectEntity.name().value(),
-      // description: projectEntity.description()?.value(),
-      // createdAt: projectEntity.createdAt().toISOString(),
-      // updatedAt: projectEntity.updatedAt().toISOString(),
+      projectId: projectEntity.id.value,
     };
   }
 }

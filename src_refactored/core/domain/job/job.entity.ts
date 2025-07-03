@@ -1,12 +1,14 @@
-import { AbstractEntity } from "@/core/common/base.entity";
+import { z } from "zod";
+
+import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
+
+import { EntityError } from "@/domain/common/errors";
 
 import { ExecutionHistoryEntry } from "./job-processing.types";
 import { JobStateMutator } from "./job-state.mutator";
 import {
   JobStatus,
-  // JobLogEntry, // No longer directly used in this file
   JobEntityProps,
-  // JobPersistenceData, // Not used directly in this file after refactor
 } from "./job.types";
 import {
   ActivityHistoryVO,
@@ -15,16 +17,63 @@ import {
 import { JobIdVO } from "./value-objects/job-id.vo";
 import { IJobOptions, JobOptionsVO } from "./value-objects/job-options.vo";
 
+const JobEntityPropsSchema = z.object({
+  id: z.custom<JobIdVO>((val) => val instanceof JobIdVO),
+  queueName: z.string(),
+  name: z.string(),
+  payload: z.any(),
+  options: z.custom<JobOptionsVO>((val) => val instanceof JobOptionsVO),
+  status: z.nativeEnum(JobStatus),
+  attemptsMade: z.number().int().min(0),
+  progress: z.union([z.number(), z.object({})]),
+  logs: z.array(z.object({
+    message: z.string(),
+    level: z.string(),
+    timestamp: z.date(),
+  })),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  delayUntil: z.date().optional().nullable(),
+  finishedAt: z.date().optional().nullable(),
+  processedAt: z.date().optional().nullable(),
+  failedReason: z.string().optional().nullable(),
+  stacktrace: z.array(z.string()).optional().nullable(),
+  returnvalue: z.any().optional().nullable(),
+  workerId: z.string().optional().nullable(),
+  lockUntil: z.date().optional().nullable(),
+});
+
+interface InternalJobEntityProps<P, R> extends EntityProps<JobIdVO> {
+  queueName: string;
+  name: string;
+  payload: P;
+  options: JobOptionsVO;
+  status: JobStatus;
+  attemptsMade: number;
+  progress: number | object;
+  logs: Array<{ message: string; level: string; timestamp: Date }>;
+  createdAt: Date;
+  updatedAt: Date;
+  delayUntil?: Date | null;
+  finishedAt?: Date | null;
+  processedAt?: Date | null;
+  failedReason?: string | null;
+  stacktrace?: string[] | null;
+  returnvalue?: R | null;
+  workerId?: string | null;
+  lockUntil?: Date | null;
+}
+
 export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
   JobIdVO,
-  JobEntityProps<P, R>
+  InternalJobEntityProps<P, R>
 > {
   private _progressChanged: boolean = false;
   private _logsChanged: boolean = false;
   private _stateMutator: JobStateMutator<P, R>;
 
   private constructor(
-    props: JobEntityProps<P, R>,
+    props: InternalJobEntityProps<P, R>,
     initialConversationHistory?: ActivityHistoryVO,
     initialExecutionHistory?: ExecutionHistoryEntry[]
   ) {
@@ -64,15 +113,17 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
       updatedAt: now,
       delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : undefined,
     };
+
+    const validationResult = JobEntityPropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid JobEntity props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
     return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
   }
 
-  // Expose props directly or through a single getter as per AGENTS.md for data-rich entities
-  public getProps(): Readonly<JobEntityProps<P, R>> {
-    return this.props;
-  }
-
-  // Keep getters with logic
   get maxAttempts(): number {
     return this.props.options.attempts;
   }
@@ -155,8 +206,6 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
     this._stateMutator.resume();
   }
 
-  // toPersistence() method is now removed and handled by JobPersistenceMapper.
-
   public getConversationHistory(): ActivityHistoryVO {
     return this._stateMutator.getConversationHistory();
   }
@@ -184,3 +233,4 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
 
 // Re-export relevant types
 export { JobStatus, type JobEntityProps };
+

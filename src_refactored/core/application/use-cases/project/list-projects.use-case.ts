@@ -56,11 +56,11 @@ export class ListProjectsUseCase
         (project: Project): ProjectListItem => {
           // Assuming project.createdAt() returns a Date directly or a VO with toISOString()
           // If project.createdAt is a VO, it might need .value().toISOString()
-          const createdAtDate = project.createdAt();
+          const createdAtDate = project.createdAt;
 
           return {
-            id: project.id().value(),
-            name: project.name().value(),
+            id: project.id.value,
+            name: project.name.value,
             createdAt: createdAtDate.toISOString(),
           };
         },

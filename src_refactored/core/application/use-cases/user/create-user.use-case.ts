@@ -74,7 +74,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
         return resultError(saveResult.error); // Error from repo should be DomainError
       }
 
-      this.logger.info(`[CreateUserUseCase] User created successfully: ${userEntity.id().value()}`);
+      this.logger.info(`[CreateUserUseCase] User created successfully: ${userEntity.id.value}`);
       return ok(this._mapToOutput(userEntity)); // Use ok factory
 
     } catch (e: unknown) { // Catch any unexpected errors not caught by VO creation try-catch
@@ -205,15 +205,15 @@ export class CreateUserUseCase implements IUseCase<CreateUserUseCaseInput, Creat
 
   private _mapToOutput(userEntity: User): CreateUserUseCaseOutput {
     return {
-      id: userEntity.id().value(), // Use id() getter
-      username: userEntity.username().value(), // Use VO getters
-      email: userEntity.email().value(),
-      nickname: userEntity.nickname().value(),
-      avatarUrl: userEntity.avatar().value(),
-      defaultLLMProviderConfigId: userEntity.defaultLLMProviderConfigId().value(),
-      assistantId: userEntity.assistantId()?.value() ?? null,
-      createdAt: userEntity.createdAt().toISOString(), // Use getter
-      updatedAt: userEntity.updatedAt().toISOString(), // Use getter
+      id: userEntity.id.value,
+      username: userEntity.username.value,
+      email: userEntity.email.value,
+      nickname: userEntity.nickname.value,
+      avatarUrl: userEntity.avatar.value,
+      defaultLLMProviderConfigId: userEntity.defaultLLMProviderConfigId.value,
+      assistantId: userEntity.assistantId?.value ?? null,
+      createdAt: userEntity.createdAt.toISOString(),
+      updatedAt: userEntity.updatedAt.toISOString(),
     };
   }
 }

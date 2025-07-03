@@ -117,12 +117,12 @@ export class ListAnnotationsUseCase
 
   private _mapToListItem(annotation: Annotation): AnnotationListItem {
     return {
-      id: annotation.id().value(),
-      text: annotation.text().value(),
-      agentId: annotation.agentId()?.value() || null,
-      jobId: annotation.jobId()?.value() || null,
-      createdAt: annotation.createdAt().toISOString(),
-      updatedAt: annotation.updatedAt().toISOString(),
+      id: annotation.id.value,
+      text: annotation.text.value,
+      agentId: annotation.agentId?.value || null,
+      jobId: annotation.jobId?.value || null,
+      createdAt: annotation.createdAt.toISOString(),
+      updatedAt: annotation.updatedAt.toISOString(),
     };
   }
 }

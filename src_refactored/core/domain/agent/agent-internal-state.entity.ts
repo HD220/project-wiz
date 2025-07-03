@@ -1,101 +1,107 @@
 // src_refactored/core/domain/agent/agent-internal-state.entity.ts
+import { z } from "zod";
+
+import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
+import { EntityError } from "@/domain/common/errors";
+
 import { AgentId } from './value-objects/agent-id.vo';
 import { CurrentGoal } from './value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from './value-objects/internal-state/current-project-id.vo';
 import { GeneralNotesCollection } from './value-objects/internal-state/general-notes.collection';
 
-interface AgentInternalStateProps {
-  currentProjectId?: CurrentProjectId;
-  currentGoal?: CurrentGoal;
+export interface AgentInternalStateProps {
+  id: AgentId;
+  currentProjectId?: CurrentProjectId | null;
+  currentGoal?: CurrentGoal | null;
   generalNotes: GeneralNotesCollection;
-  // createdAt: JobTimestamp;
-  // updatedAt: JobTimestamp;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export class AgentInternalState {
-  private readonly _agentId: AgentId;
-  private readonly props: Readonly<AgentInternalStateProps>;
+const AgentInternalStatePropsSchema = z.object({
+  id: z.custom<AgentId>((val) => val instanceof AgentId),
+  currentProjectId: z.custom<CurrentProjectId | null | undefined>((val) => val === null || val === undefined || val instanceof CurrentProjectId).optional(),
+  currentGoal: z.custom<CurrentGoal | null | undefined>((val) => val === null || val === undefined || val instanceof CurrentGoal).optional(),
+  generalNotes: z.custom<GeneralNotesCollection>((val) => val instanceof GeneralNotesCollection),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
 
-  private constructor(agentId: AgentId, props: AgentInternalStateProps) {
-    this._agentId = agentId;
-    this.props = Object.freeze(props);
+interface InternalAgentInternalStateProps extends EntityProps<AgentId> {
+  currentProjectId?: CurrentProjectId | null;
+  currentGoal?: CurrentGoal | null;
+  generalNotes: GeneralNotesCollection;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class AgentInternalState extends AbstractEntity<AgentId, InternalAgentInternalStateProps> {
+  private constructor(props: InternalAgentInternalStateProps) {
+    super(props);
   }
 
-  public static create(createProps: {
-    agentId: AgentId;
-    currentProjectId?: CurrentProjectId;
-    currentGoal?: CurrentGoal;
-    generalNotes?: GeneralNotesCollection;
-  }): AgentInternalState {
-    if (!createProps.agentId) {
-      throw new Error("AgentId is required to create AgentInternalState.");
+  public static create(props: AgentInternalStateProps): AgentInternalState {
+    const validationResult = AgentInternalStatePropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid AgentInternalState props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
     }
 
-    const notes = createProps.generalNotes instanceof GeneralNotesCollection
-                  ? createProps.generalNotes
-                  : GeneralNotesCollection.create(createProps.generalNotes || []);
+    const now = new Date();
+    const internalProps: InternalAgentInternalStateProps = {
+      id: props.id,
+      currentProjectId: props.currentProjectId === undefined ? null : props.currentProjectId,
+      currentGoal: props.currentGoal === undefined ? null : props.currentGoal,
+      generalNotes: props.generalNotes || GeneralNotesCollection.create([]),
+      createdAt: props.createdAt || now,
+      updatedAt: props.updatedAt || now,
+    };
 
-    return new AgentInternalState(createProps.agentId, {
-      currentProjectId: createProps.currentProjectId,
-      currentGoal: createProps.currentGoal,
-      generalNotes: notes,
-      // createdAt: JobTimestamp.now(),
-      // updatedAt: JobTimestamp.now(),
-    });
+    return new AgentInternalState(internalProps);
   }
 
-  public agentId(): AgentId {
-    return this._agentId;
-  }
-
-  public currentProjectId(): CurrentProjectId | undefined {
+  public get currentProjectId(): CurrentProjectId | null | undefined {
     return this.props.currentProjectId;
   }
 
-  public currentGoal(): CurrentGoal | undefined {
+  public get currentGoal(): CurrentGoal | null | undefined {
     return this.props.currentGoal;
   }
 
-  public generalNotes(): GeneralNotesCollection {
+  public get generalNotes(): GeneralNotesCollection {
     return this.props.generalNotes;
   }
 
-  // Behavior methods returning new instances
-  private touchAndUpdate(updatedProps: Partial<AgentInternalStateProps>): AgentInternalState {
-    return new AgentInternalState(this._agentId, {
-      ...this.props,
-      ...updatedProps,
-      // updatedAt: JobTimestamp.now(),
-    });
+  public changeCurrentProject(newProjectId?: CurrentProjectId | null): AgentInternalState {
+    const newProps = { ...this.props, currentProjectId: newProjectId, updatedAt: new Date() };
+    return new AgentInternalState(newProps);
   }
 
-  public changeCurrentProject(newProjectId?: CurrentProjectId): AgentInternalState {
-    return this.touchAndUpdate({ currentProjectId: newProjectId });
-  }
-
-  public changeCurrentGoal(newGoal?: CurrentGoal): AgentInternalState {
-    return this.touchAndUpdate({ currentGoal: newGoal });
+  public changeCurrentGoal(newGoal?: CurrentGoal | null): AgentInternalState {
+    const newProps = { ...this.props, currentGoal: newGoal, updatedAt: new Date() };
+    return new AgentInternalState(newProps);
   }
 
   public addGeneralNote(noteText: string): AgentInternalState {
-    const updatedNotes = this.props.generalNotes.addNote(noteText);
-    return this.touchAndUpdate({ generalNotes: updatedNotes });
+    const updatedNotes = this.generalNotes.addNote(noteText);
+    const newProps = { ...this.props, generalNotes: updatedNotes, updatedAt: new Date() };
+    return new AgentInternalState(newProps);
   }
 
   public clearCurrentGoal(): AgentInternalState {
-    // Creating a new CurrentGoal with an empty string might be one way,
-    // or allowing undefined for currentGoal in props.
-    // CurrentGoal.create('') might throw if it has min length.
-    // For simplicity, let's assume undefined means no current goal.
-    return this.touchAndUpdate({ currentGoal: undefined });
+    const newProps = { ...this.props, currentGoal: null, updatedAt: new Date() };
+    return new AgentInternalState(newProps);
   }
 
   public clearCurrentProject(): AgentInternalState {
-    return this.touchAndUpdate({ currentProjectId: undefined });
+    const newProps = { ...this.props, currentProjectId: null, updatedAt: new Date() };
+    return new AgentInternalState(newProps);
   }
 
   public setGeneralNotes(newNotes: GeneralNotesCollection): AgentInternalState {
-    return this.touchAndUpdate({ generalNotes: newNotes });
+    const newProps = { ...this.props, generalNotes: newNotes, updatedAt: new Date() };
+    return new AgentInternalState(newProps);
   }
 
   public equals(other?: AgentInternalState): boolean {
@@ -105,12 +111,9 @@ export class AgentInternalState {
     if (!(other instanceof AgentInternalState)) {
       return false;
     }
-    // Equality is based on the AgentId it belongs to, as state is unique per agent.
-    // If we allow multiple state snapshots, then a separate AgentInternalStateId might be needed.
-    // For now, assuming 1:1 state per AgentId.
-    return this._agentId.equals(other._agentId) &&
-           this.props.currentProjectId?.equals(other.props.currentProjectId) &&
-           this.props.currentGoal?.equals(other.props.currentGoal) &&
-           this.props.generalNotes.equals(other.props.generalNotes);
+    return this.id.equals(other.id) &&
+           this.currentProjectId?.equals(other.currentProjectId) &&
+           this.currentGoal?.equals(other.currentGoal) &&
+           this.generalNotes.equals(other.generalNotes);
   }
 }

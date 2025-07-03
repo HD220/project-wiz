@@ -74,7 +74,7 @@ export class CreatePersonaTemplateUseCase
 
       // 5. Return Output
       return ok({
-        personaTemplateId: personaTemplate.id().value(),
+        personaTemplateId: personaTemplate.id.value,
       });
     } catch (e: unknown) {
       if (e instanceof ZodError) {

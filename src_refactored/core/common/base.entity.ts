@@ -20,11 +20,11 @@ export abstract class AbstractEntity<IdType extends Identity, PropsType extends 
     return this._id;
   }
 
-  public createdAt(): Date {
+  public get createdAt(): Date {
     return this.props.createdAt;
   }
 
-  public updatedAt(): Date {
+  public get updatedAt(): Date {
     return this.props.updatedAt;
   }
 

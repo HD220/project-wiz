@@ -157,23 +157,23 @@ export class SearchMemoryItemsUseCase
   }
 
   private _mapMemoryItemToListItem(item: MemoryItem): MemoryListItem {
-    const contentValue = item.content().value();
+    const contentValue = item.content.value;
     const excerpt = contentValue.length > CONTENT_EXCERPT_LENGTH
       ? `${contentValue.substring(0, CONTENT_EXCERPT_LENGTH)}...`
       : contentValue;
 
-    const agentIdValue = item.agentId() ? item.agentId()!.value() : null;
-    const tagsValue = item.tags().value() || [];
-    const sourceValue = item.source().value() || null; // Assuming source() returns a VO with value()
+    const agentIdValue = item.agentId ? item.agentId.value : null;
+    const tagsValue = item.tags.value || [];
+    const sourceValue = item.source.value || null;
 
     return {
-      id: item.id().value(), // Assuming id is Identity or similar VO with value()
+      id: item.id.value,
       contentExcerpt: excerpt,
       agentId: agentIdValue,
       tags: tagsValue,
       source: sourceValue,
-      createdAt: item.createdAt().toISOString(), // Assuming createdAt is a VO or Date
-      updatedAt: item.updatedAt().toISOString(), // Assuming updatedAt is a VO or Date
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
     };
   }
 }

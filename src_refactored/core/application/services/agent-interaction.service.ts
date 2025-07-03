@@ -39,33 +39,32 @@ export class AgentInteractionService {
     agent: Agent,
     state: ExecutionState,
   ): Promise<void> {
-    const personaTemplate = agent.personaTemplate();
-    const systemMessageString = `You are ${personaTemplate.name().value()}, a ${
-      personaTemplate.role().value()
-    }. Your goal is: ${personaTemplate.goal().value()}. Persona backstory: ${personaTemplate.backstory().value()}`;
+    const systemMessageString = `You are ${agent.personaTemplate.name.value}, a ${
+      agent.personaTemplate.role.value
+    }. Your goal is: ${agent.personaTemplate.goal.value}. Persona backstory: ${agent.personaTemplate.backstory.value}`;
     const conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
 
-    this.logLlmCall(job.id().value(), job.getProps().attemptsMade, conversationMessages);
-    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id().value()} (attempt ${job.getProps().attemptsMade + 1})`, 'DEBUG');
+    this.logLlmCall(job.id.value, job.attemptsMade, conversationMessages);
+    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id.value} (attempt ${job.attemptsMade + 1})`, 'DEBUG');
     // TODO: Consider how to log the detailed message content if necessary, perhaps via logger.debug directly.
 
     const llmGenerationResult = await this.llmAdapter.generateText(conversationMessages, {
-      temperature: agent.temperature().value(),
+      temperature: agent.temperature.value,
     });
 
     if (isError(llmGenerationResult)) {
       const llmError = llmGenerationResult.error;
       const errorMessage = `LLM generation failed in iteration ${state.iterations}. Error: ${llmError.message}`;
-      const jobIdVo: JobIdVO = job.id();
-      this.logger.error(errorMessage, llmError, { jobId: jobIdVo.value() });
+      const jobIdVo: JobIdVO = job.id;
+      this.logger.error(errorMessage, llmError, { jobId: jobIdVo.value });
       const historyEntry: ExecutionHistoryEntry = { timestamp: new Date(), type: 'llm_error', name: 'LLM Generation', error: llmError.message };
       job.addExecutionHistoryEntry(historyEntry);
       throw new ApplicationError(errorMessage, llmError);
     }
 
-    state.assistantMessage = llmGenerationResult.value();
+    state.assistantMessage = llmGenerationResult.value;
     state.llmResponseText = state.assistantMessage.content || '';
-    const currentJobIdVal = job.id().value();
+    const currentJobIdVal = job.id.value;
     this.logger.info(
       `LLM response (iteration ${state.iterations}) for Job ID: ${currentJobIdVal}: ${state.llmResponseText.substring(0, 100)}...`,
     );
@@ -77,7 +76,7 @@ export class AgentInteractionService {
         return;
       }
       this.logger.warn(
-        `LLM response for Job ID ${job.id().value()} was empty/too short after ${state.replanAttemptsForEmptyResponse} re-plan attempts. Proceeding with this response.`,
+        `LLM response for Job ID ${job.id.value} was empty/too short after ${state.replanAttemptsForEmptyResponse} re-plan attempts. Proceeding with this response.`,
       );
     }
 
@@ -85,7 +84,7 @@ export class AgentInteractionService {
       tool_calls: state.assistantMessage.tool_calls as LanguageModelMessageToolCall[] | undefined,
     });
     job.addConversationEntry(assistantHistoryEntry);
-    state.activityHistory = job.getConversationHistory();
+    state.activityHistory = job.conversationHistory;
   }
 
   private _isUnusableResponse(state: ExecutionState): boolean {
@@ -99,7 +98,7 @@ export class AgentInteractionService {
 
   private _attemptReplan(job: JobEntity<AgentExecutionPayload, unknown>, state: ExecutionState): void {
     this.logger.warn(
-      `LLM response for Job ID ${job.id().value()} was empty/too short. Attempting re-plan (${state.replanAttemptsForEmptyResponse +
+      `LLM response for Job ID ${job.id.value} was empty/too short. Attempting re-plan (${state.replanAttemptsForEmptyResponse +
         1}/${this.maxReplanAttemptsForEmptyResponse})`,
     );
     const systemNote = ActivityHistoryEntryVO.create(
@@ -119,8 +118,8 @@ export class AgentInteractionService {
 
     job.setConversationHistory(updatedHistory);
     job.setExecutionHistory(updatedExecutionHistory);
-    state.activityHistory = job.getConversationHistory();
-    state.executionHistory = [...job.getExecutionHistory()];
+    state.activityHistory = job.conversationHistory;
+    state.executionHistory = [...job.executionHistory];
     state.replanAttemptsForEmptyResponse++;
     job.addLog(`LLM response was unusable. Re-planning (attempt ${state.replanAttemptsForEmptyResponse}).`, 'WARN');
   }

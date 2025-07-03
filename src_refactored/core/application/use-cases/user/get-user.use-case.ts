@@ -48,7 +48,7 @@ export class GetUserUseCase implements IUseCase<GetUserInput, GetUserOutput | nu
         return resultError(new NotFoundError('User not found.'));
       }
 
-      this.logger.info(`[GetUserUseCase] User found: ${userEntity.id().value()}`);
+      this.logger.info(`[GetUserUseCase] User found: ${userEntity.id.value}`);
       return ok(this._mapToOutput(userEntity));
 
     } catch (err: unknown) {
@@ -100,13 +100,13 @@ export class GetUserUseCase implements IUseCase<GetUserInput, GetUserOutput | nu
 
   private _mapToOutput(userEntity: User): GetUserOutput {
     return {
-      id: userEntity.id().value(),
-      username: userEntity.username().value,
-      email: userEntity.email().value,
-      nickname: userEntity.nickname().value,
-      avatarUrl: userEntity.avatar().value,
-      defaultLLMProviderConfigId: userEntity.defaultLLMProviderConfigId().value,
-      assistantId: userEntity.assistantId()?.value ?? null,
+      id: userEntity.id.value,
+      username: userEntity.username.value,
+      email: userEntity.email.value,
+      nickname: userEntity.nickname.value,
+      avatarUrl: userEntity.avatar.value,
+      defaultLLMProviderConfigId: userEntity.defaultLLMProviderConfigId.value,
+      assistantId: userEntity.assistantId?.value ?? null,
       createdAt: userEntity.createdAt.toISOString(),
       updatedAt: userEntity.updatedAt.toISOString(),
     };

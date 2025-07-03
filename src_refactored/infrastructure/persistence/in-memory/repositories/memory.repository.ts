@@ -30,7 +30,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     }
     if (filters.tags && filters.tags.length > 0) {
       results = results.filter(item =>
-        filters.tags!.every(tag => item.tags().value.some(itemTag => itemTag.value === tag))
+        filters.tags!.every(tag => item.tags.value.some(itemTag => itemTag === tag))
       );
     }
     // Does not implement options.limit, options.offset, or embedding search
