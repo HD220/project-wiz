@@ -22,8 +22,6 @@ import {
 import React from "react";
 import { toast } from "sonner";
 
-import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
-import { cn } from "@/ui/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +32,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
+import { cn } from "@/ui/lib/utils";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {

@@ -77,7 +77,7 @@ export interface IMemoryRepository {
   search(
     filters: MemorySearchFilters,
     pagination: PaginationOptions,
-  ): Promise<Result<PaginatedMemoryItemsResult, DomainError>>;
+  ): Promise<PaginatedMemoryItemsResult>;
 }
 
 export const IMemoryRepositoryToken = Symbol('IMemoryRepository');

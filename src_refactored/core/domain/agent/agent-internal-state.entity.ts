@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
+
 import { EntityError } from "@/domain/common/errors";
 
 import { AgentId } from './value-objects/agent-id.vo';

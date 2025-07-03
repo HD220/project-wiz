@@ -57,7 +57,7 @@ export class SearchSimilarMemoryItemsUseCase
 
   public async execute(
     input: SearchSimilarMemoryItemsUseCaseInput,
-  ): Promise<Result<SearchSimilarMemoryItemsUseCaseOutput, ApplicationError | ZodError | ValueError>> {
+  ): Promise<IUseCaseResponse<SearchSimilarMemoryItemsUseCaseOutput>> {
     this.logger.debug('SearchSimilarMemoryItemsUseCase: Starting execution with input:', { input });
 
     const validationResult = this._validateInput(input);
@@ -131,7 +131,7 @@ export class SearchSimilarMemoryItemsUseCase
       if (validInput.agentId) {
         agentIdVo = Identity.fromString(validInput.agentId);
       }
-      return ok({ embeddingVo, agentIdVo });
+      return { embeddingVo, agentIdVo };
     } catch (e) {
       const errorToLog = e instanceof Error ? e : new Error(String(e));
       if (e instanceof ValueError) {
@@ -139,13 +139,13 @@ export class SearchSimilarMemoryItemsUseCase
             `SearchSimilarMemoryItemsUseCase: Invalid VO creation - ${e.message}`,
             { meta: { error: errorToLog, useCase: 'SearchSimilarMemoryItemsUseCase', method: '_createValueObjects', input: validInput } }
         );
-        return resultError(e);
+        throw e;
       }
       this.logger.error(
         'SearchSimilarMemoryItemsUseCase: Unexpected error creating VOs.',
         { meta: { error: errorToLog, useCase: 'SearchSimilarMemoryItemsUseCase', method: '_createValueObjects', input: validInput } }
       );
-      return resultError(new ApplicationError(`Unexpected error processing input: ${errorToLog.message}`, errorToLog));
+      throw new ApplicationError(`Unexpected error processing input: ${errorToLog.message}`, errorToLog);
     }
   }
 }

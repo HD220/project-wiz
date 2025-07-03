@@ -47,45 +47,23 @@ export class CreateAgentUseCase
 
   async execute(
     input: CreateAgentUseCaseInput,
-  ): Promise<Result<CreateAgentUseCaseOutput, DomainError | NotFoundError | ZodError | ValueError>> {
-    const validationResult = CreateAgentUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      return resultError(validationResult.error);
-    }
-    const validInput = validationResult.data;
+  ): Promise<IUseCaseResponse<CreateAgentUseCaseOutput>> {
+    const validInput = CreateAgentUseCaseInputSchema.parse(input);
 
-    try {
-      const prerequisitesResult = await this._fetchPrerequisites(validInput);
-      if (isError(prerequisitesResult)) {
-        return resultError(prerequisitesResult.error);
-      }
-      const { personaTemplate, llmProviderConfig } = prerequisitesResult.value;
+    const { personaTemplate, llmProviderConfig } = await this._fetchPrerequisites(validInput);
+    const { temperatureVo, maxIterationsVo, agentIdVo } = this._createAgentValueObjects(validInput);
 
-      const agentValueObjectsResult = this._createAgentValueObjects(validInput);
-      if (isError(agentValueObjectsResult)) {
-        return resultError(agentValueObjectsResult.error);
-      }
-      const { temperatureVo, maxIterationsVo, agentIdVo } = agentValueObjectsResult.value;
+    const agentEntity = Agent.create({
+      id: agentIdVo,
+      personaTemplate,
+      llmProviderConfig,
+      temperature: temperatureVo,
+      maxIterations: maxIterationsVo,
+    });
 
-      // Agent.create is expected to throw on error
-      const agentEntity = Agent.create({
-        id: agentIdVo,
-        personaTemplate,
-        llmProviderConfig,
-        temperature: temperatureVo,
-        maxIterations: maxIterationsVo,
-      });
+    const savedAgent = await this.agentRepository.save(agentEntity);
 
-      const saveResult = await this.agentRepository.save(agentEntity);
-      if (isError(saveResult)) {
-        const err = saveResult.error instanceof DomainError ? saveResult.error : new DomainError(`Failed to save agent: ${saveResult.error.message}`, saveResult.error);
-        return resultError(err);
-      }
-
-      return ok({ agentId: agentEntity.id.value });
-    } catch (e: unknown) {
-      return this._handleUseCaseError(e, validInput);
-    }
+    return successUseCaseResponse({ agentId: savedAgent.id.value });
   }
 
   private async _fetchPrerequisites(validInput: CreateAgentUseCaseInput): Promise<Result<{
@@ -114,7 +92,7 @@ export class CreateAgentUseCase
       if (!llmProviderConfig) {
         return resultError(new NotFoundError(`LLMProviderConfig with ID ${validInput.llmProviderConfigId} not found.`));
       }
-      return ok({ personaTemplate, llmProviderConfig });
+      return { personaTemplate, llmProviderConfig };
     } catch (e: unknown) {
       if (e instanceof ValueError) return resultError(e);
       const message = e instanceof Error ? e.message : String(e);
@@ -142,9 +120,9 @@ export class CreateAgentUseCase
         ? AgentMaxIterations.create(validInput.maxIterations)
         : AgentMaxIterations.default();
       const agentIdVo = AgentId.generate();
-      return ok({ temperatureVo, maxIterationsVo, agentIdVo });
+      return { temperatureVo, maxIterationsVo, agentIdVo };
     } catch (e: unknown) {
-      if (e instanceof ValueError) return resultError(e);
+      if (e instanceof ValueError) throw e;
       const message = e instanceof Error ? e.message : String(e);
       const errorToLog = e instanceof Error ? e : new Error(message);
       this.logger.warn(
@@ -157,7 +135,7 @@ export class CreateAgentUseCase
           input: validInput
         },
       );
-      return resultError(new ValueError(`Error creating agent value objects: ${message}`));
+      throw new ValueError(`Error creating agent value objects: ${message}`);
     }
   }
 
@@ -175,6 +153,6 @@ export class CreateAgentUseCase
       logError,
       { useCase: 'CreateAgentUseCase', input: input ?? 'Unknown input' },
     );
-    return resultError(new DomainError(`An unexpected error occurred while creating the agent: ${message}`, logError));
+    return errorUseCaseResponse(new DomainError(`An unexpected error occurred while creating the agent: ${message}`, logError).toUseCaseErrorDetails());
   }
 }

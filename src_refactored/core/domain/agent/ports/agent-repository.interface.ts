@@ -9,5 +9,5 @@ export interface IAgentRepository {
   findById(id: AgentId): Promise<Result<Agent | null>>;
   // findAllByPersonaId(personaId: PersonaId): Promise<Result<Agent[]>>; // If multiple agents can use same persona template
   findAll(): Promise<Result<Agent[]>>;
-  delete(id: AgentId): Promise<Result<void>>;
+  delete(id: AgentId): Promise<void>;
 }

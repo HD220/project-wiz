@@ -11,7 +11,7 @@ import { LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.
 import { IToolExecutionContext, IAgentTool } from '@/core/tools/tool.interface';
 
 
-import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
+import { successUseCaseResponse, errorUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
 
 
 @injectable()
@@ -30,19 +30,13 @@ export class ToolValidationService {
 
     const toolResult = await this.toolRegistryService.getTool(toolName);
 
-    if (isError(toolResult)) {
-      const serviceError = toolResult.error;
-      this.logger.error(
-        `[ToolValidationService] Error fetching tool '${toolName}': ${serviceError.message}`,
-        serviceError,
-        { toolName, jobId: executionContext.jobId ?? 'N/A', serviceOperation: 'getTool' }
-      );
-      const isRecoverable = (serviceError instanceof ToolError && serviceError.isRecoverable) || (serviceError instanceof ApplicationError);
-      const finalToolError = serviceError instanceof ToolError ? serviceError : new ToolError(serviceError.message, toolName, serviceError, isRecoverable);
-      return { timestamp, type: 'tool_error', name: toolName, error: finalToolError, isCritical: !finalToolError.isRecoverable };
+    if (!toolResult) {
+      const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, toolName, undefined, false);
+      this.logger.error(toolNotFoundError.message, toolNotFoundError, { toolName, jobId: executionContext.jobId ?? 'N/A' });
+      return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError, isCritical: true };
     }
 
-    const toolInstance = toolResult.value;
+    const toolInstance = toolResult;
 
     const parsedArgsResult = this._parseToolArguments(toolCall, toolName, timestamp, executionContext.jobId ?? 'N/A');
     if (parsedArgsResult.error) {
@@ -181,30 +175,13 @@ export class ToolValidationService {
   }
 
   private _handleToolExecutionResult(
-    toolExecResult: Result<unknown, ToolError>,
+    toolExecResult: unknown,
     toolName: string,
     timestamp: Date,
     validatedArgs: unknown,
     currentJobId: string,
   ): ExecutionHistoryEntry {
-    if (isError(toolExecResult)) {
-      const toolErrorFromTool = toolExecResult.error;
-      this.logger.error(
-        `Tool '${toolName}' execution failed: ${toolErrorFromTool.message}`,
-        toolErrorFromTool,
-        { toolName: toolName, jobId: currentJobId, service: 'ToolValidationService', operation: '_executeTool' }
-      );
-      return {
-        timestamp,
-        type: 'tool_error',
-        name: toolName,
-        params: validatedArgs,
-        error: toolErrorFromTool,
-        isCritical: !toolErrorFromTool.isRecoverable,
-      };
-    }
-
-    this.logger.info(`Tool '${toolName}' executed successfully.`, { result: toolExecResult.value, jobId: currentJobId });
-    return { timestamp, type: 'tool_result', name: toolName, params: validatedArgs, result: toolExecResult.value };
+    this.logger.info(`Tool '${toolName}' executed successfully.`, { result: toolExecResult, jobId: currentJobId });
+    return { timestamp, type: 'tool_result', name: toolName, params: validatedArgs, result: toolExecResult };
   }
 }

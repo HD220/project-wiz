@@ -28,8 +28,7 @@ export class CreatePersonaTemplateUseCase
   implements
     Executable<
       CreatePersonaTemplateUseCaseInput,
-      CreatePersonaTemplateUseCaseOutput,
-      DomainError | ZodError | ValueError
+      CreatePersonaTemplateUseCaseOutput
     >
 {
   constructor(
@@ -39,16 +38,11 @@ export class CreatePersonaTemplateUseCase
 
   async execute(
     input: CreatePersonaTemplateUseCaseInput,
-  ): Promise<Result<CreatePersonaTemplateUseCaseOutput, DomainError | ZodError | ValueError>> {
+  ): Promise<IUseCaseResponse<CreatePersonaTemplateUseCaseOutput>> {
     // 1. Validate Input Schema
-    const validationResult = CreatePersonaTemplateUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      return resultError(validationResult.error);
-    }
-    const validInput = validationResult.data;
+    const validInput = CreatePersonaTemplateUseCaseInputSchema.parse(input);
 
     try {
-      // 2. Create Value Objects (these throw on error)
       const nameVo = PersonaName.create(validInput.name);
       const roleVo = PersonaRole.create(validInput.role);
       const goalVo = PersonaGoal.create(validInput.goal);
@@ -56,7 +50,6 @@ export class CreatePersonaTemplateUseCase
       const toolNamesVo = ToolNames.create(validInput.toolNames);
       const personaIdVo = PersonaId.generate();
 
-      // 3. Create AgentPersonaTemplate VO (this throws on error)
       const personaTemplate = AgentPersonaTemplate.create({
         id: personaIdVo,
         name: nameVo,
@@ -66,22 +59,17 @@ export class CreatePersonaTemplateUseCase
         toolNames: toolNamesVo,
       });
 
-      // 4. Save Entity/VO
-      const saveResult = await this.templateRepository.save(personaTemplate);
-      if (isError(saveResult)) {
-        return resultError(new DomainError(`Failed to save persona template: ${saveResult.error.message}`, saveResult.error));
-      }
+      const savedPersonaTemplate = await this.templateRepository.save(personaTemplate);
 
-      // 5. Return Output
-      return ok({
-        personaTemplateId: personaTemplate.id.value,
+      return successUseCaseResponse({
+        personaTemplateId: savedPersonaTemplate.id.value,
       });
     } catch (e: unknown) {
       if (e instanceof ZodError) {
-        return resultError(e);
+        return errorUseCaseResponse(e.toUseCaseErrorDetails());
       }
       if (e instanceof DomainError || e instanceof ValueError) {
-        return resultError(e);
+        return errorUseCaseResponse(e.toUseCaseErrorDetails());
       }
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message);
@@ -89,11 +77,11 @@ export class CreatePersonaTemplateUseCase
         input,
         useCase: 'CreatePersonaTemplateUseCase',
       });
-      return resultError(
+      return errorUseCaseResponse(
         new DomainError(
           `An unexpected error occurred while creating the persona template: ${message}`,
           logError
-        ),
+        ).toUseCaseErrorDetails(),
       );
     }
   }

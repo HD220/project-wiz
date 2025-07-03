@@ -20,7 +20,7 @@ export interface IChatService {
   handleSendMessageStream(
     payload: ChatSendMessagePayload,
     sendStreamEventCallback: (event: ChatStreamEventPayload) => void,
-  ): Promise<Result<IChatServiceSendMessageResponse, Error>>;
+  ): Promise<IChatServiceSendMessageResponse>;
 }
 
 export const CHAT_SERVICE_TOKEN = Symbol('IChatService');

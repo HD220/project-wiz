@@ -42,64 +42,32 @@ export class CreateLLMProviderConfigUseCase
 
   async execute(
     input: CreateLLMProviderConfigUseCaseInput,
-  ): Promise<Result<CreateLLMProviderConfigUseCaseOutput, DomainError | ZodError | ValueError>> {
-    const validationResult = CreateLLMProviderConfigUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      return resultError(validationResult.error);
+  ): Promise<IUseCaseResponse<CreateLLMProviderConfigUseCaseOutput>> {
+    const validInput = CreateLLMProviderConfigUseCaseInputSchema.parse(input);
+
+    const nameVo = LLMProviderConfigName.create(validInput.name);
+    const providerIdVo = LLMProviderId.create(validInput.providerId);
+    const apiKeyVo = validInput.apiKey ? LLMApiKey.create(validInput.apiKey) : undefined;
+
+    let baseUrlVo: BaseUrl | undefined;
+    if (validInput.baseUrl && typeof validInput.baseUrl === 'string') {
+      baseUrlVo = BaseUrl.create(validInput.baseUrl);
     }
-    const validInput = validationResult.data;
 
-    try {
-      const nameVo = LLMProviderConfigName.create(validInput.name);
-      const providerIdVo = LLMProviderId.create(validInput.providerId);
-      const apiKeyVo = validInput.apiKey ? LLMApiKey.create(validInput.apiKey) : undefined;
+    const configIdVo = LLMProviderConfigId.generate();
 
-      let baseUrlVo: BaseUrl | undefined;
-      if (validInput.baseUrl && typeof validInput.baseUrl === 'string') {
-        baseUrlVo = BaseUrl.create(validInput.baseUrl);
-      }
+    const configEntity = LLMProviderConfig.create({
+      id: configIdVo,
+      name: nameVo,
+      providerId: providerIdVo,
+      apiKey: apiKeyVo,
+      baseUrl: baseUrlVo,
+    });
 
-      const configIdVo = LLMProviderConfigId.generate();
+    const savedConfig = await this.configRepository.save(configEntity);
 
-      const configEntity = LLMProviderConfig.create({
-        id: configIdVo,
-        name: nameVo,
-        providerId: providerIdVo,
-        apiKey: apiKeyVo,
-        baseUrl: baseUrlVo,
-      });
-
-      const saveResult = await this.configRepository.save(configEntity);
-      if (isError(saveResult)) {
-        const err = saveResult.error instanceof DomainError ? saveResult.error : new DomainError(`Failed to save LLM config: ${saveResult.error.message}`, saveResult.error);
-        this.logger.error(
-          `[CreateLLMProviderConfigUseCase] Repository error: ${err.message}`,
-          { meta: { error: saveResult.error, useCase: 'CreateLLMProviderConfigUseCase', input: validInput } }
-        );
-        return resultError(err);
-      }
-
-      return ok({
-        llmProviderConfigId: configEntity.id.value,
-      });
-    } catch (e: unknown) {
-      if (e instanceof ValueError || (e instanceof DomainError && !(e instanceof ZodError))) {
-        this.logger.warn(
-          `[CreateLLMProviderConfigUseCase] Value/Domain error: ${e.message}`,
-          { meta: { error: e, useCase: 'CreateLLMProviderConfigUseCase', input: validInput } }
-        );
-        return resultError(e);
-      }
-      const message = e instanceof Error ? e.message : String(e);
-      const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error(
-        `[CreateLLMProviderConfigUseCase] Unexpected error: ${message}`,
-        { meta: { error: logError, useCase: 'CreateLLMProviderConfigUseCase', input: validInput } }
-      );
-      if (e instanceof ZodError) {
-          return resultError(e);
-      }
-      return resultError(new DomainError(`Unexpected error creating LLM config: ${message}`, logError));
-    }
+    return successUseCaseResponse({
+      llmProviderConfigId: savedConfig.id.value,
+    });
   }
 }

@@ -36,31 +36,15 @@ export class RemoveAnnotationUseCase
 
   async execute(
     input: RemoveAnnotationUseCaseInput,
-  ): Promise<Result<RemoveAnnotationUseCaseOutput, DomainError | ZodError | ValueError | NotFoundError>> {
-    const validationResult = RemoveAnnotationUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      return resultError(validationResult.error);
-    }
-    const validInput = validationResult.data;
+  ): Promise<IUseCaseResponse<RemoveAnnotationUseCaseOutput>> {
+    const validInput = RemoveAnnotationUseCaseInputSchema.parse(input);
 
     try {
       const annotationIdVo = AnnotationId.fromString(validInput.annotationId);
 
-      const deleteResult = await this.annotationRepository.delete(annotationIdVo);
+      await this.annotationRepository.delete(annotationIdVo);
 
-      if (isError(deleteResult)) {
-        const err = deleteResult.error instanceof DomainError || deleteResult.error instanceof NotFoundError
-            ? deleteResult.error
-            : new DomainError(`Failed to delete annotation: ${deleteResult.error.message}`, deleteResult.error);
-        this.logger.error(
-          `[RemoveAnnotationUseCase] Repository error: ${err.message}`,
-          deleteResult.error,
-          { useCase: 'RemoveAnnotationUseCase', input: validInput },
-        );
-        return resultError(err);
-      }
-
-      return ok({ success: true, annotationId: validInput.annotationId });
+      return successUseCaseResponse({ success: true, annotationId: validInput.annotationId });
 
     } catch (e: unknown) {
       if (e instanceof ValueError) {
@@ -68,10 +52,10 @@ export class RemoveAnnotationUseCase
           `[RemoveAnnotationUseCase] Invalid annotation ID: ${e.message}`,
           { errorName: e.name, errorMessage: e.message, useCase: 'RemoveAnnotationUseCase', input: validInput },
         );
-        return resultError(e)
+        return errorUseCaseResponse(e.toUseCaseErrorDetails());
       }
       if (e instanceof ZodError || e instanceof NotFoundError || (e instanceof Error && e.constructor.name === 'DomainError')) {
-        return resultError(e as ZodError | NotFoundError | DomainError);
+        return errorUseCaseResponse((e as ZodError | NotFoundError | DomainError).toUseCaseErrorDetails());
       }
       const message = e instanceof Error ? e.message : String(e);
       const logError = e instanceof Error ? e : new Error(message);
@@ -80,7 +64,7 @@ export class RemoveAnnotationUseCase
         logError,
         { useCase: 'RemoveAnnotationUseCase', input },
       );
-      return resultError(new DomainError(`Unexpected error removing annotation: ${message}`, logError));
+      return errorUseCaseResponse(new DomainError(`Unexpected error removing annotation: ${message}`, logError).toUseCaseErrorDetails());
     }
   }
 }

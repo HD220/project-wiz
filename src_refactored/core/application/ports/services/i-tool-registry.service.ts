@@ -4,7 +4,7 @@ import { IAgentTool } from '@/core/tools/tool.interface';
 
 import { ApplicationError } from '@/application/common/errors';
 
-import { Result } from '@/shared/result';
+
 
 /**
  * @class ToolNotFoundError
@@ -33,7 +33,7 @@ export interface IToolRegistryService {
    * @returns {Promise<Result<void, ApplicationError>>} A promise that resolves with
    *          a Result. On success, it's void. On failure, it contains an ApplicationError.
    */
-  registerTool(tool: IAgentTool<z.ZodTypeAny, unknown>): Promise<Result<void, ApplicationError>>;
+  registerTool(tool: IAgentTool<z.ZodTypeAny, unknown>): Promise<void>;
 
   /**
    * Retrieves a tool by its unique name.
@@ -54,5 +54,5 @@ export interface IToolRegistryService {
    *          On success, it contains an array of IAgentTool instances.
    *          On failure, it contains an ApplicationError.
    */
-  listTools(): Promise<Result<IAgentTool<z.ZodTypeAny, unknown>[], ApplicationError>>;
+  listTools(): Promise<IAgentTool<z.ZodTypeAny, unknown>[]>;
 }

@@ -23,7 +23,7 @@ export interface IEmbeddingService {
    * @returns A Result containing an array of embedding vectors or an EmbeddingError.
    *          The order of embeddings should correspond to the order of input texts.
    */
-  generateEmbeddings(texts: string[], modelId?: string): Promise<Result<EmbeddingVector[], EmbeddingError>>;
+  generateEmbeddings(texts: string[], modelId?: string): Promise<EmbeddingVector[]>;
 
   // Optional: Get dimensions of embeddings for a model
   // getEmbeddingDimensions(modelId?: string): Promise<Result<number, EmbeddingError>>;

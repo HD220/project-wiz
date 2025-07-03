@@ -92,13 +92,13 @@ This document outlines the comprehensive plan for refactoring the core of Projec
   - *Order of Refactoring Use Cases (suggested):*
     - [x] `user/create-user.use-case.ts`
     - [x] `user/get-user.use-case.ts`
-    - [ ] `agent/create-agent.use-case.ts`
-    - [ ] `agent-persona-template/create-persona-template.use-case.ts`
+    - [x] `agent/create-agent.use-case.ts`
+    - [x] `agent-persona-template/create-persona-template.use-case.ts`
     - [x] `annotation/list-annotations.use-case.ts`
-    - [ ] `annotation/remove-annotation.use-case.ts`
-    - [ ] `annotation/save-annotation.use-case.ts`
-    - [ ] `llm-provider-config/create-llm-provider-config.use-case.ts`
-    - [ ] `memory/remove-memory-item.use-case.ts`
+    - [x] `annotation/remove-annotation.use-case.ts`
+    - [x] `annotation/save-annotation.use-case.ts`
+    - [x] `llm-provider-config/create-llm-provider-config.use-case.ts`
+    - [x] `memory/remove-memory-item.use-case.ts`
     - [x] `memory/save-memory-item.use-case.ts`
     - [x] `memory/search-memory-items.use-case.ts`
     - [x] `memory/search-similar-memory-items.use-case.ts`
@@ -106,7 +106,7 @@ This document outlines the comprehensive plan for refactoring the core of Projec
     - [x] `project/get-project-details.use-case.ts`
     - [x] `project/list-projects.use-case.ts`
     - [x] `agent-internal-state/load-agent-internal-state.use-case.ts`
-    - [ ] `agent-internal-state/save-agent-internal-state.use-case.ts`
+    - [x] `agent-internal-state/save-agent-internal-state.use-case.ts`
 
 **For each Service in `src_refactored/core/application/services/*.ts`:**
 
@@ -117,9 +117,9 @@ This document outlines the comprehensive plan for refactoring the core of Projec
     - [x] `agent-interaction.service.ts`
     - [x] `agent-state.service.ts`
     - [x] `agent-tool.service.ts`
-    - [ ] `chat.service.ts`
+    - [x] `chat.service.ts`
     - [x] `generic-agent-executor.service.ts`
-    - [ ] `tool-validation.service.ts`
+    - [x] `tool-validation.service.ts`
 
 **For each Repository in `src_refactored/infrastructure/persistence/**/*.ts`:**
 

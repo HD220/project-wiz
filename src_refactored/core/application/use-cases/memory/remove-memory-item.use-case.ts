@@ -37,58 +37,19 @@ export class RemoveMemoryItemUseCase
 
   public async execute(
     input: RemoveMemoryItemUseCaseInput,
-  ): Promise<Result<RemoveMemoryItemUseCaseOutput, ApplicationError | ZodError | ValueError>> {
+  ): Promise<IUseCaseResponse<RemoveMemoryItemUseCaseOutput>> {
     this.logger.debug('RemoveMemoryItemUseCase: Starting execution with input:', { input });
 
-    const validationResult = RemoveMemoryItemUseCaseInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      this.logger.warn('RemoveMemoryItemUseCase: Input validation failed.', { error: validationResult.error.flatten() });
-      return resultError(validationResult.error);
-    }
-    const validatedInput = validationResult.data;
+    const validatedInput = RemoveMemoryItemUseCaseInputSchema.parse(input);
 
-    try {
-      const itemIdVo = MemoryItemId.fromString(validatedInput.memoryItemId);
+    const itemIdVo = MemoryItemId.fromString(validatedInput.memoryItemId);
 
-      const deleteResult = await this.memoryRepository.delete(itemIdVo);
+    await this.memoryRepository.delete(itemIdVo);
 
-      if (isError(deleteResult)) {
-        const cause = deleteResult.error;
-        this.logger.error(
-          `RemoveMemoryItemUseCase: Repository failed to delete memory item ${validatedInput.memoryItemId}.`,
-          { error: cause, useCase: 'RemoveMemoryItemUseCase', input: validatedInput },
-        );
-        const appError = cause instanceof ApplicationError
-          ? cause
-          : new ApplicationError(`Failed to delete memory item: ${cause.message}`, cause instanceof Error ? cause : undefined);
-        return resultError(appError);
-      }
-
-      this.logger.info(`RemoveMemoryItemUseCase: Memory item ${validatedInput.memoryItemId} processed for deletion.`);
-      return ok({
-        memoryItemId: validatedInput.memoryItemId,
-        success: true,
-      });
-
-    } catch (e: unknown) {
-      if (e instanceof ValueError) {
-        this.logger.warn(
-          `RemoveMemoryItemUseCase: Invalid MemoryItemId format - ${e.message}`,
-          { error: e, useCase: 'RemoveMemoryItemUseCase', input: validatedInput },
-        );
-        return resultError(new ApplicationError(`Invalid memory item ID format: ${e.message}`, e));
-      }
-
-      const message = e instanceof Error ? e.message : String(e);
-      const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error(
-        `RemoveMemoryItemUseCase: Unexpected error for memory item ID ${input.memoryItemId}: ${message}`,
-        { error: logError, useCase: 'RemoveMemoryItemUseCase', input },
-      );
-
-      if (e instanceof ZodError) return resultError(e); // Should be caught by safeParse earlier
-      // For other errors, wrap in ApplicationError
-      return resultError(new ApplicationError(`Unexpected error removing memory item: ${message}`, logError));
-    }
+    this.logger.info(`RemoveMemoryItemUseCase: Memory item ${validatedInput.memoryItemId} processed for deletion.`);
+    return successUseCaseResponse({
+      memoryItemId: validatedInput.memoryItemId,
+      success: true,
+    });
   }
 }

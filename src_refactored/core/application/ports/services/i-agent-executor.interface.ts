@@ -9,7 +9,7 @@ import { JobEntity } from '@/core/domain/job/job.entity';
 
 import { ApplicationError } from '@/application/common/errors';
 
-import { Result } from '@/shared/result';
+
 
 /**
  * @interface IAgentExecutor

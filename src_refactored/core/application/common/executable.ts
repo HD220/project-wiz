@@ -29,11 +29,11 @@ export interface Executable<
  * Example Usage (not part of the interface itself):
  *
  * // For a use case with no input that returns a string or specific error
- * // class MyUseCase implements Executable<void, string, MyCustomApplicationError> {
- * //   async execute(): Promise<Result<string, MyCustomApplicationError>> {
+ * // For a use case with no input that returns a string
+ * // class MyUseCase implements Executable<void, string> {
+ * //   async execute(): Promise<IUseCaseResponse<string>> {
  * //     // ... logic ...
- * //     if (success) return Result.ok("Success!");
- * //     return Result.error(new MyCustomApplicationError("Failed!"));
+ * //     return successUseCaseResponse("Success!");
  * //   }
  * // }
  *
@@ -41,9 +41,9 @@ export interface Executable<
  * // interface CreateUserInput { name: string; }
  * // interface CreateUserOutput { userId: string; }
  * // class CreateUser implements Executable<CreateUserInput, CreateUserOutput> {
- * //   async execute(input: CreateUserInput): Promise<Result<CreateUserOutput, Error>> {
+ * //   async execute(input: CreateUserInput): Promise<IUseCaseResponse<CreateUserOutput>> {
  * //     // ... logic ...
- * //     return Result.ok({ userId: "123" });
+ * //     return successUseCaseResponse({ userId: "123" });
  * //   }
  * // }
  */

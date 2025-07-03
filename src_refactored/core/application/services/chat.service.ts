@@ -25,7 +25,7 @@ export class ChatService implements IChatService {
   async handleSendMessageStream(
     payload: ChatSendMessagePayload,
     sendStreamEventCallback: (event: ChatStreamEventPayload) => void,
-  ): Promise<Result<IChatServiceSendMessageResponse, Error>> {
+  ): Promise<IChatServiceSendMessageResponse> {
     this.logger.info(`[ChatService] Handling send message stream.`);
 
     if (!this.llmAdapter) {
@@ -57,7 +57,7 @@ export class ChatService implements IChatService {
   private _handleUnsupportedStream(sendStreamEventCallback: (event: ChatStreamEventPayload) => void): Result<IChatServiceSendMessageResponse, Error> {
     this.logger.error('[ChatService] LLMAdapter does not support streamText method.');
     this.sendMockStream(sendStreamEventCallback, "LLMAdapter does not support streaming. Mock response.");
-    return ok({ message: "LLMAdapter does not support streaming, mock streaming started." });
+    return { message: "LLMAdapter does not support streaming. Mock response." };
   }
 
   private async _processLLMStream(
@@ -75,7 +75,7 @@ export class ChatService implements IChatService {
       const stream = streamTextFn!(simplePrompt);
 
       for await (const result of stream) {
-        if (isSuccess(result)) {
+        if (result.isSuccess) {
           const tokenPayload: ChatStreamTokenPayload = { type: 'token', data: result.value };
           sendStreamEventCallback(tokenPayload);
         } else {
@@ -87,7 +87,7 @@ export class ChatService implements IChatService {
       const endPayload: ChatStreamEndPayload = { type: 'end' };
       sendStreamEventCallback(endPayload);
 
-      return ok({ message: "Message received, streaming started." });
+      return { message: "Message received, streaming started." };
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error('[ChatService] Error processing stream with LLMAdapter:', err);

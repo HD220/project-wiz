@@ -9,14 +9,6 @@ import React from "react";
 import { toast } from "sonner";
 
 // Internal - Features, Hooks, Components (alphabetical within logical groups)
-import {
-  AgentInstanceForm,
-  AgentInstanceFormData,
-} from "@/ui/features/agent/components/AgentInstanceForm";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
-import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
-
-// UI Components
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AgentInstanceForm,
+  AgentInstanceFormData,
+} from "@/ui/features/agent/components/AgentInstanceForm";
+import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
+
+// UI Components
 
 // Internal - Shared
 import { IPC_CHANNELS } from "@/shared/ipc-channels";

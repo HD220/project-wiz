@@ -42,7 +42,7 @@ export class SearchMemoryItemsUseCase
 
   public async execute(
     input: SearchMemoryItemsUseCaseInput,
-  ): Promise<Result<SearchMemoryItemsUseCaseOutput, ApplicationError | ZodError | ValueError>> {
+  ): Promise<IUseCaseResponse<SearchMemoryItemsUseCaseOutput>> {
     this.logger.debug('SearchMemoryItemsUseCase: Starting execution with input:', { input });
 
     const validationResult = this._validateInput(input);
@@ -123,7 +123,7 @@ export class SearchMemoryItemsUseCase
         queryText: validatedInput.queryText,
         tags: validatedInput.tags,
       };
-      return ok(filters);
+      return filters;
     } catch (e: unknown) {
       const errorToLog = e instanceof Error ? e : new Error(String(e));
       if (e instanceof ValueError) {
@@ -131,13 +131,13 @@ export class SearchMemoryItemsUseCase
           `SearchMemoryItemsUseCase: Error building search filters - ${e.message}`,
           { meta: { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput } },
         );
-        return resultError(e);
+        throw e;
       }
       this.logger.error(
         'SearchMemoryItemsUseCase: Unexpected error building search filters.',
         { meta: { error: errorToLog, useCase: 'SearchMemoryItemsUseCase', method: '_buildSearchFilters', input: validatedInput } },
       );
-      return resultError(new ValueError(`Unexpected error building filters: ${errorToLog.message}`));
+      throw new ValueError(`Unexpected error building filters: ${errorToLog.message}`);
     }
   }
 

@@ -21,7 +21,7 @@ import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
 // eslint-disable-next-line boundaries/element-types
 import { TYPES } from '@/infrastructure/ioc/types';
 
-import { Result, ok, error as resultError, isError } from '@/shared/result';
+
 
 import { AgentInteractionService } from './agent-interaction.service';
 import { AgentStateService } from './agent-state.service';
@@ -58,19 +58,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
 
     this.logger.info(`Processing Job ID: ${jobId.value} with Agent ID: ${agentId}`, { jobId: jobId.value, agentId });
 
-    const agentFetchResult = await this._fetchAgent(agentId, job);
-    if (isError(agentFetchResult)) {
-        const appError: ApplicationError = agentFetchResult.error;
-        const errorMessage = appError.message || `Failed to fetch agent ${String(agentId)}`;
-        this.logger.error(
-            `[GenericAgentExecutor] Critical error fetching agent ${String(agentId)}: ${errorMessage}`,
-            appError.cause,
-            { component: 'GenericAgentExecutor', operation: '_fetchAgent', agentId: String(agentId), jobId: jobId.value }
-        );
-        job.addLog(`Critical error fetching agent: ${errorMessage}`, 'ERROR');
-        throw appError;
-    }
-    const agent = agentFetchResult.value;
+    const agent = await this._fetchAgent(agentId, job);
 
     const executionState = this.agentStateService.initializeExecutionState(job, agent);
 

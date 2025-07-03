@@ -76,9 +76,9 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
 8.  **No Classes With More Than Two Instance Variables.**
     *   **Intent:** A very strict rule to promote high cohesion and enforce SRP. Classes with many instance variables might be doing too much or could have their variables grouped into meaningful domain objects.
     *   **Application:** Focus on whether the instance variables represent a cohesive set of responsibilities. If a class's dependencies seem to serve multiple distinct high-level purposes, consider splitting the class.
-9.  **No Getters/Setters/Properties (for direct state access/mutation).**
-    *   **Intent:** Objects should expose behavior ("Tell, Don't Ask") rather than just raw data. State changes should occur as side effects of behavior methods.
-    *   **Application:** Entities may have public `props` or individual getters, which is common for data-centric entities that need to be serialized/deserialized or read by other layers. They should also have behavioral methods for state transitions. The goal is to ensure that *business rules* related to state changes are encapsulated in methods, not handled by external clients setting properties. Avoid public setters where a behavioral method is more appropriate. DTOs and configuration objects are primarily data containers and will naturally have properties.
+9.  **No Getters/Setters/Properties (for direct state access/mutation), except for public `readonly` properties/getters for data access.**
+    *   **Intent:** Objects should expose behavior ("Tell, Don't Ask") rather than just raw data. State changes should occur as side effects of behavior methods. Public `readonly` properties/getters are allowed for data access, ensuring immutability and clear separation of concerns.
+    *   **Application:** Entities and Value Objects may expose their internal state via public `readonly` properties or `get` accessors for data retrieval. They should also have behavioral methods for state transitions. The goal is to ensure that *business rules* related to state changes are encapsulated in methods, not handled by external clients setting properties. Avoid public setters where a behavioral method is more appropriate. DTOs and configuration objects are primarily data containers and will naturally have properties.
 
 #### 2.2.3. Other Design and Coding Principles (SOLID, DRY, KISS, YAGNI)
 

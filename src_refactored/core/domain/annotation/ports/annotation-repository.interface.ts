@@ -69,7 +69,7 @@ export interface IAnnotationRepository {
   search(
     filters: Partial<AnnotationSearchFilters>,
     pagination: PaginationOptions,
-  ): Promise<Result<PaginatedAnnotationsResult, DomainError>>;
+  ): Promise<PaginatedAnnotationsResult>;
 }
 
 export const IAnnotationRepositoryToken = Symbol('IAnnotationRepository');

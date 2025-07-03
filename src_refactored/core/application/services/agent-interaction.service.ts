@@ -10,7 +10,7 @@ import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 import { ILLMAdapter, ILLMAdapterToken } from '@/core/ports/adapters/llm-adapter.interface';
 import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 
-import { isError } from '@/shared/result';
+
 
 interface ExecutionState {
   goalAchieved: boolean;
@@ -48,21 +48,11 @@ export class AgentInteractionService {
     job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id.value} (attempt ${job.attemptsMade + 1})`, 'DEBUG');
     // TODO: Consider how to log the detailed message content if necessary, perhaps via logger.debug directly.
 
-    const llmGenerationResult = await this.llmAdapter.generateText(conversationMessages, {
+    const llmGeneration = await this.llmAdapter.generateText(conversationMessages, {
       temperature: agent.temperature.value,
     });
 
-    if (isError(llmGenerationResult)) {
-      const llmError = llmGenerationResult.error;
-      const errorMessage = `LLM generation failed in iteration ${state.iterations}. Error: ${llmError.message}`;
-      const jobIdVo: JobIdVO = job.id;
-      this.logger.error(errorMessage, llmError, { jobId: jobIdVo.value });
-      const historyEntry: ExecutionHistoryEntry = { timestamp: new Date(), type: 'llm_error', name: 'LLM Generation', error: llmError.message };
-      job.addExecutionHistoryEntry(historyEntry);
-      throw new ApplicationError(errorMessage, llmError);
-    }
-
-    state.assistantMessage = llmGenerationResult.value;
+    state.assistantMessage = llmGeneration;
     state.llmResponseText = state.assistantMessage.content || '';
     const currentJobIdVal = job.id.value;
     this.logger.info(
