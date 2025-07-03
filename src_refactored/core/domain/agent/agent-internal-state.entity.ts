@@ -112,7 +112,7 @@ export class AgentInternalState extends AbstractEntity<AgentId, InternalAgentInt
     if (!(other instanceof AgentInternalState)) {
       return false;
     }
-    return this.id.equals(other.id) &&
+    return this.id.value.equals(other.id.value) &&
            this.currentProjectId?.equals(other.currentProjectId) &&
            this.currentGoal?.equals(other.currentGoal) &&
            this.generalNotes.equals(other.generalNotes);

@@ -52,19 +52,17 @@ export class GenericAgentExecutor implements IAgentExecutor {
   public async process(
     job: JobEntity<AgentExecutionPayload, unknown>
   ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> {
-    const jobPayload = job.payload;
-    const agentId = jobPayload.agentId;
-    const jobId = job.id;
+    const jobId = job.id.value;
 
-    this.logger.info(`Processing Job ID: ${jobId.value} with Agent ID: ${agentId}`, { jobId: jobId.value, agentId });
+    this.logger.info(`Processing Job ID: ${jobId} with Agent ID: ${agentId}`, { jobId, agentId });
 
     const agent = await this._fetchAgent(agentId, job);
 
     const executionState = this.agentStateService.initializeExecutionState(job, agent);
 
-    this.logger.info(`Job ID: ${jobId.value} processing attempt: ${job.attemptsMade}`);
+    this.logger.info(`Job ID: ${jobId} processing attempt: ${job.getAttemptsMade()}`);
     job.updateProgress(10);
-    this.logger.info(`Max iterations for Job ID: ${jobId.value} set to ${executionState.maxIterations}`);
+    this.logger.info(`Max iterations for Job ID: ${jobId} set to ${executionState.maxIterations}`);
 
     await this._executionLoop(job, agent, executionState);
 
@@ -113,33 +111,17 @@ export class GenericAgentExecutor implements IAgentExecutor {
     return false;
   }
 
-  private async _fetchAgent(agentIdString: string, job: JobEntity<AgentExecutionPayload, unknown>): Promise<Result<Agent, ApplicationError>> {
-    try {
-      const agentIdVo = AgentId.fromString(agentIdString);
-      const agentResult = await this.agentRepository.findById(agentIdVo);
+  private async _fetchAgent(agentIdString: string, job: JobEntity<AgentExecutionPayload, unknown>): Promise<Agent> {
+    const agentIdVo = AgentId.fromString(agentIdString);
+    const agent = await this.agentRepository.findById(agentIdVo);
 
-      if (isError(agentResult)) {
-        const message = `Error fetching agent ${agentIdString} from repository.`;
-        const cause = agentResult.error instanceof Error ? agentResult.error : new Error(String(agentResult.error));
-        this.logger.error(message, cause, { additionalContext: "Agent repository findById error" });
-        job.addLog(message, 'ERROR');
-        return resultError(new ApplicationError(message, cause));
-      }
-
-      if (!agentResult.value) {
-        const message = `Agent with ID ${agentIdString} not found.`;
-        this.logger.error(message);
-        job.addLog(message, 'ERROR');
-        return resultError(new ApplicationError(message));
-      }
-      return ok(agentResult.value);
-    } catch (caughtError) {
-      const message = `Invalid Agent ID format for ${agentIdString}.`;
-      const err = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
-      this.logger.error(message, err, { additionalContext: "Agent ID format error" });
+    if (!agent) {
+      const message = `Agent with ID ${agentIdString} not found.`;
+      this.logger.error(message);
       job.addLog(message, 'ERROR');
-      return resultError(new ApplicationError(message, err));
+      throw new ApplicationError(message);
     }
+    return agent;
   }
 
   private _constructFinalResult(
@@ -193,6 +175,5 @@ export class GenericAgentExecutor implements IAgentExecutor {
   }
 
   private _getSerializableHistory(job: JobEntity<AgentExecutionPayload, unknown>) {
-    return job.conversationHistory.toPersistence().entries;
+    return job.getConversationHistory().toPersistence().entries;
   }
-}

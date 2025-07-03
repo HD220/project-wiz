@@ -1,15 +1,6 @@
-import { Agent } from '@/core/domain/agent/agent.entity';
-// Corrected path
-import { DomainError } from '@/core/domain/common/errors';
-// Corrected type
+
 import { AgentExecutionPayload, AgentExecutorResult, SuccessfulAgentOutput } from '@/core/domain/job/job-processing.types';
-// Corrected type
 import { JobEntity } from '@/core/domain/job/job.entity';
-
-
-import { ApplicationError } from '@/application/common/errors';
-
-
 
 /**
  * @interface IAgentExecutor
@@ -23,10 +14,8 @@ export interface IAgentExecutor {
    * tool invocations, history management, and state updates for the job.
    *
    * @param {JobEntity} job - The job entity to be processed.
-   * @param {Agent} agent - The agent entity that will process the job.
-   * @returns {Promise<Result<JobProcessingOutput, DomainError | ApplicationError>>}
-   *          A promise that resolves with a Result object.
-   *          On success, it contains the JobProcessingOutput.
+   * @returns {Promise<AgentExecutorResult<SuccessfulAgentOutput>>}
+   *          A promise that resolves with the AgentExecutorResult.
    *          Errors are expected to be thrown.
    */
   process(

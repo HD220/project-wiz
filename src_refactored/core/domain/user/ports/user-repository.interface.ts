@@ -1,20 +1,13 @@
-import { DomainError } from "@/domain/common/errors";
-
-import { Result } from "../../../../shared/result";
 import { User } from "../user.entity";
 import { UserEmail } from "../value-objects/user-email.vo";
 import { UserId } from "../value-objects/user-id.vo";
 import { UserUsername } from "../value-objects/user-username.vo";
 
 export interface IUserRepository {
-  save(user: User): Promise<Result<User, DomainError>>;
-  findById(id: UserId): Promise<Result<User | null, DomainError>>;
-  findByEmail(email: UserEmail): Promise<Result<User | null, DomainError>>;
-  findByUsername(
-    username: UserUsername
-  ): Promise<Result<User | null, DomainError>>;
-  listAll(): Promise<Result<User[], DomainError>>;
-  delete(id: UserId): Promise<Result<void, DomainError>>;
+  save(user: User): Promise<User>;
+  findById(id: UserId): Promise<User | null>;
+  findByEmail(email: UserEmail): Promise<User | null>;
+  findByUsername(username: UserUsername): Promise<User | null>;
+  listAll(): Promise<User[]>;
+  delete(id: UserId): Promise<void>;
 }
-
-export const IUserRepositoryToken = Symbol("IUserRepository");

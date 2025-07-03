@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { LLMError } from "@/domain/common/errors";
 
-import { Result } from "../../../shared/result";
+import { IUseCaseResponse } from "@/shared/application/use-case-response.dto";
 
 import {
   LLMGenerationOptions,
@@ -13,18 +13,18 @@ export interface ILLMAdapter {
   generateText(
     messages: LanguageModelMessage[],
     options?: LLMGenerationOptions
-  ): Promise<Result<LanguageModelMessage, LLMError>>;
+  ): Promise<IUseCaseResponse<LanguageModelMessage, LLMError>>;
 
   generateStructuredOutput<S extends z.ZodTypeAny>(
     prompt: string,
     schema: S,
     options?: LLMGenerationOptions
-  ): Promise<Result<z.infer<S>, LLMError>>;
+  ): Promise<IUseCaseResponse<z.infer<S>, LLMError>>;
 
   streamText?(
     prompt: string,
     options?: LLMGenerationOptions
-  ): AsyncGenerator<Result<string, LLMError>>;
+  ): AsyncGenerator<IUseCaseResponse<string, LLMError>>;
 }
 
 export const ILLMAdapterToken = Symbol("ILLMAdapter");

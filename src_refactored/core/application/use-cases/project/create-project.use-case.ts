@@ -1,125 +1,76 @@
-import { injectable, inject } from 'inversify';
-import { ZodError } from 'zod'; // For ZodError type
+import { injectable, inject } from "inversify";
+import { ZodError } from "zod";
 
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
-// Import DomainError, ValueError, EntityError from domain/common/errors
-import { DomainError, ValueError, EntityError } from '@/core/domain/common/errors';
+import { PROJECT_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
+import { IUseCase } from "@/core/application/common/ports/use-case.interface";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
+import { Project, ProjectProps } from "@/core/domain/project/project.entity";
+import { ProjectDescription } from "@/core/domain/project/value-objects/project-description.vo";
+import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
+import { ProjectName } from "@/core/domain/project/value-objects/project-name.vo";
 
-import { IProjectRepository } from '@/domain/project/ports/project-repository.interface'; // Removed ProjectRepositoryToken
-// Use Project and ProjectConstructorProps from project.entity
-import { Project, ProjectProps } from '@/domain/project/project.entity';
-import { ProjectDescription } from '@/domain/project/value-objects/project-description.vo';
-import { ProjectId } from '@/domain/project/value-objects/project-id.vo';
-import { ProjectName } from '@/domain/project/value-objects/project-name.vo';
+import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/use-case-response.dto";
 
-// Import ApplicationError and ApplicationValidationError from application/common/errors
-import { ApplicationError, ApplicationValidationError } from '@/application/common/errors';
-import { IUseCase } from '@/application/common/ports/use-case.interface';
 
-import { TYPES } from '@/infrastructure/ioc/types'; // For IoC token
 
-import { Result, ok, error as resultError, isError } from '@/shared/result';
 
-// Use schema types directly
-import { CreateProjectUseCaseInput, CreateProjectUseCaseOutput, CreateProjectInputSchema } from './create-project.schema';
+import { CreateProjectUseCaseInput, CreateProjectUseCaseOutput, CreateProjectInputSchema } from "./create-project.schema";
 
 @injectable()
-export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput, Promise<Result<CreateProjectUseCaseOutput, DomainError | ApplicationValidationError>>> {
+export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput, CreateProjectUseCaseOutput> {
   constructor(
-    @inject(TYPES.IProjectRepository) private readonly projectRepository: IProjectRepository, // Use IoC Token
+    @inject(PROJECT_REPOSITORY_INTERFACE_TYPE) private readonly projectRepository: IProjectRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  async execute(input: CreateProjectUseCaseInput): Promise<Result<CreateProjectUseCaseOutput, DomainError | ApplicationValidationError>> {
+  async execute(input: CreateProjectUseCaseInput): Promise<IUseCaseResponse<CreateProjectUseCaseOutput>> {
     this.logger.info(`[CreateProjectUseCase] Attempting to create project with name: ${input.name}`);
 
-    const validationResult = this._validateInput(input); // Returns Result<CreateProjectUseCaseInput, ApplicationValidationError>
-    if (isError(validationResult)) {
-      return resultError(validationResult.error);
-    }
-    const validatedInput = validationResult.value;
+    const validatedInput = this._validateInput(input);
 
-    try {
-      const projectEntityResult = this._createProjectEntity(validatedInput);
-      if (isError(projectEntityResult)) {
-        return resultError(projectEntityResult.error);
-      }
-      const projectEntity = projectEntityResult.value;
+    const projectEntity = this._createProjectEntity(validatedInput);
 
-      const saveResult = await this.projectRepository.save(projectEntity);
-      if (isError(saveResult)) {
-        this.logger.error('[CreateProjectUseCase] Failed to save project to repository', saveResult.error);
-        return resultError(saveResult.error);
-      }
+    const savedProject = await this.projectRepository.save(projectEntity);
 
-      this.logger.info(`[CreateProjectUseCase] Project created successfully: ${projectEntity.id.value}`); // Use id()
-      return ok(this._mapToOutput(projectEntity));
-
-    } catch (caughtError: unknown) {
-      const errorToLog = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
-      this.logger.error(
-        '[CreateProjectUseCase] Unexpected error while creating project',
-        { meta: { error: errorToLog, useCase: 'CreateProjectUseCase', input } }
-      );
-      return resultError(new ApplicationError(`An unexpected error occurred: ${errorToLog.message}`, errorToLog));
-    }
+    this.logger.info(`[CreateProjectUseCase] Project created successfully: ${savedProject.id.value()}`);
+    return successUseCaseResponse(this._mapToOutput(savedProject));
   }
 
-  private _validateInput(input: CreateProjectUseCaseInput): Result<CreateProjectUseCaseInput, ApplicationValidationError> {
+  private _validateInput(input: CreateProjectUseCaseInput): CreateProjectUseCaseInput {
     const validationResult = CreateProjectInputSchema.safeParse(input);
     if (!validationResult.success) {
       const errorMessage = 'Invalid input for CreateProjectUseCase';
-      // Log the ZodError directly for more details if needed by the logger
       this.logger.error(
         `[CreateProjectUseCase] ${errorMessage}`,
         { meta: { error: validationResult.error, details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input } }
       );
-      return resultError(new ApplicationValidationError(errorMessage, validationResult.error.flatten().fieldErrors));
+      throw new ZodError(validationResult.error.errors);
     }
-    return ok(validationResult.data);
+    return validationResult.data;
   }
 
-  private _createProjectEntity(validatedInput: CreateProjectUseCaseInput): Result<Project, DomainError> {
-    try {
-      const projectName = ProjectName.create(validatedInput.name);
-      let projectDescription: ProjectDescription | null = null;
+  private _createProjectEntity(validatedInput: CreateProjectUseCaseInput): Project {
+    const projectName = ProjectName.create(validatedInput.name);
+    let projectDescription: ProjectDescription | null = null;
 
-      if (validatedInput.description && validatedInput.description.trim() !== "") {
-        projectDescription = ProjectDescription.create(validatedInput.description);
-      }
-
-      const projectProps: ProjectProps = {
-        id: ProjectId.generate(),
-        name: projectName,
-        description: projectDescription,
-      };
-
-      const projectEntity = Project.create(projectProps);
-      return ok(projectEntity);
-
-    } catch (errorCreatingEntity: unknown) {
-      const errorToLog = errorCreatingEntity instanceof Error ? errorCreatingEntity : new Error(String(errorCreatingEntity));
-      if (errorCreatingEntity instanceof DomainError || errorCreatingEntity instanceof ValueError || errorCreatingEntity instanceof EntityError) {
-        this.logger.warn(
-          `[CreateProjectUseCase] Domain error creating project entity parts: ${errorToLog.message}`,
-          { details: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
-        );
-        return resultError(errorCreatingEntity as DomainError | ValueError | EntityError);
-      }
-      this.logger.error(
-        `[CreateProjectUseCase] Unexpected error creating project entity parts: ${errorToLog.message}`,
-        { details: { error: errorToLog, useCase: 'CreateProjectUseCase', method: '_createProjectEntity', input: validatedInput } }
-      );
-      return resultError(new DomainError(`Unexpected error creating project entity parts: ${errorToLog.message}`, errorToLog));
+    if (validatedInput.description && validatedInput.description.trim() !== "") {
+      projectDescription = ProjectDescription.create(validatedInput.description);
     }
+
+    const projectProps: ProjectProps = {
+      id: ProjectId.generate(),
+      name: projectName,
+      description: projectDescription,
+    };
+
+    const projectEntity = Project.create(projectProps);
+    return projectEntity;
   }
 
   private _mapToOutput(projectEntity: Project): CreateProjectUseCaseOutput {
-    // Assuming CreateProjectUseCaseOutput expects projectId string
-    // and entity's id(), name(), description() return VOs with a value() method.
-    // Also assuming entity's createdAt, updatedAt are Date objects.
     return {
-      projectId: projectEntity.id.value,
+      projectId: projectEntity.id.value(),
     };
   }
 }

@@ -1,47 +1,41 @@
 import { injectable } from "inversify";
 
+import { NotFoundError } from "@/core/domain/common/errors";
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { Project } from "@/core/domain/project/project.entity";
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
-
-import { DomainError, NotFoundError } from "@/domain/common/errors";
-
-import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
 export class InMemoryProjectRepository implements IProjectRepository {
   private readonly projects: Map<string, Project> = new Map();
 
-  async save(project: Project): Promise<Result<Project, DomainError>> {
+  async save(project: Project): Promise<Project> {
     this.projects.set(project.id.value, project);
-    return Ok(project);
+    return project;
   }
 
-  async findById(id: ProjectId): Promise<Result<Project | null, DomainError>> {
+  async findById(id: ProjectId): Promise<Project | null> {
     const project = this.projects.get(id.value);
-    return Ok(project || null);
+    return project || null;
   }
 
-  async findByName(name: string): Promise<Result<Project | null, DomainError>> {
+  async findByName(name: string): Promise<Project | null> {
     for (const project of this.projects.values()) {
       if (project.name.value === name) {
-        return Ok(project);
+        return project;
       }
     }
-    return Ok(null);
+    return null;
   }
 
-  async listAll(): Promise<Result<Project[], DomainError>> {
-    return Ok(Array.from(this.projects.values()));
+  async listAll(): Promise<Project[]> {
+    return Array.from(this.projects.values());
   }
 
-  async delete(
-    id: ProjectId
-  ): Promise<Result<void, DomainError | NotFoundError>> {
+  async delete(id: ProjectId): Promise<void> {
     if (!this.projects.has(id.value)) {
-      return Err(new NotFoundError(`Project with ID ${id.value} not found.`));
+      throw new NotFoundError("Project", id.value);
     }
     this.projects.delete(id.value);
-    return Ok(undefined);
   }
 }

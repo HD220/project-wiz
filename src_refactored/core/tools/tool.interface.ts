@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ToolError } from "@/domain/common/errors";
 
-import { Result } from "../../shared/result";
+import { IUseCaseResponse } from "../../shared/application/use-case-response.dto";
 
 export interface IToolExecutionContext {
   agentId?: string;
@@ -21,7 +21,7 @@ export interface IAgentTool<
   execute(
     params: z.infer<InputSchema>,
     executionContext?: IToolExecutionContext
-  ): Promise<Result<TOutput, ToolError>>;
+  ): Promise<IUseCaseResponse<TOutput, ToolError>>;
 }
 
 export const IAgentToolToken = Symbol("IAgentTool");

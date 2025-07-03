@@ -18,6 +18,8 @@ import type {
   UpdatePersonaTemplateResponse,
 } from "@/shared/ipc-types";
 
+import { usePersonaToolManagement } from "../hooks/usePersonaToolManagement";
+
 import { PersonaBackstoryField } from "./fields/PersonaBackstoryField";
 import { PersonaGoalField } from "./fields/PersonaGoalField";
 import { PersonaNameField } from "./fields/PersonaNameField";
@@ -70,6 +72,8 @@ export function PersonaTemplateForm({
     },
   });
 
+  const { currentToolInput, setCurrentToolInput, handleAddTool, handleRemoveTool } = usePersonaToolManagement(form);
+
   const createTemplateMutation = useIpcMutation<
     CreatePersonaTemplateRequest,
     CreatePersonaTemplateResponse
@@ -98,7 +102,7 @@ export function PersonaTemplateForm({
     onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success(
-          `Template "${response.data.name}" atualizado com sucesso!`
+          `Template "${response.data.name}" atualizado com sucesso!`,
         );
         onSuccess?.(response.data);
         router.invalidate();
@@ -120,29 +124,6 @@ export function PersonaTemplateForm({
     } else {
       createTemplateMutation.mutate(data);
     }
-  };
-
-  const [currentToolInput, setCurrentToolInput] = React.useState("");
-
-  const handleAddTool = () => {
-    const toolValue = currentToolInput.trim().toLowerCase();
-    if (toolValue && !form.getValues("toolNames")?.includes(toolValue)) {
-      const currentTools = form.getValues("toolNames") || [];
-      form.setValue("toolNames", [...currentTools, toolValue], {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-      setCurrentToolInput("");
-    }
-  };
-
-  const handleRemoveTool = (toolToRemove: string) => {
-    const currentTools = form.getValues("toolNames") || [];
-    form.setValue(
-      "toolNames",
-      currentTools.filter((tool) => tool !== toolToRemove),
-      { shouldValidate: true, shouldDirty: true }
-    );
   };
 
   const effectiveSubmitButtonText = isEditing
@@ -176,3 +157,4 @@ export function PersonaTemplateForm({
     </Form>
   );
 }
+

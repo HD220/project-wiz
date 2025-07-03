@@ -23,15 +23,25 @@ This document serves as a running log of observations, challenges, and strategie
 ## CoreError Constructor Refactoring
 
 - **Problem:** The original `CoreError` constructor had a flat signature (`message`, `code`, `details`, `cause`), which was inconsistent with how `DomainError` and its subclasses were passing options. This led to `TS2345` errors when trying to pass an `options` object to `super()`.
-- **Solution:** Refactored `CoreError` to accept an `options` object (`{ code?: string; details?: any; cause?: Error }`) as its second argument. All direct subclasses now call `super(message, options)` or `super(message, { code: '...', details: { ... }, cause })` to ensure consistency and correct type propagation. This resolves the `TS2345` errors related to `CoreError` constructor calls.
+- **Solution:** Refactored `CoreError` to accept an `options` object (`{ code?: string; details?: unknown; cause?: Error }`) as its second argument. All direct subclasses now call `super(message, options)` or `super(message, { code: '...', details: { ... }, cause })` to ensure consistency and correct type propagation. This resolves the `TS2345` errors related to `CoreError` constructor calls.
 
 ## `value()` method vs `value` property
 
 - **Problem:** Initially, Value Objects had a `value()` method to access their underlying value. After refactoring to `get value()` accessors, some parts of the codebase were still calling `value()` as a method.
 - **Solution:** Systematically replaced all instances of `.value()` with `.value` in the codebase.
 
-## `Result` Type Removal
+## `Result` Type Removal and Clean Architecture Adherence
 
-- **Problem:** The codebase heavily relied on the `Result` type for error handling, which is being replaced by `IUseCaseResponse` and direct error throwing.
-- **Solution:** Systematically replaced `Result` with `IUseCaseResponse` in all Use Cases, Services, and Repository interfaces. This involved updating import statements, method signatures, and error handling logic to throw `CoreError` subtypes directly and return `successUseCaseResponse` or `errorUseCaseResponse`.
-- **Observation:** This refactoring often leads to `no-undef` ESLint errors and `boundaries/element-types` violations due to incorrect import paths or lingering `Result` related code. These are being addressed iteratively.
+- **Problem:** The codebase heavily relied on the `Result` type for error handling, which was being replaced by `IUseCaseResponse` and direct error throwing. My initial approach incorrectly applied `IUseCaseResponse` to repository interfaces, violating Clean Architecture's Dependency Rule (Domain should not depend on Application).
+- **Observation:** This was a critical misinterpretation of Clean Architecture. Repository interfaces (Domain Layer) should return domain entities/primitives directly or `void`, and *throw* exceptions (subclasses of `CoreError`) on failure. The `IUseCaseResponse` (Application Layer) is a DTO for the use case boundary, handled by the `UseCaseWrapper` decorator, which catches exceptions thrown by the domain/infrastructure layers and formats them into the standardized response.
+- **Solution:**
+    1.  **Repository Interfaces (Domain Layer):** Reverted to returning domain entities/primitives directly (`Promise<Entity>`, `Promise<Entity | null>`, `Promise<void>`, `Promise<Entity[]>`).
+    2.  **Repository Implementations (Infrastructure Layer):** Updated to match the corrected interfaces, throwing `CoreError` subtypes (e.g., `NotFoundError`) on failure instead of returning `Result` or `IUseCaseResponse`.
+    3.  **Use Cases (Application Layer):** Updated to call repository methods expecting direct returns or thrown exceptions. Removed internal `try/catch` blocks for expected domain/infrastructure errors, allowing the `UseCaseWrapper` to handle them. Use cases now focus solely on business logic and throw `ZodError` (for input validation) or `CoreError` subtypes (for business/domain errors).
+- **Lesson Learned:** Strict adherence to Clean Architecture's Dependency Rule is paramount. Domain and Application layers must remain independent of outer layers. The `Result` type, while useful in some contexts, was being misused in a way that blurred architectural boundaries. The `UseCaseWrapper` is key to maintaining a clean use case interface while centralizing error handling and response formatting.
+
+## ESLint and TypeScript Compilation Issues
+
+- **Problem:** Frequent ESLint errors (`import/no-unresolved`, `boundaries/element-types`, `no-undef`, `no-inline-comments`, `no-empty-object-type`, `max-lines`, `max-lines-per-function`) and TypeScript compilation errors (`TS2307: Cannot find module`, `TS2339: Property 'props' does not exist`) during refactoring.
+- **Observation:** These errors often indicate architectural violations (e.g., `boundaries/element-types` when Application imports from Infrastructure) or inconsistencies in code style/structure. Single-file compilation issues are often misleading; full project compilation is the authoritative check.
+- **Strategy:** Address errors systematically, prioritizing architectural violations and critical compilation failures. Use `npx eslint --fix` and `npx tsc --noEmit` regularly. For `max-lines` issues, plan for a dedicated refactoring phase to break down large files/functions into smaller, more cohesive units, adhering to Object Calisthenics principles.

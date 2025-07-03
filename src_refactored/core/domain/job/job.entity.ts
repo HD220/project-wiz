@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
 
 import { EntityError } from "@/domain/common/errors";
@@ -9,6 +7,7 @@ import { JobStateMutator } from "./job-state.mutator";
 import {
   JobStatus,
   JobEntityProps,
+  JobEntityPropsSchema,
 } from "./job.types";
 import {
   ActivityHistoryVO,
@@ -17,31 +16,7 @@ import {
 import { JobIdVO } from "./value-objects/job-id.vo";
 import { IJobOptions, JobOptionsVO } from "./value-objects/job-options.vo";
 
-const JobEntityPropsSchema = z.object({
-  id: z.custom<JobIdVO>((val) => val instanceof JobIdVO),
-  queueName: z.string(),
-  name: z.string(),
-  payload: z.any(),
-  options: z.custom<JobOptionsVO>((val) => val instanceof JobOptionsVO),
-  status: z.nativeEnum(JobStatus),
-  attemptsMade: z.number().int().min(0),
-  progress: z.union([z.number(), z.object({})]),
-  logs: z.array(z.object({
-    message: z.string(),
-    level: z.string(),
-    timestamp: z.date(),
-  })),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  delayUntil: z.date().optional().nullable(),
-  finishedAt: z.date().optional().nullable(),
-  processedAt: z.date().optional().nullable(),
-  failedReason: z.string().optional().nullable(),
-  stacktrace: z.array(z.string()).optional().nullable(),
-  returnvalue: z.any().optional().nullable(),
-  workerId: z.string().optional().nullable(),
-  lockUntil: z.date().optional().nullable(),
-});
+
 
 interface InternalJobEntityProps<P, R> extends EntityProps<JobIdVO> {
   queueName: string;
@@ -92,6 +67,25 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
     payload: P;
     options?: IJobOptions;
   }): JobEntity<P, R> {
+    const props = JobEntity._createProps(params);
+
+    const validationResult = JobEntityPropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid JobEntity props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
+    return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
+  }
+
+  private static _createProps<P, R>(params: {
+    id?: JobIdVO;
+    queueName: string;
+    name: string;
+    payload: P;
+    options?: IJobOptions;
+  }): JobEntityProps<P, R> {
     const jobOptions = JobOptionsVO.create(params.options);
     const idFromOptions = jobOptions.jobId;
     const finalJobId =
@@ -99,7 +93,7 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
       (idFromOptions ? JobIdVO.create(idFromOptions) : JobIdVO.create());
     const now = new Date();
 
-    const props: JobEntityProps<P, R> = {
+    return {
       id: finalJobId,
       queueName: params.queueName,
       name: params.name,
@@ -113,15 +107,6 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
       updatedAt: now,
       delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : undefined,
     };
-
-    const validationResult = JobEntityPropsSchema.safeParse(props);
-    if (!validationResult.success) {
-      throw new EntityError("Invalid JobEntity props.", {
-        details: validationResult.error.flatten().fieldErrors,
-      });
-    }
-
-    return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
   }
 
   get maxAttempts(): number {

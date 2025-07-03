@@ -9,7 +9,9 @@ export const ANNOTATION_REPOSITORY_INTERFACE_TYPE = Symbol.for('IAnnotationRepos
 // export const USER_REPOSITORY_INTERFACE_TYPE = Symbol.for('IUserRepository');
 // export const PROJECT_REPOSITORY_INTERFACE_TYPE = Symbol.for('IProjectRepository');
 // ... and so on
-export const LOGGER_INTERFACE_TYPE_APPLICATION = Symbol.for('ILoggerApplication'); // To differentiate if necessary, or reuse common
+// To differentiate if necessary, or reuse common
+export const LOGGER_INTERFACE_TYPE_APPLICATION = Symbol.for('ILoggerApplication');
+// To differentiate if necessary, or reuse common
 export const MEMORY_REPOSITORY_INTERFACE_TYPE = Symbol.for('IMemoryRepository');
 export const LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE = Symbol.for('ILLMProviderConfigRepository');
 export const AGENT_REPOSITORY_INTERFACE_TYPE = Symbol.for('IAgentRepository');

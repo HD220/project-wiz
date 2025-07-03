@@ -1,61 +1,53 @@
 import { injectable } from "inversify";
 
+import { NotFoundError } from "@/core/domain/common/errors";
 import { IUserRepository } from "@/core/domain/user/ports/user-repository.interface";
 import { User } from "@/core/domain/user/user.entity";
 import { UserEmail } from "@/core/domain/user/value-objects/user-email.vo";
 import { UserId } from "@/core/domain/user/value-objects/user-id.vo";
 import { UserUsername } from "@/core/domain/user/value-objects/user-username.vo";
 
-import { DomainError, NotFoundError } from "@/domain/common/errors";
-
-import { Result, Ok, Err } from "@/shared/result";
 
 @injectable()
 export class InMemoryUserRepository implements IUserRepository {
   private readonly users: Map<string, User> = new Map();
 
-  async save(user: User): Promise<Result<User, DomainError>> {
+  async save(user: User): Promise<User> {
     this.users.set(user.id.value, user);
-    return Ok(user);
+    return user;
   }
 
-  async findById(id: UserId): Promise<Result<User | null, DomainError>> {
+  async findById(id: UserId): Promise<User | null> {
     const user = this.users.get(id.value);
-    return Ok(user || null);
+    return user || null;
   }
 
-  async findByEmail(
-    email: UserEmail
-  ): Promise<Result<User | null, DomainError>> {
+  async findByEmail(email: UserEmail): Promise<User | null> {
     for (const user of this.users.values()) {
-      if (user.email().equals(email)) {
-        return Ok(user);
+      if (user.email.equals(email)) {
+        return user;
       }
     }
-    return Ok(null);
+    return null;
   }
 
-  async findByUsername(
-    username: UserUsername
-  ): Promise<Result<User | null, DomainError>> {
+  async findByUsername(username: UserUsername): Promise<User | null> {
     for (const user of this.users.values()) {
-      if (user.username().equals(username)) {
-        // Assuming username() getter returns UserUsername VO
-        return Ok(user);
+      if (user.username.equals(username)) {
+        return user;
       }
     }
-    return Ok(null);
+    return null;
   }
 
-  async listAll(): Promise<Result<User[], DomainError>> {
-    return Ok(Array.from(this.users.values()));
+  async listAll(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
-  async delete(id: UserId): Promise<Result<void, DomainError | NotFoundError>> {
+  async delete(id: UserId): Promise<void> {
     if (!this.users.has(id.value)) {
-      return Err(new NotFoundError(`User with ID ${id.value} not found.`));
+      throw new NotFoundError("User", id.value);
     }
     this.users.delete(id.value);
-    return Ok(undefined);
   }
 }

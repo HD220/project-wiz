@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
 import { Agent } from '@/core/domain/agent/agent.entity';
-import { AgentExecutionPayload, JobProcessingOutput, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
+import { AgentExecutionPayload, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO, ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history.vo';
 import { LanguageModelMessage, LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
@@ -26,7 +26,7 @@ export class AgentStateService {
   ) {}
 
   public initializeExecutionState(job: JobEntity<AgentExecutionPayload, unknown>, agent: Agent): ExecutionState {
-    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.payload);
+    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.getPayload());
     return {
       goalAchieved: false,
       iterations: 0,
@@ -41,14 +41,14 @@ export class AgentStateService {
   }
 
   private _initializeHistories(job: JobEntity<AgentExecutionPayload, unknown>, jobPayload: AgentExecutionPayload): { currentActivityHistory: ActivityHistoryVO; currentExecutionHistory: ExecutionHistoryEntry[] } {
-    let activityHistory = job.conversationHistory;
-    if (activityHistory.length === 0) {
+    let activityHistory = job.getConversationHistory();
+    if (activityHistory.entries.length === 0) {
       const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.name}`;
       const userPromptEntry = ActivityHistoryEntryVO.create(ActivityEntryType.LLM_REQUEST, userPromptContent);
       job.addConversationEntry(userPromptEntry);
-      activityHistory = job.conversationHistory;
+      activityHistory = job.getConversationHistory();
     }
-    return { currentActivityHistory: activityHistory, currentExecutionHistory: [...job.executionHistory] };
+    return { currentActivityHistory: activityHistory, currentExecutionHistory: [...job.getExecutionHistory()] };
   }
 
   public checkGoalAchieved(state: ExecutionState): void {

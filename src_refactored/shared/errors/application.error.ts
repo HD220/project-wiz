@@ -19,8 +19,9 @@ import { CoreError } from './core.error';
 export class ApplicationError extends CoreError {
   constructor(
     message: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data
-    options?: { code?: string; details?: any; cause?: Error },
+     
+    // details can be any structured data
+    options?: { code?: string; details?: unknown; cause?: Error },
   ) {
     super(message, options);
     // Typically 'ApplicationError' or a subclass name.
@@ -45,8 +46,9 @@ export class ApplicationNotFoundError extends ApplicationError {
   constructor(
     resourceName: string,
     identifier?: string | number,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data
-    options?: { code?: string; details?: any; cause?: Error },
+     
+    // details can be any structured data
+    options?: { code?: string; details?: unknown; cause?: Error },
   ) {
     const message = identifier
       ? `Application resource '${resourceName}' with identifier '${identifier}' not found.`
@@ -82,12 +84,12 @@ export class ApplicationNotFoundError extends ApplicationError {
 export class ApplicationInputValidationError extends ApplicationError {
   constructor(
     message: string = 'Application input validation failed.',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- details can be any structured data, often ZodError.flatten()
-    options?: { code?: string; details?: any; cause?: Error },
+    options?: { code?: string; details?: unknown; cause?: Error },
   ) {
     super(message, {
       code: options?.code || 'APP_INPUT_VALIDATION_ERROR',
-      details: options?.details, // 'details' would often be ZodError.flatten()
+      // 'details' would often be ZodError.flatten()
+      details: options?.details,
       cause: options?.cause,
     });
     // CoreError constructor handles setting the name.

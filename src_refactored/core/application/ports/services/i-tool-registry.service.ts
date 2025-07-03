@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
+import { ApplicationError } from '@/core/application/common/errors';
 import { IAgentTool } from '@/core/tools/tool.interface';
 
-import { ApplicationError } from '@/application/common/errors';
 
 
 
@@ -30,8 +30,6 @@ export interface IToolRegistryService {
    * or dynamically.
    *
    * @param {IAgentTool} tool - The tool instance to register.
-   * @returns {Promise<Result<void, ApplicationError>>} A promise that resolves with
-   *          a Result. On success, it's void. On failure, it contains an ApplicationError.
    */
   registerTool(tool: IAgentTool<z.ZodTypeAny, unknown>): Promise<void>;
 
@@ -39,20 +37,14 @@ export interface IToolRegistryService {
    * Retrieves a tool by its unique name.
    *
    * @param {string} toolName - The unique name of the tool to retrieve.
-   * @returns {Promise<Result<IAgentTool<z.ZodTypeAny, unknown>, ToolNotFoundError | ApplicationError>>}
-   *          A promise that resolves with a Result.
-   *          On success, it contains the IAgentTool instance.
-   *          On failure, it contains a ToolNotFoundError or a generic ApplicationError.
+   * @returns {IAgentTool<z.ZodTypeAny, unknown> | undefined} The tool instance, or undefined if not found.
    */
-  getTool(toolName: string): Promise<Result<IAgentTool<z.ZodTypeAny, unknown>, ToolNotFoundError | ApplicationError>>;
+  getTool(toolName: string): IAgentTool<z.ZodTypeAny, unknown> | undefined;
 
   /**
    * Lists all tools currently registered.
    *
-   * @returns {Promise<Result<IAgentTool<z.ZodTypeAny, unknown>[], ApplicationError>>}
-   *          A promise that resolves with a Result.
-   *          On success, it contains an array of IAgentTool instances.
-   *          On failure, it contains an ApplicationError.
+   * @returns {IAgentTool<z.ZodTypeAny, unknown>[]} An array of IAgentTool instances.
    */
-  listTools(): Promise<IAgentTool<z.ZodTypeAny, unknown>[]>;
+  listTools(): IAgentTool<z.ZodTypeAny, unknown>[];
 }

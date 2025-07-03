@@ -1,8 +1,9 @@
 import React from "react";
 
-import { MarkdownRenderer } from "@/components/common/MarkdownRenderer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/ui/lib/utils";
+
+import { MessageAvatar } from "./MessageAvatar";
+import { MessageBubble } from "./MessageBubble";
 
 export interface ChatMessageSender {
   id: string;
@@ -14,17 +15,13 @@ export interface ChatMessage {
   id: string;
   sender: ChatMessageSender;
   content: string;
-  // Pode ser string formatada ou objeto Date
   timestamp: string | Date;
-  // Adicionado 'system'
   type?: "text" | "tool_call" | "tool_response" | "error" | "system";
-  // Para agrupar mensagens do mesmo sender
   isContinuation?: boolean;
 }
 
 interface MessageItemProps {
   message: ChatMessage;
-  // Para alinhar a mensagem
   isCurrentUser: boolean;
 }
 
@@ -39,7 +36,6 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
         })
       : message.timestamp;
 
-  // System messages might have a different layout
   if (message.type === "system") {
     return (
       <div className="py-2 px-4 text-center">
@@ -55,84 +51,32 @@ export function MessageItem({ message, isCurrentUser }: MessageItemProps) {
       className={cn(
         "flex items-end gap-2",
         isCurrentUser ? "justify-end" : "justify-start",
-        // Less margin if it's a continuation
-        message.isContinuation ? "mt-1" : "mt-3"
+        message.isContinuation ? "mt-1" : "mt-3",
       )}
     >
-      {!isCurrentUser && !message.isContinuation && (
-        <Avatar className="h-7 w-7">
-          <AvatarImage
-            src={message.sender.avatarUrl}
-            alt={message.sender.name}
-          />
-          <AvatarFallback>
-            {message.sender.name.substring(0, 1).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      {/* Spacer for alignment */}
-      {!isCurrentUser && message.isContinuation && (
-        <div className="w-7 h-7 flex-shrink-0" />
-      )}
-
-      <div
-        className={cn(
-          "max-w-[70%] p-2.5 rounded-lg shadow-sm",
-          isCurrentUser
-            ? "bg-sky-600 text-white rounded-br-none"
-            : "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-none",
-          message.type === "error"
-            ? "bg-red-100 dark:bg-red-800/50 border border-red-500/50"
-            : ""
-        )}
-      >
-        {!message.isContinuation && (
-          <p
-            className={cn(
-              "text-xs font-semibold mb-0.5",
-              isCurrentUser
-                ? "text-sky-100"
-                : "text-slate-600 dark:text-slate-300"
-            )}
-          >
-            {senderName}
-          </p>
-        )}
-        <MarkdownRenderer
-          content={message.content}
-          // Example of adjusting prose for chat: tighter paragraph margins
-          proseClassName="prose-p:my-0.5"
+      {!isCurrentUser && (
+        <MessageAvatar
+          sender={message.sender}
+          isCurrentUser={isCurrentUser}
+          isContinuation={message.isContinuation || false}
         />
-        {message.type === "error" && (
-          <span className="text-red-500 dark:text-red-400 ml-1 text-xs inline-block mt-0.5">
-            (Erro)
-          </span>
-        )}
-        <p
-          className={cn(
-            "text-xs mt-1 text-right",
-            isCurrentUser
-              ? "text-sky-200/80"
-              : "text-slate-400 dark:text-slate-500"
-          )}
-        >
-          {time}
-        </p>
-      </div>
-
-      {isCurrentUser && !message.isContinuation && (
-        <Avatar className="h-7 w-7">
-          {/* Assuming current user has no avatar or it's handled differently */}
-          <AvatarFallback className="bg-sky-600 text-white">
-            {/* Could be user initials if available */}
-            {message.sender.name.substring(0, 1).toUpperCase() || "U"}
-          </AvatarFallback>
-        </Avatar>
       )}
-      {/* Spacer for alignment */}
-      {isCurrentUser && message.isContinuation && (
-        <div className="w-7 h-7 flex-shrink-0" />
+
+      <MessageBubble
+        message={message}
+        isCurrentUser={isCurrentUser}
+        senderName={senderName}
+        time={time}
+      />
+
+      {isCurrentUser && (
+        <MessageAvatar
+          sender={message.sender}
+          isCurrentUser={isCurrentUser}
+          isContinuation={message.isContinuation || false}
+        />
       )}
     </div>
   );
 }
+

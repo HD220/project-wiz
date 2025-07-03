@@ -1,59 +1,65 @@
-import { injectable, inject } from 'inversify';
+import { injectable, inject } from "inversify";
 
-import { ANNOTATION_REPOSITORY_INTERFACE_TYPE } from '@/core/application/common/constants';
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+import { ANNOTATION_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
+import { IUseCase } from "@/core/application/common/ports/use-case.interface";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { IAnnotationRepository } from "@/core/domain/annotation/ports/annotation-repository.interface";
+import { AnnotationId } from "@/core/domain/annotation/value-objects/annotation-id.vo";
+import { AnnotationText } from "@/core/domain/annotation/value-objects/annotation-text.vo";
+import { NotFoundError } from "@/core/domain/common/errors";
 
-import { IAnnotationRepository } from '@/domain/annotation/ports/annotation-repository.interface';
-import { AnnotationId } from '@/domain/annotation/value-objects/annotation-id.vo';
-import { AnnotationText } from '@/domain/annotation/value-objects/annotation-text.vo';
-import { DomainError, ZodError, ValueError, NotFoundError } from '@/domain/common/errors';
-
-import { ApplicationError } from '@/application/common/errors'; // Adicionado para o catch
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-
-import { Result, ok, error, isError, isSuccess } from '@/shared/result'; // Adicionado isSuccess
+import {
+  IUseCaseResponse,
+  successUseCaseResponse,
+} from "@/shared/application/use-case-response.dto";
 
 import {
   SaveAnnotationUseCaseInput,
   SaveAnnotationUseCaseInputSchema,
   SaveAnnotationUseCaseOutput,
-} from './save-annotation.schema';
+} from "./save-annotation.schema";
 
 @injectable()
 export class SaveAnnotationUseCase
   implements
     IUseCase<
       SaveAnnotationUseCaseInput,
-      SaveAnnotationUseCaseOutput,
-      DomainError | ZodError | ValueError | NotFoundError | ApplicationError
+      SaveAnnotationUseCaseOutput
     >
 {
   constructor(
-    @inject(ANNOTATION_REPOSITORY_INTERFACE_TYPE) private readonly annotationRepository: IAnnotationRepository,
-    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
+    @inject(ANNOTATION_REPOSITORY_INTERFACE_TYPE)
+    private readonly annotationRepository: IAnnotationRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {}
 
   async execute(
-    input: SaveAnnotationUseCaseInput,
+    input: SaveAnnotationUseCaseInput
   ): Promise<IUseCaseResponse<SaveAnnotationUseCaseOutput>> {
     const validInput = SaveAnnotationUseCaseInputSchema.parse(input);
 
     const annotationId = AnnotationId.fromString(validInput.id!);
-    const existingAnnotation = await this.annotationRepository.findById(annotationId);
+    const existingAnnotation = await this.annotationRepository.findById(
+      annotationId
+    );
 
     if (!existingAnnotation) {
-      const notFoundErr = new NotFoundError('Annotation', validInput.id!); 
-      this.logger.warn(`[SaveAnnotationUseCase] ${notFoundErr.message}`, { error: notFoundErr, input: validInput });
+      const notFoundErr = new NotFoundError("Annotation", validInput.id!);
+      this.logger.warn(`[SaveAnnotationUseCase] ${notFoundErr.message}`,
+        { error: notFoundErr, input: validInput }
+      );
       throw notFoundErr;
     }
 
     const annotationEntity = existingAnnotation;
     annotationEntity.updateText(AnnotationText.create(validInput.text));
 
-    const finalAnnotation = await this.annotationRepository.save(annotationEntity);
+    const finalAnnotation = await this.annotationRepository.save(
+      annotationEntity
+    );
 
     return successUseCaseResponse({
-      annotationId: finalAnnotation.id.value,
+      annotationId: finalAnnotation.id.value(),
       createdAt: finalAnnotation.createdAt.toISOString(),
       updatedAt: finalAnnotation.updatedAt.toISOString(),
     });

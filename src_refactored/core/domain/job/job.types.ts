@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { JobIdVO } from "./value-objects/job-id.vo";
 import { IJobOptions, JobOptionsVO } from "./value-objects/job-options.vo";
 
@@ -37,6 +39,32 @@ export interface JobEntityProps<P = unknown, R = unknown> {
   failedReason?: string;
   stacktrace?: string[];
 }
+
+export const JobEntityPropsSchema = z.object({
+  id: z.custom<JobIdVO>((val) => val instanceof JobIdVO),
+  queueName: z.string(),
+  name: z.string(),
+  payload: z.any(),
+  options: z.custom<JobOptionsVO>((val) => val instanceof JobOptionsVO),
+  status: z.nativeEnum(JobStatus),
+  attemptsMade: z.number().int().min(0),
+  progress: z.union([z.number(), z.object({})]),
+  logs: z.array(z.object({
+    message: z.string(),
+    level: z.string(),
+    timestamp: z.date(),
+  })),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  delayUntil: z.date().optional().nullable(),
+  finishedAt: z.date().optional().nullable(),
+  processedAt: z.date().optional().nullable(),
+  failedReason: z.string().optional().nullable(),
+  stacktrace: z.array(z.string()).optional().nullable(),
+  returnvalue: z.any().optional().nullable(),
+  workerId: z.string().optional().nullable(),
+  lockUntil: z.date().optional().nullable(),
+});
 
 export type JobPersistenceData<P = unknown, R = unknown> = {
   id: string;

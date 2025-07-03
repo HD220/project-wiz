@@ -3,7 +3,8 @@ import * as fs from "fs/promises";
 import { injectable, inject } from "inversify";
 import { z, ZodAny } from "zod";
 
-import { ILogger } from "@/core/common/services/i-logger.service"; // Corrected import
+import { ILogger } from "@/core/common/services/i-logger.service";
+// Corrected import
 import { IAgentTool, IToolExecutionContext } from "@/core/tools/tool.interface";
 
 import { ToolError } from "@/domain/common/errors";
@@ -55,7 +56,8 @@ export class FileSystemTool implements IAgentTool<ZodAny, unknown> {
   });
 
   constructor(
-    @inject(TYPES.ILogger) private readonly logger: ILogger // Corrected token and type
+    @inject(TYPES.ILogger) private readonly logger: ILogger
+    // Corrected token and type
   ) {
     this.logger.info("[FileSystemTool] initialized");
   }

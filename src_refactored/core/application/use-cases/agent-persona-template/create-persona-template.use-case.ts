@@ -1,88 +1,66 @@
-// src_refactored/core/application/use-cases/agent-persona-template/create-persona-template.use-case.ts
-import { ZodError } from 'zod';
+import { injectable, inject } from "inversify";
 
-import { ILogger } from '@/core/common/services/i-logger.service';
+import { AGENT_PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
+import { IUseCase } from "@/core/application/common/ports/use-case.interface";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { AgentPersonaTemplate } from "@/core/domain/agent/agent-persona-template.vo";
+import { IAgentPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
+import { PersonaBackstory } from "@/core/domain/agent/value-objects/persona/persona-backstory.vo";
+import { PersonaGoal } from "@/core/domain/agent/value-objects/persona/persona-goal.vo";
+import { PersonaId } from "@/core/domain/agent/value-objects/persona/persona-id.vo";
+import { PersonaName } from "@/core/domain/agent/value-objects/persona/persona-name.vo";
+import { PersonaRole } from "@/core/domain/agent/value-objects/persona/persona-role.vo";
+import { ToolNames } from "@/core/domain/agent/value-objects/persona/tool-names.vo";
 
-import { AgentPersonaTemplate } from '@/domain/agent/agent-persona-template.vo';
-import { IAgentPersonaTemplateRepository } from '@/domain/agent/ports/agent-persona-template-repository.interface';
-import { PersonaBackstory } from '@/domain/agent/value-objects/persona/persona-backstory.vo';
-import { PersonaGoal } from '@/domain/agent/value-objects/persona/persona-goal.vo';
-import { PersonaId } from '@/domain/agent/value-objects/persona/persona-id.vo';
-import { PersonaName } from '@/domain/agent/value-objects/persona/persona-name.vo';
-import { PersonaRole } from '@/domain/agent/value-objects/persona/persona-role.vo';
-import { ToolNames } from '@/domain/agent/value-objects/persona/tool-names.vo';
-import { DomainError, ValueError } from '@/domain/common/errors';
-
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
-import { Result, ok, error as resultError, isError, isSuccess } from '@/shared/result';
+import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/use-case-response.dto";
 
 
 import {
   CreatePersonaTemplateUseCaseInput,
   CreatePersonaTemplateUseCaseInputSchema,
   CreatePersonaTemplateUseCaseOutput,
-} from './create-persona-template.schema';
+} from "./create-persona-template.schema";
 
+@injectable()
 export class CreatePersonaTemplateUseCase
   implements
-    Executable<
+    IUseCase<
       CreatePersonaTemplateUseCaseInput,
       CreatePersonaTemplateUseCaseOutput
     >
 {
   constructor(
-    private readonly templateRepository: IAgentPersonaTemplateRepository,
-    private readonly logger: ILogger,
+    @inject(AGENT_PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE) private readonly templateRepository: IAgentPersonaTemplateRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {}
 
   async execute(
-    input: CreatePersonaTemplateUseCaseInput,
+    input: CreatePersonaTemplateUseCaseInput
   ): Promise<IUseCaseResponse<CreatePersonaTemplateUseCaseOutput>> {
-    // 1. Validate Input Schema
     const validInput = CreatePersonaTemplateUseCaseInputSchema.parse(input);
 
-    try {
-      const nameVo = PersonaName.create(validInput.name);
-      const roleVo = PersonaRole.create(validInput.role);
-      const goalVo = PersonaGoal.create(validInput.goal);
-      const backstoryVo = PersonaBackstory.create(validInput.backstory);
-      const toolNamesVo = ToolNames.create(validInput.toolNames);
-      const personaIdVo = PersonaId.generate();
+    const nameVo = PersonaName.create(validInput.name);
+    const roleVo = PersonaRole.create(validInput.role);
+    const goalVo = PersonaGoal.create(validInput.goal);
+    const backstoryVo = PersonaBackstory.create(validInput.backstory);
+    const toolNamesVo = ToolNames.create(validInput.toolNames);
+    const personaIdVo = PersonaId.generate();
 
-      const personaTemplate = AgentPersonaTemplate.create({
-        id: personaIdVo,
-        name: nameVo,
-        role: roleVo,
-        goal: goalVo,
-        backstory: backstoryVo,
-        toolNames: toolNamesVo,
-      });
+    const personaTemplate = AgentPersonaTemplate.create({
+      id: personaIdVo,
+      name: nameVo,
+      role: roleVo,
+      goal: goalVo,
+      backstory: backstoryVo,
+      toolNames: toolNamesVo,
+    });
 
-      const savedPersonaTemplate = await this.templateRepository.save(personaTemplate);
+    const savedPersonaTemplate = await this.templateRepository.save(
+      personaTemplate
+    );
 
-      return successUseCaseResponse({
-        personaTemplateId: savedPersonaTemplate.id.value,
-      });
-    } catch (e: unknown) {
-      if (e instanceof ZodError) {
-        return errorUseCaseResponse(e.toUseCaseErrorDetails());
-      }
-      if (e instanceof DomainError || e instanceof ValueError) {
-        return errorUseCaseResponse(e.toUseCaseErrorDetails());
-      }
-      const message = e instanceof Error ? e.message : String(e);
-      const logError = e instanceof Error ? e : new Error(message);
-      this.logger.error(`[CreatePersonaTemplateUseCase] Unexpected error: ${message}`, logError, {
-        input,
-        useCase: 'CreatePersonaTemplateUseCase',
-      });
-      return errorUseCaseResponse(
-        new DomainError(
-          `An unexpected error occurred while creating the persona template: ${message}`,
-          logError
-        ).toUseCaseErrorDetails(),
-      );
-    }
+    return successUseCaseResponse({
+      personaTemplateId: savedPersonaTemplate.id.value,
+    });
   }
 }

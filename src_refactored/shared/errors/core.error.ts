@@ -1,9 +1,9 @@
 export class CoreError extends Error {
   public readonly code?: string;
-  public readonly details?: any;
+  public readonly details?: unknown;
   public readonly cause?: Error;
 
-  constructor(message: string, options?: { code?: string; details?: any; cause?: Error }) {
+  constructor(message: string, options?: { code?: string; details?: unknown; cause?: Error }) {
     super(message, options?.cause);
     this.name = this.constructor.name;
     this.code = options?.code;
@@ -14,7 +14,7 @@ export class CoreError extends Error {
 }
 
 export class ValueError extends CoreError {
-  constructor(message: string, details?: any, cause?: Error) {
+  constructor(message: string, details?: unknown, cause?: Error) {
     super(message, { code: 'VALUE_ERROR', details, cause });
     this.name = 'ValueError';
     Object.setPrototypeOf(this, ValueError.prototype);
@@ -22,7 +22,7 @@ export class ValueError extends CoreError {
 }
 
 export class EntityError extends CoreError {
-  constructor(message: string, details?: any, cause?: Error) {
+  constructor(message: string, details?: unknown, cause?: Error) {
     super(message, { code: 'ENTITY_ERROR', details, cause });
     this.name = 'EntityError';
     Object.setPrototypeOf(this, EntityError.prototype);
@@ -30,7 +30,7 @@ export class EntityError extends CoreError {
 }
 
 export class DomainError extends CoreError {
-  constructor(message: string, details?: any, cause?: Error) {
+  constructor(message: string, details?: unknown, cause?: Error) {
     super(message, { code: 'DOMAIN_ERROR', details, cause });
     this.name = 'DomainError';
     Object.setPrototypeOf(this, DomainError.prototype);
@@ -38,7 +38,7 @@ export class DomainError extends CoreError {
 }
 
 export class ApplicationError extends CoreError {
-  constructor(message: string, code?: string, details?: any, cause?: Error) {
+  constructor(message: string, code?: string, details?: unknown, cause?: Error) {
     super(message, { code: code || 'APPLICATION_ERROR', details, cause });
     this.name = 'ApplicationError';
     Object.setPrototypeOf(this, ApplicationError.prototype);
@@ -46,7 +46,7 @@ export class ApplicationError extends CoreError {
 }
 
 export class NotFoundError extends ApplicationError {
-  constructor(message: string, details?: any, cause?: Error) {
+  constructor(message: string, details?: unknown, cause?: Error) {
     super(message, 'NOT_FOUND_ERROR', details, cause);
     this.name = 'NotFoundError';
     Object.setPrototypeOf(this, NotFoundError.prototype);

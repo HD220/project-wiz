@@ -16,11 +16,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { LLMConfigEditLoading } from "@/ui/features/llm/components/edit/LLMConfigEditLoading";
+import { LLMConfigNotFound } from "@/ui/features/llm/components/edit/LLMConfigNotFound";
 import {
   LLMConfigForm,
   LLMConfigFormData,
 } from "@/ui/features/llm/components/LLMConfigForm";
-// For mock data type
 import { LLMConfig } from "@/ui/features/llm/components/LLMConfigList";
 
 // Simulating a "database" of LLM configurations
@@ -64,7 +65,7 @@ function EditLLMConfigPage() {
     setTimeout(() => {
       // Find by string ID from mock, as configId from URL is string
       const foundConfig = Object.values(mockLlmConfigsDb).find(
-        (config) => config.id === configId
+        (config) => config.id === configId,
       );
 
       if (foundConfig) {
@@ -90,13 +91,13 @@ function EditLLMConfigPage() {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const configToUpdate = Object.values(mockLlmConfigsDb).find(
-      (config) => config.id === configId
+      (config) => config.id === configId,
     );
 
     if (configToUpdate) {
       // Update the "DB" entry; find the actual key of the object to update
       const dbKey = Object.keys(mockLlmConfigsDb).find(
-        (key) => mockLlmConfigsDb[key].id === configId
+        (key) => mockLlmConfigsDb[key].id === configId,
       );
       if (dbKey) {
         mockLlmConfigsDb[dbKey] = {
@@ -108,7 +109,7 @@ function EditLLMConfigPage() {
       }
       setConfigName(data.name);
       toast.success(
-        `Configuração LLM "${data.name}" atualizada com sucesso (simulado)!`
+        `Configuração LLM "${data.name}" atualizada com sucesso (simulado)!`,
       );
       router.navigate({ to: "/settings/llm", replace: true });
     } else {
@@ -118,25 +119,11 @@ function EditLLMConfigPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="p-8 text-center">
-        Carregando dados da configuração LLM para edição...
-      </div>
-    );
+    return <LLMConfigEditLoading />;
   }
 
   if (!initialValues) {
-    return (
-      <div className="p-8 text-center">
-        <p>Configuração LLM não encontrada.</p>
-        <Button variant="outline" className="mt-4" asChild>
-          <Link to="/settings/llm">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Configs
-            LLM
-          </Link>
-        </Button>
-      </div>
-    );
+    return <LLMConfigNotFound configId={configId} />;
   }
 
   return (
@@ -172,3 +159,4 @@ function EditLLMConfigPage() {
 export const Route = createFileRoute("/app/settings/llm/$configId/edit/")({
   component: EditLLMConfigPage,
 });
+

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/core/domain/common/errors';
 
 export enum ActivityEntryType {
@@ -23,10 +23,8 @@ const ActivityHistoryEntryPropsSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 
-export interface ActivityHistoryEntryProps extends z.infer<typeof ActivityHistoryEntryPropsSchema> {}
-
-export class ActivityHistoryEntryVO extends AbstractValueObject<ActivityHistoryEntryProps> {
-  private constructor(props: ActivityHistoryEntryProps) {
+export class ActivityHistoryEntryVO extends AbstractValueObject<z.infer<typeof ActivityHistoryEntryPropsSchema>> {
+  private constructor(props: z.infer<typeof ActivityHistoryEntryPropsSchema>) {
     super(props);
   }
 

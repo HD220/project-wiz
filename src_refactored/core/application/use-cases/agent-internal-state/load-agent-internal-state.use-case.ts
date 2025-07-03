@@ -9,7 +9,7 @@ import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
 
 import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 
-import { successUseCaseResponse, errorUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
+import { successUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
 
 import {
   LoadAgentInternalStateUseCaseInput,

@@ -1,17 +1,13 @@
 import { injectable, inject } from 'inversify';
 import { z } from 'zod';
 
-import { ApplicationError } from '@/core/application/common/errors';
 import { APPLICATION_TYPES } from '@/core/application/common/types';
 import { IToolRegistryService } from '@/core/application/ports/services/i-tool-registry.service';
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
-import { ToolError, ToolNotFoundError } from '@/core/domain/common/errors';
+import { ToolError } from '@/core/domain/common/errors';
 import { ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { LanguageModelMessageToolCall } from '@/core/ports/adapters/llm-adapter.types';
 import { IToolExecutionContext, IAgentTool } from '@/core/tools/tool.interface';
-
-
-import { successUseCaseResponse, errorUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
 
 
 @injectable()

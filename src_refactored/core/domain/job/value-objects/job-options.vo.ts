@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/core/domain/common/errors';
 
 /**

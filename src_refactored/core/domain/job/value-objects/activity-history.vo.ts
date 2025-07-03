@@ -13,12 +13,10 @@ const ActivityHistoryPropsSchema = z.object({
   maxEntries: z.number().int().positive().optional().default(1000),
 });
 
-export interface ActivityHistoryProps extends z.infer<typeof ActivityHistoryPropsSchema> {}
-
-export class ActivityHistoryVO extends AbstractValueObject<ActivityHistoryProps> {
+export class ActivityHistoryVO extends AbstractValueObject<z.infer<typeof ActivityHistoryPropsSchema>> {
   public static readonly DEFAULT_MAX_ENTRIES = 1000;
 
-  private constructor(props: ActivityHistoryProps) {
+  private constructor(props: z.infer<typeof ActivityHistoryPropsSchema>) {
     super(props);
   }
 

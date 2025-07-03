@@ -20,7 +20,7 @@ export class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, TOutput
       this.logger.error(
         `Error in UseCase ${this.decoratedUseCase.constructor.name} with input: ${JSON.stringify(input)}`,
         error,
-        { errorName: error.name, errorMessage: error.message, errorStack: error.stack, cause: (error as any).cause }
+        { errorName: error.name, errorMessage: error.message, errorStack: error.stack, cause: error.cause }
       );
 
       if (error instanceof ZodError) {

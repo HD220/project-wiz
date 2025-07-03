@@ -83,10 +83,11 @@ export enum AgentExecutorStatus {
  * If a critical error occurs that prevents a structured result, the promise should reject.
  */
 export interface AgentExecutorResult<SuccessfulOutput = unknown> {
-  jobId: string; // This should be string, not JobIdVO, for serialization
+  jobId: string;
   status: AgentExecutorStatus;
   message: string;
-  output?: SuccessfulOutput; // Changed O to SuccessfulOutput for clarity
+  output?: SuccessfulOutput;
+  // Changed O to SuccessfulOutput for clarity
   errors?: ExecutionHistoryEntry[];
 }
 

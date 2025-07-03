@@ -2,8 +2,8 @@ import { injectable, inject } from "inversify";
 import { z } from "zod";
 
 import {
-  ILogger, // Corrected import
-  LOGGER_INTERFACE_TYPE, // Corrected import
+  ILogger,
+  LOGGER_INTERFACE_TYPE,
 } from "@/core/common/services/i-logger.service";
 import { LLMError } from "@/core/domain/common/errors";
 import { ILLMAdapter } from "@/core/ports/adapters/llm-adapter.interface";
@@ -12,12 +12,16 @@ import {
   LanguageModelMessage,
 } from "@/core/ports/adapters/llm-adapter.types";
 
-import { Result, ok, error as resultError } from "@/shared/result"; // Corrected import names
+import {
+  IUseCaseResponse,
+  successUseCaseResponse,
+  errorUseCaseResponse,
+} from "@/shared/application/use-case-response.dto";
 
 @injectable()
 export class MockLLMAdapter implements ILLMAdapter {
   constructor(
-    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger // Corrected token and type
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {
     this.logger.info("[MockLLMAdapter] Initialized");
   }
@@ -25,7 +29,7 @@ export class MockLLMAdapter implements ILLMAdapter {
   async generateText(
     messages: LanguageModelMessage[],
     options?: LLMGenerationOptions
-  ): Promise<Result<LanguageModelMessage, LLMError>> {
+  ): Promise<IUseCaseResponse<LanguageModelMessage, LLMError>> {
     this.logger.info("[MockLLMAdapter] generateText called", {
       messages,
       options,
@@ -35,9 +39,8 @@ export class MockLLMAdapter implements ILLMAdapter {
       .pop();
     const responseContent = `Mock response to: ${lastUserMessage?.content || "your request"}. Options: ${JSON.stringify(options || {})}`;
 
-    // Simulate tool call if prompt asks for it
     if (lastUserMessage?.content?.toLowerCase().includes("use tool")) {
-      return ok({ // Corrected usage
+      return successUseCaseResponse({
         role: "assistant",
         content: null,
         tool_calls: [
@@ -55,7 +58,7 @@ export class MockLLMAdapter implements ILLMAdapter {
       });
     }
 
-    return ok({ // Corrected usage
+    return successUseCaseResponse({
       role: "assistant",
       content: responseContent,
     });
@@ -65,16 +68,14 @@ export class MockLLMAdapter implements ILLMAdapter {
     prompt: string,
     schema: S,
     options?: LLMGenerationOptions
-  ): Promise<Result<z.infer<S>, LLMError>> {
+  ): Promise<IUseCaseResponse<z.infer<S>, LLMError>> {
     this.logger.info("[MockLLMAdapter] generateStructuredOutput called", {
       prompt,
       schemaDef: schema.description,
       options,
     });
-    // Try to return a mock object that somewhat fits common schemas, or a default based on schema type
     try {
       if (schema instanceof z.ZodObject) {
-        // Replaced any with Record<string, unknown>
         const mockData: Record<string, unknown> = {};
         for (const key in schema.shape) {
           const fieldSchema = schema.shape[key];
@@ -89,26 +90,25 @@ export class MockLLMAdapter implements ILLMAdapter {
           }
         }
         const validation = schema.safeParse(mockData);
-        if (validation.success) return ok(validation.data); // Corrected usage
-        return resultError( // Corrected usage
+        if (validation.success) return successUseCaseResponse(validation.data);
+        return errorUseCaseResponse(
           new LLMError(
             "Failed to generate mock structured output matching schema.",
-            { originalError: validation.error } // Wrapped ZodError in details object
+            { details: validation.error }
           )
         );
       }
-      // Renamed e to error
     } catch (error) {
-      return resultError( // Corrected usage
+      return errorUseCaseResponse(
         new LLMError(
           "Error generating mock structured output for schema.",
-          { originalError: error instanceof Error ? error : new Error(String(error)) } // Wrapped error in details object
+          { cause: error instanceof Error ? error : new Error(String(error)) }
         )
       );
     }
-    return resultError( // Corrected usage
+    return errorUseCaseResponse(
       new LLMError(
-        "Mock structured output for this schema type not implemented." // No second arg here is fine
+        "Mock structured output for this schema type not implemented."
       )
     );
   }
@@ -116,13 +116,13 @@ export class MockLLMAdapter implements ILLMAdapter {
   async *streamText(
     prompt: string,
     options?: LLMGenerationOptions
-  ): AsyncGenerator<Result<string, LLMError>> {
+  ): AsyncGenerator<IUseCaseResponse<string, LLMError>> {
     this.logger.info("[MockLLMAdapter] streamText called", { prompt, options });
     const response = `Mock streamed response to: ${prompt}. Options: ${JSON.stringify(options || {})}`;
     const words = response.split(" ");
     for (const word of words) {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      yield ok(word + " "); // Corrected usage
+      yield successUseCaseResponse(word + " ");
     }
   }
 }

@@ -9,7 +9,7 @@ import { CoreError } from '../../../shared/errors/core.error';
 export class DomainError extends CoreError {
   constructor(
     message: string,
-    options?: { code?: string; details?: any; cause?: Error },
+    options?: { code?: string; details?: unknown; cause?: Error },
   ) {
     super(message, options);
   }
@@ -112,7 +112,7 @@ export class LLMError extends DomainError {
       originalError?: unknown;
     }
   ) {
-    const opts: { code?: string; details?: any; cause?: Error } = {
+    const opts: { code?: string; details?: unknown; cause?: Error } = {
       code: 'LLM_ERROR',
       details: { ...errorDetailsProp },
     };
@@ -135,7 +135,7 @@ export class EmbeddingError extends DomainError {
       originalError?: unknown;
     }
   ) {
-    const opts: { code?: string; details?: any; cause?: Error } = {
+    const opts: { code?: string; details?: unknown; cause?: Error } = {
       code: 'EMBEDDING_ERROR',
       details: { ...errorDetailsProp },
     };

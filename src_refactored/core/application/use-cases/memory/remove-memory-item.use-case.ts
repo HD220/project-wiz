@@ -1,55 +1,49 @@
-// src_refactored/core/application/use-cases/memory/remove-memory-item.use-case.ts
-import { injectable, inject } from 'inversify';
-import { ZodError } from 'zod';
+import { injectable, inject } from "inversify";
 
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+import { MEMORY_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
+import { IUseCase } from "@/core/application/common/ports/use-case.interface";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { IMemoryRepository } from "@/core/domain/memory/ports/memory-repository.interface";
+import { MemoryItemId } from "@/core/domain/memory/value-objects/memory-item-id.vo";
 
-import { ValueError, DomainError } from '@/domain/common/errors';
-import { IMemoryRepository } from '@/domain/memory/ports/memory-repository.interface';
-import { MemoryItemId } from '@/domain/memory/value-objects/memory-item-id.vo';
+import {
+  IUseCaseResponse,
+  successUseCaseResponse,
+} from "@/shared/application/use-case-response.dto";
 
-import { ApplicationError } from '@/application/common/errors';
-import { IUseCase } from '@/application/common/ports/use-case.interface';
-
-import { TYPES } from '@/infrastructure/ioc/types';
-
-import { Result, ok, error as resultError, isSuccess, isError } from '@/shared/result';
 
 import {
   RemoveMemoryItemUseCaseInput,
   RemoveMemoryItemUseCaseInputSchema,
   RemoveMemoryItemUseCaseOutput,
-} from './remove-memory-item.schema';
+} from "./remove-memory-item.schema";
 
 @injectable()
 export class RemoveMemoryItemUseCase
   implements
     IUseCase<
       RemoveMemoryItemUseCaseInput,
-      RemoveMemoryItemUseCaseOutput,
-      ApplicationError | ZodError | ValueError
+      RemoveMemoryItemUseCaseOutput
     >
 {
   constructor(
-    @inject(TYPES.IMemoryRepository) private readonly memoryRepository: IMemoryRepository,
-    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
+    @inject(MEMORY_REPOSITORY_INTERFACE_TYPE)
+    private readonly memoryRepository: IMemoryRepository,
+    @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {}
 
-  public async execute(
-    input: RemoveMemoryItemUseCaseInput,
+  async execute(
+    input: RemoveMemoryItemUseCaseInput
   ): Promise<IUseCaseResponse<RemoveMemoryItemUseCaseOutput>> {
-    this.logger.debug('RemoveMemoryItemUseCase: Starting execution with input:', { input });
+    const validInput = RemoveMemoryItemUseCaseInputSchema.parse(input);
 
-    const validatedInput = RemoveMemoryItemUseCaseInputSchema.parse(input);
+    const memoryItemIdVo = MemoryItemId.fromString(validInput.memoryItemId);
 
-    const itemIdVo = MemoryItemId.fromString(validatedInput.memoryItemId);
+    await this.memoryRepository.delete(memoryItemIdVo);
 
-    await this.memoryRepository.delete(itemIdVo);
-
-    this.logger.info(`RemoveMemoryItemUseCase: Memory item ${validatedInput.memoryItemId} processed for deletion.`);
     return successUseCaseResponse({
-      memoryItemId: validatedInput.memoryItemId,
       success: true,
+      memoryItemId: validInput.memoryItemId,
     });
   }
 }
