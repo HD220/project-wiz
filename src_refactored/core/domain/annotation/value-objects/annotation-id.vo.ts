@@ -7,7 +7,7 @@ export class AnnotationId extends Identity {
   }
 
   public static generate(): AnnotationId {
-    return new AnnotationId(super.generate().value());
+    return new AnnotationId(super.generate().value);
   }
 
   public static fromString(value: string): AnnotationId {

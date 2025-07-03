@@ -1,37 +1,45 @@
-// src_refactored/core/domain/agent/value-objects/agent-temperature.vo.ts
+import { z } from 'zod';
+
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const MIN_TEMPERATURE = 0.0;
+const MAX_TEMPERATURE = 2.0;
+const DEFAULT_TEMPERATURE = 0.7;
+
+const AgentTemperatureSchema = z.number()
+  .min(MIN_TEMPERATURE, `Agent temperature must be between ${MIN_TEMPERATURE} and ${MAX_TEMPERATURE}.`)
+  .max(MAX_TEMPERATURE, `Agent temperature must be between ${MIN_TEMPERATURE} and ${MAX_TEMPERATURE}.`);
 
 interface AgentTemperatureProps extends ValueObjectProps {
   value: number;
 }
 
 export class AgentTemperature extends AbstractValueObject<AgentTemperatureProps> {
-  private static readonly MIN_VALUE = 0.0;
-  private static readonly MAX_VALUE = 2.0;
-
-  private constructor(value: number) {
-    super({ value });
-  }
-
-  private static validate(temperature: number): void {
-    if (temperature < this.MIN_VALUE || temperature > this.MAX_VALUE) {
-      throw new Error(
-        `Agent temperature must be between ${this.MIN_VALUE} and ${this.MAX_VALUE}. Received: ${temperature}`
-      );
-    }
+  private constructor(props: AgentTemperatureProps) {
+    super(props);
   }
 
   public static create(temperature: number): AgentTemperature {
-    this.validate(temperature);
-    return new AgentTemperature(temperature);
+    const validationResult = AgentTemperatureSchema.safeParse(temperature);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid agent temperature.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new AgentTemperature({ value: validationResult.data });
   }
 
   public static default(): AgentTemperature {
-    return new AgentTemperature(0.7);
+    return new AgentTemperature({ value: DEFAULT_TEMPERATURE });
   }
 
-  public value(): number {
+  public get value(): number {
     return this.props.value;
+  }
+
+  public equals(vo?: AgentTemperature): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {

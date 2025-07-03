@@ -1,16 +1,19 @@
-// src_refactored/core/domain/job/value-objects/activity-history.vo.ts
+import { z } from 'zod';
+
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
-import { DomainError } from '@/core/domain/common/errors';
+import { ValueError } from '@/core/domain/common/errors';
 
 import { ActivityHistoryEntryVO, ActivityEntryType } from './activity-history-entry.vo';
 
 // Re-export for convenience if other modules import primarily from this VO file
 export { ActivityHistoryEntryVO, ActivityEntryType };
 
-export interface ActivityHistoryProps {
-  entries: ReadonlyArray<ActivityHistoryEntryVO>;
-  maxEntries?: number;
-}
+const ActivityHistoryPropsSchema = z.object({
+  entries: z.array(z.instanceof(ActivityHistoryEntryVO)).default([]),
+  maxEntries: z.number().int().positive().optional().default(1000),
+});
+
+export interface ActivityHistoryProps extends z.infer<typeof ActivityHistoryPropsSchema> {}
 
 export class ActivityHistoryVO extends AbstractValueObject<ActivityHistoryProps> {
   public static readonly DEFAULT_MAX_ENTRIES = 1000;
@@ -23,14 +26,18 @@ export class ActivityHistoryVO extends AbstractValueObject<ActivityHistoryProps>
     initialEntries?: ActivityHistoryEntryVO[],
     maxEntries?: number,
   ): ActivityHistoryVO {
-    const entries = initialEntries ? Object.freeze([...initialEntries]) : Object.freeze([]);
-    if (maxEntries !== undefined && maxEntries <= 0) {
-      throw new DomainError('maxEntries for ActivityHistoryVO must be a positive number.');
-    }
-    return new ActivityHistoryVO({
-      entries,
-      maxEntries: maxEntries || ActivityHistoryVO.DEFAULT_MAX_ENTRIES,
+    const validationResult = ActivityHistoryPropsSchema.safeParse({
+      entries: initialEntries,
+      maxEntries,
     });
+
+    if (!validationResult.success) {
+      throw new ValueError('Invalid activity history.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
+    return new ActivityHistoryVO(validationResult.data);
   }
 
   get entries(): ReadonlyArray<ActivityHistoryEntryVO> {
@@ -47,12 +54,14 @@ export class ActivityHistoryVO extends AbstractValueObject<ActivityHistoryProps>
 
   public addEntry(entry: ActivityHistoryEntryVO): ActivityHistoryVO {
     if (!entry) {
-      throw new DomainError('Cannot add a null or undefined entry to activity history.');
+      throw new ValueError('Cannot add a null or undefined entry to activity history.');
     }
     const newEntries = [...this.props.entries, entry];
-    if (this.props.maxEntries && newEntries.length > this.props.maxEntries) {
+    const currentMaxEntries = this.props.maxEntries || ActivityHistoryVO.DEFAULT_MAX_ENTRIES;
+
+    if (newEntries.length > currentMaxEntries) {
       // Trim oldest entries if limit is exceeded
-      newEntries.splice(0, newEntries.length - this.props.maxEntries);
+      newEntries.splice(0, newEntries.length - currentMaxEntries);
     }
     return new ActivityHistoryVO({
       ...this.props,
@@ -103,3 +112,4 @@ export class ActivityHistoryVO extends AbstractValueObject<ActivityHistoryProps>
     };
   }
 }
+

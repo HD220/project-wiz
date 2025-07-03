@@ -63,9 +63,9 @@ export class AgentInteractionService {
       throw new ApplicationError(errorMessage, llmError);
     }
 
-    state.assistantMessage = llmGenerationResult.value;
+    state.assistantMessage = llmGenerationResult.value();
     state.llmResponseText = state.assistantMessage.content || '';
-    const currentJobIdVal = job.id().value;
+    const currentJobIdVal = job.id().value();
     this.logger.info(
       `LLM response (iteration ${state.iterations}) for Job ID: ${currentJobIdVal}: ${state.llmResponseText.substring(0, 100)}...`,
     );

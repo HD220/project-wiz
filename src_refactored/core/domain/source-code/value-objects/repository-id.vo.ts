@@ -1,5 +1,5 @@
 // src_refactored/core/domain/source-code/value-objects/repository-id.vo.ts
-import { Identity } from '../../../../core/common/value-objects/identity.vo';
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class RepositoryId extends Identity {
   private constructor(value: string) {
@@ -7,7 +7,7 @@ export class RepositoryId extends Identity {
   }
 
   public static generate(): RepositoryId {
-    return new RepositoryId(super.generate().value());
+    return new RepositoryId(super.generate().value);
   }
 
   public static fromString(value: string): RepositoryId {

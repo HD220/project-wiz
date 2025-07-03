@@ -1,41 +1,41 @@
-// src_refactored/core/domain/annotation/value-objects/annotation-text.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { z } from 'zod';
 
-import { ValueError } from '@/domain/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const MIN_LENGTH = 1;
+const MAX_LENGTH = 5000;
+
+const AnnotationTextSchema = z.string()
+  .trim()
+  .min(MIN_LENGTH, `Annotation text must be at least ${MIN_LENGTH} character long (after trimming).`)
+  .max(MAX_LENGTH, `Annotation text must be no more than ${MAX_LENGTH} characters long (after trimming).`);
 
 interface AnnotationTextProps extends ValueObjectProps {
   value: string;
 }
 
 export class AnnotationText extends AbstractValueObject<AnnotationTextProps> {
-  private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 5000;
-
   private constructor(props: AnnotationTextProps) {
     super(props);
   }
 
   public static create(text: string): AnnotationText {
-    this.validate(text);
-    return new AnnotationText({ value: text });
+    const validationResult = AnnotationTextSchema.safeParse(text);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid annotation text.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new AnnotationText({ value: validationResult.data });
   }
 
-  private static validate(text: string): void {
-    if (text === null || text === undefined) {
-      throw new ValueError('Annotation text cannot be null or undefined.');
-    }
-    const trimmedText = text.trim();
-    if (trimmedText.length < this.MIN_LENGTH) {
-      throw new ValueError(`Annotation text must be at least ${this.MIN_LENGTH} character long (after trimming).`);
-    }
-    if (trimmedText.length > this.MAX_LENGTH) {
-      throw new ValueError(`Annotation text must be no more than ${this.MAX_LENGTH} characters long (after trimming).`);
-    }
-  }
-
-  public value(): string {
+  public get value(): string {
     return this.props.value;
   }
 
-  // equals is inherited from AbstractValueObject
+  public equals(vo?: AnnotationText): boolean {
+    return super.equals(vo);
+  }
 }
+

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,22 +8,31 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/ui/components/ui/select';
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import type { PersonaTemplate } from '@/shared/ipc-types';
+import type { PersonaTemplate } from "@/shared/ipc-types";
 
-import type { AgentInstanceFormData } from '../AgentInstanceForm';
+import type { AgentInstanceFormData } from "../AgentInstanceForm";
 
 interface AgentFormFieldProps {
   control: Control<AgentInstanceFormData>;
 }
 
 interface AgentPersonaTemplateSelectFieldProps extends AgentFormFieldProps {
-  personaTemplates: Pick<PersonaTemplate, 'id' | 'name'>[];
+  personaTemplates: Pick<PersonaTemplate, "id" | "name">[];
 }
 
-export function AgentPersonaTemplateSelectField({ control, personaTemplates }: AgentPersonaTemplateSelectFieldProps) {
+export function AgentPersonaTemplateSelectField({
+  control,
+  personaTemplates,
+}: AgentPersonaTemplateSelectFieldProps) {
   return (
     <FormField
       control={control}
@@ -38,14 +47,16 @@ export function AgentPersonaTemplateSelectField({ control, personaTemplates }: A
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {personaTemplates.map(template => (
+              {personaTemplates.map((template) => (
                 <SelectItem key={template.id} value={template.id}>
                   {template.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <FormDescription>Define o comportamento, papel e objetivos base do agente.</FormDescription>
+          <FormDescription>
+            Define o comportamento, papel e objetivos base do agente.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

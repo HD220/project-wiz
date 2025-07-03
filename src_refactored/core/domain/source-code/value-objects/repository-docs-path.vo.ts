@@ -1,29 +1,37 @@
-// src_refactored/core/domain/source-code/value-objects/repository-docs-path.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { z } from 'zod';
+
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const RepositoryDocsPathSchema = z.string()
+  .trim()
+  .min(1, 'Repository docs path cannot be empty.');
 
 interface RepositoryDocsPathProps extends ValueObjectProps {
   value: string;
 }
 
 export class RepositoryDocsPath extends AbstractValueObject<RepositoryDocsPathProps> {
-  private constructor(value: string) {
-    super({ value });
-  }
-
-  private static validate(path: string): void {
-    if (path.trim().length === 0) {
-      throw new Error('Repository docs path cannot be empty.');
-    }
-    // Similar to RepositoryPath, further validation could be added.
+  private constructor(props: RepositoryDocsPathProps) {
+    super(props);
   }
 
   public static create(path: string): RepositoryDocsPath {
-    this.validate(path);
-    return new RepositoryDocsPath(path);
+    const validationResult = RepositoryDocsPathSchema.safeParse(path);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid repository docs path format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new RepositoryDocsPath({ value: validationResult.data });
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
+  }
+
+  public equals(vo?: RepositoryDocsPath): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {

@@ -1,11 +1,16 @@
-import { SendHorizontal, Paperclip, CornerDownLeft } from 'lucide-react';
+import { SendHorizontal, Paperclip, CornerDownLeft } from "lucide-react";
 // KeyboardEvent type from React namespace is used below (React.KeyboardEvent)
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/ui/components/ui/tooltip';
-import { cn } from '@/presentation/ui/lib/utils';
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/ui/lib/utils";
 
 export interface MessageInputProps {
   onSubmit: (message: string) => void;
@@ -20,7 +25,7 @@ export function MessageInput({
   isLoading = false,
   placeholder = "Digite sua mensagem ou use / para comandos...",
   className,
-  initialValue = '',
+  initialValue = "",
 }: MessageInputProps) {
   const [inputValue, setInputValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -32,7 +37,7 @@ export function MessageInput({
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       const scrollHeight = textareaRef.current.scrollHeight;
       // Max height for textarea, e.g., 5 lines of text
       const maxHeight = 5 * 24;
@@ -44,31 +49,41 @@ export function MessageInput({
     adjustTextareaHeight();
   }, [inputValue]);
 
-
   const handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
     if (inputValue.trim()) {
       onSubmit(inputValue.trim());
-      setInputValue('');
+      setInputValue("");
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = "auto";
       }
     }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSubmit();
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn("flex items-end gap-2 p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50", className)}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn(
+        "flex items-end gap-2 p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50",
+        className
+      )}
+    >
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 flex-shrink-0" type="button">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 flex-shrink-0"
+              type="button"
+            >
               <Paperclip className="h-5 w-5" />
               <span className="sr-only">Anexar arquivo (Não implementado)</span>
             </Button>
@@ -92,12 +107,17 @@ export function MessageInput({
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-             <Button type="submit" size="icon" disabled={isLoading || !inputValue.trim()} className="flex-shrink-0">
-                <SendHorizontal className="h-5 w-5" />
-                <span className="sr-only">Enviar</span>
-              </Button>
+            <Button
+              type="submit"
+              size="icon"
+              disabled={isLoading || !inputValue.trim()}
+              className="flex-shrink-0"
+            >
+              <SendHorizontal className="h-5 w-5" />
+              <span className="sr-only">Enviar</span>
+            </Button>
           </TooltipTrigger>
-           <TooltipContent side="top" className="mb-1 flex items-center">
+          <TooltipContent side="top" className="mb-1 flex items-center">
             <p>Enviar</p>
             <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <CornerDownLeft size={10} />

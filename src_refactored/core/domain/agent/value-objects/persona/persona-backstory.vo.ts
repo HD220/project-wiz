@@ -1,31 +1,38 @@
-// src_refactored/core/domain/agent/value-objects/persona/persona-backstory.vo.ts
+import { z } from 'zod';
+
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const MAX_LENGTH = 2000;
+
+const PersonaBackstorySchema = z.string()
+  .max(MAX_LENGTH, `Persona backstory must be at most ${MAX_LENGTH} characters long.`);
 
 interface PersonaBackstoryProps extends ValueObjectProps {
   value: string;
 }
 
 export class PersonaBackstory extends AbstractValueObject<PersonaBackstoryProps> {
-  private static readonly MAX_LENGTH = 2000;
-
-  private constructor(value: string) {
-    super({ value });
-  }
-
-  private static validate(backstory: string): void {
-    // Backstory can be empty if not provided
-    if (backstory.length > this.MAX_LENGTH) {
-      throw new Error(`Persona backstory must be at most ${this.MAX_LENGTH} characters long.`);
-    }
+  private constructor(props: PersonaBackstoryProps) {
+    super(props);
   }
 
   public static create(backstory: string): PersonaBackstory {
-    this.validate(backstory);
-    return new PersonaBackstory(backstory);
+    const validationResult = PersonaBackstorySchema.safeParse(backstory);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid persona backstory.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new PersonaBackstory({ value: validationResult.data });
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
+  }
+
+  public equals(vo?: PersonaBackstory): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {

@@ -1,10 +1,9 @@
-import { Link }
-  from '@tanstack/react-router';
+import { Link } from "@tanstack/react-router";
 // Example icons, removed ExternalLink
-import { Star, GitFork, CalendarDays } from 'lucide-react';
-import React from 'react';
+import { Star, GitFork, CalendarDays } from "lucide-react";
+import React from "react";
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -12,9 +11,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/presentation/ui/components/ui/card';
-import { cn } from '@/presentation/ui/lib/utils';
-
+} from "@/components/ui/card";
+import { cn } from "@/ui/lib/utils";
 
 // Define the ProjectSummary type/interface
 export interface ProjectSummary {
@@ -43,14 +41,17 @@ interface ProjectCardProps {
 export function ProjectCard({ project, className }: ProjectCardProps) {
   const lastUpdatedText = project.lastUpdatedAt
     ? `Updated ${new Date(project.lastUpdatedAt).toLocaleDateString()}`
-    : 'Not updated recently';
+    : "Not updated recently";
 
   return (
     <Link
       // TanStack Router v1 style path param
       to="/projects/$projectId"
       params={{ projectId: project.id }}
-      className={cn("block hover:shadow-lg transition-shadow duration-200 rounded-lg", className)}
+      className={cn(
+        "block hover:shadow-lg transition-shadow duration-200 rounded-lg",
+        className
+      )}
     >
       {/* Ensure card itself takes full height of Link */}
       <Card className="h-full flex flex-col">
@@ -66,18 +67,26 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
           {project.owner && (
             <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1">
               {project.owner.avatarUrl && (
-                <img src={project.owner.avatarUrl} alt={project.owner.name} className="w-4 h-4 rounded-full mr-1.5" />
+                <img
+                  src={project.owner.avatarUrl}
+                  alt={project.owner.name}
+                  className="w-4 h-4 rounded-full mr-1.5"
+                />
               )}
               <span>{project.owner.name}</span>
             </div>
           )}
         </CardHeader>
         <CardContent className="flex-grow">
-          <CardDescription className="text-sm line-clamp-3">{project.description}</CardDescription>
+          <CardDescription className="text-sm line-clamp-3">
+            {project.description}
+          </CardDescription>
           {project.tags && project.tags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {project.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
               ))}
             </div>
           )}

@@ -1,34 +1,37 @@
-// src_refactored/core/domain/source-code/value-objects/repository-path.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '../../../../core/common/value-objects/base.vo';
+import { z } from 'zod';
+
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const RepositoryPathSchema = z.string()
+  .trim()
+  .min(1, 'Repository path cannot be empty.');
 
 interface RepositoryPathProps extends ValueObjectProps {
   value: string;
 }
 
 export class RepositoryPath extends AbstractValueObject<RepositoryPathProps> {
-  private constructor(value: string) {
-    super({ value });
-  }
-
-  private static validate(path: string): void {
-    if (path.trim().length === 0) {
-      throw new Error('Repository path cannot be empty.');
-    }
-    // Basic validation. More complex validation (e.g., valid characters for paths)
-    // could be added but might be platform-dependent.
-    // Should not contain relative segments like '..' after normalization if it's an absolute path,
-    // but for now, we assume paths are handled carefully by consuming services.
+  private constructor(props: RepositoryPathProps) {
+    super(props);
   }
 
   public static create(path: string): RepositoryPath {
-    this.validate(path);
-    // Consider path normalization here if necessary (e.g., path.normalize())
-    // For simplicity, using the provided path as is after validation.
-    return new RepositoryPath(path);
+    const validationResult = RepositoryPathSchema.safeParse(path);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid repository path format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new RepositoryPath({ value: validationResult.data });
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
+  }
+
+  public equals(vo?: RepositoryPath): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {

@@ -1,12 +1,12 @@
-import React from 'react';
-import ReactMarkdown, { Options } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import React from "react";
+import ReactMarkdown, { Options } from "react-markdown";
+import remarkGfm from "remark-gfm";
 // import rehypeRaw from 'rehype-raw'; // Optional: if you need to render raw HTML from markdown
 // For syntax highlighting:
 // import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'; // Choose a theme
 
-import { cn } from '@/presentation/ui/lib/utils';
+import { cn } from "@/ui/lib/utils";
 
 interface MarkdownRendererProps {
   content: string | null | undefined;
@@ -15,7 +15,7 @@ interface MarkdownRendererProps {
   // Custom classes specifically for Tailwind Prose
   proseClassName?: string;
   // Allow overriding default HTML element rendering
-  components?: Options['components'];
+  components?: Options["components"];
 }
 
 export function MarkdownRenderer({
@@ -45,11 +45,11 @@ export function MarkdownRenderer({
     // Tables
     "prose-table:my-2 prose-table:text-sm prose-thead:border-b prose-th:px-2 prose-th:py-1 prose-th:font-semibold prose-td:px-2 prose-td:py-1 prose-tr:border-b",
     // Allow parent to provide additional/override prose classes
-    proseClassName,
+    proseClassName
   );
 
   // Default component overrides, can be merged with or overridden by `customComponents` prop
-  const defaultComponents: Options['components'] = {
+  const defaultComponents: Options["components"] = {
     // Ensure links open in a new tab and have accessible content.
     // The key 'a' correctly overrides the default anchor tag rendering.
     a: ({ node: _node, children, href, ...props }) => {
@@ -67,11 +67,11 @@ export function MarkdownRenderer({
     // This is a basic version. For syntax highlighting, you'd integrate react-syntax-highlighter here.
     // `node` is used here, so no underscore
     code({ node, className: langClassName, children, ...props }) {
-      const match = /language-(\w+)/.exec(langClassName || '');
+      const match = /language-(\w+)/.exec(langClassName || "");
       const language = match ? match[1] : null;
 
       // Fenced code block
-      if (node?.parentElement?.tagName === 'pre') {
+      if (node?.parentElement?.tagName === "pre") {
         return (
           <div className="my-2 bg-slate-100 dark:bg-slate-800 rounded-md overflow-hidden text-xs">
             {language && (
@@ -79,7 +79,11 @@ export function MarkdownRenderer({
                 {language}
               </div>
             )}
-            <pre className="p-3 overflow-x-auto"><code className={cn("font-mono", langClassName)} {...props}>{children}</code></pre>
+            <pre className="p-3 overflow-x-auto">
+              <code className={cn("font-mono", langClassName)} {...props}>
+                {children}
+              </code>
+            </pre>
           </div>
         );
       }

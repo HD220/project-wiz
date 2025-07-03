@@ -1,5 +1,6 @@
-// src_refactored/core/domain/job/value-objects/activity-history-entry.vo.ts
-import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+import { z } from 'zod';
+
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
 import { ValueError } from '@/core/domain/common/errors';
 
 export enum ActivityEntryType {
@@ -13,12 +14,16 @@ export enum ActivityEntryType {
   ERROR = 'error',
 }
 
-export interface ActivityHistoryEntryProps {
-  type: ActivityEntryType;
-  timestamp: Date;
-  content: string | object;
-  metadata?: Record<string, unknown>;
-}
+const ActivityEntryTypeSchema = z.nativeEnum(ActivityEntryType);
+
+const ActivityHistoryEntryPropsSchema = z.object({
+  type: ActivityEntryTypeSchema,
+  timestamp: z.date().default(() => new Date()),
+  content: z.union([z.string(), z.record(z.string(), z.unknown())]),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
+});
+
+export interface ActivityHistoryEntryProps extends z.infer<typeof ActivityHistoryEntryPropsSchema> {}
 
 export class ActivityHistoryEntryVO extends AbstractValueObject<ActivityHistoryEntryProps> {
   private constructor(props: ActivityHistoryEntryProps) {
@@ -31,20 +36,20 @@ export class ActivityHistoryEntryVO extends AbstractValueObject<ActivityHistoryE
     metadata?: Record<string, unknown>,
     timestamp?: Date,
   ): ActivityHistoryEntryVO {
-    if (!type || !Object.values(ActivityEntryType).includes(type)) {
-      throw new ValueError('Activity entry type is invalid or missing.');
-    }
-    if (content === undefined || content === null) {
-      throw new ValueError('Activity entry content cannot be undefined or null.');
-    }
-
-    const props: ActivityHistoryEntryProps = {
+    const validationResult = ActivityHistoryEntryPropsSchema.safeParse({
       type,
       content,
-      timestamp: timestamp || new Date(),
-      metadata: metadata || {},
-    };
-    return new ActivityHistoryEntryVO(props);
+      timestamp,
+      metadata,
+    });
+
+    if (!validationResult.success) {
+      throw new ValueError('Invalid activity history entry.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+
+    return new ActivityHistoryEntryVO(validationResult.data);
   }
 
   get type(): ActivityEntryType {
@@ -61,6 +66,10 @@ export class ActivityHistoryEntryVO extends AbstractValueObject<ActivityHistoryE
 
   get metadata(): Record<string, unknown> | undefined {
     return this.props.metadata;
+  }
+
+  public equals(vo?: ActivityHistoryEntryVO): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {

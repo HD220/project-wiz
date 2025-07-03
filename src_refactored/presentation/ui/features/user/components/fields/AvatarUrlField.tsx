@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { UserProfileFormData } from '../UserProfileForm';
+import type { UserProfileFormData } from "../UserProfileForm";
 
 interface UserProfileFormFieldProps {
   control: Control<UserProfileFormData>;
@@ -41,7 +41,9 @@ export function AvatarUrlField({ control, onUrlChange }: AvatarUrlFieldProps) {
               }}
             />
           </FormControl>
-          <FormDescription>Insira a URL para sua imagem de avatar.</FormDescription>
+          <FormDescription>
+            Insira a URL para sua imagem de avatar.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

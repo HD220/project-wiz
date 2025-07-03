@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { UserProfileFormData } from '../UserProfileForm';
+import type { UserProfileFormData } from "../UserProfileForm";
 
 interface UserProfileFormFieldProps {
   control: Control<UserProfileFormData>;
@@ -28,7 +28,9 @@ export function DisplayNameField({ control }: UserProfileFormFieldProps) {
           <FormControl>
             <Input placeholder="Seu nome" {...field} />
           </FormControl>
-          <FormDescription>Como seu nome aparecerá na aplicação.</FormDescription>
+          <FormDescription>
+            Como seu nome aparecerá na aplicação.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

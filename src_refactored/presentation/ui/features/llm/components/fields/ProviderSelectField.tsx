@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,15 +8,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/ui/components/ui/select';
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import type { LLMConfigFormData } from '../LLMConfigForm';
+import type { LLMConfigFormData } from "../LLMConfigForm";
 
 const supportedProviders = [
-  { id: 'openai', name: 'OpenAI (GPT-3.5, GPT-4, etc.)' },
-  { id: 'deepseek', name: 'DeepSeek Coder' },
-  { id: 'ollama', name: 'Ollama (Local LLMs)' },
+  { id: "openai", name: "OpenAI (GPT-3.5, GPT-4, etc.)" },
+  { id: "deepseek", name: "DeepSeek Coder" },
+  { id: "ollama", name: "Ollama (Local LLMs)" },
 ];
 
 interface LLMFormFieldProps {
@@ -40,14 +46,16 @@ export function ProviderSelectField({ control }: ProviderSelectFieldProps) {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {supportedProviders.map(provider => (
+              {supportedProviders.map((provider) => (
                 <SelectItem key={provider.id} value={provider.id}>
                   {provider.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <FormDescription>Escolha o serviço de LLM que você deseja configurar.</FormDescription>
+          <FormDescription>
+            Escolha o serviço de LLM que você deseja configurar.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

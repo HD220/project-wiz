@@ -1,20 +1,20 @@
 // UserCircle2 for generic user, PlusCircle for new chat
-import { Bot, Hash, UserCircle2, PlusCircle } from 'lucide-react';
-import React from 'react';
+import { Bot, Hash, UserCircle2, PlusCircle } from "lucide-react";
+import React from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
-import { Button } from '@/presentation/ui/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 // For potential search within conversations
-import { Input } from '@/presentation/ui/components/ui/input';
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { cn } from '@/presentation/ui/lib/utils';
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/ui/lib/utils";
 
 // Interface for conversation items, can be expanded
 export interface ConversationItem {
   id: string;
   name: string;
   // Added 'agent' type for clarity
-  type: 'dm' | 'channel' | 'agent';
+  type: "dm" | "channel" | "agent";
   avatarUrl?: string;
   lastMessage?: string;
   timestamp?: string;
@@ -40,9 +40,9 @@ export function ConversationList({
   onSelectConversation,
   onNewConversation,
 }: ConversationListProps) {
-  const [internalSearchTerm, setInternalSearchTerm] = React.useState('');
+  const [internalSearchTerm, setInternalSearchTerm] = React.useState("");
 
-  const filteredConversations = conversations.filter(conv =>
+  const filteredConversations = conversations.filter((conv) =>
     conv.name.toLowerCase().includes(internalSearchTerm.toLowerCase())
   );
 
@@ -50,9 +50,16 @@ export function ConversationList({
     <div className="flex flex-col h-full">
       <header className="p-3 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Conversas</h2>
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+            Conversas
+          </h2>
           {onNewConversation && (
-            <Button variant="ghost" size="icon" onClick={onNewConversation} aria-label="Nova Conversa">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onNewConversation}
+              aria-label="Nova Conversa"
+            >
               <PlusCircle className="h-5 w-5 text-slate-500 dark:text-slate-400" />
             </Button>
           )}
@@ -69,7 +76,7 @@ export function ConversationList({
       <ScrollArea className="flex-1">
         <nav className="p-2 space-y-0.5">
           {filteredConversations.length > 0 ? (
-            filteredConversations.map(conv => (
+            filteredConversations.map((conv) => (
               <button
                 key={conv.id}
                 onClick={() => onSelectConversation(conv.id)}
@@ -80,27 +87,41 @@ export function ConversationList({
                     ? "bg-sky-100 dark:bg-sky-700/50 text-sky-700 dark:text-sky-300 font-medium"
                     : "text-slate-700 dark:text-slate-300"
                 )}
-                aria-current={conv.id === selectedConversationId ? "page" : undefined}
+                aria-current={
+                  conv.id === selectedConversationId ? "page" : undefined
+                }
               >
                 <Avatar className="h-7 w-7 text-xs flex-shrink-0">
                   {conv.avatarUrl ? (
                     <AvatarImage src={conv.avatarUrl} alt={conv.name} />
                   ) : null}
-                  <AvatarFallback className={cn(
-                     "text-white",
-                     conv.type === 'agent' ? "bg-emerald-500" :
-                     conv.type === 'dm' ? "bg-purple-500" :
-                     // Channel or default
-                     "bg-slate-400 dark:bg-slate-600"
-                  )}>
-                    {conv.type === 'channel' ? <Hash size={14} /> :
-                     conv.type === 'agent' ? <Bot size={14} /> :
-                     conv.name.substring(0, 1).toUpperCase() || <UserCircle2 size={14} />}
+                  <AvatarFallback
+                    className={cn(
+                      "text-white",
+                      conv.type === "agent"
+                        ? "bg-emerald-500"
+                        : conv.type === "dm"
+                          ? "bg-purple-500"
+                          : // Channel or default
+                            "bg-slate-400 dark:bg-slate-600"
+                    )}
+                  >
+                    {conv.type === "channel" ? (
+                      <Hash size={14} />
+                    ) : conv.type === "agent" ? (
+                      <Bot size={14} />
+                    ) : (
+                      conv.name.substring(0, 1).toUpperCase() || (
+                        <UserCircle2 size={14} />
+                      )
+                    )}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm truncate block leading-tight">{conv.name}</span>
+                  <span className="text-sm truncate block leading-tight">
+                    {conv.name}
+                  </span>
                   {conv.lastMessage && (
                     <span className="text-xs text-slate-500 dark:text-slate-400 truncate block leading-tight">
                       {conv.lastMessage}
@@ -108,18 +129,24 @@ export function ConversationList({
                   )}
                 </div>
                 <div className="flex flex-col items-end flex-shrink-0 text-xs">
-                    {conv.timestamp && <span className="text-slate-400 dark:text-slate-500 mb-0.5">{conv.timestamp}</span>}
-                    {conv.unreadCount && conv.unreadCount > 0 && (
-                        <span className="bg-red-500 text-white font-semibold rounded-full px-1.5 py-0.5 text-[10px] leading-none">
-                        {conv.unreadCount}
-                        </span>
-                    )}
+                  {conv.timestamp && (
+                    <span className="text-slate-400 dark:text-slate-500 mb-0.5">
+                      {conv.timestamp}
+                    </span>
+                  )}
+                  {conv.unreadCount && conv.unreadCount > 0 && (
+                    <span className="bg-red-500 text-white font-semibold rounded-full px-1.5 py-0.5 text-[10px] leading-none">
+                      {conv.unreadCount}
+                    </span>
+                  )}
                 </div>
               </button>
             ))
           ) : (
             <p className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
-              {internalSearchTerm ? "Nenhuma conversa encontrada." : "Nenhuma conversa para exibir."}
+              {internalSearchTerm
+                ? "Nenhuma conversa encontrada."
+                : "Nenhuma conversa para exibir."}
             </p>
           )}
         </nav>

@@ -1,9 +1,18 @@
+import { z } from 'zod';
+
 import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
+import { ValueError } from "@/core/domain/common/errors";
 
-import { ValueError } from "@/domain/common/errors";
+const UserAvatarSchema = z.string()
+  .url("Invalid URL format for avatar.")
+  .max(2048, "Avatar URL is too long.")
+  .refine(url => url.startsWith('http://') || url.startsWith('https://'), {
+    message: "Avatar URL must use http or https protocol."
+  })
+  .nullable();
 
 interface UserAvatarProps extends ValueObjectProps {
   value: string | null;
@@ -15,35 +24,21 @@ export class UserAvatar extends AbstractValueObject<UserAvatarProps> {
   }
 
   public static create(avatarUrl: string | null | undefined): UserAvatar {
-    if (
-      avatarUrl === null ||
-      avatarUrl === undefined ||
-      avatarUrl.trim() === ""
-    ) {
-      return new UserAvatar({ value: null });
+    const validationResult = UserAvatarSchema.safeParse(avatarUrl);
+
+    if (!validationResult.success) {
+      throw new ValueError('Invalid avatar URL format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
     }
-    this.validate(avatarUrl);
-    return new UserAvatar({ value: avatarUrl });
+    return new UserAvatar({ value: validationResult.data });
   }
 
-  private static validate(avatarUrl: string): void {
-    try {
-      const url = new URL(avatarUrl);
-      // Basic check for http or https protocols
-      if (url.protocol !== "http:" && url.protocol !== "https:") {
-        throw new ValueError("Avatar URL must use http or https protocol.");
-      }
-    } catch (error) {
-      if (error instanceof ValueError) throw error;
-      throw new ValueError(`Invalid URL format for avatar: ${avatarUrl}`);
-    }
-
-    if (avatarUrl.length > 2048) {
-      throw new ValueError("Avatar URL is too long.");
-    }
-  }
-
-  public value(): string | null {
+  public get value(): string | null {
     return this.props.value;
+  }
+
+  public equals(vo?: UserAvatar): boolean {
+    return super.equals(vo);
   }
 }

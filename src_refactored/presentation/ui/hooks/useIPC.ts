@@ -1,10 +1,10 @@
 // src_refactored/presentation/ui/hooks/useIPC.ts
 
 // Using path alias
-import { ipcService } from '@/ui/services/ipc.service';
+import { ipcService } from "@/ui/services/ipc.service";
 // Using path alias, kept for type documentation
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { IElectronIPC } from '@/ui/services/ipc.types';
+import { IElectronIPC } from "@/ui/services/ipc.types";
 
 /**
  * Custom React hook to access the IPC service for communicating
@@ -51,7 +51,7 @@ export function useIPC(): typeof ipcService {
 
 /*
 import { useState, useEffect } from 'react';
-import { IElectronIPC } from '@/presentation/ui/services/ipc.types';
+import { IElectronIPC } from '@/ui/services/ipc.types';
 
 export function useRawElectronIPC(): IElectronIPC | null {
   const [api, setApi] = useState<IElectronIPC | null>(null);

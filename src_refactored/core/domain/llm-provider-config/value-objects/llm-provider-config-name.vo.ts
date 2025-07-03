@@ -1,37 +1,45 @@
-// src_refactored/core/domain/llm-provider-config/value-objects/llm-provider-config-name.vo.ts
+import { z } from 'zod';
+
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const MIN_LENGTH = 1;
+const MAX_LENGTH = 100;
+
+const LLMProviderConfigNameSchema = z.string()
+  .trim()
+  .min(MIN_LENGTH, `LLMProviderConfig name must be at least ${MIN_LENGTH} character long.`)
+  .max(MAX_LENGTH, `LLMProviderConfig name must be at most ${MAX_LENGTH} characters long.`);
 
 interface LLMProviderConfigNameProps extends ValueObjectProps {
   value: string;
 }
 
 export class LLMProviderConfigName extends AbstractValueObject<LLMProviderConfigNameProps> {
-  private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 100;
-
-  private constructor(value: string) {
-    super({ value });
-  }
-
-  private static validate(name: string): void {
-    if (name.trim().length < this.MIN_LENGTH) {
-      throw new Error(`LLMProviderConfig name must be at least ${this.MIN_LENGTH} character long.`);
-    }
-    if (name.length > this.MAX_LENGTH) {
-      throw new Error(`LLMProviderConfig name must be at most ${this.MAX_LENGTH} characters long.`);
-    }
+  private constructor(props: LLMProviderConfigNameProps) {
+    super(props);
   }
 
   public static create(name: string): LLMProviderConfigName {
-    this.validate(name);
-    return new LLMProviderConfigName(name.trim());
+    const validationResult = LLMProviderConfigNameSchema.safeParse(name);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid LLMProviderConfig name.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new LLMProviderConfigName({ value: validationResult.data });
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
+  }
+
+  public equals(vo?: LLMProviderConfigName): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {
     return this.props.value;
   }
 }
+

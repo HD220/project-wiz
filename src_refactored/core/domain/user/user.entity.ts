@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
 import { Identity } from "@/core/common/value-objects/identity.vo";
 
@@ -21,6 +23,18 @@ export interface UserProps {
   updatedAt?: Date;
 }
 
+const UserPropsSchema = z.object({
+  id: z.custom<UserId>((val) => val instanceof UserId),
+  nickname: z.custom<UserNickname>((val) => val instanceof UserNickname),
+  username: z.custom<UserUsername>((val) => val instanceof UserUsername),
+  email: z.custom<UserEmail>((val) => val instanceof UserEmail),
+  avatar: z.custom<UserAvatar>((val) => val instanceof UserAvatar),
+  defaultLLMProviderConfigId: z.custom<Identity>((val) => val instanceof Identity),
+  assistantId: z.custom<Identity | null | undefined>((val) => val === null || val === undefined || val instanceof Identity).optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
 interface InternalUserProps extends EntityProps<UserId> {
   nickname: UserNickname;
   username: UserUsername;
@@ -28,6 +42,8 @@ interface InternalUserProps extends EntityProps<UserId> {
   avatar: UserAvatar;
   defaultLLMProviderConfigId: Identity;
   assistantId?: Identity | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class User extends AbstractEntity<UserId, InternalUserProps> {
@@ -36,7 +52,12 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
   }
 
   public static create(props: UserProps): User {
-    this.validateProps(props);
+    const validationResult = UserPropsSchema.safeParse(props);
+    if (!validationResult.success) {
+      throw new EntityError("Invalid User props.", {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
 
     const now = new Date();
     const internalProps: InternalUserProps = {
@@ -52,16 +73,6 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
     };
 
     return new User(internalProps);
-  }
-
-  private static validateProps(props: UserProps): void {
-    if (!props.id) throw new EntityError("User ID is required.");
-    if (!props.nickname) throw new EntityError("User nickname is required.");
-    if (!props.username) throw new EntityError("User username is required.");
-    if (!props.email) throw new EntityError("User email is required.");
-    if (!props.avatar) throw new EntityError("User avatar is required.");
-    if (!props.defaultLLMProviderConfigId)
-      throw new EntityError("Default LLM Provider Config ID is required.");
   }
 
   public nickname(): UserNickname {
@@ -90,11 +101,11 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
     const newProps = { ...this.props };
     let updated = false;
 
-    if (params.nickname && !this.props.nickname.equals(params.nickname)) {
+    if (params.nickname && !this.nickname().equals(params.nickname)) {
       newProps.nickname = params.nickname;
       updated = true;
     }
-    if (params.avatar && !this.props.avatar.equals(params.avatar)) {
+    if (params.avatar && !this.avatar().equals(params.avatar)) {
       newProps.avatar = params.avatar;
       updated = true;
     }
@@ -109,7 +120,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
   public changeEmail(newEmail: UserEmail): User {
     if (!newEmail)
       throw new ValueError("New email cannot be null or undefined.");
-    if (this.props.email.equals(newEmail)) {
+    if (this.email().equals(newEmail)) {
       return this;
     }
     const newProps = { ...this.props, email: newEmail, updatedAt: new Date() };
@@ -119,7 +130,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
   public changeUsername(newUsername: UserUsername): User {
     if (!newUsername)
       throw new ValueError("New username cannot be null or undefined.");
-    if (this.props.username.equals(newUsername)) {
+    if (this.username().equals(newUsername)) {
       return this;
     }
     const newProps = {
@@ -135,7 +146,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
       throw new ValueError(
         "LLM Provider Config ID cannot be null or undefined."
       );
-    if (this.props.defaultLLMProviderConfigId.equals(configId)) {
+    if (this.defaultLLMProviderConfigId().equals(configId)) {
       return this;
     }
     const newProps = {
@@ -148,8 +159,8 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
 
   public assignAssistant(assistantId: Identity | null): User {
     if (
-      this.props.assistantId === assistantId ||
-      this.props.assistantId?.equals(assistantId)
+      this.assistantId() === assistantId ||
+      this.assistantId()?.equals(assistantId)
     ) {
       return this;
     }
@@ -161,3 +172,4 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
     return new User(newProps);
   }
 }
+

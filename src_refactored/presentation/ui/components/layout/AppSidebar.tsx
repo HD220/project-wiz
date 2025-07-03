@@ -1,18 +1,31 @@
-import { Link, LinkProps } from '@tanstack/react-router';
-import { Home, PlusCircle, Archive, Briefcase, Settings, LogOut, LucideIcon } from 'lucide-react';
-import React from 'react';
+import { Link, LinkProps } from "@tanstack/react-router";
+import {
+  Home,
+  PlusCircle,
+  Archive,
+  Briefcase,
+  Settings,
+  LogOut,
+  LucideIcon,
+} from "lucide-react";
+import React from "react";
 
 // Added Avatar components
-import { Avatar, AvatarFallback, AvatarImage } from '@/presentation/ui/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // Added buttonVariants
-import { Button, buttonVariants } from '@/presentation/ui/components/ui/button';
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/ui/components/ui/tooltip';
-import { cn } from '@/presentation/ui/lib/utils';
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/ui/lib/utils";
 
 // Interface para os itens da AppSidebar, focada em ícones e tooltips
-interface AppSidebarItemProps extends Omit<LinkProps, 'children' | 'title'> {
+interface AppSidebarItemProps extends Omit<LinkProps, "children" | "title"> {
   tooltip: string;
   icon: LucideIcon;
   // Para itens de projeto que podem usar Avatar
@@ -50,7 +63,7 @@ function AppSidebarItem({
 
   const commonButtonClasses = cn(
     // Usar 'ghost' para melhor adaptação à sidebar fina
-    buttonVariants({ variant: 'ghost', size: 'icon' }),
+    buttonVariants({ variant: "ghost", size: "icon" }),
     // Estilo base
     "h-12 w-12 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700",
     // Permite override de classes
@@ -93,16 +106,25 @@ function AppSidebarItem({
 
 // Mock data para projetos, simulando o que viria do estado/API
 const mockUserProjects = [
-  { id: '1', name: 'Projeto Phoenix', initials: 'PH', iconUrl: '/avatars/project-phoenix.png' },
-  { id: '2', name: 'Operação Quimera', initials: 'OQ' },
-  { id: '3', name: 'Iniciativa Netuno', initials: 'IN', iconUrl: '/avatars/project-neptune.png' },
-  { id: '4', name: 'Legado Moderno', initials: 'LM' },
+  {
+    id: "1",
+    name: "Projeto Phoenix",
+    initials: "PH",
+    iconUrl: "/avatars/project-phoenix.png",
+  },
+  { id: "2", name: "Operação Quimera", initials: "OQ" },
+  {
+    id: "3",
+    name: "Iniciativa Netuno",
+    initials: "IN",
+    iconUrl: "/avatars/project-neptune.png",
+  },
+  { id: "4", name: "Legado Moderno", initials: "LM" },
 ];
-
 
 export function AppSidebar() {
   // Rota para onde o botão "Home" levará, ajustado para /user/
-  const userHomeRoute = '/user/';
+  const userHomeRoute = "/user/";
 
   return (
     <aside className="w-16 flex-shrink-0 h-screen flex flex-col items-center gap-2 py-3 bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
@@ -140,7 +162,7 @@ export function AppSidebar() {
       {/* Lista de Projetos Ativos */}
       <ScrollArea className="flex-1 w-full overflow-y-auto">
         <div className="flex flex-col items-center gap-2 px-2">
-          {mockUserProjects.map(project => (
+          {mockUserProjects.map((project) => (
             <AppSidebarItem
               key={project.id}
               to="/projects/$projectId"
@@ -161,20 +183,23 @@ export function AppSidebar() {
 
       {/* Ações no Rodapé */}
       <div className="mt-auto flex flex-col items-center gap-2">
-         <AppSidebarItem
-            to="/settings"
-            tooltip="Configurações"
-            icon={Settings}
-            // Não usado
-            avatarFallback="S"
+        <AppSidebarItem
+          to="/settings"
+          tooltip="Configurações"
+          icon={Settings}
+          // Não usado
+          avatarFallback="S"
         />
         <AppSidebarItem
-            tooltip="Sair (Logout)"
-            icon={LogOut}
-            // Ação simulada
-            action={() => { console.log("Logout action triggered (simulated)"); alert("Logout (simulado)"); }}
-            // Não usado
-            avatarFallback="L"
+          tooltip="Sair (Logout)"
+          icon={LogOut}
+          // Ação simulada
+          action={() => {
+            console.log("Logout action triggered (simulated)");
+            alert("Logout (simulado)");
+          }}
+          // Não usado
+          avatarFallback="L"
         />
       </div>
     </aside>

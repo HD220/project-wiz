@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { PersonaTemplateFormData } from '../PersonaTemplateForm';
+import type { PersonaTemplateFormData } from "../PersonaTemplateForm";
 
 interface FormFieldProps {
   control: Control<PersonaTemplateFormData>;
@@ -28,7 +28,9 @@ export function PersonaNameField({ control }: FormFieldProps) {
           <FormControl>
             <Input placeholder="Ex: Desenvolvedor Python Sênior" {...field} />
           </FormControl>
-          <FormDescription>Um nome único e descritivo para este template de persona.</FormDescription>
+          <FormDescription>
+            Um nome único e descritivo para este template de persona.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

@@ -1,20 +1,19 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 // Added useState
-import React, { useState } from 'react';
+import React, { useState } from "react";
 // For feedback on LLM save
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 // Import type
-import { LLMConfigFormData } from '@/presentation/ui/features/llm/components/LLMConfigForm';
-import { InitialConfigStep } from '@/presentation/ui/features/onboarding/components/InitialConfigStep';
-import { OnboardingWizard } from '@/presentation/ui/features/onboarding/components/OnboardingWizard';
-import { WelcomeStep } from '@/presentation/ui/features/onboarding/components/WelcomeStep';
+import { LLMConfigFormData } from "@/ui/features/llm/components/LLMConfigForm";
+import { InitialConfigStep } from "@/ui/features/onboarding/components/InitialConfigStep";
+import { OnboardingWizard } from "@/ui/features/onboarding/components/OnboardingWizard";
+import { WelcomeStep } from "@/ui/features/onboarding/components/WelcomeStep";
 
 function OnboardingPageComponent() {
   const router = useRouter();
   const [isLLMConfigSaved, setIsLLMConfigSaved] = useState(false);
   const [isSubmittingLLM, setIsSubmittingLLM] = useState(false);
-
 
   const handleLLMConfigSaved = (data: LLMConfigFormData) => {
     // This callback is triggered by InitialConfigStep when its form is submitted successfully
@@ -34,33 +33,35 @@ function OnboardingPageComponent() {
       // This would require more state management in OnboardingWizard
       return;
     }
-    router.navigate({ to: '/dashboard', replace: true });
+    router.navigate({ to: "/dashboard", replace: true });
   };
 
   // Define the steps for the wizard
   const onboardingSteps = [
     {
-      id: 'welcome',
-      title: 'Bem-vindo ao Project Wiz!',
+      id: "welcome",
+      title: "Bem-vindo ao Project Wiz!",
       content: <WelcomeStep />,
     },
     {
-      id: 'initial-config',
-      title: 'Configuração Inicial Essencial',
+      id: "initial-config",
+      title: "Configuração Inicial Essencial",
       content: (
         <InitialConfigStep
-            onConfigSaved={handleLLMConfigSaved}
-            isSubmitting={isSubmittingLLM}
-            setIsSubmitting={setIsSubmittingLLM}
+          onConfigSaved={handleLLMConfigSaved}
+          isSubmitting={isSubmittingLLM}
+          setIsSubmitting={setIsSubmittingLLM}
         />
       ),
     },
     {
-      id: 'summary',
-      title: 'Pronto para Começar!',
+      id: "summary",
+      title: "Pronto para Começar!",
       content: (
         <div className="text-center">
-          <h3 className="text-xl font-semibold mb-2">Configuração Concluída!</h3>
+          <h3 className="text-xl font-semibold mb-2">
+            Configuração Concluída!
+          </h3>
           <p className="text-slate-700 dark:text-slate-300">
             {isLLMConfigSaved
               ? "Sua configuração LLM foi salva. Você está pronto para explorar o Project Wiz!"
@@ -68,7 +69,7 @@ function OnboardingPageComponent() {
           </p>
           {!isLLMConfigSaved && (
             <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-2">
-                A configuração do LLM é necessária para prosseguir.
+              A configuração do LLM é necessária para prosseguir.
             </p>
           )}
         </div>
@@ -88,13 +89,15 @@ function OnboardingPageComponent() {
           // This logic would need to be added to OnboardingWizard component itself.
           // For simplicity now, the summary step message and onFinish check handle it.
           // This logic would need to be added to OnboardingWizard component itself.
-          isStepBlocked={ (stepId: string) => stepId === 'summary' && !isLLMConfigSaved }
+          isStepBlocked={(stepId: string) =>
+            stepId === "summary" && !isLLMConfigSaved
+          }
         />
       </div>
     </div>
   );
 }
 
-export const Route = createFileRoute('/(public)/onboarding/')({
+export const Route = createFileRoute("/(public)/onboarding/")({
   component: OnboardingPageComponent,
 });

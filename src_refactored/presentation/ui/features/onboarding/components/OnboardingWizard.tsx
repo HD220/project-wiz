@@ -1,8 +1,15 @@
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode } from "react";
 
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
-import { Progress } from '@/presentation/ui/components/ui/progress';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface OnboardingStep {
   id: string;
@@ -22,7 +29,7 @@ export function OnboardingWizard({
   steps,
   onFinish,
   wizardTitle = "Onboarding",
-  isStepBlocked
+  isStepBlocked,
 }: OnboardingWizardProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
@@ -30,13 +37,15 @@ export function OnboardingWizard({
   const progressValue = ((currentStepIndex + 1) / steps.length) * 100;
 
   // Determine if the current step should block progression
-  const isBlocked = isStepBlocked ? isStepBlocked(currentStep.id, currentStepIndex) : false;
+  const isBlocked = isStepBlocked
+    ? isStepBlocked(currentStep.id, currentStepIndex)
+    : false;
 
   const goToNextStep = () => {
     // Check if current step is blocked for "Next"
     if (isBlocked && currentStepIndex < steps.length - 1) {
-        // Optionally show a message, but parent component (OnboardingPage) shows toast for LLM
-        return;
+      // Optionally show a message, but parent component (OnboardingPage) shows toast for LLM
+      return;
     }
     setCurrentStepIndex((prev) => Math.min(prev + 1, steps.length - 1));
   };
@@ -48,12 +57,11 @@ export function OnboardingWizard({
   const handleFinishClick = () => {
     // Check if current step (likely summary) is blocked for "Finish"
     if (isBlocked) {
-         // Parent (OnboardingPage) handles the specific toast message for LLM config not saved
-        return;
+      // Parent (OnboardingPage) handles the specific toast message for LLM config not saved
+      return;
     }
     onFinish();
-  }
-
+  };
 
   if (!currentStep) {
     return <div>Error: No current step defined.</div>;
@@ -62,15 +70,17 @@ export function OnboardingWizard({
   // Determine if the "Next" or "Finish" button should be disabled
   // The "Next" button is disabled if the current step is blocked by the isStepBlocked condition.
   // The "Finish" button is also disabled if the current (last) step is blocked.
-  const isNextButtonDisabled = isBlocked && (currentStepIndex < steps.length - 1);
-  const isFinishButtonDisabled = isBlocked && (currentStepIndex === steps.length - 1);
-
+  const isNextButtonDisabled = isBlocked && currentStepIndex < steps.length - 1;
+  const isFinishButtonDisabled =
+    isBlocked && currentStepIndex === steps.length - 1;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-2xl">{wizardTitle}</CardTitle>
-        <CardDescription>{currentStep.title} (Etapa {currentStepIndex + 1} de {steps.length})</CardDescription>
+        <CardDescription>
+          {currentStep.title} (Etapa {currentStepIndex + 1} de {steps.length})
+        </CardDescription>
       </CardHeader>
       {/* Increased min-height */}
       <CardContent className="min-h-[250px] md:min-h-[300px] py-6 flex flex-col justify-center">
@@ -79,7 +89,11 @@ export function OnboardingWizard({
       <CardFooter className="flex flex-col items-center space-y-4 pt-6">
         <Progress value={progressValue} className="w-full mb-4" />
         <div className="flex w-full justify-between">
-          <Button variant="outline" onClick={goToPreviousStep} disabled={currentStepIndex === 0}>
+          <Button
+            variant="outline"
+            onClick={goToPreviousStep}
+            disabled={currentStepIndex === 0}
+          >
             Anterior
           </Button>
           {currentStepIndex < steps.length - 1 ? (
@@ -87,7 +101,10 @@ export function OnboardingWizard({
               Próximo
             </Button>
           ) : (
-            <Button onClick={handleFinishClick} disabled={isFinishButtonDisabled}>
+            <Button
+              onClick={handleFinishClick}
+              disabled={isFinishButtonDisabled}
+            >
               Finalizar
             </Button>
           )}

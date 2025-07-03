@@ -1,7 +1,7 @@
-// src_refactored/core/domain/job/value-objects/job-options.vo.ts
+import { z } from 'zod';
 
-import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
-import { DomainError } from '@/core/domain/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
 
 /**
  * Options for how a job should be retried in case of failure.
@@ -14,6 +14,12 @@ export interface IJobBackoffOptions {
   delay: number;
   jitter?: number;
 }
+
+const JobBackoffSchema = z.object({
+  type: z.enum(['fixed', 'exponential']),
+  delay: z.number().int().min(0, 'Backoff delay must be greater than or equal to 0.'),
+  jitter: z.number().min(0).max(1).optional(),
+});
 
 /**
  * A function that determines the backoff delay for a job.
@@ -33,6 +39,12 @@ export interface IJobRemovalOptions {
   age?: number;
   count?: number;
 }
+
+const JobRemovalSchema = z.object({
+  age: z.number().int().min(0, 'Removal age cannot be negative.').optional(),
+  count: z.number().int().min(-1, 'Removal count cannot be less than -1.').optional(),
+});
+
 export interface IJobOptions {
   priority?: number;
   delay?: number;
@@ -45,65 +57,32 @@ export interface IJobOptions {
   maxStalledCount?: number;
 }
 
+const JobOptionsSchema = z.object({
+  priority: z.number().int().min(0).optional().default(0),
+  delay: z.number().int().min(0).optional().default(0),
+  attempts: z.number().int().min(1).optional().default(1),
+  // z.function() for JobBackoffStrategyFn
+  backoff: z.union([JobBackoffSchema, z.function()]).optional(),
+  removeOnComplete: z.union([z.boolean(), JobRemovalSchema]).optional().default(true),
+  removeOnFail: z.union([z.boolean(), JobRemovalSchema]).optional().default(false),
+  jobId: z.string().optional(),
+  timeout: z.number().int().min(0).optional(),
+  maxStalledCount: z.number().int().min(0).optional().default(3),
+});
+
 export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   private constructor(props: IJobOptions) {
-    super(JobOptionsVO.sanitize(props));
+    super(props);
   }
 
   public static create(options?: IJobOptions): JobOptionsVO {
-    const defaults: IJobOptions = {
-      priority: 0,
-      delay: 0,
-      attempts: 1,
-      removeOnComplete: true,
-      removeOnFail: false,
-      maxStalledCount: 3,
-    };
-    return new JobOptionsVO({ ...defaults, ...(options || {}) });
-  }
-
-  private static sanitize(props: IJobOptions): IJobOptions {
-    const sanitized: IJobOptions = { ...props };
-
-    sanitized.priority = Math.max(0, props.priority || 0);
-    sanitized.delay = Math.max(0, props.delay || 0);
-    sanitized.attempts = Math.max(1, props.attempts || 1);
-    sanitized.maxStalledCount = Math.max(0, props.maxStalledCount || 0);
-
-    if (props.backoff && typeof props.backoff === 'object') {
-      if (props.backoff.delay <= 0) {
-        throw new DomainError('Backoff delay must be greater than 0.');
-      }
-      if (props.backoff.jitter && (props.backoff.jitter < 0 || props.backoff.jitter > 1)) {
-        throw new DomainError('Backoff jitter must be between 0 and 1.');
-      }
+    const validationResult = JobOptionsSchema.safeParse(options);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid job options.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
     }
-
-    // Sanitize removeOnComplete
-    if (typeof props.removeOnComplete === 'object') {
-      if (props.removeOnComplete.age !== undefined && props.removeOnComplete.age < 0) {
-        throw new DomainError('removeOnComplete.age cannot be negative.');
-      }
-      if (props.removeOnComplete.count !== undefined && props.removeOnComplete.count < -1) {
-        throw new DomainError('removeOnComplete.count cannot be less than -1.');
-      }
-    } else if (typeof props.removeOnComplete !== 'boolean' && props.removeOnComplete !== undefined) {
-      throw new DomainError('removeOnComplete must be a boolean or an IJobRemovalOptions object.');
-    }
-
-    // Sanitize removeOnFail
-    if (typeof props.removeOnFail === 'object') {
-      if (props.removeOnFail.age !== undefined && props.removeOnFail.age < 0) {
-        throw new DomainError('removeOnFail.age cannot be negative.');
-      }
-      if (props.removeOnFail.count !== undefined && props.removeOnFail.count < -1) {
-        throw new DomainError('removeOnFail.count cannot be less than -1.');
-      }
-    } else if (typeof props.removeOnFail !== 'boolean' && props.removeOnFail !== undefined) {
-      throw new DomainError('removeOnFail must be a boolean or an IJobRemovalOptions object.');
-    }
-
-    return sanitized;
+    return new JobOptionsVO(validationResult.data);
   }
 
   get priority(): number { return this.props.priority!; }
@@ -116,6 +95,11 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   get timeout(): number | undefined { return this.props.timeout; }
   get maxStalledCount(): number { return this.props.maxStalledCount!; }
 
+  public equals(vo?: JobOptionsVO): boolean {
+    // Custom equals for JobOptionsVO if needed, otherwise rely on AbstractValueObject's JSON.stringify
+    // For now, AbstractValueObject's equals is sufficient if functions are not compared directly.
+    return super.equals(vo);
+  }
 
   public toPersistence(): IJobOptions {
     // For a custom backoff function, we might need to store its name or a reference
@@ -125,18 +109,10 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
     const persistenceProps = { ...this.props };
     if (typeof persistenceProps.backoff === 'function') {
         // Decide how to handle function persistence.
-        // Option 1: Store a well-known name of the strategy
-        // Option 2: Do not persist the function itself (rely on code for custom strategies)
-        // For now, let's remove it if it's a function to avoid serialization issues with simple JSON.
-        // The application layer would need to reconstruct it if 'custom' type is indicated.
-        // Or, better, the IJobBackoffOptions would have a 'type: "custom"' and a 'name?: string'
-        // This VO is more about runtime validation and defaults.
-        // Let's assume for now the 'backoff' field in the DB will store the IJobBackoffOptions object
-        // and custom functions are applied at runtime by the worker based on some other config or job name.
-        // So, if it's a function, it won't be directly part of the serialized options in this simple model.
-        // A more advanced system would handle this more gracefully.
-        // For this iteration, we'll allow the object form to be persisted.
+        // For now, we'll remove it if it's a function to avoid serialization issues with simple JSON.
+        delete persistenceProps.backoff;
     }
     return persistenceProps;
   }
 }
+

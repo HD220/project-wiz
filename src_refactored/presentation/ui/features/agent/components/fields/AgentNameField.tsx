@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { AgentInstanceFormData } from '../AgentInstanceForm';
+import type { AgentInstanceFormData } from "../AgentInstanceForm";
 
 interface AgentFormFieldProps {
   control: Control<AgentInstanceFormData>;
@@ -28,10 +28,14 @@ export function AgentNameField({ control }: AgentNameFieldProps) {
         <FormItem>
           <FormLabel>Nome da Instância do Agente (Opcional)</FormLabel>
           <FormControl>
-            <Input placeholder="Ex: MeuCoderQA, AgenteDeRefatoracao" {...field} />
+            <Input
+              placeholder="Ex: MeuCoderQA, AgenteDeRefatoracao"
+              {...field}
+            />
           </FormControl>
           <FormDescription>
-            Um nome customizado para esta instância específica. Se vazio, um nome será gerado.
+            Um nome customizado para esta instância específica. Se vazio, um
+            nome será gerado.
           </FormDescription>
           <FormMessage />
         </FormItem>

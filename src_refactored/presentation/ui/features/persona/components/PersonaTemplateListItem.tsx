@@ -1,21 +1,42 @@
-import { Link } from '@tanstack/react-router';
-import { UserSquare, Edit3, Trash2, MoreVertical, Settings, Zap, Brain, MessageSquare, BookText } from 'lucide-react';
-import React from 'react';
+import { Link } from "@tanstack/react-router";
+import {
+  UserSquare,
+  Edit3,
+  Trash2,
+  MoreVertical,
+  Settings,
+  Zap,
+  Brain,
+  MessageSquare,
+  BookText,
+} from "lucide-react";
+import React from "react";
 
-import { Badge } from '@/presentation/ui/components/ui/badge';
-import { Button } from '@/presentation/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/presentation/ui/components/ui/card';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/presentation/ui/components/ui/dropdown-menu';
-import { Separator } from '@/presentation/ui/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/presentation/ui/components/ui/tooltip';
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 // cn import removed
-
 
 export interface PersonaTemplate {
   id: string;
@@ -60,14 +81,23 @@ interface ListItemHeaderProps {
   onCreateAgent?: (templateId: string) => void;
 }
 
-function ListItemHeader({ template, onEdit, onDelete, onCreateAgent }: ListItemHeaderProps) {
+function ListItemHeader({
+  template,
+  onEdit,
+  onDelete,
+  onCreateAgent,
+}: ListItemHeaderProps) {
   return (
     <CardHeader className="pb-3">
       <div className="flex items-start justify-between mb-2">
         <UserSquare className="h-10 w-10 text-sky-500 dark:text-sky-400" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800"
+            >
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Mais opções</span>
             </Button>
@@ -101,11 +131,18 @@ function ListItemHeader({ template, onEdit, onDelete, onCreateAgent }: ListItemH
         </DropdownMenu>
       </div>
       <CardTitle className="text-lg truncate" title={template.name}>
-        <Link to="/personas/$templateId" params={{ templateId: template.id }} className="hover:underline">
+        <Link
+          to="/personas/$templateId"
+          params={{ templateId: template.id }}
+          className="hover:underline"
+        >
           {template.name}
         </Link>
       </CardTitle>
-      <CardDescription className="text-xs h-10 line-clamp-2" title={template.role}>
+      <CardDescription
+        className="text-xs h-10 line-clamp-2"
+        title={template.role}
+      >
         Papel: {template.role}
       </CardDescription>
     </CardHeader>
@@ -122,12 +159,14 @@ function ListItemTools({ toolNames }: ListItemToolsProps) {
   }
   return (
     <div>
-      <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Ferramentas:</h4>
+      <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+        Ferramentas:
+      </h4>
       <div className="flex flex-wrap gap-1.5">
         <TooltipProvider delayDuration={100}>
-          {toolNames.slice(0, 5).map(toolName => {
+          {toolNames.slice(0, 5).map((toolName) => {
             // Normalize toolName from data
-            const lookupKey = toolName.replace(/-/g, '');
+            const lookupKey = toolName.replace(/-/g, "");
             // Use normalized key for lookup
             const IconComponent = toolIconMap[lookupKey] || toolIconMap.default;
             return (
@@ -145,16 +184,16 @@ function ListItemTools({ toolNames }: ListItemToolsProps) {
             );
           })}
           {toolNames.length > 5 && (
-             <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="px-1.5 py-0.5 text-xs">
-                    +{toolNames.length - 5} mais
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent className="text-xs p-1">
-                  {toolNames.slice(5).join(', ')}
-                </TooltipContent>
-              </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="px-1.5 py-0.5 text-xs">
+                  +{toolNames.length - 5} mais
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs p-1">
+                {toolNames.slice(5).join(", ")}
+              </TooltipContent>
+            </Tooltip>
           )}
         </TooltipProvider>
       </div>
@@ -170,8 +209,13 @@ function ListItemContent({ template }: ListItemContentProps) {
   return (
     <CardContent className="flex-grow pb-3 space-y-2">
       <div>
-        <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-0.5">Objetivo Principal:</h4>
-        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3" title={template.goal}>
+        <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-0.5">
+          Objetivo Principal:
+        </h4>
+        <p
+          className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3"
+          title={template.goal}
+        >
           {template.goal}
         </p>
       </div>
@@ -181,25 +225,35 @@ function ListItemContent({ template }: ListItemContentProps) {
 }
 
 interface ListItemFooterProps {
- templateId: string;
+  templateId: string;
 }
 
-function ListItemFooter({templateId}: ListItemFooterProps) {
-    return (
-        <CardFooter className="p-3">
-            <Button variant="outline" size="sm" className="w-full" asChild>
-            <Link to="/personas/$templateId" params={{ templateId: templateId }}>
-                Ver Detalhes / Editar
-            </Link>
-            </Button>
-        </CardFooter>
-    );
+function ListItemFooter({ templateId }: ListItemFooterProps) {
+  return (
+    <CardFooter className="p-3">
+      <Button variant="outline" size="sm" className="w-full" asChild>
+        <Link to="/personas/$templateId" params={{ templateId: templateId }}>
+          Ver Detalhes / Editar
+        </Link>
+      </Button>
+    </CardFooter>
+  );
 }
 
-export function PersonaTemplateListItem({ template, onEdit, onDelete, onCreateAgent }: PersonaTemplateListItemProps) {
+export function PersonaTemplateListItem({
+  template,
+  onEdit,
+  onDelete,
+  onCreateAgent,
+}: PersonaTemplateListItemProps) {
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-200">
-      <ListItemHeader template={template} onEdit={onEdit} onDelete={onDelete} onCreateAgent={onCreateAgent} />
+      <ListItemHeader
+        template={template}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onCreateAgent={onCreateAgent}
+      />
       <ListItemContent template={template} />
       <Separator />
       <ListItemFooter templateId={template.id} />

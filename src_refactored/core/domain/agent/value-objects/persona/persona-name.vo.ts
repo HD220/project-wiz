@@ -1,34 +1,41 @@
-// src_refactored/core/domain/agent/value-objects/persona/persona-name.vo.ts
+import { z } from 'zod';
+
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const MIN_LENGTH = 1;
+const MAX_LENGTH = 100;
+
+const PersonaNameSchema = z.string()
+  .trim()
+  .min(MIN_LENGTH, `Persona name must be at least ${MIN_LENGTH} character long.`)
+  .max(MAX_LENGTH, `Persona name must be at most ${MAX_LENGTH} characters long.`);
 
 interface PersonaNameProps extends ValueObjectProps {
   value: string;
 }
 
 export class PersonaName extends AbstractValueObject<PersonaNameProps> {
-  private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 100;
-
-  private constructor(value: string) {
-    super({ value });
-  }
-
-  private static validate(name: string): void {
-    if (name.trim().length < this.MIN_LENGTH) {
-      throw new Error(`Persona name must be at least ${this.MIN_LENGTH} character long.`);
-    }
-    if (name.length > this.MAX_LENGTH) {
-      throw new Error(`Persona name must be at most ${this.MAX_LENGTH} characters long.`);
-    }
+  private constructor(props: PersonaNameProps) {
+    super(props);
   }
 
   public static create(name: string): PersonaName {
-    this.validate(name);
-    return new PersonaName(name.trim());
+    const validationResult = PersonaNameSchema.safeParse(name);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid persona name.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new PersonaName({ value: validationResult.data });
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
+  }
+
+  public equals(vo?: PersonaName): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {

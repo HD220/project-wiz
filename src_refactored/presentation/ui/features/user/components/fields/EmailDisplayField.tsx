@@ -1,17 +1,17 @@
-import React from 'react';
+import React from "react";
 
 import {
   FormControl,
   FormDescription,
   FormItem,
   FormLabel,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { UserProfile } from '@/shared/ipc-types';
+import type { UserProfile } from "@/shared/ipc-types";
 
 interface EmailDisplayFieldProps {
-  email: UserProfile['email'];
+  email: UserProfile["email"];
 }
 
 export function EmailDisplayField({ email }: EmailDisplayFieldProps) {
@@ -23,7 +23,9 @@ export function EmailDisplayField({ email }: EmailDisplayFieldProps) {
       <FormControl>
         <Input type="email" value={email} disabled readOnly />
       </FormControl>
-      <FormDescription>Seu endereço de email (não pode ser alterado).</FormDescription>
+      <FormDescription>
+        Seu endereço de email (não pode ser alterado).
+      </FormDescription>
     </FormItem>
   );
 }

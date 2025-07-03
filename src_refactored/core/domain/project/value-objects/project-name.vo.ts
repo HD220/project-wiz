@@ -1,39 +1,36 @@
+import { z } from 'zod';
+
 import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
+import { ValueError } from '@/core/domain/common/errors';
+
+const ProjectNameSchema = z.string()
+  .trim()
+  .min(1, 'Project name must be at least 1 character long.')
+  .max(100, 'Project name must be at most 100 characters long.');
 
 interface ProjectNameProps extends ValueObjectProps {
   value: string;
 }
 
 export class ProjectName extends AbstractValueObject<ProjectNameProps> {
-  private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 100;
-
   private constructor(value: string) {
     super({ value });
   }
 
-  private static validate(name: string): void {
-    if (name.length < this.MIN_LENGTH) {
-      throw new Error(
-        `Project name must be at least ${this.MIN_LENGTH} character long.`
-      );
-    }
-    if (name.length > this.MAX_LENGTH) {
-      throw new Error(
-        `Project name must be at most ${this.MAX_LENGTH} characters long.`
-      );
-    }
-  }
-
   public static create(name: string): ProjectName {
-    this.validate(name);
-    return new ProjectName(name);
+    const validationResult = ProjectNameSchema.safeParse(name);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid project name format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new ProjectName(validationResult.data);
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
   }
 
@@ -41,3 +38,4 @@ export class ProjectName extends AbstractValueObject<ProjectNameProps> {
     return this.props.value;
   }
 }
+

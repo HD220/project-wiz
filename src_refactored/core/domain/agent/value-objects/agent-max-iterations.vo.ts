@@ -1,46 +1,45 @@
-// src_refactored/core/domain/agent/value-objects/agent-max-iterations.vo.ts
-import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
+import { z } from 'zod';
 
-import { DomainError } from '@/domain/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
 
 const MIN_ITERATIONS = 1;
 const MAX_ITERATIONS = 100;
 const DEFAULT_ITERATIONS = 10;
 
-export class AgentMaxIterationsError extends DomainError {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AgentMaxIterationsError';
-  }
+const AgentMaxIterationsSchema = z.number()
+  .int('Max iterations must be an integer.')
+  .min(MIN_ITERATIONS, `Max iterations must be at least ${MIN_ITERATIONS}.`)
+  .max(MAX_ITERATIONS, `Max iterations must not exceed ${MAX_ITERATIONS}.`);
+
+interface AgentMaxIterationsProps extends ValueObjectProps {
+  value: number;
 }
 
-export class AgentMaxIterations extends AbstractValueObject<number> {
-  private constructor(value: number) {
-    super(value);
+export class AgentMaxIterations extends AbstractValueObject<AgentMaxIterationsProps> {
+  private constructor(props: AgentMaxIterationsProps) {
+    super(props);
   }
 
   public static create(value: number): AgentMaxIterations {
-    if (typeof value !== 'number' || !Number.isInteger(value)) {
-      throw new AgentMaxIterationsError('Max iterations must be an integer.');
+    const validationResult = AgentMaxIterationsSchema.safeParse(value);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid agent max iterations.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
     }
-    if (value < MIN_ITERATIONS) {
-      throw new AgentMaxIterationsError(
-        `Max iterations must be at least ${MIN_ITERATIONS}.`
-      );
-    }
-    if (value > MAX_ITERATIONS) {
-      throw new AgentMaxIterationsError(
-        `Max iterations must not exceed ${MAX_ITERATIONS}.`
-      );
-    }
-    return new AgentMaxIterations(value);
+    return new AgentMaxIterations({ value: validationResult.data });
   }
 
   public static default(): AgentMaxIterations {
-    return new AgentMaxIterations(DEFAULT_ITERATIONS);
+    return new AgentMaxIterations({ value: DEFAULT_ITERATIONS });
   }
 
   public get value(): number {
-    return this.props;
+    return this.props.value;
+  }
+
+  public equals(vo?: AgentMaxIterations): boolean {
+    return super.equals(vo);
   }
 }

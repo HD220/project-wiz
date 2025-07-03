@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Textarea } from '@/presentation/ui/components/ui/textarea';
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 
-import type { ProjectFormData } from '../ProjectForm';
+import type { ProjectFormData } from "../ProjectForm";
 
 interface FormFieldProps {
   control: Control<ProjectFormData>;

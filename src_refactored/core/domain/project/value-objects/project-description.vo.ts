@@ -1,33 +1,34 @@
+import { z } from 'zod';
+
 import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
+import { ValueError } from '@/core/domain/common/errors';
+
+const ProjectDescriptionSchema = z.string()
+  .max(500, 'Project description must be at most 500 characters long.');
 
 interface ProjectDescriptionProps extends ValueObjectProps {
   value: string;
 }
 
 export class ProjectDescription extends AbstractValueObject<ProjectDescriptionProps> {
-  private static readonly MAX_LENGTH = 500;
-
   private constructor(value: string) {
     super({ value });
   }
 
-  private static validate(description: string): void {
-    if (description.length > this.MAX_LENGTH) {
-      throw new Error(
-        `Project description must be at most ${this.MAX_LENGTH} characters long.`
-      );
-    }
-  }
-
   public static create(description: string): ProjectDescription {
-    this.validate(description);
-    return new ProjectDescription(description);
+    const validationResult = ProjectDescriptionSchema.safeParse(description);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid project description format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new ProjectDescription(validationResult.data);
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
   }
 

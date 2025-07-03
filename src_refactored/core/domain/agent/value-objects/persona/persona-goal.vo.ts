@@ -1,37 +1,45 @@
-// src_refactored/core/domain/agent/value-objects/persona/persona-goal.vo.ts
+import { z } from 'zod';
+
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const MIN_LENGTH = 10;
+const MAX_LENGTH = 500;
+
+const PersonaGoalSchema = z.string()
+  .trim()
+  .min(MIN_LENGTH, `Persona goal must be at least ${MIN_LENGTH} characters long.`)
+  .max(MAX_LENGTH, `Persona goal must be at most ${MAX_LENGTH} characters long.`);
 
 interface PersonaGoalProps extends ValueObjectProps {
   value: string;
 }
 
 export class PersonaGoal extends AbstractValueObject<PersonaGoalProps> {
-  private static readonly MIN_LENGTH = 10;
-  private static readonly MAX_LENGTH = 500;
-
-  private constructor(value: string) {
-    super({ value });
-  }
-
-  private static validate(goal: string): void {
-    if (goal.trim().length < this.MIN_LENGTH) {
-      throw new Error(`Persona goal must be at least ${this.MIN_LENGTH} characters long.`);
-    }
-    if (goal.length > this.MAX_LENGTH) {
-      throw new Error(`Persona goal must be at most ${this.MAX_LENGTH} characters long.`);
-    }
+  private constructor(props: PersonaGoalProps) {
+    super(props);
   }
 
   public static create(goal: string): PersonaGoal {
-    this.validate(goal);
-    return new PersonaGoal(goal.trim());
+    const validationResult = PersonaGoalSchema.safeParse(goal);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid persona goal.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new PersonaGoal({ value: validationResult.data });
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
+  }
+
+  public equals(vo?: PersonaGoal): boolean {
+    return super.equals(vo);
   }
 
   public toString(): string {
     return this.props.value;
   }
 }
+

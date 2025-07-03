@@ -1,12 +1,18 @@
 // Icon for selected state
-import { CheckCircle2 } from 'lucide-react';
-import React from 'react';
+import { CheckCircle2 } from "lucide-react";
+import React from "react";
 
 // Button import removed as it's not used
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/presentation/ui/components/ui/card';
-import { ScrollArea } from '@/presentation/ui/components/ui/scroll-area';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 // For conditional class names
-import { cn } from '@/presentation/ui/lib/utils';
+import { cn } from "@/ui/lib/utils";
 
 // Define the Persona type
 export interface Persona {
@@ -30,36 +36,36 @@ interface PersonaListProps {
 // Placeholder personas data (will be passed as a prop in a real scenario)
 const placeholderPersonas: Persona[] = [
   {
-    id: 'developer',
-    name: 'Software Developer',
-    description: 'Helps with coding tasks, debugging, and software design.',
-    tags: ['Coding', 'Debugging', 'Development'],
+    id: "developer",
+    name: "Software Developer",
+    description: "Helps with coding tasks, debugging, and software design.",
+    tags: ["Coding", "Debugging", "Development"],
     // icon: Code,
     // Example if using lucide-react icons directly
   },
   {
-    id: 'writer',
-    name: 'Content Writer',
-    description: 'Assists in writing articles, blog posts, and other content.',
-    tags: ['Writing', 'Content Creation', 'Marketing'],
+    id: "writer",
+    name: "Content Writer",
+    description: "Assists in writing articles, blog posts, and other content.",
+    tags: ["Writing", "Content Creation", "Marketing"],
     // icon: FileText,
   },
   {
-    id: 'researcher',
-    name: 'Researcher',
-    description: 'Helps gather information, summarize findings, and analyze data.',
-    tags: ['Research', 'Analysis', 'Data'],
+    id: "researcher",
+    name: "Researcher",
+    description:
+      "Helps gather information, summarize findings, and analyze data.",
+    tags: ["Research", "Analysis", "Data"],
     // icon: Search,
   },
   {
-    id: 'project_manager',
-    name: 'Project Manager',
-    description: 'Assists in planning, organizing, and managing project tasks.',
-    tags: ['Planning', 'Organization', 'Management'],
+    id: "project_manager",
+    name: "Project Manager",
+    description: "Assists in planning, organizing, and managing project tasks.",
+    tags: ["Planning", "Organization", "Management"],
     // icon: Briefcase,
   },
 ];
-
 
 export function PersonaList({
   // Use placeholder if no personas prop is provided
@@ -90,7 +96,9 @@ export function PersonaList({
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg">{persona.name}</CardTitle>
-                  {persona.icon && <persona.icon className="w-8 h-8 mt-2 text-slate-600 dark:text-slate-400" />}
+                  {persona.icon && (
+                    <persona.icon className="w-8 h-8 mt-2 text-slate-600 dark:text-slate-400" />
+                  )}
                 </div>
                 {selectedPersonaId === persona.id && (
                   <CheckCircle2 className="w-6 h-6 text-sky-500 dark:text-sky-400" />
@@ -98,11 +106,16 @@ export function PersonaList({
               </div>
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-sm mb-3">{persona.description}</CardDescription>
+              <CardDescription className="text-sm mb-3">
+                {persona.description}
+              </CardDescription>
               {persona.tags && persona.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
-                  {persona.tags.map(tag => (
-                    <span key={tag} className="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full">
+                  {persona.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full"
+                    >
                       {tag}
                     </span>
                   ))}

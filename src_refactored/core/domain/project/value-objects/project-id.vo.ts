@@ -1,5 +1,5 @@
 // src_refactored/core/domain/project/value-objects/project-id.vo.ts
-import { Identity } from '../../../../core/common/value-objects/identity.vo';
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class ProjectId extends Identity {
   private constructor(value: string) {
@@ -7,7 +7,7 @@ export class ProjectId extends Identity {
   }
 
   public static generate(): ProjectId {
-    return new ProjectId(super.generate().value());
+    return new ProjectId(super.generate().value);
   }
 
   public static fromString(value: string): ProjectId {

@@ -1,45 +1,37 @@
+import { z } from 'zod';
+
 import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
+import { ValueError } from "@/core/domain/common/errors";
 
-import { ValueError } from "@/domain/common/errors";
+const MemoryItemContentSchema = z.string()
+  .trim()
+  .min(1, 'Memory item content must be at least 1 character long (after trimming).')
+  .max(10000, 'Memory item content must be no more than 10000 characters long (after trimming).');
 
 interface MemoryItemContentProps extends ValueObjectProps {
   value: string;
 }
 
 export class MemoryItemContent extends AbstractValueObject<MemoryItemContentProps> {
-  private static readonly MIN_LENGTH = 1;
-  private static readonly MAX_LENGTH = 10000;
-
   private constructor(props: MemoryItemContentProps) {
     super(props);
   }
 
   public static create(content: string): MemoryItemContent {
-    this.validate(content);
-    return new MemoryItemContent({ value: content });
+    const validationResult = MemoryItemContentSchema.safeParse(content);
+
+    if (!validationResult.success) {
+      throw new ValueError('Invalid memory item content format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new MemoryItemContent({ value: validationResult.data });
   }
 
-  private static validate(content: string): void {
-    if (content === null || content === undefined) {
-      throw new ValueError("Memory item content cannot be null or undefined.");
-    }
-    const trimmedContent = content.trim();
-    if (trimmedContent.length < this.MIN_LENGTH) {
-      throw new ValueError(
-        `Memory item content must be at least ${this.MIN_LENGTH} character long (after trimming).`
-      );
-    }
-    if (trimmedContent.length > this.MAX_LENGTH) {
-      throw new ValueError(
-        `Memory item content must be no more than ${this.MAX_LENGTH} characters long (after trimming).`
-      );
-    }
-  }
-
-  public value(): string {
+  public get value(): string {
     return this.props.value;
   }
 }

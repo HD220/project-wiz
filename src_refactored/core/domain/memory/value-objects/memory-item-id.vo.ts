@@ -1,4 +1,4 @@
-import { Identity } from "../../../common/value-objects/identity.vo";
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class MemoryItemId extends Identity {
   private constructor(value: string) {
@@ -6,7 +6,7 @@ export class MemoryItemId extends Identity {
   }
 
   public static generate(): MemoryItemId {
-    return new MemoryItemId(super.generate().value());
+    return new MemoryItemId(super.generate().value);
   }
 
   public static fromString(value: string): MemoryItemId {

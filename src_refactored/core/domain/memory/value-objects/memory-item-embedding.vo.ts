@@ -1,9 +1,14 @@
+import { z } from 'zod';
+
 import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
+import { ValueError } from "@/core/domain/common/errors";
 
-import { ValueError } from "@/domain/common/errors";
+const MemoryItemEmbeddingSchema = z.array(z.number().finite())
+  .min(1, 'Embedding array cannot be empty if provided. Use null for no embedding.')
+  .nullable();
 
 interface MemoryItemEmbeddingProps extends ValueObjectProps {
   value: number[] | null;
@@ -17,50 +22,21 @@ export class MemoryItemEmbedding extends AbstractValueObject<MemoryItemEmbedding
   public static create(
     embedding: number[] | null | undefined
   ): MemoryItemEmbedding {
-    if (embedding === null || embedding === undefined) {
-      return new MemoryItemEmbedding({ value: null });
+    const validationResult = MemoryItemEmbeddingSchema.safeParse(embedding);
+
+    if (!validationResult.success) {
+      throw new ValueError('Invalid memory item embedding format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
     }
-    this.validate(embedding);
-    return new MemoryItemEmbedding({ value: [...embedding] });
+    return new MemoryItemEmbedding({ value: validationResult.data });
   }
 
-  private static validate(embedding: number[]): void {
-    if (!Array.isArray(embedding)) {
-      throw new ValueError("Embedding must be an array of numbers or null.");
-    }
-    if (embedding.length === 0) {
-      throw new ValueError(
-        "Embedding array cannot be empty if provided. Use null for no embedding."
-      );
-    }
-    for (const num of embedding) {
-      if (typeof num !== "number" || isNaN(num) || !isFinite(num)) {
-        throw new ValueError(
-          "All elements in the embedding array must be finite numbers."
-        );
-      }
-    }
-  }
-
-  public value(): number[] | null {
+  public get value(): number[] | null {
     return this.props.value === null ? null : [...this.props.value];
   }
 
-  public equals(other?: MemoryItemEmbedding | null): boolean {
-    if (other === null || other === undefined) {
-      return false;
-    }
-    if (this.props.value === null && other.props.value === null) {
-      return true;
-    }
-    if (this.props.value === null || other.props.value === null) {
-      return false;
-    }
-    if (this.props.value.length !== other.props.value.length) {
-      return false;
-    }
-    return this.props.value.every(
-      (val, index) => val === other.props.value![index]
-    );
+  public equals(vo?: MemoryItemEmbedding): boolean {
+    return super.equals(vo);
   }
 }

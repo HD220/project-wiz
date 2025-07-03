@@ -1,42 +1,38 @@
 // src_refactored/core/domain/user/value-objects/user-nickname.vo.ts
-import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { z } from 'zod';
 
-import { ValueError } from '@/domain/common/errors';
+import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
+import { ValueError } from '@/core/domain/common/errors';
+
+const UserNicknameSchema = z.string()
+  .trim()
+  .min(2, 'Nickname must be at least 2 characters long.')
+  .max(50, 'Nickname must be no more than 50 characters long.');
 
 interface UserNicknameProps extends ValueObjectProps {
   value: string;
 }
 
 export class UserNickname extends AbstractValueObject<UserNicknameProps> {
-  private static readonly MIN_LENGTH = 2;
-  private static readonly MAX_LENGTH = 50;
-
   private constructor(props: UserNicknameProps) {
     super(props);
   }
 
   public static create(nickname: string): UserNickname {
-    this.validate(nickname);
-    return new UserNickname({ value: nickname });
+    const validationResult = UserNicknameSchema.safeParse(nickname);
+    if (!validationResult.success) {
+      throw new ValueError('Invalid nickname format.', {
+        details: validationResult.error.flatten().fieldErrors,
+      });
+    }
+    return new UserNickname({ value: validationResult.data });
   }
 
-  private static validate(nickname: string): void {
-    if (nickname === null || nickname === undefined || nickname.trim() === '') {
-      throw new ValueError('Nickname cannot be empty.');
-    }
-    const trimmedNickname = nickname.trim();
-    if (trimmedNickname.length < this.MIN_LENGTH) {
-      throw new ValueError(`Nickname must be at least ${this.MIN_LENGTH} characters long.`);
-    }
-    if (trimmedNickname.length > this.MAX_LENGTH) {
-      throw new ValueError(`Nickname must be no more than ${this.MAX_LENGTH} characters long.`);
-    }
-    // Potentially add other validation rules, e.g., allowed characters
-  }
-
-  public value(): string {
+  public get value(): string {
     return this.props.value;
   }
 
-  // equals is inherited from AbstractValueObject
+  public equals(vo?: UserNickname): boolean {
+    return super.equals(vo);
+  }
 }

@@ -1,5 +1,5 @@
 // src_refactored/core/domain/agent/value-objects/persona/persona-id.vo.ts
-import { Identity } from '../../../../../core/common/value-objects/identity.vo';
+import { Identity } from '@/core/common/value-objects/identity.vo';
 
 export class PersonaId extends Identity {
   private constructor(value: string) {
@@ -7,7 +7,7 @@ export class PersonaId extends Identity {
   }
 
   public static generate(): PersonaId {
-    return new PersonaId(super.generate().value());
+    return new PersonaId(super.generate().value);
   }
 
   public static fromString(value: string): PersonaId {

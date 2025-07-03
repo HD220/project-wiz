@@ -7,7 +7,7 @@ export class AgentId extends Identity {
   }
 
   public static generate(): AgentId {
-    return new AgentId(super.generate().value());
+    return new AgentId(super.generate().value);
   }
 
   public static fromString(value: string): AgentId {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,21 +8,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { LLMConfigFormData } from '../LLMConfigForm';
+import type { LLMConfigFormData } from "../LLMConfigForm";
 
 interface LLMFormFieldProps {
   control: Control<LLMConfigFormData>;
 }
 
 interface ApiKeyFieldProps extends LLMFormFieldProps {
-  watchedProvider?: 'openai' | 'deepseek' | 'ollama';
+  watchedProvider?: "openai" | "deepseek" | "ollama";
 }
 
 export function ApiKeyField({ control, watchedProvider }: ApiKeyFieldProps) {
-  if (watchedProvider === 'ollama') {
+  if (watchedProvider === "ollama") {
     return null;
   }
   return (
@@ -33,9 +33,15 @@ export function ApiKeyField({ control, watchedProvider }: ApiKeyFieldProps) {
         <FormItem>
           <FormLabel>Chave de API (API Key)</FormLabel>
           <FormControl>
-            <Input type="password" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" {...field} />
+            <Input
+              type="password"
+              placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              {...field}
+            />
           </FormControl>
-          <FormDescription>Sua chave de API para o provedor selecionado.</FormDescription>
+          <FormDescription>
+            Sua chave de API para o provedor selecionado.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

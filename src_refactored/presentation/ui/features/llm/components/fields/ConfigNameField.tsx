@@ -1,5 +1,5 @@
-import React from 'react';
-import { Control } from 'react-hook-form';
+import React from "react";
+import { Control } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/presentation/ui/components/ui/form';
-import { Input } from '@/presentation/ui/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import type { LLMConfigFormData } from '../LLMConfigForm';
+import type { LLMConfigFormData } from "../LLMConfigForm";
 
 interface LLMFormFieldProps {
   control: Control<LLMConfigFormData>;
@@ -26,9 +26,14 @@ export function ConfigNameField({ control }: LLMFormFieldProps) {
         <FormItem>
           <FormLabel>Nome da Configuração</FormLabel>
           <FormControl>
-            <Input placeholder="Ex: Meu OpenAI Pessoal, Ollama Local" {...field} />
+            <Input
+              placeholder="Ex: Meu OpenAI Pessoal, Ollama Local"
+              {...field}
+            />
           </FormControl>
-          <FormDescription>Um nome amigável para identificar esta configuração LLM.</FormDescription>
+          <FormDescription>
+            Um nome amigável para identificar esta configuração LLM.
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}
