@@ -32,8 +32,19 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
         filters.tags!.every(tag => item.tags.value.some(itemTag => itemTag === tag))
       );
     }
-    // Does not implement options.limit, options.offset, or embedding search
-    return results.slice(0, options.limit || results.length);
+    const totalCount = filteredAnnotations.length;
+    const startIndex = (pagination.page - 1) * pagination.limit;
+    const endIndex = startIndex + pagination.limit;
+    const items = filteredAnnotations.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(totalCount / pagination.limit);
+
+    return {
+      data: items,
+      totalItems: totalCount,
+      currentPage: pagination.page,
+      itemsPerPage: pagination.limit,
+      totalPages,
+    };
   }
 
   async delete(id: MemoryItemId): Promise<void> {

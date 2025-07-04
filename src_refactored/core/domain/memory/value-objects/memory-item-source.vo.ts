@@ -24,7 +24,8 @@ export class MemoryItemSource extends AbstractValueObject<MemoryItemSourceProps>
     const validationResult = MemoryItemSourceSchema.safeParse(source);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid memory item source format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid memory item source format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

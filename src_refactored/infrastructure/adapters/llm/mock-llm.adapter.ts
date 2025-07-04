@@ -102,7 +102,7 @@ export class MockLLMAdapter implements ILLMAdapter {
       return errorUseCaseResponse(
         new LLMError(
           "Error generating mock structured output for schema.",
-          { cause: error instanceof Error ? error : new Error(String(error)) }
+          { originalError: error instanceof Error ? error : new Error(String(error)) }
         )
       );
     }

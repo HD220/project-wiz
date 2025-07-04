@@ -158,10 +158,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
   }
 
   public assignAssistant(assistantId: Identity | null): User {
-    if (
-      this.assistantId === assistantId ||
-      this.assistantId?.equals(assistantId)
-    ) {
+    if (this.assistantId?.equals(assistantId ?? null)) {
       return this;
     }
     const newProps = {

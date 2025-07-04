@@ -23,7 +23,8 @@ export class LLMProviderConfigName extends AbstractValueObject<LLMProviderConfig
   public static create(name: string): LLMProviderConfigName {
     const validationResult = LLMProviderConfigNameSchema.safeParse(name);
     if (!validationResult.success) {
-      throw new ValueError('Invalid LLMProviderConfig name.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid LLMProviderConfig name: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

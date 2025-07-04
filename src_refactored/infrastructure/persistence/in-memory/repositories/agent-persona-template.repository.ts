@@ -23,6 +23,11 @@ export class InMemoryAgentPersonaTemplateRepository
     return template || null;
   }
 
+  async findByRole(role: PersonaRole): Promise<AgentPersonaTemplate | null> {
+    const template = Array.from(this.templates.values()).find(t => t.role.equals(role));
+    return template || null;
+  }
+
   async findAll(): Promise<AgentPersonaTemplate[]> {
     return Array.from(this.templates.values());
   }

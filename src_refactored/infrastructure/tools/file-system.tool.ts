@@ -62,15 +62,17 @@ export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototyp
   async execute(
     params: z.infer<typeof this.parameters>,
     _executionContext?: IToolExecutionContext,
-  ): Promise<string | string[]> {
+  ): Promise<IUseCaseResponse<string | string[], ToolError>> {
     this.logger.info(`[FileSystemTool] executing action: ${params.action}`);
     try {
+      let result: string | string[];
       switch (params.action) {
         case 'readFile': {
           if (!params.filePath) {
             throw new ToolError('filePath is required for readFile.');
           }
-          return this._handleReadFile(params.filePath);
+          result = await this._handleReadFile(params.filePath);
+          break;
         }
         case 'writeFile': {
           if (!params.filePath) {
@@ -79,13 +81,15 @@ export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototyp
           if (params.content === undefined) {
             throw new ToolError('content is required for writeFile.');
           }
-          return this._handleWriteFile(params.filePath, params.content);
+          result = await this._handleWriteFile(params.filePath, params.content);
+          break;
         }
         case 'listFiles': {
           if (!params.directoryPath) {
             throw new ToolError('directoryPath is required for listFiles.');
           }
-          return this._handleListFiles(params.directoryPath);
+          result = await this._handleListFiles(params.directoryPath);
+          break;
         }
         default: {
           const actionValue = (params as Record<string, unknown>).action;
@@ -94,8 +98,9 @@ export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototyp
           );
         }
       }
+      return successUseCaseResponse(result);
     } catch (error: unknown) {
-      throw this._createError(params.action, error);
+      return errorUseCaseResponse(this._createError(params.action, error));
     }
   }
 

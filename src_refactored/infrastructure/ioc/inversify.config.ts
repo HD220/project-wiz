@@ -113,7 +113,6 @@ appContainer
     const facade = new DrizzleQueueFacade(
       queueName,
       jobRepository,
-      // defaultJobOptions
       undefined,
       coreService,
       processingService,

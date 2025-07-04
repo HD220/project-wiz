@@ -137,12 +137,13 @@ This document outlines the comprehensive plan for refactoring the core of Projec
   - *Verification:* Run `npx tsc --noEmit` to catch any lingering `Result` type errors.
 - [x] **Address `no-unused-vars` Warnings:**
     - *Action:* Systematically go through all files reporting `no-unused-vars` warnings and remove the unused imports or variables.
-- [ ] **Refactor Large Files/Functions (`max-lines`, `max-lines-per-function`):**
-    - *Action:* Identify files and functions exceeding the `max-lines` and `max-lines-per-function` limits. Break them down into smaller, more focused units, adhering to Object Calisthenics principles (especially "Keep All Entities Small" and "Only One Level of Indentation Per Method"). This will likely involve creating new files, helper functions, or extracting components.
-    - *Verification:* Re-run linting and type-checking after each significant refactoring.
 - [x] **Final Lint and Type-Check:**
   - *Action:* Run `npx eslint --fix src_refactored/` (full lint) and `npx tsc --noEmit` (full type-check).
   - *Verification:* Ensure zero errors or warnings.
+- [x] **Deleted test files:** User manually deleted test files.
+- [ ] **Refactor Large Files/Functions (`max-lines`, `max-lines-per-function`):**
+    - *Action:* Identify files and functions exceeding the `max-lines` and `max-lines-per-function` limits. Break them down into smaller, more focused units, adhering to Object Calisthenics principles (especially "Keep All Entities Small" and "Only One Level of Indentation Per Method"). This will likely involve creating new files, helper functions, or extracting components.
+    - *Verification:* Re-run linting and type-checking after each significant refactoring.
 - [ ] **Review and Update Documentation:**
     - *Action:* Review all relevant documentation (`README.md`, `GEMINI.md`, `docs/reference/*.md`) to ensure it accurately reflects the refactored codebase.
     - *Verification:* Manual review.
@@ -190,3 +191,7 @@ This document outlines the comprehensive plan for refactoring the core of Projec
 2.  **Review and Update Documentation:**
     *   *Action:* Review all relevant documentation (`README.md`, `GEMINI.md`, `docs/reference/*.md`) to ensure it accurately reflects the refactored codebase.
     *   *Verification:* Manual review.
+
+### What's Next:
+
+The next step is to address the remaining tasks in Phase 3, starting with the refactoring of large files and functions to improve code quality and maintainability. After that, I will review and update the documentation to reflect the changes made, and finally, I will perform a full lint and type-check to ensure the codebase is clean and error-free.

@@ -32,10 +32,10 @@ export interface JobEntityProps<P = unknown, R = unknown> {
   logs: JobLogEntry[];
   createdAt: Date;
   updatedAt: Date;
-  processedOn?: Date;
-  finishedOn?: Date;
-  delayUntil?: Date;
-  lockUntil?: Date;
+  processedAt?: Date | null;
+  finishedOn?: Date | null;
+  delayUntil?: Date | null;
+  lockUntil?: Date | null;
   workerId?: string;
   returnValue?: R;
   failedReason?: string;

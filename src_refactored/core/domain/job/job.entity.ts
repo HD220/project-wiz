@@ -105,7 +105,7 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
       logs: [],
       createdAt: now,
       updatedAt: now,
-      delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : undefined,
+      delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : null,
     };
   }
 
@@ -191,7 +191,7 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
     this._stateMutator.resume();
   }
 
-  public getConversationHistory(): ActivityHistoryVO {
+  public get conversationHistory(): ActivityHistoryVO {
     return this._stateMutator.getConversationHistory();
   }
 

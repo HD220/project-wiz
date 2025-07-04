@@ -91,12 +91,12 @@ function setupEventListeners(
 
   worker.on("worker.job.active", (job) =>
     process.stdout.write(
-      `[Worker] Worker started processing job: ${job.getProps().id.value}\n`
+      `[Worker] Worker started processing job: ${job.id.value}\n`
     )
   );
   worker.on("worker.job.processed", (job) =>
     process.stdout.write(
-      `[Worker] Worker finished processing job: ${job.getProps().id.value}\n`
+      `[Worker] Worker finished processing job: ${job.id.value}\n`
     )
   );
   worker.on("worker.job.errored", (job, error) =>

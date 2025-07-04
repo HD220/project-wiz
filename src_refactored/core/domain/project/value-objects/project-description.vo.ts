@@ -21,7 +21,8 @@ export class ProjectDescription extends AbstractValueObject<ProjectDescriptionPr
   public static create(description: string): ProjectDescription {
     const validationResult = ProjectDescriptionSchema.safeParse(description);
     if (!validationResult.success) {
-      throw new ValueError('Invalid project description format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid project description format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

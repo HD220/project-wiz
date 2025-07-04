@@ -19,7 +19,8 @@ export class LLMApiKey extends AbstractValueObject<LLMApiKeyProps> {
   public static create(apiKey: string): LLMApiKey {
     const validationResult = LLMApiKeySchema.safeParse(apiKey);
     if (!validationResult.success) {
-      throw new ValueError('Invalid API key.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid API key: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

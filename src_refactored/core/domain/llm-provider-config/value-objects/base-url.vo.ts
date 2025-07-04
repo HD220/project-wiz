@@ -20,7 +20,8 @@ export class BaseUrl extends AbstractValueObject<BaseUrlProps> {
   public static create(url: string): BaseUrl {
     const validationResult = BaseUrlSchema.safeParse(url);
     if (!validationResult.success) {
-      throw new ValueError('Invalid Base URL format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid Base URL format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

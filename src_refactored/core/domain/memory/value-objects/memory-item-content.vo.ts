@@ -24,7 +24,8 @@ export class MemoryItemContent extends AbstractValueObject<MemoryItemContentProp
     const validationResult = MemoryItemContentSchema.safeParse(content);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid memory item content format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid memory item content format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

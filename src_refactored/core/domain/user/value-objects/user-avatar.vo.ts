@@ -27,7 +27,8 @@ export class UserAvatar extends AbstractValueObject<UserAvatarProps> {
     const validationResult = UserAvatarSchema.safeParse(avatarUrl);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid avatar URL format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid avatar URL format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

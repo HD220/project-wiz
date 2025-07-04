@@ -98,7 +98,7 @@ export class MemoryItem extends AbstractEntity<MemoryItemId, InternalMemoryItemP
   }
 
   public assignAgent(agentId: Identity | null): MemoryItem {
-    if (this.agentId === agentId || (this.agentId?.equals(agentId))) {
+    if (this.agentId?.equals(agentId ?? null)) {
         return this;
     }
     return new MemoryItem({ ...this.props, agentId: agentId, updatedAt: new Date() });

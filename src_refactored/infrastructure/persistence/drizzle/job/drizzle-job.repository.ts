@@ -7,6 +7,7 @@ import {
   isNull,
   lt,
   or,
+  sql,
 } from "drizzle-orm";
 
 import { IJobRepository } from "@/core/application/ports/job-repository.interface";

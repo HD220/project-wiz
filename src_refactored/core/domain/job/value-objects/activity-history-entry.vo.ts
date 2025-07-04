@@ -42,7 +42,8 @@ export class ActivityHistoryEntryVO extends AbstractValueObject<z.infer<typeof A
     });
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid activity history entry.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid activity history entry: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

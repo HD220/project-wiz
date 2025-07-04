@@ -16,7 +16,7 @@ export function calculateBackoff(
 ): number {
   if (!strategy) return 0;
 
-  const options: BackoffOptions =
+  const options: IJobBackoffOptions =
     typeof strategy === 'string' ? { type: strategy } : strategy;
 
   // Stalled jobs might have a different default base delay or handling if not specified

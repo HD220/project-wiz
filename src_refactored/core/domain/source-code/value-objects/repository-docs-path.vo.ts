@@ -19,7 +19,8 @@ export class RepositoryDocsPath extends AbstractValueObject<RepositoryDocsPathPr
   public static create(path: string): RepositoryDocsPath {
     const validationResult = RepositoryDocsPathSchema.safeParse(path);
     if (!validationResult.success) {
-      throw new ValueError('Invalid repository docs path format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid repository docs path format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

@@ -25,7 +25,8 @@ export class MemoryItemEmbedding extends AbstractValueObject<MemoryItemEmbedding
     const validationResult = MemoryItemEmbeddingSchema.safeParse(embedding);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid memory item embedding format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid memory item embedding format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

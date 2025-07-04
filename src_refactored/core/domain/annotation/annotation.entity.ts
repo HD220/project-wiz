@@ -82,7 +82,7 @@ export class Annotation extends AbstractEntity<AnnotationId, InternalAnnotationP
   }
 
   public assignJob(jobId: Identity | null): Annotation {
-    if (this.jobId === jobId || (this.jobId?.equals(jobId))) {
+    if (this.jobId?.equals(jobId ?? null)) {
         return this;
     }
     const newProps = { ...this.props, jobId: jobId, updatedAt: new Date() };

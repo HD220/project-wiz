@@ -21,7 +21,8 @@ export class UserEmail extends AbstractValueObject<UserEmailProps> {
   public static create(email: string): UserEmail {
     const validationResult = UserEmailSchema.safeParse(email.toLowerCase());
     if (!validationResult.success) {
-      throw new ValueError('Invalid email format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid email format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

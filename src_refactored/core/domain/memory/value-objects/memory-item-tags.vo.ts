@@ -30,7 +30,8 @@ export class MemoryItemTags extends AbstractValueObject<MemoryItemTagsProps> {
     const validationResult = MemoryItemTagsSchema.safeParse(processedTags);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid memory item tags format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid memory item tags format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

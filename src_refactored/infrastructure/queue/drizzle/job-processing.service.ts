@@ -100,15 +100,14 @@ export class JobProcessingService<P, R> {
   }
 
   private _handleFailedJobRetryOrPermanentFail(job: JobEntity<P,R>, error: Error): void {
-    const jobProps = job.getProps();
-    if (jobProps.attemptsMade < job.maxAttempts) {
-      const baseDelay = jobProps.options.backoff?.delay || 1000;
+    if (job.attemptsMade < job.maxAttempts) {
+      const baseDelay = job.options.backoff?.delay || 1000;
       let backoffDelay = baseDelay;
-      if (jobProps.options.backoff?.type === "exponential") {
-        const currentAttempt = Math.max(1, jobProps.attemptsMade);
+      if (job.options.backoff?.type === "exponential") {
+        const currentAttempt = Math.max(1, job.attemptsMade);
         backoffDelay = baseDelay * Math.pow(2, currentAttempt - 1);
       }
-      const maxBackoff = jobProps.options.backoff?.maxDelay || 3600000;
+      const maxBackoff = job.options.backoff?.maxDelay || 3600000;
       backoffDelay = Math.min(backoffDelay, maxBackoff);
       job.moveToDelayed(new Date(Date.now() + backoffDelay), error);
     } else {

@@ -23,7 +23,8 @@ export class ProjectName extends AbstractValueObject<ProjectNameProps> {
   public static create(name: string): ProjectName {
     const validationResult = ProjectNameSchema.safeParse(name);
     if (!validationResult.success) {
-      throw new ValueError('Invalid project name format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid project name format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

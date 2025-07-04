@@ -33,7 +33,8 @@ export class LLMProviderId extends AbstractValueObject<LLMProviderIdProps> {
     const validationResult = LLMProviderIdSchema.safeParse(providerId);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid LLMProviderId format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid LLMProviderId format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

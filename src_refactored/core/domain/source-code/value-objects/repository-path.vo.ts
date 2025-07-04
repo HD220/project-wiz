@@ -19,7 +19,8 @@ export class RepositoryPath extends AbstractValueObject<RepositoryPathProps> {
   public static create(path: string): RepositoryPath {
     const validationResult = RepositoryPathSchema.safeParse(path);
     if (!validationResult.success) {
-      throw new ValueError('Invalid repository path format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid repository path format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

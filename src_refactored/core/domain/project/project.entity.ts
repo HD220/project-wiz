@@ -39,7 +39,8 @@ export class Project extends AbstractEntity<ProjectId, InternalProjectProps> {
   public static create(props: ProjectProps): Project {
     const validationResult = ProjectPropsSchema.safeParse(props);
     if (!validationResult.success) {
-      throw new EntityError("Invalid Project props.", {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new EntityError(`Invalid Project props: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

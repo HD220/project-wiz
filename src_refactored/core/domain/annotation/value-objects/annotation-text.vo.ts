@@ -23,7 +23,8 @@ export class AnnotationText extends AbstractValueObject<AnnotationTextProps> {
   public static create(text: string): AnnotationText {
     const validationResult = AnnotationTextSchema.safeParse(text);
     if (!validationResult.success) {
-      throw new ValueError('Invalid annotation text.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid annotation text: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

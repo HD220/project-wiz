@@ -25,7 +25,8 @@ export class UserUsername extends AbstractValueObject<UserUsernameProps> {
   public static create(username: string): UserUsername {
     const validationResult = UserUsernameSchema.safeParse(username.toLowerCase());
     if (!validationResult.success) {
-      throw new ValueError('Invalid username format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid username format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

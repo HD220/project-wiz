@@ -44,7 +44,8 @@ export class SourceCode extends AbstractEntity<RepositoryId, InternalSourceCodeP
   public static create(props: SourceCodeProps): SourceCode {
     const validationResult = SourceCodePropsSchema.safeParse(props);
     if (!validationResult.success) {
-      throw new EntityError("Invalid SourceCode props.", {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new EntityError(`Invalid SourceCode props: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

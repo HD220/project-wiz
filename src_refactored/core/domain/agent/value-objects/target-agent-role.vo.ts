@@ -19,7 +19,8 @@ export class TargetAgentRoleVO extends AbstractValueObject<TargetAgentRoleProps>
   public static create(role: string): TargetAgentRoleVO {
     const validationResult = TargetAgentRoleSchema.safeParse(role);
     if (!validationResult.success) {
-      throw new ValueError('Invalid target agent role.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid target agent role: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

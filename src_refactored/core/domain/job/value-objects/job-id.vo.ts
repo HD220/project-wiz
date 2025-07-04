@@ -26,7 +26,8 @@ export class JobIdVO extends AbstractValueObject<JobIdProps> {
     const validationResult = JobIdSchema.safeParse(jobId);
 
     if (!validationResult.success) {
-      throw new ValueError('Invalid Job ID format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid Job ID format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

@@ -47,7 +47,8 @@ export class LLMProviderConfig extends AbstractEntity<LLMProviderConfigId, Inter
   public static create(props: LLMProviderConfigProps): LLMProviderConfig {
     const validationResult = LLMProviderConfigPropsSchema.safeParse(props);
     if (!validationResult.success) {
-      throw new EntityError("Invalid LLMProviderConfig props.", {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new EntityError(`Invalid LLMProviderConfig props: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

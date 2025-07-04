@@ -48,10 +48,10 @@ export class JobStateMutator<P, R> {
     this.props.returnValue = returnValue;
     this.props.finishedOn = new Date();
     this.props.updatedAt = this.props.finishedOn;
-    this.props.failedReason = undefined;
-    this.props.stacktrace = undefined;
-    this.props.lockUntil = undefined;
-    this.props.workerId = undefined;
+    this.props.failedReason = null;
+    this.props.stacktrace = null;
+    this.props.lockUntil = null;
+    this.props.workerId = null;
   }
 
   public markAsFailed(reason: string, stacktrace?: string[]): void {
@@ -63,17 +63,17 @@ export class JobStateMutator<P, R> {
     this.props.stacktrace = stacktrace;
     this.props.finishedOn = new Date();
     this.props.updatedAt = this.props.finishedOn;
-    this.props.lockUntil = undefined;
-    this.props.workerId = undefined;
+    this.props.lockUntil = null;
+    this.props.workerId = null;
   }
 
   public moveToDelayed(delayUntil: Date, originalError?: Error): void {
     this.props.status = JobStatus.DELAYED;
     this.props.delayUntil = delayUntil;
     this.props.updatedAt = new Date();
-    this.props.processedOn = undefined;
-    this.props.lockUntil = undefined;
-    this.props.workerId = undefined;
+    this.props.processedOn = null;
+    this.props.lockUntil = null;
+    this.props.workerId = null;
     if (originalError) {
         this.props.failedReason = originalError.message;
     }
@@ -84,17 +84,17 @@ export class JobStateMutator<P, R> {
       // Intentionally empty: Condition checked, no specific action if true besides proceeding.
     }
     this.props.status = JobStatus.WAITING;
-    this.props.delayUntil = undefined;
-    this.props.processedOn = undefined;
+    this.props.delayUntil = null;
+    this.props.processedOn = null;
     this.props.updatedAt = new Date();
-    this.props.lockUntil = undefined;
-    this.props.workerId = undefined;
+    this.props.lockUntil = null;
+    this.props.workerId = null;
   }
 
   public markAsStalled(): boolean {
-    this.props.lockUntil = undefined;
-    this.props.workerId = undefined;
-    this.props.processedOn = undefined;
+    this.props.lockUntil = null;
+    this.props.workerId = null;
+    this.props.processedOn = null;
     this.props.updatedAt = new Date();
 
     if (this.props.attemptsMade >= this.props.options.attempts) {

@@ -21,7 +21,8 @@ export class UserNickname extends AbstractValueObject<UserNicknameProps> {
   public static create(nickname: string): UserNickname {
     const validationResult = UserNicknameSchema.safeParse(nickname);
     if (!validationResult.success) {
-      throw new ValueError('Invalid nickname format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid nickname format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

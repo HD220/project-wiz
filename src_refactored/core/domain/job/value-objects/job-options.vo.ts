@@ -78,7 +78,8 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   public static create(options?: IJobOptions): JobOptionsVO {
     const validationResult = JobOptionsSchema.safeParse(options);
     if (!validationResult.success) {
-      throw new ValueError('Invalid job options.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid job options: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }
