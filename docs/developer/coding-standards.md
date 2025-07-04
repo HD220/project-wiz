@@ -404,6 +404,47 @@ Convenções de nomenclatura consistentes são vitais. Esta seção sumariza as 
         *   Componentes React UI: `PascalCase.tsx` (e.g., `UserProfileCard.tsx`).
         *   Hooks React: `useCamelCase.ts` ou `usePascalCase.ts` (e.g., `useAuth.ts`).
     *   **Sufixos Descritivos:** Usar sufixos padronizados (e.g., `.entity.ts`, `.vo.ts`, `.service.ts`, `.repository.ts`, `.adapter.ts`, `.use-case.ts`, `.schema.ts`, `.handlers.ts`, `.config.ts`, `.types.ts`, `.constants.ts`, `.utils.ts`).
+
+### 5.4. Seção Prominente: Convenções de Nomenclatura de Arquivos Detalhadas
+
+Esta seção reitera e expande as convenções para nomenclatura de arquivos, dada sua importância para a organização e legibilidade do projeto.
+
+*   **Regra Principal: Kebab-Case Obrigatório**
+    *   Todos os nomes de arquivos DEVEM ser em `kebab-case` (minúsculas, palavras separadas por hífens).
+    *   **Exemplos (Bom):**
+        *   `user-authentication.service.ts`
+        *   `project-settings-form.component.tsx` (se não for um componente React UI principal)
+        *   `api-response.types.ts`
+        *   `database-migration-001.sql`
+        *   `contributing-guide.md`
+        *   `package.json` (mantido por convenção npm)
+        *   `vite.config.ts` (convenção da ferramenta)
+
+*   **Aplicação Ampla:**
+    *   Esta regra aplica-se a TODOS os tipos de arquivo (`.ts`, `.tsx`, `.md`, `.json`, `.sql`, `.yml`, etc.) dentro do projeto.
+
+*   **Exceções Documentadas:**
+    *   **Componentes React UI Principais:** Podem usar `PascalCase.tsx` para melhor alinhamento com as convenções de nomenclatura de componentes React (e.g., `UserProfileCard.tsx`, `MainNavigation.tsx`). No entanto, componentes auxiliares ou mais genéricos dentro de uma feature podem seguir o `kebab-case`.
+    *   **Hooks React:** Podem usar `useCamelCase.ts` ou `usePascalCase.ts` (e.g., `useAuth.ts`, `useUserProfileData.ts`).
+    *   **Frameworks ou Bibliotecas Específicas:** Se um framework, biblioteca ou ferramenta adotada no projeto (e.g., Next.js para roteamento de páginas, arquivos de configuração específicos como `vite.config.ts`, `tailwind.config.ts`) EXPLICITAMENTE requer uma convenção de nomenclatura diferente, essa convenção DEVE ser seguida para esses arquivos específicos.
+    *   **Justificativa Mandatória:** Qualquer exceção a esta regra principal (fora as listadas acima) DEVE ser documentada no `README.md` do módulo relevante ou em uma ADR, com uma justificativa clara.
+
+*   **Exemplos Comparativos:**
+
+    | Bom Nome de Arquivo                     | Mau Nome de Arquivo                     | Justificativa do Mau Nome                               |
+    | :-------------------------------------- | :-------------------------------------- | :------------------------------------------------------ |
+    | `user-profile.service.ts`             | `UserProfileService.ts`                 | Não está em kebab-case.                                 |
+    | `data-transformer.util.ts`            | `DataTransformer.ts`                    | Não está em kebab-case.                                 |
+    | `image-processor.worker.ts`           | `imageProcessor.worker.ts`              | Não está em kebab-case (camelCase).                     |
+    | `README.md`                             | `readme.MD`                             | Casing inconsistente da extensão.                       |
+    | `main-styles.css`                       | `MainStyles.css`                        | Não está em kebab-case.                                 |
+    | `auth-guard.ts`                         | `Auth_Guard.ts`                         | Usa snake_case em vez de kebab-case.                    |
+    | `UserProfileCard.tsx` (Componente UI) | `user-profile-card.component.tsx`       | Para componentes UI React, PascalCase é uma exceção aceita. |
+    | `useAuth.ts` (Hook React)             | `auth-hook.ts`                          | Para hooks React, useCamelCase é uma exceção aceita.    |
+    | `vite.config.ts` (Ferramenta)         | `vite-config.ts`                        | `vite.config.ts` é a convenção da ferramenta Vite.    |
+
+*   **Porquê:** A consistência no nome de arquivos melhora a previsibilidade, facilita a navegação e a criação de scripts, e reduz a carga cognitiva. O `kebab-case` é amplamente adotado, URL-friendly, e evita problemas de sensibilidade ao caso em diferentes sistemas operacionais.
+
 *   **4. Convenções de Nomenclatura de Diretórios:**
     *   **Padrão Principal:** `kebab-case` (e.g., `user-authentication`, `value-objects`).
     *   **Exceção:** Diretórios de rotas dinâmicas do TanStack Router (e.g., `$projectId`).
@@ -728,3 +769,5 @@ Esta seção serve como um guia prático resumido para implementar os principais
 
 ---
 Este documento será mantido atualizado conforme novas ADRs são propostas e aprovadas, e conforme os padrões evoluem.
+
+[end of docs/developer/coding-standards.md]
