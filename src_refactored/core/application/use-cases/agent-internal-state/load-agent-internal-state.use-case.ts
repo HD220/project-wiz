@@ -21,8 +21,7 @@ export class LoadAgentInternalStateUseCase
   implements
     Executable<
       LoadAgentInternalStateUseCaseInput,
-      LoadAgentInternalStateUseCaseOutput | null,
-      DomainError | ZodError | ValueError | NotFoundError
+      LoadAgentInternalStateUseCaseOutput | null
     >
 {
   constructor(

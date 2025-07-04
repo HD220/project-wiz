@@ -23,7 +23,8 @@ export class PersonaName extends AbstractValueObject<PersonaNameProps> {
   public static create(name: string): PersonaName {
     const validationResult = PersonaNameSchema.safeParse(name);
     if (!validationResult.success) {
-      throw new ValueError('Invalid persona name.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid persona name: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

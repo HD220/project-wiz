@@ -27,7 +27,7 @@ export class GetProjectDetailsUseCase
   implements
     IUseCase<
       GetProjectDetailsUseCaseInput,
-      GetProjectDetailsUseCaseOutput
+      IUseCaseResponse<GetProjectDetailsUseCaseOutput>
     >
 {
   constructor(

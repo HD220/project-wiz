@@ -11,12 +11,14 @@ import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
+  CreateAgentInstanceRequest,
   CreateAgentInstanceResponseData,
   AgentInstance,
   UpdateAgentInstanceRequest,
   UpdateAgentInstanceResponseData,
   PersonaTemplate,
   LLMConfig,
+  IPCResponse,
 } from "@/shared/ipc-types";
 
 import { AgentLLMConfigSelectField } from "./fields/AgentLLMConfigSelectField";
@@ -70,8 +72,8 @@ export function AgentInstanceForm({
   });
 
   const createAgentMutation = useIpcMutation<
-    CreateAgentInstanceRequest,
-    CreateAgentInstanceResponse
+    IPCResponse<CreateAgentInstanceResponseData>,
+    CreateAgentInstanceRequest
   >(IPC_CHANNELS.CREATE_AGENT_INSTANCE, {
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -93,8 +95,8 @@ export function AgentInstanceForm({
   });
 
   const updateAgentMutation = useIpcMutation<
-    UpdateAgentInstanceRequest,
-    UpdateAgentInstanceResponse
+    UpdateAgentInstanceResponseData,
+    UpdateAgentInstanceRequest
   >(IPC_CHANNELS.UPDATE_AGENT_INSTANCE, {
     onSuccess: (response) => {
       if (response.success && response.data) {

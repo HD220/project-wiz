@@ -26,12 +26,12 @@ export class CreateAgentUseCase
   implements
     IUseCase<
       CreateAgentUseCaseInput,
-      CreateAgentUseCaseOutput
+      IUseCaseResponse<CreateAgentUseCaseOutput>
     >
 {
   constructor(
     @inject(AGENT_REPOSITORY_INTERFACE_TYPE) private readonly agentRepository: IAgentRepository,
-    @inject(PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE) private readonly personaTemplateRepository: IPersonaTemplateRepository,
+    @inject(AGENT_PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE) private readonly personaTemplateRepository: IAgentPersonaTemplateRepository,
     @inject(LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE) private readonly llmProviderConfigRepository: ILLMProviderConfigRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {}
@@ -48,7 +48,7 @@ export class CreateAgentUseCase
       return errorUseCaseResponse(new NotFoundError("PersonaTemplate", validInput.personaTemplateId));
     }
 
-    const llmProviderConfig = await this.llmProviderConfigRepository.findById(LLMProviderConfigId.create(validInput.llmProviderConfigId));
+    const llmProviderConfig = await this.llmProviderConfigRepository.findById(LLMProviderConfigId.fromString(validInput.llmProviderConfigId));
     if (!llmProviderConfig) {
       return errorUseCaseResponse(new NotFoundError("LLMProviderConfig", validInput.llmProviderConfigId));
     }

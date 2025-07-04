@@ -20,7 +20,7 @@ import {
 import { GetUserInput, GetUserOutput, GetUserInputSchema } from "./get-user.schema";
 
 @injectable()
-export class GetUserUseCase implements IUseCase<GetUserInput, GetUserOutput> {
+export class GetUserUseCase implements IUseCase<GetUserInput, IUseCaseResponse<GetUserOutput>> {
   constructor(
     @inject(USER_REPOSITORY_INTERFACE_TYPE) private readonly userRepository: IUserRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,

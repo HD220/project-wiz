@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import EventEmitter from "node:events";
-import { setInterval, clearInterval, setTimeout, Timeout } from "node:timers";
+import { setInterval, clearInterval, setTimeout } from "node:timers";
 
 import { AbstractQueue } from "@/core/application/queue/abstract-queue";
 import { JobEntity } from "@/core/domain/job/job.entity";
@@ -12,7 +12,7 @@ export class WorkerService<P, R> extends EventEmitter {
   private _isRunning: boolean = false;
   private _isClosed: boolean = false;
   private _activeJobs: number = 0;
-  private lockRenewTimers: Map<string, Timeout> = new Map();
+  private lockRenewTimers: Map<string, NodeJS.Timeout> = new Map();
   private pollLoopPromise: Promise<void> | null = null;
   private readonly pollingIntervalMs: number = 1000;
 

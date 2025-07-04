@@ -29,8 +29,7 @@ export class SaveAgentInternalStateUseCase
   implements
     Executable<
       SaveAgentInternalStateUseCaseInput,
-      SaveAgentInternalStateUseCaseOutput,
-      DomainError | ZodError | ValueError | NotFoundError
+      SaveAgentInternalStateUseCaseOutput
     >
 {
   constructor(
@@ -60,7 +59,7 @@ export class SaveAgentInternalStateUseCase
     const currentProjectIdVo = validInput.currentProjectId ? CurrentProjectId.fromString(validInput.currentProjectId) : undefined;
     const currentGoalVo = validInput.currentGoal !== null && validInput.currentGoal !== undefined ? CurrentGoal.create(validInput.currentGoal) : undefined;
     const generalNotesVo = GeneralNotesCollection.create(validInput.generalNotes || []);
-    return AgentInternalState.create({ agentId: agentIdVo, currentProjectId: currentProjectIdVo, currentGoal: currentGoalVo, generalNotes: generalNotesVo });
+    return AgentInternalState.create({ id: agentIdVo, currentProjectId: currentProjectIdVo, currentGoal: currentGoalVo, generalNotes: generalNotesVo });
   }
 
   private _updateExistingState(stateEntity: AgentInternalState, validInput: SaveAgentInternalStateUseCaseInput): AgentInternalState {

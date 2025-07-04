@@ -28,7 +28,7 @@ export class SearchSimilarMemoryItemsUseCase
   implements
     IUseCase<
       SearchSimilarMemoryItemsUseCaseInput,
-      SearchSimilarMemoryItemsUseCaseOutput
+      IUseCaseResponse<SearchSimilarMemoryItemsUseCaseOutput>
     >
 {
   constructor(

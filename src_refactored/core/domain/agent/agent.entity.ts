@@ -49,7 +49,8 @@ export class Agent extends AbstractEntity<AgentId, InternalAgentProps> {
   public static create(props: AgentProps): Agent {
     const validationResult = AgentPropsSchema.safeParse(props);
     if (!validationResult.success) {
-      throw new EntityError("Invalid Agent props.", {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new EntityError(`Invalid Agent props: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

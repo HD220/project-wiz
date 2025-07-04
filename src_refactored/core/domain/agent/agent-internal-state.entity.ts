@@ -44,7 +44,8 @@ export class AgentInternalState extends AbstractEntity<AgentId, InternalAgentInt
   public static create(props: AgentInternalStateProps): AgentInternalState {
     const validationResult = AgentInternalStatePropsSchema.safeParse(props);
     if (!validationResult.success) {
-      throw new EntityError("Invalid AgentInternalState props.", {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new EntityError(`Invalid AgentInternalState props: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

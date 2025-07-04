@@ -111,9 +111,7 @@ export class ChatService implements IChatService {
         effectiveMessages.push({ role: 'user', content: 'Hello!' });
       }
 
-      const simplePrompt = effectiveMessages
-        .map((message) => `${message.role}: ${message.content}`)
-        .join('\n');
+      const simplePrompt = effectiveMessages        .map((message) => `${message.role}: ${message.content ?? ''}`)        .join('\n');
       const stream = this.llmAdapter.streamText!(simplePrompt);
 
       for await (const result of stream) {

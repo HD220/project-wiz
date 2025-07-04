@@ -23,7 +23,8 @@ export class PersonaRole extends AbstractValueObject<PersonaRoleProps> {
   public static create(role: string): PersonaRole {
     const validationResult = PersonaRoleSchema.safeParse(role);
     if (!validationResult.success) {
-      throw new ValueError('Invalid persona role.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid persona role: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

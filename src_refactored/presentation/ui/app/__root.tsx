@@ -2,7 +2,7 @@ import {
   createRootRoute,
   Link,
   Outlet,
-  redirect,
+  
 } from "@tanstack/react-router";
 import React from "react";
 

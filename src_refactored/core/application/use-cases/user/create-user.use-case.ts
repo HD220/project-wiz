@@ -22,7 +22,7 @@ import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/u
 import { CreateUserInput, CreateUserOutput, CreateUserInputSchema } from "./create-user.schema";
 
 @injectable()
-export class CreateUserUseCase implements IUseCase<CreateUserInput, CreateUserOutput> {
+export class CreateUserUseCase implements IUseCase<CreateUserInput, IUseCaseResponse<CreateUserOutput>> {
   constructor(
     @inject(USER_REPOSITORY_INTERFACE_TYPE) private readonly userRepository: IUserRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,

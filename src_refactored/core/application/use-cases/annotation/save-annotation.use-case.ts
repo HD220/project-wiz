@@ -24,7 +24,7 @@ export class SaveAnnotationUseCase
   implements
     IUseCase<
       SaveAnnotationUseCaseInput,
-      SaveAnnotationUseCaseOutput
+      IUseCaseResponse<SaveAnnotationUseCaseOutput>
     >
 {
   constructor(

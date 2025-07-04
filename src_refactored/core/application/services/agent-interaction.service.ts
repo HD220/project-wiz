@@ -43,7 +43,7 @@ export class AgentInteractionService {
     const conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
 
     this.logLlmCall(job.id.value, job.attemptsMade, conversationMessages);
-    job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id.value} (attempt ${job.attemptsMade + 1})`, 'DEBUG');
+        job.addLog(`Calling LLM (iteration ${state.iterations}) for job ${job.id.value} (attempt ${job.attemptsMade + 1})`, 'DEBUG');
 
     const llmGenerationResponse = await this.llmAdapter.generateText(conversationMessages, {
       temperature: agent.temperature.value,
@@ -60,7 +60,7 @@ export class AgentInteractionService {
       return;
     }
 
-    state.assistantMessage = llmGenerationResponse.data;
+    state.assistantMessage = llmGenerationResponse.data ?? null;
     state.llmResponseText = state.assistantMessage?.content ?? '';
     const currentJobIdVal = job.id.value;
     this.logger.info(
@@ -82,7 +82,7 @@ export class AgentInteractionService {
       tool_calls: state.assistantMessage?.tool_calls as LanguageModelMessageToolCall[] | undefined,
     });
     job.addConversationEntry(assistantHistoryEntry);
-    state.activityHistory = job.conversationHistory;
+    state.activityHistory = job.getConversationHistory();
   }
 
   private _isUnusableResponse(state: ExecutionState): boolean {
@@ -116,7 +116,7 @@ export class AgentInteractionService {
 
     job.setConversationHistory(updatedHistory);
     job.setExecutionHistory(updatedExecutionHistory);
-    state.activityHistory = job.conversationHistory;
+    state.activityHistory = job.getConversationHistory();
     state.executionHistory = [...job.executionHistory];
     state.replanAttemptsForEmptyResponse++;
     job.addLog(`LLM response was unusable. Re-planning (attempt ${state.replanAttemptsForEmptyResponse}).`, 'WARN');

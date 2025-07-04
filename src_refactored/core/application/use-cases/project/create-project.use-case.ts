@@ -18,7 +18,7 @@ import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/u
 import { CreateProjectUseCaseInput, CreateProjectUseCaseOutput, CreateProjectInputSchema } from "./create-project.schema";
 
 @injectable()
-export class CreateProjectUseCase implements IUseCase<CreateProjectUseCaseInput, CreateProjectUseCaseOutput> {
+export class CreateProjectUseCase   implements IUseCase<CreateProjectUseCaseInput, IUseCaseResponse<CreateProjectUseCaseOutput>> {
   constructor(
     @inject(PROJECT_REPOSITORY_INTERFACE_TYPE) private readonly projectRepository: IProjectRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,

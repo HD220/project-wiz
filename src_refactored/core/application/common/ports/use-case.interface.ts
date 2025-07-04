@@ -1,7 +1,5 @@
 // src_refactored/core/application/common/ports/use-case.interface.ts
-import { DomainError } from '@/domain/common/errors';
 
-import { ApplicationError } from '@/application/common/errors';
 
 /**
  * Defines the basic contract for a use case.
@@ -11,7 +9,7 @@ import { ApplicationError } from '@/application/common/errors';
  * @template TResponse The type of the successful output from the use case.
  * @template TError The type of the error output from the use case. Defaults to DomainError or ApplicationError.
  */
-export type IUseCase<TRequest, TResponse, TError extends Error = DomainError | ApplicationError> = {
+export type IUseCase<TRequest, TResponse> = {
   execute(request: TRequest): Promise<TResponse>;
 };
 

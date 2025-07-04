@@ -23,7 +23,8 @@ export class AgentTemperature extends AbstractValueObject<AgentTemperatureProps>
   public static create(temperature: number): AgentTemperature {
     const validationResult = AgentTemperatureSchema.safeParse(temperature);
     if (!validationResult.success) {
-      throw new ValueError('Invalid agent temperature.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid agent temperature: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

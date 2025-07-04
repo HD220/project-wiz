@@ -30,7 +30,7 @@ const CONTENT_EXCERPT_LENGTH = 200;
 
 @injectable()
 export class SearchMemoryItemsUseCase
-  implements IUseCase<SearchMemoryItemsUseCaseInput, SearchMemoryItemsUseCaseOutput>
+  implements IUseCase<SearchMemoryItemsUseCaseInput, IUseCaseResponse<SearchMemoryItemsUseCaseOutput>>
 {
   constructor(
     @inject(MEMORY_REPOSITORY_INTERFACE_TYPE) private readonly memoryRepository: IMemoryRepository,
@@ -48,7 +48,7 @@ export class SearchMemoryItemsUseCase
 
     const paginationOptions: PaginationOptions = {
       page: validatedInput.page,
-      pageSize: validatedInput.pageSize,
+      limit: validatedInput.pageSize,
     };
 
     const paginatedMemoryItems = await this.memoryRepository.search(searchFilters, paginationOptions);

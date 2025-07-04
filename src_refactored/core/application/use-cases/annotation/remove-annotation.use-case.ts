@@ -23,7 +23,7 @@ export class RemoveAnnotationUseCase
   implements
     IUseCase<
       RemoveAnnotationUseCaseInput,
-      RemoveAnnotationUseCaseOutput
+      IUseCaseResponse<RemoveAnnotationUseCaseOutput>
     >
 {
   constructor(

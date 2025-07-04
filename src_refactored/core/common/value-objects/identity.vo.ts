@@ -17,7 +17,8 @@ export class Identity extends AbstractValueObject<IdentityProps> {
   protected constructor(value: string) {
     const validationResult = IdentitySchema.safeParse(value);
     if (!validationResult.success) {
-      throw new ValueError('Invalid Identity format.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid Identity format: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

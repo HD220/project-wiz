@@ -53,7 +53,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     job: JobEntity<AgentExecutionPayload, unknown>
   ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> {
     const jobId = job.id.value;
-    const agentId = job.payload.agentId;
+    const agentId = job.props.payload.agentId;
 
     this.logger.info(`Processing Job ID: ${jobId} with Agent ID: ${agentId}`, { jobId, agentId });
 

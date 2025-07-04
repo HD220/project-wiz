@@ -3,9 +3,9 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataLoadingOrErrorDisplay } from "@/ui/components/DataLoadingOrErrorDisplay";
+import { EditAgentFormRenderer } from "@/ui/features/agent/components/EditAgentFormRenderer";
 import { useAgentInstanceData } from "@/ui/hooks/useAgentInstanceData";
 import { useUpdateAgentInstance } from "@/ui/hooks/useUpdateAgentInstance";
-import { EditAgentFormRenderer } from "@/ui/features/agent/components/EditAgentFormRenderer";
 
 function EditAgentInstancePage() {
   const router = useRouter();

@@ -1,7 +1,6 @@
 import { injectable, inject } from "inversify";
 
 import { ILogger } from "@/core/common/services/i-logger.service";
-import { DomainError, NotFoundError } from "@/core/domain/common/errors";
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { Project } from "@/core/domain/project/project.entity";
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";

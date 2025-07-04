@@ -29,7 +29,7 @@ export class CreateLLMProviderConfigUseCase
   implements
     IUseCase<
       CreateLLMProviderConfigUseCaseInput,
-      CreateLLMProviderConfigUseCaseOutput
+      IUseCaseResponse<CreateLLMProviderConfigUseCaseOutput>
     >
 {
   constructor(

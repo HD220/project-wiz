@@ -23,7 +23,8 @@ export class PersonaGoal extends AbstractValueObject<PersonaGoalProps> {
   public static create(goal: string): PersonaGoal {
     const validationResult = PersonaGoalSchema.safeParse(goal);
     if (!validationResult.success) {
-      throw new ValueError('Invalid persona goal.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid persona goal: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

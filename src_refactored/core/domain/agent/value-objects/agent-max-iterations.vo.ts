@@ -24,7 +24,8 @@ export class AgentMaxIterations extends AbstractValueObject<AgentMaxIterationsPr
   public static create(value: number): AgentMaxIterations {
     const validationResult = AgentMaxIterationsSchema.safeParse(value);
     if (!validationResult.success) {
-      throw new ValueError('Invalid agent max iterations.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid agent max iterations: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

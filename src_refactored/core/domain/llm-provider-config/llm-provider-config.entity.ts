@@ -75,7 +75,7 @@ export class LLMProviderConfig extends AbstractEntity<LLMProviderConfigId, Inter
   }
 
   public get apiKeyForAdapter(): string {
-    return this.props.apiKey ? this.props.apiKey.forHeader() : '';
+    return this.props.apiKey ? this.props.apiKey.value : '';
   }
 
   public get baseUrl(): string | null | undefined {

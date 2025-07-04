@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PlusCircle, UserSquare, Search } from "lucide-react";
+import { PlusCircle, UserSquare, Search, Bot } from "lucide-react";
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";

@@ -43,27 +43,27 @@ export class AgentPersonaTemplate extends AbstractValueObject<AgentPersonaTempla
 
   // Provide methods to access the VOs, adhering to "no direct getters"
   // by returning the VO itself, not its primitive value.
-  public id(): PersonaId {
+  public get id(): PersonaId {
     return this.props.id;
   }
 
-  public name(): PersonaName {
+  public get name(): PersonaName {
     return this.props.name;
   }
 
-  public role(): PersonaRole {
+  public get role(): PersonaRole {
     return this.props.role;
   }
 
-  public goal(): PersonaGoal {
+  public get goal(): PersonaGoal {
     return this.props.goal;
   }
 
-  public backstory(): PersonaBackstory {
+  public get backstory(): PersonaBackstory {
     return this.props.backstory;
   }
 
-  public toolNames(): ToolNames {
+  public get toolNames(): ToolNames {
     return this.props.toolNames;
   }
 

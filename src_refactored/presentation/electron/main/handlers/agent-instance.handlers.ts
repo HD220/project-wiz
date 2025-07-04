@@ -4,7 +4,7 @@ import {
   IPC_CHANNELS
 } from "../../../../shared/ipc-channels";
 import {
-  GetAgentInstancesListResponseData,
+  
   GetAgentInstanceDetailsRequest,
   GetAgentInstanceDetailsResponseData,
   CreateAgentInstanceRequest,
@@ -12,9 +12,9 @@ import {
   UpdateAgentInstanceRequest,
   UpdateAgentInstanceResponseData,
   GetAgentInstancesListRequest,
-  GetAgentInstancesListResponseData as GetAgentInstancesByProjectResponse,
+  GetAgentInstancesListResponseData
 } from "../../../../shared/ipc-types";
-import { AgentInstance, AgentLLM, LLMConfig } from "../../../../shared/types/entities";
+import { AgentInstance, AgentLLM } from "../../../../shared/types/entities";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
 function registerQueryAgentInstanceHandlers() {

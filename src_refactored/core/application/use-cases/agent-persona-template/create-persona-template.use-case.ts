@@ -26,7 +26,7 @@ export class CreatePersonaTemplateUseCase
   implements
     IUseCase<
       CreatePersonaTemplateUseCaseInput,
-      CreatePersonaTemplateUseCaseOutput
+      IUseCaseResponse<CreatePersonaTemplateUseCaseOutput>
     >
 {
   constructor(

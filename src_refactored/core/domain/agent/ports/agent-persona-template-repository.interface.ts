@@ -7,7 +7,7 @@ import { PersonaRole } from '../value-objects/persona/persona-role.vo';
 export interface IAgentPersonaTemplateRepository {
   // Save might be for future use if templates are stored in DB,
   // or for validating/caching file-based templates.
-  save(template: AgentPersonaTemplate): Promise<void>;
+  save(template: AgentPersonaTemplate): Promise<AgentPersonaTemplate>;
 
   findById(id: PersonaId): Promise<AgentPersonaTemplate | null>;
   findByRole(role: PersonaRole): Promise<AgentPersonaTemplate | null>;

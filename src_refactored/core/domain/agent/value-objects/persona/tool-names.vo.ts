@@ -19,7 +19,8 @@ export class ToolNames extends AbstractValueObject<ToolNamesProps> {
   public static create(toolNames: string[] | undefined | null): ToolNames {
     const validationResult = ToolNamesSchema.safeParse(toolNames);
     if (!validationResult.success) {
-      throw new ValueError('Invalid tool names.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid tool names: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

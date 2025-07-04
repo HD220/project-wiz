@@ -13,7 +13,7 @@ import {
   UpdateProjectResponseData,
 } from "../../../../shared/ipc-types";
 import { Project } from "../../../../shared/types/entities";
-import { AgentLLM, LLMConfig } from "../../../../shared/types/entities";
+import { AgentLLM } from "../../../../shared/types/entities";
 import {
   mockProjectsDb,
   addMockProject,

@@ -1,11 +1,11 @@
-import { AgentInstance, AgentLLM } from "../../../../shared/types/entities";
+import { AgentInstance } from "../../../../shared/types/entities";
 
 export const mockAgentInstances: AgentInstance[] = [
   {
     id: "agent-1",
     agentName: "DevHelper Bot",
     personaTemplateId: "pt-1",
-    llmProviderConfigId: "llm-openai-gpt4", // Assuming a mock ID for OpenAI GPT-4
+    llmProviderConfigId: "llm-openai-gpt4",
     temperature: 0.7,
     status: "idle",
     createdAt: new Date().toISOString(),
@@ -15,7 +15,7 @@ export const mockAgentInstances: AgentInstance[] = [
     id: "agent-2",
     agentName: "StoryBot",
     personaTemplateId: "pt-2",
-    llmProviderConfigId: "llm-anthropic-claude3", // Assuming a mock ID for Anthropic Claude 3
+    llmProviderConfigId: "llm-anthropic-claude3",
     temperature: 0.8,
     status: "idle",
     createdAt: new Date().toISOString(),
@@ -25,7 +25,7 @@ export const mockAgentInstances: AgentInstance[] = [
     id: "agent-3",
     agentName: "CodeReviewer",
     personaTemplateId: "pt-1",
-    llmProviderConfigId: "llm-google-gemini-pro", // Assuming a mock ID for Google Gemini Pro
+    llmProviderConfigId: "llm-google-gemini-pro",
     temperature: 0.5,
     status: "idle",
     createdAt: new Date().toISOString(),

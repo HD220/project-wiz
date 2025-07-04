@@ -33,7 +33,7 @@ export function EditPersonaTemplateFormRenderer({
   isSubmitting,
 }: EditPersonaTemplateFormRendererProps) {
   if (!personaTemplate) {
-    return null; // Or render a loading/error state
+    return null;
   }
 
   const initialValues: Partial<PersonaTemplateFormData> = {

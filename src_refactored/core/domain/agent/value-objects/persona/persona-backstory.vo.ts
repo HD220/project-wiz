@@ -20,7 +20,8 @@ export class PersonaBackstory extends AbstractValueObject<PersonaBackstoryProps>
   public static create(backstory: string): PersonaBackstory {
     const validationResult = PersonaBackstorySchema.safeParse(backstory);
     if (!validationResult.success) {
-      throw new ValueError('Invalid persona backstory.', {
+      const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
+      throw new ValueError(`Invalid persona backstory: ${errorMessages}`, {
         details: validationResult.error.flatten().fieldErrors,
       });
     }

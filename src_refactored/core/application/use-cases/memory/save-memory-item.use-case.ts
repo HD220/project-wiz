@@ -29,7 +29,7 @@ export class SaveMemoryItemUseCase
   implements
     IUseCase<
       SaveMemoryItemUseCaseInput,
-      SaveMemoryItemUseCaseOutput
+      IUseCaseResponse<SaveMemoryItemUseCaseOutput>
     >
 {
   constructor(

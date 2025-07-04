@@ -26,7 +26,7 @@ export class AgentStateService {
   ) {}
 
   public initializeExecutionState(job: JobEntity<AgentExecutionPayload, unknown>, agent: Agent): ExecutionState {
-    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.payload);
+    const { currentActivityHistory, currentExecutionHistory } = this._initializeHistories(job, job.props.payload);
     return {
       goalAchieved: false,
       iterations: 0,
@@ -41,14 +41,14 @@ export class AgentStateService {
   }
 
   private _initializeHistories(job: JobEntity<AgentExecutionPayload, unknown>, jobPayload: AgentExecutionPayload): { currentActivityHistory: ActivityHistoryVO; currentExecutionHistory: ExecutionHistoryEntry[] } {
-    let activityHistory = job.conversationHistory;
+    let activityHistory = job.getConversationHistory();
     if (activityHistory.entries.length === 0) {
-      const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.name}`;
+      const userPromptContent = jobPayload.initialPrompt || `Based on your persona, please address the following task: ${job.props.name}`;
       const userPromptEntry = ActivityHistoryEntryVO.create(ActivityEntryType.LLM_REQUEST, userPromptContent);
       job.addConversationEntry(userPromptEntry);
-      activityHistory = job.conversationHistory;
+      activityHistory = job.getConversationHistory();
     }
-    return { currentActivityHistory: activityHistory, currentExecutionHistory: [...job.executionHistory] };
+    return { currentActivityHistory: activityHistory, currentExecutionHistory: [...job.getExecutionHistory()] };
   }
 
   public checkGoalAchieved(state: ExecutionState): void {
