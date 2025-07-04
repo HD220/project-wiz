@@ -11,9 +11,9 @@ No Project Wiz, nos esforçamos para seguir princípios de desenvolvimento de so
 *   **YAGNI (You Aren't Gonna Need It):** Implemente apenas o que é necessário agora.
 *   **Clean Code:** Escreva código que seja fácil de ler, entender e modificar.
 
-Para uma discussão aprofundada sobre estes e outros princípios gerais, bem como diretrizes de arquitetura (Clean Architecture, Object Calisthenics) e práticas específicas para as tecnologias que usamos (Electron, React, TypeScript, Vite, Zod), consulte o nosso documento principal de Boas Práticas:
+Para uma discussão aprofundada sobre estes e outros princípios gerais, bem como diretrizes de arquitetura (Clean Architecture, Object Calisthenics), práticas específicas para as tecnologias que usamos (Electron, React, TypeScript, Vite, Zod), convenções de nomenclatura, formatação, linting, e muito mais, consulte o nosso documento centralizado e principal de Padrões de Código:
 
-*   **[Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md)** (Este link será válido após a reestruturação da seção de referência).
+*   **[Padrões de Código e Diretrizes de Desenvolvimento para o Project Wiz](./coding-standards.md)**
 
 ## Padrões de Estilo de Código
 
@@ -57,4 +57,4 @@ Os seguintes padrões de estilo são extraídos do nosso [Guia de Contribuição
 *   **Revisão de Código:** Todos os Pull Requests devem ser revisados por pelo menos um outro desenvolvedor.
 *   **Refatoração Contínua:** Dedique tempo para refatorar o código e reduzir o débito técnico.
 
-Ao aderir a esses padrões e diretrizes, contribuímos para um projeto mais robusto, colaborativo e sustentável. Lembre-se de consultar o [documento detalhado de Boas Práticas](../reference/02-best-practices.md) para um entendimento mais profundo.
+Ao aderir a esses padrões e diretrizes, contribuímos para um projeto mais robusto, colaborativo e sustentável. Lembre-se de consultar o documento [Padrões de Código e Diretrizes de Desenvolvimento para o Project Wiz](./coding-standards.md) para um entendimento completo e detalhado de todos os padrões vigentes.
