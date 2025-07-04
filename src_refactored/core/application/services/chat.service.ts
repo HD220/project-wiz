@@ -10,6 +10,7 @@ import {
   ILLMAdapter,
   ILLMAdapterToken,
 } from '@/core/ports/adapters/llm-adapter.interface';
+import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
 
 import {
   IUseCaseResponse,
@@ -116,9 +117,13 @@ export class ChatService implements IChatService {
 
       for await (const result of stream) {
         if (result.success) {
+          let tokenData: string = '';
+          if (result.data && typeof result.data === 'object' && 'content' in result.data) {
+            tokenData = (result.data as LanguageModelMessage).content || '';
+          }
           const tokenPayload: ChatStreamTokenPayload = {
             type: 'token',
-            data: result.data?.content ?? '',
+            data: tokenData,
           };
           sendStreamEventCallback(tokenPayload);
         } else {

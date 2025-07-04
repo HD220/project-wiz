@@ -5,6 +5,7 @@ import { ValueError } from '@/core/domain/common/errors';
 
 interface BaseUrlProps {
   value: string;
+  [key: string]: unknown;
 }
 
 const BaseUrlSchema = z

@@ -78,6 +78,8 @@ export type PersonaTemplatesUpdatedEventPayload = PersonaTemplate[];
 export type GetAgentInstancesListRequest = void;
 export type GetAgentInstancesListResponseData = AgentInstance[];
 
+export type GetAgentInstancesByProjectRequest = { projectId: string };
+
 export type GetAgentInstanceDetailsRequest = { agentId: string };
 export type GetAgentInstanceDetailsResponseData = AgentInstance | null;
 
@@ -98,6 +100,8 @@ export type AgentInstancesUpdatedEventPayload = AgentInstance[];
 // LLM Configurations
 export type GetLLMConfigsListRequest = void;
 export type GetLLMConfigsListResponseData = LLMConfig[];
+
+export type GetAvailableLLMsResponseData = LLMConfig[];
 
 export type GetLLMConfigDetailsRequest = { configId: string };
 export type GetLLMConfigDetailsResponseData = LLMConfig | null;
@@ -136,10 +140,13 @@ export type AppSettingsUpdatedEventPayload = AppSettings;
 export type GetDMConversationsListRequest = void;
 export type GetDMConversationsListResponseData = DirectMessageItem[];
 
+export type GetDMDetailsRequest = { dmId: string };
+export type GetDMDetailsResponseData = DirectMessageItem | null;
+
 export type GetDMMessagesRequest = { conversationId: string };
 export type GetDMMessagesResponseData = ChatMessage[];
 
-export type SendDMMessageRequest = { conversationId: string; content: string };
+export type SendDMMessageRequest = { dmId: string; content: string; senderId: string };
 export type SendDMMessageResponseData = ChatMessage;
 
 export type DMMessageReceivedEventPayload = {

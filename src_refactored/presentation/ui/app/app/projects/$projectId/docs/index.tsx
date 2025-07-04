@@ -68,31 +68,17 @@ function ProjectDocsPage() {
   ]);
 
   const getFileContent = (pathSegments: string[]): string | null => {
-    let currentEntry: DocEntry | Record<string, DocEntry> | undefined =
-      mockDocsFileSystem;
+    let currentEntry: DocEntry | undefined = mockDocsFileSystem;
     for (const segment of pathSegments) {
       if (!currentEntry) return null;
 
-      if (
-        typeof currentEntry === "object" &&
-        "children" in currentEntry &&
-        currentEntry.children
-      ) {
+      if (currentEntry.type === "folder") {
         currentEntry = currentEntry.children[segment];
-      } else if (
-        typeof currentEntry === "object" &&
-        !("type" in currentEntry) &&
-        segment in currentEntry
-      ) {
-        currentEntry = (currentEntry as DocFolder).children[segment];
       } else {
-        return null;
+        return null; // Tried to navigate into a file or non-existent segment
       }
     }
-    return currentEntry &&
-      typeof currentEntry === "object" &&
-      "type" in currentEntry &&
-      currentEntry.type === "file"
+    return currentEntry && currentEntry.type === "file"
       ? currentEntry.content
       : null;
   };

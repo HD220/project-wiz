@@ -11,7 +11,7 @@ import {
 import { useIpcQuery } from "./ipc/useIpcQuery";
 
 export function useAgentInstanceData() {
-  const params = useParams({ from: "/(app)/agents/$agentId/edit/" });
+  const params = useParams({ from: "/app/agents/$agentId/edit/" });
   const agentId = params.agentId;
 
   const {
@@ -32,9 +32,9 @@ export function useAgentInstanceData() {
     data: personaTemplates,
     isLoading: isLoadingPersonas,
     error: personasError,
-  } = useIpcQuery<null, GetPersonaTemplatesListResponseData>(
+  } = useIpcQuery<void, GetPersonaTemplatesListResponseData>(
     IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST,
-    null,
+    undefined,
     { staleTime: 15 * 60 * 1000 }
   );
 
@@ -42,9 +42,9 @@ export function useAgentInstanceData() {
     data: llmConfigs,
     isLoading: isLoadingLLMs,
     error: llmsError,
-  } = useIpcQuery<null, GetLLMConfigsListResponseData>(
+  } = useIpcQuery<void, GetLLMConfigsListResponseData>(
     IPC_CHANNELS.GET_LLM_CONFIGS_LIST,
-    null,
+    undefined,
     { staleTime: 15 * 60 * 1000 }
   );
 

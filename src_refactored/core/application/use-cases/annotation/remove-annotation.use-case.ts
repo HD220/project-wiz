@@ -6,10 +6,7 @@ import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.
 import { IAnnotationRepository } from "@/core/domain/annotation/ports/annotation-repository.interface";
 import { AnnotationId } from "@/core/domain/annotation/value-objects/annotation-id.vo";
 
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+
 
 
 import {
@@ -23,7 +20,7 @@ export class RemoveAnnotationUseCase
   implements
     IUseCase<
       RemoveAnnotationUseCaseInput,
-      IUseCaseResponse<RemoveAnnotationUseCaseOutput>
+      RemoveAnnotationUseCaseOutput
     >
 {
   constructor(
@@ -34,16 +31,16 @@ export class RemoveAnnotationUseCase
 
   async execute(
     input: RemoveAnnotationUseCaseInput
-  ): Promise<IUseCaseResponse<RemoveAnnotationUseCaseOutput>> {
+  ): Promise<RemoveAnnotationUseCaseOutput> {
     const validInput = RemoveAnnotationUseCaseInputSchema.parse(input);
 
     const annotationIdVo = AnnotationId.fromString(validInput.annotationId);
 
     await this.annotationRepository.delete(annotationIdVo);
 
-    return successUseCaseResponse({
+    return {
       success: true,
       annotationId: validInput.annotationId,
-    });
+    };
   }
 }

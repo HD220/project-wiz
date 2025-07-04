@@ -1,14 +1,16 @@
 import { JobStatus } from "@/core/domain/job/job.entity";
 import {
+  JobEntityProps,
   JobPersistenceData,
 } from "@/core/domain/job/job.types";
-import { IJobOptions } from "@/core/domain/job/value-objects/job-options.vo";
+import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
+import { IJobOptions, JobOptionsVO } from "@/core/domain/job/value-objects/job-options.vo";
 
 import * as schema from "../schema";
 
 export function mapToPersistenceData<P, R>(
-  jobData: schema.JobSelect
-): JobPersistenceData<P, R> {
+  jobData: schema.JobSelect & { payload: P; returnValue: R | null }
+): JobEntityProps<P, R> {
   const options = jobData.options as IJobOptions;
   const logs =
     (jobData.logs as Array<{
@@ -22,30 +24,28 @@ export function mapToPersistenceData<P, R>(
   const stacktrace = jobData.stacktrace as string[] | null;
 
   return {
-    id: jobData.id,
+    id: JobIdVO.create(jobData.id),
     queueName: jobData.queueName,
     name: jobData.name,
     payload: payload,
-    options: options,
-    priority: options.priority,
+    options: JobOptionsVO.create(options),
     status: jobData.status as JobStatus,
-    attemptsMade: jobData.attemptsMade,
+    attemptsMade: jobData.attemptsMade ?? 0,
     progress: progress,
-    logs: logs,
-    createdAt: jobData.createdAt.getTime(),
-    updatedAt: jobData.updatedAt.getTime(),
-    processedOn: jobData.processedOn ? jobData.processedOn.getTime() : null,
-    finishedOn: jobData.finishedOn ? jobData.finishedOn.getTime() : null,
-    delayUntil: jobData.delayUntil ? jobData.delayUntil.getTime() : null,
-    lockUntil: jobData.lockUntil ? jobData.lockUntil.getTime() : null,
-    workerId: jobData.workerId,
+    logs: logs.map(log => ({ ...log, timestamp: new Date(log.timestamp) })),
+    createdAt: new Date(jobData.createdAt),
+    updatedAt: new Date(jobData.updatedAt),
+    processedOn: jobData.processedOn ? new Date(jobData.processedOn) : null,
+    delayUntil: jobData.delayUntil ? new Date(jobData.delayUntil) : null,
+    lockUntil: jobData.lockUntil ? new Date(jobData.lockUntil) : null,
+    workerId: jobData.workerId ?? undefined,
     returnValue: returnValue,
     failedReason: jobData.failedReason,
     stacktrace: stacktrace,
   };
 }
 
-export function mapToDrizzleInput<P = unknown, R = unknown>(
+export function mapToDrizzleInput<P extends { userId?: string } = { userId?: string }, R = unknown>(
   data: JobPersistenceData<P, R>
 ): typeof schema.jobsTable.$inferInsert {
   // Ensure all fields expected by schema.jobsTable.$inferInsert are present
@@ -84,7 +84,7 @@ export function mapToDrizzleInput<P = unknown, R = unknown>(
     // This is R | null, Drizzle handles JSON
     returnValue: data.returnValue,
     failedReason: data.failedReason,
-    stacktrace: data.stacktrace,
+    stacktrace: data.stacktrace ?? undefined,
     // Convert timestamps back to Date objects for Drizzle
     createdAt: new Date(data.createdAt),
     updatedAt: new Date(data.updatedAt),

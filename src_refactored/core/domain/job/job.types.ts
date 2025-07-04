@@ -32,14 +32,14 @@ export interface JobEntityProps<P = unknown, R = unknown> {
   logs: JobLogEntry[];
   createdAt: Date;
   updatedAt: Date;
-  processedAt?: Date | null;
+  processedOn?: Date | null;
   finishedOn?: Date | null;
   delayUntil?: Date | null;
   lockUntil?: Date | null;
-  workerId?: string;
-  returnValue?: R;
-  failedReason?: string;
-  stacktrace?: string[];
+  workerId?: string | null;
+  returnValue?: R | null | undefined;
+  failedReason?: string | null | undefined;
+  stacktrace?: string[] | null | undefined;
 }
 
 export const JobEntityPropsSchema = z.object({
@@ -59,8 +59,8 @@ export const JobEntityPropsSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   delayUntil: z.date().optional().nullable(),
-  finishedAt: z.date().optional().nullable(),
-  processedAt: z.date().optional().nullable(),
+  finishedOn: z.date().optional().nullable(),
+  processedOn: z.date().optional().nullable(),
   failedReason: z.string().optional().nullable(),
   stacktrace: z.array(z.string()).optional().nullable(),
   returnvalue: z.any().optional().nullable(),

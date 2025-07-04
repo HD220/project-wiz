@@ -1,11 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import { ChatPageContent } from '@/ui/features/chat/components/ChatPageContent';
 import { ChatSidebar } from '@/ui/features/chat/components/ChatSidebar';
 import { useChatLogic } from '@/ui/hooks/useChatLogic';
 
+const chatSearchSchema = z.object({
+  conversationId: z.string().optional(),
+});
+
 export const Route = createFileRoute('/app/chat/')({
   component: ChatPage,
+  validateSearch: chatSearchSchema,
 });
 
 export function ChatPage() {

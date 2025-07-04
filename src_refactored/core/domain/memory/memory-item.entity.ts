@@ -92,8 +92,10 @@ export class MemoryItem extends AbstractEntity<MemoryItemId, InternalMemoryItemP
     return new MemoryItem({ ...this.props, source: newSource, updatedAt: new Date() });
   }
 
-  public setEmbedding(newEmbedding: MemoryItemEmbedding): MemoryItem {
-    if (this.embedding?.equals(newEmbedding)) return this;
+  public setEmbedding(newEmbedding: MemoryItemEmbedding | null | undefined): MemoryItem {
+    // Handles both being null/undefined or same object
+    if (this.embedding === newEmbedding) return this;
+    if (this.embedding && newEmbedding && this.embedding.equals(newEmbedding)) return this;
     return new MemoryItem({ ...this.props, embedding: newEmbedding, updatedAt: new Date() });
   }
 

@@ -12,8 +12,6 @@ import { PersonaName } from "@/core/domain/agent/value-objects/persona/persona-n
 import { PersonaRole } from "@/core/domain/agent/value-objects/persona/persona-role.vo";
 import { ToolNames } from "@/core/domain/agent/value-objects/persona/tool-names.vo";
 
-import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/use-case-response.dto";
-
 
 import {
   CreatePersonaTemplateUseCaseInput,
@@ -26,7 +24,7 @@ export class CreatePersonaTemplateUseCase
   implements
     IUseCase<
       CreatePersonaTemplateUseCaseInput,
-      IUseCaseResponse<CreatePersonaTemplateUseCaseOutput>
+      CreatePersonaTemplateUseCaseOutput
     >
 {
   constructor(
@@ -36,13 +34,13 @@ export class CreatePersonaTemplateUseCase
 
   async execute(
     input: CreatePersonaTemplateUseCaseInput
-  ): Promise<IUseCaseResponse<CreatePersonaTemplateUseCaseOutput>> {
+  ): Promise<CreatePersonaTemplateUseCaseOutput> {
     const validInput = CreatePersonaTemplateUseCaseInputSchema.parse(input);
 
     const nameVo = PersonaName.create(validInput.name);
     const roleVo = PersonaRole.create(validInput.role);
     const goalVo = PersonaGoal.create(validInput.goal);
-    const backstoryVo = PersonaBackstory.create(validInput.backstory);
+    const backstoryVo = validInput.backstory ? PersonaBackstory.create(validInput.backstory) : null;
     const toolNamesVo = ToolNames.create(validInput.toolNames);
     const personaIdVo = PersonaId.generate();
 
@@ -59,8 +57,8 @@ export class CreatePersonaTemplateUseCase
       personaTemplate
     );
 
-    return successUseCaseResponse({
+    return {
       personaTemplateId: savedPersonaTemplate.id.value,
-    });
+    };
   }
 }

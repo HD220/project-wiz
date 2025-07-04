@@ -10,7 +10,7 @@ import type {
 } from "@/shared/ipc-types";
 
 export function useAgentInstanceDetails() {
-  const params = useParams({ from: "/(app)/agents/$agentId/" });
+  const params = useParams({ from: "/app/agents/$agentId/" });
   const agentId = params.agentId;
 
   const {

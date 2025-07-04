@@ -13,7 +13,7 @@ export class QueueMaintenanceService<P, R> {
   private readonly maintenanceIntervalMs: number = 15000;
 
   constructor(
-    private readonly jobRepository: IJobRepository,
+    private readonly jobRepository: IJobRepository<P, R>,
     // Or a dedicated JobEventEmitter
     private readonly eventEmitter: EventEmitter,
     private readonly queueName: string

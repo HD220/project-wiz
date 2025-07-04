@@ -11,6 +11,8 @@ import { ToolError } from '@/domain/common/errors';
 
 import { TYPES } from '@/infrastructure/ioc/types';
 
+import { errorUseCaseResponse, successUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
+
 // Prefixed because these are internal schema details, not part of the public tool parameters interface
 const _ReadFileParamsSchema = z.object({
   filePath: z.string().describe('The path to the file to read.'),
@@ -62,8 +64,9 @@ export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototyp
   async execute(
     params: z.infer<typeof this.parameters>,
     _executionContext?: IToolExecutionContext,
-  ): Promise<IUseCaseResponse<string | string[], ToolError>> {
+  ): Promise<IUseCaseResponse<unknown, ToolError>> {
     this.logger.info(`[FileSystemTool] executing action: ${params.action}`);
+
     try {
       let result: string | string[];
       switch (params.action) {
@@ -99,7 +102,7 @@ export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototyp
         }
       }
       return successUseCaseResponse(result);
-    } catch (error: unknown) {
+    } catch (error) {
       return errorUseCaseResponse(this._createError(params.action, error));
     }
   }

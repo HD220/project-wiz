@@ -25,14 +25,22 @@ function NewAgentInstancePage() {
     return loadingErrorDisplay;
   }
 
+  if (!personaTemplates || !llmConfigs) {
+    return (
+      <div className="p-8 text-center">
+        <p>Dados necessários para criar um novo agente não encontrados.</p>
+      </div>
+    );
+  }
+
   const handleCancel = () => {
     router.history.back();
   };
 
   return (
     <NewAgentFormRenderer
-      personaTemplates={personaTemplates}
-      llmConfigs={llmConfigs}
+      personaTemplates={personaTemplates.data}
+      llmConfigs={llmConfigs.data}
       handleSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       onCancel={handleCancel}

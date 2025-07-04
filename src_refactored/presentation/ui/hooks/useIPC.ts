@@ -2,9 +2,7 @@
 
 // Using path alias
 import { ipcService } from "@/ui/services/ipc.service";
-// Using path alias, kept for type documentation
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { IElectronIPC } from "@/ui/services/ipc.types";
+
 
 /**
  * Custom React hook to access the IPC service for communicating

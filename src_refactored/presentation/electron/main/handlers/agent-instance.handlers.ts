@@ -22,7 +22,7 @@ function registerQueryAgentInstanceHandlers() {
     IPC_CHANNELS.GET_AGENT_INSTANCES_LIST,
     async (): Promise<GetAgentInstancesListResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { agentInstances: mockAgentInstances };
+      return { success: true, data: mockAgentInstances };
     }
   );
 
@@ -48,12 +48,12 @@ function registerQueryAgentInstanceHandlers() {
     ): Promise<GetAgentInstanceDetailsResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instance = mockAgentInstances.find(
-        (ai) => ai.id === req.instanceId
+        (ai) => ai.id === req.agentId
       );
       if (instance) {
-        return { agentInstance: instance };
+        return { success: true, data: instance };
       }
-      return { agentInstance: undefined, error: "Agent Instance not found" };
+      return { success: false, error: { message: "Agent instance not found" } };
     }
   );
 }
@@ -69,6 +69,9 @@ function registerCreateAgentInstanceHandler() {
       const newInstance: AgentInstance = {
         id: `agent-${Date.now()}`,
         personaTemplateId: req.personaTemplateId,
+        agentName: req.agentName,
+        llmProviderConfigId: req.llmProviderConfigId,
+        temperature: req.temperature,
         projectId: req.projectId,
         llmConfig: req.llmConfig || {
           llm: AgentLLM.OPENAI_GPT_4_TURBO,
@@ -80,7 +83,7 @@ function registerCreateAgentInstanceHandler() {
         updatedAt: new Date().toISOString(),
       };
       mockAgentInstances.push(newInstance);
-      return { agentInstance: newInstance };
+      return { success: true, data: newInstance };
     }
   );
 }
@@ -112,12 +115,9 @@ function registerUpdateAgentInstanceHandler() {
           updatedAt: new Date().toISOString(),
         };
         mockAgentInstances[instanceIndex] = updatedInstance;
-        return { agentInstance: updatedInstance };
+        return { success: true, data: updatedInstance };
       }
-      return {
-        agentInstance: undefined,
-        error: "Agent Instance not found for update",
-      };
+      return { success: false, error: { message: "Agent instance not found" } };
     }
   );
 }

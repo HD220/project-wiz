@@ -47,7 +47,7 @@ export function UserProfileForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: initialData?.displayName || "",
-      avatarUrl: initialData?.avatarUrl || "",
+      avatarUrl: initialData?.avatarUrl ?? "",
     },
   });
 

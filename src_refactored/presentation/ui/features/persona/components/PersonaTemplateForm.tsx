@@ -12,10 +12,10 @@ import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   CreatePersonaTemplateRequest,
-  CreatePersonaTemplateResponse,
+  CreatePersonaTemplateResponseData,
   PersonaTemplate,
   UpdatePersonaTemplateRequest,
-  UpdatePersonaTemplateResponse,
+  UpdatePersonaTemplateResponseData,
 } from "@/shared/ipc-types";
 
 import { usePersonaToolManagement } from "../hooks/usePersonaToolManagement";
@@ -77,18 +77,18 @@ export function PersonaTemplateForm({
 
   const createTemplateMutation = useIpcMutation<
     CreatePersonaTemplateRequest,
-    CreatePersonaTemplateResponse
+    CreatePersonaTemplateResponseData
   >(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, {
     onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success(`Template "${response.data.name}" criado com sucesso!`);
         onSuccess?.(response.data);
         router.navigate({
-          to: "/personas/$templateId",
+          to: "/app/personas/$templateId",
           params: { templateId: response.data.id },
         });
       } else {
-        toast.error(response.error || "Falha ao criar o template.");
+        toast.error(response.error?.message || "Falha ao criar o template.");
       }
     },
     onError: (error) => {
@@ -98,7 +98,7 @@ export function PersonaTemplateForm({
 
   const updateTemplateMutation = useIpcMutation<
     UpdatePersonaTemplateRequest,
-    UpdatePersonaTemplateResponse
+    UpdatePersonaTemplateResponseData
   >(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, {
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -108,7 +108,7 @@ export function PersonaTemplateForm({
         onSuccess?.(response.data);
         router.invalidate();
       } else {
-        toast.error(response.error || "Falha ao atualizar o template.");
+        toast.error(response.error?.message || "Falha ao atualizar o template.");
       }
     },
     onError: (error) => {
@@ -121,7 +121,7 @@ export function PersonaTemplateForm({
 
   const handleSubmit = (data: PersonaTemplateFormData) => {
     if (isEditing && template) {
-      updateTemplateMutation.mutate({ id: template.id, ...data });
+      updateTemplateMutation.mutate({ templateId: template.id, data: data });
     } else {
       createTemplateMutation.mutate(data);
     }

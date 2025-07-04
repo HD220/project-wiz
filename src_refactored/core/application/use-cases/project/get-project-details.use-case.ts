@@ -9,17 +9,8 @@ import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 import { ISourceCodeRepository } from "@/core/domain/source-code/ports/source-code-repository.interface";
 
 import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
-
-
-
-
-import {
   GetProjectDetailsUseCaseInput,
   GetProjectDetailsUseCaseOutput,
-  SourceCodeDetails,
 } from "./get-project-details.schema";
 
 @injectable()
@@ -27,7 +18,7 @@ export class GetProjectDetailsUseCase
   implements
     IUseCase<
       GetProjectDetailsUseCaseInput,
-      IUseCaseResponse<GetProjectDetailsUseCaseOutput>
+      GetProjectDetailsUseCaseOutput
     >
 {
   constructor(
@@ -36,37 +27,29 @@ export class GetProjectDetailsUseCase
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  async execute(
-    input: GetProjectDetailsUseCaseInput,
-  ): Promise<IUseCaseResponse<GetProjectDetailsUseCaseOutput>> {
-    const projectIdVo = ProjectId.fromString(input.projectId);
+  public async execute(input: GetProjectDetailsUseCaseInput): Promise<GetProjectDetailsUseCaseOutput> {
+    const { projectId } = input;
+    const id = ProjectId.fromString(projectId);
 
-    const project = await this.projectRepository.findById(projectIdVo);
+    const project = await this.projectRepository.findById(id);
 
     if (!project) {
-      throw new NotFoundError('Project', input.projectId);
+      throw new NotFoundError('Project', projectId);
     }
 
-    let sourceCodeDetails: SourceCodeDetails | null = null;
-    const sourceCodeEntity = await this.sourceCodeRepository.findByProjectId(projectIdVo);
+    const sourceCode = await this.sourceCodeRepository.findByProjectId(id);
 
-    if (sourceCodeEntity) {
-      sourceCodeDetails = {
-        id: sourceCodeEntity.id.value,
-        repositoryPath: sourceCodeEntity.path.value,
-        docsPath: sourceCodeEntity.docsPath?.value ?? null,
-      };
-    }
-
-    const output: GetProjectDetailsUseCaseOutput = {
+    return {
       id: project.id.value,
       name: project.name.value,
-      description: project.description?.value ?? null,
       createdAt: project.createdAt.toISOString(),
       updatedAt: project.updatedAt.toISOString(),
-      sourceCode: sourceCodeDetails,
+      description: project.description?.value || null,
+      sourceCode: sourceCode ? {
+        id: sourceCode.id.value,
+        repositoryPath: sourceCode.path.value,
+        docsPath: sourceCode.docsPath?.value || null,
+      } : null,
     };
-
-    return successUseCaseResponse(output);
   }
 }

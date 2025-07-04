@@ -14,7 +14,7 @@ import { UserId } from "@/core/domain/user/value-objects/user-id.vo";
 import { UserNickname } from "@/core/domain/user/value-objects/user-nickname.vo";
 import { UserUsername } from "@/core/domain/user/value-objects/user-username.vo";
 
-import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/use-case-response.dto";
+
 
 
 
@@ -22,13 +22,13 @@ import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/u
 import { CreateUserInput, CreateUserOutput, CreateUserInputSchema } from "./create-user.schema";
 
 @injectable()
-export class CreateUserUseCase implements IUseCase<CreateUserInput, IUseCaseResponse<CreateUserOutput>> {
+export class CreateUserUseCase implements IUseCase<CreateUserInput, CreateUserOutput> {
   constructor(
     @inject(USER_REPOSITORY_INTERFACE_TYPE) private readonly userRepository: IUserRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  async execute(input: CreateUserInput): Promise<IUseCaseResponse<CreateUserOutput>> {
+  async execute(input: CreateUserInput): Promise<CreateUserOutput> {
     this.logger.info(`[CreateUserUseCase] Attempting to create user with username: ${input.username}`);
 
     const validatedInput = CreateUserInputSchema.parse(input);
@@ -42,7 +42,7 @@ export class CreateUserUseCase implements IUseCase<CreateUserInput, IUseCaseResp
     const savedUser = await this.userRepository.save(userEntity);
 
     this.logger.info(`[CreateUserUseCase] User created successfully: ${savedUser.id.value}`);
-    return successUseCaseResponse(this._mapToOutput(savedUser));
+    return this._mapToOutput(savedUser);
   }
 
   private async _checkExistingUser(validatedInput: CreateUserInput): Promise<void> {

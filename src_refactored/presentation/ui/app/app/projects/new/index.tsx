@@ -27,8 +27,8 @@ function NewProjectPage() {
   const router = useRouter();
 
   const createProjectMutation = useIpcMutation<
-    CreateProjectRequest,
-    IPCResponse<CreateProjectResponseData>
+    IPCResponse<CreateProjectResponseData>,
+    CreateProjectRequest
   >(IPC_CHANNELS.CREATE_PROJECT, {
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -44,17 +44,14 @@ function NewProjectPage() {
         );
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error(`Falha ao criar o projeto: ${error.message}`);
     },
   });
 
   const handleSubmit = async (data: ProjectFormData) => {
     console.log("Dados do novo projeto:", data);
-    createProjectMutation.mutate({
-      name: data.name,
-      description: data.description,
-    });
+    createProjectMutation.mutate(data);
   };
 
   return (

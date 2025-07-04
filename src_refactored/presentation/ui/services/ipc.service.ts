@@ -1,6 +1,6 @@
 // src_refactored/presentation/ui/services/ipc.service.ts
 
-import { IPCChannel } from '@/shared/ipc-channels';
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
 import {
   ChatSendMessagePayload,
   ChatStreamEventPayload,
@@ -40,7 +40,7 @@ class IPCService {
   private createMockAPI(): IElectronIPC {
     const mockInvoke = async <T>(channel: string, ...args: unknown[]): Promise<T> => {
       console.warn(`[MockIPC] Invoke: '${channel}' with args:`, args);
-      if (channel === IPCChannel.CHAT_SEND_MESSAGE) {
+      if (channel === IPC_CHANNELS.CHAT_SEND_MESSAGE) {
         // Simulate sending message, no specific data needed for void promise
         // Use unknown
         return undefined as unknown as T;
@@ -52,7 +52,7 @@ class IPCService {
 
     const mockOn = (channel: string, listener: (...args: unknown[]) => void): (() => void) => {
       console.warn(`[MockIPC] Listener registered for channel: '${channel}'`, listener);
-      if (channel === IPCChannel.CHAT_STREAM_EVENT) {
+      if (channel === IPC_CHANNELS.CHAT_STREAM_EVENT) {
         // Simulate some stream events for chat for testing purposes
         setTimeout(() => listener({ type: 'token', data: 'Hello' } as ChatStreamTokenPayload), 100);
         setTimeout(() => listener({ type: 'token', data: ' world' } as ChatStreamTokenPayload), 200);
@@ -122,8 +122,7 @@ class IPCService {
     // Casting our more specific `(...args: unknown[]) => void` to `any` here is acceptable
     // as `unknown[]` can be spread into `any[]`.
     // Ideally, IElectronIPC would also use `unknown[]`.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.api.on(channel, listener as (...args: any[]) => void);
+    return this.api.on(channel, listener as (...args: unknown[]) => void);
   }
 
   // Args to unknown[]
@@ -145,7 +144,7 @@ class IPCService {
    *          For now, typed as Promise<IPCResult<void>> assuming no specific data on success.
    */
   public async sendChatMessage(payload: ChatSendMessagePayload): Promise<IPCResult<void>> {
-    return this.invoke<void>(IPCChannel.CHAT_SEND_MESSAGE, payload);
+    return this.invoke<void>(IPC_CHANNELS.CHAT_SEND_MESSAGE, payload);
   }
 
   /**
@@ -182,8 +181,7 @@ class IPCService {
     // then our `listener` here would correctly receive just `data`.
     // Let's assume the preload script will be written to simplify this for the renderer,
     // meaning it calls the listener with only the data payload.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.on(IPCChannel.CHAT_STREAM_EVENT, listener as (...args: any[]) => void);
+    return this.on(IPC_CHANNELS.CHAT_STREAM_EVENT, listener as (...args: unknown[]) => void);
   }
   // --- Project Specific Methods ---
 
@@ -192,7 +190,7 @@ class IPCService {
    * @returns A promise that resolves with an IPCResult containing ProjectListItem[] or an error.
    */
   public async listProjects(): Promise<IPCResult<ProjectListItem[]>> {
-    return this.invoke<ProjectListItem[]>(IPCChannel.PROJECT_LIST_QUERY);
+    return this.invoke<ProjectListItem[]>(IPC_CHANNELS.PROJECT_LIST_QUERY);
   }
 }
 

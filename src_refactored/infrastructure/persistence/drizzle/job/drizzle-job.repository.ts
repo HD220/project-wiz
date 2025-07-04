@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   and,
   asc as ascDrizzle,
@@ -7,7 +8,6 @@ import {
   isNull,
   lt,
   or,
-  sql,
 } from "drizzle-orm";
 
 import { IJobRepository } from "@/core/application/ports/job-repository.interface";
@@ -29,10 +29,10 @@ import {
   mapToPersistenceData,
 } from "./drizzle-job.mapper";
 
-export class DrizzleJobRepository implements IJobRepository {
+export class DrizzleJobRepository<P extends { userId?: string }, R> implements IJobRepository<P, R> {
   constructor(private readonly drizzleDbInstance: typeof DbType) {}
 
-  async save(job: JobEntity<unknown, unknown>): Promise<void> {
+  async save(job: JobEntity<P, R>): Promise<void> {
     const persistenceData = JobPersistenceMapper.toPersistence(job.toPersistence());
     const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
@@ -41,9 +41,8 @@ export class DrizzleJobRepository implements IJobRepository {
       .onConflictDoUpdate({ target: schema.jobsTable.id, set: drizzleInput });
   }
 
-  async update(job: JobEntity<unknown, unknown>): Promise<void> {
+  async update(job: JobEntity<P, R>): Promise<void> {
     const persistenceData = JobPersistenceMapper.toPersistence(job.toPersistence());
-    // mapToDrizzleInput now accepts JobPersistenceData from the updated mapper
     const drizzleInput = mapToDrizzleInput(persistenceData);
     await this.drizzleDbInstance
       .update(schema.jobsTable)
@@ -51,18 +50,18 @@ export class DrizzleJobRepository implements IJobRepository {
       .where(eq(schema.jobsTable.id, drizzleInput.id));
   }
 
-  async findById(id: JobIdVO): Promise<JobEntity<unknown, unknown> | null> {
+  async findById(id: JobIdVO): Promise<JobEntity<P, R> | null> {
     const result = await this.drizzleDbInstance.query.jobsTable.findFirst({
       where: eq(schema.jobsTable.id, id.value),
     });
     if (!result) return null;
-    return JobEntity.fromPersistenceData(mapToPersistenceData(result));
+    return JobEntity.fromPersistenceData(mapToPersistenceData(result as schema.JobSelect & { payload: P; returnValue: R | null }));
   }
 
   async findNextJobsToProcess(
     queueName: string,
     limit: number
-  ): Promise<Array<JobEntity<unknown, unknown>>> {
+  ): Promise<Array<JobEntity<P, R>>> {
     const now = new Date();
     const results = await this.drizzleDbInstance.query.jobsTable.findMany({
       where: and(eq(schema.jobsTable.queueName, queueName), or(eq(schema.jobsTable.status, JobStatus.WAITING), and(eq(schema.jobsTable.status, JobStatus.DELAYED), lt(schema.jobsTable.delayUntil, now)))),
@@ -72,8 +71,8 @@ export class DrizzleJobRepository implements IJobRepository {
       ],
       limit,
     });
-    return results.map((jobData: typeof schema.jobsTable.$inferSelect) =>
-      JobEntity.fromPersistenceData(mapToPersistenceData(jobData))
+    return results.map((jobData) =>
+      JobEntity.fromPersistenceData(mapToPersistenceData(jobData as schema.JobSelect & { payload: P; returnValue: R | null }))
     );
   }
 
@@ -104,13 +103,13 @@ export class DrizzleJobRepository implements IJobRepository {
     queueName: string,
     olderThan: Date,
     limit: number
-  ): Promise<Array<JobEntity<unknown, unknown>>> {
+  ): Promise<Array<JobEntity<P, R>>> {
     const results = await this.drizzleDbInstance.query.jobsTable.findMany({
       where: and(eq(schema.jobsTable.queueName, queueName), eq(schema.jobsTable.status, JobStatus.ACTIVE), lt(schema.jobsTable.lockUntil, olderThan)),
       limit,
     });
-    return results.map((jobData: typeof schema.jobsTable.$inferSelect) =>
-      JobEntity.fromPersistenceData(mapToPersistenceData(jobData))
+    return results.map((jobData) =>
+      JobEntity.fromPersistenceData(mapToPersistenceData(jobData as schema.JobSelect & { payload: P; returnValue: R | null }))
     );
   }
 
@@ -126,7 +125,7 @@ export class DrizzleJobRepository implements IJobRepository {
     start: number = 0,
     end: number = 100,
     asc: boolean = false
-  ): Promise<Array<JobEntity<unknown, unknown>>> {
+  ): Promise<Array<JobEntity<P, R>>> {
     const results = await this.drizzleDbInstance.query.jobsTable.findMany({
       where: and(eq(schema.jobsTable.queueName, queueName), inArray(schema.jobsTable.status, statuses)),
       orderBy: [
@@ -137,8 +136,8 @@ export class DrizzleJobRepository implements IJobRepository {
       offset: start,
       limit: end,
     });
-    return results.map((jobData: typeof schema.jobsTable.$inferSelect) =>
-      JobEntity.fromPersistenceData(mapToPersistenceData(jobData))
+    return results.map((jobData) =>
+      JobEntity.fromPersistenceData(mapToPersistenceData(jobData as schema.JobSelect & { payload: P; returnValue: R | null }))
     );
   }
 
@@ -149,7 +148,7 @@ export class DrizzleJobRepository implements IJobRepository {
     const query = this.drizzleDbInstance
       .select({
         status: schema.jobsTable.status,
-        count: schema.sql`count(*)`.mapWith(Number),
+        count: sql`count(*)`.mapWith(Number),
       })
       .from(schema.jobsTable)
       .where(and(eq(schema.jobsTable.queueName, queueName), statuses ? inArray(schema.jobsTable.status, statuses) : undefined))

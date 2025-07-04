@@ -29,7 +29,7 @@ export function useIpcQuery<TResponse, TRequest = undefined>(
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
-    if (!window.electron || !window.electron.ipcRenderer) {
+    if (!window.electronIPC || !window.electronIPC.ipcRenderer) {
       console.error('Electron IPC renderer not available. Ensure preload script is correctly configured.');
       setError(new Error('Electron IPC renderer not available.'));
       setIsLoading(false);
@@ -41,7 +41,7 @@ export function useIpcQuery<TResponse, TRequest = undefined>(
 
     try {
       // console.log(`useIpcQuery: Invoking channel ${channel} with params:`, params);
-      const result = await window.electron.ipcRenderer.invoke<TResponse>(channel, params);
+      const result = await window.electronIPC.ipcRenderer.invoke<TResponse>(channel, params);
       // console.log(`useIpcQuery: Received result for channel ${channel}:`, result);
       setData(result);
     } catch (err: unknown) {

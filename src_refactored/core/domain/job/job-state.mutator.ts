@@ -48,10 +48,10 @@ export class JobStateMutator<P, R> {
     this.props.returnValue = returnValue;
     this.props.finishedOn = new Date();
     this.props.updatedAt = this.props.finishedOn;
-    this.props.failedReason = null;
-    this.props.stacktrace = null;
-    this.props.lockUntil = null;
-    this.props.workerId = null;
+    this.props.failedReason = undefined;
+    this.props.stacktrace = undefined;
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined;
   }
 
   public markAsFailed(reason: string, stacktrace?: string[]): void {
@@ -72,8 +72,6 @@ export class JobStateMutator<P, R> {
     this.props.delayUntil = delayUntil;
     this.props.updatedAt = new Date();
     this.props.processedOn = null;
-    this.props.lockUntil = null;
-    this.props.workerId = null;
     if (originalError) {
         this.props.failedReason = originalError.message;
     }
@@ -84,11 +82,11 @@ export class JobStateMutator<P, R> {
       // Intentionally empty: Condition checked, no specific action if true besides proceeding.
     }
     this.props.status = JobStatus.WAITING;
-    this.props.delayUntil = null;
-    this.props.processedOn = null;
+    this.props.delayUntil = undefined;
+    this.props.processedOn = undefined;
     this.props.updatedAt = new Date();
-    this.props.lockUntil = null;
-    this.props.workerId = null;
+    this.props.lockUntil = undefined;
+    this.props.workerId = undefined;
   }
 
   public markAsStalled(): boolean {

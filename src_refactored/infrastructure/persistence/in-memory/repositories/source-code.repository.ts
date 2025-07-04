@@ -11,9 +11,8 @@ import { NotFoundError } from '@/shared/errors/core.error';
 export class InMemorySourceCodeRepository implements ISourceCodeRepository {
   private readonly sourceCodes: Map<string, SourceCode> = new Map();
 
-  async save(sourceCode: SourceCode): Promise<SourceCode> {
+  async save(sourceCode: SourceCode): Promise<void> {
     this.sourceCodes.set(sourceCode.id.value, sourceCode);
-    return sourceCode;
   }
 
   async findById(id: SourceCodeId): Promise<SourceCode | null> {
@@ -21,11 +20,11 @@ export class InMemorySourceCodeRepository implements ISourceCodeRepository {
     return sourceCode || null;
   }
 
-  async findByProjectId(projectId: ProjectId): Promise<SourceCode[]> {
-    const found = Array.from(this.sourceCodes.values()).filter((sc) =>
+  async findByProjectId(projectId: ProjectId): Promise<SourceCode | null> {
+    const found = Array.from(this.sourceCodes.values()).find((sc) =>
       sc.projectId.equals(projectId),
     );
-    return found;
+    return found || null;
   }
 
   async delete(id: SourceCodeId): Promise<void> {

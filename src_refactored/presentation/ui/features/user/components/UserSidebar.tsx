@@ -58,7 +58,7 @@ function DirectMessageItem({
   isActive,
 }: DirectMessageItemProps) {
   // Placeholder base path for DMs
-  const basePath = "/user/dms";
+  const basePath = "/app/user/dms";
   const initials = name
     .split(" ")
     .map((namePart) => namePart[0])

@@ -12,7 +12,7 @@ import type {
 
 interface UseMessageSendingProps {
   conversationId: string;
-  conversationDetails: DirectMessageItem;
+  conversationDetails: DirectMessageItem | null | undefined;
 }
 
 export function useMessageSending({
@@ -20,8 +20,8 @@ export function useMessageSending({
   conversationDetails,
 }: UseMessageSendingProps) {
   const sendMessageMutation = useIpcMutation<
-    SendDMMessageRequest,
-    IPCResponse<SendDMMessageResponseData>
+    IPCResponse<SendDMMessageResponseData>,
+    SendDMMessageRequest
   >(IPC_CHANNELS.SEND_DM_MESSAGE, {
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -46,7 +46,8 @@ export function useMessageSending({
       toast.info("Aguarde o envio da mensagem anterior.");
       return;
     }
-    sendMessageMutation.mutate({ conversationId, content });
+    // Assuming currentUserId is available in the context or passed as prop
+    sendMessageMutation.mutate({ dmId: conversationId, content, senderId: "current-user-id" });
   };
 
   return { handleSendMessage, sendMessageMutation };

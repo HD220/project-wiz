@@ -11,9 +11,9 @@ export function useNewAgentInstanceData() {
     data: personaTemplates,
     isLoading: isLoadingPersonas,
     error: personasError,
-  } = useIpcQuery<null, GetPersonaTemplatesListResponseData>(
+  } = useIpcQuery<void, GetPersonaTemplatesListResponseData>(
     IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST,
-    null,
+    undefined,
     { staleTime: 5 * 60 * 1000 }
   );
 
@@ -21,9 +21,9 @@ export function useNewAgentInstanceData() {
     data: llmConfigs,
     isLoading: isLoadingLLMConfigs,
     error: llmConfigsError,
-  } = useIpcQuery<null, GetLLMConfigsListResponseData>(
+  } = useIpcQuery<void, GetLLMConfigsListResponseData>(
     IPC_CHANNELS.GET_LLM_CONFIGS_LIST,
-    null,
+    undefined,
     { staleTime: 5 * 60 * 1000 }
   );
 

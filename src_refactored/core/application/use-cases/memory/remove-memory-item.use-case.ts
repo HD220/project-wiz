@@ -7,14 +7,7 @@ import { IMemoryRepository } from "@/core/domain/memory/ports/memory-repository.
 import { MemoryItemId } from "@/core/domain/memory/value-objects/memory-item-id.vo";
 
 import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
-
-
-import {
   RemoveMemoryItemUseCaseInput,
-  RemoveMemoryItemUseCaseInputSchema,
   RemoveMemoryItemUseCaseOutput,
 } from "./remove-memory-item.schema";
 
@@ -32,18 +25,12 @@ export class RemoveMemoryItemUseCase
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {}
 
-  async execute(
-    input: RemoveMemoryItemUseCaseInput
-  ): Promise<IUseCaseResponse<RemoveMemoryItemUseCaseOutput>> {
-    const validInput = RemoveMemoryItemUseCaseInputSchema.parse(input);
+  public async execute(input: RemoveMemoryItemUseCaseInput): Promise<RemoveMemoryItemUseCaseOutput> {
+    const { memoryItemId } = input;
+    const id = MemoryItemId.fromString(memoryItemId);
 
-    const memoryItemIdVo = MemoryItemId.fromString(validInput.memoryItemId);
+    await this.memoryRepository.delete(id);
 
-    await this.memoryRepository.delete(memoryItemIdVo);
-
-    return successUseCaseResponse({
-      success: true,
-      memoryItemId: validInput.memoryItemId,
-    });
+    return { success: true, memoryItemId: id.value };
   }
 }

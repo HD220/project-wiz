@@ -13,7 +13,7 @@ Project Wiz is an innovative desktop application designed to function as an auto
 
 Our vision is to **transform fundamentally the software development lifecycle through intelligent collaboration between humans and autonomous AI agents.** We aim to create a platform where AI agents are integral, proactive members of development teams, capable of handling complex tasks from end to end, empowering human developers to focus on innovation and high-level problem-solving.
 
-For more details, see our [Vision and Goals](./docs/project-overview/vision-and-goals.md).
+
 
 ## Key Features
 
@@ -73,14 +73,14 @@ To get Project Wiz up and running:
     npm start
     ```
 
-For more detailed setup instructions, please refer to the [Development Setup Guide](./docs/technical-documentation/06-development-setup.md) and the [Quick Start Guide](./docs/user-guide/02-quick-start.md).
+For more detailed setup instructions, please refer to the [Development Setup Guide](./docs/developer/01-development-setup.md) and the [Quick Start Guide](./docs/user/02-getting-started.md).
 
 ## Documentation
 
 Dive deeper into Project Wiz with our comprehensive documentation:
 
-* **[User Guide](./docs/user-guide/01-introduction.md):** Introduces users to Project Wiz and how to use its features.
-* **[Technical Documentation](./docs/technical-documentation/01-architecture.md):** Details the architecture, agent framework, and other technical aspects for developers.
+* **[User Guide](./docs/user/01-introduction.md):** Introduces users to Project Wiz and how to use its features.
+* **[Technical Documentation](./docs/reference/01-software-architecture.md):** Details the architecture, agent framework, and other technical aspects for developers.
 * **[Vision and Goals](./docs/project-overview/vision-and-goals.md):** Outlines the long-term vision and strategic objectives of Project Wiz.
 * **[Roadmap](./docs/project-overview/roadmap.md):** Shows the planned features and future development direction.
 
@@ -92,7 +92,7 @@ Please read our [Contribution Guide](./docs/contribution-guide.md) to get starte
 
 ## Roadmap
 
-Check out our [Project Roadmap](./docs/project-overview/roadmap.md) to see what features and improvements are planned for the future.
+
 
 ## License
 

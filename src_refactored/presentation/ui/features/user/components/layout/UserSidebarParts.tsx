@@ -36,7 +36,7 @@ export function DMListItem({ dm, selectedDmId, onSelectDm }: DMListItemProps) {
   return (
     <Link
       key={dm.id}
-      to="/user/dm/$conversationId"
+      to="/app/user/dm/$conversationId"
       params={{ conversationId: dm.id }}
       className={cn(
         "flex items-center gap-2.5 p-2 rounded-md text-left transition-colors group",
@@ -139,13 +139,13 @@ export function UserProfileDropdown({ router }: UserProfileDropdownProps) {
       <DropdownMenuContent className="w-64 ml-1" align="start" side="bottom">
         <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => router.navigate({ to: '/settings/profile' })}>
+        <DropdownMenuItem onSelect={() => router.navigate({ to: '/app/settings/profile' })}>
           <UserCircle className="mr-2 h-4 w-4" /> Perfil
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.navigate({ to: '/settings/appearance' })}>
+        <DropdownMenuItem onSelect={() => router.navigate({ to: '/app/settings/appearance' })}>
           <Palette className="mr-2 h-4 w-4" /> Aparência
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.navigate({ to: '/settings' })}>
+        <DropdownMenuItem onSelect={() => router.navigate({ to: '/app/settings' })}>
           <Settings className="mr-2 h-4 w-4" /> Todas Configurações
         </DropdownMenuItem>
         <DropdownMenuSeparator />

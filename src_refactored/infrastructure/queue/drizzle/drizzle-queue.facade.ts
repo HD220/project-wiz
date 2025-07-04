@@ -9,12 +9,12 @@ import { JobProcessingService } from "./job-processing.service";
 import { QueueMaintenanceService } from "./queue-maintenance.service";
 import { QueueServiceCore } from "./queue-service-core";
 
-export class DrizzleQueueFacade<P, R> extends AbstractQueue<P, R> {
+export class DrizzleQueueFacade<P extends { userId?: string }, R> extends AbstractQueue<P, R> {
   constructor(
     // Parameters for AbstractQueue constructor
     queueName: string,
     // jobRepository is also used by core, processor, maintenance
-    jobRepository: IJobRepository,
+    jobRepository: IJobRepository<P, R>,
     // Composed services
     private readonly coreService: QueueServiceCore<P, R>,
     private readonly processingService: JobProcessingService<P, R>,

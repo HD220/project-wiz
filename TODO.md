@@ -1,197 +1,140 @@
-# Refactoring Plan: Project Wiz Core (`src_refactored/`)
+# Plano de Ação do Agente Gemini para o Projeto Wiz
 
-This document outlines the comprehensive plan for refactoring the core of Project Wiz, focusing on adherence to Clean Architecture principles, standardized validation, and consistent property access. Each task includes verification steps to ensure code quality and correctness.
+## Resumo do Progresso Atual
 
-## Phase 0: Foundational Setup & ADR-009 Implementation
+O agente Gemini tem trabalhado na resolução de erros de ESLint e TypeScript no repositório.
 
-- [x] **Verify `CoreError` and `IUseCaseResponse`:** Confirm `src_refactored/shared/errors/core.error.ts` and `src_refactored/shared/application/use-case-response.dto.ts` are correctly implemented as per ADR-008.
-  - *Verification:* Manual review (already confirmed).
-- [x] **Implement `get value()` in `Identity` Value Object:**
-  - *File:* `src_refactored/core/common/value-objects/identity.vo.ts`
-  - *Action:* Replace `public value(): string` with `public get value(): string`.
-  - *Verification:* Run `npx eslint --fix <path>` and `npx tsc --noEmit --pretty <path>` to ensure no linting or type errors.
-- [x] **Update `AbstractValueObject` (if necessary):**
-  - *File:* `src_refactored/core/common/value-objects/base.vo.ts`
-  - *Action:* Ensure `AbstractValueObject`'s `equals` method is compatible with the new `get value()` pattern. (No changes needed).
-  - *Verification:* Run `npx eslint --fix <path>` and `npx tsc --noEmit --pretty <path>` to ensure no linting or type errors.
-- [x] **Refactor `CoreError` and its direct subclasses:** Updated `CoreError`, `ValueError`, `EntityError`, `DomainError`, `ApplicationError`, and `NotFoundError` constructors in `src_refactored/shared/errors/core.error.ts` to consistently use the `options` object for `code`, `details`, and `cause`.
+**ESLint:**
+*   Um erro de parsing em `drizzle-job.repository.ts` foi identificado e corrigido.
+*   O linter foi executado novamente e não reportou mais erros de parsing.
 
-## Phase 1: Domain Layer Refactoring (ADR-007 & ADR-009)
+**TypeScript:**
+*   Vários erros de tipo foram identificados e corrigidos em diferentes arquivos.
+*   As correções envolveram:
+    *   Ajuste de chamadas de métodos de fábrica (`create` vs `fromString`).
+    *   Tratamento explícito de `null` e `undefined` em propriedades.
+    *   Padronização de nomes de propriedades entre entidades e tipos de persistência.
+    *   Propagação de restrições de tipos genéricos em interfaces.
+    *   Ajuste de chamadas de função para corresponder às assinaturas corretas.
 
-**For each Value Object (VO) in `src_refactored/core/domain/**/value-objects/*.ts` (excluding `identity.vo.ts`):**
+## Erros Pendentes (Última Verificação `tsc --noEmit`)
 
-- [x] **Implement `get value()` and Zod Validation:**
-  - *Action:* Replace `public value(): PrimitiveType` with `public public get value(): PrimitiveType`. Ensure `create` static method uses Zod schema and throws `ValueError`. Add explicit `public equals(vo?: MyVO): boolean { return super.equals(vo); }`.
-  - *Verification:* Run `npx eslint --fix <path/to/vo.ts>` and `npx tsc --noEmit --pretty <path/to/vo.ts>` to ensure no linting or type errors.
-  - *Order of Refactoring VOs (suggested):*
-    - [x] `user-avatar.vo.ts`
-    - [x] `user-email.vo.ts`
-    - [x] `user-nickname.vo.ts`
-    - [x] `user-username.vo.ts`
-    - [x] `agent-id.vo.ts`
-    - [x] `agent-max-iterations.vo.ts`
-    - [x] `agent-temperature.vo.ts`
-    - [x] `persona-id.vo.ts`
-    - [x] `persona-name.vo.ts`
-    - [x] `persona-role.vo.ts`
-    - [x] `persona-backstory.vo.ts`
-    - [x] `persona-goal.vo.ts`
-    - [x] `tool-names.vo.ts`
-    - [x] `target-agent-role.vo.ts`
-    - [x] `annotation-id.vo.ts`
-    - [x] `annotation-text.vo.ts`
-    - [x] `job-id.vo.ts`
-    - [x] `job-options.vo.ts`
-    - [x] `activity-history-entry.vo.ts`
-    - [x] `activity-history.vo.ts`
-    - [x] `llm-api-key.vo.ts`
-    - [x] `llm-provider-config-id.vo.ts`
-    - [x] `llm-provider-config-name.vo.ts`
-    - [x] `llm-provider-id.vo.ts`
-    - [x] `memory-item-id.vo.ts`
-    - [x] `memory-item-content.vo.ts`
-    - [x] `memory-item-embedding.vo.ts`
-    - [x] `memory-item-source.vo.ts`
-    - [x] `memory-item-tags.vo.ts`
-    - [x] `project-id.vo.ts`
-    - [x] `project-name.vo.ts`
-    - [x] `project-description.vo.ts`
-    - [x] `repository-id.vo.ts`
-    - [x] `repository-path.vo.ts`
-    - [x] `repository-docs-path.vo.ts`
+Ainda existem erros de TypeScript a serem resolvidos. A lista atual de arquivos com erros é:
 
-**For each Entity in `src_refactored/core/domain/**/*.entity.ts`:**
+*   `src_refactored/examples/queue-usage-example.final.ts`
+*   `src_refactored/infrastructure/ioc/inversify.config.ts`
+*   `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.mapper.ts`
+*   `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts`
+*   `src_refactored/infrastructure/queue/drizzle/job-processing.service.ts`
+*   `src_refactored/infrastructure/queue/drizzle/queue-maintenance.service.ts`
+*   `src_refactored/infrastructure/queue/drizzle/queue-service-core.ts`
+*   `src_refactored/presentation/electron/main/handlers/agent-instance.handlers.ts`
+*   `src_refactored/presentation/electron/main/handlers/dm.handlers.ts`
+*   `src_refactored/presentation/electron/main/handlers/llm-config.handlers.ts`
+*   `src_refactored/presentation/electron/main/handlers/persona-template.handlers.ts`
+*   `src_refactored/presentation/electron/main/handlers/project.handlers.ts`
+*   `src_refactored/presentation/electron/main/handlers/user.handlers.ts`
+*   `src_refactored/presentation/electron/main/ipc-chat.handlers.ts`
+*   `src_refactored/presentation/electron/main/ipc-project.handlers.ts`
+*   `src_refactored/presentation/electron/main/mocks/agent-instance.mocks.ts`
+*   `src_refactored/presentation/electron/main/mocks/llm-config.mocks.ts`
+*   `src_refactored/presentation/ui/app/app/agents/$agentId/edit/index.tsx`
+*   `src_refactored/presentation/ui/app/app/agents/$agentId/index.tsx`
+*   `src_refactored/presentation/ui/app/app/chat/index.tsx`
+*   `src_refactored/presentation/ui/app/app/personas/$templateId/edit/index.tsx`
+*   `src_refactored/presentation/ui/app/app/personas/new/index.tsx`
+*   `src_refactored/presentation/ui/app/app/projects/$projectId/docs/index.tsx`
+*   `src_refactored/presentation/ui/app/app/projects/$projectId/members/index.tsx`
+*   `src_refactored/presentation/ui/app/app/projects/$projectId/settings/index.tsx`
+*   `src_refactored/presentation/ui/app/app/projects/new/index.tsx`
+*   `src_refactored/presentation/ui/app/app/settings/llm/$configId/edit/index.tsx`
+*   `src_refactored/presentation/ui/app/app/user/dm/$conversationId/index.tsx`
+*   `src_refactored/presentation/ui/components/common/MarkdownRenderer.tsx`
+*   `src_refactored/presentation/ui/components/layout/AppSidebar.tsx`
+*   `src_refactored/presentation/ui/features/agent/components/AgentInstanceForm.tsx`
+*   `src_refactored/presentation/ui/features/agent/components/EditAgentFormRenderer.tsx`
+*   `src_refactored/presentation/ui/features/agent/components/list-item-parts/AgentInstanceHeader.tsx`
+*   `src_refactored/presentation/ui/features/agent/components/NewAgentFormRenderer.tsx`
+*   `src_refactored/presentation/ui/features/chat/components/ChatSidebar.tsx`
+*   `src_refactored/presentation/ui/features/chat/components/DirectMessageLoadingErrorDisplay.tsx`
+*   `src_refactored/presentation/ui/features/persona/components/edit/EditPersonaTemplateFormRenderer.tsx`
+*   `src_refactored/presentation/ui/features/persona/components/EditPersonaTemplateLoadingErrorDisplay.tsx`
+*   `src_refactored/presentation/ui/features/persona/components/list-item-parts/ListItemFooter.tsx`
+*   `src_refactored/presentation/ui/features/persona/components/list-item-parts/ListItemHeader.tsx`
+*   `src_refactored/presentation/ui/features/persona/components/PersonaTemplateForm.tsx`
+*   `src_refactored/presentation/ui/features/project/components/details/ProjectDetailHeader.tsx`
+*   `src_refactored/presentation/ui/features/project/components/details/ProjectNotFound.tsx`
+*   `src_refactored/presentation/ui/features/project/components/docs/DocSidebar.tsx`
+*   `src_refactored/presentation/ui/features/project/components/layout/ProjectContextSidebar.tsx`
+*   `src_refactored/presentation/ui/features/project/components/list/NoProjectsDisplay.tsx`
+*   `src_refactored/presentation/ui/features/project/components/list/ProjectsHeader.tsx`
+*   `src_refactored/presentation/ui/features/project/components/ProjectCard.tsx`
+*   `src_refactored/presentation/ui/features/project/components/ProjectForm.tsx`
+*   `src_refactored/presentation/ui/features/project/components/ProjectSidebar.tsx`
+*   `src_refactored/presentation/ui/features/project/components/settings/ProjectSettingsForm.tsx`
+*   `src_refactored/presentation/ui/features/user/components/fields/AvatarUrlField.tsx`
+*   `src_refactored/presentation/ui/features/user/components/fields/DisplayNameField.tsx`
+*   `src_refactored/presentation/ui/features/user/components/layout/UserSidebarParts.tsx`
+*   `src_refactored/presentation/ui/features/user/components/profile/UserProfileAvatar.tsx`
+*   `src_refactored/presentation/ui/features/user/components/profile/UserProfileFormFields.tsx`
+*   `src_refactored/presentation/ui/features/user/components/UserProfileForm.tsx`
+*   `src_refactored/presentation/ui/features/user/components/UserSidebar.tsx`
+*   `src_refactored/presentation/ui/hooks/ipc/useIpcMutation.ts`
+*   `src_refactored/presentation/ui/hooks/ipc/useIpcQuery.ts`
+*   `src_refactored/presentation/ui/hooks/ipc/useIpcSubscription.ts`
+*   `src_refactored/presentation/ui/hooks/useAgentInstanceData.ts`
+*   `src_refactored/presentation/ui/hooks/useAgentInstanceDetails.ts`
+*   `src_refactored/presentation/ui/hooks/useChatLogic.ts`
+*   `src_refactored/presentation/ui/hooks/useCreateAgentInstance.ts`
+*   `src_refactored/presentation/ui/hooks/useDirectMessages.ts`
+*   `src_refactored/presentation/ui/hooks/useMessageSending.ts`
+*   `src_refactored/presentation/ui/hooks/useNewAgentInstanceData.ts`
+*   `src_refactored/presentation/ui/hooks/useSendMessage.ts`
+*   `src_refactored/presentation/ui/hooks/useUpdateAgentInstance.ts`
+*   `src_refactored/presentation/ui/services/ipc.service.ts`
 
-- [x] **Implement Zod Validation for `create`:**
-  - *Action:* Define Zod schema for Entity's `Props`. Use `schema.safeParse` in `static create` and throw `EntityError` on failure. Handle `createdAt`/`updatedAt`.
-  - *Verification:* Run `npx eslint --fix <path/to/entity.ts>` and `npx tsc --noEmit --pretty <path/to/entity.ts>` to ensure no linting or type errors.
-- [x] **Update Property Access (ADR-009):**
-  - *Action:* Replace all getter methods (e.g., `public username(): UserUsername`) with public `get` accessors (e.g., `public get username(): UserUsername`). Update all internal calls from `entity.someVO().value()` to `entity.someVO.value` and `entity.someVO()` to `entity.someVO`.
-  - *Verification:* Run `npx eslint --fix <path/to/entity.ts>` and `npx tsc --noEmit --pretty <path/to/entity.ts>` to ensure no linting or type errors.
-  - *Order of Refactoring Entities (suggested):*
-    - [x] `user.entity.ts`
-    - [x] `agent.entity.ts`
-    - [x] `annotation.entity.ts`
-    - [x] `job.entity.ts`
-    - [x] `llm-provider-config.entity.ts`
-    - [x] `memory-item.entity.ts`
-    - [x] `project.entity.ts`
-    - [x] `source-code.entity.ts`
-    - [x] `agent-internal-state.entity.ts`
+## Próximos Passos: Plano de Ação Detalhado
 
-## Phase 2: Application Layer Refactoring (ADR-008 & ADR-009 Impact)
+O objetivo é resolver todos os erros de TypeScript e ESLint. A abordagem será iterativa, focando em grupos de erros ou arquivos, e aplicando os princípios de aprendizado contínuo.
 
-**For each Use Case in `src_refactored/core/application/use-cases/**/*.ts`:**
+### Fase 1: Resolução de Erros de Tipo Remanescentes
 
-- [x] **Standardize Input Validation and Error Handling (ADR-008):**
-  - *Action:* Validate input DTO with Zod. Use cases should *throw* `ZodError` or `CoreError` subtypes. `execute` method returns `Promise<IUseCaseResponse<TOutput>>` and returns `successUseCaseResponse(data)` on success.
-  - *Verification:* Run `npx eslint --fix <path/to/use-case.ts>` and `npx tsc --noEmit --pretty <path/to/use-case.ts>` to ensure no linting or type errors.
-- [x] **Update Domain Object Access (ADR-009):**
-  - *Action:* Replace all calls to domain object getter methods (e.g., `entity.someVO().value()`, `entity.someVO()`) with direct property access (e.g., `entity.someVO.value`, `entity.someVO`).
-  - *Verification:* Run `npx eslint --fix <path/to/use-case.ts>` and `npx tsc --noEmit --pretty <path/to/use-case.ts>` to ensure no linting or type errors.
-  - *Order of Refactoring Use Cases (suggested):*
-    - [x] `user/create-user.use-case.ts`
-    - [x] `user/get-user.use-case.ts`
-    - [x] `agent/create-agent.use-case.ts`
-    - [x] `agent-persona-template/create-persona-template.use-case.ts`
-    - [x] `annotation/list-annotations.use-case.ts`
-    - [x] `annotation/remove-annotation.use-case.ts`
-    - [x] `annotation/save-annotation.use-case.ts`
-    - [x] `llm-provider-config/create-llm-provider-config.use-case.ts`
-    - [x] `memory/remove-memory-item.use-case.ts`
-    - [x] `memory/save-memory-item.use-case.ts`
-    - [x] `memory/search-memory-items.use-case.ts`
-    - [x] `memory/search-similar-memory-items.use-case.ts`
-    - [x] `project/create-project.use-case.ts`
-    - [x] `project/get-project-details.use-case.ts`
-    - [x] `project/list-projects.use-case.ts`
-    - [x] `agent-internal-state/load-agent-internal-state.use-case.ts`
-    - [x] `agent-internal-state/save-agent-internal-state.use-case.ts`
+1.  **Priorização:** Começar pelos erros que afetam os tipos mais fundamentais ou que se repetem em vários arquivos, pois sua correção pode resolver múltiplos problemas de uma vez.
+2.  **Abordagem por Arquivo/Módulo:**
+    *   Para cada arquivo com erros:
+        *   **Ler o arquivo:** Entender o contexto do código e a natureza do erro.
+        *   **Identificar a Causa Raiz:** Determinar se é um erro de digitação, incompatibilidade de tipo, uso incorreto de genéricos, ou problema de nulidade.
+        *   **Aplicar Correção:** Implementar a solução mais apropriada, seguindo os princípios de tipagem explícita, consistência de nomenclatura e propagação de restrições de tipos genéricos.
+        *   **Verificação Imediata:** Executar `npx tsc --noEmit` após cada correção significativa para validar a mudança e obter a lista atualizada de erros.
+        *   **Reflexão e Registro:** Após cada correção bem-sucedida, refletir sobre o aprendizado e registrá-lo na memória (conforme a "Meta-Diretriz de Aprendizagem Contínua").
 
-**For each Service in `src_refactored/core/application/services/*.ts`:**
+### Fase 2: Verificação Abrangente
 
-- [x] **Update Domain Object Access (ADR-009):**
-  - *Action:* Replace all calls to domain object getter methods (e.g., `entity.someVO().value()`, `entity.someVO()`) with direct property access (e.g., `entity.someVO.value`, `entity.someVO`).
-  - *Verification:* Run `npx eslint --fix <path/to/service.ts>` and `npx tsc --noEmit --pretty <path/to/service.ts>` to ensure no linting or type errors.
-  - *Order of Refactoring Services (suggested):*
-    - [x] `agent-interaction.service.ts`
-    - [x] `agent-state.service.ts`
-    - [x] `agent-tool.service.ts`
-    - [x] `chat.service.ts`
-    - [x] `generic-agent-executor.service.ts`
-    - [x] `tool-validation.service.ts`
+1.  **Executar `npx tsc --noEmit`:** Garantir que não há mais erros de TypeScript.
+2.  **Executar `npx eslint --fix --ext .ts,.tsx .`:** Garantir que não há mais erros ou warnings de ESLint.
+3.  **Executar Testes:** Identificar e executar os testes existentes do projeto (`npm test` ou `vitest run`) para garantir que as mudanças não introduziram regressões.
+4.  **Verificação de Build:** Executar o comando de build do projeto (`npm run build`) para garantir que a aplicação pode ser construída sem problemas.
 
-**For each Repository in `src_refactored/infrastructure/persistence/**/*.ts`:**
+### Checklists para Futuras Ações
 
-- [x] **Update Return Types and Domain Object Access:**
-  - *Action:* Modify repository methods to return domain entities/primitives directly (`Promise<Entity>`, `Promise<Entity | null>`, `Promise<void>`, `Promise<Entity[]>`). Repositories should *throw* `CoreError` subtypes (e.g., `NotFoundError`) on failure.
-  - *Verification:* Run `npx eslint --fix <path/to/repository.ts>` and `npx tsc --noEmit --pretty <path/to/repository.ts>` to ensure no linting or type errors.
+*   **Antes de qualquer modificação de código:**
+    *   [ ] **Entendimento:** Compreender completamente a tarefa e o contexto do código.
+    *   [ ] **Análise:** Revisar arquivos relacionados, convenções e dependências.
+    *   [ ] **Plano:** Definir um plano de ação claro, incluindo a estratégia de verificação.
+*   **Após cada modificação de código (incremental):**
+    *   [ ] **Compilação:** `npx tsc --noEmit` (sem erros).
+    *   [ ] **Linting:** `npx eslint --fix --ext .ts,.tsx .` (sem erros/warnings).
+    *   [ ] **Testes (se aplicável):** Executar testes relevantes (sem falhas).
+    *   [ ] **Consistência:** A mudança está alinhada com as convenções do projeto?
+    *   [ ] **Reflexão e Registro:** Refletir sobre a ação e registrar o aprendizado na memória.
+*   **Antes de finalizar a tarefa:**
+    *   [ ] **Verificação Completa:** Executar todos os testes, linting e build do projeto.
+    *   [ ] **Revisão de Código:** Preparar um commit semântico e estar pronto para uma revisão.
 
-## Phase 3: Global Verification & Cleanup
+## Notas Adicionais para o Agente
 
-- [x] **Update `AGENTS.md`:**
-  - *Action:* Modify the "Object Calisthenics" section to reflect the approved ADR-009, specifically updating Rule 9 to allow public `readonly` properties/getters for data access.
-  - *Verification:* Manual review.
-- [x] **Remove `Result` Type Usage:**
-  - *Action:* Systematically replace all instances of `Result`, `ok`, and `error` (from `@/shared/result`) with `IUseCaseResponse`, `successUseCaseResponse`, and `errorUseCaseResponse` (from `@/shared/application/use-case-response.dto.ts`) in all non-test files.
-  - *Verification:* Run `npx tsc --noEmit` to catch any lingering `Result` type errors.
-- [x] **Address `no-unused-vars` Warnings:**
-    - *Action:* Systematically go through all files reporting `no-unused-vars` warnings and remove the unused imports or variables.
-- [x] **Final Lint and Type-Check:**
-  - *Action:* Run `npx eslint --fix src_refactored/` (full lint) and `npx tsc --noEmit` (full type-check).
-  - *Verification:* Ensure zero errors or warnings.
-- [x] **Deleted test files:** User manually deleted test files.
-- [ ] **Refactor Large Files/Functions (`max-lines`, `max-lines-per-function`):**
-    - *Action:* Identify files and functions exceeding the `max-lines` and `max-lines-per-function` limits. Break them down into smaller, more focused units, adhering to Object Calisthenics principles (especially "Keep All Entities Small" and "Only One Level of Indentation Per Method"). This will likely involve creating new files, helper functions, or extracting components.
-    - *Verification:* Re-run linting and type-checking after each significant refactoring.
-- [ ] **Review and Update Documentation:**
-    - *Action:* Review all relevant documentation (`README.md`, `GEMINI.md`, `docs/reference/*.md`) to ensure it accurately reflects the refactored codebase.
-    - *Verification:* Manual review.
-
-## Current Progress and Next Steps
-
-### Progress Made:
-
-- All Value Objects in `Phase 1` have been refactored to use `get value()` accessors and Zod validation.
-- All Entities in `Phase 1` have been refactored to use `get` accessors and Zod validation.
-- The `CoreError` constructor and its direct subclasses (`ValueError`, `EntityError`, `DomainError`, `ApplicationError`, `NotFoundError`) in `src_refactored/shared/errors/core.error.ts` have been refactored to consistently use the `options` object for `code`, `details`, and `cause`.
-- All instances of `().value()` have been replaced with `.value` in non-test files within `src_refactored/core/application/services/` and `src_refactored/core/application/use-cases/`.
-- All Use Cases in `Phase 2` have been refactored to standardize input validation and error handling (ADR-008) and update domain object access (ADR-009). This includes ensuring they *throw* exceptions for errors, relying on the `UseCaseWrapper` for `IUseCaseResponse` formatting.
-- All Services in `Phase 2` have been refactored to update domain object access (ADR-009).
-- All Repository *interfaces* have been updated to remove `Result` types and use direct returns (e.g., `Promise<Entity>`, `Promise<void>`).
-- All *in-memory repository implementations* (`InMemoryAgentPersonaTemplateRepository`, `InMemoryAgentRepository`, `InMemoryAnnotationRepository`, `InMemoryLLMProviderConfigRepository`, `InMemoryMemoryRepository`, `InMemoryProjectRepository`, `InMemoryUserRepository`) have been updated to match their interfaces, returning direct types and *throwing* `NotFoundError` or other `CoreError` subtypes on failure.
-- `AGENTS.md` has been updated to reflect ADR-009.
-- Corrected `import/no-unresolved` errors in various use cases and services by updating import paths for `use-case.interface` and `use-case-response.dto`.
-- Corrected `no-undef` errors related to `TYPES` by replacing them with imports from `core/application/common/constants`.
-- Corrected `Unexpected any` errors in `core.error.ts`, `application.error.ts`, and `use-case-wrapper.ts` by replacing `any` with `unknown` or more specific types.
-- Corrected `no-empty-object-type` errors in `activity-history-entry.vo.ts` and `activity-history.vo.ts`.
-- Corrected `no-inline-comments` in `job-processing.types.ts`, `ConversationList.tsx`, and `application.error.ts`.
-- **Fixed `TS2306` error:** Removed `Executable` import from `use-case.interface.ts` and defined `IUseCase` directly.
-- **Fixed `TS2339` and `TS6234` errors (property access):** Corrected all instances of `().value()` to `.value` and similar property access issues in `agent-interaction.service.ts`, `agent-state.service.ts`, `agent-tool.service.ts`, `chat.service.ts`, `generic-agent-executor.service.ts`, `load-agent-internal-state.use-case.ts`, `save-memory-item.use-case.ts`, `search-memory-items.use-case.ts`, `search-similar-memory-items.use-case.ts`, `create-project.use-case.ts`, `get-project-details.use-case.ts`, `list-projects.use-case.ts`, `create-user.use-case.ts`, `get-user.use-case.ts`, `agent-internal-state.repository.ts`, `agent-persona-template.repository.ts`, `agent.repository.ts`, `annotation.repository.ts`, `llm-provider-config.repository.ts`, `memory.repository.ts`, `project.repository.ts`, `source-code.repository.ts`, `user.repository.ts`.
-- **Fixed `TS2353` error (object literal):** Corrected object literal structures in `list-annotations.use-case.ts`, `create-project.use-case.ts`, `agent-instance.handlers.ts`, `dm.handlers.ts`, `llm-config.handlers.ts`, `persona-template.handlers.ts`, `project.handlers.ts`, `user.handlers.ts`, `agent-instance.mocks.ts`, `dm.mocks.ts`, `llm-config.mocks.ts`, `persona-template.mocks.ts`, `user.mocks.ts`, `projects/$projectId/docs/index.tsx`.
-- **Fixed `TS2724` errors (exported members):** Corrected import names in `create-agent.use-case.ts`, `source-code.repository.ts`, `agent-instance.handlers.ts`, `dm.handlers.ts`, `llm-config.handlers.ts`, `persona-template.handlers.ts`, `project.handlers.ts`, `user.handlers.ts`, `ipc-chat.handlers.ts`, `ipc-project.handlers.ts`, `ipc.service.ts`, `agent-instance.mocks.ts`, `dm.mocks.ts`, `llm-config.mocks.ts`, `persona-template.mocks.ts`, `user.mocks.ts`, `user/components/fields/AvatarUrlField.tsx`, `user/components/fields/DisplayNameField.tsx`.
-- **Fixed `TS2345` errors (argument type mismatch):** Corrected argument types in `create-llm-provider-config.use-case.ts`, `save-memory-item.use-case.ts`, `drizzle-job.mapper.ts`, `drizzle-job.repository.ts`.
-- **Fixed `TS1016` error (optional parameter order):** Corrected parameter order in `drizzle-queue.facade.ts`.
-- **Fixed `TS2339` error (property access on `JobEntity`):** Replaced `job.getProps()` with `job.toPersistence()` and direct property access (`job.workerId`, `job.status`) in `job-processing.service.ts`.
-- **Fixed `TS5097` error (import extension):** Removed `.ts` extension from import path in `tool-registry.service.ts`.
-- **Fixed `TS2416` errors (interface implementation):** Adjusted method signatures in `tool-registry.service.ts`, `drizzle-project.repository.ts`, `agent-internal-state.repository.ts`, `agent-persona-template.repository.ts`, `memory.repository.ts`, `source-code.repository.ts`.
-- **Fixed `TS2820` errors (TanStack Router paths):** Corrected all relative paths to absolute paths (`/app/`) in UI components: `onboarding/index.tsx`, `agents/$agentId/edit/EditAgentFormRenderer.tsx`, `agents/$agentId/edit/index.tsx`, `agents/index.tsx`, `chat/index.tsx`, `personas/$templateId/edit/index.tsx`, `personas/$templateId/index.tsx`, `personas/index.tsx`, `personas/new/index.tsx`, `projects/$projectId/chat/index.tsx`, `projects/$projectId/index.tsx`, `projects/$projectId/members/index.tsx`, `projects/$projectId/settings/index.tsx`, `projects/new/index.tsx`, `settings/appearance/index.tsx`, `settings/llm/$configId/edit/index.tsx`, `settings/llm/index.tsx`, `settings/llm/new/index.tsx`, `settings/profile/index.tsx`, `user/dm/$conversationId/index.tsx`, `components/layout/AppSidebar.tsx`.
-- **Fixed `TS2339` error (property access on `Element`):** Changed `node.parentElement` to `node.parent` in `MarkdownRenderer.tsx`.
-- **Fixed `TS2322` error (type assignment):** Corrected type assignments in `chat/components/ChatWindow.tsx`, `chat/components/ChatSidebar.tsx`, `user/dm/$conversationId/index.tsx`.
-- **Fixed `TS2554` error (argument count):** Corrected argument count in `personas/new/index.tsx`, `project/components/ProjectForm.tsx`.
-- **Installed `@types/prop-types`:** Resolved `TS7016` error.
-- **Deleted test files:** User manually deleted test files.
-
-### Remaining Tasks:
-
-1.  **Refactor Large Files/Functions (`max-lines`, `max-lines-per-function`):**
-    *   *Action:* Identify files and functions exceeding the `max-lines` and `max-lines-per-function` limits. Break them down into smaller, more focused units, adhering to Object Calisthenics principles (especially "Keep All Entities Small" and "Only One Level of Indentation Per Method"). This will likely involve creating new files, helper functions, or extracting components.
-    *   *Verification:* Re-run linting and type-checking after each significant refactoring.
-
-2.  **Review and Update Documentation:**
-    *   *Action:* Review all relevant documentation (`README.md`, `GEMINI.md`, `docs/reference/*.md`) to ensure it accurately reflects the refactored codebase.
-    *   *Verification:* Manual review.
-
-### What's Next:
-
-The next step is to address the remaining tasks in Phase 3, starting with the refactoring of large files and functions to improve code quality and maintainability. After that, I will review and update the documentation to reflect the changes made, and finally, I will perform a full lint and type-check to ensure the codebase is clean and error-free.
+*   **Prioridade:** A resolução de erros de tipo e lint é a prioridade máxima.
+*   **Comunicação:** Manter o usuário informado sobre o progresso e quaisquer decisões importantes.
+*   **Segurança:** Continuar aderindo rigorosamente à diretriz de segurança ao executar comandos de shell que modificam o sistema de arquivos.
+*   **Autonomia:** Utilizar os princípios registrados na memória para tomar decisões e resolver problemas de forma autônoma.
+*   **Débito Técnico:** Anotar qualquer uso de `any` ou soluções temporárias como débito técnico para futura refatoração.

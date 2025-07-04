@@ -12,11 +12,11 @@ import {
   ProjectFormData,
 } from "@/ui/features/project/components/ProjectForm";
 
+import { Project } from "@/shared/ipc-types";
+import { GetProjectDetailsResponseData } from "@/shared/ipc-types";
+
 interface ProjectSettingsFormProps {
-  project: {
-    name: string;
-    description?: string;
-  };
+  project: GetProjectDetailsResponseData;
   handleSubmit: (formData: ProjectFormData) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -26,6 +26,10 @@ export function ProjectSettingsForm({
   handleSubmit,
   isSubmitting,
 }: ProjectSettingsFormProps) {
+  if (!project) {
+    return null; // Or a loading/error state
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -39,7 +43,7 @@ export function ProjectSettingsForm({
           onSubmit={handleSubmit}
           initialValues={{
             name: project.name,
-            description: project.description,
+            description: project.description ?? undefined,
           }}
           isSubmitting={isSubmitting}
           submitButtonText="Salvar Alterações"

@@ -16,7 +16,7 @@ export abstract class AbstractEntity<IdType extends Identity, PropsType extends 
     this.props = props;
   }
 
-  public id(): IdType {
+  public get id(): IdType {
     return this._id;
   }
 

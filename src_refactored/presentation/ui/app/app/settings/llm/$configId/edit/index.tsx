@@ -50,8 +50,12 @@ let mockLlmConfigsDb: Record<string, LLMConfig> = {
 
 function EditLLMConfigPage() {
   const router = useRouter();
-  const params = useParams({ from: "/(app)/settings/llm/$configId/edit/" });
+  const params = useParams({ from: "/app/settings/llm/$configId/edit/" });
   const configId = params.configId;
+
+  if (!configId) {
+    return <LLMConfigNotFound configId="" />;
+  }
 
   const [initialValues, setInitialValues] =
     useState<Partial<LLMConfigFormData> | null>(null);
@@ -129,7 +133,7 @@ function EditLLMConfigPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto">
       <Button variant="outline" size="sm" className="mb-4" asChild>
-        <Link to="/settings/llm">
+        <Link to="/app/settings/llm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Configs
           LLM
         </Link>

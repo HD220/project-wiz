@@ -3,18 +3,19 @@ import { ZodError } from 'zod';
 import { ILogger } from '../../core/common/services/i-logger.service';
 import { CoreError } from '../errors/core.error';
 
-import { IUseCaseResponse, errorUseCaseResponse } from './use-case-response.dto';
+import { IUseCaseResponse, errorUseCaseResponse, successUseCaseResponse, IUseCaseErrorDetails } from './use-case-response.dto';
 import { IUseCase } from './use-case.interface';
 
-export class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, TOutput> {
+export class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, IUseCaseResponse<TOutput, IUseCaseErrorDetails>> {
   constructor(
     private readonly decoratedUseCase: IUseCase<TInput, TOutput>,
     private readonly logger: ILogger,
   ) {}
 
-  async execute(input: TInput): Promise<IUseCaseResponse<TOutput>> {
+  async execute(input: TInput): Promise<IUseCaseResponse<TOutput, IUseCaseErrorDetails>> {
     try {
-      return await this.decoratedUseCase.execute(input);
+      const result = await this.decoratedUseCase.execute(input);
+      return successUseCaseResponse(result);
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       this.logger.error(
@@ -37,13 +38,6 @@ export class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, TOutput
           message: error.message,
           code: error.code || `CORE_${error.name.toUpperCase()}`,
           details: error.details,
-          cause: error,
-        });
-      } else if (error instanceof Error) {
-        return errorUseCaseResponse({
-          name: error.name || 'SystemError',
-          message: 'An unexpected system error occurred.',
-          code: 'UNEXPECTED_SYSTEM_ERROR',
           cause: error,
         });
       } 

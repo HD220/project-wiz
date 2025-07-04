@@ -5,7 +5,7 @@ import {
 } from "../../../../shared/types/entities";
 
 // This could represent globally available LLM models or presets
-export const mockAvailableLLMs: LLMSettings[] = [
+export const mockAvailableLLMs: LLMConfig[] = [
   {
     id: "llm-openai-gpt-4-turbo",
     name: "OpenAI GPT-4 Turbo",
@@ -75,6 +75,10 @@ export let mockUserLLMConfigs: Record<
   [AgentLLM.ANTHROPIC_CLAUDE_3_OPUS]: {
     apiKey: "sk-mockAnthropicKey456",
   },
+  [AgentLLM.OPENAI_GPT_3_5_TURBO]: {},
+  [AgentLLM.ANTHROPIC_CLAUDE_3_SONNET]: {},
+  [AgentLLM.GOOGLE_GEMINI_PRO]: {},
+  [AgentLLM.OLLAMA_LLAMA2]: {},
   // User might not have configured all LLMs
 };
 

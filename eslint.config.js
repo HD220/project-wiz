@@ -300,6 +300,7 @@ export default [
         ...globals.node,
         ...globals.browser,
         window: "readonly",
+        NodeJS: "readonly",
       },
     },
     plugins: {

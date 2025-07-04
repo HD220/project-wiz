@@ -124,7 +124,7 @@ const mockUserProjects = [
 
 export function AppSidebar() {
   // Rota para onde o botão "Home" levará, ajustado para /user/
-  const userHomeRoute = "/app/user/";
+  const userHomeRoute = "/app/user";
 
   return (
     <aside className="w-16 flex-shrink-0 h-screen flex flex-col items-center gap-2 py-3 bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">

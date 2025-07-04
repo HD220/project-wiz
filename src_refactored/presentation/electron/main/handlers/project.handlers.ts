@@ -25,7 +25,7 @@ function registerQueryProjectHandlers() {
     IPC_CHANNELS.GET_PROJECTS_LIST,
     async (): Promise<GetProjectsListResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { projects: mockProjectsDb };
+      return { success: true, data: mockProjectsDb };
     }
   );
 
@@ -36,13 +36,13 @@ function registerQueryProjectHandlers() {
       req: GetProjectDetailsRequest
     ): Promise<GetProjectDetailsResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const projectDetails = mockProjectsDb.find(
+      const projectDetails = Object.values(mockProjectsDb).find(
         (project) => project.id === req.projectId
       );
       if (projectDetails) {
-        return { project: projectDetails };
+        return { success: true, data: projectDetails };
       }
-      return { project: undefined, error: "Project not found" };
+      return { success: false, error: { message: "Project not found" } };
     }
   );
 }
@@ -76,7 +76,7 @@ function registerMutationProjectHandlers() {
         // agentInstances: [], // Assuming this might be populated later or via another mechanism
       };
       addMockProject(newProject);
-      return { project: newProject };
+      return { success: true, data: newProject };
     }
   );
 
@@ -87,11 +87,11 @@ function registerMutationProjectHandlers() {
       req: UpdateProjectRequest
     ): Promise<UpdateProjectResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const updatedProject = updateMockProject(req.projectId, req.updates);
+      const updatedProject = updateMockProject(req.projectId, req.data);
       if (updatedProject) {
-        return { project: updatedProject };
+        return { success: true, data: updatedProject };
       }
-      return { project: undefined, error: "Project not found for update" };
+      return { success: false, error: { message: "Project not found for update" } };
     }
   );
 }

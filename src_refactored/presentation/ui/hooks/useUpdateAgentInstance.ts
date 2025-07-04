@@ -23,8 +23,8 @@ export function useUpdateAgentInstance({
   const router = useRouter();
 
   const updateAgentMutation = useIpcMutation<
-    UpdateAgentInstanceRequest,
-    IPCResponse<UpdateAgentInstanceResponseData>
+    IPCResponse<UpdateAgentInstanceResponseData>,
+    UpdateAgentInstanceRequest
   >(IPC_CHANNELS.UPDATE_AGENT_INSTANCE, {
     onSuccess: (response): void => {
       if (response.success && response.data) {
@@ -36,7 +36,7 @@ export function useUpdateAgentInstance({
         );
         refetchAgent();
         router.navigate({
-          to: "/agents/$agentId",
+          to: "/app/agents/$agentId",
           params: { agentId: response.data.id },
           replace: true,
         });

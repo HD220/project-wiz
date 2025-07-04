@@ -40,10 +40,10 @@ function EditAgentInstancePage() {
     return loadingOrErrorDisplay;
   }
 
-  if (!agentInstance) {
+  if (!agentInstance || !personaTemplates || !llmConfigs) {
     return (
       <div className="p-8 text-center">
-        <p>Instância de Agente com ID &quot;{agentId}&quot; não encontrada.</p>
+        <p>Dados necessários para o agente não encontrados.</p>
         <Button variant="outline" className="mt-4" asChild>
           <Link to="/app/agents">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes
@@ -57,8 +57,8 @@ function EditAgentInstancePage() {
     <EditAgentFormRenderer
       agentId={agentId}
       agentInstance={agentInstance}
-      personaTemplates={personaTemplates}
-      llmConfigs={llmConfigs}
+      personaTemplates={personaTemplates.data}
+      llmConfigs={llmConfigs.data}
       handleSubmit={handleSubmit}
       isSubmitting={isSubmitting}
     />

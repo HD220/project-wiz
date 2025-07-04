@@ -1,6 +1,7 @@
 // src_refactored/core/application/services/generic-agent-executor.service.ts
 import { injectable, inject } from 'inversify';
 
+import { AGENT_REPOSITORY_INTERFACE_TYPE } from '@/core/application/common/constants';
 import { ApplicationError } from '@/core/application/common/errors';
 import { IAgentExecutor } from '@/core/application/ports/services/i-agent-executor.interface';
 import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
@@ -17,11 +18,6 @@ import {
 import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO } from '@/core/domain/job/value-objects/activity-history.vo';
 import { LanguageModelMessage } from '@/core/ports/adapters/llm-adapter.types';
-
-// eslint-disable-next-line boundaries/element-types
-import { TYPES } from '@/infrastructure/ioc/types';
-
-
 
 import { AgentInteractionService } from './agent-interaction.service';
 import { AgentStateService } from './agent-state.service';
@@ -42,7 +38,7 @@ interface ExecutionState {
 @injectable()
 export class GenericAgentExecutor implements IAgentExecutor {
   constructor(
-    @inject(TYPES.IAgentRepository) private readonly agentRepository: IAgentRepository,
+    @inject(AGENT_REPOSITORY_INTERFACE_TYPE) private readonly agentRepository: IAgentRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
     @inject(AgentInteractionService) private readonly agentInteractionService: AgentInteractionService,
     @inject(AgentToolService) private readonly agentToolService: AgentToolService,
@@ -53,7 +49,7 @@ export class GenericAgentExecutor implements IAgentExecutor {
     job: JobEntity<AgentExecutionPayload, unknown>
   ): Promise<AgentExecutorResult<SuccessfulAgentOutput>> {
     const jobId = job.id.value;
-    const agentId = job.props.payload.agentId;
+    const agentId = job.payload.agentId;
 
     this.logger.info(`Processing Job ID: ${jobId} with Agent ID: ${agentId}`, { jobId, agentId });
 

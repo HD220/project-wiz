@@ -17,8 +17,8 @@ interface UseSendMessageProps {
 
 export function useSendMessage({ selectedConversationId }: UseSendMessageProps) {
   const sendMessageMutation = useIpcMutation<
-    SendConversationMessageRequest,
-    IPCResponse<SendConversationMessageResponseData>
+    IPCResponse<SendConversationMessageResponseData>,
+    SendConversationMessageRequest
   >(SEND_CONVERSATION_MESSAGE_CHANNEL, {
     onSuccess: (response) => {
       if (!response.success) {
@@ -41,9 +41,11 @@ export function useSendMessage({ selectedConversationId }: UseSendMessageProps) 
       toast.info('Aguarde o envio da mensagem anterior.');
       return;
     }
+    // Assuming currentUserId is available in the context or passed as prop
     sendMessageMutation.mutate({
-      conversationId: selectedConversationId,
+      dmId: selectedConversationId,
       content,
+      senderId: "current-user-id", // Placeholder for actual user ID
     });
   };
 

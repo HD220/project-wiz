@@ -53,7 +53,7 @@ export function ChatSidebar({
           className="mb-2 w-full justify-start"
           asChild
         >
-          <Link to="/user">
+          <Link to="/app/user">
             {" "}
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para DMs{" "}
           </Link>

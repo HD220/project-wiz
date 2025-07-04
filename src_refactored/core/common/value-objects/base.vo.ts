@@ -18,7 +18,7 @@ export abstract class AbstractValueObject<T extends ValueObjectProps> {
     this.props = Object.freeze(props);
   }
 
-  public equals(vo?: AbstractValueObject<T>): boolean {
+  public equals(vo?: AbstractValueObject<T> | null): boolean {
     if (vo === null || vo === undefined) {
       return false;
     }

@@ -3,19 +3,15 @@ import { injectable, inject } from "inversify";
 import { ANNOTATION_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
 import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
+import { Annotation } from "@/core/domain/annotation/annotation.entity";
 import { IAnnotationRepository } from "@/core/domain/annotation/ports/annotation-repository.interface";
 import { AnnotationId } from "@/core/domain/annotation/value-objects/annotation-id.vo";
 import { AnnotationText } from "@/core/domain/annotation/value-objects/annotation-text.vo";
-import { NotFoundError } from "@/core/domain/common/errors";
-
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 
 import {
   SaveAnnotationUseCaseInput,
-  SaveAnnotationUseCaseInputSchema,
   SaveAnnotationUseCaseOutput,
 } from "./save-annotation.schema";
 
@@ -24,7 +20,7 @@ export class SaveAnnotationUseCase
   implements
     IUseCase<
       SaveAnnotationUseCaseInput,
-      IUseCaseResponse<SaveAnnotationUseCaseOutput>
+      SaveAnnotationUseCaseOutput
     >
 {
   constructor(
@@ -33,35 +29,27 @@ export class SaveAnnotationUseCase
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger
   ) {}
 
-  async execute(
-    input: SaveAnnotationUseCaseInput
-  ): Promise<IUseCaseResponse<SaveAnnotationUseCaseOutput>> {
-    const validInput = SaveAnnotationUseCaseInputSchema.parse(input);
+  public async execute(input: SaveAnnotationUseCaseInput): Promise<SaveAnnotationUseCaseOutput> {
+    const { id, text, jobId, agentId } = input;
 
-    const annotationId = AnnotationId.fromString(validInput.id!);
-    const existingAnnotation = await this.annotationRepository.findById(
-      annotationId
-    );
+    const annotationId = id ? AnnotationId.fromString(id) : AnnotationId.generate();
+    const annotationText = AnnotationText.create(text);
+    const annotationJobId = jobId ? JobIdVO.create(jobId) : null;
+    const annotationAgentId = agentId ? AgentId.fromString(agentId) : null;
 
-    if (!existingAnnotation) {
-      const notFoundErr = new NotFoundError("Annotation", validInput.id!);
-      this.logger.warn(`[SaveAnnotationUseCase] ${notFoundErr.message}`,
-        { error: notFoundErr, input: validInput }
-      );
-      throw notFoundErr;
-    }
-
-    const annotationEntity = existingAnnotation;
-    annotationEntity.updateText(AnnotationText.create(validInput.text));
-
-    const finalAnnotation = await this.annotationRepository.save(
-      annotationEntity
-    );
-
-    return successUseCaseResponse({
-      annotationId: finalAnnotation.id.value,
-      createdAt: finalAnnotation.createdAt.toISOString(),
-      updatedAt: finalAnnotation.updatedAt.toISOString(),
+    const annotation = Annotation.create({
+      id: annotationId,
+      text: annotationText,
+      jobId: annotationJobId,
+      agentId: annotationAgentId,
     });
+
+    await this.annotationRepository.save(annotation);
+
+    return {
+      annotationId: annotation.id.value,
+      createdAt: annotation.createdAt.toISOString(),
+      updatedAt: annotation.updatedAt.toISOString(),
+    };
   }
 }

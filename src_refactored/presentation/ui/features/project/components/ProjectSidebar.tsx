@@ -102,7 +102,7 @@ export function ProjectSidebar({ className }: ProjectSidebarProps) {
                 {channels.map(channel => (
                   <Link
                     key={channel.id}
-                    to={`/projects/${projectId}/channels/${channel.id}`}
+                    to={`/app/projects/${projectId}/channels/${channel.id}`}
                     className="flex items-center space-x-2 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md"
                     activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50 font-medium' }}
                   >

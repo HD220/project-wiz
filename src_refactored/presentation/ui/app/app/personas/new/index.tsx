@@ -27,8 +27,8 @@ function NewPersonaTemplatePage() {
   const router = useRouter();
 
   const createPersonaMutation = useIpcMutation<
-    CreatePersonaTemplateRequest,
-    IPCResponse<CreatePersonaTemplateResponseData>
+    IPCResponse<CreatePersonaTemplateResponseData>,
+    CreatePersonaTemplateRequest
   >(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, {
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -46,20 +46,14 @@ function NewPersonaTemplatePage() {
         );
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error(`Falha ao criar o template: ${error.message}`);
     },
   });
 
   const handleSubmit = async (data: PersonaTemplateFormData) => {
     console.log("Dados do novo template de persona:", data);
-    createPersonaMutation.mutate({
-      name: data.name,
-      role: data.role,
-      goal: data.goal,
-      backstory: data.backstory,
-      toolNames: data.toolNames,
-    });
+    createPersonaMutation.mutate(data);
   };
 
   return (

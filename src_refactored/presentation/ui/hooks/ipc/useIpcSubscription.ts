@@ -49,17 +49,17 @@ function useInitialIpcData<Args, InitialData>(
     }
 
     window.electronIPC.invoke(fetchChannel, memoizedFetchArgs)
-      .then(response => {
+      .then((response: IPCResponse<InitialData>) => {
         if (!isMounted) return;
         if (response.success) {
-          setDataStore({ data: response.data as InitialData });
+          setDataStore({ data: response.data });
         } else {
           const err = new Error(response.error?.message || `Failed to fetch initial data from ${fetchChannel}`);
           setError(err);
           if (optionsOnError) optionsOnError(err); else toast.error(err.message);
         }
       })
-      .catch(err => {
+      .catch((err: Error) => {
         if (!isMounted) return;
         setError(err);
         if (optionsOnError) optionsOnError(err); else toast.error(err.message);
@@ -114,16 +114,13 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
     };
 
     console.log(`useIpcSubscription: Subscribing to ${eventChannel}`);
-    const unsubscribeFn = window.electronIPC.on(eventChannel, handler);
+    const unsubscribeFn = window.electronIPC.on(eventChannel, (_event, eventPayload: EventPayload) => handler(eventPayload));
 
     return () => {
       console.log(`useIpcSubscription: Unsubscribing from ${eventChannel}`);
       // It might be null if window.electronIPC.on is not fully implemented or returns void
       if (unsubscribeFn) {
         unsubscribeFn();
-      // Fallback if `on` doesn't return unsubscribe but `off` exists
-      } else if (window.electronIPC.off) {
-        window.electronIPC.off(eventChannel, handler);
       }
     };
   }, [eventChannel, getSnapshot, enabled, setStore]);

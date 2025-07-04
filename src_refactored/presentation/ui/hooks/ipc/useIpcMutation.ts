@@ -28,7 +28,7 @@ export function useIpcMutation<TResponse, TRequest = undefined>(
   const [error, setError] = useState<Error | null>(null);
 
   const mutate = useCallback(async (params: TRequest): Promise<TResponse | undefined> => {
-    if (!window.electron || !window.electron.ipcRenderer) {
+    if (!window.electronIPC || !window.electronIPC.ipcRenderer) {
       const errMessage = 'Electron IPC renderer not available. Ensure preload script is correctly configured.';
       console.error(errMessage);
       setError(new Error(errMessage));
@@ -43,7 +43,7 @@ export function useIpcMutation<TResponse, TRequest = undefined>(
 
     try {
       // console.log(`useIpcMutation: Invoking channel ${channel} with params:`, params);
-      const result = await window.electron.ipcRenderer.invoke<TResponse>(channel, params);
+      const result = await window.electronIPC.ipcRenderer.invoke<TResponse>(channel, params);
       // console.log(`useIpcMutation: Received result for channel ${channel}:`, result);
       setData(result);
       return result;

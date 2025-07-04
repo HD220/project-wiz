@@ -33,13 +33,13 @@ function EditPersonaTemplatePage() {
     refetch,
   } = useIpcQuery<
     GetPersonaTemplateDetailsRequest,
-    GetPersonaTemplateDetailsResponseData
+    IPCResponse<GetPersonaTemplateDetailsResponseData>
   >(
     IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS,
     { templateId },
     {
       staleTime: 5 * 60 * 1000,
-      onError: (err) => {
+      onError: (err: Error) => {
         toast.error(`Erro ao buscar detalhes do template: ${err.message}`);
       },
     },

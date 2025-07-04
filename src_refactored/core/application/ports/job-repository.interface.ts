@@ -4,13 +4,13 @@ import { JobIdVO } from '@/core/domain/job/value-objects/job-id.vo';
 
 export const JOB_REPOSITORY_TOKEN = Symbol('IJobRepository');
 
-export interface IJobRepository {
+export interface IJobRepository<P extends { userId?: string }, R = unknown> {
   /**
    * Saves a new job or updates an existing one.
    * This should handle both creation and full update scenarios.
    * @param job The job entity to save.
    */
-  save(job: JobEntity<unknown, unknown>): Promise<void>;
+  save(job: JobEntity<P, R>): Promise<void>;
 
   /**
    * Updates specific fields of an existing job.
@@ -20,14 +20,14 @@ export interface IJobRepository {
    *            Alternatively, have more granular methods like updateStatus, updateProgress, etc.
    *            For now, a general update that persists the current state of the entity.
    */
-  update(job: JobEntity<unknown, unknown>): Promise<void>;
+  update(job: JobEntity<P, R>): Promise<void>;
 
   /**
    * Finds a job by its ID.
    * @param id The ID of the job.
    * @returns The job entity if found, otherwise null.
    */
-  findById(id: JobIdVO): Promise<JobEntity<unknown, unknown> | null>;
+  findById(id: JobIdVO): Promise<JobEntity<P, R> | null>;
 
   /**
    * Finds the next batch of jobs that are ready to be processed.
@@ -37,7 +37,7 @@ export interface IJobRepository {
    * @param limit The maximum number of jobs to return.
    * @returns An array of job entities.
    */
-  findNextJobsToProcess(queueName: string, limit: number): Promise<Array<JobEntity<unknown, unknown>>>;
+  findNextJobsToProcess(queueName: string, limit: number): Promise<Array<JobEntity<P, R>>>;
 
   /**
    * Attempts to acquire an exclusive lock on a job for a specific worker.
@@ -73,7 +73,7 @@ export interface IJobRepository {
    * @param limit The maximum number of stalled jobs to return.
    * @returns An array of stalled job entities.
    */
-  findStalledJobs(queueName: string, olderThan: Date, limit: number): Promise<Array<JobEntity<unknown, unknown>>>;
+  findStalledJobs(queueName: string, olderThan: Date, limit: number): Promise<Array<JobEntity<P, R>>>;
 
   /**
    * Removes a job from the repository.
@@ -96,7 +96,7 @@ export interface IJobRepository {
     start?: number,
     end?: number,
     asc?: boolean,
-  ): Promise<Array<JobEntity<unknown, unknown>>>;
+  ): Promise<Array<JobEntity<P, R>>>;
 
   /**
    * Counts jobs by their status for a given queue.

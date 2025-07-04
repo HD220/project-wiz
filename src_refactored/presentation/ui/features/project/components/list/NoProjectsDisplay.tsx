@@ -37,7 +37,7 @@ export function NoProjectsDisplay({ searchTerm }: NoProjectsDisplayProps) {
       {!searchTerm && (
         <div className="mt-6">
           <Button asChild variant="outline">
-            <Link to="/projects/new">
+            <Link to="/app/projects/new">
               <PlusCircle className="mr-2 h-4 w-4" />
               Criar Novo Projeto
             </Link>

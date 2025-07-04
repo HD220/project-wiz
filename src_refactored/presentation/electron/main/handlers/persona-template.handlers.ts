@@ -18,17 +18,16 @@ import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
 export function registerPersonaTemplateHandlers() {
   ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST, async (): Promise<GetPersonaTemplatesListResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { personaTemplates: mockPersonaTemplates };
+    return { success: true, data: mockPersonaTemplates };
   });
 
   ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS, async (_event, req: GetPersonaTemplateDetailsRequest): Promise<GetPersonaTemplateDetailsResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const template = mockPersonaTemplates.find(pt => pt.id === req.templateId);
     if (template) {
-      return { personaTemplate: template };
+      return { success: true, data: template };
     }
-      return { personaTemplate: undefined, error: 'Persona Template not found' };
-
+    return { success: false, error: { message: 'Persona Template not found' } };
   });
 
   ipcMain.handle(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, async (_event, req: CreatePersonaTemplateRequest): Promise<CreatePersonaTemplateResponseData> => {
@@ -36,6 +35,8 @@ export function registerPersonaTemplateHandlers() {
     const newTemplate: PersonaTemplate = {
       id: `pt-${Date.now()}`,
       name: req.name,
+      role: req.role,
+      goal: req.goal,
       description: req.description ?? undefined,
       systemPrompt: req.systemPrompt,
       visionEnabled: req.visionEnabled ?? false,
@@ -45,18 +46,17 @@ export function registerPersonaTemplateHandlers() {
     };
     // In a real scenario, you'd add this to your persistent or in-memory store
     mockPersonaTemplates.push(newTemplate);
-    return { personaTemplate: newTemplate };
+    return { success: true, data: newTemplate };
   });
 
   ipcMain.handle(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, async (_event, req: UpdatePersonaTemplateRequest): Promise<UpdatePersonaTemplateResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const templateIndex = mockPersonaTemplates.findIndex(pt => pt.id === req.templateId);
     if (templateIndex !== -1) {
-      const updatedTemplate = { ...mockPersonaTemplates[templateIndex], ...req.updates, updatedAt: new Date().toISOString() };
+      const updatedTemplate = { ...mockPersonaTemplates[templateIndex], ...req.data, updatedAt: new Date().toISOString() };
       mockPersonaTemplates[templateIndex] = updatedTemplate;
-      return { personaTemplate: updatedTemplate };
+      return { success: true, data: updatedTemplate };
     }
-      return { personaTemplate: undefined, error: 'Persona Template not found for update' };
-
+    return { success: false, error: { message: 'Persona Template not found for update' } };
   });
 }

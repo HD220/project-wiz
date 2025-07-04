@@ -11,15 +11,15 @@ export interface FailDetails {
   retryable?: boolean;
 }
 
-export interface IJobQueue {
-  add(job: JobEntity): Promise<IUseCaseResponse<JobEntity, QueueError>>;
+export interface IJobQueue<P extends { userId?: string }, R> {
+  add(job: JobEntity<P, R>): Promise<IUseCaseResponse<JobEntity<P, R>, QueueError>>;
   getNext(
     workerId: string,
     supportedRoles: TargetAgentRoleVO[]
-  ): Promise<IUseCaseResponse<JobEntity | null, QueueError>>;
+  ): Promise<IUseCaseResponse<JobEntity<P, R> | null, QueueError>>;
   complete(
     jobId: JobIdVO,
-    resultData?: unknown
+    resultData?: R
   ): Promise<IUseCaseResponse<void, QueueError>>;
   fail(
     jobId: JobIdVO,
@@ -27,7 +27,7 @@ export interface IJobQueue {
     attempt: number
   ): Promise<IUseCaseResponse<void, QueueError>>;
   delay(jobId: JobIdVO, delayUntil: Date): Promise<IUseCaseResponse<void, QueueError>>;
-  getJobById(jobId: JobIdVO): Promise<IUseCaseResponse<JobEntity | null, QueueError>>;
+  getJobById(jobId: JobIdVO): Promise<IUseCaseResponse<JobEntity<P, R> | null, QueueError>>;
 }
 
 export const IJobQueueToken = Symbol("IJobQueue");

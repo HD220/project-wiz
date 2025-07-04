@@ -18,7 +18,7 @@ function AgentInstanceDetailPage() {
     return loadingErrorDisplay;
   }
 
-  const statusInfo = instance ? statusDisplayMap[instance.status] || statusDisplayMap.idle : statusDisplayMap.idle;
+  const statusInfo = instance ? statusDisplayMap[instance.status] : statusDisplayMap.idle;
 
   return (
     <AgentDetailView

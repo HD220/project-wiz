@@ -14,10 +14,10 @@ import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   CreateProjectRequest,
-  CreateProjectResponse,
+  CreateProjectResponseData,
   Project,
   UpdateProjectRequest,
-  UpdateProjectResponse,
+  UpdateProjectResponseData,
 } from "@/shared/ipc-types";
 
 import { ProjectDescriptionField } from "./fields/ProjectDescriptionField";
@@ -41,6 +41,7 @@ interface ProjectFormProps {
   project?: Project;
   onSuccess?: (data: Project) => void;
   submitButtonText?: string;
+  onSubmit?: (data: ProjectFormData) => Promise<void>;
 }
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
@@ -57,14 +58,14 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
 
   const createProjectMutation = useIpcMutation<
     CreateProjectRequest,
-    CreateProjectResponse
+    CreateProjectResponseData
   >(IPC_CHANNELS.CREATE_PROJECT, {
     onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success(`Projeto "${response.data.name}" criado com sucesso!`);
         onSuccess?.(response.data);
         router.navigate({
-          to: "/projects/$projectId",
+          to: "/app/projects/$projectId",
           params: { projectId: response.data.id },
         });
       } else {
@@ -78,7 +79,7 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
 
   const updateProjectMutation = useIpcMutation<
     UpdateProjectRequest,
-    UpdateProjectResponse
+    UpdateProjectResponseData
   >(IPC_CHANNELS.UPDATE_PROJECT, {
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -101,7 +102,7 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
 
   const handleSubmit = (data: ProjectFormData) => {
     if (isEditing && project) {
-      updateProjectMutation.mutate({ id: project.id, ...data });
+      updateProjectMutation.mutate({ projectId: project.id, data: data });
     } else {
       createProjectMutation.mutate(data);
     }

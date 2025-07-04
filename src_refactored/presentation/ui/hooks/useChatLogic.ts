@@ -37,7 +37,7 @@ export function useChatLogic({
   selectedConversationIdFromSearch,
   routeFullPath,
 }: UseChatLogicProps) {
-  const navigate = useNavigate({ from: routeFullPath });
+  const navigate = useNavigate();
 
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | undefined
@@ -51,16 +51,16 @@ export function useChatLogic({
     data: sidebarConversations,
     isLoading: isLoadingSidebarConvs,
     error: sidebarConvsError,
-  } = useIpcQuery<null, GetDMConversationsListResponseData>(
+  } = useIpcQuery<void, GetDMConversationsListResponseData>(
     GET_SIDEBAR_CONVERSATIONS_CHANNEL,
-    null,
+    undefined,
     { staleTime: 5 * 60 * 1000 }
   );
 
   const selectedConversationDetails = useMemo(() => {
     if (!selectedConversationId || !sidebarConversations) return null;
     return (
-      sidebarConversations.find((conv) => conv.id === selectedConversationId) ||
+      (sidebarConversations as DirectMessageItem[]).find((conv) => conv.id === selectedConversationId) ||
       null
     );
   }, [selectedConversationId, sidebarConversations]);
@@ -75,7 +75,7 @@ export function useChatLogic({
 
   const handleSelectConversation = (convId: string): void => {
     navigate({
-      search: (prev) => ({ ...prev, conversationId: convId }),
+      search: { conversationId: convId },
       replace: true,
     });
   };

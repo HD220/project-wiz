@@ -9,7 +9,7 @@ import { ActivityHistoryEntryVO, ActivityEntryType } from './activity-history-en
 export { ActivityHistoryEntryVO, ActivityEntryType };
 
 const ActivityHistoryPropsSchema = z.object({
-  entries: z.array(z.instanceof(ActivityHistoryEntryVO)).default([]),
+  entries: z.array(z.any()).default([]).readonly(),
   maxEntries: z.number().int().positive().optional().default(1000),
 });
 

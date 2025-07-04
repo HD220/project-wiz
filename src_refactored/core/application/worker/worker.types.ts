@@ -6,7 +6,7 @@ import { JobEntity } from '@/core/domain/job/job.entity';
  * It receives a job entity and should return a promise that resolves with the result.
  * If an error is thrown, the job will be marked as failed.
  */
-export type ProcessorFunction<P = unknown, R = unknown> = (
+export type ProcessorFunction<P extends { userId?: string } = { userId?: string }, R = unknown> = (
   job: JobEntity<P, R>,
 ) => Promise<R>;
 

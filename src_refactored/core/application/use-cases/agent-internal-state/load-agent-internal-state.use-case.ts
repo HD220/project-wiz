@@ -1,15 +1,11 @@
 // src_refactored/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
-import { ZodError } from 'zod';
 
+
+import { IUseCase } from '@/core/application/common/ports/use-case.interface';
 import { ILogger } from '@/core/common/services/i-logger.service';
-
-import { IAgentInternalStateRepository } from '@/domain/agent/ports/agent-internal-state-repository.interface';
-import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
-import { DomainError, NotFoundError, ValueError } from '@/domain/common/errors';
-
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
-
-import { successUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
+import { IAgentInternalStateRepository } from '@/core/domain/agent/ports/agent-internal-state-repository.interface';
+import { AgentId } from '@/core/domain/agent/value-objects/agent-id.vo';
+import { NotFoundError } from '@/core/domain/common/errors';
 
 import {
   LoadAgentInternalStateUseCaseInput,
@@ -19,9 +15,9 @@ import {
 
 export class LoadAgentInternalStateUseCase
   implements
-    Executable<
+    IUseCase<
       LoadAgentInternalStateUseCaseInput,
-      LoadAgentInternalStateUseCaseOutput | null
+      LoadAgentInternalStateUseCaseOutput
     >
 {
   constructor(
@@ -31,7 +27,7 @@ export class LoadAgentInternalStateUseCase
 
   async execute(
     input: LoadAgentInternalStateUseCaseInput,
-  ): Promise<IUseCaseResponse<LoadAgentInternalStateUseCaseOutput | null>> {
+  ): Promise<LoadAgentInternalStateUseCaseOutput> {
     const validInput = LoadAgentInternalStateUseCaseInputSchema.parse(input);
 
     const agentIdVo = AgentId.fromString(validInput.agentId);
@@ -39,16 +35,15 @@ export class LoadAgentInternalStateUseCase
     const stateEntity = await this.stateRepository.findByAgentId(agentIdVo);
 
     if (!stateEntity) {
-      return successUseCaseResponse(null);
+      throw new NotFoundError("AgentInternalState", validInput.agentId);
     }
 
     const output: LoadAgentInternalStateUseCaseOutput = {
       agentId: stateEntity.agentId.value,
-      currentProjectId: stateEntity.currentProjectId?.value ?? null,
-      currentGoal: stateEntity.currentGoal?.value ?? null,
+      currentProjectId: stateEntity.currentProjectId ? stateEntity.currentProjectId.value : null,
+      currentGoal: stateEntity.currentGoal ? stateEntity.currentGoal.value : null,
       generalNotes: [...stateEntity.generalNotes.list()],
     };
-
-    return successUseCaseResponse(output);
+    return output;
   }
 }

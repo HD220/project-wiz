@@ -16,8 +16,8 @@ export function useCreateAgentInstance() {
   const router = useRouter();
 
   const createAgentMutation = useIpcMutation<
-    CreateAgentInstanceRequest,
-    IPCResponse<CreateAgentInstanceResponseData>
+    IPCResponse<CreateAgentInstanceResponseData>,
+    CreateAgentInstanceRequest
   >(IPC_CHANNELS.CREATE_AGENT_INSTANCE, {
     onSuccess: (response): void => {
       if (response.success && response.data) {
@@ -28,7 +28,7 @@ export function useCreateAgentInstance() {
           `Instância de Agente "${agentDisplayName}" criada com sucesso!`
         );
         router.navigate({
-          to: "/agents/$agentId",
+          to: "/app/agents/$agentId",
           params: { agentId: response.data.id },
           replace: true,
         });

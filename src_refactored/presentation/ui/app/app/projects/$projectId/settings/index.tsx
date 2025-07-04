@@ -30,13 +30,13 @@ function ProjectSettingsPage() {
     refetch,
   } = useIpcQuery<
     GetProjectDetailsRequest,
-    GetProjectDetailsResponseData
+    IPCResponse<GetProjectDetailsResponseData>
   >(
     IPC_CHANNELS.GET_PROJECT_DETAILS,
     { projectId },
     {
       staleTime: 5 * 60 * 1000,
-      onError: (err) => {
+      onError: (err: Error) => {
         toast.error(`Erro ao buscar detalhes do projeto: ${err.message}`);
       },
     },
@@ -58,7 +58,7 @@ function ProjectSettingsPage() {
         );
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error(`Falha ao atualizar o projeto: ${error.message}`);
     },
   });
@@ -81,7 +81,7 @@ function ProjectSettingsPage() {
     );
   }
 
-  if (!project) {
+  if (!project || !project.data) {
     return (
       <ProjectSettingsError
         error={new Error("Projeto não encontrado ou falha ao carregar dados.")}
@@ -92,7 +92,7 @@ function ProjectSettingsPage() {
 
   return (
     <ProjectSettingsForm
-      project={project}
+      project={project.data}
       handleSubmit={handleSubmit}
       isSubmitting={updateProjectMutation.isLoading}
     />

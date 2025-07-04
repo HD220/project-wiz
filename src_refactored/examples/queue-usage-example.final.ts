@@ -1,12 +1,17 @@
 // src_refactored/examples/queue-usage-example.final.ts
+import EventEmitter from 'node:events';
+
 import { WorkerService } from "@/core/application/worker/worker.service";
 import { JobEntity } from "@/core/domain/job/job.entity";
 
 import { db } from "@/infrastructure/persistence/drizzle/drizzle.client";
 import { DrizzleJobRepository } from "@/infrastructure/persistence/drizzle/job/drizzle-job.repository";
 import { DrizzleQueueFacade as QueueService } from "@/infrastructure/queue/drizzle/drizzle-queue.facade";
+import { JobProcessingService } from "@/infrastructure/queue/drizzle/job-processing.service";
+import { QueueMaintenanceService } from "@/infrastructure/queue/drizzle/queue-maintenance.service";
+import { QueueServiceCore } from "@/infrastructure/queue/drizzle/queue-service-core";
 
-type EmailJobPayload = { email: string };
+type EmailJobPayload = { email: string; userId?: string; };
 type EmailJobResult = { status: string };
 
 function setupProcessor(): (
@@ -15,7 +20,7 @@ function setupProcessor(): (
   return async (
     job: JobEntity<EmailJobPayload, EmailJobResult>
   ): Promise<EmailJobResult> => {
-    const props = job.getProps();
+    const props = job;
     process.stdout.write(
       `[Worker] Processing job ${props.id.value} (attempt ${props.attemptsMade}) for email: ${props.payload.email}\n`
     );
@@ -74,8 +79,7 @@ function setupEventListeners(
   );
   // Condensing this handler to help with max-lines-per-function
   queue.on("job.active", (job) => process.stdout.write(`[Queue] Job ${job.getProps().id.value} is now active.\n`));
-  queue.on("job.stalled", (job) =>
-    process.stdout.write(`[Queue] Job ${job.getProps().id.value} stalled and re-queued.\n`)
+  queue.on("job.stalled", (job) =>    process.stdout.write(`[Queue] Job ${job.getProps().id.value} stalled and re-queued.\n`)
   );
   queue.on("job.progress", (job) =>
     process.stdout.write(
@@ -111,16 +115,8 @@ async function addJobsAndRun(
   worker: WorkerService<EmailJobPayload, EmailJobResult>
 ): Promise<void> {
   await queue.add("send-email", { email: "success@example.com" });
-  await queue.add(
-    "send-email",
-    { email: "delayed@example.com" },
-    { delay: 7000 }
-  );
-  await queue.add(
-    "send-email",
-    { email: "retry@example.com" },
-    { attempts: 3, backoff: { type: "exponential", delay: 1000 } }
-  );
+  await queue.add("send-email", { email: "delayed@example.com" }, { delay: 7000 });
+  await queue.add("send-email", { email: "fail@example.com" }, { attempts: 1 });
   await queue.add("send-email", { email: "fail@example.com" }, { attempts: 1 });
 
   worker.run();
@@ -141,10 +137,27 @@ async function addJobsAndRun(
 }
 
 async function main() {
-  const jobRepository = new DrizzleJobRepository(db);
-  const queue = new QueueService<EmailJobPayload, EmailJobResult>(
+  const jobRepository = new DrizzleJobRepository<EmailJobPayload, EmailJobResult>(db);
+  const coreService = new QueueServiceCore(
     "default",
     jobRepository
+  );
+  const processingService = new JobProcessingService(
+    jobRepository,
+    new EventEmitter(),
+    "default"
+  );
+  const maintenanceService = new QueueMaintenanceService(
+    jobRepository,
+    new EventEmitter(),
+    "default"
+  );
+  const queue = new QueueService<EmailJobPayload, EmailJobResult>(
+    "default",
+    jobRepository,
+    coreService,
+    processingService,
+    maintenanceService
   );
   const processor = setupProcessor();
   const worker = new WorkerService(queue, processor, {

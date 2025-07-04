@@ -82,7 +82,7 @@ export function AgentInstanceForm({
         );
         onSuccess?.(response.data);
         router.navigate({
-          to: "/agents/$agentId",
+          to: "/app/agents/$agentId",
           params: { agentId: response.data.id },
         });
       } else {
@@ -119,7 +119,7 @@ export function AgentInstanceForm({
 
   const handleSubmit = (data: AgentInstanceFormData) => {
     if (isEditing && agentInstance) {
-      updateAgentMutation.mutate({ id: agentInstance.id, ...data });
+      updateAgentMutation.mutate({ agentId: agentInstance.id, data: data });
     } else {
       createAgentMutation.mutate(data);
     }

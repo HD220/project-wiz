@@ -4,6 +4,7 @@ import { EntityError } from "@/domain/common/errors";
 
 import { ExecutionHistoryEntry } from "./job-processing.types";
 import { JobStateMutator } from "./job-state.mutator";
+import { JobFactory } from "./job.factory";
 import {
   JobStatus,
   JobEntityProps,
@@ -34,12 +35,12 @@ interface InternalJobEntityProps<P, R> extends EntityProps<JobIdVO> {
   processedAt?: Date | null;
   failedReason?: string | null;
   stacktrace?: string[] | null;
-  returnvalue?: R | null;
-  workerId?: string | null;
+  returnValue?: R | null;
+  workerId?: string;
   lockUntil?: Date | null;
 }
 
-export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
+export class JobEntity<P extends { userId?: string }, R = unknown> extends AbstractEntity<
   JobIdVO,
   InternalJobEntityProps<P, R>
 > {
@@ -60,14 +61,14 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
     );
   }
 
-  public static create<P, R>(params: {
+  public static create<P extends { userId?: string }, R>(params: {
     id?: JobIdVO;
     queueName: string;
     name: string;
     payload: P;
     options?: IJobOptions;
   }): JobEntity<P, R> {
-    const props = JobEntity._createProps(params);
+    const props = JobFactory.createJobProps(params);
 
     const validationResult = JobEntityPropsSchema.safeParse(props);
     if (!validationResult.success) {
@@ -76,38 +77,10 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
       });
     }
 
-    return new JobEntity<P, R>(props, ActivityHistoryVO.create(), []);
+    return new JobEntity<P, R>(props as InternalJobEntityProps<P, R>, ActivityHistoryVO.create(), []);
   }
 
-  private static _createProps<P, R>(params: {
-    id?: JobIdVO;
-    queueName: string;
-    name: string;
-    payload: P;
-    options?: IJobOptions;
-  }): JobEntityProps<P, R> {
-    const jobOptions = JobOptionsVO.create(params.options);
-    const idFromOptions = jobOptions.jobId;
-    const finalJobId =
-      params.id ||
-      (idFromOptions ? JobIdVO.create(idFromOptions) : JobIdVO.create());
-    const now = new Date();
-
-    return {
-      id: finalJobId,
-      queueName: params.queueName,
-      name: params.name,
-      payload: params.payload,
-      options: jobOptions,
-      status: (jobOptions.delay && jobOptions.delay > 0) ? JobStatus.DELAYED : JobStatus.WAITING,
-      attemptsMade: 0,
-      progress: 0,
-      logs: [],
-      createdAt: now,
-      updatedAt: now,
-      delayUntil: (jobOptions.delay && jobOptions.delay > 0) ? new Date(now.getTime() + jobOptions.delay) : null,
-    };
-  }
+  public get finishedAt(): Date | null | undefined { return this.props.finishedAt; }
 
   get maxAttempts(): number {
     return this.props.options.attempts;
@@ -213,6 +186,46 @@ export class JobEntity<P = unknown, R = unknown> extends AbstractEntity<
 
   public setExecutionHistory(history: ExecutionHistoryEntry[]): void {
     this._stateMutator.setExecutionHistory(history);
+  }
+
+  public get attemptsMade(): number {
+    return this.props.attemptsMade;
+  }
+
+  public get payload(): P {
+    return this.props.payload;
+  }
+
+  public get name(): string {
+    return this.props.name;
+  }
+
+  public get userId(): string | undefined {
+    return this.props.payload.userId;
+  }
+
+  public get workerId(): string | undefined {
+    return this.props.workerId;
+  }
+
+  public get status(): JobStatus {
+    return this.props.status;
+  }
+
+  public get options(): JobOptionsVO {
+    return this.props.options;
+  }
+
+  public get lockUntil(): Date | null | undefined {
+    return this.props.lockUntil;
+  }
+
+  public toPersistence(): JobEntityProps<P, R> {
+    return this.props;
+  }
+
+  public static fromPersistenceData<P extends { userId?: string }, R>(props: JobEntityProps<P, R>, initialConversationHistory?: ActivityHistoryVO, initialExecutionHistory?: ExecutionHistoryEntry[]): JobEntity<P, R> {
+    return new JobEntity<P, R>(props as InternalJobEntityProps<P, R>, initialConversationHistory, initialExecutionHistory);
   }
 }
 

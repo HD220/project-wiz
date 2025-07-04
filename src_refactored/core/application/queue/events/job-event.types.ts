@@ -42,27 +42,27 @@ export enum JobEventType {
 
 // --- Payload types for each event ---
 
-export interface JobAddedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobAddedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
 }
 
-export interface JobFetchedPayload<PayloadType = unknown, ReturnType = unknown> {
-  job: JobEntity<PayloadType, ReturnType>;
-  workerId: string;
-}
-
-export interface JobActivatedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobFetchedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
   workerId: string;
 }
 
-export interface JobCompletedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobActivatedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
+  job: JobEntity<PayloadType, ReturnType>;
+  workerId: string;
+}
+
+export interface JobCompletedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
   returnValue: ReturnType;
   workerId: string;
 }
 
-export interface JobFailedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobFailedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
   // Could be an Error object or a serialized string
   error: Error | string;
@@ -70,7 +70,7 @@ export interface JobFailedPayload<PayloadType = unknown, ReturnType = unknown> {
   workerId?: string;
 }
 
-export interface JobDelayedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobDelayedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
   delayUntil: Date;
 }
@@ -86,12 +86,12 @@ export interface JobRemovedPayload {
   queueName: string;
 }
 
-export interface JobProgressUpdatedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobProgressUpdatedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
   progress: number | object;
 }
 
-export interface JobLogAddedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface JobLogAddedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
   job: JobEntity<PayloadType, ReturnType>;
   log: { message: string; level: string; timestamp: Date };
 }
@@ -111,7 +111,7 @@ export interface QueueCleanedPayload {
 }
 
 // Use unknown if PayloadType, ReturnType are not specifically known here
-export interface WorkerJobInterruptedPayload<PayloadType = unknown, ReturnType = unknown> {
+export interface WorkerJobInterruptedPayload<PayloadType extends { userId?: string }, ReturnType = unknown> {
     // Or JobEntity<unknown, unknown> if types are truly generic for this event
     job: JobEntity<PayloadType,ReturnType>;
     workerId: string;
@@ -125,21 +125,21 @@ export interface WorkerErrorPayload {
 
 // --- Event Map ---
 
-export type JobEventPayloadMap = {
-  [JobEventType.JOB_ADDED]: JobAddedPayload<unknown, unknown>;
-  [JobEventType.JOB_FETCHED]: JobFetchedPayload<unknown, unknown>;
-  [JobEventType.JOB_ACTIVATED]: JobActivatedPayload<unknown, unknown>;
-  [JobEventType.JOB_COMPLETED]: JobCompletedPayload<unknown, unknown>;
-  [JobEventType.JOB_FAILED]: JobFailedPayload<unknown, unknown>;
-  [JobEventType.JOB_DELAYED]: JobDelayedPayload<unknown, unknown>;
+export type JobEventPayloadMap<P extends { userId?: string }, R = unknown> = {
+  [JobEventType.JOB_ADDED]: JobAddedPayload<P, R>;
+  [JobEventType.JOB_FETCHED]: JobFetchedPayload<P, R>;
+  [JobEventType.JOB_ACTIVATED]: JobActivatedPayload<P, R>;
+  [JobEventType.JOB_COMPLETED]: JobCompletedPayload<P, R>;
+  [JobEventType.JOB_FAILED]: JobFailedPayload<P, R>;
+  [JobEventType.JOB_DELAYED]: JobDelayedPayload<P, R>;
   [JobEventType.JOB_STALLED]: JobStalledPayload;
   [JobEventType.JOB_REMOVED]: JobRemovedPayload;
-  [JobEventType.JOB_PROGRESS_UPDATED]: JobProgressUpdatedPayload<unknown, unknown>;
-  [JobEventType.JOB_LOG_ADDED]: JobLogAddedPayload<unknown, unknown>;
+  [JobEventType.JOB_PROGRESS_UPDATED]: JobProgressUpdatedPayload<P, R>;
+  [JobEventType.JOB_LOG_ADDED]: JobLogAddedPayload<P, R>;
   [JobEventType.QUEUE_PAUSED]: QueuePausedPayload;
   [JobEventType.QUEUE_RESUMED]: QueueResumedPayload;
   [JobEventType.QUEUE_CLEANED]: QueueCleanedPayload;
-  [JobEventType.WORKER_JOB_INTERRUPTED]: WorkerJobInterruptedPayload;
+  [JobEventType.WORKER_JOB_INTERRUPTED]: WorkerJobInterruptedPayload<P, R>;
   [JobEventType.WORKER_ERROR]: WorkerErrorPayload;
   // Add other events as needed
 };

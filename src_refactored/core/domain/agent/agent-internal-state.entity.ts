@@ -1,9 +1,7 @@
-// src_refactored/core/domain/agent/agent-internal-state.entity.ts
 import { z } from "zod";
 
 import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
-
-import { EntityError } from "@/domain/common/errors";
+import { EntityError } from "@/core/domain/common/errors";
 
 import { AgentId } from './value-objects/agent-id.vo';
 import { CurrentGoal } from './value-objects/internal-state/current-goal.vo';
@@ -75,6 +73,10 @@ export class AgentInternalState extends AbstractEntity<AgentId, InternalAgentInt
     return this.props.generalNotes;
   }
 
+  public get agentId(): AgentId {
+    return this.props.id;
+  }
+
   public changeCurrentProject(newProjectId?: CurrentProjectId | null): AgentInternalState {
     const newProps = { ...this.props, currentProjectId: newProjectId, updatedAt: new Date() };
     return new AgentInternalState(newProps);
@@ -113,9 +115,38 @@ export class AgentInternalState extends AbstractEntity<AgentId, InternalAgentInt
     if (!(other instanceof AgentInternalState)) {
       return false;
     }
-    return this.id.value.equals(other.id.value) &&
-           this.currentProjectId?.equals(other.currentProjectId) &&
-           this.currentGoal?.equals(other.currentGoal) &&
-           this.generalNotes.equals(other.generalNotes);
+    // Compare IDs
+    if (!this.id.equals(other.id)) {
+      return false;
+    }
+
+    // Compare currentProjectId
+    const currentProjectIdEquals = 
+      (this.currentProjectId === null && other.currentProjectId === null) ||
+      (this.currentProjectId === undefined && other.currentProjectId === undefined) ||
+      (this.currentProjectId !== null && this.currentProjectId !== undefined &&
+       other.currentProjectId !== null && other.currentProjectId !== undefined &&
+       this.currentProjectId.equals(other.currentProjectId));
+    if (!currentProjectIdEquals) {
+      return false;
+    }
+
+    // Compare currentGoal
+    const currentGoalEquals = 
+      (this.currentGoal === null && other.currentGoal === null) ||
+      (this.currentGoal === undefined && other.currentGoal === undefined) ||
+      (this.currentGoal !== null && this.currentGoal !== undefined &&
+       other.currentGoal !== null && other.currentGoal !== undefined &&
+       this.currentGoal.equals(other.currentGoal));
+    if (!currentGoalEquals) {
+      return false;
+    }
+
+    // Compare generalNotes
+    if (!this.generalNotes.equals(other.generalNotes)) {
+      return false;
+    }
+
+    return true;
   }
 }

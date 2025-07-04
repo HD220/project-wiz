@@ -50,11 +50,13 @@ export interface IJobOptions {
   delay?: number;
   attempts?: number;
   backoff?: IJobBackoffOptions | JobBackoffStrategyFn;
+  maxDelay?: number; // Added maxDelay
   removeOnComplete?: boolean | IJobRemovalOptions;
   removeOnFail?: boolean | IJobRemovalOptions;
   jobId?: string;
   timeout?: number;
   maxStalledCount?: number;
+  [key: string]: unknown;
 }
 
 const JobOptionsSchema = z.object({
@@ -62,12 +64,13 @@ const JobOptionsSchema = z.object({
   delay: z.number().int().min(0).optional().default(0),
   attempts: z.number().int().min(1).optional().default(1),
   // z.function() for JobBackoffStrategyFn
-  backoff: z.union([JobBackoffSchema, z.function()]).optional(),
+  backoff: z.union([JobBackoffSchema, z.function().returns(z.number())]).optional(),
   removeOnComplete: z.union([z.boolean(), JobRemovalSchema]).optional().default(true),
   removeOnFail: z.union([z.boolean(), JobRemovalSchema]).optional().default(false),
   jobId: z.string().optional(),
   timeout: z.number().int().min(0).optional(),
   maxStalledCount: z.number().int().min(0).optional().default(3),
+  maxDelay: z.number().int().min(0).optional(), // Added maxDelay to schema
 });
 
 export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
@@ -95,6 +98,7 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   get jobId(): string | undefined { return this.props.jobId; }
   get timeout(): number | undefined { return this.props.timeout; }
   get maxStalledCount(): number { return this.props.maxStalledCount!; }
+  get maxDelay(): number | undefined { return this.props.maxDelay; } // Added getter for maxDelay
 
   public equals(vo?: JobOptionsVO): boolean {
     // Custom equals for JobOptionsVO if needed, otherwise rely on AbstractValueObject's JSON.stringify
