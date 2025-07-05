@@ -123,4 +123,5 @@ Serão adotados os seguintes padrões para o gerenciamento de configuração:
 *   Crie interfaces/classes tipadas para agrupar configurações relacionadas. Popule-as a partir de `process.env` ou `import.meta.env` na inicialização ou na configuração de DI. Injete esses objetos, não use `process.env` diretamente nos serviços/componentes.
 *   Use Zod para validar a estrutura e os tipos das suas configurações na inicialização.
 *   Para segredos fornecidos pelo usuário que precisam ser salvos, garanta que a camada de persistência use `electron.safeStorage`.
+*   Se uma configuração persistida pelo usuário for modelada como uma Entidade de Domínio (e.g., `LLMProviderConfig`), sua instanciação deve seguir os padrões da ADR-010, utilizando seu construtor público (e.g., `new LLMProviderConfig(props)`).
 *   NÃO inclua arquivos `.env` com segredos no versionamento. Use `.env.example`.
