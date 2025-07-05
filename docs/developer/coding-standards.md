@@ -769,5 +769,3 @@ Esta seção serve como um guia prático resumido para implementar os principais
 
 ---
 Este documento será mantido atualizado conforme novas ADRs são propostas e aprovadas, e conforme os padrões evoluem.
-
-[end of docs/developer/coding-standards.md]
