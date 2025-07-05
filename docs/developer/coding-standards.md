@@ -1,771 +1,1175 @@
-# Padrões de Código e Diretrizes de Desenvolvimento para o Project Wiz
+# Padrões de Código e Diretrizes de Desenvolvimento
 
-## 1. Introdução
+Manter um padrão de código consistente e seguir as diretrizes de desenvolvimento é crucial para a qualidade, legibilidade e manutenção do Project Wiz. Este documento consolida os principais padrões de código, estilo, formatação, nomenclatura, e melhores práticas específicas para tecnologias, servindo como fonte única de verdade.
 
-Este documento é o guia mestre e a fonte única de verdade para todos os padrões de codificação, estilo, e boas práticas de desenvolvimento no Project Wiz. Seu propósito é garantir a criação de um codebase consistente, de alta qualidade, manutenível, legível e robusto.
+## Princípios Fundamentais
 
-Ele consolida e detalha as decisões formais tomadas nas diversas **Architecture Decision Records (ADRs)** do projeto, que podem ser encontradas em `docs/reference/adrs/`. Enquanto as ADRs registram as decisões e suas justificativas em um momento específico, este documento serve como um manual prático e vivo, aplicando essas decisões ao contexto diário de desenvolvimento.
+No Project Wiz, seguimos os seguintes princípios de desenvolvimento de software:
 
-Adicionalmente, este guia complementa o documento de arquitetura principal, `docs/reference/software-architecture.md`, que descreve a visão arquitetural de alto nível, as camadas e os principais componentes do sistema. Enquanto o documento de arquitetura foca no "o quê" e no "porquê" da estrutura, este guia foca no "como" implementar o código dentro dessa arquitetura.
+*   **DRY (Don't Repeat Yourself):**
+    *   **Regra:** Evite duplicação de código. Abstraia lógica comum em funções, classes ou módulos reutilizáveis.
+    *   **Porquê:** Reduz a redundância, melhora a manutenibilidade (alterações são feitas em um só lugar), diminui a chance de inconsistências e facilita a compreensão, pois o comportamento é definido uma única vez. Código duplicado é um convite a bugs quando uma cópia é atualizada e a outra não.
 
-A adesão estrita a este documento é mandatória para todo o código novo e para refatorações no Project Wiz, tanto para desenvolvedores humanos quanto para Agentes de IA. O objetivo é um codebase exemplar, e isso requer atenção meticulosa aos detalhes, não apenas o cumprimento mínimo das regras.
-
-## 2. Princípios Fundamentais de Design
-
-Os seguintes princípios de design de software são a base para nossas decisões arquiteturais e de codificação. Eles são cruciais para alcançar a qualidade e manutenibilidade desejadas. Detalhes mais amplos sobre sua aplicação na arquitetura geral podem ser encontrados em `docs/reference/software-architecture.md`.
-
-*   **DRY (Don't Repeat Yourself - Não se Repita):**
-    *   **Definição:** Evite a duplicação de código, lógica e conhecimento. Abstraia comportamentos comuns em funções, classes, módulos ou serviços reutilizáveis.
-    *   **Porquê:** Reduz a redundância, melhora a manutenibilidade (alterações são feitas em um só lugar), diminui a chance de inconsistências e facilita a compreensão, pois o comportamento é definido uma única vez.
-    *   **Aplicação no Project Wiz:**
-        *   Criação de Objetos de Valor (VOs) para encapsular dados com regras de validação e formatação próprias, evitando lógica duplicada em múltiplos locais (ver **ADR-010**).
-        *   Uso de Serviços de Aplicação para orquestrar lógica de negócios que pode ser invocada por diferentes Casos de Uso (ver **ADR-012**).
-        *   Desenvolvimento de hooks customizados no frontend para encapsular lógica de UI reutilizável (ver **ADR-025**).
-
-*   **KISS (Keep It Simple, Stupid - Mantenha Simples, Estúpido):**
-    *   **Definição:** Priorize soluções simples e diretas em detrimento de complexidade desnecessária ou engenharia excessiva (over-engineering).
+*   **KISS (Keep It Simple, Stupid):**
+    *   **Regra:** Mantenha as soluções o mais simples possível, mas não mais simples. Evite complexidade desnecessária ou prematura.
     *   **Porquê:** Código simples é mais fácil de entender, testar, depurar e manter. Complexidade acidental aumenta a carga cognitiva e a probabilidade de erros.
-    *   **Aplicação no Project Wiz:**
-        *   Preferir implementações diretas e claras, mesmo que uma solução "mais inteligente" ou "mais genérica" seja possível, se esta última adicionar complexidade sem um benefício claro e imediato.
-        *   Adoção de padrões de design apenas quando a complexidade do problema realmente os justifica.
 
-*   **YAGNI (You Aren't Gonna Need It - Você Não Vai Precisar Disso):**
-    *   **Definição:** Implemente apenas as funcionalidades e abstrações que são estritamente necessárias com base nos requisitos atuais. Evite adicionar código especulativamente para um futuro incerto.
-    *   **Porquê:** Previne o desperdício de esforço em funcionalidades que podem nunca ser usadas, mantém o código mais enxuto, focado e reduz a complexidade geral do sistema.
-    *   **Aplicação no Project Wiz:**
-        *   Focar na entrega de valor para os requisitos definidos para o MVP ou para o incremento atual.
-        *   Evitar a criação de abstrações genéricas ou pontos de extensão complexos antes que a necessidade real seja identificada e compreendida.
+*   **YAGNI (You Aren't Gonna Need It):**
+    *   **Regra:** Implemente apenas o que é necessário agora, com base nos requisitos atuais. Evite adicionar funcionalidades ou abstrações especulativamente para um futuro incerto.
+    *   **Porquê:** Previne o desperdício de esforço em funcionalidades que podem nunca ser usadas, mantém o código mais enxuto e focado, e reduz a complexidade geral do sistema.
 
-*   **Clean Code (Código Limpo):**
-    *   **Definição:** Escreva código que seja fácil de ler, entender e modificar por qualquer desenvolvedor da equipe (incluindo seu "eu" futuro). Siga as práticas descritas por Robert C. Martin e outros.
-    *   **Porquê:** Código limpo melhora a colaboração, reduz a curva de aprendizado, diminui a probabilidade de introdução de bugs durante modificações e torna o desenvolvimento mais eficiente e prazeroso.
-    *   **Aplicação no Project Wiz:**
-        *   Adesão estrita às convenções de nomenclatura (ADR-028), formatação (Prettier), e linting (ESLint).
-        *   Aplicação dos princípios SOLID e Object Calisthenics (ADR-016).
-        *   Escrever funções e métodos curtos e com responsabilidade única.
+*   **Clean Code:**
+    *   **Regra:** Escreva código que seja fácil de ler, entender e modificar por qualquer desenvolvedor da equipe (incluindo seu "eu" futuro).
+    *   **Porquê:** Código limpo melhora a colaboração, reduz a curva de aprendizado para novos membros, diminui a probabilidade de introdução de bugs durante modificações e torna o desenvolvimento mais eficiente e prazeroso.
 
-*   **SOLID:** Estes cinco princípios de design orientado a objetos ajudam a criar software mais compreensível, flexível e manutenível. A aplicação destes princípios é fundamental na estruturação das camadas da Clean Architecture (ver `docs/reference/software-architecture.md`).
-    *   **S - Single Responsibility Principle (Princípio da Responsabilidade Única):**
-        *   **Definição:** Uma classe, módulo ou função deve ter apenas uma razão para mudar, ou seja, deve ter apenas uma responsabilidade ou tarefa bem definida.
-        *   **Porquê:** Torna os componentes mais focados, coesos, fáceis de entender, testar e menos propensos a efeitos colaterais quando modificados.
-        *   **Aplicação no Project Wiz:** Entidades e VOs com responsabilidades claras (ADR-010), Casos de Uso focados em uma única operação de aplicação (ADR-012), Serviços de Aplicação com um conjunto coeso de funcionalidades relacionadas.
-    *   **O - Open/Closed Principle (Princípio Aberto/Fechado):**
-        *   **Definição:** Entidades de software devem ser abertas para extensão, mas fechadas para modificação do seu código fonte já testado.
-        *   **Porquê:** Permite adicionar novas funcionalidades (extensões) sem alterar código existente e estável, reduzindo o risco de introduzir bugs em funcionalidades antigas e promovendo a reutilização através de abstrações.
-        *   **Aplicação no Project Wiz:** Uso de interfaces (Portas) para Adaptadores de Infraestrutura (ADR-018) permite adicionar novas implementações (e.g., um novo provedor de LLM) sem modificar o código da camada de aplicação que usa a interface.
-    *   **L - Liskov Substitution Principle (Princípio da Substituição de Liskov):**
-        *   **Definição:** Subtipos devem ser substituíveis por seus tipos base sem alterar a corretude ou o comportamento esperado do programa. Ou seja, uma classe filha deve poder ser usada em qualquer lugar que sua classe pai é esperada, sem causar problemas.
+*   **SOLID:** Estes princípios de design orientado a objetos ajudam a criar software mais compreensível, flexível e manutenível.
+    *   **S**ingle Responsibility Principle (Princípio da Responsabilidade Única):
+        *   **Regra:** Uma classe ou módulo deve ter apenas uma razão para mudar, ou seja, deve ter apenas uma responsabilidade ou tarefa.
+        *   **Porquê:** Torna as classes mais focadas, coesas, fáceis de entender, testar e menos propensas a efeitos colaterais quando modificadas.
+    *   **O**pen/Closed Principle (Princípio Aberto/Fechado):
+        *   **Regra:** Entidades de software (classes, módulos, funções) devem ser abertas para extensão, mas fechadas para modificação.
+        *   **Porquê:** Permite adicionar novas funcionalidades sem alterar código existente e testado, reduzindo o risco de introduzir bugs em funcionalidades antigas e promovendo a reutilização.
+    *   **L**iskov Substitution Principle (Princípio da Substituição de Liskov):
+        *   **Regra:** Subtipos devem ser substituíveis por seus tipos base sem alterar a corretude ou o comportamento esperado do programa.
         *   **Porquê:** Garante que a herança (e polimorfismo) seja usada corretamente, mantendo a consistência, a previsibilidade do sistema e a integridade dos contratos estabelecidos pelas classes base.
-        *   **Aplicação no Project Wiz:** Ao usar herança (e.g., `AbstractEntity` - ADR-010), garantir que as classes filhas respeitem o contrato da classe base.
-    *   **I - Interface Segregation Principle (Princípio da Segregação de Interfaces):**
-        *   **Definição:** Clientes não devem ser forçados a depender de interfaces que não utilizam. É melhor ter várias interfaces pequenas e específicas do cliente do que uma interface grande e genérica.
-        *   **Porquê:** Evita interfaces "gordas" (fat interfaces) e o acoplamento desnecessário a métodos não utilizados, resultando em um design mais flexível, modular e coeso.
-        *   **Aplicação no Project Wiz:** Interfaces de Repositório específicas por entidade (ADR-011) e interfaces de Adaptadores focadas em um conjunto coeso de operações (ADR-018).
-    *   **D - Dependency Inversion Principle (Princípio da Inversão de Dependência):**
-        *   **Definição:** Módulos de alto nível (e.g., lógica de aplicação) não devem depender de módulos de baixo nível (e.g., detalhes de infraestrutura). Ambos devem depender de abstrações (interfaces, tipos abstratos). Além disso, abstrações não devem depender de detalhes; detalhes devem depender de abstrações.
-        *   **Porquê:** Promove baixo acoplamento e alta flexibilidade, facilitando a substituição de implementações (e.g., trocar um banco de dados ou um serviço externo) e a testabilidade (permitindo mocks para dependências externas).
-        *   **Aplicação no Project Wiz:** A Clean Architecture é uma manifestação direta deste princípio. A Camada de Aplicação depende de Portas (interfaces) como `IUserRepository` (ADR-011) ou `ILLMAdapter` (ADR-018), cujas implementações concretas residem na Camada de Infraestrutura. O framework de Injeção de Dependência InversifyJS (ADR-019) é usado para realizar essa inversão.
+    *   **I**nterface Segregation Principle (Princípio da Segregação de Interfaces):
+        *   **Regra:** Clientes não devem ser forçados a depender de interfaces que não utilizam. Crie interfaces menores, coesas e mais específicas para cada tipo de cliente.
+        *   **Porquê:** Evita interfaces "gordas" (fat interfaces) e o acoplamento desnecessário a métodos não utilizados, resultando em um design mais flexível e modular.
+    *   **D**ependency Inversion Principle (Princípio da Inversão de Dependência):
+        *   **Regra:** Módulos de alto nível não devem depender de módulos de baixo nível; ambos devem depender de abstrações (interfaces, tipos abstratos). Além disso, abstrações não devem depender de detalhes; detalhes devem depender de abstrações.
+        *   **Porquê:** Promove baixo acoplamento e alta flexibilidade, facilitando a substituição de implementações, a testabilidade (via mocks) e a evolução independente das diferentes partes do sistema.
 
-## 3. Diretrizes de Linguagem: TypeScript
+*   **Nomenclatura Descritiva:**
+    *   **Regra:** Use nomes claros, inequívocos e em **inglês** para variáveis, funções, classes, arquivos e pastas. Os nomes devem transmitir intenção e propósito de forma concisa.
+    *   **Porquê:** Melhora drasticamente a legibilidade e reduz o tempo necessário para outros desenvolvedores (ou você mesmo no futuro) entenderem o significado e o papel de cada elemento do código. Nomes bem escolhidos são uma forma primária de documentação.
 
-TypeScript é a linguagem primária do Project Wiz. Esta seção detalha como utilizar seus recursos de forma eficaz e padronizada, baseando-se fortemente na **ADR-015: Padrões para Uso Avançado e Melhores Práticas de TypeScript**.
+*   **Falhar Rápido (Fail Fast):**
+    *   **Regra:** Detecte erros, entradas inválidas e condições anormais o mais cedo possível no ciclo de vida de uma operação e interrompa a execução ou lance uma exceção imediatamente. Valide pré-condições e pós-condições.
+    *   **Porquê:** Previne a propagação de estados inválidos pelo sistema, o que pode levar a erros mais complexos e difíceis de depurar em estágios posteriores. Identificar a origem do problema rapidamente economiza tempo e esforço.
 
-### 3.1. Configurações do Compilador (`tsconfig.json`)
-*   **Padrão:** Manter `strict: true` (ou todas as suas sub-flags individuais como `strictNullChecks`, `noImplicitAny`, `noImplicitThis`, `alwaysStrict`, `strictBindCallApply`, `strictFunctionTypes`, `strictPropertyInitialization`) habilitado.
-*   **Outras Flags Importantes:**
-    *   `esModuleInterop: true`: Para melhor compatibilidade com módulos CommonJS.
-    *   `isolatedModules: true`: Garante que cada arquivo possa ser transpilado como um módulo separado.
-    *   `forceConsistentCasingInFileNames: true`: Previne problemas de casing em imports.
-    *   `noUnusedLocals: true` e `noUnusedParameters: true`: Para manter o código limpo.
-    *   `skipLibCheck: true`: Pode acelerar a compilação (usar com cautela).
-*   **Porquê:** Configurações estritas maximizam os benefícios de segurança de tipo do TypeScript, detectando mais erros em tempo de compilação e levando a um código mais robusto, confiável e fácil de refatorar.
+*   **Operações Idempotentes:**
+    *   **Regra:** Projete operações (especialmente interações com APIs, manipulação de estado ou tarefas de longa duração) para serem idempotentes quando aplicável. Uma operação idempotente é aquela que, se executada múltiplas vezes com os mesmos parâmetros, produz o mesmo resultado e efeito colateral que teria se fosse executada apenas uma vez.
+    *   **Porquê:** Aumenta a robustez e a resiliência do sistema, especialmente em operações de rede ou transações que podem ser reintentadas automaticamente ou manualmente sem causar efeitos indesejados (ex: múltiplas cobranças, duplicação de dados).
 
-### 3.2. Tipos Avançados e Utilitários
-
-*   **Utility Types (Tipos Utilitários):** Utilizar os tipos utilitários nativos do TypeScript para manipulações comuns e seguras de tipos.
-    *   `Partial<T>`: Constrói um tipo com todas as propriedades de `T` opcionais.
-        *   *Uso:* Ideal para representar atualizações parciais de um objeto, como em DTOs de update.
-        *   *Exemplo:* `interface User { id: string; name: string; email: string; } type UserUpdateDto = Partial<Omit<User, 'id'>>; // { name?: string; email?: string; }`
-    *   `Required<T>`: Constrói um tipo com todas as propriedades de `T` obrigatórias.
-    *   `Readonly<T>`: Constrói um tipo com todas as propriedades de `T` como `readonly`.
-        *   *Uso:* Para garantir imutabilidade em objetos de configuração, props de componentes React que não devem ser alteradas, ou dados que devem permanecer constantes após a criação.
-        *   *Exemplo:* `type AppConfig = Readonly<{ api_key: string; version: string; }>;`
-    *   `ReadonlyArray<T>`: Para arrays imutáveis.
-    *   `Record<Keys, Type>`: Constrói um tipo de objeto cujas chaves são do tipo `Keys` (geralmente `string | number | symbol`) e os valores são do tipo `Type`.
-        *   *Uso:* Excelente para dicionários, mapas ou objetos onde as chaves são dinâmicas mas os valores têm um tipo consistente.
-        *   *Exemplo:* `type UserRoles = Record<UserId, 'admin' | 'editor' | 'viewer'>;`
-    *   `Pick<Type, Keys>`: Constrói um tipo selecionando um conjunto de propriedades `Keys` de `Type`.
-    *   `Omit<Type, Keys>`: Constrói um tipo omitindo um conjunto de propriedades `Keys` de `Type`.
-        *   *Uso (Pick/Omit):* Para criar DTOs, tipos de visualização ou subtipos com um subconjunto específico de propriedades de um tipo maior, promovendo interfaces mais enxutas.
-        *   *Exemplo:* `interface DetailedUser { id: string; name: string; email: string; address: string; } type UserSummary = Omit<DetailedUser, 'address'>;`
-    *   `ReturnType<typeof someFunction>`: Extrai o tipo de retorno de uma função.
-    *   `Parameters<typeof someFunction>`: Extrai os tipos dos parâmetros de uma função como uma tupla.
-    *   `NonNullable<Type>`: Exclui `null` e `undefined` de `Type`.
-        *   *Uso:* Útil após uma verificação de nulidade para informar ao compilador que o valor é definitivamente não-nulo/não-undefined.
-    *   `Awaited<Type>`: Obtém o tipo resolvido de uma `Promise`. Útil para tipar o resultado de uma função `async`.
-        *   *Exemplo:* `async function fetchData(): Promise<string[]> { /* ... */ } type FetchedData = Awaited<ReturnType<typeof fetchData>>; // string[]`
-    *   **Porquê (Utility Types):** Permitem manipulações de tipo complexas de forma declarativa e segura, evitando a necessidade de criar manualmente tipos derivados e reduzindo a verbosidade.
-
-*   **Mapped Types (Tipos Mapeados):** Usar para criar novos tipos baseados na transformação das propriedades de um tipo existente, aplicando modificadores como `readonly` ou `?` (opcional), ou alterando os tipos das propriedades.
-    *   **Exemplo (Criar um tipo onde todas as propriedades são funções que retornam o tipo original da propriedade):**
+*   **Dados Imutáveis:**
+    *   **Regra:** Prefira estruturas de dados e objetos imutáveis sempre que possível. Evite modificar objetos ou arrays no local (in-place mutation); em vez disso, crie novas instâncias com os valores atualizados.
+    *   **Porquê:** Reduz efeitos colaterais, simplifica o rastreamento de mudanças de estado, melhora a previsibilidade do comportamento do código e facilita o debugging. É especialmente útil em React (para detecção de mudanças) e em programação concorrente ou funcional.
+    *   **Exemplo Avançado (TypeScript com `immer` ou `fp-ts` para imutabilidade complexa):**
         ```typescript
-        // type GetterMethods<T> = {
-        //   [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K]
-        // };
-        // interface Point { x: number; y: number; }
-        // type PointGetters = GetterMethods<Point>;
-        // // Result: { getX: () => number; getY: () => number; }
-        ```
-    *   **Porquê:** Permite criar tipos derivados de forma programática e DRY, mantendo uma relação clara com o tipo original.
+        // Usando Readonly para imutabilidade superficial
+        type DeepReadonly<T> = { readonly [P in keyof T]: DeepReadonly<T[P]> };
+        interface ComplexState {
+          user: { id: string; preferences: { theme: string; notifications: boolean } };
+          posts: ReadonlyArray<{ id: string; comments: ReadonlyArray<string> }>;
+        }
+        const initialState: DeepReadonly<ComplexState> = {
+          user: { id: "user1", preferences: { theme: "dark", notifications: true } },
+          posts: [{ id: "post1", comments: ["comment1", "comment2"] }]
+        };
 
-*   **Conditional Types (Tipos Condicionais):** Usar a sintaxe `T extends U ? X : Y` para criar tipos que são escolhidos dinamicamente com base em uma condição de tipo. Sąo a base para muitos tipos utilitários avançados.
-    *   **Exemplo (Extrair o tipo do conteúdo de uma `Box` ou retornar `never`):**
+        // Para atualizações complexas, bibliotecas como 'immer' podem ajudar:
+        // import produce from 'immer';
+        // const nextState = produce(initialState, draftState => {
+        //   draftState.user.preferences.theme = "light";
+        //   draftState.posts[0].comments.push("newComment");
+        // });
+        // console.log(initialState.user.preferences.theme); // "dark" (original não modificado)
+        // console.log(nextState.user.preferences.theme); // "light"
+        ```
+
+*   **Consciência de Performance:**
+    *   **Regra:** Considere os impactos de performance das escolhas de algoritmos, estruturas de dados e operações, especialmente em caminhos críticos, loops frequentes ou manipulação de grandes volumes de dados. Otimize quando necessário e justificado por medições (profiling), não por suposições prematuras.
+    *   **Porquê:** Garante que a aplicação seja responsiva, eficiente e escale adequadamente, proporcionando uma boa experiência ao usuário e utilizando os recursos do sistema de forma otimizada.
+
+*   **Melhores Práticas de Segurança:**
+    *   **Regra:** Esteja atento a vulnerabilidades de segurança em todas as fases do desenvolvimento. Sanitize todas as entradas do usuário, valide dados em ambos frontend e backend, evite codificar informações sensíveis, use HTTPS, implemente controle de acesso adequado e siga as diretrizes OWASP Top 10.
+    *   **Porquê:** Protege os dados do usuário, a integridade do sistema e a reputação do projeto contra atividades maliciosas, acessos não autorizados e vazamento de informações.
+
+*   **Refatoração Regular:**
+    *   **Regra:** Refatore continuamente o código para melhorar seu design, clareza, simplicidade e manutenibilidade. Aplique a "Boy Scout Rule": deixe o código mais limpo do que você o encontrou. Não adie o débito técnico indefinidamente.
+    *   **Porquê:** Mantém o código saudável, adaptável a mudanças futuras, previne o acúmulo de "sujeira" que pode comprometer a produtividade e a qualidade, e facilita a incorporação de novos desenvolvedores.
+
+*   **Evitar Números Mágicos/Strings:**
+    *   **Regra:** Substitua números ou strings literais, que aparecem diretamente no código sem explicação, por constantes nomeadas ou enumerações que descrevam seu significado.
+    *   **Porquê:** Melhora a legibilidade, pois o nome da constante fornece contexto. Facilita a manutenção, pois o valor pode ser alterado em um único local. Reduz o risco de erros de digitação ao usar o mesmo valor em múltiplos lugares.
+    *   **Exemplo Avançado (TypeScript):**
         ```typescript
-        // type BoxedValue<T> = { value: T };
-        // type Unbox<B> = B extends BoxedValue<infer V> ? V : never;
+        // Ruim
+        // if (user.status === 3 && user.type === 'premium_plus') { /* ... */ }
+        // setTimeout(processData, 3600000);
 
-        // type NumberBox = BoxedValue<number>; // { value: number }
-        // type UnboxedNumber = Unbox<NumberBox>; // number
-        // type NotABox = Unbox<string>; // never
+        // Bom
+        enum UserAccountStatus { ACTIVE = 1, INACTIVE = 2, SUSPENDED = 3 }
+        enum UserAccountType { BASIC = 'basic', PREMIUM = 'premium', PREMIUM_PLUS = 'premium_plus' }
+
+        const ONE_HOUR_IN_MS = 60 * 60 * 1000;
+
+        // if (user.status === UserAccountStatus.SUSPENDED && user.type === UserAccountType.PREMIUM_PLUS) { /* ... */ }
+        // setTimeout(processData, ONE_HOUR_IN_MS);
         ```
-    *   **Porquê:** Permitem lógica de tipo sofisticada e a criação de abstrações de tipo poderosas, especialmente úteis em bibliotecas ou código genérico complexo.
 
-*   **Template Literal Types (Tipos de Template Literal):** Usar para criar tipos de string específicos baseados na concatenação de strings e outros tipos literais.
-    *   **Exemplo (Criar tipos para nomes de eventos com prefixo e sufixo):**
-        ```typescript
-        // type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
-        // type ApiRoute = `/api/${string}`;
-        // type Endpoint = `${HttpMethod} ${ApiRoute}`;
+*   **Baixo Acoplamento, Alta Coesão:**
+    *   **Regra:** Projete módulos, classes e componentes para serem fracamente acoplados (minimizar dependências diretas e conhecimento mútuo entre eles) e altamente coesos (elementos dentro de um módulo/classe/componente são funcionalmente relacionados e focados em um único propósito bem definido).
+    *   **Porquê:** Aumenta a modularidade, o que facilita a reutilização, a testabilidade isolada e a manutenção, pois mudanças em um módulo têm menos chance de impactar outros módulos não relacionados diretamente.
 
-        // const getProjects: Endpoint = 'GET /api/projects';
-        // // const postUser: Endpoint = 'POST /users'; // Erro: '/users' não corresponde a ApiRoute
-        ```
-    *   **Porquê:** Permitem modelar e validar formatos de string específicos em tempo de compilação, aumentando a segurança de tipo para constantes ou identificadores baseados em string.
+*   **Revisões de Código:**
+    *   **Regra:** Participe ativamente e conduza revisões de código (Code Reviews) completas e construtivas para todo código novo ou modificado antes de ser integrado à base principal.
+    *   **Porquê:** É uma das formas mais eficazes de identificar bugs precocemente, garantir a adesão aos padrões de código, compartilhar conhecimento entre a equipe, melhorar a qualidade geral do design e da implementação, e promover um senso de propriedade coletiva do código. (Ver seção "Diretrizes para Revisão de Código (Code Review)" para mais detalhes).
 
-*   **Indexed Access Types (`Type[Key]`):** Usar para acessar o tipo de uma propriedade específica `Key` de um tipo `Type`.
-    *   **Exemplo:**
-        ```typescript
-        // interface AppSettings {
-        //   theme: 'dark' | 'light';
-        //   notifications: { enabled: boolean; sound: string };
-        // }
-        // type ThemeType = AppSettings['theme']; // 'dark' | 'light'
-        // type NotificationSoundType = AppSettings['notifications']['sound']; // string
-        ```
-    *   **Porquê:** Permite referenciar tipos de subpropriedades de forma dinâmica e segura, útil para criar tipos relacionados ou acessar partes de um tipo maior.
+### Visualização da Clean Architecture
 
-### 3.3. Genéricos (`<T>`)
-
-*   **Padrão:** Usar genéricos para criar funções, classes, interfaces e tipos que podem operar sobre uma variedade de tipos de dados de forma segura e reutilizável.
-*   **Constraints Genéricas (`<T extends SomeType>`):** Aplicar constraints para especificar que um tipo genérico deve atender a um certo contrato (e.g., ter certas propriedades ou métodos), permitindo o acesso seguro a essas propriedades dentro da lógica genérica.
-    *   **Exemplo (Função que opera em objetos com uma propriedade `id` e `name`):**
-        ```typescript
-        // interface IdentifiableAndNameable { id: string | number; name: string; }
-        // function createLabel<T extends IdentifiableAndNameable>(item: T): string {
-        //   return `${item.name} (ID: ${item.id})`;
-        // }
-        // const userLabel = createLabel({ id: 1, name: "Alice", age: 30 }); // OK
-        // // const productLabel = createLabel({ code: "P123", price: 100 }); // Erro: 'code' e 'price' não satisfazem a constraint
-        ```
-*   **Inferência:** Deixar o TypeScript inferir os tipos genéricos sempre que possível para manter o código conciso. Especificar os tipos genéricos explicitamente (<TipoConcreto>) se a inferência falhar, for ambígua, ou se a clareza for comprometida.
-*   **Quando Usar:** Quando uma funcionalidade, estrutura de dados ou contrato pode ser aplicado a diferentes tipos de dados sem alterar sua lógica fundamental ou estrutura.
-*   **Porquê:** Promove DRY (Don't Repeat Yourself) e reutilização de código, mantendo a segurança de tipo e evitando a necessidade de `any` ou duplicação de código para diferentes tipos.
-
-### 3.4. Type Guards (Guardas de Tipo) e Type Narrowing (Estreitamento de Tipo)
-
-*   **Padrão:** Utilizar type guards para estreitar (narrow) o tipo de uma variável dentro de um escopo condicional, permitindo o acesso seguro a propriedades ou métodos específicos do tipo estreitado.
-*   **User-Defined Type Guards (Funções `is`):** Criar funções que retornam `parametro is TipoDesejado` para verificações de tipo customizadas e complexas.
-    ```typescript
-    // interface Circle { kind: "circle"; radius: number; }
-    // interface Square { kind: "square"; sideLength: number; }
-    // type Shape = Circle | Square;
-    // function isSquare(shape: Shape): shape is Square { // Type guard
-    //   return shape.kind === "square";
-    // }
-    // function getArea(shape: Shape): number {
-    //   if (isSquare(shape)) {
-    //     return shape.sideLength * shape.sideLength; // shape é Square aqui
-    //   }
-    //   return Math.PI * shape.radius * shape.radius; // shape é Circle aqui
-    // }
-    ```
-*   **Operadores `typeof`, `instanceof`, `in`:**
-    *   `typeof variable === "typename"`: Para estreitar tipos primitivos (`string`, `number`, `boolean`, `symbol`, `bigint`, `undefined`, `function`).
-    *   `variable instanceof ClassName`: Para estreitar tipos de instâncias de classe.
-    *   `"propertyName" in object`: Para verificar a existência de uma propriedade em um objeto (usar com cautela, pois verifica a existência da chave, não o tipo do valor).
-*   **Discriminated Unions (Uniões Discriminadas / Tagged Unions):** Este é um padrão altamente recomendado para modelar estados ou tipos variantes de forma segura e exaustiva. Consiste em adicionar uma propriedade literal comum (o "discriminante" ou "tag", e.g., `kind`, `type`, `status`) em cada tipo da união. Permite narrowing exaustivo com `switch` ou `if/else if` statements.
-    *   **Exemplo (Resposta de API com discriminante `status`):**
-        ```typescript
-        // interface ApiSuccessResponse<TData> { status: 'success'; data: TData; }
-        // interface ApiErrorResponse { status: 'error'; error: { code: string; message: string; }; }
-        // type ApiResponse<TData> = ApiSuccessResponse<TData> | ApiErrorResponse<TData>;
-
-        // function handleApiResponse<TData>(response: ApiResponse<TData>) {
-        //   switch (response.status) {
-        //     case 'success':
-        //       console.log("Data:", response.data); // response é ApiSuccessResponse<TData>
-        //       break;
-        //     case 'error':
-        //       console.error("Error:", response.error.message); // response é ApiErrorResponse
-        //       break;
-        //     default:
-        //       const _exhaustiveCheck: never = response; // Garante que todos os casos foram tratados
-        //       return _exhaustiveCheck;
-        //   }
-        // }
-        ```
-*   **Porquê:** Permite trabalhar com tipos de união e `unknown` de forma segura e explícita, garantindo que o código acesse apenas propriedades ou métodos que realmente existem no tipo estreitado, prevenindo erros em tempo de execução. A verificação de exaustividade com `never` em uniões discriminadas é uma prática poderosa.
-
-### 3.5. `unknown` vs. `any`
-
-*   **Padrão:** **SEMPRE preferir `unknown` em vez de `any`** quando o tipo de um valor não é conhecido antecipadamente (e.g., dados de uma API externa, conteúdo de um arquivo, entrada do usuário).
-    *   `unknown` é o "irmão type-safe" do `any`. Ele força uma verificação de tipo explícita (usando type guards, `instanceof`, asserção de tipo após verificação) antes que qualquer operação possa ser realizada sobre o valor.
-    *   `any` desabilita efetivamente todas as verificações de tipo para aquela variável, tornando-se uma "porta de escape" perigosa que deve ser evitada a todo custo, pois anula os benefícios do TypeScript.
-*   **Quando `any` é (cautelosamente e raramente) Aceitável:**
-    *   Ao interagir com código JavaScript legado que não pode ser migrado ou tipado.
-    *   Para algumas bibliotecas de terceiros muito dinâmicas que não possuem tipos adequados (e não há tipos da comunidade em `@types/`).
-    *   Em código de teste para mocks muito complexos onde a tipagem completa seria excessivamente verbosa e não traria benefício proporcional (mesmo assim, buscar alternativas).
-    *   **Sempre justifique o uso de `any` com um comentário explicando o porquê e restrinja seu escopo ao mínimo absoluto.**
-*   **Exemplo (`unknown` e Type Guard):**
-    ```typescript
-    // async function fetchDataFromExternalApi(endpoint: string): Promise<unknown> {
-    //   const response = await fetch(endpoint);
-    //   return response.json();
-    // }
-
-    // interface ExpectedData { id: number; value: string; }
-    // const ExpectedDataSchema = z.object({ id: z.number(), value: z.string() }); // Usando Zod para validação
-
-    // async function processExternalData() {
-    //   const rawData = await fetchDataFromExternalApi("/api/some-data");
-
-    //   // Validando e estreitando o tipo de 'unknown'
-    //   const validationResult = ExpectedDataSchema.safeParse(rawData);
-    //   if (validationResult.success) {
-    //     const typedData: ExpectedData = validationResult.data;
-    //     console.log(typedData.id, typedData.value.toUpperCase()); // Acesso seguro
-    //   } else {
-    //     console.error("Invalid data structure received:", validationResult.error.flatten());
-    //   }
-    // }
-    ```
-*   **Porquê:** `unknown` mantém a segurança de tipo do sistema, forçando o desenvolvedor a lidar explicitamente com o tipo desconhecido de forma segura, enquanto `any` sacrifica essa segurança e pode esconder bugs que só aparecerão em tempo de execução.
-
-### 3.6. Enums
-
-*   **Padrão:**
-    *   Para conjuntos simples e fixos de valores string, **prefira Tipos de União Literal** (e.g., `type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED';`). São mais leves e diretos.
-    *   Use `enum` do TypeScript quando:
-        *   Se necessita de um objeto no runtime que mapeia nomes para valores (e vice-versa para enums numéricos).
-        *   Para interoperabilidade com APIs ou código legado que espera ou retorna enums numéricos.
-        *   Para conjuntos de constantes numéricas onde os valores em si são importantes e podem não ser sequenciais, ou quando se deseja um comportamento de bit flags.
-    *   Se usar `enum`, prefira `const enum` quando os valores são usados apenas em contextos onde podem ser inlined em tempo de compilação (e.g., não precisa iterar sobre as chaves/valores do enum no runtime). `const enum` é completamente removido durante a transpilação, resultando em código JavaScript menor.
-    *   Para enums string, os valores devem ser explícitos para evitar que a refatoração do nome da chave altere o valor.
-*   **Exemplo (String Literal Union vs. String Enum vs. Const Enum):**
-    ```typescript
-    // Preferido para status simples:
-    type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
-    let status: PaymentStatus = 'PENDING';
-
-    // String Enum (se o objeto enum for útil no runtime ou para maior clareza em alguns contextos):
-    enum LogLevel {
-      ERROR = "ERROR",
-      WARN = "WARN",
-      INFO = "INFO",
-      DEBUG = "DEBUG"
-    }
-    function logMessage(level: LogLevel, message: string) { /* ... */ }
-    logMessage(LogLevel.ERROR, "Falha crítica no sistema!");
-
-    // Const Enum (valores inlinados, sem objeto no runtime):
-    const enum Direction { UP, DOWN, LEFT, RIGHT }
-    let move: Direction = Direction.UP; // 'move' será '0' no JavaScript transpilado
-    ```
-*   **Porquê:** Uniões literais são frequentemente a opção mais simples e leve para strings. Enums (especialmente `const enum`) podem ser eficientes para valores numéricos ou quando o objeto enum é necessário, mas sua necessidade deve ser avaliada caso a caso para evitar verbosidade desnecessária ou as particularidades dos enums JavaScript (como enums numéricos reversos).
-
-### 3.7. Módulos e Namespaces
-
-*   **Padrão:** Utilizar exclusivamente Módulos ES6 (`import`/`export`) para organização de código em arquivos. Cada arquivo `.ts` ou `.tsx` é implicitamente um módulo.
-*   **Desencorajar Uso de `namespace`:** O uso de `namespace` do TypeScript (anteriormente "internal modules") deve ser FORTEMENTE DESENCORAJADO para organizar código dentro do projeto.
-    *   **Exceções Raras:**
-        *   Ao criar arquivos de declaração de tipo ambiente (`.d.ts`) para bibliotecas JavaScript globais (não modulares) muito antigas que expõem seus tipos em um objeto global.
-        *   Para agrupar um conjunto grande de tipos relacionados em um arquivo de declaração, se isso melhorar a organização e não for possível usar módulos.
-*   **Porquê:** Módulos ES6 são o padrão moderno para JavaScript e TypeScript, promovem melhor organização de código, encapsulamento, clareza de dependências e são otimizados por ferramentas de build (e.g., para tree-shaking). `namespace` é um padrão mais antigo, menos comum em código moderno e pode levar a uma organização de código menos clara ou a dificuldades com o sistema de módulos ES6.
-
-### 3.8. Sobrecarga de Funções (Function Overloads)
-
-*   **Padrão:** Usar sobrecargas de função com moderação e apenas quando estritamente necessário para fornecer múltiplas assinaturas de tipo para uma única função de implementação. Isso ocorre tipicamente quando uma função pode aceitar diferentes combinações de tipos de parâmetros e/ou ter tipos de retorno diferentes baseados nesses parâmetros, e quando alternativas (como usar tipos de união para parâmetros com narrowing ou um objeto de opções como único parâmetro) não são mais claras ou ergonômicas.
-*   **Estrutura:** Defina as assinaturas de sobrecarga (sem corpo) primeiro, seguidas pela assinatura de implementação real (com corpo). A assinatura de implementação deve ser compatível com todas as assinaturas de sobrecarga e geralmente usa `any` ou tipos de união para os parâmetros, necessitando de type guards ou verificações no corpo da função para lidar com as diferentes assinaturas.
-*   **Exemplo:**
-    ```typescript
-    // function formatValue(value: string, mode: 'uppercase'): string;
-    // function formatValue(value: number, mode: 'currency', currencySymbol?: string): string;
-    // function formatValue(value: Date, mode: 'iso'): string;
-    // function formatValue(value: string | number | Date, mode: 'uppercase' | 'currency' | 'iso', option?: string): string {
-    //   if (mode === 'uppercase' && typeof value === 'string') {
-    //     return value.toUpperCase();
-    //   } else if (mode === 'currency' && typeof value === 'number') {
-    //     const symbol = option || '$';
-    //     return `${symbol}${value.toFixed(2)}`;
-    //   } else if (mode === 'iso' && value instanceof Date) {
-    //     return value.toISOString();
-    //   }
-    //   throw new Error('Invalid arguments for formatValue');
-    // }
-    // const upper = formatValue("hello", "uppercase"); // string
-    // const price = formatValue(123.45, "currency", "R$"); // string
-    ```
-*   **Porquê:** Fornece type-safety e melhor autocompletar em IDEs para funções que genuinamente operam de maneiras diferentes com base nos tipos ou número de argumentos. No entanto, podem aumentar a complexidade da implementação da função e devem ser evitadas se uma assinatura única com tipos de união e narrowing for mais simples.
-
-### 3.9. Decorators
-
-*   **Padrão:**
-    *   O uso de Decorators é primariamente para interagir com frameworks ou bibliotecas que os utilizam como parte de sua API, como o InversifyJS para Injeção de Dependência (`@injectable()`, `@inject()`, `@multiInject()`, etc.), conforme detalhado na **ADR-019**.
-    *   A criação de decorators customizados para lógica de aplicação (e.g., logging aspect-oriented, caching, transformação de dados) deve ser considerada uma técnica avançada, usada com muita cautela e apenas quando traz um benefício claro em termos de DRY e separação de responsabilidades que não pode ser alcançado de forma mais simples com composição de funções ou classes.
-    *   Decorators customizados DEVEM ser bem justificados, documentados extensivamente (seu propósito, como funcionam, e quaisquer efeitos colaterais ou requisitos de configuração) e testados rigorosamente.
-*   **Configuração:** Requer que as opções `experimentalDecorators` e `emitDecoratorMetadata` sejam habilitadas no `tsconfig.json` (o que já é o caso para InversifyJS).
-*   **Porquê:** Decorators são necessários para frameworks como InversifyJS e podem ser uma ferramenta poderosa para metaprogramação e adicionar comportamento a classes e seus membros de forma declarativa. No entanto, podem adicionar uma camada de "mágica" ou complexidade ao código se usados excessivamente ou para tarefas que poderiam ser resolvidas com padrões mais simples. A depuração de decorators também pode ser mais desafiadora.
-
-### 3.10. Código Assíncrono (`async`/`await`, `Promise`)
-
-*   **Padrão:**
-    *   Utilizar `async/await` para todo código assíncrono que envolve Promises. Isso melhora a legibilidade e permite que o fluxo de controle se assemelhe ao código síncrono.
-    *   Sempre tratar erros de Promises de forma explícita. Em funções `async`, isso significa usar blocos `try/catch` para capturar rejeições de `await`ed Promises.
-    *   Evitar o anti-padrão "async executor" (passar uma função `async` para o construtor de `new Promise((resolve, reject) => { /* async code aqui */ })`). Funções `async` já retornam Promises.
-    *   Ao lidar com múltiplas Promises:
-        *   `Promise.all()`: Usar quando todas as Promises precisam ser resolvidas com sucesso para continuar, e uma falha em qualquer uma deve rejeitar o conjunto.
-        *   `Promise.allSettled()`: Usar quando se deseja esperar que todas as Promises sejam concluídas (resolvidas ou rejeitadas) e então inspecionar o resultado de cada uma individualmente.
-        *   `Promise.race()`: Usar quando se deseja o resultado da primeira Promise a ser resolvida ou rejeitada.
-    *   Evitar o uso de `void` em Promises não tratadas (e.g., `async function update(): Promise<void> { await someAsyncCall(); }` sem um `try/catch` interno ou tratamento pelo chamador). Isso pode levar a "unhandled promise rejections". Configurar o ESLint (`@typescript-eslint/no-floating-promises`) para detectar isso.
-*   **Porquê:** `async/await` torna o código assíncrono significativamente mais fácil de ler, escrever e depurar. O tratamento explícito de erros de Promises é crucial para a robustez da aplicação, prevenindo que exceções não capturadas causem comportamento inesperado ou crashes.
-
-### 3.11. Estilo de Código para Tipos Complexos
-
-*   **Padrão:** Para definições de tipo complexas (e.g., uniões longas, tipos mapeados extensos, tipos condicionais aninhados), usar quebras de linha, indentação e comentários para melhorar a legibilidade, de forma similar a como se formata código regular.
-*   Ferramentas como Prettier podem ajudar a formatar tipos de forma consistente, mas a clareza manual pode ser necessária.
-*   **Exemplo:**
-    ```typescript
-    // Ruim: Difícil de ler
-    // type ComplexType<T, U> = T extends string ? (U extends number ? { value: T; count: U; } : { value: T; error: string; }) : T extends number ? { result: T[]; } : never;
-
-    // Bom: Mais legível
-    // type ComplexType<T, U> = T extends string
-    //   ? U extends number
-    //     ? { value: T; count: U } // T é string, U é number
-    //     : { value: T; error: string } // T é string, U não é number
-    //   : T extends number
-    //     ? { result: T[] } // T é number
-    //     : never; // T não é string nem number
-    ```
-*   **Porquê:** Definições de tipo complexas podem se tornar tão difíceis de ler e entender quanto código algorítmico complexo se não forem bem formatadas. A clareza é essencial para a manutenibilidade.
-
-## 4. Object Calisthenics no Project Wiz
-
-Os princípios de Object Calisthenics são um conjunto de nove regras que visam promover código orientado a objetos de alta qualidade, coesão e baixo acoplamento. A aplicação detalhada e exemplos para cada regra estão formalizados na **ADR-016: Aplicação Prática de Object Calisthenics no Project Wiz**. Esta seção resume os princípios e reitera sua importância.
-
-*   **1. Apenas Um Nível de Indentação por Método:**
-    *   *Resumo:* Extrair lógica aninhada para métodos privados/funções. Usar Guard Clauses.
-    *   *Exemplo (Conceitual):* Ver ADR-016 ou `coding-standards.md` para "antes e depois".
-*   **2. Não Use a Palavra-Chave `else`:**
-    *   *Resumo:* Priorizar Guard Clauses, polimorfismo ou State/Strategy pattern.
-    *   *Exemplo (Conceitual):* Ver ADR-016 ou `coding-standards.md`.
-*   **3. Envolva Todas as Primitivas e Strings:**
-    *   *Resumo:* Usar Objetos de Valor (VOs) para primitivas com significado de domínio (ADR-010).
-    *   *Exemplo (Conceitual):* `userId: UserId` em vez de `userId: string`.
-*   **4. Coleções de Primeira Classe:**
-    *   *Resumo:* Encapsular coleções e suas operações em classes dedicadas.
-    *   *Exemplo (Conceitual):* `ActivityLogVO` contendo `LogEntryVO[]` e métodos de manipulação.
-*   **5. Apenas Um Ponto Por Linha (Lei de Demeter):**
-    *   *Resumo:* Limitar chamadas encadeadas, preferir "Tell, Don't Ask".
-    *   *Exemplo (Conceitual):* `order.processPayment()` em vez de `order.getPaymentGateway().chargeCard(...)`.
-*   **6. Não Abreviar:**
-    *   *Resumo:* Usar nomes completos e descritivos em inglês (ADR-028).
-*   **7. Mantenha Todas as Entidades Pequenas (Classes e Métodos):**
-    *   *Resumo:* Classes < 100 linhas (ideal < 50), Métodos < 15 linhas (ideal < 10).
-*   **8. Nenhuma Classe Com Mais de Duas Variáveis de Instância:**
-    *   *Resumo:* Aplicar pragmaticamente, focando no estado interno. Dependências injetadas podem exceder, mas questionar SRP.
-*   **9. Sem Getters/Setters/Properties (para acesso/mutação direta de estado):**
-    *   *Resumo:* VOs expõem valor via `get`. Entidades expõem estado via `get`, mutações via métodos de negócio retornando nova instância (ADR-010).
-
-## 5. Convenções de Nomenclatura Abrangentes
-
-Convenções de nomenclatura consistentes são vitais. Esta seção sumariza as diretrizes principais, detalhadas na **ADR-028: Convenções Abrangentes de Nomenclatura** e, para aspectos específicos de UI, na **ADR-027: Estrutura de Diretórios e Convenções de Nomenclatura para o Frontend**.
-
-*   **1. Mandato da Língua Inglesa no Código:**
-    *   **Padrão:** TODOS os identificadores no código-fonte (variáveis, funções, classes, arquivos, diretórios, etc.) e comentários DEVEM ser em Inglês.
-    *   **Porquê:** Inglês é a língua franca no desenvolvimento, facilitando colaboração e uso de ferramentas.
-*   **2. Convenções Gerais de Casing:**
-    *   **`camelCase`:** Variáveis, parâmetros, nomes de funções/métodos. (e.g., `currentUser`, `calculatePrice()`).
-    *   **`PascalCase`:** Classes, Interfaces, Tipos, Enums. (e.g., `UserService`, `IOrderRepository`).
-    *   **`UPPER_SNAKE_CASE`:** Constantes, membros de Enums significativos, Tokens de DI. (e.g., `MAX_RETRIES`, `USER_REPOSITORY_TOKEN`).
-*   **3. Convenções de Nomenclatura de Arquivos:**
-    *   **Padrão Principal:** `kebab-case.ts` (e.g., `job-validator.service.ts`).
-    *   **Exceções:**
-        *   Componentes React UI: `PascalCase.tsx` (e.g., `UserProfileCard.tsx`).
-        *   Hooks React: `useCamelCase.ts` ou `usePascalCase.ts` (e.g., `useAuth.ts`).
-    *   **Sufixos Descritivos:** Usar sufixos padronizados (e.g., `.entity.ts`, `.vo.ts`, `.service.ts`, `.repository.ts`, `.adapter.ts`, `.use-case.ts`, `.schema.ts`, `.handlers.ts`, `.config.ts`, `.types.ts`, `.constants.ts`, `.utils.ts`).
-
-### 5.4. Seção Prominente: Convenções de Nomenclatura de Arquivos Detalhadas
-
-Esta seção reitera e expande as convenções para nomenclatura de arquivos, dada sua importância para a organização e legibilidade do projeto.
-
-*   **Regra Principal: Kebab-Case Obrigatório**
-    *   Todos os nomes de arquivos DEVEM ser em `kebab-case` (minúsculas, palavras separadas por hífens).
-    *   **Exemplos (Bom):**
-        *   `user-authentication.service.ts`
-        *   `project-settings-form.component.tsx` (se não for um componente React UI principal)
-        *   `api-response.types.ts`
-        *   `database-migration-001.sql`
-        *   `contributing-guide.md`
-        *   `package.json` (mantido por convenção npm)
-        *   `vite.config.ts` (convenção da ferramenta)
-
-*   **Aplicação Ampla:**
-    *   Esta regra aplica-se a TODOS os tipos de arquivo (`.ts`, `.tsx`, `.md`, `.json`, `.sql`, `.yml`, etc.) dentro do projeto.
-
-*   **Exceções Documentadas:**
-    *   **Componentes React UI Principais:** Podem usar `PascalCase.tsx` para melhor alinhamento com as convenções de nomenclatura de componentes React (e.g., `UserProfileCard.tsx`, `MainNavigation.tsx`). No entanto, componentes auxiliares ou mais genéricos dentro de uma feature podem seguir o `kebab-case`.
-    *   **Hooks React:** Podem usar `useCamelCase.ts` ou `usePascalCase.ts` (e.g., `useAuth.ts`, `useUserProfileData.ts`).
-    *   **Frameworks ou Bibliotecas Específicas:** Se um framework, biblioteca ou ferramenta adotada no projeto (e.g., Next.js para roteamento de páginas, arquivos de configuração específicos como `vite.config.ts`, `tailwind.config.ts`) EXPLICITAMENTE requer uma convenção de nomenclatura diferente, essa convenção DEVE ser seguida para esses arquivos específicos.
-    *   **Justificativa Mandatória:** Qualquer exceção a esta regra principal (fora as listadas acima) DEVE ser documentada no `README.md` do módulo relevante ou em uma ADR, com uma justificativa clara.
-
-*   **Exemplos Comparativos:**
-
-    | Bom Nome de Arquivo                     | Mau Nome de Arquivo                     | Justificativa do Mau Nome                               |
-    | :-------------------------------------- | :-------------------------------------- | :------------------------------------------------------ |
-    | `user-profile.service.ts`             | `UserProfileService.ts`                 | Não está em kebab-case.                                 |
-    | `data-transformer.util.ts`            | `DataTransformer.ts`                    | Não está em kebab-case.                                 |
-    | `image-processor.worker.ts`           | `imageProcessor.worker.ts`              | Não está em kebab-case (camelCase).                     |
-    | `README.md`                             | `readme.MD`                             | Casing inconsistente da extensão.                       |
-    | `main-styles.css`                       | `MainStyles.css`                        | Não está em kebab-case.                                 |
-    | `auth-guard.ts`                         | `Auth_Guard.ts`                         | Usa snake_case em vez de kebab-case.                    |
-    | `UserProfileCard.tsx` (Componente UI) | `user-profile-card.component.tsx`       | Para componentes UI React, PascalCase é uma exceção aceita. |
-    | `useAuth.ts` (Hook React)             | `auth-hook.ts`                          | Para hooks React, useCamelCase é uma exceção aceita.    |
-    | `vite.config.ts` (Ferramenta)         | `vite-config.ts`                        | `vite.config.ts` é a convenção da ferramenta Vite.    |
-
-*   **Porquê:** A consistência no nome de arquivos melhora a previsibilidade, facilita a navegação e a criação de scripts, e reduz a carga cognitiva. O `kebab-case` é amplamente adotado, URL-friendly, e evita problemas de sensibilidade ao caso em diferentes sistemas operacionais.
-
-*   **4. Convenções de Nomenclatura de Diretórios:**
-    *   **Padrão Principal:** `kebab-case` (e.g., `user-authentication`, `value-objects`).
-    *   **Exceção:** Diretórios de rotas dinâmicas do TanStack Router (e.g., `$projectId`).
-*   **5. Padrões Específicos por Tipo de Identificador:**
-    *   **Interfaces:** `I[Nome]` (e.g., `IUserRepository`).
-    *   **Classes Abstratas:** `Abstract[Nome]` (e.g., `AbstractEntity`).
-    *   **Booleanos:** Prefixo `is`, `has`, `should`, `can`, etc. (e.g., `isActive`).
-    *   **Eventos (EventEmitter):** `objeto.evento` (e.g., `job.completed`).
-    *   **Esquemas Zod:** `[Nome]Schema` (e.g., `CreateUserInputSchema`).
-*   **6. Clareza e Descritividade:** Evitar abreviações desnecessárias.
-
-## 6. Estrutura de Arquivos e Diretórios
-
-Uma estrutura de projeto bem organizada é crucial para a navegabilidade, manutenibilidade e compreensão da arquitetura. As convenções aqui detalhadas baseiam-se nas decisões da **ADR-027 (Frontend Directory Structure and Naming Conventions)** para a UI e nas práticas da Clean Architecture para o backend, conforme descrito em `docs/reference/software-architecture.md`.
-
-**Porquê Geral:** Uma estrutura padronizada reduz a carga cognitiva, facilita a localização de código relevante, promove a consistência entre diferentes partes do projeto e simplifica a integração de novos desenvolvedores.
-
-### 6.1. Estrutura do Frontend (`src_refactored/presentation/ui/`)
-
-A interface do usuário (UI) é uma SPA React e sua estrutura visa agrupar arquivos por funcionalidade (feature-sliced) e por tipo técnico.
+A arquitetura do Project Wiz adota os princípios da Clean Architecture. Para uma discussão detalhada, consulte **[Boas Práticas e Diretrizes de Desenvolvimento Detalhadas](../reference/02-best-practices.md)**. A visualização abaixo ilustra as camadas e a regra de dependência:
 
 ```mermaid
-graph LR
-    subgraph "presentation/ui/"
-        AppDir["app/ (Rotas Principais - TanStack Router)"]
-        AssetsDir["assets/ (Imagens, Fontes)"]
-        ComponentsDir["components/ (Globais Reutilizáveis)"]
-        ConfigDir["config/ (Router, Query Client)"]
-        FeaturesDir["features/ (Módulos de Funcionalidade)"]
-        HooksDir["hooks/ (Globais Reutilizáveis)"]
-        LibDir["lib/ (Utilitários Puros JS/TS)"]
-        ServicesDir["services/ (IPCService, etc.)"]
-        StylesDir["styles/ (CSS Global, Temas)"]
-        TypesDir["types/ (Tipos UI Globais)"]
-        MainTSX["main.tsx (Ponto de Entrada UI)"]
-        IndexHTML["index.html"]
-        RouteTreeGen["routeTree.gen.ts (Auto-gerado)"]
+graph TD
+    A[Frameworks & Drivers] --> B(Adaptadores)
+    B --> C(Casos de Uso)
+    C --> D(Entidades)
+
+    subgraph "Camada Externa (Frameworks & Drivers Layer)"
+        A
     end
-
-    ComponentsDir --> CDCommon["common/ (Genéricos, e.g., Button, Spinner)"]
-    ComponentsDir --> CDLayout["layout/ (Estrutura Visual, e.g., AppShell, Sidebar)"]
-    ComponentsDir --> CDUI["ui/ (Componentes base Shadcn/UI)"]
-
-    FeaturesDir --> FeatureNameDir["[nome-da-feature]/ (e.g., project-management)"]
-    FeatureNameDir --> FNAComponents["components/ (Específicos da Feature)"]
-    FeatureNameDir --> FNAHooks["hooks/ (Específicos da Feature)"]
-    FeatureNameDir --> FNAServices["services/ (Específicos da Feature, Opcional)"]
-    FeatureNameDir --> FNATypes["types/ (Específicos da Feature, Opcional)"]
-    FeatureNameDir --> FNAIndex["index.ts (Exportações da Feature, Opcional)"]
-
-    AppDir --> AppLayout["_layout.tsx (Layout da Rota)"]
-    AppDir --> AppIndex["index.tsx (Página da Rota Raiz '/app')"]
-    AppDir --> AppProjects["projects/"]
-    AppProjects --> AppProjectIdLayout["$projectId/_layout.tsx"]
-    AppProjects --> AppProjectIdIndex["$projectId/index.tsx (Página de Detalhe)"]
+    subgraph "Camada de Adaptadores de Interface (Interface Adapters Layer)"
+        B
+    end
+    subgraph "Camada de Aplicação (Application Layer)"
+        C
+    end
+    subgraph "Camada de Domínio (Domain Layer)"
+        D
+    end
+    style D fill:#FAA,stroke:#333,stroke-width:2px
+    style C fill:#AFE,stroke:#333,stroke-width:2px
+    style B fill:#ADD,stroke:#333,stroke-width:2px
+    style A fill:#DAE,stroke:#333,stroke-width:2px
 ```
+*   **Regra de Dependência:** As dependências fluem sempre para dentro. Código em camadas internas não deve saber nada sobre código em camadas externas.
 
-*   **`app/`**: Contém os componentes de rota e layouts definidos pelo TanStack Router (convenção file-based routing). Ver ADR-027.
-    *   **Porquê:** Separa os pontos de entrada de rotas da lógica de features reutilizáveis.
-*   **`components/`**: Componentes React globais e reutilizáveis.
-    *   `common/`: Pequenos componentes de UI genéricos (e.g., `LoadingSpinner`).
-    *   `layout/`: Componentes para a estrutura visual principal (e.g., `AppShell`).
-    *   `ui/`: Componentes base da biblioteca Shadcn/UI.
-    *   **Porquê:** Promove reuso e consistência visual.
-*   **`features/<nome-da-feature>/`**: Módulos de UI agrupados por funcionalidade (e.g., `project-management`, `user-authentication`).
-    *   Contém subdiretórios para `components/`, `hooks/`, `pages/` (se não em `app/`), `services/`, `types/` específicos da feature.
-    *   **Porquê (Feature-Sliced Design):** Alta coesão, baixo acoplamento, facilita desenvolvimento e manutenção.
-*   **Outros diretórios (`assets`, `config`, `hooks`, `lib`, `services`, `styles`, `types`):** Conforme descrito na ADR-027 e no `software-architecture.md`, cada um com seu propósito específico para organizar configurações, utilitários, serviços globais da UI e tipos.
+A seção **Princípios de Object Calisthenics (Exemplos Práticos)** mais abaixo neste documento detalha algumas dessas regras com exemplos.
 
-### 6.2. Estrutura do Backend (`src_refactored/`)
+## Padrões de Estilo de Código
 
-Segue a Clean Architecture, detalhada em `docs/reference/software-architecture.md`:
+### Linguagem Principal: TypeScript
 
-*   **`core/`**: Lógica de negócios central, independente de frameworks.
-    *   `domain/<entidade>/`: Contém Entidades (`*.entity.ts`), Objetos de Valor (`*.vo.ts`), e as interfaces de seus repositórios (`<entidade>-repository.interface.ts` em subdiretório `ports/`).
-        *   **Porquê (ADR-010, ADR-011):** Isola o domínio, com VOs e Entidades definindo suas próprias regras e os repositórios definindo contratos de persistência agnósticos.
-    *   `application/`: Casos de Uso (`*.use-case.ts`), Serviços de Aplicação (`*.service.ts`), DTOs e esquemas Zod (`*.schema.ts`), e Portas para a infraestrutura (`ports/`).
-        *   **Porquê (ADR-012):** Orquestra a lógica de domínio e medeia com o mundo externo.
-*   **`infrastructure/`**: Implementações concretas de preocupações externas.
-    *   `persistence/drizzle/schema/`: Esquemas de tabela Drizzle (`*.schema.ts`) (ADR-017).
-    *   `persistence/drizzle/<entidade>/`: Implementações de repositório Drizzle (`*.repository.ts`) e mappers (`*.mapper.ts`) (ADR-017).
-    *   `adapters/<tipo_adaptador>/`: Adaptadores para serviços externos (e.g., `llm/openai-llm.adapter.ts`) (ADR-018).
-    *   `queue/drizzle/`: Implementação do sistema de filas com Drizzle (`drizzle-queue.facade.ts` e serviços internos) (ADR-020).
-    *   `ioc/`: Configuração do InversifyJS (`inversify.config.ts`) (ADR-019).
-*   **`presentation/electron/`**: Código específico do Electron.
-    *   `main/`: Lógica do processo principal, incluindo `main.ts` e `handlers/` para IPC (ADR-023, ADR-024).
-    *   `preload/`: Scripts de preload (`preload.ts`) (ADR-024).
-*   **`shared/`**: Código utilitário, tipos comuns, erros customizados (`errors/core.error.ts` e subclasses - ADR-014), DTOs de resposta de caso de uso (`application/use-case-response.dto.ts` - ADR-008). Usar com cautela para não violar dependências da Clean Architecture.
+*   **Configuração `strict`:**
+    *   **Regra:** Utilizamos a configuração `strict: true` (ou todas as suas flags individuais como `noImplicitAny`, `strictNullChecks`, etc.) ativada no `tsconfig.json`.
+    *   **Porquê:** Garante maior segurança de tipo, detectando muitos erros comuns (como referências nulas ou tipos implícitos `any`) em tempo de compilação, resultando em código mais robusto, confiável e fácil de refatorar.
+*   **Path Aliases:**
+    *   **Regra:** Path aliases como `@/components`, `@/lib`, `@/core` são utilizados para facilitar a importação de módulos.
+    *   **Porquê:** Evita caminhos de importação relativos longos e frágeis (ex: `../../../../components/Button`), tornando o código mais limpo, fácil de mover entre diretórios e melhorando a legibilidade das importações.
+*   **Tipagem Forte:**
+    *   **Regra:** Priorize a tipagem forte; evite `any` sempre que possível. Se `any` for estritamente necessário (ex: interagir com bibliotecas de terceiros sem tipos ou código dinâmico complexo), justifique seu uso com um comentário e restrinja seu escopo ao mínimo. Considere `unknown` como uma alternativa mais segura a `any`.
+    *   **Porquê:** `any` desabilita a verificação de tipos do TypeScript para a variável ou expressão específica, anulando os benefícios de segurança de tipo e aumentando o risco de erros em tempo de execução que poderiam ser pegos em compilação. `unknown` força verificações de tipo antes do uso.
+*   **Aplicação de Tipos:**
+    *   **Regra:** Defina explicitamente tipos para todas as declarações de variáveis, parâmetros de função e valores de retorno de função, a menos que o tipo inferido pelo TypeScript seja óbvio, correto e não prejudique a clareza.
+    *   **Porquê:** Melhora a clareza do código, serve como documentação, auxilia na detecção precoce de erros de tipo e facilita o entendimento das estruturas de dados e contratos de função por outros desenvolvedores.
+*   **Interface vs. Type:**
+    *   **Regra:** Use `interface` para definir a forma de objetos públicos (especialmente aqueles que podem ser estendidos ou implementados por classes) ou quando desejar a capacidade de "declaration merging" (útil para estender interfaces de bibliotecas de terceiros). Use `type` para tipos de união, interseção, tuplas, tipos mapeados, tipos condicionais, ou para nomear tipos primitivos e formas de objeto mais complexas que não necessitam de "declaration merging" ou herança de interface explícita.
+    *   **Porquê:** `interface` oferece melhor performance em algumas verificações de tipo e mensagens de erro potencialmente mais claras para estruturas de objeto simples e hierarquias. `type` é mais versátil para construções de tipo mais complexas e operações de tipo. A escolha deve visar clareza e intenção.
+    *   **Exemplo Avançado (Type para Mapped Type):**
+        ```typescript
+        // Interface para descrever uma entidade
+        interface Product {
+          id: string;
+          name: string;
+          price: number;
+          inStock: boolean;
+        }
 
-## 7. Formatação de Código (Prettier)
+        // Type para criar um tipo parcial com todos os campos opcionais, útil para updates
+        type PartialProductUpdate = Partial<Product>;
+        // Resultado: { id?: string; name?: string; price?: number; inStock?: boolean; }
 
-*   **Padrão:** Prettier é a ferramenta padrão para formatação automática de código, garantindo um estilo visual consistente em toda a codebase.
-*   **Configuração:** As regras de formatação estão definidas no arquivo `.prettierrc.js` na raiz do projeto. As principais incluem:
+        // Type para criar um tipo onde todas as propriedades são readonly
+        type ReadonlyProduct = Readonly<Product>;
+
+        // Type para um DTO que omite certos campos
+        type ProductListingDTO = Omit<Product, 'inStock'>;
+        ```
+*   **Propriedades Readonly:**
+    *   **Regra:** Aplique `readonly` a propriedades de interfaces/tipos, a arrays (`ReadonlyArray<T>`) e a tuplas que não devem ser reatribuídos ou modificados após a inicialização da instância que os contém.
+    *   **Porquê:** Promove a imutabilidade e a previsibilidade do estado, prevenindo modificações acidentais e tornando mais claro quais dados são fixos e quais podem mudar.
+    *   **Exemplo (ReadonlyArray e Tupla):**
+        ```typescript
+        interface AppConfig {
+          readonly adminEmails: ReadonlyArray<string>;
+          readonly defaultCoordinates: readonly [number, number]; // Tupla readonly
+        }
+        const config: AppConfig = {
+          adminEmails: ["admin@example.com", "support@example.com"],
+          defaultCoordinates: [10.0, 20.5]
+        };
+        // config.adminEmails.push("new@example.com"); // Erro
+        // config.defaultCoordinates[0] = 5.0; // Erro
+        ```
+*   **Enums vs. Tipos de União Literal:**
+    *   **Regra:** Prefira tipos de união literal (ex: `'status-ativo' | 'status-inativo'`) para um conjunto pequeno e fixo de valores literais conhecidos, especialmente strings. Use `enum` do TypeScript (preferencialmente `const enum` para evitar código JavaScript extra) para conjuntos distintos de constantes numéricas relacionadas, quando a interoperabilidade com código legado que usa enums for necessária, ou quando se deseja um objeto iterável no runtime com nomes e valores.
+    *   **Porquê:** Tipos de união literal geralmente oferecem melhor tree-shaking, não introduzem um objeto extra no runtime (no caso de `const enum`, são inlined), e podem ser mais fáceis de depurar. `enum`s podem ser mais verbosos e ter algumas armadilhas (como enums numéricos reversos).
+*   **Genéricos para Reusabilidade:**
+    *   **Regra:** Empregue genéricos (`<T>`) para criar componentes, funções, classes e tipos reutilizáveis que podem operar em uma variedade de tipos de dados enquanto mantêm a segurança de tipo.
+    *   **Porquê:** Permite escrever código flexível, abstrato e DRY (Don't Repeat Yourself) sem sacrificar a segurança de tipos, evitando a necessidade de `any` ou duplicação de código para diferentes tipos.
+    *   **Exemplo Avançado (Função Genérica com Constraints):**
+        ```typescript
+        interface Lengthwise {
+          length: number;
+        }
+
+        // Esta função genérica aceita qualquer tipo T que tenha uma propriedade 'length' do tipo number.
+        function logLength<T extends Lengthwise>(arg: T): T {
+          console.log(arg.length);
+          return arg;
+        }
+
+        logLength("hello"); // OK, string tem length
+        logLength([1, 2, 3]); // OK, array tem length
+        // logLength(123); // Erro: number não tem propriedade length
+        logLength({ length: 10, value: "test" }); // OK
+
+        // Exemplo com múltiplas constraints ou classes
+        // function createInstance<T extends SomeBaseClass & SomeInterface>(constructor: new () => T): T {
+        //   return new constructor();
+        // }
+        ```
+*   **Tratamento de Null e Undefined (`strictNullChecks`):**
+    *   **Regra:** Com `strictNullChecks` ativado, trate explicitamente a possibilidade de valores `null` ou `undefined`. Utilize encadeamento opcional (`?.`), coalescência nula (`??`), guardas de tipo (type guards como `typeof x === 'string'` ou `x instanceof MyClass`), asserções de tipo (com cautela, ex: `value!`), ou utilitários como `NonNullable<T>`.
+    *   **Porquê:** `strictNullChecks` é uma das funcionalidades mais poderosas do TypeScript para prevenir erros comuns de "cannot read property 'foo' of undefined/null" em tempo de execução. Exige um manejo explícito desses valores, tornando o código mais seguro e robusto.
+    *   **Exemplo Avançado (Type Guard e NonNullable):**
+        ```typescript
+        interface UserProfile { name: string; bio?: string | null; }
+
+        function printUserProfile(profile: UserProfile) {
+          console.log(`Name: ${profile.name}`);
+          // Usando type guard para refinar o tipo de bio
+          if (typeof profile.bio === 'string') {
+            console.log(`Bio: ${profile.bio.toUpperCase()}`); // profile.bio é string aqui
+          } else {
+            console.log("Bio not provided or is null.");
+          }
+        }
+        // Exemplo com NonNullable
+        // function getBioOrFail(bio: string | null | undefined): NonNullable<string | null | undefined> /* string */ {
+        //   if (bio === null || bio === undefined) throw new Error("Bio is missing!");
+        //   return bio;
+        // }
+        ```
+*   **Módulos ESM:**
+    *   **Regra:** Sempre prefira a sintaxe de módulo ES (`import`/`export`) em vez de outros sistemas de módulos como CommonJS (`require`/`module.exports`) no código TypeScript.
+    *   **Porquê:** É o padrão moderno para módulos JavaScript/TypeScript, suportado nativamente por navegadores e Node.js (em versões recentes), e permite melhor análise estática por ferramentas de build e linters, facilitando otimizações como tree-shaking.
+*   **Opções Estritas do Compilador:**
+    *   **Regra:** Mantenha todas as opções do compilador relacionadas à `strict` (ou a própria `strict: true`) habilitadas no `tsconfig.json`. Escreva código que seja compatível com essas verificações rigorosas.
+    *   **Porquê:** Ajuda a escrever código mais seguro, robusto e de melhor qualidade, pegando uma gama maior de erros potenciais em tempo de compilação antes que se tornem problemas em produção.
+
+### Formatação (Prettier)
+
+*   **Regra:** O projeto utiliza Prettier para garantir consistência na formatação automática do código. As configurações estão definidas em `.prettierrc.js` (ou similar).
     *   Indentação: 2 espaços.
     *   Aspas: Simples (`singleQuote: true`).
     *   Ponto e vírgula: Sempre no final das instruções (`semi: true`).
-    *   Vírgula Trailing: `es5` (vírgulas no final de arrays e objetos multi-linha).
-    *   Comprimento da Linha: ~120 caracteres (configurável, mas manter um limite razoável).
-*   **Integração:**
-    *   **ESLint:** Integrado com ESLint via `eslint-config-prettier` para desabilitar regras de estilo do ESLint que conflitam com o Prettier.
-    *   **Tailwind CSS (ADR-026):** O plugin `eslint-plugin-tailwindcss` (mencionado na seção de Linting) geralmente inclui ou recomenda um plugin Prettier (`prettier-plugin-tailwindcss`) para ordenar automaticamente as classes utilitárias do Tailwind.
-*   **Uso Mandatório:** Formatação automática ao salvar (configuração no editor) é ALTAMENTE RECOMENDADA. Código enviado em Pull Requests DEVE estar formatado pelo Prettier.
-*   **Porquê:** Elimina debates sobre estilo de formatação, melhora a legibilidade, e permite que os desenvolvedores foquem na lógica. A consistência visual facilita a leitura e a revisão de código.
+    *   Outras configurações conforme o arquivo do projeto.
+*   **Porquê:** Formatação automática e consistente elimina debates sobre estilo pessoal, garante um visual uniforme em toda a codebase, melhora a legibilidade e permite que os desenvolvedores se concentrem na lógica de negócios em vez de se preocuparem com detalhes de formatação.
+*   **Ação:** Recomenda-se configurar seu editor para formatar ao salvar (Format On Save) ou executar o script de formatação (ex: `npm run format`) regularmente.
+*   **Consistência na Formatação:**
+    *   **Regra:** Adira ao estilo de formatação de código consistente imposto pelo Prettier. Evite desabilitar regras do Prettier ou introduzir formatação manual que divirja do padrão.
+    *   **Porquê:** Garante que as diferenças de código (diffs) em revisões e merges reflitam apenas mudanças lógicas, não de estilo pessoal, facilitando a colaboração e a manutenção do histórico.
 
-## 8. Linting de Código (ESLint)
+### Linting (ESLint)
 
-*   **Padrão:** ESLint é a ferramenta padrão para análise estática de código, identificando padrões problemáticos, potenciais erros e garantindo a adesão a boas práticas de codificação não cobertas pela formatação.
-*   **Configuração:** As regras e plugins são definidos em `eslint.config.js` (formato Flat Config).
-*   **Plugins Essenciais (conforme menção prévia, a serem formalizados em ADR de Tooling):**
-    *   `@typescript-eslint/eslint-plugin` e `@typescript-eslint/parser`: Para código TypeScript.
-    *   `eslint-plugin-import`: Para organizar e validar importações.
-    *   `eslint-plugin-react` e `eslint-plugin-react-hooks`: Para código React.
-    *   `eslint-plugin-jsx-a11y`: Para acessibilidade em JSX.
-    *   `eslint-plugin-tailwindcss` (ADR-026): Para regras específicas do Tailwind CSS.
-    *   *Sugestões (a serem avaliadas e formalizadas em ADR de Tooling):* `eslint-plugin-sonarjs` (code smells), `eslint-plugin-security` (vulnerabilidades), plugins para nomenclatura de arquivos (e.g., `eslint-plugin-filenames-simple` ou `eslint-plugin-unicorn`).
-*   **Uso Mandatório:**
-    *   Todo código DEVE passar pelas verificações do ESLint sem erros antes de ser commitado.
-    *   Warnings devem ser tratados ou justificados com um comentário `// eslint-disable-next-line ...` se for uma exceção válida e documentada.
-    *   Utilizar `npm run lint` e `npm run lint:fix`.
-*   **Porquê:** Ajuda a manter a alta qualidade do código, previne erros comuns, melhora a consistência e a manutenibilidade, e reforça os padrões definidos.
+*   **Regra:** ESLint é usado para análise estática de código e para impor padrões de qualidade de código, boas práticas e estilo não cobertos pelo Prettier. A configuração base (`eslint.config.js`) estende-se de presets recomendados e é customizada para as necessidades do projeto.
+*   **Porquê:** Ajuda a prevenir erros comuns, identificar anti-padrões, promover consistência no uso de construções da linguagem, e manter a qualidade geral do código, melhorando sua robustez e manutenibilidade a longo prazo.
+*   **Ação:** Execute `npm run lint` para verificar o código e `npm run lint:fix` para tentar correções automáticas para as regras que o suportam.
+*   **Instrução Crucial:**
+        *   **Regra:** Após criar ou modificar um arquivo, **SEMPRE execute o ESLint (`npx eslint path/to/your/file.tsx --fix` ou o script do projeto `npm run lint:fix`) e realize TODOS os ajustes e refatorações necessários para eliminar erros e avisos.** Não prossiga com o commit de código que possua erros de linting.
+        *   **Porquê:** Garante que apenas código em conformidade com os padrões de qualidade seja integrado à base principal, mantendo a alta qualidade e prevenindo a introdução de "code smells" ou potenciais bugs.
 
-## 9. Comentários no Código
+### Convenções de Nomenclatura
 
-As diretrizes para comentários visam maximizar a clareza do código, minimizando a necessidade de explicações externas. Baseado em **ADR-028** e **ADR-016**.
+*   **Variáveis, Funções, Classes, Pastas:**
+    *   **Regra:** Use nomes claros, descritivos, autoexplicativos e em **inglês** para todas as construções de código.
+        *   Variáveis e funções: `camelCase` (e.g., `currentUser`, `calculateTotalPrice`).
+        *   Classes, Interfaces, Tipos, Enums: `PascalCase` (e.g., `UserService`, `IOrderRepository`, `PaymentStatus`).
+        *   Constantes (valores fixos e imutáveis): `UPPER_SNAKE_CASE` (e.g., `MAX_RETRIES`, `DEFAULT_TIMEOUT_MS`).
+    *   **Porquê:** Inglês é a língua universal no desenvolvimento de software, facilitando a colaboração. Nomes descritivos e consistentes com as convenções de casing melhoram drasticamente a legibilidade, reduzem ambiguidades e o tempo necessário para entender o código.
+*   **Pastas:**
+    *   **Regra:** Devem ser nomeadas em inglês e, para este projeto, **prioritariamente em `kebab-case`** (ex: `user-authentication`, `data-processing`), a menos que uma convenção específica de um framework ou ferramenta exija outro padrão (ex: componentes React podem estar em pastas `PascalCase` se essa for a convenção do projeto para componentes).
+    *   **Porquê:** Consistência na nomeação de pastas melhora a navegabilidade do projeto e `kebab-case` é comum em muitos ecossistemas web para nomes de diretórios.
 
-*   **Idioma:** TODOS os comentários DEVEM ser escritos em **Inglês**.
-    *   **Porquê:** Consistência com o código e facilita a colaboração global.
-*   **Priorizar Código Autoexplicativo:**
-    *   **Padrão:** O código deve ser o mais claro e expressivo possível, através de boa nomenclatura (ADR-028), estrutura lógica e adesão a padrões, reduzindo a necessidade de comentários.
-    *   **Porquê:** Comentários podem ficar desatualizados; código claro é a melhor documentação.
-*   **Quando Comentar:**
-    *   **Explicar o "Porquê", Não o "O quê":** Se um bloco de código é complexo e não pode ser simplificado mais, ou se uma decisão de design não é óbvia, o comentário deve explicar *por que* o código está escrito daquela forma, não *o que* ele faz (isso deve ser claro pelo código).
-    *   **Documentar Trade-offs:** Explicar por que uma determinada solução foi escolhida em detrimento de outras, especialmente se envolveu trade-offs.
-    *   **Workarounds:** Comentar workarounds para bugs de bibliotecas externas ou comportamentos inesperados.
-    *   **Documentação de API Pública (JSDoc/TSDoc):** Funções, classes e métodos exportados que formam uma API pública de um módulo ou serviço devem ter comentários de documentação (e.g., TSDoc) explicando seu propósito, parâmetros e tipo de retorno.
-*   **O Que Evitar:**
-    *   **Comentários Redundantes:** Não comente código que já é óbvio.
-    *   **Código Comentado:** Remova código não utilizado. Use o Git para histórico.
-    *   **Comentários de Metadados Supérfluos:** (Autores, datas, logs de mudança no arquivo) - Git lida com isso.
-*   **Porquê (Geral):** Comentários bem utilizados melhoram a compreensão e manutenção do código. Comentários ruins ou desatualizados pioram.
+### Convenções de Nomenclatura de Arquivos
 
-## 10. Controle de Versão com Git
+*   **Regra:** **Todos os nomes de arquivos devem estar em kebab-case** (e.g., `user-profile.component.ts`, `data-fetcher.service.ts`, `auth-constants.ts`).
+    *   **Porquê:** `kebab-case` é fácil de ler em nomes de arquivo, é URL-friendly (embora menos relevante para arquivos de código-fonte), e evita problemas de sensibilidade de caixa em diferentes sistemas operacionais, garantindo consistência entre ambientes de desenvolvimento.
+*   **Aplicabilidade:** Esta regra se aplica a todos os tipos de arquivo criados dentro do projeto (.ts, .tsx, .md, .json, etc.).
+*   **Exceções Justificáveis:**
+    *   Frameworks ou bibliotecas que exigem explicitamente uma convenção diferente (e.g., roteamento de páginas Next.js como `page.tsx` ou `layout.tsx` dentro de diretórios específicos).
+    *   Arquivos de configuração com nomes padronizados pela comunidade ou ferramentas (e.g., `vite.config.ts`, `tailwind.config.ts`, `README.md`, `Dockerfile`, `Procfile`).
+    *   Arquivos de definição de tipo globais ou de bibliotecas de terceiros que seguem suas próprias convenções (ex: `custom.d.ts`).
+    *   **Importante:** Tais exceções devem ser limitadas e, se não forem universalmente reconhecidas, justificadas internamente ou documentadas se necessário.
+*   **Exemplos:**
+    *   **Bom:** `user-service.ts`, `invoice-generator.util.ts`, `use-auth-session.hook.tsx`, `api-error.model.ts`, `contributing-guide.md`
+    *   **Ruim:** `UserService.ts`, `InvoiceGenerator.util.ts`, `useAuthSession.tsx`, `ApiErrorModel.ts`, `ContributingGuide.md`
+    *   **Exceções Aceitáveis:** `vite.config.ts`, `next.config.js`, `src/app/admin/users/[userId]/page.tsx` (Next.js), `src/components/Button/Button.stories.tsx` (Storybook convention), `jest.setup.ts`
 
-Práticas consistentes de controle de versão são essenciais para a colaboração e o histórico do projeto. Baseado em **ADR-028**.
+### Controle de Versão (Git)
 
 *   **Commits Atômicos:**
-    *   **Padrão:** Cada commit deve representar uma única mudança lógica, funcional ou correção. Evite commits que misturem múltiplas alterações não relacionadas.
-    *   **Porquê:** Facilita a revisão, rastreamento (`git blame`), reversão (`git revert`) e compreensão do histórico.
-*   **Mensagens de Commit (Semantic Commits):**
-    *   **Padrão:** Siga o padrão [Conventional Commits](https://www.conventionalcommits.org/).
-        *   Formato: `tipo(escopo_opcional): descrição concisa no imperativo`
-        *   Ex: `feat(auth): implement password reset via email`
-        *   Corpo e rodapé opcionais para mais detalhes ou breaking changes/issues.
-    *   **Tipos Comuns:**
-        | Tipo       | Descrição (Português)                                      |
-        | ---------- | ---------------------------------------------------------- |
-        | `feat`     | Nova funcionalidade para o usuário                         |
-        | `fix`      | Correção de bug para o usuário                             |
-        | `docs`     | Mudanças na documentação                                   |
-        | `style`    | Formatação, estilos; sem mudança na lógica                |
-        | `refactor` | Refatoração de código sem mudança de comportamento externo |
-        | `test`     | Adição ou correção de testes                               |
-        | `chore`    | Manutenção, build, config de pacotes, etc.                |
-        | `perf`     | Melhoria de performance                                    |
-        | `ci`       | Mudanças em scripts/config de CI/CD                         |
-        | `build`    | Mudanças no sistema de build ou dependências externas      |
-        | `revert`   | Reverte um commit anterior                                 |
-    *   **Idioma:** Mensagens de commit DEVEM ser em Inglês.
-    *   **Porquê:** Histórico legível, automação de changelogs, versionamento semântico.
-*   **Nomenclatura de Branches:**
-    *   **Padrão:** Usar `kebab-case` e prefixos descritivos.
-        *   Features: `feature/nome-da-feature` (e.g., `feature/user-profile-editing`)
-        *   Correções: `fix/descricao-curta-do-bug` (e.g., `fix/login-redirect-issue`)
-        *   Chores/Refactors: `chore/tarefa-especifica` (e.g., `chore/update-eslint-config`)
-    *   **Porquê:** Organização e clareza sobre o propósito da branch.
+    *   **Regra:** Faça commits pequenos e atômicos, representando uma única mudança lógica ou funcional. Evite commits gigantescos que misturam várias alterações não relacionadas.
+    *   **Porquê:** Facilita a revisão do código (Pull Requests menores são mais fáceis de revisar), o rastreamento de alterações (`git blame`), a reversão de mudanças problemáticas (`git revert`), a depuração com `git bisect`, e a compreensão do histórico do projeto.
+*   **Mensagens de Commit em Inglês:**
+    *   **Regra:** Escreva todas as mensagens de commit em inglês.
+    *   **Porquê:** Consistência com a nomeação do código e das variáveis, e facilita a colaboração em um contexto potencialmente internacional.
 
-## 11. Padrões de Tratamento de Erros
+*   **Escrevendo Boas Mensagens de Commit:**
+    *   **Padrão:** Siga o padrão de [Commits Semânticos (Semantic Commits)](https://www.conventionalcommits.org/).
+        *   **Porquê:** Cria um histórico de commits mais legível, significativo e estruturado. Permite a automação de changelogs, facilita o versionamento semântico (SemVer) e melhora a comunicação sobre a natureza das mudanças.
+        *   **Tipos Comuns e Seus Significados:**
+            *   `feat:` (nova funcionalidade para o usuário, não uma nova funcionalidade para o script de build)
+            *   `fix:` (correção de bug para o usuário, não uma correção de bug no script de build)
+            *   `docs:` (mudanças na documentação, como README, guias, etc.)
+            *   `style:` (formatação, ponto e vírgula faltando, etc.; nenhuma mudança na lógica do código)
+            *   `refactor:` (refatoração de código de produção, ex.: renomear uma variável, sem alterar comportamento externo)
+            *   `test:` (adição ou correção de testes; nenhuma mudança no código de produção)
+            *   `chore:` (atualização de tarefas de build, configuração de pacotes, etc.; nenhuma mudança no código de produção)
+            *   `perf:` (mudanças de código que melhoram a performance)
+            *   `ci:` (mudanças nos arquivos e scripts de configuração de CI/CD)
+            *   `build:` (mudanças que afetam o sistema de build ou dependências externas, ex: Gulp, Webpack, NPM)
+            *   `revert:` (reverte um commit anterior)
+    *   **Estrutura:**
+        1.  **Linha de Resumo (Subject):** `tipo(escopo_opcional): descrição_curta_imperativa`
+            *   Curta (idealmente 50 caracteres, máximo 72).
+            *   Escrita no imperativo presente (e.g., "Add feature" não "Added feature" ou "Adds feature").
+            *   Escopo opcional entre parênteses para indicar a parte do código afetada (e.g., `feat(auth): ...`, `fix(payment-gateway): ...`).
+            *   Não termine com ponto final.
+        2.  **Corpo (Body - Opcional):**
+            *   Separado do resumo por uma linha em branco.
+            *   Explica o *contexto*, o *quê* e o *porquê* da mudança em mais detalhes. Pode ter múltiplos parágrafos.
+            *   Mantenha as linhas com no máximo 72-80 caracteres para melhor legibilidade em diferentes ferramentas Git.
+        3.  **Rodapé (Footer - Opcional):**
+            *   Separado do corpo por uma linha em branco.
+            *   Para informações de "Breaking Changes" (mudanças que quebram a compatibilidade): `BREAKING CHANGE: descrição da mudança e instruções de migração.`
+            *   Para referenciar issues (ex: `Closes #123`, `Fixes #456`).
+    *   **Exemplos Detalhados:**
 
-Uma estratégia consistente para lidar com erros é crucial para a robustez e depuração. Baseado na **ADR-014: Estratégia Principal de Tratamento de Erros**.
+        | Tipo de Commit | Exemplo Bom                                                                 | Exemplo Ruim                               |
+        | -------------- | --------------------------------------------------------------------------- | ------------------------------------------ |
+        | `feat`         | `feat(profile): Permite upload de avatar do usuário`                         | `Adicionado upload`                        |
+        |                | `Implementa a funcionalidade de upload de avatar na página de perfil.`<br>`Inclui validação de tipo e tamanho de imagem.` |                                            |
+        | `fix`          | `fix(auth): Corrige redirecionamento após login com token expirado`          | `Bug no login`                             |
+        |                | `O token de acesso não estava sendo renovado corretamente,` <br> `causando falha no redirecionamento. Agora o refresh token é usado.` | `corrigi o problema do token`              |
+        | `docs`         | `docs(api): Adiciona documentação para o endpoint de usuários`               | `Atualizei a documentação`                 |
+        | `style`        | `style(components): Aplica formatação do Prettier em UserCard`              | `prettier`                                 |
+        | `refactor`     | `refactor(services): Extrai lógica de cálculo de imposto para TaxService`    | `Melhorias no código`                      |
+        | `test`         | `test(auth): Adiciona testes de integração para fluxo de registro`          | `Testes`                                   |
+        | `chore`        | `chore: Atualiza dependência do ESLint para v8.50.0`                       | `Update deps`                              |
+        | `perf`         | `perf(list): Otimiza renderização de lista virtualizada para grandes datasets` | `Melhora performance da lista`             |
+        | `ci`           | `ci(deploy): Ajusta script de deploy para novo ambiente de staging`          | `Ajuste CI`                                |
+        | `build`        | `build: Configura tree-shaking para reduzir bundle final`                   | `Build`                                    |
+        | `revert`       | `revert: feat(profile): Remove funcionalidade de upload de avatar`           | `Revertendo último commit`                 |
+        |                | `Este commit reverte o commit abc123xyz.`                                   |                                            |
 
-*   **Classe Base `CoreError`:**
-    *   **Padrão:** Usar `CoreError` (de `shared/errors/core.error.ts` ou similar) como base para todos os erros customizados da aplicação. Ela inclui `name`, `message`, `code?`, `context?`, `originalError?`.
-    *   **Porquê:** Base comum para tratamento polimórfico e inclusão de informações estruturadas.
-*   **Tipos de Erro Customizados:**
-    *   **Padrão:** Criar classes de erro específicas herdando de `CoreError` (e.g., `ValueError`, `EntityError`, `NotFoundError`, `ApplicationError`, `InfrastructureError`, `AuthenticationError`, `AuthorizationError`).
-    *   **Porquê:** Permite tratamento granular e específico baseado no tipo de erro.
-*   **Criação e Lançamento:** Lançar (`throw`) instâncias de erros customizados assim que a condição de erro for detectada, preenchendo os campos relevantes.
-*   **Encapsulamento (Wrapping):** Erros de camadas inferiores ou bibliotecas DEVEM ser encapsulados em um erro customizado apropriado, com o erro original em `originalError`.
-    *   **Porquê:** Abstrai detalhes da camada inferior e adiciona contexto de aplicação.
-*   **Mapeamento para `IUseCaseResponse`:** Conforme **ADR-008** e **ADR-012**, o `UseCaseWrapper` mapeia `CoreError` (e outros) para a estrutura `IUseCaseErrorDetails` da resposta padronizada.
-*   **Segurança:** Não vazar informações sensíveis ou stack traces detalhados para o cliente em produção.
 
-## 12. Estratégia de Logging
+*   **Disciplina de Controle de Versão:**
+    *   **Regra:** Gerencie dependências do projeto explicitamente (ex: `package.json` e `package-lock.json`). Mantenha as dependências atualizadas (avaliando o impacto de cada atualização) e monitore vulnerabilidades conhecidas (ex: usando `npm audit`).
+    *   **Porquê:** Garante a reprodutibilidade do build, a segurança do projeto contra vulnerabilidades em dependências e facilita a colaboração ao manter todos os desenvolvedores em um conjunto consistente de dependências.
 
-Logging eficaz é vital para monitoramento e depuração. Baseado na **ADR-013: Estratégia de Logging Principal da Aplicação**.
+### Comentários
 
-*   **Interface Padrão `ILogger`:**
-    *   **Padrão:** Usar a interface `ILogger` (de `core/common/services/i-logger.service.ts`) via DI para todas as necessidades de logging.
-    *   **Métodos:** `error(message, error?, context?)`, `warn(message, context?)`, `info(message, context?)`, `debug(message, context?)`.
-    *   **Porquê:** Abstrai a implementação, permitindo diferentes backends de log.
-*   **Uso de `console.*`:** Fortemente desencorajado, exceto em cenários muito específicos (scripts de exemplo, logs de bootstrap inicial).
-*   **Níveis de Log:** Usar `ERROR`, `WARN`, `INFO`, `DEBUG` (e opcionalmente `VERBOSE`) consistentemente.
-*   **Logging Estruturado e Contextual:**
-    *   **Padrão:** Logs devem ser estruturados (preferencialmente JSON em produção) e incluir `timestamp`, `level`, `message`.
-    *   Usar o parâmetro `context` para adicionar dados estruturados relevantes (e.g., `jobId`, `userId`).
-    *   **Porquê:** Facilita a análise e consulta por ferramentas de agregação de logs.
-*   **Logging por Camada:**
-    *   Domínio: Geralmente não loga, lança erros.
-    *   Aplicação: Loga início/fim de operações, decisões, erros.
-    *   Infraestrutura: Loga interações com sistemas externos, erros.
-    *   UI (Renderer): Usa `IPCService` para enviar logs críticos para o processo principal.
-*   **Logging de Jobs (`JobEntity.addLog()`):** Distinto do `ILogger`, é para o histórico operacional específico de um job.
-*   **Dados Sensíveis:** NUNCA logar dados sensíveis em plain text.
-*   **Performance:** Considerar o impacto do logging em caminhos críticos.
+*   **Evitar Comentários Desnecessários:**
+    *   **Regra:** Evite comentários o máximo possível. O código deve ser autoexplicativo através de boa nomenclatura, estrutura clara e design expressivo.
+    *   **Porquê:** Comentários tendem a ficar desatualizados à medida que o código evolui, tornando-se enganosos ou irrelevantes. Código claro não precisa de comentários para explicar o que faz. Comentários que parafraseiam o código são redundantes.
+*   **Comentários Necessários (O "Porquê" e o "Trade-off"):**
+    *   **Regra:** Se um comentário for *absolutamente necessário*, ele deve explicar o *porquê* de uma decisão de design particular, as consequências de uma otimização, um workaround para um problema conhecido de uma biblioteca externa, ou a razão de uma lógica de negócios complexa que não pode ser simplificada mais sem perder clareza. Não comente o *o quê* o código faz.
+    *   **Porquê:** O "o quê" o código faz deve ser óbvio pela leitura do próprio código. O "porquê" ou o contexto de decisões não óbvias são informações valiosas que o código por si só não pode transmitir.
+*   **Idioma dos Comentários:**
+    *   **Regra:** Escreva todos os comentários (quando necessários) em inglês.
+    *   **Porquê:** Consistência com o restante do código e mensagens de commit, e facilita a colaboração e compreensão por uma audiência global de desenvolvedores.
+*   **Não Comentar Código:**
+    *   **Regra:** Não use comentários para desabilitar ou "comentar" blocos de código. Se o código não é necessário, remova-o. Se for experimental ou para referência futura, use branches do Git ou outras ferramentas.
+    *   **Porquê:** O controle de versão (Git) é a ferramenta apropriada para manter o histórico das versões anteriores e gerenciar diferentes linhas de desenvolvimento. Código comentado polui a codebase, dificulta a leitura e pode ser confundido com código ativo.
+*   **Sem Comentários de Metadados Supérfluos:**
+    *   **Regra:** Não inclua comentários no início de um arquivo indicando seu caminho, autor, data de criação/modificação, ou no final de um arquivo indicando `[fim do arquivo]`.
+    *   **Porquê:** Estas informações são fornecidas e gerenciadas de forma mais eficaz pelo sistema de controle de versão (Git) e pelo IDE. Tais comentários adicionam ruído visual e se tornam rapidamente desatualizados.
+*   **Sem Comentários de Log de Mudanças no Código:**
+    *   **Regra:** REMOVA TODOS OS COMENTÁRIOS EXPLICATIVOS PARA MODIFICAÇÕES DE CÓDIGO (e.g., `'// Corrigido bug X em DD/MM/AAAA por Fulano'`, `'// Adicionada feature Y'`).
+    *   **Porquê:** O histórico do Git (`git blame`, `git log`, mensagens de commit semânticas) serve a esse propósito de forma muito mais eficaz e organizada. Comentários de log no código poluem e se tornam obsoletos.
+*   **Priorize Clareza Sobre Comentários:**
+    *   **Regra:** Em vez de adicionar um comentário para explicar uma seção confusa ou complexa do código, dedique tempo para refatorá-la até que se torne autoexplicativa. Use nomes melhores, divida funções/métodos, simplifique a lógica.
+    *   **Porquê:** Código claro é inerentemente mais fácil de manter, entender e depurar do que código complexo com explicações adicionais. O esforço para tornar o código autoexplicativo compensa a longo prazo.
 
-## 13. Padrões de Testes Automatizados
+## Convenções de Estrutura de Diretórios
 
-Testes automatizados são cruciais para garantir a qualidade, prevenir regressões e facilitar refatorações seguras. Esta seção sintetiza as decisões da **ADR-029: Estratégia e Padrões de Testes Automatizados**.
+Manter uma estrutura de diretórios consistente facilita a navegação, a localização de código e a compreensão da arquitetura do projeto. A estrutura de diretórios do Project Wiz é baseada nos princípios da Clean Architecture e em convenções comuns para aplicações frontend modernas. Consulte `docs/reference/01-software-architecture.md` para detalhes arquiteturais completos.
 
-*   **Framework Padrão:** Vitest.
-    *   **Porquê:** Integração com Vite, API compatível com Jest, suporte a TypeScript/ESM, performance.
-*   **Localização e Nomenclatura:**
-    *   Testes co-localizados em `__tests__` (e.g., `user.entity.test.ts` para `user.entity.ts`).
-    *   **Porquê:** Facilita encontrar e manter testes junto ao código testado.
-*   **Tipos de Testes:**
-    *   **Unitários (Obrigatórios):** Foco em isolar a menor unidade lógica (funções, métodos, componentes React simples, hooks). Dependências externas DEVEM ser mockadas (`vi.mock`, `vi.fn`).
-        *   *O Quê:* Lógica de negócios (Entidades, VOs, Serviços), utilitários, renderização de componentes baseada em props, lógica de hooks.
-    *   **Integração (Altamente Recomendados):** Verificar interação entre componentes/camadas, mockando o mínimo (geralmente sistemas externos).
-        *   *Exemplos:* Caso de Uso + Repositório (real ou mock), Serviço + Adaptador (mockado), UI + `IPCService` (mockado), Repositório + DB de teste.
-    *   **End-to-End (E2E) (Opcional/Futuro):** Testar fluxos completos. Ferramentas como Playwright ou Spectron.
-*   **Mocking (`vitest`):**
-    *   Usar `vi.mock()`, `vi.fn()`, `vi.spyOn()`.
-    *   Mocks manuais em diretórios `__mocks__` adjacentes.
-    *   Injetar mocks via DI para classes que usam InversifyJS.
-*   **Cobertura de Testes:**
-    *   Usar `c8` ou `istanbul` via Vitest. Metas iniciais sugeridas: Domínio >90%, Aplicação >80%, Infra >75%, UI >70%.
-    *   **Foco na qualidade dos testes, não apenas na porcentagem.**
-*   **Estrutura (`describe`, `it`, AAA):**
-    *   `describe('Componente/Funcionalidade', () => { ... });`
-    *   `it('should [resultado esperado] when [condição]', () => { /* Arrange, Act, Assert */ });`
-    *   Descrições claras em Inglês.
-*   **Execução e CI:**
-    *   Scripts em `package.json`: `test`, `test:watch`, `test:coverage`.
-    *   Integrar `npm test` no pipeline de CI.
+**Porquê:** Uma estrutura bem definida acelera o desenvolvimento, pois os desenvolvedores sabem onde encontrar ou colocar diferentes tipos de arquivos, reforça a separação de responsabilidades arquiteturais, e facilita a integração de novos membros à equipe.
 
-## 14. Diretrizes de Segurança da Aplicação
+### Backend (`src_refactored/`)
 
-A segurança é um pilar fundamental. Esta seção resume as diretrizes da **ADR-030: Diretrizes de Segurança da Aplicação**, complementando ADR-023 e ADR-024.
+A estrutura do backend segue as camadas da Clean Architecture, promovendo separação de responsabilidades e testabilidade:
 
-*   **Configuração Segura do Electron (ADR-023):**
-    *   `contextIsolation: true`, `nodeIntegration: false`, `preload` script obrigatórios.
-    *   `webSecurity: true`, `allowRunningInsecureContent: false` altamente recomendados.
-    *   Implementar Content Security Policy (CSP) restritiva.
-    *   Gerenciar permissões com `session.setPermissionRequestHandler`.
-*   **Segurança IPC (ADR-024):**
-    *   Validar TODAS as entradas do renderer nos handlers IPC (main process) usando Zod.
-    *   API mínima exposta pelo preload script via `contextBridge`.
-*   **Validação de Entradas Externas:** Validar todos os dados de fontes externas (APIs, arquivos) com Zod.
-*   **Codificação e Sanitização de Saídas:** Evitar `dangerouslySetInnerHTML`. Usar bibliotecas de sanitização para HTML gerado dinamicamente.
-*   **Manuseio e Armazenamento Seguro de Dados:**
-    *   Não hardcodar segredos. Usar variáveis de ambiente (com `.env.example`).
-    *   Usar `electron.safeStorage` para segredos do usuário persistidos localmente (e.g., API keys de LLMs).
-    *   Não logar dados sensíveis (ADR-013).
-    *   Princípio do Menor Privilégio.
-*   **Gerenciamento de Dependências:** Auditorias regulares (`npm audit fix`), ferramentas como Snyk/Dependabot, manter dependências atualizadas.
-*   **Tratamento de Erros Seguro (ADR-014):** Não vazar informações sensíveis/internas em mensagens de erro para o usuário.
-*   **Acesso Seguro ao Sistema de Arquivos:** Validar e sanitizar caminhos rigorosamente. Prevenir Path Traversal.
-*   **Autenticação e Autorização:** Se implementado, usar hashes fortes para senhas, tokens seguros, e realizar verificações de autorização explícitas.
-*   **Manter Electron Atualizado:** Para patches de segurança.
+*   `core/`: Coração da aplicação, contendo a lógica de negócios pura, independente de frameworks ou detalhes de infraestrutura.
+    *   `domain/`: Define as entidades de negócio, objetos de valor, regras de domínio intrínsecas e as interfaces dos repositórios (contratos de persistência). É o núcleo mais interno e estável.
+        *   **Porquê:** Isola a lógica de negócio fundamental de preocupações externas, tornando-a reutilizável e testável independentemente de UI, banco de dados, etc.
+        *   **Exemplo:** `user.entity.ts`, `job-status.vo.ts`, `i-project.repository.ts`
+    *   `application/`: Orquestra os casos de uso da aplicação. Contém serviços de aplicação, DTOs (Data Transfer Objects) para comunicação entre camadas, e as interfaces (portas) para serviços externos que a aplicação necessita (ex: gateways de notificação, sistemas de arquivos).
+        *   **Porquê:** Define o que a aplicação pode fazer e como os dados fluem para executar essas operações, conectando o domínio à infraestrutura através de abstrações.
+        *   **Exemplo:** `create-user.use-case.ts`, `project.service.ts`, `i-notification.gateway.ts`
+*   `infrastructure/`: Implementações concretas de componentes externos e detalhes técnicos.
+    *   `persistence/`: Implementações dos repositórios definidos no domínio (e.g., usando Drizzle ORM para interagir com SQLite).
+        *   **Porquê:** Abstrai os detalhes de como os dados são armazenados e recuperados, permitindo trocar a tecnologia de persistência sem impactar o core da aplicação.
+        *   **Exemplo:** `drizzle-user.repository.ts`
+    *   `adapters/`: Adaptadores para serviços externos (LLMs, APIs de terceiros), implementações de gateways, e outros componentes que traduzem dados entre o formato da aplicação e o formato de sistemas externos.
+        *   **Porquê:** Isola a aplicação das particularidades de ferramentas e serviços externos.
+        *   **Exemplo:** `openai-llm.adapter.ts`, `bullmq-job.queue.ts`
+    *   `electron/`: Código específico do processo principal do Electron (configuração de IPC, ciclo de vida da aplicação, gerenciamento de janelas).
+        *   **Porquê:** Concentra a lógica relacionada ao ambiente desktop Electron.
+    *   `frameworks/`: Configurações e código de "cola" (glue code) para frameworks específicos (ex: configuração de um servidor HTTP se houver um).
+        *   **Porquê:** Mantém o código específico de framework separado da lógica de aplicação.
+    *   `ioc/`: Configuração de Injeção de Dependência (ex: usando InversifyJS) para montar a aplicação, conectando abstrações às suas implementações concretas.
+        *   **Porquê:** Facilita o baixo acoplamento e a testabilidade, permitindo que as dependências sejam injetadas em vez de serem codificadas diretamente.
+*   `presentation/`: Camada responsável pela interação com o usuário ou outros sistemas (frequentemente considerada parte da infraestrutura na Clean Architecture).
+    *   `electron/`: (Pode ser subdividido em `main/` e `preload/` scripts).
+    *   `ui/`: Contém a aplicação frontend React. (Ver detalhes abaixo).
+*   `shared/`: Código utilitário, tipos comuns, ou lógica que precisa ser compartilhada entre diferentes camadas (usar com cautela para não violar as regras de dependência da Clean Architecture – idealmente, o core não deve depender do shared se o shared tiver dependências de infraestrutura).
+    *   **Porquê:** Evita duplicação de código para funcionalidades transversais como logging, tratamento de resultados, etc.
+    *   **Exemplo:** `result.ts` (para encapsular sucesso/falha de operações), `logger.interface.ts`
 
-## 15. Estratégia de Gerenciamento de Configuração
+### Frontend (`src_refactored/presentation/ui/`)
 
-Gerenciamento de configuração consistente e seguro é vital. Baseado na **ADR-031: Estratégia de Gerenciamento de Configuração**.
+A interface do usuário (UI) é uma SPA React organizada para clareza, escalabilidade e Developer Experience (DX). A estrutura visa agrupar arquivos por funcionalidade (feature-sliced) e por tipo.
+**Porquê Geral da Estrutura Frontend:** Esta organização visa facilitar a localização do código, promover a reutilização de componentes, isolar funcionalidades para melhor manutenção, e alinhar-se com as práticas modernas de desenvolvimento React para projetos de médio a grande porte.
 
-*   **Tipos de Configuração:**
-    *   **Build/Estática:** Arquivos como `vite.config.ts`, `tailwind.config.ts`. Versionados.
-    *   **Variáveis de Ambiente em Runtime:**
-        *   Main Process: Via arquivos `.env` (não versionados, com `.env.example`) e `process.env`.
-        *   Renderer Process (UI): Prefixadas com `VITE_`, acessadas via `import.meta.env`.
-    *   **Configuração Persistida do Usuário:** E.g., `LLMProviderConfig`. Gerenciadas como entidades de domínio, com segredos criptografados via `electron.safeStorage` (ADR-030).
-    *   **Configuração de Comportamento da Aplicação:** Arquivos JSON/YAML dedicados, constantes TS, ou objetos injetados via DI.
-*   **Acesso à Configuração:**
-    *   **Padrão:** Evitar `process.env` direto. Usar objetos de configuração tipados e injetados via DI (ADR-019).
-    *   UI: `import.meta.env` para variáveis `VITE_` é aceitável; agrupar em serviços/hooks se complexo.
-*   **Validação:** Usar Zod para validar objetos de configuração na inicialização. Falhar rapidamente se inválido.
-*   **Segurança:** Não hardcodar segredos. Usar `.env` e `electron.safeStorage`. Não logar.
-*   **Hierarquia/Overrides:** Definir precedência clara (e.g., Env Vars > Arquivo específico do ambiente > Arquivo base > Defaults).
-*   **Ambientes (`NODE_ENV`):** Usar para controlar comportamento específico do ambiente.
+```mermaid
+graph LR
+    subgraph "src_refactored/presentation/ui/"
+        A[index.html]
+        B[main.tsx]
+        C[assets/]
+        D[components/]
+        E[config/]
+        F[features/]
+        G[hooks/]
+        H[lib/]
+        I[services/]
+        J[store/]
+        K[styles/]
+        L[types/]
+        M[routeTree.gen.ts]
 
-## 16. Implementação de Padrões Arquiteturais Chave (Guia Prático)
+        D --- D1[common/]
+        D --- D2[layout/]
+        D --- D3[ui/ (shadcn)]
+        F --- F1[feature-A/]
+        F --- F2[feature-B/]
+        F1 --- F1a[components/]
+        F1 --- F1b[hooks/]
+        F1 --- F1c[pages/]
+    end
+```
 
-Esta seção serve como um guia prático resumido para implementar os principais padrões arquiteturais definidos nas ADRs. Consulte sempre a ADR específica para detalhes completos.
+*   **Raiz (`index.html`, `main.tsx`):** Ponto de entrada da aplicação React. `main.tsx` configura providers globais (tema, query client, router).
+    *   **Porquê:** Padrão para aplicações Vite/React, centralizando a inicialização da aplicação e contextos globais.
+*   `assets/`: Recursos estáticos como imagens, fontes, etc.
+    *   **Porquê:** Localização padrão para arquivos que são servidos diretamente ou importados pelo sistema de build.
+*   `components/`: Componentes React reutilizáveis em toda a aplicação.
+    *   `common/`: Componentes UI genéricos, pequenos e altamente reutilizáveis, sem lógica de negócio específica (ex: `LoadingSpinner`, `ErrorFallback`, `PageTitle`, `CustomButton`).
+        *   **Porquê:** Promove máxima reutilização, consistência visual para elementos básicos e evita duplicação de componentes de UI simples.
+    *   `layout/`: Componentes responsáveis pela estrutura visual principal das páginas e seções da aplicação (ex: `AppShell` para o container principal, `MainSidebar`, `ContextSidebar` para barras laterais contextuais, `PageHeader`).
+        *   **Porquê:** Separa a estrutura geral da aplicação (o "esqueleto") do conteúdo específico das páginas/features, facilitando mudanças globais de layout.
+    *   `ui/`: Componentes base da biblioteca de UI (e.g., Shadcn/UI como `button.tsx`, `card.tsx`, `dialog.tsx`). Geralmente adicionados via CLI e podem ser customizados.
+        *   **Porquê:** Mantém os componentes da biblioteca de UI externa organizados e permite fácil customização ou extensão sem modificar diretamente o código da biblioteca.
+*   `config/`: Centraliza configurações principais da UI (instâncias de router, query client, configuração de i18n).
+    *   **Porquê:** Facilita encontrar e modificar configurações globais da aplicação frontend, como comportamento de rotas ou cache de dados.
+*   `features/<nome-da-feature>/`: Agrupamento modular por funcionalidade de negócio (ex: `auth`, `project-dashboard`, `chat-module`). Esta é uma abordagem chave para escalabilidade e organização.
+    *   `components/`: Componentes React reutilizáveis *exclusivamente* dentro desta feature.
+    *   `hooks/`: Hooks React contendo lógica de UI, estado e efeitos colaterais específicos da feature.
+    *   `pages/` ou `views/`: Componentes de página completos que são os pontos de entrada para as rotas da feature (ex: `ProjectListPage.tsx`, `AuthPage.tsx`).
+    *   `services/` (opcional): Funções encapsulando chamadas IPC ou lógica de busca de dados específica da feature.
+    *   `types/` (opcional): Definições de tipo TypeScript específicas desta feature.
+    *   `index.ts` (opcional): Ponto de entrada para exportar elementos públicos da feature (componentes, hooks, tipos), facilitando importações em outras partes da aplicação.
+    *   **Porquê (Feature-Sliced Design):** Promove alta coesão (tudo relacionado a uma feature está agrupado) e baixo acoplamento (features são mais independentes umas das outras). Facilita o desenvolvimento paralelo por diferentes equipes, a manutenção (mudanças em uma feature têm menos chance de quebrar outra) e a eventual remoção ou alteração significativa de features.
+*   `hooks/`: Contém hooks React globais, utilitários e reutilizáveis através de múltiplas features (ex: `useDebounce`, `useLocalStorage`, `useAppTheme`).
+    *   **Porquê:** Permite reutilizar lógica de UI comum que não é específica de uma única feature, evitando duplicação.
+*   `lib/`: Utilitários JavaScript/TypeScript puros (não-React) que podem ser usados em qualquer parte do frontend (ex: `cn` para classnames, utilitários de data, formatação de strings, helpers de validação).
+    *   **Porquê:** Separa lógica puramente funcional e utilitária do código React (componentes, hooks), tornando-os mais fáceis de testar e reutilizar em contextos não-React se necessário.
+*   `services/`: Define a camada de abstração para comunicação com o backend (Electron main process via IPC ou APIs HTTP). Contém funções que encapsulam chamadas, tratam dados e erros de comunicação.
+    *   **Porquê:** Decoupla a lógica da UI e dos componentes dos detalhes da comunicação com o backend. Isso facilita a manutenção, a testabilidade (mockando a camada de serviço) e a potencial troca de implementações de transporte (ex: de IPC para HTTP) no futuro.
+*   `store/`: Para gerenciamento de estado global do cliente que não é estado de servidor (o qual é geralmente gerenciado por bibliotecas como TanStack Query). Pode usar Zustand, Jotai, ou React Context API para estados mais simples.
+    *   **Porquê:** Centraliza o estado que precisa ser acessado e modificado por múltiplas partes não relacionadas da árvore de componentes, evitando prop drilling excessivo e complexidade na sincronização de estado.
+*   `styles/`: Arquivos de estilo globais (ex: `globals.css` com importações do Tailwind CSS, variáveis de tema CSS globais, reset/normalize CSS).
+    *   **Porquê:** Local padrão para estilos que afetam toda a aplicação ou definem a base visual.
+*   `types/`: Definições de tipo TypeScript globais para o frontend, usáveis através de múltiplas features ou componentes (ex: tipos para objetos de usuário, temas, configurações globais da UI).
+    *   **Porquê:** Centraliza tipos que são comuns a várias partes da UI, evitando duplicação e facilitando a manutenção.
+*   `routeTree.gen.ts`: Arquivo gerado automaticamente pelo TanStack Router Vite plugin, contendo a árvore de rotas da aplicação baseada na estrutura de arquivos em `features/**/pages/`.
+    *   **Porquê:** Facilita o roteamento type-safe e a organização de rotas baseada em convenções de arquivos, reduzindo a necessidade de configuração manual de rotas.
 
-*   **Entidades e Objetos de Valor (VOs) (ADR-010):**
-    *   **Como:** Use classes herdando de `AbstractEntity` ou `AbstractValueObject`. Construtor `private`. Método estático `create()` com validação Zod. VOs são imutáveis (`readonly props`). Entidades usam imutabilidade funcional (métodos retornam nova instância). Exponha props via `get` accessors. Implemente `toPersistence()` e `fromPersistenceData()` em Entidades.
-    *   **Exemplo (VO):** `class UserEmail extends AbstractValueObject<Props> { public static create(email: string): UserEmail { /* valida com Zod */ return new UserEmail({value: email}); } public get value(): string {return this.props.value} }`
-*   **Repositórios (Interfaces e Implementações Drizzle) (ADR-011, ADR-017):**
-    *   **Como:** Interfaces em `core/domain/<entidade>/ports/`, nome `I[NomeEntidade]Repository`. Implementações Drizzle em `infrastructure/persistence/drizzle/<entidade>/`, nome `Drizzle[NomeEntidade]Repository`. Mappers co-localizados para converter entre POJO de persistência da entidade e formato Drizzle. `save()` como upsert. Tratamento de erro Drizzle encapsulado em `InfrastructureError`.
-    *   **Exemplo (Interface):** `interface IUserRepository { findById(id: UserId): Promise<User | null>; save(user: User): Promise<void>; }`
-*   **Casos de Uso e Serviços de Aplicação (ADR-012):**
-    *   **Como:** Casos de Uso implementam `IUseCase<Input, IUseCaseResponse<Output>>`. Validam DTOs de entrada com Zod (`*.schema.ts`). Retornam `successUseCaseResponse` ou `errorUseCaseResponse` (ADR-008). Serviços de Aplicação para lógica mais complexa, podem também retornar `IUseCaseResponse`.
-    *   **Exemplo (Caso de Uso):** `class CreateUserUseCase implements IUseCase<Input, Resp> { async execute(input: Input): Promise<Resp> { /* valida, cria entidade, salva, retorna */ } }`
-*   **Adaptadores de Infraestrutura (ADR-018):**
-    *   **Como:** Implementam portas de `core/ports/adapters/` (e.g., `ILLMAdapter`). Encapsulam lógica de API externa. Retornam `Promise<TipoEspecifico>` (NÃO `IUseCaseResponse`). Erros externos são encapsulados em `InfrastructureError`. Incluem logging e mocks.
-    *   **Exemplo (Adaptador):** `class OpenAILLMAdapter implements ILLMAdapter { async generate(prompt: string): Promise<string> { /* try/catch, chama API, mapeia resposta/erro */ } }`
-*   **Sistema de Filas (`AbstractQueue`, `DrizzleQueueFacade`, etc.) (ADR-020):**
-    *   **Como:** `AbstractQueue` define a API. `DrizzleQueueFacade` implementa, compondo `QueueServiceCore`, `JobProcessingService`, `QueueMaintenanceService`. Jobs são `JobEntity`.
-    *   **Exemplo (Adicionar Job):** `const job = await injectedQueue.add("process-image", { imageId: "123" });`
-*   **`WorkerService` e Funções Processadoras de Job (ADR-021, ADR-022):**
-    *   **Como:** `WorkerService` pega jobs da fila e executa uma `ProcessorFunction<(job: JobEntity) => Promise<ResultType>>`. O Worker instrumenta `job.addLog/updateProgress` para persistência via fila.
-    *   **Exemplo (Processor):** `const myJobProcessor: ProcessorFunction<Payload, Result> = async (job) => { /* ... lógica ...; job.addLog("etapa1"); return resultado; */ }`
-*   **Injeção de Dependência (InversifyJS) (ADR-019):**
-    *   **Como:** Classes `@injectable()`. Dependências injetadas no construtor com `@inject(TOKEN_SIMBOLO)`. Configuração em `inversify.config.ts`.
-    *   **Exemplo (Serviço):** `@injectable() class MyService { constructor(@inject(ILogger_TOKEN) private logger: ILogger) {} }`
-*   **IPC (Electron) (ADR-024):**
-    *   **Como:** Preload script expõe API segura (`window.electronIPC`) via `contextBridge`. Handlers no main validam DTOs (Zod) e chamam casos de uso. UI usa `IPCService` e hooks (`useIpcQuery/Mutation`) que chamam `window.electronIPC`.
-    *   **Exemplo (Handler Main):** `ipcMain.handle("channel", async (_event, dto) => { /* valida dto, chama useCase.execute(), retorna IUseCaseResponse */ });`
-*   **Componentes React e Estado (ADR-025):**
-    *   **Como:** Componentes funcionais, hooks. Estado local (`useState/Reducer`), compartilhado (Context, levantar estado), servidor (`useIpcQuery/Mutation`), global (Context ou Zustand/Jotai se complexo).
-*   **Estilização (Tailwind/Shadcn) (ADR-026):**
-    *   **Como:** Utility-first com Tailwind. Componentes Shadcn/UI customizados no projeto. Função `cn(clsx, twMerge)` para classes.
+## Princípios de Object Calisthenics (Exemplos Práticos)
 
----
-Este documento será mantido atualizado conforme novas ADRs são propostas e aprovadas, e conforme os padrões evoluem.
+Object Calisthenics são um conjunto de 9 regras que ajudam a escrever código orientado a objetos melhor e mais limpo. Eles promovem baixo acoplamento, alta coesão e melhor encapsulamento. Consulte `../reference/02-best-practices.md` para a lista completa. Abaixo, exemplos práticos para algumas regras chave:
+
+| Regra                                      | Impacto Principal                                                                 |
+| ------------------------------------------ | --------------------------------------------------------------------------------- |
+| Um Nível de Indentação por Método          | Métodos menores, mais focados, legibilidade aumentada.                             |
+| Não Use a Palavra-Chave ELSE               | Fluxo de controle mais linear, complexidade ciclomática reduzida.                   |
+| Envolva Todas as Primitivas e Strings      | Código mais expressivo, validação centralizada, redução de "Primitive Obsession".   |
+| Um Ponto Por Linha (Lei de Demeter)        | Redução de acoplamento, melhor encapsulamento.                                     |
+| Mantenha Todas as Entidades Pequenas         | Maior coesão, melhor SRP, facilidade de entendimento e teste.                     |
+| Sem Classes Com Mais de Duas Vars. de Inst. | Força alta coesão e SRP, pode levar à descoberta de novos conceitos de domínio.    |
+
+### 1. Um Nível de Indentação por Método
+
+*   **Regra:** Mantenha apenas um nível de indentação (bloco de código aninhado) dentro de um método.
+*   **Porquê:** Força a criação de métodos menores e mais focados, extraindo lógica aninhada para métodos privados ou funções auxiliares. Isso melhora drasticamente a legibilidade e facilita o entendimento do fluxo de cada método.
+*   **Antes:**
+    ```typescript
+    class ReportGenerator {
+      public generate(items: ReportItem[], format: ReportFormat, user: User) {
+        if (items && items.length > 0) { // Nível 1
+          if (user.hasPermission(Permissions.GENERATE_REPORT)) { // Nível 2
+            let reportContent = "";
+            for (const item of items) { // Nível 3
+              if (item.isActive) { // Nível 4
+                reportContent += `${item.name}: ${item.value}\n`;
+              }
+            }
+            if (format === ReportFormat.PDF) { // Nível 3
+              // ... lógica para PDF ...
+              console.log("Generating PDF report with content:", reportContent);
+            } else {
+              // ... lógica para CSV ...
+              console.log("Generating CSV report with content:", reportContent);
+            }
+            return true;
+          } else {
+            console.error("User does not have permission."); return false;
+          }
+        } else {
+          console.warn("No items to report."); return false;
+        }
+      }
+    }
+    ```
+*   **Depois:**
+    ```typescript
+    class ReportGenerator {
+      private generateReportContent(items: ReportItem[]): string {
+        let content = "";
+        for (const item of items) { // Nível 1 (dentro do novo método)
+          if (item.isActive) { // Nível 2, mas extraído para outro método se complexo
+            content += this.formatItem(item);
+          }
+        }
+        return content;
+      }
+
+      private formatItem(item: ReportItem): string {
+        return `${item.name}: ${item.value}\n`; // Nível 1
+      }
+
+      private saveReport(content: string, format: ReportFormat): void {
+        if (format === ReportFormat.PDF) { // Nível 1
+          console.log("Generating PDF report with content:", content);
+          // ... lógica para PDF ...
+          return;
+        }
+        console.log("Generating CSV report with content:", content);
+        // ... lógica para CSV ...
+      }
+
+      public generate(items: ReportItem[], format: ReportFormat, user: User): boolean {
+        if (!items || items.length === 0) { // Nível 1 (Guard Clause)
+          console.warn("No items to report.");
+          return false;
+        }
+        if (!user.hasPermission(Permissions.GENERATE_REPORT)) { // Nível 1 (Guard Clause)
+          console.error("User does not have permission.");
+          return false;
+        }
+        const reportContent = this.generateReportContent(items);
+        this.saveReport(reportContent, format);
+        return true;
+      }
+    }
+    ```
+
+### 2. Não Use a Palavra-Chave ELSE
+
+*   **Regra:** Evite o uso da palavra-chave `else`. Use retornos antecipados (guard clauses) ou polimorfismo, ou padrões de projeto como State ou Strategy.
+*   **Porquê:** Reduz o aninhamento, a complexidade ciclomática e torna o fluxo de controle do método mais claro, linear e fácil de seguir, pois o "caminho feliz" não é interrompido por blocos `else`.
+*   **Antes:**
+    ```typescript
+    function processPayment(amount: number, method: PaymentMethod, user: User) {
+      if (user.isBlocked) {
+        return { success: false, error: "User is blocked" };
+      } else {
+        if (method === PaymentMethod.CREDIT_CARD) {
+          if (amount > user.creditLimit) {
+            return { success: false, error: "Exceeds credit limit" };
+          } else {
+            // Process credit card payment
+            return { success: true, transactionId: "cc_123" };
+          }
+        } else if (method === PaymentMethod.PAYPAL) {
+          // Process PayPal payment
+          return { success: true, transactionId: "pp_456" };
+        } else {
+          return { success: false, error: "Unsupported payment method" };
+        }
+      }
+    }
+    ```
+*   **Depois (com Guard Clauses):**
+    ```typescript
+    function processPayment(amount: number, method: PaymentMethod, user: User) {
+      if (user.isBlocked) {
+        return { success: false, error: "User is blocked" };
+      }
+      if (method === PaymentMethod.CREDIT_CARD) {
+        if (amount > user.creditLimit) {
+          return { success: false, error: "Exceeds credit limit" };
+        }
+        // Process credit card payment
+        return { success: true, transactionId: "cc_123" };
+      }
+      if (method === PaymentMethod.PAYPAL) {
+        // Process PayPal payment
+        return { success: true, transactionId: "pp_456" };
+      }
+      return { success: false, error: "Unsupported payment method" };
+    }
+    ```
+
+### 3. Envolva Todas as Primitivas e Strings (Wrap All Primitives and Strings)
+
+*   **Regra:** Se um tipo primitivo (string, número, booleano) ou uma string literal tiver significado de domínio, regras de validação, restrições de formato ou comportamento associado, encapsule-o em uma classe ou tipo específico (Objeto de Valor - Value Object).
+*   **Porquê:** Evita "Obsessão por Primitivas" (Primitive Obsession). Dá significado semântico aos dados, centraliza a lógica de validação e comportamento relacionado àquele dado específico, torna o código mais expressivo, type-safe e reduz a chance de erros por uso incorreto de primitivas.
+*   **Antes:**
+    ```typescript
+    function createUser(email: string, age: number, postalCode: string): User {
+      if (!email.includes('@') || email.length < 5) {
+        throw new Error("Invalid email format.");
+      }
+      if (age < 18) {
+        throw new Error("User must be at least 18 years old.");
+      }
+      if (!/^\d{5}-\d{3}$/.test(postalCode)) { // Ex: CEP brasileiro
+        throw new Error("Invalid postal code format.");
+      }
+      return new User(email, age, postalCode);
+    }
+    ```
+*   **Depois:**
+    ```typescript
+    class Email {
+      readonly value: string;
+      constructor(email: string) {
+        if (!email.includes('@') || email.length < 5) { // Validação interna
+          throw new Error(`Invalid email format: ${email}`);
+        }
+        this.value = email;
+      }
+      get domain(): string { return this.value.split('@')[1]; }
+    }
+
+    class Age {
+      readonly value: number;
+      constructor(age: number) {
+        if (age < 18) { // Validação interna
+          throw new Error("User must be at least 18 years old.");
+        }
+        this.value = age;
+      }
+      isAdult(): boolean { return this.value >= 18; }
+    }
+
+    class PostalCode {
+      readonly value: string;
+      private static readonly BRAZILIAN_REGEX = /^\d{5}-\d{3}$/;
+      constructor(postalCode: string) {
+        if (!PostalCode.BRAZILIAN_REGEX.test(postalCode)) { // Validação interna
+          throw new Error(`Invalid postal code format for Brazil: ${postalCode}`);
+        }
+        this.value = postalCode;
+      }
+    }
+
+    function createUser(email: Email, age: Age, postalCode: PostalCode): User {
+      // A lógica de validação já foi garantida pelos Value Objects
+      return new User(email.value, age.value, postalCode.value);
+    }
+    // Uso:
+    // const userEmail = new Email("test@example.com");
+    // const userAge = new Age(30);
+    // const userPostalCode = new PostalCode("12345-678");
+    // const newUser = createUser(userEmail, userAge, userPostalCode);
+    ```
+
+### 4. Um Ponto Por Linha (Law of Demeter)
+
+*   **Regra:** Limite o número de "pontos" (acesso a propriedades ou chamadas de método) em uma única linha de código. Evite cadeias longas como `objeto.getA().getB().getC().fazerAlgo()`. Em vez disso, peça ao objeto para fazer algo por você (Tell, Don't Ask) ou introduza variáveis intermediárias se for apenas para melhorar a legibilidade.
+*   **Porquê:** Reduz o acoplamento entre classes, pois uma classe não precisa conhecer a estrutura interna de múltiplos outros objetos ("não fale com estranhos"). Melhora o encapsulamento e a manutenibilidade, pois mudanças na estrutura interna de um objeto têm menos probabilidade de quebrar código cliente distante.
+*   **Antes (Violação da Lei de Demeter):**
+    ```typescript
+    class Order {
+      customer: Customer;
+      // ...
+      getShippingLabelInfo(): string {
+        // Violação: conhece detalhes de Address e ZipCode
+        const city = this.customer.getAddress().getCity();
+        const zip = this.customer.getAddress().getZipCode().getCode();
+        return `Ship to: ${city}, ${zip}`;
+      }
+    }
+    // Em outro lugar:
+    // const label = order.getShippingLabelInfo();
+    // const primaryPhoneNumber = order.getCustomer().getContactInfo().getPrimaryPhone().getNumber();
+    ```
+*   **Depois (Seguindo a Lei de Demeter):**
+    ```typescript
+    class ZipCode {
+      constructor(private code: string) {}
+      getCode(): string { return this.code; }
+    }
+    class Address {
+      constructor(private city: string, private zipCode: ZipCode) {}
+      getCity(): string { return this.city; }
+      getZipCode(): ZipCode { return this.zipCode; }
+      // Novo método para atender Order
+      getShippingCityAndZip(): { city: string; zip: string } {
+        return { city: this.city, zip: this.zipCode.getCode() };
+      }
+    }
+    class ContactInfo {
+        // ...
+        getPrimaryPhoneNumber(): string { /* ... */ return "123-456"; }
+    }
+    class Customer {
+      constructor(private address: Address, private contactInfo: ContactInfo) {}
+      // Novo método para atender Order
+      getShippingInfo(): { city: string; zip: string } {
+        return this.address.getShippingCityAndZip(); // Delega
+      }
+      getPrimaryContactNumber(): string {
+        return this.contactInfo.getPrimaryPhoneNumber(); // Delega
+      }
+    }
+    class Order {
+      constructor(private customer: Customer) {}
+      getShippingLabelInfo(): string {
+        const shippingData = this.customer.getShippingInfo(); // Apenas um ponto para Customer
+        return `Ship to: ${shippingData.city}, ${shippingData.zip}`;
+      }
+      getCustomerPrimaryPhoneNumber(): string {
+          return this.customer.getPrimaryContactNumber(); // Apenas um ponto
+      }
+    }
+    ```
+    *Tabela de Impacto:*
+    | Benefício da Regra "Um Ponto Por Linha" | Descrição                                                                 |
+    | --------------------------------------- | ------------------------------------------------------------------------- |
+    | Menor Acoplamento                       | Classes dependem menos da estrutura interna de outras; interagem com "amigos" diretos. |
+    | Maior Encapsulamento                    | Detalhes internos dos objetos são mais bem protegidos e gerenciados por eles mesmos. |
+    | Melhor Manutenibilidade                 | Mudanças na estrutura de um objeto (ex: `Address`) têm impacto mais localizado. |
+    | Código Mais Legível (Tell, Don't Ask)   | Interações com objetos se tornam mais semânticas e focadas no "o quê" o objeto faz, não "como" ele obtém os dados. |
+
+### 5. Mantenha Todas as Entidades Pequenas (Classes e Métodos)
+
+*   **Regra:** Classes devem ser pequenas e coesas (idealmente menos de 100 linhas de código, preferencialmente menos de 50). Métodos devem ser ainda menores e mais focados (idealmente menos de 15 linhas, preferencialmente menos de 5-10).
+*   **Porquê:** Classes e métodos pequenos são inerentemente mais fáceis de entender, testar isoladamente e manter. Promovem alta coesão (elementos da classe/método trabalham juntos para um único propósito) e o Princípio da Responsabilidade Única (SRP). Se uma classe ou método está se tornando muito grande, é um forte indicador de que está acumulando responsabilidades demais e precisa ser dividido em unidades menores e mais especializadas.
+*   **Antes (Classe Grande, Método Longo - Conceitual):**
+    ```typescript
+    class UserProfileManager { // Potencialmente >200 linhas
+      // ... várias propriedades ...
+      constructor(/* ...várias dependências... */) {}
+
+      public displayUserProfile(userId: string): void { // Potencialmente > 50 linhas
+        // 1. Buscar dados do usuário (fetch, parsing)
+        // 2. Buscar preferências do usuário
+        // 3. Buscar histórico de pedidos
+        // 4. Formatar dados para exibição
+        // 5. Renderizar seção de informações pessoais
+        // 6. Renderizar seção de preferências
+        // 7. Renderizar histórico de pedidos
+        // 8. Lógica de logging
+        console.log("Exibindo perfil completo...");
+      }
+      // ... muitos outros métodos grandes ...
+    }
+    ```
+*   **Depois (Classes Menores, Métodos Curtos - Conceitual):**
+    ```typescript
+    // interface UserData { /* ... */ }
+    // interface UserPreferences { /* ... */ }
+    // interface OrderHistory { /* ... */ }
+
+    // class UserDataService { fetch(id: string): UserData { /* ... */ return {} as UserData; } } // < 50 linhas
+    // class PreferencesService { fetch(id: string): UserPreferences { /* ... */ return {} as UserPreferences; } } // < 50 linhas
+    // class OrderHistoryService { fetch(id: string): OrderHistory { /* ... */ return {} as OrderHistory; } } // < 50 linhas
+
+    // class UserProfileFormatter { // Focado na formatação
+    //   formatBasicInfo(data: UserData): FormattedBasicInfo { /* < 15 linhas */ return {} as FormattedBasicInfo; }
+    //   formatPreferences(prefs: UserPreferences): FormattedPrefs { /* < 15 linhas */ return {} as FormattedPrefs; }
+    //   formatOrderHistory(history: OrderHistory): FormattedHistory { /* < 15 linhas */ return {} as FormattedHistory; }
+    // }
+
+    // class UserProfileRenderer { // Focado na renderização
+    //   constructor(private formatter: UserProfileFormatter) {}
+    //   render(data: UserData, prefs: UserPreferences, history: OrderHistory): void { // < 15 linhas
+    //     const basic = this.formatter.formatBasicInfo(data);
+    //     const preferences = this.formatter.formatPreferences(prefs);
+    //     const orders = this.formatter.formatOrderHistory(history);
+    //     this.renderSection("User Info", basic);
+    //     this.renderSection("Preferences", preferences);
+    //     this.renderSection("Order History", orders);
+    //   }
+    //   private renderSection(title: string, content: any) { /* < 5 linhas - lógica de renderização real */ }
+    // }
+
+    // class UserProfileViewUseCase { // Orquestrador
+    //   constructor(
+    //     private dataService: UserDataService,
+    //     private prefsService: PreferencesService,
+    //     private historyService: OrderHistoryService,
+    //     private renderer: UserProfileRenderer
+    //   ) {}
+
+    //   public async display(userId: string): Promise<void> { // < 15 linhas
+    //     const userData = await this.dataService.fetch(userId);
+    //     const userPrefs = await this.prefsService.fetch(userId);
+    //     const orderHistory = await this.historyService.fetch(userId);
+    //     this.renderer.render(userData, userPrefs, orderHistory);
+    //     // Logging pode ser um aspecto separado (Aspect-Oriented Programming) ou um decorator
+    //   }
+    // }
+    ```
+    *Tabela de Impacto:*
+    | Benefício de Entidades Pequenas         | Descrição                                                                 |
+    | --------------------------------------- | ------------------------------------------------------------------------- |
+    | Alta Coesão e SRP                       | Cada classe/método foca em uma única responsabilidade bem definida.        |
+    | Melhor Legibilidade e Compreensão       | Código menor é mais fácil de ler, assimilar e entender o propósito.       |
+    | Facilidade de Teste Unitário            | Unidades menores e focadas são significativamente mais fáceis de testar isoladamente. |
+    | Manutenção Simplificada e Segura        | Mudanças são localizadas, reduzindo o risco de efeitos colaterais.        |
+    | Maior Reutilização Potencial            | Componentes menores e bem definidos tendem a ser mais reutilizáveis em diferentes contextos. |
+
+### 6. Nenhuma Classe Com Mais de Duas Variáveis de Instância
+
+*   **Regra:** Classes não devem ter mais do que duas variáveis de instância (propriedades de classe). Se uma classe parece precisar de mais, é um forte indicador de que essas variáveis podem (e devem) ser agrupadas em um novo objeto de valor ou entidade coesa que representa um conceito de domínio distinto.
+*   **Porquê:** Esta é uma das regras mais rigorosas e desafiadoras do Object Calisthenics, mas seu objetivo é forçar um altíssimo nível de coesão nas classes. Muitas variáveis de instância frequentemente indicam que a classe está gerenciando múltiplos conceitos ou responsabilidades. A aplicação desta regra ajuda a descobrir e modelar explicitamente esses conceitos, levando a um design de domínio mais rico e classes menores e mais focadas.
+*   **Antes:**
+    ```typescript
+    class ReportConfig {
+      // Potencialmente muitas variáveis de instância para configurar um relatório
+      private reportTitle: string;
+      private outputFormat: 'PDF' | 'CSV' | 'HTML';
+      private includeHeader: boolean;
+      private headerText: string; // Só relevante se includeHeader for true
+      private includeFooter: boolean;
+      private footerText: string; // Só relevante se includeFooter for true
+      private dataFilterStartDate: Date;
+      private dataFilterEndDate: Date;
+      // ... e talvez mais ...
+
+      constructor(title: string, format: 'PDF' | 'CSV' | 'HTML', incHeader: boolean, hText: string, incFooter: boolean, fText: string, startDate: Date, endDate: Date) {
+        this.reportTitle = title; this.outputFormat = format;
+        this.includeHeader = incHeader; this.headerText = hText;
+        // ... etc ...
+      }
+    }
+    ```
+*   **Depois:**
+    ```typescript
+    // Value Objects para conceitos menores
+    class ReportTitle { constructor(public readonly value: string) { /* validação */ } }
+    enum OutputFormat { PDF = 'PDF', CSV = 'CSV', HTML = 'HTML' }
+    class HeaderConfig { // Agrupa configurações do cabeçalho
+      constructor(public readonly include: boolean, public readonly text?: string) {
+        if (include && !text) throw new Error("Header text required if header is included.");
+      }
+      static noHeader(): HeaderConfig { return new HeaderConfig(false); }
+      static withText(text: string): HeaderConfig { return new HeaderConfig(true, text); }
+    }
+    class FooterConfig { // Agrupa configurações do rodapé
+      constructor(public readonly include: boolean, public readonly text?: string) {
+        if (include && !text) throw new Error("Footer text required if footer is included.");
+      }
+      static noFooter(): FooterConfig { return new FooterConfig(false); }
+      static withText(text: string): FooterConfig { return new FooterConfig(true, text); }
+    }
+    class DateRangeFilter { // Agrupa o filtro de data
+      constructor(public readonly startDate: Date, public readonly endDate: Date) {
+        if (endDate < startDate) throw new Error("End date must be after start date.");
+      }
+    }
+
+    // Classe principal agora com menos (ou idealmente duas) variáveis de instância,
+    // que são elas mesmas objetos bem definidos.
+    // Se ainda tiver mais de duas, pode ser dividida ainda mais.
+    // Ex: ReportMetadata (title, format) e ReportStructure (header, footer, dataFilter)
+    class ReportMetadata {
+        constructor(
+            public readonly title: ReportTitle,
+            public readonly format: OutputFormat
+        ){}
+    }
+    class ReportLayout { // Exemplo de outra classe com 2 VOs
+        constructor(
+            public readonly header: HeaderConfig,
+            public readonly footer: FooterConfig
+        ){}
+    }
+    // A classe ReportConfig original poderia ser um orquestrador ou builder
+    // que usa essas classes menores, ou ser decomposta nelas.
+    // Para estritamente 2 variáveis, ReportConfig poderia ser:
+    class ReportConfig {
+        constructor(
+            public readonly metadata: ReportMetadata, // VO 1
+            public readonly layout: ReportLayout     // VO 2
+            // public readonly dataFilter: DateRangeFilter // Se adicionar esta, já são 3.
+                                                      // Talvez layout inclua o dataFilter ou
+                                                      // ReportConfig precise ser repensado.
+        ){}
+    }
+    ```
+    *Tabela de Impacto:*
+    | Benefício de Poucas Variáveis de Instância | Descrição                                                              |
+    | ------------------------------------------ | ---------------------------------------------------------------------- |
+    | Coesão Máxima e SRP Extremo                | Garante que a classe está focada em um conceito único e altamente coeso. |
+    | Descoberta de Conceitos de Domínio         | Ajuda a identificar e modelar explicitamente novos Objetos de Valor ou Entidades que estavam implícitos. |
+    | Redução de Complexidade da Classe          | Classes com menos estado interno são geralmente mais simples de entender e testar. |
+    | Clareza de Responsabilidade                | Torna o propósito e as responsabilidades da classe extremamente claros. |
+    | Facilita a Imutabilidade                   | Classes com poucas dependências de estado são mais fáceis de tornar imutáveis. |
+
+## Validação da Camada de Domínio (Entidades e Objetos de Valor)
+
+*   **Autovalidação:**
+    *   **Regra:** Entidades e Objetos de Valor (VOs) na Camada de Domínio (`src_refactored/core/domain/`) são responsáveis por garantir sua própria consistência interna e aderir a invariantes de negócios. Eles devem validar seus dados na criação (construtor ou método de fábrica estático) ou em mudanças significativas de estado.
+    *   **Porquê:** Centraliza as regras de negócio e as invariantes nos próprios objetos de domínio, tornando o domínio mais rico, robusto e garantindo que um objeto nunca exista em estado inválido. Isso previne a propagação de dados inválidos pelo sistema.
+*   **Zod para Validação de Domínio:**
+    *   **Regra:** Zod é a biblioteca padrão para definir esquemas de validação concisos e poderosos dentro da Camada de Domínio. VOs e Entidades devem usar esquemas Zod em seus métodos de fábrica `create` (preferencial) ou construtores para validar dados de entrada. Falhas de validação devem lançar erros específicos do domínio (ex: `ValueError`, `EntityError`), que podem encapsular os detalhes do erro Zod.
+    *   **Porquê:** Zod fornece uma forma declarativa, type-safe e poderosa de definir e aplicar validações complexas, com excelente integração com TypeScript para inferência de tipos. Isso mantém as regras de validação próximas aos dados que elas protegem.
+*   **Confiança do Caso de Uso na Validação do Domínio:**
+    *   **Regra:** Casos de Uso da Camada de Aplicação devem confiar na validação realizada pelos VOs e Entidades para regras de negócio e consistência de dados. Eles podem usar Zod para validar a forma e os tipos de DTOs de entrada (input port), mas a lógica de negócio central e as invariantes são responsabilidade do domínio.
+    *   **Porquê:** Evita duplicação de lógica de validação em múltiplas camadas e mantém os casos de uso focados na orquestração de interações com o domínio, não na validação detalhada de regras de negócio que pertencem às entidades.
+*   **Benefícios:** Esta abordagem garante que os objetos de domínio sejam sempre consistentes e válidos, reduz a duplicação de código de validação, torna o sistema mais fácil de manter e entender, e aumenta a confiabilidade geral da aplicação.
+
+## Padrão de Resposta e Tratamento de Erros de Caso de Uso
+
+*   **DTO de Resposta Padronizado:**
+    *   **Regra:** Todos os Casos de Uso da Camada de Aplicação (`src_refactored/application/use-cases/`) devem retornar um objeto de resposta padronizado, como `IUseCaseResponse<TOutput, TErrorDetails>` (definida em `src_refactored/shared/application/use-case-response.dto.ts`). Este objeto indica sucesso/falha e carrega os dados de saída ou detalhes do erro.
+    *   **Porquê:** Cria um contrato consistente e previsível para os consumidores dos casos de uso (e.g., camada de apresentação, controladores de API, outros serviços), simplificando o tratamento de resultados de sucesso e de condições de falha de forma uniforme.
+*   **Implementação via `UseCaseWrapper` (Decorator ou Função de Ordem Superior):**
+    *   **Regra:** A lógica de `try/catch` para erros genéricos, logging de erros e o mapeamento de exceções (tanto erros de domínio esperados quanto exceções inesperadas) para o DTO de erro padronizado devem ser centralizados, idealmente através de um Decorator (se a sintaxe for suportada e desejada) ou uma função de ordem superior que "envolve" a execução do caso de uso. Casos de uso focam na lógica de negócio e lançam exceções específicas do domínio ou de aplicação em caso de falha.
+    *   **Porquê:** Mantém os casos de uso limpos e focados em sua responsabilidade principal (SRP), evita boilerplate de tratamento de erro repetitivo em cada caso de uso (DRY), e garante um tratamento de erro uniforme e consistente em toda a camada de aplicação.
+*   **Referência ADR:** ADR-008 ("Padrão de Tratamento de Erros e Resposta para Casos de Uso") detalha este padrão e a hierarquia de erros (`CoreError`).
+*   **Benefícios:** Consistência na comunicação de resultados, clareza no tratamento de erros, manutenibilidade melhorada devido à centralização da lógica de erro, e casos de uso mais limpos e focados.
+
+## Melhores Práticas Específicas de Tecnologia/Ferramenta
+
+### Electron.js
+*   **Separar Processos Principal e de Renderização:**
+    *   **Regra:** Separe estritamente a lógica. O processo principal lida com o ciclo de vida do aplicativo, gerenciamento de janelas e APIs nativas do sistema operacional. Processos de renderização são responsáveis exclusivamente pela interface do usuário (UI) de cada janela. Evite misturar preocupações.
+    *   **Porquê:** Melhora a segurança (sandboxing do renderizador, que pode executar código de terceiros se carregar conteúdo web), estabilidade (um crash no renderizador não derruba o processo principal e, consequentemente, a aplicação inteira) e performance (distribuição de carga e responsividade da UI).
+*   **Comunicação IPC Segura:**
+    *   **Regra:** Use `ipcMain` (no processo principal) e `ipcRenderer` (em scripts de preload) para toda comunicação entre os processos. Defina nomes de canal claros e descritivos. Utilize `contextBridge.exposeInMainWorld` no script de preload para expor APIs do processo principal ao renderizador de forma segura e controlada, em vez de habilitar `nodeIntegration` no renderizador.
+    *   **Porquê:** Previne que o código do renderizador acesse APIs Node.js e do Electron diretamente e de forma irrestrita, o que é uma grande vulnerabilidade de segurança. O `contextBridge` garante que apenas as funcionalidades explicitamente expostas estejam disponíveis, mantendo o isolamento de contexto.
+*   **Uso do Context Bridge:**
+    *   **Regra:** Exponha apenas as funções e objetos estritamente necessários e seguros do processo principal para o renderizador via `contextBridge` no script de preload. Evite expor `ipcRenderer` diretamente, módulos Node.js inteiros (como `fs`, `child_process`), ou objetos complexos com referências internas ao processo principal.
+    *   **Porquê:** Garante que apenas as APIs absolutamente necessárias sejam expostas ao renderizador, minimizando a superfície de ataque e reforçando o princípio do menor privilégio para o código que roda no renderizador.
+*   **Manuseio de Recursos:**
+    *   **Regra:** Gerencie recursos da aplicação (como acesso a arquivos do sistema, conexões de banco de dados, configurações sensíveis) primariamente no processo principal. Processos de renderização devem solicitar acesso ou dados desses recursos via IPC, e o processo principal atua como um gatekeeper.
+    *   **Porquê:** Centraliza o gerenciamento de recursos sensíveis ou pesados, melhorando a segurança (renderizador não acessa diretamente), o controle sobre o uso desses recursos, a consistência dos dados e permite que o processo principal gerencie concorrência ou bloqueios se necessário.
+*   **Considerações de Performance:**
+    *   **Regra:** Otimize o tempo de inicialização da aplicação e o uso de recursos. Carregue módulos preguiçosamente (`Lazy-loading`) quando possível, minimize operações síncronas bloqueantes no processo principal (especialmente durante a inicialização), e gerencie a memória eficientemente, especialmente se a aplicação puder ter múltiplas janelas ou processos de renderização.
+    *   **Porquê:** Impacta diretamente a experiência do usuário; uma aplicação desktop responsiva e eficiente, que inicia rapidamente e não consome recursos excessivos, é crucial para a satisfação e retenção do usuário.
+*   **Tratamento de Erros e Logging:**
+    *   **Regra:** Implemente tratamento de erros robusto em ambos os processos (principal e renderizador). Utilize mecanismos para capturar exceções não tratadas em cada processo. Centralize o logging de erros e eventos importantes para facilitar a depuração e monitoramento (ex: usando um logger que pode escrever para console e/ou arquivo).
+    *   **Porquê:** Permite identificar e diagnosticar problemas de forma eficaz, tanto durante o desenvolvimento quanto em produção (se logs forem coletados), melhorando a estabilidade e a capacidade de manutenção da aplicação.
+*   **Integração de Módulo Nativo:**
+    *   **Regra:** Ao usar módulos Node.js nativos (escritos em C/C++), garanta que sejam corretamente reconstruídos para a versão específica do Node.js usada pelo Electron (usando ferramentas como `electron-rebuild`). Idealmente, mantenha o uso de módulos nativos restrito ao processo principal.
+    *   **Porquê:** Módulos nativos precisam ser compilados especificamente para o ambiente Electron para funcionar corretamente. Restringi-los ao processo principal simplifica o processo de build, a distribuição da aplicação e evita potenciais problemas de segurança ou compatibilidade se expostos diretamente ao renderizador.
+
+### React
+*   **Componentes Funcionais & Hooks:**
+    *   **Regra:** Sempre use componentes funcionais e React Hooks (como `useState`, `useEffect`, `useContext`, `useCallback`, `useMemo`, etc.) para criar componentes UI, gerenciar estado e lidar com efeitos colaterais. Evite componentes de classe em novo código.
+    *   **Porquê:** Hooks oferecem uma maneira mais direta, concisa e funcional de reutilizar lógica com estado e lidar com o ciclo de vida e efeitos colaterais dos componentes, resultando em código geralmente mais legível, testável e fácil de compor.
+*   **Estrutura de Componentes:**
+    *   **Regra:** Organize componentes logicamente, seguindo padrões como Atomic Design (átomos, moléculas, organismos, templates, páginas) ou agrupando por funcionalidade (feature-based). Cada componente deve idealmente aderir ao Princípio da Responsabilidade Única (SRP), focando em uma única tarefa ou aspecto da UI. Quebre componentes complexos em componentes menores e mais focados.
+    *   **Porquê:** Melhora a reutilização, testabilidade e manutenibilidade dos componentes. Uma estrutura clara torna a base de código mais fácil de navegar, entender e modificar sem causar efeitos colaterais inesperados.
+*   **Evitar Prop Drilling:**
+    *   **Regra:** Minimize o "prop drilling" (passar props por múltiplos níveis de componentes aninhados que não usam diretamente essas props, apenas as repassam). Para dados que são necessários em muitos lugares distantes na árvore de componentes, considere `React Context` (para dados que não mudam com frequência extrema) ou bibliotecas de gerenciamento de estado mais robustas (como Zustand, Jotai, Redux).
+    *   **Porquê:** Prop drilling excessivo torna os componentes intermediários menos reutilizáveis, mais acoplados à estrutura de dados dos pais e muito mais difíceis de refatorar, pois a assinatura de muitos componentes precisa ser alterada.
+*   **Memoização para Performance:**
+    *   **Regra:** Use `React.memo` para componentes funcionais, `useCallback` para funções passadas como props, e `useMemo` para valores computados de forma custosa, mas faça-o criteriosamente. Aplique memoização apenas quando o custo do recálculo/re-render for comprovadamente significativo (através de profiling) e puder ser evitado sem introduzir complexidade excessiva.
+    *   **Porquê:** Renderizações desnecessárias de componentes e recálculos de funções/valores podem levar a problemas de performance em aplicações React complexas. No entanto, a memoização em si também tem um custo (overhead de comparação de props/dependências), então seu uso indiscriminado pode ser prejudicial.
+*   **Prop `key` para Listas:**
+    *   **Regra:** Sempre forneça uma prop `key` estável, única dentro da lista e previsível ao renderizar listas de elementos React. A `key` deve idealmente ser derivada de um ID único e imutável do item de dados que o elemento representa. Evite usar o índice do array como `key` se a lista puder ser reordenada, itens puderem ser adicionados/removidos do meio, ou se os itens tiverem estado interno.
+    *   **Porquê:** Keys são cruciais para o algoritmo de reconciliação do React. Elas ajudam o React a identificar eficientemente quais itens foram alterados, adicionados ou removidos, otimizando as atualizações da DOM e evitando comportamentos inesperados com o estado interno dos componentes da lista (ex: perda de foco em inputs).
+*   **Acessibilidade (A11y):**
+    *   **Regra:** Priorize a acessibilidade web (a11y) em todos os componentes e interações da UI. Use HTML semântico (e.g., `<button>`, `<nav>`, `<article>`), atributos ARIA (`aria-label`, `aria-hidden`, `role`, etc.) quando o HTML semântico não for suficiente, e garanta navegação completa por teclado, contraste adequado de cores e compatibilidade com leitores de tela.
+    *   **Porquê:** Torna a aplicação utilizável por um público mais amplo, incluindo pessoas com diversas deficiências (visuais, motoras, auditivas, cognitivas). Além de ser uma prática inclusiva e ética, é um requisito legal em muitas jurisdições e contextos.
+*   **Renderização Condicional:**
+    *   **Regra:** Use técnicas de renderização condicional claras e legíveis. Para lógica simples, operadores ternários (`condição ? <ComponenteA /> : <ComponenteB />`) ou o operador `&&` (`condição && <ComponenteA />`) são aceitáveis dentro do JSX. Para lógica mais complexa ou múltiplas condições, considere extrair a lógica para variáveis descritivas antes do `return` do JSX, ou até mesmo para funções auxiliares ou componentes menores.
+    *   **Porquê:** JSX excessivamente complexo e aninhado com muita lógica condicional inline pode se tornar rapidamente difícil de ler, entender e manter. Clareza e legibilidade são fundamentais para a manutenibilidade.
+*   **Gerenciamento de Estado:**
+    *   **Regra:** Gerencie o estado local do componente (que não é necessário por outros componentes) com `useState`. Para estado que precisa ser compartilhado entre alguns componentes irmãos ou entre pai e filho distante, considere levantar o estado (lifting state up) para o ancestral comum mais próximo. Para estado global complexo ou que afeta muitas partes não relacionadas da aplicação, utilize `React Context` com `useReducer` para lógica de atualização mais complexa, ou uma biblioteca de gerenciamento de estado dedicada (e.g., Zustand, Jotai, Redux Toolkit).
+    *   **Porquê:** Escolher a ferramenta e o escopo corretos para o gerenciamento de estado simplifica o fluxo de dados, melhora a performance (evitando re-renders desnecessários de partes não afetadas da UI) e facilita a depuração e o rastreamento de como o estado muda ao longo do tempo.
+*   **Hooks Customizados para Reuso de Lógica:**
+    *   **Regra:** Extraia lógica reutilizável que envolve estado (usando `useState`, `useReducer`) e/ou efeitos colaterais (`useEffect`) para Hooks customizados. Nomeie-os começando com `use` (e.g., `useFormInput`, `useFetchData`, `useWindowSize`).
+    *   **Porquê:** Promove o DRY (Don't Repeat Yourself), organiza melhor a lógica relacionada ao estado e efeitos colaterais que pode ser compartilhada entre múltiplos componentes, facilita testes dessa lógica de forma isolada e torna os componentes que os utilizam mais limpos, focados na apresentação e mais fáceis de entender.
+*   **Efeitos Colaterais com `useEffect`:**
+    *   **Regra:** Manipule todos os efeitos colaterais (como busca de dados, inscrições a eventos, timers, e manipulações diretas do DOM que não podem ser feitas declarativamente) dentro de hooks `useEffect`. Sempre forneça um array de dependências correto e completo para controlar quando o efeito é re-executado. Implemente funções de limpeza (cleanup functions) retornadas pelo `useEffect` para evitar memory leaks ou comportamento inesperado (e.g., cancelar inscrições a eventos, limpar timers, abortar requisições fetch).
+    *   **Porquê:** `useEffect` fornece um ciclo de vida claro e declarativo para efeitos colaterais dentro de componentes funcionais, garantindo que eles sejam executados e limpos de forma previsível e eficiente em relação ao ciclo de vida do componente e suas dependências. Um array de dependências incorreto ou ausente é uma fonte comum de bugs difíceis de rastrear (loops infinitos, closures obsoletas, memory leaks).
+
+### Vite.js
+*   **Recursos Nativos do Vite:**
+    *   **Regra:** Utilize as importações de módulo ES nativas do Vite para Hot Module Replacement (HMR) extremamente rápido e um servidor de desenvolvimento eficiente.
+    *   **Porquê:** Proporciona uma experiência de desenvolvimento significativamente mais ágil e responsiva em comparação com bundlers tradicionais, pois não precisa re-empacotar toda a aplicação a cada mudança, apenas os módulos afetados.
+*   **Configuração (`vite.config.ts`):**
+    *   **Regra:** Mantenha `vite.config.ts` (ou `.js`/`.mts`) limpo, organizado e focado. Use plugins do ecossistema Vite para estender funcionalidades quando necessário (ex: para React, SVGR, otimizações específicas).
+    *   **Porquê:** Facilita o entendimento e a manutenção da configuração de build e desenvolvimento. Uma configuração clara torna mais fácil diagnosticar problemas de build ou otimizar o processo.
+*   **Manuseio de Ativos:**
+    *   **Regra:** Gerencie ativos estáticos usando o manuseio de ativos embutido do Vite. Coloque ativos na pasta `public/` para que sejam copiados para a raiz do diretório de build sem processamento e acessíveis via caminhos absolutos. Importe ativos diretamente no código JavaScript/TypeScript (ex: `import logoUrl from './logo.svg'`) para que sejam incluídos no grafo de dependências, processados, hasheados para cache busting e otimizados.
+    *   **Porquê:** Oferece uma integração eficiente e flexível com o processo de build, com versionamento automático de assets importados (cache busting) e fácil acesso a assets públicos que não precisam de processamento.
+*   **Variáveis de Ambiente:**
+    *   **Regra:** Use `import.meta.env` para acessar variáveis de ambiente no código do cliente, seguindo a convenção do Vite de prefixá-las com `VITE_` (e.g., `VITE_API_URL`, `VITE_FEATURE_FLAG_XYZ`) para que sejam expostas ao código do frontend durante o build.
+    *   **Porquê:** É a maneira padronizada e segura de expor variáveis de ambiente para o código do cliente. O prefixo `VITE_` previne o vazamento acidental de variáveis de ambiente sensíveis do servidor ou do sistema de build que não deveriam estar acessíveis no frontend.
+
+### Zod
+*   **Abordagem Schema First:**
+    *   **Regra:** Sempre defina um esquema Zod para validação de entrada antes de processar quaisquer dados externos (recebidos de APIs, formulários de usuário, chamadas IPC) ou dados que cruzam limites de camadas importantes dentro da aplicação.
+    *   **Porquê:** Garante a integridade, a forma esperada e os tipos dos dados desde o ponto de entrada, prevenindo erros em tempo de execução devido a dados malformados ou inesperados. Os esquemas Zod também servem como uma documentação clara e concisa da estrutura de dados esperada.
+*   **Esquemas de Objeto Estritos (`.strict()`):**
+    *   **Regra:** Prefira `z.object({...}).strict()` para esquemas de objeto, a menos que haja uma razão explícita e bem compreendida para permitir chaves desconhecidas (nesse caso, documente o porquê).
+    *   **Porquê:** Ajuda a capturar dados inesperados ou chaves extras que podem ter sido enviadas inadvertidamente, aumentando a robustez da validação e prevenindo que dados não modelados se propaguem pela aplicação.
+*   **Inferência de Tipo (`z.infer<>`):**
+    *   **Regra:** Utilize `z.infer<typeof seuSchema>` do Zod para derivar tipos TypeScript diretamente de seus esquemas de validação Zod. Evite definir manualmente interfaces/tipos que espelham esquemas Zod.
+    *   **Porquê:** Mantém os tipos TypeScript e as regras de validação Zod perfeitamente sincronizados (DRY - Don't Repeat Yourself). Qualquer alteração no esquema Zod reflete automaticamente no tipo TypeScript, reduzindo a chance de inconsistências e erros de dessincronização.
+*   **Refinamento para Lógica Complexa (`.refine()`, `.superRefine()`):**
+    *   **Regra:** Use `.refine()` (para validações em um único campo após as checagens de tipo) ou `.superRefine()` (para validações que envolvem múltiplos campos do objeto ou lógica mais complexa) para implementar validações customizadas que vão além das verificações de tipo e forma básicas.
+    *   **Porquê:** Permite encapsular regras de validação complexas e específicas do domínio (ex: uma data final deve ser posterior à data inicial, a soma de percentuais não deve exceder 100) dentro do próprio esquema, mantendo a lógica de validação centralizada, coesa com a definição da forma dos dados e reutilizável.
+*   **Customização de Mensagem de Erro:**
+    *   **Regra:** Forneça mensagens de erro customizadas e descritivas nos esquemas Zod, especialmente para validações cujos erros podem ser expostos ao usuário final ou necessitam de clareza em logs de depuração. Use o parâmetro `message` ou `errorMap` de Zod.
+    *   **Porquê:** Melhora a experiência do desenvolvedor durante a depuração, fornecendo contexto sobre a falha de validação, e permite apresentar feedback mais útil e acionável ao usuário sobre entradas de dados inválidas, em vez de mensagens genéricas.
+*   **Campos Opcionais, Anuláveis e Padrão (`.optional()`, `.nullable()`, `.default()`):**
+    *   **Regra:** Distinga claramente e use corretamente os modificadores `.optional()` (o campo pode estar ausente), `.nullable()` (o campo pode ser `null`), e `.default(valor)` (o campo terá um valor padrão se ausente na entrada) nos esquemas Zod, conforme a necessidade semântica do modelo de dados.
+    *   **Porquê:** Garante que o esquema reflita precisamente a estrutura de dados esperada e como lidar com valores ausentes, nulos ou que devem ter um fallback padrão, prevenindo erros de lógica e tornando o contrato de dados mais explícito.
+*   **Transformações (`.transform()`, `.pipe()` com `z.coerce`):**
+    *   **Regra:** Use `.transform()` para realizar transformações de dados (e.g., sanitização, conversão de tipo segura, formatação de strings) *após* a validação ser bem-sucedida. Para coerção de tipos antes da validação (ex: string para número), use `z.coerce` (disponível em Zod 3.20+), frequentemente dentro de um `.pipe()`.
+    *   **Porquê:** `.transform()` assegura que as transformações sejam aplicadas apenas a dados que já foram validados como corretos. `z.coerce` permite que dados de entrada (como strings de query params) sejam convertidos para o tipo esperado antes da validação principal, simplificando o esquema. Isso mantém a lógica de validação e transformação separada mas encadeada de forma segura e explícita.
+*   **Validação em Pontos de Entrada/Limites de Camada:**
+    *   **Regra:** Realize a validação com esquemas Zod no ponto de entrada mais cedo possível para dados externos (e.g., em handlers IPC, controladores de API HTTP, ao receber dados de formulários da UI) e idealmente ao cruzar limites entre camadas arquiteturais importantes (ex: DTOs de entrada para casos de uso).
+    *   **Porquê:** Previne que dados inválidos ou malformados se propaguem pela aplicação, garantindo que as camadas internas e a lógica de negócios operem sempre com dados já validados e conformes com a estrutura esperada, aumentando a robustez e segurança do sistema.
+
+## Qualidade do Código e Refatoração
+
+*   **Testes:**
+    *   **Regra:** Novas funcionalidades devem ser acompanhadas de testes unitários e/ou de integração que validem seu comportamento e casos de borda. Correções de bugs devem, idealmente, incluir um novo teste que demonstre o bug (reproduzindo a falha) e verifique a correção.
+    *   **Porquê:** Garante que o código funcione como esperado, previne regressões (introdução de novos bugs em funcionalidades existentes ao modificar o código), facilita refatorações seguras (testes atuam como uma rede de segurança) e serve como documentação viva do comportamento esperado. Consulte o [Guia de Testes](./03-testing-guide.md) (a ser criado/movido).
+*   **Revisão de Código:**
+    *   **Regra:** Todos os Pull Requests (ou Merge Requests) devem ser revisados por pelo menos um outro desenvolvedor qualificado da equipe antes de serem mesclados à branch principal. (Ver seção "Diretrizes para Revisão de Código (Code Review)" para mais detalhes).
+    *   **Porquê:** (Já coberto em Princípios Fundamentais) É uma etapa crucial para a detecção de bugs, melhoria da qualidade do código, compartilhamento de conhecimento, disseminação de boas práticas e garantia de conformidade com os padrões estabelecidos.
+*   **Refatoração Contínua:**
+    *   **Regra:** Dedique tempo para refatorar o código regularmente e reduzir o débito técnico acumulado. Siga a "Boy Scout Rule": deixe o código sempre um pouco mais limpo do que você o encontrou.
+    *   **Porquê:** (Já coberto em Princípios Fundamentais) Mantém o código saudável, flexível, fácil de entender e adaptável a futuras mudanças, prevenindo que se torne um "legado" difícil e custoso de manter.
+
+## Diretrizes para Revisão de Código (Code Review)
+
+**Objetivo da Revisão de Código:** Garantir a qualidade, conformidade com os padrões, identificar bugs potenciais, promover o compartilhamento de conhecimento e manter a consistência do codebase.
+
+**Checklist para Revisores:**
+
+*   [ ] **Conformidade com `coding-standards.md`:** Aderência a todos os padrões de nomenclatura, estilo, formatação, Object Calisthenics, etc?
+*   [ ] **Clareza e Legibilidade:** O código é fácil de entender? Nomes são descritivos? A lógica é direta?
+*   [ ] **Corretude:** A implementação atende aos requisitos da tarefa/issue? Cobre casos de borda?
+*   [ ] **Testes:** Existem testes unitários/integração? São adequados e passam?
+*   [ ] **Performance:** Há alguma preocupação óbvia de performance? Loops desnecessários, consultas ineficientes?
+*   [ ] **Segurança:** Há alguma vulnerabilidade de segurança aparente (ex: XSS, injeção de SQL, tratamento inadequado de dados sensíveis)?
+*   [ ] **Documentação:** Comentários (se necessários) são claros e em inglês? Código autoexplicativo é priorizado?
+*   [ ] **Mensagens de Commit:** São semânticas e descritivas?
+*   [ ] **Princípios de Design:** SOLID, DRY, KISS, YAGNI foram considerados?
+*   [ ] **Tratamento de Erros:** Erros são tratados de forma robusta e consistente?
+
+**Tom da Revisão:** Construtivo, respeitoso e focado no código, não no autor. O objetivo é melhorar o produto e ajudar a equipe a crescer, não criticar. Forneça sugestões claras e acionáveis.
+
+## Plugins Recomendados para Linting e Formatação
+
+Para auxiliar na aplicação automática e validação destes padrões, recomendamos a configuração e uso dos seguintes plugins e ferramentas no ambiente de desenvolvimento e no pipeline de CI/CD:
+
+*   **ESLint (`eslint.config.js`):** Principal ferramenta para análise estática e imposição de regras de código.
+    *   `@typescript-eslint/eslint-plugin` e `@typescript-eslint/parser`: Essenciais para projetos TypeScript. Permitem que o ESLint entenda a sintaxe do TypeScript e aplicam regras específicas para a linguagem.
+        *   **Porquê:** Garante conformidade com as melhores práticas do TypeScript, detecta erros comuns relacionados a tipos e funcionalidades específicas do TS.
+    *   `eslint-plugin-import`: Ajuda a organizar, validar e impor um padrão para as declarações de `import`. (Ex: `import/order` para ordenar importações, `import/no-unresolved` para caminhos inválidos, `import/no-duplicates` para evitar importações repetidas).
+        *   **Porquê:** Mantém as importações organizadas, legíveis e previne erros de caminhos inválidos ou redundâncias.
+    *   `eslint-plugin-react` e `eslint-plugin-react-hooks`: Indispensáveis para projetos React.
+        *   **Porquê:** Impõe as regras do React, como o uso correto de hooks (ex: `react-hooks/rules-of-hooks`), convenções de JSX, e outras boas práticas específicas do React.
+    *   `eslint-plugin-jsx-a11y`: Para verificar e impor padrões de acessibilidade em código JSX.
+        *   **Porquê:** Ajuda a criar interfaces de usuário mais acessíveis para todos os usuários, incluindo aqueles com deficiências, seguindo as diretrizes WCAG.
+    *   **Pesquisa e Sugestão:**
+        *   "`eslint-plugin-sonarjs`: Para detecção de "code smells" e melhoria da manutenibilidade.
+            *   **Porquê:** Identifica lógica complexa ou repetitiva, duplicação de código, e outros padrões que podem ser simplificados para tornar o código mais robusto e fácil de manter."
+        *   "`eslint-plugin-security` ou `eslint-plugin-security-node`: Para identificar potenciais vulnerabilidades de segurança no código Node.js ou JavaScript em geral.
+            *   **Porquê:** Auxilia na prevenção de falhas comuns de segurança, como uso de `eval` perigoso, detecção de regex inseguras, ou potenciais pontos de injeção."
+    *   **Para Nomenclatura de Arquivos (kebab-case):**
+        *   "Atualmente, não há um plugin ESLint padrão amplamente adotado que imponha `kebab-case` em nomes de arquivos de forma universal e facilmente configurável para exceções complexas. Isso geralmente requer scripts customizados (ver `docs/developer/adaptation-plan.md`) ou verificações em hooks de pré-commit (como com `lint-staged`). No entanto, pode-se investigar:
+            *   `eslint-plugin-filenames-simple`: Permite configurar uma `filenamePattern` usando regex. Ex: `{'case': 'kebab-case', 'name': '/^[a-z0-9\\-]+$|^[A-Z][a-zA-Z0-9]+$/'}` (permitindo kebab ou PascalCase).
+            *   `eslint-plugin-unicorn` (regra `unicorn/filename-case`): Oferece várias opções de casing, incluindo `kebabCase`. Pode ser configurado para ignorar certos padrões.
+            *   Criar uma regra customizada de ESLint se a necessidade for crítica e as opções existentes não forem suficientes.
+        *   **Porquê:** Garante consistência visual na estrutura de arquivos, facilita a localização de arquivos e adere ao padrão definido neste documento."
+    *   **Para Object Calisthenics:**
+        *   "Algumas regras de Object Calisthenics (ex: `no-else-return` do ESLint core, `max-depth` para níveis de indentação, `max-lines-per-function`, `max-classes-per-file`, `complexity` para complexidade ciclomática) podem ser configuradas diretamente no ESLint ou com plugins como `eslint-plugin-sonarjs`. Outras regras (ex: 'Envolver Todas as Primitivas', 'Um Ponto Por Linha', 'Não Mais Que Duas Variáveis de Instância') são mais conceituais e requerem disciplina da equipe e verificação em revisões de código."
+        *   **Porquê:** Promove código mais limpo, modular, com responsabilidades bem definidas e, consequentemente, mais fácil de manter e testar.
+*   **Prettier:** Ferramenta opinativa para formatação de código automática e consistente.
+    *   **Porquê:** Elimina debates sobre estilo de formatação, garante um padrão visual uniforme em toda a codebase e permite que os desenvolvedores se concentrem na lógica.
+    *   **Integração:** Deve ser integrado com ESLint usando `eslint-config-prettier` para desabilitar regras de estilo do ESLint que possam conflitar com as decisões do Prettier.
+*   **EditorConfig (`.editorconfig`):** Arquivo para manter configurações básicas de edição (como indentação, tipo de fim de linha, charset) consistentes entre diferentes editores e IDEs.
+    *   **Porquê:** Evita problemas de formatação e inconsistências causados por configurações divergentes de editores entre os membros da equipe.
+*   **Husky & lint-staged:** Ferramentas para configurar Git hooks.
+    *   **Porquê:** Permitem rodar linters, formatadores e testes automaticamente antes dos commits ou pushes, garantindo que apenas código conforme e testado seja enviado para o repositório, melhorando a qualidade e prevenindo a introdução de erros na base de código principal.
+*   **Exemplo de Configuração (Conceitual para `eslint.config.js` em formato Flat Config):**
+    ```javascript
+    // Exemplo meramente ilustrativo de como algumas regras poderiam ser adicionadas
+    // import globals from 'globals';
+    // import tseslint from 'typescript-eslint';
+    // import eslintPluginReactHooks from 'eslint-plugin-react-hooks';
+    // import eslintPluginJsxA11y from 'eslint-plugin-jsx-a11y';
+    // import eslintPluginFilenamesSimple from 'eslint-plugin-filenames-simple';
+    // // ... outros imports de plugins ...
+
+    // export default tseslint.config(
+    //   {
+    //     ignores: ['dist/**', 'node_modules/**', '*.config.js'],
+    //   },
+    //   {
+    //     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
+    //     languageOptions: {
+    //       globals: { ...globals.browser, ...globals.node },
+    //       parser: tseslint.parser,
+    //       parserOptions: {
+    //         project: './tsconfig.json', // ou tsconfig.eslint.json
+    //         ecmaFeatures: { jsx: true },
+    //       },
+    //     },
+    //     plugins: {
+    //       '@typescript-eslint': tseslint.plugin,
+    //       'react-hooks': eslintPluginReactHooks,
+    //       'jsx-a11y': eslintPluginJsxA11y,
+    //       'filenames-simple': eslintPluginFilenamesSimple,
+    //       // 'import': eslintPluginImport,
+    //       // 'unicorn': eslintPluginUnicorn,
+    //       // 'sonarjs': eslintPluginSonarjs,
+    //     },
+    //     rules: {
+    //       '@typescript-eslint/no-explicit-any': 'warn',
+    //       '@typescript-eslint/explicit-function-return-type': ['warn', { allowExpressions: true }],
+    //       'react-hooks/rules-of-hooks': 'error',
+    //       'react-hooks/exhaustive-deps': 'warn',
+    //       'max-depth': ['warn', { max: 3 }], // Object Calisthenics: Um nível de indentação (aproximado)
+    //       'no-else-return': 'warn',           // Object Calisthenics: Não use ELSE
+    //       'complexity': ['warn', 10],         // Limita complexidade ciclomática
+    //       'filenames-simple/filename-case': ['error', { 'case': 'kebab-case' }],
+    //       // 'unicorn/filename-case': ['error', { case: 'kebabCase', ignore: ['\\.config\\.js$', '\\[.*\\]\\.tsx?$'] }],
+    //       // ... outras regras ...
+    //     },
+    //   }
+    // );
+    ```
+*   **Nota:** A configuração exata dos plugins e regras deve ser mantida e evoluída no arquivo `eslint.config.js` (ou equivalente) do projeto. Esta seção serve como um guia de alto nível e sugestão de ferramentas para alcançar os padrões descritos.
+
+Ao aderir a esses padrões e diretrizes, contribuímos para um projeto mais robusto, colaborativo e sustentável. Lembre-se de consultar o [documento detalhado de Boas Práticas](../reference/02-best-practices.md) para um entendimento mais profundo sobre arquitetura e outros conceitos.
