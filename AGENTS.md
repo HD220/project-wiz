@@ -140,8 +140,6 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
         4.  Returning an `IUseCaseResponse` with `success: false` and the populated `error` field, or forwarding the success response from the concrete Use Case.
 *   **Benefits:** This approach ensures DRY, promotes SRP by keeping Use Cases clean of boilerplate error handling, provides a consistent contract for consumers, and centralizes error logging and mapping logic.
 
-#### 2.2.6. Code, Style, and Naming Standards (Single Source of Truth)
-
 All code, style, formatting, linting, naming conventions (including the **strict requirement for kebab-case for file names**), and technology-specific best practices (TypeScript, React, Electron, etc.) are now centralized in the following document:
 
 **➡️ `docs/developer/coding-standards.md`** (Note: This document is primarily in Portuguese. You are expected to understand and strictly apply its rules, using code examples and structure as your guide, or translation tools if needed for textual parts.)
