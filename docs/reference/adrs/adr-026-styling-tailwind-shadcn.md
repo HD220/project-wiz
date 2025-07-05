@@ -7,7 +7,7 @@ A estilização da interface do usuário (UI) no Project Wiz é realizada primar
 
 **Decisão:**
 
-Serão adotados as seguintes convenções e padrões para estilização:
+Serão adotadas as seguintes convenções e padrões para estilização:
 
 **1. Tailwind CSS como Motor Principal de Estilização:**
     *   **Padrão (Utility-First):** A abordagem "utility-first" do Tailwind CSS é o padrão. Estilos devem ser aplicados primariamente através da composição de classes utilitárias diretamente no JSX dos componentes.
@@ -19,7 +19,6 @@ Serão adotados as seguintes convenções e padrões para estilização:
 
 **2. Uso e Convenções de Shadcn/UI:**
     *   **Natureza dos Componentes:** Componentes Shadcn/UI não são uma biblioteca tradicional de componentes instalada via npm. Eles são "receitas" ou "blocos de construção" que são copiados para o codebase do projeto (tipicamente em `src_refactored/presentation/ui/components/ui/` via CLI `shadcn-ui add [component-name]`).
-    *   **Nomenclatura de Arquivos (Shadcn/UI):** Ao adicionar componentes Shadcn/UI ao projeto (e.g., em `components/ui/`), seus arquivos `.tsx` DEVEM ser nomeados usando `kebab-case.tsx`, conforme ADR-028. Por exemplo, se um componente é conceitualmente "User Profile Card", seu arquivo seria `user-profile-card.tsx`. Componentes como `button` ou `dialog` da Shadcn/UI já usam nomes (`button.tsx`, `dialog.tsx`) que são compatíveis com kebab-case por serem palavras únicas.
     *   **Customização:** A customização da aparência dos componentes Shadcn/UI é feita editando diretamente seu código fonte (o arquivo `.tsx` copiado para o projeto) e ajustando as classes Tailwind CSS dentro deles.
     *   **Composição:** Componentes Shadcn/UI (e.g., `Button`, `Card`, `Dialog`, `Input`) são usados como primitivas para construir componentes de aplicação mais complexos e específicos do domínio.
     *   **Atualizações:** Atualizar um componente Shadcn/UI para uma nova versão da "receita" pode exigir a repetição do comando `add` (com overwrite) e a reaplicação de customizações, ou a comparação manual das mudanças.
@@ -92,4 +91,3 @@ Serão adotados as seguintes convenções e padrões para estilização:
 *   Use a função `cn` (que combina `clsx` e `tailwind-merge`) ao construir componentes que aceitam `className` como prop ou que precisam de classes condicionais.
 *   Para modo escuro, use a variante `dark:` e as cores semânticas configuradas (e.g., `bg-background`, `text-foreground`).
 *   Siga a ordem de classes definida pelo linter do Tailwind.
-*   Lembre-se que os arquivos de componentes React (incluindo os baseados em Shadcn/UI) devem ser nomeados `kebab-case.tsx` (e.g., `meu-botao.tsx`, `cartao-perfil.tsx`).

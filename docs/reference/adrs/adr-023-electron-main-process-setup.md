@@ -32,7 +32,7 @@ Serão adotados os seguintes padrões para a configuração e segurança do proc
     *   **Configurações de Segurança Essenciais (`webPreferences`):**
         *   `contextIsolation: true` (OBRIGATÓRIO): Isola o contexto do script de preload e do código do renderer do ambiente interno do Electron.
         *   `nodeIntegration: false` (OBRIGATÓRIO): Impede que o processo de renderização acesse APIs Node.js diretamente.
-        *   `preload: path.join(__dirname, "preload.js")` (OBRIGATÓRIO): Especifica o script de preload que atuará como ponte segura entre o renderer e o main. (Nota: Em um projeto TypeScript, isso geralmente será `preload.ts` transpilado para `preload.js` na mesma estrutura de diretório de saída).
+        *   `preload: path.join(__dirname, "preload.js")` (OBRIGATÓRIO): Especifica o script de preload que atuará como ponte segura entre o renderer e o main.
         *   `webSecurity: true` (Recomendado, padrão é `true`): Desabilitar apenas se houver uma razão muito forte e as implicações de segurança forem compreendidas (e.g., para carregar conteúdo local de forma específica, mas geralmente não recomendado).
         *   `allowRunningInsecureContent: false` (Recomendado, padrão é `false`): Previne o carregamento de HTTP sobre HTTPS.
     *   **Carregamento de Conteúdo (Vite):** Utilizar o padrão para carregar a URL do servidor de desenvolvimento Vite (`MAIN_WINDOW_VITE_DEV_SERVER_URL`) em ambiente de desenvolvimento e o arquivo `index.html` do build de produção (`../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`).
@@ -42,7 +42,7 @@ Serão adotados os seguintes padrões para a configuração e segurança do proc
 
 **4. Registro de Handlers IPC:**
     *   **Padrão CRÍTICO:** Todas as funções de registro de handlers IPC (e.g., `registerProjectHandlers()`, `registerDMHandlers()` de `src_refactored/presentation/electron/main/handlers/`) DEVEM ser chamadas explicitamente no `main.ts`, tipicamente dentro do callback de `app.on("ready", ...)`, antes da criação da janela principal ou logo após, dependendo se os handlers precisam de acesso à instância da janela.
-    *   **Consolidação de Diretório:** Conforme identificado na análise, os handlers IPC devem ser consolidados em um único diretório (`src_refactored/presentation/electron/main/handlers/`). O diretório `ipc-handlers/` deve ser removido. Os arquivos de handlers devem seguir o padrão `kebab-case.handlers.ts` (e.g., `project.handlers.ts`).
+    *   **Consolidação de Diretório:** Conforme identificado na análise, os handlers IPC devem ser consolidados em um único diretório (`src_refactored/presentation/electron/main/handlers/`). O diretório `ipc-handlers/` deve ser removido.
     *   **Acesso a Dependências (DI):** Se os handlers IPC (ou as funções que eles invocam) necessitarem de serviços da camada de aplicação/infraestrutura, essas dependências devem ser resolvidas a partir do container DI (`appContainer` de `inversify.config.ts`) no `main.ts` e passadas para as funções de registro dos handlers, ou os próprios handlers devem ser classes injetáveis (menos comum para simples agrupamentos de `ipcMain.handle`). (Ver ADR-019 para DI).
     *   **Justificativa:** É essencial que os handlers sejam registrados para que a comunicação entre o renderer e o main funcione. A ausência de registro (estado atual comentado no código) impede a funcionalidade da aplicação.
 
@@ -108,7 +108,7 @@ Serão adotados os seguintes padrões para a configuração e segurança do proc
 
 ---
 **Notas de Implementação para LLMs:**
-*   Ao modificar `main.ts`, certifique-se de que as `webPreferences` (`contextIsolation: true`, `nodeIntegration: false`, `preload`) estão sempre configuradas corretamente para novas `BrowserWindow`. O arquivo de preload geralmente é `preload.ts` (que será transpilado para `preload.js`).
-*   Garanta que TODAS as funções de registro de handlers IPC (e.g., `registerProjectHandlers`) sejam chamadas dentro de `app.on('ready', ...)`. Os arquivos contendo estes handlers devem seguir o padrão `feature-name.handlers.ts`.
+*   Ao modificar `main.ts`, certifique-se de que as `webPreferences` (`contextIsolation: true`, `nodeIntegration: false`, `preload`) estão sempre configuradas corretamente para novas `BrowserWindow`.
+*   Garanta que TODAS as funções de registro de handlers IPC (e.g., `registerProjectHandlers`) sejam chamadas dentro de `app.on('ready', ...)`.
 *   Use `ILogger` para logging no processo principal, evitando `console.*` após a inicialização do logger.
 *   Considere as implicações de segurança de qualquer nova funcionalidade adicionada ao processo principal, especialmente se envolver IPC ou acesso a recursos do sistema.

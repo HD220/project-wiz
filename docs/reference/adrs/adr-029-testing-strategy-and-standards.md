@@ -24,7 +24,7 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
         *   **Foco:** Isolar e verificar a menor unidade lógica de código (e.g., uma função, um método de uma classe, um componente React em isolamento, um hook customizado).
         *   **Dependências:** Todas as dependências externas à unidade sob teste DEVEM ser mockadas usando as funcionalidades do Vitest (`vi.mock`, `vi.fn`, `vi.spyOn`).
         *   **O Que Testar:**
-            *   **Lógica de Negócios:** Regras em Entidades (construtor, métodos), Objetos de Valor (construtor, getters), Serviços de Domínio/Aplicação (métodos públicos).
+            *   **Lógica de Negócios:** Regras em Entidades, Objetos de Valor, Serviços de Domínio/Aplicação.
             *   **Funções Utilitárias:** Entradas, saídas, casos de borda.
             *   **Componentes React:** Renderização baseada em props, renderização condicional, chamadas a callbacks de props quando interações simples ocorrem (e.g., clique em botão). Testar o contrato do componente, não detalhes de implementação interna.
             *   **Hooks React Customizados:** Lógica de estado, efeitos colaterais (mockando timers, APIs de browser), valor de retorno com diferentes entradas.
@@ -35,7 +35,7 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
         *   **Exemplos:**
             *   **Caso de Uso + Repositório:** Um Caso de Uso interagindo com uma implementação de repositório (pode ser contra um banco de dados de teste em memória/containerizado, ou um mock do repositório se o foco for apenas no Caso de Uso).
             *   **Serviço de Aplicação + Adaptador:** Um serviço que usa um adaptador para um sistema externo (o adaptador seria mockado para simular respostas do sistema externo).
-            *   **UI + `ipc.service.ts` (Mockado):** Componentes React que usam `ipc.service.ts` para buscar dados ou executar mutações, com o `ipc.service.ts` mockado para simular respostas do processo principal.
+            *   **UI + `IPCService` (Mockado):** Componentes React que usam `IPCService` para buscar dados ou executar mutações, com o `IPCService` mockado para simular respostas do processo principal.
             *   **Repositório + Banco de Dados:** Testar a implementação `Drizzle[NomeEntidade]Repository` contra uma instância real (de teste) do SQLite para validar queries SQL e mapeamentos ORM.
         *   **Justificativa:** Garantem que as diferentes partes do sistema funcionam juntas corretamente, cobrindo lacunas que os testes unitários não pegam.
     *   **c. Testes End-to-End (E2E) (Opcional/Futuro):**
@@ -49,7 +49,7 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
         *   `vi.mock(caminho, factory?)`: Para mockar módulos inteiros.
         *   `vi.fn()`: Para criar funções mock simples.
         *   `vi.spyOn(objeto, 'metodo')`: Para espionar ou mockar métodos de um objeto existente.
-    *   **Mocks Manuais:** Para mocks mais complexos ou reutilizáveis, criar arquivos em um diretório `__mocks__` adjacente ao módulo que está sendo mockado (e.g., `src_refactored/core/ports/adapters/__mocks__/llm.adapter.interface.ts` para mockar `ILLMAdapter`). O Vitest pode ser configurado para pegar esses mocks automaticamente.
+    *   **Mocks Manuais:** Para mocks mais complexos ou reutilizáveis, criar arquivos em um diretório `__mocks__` adjacente ao módulo que está sendo mockado (e.g., `src_refactored/core/ports/adapters/__mocks__/llm-adapter.interface.ts` para mockar `ILLMAdapter`). O Vitest pode ser configurado para pegar esses mocks automaticamente.
     *   **Injeção de Mocks (DI):** Ao testar classes que usam DI (InversifyJS), criar um container de teste no setup do teste e vincular implementações mock das dependências para a classe/serviço sob teste.
     *   **Justificativa:** Permite isolar a unidade sob teste e controlar o comportamento de suas dependências.
 
@@ -69,7 +69,7 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
         *   Usar `describe(description: string, fn: () => void)` para agrupar casos de teste relacionados (e.g., uma suíte por classe, ou por método público de uma classe).
         *   Usar `it(description: string, fn: () => void | Promise<void>)` ou `test(...)` para casos de teste individuais.
         *   Descrições DEVEM ser claras, em Inglês, e seguir um padrão que indique o que está sendo testado, sob quais condições, e qual o resultado esperado.
-            *   Exemplo: `describe('JobEntity', () => { describe('constructor', () => { it('should throw EntityError if queueName is empty when creating props for constructor', () => { /* ... test logic that leads to new JobEntity(invalidProps) ... */ }); it('should correctly initialize props via constructor on valid input', () => { /* ... test logic for new JobEntity(validProps) ... */ }); }); });`
+            *   Exemplo: `describe('JobEntity', () => { describe('create', () => { it('should throw EntityError if queueName is empty', () => { /* ... */ }); it('should correctly initialize props on valid input', () => { /* ... */ }); }); });`
     *   **Arrange-Act-Assert (AAA):** Estruturar o corpo de cada caso de teste seguindo o padrão AAA:
         1.  **Arrange:** Configurar as condições iniciais, instanciar objetos, preparar mocks.
         2.  **Act:** Executar a unidade de código sob teste.
@@ -99,5 +99,5 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
 *   Aplique o padrão Arrange-Act-Assert (AAA) em seus testes.
 *   Mock todas as dependências externas da unidade sob teste usando `vi.mock()` ou `vi.fn()`.
 *   Escreva testes para cobrir casos de sucesso, casos de falha esperados e casos de borda.
-*   Se estiver implementando uma classe, tente testar cada método público. Para Entidades e VOs, teste a lógica do construtor (validações, inicialização) e métodos públicos.
+*   Se estiver implementando uma classe, tente testar cada método público.
 *   Se estiver implementando um componente React, teste sua renderização com diferentes props e interações simples.
