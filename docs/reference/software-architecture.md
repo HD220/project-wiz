@@ -144,6 +144,7 @@ A seleção de tecnologias visa robustez, produtividade, suporte da comunidade e
 
 A arquitetura do Project Wiz é baseada nos princípios da Clean Architecture de Robert C. Martin, que organiza o software em camadas concêntricas. Esta estrutura promove a separação de responsabilidades, testabilidade e independência de frameworks e tecnologias externas. A regra fundamental é a **Regra de Dependência**: o código fonte só pode ter dependências que apontam para "dentro", ou seja, camadas de alto nível (como a de Domínio) não devem depender de camadas de baixo nível (como a de Infraestrutura). Em vez disso, ambas dependem de abstrações.
 
+
 ### Visualização das Camadas Principais
 (Esta visualização é uma representação da Clean Architecture clássica, adaptada para o contexto do projeto)
 ```mermaid
