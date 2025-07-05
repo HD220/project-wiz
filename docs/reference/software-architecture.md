@@ -400,6 +400,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
         *   **Exemplo no Project Wiz:** Se a criação de uma `ITask` específica (conceito ainda em desenvolvimento) ou de um `IAgentTool` se tornar complexa, dependendo de configurações dinâmicas ou múltiplas sub-dependências, uma fábrica poderia ser introduzida para encapsular essa lógica de instanciação.
 
 A camada de aplicação é crucial para manter a lógica de domínio pura, pois ela lida com a orquestração, a adaptação de dados entre o mundo externo (UI, infraestrutura) e o núcleo de negócios, e a execução dos fluxos de trabalho que definem as funcionalidades da aplicação.
+
 ### 3.3. Camada de Infraestrutura (`src_refactored/infrastructure/` e `src_refactored/presentation/electron/main/`)
 
 *   **Propósito:** Contém todas as implementações concretas de detalhes externos à aplicação. Esta camada lida com frameworks, acesso a banco de dados, interação com sistemas de arquivos, comunicação com APIs de terceiros, e a interface do usuário (UI) no contexto de ser um mecanismo de entrega. Ela implementa as interfaces (portas) definidas pelas camadas de Aplicação e Domínio, tornando as camadas internas independentes de detalhes de implementação específicos.
