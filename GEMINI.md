@@ -135,89 +135,13 @@ All 9 Object Calisthenics principles must be strictly applied. This is a key non
 *   **ADR Reference:** This pattern, including the `UseCaseWrapper` implementation strategy and the `CoreError` hierarchy, is formally documented in **ADR-008: Padrão de Tratamento de Erros e Resposta para Casos de Uso**. Adherence to this ADR is mandatory.
 *   **Benefits:** This approach ensures DRY, promotes SRP by keeping Use Cases clean of boilerplate error handling, provides a consistent contract for consumers, and centralizes error logging and mapping logic.
 
-#### 2.2.6. Code and Style Standards
+#### 2.2.6. Padrões de Código, Estilo e Nomenclatura (Fonte Única de Verdade)
 
-*   **Main Language:** TypeScript.
-    *   We use the `strict` configuration activated (`noImplicitAny`, `strictNullChecks`) for greater type safety.
-    *   Path aliases like `@/components`, `@/lib` are used to facilitate imports.
-    *   Prioritize strong typing; avoid `any` whenever possible and justify its use if strictly necessary.
-*   **Formatting (Prettier):**
-    *   The project uses Prettier to ensure consistency in code formatting.
-    *   Main settings: 2-space indentation, single quotes (`singleQuote: true`), semicolons at the end of statements (`semi: true`).
-    *   Configure your editor to format on save or run `npm run format`.
-*   **Linting (ESLint):**
-    *   ESLint is used for static code analysis and to enforce standards.
-    *   The base configuration extends from presets like `eslint:recommended`, `@typescript-eslint/recommended`, and `import/recommended`.
-    *   **Crucial Instruction:** After creating or modifying a file, **ALWAYS run ESLint (`npx eslint path/to/your/file.tsx --fix` or the project script `npm run lint`) and perform ALL necessary adjustments and refactorings to eliminate errors and warnings.** Do not proceed until the file is clean of linting issues.
-*   **Naming Conventions:**
-    *   Use clear, descriptive names in **English** for variables, functions, classes, files, and folders.
-    *   Folders should be named in English.
-*   **Version Control (Git):**
-    *   Make small, atomic commits.
-    *   Write clear, descriptive commit messages in English. Follow the [Semantic Commits](https://www.conventionalcommits.org/) pattern (e.g., `feat: Add new Tool X`, `fix: Correct login issue when using Y`).
-*   **Comments:**
-    *   **Avoid comments as much as possible.** The code should be self-explanatory.
-    *   If a comment is *absolutely necessary* (e.g., to explain complex business logic that cannot be simplified, or a temporary workaround for an external issue), it should explain the *why* of the logic, not just the *what*.
-    *   Write comments in English.
-    *   **Do not use comments to disable code (commented-out lines).** If the code is not needed, remove it. Git history maintains previous versions.
-    *   **Do not include a comment at the start of a file indicating its path.** File paths are evident from the IDE and version control.
-    *   **Do not include a comment at the end of a file indicating something like `[end of file]` or `[end of X]`.** These are unnecessary and add clutter.
-    *   **REMOVE ALL EXPLANATORY COMMENTS FOR CODE MODIFICATIONS:** After any change, review and remove any comments added to explain the change itself (e.g., 'fixed X', 'added Y'). Git history serves this purpose. Comments are only permissible to explain the *why* of complex logic that cannot be simplified, never the *what*.
+Todos os padrões de código, estilo, formatação, linting, convenções de nomenclatura (incluindo a **obrigatoriedade do uso de kebab-case para nomes de arquivos**), e melhores práticas específicas para tecnologias (TypeScript, React, Electron, etc.) estão agora centralizados no seguinte documento:
 
-#### 2.2.5. Prioritize Clarity Over Comments
+**➡️ `docs/developer/coding-standards.md`**
 
-*   **Strive for Self-Documenting Code:** Instead of commenting on a confusing section of code, dedicate time to refactor it until it becomes self-explanatory. Well-chosen variable, function, and class names are always preferable to comments. Code should clearly communicate its intent.
-
-#### 2.2.6. Technology/Tool - Specific Best Practices
-
-##### Electron.js
-*   **Separate Main and Renderer Processes:** Strictly separate logic. The main process handles app lifecycle and native APIs. Renderer processes handle the UI. Avoid mixing concerns.
-*   **IPC Communication:** Use `ipcMain` and `ipcRenderer` for all communication between main and renderer processes. Define clear, descriptive channel names and send only necessary data.
-*   **Security Best Practices:** Implement strict security: enable `contextIsolation`, disable `nodeIntegration` in renderer processes, and use preload scripts to expose only safe APIs via `contextBridge`.
-*   **Preload Scripts:** All inter-process communication (IPC) for renderer processes must be handled via a secure preload script. Do not expose Node.js APIs directly to the renderer.
-*   **Context Bridge Usage:** Expose only specific, safe functions and objects from the main process to the renderer via `contextBridge` in the preload script. Avoid exposing `ipcRenderer` directly.
-*   **Resource Handling:** Manage application resources (files, database connections) primarily in the main process. Renderers should request these resources via IPC.
-*   **Performance Considerations:** Optimize startup time and resource usage. Lazy-load modules, minimize synchronous operations, and manage memory efficiently, especially for multiple windows.
-*   **Error Handling and Logging:** Implement robust error handling across both processes. Centralize logging for main and renderer errors to facilitate debugging.
-*   **Native Module Integration:** When using native Node.js modules, ensure they are correctly rebuilt for Electron and handled exclusively in the main process.
-
-##### React
-*   **Functional Components & Hooks:** Always use functional components and React Hooks (useState, useEffect, useContext, useCallback, useMemo, etc.) for state management and side effects. Avoid class components.
-*   **Component Structure:** Organize components logically (e.g., Atomic Design). Each component should ideally adhere to the Single Responsibility Principle, doing one thing well. Break down complex components.
-*   **Prop Drilling Avoidance:** Minimize prop drilling. For deeply nested data, consider `useContext` or a dedicated state management library.
-*   **Memoization for Performance:** Use `React.memo`, `useCallback`, and `useMemo` judiciously to prevent unnecessary re-renders of components, functions, and expensive calculations.
-*   **Key Prop for Lists:** Always provide a stable, unique `key` prop when rendering lists of elements. The key should ideally be derived from the item's ID, not its index.
-*   **Accessibility (A11y):** Prioritize web accessibility. Use semantic HTML, `aria-*` attributes where necessary, and ensure keyboard navigation and screen reader compatibility.
-*   **Conditional Rendering:** Use clear and readable conditional rendering techniques.
-*   **State Management:** Manage component local state with `useState`. For shared or global state, evaluate `useContext` or a state management library.
-*   **Custom Hooks for Logic Reuse:** Extract reusable, stateful logic into custom Hooks. Name them starting with `use`.
-*   **Side Effects with useEffect:** Handle all side effects (data fetching, subscriptions, DOM manipulations) within `useEffect` hooks. Ensure correct dependency arrays to prevent infinite loops or stale closures.
-
-##### TypeScript
-*   **Type Safety Enforcement:** Explicitly define types for all variables, function arguments, and return values. Avoid `any` unless absolutely necessary and justified.
-*   **Interface/Type Definition:** Use `interface` or `type` for object shapes and complex types.
-*   **Readonly Properties:** Apply `readonly` to properties that should not be reassigned after initialization.
-*   **Enums vs. Union Types:** Prefer union types (`'value1' | 'value2'`) for simple literal sets. Use `enum` for distinct sets of related constants with symbolic names.
-*   **Generics for Reusability:** Employ generics to create reusable components and functions that maintain type safety across different types.
-*   **Null and Undefined Handling:** Explicitly handle `null` or `undefined` values using optional chaining (`?.`), nullish coalescing (`??`), or type guards.
-*   **ESM Modules:** Always prefer ES module syntax (`import`/`export`).
-*   **Strict Compiler Options:** Assume strict TypeScript compiler options (e.g., `strict: true`) are enabled and write code compatible with them.
-
-##### Vite.js
-*   **Vite Native Features:** Utilize Vite's native ES module imports for fast Hot Module Replacement (HMR) and development server.
-*   **Configuration (vite.config.ts):** Keep `vite.config.ts` clean and minimal. Use plugins for extended functionality.
-*   **Asset Handling:** Manage static assets using Vite's built-in asset handling. Use the `public` folder for static assets that need to be served directly.
-*   **Environment Variables:** Use `import.meta.env` for accessing environment variables, following Vite's convention (prefix `VITE_`).
-
-##### Zod
-*   **Schema First Approach:** Always define a Zod schema for input validation before processing any external data.
-*   **Strict Object Schemas:** Prefer `z.object().strict()` for object schemas to disallow unknown keys by default.
-*   **Type Inference:** Utilize Zod's `z.infer<typeof yourSchema>` to derive TypeScript types directly from your schemas.
-*   **Refinement for Complex Logic:** Use `z.refine()` or `z.superRefine()` for complex validation logic.
-*   **Error Message Customization:** Provide descriptive custom error messages.
-*   **Optional and Nullable Fields:** Clearly distinguish between optional (`z.optional()`), nullable (`z.nullable()`), and default (`z.default()`) fields.
-*   **Transformations (`.transform()`):** Use `.transform()` for data transformations *after* validation.
-*   **Validation in API Endpoints/Entry Points:** Perform Zod validation at the earliest possible entry point for external data.
+**A consulta e adesão estrita a este documento são mandatórias antes de qualquer desenvolvimento ou modificação de código.** Ele substitui quaisquer diretrizes de estilo de código anteriormente dispersas em outros documentos. Assegure-se de que todas as regras, especialmente a de nomenclatura de arquivos em kebab-case (ex: `meu-componente.tsx`, `servico-de-calculo.ts`), sejam seguidas rigorosamente.
 
 ## 3. Key Technologies
 
