@@ -41,11 +41,11 @@ export function useSendMessage({ selectedConversationId }: UseSendMessageProps) 
       toast.info('Aguarde o envio da mensagem anterior.');
       return;
     }
-    // Assuming currentUserId is available in the context or passed as prop
     sendMessageMutation.mutate({
       dmId: selectedConversationId,
       content,
-      senderId: "current-user-id", // Placeholder for actual user ID
+      // Placeholder for actual user ID
+      senderId: "current-user-id",
     });
   };
 

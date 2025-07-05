@@ -12,7 +12,8 @@ import {
   UpdateAgentInstanceRequest,
   UpdateAgentInstanceResponseData,
   GetAgentInstancesListRequest,
-  GetAgentInstancesListResponseData
+  GetAgentInstancesByProjectRequest,
+  IPCResponse
 } from "../../../../shared/ipc-types";
 import { AgentInstance, AgentLLM } from "../../../../shared/types/entities";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
@@ -20,7 +21,7 @@ import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 function registerQueryAgentInstanceHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_AGENT_INSTANCES_LIST,
-    async (): Promise<GetAgentInstancesListResponseData> => {
+    async (): Promise<IPCResponse<AgentInstance[]>> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       return { success: true, data: mockAgentInstances };
     }
@@ -30,13 +31,13 @@ function registerQueryAgentInstanceHandlers() {
     IPC_CHANNELS.GET_AGENT_INSTANCES_BY_PROJECT,
     async (
       _event,
-      req: GetAgentInstancesListRequest
-    ): Promise<GetAgentInstancesListResponseData> => {
+      req: GetAgentInstancesByProjectRequest
+    ): Promise<IPCResponse<AgentInstance[]>> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instances = mockAgentInstances.filter(
         (ai) => ai.projectId === req.projectId
       );
-      return { agentInstances: instances };
+      return { success: true, data: instances };
     }
   );
 
@@ -64,7 +65,7 @@ function registerCreateAgentInstanceHandler() {
     async (
       _event,
       req: CreateAgentInstanceRequest
-    ): Promise<CreateAgentInstanceResponseData> => {
+    ): Promise<IPCResponse<AgentInstance>> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const newInstance: AgentInstance = {
         id: `agent-${Date.now()}`,
@@ -74,13 +75,16 @@ function registerCreateAgentInstanceHandler() {
         temperature: req.temperature,
         projectId: req.projectId,
         llmConfig: req.llmConfig || {
+          id: `llm-config-${Date.now()}`,
+          name: "Default OpenAI GPT-4 Turbo",
+          providerId: "openai",
           llm: AgentLLM.OPENAI_GPT_4_TURBO,
           temperature: 0.7,
           maxTokens: 2048,
         },
         tools: req.tools || [],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        status: "idle",
       };
       mockAgentInstances.push(newInstance);
       return { success: true, data: newInstance };
@@ -94,21 +98,21 @@ function registerUpdateAgentInstanceHandler() {
     async (
       _event,
       req: UpdateAgentInstanceRequest
-    ): Promise<UpdateAgentInstanceResponseData> => {
+    ): Promise<IPCResponse<AgentInstance>> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instanceIndex = mockAgentInstances.findIndex(
-        (ai) => ai.id === req.instanceId
+        (ai) => ai.id === req.agentId
       );
       if (instanceIndex !== -1) {
         const currentInstance = mockAgentInstances[instanceIndex];
         const updatedInstance = {
           ...currentInstance,
-          ...req.updates,
-          ...(req.updates.llmConfig && currentInstance.llmConfig
+          ...req.data,
+          ...(req.data.llmConfig && currentInstance.llmConfig
             ? {
                 llmConfig: {
                   ...currentInstance.llmConfig,
-                  ...req.updates.llmConfig,
+                  ...req.data.llmConfig,
                 },
               }
             : currentInstance.llmConfig),

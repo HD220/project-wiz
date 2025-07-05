@@ -55,7 +55,7 @@ export function registerPersonaTemplateHandlers() {
     if (templateIndex !== -1) {
       const updatedTemplate = { ...mockPersonaTemplates[templateIndex], ...req.data, updatedAt: new Date().toISOString() };
       mockPersonaTemplates[templateIndex] = updatedTemplate;
-      return { success: true, data: updatedTemplate };
+      return { success: true, data: updatedTemplate } as UpdatePersonaTemplateResponseData;
     }
     return { success: false, error: { message: 'Persona Template not found for update' } };
   });

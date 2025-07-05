@@ -4,7 +4,9 @@ import { ListProjectsUseCase } from "@/core/application/use-cases/project/list-p
 import { Project } from "@/core/domain/project/project.entity";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import { ProjectListItem } from "@/shared/ipc-project.types";
+import { IPCResponse } from "@/shared/ipc-types";
+import { ProjectListItem } from "@/core/application/use-cases/project/list-projects.schema";
+
 
 let internalListProjectsUseCase: ListProjectsUseCase | null = null;
 
@@ -37,7 +39,7 @@ function mapProjectsToProjectListItems(projects: Project[]): ProjectListItem[] {
   }));
 }
 
-async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
+async function handleProjectListQuery(_event: IpcMainInvokeEvent, ...args: unknown[]): Promise<IPCResponse<ProjectListItem[]>> {
   console.log(
     `[IPC Project Handler] Received ${IPC_CHANNELS.PROJECT_LIST_QUERY}`
   );
@@ -54,22 +56,23 @@ async function handleProjectListQuery(_event: IpcMainInvokeEvent) {
 
     const result = await internalListProjectsUseCase.execute();
 
-    if (result.success) {
-      const projects = result.data;
-      const projectListItems = mapProjectsToProjectListItems(projects);
-      console.log(
-        `[IPC Project Handler] Sending ${projectListItems.length} projects.`
+    if (!result.success) {
+      console.error(
+        "[IPC Project Handler] Error listing projects:",
+        (result as { error: { message: string; name: string } }).error
       );
-      return { success: true, data: projectListItems };
+      return {
+        success: false,
+        error: { message: (result as { error: { message: string } }).error.message, name: (result as { error: { name: string } }).error.name },
+      };
     }
-    console.error(
-      "[IPC Project Handler] Error listing projects:",
-      result.error
+
+    const projects = result.data;
+    const projectListItems = mapProjectsToProjectListItems(projects);
+    console.log(
+      `[IPC Project Handler] Sending ${projectListItems.length} projects.`
     );
-    return {
-      success: false,
-      error: { message: result.error!.message, name: result.error!.name },
-    };
+    return { success: true, data: projectListItems };
   } catch (error: unknown) {
     console.error(
       "[IPC Project Handler] Exception in project:list handler:",

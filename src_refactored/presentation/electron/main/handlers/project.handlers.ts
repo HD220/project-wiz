@@ -25,7 +25,7 @@ function registerQueryProjectHandlers() {
     IPC_CHANNELS.GET_PROJECTS_LIST,
     async (): Promise<GetProjectsListResponseData> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { success: true, data: mockProjectsDb };
+      return { success: true, data: Object.values(mockProjectsDb) };
     }
   );
 
@@ -58,7 +58,7 @@ function registerMutationProjectHandlers() {
       const newProject: Project = {
         id: `proj-${Date.now()}`,
         name: req.name,
-        description: req.description ?? undefined,
+        description: req.description || "",
         platformUrl: req.platformUrl ?? undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -69,6 +69,9 @@ function registerMutationProjectHandlers() {
         repositoryUrl: req.repositoryUrl ?? undefined,
         tags: req.tags ?? [],
         llmConfig: req.llmConfig || {
+          id: `llm-config-${Date.now()}`,
+          name: "Default OpenAI GPT-4 Turbo",
+          providerId: "openai",
           llm: AgentLLM.OPENAI_GPT_4_TURBO,
           temperature: 0.7,
           maxTokens: 2048,

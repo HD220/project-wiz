@@ -42,6 +42,8 @@ interface ProjectFormProps {
   onSuccess?: (data: Project) => void;
   submitButtonText?: string;
   onSubmit?: (data: ProjectFormData) => Promise<void>;
+  isSubmitting?: boolean;
+  initialValues?: Partial<ProjectFormData>;
 }
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {

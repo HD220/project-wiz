@@ -7,6 +7,7 @@ import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetAgentInstanceDetailsRequest,
   GetAgentInstanceDetailsResponseData,
+  AgentInstance,
 } from "@/shared/ipc-types";
 
 export function useAgentInstanceDetails() {
@@ -18,16 +19,11 @@ export function useAgentInstanceDetails() {
     isLoading,
     error,
   } = useIpcQuery<
-    GetAgentInstanceDetailsRequest,
-    GetAgentInstanceDetailsResponseData
+    AgentInstance | null,
+    GetAgentInstanceDetailsRequest
   >(
     IPC_CHANNELS.GET_AGENT_INSTANCE_DETAILS,
-    { agentId },
-    {
-      onError: (err) => {
-        toast.error(`Erro ao buscar detalhes do agente: ${err.message}`);
-      },
-    }
+    { agentId }
   );
 
   return { agentId, instance, isLoading, error };

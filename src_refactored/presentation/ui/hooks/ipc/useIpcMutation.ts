@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 
+import { IPCResponse } from "@/shared/ipc-types";
+
 interface IpcMutationState<TResponse> {
-  data: TResponse | null;
+  data: IPCResponse<TResponse> | null;
   isLoading: boolean;
   error: Error | null;
 }
 
-type MutateFunction<TResponse, TRequest> = (params: TRequest) => Promise<TResponse | undefined>;
+type MutateFunction<TResponse, TRequest> = (params: TRequest) => Promise<IPCResponse<TResponse> | undefined>;
 
 interface IpcMutationResult<TResponse, TRequest> extends IpcMutationState<TResponse> {
   mutate: MutateFunction<TResponse, TRequest>;
@@ -21,15 +23,19 @@ interface IpcMutationResult<TResponse, TRequest> extends IpcMutationState<TRespo
  * @returns An object containing data, isLoading, error, a mutate function, and a reset function.
  */
 export function useIpcMutation<TResponse, TRequest = undefined>(
-  channel: string
+  channel: string,
+  options?: {
+    onSuccess?: (data: IPCResponse<TResponse>) => void;
+    onError?: (error: Error) => void;
+  }
 ): IpcMutationResult<TResponse, TRequest> {
-  const [data, setData] = useState<TResponse | null>(null);
+  const [data, setData] = useState<IPCResponse<TResponse> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const mutate = useCallback(async (params: TRequest): Promise<TResponse | undefined> => {
-    if (!window.electronIPC || !window.electronIPC.ipcRenderer) {
-      const errMessage = 'Electron IPC renderer not available. Ensure preload script is correctly configured.';
+  const mutate = useCallback(async (params: TRequest): Promise<IPCResponse<TResponse> | undefined> => {
+    if (!window.electronIPC) {
+      const errMessage = 'Electron IPC bridge not available. Ensure preload script is correctly configured.';
       console.error(errMessage);
       setError(new Error(errMessage));
       setIsLoading(false);
@@ -43,19 +49,24 @@ export function useIpcMutation<TResponse, TRequest = undefined>(
 
     try {
       // console.log(`useIpcMutation: Invoking channel ${channel} with params:`, params);
-      const result = await window.electronIPC.ipcRenderer.invoke<TResponse>(channel, params);
+      const result = await window.electronIPC.invoke<IPCResponse<TResponse>>(channel, params);
       // console.log(`useIpcMutation: Received result for channel ${channel}:`, result);
       setData(result);
+      options?.onSuccess?.(result);
       return result;
     } catch (err: unknown) {
       console.error(`Error invoking IPC channel ${channel} for mutation:`, err);
+      let errorMessage = 'An unknown error occurred during mutation';
       if (err instanceof Error) {
-        setError(err);
+        errorMessage = err.message;
       } else if (typeof err === 'object' && err !== null && 'message' in err) {
-        setError(new Error(String((err as { message: unknown }).message)));
+        errorMessage = String((err as { message: unknown }).message);
       } else {
-        setError(new Error(String(err || 'An unknown error occurred during mutation')));
+        errorMessage = String(err);
       }
+      const error = new Error(errorMessage);
+      setError(error);
+      options?.onError?.(error);
       setData(null);
       return undefined;
     } finally {

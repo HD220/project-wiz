@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import type { DirectMessageItem } from "@/shared/ipc-types";
 
 interface ChatSidebarProps {
-  conversations: DirectMessageItem[] | null | undefined;
+  conversations: DirectMessageItem[] | undefined;
   selectedConversationId: string | undefined;
   onSelectConversation: (id: string) => void;
   isLoading: boolean;

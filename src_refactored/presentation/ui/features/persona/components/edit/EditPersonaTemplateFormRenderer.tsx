@@ -32,7 +32,7 @@ export function EditPersonaTemplateFormRenderer({
   handleSubmit,
   isSubmitting,
 }: EditPersonaTemplateFormRendererProps) {
-  if (!personaTemplate) {
+  if (!personaTemplate || !personaTemplate.success || !personaTemplate.data) {
     return (
       <div className="p-8 text-center">
         <p>
@@ -48,11 +48,12 @@ export function EditPersonaTemplateFormRenderer({
   }
 
   const initialValues: Partial<PersonaTemplateFormData> = {
-    name: personaTemplate.name,
-    role: personaTemplate.role,
-    goal: personaTemplate.goal,
-    backstory: personaTemplate.backstory,
-    toolNames: personaTemplate.toolNames || [],
+    id: personaTemplate.data.id,
+    name: personaTemplate.data.name,
+    role: personaTemplate.data.role,
+    goal: personaTemplate.data.goal,
+    backstory: personaTemplate.data.backstory,
+    toolNames: personaTemplate.data.toolNames || [],
   };
 
   return (
@@ -65,7 +66,7 @@ export function EditPersonaTemplateFormRenderer({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
-            Editar Template de Persona: {personaTemplate.name}
+            Editar Template de Persona: {personaTemplate.data.name}
           </CardTitle>
           <CardDescription>
             Modifique as características base deste template de Agente IA.

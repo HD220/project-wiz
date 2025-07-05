@@ -27,6 +27,7 @@ import { PersonaRoleField } from "./fields/PersonaRoleField";
 import { PersonaToolsField } from "./fields/PersonaToolsField";
 
 const personaTemplateFormSchema = z.object({
+  id: z.string().optional(),
   name: z
     .string()
     .min(3, "Nome deve ter ao menos 3 caracteres.")
@@ -51,26 +52,39 @@ export type PersonaTemplateFormData = z.infer<typeof personaTemplateFormSchema>;
 
 interface PersonaTemplateFormProps {
   template?: PersonaTemplate;
+  onSubmit: (formData: PersonaTemplateFormData) => Promise<void>;
   onSuccess?: (data: PersonaTemplate) => void;
+  initialValues?: Partial<PersonaTemplateFormData>;
+  isSubmitting: boolean;
   submitButtonText?: string;
 }
 
 export function PersonaTemplateForm({
   template,
   onSuccess,
+  initialValues,
+  isSubmitting,
+  submitButtonText,
 }: PersonaTemplateFormProps) {
   const router = useRouter();
   const isEditing = !!template;
 
   const form = useForm<PersonaTemplateFormData>({
     resolver: zodResolver(personaTemplateFormSchema),
-    defaultValues: {
-      name: template?.name || "",
-      role: template?.role || "",
-      goal: template?.goal || "",
-      backstory: template?.backstory || "",
-      toolNames: template?.toolNames || [],
-    },
+    defaultValues: initialValues || (template ? {
+      id: template.id as string | undefined, // Explicitly cast to string | undefined
+      name: template.name,
+      role: template.role,
+      goal: template.goal,
+      backstory: template.backstory,
+      toolNames: template.toolNames || [], // Ensure toolNames is always an array
+    } : {
+      name: "",
+      role: "",
+      goal: "",
+      backstory: "",
+      toolNames: [],
+    }),
   });
 
   const { currentToolInput, setCurrentToolInput, handleAddTool, handleRemoveTool } = usePersonaToolManagement(form);
@@ -116,10 +130,10 @@ export function PersonaTemplateForm({
     },
   });
 
-  const isSubmitting =
-    createTemplateMutation.isLoading || updateTemplateMutation.isLoading;
+  const effectiveIsSubmitting =
+    isSubmitting || createTemplateMutation.isLoading || updateTemplateMutation.isLoading;
 
-  const handleSubmit = (data: PersonaTemplateFormData) => {
+  const effectiveHandleSubmit = (data: PersonaTemplateFormData) => {
     if (isEditing && template) {
       updateTemplateMutation.mutate({ templateId: template.id, data: data });
     } else {
@@ -127,13 +141,13 @@ export function PersonaTemplateForm({
     }
   };
 
-  const effectiveSubmitButtonText = isEditing
+  const effectiveSubmitButtonText = submitButtonText || (isEditing
     ? "Atualizar Template"
-    : "Salvar Template";
+    : "Salvar Template");
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(effectiveHandleSubmit)} className="space-y-6">
         <PersonaNameField control={form.control} />
         <PersonaRoleField control={form.control} />
         <PersonaGoalField control={form.control} />
@@ -149,13 +163,12 @@ export function PersonaTemplateForm({
         <div className="flex justify-end pt-2">
           <Button
             type="submit"
-            disabled={isSubmitting || (isEditing && !form.formState.isDirty)}
+            disabled={effectiveIsSubmitting || (isEditing && !form.formState.isDirty)}
           >
-            {isSubmitting ? "Salvando Template..." : effectiveSubmitButtonText}
+            {effectiveIsSubmitting ? "Salvando Template..." : effectiveSubmitButtonText}
           </Button>
         </div>
       </form>
     </Form>
   );
 }
-

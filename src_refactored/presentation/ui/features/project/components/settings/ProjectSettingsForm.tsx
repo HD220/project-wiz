@@ -27,7 +27,8 @@ export function ProjectSettingsForm({
   isSubmitting,
 }: ProjectSettingsFormProps) {
   if (!project) {
-    return null; // Or a loading/error state
+    // Or a loading/error state
+    return null;
   }
 
   return (

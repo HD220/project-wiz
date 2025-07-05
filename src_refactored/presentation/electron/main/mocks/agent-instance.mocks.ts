@@ -9,7 +9,6 @@ export const mockAgentInstances: AgentInstance[] = [
     temperature: 0.7,
     status: "idle",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     id: "agent-2",
@@ -19,7 +18,6 @@ export const mockAgentInstances: AgentInstance[] = [
     temperature: 0.8,
     status: "idle",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     id: "agent-3",
@@ -29,7 +27,6 @@ export const mockAgentInstances: AgentInstance[] = [
     temperature: 0.5,
     status: "idle",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
 ];
 
@@ -40,7 +37,7 @@ export function addMockAgentInstance(newInstance: AgentInstance) {
 export function updateMockAgentInstance(instanceId: string, updates: Partial<AgentInstance>): AgentInstance | undefined {
   const index = mockAgentInstances.findIndex(ai => ai.id === instanceId);
   if (index !== -1) {
-    const updated = { ...mockAgentInstances[index], ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...mockAgentInstances[index], ...updates };
     mockAgentInstances[index] = updated;
     return updated;
   }

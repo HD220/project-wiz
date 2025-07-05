@@ -11,10 +11,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ProfileFormData } from "@/ui/app/app/settings/profile";
+import { UserProfileFormData } from "../UserProfileForm";
 
 interface UserProfileFormFieldsProps {
-  form: UseFormReturn<ProfileFormData>;
+  form: UseFormReturn<UserProfileFormData>;
 }
 
 export function UserProfileFormFields({ form }: UserProfileFormFieldsProps) {
@@ -31,27 +31,6 @@ export function UserProfileFormFields({ form }: UserProfileFormFieldsProps) {
             </FormControl>
             <FormDescription>
               Como seu nome aparecerá na aplicação.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="email"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input
-                type="email"
-                placeholder="seu@email.com"
-                {...field}
-                disabled
-              />
-            </FormControl>
-            <FormDescription>
-              Seu endereço de email (não pode ser alterado aqui).
             </FormDescription>
             <FormMessage />
           </FormItem>

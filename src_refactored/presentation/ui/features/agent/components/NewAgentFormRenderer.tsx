@@ -13,11 +13,11 @@ import {
   AgentInstanceFormData,
 } from "@/ui/features/agent/components/AgentInstanceForm";
 
-import type { PersonaTemplate, LLMConfig } from "@/shared/ipc-types";
+import type { PersonaTemplate, LLMConfig, AgentLLM } from "@/shared/ipc-types";
 
 interface NewAgentFormRendererProps {
   personaTemplates: PersonaTemplate[] | null | undefined;
-  llmConfigs: LLMConfig[] | null | undefined;
+  llmConfigs: Record<AgentLLM, LLMConfig> | null | undefined;
   handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
@@ -46,15 +46,8 @@ export function NewAgentFormRenderer({
           <AgentInstanceForm
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            personaTemplates={
-              (personaTemplates || []) as Pick<PersonaTemplate, "id" | "name">[]
-            }
-            llmConfigs={
-              (llmConfigs || []) as Pick<
-                LLMConfig,
-                "id" | "name" | "providerId"
-              >[]
-            }
+            personaTemplates={personaTemplates?.data || []}
+            llmConfigs={llmConfigs?.data || []}
           />
         </CardContent>
       </Card>

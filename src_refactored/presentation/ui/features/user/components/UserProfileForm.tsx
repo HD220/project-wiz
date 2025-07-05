@@ -10,17 +10,11 @@ import { Button } from "@/components/ui/button";
 // FormControl, etc. are used by sub-components
 import { Form } from "@/components/ui/form";
 
-import type { UserProfile, UserProfileFormData } from "@/shared/ipc-types";
+import type { UserProfile } from "@/shared/ipc-types";
 
 import { AvatarUrlField } from "./fields/AvatarUrlField";
 import { DisplayNameField } from "./fields/DisplayNameField";
 import { EmailDisplayField } from "./fields/EmailDisplayField";
-
-interface UserProfileFormProps {
-  initialData: UserProfile | null;
-  onSubmit: (data: UserProfileFormData) => Promise<void>;
-  isSubmitting?: boolean;
-}
 
 const profileFormSchema = z.object({
   displayName: z
@@ -33,6 +27,14 @@ const profileFormSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+export type UserProfileFormData = z.infer<typeof profileFormSchema>;
+
+interface UserProfileFormProps {
+  initialData: UserProfile | null;
+  onSubmit: (data: UserProfileFormData) => Promise<void>;
+  isSubmitting?: boolean;
+}
 
 export function UserProfileForm({
   initialData,

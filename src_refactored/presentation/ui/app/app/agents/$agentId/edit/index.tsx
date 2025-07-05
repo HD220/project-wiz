@@ -9,18 +9,7 @@ import { useUpdateAgentInstance } from "@/ui/hooks/useUpdateAgentInstance";
 
 function EditAgentInstancePage() {
   const router = useRouter();
-  const {
-    agentId,
-    agentInstance,
-    personaTemplates,
-    llmConfigs,
-    isLoadingAll,
-    anyError,
-    agentError,
-    personasError,
-    llmsError,
-    refetchAgent,
-  } = useAgentInstanceData();
+  const { agentId, agentInstance, personaTemplates, llmConfigs, isLoadingAll, anyError, agentError, personasError, llmsError, refetchAgent, } = useAgentInstanceData();
 
   const { handleSubmit, isSubmitting } = useUpdateAgentInstance({
     agentId,
@@ -57,8 +46,8 @@ function EditAgentInstancePage() {
     <EditAgentFormRenderer
       agentId={agentId}
       agentInstance={agentInstance}
-      personaTemplates={personaTemplates.data}
-      llmConfigs={llmConfigs.data}
+      personaTemplates={personaTemplates}
+      llmConfigs={llmConfigs}
       handleSubmit={handleSubmit}
       isSubmitting={isSubmitting}
     />

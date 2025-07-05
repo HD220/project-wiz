@@ -152,7 +152,7 @@ export function AppSidebar() {
         tooltip="Projetos Arquivados"
         icon={Archive}
         // Rota placeholder
-        to="/app/projects/archived"
+        to="/app/projects"
         // Não usado
         avatarFallback="A"
       />

@@ -20,27 +20,27 @@ import {
 export function registerLLMConfigHandlers() {
   ipcMain.handle(IPC_CHANNELS.GET_AVAILABLE_LLMS, async (): Promise<GetAvailableLLMsResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { availableLLMs: mockAvailableLLMs };
+    return { success: true, data: mockAvailableLLMs };
   });
 
   ipcMain.handle(IPC_CHANNELS.GET_LLM_CONFIGS_LIST, async (): Promise<GetLLMConfigsListResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     // Construct full configs with defaults for all available LLMs
-    const fullUserConfigs = Object.values(AgentLLM).reduce((acc: Record<AgentLLM, LLMConfig>, llmKey) => {
+    const fullUserConfigs = Object.values(AgentLLM).reduce((acc: Record<AgentLLM, LLMConfig>, llmKey: AgentLLM) => {
       // Ensure llmKey is treated as a key of AgentLLM enum
       const key = llmKey as AgentLLM;
       acc[key] = getLLMConfigWithDefaults(key);
       return acc;
     }, {} as Record<AgentLLM, LLMConfig>); 
 
-    return { userLLMConfigs: fullUserConfigs };
+    return { success: true, data: fullUserConfigs };
   });
 
   ipcMain.handle(IPC_CHANNELS.UPDATE_LLM_CONFIG, async (_event, req: UpdateLLMConfigRequest): Promise<UpdateLLMConfigResponseData> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    const { llm, config } = req;
-    updateUserLLMConfig(llm, config);
-    const updatedConfig = getLLMConfigWithDefaults(llm);
-    return { updatedConfig: updatedConfig };
+    const { configId, data } = req;
+    updateUserLLMConfig(configId, data);
+    const updatedConfig = getLLMConfigWithDefaults(configId);
+    return { success: true, data: updatedConfig };
   });
 }

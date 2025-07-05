@@ -17,7 +17,7 @@ export function addMockProject(project: Project) {
   mockProjectsDb[project.id] = project;
 }
 export function updateMockProject(projectId: string, updates: Partial<Project>): Project | undefined {
-  const index = Object.values(mockProjectsDb).findIndex(p => p.id === projectId);
+  const index = Object.values(mockProjectsDb).findIndex(project => project.id === projectId);
   if (index !== -1) {
     const currentProject = Object.values(mockProjectsDb)[index];
     const updated = { ...currentProject, ...updates, updatedAt: new Date().toISOString() };

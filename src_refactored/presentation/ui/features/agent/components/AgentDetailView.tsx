@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Edit3, MessageSquare } from "lucide-react";
 import React from "react";
 
@@ -13,11 +13,15 @@ import type { AgentInstance } from "@/shared/ipc-types";
 interface AgentDetailViewProps {
   instance: AgentInstance;
   statusInfo: { label: string; icon: React.ElementType; colorClasses: string };
+  agentId: string;
+  router: ReturnType<typeof useRouter>;
 }
 
 export function AgentDetailView({
   instance,
   statusInfo,
+  agentId,
+  router,
 }: AgentDetailViewProps) {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
@@ -57,3 +61,5 @@ export function AgentDetailView({
     </div>
   );
 }
+
+

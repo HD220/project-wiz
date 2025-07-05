@@ -9,58 +9,58 @@ export const mockAvailableLLMs: LLMConfig[] = [
   {
     id: "llm-openai-gpt-4-turbo",
     name: "OpenAI GPT-4 Turbo",
-    provider: "OpenAI",
-    model: AgentLLM.OPENAI_GPT_4_TURBO,
-    description: "OpenAI's most advanced model, great for complex tasks.",
-    apiKeyRequired: true,
-    apiUrl: "https://api.openai.com/v1/chat/completions",
+    providerId: "OpenAI",
+    llm: AgentLLM.OPENAI_GPT_4_TURBO,
+    temperature: 0.7,
+    maxTokens: 4096,
+    baseUrl: "https://api.openai.com/v1/chat/completions",
   },
   {
     id: "llm-openai-gpt-3.5-turbo",
     name: "OpenAI GPT-3.5 Turbo",
-    provider: "OpenAI",
-    model: AgentLLM.OPENAI_GPT_3_5_TURBO,
-    description: "A fast and cost-effective model from OpenAI.",
-    apiKeyRequired: true,
-    apiUrl: "https://api.openai.com/v1/chat/completions",
+    providerId: "OpenAI",
+    llm: AgentLLM.OPENAI_GPT_3_5_TURBO,
+    temperature: 0.7,
+    maxTokens: 4096,
+    baseUrl: "https://api.openai.com/v1/chat/completions",
   },
   {
     id: "llm-anthropic-claude-3-opus",
     name: "Anthropic Claude 3 Opus",
-    provider: "Anthropic",
-    model: AgentLLM.ANTHROPIC_CLAUDE_3_OPUS,
-    description: "Anthropic's most powerful model, for highly complex tasks.",
-    apiKeyRequired: true,
-    apiUrl: "https://api.anthropic.com/v1/messages",
+    providerId: "Anthropic",
+    llm: AgentLLM.ANTHROPIC_CLAUDE_3_OPUS,
+    temperature: 0.7,
+    maxTokens: 4096,
+    baseUrl: "https://api.anthropic.com/v1/messages",
   },
   {
     id: "llm-anthropic-claude-3-sonnet",
     name: "Anthropic Claude 3 Sonnet",
-    provider: "Anthropic",
-    model: AgentLLM.ANTHROPIC_CLAUDE_3_SONNET,
-    description: "A balanced model for performance and speed by Anthropic.",
-    apiKeyRequired: true,
-    apiUrl: "https://api.anthropic.com/v1/messages",
+    providerId: "Anthropic",
+    llm: AgentLLM.ANTHROPIC_CLAUDE_3_SONNET,
+    temperature: 0.7,
+    maxTokens: 4096,
+    baseUrl: "https://api.anthropic.com/v1/messages",
   },
   {
     id: "llm-google-gemini-pro",
     name: "Google Gemini Pro",
-    provider: "Google",
-    model: AgentLLM.GOOGLE_GEMINI_PRO,
-    description: "Google's model for scaling across a wide range of tasks.",
-    apiKeyRequired: true,
-    apiUrl:
+    providerId: "Google",
+    llm: AgentLLM.GOOGLE_GEMINI_PRO,
+    temperature: 0.7,
+    maxTokens: 4096,
+    baseUrl:
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
   },
   // Add more mock LLMs as needed, including local/Ollama if supported
   {
     id: "llm-ollama-llama2",
     name: "Ollama Llama 2",
-    provider: "Ollama",
-    model: AgentLLM.OLLAMA_LLAMA2,
-    description: "Llama 2 running locally via Ollama.",
-    apiKeyRequired: false,
-    apiUrl: "http://localhost:11434/api/generate",
+    providerId: "Ollama",
+    llm: AgentLLM.OLLAMA_LLAMA2,
+    temperature: 0.7,
+    maxTokens: 4096,
+    baseUrl: "http://localhost:11434/api/generate",
   },
 ];
 
@@ -94,13 +94,20 @@ export const updateUserLLMConfig = (
 
 export const getLLMConfigWithDefaults = (llm: AgentLLM): LLMConfig => {
   const userConfig = mockUserLLMConfigs[llm] || {};
-  const modelDetails = mockAvailableLLMs.find((model) => model.model === llm);
+  const modelDetails = mockAvailableLLMs.find((model) => model.llm === llm);
+
+  if (!modelDetails) {
+    throw new Error(`LLM configuration not found for: ${llm}`);
+  }
 
   return {
-    id: modelDetails?.id || `mock-id-${llm}`,
-    name: modelDetails?.name || `Mock LLM ${llm}`,
-    providerId: modelDetails?.provider || 'unknown',
-    baseUrl: modelDetails?.apiUrl,
+    id: modelDetails.id,
+    name: modelDetails.name,
+    providerId: modelDetails.providerId,
+    llm: modelDetails.llm,
+    temperature: userConfig.temperature ?? modelDetails.temperature,
+    maxTokens: userConfig.maxTokens ?? modelDetails.maxTokens,
+    baseUrl: userConfig.baseUrl ?? modelDetails.baseUrl,
     apiKey: userConfig.apiKey,
   };
 };

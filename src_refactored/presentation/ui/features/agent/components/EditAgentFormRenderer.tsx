@@ -21,15 +21,19 @@ import type {
   GetAgentInstanceDetailsResponseData,
   PersonaTemplate,
   LLMConfig,
+  AgentLLM,
 } from "@/shared/ipc-types";
+
+import { AgentInstance } from "@/shared/types/entities";
 
 interface EditAgentFormRendererProps {
   agentId: string;
-  agentInstance: GetAgentInstanceDetailsResponseData;
-  personaTemplates: GetPersonaTemplatesListResponseData | null | undefined;
-  llmConfigs: GetLLMConfigsListResponseData | null | undefined;
+  agentInstance: AgentInstance;
+  personaTemplates: PersonaTemplate[] | null | undefined;
+  llmConfigs: Record<AgentLLM, LLMConfig> | null | undefined;
   handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
+  initialValues?: Partial<AgentInstanceFormData>;
 }
 
 export function EditAgentFormRenderer({
@@ -85,15 +89,8 @@ export function EditAgentFormRenderer({
             onSubmit={handleSubmit}
             initialValues={initialValues}
             isSubmitting={isSubmitting}
-            personaTemplates={
-              (personaTemplates || []) as Pick<PersonaTemplate, "id" | "name">[]
-            }
-            llmConfigs={
-              (llmConfigs || []) as Pick<
-                LLMConfig,
-                "id" | "name" | "providerId"
-              >[]
-            }
+            personaTemplates={personaTemplates?.data || []}
+            llmConfigs={llmConfigs?.data || []}
           />
         </CardContent>
       </Card>

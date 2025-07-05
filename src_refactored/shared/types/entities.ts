@@ -1,4 +1,3 @@
-// --- Project Types ---
 export interface Project {
   id: string;
   name: string;
@@ -7,19 +6,19 @@ export interface Project {
   status: "active" | "paused" | "planning" | "completed" | "archived";
   agentCount: number;
   taskCount: number;
-  platformUrl?: string; // Added missing property
-  repositoryUrl?: string; // Added missing property
-  tags?: string[]; // Added missing property
-  llmConfig?: LLMConfig; // Added missing property
+  platformUrl?: string;
+  repositoryUrl?: string;
+  tags?: string[];
+  llmConfig?: LLMConfig;
 }
 
 export interface ProjectFormData {
   name: string;
   description?: string;
-  platformUrl?: string; // Added missing property
-  repositoryUrl?: string; // Added missing property
-  tags?: string[]; // Added missing property
-  llmConfig?: LLMConfig; // Added missing property
+  platformUrl?: string;
+  repositoryUrl?: string;
+  tags?: string[];
+  llmConfig?: LLMConfig;
 }
 
 // --- Persona Template Types ---
@@ -28,22 +27,25 @@ export interface PersonaTemplate {
   name: string;
   role: string;
   goal: string;
-  description?: string; // Added missing property
-  systemPrompt?: string; // Added missing property
-  visionEnabled?: boolean; // Added missing property
-  exampleConversations?: Array<{ user: string; agent: string }>; // Added missing property
+  description?: string;
+  systemPrompt?: string;
+  visionEnabled?: boolean;
+  exampleConversations?: Array<{ user: string; agent: string }>;
   backstory?: string;
   toolNames?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PersonaTemplateFormData {
+  id?: string;
   name: string;
   role: string;
   goal: string;
-  description?: string; // Added missing property
-  systemPrompt?: string; // Added missing property
-  visionEnabled?: boolean; // Added missing property
-  exampleConversations?: Array<{ user: string; agent: string }>; // Added missing property
+  description?: string;
+  systemPrompt?: string;
+  visionEnabled?: boolean;
+  exampleConversations?: Array<{ user: string; agent: string }>;
   backstory?: string;
   toolNames?: string[];
 }
@@ -71,8 +73,8 @@ export interface AgentInstance {
   lastActivity?: string;
   projectId?: string;
   llmConfig?: LLMConfig;
-  createdAt?: string; // Added missing property
-  tools?: string[]; // Added missing property
+  createdAt?: string;
+  tools?: string[];
 }
 
 export interface AgentInstanceFormData {
@@ -80,9 +82,9 @@ export interface AgentInstanceFormData {
   personaTemplateId: string;
   llmProviderConfigId: string;
   temperature: number;
-  projectId?: string; // Added missing property
-  llmConfig?: LLMConfig; // Added missing property
-  tools?: string[]; // Added missing property
+  projectId?: string;
+  llmConfig?: LLMConfig;
+  tools?: string[];
 }
 
 // --- LLMConfig Types ---
@@ -90,6 +92,9 @@ export interface LLMConfig {
   id: string;
   name: string;
   providerId: string;
+  llm: AgentLLM;
+  temperature: number;
+  maxTokens: number;
   baseUrl?: string;
   apiKey?: string;
 }

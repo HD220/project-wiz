@@ -75,7 +75,7 @@ function ProjectDocsPage() {
       if (currentEntry.type === "folder") {
         currentEntry = currentEntry.children[segment];
       } else {
-        return null; // Tried to navigate into a file or non-existent segment
+        return null;
       }
     }
     return currentEntry && currentEntry.type === "file"

@@ -50,12 +50,7 @@ let mockLlmConfigsDb: Record<string, LLMConfig> = {
 
 function EditLLMConfigPage() {
   const router = useRouter();
-  const params = useParams({ from: "/app/settings/llm/$configId/edit/" });
-  const configId = params.configId;
-
-  if (!configId) {
-    return <LLMConfigNotFound configId="" />;
-  }
+  const { configId } = useParams({ from: "/app/settings/llm/$configId/edit/" });
 
   const [initialValues, setInitialValues] =
     useState<Partial<LLMConfigFormData> | null>(null);
@@ -64,6 +59,12 @@ function EditLLMConfigPage() {
   const [configName, setConfigName] = useState<string>("");
 
   useEffect(() => {
+    if (!configId) {
+      setIsLoading(false);
+      toast.error("ID da configuração LLM não fornecido.");
+      return;
+    }
+
     setIsLoading(true);
     // Simulate fetching config data
     setTimeout(() => {

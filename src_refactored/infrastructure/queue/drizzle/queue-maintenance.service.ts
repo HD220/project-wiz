@@ -6,7 +6,7 @@ import { IJobRepository } from "@/core/application/ports/job-repository.interfac
 import { JobEntity } from "@/core/domain/job/job.entity";
 
 // This service could implement an IQueueMaintenanceService interface
-export class QueueMaintenanceService<P, R> {
+export class QueueMaintenanceService<P extends { userId?: string }, R> {
   private _isMaintenanceRunning: boolean = false;
   private maintenanceLoopPromise: Promise<void> | null = null;
   // Consider making this configurable

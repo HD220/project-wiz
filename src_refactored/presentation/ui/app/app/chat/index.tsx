@@ -22,7 +22,7 @@ export function ChatPage() {
     sidebarConversations,
     isLoadingSidebarConvs,
     sidebarConvsError,
-    messages,
+    messages: chatMessages,
     isLoadingMessages,
     messagesError,
     handleSendMessage,
@@ -37,7 +37,7 @@ export function ChatPage() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950">
       <ChatSidebar
-        conversations={sidebarConversations}
+        conversations={sidebarConversations?.success ? sidebarConversations.data : undefined}
         selectedConversationId={selectedConversationId}
         onSelectConversation={handleSelectConversation}
         isLoading={isLoadingSidebarConvs}
@@ -45,7 +45,7 @@ export function ChatPage() {
       />
       <ChatPageContent
         conversationHeader={chatWindowConversationHeader}
-        messages={messages || []}
+        messages={chatMessages ?? []}
         isLoadingMessages={isLoadingMessages}
         messagesError={messagesError}
         onSendMessage={handleSendMessage}
@@ -55,5 +55,3 @@ export function ChatPage() {
     </div>
   );
 }
-
-

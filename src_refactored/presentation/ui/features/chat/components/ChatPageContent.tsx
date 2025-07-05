@@ -4,6 +4,8 @@ import { ChatWindow } from "@/ui/features/chat/components/ChatWindow";
 
 import type {
   GetDMMessagesResponseData as GetConversationMessagesResponseData,
+  DirectMessageItem,
+  ChatMessage,
 } from "@/shared/ipc-types";
 
 interface ChatWindowConversationHeader {
@@ -15,7 +17,7 @@ interface ChatWindowConversationHeader {
 
 interface ChatPageContentProps {
   conversationHeader: ChatWindowConversationHeader | null;
-  messages: GetConversationMessagesResponseData;
+  messages: ChatMessage[] | null | undefined;
   isLoadingMessages: boolean;
   messagesError: Error | null;
   onSendMessage: (content: string) => void;

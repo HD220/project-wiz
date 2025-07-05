@@ -25,7 +25,7 @@ function NewAgentInstancePage() {
     return loadingErrorDisplay;
   }
 
-  if (!personaTemplates || !llmConfigs) {
+  if (!personaTemplates?.success || !personaTemplates.data || !llmConfigs?.success || !llmConfigs.data) {
     return (
       <div className="p-8 text-center">
         <p>Dados necessários para criar um novo agente não encontrados.</p>

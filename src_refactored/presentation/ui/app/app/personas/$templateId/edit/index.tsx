@@ -19,6 +19,7 @@ import type {
   UpdatePersonaTemplateRequest,
   UpdatePersonaTemplateResponseData,
   IPCResponse,
+  PersonaTemplate,
 } from "@/shared/ipc-types";
 
 function EditPersonaTemplatePage() {
@@ -27,13 +28,13 @@ function EditPersonaTemplatePage() {
   const templateId = params.templateId;
 
   const {
-    data: personaTemplate,
+    data: personaTemplateResponse,
     isLoading: isLoadingTemplate,
     error: templateError,
     refetch,
   } = useIpcQuery<
-    GetPersonaTemplateDetailsRequest,
-    IPCResponse<GetPersonaTemplateDetailsResponseData>
+    GetPersonaTemplateDetailsResponseData,
+    GetPersonaTemplateDetailsRequest
   >(
     IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS,
     { templateId },
@@ -45,12 +46,16 @@ function EditPersonaTemplatePage() {
     },
   );
 
+  const personaTemplate = personaTemplateResponse?.success
+    ? personaTemplateResponse.data
+    : null;
+
   const updatePersonaMutation = useIpcMutation<
     UpdatePersonaTemplateRequest,
-    IPCResponse<UpdatePersonaTemplateResponseData>
+    IPCResponse<PersonaTemplate>
   >(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, {
     onSuccess: (response) => {
-      if (response.success && response.data) {
+      if (response.success) {
         toast.success(
           `Template "${response.data.name}" atualizado com sucesso!`,
         );

@@ -50,7 +50,8 @@ export interface IJobOptions {
   delay?: number;
   attempts?: number;
   backoff?: IJobBackoffOptions | JobBackoffStrategyFn;
-  maxDelay?: number; // Added maxDelay
+  // Added maxDelay
+  maxDelay?: number;
   removeOnComplete?: boolean | IJobRemovalOptions;
   removeOnFail?: boolean | IJobRemovalOptions;
   jobId?: string;
@@ -70,7 +71,8 @@ const JobOptionsSchema = z.object({
   jobId: z.string().optional(),
   timeout: z.number().int().min(0).optional(),
   maxStalledCount: z.number().int().min(0).optional().default(3),
-  maxDelay: z.number().int().min(0).optional(), // Added maxDelay to schema
+  // Added maxDelay to schema
+  maxDelay: z.number().int().min(0).optional(),
 });
 
 export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
@@ -98,22 +100,20 @@ export class JobOptionsVO extends AbstractValueObject<IJobOptions> {
   get jobId(): string | undefined { return this.props.jobId; }
   get timeout(): number | undefined { return this.props.timeout; }
   get maxStalledCount(): number { return this.props.maxStalledCount!; }
-  get maxDelay(): number | undefined { return this.props.maxDelay; } // Added getter for maxDelay
+  // Added getter for maxDelay
+  get maxDelay(): number | undefined { return this.props.maxDelay; }
 
   public equals(vo?: JobOptionsVO): boolean {
-    // Custom equals for JobOptionsVO if needed, otherwise rely on AbstractValueObject's JSON.stringify
     // For now, AbstractValueObject's equals is sufficient if functions are not compared directly.
     return super.equals(vo);
   }
 
   public toPersistence(): IJobOptions {
-    // For a custom backoff function, we might need to store its name or a reference
     // if it's not directly serializable. For now, assume it's handled or not persisted if function.
     // For simplicity, this example directly returns props, but in a real scenario,
     // you might transform function references or other non-serializable parts.
     const persistenceProps = { ...this.props };
     if (typeof persistenceProps.backoff === 'function') {
-        // Decide how to handle function persistence.
         // For now, we'll remove it if it's a function to avoid serialization issues with simple JSON.
         delete persistenceProps.backoff;
     }

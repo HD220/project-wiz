@@ -20,6 +20,7 @@ import type {
   UserProfile,
   UserProfileFormData,
   AppSettings,
+  AgentLLM,
 } from "../types/entities";
 
 // General structure for invoke responses from main process
@@ -34,19 +35,19 @@ export type IPCResponse<T = unknown> =
 
 // Projects
 export type GetProjectsListRequest = void;
-export type GetProjectsListResponseData = Project[];
+export type GetProjectsListResponseData = IPCResponse<Project[]>;
 
 export type GetProjectDetailsRequest = { projectId: string };
-export type GetProjectDetailsResponseData = Project | null;
+export type GetProjectDetailsResponseData = IPCResponse<Project | null>;
 
 export type CreateProjectRequest = ProjectFormData;
-export type CreateProjectResponseData = Project;
+export type CreateProjectResponseData = IPCResponse<Project>;
 
 export type UpdateProjectRequest = {
   projectId: string;
   data: Partial<ProjectFormData>;
 };
-export type UpdateProjectResponseData = Project;
+export type UpdateProjectResponseData = IPCResponse<Project>;
 
 export type DeleteProjectRequest = { projectId: string };
 export type DeleteProjectResponseData = { success: boolean };
@@ -55,19 +56,19 @@ export type ProjectsUpdatedEventPayload = Project[];
 
 // Persona Templates
 export type GetPersonaTemplatesListRequest = void;
-export type GetPersonaTemplatesListResponseData = PersonaTemplate[];
+export type GetPersonaTemplatesListResponseData = IPCResponse<PersonaTemplate[]>;
 
 export type GetPersonaTemplateDetailsRequest = { templateId: string };
-export type GetPersonaTemplateDetailsResponseData = PersonaTemplate | null;
+export type GetPersonaTemplateDetailsResponseData = IPCResponse<PersonaTemplate | null>;
 
 export type CreatePersonaTemplateRequest = PersonaTemplateFormData;
-export type CreatePersonaTemplateResponseData = PersonaTemplate;
+export type CreatePersonaTemplateResponseData = IPCResponse<PersonaTemplate>;
 
 export type UpdatePersonaTemplateRequest = {
   templateId: string;
   data: Partial<PersonaTemplateFormData>;
 };
-export type UpdatePersonaTemplateResponseData = PersonaTemplate;
+export type UpdatePersonaTemplateResponseData = IPCResponse<PersonaTemplate>;
 
 export type DeletePersonaTemplateRequest = { templateId: string };
 export type DeletePersonaTemplateResponseData = { success: boolean };
@@ -76,21 +77,22 @@ export type PersonaTemplatesUpdatedEventPayload = PersonaTemplate[];
 
 // Agent Instances
 export type GetAgentInstancesListRequest = void;
-export type GetAgentInstancesListResponseData = AgentInstance[];
+export type GetAgentInstancesListResponseData = IPCResponse<AgentInstance[]>;
 
 export type GetAgentInstancesByProjectRequest = { projectId: string };
+export type GetAgentInstancesByProjectResponseData = IPCResponse<AgentInstance[]>;
 
 export type GetAgentInstanceDetailsRequest = { agentId: string };
-export type GetAgentInstanceDetailsResponseData = AgentInstance | null;
+export type GetAgentInstanceDetailsResponseData = IPCResponse<AgentInstance | null>;
 
 export type CreateAgentInstanceRequest = AgentInstanceFormData;
-export type CreateAgentInstanceResponseData = AgentInstance;
+export type CreateAgentInstanceResponseData = IPCResponse<AgentInstance>;
 
 export type UpdateAgentInstanceRequest = {
   agentId: string;
   data: Partial<AgentInstanceFormData>;
 };
-export type UpdateAgentInstanceResponseData = AgentInstance;
+export type UpdateAgentInstanceResponseData = IPCResponse<AgentInstance>;
 
 export type DeleteAgentInstanceRequest = { agentId: string };
 export type DeleteAgentInstanceResponseData = { success: boolean };
@@ -99,21 +101,21 @@ export type AgentInstancesUpdatedEventPayload = AgentInstance[];
 
 // LLM Configurations
 export type GetLLMConfigsListRequest = void;
-export type GetLLMConfigsListResponseData = LLMConfig[];
+export type GetLLMConfigsListResponseData = IPCResponse<Record<AgentLLM, LLMConfig>>;
 
-export type GetAvailableLLMsResponseData = LLMConfig[];
+export type GetAvailableLLMsResponseData = IPCResponse<LLMConfig[]>;
 
 export type GetLLMConfigDetailsRequest = { configId: string };
-export type GetLLMConfigDetailsResponseData = LLMConfig | null;
+export type GetLLMConfigDetailsResponseData = IPCResponse<LLMConfig | null>;
 
 export type CreateLLMConfigRequest = LLMConfigFormData;
-export type CreateLLMConfigResponseData = LLMConfig;
+export type CreateLLMConfigResponseData = IPCResponse<LLMConfig>;
 
 export type UpdateLLMConfigRequest = {
   configId: string;
   data: Partial<LLMConfigFormData>;
 };
-export type UpdateLLMConfigResponseData = LLMConfig;
+export type UpdateLLMConfigResponseData = IPCResponse<LLMConfig>;
 
 export type DeleteLLMConfigRequest = { configId: string };
 export type DeleteLLMConfigResponseData = { success: boolean };
@@ -122,10 +124,12 @@ export type LLMConfigsUpdatedEventPayload = LLMConfig[];
 
 // User Profile
 export type GetUserProfileRequest = void;
-export type GetUserProfileResponseData = UserProfile | null;
+export type GetUserProfileResponseData = IPCResponse<UserProfile | null>;
 
-export type UpdateUserProfileRequest = UserProfileFormData;
-export type UpdateUserProfileResponseData = UserProfile;
+export type UpdateUserProfileRequest = {
+  updates: Partial<UserProfileFormData>;
+};
+export type UpdateUserProfileResponseData = IPCResponse<UserProfile>;
 
 // App Settings
 export type GetAppSettingsRequest = void;
@@ -138,13 +142,13 @@ export type AppSettingsUpdatedEventPayload = AppSettings;
 
 // Direct Messages
 export type GetDMConversationsListRequest = void;
-export type GetDMConversationsListResponseData = DirectMessageItem[];
+export type GetDMConversationsListResponseData = IPCResponse<DirectMessageItem[]>;
 
 export type GetDMDetailsRequest = { dmId: string };
-export type GetDMDetailsResponseData = DirectMessageItem | null;
+export type GetDMDetailsResponseData = IPCResponse<DirectMessageItem | null>;
 
 export type GetDMMessagesRequest = { conversationId: string };
-export type GetDMMessagesResponseData = ChatMessage[];
+export type GetDMMessagesResponseData = IPCResponse<ChatMessage[]>;
 
 export type SendDMMessageRequest = { dmId: string; content: string; senderId: string };
 export type SendDMMessageResponseData = ChatMessage;

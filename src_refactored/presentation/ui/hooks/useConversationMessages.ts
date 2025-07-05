@@ -7,7 +7,9 @@ import type {
   GetDMMessagesRequest as GetConversationMessagesRequest,
   GetDMMessagesResponseData as GetConversationMessagesResponseData,
   DMMessageReceivedEventPayload as ConversationMessageReceivedEventPayload,
-} from '@/shared/ipc-types';
+  ChatMessage,
+  IPCResponse,
+} from "@/shared/ipc-types";
 
 const GET_CONVERSATION_MESSAGES_CHANNEL = IPC_CHANNELS.GET_DM_MESSAGES;
 const CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL =
@@ -26,21 +28,23 @@ export function useConversationMessages({
     error: messagesError,
   } = useIpcSubscription<
     GetConversationMessagesRequest,
-    GetConversationMessagesResponseData,
+    IPCResponse<ChatMessage[]>,
     ConversationMessageReceivedEventPayload
   >(
     GET_CONVERSATION_MESSAGES_CHANNEL,
     { conversationId: selectedConversationId || '' },
     CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL,
     {
-      getSnapshot: (prevMessages, eventPayload) => {
-        if (eventPayload.conversationId === selectedConversationId) {
-          if (prevMessages?.find((msg) => msg.id === eventPayload.message.id)) {
-            return prevMessages;
+      getSnapshot: (prevMessagesResponse, eventPayload) => {
+        const typedEventPayload = eventPayload as ConversationMessageReceivedEventPayload;
+        const currentMessages = prevMessagesResponse?.success ? (prevMessagesResponse.data || []) : [];
+        if (typedEventPayload.conversationId === selectedConversationId) {
+          if (currentMessages.find((msg) => msg.id === typedEventPayload.message.id)) {
+            return { success: true, data: currentMessages };
           }
-          return [...(prevMessages || []), eventPayload.message];
+          return { success: true, data: [...currentMessages, typedEventPayload.message] };
         }
-        return prevMessages || [];
+        return { success: true, data: currentMessages };
       },
       onError: (err) => {
         toast.error(`Erro na subscrição de mensagens: ${err.message}`);
@@ -49,5 +53,5 @@ export function useConversationMessages({
     },
   );
 
-  return { messages, isLoadingMessages, messagesError };
+  return { messages: messages?.data, isLoadingMessages, messagesError };
 }

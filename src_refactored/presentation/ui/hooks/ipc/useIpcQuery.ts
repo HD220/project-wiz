@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 
+import { IPCResponse } from "@/shared/ipc-types";
+
 interface IpcQueryState<T> {
-  data: T | null;
+  data: IPCResponse<T> | null;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -21,18 +23,24 @@ interface IpcQueryState<T> {
 export function useIpcQuery<TResponse, TRequest = undefined>(
   channel: string,
   params?: TRequest,
-  options: { enabled?: boolean } = { enabled: true }
+  options: { enabled?: boolean; staleTime?: number; onError?: (error: Error) => void } = { enabled: true }
 ): IpcQueryState<TResponse> {
-  const [data, setData] = useState<TResponse | null>(null);
-  // Start loading if enabled
+  const [data, setData] = useState<IPCResponse<TResponse> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(options.enabled || false);
   const [error, setError] = useState<Error | null>(null);
+  const [lastFetched, setLastFetched] = useState<number>(0);
 
   const fetchData = useCallback(async () => {
-    if (!window.electronIPC || !window.electronIPC.ipcRenderer) {
-      console.error('Electron IPC renderer not available. Ensure preload script is correctly configured.');
-      setError(new Error('Electron IPC renderer not available.'));
+    if (!window.electronIPC) {
+      console.error('Electron IPC bridge not available. Ensure preload script is correctly configured.');
+      setError(new Error('Electron IPC bridge not available.'));
       setIsLoading(false);
+      return;
+    }
+
+    const now = Date.now();
+    if (options.staleTime && now - lastFetched < options.staleTime) {
+      // Data is not stale, no need to refetch
       return;
     }
 
@@ -40,35 +48,34 @@ export function useIpcQuery<TResponse, TRequest = undefined>(
     setError(null);
 
     try {
-      // console.log(`useIpcQuery: Invoking channel ${channel} with params:`, params);
-      const result = await window.electronIPC.ipcRenderer.invoke<TResponse>(channel, params);
-      // console.log(`useIpcQuery: Received result for channel ${channel}:`, result);
+      const result = await window.electronIPC.invoke<IPCResponse<TResponse>>(channel, params);
       setData(result);
+      setLastFetched(now);
     } catch (err: unknown) {
       console.error(`Error invoking IPC channel ${channel}:`, err);
+      let errorMessage = 'An unknown error occurred';
       if (err instanceof Error) {
-        setError(err);
+        errorMessage = err.message;
       } else if (typeof err === 'object' && err !== null && 'message' in err) {
-        setError(new Error(String((err as { message: unknown }).message)));
+        errorMessage = String((err as { message: unknown }).message);
       } else {
-        setError(new Error(String(err || 'An unknown error occurred')));
+        errorMessage = String(err);
       }
-      // Clear data on error
+      setError(new Error(errorMessage));
       setData(null);
     } finally {
       setIsLoading(false);
     }
-  // `params` are part of dependencies to refetch if they change
-  }, [channel, params]);
+  }, [channel, params, options.staleTime, lastFetched]);
 
   useEffect(() => {
     if (options.enabled) {
       fetchData();
     }
-  // Rerun if fetchData (channel/params) or enabled status changes
   }, [fetchData, options.enabled]);
 
   const refetch = useCallback(() => {
+    // Force refetch
     fetchData();
   }, [fetchData]);
 

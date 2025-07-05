@@ -18,32 +18,34 @@ import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
-  CreatePersonaTemplateRequest,
   CreatePersonaTemplateResponseData,
   IPCResponse,
 } from "@/shared/ipc-types";
+import type { CreatePersonaTemplateRequest } from "@/shared/ipc-types";
 
 function NewPersonaTemplatePage() {
   const router = useRouter();
 
   const createPersonaMutation = useIpcMutation<
-    IPCResponse<CreatePersonaTemplateResponseData>,
-    CreatePersonaTemplateRequest
+    CreatePersonaTemplateRequest,
+    CreatePersonaTemplateResponseData
   >(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, {
     onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success(
-          `Template de Persona "${response.data.name}" criado com sucesso!`
+          `Template de Persona "${response.data.name!}" criado com sucesso!`
         );
         router.navigate({
           to: "/app/personas/$templateId",
-          params: { templateId: response.data.id },
+          params: { templateId: response.data.id! },
           replace: true,
         });
-      } else {
+      } else if (!response.success && response.error) {
         toast.error(
-          `Falha ao criar o template: ${response.error?.message || "Erro desconhecido."}`
+          `Falha ao criar o template: ${response.error.message || "Erro desconhecido."}`
         );
+      } else {
+        toast.error("Falha ao criar o template: Erro desconhecido.");
       }
     },
     onError: (error: Error) => {
