@@ -54,7 +54,7 @@ Serão adotados os seguintes padrões para o design de componentes React e geren
 
 **5. Hooks Customizados (`src_refactored/presentation/ui/hooks/`):**
     *   **Padrão:** Encorajar a criação de hooks customizados para extrair e reutilizar lógica de UI com estado e/ou efeitos colaterais entre componentes.
-    *   **Nomenclatura:** Devem começar com `use` (e.g., `useDebounce`, `useProjectFilters`).
+    *   **Nomenclatura:** Devem começar com `use` (e.g., `useDebounce`, `useProjectFilters`). O nome do arquivo do hook deve seguir `use-kebab-case-nome.hook.ts` (conforme ADR-028).
     *   **Localização:** Hooks globais em `hooks/`. Hooks específicos de uma feature em `features/<nome-da-feature>/hooks/`.
     *   **Justificativa:** DRY, melhor organização da lógica, componentes mais limpos e focados na apresentação.
 
@@ -110,11 +110,12 @@ Serão adotados os seguintes padrões para o design de componentes React e geren
 
 ---
 **Notas de Implementação para LLMs:**
-*   Sempre crie componentes funcionais usando hooks.
+*   Sempre crie componentes funcionais usando hooks. Os arquivos de componentes devem ser nomeados `kebab-case.tsx` (e.g., `minha-feature/components/meu-cartao-perfil.tsx`).
 *   Divida componentes grandes em menores e mais focados.
-*   Para interações com o backend (IPC), use os hooks `useIpcQuery` e `useIpcMutation` (assumindo que serão corrigidos para usar `IPCService` ou `window.electronIPC`).
+*   Para interações com o backend (IPC), use os hooks `useIpcQuery` e `useIpcMutation` (que utilizam o `IPCService` ou `window.electronIPC`). Os arquivos destes hooks devem ser nomeados `use-kebab-case-nome.hook.ts` (e.g., `minha-feature/hooks/use-dados-projeto.hook.ts`).
 *   Gerencie o estado local com `useState`/`useReducer`. Para estado compartilhado/global, comece com Context e avalie bibliotecas dedicadas (Zustand/Jotai) se a complexidade aumentar.
 *   Use `useEffect` com arrays de dependência corretos e funções de limpeza.
 *   Aplique memoização (`React.memo`, `useCallback`, `useMemo`) apenas quando houver um gargalo de performance identificado.
 *   Siga as diretrizes de acessibilidade.
 *   Use React Hook Form e Zod para formulários.
+*   Consulte ADR-027 e ADR-028 para as convenções de nomenclatura de arquivos e diretórios do frontend atualizadas.

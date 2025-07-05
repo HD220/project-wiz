@@ -109,10 +109,10 @@ Serão adotados os seguintes padrões para o design e implementação de Adaptad
 ---
 **Notas de Implementação para LLMs:**
 *   Ao integrar um novo serviço externo:
-    1.  Defina a interface (porta) em `core/ports/adapters/`.
-    2.  Crie a implementação concreta do adaptador em `infrastructure/adapters/`.
+    1.  Defina a interface (porta) em `core/ports/adapters/`. O nome do arquivo da interface deve ser `<nome-serviço-kebab-case>.adapter.interface.ts`.
+    2.  Crie a implementação concreta do adaptador em `infrastructure/adapters/`. O nome do arquivo do adaptador deve ser `<nome-serviço-kebab-case>.adapter.ts` ou `<provedor-especifico-nome-serviço-kebab-case>.adapter.ts`.
     3.  Implemente tratamento de erro robusto, encapsulando erros externos em `InfrastructureError` ou subclasses.
     4.  Decida sobre o tipo de retorno (Promise de tipo específico, NÃO `IUseCaseResponse`).
     5.  Adicione logging detalhado (com cuidado para dados sensíveis).
-    6.  Crie uma implementação mock para testes.
+    6.  Crie uma implementação mock no arquivo `mock-[nome-serviço-kebab-case].adapter.ts`.
     7.  Configure a injeção de dependência no `inversify.config.ts`.

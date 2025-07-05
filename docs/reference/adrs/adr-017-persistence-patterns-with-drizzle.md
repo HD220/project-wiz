@@ -31,8 +31,8 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
     *   **Justificativa:** Padroniza a estrutura do banco de dados, melhora a performance com índices e garante consistência na representação de tipos de dados do domínio.
 
 **2. Implementações de Repositório (`Drizzle[NomeEntidade]Repository.ts`):**
-    *   **Localização:** `src_refactored/infrastructure/persistence/drizzle/<nome-entidade-kebab-case>/[nome-entidade-kebab-case].repository.ts`.
-        *   Exemplo: `src_refactored/infrastructure/persistence/drizzle/job/job.repository.ts` (Nota: o nome do arquivo deve ser kebab-case, o nome da classe PascalCase `DrizzleJobRepository`).
+    *   **Localização:** `src_refactored/infrastructure/persistence/drizzle/<nome-entidade-kebab-case>/drizzle-[nome-entidade-kebab-case].repository.ts`.
+        *   Exemplo: `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts` (para a classe `DrizzleJobRepository`).
     *   **Injeção de Dependência:** Devem ser `@injectable()` e receber a instância do cliente Drizzle (`db: typeof DbType`) e quaisquer outros repositórios ou serviços necessários via construtor.
     *   **Implementação de `IRepository`:** Devem implementar a interface `I[NomeEntidade]Repository` definida no domínio (conforme ADR-011).
 
@@ -69,12 +69,12 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
             // }
             ```
     *   **Objeto de Persistência para Entidade:**
-        *   A entidade expõe um método estático `fromPersistenceData(data: PersistenceData): EntityType` que reconstrói a entidade e seus VOs a partir do POJO de persistência.
+        *   A reconstrução de Entidades a partir de dados de persistência (o inverso de `toPersistence()`) é responsabilidade da camada de Repositório ou, mais especificamente, de seus Mappers (`drizzle-[nome-entidade-kebab-case].mapper.ts`). O Mapper converterá os dados crus do Drizzle (`DrizzleSelect` object) para um POJO (`PersistenceData`) que contém os valores primitivos necessários. Em seguida, o Mapper (ou o Repositório) usará os construtores públicos da Entidade e de seus VOs para recriar as instâncias do domínio. Ex: `return new EntityConstructor(entityPropsComVOsInstanciados);` onde `entityPropsComVOsInstanciados` é montado após instanciar cada VO com `new VOxConstructor(valorPrimitivo)`.
     *   **Diagrama de Fluxo de Mapeamento (Escrita):**
         `Entidade.toPersistence()` -> `POJO de Persistência` -> `MapperInfra.mapToDrizzleInput()` -> `Objeto DrizzleInput` -> `DrizzleORM`
     *   **Diagrama de Fluxo de Mapeamento (Leitura):**
-        `DrizzleORM` -> `Objeto DrizzleSelect` -> `MapperInfra.mapToPersistenceData()` -> `POJO de Persistência` -> `Entidade.fromPersistenceData()` -> `Entidade`
-    *   **Justificativa:** Separa claramente as responsabilidades de mapeamento. A entidade lida com sua representação de domínio para/de um POJO genérico. O mapper da infraestrutura lida com as especificidades do ORM/banco de dados (nomes de colunas, serialização JSON, conversão de tipos como Date/timestamp). Isso mantém o domínio agnóstico à persistência e o repositório focado na lógica de consulta.
+        `DrizzleORM` -> `Objeto DrizzleSelect` -> `MapperInfra.mapToPersistenceData()` -> `POJO de Persistência` -> `Mapper/Repositório (usa new VOs + new Entidade)` -> `Entidade`
+    *   **Justificativa:** Separa claramente as responsabilidades de mapeamento. A entidade de domínio é responsável por converter seu estado para um POJO de persistência (`toPersistence()`). O mapper da infraestrutura lida com as especificidades do ORM/banco de dados (e.g., nomes de colunas snake_case, serialização de JSON, conversão de Date para timestamp e vice-versa). Crucialmente, o mapper (ou o repositório que o utiliza) agora também é responsável por tomar o POJO de persistência (após a leitura do banco de dados e mapeamento inicial pelo mapper) e usar os construtores públicos da Entidade e seus VOs para reconstruir as instâncias de domínio. Isso mantém a Entidade ignorante sobre os detalhes da reconstrução a partir de dados crus, alinhando-se com a remoção do método `fromPersistenceData` das Entidades (ADR-010).
 
 **4. Semântica de `save` (Upsert):**
     *   **Padrão:** O método `save(entity: EntityType)` em repositórios Drizzle deve implementar uma lógica "upsert" usando ` .onConflictDoUpdate({ target: schema.table.id, set: drizzleInput })`.
@@ -139,16 +139,16 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
 
 **Consequências:**
 *   Consistência na interação com o banco de dados usando Drizzle ORM.
-*   Clareza na estratégia de mapeamento entre domínio e persistência.
+*   Clareza na estratégia de mapeamento entre domínio e persistência, alinhada com ADR-010.
 *   Melhor tratamento de erros e transações.
 *   Manutenção facilitada dos esquemas de banco de dados e repositórios.
 
 ---
 **Notas de Implementação para LLMs:**
 *   Ao criar um novo repositório Drizzle:
-    *   Defina o esquema da tabela em `.../schema/`.
-    *   Crie a classe `Drizzle[NomeEntidade]Repository` em `.../drizzle/[entidade-kebab-case]/`.
+    *   Defina o esquema da tabela em `.../schema/[nome-tabela-singular-kebab-case].schema.ts`.
+    *   Crie a classe `Drizzle[NomeEntidade]Repository` no arquivo `.../drizzle/[entidade-kebab-case]/drizzle-[entidade-kebab-case].repository.ts`.
     *   Implemente a interface `I[NomeEntidade]Repository`.
-    *   Crie um mapper (`drizzle-[nome-entidade-kebab-case].mapper.ts`) para as transformações entre o POJO de persistência da entidade e os formatos Drizzle.
+    *   Crie um mapper (`drizzle-[nome-entidade-kebab-case].mapper.ts`). Este mapper será responsável por: 1. Converter o POJO de persistência da entidade (de `toPersistence()`) para o formato de input do Drizzle. 2. Converter o resultado de uma query Drizzle (`DrizzleSelect`) para um POJO de persistência. 3. **Crucialmente, o mapper (ou o repositório que o utiliza) também será responsável por reconstruir a Entidade de domínio e seus VOs a partir do POJO de persistência, utilizando os construtores públicos `new VOx(valor)` e `new Entidade(propsComVOs)` (conforme ADR-010).**
     *   Use `db.transaction` nos Casos de Uso/Serviços para operações multi-escrita.
     *   Encapsule erros Drizzle em `InfrastructureError`.

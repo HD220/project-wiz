@@ -10,7 +10,7 @@ Um sistema de filas é essencial para processamento assíncrono de tarefas, como
 A arquitetura do sistema de filas será padronizada da seguinte forma:
 
 **1. Abstração Principal (`AbstractQueue`):**
-    *   **Localização:** `src_refactored/core/application/queue/abstract-queue.ts`.
+    *   **Localização:** `src_refactored/core/application/ports/queue/abstract-queue.port.ts` (ou `abstract-queue.interface.ts` se preferido, mas `.port.ts` é sugerido pela ADR-028 para este tipo de interface de aplicação).
     *   **Papel:** Define o contrato (porta) para todas as interações com o sistema de filas a partir da camada de aplicação ou de outros serviços. É uma classe abstrata que também funciona como `EventEmitter` para eventos de ciclo de vida de jobs e da fila.
     *   **Métodos Chave:** Define a API pública para adicionar jobs (`add`, `addBulk`), recuperar jobs (`getJob`, `getJobsByStatus`), gerenciar a fila (`pause`, `resume`, `clean`), e para workers interagirem com jobs (`fetchNextJobAndLock`, `markJobAsCompleted`, `markJobAsFailed`, `updateJobProgress`, `addJobLog`).
     *   **Eventos Emitidos (Exemplos):** `job.added`, `job.completed`, `job.failed`, `job.active`, `job.progress`, `queue.paused`, `queue.resumed`, `queue.closed`. (A lista completa deve ser documentada no `coding-standards.md` ou em uma documentação específica da API da fila).
@@ -27,7 +27,7 @@ A arquitetura do sistema de filas será padronizada da seguinte forma:
 **3. Serviços Internos da Fila (Composição):**
     *   Estes serviços residem em `src_refactored/infrastructure/queue/drizzle/` e são compostos pela `DrizzleQueueFacade`. Eles NÃO implementam `AbstractQueue` diretamente.
     *   **`QueueServiceCore<P, R>`:**
-        *   **Responsabilidade:** Lógica central de criação de `JobEntity` (usando `JobEntity.create()`), persistência inicial (usando `IJobRepository.save()`), recuperação básica de jobs, e emissão de eventos centrais relacionados à adição e estado da fila (e.g., `job.added`, `queue.paused`).
+        *   **Responsabilidade:** Lógica central de preparação das propriedades e instanciação de `JobEntity` (usando `new JobEntity(props)`, conforme ADR-010), persistência inicial (usando `IJobRepository.save()`), recuperação básica de jobs, e emissão de eventos centrais relacionados à adição e estado da fila (e.g., `job.added`, `queue.paused`).
         *   Não lida com a lógica de processamento de jobs por workers ou manutenção da fila.
     *   **`JobProcessingService<P, R>`:**
         *   **Responsabilidade:** Gerencia a interação entre workers e jobs. Implementa os métodos de `AbstractQueue` que são tipicamente chamados por um `WorkerService`, como `fetchNextJobAndLock`, `extendJobLock`, `markJobAsCompleted`, `markJobAsFailed`, `updateJobProgress`, `addJobLog`.
@@ -43,7 +43,7 @@ A arquitetura do sistema de filas será padronizada da seguinte forma:
     3.  A chamada é delegada para `DrizzleQueueFacade.add(...)`.
     4.  `DrizzleQueueFacade` delega para `QueueServiceCore.add(...)`.
     5.  `QueueServiceCore` executa:
-        *   `JobEntity.create<P, R>({ queueName, name, payload, options })` para criar a instância da entidade.
+        *   Prepara as propriedades necessárias (incluindo instanciação de VOs se `payload` ou `options` contiverem dados crus para eles) e então instancia com `new JobEntity<P, R>(props)` para criar a instância da entidade (conforme ADR-010).
         *   `this.jobRepository.save(jobEntity)` para persistir a nova entidade no banco de dados (que, para `DrizzleJobRepository`, fará um upsert).
         *   `this.emit("job.added", jobEntity)` para notificar sobre o novo job.
     6.  A `JobEntity` criada é retornada ao chamador original.
@@ -54,13 +54,14 @@ A arquitetura do sistema de filas será padronizada da seguinte forma:
             participant AQ as AbstractQueue (DI)
             participant DQF as DrizzleQueueFacade
             participant QSC as QueueServiceCore
-            participant JE as JobEntity (static)
+            participant JE as JobEntity (classe)
             participant JR as IJobRepository (DI)
 
             AppService->>+AQ: add(jobName, data, opts)
             AQ->>+DQF: add(jobName, data, opts)
             DQF->>+QSC: add(jobName, data, opts)
-            QSC->>+JE: create(params)
+            QSC->>QSC: Prepara props para JobEntity
+            QSC->>JE: new JobEntity(props)
             JE-->>-QSC: jobEntity
             QSC->>+JR: save(jobEntity)
             JR-->>-QSC: Promise<void> (resolvida)
@@ -109,5 +110,5 @@ A arquitetura do sistema de filas será padronizada da seguinte forma:
 ---
 **Notas de Implementação para LLMs:**
 *   Para adicionar um job à fila "default", injete `AbstractQueue` usando o token `getQueueServiceToken("default")` e chame seu método `add()`.
-*   A lógica de criação da `JobEntity` e sua persistência inicial estão encapsuladas dentro da implementação da fila (especificamente `QueueServiceCore`).
+*   A lógica de criação da `JobEntity` (usando `new JobEntity(props)` após preparar as props) e sua persistência inicial estão encapsuladas dentro da implementação da fila (especificamente `QueueServiceCore`).
 *   Entenda a distinção de responsabilidades entre `DrizzleQueueFacade`, `QueueServiceCore`, `JobProcessingService` e `QueueMaintenanceService` ao trabalhar com o código da fila.

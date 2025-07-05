@@ -43,7 +43,7 @@ Serão adotados os seguintes padrões para o design de Funções Processadoras d
 
 **5. Sinalização de Falha:**
     *   **Padrão:** Uma falha na execução é sinalizada pela função processadora lançando (`throw`) um `Error`.
-    *   Idealmente, deve-se lançar uma instância de um erro customizado que herde de `CoreError` (conforme ADR-014), como `ApplicationError` ou um erro de negócio específico, se a falha for devido a uma regra de negócio ou condição de erro esperada dentro do processador.
+    *   Idealmente, deve-se lançar uma instância de um erro customizado que herde de `CoreError` (conforme ADR-014), como `ApplicationError` ou um erro de negócio específico, if a falha for devido a uma regra de negócio ou condição de erro esperada dentro do processador.
     *   O `WorkerService` capturará esta exceção e chamará `queue.markJobAsFailed(job.id, workerId, error, job)`.
     *   **Justificativa:** Padrão de Promise padrão para falhas. Erros tipados ajudam no tratamento e diagnóstico.
 

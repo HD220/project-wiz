@@ -1,16 +1,16 @@
 # ADR-028: Convenções Abrangentes de Nomenclatura (Mandato de Inglês no Código)
 
-**Status:** Proposto (Considerado Aprovado Conforme Instrução)
+**Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para kebab-case universal em `src_refactored/`)
 
 **Contexto:**
-Convenções de nomenclatura consistentes são fundamentais para a legibilidade, manutenibilidade e colaboração em qualquer projeto de software. Esta ADR consolida e formaliza todas as convenções de nomenclatura para identificadores de código, arquivos e diretórios em todo o Project Wiz, com um mandato explícito para o uso da língua inglesa em todos os identificadores de código. Ela referencia e complementa convenções específicas já mencionadas em outras ADRs (e.g., ADR-027 para arquivos de UI React).
+Convenções de nomenclatura consistentes são fundamentais para a legibilidade, manutenibilidade e colaboração em qualquer projeto de software. Esta ADR consolida e formaliza todas as convenções de nomenclatura para identificadores de código, arquivos e diretórios em todo o Project Wiz, com um mandato explícito para o uso da língua inglesa em todos os identificadores de código.
 
 **Decisão:**
 
 As seguintes convenções de nomenclatura abrangentes serão adotadas:
 
 **1. Mandato da Língua Inglesa no Código:**
-    *   **Padrão:** TODOS os identificadores no código-fonte (nomes de variáveis, funções, métodos, classes, interfaces, tipos, enums, parâmetros, módulos, arquivos (exceto onde especificado), e diretórios) DEVEM ser escritos em Inglês.
+    *   **Padrão:** TODOS os identificadores no código-fonte (nomes de variáveis, funções, métodos, classes, interfaces, tipos, enums, parâmetros, módulos, arquivos e diretórios) DEVEM ser escritos em Inglês.
     *   Comentários no código (quando absolutamente necessários, conforme ADR-016 e `coding-standards.md`) DEVEM também ser em Inglês.
     *   Documentação voltada para o desenvolvedor (como esta ADR, `coding-standards.md`, `software-architecture.md`) será em Português, conforme o contexto do projeto. Documentação para usuários finais ou APIs públicas (se houver) pode ter outros requisitos de idioma.
     *   **Justificativa:** Inglês é a língua franca no desenvolvimento de software, facilitando a colaboração com uma comunidade global, o uso de bibliotecas e ferramentas internacionais, e a compreensão por LLMs e outros desenvolvedores que podem não ser falantes de português. Evita codebases com idiomas misturados, que são difíceis de ler e manter.
@@ -28,31 +28,37 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
     *   **Justificativa:** Convenções amplamente adotadas na comunidade JavaScript/TypeScript, melhoram a legibilidade e ajudam a distinguir rapidamente o tipo de identificador.
 
 **3. Convenções de Nomenclatura de Arquivos (Geral):**
-    *   **Padrão Principal:** `kebab-case` para nomes de arquivos.
+    *   **Padrão Principal:** **TODOS** os nomes de arquivos e pastas em `src_refactored/` DEVEM ser em `kebab-case`.
         *   Extensões devem ser minúsculas (e.g., `.ts`, `.md`, `.json`, `.schema.ts`).
-        *   **Exemplos:** `job.entity.ts`, `user-repository.interface.ts`, `generic-agent-executor.service.ts`, `calculate-total.util.ts`, `auth.config.ts`, `project-routes.ts`.
-    *   **Exceção Principal (Componentes React UI):** Arquivos de componentes React (`.tsx`) DEVEM usar `PascalCase.tsx` (conforme ADR-027). Ex: `UserProfileCard.tsx`.
-    *   **Sufixos Descritivos:** Usar sufixos padronizados para indicar o tipo/propósito principal do arquivo:
+        *   **Exemplos:**
+            *   `user-profile-card.tsx` (componente React)
+            *   `use-auth-session.hook.ts` (hook React)
+            *   `job.entity.ts` (entidade de domínio)
+            *   `generic-agent-executor.service.ts` (serviço de aplicação)
+            *   `user-notification.port.ts` (interface de porta)
+    *   **Sufixos Descritivos:** Usar sufixos padronizados, **obrigatoriamente**, para indicar o tipo/propósito principal do arquivo:
         *   Entidades: `*.entity.ts` (e.g., `user.entity.ts`)
         *   Objetos de Valor: `*.vo.ts` (e.g., `email.vo.ts`, `job-id.vo.ts`)
-        *   Interfaces (especialmente Ports): `*.interface.ts` (e.g., `job-repository.interface.ts`)
-        *   Serviços: `*.service.ts` (e.g., `user.service.ts`, `ipc.service.ts`)
+        *   Interfaces de Repositório (Domínio): `*-repository.interface.ts` (e.g., `job-repository.interface.ts`)
+        *   Outras Interfaces de Portas (Aplicação/Domínio): `*.port.ts` (e.g., `user-notification.port.ts`, `llm-generation.port.ts`)
+        *   Serviços (Aplicação, Domínio, Infraestrutura): `*.service.ts` (e.g., `user-authentication.service.ts`, `job-processing.service.ts`)
         *   Repositórios (implementações): `*.repository.ts` (e.g., `drizzle-user.repository.ts`)
         *   Adaptadores (implementações): `*.adapter.ts` (e.g., `openai-llm.adapter.ts`)
         *   Casos de Uso: `*.use-case.ts` (e.g., `create-project.use-case.ts`)
         *   Esquemas Zod: `*.schema.ts` (e.g., `create-project.schema.ts`)
         *   Handlers (e.g., IPC, eventos): `*.handlers.ts` (e.g., `project.handlers.ts`)
         *   Configurações: `*.config.ts` (e.g., `database.config.ts`, `tailwind.config.ts`)
-        *   Tipos: `*.types.ts` (e.g., `job.types.ts`, `ipc-shared.types.ts`)
+        *   Tipos (DTOs, definições de tipo específicas de módulo): `*.types.ts` (e.g., `job.types.ts`, `ipc-shared.types.ts`)
         *   Constantes: `*.constants.ts`
         *   Utilitários: `*.utils.ts` ou `*.helpers.ts`
-        *   Hooks React: `use-*.hook.ts` ou `use*.ts` (ADR-027 tem preferência por `useCamelCase.ts`, esta ADR sugere consistência com kebab-case para arquivos não-componentes: `use-nome-hook.hook.ts`. **DECISÃO FINAL:** Manter `useCamelCase.ts` ou `usePascalCase.ts` para hooks como exceção ao kebab-case geral de arquivos `.ts` devido à forte convenção da comunidade React e para que o nome do arquivo espelhe o nome do hook exportado).
-    *   **Justificativa:** `kebab-case` é URL-friendly, evita problemas de case-sensitivity entre sistemas operacionais e é comum para arquivos de configuração e scripts. Sufixos padronizados melhoram a identificabilidade do conteúdo do arquivo. Exceção para componentes React e hooks alinha-se com convenções do ecossistema.
+        *   Componentes React: `*.tsx` (e.g., `user-profile-card.tsx`, `login-form.tsx`). (A extensão `.tsx` por si só já indica um componente React. O nome do arquivo deve ser descritivo e em kebab-case).
+        *   Hooks React: `use-*.hook.ts` (e.g., `use-auth-session.hook.ts`, `use-form-validation.hook.ts`). O prefixo `use-` é parte do nome do arquivo.
+    *   **Justificativa:** Consistência universal em `src_refactored/` é a prioridade máxima para nomes de arquivos e diretórios. `kebab-case` é URL-friendly, evita problemas de case-sensitivity entre sistemas operacionais e é um padrão comum. Sufixos de tipo mandatórios melhoram drasticamente a identificabilidade do conteúdo e propósito do arquivo sem a necessidade de abri-lo, facilitando a navegação e compreensão da estrutura do projeto.
 
 **4. Convenções de Nomenclatura de Diretórios (Geral):**
-    *   **Padrão Principal:** `kebab-case` para nomes de diretórios.
+    *   **Padrão Principal:** TODOS os nomes de diretórios em `src_refactored/` DEVEM ser em `kebab-case`.
     *   **Exemplos:** `core/domain/value-objects/`, `infrastructure/persistence/repositories/`, `presentation/electron/main-process/`, `features/user-profile/components/`.
-    *   **Exceção:** Diretórios em `presentation/ui/app/` que mapeiam para rotas dinâmicas do TanStack Router seguem a convenção do router (e.g., `$projectId`), conforme ADR-027.
+    *   **Exceção para Convenções de Frameworks:** Diretórios dentro de `src_refactored/presentation/ui/app/` (ou outra estrutura de páginas designada por um framework de roteamento) que são gerados ou rigidamente exigidos pelo framework de roteamento (e.g., TanStack Router para rotas dinâmicas como `$paramId` ou arquivos de layout especiais como `_layout.tsx`, `_auth.tsx`) podem seguir as convenções do framework. Todos os outros diretórios criados por desenvolvedores, mesmo dentro de `app/`, DEVEM seguir `kebab-case`.
     *   **Justificativa:** Consistência com nomeação de arquivos, legibilidade e prevenção de problemas de case-sensitivity.
 
 **5. Padrões de Nomenclatura Específicos por Tipo de Identificador:**
@@ -90,7 +96,7 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
     *   **Justificativa:** Código auto-documentável é mais fácil de entender e manter.
 
 **7. Consistência Entre Camadas:**
-    *   **Padrão:** Estas convenções de nomenclatura (exceto as específicas de arquivos de UI React) devem ser aplicadas consistentemente em todas as camadas do projeto (`core`, `infrastructure`, `presentation`, `shared`).
+    *   **Padrão:** Estas convenções de nomenclatura DEVEM ser aplicadas consistentemente em todas as camadas e arquivos dentro de `src_refactored/`.
     *   **Justificativa:** Uniformidade reduz a carga cognitiva e facilita a navegação e compreensão do código.
 
 **Consequências:**
@@ -102,9 +108,18 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
 
 ---
 **Notas de Implementação para LLMs:**
-*   TODOS os nomes de variáveis, funções, classes, arquivos (exceto componentes .tsx React) e diretórios que você criar ou modificar DEVEM estar em Inglês e seguir as convenções de casing especificadas (camelCase, PascalCase, UPPER_SNAKE_CASE, kebab-case).
-*   Use sufixos de arquivo padronizados (`.entity.ts`, `.service.ts`, etc.).
-*   Para interfaces, use o prefixo `I-` (e.g., `IMyInterface`).
-*   Para booleanos, use prefixos como `is...`, `has...`.
+*   TODOS os nomes de variáveis, funções, classes e outros identificadores de código DEVEM estar em Inglês e seguir as convenções de casing especificadas (camelCase, PascalCase, UPPER_SNAKE_CASE).
+*   TODOS os nomes de arquivos e diretórios que você criar ou modificar dentro de `src_refactored/` DEVEM estar em `kebab-case` e em Inglês.
+*   Use sufixos de tipo mandatórios e padronizados para todos os arquivos:
+    *   Componentes React: `meu-componente.tsx`
+    *   Hooks React: `use-minha-logica.hook.ts`
+    *   Entidades: `nome-entidade.entity.ts`
+    *   Objetos de Valor: `nome-vo.vo.ts`
+    *   Serviços: `nome-servico.service.ts`
+    *   Interfaces de Repositório: `nome-repositorio.interface.ts`
+    *   Outras Interfaces de Porta: `nome-porta.port.ts`
+    *   E assim por diante para `.schema.ts`, `.repository.ts`, `.adapter.ts`, `.use-case.ts`, `.types.ts`, etc.
+*   Para interfaces (tipos TypeScript), use o prefixo `I` (e.g., `IMyInterface`).
+*   Para booleanos, use prefixos como `is...`, `has...`, `should...`.
 *   Seja descritivo e evite abreviações desnecessárias.
-*   Em caso de dúvida sobre uma convenção específica, consulte esta ADR ou a ADR relevante (e.g., ADR-027 para UI).
+*   Em caso de dúvida sobre uma convenção específica, consulte esta ADR. A consistência é chave.

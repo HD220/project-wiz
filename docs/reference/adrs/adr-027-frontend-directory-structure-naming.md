@@ -1,9 +1,9 @@
 # ADR-027: Estrutura de Diretórios e Convenções de Nomenclatura para o Frontend
 
-**Status:** Proposto (Considerado Aprovado Conforme Instrução)
+**Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para alinhar com ADR-028)
 
 **Contexto:**
-Uma estrutura de diretórios bem definida e convenções de nomenclatura consistentes são cruciais para a organização, navegabilidade e manutenibilidade do código do frontend (`src_refactored/presentation/ui/`). A análise da estrutura existente, do `routeTree.gen.ts` (TanStack Router) e da documentação de arquitetura (`docs/reference/01-software-architecture.md`) informa esta decisão.
+Uma estrutura de diretórios bem definida e convenções de nomenclatura consistentes são cruciais para a organização, navegabilidade e manutenibilidade do código do frontend (`src_refactored/presentation/ui/`). A análise da estrutura existente, do `routeTree.gen.ts` (TanStack Router) e da documentação de arquitetura (`docs/reference/01-software-architecture.md`) informa esta decisão. Esta ADR é alinhada com a **ADR-028**, que estabelece `kebab-case` universal para arquivos em `src_refactored/`.
 
 **Decisão:**
 
@@ -75,15 +75,15 @@ graph LR
         *   Exemplos: `user-authentication`, `project-settings`, `common-components`.
     *   Exceção: Diretórios em `app/` que mapeiam para rotas dinâmicas do TanStack Router seguem a convenção do router (e.g., `$projectId`).
 *   **Arquivos de Componentes React (.tsx):**
-    *   DEVEM ser nomeados em `PascalCase.tsx`.
-        *   Exemplos: `UserProfileCard.tsx`, `ProjectList.tsx`, `MainLayout.tsx`.
-    *   **Justificativa:** Convenção padrão e amplamente reconhecida no ecossistema React. Facilita a identificação de componentes.
+    *   DEVEM ser nomeados em `kebab-case.tsx`.
+        *   Exemplos: `user-profile-card.tsx`, `project-list.tsx`, `main-layout.tsx`.
+    *   **Justificativa:** Padronização universal com `kebab-case` para todos os arquivos em `src_refactored/` conforme ADR-028. A extensão `.tsx` por si só já indica um componente React, tornando o sufixo `.component` redundante.
 *   **Arquivos de Hooks Customizados (.ts ou .tsx):**
-    *   DEVEM ser nomeados em `useCamelCase.ts` ou `usePascalCase.ts` (preferência por `useCamelCase.ts`). Adicionar o sufixo `.hook.ts` é opcional, mas pode ajudar na clareza se houver muitos arquivos utilitários no mesmo diretório (e.g. `use-project-filters.ts` ou `useProjectFilters.hook.ts`).
-        *   Exemplos: `useAuth.ts`, `useProjectData.ts`, `use-form-validation.hook.ts`.
-    *   **Justificativa:** Convenção do React para hooks (`use...`). `camelCase` ou `PascalCase` para o nome do hook em si é comum.
+    *   DEVEM ser nomeados em `use-kebab-case-nome.hook.ts`. (O prefixo `use-` é mantido pela convenção React para identificar hooks).
+        *   Exemplos: `use-auth-session.hook.ts`, `use-project-data.hook.ts`, `use-form-validation.hook.ts`.
+    *   **Justificativa:** Padronização universal com `kebab-case` para todos os arquivos em `src_refactored/` conforme ADR-028, mantendo o prefixo `use-` para identificar hooks. O sufixo `.hook.ts` clarifica o tipo de arquivo.
 *   **Outros Arquivos TypeScript na UI (.ts):**
-    *   (Serviços, tipos, utilitários, configurações, esquemas Zod para UI) DEVEM ser nomeados em `kebab-case.ts`.
+    *   (Serviços, tipos, utilitários, configurações, esquemas Zod para UI) DEVEM ser nomeados em `kebab-case.sufixo.ts` (e.g., `ipc.service.ts`, `project.types.ts`, `login-form.schema.ts`). Consulte ADR-028 para uma lista de sufixos padronizados.
         *   Exemplos: `ipc.service.ts`, `project.types.ts`, `date-utils.ts`, `router.config.ts`, `login-form.schema.ts`.
 *   **Arquivos de Estilo (se existirem CSS/SCSS customizado mínimo):**
     *   `kebab-case.css` ou `kebab-case.module.css`.
@@ -96,14 +96,16 @@ graph LR
 
 **Consequências:**
 *   Estrutura de diretórios do frontend clara, modular e escalável.
-*   Convenções de nomenclatura consistentes que facilitam a identificação do tipo e propósito dos arquivos.
+*   Convenções de nomenclatura consistentes que facilitam a identificação do tipo e propósito dos arquivos, alinhadas com ADR-028.
 *   Melhor organização e separação de responsabilidades dentro da camada de UI.
-*   Alinhamento com as convenções do TanStack Router e do ecossistema React.
+*   Alinhamento com as convenções do TanStack Router e do ecossistema React (para o prefixo `use-` de hooks).
 
 ---
 **Notas de Implementação para LLMs:**
 *   Ao criar uma nova funcionalidade de UI, crie um diretório em `features/` (e.g., `features/new-feature/`).
-*   Dentro do diretório da feature, crie subdiretórios para `components`, `hooks`, `types`, etc., conforme necessário.
-*   Componentes React devem ser `PascalCase.tsx`. Outros arquivos TS (hooks, services, utils) devem ser `kebab-case.ts`.
-*   Para criar uma nova página/rota, adicione a estrutura de arquivos apropriada em `app/` (e.g., `app/app/new-feature-route/index.tsx`). Este componente de página então usará os componentes da sua feature.
-*   Siga rigorosamente as convenções de nomenclatura para arquivos e diretórios.
+*   Dentro do diretório da feature, crie subdiretórios para `components`, `hooks`, `types`, etc., conforme necessário. Todos os diretórios devem ser `kebab-case`.
+*   Componentes React devem ser `kebab-case.tsx` (e.g., `user-profile-card.tsx`).
+*   Hooks customizados devem ser `use-kebab-case-nome.hook.ts` (e.g., `use-auth-state.hook.ts`).
+*   Outros arquivos TS (services, utils, types, schemas, etc.) devem ser `kebab-case.sufixo.ts` (e.g., `user-preferences.service.ts`, `validation.utils.ts`).
+*   Para criar uma nova página/rota, adicione a estrutura de arquivos apropriada em `app/` (e.g., `app/app/new-feature-route/page.tsx`). Este componente de página então usará os componentes da sua feature.
+*   Siga rigorosamente as convenções de nomenclatura `kebab-case` e os sufixos de tipo para todos os arquivos e diretórios dentro de `src_refactored/presentation/ui/`, conforme detalhado nesta ADR e na ADR-028.

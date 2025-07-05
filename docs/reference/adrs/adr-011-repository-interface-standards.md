@@ -10,7 +10,7 @@ Interfaces de Repositório são um componente crucial da Clean Architecture, def
 Serão adotados os seguintes padrões para todas as Interfaces de Repositório:
 
 **1. Localização das Interfaces:**
-    *   **Padrão:** Todas as interfaces de repositório DEVERÃO ser localizadas dentro da camada de domínio, especificamente em: `src_refactored/core/domain/<nome-da-entidade>/ports/<nome-da-entidade>-repository.interface.ts`.
+    *   **Padrão:** Todas as interfaces de repositório DEVERÃO ser localizadas dentro da camada de domínio, especificamente em: `src_refactored/core/domain/<nome-da-entidade-kebab-case>/ports/<nome-da-entidade-kebab-case>-repository.interface.ts` (onde `<nome-da-entidade-kebab-case>` representa o nome da entidade em kebab-case).
         *   Exemplo: `src_refactored/core/domain/user/ports/user-repository.interface.ts` para `User`.
         *   Exemplo: `src_refactored/core/domain/job/ports/job-repository.interface.ts` para `Job`.
     *   **Justificativa:** Interfaces de repositório são contratos definidos PELA camada de domínio, especificando como as entidades de domínio devem ser persistidas e recuperadas. A camada de domínio "possui" esses contratos. A camada de aplicação utiliza essas interfaces, e a camada de infraestrutura as implementa. Esta localização reforça a Regra de Dependência da Clean Architecture (dependências fluem para dentro).
@@ -54,9 +54,7 @@ Serão adotados os seguintes padrões para todas as Interfaces de Repositório:
 
 **6. Tratamento de Erros:**
     *   **Padrão:** Interfaces de repositório não devem vazar exceções específicas da camada de persistência (e.g., erros Drizzle, erros de conexão SQL).
-    *   Implementações concretas de repositório (camada de infraestrutura) são responsáveis por capturar erros específicos da ferramenta de persistência e:
-        1.  Mapeá-los para erros de domínio genéricos (e.g., `InfrastructureError`, `ConnectivityError` de `core/domain/common/errors.ts`) ou,
-        2.  Em casos onde o erro é recuperável ou esperado (como uma falha de constraint única que pode ser tratada como um erro de negócio), podem retornar um resultado indicando a falha (e.g., um `Result<void, DomainError>` object), embora o padrão primário seja lançar exceções mapeadas.
+    *   Implementações concretas de repositório (camada de infraestrutura) são responsáveis por capturar erros específicos da ferramenta de persistência (e.g., erros de banco de dados, falhas de conexão) e DEVEM mapeá-los para erros genéricos de infraestrutura (e.g., `InfrastructureError`, `ConnectivityError`, `PersistenceError` de `shared/errors/`) antes de relançá-los. O objetivo é não vazar detalhes da implementação da persistência para as camadas superiores.
     *   Métodos como `findById` retornam `null` para indicar "não encontrado", não lançam um erro. A camada de aplicação (caso de uso) decide se "não encontrado" é uma condição de erro.
     *   **Justificativa:** Decoupla o domínio e a aplicação de detalhes da infraestrutura, permitindo que a tecnologia de persistência seja trocada com impacto mínimo nas camadas superiores.
 

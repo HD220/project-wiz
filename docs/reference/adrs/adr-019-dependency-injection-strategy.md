@@ -95,7 +95,7 @@ Serão adotados os seguintes padrões para a estratégia de Injeção de Depend�
 
 **9. Evitar Dependências Circulares:**
     *   **Padrão:** O design das classes e suas dependências deve evitar dependências circulares (A depende de B, e B depende de A). InversifyJS pode ter problemas para resolver tais dependências ou pode resolvê-las de forma inesperada.
-    *   **Estratégias de Resolução/Prevenção:** Refatorar para extrair uma terceira classe da qual ambos dependem, usar injeção de propriedade (com cautela e apenas se absolutamente necessário e compreendido), ou repensar as responsabilidades das classes envolvidas.
+    *   **Estratégias de Resolução/Prevenção:** Refatorar para extrair uma terceira classe da qual ambos dependem, usar injeção de propriedade (com cautela e apenas seolutamente necessário e compreendido), ou repensar as responsabilidades das classes envolvidas.
     *   **Justificativa:** Dependências circulares geralmente indicam um problema de design (acoplamento excessivo ou responsabilidades mal definidas).
 
 **10. Módulos de Container (`ContainerModule`):**
@@ -112,7 +112,7 @@ Serão adotados os seguintes padrões para a estratégia de Injeção de Depend�
 **Notas de Implementação para LLMs:**
 *   Sempre decore classes que precisam de DI com `@injectable()`.
 *   Use injeção via construtor com `@inject(TOKEN)` para todas as dependências. Evite injeção de propriedade.
-*   Defina tokens `Symbol` para cada interface que será injetada e exporte-os junto da interface.
+*   Defina tokens `Symbol` para cada interface que será injetada e exporte-os junto da interface. O nome do arquivo da interface deve ser `kebab-case.interface.ts` ou similar conforme ADR-028.
 *   Ao adicionar uma nova classe que precisa ser injetável (e.g., um novo Serviço, Repositório, Adaptador):
     1.  Defina sua interface e o token `Symbol` no local apropriado (e.g., `core/application/ports/` ou `core/domain/ports/`).
     2.  Implemente a classe, decorando-a com `@injectable()` e usando `@inject()` no construtor para suas dependências.
