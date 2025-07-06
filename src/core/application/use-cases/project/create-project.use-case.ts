@@ -40,42 +40,4 @@ export class CreateProjectUseCase   implements IUseCase<CreateProjectUseCaseInpu
 
     return { projectId: project.id.value };
   }
-
-  private _validateInput(input: CreateProjectUseCaseInput): CreateProjectUseCaseInput {
-    const validationResult = CreateProjectInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      const errorMessage = 'Invalid input for CreateProjectUseCase';
-      this.logger.error(
-        `[CreateProjectUseCase] ${errorMessage}`,
-        validationResult.error,
-        { details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input }
-      );
-      throw new ZodError(validationResult.error.errors);
-    }
-    return validationResult.data;
-  }
-
-  private _createProjectEntity(validatedInput: CreateProjectUseCaseInput): Project {
-    const projectName = ProjectName.create(validatedInput.name);
-    let projectDescription: ProjectDescription | null = null;
-
-    if (validatedInput.description && validatedInput.description.trim() !== "") {
-      projectDescription = ProjectDescription.create(validatedInput.description);
-    }
-
-    const projectProps: ProjectProps = {
-      id: ProjectId.generate(),
-      name: projectName,
-      description: projectDescription,
-    };
-
-    const projectEntity = Project.create(projectProps);
-    return projectEntity;
-  }
-
-  private _mapToOutput(projectEntity: Project): CreateProjectUseCaseOutput {
-    return {
-      projectId: projectEntity.id.value,
-    };
-  }
 }

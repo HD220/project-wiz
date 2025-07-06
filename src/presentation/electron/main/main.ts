@@ -6,14 +6,7 @@ import squirrelStartup from "electron-squirrel-startup";
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
-// import { registerAgentInstanceHandlers } from "./handlers/agent-instance.handlers";
-// import { registerDMHandlers } from "./handlers/dm.handlers";
-// import { registerLLMConfigHandlers } from "./handlers/llm-config.handlers";
-// import { registerPersonaTemplateHandlers } from "./handlers/persona-template.handlers";
 import { composeMainProcessHandlers } from "@/presentation/electron/main/electron-main-composition";
-// import { registerUserHandlers } from "./handlers/user.handlers";
-// import { registerChatIPCHandlers } from "./ipc-chat.handlers";
-// import { registerProjectIPCHandlers as registerLegacyProjectIPCHandlers } from "./ipc-project.handlers";
 
 if (squirrelStartup) {
   app.quit();

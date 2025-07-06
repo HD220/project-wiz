@@ -13,24 +13,6 @@ import { TYPES } from '@/infrastructure/ioc/types';
 
 import { errorUseCaseResponse, successUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
 
-// Prefixed because these are internal schema details, not part of the public tool parameters interface
-const _ReadFileParamsSchema = z.object({
-  filePath: z.string().describe('The path to the file to read.'),
-});
-
-// Prefixed
-const _WriteFileParamsSchema = z.object({
-  filePath: z.string().describe('The path to the file to write.'),
-  content: z.string().describe('The content to write to the file.'),
-});
-
-// Prefixed
-const _ListFilesParamsSchema = z.object({
-  directoryPath: z
-    .string()
-    .describe('The path to the directory to list files from.'),
-});
-
 @injectable()
 export class FileSystemTool implements IAgentTool<typeof FileSystemTool.prototype.parameters, unknown> {
   public readonly name = 'fileSystem';
