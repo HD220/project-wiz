@@ -3,22 +3,13 @@ import { injectable, inject } from "inversify";
 import { MEMORY_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
 import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
-import { Identity } from "@/core/common/value-objects/identity.vo";
+import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 import { MemoryItem } from "@/core/domain/memory/memory-item.entity";
 import { IMemoryRepository } from "@/core/domain/memory/ports/memory-repository.interface";
 import { MemoryItemEmbedding } from "@/core/domain/memory/value-objects/memory-item-embedding.vo";
 
 import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
-
-
-
-
-import {
   SearchSimilarMemoryItemsUseCaseInput,
-  SearchSimilarMemoryItemsUseCaseInputSchema,
   SearchSimilarMemoryItemsUseCaseOutput,
   SimilarMemoryListItem,
 } from "./search-similar-memory-items.schema";
@@ -28,7 +19,7 @@ export class SearchSimilarMemoryItemsUseCase
   implements
     IUseCase<
       SearchSimilarMemoryItemsUseCaseInput,
-      IUseCaseResponse<SearchSimilarMemoryItemsUseCaseOutput>
+      SearchSimilarMemoryItemsUseCaseOutput
     >
 {
   constructor(
@@ -53,38 +44,24 @@ export class SearchSimilarMemoryItemsUseCase
     };
   }
 
-  public async execute(
-    input: SearchSimilarMemoryItemsUseCaseInput
-  ): Promise<IUseCaseResponse<SearchSimilarMemoryItemsUseCaseOutput>> {
-    this.logger.debug("SearchSimilarMemoryItemsUseCase: Starting execution with input:", { input });
+  public async execute(input: SearchSimilarMemoryItemsUseCaseInput): Promise<SearchSimilarMemoryItemsUseCaseOutput> {
+    const { queryEmbedding, limit, agentId } = input;
 
-    const validInput = SearchSimilarMemoryItemsUseCaseInputSchema.parse(input);
+    const embedding = MemoryItemEmbedding.create(queryEmbedding);
+    const agent = agentId ? AgentId.fromString(agentId) : undefined;
 
-    const { embeddingVo, agentIdVo } = this._createValueObjects(validInput);
+    const result = await this.memoryRepository.searchSimilar(embedding, agent, limit);
 
-    const similarItems = await this.memoryRepository.searchSimilar(
-      embeddingVo,
-      agentIdVo,
-      validInput.limit
-    );
-
-    const outputItems = similarItems.map((item) => this.mapEntityToSimilarListItem(item));
-
-    this.logger.debug("SearchSimilarMemoryItemsUseCase: Execution successful.");
-    return successUseCaseResponse({
-      items: outputItems,
-    });
-  }
-
-  private _createValueObjects(validInput: SearchSimilarMemoryItemsUseCaseInput): {
-    embeddingVo: MemoryItemEmbedding;
-    agentIdVo?: Identity;
-  } {
-    const embeddingVo = MemoryItemEmbedding.create(validInput.queryEmbedding);
-    let agentIdVo: Identity | undefined;
-    if (validInput.agentId) {
-      agentIdVo = Identity.fromString(validInput.agentId);
-    }
-    return { embeddingVo, agentIdVo };
+    return {
+      items: result.map((item) => ({
+        id: item.id.value,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+        agentId: item.agentId?.value || null,
+        tags: item.tags.value,
+        source: item.source?.value || null,
+        contentExcerpt: item.content.value.substring(0, 200),
+      })),
+    };
   }
 }

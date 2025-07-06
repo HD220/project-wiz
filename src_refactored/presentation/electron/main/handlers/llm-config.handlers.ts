@@ -1,46 +1,40 @@
 import { ipcMain } from 'electron';
 
-import {
-  IPC_CHANNELS
-} from '../../../../shared/ipc-channels';
-import {
-  GetAvailableLLMsResponseData,
-  GetLLMConfigsListResponseData,
-  UpdateLLMConfigRequest,
-  UpdateLLMConfigResponseData
-} from '../../../../shared/ipc-types';
-import { AgentLLM, LLMConfig } from '../../../../shared/types/entities';
+import { AgentLLM, LLMConfig } from "@/domain/entities/llm";
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import { UpdateLLMConfigRequest } from '@/shared/ipc-types/llm.types';
+
 import {
   mockAvailableLLMs,
-  // mockUserLLMConfigs, // Not directly used, access via getLLMConfigWithDefaults or updateUserLLMConfig
   updateUserLLMConfig,
   getLLMConfigWithDefaults
 } from '../mocks/llm-config.mocks';
 
 export function registerLLMConfigHandlers() {
-  ipcMain.handle(IPC_CHANNELS.GET_AVAILABLE_LLMS, async (): Promise<GetAvailableLLMsResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_AVAILABLE_LLMS, async (): Promise<LLMConfig[]> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { availableLLMs: mockAvailableLLMs };
+    return mockAvailableLLMs;
   });
 
-  ipcMain.handle(IPC_CHANNELS.GET_LLM_CONFIGS_LIST, async (): Promise<GetLLMConfigsListResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_LLM_CONFIGS_LIST, async (): Promise<Record<AgentLLM, LLMConfig>> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     // Construct full configs with defaults for all available LLMs
-    const fullUserConfigs = Object.values(AgentLLM).reduce((acc: Record<AgentLLM, LLMConfig>, llmKey) => {
+    const fullUserConfigs = Object.values(AgentLLM).reduce((acc: Record<AgentLLM, LLMConfig>, llmKey: AgentLLM) => {
       // Ensure llmKey is treated as a key of AgentLLM enum
       const key = llmKey as AgentLLM;
       acc[key] = getLLMConfigWithDefaults(key);
       return acc;
     }, {} as Record<AgentLLM, LLMConfig>); 
 
-    return { userLLMConfigs: fullUserConfigs };
+    return fullUserConfigs;
   });
 
-  ipcMain.handle(IPC_CHANNELS.UPDATE_LLM_CONFIG, async (_event, req: UpdateLLMConfigRequest): Promise<UpdateLLMConfigResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.UPDATE_LLM_CONFIG, async (_event, req: UpdateLLMConfigRequest): Promise<LLMConfig> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    const { llm, config } = req;
-    updateUserLLMConfig(llm, config);
-    const updatedConfig = getLLMConfigWithDefaults(llm);
-    return { updatedConfig: updatedConfig };
+    const { configId, data } = req;
+    updateUserLLMConfig(configId as AgentLLM, data);
+    const updatedConfig = getLLMConfigWithDefaults(configId as AgentLLM);
+    return updatedConfig;
   });
 }

@@ -13,5 +13,9 @@ export class CurrentProjectId extends Identity {
     // Validation is handled by the parent Identity class constructor
     return new CurrentProjectId(value);
   }
+
+  public get value(): string {
+    return this.props.value;
+  }
   // No generate() here, it's set based on an existing project.
 }

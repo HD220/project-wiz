@@ -1,6 +1,8 @@
 import React from "react";
 import { Control } from "react-hook-form";
 
+import type { LLMConfig } from "@/core/domain/entities/llm";
+
 import {
   FormControl,
   FormDescription,
@@ -17,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { LLMConfig } from "@/shared/ipc-types";
 
 // Path to AgentInstanceFormData is now fixed relative to this file's new location
 import type { AgentInstanceFormData } from "../AgentInstanceForm";

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DocEntry, mockDocsFileSystem } from './docs-data';
 
 interface DocSidebarProps {
+  mockDocsFileSystem: Record<string, DocEntry>;
   selectedFilePath: string[];
   setSelectedFilePath: React.Dispatch<React.SetStateAction<string[]>>;
 }

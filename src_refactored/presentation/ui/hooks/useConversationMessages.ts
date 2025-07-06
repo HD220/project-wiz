@@ -1,13 +1,15 @@
 import { toast } from 'sonner';
 
+import type { ChatMessage } from "@/core/domain/entities/chat";
+
 import { useIpcSubscription } from '@/ui/hooks/ipc/useIpcSubscription';
 
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
 import type {
-  GetDMMessagesRequest as GetConversationMessagesRequest,
-  GetDMMessagesResponseData as GetConversationMessagesResponseData,
-  DMMessageReceivedEventPayload as ConversationMessageReceivedEventPayload,
-} from '@/shared/ipc-types';
+  GetDMMessagesRequest,
+  GetDMMessagesResponse,
+  DMMessageReceivedEventPayload,
+} from "@/shared/ipc-types/chat.types";
 
 const GET_CONVERSATION_MESSAGES_CHANNEL = IPC_CHANNELS.GET_DM_MESSAGES;
 const CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL =
@@ -25,9 +27,9 @@ export function useConversationMessages({
     isLoading: isLoadingMessages,
     error: messagesError,
   } = useIpcSubscription<
-    GetConversationMessagesRequest,
-    GetConversationMessagesResponseData,
-    ConversationMessageReceivedEventPayload
+    GetDMMessagesRequest,
+    GetDMMessagesResponse,
+    DMMessageReceivedEventPayload
   >(
     GET_CONVERSATION_MESSAGES_CHANNEL,
     { conversationId: selectedConversationId || '' },
@@ -35,7 +37,7 @@ export function useConversationMessages({
     {
       getSnapshot: (prevMessages, eventPayload) => {
         if (eventPayload.conversationId === selectedConversationId) {
-          if (prevMessages?.find((msg) => msg.id === eventPayload.message.id)) {
+          if (prevMessages?.find((msg: ChatMessage) => msg.id === eventPayload.message.id)) {
             return prevMessages;
           }
           return [...(prevMessages || []), eventPayload.message];

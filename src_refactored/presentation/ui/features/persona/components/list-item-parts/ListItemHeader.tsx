@@ -82,7 +82,7 @@ export function ListItemHeader({
       </div>
       <CardTitle className="text-lg truncate" title={template.name}>
         <Link
-          to="/personas/$templateId"
+          to="/app/personas/$templateId"
           params={{ templateId: template.id }}
           className="hover:underline"
         >

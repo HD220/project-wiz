@@ -14,7 +14,7 @@ import { JobOptionsVO } from './value-objects/job-options.vo';
 
 
 export class JobPersistenceMapper {
-  public static fromPersistence<P, R>(
+  public static fromPersistence<P extends { userId?: string }, R>(
     data: JobPersistenceData<P, R>
   ): JobEntity<P, R> {
     const entityProps: JobEntityProps<P, R> = {

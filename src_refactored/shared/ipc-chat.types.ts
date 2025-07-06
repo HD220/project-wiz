@@ -39,3 +39,10 @@ export type ChatStreamEventPayload =
   | ChatStreamCompletePayload
   | ChatStreamErrorPayload
   | ChatStreamEndPayload;
+
+export interface ChatWindowConversationHeader {
+  id: string;
+  name: string;
+  type: "dm" | "channel" | "agent";
+  avatarUrl?: string;
+}

@@ -1,15 +1,17 @@
 import { useRouter } from '@tanstack/react-router';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 
 // UI - Components
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { ScrollArea } from '@/ui/components/ui/scroll-area';
 // UI - Hooks
 import { useIpcSubscription } from '@/ui/hooks/ipc/useIpcSubscription';
 
 // Shared
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
-import type { GetDMConversationsListResponseData, DMConversationsUpdatedEventPayload } from '@/shared/ipc-types';
+import type { GetDMConversationsListResponse, DMConversationsUpdatedEventPayload } from '@/shared/ipc-types/chat.types';
 
 // Parts for this component
 import {
@@ -24,12 +26,12 @@ export function UserSidebar() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: dmConversations, isLoading, error } = useIpcSubscription<
-    null,
-    GetDMConversationsListResponseData,
+    void,
+    GetDMConversationsListResponse,
     DMConversationsUpdatedEventPayload
   >(
     IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST,
-    null,
+    undefined,
     IPC_CHANNELS.DM_CONVERSATION_UPDATED_EVENT,
     {
       getSnapshot: (_prevData, eventPayload) => eventPayload,
@@ -45,7 +47,7 @@ export function UserSidebar() {
     return dmPathMatch ? dmPathMatch[1] : null;
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (dmConversations && dmConversations.length > 0) {
       const currentSelectionExists = dmConversations.some(dm => dm.id === selectedDmId);
       if (!currentSelectionExists && !selectedDmId) {
@@ -60,7 +62,7 @@ export function UserSidebar() {
 
   const filteredDMs = useMemo(() => {
     if (!dmConversations) return [];
-    return dmConversations.filter(dm =>
+    return dmConversations.filter((dm: DirectMessageItem) =>
       dm.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [dmConversations, searchTerm]);

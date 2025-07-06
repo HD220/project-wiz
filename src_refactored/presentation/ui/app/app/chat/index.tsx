@@ -1,11 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import { ChatPageContent } from '@/ui/features/chat/components/ChatPageContent';
 import { ChatSidebar } from '@/ui/features/chat/components/ChatSidebar';
 import { useChatLogic } from '@/ui/hooks/useChatLogic';
 
+const chatSearchSchema = z.object({
+  conversationId: z.string().optional(),
+});
+
 export const Route = createFileRoute('/app/chat/')({
   component: ChatPage,
+  validateSearch: chatSearchSchema,
 });
 
 export function ChatPage() {
@@ -14,15 +20,15 @@ export function ChatPage() {
   const {
     selectedConversationId,
     sidebarConversations,
-    isLoadingSidebarConvs,
-    sidebarConvsError,
-    messages,
-    isLoadingMessages,
-    messagesError,
+    messages: chatMessages,
     handleSendMessage,
     handleSelectConversation,
     chatWindowConversationHeader,
     currentUserId,
+    isLoadingSidebarConvs,
+    sidebarConvsError,
+    isLoadingMessages,
+    messagesError,
   } = useChatLogic({
     selectedConversationIdFromSearch,
     routeFullPath: Route.fullPath,
@@ -39,7 +45,7 @@ export function ChatPage() {
       />
       <ChatPageContent
         conversationHeader={chatWindowConversationHeader}
-        messages={messages || []}
+        messages={chatMessages ?? []}
         isLoadingMessages={isLoadingMessages}
         messagesError={messagesError}
         onSendMessage={handleSendMessage}
@@ -49,5 +55,3 @@ export function ChatPage() {
     </div>
   );
 }
-
-

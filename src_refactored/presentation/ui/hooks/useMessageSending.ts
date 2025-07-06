@@ -1,18 +1,15 @@
 import { toast } from "sonner";
 
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import type {
-  SendDMMessageRequest,
-  SendDMMessageResponseData,
-  IPCResponse,
-  DirectMessageItem,
-} from "@/shared/ipc-types";
+import type { SendDMMessageRequest, SendDMMessageResponse } from "@/shared/ipc-types/chat.types";
 
 interface UseMessageSendingProps {
   conversationId: string;
-  conversationDetails: DirectMessageItem;
+  conversationDetails: DirectMessageItem | null | undefined;
 }
 
 export function useMessageSending({
@@ -20,17 +17,11 @@ export function useMessageSending({
   conversationDetails,
 }: UseMessageSendingProps) {
   const sendMessageMutation = useIpcMutation<
-    SendDMMessageRequest,
-    IPCResponse<SendDMMessageResponseData>
+    SendDMMessageResponse,
+    SendDMMessageRequest
   >(IPC_CHANNELS.SEND_DM_MESSAGE, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        console.log("Message sent, response data:", response.data);
-      } else {
-        toast.error(
-          `Falha ao enviar mensagem: ${response.error?.message || "Erro desconhecido retornando sucesso."}`,
-        );
-      }
+    onSuccess: (data) => {
+      console.log("Message sent, response data:", data);
     },
     onError: (error) => {
       toast.error(`Falha ao enviar mensagem: ${error.message}`);
@@ -42,11 +33,12 @@ export function useMessageSending({
       toast.error("Detalhes da conversa não encontrados para enviar mensagem.");
       return;
     }
-    if (sendMessageMutation.isLoading) {
+    if (sendMessageMutation.isPending) {
       toast.info("Aguarde o envio da mensagem anterior.");
       return;
     }
-    sendMessageMutation.mutate({ conversationId, content });
+    // Assuming currentUserId is available in the context or passed as prop
+    sendMessageMutation.mutate({ dmId: conversationId, content, senderId: "current-user-id" });
   };
 
   return { handleSendMessage, sendMessageMutation };

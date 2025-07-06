@@ -1,31 +1,19 @@
 import { ipcMain } from "electron";
 
-import {
-  IPC_CHANNELS
-} from "../../../../shared/ipc-channels";
-import {
-  GetProjectDetailsRequest,
-  GetProjectDetailsResponseData,
-  GetProjectsListResponseData,
-  CreateProjectRequest,
-  CreateProjectResponseData,
-  UpdateProjectRequest,
-  UpdateProjectResponseData,
-} from "../../../../shared/ipc-types";
-import { Project } from "../../../../shared/types/entities";
-import { AgentLLM } from "../../../../shared/types/entities";
-import {
-  mockProjectsDb,
-  addMockProject,
-  updateMockProject,
-} from "../mocks/project.mocks";
+import { GetAllProjectsUseCase } from "@/core/application/use-cases/get-all-projects.use-case";
+import { IProjectRepository } from "@/core/domain/repositories/project.repository";
 
-function registerQueryProjectHandlers() {
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { GetProjectDetailsRequest, CreateProjectRequest, UpdateProjectRequest, Project } from "@/shared/ipc-types";
+
+function registerQueryProjectHandlers(projectRepository: IProjectRepository) {
+  const getAllProjectsUseCase = new GetAllProjectsUseCase(projectRepository);
+
   ipcMain.handle(
     IPC_CHANNELS.GET_PROJECTS_LIST,
-    async (): Promise<GetProjectsListResponseData> => {
+    async (): Promise<Project[]> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { projects: mockProjectsDb };
+      return getAllProjectsUseCase.execute();
     }
   );
 
@@ -34,49 +22,28 @@ function registerQueryProjectHandlers() {
     async (
       _event,
       req: GetProjectDetailsRequest
-    ): Promise<GetProjectDetailsResponseData> => {
+    ): Promise<Project | null> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const projectDetails = mockProjectsDb.find(
-        (project) => project.id === req.projectId
-      );
+      const projectDetails = await projectRepository.getProjectById(req.projectId);
       if (projectDetails) {
-        return { project: projectDetails };
+        return projectDetails;
       }
-      return { project: undefined, error: "Project not found" };
+      throw new Error("Project not found");
     }
   );
 }
 
-function registerMutationProjectHandlers() {
+function registerMutationProjectHandlers(projectRepository: IProjectRepository) {
+
   ipcMain.handle(
     IPC_CHANNELS.CREATE_PROJECT,
     async (
       _event,
       req: CreateProjectRequest
-    ): Promise<CreateProjectResponseData> => {
+    ): Promise<Project> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const newProject: Project = {
-        id: `proj-${Date.now()}`,
-        name: req.name,
-        description: req.description ?? undefined,
-        platformUrl: req.platformUrl ?? undefined,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        projectManager: "user-123",
-        teamMembers: ["user-123"],
-        status: "active",
-        version: "1.0.0",
-        repositoryUrl: req.repositoryUrl ?? undefined,
-        tags: req.tags ?? [],
-        llmConfig: req.llmConfig || {
-          llm: AgentLLM.OPENAI_GPT_4_TURBO,
-          temperature: 0.7,
-          maxTokens: 2048,
-        },
-        // agentInstances: [], // Assuming this might be populated later or via another mechanism
-      };
-      addMockProject(newProject);
-      return { project: newProject };
+      const newProject = await projectRepository.createProject(req);
+      return newProject;
     }
   );
 
@@ -85,18 +52,18 @@ function registerMutationProjectHandlers() {
     async (
       _event,
       req: UpdateProjectRequest
-    ): Promise<UpdateProjectResponseData> => {
+    ): Promise<Project> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const updatedProject = updateMockProject(req.projectId, req.updates);
+      const updatedProject = await projectRepository.updateProject(req.projectId, req.data);
       if (updatedProject) {
-        return { project: updatedProject };
+        return updatedProject;
       }
-      return { project: undefined, error: "Project not found for update" };
+      throw new Error("Project not found for update");
     }
   );
 }
 
-export function registerProjectHandlers() {
-  registerQueryProjectHandlers();
-  registerMutationProjectHandlers();
+export function registerProjectHandlers(projectRepository: IProjectRepository) {
+  registerQueryProjectHandlers(projectRepository);
+  registerMutationProjectHandlers(projectRepository);
 }

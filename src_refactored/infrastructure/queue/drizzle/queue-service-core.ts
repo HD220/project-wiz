@@ -10,14 +10,14 @@ import { IJobOptions, JobOptionsVO } from "@/core/domain/job/value-objects/job-o
 
 // IQueueMaintenanceService forward declaration no longer needed here
 
-export class QueueServiceCore<P, R> extends EventEmitter {
+export class QueueServiceCore<P extends { userId?: string }, R> extends EventEmitter {
   public readonly queueName: string;
-  protected readonly jobRepository: IJobRepository;
+  protected readonly jobRepository: IJobRepository<P, R>;
   protected readonly defaultJobOptions: JobOptionsVO;
 
   constructor(
     queueName: string,
-    jobRepository: IJobRepository,
+    jobRepository: IJobRepository<P, R>,
     defaultJobOptions?: IJobOptions
   ) {
     // Call EventEmitter constructor

@@ -2,18 +2,20 @@ import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
-  GetPersonaTemplatesListResponseData,
-  GetLLMConfigsListResponseData,
-} from "@/shared/ipc-types";
+  GetLLMConfigsListResponse,
+} from "@/shared/ipc-types/llm.types";
+import type {
+  GetPersonaTemplatesListResponse,
+} from "@/shared/ipc-types/persona.types";
 
 export function useNewAgentInstanceData() {
   const {
     data: personaTemplates,
     isLoading: isLoadingPersonas,
     error: personasError,
-  } = useIpcQuery<null, GetPersonaTemplatesListResponseData>(
+  } = useIpcQuery<GetPersonaTemplatesListResponse>(
     IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST,
-    null,
+    undefined,
     { staleTime: 5 * 60 * 1000 }
   );
 
@@ -21,9 +23,9 @@ export function useNewAgentInstanceData() {
     data: llmConfigs,
     isLoading: isLoadingLLMConfigs,
     error: llmConfigsError,
-  } = useIpcQuery<null, GetLLMConfigsListResponseData>(
+  } = useIpcQuery<GetLLMConfigsListResponse>(
     IPC_CHANNELS.GET_LLM_CONFIGS_LIST,
-    null,
+    undefined,
     { staleTime: 5 * 60 * 1000 }
   );
 

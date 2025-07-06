@@ -6,10 +6,7 @@ import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { Project } from "@/core/domain/project/project.entity";
 
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+
 
 
 
@@ -25,7 +22,7 @@ export class ListProjectsUseCase
   implements
     IUseCase<
       ListProjectsUseCaseInput,
-      IUseCaseResponse<ListProjectsUseCaseOutput>
+      ListProjectsUseCaseOutput
     >
 {
   constructor(
@@ -35,7 +32,7 @@ export class ListProjectsUseCase
 
   async execute(
     _input: ListProjectsUseCaseInput,
-  ): Promise<IUseCaseResponse<ListProjectsUseCaseOutput>> {
+  ): Promise<ListProjectsUseCaseOutput> {
     const projects = await this.projectRepository.findAll();
 
     const outputItems: ListProjectsUseCaseOutput = projects.map(
@@ -50,6 +47,6 @@ export class ListProjectsUseCase
       },
     );
 
-    return successUseCaseResponse(outputItems);
+    return outputItems;
   }
 }

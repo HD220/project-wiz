@@ -30,16 +30,20 @@ export const appContainer = new Container();
 
 // Job Repository and Queue Service bindings
 appContainer
-  .bind<IJobRepository>(JOB_REPOSITORY_TOKEN)
+  .bind<IJobRepository<{ [key: string]: unknown; userId?: string }, unknown>>(
+    JOB_REPOSITORY_TOKEN,
+  )
   .toConstantValue(new DrizzleJobRepository(db));
 
 // Tool Registry Service binding
 appContainer.bind<IToolRegistryService>(APPLICATION_TYPES.IToolRegistryService).to(ToolRegistryService).inSingletonScope();
 
 appContainer
-  .bind<AbstractQueue<unknown, unknown>>(getQueueServiceToken("default"))
+  .bind<AbstractQueue<{ [key: string]: unknown; userId?: string }, unknown>>(
+    getQueueServiceToken("default"),
+  )
   .toDynamicValue((context) => {
-    const jobRepository = context.container.get<IJobRepository>(JOB_REPOSITORY_TOKEN);
+    const jobRepository = context.get<IJobRepository<{ [key: string]: unknown; userId?: string }, unknown>>(JOB_REPOSITORY_TOKEN);
     // Or derive from token if more queues are added
     const queueName = "default";
 
@@ -113,7 +117,6 @@ appContainer
     const facade = new DrizzleQueueFacade(
       queueName,
       jobRepository,
-      undefined,
       coreService,
       processingService,
       maintenanceService

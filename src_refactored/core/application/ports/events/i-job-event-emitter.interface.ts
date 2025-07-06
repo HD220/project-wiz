@@ -7,22 +7,22 @@ import {
 
 export const JOB_EVENT_EMITTER_TOKEN = Symbol('IJobEventEmitter');
 
-export interface IJobEventEmitter {
-  emit<K extends JobEventType>(event: K, payload: JobEventPayloadMap[K]): boolean;
+export interface IJobEventEmitter<P extends { userId?: string }, R = unknown> {
+  emit<K extends JobEventType>(event: K, payload: JobEventPayloadMap<P, R>[K]): boolean;
 
   on<K extends JobEventType>(
     event: K,
-    listener: (payload: JobEventPayloadMap[K]) => void,
+    listener: (payload: JobEventPayloadMap<P, R>[K]) => void,
   ): this;
 
   off<K extends JobEventType>(
     event: K,
-    listener: (payload: JobEventPayloadMap[K]) => void,
+    listener: (payload: JobEventPayloadMap<P, R>[K]) => void,
   ): this;
 
   once<K extends JobEventType>(
     event: K,
-    listener: (payload: JobEventPayloadMap[K]) => void,
+    listener: (payload: JobEventPayloadMap<P, R>[K]) => void,
   ): this;
 
   removeAllListeners(event?: JobEventType): this;

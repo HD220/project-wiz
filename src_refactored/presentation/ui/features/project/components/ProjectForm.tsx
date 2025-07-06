@@ -1,13 +1,14 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import React from "react";
-// Control removed as it's now in field components
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { Project } from "@/core/domain/entities/project";
+
 import { Button } from "@/components/ui/button";
-// Other Form components are used by fields
 import { Form } from "@/components/ui/form";
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
@@ -15,10 +16,10 @@ import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   CreateProjectRequest,
   CreateProjectResponse,
-  Project,
   UpdateProjectRequest,
   UpdateProjectResponse,
-} from "@/shared/ipc-types";
+} from "@/shared/ipc-types/project.types";
+
 
 import { ProjectDescriptionField } from "./fields/ProjectDescriptionField";
 import { ProjectNameField } from "./fields/ProjectNameField";
@@ -40,7 +41,6 @@ export type ProjectFormData = z.infer<typeof projectFormSchema>;
 interface ProjectFormProps {
   project?: Project;
   onSuccess?: (data: Project) => void;
-  submitButtonText?: string;
 }
 
 export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
@@ -56,20 +56,16 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   });
 
   const createProjectMutation = useIpcMutation<
-    CreateProjectRequest,
-    CreateProjectResponse
+    CreateProjectResponse,
+    CreateProjectRequest
   >(IPC_CHANNELS.CREATE_PROJECT, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(`Projeto "${response.data.name}" criado com sucesso!`);
-        onSuccess?.(response.data);
-        router.navigate({
-          to: "/projects/$projectId",
-          params: { projectId: response.data.id },
-        });
-      } else {
-        toast.error(response.error?.message || "Falha ao criar o projeto.");
-      }
+    onSuccess: (data) => {
+      toast.success(`Projeto "${data.name}" criado com sucesso!`);
+      onSuccess?.(data);
+      router.navigate({
+        to: "/app/projects/$projectId",
+        params: { projectId: data.id },
+      });
     },
     onError: (error) => {
       toast.error(`Erro ao criar projeto: ${error.message}`);
@@ -77,19 +73,13 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   });
 
   const updateProjectMutation = useIpcMutation<
-    UpdateProjectRequest,
-    UpdateProjectResponse
+    UpdateProjectResponse,
+    UpdateProjectRequest
   >(IPC_CHANNELS.UPDATE_PROJECT, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(
-          `Projeto "${response.data.name}" atualizado com sucesso!`
-        );
-        onSuccess?.(response.data);
-        router.invalidate();
-      } else {
-        toast.error(response.error?.message || "Falha ao atualizar o projeto.");
-      }
+    onSuccess: (data) => {
+      toast.success(`Projeto "${data.name}" atualizado com sucesso!`);
+      onSuccess?.(data);
+      router.invalidate();
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar projeto: ${error.message}`);
@@ -97,19 +87,17 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
   });
 
   const isSubmitting =
-    createProjectMutation.isLoading || updateProjectMutation.isLoading;
+    createProjectMutation.isPending || updateProjectMutation.isPending;
 
   const handleSubmit = (data: ProjectFormData) => {
     if (isEditing && project) {
-      updateProjectMutation.mutate({ id: project.id, ...data });
+      updateProjectMutation.mutate({ projectId: project.id, data });
     } else {
       createProjectMutation.mutate(data);
     }
   };
 
-  const effectiveSubmitButtonText = isEditing
-    ? "Salvar Alterações"
-    : "Criar Projeto";
+  const submitButtonText = isEditing ? "Salvar Alterações" : "Criar Projeto";
 
   return (
     <Form {...form}>
@@ -117,17 +105,16 @@ export function ProjectForm({ project, onSuccess }: ProjectFormProps) {
         <ProjectNameField control={form.control} />
         <ProjectDescriptionField control={form.control} />
 
-        {/* Futuros campos podem ser adicionados aqui */}
-
         <div className="flex justify-end pt-2">
           <Button
             type="submit"
             disabled={isSubmitting || (isEditing && !form.formState.isDirty)}
           >
-            {isSubmitting ? "Salvando..." : effectiveSubmitButtonText}
+            {isSubmitting ? "Salvando..." : submitButtonText}
           </Button>
         </div>
       </form>
     </Form>
   );
 }
+

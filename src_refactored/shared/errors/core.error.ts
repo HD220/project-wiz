@@ -4,7 +4,7 @@ export class CoreError extends Error {
   public readonly cause?: Error;
 
   constructor(message: string, options?: { code?: string; details?: unknown; cause?: Error }) {
-    super(message, options?.cause);
+    super(message, options?.cause ? { cause: options.cause } : undefined);
     this.name = this.constructor.name;
     this.code = options?.code;
     this.details = options?.details;

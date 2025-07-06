@@ -18,21 +18,19 @@ export class DomainError extends CoreError {
 // Kept the more specific NotFoundError and removed the duplicate.
 export class NotFoundError extends DomainError {
   constructor(entityType: string, id: string, cause?: Error) {
-    super(`${entityType} with ID '${id}' not found.`, {
+    const domainErrorOptions: { code?: string; details?: unknown; cause?: Error } = {
       code: `${entityType.toUpperCase()}_NOT_FOUND`,
       details: { entityType, id },
       cause,
-    });
+    };
+    super(`${entityType} with ID '${id}' not found.`, domainErrorOptions);
     this.name = 'NotFoundError';
   }
 }
 
 export class ToolNotFoundError extends NotFoundError {
   constructor(toolName: string, cause?: Error) {
-    super('Tool', toolName, {
-      details: { toolName },
-      cause,
-    });
+    super('Tool', toolName, cause);
     this.name = 'ToolNotFoundError';
   }
 }
@@ -41,11 +39,11 @@ export class ToolNotFoundError extends NotFoundError {
  * Error thrown when a Value Object validation fails.
  */
 export class ValueError extends DomainError {
-  constructor(message: string, field?: string, value?: unknown, cause?: Error) {
+  constructor(message: string, options?: { field?: string; value?: unknown; details?: unknown; cause?: Error }) {
     super(message, {
       code: 'VALUE_ERROR',
-      details: { field, value },
-      cause,
+      details: options?.details || { field: options?.field, value: options?.value },
+      cause: options?.cause,
     });
   }
 }
@@ -54,11 +52,11 @@ export class ValueError extends DomainError {
  * Error thrown when an Entity-specific business rule is violated.
  */
 export class EntityError extends DomainError {
-  constructor(message: string, entityId?: string, cause?: Error) {
+  constructor(message: string, options?: { entityId?: string; details?: unknown; cause?: Error }) {
     super(message, {
       code: 'ENTITY_ERROR',
-      details: { entityId },
-      cause,
+      details: options?.details || { entityId: options?.entityId },
+      cause: options?.cause,
     });
   }
 }
@@ -74,14 +72,22 @@ export class EntityError extends DomainError {
 export class ToolError extends DomainError {
   constructor(
     message: string,
-    toolName?: string,
-    originalError?: unknown,
-    isRecoverable: boolean = true,
+    options?: {
+      toolName?: string;
+      originalError?: unknown;
+      isRecoverable?: boolean;
+      details?: unknown;
+      cause?: Error;
+    },
   ) {
     super(message, {
       code: 'TOOL_ERROR',
-      details: { toolName, isRecoverable, originalError: originalError instanceof Error ? undefined : originalError },
-      cause: originalError instanceof Error ? originalError : undefined,
+      details: options?.details || {
+        toolName: options?.toolName,
+        isRecoverable: options?.isRecoverable,
+        originalError: options?.originalError instanceof Error ? undefined : options?.originalError,
+      },
+      cause: options?.originalError instanceof Error ? options?.originalError : options?.cause,
     });
   }
 }
@@ -90,11 +96,11 @@ export class ToolError extends DomainError {
  * Error thrown by queue operations.
  */
 export class QueueError extends DomainError {
-  constructor(message: string, queueName?: string, jobId?: string, cause?: Error) {
+  constructor(message: string, options?: { queueName?: string; jobId?: string; details?: unknown; cause?: Error }) {
     super(message, {
       code: 'QUEUE_ERROR',
-      details: { queueName, jobId },
-      cause,
+      details: options?.details || { queueName: options?.queueName, jobId: options?.jobId },
+      cause: options?.cause,
     });
   }
 }
@@ -112,15 +118,15 @@ export class LLMError extends DomainError {
       originalError?: unknown;
     }
   ) {
-    const opts: { code?: string; details?: unknown; cause?: Error } = {
-      code: 'LLM_ERROR',
-      details: { ...errorDetailsProp },
-    };
-    if (errorDetailsProp?.originalError instanceof Error) {
-      opts.cause = errorDetailsProp.originalError;
-      delete opts.details.originalError;
+    const details = { ...errorDetailsProp };
+    let cause: Error | undefined;
+
+    if (details.originalError instanceof Error) {
+      cause = details.originalError;
+      delete details.originalError;
     }
-    super(message, opts);
+
+    super(message, { code: 'LLM_ERROR', details, cause });
   }
 }
 
@@ -135,14 +141,14 @@ export class EmbeddingError extends DomainError {
       originalError?: unknown;
     }
   ) {
-    const opts: { code?: string; details?: unknown; cause?: Error } = {
-      code: 'EMBEDDING_ERROR',
-      details: { ...errorDetailsProp },
-    };
-    if (errorDetailsProp?.originalError instanceof Error) {
-      opts.cause = errorDetailsProp.originalError;
-      delete opts.details.originalError;
+    const details = { ...errorDetailsProp };
+    let cause: Error | undefined;
+
+    if (details.originalError instanceof Error) {
+      cause = details.originalError;
+      delete details.originalError;
     }
-    super(message, opts);
+
+    super(message, { code: 'EMBEDDING_ERROR', details, cause });
   }
 }

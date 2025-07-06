@@ -10,7 +10,7 @@ import { ProjectDescription } from "@/core/domain/project/value-objects/project-
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 import { ProjectName } from "@/core/domain/project/value-objects/project-name.vo";
 
-import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/use-case-response.dto";
+
 
 
 
@@ -18,23 +18,27 @@ import { IUseCaseResponse, successUseCaseResponse } from "@/shared/application/u
 import { CreateProjectUseCaseInput, CreateProjectUseCaseOutput, CreateProjectInputSchema } from "./create-project.schema";
 
 @injectable()
-export class CreateProjectUseCase   implements IUseCase<CreateProjectUseCaseInput, IUseCaseResponse<CreateProjectUseCaseOutput>> {
+export class CreateProjectUseCase   implements IUseCase<CreateProjectUseCaseInput, CreateProjectUseCaseOutput> {
   constructor(
     @inject(PROJECT_REPOSITORY_INTERFACE_TYPE) private readonly projectRepository: IProjectRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  async execute(input: CreateProjectUseCaseInput): Promise<IUseCaseResponse<CreateProjectUseCaseOutput>> {
-    this.logger.info(`[CreateProjectUseCase] Attempting to create project with name: ${input.name}`);
+  public async execute(input: CreateProjectUseCaseInput): Promise<CreateProjectUseCaseOutput> {
+    const { name, description } = input;
 
-    const validatedInput = this._validateInput(input);
+    const projectName = ProjectName.create(name);
+    const projectDescription = description ? ProjectDescription.create(description) : null;
 
-    const projectEntity = this._createProjectEntity(validatedInput);
+    const project = Project.create({
+      id: ProjectId.generate(),
+      name: projectName,
+      description: projectDescription,
+    });
 
-    const savedProject = await this.projectRepository.save(projectEntity);
+    await this.projectRepository.save(project);
 
-    this.logger.info(`[CreateProjectUseCase] Project created successfully: ${savedProject.id.value}`);
-    return successUseCaseResponse(this._mapToOutput(savedProject));
+    return { projectId: project.id.value };
   }
 
   private _validateInput(input: CreateProjectUseCaseInput): CreateProjectUseCaseInput {
@@ -43,7 +47,8 @@ export class CreateProjectUseCase   implements IUseCase<CreateProjectUseCaseInpu
       const errorMessage = 'Invalid input for CreateProjectUseCase';
       this.logger.error(
         `[CreateProjectUseCase] ${errorMessage}`,
-        { error: validationResult.error, details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input }
+        validationResult.error,
+        { details: validationResult.error.flatten().fieldErrors, useCase: 'CreateProjectUseCase', input }
       );
       throw new ZodError(validationResult.error.errors);
     }

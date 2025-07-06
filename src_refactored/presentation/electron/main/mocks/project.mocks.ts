@@ -1,5 +1,5 @@
 // src_refactored/presentation/electron/main/mocks/project.mocks.ts
-import { Project } from '@/shared/types/entities';
+import { Project } from "@/core/domain/entities/project";
 
 // Using a Record for easier lookup by ID, similar to how a DB might work.
 // The GET_PROJECTS_LIST handler will return Object.values(mockProjectsDb)
@@ -13,12 +13,16 @@ export const mockProjectsDb: Record<string, Project> = {
 
 // Add more mock data or functions to manipulate this data if needed for simulating CUD operations.
 // For example:
-// export function addMockProject(project: Project) {
-//   mockProjectsDb[project.id] = project;
-// }
-// export function deleteMockProject(projectId: string) {
-//   delete mockProjectsDb[projectId];
-// }
-// etc.
-// These would be used by the CREATE/UPDATE/DELETE IPC handlers.
-// And after modification, an event like PROJECTS_UPDATED_EVENT would be emitted.
+export function addMockProject(project: Project) {
+  mockProjectsDb[project.id] = project;
+}
+export function updateMockProject(projectId: string, updates: Partial<Project>): Project | undefined {
+  const index = Object.values(mockProjectsDb).findIndex(project => project.id === projectId);
+  if (index !== -1) {
+    const currentProject = Object.values(mockProjectsDb)[index];
+    const updated = { ...currentProject, ...updates, updatedAt: new Date().toISOString() };
+    mockProjectsDb[projectId] = updated;
+    return updated;
+  }
+  return undefined;
+}

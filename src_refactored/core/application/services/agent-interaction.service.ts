@@ -19,7 +19,7 @@ interface ExecutionState {
   replanAttemptsForEmptyResponse: number;
   criticalErrorEncounteredThisTurn: boolean;
   activityHistory: ActivityHistoryVO;
-  executionHistory: ExecutionHistoryEntry[];
+  executionHistory: ReadonlyArray<ExecutionHistoryEntry>;
 }
 
 @injectable()
@@ -39,7 +39,7 @@ export class AgentInteractionService {
   ): Promise<void> {
     const systemMessageString = `You are ${agent.personaTemplate.name.value}, a ${
       agent.personaTemplate.role.value
-    }. Your goal is: ${agent.personaTemplate.goal.value}. Persona backstory: ${agent.personaTemplate.backstory.value}`;
+    }. Your goal is: ${agent.personaTemplate.goal.value}. Persona backstory: ${agent.personaTemplate.backstory?.value || ''}`;
     const conversationMessages = this.convertActivityHistoryToLlmMessages(systemMessageString, state.activityHistory);
 
     this.logLlmCall(job.id.value, job.attemptsMade, conversationMessages);
@@ -82,7 +82,7 @@ export class AgentInteractionService {
       tool_calls: state.assistantMessage?.tool_calls as LanguageModelMessageToolCall[] | undefined,
     });
     job.addConversationEntry(assistantHistoryEntry);
-    state.activityHistory = job.getConversationHistory();
+    state.activityHistory = job.conversationHistory;
   }
 
   private _isUnusableResponse(state: ExecutionState): boolean {
@@ -105,7 +105,7 @@ export class AgentInteractionService {
     );
     const updatedHistory = state.activityHistory.addEntry(systemNote);
     const updatedExecutionHistory = [
-      ...job.executionHistory,
+      ...job.getExecutionHistory(),
       {
         timestamp: new Date(),
         type: 'unusable_llm_response' as ExecutionHistoryEntry['type'],
@@ -116,8 +116,8 @@ export class AgentInteractionService {
 
     job.setConversationHistory(updatedHistory);
     job.setExecutionHistory(updatedExecutionHistory);
-    state.activityHistory = job.getConversationHistory();
-    state.executionHistory = [...job.executionHistory];
+    state.activityHistory = job.conversationHistory;
+    state.executionHistory = [...job.getExecutionHistory()];
     state.replanAttemptsForEmptyResponse++;
     job.addLog(`LLM response was unusable. Re-planning (attempt ${state.replanAttemptsForEmptyResponse}).`, 'WARN');
   }

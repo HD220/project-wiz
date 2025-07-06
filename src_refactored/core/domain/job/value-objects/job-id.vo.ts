@@ -10,6 +10,7 @@ const JobIdSchema = z.string().uuid('Invalid Job ID format (must be a valid UUID
 
 interface JobIdProps {
   value: string;
+  [key: string]: unknown;
 }
 
 export class JobIdVO extends AbstractValueObject<JobIdProps> {

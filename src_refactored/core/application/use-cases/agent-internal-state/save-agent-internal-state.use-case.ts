@@ -1,6 +1,7 @@
 // src_refactored/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts
-import { ZodError } from 'zod';
 
+
+import { IUseCase } from '@/core/application/common/ports/use-case.interface';
 import { ILogger } from '@/core/common/services/i-logger.service';
 
 import { AgentInternalState } from '@/domain/agent/agent-internal-state.entity';
@@ -9,11 +10,10 @@ import { AgentId } from '@/domain/agent/value-objects/agent-id.vo';
 import { CurrentGoal } from '@/domain/agent/value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from '@/domain/agent/value-objects/internal-state/current-project-id.vo';
 import { GeneralNotesCollection } from '@/domain/agent/value-objects/internal-state/general-notes.collection';
-import { DomainError, ValueError, NotFoundError } from '@/domain/common/errors';
 
-import { IUseCase as Executable } from '@/application/common/ports/use-case.interface';
 
-import { successUseCaseResponse, IUseCaseResponse } from '@/shared/application/use-case-response.dto';
+
+
 
 
 
@@ -27,7 +27,7 @@ import {
 
 export class SaveAgentInternalStateUseCase
   implements
-    Executable<
+    IUseCase<
       SaveAgentInternalStateUseCaseInput,
       SaveAgentInternalStateUseCaseOutput
     >
@@ -39,7 +39,7 @@ export class SaveAgentInternalStateUseCase
 
   async execute(
     input: SaveAgentInternalStateUseCaseInput,
-  ): Promise<IUseCaseResponse<SaveAgentInternalStateUseCaseOutput>> {
+  ): Promise<SaveAgentInternalStateUseCaseOutput> {
     const validInput = SaveAgentInternalStateUseCaseInputSchema.parse(input);
     const agentIdVo = AgentId.fromString(validInput.agentId);
 
@@ -52,7 +52,7 @@ export class SaveAgentInternalStateUseCase
     const _isNewState = !existingState;
     await this.stateRepository.save(stateEntity);
 
-    return successUseCaseResponse({ success: true });
+    return { success: true };
   }
 
   private _createNewState(agentIdVo: AgentId, validInput: SaveAgentInternalStateUseCaseInput): AgentInternalState {

@@ -10,18 +10,21 @@ import { LLMProviderConfigId } from './value-objects/llm-provider-config-id.vo';
 import { LLMProviderConfigName } from './value-objects/llm-provider-config-name.vo';
 import { LLMProviderId } from './value-objects/llm-provider-id.vo';
 
-export interface LLMProviderConfigProps {
-  id: LLMProviderConfigId;
+export interface LLMProviderConfigCreationProps {
   name: LLMProviderConfigName;
   providerId: LLMProviderId;
-  apiKey?: LLMApiKey; 
+  apiKey?: LLMApiKey;
   baseUrl?: string;
+}
+
+export interface LLMProviderConfigProps extends LLMProviderConfigCreationProps {
+  id: LLMProviderConfigId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const LLMProviderConfigPropsSchema = z.object({
-  id: z.custom<LLMProviderConfigId>((val) => val instanceof LLMProviderConfigId),
+  id: z.custom<LLMProviderConfigId>((val) => val instanceof LLMProviderConfigId).optional(),
   name: z.custom<LLMProviderConfigName>((val) => val instanceof LLMProviderConfigName),
   providerId: z.custom<LLMProviderId>((val) => val instanceof LLMProviderId),
   apiKey: z.custom<LLMApiKey>((val) => val instanceof LLMApiKey).optional(),
@@ -44,7 +47,7 @@ export class LLMProviderConfig extends AbstractEntity<LLMProviderConfigId, Inter
     super(props);
   }
 
-  public static create(props: LLMProviderConfigProps): LLMProviderConfig {
+  public static create(props: LLMProviderConfigCreationProps): LLMProviderConfig {
     const validationResult = LLMProviderConfigPropsSchema.safeParse(props);
     if (!validationResult.success) {
       const errorMessages = Object.values(validationResult.error.flatten().fieldErrors).flat().join('; ');
@@ -55,13 +58,13 @@ export class LLMProviderConfig extends AbstractEntity<LLMProviderConfigId, Inter
 
     const now = new Date();
     const internalProps: InternalLLMProviderConfigProps = {
-      id: props.id || LLMProviderConfigId.generate(),
+      id: LLMProviderConfigId.generate(),
       name: props.name,
       providerId: props.providerId,
       apiKey: props.apiKey === undefined ? null : props.apiKey,
       baseUrl: props.baseUrl === undefined ? null : props.baseUrl,
-      createdAt: props.createdAt || now,
-      updatedAt: props.updatedAt || now,
+      createdAt: now,
+      updatedAt: now,
     };
 
     return new LLMProviderConfig(internalProps);

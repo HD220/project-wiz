@@ -2,12 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { Bot, Hash, Loader2, ServerCrash, ArrowLeft } from "lucide-react";
 import React from "react";
 
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { Button } from "@/components/ui/button";
 
-import type { DirectMessageItem } from "@/shared/ipc-types";
 
 interface ChatSidebarProps {
-  conversations: DirectMessageItem[] | null | undefined;
+  conversations: DirectMessageItem[] | undefined;
   selectedConversationId: string | undefined;
   onSelectConversation: (id: string) => void;
   isLoading: boolean;
@@ -53,7 +54,7 @@ export function ChatSidebar({
           className="mb-2 w-full justify-start"
           asChild
         >
-          <Link to="/user">
+          <Link to="/app/user">
             {" "}
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para DMs{" "}
           </Link>

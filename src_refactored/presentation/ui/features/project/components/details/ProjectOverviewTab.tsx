@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { Project } from '@/core/domain/entities/project';
+
 import {
   Card,
   CardContent,
@@ -7,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Project } from '@/ui/features/project/components/ProjectListItem';
 
 export const ProjectOverviewTab = ({ project }: { project: Project }) => (
   <div className="space-y-6">

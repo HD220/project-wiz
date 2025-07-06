@@ -5,15 +5,7 @@ import { ChatWindow } from "@/ui/features/chat/components/ChatWindow";
 import { DirectMessageLoadingErrorDisplay } from "@/ui/features/chat/components/DirectMessageLoadingErrorDisplay";
 import { useDirectMessages } from "@/ui/hooks/useDirectMessages";
 
-import type {
-} from "@/shared/ipc-types";
-
-interface ChatWindowConversationHeader {
-  id: string;
-  name: string;
-  type: "user" | "agent" | "dm" | "channel";
-  avatarUrl?: string;
-}
+import type { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
 
 const currentUserId = "userJdoe";
 
@@ -43,8 +35,7 @@ function DirectMessagePage() {
   const chatWindowConversationHeader: ChatWindowConversationHeader = {
     id: conversationDetails.id,
     name: conversationDetails.name,
-    type:
-      conversationDetails.type === "agent" ? "dm" : conversationDetails.type,
+    type: conversationDetails.type,
     avatarUrl: conversationDetails.avatarUrl,
   };
 

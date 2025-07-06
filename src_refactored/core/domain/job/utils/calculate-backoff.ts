@@ -1,6 +1,8 @@
 // src_refactored/core/domain/job/utils/calculate-backoff.ts
 
-import { BackoffOptions, BackoffType } from '../value-objects/job-options.vo';
+import { IJobBackoffOptions } from '../value-objects/job-options.vo';
+
+type BackoffType = IJobBackoffOptions['type'];
 
 /**
  * Calculates the backoff delay for a job attempt.
@@ -11,12 +13,12 @@ import { BackoffOptions, BackoffType } from '../value-objects/job-options.vo';
  */
 export function calculateBackoff(
   attempt: number,
-  strategy?: BackoffOptions | BackoffType,
+  strategy?: IJobBackoffOptions | BackoffType,
   isForStalled: boolean = false,
 ): number {
   if (!strategy) return 0;
 
-  const options: IJobBackoffOptions =
+  const options: Partial<IJobBackoffOptions> =
     typeof strategy === 'string' ? { type: strategy } : strategy;
 
   // Stalled jobs might have a different default base delay or handling if not specified
@@ -31,7 +33,7 @@ export function calculateBackoff(
       // attempt 3: baseDelay * 4
       // ...
       const exponentialDelay = defaultBaseDelay * Math.pow(2, Math.max(0, attempt - 1));
-      return Math.min(exponentialDelay, options.maxDelay || Infinity);
+      return exponentialDelay;
     }
     case 'fixed':
       return defaultBaseDelay;

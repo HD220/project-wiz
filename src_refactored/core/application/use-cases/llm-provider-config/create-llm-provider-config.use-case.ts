@@ -5,22 +5,16 @@ import { IUseCase } from "@/core/application/common/ports/use-case.interface";
 import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
 import { LLMProviderConfig } from '@/core/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
-import { BaseUrl } from "@/core/domain/llm-provider-config/value-objects/base-url.vo";
 import { LLMApiKey } from "@/core/domain/llm-provider-config/value-objects/llm-api-key.vo";
-import { LLMProviderConfigId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo";
 import { LLMProviderConfigName } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-name.vo";
 import { LLMProviderId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-id.vo";
 
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+
 
 
 
 import {
   CreateLLMProviderConfigUseCaseInput,
-  CreateLLMProviderConfigUseCaseInputSchema,
   CreateLLMProviderConfigUseCaseOutput,
 } from "./create-llm-provider-config.schema";
 
@@ -29,7 +23,7 @@ export class CreateLLMProviderConfigUseCase
   implements
     IUseCase<
       CreateLLMProviderConfigUseCaseInput,
-      IUseCaseResponse<CreateLLMProviderConfigUseCaseOutput>
+      CreateLLMProviderConfigUseCaseOutput
     >
 {
   constructor(
@@ -39,35 +33,22 @@ export class CreateLLMProviderConfigUseCase
     private readonly logger: ILogger
   ) {}
 
-  async execute(
-    input: CreateLLMProviderConfigUseCaseInput
-  ): Promise<IUseCaseResponse<CreateLLMProviderConfigUseCaseOutput>> {
-    const validInput = CreateLLMProviderConfigUseCaseInputSchema.parse(input);
+  public async execute(input: CreateLLMProviderConfigUseCaseInput): Promise<CreateLLMProviderConfigUseCaseOutput> {
+    const { name, providerId, apiKey, baseUrl } = input;
 
-    const nameVo = LLMProviderConfigName.create(validInput.name);
-    const providerIdVo = LLMProviderId.create(validInput.providerId);
-    const apiKeyVo = validInput.apiKey
-      ? LLMApiKey.create(validInput.apiKey)
-      : undefined;
+    const llmProviderConfigName = LLMProviderConfigName.create(name);
+    const llmProviderConfigProvider = LLMProviderId.create(providerId);
+    const llmProviderConfigApiKey = LLMApiKey.create(apiKey);
 
-    const baseUrlVo = validInput.baseUrl
-      ? BaseUrl.create(validInput.baseUrl)
-      : undefined;
-
-    const configIdVo = LLMProviderConfigId.generate();
-
-    const configEntity = LLMProviderConfig.create({
-      id: configIdVo,
-      name: nameVo,
-      providerId: providerIdVo,
-      apiKey: apiKeyVo,
-      baseUrl: baseUrlVo?.value,
+    const llmProviderConfig = LLMProviderConfig.create({
+      name: llmProviderConfigName,
+      providerId: llmProviderConfigProvider,
+      apiKey: llmProviderConfigApiKey,
+      baseUrl: baseUrl ?? undefined,
     });
 
-    const savedConfig = await this.configRepository.save(configEntity);
+    await this.configRepository.save(llmProviderConfig);
 
-    return successUseCaseResponse({
-      llmProviderConfigId: savedConfig.id.value,
-    });
+    return { llmProviderConfigId: llmProviderConfig.id.value };
   }
 }

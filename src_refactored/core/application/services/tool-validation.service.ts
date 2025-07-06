@@ -27,7 +27,7 @@ export class ToolValidationService {
     const toolResult = await this.toolRegistryService.getTool(toolName);
 
     if (!toolResult) {
-      const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, toolName, undefined, false);
+      const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, { toolName, isRecoverable: false });
       this.logger.error(toolNotFoundError.message, toolNotFoundError, { toolName, jobId: executionContext.jobId ?? 'N/A' });
       return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError, isCritical: true };
     }
@@ -52,7 +52,7 @@ export class ToolValidationService {
   }
 
   private _createToolNotFoundError(toolName: string, timestamp: Date, jobId: string): ExecutionHistoryEntry {
-    const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, toolName, undefined, false);
+    const toolNotFoundError = new ToolError(`Tool '${toolName}' not found.`, { toolName, isRecoverable: false });
     this.logger.error(toolNotFoundError.message, toolNotFoundError, { toolName, jobId: jobId ?? 'N/A' });
     return { timestamp, type: 'tool_error', name: toolName, error: toolNotFoundError, isCritical: true };
   }
@@ -69,9 +69,7 @@ export class ToolValidationService {
       const parseError = error instanceof Error ? error : new Error(String(error));
       const parsingToolError = new ToolError(
         `Failed to parse arguments for tool '${toolName}'. Error: ${parseError.message}`,
-        toolName,
-        parseError,
-        true,
+        { toolName, originalError: parseError, isRecoverable: true },
       );
       this.logger.error(
         parsingToolError.message,
@@ -106,9 +104,7 @@ export class ToolValidationService {
   ): ExecutionHistoryEntry {
     const validationToolError = new ToolError(
       `Argument validation failed for tool '${toolName}'.`,
-      toolName,
-      validationError,
-      true,
+      { toolName, originalError: validationError, isRecoverable: true },
     );
     this.logger.error(
       validationToolError.message,
@@ -151,9 +147,7 @@ export class ToolValidationService {
     const execError = error instanceof Error ? error : new Error(String(error));
     const unexpectedToolError = new ToolError(
       `Unexpected error during tool '${toolName}' execution: ${execError.message}`,
-      toolName,
-      execError,
-      false,
+      { toolName, originalError: execError, isRecoverable: false },
     );
     this.logger.error(
       unexpectedToolError.message,

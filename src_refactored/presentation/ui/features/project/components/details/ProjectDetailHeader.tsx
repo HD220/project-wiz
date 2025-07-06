@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
+import type { Project } from '@/core/domain/entities/project';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,7 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Project } from '@/ui/features/project/components/ProjectListItem';
 import { statusDetails } from '@/ui/features/project/misc/statusDetails';
 
 interface ProjectDetailHeaderProps {
@@ -50,7 +51,7 @@ export function ProjectDetailHeader({ project }: ProjectDetailHeaderProps) {
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" asChild>
-            <Link to="./settings" params={{ projectId: project.id }}>
+            <Link to="/app/projects/$projectId/settings" params={{ projectId: project.id }}>
               <Settings className="mr-1.5 h-3.5 w-3.5" /> Configurações
             </Link>
           </Button>

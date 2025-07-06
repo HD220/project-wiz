@@ -5,22 +5,17 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { UserProfile } from "@/core/domain/entities/user";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 // FormControl, etc. are used by sub-components
 import { Form } from "@/components/ui/form";
 
-import type { UserProfile, UserProfileFormData } from "@/shared/ipc-types";
 
 import { AvatarUrlField } from "./fields/AvatarUrlField";
 import { DisplayNameField } from "./fields/DisplayNameField";
 import { EmailDisplayField } from "./fields/EmailDisplayField";
-
-interface UserProfileFormProps {
-  initialData: UserProfile | null;
-  onSubmit: (data: UserProfileFormData) => Promise<void>;
-  isSubmitting?: boolean;
-}
 
 const profileFormSchema = z.object({
   displayName: z
@@ -31,8 +26,17 @@ const profileFormSchema = z.object({
     .string()
     .url("URL do avatar inválida.")
     .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .transform((val) => (val === "" ? undefined : val)),
 });
+
+export type UserProfileFormData = z.infer<typeof profileFormSchema>;
+
+interface UserProfileFormProps {
+  initialData: UserProfile | null;
+  onSubmit: (data: UserProfileFormData) => Promise<void>;
+  isSubmitting?: boolean;
+}
 
 export function UserProfileForm({
   initialData,
@@ -47,7 +51,7 @@ export function UserProfileForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: initialData?.displayName || "",
-      avatarUrl: initialData?.avatarUrl || "",
+      avatarUrl: initialData?.avatarUrl ?? undefined,
     },
   });
 
@@ -55,7 +59,7 @@ export function UserProfileForm({
     if (initialData) {
       form.reset({
         displayName: initialData.displayName,
-        avatarUrl: initialData.avatarUrl || "",
+        avatarUrl: initialData.avatarUrl ?? undefined,
       });
       setCurrentAvatarPreview(initialData.avatarUrl || null);
     }
@@ -135,3 +139,4 @@ export function UserProfileForm({
     </div>
   );
 }
+

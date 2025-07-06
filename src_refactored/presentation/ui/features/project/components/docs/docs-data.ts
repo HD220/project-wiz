@@ -6,11 +6,12 @@ type DocFolder = {
 };
 type DocEntry = DocFile | DocFolder;
 
-const mockDocsFileSystem = {
+const mockDocsFileSystem: Record<string, DocEntry> = {
   readmeMd: {
     type: "file",
     content: "# Documentação do Projeto X\n\nBem-vindo à documentação oficial do Projeto X. Este documento serve como ponto de partida para entender a arquitetura, configuração e funcionalidades chave.\n\n## Seções Principais\n- Arquitetura do Sistema\n- Guia de Instalação\n- Casos de Uso\n\n### Exemplo de Código\n```typescript\nfunction greet(name: string): string {\n  return `Hello, ${name}!`;\n}\n```\n",
   },
+
   arquiteturaDir: {
     type: "folder",
     nameOverride: "arquitetura/",

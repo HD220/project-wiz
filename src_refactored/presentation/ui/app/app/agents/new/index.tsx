@@ -6,8 +6,6 @@ import { NewAgentLoadingErrorDisplay } from "@/ui/features/agent/components/NewA
 import { useCreateAgentInstance } from "@/ui/hooks/useCreateAgentInstance";
 import { useNewAgentInstanceData } from "@/ui/hooks/useNewAgentInstanceData";
 
-
-
 function NewAgentInstancePage() {
   const router = useRouter();
 
@@ -23,6 +21,14 @@ function NewAgentInstancePage() {
 
   if (loadingErrorDisplay) {
     return loadingErrorDisplay;
+  }
+
+  if (!personaTemplates || !llmConfigs) {
+    return (
+      <div className="p-8 text-center">
+        <p>Dados necessários para criar um novo agente não encontrados.</p>
+      </div>
+    );
   }
 
   const handleCancel = () => {

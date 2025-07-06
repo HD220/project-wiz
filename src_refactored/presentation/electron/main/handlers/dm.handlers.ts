@@ -1,17 +1,10 @@
 import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from "electron";
 
-import {
-  IPC_CHANNELS
-} from "../../../../shared/ipc-channels";
-import {
-  GetDMConversationsListResponseData,
-  GetDMDetailsRequest,
-  GetDMDetailsResponseData,
-  SendDMMessageRequest,
-  SendDMMessageResponseData,
-  DMMessageReceivedEventPayload,
-} from "../../../../shared/ipc-types";
-import { ChatMessage } from "../../../../shared/types/entities";
+import { ChatMessage, DirectMessageItem } from "@/domain/entities/chat";
+
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { GetDMDetailsRequest, SendDMMessageRequest, DMMessageReceivedEventPayload } from "@/shared/ipc-types/chat.types";
+
 import { mockDMs, addMessageToMockDM } from "../mocks/dm.mocks";
 
 function notifyAllWindows(channel: string, payload: unknown) {
@@ -40,19 +33,20 @@ function simulateAgentReply(dmId: string, originalContent: string, updatedDM: { 
         id: `msg-agent-${Date.now()}`,
         conversationId: dmId,
         // Assuming agent's ID is 'agent-1'
-        senderId: "agent-1",
+        sender: { id: "agent-1", name: "Agent", type: "agent" },
         content: agentReplyContent,
-        contentType: "text",
+        
+        type: "text",
         timestamp: new Date().toISOString(),
       };
       const finalDM = addMessageToMockDM(dmId, agentReply);
       if (finalDM) {
         const agentNotificationPayload: DMMessageReceivedEventPayload = {
-          dmId: dmId,
+          conversationId: dmId,
           message: agentReply,
         };
         notifyAllWindows(
-          IPC_CHANNELS.DM_MESSAGE_RECEIVED,
+          IPC_CHANNELS.DM_MESSAGE_RECEIVED_EVENT,
           agentNotificationPayload
         );
       }
@@ -63,16 +57,17 @@ function simulateAgentReply(dmId: string, originalContent: string, updatedDM: { 
 async function handleSendDMMessage(
   _event: IpcMainInvokeEvent,
   req: SendDMMessageRequest
-): Promise<SendDMMessageResponseData> {
+): Promise<ChatMessage> {
   await new Promise((resolve) => setTimeout(resolve, 50));
   const { dmId, content, senderId } = req;
 
   const newMessage: ChatMessage = {
     id: `msg-${Date.now()}`,
     conversationId: dmId,
-    senderId: senderId,
+    sender: { id: senderId, name: "User", type: "user" },
     content: content,
-    contentType: "text",
+    
+    type: "text",
     timestamp: new Date().toISOString(),
   };
 
@@ -80,28 +75,25 @@ async function handleSendDMMessage(
 
   if (updatedDM) {
     const notificationPayload: DMMessageReceivedEventPayload = {
-      dmId: dmId,
+      conversationId: dmId,
       message: newMessage,
     };
-    notifyAllWindows(IPC_CHANNELS.DM_MESSAGE_RECEIVED, notificationPayload);
+    notifyAllWindows(IPC_CHANNELS.DM_MESSAGE_RECEIVED_EVENT, notificationPayload);
 
     // Simulate agent reply only if sender is not the agent
     if (senderId !== "agent-1") {
       simulateAgentReply(dmId, content, updatedDM);
     }
-    return { success: true, message: newMessage };
+    return newMessage;
   }
-  return {
-    success: false,
-    error: "DM not found or failed to send message",
-  };
+  throw new Error("DM not found or failed to send message");
 }
 
 
 function registerQueryDMHandlers() {
-  ipcMain.handle(IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST, async (): Promise<GetDMConversationsListResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST, async (): Promise<DirectMessageItem[]> => {
     await new Promise((resolve) => setTimeout(resolve, 50));
-    return { dms: mockDMs };
+    return mockDMs;
   });
 
   ipcMain.handle(
@@ -109,13 +101,13 @@ function registerQueryDMHandlers() {
     async (
       _event: IpcMainInvokeEvent,
       req: GetDMDetailsRequest
-    ): Promise<GetDMDetailsResponseData> => {
+    ): Promise<DirectMessageItem | null> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const dm = mockDMs.find((dmEntry) => dmEntry.id === req.dmId);
       if (dm) {
-        return { dm };
+        return dm;
       }
-      return { dm: undefined, error: "DM not found" };
+      throw new Error("DM not found");
     }
   );
 }

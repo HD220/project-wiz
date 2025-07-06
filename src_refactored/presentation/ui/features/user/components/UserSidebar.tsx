@@ -51,14 +51,12 @@ interface DirectMessageItemProps {
 }
 
 function DirectMessageItem({
-  id,
+  id = "",
   name,
   avatarUrl,
   status = "offline",
   isActive,
 }: DirectMessageItemProps) {
-  // Placeholder base path for DMs
-  const basePath = "/user/dms";
   const initials = name
     .split(" ")
     .map((namePart) => namePart[0])
@@ -67,7 +65,8 @@ function DirectMessageItem({
     .toUpperCase();
   return (
     <Link
-      to={`${basePath}/${id}`}
+      to="/app/user/dm/$conversationId"
+      params={{ conversationId: id }}
       className={`flex items-center space-x-3 px-3 py-1.5 text-sm group rounded-md
                         ${
                           isActive

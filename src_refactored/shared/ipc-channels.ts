@@ -1,6 +1,7 @@
 export const IPC_CHANNELS = {
   // --- Project Management ---
   GET_PROJECTS_LIST: "projects:get-list",
+  PROJECT_LIST_QUERY: "projects:list-query",
   GET_PROJECT_DETAILS: "projects:get-details",
   CREATE_PROJECT: "projects:create",
   UPDATE_PROJECT: "projects:update",
@@ -17,6 +18,7 @@ export const IPC_CHANNELS = {
 
   // --- Agent Instances ---
   GET_AGENT_INSTANCES_LIST: "agent-instances:get-list",
+  GET_AGENT_INSTANCES_BY_PROJECT: "agent-instances:get-by-project",
   GET_AGENT_INSTANCE_DETAILS: "agent-instances:get-details",
   CREATE_AGENT_INSTANCE: "agent-instances:create",
   UPDATE_AGENT_INSTANCE: "agent-instances:update",
@@ -25,6 +27,7 @@ export const IPC_CHANNELS = {
 
   // --- LLM Configurations ---
   GET_LLM_CONFIGS_LIST: "llm-configs:get-list",
+  GET_AVAILABLE_LLMS: "llm-configs:get-available-llms",
   GET_LLM_CONFIG_DETAILS: "llm-configs:get-details",
   CREATE_LLM_CONFIG: "llm-configs:create",
   UPDATE_LLM_CONFIG: "llm-configs:update",
@@ -40,8 +43,13 @@ export const IPC_CHANNELS = {
 
   // --- Direct Messages (DMs) & Chat ---
   GET_DM_CONVERSATIONS_LIST: "dms:get-list",
+  GET_DM_DETAILS: "dms:get-details",
   GET_DM_MESSAGES: "dms:get-messages",
   SEND_DM_MESSAGE: "dms:send-message",
   DM_MESSAGE_RECEIVED_EVENT: "dms:message-received-event",
   DM_CONVERSATION_UPDATED_EVENT: "dms:conversation-updated-event",
+
+  // --- Chat ---
+  CHAT_SEND_MESSAGE: "chat:send-message",
+  CHAT_STREAM_EVENT: "chat:stream-event",
 };

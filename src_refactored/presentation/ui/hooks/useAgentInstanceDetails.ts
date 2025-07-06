@@ -1,16 +1,16 @@
 import { useParams } from "@tanstack/react-router";
-import { toast } from "sonner";
+
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponseData,
-} from "@/shared/ipc-types";
+} from "@/shared/ipc-types/agent.types";
 
 export function useAgentInstanceDetails() {
-  const params = useParams({ from: "/(app)/agents/$agentId/" });
+  const params = useParams({ from: "/app/agents/$agentId/" });
   const agentId = params.agentId;
 
   const {
@@ -18,16 +18,11 @@ export function useAgentInstanceDetails() {
     isLoading,
     error,
   } = useIpcQuery<
-    GetAgentInstanceDetailsRequest,
-    GetAgentInstanceDetailsResponseData
+    AgentInstance | null,
+    GetAgentInstanceDetailsRequest
   >(
     IPC_CHANNELS.GET_AGENT_INSTANCE_DETAILS,
-    { agentId },
-    {
-      onError: (err) => {
-        toast.error(`Erro ao buscar detalhes do agente: ${err.message}`);
-      },
-    }
+    { agentId }
   );
 
   return { agentId, instance, isLoading, error };

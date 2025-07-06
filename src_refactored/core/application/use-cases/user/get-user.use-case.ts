@@ -9,10 +9,7 @@ import { User } from "@/core/domain/user/user.entity";
 import { UserEmail } from "@/core/domain/user/value-objects/user-email.vo";
 import { UserId } from "@/core/domain/user/value-objects/user-id.vo";
 
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+
 
 
 
@@ -20,13 +17,13 @@ import {
 import { GetUserInput, GetUserOutput, GetUserInputSchema } from "./get-user.schema";
 
 @injectable()
-export class GetUserUseCase implements IUseCase<GetUserInput, IUseCaseResponse<GetUserOutput>> {
+export class GetUserUseCase implements IUseCase<GetUserInput, GetUserOutput> {
   constructor(
     @inject(USER_REPOSITORY_INTERFACE_TYPE) private readonly userRepository: IUserRepository,
     @inject(LOGGER_INTERFACE_TYPE) private readonly logger: ILogger,
   ) {}
 
-  async execute(input: GetUserInput): Promise<IUseCaseResponse<GetUserOutput>> {
+  async execute(input: GetUserInput): Promise<GetUserOutput> {
     this.logger.info(`[GetUserUseCase] Attempting to get user with input: ${JSON.stringify(input)}`);
 
     const validatedInput = GetUserInputSchema.parse(input);
@@ -39,7 +36,7 @@ export class GetUserUseCase implements IUseCase<GetUserInput, IUseCaseResponse<G
     }
 
     this.logger.info(`[GetUserUseCase] User found: ${userEntity.id.value}`);
-    return successUseCaseResponse(this._mapToOutput(userEntity));
+    return this._mapToOutput(userEntity);
   }
 
   private async _fetchUser(validatedInput: GetUserInput): Promise<User | null> {

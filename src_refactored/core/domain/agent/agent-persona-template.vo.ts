@@ -15,7 +15,7 @@ interface AgentPersonaTemplateProps extends ValueObjectProps {
   name: PersonaName;
   role: PersonaRole;
   goal: PersonaGoal;
-  backstory: PersonaBackstory;
+  backstory: PersonaBackstory | null;
   toolNames: ToolNames;
 }
 
@@ -33,7 +33,7 @@ export class AgentPersonaTemplate extends AbstractValueObject<AgentPersonaTempla
     name: PersonaName;
     role: PersonaRole;
     goal: PersonaGoal;
-    backstory: PersonaBackstory;
+    backstory: PersonaBackstory | null;
     toolNames: ToolNames;
   }): AgentPersonaTemplate {
     // All props are VOs, so they are already validated upon their own creation.
@@ -59,7 +59,7 @@ export class AgentPersonaTemplate extends AbstractValueObject<AgentPersonaTempla
     return this.props.goal;
   }
 
-  public get backstory(): PersonaBackstory {
+  public get backstory(): PersonaBackstory | null {
     return this.props.backstory;
   }
 

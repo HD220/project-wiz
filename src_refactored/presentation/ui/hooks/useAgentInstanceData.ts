@@ -1,17 +1,17 @@
 import { useParams } from "@tanstack/react-router";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import {
-  GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponseData,
-  GetPersonaTemplatesListResponseData,
-  GetLLMConfigsListResponseData,
-} from "@/shared/ipc-types";
+import type { GetAgentInstanceDetailsRequest } from "@/shared/ipc-types/agent.types";
 
 import { useIpcQuery } from "./ipc/useIpcQuery";
 
 export function useAgentInstanceData() {
-  const params = useParams({ from: "/(app)/agents/$agentId/edit/" });
+  const params = useParams({ from: "/app/agents/$agentId/edit/" });
   const agentId = params.agentId;
 
   const {
@@ -20,11 +20,11 @@ export function useAgentInstanceData() {
     error: agentError,
     refetch: refetchAgent,
   } = useIpcQuery<
-    GetAgentInstanceDetailsRequest,
-    GetAgentInstanceDetailsResponseData
+    AgentInstance | null,
+    GetAgentInstanceDetailsRequest
   >(
     IPC_CHANNELS.GET_AGENT_INSTANCE_DETAILS,
-    { agentId },
+    { agentId: agentId },
     { staleTime: 5 * 60 * 1000 }
   );
 
@@ -32,9 +32,9 @@ export function useAgentInstanceData() {
     data: personaTemplates,
     isLoading: isLoadingPersonas,
     error: personasError,
-  } = useIpcQuery<null, GetPersonaTemplatesListResponseData>(
+  } = useIpcQuery<PersonaTemplate[]>(
     IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST,
-    null,
+    undefined,
     { staleTime: 15 * 60 * 1000 }
   );
 
@@ -42,9 +42,9 @@ export function useAgentInstanceData() {
     data: llmConfigs,
     isLoading: isLoadingLLMs,
     error: llmsError,
-  } = useIpcQuery<null, GetLLMConfigsListResponseData>(
+  } = useIpcQuery<Record<AgentLLM, LLMConfig>>(
     IPC_CHANNELS.GET_LLM_CONFIGS_LIST,
-    null,
+    undefined,
     { staleTime: 15 * 60 * 1000 }
   );
 
@@ -64,3 +64,4 @@ export function useAgentInstanceData() {
     refetchAgent,
   };
 }
+

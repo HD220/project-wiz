@@ -2,6 +2,8 @@ import { Link, useRouter } from '@tanstack/react-router';
 import { Settings, UserCircle, MessageSquarePlus, Search, Palette, Bot as BotIcon, Loader2, AlertTriangle } from 'lucide-react';
 import React from 'react';
 
+import type { DirectMessageItem } from '@/core/domain/entities/chat';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/ui/components/ui/avatar';
 import { Button } from '@/ui/components/ui/button';
 import {
@@ -15,7 +17,6 @@ import {
 import { Input } from '@/ui/components/ui/input';
 import { cn } from '@/ui/lib/utils';
 
-import type { DirectMessageItem } from '@/shared/ipc-types';
 
 // This mock is used by UserProfileDropdown, so it's included here.
 // If it were used by UserSidebar directly for other purposes, it might stay there or be passed as prop.
@@ -36,7 +37,7 @@ export function DMListItem({ dm, selectedDmId, onSelectDm }: DMListItemProps) {
   return (
     <Link
       key={dm.id}
-      to="/user/dm/$conversationId"
+      to="/app/user/dm/$conversationId"
       params={{ conversationId: dm.id }}
       className={cn(
         "flex items-center gap-2.5 p-2 rounded-md text-left transition-colors group",
@@ -53,7 +54,7 @@ export function DMListItem({ dm, selectedDmId, onSelectDm }: DMListItemProps) {
           "text-white",
           dm.type === 'agent' ? "bg-emerald-500" : "bg-purple-500"
         )}>
-          {dm.type === 'agent' ? <BotIcon size={14}/> : dm.name.substring(0,1).toUpperCase()}
+          {(dm.type as string) === 'agent' ? <BotIcon size={14}/> : dm.name.substring(0,1).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
@@ -139,13 +140,13 @@ export function UserProfileDropdown({ router }: UserProfileDropdownProps) {
       <DropdownMenuContent className="w-64 ml-1" align="start" side="bottom">
         <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => router.navigate({ to: '/settings/profile' })}>
+        <DropdownMenuItem onSelect={() => router.navigate({ to: '/app/settings/profile' })}>
           <UserCircle className="mr-2 h-4 w-4" /> Perfil
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.navigate({ to: '/settings/appearance' })}>
+        <DropdownMenuItem onSelect={() => router.navigate({ to: '/app/settings/appearance' })}>
           <Palette className="mr-2 h-4 w-4" /> Aparência
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.navigate({ to: '/settings' })}>
+        <DropdownMenuItem onSelect={() => router.navigate({ to: '/app/settings' })}>
           <Settings className="mr-2 h-4 w-4" /> Todas Configurações
         </DropdownMenuItem>
         <DropdownMenuSeparator />

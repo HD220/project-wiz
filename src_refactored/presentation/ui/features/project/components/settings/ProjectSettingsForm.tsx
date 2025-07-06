@@ -1,5 +1,7 @@
 import React from "react";
 
+import type { Project } from "@/core/domain/entities/project";
+
 import {
   Card,
   CardContent,
@@ -7,25 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ProjectForm,
-  ProjectFormData,
-} from "@/ui/features/project/components/ProjectForm";
+import { ProjectForm } from "@/ui/features/project/components/ProjectForm";
 
 interface ProjectSettingsFormProps {
-  project: {
-    name: string;
-    description?: string;
-  };
-  handleSubmit: (formData: ProjectFormData) => Promise<void>;
-  isSubmitting: boolean;
+  project: Project;
 }
 
-export function ProjectSettingsForm({
-  project,
-  handleSubmit,
-  isSubmitting,
-}: ProjectSettingsFormProps) {
+export function ProjectSettingsForm({ project }: ProjectSettingsFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -35,15 +25,7 @@ export function ProjectSettingsForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ProjectForm
-          onSubmit={handleSubmit}
-          initialValues={{
-            name: project.name,
-            description: project.description,
-          }}
-          isSubmitting={isSubmitting}
-          submitButtonText="Salvar Alterações"
-        />
+        <ProjectForm project={project} />
       </CardContent>
     </Card>
   );

@@ -6,8 +6,8 @@ import { JobEntity } from './job.entity';
  * Represents the output of a job processed by an agent.
  * This is a placeholder and can be extended based on specific agent requirements.
  */
-export interface JobProcessingOutput<R = unknown> {
-  job: JobEntity<unknown, R>;
+export interface JobProcessingOutput<P extends { userId?: string } = { userId?: string }, R = unknown> {
+  job: JobEntity<P, R>;
   result: R;
 }
 

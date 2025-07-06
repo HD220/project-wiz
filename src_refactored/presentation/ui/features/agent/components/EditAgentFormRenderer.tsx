@@ -2,6 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import React from "react";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,24 +16,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
 import {
   AgentInstanceForm,
-  AgentInstanceFormData,
 } from "@/ui/features/agent/components/AgentInstanceForm";
-
-import type {
-  GetPersonaTemplatesListResponseData,
-  GetLLMConfigsListResponseData,
-  GetAgentInstanceDetailsResponseData,
-  PersonaTemplate,
-  LLMConfig,
-} from "@/shared/ipc-types";
 
 interface EditAgentFormRendererProps {
   agentId: string;
-  agentInstance: GetAgentInstanceDetailsResponseData;
-  personaTemplates: GetPersonaTemplatesListResponseData | null | undefined;
-  llmConfigs: GetLLMConfigsListResponseData | null | undefined;
+  agentInstance: AgentInstance;
+  personaTemplates: PersonaTemplate[];
+  llmConfigs: Record<AgentLLM, LLMConfig>;
   handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -37,29 +35,7 @@ export function EditAgentFormRenderer({
   agentInstance,
   personaTemplates,
   llmConfigs,
-  handleSubmit,
-  isSubmitting,
 }: EditAgentFormRendererProps) {
-  if (!agentInstance) {
-    // Should not happen if DataLoadingOrErrorDisplay is used before this
-    return (
-      <div className="p-8 text-center">
-        <p>Instância de Agente não encontrada.</p>
-        <Button variant="outline" className="mt-4" asChild>
-          <Link to="/app/agents">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes
-          </Link>
-        </Button>
-      </div>
-    );
-  }
-
-  const initialValues: Partial<AgentInstanceFormData> = {
-    agentName: agentInstance.agentName,
-    personaTemplateId: agentInstance.personaTemplateId,
-    llmProviderConfigId: agentInstance.llmProviderConfigId,
-    temperature: agentInstance.temperature,
-  };
   const agentDisplayName =
     agentInstance.agentName ||
     `Agente (ID: ${agentInstance.id.substring(0, 6)})`;
@@ -82,18 +58,9 @@ export function EditAgentFormRenderer({
         </CardHeader>
         <CardContent>
           <AgentInstanceForm
-            onSubmit={handleSubmit}
-            initialValues={initialValues}
-            isSubmitting={isSubmitting}
-            personaTemplates={
-              (personaTemplates || []) as Pick<PersonaTemplate, "id" | "name">[]
-            }
-            llmConfigs={
-              (llmConfigs || []) as Pick<
-                LLMConfig,
-                "id" | "name" | "providerId"
-              >[]
-            }
+            agentInstance={agentInstance}
+            personaTemplates={personaTemplates}
+            llmConfigs={Object.values(llmConfigs)}
           />
         </CardContent>
       </Card>

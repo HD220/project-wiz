@@ -13,7 +13,7 @@ import { MessageList } from "./MessageList";
 interface Conversation {
   id: string;
   name: string;
-  type: "dm" | "channel" | "agent";
+  type: "user" | "dm" | "channel" | "agent";
   avatarUrl?: string;
   // Para canais
   participants?: number;

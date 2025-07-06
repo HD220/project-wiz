@@ -1,10 +1,11 @@
 import { Briefcase, Cpu, ListChecks, Thermometer } from "lucide-react";
 import React from "react";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+
 import { CardContent } from "@/components/ui/card";
 import { InfoItem } from "@/ui/components/InfoItem";
 
-import type { AgentInstance } from "@/shared/ipc-types";
 
 interface AgentDetailContentProps {
   instance: AgentInstance;

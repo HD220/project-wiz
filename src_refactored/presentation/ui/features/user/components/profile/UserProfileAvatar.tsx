@@ -5,11 +5,12 @@ import { UseFormReturn } from "react-hook-form";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ProfileFormData } from "@/ui/app/app/settings/profile";
+
+import { UserProfileFormData } from "../UserProfileForm";
 
 interface UserProfileAvatarProps {
   currentAvatar: string | null;
-  form: UseFormReturn<ProfileFormData>;
+  form: UseFormReturn<UserProfileFormData>;
 }
 
 export function UserProfileAvatar({ currentAvatar, form }: UserProfileAvatarProps) {

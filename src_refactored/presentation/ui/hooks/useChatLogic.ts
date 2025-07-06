@@ -1,32 +1,20 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { z } from "zod";
 
-import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { useConversationMessages } from "@/ui/hooks/useConversationMessages";
 import { useSendMessage } from "@/ui/hooks/useSendMessage";
+import { useSidebarConversations } from "@/ui/hooks/useSidebarConversations";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import type {
-  GetDMConversationsListResponseData,
-} from "@/shared/ipc-types";
-
-interface ChatWindowConversationHeader {
-  id: string;
-  name: string;
-  type: "dm" | "channel" | "agent";
-  avatarUrl?: string;
-}
+import type { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
 
 const currentUserId = "userJdoe";
 
 const chatSearchSchema = z.object({
   conversationId: z.string().optional(),
 });
-
-
-const GET_SIDEBAR_CONVERSATIONS_CHANNEL =
-  IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST;
 
 interface UseChatLogicProps {
   selectedConversationIdFromSearch: string | undefined;
@@ -37,7 +25,7 @@ export function useChatLogic({
   selectedConversationIdFromSearch,
   routeFullPath,
 }: UseChatLogicProps) {
-  const navigate = useNavigate({ from: routeFullPath });
+  const navigate = useNavigate();
 
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | undefined
@@ -47,20 +35,12 @@ export function useChatLogic({
     setSelectedConversationId(selectedConversationIdFromSearch);
   }, [selectedConversationIdFromSearch]);
 
-  const {
-    data: sidebarConversations,
-    isLoading: isLoadingSidebarConvs,
-    error: sidebarConvsError,
-  } = useIpcQuery<null, GetDMConversationsListResponseData>(
-    GET_SIDEBAR_CONVERSATIONS_CHANNEL,
-    null,
-    { staleTime: 5 * 60 * 1000 }
-  );
+  const { sidebarConversations, isLoadingSidebarConvs, sidebarConvsError } = useSidebarConversations();
 
   const selectedConversationDetails = useMemo(() => {
     if (!selectedConversationId || !sidebarConversations) return null;
     return (
-      sidebarConversations.find((conv) => conv.id === selectedConversationId) ||
+      sidebarConversations.find((conv: DirectMessageItem) => conv.id === selectedConversationId) ||
       null
     );
   }, [selectedConversationId, sidebarConversations]);
@@ -75,25 +55,34 @@ export function useChatLogic({
 
   const handleSelectConversation = (convId: string): void => {
     navigate({
-      search: (prev) => ({ ...prev, conversationId: convId }),
+      to: routeFullPath,
+      search: { conversationId: convId },
       replace: true,
     });
   };
 
-  const chatWindowConversationHeader: ChatWindowConversationHeader | null =
-    selectedConversationDetails
-      ? {
-          id: selectedConversationDetails.id,
-          name: selectedConversationDetails.name,
-          type:
-            selectedConversationDetails.type === "agent"
-              ? "agent"
-              : selectedConversationDetails.type === "dm"
-                ? "dm"
-                : "channel",
-          avatarUrl: selectedConversationDetails.avatarUrl,
-        }
-      : null;
+  const getChatWindowConversationHeader = useCallback((): ChatWindowConversationHeader | null => {
+    if (!selectedConversationDetails) return null;
+
+    let type: "agent" | "dm" | "channel";
+    if (selectedConversationDetails.type === "dm") {
+      type = "dm";
+    } else if (selectedConversationDetails.type === "agent") {
+      type = "agent";
+    } else {
+      // Fallback or default for other types, assuming 'channel' for now
+      type = "channel";
+    }
+
+    return {
+      id: selectedConversationDetails.id,
+      name: selectedConversationDetails.name,
+      type: type,
+      avatarUrl: selectedConversationDetails.avatarUrl,
+    };
+  }, [selectedConversationDetails]);
+
+  const chatWindowConversationHeader = getChatWindowConversationHeader();
 
   return {
     selectedConversationId,

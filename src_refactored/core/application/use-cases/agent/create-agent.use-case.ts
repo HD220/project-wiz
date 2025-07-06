@@ -9,10 +9,10 @@ import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.int
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 import { AgentMaxIterations } from "@/core/domain/agent/value-objects/agent-max-iterations.vo";
 import { AgentTemperature } from "@/core/domain/agent/value-objects/agent-temperature.vo";
+import { PersonaId } from "@/core/domain/agent/value-objects/persona/persona-id.vo";
 import { NotFoundError } from "@/core/domain/common/errors";
 import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
-
-import { IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse } from "@/shared/application/use-case-response.dto";
+import { LLMProviderConfigId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo";
 
 
 import {
@@ -26,7 +26,7 @@ export class CreateAgentUseCase
   implements
     IUseCase<
       CreateAgentUseCaseInput,
-      IUseCaseResponse<CreateAgentUseCaseOutput>
+      CreateAgentUseCaseOutput
     >
 {
   constructor(
@@ -38,19 +38,19 @@ export class CreateAgentUseCase
 
   async execute(
     input: CreateAgentUseCaseInput
-  ): Promise<IUseCaseResponse<CreateAgentUseCaseOutput>> {
+  ): Promise<CreateAgentUseCaseOutput> {
     const validInput = CreateAgentUseCaseInputSchema.parse(input);
 
     const { temperatureVo, maxIterationsVo, agentIdVo } = this._createAgentValueObjects(validInput);
 
-    const personaTemplate = await this.personaTemplateRepository.findById(validInput.personaTemplateId);
+    const personaTemplate = await this.personaTemplateRepository.findById(PersonaId.fromString(validInput.personaTemplateId));
     if (!personaTemplate) {
-      return errorUseCaseResponse(new NotFoundError("PersonaTemplate", validInput.personaTemplateId));
+      throw new NotFoundError("PersonaTemplate", validInput.personaTemplateId);
     }
 
     const llmProviderConfig = await this.llmProviderConfigRepository.findById(LLMProviderConfigId.fromString(validInput.llmProviderConfigId));
     if (!llmProviderConfig) {
-      return errorUseCaseResponse(new NotFoundError("LLMProviderConfig", validInput.llmProviderConfigId));
+      throw new NotFoundError("LLMProviderConfig", validInput.llmProviderConfigId);
     }
 
     const agentEntity = Agent.create({
@@ -63,7 +63,7 @@ export class CreateAgentUseCase
 
     const savedAgent = await this.agentRepository.save(agentEntity);
 
-    return successUseCaseResponse({ agentId: savedAgent.id.value });
+    return { agentId: savedAgent.id.value };
   }
 
   private _createAgentValueObjects(validInput: CreateAgentUseCaseInput): {

@@ -1,6 +1,8 @@
-import { Link } from '@tanstack/react-router';
+import { Link, Router } from "@tanstack/react-router";
 import { ArrowLeft, Edit3, MessageSquare } from "lucide-react";
 import React from "react";
+
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,11 +10,12 @@ import { AgentActivityLogCard } from "@/ui/features/agent/components/AgentActivi
 import { AgentDetailContent } from "@/ui/features/agent/components/AgentDetailContent";
 import { AgentDetailHeader } from "@/ui/features/agent/components/AgentDetailHeader";
 
-import type { AgentInstance } from "@/shared/ipc-types";
 
 interface AgentDetailViewProps {
   instance: AgentInstance;
   statusInfo: { label: string; icon: React.ElementType; colorClasses: string };
+  agentId: string;
+  
 }
 
 export function AgentDetailView({
@@ -57,3 +60,5 @@ export function AgentDetailView({
     </div>
   );
 }
+
+

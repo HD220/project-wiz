@@ -1,5 +1,7 @@
 import React from "react";
 
+import type { UserProfile } from "@/core/domain/entities/user";
+
 import {
   FormControl,
   FormDescription,
@@ -8,10 +10,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import type { UserProfile } from "@/shared/ipc-types";
 
 interface EmailDisplayFieldProps {
-  email: UserProfile["email"];
+  email: UserProfile["email"] | undefined;
 }
 
 export function EmailDisplayField({ email }: EmailDisplayFieldProps) {

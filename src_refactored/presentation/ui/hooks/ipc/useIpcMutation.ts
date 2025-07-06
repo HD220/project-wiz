@@ -1,94 +1,64 @@
-import { useState, useCallback } from 'react';
+import {
+  useMutation,
+  type UseMutationOptions,
+} from "@tanstack/react-query";
 
-interface IpcMutationState<TResponse> {
-  data: TResponse | null;
-  isLoading: boolean;
-  error: Error | null;
-}
-
-type MutateFunction<TResponse, TRequest> = (params: TRequest) => Promise<TResponse | undefined>;
-
-interface IpcMutationResult<TResponse, TRequest> extends IpcMutationState<TResponse> {
-  mutate: MutateFunction<TResponse, TRequest>;
-  reset: () => void;
-}
+import type { IPCResponse } from "@/shared/ipc-types";
 
 /**
- * Custom hook to perform an IPC mutation (invoke for write operations) to the main process.
- * Manages loading, data, and error states for create, update, delete operations.
- *
+ * The mutation function that handles the IPC call.
+ * It invokes the specified channel and processes the IPCResponse.
+ * If the response is successful, it returns the data.
+ * If the response is not successful, it throws an error.
  * @param channel The IPC channel to invoke.
- * @returns An object containing data, isLoading, error, a mutate function, and a reset function.
+ * @param params The parameters for the IPC call.
+ * @returns The data from the successful IPC response.
+ * @throws An error with the message from the failed IPC response.
  */
-export function useIpcMutation<TResponse, TRequest = undefined>(
-  channel: string
-): IpcMutationResult<TResponse, TRequest> {
-  const [data, setData] = useState<TResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
+async function ipcMutationFn<TResponse, TRequest>(
+  channel: string,
+  params: TRequest
+): Promise<TResponse> {
+  if (!window.electronIPC) {
+    throw new Error("Electron IPC bridge not available.");
+  }
 
-  const mutate = useCallback(async (params: TRequest): Promise<TResponse | undefined> => {
-    if (!window.electron || !window.electron.ipcRenderer) {
-      const errMessage = 'Electron IPC renderer not available. Ensure preload script is correctly configured.';
-      console.error(errMessage);
-      setError(new Error(errMessage));
-      setIsLoading(false);
-      return undefined;
-    }
+  const result = await window.electronIPC.invoke<IPCResponse<TResponse>>(
+    channel,
+    params
+  );
 
-    setIsLoading(true);
-    setError(null);
-    // Reset previous data on new mutation
-    setData(null);
-
-    try {
-      // console.log(`useIpcMutation: Invoking channel ${channel} with params:`, params);
-      const result = await window.electron.ipcRenderer.invoke<TResponse>(channel, params);
-      // console.log(`useIpcMutation: Received result for channel ${channel}:`, result);
-      setData(result);
-      return result;
-    } catch (err: unknown) {
-      console.error(`Error invoking IPC channel ${channel} for mutation:`, err);
-      if (err instanceof Error) {
-        setError(err);
-      } else if (typeof err === 'object' && err !== null && 'message' in err) {
-        setError(new Error(String((err as { message: unknown }).message)));
-      } else {
-        setError(new Error(String(err || 'An unknown error occurred during mutation')));
-      }
-      setData(null);
-      return undefined;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [channel]);
-
-  const reset = useCallback(() => {
-    setData(null);
-    setIsLoading(false);
-    setError(null);
-  }, []);
-
-  return { data, isLoading, error, mutate, reset };
+  if (result.success) {
+    return result.data;
+  } 
+    throw new Error(result.error.message);
+  
 }
 
-// Example Usage (for documentation purposes, not to be run here):
-/*
-  // In a component:
-  // const { mutate: createProject, isLoading: isCreating, error: createError, data: newProjectData } =
-  //   useIpcMutation<CreateProjectResponse, CreateProjectRequest>(CREATE_PROJECT_CHANNEL);
+// Define a type for the hook's options, excluding mutationFn.
+// This allows consumers to pass any other standard useMutation options like onSuccess, onError, etc.
+type IpcMutationOptions<TResponse, TRequest> = Omit<
+  UseMutationOptions<TResponse, Error, TRequest, unknown>,
+  "mutationFn"
+>;
 
-  // const handleCreateProject = async (formData) => {
-  //   const result = await createProject({ name: formData.name, description: formData.description });
-  //   if (result) {
-  //     // Handle successful creation
-  //     console.log('Project created:', result.project);
-  //   } else {
-  //     // Handle error (already set in createError)
-  //     console.error('Failed to create project');
-  //   }
-  // };
+/**
+ * Custom hook to perform an IPC mutation using @tanstack/react-query.
+ * It abstracts away the IPC communication details and the response unwrapping.
+ *
+ * @param channel The IPC channel to invoke.
+ * @param options Optional react-query mutation options (onSuccess, onError, etc.).
+ * @returns The result of the useMutation hook.
+ */
+export function useIpcMutation<TResponse, TRequest = void>(
+  channel: string,
+  options?: IpcMutationOptions<TResponse, TRequest>
+) {
+  const mutation = useMutation<TResponse, Error, TRequest, unknown>({
+    mutationFn: (params: TRequest) => ipcMutationFn(channel, params),
+    ...options,
+  });
 
-  // To reset the state of the mutation (e.g., after displaying an error or success message)
-  // resetCreateProjectState(); // Assuming you aliased reset when destructuring or call directly: mutationResult.reset()
-*/
+  return mutation;
+}
+

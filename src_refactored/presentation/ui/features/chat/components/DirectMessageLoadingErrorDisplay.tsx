@@ -37,7 +37,7 @@ export function DirectMessageLoadingErrorDisplay({
           {error.message}
         </p>
         <Button
-          onClick={() => router.navigate({ to: "/app/user/" })}
+          onClick={() => router.navigate({ to: "/app/user" })}
           variant="destructive"
           className="mt-4"
         >
@@ -57,7 +57,7 @@ export function DirectMessageLoadingErrorDisplay({
           {conversationId}.
         </p>
         <Button
-          onClick={() => router.navigate({ to: "/app/user/" })}
+          onClick={() => router.navigate({ to: "/app/user" })}
           variant="outline"
           className="mt-4"
         >

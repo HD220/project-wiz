@@ -6,10 +6,14 @@ import { JobEntity, JobStatus } from "@/core/domain/job/job.entity";
 import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 // IJobOptions might be needed if default options are used from a central place, but likely not for this service.
 
+function isJobEntity<P extends { userId?: string }, R>(job: unknown): job is JobEntity<P, R> {
+  return job instanceof JobEntity;
+}
+
 // This service could implement a more specific interface like IJobProcessorService
-export class JobProcessingService<P, R> {
+export class JobProcessingService<P extends { userId?: string }, R> {
   constructor(
-    private readonly jobRepository: IJobRepository,
+    private readonly jobRepository: IJobRepository<P, R>,
     // Or a dedicated JobEventEmitter
     private readonly eventEmitter: EventEmitter,
     // Needed for some repository calls if they are queue-specific
@@ -30,11 +34,14 @@ export class JobProcessingService<P, R> {
       return null;
     }
 
-    const job = jobs[0] as JobEntity<P, R>;
-    const jobProps = job.toPersistence();
+    const job = jobs[0];
+    if (!isJobEntity<P, R>(job)) {
+      return null;
+    }
+    
     const lockUntil = new Date(Date.now() + lockDurationMs);
     const locked = await this.jobRepository.acquireLock(
-      jobProps.id,
+      job.id,
       workerId,
       lockUntil
     );
@@ -55,9 +62,11 @@ export class JobProcessingService<P, R> {
     lockDurationMs: number
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
-    // getJob might come from jobRepository or a core service
-    const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.getProps().workerId === workerId && job.getProps().status === JobStatus.ACTIVE) {
+    const job = await this.jobRepository.findById(id);
+    if (!job || !isJobEntity<P, R>(job)) {
+      return;
+    }
+    if (job.workerId === workerId && job.status === JobStatus.ACTIVE) {
       const newLockUntil = new Date(Date.now() + lockDurationMs);
       job.extendLock(newLockUntil, workerId);
       await this.jobRepository.update(job);
@@ -74,7 +83,7 @@ export class JobProcessingService<P, R> {
     _jobInstanceWithChanges?: JobEntity<P, R>
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
-    const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
+    const job = await this.jobRepository.findById(id);
     if (job && job.workerId === workerId) {
       job.markAsCompleted(result);
       await this.jobRepository.update(job);
@@ -91,8 +100,11 @@ export class JobProcessingService<P, R> {
     _jobInstanceWithChanges?: JobEntity<P, R>
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
-    const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.workerId === workerId) {
+    const job = await this.jobRepository.findById(id);
+    if (!job || !isJobEntity<P, R>(job)) {
+      return;
+    }
+    if (job.workerId === workerId) {
       this._handleFailedJobRetryOrPermanentFail(job, error);
       await this.jobRepository.update(job);
       this.eventEmitter.emit("job.failed", job);
@@ -101,14 +113,21 @@ export class JobProcessingService<P, R> {
 
   private _handleFailedJobRetryOrPermanentFail(job: JobEntity<P,R>, error: Error): void {
     if (job.attemptsMade < job.maxAttempts) {
-      const baseDelay = job.options.backoff?.delay || 1000;
-      let backoffDelay = baseDelay;
-      if (job.options.backoff?.type === "exponential") {
-        const currentAttempt = Math.max(1, job.attemptsMade);
-        backoffDelay = baseDelay * Math.pow(2, currentAttempt - 1);
+      // Default delay
+      let backoffDelay = 1000;
+      if (job.options.backoff && typeof job.options.backoff === 'object') {
+        const baseDelay = job.options.backoff.delay || 1000;
+        backoffDelay = baseDelay;
+        if (job.options.backoff.type === "exponential") {
+          const currentAttempt = Math.max(1, job.attemptsMade);
+          backoffDelay = baseDelay * Math.pow(2, currentAttempt - 1);
+        }
+        const maxBackoff = job.options.maxDelay || 3600000;
+        backoffDelay = Math.min(backoffDelay, maxBackoff);
+      } else if (typeof job.options.backoff === 'function') {
+        // If it's a function, execute it to get the delay
+        backoffDelay = job.options.backoff(job.attemptsMade, error);
       }
-      const maxBackoff = job.options.backoff?.maxDelay || 3600000;
-      backoffDelay = Math.min(backoffDelay, maxBackoff);
       job.moveToDelayed(new Date(Date.now() + backoffDelay), error);
     } else {
       job.markAsFailed(error.message, error.stack?.split("\n"));
@@ -122,8 +141,11 @@ export class JobProcessingService<P, R> {
     progress: number | object
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
-    const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
-    if (job && job.workerId === workerId) {
+    const job = await this.jobRepository.findById(id);
+    if (!job || !isJobEntity<P, R>(job)) {
+      return;
+    }
+    if (job.workerId === workerId) {
       job.updateProgress(progress);
       await this.jobRepository.update(job);
       this.eventEmitter.emit("job.progress", job);
@@ -138,7 +160,10 @@ export class JobProcessingService<P, R> {
     level?: string
   ): Promise<void> {
     const id = jobId instanceof JobIdVO ? jobId : JobIdVO.create(jobId);
-    const job = (await this.jobRepository.findById(id)) as JobEntity<P,R> | null;
+    const job = await this.jobRepository.findById(id);
+    if (!job || !isJobEntity<P, R>(job)) {
+      return;
+    }
     if (job && job.workerId === workerId) {
       job.addLog(message, level);
       await this.jobRepository.update(job);

@@ -46,7 +46,7 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
   return (
     <Link
       // TanStack Router v1 style path param
-      to="/projects/$projectId"
+      to="/app/projects/$projectId"
       params={{ projectId: project.id }}
       className={cn(
         "block hover:shadow-lg transition-shadow duration-200 rounded-lg",

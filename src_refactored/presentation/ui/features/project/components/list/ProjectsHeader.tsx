@@ -16,7 +16,7 @@ export function ProjectsHeader() {
         </p>
       </div>
       <Button asChild>
-        <Link to="/projects/new">
+        <Link to="/app/projects/new">
           <PlusCircle className="mr-2 h-4 w-4" />
           Novo Projeto
         </Link>

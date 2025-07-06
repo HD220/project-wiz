@@ -11,10 +11,7 @@ import {
   PaginationOptions,
 } from "@/core/domain/annotation/ports/annotation-repository.types";
 
-import {
-  IUseCaseResponse,
-  successUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+
 
 
 import {
@@ -40,11 +37,13 @@ export class ListAnnotationsUseCase
 
   async execute(
     input: ListAnnotationsUseCaseInput
-  ): Promise<IUseCaseResponse<ListAnnotationsUseCaseOutput>> {
-    const validInput = ListAnnotationsUseCaseInputSchema.parse(input);
+  ): Promise<ListAnnotationsUseCaseOutput> {
+    this.logger.debug("SearchMemoryItemsUseCase: Starting execution with input:", { input });
 
-    const filters = this._buildSearchFilters(validInput);
-    const pagination = this._buildPaginationOptions(validInput);
+    const validatedInput = ListAnnotationsUseCaseInputSchema.parse(input);
+
+    const filters = this._buildSearchFilters(validatedInput);
+    const pagination = this._buildPaginationOptions(validatedInput);
 
     const paginatedData = await this.annotationRepository.search(
       filters,
@@ -58,7 +57,7 @@ export class ListAnnotationsUseCase
       pageSize: paginatedData.pageSize,
       totalPages: paginatedData.totalPages,
     };
-    return successUseCaseResponse(output);
+    return output;
   }
 
   private _buildSearchFilters(

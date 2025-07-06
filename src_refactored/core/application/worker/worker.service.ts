@@ -2,12 +2,15 @@ import { randomUUID } from "node:crypto";
 import EventEmitter from "node:events";
 import { setInterval, clearInterval, setTimeout } from "node:timers";
 
+
 import { AbstractQueue } from "@/core/application/queue/abstract-queue";
 import { JobEntity } from "@/core/domain/job/job.entity";
 
 import { ProcessorFunction, WorkerOptions } from "./worker.types";
 
-export class WorkerService<P, R> extends EventEmitter {
+
+
+export class WorkerService<P extends { userId?: string }, R> extends EventEmitter {
   public readonly workerId: string;
   private _isRunning: boolean = false;
   private _isClosed: boolean = false;
@@ -19,7 +22,7 @@ export class WorkerService<P, R> extends EventEmitter {
   constructor(
     protected readonly queue: AbstractQueue<P, R>,
     protected readonly processor: ProcessorFunction<P, R>,
-    protected readonly opts: WorkerOptions = { lockDuration: 30000 }
+    protected readonly opts: WorkerOptions = { lockDuration: 30000, lockRenewTimeBuffer: 10000 }
   ) {
     super();
     this.workerId = randomUUID();
@@ -168,7 +171,7 @@ export class WorkerService<P, R> extends EventEmitter {
   private async _executeProcessor(job: JobEntity<P, R>): Promise<void> {
     try {
       const result = await this.processor(job);
-      if (this._isClosed && !job.finishedOn) {
+      if (this._isClosed && !job.finishedAt) {
         this.emit("worker.job.interrupted", job);
       } else if (!this._isClosed) {
         await this.queue.markJobAsCompleted(job.id, this.workerId, result, job);
@@ -207,12 +210,11 @@ export class WorkerService<P, R> extends EventEmitter {
   }
 
   private setupLockRenewal(job: JobEntity<P, R>): void {
-    const renewBuffer =
-      this.opts.lockRenewTimeBuffer ?? this.opts.lockDuration / 2;
-    const renewInterval = this.opts.lockDuration - renewBuffer;
+    const renewBuffer = this.opts.lockRenewTimeBuffer ?? (this.opts.lockDuration ?? 30000) / 2;
+    const renewInterval = (this.opts.lockDuration ?? 30000) - renewBuffer;
 
     const timer = setInterval(() => {
-      this.queue.extendJobLock(job.id, this.workerId, this.opts.lockDuration);
+      this.queue.extendJobLock(job.id, this.workerId, this.opts.lockDuration ?? 30000);
     }, renewInterval);
 
     this.lockRenewTimers.set(job.id.value, timer);

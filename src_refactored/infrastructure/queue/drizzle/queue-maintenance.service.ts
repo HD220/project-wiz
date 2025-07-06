@@ -6,14 +6,14 @@ import { IJobRepository } from "@/core/application/ports/job-repository.interfac
 import { JobEntity } from "@/core/domain/job/job.entity";
 
 // This service could implement an IQueueMaintenanceService interface
-export class QueueMaintenanceService<P, R> {
+export class QueueMaintenanceService<P extends { userId?: string }, R> {
   private _isMaintenanceRunning: boolean = false;
   private maintenanceLoopPromise: Promise<void> | null = null;
   // Consider making this configurable
   private readonly maintenanceIntervalMs: number = 15000;
 
   constructor(
-    private readonly jobRepository: IJobRepository,
+    private readonly jobRepository: IJobRepository<P, R>,
     // Or a dedicated JobEventEmitter
     private readonly eventEmitter: EventEmitter,
     private readonly queueName: string

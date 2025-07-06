@@ -15,13 +15,11 @@ import {
   PersonaTemplateFormData,
 } from "@/ui/features/persona/components/PersonaTemplateForm";
 
-import type {
-  GetPersonaTemplateDetailsResponseData,
-} from "@/shared/ipc-types";
+import type { GetPersonaTemplateDetailsResponse } from "@/shared/ipc-types/persona.types";
 
 interface EditPersonaTemplateFormRendererProps {
   templateId: string;
-  personaTemplate: GetPersonaTemplateDetailsResponseData;
+  personaTemplate: GetPersonaTemplateDetailsResponse;
   handleSubmit: (formData: PersonaTemplateFormData) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -47,7 +45,7 @@ export function EditPersonaTemplateFormRenderer({
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
       <Button variant="outline" size="sm" className="mb-4" asChild>
-        <Link to="/personas/$templateId" params={{ templateId }}>
+        <Link to="/app/personas/$templateId" params={{ templateId }}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Detalhes
         </Link>
       </Button>

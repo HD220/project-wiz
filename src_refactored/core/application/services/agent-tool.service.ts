@@ -72,7 +72,7 @@ export class AgentToolService {
     const executionContext: IToolExecutionContext = {
       agentId: agent.id.value,
       jobId: job.id.value,
-      userId: job.props.payload.userId,
+      userId: job.userId,
     };
     return this.toolValidationService.processAndValidateSingleToolCall(toolCall, executionContext);
   }

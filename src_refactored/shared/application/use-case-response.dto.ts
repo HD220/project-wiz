@@ -74,8 +74,7 @@ export interface IUseCaseResponse<
  */
 export type SuccessUseCaseResponse<TOutput = void> = IUseCaseResponse<
   TOutput,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Forcing error to be undefined in success types.
-  any
+  IUseCaseErrorDetails
 > & {
   success: true;
   // data is explicitly required for success, even if TOutput is void.
@@ -88,8 +87,7 @@ export type SuccessUseCaseResponse<TOutput = void> = IUseCaseResponse<
  * Utility type for a failed use case response.
  */
 export type ErrorUseCaseResponse<TErrorDetails = IUseCaseErrorDetails> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Forcing data to be 'never' (or typed as 'any' then 'never') in error responses.
-  IUseCaseResponse<any, TErrorDetails> & {
+  IUseCaseResponse<never, TErrorDetails> & {
     success: false;
     data?: never;
     error: TErrorDetails;

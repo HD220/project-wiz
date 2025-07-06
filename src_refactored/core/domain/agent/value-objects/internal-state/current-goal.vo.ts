@@ -24,7 +24,7 @@ export class CurrentGoal extends AbstractValueObject<CurrentGoalProps> {
     return new CurrentGoal(goal);
   }
 
-  public value(): string {
+  public get value(): string {
     return this.props.value;
   }
 

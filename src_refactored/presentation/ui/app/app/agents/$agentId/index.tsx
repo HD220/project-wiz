@@ -9,7 +9,6 @@ import { useAgentInstanceDetails } from "@/ui/hooks/useAgentInstanceDetails";
 import { statusDisplayMap } from "@/ui/utils/agent-status";
 
 function AgentInstanceDetailPage() {
-  const router = useRouter();
   const { agentId, instance, isLoading, error } = useAgentInstanceDetails();
 
   const loadingErrorDisplay = AgentDetailLoadingErrorDisplay({ isLoading, error, agentId });
@@ -18,14 +17,17 @@ function AgentInstanceDetailPage() {
     return loadingErrorDisplay;
   }
 
-  const statusInfo = instance ? statusDisplayMap[instance.status] || statusDisplayMap.idle : statusDisplayMap.idle;
+  if (!instance) {
+    return <div>No agent instance data available.</div>;
+  }
+
+  const statusInfo = statusDisplayMap[instance.status as keyof typeof statusDisplayMap] || statusDisplayMap.idle;
 
   return (
     <AgentDetailView
-      instance={instance!}
+      instance={instance}
       statusInfo={statusInfo}
       agentId={agentId}
-      router={router}
     />
   );
 }

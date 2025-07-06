@@ -9,18 +9,7 @@ import { useUpdateAgentInstance } from "@/ui/hooks/useUpdateAgentInstance";
 
 function EditAgentInstancePage() {
   const router = useRouter();
-  const {
-    agentId,
-    agentInstance,
-    personaTemplates,
-    llmConfigs,
-    isLoadingAll,
-    anyError,
-    agentError,
-    personasError,
-    llmsError,
-    refetchAgent,
-  } = useAgentInstanceData();
+  const { agentId, agentInstance, personaTemplates, llmConfigs, isLoadingAll, anyError, agentError, personasError, llmsError, refetchAgent, } = useAgentInstanceData();
 
   const { handleSubmit, isSubmitting } = useUpdateAgentInstance({
     agentId,
@@ -40,10 +29,10 @@ function EditAgentInstancePage() {
     return loadingOrErrorDisplay;
   }
 
-  if (!agentInstance) {
+  if (!agentInstance || !personaTemplates || !llmConfigs) {
     return (
       <div className="p-8 text-center">
-        <p>Instância de Agente com ID &quot;{agentId}&quot; não encontrada.</p>
+        <p>Dados necessários para o agente não encontrados.</p>
         <Button variant="outline" className="mt-4" asChild>
           <Link to="/app/agents">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes

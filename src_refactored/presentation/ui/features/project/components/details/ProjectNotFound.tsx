@@ -9,7 +9,7 @@ export function ProjectNotFound() {
     <div className="p-8 text-center">
       <h2 className="text-xl font-semibold mb-2">Projeto não encontrado</h2>
       <Button asChild variant="outline">
-        <Link to="/projects">
+        <Link to="/app/projects">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Projetos
         </Link>
       </Button>

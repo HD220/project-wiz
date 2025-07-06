@@ -1,28 +1,19 @@
 import { ipcMain } from "electron";
 
-import {
-  IPC_CHANNELS
-} from "../../../../shared/ipc-channels";
-import {
-  
-  GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponseData,
-  CreateAgentInstanceRequest,
-  CreateAgentInstanceResponseData,
-  UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponseData,
-  GetAgentInstancesListRequest,
-  GetAgentInstancesListResponseData
-} from "../../../../shared/ipc-types";
-import { AgentInstance, AgentLLM } from "../../../../shared/types/entities";
+import { AgentInstance } from "@/domain/entities/agent";
+import { AgentLLM } from "@/domain/entities/llm";
+
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { GetAgentInstanceDetailsRequest, CreateAgentInstanceRequest, UpdateAgentInstanceRequest, GetAgentInstancesByProjectRequest } from "@/shared/ipc-types/agent.types";
+
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
 function registerQueryAgentInstanceHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_AGENT_INSTANCES_LIST,
-    async (): Promise<GetAgentInstancesListResponseData> => {
+    async (): Promise<AgentInstance[]> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { agentInstances: mockAgentInstances };
+      return mockAgentInstances;
     }
   );
 
@@ -30,13 +21,13 @@ function registerQueryAgentInstanceHandlers() {
     IPC_CHANNELS.GET_AGENT_INSTANCES_BY_PROJECT,
     async (
       _event,
-      req: GetAgentInstancesListRequest
-    ): Promise<GetAgentInstancesListResponseData> => {
+      req: GetAgentInstancesByProjectRequest
+    ): Promise<AgentInstance[]> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instances = mockAgentInstances.filter(
         (ai) => ai.projectId === req.projectId
       );
-      return { agentInstances: instances };
+      return instances;
     }
   );
 
@@ -45,15 +36,15 @@ function registerQueryAgentInstanceHandlers() {
     async (
       _event,
       req: GetAgentInstanceDetailsRequest
-    ): Promise<GetAgentInstanceDetailsResponseData> => {
+    ): Promise<AgentInstance | null> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instance = mockAgentInstances.find(
-        (ai) => ai.id === req.instanceId
+        (ai) => ai.id === req.agentId
       );
       if (instance) {
-        return { agentInstance: instance };
+        return instance;
       }
-      return { agentInstance: undefined, error: "Agent Instance not found" };
+      throw new Error("Agent instance not found");
     }
   );
 }
@@ -64,23 +55,29 @@ function registerCreateAgentInstanceHandler() {
     async (
       _event,
       req: CreateAgentInstanceRequest
-    ): Promise<CreateAgentInstanceResponseData> => {
+    ): Promise<AgentInstance> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const newInstance: AgentInstance = {
         id: `agent-${Date.now()}`,
         personaTemplateId: req.personaTemplateId,
+        agentName: req.agentName,
+        llmProviderConfigId: req.llmProviderConfigId,
+        temperature: req.temperature,
         projectId: req.projectId,
         llmConfig: req.llmConfig || {
+          id: `llm-config-${Date.now()}`,
+          name: "Default OpenAI GPT-4 Turbo",
+          providerId: "openai",
           llm: AgentLLM.OPENAI_GPT_4_TURBO,
           temperature: 0.7,
           maxTokens: 2048,
         },
         tools: req.tools || [],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        status: "idle",
       };
       mockAgentInstances.push(newInstance);
-      return { agentInstance: newInstance };
+      return newInstance;
     }
   );
 }
@@ -91,33 +88,30 @@ function registerUpdateAgentInstanceHandler() {
     async (
       _event,
       req: UpdateAgentInstanceRequest
-    ): Promise<UpdateAgentInstanceResponseData> => {
+    ): Promise<AgentInstance> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instanceIndex = mockAgentInstances.findIndex(
-        (ai) => ai.id === req.instanceId
+        (ai) => ai.id === req.agentId
       );
       if (instanceIndex !== -1) {
         const currentInstance = mockAgentInstances[instanceIndex];
         const updatedInstance = {
           ...currentInstance,
-          ...req.updates,
-          ...(req.updates.llmConfig && currentInstance.llmConfig
+          ...req.data,
+          ...(req.data.llmConfig && currentInstance.llmConfig
             ? {
                 llmConfig: {
                   ...currentInstance.llmConfig,
-                  ...req.updates.llmConfig,
+                  ...req.data.llmConfig,
                 },
               }
             : currentInstance.llmConfig),
           updatedAt: new Date().toISOString(),
         };
         mockAgentInstances[instanceIndex] = updatedInstance;
-        return { agentInstance: updatedInstance };
+        return updatedInstance;
       }
-      return {
-        agentInstance: undefined,
-        error: "Agent Instance not found for update",
-      };
+      throw new Error("Agent instance not found");
     }
   );
 }

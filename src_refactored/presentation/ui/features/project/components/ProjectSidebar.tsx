@@ -1,5 +1,5 @@
 // Removed useParams
-import { Link } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 // Removed Folder
 import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Hash, Plus } from 'lucide-react';
 import React from 'react';
@@ -22,14 +22,10 @@ interface ProjectNavLinkProps {
 
 // Removed exact
 function ProjectNavLink({ to, basePath, children, icon: iconProp }: ProjectNavLinkProps) {
-  // Alias for JSX
   const IconComponent = iconProp;
-  const fullPath = `${basePath}${to.startsWith('/') ? to : `/${to}`}`;
   return (
     <Link
-      // Cast to string for dynamically constructed paths.
-      // Consider using a more specific type if possible, or ensure paths are validated.
-      to={fullPath as string}
+      to={basePath + to}
       className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
       activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50' }}
     >
@@ -51,7 +47,7 @@ export function ProjectSidebar({ className }: ProjectSidebarProps) {
   // const params = useParams();
   // const projectId = params.projectId;
   // Placeholder
-  const projectId = "{projectId}";
+  const { projectId = '' } = useParams({ strict: false });
 
   // Placeholder data
   const project = {
@@ -102,7 +98,9 @@ export function ProjectSidebar({ className }: ProjectSidebarProps) {
                 {channels.map(channel => (
                   <Link
                     key={channel.id}
-                    to={`/projects/${projectId}/channels/${channel.id}`}
+                    to="/app/projects/$projectId/chat"
+                    params={{ projectId: projectId }}
+                    search={{ channelId: channel.id }}
                     className="flex items-center space-x-2 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-md"
                     activeProps={{ className: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50 font-medium' }}
                   >

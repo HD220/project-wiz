@@ -31,7 +31,7 @@ export const GetProjectDetailsUseCaseOutputSchema = z.object({
   id: z.string().uuid().describe("The unique identifier of the project."),
   name: z.string().describe("The name of the project."),
   // ProjectDescription VO always holds a string, and Project entity requires it.
-  description: z.string().describe("The description of the project."),
+  description: z.string().nullable().describe("The description of the project."),
   createdAt: z.string().datetime().describe("The ISO 8601 date and time when the project was created."),
   updatedAt: z.string().datetime().describe("The ISO 8601 date and time when the project was last updated."),
   // SourceCode might not exist for a project, or could be disassociated.

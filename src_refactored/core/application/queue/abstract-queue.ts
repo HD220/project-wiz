@@ -11,14 +11,14 @@ export const QUEUE_SERVICE_TOKEN_PREFIX = 'QueueService:';
 export const getQueueServiceToken = (queueName: string) => `${QUEUE_SERVICE_TOKEN_PREFIX}${queueName}`;
 
 
-export abstract class AbstractQueue<P = unknown, R = unknown> extends EventEmitter {
+export abstract class AbstractQueue<P extends { userId?: string }, R = unknown> extends EventEmitter {
   public readonly queueName: string;
-  protected readonly jobRepository: IJobRepository;
+  protected readonly jobRepository: IJobRepository<P, R>;
   protected readonly defaultJobOptions: JobOptionsVO;
 
   constructor(
     queueName: string,
-    jobRepository: IJobRepository,
+    jobRepository: IJobRepository<P, R>,
     defaultJobOptions?: IJobOptions,
   ) {
     super();

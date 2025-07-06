@@ -108,7 +108,7 @@ export function AgentInstanceHeader({
       </div>
       <CardTitle className="text-lg truncate" title={agentDisplayName}>
         <Link
-          to="/agents/$agentId"
+          to="/app/agents/$agentId"
           params={{ agentId: instance.id }}
           className="hover:underline"
         >

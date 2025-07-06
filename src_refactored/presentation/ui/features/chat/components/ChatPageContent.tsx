@@ -1,21 +1,14 @@
 import React from "react";
 
+import type { ChatMessage } from "@/core/domain/entities/chat";
+
 import { ChatWindow } from "@/ui/features/chat/components/ChatWindow";
 
-import type {
-  GetDMMessagesResponseData as GetConversationMessagesResponseData,
-} from "@/shared/ipc-types";
-
-interface ChatWindowConversationHeader {
-  id: string;
-  name: string;
-  type: "dm" | "channel" | "agent";
-  avatarUrl?: string;
-}
+import { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
 
 interface ChatPageContentProps {
   conversationHeader: ChatWindowConversationHeader | null;
-  messages: GetConversationMessagesResponseData;
+  messages: ChatMessage[] | null | undefined;
   isLoadingMessages: boolean;
   messagesError: Error | null;
   onSendMessage: (content: string) => void;
@@ -44,7 +37,7 @@ export function ChatPageContent({
       )}
       <ChatWindow
         conversation={conversationHeader}
-        messages={messages}
+        messages={messages ?? []}
         onSendMessage={onSendMessage}
         isLoading={isLoadingMessages && !messagesError}
         currentUserId={currentUserId}

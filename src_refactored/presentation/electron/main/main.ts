@@ -10,7 +10,7 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 // import { registerDMHandlers } from "./handlers/dm.handlers";
 // import { registerLLMConfigHandlers } from "./handlers/llm-config.handlers";
 // import { registerPersonaTemplateHandlers } from "./handlers/persona-template.handlers";
-// import { registerProjectHandlers } from "./handlers/project.handlers";
+import { composeMainProcessHandlers } from "@/presentation/electron/main/electron-main-composition";
 // import { registerUserHandlers } from "./handlers/user.handlers";
 // import { registerChatIPCHandlers } from "./ipc-chat.handlers";
 // import { registerProjectIPCHandlers as registerLegacyProjectIPCHandlers } from "./ipc-project.handlers";
@@ -52,23 +52,8 @@ const createWindow = () => {
 app.on("ready", () => {
   console.log("[Main Process] Registering IPC Handlers...");
 
-  // registerChatIPCHandlers();
-  // registerLegacyProjectIPCHandlers();
-
-  // registerProjectHandlers();
-  // console.log("[Main Process] Project handlers registered.");
-  // registerPersonaTemplateHandlers();
-  // console.log("[Main Process] Persona Template handlers registered.");
-  // registerAgentInstanceHandlers();
-  // console.log("[Main Process] Agent Instance handlers registered.");
-  // registerLLMConfigHandlers();
-  // console.log("[Main Process] LLM Config handlers registered.");
-  // registerUserHandlers();
-  // console.log("[Main Process] User handlers registered.");
-  // registerDMHandlers();
-  // console.log("[Main Process] DM handlers registered.");
-
-  // console.log("[Main Process] All IPC Handlers registered.");
+  composeMainProcessHandlers();
+  console.log("[Main Process] All IPC Handlers registered.");
 
   createWindow();
 });

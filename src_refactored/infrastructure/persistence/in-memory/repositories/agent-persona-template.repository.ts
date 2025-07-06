@@ -3,6 +3,7 @@ import { injectable } from "inversify";
 import { AgentPersonaTemplate } from "@/core/domain/agent/agent-persona-template.vo";
 import { IAgentPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
 import { PersonaId } from "@/core/domain/agent/value-objects/persona/persona-id.vo";
+import { PersonaRole } from "@/core/domain/agent/value-objects/persona/persona-role.vo";
 import { NotFoundError } from "@/core/domain/common/errors";
 
 @injectable()
@@ -24,7 +25,7 @@ export class InMemoryAgentPersonaTemplateRepository
   }
 
   async findByRole(role: PersonaRole): Promise<AgentPersonaTemplate | null> {
-    const template = Array.from(this.templates.values()).find(t => t.role.equals(role));
+    const template = Array.from(this.templates.values()).find(template => template.role.equals(role));
     return template || null;
   }
 

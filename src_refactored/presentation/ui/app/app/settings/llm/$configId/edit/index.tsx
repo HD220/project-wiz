@@ -8,6 +8,8 @@ import { ArrowLeft } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,15 +24,18 @@ import {
   LLMConfigForm,
   LLMConfigFormData,
 } from "@/ui/features/llm/components/LLMConfigForm";
-import { LLMConfig } from "@/ui/features/llm/components/LLMConfigList";
 
 // Simulating a "database" of LLM configurations
 // In a real app, this would be fetched and updated via IPC/API
+
 let mockLlmConfigsDb: Record<string, LLMConfig> = {
   configId1: {
     id: "1",
     name: "OpenAI Pessoal",
     providerId: "openai",
+    llm: AgentLLM.OPENAI_GPT_4_TURBO,
+    temperature: 0.7,
+    maxTokens: 2048,
     baseUrl: "https://api.openai.com/v1",
     apiKey: "sk-...",
   },
@@ -38,20 +43,25 @@ let mockLlmConfigsDb: Record<string, LLMConfig> = {
     id: "2",
     name: "Ollama Local (Llama3)",
     providerId: "ollama",
+    llm: AgentLLM.OLLAMA_LLAMA2,
+    temperature: 0.7,
+    maxTokens: 2048,
     baseUrl: "http://localhost:11434",
   },
   configId3: {
     id: "3",
     name: "DeepSeek Trabalho",
     providerId: "deepseek",
+    llm: AgentLLM.OPENAI_GPT_4_TURBO,
+    temperature: 0.7,
+    maxTokens: 2048,
     apiKey: "dk-...",
   },
 };
 
 function EditLLMConfigPage() {
   const router = useRouter();
-  const params = useParams({ from: "/(app)/settings/llm/$configId/edit/" });
-  const configId = params.configId;
+  const { configId } = useParams({ from: "/app/settings/llm/$configId/edit/" });
 
   const [initialValues, setInitialValues] =
     useState<Partial<LLMConfigFormData> | null>(null);
@@ -60,6 +70,12 @@ function EditLLMConfigPage() {
   const [configName, setConfigName] = useState<string>("");
 
   useEffect(() => {
+    if (!configId) {
+      setIsLoading(false);
+      toast.error("ID da configuração LLM não fornecido.");
+      return;
+    }
+
     setIsLoading(true);
     // Simulate fetching config data
     setTimeout(() => {
@@ -129,7 +145,7 @@ function EditLLMConfigPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto">
       <Button variant="outline" size="sm" className="mb-4" asChild>
-        <Link to="/settings/llm">
+        <Link to="/app/settings/llm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Configs
           LLM
         </Link>
