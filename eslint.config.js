@@ -150,18 +150,8 @@ const importAndBoundaryRules = {
         },
         {
           from: ["presentation"],
-          allow: [
-            "domain",
-            "application",
-            "infrastructure",
-            "shared",
-          ],
-          disallow: [
-            "ui-components",
-            "ui-lib",
-            "ui-hooks",
-            "ui-features",
-          ],
+          allow: ["domain", "application", "infrastructure", "shared"],
+          disallow: ["ui-components", "ui-lib", "ui-hooks", "ui-features"],
           message:
             "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, infrastructure, shared, mas não de UI).",
         },
@@ -261,17 +251,11 @@ export default [
   // 1. Global Ignores
   {
     ignores: [
-      "**/_old/**",
       "**/coverage/**",
       "**/dist/**",
       "**/node_modules/**",
-      "tests/**",
       "**/k6/**",
       "**/jslib.k6.io/**",
-      "backup/**",
-      "src/**",
-      "src2/**",
-      "scripts/**",
       ".vite/**",
       "*.config.js",
       "*.config.ts",
@@ -281,13 +265,10 @@ export default [
       "docs/**",
       "migrations/**",
       "public/**",
-      ".jules/**",
-      ".roo/**",
-      "types/**",
     ],
   },
   {
-    files: ["src_refactored/**/*.ts", "src_refactored/**/*.tsx"],
+    files: ["src/**/*.ts", "src/**/*.tsx"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -329,21 +310,21 @@ export default [
         },
       },
       "boundaries/elements": [
-        { type: "domain", pattern: "src_refactored/core/domain" },
-        { type: "application", pattern: "src_refactored/core/application" },
-        { type: "infrastructure", pattern: "src_refactored/infrastructure" },
-        { type: "presentation", pattern: "src_refactored/presentation" },
-        { type: "shared", pattern: "src_refactored/shared" },
+        { type: "domain", pattern: "src/core/domain" },
+        { type: "application", pattern: "src/core/application" },
+        { type: "infrastructure", pattern: "src/infrastructure" },
+        { type: "presentation", pattern: "src/presentation" },
+        { type: "shared", pattern: "src/shared" },
         { type: "zod-lib", pattern: "zod" }, // Added for Zod
         {
           type: "ui-components",
-          pattern: "src_refactored/presentation/ui/components",
+          pattern: "src/presentation/ui/components",
         },
-        { type: "ui-features", pattern: "src_refactored/presentation/ui/app" },
-        { type: "ui-lib", pattern: "src_refactored/presentation/ui/lib" },
-        { type: "ui-hooks", pattern: "src_refactored/presentation/ui/hooks" },
+        { type: "ui-features", pattern: "src/presentation/ui/app" },
+        { type: "ui-lib", pattern: "src/presentation/ui/lib" },
+        { type: "ui-hooks", pattern: "src/presentation/ui/hooks" },
       ],
-      "boundaries/ignore": ["src_refactored/presentation/ui/routeTree.gen.ts"],
+      "boundaries/ignore": ["src/presentation/ui/routeTree.gen.ts"],
       react: {
         version: "detect",
       },
@@ -354,13 +335,13 @@ export default [
   //    (Excluding ShadCN UI components)
   {
     files: [
-      "src_refactored/**/*.tsx",
-      "src_refactored/**/*.spec.ts",
-      "src_refactored/**/*.test.ts",
-      "src_refactored/**/*.spec.tsx",
-      "src_refactored/**/*.test.tsx",
+      "src/**/*.tsx",
+      "src/**/*.spec.ts",
+      "src/**/*.test.ts",
+      "src/**/*.spec.tsx",
+      "src/**/*.test.tsx",
     ],
-    ignores: ["src_refactored/presentation/ui/components/ui/**/*.tsx"],
+    ignores: ["src/presentation/ui/components/ui/**/*.tsx"],
     rules: {
       // Relaxed line limits for .tsx and test files
       "max-lines-per-function": [
@@ -373,10 +354,10 @@ export default [
   // 4. Override for Test files (relaxing other specific rules)
   {
     files: [
-      "src_refactored/**/*.spec.ts",
-      "src_refactored/**/*.test.ts",
-      "src_refactored/**/*.spec.tsx",
-      "src_refactored/**/*.test.tsx",
+      "src/**/*.spec.ts",
+      "src/**/*.test.ts",
+      "src/**/*.spec.tsx",
+      "src/**/*.test.tsx",
     ],
     rules: {
       "@typescript-eslint/no-unused-vars": [
@@ -408,9 +389,9 @@ export default [
   // 5. Override for ShadCN UI components
   {
     files: [
-      "src_refactored/presentation/ui/components/ui/**/*.tsx",
-      "src_refactored/**/*.gen.ts",
-      "src_refactored/**/locales/*.ts",
+      "src/presentation/ui/components/ui/**/*.tsx",
+      "src/**/*.gen.ts",
+      "src/**/locales/*.ts",
     ],
     rules: {
       "@typescript-eslint/naming-convention": "off",

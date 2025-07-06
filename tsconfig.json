@@ -26,15 +26,12 @@
       "@/infrastructure/*": ["./src/infrastructure/*"],
       "@/components/*": ["./src/presentation/ui/components/*"],
       "@/shared/*": ["./src/shared/*"],
-      // Simplified @ui path
       "@/ui/*": ["./src/presentation/ui/*"],
-      // General fallback
       "@/*": ["./src/*"]
     }
   },
   "include": [
     "src/**/*",
-    "src/presentation/ui/global.d.ts",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
