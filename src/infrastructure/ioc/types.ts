@@ -9,7 +9,6 @@ const TYPES = {
   IJobRepository: Symbol.for("IJobRepository"),
   ILLMProviderConfigRepository: Symbol.for("ILLMProviderConfigRepository"),
   IMemoryRepository: Symbol.for("IMemoryRepository"),
-  IProjectRepository: Symbol.for("IProjectRepository"),
   IQueueMetadataRepository: Symbol.for("IQueueMetadataRepository"),
   ISourceCodeRepository: Symbol.for("ISourceCodeRepository"),
   IUserRepository: Symbol.for("IUserRepository"),
