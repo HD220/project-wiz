@@ -5,13 +5,13 @@
 
 ## Context
 
-The current codebase, particularly within the `src_refactored/core/domain` layer, adheres to Object Calisthenics Rule 9: "No Getters/Setters/Properties." This rule promotes encapsulating behavior within objects, encouraging a "Tell, Don't Ask" philosophy. Consequently, accessing the value of a Value Object (VO) or an Entity's property often requires calling a method (e.g., `myVo.value()`, `myEntity.propertyName()`).
+The current codebase, particularly within the `src/core/domain` layer, adheres to Object Calisthenics Rule 9: "No Getters/Setters/Properties." This rule promotes encapsulating behavior within objects, encouraging a "Tell, Don't Ask" philosophy. Consequently, accessing the value of a Value Object (VO) or an Entity's property often requires calling a method (e.g., `myVo.value()`, `myEntity.propertyName()`).
 
 While this approach strictly enforces behavioral encapsulation, it can lead to verbosity and a less intuitive API for simple data retrieval, especially when the "property" is merely a wrapped primitive. The user has expressed a desire for a more direct way to access property values, suggesting public `readonly` properties or TypeScript getters/setters, reserving method calls for actions that perform operations or change state.
 
 ## Decision
 
-We will modify the interpretation and application of Object Calisthenics Rule 9 ("No Getters/Setters/Properties") for domain objects (Entities and Value Objects) within `src_refactored/core/domain`.
+We will modify the interpretation and application of Object Calisthenics Rule 9 ("No Getters/Setters/Properties") for domain objects (Entities and Value Objects) within `src/core/domain`.
 
 For simple data retrieval from Value Objects and Entity properties that represent data rather than behavior, we will adopt the following:
 
@@ -112,7 +112,7 @@ export class User extends AbstractEntity<UserId, InternalUserProps> {
 **Cons:**
 *   **Deviation from Strict Object Calisthenics Rule 9:** This decision explicitly relaxes the "No Getters/Setters/Properties" rule. While it's a pragmatic choice for data access, it's a departure from the strict interpretation.
 *   **Potential for Misuse:** Developers might be tempted to expose mutable properties directly, violating encapsulation. This risk will be mitigated by enforcing `readonly` and relying on code reviews.
-*   **Refactoring Effort:** Requires significant refactoring across the `src_refactored/core/domain` and `src_refactored/core/application` layers to update all property access patterns.
+*   **Refactoring Effort:** Requires significant refactoring across the `src/core/domain` and `src/core/application` layers to update all property access patterns.
 
 ## Recommendation: Accept
 

@@ -18,7 +18,7 @@ Serão adotadas as seguintes convenções e padrões para estilização:
     *   **Justificativa:** Utility-first promove consistência, rapidez no desenvolvimento, evita o crescimento descontrolado de CSS e facilita a manutenção, pois os estilos estão co-localizados com a marcação.
 
 **2. Uso e Convenções de Shadcn/UI:**
-    *   **Natureza dos Componentes:** Componentes Shadcn/UI não são uma biblioteca tradicional de componentes instalada via npm. Eles são "receitas" ou "blocos de construção" que são copiados para o codebase do projeto (tipicamente em `src_refactored/presentation/ui/components/ui/` via CLI `shadcn-ui add [component-name]`).
+    *   **Natureza dos Componentes:** Componentes Shadcn/UI não são uma biblioteca tradicional de componentes instalada via npm. Eles são "receitas" ou "blocos de construção" que são copiados para o codebase do projeto (tipicamente em `src/presentation/ui/components/ui/` via CLI `shadcn-ui add [component-name]`).
     *   **Customização:** A customização da aparência dos componentes Shadcn/UI é feita editando diretamente seu código fonte (o arquivo `.tsx` copiado para o projeto) e ajustando as classes Tailwind CSS dentro deles.
     *   **Composição:** Componentes Shadcn/UI (e.g., `Button`, `Card`, `Dialog`, `Input`) são usados como primitivas para construir componentes de aplicação mais complexos e específicos do domínio.
     *   **Atualizações:** Atualizar um componente Shadcn/UI para uma nova versão da "receita" pode exigir a repetição do comando `add` (com overwrite) e a reaplicação de customizações, ou a comparação manual das mudanças.

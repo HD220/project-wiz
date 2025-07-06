@@ -3,7 +3,7 @@
 **Status:** Proposto (Considerado Aprovado Conforme Instrução)
 
 **Contexto:**
-Adaptadores na camada de infraestrutura (`src_refactored/infrastructure/adapters/`) são responsáveis por encapsular a comunicação com serviços externos (e.g., LLMs, APIs de terceiros, gateways de pagamento, serviços de email). É crucial padronizar seu design, como lidam com erros, e seus contratos para garantir desacoplamento, testabilidade e um tratamento de falhas consistente. A análise do `MockLLMAdapter` revelou alguns padrões, incluindo o retorno de `IUseCaseResponse`.
+Adaptadores na camada de infraestrutura (`src/infrastructure/adapters/`) são responsáveis por encapsular a comunicação com serviços externos (e.g., LLMs, APIs de terceiros, gateways de pagamento, serviços de email). É crucial padronizar seu design, como lidam com erros, e seus contratos para garantir desacoplamento, testabilidade e um tratamento de falhas consistente. A análise do `MockLLMAdapter` revelou alguns padrões, incluindo o retorno de `IUseCaseResponse`.
 
 **Decisão:**
 
@@ -11,10 +11,10 @@ Serão adotados os seguintes padrões para o design e implementação de Adaptad
 
 **1. Propósito e Localização:**
     *   **Propósito:** Adaptadores medeiam a comunicação entre a aplicação (especificamente a camada de aplicação ou outros serviços de infraestrutura) e um sistema externo. Eles traduzem requisições da aplicação para o formato entendido pelo serviço externo e as respostas do serviço externo para um formato entendido pela aplicação.
-    *   **Localização:** `src_refactored/infrastructure/adapters/<tipo_de_serviço_ou_nome_específico>/`. Ex: `src_refactored/infrastructure/adapters/llm/openai-llm.adapter.ts`.
+    *   **Localização:** `src/infrastructure/adapters/<tipo_de_serviço_ou_nome_específico>/`. Ex: `src/infrastructure/adapters/llm/openai-llm.adapter.ts`.
 
 **2. Definição da Interface (Porta):**
-    *   **Padrão:** Cada adaptador DEVE implementar uma interface (porta) definida em `src_refactored/core/ports/adapters/`. Esta interface define o contrato que a camada de aplicação usará, abstraindo os detalhes do serviço externo específico.
+    *   **Padrão:** Cada adaptador DEVE implementar uma interface (porta) definida em `src/core/ports/adapters/`. Esta interface define o contrato que a camada de aplicação usará, abstraindo os detalhes do serviço externo específico.
     *   **Nomenclatura da Interface:** `I[NomeDoServiço/Funcionalidade]Adapter` (e.g., `ILLMAdapter`, `INotificationServiceAdapter`).
     *   **Nomenclatura do Arquivo da Interface:** `<nome-serviço-kebab-case>.adapter.interface.ts`.
     *   **Justificativa:** Princípio da Inversão de Dependência. A camada de aplicação depende da abstração (porta), não da implementação concreta do adaptador. Permite trocar implementações (e.g., de OpenAI para Anthropic) com impacto mínimo.
@@ -86,7 +86,7 @@ Serão adotados os seguintes padrões para o design e implementação de Adaptad
     *   **Justificativa:** Separa a configuração da lógica do adaptador, facilita a alteração de configurações entre ambientes (dev, staging, prod) e melhora a testabilidade.
 
 **8. Implementações Mock para Testes e Desenvolvimento:**
-    *   **Padrão:** Para cada interface de adaptador (`I[NomeServiço]Adapter`), uma implementação mock (e.g., `MockLLMAdapter`) DEVE ser fornecida em `src_refactored/infrastructure/adapters/<tipo_de_serviço_ou_nome_específico>/mock-[nome-serviço-kebab-case].adapter.ts`.
+    *   **Padrão:** Para cada interface de adaptador (`I[NomeServiço]Adapter`), uma implementação mock (e.g., `MockLLMAdapter`) DEVE ser fornecida em `src/infrastructure/adapters/<tipo_de_serviço_ou_nome_específico>/mock-[nome-serviço-kebab-case].adapter.ts`.
     *   O mock deve implementar a mesma interface e simular respostas realistas, incluindo casos de sucesso, diferentes tipos de dados e condições de erro.
     *   O DI container deve ser configurado para injetar a implementação real ou o mock dependendo do ambiente ou configuração de teste.
     *   **Justificativa:** Crucial para testes unitários e de integração dos serviços que dependem do adaptador, permite desenvolvimento frontend/backend desacoplado, e possibilita rodar a aplicação localmente sem dependência real de serviços externos (economizando custos e evitando instabilidade).

@@ -23,7 +23,7 @@ Serão adotados os seguintes padrões para logging na aplicação:
 **2. Uso de `console.*`:**
     *   **Padrão:** O uso direto de `console.log()`, `console.warn()`, `console.error()`, etc., é FORTEMENTE DESENCORAJADO e deve ser evitado no código das camadas `core/` e `infrastructure/`, e na maior parte da camada `presentation/`.
     *   **Exceções Permitidas:**
-        *   Scripts de exemplo (`src_refactored/examples/`).
+        *   Scripts de exemplo (`src/examples/`).
         *   Mensagens de status muito iniciais no `main.ts` do Electron, antes que a instância `ILogger` esteja configurada e disponível.
         *   No script `preload.ts` do Electron para logs simples de status de exposição da API (e.g., `console.log("[Preload] electronIPC exposed.")`).
         *   Durante depuração interativa temporária (deve ser removido antes do commit).

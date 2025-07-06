@@ -32,7 +32,7 @@ Determinar se um arquivo `tailwind.config.ts` (ou `.js`) é estritamente necess�
     *   No entanto, o plugin `@tailwindcss/vite` é projetado para integrar o Tailwind (que usa `tailwind.config.ts` para suas configurações) com o processo de build do Vite. Se um `tailwind.config.ts` existe e contém configurações de tema ou plugins, o `@tailwindcss/vite` irá utilizá-lo.
 
 ## Conclusão para o Projeto Atual
-*   **Para `content` paths**: O `tailwind.config.ts` não é *estritamente* mandatório se a detecção automática do Tailwind v4 funcionar para a estrutura do projeto (`src_refactored/presentation/ui/`). No entanto, especificar `content` explicitamente é uma boa prática e não causa problemas.
+*   **Para `content` paths**: O `tailwind.config.ts` não é *estritamente* mandatório se a detecção automática do Tailwind v4 funcionar para a estrutura do projeto (`src/presentation/ui/`). No entanto, especificar `content` explicitamente é uma boa prática e não causa problemas.
 *   **Para `theme` e `plugins`**: O `tailwind.config.ts` **é necessário** no projeto atual porque:
     1.  Ele define um tema customizado (`theme.extend.colors`, `theme.extend.borderRadius`, etc.) que referencia as variáveis CSS do `globals.css`.
     2.  Ele inclui o plugin `tailwindcss-animate`.

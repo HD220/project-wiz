@@ -10,7 +10,7 @@ A camada de persistência é responsável por salvar e recuperar dados do domín
 Serão adotados os seguintes padrões para a camada de persistência com Drizzle ORM:
 
 **1. Definição de Esquemas de Tabela (`*.schema.ts`):**
-    *   **Localização:** `src_refactored/infrastructure/persistence/drizzle/schema/`. Um arquivo por tabela ou agrupamentos lógicos (e.g., `index.ts` para exportar todos os esquemas).
+    *   **Localização:** `src/infrastructure/persistence/drizzle/schema/`. Um arquivo por tabela ou agrupamentos lógicos (e.g., `index.ts` para exportar todos os esquemas).
     *   **Nomenclatura:**
         *   **Tabelas:** Plural e `snake_case` (e.g., `jobs`, `user_profiles`).
         *   **Colunas:** `snake_case` (e.g., `queue_name`, `created_at`, `user_id`).
@@ -31,8 +31,8 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
     *   **Justificativa:** Padroniza a estrutura do banco de dados, melhora a performance com índices e garante consistência na representação de tipos de dados do domínio.
 
 **2. Implementações de Repositório (`Drizzle[NomeEntidade]Repository.ts`):**
-    *   **Localização:** `src_refactored/infrastructure/persistence/drizzle/<nome-entidade-kebab-case>/drizzle-[nome-entidade-kebab-case].repository.ts`.
-        *   Exemplo: `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts` (para a classe `DrizzleJobRepository`).
+    *   **Localização:** `src/infrastructure/persistence/drizzle/<nome-entidade-kebab-case>/drizzle-[nome-entidade-kebab-case].repository.ts`.
+        *   Exemplo: `src/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts` (para a classe `DrizzleJobRepository`).
     *   **Injeção de Dependência:** Devem ser `@injectable()` e receber a instância do cliente Drizzle (`db: typeof DbType`) e quaisquer outros repositórios ou serviços necessários via construtor.
     *   **Implementação de `IRepository`:** Devem implementar a interface `I[NomeEntidade]Repository` definida no domínio (conforme ADR-011).
 
@@ -127,13 +127,13 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
     *   **Justificativa:** O construtor de consultas do Drizzle oferece segurança de tipo e é mais fácil de manter. SQL bruto pode ser poderoso, mas menos seguro e mais difícil de refatorar.
 
 **8. Cliente Drizzle (`drizzle.client.ts`):**
-    *   **Padrão:** A instância do cliente Drizzle (`db`) e a conexão com o banco de dados (SQLite) devem ser inicializadas em um arquivo central (e.g., `src_refactored/infrastructure/persistence/drizzle/drizzle.client.ts`).
+    *   **Padrão:** A instância do cliente Drizzle (`db`) e a conexão com o banco de dados (SQLite) devem ser inicializadas em um arquivo central (e.g., `src/infrastructure/persistence/drizzle/drizzle.client.ts`).
     *   Esta instância `db` deve ser exportada e usada para injeção nos repositórios (como visto no `inversify.config.ts`).
     *   **Justificativa:** Centraliza a configuração da conexão do banco de dados e fornece um singleton para o cliente Drizzle.
 
 **9. Migrações (`drizzle-kit`):**
     *   **Padrão:** Utilizar `drizzle-kit` para gerar e gerenciar migrações de esquema do banco de dados.
-    *   As migrações geradas devem ser versionadas no repositório (e.g., na pasta `src_refactored/infrastructure/persistence/drizzle/migrations/`).
+    *   As migrações geradas devem ser versionadas no repositório (e.g., na pasta `src/infrastructure/persistence/drizzle/migrations/`).
     *   Um processo para aplicar migrações durante o deploy ou inicialização da aplicação deve ser definido.
     *   **Justificativa:** Ferramenta padrão do ecossistema Drizzle para gerenciamento de esquema de forma segura e versionada.
 

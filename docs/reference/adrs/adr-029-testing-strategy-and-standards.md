@@ -3,7 +3,7 @@
 **Status:** Proposto (Considerado Aprovado Conforme Instrução)
 
 **Contexto:**
-Testes automatizados são fundamentais para garantir a qualidade do software, prevenir regressões, facilitar refatorações seguras e servir como documentação viva. A análise inicial do codebase `src_refactored/` não revelou uma estrutura de testes automatizados visível ou substancial. Esta ADR define a estratégia e os padrões para a implementação de testes automatizados no Project Wiz, confirmando Vitest como o framework principal.
+Testes automatizados são fundamentais para garantir a qualidade do software, prevenir regressões, facilitar refatorações seguras e servir como documentação viva. A análise inicial do codebase `src/` não revelou uma estrutura de testes automatizados visível ou substancial. Esta ADR define a estratégia e os padrões para a implementação de testes automatizados no Project Wiz, confirmando Vitest como o framework principal.
 
 **Decisão:**
 
@@ -15,7 +15,7 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
 
 **2. Localização e Nomenclatura de Arquivos de Teste:**
     *   **Localização:** Arquivos de teste DEVEM ser co-localizados com os arquivos fonte que estão testando, dentro de um subdiretório chamado `__tests__`.
-        *   Exemplo: Para `src_refactored/core/domain/user/user.entity.ts`, o arquivo de teste correspondente será `src_refactored/core/domain/user/__tests__/user.entity.test.ts`.
+        *   Exemplo: Para `src/core/domain/user/user.entity.ts`, o arquivo de teste correspondente será `src/core/domain/user/__tests__/user.entity.test.ts`.
     *   **Nomenclatura do Arquivo:** `[nome-do-arquivo-testado].test.ts`. (O uso de `.spec.ts` é uma alternativa, mas `.test.ts` será o padrão para consistência).
     *   **Justificativa:** Co-localização facilita encontrar testes relevantes, promove a escrita de testes ao criar ou modificar código, e melhora a organização quando comparado a um diretório de testes monolítico no topo do projeto.
 
@@ -49,7 +49,7 @@ Serão adotados os seguintes padrões e estratégias para testes automatizados:
         *   `vi.mock(caminho, factory?)`: Para mockar módulos inteiros.
         *   `vi.fn()`: Para criar funções mock simples.
         *   `vi.spyOn(objeto, 'metodo')`: Para espionar ou mockar métodos de um objeto existente.
-    *   **Mocks Manuais:** Para mocks mais complexos ou reutilizáveis, criar arquivos em um diretório `__mocks__` adjacente ao módulo que está sendo mockado (e.g., `src_refactored/core/ports/adapters/__mocks__/llm-adapter.interface.ts` para mockar `ILLMAdapter`). O Vitest pode ser configurado para pegar esses mocks automaticamente.
+    *   **Mocks Manuais:** Para mocks mais complexos ou reutilizáveis, criar arquivos em um diretório `__mocks__` adjacente ao módulo que está sendo mockado (e.g., `src/core/ports/adapters/__mocks__/llm-adapter.interface.ts` para mockar `ILLMAdapter`). O Vitest pode ser configurado para pegar esses mocks automaticamente.
     *   **Injeção de Mocks (DI):** Ao testar classes que usam DI (InversifyJS), criar um container de teste no setup do teste e vincular implementações mock das dependências para a classe/serviço sob teste.
     *   **Justificativa:** Permite isolar a unidade sob teste e controlar o comportamento de suas dependências.
 

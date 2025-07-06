@@ -1,6 +1,6 @@
 # ADR-028: Convenções Abrangentes de Nomenclatura (Mandato de Inglês no Código)
 
-**Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para kebab-case universal em `src_refactored/`)
+**Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para kebab-case universal em `src/`)
 
 **Contexto:**
 Convenções de nomenclatura consistentes são fundamentais para a legibilidade, manutenibilidade e colaboração em qualquer projeto de software. Esta ADR consolida e formaliza todas as convenções de nomenclatura para identificadores de código, arquivos e diretórios em todo o Project Wiz, com um mandato explícito para o uso da língua inglesa em todos os identificadores de código.
@@ -28,7 +28,7 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
     *   **Justificativa:** Convenções amplamente adotadas na comunidade JavaScript/TypeScript, melhoram a legibilidade e ajudam a distinguir rapidamente o tipo de identificador.
 
 **3. Convenções de Nomenclatura de Arquivos (Geral):**
-    *   **Padrão Principal:** **TODOS** os nomes de arquivos e pastas em `src_refactored/` DEVEM ser em `kebab-case`.
+    *   **Padrão Principal:** **TODOS** os nomes de arquivos e pastas em `src/` DEVEM ser em `kebab-case`.
         *   Extensões devem ser minúsculas (e.g., `.ts`, `.md`, `.json`, `.schema.ts`).
         *   **Exemplos:**
             *   `user-profile-card.tsx` (componente React)
@@ -53,12 +53,12 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
         *   Utilitários: `*.utils.ts` ou `*.helpers.ts`
         *   Componentes React: `*.tsx` (e.g., `user-profile-card.tsx`, `login-form.tsx`). (A extensão `.tsx` por si só já indica um componente React. O nome do arquivo deve ser descritivo e em kebab-case).
         *   Hooks React: `use-*.hook.ts` (e.g., `use-auth-session.hook.ts`, `use-form-validation.hook.ts`). O prefixo `use-` é parte do nome do arquivo.
-    *   **Justificativa:** Consistência universal em `src_refactored/` é a prioridade máxima para nomes de arquivos e diretórios. `kebab-case` é URL-friendly, evita problemas de case-sensitivity entre sistemas operacionais e é um padrão comum. Sufixos de tipo mandatórios melhoram drasticamente a identificabilidade do conteúdo e propósito do arquivo sem a necessidade de abri-lo, facilitando a navegação e compreensão da estrutura do projeto.
+    *   **Justificativa:** Consistência universal em `src/` é a prioridade máxima para nomes de arquivos e diretórios. `kebab-case` é URL-friendly, evita problemas de case-sensitivity entre sistemas operacionais e é um padrão comum. Sufixos de tipo mandatórios melhoram drasticamente a identificabilidade do conteúdo e propósito do arquivo sem a necessidade de abri-lo, facilitando a navegação e compreensão da estrutura do projeto.
 
 **4. Convenções de Nomenclatura de Diretórios (Geral):**
-    *   **Padrão Principal:** TODOS os nomes de diretórios em `src_refactored/` DEVEM ser em `kebab-case`.
+    *   **Padrão Principal:** TODOS os nomes de diretórios em `src/` DEVEM ser em `kebab-case`.
     *   **Exemplos:** `core/domain/value-objects/`, `infrastructure/persistence/repositories/`, `presentation/electron/main-process/`, `features/user-profile/components/`.
-    *   **Exceção para Convenções de Frameworks:** Diretórios dentro de `src_refactored/presentation/ui/app/` (ou outra estrutura de páginas designada por um framework de roteamento) que são gerados ou rigidamente exigidos pelo framework de roteamento (e.g., TanStack Router para rotas dinâmicas como `$paramId` ou arquivos de layout especiais como `_layout.tsx`, `_auth.tsx`) podem seguir as convenções do framework. Todos os outros diretórios criados por desenvolvedores, mesmo dentro de `app/`, DEVEM seguir `kebab-case`.
+    *   **Exceção para Convenções de Frameworks:** Diretórios dentro de `src/presentation/ui/app/` (ou outra estrutura de páginas designada por um framework de roteamento) que são gerados ou rigidamente exigidos pelo framework de roteamento (e.g., TanStack Router para rotas dinâmicas como `$paramId` ou arquivos de layout especiais como `_layout.tsx`, `_auth.tsx`) podem seguir as convenções do framework. Todos os outros diretórios criados por desenvolvedores, mesmo dentro de `app/`, DEVEM seguir `kebab-case`.
     *   **Justificativa:** Consistência com nomeação de arquivos, legibilidade e prevenção de problemas de case-sensitivity.
 
 **5. Padrões de Nomenclatura Específicos por Tipo de Identificador:**
@@ -96,7 +96,7 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
     *   **Justificativa:** Código auto-documentável é mais fácil de entender e manter.
 
 **7. Consistência Entre Camadas:**
-    *   **Padrão:** Estas convenções de nomenclatura DEVEM ser aplicadas consistentemente em todas as camadas e arquivos dentro de `src_refactored/`.
+    *   **Padrão:** Estas convenções de nomenclatura DEVEM ser aplicadas consistentemente em todas as camadas e arquivos dentro de `src/`.
     *   **Justificativa:** Uniformidade reduz a carga cognitiva e facilita a navegação e compreensão do código.
 
 **Consequências:**
@@ -109,7 +109,7 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
 ---
 **Notas de Implementação para LLMs:**
 *   TODOS os nomes de variáveis, funções, classes e outros identificadores de código DEVEM estar em Inglês e seguir as convenções de casing especificadas (camelCase, PascalCase, UPPER_SNAKE_CASE).
-*   TODOS os nomes de arquivos e diretórios que você criar ou modificar dentro de `src_refactored/` DEVEM estar em `kebab-case` e em Inglês.
+*   TODOS os nomes de arquivos e diretórios que você criar ou modificar dentro de `src/` DEVEM estar em `kebab-case` e em Inglês.
 *   Use sufixos de tipo mandatórios e padronizados para todos os arquivos:
     *   Componentes React: `meu-componente.tsx`
     *   Hooks React: `use-minha-logica.hook.ts`

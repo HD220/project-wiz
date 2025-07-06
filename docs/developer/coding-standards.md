@@ -431,17 +431,17 @@ Esta seção reitera e expande as convenções para nomenclatura de arquivos, da
 
 *   **Exemplos Comparativos:**
 
-    | Bom Nome de Arquivo                     | Mau Nome de Arquivo                     | Justificativa do Mau Nome                               |
-    | :-------------------------------------- | :-------------------------------------- | :------------------------------------------------------ |
-    | `user-profile.service.ts`             | `UserProfileService.ts`                 | Não está em kebab-case.                                 |
-    | `data-transformer.util.ts`            | `DataTransformer.ts`                    | Não está em kebab-case.                                 |
-    | `image-processor.worker.ts`           | `imageProcessor.worker.ts`              | Não está em kebab-case (camelCase).                     |
-    | `README.md`                             | `readme.MD`                             | Casing inconsistente da extensão.                       |
-    | `main-styles.css`                       | `MainStyles.css`                        | Não está em kebab-case.                                 |
-    | `auth-guard.ts`                         | `Auth_Guard.ts`                         | Usa snake_case em vez de kebab-case.                    |
-    | `UserProfileCard.tsx` (Componente UI) | `user-profile-card.component.tsx`       | Para componentes UI React, PascalCase é uma exceção aceita. |
-    | `useAuth.ts` (Hook React)             | `auth-hook.ts`                          | Para hooks React, useCamelCase é uma exceção aceita.    |
-    | `vite.config.ts` (Ferramenta)         | `vite-config.ts`                        | `vite.config.ts` é a convenção da ferramenta Vite.    |
+    | Bom Nome de Arquivo                   | Mau Nome de Arquivo               | Justificativa do Mau Nome                                   |
+    | :------------------------------------ | :-------------------------------- | :---------------------------------------------------------- |
+    | `user-profile.service.ts`             | `UserProfileService.ts`           | Não está em kebab-case.                                     |
+    | `data-transformer.util.ts`            | `DataTransformer.ts`              | Não está em kebab-case.                                     |
+    | `image-processor.worker.ts`           | `imageProcessor.worker.ts`        | Não está em kebab-case (camelCase).                         |
+    | `README.md`                           | `readme.MD`                       | Casing inconsistente da extensão.                           |
+    | `main-styles.css`                     | `MainStyles.css`                  | Não está em kebab-case.                                     |
+    | `auth-guard.ts`                       | `Auth_Guard.ts`                   | Usa snake_case em vez de kebab-case.                        |
+    | `UserProfileCard.tsx` (Componente UI) | `user-profile-card.component.tsx` | Para componentes UI React, PascalCase é uma exceção aceita. |
+    | `useAuth.ts` (Hook React)             | `auth-hook.ts`                    | Para hooks React, useCamelCase é uma exceção aceita.        |
+    | `vite.config.ts` (Ferramenta)         | `vite-config.ts`                  | `vite.config.ts` é a convenção da ferramenta Vite.          |
 
 *   **Porquê:** A consistência no nome de arquivos melhora a previsibilidade, facilita a navegação e a criação de scripts, e reduz a carga cognitiva. O `kebab-case` é amplamente adotado, URL-friendly, e evita problemas de sensibilidade ao caso em diferentes sistemas operacionais.
 
@@ -462,7 +462,7 @@ Uma estrutura de projeto bem organizada é crucial para a navegabilidade, manute
 
 **Porquê Geral:** Uma estrutura padronizada reduz a carga cognitiva, facilita a localização de código relevante, promove a consistência entre diferentes partes do projeto e simplifica a integração de novos desenvolvedores.
 
-### 6.1. Estrutura do Frontend (`src_refactored/presentation/ui/`)
+### 6.1. Estrutura do Frontend (`src/presentation/ui/`)
 
 A interface do usuário (UI) é uma SPA React e sua estrutura visa agrupar arquivos por funcionalidade (feature-sliced) e por tipo técnico.
 
@@ -514,7 +514,7 @@ graph LR
     *   **Porquê (Feature-Sliced Design):** Alta coesão, baixo acoplamento, facilita desenvolvimento e manutenção.
 *   **Outros diretórios (`assets`, `config`, `hooks`, `lib`, `services`, `styles`, `types`):** Conforme descrito na ADR-027 e no `software-architecture.md`, cada um com seu propósito específico para organizar configurações, utilitários, serviços globais da UI e tipos.
 
-### 6.2. Estrutura do Backend (`src_refactored/`)
+### 6.2. Estrutura do Backend (`src/`)
 
 Segue a Clean Architecture, detalhada em `docs/reference/software-architecture.md`:
 
@@ -604,12 +604,12 @@ Práticas consistentes de controle de versão são essenciais para a colaboraç�
         | `feat`     | Nova funcionalidade para o usuário                         |
         | `fix`      | Correção de bug para o usuário                             |
         | `docs`     | Mudanças na documentação                                   |
-        | `style`    | Formatação, estilos; sem mudança na lógica                |
+        | `style`    | Formatação, estilos; sem mudança na lógica                 |
         | `refactor` | Refatoração de código sem mudança de comportamento externo |
         | `test`     | Adição ou correção de testes                               |
-        | `chore`    | Manutenção, build, config de pacotes, etc.                |
+        | `chore`    | Manutenção, build, config de pacotes, etc.                 |
         | `perf`     | Melhoria de performance                                    |
-        | `ci`       | Mudanças em scripts/config de CI/CD                         |
+        | `ci`       | Mudanças em scripts/config de CI/CD                        |
         | `build`    | Mudanças no sistema de build ou dependências externas      |
         | `revert`   | Reverte um commit anterior                                 |
     *   **Idioma:** Mensagens de commit DEVEM ser em Inglês.

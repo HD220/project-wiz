@@ -17,9 +17,9 @@ Este documento detalha as fases e tarefas restantes para a implementação do no
 ### Fase 2: Interfaces de Aplicação e Persistência
 
 *   **Status Atual:** Arquivos de interface e tipos criados.
-    *   `src_refactored/core/application/ports/job-repository.interface.ts` (`IJobRepository`): **Criado.**
-    *   `src_refactored/core/application/queue/abstract-queue.ts` (`AbstractQueue<P, R> extends EventEmitter`): **Criado.**
-    *   `src_refactored/core/application/worker/worker.types.ts` (`ProcessorFunction<P, R>`, `WorkerOptions`): **Criado.**
+    *   `src/core/application/ports/job-repository.interface.ts` (`IJobRepository`): **Criado.**
+    *   `src/core/application/queue/abstract-queue.ts` (`AbstractQueue<P, R> extends EventEmitter`): **Criado.**
+    *   `src/core/application/worker/worker.types.ts` (`ProcessorFunction<P, R>`, `WorkerOptions`): **Criado.**
 *   **Tarefas Pendentes:**
     1.  **Lint dos arquivos criados:**
         *   `job-repository.interface.ts`
@@ -34,20 +34,20 @@ Este documento detalha as fases e tarefas restantes para a implementação do no
 
 *   **Tarefas Pendentes:**
     1.  **Criar Schema do Job:**
-        *   Arquivo: `src_refactored/infrastructure/persistence/drizzle/schema/jobs.schema.ts`
+        *   Arquivo: `src/infrastructure/persistence/drizzle/schema/jobs.schema.ts`
         *   Conteúdo: Definir a tabela `jobsTable` com todas as colunas necessárias para persistir o `JobEntity` (incluindo serialização de `payload`, `options`, `logs`, `returnValue` como JSON/text ou blob).
     2.  **Configurar Drizzle:**
-        *   Atualizar `src_refactored/infrastructure/persistence/drizzle/schema/index.ts` para exportar o novo `jobsTable`.
+        *   Atualizar `src/infrastructure/persistence/drizzle/schema/index.ts` para exportar o novo `jobsTable`.
         *   Verificar `drizzle.config.ts`: garantir que `schema/index.ts` (ou o caminho direto para `jobs.schema.ts`) esteja incluído para a geração de migrações.
     3.  **Gerar Migração do Banco de Dados:**
         *   Comando: `npm run db:generate` (ou similar, para criar o arquivo de migração SQL).
     4.  **Aplicar Migração do Banco de Dados:**
         *   Comando: `npm run db:migrate` (ou similar, para executar a migração no banco de dados de desenvolvimento).
     5.  **Implementar `DrizzleJobRepository`:**
-        *   Arquivo: `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts`
+        *   Arquivo: `src/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts`
         *   Conteúdo: Implementar todos os métodos da interface `IJobRepository` utilizando Drizzle ORM para interagir com a `jobsTable`. Realizar mapeamento cuidadoso entre `JobEntity` (e seus VOs) e o formato do schema do banco de dados.
     6.  **Implementar `QueueService`:**
-        *   Arquivo: `src_refactored/infrastructure/queue/drizzle/queue.service.ts` (ou nome similar, ex: `drizzle-queue.service.ts`)
+        *   Arquivo: `src/infrastructure/queue/drizzle/queue.service.ts` (ou nome similar, ex: `drizzle-queue.service.ts`)
         *   Conteúdo: Classe `QueueService<P, R> extends AbstractQueue<P, R>`.
             *   Implementar todos os métodos abstratos de `AbstractQueue` utilizando a instância de `DrizzleJobRepository`.
             *   Lógica para aplicar `defaultJobOptions` ao adicionar jobs.
@@ -69,7 +69,7 @@ Este documento detalha as fases e tarefas restantes para a implementação do no
 
 *   **Tarefas Pendentes:**
     1.  **Implementar `WorkerService`:**
-        *   Arquivo: `src_refactored/core/application/worker/worker.service.ts`
+        *   Arquivo: `src/core/application/worker/worker.service.ts`
         *   Conteúdo: Classe `WorkerService<P, R> extends EventEmitter`.
             *   Construtor: `(protected readonly queue: AbstractQueue<P, R>, protected readonly processor: ProcessorFunction<P, R>, protected readonly opts: WorkerOptions)`. O `workerId` deve ser gerado internamente (ex: com `randomUUID()`).
             *   Método `run()`: Inicia o loop de processamento de jobs. Deve respeitar a `concurrency`.
@@ -92,7 +92,7 @@ Este documento detalha as fases e tarefas restantes para a implementação do no
 ### Fase 5: Configuração de Inversão de Dependência (Inversify)
 
 *   **Tarefas Pendentes:**
-    1.  **Atualizar `src_refactored/infrastructure/ioc/inversify.config.ts`:**
+    1.  **Atualizar `src/infrastructure/ioc/inversify.config.ts`:**
         *   Registrar a implementação `DrizzleJobRepository` para a interface `IJobRepository` (usando `JOB_REPOSITORY_TOKEN`).
         *   Registrar a implementação `QueueService` para `AbstractQueue`. Isso pode ser feito de forma nomeada se houver múltiplas filas, ou com um token específico para a fila principal. Ex: `appContainer.bind<AbstractQueue<MyPayload, MyResult>>(getQueueServiceToken('emailQueue')).toDynamicValue(...)` ou similar.
     2.  **Commit da Fase 5.**

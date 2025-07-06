@@ -222,7 +222,7 @@ Manter uma estrutura de diretórios consistente facilita a navegação, a locali
 
 **Porquê:** Uma estrutura bem definida acelera o desenvolvimento, pois os desenvolvedores sabem onde encontrar ou colocar diferentes tipos de arquivos, reforça a separação de responsabilidades arquiteturais, e facilita a integração de novos membros à equipe.
 
-### Backend (`src_refactored/`)
+### Backend (`src/`)
 
 A estrutura do backend segue as camadas da Clean Architecture, promovendo separação de responsabilidades e testabilidade:
 
@@ -253,14 +253,14 @@ A estrutura do backend segue as camadas da Clean Architecture, promovendo separa
     *   **Porquê:** Evita duplicação de código para funcionalidades transversais como logging, tratamento de resultados, etc.
     *   **Exemplo:** `result.ts` (para encapsular sucesso/falha de operações), `logger.interface.ts`
 
-### Frontend (`src_refactored/presentation/ui/`)
+### Frontend (`src/presentation/ui/`)
 
 A interface do usuário (UI) é uma SPA React organizada para clareza, escalabilidade e Developer Experience (DX). A estrutura visa agrupar arquivos por funcionalidade (feature-sliced) e por tipo.
 **Porquê Geral da Estrutura Frontend:** Esta organização visa facilitar a localização do código, promover a reutilização de componentes, isolar funcionalidades para melhor manutenção, e alinhar-se com as práticas modernas de desenvolvimento React para projetos de médio a grande porte.
 
 ```mermaid
 graph LR
-    subgraph "src_refactored/presentation/ui/"
+    subgraph "src/presentation/ui/"
         A[index.html]
         B[main.tsx]
         C[assets/]
@@ -325,7 +325,7 @@ graph LR
 ## Validação da Camada de Domínio (Entidades e Objetos de Valor)
 
 *   **Autovalidação:**
-    *   **Regra:** Entidades e Objetos de Valor (VOs) na Camada de Domínio (`src_refactored/core/domain/`) são responsáveis por garantir sua própria consistência interna e aderir a invariantes de negócios. Eles devem validar seus dados na criação (construtor ou método de fábrica estático) ou em mudanças significativas de estado.
+    *   **Regra:** Entidades e Objetos de Valor (VOs) na Camada de Domínio (`src/core/domain/`) são responsáveis por garantir sua própria consistência interna e aderir a invariantes de negócios. Eles devem validar seus dados na criação (construtor ou método de fábrica estático) ou em mudanças significativas de estado.
     *   **Porquê:** Centraliza as regras de negócio e as invariantes nos próprios objetos de domínio, tornando o domínio mais rico, robusto e garantindo que um objeto nunca exista em estado inválido. Isso previne a propagação de dados inválidos pelo sistema.
 *   **Zod para Validação de Domínio:**
     *   **Regra:** Zod é a biblioteca padrão para definir esquemas de validação concisos e poderosos dentro da Camada de Domínio. VOs e Entidades devem usar esquemas Zod em seus métodos de fábrica `create` (preferencial) ou construtores para validar dados de entrada. Falhas de validação devem lançar erros específicos do domínio (ex: `ValueError`, `EntityError`), que podem encapsular os detalhes do erro Zod.
@@ -338,7 +338,7 @@ graph LR
 ## Padrão de Resposta e Tratamento de Erros de Caso de Uso
 
 *   **DTO de Resposta Padronizado:**
-    *   **Regra:** Todos os Casos de Uso da Camada de Aplicação (`src_refactored/application/use-cases/`) devem retornar um objeto de resposta padronizado, como `IUseCaseResponse<TOutput, TErrorDetails>` (definida em `src_refactored/shared/application/use-case-response.dto.ts`). Este objeto indica sucesso/falha e carrega os dados de saída ou detalhes do erro.
+    *   **Regra:** Todos os Casos de Uso da Camada de Aplicação (`src/application/use-cases/`) devem retornar um objeto de resposta padronizado, como `IUseCaseResponse<TOutput, TErrorDetails>` (definida em `src/shared/application/use-case-response.dto.ts`). Este objeto indica sucesso/falha e carrega os dados de saída ou detalhes do erro.
     *   **Porquê:** Cria um contrato consistente e previsível para os consumidores dos casos de uso (e.g., camada de apresentação, controladores de API, outros serviços), simplificando o tratamento de resultados de sucesso e de condições de falha de forma uniforme.
 *   **Implementação via `UseCaseWrapper` (Decorator ou Função de Ordem Superior):**
     *   **Regra:** A lógica de `try/catch` para erros genéricos, logging de erros e o mapeamento de exceções (tanto erros de domínio esperados quanto exceções inesperadas) para o DTO de erro padronizado devem ser centralizados, idealmente através de um Decorator (se a sintaxe for suportada e desejada) ou uma função de ordem superior que "envolve" a execução do caso de uso. Casos de uso focam na lógica de negócio e lançam exceções específicas do domínio ou de aplicação em caso de falha.

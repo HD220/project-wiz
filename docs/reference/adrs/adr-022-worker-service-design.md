@@ -3,7 +3,7 @@
 **Status:** Proposto (Considerado Aprovado Conforme Instrução)
 
 **Contexto:**
-O `WorkerService` (localizado em `src_refactored/core/application/worker/worker.service.ts`) é o componente responsável por retirar jobs da fila, processá-los utilizando uma função processadora específica, e gerenciar o ciclo de vida do job durante sua execução (locks, conclusão, falha). Esta ADR detalha seu design, responsabilidades e o modelo de concorrência atual.
+O `WorkerService` (localizado em `src/core/application/worker/worker.service.ts`) é o componente responsável por retirar jobs da fila, processá-los utilizando uma função processadora específica, e gerenciar o ciclo de vida do job durante sua execução (locks, conclusão, falha). Esta ADR detalha seu design, responsabilidades e o modelo de concorrência atual.
 
 **Decisão:**
 

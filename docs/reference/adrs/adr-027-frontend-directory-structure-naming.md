@@ -3,13 +3,13 @@
 **Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para alinhar com ADR-028)
 
 **Contexto:**
-Uma estrutura de diretórios bem definida e convenções de nomenclatura consistentes são cruciais para a organização, navegabilidade e manutenibilidade do código do frontend (`src_refactored/presentation/ui/`). A análise da estrutura existente, do `routeTree.gen.ts` (TanStack Router) e da documentação de arquitetura (`docs/reference/01-software-architecture.md`) informa esta decisão. Esta ADR é alinhada com a **ADR-028**, que estabelece `kebab-case` universal para arquivos em `src_refactored/`.
+Uma estrutura de diretórios bem definida e convenções de nomenclatura consistentes são cruciais para a organização, navegabilidade e manutenibilidade do código do frontend (`src/presentation/ui/`). A análise da estrutura existente, do `routeTree.gen.ts` (TanStack Router) e da documentação de arquitetura (`docs/reference/01-software-architecture.md`) informa esta decisão. Esta ADR é alinhada com a **ADR-028**, que estabelece `kebab-case` universal para arquivos em `src/`.
 
 **Decisão:**
 
 Serão adotados os seguintes padrões para a estrutura de diretórios e convenções de nomenclatura no frontend:
 
-**1. Estrutura Principal de Diretórios em `src_refactored/presentation/ui/`:**
+**1. Estrutura Principal de Diretórios em `src/presentation/ui/`:**
 
 A estrutura visa agrupar arquivos por funcionalidade (feature-sliced) e por tipo, promovendo coesão e baixo acoplamento.
 
@@ -77,11 +77,11 @@ graph LR
 *   **Arquivos de Componentes React (.tsx):**
     *   DEVEM ser nomeados em `kebab-case.tsx`.
         *   Exemplos: `user-profile-card.tsx`, `project-list.tsx`, `main-layout.tsx`.
-    *   **Justificativa:** Padronização universal com `kebab-case` para todos os arquivos em `src_refactored/` conforme ADR-028. A extensão `.tsx` por si só já indica um componente React, tornando o sufixo `.component` redundante.
+    *   **Justificativa:** Padronização universal com `kebab-case` para todos os arquivos em `src/` conforme ADR-028. A extensão `.tsx` por si só já indica um componente React, tornando o sufixo `.component` redundante.
 *   **Arquivos de Hooks Customizados (.ts ou .tsx):**
     *   DEVEM ser nomeados em `use-kebab-case-nome.hook.ts`. (O prefixo `use-` é mantido pela convenção React para identificar hooks).
         *   Exemplos: `use-auth-session.hook.ts`, `use-project-data.hook.ts`, `use-form-validation.hook.ts`.
-    *   **Justificativa:** Padronização universal com `kebab-case` para todos os arquivos em `src_refactored/` conforme ADR-028, mantendo o prefixo `use-` para identificar hooks. O sufixo `.hook.ts` clarifica o tipo de arquivo.
+    *   **Justificativa:** Padronização universal com `kebab-case` para todos os arquivos em `src/` conforme ADR-028, mantendo o prefixo `use-` para identificar hooks. O sufixo `.hook.ts` clarifica o tipo de arquivo.
 *   **Outros Arquivos TypeScript na UI (.ts):**
     *   (Serviços, tipos, utilitários, configurações, esquemas Zod para UI) DEVEM ser nomeados em `kebab-case.sufixo.ts` (e.g., `ipc.service.ts`, `project.types.ts`, `login-form.schema.ts`). Consulte ADR-028 para uma lista de sufixos padronizados.
         *   Exemplos: `ipc.service.ts`, `project.types.ts`, `date-utils.ts`, `router.config.ts`, `login-form.schema.ts`.
@@ -108,4 +108,4 @@ graph LR
 *   Hooks customizados devem ser `use-kebab-case-nome.hook.ts` (e.g., `use-auth-state.hook.ts`).
 *   Outros arquivos TS (services, utils, types, schemas, etc.) devem ser `kebab-case.sufixo.ts` (e.g., `user-preferences.service.ts`, `validation.utils.ts`).
 *   Para criar uma nova página/rota, adicione a estrutura de arquivos apropriada em `app/` (e.g., `app/app/new-feature-route/page.tsx`). Este componente de página então usará os componentes da sua feature.
-*   Siga rigorosamente as convenções de nomenclatura `kebab-case` e os sufixos de tipo para todos os arquivos e diretórios dentro de `src_refactored/presentation/ui/`, conforme detalhado nesta ADR e na ADR-028.
+*   Siga rigorosamente as convenções de nomenclatura `kebab-case` e os sufixos de tipo para todos os arquivos e diretórios dentro de `src/presentation/ui/`, conforme detalhado nesta ADR e na ADR-028.

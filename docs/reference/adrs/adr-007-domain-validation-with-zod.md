@@ -23,12 +23,12 @@ The ESLint rule `no-restricted-syntax` (or similar custom rules) combined with `
 We will adopt a standardized approach for domain object self-validation using Zod:
 
 1.  **Value Objects (VOs):**
-    *   VOs in `src_refactored/core/domain/**/value-objects/` **must** use Zod schemas within their `create` factory method (or constructor, if applicable) to validate all input parameters against their defined constraints (type, format, range, specific business rules).
+    *   VOs in `src/core/domain/**/value-objects/` **must** use Zod schemas within their `create` factory method (or constructor, if applicable) to validate all input parameters against their defined constraints (type, format, range, specific business rules).
     *   Upon validation failure (Zod `safeParse().success === false`), the factory method must throw a `ValueError` (from `@/domain/common/errors`). This `ValueError` should ideally include the `ZodError.flatten().fieldErrors` or a summary as part of its message or context for better diagnostics.
     *   The Zod schema should be co-located or directly defined within the VO's file.
 
 2.  **Entities:**
-    *   Entities in `src_refactored/core/domain/**/` (e.g., `annotation.entity.ts`) **must** use Zod schemas within their `create` factory method to validate the initial set of VOs and any primitive properties passed for construction. This ensures the entity is created in a valid initial state.
+    *   Entities in `src/core/domain/**/` (e.g., `annotation.entity.ts`) **must** use Zod schemas within their `create` factory method to validate the initial set of VOs and any primitive properties passed for construction. This ensures the entity is created in a valid initial state.
     *   For methods that change the state of an entity (e.g., `updateText()`, `assignAgent()`), the entity itself is responsible for ensuring the new state remains valid according to its business invariants. If these invariants are complex, Zod schemas can also be used internally within these methods to validate the proposed state or parts of it.
     *   Upon validation failure, entity methods (create or state-changing) must throw an `EntityError` or a more specific `DomainError` (from `@/domain/common/errors`), including details of the validation failure.
 
@@ -38,7 +38,7 @@ We will adopt a standardized approach for domain object self-validation using Zo
     *   If a call to a VO/Entity factory or method from a Use Case results in a `ValueError`, `EntityError`, or `DomainError` being thrown, the Use Case should catch this error and typically return it as the error part of its `Result` (e.g., `Result.error(domainError)`).
 
 4.  **Zod as a Domain Dependency:**
-    *   The Domain Layer (`src_refactored/core/domain/`) is now permitted to have Zod as a direct dependency for validation purposes. The ESLint rule `boundaries/element-types` will be configured to allow imports from `zod` within the domain layer.
+    *   The Domain Layer (`src/core/domain/`) is now permitted to have Zod as a direct dependency for validation purposes. The ESLint rule `boundaries/element-types` will be configured to allow imports from `zod` within the domain layer.
 
 ## Consequences
 

@@ -14,7 +14,7 @@ Serão adotados os seguintes padrões para a estratégia de Injeção de Depend�
     *   **Justificativa:** InversifyJS é um container de DI leve, poderoso e popular para TypeScript, com bom suporte a decoradores e tipos.
 
 **2. Configuração do Container:**
-    *   **Padrão:** Um único container InversifyJS (`appContainer`) será criado e configurado centralmente no arquivo `src_refactored/infrastructure/ioc/inversify.config.ts`. Este container será responsável por gerenciar as dependências de toda a aplicação (para o processo principal do Electron).
+    *   **Padrão:** Um único container InversifyJS (`appContainer`) será criado e configurado centralmente no arquivo `src/infrastructure/ioc/inversify.config.ts`. Este container será responsável por gerenciar as dependências de toda a aplicação (para o processo principal do Electron).
     *   **Exportação:** O `appContainer` configurado será exportado para que possa ser usado no ponto de entrada da aplicação para resolver as dependências iniciais (e.g., registrar handlers IPC que precisam de serviços injetados).
     *   **Justificativa:** Centraliza a configuração de DI, tornando mais fácil entender como os componentes da aplicação são conectados.
 

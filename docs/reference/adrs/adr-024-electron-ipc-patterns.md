@@ -36,18 +36,18 @@ Serão adotados os seguintes padrões para IPC e o script de preload:
     *   **Justificativa:** Garante uma ponte segura e controlada entre o main e o renderer, minimizando a superfície de ataque e mantendo o isolamento de contexto. Tipagem forte e listeners simplificados melhoram a Developer Experience (DX) no renderer.
 
 **2. Canais IPC (`shared/ipc-channels.ts`):**
-    *   **Padrão:** Todos os nomes de canais IPC DEVEM ser definidos como constantes string (ou membros de um enum) em um arquivo centralizado, por exemplo, `src_refactored/shared/ipc-channels.ts`.
+    *   **Padrão:** Todos os nomes de canais IPC DEVEM ser definidos como constantes string (ou membros de um enum) em um arquivo centralizado, por exemplo, `src/shared/ipc-channels.ts`.
     *   **Nomenclatura de Canais:** Adotar um padrão consistente, como `OBJETO:AÇÃO` ou `FUNCIONALIDADE:EVENTO` (e.g., `"PROJECT:CREATE"`, `"CHAT:NEW_MESSAGE"`, `"APP_STATUS:IS_DEV"`). Usar letras maiúsculas e `snake_case` (ou `kebab-case` se preferido, mas ser consistente).
     *   **Justificativa:** Evita o uso de strings "mágicas" para nomes de canais, reduzindo erros de digitação e facilitando a refatoração e a busca por usos de um canal específico.
 
 **3. Serialização de Dados e Tipos DTO (`shared/ipc-types/` ou similar):**
     *   **Padrão:** Todos os dados passados entre processos via IPC (argumentos para `invoke`/`send`, payloads para `on`) DEVEM ser serializáveis pelo [Structured Clone Algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm) (e.g., primitivas, objetos simples, arrays, `Date`, `RegExp`, `Map`, `Set`, `ArrayBuffer`, mas não funções, instâncias de classes complexas com métodos, ou DOM nodes).
-    *   **DTOs (Data Transfer Objects):** Definir interfaces ou tipos TypeScript para todos os payloads de requisição e resposta de canais IPC. Estes DTOs devem residir em `src_refactored/shared/ipc-types/` ou em arquivos de tipo específicos de funcionalidade (e.g., `shared/ipc-chat.types.ts`).
+    *   **DTOs (Data Transfer Objects):** Definir interfaces ou tipos TypeScript para todos os payloads de requisição e resposta de canais IPC. Estes DTOs devem residir em `src/shared/ipc-types/` ou em arquivos de tipo específicos de funcionalidade (e.g., `shared/ipc-chat.types.ts`).
     *   **Justificativa:** Garante que os dados possam ser transferidos de forma confiável entre processos. DTOs tipados fornecem clareza sobre a estrutura dos dados esperados e Habilitam type-safety em ambos os lados da comunicação IPC.
 
 **4. Handlers IPC (Processo Principal - `handlers/*.handlers.ts`):**
     *   **Localização e Registro:**
-        *   Consolidar todos os handlers IPC no diretório `src_refactored/presentation/electron/main/handlers/`.
+        *   Consolidar todos os handlers IPC no diretório `src/presentation/electron/main/handlers/`.
         *   Cada funcionalidade principal (e.g., Project, DM, User) deve ter seu arquivo `*.handlers.ts`.
         *   Todas as funções de registro de handlers (e.g., `registerProjectHandlers`) DEVEM ser chamadas no `main.ts` (conforme ADR-023).
     *   **Estrutura de um Handler (`ipcMain.handle`):**
@@ -65,7 +65,7 @@ Serão adotados os seguintes padrões para IPC e o script de preload:
 
 **5. Interação IPC no Renderer (`IPCService.ts`, Hooks Customizados):**
     *   **`IPCService.ts` como Padrão:**
-        *   O `IPCService` (singleton, localizado em `src_refactored/presentation/ui/services/`) DEVE ser a abstração primária usada pelo código da UI (componentes, outros hooks, serviços da UI) para interagir com o `window.electronIPC` exposto pelo preload.
+        *   O `IPCService` (singleton, localizado em `src/presentation/ui/services/`) DEVE ser a abstração primária usada pelo código da UI (componentes, outros hooks, serviços da UI) para interagir com o `window.electronIPC` exposto pelo preload.
         *   Ele fornece métodos tipados para canais específicos, encapsula a lógica de `invoke`/`on`/`send`, e padroniza o formato de resposta para `invoke` com `IPCResult<T>` (`{ success, data?, error? }`).
         *   Inclui uma implementação mock para ambientes não-Electron, facilitando testes e desenvolvimento.
     *   **Hooks Customizados (`useIpcQuery`, `useIpcMutation`, `useIpcSubscription`):**

@@ -10,7 +10,7 @@ Uma estratégia de tratamento de erros robusta e consistente é essencial para a
 Serão adotados os seguintes padrões para o tratamento de erros:
 
 **1. Classe Base `CoreError`:**
-    *   **Padrão:** Será definida uma classe base abstrata `CoreError extends Error` (localizada em `src_refactored/shared/errors/core.error.ts` ou `src_refactored/core/common/errors.ts`).
+    *   **Padrão:** Será definida uma classe base abstrata `CoreError extends Error` (localizada em `src/shared/errors/core.error.ts` ou `src/core/common/errors.ts`).
     *   **Propriedades:**
         *   `name`: Nome da classe de erro (e.g., "EntityError", "ApplicationError").
         *   `message`: Mensagem descritiva do erro.
@@ -21,7 +21,7 @@ Serão adotados os seguintes padrões para o tratamento de erros:
     *   **Justificativa:** Fornece uma base comum para todos os erros customizados da aplicação, permitindo tratamento polimórfico e a inclusão de informações estruturadas.
 
 **2. Tipos de Erro Customizados Específicos:**
-    *   **Padrão:** Serão criadas classes de erro específicas que herdam de `CoreError` para diferentes categorias de falhas. Todas devem residir em `src_refactored/shared/errors/` ou `src_refactored/core/domain/common/errors.ts` e `src_refactored/core/application/common/errors.ts` conforme o escopo.
+    *   **Padrão:** Serão criadas classes de erro específicas que herdam de `CoreError` para diferentes categorias de falhas. Todas devem residir em `src/shared/errors/` ou `src/core/domain/common/errors.ts` e `src/core/application/common/errors.ts` conforme o escopo.
     *   **Exemplos Principais:**
         *   **`ValueError extends CoreError`:** Para falhas de validação em Objetos de Valor (VOs).
             *   `context` deve incluir os detalhes da falha (e.g., `zodError.flatten().fieldErrors`).

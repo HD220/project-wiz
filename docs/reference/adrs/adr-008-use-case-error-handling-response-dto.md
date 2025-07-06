@@ -12,7 +12,7 @@ Adotar um DTO de resposta padrão para todos os casos de uso, denominado `IUseCa
 
 **Estrutura do DTO de Resposta:**
 
-O DTO `IUseCaseResponse` será definido da seguinte forma (localizado em `src_refactored/shared/application/use-case-response.dto.ts`):
+O DTO `IUseCaseResponse` será definido da seguinte forma (localizado em `src/shared/application/use-case-response.dto.ts`):
 
 ```typescript
 interface IUseCaseErrorDetails {
@@ -71,7 +71,7 @@ Esta abordagem com Decorator centraliza a lógica de tratamento de erros e loggi
 
 **Hierarquia de Erros Base:**
 
-Para facilitar o mapeamento no `UseCaseWrapper`, será definida uma classe base `CoreError` (`src_refactored/shared/errors/core.error.ts`) da qual herdarão os erros específicos de domínio (`DomainError`, `EntityError`, `ValueError`) e aplicação (`ApplicationError`, `NotFoundError` quando referente à lógica de aplicação). Erros de validação de entrada (`ZodError`) e erros genéricos (`Error`) também são tratados especificamente pelo wrapper.
+Para facilitar o mapeamento no `UseCaseWrapper`, será definida uma classe base `CoreError` (`src/shared/errors/core.error.ts`) da qual herdarão os erros específicos de domínio (`DomainError`, `EntityError`, `ValueError`) e aplicação (`ApplicationError`, `NotFoundError` quando referente à lógica de aplicação). Erros de validação de entrada (`ZodError`) e erros genéricos (`Error`) também são tratados especificamente pelo wrapper.
 
 **Exemplo de Implementação (Conceitual do Wrapper):**
 

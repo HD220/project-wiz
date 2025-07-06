@@ -10,14 +10,14 @@ Um sistema de filas é essencial para processamento assíncrono de tarefas, como
 A arquitetura do sistema de filas será padronizada da seguinte forma:
 
 **1. Abstração Principal (`AbstractQueue`):**
-    *   **Localização:** `src_refactored/core/application/ports/queue/abstract-queue.port.ts` (ou `abstract-queue.interface.ts` se preferido, mas `.port.ts` é sugerido pela ADR-028 para este tipo de interface de aplicação).
+    *   **Localização:** `src/core/application/ports/queue/abstract-queue.port.ts` (ou `abstract-queue.interface.ts` se preferido, mas `.port.ts` é sugerido pela ADR-028 para este tipo de interface de aplicação).
     *   **Papel:** Define o contrato (porta) para todas as interações com o sistema de filas a partir da camada de aplicação ou de outros serviços. É uma classe abstrata que também funciona como `EventEmitter` para eventos de ciclo de vida de jobs e da fila.
     *   **Métodos Chave:** Define a API pública para adicionar jobs (`add`, `addBulk`), recuperar jobs (`getJob`, `getJobsByStatus`), gerenciar a fila (`pause`, `resume`, `clean`), e para workers interagirem com jobs (`fetchNextJobAndLock`, `markJobAsCompleted`, `markJobAsFailed`, `updateJobProgress`, `addJobLog`).
     *   **Eventos Emitidos (Exemplos):** `job.added`, `job.completed`, `job.failed`, `job.active`, `job.progress`, `queue.paused`, `queue.resumed`, `queue.closed`. (A lista completa deve ser documentada no `coding-standards.md` ou em uma documentação específica da API da fila).
     *   **Justificativa:** Desacopla a lógica da aplicação da implementação concreta da fila, permitindo diferentes implementações (e.g., Drizzle, Redis) no futuro.
 
 **2. Implementação Concreta com Facade (`DrizzleQueueFacade`):**
-    *   **Localização:** `src_refactored/infrastructure/queue/drizzle/drizzle-queue.facade.ts`.
+    *   **Localização:** `src/infrastructure/queue/drizzle/drizzle-queue.facade.ts`.
     *   **Papel:** É a principal implementação concreta de `AbstractQueue` para a persistência baseada em Drizzle/SQLite. Atua como uma Facade, simplificando a interface para um subsistema mais complexo de serviços internos.
     *   **Herança:** `export class DrizzleQueueFacade<P, R> extends AbstractQueue<P, R>`.
     *   **Injeção de Dependência:** Recebe o `queueName`, `IJobRepository`, `defaultJobOptions` (para o construtor de `AbstractQueue`), e instâncias dos serviços internos (`QueueServiceCore`, `JobProcessingService`, `QueueMaintenanceService`).
@@ -25,7 +25,7 @@ A arquitetura do sistema de filas será padronizada da seguinte forma:
     *   **Justificativa:** Fornece um ponto de entrada único e simplificado para o sistema de filas baseado em Drizzle, enquanto organiza a lógica interna em componentes mais coesos.
 
 **3. Serviços Internos da Fila (Composição):**
-    *   Estes serviços residem em `src_refactored/infrastructure/queue/drizzle/` e são compostos pela `DrizzleQueueFacade`. Eles NÃO implementam `AbstractQueue` diretamente.
+    *   Estes serviços residem em `src/infrastructure/queue/drizzle/` e são compostos pela `DrizzleQueueFacade`. Eles NÃO implementam `AbstractQueue` diretamente.
     *   **`QueueServiceCore<P, R>`:**
         *   **Responsabilidade:** Lógica central de preparação das propriedades e instanciação de `JobEntity` (usando `new JobEntity(props)`, conforme ADR-010), persistência inicial (usando `IJobRepository.save()`), recuperação básica de jobs, e emissão de eventos centrais relacionados à adição e estado da fila (e.g., `job.added`, `queue.paused`).
         *   Não lida com a lógica de processamento de jobs por workers ou manutenção da fila.

@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-This document outlines the plan for integrating and implementing the new BullMQ-inspired job queue system (detailed in `bullmq-inspired-queue-system.md`) within the `src_refactored/` codebase of Project Wiz. It covers the proposed directory structure, mapping of components to architectural layers, a phased implementation plan, and initial considerations for integrating with existing application components.
+This document outlines the plan for integrating and implementing the new BullMQ-inspired job queue system (detailed in `bullmq-inspired-queue-system.md`) within the `src/` codebase of Project Wiz. It covers the proposed directory structure, mapping of components to architectural layers, a phased implementation plan, and initial considerations for integrating with existing application components.
 
 ## 2. Architectural Layer Mapping
 
@@ -50,10 +50,10 @@ The components of the new queue system will be mapped to the Clean Architecture 
 
 ## 3. Proposed Directory Structure
 
-The following structure is proposed within `src_refactored/`:
+The following structure is proposed within `src/`:
 
 ```
-src_refactored/
+src/
 ├── core/
 │   ├── application/
 │   │   ├── queue/  // New directory
@@ -162,7 +162,7 @@ The implementation will proceed in the following phases:
     *   This involves constructing the `JobOptions` (priority, delay, retries, dependencies) as needed and providing the correct `queueName`, `jobName`, and `payload`.
 
 *   **Dependency Injection (DI):**
-    *   Services like `DrizzleJobRepository`, `InMemoryJobEventEmitter`, `JobQueueService`, `JobWorkerService`, and `QueueSchedulerService` should be managed by a DI container (e.g., InversifyJS, if already in use in `src_refactored`, or a simple factory pattern).
+    *   Services like `DrizzleJobRepository`, `InMemoryJobEventEmitter`, `JobQueueService`, `JobWorkerService`, and `QueueSchedulerService` should be managed by a DI container (e.g., InversifyJS, if already in use in `src`, or a simple factory pattern).
     *   The Drizzle client instance and `JobEventEmitter` instance will be key dependencies injected into queue services.
 
 *   **Configuration:**

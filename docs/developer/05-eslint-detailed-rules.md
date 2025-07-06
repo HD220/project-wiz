@@ -2,7 +2,7 @@
 
 Data: 2024-07-15
 
-Este documento detalha propostas para novas regras ESLint a serem incorporadas ao projeto `Project Wiz`, baseadas em um exemplo de configuração fornecido. O objetivo é melhorar a padronização, manutenibilidade e qualidade do código. As regras devem ser adaptadas para o formato `eslint.config.js` (flat config) e para a estrutura de pastas atual (`src_refactored`).
+Este documento detalha propostas para novas regras ESLint a serem incorporadas ao projeto `Project Wiz`, baseadas em um exemplo de configuração fornecido. O objetivo é melhorar a padronização, manutenibilidade e qualidade do código. As regras devem ser adaptadas para o formato `eslint.config.js` (flat config) e para a estrutura de pastas atual (`src`).
 
 ## 1. Modularidade de Importações (Ref. `LINT-CUSTOM-001`)
 
@@ -18,38 +18,38 @@ Este documento detalha propostas para novas regras ESLint a serem incorporadas a
     //     modules: [
     //       {
     //         name: "Domain Layer (Core)",
-    //         pattern: "src_refactored/core/domain/**",
+    //         pattern: "src/core/domain/**",
     //         allowImportsFrom: [
     //           "{self}", // Permite importações dentro do próprio módulo
-    //           "src_refactored/core/common/**", // Common utilities for core
-    //           "src_refactored/shared/**" // Shared utilities (Result, etc.)
+    //           "src/core/common/**", // Common utilities for core
+    //           "src/shared/**" // Shared utilities (Result, etc.)
     //           // NÃO PODE importar de application, infrastructure, presentation
     //         ],
     //         errorMessage: "🔥 Domain layer can only import from itself, core/common, or shared. 🔥"
     //       },
     //       {
     //         name: "Application Layer (Core)",
-    //         pattern: "src_refactored/core/application/**",
+    //         pattern: "src/core/application/**",
     //         allowImportsFrom: [
     //           "{self}",
-    //           "src_refactored/core/domain/**",
-    //           "src_refactored/core/common/**",
-    //           "src_refactored/core/ports/**", // Portas definidas no core
-    //           "src_refactored/shared/**"
+    //           "src/core/domain/**",
+    //           "src/core/common/**",
+    //           "src/core/ports/**", // Portas definidas no core
+    //           "src/shared/**"
     //           // NÃO PODE importar de infrastructure, presentation
     //         ],
     //         errorMessage: "🔥 Application layer can import from itself, domain, core/common, core/ports, or shared. 🔥"
     //       },
     //       {
     //         name: "Infrastructure Layer",
-    //         pattern: "src_refactored/infrastructure/**",
+    //         pattern: "src/infrastructure/**",
     //         allowImportsFrom: [
     //           "{self}",
-    //           "src_refactored/core/application/**", // Casos de uso, portas de app
-    //           "src_refactored/core/domain/**", // Entidades, VOs (ex: para DTOs de repositório)
-    //           "src_refactored/core/common/**",
-    //           "src_refactored/core/ports/**",
-    //           "src_refactored/shared/**",
+    //           "src/core/application/**", // Casos de uso, portas de app
+    //           "src/core/domain/**", // Entidades, VOs (ex: para DTOs de repositório)
+    //           "src/core/common/**",
+    //           "src/core/ports/**",
+    //           "src/shared/**",
     //           // Pode ter dependências externas (npm packages)
     //         ],
     //         errorMessage: "🔥 Infrastructure layer has specific import rules. 🔥"
@@ -57,22 +57,22 @@ Este documento detalha propostas para novas regras ESLint a serem incorporadas a
     //       {
     //         name: "Presentation Layer (React UI, Electron IPC Handlers)",
     //         pattern: [
-    //            "src_refactored/infrastructure/frameworks/react/**",
-    //            "src_refactored/infrastructure/frameworks/electron/main/handlers/**"
+    //            "src/infrastructure/frameworks/react/**",
+    //            "src/infrastructure/frameworks/electron/main/handlers/**"
     //            // Adicionar outros padrões da camada de apresentação
     //         ],
     //         allowImportsFrom: [
     //           "{self}",
-    //           "src_refactored/core/application/**", // Para chamar casos de uso
-    //           "src_refactored/shared/**", // Tipos IPC, etc.
-    //           "src_refactored/infrastructure/ioc/**", // Para DI
+    //           "src/core/application/**", // Para chamar casos de uso
+    //           "src/shared/**", // Tipos IPC, etc.
+    //           "src/infrastructure/ioc/**", // Para DI
     //           // Pode ter dependências externas (npm packages de UI)
     //         ],
     //         errorMessage: "🔥 Presentation layer has specific import rules. 🔥"
     //       },
     //       {
     //         name: "Shared Utilities",
-    //         pattern: "src_refactored/shared/**",
+    //         pattern: "src/shared/**",
     //         allowImportsFrom: ["{self}"], // Shared não deve importar de camadas superiores
     //         errorMessage: "🔥 Shared utilities should not import from core or infrastructure layers directly. 🔥"
     //       }
@@ -85,10 +85,10 @@ Este documento detalha propostas para novas regras ESLint a serem incorporadas a
     ```
 *   **Adaptação para Project Wiz:**
     *   **Pesquisa:** Investigar se `eslint-plugin-project-structure` é compatível com "flat config" ou se alternativas como `eslint-plugin-import` (com `no-restricted-paths`) ou `eslint-plugin-boundaries` podem atingir um resultado similar.
-    *   Definir os `pattern` e `allowImportsFrom` com base na arquitetura de `src_refactored` (domain, application, infrastructure, presentation, shared, core/common, core/ports).
+    *   Definir os `pattern` e `allowImportsFrom` com base na arquitetura de `src` (domain, application, infrastructure, presentation, shared, core/common, core/ports).
 *   **Exemplo (Conceitual para Clean Architecture):**
-    *   **Ruim:** `src_refactored/core/domain/job.entity.ts` importando de `src_refactored/infrastructure/repositories/drizzle/job.repository.ts`.
-    *   **Bom:** `src_refactored/infrastructure/repositories/drizzle/job.repository.ts` importando de `src_refactored/core/domain/job.entity.ts`.
+    *   **Ruim:** `src/core/domain/job.entity.ts` importando de `src/infrastructure/repositories/drizzle/job.repository.ts`.
+    *   **Bom:** `src/infrastructure/repositories/drizzle/job.repository.ts` importando de `src/core/domain/job.entity.ts`.
 
 ## 2. Padronização de Componentes React (Ref. `LINT-REACT-001`)
 
@@ -198,12 +198,12 @@ Este documento detalha propostas para novas regras ESLint a serem incorporadas a
         // (Dentro de um objeto de configuração global ou específico para arquivos .ts)
         // rules: { "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }] }
         // (E em objetos de configuração separados para overrides)
-        // { files: ["src_refactored/core/domain/**/*.ts", "src_refactored/core/application/**/*.ts"], rules: { "max-lines": ["warn", { "max": 100 }] } }
+        // { files: ["src/core/domain/**/*.ts", "src/core/application/**/*.ts"], rules: { "max-lines": ["warn", { "max": 100 }] } }
         // { files: ["*.tsx"], rules: { "max-lines": ["warn", { "max": 250 }] } }
         ```
 *   **Adaptação para Project Wiz:**
     *   Adotar estas regras, ajustando os limites (`max`, `min`, `exceptions`) conforme apropriado para o projeto.
-    *   Os overrides para `max-lines` devem usar os caminhos de `src_refactored`.
+    *   Os overrides para `max-lines` devem usar os caminhos de `src`.
     *   Considerar o RNF-COD-002 (Object Calisthenics) ao definir esses limites.
 
 ## Implementação Geral

@@ -180,9 +180,9 @@ graph TD
 *   **Fluxo de Controle:** O fluxo de controle geralmente começa em uma camada externa (e.g., interação do usuário na UI), passa pelos adaptadores de interface (e.g., um handler IPC que valida e transforma dados), chega à camada de aplicação (casos de uso), que então orquestra as entidades e objetos de valor da camada de domínio. Os dados resultantes retornam pelo mesmo caminho, sendo transformados pelos adaptadores para o formato esperado pela camada externa.
 *   **Interfaces (Portas):** As interfaces definidas nas camadas internas (e.g., interfaces de repositório no domínio, interfaces de adaptadores para serviços externos na aplicação) atuam como "portas" que são implementadas pelas camadas externas. Isso permite que as implementações concretas (detalhes) sejam trocadas sem afetar as camadas internas.
 
-A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz, localizadas primariamente em `src_refactored/`.
+A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz, localizadas primariamente em `src/`.
 
-### 3.1. Camada de Domínio (`src_refactored/core/domain/`)
+### 3.1. Camada de Domínio (`src/core/domain/`)
 
 *   **Propósito:** Contém a lógica de negócios mais pura e central da aplicação, representando as regras, conceitos e o "idioma" do domínio do Project Wiz. Esta camada é o coração do software e deve ser completamente independente de qualquer outra camada em termos de dependências de código fonte (não deve importar nada de `application`, `infrastructure` ou `presentation`). Sua estabilidade é crucial, pois mudanças aqui refletem mudanças fundamentais no negócio.
 *   **Componentes Chave:**
@@ -196,7 +196,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
             *   Possuem um Objeto de Valor `Identity` para seu ID (e.g., `UserId`, `ProjectId`).
         *   **Exemplo (Estrutura Conceitual):**
             ```typescript
-            // // src_refactored/core/domain/project/project.entity.ts
+            // // src/core/domain/project/project.entity.ts
             // import { AbstractEntity, EntityError, Result, success, failure } from "@shared"; // Exemplo
             // import { ProjectId } from "./value-objects/project-id.vo";
             // import { ProjectName } from "./value-objects/project-name.vo";
@@ -268,7 +268,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
             *   Não possuem IDs próprios, exceto se o ID em si for um VO (como `JobId`, que é um `Identity<string>`).
         *   **Exemplo (Estrutura Conceitual):**
             ```typescript
-            // // src_refactored/core/domain/job/value-objects/job-status.vo.ts
+            // // src/core/domain/job/value-objects/job-status.vo.ts
             // import { AbstractValueObject, ValueError, Result, success, failure } from "@shared"; // Exemplo
             // import { z } from "zod";
 
@@ -297,7 +297,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
         *   **Aplicação no Project Wiz:** Devem ser usados com moderação. Um exemplo poderia ser um serviço que calcula a prioridade de um `JobEntity` com base em múltiplas outras entidades e regras de negócio complexas que não se encaixam bem nem na `JobEntity` nem em um Serviço de Aplicação (pois a lógica é puramente de domínio e reutilizável em diferentes contextos de aplicação). Atualmente, a maioria da lógica de coordenação reside nos Serviços de Aplicação.
     *   **Interfaces de Repositório (`<entidade>-repository.interface.ts`):**
         *   **Papel:** Definem os contratos (portas) que a camada de domínio (e, por extensão, a camada de aplicação) utiliza para persistir e recuperar Entidades. Especificam *o quê* precisa ser persistido ou recuperado, mas não *como* isso é feito. Isso isola o domínio dos detalhes de persistência.
-        *   **Localização (ADR-011):** `src_refactored/core/domain/<nome-da-entidade>/ports/`.
+        *   **Localização (ADR-011):** `src/core/domain/<nome-da-entidade>/ports/`.
         *   **Padrões (ADR-011):**
             *   Nomenclatura `I[NomeDaEntidade]Repository` (e.g., `IProjectRepository`).
             *   Métodos CRUD padrão (`findById`, `save` com semântica de upsert, `delete`).
@@ -308,7 +308,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
         *   **Papel:** Representam ocorrências significativas dentro do domínio que outros partes do sistema (inclusive outros domínios agregados, bounded contexts, ou a camada de aplicação) podem ter interesse em reagir. São fatos que aconteceram.
         *   **Padrão:** Se implementados, seriam objetos imutáveis, nomeados no tempo passado (e.g., `ProjectCreatedEvent`), e poderiam ser despachados por Entidades após uma mudança de estado. Um dispatcher de eventos central poderia então notificar os subscribers interessados.
 
-### 3.2. Camada de Aplicação (`src_refactored/core/application/`)
+### 3.2. Camada de Aplicação (`src/core/application/`)
 
 *   **Propósito:** Contém a lógica específica da aplicação, orquestrando os casos de uso do sistema. Ela atua como uma mediadora entre a camada de Domínio (onde reside a lógica de negócios pura) e as camadas externas (Apresentação e Infraestrutura). Esta camada define o que a aplicação pode fazer e como as interações externas são convertedas em operações de domínio.
 *   **Componentes Chave:**
@@ -323,7 +323,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
             *   Retornam `Promise<IUseCaseResponse<TOutputData, TErrorDetails>>` (conforme **ADR-008**) para indicar sucesso ou falha de forma padronizada e estruturada.
         *   **Exemplo (Estrutura Conceitual):**
             ```typescript
-            // // src_refactored/core/application/use-cases/project/create-project.use-case.ts
+            // // src/core/application/use-cases/project/create-project.use-case.ts
             // import { injectable, inject } from "inversify";
             // import { IUseCase, IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse, CoreError } from "@shared/application"; // Exemplo de localização
             // import { IProjectRepository, PROJECT_REPOSITORY_TOKEN } from "@core/domain/project/ports/project-repository.interface";
@@ -401,7 +401,7 @@ A seguir, detalhamos as principais camadas conforme implementadas no Project Wiz
 
 A camada de aplicação é crucial para manter a lógica de domínio pura, pois ela lida com a orquestração, a adaptação de dados entre o mundo externo (UI, infraestrutura) e o núcleo de negócios, e a execução dos fluxos de trabalho que definem as funcionalidades da aplicação.
 
-### 3.3. Camada de Infraestrutura (`src_refactored/infrastructure/` e `src_refactored/presentation/electron/main/`)
+### 3.3. Camada de Infraestrutura (`src/infrastructure/` e `src/presentation/electron/main/`)
 
 *   **Propósito:** Contém todas as implementações concretas de detalhes externos à aplicação. Esta camada lida com frameworks, acesso a banco de dados, interação com sistemas de arquivos, comunicação com APIs de terceiros, e a interface do usuário (UI) no contexto de ser um mecanismo de entrega. Ela implementa as interfaces (portas) definidas pelas camadas de Aplicação e Domínio, tornando as camadas internas independentes de detalhes de implementação específicos.
 *   **Componentes Chave:**
@@ -464,7 +464,7 @@ A camada de aplicação é crucial para manter a lógica de domínio pura, pois 
                 AdapterImpl-->>-AdapterPort: Promise<string | InfrastructureError>
                 AdapterPort-->>-AppService: Promise<string | InfrastructureError>
             ```
-    *   **Processo Principal Electron e Handlers IPC (`src_refactored/presentation/electron/main/`):**
+    *   **Processo Principal Electron e Handlers IPC (`src/presentation/electron/main/`):**
         *   **Papel:** O processo principal do Electron (`main.ts`) é responsável por gerenciar o ciclo de vida da aplicação, criar janelas de navegador (`BrowserWindow`), e registrar handlers para chamadas de Comunicação Inter-Processos (IPC) vindas do processo de renderização (UI). Do ponto de vista da Clean Architecture, os handlers IPC (e.g., `ProjectActionHandler`) atuam como adaptadores de interface, recebendo requisições da UI e delegando para Casos de Uso ou Serviços de Aplicação na camada de Aplicação.
         *   **Padrões:**
             *   **ADR-023 (Configuração e Segurança do Main Process):** Detalha a configuração segura das `BrowserWindow` (e.g., `contextIsolation: true`, `nodeIntegration: false`, uso de `preload` scripts), gerenciamento do ciclo de vida da aplicação (eventos `ready`, `window-all-closed`, `activate`), e tratamento de erros no processo principal.
@@ -477,9 +477,9 @@ A camada de aplicação é crucial para manter a lógica de domínio pura, pois 
             *   Organização das bindings em módulos do InversifyJS (`ContainerModule`) para melhor escalabilidade e separação de responsabilidades de configuração.
             *   Resolução de dependências para classes em todas as camadas que necessitam de serviços externos ou outras dependências gerenciadas (e.g., um Caso de Uso recebendo um Repositório e um Logger).
 
-### 3.4. Arquitetura Frontend (UI - React) (`src_refactored/presentation/ui/`)
+### 3.4. Arquitetura Frontend (UI - React) (`src/presentation/ui/`)
 
-A interface do usuário (UI) do Project Wiz é uma Single Page Application (SPA) construída com React, TypeScript e Vite, localizada em `src_refactored/presentation/ui/`. Ela é responsável por toda a interação visual com o usuário e comunica-se com o processo principal do Electron via IPC para executar operações de backend e persistir dados.
+A interface do usuário (UI) do Project Wiz é uma Single Page Application (SPA) construída com React, TypeScript e Vite, localizada em `src/presentation/ui/`. Ela é responsável por toda a interação visual com o usuário e comunica-se com o processo principal do Electron via IPC para executar operações de backend e persistir dados.
 
 *   **Princípios de Design da UI (ADR-025):**
     *   **Componentes Funcionais e Hooks:** Uso exclusivo de componentes funcionais e React Hooks para toda a lógica de UI, promovendo um estilo de codificação mais conciso e componível.

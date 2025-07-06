@@ -10,9 +10,9 @@ Interfaces de Repositório são um componente crucial da Clean Architecture, def
 Serão adotados os seguintes padrões para todas as Interfaces de Repositório:
 
 **1. Localização das Interfaces:**
-    *   **Padrão:** Todas as interfaces de repositório DEVERÃO ser localizadas dentro da camada de domínio, especificamente em: `src_refactored/core/domain/<nome-da-entidade-kebab-case>/ports/<nome-da-entidade-kebab-case>-repository.interface.ts` (onde `<nome-da-entidade-kebab-case>` representa o nome da entidade em kebab-case).
-        *   Exemplo: `src_refactored/core/domain/user/ports/user-repository.interface.ts` para `User`.
-        *   Exemplo: `src_refactored/core/domain/job/ports/job-repository.interface.ts` para `Job`.
+    *   **Padrão:** Todas as interfaces de repositório DEVERÃO ser localizadas dentro da camada de domínio, especificamente em: `src/core/domain/<nome-da-entidade-kebab-case>/ports/<nome-da-entidade-kebab-case>-repository.interface.ts` (onde `<nome-da-entidade-kebab-case>` representa o nome da entidade em kebab-case).
+        *   Exemplo: `src/core/domain/user/ports/user-repository.interface.ts` para `User`.
+        *   Exemplo: `src/core/domain/job/ports/job-repository.interface.ts` para `Job`.
     *   **Justificativa:** Interfaces de repositório são contratos definidos PELA camada de domínio, especificando como as entidades de domínio devem ser persistidas e recuperadas. A camada de domínio "possui" esses contratos. A camada de aplicação utiliza essas interfaces, e a camada de infraestrutura as implementa. Esta localização reforça a Regra de Dependência da Clean Architecture (dependências fluem para dentro).
 
 **2. Convenções de Nomenclatura:**
@@ -76,7 +76,7 @@ Serão adotados os seguintes padrões para todas as Interfaces de Repositório:
 ---
 **Notas de Implementação para LLMs:**
 *   Ao criar uma nova interface de repositório para uma entidade `MinhaEntidade` com ID `MinhaEntidadeIdVO`:
-    *   Crie o arquivo em `src_refactored/core/domain/minha-entidade/ports/minha-entidade-repository.interface.ts`.
+    *   Crie o arquivo em `src/core/domain/minha-entidade/ports/minha-entidade-repository.interface.ts`.
     *   Nomeie a interface `IMinhaEntidadeRepository`.
     *   Defina o token de DI: `export const MINHA_ENTIDADE_REPOSITORY_TOKEN = Symbol("IMinhaEntidadeRepository");`
     *   Implemente os métodos CRUD padrão (e.g., `findById(id: MinhaEntidadeIdVO): Promise<MinhaEntidade | null>`, `save(entity: MinhaEntidade): Promise<void>`, etc.).

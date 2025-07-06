@@ -3,7 +3,7 @@
 **Status:** Proposto (Considerado Aprovado Conforme Instrução)
 
 **Contexto:**
-A camada de UI (`src_refactored/presentation/ui/`) é construída com React e TypeScript. Para garantir uma UI manutenível, performática, testável e com boa Developer Experience (DX), é crucial padronizar como os componentes são projetados, como o estado é gerenciado (local, compartilhado, global), e como as interações com o backend (via IPC) são tratadas. Esta ADR consolida as melhores práticas e define os padrões para o desenvolvimento React no Project Wiz.
+A camada de UI (`src/presentation/ui/`) é construída com React e TypeScript. Para garantir uma UI manutenível, performática, testável e com boa Developer Experience (DX), é crucial padronizar como os componentes são projetados, como o estado é gerenciado (local, compartilhado, global), e como as interações com o backend (via IPC) são tratadas. Esta ADR consolida as melhores práticas e define os padrões para o desenvolvimento React no Project Wiz.
 
 **Decisão:**
 
@@ -17,7 +17,7 @@ Serão adotados os seguintes padrões para o design de componentes React e geren
     *   **Princípio da Responsabilidade Única (SRP):** Cada componente deve ter uma única responsabilidade bem definida. Componentes complexos devem ser divididos em componentes menores e mais focados.
     *   **Composição:** Favorecer a composição de componentes para construir UIs complexas.
     *   **Distinção (Conceitual) Container/Presentational:**
-        *   **Componentes de Página/Feature (Containers - Smart):** Localizados em `src_refactored/presentation/ui/app/**` (para rotas) ou em `features/**/components/` (se forem containers de features mais complexas). São responsáveis por:
+        *   **Componentes de Página/Feature (Containers - Smart):** Localizados em `src/presentation/ui/app/**` (para rotas) ou em `features/**/components/` (se forem containers de features mais complexas). São responsáveis por:
             *   Buscar dados (usando hooks como `useIpcQuery`).
             *   Gerenciar estado relevante para a feature ou página.
             *   Passar dados e callbacks para componentes de apresentação.
@@ -52,7 +52,7 @@ Serão adotados os seguintes padrões para o design de componentes React e geren
             2.  Se a complexidade do estado global da UI crescer significativamente (múltiplas fatias de estado interconectadas, necessidade de middlewares, devtools avançados), adotar uma biblioteca de gerenciamento de estado leve e moderna como **Zustand** ou **Jotai**. A escolha deve ser objeto de uma nova ADR se/quando a necessidade se tornar clara. Evitar Redux Toolkit inicialmente devido à sua verbosidade, a menos que a complexidade realmente o justifique.
     *   **Justificativa:** Escolher a ferramenta certa para cada tipo de estado (local, compartilhado, servidor, global) resulta em código mais simples, performático e fácil de manter.
 
-**5. Hooks Customizados (`src_refactored/presentation/ui/hooks/`):**
+**5. Hooks Customizados (`src/presentation/ui/hooks/`):**
     *   **Padrão:** Encorajar a criação de hooks customizados para extrair e reutilizar lógica de UI com estado e/ou efeitos colaterais entre componentes.
     *   **Nomenclatura:** Devem começar com `use` (e.g., `useDebounce`, `useProjectFilters`). O nome do arquivo do hook deve seguir `use-kebab-case-nome.hook.ts` (conforme ADR-028).
     *   **Localização:** Hooks globais em `hooks/`. Hooks específicos de uma feature em `features/<nome-da-feature>/hooks/`.
