@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import type { UserProfile } from "@/shared/ipc-types";
+import type { UserProfile } from "@/core/domain/entities/user";
 
 interface EmailDisplayFieldProps {
-  email: UserProfile["email"];
+  email: UserProfile["email"] | undefined;
 }
 
 export function EmailDisplayField({ email }: EmailDisplayFieldProps) {

@@ -1,7 +1,7 @@
 import { AlertTriangle, Zap } from "lucide-react";
 import React from "react";
 
-import type { AgentInstance } from "@/shared/ipc-types";
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 export const statusDisplayMap: Record<
   AgentInstance["status"],

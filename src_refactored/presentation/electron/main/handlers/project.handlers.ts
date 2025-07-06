@@ -5,27 +5,24 @@ import {
 } from "../../../../shared/ipc-channels";
 import {
   GetProjectDetailsRequest,
-  GetProjectDetailsResponseData,
-  GetProjectsListResponseData,
   CreateProjectRequest,
-  CreateProjectResponseData,
+  CreateProjectResponse,
   UpdateProjectRequest,
-  UpdateProjectResponseData,
+  UpdateProjectResponse,
+  Project,
 } from "../../../../shared/ipc-types";
-import { Project } from "../../../../shared/types/entities";
-import { AgentLLM } from "../../../../shared/types/entities";
-import {
-  mockProjectsDb,
-  addMockProject,
-  updateMockProject,
-} from "../mocks/project.mocks";
+import { GetAllProjectsUseCase } from "@/core/application/use-cases/get-all-projects.use-case";
+import { InMemoryProjectRepository } from "@/infrastructure/persistence/repositories/in-memory-project.repository";
 
 function registerQueryProjectHandlers() {
+  const projectRepository = new InMemoryProjectRepository();
+  const getAllProjectsUseCase = new GetAllProjectsUseCase(projectRepository);
+
   ipcMain.handle(
     IPC_CHANNELS.GET_PROJECTS_LIST,
-    async (): Promise<GetProjectsListResponseData> => {
+    async (): Promise<Project[]> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { success: true, data: Object.values(mockProjectsDb) };
+      return getAllProjectsUseCase.execute();
     }
   );
 
@@ -34,52 +31,29 @@ function registerQueryProjectHandlers() {
     async (
       _event,
       req: GetProjectDetailsRequest
-    ): Promise<GetProjectDetailsResponseData> => {
+    ): Promise<Project | null> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const projectDetails = Object.values(mockProjectsDb).find(
-        (project) => project.id === req.projectId
-      );
+      const projectDetails = await projectRepository.getProjectById(req.projectId);
       if (projectDetails) {
-        return { success: true, data: projectDetails };
+        return projectDetails;
       }
-      return { success: false, error: { message: "Project not found" } };
+      throw new Error("Project not found");
     }
   );
 }
 
 function registerMutationProjectHandlers() {
+  const projectRepository = new InMemoryProjectRepository();
+
   ipcMain.handle(
     IPC_CHANNELS.CREATE_PROJECT,
     async (
       _event,
       req: CreateProjectRequest
-    ): Promise<CreateProjectResponseData> => {
+    ): Promise<Project> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const newProject: Project = {
-        id: `proj-${Date.now()}`,
-        name: req.name,
-        description: req.description || "",
-        platformUrl: req.platformUrl ?? undefined,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        projectManager: "user-123",
-        teamMembers: ["user-123"],
-        status: "active",
-        version: "1.0.0",
-        repositoryUrl: req.repositoryUrl ?? undefined,
-        tags: req.tags ?? [],
-        llmConfig: req.llmConfig || {
-          id: `llm-config-${Date.now()}`,
-          name: "Default OpenAI GPT-4 Turbo",
-          providerId: "openai",
-          llm: AgentLLM.OPENAI_GPT_4_TURBO,
-          temperature: 0.7,
-          maxTokens: 2048,
-        },
-        // agentInstances: [], // Assuming this might be populated later or via another mechanism
-      };
-      addMockProject(newProject);
-      return { success: true, data: newProject };
+      const newProject = await projectRepository.createProject(req);
+      return newProject;
     }
   );
 
@@ -88,13 +62,13 @@ function registerMutationProjectHandlers() {
     async (
       _event,
       req: UpdateProjectRequest
-    ): Promise<UpdateProjectResponseData> => {
+    ): Promise<Project> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      const updatedProject = updateMockProject(req.projectId, req.data);
+      const updatedProject = await projectRepository.updateProject(req.projectId, req.data);
       if (updatedProject) {
-        return { success: true, data: updatedProject };
+        return updatedProject;
       }
-      return { success: false, error: { message: "Project not found for update" } };
+      throw new Error("Project not found for update");
     }
   );
 }

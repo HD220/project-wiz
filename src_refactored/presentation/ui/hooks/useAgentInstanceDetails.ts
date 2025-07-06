@@ -6,9 +6,9 @@ import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponseData,
-  AgentInstance,
-} from "@/shared/ipc-types";
+  GetAgentInstanceDetailsResponse,
+} from "@/shared/ipc-types/agent.types";
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 export function useAgentInstanceDetails() {
   const params = useParams({ from: "/app/agents/$agentId/" });

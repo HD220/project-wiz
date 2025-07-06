@@ -1,22 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@tanstack/react-router";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
-
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import type {
-  CreatePersonaTemplateRequest,
-  CreatePersonaTemplateResponseData,
-  PersonaTemplate,
-  UpdatePersonaTemplateRequest,
-  UpdatePersonaTemplateResponseData,
-} from "@/shared/ipc-types";
 
 import { usePersonaToolManagement } from "../hooks/usePersonaToolManagement";
 
@@ -51,103 +39,33 @@ const personaTemplateFormSchema = z.object({
 export type PersonaTemplateFormData = z.infer<typeof personaTemplateFormSchema>;
 
 interface PersonaTemplateFormProps {
-  template?: PersonaTemplate;
-  onSubmit: (formData: PersonaTemplateFormData) => Promise<void>;
-  onSuccess?: (data: PersonaTemplate) => void;
   initialValues?: Partial<PersonaTemplateFormData>;
+  onSubmit: SubmitHandler<PersonaTemplateFormData>;
   isSubmitting: boolean;
-  submitButtonText?: string;
+  submitButtonText: string;
 }
 
 export function PersonaTemplateForm({
-  template,
-  onSuccess,
   initialValues,
+  onSubmit,
   isSubmitting,
   submitButtonText,
 }: PersonaTemplateFormProps) {
-  const router = useRouter();
-  const isEditing = !!template;
-
   const form = useForm<PersonaTemplateFormData>({
     resolver: zodResolver(personaTemplateFormSchema),
-    defaultValues: initialValues || (template ? {
-      id: template.id as string | undefined, // Explicitly cast to string | undefined
-      name: template.name,
-      role: template.role,
-      goal: template.goal,
-      backstory: template.backstory,
-      toolNames: template.toolNames || [], // Ensure toolNames is always an array
-    } : {
-      name: "",
-      role: "",
-      goal: "",
-      backstory: "",
-      toolNames: [],
-    }),
+    defaultValues: initialValues,
   });
 
-  const { currentToolInput, setCurrentToolInput, handleAddTool, handleRemoveTool } = usePersonaToolManagement(form);
-
-  const createTemplateMutation = useIpcMutation<
-    CreatePersonaTemplateRequest,
-    CreatePersonaTemplateResponseData
-  >(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(`Template "${response.data.name}" criado com sucesso!`);
-        onSuccess?.(response.data);
-        router.navigate({
-          to: "/app/personas/$templateId",
-          params: { templateId: response.data.id },
-        });
-      } else {
-        toast.error(response.error?.message || "Falha ao criar o template.");
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro ao criar template: ${error.message}`);
-    },
-  });
-
-  const updateTemplateMutation = useIpcMutation<
-    UpdatePersonaTemplateRequest,
-    UpdatePersonaTemplateResponseData
-  >(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(
-          `Template "${response.data.name}" atualizado com sucesso!`,
-        );
-        onSuccess?.(response.data);
-        router.invalidate();
-      } else {
-        toast.error(response.error?.message || "Falha ao atualizar o template.");
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro ao atualizar template: ${error.message}`);
-    },
-  });
-
-  const effectiveIsSubmitting =
-    isSubmitting || createTemplateMutation.isLoading || updateTemplateMutation.isLoading;
-
-  const effectiveHandleSubmit = (data: PersonaTemplateFormData) => {
-    if (isEditing && template) {
-      updateTemplateMutation.mutate({ templateId: template.id, data: data });
-    } else {
-      createTemplateMutation.mutate(data);
-    }
-  };
-
-  const effectiveSubmitButtonText = submitButtonText || (isEditing
-    ? "Atualizar Template"
-    : "Salvar Template");
+  const {
+    currentToolInput,
+    setCurrentToolInput,
+    handleAddTool,
+    handleRemoveTool,
+  } = usePersonaToolManagement(form);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(effectiveHandleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <PersonaNameField control={form.control} />
         <PersonaRoleField control={form.control} />
         <PersonaGoalField control={form.control} />
@@ -163,9 +81,9 @@ export function PersonaTemplateForm({
         <div className="flex justify-end pt-2">
           <Button
             type="submit"
-            disabled={effectiveIsSubmitting || (isEditing && !form.formState.isDirty)}
+            disabled={isSubmitting || !form.formState.isDirty}
           >
-            {effectiveIsSubmitting ? "Salvando Template..." : effectiveSubmitButtonText}
+            {isSubmitting ? "Salvando Template..." : submitButtonText}
           </Button>
         </div>
       </form>

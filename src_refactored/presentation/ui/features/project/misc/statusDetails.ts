@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-import { Project } from '@/ui/features/project/components/ProjectListItem';
+import type { Project } from '@/core/domain/entities/project';
 
 export const statusDetails: Record<
   Project['status'],

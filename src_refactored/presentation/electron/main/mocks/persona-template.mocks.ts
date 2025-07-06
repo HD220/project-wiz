@@ -1,4 +1,4 @@
-import { PersonaTemplate } from "../../../../shared/types/entities";
+import { PersonaTemplate } from "@/shared/ipc-types";
 
 export const mockPersonaTemplates: PersonaTemplate[] = [
   {

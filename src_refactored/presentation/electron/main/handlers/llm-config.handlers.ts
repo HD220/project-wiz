@@ -4,12 +4,12 @@ import {
   IPC_CHANNELS
 } from '../../../../shared/ipc-channels';
 import {
-  GetAvailableLLMsResponseData,
-  GetLLMConfigsListResponseData,
+  GetAvailableLLMsResponse,
+  GetLLMConfigsListResponse,
   UpdateLLMConfigRequest,
-  UpdateLLMConfigResponseData
-} from '../../../../shared/ipc-types';
-import { AgentLLM, LLMConfig } from '../../../../shared/types/entities';
+  UpdateLLMConfigResponse
+} from '../../../../shared/ipc-types/llm.types';
+import { AgentLLM, LLMConfig } from "@/domain/entities/llm";
 import {
   mockAvailableLLMs,
   // mockUserLLMConfigs, // Not directly used, access via getLLMConfigWithDefaults or updateUserLLMConfig
@@ -18,12 +18,12 @@ import {
 } from '../mocks/llm-config.mocks';
 
 export function registerLLMConfigHandlers() {
-  ipcMain.handle(IPC_CHANNELS.GET_AVAILABLE_LLMS, async (): Promise<GetAvailableLLMsResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_AVAILABLE_LLMS, async (): Promise<LLMConfig[]> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { success: true, data: mockAvailableLLMs };
+    return mockAvailableLLMs;
   });
 
-  ipcMain.handle(IPC_CHANNELS.GET_LLM_CONFIGS_LIST, async (): Promise<GetLLMConfigsListResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_LLM_CONFIGS_LIST, async (): Promise<Record<AgentLLM, LLMConfig>> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     // Construct full configs with defaults for all available LLMs
     const fullUserConfigs = Object.values(AgentLLM).reduce((acc: Record<AgentLLM, LLMConfig>, llmKey: AgentLLM) => {
@@ -33,14 +33,14 @@ export function registerLLMConfigHandlers() {
       return acc;
     }, {} as Record<AgentLLM, LLMConfig>); 
 
-    return { success: true, data: fullUserConfigs };
+    return fullUserConfigs;
   });
 
-  ipcMain.handle(IPC_CHANNELS.UPDATE_LLM_CONFIG, async (_event, req: UpdateLLMConfigRequest): Promise<UpdateLLMConfigResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.UPDATE_LLM_CONFIG, async (_event, req: UpdateLLMConfigRequest): Promise<LLMConfig> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const { configId, data } = req;
-    updateUserLLMConfig(configId, data);
-    const updatedConfig = getLLMConfigWithDefaults(configId);
-    return { success: true, data: updatedConfig };
+    updateUserLLMConfig(configId as AgentLLM, data);
+    const updatedConfig = getLLMConfigWithDefaults(configId as AgentLLM);
+    return updatedConfig;
   });
 }

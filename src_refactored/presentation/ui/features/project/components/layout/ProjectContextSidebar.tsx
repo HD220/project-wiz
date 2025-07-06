@@ -132,7 +132,7 @@ export function ProjectContextSidebar({ project, className }: ProjectContextSide
             <DropdownMenuItem>Convidar Membros (N/I)</DropdownMenuItem>
             <DropdownMenuItem asChild>
               {/* Link to project settings using its relative path from $projectId */}
-              <Link to={`/app/projects/${project.id}/settings`} params={{projectId: project.id}}>Configurações do Projeto</Link>
+              <Link to="/app/projects/$projectId/settings" params={{projectId: project.id}}>Configurações do Projeto</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-500 focus:text-red-500 dark:focus:text-red-500">Arquivar Projeto (N/I)</DropdownMenuItem>

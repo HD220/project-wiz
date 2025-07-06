@@ -4,26 +4,25 @@ import {
   IPC_CHANNELS
 } from "../../../../shared/ipc-channels";
 import {
-  
   GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponseData,
+  GetAgentInstanceDetailsResponse,
   CreateAgentInstanceRequest,
-  CreateAgentInstanceResponseData,
+  CreateAgentInstanceResponse,
   UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponseData,
+  UpdateAgentInstanceResponse,
   GetAgentInstancesListRequest,
   GetAgentInstancesByProjectRequest,
-  IPCResponse
-} from "../../../../shared/ipc-types";
-import { AgentInstance, AgentLLM } from "../../../../shared/types/entities";
+} from "../../../../shared/ipc-types/agent.types";
+import { AgentInstance } from "@/domain/entities/agent";
+import { AgentLLM } from "@/domain/entities/llm";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
 function registerQueryAgentInstanceHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_AGENT_INSTANCES_LIST,
-    async (): Promise<IPCResponse<AgentInstance[]>> => {
+    async (): Promise<AgentInstance[]> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      return { success: true, data: mockAgentInstances };
+      return mockAgentInstances;
     }
   );
 
@@ -32,12 +31,12 @@ function registerQueryAgentInstanceHandlers() {
     async (
       _event,
       req: GetAgentInstancesByProjectRequest
-    ): Promise<IPCResponse<AgentInstance[]>> => {
+    ): Promise<AgentInstance[]> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instances = mockAgentInstances.filter(
         (ai) => ai.projectId === req.projectId
       );
-      return { success: true, data: instances };
+      return instances;
     }
   );
 
@@ -46,15 +45,15 @@ function registerQueryAgentInstanceHandlers() {
     async (
       _event,
       req: GetAgentInstanceDetailsRequest
-    ): Promise<GetAgentInstanceDetailsResponseData> => {
+    ): Promise<AgentInstance | null> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instance = mockAgentInstances.find(
         (ai) => ai.id === req.agentId
       );
       if (instance) {
-        return { success: true, data: instance };
+        return instance;
       }
-      return { success: false, error: { message: "Agent instance not found" } };
+      throw new Error("Agent instance not found");
     }
   );
 }
@@ -65,7 +64,7 @@ function registerCreateAgentInstanceHandler() {
     async (
       _event,
       req: CreateAgentInstanceRequest
-    ): Promise<IPCResponse<AgentInstance>> => {
+    ): Promise<AgentInstance> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const newInstance: AgentInstance = {
         id: `agent-${Date.now()}`,
@@ -87,7 +86,7 @@ function registerCreateAgentInstanceHandler() {
         status: "idle",
       };
       mockAgentInstances.push(newInstance);
-      return { success: true, data: newInstance };
+      return newInstance;
     }
   );
 }
@@ -98,7 +97,7 @@ function registerUpdateAgentInstanceHandler() {
     async (
       _event,
       req: UpdateAgentInstanceRequest
-    ): Promise<IPCResponse<AgentInstance>> => {
+    ): Promise<AgentInstance> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const instanceIndex = mockAgentInstances.findIndex(
         (ai) => ai.id === req.agentId
@@ -119,9 +118,9 @@ function registerUpdateAgentInstanceHandler() {
           updatedAt: new Date().toISOString(),
         };
         mockAgentInstances[instanceIndex] = updatedInstance;
-        return { success: true, data: updatedInstance };
+        return updatedInstance;
       }
-      return { success: false, error: { message: "Agent instance not found" } };
+      throw new Error("Agent instance not found");
     }
   );
 }

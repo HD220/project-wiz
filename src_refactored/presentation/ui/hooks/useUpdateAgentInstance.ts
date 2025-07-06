@@ -1,15 +1,15 @@
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import type { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import {
+import type {
   UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponseData,
-  IPCResponse,
-} from "@/shared/ipc-types";
+  UpdateAgentInstanceResponse,
+} from "@/shared/ipc-types/agent.types";
 
 interface UseUpdateAgentInstanceProps {
   agentId: string;
@@ -23,28 +23,21 @@ export function useUpdateAgentInstance({
   const router = useRouter();
 
   const updateAgentMutation = useIpcMutation<
-    IPCResponse<UpdateAgentInstanceResponseData>,
+    UpdateAgentInstanceResponse,
     UpdateAgentInstanceRequest
   >(IPC_CHANNELS.UPDATE_AGENT_INSTANCE, {
-    onSuccess: (response): void => {
-      if (response.success && response.data) {
-        const agentDisplayName =
-          response.data.agentName ||
-          `Agente (ID: ${response.data.id.substring(0, 6)})`;
-        toast.success(
-          `Instância de Agente "${agentDisplayName}" atualizada com sucesso!`
-        );
-        refetchAgent();
-        router.navigate({
-          to: "/app/agents/$agentId",
-          params: { agentId: response.data.id },
-          replace: true,
-        });
-      } else {
-        toast.error(
-          `Falha ao atualizar a instância: ${response.error?.message || "Erro desconhecido."}`
-        );
-      }
+    onSuccess: (data) => {
+      const agentDisplayName =
+        data.agentName || `Agente (ID: ${data.id.substring(0, 6)})`;
+      toast.success(
+        `Instância de Agente "${agentDisplayName}" atualizada com sucesso!`
+      );
+      refetchAgent();
+      router.navigate({
+        to: "/app/agents/$agentId",
+        params: { agentId: data.id },
+        replace: true,
+      });
     },
     onError: (error) => {
       toast.error(`Falha ao atualizar a instância: ${error.message}`);
@@ -54,9 +47,8 @@ export function useUpdateAgentInstance({
   const handleSubmit = async (
     formData: AgentInstanceFormData
   ): Promise<void> => {
-    console.log("Dados atualizados da instância de agente:", agentId, formData);
     updateAgentMutation.mutate({ agentId, data: formData });
   };
 
-  return { handleSubmit, isSubmitting: updateAgentMutation.isLoading };
+  return { handleSubmit, isSubmitting: updateAgentMutation.isPending };
 }

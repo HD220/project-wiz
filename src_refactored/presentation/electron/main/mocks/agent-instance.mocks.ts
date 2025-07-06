@@ -1,4 +1,6 @@
-import { AgentInstance } from "../../../../shared/types/entities";
+import { AgentInstance } from "@/shared/ipc-types";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import { getLLMConfigWithDefaults } from "./llm-config.mocks";
 
 export const mockAgentInstances: AgentInstance[] = [
   {
@@ -8,6 +10,7 @@ export const mockAgentInstances: AgentInstance[] = [
     llmProviderConfigId: "llm-openai-gpt4",
     temperature: 0.7,
     status: "idle",
+    llmConfig: getLLMConfigWithDefaults(AgentLLM.OPENAI_GPT_4_TURBO),
     createdAt: new Date().toISOString(),
   },
   {
@@ -17,6 +20,7 @@ export const mockAgentInstances: AgentInstance[] = [
     llmProviderConfigId: "llm-anthropic-claude3",
     temperature: 0.8,
     status: "idle",
+    llmConfig: getLLMConfigWithDefaults(AgentLLM.ANTHROPIC_CLAUDE_3_OPUS),
     createdAt: new Date().toISOString(),
   },
   {
@@ -26,6 +30,7 @@ export const mockAgentInstances: AgentInstance[] = [
     llmProviderConfigId: "llm-google-gemini-pro",
     temperature: 0.5,
     status: "idle",
+    llmConfig: getLLMConfigWithDefaults(AgentLLM.GOOGLE_GEMINI_PRO),
     createdAt: new Date().toISOString(),
   },
 ];

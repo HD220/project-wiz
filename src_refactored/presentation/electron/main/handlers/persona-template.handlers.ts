@@ -4,33 +4,33 @@ import {
   IPC_CHANNELS
 } from '../../../../shared/ipc-channels';
 import {
-  GetPersonaTemplatesListResponseData,
+  GetPersonaTemplatesListResponse,
   GetPersonaTemplateDetailsRequest,
-  GetPersonaTemplateDetailsResponseData,
+  GetPersonaTemplateDetailsResponse,
   CreatePersonaTemplateRequest,
-  CreatePersonaTemplateResponseData,
+  CreatePersonaTemplateResponse,
   UpdatePersonaTemplateRequest,
-  UpdatePersonaTemplateResponseData,
-} from '../../../../shared/ipc-types';
-import { PersonaTemplate } from '../../../../shared/types/entities';
+  UpdatePersonaTemplateResponse,
+} from '../../../../shared/ipc-types/persona.types';
+import { PersonaTemplate } from "@/domain/entities/persona";
 import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
 
 export function registerPersonaTemplateHandlers() {
-  ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST, async (): Promise<GetPersonaTemplatesListResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATES_LIST, async (): Promise<PersonaTemplate[]> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { success: true, data: mockPersonaTemplates };
+    return mockPersonaTemplates;
   });
 
-  ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS, async (_event, req: GetPersonaTemplateDetailsRequest): Promise<GetPersonaTemplateDetailsResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_PERSONA_TEMPLATE_DETAILS, async (_event, req: GetPersonaTemplateDetailsRequest): Promise<PersonaTemplate | null> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const template = mockPersonaTemplates.find(pt => pt.id === req.templateId);
     if (template) {
-      return { success: true, data: template };
+      return template;
     }
-    return { success: false, error: { message: 'Persona Template not found' } };
+    throw new Error('Persona Template not found');
   });
 
-  ipcMain.handle(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, async (_event, req: CreatePersonaTemplateRequest): Promise<CreatePersonaTemplateResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.CREATE_PERSONA_TEMPLATE, async (_event, req: CreatePersonaTemplateRequest): Promise<PersonaTemplate> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const newTemplate: PersonaTemplate = {
       id: `pt-${Date.now()}`,
@@ -46,17 +46,17 @@ export function registerPersonaTemplateHandlers() {
     };
     // In a real scenario, you'd add this to your persistent or in-memory store
     mockPersonaTemplates.push(newTemplate);
-    return { success: true, data: newTemplate };
+    return newTemplate;
   });
 
-  ipcMain.handle(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, async (_event, req: UpdatePersonaTemplateRequest): Promise<UpdatePersonaTemplateResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, async (_event, req: UpdatePersonaTemplateRequest): Promise<PersonaTemplate> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const templateIndex = mockPersonaTemplates.findIndex(pt => pt.id === req.templateId);
     if (templateIndex !== -1) {
       const updatedTemplate = { ...mockPersonaTemplates[templateIndex], ...req.data, updatedAt: new Date().toISOString() };
       mockPersonaTemplates[templateIndex] = updatedTemplate;
-      return { success: true, data: updatedTemplate } as UpdatePersonaTemplateResponseData;
+      return updatedTemplate;
     }
-    return { success: false, error: { message: 'Persona Template not found for update' } };
+    throw new Error('Persona Template not found for update');
   });
 }

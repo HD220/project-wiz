@@ -1,140 +1,110 @@
-# Plano de Ação do Agente Gemini para o Projeto Wiz
+# Plano de Refatoração `src_refactored` (Checklist Detalhado)
 
-## Resumo do Progresso Atual
+**Data de Geração:** 5 de julho de 2025
 
-O agente Gemini tem trabalhado na resolução de erros de ESLint e TypeScript no repositório.
+**Contexto:** Refatoração completa do diretório `src_refactored` para simplificar o código, melhorar a segurança de tipos e aderir às boas práticas de programação. O trabalho será guiado por erros de compilação e lint.
 
-**ESLint:**
-*   Um erro de parsing em `drizzle-job.repository.ts` foi identificado e corrigido.
-*   O linter foi executado novamente e não reportou mais erros de parsing.
+---
 
-**TypeScript:**
-*   Vários erros de tipo foram identificados e corrigidos em diferentes arquivos.
-*   As correções envolveram:
-    *   Ajuste de chamadas de métodos de fábrica (`create` vs `fromString`).
-    *   Tratamento explícito de `null` e `undefined` em propriedades.
-    *   Padronização de nomes de propriedades entre entidades e tipos de persistência.
-    *   Propagação de restrições de tipos genéricos em interfaces.
-    *   Ajuste de chamadas de função para corresponder às assinaturas corretas.
+## **Fase 1: Definição Canônica de Tipos e Resolução de Módulos**
 
-## Erros Pendentes (Última Verificação `tsc --noEmit`)
+Esta fase visa estabelecer uma base sólida para os tipos, garantindo que cada entidade e tipo IPC seja definido em seu local canônico e importado corretamente.
 
-Ainda existem erros de TypeScript a serem resolvidos. A lista atual de arquivos com erros é:
+### **1.1. Padronizar Entidades de Domínio**
 
-*   `src_refactored/examples/queue-usage-example.final.ts`
-*   `src_refactored/infrastructure/ioc/inversify.config.ts`
-*   `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.mapper.ts`
-*   `src_refactored/infrastructure/persistence/drizzle/job/drizzle-job.repository.ts`
-*   `src_refactored/infrastructure/queue/drizzle/job-processing.service.ts`
-*   `src_refactored/infrastructure/queue/drizzle/queue-maintenance.service.ts`
-*   `src_refactored/infrastructure/queue/drizzle/queue-service-core.ts`
-*   `src_refactored/presentation/electron/main/handlers/agent-instance.handlers.ts`
-*   `src_refactored/presentation/electron/main/handlers/dm.handlers.ts`
-*   `src_refactored/presentation/electron/main/handlers/llm-config.handlers.ts`
-*   `src_refactored/presentation/electron/main/handlers/persona-template.handlers.ts`
-*   `src_refactored/presentation/electron/main/handlers/project.handlers.ts`
-*   `src_refactored/presentation/electron/main/handlers/user.handlers.ts`
-*   `src_refactored/presentation/electron/main/ipc-chat.handlers.ts`
-*   `src_refactored/presentation/electron/main/ipc-project.handlers.ts`
-*   `src_refactored/presentation/electron/main/mocks/agent-instance.mocks.ts`
-*   `src_refactored/presentation/electron/main/mocks/llm-config.mocks.ts`
-*   `src_refactored/presentation/ui/app/app/agents/$agentId/edit/index.tsx`
-*   `src_refactored/presentation/ui/app/app/agents/$agentId/index.tsx`
-*   `src_refactored/presentation/ui/app/app/chat/index.tsx`
-*   `src_refactored/presentation/ui/app/app/personas/$templateId/edit/index.tsx`
-*   `src_refactored/presentation/ui/app/app/personas/new/index.tsx`
-*   `src_refactored/presentation/ui/app/app/projects/$projectId/docs/index.tsx`
-*   `src_refactored/presentation/ui/app/app/projects/$projectId/members/index.tsx`
-*   `src_refactored/presentation/ui/app/app/projects/$projectId/settings/index.tsx`
-*   `src_refactored/presentation/ui/app/app/projects/new/index.tsx`
-*   `src_refactored/presentation/ui/app/app/settings/llm/$configId/edit/index.tsx`
-*   `src_refactored/presentation/ui/app/app/user/dm/$conversationId/index.tsx`
-*   `src_refactored/presentation/ui/components/common/MarkdownRenderer.tsx`
-*   `src_refactored/presentation/ui/components/layout/AppSidebar.tsx`
-*   `src_refactored/presentation/ui/features/agent/components/AgentInstanceForm.tsx`
-*   `src_refactored/presentation/ui/features/agent/components/EditAgentFormRenderer.tsx`
-*   `src_refactored/presentation/ui/features/agent/components/list-item-parts/AgentInstanceHeader.tsx`
-*   `src_refactored/presentation/ui/features/agent/components/NewAgentFormRenderer.tsx`
-*   `src_refactored/presentation/ui/features/chat/components/ChatSidebar.tsx`
-*   `src_refactored/presentation/ui/features/chat/components/DirectMessageLoadingErrorDisplay.tsx`
-*   `src_refactored/presentation/ui/features/persona/components/edit/EditPersonaTemplateFormRenderer.tsx`
-*   `src_refactored/presentation/ui/features/persona/components/EditPersonaTemplateLoadingErrorDisplay.tsx`
-*   `src_refactored/presentation/ui/features/persona/components/list-item-parts/ListItemFooter.tsx`
-*   `src_refactored/presentation/ui/features/persona/components/list-item-parts/ListItemHeader.tsx`
-*   `src_refactored/presentation/ui/features/persona/components/PersonaTemplateForm.tsx`
-*   `src_refactored/presentation/ui/features/project/components/details/ProjectDetailHeader.tsx`
-*   `src_refactored/presentation/ui/features/project/components/details/ProjectNotFound.tsx`
-*   `src_refactored/presentation/ui/features/project/components/docs/DocSidebar.tsx`
-*   `src_refactored/presentation/ui/features/project/components/layout/ProjectContextSidebar.tsx`
-*   `src_refactored/presentation/ui/features/project/components/list/NoProjectsDisplay.tsx`
-*   `src_refactored/presentation/ui/features/project/components/list/ProjectsHeader.tsx`
-*   `src_refactored/presentation/ui/features/project/components/ProjectCard.tsx`
-*   `src_refactored/presentation/ui/features/project/components/ProjectForm.tsx`
-*   `src_refactored/presentation/ui/features/project/components/ProjectSidebar.tsx`
-*   `src_refactored/presentation/ui/features/project/components/settings/ProjectSettingsForm.tsx`
-*   `src_refactored/presentation/ui/features/user/components/fields/AvatarUrlField.tsx`
-*   `src_refactored/presentation/ui/features/user/components/fields/DisplayNameField.tsx`
-*   `src_refactored/presentation/ui/features/user/components/layout/UserSidebarParts.tsx`
-*   `src_refactored/presentation/ui/features/user/components/profile/UserProfileAvatar.tsx`
-*   `src_refactored/presentation/ui/features/user/components/profile/UserProfileFormFields.tsx`
-*   `src_refactored/presentation/ui/features/user/components/UserProfileForm.tsx`
-*   `src_refactored/presentation/ui/features/user/components/UserSidebar.tsx`
-*   `src_refactored/presentation/ui/hooks/ipc/useIpcMutation.ts`
-*   `src_refactored/presentation/ui/hooks/ipc/useIpcQuery.ts`
-*   `src_refactored/presentation/ui/hooks/ipc/useIpcSubscription.ts`
-*   `src_refactored/presentation/ui/hooks/useAgentInstanceData.ts`
-*   `src_refactored/presentation/ui/hooks/useAgentInstanceDetails.ts`
-*   `src_refactored/presentation/ui/hooks/useChatLogic.ts`
-*   `src_refactored/presentation/ui/hooks/useCreateAgentInstance.ts`
-*   `src_refactored/presentation/ui/hooks/useDirectMessages.ts`
-*   `src_refactored/presentation/ui/hooks/useMessageSending.ts`
-*   `src_refactored/presentation/ui/hooks/useNewAgentInstanceData.ts`
-*   `src_refactored/presentation/ui/hooks/useSendMessage.ts`
-*   `src_refactored/presentation/ui/hooks/useUpdateAgentInstance.ts`
-*   `src_refactored/presentation/ui/services/ipc.service.ts`
+- [x] **Mover Entidades para o Domínio:**
+    - [x] Criar `src_refactored/core/domain/entities/persona.ts` e mover `PersonaTemplate`, `PersonaTemplateFormData`.
+    - [x] Criar `src_refactored/core/domain/entities/agent.ts` e mover `AgentInstance`, `AgentInstanceFormData`, `AgentLLM`.
+    - [x] Criar `src_refactored/core/domain/entities/llm.ts` e mover `LLMConfig`, `LLMConfigFormData`, `LLMSettings`.
+    - [x] Criar `src_refactored/core/domain/entities/chat.ts` e mover `ChatMessage`, `ChatMessageSender`, `DirectMessageItem`.
+    - [x] Criar `src_refactored/core/domain/entities/user.ts` e mover `UserProfile`, `UserProfileFormData`.
+    - [x] Criar `src_refactored/core/domain/entities/app-settings.ts` e mover `AppSettings`, `Theme`.
+- [x] **Corrigir Importações Internas das Novas Entidades:**
+    - [x] Em `src_refactored/core/domain/entities/agent.ts`, garantir que `LLMConfig` seja importado de `./llm`.
+    - [x] Em `src_refactored/core/domain/entities/llm.ts`, garantir que `AgentLLM` seja importado de `./agent`.
+- [x] **Atualizar `src_refactored/shared/types/entities.ts`:**
+    - [x] Remover todas as definições de interface diretas.
+    - [x] Adicionar re-exportações para todos os novos arquivos de entidade em `src_refactored/core/domain/entities/`.
+- [x] **Atualizar `src_refactored/shared/ipc-types/index.ts`:**
+    - [x] Remover `export * from "../types/entities";`.
+    - [x] Importar e re-exportar os tipos IPC específicos de seus novos arquivos (ex: `export * from "./agent.types";`, `export * from "./persona.types";`, etc.).
 
-## Próximos Passos: Plano de Ação Detalhado
+### **1.2. Corrigir Importações em Todos os Arquivos Afetados**
 
-O objetivo é resolver todos os erros de TypeScript e ESLint. A abordagem será iterativa, focando em grupos de erros ou arquivos, e aplicando os princípios de aprendizado contínuo.
+- [ ] **Pesquisa Global por Importações Problemáticas:**
+    - [ ] Pesquisar todas as instâncias de `from "@/shared/ipc-types"` e `from "@/shared/types/entities"` e inspecioná-las manualmente.
+- [ ] **Corrigir Importações (Iterativo):**
+    - [ ] Para cada arquivo que reporta `TS2307` (`Cannot find module`) e `TS2724` (`*Data` suffix`):
+        - [ ] Atualizar as importações para apontar para os novos arquivos de tipos IPC (`@/shared/ipc-types/agent.types`, `@/shared/ipc-types/persona.types`, etc.) ou para as entidades de domínio corretas (`@/core/domain/entities/project`, etc.).
+        - [ ] Remover quaisquer importações redundantes que causem erros `TS2300` (`Duplicate identifier`).
+        - [ ] Substituir os tipos com sufixo `*Data` por seus equivalentes corretos (ex: `GetAgentInstanceDetailsResponseData` para `GetAgentInstanceDetailsResponse`).
+    - [x] **Arquivos a serem verificados e corrigidos (baseado nos últimos erros):**
+        - [x] `src_refactored/presentation/electron/main/handlers/agent-instance.handlers.ts`
+        - [x] `src_refactored/presentation/electron/main/handlers/dm.handlers.ts`
+        - [x] `src_refactored/presentation/electron/main/handlers/llm-config.handlers.ts`
+        - [x] `src_refactored/presentation/electron/main/handlers/persona-template.handlers.ts`
+        - [x] `src_refactored/presentation/electron/main/handlers/user.handlers.ts`
+        - [x] `src_refactored/presentation/ui/app/app/personas/$templateId/edit/index.tsx`
+        - [x] `src_refactored/presentation/ui/app/app/personas/new/index.tsx`
+        - [x] `src_refactored/presentation/ui/app/app/projects/$projectId/docs/index.tsx` (Verificar `DocEntry` e `mockDocsFileSystem` novamente)
+        - [x] `src_refactored/presentation/ui/app/app/projects/$projectId/settings/index.tsx`
+        - [x] `src_refactored/presentation/ui/app/app/projects/index.tsx`
+        - [x] `src_refactored/presentation/ui/features/agent/components/AgentInstanceForm.tsx`
+        - [x] `src_refactored/presentation/ui/features/agent/components/EditAgentFormRenderer.tsx`
+        - [x] `src_refactored/presentation/ui/features/agent/components/NewAgentFormRenderer.tsx`
+        - [x] `src_refactored/presentation/ui/features/agent/components/fields/AgentLLMConfigSelectField.tsx`
+        - [x] `src_refactored/presentation/ui/features/agent/components/fields/AgentPersonaTemplateSelectField.tsx`
+        - [x] `src_refactored/presentation/ui/features/chat/components/ChatSidebar.tsx`
+        - [x] `src_refactored/presentation/ui/features/persona/components/edit/EditPersonaTemplateFormRenderer.tsx`
+        - [x] `src_refactored/presentation/ui/features/persona/components/PersonaTemplateForm.tsx`
+        - [x] `src_refactored/presentation/ui/features/project/components/ProjectSidebar.tsx`
+        - [x] `src_refactored/presentation/ui/features/user/components/fields/EmailDisplayField.tsx`
+        - [x] `src_refactored/presentation/ui/features/user/components/layout/UserSidebarParts.tsx`
+        - [x] `src_refactored/presentation/ui/features/user/components/UserSidebar.tsx`
+        - [x] `src_refactored/presentation/ui/hooks/ipc/useIpcSubscription.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useAgentInstanceData.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useChatLogic.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useConversationMessages.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useDirectMessages.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useMessageSending.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useNewAgentInstanceData.ts`
+        - [x] `src_refactored/presentation/ui/hooks/useUpdateAgentInstance.ts`
+        - [x] `src_refactored/presentation/ui/utils/agent-status.ts`
 
-### Fase 1: Resolução de Erros de Tipo Remanescentes
+#### **Fase 2: Modernizando Hooks IPC e Simplificando Componentes Consumidores**
 
-1.  **Priorização:** Começar pelos erros que afetam os tipos mais fundamentais ou que se repetem em vários arquivos, pois sua correção pode resolver múltiplos problemas de uma vez.
-2.  **Abordagem por Arquivo/Módulo:**
-    *   Para cada arquivo com erros:
-        *   **Ler o arquivo:** Entender o contexto do código e a natureza do erro.
-        *   **Identificar a Causa Raiz:** Determinar se é um erro de digitação, incompatibilidade de tipo, uso incorreto de genéricos, ou problema de nulidade.
-        *   **Aplicar Correção:** Implementar a solução mais apropriada, seguindo os princípios de tipagem explícita, consistência de nomenclatura e propagação de restrições de tipos genéricos.
-        *   **Verificação Imediata:** Executar `npx tsc --noEmit` após cada correção significativa para validar a mudança e obter a lista atualizada de erros.
-        *   **Reflexão e Registro:** Após cada correção bem-sucedida, refletir sobre o aprendizado e registrá-lo na memória (conforme a "Meta-Diretriz de Aprendizagem Contínua").
+Esta fase visa simplificar a API dos hooks IPC e, consequentemente, o código dos componentes que os utilizam.
 
-### Fase 2: Verificação Abrangente
+- [x] **Refatorar `useIpcQuery` (`src_refactored/presentation/ui/hooks/ipc/useIpcQuery.ts`):**
+    - [x] Modificar o hook para que sua função interna (`ipcQueryFn`) chame `window.electronIPC.invoke`. Se a resposta for `success: true`, ela retornará `result.data` (o dado puro). Se for `success: false`, ela lançará um `Error` com a mensagem de erro.
+    - [x] Ajustar a tipagem de `IpcQueryOptions` para incluir `onError` explicitamente, garantindo compatibilidade com as opções do `@tanstack/react-query`.
+    - [x] Garantir que o hook retorne diretamente os valores de `data`, `isLoading`, `error` e `refetch` do `useQuery` do TanStack, que agora estarão com os tipos corretos e o comportamento esperado.
+- [x] **Refatorar `useIpcMutation` (`src_refactored/presentation/ui/hooks/ipc/useIpcMutation.ts`):**
+    - [x] Modificar o hook para que sua função interna (`ipcMutationFn`) chame `window.electronIPC.invoke`. Se a resposta for `success: true`, ela retornará `result.data`. Se for `success: false`, ela lançará um `Error`.
+    - [x] O `onSuccess` e `onError` das opções do `useMutation` receberão os dados desempacotados ou o erro diretamente.
+- [ ] **Refatorar `useIpcSubscription` (`src_refactored/presentation/ui/hooks/ipc/useIpcSubscription.ts`):**
+    - [ ] Modificar a função `useInitialIpcData` para usar a mesma lógica de `ipcQueryFn` para buscar os dados iniciais, retornando o dado puro ou lançando um erro.
+    - [ ] Ajustar a tipagem da `options.getSnapshot` para que ela receba o dado puro (`InitialData | null`) e retorne o dado puro.
+    - [ ] Garantir que o retorno do `useIpcSubscription` seja `{ data: InitialData | null, isLoading: boolean, error: Error | null }`.
+- [ ] **Atualizar Componentes Consumidores (Remover Desempacotamento Manual e Props Obsoletas):**
+    - [ ] **`PersonaTemplateForm` e Renderers:**
+        - [ ] Remover as props obsoletas (`onSubmit`, `isSubmitting`, `initialValues`, `submitButtonText`) de `PersonaTemplateFormProps` e de suas chamadas em `NewPersonaTemplatePage` e `EditPersonaTemplateFormRenderer`.
+    - [ ] **`ProjectListItem`:**
+        - [ ] Corrigir a inconsistência do campo `description` entre `Project` e `ProjectListItem` (já feito).
+    - [ ] **`useChatLogic`, `useAgentInstanceData`, `useDirectMessages`:**
+        - [ ] Remover todas as verificações manuais de `success` e `data` de `IPCResponse`, pois os hooks agora desempacotam isso.
+        - [ ] Digitar explicitamente os parâmetros `any` (por exemplo, `conv` em `useChatLogic`).
+    - [ ] **Router Paths:**
+        - [ ] Corrigir os erros de caminho do roteador (`TS2820`, `TS2353`) em componentes como `ProjectContextSidebar.tsx` e `ProjectSidebar.tsx` usando a sintaxe correta de `Link` com `params` (já feito).
+    - [ ] **`string | undefined` para `string`:**
+        - [ ] Onde um campo opcional (`string | undefined`) está sendo atribuído a um campo obrigatório (`string`), adicionar um fallback (`?? ''`) ou ajustar a tipagem se a `undefined` for uma possibilidade válida.
 
-1.  **Executar `npx tsc --noEmit`:** Garantir que não há mais erros de TypeScript.
-2.  **Executar `npx eslint --fix --ext .ts,.tsx .`:** Garantir que não há mais erros ou warnings de ESLint.
-3.  **Executar Testes:** Identificar e executar os testes existentes do projeto (`npm test` ou `vitest run`) para garantir que as mudanças não introduziram regressões.
-4.  **Verificação de Build:** Executar o comando de build do projeto (`npm run build`) para garantir que a aplicação pode ser construída sem problemas.
+#### **Fase 3: Verificação Final**
 
-### Checklists para Futuras Ações
+- [ ] Executar `npx tsc --noEmit`.
+- [ ] Executar `npx eslint .`.
 
-*   **Antes de qualquer modificação de código:**
-    *   [ ] **Entendimento:** Compreender completamente a tarefa e o contexto do código.
-    *   [ ] **Análise:** Revisar arquivos relacionados, convenções e dependências.
-    *   [ ] **Plano:** Definir um plano de ação claro, incluindo a estratégia de verificação.
-*   **Após cada modificação de código (incremental):**
-    *   [ ] **Compilação:** `npx tsc --noEmit` (sem erros).
-    *   [ ] **Linting:** `npx eslint --fix --ext .ts,.tsx .` (sem erros/warnings).
-    *   [ ] **Testes (se aplicável):** Executar testes relevantes (sem falhas).
-    *   [ ] **Consistência:** A mudança está alinhada com as convenções do projeto?
-    *   [ ] **Reflexão e Registro:** Refletir sobre a ação e registrar o aprendizado na memória.
-*   **Antes de finalizar a tarefa:**
-    *   [ ] **Verificação Completa:** Executar todos os testes, linting e build do projeto.
-    *   [ ] **Revisão de Código:** Preparar um commit semântico e estar pronto para uma revisão.
+---
+**Próximo Passo Concreto para o Próximo Agente:**
 
-## Notas Adicionais para o Agente
-
-*   **Prioridade:** A resolução de erros de tipo e lint é a prioridade máxima.
-*   **Comunicação:** Manter o usuário informado sobre o progresso e quaisquer decisões importantes.
-*   **Segurança:** Continuar aderindo rigorosamente à diretriz de segurança ao executar comandos de shell que modificam o sistema de arquivos.
-*   **Autonomia:** Utilizar os princípios registrados na memória para tomar decisões e resolver problemas de forma autônoma.
-*   **Débito Técnico:** Anotar qualquer uso de `any` ou soluções temporárias como débito técnico para futura refatoração.
+O próximo agente deve começar pela **Fase 1, Passo 1.1. Padronizar Entidades de Domínio**, continuando a criação dos arquivos de entidade e a atualização dos arquivos `shared/types/entities.ts` e `shared/ipc-types/index.ts`.

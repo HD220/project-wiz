@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/ui/lib/utils";
 
-import type { AgentInstance } from "@/shared/ipc-types";
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 interface AgentDetailHeaderProps {
   instance: AgentInstance;

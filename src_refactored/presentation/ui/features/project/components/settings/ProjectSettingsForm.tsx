@@ -7,30 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ProjectForm,
-  ProjectFormData,
-} from "@/ui/features/project/components/ProjectForm";
-
-import { Project } from "@/shared/ipc-types";
-import { GetProjectDetailsResponseData } from "@/shared/ipc-types";
+import { ProjectForm } from "@/ui/features/project/components/ProjectForm";
+import type { Project } from "@/core/domain/entities/project";
 
 interface ProjectSettingsFormProps {
-  project: GetProjectDetailsResponseData;
-  handleSubmit: (formData: ProjectFormData) => Promise<void>;
-  isSubmitting: boolean;
+  project: Project;
 }
 
-export function ProjectSettingsForm({
-  project,
-  handleSubmit,
-  isSubmitting,
-}: ProjectSettingsFormProps) {
-  if (!project) {
-    // Or a loading/error state
-    return null;
-  }
-
+export function ProjectSettingsForm({ project }: ProjectSettingsFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -40,15 +24,7 @@ export function ProjectSettingsForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ProjectForm
-          onSubmit={handleSubmit}
-          initialValues={{
-            name: project.name,
-            description: project.description ?? undefined,
-          }}
-          isSubmitting={isSubmitting}
-          submitButtonText="Salvar Alterações"
-        />
+        <ProjectForm project={project} />
       </CardContent>
     </Card>
   );

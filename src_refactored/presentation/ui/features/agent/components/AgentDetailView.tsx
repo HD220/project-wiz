@@ -8,7 +8,7 @@ import { AgentActivityLogCard } from "@/ui/features/agent/components/AgentActivi
 import { AgentDetailContent } from "@/ui/features/agent/components/AgentDetailContent";
 import { AgentDetailHeader } from "@/ui/features/agent/components/AgentDetailHeader";
 
-import type { AgentInstance } from "@/shared/ipc-types";
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 interface AgentDetailViewProps {
   instance: AgentInstance;

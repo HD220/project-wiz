@@ -1,6 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import React from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,49 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ProjectForm,
-  ProjectFormData,
-} from "@/ui/features/project/components/ProjectForm";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
-
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import type {
-  CreateProjectRequest,
-  CreateProjectResponseData,
-  IPCResponse,
-} from "@/shared/ipc-types";
+import { ProjectForm } from "@/ui/features/project/components/ProjectForm";
 
 function NewProjectPage() {
   const router = useRouter();
-
-  const createProjectMutation = useIpcMutation<
-    IPCResponse<CreateProjectResponseData>,
-    CreateProjectRequest
-  >(IPC_CHANNELS.CREATE_PROJECT, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(`Projeto "${response.data.name}" criado com sucesso!`);
-        router.navigate({
-          to: "/app/projects/$projectId",
-          params: { projectId: response.data.id },
-          replace: true,
-        });
-      } else {
-        toast.error(
-          `Falha ao criar o projeto: ${response.error?.message || "Erro desconhecido retornando sucesso."}`
-        );
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Falha ao criar o projeto: ${error.message}`);
-    },
-  });
-
-  const handleSubmit = async (data: ProjectFormData) => {
-    console.log("Dados do novo projeto:", data);
-    createProjectMutation.mutate(data);
-  };
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto">
@@ -64,18 +24,13 @@ function NewProjectPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ProjectForm
-            onSubmit={handleSubmit}
-            isSubmitting={createProjectMutation.isLoading}
-            submitButtonText="Criar Projeto"
-          />
+          <ProjectForm />
         </CardContent>
       </Card>
       <Button
         variant="link"
         onClick={() => router.history.back()}
         className="mt-4"
-        disabled={createProjectMutation.isLoading}
       >
         Cancelar e Voltar
       </Button>

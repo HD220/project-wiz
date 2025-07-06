@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 // FormControl, etc. are used by sub-components
 import { Form } from "@/components/ui/form";
 
-import type { UserProfile } from "@/shared/ipc-types";
+import type { UserProfile } from "@/core/domain/entities/user";
 
 import { AvatarUrlField } from "./fields/AvatarUrlField";
 import { DisplayNameField } from "./fields/DisplayNameField";
@@ -25,7 +25,8 @@ const profileFormSchema = z.object({
     .string()
     .url("URL do avatar inválida.")
     .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .transform((val) => (val === "" ? undefined : val)),
 });
 
 export type UserProfileFormData = z.infer<typeof profileFormSchema>;
@@ -49,7 +50,7 @@ export function UserProfileForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: initialData?.displayName || "",
-      avatarUrl: initialData?.avatarUrl ?? "",
+      avatarUrl: initialData?.avatarUrl ?? undefined,
     },
   });
 
@@ -57,7 +58,7 @@ export function UserProfileForm({
     if (initialData) {
       form.reset({
         displayName: initialData.displayName,
-        avatarUrl: initialData.avatarUrl || "",
+        avatarUrl: initialData.avatarUrl ?? undefined,
       });
       setCurrentAvatarPreview(initialData.avatarUrl || null);
     }
@@ -137,3 +138,4 @@ export function UserProfileForm({
     </div>
   );
 }
+

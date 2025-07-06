@@ -5,51 +5,12 @@ import { DocSidebar } from "@/ui/features/project/components/docs/DocSidebar";
 import { DocViewer } from "@/ui/features/project/components/docs/DocViewer";
 
 // Mock documentation structure and content
-const mockDocsFileSystem = {
-  readmeMd: {
-    type: "file" as const,
-    content: `# Documentação do Projeto X
-
-Bem-vindo à documentação oficial do Projeto X. Este documento serve como ponto de partida para entender a arquitetura, configuração e funcionalidades chave.
-
-## Seções Principais
-- Arquitetura do Sistema
-- Guia de Instalação
-- Casos de Uso
-
-### Exemplo de Código
-\`\`\`typescript
-function greet(name: string): string {
-  return \`Hello, ${name}!\`;
-}
-\`\`\`
-`,
-  },
-  arquiteturaDir: {
-    type: "folder" as const,
-    nameOverride: "arquitetura/",
-    children: {
-      visaoGeralMd: {
-        nameOverride: "visao-geral.md",
-        type: "file" as const,
-        content: "## Visão Geral da Arquitetura\n\nO sistema é modular...",
-      },
-      componentesMd: {
-        nameOverride: "componentes.md",
-        type: "file" as const,
-        content: "### Componentes Principais\n\n- Módulo A\n- Módulo B",
-      },
-    },
-  },
-  guiasDir: {
-    type: "folder" as const,
-    nameOverride: "guias/",
-    children: {
-      instalacaoMd: {
-        nameOverride: "instalacao.md",
-        type: "file" as const,
-        content: "## Guia de Instalação\n\nSiga os passos...",
-      },
+const mockDocsFileSystem: DocFolder = {
+  type: "folder",
+  children: {
+    testFile: {
+      type: "file",
+      content: "Test content",
     },
   },
 };
@@ -68,14 +29,19 @@ function ProjectDocsPage() {
   ]);
 
   const getFileContent = (pathSegments: string[]): string | null => {
-    let currentEntry: DocEntry | undefined = mockDocsFileSystem;
+    let currentChildren: Record<string, DocEntry> | undefined = mockDocsFileSystem.children;
+    let currentEntry: DocEntry | undefined;
+
     for (const segment of pathSegments) {
+      if (!currentChildren) return null;
+      currentEntry = currentChildren[segment];
+
       if (!currentEntry) return null;
 
       if (currentEntry.type === "folder") {
-        currentEntry = currentEntry.children[segment];
+        currentChildren = currentEntry.children;
       } else {
-        return null;
+        currentChildren = undefined; // No more children to traverse if it's a file
       }
     }
     return currentEntry && currentEntry.type === "file"
@@ -88,7 +54,7 @@ function ProjectDocsPage() {
   return (
     <div className="flex h-[calc(100vh-var(--header-height,150px))]">
       <DocSidebar
-        mockDocsFileSystem={mockDocsFileSystem}
+        mockDocsFileSystem={mockDocsFileSystem.children}
         selectedFilePath={selectedFilePath}
         setSelectedFilePath={setSelectedFilePath}
       />

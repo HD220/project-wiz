@@ -4,7 +4,7 @@ import React from "react";
 import { CardContent } from "@/components/ui/card";
 import { InfoItem } from "@/ui/components/InfoItem";
 
-import type { AgentInstance } from "@/shared/ipc-types";
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 interface AgentDetailContentProps {
   instance: AgentInstance;

@@ -71,7 +71,7 @@ export function MarkdownRenderer({
       const language = match ? match[1] : null;
 
       // Fenced code block
-      if (node?.parent?.tagName === "pre") {
+      if ((node as any)?.parent?.tagName === "pre") {
         return (
           <div className="my-2 bg-slate-100 dark:bg-slate-800 rounded-md overflow-hidden text-xs">
             {language && (

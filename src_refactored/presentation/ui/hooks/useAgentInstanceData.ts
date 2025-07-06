@@ -1,13 +1,12 @@
 import { useParams } from "@tanstack/react-router";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import type { GetAgentInstanceDetailsRequest } from "@/shared/ipc-types/agent.types";
+
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import type {
-  GetAgentInstanceDetailsRequest,
-  AgentInstance,
-  PersonaTemplate,
-  AgentLLM,
-  LLMConfig,
-} from "@/shared/ipc-types";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+import type { LLMConfig } from "@/core/domain/entities/llm";
 
 import { useIpcQuery } from "./ipc/useIpcQuery";
 
@@ -54,9 +53,9 @@ export function useAgentInstanceData() {
 
   return {
     agentId,
-    agentInstance: agentInstance?.success ? agentInstance.data : null,
-    personaTemplates: personaTemplates?.success ? personaTemplates.data : null,
-    llmConfigs: llmConfigs?.success ? llmConfigs.data : null,
+    agentInstance,
+    personaTemplates,
+    llmConfigs,
     isLoadingAll,
     anyError,
     agentError,
@@ -65,3 +64,4 @@ export function useAgentInstanceData() {
     refetchAgent,
   };
 }
+

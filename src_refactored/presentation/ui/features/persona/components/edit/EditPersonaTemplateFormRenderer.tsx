@@ -10,51 +10,47 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  PersonaTemplateForm,
-  PersonaTemplateFormData,
-} from "@/ui/features/persona/components/PersonaTemplateForm";
+import { PersonaTemplateForm, type PersonaTemplateFormData } from "@/ui/features/persona/components/PersonaTemplateForm";
+import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+import { toast } from "sonner";
 
-import type {
-  GetPersonaTemplateDetailsResponseData,
-} from "@/shared/ipc-types";
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import type { GetPersonaTemplateDetailsResponse, UpdatePersonaTemplateRequest, UpdatePersonaTemplateResponse } from "@/shared/ipc-types/persona.types";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
 
 interface EditPersonaTemplateFormRendererProps {
   templateId: string;
-  personaTemplate: GetPersonaTemplateDetailsResponseData;
-  handleSubmit: (formData: PersonaTemplateFormData) => Promise<void>;
-  isSubmitting: boolean;
+  personaTemplate: GetPersonaTemplateDetailsResponse;
 }
 
 export function EditPersonaTemplateFormRenderer({
   templateId,
   personaTemplate,
-  handleSubmit,
-  isSubmitting,
 }: EditPersonaTemplateFormRendererProps) {
-  if (!personaTemplate || !personaTemplate.success || !personaTemplate.data) {
-    return (
-      <div className="p-8 text-center">
-        <p>
-          Template de Persona com ID &quot;{templateId}&quot; não encontrado.
-        </p>
-        <Button variant="outline" className="mt-4" asChild>
-          <Link to="/app/personas">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Personas
-          </Link>
-        </Button>
-      </div>
-    );
+  if (!personaTemplate) {
+    return null;
   }
 
-  const initialValues: Partial<PersonaTemplateFormData> = {
-    id: personaTemplate.data.id,
-    name: personaTemplate.data.name,
-    role: personaTemplate.data.role,
-    goal: personaTemplate.data.goal,
-    backstory: personaTemplate.data.backstory,
-    toolNames: personaTemplate.data.toolNames || [],
+  const updateTemplateMutation = useIpcMutation<
+    UpdatePersonaTemplateResponse,
+    UpdatePersonaTemplateRequest
+  >(IPC_CHANNELS.UPDATE_PERSONA_TEMPLATE, {
+    onSuccess: (data) => {
+      toast.success(`Template "${data.name}" atualizado com sucesso!`);
+    },
+    onError: (error) => {
+      toast.error(`Erro ao atualizar template: ${error.message}`);
+    },
+  });
+
+  const handleSubmit = async (formData: PersonaTemplateFormData) => {
+    updateTemplateMutation.mutate({
+      templateId: personaTemplate.id,
+      data: formData as Partial<PersonaTemplate>,
+    });
   };
+
+  const isSubmitting = updateTemplateMutation.isPending;
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">
@@ -66,7 +62,7 @@ export function EditPersonaTemplateFormRenderer({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
-            Editar Template de Persona: {personaTemplate.data.name}
+            Editar Template de Persona: {personaTemplate.name}
           </CardTitle>
           <CardDescription>
             Modifique as características base deste template de Agente IA.
@@ -74,10 +70,10 @@ export function EditPersonaTemplateFormRenderer({
         </CardHeader>
         <CardContent>
           <PersonaTemplateForm
+            initialValues={personaTemplate}
             onSubmit={handleSubmit}
-            initialValues={initialValues}
             isSubmitting={isSubmitting}
-            submitButtonText="Salvar Alterações"
+            submitButtonText="Atualizar Template"
           />
         </CardContent>
       </Card>

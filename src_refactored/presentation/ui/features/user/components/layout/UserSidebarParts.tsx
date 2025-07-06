@@ -15,7 +15,7 @@ import {
 import { Input } from '@/ui/components/ui/input';
 import { cn } from '@/ui/lib/utils';
 
-import type { DirectMessageItem } from '@/shared/ipc-types';
+import type { DirectMessageItem } from '@/core/domain/entities/chat';
 
 // This mock is used by UserProfileDropdown, so it's included here.
 // If it were used by UserSidebar directly for other purposes, it might stay there or be passed as prop.
@@ -53,7 +53,7 @@ export function DMListItem({ dm, selectedDmId, onSelectDm }: DMListItemProps) {
           "text-white",
           dm.type === 'agent' ? "bg-emerald-500" : "bg-purple-500"
         )}>
-          {dm.type === 'agent' ? <BotIcon size={14}/> : dm.name.substring(0,1).toUpperCase()}
+          {(dm.type as string) === 'agent' ? <BotIcon size={14}/> : dm.name.substring(0,1).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">

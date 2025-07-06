@@ -1,8 +1,8 @@
 import React from 'react';
 import { toast } from 'sonner';
 
-// Assuming Project type is exported
-import { Project, ProjectListItem } from './ProjectListItem';
+import type { Project } from '@/core/domain/entities/project';
+import { ProjectListItem } from './ProjectListItem';
 
 interface ProjectListProps {
   projects: Project[];
@@ -77,3 +77,4 @@ export function ProjectList({ projects, viewMode }: ProjectListProps) {
     </div>
   );
 }
+

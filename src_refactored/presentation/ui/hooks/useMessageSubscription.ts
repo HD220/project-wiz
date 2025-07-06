@@ -5,9 +5,14 @@ import { useIpcSubscription } from "@/ui/hooks/ipc/useIpcSubscription";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetDMMessagesRequest,
-  GetDMMessagesResponseData,
+  GetDMMessagesResponse,
   DMMessageReceivedEventPayload,
-} from "@/shared/ipc-types";
+} from "@/shared/ipc-types/chat.types";
+import type { ChatMessage } from "@/core/domain/entities/chat";
+
+const GET_CONVERSATION_MESSAGES_CHANNEL = IPC_CHANNELS.GET_DM_MESSAGES;
+const CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL =
+  IPC_CHANNELS.DM_MESSAGE_RECEIVED_EVENT;
 
 interface UseMessageSubscriptionProps {
   conversationId: string;
@@ -22,12 +27,12 @@ export function useMessageSubscription({
     error: messagesError,
   } = useIpcSubscription<
     GetDMMessagesRequest,
-    GetDMMessagesResponseData,
+    GetDMMessagesResponse,
     DMMessageReceivedEventPayload
   >(
-    IPC_CHANNELS.GET_DM_MESSAGES,
-    { conversationId },
-    IPC_CHANNELS.DM_MESSAGE_RECEIVED_EVENT,
+    GET_CONVERSATION_MESSAGES_CHANNEL,
+    { conversationId: conversationId || '' },
+    CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL,
     {
       getSnapshot: (prevMessages, eventPayload) => {
         if (eventPayload.conversationId === conversationId) {
@@ -41,8 +46,10 @@ export function useMessageSubscription({
       onError: (err) => {
         toast.error(`Erro na subscrição de mensagens: ${err.message}`);
       },
+      enabled: !!conversationId,
     },
   );
 
   return { messages, isLoadingMessages, messagesError };
 }
+

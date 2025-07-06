@@ -1,4 +1,4 @@
-import { UserProfile } from "../../../../shared/types/entities";
+import { UserProfile } from "@/shared/ipc-types";
 
 export let mockUserProfile: UserProfile = {
   id: "user-123",

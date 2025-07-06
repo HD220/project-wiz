@@ -4,7 +4,7 @@ import React from "react";
 
 import { Button } from "@/components/ui/button";
 
-import type { DirectMessageItem } from "@/shared/ipc-types";
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
 
 interface ChatSidebarProps {
   conversations: DirectMessageItem[] | undefined;

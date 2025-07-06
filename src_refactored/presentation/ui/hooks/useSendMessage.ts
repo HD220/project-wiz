@@ -5,9 +5,8 @@ import { useIpcMutation } from '@/ui/hooks/ipc/useIpcMutation';
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
 import type {
   SendDMMessageRequest as SendConversationMessageRequest,
-  SendDMMessageResponseData as SendConversationMessageResponseData,
-  IPCResponse,
-} from '@/shared/ipc-types';
+  SendDMMessageResponse as SendConversationMessageResponse,
+} from '@/shared/ipc-types/chat.types';
 
 const SEND_CONVERSATION_MESSAGE_CHANNEL = IPC_CHANNELS.SEND_DM_MESSAGE;
 
@@ -17,15 +16,12 @@ interface UseSendMessageProps {
 
 export function useSendMessage({ selectedConversationId }: UseSendMessageProps) {
   const sendMessageMutation = useIpcMutation<
-    IPCResponse<SendConversationMessageResponseData>,
+    SendConversationMessageResponse,
     SendConversationMessageRequest
   >(SEND_CONVERSATION_MESSAGE_CHANNEL, {
-    onSuccess: (response) => {
-      if (!response.success) {
-        toast.error(
-          `Falha ao enviar mensagem: ${response.error?.message || 'Erro desconhecido.'}`, 
-        );
-      }
+    onSuccess: (data) => {
+      // Data is already unwrapped by the hook
+      console.log("Message sent, response data:", data);
     },
     onError: (error) => {
       toast.error(`Erro ao enviar mensagem: ${error.message}`);
@@ -37,7 +33,7 @@ export function useSendMessage({ selectedConversationId }: UseSendMessageProps) 
       toast.error('Nenhuma conversa selecionada.');
       return;
     }
-    if (sendMessageMutation.isLoading) {
+    if (sendMessageMutation.isPending) {
       toast.info('Aguarde o envio da mensagem anterior.');
       return;
     }

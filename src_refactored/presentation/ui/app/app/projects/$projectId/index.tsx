@@ -13,7 +13,7 @@ import { ProjectNotFound } from '@/ui/features/project/components/details/Projec
 import { ProjectOverviewTab } from '@/ui/features/project/components/details/ProjectOverviewTab';
 import { ProjectContextSidebar } from '@/ui/features/project/components/layout/ProjectContextSidebar';
 import { ProjectParticipantsSidebar } from '@/ui/features/project/components/layout/ProjectParticipantsSidebar';
-import { Project } from '@/ui/features/project/components/ProjectListItem';
+import type { Project } from '@/core/domain/entities/project';
 
 // Mock data - replace with actual data fetching
 const mockProjectsData: Record<string, Project> = {

@@ -18,11 +18,15 @@ function AgentInstanceDetailPage() {
     return loadingErrorDisplay;
   }
 
-  const statusInfo = instance?.success && instance.data ? statusDisplayMap[instance.data.status as keyof typeof statusDisplayMap] : statusDisplayMap.idle;
+  if (!instance) {
+    return <div>No agent instance data available.</div>;
+  }
+
+  const statusInfo = statusDisplayMap[instance.status as keyof typeof statusDisplayMap] || statusDisplayMap.idle;
 
   return (
     <AgentDetailView
-      instance={instance.data}
+      instance={instance}
       statusInfo={statusInfo}
       agentId={agentId}
       router={router}

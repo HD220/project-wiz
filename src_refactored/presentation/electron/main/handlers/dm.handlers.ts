@@ -4,15 +4,13 @@ import {
   IPC_CHANNELS
 } from "../../../../shared/ipc-channels";
 import {
-  GetDMConversationsListResponseData,
+  GetDMConversationsListResponse,
   GetDMDetailsRequest,
-  GetDMDetailsResponseData,
+  GetDMDetailsResponse,
   SendDMMessageRequest,
-
   DMMessageReceivedEventPayload,
-  IPCResponse,
-} from "../../../../shared/ipc-types";
-import { ChatMessage } from "../../../../shared/types/entities";
+} from "../../../../shared/ipc-types/chat.types";
+import { ChatMessage, DirectMessageItem } from "@/domain/entities/chat";
 import { mockDMs, addMessageToMockDM } from "../mocks/dm.mocks";
 
 function notifyAllWindows(channel: string, payload: unknown) {
@@ -65,7 +63,7 @@ function simulateAgentReply(dmId: string, originalContent: string, updatedDM: { 
 async function handleSendDMMessage(
   _event: IpcMainInvokeEvent,
   req: SendDMMessageRequest
-): Promise<IPCResponse<ChatMessage>> {
+): Promise<ChatMessage> {
   await new Promise((resolve) => setTimeout(resolve, 50));
   const { dmId, content, senderId } = req;
 
@@ -92,19 +90,16 @@ async function handleSendDMMessage(
     if (senderId !== "agent-1") {
       simulateAgentReply(dmId, content, updatedDM);
     }
-    return { success: true, data: newMessage };
+    return newMessage;
   }
-  return {
-    success: false,
-    error: { message: "DM not found or failed to send message" },
-  };
+  throw new Error("DM not found or failed to send message");
 }
 
 
 function registerQueryDMHandlers() {
-  ipcMain.handle(IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST, async (): Promise<IPCResponse<GetDMConversationsListResponseData>> => {
+  ipcMain.handle(IPC_CHANNELS.GET_DM_CONVERSATIONS_LIST, async (): Promise<DirectMessageItem[]> => {
     await new Promise((resolve) => setTimeout(resolve, 50));
-    return { success: true, data: mockDMs };
+    return mockDMs;
   });
 
   ipcMain.handle(
@@ -112,13 +107,13 @@ function registerQueryDMHandlers() {
     async (
       _event: IpcMainInvokeEvent,
       req: GetDMDetailsRequest
-    ): Promise<IPCResponse<GetDMDetailsResponseData>> => {
+    ): Promise<DirectMessageItem | null> => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       const dm = mockDMs.find((dmEntry) => dmEntry.id === req.dmId);
       if (dm) {
-        return { success: true, data: dm };
+        return dm;
       }
-      return { success: false, error: { message: "DM not found" } };
+      throw new Error("DM not found");
     }
   );
 }

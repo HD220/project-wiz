@@ -1,11 +1,11 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 
+import { ProjectListItem } from "@/core/application/use-cases/project/list-projects.schema";
 import { ListProjectsUseCase } from "@/core/application/use-cases/project/list-projects.use-case";
 import { Project } from "@/core/domain/project/project.entity";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { IPCResponse } from "@/shared/ipc-types";
-import { ProjectListItem } from "@/core/application/use-cases/project/list-projects.schema";
 
 
 let internalListProjectsUseCase: ListProjectsUseCase | null = null;
@@ -27,17 +27,7 @@ export function registerProjectIPCHandlers(
   console.log("[IPC Project Handler] Project IPC handlers registered.");
 }
 
-function mapProjectsToProjectListItems(projects: Project[]): ProjectListItem[] {
-  return projects.map((project) => ({
-    id: project.id.value,
-    name: project.name.value,
-    description: project.description?.value,
-    createdAt: project.createdAt.toISOString(),
-    updatedAt: project.updatedAt.toISOString(),
-    // ownerName: project.owner?.name.value, // Example, if Project entity has owner
-    // thumbnailUrl: project.thumbnailUrl?.value, // Example
-  }));
-}
+
 
 async function handleProjectListQuery(_event: IpcMainInvokeEvent, ...args: unknown[]): Promise<IPCResponse<ProjectListItem[]>> {
   console.log(
@@ -54,21 +44,8 @@ async function handleProjectListQuery(_event: IpcMainInvokeEvent, ...args: unkno
       };
     }
 
-    const result = await internalListProjectsUseCase.execute();
-
-    if (!result.success) {
-      console.error(
-        "[IPC Project Handler] Error listing projects:",
-        (result as { error: { message: string; name: string } }).error
-      );
-      return {
-        success: false,
-        error: { message: (result as { error: { message: string } }).error.message, name: (result as { error: { name: string } }).error.name },
-      };
-    }
-
-    const projects = result.data;
-    const projectListItems = mapProjectsToProjectListItems(projects);
+    const projects = await internalListProjectsUseCase.execute({});
+    const projectListItems = projects;
     console.log(
       `[IPC Project Handler] Sending ${projectListItems.length} projects.`
     );

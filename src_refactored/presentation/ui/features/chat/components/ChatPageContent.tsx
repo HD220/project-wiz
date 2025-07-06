@@ -2,18 +2,11 @@ import React from "react";
 
 import { ChatWindow } from "@/ui/features/chat/components/ChatWindow";
 
+import { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
 import type {
-  GetDMMessagesResponseData as GetConversationMessagesResponseData,
-  DirectMessageItem,
-  ChatMessage,
-} from "@/shared/ipc-types";
-
-interface ChatWindowConversationHeader {
-  id: string;
-  name: string;
-  type: "dm" | "channel" | "agent";
-  avatarUrl?: string;
-}
+  GetDMMessagesResponse,
+} from "@/shared/ipc-types/chat.types";
+import type { ChatMessage } from "@/core/domain/entities/chat";
 
 interface ChatPageContentProps {
   conversationHeader: ChatWindowConversationHeader | null;
@@ -46,7 +39,7 @@ export function ChatPageContent({
       )}
       <ChatWindow
         conversation={conversationHeader}
-        messages={messages}
+        messages={messages ?? []}
         onSendMessage={onSendMessage}
         isLoading={isLoadingMessages && !messagesError}
         currentUserId={currentUserId}

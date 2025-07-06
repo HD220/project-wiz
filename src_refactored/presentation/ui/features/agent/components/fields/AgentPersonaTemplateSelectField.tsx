@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { PersonaTemplate } from "@/shared/ipc-types";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
 
 import type { AgentInstanceFormData } from "../AgentInstanceForm";
 

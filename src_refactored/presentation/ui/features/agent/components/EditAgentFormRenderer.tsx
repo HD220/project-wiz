@@ -15,25 +15,27 @@ import {
   AgentInstanceFormData,
 } from "@/ui/features/agent/components/AgentInstanceForm";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+import type { LLMConfig } from "@/core/domain/entities/llm";
 import type {
-  GetPersonaTemplatesListResponseData,
-  GetLLMConfigsListResponseData,
-  GetAgentInstanceDetailsResponseData,
-  PersonaTemplate,
-  LLMConfig,
-  AgentLLM,
-} from "@/shared/ipc-types";
-
-import { AgentInstance } from "@/shared/types/entities";
+  GetPersonaTemplatesListResponse,
+} from "@/shared/ipc-types/persona.types";
+import type {
+  GetLLMConfigsListResponse,
+} from "@/shared/ipc-types/llm.types";
+import type {
+  GetAgentInstanceDetailsResponse,
+} from "@/shared/ipc-types/agent.types";
 
 interface EditAgentFormRendererProps {
   agentId: string;
   agentInstance: AgentInstance;
-  personaTemplates: PersonaTemplate[] | null | undefined;
-  llmConfigs: Record<AgentLLM, LLMConfig> | null | undefined;
+  personaTemplates: PersonaTemplate[];
+  llmConfigs: Record<AgentLLM, LLMConfig>;
   handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
-  initialValues?: Partial<AgentInstanceFormData>;
 }
 
 export function EditAgentFormRenderer({
@@ -44,20 +46,6 @@ export function EditAgentFormRenderer({
   handleSubmit,
   isSubmitting,
 }: EditAgentFormRendererProps) {
-  if (!agentInstance) {
-    // Should not happen if DataLoadingOrErrorDisplay is used before this
-    return (
-      <div className="p-8 text-center">
-        <p>Instância de Agente não encontrada.</p>
-        <Button variant="outline" className="mt-4" asChild>
-          <Link to="/app/agents">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Agentes
-          </Link>
-        </Button>
-      </div>
-    );
-  }
-
   const initialValues: Partial<AgentInstanceFormData> = {
     agentName: agentInstance.agentName,
     personaTemplateId: agentInstance.personaTemplateId,
@@ -86,11 +74,9 @@ export function EditAgentFormRenderer({
         </CardHeader>
         <CardContent>
           <AgentInstanceForm
-            onSubmit={handleSubmit}
-            initialValues={initialValues}
-            isSubmitting={isSubmitting}
-            personaTemplates={personaTemplates?.data || []}
-            llmConfigs={llmConfigs?.data || []}
+            agentInstance={agentInstance}
+            personaTemplates={personaTemplates}
+            llmConfigs={Object.values(llmConfigs)}
           />
         </CardContent>
       </Card>

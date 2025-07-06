@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Project } from '@/ui/features/project/components/ProjectListItem';
+import type { Project } from '@/core/domain/entities/project';
 
 export const ProjectOverviewTab = ({ project }: { project: Project }) => (
   <div className="space-y-6">

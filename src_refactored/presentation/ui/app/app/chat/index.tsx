@@ -20,15 +20,15 @@ export function ChatPage() {
   const {
     selectedConversationId,
     sidebarConversations,
-    isLoadingSidebarConvs,
-    sidebarConvsError,
     messages: chatMessages,
-    isLoadingMessages,
-    messagesError,
     handleSendMessage,
     handleSelectConversation,
     chatWindowConversationHeader,
     currentUserId,
+    isLoadingSidebarConvs,
+    sidebarConvsError,
+    isLoadingMessages,
+    messagesError,
   } = useChatLogic({
     selectedConversationIdFromSearch,
     routeFullPath: Route.fullPath,
@@ -37,7 +37,7 @@ export function ChatPage() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950">
       <ChatSidebar
-        conversations={sidebarConversations?.success ? sidebarConversations.data : undefined}
+        conversations={sidebarConversations}
         selectedConversationId={selectedConversationId}
         onSelectConversation={handleSelectConversation}
         isLoading={isLoadingSidebarConvs}

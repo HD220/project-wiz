@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Project } from '@/ui/features/project/components/ProjectListItem';
+import type { Project } from '@/core/domain/entities/project';
 import { statusDetails } from '@/ui/features/project/misc/statusDetails';
 
 interface ProjectDetailHeaderProps {

@@ -5,6 +5,7 @@ import { UseFormReturn } from "react-hook-form";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+
 import { UserProfileFormData } from "../UserProfileForm";
 
 interface UserProfileAvatarProps {

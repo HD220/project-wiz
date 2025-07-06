@@ -1,15 +1,13 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { z } from "zod";
 
 import { useConversationMessages } from "@/ui/hooks/useConversationMessages";
 import { useSendMessage } from "@/ui/hooks/useSendMessage";
 import { useSidebarConversations } from "@/ui/hooks/useSidebarConversations";
 
-import type {
-  DirectMessageItem,
-  ChatMessage,
-} from "@/shared/ipc-types";
+import type { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
+import type { DirectMessageItem, ChatMessage } from "@/core/domain/entities/chat";
 
 const currentUserId = "userJdoe";
 
@@ -36,29 +34,19 @@ export function useChatLogic({
     setSelectedConversationId(selectedConversationIdFromSearch);
   }, [selectedConversationIdFromSearch]);
 
-  const {
-    sidebarConversations,
-    isLoadingSidebarConvs,
-    sidebarConvsError,
-  } = useSidebarConversations();
+  const { sidebarConversations, isLoadingSidebarConvs, sidebarConvsError } = useSidebarConversations();
 
   const selectedConversationDetails = useMemo(() => {
     if (!selectedConversationId || !sidebarConversations) return null;
     return (
-      sidebarConversations?.find((conv) => conv.id === selectedConversationId) ||
+      sidebarConversations.find((conv: DirectMessageItem) => conv.id === selectedConversationId) ||
       null
     );
   }, [selectedConversationId, sidebarConversations]);
 
-  const {
-    data: messagesResponse,
-    isLoading: isLoadingMessages,
-    error: messagesError,
-  } = useConversationMessages({
+  const { messages, isLoadingMessages, messagesError } = useConversationMessages({
     selectedConversationId,
   });
-
-  const messages: ChatMessage[] | null | undefined = messagesResponse?.data;
 
   const { handleSendMessage } = useSendMessage({
     selectedConversationId,
@@ -66,25 +54,33 @@ export function useChatLogic({
 
   const handleSelectConversation = (convId: string): void => {
     navigate({
-      search: { conversationId: convId },
+      search: (prev: { conversationId?: string }) => ({ ...prev, conversationId: convId }),
       replace: true,
     });
   };
 
-  const chatWindowConversationHeader = useMemo(() => {
+  const getChatWindowConversationHeader = useCallback((): ChatWindowConversationHeader | null => {
     if (!selectedConversationDetails) return null;
+
+    let type: "agent" | "dm" | "channel";
+    if (selectedConversationDetails.type === "dm") {
+      type = "dm";
+    } else if (selectedConversationDetails.type === "agent") {
+      type = "agent";
+    } else {
+      // Fallback or default for other types, assuming 'channel' for now
+      type = "channel";
+    }
+
     return {
       id: selectedConversationDetails.id,
       name: selectedConversationDetails.name,
-      type:
-        selectedConversationDetails.type === "agent"
-          ? "agent"
-          : selectedConversationDetails.type === "dm"
-            ? "dm"
-            : "channel",
+      type: type,
       avatarUrl: selectedConversationDetails.avatarUrl,
     };
   }, [selectedConversationDetails]);
+
+  const chatWindowConversationHeader = getChatWindowConversationHeader();
 
   return {
     selectedConversationId,

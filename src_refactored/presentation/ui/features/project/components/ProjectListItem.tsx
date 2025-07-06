@@ -14,18 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/ui/components/ui/dropdown-menu';
 import { Separator } from '@/ui/components/ui/separator';
-
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  lastActivity: string;
-  status: 'active' | 'paused' | 'planning' | 'completed' | 'archived';
-  agentCount: number;
-  taskCount: number;
-  // Optional image for the project card
-  // imageUrl?: string;
-}
+import type { Project } from "@/core/domain/entities/project";
 
 interface ProjectActionsDropdownProps {
   project: Project;
@@ -111,7 +100,7 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate" title={project.name}>
                 {project.name}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate" title={project.description}>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate" title={project.description || "Sem descrição"}>
                 {project.description || "Sem descrição"}
               </p>
             </div>
@@ -153,7 +142,7 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
             </Badge>
           </div>
           <CardTitle className="mt-3 text-lg truncate" title={project.name}>{project.name}</CardTitle>
-          <CardDescription className="text-xs h-8 line-clamp-2" title={project.description}>
+          <CardDescription className="text-xs h-8 line-clamp-2" title={project.description || "Sem descrição"}>
             {project.description || "Sem descrição"}
           </CardDescription>
         </CardHeader>
@@ -181,3 +170,4 @@ export function ProjectListItem({ project, viewMode, onDelete, onEdit, onToggleS
     </Card>
   );
 }
+

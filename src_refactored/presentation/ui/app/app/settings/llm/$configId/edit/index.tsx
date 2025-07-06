@@ -22,15 +22,19 @@ import {
   LLMConfigForm,
   LLMConfigFormData,
 } from "@/ui/features/llm/components/LLMConfigForm";
-import { LLMConfig } from "@/ui/features/llm/components/LLMConfigList";
+import { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
 
 // Simulating a "database" of LLM configurations
 // In a real app, this would be fetched and updated via IPC/API
+
 let mockLlmConfigsDb: Record<string, LLMConfig> = {
   configId1: {
     id: "1",
     name: "OpenAI Pessoal",
     providerId: "openai",
+    llm: AgentLLM.OPENAI_GPT_4_TURBO,
+    temperature: 0.7,
+    maxTokens: 2048,
     baseUrl: "https://api.openai.com/v1",
     apiKey: "sk-...",
   },
@@ -38,12 +42,18 @@ let mockLlmConfigsDb: Record<string, LLMConfig> = {
     id: "2",
     name: "Ollama Local (Llama3)",
     providerId: "ollama",
+    llm: AgentLLM.OLLAMA_LLAMA2,
+    temperature: 0.7,
+    maxTokens: 2048,
     baseUrl: "http://localhost:11434",
   },
   configId3: {
     id: "3",
     name: "DeepSeek Trabalho",
     providerId: "deepseek",
+    llm: AgentLLM.OPENAI_GPT_4_TURBO, // Assuming a default LLM for DeepSeek
+    temperature: 0.7,
+    maxTokens: 2048,
     apiKey: "dk-...",
   },
 };

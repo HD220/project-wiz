@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 // Removed User import
 import { MessageSquare, Settings, Plus, Users, Search } from "lucide-react";
 import React from "react";
@@ -51,12 +51,13 @@ interface DirectMessageItemProps {
 }
 
 function DirectMessageItem({
-  id,
+  id = "",
   name,
   avatarUrl,
   status = "offline",
   isActive,
 }: DirectMessageItemProps) {
+  const router = useRouter();
   // Placeholder base path for DMs
   const basePath = "/app/user/dms";
   const initials = name
@@ -67,7 +68,8 @@ function DirectMessageItem({
     .toUpperCase();
   return (
     <Link
-      to={`${basePath}/${id}`}
+      to="/app/user/dm/$conversationId"
+      params={{ conversationId: id }}
       className={`flex items-center space-x-3 px-3 py-1.5 text-sm group rounded-md
                         ${
                           isActive

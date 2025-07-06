@@ -1,8 +1,4 @@
-import {
-  LLMConfig,
-  AgentLLM,
-  LLMSettings,
-} from "../../../../shared/types/entities";
+import { LLMConfig, AgentLLM } from "@/shared/ipc-types";
 
 // This could represent globally available LLM models or presets
 export const mockAvailableLLMs: LLMConfig[] = [

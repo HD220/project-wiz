@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { LLMConfig } from "@/shared/ipc-types";
+import type { LLMConfig } from "@/core/domain/entities/llm";
 
 // Path to AgentInstanceFormData is now fixed relative to this file's new location
 import type { AgentInstanceFormData } from "../AgentInstanceForm";

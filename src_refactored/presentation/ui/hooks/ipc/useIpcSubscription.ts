@@ -3,25 +3,44 @@ import { toast } from 'sonner';
 
 import { IPCResponse } from "@/shared/ipc-types";
 
+// Helper function to fetch initial data, similar to ipcQueryFn
+async function ipcSubscriptionInitialFetchFn<TResponse, TRequest>(
+  channel: string,
+  params?: TRequest
+): Promise<TResponse> {
+  if (!window.electronIPC) {
+    throw new Error("Electron IPC bridge not available.");
+  }
+
+  const result = await window.electronIPC.invoke<IPCResponse<TResponse>>(
+    channel,
+    params
+  );
+
+  if (result.success) {
+    return result.data;
+  } else {
+    throw new Error(result.error.message);
+  }
+}
+
 interface IpcSubscriptionOptions<InitialData, EventPayload> {
-  getSnapshot: (prevData: IPCResponse<InitialData> | null, eventPayload: EventPayload) => IPCResponse<InitialData> | null;
+  getSnapshot: (prevData: InitialData | null, eventPayload: EventPayload) => InitialData | null;
   onError?: (error: Error) => void;
   initialData?: InitialData | null;
-  // To enable/disable the subscription
   enabled?: boolean;
 }
 
-// Helper hook for initial data fetching
 function useInitialIpcData<Args, InitialData>(
   fetchChannel: string,
   fetchArgs: Args,
   optionsOnError?: (error: Error) => void,
-  providedInitialData: IPCResponse<InitialData> | null = null,
+  providedInitialData: InitialData | null = null,
   enabled: boolean = true
 ) {
   const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<IPCResponse<InitialData> | null>(providedInitialData);
+  const [data, setData] = useState<InitialData | null>(providedInitialData);
 
   const memoizedFetchArgs = useMemo(() => fetchArgs, [fetchArgs]);
 
@@ -35,16 +54,8 @@ function useInitialIpcData<Args, InitialData>(
     setIsLoading(true);
     setError(null);
 
-    if (!window.electronIPC) {
-      const errMsg = 'Electron IPC bridge not found.';
-      setError(new Error(errMsg));
-      setIsLoading(false);
-      if (optionsOnError) optionsOnError(new Error(errMsg)); else toast.error(errMsg);
-      return;
-    }
-
-    window.electronIPC.invoke(fetchChannel, memoizedFetchArgs)
-      .then((response: IPCResponse<InitialData>) => {
+    ipcSubscriptionInitialFetchFn<InitialData, Args>(fetchChannel, memoizedFetchArgs)
+      .then((response) => {
         if (!isMounted) return;
         setData(response);
       })
@@ -63,12 +74,11 @@ function useInitialIpcData<Args, InitialData>(
   return { isLoading, error, data, setData };
 }
 
-
 export function useIpcSubscription<Args, InitialData, EventPayload>(
   initialFetchChannel: string,
   initialFetchArgs: Args,
   eventChannel: string,
-  options: IpcSubscriptionOptions<IPCResponse<InitialData>, EventPayload>
+  options: IpcSubscriptionOptions<InitialData, EventPayload>
 ) {
   const { getSnapshot, onError: optionsOnError, initialData: providedInitialData = null, enabled = true } = options;
 
@@ -92,10 +102,6 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
         }
         return () => {};
     }
-    if (!window.electronIPC) {
-        console.warn('IPC bridge not available for subscription in useIpcSubscription.');
-        return () => {};
-    }
 
     const handler = (eventPayload: EventPayload) => {
       console.log(`useIpcSubscription: Event received on ${eventChannel}:`, eventPayload);
@@ -104,7 +110,7 @@ export function useIpcSubscription<Args, InitialData, EventPayload>(
     };
 
     console.log(`useIpcSubscription: Subscribing to ${eventChannel}`);
-    const unsubscribeFn = window.electronIPC.on(eventChannel, (_event, eventPayload: EventPayload) => handler(eventPayload));
+    const unsubscribeFn = window.electronIPC.on(eventChannel, (_event, ...args) => handler(args[0] as EventPayload));
 
     return () => {
       console.log(`useIpcSubscription: Unsubscribing from ${eventChannel}`);

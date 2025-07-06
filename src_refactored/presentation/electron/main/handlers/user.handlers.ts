@@ -4,21 +4,22 @@ import {
   IPC_CHANNELS
 } from '../../../../shared/ipc-channels';
 import {
-  GetUserProfileResponseData,
+  GetUserProfileResponse,
   UpdateUserProfileRequest,
-  UpdateUserProfileResponseData,
-} from '../../../../shared/ipc-types';
+  UpdateUserProfileResponse,
+} from '../../../../shared/ipc-types/user.types';
+import { UserProfile } from "@/domain/entities/user";
 import { mockUserProfile, updateMockUserProfile } from '../mocks/user.mocks';
 
 export function registerUserHandlers() {
-  ipcMain.handle(IPC_CHANNELS.GET_USER_PROFILE, async (): Promise<GetUserProfileResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.GET_USER_PROFILE, async (): Promise<UserProfile | null> => {
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { success: true, data: mockUserProfile };
+    return mockUserProfile;
   });
 
-  ipcMain.handle(IPC_CHANNELS.UPDATE_USER_PROFILE, async (_event, req: UpdateUserProfileRequest): Promise<UpdateUserProfileResponseData> => {
+  ipcMain.handle(IPC_CHANNELS.UPDATE_USER_PROFILE, async (_event, req: UpdateUserProfileRequest): Promise<UserProfile> => {
     await new Promise(resolve => setTimeout(resolve, 50));
     const updatedProfile = updateMockUserProfile(req.updates);
-    return { success: true, data: updatedProfile };
+    return updatedProfile;
   });
 }

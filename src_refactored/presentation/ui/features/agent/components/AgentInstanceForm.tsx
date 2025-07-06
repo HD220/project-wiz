@@ -9,17 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   CreateAgentInstanceRequest,
-  CreateAgentInstanceResponseData,
-  AgentInstance,
+  CreateAgentInstanceResponse,
   UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponseData,
-  PersonaTemplate,
-  LLMConfig,
-  IPCResponse,
-} from "@/shared/ipc-types";
+  UpdateAgentInstanceResponse,
+} from "@/shared/ipc-types/agent.types";
 
 import { AgentLLMConfigSelectField } from "./fields/AgentLLMConfigSelectField";
 import { AgentNameField } from "./fields/AgentNameField";
@@ -49,10 +48,7 @@ interface AgentInstanceFormProps {
   agentInstance?: AgentInstance;
   personaTemplates: Pick<PersonaTemplate, "id" | "name">[];
   llmConfigs: Pick<LLMConfig, "id" | "name" | "providerId">[];
-  onSubmit?: (formData: AgentInstanceFormData) => Promise<void>;
   onSuccess?: (data: AgentInstance) => void;
-  initialValues?: Partial<AgentInstanceFormData>;
-  isSubmitting?: boolean;
 }
 
 export function AgentInstanceForm({
@@ -75,22 +71,18 @@ export function AgentInstanceForm({
   });
 
   const createAgentMutation = useIpcMutation<
-    IPCResponse<CreateAgentInstanceResponseData>,
+    CreateAgentInstanceResponse,
     CreateAgentInstanceRequest
   >(IPC_CHANNELS.CREATE_AGENT_INSTANCE, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(
-          `Agente "${response.data.agentName || response.data.id}" criado com sucesso!`
-        );
-        onSuccess?.(response.data.data);
-        router.navigate({
-          to: "/app/agents/$agentId",
-          params: { agentId: response.data.id },
-        });
-      } else {
-        toast.error(response.error?.message || "Falha ao criar o agente.");
-      }
+    onSuccess: (data) => {
+      toast.success(
+        `Agente "${data.agentName || data.id}" criado com sucesso!`
+      );
+      onSuccess?.(data);
+      router.navigate({
+        to: "/app/agents/$agentId",
+        params: { agentId: data.id },
+      });
     },
     onError: (error) => {
       toast.error(`Erro ao criar agente: ${error.message}`);
@@ -98,18 +90,14 @@ export function AgentInstanceForm({
   });
 
   const updateAgentMutation = useIpcMutation<
-    IPCResponse<UpdateAgentInstanceResponseData>,
+    UpdateAgentInstanceResponse,
     UpdateAgentInstanceRequest
   >(IPC_CHANNELS.UPDATE_AGENT_INSTANCE, {
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        toast.success(
-          `Agente "${response.data.agentName || response.data.id}" atualizado com sucesso!`
-        );
-        onSuccess?.(response.data.data);
-      } else {
-        toast.error(response.error?.message || "Falha ao atualizar o agente.");
-      }
+    onSuccess: (data) => {
+      toast.success(
+        `Agente "${data.agentName || data.id}" atualizado com sucesso!`
+      );
+      onSuccess?.(data);
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar agente: ${error.message}`);
@@ -117,7 +105,7 @@ export function AgentInstanceForm({
   });
 
   const isSubmitting =
-    createAgentMutation.isLoading || updateAgentMutation.isLoading;
+    createAgentMutation.isPending || updateAgentMutation.isPending;
 
   const handleSubmit = (data: AgentInstanceFormData) => {
     if (isEditing && agentInstance) {
