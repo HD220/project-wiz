@@ -1,10 +1,11 @@
 import { toast } from "sonner";
 
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type { SendDMMessageRequest, SendDMMessageResponse } from "@/shared/ipc-types/chat.types";
-import type { DirectMessageItem, ChatMessage } from "@/core/domain/entities/chat";
 
 interface UseMessageSendingProps {
   conversationId: string;

@@ -7,13 +7,14 @@ import {
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import type { Project } from '@/core/domain/entities/project';
+
 import { ProjectDetailHeader } from '@/ui/features/project/components/details/ProjectDetailHeader';
 import { ProjectLoading } from '@/ui/features/project/components/details/ProjectLoading';
 import { ProjectNotFound } from '@/ui/features/project/components/details/ProjectNotFound';
 import { ProjectOverviewTab } from '@/ui/features/project/components/details/ProjectOverviewTab';
 import { ProjectContextSidebar } from '@/ui/features/project/components/layout/ProjectContextSidebar';
 import { ProjectParticipantsSidebar } from '@/ui/features/project/components/layout/ProjectParticipantsSidebar';
-import type { Project } from '@/core/domain/entities/project';
 
 // Mock data - replace with actual data fetching
 const mockProjectsData: Record<string, Project> = {

@@ -11,13 +11,12 @@ import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetPersonaTemplateDetailsRequest,
-  GetPersonaTemplateDetailsResponse,
 } from "@/shared/ipc-types/persona.types";
 
 function EditPersonaTemplatePage() {
   const { templateId } = useParams({ from: "/app/personas/$templateId/edit/" });
 
-  const { data: personaTemplate, isLoading, error, refetch } = useIpcQuery<
+  const { data: personaTemplate, isLoading, error } = useIpcQuery<
     GetPersonaTemplateDetailsResponse,
     GetPersonaTemplateDetailsRequest
   >(

@@ -1,18 +1,11 @@
 import { ipcMain } from 'electron';
 
-import {
-  IPC_CHANNELS
-} from '../../../../shared/ipc-channels';
-import {
-  GetAvailableLLMsResponse,
-  GetLLMConfigsListResponse,
-  UpdateLLMConfigRequest,
-  UpdateLLMConfigResponse
-} from '../../../../shared/ipc-types/llm.types';
 import { AgentLLM, LLMConfig } from "@/domain/entities/llm";
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import { UpdateLLMConfigRequest } from '@/shared/ipc-types/llm.types';
 import {
   mockAvailableLLMs,
-  // mockUserLLMConfigs, // Not directly used, access via getLLMConfigWithDefaults or updateUserLLMConfig
   updateUserLLMConfig,
   getLLMConfigWithDefaults
 } from '../mocks/llm-config.mocks';

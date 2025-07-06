@@ -1,18 +1,9 @@
 import { ipcMain } from 'electron';
 
-import {
-  IPC_CHANNELS
-} from '../../../../shared/ipc-channels';
-import {
-  GetPersonaTemplatesListResponse,
-  GetPersonaTemplateDetailsRequest,
-  GetPersonaTemplateDetailsResponse,
-  CreatePersonaTemplateRequest,
-  CreatePersonaTemplateResponse,
-  UpdatePersonaTemplateRequest,
-  UpdatePersonaTemplateResponse,
-} from '../../../../shared/ipc-types/persona.types';
 import { PersonaTemplate } from "@/domain/entities/persona";
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import { GetPersonaTemplateDetailsRequest, CreatePersonaTemplateRequest, UpdatePersonaTemplateRequest } from '@/shared/ipc-types/persona.types';
 import { mockPersonaTemplates } from '../mocks/persona-template.mocks';
 
 export function registerPersonaTemplateHandlers() {

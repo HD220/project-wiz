@@ -27,4 +27,4 @@ export interface AgentInstanceFormData {
   tools?: string[];
 }
 
-import { LLMConfig } from "./llm"; // Import LLMConfig from its new location
+import { LLMConfig } from "./llm";

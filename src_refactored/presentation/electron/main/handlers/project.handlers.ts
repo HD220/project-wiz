@@ -1,21 +1,12 @@
 import { ipcMain } from "electron";
 
-import {
-  IPC_CHANNELS
-} from "../../../../shared/ipc-channels";
-import {
-  GetProjectDetailsRequest,
-  CreateProjectRequest,
-  CreateProjectResponse,
-  UpdateProjectRequest,
-  UpdateProjectResponse,
-  Project,
-} from "../../../../shared/ipc-types";
 import { GetAllProjectsUseCase } from "@/core/application/use-cases/get-all-projects.use-case";
-import { InMemoryProjectRepository } from "@/infrastructure/persistence/repositories/in-memory-project.repository";
+import { IProjectRepository } from "@/core/domain/repositories/project.repository";
 
-function registerQueryProjectHandlers() {
-  const projectRepository = new InMemoryProjectRepository();
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { GetProjectDetailsRequest, CreateProjectRequest, UpdateProjectRequest, Project } from "@/shared/ipc-types";
+
+function registerQueryProjectHandlers(projectRepository: IProjectRepository) {
   const getAllProjectsUseCase = new GetAllProjectsUseCase(projectRepository);
 
   ipcMain.handle(
@@ -42,8 +33,7 @@ function registerQueryProjectHandlers() {
   );
 }
 
-function registerMutationProjectHandlers() {
-  const projectRepository = new InMemoryProjectRepository();
+function registerMutationProjectHandlers(projectRepository: IProjectRepository) {
 
   ipcMain.handle(
     IPC_CHANNELS.CREATE_PROJECT,
@@ -73,7 +63,7 @@ function registerMutationProjectHandlers() {
   );
 }
 
-export function registerProjectHandlers() {
-  registerQueryProjectHandlers();
-  registerMutationProjectHandlers();
+export function registerProjectHandlers(projectRepository: IProjectRepository) {
+  registerQueryProjectHandlers(projectRepository);
+  registerMutationProjectHandlers(projectRepository);
 }

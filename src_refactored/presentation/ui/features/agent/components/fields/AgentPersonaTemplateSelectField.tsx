@@ -1,6 +1,8 @@
 import React from "react";
 import { Control } from "react-hook-form";
 
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 import {
   FormControl,
   FormDescription,
@@ -17,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
 
 import type { AgentInstanceFormData } from "../AgentInstanceForm";
 

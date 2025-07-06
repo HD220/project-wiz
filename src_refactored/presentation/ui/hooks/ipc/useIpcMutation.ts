@@ -30,9 +30,9 @@ async function ipcMutationFn<TResponse, TRequest>(
 
   if (result.success) {
     return result.data;
-  } else {
+  } 
     throw new Error(result.error.message);
-  }
+  
 }
 
 // Define a type for the hook's options, excluding mutationFn.

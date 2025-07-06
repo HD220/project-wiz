@@ -2,9 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Bot, Hash, Loader2, ServerCrash, ArrowLeft } from "lucide-react";
 import React from "react";
 
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { Button } from "@/components/ui/button";
 
-import type { DirectMessageItem } from "@/core/domain/entities/chat";
 
 interface ChatSidebarProps {
   conversations: DirectMessageItem[] | undefined;

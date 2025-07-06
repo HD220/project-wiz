@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
+import type { Project } from '@/core/domain/entities/project';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,7 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Project } from '@/core/domain/entities/project';
 import { statusDetails } from '@/ui/features/project/misc/statusDetails';
 
 interface ProjectDetailHeaderProps {

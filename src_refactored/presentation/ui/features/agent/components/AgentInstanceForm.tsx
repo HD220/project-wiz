@@ -5,13 +5,15 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
-import type { AgentInstance } from "@/core/domain/entities/agent";
-import type { LLMConfig } from "@/core/domain/entities/llm";
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   CreateAgentInstanceRequest,

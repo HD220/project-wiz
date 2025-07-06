@@ -1,5 +1,5 @@
-import { IProjectRepository } from "@/core/domain/repositories/project.repository";
 import { Project, ProjectCreationProps, ProjectUpdateProps } from "@/core/domain/entities/project";
+import { IProjectRepository } from "@/core/domain/repositories/project.repository";
 
 // Mock data for initial state
 const mockProjects: Project[] = [
@@ -47,7 +47,7 @@ export class InMemoryProjectRepository implements IProjectRepository {
       id: `proj-${Date.now()}`,
       ...projectProps,
       lastActivity: new Date().toISOString(),
-      status: "active", // Default status
+      status: "active",
       agentCount: 0,
       taskCount: 0,
       createdAt: new Date().toISOString(),

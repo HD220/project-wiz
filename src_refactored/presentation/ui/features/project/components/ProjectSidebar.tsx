@@ -1,5 +1,5 @@
 // Removed useParams
-import { Link, useParams, useRouter } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 // Removed Folder
 import { ChevronRight, LayoutDashboard, CheckSquare, MessageSquare, FileText, Settings2, Hash, Plus } from 'lucide-react';
 import React from 'react';
@@ -42,7 +42,6 @@ interface ProjectSidebarProps {
 }
 
 export function ProjectSidebar({ className }: ProjectSidebarProps) {
-  const router = useRouter();
   // In a real scenario, projectId would come from router params or props.
   // if used in a route component
   // const params = useParams();

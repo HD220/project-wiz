@@ -21,9 +21,9 @@ async function ipcQueryFn<TResponse, TRequest>(
 
   if (result.success) {
     return result.data;
-  } else {
+  } 
     throw new Error(result.error.message);
-  }
+  
 }
 
 // This creates a cleaner options type for the hook, omitting the parts we manage internally.

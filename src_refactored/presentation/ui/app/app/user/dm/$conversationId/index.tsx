@@ -6,8 +6,6 @@ import { DirectMessageLoadingErrorDisplay } from "@/ui/features/chat/components/
 import { useDirectMessages } from "@/ui/hooks/useDirectMessages";
 
 import type { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
-import type { ChatMessage } from "@/core/domain/entities/chat";
-import type { GetDMMessagesResponse } from "@/shared/ipc-types/chat.types";
 
 const currentUserId = "userJdoe";
 

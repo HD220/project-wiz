@@ -1,5 +1,7 @@
 import { toast } from 'sonner';
 
+import type { ChatMessage } from "@/core/domain/entities/chat";
+
 import { useIpcSubscription } from '@/ui/hooks/ipc/useIpcSubscription';
 
 import { IPC_CHANNELS } from '@/shared/ipc-channels';
@@ -8,7 +10,6 @@ import type {
   GetDMMessagesResponse,
   DMMessageReceivedEventPayload,
 } from "@/shared/ipc-types/chat.types";
-import type { ChatMessage } from "@/core/domain/entities/chat";
 
 const GET_CONVERSATION_MESSAGES_CHANNEL = IPC_CHANNELS.GET_DM_MESSAGES;
 const CONVERSATION_MESSAGE_RECEIVED_EVENT_CHANNEL =

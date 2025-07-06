@@ -1,14 +1,9 @@
 import { ipcMain } from 'electron';
 
-import {
-  IPC_CHANNELS
-} from '../../../../shared/ipc-channels';
-import {
-  GetUserProfileResponse,
-  UpdateUserProfileRequest,
-  UpdateUserProfileResponse,
-} from '../../../../shared/ipc-types/user.types';
 import { UserProfile } from "@/domain/entities/user";
+
+import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import { UpdateUserProfileRequest } from '@/shared/ipc-types/user.types';
 import { mockUserProfile, updateMockUserProfile } from '../mocks/user.mocks';
 
 export function registerUserHandlers() {

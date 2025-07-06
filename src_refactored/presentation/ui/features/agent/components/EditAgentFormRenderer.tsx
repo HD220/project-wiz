@@ -2,6 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import React from "react";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,30 +17,13 @@ import {
 } from "@/components/ui/card";
 import {
   AgentInstanceForm,
-  AgentInstanceFormData,
 } from "@/ui/features/agent/components/AgentInstanceForm";
-
-import type { AgentInstance } from "@/core/domain/entities/agent";
-import { AgentLLM } from "@/core/domain/entities/llm";
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
-import type { LLMConfig } from "@/core/domain/entities/llm";
-import type {
-  GetPersonaTemplatesListResponse,
-} from "@/shared/ipc-types/persona.types";
-import type {
-  GetLLMConfigsListResponse,
-} from "@/shared/ipc-types/llm.types";
-import type {
-  GetAgentInstanceDetailsResponse,
-} from "@/shared/ipc-types/agent.types";
 
 interface EditAgentFormRendererProps {
   agentId: string;
   agentInstance: AgentInstance;
   personaTemplates: PersonaTemplate[];
   llmConfigs: Record<AgentLLM, LLMConfig>;
-  handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
-  isSubmitting: boolean;
 }
 
 export function EditAgentFormRenderer({
@@ -43,15 +31,7 @@ export function EditAgentFormRenderer({
   agentInstance,
   personaTemplates,
   llmConfigs,
-  handleSubmit,
-  isSubmitting,
 }: EditAgentFormRendererProps) {
-  const initialValues: Partial<AgentInstanceFormData> = {
-    agentName: agentInstance.agentName,
-    personaTemplateId: agentInstance.personaTemplateId,
-    llmProviderConfigId: agentInstance.llmProviderConfigId,
-    temperature: agentInstance.temperature,
-  };
   const agentDisplayName =
     agentInstance.agentName ||
     `Agente (ID: ${agentInstance.id.substring(0, 6)})`;

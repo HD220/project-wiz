@@ -2,6 +2,8 @@ import { Link, useRouter } from '@tanstack/react-router';
 import { Settings, UserCircle, MessageSquarePlus, Search, Palette, Bot as BotIcon, Loader2, AlertTriangle } from 'lucide-react';
 import React from 'react';
 
+import type { DirectMessageItem } from '@/core/domain/entities/chat';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/ui/components/ui/avatar';
 import { Button } from '@/ui/components/ui/button';
 import {
@@ -15,7 +17,6 @@ import {
 import { Input } from '@/ui/components/ui/input';
 import { cn } from '@/ui/lib/utils';
 
-import type { DirectMessageItem } from '@/core/domain/entities/chat';
 
 // This mock is used by UserProfileDropdown, so it's included here.
 // If it were used by UserSidebar directly for other purposes, it might stay there or be passed as prop.

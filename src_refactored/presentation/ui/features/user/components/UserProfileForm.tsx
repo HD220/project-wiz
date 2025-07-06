@@ -5,12 +5,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { UserProfile } from "@/core/domain/entities/user";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 // FormControl, etc. are used by sub-components
 import { Form } from "@/components/ui/form";
 
-import type { UserProfile } from "@/core/domain/entities/user";
 
 import { AvatarUrlField } from "./fields/AvatarUrlField";
 import { DisplayNameField } from "./fields/DisplayNameField";

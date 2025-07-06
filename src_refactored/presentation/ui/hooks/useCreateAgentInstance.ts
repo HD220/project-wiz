@@ -1,8 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import type { AgentInstance } from "@/core/domain/entities/agent";
-import type { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
@@ -10,6 +8,8 @@ import type {
   CreateAgentInstanceRequest,
   CreateAgentInstanceResponse,
 } from "@/shared/ipc-types/agent.types";
+
+import type { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
 
 export function useCreateAgentInstance() {
   const router = useRouter();

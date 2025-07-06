@@ -1,12 +1,10 @@
 import React from "react";
 
+import type { ChatMessage } from "@/core/domain/entities/chat";
+
 import { ChatWindow } from "@/ui/features/chat/components/ChatWindow";
 
 import { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
-import type {
-  GetDMMessagesResponse,
-} from "@/shared/ipc-types/chat.types";
-import type { ChatMessage } from "@/core/domain/entities/chat";
 
 interface ChatPageContentProps {
   conversationHeader: ChatWindowConversationHeader | null;

@@ -19,9 +19,9 @@ async function ipcSubscriptionInitialFetchFn<TResponse, TRequest>(
 
   if (result.success) {
     return result.data;
-  } else {
+  } 
     throw new Error(result.error.message);
-  }
+  
 }
 
 interface IpcSubscriptionOptions<InitialData, EventPayload> {

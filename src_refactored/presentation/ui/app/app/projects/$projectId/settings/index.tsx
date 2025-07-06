@@ -24,7 +24,7 @@ function ProjectSettingsPage() {
     IPC_CHANNELS.GET_PROJECT_DETAILS,
     { projectId },
     {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       onError: (err: Error) => {
         toast.error(`Erro ao buscar detalhes do projeto: ${err.message}`);
       },

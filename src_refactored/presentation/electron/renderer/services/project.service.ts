@@ -1,5 +1,6 @@
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { Project } from "@/core/domain/entities/project";
+
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { IPCResponse } from "@/shared/ipc-types";
 
 export class ProjectService {
@@ -14,8 +15,14 @@ export class ProjectService {
       // The main process handler now returns Project[] directly or throws an error.
       // We need to wrap it in IPCResponse here.
       return { success: true, data: response as Project[] };
-    } catch (error: any) {
-      return { success: false, error: { message: error.message || "Unknown error" } };
+    } catch (error: unknown) {
+      let errorMessage = "Unknown error";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      return { success: false, error: { message: errorMessage } };
     }
   }
 }

@@ -2,7 +2,6 @@ import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import { ProjectListItem } from "@/core/application/use-cases/project/list-projects.schema";
 import { ListProjectsUseCase } from "@/core/application/use-cases/project/list-projects.use-case";
-import { Project } from "@/core/domain/project/project.entity";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { IPCResponse } from "@/shared/ipc-types";
@@ -29,7 +28,7 @@ export function registerProjectIPCHandlers(
 
 
 
-async function handleProjectListQuery(_event: IpcMainInvokeEvent, ...args: unknown[]): Promise<IPCResponse<ProjectListItem[]>> {
+async function handleProjectListQuery(_event: IpcMainInvokeEvent): Promise<IPCResponse<ProjectListItem[]>> {
   console.log(
     `[IPC Project Handler] Received ${IPC_CHANNELS.PROJECT_LIST_QUERY}`
   );

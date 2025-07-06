@@ -1,5 +1,7 @@
 import React from "react";
 
+import type { Project } from "@/core/domain/entities/project";
+
 import {
   Card,
   CardContent,
@@ -8,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProjectForm } from "@/ui/features/project/components/ProjectForm";
-import type { Project } from "@/core/domain/entities/project";
 
 interface ProjectSettingsFormProps {
   project: Project;

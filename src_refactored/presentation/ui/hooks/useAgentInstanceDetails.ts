@@ -1,14 +1,13 @@
 import { useParams } from "@tanstack/react-router";
-import { toast } from "sonner";
+
+import type { AgentInstance } from "@/core/domain/entities/agent";
 
 import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponse,
 } from "@/shared/ipc-types/agent.types";
-import type { AgentInstance } from "@/core/domain/entities/agent";
 
 export function useAgentInstanceDetails() {
   const params = useParams({ from: "/app/agents/$agentId/" });

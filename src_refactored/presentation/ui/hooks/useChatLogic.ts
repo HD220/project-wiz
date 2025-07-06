@@ -2,12 +2,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { z } from "zod";
 
+import type { DirectMessageItem } from "@/core/domain/entities/chat";
+
 import { useConversationMessages } from "@/ui/hooks/useConversationMessages";
 import { useSendMessage } from "@/ui/hooks/useSendMessage";
 import { useSidebarConversations } from "@/ui/hooks/useSidebarConversations";
 
 import type { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
-import type { DirectMessageItem, ChatMessage } from "@/core/domain/entities/chat";
 
 const currentUserId = "userJdoe";
 

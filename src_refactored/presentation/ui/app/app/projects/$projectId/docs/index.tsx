@@ -41,7 +41,7 @@ function ProjectDocsPage() {
       if (currentEntry.type === "folder") {
         currentChildren = currentEntry.children;
       } else {
-        currentChildren = undefined; // No more children to traverse if it's a file
+        currentChildren = undefined;
       }
     }
     return currentEntry && currentEntry.type === "file"

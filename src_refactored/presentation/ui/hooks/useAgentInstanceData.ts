@@ -1,12 +1,12 @@
 import { useParams } from "@tanstack/react-router";
 
 import type { AgentInstance } from "@/core/domain/entities/agent";
-import type { GetAgentInstanceDetailsRequest } from "@/shared/ipc-types/agent.types";
+import { AgentLLM } from "@/core/domain/entities/llm";
+import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
-import { AgentLLM } from "@/core/domain/entities/llm";
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
-import type { LLMConfig } from "@/core/domain/entities/llm";
+import type { GetAgentInstanceDetailsRequest } from "@/shared/ipc-types/agent.types";
 
 import { useIpcQuery } from "./ipc/useIpcQuery";
 

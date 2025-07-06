@@ -3,6 +3,8 @@ import { Link } from '@tanstack/react-router';
 import { Briefcase, MoreHorizontal, Trash2, Edit3, PlayCircle, PauseCircle } from 'lucide-react';
 import React from 'react';
 
+import type { Project } from "@/core/domain/entities/project";
+
 import { Badge } from '@/ui/components/ui/badge';
 import { Button } from '@/ui/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/components/ui/card';
@@ -14,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/ui/components/ui/dropdown-menu';
 import { Separator } from '@/ui/components/ui/separator';
-import type { Project } from "@/core/domain/entities/project";
 
 interface ProjectActionsDropdownProps {
   project: Project;

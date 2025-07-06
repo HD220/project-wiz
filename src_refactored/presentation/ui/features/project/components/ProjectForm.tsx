@@ -6,9 +6,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { Project } from "@/core/domain/entities/project";
+
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import type { Project } from "@/core/domain/entities/project";
+import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   CreateProjectRequest,
@@ -16,7 +19,7 @@ import type {
   UpdateProjectRequest,
   UpdateProjectResponse,
 } from "@/shared/ipc-types/project.types";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+
 
 import { ProjectDescriptionField } from "./fields/ProjectDescriptionField";
 import { ProjectNameField } from "./fields/ProjectNameField";

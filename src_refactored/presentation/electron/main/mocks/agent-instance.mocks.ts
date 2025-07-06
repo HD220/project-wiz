@@ -1,5 +1,7 @@
-import { AgentInstance } from "@/shared/ipc-types";
 import { AgentLLM } from "@/core/domain/entities/llm";
+
+import { AgentInstance } from "@/shared/ipc-types";
+
 import { getLLMConfigWithDefaults } from "./llm-config.mocks";
 
 export const mockAgentInstances: AgentInstance[] = [

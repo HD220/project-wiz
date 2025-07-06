@@ -8,6 +8,8 @@ import { ArrowLeft } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,7 +24,6 @@ import {
   LLMConfigForm,
   LLMConfigFormData,
 } from "@/ui/features/llm/components/LLMConfigForm";
-import { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
 
 // Simulating a "database" of LLM configurations
 // In a real app, this would be fetched and updated via IPC/API
@@ -51,7 +52,7 @@ let mockLlmConfigsDb: Record<string, LLMConfig> = {
     id: "3",
     name: "DeepSeek Trabalho",
     providerId: "deepseek",
-    llm: AgentLLM.OPENAI_GPT_4_TURBO, // Assuming a default LLM for DeepSeek
+    llm: AgentLLM.OPENAI_GPT_4_TURBO,
     temperature: 0.7,
     maxTokens: 2048,
     apiKey: "dk-...",

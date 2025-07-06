@@ -66,12 +66,12 @@ export function MarkdownRenderer({
     // Custom styling for code blocks (pre > code)
     // This is a basic version. For syntax highlighting, you'd integrate react-syntax-highlighter here.
     // `node` is used here, so no underscore
-    code({ node, className: langClassName, children, ...props }) {
-      const match = /language-(\w+)/.exec(langClassName || "");
+        code({ node, className, children, ...props }) {
+      const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : null;
 
       // Fenced code block
-      if ((node as any)?.parent?.tagName === "pre") {
+      if (node && "tagName" in node && node.tagName === "pre") {
         return (
           <div className="my-2 bg-slate-100 dark:bg-slate-800 rounded-md overflow-hidden text-xs">
             {language && (
@@ -80,7 +80,7 @@ export function MarkdownRenderer({
               </div>
             )}
             <pre className="p-3 overflow-x-auto">
-              <code className={cn("font-mono", langClassName)} {...props}>
+              <code className={className} {...props}>
                 {children}
               </code>
             </pre>
@@ -90,7 +90,7 @@ export function MarkdownRenderer({
 
       // Inline code (already styled by prose-code:)
       return (
-        <code className={langClassName} {...props}>
+        <code className={className} {...props}>
           {children}
         </code>
       );

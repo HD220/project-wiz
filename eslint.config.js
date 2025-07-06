@@ -153,22 +153,23 @@ const importAndBoundaryRules = {
           allow: [
             "domain",
             "application",
+            "infrastructure",
             "shared",
+          ],
+          disallow: [
             "ui-components",
             "ui-lib",
             "ui-hooks",
             "ui-features",
           ],
-          disallow: ["infrastructure"],
           message:
-            "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, shared, ui/*).",
+            "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, infrastructure, shared, mas não de UI).",
         },
         {
           from: ["shared"],
+          allow: ["application", "infrastructure"],
           disallow: [
             "domain",
-            "application",
-            "infrastructure",
             "presentation",
             "ui-components",
             "ui-lib",

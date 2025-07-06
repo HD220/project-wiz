@@ -1,6 +1,8 @@
 import { Bot } from "lucide-react";
 import React from "react";
 
+import type { AgentInstance } from "@/core/domain/entities/agent";
+
 import { Badge } from "@/components/ui/badge";
 import {
   CardHeader,
@@ -8,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/ui/lib/utils";
 
-import type { AgentInstance } from "@/core/domain/entities/agent";
 
 interface AgentDetailHeaderProps {
   instance: AgentInstance;

@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
+
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +15,10 @@ import {
 } from "@/components/ui/card";
 import { PersonaTemplateForm, type PersonaTemplateFormData } from "@/ui/features/persona/components/PersonaTemplateForm";
 import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
-import { toast } from "sonner";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type { GetPersonaTemplateDetailsResponse, UpdatePersonaTemplateRequest, UpdatePersonaTemplateResponse } from "@/shared/ipc-types/persona.types";
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 
 interface EditPersonaTemplateFormRendererProps {
   templateId: string;
@@ -27,10 +29,6 @@ export function EditPersonaTemplateFormRenderer({
   templateId,
   personaTemplate,
 }: EditPersonaTemplateFormRendererProps) {
-  if (!personaTemplate) {
-    return null;
-  }
-
   const updateTemplateMutation = useIpcMutation<
     UpdatePersonaTemplateResponse,
     UpdatePersonaTemplateRequest
@@ -44,6 +42,10 @@ export function EditPersonaTemplateFormRenderer({
   });
 
   const handleSubmit = async (formData: PersonaTemplateFormData) => {
+    if (!personaTemplate) {
+      toast.error("Erro: Template de persona não encontrado para atualização.");
+      return;
+    }
     updateTemplateMutation.mutate({
       templateId: personaTemplate.id,
       data: formData as Partial<PersonaTemplate>,
@@ -51,6 +53,10 @@ export function EditPersonaTemplateFormRenderer({
   };
 
   const isSubmitting = updateTemplateMutation.isPending;
+
+  if (!personaTemplate) {
+    return null;
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-3xl mx-auto">

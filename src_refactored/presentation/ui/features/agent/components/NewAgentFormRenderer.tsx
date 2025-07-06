@@ -1,5 +1,8 @@
 import React from "react";
 
+import type { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
+import type { PersonaTemplate } from "@/core/domain/entities/persona";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,16 +13,12 @@ import {
 } from "@/components/ui/card";
 import {
   AgentInstanceForm,
-  AgentInstanceFormData,
 } from "@/ui/features/agent/components/AgentInstanceForm";
 
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
-import type { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
 
 interface NewAgentFormRendererProps {
   personaTemplates: PersonaTemplate[];
   llmConfigs: Record<AgentLLM, LLMConfig>;
-  handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
 }
@@ -27,7 +26,6 @@ interface NewAgentFormRendererProps {
 export function NewAgentFormRenderer({
   personaTemplates,
   llmConfigs,
-  handleSubmit,
   isSubmitting,
   onCancel,
 }: NewAgentFormRendererProps) {

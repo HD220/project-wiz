@@ -1,20 +1,9 @@
 import { ipcMain } from "electron";
 
-import {
-  IPC_CHANNELS
-} from "../../../../shared/ipc-channels";
-import {
-  GetAgentInstanceDetailsRequest,
-  GetAgentInstanceDetailsResponse,
-  CreateAgentInstanceRequest,
-  CreateAgentInstanceResponse,
-  UpdateAgentInstanceRequest,
-  UpdateAgentInstanceResponse,
-  GetAgentInstancesListRequest,
-  GetAgentInstancesByProjectRequest,
-} from "../../../../shared/ipc-types/agent.types";
 import { AgentInstance } from "@/domain/entities/agent";
 import { AgentLLM } from "@/domain/entities/llm";
+
+import { GetAgentInstanceDetailsRequest, CreateAgentInstanceRequest, UpdateAgentInstanceRequest, GetAgentInstancesByProjectRequest } from "@/shared/ipc-types/agent.types";
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
 function registerQueryAgentInstanceHandlers() {
