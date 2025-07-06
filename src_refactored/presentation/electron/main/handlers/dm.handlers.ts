@@ -4,6 +4,7 @@ import { ChatMessage, DirectMessageItem } from "@/domain/entities/chat";
 
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { GetDMDetailsRequest, SendDMMessageRequest, DMMessageReceivedEventPayload } from "@/shared/ipc-types/chat.types";
+
 import { mockDMs, addMessageToMockDM } from "../mocks/dm.mocks";
 
 function notifyAllWindows(channel: string, payload: unknown) {

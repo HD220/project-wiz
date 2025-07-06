@@ -11,6 +11,7 @@ import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
 import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import type {
   GetPersonaTemplateDetailsRequest,
+  GetPersonaTemplateDetailsResponse,
 } from "@/shared/ipc-types/persona.types";
 
 function EditPersonaTemplatePage() {

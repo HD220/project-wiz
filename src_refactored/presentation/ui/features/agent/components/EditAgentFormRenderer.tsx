@@ -24,6 +24,8 @@ interface EditAgentFormRendererProps {
   agentInstance: AgentInstance;
   personaTemplates: PersonaTemplate[];
   llmConfigs: Record<AgentLLM, LLMConfig>;
+  handleSubmit: (formData: any) => Promise<void>;
+  isSubmitting: boolean;
 }
 
 export function EditAgentFormRenderer({

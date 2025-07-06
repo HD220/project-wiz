@@ -31,7 +31,7 @@ export class InMemoryProjectRepository implements IProjectRepository {
   private projects: Map<string, Project>;
 
   constructor() {
-    this.projects = new Map(mockProjects.map(p => [p.id, p]));
+    this.projects = new Map(mockProjects.map(project => [project.id, project]));
   }
 
   async getAllProjects(): Promise<Project[]> {

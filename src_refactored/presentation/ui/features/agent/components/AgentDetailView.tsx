@@ -14,6 +14,8 @@ import { AgentDetailHeader } from "@/ui/features/agent/components/AgentDetailHea
 interface AgentDetailViewProps {
   instance: AgentInstance;
   statusInfo: { label: string; icon: React.ElementType; colorClasses: string };
+  agentId: string;
+  router: any;
 }
 
 export function AgentDetailView({

@@ -19,6 +19,7 @@ import {
 interface NewAgentFormRendererProps {
   personaTemplates: PersonaTemplate[];
   llmConfigs: Record<AgentLLM, LLMConfig>;
+  handleSubmit: (formData: any) => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
 }

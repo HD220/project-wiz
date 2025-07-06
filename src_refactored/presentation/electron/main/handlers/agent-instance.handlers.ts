@@ -3,7 +3,9 @@ import { ipcMain } from "electron";
 import { AgentInstance } from "@/domain/entities/agent";
 import { AgentLLM } from "@/domain/entities/llm";
 
+import { IPC_CHANNELS } from "@/shared/ipc-channels";
 import { GetAgentInstanceDetailsRequest, CreateAgentInstanceRequest, UpdateAgentInstanceRequest, GetAgentInstancesByProjectRequest } from "@/shared/ipc-types/agent.types";
+
 import { mockAgentInstances } from "../mocks/agent-instance.mocks";
 
 function registerQueryAgentInstanceHandlers() {
