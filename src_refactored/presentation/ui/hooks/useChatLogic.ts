@@ -54,7 +54,8 @@ export function useChatLogic({
 
   const handleSelectConversation = (convId: string): void => {
     navigate({
-      search: (prev: { conversationId?: string }) => ({ ...prev, conversationId: convId }),
+      to: routeFullPath,
+      search: { conversationId: convId },
       replace: true,
     });
   };
