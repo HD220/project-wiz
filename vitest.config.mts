@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
-import viteTsconfigPaths from 'vite-tsconfig-paths';
+import viteTsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [viteTsconfigPaths()],
@@ -11,8 +11,8 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      include: ["src_refactored/**/*.ts"], // Coverage also scoped
+      include: ["src/**/*.ts"], // Coverage also scoped
     },
-    include: ['src_refactored/**/*.spec.ts', 'src_refactored/**/*.test.ts'],
+    include: ["src/**/*.spec.ts", "src/**/*.test.ts"],
   },
 });

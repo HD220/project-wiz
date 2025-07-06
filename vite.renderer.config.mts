@@ -8,7 +8,7 @@ import { defineConfig } from "vite";
 const projectRoot = path.resolve(__dirname);
 
 export default defineConfig({
-  root: path.resolve(projectRoot, "src_refactored/presentation/ui"), // Corrected root
+  root: path.resolve(projectRoot, "src/presentation/ui"), // Corrected root
   // build: {
   //   outDir: `./vite/renderer/`,
   // },
@@ -16,13 +16,10 @@ export default defineConfig({
     tanstackRouter({
       target: "react",
       // autoCodeSplitting: true,
-      routesDirectory: path.resolve(
-        projectRoot,
-        "src_refactored/presentation/ui/app"
-      ),
+      routesDirectory: path.resolve(projectRoot, "src/presentation/ui/app"),
       generatedRouteTree: path.resolve(
         projectRoot,
-        "src_refactored/presentation/ui/routeTree.gen.ts"
+        "src/presentation/ui/routeTree.gen.ts"
       ),
     }),
     react({
@@ -36,17 +33,17 @@ export default defineConfig({
   resolve: {
     alias: {
       // Specific alias for @/ui to point to the presentation/ui directory
-      "@/ui": path.resolve(projectRoot, "src_refactored/presentation/ui"),
+      "@/ui": path.resolve(projectRoot, "src/presentation/ui"),
       // Alias for @/components to point to the presentation/ui/components directory
       "@/components": path.resolve(
         projectRoot,
-        "src_refactored/presentation/ui/components"
+        "src/presentation/ui/components"
       ),
       // Alias for @/shared for shared types and utilities
-      "@/shared": path.resolve(projectRoot, "src_refactored/shared"),
-      // Add other specific @/ aliases if the renderer needs them from other parts of src_refactored
+      "@/shared": path.resolve(projectRoot, "src/shared"),
+      // Add other specific @/ aliases if the renderer needs them from other parts of src
       // For example, if it directly imported from @/core (though unlikely for renderer)
-      // "@/core": path.resolve(projectRoot, "src_refactored/core"),
+      // "@/core": path.resolve(projectRoot, "src/core"),
     },
   },
 });

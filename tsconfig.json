@@ -20,28 +20,28 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@/application/*": ["./src_refactored/core/application/*"],
-      "@/core/*": ["./src_refactored/core/*"],
-      "@/domain/*": ["./src_refactored/core/domain/*"],
-      "@/infrastructure/*": ["./src_refactored/infrastructure/*"],
-      "@/components/*": ["./src_refactored/presentation/ui/components/*"],
-      "@/shared/*": ["./src_refactored/shared/*"],
+      "@/application/*": ["./src/core/application/*"],
+      "@/core/*": ["./src/core/*"],
+      "@/domain/*": ["./src/core/domain/*"],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/components/*": ["./src/presentation/ui/components/*"],
+      "@/shared/*": ["./src/shared/*"],
       // Simplified @ui path
-      "@/ui/*": ["./src_refactored/presentation/ui/*"],
+      "@/ui/*": ["./src/presentation/ui/*"],
       // General fallback
-      "@/*": ["./src_refactored/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
-    "src_refactored/**/*",
-    "src_refactored/presentation/ui/global.d.ts",
+    "src/**/*",
+    "src/presentation/ui/global.d.ts",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
     "lingui.config.ts",
     "vitest.config.mts",
     "vitest.config.ts",
-    "tailwind.config.ts",
+    "tailwind.config.ts"
   ],
   "exclude": ["node_modules", "coverage"]
 }
