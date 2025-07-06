@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, Router } from "@tanstack/react-router";
 import { ArrowLeft, Edit3, MessageSquare } from "lucide-react";
 import React from "react";
 
@@ -15,7 +15,7 @@ interface AgentDetailViewProps {
   instance: AgentInstance;
   statusInfo: { label: string; icon: React.ElementType; colorClasses: string };
   agentId: string;
-  router: any;
+  
 }
 
 export function AgentDetailView({

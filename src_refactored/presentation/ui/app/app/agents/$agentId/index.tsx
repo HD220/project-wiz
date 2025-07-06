@@ -9,7 +9,6 @@ import { useAgentInstanceDetails } from "@/ui/hooks/useAgentInstanceDetails";
 import { statusDisplayMap } from "@/ui/utils/agent-status";
 
 function AgentInstanceDetailPage() {
-  const router = useRouter();
   const { agentId, instance, isLoading, error } = useAgentInstanceDetails();
 
   const loadingErrorDisplay = AgentDetailLoadingErrorDisplay({ isLoading, error, agentId });
@@ -29,7 +28,6 @@ function AgentInstanceDetailPage() {
       instance={instance}
       statusInfo={statusInfo}
       agentId={agentId}
-      router={router}
     />
   );
 }

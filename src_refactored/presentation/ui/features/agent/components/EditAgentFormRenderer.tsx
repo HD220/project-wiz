@@ -7,6 +7,7 @@ import { AgentLLM } from "@/core/domain/entities/llm";
 import type { LLMConfig } from "@/core/domain/entities/llm";
 import type { PersonaTemplate } from "@/core/domain/entities/persona";
 
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
 import {
   AgentInstanceForm,
 } from "@/ui/features/agent/components/AgentInstanceForm";
@@ -24,7 +26,7 @@ interface EditAgentFormRendererProps {
   agentInstance: AgentInstance;
   personaTemplates: PersonaTemplate[];
   llmConfigs: Record<AgentLLM, LLMConfig>;
-  handleSubmit: (formData: any) => Promise<void>;
+  handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
 }
 

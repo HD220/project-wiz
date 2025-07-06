@@ -14,12 +14,12 @@ import {
 import {
   AgentInstanceForm,
 } from "@/ui/features/agent/components/AgentInstanceForm";
-
+import { AgentInstanceFormData } from "@/ui/features/agent/components/AgentInstanceForm";
 
 interface NewAgentFormRendererProps {
   personaTemplates: PersonaTemplate[];
   llmConfigs: Record<AgentLLM, LLMConfig>;
-  handleSubmit: (formData: any) => Promise<void>;
+  handleSubmit: (formData: AgentInstanceFormData) => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
 }
