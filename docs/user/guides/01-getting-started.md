@@ -31,7 +31,7 @@ Com o Project Wiz, você pode gerenciar seus projetos de software de forma centr
         *   `worktrees/`: Áreas de trabalho que os Agentes IA podem usar.
     *   Um repositório Git é inicializado automaticamente na pasta `source-code/`, permitindo o controle de versão desde o início.
 *   **Próximos Passos com Projetos:**
-    *   Para mais detalhes sobre como gerenciar e configurar seus projetos, consulte o guia [Gerenciando Projetos](./core-concepts/projects.md).
+    *   Para mais detalhes sobre como gerenciar e configurar seus projetos, consulte o guia [Gerenciando Projetos](../concepts/02-projects.md).
 
 ## 5. Solicitando seu Primeiro Agente IA Especializado (Persona)
 
@@ -49,7 +49,7 @@ No Project Wiz, você conta com um **Assistente Pessoal IA** para ajudá-lo a da
     *   Configurações que você aprova podem ser **salvas como uma nova "Persona Personalizada"** ou atualizar uma existente.
 *   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para auxiliar na realização dos seus objetivos.
 *   **Saiba Mais:**
-    *   Para um mergulho profundo na interação com o Assistente Pessoal e no gerenciamento de suas Personas Personalizadas e Agentes IA, veja [Personas Personalizadas e Agentes IA](./core-concepts/personas-and-agents.md).
+    *   Para um mergulho profundo na interação com o Assistente Pessoal e no gerenciamento de suas Personas Personalizadas e Agentes IA, veja [Personas Personalizadas e Agentes IA](../concepts/03-personas-and-agents.md).
 
 ## 6. Delegando sua Primeira Tarefa de Alto Nível
 

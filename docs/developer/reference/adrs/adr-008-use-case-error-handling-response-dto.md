@@ -8,7 +8,7 @@ Durante a refatoração do sistema, identificou-se a necessidade de um padrão c
 
 **Decisão:**
 
-Adotar um DTO de resposta padrão para todos os casos de uso, denominado `IUseCaseResponse`. Este DTO servirá como um envelope para o resultado da execução do caso de uso, indicando explicitamente se a operação foi bem-sucedida ou se ocorreu um erro.
+Adotar um DTO de resposta padrão para todos os **Comandos e Queries** (anteriormente Casos de Uso), denominado `IUseCaseResponse`. Este DTO servirá como um envelope para o resultado da execução, indicando explicitamente se a operação foi bem-sucedida ou se ocorreu um erro.
 
 **Estrutura do DTO de Resposta:**
 
@@ -45,14 +45,14 @@ type ErrorUseCaseResponse<TErrorDetails = IUseCaseErrorDetails> = IUseCaseRespon
 
 **Mecanismo de Tratamento de Erros e Implementação com Decorator:**
 
-Para aplicar este padrão de forma consistente e evitar repetição de código (DRY), a abordagem preferencial é utilizar um Decorator (`UseCaseWrapper`) que envolve a execução do caso de uso real.
+Para aplicar este padrão de forma consistente e evitar repetição de código (DRY), a abordagem preferencial é utilizar um Decorator (`UseCaseWrapper`) que envolve a execução do **Handler** real.
 
-1.  **Caso de Uso Concreto (Lógica de Negócio Pura):**
+1.  **Handler Concreto (Command/Query - Lógica de Negócio Pura):**
     *   A classe do caso de uso concreto foca exclusivamente na lógica de negócio e na orquestração do fluxo principal.
     *   Ela valida o DTO de entrada (ex: com Zod, podendo lançar `ZodError`).
     *   Ela interage com entidades de domínio e repositórios (que podem lançar `CoreError`s como `DomainError`, `NotFoundError`, `ValueError`, `EntityError`).
     *   Em caso de sucesso, retorna diretamente `successUseCaseResponse(data)`.
-    *   **Importante:** O caso de uso concreto *não* implementa o bloco `try/catch` para mapeamento de erro para `IUseCaseResponse`. Ele lança exceções diretamente.
+    *   **Importante:** O handler concreto *não* implementa o bloco `try/catch` para mapeamento de erro para `IUseCaseResponse`. Ele lança exceções diretamente.
 
 2.  **`UseCaseWrapper` (Decorator):**
     *   Esta classe envolve uma instância do caso de uso concreto e uma instância de `ILogger`.
@@ -65,7 +65,7 @@ Para aplicar este padrão de forma consistente e evitar repetição de código (
     *   Se o caso de uso concreto completar sem exceções, o wrapper repassa a resposta de sucesso.
 
 3.  **Injeção de Dependência:**
-    *   O container de DI (ex: InversifyJS) é configurado para que, ao solicitar uma interface de caso de uso (ex: `IUseCase<Input, Output>`), ele forneça uma instância do `UseCaseWrapper`, que por sua vez tem o caso de uso concreto e o logger injetados.
+    *   O container de DI (ex: InversifyJS) é configurado para que, ao solicitar uma interface de **Command/Query** (ex: `ICommand<Input, Output>` ou `IQuery<Input, Output>`), ele forneça uma instância do `UseCaseWrapper`, que por sua vez tem o **Handler** concreto e o logger injetados.
 
 Esta abordagem com Decorator centraliza a lógica de tratamento de erros e logging, mantendo os casos de uso concretos limpos, focados em suas responsabilidades e mais fáceis de testar.
 
@@ -78,24 +78,24 @@ Para facilitar o mapeamento no `UseCaseWrapper`, será definida uma classe base 
 ```typescript
 // imports ...
 // imports ...
-// IUseCase, IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse, IUseCaseErrorDetails
-// ILogger, ZodError, CoreError, ConcreteUseCase, ConcreteUseCaseInput, ConcreteUseCaseOutput
+// ICommand, IQuery, IUseCaseResponse, successUseCaseResponse, errorUseCaseResponse, IUseCaseErrorDetails
+// ILogger, ZodError, CoreError, ConcreteHandler, ConcreteHandlerInput, ConcreteHandlerOutput
 
 /**
  * Conceptual example of UseCaseWrapper
  */
-class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, TOutput> {
+class UseCaseWrapper<TInput, TOutput> implements ICommand<TInput, TOutput>, IQuery<TInput, TOutput> {
   constructor(
-    private readonly decoratedUseCase: IUseCase<TInput, TOutput>,
+    private readonly decoratedHandler: ICommand<TInput, TOutput> | IQuery<TInput, TOutput>,
     private readonly logger: ILogger,
   ) {}
 
   async execute(input: TInput): Promise<IUseCaseResponse<TOutput>> {
     try {
-      return await this.decoratedUseCase.execute(input);
+      return await this.decoratedHandler.execute(input);
     } catch (err: any) {
       this.logger.error(
-        `Error in UseCase ${this.decoratedUseCase.constructor.name} with input: ${JSON.stringify(input)}`,
+        `Error in Handler ${this.decoratedHandler.constructor.name} with input: ${JSON.stringify(input)}`,
         { errorName: err.name, errorMessage: err.message, errorStack: err.stack, cause: err.cause }
       );
 
@@ -138,13 +138,13 @@ class UseCaseWrapper<TInput, TOutput> implements IUseCase<TInput, TOutput> {
 }
 
 /**
- * Conceptual example of a Concrete Use Case (no try/catch for IUseCaseResponse mapping)
+ * Conceptual example of a Concrete Handler (no try/catch for IUseCaseResponse mapping)
  */
-class MyConcreteUseCase implements IUseCase<IMyUseCaseInput, IMyUseCaseOutput> {
+class MyConcreteHandler implements ICommand<IMyCommandInput, IMyCommandOutput> {
   constructor(private readonly repository: IMyRepository) {}
 
-  async execute(input: IMyUseCaseInput): Promise<IUseCaseResponse<IMyUseCaseOutput>> {
-    // 1. Validate input (e.g., MyUseCaseInputSchema.parse(input))
+  async execute(input: IMyCommandInput): Promise<IMyCommandOutput> {
+    // 1. Validate input (e.g., MyCommandInputSchema.parse(input))
     //    This can throw ZodError.
 
     // 2. Business logic
@@ -157,8 +157,8 @@ class MyConcreteUseCase implements IUseCase<IMyUseCaseInput, IMyUseCaseOutput> {
     //    entity.doSomethingOrThrow();
 
     // 3. Prepare output
-    const output: IMyUseCaseOutput = { result: "some data" }; // Placeholder
-    return successUseCaseResponse(output); // Return success directly
+    const output: IMyCommandOutput = { result: "some data" }; // Placeholder
+    return output; // Return success data directly
   }
 }
 ```
@@ -168,20 +168,20 @@ class MyConcreteUseCase implements IUseCase<IMyUseCaseInput, IMyUseCaseOutput> {
 *   **Positivas:**
     *   **Contrato Claro:** As camadas chamadoras sempre esperam um `IUseCaseResponse`.
     *   **Tratamento de Erro Centralizado (no `UseCaseWrapper`):** A lógica de captura, logging e mapeamento de erros é centralizada, seguindo o princípio DRY.
-    *   **Casos de Uso Limpos (SRP):** Os casos de uso concretos focam apenas na lógica de negócio, lançando exceções quando necessário, sem se preocupar com a formatação da resposta de erro.
-    *   **Melhor Experiência do Desenvolvedor:** Simplifica a criação e o consumo dos casos de uso.
-    *   **Consistência:** Garante que todos os casos de uso sigam rigorosamente o mesmo padrão de resposta e tratamento de erro.
+    *   **Handlers Limpos (SRP):** Os handlers concretos focam apenas na lógica de negócio, lançando exceções quando necessário, sem se preocupar com a formatação da resposta de erro.
+    *   **Melhor Experiência do Desenvolvedor:** Simplifica a criação e o consumo dos handlers.
+    *   **Consistência:** Garante que todos os handlers sigam rigorosamente o mesmo padrão de resposta e tratamento de erro.
     *   **Facilidade de Teste:**
-        *   Casos de uso concretos podem ser testados verificando se lançam as exceções corretas.
+        *   Handlers concretos podem ser testados verificando se lançam as exceções corretas.
         *   O `UseCaseWrapper` pode ser testado isoladamente para garantir que mapeia corretamente diferentes tipos de erro.
 
 *   **Negativas/Desafios:**
     *   **Configuração da DI:** A configuração da injeção de dependência para o Decorator pode adicionar uma pequena complexidade inicial.
-    *   **Refatoração:** Casos de uso existentes precisarão ser adaptados para não mais implementarem o `try/catch` de mapeamento de erro e para lançarem exceções diretamente.
+    *   **Refatoração:** Handlers existentes precisarão ser adaptados para não mais implementarem o `try/catch` de mapeamento de erro e para lançarem exceções diretamente.
 
 **Alternativas Consideradas:**
 
 1.  **Manter o `Result` Helper:** Rejeitado devido à preferência por uma API de retorno mais explícita (`success` flag) e menos "funcional" para este contexto.
-2.  **Lançar Exceções Diretamente dos Casos de Uso:** Rejeitado porque o requisito era que o caso de uso, como ponto de entrada da aplicação core, deveria fornecer uma resposta encapsulada, não propagar exceções que a camada de apresentação/infraestrutura teria que conhecer e tratar individualmente.
+2.  **Lançar Exceções Diretamente dos Handlers:** Rejeitado porque o requisito era que o handler, como ponto de entrada da aplicação core, deveria fornecer uma resposta encapsulada, não propagar exceções que a camada de apresentação/infraestrutura teria que conhecer e tratar individualmente.
 
-Este ADR visa padronizar e simplificar a forma como os resultados e erros são comunicados pelos casos de uso, promovendo um design mais robusto e de fácil manutenção.
+Este ADR visa padronizar e simplificar a forma como os resultados e erros são comunicados pelos handlers, promovendo um design mais robusto e de fácil manutenção.

@@ -36,7 +36,7 @@ The components of the new queue system will be mapped to the Clean Architecture 
     *   **Layer:** `infrastructure/events/` (e.g., `InMemoryJobEventEmitter.ts`) or `shared/events/`.
     *   **Details:** Handles in-process event publication and subscription for job lifecycle events.
 
-*   **Use Cases (e.g., `CreateJobUseCase`, `GetJobUseCase`):**
+*   **Commands/Queries (e.g., `CreateJobCommand`, `GetJobQuery`):**
     *   **Layer:** `core/application/queue/use-cases/`
     *   **Details:** Encapsulate specific job-related operations, used by services like `JobQueueService`.
 
@@ -122,7 +122,7 @@ The implementation will proceed in the following phases:
 *   **Objective:** Implement the API for adding jobs and basic inspection.
 *   **Tasks:**
     1.  Implement `InMemoryJobEventEmitter` (`infrastructure/events/`).
-    2.  Implement core Job Use Cases (e.g., `CreateJobUseCase`) (`core/application/queue/use-cases/`).
+    2.  Implement core Job Commands/Queries (e.g., `CreateJobCommand`) (`core/application/queue/commands-queries/`).
     3.  Implement `JobQueueService` (`core/application/queue/job-queue.service.ts`).
     4.  Unit & Integration tests for `JobQueueService`.
 

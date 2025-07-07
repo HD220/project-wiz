@@ -17,7 +17,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 
 ### RF-PROJ: Gerenciamento de Projetos ([Core Concept: Gerenciando Projetos](../../user/core-concepts/projects.md))
 *   **RF-PROJ-001:** O sistema deve permitir ao usuário criar novos projetos de software (com nome e descrição opcional).
-*   **RF-PROJ-002:** Na criação de um projeto, o sistema (via `CreateProjectUseCase`) deve:
+*   **RF-PROJ-002:** Na criação de um projeto, o sistema (via `CreateProjectCommand` e seu handler) deve:
     *   Gerar um `ProjectId`.
     *   Criar uma estrutura de pastas base (ex: `<ProjectId>/source-code/`, `<ProjectId>/source-code/docs/`, `<ProjectId>/worktrees/`).
     *   Inicializar um repositório Git em `<ProjectId>/source-code/`.
@@ -29,7 +29,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 ### RF-PERSONA: Gerenciamento de Personas e Agentes IA ([Core Concept: Personas Personalizadas e Agentes IA](../../user/core-concepts/personas-and-agents.md))
 > (Nota: `AgentPersonaTemplate` neste contexto refere-se a uma especificação persistente de uma "Persona Personalizada" ou "Agente Configurado", que pode ser resultado de uma customização de um agente dinamicamente proposto ou criada diretamente pelo usuário.)
 *   **RF-PERSONA-001:** O sistema deve permitir ao usuário definir/salvar configurações de Persona (`AgentPersonaTemplate`) especificando Nome, Papel (Role), Objetivo (Goal), Backstory e capacidades/acessos necessários.
-*   **RF-PERSONA-002:** O sistema deve permitir a criação de instâncias de `Agent` executáveis, vinculando um `AgentPersonaTemplate` a uma `LLMProviderConfig` e `temperature` (via `CreateAgentUseCase`).
+*   **RF-PERSONA-002:** O sistema deve permitir a criação de instâncias de `Agent` executáveis, vinculando um `AgentPersonaTemplate` a uma `LLMProviderConfig` e `temperature` (via um `CreateAgentCommand`).
 *   **RF-PERSONA-003:** O sistema deve persistir `AgentPersonaTemplate` e `Agent`.
 *   **RF-PERSONA-004:** A UI deve permitir listar e selecionar `AgentPersonaTemplate`.
 *   **RF-PERSONA-005:** Cada `Agent` deve poder ter um `AgentInternalState` persistente para aprendizado e continuidade.
@@ -53,7 +53,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 
 ### RF-JOB: Sistema Interno de Jobs, Atividades e Fila
 *   **RF-JOB-001:** O sistema deve usar a entidade `Job` para representar unidades de trabalho internas dos agentes, com atributos como ID, `targetAgentRole`, `name`, `payload`, `data` (para `agentState` contendo `ActivityContext`), `status`, `priority`, `dependsOnJobIds`, `parentJobId`, `RetryPolicy`, timestamps e `result`.
-*   **RF-JOB-002:** Agentes (internamente) devem ser capazes de criar Jobs para si (Sub-Jobs), potencialmente através de uma capacidade de gerenciamento de tarefas (conceito que usa internamente algo como um `CreateJobUseCase`).
+*   **RF-JOB-002:** Agentes (internamente) devem ser capazes de criar Jobs para si (Sub-Jobs), potencialmente através de uma capacidade de gerenciamento de tarefas (conceito que usa internamente algo como um `CreateJobCommand`).
 *   **RF-JOB-003:** O sistema deve suportar filas implícitas por `targetAgentRole`.
 *   **RF-JOB-004:** Jobs devem transitar por um ciclo de vida (`JobStatus` VO: `PENDING`, `ACTIVE`, `COMPLETED`, `FAILED`, `DELAYED`, `WAITING`).
 *   **RF-JOB-005:** Um `WorkerService` (configurado por `handlesRole`) deve buscar Jobs e entregá-los ao `GenericAgentExecutor` para processamento.
@@ -65,7 +65,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-JOB-011:** A UI deve permitir o monitoramento básico do status das atividades dos agentes ou do progresso das solicitações do usuário (que podem corresponder a Jobs internos dos agentes).
 
 ### RF-LLM: Integração com LLM ([LLM Integration](./04-llm-integration.md))
-*   **RF-LLM-001:** O sistema deve permitir a configuração de múltiplos provedores de LLM (`LLMProviderConfig` entidade, `CreateLLMProviderConfigUseCase`).
+*   **RF-LLM-001:** O sistema deve permitir a configuração de múltiplos provedores de LLM (`LLMProviderConfig` entidade, `CreateLLMProviderConfigCommand`).
 *   **RF-LLM-002:** Uma instância de `Agent` deve vincular um `AgentPersonaTemplate` a uma `LLMProviderConfig`.
 *   **RF-LLM-003:** O `GenericAgentExecutor` deve usar o LLM configurado para o Agente para todas as operações de IA.
 *   **RF-LLM-004:** Interações com LLM devem ser contextualizadas (prompt de sistema da Persona, `conversationHistory` do `ActivityContext`, descrição das `Tools`). Agentes podem usar `MemoryTool` para buscar contexto adicional do `AgentInternalState`.

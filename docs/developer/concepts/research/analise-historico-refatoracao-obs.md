@@ -2,6 +2,8 @@
 
 ## Observações de Alto Nível e Áreas para Revisão (Histórico)
 
+> **Nota sobre o Status:** Este documento contém observações de alto nível e próximos passos identificados em um guia anterior de qualidade de código e refatoração. As referências a `UseCase` e `Service` neste documento refletem a terminologia da época e foram substituídas pelo padrão **CQRS (Commands/Queries)** na arquitetura atual. Consulte `docs/developer/concepts/software-architecture.md` para a arquitetura definitiva.
+
 Com base em uma exploração inicial do código (em um estágio anterior do projeto), as seguintes áreas foram sinalizadas para revisão mais detalhada durante um planejamento de refatoração:
 
 1.  **`GenericAgentExecutor` Class Size and Complexity:**

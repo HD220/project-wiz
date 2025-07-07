@@ -60,7 +60,7 @@ Mesmo que a *configuração* de uma Persona seja dinâmica ou personalizada, os 
 *   *(Planejado)* **Chat Interativo Direto:** Possibilidade de interações diretas com os Agentes especializados durante a execução de suas atividades.
 
 ## Próximos Passos
-*   **Gerenciando Projetos:** Entenda como os [Projetos](./projects.md) fornecem o contexto para o trabalho dos Agentes.
+*   **Gerenciando Projetos:** Entenda como os [Projetos](./02-projects.md) fornecem o contexto para o trabalho dos Agentes.
 *   **Visão Geral da Interface:** Se ainda não o fez, familiarize-se com a [Interface do Usuário](../03-interface-overview.md) do Project Wiz.
 
 Este guia será atualizado conforme as funcionalidades evoluem.

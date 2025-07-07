@@ -82,14 +82,12 @@ Serão adotados os seguintes padrões para a estratégia de Injeção de Depend�
     *   **Padrão:** Os handlers IPC registrados no `main.ts` do Electron, se precisarem de serviços ou casos de uso da camada de aplicação, devem obter instâncias desses serviços resolvendo-as a partir do `appContainer` no momento do registro do handler ou no início de cada chamada de handler (se o escopo do serviço não for singleton).
     *   **Exemplo (Conceitual):**
         ```typescript
-        // import { appContainer } from "@/infrastructure/ioc/inversify.config";
-        // import { CREATE_USER_USE_CASE_TOKEN, ICreateUserUseCase } from "@/core/application/use-cases/user/...";
-        //
-        // // No registro do handler:
-        // // const createUserUseCase = appContainer.get<ICreateUserUseCase>(CREATE_USER_USE_CASE_TOKEN);
-        // // ipcMain.handle(IPC_CHANNELS.CREATE_USER, async (_event, args) => {
-        // //   return await createUserUseCase.execute(args);
-        // // });
+        // import { CREATE_USER_COMMAND_TOKEN, ICreateUserCommand } from "@/core/application/commands/user/...";
+//
+// // const createUserCommand = appContainer.get<ICreateUserCommand>(CREATE_USER_COMMAND_TOKEN);
+// // ipcMain.handle(IPC_CHANNELS.CREATE_USER, async (_event, args) => {
+// //   return await createUserCommand.execute(args);
+// // });
         ```
     *   **Justificativa:** Integra o sistema de DI com os pontos de entrada da aplicação (handlers IPC).
 

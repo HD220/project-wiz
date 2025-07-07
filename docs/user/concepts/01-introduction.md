@@ -23,8 +23,8 @@ O Project Wiz é ideal para:
 
 Com o Project Wiz, você poderá:
 
-*   [Gerenciar seus projetos de software](./core-concepts/projects.md) em um ambiente centralizado.
-*   Contar com [Agentes de IA (Personas)](./core-concepts/personas-and-agents.md) especializados para diferentes papéis, seja utilizando configurações sugeridas dinamicamente pelo sistema, personalizando-as, ou definindo as suas próprias.
+*   [Gerenciar seus projetos de software](./02-projects.md) em um ambiente centralizado.
+*   Contar com [Agentes de IA (Personas)](./03-personas-and-agents.md) especializados para diferentes papéis, seja utilizando configurações sugeridas dinamicamente pelo sistema, personalizando-as, ou definindo as suas próprias.
 *   Delegar objetivos e tarefas complexas ao seu Assistente Pessoal IA, que coordenará Agentes IA especializados para realizar o trabalho, abrangendo atividades como:
     *   Geração de código
     *   Análise de código
@@ -40,8 +40,8 @@ Com o Project Wiz, você poderá:
 
 A interação típica com o Project Wiz e seus Agentes de IA segue um fluxo como este:
 
-1.  **Conversa e Delegação com o Assistente Pessoal:** Você interage com seu **Assistente Pessoal IA** através de uma interface de chat, descrevendo uma necessidade ou objetivo de alto nível no contexto de um [Projeto](./core-concepts/projects.md).
-2.  **Análise e Planejamento Interno pelo Agente:** O Assistente Pessoal, ou um Agente IA especializado para o qual a tarefa foi delegada (seja uma [Persona](./core-concepts/personas-and-agents.md) que você configurou/salvou ou um agente gerado dinamicamente), analisa sua solicitação. Internamente, o agente elabora um plano de ação, definindo as atividades e etapas necessárias (seus próprios "jobs" ou "sub-jobs" internos) para alcançar o objetivo, incluindo critérios de "Definição de Pronto".
+1.  **Conversa e Delegação com o Assistente Pessoal:** Você interage com seu **Assistente Pessoal IA** através de uma interface de chat, descrevendo uma necessidade ou objetivo de alto nível no contexto de um [Projeto](./02-projects.md).
+2.  **Análise e Planejamento Interno pelo Agente:** O Assistente Pessoal, ou um Agente IA especializado para o qual a tarefa foi delegada (seja uma [Persona](./03-personas-and-agents.md) que você configurou/salvou ou um agente gerado dinamicamente), analisa sua solicitação. Internamente, o agente elabora um plano de ação, definindo as atividades e etapas necessárias (seus próprios "jobs" ou "sub-jobs" internos) para alcançar o objetivo, incluindo critérios de "Definição de Pronto".
 3.  **Aprovação do Usuário (Ponto de Verificação Opcional):** Para tarefas mais complexas ou antes de ações significativas, o Agente pode apresentar seu plano de alto nível ou os critérios de "Definição de Pronto" para sua aprovação via chat.
 4.  **Execução Autônoma:** Após a aprovação (ou se não for um passo requerido), o Agente começa a executar as atividades que planejou. Ele utiliza sua inteligência (LLM) e suas capacidades designadas (como interagir com o sistema de arquivos, executar comandos, etc.) para realizar as etapas. Para tarefas de código, o Agente opera dentro do diretório de trabalho do projeto, geralmente em um branch Git específico.
 5.  **Auto-Validação (Orientada pelo Agente):** O Agente pode realizar uma auto-validação interna, comparando os resultados com os critérios de "Definição de Pronto" estabelecidos para suas atividades internas.

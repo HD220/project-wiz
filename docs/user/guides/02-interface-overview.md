@@ -67,7 +67,7 @@ Esta visão geral fornece um mapa básico da interface do Project Wiz. Cada seç
 <<<<<<< HEAD
 Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-getting-started.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](./core-concepts/projects.md).
 =======
-Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./02-getting-started.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](../user/core-concepts/projects.md) (a ser criado).
+Para aprender sobre os primeiros passos práticos com a aplicação, consulte o [Guia de Início Rápido](./01-getting-started.md). Se você quiser entender como gerenciar seus projetos, siga para o guia [Gerenciando Projetos](../concepts/02-projects.md).
 >>>>>>> lint-tests
 
 Este documento será expandido e atualizado conforme a interface do usuário evolui.

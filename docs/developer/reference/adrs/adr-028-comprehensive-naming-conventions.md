@@ -64,7 +64,7 @@ As seguintes convenções de nomenclatura abrangentes serão adotadas:
 **5. Padrões de Nomenclatura Específicos por Tipo de Identificador:**
     *   **Interfaces:**
         *   **Padrão:** Usar `PascalCase` com um prefixo `I`.
-        *   **Exemplos:** `IUserRepository`, `ILLMAdapter`, `IUseCase`.
+        *   **Exemplos:** `IUserRepository`, `ILLMAdapter`, `ICommand`, `IQuery`.
         *   **Justificativa:** Convenção comum em muitas codebases TypeScript/C# que torna imediatamente claro que o tipo é uma interface. (Esta é uma decisão que formaliza a preferência vista em `IJobRepository` e outras interfaces de port).
     *   **Classes Abstratas:**
         *   **Padrão:** Usar `PascalCase` com um prefixo `Abstract`.

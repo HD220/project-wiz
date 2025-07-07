@@ -76,7 +76,7 @@ Serão adotados os seguintes padrões para o tratamento de erros:
 
 **5. Propagação de Erros:**
     *   **Padrão:** Erros customizados (instâncias de `CoreError`) são propagados através do lançamento (`throw`).
-    *   Camadas de serviço ou casos de uso capturam esses erros e os utilizam para construir a parte `error` do `IUseCaseResponse`.
+    *   Camadas de serviço ou **Handlers de Commands/Queries** capturam esses erros e os utilizam para construir a parte `error` do `IUseCaseResponse`.
     *   Não se deve capturar um `CoreError` apenas para relançá-lo sem adicionar valor ou transformá-lo, a menos que seja na fronteira da aplicação (e.g., wrapper de Caso de Uso).
     *   **Justificativa:** Mantém um fluxo de erro claro e rastreável.
 

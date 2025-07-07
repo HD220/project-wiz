@@ -69,8 +69,8 @@ As Personas utilizam suas **Ferramentas** habilitadas para realizar o trabalho e
 
 ## Próximos Passos
 
-*   **Personas e Agentes IA:** Certifique-se de que seus [Agentes](./personas-and-agents.md) estão configurados e prontos para o trabalho.
-*   **Gerenciando Projetos:** Lembre-se que os Jobs geralmente operam dentro do contexto de um [Projeto](./projects.md).
-*   **Visão Geral da Interface:** Localize as seções de gerenciamento de Tarefas/Jobs na [Interface do Usuário](../03-interface-overview.md).
+*   **Personas e Agentes IA:** Certifique-se de que seus [Agentes](./03-personas-and-agents.md) estão configurados e prontos para o trabalho.
+*   **Gerenciando Projetos:** Lembre-se que os Jobs geralmente operam dentro do contexto de um [Projeto](./02-projects.md).
+*   **Visão Geral da Interface:** Localize as seções de gerenciamento de Tarefas/Jobs na [Interface do Usuário](../guides/02-interface-overview.md).
 
 Este sistema de Jobs e automação é projetado para ser robusto e flexível, permitindo que o Project Wiz lide com uma ampla gama de tarefas de desenvolvimento de software de forma organizada e escalável.

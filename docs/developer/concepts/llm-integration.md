@@ -5,13 +5,13 @@ A integração com Modelos de Linguagem Grandes (LLMs) é um pilar central do Pr
 ## Funcionalidades Principais:
 
 1.  **Configuração de Provedores de LLM:**
-    *   O sistema permite que usuários configurem diferentes provedores de LLM (ex: OpenAI, DeepSeek, Anthropic) através do `CreateLLMProviderConfigUseCase`.
+    *   O sistema permite que usuários configurem diferentes provedores de LLM (ex: OpenAI, DeepSeek, Anthropic) através de um `CreateLLMProviderConfigCommand`.
     *   A configuração (`LLMProviderConfig` entidade) inclui detalhes como chaves de API (gerenciadas de forma segura via variáveis de ambiente), endpoints e outros parâmetros específicos do provedor.
     *   A UI (componente `llm-config-form.tsx`) suporta este processo de configuração.
 
 2.  **Seleção de Modelo por Instância de Agente:**
     *   Um `AgentPersonaTemplate` define o perfil base do Agente.
-    *   Uma instância de `Agent` (criada via `CreateAgentUseCase`) vincula um `AgentPersonaTemplate` a uma `LLMProviderConfig` específica e a parâmetros como `temperature`.
+    *   Uma instância de `Agent` (criada via um `CreateAgentCommand`) vincula um `AgentPersonaTemplate` a uma `LLMProviderConfig` específica e a parâmetros como `temperature`.
     *   Isso permite que diferentes instâncias de Agentes (mesmo que baseadas no mesmo template de Persona) utilizem diferentes LLMs ou configurações.
 
 3.  **LLM como Motor de Raciocínio e Planejamento para Agentes:**

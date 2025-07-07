@@ -64,7 +64,7 @@ Serão adotados os seguintes padrões para logging na aplicação:
 
 **5. Logging por Camada/Ambiente:**
     *   **`core/domain`:** Entidades e VOs geralmente NÃO DEVEM realizar logging direto usando `ILogger`. Sua responsabilidade é garantir o estado válido e lançar exceções de domínio (`EntityError`, `ValueError`) em caso de falha.
-    *   **`core/application` (Casos de Uso, Serviços):** Devem usar `ILogger` injetado para logar o início/fim de operações importantes, decisões de fluxo, tratamento de erros esperados e erros inesperados (capturando exceções do domínio ou da infraestrutura e logando-as antes de mapeá-las para `IUseCaseResponse`).
+    *   **`core/application` (Commands, Queries, Services):** Devem usar `ILogger` injetado para logar o início/fim de operações importantes, decisões de fluxo, tratamento de erros esperados e erros inesperados (capturando exceções do domínio ou da infraestrutura e logando-as antes de mapeá-las para `IUseCaseResponse`).
     *   **`infrastructure/` (Repositórios, Adaptadores):** Devem usar `ILogger` para logar interações com sistemas externos (DBs, APIs), incluindo requisições (potencialmente com dados sensíveis anonimizados), respostas (resumidas), e erros.
     *   **`presentation/electron/main.ts`:** Pode usar `ILogger` (uma vez configurado) para eventos do ciclo de vida da aplicação e operações do processo principal.
     *   **`presentation/electron/preload.ts`:** Uso mínimo de `console.log` apenas para status de inicialização.
