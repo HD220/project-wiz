@@ -1,11 +1,7 @@
-# Integração com Modelos de Linguagem Grandes (LLM)
-
-A integração com Modelos de Linguagem Grandes (LLMs) é um pilar central do Project Wiz, capacitando a inteligência e autonomia dos Agentes IA. O `GenericAgentExecutor` é o principal componente que gerencia essa integração utilizando SDKs como o `ai-sdk`.
-
 ## Funcionalidades Principais:
 
 1.  **Configuração de Provedores de LLM:**
-    *   O sistema permite que usuários configurem diferentes provedores de LLM (ex: OpenAI, DeepSeek, Anthropic) através de um `CreateLLMProviderConfigCommand`.
+    *   O sistema permite que usuários configurem diferentes provedores de IA (ex: OpenAI, DeepSeek, Anthropic) através de um `CreateLLMProviderConfigCommand`.
     *   A configuração (`LLMProviderConfig` entidade) inclui detalhes como chaves de API (gerenciadas de forma segura via variáveis de ambiente), endpoints e outros parâmetros específicos do provedor.
     *   A UI (componente `llm-config-form.tsx`) suporta este processo de configuração.
 
@@ -14,8 +10,8 @@ A integração com Modelos de Linguagem Grandes (LLMs) é um pilar central do Pr
     *   Uma instância de `Agent` (criada via um `CreateAgentCommand`) vincula um `AgentPersonaTemplate` a uma `LLMProviderConfig` específica e a parâmetros como `temperature`.
     *   Isso permite que diferentes instâncias de Agentes (mesmo que baseadas no mesmo template de Persona) utilizem diferentes LLMs ou configurações.
 
-3.  **LLM como Motor de Raciocínio e Planejamento para Agentes:**
-    *   O `GenericAgentExecutor`, ao processar um Job para um Agente, utiliza o LLM configurado para:
+3.  **IA como Motor de Raciocínio e Planejamento para Agentes:**
+    *   O `GenericAgentExecutor`, ao processar um Job para um Agente, utiliza a IA configurada para:
         *   **Interpretar Solicitações:** Entender as necessidades e objetivos do Job (vindas do `job.payload.goal`).
         *   **Planejar Ações:** Decompor tarefas complexas em uma sequência de chamadas de `Tools`.
         *   **Tomar Decisões:** Escolher a próxima `Tool` a ser utilizada com base na `conversationHistory` (parte do `ActivityContext` em `job.data.agentState`) e no objetivo do Job.
@@ -30,9 +26,9 @@ A integração com Modelos de Linguagem Grandes (LLMs) é um pilar central do Pr
         *   **`AgentInternalState` (Parcialmente):** Embora não seja injetado automaticamente em cada prompt pelo `GenericAgentExecutor`, o Agente (via LLM) pode ser instruído a usar a `MemoryTool` para consultar seu `AgentInternalState` ou memória de longo prazo e usar essa informação em seu raciocínio.
         *   **Descrição das `Tools` Disponíveis:** O `GenericAgentExecutor` fornece ao LLM (via `ai-sdk`) os nomes, descrições e schemas de parâmetros das `Tools` habilitadas para a Persona.
 
-5.  **Orquestração de `Tools` pelo LLM:**
-    *   O LLM, através do `GenericAgentExecutor`, pode decidir solicitar a execução de uma ou mais `Tools` disponíveis.
-    *   O `GenericAgentExecutor` e o `ai-sdk` interpretam a intenção do LLM, executam a `Tool` solicitada (via `ToolRegistry`) com os argumentos fornecidos pelo LLM, e o resultado da `Tool` é adicionado à `conversationHistory` para processamento subsequente pelo LLM.
+5.  **Orquestração de `Tools` pela IA:**
+    *   A IA, através do `GenericAgentExecutor`, pode decidir solicitar a execução de uma ou mais `Tools` disponíveis.
+    *   O `GenericAgentExecutor` e o `ai-sdk` interpretam a intenção da IA, executam a `Tool` solicitada (via `ToolRegistry`) com os argumentos fornecidos pela IA, e o resultado da `Tool` é adicionado à `conversationHistory` para processamento subsequente pela IA.
 
 6.  **Abstração da Comunicação (AI SDK):**
     *   O sistema utiliza o `ai-sdk` (ex: `generateObject`, `generateText`) para abstrair as particularidades das APIs dos diferentes provedores de LLM.

@@ -47,7 +47,7 @@ Este comando lerá o arquivo `package.json` e `package-lock.json` e baixará tod
 O projeto utiliza SQLite, que é um banco de dados baseado em arquivo e não requer um servidor separado. O Drizzle ORM é usado para definir o schema e executar migrações.
 
 *   **Geração de Migrações (se você alterar o schema):**
-    Se você fizer alterações nos arquivos de schema do Drizzle (localizados geralmente em `src/infrastructure/services/drizzle/schema/`), você precisará gerar novos arquivos de migração:
+    Se você fizer alterações nos arquivos de schema do Drizzle (localizados dentro dos diretórios de persistência dos módulos de negócio, ex: `src/main/modules/project-management/persistence/project.schema.ts`), você precisará gerar novos arquivos de migração:
     ```bash
     npm run db:generate
     ```

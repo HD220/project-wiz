@@ -32,10 +32,10 @@ We will adopt a standardized approach for domain object self-validation using Zo
     *   For methods that change the state of an entity (e.g., `updateText()`, `assignAgent()`), the entity itself is responsible for ensuring the new state remains valid according to its business invariants. If these invariants are complex, Zod schemas can also be used internally within these methods to validate the proposed state or parts of it.
     *   Upon validation failure, entity methods (create or state-changing) must throw an `EntityError` or a more specific `DomainError` (from `@/domain/common/errors`), including details of the validation failure.
 
-3.  **Use Cases (Application Layer):**
-    *   Use Cases will continue to use Zod schemas to validate the structure, type, and presence of data in their input DTOs. This is considered input sanitization and request validation.
-    *   Use Cases will **rely** on the VOs and Entities to perform their own detailed business rule and invariant validation during their creation or state transitions.
-    *   If a call to a VO/Entity factory or method from a Use Case results in a `ValueError`, `EntityError`, or `DomainError` being thrown, the Use Case should catch this error and typically return it as the error part of its `Result` (e.g., `Result.error(domainError)`).
+3.  **Commands/Queries (Application Layer):**
+    *   Commands/Queries will continue to use Zod schemas to validate the structure, type, and presence of data in their input DTOs. This is considered input sanitization and request validation.
+    *   Commands/Queries will **rely** on the VOs and Entities to perform their own detailed business rule and invariant validation during their creation or state transitions.
+    *   If a call to a VO/Entity factory or method from a Command/Query results in a `ValueError`, `EntityError`, or `DomainError` being thrown, the Command/Query should catch this error and typically return it as the error part of its `Result` (e.g., `Result.error(domainError)`).
 
 4.  **Zod as a Domain Dependency:**
     *   The Domain Layer (`src/core/domain/`) is now permitted to have Zod as a direct dependency for validation purposes. The ESLint rule `boundaries/element-types` will be configured to allow imports from `zod` within the domain layer.

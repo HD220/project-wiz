@@ -43,7 +43,7 @@ O tratamento de exceções é fundamental para lidar com erros inesperados ou co
     }
     ```
 *   **Exceções em Agentes e Jobs:**
-    *   Conforme descrito na [Arquitetura de Software](./01-software-architecture.md) (especialmente seções sobre Jobs e Workers), quando um Agente lança uma exceção, o Worker responsável captura essa exceção.
+    *   Conforme descrito na [Arquitetura de Software](../concepts/software-architecture.md) (especialmente seções sobre Jobs e Workers), quando um Agente lança uma exceção, o Worker responsável captura essa exceção.
     *   O Worker então notifica a Fila (Queue) sobre a falha, que por sua vez gerencia o estado do Job (ex: movendo para `failed` ou `delayed` para retentativa) e armazena a informação do erro.
 *   **Não Suprimir Erros Silenciosamente:** Evite capturar erros e não fazer nada com eles (ex: um bloco `catch` vazio), a menos que seja intencional e justificado. Isso pode esconder problemas e dificultar a depuração.
 

@@ -4,7 +4,7 @@ Este guia fornece os passos essenciais para você começar a usar o Project Wiz 
 
 ## 1. Instalação
 
-Atualmente, o Project Wiz é executado a partir do código-fonte. Para informações sobre como configurar o ambiente de desenvolvimento e executar a aplicação, por favor, consulte o guia de [Configuração do Ambiente de Desenvolvimento](../developer/01-development-setup.md).
+Atualmente, o Project Wiz é executado a partir do aplicativo. Para informações sobre como configurar o ambiente de desenvolvimento e executar a aplicação, por favor, consulte o guia de [Configuração do Ambiente de Desenvolvimento](../developer/01-development-setup.md).
 
 *(Nota: Esta seção será atualizada quando houver instaladores disponíveis para diferentes sistemas operacionais.)*
 
@@ -29,7 +29,7 @@ Com o Project Wiz, você pode gerenciar seus projetos de software de forma centr
         *   `source-code/`: Onde o código principal do seu projeto residirá.
         *   `docs/`: Para a documentação específica do projeto.
         *   `worktrees/`: Áreas de trabalho que os Agentes IA podem usar.
-    *   Um repositório Git é inicializado automaticamente na pasta `source-code/`, permitindo o controle de versão desde o início.
+    *   Um sistema de controle de versão é inicializado automaticamente na pasta `source-code/`, permitindo o controle de versão desde o início.
 *   **Próximos Passos com Projetos:**
     *   Para mais detalhes sobre como gerenciar e configurar seus projetos, consulte o guia [Gerenciando Projetos](../concepts/02-projects.md).
 
@@ -40,14 +40,14 @@ No Project Wiz, você conta com um **Assistente Pessoal IA** para ajudá-lo a da
 *   **Descrevendo sua Necessidade:**
     *   Comece conversando com seu Assistente Pessoal IA. Descreva a tarefa que você precisa realizar (ex: "Preciso criar testes unitários para o módulo de autenticação").
 *   **Geração ou Seleção do Agente:**
-    *   O Assistente Pessoal, com auxílio de um LLM, analisará sua solicitação.
+    *   O Assistente Pessoal, com auxílio de uma IA, analisará sua solicitação.
     *   Ele poderá **sugerir uma configuração para um novo Agente IA especializado**, detalhando o papel (ex: "QA Tester"), objetivo, e as capacidades que ele usaria.
     *   Se você já tiver **"Personas Personalizadas" salvas** que se encaixem, o assistente poderá sugerir o uso de uma delas.
 *   **Customização e Configuração:**
     *   Você terá a oportunidade de **revisar e customizar** as características do Agente proposto (seja ele novo ou baseado em uma Persona Personalizada). Isso inclui seu nome, papel, objetivo, backstory (contexto para o LLM) e as capacidades permitidas.
-    *   Você também definirá qual modelo de LLM o Agente usará e outros parâmetros (como a "temperatura").
+    *   Você também definirá qual modelo de IA o Agente usará e outros parâmetros (como a "temperatura").
     *   Configurações que você aprova podem ser **salvas como uma nova "Persona Personalizada"** ou atualizar uma existente.
-*   **Pronto para o Trabalho:** Uma vez configurado, este Agente IA (uma instância `Agent`) estará pronto para auxiliar na realização dos seus objetivos.
+*   **Pronto para o Trabalho:** Uma vez configurado, este Agente (uma instância `Agent`) estará pronto para auxiliar na realização dos seus objetivos.
 *   **Saiba Mais:**
     *   Para um mergulho profundo na interação com o Assistente Pessoal e no gerenciamento de suas Personas Personalizadas e Agentes IA, veja [Personas Personalizadas e Agentes IA](../concepts/03-personas-and-agents.md).
 

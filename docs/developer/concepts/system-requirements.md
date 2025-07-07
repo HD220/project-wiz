@@ -68,7 +68,7 @@ Este documento detalha os Requisitos Funcionais (RF) e Não Funcionais (RNF) par
 *   **RF-LLM-001:** O sistema deve permitir a configuração de múltiplos provedores de LLM (com informações de configuração e um comando para criação).
 *   **RF-LLM-002:** Uma instância de Agente deve vincular uma configuração de Persona a uma configuração de provedor LLM.
 *   **RF-LLM-003:** O sistema deve usar o LLM configurado para o Agente para todas as operações de IA.
-*   **RF-LLM-004:** Interações com LLM devem ser contextualizadas (prompt de sistema da Persona, histórico de conversas da atividade, descrição das Ferramentas). Agentes podem usar uma ferramenta de memória para buscar contexto adicional do seu estado interno.
+*   **RF-LLM-004:** Interações com IA devem ser contextualizadas (prompt de sistema da Persona, histórico de conversas da atividade, descrição das Ferramentas). Agentes podem usar uma ferramenta de memória para buscar contexto adicional do seu estado interno.
 *   **RF-LLM-005:** O LLM, através do sistema, deveria poder solicitar a execução de capacidades/ferramentas registradas.
 *   **RF-LLM-006:** O sistema deve usar `ai-sdk` para abstrair a comunicação com diferentes APIs de LLM.
 

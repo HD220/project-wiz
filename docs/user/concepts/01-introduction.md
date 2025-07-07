@@ -1,6 +1,6 @@
 # Introdução ao Project Wiz
 
-Bem-vindo ao Project Wiz! Seu propósito é ser um sistema ElectronJS para automatizar tarefas de desenvolvimento usando modelos LLM (Large Language Models) localmente, permitindo que a LLM trabalhe de forma autônoma em repositórios GitHub.
+Bem-vindo ao Project Wiz! Seu propósito é ser um aplicativo de desktop para automatizar tarefas de desenvolvimento usando inteligência artificial avançada, permitindo que a IA trabalhe de forma autônoma em seus projetos de código.
 
 Este guia é destinado a ajudar você, usuário, a compreender o que é o Project Wiz, para quem ele se destina e como você pode se beneficiar de suas funcionalidades.
 
@@ -31,7 +31,7 @@ Com o Project Wiz, você poderá:
     *   Criação de pull requests (planejado)
     *   Geração de documentação
     *   Análise de issues (planejado)
-*   Configurar parâmetros dos modelos de linguagem utilizados pelas Personas.
+*   Configurar parâmetros dos modelos de inteligência artificial utilizados pelas Personas.
 *   Acompanhar o progresso das tarefas e a performance dos seus agentes.
 *   Interagir com as Personas através de uma interface de chat.
 *   E muito mais à medida que o projeto evolui!
@@ -41,10 +41,10 @@ Com o Project Wiz, você poderá:
 A interação típica com o Project Wiz e seus Agentes de IA segue um fluxo como este:
 
 1.  **Conversa e Delegação com o Assistente Pessoal:** Você interage com seu **Assistente Pessoal IA** através de uma interface de chat, descrevendo uma necessidade ou objetivo de alto nível no contexto de um [Projeto](./02-projects.md).
-2.  **Análise e Planejamento Interno pelo Agente:** O Assistente Pessoal, ou um Agente IA especializado para o qual a tarefa foi delegada (seja uma [Persona](./03-personas-and-agents.md) que você configurou/salvou ou um agente gerado dinamicamente), analisa sua solicitação. Internamente, o agente elabora um plano de ação, definindo as atividades e etapas necessárias (seus próprios "jobs" ou "sub-jobs" internos) para alcançar o objetivo, incluindo critérios de "Definição de Pronto".
-3.  **Aprovação do Usuário (Ponto de Verificação Opcional):** Para tarefas mais complexas ou antes de ações significativas, o Agente pode apresentar seu plano de alto nível ou os critérios de "Definição de Pronto" para sua aprovação via chat.
-4.  **Execução Autônoma:** Após a aprovação (ou se não for um passo requerido), o Agente começa a executar as atividades que planejou. Ele utiliza sua inteligência (LLM) e suas capacidades designadas (como interagir com o sistema de arquivos, executar comandos, etc.) para realizar as etapas. Para tarefas de código, o Agente opera dentro do diretório de trabalho do projeto, geralmente em um branch Git específico.
-5.  **Auto-Validação (Orientada pelo Agente):** O Agente pode realizar uma auto-validação interna, comparando os resultados com os critérios de "Definição de Pronto" estabelecidos para suas atividades internas.
+2.  **Análise e Planejamento Interno pelo Agente:** O Assistente Pessoal, ou um Agente IA especializado para o qual a tarefa foi delegada (seja uma [Persona](./03-personas-and-agents.md) que você configurou/salvou ou um agente gerado dinamicamente), analisa sua solicitação. Internamente, o agente elabora um plano de ação, definindo as atividades e etapas necessárias (seus próprios "jobs" ou "sub-jobs" internos) para alcançar o objetivo, incluindo critérios de "critérios de conclusão".
+3.  **Aprovação do Usuário (Ponto de Verificação Opcional):** Para tarefas mais complexas ou antes de ações significativas, o Agente pode apresentar seu plano de alto nível ou os critérios de "critérios de conclusão" para sua aprovação via chat.
+4.  **Execução Autônoma:** Após a aprovação (ou se não for um passo requerido), o Agente começa a executar as atividades que planejou. Ele utiliza sua inteligência (IA) e suas capacidades designadas (como interagir com o sistema de arquivos, executar comandos, etc.) para realizar as etapas. Para tarefas de código, o Agente opera dentro do diretório de trabalho do projeto, geralmente em uma versão de código específica.
+5.  **Auto-Validação (Orientada pelo Agente):** O Agente pode realizar uma auto-validação interna, comparando os resultados com os critérios de "critérios de conclusão" estabelecidos para suas atividades internas.
 6.  **Acompanhamento e Entrega:** Você pode acompanhar o progresso geral da sua solicitação ou o trabalho do agente através da interface (por exemplo, visualizando o status ou logs do agente, conforme a interface permitir). Ao final, o Agente, através do Assistente Pessoal, entrega o resultado do seu objetivo (ex: um novo branch Git com código modificado, um relatório, etc.). Você pode então continuar a interação para feedback ou ajustes.
 
 Para começar a usar a aplicação, recomendamos seguir nosso [Guia de Início Rápido](./02-getting-started.md). Para uma visão geral da interface, consulte a [Visão Geral da Interface do Usuário](./03-interface-overview.md). Navegue pelas próximas seções deste guia para aprender como utilizar as principais funcionalidades do Project Wiz.

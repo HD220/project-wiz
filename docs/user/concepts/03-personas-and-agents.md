@@ -10,10 +10,10 @@ Este guia explica como os Agentes são gerados e como você pode gerenciá-los.
     *   Seu ponto de partida no Project Wiz. Você descreve suas necessidades a ele.
     *   Ele interpreta sua solicitação e pode:
         *   Sugerir o uso de uma de suas Personas Personalizadas já existentes.
-        *   Propor a geração de um novo Agente IA Especializado, cujas características são definidas dinamicamente por um LLM com base na tarefa.
+        *   Propor a geração de um novo Agente IA Especializado, cujas características são definidas dinamicamente por uma IA com base na tarefa.
 
-*   **Agente IA Especializado (Instância `Agent`):**
-    *   Seja originado de uma Persona Personalizada ou gerado dinamicamente, é este Agente (uma instância da entidade `Agent`) que efetivamente processa as tarefas delegadas.
+*   **Agente IA Especializado (Agente):****
+    *   Seja originado de uma Persona Personalizada ou gerado dinamicamente, é este Agente que efetivamente processa as tarefas delegadas.
     *   Ele utiliza sua configuração específica (papel, objetivos, capacidades, LLM) para realizar o trabalho.
 
 **Principais Funções dos Agentes IA Especializados:**
@@ -40,19 +40,19 @@ Você tem a flexibilidade de refinar, salvar e criar suas próprias configuraç�
     *   **Nome da Persona:** Um identificador para sua configuração (ex: "Meu Dev Python Padrão", "Revisor de Documentação Técnica").
     *   **Papel (Role):** A especialização principal (ex: `Developer`, `QA Tester`, `Technical Writer`).
     *   **Objetivo (Goal):** O objetivo geral que Agentes com esta configuração devem buscar.
-    *   **Backstory/Contexto:** Informações de fundo para guiar o LLM.
+    *   **Backstory/Contexto:** Informações de fundo para guiar a IA.
     *   **Capacidades Necessárias:** O tipo de acesso ao sistema ou habilidades que o agente precisará (ex: capacidade de interagir com arquivos, executar comandos, ou pesquisar informações).
-    *   **Configuração de LLM:** Associar um provedor de LLM, modelo e parâmetros (ex: temperatura).
+    *   **Configuração de IA:** Associar um provedor de IA, modelo e parâmetros (ex: temperatura).
 
 Você geralmente gerenciará suas Personas Personalizadas em uma seção dedicada na interface do Project Wiz.
 
 ## Instanciando um Agente para uma Tarefa
-Independentemente de ser uma Persona Personalizada ou uma configuração gerada dinamicamente, quando uma tarefa precisa ser executada, uma instância de `Agent` é utilizada. Esta instância combina o perfil da Persona (papel, objetivos, capacidades definidas) com a configuração do LLM.
+Independentemente de ser uma Persona Personalizada ou uma configuração gerada dinamicamente, quando uma tarefa precisa ser executada, um Agente é utilizado. Este Agente combina o perfil da Persona (papel, objetivos, capacidades definidas) com a configuração da IA.
 
 ## Estado e Aprendizado do Agente (Conceitos Avançados)
 Mesmo que a *configuração* de uma Persona seja dinâmica ou personalizada, os Agentes em execução podem interagir com sistemas de memória:
-*   **`AgentInternalState` (Estado Interno/Memória de Longo Prazo):** Permite aprendizado e continuidade entre tarefas para perfis de agentes ou papéis.
-*   **`AgentJobState` (Estado do Job/Memória de Curto Prazo):** Contexto específico da tarefa atual.
+*   **Estado Interno (Memória de Longo Prazo):** Permite aprendizado e continuidade entre tarefas para perfis de agentes ou papéis.
+*   **Estado do Job (Memória de Curto Prazo):** Contexto específico da tarefa atual.
 
 ## Interagindo com Agentes IA
 *   **Via Assistente Pessoal:** Sua interface principal para delegar objetivos e tarefas de alto nível.
