@@ -1,61 +1,63 @@
 # Arquitetura de Software - Project Wiz
 
-Este documento descreve a arquitetura de software para o Project Wiz. A arquitetura é projetada para ser robusta, escalável, manutenível e testável, aderindo às melhores práticas modernas e aos requisitos específicos do projeto. Todo o código e identificadores seguem as convenções detalhadas na **ADR-028: Convenções Abrangentes de Nomenclatura**.
+Este documento descreve a arquitetura de software para o Project Wiz, focando na **Arquitetura de Módulos Adaptativos (AMA)**. A AMA é uma abordagem pragmática projetada para aumentar a velocidade de desenvolvimento, a manutenibilidade e a escalabilidade do projeto, com um foco intenso na Experiência do Desenvolvedor (Developer Experience - DX). Todo o código e identificadores seguem as convenções detalhadas na **ADR-028: Convenções Abrangentes de Nomenclatura**.
 
 ## 1. Princípios Arquiteturais Fundamentais
 
 A arquitetura do Project Wiz é guiada por um conjunto de princípios fundamentais que visam garantir a qualidade, flexibilidade e longevidade do sistema. Eles são a espinha dorsal das decisões de design e são refletidos em várias ADRs.
 
+### Visualização da Arquitetura de Módulos Adaptativos (AMA)
+
 ```mermaid
 graph TD
-    Usuarios[Usuários / Clientes Externos] --> CAM_PRES[Camada de Apresentação (Electron UI, CLI)];
-    CAM_PRES --> CAM_APP[Camada de Aplicação (Casos de Uso, Serviços de Aplicação)];
-    CAM_APP --> CAM_DOM[Camada de Domínio (Entidades, VOs, Serviços de Domínio)];
-    CAM_APP --> PORTAS_INFRA[Portas (Abstrações para Infraestrutura)];
-    CAM_INFRA[Camada de Infraestrutura (Adaptadores, Persistência, Dispositivos Externos)] --> PORTAS_INFRA;
-
-    subgraph " "
-      direction LR
-      SHARED_KERNEL[Kernel Compartilhado (Erros, DTOs Comuns, Utilitários Base)]
+    subgraph "Processo Principal (Backend - Main)"
+        MainLogic[Lógica de Negócio, Estado Central, Acesso a Recursos do Sistema]
     end
 
-    CAM_PRES --> SHARED_KERNEL;
-    CAM_APP --> SHARED_KERNEL;
-    CAM_DOM --> SHARED_KERNEL;
-    CAM_INFRA --> SHARED_KERNEL;
-
-    subgraph "Interface do Usuário / Mecanismos de Entrega"
-        CAM_PRES
-    end
-    subgraph "Lógica de Negócios Principal e Orquestração da Aplicação"
-        CAM_DOM
-        CAM_APP
-    end
-    subgraph "Detalhes Técnicos e Dependências Externas"
-        CAM_INFRA
-    end
-    subgraph "Recursos Transversais (Cross-Cutting)"
-        SHARED_KERNEL
+    subgraph "Processo de Renderização (Frontend - Renderer)"
+        RendererUI[Interface do Usuário (React)]
     end
 
-    style CAM_DOM fill:#FFDAB9,stroke:#333,stroke-width:2px
-    style CAM_APP fill:#ADD8E6,stroke:#333,stroke-width:2px
-    style CAM_PRES fill:#E6E6FA,stroke:#333,stroke-width:2px
-    style CAM_INFRA fill:#90EE90,stroke:#333,stroke-width:2px
-    style PORTAS_INFRA fill:#FFFFE0,stroke:#333,stroke-width:2px
-    style SHARED_KERNEL fill:#F5F5DC,stroke:#333,stroke-width:2px
+    subgraph "Contrato Compartilhado (Shared)"
+        SharedContract[Contrato de Comunicação IPC entre Main e Renderer]
+    end
+
+    RendererUI -- Comunica via IPC --> SharedContract
+    SharedContract -- Comunica via IPC --> MainLogic
+
+    subgraph "Módulos de Negócio (Dentro do Processo Principal)"
+        direction LR
+        ModuleA[Módulo A (Ex: Gerenciamento de Projetos)]
+        ModuleB[Módulo B (Ex: Execução de Agentes)]
+        ModuleC[Módulo C (Ex: Configurações de LLM)]
+    end
+
+    MainLogic -- Contém --> ModuleA
+    MainLogic -- Contém --> ModuleB
+    MainLogic -- Contém --> ModuleC
+
+    ModuleA -- CQRS/Event Bus --> ModuleB
+    ModuleB -- CQRS/Event Bus --> ModuleC
+
+    style MainLogic fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style RendererUI fill:#E6E6FA,stroke:#333,stroke-width:2px
+    style SharedContract fill:#F5F5DC,stroke:#333,stroke-width:2px
+    style ModuleA fill:#FFDAB9,stroke:#333,stroke-width:2px
+    style ModuleB fill:#FFDAB9,stroke:#333,stroke-width:2px
+    style ModuleC fill:#FFDAB9,stroke:#333,stroke-width:2px
 
     classDef default fill:#fff,stroke:#333,stroke-width:2px;
 ```
-*Legenda: As setas indicam a direção das dependências permitidas.*
+*Legenda: As setas indicam a direção das dependências e fluxos de comunicação.*
 
-*   **Clean Architecture:**
-    *   **Descrição:** O sistema segue rigorosamente os princípios da Clean Architecture. Esta abordagem organiza a codebase em camadas concêntricas (Domínio, Aplicação, Infraestrutura), com uma regra estrita de dependência: todas as dependências de código fonte fluem para dentro, em direção à camada de Domínio. Isso garante que a lógica de negócios central (contida nas camadas de Domínio e Aplicação) seja independente de frameworks externos, UI, e detalhes de banco de dados, promovendo alta testabilidade e manutenibilidade.
+*   **Arquitetura de Módulos Adaptativos (AMA):**
+    *   **Descrição:** O sistema adota a Arquitetura de Módulos Adaptativos (AMA), uma abordagem pragmática que estende os princípios da Clean Architecture. A AMA organiza o backend em **módulos de negócio verticais** auto-contidos, cada um co-localizando sua lógica de domínio, aplicação e persistência. A comunicação entre módulos e entre o processo principal (backend) e o de renderização (frontend) é feita explicitamente via **CQRS (Commands e Queries)** e um **Event Bus** central. Isso garante alta testabilidade, manutenibilidade e escalabilidade, com forte foco na Experiência do Desenvolvedor (DX).
     *   **Manifestação no Project Wiz:**
-        *   A estrutura de diretórios reflete claramente as camadas: `core/domain/`, `core/application/`, `infrastructure/`, e `presentation/`.
-        *   Casos de Uso (`core/application/use-cases/`) dependem de interfaces de repositório (`core/domain/<entidade>/ports/`) que são implementadas na camada de `infrastructure/persistence/`.
-        *   Entidades e Objetos de Valor (`core/domain/`) não possuem conhecimento sobre Drizzle ORM, Electron, ou React. Eles contêm pura lógica de negócio.
-        *   A comunicação entre a UI (`presentation/ui/`) e o backend é feita através de um conjunto bem definido de DTOs e handlers IPC, que por sua vez invocam Casos de Uso na camada de Aplicação.
+        *   A estrutura de diretórios reflete a divisão Main/Renderer e a organização em módulos de negócio (`src/main/modules/`, `src/renderer/features/`).
+        *   Operações são modeladas como Commands (escrita) e Queries (leitura), cada uma com seu Handler dedicado, orquestrando interações com o domínio e a infraestrutura.
+        *   Eventos de domínio são publicados no Event Bus para comunicação desacoplada entre módulos.
+        *   Entidades e Objetos de Valor (`core/domain/`) contêm pura lógica de negócio, independente de frameworks ou detalhes de persistência.
+        *   A comunicação entre a UI (`presentation/ui/`) e o backend é feita através de um contrato IPC bem definido, que invoca Commands e Queries no processo principal.
     *   **ADRs Relevantes:** Este princípio é fundamental e permeia quase todas as ADRs que tratam de estrutura e interações entre componentes, notavelmente **ADR-010** (Entidades e VOs), **ADR-011** (Repositórios), **ADR-012** (Casos de Uso), **ADR-017** (Persistência), **ADR-018** (Adaptadores), **ADR-019** (Injeção de Dependência), **ADR-023** (Electron Main), **ADR-024** (IPC), e **ADR-025** (Componentes React). A visualização detalhada das camadas e suas responsabilidades é apresentada na seção "3. Camadas Arquiteturais".
 
 *   **Object Calisthenics:**

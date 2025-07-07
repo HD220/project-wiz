@@ -73,83 +73,126 @@ function calculateInvoiceTotal(products: any[]): number {
 // const finalPrice = price * (1 + 0.05);
 </example\>
 
-## Clean Architecture Principles
+## Adaptive Module Architecture (AMA) Principles
 
-This rule set promotes strict adherence to Clean Architecture principles, ensuring the development of robust, testable, and scalable applications by defining clear layer responsibilities and dependency rules.
+This rule set promotes strict adherence to the Adaptive Module Architecture (AMA) principles, ensuring the development of robust, testable, and scalable applications by defining clear module responsibilities and communication patterns. The AMA is a pragmatic approach designed to increase development speed, maintainability, and scalability, with a strong focus on Developer Experience (DX).
 
-*   **Dependency Rule:** Strictly enforce the Dependency Rule: dependencies must always point inwards. Inner circles (Entities, Use Cases) must not know anything about outer circles (Adapters, Frameworks/Drivers).
-*   **Layer Separation:** Maintain clear separation between the four main layers:
-    *   **Entities:** Core business rules, data structures, and enterprise-wide business rules. Pure domain objects.
-    *   **Use Cases (Interactors):** Application-specific business rules. Orchestrates the flow of data to and from entities.
-    *   **Adapters (Controllers, Gateways, Presenters):** Convert data from inner layers to outer layers (and vice-versa). Bridges between use cases and external frameworks/drivers.
-    *   **Frameworks & Drivers (Web, DB, UI):** The outermost layer, dealing with specific technologies and external systems.
-*   **Inversion of Control (IoC):** Utilize the Dependency Inversion Principle. Inner layers define interfaces (abstractions), and outer layers implement them. Dependencies are injected from the outside in.
-*   **Testability:** Prioritize testability. Each layer, especially Entities and Use Cases, should be independently testable without reliance on external frameworks or databases.
-*   **No Direct Framework Imports in Core:** The core business logic (Entities, Use Cases) must have zero direct imports or dependencies on any external framework (e.g., React, Express, Database ORMs).
-*   **Data Flow:** Define explicit data flow between layers. Use simple data structures (Plain Old JavaScript Objects/interfaces) for input and output across layer boundaries.
-*   **Well-Defined Interfaces:** Define clear interfaces (ports) between layers to describe the communication contracts. Avoid implicit dependencies.
-*   **Persistence Ignorance:** Entities and Use Cases should be unaware of how data is persisted. This concern belongs to the Gateway or Repository adapters.
+*   **Clear Main/Renderer Division:** Enforce a strict separation between the Electron main process (backend) and the renderer process (frontend). Communication between them must occur only through a well-defined IPC contract.
+*   **Vertical Slices by Business Module:** Organize the backend (`main`) into self-contained modules, each representing a vertical slice of business functionality (e.g., `project-management`, `agent-execution`). This promotes high cohesion and reduces coupling.
+*   **Co-location Radical:** Within each business module, co-locate all related code (logic, domain, persistence) to minimize cross-directory navigation and simplify feature development.
+*   **Explicit Communication via CQRS:** Manage data flow by separating write operations (Commands) from read operations (Queries). Each use case is represented by a dedicated Command or Query class with its own Handler. This clarifies intent and isolates logic.
+*   **Event-Driven Reactivity:** Implement asynchronous communication between business modules via a central Event Bus. This decouples modules, allowing them to evolve independently.
+*   **Dependency Inversion:** Utilize the Dependency Inversion Principle. Inner layers define interfaces (abstractions), and outer layers implement them. Dependencies are injected from the outside in, promoting testability and flexibility.
+*   **Testability:** Prioritize testability. Each module and its components should be independently testable without reliance on external frameworks or databases.
+*   **No Direct Framework Imports in Core:** The core business logic within modules (domain entities, command/query handlers) must have zero direct imports or dependencies on any external framework (e.g., React, Electron APIs, Database ORMs).
+*   **Data Flow:** Define explicit data flow between layers and modules. Use simple data structures (Plain Old JavaScript Objects/interfaces) for input and output across boundaries.
+*   **Well-Defined Interfaces:** Define clear interfaces (ports) between modules and layers to describe communication contracts. Avoid implicit dependencies.
+*   **Persistence Ignorance:** Domain entities and business logic should be unaware of how data is persisted. This concern belongs to the persistence layer within each module.
 *   **Avoid Global State:** Minimize or avoid global state where possible, especially in core layers. Pass data explicitly between components and layers.
-*   **Error Handling:** Define a consistent error handling strategy across all layers. Errors should be passed inwards, but their handling and presentation can be adapted outwards.
+*   **Consistent Error Handling:** Define a consistent error handling strategy across all layers and modules. Errors should be passed inwards, but their handling and presentation can be adapted outwards.
 
-### Examples (Clean Architecture)
+### Examples (Adaptive Module Architecture - AMA)
 
 <example type="valid">
 TypeScript
-// User type definition (assuming it's in a shared types file or domain)
-type User = { id: string; name: string; /* other properties */ };
+// Example: Command and its Handler (Backend - Main Process)
+// In: src/main/modules/project-management/commands/create-project.command.ts
+import { Project } from '@/core/domain/project/project.entity';
+import { IProjectRepository } from '@/core/domain/project/project.repository';
+import { EventBus } from '@/kernel/event-bus'; // Abstraction, not concrete implementation
 
-// Good: Use Case (Inner Layer)
-interface UserRepository {
-  findById(id: string): Promise<User | null>;
-  save(user: User): Promise<void>;
+export class CreateProjectCommand {
+  constructor(public readonly name: string, public readonly description?: string) {}
 }
 
-class GetUserByIdUseCase {
-  constructor(private userRepository: UserRepository) {} // IoC
-  async execute(userId: string): Promise<User | null> {
-    return this.userRepository.findById(userId);
+export class CreateProjectCommandHandler {
+  constructor(
+    private readonly projectRepository: IProjectRepository,
+    private readonly eventBus: EventBus
+  ) {}
+
+  async execute(command: CreateProjectCommand): Promise<Project> {
+    const newProject = Project.create({
+      name: command.name,
+      description: command.description,
+    });
+    await this.projectRepository.save(newProject);
+    this.eventBus.publish('ProjectCreated', newProject); // Event-driven reactivity
+    return newProject;
   }
 }
 
-// Good: Adapter (Outer Layer)
-class MongoUserRepository implements UserRepository {
-  async findById(id: string): Promise<User | null> {
-    // MongoDB specific logic
-    // Example: return await UserModel.findById(id).lean();
-    return null;
-  }
-  async save(user: User): Promise<void> {
-    // MongoDB specific logic
-    // Example: const userModel = new UserModel(user); await userModel.save();
+// Example: Query and its Handler (Backend - Main Process)
+// In: src/main/modules/project-management/queries/get-project-by-id.query.ts
+import { IProjectRepository } from '@/core/domain/project/project.repository';
+import { Project } from '@/core/domain/project/project.entity';
+
+export class GetProjectByIdQuery {
+  constructor(public readonly projectId: string) {}
+}
+
+export class GetProjectByIdQueryHandler {
+  constructor(private readonly projectRepository: IProjectRepository) {}
+
+  async execute(query: GetProjectByIdQuery): Promise<Project | null> {
+    return this.projectRepository.findById(query.projectId);
   }
 }
+
+// Example: IPC Communication (Frontend to Backend)
+// In: src/renderer/services/ipc.ts (Abstraction over ipcRenderer)
+import { ipcRenderer } from 'electron'; // Electron API, only here
+
+export const ipcService = {
+  sendCreateProjectCommand: (name: string, description?: string) => {
+    return ipcRenderer.invoke('project:create', { name, description });
+  },
+  sendGetProjectByIdQuery: (projectId: string) => {
+    return ipcRenderer.invoke('project:getById', { projectId });
+  },
+  // ... other IPC methods
+};
+
+// In: src/shared/ipc-contracts.ts (Shared contract)
+export type IpcChannels = {
+  'project:create': {
+    request: { name: string; description?: string };
+    response: Project; // Assuming Project is also defined in shared types or can be serialized
+  };
+  'project:getById': {
+    request: { projectId: string };
+    response: Project | null;
+  };
+  // ...
+};
 </example\>
 <example type="invalid">
 TypeScript
 
-// Bad: Use Case directly importing framework (Dependency Rule Violation)
-// import { Express } from 'express'; // BAD: Framework import in inner layer
+// Bad: Direct Electron API import in a business module (violates separation)
+// In: src/main/modules/project-management/commands/create-project.command.ts
+// import { app } from 'electron'; // BAD: Direct Electron API import
 
-class CreateUserUseCase {
-  // execute(userData: any, req: Express.Request) { // BAD: Framework specific types
-  execute(userData: any, req: any) { // Still conceptually bad if req is framework-specific
-    //...
-  }
+// Bad: Generic Use Case mixing read/write concerns (violates CQRS)
+class ProjectService {
+  // This service would handle both creating projects and getting them,
+  // which is discouraged in AMA in favor of explicit Commands and Queries.
+  // createProject(name: string): Project { /* ... */ }
+  // getProject(id: string): Project | null { /* ... */ }
 }
 
-// Bad: Entity with persistence logic (Persistence Ignorance Violation)
-class Product {
-  id: string;
-  name: string;
-  constructor(id: string, name: string) {
-    this.id = id;
-    this.name = name;
-  }
-  saveToDatabase(): void { // BAD: Entity knows about persistence
-    // db.save(this);
-  }
-}
+// Bad: Frontend component directly calling Electron IPC without abstraction
+// In: src/renderer/features/project-management/components/ProjectForm.tsx
+// import { ipcRenderer } from 'electron'; // BAD: Electron API directly in UI component
+
+// function ProjectForm() {
+//   const handleSubmit = async (data) => {
+//     // BAD: Direct IPC call
+//     const newProject = await ipcRenderer.invoke('create-project', data);
+//     console.log(newProject);
+//   };
+//   // ...
+// }
 </example\>
 
 ## Clean Code: Object Calisthenics
@@ -159,19 +202,18 @@ This rule set enforces the Object Calisthenics principles to promote highly modu
 1.  **Only One Level of Indentation Per Method.**
     *   **Intent:** Promotes small, focused methods by discouraging deep nesting of conditional logic or loops.
     *   **Application:** Extract complex conditional blocks or loop bodies into separate, well-named private methods or helper functions. Single `if` statements or simple loops are generally acceptable.
-    *   *Project Relevance:* Methods like `GenericAgentExecutor.processJob` and `WorkerService.processJob` should be reviewed for opportunities to reduce indentation by extracting helper methods.
+    *   *Project Relevance:* Review complex methods within modules for opportunities to reduce indentation by extracting helper methods.
 
 2.  **Don’t Use the ELSE Keyword.**
     *   **Intent:** Encourages clearer conditional logic through early returns (guard clauses), polymorphism, or state patterns, reducing nesting.
     *   **Application:** Prioritize guard clauses for preconditions. For more complex state-dependent logic, consider if a State pattern or strategy pattern could eliminate complex `if/else if/else` chains.
-    *   *Project Relevance:* Review complex conditional structures in agent logic and service methods.
+    *   *Project Relevance:* Review complex conditional structures within modules and services.
 
 3.  **Wrap All Primitives and Strings.**
     *   **Intent:** Avoid "Primitive Obsession." If a primitive type (string, number, boolean) has inherent rules, constraints, or behavior associated with it, it should be encapsulated in a dedicated class or type (Value Object).
     *   **Application:**
         *   IDs (e.g., `JobId`, `PersonaId`): Currently UUID strings. This is acceptable, but if they start acquiring specific validation or formatting logic beyond simple string, consider wrapping.
         *   Domain-specific concepts passed as strings or numbers (e.g., status strings, priorities, configuration values like timeouts) could be candidates for wrapping if they have associated business rules or a constrained set of values (enums are a good TypeScript feature for this).
-        *   `job.payload` and `job.data`: `job.data` has been improved with `AgentJobState`. `job.payload` should ideally use specific DTOs for different job types rather than `any`.
         *   Tool parameters defined by Zod schemas already provide a strong form of "wrapping" with validation.
 
 4.  **First Class Collections.**
@@ -179,12 +221,12 @@ This rule set enforces the Object Calisthenics principles to promote highly modu
     *   **Application:**
         *   `GenericAgentExecutor.agentState.conversationHistory` and `executionHistory`: If the logic for managing these histories (e.g., adding entries, summarizing, querying specific parts) becomes complex, they could be extracted into their own classes (e.g., `ConversationHistoryManager`, `ExecutionLog`).
         *   `ToolRegistry` is a good example of this rule applied.
-    *   *Project Relevance:* Monitor the complexity of collection management within `GenericAgentExecutor`.
+    *   *Project Relevance:* Monitor the complexity of collection management within modules.
 
 5.  **One Dot Per Line (Law of Demeter).**
     *   **Intent:** Reduce coupling by limiting method calls to direct collaborators. Avoid long chains like `object.getA().getB().doSomething()`.
     *   **Application:** If such chains are found, consider if the intermediate objects are exposing too much internal state, or if a method should be added to the direct collaborator to provide the needed information or perform the action.
-    *   *Project Relevance:* Review interactions between services, use cases, and entities. For example, instead of `job.getData().getAgentState().getHistory()`, perhaps `job.getMostRecentHistoryEvent()` if that's a common need.
+    *   *Project Relevance:* Review interactions between modules, services, and entities.
 
 6.  **Don’t Abbreviate.**
     *   **Intent:** Use clear, explicit, and unambiguous names for variables, functions, classes, and files.
@@ -194,18 +236,18 @@ This rule set enforces the Object Calisthenics principles to promote highly modu
 7.  **Keep All Entities Small.**
     *   **Intent:** Classes should be small (e.g., <100 lines, ideally <50) and methods even smaller (e.g., <15 lines, ideally <5-10). This promotes Single Responsibility.
     *   **Application:** This is a key area for review.
-    *   *Project Relevance:* `GenericAgentExecutor.ts` (especially `processJob`) and `WorkerService.ts` are prime candidates for refactoring into smaller, more focused methods and potentially helper classes/services if responsibilities can be further delineated.
+    *   *Project Relevance:* Review modules and their components for opportunities to refactor into smaller, more focused methods and potentially helper classes/services if responsibilities can be further delineated.
 
 8.  **No Classes With More Than Two Instance Variables.**
     *   **Intent:** A very strict rule to promote high cohesion and enforce SRP. Classes with many instance variables might be doing too much or could have their variables grouped into meaningful domain objects.
     *   **Application:** This is often the most challenging Calisthenics rule to apply strictly, especially with Dependency Injection where classes collaborate with several services/repositories.
     *   **Pragmatic Adaptation:** Focus on whether the instance variables represent a cohesive set of responsibilities. If a class's dependencies seem to serve multiple distinct high-level purposes, consider splitting the class. For `GenericAgentExecutor`, its core dependencies (`personaTemplate`, `toolRegistryInstance`, `internalAnnotationTool`) are all fundamental to its role of executing a job for a persona. Further decomposition here would need careful thought to avoid over-fragmentation.
-    *   *Project Relevance:* Review classes like `GenericAgentExecutor` and `WorkerService`. Are all constructor-injected dependencies strictly necessary for *all* its public methods, or could some responsibilities be split?
+    *   *Project Relevance:* Review classes within modules. Are all constructor-injected dependencies strictly necessary for *all* its public methods, or could some responsibilities be split?
 
 9.  **No Getters/Setters/Properties (for direct state access/mutation).**
     *   **Intent:** Objects should expose behavior ("Tell, Don't Ask") rather than just raw data. State changes should occur as side effects of behavior methods.
     *   **Application:**
-        *   **Entities (`Job`, `MemoryItem`, `Annotation`):** These currently have public `props` or individual getters, which is common for data-centric entities that need to be serialized/deserialized or read by other layers. They also have behavioral methods for state transitions (e.g., `Job.moveToActive()`, `MemoryItem.updateContent()`). This balance is often pragmatic. The goal is to ensure that *business rules* related to state changes are encapsulated in methods, not handled by external clients setting properties. Avoid public setters where a behavioral method is more appropriate.
+        *   **Entities:** Continue to favor behavioral methods on entities for state changes. Review if any current public property access could be better encapsulated by a method representing an operation.
         *   **DTOs and Config Objects:** These are primarily data containers and will naturally have properties.
     *   *Project Relevance:* Continue to favor behavioral methods on entities for state changes. Review if any current public property access could be better encapsulated by a method representing an operation.
 
@@ -315,7 +357,7 @@ class AccountInvalid { // Renamed to avoid conflict
 
 This rule set guides the AI in developing robust, secure, and performant Electron applications by enforcing best practices for process separation, inter-process communication (IPC), and security.
 
-*   **Separate Main and Renderer Processes:** Strictly separate logic. The main process handles app lifecycle and native APIs. Renderer processes handle UI. Avoid mixing concerns.
+    *   **Separate Main and Renderer Processes:** Strictly separate logic. The main process handles app lifecycle and native APIs. Renderer processes handle UI. Avoid mixing concerns.
 *   **IPC Communication:** Use ipcMain and ipcRenderer for all communication between main and renderer processes. Define clear, descriptive channel names and send only necessary data.
 *   **Security Best Practices:** Implement strict security: enable contextIsolation, disable nodeIntegration in renderer processes, and use preload scripts to expose only safe APIs via contextBridge.
 *   **Preload Scripts:** All inter-process communication (IPC) for renderer processes must be handled via a secure preload script. Do not expose Node.js APIs directly to the renderer.
@@ -420,7 +462,7 @@ function createWindowInvalid(): void { // Renamed
 This rule set guides the AI in developing maintainable, performant, and accessible React components by enforcing modern best practices.
 
 *   **Functional Components & Hooks:** Always use functional components and React Hooks (useState, useEffect, useContext, useCallback, useMemo, etc.) for state management and side effects. Avoid class components.
-*   **Component Structure:** Organize components logically (e.g., Atomic Design). Each component should ideally adhere to the Single Responsibility Principle, doing one thing well. Break down complex components.
+*   **Component Structure:** Organize components logically, preferably following a Feature-Sliced Design where components are grouped by business functionality. Each component should ideally adhere to the Single Responsibility Principle, doing one thing well. Break down complex components.
 *   **Prop Drilling Avoidance:** Minimize prop drilling. For deeply nested data, consider useContext or a dedicated state management library (e.g., Redux, Zustand) for global state.
 *   **Memoization for Performance:** Use React.memo, useCallback, and useMemo judiciously to prevent unnecessary re-renders of components, functions, and expensive calculations.
 *   **Key Prop for Lists:** Always provide a stable, unique key prop when rendering lists of elements. The key should ideally be derived from the item's ID, not its index.
@@ -495,7 +537,7 @@ class ItemListInvalid extends Component<ItemListInvalidProps> { // Added props t
 This rule set guides the AI to adhere to fundamental TypeScript best practices, ensuring robust type safety, clear interface definitions, and modern module usage.
 
 *   **Type Safety Enforcement:** Explicitly define types for all variables, function arguments, and return values. Avoid `any` unless absolutely necessary and justified with a comment.
-*   **Interface/Type Definition:** Use `interface` or `type` for object shapes and complex types. Organize these definitions in dedicated types or interfaces files/folders.
+*   **Interface/Type Definition:** Use `interface` or `type` for object shapes and complex types. Organize these definitions in dedicated types or interfaces files/folders, ensuring they reflect the contracts between modules and layers.
 *   **Readonly Properties:** Apply `readonly` to properties that should not be reassigned after initialization in interfaces, types, and classes.
 *   **Enums vs. Union Types:** Prefer union types ('value1' | 'value2') for simple literal sets. Use `enum` for distinct sets of related constants with symbolic names.
 *   **Generics for Reusability:** Employ generics to create reusable components and functions that maintain type safety across different types.
@@ -671,18 +713,18 @@ const rawProductData = { name: 'Laptop', price: 1200, extraField: 'ignored' };
 Maintaining a clean codebase free of obsolete components is crucial for the long-term health of the project. The following practices are recommended based on cleanup process audits:
 
 *   **History of Obsolete Code:**
-    *   Maintain a record of removed files and components.
-    *   Include the justification for their obsolescence (e.g., in an `OBSOLETE_COMPONENTS.md` file or similar in the project documentation).
+    *   Maintain a record of removed modules, components, and files.
+    *   Include the justification for their obsolescence (e.g., in an `OBSOLETE_COMPONENTS.md` file or similar in the project documentation, referencing relevant ADRs or design decisions).
 *   **Cleanup Process Documentation:**
     *   The process of identifying, analyzing, and removing obsolete code should be documented.
-    *   Consider using templates to list files and components candidates for removal.
+    *   Consider using templates to list modules, components, and files candidates for removal.
     *   Document how to handle exception scenarios, such as shared components or those with non-obvious dependencies.
 *   **Traceability of Obsolescence:**
-    *   When marking files or components as obsolete, there should be a clear link (reference to ADRs, issues, or design decisions) to the architectural or business justification that led to the decision.
+    *   When marking modules, components, or files as obsolete, there should be a clear link (reference to ADRs, issues, or design decisions) to the architectural or business justification that led to the decision.
 *   **Cross-Validation and Backup:**
     *   Before mass deletion of code, perform static dependency analyses (where possible) to confirm non-usage.
     *   Always perform backups or ensure the version control system allows for easy rollback (e.g., create git tags) before major removals.
 *   **Automation and Tooling:**
-    *   Consider creating scripts to assist in generating lists of candidate files for obsolescence or to validate paths and permissions before deletion.
+    *   Consider creating scripts to assist in generating lists of candidate modules, components, or files for obsolescence or to validate paths and permissions before deletion.
 
 Adopting these practices helps ensure that the cleanup process is safe, traceable, and well-understood by the team.
