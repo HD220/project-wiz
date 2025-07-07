@@ -54,7 +54,7 @@ Serão adotados os seguintes padrões para IPC e o script de preload:
         1.  O primeiro argumento é `event: IpcMainInvokeEvent` (para `handle`) ou `event: IpcMainEvent` (para `on`).
         2.  Os argumentos subsequentes são os dados enviados pelo renderer.
         3.  **Validação de Entrada (OBRIGATÓRIO):** O handler DEVE validar o DTO de entrada recebido do renderer usando esquemas Zod (definidos junto com os tipos DTO em `shared/`). Se a validação falhar, o handler deve retornar/lançar um erro apropriado (que será encapsulado em `IUseCaseResponse.error` pelo Caso de Uso ou seu wrapper).
-        4.  **Lógica de Negócios:** O handler DEVE delegar a lógica de negócios para um Caso de Uso ou Serviço de Aplicação apropriado, passando os dados validados.
+        4.  **Lógica de Negócios:** O handler DEVE delegar a lógica de negócios para o **dispatcher CQRS**, que por sua vez invocará o `CommandHandler` ou `QueryHandler` apropriado. O handler passa os dados validados para o dispatcher.
         5.  **Resposta:** O handler DEVE retornar o resultado do Caso de Uso/Serviço (que já deve estar no formato `IUseCaseResponse`). O handler em si não precisa re-empacotar a resposta se o Caso de Uso/Serviço já o faz.
         6.  **Tratamento de Erro:** Erros lançados por Casos de Uso/Serviços (que devem ser `CoreError` ou subclasses) serão capturados pelo mecanismo de `invoke` e transmitidos ao renderer. O `UseCaseWrapper` (ADR-008, ADR-012) garante que esses erros sejam formatados corretamente no `IUseCaseResponse`.
     *   **Segurança:**

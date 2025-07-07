@@ -1,5 +1,10 @@
 # ADR-027: Estrutura de Diretórios e Convenções de Nomenclatura para o Frontend
 
+**Nota de Arquitetura:** Esta estrutura de frontend, baseada no **Feature-Sliced Design**, é um componente chave da **Arquitetura de Módulos Adaptativos (AMA)**. As "features" na UI (`src/presentation/ui/features/`) são projetadas para espelhar os "módulos de negócio" no backend (`src/main/modules/`), criando uma forte coesão vertical. Para o contexto completo, consulte o documento principal de arquitetura: `docs/developer/reference/software-architecture.md`.
+
+---
+
+
 **Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para alinhar com ADR-028)
 
 **Contexto:**

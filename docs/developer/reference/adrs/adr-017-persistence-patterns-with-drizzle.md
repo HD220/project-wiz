@@ -10,7 +10,7 @@ A camada de persistência é responsável por salvar e recuperar dados do domín
 Serão adotados os seguintes padrões para a camada de persistência com Drizzle ORM:
 
 **1. Definição de Esquemas de Tabela (`*.schema.ts`):**
-    *   **Localização:** `src/infrastructure/persistence/drizzle/schema/`. Um arquivo por tabela ou agrupamentos lógicos (e.g., `index.ts` para exportar todos os esquemas).
+    *   **Localização:** A definição de cada tabela (o schema Drizzle) pertence ao módulo de negócio que a gerencia. O arquivo `*.schema.ts` fica localizado dentro do diretório de persistência do seu respectivo módulo (ex: `src/main/modules/project-management/persistence/project.schema.ts`). As migrações SQL geradas, no entanto, são centralizadas em `src/main/persistence/migrations/` para garantir uma fonte única da verdade para a estrutura do banco de dados.
     *   **Nomenclatura:**
         *   **Tabelas:** Plural e `snake_case` (e.g., `jobs`, `user_profiles`).
         *   **Colunas:** `snake_case` (e.g., `queue_name`, `created_at`, `user_id`).

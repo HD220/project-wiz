@@ -1,5 +1,10 @@
 # ADR-012: Padrões para Casos de Uso e Serviços de Aplicação
 
+**Status:** <span style="color:red;font-weight:bold">OBsoleto</span> - Este ADR foi superado pela adoção da **Arquitetura de Módulos Adaptativos (AMA)**, que substitui o padrão de UseCase/Service genérico pelo padrão **CQRS (Command Query Responsibility Segregation)**. A lógica de aplicação agora é implementada em `Command Handlers` e `Query Handlers` específicos e focados. Consulte o documento `docs/developer/reference/software-architecture.md` para mais detalhes.
+
+---
+
+
 **Status:** Proposto (Considerado Aprovado Conforme Instrução - Revisado para alinhamento com UseCaseWrapper)
 
 **Contexto:**
