@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 
 import { z } from "zod";
 
-import { ValueError } from "@/core/domain/common/errors";
+import { ValueError } from "@/core/domain/common/common-domain.errors";
 
 import { AbstractValueObject, ValueObjectProps } from "./base.vo";
 

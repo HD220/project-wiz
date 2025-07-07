@@ -2,10 +2,10 @@ import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DataLoadingOrErrorDisplay } from "@/ui/components/DataLoadingOrErrorDisplay";
-import { EditAgentFormRenderer } from "@/ui/features/agent/components/EditAgentFormRenderer";
-import { useAgentInstanceData } from "@/ui/hooks/useAgentInstanceData";
-import { useUpdateAgentInstance } from "@/ui/hooks/useUpdateAgentInstance";
+import { DataLoadingOrErrorDisplay } from "@/ui/components/data-loading-or-error-display";
+import { EditAgentFormRenderer } from "@/ui/features/agent/components/edit-agent-form-renderer";
+import { useAgentInstanceData } from "@/ui/hooks/use-agent-instance-data.hook";
+import { useUpdateAgentInstance } from "@/ui/hooks/use-update-agent-instance.hook";
 
 function EditAgentInstancePage() {
   const router = useRouter();

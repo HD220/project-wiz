@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
-import { ValueError } from '@/core/domain/common/errors';
+import { ValueError } from '@/core/domain/common/common-domain.errors';
 
 const MIN_TEMPERATURE = 0.0;
 const MAX_TEMPERATURE = 2.0;

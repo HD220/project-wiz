@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { UserProfile } from "@/core/domain/entities/user";
+import type { UserProfile } from "@/core/domain/entities/user.entity";
 
 import {
   FormControl,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
-import { ValueError } from '@/core/domain/common/errors';
+import { ValueError } from '@/core/domain/common/common-domain.errors';
 
 /**
  * Options for how a job should be retried in case of failure.

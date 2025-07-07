@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 
 import { AGENT_REPOSITORY_INTERFACE_TYPE, AGENT_PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE, LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 import { Agent } from "@/core/domain/agent/agent.entity";
 import { IAgentPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
 import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
@@ -10,7 +10,7 @@ import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 import { AgentMaxIterations } from "@/core/domain/agent/value-objects/agent-max-iterations.vo";
 import { AgentTemperature } from "@/core/domain/agent/value-objects/agent-temperature.vo";
 import { PersonaId } from "@/core/domain/agent/value-objects/persona/persona-id.vo";
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
 import { LLMProviderConfigId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo";
 

@@ -527,7 +527,7 @@ Segue a Clean Architecture, detalhada em `docs/reference/software-architecture.m
     *   `persistence/drizzle/schema/`: Esquemas de tabela Drizzle (`*.schema.ts`) (ADR-017).
     *   `persistence/drizzle/<entidade>/`: Implementações de repositório Drizzle (`*.repository.ts`) e mappers (`*.mapper.ts`) (ADR-017).
     *   `adapters/<tipo_adaptador>/`: Adaptadores para serviços externos (e.g., `llm/openai-llm.adapter.ts`) (ADR-018).
-    *   `queue/drizzle/`: Implementação do sistema de filas com Drizzle (`drizzle-queue.facade.ts` e serviços internos) (ADR-020).
+        *   `queue/drizzle/`: Implementação do sistema de filas com Drizzle (`drizzle-queue.service.ts` e serviços internos) (ADR-020).
     *   `ioc/`: Configuração do InversifyJS (`inversify.config.ts`) (ADR-019).
 *   **`presentation/electron/`**: Código específico do Electron.
     *   `main/`: Lógica do processo principal, incluindo `main.ts` e `handlers/` para IPC (ADR-023, ADR-024).
@@ -642,7 +642,7 @@ Uma estratégia consistente para lidar com erros é crucial para a robustez e de
 Logging eficaz é vital para monitoramento e depuração. Baseado na **ADR-013: Estratégia de Logging Principal da Aplicação**.
 
 *   **Interface Padrão `ILogger`:**
-    *   **Padrão:** Usar a interface `ILogger` (de `core/common/services/i-logger.service.ts`) via DI para todas as necessidades de logging.
+    *   **Padrão:** Usar a interface `ILogger` (de `core/common/services/logger.port.ts`) via DI para todas as necessidades de logging.
     *   **Métodos:** `error(message, error?, context?)`, `warn(message, context?)`, `info(message, context?)`, `debug(message, context?)`.
     *   **Porquê:** Abstrai a implementação, permitindo diferentes backends de log.
 *   **Uso de `console.*`:** Fortemente desencorajado, exceto em cenários muito específicos (scripts de exemplo, logs de bootstrap inicial).

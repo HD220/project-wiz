@@ -3,9 +3,9 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 
-import { AgentDetailLoadingErrorDisplay } from "@/ui/features/agent/components/AgentDetailLoadingErrorDisplay";
-import { AgentDetailView } from "@/ui/features/agent/components/AgentDetailView";
-import { useAgentInstanceDetails } from "@/ui/hooks/useAgentInstanceDetails";
+import { AgentDetailLoadingErrorDisplay } from "@/ui/features/agent/components/agent-detail-loading-error-display";
+import { AgentDetailView } from "@/ui/features/agent/components/agent-detail-view";
+import { useAgentInstanceDetails } from "@/ui/hooks/use-agent-instance-details.hook";
 import { statusDisplayMap } from "@/ui/utils/agent-status";
 
 function AgentInstanceDetailPage() {

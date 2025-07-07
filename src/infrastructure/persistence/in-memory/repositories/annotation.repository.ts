@@ -9,7 +9,7 @@ import {
   PaginatedAnnotationsResult,
 } from "@/core/domain/annotation/ports/annotation-repository.types";
 import { AnnotationId } from "@/core/domain/annotation/value-objects/annotation-id.vo";
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 
 @injectable()
 export class InMemoryAnnotationRepository implements IAnnotationRepository {

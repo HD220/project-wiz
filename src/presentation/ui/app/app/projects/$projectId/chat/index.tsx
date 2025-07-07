@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import { ChatWindow } from '@/ui/features/chat/components/ChatWindow'; // Future integration
+// import { ChatWindow } from '@/ui/features/chat/components/chat-window'; // Future integration
 
 function ProjectChatPage() {
   const params = useParams({ from: "/app/projects/$projectId/chat/" });

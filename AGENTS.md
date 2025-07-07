@@ -338,7 +338,7 @@ graph LR
 ## Padrão de Resposta e Tratamento de Erros de Caso de Uso
 
 *   **DTO de Resposta Padronizado:**
-    *   **Regra:** Todos os Casos de Uso da Camada de Aplicação (`src/application/use-cases/`) devem retornar um objeto de resposta padronizado, como `IUseCaseResponse<TOutput, TErrorDetails>` (definida em `src/shared/application/use-case-response.dto.ts`). Este objeto indica sucesso/falha e carrega os dados de saída ou detalhes do erro.
+    *   **Regra:** Todos os Casos de Uso da Camada de Aplicação (`src/application/use-cases/`) devem retornar um objeto de resposta padronizado, como `IUseCaseResponse<TOutput, TErrorDetails>` (definida em `src/shared/application/use-case-response.types.ts`). Este objeto indica sucesso/falha e carrega os dados de saída ou detalhes do erro.
     *   **Porquê:** Cria um contrato consistente e previsível para os consumidores dos casos de uso (e.g., camada de apresentação, controladores de API, outros serviços), simplificando o tratamento de resultados de sucesso e de condições de falha de forma uniforme.
 *   **Implementação via `UseCaseWrapper` (Decorator ou Função de Ordem Superior):**
     *   **Regra:** A lógica de `try/catch` para erros genéricos, logging de erros e o mapeamento de exceções (tanto erros de domínio esperados quanto exceções inesperadas) para o DTO de erro padronizado devem ser centralizados, idealmente através de um Decorator (se a sintaxe for suportada e desejada) ou uma função de ordem superior que "envolve" a execução do caso de uso. Casos de uso focam na lógica de negócio e lançam exceções específicas do domínio ou de aplicação em caso de falha.

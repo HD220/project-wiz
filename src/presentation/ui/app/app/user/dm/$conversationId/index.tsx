@@ -1,9 +1,9 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import React from "react";
 
-import { ChatWindow } from "@/ui/features/chat/components/ChatWindow";
-import { DirectMessageLoadingErrorDisplay } from "@/ui/features/chat/components/DirectMessageLoadingErrorDisplay";
-import { useDirectMessages } from "@/ui/hooks/useDirectMessages";
+import { ChatWindow } from "@/ui/features/chat/components/chat-window";
+import { DirectMessageLoadingErrorDisplay } from "@/ui/features/chat/components/direct-message-loading-error-display";
+import { useDirectMessages } from "@/ui/hooks/use-direct-messages.hook";
 
 import type { ChatWindowConversationHeader } from "@/shared/ipc-chat.types";
 

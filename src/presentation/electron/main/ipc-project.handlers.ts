@@ -3,7 +3,7 @@ import { ipcMain, IpcMainInvokeEvent } from "electron";
 import { ProjectListItem } from "@/core/application/use-cases/project/list-projects.schema";
 import { ListProjectsUseCase } from "@/core/application/use-cases/project/list-projects.use-case";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import { IPCResponse } from "@/shared/ipc-types";
 
 

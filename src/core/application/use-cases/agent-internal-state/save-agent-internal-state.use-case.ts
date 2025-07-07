@@ -1,14 +1,14 @@
 // src/core/application/use-cases/agent-internal-state/save-agent-internal-state.use-case.ts
 
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger } from "@/core/common/services/i-logger.service";
+import { ILogger } from "@/core/common/services/logger.port";
 
 import { AgentInternalState } from "@/domain/agent/agent-internal-state.entity";
 import { IAgentInternalStateRepository } from "@/domain/agent/ports/agent-internal-state-repository.interface";
 import { AgentId } from "@/domain/agent/value-objects/agent-id.vo";
 import { CurrentGoal } from "@/domain/agent/value-objects/internal-state/current-goal.vo";
 import { CurrentProjectId } from "@/domain/agent/value-objects/internal-state/current-project-id.vo";
-import { GeneralNotesCollection } from "@/domain/agent/value-objects/internal-state/general-notes.collection";
+import { GeneralNotesCollection } from "@/domain/agent/value-objects/internal-state/general-notes.collection.vo";
 
 import {
   SaveAgentInternalStateUseCaseInput,

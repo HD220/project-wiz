@@ -1,9 +1,9 @@
 import { TargetAgentRoleVO } from "@/core/domain/agent/value-objects/target-agent-role.vo";
-import { QueueError } from "@/core/domain/common/errors";
+import { QueueError } from "@/core/domain/common/common-domain.errors";
 import { JobEntity } from "@/core/domain/job/job.entity";
 import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 
-import { IUseCaseResponse } from "@/shared/application/use-case-response.dto";
+import { IUseCaseResponse } from "@/shared/application/use-case-response.types";
 
 export interface FailDetails {
   message: string;

@@ -7,7 +7,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { Project } from '@/core/domain/entities/project';
+import type { Project } from '@/core/domain/entities/project.entity';
 
 import { ProjectDetailHeader } from '@/ui/features/project/components/details/ProjectDetailHeader';
 import { ProjectLoading } from '@/ui/features/project/components/details/ProjectLoading';

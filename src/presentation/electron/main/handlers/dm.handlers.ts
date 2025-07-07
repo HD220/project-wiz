@@ -2,7 +2,7 @@ import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from "electron";
 
 import { ChatMessage, DirectMessageItem } from "@/domain/entities/chat";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import { GetDMDetailsRequest, SendDMMessageRequest, DMMessageReceivedEventPayload } from "@/shared/ipc-types/chat.types";
 
 import { mockDMs, addMessageToMockDM } from "../mocks/dm.mocks";

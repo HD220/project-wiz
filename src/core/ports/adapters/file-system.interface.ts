@@ -1,5 +1,5 @@
 // src/core/ports/adapters/file-system.interface.ts
-import { IUseCaseResponse } from "../../../shared/application/use-case-response.dto";
+import { IUseCaseResponse } from "../../../shared/application/use-case-response.types";
 
 export interface IFileSystem {
   mkdir(

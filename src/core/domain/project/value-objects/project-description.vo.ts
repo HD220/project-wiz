@@ -4,7 +4,7 @@ import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
-import { ValueError } from '@/core/domain/common/errors';
+import { ValueError } from '@/core/domain/common/common-domain.errors';
 
 const ProjectDescriptionSchema = z.string()
   .max(500, 'Project description must be at most 500 characters long.');

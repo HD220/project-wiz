@@ -5,7 +5,7 @@ import {
   ILogger,
   LOGGER_INTERFACE_TYPE,
 } from "@/core/common/services/i-logger.service";
-import { LLMError } from "@/core/domain/common/errors";
+import { LLMError } from "@/core/domain/common/common-domain.errors";
 import {
   ILLMAdapter,
   ILLMAdapterToken,
@@ -16,7 +16,7 @@ import {
   IUseCaseResponse,
   successUseCaseResponse,
   errorUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+} from "@/shared/application/use-case-response.types";
 import {
   ChatSendMessagePayload,
   ChatStreamEndPayload,
@@ -28,7 +28,7 @@ import {
 import {
   IChatService,
   IChatServiceSendMessageResponse,
-} from "../ports/services/i-chat.service";
+} from "../ports/services/chat.service.port";
 
 @injectable()
 export class ChatService implements IChatService {

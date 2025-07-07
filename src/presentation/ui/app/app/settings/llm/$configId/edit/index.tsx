@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { LLMConfig, AgentLLM } from "@/core/domain/entities/llm";
+import { LLMConfig, AgentLLM } from "@/core/domain/entities/llm.entity";
 
 import { Button } from "@/components/ui/button";
 import {

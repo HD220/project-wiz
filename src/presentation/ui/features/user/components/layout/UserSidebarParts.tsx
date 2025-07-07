@@ -2,7 +2,7 @@ import { Link, useRouter } from '@tanstack/react-router';
 import { Settings, UserCircle, MessageSquarePlus, Search, Palette, Bot as BotIcon, Loader2, AlertTriangle } from 'lucide-react';
 import React from 'react';
 
-import type { DirectMessageItem } from '@/core/domain/entities/chat';
+import type { DirectMessageItem } from '@/core/domain/entities/chat.entity';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/ui/components/ui/avatar';
 import { Button } from '@/ui/components/ui/button';

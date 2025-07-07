@@ -4,8 +4,8 @@ import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AgentInstanceList } from "@/ui/features/agent/components/AgentInstanceList";
-import { AgentInstance } from "@/ui/features/agent/components/AgentInstanceListItem";
+import { AgentInstanceList } from "@/ui/features/agent/components/agent-instance-list";
+import { AgentInstance } from "@/ui/features/agent/components/agent-instance-list-item";
 import { LLMConfig } from "@/ui/features/llm/components/LLMConfigList";
 import { PersonaTemplate } from "@/ui/features/persona/components/PersonaTemplateListItem";
 

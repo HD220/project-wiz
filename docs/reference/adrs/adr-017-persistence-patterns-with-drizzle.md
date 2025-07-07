@@ -106,7 +106,7 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
 
 **6. Tratamento de Erros de Banco de Dados:**
     *   **Padrão:** Implementações de repositório DEVEM capturar exceções específicas do Drizzle ORM ou do driver do banco de dados (e.g., erros de conexão, violações de constraint, deadlocks).
-    *   Essas exceções DEVEM ser encapsuladas (wrapped) em um `InfrastructureError` (de `core/domain/common/errors.ts` ou `shared/errors/`) antes de serem relançadas. O erro original deve ser incluído na propriedade `originalError` do `InfrastructureError`.
+    *   Essas exceções DEVEM ser encapsuladas (wrapped) em um `InfrastructureError` (de `core/domain/common/common-domain.errors.ts` ou `shared/errors/`) antes de serem relançadas. O erro original deve ser incluído na propriedade `originalError` do `InfrastructureError`.
     *   **Exemplo:**
         ```typescript
         // try {
@@ -126,8 +126,8 @@ Serão adotados os seguintes padrões para a camada de persistência com Drizzle
     *   Se usado, deve ser encapsulado cuidadosamente e os parâmetros devem ser passados de forma segura para evitar injeção de SQL.
     *   **Justificativa:** O construtor de consultas do Drizzle oferece segurança de tipo e é mais fácil de manter. SQL bruto pode ser poderoso, mas menos seguro e mais difícil de refatorar.
 
-**8. Cliente Drizzle (`drizzle.client.ts`):**
-    *   **Padrão:** A instância do cliente Drizzle (`db`) e a conexão com o banco de dados (SQLite) devem ser inicializadas em um arquivo central (e.g., `src/infrastructure/persistence/drizzle/drizzle.client.ts`).
+**8. Cliente Drizzle (`drizzle.client.utils.ts`):**
+    *   **Padrão:** A instância do cliente Drizzle (`db`) e a conexão com o banco de dados (SQLite) devem ser inicializadas em um arquivo central (e.g., `src/infrastructure/persistence/drizzle/drizzle.client.utils.ts`).
     *   Esta instância `db` deve ser exportada e usada para injeção nos repositórios (como visto no `inversify.config.ts`).
     *   **Justificativa:** Centraliza a configuração da conexão do banco de dados e fornece um singleton para o cliente Drizzle.
 

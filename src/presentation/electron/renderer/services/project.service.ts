@@ -1,6 +1,6 @@
-import { Project } from "@/core/domain/entities/project";
+import { Project } from "@/core/domain/entities/project.entity";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import { IPCResponse } from "@/shared/ipc-types";
 
 export class ProjectService {

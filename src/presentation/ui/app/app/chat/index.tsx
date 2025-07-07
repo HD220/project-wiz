@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 
-import { ChatPageContent } from '@/ui/features/chat/components/ChatPageContent';
-import { ChatSidebar } from '@/ui/features/chat/components/ChatSidebar';
-import { useChatLogic } from '@/ui/hooks/useChatLogic';
+import { ChatPageContent } from '@/ui/features/chat/components/chat-page-content';
+import { ChatSidebar } from '@/ui/features/chat/components/chat-sidebar';
+import { useChatLogic } from '@/ui/hooks/use-chat-logic.hook';
 
 const chatSearchSchema = z.object({
   conversationId: z.string().optional(),

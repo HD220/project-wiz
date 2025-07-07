@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { ZodAny } from "zod";
 
-import { IToolRegistryService } from "@/core/application/ports/services/i-tool-registry.service";
-import { ILogger } from "@/core/common/services/i-logger.service";
+import { IToolRegistryService } from "@/core/application/ports/services/tool-registry.service.port";
+import { ILogger } from "@/core/common/services/logger.port";
 import { IAgentTool } from "@/core/tools/tool.interface";
 
 import { TYPES } from "@/infrastructure/ioc/types";

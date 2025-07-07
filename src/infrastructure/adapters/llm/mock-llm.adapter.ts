@@ -5,7 +5,7 @@ import {
   ILogger,
   LOGGER_INTERFACE_TYPE,
 } from "@/core/common/services/i-logger.service";
-import { LLMError } from "@/core/domain/common/errors";
+import { LLMError } from "@/core/domain/common/common-domain.errors";
 import { ILLMAdapter } from "@/core/ports/adapters/llm-adapter.interface";
 import {
   LLMGenerationOptions,
@@ -16,7 +16,7 @@ import {
   IUseCaseResponse,
   successUseCaseResponse,
   errorUseCaseResponse,
-} from "@/shared/application/use-case-response.dto";
+} from "@/shared/application/use-case-response.types";
 
 @injectable()
 export class MockLLMAdapter implements ILLMAdapter {

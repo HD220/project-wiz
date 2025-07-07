@@ -1,4 +1,4 @@
-import { Project, ProjectCreationProps, ProjectUpdateProps } from "@/core/domain/entities/project";
+import { Project, ProjectCreationProps, ProjectUpdateProps } from "@/core/domain/entities/project.entity";
 import { IProjectRepository } from "@/core/domain/repositories/project.repository";
 
 // Mock data for initial state

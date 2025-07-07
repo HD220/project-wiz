@@ -1,10 +1,10 @@
 // src/core/application/use-cases/agent-internal-state/load-agent-internal-state.use-case.ts
 
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger } from "@/core/common/services/i-logger.service";
+import { ILogger } from "@/core/common/services/logger.port";
 import { IAgentInternalStateRepository } from "@/core/domain/agent/ports/agent-internal-state-repository.interface";
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 
 import {
   LoadAgentInternalStateUseCaseInput,

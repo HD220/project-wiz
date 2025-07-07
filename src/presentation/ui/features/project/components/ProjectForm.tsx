@@ -6,13 +6,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import type { Project } from "@/core/domain/entities/project";
+import type { Project } from "@/core/domain/entities/project.entity";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+import { useIpcMutation } from "@/ui/hooks/ipc/use-ipc-mutation.hook";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import type {
   CreateProjectRequest,
   CreateProjectResponse,

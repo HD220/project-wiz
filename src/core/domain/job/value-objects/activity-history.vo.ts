@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { AbstractValueObject } from '@/core/common/value-objects/base.vo';
-import { ValueError } from '@/core/domain/common/errors';
+import { ValueError } from '@/core/domain/common/common-domain.errors';
 
 import { ActivityHistoryEntryVO, ActivityEntryType } from './activity-history-entry.vo';
 

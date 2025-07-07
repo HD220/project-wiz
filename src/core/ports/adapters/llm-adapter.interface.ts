@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { LLMError } from "@/domain/common/errors";
 
-import { IUseCaseResponse } from "@/shared/application/use-case-response.dto";
+import { IUseCaseResponse } from "@/shared/application/use-case-response.types";
 
 import {
   LLMGenerationOptions,

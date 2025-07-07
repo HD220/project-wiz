@@ -14,9 +14,9 @@ import {
   PersonaTemplateForm,
   type PersonaTemplateFormData,
 } from "@/ui/features/persona/components/PersonaTemplateForm";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+import { useIpcMutation } from "@/ui/hooks/ipc/use-ipc-mutation.hook";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import type {
   CreatePersonaTemplateRequest,
   CreatePersonaTemplateResponse,

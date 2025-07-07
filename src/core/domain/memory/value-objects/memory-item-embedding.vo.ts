@@ -4,7 +4,7 @@ import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
-import { ValueError } from "@/core/domain/common/errors";
+import { ValueError } from "@/core/domain/common/common-domain.errors";
 
 const MemoryItemEmbeddingSchema = z.array(z.number().finite())
   .min(1, 'Embedding array cannot be empty if provided. Use null for no embedding.')

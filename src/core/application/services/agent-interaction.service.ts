@@ -1,6 +1,6 @@
 import { injectable, inject } from 'inversify';
 
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/logger.port';
 import { Agent } from '@/core/domain/agent/agent.entity';
 import { AgentExecutionPayload, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';

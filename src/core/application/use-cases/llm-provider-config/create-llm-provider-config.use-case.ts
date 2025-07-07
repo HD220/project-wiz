@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 
 import { LLM_PROVIDER_CONFIG_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 import { LLMProviderConfig } from '@/core/domain/llm-provider-config/llm-provider-config.entity';
 import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
 import { LLMApiKey } from "@/core/domain/llm-provider-config/value-objects/llm-api-key.vo";

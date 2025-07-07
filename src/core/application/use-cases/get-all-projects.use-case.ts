@@ -1,4 +1,4 @@
-import { Project } from "../../domain/entities/project";
+import { Project } from "../../domain/entities/project.entity";
 import { IProjectRepository } from "../../domain/repositories/project.repository";
 
 export class GetAllProjectsUseCase {

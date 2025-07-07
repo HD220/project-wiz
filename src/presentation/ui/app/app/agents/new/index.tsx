@@ -1,10 +1,10 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import React from "react";
 
-import { NewAgentFormRenderer } from "@/ui/features/agent/components/NewAgentFormRenderer";
-import { NewAgentLoadingErrorDisplay } from "@/ui/features/agent/components/NewAgentLoadingErrorDisplay";
-import { useCreateAgentInstance } from "@/ui/hooks/useCreateAgentInstance";
-import { useNewAgentInstanceData } from "@/ui/hooks/useNewAgentInstanceData";
+import { NewAgentFormRenderer } from "@/ui/features/agent/components/new-agent-form-renderer";
+import { NewAgentLoadingErrorDisplay } from "@/ui/features/agent/components/new-agent-loading-error-display";
+import { useCreateAgentInstance } from "@/ui/hooks/use-create-agent-instance.hook";
+import { useNewAgentInstanceData } from "@/ui/hooks/use-new-agent-instance-data.hook";
 
 function NewAgentInstancePage() {
   const router = useRouter();

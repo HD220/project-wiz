@@ -22,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/components/ui/tooltip" // Corrected path
-import { useIsMobile } from "@/ui/hooks/use-mobile" // Corrected path
+import { useIsMobile } from "@/ui/hooks/use-mobile.hook" // Corrected path
 import { cn } from "@/ui/lib/utils" // Corrected path
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"

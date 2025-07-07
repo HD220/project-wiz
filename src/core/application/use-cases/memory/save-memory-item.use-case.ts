@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 
 import { MEMORY_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 import { Identity } from "@/core/common/value-objects/identity.vo";
 import { MemoryItem } from "@/core/domain/memory/memory-item.entity";
 import { IMemoryRepository } from "@/core/domain/memory/ports/memory-repository.interface";

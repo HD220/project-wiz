@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 import { LLMProviderConfig } from "@/core/domain/llm-provider-config/llm-provider-config.entity";
 import { ILLMProviderConfigRepository } from "@/core/domain/llm-provider-config/ports/llm-provider-config-repository.interface";
 import { LLMProviderConfigId } from "@/core/domain/llm-provider-config/value-objects/llm-provider-config-id.vo";

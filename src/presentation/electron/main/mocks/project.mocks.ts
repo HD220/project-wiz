@@ -1,5 +1,5 @@
 // src/presentation/electron/main/mocks/project.mocks.ts
-import { Project } from "@/core/domain/entities/project";
+import { Project } from "@/core/domain/entities/project.entity";
 
 // Using a Record for easier lookup by ID, similar to how a DB might work.
 // The GET_PROJECTS_LIST handler will return Object.values(mockProjectsDb)

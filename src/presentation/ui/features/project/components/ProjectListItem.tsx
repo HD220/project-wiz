@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { Briefcase, MoreHorizontal, Trash2, Edit3, PlayCircle, PauseCircle } from 'lucide-react';
 import React from 'react';
 
-import type { Project } from "@/core/domain/entities/project";
+import type { Project } from "@/core/domain/entities/project.entity";
 
 import { Badge } from '@/ui/components/ui/badge';
 import { Button } from '@/ui/components/ui/button';

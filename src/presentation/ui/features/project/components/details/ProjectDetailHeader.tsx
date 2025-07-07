@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-import type { Project } from '@/core/domain/entities/project';
+import type { Project } from '@/core/domain/entities/project.entity';
 
 import { Button } from '@/components/ui/button';
 import {

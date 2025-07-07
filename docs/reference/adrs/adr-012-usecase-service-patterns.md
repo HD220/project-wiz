@@ -35,7 +35,7 @@ Serão adotados os seguintes padrões para Casos de Uso e Serviços de Aplicaç�
     *   **Justificativa:** Garante a integridade dos dados na entrada dos Casos de Uso. Zod fornece validação robusta e inferência de tipos. Co-localização melhora a organização.
 
 **3. Resposta Padronizada para Casos de Uso (`IUseCaseResponse`):**
-    *   **Padrão:** `IUseCaseResponse<TOutputData, TErrorDetails>` (de `shared/application/use-case-response.dto.ts`) é o contrato de resposta *externo* e padronizado para qualquer Caso de Uso, conforme definido na **ADR-008**.
+    *   **Padrão:** `IUseCaseResponse<TOutputData, TErrorDetails>` (de `shared/application/use-case-response.types.ts`) é o contrato de resposta *externo* e padronizado para qualquer Caso de Uso, conforme definido na **ADR-008**.
     *   Esta resposta é tipicamente construída por um `UseCaseWrapper` (ver ADR-008) que executa o método `execute` do Caso de Uso concreto.
     *   Implementações concretas de Casos de Uso NÃO DEVEM construir `IUseCaseResponse` diretamente. Elas retornam os dados de sucesso diretamente (e.g., `Promise<TSuccessData>`) ou lançam uma instância de `CoreError` (ou suas subclasses) em caso de falha.
     *   **Justificativa:** Contrato de saída uniforme, facilitando o tratamento de sucesso e falha pelos chamadores (e.g., handlers IPC, outros serviços) através do `UseCaseWrapper`.

@@ -3,8 +3,8 @@ import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
 import { EntityError } from "@/domain/common/errors";
 
 import { ExecutionHistoryEntry } from "./job-processing.types";
-import { JobStateMutator } from "./job-state.mutator";
-import { JobFactory } from "./job.factory";
+import { JobStateMutator } from "./job-state.mutator.service";
+import { JobFactory } from "./job.factory.utils";
 import {
   JobStatus,
   JobEntityProps,

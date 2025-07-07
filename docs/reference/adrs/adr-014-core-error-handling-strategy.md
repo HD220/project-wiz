@@ -21,7 +21,7 @@ Serão adotados os seguintes padrões para o tratamento de erros:
     *   **Justificativa:** Fornece uma base comum para todos os erros customizados da aplicação, permitindo tratamento polimórfico e a inclusão de informações estruturadas.
 
 **2. Tipos de Erro Customizados Específicos:**
-    *   **Padrão:** Serão criadas classes de erro específicas que herdam de `CoreError` para diferentes categorias de falhas. Todas devem residir em `src/shared/errors/` ou `src/core/domain/common/errors.ts` e `src/core/application/common/errors.ts` conforme o escopo.
+    *   **Padrão:** Serão criadas classes de erro específicas que herdam de `CoreError` para diferentes categorias de falhas. Todas devem residir em `src/shared/errors/` ou `src/core/domain/common/common-domain.errors.ts` e `src/core/application/common/common-application.errors.ts` conforme o escopo.
     *   **Exemplos Principais:**
         *   **`ValueError extends CoreError`:** Para falhas de validação em Objetos de Valor (VOs).
             *   `context` deve incluir os detalhes da falha (e.g., `zodError.flatten().fieldErrors`).

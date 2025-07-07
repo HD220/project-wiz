@@ -6,9 +6,9 @@ import React from "react";
 
 import { EditPersonaTemplateFormRenderer } from "@/ui/features/persona/components/edit/EditPersonaTemplateFormRenderer";
 import { EditPersonaTemplateLoadingErrorDisplay } from "@/ui/features/persona/components/edit/EditPersonaTemplateLoadingErrorDisplay";
-import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
+import { useIpcQuery } from "@/ui/hooks/ipc/use-ipc-query.hook";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import type {
   GetPersonaTemplateDetailsRequest,
   GetPersonaTemplateDetailsResponse,

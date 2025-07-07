@@ -3,14 +3,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 
 // UI - Components
-import type { DirectMessageItem } from "@/core/domain/entities/chat";
+import type { DirectMessageItem } from "@/core/domain/entities/chat.entity";
 
 import { ScrollArea } from '@/ui/components/ui/scroll-area';
 // UI - Hooks
-import { useIpcSubscription } from '@/ui/hooks/ipc/useIpcSubscription';
+import { useIpcSubscription } from '@/ui/hooks/ipc/use-ipc-subscription.hook';
 
 // Shared
-import { IPC_CHANNELS } from '@/shared/ipc-channels';
+import { IPC_CHANNELS } from '@/shared/ipc-channels.constants';
 import type { GetDMConversationsListResponse, DMConversationsUpdatedEventPayload } from '@/shared/ipc-types/chat.types';
 
 // Parts for this component

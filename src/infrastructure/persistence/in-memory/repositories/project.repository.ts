@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { Project } from "@/core/domain/project/project.entity";
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";

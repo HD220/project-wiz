@@ -58,7 +58,7 @@ export const GENERIC_AGENT_EXECUTOR_INTERFACE_TYPE = Symbol.for(
 // However, it's often better to inject interfaces/ports rather than concrete use cases directly into other use cases.
 
 // Common services used across application layer
-export { LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+export { LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 
 // Note: Ensure these symbols match the ones used in the InversifyJS bindings in the infrastructure layer.
 // The infrastructure layer will bind concrete implementations to these application/domain defined symbols.
@@ -79,9 +79,9 @@ export { LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
 // The `LOGGER_INTERFACE_TYPE` is re-exported from common services for convenience.
 // `TOOL_REGISTRY_SERVICE_INTERFACE_TYPE` was previously defined in `infrastructure/ioc/types.ts`
 // and used by `ToolValidationService`. Now it's centralized here.
-// `IToolRegistryService` itself is in `core/application/ports/services/i-tool-registry.interface.ts`.
+// `IToolRegistryService` itself is in `core/application/ports/services/tool-registry.service.port.ts`.
 // The symbol `TOOL_REGISTRY_SERVICE_INTERFACE_TYPE` should be used for DI.
-// `AGENT_EXECUTOR_INTERFACE_TYPE` for `IAgentExecutor` from `core/application/ports/services/i-agent-executor.interface.ts`
+// `AGENT_EXECUTOR_INTERFACE_TYPE` for `IAgentExecutor` from `core/application/ports/services/agent-executor.port.ts`
 // `AGENT_STATE_SERVICE_INTERFACE_TYPE` for `IAgentStateService` from `core/application/services/agent-state.service.ts` (interface is implicit)
 // `AGENT_INTERACTION_SERVICE_INTERFACE_TYPE` for `IAgentInteractionService` from `core/application/services/agent-interaction.service.ts` (interface is implicit)
 // `AGENT_TOOL_SERVICE_INTERFACE_TYPE` for `IAgentToolService` from `core/application/services/agent-tool.service.ts` (interface is implicit)

@@ -1,7 +1,7 @@
 import React from 'react';
 import { toast } from 'sonner';
 
-import type { Project } from '@/core/domain/entities/project';
+import type { Project } from '@/core/domain/entities/project.entity';
 
 import { ProjectListItem } from './ProjectListItem';
 

@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 import { IUserRepository } from "@/core/domain/user/ports/user-repository.interface";
 import { User } from "@/core/domain/user/user.entity";
 import { UserEmail } from "@/core/domain/user/value-objects/user-email.vo";

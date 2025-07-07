@@ -4,7 +4,7 @@ import { Agent } from "@/core/domain/agent/agent.entity";
 import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";
 import { PersonaId } from "@/core/domain/agent/value-objects/persona/persona-id.vo";
-import { NotFoundError } from "@/core/domain/common/errors";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 
 @injectable()
 export class InMemoryAgentRepository implements IAgentRepository {

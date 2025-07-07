@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 
 import { AGENT_PERSONA_TEMPLATE_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 import { AgentPersonaTemplate } from "@/core/domain/agent/agent-persona-template.vo";
 import { IAgentPersonaTemplateRepository } from "@/core/domain/agent/ports/agent-persona-template-repository.interface";
 import { PersonaBackstory } from "@/core/domain/agent/value-objects/persona/persona-backstory.vo";

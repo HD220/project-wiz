@@ -2,8 +2,8 @@ import { injectable, inject } from "inversify";
 
 import { PROJECT_REPOSITORY_INTERFACE_TYPE, SOURCE_CODE_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
-import { NotFoundError } from "@/core/domain/common/errors";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
+import { NotFoundError } from "@/core/domain/common/common-domain.errors";
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";
 import { ISourceCodeRepository } from "@/core/domain/source-code/ports/source-code-repository.interface";

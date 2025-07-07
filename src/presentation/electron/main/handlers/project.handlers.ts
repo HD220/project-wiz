@@ -3,7 +3,7 @@ import { ipcMain } from "electron";
 import { GetAllProjectsUseCase } from "@/core/application/use-cases/get-all-projects.use-case";
 import { IProjectRepository } from "@/core/domain/repositories/project.repository";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import { GetProjectDetailsRequest, CreateProjectRequest, UpdateProjectRequest, Project } from "@/shared/ipc-types";
 
 function registerQueryProjectHandlers(projectRepository: IProjectRepository) {

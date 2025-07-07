@@ -1,6 +1,6 @@
 // src/presentation/ui/services/ipc.service.ts
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import {
   ChatSendMessagePayload,
   ChatStreamEventPayload,

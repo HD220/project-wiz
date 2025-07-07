@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 import { AbstractEntity, EntityProps } from "@/core/common/base.entity";
-import { EntityError } from "@/core/domain/common/errors";
+import { EntityError } from "@/core/domain/common/common-domain.errors";
 
 import { AgentId } from './value-objects/agent-id.vo';
 import { CurrentGoal } from './value-objects/internal-state/current-goal.vo';
 import { CurrentProjectId } from './value-objects/internal-state/current-project-id.vo';
-import { GeneralNotesCollection } from './value-objects/internal-state/general-notes.collection';
+import { GeneralNotesCollection } from './value-objects/internal-state/general-notes.collection.vo';
 
 export interface AgentInternalStateProps {
   id: AgentId;

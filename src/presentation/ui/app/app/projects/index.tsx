@@ -2,15 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import React, { useState } from "react";
 
 
-import type { Project } from "@/core/domain/entities/project";
+import type { Project } from "@/core/domain/entities/project.entity";
 
 import { NoProjectsDisplay } from "@/ui/features/project/components/list/NoProjectsDisplay";
 import { ProjectsFilterOptions } from "@/ui/features/project/components/list/ProjectsFilterOptions";
 import { ProjectsHeader } from "@/ui/features/project/components/list/ProjectsHeader";
 import { ProjectList } from "@/ui/features/project/components/ProjectList";
-import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
+import { useIpcQuery } from "@/ui/hooks/ipc/use-ipc-query.hook";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import type { GetProjectsListResponse } from "@/shared/ipc-types/project.types";
 
 function ProjectsPage() {

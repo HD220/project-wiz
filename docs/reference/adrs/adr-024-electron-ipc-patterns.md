@@ -35,8 +35,8 @@ Serão adotados os seguintes padrões para IPC e o script de preload:
         *   A função de `on` DEVE retornar uma função para remover o listener (unsubscribe), prevenindo memory leaks.
     *   **Justificativa:** Garante uma ponte segura e controlada entre o main e o renderer, minimizando a superfície de ataque e mantendo o isolamento de contexto. Tipagem forte e listeners simplificados melhoram a Developer Experience (DX) no renderer.
 
-**2. Canais IPC (`shared/ipc-channels.ts`):**
-    *   **Padrão:** Todos os nomes de canais IPC DEVEM ser definidos como constantes string (ou membros de um enum) em um arquivo centralizado, por exemplo, `src/shared/ipc-channels.ts`.
+**2. Canais IPC (`shared/ipc-channels.constants.ts`):**
+    *   **Padrão:** Todos os nomes de canais IPC DEVEM ser definidos como constantes string (ou membros de um enum) em um arquivo centralizado, por exemplo, `src/shared/ipc-channels.constants.ts`.
     *   **Nomenclatura de Canais:** Adotar um padrão consistente, como `OBJETO:AÇÃO` ou `FUNCIONALIDADE:EVENTO` (e.g., `"PROJECT:CREATE"`, `"CHAT:NEW_MESSAGE"`, `"APP_STATUS:IS_DEV"`). Usar letras maiúsculas e `snake_case` (ou `kebab-case` se preferido, mas ser consistente).
     *   **Justificativa:** Evita o uso de strings "mágicas" para nomes de canais, reduzindo erros de digitação e facilitando a refatoração e a busca por usos de um canal específico.
 
@@ -90,7 +90,7 @@ Serão adotados os seguintes padrões para IPC e o script de preload:
 
 ---
 **Notas de Implementação para LLMs:**
-*   Sempre defina canais IPC em `shared/ipc-channels.ts`.
+*   Sempre defina canais IPC em `shared/ipc-channels.constants.ts`.
 *   Para cada canal, defina tipos DTO de requisição/resposta em `shared/ipc-types/`.
 *   No Preload (`preload.ts`): Exponha apenas os métodos `invoke`, `on`, `send` etc., através de um objeto único em `window.electronIPC`. Garanta que `on` retorne uma função de unsubscribe e que o listener receba apenas os dados.
 *   Nos Handlers IPC (Main Process): Valide TODAS as entradas do renderer com Zod. Delegue para Casos de Uso/Serviços. Retorne `IUseCaseResponse`.

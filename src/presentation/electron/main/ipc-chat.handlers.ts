@@ -2,11 +2,11 @@ import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import {
   IChatService,
-} from "@/core/application/ports/services/i-chat.service";
+} from "@/core/application/ports/services/chat.service.port";
 
 import {
   IPC_CHANNELS
-} from "@/shared/ipc-channels";
+} from "@/shared/ipc-channels.constants";
 import {
   ChatSendMessagePayload,
   ChatStreamEventPayload,

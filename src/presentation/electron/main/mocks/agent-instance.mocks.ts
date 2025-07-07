@@ -1,4 +1,4 @@
-import { AgentLLM } from "@/core/domain/entities/llm";
+import { AgentLLM } from "@/core/domain/entities/llm.entity";
 
 import { AgentInstance } from "@/shared/ipc-types";
 

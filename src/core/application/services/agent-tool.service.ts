@@ -1,8 +1,8 @@
 import { injectable, inject } from 'inversify';
 
-import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/i-logger.service';
+import { ILogger, LOGGER_INTERFACE_TYPE } from '@/core/common/services/logger.port';
 import { Agent } from '@/core/domain/agent/agent.entity';
-import { ToolError } from '@/core/domain/common/errors';
+import { ToolError } from '@/core/domain/common/common-domain.errors';
 import { AgentExecutionPayload, ExecutionHistoryEntry } from '@/core/domain/job/job-processing.types';
 import { JobEntity } from '@/core/domain/job/job.entity';
 import { ActivityHistoryVO, ActivityHistoryEntryVO, ActivityEntryType } from '@/core/domain/job/value-objects/activity-history.vo';

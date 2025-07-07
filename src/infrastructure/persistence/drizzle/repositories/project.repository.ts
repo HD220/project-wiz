@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
 
-import { ILogger } from "@/core/common/services/i-logger.service";
+import { ILogger } from "@/core/common/services/logger.port";
 import { IProjectRepository } from "@/core/domain/project/ports/project-repository.interface";
 import { Project } from "@/core/domain/project/project.entity";
 import { ProjectId } from "@/core/domain/project/value-objects/project-id.vo";

@@ -1,7 +1,7 @@
 import { Edit, FileText } from 'lucide-react';
 import React from 'react';
 
-import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
+import { MarkdownRenderer } from '@/components/common/markdown-renderer';
 import { Button } from '@/components/ui/button';
 import {
   Card,

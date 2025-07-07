@@ -5,7 +5,7 @@ import {
   AbstractValueObject,
   ValueObjectProps,
 } from "@/core/common/value-objects/base.vo";
-import { ValueError } from "@/core/domain/common/errors";
+import { ValueError } from "@/core/domain/common/common-domain.errors";
 
 const UserEmailSchema = z
   .string()

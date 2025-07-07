@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { ProjectSettingsError } from "@/ui/features/project/components/settings/ProjectSettingsError";
 import { ProjectSettingsForm } from "@/ui/features/project/components/settings/ProjectSettingsForm";
 import { ProjectSettingsLoading } from "@/ui/features/project/components/settings/ProjectSettingsLoading";
-import { useIpcQuery } from "@/ui/hooks/ipc/useIpcQuery";
+import { useIpcQuery } from "@/ui/hooks/ipc/use-ipc-query.hook";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import type {
   GetProjectDetailsRequest,
   GetProjectDetailsResponse,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { AbstractValueObject, ValueObjectProps } from '@/core/common/value-objects/base.vo';
-import { ValueError } from '@/core/domain/common/errors';
+import { ValueError } from '@/core/domain/common/common-domain.errors';
 
 const ToolNamesSchema = z.array(z.string().min(1, 'Tool name cannot be empty.'))
   .optional()

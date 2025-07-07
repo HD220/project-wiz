@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 
 import { ANNOTATION_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 import { IAnnotationRepository } from "@/core/domain/annotation/ports/annotation-repository.interface";
 import { AnnotationId } from "@/core/domain/annotation/value-objects/annotation-id.vo";
 

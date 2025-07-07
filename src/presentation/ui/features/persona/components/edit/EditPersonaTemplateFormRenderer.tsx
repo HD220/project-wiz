@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
-import type { PersonaTemplate } from "@/core/domain/entities/persona";
+import type { PersonaTemplate } from "@/core/domain/entities/persona.entity";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +14,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PersonaTemplateForm, type PersonaTemplateFormData } from "@/ui/features/persona/components/PersonaTemplateForm";
-import { useIpcMutation } from "@/ui/hooks/ipc/useIpcMutation";
+import { useIpcMutation } from "@/ui/hooks/ipc/use-ipc-mutation.hook";
 
-import { IPC_CHANNELS } from "@/shared/ipc-channels";
+import { IPC_CHANNELS } from "@/shared/ipc-channels.constants";
 import type { GetPersonaTemplateDetailsResponse, UpdatePersonaTemplateRequest, UpdatePersonaTemplateResponse } from "@/shared/ipc-types/persona.types";
 
 

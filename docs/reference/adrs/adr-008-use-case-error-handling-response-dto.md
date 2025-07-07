@@ -12,7 +12,7 @@ Adotar um DTO de resposta padrão para todos os casos de uso, denominado `IUseCa
 
 **Estrutura do DTO de Resposta:**
 
-O DTO `IUseCaseResponse` será definido da seguinte forma (localizado em `src/shared/application/use-case-response.dto.ts`):
+O DTO `IUseCaseResponse` será definido da seguinte forma (localizado em `src/shared/application/use-case-response.types.ts`):
 
 ```typescript
 interface IUseCaseErrorDetails {

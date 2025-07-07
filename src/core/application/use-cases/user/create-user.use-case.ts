@@ -3,9 +3,9 @@ import { injectable, inject } from "inversify";
 
 import { USER_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
 import { IUseCase } from "@/core/application/common/ports/use-case.interface";
-import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/i-logger.service";
+import { ILogger, LOGGER_INTERFACE_TYPE } from "@/core/common/services/logger.port";
 import { Identity } from "@/core/common/value-objects/identity.vo";
-import { DomainError } from "@/core/domain/common/errors";
+import { DomainError } from "@/core/domain/common/common-domain.errors";
 import { IUserRepository } from "@/core/domain/user/ports/user-repository.interface";
 import { User, UserProps } from "@/core/domain/user/user.entity";
 import { UserAvatar } from "@/core/domain/user/value-objects/user-avatar.vo";

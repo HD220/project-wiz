@@ -2,12 +2,12 @@
 import { injectable, inject } from "inversify";
 
 import { AGENT_REPOSITORY_INTERFACE_TYPE } from "@/core/application/common/constants";
-import { ApplicationError } from "@/core/application/common/errors";
-import { IAgentExecutor } from "@/core/application/ports/services/i-agent-executor.interface";
+import { ApplicationError } from "@/core/application/common/common-application.errors";
+import { IAgentExecutor } from "@/core/application/ports/services/agent-executor.port";
 import {
   ILogger,
   LOGGER_INTERFACE_TYPE,
-} from "@/core/common/services/i-logger.service";
+} from "@/core/common/services/logger.port";
 import { Agent } from "@/core/domain/agent/agent.entity";
 import { IAgentRepository } from "@/core/domain/agent/ports/agent-repository.interface";
 import { AgentId } from "@/core/domain/agent/value-objects/agent-id.vo";

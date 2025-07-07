@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm";
 
 import { IJobRepository } from "@/core/application/ports/job-repository.interface";
-import { JobPersistenceMapper } from "@/core/domain/job/job-persistence.mapper";
+import { JobPersistenceMapper } from "@/core/domain/job/job-persistence.mapper.utils";
 import {
   JobEntity,
   JobStatus,

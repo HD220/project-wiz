@@ -10,7 +10,7 @@ Um sistema de logging consistente e eficaz é crucial para depuração, monitora
 Serão adotados os seguintes padrões para logging na aplicação:
 
 **1. Interface Padrão `ILogger`:**
-    *   **Padrão:** A interface `ILogger` (de `core/common/services/i-logger.service.ts`) é o contrato padrão para todas as necessidades de logging da aplicação. Todas as partes do sistema que necessitam de logging devem receber uma instância de `ILogger` via injeção de dependência.
+    *   **Padrão:** A interface `ILogger` (de `core/common/services/logger.port.ts`) é o contrato padrão para todas as necessidades de logging da aplicação. Todas as partes do sistema que necessitam de logging devem receber uma instância de `ILogger` via injeção de dependência.
     *   **Métodos Padrão:** A interface `ILogger` deve prover no mínimo os seguintes métodos, representando níveis de severidade:
         *   `error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void;`
         *   `warn(message: string, context?: Record<string, unknown>): void;`

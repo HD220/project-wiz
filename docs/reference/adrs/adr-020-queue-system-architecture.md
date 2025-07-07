@@ -17,7 +17,7 @@ A arquitetura do sistema de filas será padronizada da seguinte forma:
     *   **Justificativa:** Desacopla a lógica da aplicação da implementação concreta da fila, permitindo diferentes implementações (e.g., Drizzle, Redis) no futuro.
 
 **2. Implementação Concreta com Facade (`DrizzleQueueFacade`):**
-    *   **Localização:** `src/infrastructure/queue/drizzle/drizzle-queue.facade.ts`.
+    *   **Localização:** `src/infrastructure/queue/drizzle/drizzle-queue.service.ts`.
     *   **Papel:** É a principal implementação concreta de `AbstractQueue` para a persistência baseada em Drizzle/SQLite. Atua como uma Facade, simplificando a interface para um subsistema mais complexo de serviços internos.
     *   **Herança:** `export class DrizzleQueueFacade<P, R> extends AbstractQueue<P, R>`.
     *   **Injeção de Dependência:** Recebe o `queueName`, `IJobRepository`, `defaultJobOptions` (para o construtor de `AbstractQueue`), e instâncias dos serviços internos (`QueueServiceCore`, `JobProcessingService`, `QueueMaintenanceService`).
