@@ -3,7 +3,7 @@ import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { initializeDb, setTestDb } from '../src/main/persistence/db';
 import path from 'path';
 
-let testDb: any;
+let testDb: ReturnType<typeof initializeDb>;
 
 beforeEach(() => {
   testDb = initializeDb(':memory:');
