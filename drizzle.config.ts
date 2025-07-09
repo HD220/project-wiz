@@ -1,11 +1,16 @@
-import "dotenv/config";
-import { defineConfig } from "drizzle-kit";
+import type { Config } from "drizzle-kit";
 
-export default defineConfig({
-  out: "./src/infrastructure/persistence/drizzle/migrations",
-  schema: "./src/infrastructure/persistence/drizzle/schema/index.ts",
+export default {
+  schema: [
+    "./src/main/persistence/schema.ts",
+    "./src/main/modules/direct-messages/persistence/schema.ts",
+    "./src/main/modules/persona-management/persistence/schema.ts",
+    "./src/main/modules/user-settings/persistence/schema.ts",
+    "./src/main/modules/llm-integration/persistence/schema.ts",
+  ],
+  out: "./src/main/persistence/migrations",
   dialect: "sqlite",
   dbCredentials: {
-    url: process.env.DB_FILE_NAME!,
+    url: "./project-wiz.db",
   },
-});
+} satisfies Config;

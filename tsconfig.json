@@ -4,13 +4,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2024", "ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vitest/globals"],
     "outDir": "dist",
     "baseUrl": ".",
 
     "noEmit": false,
 
-    //electron
-    "types": ["node", "electron", "vitest"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -20,13 +19,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@/application/*": ["./src/core/application/*"],
-      "@/core/*": ["./src/core/*"],
-      "@/domain/*": ["./src/core/domain/*"],
-      "@/infrastructure/*": ["./src/infrastructure/*"],
-      "@/components/*": ["./src/presentation/ui/components/*"],
+      "@/components/*": ["./src/renderer/components/*"],
+      "@/ui/*": ["./src/renderer/components/ui/*"],
+      "@/lib/*": ["./src/renderer/lib/*"],
+      "@/hooks/*": ["./src/renderer/hooks/*"],
       "@/shared/*": ["./src/shared/*"],
-      "@/ui/*": ["./src/presentation/ui/*"],
       "@/*": ["./src/*"]
     }
   },

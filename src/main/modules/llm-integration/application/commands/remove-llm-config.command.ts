@@ -1,0 +1,24 @@
+import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
+
+export interface RemoveLlmConfigCommandPayload {
+  id: string;
+}
+
+export class RemoveLlmConfigCommand implements ICommand<RemoveLlmConfigCommandPayload> {
+  readonly type = "RemoveLlmConfigCommand";
+  constructor(public payload: RemoveLlmConfigCommandPayload) {}
+}
+
+export class RemoveLlmConfigCommandHandler {
+  constructor(private llmConfigRepository: ILlmConfigRepository) {}
+
+  async handle(command: RemoveLlmConfigCommand): Promise<boolean> {
+    try {
+      return await this.llmConfigRepository.delete(command.payload.id);
+    } catch (error) {
+      console.error(`Failed to remove LLM config:`, error);
+      throw new Error(`Failed to remove LLM config: ${(error as Error).message}`);
+    }
+  }
+}

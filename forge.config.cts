@@ -26,12 +26,12 @@ const config: ForgeConfig = {
     new VitePlugin({
       build: [
         {
-          entry: "src/presentation/electron/main/main.ts",
+          entry: "src/main/main.ts",
           config: "vite.main.config.mts",
           target: "main",
         },
         {
-          entry: "src/presentation/electron/preload.ts",
+          entry: "src/renderer/preload.ts",
           config: "vite.preload.config.mts",
           target: "preload",
         },
