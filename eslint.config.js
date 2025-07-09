@@ -290,6 +290,7 @@ export default [
   },
   {
     files: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"],
+    ignores: ["src/renderer/components/ui/**/*.tsx"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
