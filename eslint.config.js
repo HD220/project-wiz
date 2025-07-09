@@ -321,8 +321,8 @@ export default [
       ...typeScriptSpecificRules,
       ...reactSpecificRules,
       "no-inline-comments": "off", // Allow inline comments globally
-      "jsx-a11y/anchor-has-content": "off", // Temporarily disable for Shadcn UI
-      "react-hooks/exhaustive-deps": "off", // Temporarily disable for now
+      
+      
       "max-lines": ["warn", { max: 500, skipBlankLines: true, skipComments: true }], // Relaxed
       "max-lines-per-function": ["warn", { max: 200, skipBlankLines: true, skipComments: true }], // Relaxed
       "id-length": ["warn", { min: 1, exceptions: ["_", "a", "b", "e", "i", "x", "y", "z", "t", "q", "v"] }], // Relaxed
