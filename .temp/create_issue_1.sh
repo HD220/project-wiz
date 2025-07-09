@@ -1,1 +1,0 @@
-gh issue create --title "Implementar Sistema de Filas por Agente (Backend)" --body-file D:/Documentos/Pessoal/Github/project-wiz/.temp/issue_body_fila_agente.txt

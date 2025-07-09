@@ -20,10 +20,14 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
     setError(null);
 
     try {
-      await window.electronIPC.invoke('project:create', { name: projectName });
-      setProjectName('');
-      setIsOpen(false);
-      onProjectCreated?.();
+      const result = await window.electronIPC.invoke('project:create', { name: projectName });
+      if (result.success) {
+        setProjectName('');
+        setIsOpen(false);
+        onProjectCreated?.();
+      } else {
+        setError(result.error?.message || 'An unknown error occurred');
+      }
     } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
