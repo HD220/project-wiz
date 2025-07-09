@@ -1,1 +1,1 @@
-\"fix: Resolve warnings de vari†veis n∆o utilizadas\"  
+\"feat: Padroniza nomenclatura e uso de coment†rios no ESLint\"  
