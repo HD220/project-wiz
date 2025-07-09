@@ -355,7 +355,7 @@ Aqui estão algumas das bibliotecas e frameworks mais importantes que o Project 
 - **electron-forge:** Ferramenta completa para empacotar e distribuir aplicações Electron.
 - **lucide-react:** Coleção de ícones bonitos e personalizáveis para React.
 - **react-markdown, remark-gfm, rehype-highlight, rehype-sanitize:** Bibliotecas para renderizar conteúdo Markdown na interface do usuário, com suporte a tabelas, listas de tarefas e realce de sintaxe.
-- **uuid:** Gerador de IDs universais únicos (UUIDs). (deve ser desinstalado e devese usar o randomUUID do nodejs)
+
 
 # Workflows e Processos de Contribuição
 
