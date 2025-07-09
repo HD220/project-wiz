@@ -24,7 +24,8 @@
       "@/lib/*": ["./src/renderer/lib/*"],
       "@/hooks/*": ["./src/renderer/hooks/*"],
       "@/shared/*": ["./src/shared/*"],
-      "@/*": ["./src/*"]
+      "@/main/*": ["./src/main/*"],
+      "@/renderer/*": ["./src/renderer/*"]
     }
   },
   "include": [
