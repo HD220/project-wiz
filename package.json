@@ -51,15 +51,15 @@
     "@tanstack/router-plugin": "^1.115.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "@types/bcrypt": "^5.0.2",
+    
     "@types/better-sqlite3": "^7.6.13",
-    "@types/electron-squirrel-startup": "^1.0.2",
-    "@types/express": "^5.0.1",
-    "@types/jest": "^29.5.14",
+    
+    
+    
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.30",
-    "@types/node-fetch": "^2.6.12",
-    "@types/prop-types": "^15.7.15",
+    
+    
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.35.1",
@@ -80,7 +80,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-vitest": "^0.5.4",
     "globals": "^16.2.0",
-    "ts-jest": "^29.3.4",
+    
     "ts-node": "^10.9.2",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
@@ -130,7 +130,7 @@
     "@types/cors": "^2.8.17",
     
     "ai": "^4.3.16",
-    "bcrypt": "^5.1.1",
+    
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -154,7 +154,7 @@
     "react-hook-form": "^7.60.0",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.9",
-    "react-router-dom": "^7.5.0",
+    
     "recharts": "^2.15.4",
     "rehype-highlight": "^7.0.2",
     "rehype-sanitize": "^6.0.0",
