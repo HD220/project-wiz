@@ -60,10 +60,18 @@ const typeScriptSpecificRules = {
     { selector: "enumMember", format: ["PascalCase", "UPPER_CASE"] },
     // Added 'property' to allow snake_case for interface/type properties (e.g. for external APIs)
     {
-      selector: ["objectLiteralProperty", "property"],
+      selector: ["objectLiteralProperty", "property", "typeProperty"],
       format: ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"],
       leadingUnderscore: "allow",
       trailingUnderscore: "allow",
+    },
+    {
+      selector: "property",
+      format: null,
+      custom: {
+        regex: "^[a-z]+(?:-[a-z]+)*:[a-z]+(?:-[a-z]+)*$",
+        match: true,
+      },
     },
     {
       selector: "classProperty",
