@@ -5,7 +5,7 @@
   "description": "Aplicação desktop para automação do ciclo de vida de desenvolvimento de software com Agentes de IA.",
   "main": ".vite/build/main.js",
   "scripts": {
-    "start": "electron-forge start",
+    
     "dev": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
