@@ -10,6 +10,6 @@ export function initializeDb(dbPath: string = "project-wiz.db") {
 
 export let db = initializeDb();
 
-export function setTestDb(testDbInstance: any) {
+export function setTestDb(testDbInstance: ReturnType<typeof initializeDb>) {
   db = testDbInstance;
 }
