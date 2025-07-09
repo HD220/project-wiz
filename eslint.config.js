@@ -281,7 +281,7 @@ export default [
     ],
   },
   {
-    files: ["src/**/*.ts", "src/**/*.tsx"],
+    files: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

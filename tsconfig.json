@@ -30,6 +30,7 @@
   },
   "include": [
     "src/**/*",
+    "tests/**/*",
     "drizzle.config.ts",
     "forge.config.ts",
     "forge.env.d.ts",
