@@ -4,9 +4,7 @@ import { ListLlmConfigsQuery } from "@/main/modules/llm-integration/application/
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { RemoveLlmConfigCommand } from "@/main/modules/llm-integration/application/commands/remove-llm-config.command";
 import { DrizzleLlmConfigRepository } from "@/main/modules/llm-integration/persistence/drizzle-llm-config.repository";
-import { llmConfigs } from "@/main/modules/llm-integration/persistence/schema";
-import { db } from "@/main/persistence/db";
-import { sql } from "drizzle-orm";
+
 import { SaveLlmConfigCommandHandler } from "@/main/modules/llm-integration/application/commands/save-llm-config.command";
 import { ListLlmConfigsQueryHandler } from "@/main/modules/llm-integration/application/queries/list-llm-configs.query";
 import { RemoveLlmConfigCommandHandler } from "@/main/modules/llm-integration/application/commands/remove-llm-config.command";

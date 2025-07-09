@@ -1,4 +1,4 @@
-import { IForumTopic, IForumPost, IProject, IDirectMessage, IPersona, IUserSetting, ILlmConfig, IpcLlmConfigSavePayload, IpcLlmConfigSaveResponse, IpcLlmConfigGetPayload, IpcLlmConfigGetResponse, IpcLlmConfigListPayload, IpcLlmConfigListResponse, IpcLlmConfigRemovePayload, IpcLlmConfigRemoveResponse, IProjectStack } from "./entities";
+import { IForumTopic, IForumPost, IProject, IDirectMessage, IPersona, IUserSetting, ILlmConfig, IProjectStack } from "./entities";
 
 export interface IpcEvents {
   "forum:list-topics": {

@@ -4,9 +4,7 @@ import { ListPersonasQuery } from "@/main/modules/persona-management/application
 import { RemovePersonaCommand } from "@/main/modules/persona-management/application/commands/remove-persona.command";
 import { DrizzlePersonaRepository } from "@/main/modules/persona-management/persistence/drizzle-persona.repository";
 import { Persona } from "@/main/modules/persona-management/domain/persona.entity";
-import { personas } from "@/main/modules/persona-management/persistence/schema";
-import { db } from "@/main/persistence/db";
-import { sql } from "drizzle-orm";
+
 import { CreatePersonaCommandHandler } from "@/main/modules/persona-management/application/commands/create-persona.command";
 import { ListPersonasQueryHandler } from "@/main/modules/persona-management/application/queries/list-personas.query";
 import { RemovePersonaCommandHandler } from "@/main/modules/persona-management/application/commands/remove-persona.command";

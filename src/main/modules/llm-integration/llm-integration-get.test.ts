@@ -3,9 +3,7 @@ import { SaveLlmConfigCommand } from "@/main/modules/llm-integration/application
 import { GetLlmConfigQuery } from "@/main/modules/llm-integration/application/queries/get-llm-config.query";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { DrizzleLlmConfigRepository } from "@/main/modules/llm-integration/persistence/drizzle-llm-config.repository";
-import { llmConfigs } from "@/main/modules/llm-integration/persistence/schema";
-import { db } from "@/main/persistence/db";
-import { sql } from "drizzle-orm";
+
 import { SaveLlmConfigCommandHandler } from "@/main/modules/llm-integration/application/commands/save-llm-config.command";
 import { GetLlmConfigQueryHandler } from "@/main/modules/llm-integration/application/queries/get-llm-config.query";
 

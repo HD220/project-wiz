@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, afterAll } from 'vitest';
+import { beforeAll as _beforeAll, beforeEach, afterAll } from 'vitest';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { initializeDb, setTestDb } from '../src/main/persistence/db';
 import path from 'path';
