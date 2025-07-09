@@ -2,7 +2,7 @@
   "name": "project-wiz",
   "productName": "project-wiz",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Aplicação desktop para automação do ciclo de vida de desenvolvimento de software com Agentes de IA.",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -22,8 +22,15 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
   },
-  "keywords": [],
-  "author": "Nicolas Fraga Faust <nicolas.faust@hotmail.com>",
+  "keywords": [
+    "electron",
+    "react",
+    "typescript",
+    "ai",
+    "software-engineering",
+    "desktop-app"
+  ],
+  "author": "Project Wiz Team",
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.7.0",
