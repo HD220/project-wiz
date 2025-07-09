@@ -15,9 +15,7 @@ describe("LLM Config Remove Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  const clearLlmConfigsTable = async () => {
-    await db.delete(llmConfigs).where(sql`1=1`);
-  };
+  
 
   beforeEach(() => {
     cqrsDispatcher = new CqrsDispatcher();
@@ -32,9 +30,7 @@ describe("LLM Config Remove Operations", () => {
     cqrsDispatcher.registerCommandHandler("RemoveLlmConfigCommand", removeLlmConfigCommandHandler.handle.bind(removeLlmConfigCommandHandler));
   });
 
-  beforeEach(async () => {
-    await clearLlmConfigsTable();
-  });
+  
 
   it("should remove an LLM config", async () => {
     const createCommand = new SaveLlmConfigCommand({

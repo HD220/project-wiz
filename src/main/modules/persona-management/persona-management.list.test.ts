@@ -13,9 +13,7 @@ describe("Persona Management Module - List Personas", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let personaRepository: DrizzlePersonaRepository;
 
-  const clearPersonasTable = async () => {
-    await db.delete(personas).where(sql`1=1`);
-  };
+  
 
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
@@ -29,7 +27,7 @@ describe("Persona Management Module - List Personas", () => {
   });
 
   beforeEach(async () => {
-    await clearPersonasTable();
+    
   });
 
   it("should list all personas", async () => {

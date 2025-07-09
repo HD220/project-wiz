@@ -13,9 +13,7 @@ describe("LLM Config List Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  const clearLlmConfigsTable = async () => {
-    await db.delete(llmConfigs).where(sql`1=1`);
-  };
+  
 
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
@@ -29,7 +27,7 @@ describe("LLM Config List Operations", () => {
   });
 
   beforeEach(async () => {
-    await clearLlmConfigsTable();
+    
   });
 
   it("should list all LLM configs", async () => {

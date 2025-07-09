@@ -13,9 +13,7 @@ describe("Persona Management Module - Create Persona", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let personaRepository: DrizzlePersonaRepository;
 
-  const clearPersonasTable = async () => {
-    await db.delete(personas).where(sql`1=1`);
-  };
+  
 
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
@@ -29,7 +27,7 @@ describe("Persona Management Module - Create Persona", () => {
   });
 
   beforeEach(async () => {
-    await clearPersonasTable();
+    
   });
 
   it("should create a new persona", async () => {

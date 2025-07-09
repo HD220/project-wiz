@@ -94,8 +94,8 @@ export class DrizzleLlmConfigRepository implements ILlmConfigRepository {
 
   async delete(id: string): Promise<boolean> {
     try {
-      const result = await db.delete(llmConfigs).where(eq(llmConfigs.id, id));
-      return result.changes > 0;
+      const result = await db.delete(llmConfigs).where(eq(llmConfigs.id, id)).returning({ id: llmConfigs.id });
+      return result.length > 0;
     } catch (error: unknown) {
       console.error(`Failed to delete LLM config with ID ${id}:`, error);
       throw new Error(`Failed to delete LLM config: ${(error as Error).message}`);

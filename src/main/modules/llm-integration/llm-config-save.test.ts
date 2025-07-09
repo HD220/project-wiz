@@ -13,9 +13,7 @@ describe("LLM Config Save Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  const clearLlmConfigsTable = async () => {
-    await db.delete(llmConfigs).where(sql`1=1`);
-  };
+  
 
   beforeEach(() => {
     cqrsDispatcher = new CqrsDispatcher();
@@ -29,7 +27,7 @@ describe("LLM Config Save Operations", () => {
   });
 
   beforeEach(async () => {
-    await clearLlmConfigsTable();
+    
   });
 
   it("should save a new LLM config", async () => {
