@@ -426,6 +426,13 @@ export default [
       "src/**/*.gen.ts",
       "src/**/locales/*.ts",
     ],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       "@typescript-eslint/naming-convention": "off",
       "max-lines-per-function": "off",
