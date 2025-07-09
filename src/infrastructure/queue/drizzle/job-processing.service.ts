@@ -5,6 +5,8 @@ import { IJobRepository } from "@/core/application/ports/job-repository.interfac
 import { JobEntity, JobStatus } from "@/core/domain/job/job.entity";
 import { JobIdVO } from "@/core/domain/job/value-objects/job-id.vo";
 // IJobOptions might be needed if default options are used from a central place, but likely not for this service.
+import { AgentQueueService } from '@/core/application/agent-queues/services/agent-queue.service';
+import { JobQueueEntry } from '@/core/application/agent-queues/domain/job-queue-entry.entity';
 
 function isJobEntity<P extends { userId?: string }, R>(
   job: unknown
@@ -19,28 +21,47 @@ export class JobProcessingService<P extends { userId?: string }, R> {
     // Or a dedicated JobEventEmitter
     private readonly eventEmitter: EventEmitter,
     // Needed for some repository calls if they are queue-specific
-    private readonly queueName: string
+    private readonly queueName: string,
+    private readonly agentQueueService: AgentQueueService
   ) {}
 
   // Corresponds to AbstractQueue.fetchNextJobAndLock
   async fetchNextJobAndLock(
     workerId: string,
-    lockDurationMs: number
+    lockDurationMs: number,
+    agentId?: string
   ): Promise<JobEntity<P, R> | null> {
-    // Assumes findNextJobsToProcess is queue-specific
-    const jobs = await this.jobRepository.findNextJobsToProcess(
-      this.queueName,
-      1
-    );
-    if (jobs.length === 0) {
+    let jobToProcess: JobEntity<P, R> | null = null;
+
+    if (agentId) {
+      const agentQueueEntry: JobQueueEntry | null = await this.agentQueueService.dequeue(agentId);
+      if (agentQueueEntry) {
+        const job = await this.jobRepository.findById(JobIdVO.create(agentQueueEntry.jobId));
+        // Ensure job is pending and is of the correct type
+        if (job && isJobEntity<P, R>(job) && job.status === JobStatus.PENDING) {
+          jobToProcess = job;
+        } else if (job) {
+          console.warn(`Job ${agentQueueEntry.jobId} from agent queue for ${agentId} is not in PENDING state. Status: ${job.status}`);
+        }
+        // If job is null (not found), it will just proceed to return null later
+      }
+    } else {
+      // Fallback to general queue if no agentId is provided
+      const jobs = await this.jobRepository.findNextJobsToProcess(
+        this.queueName,
+        1
+      );
+      if (jobs.length > 0 && isJobEntity<P, R>(jobs[0])) {
+        jobToProcess = jobs[0];
+      }
+    }
+
+    if (!jobToProcess) {
       return null;
     }
 
-    const job = jobs[0];
-    if (!isJobEntity<P, R>(job)) {
-      return null;
-    }
-
+    // Common locking logic
+    const job = jobToProcess;
     const lockUntil = new Date(Date.now() + lockDurationMs);
     const locked = await this.jobRepository.acquireLock(
       job.id,
@@ -54,6 +75,11 @@ export class JobProcessingService<P extends { userId?: string }, R> {
       this.eventEmitter.emit("job.active", job);
       return job;
     }
+
+    if (agentId && jobToProcess) {
+        console.warn(`Failed to lock job ${jobToProcess.id.value} for agent ${agentId}. Job was dequeued from agent queue but could not be locked.`);
+    }
+
     return null;
   }
 

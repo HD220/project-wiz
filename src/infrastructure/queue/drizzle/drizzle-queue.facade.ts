@@ -82,9 +82,10 @@ export class DrizzleQueueFacade<
 
   async fetchNextJobAndLock(
     workerId: string,
-    lockDurationMs: number
+    lockDurationMs: number,
+    agentId?: string
   ): Promise<JobEntity<P, R> | null> {
-    return this.processingService.fetchNextJobAndLock(workerId, lockDurationMs);
+    return this.processingService.fetchNextJobAndLock(workerId, lockDurationMs, agentId);
   }
 
   async extendJobLock(

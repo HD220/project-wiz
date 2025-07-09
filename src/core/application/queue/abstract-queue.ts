@@ -127,7 +127,8 @@ export abstract class AbstractQueue<
    */
   abstract fetchNextJobAndLock(
     workerId: string,
-    lockDurationMs: number
+    lockDurationMs: number,
+    agentId?: string
   ): Promise<JobEntity<P, R> | null>;
 
   /**
