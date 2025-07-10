@@ -33,6 +33,14 @@ const typeScriptSpecificRules = {
   "@typescript-eslint/naming-convention": [
     "warn",
     {
+      selector: "typeProperty",
+      filter: {
+        regex: "^[a-z]+(?:-[a-z]+)*:[a-z]+(?:-[a-z]+)*$",
+        match: true,
+      },
+      format: null,
+    },
+    {
       selector: "default",
       format: ["camelCase"],
       leadingUnderscore: "allow",
