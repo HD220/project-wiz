@@ -2,17 +2,17 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { UserSetting } from "@/main/modules/user-settings/domain/user-setting.entity";
 import { IUserSettingsRepository } from "@/main/modules/user-settings/domain/user-settings.repository";
 
-export interface SaveUserSettingCommandPayload {
+export interface ISaveUserSettingCommandPayload {
   userId: string;
   key: string;
   value: string;
 }
 
 export class SaveUserSettingCommand
-  implements ICommand<SaveUserSettingCommandPayload>
+  implements ICommand<ISaveUserSettingCommandPayload>
 {
   readonly type = "SaveUserSettingCommand";
-  constructor(public payload: SaveUserSettingCommandPayload) {}
+  constructor(public payload: ISaveUserSettingCommandPayload) {}
 }
 
 export class SaveUserSettingCommandHandler {

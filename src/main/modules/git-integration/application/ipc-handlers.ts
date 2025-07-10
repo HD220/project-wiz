@@ -22,7 +22,7 @@ export function registerGitIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
     ): Promise<IpcGitIntegrationCloneResponse> => {
       try {
         await cqrsDispatcher.dispatchCommand(
-          new CloneRepositoryCommand(payload),
+          new CloneRepositoryCommand(payload.repoUrl, payload.localPath),
         );
         return { success: true };
       } catch (error) {
@@ -40,9 +40,7 @@ export function registerGitIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       payload: IpcGitIntegrationInitializePayload,
     ): Promise<IpcGitIntegrationInitializeResponse> => {
       try {
-        await cqrsDispatcher.dispatchCommand(
-          new InitializeRepositoryCommand(payload),
-        );
+        await cqrsDispatcher.dispatchCommand(new InitializeRepositoryCommand());
         return { success: true };
       } catch (error) {
         const message =
@@ -59,9 +57,7 @@ export function registerGitIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       payload: IpcGitIntegrationPullPayload,
     ): Promise<IpcGitIntegrationPullResponse> => {
       try {
-        await cqrsDispatcher.dispatchCommand(
-          new PullRepositoryCommand(payload),
-        );
+        await cqrsDispatcher.dispatchCommand(new PullRepositoryCommand());
         return { success: true };
       } catch (error) {
         const message =

@@ -2,16 +2,16 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { ForumTopic } from "@/main/modules/forum/domain/forum-topic.entity";
 import { IForumTopicRepository } from "@/main/modules/forum/persistence/drizzle-forum-topic.repository";
 
-export interface CreateForumTopicCommandPayload {
+export interface ICreateForumTopicCommandPayload {
   title: string;
   authorId: string;
 }
 
 export class CreateForumTopicCommand
-  implements ICommand<CreateForumTopicCommandPayload>
+  implements ICommand<ICreateForumTopicCommandPayload>
 {
   readonly type = "CreateForumTopicCommand";
-  constructor(public payload: CreateForumTopicCommandPayload) {}
+  constructor(public payload: ICreateForumTopicCommandPayload) {}
 }
 
 export class CreateForumTopicCommandHandler {

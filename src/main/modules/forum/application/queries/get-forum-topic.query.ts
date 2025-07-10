@@ -2,13 +2,13 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { ForumTopic } from "@/main/modules/forum/domain/forum-topic.entity";
 import { IForumTopicRepository } from "@/main/modules/forum/persistence/drizzle-forum-topic.repository";
 
-export interface GetForumTopicQueryPayload {
+export interface IGetForumTopicQueryPayload {
   id: string;
 }
 
-export class GetForumTopicQuery implements IQuery<GetForumTopicQueryPayload> {
+export class GetForumTopicQuery implements IQuery<IGetForumTopicQueryPayload> {
   readonly type = "GetForumTopicQuery";
-  constructor(public payload: GetForumTopicQueryPayload) {}
+  constructor(public payload: IGetForumTopicQueryPayload) {}
 }
 
 export class GetForumTopicQueryHandler {

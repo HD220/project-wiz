@@ -2,17 +2,17 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { ForumPost } from "@/main/modules/forum/domain/forum-post.entity";
 import { IForumPostRepository } from "@/main/modules/forum/persistence/drizzle-forum-post.repository";
 
-export interface CreateForumPostCommandPayload {
+export interface ICreateForumPostCommandPayload {
   topicId: string;
   authorId: string;
   content: string;
 }
 
 export class CreateForumPostCommand
-  implements ICommand<CreateForumPostCommandPayload>
+  implements ICommand<ICreateForumPostCommandPayload>
 {
   readonly type = "CreateForumPostCommand";
-  constructor(public payload: CreateForumPostCommandPayload) {}
+  constructor(public payload: ICreateForumPostCommandPayload) {}
 }
 
 export class CreateForumPostCommandHandler {

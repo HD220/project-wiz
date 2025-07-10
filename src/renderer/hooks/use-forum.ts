@@ -1,13 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { IForumTopic, IForumPost } from "@/shared/ipc-types/domain-types";
-import { ElectronIPC } from "../preload";
+import { IElectronIPC } from "../preload";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-
-declare global {
-  interface Window {
-    electronIPC: ElectronIPC;
-  }
-}
 
 // Helper function to load topics
 async function loadTopicsHelper(

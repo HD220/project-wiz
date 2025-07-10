@@ -2,13 +2,15 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { ForumPost } from "@/main/modules/forum/domain/forum-post.entity";
 import { IForumPostRepository } from "@/main/modules/forum/persistence/drizzle-forum-post.repository";
 
-export interface ListForumPostsQueryPayload {
+export interface IListForumPostsQueryPayload {
   topicId: string;
 }
 
-export class ListForumPostsQuery implements IQuery<ListForumPostsQueryPayload> {
+export class ListForumPostsQuery
+  implements IQuery<IListForumPostsQueryPayload>
+{
   readonly type = "ListForumPostsQuery";
-  constructor(public payload: ListForumPostsQueryPayload) {}
+  constructor(public payload: IListForumPostsQueryPayload) {}
 }
 
 export class ListForumPostsQueryHandler {

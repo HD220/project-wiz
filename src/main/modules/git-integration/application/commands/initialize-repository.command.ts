@@ -1,5 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
-import { GitService } from "@/main/modules/git-integration/git.service";
+import { GitService } from "@/main/modules/git-integration/domain/git.service";
 
 export class InitializeRepositoryCommand implements ICommand<undefined> {
   readonly type = "InitializeRepositoryCommand";

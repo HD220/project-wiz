@@ -2,14 +2,14 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { DirectMessage } from "@/main/modules/direct-messages/domain/direct-message.entity";
 import { IDirectMessageRepository } from "@/main/modules/direct-messages/domain/direct-message.repository";
 
-export interface ListMessagesQueryPayload {
+export interface IListMessagesQueryPayload {
   senderId: string;
   receiverId: string;
 }
 
-export class ListMessagesQuery implements IQuery<ListMessagesQueryPayload> {
+export class ListMessagesQuery implements IQuery<IListMessagesQueryPayload> {
   readonly type = "ListMessagesQuery";
-  constructor(public payload: ListMessagesQueryPayload) {}
+  constructor(public payload: IListMessagesQueryPayload) {}
 }
 
 export class ListMessagesQueryHandler {

@@ -1,15 +1,15 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { IProjectRepository } from "@/main/modules/project-management/domain/project.repository";
 
-export interface RemoveProjectCommandPayload {
+export interface IRemoveProjectCommandPayload {
   id: string;
 }
 
 export class RemoveProjectCommand
-  implements ICommand<RemoveProjectCommandPayload>
+  implements ICommand<IRemoveProjectCommandPayload>
 {
   readonly type = "RemoveProjectCommand";
-  constructor(public payload: RemoveProjectCommandPayload) {}
+  constructor(public payload: IRemoveProjectCommandPayload) {}
 }
 
 export class RemoveProjectCommandHandler {

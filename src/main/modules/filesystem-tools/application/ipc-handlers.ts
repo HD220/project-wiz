@@ -25,7 +25,7 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
     ): Promise<IpcFilesystemListDirectoryResponse> => {
       try {
         const entries = (await cqrsDispatcher.dispatchQuery(
-          new ListDirectoryQuery(payload),
+          new ListDirectoryQuery(payload.path),
         )) as string[];
         return { success: true, data: entries };
       } catch (error) {
@@ -44,7 +44,7 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
     ): Promise<IpcFilesystemReadFileResponse> => {
       try {
         const content = (await cqrsDispatcher.dispatchQuery(
-          new ReadFileQuery(payload),
+          new ReadFileQuery(payload.absolutePath),
         )) as string;
         return { success: true, data: content };
       } catch (error) {
@@ -63,7 +63,7 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
     ): Promise<IpcFilesystemSearchFileContentResponse> => {
       try {
         const matches = (await cqrsDispatcher.dispatchQuery(
-          new SearchFileContentQuery(payload),
+          new SearchFileContentQuery(payload.path!, payload.pattern!),
         )) as string[];
         return { success: true, data: matches };
       } catch (error) {
@@ -81,7 +81,9 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
       payload: IpcFilesystemWriteFilePayload,
     ): Promise<IpcFilesystemWriteFileResponse> => {
       try {
-        await cqrsDispatcher.dispatchCommand(new WriteFileCommand(payload));
+        await cqrsDispatcher.dispatchCommand(
+          new WriteFileCommand(payload.content, payload.filePath),
+        );
         return { success: true };
       } catch (error) {
         const message =

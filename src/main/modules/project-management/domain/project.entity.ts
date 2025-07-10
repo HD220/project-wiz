@@ -1,4 +1,4 @@
-import { BaseEntity } from "@/shared/common/base.entity";
+import { BaseEntity } from "@/main/kernel/domain/base.entity";
 import { z } from "zod";
 
 export const ProjectPropsSchema = z.object({

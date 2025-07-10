@@ -1,15 +1,15 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { IPersonaRepository } from "@/main/modules/persona-management/domain/persona.repository";
 
-export interface RemovePersonaCommandPayload {
+export interface IRemovePersonaCommandPayload {
   id: string;
 }
 
 export class RemovePersonaCommand
-  implements ICommand<RemovePersonaCommandPayload>
+  implements ICommand<IRemovePersonaCommandPayload>
 {
   readonly type = "RemovePersonaCommand";
-  constructor(public payload: RemovePersonaCommandPayload) {}
+  constructor(public payload: IRemovePersonaCommandPayload) {}
 }
 
 export class RemovePersonaCommandHandler {

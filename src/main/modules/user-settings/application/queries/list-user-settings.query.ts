@@ -2,15 +2,15 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { UserSetting } from "@/main/modules/user-settings/domain/user-setting.entity";
 import { IUserSettingsRepository } from "@/main/modules/user-settings/domain/user-settings.repository";
 
-export interface ListUserSettingsQueryPayload {
+export interface IListUserSettingsQueryPayload {
   userId: string;
 }
 
 export class ListUserSettingsQuery
-  implements IQuery<ListUserSettingsQueryPayload>
+  implements IQuery<IListUserSettingsQueryPayload>
 {
   readonly type = "ListUserSettingsQuery";
-  constructor(public payload: ListUserSettingsQueryPayload) {}
+  constructor(public payload: IListUserSettingsQueryPayload) {}
 }
 
 export class ListUserSettingsQueryHandler {

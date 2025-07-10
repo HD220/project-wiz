@@ -3,7 +3,7 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 // Define a type for the exposed Electron IPC API
 import { IpcContracts } from "@/shared/ipc-types/ipc-contracts";
 
-export interface ElectronIPC {
+export interface IElectronIPC {
   invoke: <Channel extends keyof IpcContracts>(
     channel: Channel,
     ...args: IpcContracts[Channel]["request"] extends void
@@ -18,7 +18,7 @@ export interface ElectronIPC {
   removeAllListeners: (channel: string) => void;
 }
 
-const electronIPC: ElectronIPC = {
+const electronIPC: IElectronIPC = {
   invoke: <T = unknown>(channel: string, ...args: unknown[]): Promise<T> => {
     return ipcRenderer.invoke(channel, ...args);
   },

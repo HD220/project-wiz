@@ -2,7 +2,7 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { Persona } from "@/main/modules/persona-management/domain/persona.entity";
 import { IPersonaRepository } from "@/main/modules/persona-management/domain/persona.repository";
 
-export interface CreatePersonaCommandPayload {
+export interface ICreatePersonaCommandPayload {
   name: string;
   description: string;
   llmModel: string;
@@ -11,10 +11,10 @@ export interface CreatePersonaCommandPayload {
 }
 
 export class CreatePersonaCommand
-  implements ICommand<CreatePersonaCommandPayload>
+  implements ICommand<ICreatePersonaCommandPayload>
 {
   readonly type = "CreatePersonaCommand";
-  constructor(public payload: CreatePersonaCommandPayload) {}
+  constructor(public payload: ICreatePersonaCommandPayload) {}
 }
 
 export class CreatePersonaCommandHandler {

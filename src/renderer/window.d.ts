@@ -1,7 +1,7 @@
-import { ElectronIPC } from "./preload";
+import { IElectronIPC } from "./preload";
 
 declare global {
   interface Window {
-    electronIPC: ElectronIPC;
+    electronIPC: IElectronIPC;
   }
 }

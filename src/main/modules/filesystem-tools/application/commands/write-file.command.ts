@@ -1,5 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
-import { FilesystemService } from "@/main/modules/filesystem-tools/filesystem.service";
+import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 
 export class WriteFileCommand
   implements

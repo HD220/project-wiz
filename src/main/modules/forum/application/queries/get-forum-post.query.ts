@@ -2,13 +2,13 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { ForumPost } from "@/main/modules/forum/domain/forum-post.entity";
 import { IForumPostRepository } from "@/main/modules/forum/persistence/drizzle-forum-post.repository";
 
-export interface GetForumPostQueryPayload {
+export interface IGetForumPostQueryPayload {
   id: string;
 }
 
-export class GetForumPostQuery implements IQuery<GetForumPostQueryPayload> {
+export class GetForumPostQuery implements IQuery<IGetForumPostQueryPayload> {
   readonly type = "GetForumPostQuery";
-  constructor(public payload: GetForumPostQueryPayload) {}
+  constructor(public payload: IGetForumPostQueryPayload) {}
 }
 
 export class GetForumPostQueryHandler {

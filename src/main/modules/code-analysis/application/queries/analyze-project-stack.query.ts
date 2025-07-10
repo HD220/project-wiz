@@ -1,26 +1,26 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 
-export interface ProjectStack {
+export interface IProjectStack {
   languages: { [key: string]: number };
   frameworks: string[];
   libraries: string[];
 }
 
-export interface AnalyzeProjectStackQueryPayload {
+export interface IAnalyzeProjectStackQueryPayload {
   projectPath: string;
 }
 
 export class AnalyzeProjectStackQuery
-  implements IQuery<AnalyzeProjectStackQueryPayload>
+  implements IQuery<IAnalyzeProjectStackQueryPayload>
 {
   readonly type = "AnalyzeProjectStackQuery";
-  constructor(public payload: AnalyzeProjectStackQueryPayload) {}
+  constructor(public payload: IAnalyzeProjectStackQueryPayload) {}
 }
 
 export class AnalyzeProjectStackQueryHandler {
-  async handle(query: AnalyzeProjectStackQuery): Promise<ProjectStack> {
+  async handle(query: AnalyzeProjectStackQuery): Promise<IProjectStack> {
     const { projectPath } = query.payload;
-    const stack: ProjectStack = {
+    const stack: IProjectStack = {
       languages: {},
       frameworks: [],
       libraries: [],

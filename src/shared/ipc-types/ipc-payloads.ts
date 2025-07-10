@@ -134,3 +134,48 @@ export interface IpcAutomaticPersonaHiringHirePayload {
   projectPath: string;
 }
 export type IpcAutomaticPersonaHiringHireResponse = IpcResponse<boolean>;
+
+// Filesystem Tools Module
+export interface IpcFilesystemListDirectoryPayload {
+  path: string;
+  ignore?: string[];
+  respectGitIgnore?: boolean;
+}
+export type IpcFilesystemListDirectoryResponse = IpcResponse<string[]>;
+
+export interface IpcFilesystemReadFilePayload {
+  absolutePath: string;
+  limit?: number;
+  offset?: number;
+}
+export type IpcFilesystemReadFileResponse = IpcResponse<string>;
+
+export interface IpcFilesystemSearchFileContentPayload {
+  pattern: string;
+  include?: string;
+  path?: string;
+}
+export type IpcFilesystemSearchFileContentResponse = IpcResponse<string[]>;
+
+export interface IpcFilesystemWriteFilePayload {
+  content: string;
+  filePath: string;
+}
+export type IpcFilesystemWriteFileResponse = IpcResponse<void>;
+
+// Git Integration Module
+export interface IpcGitIntegrationClonePayload {
+  repoUrl: string;
+  localPath: string;
+}
+export type IpcGitIntegrationCloneResponse = IpcResponse<string>;
+
+export interface IpcGitIntegrationInitializePayload {
+  projectPath: string;
+}
+export type IpcGitIntegrationInitializeResponse = IpcResponse<string>;
+
+export interface IpcGitIntegrationPullPayload {
+  projectPath: string;
+}
+export type IpcGitIntegrationPullResponse = IpcResponse<string>;

@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { IGitService } from "./domain/git.service.interface";
+import { IGitService } from "./git.service.interface";
 
 const execPromise = promisify(exec);
 

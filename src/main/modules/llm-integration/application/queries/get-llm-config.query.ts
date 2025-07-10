@@ -2,15 +2,15 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
-export interface GetLlmConfigQueryPayload {
+export interface IGetLlmConfigQueryPayload {
   id?: string;
   provider?: string;
   model?: string;
 }
 
-export class GetLlmConfigQuery implements IQuery<GetLlmConfigQueryPayload> {
+export class GetLlmConfigQuery implements IQuery<IGetLlmConfigQueryPayload> {
   readonly type = "GetLlmConfigQuery";
-  constructor(public payload: GetLlmConfigQueryPayload) {}
+  constructor(public payload: IGetLlmConfigQueryPayload) {}
 }
 
 export class GetLlmConfigQueryHandler {

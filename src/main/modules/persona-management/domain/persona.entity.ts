@@ -1,14 +1,14 @@
-import { BaseEntity } from "@/shared/common/base.entity";
+import { BaseEntity } from "@/main/kernel/domain/base.entity";
 
-export interface PersonaProps {
+export interface IPersonaProps {
   name: string;
   description: string;
   llmConfig: { model: string; temperature: number };
   tools: string[];
 }
 
-export class Persona extends BaseEntity<PersonaProps> {
-  constructor(props: PersonaProps, id?: string) {
+export class Persona extends BaseEntity<IPersonaProps> {
+  constructor(props: IPersonaProps, id?: string) {
     super(props, id);
   }
 

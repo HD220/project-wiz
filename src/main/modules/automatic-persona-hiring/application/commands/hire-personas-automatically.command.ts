@@ -1,9 +1,9 @@
-import { ProjectStack } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
+import { IProjectStack } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
 import { CqrsDispatcher, ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { AnalyzeProjectStackQuery } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
 import {
   CreatePersonaCommand,
-  CreatePersonaCommandPayload,
+  ICreatePersonaCommandPayload,
 } from "@/main/modules/persona-management/application/commands/create-persona.command";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { GetLlmConfigQuery } from "@/main/modules/llm-integration/application/queries/get-llm-config.query";
@@ -30,7 +30,7 @@ export class HirePersonasAutomaticallyCommandHandler {
       // 1. Analyze project stack
       const projectStack = await this.cqrsDispatcher.dispatchQuery<
         AnalyzeProjectStackQuery,
-        ProjectStack
+        IProjectStack
       >(new AnalyzeProjectStackQuery({ projectPath }));
 
       // 2. Use LLM to suggest personas based on stack
@@ -43,7 +43,7 @@ export class HirePersonasAutomaticallyCommandHandler {
         throw new Error("Failed to get LLM config for persona suggestion.");
       }
 
-      const suggestedPersonas: CreatePersonaCommandPayload[] = [];
+      const suggestedPersonas: ICreatePersonaCommandPayload[] = [];
 
       if (projectStack.frameworks.includes("React")) {
         suggestedPersonas.push({

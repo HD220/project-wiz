@@ -2,15 +2,15 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { Project } from "@/main/modules/project-management/domain/project.entity";
 import { IProjectRepository } from "@/main/modules/project-management/domain/project.repository";
 
-export interface CreateProjectCommandPayload {
+export interface ICreateProjectCommandPayload {
   name: string;
 }
 
 export class CreateProjectCommand
-  implements ICommand<CreateProjectCommandPayload>
+  implements ICommand<ICreateProjectCommandPayload>
 {
   readonly type = "CreateProjectCommand";
-  constructor(public payload: CreateProjectCommandPayload) {}
+  constructor(public payload: ICreateProjectCommandPayload) {}
 }
 
 export class CreateProjectCommandHandler {

@@ -2,13 +2,13 @@ import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { Persona } from "@/main/modules/persona-management/domain/persona.entity";
 import { IPersonaRepository } from "@/main/modules/persona-management/domain/persona.repository";
 
-export interface GetPersonaQueryPayload {
+export interface IGetPersonaQueryPayload {
   id: string;
 }
 
-export class GetPersonaQuery implements IQuery<GetPersonaQueryPayload> {
+export class GetPersonaQuery implements IQuery<IGetPersonaQueryPayload> {
   readonly type = "GetPersonaQuery";
-  constructor(public payload: GetPersonaQueryPayload) {}
+  constructor(public payload: IGetPersonaQueryPayload) {}
 }
 
 export class GetPersonaQueryHandler {

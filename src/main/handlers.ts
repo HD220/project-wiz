@@ -1,25 +1,30 @@
 import { ipcMain } from "electron";
 
 import { bootstrap } from "./bootstrap";
+import { CqrsDispatcher } from "./kernel/cqrs-dispatcher";
+import { EventBus } from "./kernel/event-bus";
+import { db } from "./persistence/db";
 
-import { registerForumHandlers } from "./modules/forum/ipc-handlers";
-import { registerProjectManagementHandlers } from "./modules/project-management/ipc-handlers";
-import { registerDirectMessagesHandlers } from "./modules/direct-messages/ipc-handlers";
-import { registerUserSettingsHandlers } from "./modules/user-settings/ipc-handlers";
-import { registerPersonaManagementHandlers } from "./modules/persona-management/ipc-handlers";
-import { registerLlmIntegrationHandlers } from "./modules/llm-integration/ipc-handlers";
-import { registerCodeAnalysisHandlers } from "./modules/code-analysis/ipc-handlers";
-import { registerAutomaticPersonaHiringHandlers } from "./modules/automatic-persona-hiring/ipc-handlers";
+import { registerForumModule } from "./modules/forum";
+import { registerProjectManagementModule } from "./modules/project-management";
+import { registerDirectMessagesModule } from "./modules/direct-messages";
+import { registerUserSettingsModule } from "./modules/user-settings";
+import { registerPersonaManagementModule } from "./modules/persona-management";
+import { registerLlmIntegrationModule } from "./modules/llm-integration";
+import { registerCodeAnalysisModule } from "./modules/code-analysis";
+import { registerAutomaticPersonaHiringModule } from "./modules/automatic-persona-hiring";
 
 export async function composeMainProcessHandlers() {
-  const { cqrsDispatcher } = await bootstrap();
+  const cqrsDispatcher = new CqrsDispatcher();
+  const eventBus = new EventBus();
+  await bootstrap(cqrsDispatcher, eventBus, db);
 
-  registerForumHandlers(cqrsDispatcher);
-  registerProjectManagementHandlers(cqrsDispatcher);
-  registerDirectMessagesHandlers(cqrsDispatcher);
-  registerUserSettingsHandlers(cqrsDispatcher);
-  registerPersonaManagementHandlers(cqrsDispatcher);
-  registerLlmIntegrationHandlers(cqrsDispatcher);
-  registerCodeAnalysisHandlers(cqrsDispatcher);
-  registerAutomaticPersonaHiringHandlers(cqrsDispatcher);
+  registerForumModule(cqrsDispatcher);
+  registerProjectManagementModule(cqrsDispatcher);
+  registerDirectMessagesModule(cqrsDispatcher);
+  registerUserSettingsModule(cqrsDispatcher);
+  registerPersonaManagementModule(cqrsDispatcher);
+  registerLlmIntegrationModule(cqrsDispatcher);
+  registerCodeAnalysisModule(cqrsDispatcher);
+  registerAutomaticPersonaHiringModule(cqrsDispatcher);
 }

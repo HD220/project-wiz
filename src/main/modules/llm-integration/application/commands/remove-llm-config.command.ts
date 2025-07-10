@@ -1,15 +1,15 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
-export interface RemoveLlmConfigCommandPayload {
+export interface IRemoveLlmConfigCommandPayload {
   id: string;
 }
 
 export class RemoveLlmConfigCommand
-  implements ICommand<RemoveLlmConfigCommandPayload>
+  implements ICommand<IRemoveLlmConfigCommandPayload>
 {
   readonly type = "RemoveLlmConfigCommand";
-  constructor(public payload: RemoveLlmConfigCommandPayload) {}
+  constructor(public payload: IRemoveLlmConfigCommandPayload) {}
 }
 
 export class RemoveLlmConfigCommandHandler {

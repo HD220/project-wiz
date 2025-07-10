@@ -2,7 +2,7 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
-export interface SaveLlmConfigCommandPayload {
+export interface ISaveLlmConfigCommandPayload {
   id?: string;
   provider: string;
   model: string;
@@ -12,10 +12,10 @@ export interface SaveLlmConfigCommandPayload {
 }
 
 export class SaveLlmConfigCommand
-  implements ICommand<SaveLlmConfigCommandPayload>
+  implements ICommand<ISaveLlmConfigCommandPayload>
 {
   readonly type = "SaveLlmConfigCommand";
-  constructor(public payload: SaveLlmConfigCommandPayload) {}
+  constructor(public payload: ISaveLlmConfigCommandPayload) {}
 }
 
 export class SaveLlmConfigCommandHandler {

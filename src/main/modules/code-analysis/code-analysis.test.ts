@@ -1,6 +1,6 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { AnalyzeProjectStackQuery } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
-import { ProjectStack } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
+import { IProjectStack } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
 import { AnalyzeProjectStackQueryHandler } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
 
 describe("Code Analysis Module", () => {
@@ -26,7 +26,7 @@ describe("Code Analysis Module", () => {
     });
     const projectStack = await cqrsDispatcher.dispatchQuery<
       AnalyzeProjectStackQuery,
-      ProjectStack
+      IProjectStack
     >(query);
 
     expect(projectStack.languages).toEqual({
@@ -43,7 +43,7 @@ describe("Code Analysis Module", () => {
     });
     const projectStack = await cqrsDispatcher.dispatchQuery<
       AnalyzeProjectStackQuery,
-      ProjectStack
+      IProjectStack
     >(query);
 
     expect(projectStack.languages).toEqual({ JavaScript: 1.0 });
@@ -57,7 +57,7 @@ describe("Code Analysis Module", () => {
     });
     const projectStack = await cqrsDispatcher.dispatchQuery<
       AnalyzeProjectStackQuery,
-      ProjectStack
+      IProjectStack
     >(query);
 
     expect(projectStack.languages).toEqual({ Unknown: 1.0 });

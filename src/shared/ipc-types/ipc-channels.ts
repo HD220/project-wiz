@@ -29,7 +29,22 @@ export enum IpcChannel {
   LLM_CONFIG_SAVE = "llm-config:save",
   LLM_CONFIG_GET = "llm-config:get",
   LLM_CONFIG_LIST = "llm-config:list",
+  LLM_CONFIG_REMOVE = "llm-config:remove",
 
   // Code Analysis Module
   CODE_ANALYSIS_ANALYZE_STACK = "code-analysis:analyze-stack",
+
+  // Filesystem Tools Module
+  FILESYSTEM_LIST_DIRECTORY = "filesystem:list-directory",
+  FILESYSTEM_READ_FILE = "filesystem:read-file",
+  FILESYSTEM_SEARCH_FILE_CONTENT = "filesystem:search-file-content",
+  FILESYSTEM_WRITE_FILE = "filesystem:write-file",
+
+  // Git Integration Module
+  GIT_INTEGRATION_CLONE = "git:clone",
+  GIT_INTEGRATION_INITIALIZE = "git:initialize",
+  GIT_INTEGRATION_PULL = "git:pull",
+
+  // Automatic Persona Hiring Module
+  AUTOMATIC_PERSONA_HIRING_HIRE = "automatic-persona-hiring:hire",
 }

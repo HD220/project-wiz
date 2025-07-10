@@ -1,15 +1,15 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { IForumTopicRepository } from "@/main/modules/forum/persistence/drizzle-forum-topic.repository";
 
-export interface RemoveForumTopicCommandPayload {
+export interface IRemoveForumTopicCommandPayload {
   id: string;
 }
 
 export class RemoveForumTopicCommand
-  implements ICommand<RemoveForumTopicCommandPayload>
+  implements ICommand<IRemoveForumTopicCommandPayload>
 {
   readonly type = "RemoveForumTopicCommand";
-  constructor(public payload: RemoveForumTopicCommandPayload) {}
+  constructor(public payload: IRemoveForumTopicCommandPayload) {}
 }
 
 export class RemoveForumTopicCommandHandler {

@@ -2,15 +2,17 @@ import { ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { DirectMessage } from "@/main/modules/direct-messages/domain/direct-message.entity";
 import { IDirectMessageRepository } from "@/main/modules/direct-messages/domain/direct-message.repository";
 
-export interface SendMessageCommandPayload {
+export interface ISendMessageCommandPayload {
   senderId: string;
   receiverId: string;
   content: string;
 }
 
-export class SendMessageCommand implements ICommand<SendMessageCommandPayload> {
+export class SendMessageCommand
+  implements ICommand<ISendMessageCommandPayload>
+{
   readonly type = "SendMessageCommand";
-  constructor(public payload: SendMessageCommandPayload) {}
+  constructor(public payload: ISendMessageCommandPayload) {}
 }
 
 export class SendMessageCommandHandler {

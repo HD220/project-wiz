@@ -1,6 +1,6 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { EventBus } from "@/main/kernel/event-bus";
-import { db } from "@/main/persistence/db";
+import { initializeDb } from "@/main/persistence/db";
 
 import { initializeProjectManagement } from "./initializers/project-management";
 import { initializeDirectMessages } from "./initializers/direct-messages";
@@ -17,7 +17,7 @@ import { registerFilesystemToolsModule } from "./modules/filesystem-tools";
 export async function bootstrap(
   cqrsDispatcher: CqrsDispatcher,
   eventBus: EventBus,
-  db: typeof db,
+  db: ReturnType<typeof initializeDb>,
 ) {
   // Initialize and register business modules
   initializeProjectManagement(cqrsDispatcher);
@@ -30,4 +30,6 @@ export async function bootstrap(
 
   registerGitIntegrationModule(cqrsDispatcher);
   registerFilesystemToolsModule(cqrsDispatcher);
+
+  return { cqrsDispatcher, eventBus, db };
 }

@@ -11,6 +11,7 @@ import {
 } from "@/ui/dialog";
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 
 interface CreateProjectModalProps {
   onProjectCreated?: () => void;
@@ -28,9 +29,12 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
     setError(null);
 
     try {
-      const result = await window.electronIPC.invoke("project:create", {
-        name: projectName,
-      });
+      const result = await window.electronIPC.invoke(
+        IpcChannel.PROJECT_CREATE,
+        {
+          name: projectName,
+        },
+      );
       if (result.success) {
         setProjectName("");
         setIsOpen(false);

@@ -44,7 +44,7 @@ const createWindow = () => {
   });
 };
 
-app.on("ready", () => {
+app.on("ready", async () => {
   console.log("[Main Process] Initializing business modules...");
   const cqrsDispatcher = new CqrsDispatcher();
   const eventBus = new EventBus();

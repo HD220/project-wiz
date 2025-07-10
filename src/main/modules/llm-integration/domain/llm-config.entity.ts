@@ -1,6 +1,6 @@
-import { BaseEntity } from "@/shared/common/base.entity";
+import { BaseEntity } from "@/main/kernel/domain/base.entity";
 
-interface LlmConfigProps {
+interface ILlmConfigProps {
   provider: string;
   model: string;
   apiKey: string;
@@ -8,8 +8,8 @@ interface LlmConfigProps {
   maxTokens: number;
 }
 
-export class LlmConfig extends BaseEntity<LlmConfigProps> {
-  constructor(props: LlmConfigProps, id?: string) {
+export class LlmConfig extends BaseEntity<ILlmConfigProps> {
+  constructor(props: ILlmConfigProps, id?: string) {
     super(props, id);
   }
 
@@ -33,7 +33,7 @@ export class LlmConfig extends BaseEntity<LlmConfigProps> {
     return this.props.maxTokens;
   }
 
-  public updateConfig(updates: Partial<LlmConfigProps>): void {
+  public updateConfig(updates: Partial<ILlmConfigProps>): void {
     Object.assign(this.props, updates);
   }
 }
