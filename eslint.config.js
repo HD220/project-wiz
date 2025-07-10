@@ -8,6 +8,7 @@ import boundariesPlugin from "eslint-plugin-boundaries";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import reactPlugin from "eslint-plugin-react";
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
+import eslintPluginPrettier from "eslint-plugin-prettier";
 import globals from "globals";
 
 // --- Thematic Rule Group Constants ---
@@ -259,17 +260,6 @@ const importAndBoundaryRules = {
 const codeStyleAndQualityRules = {
   "max-depth": ["warn", { max: 4 }],
   "no-else-return": "warn",
-  "id-length": ["warn", { min: 2, exceptions: ["_", "a"] }], // Added 'a' for ReactMarkdown components
-  "max-statements": ["warn", { max: 35 }], // Updated from 25
-  "max-lines-per-function": [
-    "error",
-    { max: 70, skipBlankLines: true, skipComments: true },
-  ], // Updated from 50
-  "max-lines": [
-    "error",
-    { max: 200, skipBlankLines: true, skipComments: true },
-  ],
-  "no-inline-comments": "error",
 };
 
 const testingSpecificRules = {
@@ -326,30 +316,15 @@ export default [
       "react-hooks": reactHooksPlugin,
       react: reactPlugin,
       "jsx-a11y": jsxA11yPlugin,
+      prettier: eslintPluginPrettier,
     },
     rules: {
       ...baseRecommendedRules,
       ...typeScriptSpecificRules,
       ...reactSpecificRules,
-      "no-inline-comments": "off", // Allow inline comments globally
-
-      "max-lines": [
-        "warn",
-        { max: 500, skipBlankLines: true, skipComments: true },
-      ], // Relaxed
-      "max-lines-per-function": [
-        "warn",
-        { max: 200, skipBlankLines: true, skipComments: true },
-      ], // Relaxed
-      "id-length": [
-        "warn",
-        {
-          min: 1,
-          exceptions: ["_", "a", "b", "e", "i", "x", "y", "z", "t", "q", "v"],
-        },
-      ], // Relaxed
       ...codeStyleAndQualityRules,
       ...testingSpecificRules,
+      "prettier/prettier": "error",
     },
     settings: {
       "import/resolver": {
@@ -385,8 +360,7 @@ export default [
     },
   },
 
-  // 3. Override for Application .tsx AND ALL Test files for line limits
-  //    (Excluding ShadCN UI components)
+  // 3. Consolidated Override for Application .tsx and Test files
   {
     files: [
       "src/**/*.tsx",
@@ -397,23 +371,10 @@ export default [
     ],
     ignores: ["src/renderer/components/ui/**/*.tsx"],
     rules: {
-      // Relaxed line limits for .tsx and test files
       "max-lines-per-function": [
         "error",
         { max: 100, skipBlankLines: true, skipComments: true },
       ],
-    },
-  },
-
-  // 4. Override for Test files (relaxing other specific rules)
-  {
-    files: [
-      "src/**/*.spec.ts",
-      "src/**/*.test.ts",
-      "src/**/*.spec.tsx",
-      "src/**/*.test.tsx",
-    ],
-    rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
