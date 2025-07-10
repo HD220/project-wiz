@@ -6,7 +6,9 @@ export interface CreateProjectCommandPayload {
   name: string;
 }
 
-export class CreateProjectCommand implements ICommand<CreateProjectCommandPayload> {
+export class CreateProjectCommand
+  implements ICommand<CreateProjectCommandPayload>
+{
   readonly type = "CreateProjectCommand";
   constructor(public payload: CreateProjectCommandPayload) {}
 }

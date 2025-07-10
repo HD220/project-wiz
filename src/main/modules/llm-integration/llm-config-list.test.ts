@@ -11,32 +11,53 @@ describe("LLM Config List Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  
-
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
     llmConfigRepository = new DrizzleLlmConfigRepository();
 
-    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(llmConfigRepository);
-    const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(llmConfigRepository);
+    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(
+      llmConfigRepository,
+    );
+    const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(
+      llmConfigRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("SaveLlmConfigCommand", saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListLlmConfigsQuery", listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "SaveLlmConfigCommand",
+      saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListLlmConfigsQuery",
+      listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   it("should list all LLM configs", async () => {
-    await cqrsDispatcher.dispatchCommand(new SaveLlmConfigCommand({
-      provider: "openai", model: "gpt-3.5", apiKey: "key1", temperature: 0.5, maxTokens: 500
-    }));
-    await cqrsDispatcher.dispatchCommand(new SaveLlmConfigCommand({
-      provider: "google", model: "gemini-pro", apiKey: "key2", temperature: 0.8, maxTokens: 1500
-    }));
+    await cqrsDispatcher.dispatchCommand(
+      new SaveLlmConfigCommand({
+        provider: "openai",
+        model: "gpt-3.5",
+        apiKey: "key1",
+        temperature: 0.5,
+        maxTokens: 500,
+      }),
+    );
+    await cqrsDispatcher.dispatchCommand(
+      new SaveLlmConfigCommand({
+        provider: "google",
+        model: "gemini-pro",
+        apiKey: "key2",
+        temperature: 0.8,
+        maxTokens: 1500,
+      }),
+    );
 
-    const listedConfigs = await cqrsDispatcher.dispatchQuery<ListLlmConfigsQuery, LlmConfig[]>(new ListLlmConfigsQuery());
+    const listedConfigs = await cqrsDispatcher.dispatchQuery<
+      ListLlmConfigsQuery,
+      LlmConfig[]
+    >(new ListLlmConfigsQuery());
 
     expect(listedConfigs.length).toBe(2);
     expect(listedConfigs[0].provider).toBe("openai");

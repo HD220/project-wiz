@@ -5,7 +5,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [tsconfigPaths()],
   build: {
-    rollupOptions: { external: ["better-sqlite3", "@/main/core/domain/common/base.entity"] },
+    rollupOptions: {
+      external: ["better-sqlite3", "@/main/core/domain/common/base.entity"],
+    },
   },
   resolve: {
     alias: {

@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-import { CreateProjectModal } from './components/create-project-modal';
-import { ProjectSidebar } from './components/project-sidebar';
+import { CreateProjectModal } from "./components/create-project-modal";
+import { ProjectSidebar } from "./components/project-sidebar";
 
 export const ProjectManagementFeature: React.FC = () => {
   return (

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": true
+  },
+  "include": [
+    "vite.main.config.mts",
+    "vite.preload.config.mts",
+    "vite.renderer.config.mts",
+    "forge.config.cts",
+    "drizzle.config.ts",
+    "tailwind.config.ts",
+    "lingui.config.ts",
+    "eslint.config.js"
+  ]
+}

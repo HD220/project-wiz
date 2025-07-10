@@ -17,10 +17,15 @@ export class GetUserSettingQueryHandler {
 
   async handle(query: GetUserSettingQuery): Promise<UserSetting | undefined> {
     try {
-      return await this.userSettingsRepository.findByUserIdAndKey(query.payload.userId, query.payload.key);
+      return await this.userSettingsRepository.findByUserIdAndKey(
+        query.payload.userId,
+        query.payload.key,
+      );
     } catch (error) {
       console.error(`Failed to get user setting:`, error);
-      throw new Error(`Failed to get user setting: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to get user setting: ${(error as Error).message}`,
+      );
     }
   }
 }

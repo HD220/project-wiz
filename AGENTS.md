@@ -356,7 +356,6 @@ Aqui estão algumas das bibliotecas e frameworks mais importantes que o Project 
 - **lucide-react:** Coleção de ícones bonitos e personalizáveis para React.
 - **react-markdown, remark-gfm, rehype-highlight, rehype-sanitize:** Bibliotecas para renderizar conteúdo Markdown na interface do usuário, com suporte a tabelas, listas de tarefas e realce de sintaxe.
 
-
 # Workflows e Processos de Contribuição
 
 ## Como Contribuir

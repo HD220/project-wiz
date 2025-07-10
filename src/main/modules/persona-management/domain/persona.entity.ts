@@ -3,7 +3,7 @@ import { BaseEntity } from "@/shared/common/base.entity";
 export interface PersonaProps {
   name: string;
   description: string;
-  llmConfig: { model: string; temperature: number; };
+  llmConfig: { model: string; temperature: number };
   tools: string[];
 }
 
@@ -20,7 +20,7 @@ export class Persona extends BaseEntity<PersonaProps> {
     return this.props.description;
   }
 
-  get llmConfig(): { model: string; temperature: number; } {
+  get llmConfig(): { model: string; temperature: number } {
     return this.props.llmConfig;
   }
 

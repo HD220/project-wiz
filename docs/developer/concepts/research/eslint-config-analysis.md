@@ -3,9 +3,11 @@
 Data da Análise: 2024-07-15
 
 ## Objetivo
+
 Analisar os arquivos `.eslintrc.json` e `eslint.config.js` para consolidar a configuração do ESLint, especificamente migrando os `ignorePatterns` e determinando se `.eslintrc.json` pode ser removido.
 
 ## Arquivos Analisados
+
 1.  `.eslintrc.json` (configuração legada)
 2.  `eslint.config.js` (nova configuração "flat config")
 
@@ -13,19 +15,14 @@ Analisar os arquivos `.eslintrc.json` e `eslint.config.js` para consolidar a con
 
 ```json
 {
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": "warn"
@@ -37,36 +34,34 @@ Analisar os arquivos `.eslintrc.json` e `eslint.config.js` para consolidar a con
       }
     }
   },
-  "ignorePatterns": [
-    "**/k6/**",
-    "**/jslib.k6.io/**"
-  ]
+  "ignorePatterns": ["**/k6/**", "**/jslib.k6.io/**"]
 }
 ```
 
 **Pontos Chave de `.eslintrc.json`:**
-*   **`ignorePatterns`**: `["**/k6/**", "**/jslib.k6.io/**"]`. Estes são os padrões a serem migrados.
-*   **`extends`**: `eslint:recommended`, `plugin:@typescript-eslint/recommended`.
-*   **`parser`**: `@typescript-eslint/parser`.
-*   **`parserOptions`**: `project: "./tsconfig.json"` (entre outros).
-*   **`plugins`**: `@typescript-eslint`.
-*   **`rules`**:
-    *   `@typescript-eslint/no-explicit-any: "warn"`
-    *   `@typescript-eslint/no-unused-vars: "warn"`
-*   **`settings`**: Configuração para `eslint-plugin-import`.
+
+- **`ignorePatterns`**: `["**/k6/**", "**/jslib.k6.io/**"]`. Estes são os padrões a serem migrados.
+- **`extends`**: `eslint:recommended`, `plugin:@typescript-eslint/recommended`.
+- **`parser`**: `@typescript-eslint/parser`.
+- **`parserOptions`**: `project: "./tsconfig.json"` (entre outros).
+- **`plugins`**: `@typescript-eslint`.
+- **`rules`**:
+  - `@typescript-eslint/no-explicit-any: "warn"`
+  - `@typescript-eslint/no-unused-vars: "warn"`
+- **`settings`**: Configuração para `eslint-plugin-import`.
 
 ## Análise de `eslint.config.js` (Resumo)
 
 O arquivo `eslint.config.js` já implementa o formato "flat config" e inclui configurações detalhadas para arquivos `*.ts` e `*.tsx`.
 
-*   **`ignores`**: Já possui uma lista: `["**/_old/**", "**/coverage/**", "**/dist/**", "**/node_modules/**", "tests/test-setup.d.ts"]`. Os novos padrões de ignore devem ser adicionados a esta lista.
-*   **Cobertura das Configurações Legadas:**
-    *   As `extends` (`eslint:recommended`, `plugin:@typescript-eslint/recommended`) são cobertas pela inclusão de `js.configs.recommended.rules` e `tsPlugin.configs.recommended.rules` dentro dos objetos de configuração específicos para arquivos TypeScript.
-    *   O `parser` (`@typescript-eslint/parser`) é definido como `tsParser`.
-    *   `parserOptions` (incluindo `project: "./tsconfig.json"`) estão configuradas.
-    *   O plugin `@typescript-eslint` (como `tsPlugin`) e `eslint-plugin-import` (como `importPlugin`) estão incluídos.
-    *   As regras `@typescript-eslint/no-explicit-any` e `@typescript-eslint/no-unused-vars` estão presentes em `eslint.config.js`, com a severidade aumentada para `"error"` (para `no-explicit-any`) ou configurada de forma mais granular (para `no-unused-vars`), o que é uma melhoria ou manutenção da intenção.
-    *   A configuração `settings` para `import/resolver` também está presente e corretamente configurada em `eslint.config.js`.
+- **`ignores`**: Já possui uma lista: `["**/_old/**", "**/coverage/**", "**/dist/**", "**/node_modules/**", "tests/test-setup.d.ts"]`. Os novos padrões de ignore devem ser adicionados a esta lista.
+- **Cobertura das Configurações Legadas:**
+  - As `extends` (`eslint:recommended`, `plugin:@typescript-eslint/recommended`) são cobertas pela inclusão de `js.configs.recommended.rules` e `tsPlugin.configs.recommended.rules` dentro dos objetos de configuração específicos para arquivos TypeScript.
+  - O `parser` (`@typescript-eslint/parser`) é definido como `tsParser`.
+  - `parserOptions` (incluindo `project: "./tsconfig.json"`) estão configuradas.
+  - O plugin `@typescript-eslint` (como `tsPlugin`) e `eslint-plugin-import` (como `importPlugin`) estão incluídos.
+  - As regras `@typescript-eslint/no-explicit-any` e `@typescript-eslint/no-unused-vars` estão presentes em `eslint.config.js`, com a severidade aumentada para `"error"` (para `no-explicit-any`) ou configurada de forma mais granular (para `no-unused-vars`), o que é uma melhoria ou manutenção da intenção.
+  - A configuração `settings` para `import/resolver` também está presente e corretamente configurada em `eslint.config.js`.
 
 ## Conclusão da Análise e Próximos Passos
 
@@ -87,7 +82,7 @@ O arquivo `eslint.config.js` já implementa o formato "flat config" e inclui con
       "**/k6/**", // Adicionado
       "**/jslib.k6.io/**" // Adicionado
     ]
-  },
+  }
   // ... restante da configuração
 ]
 ```

@@ -13,37 +13,61 @@ describe("LLM Config Remove Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  
-
   beforeEach(() => {
     cqrsDispatcher = new CqrsDispatcher();
     llmConfigRepository = new DrizzleLlmConfigRepository();
 
-    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(llmConfigRepository);
-    const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(llmConfigRepository);
-    const removeLlmConfigCommandHandler = new RemoveLlmConfigCommandHandler(llmConfigRepository);
+    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(
+      llmConfigRepository,
+    );
+    const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(
+      llmConfigRepository,
+    );
+    const removeLlmConfigCommandHandler = new RemoveLlmConfigCommandHandler(
+      llmConfigRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("SaveLlmConfigCommand", saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListLlmConfigsQuery", listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler));
-    cqrsDispatcher.registerCommandHandler("RemoveLlmConfigCommand", removeLlmConfigCommandHandler.handle.bind(removeLlmConfigCommandHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "SaveLlmConfigCommand",
+      saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListLlmConfigsQuery",
+      listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler),
+    );
+    cqrsDispatcher.registerCommandHandler(
+      "RemoveLlmConfigCommand",
+      removeLlmConfigCommandHandler.handle.bind(removeLlmConfigCommandHandler),
+    );
   });
-
-  
 
   it("should remove an LLM config", async () => {
     const createCommand = new SaveLlmConfigCommand({
-      provider: "test", model: "test-model", apiKey: "key-to-remove", temperature: 0.1, maxTokens: 100
+      provider: "test",
+      model: "test-model",
+      apiKey: "key-to-remove",
+      temperature: 0.1,
+      maxTokens: 100,
     });
-    const createdConfig = await cqrsDispatcher.dispatchCommand<SaveLlmConfigCommand, LlmConfig>(createCommand);
+    const createdConfig = await cqrsDispatcher.dispatchCommand<
+      SaveLlmConfigCommand,
+      LlmConfig
+    >(createCommand);
     expect(createdConfig).toBeInstanceOf(LlmConfig);
 
     const configId = createdConfig.id;
     const removeCommand = new RemoveLlmConfigCommand({ id: configId });
-    const removeResult = await cqrsDispatcher.dispatchCommand<RemoveLlmConfigCommand, boolean>(removeCommand);
+    const removeResult = await cqrsDispatcher.dispatchCommand<
+      RemoveLlmConfigCommand,
+      boolean
+    >(removeCommand);
 
     expect(removeResult).toBe(true);
 
-    const listedConfigs = await cqrsDispatcher.dispatchQuery<ListLlmConfigsQuery, LlmConfig[]>(new ListLlmConfigsQuery());
+    const listedConfigs = await cqrsDispatcher.dispatchQuery<
+      ListLlmConfigsQuery,
+      LlmConfig[]
+    >(new ListLlmConfigsQuery());
     expect(listedConfigs.length).toBe(0);
   });
 });

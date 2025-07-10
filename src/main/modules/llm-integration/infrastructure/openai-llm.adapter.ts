@@ -1,4 +1,3 @@
-
 import { ILLMAdapter } from "../domain/llm.adapter";
 
 export class OpenAILLMAdapter implements ILLMAdapter {
@@ -8,8 +7,13 @@ export class OpenAILLMAdapter implements ILLMAdapter {
       // Placeholder implementation
       return `This is a refined suggestion for: ${prompt}`;
     } catch (error) {
-      console.error(`Failed to generate LLM response for prompt "${prompt}":`, error);
-      throw new Error(`Failed to generate LLM response: ${(error as Error).message}`);
+      console.error(
+        `Failed to generate LLM response for prompt "${prompt}":`,
+        error,
+      );
+      throw new Error(
+        `Failed to generate LLM response: ${(error as Error).message}`,
+      );
     }
   }
 }

@@ -2,5 +2,8 @@ import { DirectMessage } from "@/main/modules/direct-messages/domain/direct-mess
 
 export interface IDirectMessageRepository {
   save(message: DirectMessage): Promise<DirectMessage>;
-  findByConversation(senderId: string, receiverId: string): Promise<DirectMessage[]>;
+  findByConversation(
+    senderId: string,
+    receiverId: string,
+  ): Promise<DirectMessage[]>;
 }

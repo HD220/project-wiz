@@ -7,7 +7,9 @@ export interface CreateForumTopicCommandPayload {
   authorId: string;
 }
 
-export class CreateForumTopicCommand implements ICommand<CreateForumTopicCommandPayload> {
+export class CreateForumTopicCommand
+  implements ICommand<CreateForumTopicCommandPayload>
+{
   readonly type = "CreateForumTopicCommand";
   constructor(public payload: CreateForumTopicCommandPayload) {}
 }
@@ -26,7 +28,9 @@ export class CreateForumTopicCommandHandler {
       return await this.forumTopicRepository.save(topic);
     } catch (error) {
       console.error(`Failed to create forum topic:`, error);
-      throw new Error(`Failed to create forum topic: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to create forum topic: ${(error as Error).message}`,
+      );
     }
   }
 }

@@ -75,40 +75,50 @@ A interface e a experiência do usuário são projetadas em torno de uma metáfo
 ## 3. Capacidades Conceituais de Suporte Técnico
 
 ### Sistema 1: Kernel da Aplicação
+
 - **1.1. Orquestração de Fluxo de Dados:** Um mecanismo central para gerenciar as operações do sistema, separando as ações que modificam dados (Comandos) das que apenas leem dados (Queries).
 - **1.2. Comunicação Assíncrona:** Um barramento de eventos para permitir que os diferentes módulos do sistema se comuniquem de forma desacoplada.
 
 ### Sistema 2: Camada de Persistência
+
 - **2.1. Armazenamento de Dados:** Um sistema de banco de dados local para persistir todos os metadados da aplicação (projetos, personas, jobs, configurações, discussões do fórum, etc.).
 - **2.2. Acesso a Dados:** Uma camada de abstração (como um ORM) para interagir com o banco de dados de forma segura e previsível.
 - **2.3. Gerenciamento de Schema:** Um processo para gerenciar as mudanças na estrutura do banco de dados de forma versionada.
 
 ### Sistema 3: Comunicação com a Interface
+
 - **3.1. Ponte Segura:** Um mecanismo para expor funcionalidades do backend para o frontend de forma segura, sem vazar detalhes de implementação.
 - **3.2. Contrato de Interface:** Um conjunto de definições de tipos compartilhados que garantem que a comunicação entre o backend e o frontend seja consistente e à prova de erros.
 
 ### Sistema 4: Sistema de Filas de Tarefas
+
 - **4.1. Filas de Tarefas Dedicadas:** Cada agente de IA ativo possui sua própria fila de tarefas persistente, garantindo que o trabalho seja isolado e processado em ordem pelo especialista correto.
 
 ### Sistema 5: Camada de Inteligência Artificial
+
 - **5.1. Abstração de LLM:** Uma camada de serviço que encapsula a comunicação com modelos de linguagem grandes, permitindo que o provedor seja trocado sem grandes refatorações.
 - **5.2. Gerenciamento de Prompts:** Um sistema para criar, gerenciar e versionar os prompts que definem o comportamento e as habilidades das Personas.
 
 ### Sistema 6: Interação com o Ambiente
+
 - **6.1. Ferramentas de Sistema de Arquivos:** Um conjunto de capacidades seguras para os agentes lerem e escreverem arquivos dentro dos limites do diretório de um projeto.
 
 ### Sistema 7: Camada de Controle de Versão
+
 - **7.1. Automação de Fluxo de Versionamento:** O sistema deve ser capaz de executar operações de controle de versão (como `pull`, `commit`, `push`) de forma autônoma, como parte do ciclo de vida de uma tarefa.
 - **7.2. Provisionamento de Repositório:** O sistema deve ser capaz de provisionar novos projetos, seja inicializando um novo repositório ou clonando um existente.
 - **7.3. Gerenciamento de Credenciais:** Um mecanismo para armazenar e usar de forma segura as credenciais necessárias para interagir com serviços de hospedagem de código.
 
 ### Sistema 8: Camada de Análise de Código
+
 - **8.1. Análise de Dependências:** A capacidade de inspecionar a base de código de um projeto para identificar sua stack tecnológica e dependências, a fim de suportar a contratação automática de Personas.
 
 ### Sistema 9: Modelo de Execução do Agente
+
 - **9.1. Processos de Agentes Persistentes:** Um "Agente" é um processo de trabalho de longa duração. Um novo processo de Agente é iniciado para cada Persona "contratada" e permanece ativo, aguardando por tarefas em sua fila dedicada.
 
 ### Sistema 10: Orquestrador de Intenção
+
 - **10.1. Processamento de Linguagem Natural:** O cérebro do sistema, que usa um modelo de linguagem para analisar a conversa do usuário e classificar sua intenção (ex: pedido de tarefa, pergunta, etc.).
 - **10.2. Roteamento de Tarefas:** Um mecanismo de decisão que, dada uma tarefa, a atribui à Persona mais qualificada com base em suas habilidades definidas.
 - **10.3. Enfileiramento de Tarefas:** Após rotear uma tarefa, o orquestrador a coloca na fila de trabalho específica do agente selecionado.

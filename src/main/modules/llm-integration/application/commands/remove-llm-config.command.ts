@@ -5,7 +5,9 @@ export interface RemoveLlmConfigCommandPayload {
   id: string;
 }
 
-export class RemoveLlmConfigCommand implements ICommand<RemoveLlmConfigCommandPayload> {
+export class RemoveLlmConfigCommand
+  implements ICommand<RemoveLlmConfigCommandPayload>
+{
   readonly type = "RemoveLlmConfigCommand";
   constructor(public payload: RemoveLlmConfigCommandPayload) {}
 }
@@ -18,7 +20,9 @@ export class RemoveLlmConfigCommandHandler {
       return await this.llmConfigRepository.delete(command.payload.id);
     } catch (error) {
       console.error(`Failed to remove LLM config:`, error);
-      throw new Error(`Failed to remove LLM config: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to remove LLM config: ${(error as Error).message}`,
+      );
     }
   }
 }

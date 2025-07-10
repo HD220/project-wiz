@@ -10,8 +10,13 @@ export class RefinePersonaSuggestionHandler {
     try {
       return await this.llmAdapter.generate(prompt);
     } catch (error) {
-      console.error(`Failed to refine persona suggestion for "${name}":`, error);
-      throw new Error(`Failed to refine persona suggestion: ${(error as Error).message}`);
+      console.error(
+        `Failed to refine persona suggestion for "${name}":`,
+        error,
+      );
+      throw new Error(
+        `Failed to refine persona suggestion: ${(error as Error).message}`,
+      );
     }
   }
 }

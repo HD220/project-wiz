@@ -1,14 +1,19 @@
-import { ICommand } from '@/main/kernel/cqrs-dispatcher';
-import { GitService } from '@/main/modules/git-integration/git.service';
+import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { GitService } from "@/main/modules/git-integration/git.service";
 
+export class CloneRepositoryCommand
+  implements
+    ICommand<{
+      repoUrl: string;
+      localPath: string;
+    }>
+{
+  readonly type = "CloneRepositoryCommand";
 
-export class CloneRepositoryCommand implements ICommand<{
-  repoUrl: string;
-  localPath: string;
-}> {
-  readonly type = 'CloneRepositoryCommand';
-
-  constructor(public readonly repoUrl: string, public readonly localPath: string) {}
+  constructor(
+    public readonly repoUrl: string,
+    public readonly localPath: string,
+  ) {}
 
   get payload() {
     return { repoUrl: this.repoUrl, localPath: this.localPath };
@@ -23,7 +28,9 @@ export class CloneRepositoryCommandHandler {
       return await this.gitService.clone(command.repoUrl, command.localPath);
     } catch (error: unknown) {
       console.error(`Failed to clone repository:`, error);
-      throw new Error(`Failed to clone repository: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to clone repository: ${(error as Error).message}`,
+      );
     }
   }
 }

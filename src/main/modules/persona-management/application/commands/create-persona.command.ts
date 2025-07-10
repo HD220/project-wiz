@@ -10,7 +10,9 @@ export interface CreatePersonaCommandPayload {
   tools: string[];
 }
 
-export class CreatePersonaCommand implements ICommand<CreatePersonaCommandPayload> {
+export class CreatePersonaCommand
+  implements ICommand<CreatePersonaCommandPayload>
+{
   readonly type = "CreatePersonaCommand";
   constructor(public payload: CreatePersonaCommandPayload) {}
 }
@@ -22,7 +24,10 @@ export class CreatePersonaCommandHandler {
     const persona = new Persona({
       name: command.payload.name,
       description: command.payload.description,
-      llmConfig: { model: command.payload.llmModel, temperature: command.payload.llmTemperature },
+      llmConfig: {
+        model: command.payload.llmModel,
+        temperature: command.payload.llmTemperature,
+      },
       tools: command.payload.tools,
     });
     try {

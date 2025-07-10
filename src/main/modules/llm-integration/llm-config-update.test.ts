@@ -11,22 +11,28 @@ describe("LLM Config Update Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  
-
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
     llmConfigRepository = new DrizzleLlmConfigRepository();
 
-    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(llmConfigRepository);
-    const getLlmConfigQueryHandler = new GetLlmConfigQueryHandler(llmConfigRepository);
+    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(
+      llmConfigRepository,
+    );
+    const getLlmConfigQueryHandler = new GetLlmConfigQueryHandler(
+      llmConfigRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("SaveLlmConfigCommand", saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler));
-    cqrsDispatcher.registerQueryHandler("GetLlmConfigQuery", getLlmConfigQueryHandler.handle.bind(getLlmConfigQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "SaveLlmConfigCommand",
+      saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "GetLlmConfigQuery",
+      getLlmConfigQueryHandler.handle.bind(getLlmConfigQueryHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   const createAndAssertLlmConfig = async (payload: {
     provider: string;
@@ -36,19 +42,29 @@ describe("LLM Config Update Operations", () => {
     maxTokens: number;
   }): Promise<LlmConfig> => {
     const command = new SaveLlmConfigCommand(payload);
-    return await cqrsDispatcher.dispatchCommand<SaveLlmConfigCommand, LlmConfig>(command);
+    return await cqrsDispatcher.dispatchCommand<
+      SaveLlmConfigCommand,
+      LlmConfig
+    >(command);
   };
 
-  const updateAndAssertLlmConfig = async (payload: {
-    id: string;
-    provider: string;
-    model: string;
-    apiKey: string;
-    temperature: number;
-    maxTokens: number;
-  }, expectedTemperature: number, expectedApiKey: string): Promise<LlmConfig> => {
+  const updateAndAssertLlmConfig = async (
+    payload: {
+      id: string;
+      provider: string;
+      model: string;
+      apiKey: string;
+      temperature: number;
+      maxTokens: number;
+    },
+    expectedTemperature: number,
+    expectedApiKey: string,
+  ): Promise<LlmConfig> => {
     const command = new SaveLlmConfigCommand(payload);
-    const updatedConfig = await cqrsDispatcher.dispatchCommand<SaveLlmConfigCommand, LlmConfig>(command);
+    const updatedConfig = await cqrsDispatcher.dispatchCommand<
+      SaveLlmConfigCommand,
+      LlmConfig
+    >(command);
     expect(updatedConfig.apiKey).toBe(expectedApiKey);
     expect(updatedConfig.temperature).toBe(expectedTemperature);
     return updatedConfig;
@@ -64,16 +80,23 @@ describe("LLM Config Update Operations", () => {
     });
 
     const configId = createdConfig.id;
-    await updateAndAssertLlmConfig({
-      id: configId,
-      provider: "openai",
-      model: "gpt-3.5-turbo",
-      apiKey: "sk-new-key",
-      temperature: 0.8,
-      maxTokens: 2000,
-    }, 0.8, "sk-new-key");
+    await updateAndAssertLlmConfig(
+      {
+        id: configId,
+        provider: "openai",
+        model: "gpt-3.5-turbo",
+        apiKey: "sk-new-key",
+        temperature: 0.8,
+        maxTokens: 2000,
+      },
+      0.8,
+      "sk-new-key",
+    );
 
-    const retrievedConfig = await cqrsDispatcher.dispatchQuery<GetLlmConfigQuery, LlmConfig>(new GetLlmConfigQuery({ id: configId }));
+    const retrievedConfig = await cqrsDispatcher.dispatchQuery<
+      GetLlmConfigQuery,
+      LlmConfig
+    >(new GetLlmConfigQuery({ id: configId }));
     expect(retrievedConfig?.apiKey).toBe("sk-new-key");
   });
 });

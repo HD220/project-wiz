@@ -1,6 +1,5 @@
-
-import { ipcMain } from 'electron'
-import { CqrsDispatcher } from '@/main/kernel/cqrs-dispatcher'
+import { ipcMain } from "electron";
+import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import {
   IUserSetting,
   IpcUserSettingsSavePayload,
@@ -9,14 +8,14 @@ import {
   IpcUserSettingsGetResponse,
   IpcUserSettingsListPayload,
   IpcUserSettingsListResponse,
-} from '@/shared/ipc-types/entities'
-import { SaveUserSettingCommand } from './application/commands/save-user-setting.command'
-import { GetUserSettingQuery } from './application/queries/get-user-setting.query'
-import { ListUserSettingsQuery } from './application/queries/list-user-settings.query'
+} from "@/shared/ipc-types/entities";
+import { SaveUserSettingCommand } from "./application/commands/save-user-setting.command";
+import { GetUserSettingQuery } from "./application/queries/get-user-setting.query";
+import { ListUserSettingsQuery } from "./application/queries/list-user-settings.query";
 
 export function registerUserSettingsHandlers(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    'user-settings:save',
+    "user-settings:save",
     async (
       _,
       payload: IpcUserSettingsSavePayload,
@@ -24,17 +23,18 @@ export function registerUserSettingsHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const setting = (await cqrsDispatcher.dispatchCommand(
           new SaveUserSettingCommand(payload),
-        )) as IUserSetting
-        return { success: true, data: setting }
+        )) as IUserSetting;
+        return { success: true, data: setting };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'user-settings:get',
+    "user-settings:get",
     async (
       _,
       payload: IpcUserSettingsGetPayload,
@@ -42,17 +42,18 @@ export function registerUserSettingsHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const setting = (await cqrsDispatcher.dispatchQuery(
           new GetUserSettingQuery(payload),
-        )) as IUserSetting | undefined
-        return { success: true, data: setting }
+        )) as IUserSetting | undefined;
+        return { success: true, data: setting };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'user-settings:list',
+    "user-settings:list",
     async (
       _,
       payload: IpcUserSettingsListPayload,
@@ -60,12 +61,13 @@ export function registerUserSettingsHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const settings = (await cqrsDispatcher.dispatchQuery(
           new ListUserSettingsQuery(payload),
-        )) as IUserSetting[]
-        return { success: true, data: settings }
+        )) as IUserSetting[];
+        return { success: true, data: settings };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 }

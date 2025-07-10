@@ -22,7 +22,10 @@ export class GetLlmConfigQueryHandler {
         return await this.llmConfigRepository.findById(query.payload.id);
       }
       if (query.payload.provider && query.payload.model) {
-        return await this.llmConfigRepository.findByProviderAndModel(query.payload.provider, query.payload.model);
+        return await this.llmConfigRepository.findByProviderAndModel(
+          query.payload.provider,
+          query.payload.model,
+        );
       }
       throw new Error("Either id or provider and model must be provided.");
     } catch (error) {

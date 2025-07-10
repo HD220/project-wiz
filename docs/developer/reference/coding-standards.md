@@ -10,21 +10,21 @@ Adherence to this document is mandatory for all new code and refactoring efforts
 
 Our development is guided by the following fundamental software design principles:
 
-*   **DRY (Don't Repeat Yourself):** Eliminate code duplication. Abstract common logic into reusable functions, classes, or modules.
-*   **KISS (Keep It Simple, Stupid):** Design solutions that are as simple as possible. Avoid unnecessary complexity and over-engineering.
-*   **YAGNI (You Aren't Gonna Need It):** Implement only what is currently required. Avoid adding features speculatively.
-*   **Clean Code:** Write code that is easy to read, understand, and modify. This includes using descriptive names, writing small functions, and maintaining a clear structure.
+- **DRY (Don't Repeat Yourself):** Eliminate code duplication. Abstract common logic into reusable functions, classes, or modules.
+- **KISS (Keep It Simple, Stupid):** Design solutions that are as simple as possible. Avoid unnecessary complexity and over-engineering.
+- **YAGNI (You Aren't Gonna Need It):** Implement only what is currently required. Avoid adding features speculatively.
+- **Clean Code:** Write code that is easy to read, understand, and modify. This includes using descriptive names, writing small functions, and maintaining a clear structure.
 
 ## 3. Architectural Principles: Adaptive Module Architecture (AMA)
 
 The project's structure is dictated by the **Adaptive Module Architecture (AMA)**. All code must adhere to its principles. For a complete overview, see the main [Software Architecture document](../concepts/software-architecture.md).
 
-*   **Clear Main/Renderer Division:** Strictly separate backend (`main`) and frontend (`renderer`) logic. Communication occurs only via a well-defined IPC contract.
-*   **Vertical Slices by Business Module:** Organize the backend into self-contained modules representing business functionality (e.g., `project-management`).
-*   **Radical Co-location:** All code related to a feature (domain, persistence, commands, queries) lives within that feature's module.
-*   **Explicit Communication via CQRS:** Use `Commands` (for writes) and `Queries` (for reads), each with a dedicated `Handler`, instead of generic services or use cases.
-*   **Event-Driven Reactivity:** Use a central `Event Bus` for asynchronous communication *between* modules.
-*   **Dependency Inversion:** Core layers must define abstractions (interfaces/ports) that the outer layers implement. The core must not depend on any framework or infrastructure detail.
+- **Clear Main/Renderer Division:** Strictly separate backend (`main`) and frontend (`renderer`) logic. Communication occurs only via a well-defined IPC contract.
+- **Vertical Slices by Business Module:** Organize the backend into self-contained modules representing business functionality (e.g., `project-management`).
+- **Radical Co-location:** All code related to a feature (domain, persistence, commands, queries) lives within that feature's module.
+- **Explicit Communication via CQRS:** Use `Commands` (for writes) and `Queries` (for reads), each with a dedicated `Handler`, instead of generic services or use cases.
+- **Event-Driven Reactivity:** Use a central `Event Bus` for asynchronous communication _between_ modules.
+- **Dependency Inversion:** Core layers must define abstractions (interfaces/ports) that the outer layers implement. The core must not depend on any framework or infrastructure detail.
 
 ## 4. Object-Oriented Design: Object Calisthenics
 
@@ -44,34 +44,34 @@ We apply the Object Calisthenics rules to produce clean, modular, and maintainab
 
 ### 5.1. TypeScript Best Practices (Ref: ADR-015)
 
-*   **Strict Mode:** `strict: true` is mandatory in `tsconfig.json`.
-*   **`unknown` over `any`:** Always prefer `unknown` for values of unknown type and perform explicit type checking. `any` is forbidden unless absolutely necessary and justified with a comment.
-*   **Utility Types:** Leverage TypeScript's built-in utility types (`Partial`, `Readonly`, `Pick`, `Omit`, etc.) to create robust and maintainable types.
-*   **Type Guards & Discriminated Unions:** Use type guards and the discriminated union pattern to handle different data structures safely and exhaustively.
+- **Strict Mode:** `strict: true` is mandatory in `tsconfig.json`.
+- **`unknown` over `any`:** Always prefer `unknown` for values of unknown type and perform explicit type checking. `any` is forbidden unless absolutely necessary and justified with a comment.
+- **Utility Types:** Leverage TypeScript's built-in utility types (`Partial`, `Readonly`, `Pick`, `Omit`, etc.) to create robust and maintainable types.
+- **Type Guards & Discriminated Unions:** Use type guards and the discriminated union pattern to handle different data structures safely and exhaustively.
 
 ### 5.2. Naming Conventions (Ref: ADR-028)
 
-*   **Language:** All identifiers (variables, functions, classes, files, etc.) **must** be in **English**.
-*   **Casing:**
-    *   `camelCase` for variables, parameters, and functions.
-    *   `PascalCase` for classes, interfaces, types, and enums.
-    *   `UPPER_SNAKE_CASE` for constants and DI tokens.
-*   **File Naming:**
-    *   **`kebab-case`** is the universal standard for all files and directories in `src/`.
-    *   Use descriptive suffixes: `.entity.ts`, `.vo.ts`, `.service.ts`, `.repository.ts`, `.adapter.ts`, `.command.ts`, `.query.ts`, `.handler.ts`, `.schema.ts`, `.types.ts`, `.tsx`, `.hook.ts`.
+- **Language:** All identifiers (variables, functions, classes, files, etc.) **must** be in **English**.
+- **Casing:**
+  - `camelCase` for variables, parameters, and functions.
+  - `PascalCase` for classes, interfaces, types, and enums.
+  - `UPPER_SNAKE_CASE` for constants and DI tokens.
+- **File Naming:**
+  - **`kebab-case`** is the universal standard for all files and directories in `src/`.
+  - Use descriptive suffixes: `.entity.ts`, `.vo.ts`, `.service.ts`, `.repository.ts`, `.adapter.ts`, `.command.ts`, `.query.ts`, `.handler.ts`, `.schema.ts`, `.types.ts`, `.tsx`, `.hook.ts`.
 
 ### 5.3. Code Formatting (Prettier)
 
-*   Code formatting is managed automatically by Prettier. The configuration is in `.prettierrc.js`. All committed code must be formatted.
+- Code formatting is managed automatically by Prettier. The configuration is in `.prettierrc.js`. All committed code must be formatted.
 
 ### 5.4. Linting (ESLint)
 
-*   ESLint is used for static analysis. The configuration is in `eslint.config.js`. All code must pass linting without errors.
+- ESLint is used for static analysis. The configuration is in `eslint.config.js`. All code must pass linting without errors.
 
 ## 6. Other Key Practices
 
-*   **Error Handling (Ref: ADR-014):** Use the custom `CoreError` hierarchy. Catch specific errors and wrap external errors in `InfrastructureError`.
-*   **Logging (Ref: ADR-013):** Use the `ILogger` interface via DI. Avoid `console.*`. Use structured, contextual logging.
-*   **Testing (Ref: ADR-029):** Use Vitest. Co-locate tests in a `__tests__` directory. Write unit tests for all logic and integration tests for component interactions.
-*   **Security (Ref: ADR-030):** Follow all security guidelines, especially for Electron (`contextIsolation`) and IPC (input validation).
-*   **Git (Ref: ADR-028):** Use atomic commits with Conventional Commit messages (`feat:`, `fix:`, etc.). Use `kebab-case` for branch names.
+- **Error Handling (Ref: ADR-014):** Use the custom `CoreError` hierarchy. Catch specific errors and wrap external errors in `InfrastructureError`.
+- **Logging (Ref: ADR-013):** Use the `ILogger` interface via DI. Avoid `console.*`. Use structured, contextual logging.
+- **Testing (Ref: ADR-029):** Use Vitest. Co-locate tests in a `__tests__` directory. Write unit tests for all logic and integration tests for component interactions.
+- **Security (Ref: ADR-030):** Follow all security guidelines, especially for Electron (`contextIsolation`) and IPC (input validation).
+- **Git (Ref: ADR-028):** Use atomic commits with Conventional Commit messages (`feat:`, `fix:`, etc.). Use `kebab-case` for branch names.

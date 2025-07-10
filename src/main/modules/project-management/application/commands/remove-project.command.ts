@@ -5,7 +5,9 @@ export interface RemoveProjectCommandPayload {
   id: string;
 }
 
-export class RemoveProjectCommand implements ICommand<RemoveProjectCommandPayload> {
+export class RemoveProjectCommand
+  implements ICommand<RemoveProjectCommandPayload>
+{
   readonly type = "RemoveProjectCommand";
   constructor(public payload: RemoveProjectCommandPayload) {}
 }

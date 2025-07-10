@@ -1,7 +1,7 @@
-import React from 'react';
-import { TopicList } from './TopicList';
-import { DiscussionThread } from './DiscussionThread';
-import { useForum } from '@/renderer/hooks/use-forum';
+import React from "react";
+import { TopicList } from "./TopicList";
+import { DiscussionThread } from "./DiscussionThread";
+import { useForum } from "@/renderer/hooks/use-forum";
 
 export function ForumPage() {
   const { topics, loading, error } = useForum();

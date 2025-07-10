@@ -5,7 +5,9 @@ export interface RemoveForumPostCommandPayload {
   id: string;
 }
 
-export class RemoveForumPostCommand implements ICommand<RemoveForumPostCommandPayload> {
+export class RemoveForumPostCommand
+  implements ICommand<RemoveForumPostCommandPayload>
+{
   readonly type = "RemoveForumPostCommand";
   constructor(public payload: RemoveForumPostCommandPayload) {}
 }
@@ -18,7 +20,9 @@ export class RemoveForumPostCommandHandler {
       return await this.forumPostRepository.delete(command.payload.id);
     } catch (error) {
       console.error(`Failed to remove forum post:`, error);
-      throw new Error(`Failed to remove forum post: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to remove forum post: ${(error as Error).message}`,
+      );
     }
   }
 }

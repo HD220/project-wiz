@@ -10,19 +10,19 @@ Comprometemo-nos a agir e interagir de maneiras que contribuam para uma comunida
 
 Exemplos de comportamento que contribuem para um ambiente positivo para nossa comunidade incluem:
 
-*   Demonstrar empatia e gentileza para com outras pessoas.
-*   Respeitar opiniões, pontos de vista e experiências diferentes.
-*   Dar e aceitar feedback construtivo de forma elegante.
-*   Assumir a responsabilidade e pedir desculpas àqueles afetados por nossos erros, aprendendo com a experiência.
-*   Focar no que é melhor não apenas para nós como indivíduos, mas para a comunidade em geral.
+- Demonstrar empatia e gentileza para com outras pessoas.
+- Respeitar opiniões, pontos de vista e experiências diferentes.
+- Dar e aceitar feedback construtivo de forma elegante.
+- Assumir a responsabilidade e pedir desculpas àqueles afetados por nossos erros, aprendendo com a experiência.
+- Focar no que é melhor não apenas para nós como indivíduos, mas para a comunidade em geral.
 
 Exemplos de comportamento inaceitável incluem:
 
-*   O uso de linguagem ou imagens sexualizadas, e atenção ou avanços sexuais de qualquer tipo.
-*   Trolling, comentários insultuosos ou depreciativos, e ataques pessoais ou políticos.
-*   Assédio público ou privado.
-*   Publicar informações privadas de outros, como endereços físicos ou de e-mail, sem sua permissão explícita.
-*   Outras condutas que poderiam razoavelmente ser consideradas inadequadas em um ambiente profissional.
+- O uso de linguagem ou imagens sexualizadas, e atenção ou avanços sexuais de qualquer tipo.
+- Trolling, comentários insultuosos ou depreciativos, e ataques pessoais ou políticos.
+- Assédio público ou privado.
+- Publicar informações privadas de outros, como endereços físicos ou de e-mail, sem sua permissão explícita.
+- Outras condutas que poderiam razoavelmente ser consideradas inadequadas em um ambiente profissional.
 
 ## Responsabilidades de Aplicação
 

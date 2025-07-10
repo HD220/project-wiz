@@ -12,7 +12,7 @@ export interface ElectronIPC {
   ) => Promise<IpcEvents[Channel]["response"]>;
   on: (
     channel: string,
-    listener: (event: IpcRendererEvent, ...args: unknown[]) => void
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
   ) => () => void;
   send: (channel: string, ...args: unknown[]) => void;
   removeAllListeners: (channel: string) => void;
@@ -31,7 +31,7 @@ const electronIPC: ElectronIPC = {
    */
   on: (
     channel: string,
-    listener: (event: IpcRendererEvent, ...args: unknown[]) => void
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
   ): (() => void) => {
     ipcRenderer.on(channel, listener);
     return () => {

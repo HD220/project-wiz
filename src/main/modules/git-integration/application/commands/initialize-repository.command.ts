@@ -1,9 +1,8 @@
-import { ICommand } from '@/main/kernel/cqrs-dispatcher';
-import { GitService } from '@/main/modules/git-integration/git.service';
-
+import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { GitService } from "@/main/modules/git-integration/git.service";
 
 export class InitializeRepositoryCommand implements ICommand<undefined> {
-  readonly type = 'InitializeRepositoryCommand';
+  readonly type = "InitializeRepositoryCommand";
 
   constructor() {}
 
@@ -20,7 +19,9 @@ export class InitializeRepositoryCommandHandler {
       return await this.gitService.init();
     } catch (error: unknown) {
       console.error(`Failed to initialize repository:`, error);
-      throw new Error(`Failed to initialize repository: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to initialize repository: ${(error as Error).message}`,
+      );
     }
   }
 }

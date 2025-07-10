@@ -22,11 +22,21 @@ describe("Direct Messages Module", () => {
     cqrsDispatcher = new CqrsDispatcher();
     directMessageRepository = new DrizzleDirectMessageRepository();
 
-    const sendMessageCommandHandler = new SendMessageCommandHandler(directMessageRepository);
-    const listMessagesQueryHandler = new ListMessagesQueryHandler(directMessageRepository);
+    const sendMessageCommandHandler = new SendMessageCommandHandler(
+      directMessageRepository,
+    );
+    const listMessagesQueryHandler = new ListMessagesQueryHandler(
+      directMessageRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("SendMessageCommand", sendMessageCommandHandler.handle.bind(sendMessageCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListMessagesQuery", listMessagesQueryHandler.handle.bind(listMessagesQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "SendMessageCommand",
+      sendMessageCommandHandler.handle.bind(sendMessageCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListMessagesQuery",
+      listMessagesQueryHandler.handle.bind(listMessagesQueryHandler),
+    );
   });
 
   beforeEach(async () => {
@@ -39,22 +49,49 @@ describe("Direct Messages Module", () => {
       receiverId: "user2",
       content: "Hello there!",
     });
-    const createdMessage = await cqrsDispatcher.dispatchCommand<SendMessageCommand, DirectMessage>(command);
+    const createdMessage = await cqrsDispatcher.dispatchCommand<
+      SendMessageCommand,
+      DirectMessage
+    >(command);
 
     expect(createdMessage).toBeInstanceOf(DirectMessage);
     expect(createdMessage.content).toBe("Hello there!");
 
-    const listedMessages = await cqrsDispatcher.dispatchQuery<ListMessagesQuery, DirectMessage[]>(new ListMessagesQuery({ senderId: "user1", receiverId: "user2" }));
+    const listedMessages = await cqrsDispatcher.dispatchQuery<
+      ListMessagesQuery,
+      DirectMessage[]
+    >(new ListMessagesQuery({ senderId: "user1", receiverId: "user2" }));
     expect(listedMessages.length).toBe(1);
     expect(listedMessages[0].content).toBe("Hello there!");
   });
 
   it("should list messages for a conversation", async () => {
-    await cqrsDispatcher.dispatchCommand(new SendMessageCommand({ senderId: "user1", receiverId: "user2", content: "Message 1" }));
-    await cqrsDispatcher.dispatchCommand(new SendMessageCommand({ senderId: "user2", receiverId: "user1", content: "Message 2" }));
-    await cqrsDispatcher.dispatchCommand(new SendMessageCommand({ senderId: "user1", receiverId: "user2", content: "Message 3" }));
+    await cqrsDispatcher.dispatchCommand(
+      new SendMessageCommand({
+        senderId: "user1",
+        receiverId: "user2",
+        content: "Message 1",
+      }),
+    );
+    await cqrsDispatcher.dispatchCommand(
+      new SendMessageCommand({
+        senderId: "user2",
+        receiverId: "user1",
+        content: "Message 2",
+      }),
+    );
+    await cqrsDispatcher.dispatchCommand(
+      new SendMessageCommand({
+        senderId: "user1",
+        receiverId: "user2",
+        content: "Message 3",
+      }),
+    );
 
-    const listedMessages = await cqrsDispatcher.dispatchQuery<ListMessagesQuery, DirectMessage[]>(new ListMessagesQuery({ senderId: "user1", receiverId: "user2" }));
+    const listedMessages = await cqrsDispatcher.dispatchQuery<
+      ListMessagesQuery,
+      DirectMessage[]
+    >(new ListMessagesQuery({ senderId: "user1", receiverId: "user2" }));
 
     expect(listedMessages.length).toBe(3);
     expect(listedMessages[0].content).toBe("Message 1");

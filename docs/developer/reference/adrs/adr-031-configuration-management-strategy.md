@@ -65,11 +65,11 @@ Serão adotados os seguintes padrões para o gerenciamento de configuração:
     *   **Justificativa:** Promove type-safety, centraliza a lógica de leitura de configuração, facilita o mock para testes, e desacopla os componentes dos detalhes de onde a configuração vem (e.g., `process.env`).
 
 **3. Validação de Configuração:**
-    *   **Padrão:** Utilizar esquemas Zod para definir a estrutura e os tipos esperados para objetos de configuração, especialmente aqueles carregados de arquivos ou variáveis de ambiente.
-    *   A validação DEVE ocorrer na inicialização da aplicação (e.g., ao popular os objetos de configuração tipados).
-    *   Se configurações críticas estiverem ausentes ou inválidas, a aplicação DEVE falhar rapidamente (fail fast) com uma mensagem de erro clara indicando o problema de configuração.
-    *   **Exemplo (Validação de `process.env` para um objeto de config):**
-        ```typescript
+_ **Padrão:** Utilizar esquemas Zod para definir a estrutura e os tipos esperados para objetos de configuração, especialmente aqueles carregados de arquivos ou variáveis de ambiente.
+_ A validação DEVE ocorrer na inicialização da aplicação (e.g., ao popular os objetos de configuração tipados).
+_ Se configurações críticas estiverem ausentes ou inválidas, a aplicação DEVE falhar rapidamente (fail fast) com uma mensagem de erro clara indicando o problema de configuração.
+_ **Exemplo (Validação de `process.env` para um objeto de config):**
+`typescript
         // const EnvSchema = z.object({
         //   NODE_ENV: z.enum(['development', 'production', 'test']),
         //   DATABASE_URL: z.string().url(),
@@ -82,45 +82,39 @@ Serão adotados os seguintes padrões para o gerenciamento de configuração:
         //   // console.error("Configuração de ambiente inválida!", error.flatten().fieldErrors);
         //   // process.exit(1);
         // }
-        ```
-    *   **Justificativa:** Garante que a aplicação inicie com uma configuração válida, prevenindo erros obscuros em runtime devido a configurações incorretas.
+        ` \* **Justificativa:** Garante que a aplicação inicie com uma configuração válida, prevenindo erros obscuros em runtime devido a configurações incorretas.
 
 **4. Segurança para Configurações Sensíveis (Reforço do ADR-030):**
-    *   **NÃO HARDCODAR SEGREDOS:** Chaves de API, senhas, tokens, etc., NUNCA devem estar no código-fonte.
-    *   **Variáveis de Ambiente:** Usar para segredos, carregadas de arquivos `.env` (fora do VCS) ou injetadas pelo ambiente de CI/CD.
-    *   **`electron.safeStorage`:** Para segredos fornecidos pelo usuário e que precisam ser persistidos localmente pela aplicação (e.g., `LLMProviderConfig.apiKey`), usar `safeStorage.encryptString()` e `safeStorage.decryptString()`. O acesso ao `safeStorage` deve ser encapsulado na camada de infraestrutura (e.g., no repositório que salva `LLMProviderConfig`).
-    *   **Logging:** NUNCA logar valores de configuração sensíveis.
-    *   **Justificativa:** Protege informações críticas contra exposição.
+_ **NÃO HARDCODAR SEGREDOS:** Chaves de API, senhas, tokens, etc., NUNCA devem estar no código-fonte.
+_ **Variáveis de Ambiente:** Usar para segredos, carregadas de arquivos `.env` (fora do VCS) ou injetadas pelo ambiente de CI/CD.
+_ **`electron.safeStorage`:** Para segredos fornecidos pelo usuário e que precisam ser persistidos localmente pela aplicação (e.g., `LLMProviderConfig.apiKey`), usar `safeStorage.encryptString()` e `safeStorage.decryptString()`. O acesso ao `safeStorage` deve ser encapsulado na camada de infraestrutura (e.g., no repositório que salva `LLMProviderConfig`).
+_ **Logging:** NUNCA logar valores de configuração sensíveis. \* **Justificativa:** Protege informações críticas contra exposição.
 
 **5. Hierarquia e Sobrescritas (Overrides):**
-    *   **Padrão (se aplicável):** Se a configuração puder vir de múltiplas fontes, definir uma ordem de precedência clara. Comum:
-        1.  Valores padrão codificados (hardcoded defaults, menos preferível para segredos).
-        2.  Valores de um arquivo de configuração base (e.g., `config.json`).
-        3.  Valores de um arquivo de configuração específico do ambiente (e.g., `config.production.json`).
-        4.  Variáveis de ambiente (geralmente têm a maior precedência).
-    *   Bibliotecas como `convict` ou lógicas customizadas podem gerenciar essa hierarquia. Para o Project Wiz, iniciar com variáveis de ambiente (via `.env`) e defaults em código para objetos de configuração injetados é um bom começo.
-    *   **Justificativa:** Flexibilidade para diferentes ambientes e configurações.
+_ **Padrão (se aplicável):** Se a configuração puder vir de múltiplas fontes, definir uma ordem de precedência clara. Comum: 1. Valores padrão codificados (hardcoded defaults, menos preferível para segredos). 2. Valores de um arquivo de configuração base (e.g., `config.json`). 3. Valores de um arquivo de configuração específico do ambiente (e.g., `config.production.json`). 4. Variáveis de ambiente (geralmente têm a maior precedência).
+_ Bibliotecas como `convict` ou lógicas customizadas podem gerenciar essa hierarquia. Para o Project Wiz, iniciar com variáveis de ambiente (via `.env`) e defaults em código para objetos de configuração injetados é um bom começo. \* **Justificativa:** Flexibilidade para diferentes ambientes e configurações.
 
 **6. Configuração para Diferentes Ambientes (`NODE_ENV`):**
-    *   **Padrão:** Utilizar a variável de ambiente `NODE_ENV` (com valores como `development`, `production`, `test`) para controlar comportamentos específicos do ambiente (e.g., nível de log, abertura de DevTools, carregamento de diferentes arquivos `.env`).
-    *   Vite (`import.meta.env.MODE`) também fornece o modo atual.
-    *   **Justificativa:** Padrão comum para diferenciar comportamento em diferentes estágios do ciclo de vida da aplicação.
+_ **Padrão:** Utilizar a variável de ambiente `NODE_ENV` (com valores como `development`, `production`, `test`) para controlar comportamentos específicos do ambiente (e.g., nível de log, abertura de DevTools, carregamento de diferentes arquivos `.env`).
+_ Vite (`import.meta.env.MODE`) também fornece o modo atual. \* **Justificativa:** Padrão comum para diferenciar comportamento em diferentes estágios do ciclo de vida da aplicação.
 
 **7. Atualização de Configurações (Runtime):**
-    *   **Configurações Persistidas pelo Usuário:** Alterações (e.g., em `LLMProviderConfig`) são tratadas como operações CRUD normais e devem ser refletidas na aplicação conforme a lógica de carregamento dessas configurações (e.g., recarregar ao usar, ou um sistema de cache/notificação).
-    *   **Variáveis de Ambiente / Arquivos de Configuração:** Geralmente requerem reinício da aplicação para que as mudanças tenham efeito, a menos que um mecanismo de hot-reloading de configuração seja implementado (geralmente complexo e não necessário inicialmente).
-    *   **Justificativa:** Clareza sobre como e quando as atualizações de configuração são aplicadas.
+_ **Configurações Persistidas pelo Usuário:** Alterações (e.g., em `LLMProviderConfig`) são tratadas como operações CRUD normais e devem ser refletidas na aplicação conforme a lógica de carregamento dessas configurações (e.g., recarregar ao usar, ou um sistema de cache/notificação).
+_ **Variáveis de Ambiente / Arquivos de Configuração:** Geralmente requerem reinício da aplicação para que as mudanças tenham efeito, a menos que um mecanismo de hot-reloading de configuração seja implementado (geralmente complexo e não necessário inicialmente). \* **Justificativa:** Clareza sobre como e quando as atualizações de configuração são aplicadas.
 
 **Consequências:**
-*   Gerenciamento de configuração centralizado, seguro e tipado.
-*   Redução de erros devido a configurações inválidas ou ausentes.
-*   Facilidade para configurar a aplicação para diferentes ambientes.
-*   Melhor testabilidade devido à injeção de objetos de configuração.
+
+- Gerenciamento de configuração centralizado, seguro e tipado.
+- Redução de erros devido a configurações inválidas ou ausentes.
+- Facilidade para configurar a aplicação para diferentes ambientes.
+- Melhor testabilidade devido à injeção de objetos de configuração.
 
 ---
+
 **Notas de Implementação para LLMs:**
-*   Ao adicionar uma nova configuração que varia por ambiente, use variáveis de ambiente. Para o frontend, prefixe com `VITE_`.
-*   Crie interfaces/classes tipadas para agrupar configurações relacionadas. Popule-as a partir de `process.env` ou `import.meta.env` na inicialização ou na configuração de DI. Injete esses objetos, não use `process.env` diretamente nos serviços/componentes.
-*   Use Zod para validar a estrutura e os tipos das suas configurações na inicialização.
-*   Para segredos fornecidos pelo usuário que precisam ser salvos, garanta que a camada de persistência use `electron.safeStorage`.
-*   NÃO inclua arquivos `.env` com segredos no versionamento. Use `.env.example`.
+
+- Ao adicionar uma nova configuração que varia por ambiente, use variáveis de ambiente. Para o frontend, prefixe com `VITE_`.
+- Crie interfaces/classes tipadas para agrupar configurações relacionadas. Popule-as a partir de `process.env` ou `import.meta.env` na inicialização ou na configuração de DI. Injete esses objetos, não use `process.env` diretamente nos serviços/componentes.
+- Use Zod para validar a estrutura e os tipos das suas configurações na inicialização.
+- Para segredos fornecidos pelo usuário que precisam ser salvos, garanta que a camada de persistência use `electron.safeStorage`.
+- NÃO inclua arquivos `.env` com segredos no versionamento. Use `.env.example`.

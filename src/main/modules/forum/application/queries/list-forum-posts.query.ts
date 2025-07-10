@@ -16,10 +16,14 @@ export class ListForumPostsQueryHandler {
 
   async handle(query: ListForumPostsQuery): Promise<ForumPost[]> {
     try {
-      return await this.forumPostRepository.findByTopicId(query.payload.topicId);
+      return await this.forumPostRepository.findByTopicId(
+        query.payload.topicId,
+      );
     } catch (error) {
       console.error(`Failed to list forum posts:`, error);
-      throw new Error(`Failed to list forum posts: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to list forum posts: ${(error as Error).message}`,
+      );
     }
   }
 }

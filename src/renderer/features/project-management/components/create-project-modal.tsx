@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
-import { Button } from '@/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/dialog';
-import { Input } from '@/ui/input';
-import { Label } from '@/ui/label';
+import React, { useState } from "react";
+import { Button } from "@/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/ui/dialog";
+import { Input } from "@/ui/input";
+import { Label } from "@/ui/label";
 
 interface CreateProjectModalProps {
   onProjectCreated?: () => void;
 }
 
 function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
-  const [projectName, setProjectName] = useState('');
+  const [projectName, setProjectName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,13 +28,15 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
     setError(null);
 
     try {
-      const result = await window.electronIPC.invoke('project:create', { name: projectName });
+      const result = await window.electronIPC.invoke("project:create", {
+        name: projectName,
+      });
       if (result.success) {
-        setProjectName('');
+        setProjectName("");
         setIsOpen(false);
         onProjectCreated?.();
       } else {
-        setError(result.error?.message || 'An unknown error occurred');
+        setError(result.error?.message || "An unknown error occurred");
       }
     } catch (err: unknown) {
       setError((err as Error).message);
@@ -56,7 +66,9 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
               <Input
                 id="projectName"
                 value={projectName}
-                onChange={(changeEvent) => setProjectName(changeEvent.target.value)}
+                onChange={(changeEvent) =>
+                  setProjectName(changeEvent.target.value)
+                }
                 className="col-span-3"
                 required
               />
@@ -64,11 +76,16 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
           </div>
           {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? "Creating..." : "Create Project"}
             </Button>
           </DialogFooter>
         </form>

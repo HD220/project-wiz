@@ -1,6 +1,5 @@
-
-import { ipcMain } from 'electron'
-import { CqrsDispatcher } from '@/main/kernel/cqrs-dispatcher'
+import { ipcMain } from "electron";
+import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import {
   ILlmConfig,
   IpcLlmConfigSavePayload,
@@ -11,15 +10,15 @@ import {
   IpcLlmConfigListResponse,
   IpcLlmConfigRemovePayload,
   IpcLlmConfigRemoveResponse,
-} from '@/shared/ipc-types/entities'
-import { SaveLlmConfigCommand } from './application/commands/save-llm-config.command'
-import { GetLlmConfigQuery } from './application/queries/get-llm-config.query'
-import { ListLlmConfigsQuery } from './application/queries/list-llm-configs.query'
-import { RemoveLlmConfigCommand } from './application/commands/remove-llm-config.command'
+} from "@/shared/ipc-types/entities";
+import { SaveLlmConfigCommand } from "./application/commands/save-llm-config.command";
+import { GetLlmConfigQuery } from "./application/queries/get-llm-config.query";
+import { ListLlmConfigsQuery } from "./application/queries/list-llm-configs.query";
+import { RemoveLlmConfigCommand } from "./application/commands/remove-llm-config.command";
 
 export function registerLlmIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    'llm-config:save',
+    "llm-config:save",
     async (
       _,
       payload: IpcLlmConfigSavePayload,
@@ -27,17 +26,18 @@ export function registerLlmIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const llmConfig = (await cqrsDispatcher.dispatchCommand(
           new SaveLlmConfigCommand(payload),
-        )) as ILlmConfig
-        return { success: true, data: llmConfig }
+        )) as ILlmConfig;
+        return { success: true, data: llmConfig };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'llm-config:get',
+    "llm-config:get",
     async (
       _,
       payload: IpcLlmConfigGetPayload,
@@ -45,17 +45,18 @@ export function registerLlmIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const llmConfig = (await cqrsDispatcher.dispatchQuery(
           new GetLlmConfigQuery(payload),
-        )) as ILlmConfig | undefined
-        return { success: true, data: llmConfig }
+        )) as ILlmConfig | undefined;
+        return { success: true, data: llmConfig };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'llm-config:list',
+    "llm-config:list",
     async (
       _,
       payload: IpcLlmConfigListPayload,
@@ -63,17 +64,18 @@ export function registerLlmIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const llmConfigs = (await cqrsDispatcher.dispatchQuery(
           new ListLlmConfigsQuery(payload),
-        )) as ILlmConfig[]
-        return { success: true, data: llmConfigs }
+        )) as ILlmConfig[];
+        return { success: true, data: llmConfigs };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'llm-config:remove',
+    "llm-config:remove",
     async (
       _,
       payload: IpcLlmConfigRemovePayload,
@@ -81,12 +83,13 @@ export function registerLlmIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       try {
         const result = (await cqrsDispatcher.dispatchCommand(
           new RemoveLlmConfigCommand(payload),
-        )) as boolean
-        return { success: true, data: result }
+        )) as boolean;
+        return { success: true, data: result };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 }

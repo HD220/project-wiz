@@ -17,42 +17,45 @@ Colors are defined using the `oklch()` color function for wider gamut and predic
 
 **Common Variables (defined in `:root` for light theme, overridden in `.dark` for dark theme):**
 
-*   `--background`: Overall page background.
-*   `--foreground`: Default text color.
-*   `--card`: Background color for card components.
-*   `--card-foreground`: Text color for card components.
-*   `--popover`: Background color for popovers.
-*   `--popover-foreground`: Text color for popovers.
-*   `--primary`: Primary accent color (e.g., for main buttons, active elements).
-*   `--primary-foreground`: Text color for elements with `--primary` background.
-*   `--secondary`: Secondary accent color (e.g., for less prominent buttons).
-*   `--secondary-foreground`: Text color for elements with `--secondary` background.
-*   `--muted`: Color for muted or less emphasized content.
-*   `--muted-foreground`: Text color for muted content.
-*   `--accent`: An accent color, often used for hover states or subtle highlights.
-*   `--accent-foreground`: Text color for elements with `--accent` background.
-*   `--destructive`: Color used for destructive actions (e.g., delete buttons, error states).
-    *   Note: In the dark theme, `--destructive` for buttons might use a different shade (`destructive/60`) than the ring/border for destructive inputs.
-*   `--border`: Default border color.
-*   `--input`: Background or border color for input elements.
-*   `--ring`: Color for focus rings and interactive element outlines.
+- `--background`: Overall page background.
+- `--foreground`: Default text color.
+- `--card`: Background color for card components.
+- `--card-foreground`: Text color for card components.
+- `--popover`: Background color for popovers.
+- `--popover-foreground`: Text color for popovers.
+- `--primary`: Primary accent color (e.g., for main buttons, active elements).
+- `--primary-foreground`: Text color for elements with `--primary` background.
+- `--secondary`: Secondary accent color (e.g., for less prominent buttons).
+- `--secondary-foreground`: Text color for elements with `--secondary` background.
+- `--muted`: Color for muted or less emphasized content.
+- `--muted-foreground`: Text color for muted content.
+- `--accent`: An accent color, often used for hover states or subtle highlights.
+- `--accent-foreground`: Text color for elements with `--accent` background.
+- `--destructive`: Color used for destructive actions (e.g., delete buttons, error states).
+  - Note: In the dark theme, `--destructive` for buttons might use a different shade (`destructive/60`) than the ring/border for destructive inputs.
+- `--border`: Default border color.
+- `--input`: Background or border color for input elements.
+- `--ring`: Color for focus rings and interactive element outlines.
 
 **Chart Colors:**
-*   `--chart-1` through `--chart-5`: A palette of distinct colors for use in charts and visualizations.
+
+- `--chart-1` through `--chart-5`: A palette of distinct colors for use in charts and visualizations.
 
 **Sidebar-Specific Colors:**
-*   `--sidebar`: Background for sidebars.
-*   `--sidebar-foreground`: Text color for sidebars.
-*   `--sidebar-primary`: Primary accent within sidebars.
-*   `--sidebar-primary-foreground`: Text color for sidebar primary elements.
-*   `--sidebar-accent`: Accent color within sidebars.
-*   `--sidebar-accent-foreground`: Text color for sidebar accent elements.
-*   `--sidebar-border`: Border color within sidebars.
-*   `--sidebar-ring`: Ring color for interactive elements within sidebars.
 
-*(The specific `oklch()` values for light and dark themes are detailed in `globals.css` and should be referenced for exact shades.)*
+- `--sidebar`: Background for sidebars.
+- `--sidebar-foreground`: Text color for sidebars.
+- `--sidebar-primary`: Primary accent within sidebars.
+- `--sidebar-primary-foreground`: Text color for sidebar primary elements.
+- `--sidebar-accent`: Accent color within sidebars.
+- `--sidebar-accent-foreground`: Text color for sidebar accent elements.
+- `--sidebar-border`: Border color within sidebars.
+- `--sidebar-ring`: Ring color for interactive elements within sidebars.
+
+_(The specific `oklch()` values for light and dark themes are detailed in `globals.css` and should be referenced for exact shades.)_
 
 ### 2.2. Theme Application
+
 The `@theme inline` block in `globals.css` maps these CSS variables for use with Tailwind utilities (e.g., `--color-background` becomes available for classes like `bg-background`).
 
 ## 3. Typography
@@ -75,18 +78,20 @@ The `@theme inline` block in `globals.css` maps these CSS variables for use with
 ## 6. Component Styles (Examples from ShadCN UI conventions)
 
 ### 6.1. Buttons (`button.tsx`)
+
 - **Base:** `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all`.
 - **Variants (`cva`):**
-    - `default`: `bg-primary text-primary-foreground shadow-xs hover:bg-primary/90`
-    - `destructive`: `bg-destructive text-white shadow-xs hover:bg-destructive/90` (dark: `dark:bg-destructive/60`)
-    - `outline`: `border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground` (dark: `dark:bg-input/30 dark:border-input dark:hover:bg-input/50`)
-    - `secondary`: `bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80`
-    - `ghost`: `hover:bg-accent hover:text-accent-foreground` (dark: `dark:hover:bg-accent/50`)
-    - `link`: `text-primary underline-offset-4 hover:underline`
+  - `default`: `bg-primary text-primary-foreground shadow-xs hover:bg-primary/90`
+  - `destructive`: `bg-destructive text-white shadow-xs hover:bg-destructive/90` (dark: `dark:bg-destructive/60`)
+  - `outline`: `border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground` (dark: `dark:bg-input/30 dark:border-input dark:hover:bg-input/50`)
+  - `secondary`: `bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80`
+  - `ghost`: `hover:bg-accent hover:text-accent-foreground` (dark: `dark:hover:bg-accent/50`)
+  - `link`: `text-primary underline-offset-4 hover:underline`
 - **Sizes:** `default` (h-9), `sm` (h-8), `lg` (h-10), `icon` (size-9).
 - **States:** Styles for `disabled`, `focus-visible`, and `aria-invalid` are defined using theme colors.
 
 ### 6.2. Cards (`card.tsx`)
+
 - **Base:** `bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm`.
 - **Header:** `grid items-start gap-1.5 px-6`.
 - **Title:** `leading-none font-semibold`.
@@ -95,6 +100,7 @@ The `@theme inline` block in `globals.css` maps these CSS variables for use with
 - **Footer:** `flex items-center px-6`.
 
 ### 6.3. Inputs (`input.tsx`)
+
 - **Base:** `file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none`.
 - **States:** Styles for `disabled`, `focus-visible`, and `aria-invalid` are defined using theme colors.
 
@@ -108,6 +114,7 @@ The `@theme inline` block in `globals.css` maps these CSS variables for use with
 - (Icon usage was not explicitly analyzed in this phase but is common in such UIs. SVG icons are often used, potentially embedded directly or via a library. The `buttonVariants` included styling for `svg` elements: `[&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0`.)
 
 ## 9. Animations
+
 - **Accordion:** `accordion-down` and `accordion-up` keyframes are defined for accordion components.
 - **General Transitions:** `transition-all` is used on buttons, and `transition-[color,box-shadow]` on inputs, indicating smooth transitions for property changes.
 

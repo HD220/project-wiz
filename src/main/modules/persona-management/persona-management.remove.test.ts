@@ -13,48 +13,73 @@ describe("Persona Management Module - Remove Persona", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let personaRepository: DrizzlePersonaRepository;
 
-  
-
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
     personaRepository = new DrizzlePersonaRepository();
 
-    const createPersonaCommandHandler = new CreatePersonaCommandHandler(personaRepository);
-    const listPersonasQueryHandler = new ListPersonasQueryHandler(personaRepository);
-    const removePersonaCommandHandler = new RemovePersonaCommandHandler(personaRepository);
+    const createPersonaCommandHandler = new CreatePersonaCommandHandler(
+      personaRepository,
+    );
+    const listPersonasQueryHandler = new ListPersonasQueryHandler(
+      personaRepository,
+    );
+    const removePersonaCommandHandler = new RemovePersonaCommandHandler(
+      personaRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("CreatePersonaCommand", createPersonaCommandHandler.handle.bind(createPersonaCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListPersonasQuery", listPersonasQueryHandler.handle.bind(listPersonasQueryHandler));
-    cqrsDispatcher.registerCommandHandler("RemovePersonaCommand", removePersonaCommandHandler.handle.bind(removePersonaCommandHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "CreatePersonaCommand",
+      createPersonaCommandHandler.handle.bind(createPersonaCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListPersonasQuery",
+      listPersonasQueryHandler.handle.bind(listPersonasQueryHandler),
+    );
+    cqrsDispatcher.registerCommandHandler(
+      "RemovePersonaCommand",
+      removePersonaCommandHandler.handle.bind(removePersonaCommandHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   it("should remove a persona", async () => {
-    const createdPersona = await cqrsDispatcher.dispatchCommand<CreatePersonaCommand, Persona>(new CreatePersonaCommand({
-      name: "Persona to Remove",
-      description: "",
-      llmModel: "gemini",
-      llmTemperature: 0.1,
-      tools: [],
-    }));
+    const createdPersona = await cqrsDispatcher.dispatchCommand<
+      CreatePersonaCommand,
+      Persona
+    >(
+      new CreatePersonaCommand({
+        name: "Persona to Remove",
+        description: "",
+        llmModel: "gemini",
+        llmTemperature: 0.1,
+        tools: [],
+      }),
+    );
     expect(createdPersona).toBeInstanceOf(Persona);
 
     const personaId = createdPersona.id;
     const removeCommand = new RemovePersonaCommand({ id: personaId });
-    const removeResult = await cqrsDispatcher.dispatchCommand<RemovePersonaCommand, boolean>(removeCommand);
+    const removeResult = await cqrsDispatcher.dispatchCommand<
+      RemovePersonaCommand,
+      boolean
+    >(removeCommand);
 
     expect(removeResult).toBe(true);
 
-    const listedPersonas = await cqrsDispatcher.dispatchQuery<ListPersonasQuery, Persona[]>(new ListPersonasQuery());
+    const listedPersonas = await cqrsDispatcher.dispatchQuery<
+      ListPersonasQuery,
+      Persona[]
+    >(new ListPersonasQuery());
     expect(listedPersonas.length).toBe(0);
   });
 
   it("should return false if persona to remove does not exist", async () => {
     const removeCommand = new RemovePersonaCommand({ id: "non-existent-id" });
-    const removeResult = await cqrsDispatcher.dispatchCommand<RemovePersonaCommand, boolean>(removeCommand);
+    const removeResult = await cqrsDispatcher.dispatchCommand<
+      RemovePersonaCommand,
+      boolean
+    >(removeCommand);
 
     expect(removeResult).toBe(false);
   });

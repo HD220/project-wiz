@@ -17,7 +17,7 @@ export default defineConfig({
       routesDirectory: path.resolve(projectRoot, "src/renderer/app"),
       generatedRouteTree: path.resolve(
         projectRoot,
-        "src/renderer/routeTree.gen.ts"
+        "src/renderer/routeTree.gen.ts",
       ),
     }),
     react({

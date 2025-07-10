@@ -13,16 +13,18 @@ Considera-se que esta utilidade poderia ser envolvida como uma `IAgentTool` (ex:
 A função `safeJSExecute` utilizaria o módulo `node:vm` do Node.js para criar um contexto de execução JavaScript isolado.
 
 **Componentes Chave Propostos para `safeJSExecute`:**
-*   `SafeJSExecuteOptions`: Permitiria configuração de `allowedGlobals`, `timeLimit`, `memoryLimit`, etc.
-*   `SafeJSExecuteError`: Classe de erro customizada.
-*   **Controle Global:** Whitelist/blacklist de globais, proxy para globais no contexto VM.
-*   **Limitação de Recursos:** Timeout, limite de memória, profundidade de chamada.
-*   **Sanitização de Entrada:** Tentativas de limpar código de entrada.
-*   **Fluxo de Execução:** Validar entrada, preparar contexto VM, compilar e executar script, tratar resultados/erros, limpar.
+
+- `SafeJSExecuteOptions`: Permitiria configuração de `allowedGlobals`, `timeLimit`, `memoryLimit`, etc.
+- `SafeJSExecuteError`: Classe de erro customizada.
+- **Controle Global:** Whitelist/blacklist de globais, proxy para globais no contexto VM.
+- **Limitação de Recursos:** Timeout, limite de memória, profundidade de chamada.
+- **Sanitização de Entrada:** Tentativas de limpar código de entrada.
+- **Fluxo de Execução:** Validar entrada, preparar contexto VM, compilar e executar script, tratar resultados/erros, limpar.
 
 **(O restante do conteúdo original sobre Key Components, Simplified Code Snippet, Key Features, Limitations, e Intended Use Case pode ser mantido, pois descreve bem a proposta técnica da utilidade em si, mas a linguagem que sugere sua implementação final como uma Tool deve ser lida com o contexto desta nota.)**
 
 **Simplified Code Snippet (Illustrative of Core VM Usage):**
+
 ```javascript
 // import vm from "node:vm";
 // // ... (setup of safeGlobals, options) ...
@@ -50,24 +52,25 @@ A função `safeJSExecute` utilizaria o módulo `node:vm` do Node.js para criar 
 
 ## 3. Key Features (Propostas)
 
-*   **Sandboxed Execution:** Usaria `node:vm`.
-*   **Controlled Global Access:** Apenas globais explicitamente permitidos.
-*   **Resource Constraints:** Limites de tempo, memória, profundidade de chamada.
-*   **Input Sanitization:** Tentativas básicas de limpar código.
-*   **Blacklisting:** Prevenção de keywords e propriedades perigosas.
+- **Sandboxed Execution:** Usaria `node:vm`.
+- **Controlled Global Access:** Apenas globais explicitamente permitidos.
+- **Resource Constraints:** Limites de tempo, memória, profundidade de chamada.
+- **Input Sanitization:** Tentativas básicas de limpar código.
+- **Blacklisting:** Prevenção de keywords e propriedades perigosas.
 
 ## 4. Limitations (Consideradas)
 
-*   **No `require()` or `import`:** Restringe a lógica JavaScript pura.
-*   **Sandbox Imperfection:** Segurança depende da robustez do `node:vm` e da configuração.
-*   **Performance Overhead:** Proxying, sanitização, e monitoramento adicionam overhead.
+- **No `require()` or `import`:** Restringe a lógica JavaScript pura.
+- **Sandbox Imperfection:** Segurança depende da robustez do `node:vm` e da configuração.
+- **Performance Overhead:** Proxying, sanitização, e monitoramento adicionam overhead.
 
 ## 5. Intended Use Case (Proposto)
 
 A utilidade `safeJSExecute`, se envolvida como uma `IAgentTool` como `javascript.executeSandboxedCode`, seria para cenários onde um Agente IA precisa:
-*   Avaliar expressões simples.
-*   Realizar transformações de dados em objetos/arrays.
-*   Executar pequenas funções utilitárias geradas por LLM.
-*   Rodar código onde acesso ao sistema de arquivos/rede não é desejado.
+
+- Avaliar expressões simples.
+- Realizar transformações de dados em objetos/arrays.
+- Executar pequenas funções utilitárias geradas por LLM.
+- Rodar código onde acesso ao sistema de arquivos/rede não é desejado.
 
 Não substituiria a execução de scripts Node.js completos (que usariam `FileSystemTool` e `TerminalTool`).

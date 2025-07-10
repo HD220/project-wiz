@@ -1,4 +1,8 @@
-import { CqrsDispatcher, ICommand, IQuery } from "@/main/kernel/cqrs-dispatcher";
+import {
+  CqrsDispatcher,
+  ICommand,
+  IQuery,
+} from "@/main/kernel/cqrs-dispatcher";
 import { EventBus } from "@/main/kernel/event-bus";
 
 describe("CQRS Dispatcher and Event Bus", () => {
@@ -11,29 +15,51 @@ describe("CQRS Dispatcher and Event Bus", () => {
   });
 
   it("should dispatch a command and return a successful result", async () => {
-    interface TestCommandPayload { value: string; }
+    interface TestCommandPayload {
+      value: string;
+    }
 
-    const command: ICommand<TestCommandPayload> = { type: "TestCommand", payload: { value: "test" } };
+    const command: ICommand<TestCommandPayload> = {
+      type: "TestCommand",
+      payload: { value: "test" },
+    };
 
-    cqrsDispatcher.registerCommandHandler("TestCommand", async (cmd: ICommand<TestCommandPayload>) => {
-      return `Processed: ${cmd.payload.value}`;
-    });
+    cqrsDispatcher.registerCommandHandler(
+      "TestCommand",
+      async (cmd: ICommand<TestCommandPayload>) => {
+        return `Processed: ${cmd.payload.value}`;
+      },
+    );
 
-    const result = await cqrsDispatcher.dispatchCommand<ICommand<TestCommandPayload>, string>(command);
+    const result = await cqrsDispatcher.dispatchCommand<
+      ICommand<TestCommandPayload>,
+      string
+    >(command);
 
     expect(result).toBe("Processed: test");
   });
 
   it("should dispatch a query and return a successful result", async () => {
-    interface TestQueryPayload { id: string; }
+    interface TestQueryPayload {
+      id: string;
+    }
 
-    const query: IQuery<TestQueryPayload> = { type: "TestQuery", payload: { id: "123" } };
+    const query: IQuery<TestQueryPayload> = {
+      type: "TestQuery",
+      payload: { id: "123" },
+    };
 
-    cqrsDispatcher.registerQueryHandler("TestQuery", async (q: IQuery<TestQueryPayload>) => {
-      return { data: `Fetched data for ${q.payload.id}` };
-    });
+    cqrsDispatcher.registerQueryHandler(
+      "TestQuery",
+      async (q: IQuery<TestQueryPayload>) => {
+        return { data: `Fetched data for ${q.payload.id}` };
+      },
+    );
 
-    const result = await cqrsDispatcher.dispatchQuery<IQuery<TestQueryPayload>, { data: string }>(query);
+    const result = await cqrsDispatcher.dispatchQuery<
+      IQuery<TestQueryPayload>,
+      { data: string }
+    >(query);
 
     expect(result.data).toBe("Fetched data for 123");
   });
@@ -69,16 +95,16 @@ describe("CQRS Dispatcher and Event Bus", () => {
   it("should throw an error for unregistered command handlers", async () => {
     const command: ICommand<unknown> = { type: "UnknownCommand", payload: {} };
 
-    await expect(cqrsDispatcher.dispatchCommand<ICommand<unknown>, unknown>(command)).rejects.toThrow(
-      "No handler registered for command type UnknownCommand"
-    );
+    await expect(
+      cqrsDispatcher.dispatchCommand<ICommand<unknown>, unknown>(command),
+    ).rejects.toThrow("No handler registered for command type UnknownCommand");
   });
 
   it("should throw an error for unregistered query handlers", async () => {
     const query: IQuery<unknown> = { type: "UnknownQuery", payload: {} };
 
-    await expect(cqrsDispatcher.dispatchQuery<IQuery<unknown>, unknown>(query)).rejects.toThrow(
-      "No handler registered for query type UnknownQuery"
-    );
+    await expect(
+      cqrsDispatcher.dispatchQuery<IQuery<unknown>, unknown>(query),
+    ).rejects.toThrow("No handler registered for query type UnknownQuery");
   });
 });

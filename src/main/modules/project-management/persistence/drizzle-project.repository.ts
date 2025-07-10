@@ -6,19 +6,20 @@ import { db } from "@/main/persistence/db";
 
 import { projects } from "./schema";
 
-
-
 export class DrizzleProjectRepository implements IProjectRepository {
   async save(project: Project): Promise<Project> {
     try {
-      await db.insert(projects).values({
-        id: project.id,
-        name: project.name,
-        createdAt: project.createdAt,
-      }).onConflictDoUpdate({
-        target: projects.id,
-        set: { name: project.name },
-      });
+      await db
+        .insert(projects)
+        .values({
+          id: project.id,
+          name: project.name,
+          createdAt: project.createdAt,
+        })
+        .onConflictDoUpdate({
+          target: projects.id,
+          set: { name: project.name },
+        });
       return project;
     } catch (error: unknown) {
       console.error("Failed to save project:", error);
@@ -28,7 +29,11 @@ export class DrizzleProjectRepository implements IProjectRepository {
 
   async findById(id: string): Promise<Project | undefined> {
     try {
-      const result = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+      const result = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, id))
+        .limit(1);
       if (result.length === 0) {
         return undefined;
       }
@@ -36,17 +41,21 @@ export class DrizzleProjectRepository implements IProjectRepository {
       return new Project(projectData, projectData.id);
     } catch (error: unknown) {
       console.error(`Failed to find project by ID ${id}:`, error);
-      throw new Error(`Failed to find project by ID: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to find project by ID: ${(error as Error).message}`,
+      );
     }
   }
 
   async findAll(): Promise<Project[]> {
     try {
       const results = await db.select().from(projects);
-      return results.map(data => new Project(data, data.id));
+      return results.map((data) => new Project(data, data.id));
     } catch (error: unknown) {
       console.error("Failed to find all projects:", error);
-      throw new Error(`Failed to find all projects: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to find all projects: ${(error as Error).message}`,
+      );
     }
   }
 

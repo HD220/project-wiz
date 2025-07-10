@@ -17,7 +17,10 @@ export class ListMessagesQueryHandler {
 
   async handle(query: ListMessagesQuery): Promise<DirectMessage[]> {
     try {
-      return await this.messageRepository.findByConversation(query.payload.senderId, query.payload.receiverId);
+      return await this.messageRepository.findByConversation(
+        query.payload.senderId,
+        query.payload.receiverId,
+      );
     } catch (error) {
       console.error("Failed to list messages:", error);
       throw new Error(`Failed to list messages: ${(error as Error).message}`);

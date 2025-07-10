@@ -9,30 +9,36 @@ export interface IQuery<T = unknown> {
 }
 
 export type CommandHandler<TCommand extends ICommand, TResult> = (
-  command: TCommand
+  command: TCommand,
 ) => Promise<TResult>;
 
 export type QueryHandler<TQuery extends IQuery, TResult> = (
-  query: TQuery
+  query: TQuery,
 ) => Promise<TResult>;
 
 export class CqrsDispatcher {
-  private commandHandlers = new Map<string, CommandHandler<ICommand, unknown>>();
+  private commandHandlers = new Map<
+    string,
+    CommandHandler<ICommand, unknown>
+  >();
   private queryHandlers = new Map<string, QueryHandler<IQuery, unknown>>();
 
   registerCommandHandler<TCommand extends ICommand, TResult>(
     commandType: string,
-    handler: CommandHandler<TCommand, TResult>
+    handler: CommandHandler<TCommand, TResult>,
   ) {
     if (this.commandHandlers.has(commandType)) {
       throw new Error(`Command handler for ${commandType} already registered.`);
     }
-    this.commandHandlers.set(commandType, handler as CommandHandler<ICommand, unknown>);
+    this.commandHandlers.set(
+      commandType,
+      handler as CommandHandler<ICommand, unknown>,
+    );
   }
 
   registerQueryHandler<TQuery extends IQuery, TResult>(
     queryType: string,
-    handler: QueryHandler<TQuery, TResult>
+    handler: QueryHandler<TQuery, TResult>,
   ) {
     if (this.queryHandlers.has(queryType)) {
       throw new Error(`Query handler for ${queryType} already registered.`);
@@ -41,7 +47,7 @@ export class CqrsDispatcher {
   }
 
   async dispatchCommand<TCommand extends ICommand, TResult>(
-    command: TCommand
+    command: TCommand,
   ): Promise<TResult> {
     const handler = this.commandHandlers.get(command.type);
     if (!handler) {
@@ -58,7 +64,7 @@ export class CqrsDispatcher {
   }
 
   async dispatchQuery<TQuery extends IQuery, TResult>(
-    query: TQuery
+    query: TQuery,
   ): Promise<TResult> {
     const handler = this.queryHandlers.get(query.type);
     if (!handler) {

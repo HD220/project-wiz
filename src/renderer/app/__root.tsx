@@ -1,9 +1,4 @@
-import {
-  createRootRoute,
-  Link,
-  Outlet,
-  
-} from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import React from "react";
 
 // Exemplo de como um componente de layout poderia ser usado, se existir:

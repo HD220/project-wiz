@@ -17,7 +17,9 @@ export class ListLlmConfigsQueryHandler {
       return await this.llmConfigRepository.findAll();
     } catch (error) {
       console.error(`Failed to list LLM configs:`, error);
-      throw new Error(`Failed to list LLM configs: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to list LLM configs: ${(error as Error).message}`,
+      );
     }
   }
 }

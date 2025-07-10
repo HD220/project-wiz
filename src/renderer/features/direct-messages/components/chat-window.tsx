@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 
-import { IDirectMessage } from '@/shared/ipc-types/entities';
-
-
+import { IDirectMessage } from "@/shared/ipc-types/entities";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -10,21 +8,24 @@ interface ChatWindowProps {
 
 function ChatWindow({ conversationId }: ChatWindowProps) {
   const [messages, setMessages] = useState<IDirectMessage[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [senderId, receiverId] = conversationId.split('-');
+  const [senderId, receiverId] = conversationId.split("-");
 
   const fetchMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await window.electronIPC.invoke('direct-messages:list', { senderId, receiverId });
+      const result = await window.electronIPC.invoke("direct-messages:list", {
+        senderId,
+        receiverId,
+      });
       if (result.success) {
         setMessages(result.data || []);
       } else {
-        setError(result.error?.message || 'An unknown error occurred');
+        setError(result.error?.message || "An unknown error occurred");
       }
     } catch (err: unknown) {
       setError((err as Error).message);
@@ -40,16 +41,18 @@ function ChatWindow({ conversationId }: ChatWindowProps) {
     }
 
     try {
-      const result = await window.electronIPC.invoke('direct-messages:send', {
+      const result = await window.electronIPC.invoke("direct-messages:send", {
         senderId,
         receiverId,
         content: newMessage,
       });
       if (result.success) {
-        setNewMessage('');
+        setNewMessage("");
         fetchMessages();
       } else {
-        alert(`Error sending message: ${result.error?.message || 'An unknown error occurred'}`);
+        alert(
+          `Error sending message: ${result.error?.message || "An unknown error occurred"}`,
+        );
       }
     } catch (err: unknown) {
       alert(`Error sending message: ${(err as Error).message}`);
@@ -67,8 +70,12 @@ function ChatWindow({ conversationId }: ChatWindowProps) {
     <div className="flex flex-col h-full p-4">
       <div className="flex-1 overflow-y-auto mb-4 border rounded p-2">
         {messages.map((msg) => (
-          <div key={msg.id} className={`mb-2 ${msg.senderId === senderId ? 'text-right' : 'text-left'}`}>
-            <span className="font-bold">{msg.senderId}: </span>{msg.content}
+          <div
+            key={msg.id}
+            className={`mb-2 ${msg.senderId === senderId ? "text-right" : "text-left"}`}
+          >
+            <span className="font-bold">{msg.senderId}: </span>
+            {msg.content}
           </div>
         ))}
       </div>

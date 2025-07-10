@@ -11,22 +11,28 @@ describe("Persona Management Module - Create Persona", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let personaRepository: DrizzlePersonaRepository;
 
-  
-
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
     personaRepository = new DrizzlePersonaRepository();
 
-    const createPersonaCommandHandler = new CreatePersonaCommandHandler(personaRepository);
-    const listPersonasQueryHandler = new ListPersonasQueryHandler(personaRepository);
+    const createPersonaCommandHandler = new CreatePersonaCommandHandler(
+      personaRepository,
+    );
+    const listPersonasQueryHandler = new ListPersonasQueryHandler(
+      personaRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("CreatePersonaCommand", createPersonaCommandHandler.handle.bind(createPersonaCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListPersonasQuery", listPersonasQueryHandler.handle.bind(listPersonasQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "CreatePersonaCommand",
+      createPersonaCommandHandler.handle.bind(createPersonaCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListPersonasQuery",
+      listPersonasQueryHandler.handle.bind(listPersonasQueryHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   it("should create a new persona", async () => {
     const command = new CreatePersonaCommand({
@@ -36,12 +42,18 @@ describe("Persona Management Module - Create Persona", () => {
       llmTemperature: 0.7,
       tools: ["tool1", "tool2"],
     });
-    const createdPersona = await cqrsDispatcher.dispatchCommand<CreatePersonaCommand, Persona>(command);
+    const createdPersona = await cqrsDispatcher.dispatchCommand<
+      CreatePersonaCommand,
+      Persona
+    >(command);
 
     expect(createdPersona).toBeInstanceOf(Persona);
     expect(createdPersona.name).toBe("Test Persona");
 
-    const listedPersonas = await cqrsDispatcher.dispatchQuery<ListPersonasQuery, Persona[]>(new ListPersonasQuery());
+    const listedPersonas = await cqrsDispatcher.dispatchQuery<
+      ListPersonasQuery,
+      Persona[]
+    >(new ListPersonasQuery());
     expect(listedPersonas.length).toBe(1);
     expect(listedPersonas[0].name).toBe("Test Persona");
   });

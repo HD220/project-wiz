@@ -7,7 +7,9 @@ export interface UpdateForumPostCommandPayload {
   content: string;
 }
 
-export class UpdateForumPostCommand implements ICommand<UpdateForumPostCommandPayload> {
+export class UpdateForumPostCommand
+  implements ICommand<UpdateForumPostCommandPayload>
+{
   readonly type = "UpdateForumPostCommand";
   constructor(public payload: UpdateForumPostCommandPayload) {}
 }
@@ -17,17 +19,20 @@ export class UpdateForumPostCommandHandler {
 
   async handle(command: UpdateForumPostCommand): Promise<ForumPost> {
     try {
-      const existingPost = await this.forumPostRepository.findById(command.payload.id);
+      const existingPost = await this.forumPostRepository.findById(
+        command.payload.id,
+      );
 
       if (existingPost) {
         existingPost.updateContent(command.payload.content);
         return await this.forumPostRepository.save(existingPost);
-      } 
-        throw new Error(`Forum post with ID ${command.payload.id} not found.`);
-      
+      }
+      throw new Error(`Forum post with ID ${command.payload.id} not found.`);
     } catch (error) {
       console.error(`Failed to update forum post:`, error);
-      throw new Error(`Failed to update forum post: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to update forum post: ${(error as Error).message}`,
+      );
     }
   }
 }

@@ -10,7 +10,9 @@ export interface AnalyzeProjectStackQueryPayload {
   projectPath: string;
 }
 
-export class AnalyzeProjectStackQuery implements IQuery<AnalyzeProjectStackQueryPayload> {
+export class AnalyzeProjectStackQuery
+  implements IQuery<AnalyzeProjectStackQueryPayload>
+{
   readonly type = "AnalyzeProjectStackQuery";
   constructor(public payload: AnalyzeProjectStackQueryPayload) {}
 }
@@ -41,8 +43,13 @@ export class AnalyzeProjectStackQueryHandler {
 
       return stack;
     } catch (error) {
-      console.error(`Failed to analyze project stack for path ${projectPath}:`, error);
-      throw new Error(`Failed to analyze project stack: ${(error as Error).message}`);
+      console.error(
+        `Failed to analyze project stack for path ${projectPath}:`,
+        error,
+      );
+      throw new Error(
+        `Failed to analyze project stack: ${(error as Error).message}`,
+      );
     }
   }
 }

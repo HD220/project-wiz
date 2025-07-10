@@ -1,6 +1,6 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { IGitService } from './domain/git.service.interface';
+import { exec } from "child_process";
+import { promisify } from "util";
+import { IGitService } from "./domain/git.service.interface";
 
 const execPromise = promisify(exec);
 
@@ -13,7 +13,9 @@ export class GitService implements IGitService {
 
   private async executeGitCommand(command: string): Promise<string> {
     try {
-      const { stdout, stderr } = await execPromise(command, { cwd: this.baseDir });
+      const { stdout, stderr } = await execPromise(command, {
+        cwd: this.baseDir,
+      });
       if (stderr) {
         console.warn(`Git command stderr: ${stderr}`);
       }

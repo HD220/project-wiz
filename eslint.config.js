@@ -241,13 +241,15 @@ const importAndBoundaryRules = {
           from: ["renderer"],
           allow: ["shared"],
           disallow: ["main"],
-          message: "RENDERER: Proibido importar de ${dependency.type}. A comunicação deve ser via IPC.",
+          message:
+            "RENDERER: Proibido importar de ${dependency.type}. A comunicação deve ser via IPC.",
         },
         {
           from: ["main"],
           allow: ["shared"],
           disallow: ["renderer"],
-          message: "MAIN: Proibido importar de ${dependency.type}. A comunicação deve ser via IPC.",
+          message:
+            "MAIN: Proibido importar de ${dependency.type}. A comunicação deve ser via IPC.",
         },
       ],
     },
@@ -330,11 +332,22 @@ export default [
       ...typeScriptSpecificRules,
       ...reactSpecificRules,
       "no-inline-comments": "off", // Allow inline comments globally
-      
-      
-      "max-lines": ["warn", { max: 500, skipBlankLines: true, skipComments: true }], // Relaxed
-      "max-lines-per-function": ["warn", { max: 200, skipBlankLines: true, skipComments: true }], // Relaxed
-      "id-length": ["warn", { min: 1, exceptions: ["_", "a", "b", "e", "i", "x", "y", "z", "t", "q", "v"] }], // Relaxed
+
+      "max-lines": [
+        "warn",
+        { max: 500, skipBlankLines: true, skipComments: true },
+      ], // Relaxed
+      "max-lines-per-function": [
+        "warn",
+        { max: 200, skipBlankLines: true, skipComments: true },
+      ], // Relaxed
+      "id-length": [
+        "warn",
+        {
+          min: 1,
+          exceptions: ["_", "a", "b", "e", "i", "x", "y", "z", "t", "q", "v"],
+        },
+      ], // Relaxed
       ...codeStyleAndQualityRules,
       ...testingSpecificRules,
     },
@@ -360,7 +373,7 @@ export default [
         { type: "ui-lib", pattern: "src/renderer/lib" },
         {
           type: "ui-hooks",
-          pattern: "src/renderer/hooks"
+          pattern: "src/renderer/hooks",
         },
         { type: "main", pattern: "src/main" },
         { type: "renderer", pattern: "src/renderer" },

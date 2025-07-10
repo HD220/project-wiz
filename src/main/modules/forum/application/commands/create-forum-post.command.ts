@@ -8,7 +8,9 @@ export interface CreateForumPostCommandPayload {
   content: string;
 }
 
-export class CreateForumPostCommand implements ICommand<CreateForumPostCommandPayload> {
+export class CreateForumPostCommand
+  implements ICommand<CreateForumPostCommandPayload>
+{
   readonly type = "CreateForumPostCommand";
   constructor(public payload: CreateForumPostCommandPayload) {}
 }
@@ -28,7 +30,9 @@ export class CreateForumPostCommandHandler {
       return await this.forumPostRepository.save(post);
     } catch (error) {
       console.error(`Failed to create forum post:`, error);
-      throw new Error(`Failed to create forum post: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to create forum post: ${(error as Error).message}`,
+      );
     }
   }
 }

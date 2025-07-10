@@ -11,45 +11,73 @@ describe("LLM Config Get Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  
-
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
     llmConfigRepository = new DrizzleLlmConfigRepository();
 
-    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(llmConfigRepository);
-    const getLlmConfigQueryHandler = new GetLlmConfigQueryHandler(llmConfigRepository);
+    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(
+      llmConfigRepository,
+    );
+    const getLlmConfigQueryHandler = new GetLlmConfigQueryHandler(
+      llmConfigRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("SaveLlmConfigCommand", saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler));
-    cqrsDispatcher.registerQueryHandler("GetLlmConfigQuery", getLlmConfigQueryHandler.handle.bind(getLlmConfigQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "SaveLlmConfigCommand",
+      saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "GetLlmConfigQuery",
+      getLlmConfigQueryHandler.handle.bind(getLlmConfigQueryHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   it("should get LLM config by ID", async () => {
     const createCommand = new SaveLlmConfigCommand({
-      provider: "by-id", model: "model-id", apiKey: "id-key", temperature: 0.3, maxTokens: 300
+      provider: "by-id",
+      model: "model-id",
+      apiKey: "id-key",
+      temperature: 0.3,
+      maxTokens: 300,
     });
-    const createdConfig = await cqrsDispatcher.dispatchCommand<SaveLlmConfigCommand, LlmConfig>(createCommand);
+    const createdConfig = await cqrsDispatcher.dispatchCommand<
+      SaveLlmConfigCommand,
+      LlmConfig
+    >(createCommand);
     expect(createdConfig).toBeInstanceOf(LlmConfig);
 
     const configId = createdConfig.id;
     const getQuery = new GetLlmConfigQuery({ id: configId });
-    const retrievedConfig = await cqrsDispatcher.dispatchQuery<GetLlmConfigQuery, LlmConfig>(getQuery);
+    const retrievedConfig = await cqrsDispatcher.dispatchQuery<
+      GetLlmConfigQuery,
+      LlmConfig
+    >(getQuery);
 
     expect(retrievedConfig.id).toBe(configId);
     expect(retrievedConfig.model).toBe("model-id");
   });
 
   it("should get LLM config by provider and model", async () => {
-    await cqrsDispatcher.dispatchCommand(new SaveLlmConfigCommand({
-      provider: "by-provider-model", model: "specific-model", apiKey: "pm-key", temperature: 0.6, maxTokens: 600
-    }));
+    await cqrsDispatcher.dispatchCommand(
+      new SaveLlmConfigCommand({
+        provider: "by-provider-model",
+        model: "specific-model",
+        apiKey: "pm-key",
+        temperature: 0.6,
+        maxTokens: 600,
+      }),
+    );
 
-    const getQuery = new GetLlmConfigQuery({ provider: "by-provider-model", model: "specific-model" });
-    const retrievedConfig = await cqrsDispatcher.dispatchQuery<GetLlmConfigQuery, LlmConfig>(getQuery);
+    const getQuery = new GetLlmConfigQuery({
+      provider: "by-provider-model",
+      model: "specific-model",
+    });
+    const retrievedConfig = await cqrsDispatcher.dispatchQuery<
+      GetLlmConfigQuery,
+      LlmConfig
+    >(getQuery);
 
     expect(retrievedConfig.provider).toBe("by-provider-model");
     expect(retrievedConfig.model).toBe("specific-model");
@@ -57,14 +85,23 @@ describe("LLM Config Get Operations", () => {
 
   it("should return undefined if LLM config not found by ID", async () => {
     const getQuery = new GetLlmConfigQuery({ id: "non-existent-id" });
-    const retrievedConfig = await cqrsDispatcher.dispatchQuery<GetLlmConfigQuery, LlmConfig | undefined>(getQuery);
+    const retrievedConfig = await cqrsDispatcher.dispatchQuery<
+      GetLlmConfigQuery,
+      LlmConfig | undefined
+    >(getQuery);
 
     expect(retrievedConfig).toBeUndefined();
   });
 
   it("should return undefined if LLM config not found by provider and model", async () => {
-    const getQuery = new GetLlmConfigQuery({ provider: "non-existent", model: "non-existent" });
-    const retrievedConfig = await cqrsDispatcher.dispatchQuery<GetLlmConfigQuery, LlmConfig | undefined>(getQuery);
+    const getQuery = new GetLlmConfigQuery({
+      provider: "non-existent",
+      model: "non-existent",
+    });
+    const retrievedConfig = await cqrsDispatcher.dispatchQuery<
+      GetLlmConfigQuery,
+      LlmConfig | undefined
+    >(getQuery);
 
     expect(retrievedConfig).toBeUndefined();
   });
@@ -72,7 +109,7 @@ describe("LLM Config Get Operations", () => {
   it("should throw error if neither id nor provider/model are provided", async () => {
     const getQuery = new GetLlmConfigQuery({});
     await expect(cqrsDispatcher.dispatchQuery(getQuery)).rejects.toThrow(
-      "Either id or provider and model must be provided."
+      "Either id or provider and model must be provided.",
     );
   });
 });

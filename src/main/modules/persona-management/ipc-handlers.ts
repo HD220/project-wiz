@@ -1,6 +1,5 @@
-
-import { ipcMain } from 'electron'
-import { CqrsDispatcher } from '@/main/kernel/cqrs-dispatcher'
+import { ipcMain } from "electron";
+import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import {
   IPersona,
   IpcPersonaRefineSuggestionPayload,
@@ -11,15 +10,17 @@ import {
   IpcPersonaListResponse,
   IpcPersonaRemovePayload,
   IpcPersonaRemoveResponse,
-} from '@/shared/ipc-types/entities'
-import { RefinePersonaSuggestionCommand } from './application/commands/refine-persona-suggestion.command'
-import { CreatePersonaCommand } from './application/commands/create-persona.command'
-import { ListPersonasQuery } from './application/queries/list-personas.query'
-import { RemovePersonaCommand } from './application/commands/remove-persona.command'
+} from "@/shared/ipc-types/entities";
+import { RefinePersonaSuggestionCommand } from "./application/commands/refine-persona-suggestion.command";
+import { CreatePersonaCommand } from "./application/commands/create-persona.command";
+import { ListPersonasQuery } from "./application/queries/list-personas.query";
+import { RemovePersonaCommand } from "./application/commands/remove-persona.command";
 
-export function registerPersonaManagementHandlers(cqrsDispatcher: CqrsDispatcher) {
+export function registerPersonaManagementHandlers(
+  cqrsDispatcher: CqrsDispatcher,
+) {
   ipcMain.handle(
-    'persona:refine-suggestion',
+    "persona:refine-suggestion",
     async (
       _,
       payload: IpcPersonaRefineSuggestionPayload,
@@ -27,17 +28,18 @@ export function registerPersonaManagementHandlers(cqrsDispatcher: CqrsDispatcher
       try {
         const result = (await cqrsDispatcher.dispatchCommand(
           new RefinePersonaSuggestionCommand(payload),
-        )) as IPersona
-        return { success: true, data: result }
+        )) as IPersona;
+        return { success: true, data: result };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'persona:create',
+    "persona:create",
     async (
       _,
       payload: IpcPersonaCreatePayload,
@@ -45,17 +47,18 @@ export function registerPersonaManagementHandlers(cqrsDispatcher: CqrsDispatcher
       try {
         const persona = (await cqrsDispatcher.dispatchCommand(
           new CreatePersonaCommand(payload),
-        )) as IPersona
-        return { success: true, data: persona }
+        )) as IPersona;
+        return { success: true, data: persona };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'persona:list',
+    "persona:list",
     async (
       _,
       payload: IpcPersonaListPayload,
@@ -63,17 +66,18 @@ export function registerPersonaManagementHandlers(cqrsDispatcher: CqrsDispatcher
       try {
         const personas = (await cqrsDispatcher.dispatchQuery(
           new ListPersonasQuery(payload),
-        )) as IPersona[]
-        return { success: true, data: personas }
+        )) as IPersona[];
+        return { success: true, data: personas };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 
   ipcMain.handle(
-    'persona:remove',
+    "persona:remove",
     async (
       _,
       payload: IpcPersonaRemovePayload,
@@ -81,12 +85,13 @@ export function registerPersonaManagementHandlers(cqrsDispatcher: CqrsDispatcher
       try {
         const result = (await cqrsDispatcher.dispatchCommand(
           new RemovePersonaCommand(payload),
-        )) as boolean
-        return { success: true, data: result }
+        )) as boolean;
+        return { success: true, data: result };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred'
-        return { success: false, error: { message } }
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
       }
     },
-  )
+  );
 }

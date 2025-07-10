@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import { ChatWindow } from './components/chat-window';
-import { ConversationList } from './components/conversation-list';
+import { ChatWindow } from "./components/chat-window";
+import { ConversationList } from "./components/conversation-list";
 
 function DirectMessagesFeature() {
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(null);
 
   return (
     <div className="flex h-full">

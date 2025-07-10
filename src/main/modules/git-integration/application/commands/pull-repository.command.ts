@@ -1,9 +1,8 @@
-import { ICommand } from '@/main/kernel/cqrs-dispatcher';
-import { GitService } from '@/main/modules/git-integration/git.service';
-
+import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { GitService } from "@/main/modules/git-integration/git.service";
 
 export class PullRepositoryCommand implements ICommand<undefined> {
-  readonly type = 'PullRepositoryCommand';
+  readonly type = "PullRepositoryCommand";
 
   constructor() {}
 

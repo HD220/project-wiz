@@ -26,19 +26,24 @@ export class AgentProcess {
   private async runLoop(): Promise<void> {
     while (this.running) {
       try {
-        const persona: Persona | undefined = await this.cqrsDispatcher.dispatchQuery(
-          new GetPersonaQuery({ id: this.personaId })
-        );
+        const persona: Persona | undefined =
+          await this.cqrsDispatcher.dispatchQuery(
+            new GetPersonaQuery({ id: this.personaId }),
+          );
 
         if (persona) {
           console.log(`Agent ${persona.name} is processing jobs...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         } else {
-          console.error(`Failed to load persona ${this.personaId}: Persona not found.`);
+          console.error(
+            `Failed to load persona ${this.personaId}: Persona not found.`,
+          );
           this.stop();
         }
       } catch (error) {
-        console.error(`Failed to load persona ${this.personaId}: ${(error as Error).message}`);
+        console.error(
+          `Failed to load persona ${this.personaId}: ${(error as Error).message}`,
+        );
         this.stop();
       }
     }

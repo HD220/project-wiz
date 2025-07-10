@@ -11,40 +11,53 @@ describe("Persona Management Module - List Personas", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let personaRepository: DrizzlePersonaRepository;
 
-  
-
   beforeAll(() => {
     cqrsDispatcher = new CqrsDispatcher();
     personaRepository = new DrizzlePersonaRepository();
 
-    const createPersonaCommandHandler = new CreatePersonaCommandHandler(personaRepository);
-    const listPersonasQueryHandler = new ListPersonasQueryHandler(personaRepository);
+    const createPersonaCommandHandler = new CreatePersonaCommandHandler(
+      personaRepository,
+    );
+    const listPersonasQueryHandler = new ListPersonasQueryHandler(
+      personaRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("CreatePersonaCommand", createPersonaCommandHandler.handle.bind(createPersonaCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListPersonasQuery", listPersonasQueryHandler.handle.bind(listPersonasQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "CreatePersonaCommand",
+      createPersonaCommandHandler.handle.bind(createPersonaCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListPersonasQuery",
+      listPersonasQueryHandler.handle.bind(listPersonasQueryHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   it("should list all personas", async () => {
-    await cqrsDispatcher.dispatchCommand(new CreatePersonaCommand({
-      name: "Persona 1",
-      description: "Desc 1",
-      llmModel: "gpt-3.5",
-      llmTemperature: 0.5,
-      tools: [],
-    }));
-    await cqrsDispatcher.dispatchCommand(new CreatePersonaCommand({
-      name: "Persona 2",
-      description: "Desc 2",
-      llmModel: "claude-3",
-      llmTemperature: 0.9,
-      tools: ["toolA"],
-    }));
+    await cqrsDispatcher.dispatchCommand(
+      new CreatePersonaCommand({
+        name: "Persona 1",
+        description: "Desc 1",
+        llmModel: "gpt-3.5",
+        llmTemperature: 0.5,
+        tools: [],
+      }),
+    );
+    await cqrsDispatcher.dispatchCommand(
+      new CreatePersonaCommand({
+        name: "Persona 2",
+        description: "Desc 2",
+        llmModel: "claude-3",
+        llmTemperature: 0.9,
+        tools: ["toolA"],
+      }),
+    );
 
-    const listedPersonas = await cqrsDispatcher.dispatchQuery<ListPersonasQuery, Persona[]>(new ListPersonasQuery());
+    const listedPersonas = await cqrsDispatcher.dispatchQuery<
+      ListPersonasQuery,
+      Persona[]
+    >(new ListPersonasQuery());
 
     expect(listedPersonas.length).toBe(2);
     expect(listedPersonas[0].name).toBe("Persona 1");

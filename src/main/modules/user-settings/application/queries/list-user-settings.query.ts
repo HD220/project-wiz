@@ -6,7 +6,9 @@ export interface ListUserSettingsQueryPayload {
   userId: string;
 }
 
-export class ListUserSettingsQuery implements IQuery<ListUserSettingsQueryPayload> {
+export class ListUserSettingsQuery
+  implements IQuery<ListUserSettingsQueryPayload>
+{
   readonly type = "ListUserSettingsQuery";
   constructor(public payload: ListUserSettingsQueryPayload) {}
 }
@@ -16,10 +18,14 @@ export class ListUserSettingsQueryHandler {
 
   async handle(query: ListUserSettingsQuery): Promise<UserSetting[]> {
     try {
-      return await this.userSettingsRepository.findByUserId(query.payload.userId);
+      return await this.userSettingsRepository.findByUserId(
+        query.payload.userId,
+      );
     } catch (error) {
       console.error(`Failed to list user settings:`, error);
-      throw new Error(`Failed to list user settings: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to list user settings: ${(error as Error).message}`,
+      );
     }
   }
 }

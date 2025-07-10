@@ -11,22 +11,28 @@ describe("LLM Config Save Operations", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let llmConfigRepository: DrizzleLlmConfigRepository;
 
-  
-
   beforeEach(() => {
     cqrsDispatcher = new CqrsDispatcher();
     llmConfigRepository = new DrizzleLlmConfigRepository();
 
-    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(llmConfigRepository);
-    const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(llmConfigRepository);
+    const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(
+      llmConfigRepository,
+    );
+    const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(
+      llmConfigRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("SaveLlmConfigCommand", saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListLlmConfigsQuery", listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "SaveLlmConfigCommand",
+      saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListLlmConfigsQuery",
+      listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler),
+    );
   });
 
-  beforeEach(async () => {
-    
-  });
+  beforeEach(async () => {});
 
   it("should save a new LLM config", async () => {
     const command = new SaveLlmConfigCommand({
@@ -36,12 +42,18 @@ describe("LLM Config Save Operations", () => {
       temperature: 0.7,
       maxTokens: 1000,
     });
-    const savedConfig = await cqrsDispatcher.dispatchCommand<SaveLlmConfigCommand, LlmConfig>(command);
+    const savedConfig = await cqrsDispatcher.dispatchCommand<
+      SaveLlmConfigCommand,
+      LlmConfig
+    >(command);
 
     expect(savedConfig).toBeInstanceOf(LlmConfig);
     expect(savedConfig.provider).toBe("openai");
 
-    const listedConfigs = await cqrsDispatcher.dispatchQuery<ListLlmConfigsQuery, LlmConfig[]>(new ListLlmConfigsQuery());
+    const listedConfigs = await cqrsDispatcher.dispatchQuery<
+      ListLlmConfigsQuery,
+      LlmConfig[]
+    >(new ListLlmConfigsQuery());
     expect(listedConfigs.length).toBe(1);
     expect(listedConfigs[0].model).toBe("gpt-3.5-turbo");
   });

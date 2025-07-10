@@ -11,7 +11,9 @@ export interface SaveLlmConfigCommandPayload {
   maxTokens: number;
 }
 
-export class SaveLlmConfigCommand implements ICommand<SaveLlmConfigCommandPayload> {
+export class SaveLlmConfigCommand
+  implements ICommand<SaveLlmConfigCommandPayload>
+{
   readonly type = "SaveLlmConfigCommand";
   constructor(public payload: SaveLlmConfigCommandPayload) {}
 }
@@ -24,7 +26,9 @@ export class SaveLlmConfigCommandHandler {
 
     try {
       if (command.payload.id) {
-        const existingConfig = await this.llmConfigRepository.findById(command.payload.id);
+        const existingConfig = await this.llmConfigRepository.findById(
+          command.payload.id,
+        );
         if (existingConfig) {
           llmConfig = existingConfig;
           llmConfig.updateConfig({
@@ -36,13 +40,16 @@ export class SaveLlmConfigCommandHandler {
           });
         } else {
           // If ID is provided but not found, create a new one with that ID
-          llmConfig = new LlmConfig({
-            provider: command.payload.provider,
-            model: command.payload.model,
-            apiKey: command.payload.apiKey,
-            temperature: command.payload.temperature,
-            maxTokens: command.payload.maxTokens,
-          }, command.payload.id);
+          llmConfig = new LlmConfig(
+            {
+              provider: command.payload.provider,
+              model: command.payload.model,
+              apiKey: command.payload.apiKey,
+              temperature: command.payload.temperature,
+              maxTokens: command.payload.maxTokens,
+            },
+            command.payload.id,
+          );
         }
       } else {
         llmConfig = new LlmConfig({

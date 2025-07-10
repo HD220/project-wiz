@@ -16,13 +16,28 @@ describe("Project Management Module", () => {
     cqrsDispatcher = new CqrsDispatcher();
     projectRepository = new DrizzleProjectRepository();
 
-    const createProjectCommandHandler = new CreateProjectCommandHandler(projectRepository);
-    const listProjectsQueryHandler = new ListProjectsQueryHandler(projectRepository);
-    const removeProjectCommandHandler = new RemoveProjectCommandHandler(projectRepository);
+    const createProjectCommandHandler = new CreateProjectCommandHandler(
+      projectRepository,
+    );
+    const listProjectsQueryHandler = new ListProjectsQueryHandler(
+      projectRepository,
+    );
+    const removeProjectCommandHandler = new RemoveProjectCommandHandler(
+      projectRepository,
+    );
 
-    cqrsDispatcher.registerCommandHandler("CreateProjectCommand", createProjectCommandHandler.handle.bind(createProjectCommandHandler));
-    cqrsDispatcher.registerQueryHandler("ListProjects", listProjectsQueryHandler.handle.bind(listProjectsQueryHandler));
-    cqrsDispatcher.registerCommandHandler("RemoveProjectCommand", removeProjectCommandHandler.handle.bind(removeProjectCommandHandler));
+    cqrsDispatcher.registerCommandHandler(
+      "CreateProjectCommand",
+      createProjectCommandHandler.handle.bind(createProjectCommandHandler),
+    );
+    cqrsDispatcher.registerQueryHandler(
+      "ListProjects",
+      listProjectsQueryHandler.handle.bind(listProjectsQueryHandler),
+    );
+    cqrsDispatcher.registerCommandHandler(
+      "RemoveProjectCommand",
+      removeProjectCommandHandler.handle.bind(removeProjectCommandHandler),
+    );
   });
 
   beforeEach(async () => {
@@ -35,21 +50,34 @@ describe("Project Management Module", () => {
 
   it("should create a new project", async () => {
     const command = new CreateProjectCommand({ name: "Test Project" });
-    const createdProject = await cqrsDispatcher.dispatchCommand<CreateProjectCommand, Project>(command);
+    const createdProject = await cqrsDispatcher.dispatchCommand<
+      CreateProjectCommand,
+      Project
+    >(command);
 
     expect(createdProject).toBeInstanceOf(Project);
     expect(createdProject.name).toBe("Test Project");
 
-    const listedProjects = await cqrsDispatcher.dispatchQuery<ListProjectsQuery, Project[]>(new ListProjectsQuery());
+    const listedProjects = await cqrsDispatcher.dispatchQuery<
+      ListProjectsQuery,
+      Project[]
+    >(new ListProjectsQuery());
     expect(listedProjects.length).toBe(1);
     expect(listedProjects[0].name).toBe("Test Project");
   });
 
   it("should list all projects", async () => {
-    await cqrsDispatcher.dispatchCommand(new CreateProjectCommand({ name: "Project 1" }));
-    await cqrsDispatcher.dispatchCommand(new CreateProjectCommand({ name: "Project 2" }));
+    await cqrsDispatcher.dispatchCommand(
+      new CreateProjectCommand({ name: "Project 1" }),
+    );
+    await cqrsDispatcher.dispatchCommand(
+      new CreateProjectCommand({ name: "Project 2" }),
+    );
 
-    const listedProjects = await cqrsDispatcher.dispatchQuery<ListProjectsQuery, Project[]>(new ListProjectsQuery());
+    const listedProjects = await cqrsDispatcher.dispatchQuery<
+      ListProjectsQuery,
+      Project[]
+    >(new ListProjectsQuery());
 
     expect(listedProjects.length).toBe(2);
     expect(listedProjects[0].name).toBe("Project 1");
@@ -57,22 +85,34 @@ describe("Project Management Module", () => {
   });
 
   it("should remove a project", async () => {
-    const createdProject = await cqrsDispatcher.dispatchCommand<CreateProjectCommand, Project>(new CreateProjectCommand({ name: "Project to Remove" }));
+    const createdProject = await cqrsDispatcher.dispatchCommand<
+      CreateProjectCommand,
+      Project
+    >(new CreateProjectCommand({ name: "Project to Remove" }));
     expect(createdProject).toBeInstanceOf(Project);
 
     const projectId = createdProject.id;
     const removeCommand = new RemoveProjectCommand({ id: projectId });
-    const removeResult = await cqrsDispatcher.dispatchCommand<RemoveProjectCommand, boolean>(removeCommand);
+    const removeResult = await cqrsDispatcher.dispatchCommand<
+      RemoveProjectCommand,
+      boolean
+    >(removeCommand);
 
     expect(removeResult).toBe(true);
 
-    const listedProjects = await cqrsDispatcher.dispatchQuery<ListProjectsQuery, Project[]>(new ListProjectsQuery());
+    const listedProjects = await cqrsDispatcher.dispatchQuery<
+      ListProjectsQuery,
+      Project[]
+    >(new ListProjectsQuery());
     expect(listedProjects.length).toBe(0);
   });
 
   it("should return false if project to remove does not exist", async () => {
     const removeCommand = new RemoveProjectCommand({ id: "non-existent-id" });
-    const removeResult = await cqrsDispatcher.dispatchCommand<RemoveProjectCommand, boolean>(removeCommand);
+    const removeResult = await cqrsDispatcher.dispatchCommand<
+      RemoveProjectCommand,
+      boolean
+    >(removeCommand);
 
     expect(removeResult).toBe(false);
   });

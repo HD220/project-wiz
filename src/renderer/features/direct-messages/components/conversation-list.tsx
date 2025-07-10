@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface ConversationListProps {
   onSelectConversation: (conversationId: string) => void;
@@ -13,7 +13,7 @@ function ConversationList({ onSelectConversation }: ConversationListProps) {
     setLoading(true);
     setError(null);
     try {
-      const dummyConversations = ['user1-user2', 'user3-user4', 'user5-user6'];
+      const dummyConversations = ["user1-user2", "user3-user4", "user5-user6"];
       setConversations(dummyConversations);
     } catch (err: unknown) {
       setError((err as Error).message);
@@ -30,7 +30,10 @@ function ConversationList({ onSelectConversation }: ConversationListProps) {
       <h2 className="text-xl font-semibold mb-4">Conversations</h2>
       <ul>
         {conversations.map((convId) => (
-          <li key={convId} className="py-2 border-b border-gray-200 last:border-b-0">
+          <li
+            key={convId}
+            className="py-2 border-b border-gray-200 last:border-b-0"
+          >
             <button
               onClick={() => onSelectConversation(convId)}
               className="text-blue-600 hover:underline"

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useForum } from '@/renderer/hooks/use-forum';
+import React from "react";
+import { useForum } from "@/renderer/hooks/use-forum";
 
 export function TopicList() {
   const { topics, loading, error } = useForum();

@@ -1,11 +1,13 @@
-import { IQuery } from '@/main/kernel/cqrs-dispatcher';
-import { FilesystemService } from '@/main/modules/filesystem-tools/filesystem.service';
+import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { FilesystemService } from "@/main/modules/filesystem-tools/filesystem.service";
 
-
-export class ListDirectoryQuery implements IQuery<{
-  relativePath: string;
-}> {
-  readonly type = 'ListDirectoryQuery';
+export class ListDirectoryQuery
+  implements
+    IQuery<{
+      relativePath: string;
+    }>
+{
+  readonly type = "ListDirectoryQuery";
 
   constructor(public readonly relativePath: string) {}
 
