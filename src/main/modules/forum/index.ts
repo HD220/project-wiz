@@ -1,4 +1,5 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { ipcMain } from "electron";
 import { DrizzleForumTopicRepository } from "./persistence/drizzle-forum-topic.repository";
 import { DrizzleForumPostRepository } from "./persistence/drizzle-forum-post.repository";
 
@@ -43,6 +44,18 @@ import {
   GetForumPostQueryHandler,
   GetForumPostQuery,
 } from "./application/queries/get-forum-post.query";
+
+import {
+  IpcForumListTopicsResponse,
+  IpcForumCreateTopicPayload,
+  IpcForumCreateTopicResponse,
+  IpcForumListPostsPayload,
+  IpcForumListPostsResponse,
+  IpcForumCreatePostPayload,
+  IpcForumCreatePostResponse,
+  IForumTopic,
+  IForumPost,
+} from "@/shared/ipc-types/entities";
 
 export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
   const forumTopicRepository = new DrizzleForumTopicRepository();
@@ -122,5 +135,79 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
   cqrsDispatcher.registerQueryHandler(
     GetForumPostQuery.name,
     getForumPostQueryHandler.handle.bind(getForumPostQueryHandler),
+  );
+
+  // IPC Handlers
+  ipcMain.handle(
+    "forum:list-topics",
+    async (): Promise<IpcForumListTopicsResponse> => {
+      try {
+        const topics = (await cqrsDispatcher.dispatchQuery(
+          new ListForumTopicsQuery(),
+        )) as IForumTopic[];
+        return { success: true, data: topics };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "forum:create-topic",
+    async (
+      _,
+      payload: IpcForumCreateTopicPayload,
+    ): Promise<IpcForumCreateTopicResponse> => {
+      try {
+        const topic = (await cqrsDispatcher.dispatchCommand(
+          new CreateForumTopicCommand(payload),
+        )) as IForumTopic;
+        return { success: true, data: topic };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "forum:list-posts",
+    async (
+      _,
+      payload: IpcForumListPostsPayload,
+    ): Promise<IpcForumListPostsResponse> => {
+      try {
+        const posts = (await cqrsDispatcher.dispatchQuery(
+          new ListForumPostsQuery(payload),
+        )) as IForumPost[];
+        return { success: true, data: posts };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "forum:create-post",
+    async (
+      _,
+      payload: IpcForumCreatePostPayload,
+    ): Promise<IpcForumCreatePostResponse> => {
+      try {
+        const post = (await cqrsDispatcher.dispatchCommand(
+          new CreateForumPostCommand(payload),
+        )) as IForumPost;
+        return { success: true, data: post };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
+      }
+    },
   );
 }
