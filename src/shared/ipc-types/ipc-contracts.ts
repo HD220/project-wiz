@@ -114,6 +114,10 @@ export interface IpcContracts {
     request: void;
     response: IpcLlmConfigListResponse;
   };
+  [IpcChannel.LLM_CONFIG_REMOVE]: {
+    request: IpcLlmConfigRemovePayload;
+    response: IpcLlmConfigRemoveResponse;
+  };
   [IpcChannel.CODE_ANALYSIS_ANALYZE_STACK]: {
     request: IpcCodeAnalysisAnalyzeStackPayload;
     response: IpcCodeAnalysisAnalyzeStackResponse;

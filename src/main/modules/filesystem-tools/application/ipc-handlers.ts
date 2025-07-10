@@ -17,6 +17,13 @@ import { SearchFileContentQuery } from "../application/queries/search-file-conte
 import { WriteFileCommand } from "../application/commands/write-file.command";
 
 export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
+  handleListDirectory(cqrsDispatcher);
+  handleReadFile(cqrsDispatcher);
+  handleSearchFileContent(cqrsDispatcher);
+  handleWriteFile(cqrsDispatcher);
+}
+
+function handleListDirectory(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FILESYSTEM_LIST_DIRECTORY,
     async (
@@ -35,7 +42,9 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
       }
     },
   );
+}
 
+function handleReadFile(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FILESYSTEM_READ_FILE,
     async (
@@ -54,7 +63,9 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
       }
     },
   );
+}
 
+function handleSearchFileContent(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FILESYSTEM_SEARCH_FILE_CONTENT,
     async (
@@ -73,7 +84,9 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
       }
     },
   );
+}
 
+function handleWriteFile(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FILESYSTEM_WRITE_FILE,
     async (

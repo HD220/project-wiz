@@ -1,4 +1,7 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { db } from "@/main/persistence/db";
+
+
 import { ipcMain } from "electron";
 import { DrizzleForumTopicRepository } from "./persistence/drizzle-forum-topic.repository";
 import { DrizzleForumPostRepository } from "./persistence/drizzle-forum-post.repository";
@@ -141,11 +144,7 @@ function registerForumPostHandlers(
   );
 }
 
-function registerForumIpcHandlers(
-  cqrsDispatcher: CqrsDispatcher,
-  forumTopicRepository: DrizzleForumTopicRepository,
-  forumPostRepository: DrizzleForumPostRepository,
-) {
+function handleForumListTopics(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FORUM_LIST_TOPICS,
     async (): Promise<IpcForumListTopicsResponse> => {
@@ -161,7 +160,9 @@ function registerForumIpcHandlers(
       }
     },
   );
+}
 
+function handleForumCreateTopic(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FORUM_CREATE_TOPIC,
     async (
@@ -180,7 +181,9 @@ function registerForumIpcHandlers(
       }
     },
   );
+}
 
+function handleForumListPosts(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FORUM_LIST_POSTS,
     async (
@@ -199,7 +202,9 @@ function registerForumIpcHandlers(
       }
     },
   );
+}
 
+function handleForumCreatePost(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.FORUM_CREATE_POST,
     async (
@@ -220,15 +225,18 @@ function registerForumIpcHandlers(
   );
 }
 
-export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
-  const forumTopicRepository = new DrizzleForumTopicRepository();
-  const forumPostRepository = new DrizzleForumPostRepository();
+
+
+export function registerForumModule(
+  cqrsDispatcher: CqrsDispatcher,
+) {
+  const forumTopicRepository = new DrizzleForumTopicRepository(db);
+  const forumPostRepository = new DrizzleForumPostRepository(db);
 
   registerForumTopicHandlers(cqrsDispatcher, forumTopicRepository);
   registerForumPostHandlers(cqrsDispatcher, forumPostRepository);
-  registerForumIpcHandlers(
-    cqrsDispatcher,
-    forumTopicRepository,
-    forumPostRepository,
-  );
+  handleForumListTopics(cqrsDispatcher);
+  handleForumCreateTopic(cqrsDispatcher);
+  handleForumListPosts(cqrsDispatcher);
+  handleForumCreatePost(cqrsDispatcher);
 }

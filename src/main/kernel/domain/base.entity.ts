@@ -26,7 +26,7 @@ export abstract class BaseEntity<T> {
     return this._id === entity._id;
   }
 
-  private isEntity(v: unknown): v is BaseEntity<T> {
-    return v instanceof BaseEntity;
+  private isEntity(candidate: unknown): candidate is BaseEntity<T> {
+    return candidate instanceof BaseEntity;
   }
 }

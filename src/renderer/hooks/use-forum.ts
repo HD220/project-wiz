@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { IForumTopic, IForumPost } from "@/shared/ipc-types/domain-types";
-import { IElectronIPC } from "../preload";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import {
+  IpcForumCreatePostPayload,
+  IpcForumCreateTopicPayload,
+} from "@/shared/ipc-types/ipc-payloads";
 
 // Helper function to load topics
 async function loadTopicsHelper(
@@ -26,6 +29,78 @@ async function loadTopicsHelper(
   }
 }
 
+async function createTopicHelper(
+  payload: IpcForumCreateTopicPayload,
+  setLoading: (loading: boolean) => void,
+  setError: (error: string | null) => void,
+) {
+  setLoading(true);
+  try {
+    const result = await window.electronIPC.invoke(
+      IpcChannel.FORUM_CREATE_TOPIC,
+      payload,
+    );
+    if (!result.success) {
+      setError(result.error?.message || "An unknown error occurred");
+    }
+    return result.success;
+  } catch (err: unknown) {
+    setError((err as Error).message);
+    return false;
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function createPostHelper(
+  payload: IpcForumCreatePostPayload,
+  setLoading: (loading: boolean) => void,
+  setError: (error: string | null) => void,
+) {
+  setLoading(true);
+  try {
+    const result = await window.electronIPC.invoke(
+      IpcChannel.FORUM_CREATE_POST,
+      payload,
+    );
+    if (!result.success) {
+      setError(result.error?.message || "An unknown error occurred");
+    }
+    return result.success;
+  } catch (err: unknown) {
+    setError((err as Error).message);
+    return false;
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function getPostsForTopicHelper(
+  topicId: string,
+  setLoading: (loading: boolean) => void,
+  setError: (error: string | null) => void,
+): Promise<IForumPost[]> {
+  setLoading(true);
+  try {
+    const result = await window.electronIPC.invoke(
+      IpcChannel.FORUM_LIST_POSTS,
+      {
+        topicId,
+      },
+    );
+    if (result.success && result.data) {
+      return result.data;
+    }
+    setError(result.error?.message || "An unknown error occurred");
+    return [];
+  } catch (err: unknown) {
+    setError((err as Error).message);
+    return [];
+  } finally {
+    setLoading(false);
+  }
+}
+
 export function useForum() {
   const [topics, setTopics] = useState<IForumTopic[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -37,33 +112,13 @@ export function useForum() {
 
   const handleCreateTopic = useCallback(
     async (title: string, authorId: string) => {
-      setLoading(true);
-      try {
-        const result = await window.electronIPC.invoke(
-          IpcChannel.FORUM_CREATE_TOPIC,
-          {
-            title,
-            authorId,
-          },
-        );
-        if (result.success && result.data) {
-          const updatedTopicsResult = await window.electronIPC.invoke(
-            IpcChannel.FORUM_LIST_TOPICS,
-          );
-          if (updatedTopicsResult.success && updatedTopicsResult.data) {
-            setTopics(updatedTopicsResult.data);
-          } else {
-            setError(
-              updatedTopicsResult.error?.message || "An unknown error occurred",
-            );
-          }
-        } else {
-          setError(result.error?.message || "An unknown error occurred");
-        }
-      } catch (err: unknown) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
+      const success = await createTopicHelper(
+        { title, authorId },
+        setLoading,
+        setError,
+      );
+      if (success) {
+        loadTopicsHelper(setTopics, setLoading, setError);
       }
     },
     [],
@@ -71,49 +126,18 @@ export function useForum() {
 
   const handleCreatePost = useCallback(
     async (topicId: string, authorId: string, content: string) => {
-      setLoading(true);
-      try {
-        const result = await window.electronIPC.invoke(
-          IpcChannel.FORUM_CREATE_POST,
-          {
-            topicId,
-            authorId,
-            content,
-          },
-        );
-        if (result.success) {
-          // No need to reload all posts here, as getPostsForTopic will fetch them dynamically
-        } else {
-          setError(result.error?.message || "An unknown error occurred");
-        }
-      } catch (err: unknown) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
+      await createPostHelper(
+        { topicId, authorId, content },
+        setLoading,
+        setError,
+      );
     },
     [],
   );
 
   const handleGetPostsForTopic = useCallback(
     async (topicId: string): Promise<IForumPost[]> => {
-      setLoading(true);
-      try {
-        const result = await window.electronIPC.invoke(
-          IpcChannel.FORUM_LIST_POSTS,
-          {
-            topicId,
-          },
-        );
-        if (result.success && result.data) {
-          return result.data;
-        }
-        setError(result.error?.message || "An unknown error occurred");
-        return [];
-      } catch (err: unknown) {
-        setError((err as Error).message);
-        return [];
-      }
+      return getPostsForTopicHelper(topicId, setLoading, setError);
     },
     [],
   );

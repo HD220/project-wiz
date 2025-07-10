@@ -20,6 +20,13 @@ import { RemovePersonaCommand } from "./application/commands/remove-persona.comm
 export function registerPersonaManagementModule(
   cqrsDispatcher: CqrsDispatcher,
 ) {
+  handlePersonaRefineSuggestion(cqrsDispatcher);
+  handlePersonaCreate(cqrsDispatcher);
+  handlePersonaList(cqrsDispatcher);
+  handlePersonaRemove(cqrsDispatcher);
+}
+
+function handlePersonaRefineSuggestion(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.PERSONA_REFINE_SUGGESTION,
     async (
@@ -38,7 +45,9 @@ export function registerPersonaManagementModule(
       }
     },
   );
+}
 
+function handlePersonaCreate(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.PERSONA_CREATE,
     async (
@@ -57,7 +66,9 @@ export function registerPersonaManagementModule(
       }
     },
   );
+}
 
+function handlePersonaList(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.PERSONA_LIST,
     async (
@@ -76,7 +87,9 @@ export function registerPersonaManagementModule(
       }
     },
   );
+}
 
+function handlePersonaRemove(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.PERSONA_REMOVE,
     async (

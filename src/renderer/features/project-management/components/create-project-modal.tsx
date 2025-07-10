@@ -4,14 +4,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/ui/dialog";
-import { Input } from "@/ui/input";
-import { Label } from "@/ui/label";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import CreateProjectForm from "./create-project-form";
 
 interface CreateProjectModalProps {
   onProjectCreated?: () => void;
@@ -49,6 +47,12 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
     }
   };
 
+  const handleCancel = () => {
+    setIsOpen(false);
+    setProjectName("");
+    setError(null);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -61,38 +65,14 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
             Enter the name for your new project.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="projectName" className="text-right">
-                Project Name
-              </Label>
-              <Input
-                id="projectName"
-                value={projectName}
-                onChange={(changeEvent) =>
-                  setProjectName(changeEvent.target.value)
-                }
-                className="col-span-3"
-                required
-              />
-            </div>
-          </div>
-          {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Project"}
-            </Button>
-          </DialogFooter>
-        </form>
+        <CreateProjectForm
+          projectName={projectName}
+          setProjectName={setProjectName}
+          handleSubmit={handleSubmit}
+          loading={loading}
+          error={error}
+          onCancel={handleCancel}
+        />
       </DialogContent>
     </Dialog>
   );

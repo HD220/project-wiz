@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { IDirectMessage } from "@/shared/ipc-types/domain-types";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import MessageList from "./message-list";
+import MessageInput from "./message-input";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -75,32 +77,12 @@ function ChatWindow({ conversationId }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full p-4">
-      <div className="flex-1 overflow-y-auto mb-4 border rounded p-2">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`mb-2 ${msg.senderId === senderId ? "text-right" : "text-left"}`}
-          >
-            <span className="font-bold">{msg.senderId}: </span>
-            {msg.content}
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSendMessage} className="flex">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(changeEvent) => setNewMessage(changeEvent.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 border rounded-l p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r focus:outline-none focus:shadow-outline"
-        >
-          Send
-        </button>
-      </form>
+      <MessageList messages={messages} senderId={senderId} />
+      <MessageInput
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+        handleSendMessage={handleSendMessage}
+      />
     </div>
   );
 }

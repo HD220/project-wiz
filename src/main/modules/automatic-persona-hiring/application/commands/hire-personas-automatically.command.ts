@@ -27,56 +27,10 @@ export class HirePersonasAutomaticallyCommandHandler {
     const { projectPath } = command.payload;
 
     try {
-      // 1. Analyze project stack
-      const projectStack = await this.cqrsDispatcher.dispatchQuery<
-        AnalyzeProjectStackQuery,
-        IProjectStack
-      >(new AnalyzeProjectStackQuery({ projectPath }));
-
-      // 2. Use LLM to suggest personas based on stack
-      const llmConfig = await this.cqrsDispatcher.dispatchQuery<
-        GetLlmConfigQuery,
-        LlmConfig | undefined
-      >(new GetLlmConfigQuery({ provider: "openai", model: "gpt-4" }));
-
-      if (!llmConfig) {
-        throw new Error("Failed to get LLM config for persona suggestion.");
-      }
-
-      const suggestedPersonas: ICreatePersonaCommandPayload[] = [];
-
-      if (projectStack.frameworks.includes("React")) {
-        suggestedPersonas.push({
-          name: "Frontend React Developer",
-          description:
-            "Expert in React, Redux, and modern frontend development.",
-          llmModel: llmConfig.model,
-          llmTemperature: llmConfig.temperature,
-          tools: ["react-dev-tool", "css-tool"],
-        });
-      }
-      if (projectStack.frameworks.includes("Express.js")) {
-        suggestedPersonas.push({
-          name: "Backend Node.js Developer",
-          description:
-            "Proficient in Node.js, Express.js, and database interactions.",
-          llmModel: llmConfig.model,
-          llmTemperature: llmConfig.temperature,
-          tools: ["node-dev-tool", "db-tool"],
-        });
-      }
-
-      // 3. Create suggested personas
-      for (const personaPayload of suggestedPersonas) {
-        try {
-          const createPersonaCommand = new CreatePersonaCommand(personaPayload);
-          await this.cqrsDispatcher.dispatchCommand(createPersonaCommand);
-        } catch (error) {
-          console.warn(
-            `Failed to create suggested persona ${personaPayload.name}: ${(error as Error).message}`,
-          );
-        }
-      }
+      const projectStack = await this.analyzeProjectStack(projectPath);
+      const llmConfig = await this.getLlmConfig();
+      const suggestedPersonas = this.suggestPersonas(projectStack, llmConfig);
+      await this.createSuggestedPersonas(suggestedPersonas);
 
       return true;
     } catch (error) {
@@ -84,6 +38,70 @@ export class HirePersonasAutomaticallyCommandHandler {
         `Failed to hire personas automatically: ${(error as Error).message}`,
       );
       throw error;
+    }
+  }
+
+  private async analyzeProjectStack(
+    projectPath: string,
+  ): Promise<IProjectStack> {
+    return this.cqrsDispatcher.dispatchQuery<
+      AnalyzeProjectStackQuery,
+      IProjectStack
+    >(new AnalyzeProjectStackQuery({ projectPath }));
+  }
+
+  private async getLlmConfig(): Promise<LlmConfig> {
+    const llmConfig = await this.cqrsDispatcher.dispatchQuery<
+      GetLlmConfigQuery,
+      LlmConfig | undefined
+    >(new GetLlmConfigQuery({ provider: "openai", model: "gpt-4" }));
+
+    if (!llmConfig) {
+      throw new Error("Failed to get LLM config for persona suggestion.");
+    }
+    return llmConfig;
+  }
+
+  private suggestPersonas(
+    projectStack: IProjectStack,
+    llmConfig: LlmConfig,
+  ): ICreatePersonaCommandPayload[] {
+    const suggestedPersonas: ICreatePersonaCommandPayload[] = [];
+
+    if (projectStack.frameworks.includes("React")) {
+      suggestedPersonas.push({
+        name: "Frontend React Developer",
+        description: "Expert in React, Redux, and modern frontend development.",
+        llmModel: llmConfig.model,
+        llmTemperature: llmConfig.temperature,
+        tools: ["react-dev-tool", "css-tool"],
+      });
+    }
+    if (projectStack.frameworks.includes("Express.js")) {
+      suggestedPersonas.push({
+        name: "Backend Node.js Developer",
+        description:
+          "Proficient in Node.js, Express.js, and database interactions.",
+        llmModel: llmConfig.model,
+        llmTemperature: llmConfig.temperature,
+        tools: ["node-dev-tool", "db-tool"],
+      });
+    }
+    return suggestedPersonas;
+  }
+
+  private async createSuggestedPersonas(
+    suggestedPersonas: ICreatePersonaCommandPayload[],
+  ): Promise<void> {
+    for (const personaPayload of suggestedPersonas) {
+      try {
+        const createPersonaCommand = new CreatePersonaCommand(personaPayload);
+        await this.cqrsDispatcher.dispatchCommand(createPersonaCommand);
+      } catch (error) {
+        console.warn(
+          `Failed to create suggested persona ${personaPayload.name}: ${(error as Error).message}`,
+        );
+      }
     }
   }
 }

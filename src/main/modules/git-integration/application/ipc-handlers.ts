@@ -37,7 +37,7 @@ export function registerGitIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
     IpcChannel.GIT_INTEGRATION_INITIALIZE,
     async (
       _,
-      payload: IpcGitIntegrationInitializePayload,
+      _payload: IpcGitIntegrationInitializePayload,
     ): Promise<IpcGitIntegrationInitializeResponse> => {
       try {
         await cqrsDispatcher.dispatchCommand(new InitializeRepositoryCommand());
@@ -54,7 +54,7 @@ export function registerGitIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
     IpcChannel.GIT_INTEGRATION_PULL,
     async (
       _,
-      payload: IpcGitIntegrationPullPayload,
+      _payload: IpcGitIntegrationPullPayload,
     ): Promise<IpcGitIntegrationPullResponse> => {
       try {
         await cqrsDispatcher.dispatchCommand(new PullRepositoryCommand());

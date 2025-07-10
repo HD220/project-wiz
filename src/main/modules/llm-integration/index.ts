@@ -18,6 +18,13 @@ import { ListLlmConfigsQuery } from "./application/queries/list-llm-configs.quer
 import { RemoveLlmConfigCommand } from "./application/commands/remove-llm-config.command";
 
 export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
+  handleLlmConfigSave(cqrsDispatcher);
+  handleLlmConfigGet(cqrsDispatcher);
+  handleLlmConfigList(cqrsDispatcher);
+  handleLlmConfigRemove(cqrsDispatcher);
+}
+
+function handleLlmConfigSave(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.LLM_CONFIG_SAVE,
     async (
@@ -36,7 +43,9 @@ export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
       }
     },
   );
+}
 
+function handleLlmConfigGet(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.LLM_CONFIG_GET,
     async (
@@ -55,7 +64,9 @@ export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
       }
     },
   );
+}
 
+function handleLlmConfigList(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.LLM_CONFIG_LIST,
     async (
@@ -74,7 +85,9 @@ export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
       }
     },
   );
+}
 
+function handleLlmConfigRemove(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
     IpcChannel.LLM_CONFIG_REMOVE,
     async (

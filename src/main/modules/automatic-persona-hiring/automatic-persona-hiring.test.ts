@@ -7,80 +7,80 @@ import { CreatePersonaCommand } from "@/main/modules/persona-management/applicat
 import { Persona } from "@/main/modules/persona-management/domain/persona.entity";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 
+const setupAnalyzeProjectStackQueryMock = (dispatcher: CqrsDispatcher) => {
+  dispatcher.registerQueryHandler(
+    "AnalyzeProjectStackQuery",
+    async (query: AnalyzeProjectStackQuery) => {
+      if (query.payload.projectPath.includes("react")) {
+        return {
+          languages: { TypeScript: 0.8 },
+          frameworks: ["React"],
+          libraries: ["Redux"],
+        };
+      }
+      if (query.payload.projectPath.includes("node")) {
+        return {
+          languages: { JavaScript: 1.0 },
+          frameworks: ["Express.js"],
+          libraries: ["Mongoose"],
+        };
+      }
+      return { languages: { Unknown: 1.0 }, frameworks: [], libraries: [] };
+    },
+  );
+};
+
+const setupGetLlmConfigQueryMock = (
+  dispatcher: CqrsDispatcher,
+  llmConfig: LlmConfig | undefined,
+) => {
+  dispatcher.registerQueryHandler(
+    "GetLlmConfigQuery",
+    async (query: GetLlmConfigQuery) => {
+      if (
+        query.payload.provider === "openai" &&
+        query.payload.model === "gpt-4"
+      ) {
+        return llmConfig;
+      }
+      return undefined;
+    },
+  );
+};
+
+const setupCreatePersonaCommandMock = (dispatcher: CqrsDispatcher) => {
+  dispatcher.registerCommandHandler(
+    "CreatePersonaCommand",
+    async (command: CreatePersonaCommand) => {
+      return new Persona(
+        {
+          name: command.payload.name,
+          description: command.payload.description,
+          llmConfig: {
+            model: command.payload.llmModel,
+            temperature: command.payload.llmTemperature,
+          },
+          tools: command.payload.tools,
+        },
+        "mock-persona-id",
+      );
+    },
+  );
+};
+
+const setupHirePersonasAutomaticallyCommandHandler = (
+  dispatcher: CqrsDispatcher,
+) => {
+  const handler = new HirePersonasAutomaticallyCommandHandler(dispatcher);
+  dispatcher.registerCommandHandler(
+    "HirePersonasAutomaticallyCommand",
+    handler.handle.bind(handler),
+  );
+};
+
 describe("Automatic Persona Hiring Module", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let mockLlmConfig: LlmConfig | undefined;
-
-  const setupAnalyzeProjectStackQueryMock = (dispatcher: CqrsDispatcher) => {
-    dispatcher.registerQueryHandler(
-      "AnalyzeProjectStackQuery",
-      async (query: AnalyzeProjectStackQuery) => {
-        if (query.payload.projectPath.includes("react")) {
-          return {
-            languages: { TypeScript: 0.8 },
-            frameworks: ["React"],
-            libraries: ["Redux"],
-          };
-        }
-        if (query.payload.projectPath.includes("node")) {
-          return {
-            languages: { JavaScript: 1.0 },
-            frameworks: ["Express.js"],
-            libraries: ["Mongoose"],
-          };
-        }
-        return { languages: { Unknown: 1.0 }, frameworks: [], libraries: [] };
-      },
-    );
-  };
-
-  const setupGetLlmConfigQueryMock = (
-    dispatcher: CqrsDispatcher,
-    llmConfig: LlmConfig | undefined,
-  ) => {
-    dispatcher.registerQueryHandler(
-      "GetLlmConfigQuery",
-      async (query: GetLlmConfigQuery) => {
-        if (
-          query.payload.provider === "openai" &&
-          query.payload.model === "gpt-4"
-        ) {
-          return llmConfig;
-        }
-        return undefined;
-      },
-    );
-  };
-
-  const setupCreatePersonaCommandMock = (dispatcher: CqrsDispatcher) => {
-    dispatcher.registerCommandHandler(
-      "CreatePersonaCommand",
-      async (command: CreatePersonaCommand) => {
-        return new Persona(
-          {
-            name: command.payload.name,
-            description: command.payload.description,
-            llmConfig: {
-              model: command.payload.llmModel,
-              temperature: command.payload.llmTemperature,
-            },
-            tools: command.payload.tools,
-          },
-          "mock-persona-id",
-        );
-      },
-    );
-  };
-
-  const setupHirePersonasAutomaticallyCommandHandler = (
-    dispatcher: CqrsDispatcher,
-  ) => {
-    const handler = new HirePersonasAutomaticallyCommandHandler(dispatcher);
-    dispatcher.registerCommandHandler(
-      "HirePersonasAutomaticallyCommand",
-      handler.handle.bind(handler),
-    );
-  };
 
   beforeEach(() => {
     cqrsDispatcher = new CqrsDispatcher();
