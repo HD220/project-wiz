@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 
 export class WriteFileCommand
@@ -31,7 +32,7 @@ export class WriteFileCommandHandler {
       );
     } catch (error: unknown) {
       console.error(`Failed to write file:`, error);
-      throw new Error(`Failed to write file: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to write file: ${(error as Error).message}`);
     }
   }
 }

@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { ForumTopic } from "@/main/modules/forum/domain/forum-topic.entity";
 import { IForumTopicRepository } from "@/main/modules/forum/persistence/drizzle-forum-topic.repository";
 
@@ -19,9 +20,8 @@ export class ListForumTopicsQueryHandler {
       return await this.forumTopicRepository.findAll();
     } catch (error) {
       console.error(`Failed to list forum topics:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to list forum topics: ${(error as Error).message}`,
       );
-    }
   }
 }

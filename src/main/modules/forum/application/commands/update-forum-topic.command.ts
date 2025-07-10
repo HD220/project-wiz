@@ -1,4 +1,6 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
+import { NotFoundError } from "@/main/errors/not-found.error";
 import { ForumTopic } from "@/main/modules/forum/domain/forum-topic.entity";
 import { IForumTopicRepository } from "@/main/modules/forum/persistence/drizzle-forum-topic.repository";
 
@@ -27,10 +29,10 @@ export class UpdateForumTopicCommandHandler {
         existingTopic.updateTitle(command.payload.title);
         return await this.forumTopicRepository.save(existingTopic);
       }
-      throw new Error(`Forum topic with ID ${command.payload.id} not found.`);
+      throw new NotFoundError(`Forum topic with ID ${command.payload.id} not found.`);
     } catch (error) {
       console.error(`Failed to update forum topic:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to update forum topic: ${(error as Error).message}`,
       );
     }

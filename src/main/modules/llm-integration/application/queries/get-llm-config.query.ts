@@ -1,4 +1,6 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
+import { ValidationError } from "@/main/errors/validation.error";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
@@ -27,10 +29,10 @@ export class GetLlmConfigQueryHandler {
           query.payload.model,
         );
       }
-      throw new Error("Either id or provider and model must be provided.");
+      throw new ValidationError("Either id or provider and model must be provided.");
     } catch (error) {
       console.error(`Failed to get LLM config:`, error);
-      throw new Error(`Failed to get LLM config: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to get LLM config: ${(error as Error).message}`);
     }
   }
 }

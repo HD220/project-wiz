@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { ForumTopic } from "@/main/modules/forum/domain/forum-topic.entity";
 import { IForumTopicRepository } from "@/main/modules/forum/persistence/drizzle-forum-topic.repository";
 
@@ -28,7 +29,7 @@ export class CreateForumTopicCommandHandler {
       return await this.forumTopicRepository.save(topic);
     } catch (error) {
       console.error(`Failed to create forum topic:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to create forum topic: ${(error as Error).message}`,
       );
     }

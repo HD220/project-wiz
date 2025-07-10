@@ -13,26 +13,6 @@ export class LlmConfig extends BaseEntity<ILlmConfigProps> {
     super(props, id);
   }
 
-  get provider(): string {
-    return this.props.provider;
-  }
-
-  get model(): string {
-    return this.props.model;
-  }
-
-  get apiKey(): string {
-    return this.props.apiKey;
-  }
-
-  get temperature(): number {
-    return this.props.temperature;
-  }
-
-  get maxTokens(): number {
-    return this.props.maxTokens;
-  }
-
   public updateConfig(updates: Partial<ILlmConfigProps>): void {
     Object.assign(this.props, updates);
   }

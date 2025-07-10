@@ -1,5 +1,6 @@
 import { RefinePersonaSuggestionCommand } from "./refine-persona-suggestion.command";
 import { ILLMAdapter } from "@/main/modules/llm-integration/domain/llm.adapter";
+import { ApplicationError } from "@/main/errors/application.error";
 
 export class RefinePersonaSuggestionHandler {
   constructor(private readonly llmAdapter: ILLMAdapter) {}
@@ -14,9 +15,8 @@ export class RefinePersonaSuggestionHandler {
         `Failed to refine persona suggestion for "${name}":`,
         error,
       );
-      throw new Error(
+      throw new ApplicationError(
         `Failed to refine persona suggestion: ${(error as Error).message}`,
       );
-    }
   }
 }

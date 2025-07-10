@@ -1,4 +1,5 @@
 import { ILLMAdapter } from "../domain/llm.adapter";
+import { ApplicationError } from "@/main/errors/application.error";
 
 export class OpenAILLMAdapter implements ILLMAdapter {
   async generate(prompt: string): Promise<string> {
@@ -11,9 +12,8 @@ export class OpenAILLMAdapter implements ILLMAdapter {
         `Failed to generate LLM response for prompt "${prompt}":`,
         error,
       );
-      throw new Error(
+      throw new ApplicationError(
         `Failed to generate LLM response: ${(error as Error).message}`,
       );
-    }
   }
 }

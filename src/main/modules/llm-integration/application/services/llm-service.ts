@@ -1,3 +1,5 @@
+import { ApplicationError } from "@/main/errors/application.error";
+
 export class LlmService {
   async generate(prompt: string): Promise<string> {
     console.log("Generating LLM response for prompt:", prompt);
@@ -9,7 +11,7 @@ export class LlmService {
         `Failed to generate LLM response for prompt "${prompt}":`,
         error,
       );
-      throw new Error(
+      throw new ApplicationError(
         `Failed to generate LLM response: ${(error as Error).message}`,
       );
     }

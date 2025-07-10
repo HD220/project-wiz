@@ -1,74 +1,73 @@
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { ipcMain } from "electron";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { IUserSetting } from "@/shared/ipc-types/domain-types";
-import {
+import type { IUserSetting } from "@/shared/ipc-types/domain-types";
+import type {
   IpcUserSettingsSavePayload,
-  IpcUserSettingsSaveResponse,
   IpcUserSettingsGetPayload,
-  IpcUserSettingsGetResponse,
   IpcUserSettingsListPayload,
-  IpcUserSettingsListResponse,
 } from "@/shared/ipc-types/ipc-payloads";
-import { SaveUserSettingCommand } from "./application/commands/save-user-setting.command";
-import { GetUserSettingQuery } from "./application/queries/get-user-setting.query";
-import { ListUserSettingsQuery } from "./application/queries/list-user-settings.query";
+import { SaveUserSettingCommand, SaveUserSettingCommandHandler } from "./application/commands/save-user-setting.command";
+import { GetUserSettingQuery, GetUserSettingQueryHandler } from "./application/queries/get-user-setting.query";
+import { ListUserSettingsQuery, ListUserSettingsQueryHandler } from "./application/queries/list-user-settings.query";
+import { DrizzleUserSettingsRepository } from "./persistence/drizzle-user-settings.repository";
+import { db } from "@/main/persistence/db";
 
 export function registerUserSettingsModule(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  const userSettingsRepository = new DrizzleUserSettingsRepository(db);
+  const saveUserSettingCommandHandler = new SaveUserSettingCommandHandler(
+    userSettingsRepository,
+  );
+  const getUserSettingQueryHandler = new GetUserSettingQueryHandler(
+    userSettingsRepository,
+  );
+  const listUserSettingsQueryHandler = new ListUserSettingsQueryHandler(
+    userSettingsRepository,
+  );
+
+  cqrsDispatcher.registerCommandHandler<SaveUserSettingCommand, IUserSetting>(
+    SaveUserSettingCommand.name,
+    saveUserSettingCommandHandler.handle.bind(saveUserSettingCommandHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<GetUserSettingQuery, IUserSetting | undefined>(
+    GetUserSettingQuery.name,
+    getUserSettingQueryHandler.handle.bind(getUserSettingQueryHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<ListUserSettingsQuery, IUserSetting[]>(
+    ListUserSettingsQuery.name,
+    listUserSettingsQueryHandler.handle.bind(listUserSettingsQueryHandler),
+  );
+
+  createIpcHandler<IpcUserSettingsSavePayload, IUserSetting>(
     IpcChannel.USER_SETTINGS_SAVE,
-    async (
-      _,
-      payload: IpcUserSettingsSavePayload,
-    ): Promise<IpcUserSettingsSaveResponse> => {
-      try {
-        const setting = (await cqrsDispatcher.dispatchCommand(
-          new SaveUserSettingCommand(payload),
-        )) as IUserSetting;
-        return { success: true, data: setting };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const setting = (await cqrsDispatcher.dispatchCommand(
+        new SaveUserSettingCommand(payload),
+      )) as IUserSetting;
+      return setting;
     },
   );
 
-  ipcMain.handle(
+  createIpcHandler<IpcUserSettingsGetPayload, IUserSetting | undefined>(
     IpcChannel.USER_SETTINGS_GET,
-    async (
-      _,
-      payload: IpcUserSettingsGetPayload,
-    ): Promise<IpcUserSettingsGetResponse> => {
-      try {
-        const setting = (await cqrsDispatcher.dispatchQuery(
-          new GetUserSettingQuery(payload),
-        )) as IUserSetting | undefined;
-        return { success: true, data: setting };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const setting = (await cqrsDispatcher.dispatchQuery(
+        new GetUserSettingQuery(payload),
+      )) as IUserSetting | undefined;
+      return setting;
     },
   );
 
-  ipcMain.handle(
+  createIpcHandler<IpcUserSettingsListPayload, IUserSetting[]>(
     IpcChannel.USER_SETTINGS_LIST,
-    async (
-      _,
-      payload: IpcUserSettingsListPayload,
-    ): Promise<IpcUserSettingsListResponse> => {
-      try {
-        const settings = (await cqrsDispatcher.dispatchQuery(
-          new ListUserSettingsQuery(payload),
-        )) as IUserSetting[];
-        return { success: true, data: settings };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const settings = (await cqrsDispatcher.dispatchQuery(
+        new ListUserSettingsQuery(payload),
+      )) as IUserSetting[];
+      return settings;
     },
   );
 }

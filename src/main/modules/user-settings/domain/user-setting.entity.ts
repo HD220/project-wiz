@@ -15,18 +15,6 @@ export class UserSetting extends BaseEntity<UserSettingProps> {
     super(props, id);
   }
 
-  get userId(): string {
-    return this.props.userId;
-  }
-
-  get key(): string {
-    return this.props.key;
-  }
-
-  get value(): string {
-    return this.props.value;
-  }
-
   public updateValue(newValue: string): void {
     this.props.value = newValue;
   }

@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { DirectMessage } from "@/main/modules/direct-messages/domain/direct-message.entity";
 import { IDirectMessageRepository } from "@/main/modules/direct-messages/domain/direct-message.repository";
 
@@ -23,7 +24,7 @@ export class ListMessagesQueryHandler {
       );
     } catch (error) {
       console.error("Failed to list messages:", error);
-      throw new Error(`Failed to list messages: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to list messages: ${(error as Error).message}`);
     }
   }
 }

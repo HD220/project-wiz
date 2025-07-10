@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { ForumPost } from "@/main/modules/forum/domain/forum-post.entity";
 import { IForumPostRepository } from "@/main/modules/forum/persistence/drizzle-forum-post.repository";
 
@@ -19,7 +20,7 @@ export class GetForumPostQueryHandler {
       return await this.forumPostRepository.findById(query.payload.id);
     } catch (error) {
       console.error(`Failed to get forum post:`, error);
-      throw new Error(`Failed to get forum post: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to get forum post: ${(error as Error).message}`);
     }
   }
 }

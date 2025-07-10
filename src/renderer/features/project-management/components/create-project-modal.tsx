@@ -10,6 +10,9 @@ import {
 } from "@/ui/dialog";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 import CreateProjectForm from "./create-project-form";
+import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
+import type { IpcProjectCreatePayload } from "@/shared/ipc-types/ipc-payloads";
+import type { IProject } from "@/shared/ipc-types/domain-types";
 
 interface CreateProjectModalProps {
   onProjectCreated?: () => void;
@@ -18,39 +21,28 @@ interface CreateProjectModalProps {
 function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const { mutate: createProject, isPending, error } = useIpcMutation<IProject, Error, IpcProjectCreatePayload>({
+    channel: IpcChannel.PROJECT_CREATE,
+    onSuccess: () => {
+      setProjectName("");
+      setIsOpen(false);
+      onProjectCreated?.();
+    },
+    onError: (err) => {
+      // Error is handled by the form, so we just log it here if needed
+      console.error("Failed to create project:", err);
+    },
+  });
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await window.electronIPC.invoke(
-        IpcChannel.PROJECT_CREATE,
-        {
-          name: projectName,
-        },
-      );
-      if (result.success) {
-        setProjectName("");
-        setIsOpen(false);
-        onProjectCreated?.();
-      } else {
-        setError(result.error?.message || "An unknown error occurred");
-      }
-    } catch (err: unknown) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+    createProject({ name: projectName });
   };
 
   const handleCancel = () => {
     setIsOpen(false);
     setProjectName("");
-    setError(null);
   };
 
   return (
@@ -69,8 +61,8 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
           projectName={projectName}
           setProjectName={setProjectName}
           handleSubmit={handleSubmit}
-          loading={loading}
-          error={error}
+          loading={isPending}
+          error={error?.message || null}
           onCancel={handleCancel}
         />
       </DialogContent>

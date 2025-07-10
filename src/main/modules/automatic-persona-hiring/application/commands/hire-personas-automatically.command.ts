@@ -1,4 +1,5 @@
 import { IProjectStack } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
+import { NotFoundError } from "@/main/errors/not-found.error";
 import { CqrsDispatcher, ICommand } from "@/main/kernel/cqrs-dispatcher";
 import { AnalyzeProjectStackQuery } from "@/main/modules/code-analysis/application/queries/analyze-project-stack.query";
 import {
@@ -57,7 +58,7 @@ export class HirePersonasAutomaticallyCommandHandler {
     >(new GetLlmConfigQuery({ provider: "openai", model: "gpt-4" }));
 
     if (!llmConfig) {
-      throw new Error("Failed to get LLM config for persona suggestion.");
+      throw new NotFoundError("Failed to get LLM config for persona suggestion.");
     }
     return llmConfig;
   }

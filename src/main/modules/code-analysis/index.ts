@@ -1,30 +1,28 @@
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { ipcMain } from "electron";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { IProjectStack } from "@/shared/ipc-types/domain-types";
-import {
+import type { IProjectStack } from "@/shared/ipc-types/domain-types";
+import type {
   IpcCodeAnalysisAnalyzeStackPayload,
-  IpcCodeAnalysisAnalyzeStackResponse,
 } from "@/shared/ipc-types/ipc-payloads";
-import { AnalyzeProjectStackQuery } from "./application/queries/analyze-project-stack.query";
+import { AnalyzeProjectStackQuery, AnalyzeProjectStackQueryHandler } from "./application/queries/analyze-project-stack.query";
 
 export function registerCodeAnalysisModule(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  const analyzeProjectStackQueryHandler = new AnalyzeProjectStackQueryHandler();
+
+  cqrsDispatcher.registerQueryHandler<AnalyzeProjectStackQuery, IProjectStack>(
+    AnalyzeProjectStackQuery.name,
+    analyzeProjectStackQueryHandler.handle.bind(analyzeProjectStackQueryHandler),
+  );
+
+  createIpcHandler<IpcCodeAnalysisAnalyzeStackPayload, IProjectStack>(
     IpcChannel.CODE_ANALYSIS_ANALYZE_STACK,
-    async (
-      _,
-      payload: IpcCodeAnalysisAnalyzeStackPayload,
-    ): Promise<IpcCodeAnalysisAnalyzeStackResponse> => {
-      try {
-        const stack = (await cqrsDispatcher.dispatchQuery(
-          new AnalyzeProjectStackQuery(payload),
-        )) as IProjectStack;
-        return { success: true, data: stack };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const stack = (await cqrsDispatcher.dispatchQuery(
+        new AnalyzeProjectStackQuery(payload),
+      )) as IProjectStack;
+      return stack;
     },
   );
 }

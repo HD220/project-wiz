@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { IForumPostRepository } from "@/main/modules/forum/persistence/drizzle-forum-post.repository";
 
 export interface IRemoveForumPostCommandPayload {
@@ -20,9 +21,8 @@ export class RemoveForumPostCommandHandler {
       return await this.forumPostRepository.delete(command.payload.id);
     } catch (error) {
       console.error(`Failed to remove forum post:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to remove forum post: ${(error as Error).message}`,
       );
-    }
   }
 }

@@ -13,12 +13,4 @@ export class Project extends BaseEntity<ProjectProps> {
     ProjectPropsSchema.parse(props);
     super(props, id);
   }
-
-  get name(): string {
-    return this.props.name;
-  }
-
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
 }

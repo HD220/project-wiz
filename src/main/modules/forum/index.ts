@@ -145,82 +145,72 @@ function registerForumPostHandlers(
 }
 
 function handleForumListTopics(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcForumListTopicsPayload, IForumTopic[]>(
     IpcChannel.FORUM_LIST_TOPICS,
-    async (): Promise<IpcForumListTopicsResponse> => {
-      try {
-        const topics = (await cqrsDispatcher.dispatchQuery(
-          new ListForumTopicsQuery(),
-        )) as IForumTopic[];
-        return { success: true, data: topics };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const topics = (await cqrsDispatcher.dispatchQuery(
+        new ListForumTopicsQuery(payload),
+      )) as IForumTopic[];
+      return topics;
     },
   );
 }
+
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import type { IForumTopic, IForumPost } from "@/shared/ipc-types/domain-types";
+import type {
+  IpcForumCreateTopicPayload,
+  IpcForumListTopicsPayload,
+  IpcForumListPostsPayload,
+  IpcForumCreatePostPayload,
+} from "@/shared/ipc-types/ipc-payloads";
+import { CreateForumTopicCommand } from "./application/commands/create-forum-topic.command";
+import { ListForumTopicsQuery } from "./application/queries/list-forum-topics.query";
+import { ListForumPostsQuery } from "./application/queries/list-forum-posts.query";
+import { CreateForumPostCommand } from "./application/commands/create-forum-post.command";
+
+// ... (código existente)
 
 function handleForumCreateTopic(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcForumCreateTopicPayload, IForumTopic>(
     IpcChannel.FORUM_CREATE_TOPIC,
-    async (
-      _,
-      payload: IpcForumCreateTopicPayload,
-    ): Promise<IpcForumCreateTopicResponse> => {
-      try {
-        const topic = (await cqrsDispatcher.dispatchCommand(
-          new CreateForumTopicCommand(payload),
-        )) as IForumTopic;
-        return { success: true, data: topic };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const topic = (await cqrsDispatcher.dispatchCommand(
+        new CreateForumTopicCommand(payload),
+      )) as IForumTopic;
+      return topic;
     },
   );
 }
 
+// ... (restante do código)
+
 function handleForumListPosts(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcForumListPostsPayload, IForumPost[]>(
     IpcChannel.FORUM_LIST_POSTS,
-    async (
-      _,
-      payload: IpcForumListPostsPayload,
-    ): Promise<IpcForumListPostsResponse> => {
-      try {
-        const posts = (await cqrsDispatcher.dispatchQuery(
-          new ListForumPostsQuery(payload),
-        )) as IForumPost[];
-        return { success: true, data: posts };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const posts = (await cqrsDispatcher.dispatchQuery(
+        new ListForumPostsQuery(payload),
+      )) as IForumPost[];
+      return posts;
     },
   );
 }
 
 function handleForumCreatePost(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcForumCreatePostPayload, IForumPost>(
     IpcChannel.FORUM_CREATE_POST,
-    async (
-      _,
-      payload: IpcForumCreatePostPayload,
-    ): Promise<IpcForumCreatePostResponse> => {
-      try {
-        const post = (await cqrsDispatcher.dispatchCommand(
-          new CreateForumPostCommand(payload),
-        )) as IForumPost;
-        return { success: true, data: post };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const post = (await cqrsDispatcher.dispatchCommand(
+        new CreateForumPostCommand(payload),
+      )) as IForumPost;
+      return post;
     },
   );
 }
@@ -235,8 +225,48 @@ export function registerForumModule(
 
   registerForumTopicHandlers(cqrsDispatcher, forumTopicRepository);
   registerForumPostHandlers(cqrsDispatcher, forumPostRepository);
-  handleForumListTopics(cqrsDispatcher);
-  handleForumCreateTopic(cqrsDispatcher);
-  handleForumListPosts(cqrsDispatcher);
-  handleForumCreatePost(cqrsDispatcher);
+
+  createIpcHandler<IpcForumCreateTopicPayload, IForumTopic>(
+    IpcChannel.FORUM_CREATE_TOPIC,
+    cqrsDispatcher,
+    async (payload) => {
+      const topic = (await cqrsDispatcher.dispatchCommand(
+        new CreateForumTopicCommand(payload),
+      )) as IForumTopic;
+      return topic;
+    },
+  );
+
+  createIpcHandler<IpcForumListTopicsPayload, IForumTopic[]>(
+    IpcChannel.FORUM_LIST_TOPICS,
+    cqrsDispatcher,
+    async (payload) => {
+      const topics = (await cqrsDispatcher.dispatchQuery(
+        new ListForumTopicsQuery(payload),
+      )) as IForumTopic[];
+      return topics;
+    },
+  );
+
+  createIpcHandler<IpcForumListPostsPayload, IForumPost[]>(
+    IpcChannel.FORUM_LIST_POSTS,
+    cqrsDispatcher,
+    async (payload) => {
+      const posts = (await cqrsDispatcher.dispatchQuery(
+        new ListForumPostsQuery(payload),
+      )) as IForumPost[];
+      return posts;
+    },
+  );
+
+  createIpcHandler<IpcForumCreatePostPayload, IForumPost>(
+    IpcChannel.FORUM_CREATE_POST,
+    cqrsDispatcher,
+    async (payload) => {
+      const post = (await cqrsDispatcher.dispatchCommand(
+        new CreateForumPostCommand(payload),
+      )) as IForumPost;
+      return post;
+    },
+  );
 }

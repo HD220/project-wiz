@@ -25,7 +25,10 @@
       "@/hooks/*": ["./src/renderer/hooks/*"],
       "@/shared/*": ["./src/shared/*"],
       "@/main/*": ["./src/main/*"],
-      "@/renderer/*": ["./src/renderer/*"]
+      "@/renderer/*": ["./src/renderer/*"],
+      "@/persistence/*": ["./src/main/persistence/*"],
+      "@/kernel/*": ["./src/main/kernel/*"],
+      "@/modules/*": ["./src/main/modules/*"]
     }
   },
   "include": [

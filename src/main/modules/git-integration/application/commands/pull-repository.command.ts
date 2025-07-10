@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { GitService } from "@/main/modules/git-integration/domain/git.service";
 
 export class PullRepositoryCommand implements ICommand<undefined> {
@@ -19,7 +20,7 @@ export class PullRepositoryCommandHandler {
       return await this.gitService.pull();
     } catch (error: unknown) {
       console.error(`Failed to pull repository:`, error);
-      throw new Error(`Failed to pull repository: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to pull repository: ${(error as Error).message}`);
     }
   }
 }

@@ -21,6 +21,20 @@ const baseRecommendedRules = {
   ...jsxA11yPlugin.configs.recommended.rules,
 };
 
+const customRules = {
+  "no-restricted-syntax": [
+    "error",
+    {
+      selector: "CallExpression[callee.object.name='ipcMain'][callee.property.name='handle']",
+      message: "Direct use of ipcMain.handle is forbidden. Use createIpcHandler from @/main/kernel/ipc-handler-utility instead.",
+    },
+    {
+      selector: "CallExpression[callee.object.property.name='electronIPC'][callee.property.name='invoke']",
+      message: "Direct use of window.electronIPC.invoke is forbidden. Use useIpcQuery or useIpcMutation hooks instead.",
+    },
+  ],
+};
+
 const typeScriptSpecificRules = {
   "@typescript-eslint/no-unused-vars": [
     "warn",
@@ -334,6 +348,7 @@ export default [
       ...reactSpecificRules,
       ...codeStyleAndQualityRules,
       ...testingSpecificRules,
+      ...customRules,
       "prettier/prettier": "error",
     },
     settings: {

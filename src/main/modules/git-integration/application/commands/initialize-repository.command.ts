@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { GitService } from "@/main/modules/git-integration/domain/git.service";
 
 export class InitializeRepositoryCommand implements ICommand<undefined> {
@@ -19,9 +20,8 @@ export class InitializeRepositoryCommandHandler {
       return await this.gitService.init();
     } catch (error: unknown) {
       console.error(`Failed to initialize repository:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to initialize repository: ${(error as Error).message}`,
       );
-    }
   }
 }

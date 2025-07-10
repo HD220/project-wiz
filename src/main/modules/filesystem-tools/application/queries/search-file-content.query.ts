@@ -1,4 +1,5 @@
-import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { IQuery }m "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 
 export class SearchFileContentQuery
@@ -31,7 +32,7 @@ export class SearchFileContentQueryHandler {
       );
     } catch (error: unknown) {
       console.error(`Failed to search file content:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to search file content: ${(error as Error).message}`,
       );
     }

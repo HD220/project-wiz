@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { IPersona } from "@/shared/ipc-types/domain-types";
+import type { IPersona } from "@/shared/ipc-types/domain-types";
+import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
+import type { IpcPersonaRefineSuggestionPayload, IpcPersonaCreatePayload } from "@/shared/ipc-types/ipc-payloads";
 
 interface UsePersonaSubmissionProps {
   onSuccess: () => void;
@@ -13,6 +15,33 @@ export function usePersonaSubmission({
   onError,
   onFinally,
 }: UsePersonaSubmissionProps) {
+  const { mutate: createPersona } = useIpcMutation<IPersona, Error, IpcPersonaCreatePayload>({
+    channel: IpcChannel.PERSONA_CREATE,
+    onSuccess: () => {
+      onSuccess();
+    },
+    onError: (err) => {
+      onError(err.message || "Failed to create persona");
+    },
+    onSettled: onFinally,
+  });
+
+  const { mutate: refinePersonaSuggestion } = useIpcMutation<IPersona, Error, IpcPersonaRefineSuggestionPayload>({
+    channel: IpcChannel.PERSONA_REFINE_SUGGESTION,
+    onSuccess: (refinedPersona) => {
+      createPersona({
+        name: refinedPersona.name,
+        description: refinedPersona.description,
+        llmModel: refinedPersona.llmConfig.model,
+        llmTemperature: refinedPersona.llmConfig.temperature,
+        tools: refinedPersona.tools,
+      });
+    },
+    onError: (err) => {
+      onError(err.message || "Failed to refine persona suggestion");
+    },
+  });
+
   const handlePersonaSubmission = useCallback(
     async (
       name: string,
@@ -21,57 +50,18 @@ export function usePersonaSubmission({
       temperature: number,
       toolsList: string,
     ) => {
-      try {
-        const refinedPersonaResult = await window.electronIPC.invoke(
-          IpcChannel.PERSONA_REFINE_SUGGESTION,
-          {
-            name,
-            description,
-            llmModel: model,
-            llmTemperature: temperature,
-            tools: toolsList
-              .split(",")
-              .map((tool) => tool.trim())
-              .filter((tool) => tool),
-          },
-        );
-
-        if (!refinedPersonaResult.success || !refinedPersonaResult.data) {
-          onError(
-            refinedPersonaResult.error?.message ||
-              "Failed to refine persona suggestion",
-          );
-          return;
-        }
-
-        const finalPersona = refinedPersonaResult.data as IPersona;
-
-        const createPersonaResult = await window.electronIPC.invoke(
-          IpcChannel.PERSONA_CREATE,
-          {
-            name: finalPersona.name,
-            description: finalPersona.description,
-            llmModel: finalPersona.llmConfig.model,
-            llmTemperature: finalPersona.llmConfig.temperature,
-            tools: finalPersona.tools,
-          },
-        );
-
-        if (!createPersonaResult.success) {
-          onError(
-            createPersonaResult.error?.message || "Failed to create persona",
-          );
-          return;
-        }
-
-        onSuccess();
-      } catch (err: unknown) {
-        onError((err as Error).message);
-      } finally {
-        onFinally();
-      }
+      refinePersonaSuggestion({
+        name,
+        description,
+        llmModel: model,
+        llmTemperature: temperature,
+        tools: toolsList
+          .split(",")
+          .map((tool) => tool.trim())
+          .filter((tool) => tool),
+      });
     },
-    [onSuccess, onError, onFinally],
+    [refinePersonaSuggestion, createPersona, onSuccess, onError, onFinally],
   );
 
   return { handlePersonaSubmission };

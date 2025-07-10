@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { Project } from "@/main/modules/project-management/domain/project.entity";
 import { IProjectRepository } from "@/main/modules/project-management/domain/project.repository";
 
@@ -17,7 +18,7 @@ export class ListProjectsQueryHandler {
       return await this.projectRepository.findAll();
     } catch (error) {
       console.error(`Failed to list projects:`, error);
-      throw new Error(`Failed to list projects: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to list projects: ${(error as Error).message}`);
     }
   }
 }

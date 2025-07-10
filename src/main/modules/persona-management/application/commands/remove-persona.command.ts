@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { IPersonaRepository } from "@/main/modules/persona-management/domain/persona.repository";
 
 export interface IRemovePersonaCommandPayload {
@@ -20,7 +21,7 @@ export class RemovePersonaCommandHandler {
       return await this.personaRepository.delete(command.payload.id);
     } catch (error) {
       console.error(`Failed to remove persona:`, error);
-      throw new Error(`Failed to remove persona: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to remove persona: ${(error as Error).message}`);
     }
   }
 }

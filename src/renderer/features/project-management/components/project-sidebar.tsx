@@ -1,60 +1,38 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 
-import { IProject } from "@/shared/ipc-types/domain-types";
+import type { IProject } from "@/shared/ipc-types/domain-types";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { useIpcQuery } from "@/renderer/hooks/use-ipc-query.hook";
+import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
+import type { IpcProjectRemovePayload } from "@/shared/ipc-types/ipc-payloads";
 
 export function ProjectSidebar() {
-  const [projects, setProjects] = useState<IProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: projects, isLoading, error, refetch: fetchProjects } = useIpcQuery<IProject[]>({
+    channel: IpcChannel.PROJECT_LIST,
+  });
 
-  const fetchProjects = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await window.electronIPC.invoke(IpcChannel.PROJECT_LIST);
-      if (result.success) {
-        setProjects(result.data || []);
-      } else {
-        setError(result.error?.message || "An unknown error occurred");
-      }
-    } catch (err: unknown) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { mutate: removeProject } = useIpcMutation<void, Error, IpcProjectRemovePayload>({
+    channel: IpcChannel.PROJECT_REMOVE,
+    onSuccess: () => {
+      fetchProjects();
+    },
+    onError: (err) => {
+      alert(`Error removing project: ${err.message}`);
+    },
+  });
 
-  const handleRemoveProject = async (id: string) => {
-    try {
-      const result = await window.electronIPC.invoke(
-        IpcChannel.PROJECT_REMOVE,
-        { id },
-      );
-      if (result.success) {
-        fetchProjects();
-      } else {
-        alert(
-          `Error removing project: ${result.error?.message || "An unknown error occurred"}`,
-        );
-      }
-    } catch (err: unknown) {
-      alert(`Error removing project: ${(err as Error).message}`);
-    }
+  const handleRemoveProject = (id: string) => {
+    removeProject({ id });
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
-  if (loading) return <div>Loading projects...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <div>Loading projects...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="w-64 bg-gray-100 p-4 border-r border-gray-200">
       <h2 className="text-xl font-semibold mb-4">Projects</h2>
       <ul>
-        {projects.map((project) => (
+        {projects?.map((project) => (
           <li
             key={project.id}
             className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"

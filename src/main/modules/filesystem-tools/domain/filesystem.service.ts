@@ -1,5 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+import { ApplicationError } from "@/main/errors/application.error";
+import { NotFoundError } from "@/main/errors/not-found.error";
 
 export class FilesystemService {
   private projectBaseDir: string;
@@ -17,7 +19,7 @@ export class FilesystemService {
     try {
       return await fs.readFile(absolutePath, { encoding: "utf8" });
     } catch (error: unknown) {
-      throw new Error(
+      throw new ApplicationError(
         `Failed to read file ${relativePath}: ${(error as Error).message}`,
       );
     }
@@ -28,10 +30,9 @@ export class FilesystemService {
     try {
       await fs.writeFile(absolutePath, content, { encoding: "utf8" });
     } catch (error: unknown) {
-      throw new Error(
+      throw new ApplicationError(
         `Failed to write file ${relativePath}: ${(error as Error).message}`,
       );
-    }
   }
 
   async listDirectory(relativePath: string): Promise<string[]> {
@@ -40,10 +41,9 @@ export class FilesystemService {
       const entries = await fs.readdir(absolutePath);
       return entries;
     } catch (error: unknown) {
-      throw new Error(
+      throw new ApplicationError(
         `Failed to list directory ${relativePath}: ${(error as Error).message}`,
       );
-    }
   }
 
   async searchFileContent(
@@ -63,9 +63,8 @@ export class FilesystemService {
       });
       return matchingLines;
     } catch (error: unknown) {
-      throw new Error(
+      throw new ApplicationError(
         `Failed to search file content in ${relativePath}: ${(error as Error).message}`,
       );
-    }
   }
 }

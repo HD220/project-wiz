@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
 export interface IRemoveLlmConfigCommandPayload {
@@ -20,9 +21,8 @@ export class RemoveLlmConfigCommandHandler {
       return await this.llmConfigRepository.delete(command.payload.id);
     } catch (error) {
       console.error(`Failed to remove LLM config:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to remove LLM config: ${(error as Error).message}`,
       );
-    }
   }
 }

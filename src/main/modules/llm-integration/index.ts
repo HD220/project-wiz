@@ -1,109 +1,94 @@
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { ipcMain } from "electron";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { ILlmConfig } from "@/shared/ipc-types/domain-types";
-import {
+import type { ILlmConfig } from "@/shared/ipc-types/domain-types";
+import type {
   IpcLlmConfigSavePayload,
-  IpcLlmConfigSaveResponse,
   IpcLlmConfigGetPayload,
-  IpcLlmConfigGetResponse,
   IpcLlmConfigListPayload,
-  IpcLlmConfigListResponse,
   IpcLlmConfigRemovePayload,
-  IpcLlmConfigRemoveResponse,
 } from "@/shared/ipc-types/ipc-payloads";
-import { SaveLlmConfigCommand } from "./application/commands/save-llm-config.command";
-import { GetLlmConfigQuery } from "./application/queries/get-llm-config.query";
-import { ListLlmConfigsQuery } from "./application/queries/list-llm-configs.query";
-import { RemoveLlmConfigCommand } from "./application/commands/remove-llm-config.command";
+import { SaveLlmConfigCommand, SaveLlmConfigCommandHandler } from "./application/commands/save-llm-config.command";
+import { GetLlmConfigQuery, GetLlmConfigQueryHandler } from "./application/queries/get-llm-config.query";
+import { ListLlmConfigsQuery, ListLlmConfigsQueryHandler } from "./application/queries/list-llm-configs.query";
+import { RemoveLlmConfigCommand, RemoveLlmConfigCommandHandler } from "./application/commands/remove-llm-config.command";
+import { DrizzleLlmConfigRepository } from "./persistence/drizzle-llm-config.repository";
+import { db } from "@/main/persistence/db";
 
 export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
-  handleLlmConfigSave(cqrsDispatcher);
-  handleLlmConfigGet(cqrsDispatcher);
-  handleLlmConfigList(cqrsDispatcher);
-  handleLlmConfigRemove(cqrsDispatcher);
-}
+  const llmConfigRepository = new DrizzleLlmConfigRepository(db);
+  const saveLlmConfigCommandHandler = new SaveLlmConfigCommandHandler(
+    llmConfigRepository,
+  );
+  const getLlmConfigQueryHandler = new GetLlmConfigQueryHandler(
+    llmConfigRepository,
+  );
+  const listLlmConfigsQueryHandler = new ListLlmConfigsQueryHandler(
+    llmConfigRepository,
+  );
+  const removeLlmConfigCommandHandler = new RemoveLlmConfigCommandHandler(
+    llmConfigRepository,
+  );
 
-function handleLlmConfigSave(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  cqrsDispatcher.registerCommandHandler<SaveLlmConfigCommand, ILlmConfig>(
+    SaveLlmConfigCommand.name,
+    saveLlmConfigCommandHandler.handle.bind(saveLlmConfigCommandHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<GetLlmConfigQuery, ILlmConfig | undefined>(
+    GetLlmConfigQuery.name,
+    getLlmConfigQueryHandler.handle.bind(getLlmConfigQueryHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<ListLlmConfigsQuery, ILlmConfig[]>(
+    ListLlmConfigsQuery.name,
+    listLlmConfigsQueryHandler.handle.bind(listLlmConfigsQueryHandler),
+  );
+  cqrsDispatcher.registerCommandHandler<RemoveLlmConfigCommand, boolean>(
+    RemoveLlmConfigCommand.name,
+    removeLlmConfigCommandHandler.handle.bind(removeLlmConfigCommandHandler),
+  );
+
+  createIpcHandler<IpcLlmConfigSavePayload, ILlmConfig>(
     IpcChannel.LLM_CONFIG_SAVE,
-    async (
-      _,
-      payload: IpcLlmConfigSavePayload,
-    ): Promise<IpcLlmConfigSaveResponse> => {
-      try {
-        const llmConfig = (await cqrsDispatcher.dispatchCommand(
-          new SaveLlmConfigCommand(payload),
-        )) as ILlmConfig;
-        return { success: true, data: llmConfig };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const llmConfig = (await cqrsDispatcher.dispatchCommand(
+        new SaveLlmConfigCommand(payload),
+      )) as ILlmConfig;
+      return llmConfig;
     },
   );
-}
 
-function handleLlmConfigGet(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcLlmConfigGetPayload, ILlmConfig | undefined>(
     IpcChannel.LLM_CONFIG_GET,
-    async (
-      _,
-      payload: IpcLlmConfigGetPayload,
-    ): Promise<IpcLlmConfigGetResponse> => {
-      try {
-        const llmConfig = (await cqrsDispatcher.dispatchQuery(
-          new GetLlmConfigQuery(payload),
-        )) as ILlmConfig | undefined;
-        return { success: true, data: llmConfig };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const llmConfig = (await cqrsDispatcher.dispatchQuery(
+        new GetLlmConfigQuery(payload),
+      )) as ILlmConfig | undefined;
+      return llmConfig;
     },
   );
-}
 
-function handleLlmConfigList(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcLlmConfigListPayload, ILlmConfig[]>(
     IpcChannel.LLM_CONFIG_LIST,
-    async (
-      _,
-      payload: IpcLlmConfigListPayload,
-    ): Promise<IpcLlmConfigListResponse> => {
-      try {
-        const llmConfigs = (await cqrsDispatcher.dispatchQuery(
-          new ListLlmConfigsQuery(payload),
-        )) as ILlmConfig[];
-        return { success: true, data: llmConfigs };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const llmConfigs = (await cqrsDispatcher.dispatchQuery(
+        new ListLlmConfigsQuery(payload),
+      )) as ILlmConfig[];
+      return llmConfigs;
+    },
+  );
+
+  createIpcHandler<IpcLlmConfigRemovePayload, boolean>(
+    IpcChannel.LLM_CONFIG_REMOVE,
+    cqrsDispatcher,
+    async (payload) => {
+      const result = (await cqrsDispatcher.dispatchCommand(
+        new RemoveLlmConfigCommand(payload),
+      )) as boolean;
+      return result;
     },
   );
 }
 
-function handleLlmConfigRemove(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
-    IpcChannel.LLM_CONFIG_REMOVE,
-    async (
-      _,
-      payload: IpcLlmConfigRemovePayload,
-    ): Promise<IpcLlmConfigRemoveResponse> => {
-      try {
-        const result = (await cqrsDispatcher.dispatchCommand(
-          new RemoveLlmConfigCommand(payload),
-        )) as boolean;
-        return { success: true, data: result };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
-    },
-  );
-}

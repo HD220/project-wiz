@@ -15,20 +15,4 @@ export class DirectMessage extends BaseEntity<DirectMessageProps> {
     DirectMessagePropsSchema.parse(props);
     super(props, id);
   }
-
-  get senderId(): string {
-    return this.props.senderId;
-  }
-
-  get receiverId(): string {
-    return this.props.receiverId;
-  }
-
-  get content(): string {
-    return this.props.content;
-  }
-
-  get timestamp(): Date {
-    return this.props.timestamp;
-  }
 }

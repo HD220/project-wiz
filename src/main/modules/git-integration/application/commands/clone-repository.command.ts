@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { GitService } from "@/main/modules/git-integration/domain/git.service";
 
 export class CloneRepositoryCommand
@@ -28,9 +29,8 @@ export class CloneRepositoryCommandHandler {
       return await this.gitService.clone(command.repoUrl, command.localPath);
     } catch (error: unknown) {
       console.error(`Failed to clone repository:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to clone repository: ${(error as Error).message}`,
       );
-    }
   }
 }

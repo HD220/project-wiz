@@ -1,4 +1,5 @@
 import { and, or, eq } from "drizzle-orm";
+import { ApplicationError } from "@/main/errors/application.error";
 
 import { DirectMessage } from "@/main/modules/direct-messages/domain/direct-message.entity";
 import { IDirectMessageRepository } from "@/main/modules/direct-messages/domain/direct-message.repository";
@@ -21,10 +22,9 @@ export class DrizzleDirectMessageRepository
       return message;
     } catch (error: unknown) {
       console.error("Failed to save direct message:", error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to save direct message: ${(error as Error).message}`,
       );
-    }
   }
 
   async findByConversation(
@@ -52,9 +52,8 @@ export class DrizzleDirectMessageRepository
       return results.map((data) => new DirectMessage(data, data.id));
     } catch (error: unknown) {
       console.error("Failed to find direct messages by conversation:", error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to find direct messages by conversation: ${(error as Error).message}`,
       );
-    }
   }
 }

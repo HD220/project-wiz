@@ -17,26 +17,6 @@ export class ForumPost extends BaseEntity<ForumPostProps> {
     super(props, id);
   }
 
-  get topicId(): string {
-    return this.props.topicId;
-  }
-
-  get authorId(): string {
-    return this.props.authorId;
-  }
-
-  get content(): string {
-    return this.props.content;
-  }
-
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-
   public updateContent(newContent: string): void {
     this.props.content = newContent;
     this.props.updatedAt = new Date();

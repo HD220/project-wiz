@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
@@ -17,9 +18,8 @@ export class ListLlmConfigsQueryHandler {
       return await this.llmConfigRepository.findAll();
     } catch (error) {
       console.error(`Failed to list LLM configs:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to list LLM configs: ${(error as Error).message}`,
       );
-    }
   }
 }

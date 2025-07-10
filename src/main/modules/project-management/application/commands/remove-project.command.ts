@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { IProjectRepository } from "@/main/modules/project-management/domain/project.repository";
 
 export interface IRemoveProjectCommandPayload {
@@ -20,7 +21,7 @@ export class RemoveProjectCommandHandler {
       return await this.projectRepository.delete(command.payload.id);
     } catch (error) {
       console.error(`Failed to remove project:`, error);
-      throw new Error(`Failed to remove project: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to remove project: ${(error as Error).message}`);
     }
   }
 }

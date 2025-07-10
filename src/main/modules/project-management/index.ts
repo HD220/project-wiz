@@ -1,71 +1,69 @@
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { ipcMain } from "electron";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import {
+import type {
   IpcProjectCreatePayload,
-  IpcProjectCreateResponse,
   IpcProjectListResponse,
   IpcProjectRemovePayload,
-  IpcProjectRemoveResponse,
 } from "@/shared/ipc-types/ipc-payloads";
-import { CreateProjectCommand } from "./application/commands/create-project.command";
-import { ListProjectsQuery } from "./application/queries/list-projects.query";
-import { RemoveProjectCommand } from "./application/commands/remove-project.command";
-import { Project } from "./domain/project.entity";
+import { CreateProjectCommand, CreateProjectCommandHandler } from "./application/commands/create-project.command";
+import { ListProjectsQuery, ListProjectsQueryHandler } from "./application/queries/list-projects.query";
+import { RemoveProjectCommand, RemoveProjectCommandHandler } from "./application/commands/remove-project.command";
+import type { Project } from "./domain/project.entity";
+import { DrizzleProjectRepository } from "./persistence/drizzle-project.repository";
+import { db } from "@/main/persistence/db";
 
 export function registerProjectManagementModule(
   cqrsDispatcher: CqrsDispatcher,
 ) {
-  ipcMain.handle(
+  const projectRepository = new DrizzleProjectRepository(db);
+  const createProjectCommandHandler = new CreateProjectCommandHandler(
+    projectRepository,
+  );
+  const listProjectsQueryHandler = new ListProjectsQueryHandler(
+    projectRepository,
+  );
+  const removeProjectCommandHandler = new RemoveProjectCommandHandler(
+    projectRepository,
+  );
+
+  cqrsDispatcher.registerCommandHandler<CreateProjectCommand, Project>(
+    CreateProjectCommand.name,
+    createProjectCommandHandler.handle.bind(createProjectCommandHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<ListProjectsQuery, Project[]>(
+    ListProjectsQuery.name,
+    listProjectsQueryHandler.handle.bind(listProjectsQueryHandler),
+  );
+  cqrsDispatcher.registerCommandHandler<RemoveProjectCommand, boolean>(
+    RemoveProjectCommand.name,
+    removeProjectCommandHandler.handle.bind(removeProjectCommandHandler),
+  );
+
+  createIpcHandler<IpcProjectCreatePayload, Project>(
     IpcChannel.PROJECT_CREATE,
-    async (
-      _,
-      payload: IpcProjectCreatePayload,
-    ): Promise<IpcProjectCreateResponse> => {
-      try {
-        const command = new CreateProjectCommand(payload);
-        const result = (await cqrsDispatcher.dispatchCommand(
-          command,
-        )) as Project;
-        return { success: true, data: result };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const command = new CreateProjectCommand(payload);
+      return (await cqrsDispatcher.dispatchCommand(command)) as Project;
     },
   );
 
-  ipcMain.handle(
+  createIpcHandler<undefined, IpcProjectListResponse>(
     IpcChannel.PROJECT_LIST,
-    async (): Promise<IpcProjectListResponse> => {
-      try {
-        const query = new ListProjectsQuery();
-        const result = (await cqrsDispatcher.dispatchQuery(query)) as Project[];
-        return { success: true, data: result };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async () => {
+      const query = new ListProjectsQuery();
+      return (await cqrsDispatcher.dispatchQuery(query)) as Project[];
     },
   );
 
-  ipcMain.handle(
+  createIpcHandler<IpcProjectRemovePayload, void>(
     IpcChannel.PROJECT_REMOVE,
-    async (
-      _,
-      payload: IpcProjectRemovePayload,
-    ): Promise<IpcProjectRemoveResponse> => {
-      try {
-        const command = new RemoveProjectCommand(payload);
-        await cqrsDispatcher.dispatchCommand(command);
-        return { success: true };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const command = new RemoveProjectCommand(payload);
+      await cqrsDispatcher.dispatchCommand(command);
     },
   );
 }

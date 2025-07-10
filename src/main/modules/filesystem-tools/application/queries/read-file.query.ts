@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 
 export class ReadFileQuery
@@ -24,7 +25,7 @@ export class ReadFileQueryHandler {
       return await this.filesystemService.readFile(query.relativePath);
     } catch (error: unknown) {
       console.error(`Failed to read file:`, error);
-      throw new Error(`Failed to read file: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to read file: ${(error as Error).message}`);
     }
   }
 }

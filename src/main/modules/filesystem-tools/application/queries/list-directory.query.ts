@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 
 export class ListDirectoryQuery
@@ -24,7 +25,7 @@ export class ListDirectoryQueryHandler {
       return await this.filesystemService.listDirectory(query.relativePath);
     } catch (error: unknown) {
       console.error(`Failed to list directory:`, error);
-      throw new Error(`Failed to list directory: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to list directory: ${(error as Error).message}`);
     }
   }
 }

@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { DirectMessage } from "@/main/modules/direct-messages/domain/direct-message.entity";
 import { IDirectMessageRepository } from "@/main/modules/direct-messages/domain/direct-message.repository";
 
@@ -29,7 +30,7 @@ export class SendMessageCommandHandler {
       return await this.messageRepository.save(message);
     } catch (error) {
       console.error(`Failed to send message:`, error);
-      throw new Error(`Failed to send message: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to send message: ${(error as Error).message}`);
     }
   }
 }

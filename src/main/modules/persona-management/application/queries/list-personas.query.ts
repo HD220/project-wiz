@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { Persona } from "@/main/modules/persona-management/domain/persona.entity";
 import { IPersonaRepository } from "@/main/modules/persona-management/domain/persona.repository";
 
@@ -17,7 +18,7 @@ export class ListPersonasQueryHandler {
       return await this.personaRepository.findAll();
     } catch (error) {
       console.error(`Failed to list personas:`, error);
-      throw new Error(`Failed to list personas: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to list personas: ${(error as Error).message}`);
     }
   }
 }

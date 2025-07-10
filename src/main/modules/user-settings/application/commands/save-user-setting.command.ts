@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { UserSetting } from "@/main/modules/user-settings/domain/user-setting.entity";
 import { IUserSettingsRepository } from "@/main/modules/user-settings/domain/user-settings.repository";
 
@@ -38,9 +39,8 @@ export class SaveUserSettingCommandHandler {
       return await this.userSettingsRepository.save(newSetting);
     } catch (error) {
       console.error(`Failed to save user setting:`, error);
-      throw new Error(
+      throw new ApplicationError(
         `Failed to save user setting: ${(error as Error).message}`,
       );
-    }
   }
 }

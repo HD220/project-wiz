@@ -16,22 +16,6 @@ export class ForumTopic extends BaseEntity<ForumTopicProps> {
     super(props, id);
   }
 
-  get title(): string {
-    return this.props.title;
-  }
-
-  get authorId(): string {
-    return this.props.authorId;
-  }
-
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this.props.updatedAt;
-  }
-
   public updateTitle(newTitle: string): void {
     this.props.title = newTitle;
     this.props.updatedAt = new Date();

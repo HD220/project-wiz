@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import { IGitService } from "./git.service.interface";
+import { ApplicationError } from "@/main/errors/application.error";
 
 const execPromise = promisify(exec);
 
@@ -21,7 +22,7 @@ export class GitService implements IGitService {
       }
       return stdout;
     } catch (error: unknown) {
-      throw new Error(`Git command failed: ${(error as Error).message}`);
+      throw new ApplicationError(`Git command failed: ${(error as Error).message}`);
     }
   }
 

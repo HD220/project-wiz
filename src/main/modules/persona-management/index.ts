@@ -1,111 +1,104 @@
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { ipcMain } from "electron";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { IPersona } from "@/shared/ipc-types/domain-types";
-import {
+import type { IPersona } from "@/shared/ipc-types/domain-types";
+import type {
   IpcPersonaRefineSuggestionPayload,
-  IpcPersonaRefineSuggestionResponse,
   IpcPersonaCreatePayload,
-  IpcPersonaCreateResponse,
   IpcPersonaListPayload,
-  IpcPersonaListResponse,
   IpcPersonaRemovePayload,
-  IpcPersonaRemoveResponse,
 } from "@/shared/ipc-types/ipc-payloads";
-import { RefinePersonaSuggestionCommand } from "./application/commands/refine-persona-suggestion.command";
-import { CreatePersonaCommand } from "./application/commands/create-persona.command";
-import { ListPersonasQuery } from "./application/queries/list-personas.query";
-import { RemovePersonaCommand } from "./application/commands/remove-persona.command";
+import { RefinePersonaSuggestionCommand, RefinePersonaSuggestionHandler } from "./application/commands/refine-persona-suggestion.command";
+import { CreatePersonaCommand, CreatePersonaCommandHandler } from "./application/commands/create-persona.command";
+import { ListPersonasQuery, ListPersonasQueryHandler } from "./application/queries/list-personas.query";
+import { RemovePersonaCommand, RemovePersonaCommandHandler } from "./application/commands/remove-persona.command";
+import { GetPersonaQuery, GetPersonaQueryHandler } from "./application/queries/get-persona.query";
+import { DrizzlePersonaRepository } from "./persistence/drizzle-persona.repository";
+import { OpenAILLMAdapter } from "@/main/modules/llm-integration/infrastructure/openai-llm.adapter";
+import { db } from "@/main/persistence/db";
 
 export function registerPersonaManagementModule(
   cqrsDispatcher: CqrsDispatcher,
 ) {
-  handlePersonaRefineSuggestion(cqrsDispatcher);
-  handlePersonaCreate(cqrsDispatcher);
-  handlePersonaList(cqrsDispatcher);
-  handlePersonaRemove(cqrsDispatcher);
-}
+  const personaRepository = new DrizzlePersonaRepository(db);
+  const createPersonaCommandHandler = new CreatePersonaCommandHandler(
+    personaRepository,
+  );
+  const listPersonasQueryHandler = new ListPersonasQueryHandler(
+    personaRepository,
+  );
+  const getPersonaQueryHandler = new GetPersonaQueryHandler(personaRepository);
+  const removePersonaCommandHandler = new RemovePersonaCommandHandler(
+    personaRepository,
+  );
+  const llmAdapter = new OpenAILLMAdapter();
+  const refinePersonaSuggestionHandler = new RefinePersonaSuggestionHandler(
+    llmAdapter,
+  );
 
-function handlePersonaRefineSuggestion(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  cqrsDispatcher.registerCommandHandler<RefinePersonaSuggestionCommand, IPersona>(
+    RefinePersonaSuggestionCommand.name,
+    refinePersonaSuggestionHandler.execute.bind(refinePersonaSuggestionHandler),
+  );
+  cqrsDispatcher.registerCommandHandler<CreatePersonaCommand, IPersona>(
+    CreatePersonaCommand.name,
+    createPersonaCommandHandler.handle.bind(createPersonaCommandHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<ListPersonasQuery, IPersona[]>(
+    ListPersonasQuery.name,
+    listPersonasQueryHandler.handle.bind(listPersonasQueryHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<GetPersonaQuery, IPersona | undefined>(
+    GetPersonaQuery.name,
+    getPersonaQueryHandler.handle.bind(getPersonaQueryHandler),
+  );
+  cqrsDispatcher.registerCommandHandler<RemovePersonaCommand, boolean>(
+    RemovePersonaCommand.name,
+    removePersonaCommandHandler.handle.bind(removePersonaCommandHandler),
+  );
+
+  createIpcHandler<IpcPersonaRefineSuggestionPayload, IPersona>(
     IpcChannel.PERSONA_REFINE_SUGGESTION,
-    async (
-      _,
-      payload: IpcPersonaRefineSuggestionPayload,
-    ): Promise<IpcPersonaRefineSuggestionResponse> => {
-      try {
-        const result = (await cqrsDispatcher.dispatchCommand(
-          new RefinePersonaSuggestionCommand(payload),
-        )) as IPersona;
-        return { success: true, data: result };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const result = (await cqrsDispatcher.dispatchCommand(
+        new RefinePersonaSuggestionCommand(payload),
+      )) as IPersona;
+      return result;
     },
   );
-}
 
-function handlePersonaCreate(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcPersonaCreatePayload, IPersona>(
     IpcChannel.PERSONA_CREATE,
-    async (
-      _,
-      payload: IpcPersonaCreatePayload,
-    ): Promise<IpcPersonaCreateResponse> => {
-      try {
-        const persona = (await cqrsDispatcher.dispatchCommand(
-          new CreatePersonaCommand(payload),
-        )) as IPersona;
-        return { success: true, data: persona };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const persona = (await cqrsDispatcher.dispatchCommand(
+        new CreatePersonaCommand(payload),
+      )) as IPersona;
+      return persona;
     },
   );
-}
 
-function handlePersonaList(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  createIpcHandler<IpcPersonaListPayload, IPersona[]>(
     IpcChannel.PERSONA_LIST,
-    async (
-      _,
-      payload: IpcPersonaListPayload,
-    ): Promise<IpcPersonaListResponse> => {
-      try {
-        const personas = (await cqrsDispatcher.dispatchQuery(
-          new ListPersonasQuery(payload),
-        )) as IPersona[];
-        return { success: true, data: personas };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      const personas = (await cqrsDispatcher.dispatchQuery(
+        new ListPersonasQuery(payload),
+      )) as IPersona[];
+      return personas;
+    },
+  );
+
+  createIpcHandler<IpcPersonaRemovePayload, boolean>(
+    IpcChannel.PERSONA_REMOVE,
+    cqrsDispatcher,
+    async (payload) => {
+      const result = (await cqrsDispatcher.dispatchCommand(
+        new RemovePersonaCommand(payload),
+      )) as boolean;
+      return result;
     },
   );
 }
 
-function handlePersonaRemove(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
-    IpcChannel.PERSONA_REMOVE,
-    async (
-      _,
-      payload: IpcPersonaRemovePayload,
-    ): Promise<IpcPersonaRemoveResponse> => {
-      try {
-        const result = (await cqrsDispatcher.dispatchCommand(
-          new RemovePersonaCommand(payload),
-        )) as boolean;
-        return { success: true, data: result };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
-    },
-  );
-}

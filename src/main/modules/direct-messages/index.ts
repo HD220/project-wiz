@@ -1,52 +1,51 @@
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { ipcMain } from "electron";
+import type { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { createIpcHandler } from "@/main/kernel/ipc-handler-utility";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { IDirectMessage } from "@/shared/ipc-types/domain-types";
-import {
-  IpcDirectMessagesListResponse,
+import type { IDirectMessage } from "@/shared/ipc-types/domain-types";
+import type {
   IpcDirectMessagesSendPayload,
-  IpcDirectMessagesSendResponse,
   IpcDirectMessagesListPayload,
 } from "@/shared/ipc-types/ipc-payloads";
-import { SendMessageCommand } from "./application/commands/send-message.command";
-import { ListMessagesQuery } from "./application/queries/list-messages.query";
+import { SendMessageCommand, SendMessageCommandHandler } from "./application/commands/send-message.command";
+import { ListMessagesQuery, ListMessagesQueryHandler } from "./application/queries/list-messages.query";
+import { DrizzleDirectMessageRepository } from "./persistence/drizzle-direct-message.repository";
+import { db } from "@/main/persistence/db";
 
 export function registerDirectMessagesModule(cqrsDispatcher: CqrsDispatcher) {
-  ipcMain.handle(
+  const directMessageRepository = new DrizzleDirectMessageRepository(db);
+  const sendMessageCommandHandler = new SendMessageCommandHandler(
+    directMessageRepository,
+  );
+  const listMessagesQueryHandler = new ListMessagesQueryHandler(
+    directMessageRepository,
+  );
+
+  cqrsDispatcher.registerCommandHandler<SendMessageCommand, IDirectMessage>(
+    SendMessageCommand.name,
+    sendMessageCommandHandler.handle.bind(sendMessageCommandHandler),
+  );
+  cqrsDispatcher.registerQueryHandler<ListMessagesQuery, IDirectMessage[]>(
+    ListMessagesQuery.name,
+    listMessagesQueryHandler.handle.bind(listMessagesQueryHandler),
+  );
+
+  createIpcHandler<IpcDirectMessagesSendPayload, IDirectMessage>(
     IpcChannel.DIRECT_MESSAGES_SEND,
-    async (
-      _,
-      payload: IpcDirectMessagesSendPayload,
-    ): Promise<IpcDirectMessagesSendResponse> => {
-      try {
-        const message = (await cqrsDispatcher.dispatchCommand(
-          new SendMessageCommand(payload),
-        )) as IDirectMessage;
-        return { success: true, data: message };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      return (await cqrsDispatcher.dispatchCommand(
+        new SendMessageCommand(payload),
+      )) as IDirectMessage;
     },
   );
 
-  ipcMain.handle(
+  createIpcHandler<IpcDirectMessagesListPayload, IDirectMessage[]>(
     IpcChannel.DIRECT_MESSAGES_LIST,
-    async (
-      _,
-      payload: IpcDirectMessagesListPayload,
-    ): Promise<IpcDirectMessagesListResponse> => {
-      try {
-        const messages = (await cqrsDispatcher.dispatchQuery(
-          new ListMessagesQuery(payload),
-        )) as IDirectMessage[];
-        return { success: true, data: messages };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        return { success: false, error: { message } };
-      }
+    cqrsDispatcher,
+    async (payload) => {
+      return (await cqrsDispatcher.dispatchQuery(
+        new ListMessagesQuery(payload),
+      )) as IDirectMessage[];
     },
   );
 }

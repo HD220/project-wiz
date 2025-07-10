@@ -1,4 +1,5 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 
@@ -64,7 +65,7 @@ export class SaveLlmConfigCommandHandler {
       return await this.llmConfigRepository.save(llmConfig);
     } catch (error) {
       console.error(`Failed to save LLM config:`, error);
-      throw new Error(`Failed to save LLM config: ${(error as Error).message}`);
+      throw new ApplicationError(`Failed to save LLM config: ${(error as Error).message}`);
     }
   }
 }

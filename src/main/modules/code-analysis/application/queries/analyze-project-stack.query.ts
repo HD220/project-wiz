@@ -1,4 +1,5 @@
 import { IQuery } from "@/main/kernel/cqrs-dispatcher";
+import { ApplicationError } from "@/main/errors/application.error";
 
 export interface IProjectStack {
   languages: { [key: string]: number };
@@ -47,7 +48,7 @@ export class AnalyzeProjectStackQueryHandler {
         `Failed to analyze project stack for path ${projectPath}:`,
         error,
       );
-      throw new Error(
+      throw new ApplicationError(
         `Failed to analyze project stack: ${(error as Error).message}`,
       );
     }
