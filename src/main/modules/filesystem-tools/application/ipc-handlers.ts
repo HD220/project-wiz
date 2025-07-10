@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 import {
   IpcFilesystemListDirectoryPayload,
   IpcFilesystemListDirectoryResponse,
@@ -9,7 +10,7 @@ import {
   IpcFilesystemSearchFileContentResponse,
   IpcFilesystemWriteFilePayload,
   IpcFilesystemWriteFileResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { ListDirectoryQuery } from "../application/queries/list-directory.query";
 import { ReadFileQuery } from "../application/queries/read-file.query";
 import { SearchFileContentQuery } from "../application/queries/search-file-content.query";
@@ -17,7 +18,7 @@ import { WriteFileCommand } from "../application/commands/write-file.command";
 
 export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    "filesystem:list-directory",
+    IpcChannel.FILESYSTEM_LIST_DIRECTORY,
     async (
       _,
       payload: IpcFilesystemListDirectoryPayload,
@@ -36,7 +37,7 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "filesystem:read-file",
+    IpcChannel.FILESYSTEM_READ_FILE,
     async (
       _,
       payload: IpcFilesystemReadFilePayload,
@@ -55,7 +56,7 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "filesystem:search-file-content",
+    IpcChannel.FILESYSTEM_SEARCH_FILE_CONTENT,
     async (
       _,
       payload: IpcFilesystemSearchFileContentPayload,
@@ -74,7 +75,7 @@ export function registerFilesystemHandlers(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "filesystem:write-file",
+    IpcChannel.FILESYSTEM_WRITE_FILE,
     async (
       _,
       payload: IpcFilesystemWriteFilePayload,

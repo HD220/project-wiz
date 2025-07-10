@@ -1,7 +1,8 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { ILlmConfig } from "@/shared/ipc-types/domain-types";
 import {
-  ILlmConfig,
   IpcLlmConfigSavePayload,
   IpcLlmConfigSaveResponse,
   IpcLlmConfigGetPayload,
@@ -10,7 +11,7 @@ import {
   IpcLlmConfigListResponse,
   IpcLlmConfigRemovePayload,
   IpcLlmConfigRemoveResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { SaveLlmConfigCommand } from "./application/commands/save-llm-config.command";
 import { GetLlmConfigQuery } from "./application/queries/get-llm-config.query";
 import { ListLlmConfigsQuery } from "./application/queries/list-llm-configs.query";
@@ -18,7 +19,7 @@ import { RemoveLlmConfigCommand } from "./application/commands/remove-llm-config
 
 export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    "llm-config:save",
+    IpcChannel.LLM_CONFIG_SAVE,
     async (
       _,
       payload: IpcLlmConfigSavePayload,
@@ -37,7 +38,7 @@ export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "llm-config:get",
+    IpcChannel.LLM_CONFIG_GET,
     async (
       _,
       payload: IpcLlmConfigGetPayload,
@@ -56,7 +57,7 @@ export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "llm-config:list",
+    IpcChannel.LLM_CONFIG_LIST,
     async (
       _,
       payload: IpcLlmConfigListPayload,
@@ -75,7 +76,7 @@ export function registerLlmIntegrationModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "llm-config:remove",
+    IpcChannel.LLM_CONFIG_REMOVE,
     async (
       _,
       payload: IpcLlmConfigRemovePayload,

@@ -11,21 +11,8 @@ describe("Automatic Persona Hiring Module", () => {
   let cqrsDispatcher: CqrsDispatcher;
   let mockLlmConfig: LlmConfig | undefined;
 
-  beforeEach(() => {
-    cqrsDispatcher = new CqrsDispatcher();
-    mockLlmConfig = new LlmConfig(
-      {
-        provider: "openai",
-        model: "gpt-4",
-        apiKey: "test-key",
-        temperature: 0.7,
-        maxTokens: 2000,
-      },
-      "llm-config-id",
-    );
-
-    // Mock AnalyzeProjectStackQueryHandler
-    cqrsDispatcher.registerQueryHandler(
+  const setupAnalyzeProjectStackQueryMock = (dispatcher: CqrsDispatcher) => {
+    dispatcher.registerQueryHandler(
       "AnalyzeProjectStackQuery",
       async (query: AnalyzeProjectStackQuery) => {
         if (query.payload.projectPath.includes("react")) {
@@ -45,26 +32,30 @@ describe("Automatic Persona Hiring Module", () => {
         return { languages: { Unknown: 1.0 }, frameworks: [], libraries: [] };
       },
     );
+  };
 
-    // Default mock for GetLlmConfigQuery to return a valid config
-    cqrsDispatcher.registerQueryHandler(
+  const setupGetLlmConfigQueryMock = (
+    dispatcher: CqrsDispatcher,
+    llmConfig: LlmConfig | undefined,
+  ) => {
+    dispatcher.registerQueryHandler(
       "GetLlmConfigQuery",
       async (query: GetLlmConfigQuery) => {
         if (
           query.payload.provider === "openai" &&
           query.payload.model === "gpt-4"
         ) {
-          return mockLlmConfig;
+          return llmConfig;
         }
         return undefined;
       },
     );
+  };
 
-    // Mock CreatePersonaCommand (spy on it)
-    cqrsDispatcher.registerCommandHandler(
+  const setupCreatePersonaCommandMock = (dispatcher: CqrsDispatcher) => {
+    dispatcher.registerCommandHandler(
       "CreatePersonaCommand",
       async (command: CreatePersonaCommand) => {
-        // In a real scenario, this would save to DB. Here, we just return a mock persona.
         return new Persona(
           {
             name: command.payload.name,
@@ -79,15 +70,35 @@ describe("Automatic Persona Hiring Module", () => {
         );
       },
     );
+  };
 
-    const hirePersonasAutomaticallyCommandHandler =
-      new HirePersonasAutomaticallyCommandHandler(cqrsDispatcher);
-    cqrsDispatcher.registerCommandHandler(
+  const setupHirePersonasAutomaticallyCommandHandler = (
+    dispatcher: CqrsDispatcher,
+  ) => {
+    const handler = new HirePersonasAutomaticallyCommandHandler(dispatcher);
+    dispatcher.registerCommandHandler(
       "HirePersonasAutomaticallyCommand",
-      hirePersonasAutomaticallyCommandHandler.handle.bind(
-        hirePersonasAutomaticallyCommandHandler,
-      ),
+      handler.handle.bind(handler),
     );
+  };
+
+  beforeEach(() => {
+    cqrsDispatcher = new CqrsDispatcher();
+    mockLlmConfig = new LlmConfig(
+      {
+        provider: "openai",
+        model: "gpt-4",
+        apiKey: "test-key",
+        temperature: 0.7,
+        maxTokens: 2000,
+      },
+      "llm-config-id",
+    );
+
+    setupAnalyzeProjectStackQueryMock(cqrsDispatcher);
+    setupGetLlmConfigQueryMock(cqrsDispatcher, mockLlmConfig);
+    setupCreatePersonaCommandMock(cqrsDispatcher);
+    setupHirePersonasAutomaticallyCommandHandler(cqrsDispatcher);
   });
 
   it("should hire personas automatically based on project stack (React)", async () => {

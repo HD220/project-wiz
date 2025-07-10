@@ -1,15 +1,16 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { IProjectStack } from "@/shared/ipc-types/domain-types";
 import {
-  IProjectStack,
   IpcCodeAnalysisAnalyzeStackPayload,
   IpcCodeAnalysisAnalyzeStackResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { AnalyzeProjectStackQuery } from "./application/queries/analyze-project-stack.query";
 
 export function registerCodeAnalysisModule(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    "code-analysis:analyze-stack",
+    IpcChannel.CODE_ANALYSIS_ANALYZE_STACK,
     async (
       _,
       payload: IpcCodeAnalysisAnalyzeStackPayload,

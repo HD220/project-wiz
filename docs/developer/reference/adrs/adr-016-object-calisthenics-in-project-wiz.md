@@ -14,8 +14,9 @@ _ **Intenção:** Promove métodos pequenos e focados, desencorajando o aninhame
 _ **Aplicação no Project Wiz:**
 _ Extraia blocos `if`, `for`, `while`, `try/catch` aninhados para métodos privados ou funções auxiliares bem nomeadas.
 _ Utilize "Guard Clauses" (retornos antecipados) para validar pré-condições e reduzir o aninhamento no "caminho feliz" do método.
-_ **Exemplo (TypeScript):**
-```typescript
+\_ **Exemplo (TypeScript):**
+
+````typescript
 // Ruim (múltiplos níveis)
 // function processItem(item: Item, user: User) {
 // if (item) {
@@ -139,3 +140,4 @@ _ Toda mutação de estado deve ocorrer através de métodos de negócio bem def
 - Identifique primitivas que carregam significado de domínio e proponha/crie VOs para elas.
 - Desafie classes com muitas variáveis de instância ou métodos longos, buscando oportunidades para dividi-las.
 - Foque em expor comportamento, não apenas estado.
+````

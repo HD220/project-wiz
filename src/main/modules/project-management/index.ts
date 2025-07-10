@@ -1,12 +1,13 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 import {
   IpcProjectCreatePayload,
   IpcProjectCreateResponse,
   IpcProjectListResponse,
   IpcProjectRemovePayload,
   IpcProjectRemoveResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { CreateProjectCommand } from "./application/commands/create-project.command";
 import { ListProjectsQuery } from "./application/queries/list-projects.query";
 import { RemoveProjectCommand } from "./application/commands/remove-project.command";
@@ -16,7 +17,7 @@ export function registerProjectManagementModule(
   cqrsDispatcher: CqrsDispatcher,
 ) {
   ipcMain.handle(
-    "project:create",
+    IpcChannel.PROJECT_CREATE,
     async (
       _,
       payload: IpcProjectCreatePayload,
@@ -35,20 +36,23 @@ export function registerProjectManagementModule(
     },
   );
 
-  ipcMain.handle("project:list", async (): Promise<IpcProjectListResponse> => {
-    try {
-      const query = new ListProjectsQuery();
-      const result = (await cqrsDispatcher.dispatchQuery(query)) as Project[];
-      return { success: true, data: result };
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      return { success: false, error: { message } };
-    }
-  });
+  ipcMain.handle(
+    IpcChannel.PROJECT_LIST,
+    async (): Promise<IpcProjectListResponse> => {
+      try {
+        const query = new ListProjectsQuery();
+        const result = (await cqrsDispatcher.dispatchQuery(query)) as Project[];
+        return { success: true, data: result };
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, error: { message } };
+      }
+    },
+  );
 
   ipcMain.handle(
-    "project:remove",
+    IpcChannel.PROJECT_REMOVE,
     async (
       _,
       payload: IpcProjectRemovePayload,

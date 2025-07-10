@@ -77,47 +77,76 @@ Algumas funcionalidades, especialmente integrações com APIs de LLM, podem requ
 
 ## 6. Executando a Aplicação em Modo de Desenvolvimento
 
-Para iniciar o Project Wiz em modo de desenvolvimento, com hot-reloading para o frontend (React/Vite) e o backend (Electron/Node.js):
+Para iniciar o Project Wiz em modo de desenvolvimento, com hot-reloading para o frontend (React/Vite) e o backend (Electron/Node.js), execute:
 
 ```bash
 npm run dev
 ```
 
-Este comando geralmente utiliza `electron-forge start` nos bastidores. A aplicação Electron deverá abrir. Quaisquer alterações que você fizer no código-fonte (especialmente no frontend e no código do processo principal/preload do Electron) devem recarregar a aplicação automaticamente.
+Este comando utiliza `electron-forge start` nos bastidores. A aplicação Electron deverá abrir. Quaisquer alterações que você fizer no código-fonte devem recarregar a aplicação automaticamente.
 
-## 7. Linting e Formatação
+## 7. Comandos Essenciais do Projeto
 
-O projeto utiliza ESLint para análise estática de código e Prettier (ou configuração similar) para formatação de código.
+Para facilitar o desenvolvimento, o `package.json` contém vários scripts úteis. Aqui estão os mais importantes:
 
-- **Verificar por Erros de Lint:**
+- **Rodar a Aplicação (Desenvolvimento):**
+
   ```bash
-  npm run lint
+  npm run dev
   ```
-- **Tentar Corrigir Erros de Lint Automaticamente:**
-  ``bash
-    npm run lint:fix  # Ou um script similar como `npm run format`
-    ``
-  É uma boa prática executar o linter antes de commitar suas alterações. Considere configurar seu editor de código (VS Code, WebStorm, etc.) para integrar com ESLint e formatar o código ao salvar.
 
-## 8. Executando Testes
+  _Inicia a aplicação em modo de desenvolvimento com recarregamento automático._
 
-O projeto utiliza Vitest para testes.
+- **Construir para Produção:**
 
-- **Executar todos os testes uma vez:**
   ```bash
-  npm run test
+  npm run build
   ```
-- **Executar testes em modo watch (re-executa ao salvar arquivos):**
-  ```bash
-  npm run test:watch
-  ```
-- **Verificar cobertura de testes:**
-  ```bash
-  npm run test:coverage
-  ```
+
+  _Compila e empacota a aplicação para distribuição._
+
+- **Executar Testes:**
+  - Para rodar todos os testes uma vez:
+    ```bash
+    npm run test
+    ```
+  - Para rodar os testes em modo "watch" (re-executa ao salvar):
+    ```bash
+    npm run test:watch
+    ```
+  - Para gerar um relatório de cobertura de testes:
+    ```bash
+    npm run test:coverage
+    ```
+
+- **Análise e Formatação de Código:**
+  - Para verificar o código com ESLint e tentar corrigir problemas:
+    ```bash
+    npm run lint
+    ```
+  - Para formatar todo o código com Prettier:
+    ```bash
+    npm run format
+    ```
+  - Para verificar se o código está formatado (útil em CI):
+    ```bash
+    npm run format:check
+    ```
+
+- **Gestão do Banco de Dados (Drizzle):**
+  - Para gerar migrações após alterar o schema:
+    ```bash
+    npm run db:generate
+    ```
+  - Para aplicar migrações ao banco de dados:
+    ```bash
+    npm run db:migrate
+    ```
+  - Para abrir o Drizzle Studio (interface web para o DB):
+    ```bash
+    npm run db:studio
+    ```
 
 ## Conclusão
 
-Com estes passos, seu ambiente de desenvolvimento para o Project Wiz deve estar configurado e pronto. Lembre-se de consultar o `package.json` para outros scripts úteis e manter suas dependências atualizadas (com cautela, para evitar quebras de compatibilidade).
-
-Se encontrar problemas, verifique as issues abertas no repositório do projeto ou considere abrir uma nova issue com detalhes do problema.
+Com estes passos, seu ambiente de desenvolvimento para o Project Wiz deve estar configurado e pronto. Se encontrar problemas, verifique as issues abertas no repositório do projeto ou considere abrir uma nova issue com detalhes do problema.

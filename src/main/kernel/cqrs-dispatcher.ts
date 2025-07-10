@@ -16,6 +16,11 @@ export type QueryHandler<TQuery extends IQuery, TResult> = (
   query: TQuery,
 ) => Promise<TResult>;
 
+// Centralized error logging function
+function logError(message: string, error: unknown, context: string) {
+  console.error(`[CQRS Dispatcher] Error in ${context}: ${message}`, error);
+}
+
 export class CqrsDispatcher {
   private commandHandlers = new Map<
     string,
@@ -51,14 +56,19 @@ export class CqrsDispatcher {
   ): Promise<TResult> {
     const handler = this.commandHandlers.get(command.type);
     if (!handler) {
-      throw new Error(`No handler registered for command type ${command.type}`);
+      const errorMessage = `No handler registered for command type ${command.type}`;
+      logError(errorMessage, null, "dispatchCommand");
+      throw new Error(errorMessage);
     }
     try {
       const typedHandler = handler as CommandHandler<TCommand, TResult>;
       return await typedHandler(command);
     } catch (error: unknown) {
-      // TODO: Implement a centralized logging strategy
-      console.error(`Error dispatching command ${command.type}:`, error);
+      logError(
+        `Error dispatching command ${command.type}`,
+        error,
+        "dispatchCommand",
+      );
       throw error;
     }
   }
@@ -68,14 +78,15 @@ export class CqrsDispatcher {
   ): Promise<TResult> {
     const handler = this.queryHandlers.get(query.type);
     if (!handler) {
-      throw new Error(`No handler registered for query type ${query.type}`);
+      const errorMessage = `No handler registered for query type ${query.type}`;
+      logError(errorMessage, null, "dispatchQuery");
+      throw new Error(errorMessage);
     }
     try {
       const typedHandler = handler as QueryHandler<TQuery, TResult>;
       return await typedHandler(query);
     } catch (error: unknown) {
-      // TODO: Implement a centralized logging strategy
-      console.error(`Error dispatching query ${query.type}:`, error);
+      logError(`Error dispatching query ${query.type}`, error, "dispatchQuery");
       throw error;
     }
   }

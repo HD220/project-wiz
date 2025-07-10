@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-import { IDirectMessage } from "@/shared/ipc-types/entities";
+import { IDirectMessage } from "@/shared/ipc-types/domain-types";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -18,10 +19,13 @@ function ChatWindow({ conversationId }: ChatWindowProps) {
     setLoading(true);
     setError(null);
     try {
-      const result = await window.electronIPC.invoke("direct-messages:list", {
-        senderId,
-        receiverId,
-      });
+      const result = await window.electronIPC.invoke(
+        IpcChannel.DIRECT_MESSAGES_LIST,
+        {
+          senderId,
+          receiverId,
+        },
+      );
       if (result.success) {
         setMessages(result.data || []);
       } else {
@@ -41,11 +45,14 @@ function ChatWindow({ conversationId }: ChatWindowProps) {
     }
 
     try {
-      const result = await window.electronIPC.invoke("direct-messages:send", {
-        senderId,
-        receiverId,
-        content: newMessage,
-      });
+      const result = await window.electronIPC.invoke(
+        IpcChannel.DIRECT_MESSAGES_SEND,
+        {
+          senderId,
+          receiverId,
+          content: newMessage,
+        },
+      );
       if (result.success) {
         setNewMessage("");
         fetchMessages();

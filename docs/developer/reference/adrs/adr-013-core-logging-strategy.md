@@ -74,10 +74,11 @@ _ **Exemplo (IPCService):** `ipcService.logErrorToMain("Error fetching projects"
 _ **Justificativa:** Adapta a estratégia de logging às responsabilidades e ao ambiente de cada camada.
 
 **6. Logging de Jobs (`JobEntity.addLog()`):**
-* **Distinção:** O método `JobEntity.addLog()` é para registrar um histórico operacional *específico da execução de um Job individual*. Esses logs são armazenados como parte dos dados do `JobEntity` (e.g., na coluna `logs` do banco de dados).
-* **Não Substitui `ILogger`:** `job.addLog()` não substitui o uso de `ILogger` pelos serviços que processam o job (e.g., `WorkerService`, `GenericAgentExecutor`). Esses serviços ainda devem usar `ILogger` para seus próprios logs de diagnóstico e operacionais.
-_ **Exemplo:** `WorkerService` pode usar `this.logger.info("Processing job X")` e também chamar `job.addLog("Processor started")`.
-_ **Justificativa:** Separa o log de auditoria/progresso detalhado de um job específico do log geral da aplicação.
+
+- **Distinção:** O método `JobEntity.addLog()` é para registrar um histórico operacional _específico da execução de um Job individual_. Esses logs são armazenados como parte dos dados do `JobEntity` (e.g., na coluna `logs` do banco de dados).
+- **Não Substitui `ILogger`:** `job.addLog()` não substitui o uso de `ILogger` pelos serviços que processam o job (e.g., `WorkerService`, `GenericAgentExecutor`). Esses serviços ainda devem usar `ILogger` para seus próprios logs de diagnóstico e operacionais.
+  _ **Exemplo:** `WorkerService` pode usar `this.logger.info("Processing job X")` e também chamar `job.addLog("Processor started")`.
+  _ **Justificativa:** Separa o log de auditoria/progresso detalhado de um job específico do log geral da aplicação.
 
 **7. Destino dos Logs e Configuração:**
 _ **Desenvolvimento:** A implementação padrão do `ILogger` deve, no mínimo, logar para o console de forma legível, incluindo níveis e timestamps.

@@ -1,21 +1,22 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { IUserSetting } from "@/shared/ipc-types/domain-types";
 import {
-  IUserSetting,
   IpcUserSettingsSavePayload,
   IpcUserSettingsSaveResponse,
   IpcUserSettingsGetPayload,
   IpcUserSettingsGetResponse,
   IpcUserSettingsListPayload,
   IpcUserSettingsListResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { SaveUserSettingCommand } from "./application/commands/save-user-setting.command";
 import { GetUserSettingQuery } from "./application/queries/get-user-setting.query";
 import { ListUserSettingsQuery } from "./application/queries/list-user-settings.query";
 
 export function registerUserSettingsModule(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    "user-settings:save",
+    IpcChannel.USER_SETTINGS_SAVE,
     async (
       _,
       payload: IpcUserSettingsSavePayload,
@@ -34,7 +35,7 @@ export function registerUserSettingsModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "user-settings:get",
+    IpcChannel.USER_SETTINGS_GET,
     async (
       _,
       payload: IpcUserSettingsGetPayload,
@@ -53,7 +54,7 @@ export function registerUserSettingsModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "user-settings:list",
+    IpcChannel.USER_SETTINGS_LIST,
     async (
       _,
       payload: IpcUserSettingsListPayload,

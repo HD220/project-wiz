@@ -45,6 +45,8 @@ import {
   GetForumPostQuery,
 } from "./application/queries/get-forum-post.query";
 
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { IForumTopic, IForumPost } from "@/shared/ipc-types/domain-types";
 import {
   IpcForumListTopicsResponse,
   IpcForumCreateTopicPayload,
@@ -53,15 +55,12 @@ import {
   IpcForumListPostsResponse,
   IpcForumCreatePostPayload,
   IpcForumCreatePostResponse,
-  IForumTopic,
-  IForumPost,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 
-export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
-  const forumTopicRepository = new DrizzleForumTopicRepository();
-  const forumPostRepository = new DrizzleForumPostRepository();
-
-  // Forum Topic Handlers
+function registerForumTopicHandlers(
+  cqrsDispatcher: CqrsDispatcher,
+  forumTopicRepository: DrizzleForumTopicRepository,
+) {
   const createForumTopicCommandHandler = new CreateForumTopicCommandHandler(
     forumTopicRepository,
   );
@@ -98,8 +97,12 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
     GetForumTopicQuery.name,
     getForumTopicQueryHandler.handle.bind(getForumTopicQueryHandler),
   );
+}
 
-  // Forum Post Handlers
+function registerForumPostHandlers(
+  cqrsDispatcher: CqrsDispatcher,
+  forumPostRepository: DrizzleForumPostRepository,
+) {
   const createForumPostCommandHandler = new CreateForumPostCommandHandler(
     forumPostRepository,
   );
@@ -136,10 +139,15 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
     GetForumPostQuery.name,
     getForumPostQueryHandler.handle.bind(getForumPostQueryHandler),
   );
+}
 
-  // IPC Handlers
+function registerForumIpcHandlers(
+  cqrsDispatcher: CqrsDispatcher,
+  forumTopicRepository: DrizzleForumTopicRepository,
+  forumPostRepository: DrizzleForumPostRepository,
+) {
   ipcMain.handle(
-    "forum:list-topics",
+    IpcChannel.FORUM_LIST_TOPICS,
     async (): Promise<IpcForumListTopicsResponse> => {
       try {
         const topics = (await cqrsDispatcher.dispatchQuery(
@@ -155,7 +163,7 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "forum:create-topic",
+    IpcChannel.FORUM_CREATE_TOPIC,
     async (
       _,
       payload: IpcForumCreateTopicPayload,
@@ -174,7 +182,7 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "forum:list-posts",
+    IpcChannel.FORUM_LIST_POSTS,
     async (
       _,
       payload: IpcForumListPostsPayload,
@@ -193,7 +201,7 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "forum:create-post",
+    IpcChannel.FORUM_CREATE_POST,
     async (
       _,
       payload: IpcForumCreatePostPayload,
@@ -209,5 +217,18 @@ export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
         return { success: false, error: { message } };
       }
     },
+  );
+}
+
+export function registerForumModule(cqrsDispatcher: CqrsDispatcher) {
+  const forumTopicRepository = new DrizzleForumTopicRepository();
+  const forumPostRepository = new DrizzleForumPostRepository();
+
+  registerForumTopicHandlers(cqrsDispatcher, forumTopicRepository);
+  registerForumPostHandlers(cqrsDispatcher, forumPostRepository);
+  registerForumIpcHandlers(
+    cqrsDispatcher,
+    forumTopicRepository,
+    forumPostRepository,
   );
 }

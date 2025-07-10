@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForum } from "@/renderer/hooks/use-forum";
-import { IForumPost } from "@/shared/ipc-types/entities";
+import { IForumPost } from "@/shared/ipc-types/domain-types";
 
 interface DiscussionThreadProps {
   topicId: string;

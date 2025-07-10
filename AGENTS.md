@@ -25,10 +25,10 @@ O Project Wiz é uma aplicação desktop autônoma, o que significa que ele resi
 
 ## Links Úteis
 
-- [Documentação do Usuário](D:/Documentos/Pessoal/Github/project-wiz/docs/user/01-introduction.md)
-- [Documentação Técnica](D:/Documentos/Pessoal/Github/project-wiz/docs/reference/01-software-architecture.md)
-- [Guia de Contribuição](D:/Documentos/Pessoal/Github/project-wiz/docs/contribution-guide.md)
-- [Código de Conduta](D:/Documentos/Pessoal/Github/project-wiz/docs/code-of-conduct.md)
+- [Documentação do Usuário](D:/Documentos/Pessoal/Github/project-wiz/docs/user/README.md)
+- [Documentação Técnica](D:/Documentos/Pessoal/Github/project-wiz/docs/developer/reference/software-architecture.md)
+- [Guia de Contribuição](D:/Documentos/Pessoal/Github/project-wiz/docs/developer/community/contribution-guide.md)
+- [Código de Conduta](D:/Documentos/Pessoal/Github/project-wiz/docs/developer/community/code-of-conduct.md)
 
 # Arquitetura do Sistema
 

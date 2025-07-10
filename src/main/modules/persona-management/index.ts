@@ -1,7 +1,8 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { IPersona } from "@/shared/ipc-types/domain-types";
 import {
-  IPersona,
   IpcPersonaRefineSuggestionPayload,
   IpcPersonaRefineSuggestionResponse,
   IpcPersonaCreatePayload,
@@ -10,7 +11,7 @@ import {
   IpcPersonaListResponse,
   IpcPersonaRemovePayload,
   IpcPersonaRemoveResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { RefinePersonaSuggestionCommand } from "./application/commands/refine-persona-suggestion.command";
 import { CreatePersonaCommand } from "./application/commands/create-persona.command";
 import { ListPersonasQuery } from "./application/queries/list-personas.query";
@@ -20,7 +21,7 @@ export function registerPersonaManagementModule(
   cqrsDispatcher: CqrsDispatcher,
 ) {
   ipcMain.handle(
-    "persona:refine-suggestion",
+    IpcChannel.PERSONA_REFINE_SUGGESTION,
     async (
       _,
       payload: IpcPersonaRefineSuggestionPayload,
@@ -39,7 +40,7 @@ export function registerPersonaManagementModule(
   );
 
   ipcMain.handle(
-    "persona:create",
+    IpcChannel.PERSONA_CREATE,
     async (
       _,
       payload: IpcPersonaCreatePayload,
@@ -58,7 +59,7 @@ export function registerPersonaManagementModule(
   );
 
   ipcMain.handle(
-    "persona:list",
+    IpcChannel.PERSONA_LIST,
     async (
       _,
       payload: IpcPersonaListPayload,
@@ -77,7 +78,7 @@ export function registerPersonaManagementModule(
   );
 
   ipcMain.handle(
-    "persona:remove",
+    IpcChannel.PERSONA_REMOVE,
     async (
       _,
       payload: IpcPersonaRemovePayload,

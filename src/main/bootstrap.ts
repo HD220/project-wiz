@@ -14,14 +14,11 @@ import { initializeAutomaticPersonaHiring } from "./initializers/automatic-perso
 import { registerGitIntegrationModule } from "./modules/git-integration";
 import { registerFilesystemToolsModule } from "./modules/filesystem-tools";
 
-
-
-
-
-export async function bootstrap() {
-  const cqrsDispatcher = new CqrsDispatcher();
-  const eventBus = new EventBus();
-
+export async function bootstrap(
+  cqrsDispatcher: CqrsDispatcher,
+  eventBus: EventBus,
+  db: typeof db,
+) {
   // Initialize and register business modules
   initializeProjectManagement(cqrsDispatcher);
   initializeDirectMessages(cqrsDispatcher);
@@ -33,10 +30,4 @@ export async function bootstrap() {
 
   registerGitIntegrationModule(cqrsDispatcher);
   registerFilesystemToolsModule(cqrsDispatcher);
-
-  return {
-    cqrsDispatcher,
-    eventBus,
-    db,
-  };
 }

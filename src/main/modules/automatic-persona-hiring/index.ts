@@ -1,16 +1,17 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 import {
   IpcAutomaticPersonaHiringHirePayload,
   IpcAutomaticPersonaHiringHireResponse,
-} from "@/shared/ipc-types/entities";
+} from "@/shared/ipc-types/ipc-payloads";
 import { HirePersonasAutomaticallyCommand } from "./application/commands/hire-personas-automatically.command";
 
 export function registerAutomaticPersonaHiringModule(
   cqrsDispatcher: CqrsDispatcher,
 ) {
   ipcMain.handle(
-    "automatic-persona-hiring:hire",
+    IpcChannel.AUTOMATIC_PERSONA_HIRING_HIRE,
     async (
       _,
       payload: IpcAutomaticPersonaHiringHirePayload,

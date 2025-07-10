@@ -121,7 +121,8 @@ _ Para interoperabilidade com APIs ou código legado que espera enums.
 _ Para conjuntos de constantes numéricas onde os valores em si são importantes e podem não ser sequenciais.
 _ Se usar `enum`, prefira `const enum` quando possível, pois são completamente removidos durante a transpilação e seus valores são inlined, resultando em código JavaScript menor. No entanto, `const enum` tem limitações (e.g., não podem ser iterados no runtime).
 _ **Exemplo (String Literal Union vs. String Enum):**
-```typescript
+
+````typescript
 // Preferido para status simples:
 // type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED';
 
@@ -185,3 +186,4 @@ _ **Justificativa:** Tipos complexos podem se tornar tão difíceis de ler quant
 - Use `async/await` para código assíncrono e sempre inclua tratamento de erro (`try/catch`).
 - Para modelar estados variantes, use Discriminated Unions.
 - Consulte esta ADR ao encontrar situações que exijam modelagem de tipo mais complexa.
+````

@@ -8,8 +8,8 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./app/components/__root";
-import { Route as IndexRouteImport } from "./app/components/index";
+import { Route as rootRouteImport } from "./app/__root";
+import { Route as IndexRouteImport } from "./app/index";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",

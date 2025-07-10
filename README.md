@@ -65,20 +65,30 @@ To get Project Wiz up and running:
    npm install
    ```
 
-3. **Run the application:**
+3. **Configure Environment Variables:**
+   Create a `.env` file in the project root and copy the content from `.env.example`. Fill in necessary API keys.
+
+4. **Setup Database:**
 
    ```bash
-   npm start
+   npm run db:generate
+   npm run db:migrate
    ```
 
-For more detailed setup instructions, please refer to the [Development Setup Guide](./docs/developer/01-development-setup.md) and the [Quick Start Guide](./docs/user/02-getting-started.md).
+5. **Run the application:**
+
+   ```bash
+   npm run dev
+   ```
+
+For more detailed setup instructions, please refer to the [Development Setup Guide](./docs/developer/tutorials/01-development-setup.md) and the [Quick Start Guide](./docs/user/guides/01-getting-started.md).
 
 ## Documentation
 
 Dive deeper into Project Wiz with our comprehensive documentation:
 
-- **[User Guide](./docs/user/01-introduction.md):** Introduces users to Project Wiz and how to use its features.
-- **[Technical Documentation](./docs/reference/01-software-architecture.md):** Details the architecture, agent framework, and other technical aspects for developers.
+- **[User Guide](./docs/user/README.md):** Introduces users to Project Wiz and how to use its features.
+- **[Technical Documentation](./docs/developer/reference/software-architecture.md):** Details the architecture, agent framework, and other technical aspects for developers.
 - **[Vision and Goals](./docs/project-overview/vision-and-goals.md):** Outlines the long-term vision and strategic objectives of Project Wiz.
 - **[Roadmap](./docs/project-overview/roadmap.md):** Shows the planned features and future development direction.
 

@@ -1,17 +1,19 @@
 import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
 import { ipcMain } from "electron";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
+import { IDirectMessage } from "@/shared/ipc-types/domain-types";
 import {
-  IDirectMessage,
   IpcDirectMessagesListResponse,
   IpcDirectMessagesSendPayload,
   IpcDirectMessagesSendResponse,
-} from "@/shared/ipc-types/entities";
+  IpcDirectMessagesListPayload,
+} from "@/shared/ipc-types/ipc-payloads";
 import { SendMessageCommand } from "./application/commands/send-message.command";
 import { ListMessagesQuery } from "./application/queries/list-messages.query";
 
 export function registerDirectMessagesModule(cqrsDispatcher: CqrsDispatcher) {
   ipcMain.handle(
-    "direct-messages:send",
+    IpcChannel.DIRECT_MESSAGES_SEND,
     async (
       _,
       payload: IpcDirectMessagesSendPayload,
@@ -30,10 +32,10 @@ export function registerDirectMessagesModule(cqrsDispatcher: CqrsDispatcher) {
   );
 
   ipcMain.handle(
-    "direct-messages:list",
+    IpcChannel.DIRECT_MESSAGES_LIST,
     async (
       _,
-      payload: { senderId: string; receiverId: string },
+      payload: IpcDirectMessagesListPayload,
     ): Promise<IpcDirectMessagesListResponse> => {
       try {
         const messages = (await cqrsDispatcher.dispatchQuery(

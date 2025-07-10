@@ -260,6 +260,16 @@ const importAndBoundaryRules = {
 const codeStyleAndQualityRules = {
   "max-depth": ["warn", { max: 4 }],
   "no-else-return": "warn",
+  "max-lines": ["warn", { max: 350, skipBlankLines: true, skipComments: true }],
+  "max-lines-per-function": [
+    "warn",
+    { max: 70, skipBlankLines: true, skipComments: true },
+  ],
+  "max-statements": ["warn", { max: 15 }],
+  "id-length": [
+    "warn",
+    { min: 2, exceptions: ["i", "j", "k", "x", "y", "z", "a", "b", "_"] },
+  ],
 };
 
 const testingSpecificRules = {
@@ -360,21 +370,15 @@ export default [
     },
   },
 
-  // 3. Consolidated Override for Application .tsx and Test files
+  // 3. Consolidated Override for Application .tsx files
   {
-    files: [
-      "src/**/*.tsx",
-      "src/**/*.spec.ts",
-      "src/**/*.test.ts",
-      "src/**/*.spec.tsx",
-      "src/**/*.test.tsx",
+    files: ["src/**/*.tsx"],
+    ignores: [
+      "src/renderer/components/ui/**/*.tsx",
+      "**/*.test.tsx",
+      "**/*.spec.tsx",
     ],
-    ignores: ["src/renderer/components/ui/**/*.tsx"],
     rules: {
-      "max-lines-per-function": [
-        "error",
-        { max: 100, skipBlankLines: true, skipComments: true },
-      ],
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -386,7 +390,6 @@ export default [
           ignoreRestSiblings: true,
         },
       ],
-      "max-statements": "off",
       "no-inline-comments": "off", // Allow inline comments in test files
       "@typescript-eslint/ban-ts-comment": [
         "error",
@@ -398,6 +401,18 @@ export default [
           minimumDescriptionLength: 3,
         },
       ],
+    },
+  },
+
+  // 4. Override for Test files
+  {
+    files: ["**/*.test.ts", "**/*.spec.ts", "**/*.test.tsx", "**/*.spec.tsx"],
+    rules: {
+      "max-lines-per-function": [
+        "warn",
+        { max: 120, skipBlankLines: true, skipComments: true },
+      ],
+      "max-statements": "off",
     },
   },
 

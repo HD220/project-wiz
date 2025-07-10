@@ -19,7 +19,9 @@ function registerAutomaticPersonaHiringHandlers(
   );
 }
 
-export function initializeAutomaticPersonaHiring(cqrsDispatcher: CqrsDispatcher) {
+export function initializeAutomaticPersonaHiring(
+  cqrsDispatcher: CqrsDispatcher,
+) {
   const hirePersonasAutomaticallyCommandHandler =
     new HirePersonasAutomaticallyCommandHandler(cqrsDispatcher);
 

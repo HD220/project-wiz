@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Step1 } from "./components/step1";
 import { Step2 } from "./components/step2";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 
 interface PersonaCreationWizardProps {
   onPersonaCreated?: () => void;
@@ -18,27 +19,35 @@ function PersonaCreationWizard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleNext = () => {
+  const resetFormState = useCallback(() => {
+    setStep(1);
+    setPersonaName("");
+    setPersonaDescription("");
+    setLlmModel("");
+    setLlmTemperature(0.7);
+    setTools("");
+  }, []);
+
+  const handleNext = useCallback(() => {
     setError(null);
     if (step === 1 && (!personaName || !personaDescription)) {
       setError("Name and Description are required.");
       return;
     }
     setStep(step + 1);
-  };
+  }, [step, personaName, personaDescription]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setStep(step - 1);
-  };
+  }, [step]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePersonaSubmission = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
       const refinedPersonaResult = await window.electronIPC.invoke(
-        "persona:refine-suggestion",
+        IpcChannel.PERSONA_REFINE_SUGGESTION,
         {
           name: personaName,
           description: personaDescription,
@@ -56,14 +65,13 @@ function PersonaCreationWizard({
           refinedPersonaResult.error?.message ||
             "Failed to refine persona suggestion",
         );
-        setLoading(false);
         return;
       }
 
       const finalPersona = refinedPersonaResult.data;
 
       const createPersonaResult = await window.electronIPC.invoke(
-        "persona:create",
+        IpcChannel.PERSONA_CREATE,
         {
           name: finalPersona.name,
           description: finalPersona.description,
@@ -77,23 +85,33 @@ function PersonaCreationWizard({
         setError(
           createPersonaResult.error?.message || "Failed to create persona",
         );
-        setLoading(false);
         return;
       }
 
-      setStep(1);
-      setPersonaName("");
-      setPersonaDescription("");
-      setLlmModel("");
-      setLlmTemperature(0.7);
-      setTools("");
+      resetFormState();
       onPersonaCreated?.();
     } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    personaName,
+    personaDescription,
+    llmModel,
+    llmTemperature,
+    tools,
+    resetFormState,
+    onPersonaCreated,
+  ]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      await handlePersonaSubmission();
+    },
+    [handlePersonaSubmission],
+  );
 
   return (
     <div className="p-4 max-w-2xl mx-auto">

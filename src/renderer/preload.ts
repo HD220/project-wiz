@@ -1,15 +1,15 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
 // Define a type for the exposed Electron IPC API
-import { IpcEvents } from "@/shared/ipc-types/ipc-events";
+import { IpcContracts } from "@/shared/ipc-types/ipc-contracts";
 
 export interface ElectronIPC {
-  invoke: <Channel extends keyof IpcEvents>(
+  invoke: <Channel extends keyof IpcContracts>(
     channel: Channel,
-    ...args: IpcEvents[Channel]["request"] extends void
+    ...args: IpcContracts[Channel]["request"] extends void
       ? []
-      : [IpcEvents[Channel]["request"]]
-  ) => Promise<IpcEvents[Channel]["response"]>;
+      : [IpcContracts[Channel]["request"]]
+  ) => Promise<IpcContracts[Channel]["response"]>;
   on: (
     channel: string,
     listener: (event: IpcRendererEvent, ...args: unknown[]) => void,

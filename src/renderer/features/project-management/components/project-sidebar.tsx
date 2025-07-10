@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-import { IProject } from "@/shared/ipc-types/entities";
+import { IProject } from "@/shared/ipc-types/domain-types";
+import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 
 export function ProjectSidebar() {
   const [projects, setProjects] = useState<IProject[]>([]);
@@ -11,7 +12,7 @@ export function ProjectSidebar() {
     setLoading(true);
     setError(null);
     try {
-      const result = await window.electronIPC.invoke("project:list");
+      const result = await window.electronIPC.invoke(IpcChannel.PROJECT_LIST);
       if (result.success) {
         setProjects(result.data || []);
       } else {
@@ -26,7 +27,10 @@ export function ProjectSidebar() {
 
   const handleRemoveProject = async (id: string) => {
     try {
-      const result = await window.electronIPC.invoke("project:remove", { id });
+      const result = await window.electronIPC.invoke(
+        IpcChannel.PROJECT_REMOVE,
+        { id },
+      );
       if (result.success) {
         fetchProjects();
       } else {

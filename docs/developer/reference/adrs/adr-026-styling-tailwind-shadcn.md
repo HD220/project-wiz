@@ -56,12 +56,14 @@ _ Adotar uma abordagem "mobile-first": estilizar para telas pequenas primeiro, e
 **5. Modo Escuro (Dark Mode) e Tematização:**
 _ **Padrão (Tailwind):** Utilizar a variante `dark:` do Tailwind CSS para aplicar estilos específicos para o modo escuro. A ativação do modo escuro (adição da classe `dark` ao elemento `html` ou outro ancestral) é geralmente gerenciada por um `ThemeProvider` (como o `next-themes` ou um customizado).
 _ **Cores Semânticas (CSS Variables):**
-_ Definir um conjunto de variáveis CSS para cores semânticas no arquivo global de estilos (e.g., `globals.css` ou `styles/theme.css`), com valores diferentes para light e dark mode.
+\_ Definir um conjunto de variáveis CSS para cores semânticas no arquivo global de estilos (e.g., `globals.css` ou `styles/theme.css`), com valores diferentes para light e dark mode.
+
 ```css
 /_ :root { --background: 0 0% 100%; --foreground: 222.2 84% 4.9%; --primary: ...; } _/
 /_ .dark { --background: 222.2 84% 4.9%; --foreground: 0 0% 98%; --primary: ...; } _/
 ```
-_ Configurar estas variáveis no `tailwind.config.ts` para que possam ser usadas com as classes utilitárias do Tailwind (e.g., `bg-background`, `text-foreground`, `bg-primary`). Shadcn/UI já promove esta abordagem. \* **Justificativa:** Permite uma implementação consistente e fácil de manter para o modo escuro e temas, aproveitando as capacidades do Tailwind e CSS variables.
+
+\_ Configurar estas variáveis no `tailwind.config.ts` para que possam ser usadas com as classes utilitárias do Tailwind (e.g., `bg-background`, `text-foreground`, `bg-primary`). Shadcn/UI já promove esta abordagem. \* **Justificativa:** Permite uma implementação consistente e fácil de manter para o modo escuro e temas, aproveitando as capacidades do Tailwind e CSS variables.
 
 **6. Organização de Classes Utilitárias Customizadas (Raras):**
 _ **Padrão:** Se for absolutamente necessário criar classes utilitárias globais que não podem ser alcançadas pela configuração do Tailwind (e.g., uma animação complexa reutilizável), elas devem ser definidas em um arquivo CSS global (e.g., `styles/custom-utilities.css`) e importadas no `globals.css` ou no ponto de entrada da aplicação.
