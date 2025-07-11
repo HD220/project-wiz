@@ -2,6 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
 import { Button } from "@/ui/button";
 import { Badge } from "@/ui/badge";
@@ -92,13 +93,9 @@ export function MessageComponent({
             <span className="font-medium text-green-400">Task Update</span>
           </div>
           <ReactMarkdown
-            className="text-gray-300"
+            className="text-gray-300 prose prose-sm prose-invert max-w-none"
             remarkPlugins={[remarkGfm]}
-            // Ensure HTML from mention processing is rendered
-            // This might need further customization if complex HTML is involved
-            // For simple span, this should work.
-            // Alternatively, rehype-raw could be used if security implications are understood.
-            // For now, we assume the mention spans are safe.
+            rehypePlugins={[rehypeRaw]}
             // eslint-disable-next-line react/no-children-prop
             children={contentWithMentions} // Use content with processed mentions
           />
@@ -119,8 +116,9 @@ export function MessageComponent({
           <div className="flex items-center space-x-2">
             <Info className="h-4 w-4 text-blue-500" />
             <ReactMarkdown
-              className="text-blue-300"
+              className="text-blue-300 prose prose-sm prose-invert max-w-none"
               remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
               // eslint-disable-next-line react/no-children-prop
               children={message.content} // System messages likely don't have mentions
             />
@@ -135,18 +133,18 @@ export function MessageComponent({
       <ReactMarkdown
         className="text-gray-300 prose prose-sm prose-invert max-w-none"
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
         // eslint-disable-next-line react/no-children-prop
         children={contentWithMentions}
         // Components prop can be used to customize rendering of specific elements
         // e.g., to handle mentions if they were parsed as a specific markdown element
-        components={{
-          // Example: Customizing how links are rendered
-          // a: ({node, ...props}) => <a {...props} className="text-blue-400 hover:underline" />
-          // For now, relying on the pre-processed HTML for mentions
-          // and default rendering for other markdown elements.
-          // If the `span` for mentions is not rendered correctly,
-          // we might need to use `rehype-raw` or a custom component.
-        }}
+        components={
+          {
+            // Example: Customizing how links are rendered
+            // a: ({node, ...props}) => <a {...props} className="text-blue-400 hover:underline" />
+            // With rehypeRaw, the explicitly created span for mentions should be rendered.
+          }
+        }
       />
     );
   };
