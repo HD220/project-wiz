@@ -30,6 +30,7 @@ import {
 import { Channel, Agent, mockUser } from "@/lib/placeholders";
 
 interface ChannelsSidebarProps {
+  projectId: string; // Added projectId
   projectName: string;
   channels: Channel[];
   agents: Agent[];
@@ -41,6 +42,7 @@ interface ChannelsSidebarProps {
 
 export function ChannelsSidebar({
   projectName,
+  projectId, // Added projectId
   channels,
   agents,
   selectedChannelId,
@@ -114,41 +116,41 @@ export function ChannelsSidebar({
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
             <Button
-              variant={location.pathname === "/" ? "secondary" : "ghost"}
+              variant={location.pathname === `/project/${projectId}/` ? "secondary" : "ghost"}
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/">
+              <Link to="/project/$projectId/" params={{ projectId }}>
                 <Home className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Dashboard</span>
               </Link>
             </Button>
             <Button
-              variant={location.pathname === "/agents" ? "secondary" : "ghost"}
+              variant={location.pathname === `/project/${projectId}/agents/` ? "secondary" : "ghost"}
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/agents">
+              <Link to="/project/$projectId/agents/" params={{ projectId }}>
                 <Users className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Agentes</span>
               </Link>
             </Button>
             <Button
-              variant={location.pathname === "/tasks" ? "secondary" : "ghost"}
+              variant={location.pathname === `/project/${projectId}/tasks/` ? "secondary" : "ghost"}
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/tasks">
+              <Link to="/project/$projectId/tasks/" params={{ projectId }}>
                 <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Tarefas</span>
               </Link>
             </Button>
             <Button
-              variant={location.pathname === "/docs" ? "secondary" : "ghost"}
+              variant={location.pathname === `/project/${projectId}/docs/` ? "secondary" : "ghost"}
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/docs">
+              <Link to="/project/$projectId/docs/" params={{ projectId }}>
                 <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Documentos</span>
               </Link>
@@ -227,7 +229,7 @@ export function ChannelsSidebar({
               <Volume2 className="h-4 w-4 text-muted-foreground" />
             </Button>
             <Button variant="ghost" size="icon" className="w-6 h-6" asChild>
-              <Link to="/settings">
+              <Link to="/user/settings/">
                 <Settings className="h-4 w-4 text-muted-foreground" />
               </Link>
             </Button>

@@ -76,6 +76,7 @@ export function ProjectLayout() {
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
         <ChannelsSidebar
           projectName={currentProject.name}
+            projectId={projectId} // Pass projectId
           channels={channels}
           agents={agents}
           selectedChannelId={selectedChannelId}
