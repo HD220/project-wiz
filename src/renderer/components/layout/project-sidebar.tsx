@@ -1,20 +1,14 @@
-import { useState } from "react";
-import { cn } from "@/renderer/lib/utils";
-import { Button } from "@/renderer/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/renderer/components/ui/tooltip";
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Folder } from "lucide-react";
-
-interface Project {
-  id: string;
-  name: string;
-  avatarUrl?: string;
-  hasNotifications?: boolean;
-}
+import { Project } from "@/lib/placeholders";
 
 interface ProjectSidebarProps {
   projects: Project[];
@@ -32,7 +26,7 @@ export function ProjectSidebar({
   onSettings,
 }: ProjectSidebarProps) {
   return (
-    <div className="w-[72px] bg-gray-900 flex flex-col items-center py-3 space-y-2">
+    <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2">
       {/* Home/Dashboard */}
       <TooltipProvider>
         <Tooltip>
@@ -40,9 +34,9 @@ export function ProjectSidebar({
             <Button
               variant="ghost"
               size="icon"
-              className="w-12 h-12 rounded-[24px] bg-brand-500 hover:bg-brand-600 hover:rounded-[16px] transition-all duration-200"
+              className="w-12 h-12 rounded-2xl bg-primary hover:bg-primary/90 hover:rounded-xl transition-all duration-200"
             >
-              <Folder className="h-6 w-6 text-white" />
+              <Folder className="h-6 w-6 text-primary-foreground" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
@@ -52,7 +46,7 @@ export function ProjectSidebar({
       </TooltipProvider>
 
       {/* Separator */}
-      <div className="w-8 h-[2px] bg-gray-600 rounded-full" />
+      <div className="w-8 h-0.5 bg-border rounded-full" />
 
       {/* Project List */}
       <div className="flex flex-col space-y-2 flex-1">
@@ -65,32 +59,37 @@ export function ProjectSidebar({
                   size="icon"
                   onClick={() => onProjectSelect(project.id)}
                   className={cn(
-                    "w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all duration-200 relative",
+                    "w-12 h-12 rounded-2xl hover:rounded-xl transition-all duration-200 relative",
                     selectedProjectId === project.id
-                      ? "bg-brand-500 rounded-[16px]"
-                      : "bg-gray-700 hover:bg-gray-600",
+                      ? "bg-primary rounded-xl"
+                      : "bg-muted hover:bg-muted/80",
                   )}
                 >
-                  {project.avatarUrl ? (
+                  {project.avatar ? (
                     <img
-                      src={project.avatarUrl}
+                      src={project.avatar}
                       alt={project.name}
-                      className="w-full h-full rounded-inherit"
+                      className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-white font-semibold">
-                      {project.name.charAt(0).toUpperCase()}
+                    <span className="text-sm font-semibold text-foreground">
+                      {project.name.slice(0, 2).toUpperCase()}
                     </span>
                   )}
 
                   {/* Notification indicator */}
-                  {project.hasNotifications && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-900" />
+                  {project.unreadCount > 0 && (
+                    <Badge 
+                      className="absolute -top-1 -right-1 w-5 h-5 p-0 text-xs flex items-center justify-center"
+                      variant="destructive"
+                    >
+                      {project.unreadCount > 9 ? '9+' : project.unreadCount}
+                    </Badge>
                   )}
 
                   {/* Selection indicator */}
                   {selectedProjectId === project.id && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-1 h-8 bg-white rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-1 h-8 bg-foreground rounded-r-full" />
                   )}
                 </Button>
               </TooltipTrigger>
@@ -110,13 +109,13 @@ export function ProjectSidebar({
               variant="ghost"
               size="icon"
               onClick={onCreateProject}
-              className="w-12 h-12 rounded-[24px] bg-gray-700 hover:bg-green-600 hover:rounded-[16px] transition-all duration-200"
+              className="w-12 h-12 rounded-2xl border-2 border-dashed border-muted-foreground hover:border-solid hover:border-green-500 hover:bg-green-500/10 hover:rounded-xl transition-all duration-200"
             >
-              <Plus className="h-6 w-6 text-green-500 hover:text-white" />
+              <Plus className="h-6 w-6 text-muted-foreground hover:text-green-500" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Add a Project</p>
+            <p>Adicionar Projeto</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -129,13 +128,13 @@ export function ProjectSidebar({
               variant="ghost"
               size="icon"
               onClick={onSettings}
-              className="w-12 h-12 rounded-[24px] bg-gray-700 hover:bg-gray-600 hover:rounded-[16px] transition-all duration-200"
+              className="w-12 h-12 rounded-2xl bg-muted hover:bg-muted/80 hover:rounded-xl transition-all duration-200"
             >
-              <Settings className="h-5 w-5 text-gray-300" />
+              <Settings className="h-5 w-5 text-muted-foreground" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Settings</p>
+            <p>Configurações</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

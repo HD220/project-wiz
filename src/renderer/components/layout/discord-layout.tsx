@@ -1,14 +1,15 @@
 import { ReactNode } from "react";
 import { ProjectSidebar } from "./project-sidebar";
 import { ChannelsSidebar } from "./channels-sidebar";
+import { Project, Channel, Agent } from "@/lib/placeholders";
 
 interface DiscordLayoutProps {
   children: ReactNode;
-  projects: any[];
+  projects: Project[];
   selectedProjectId?: string;
   projectName: string;
-  channels: any[];
-  agents: any[];
+  channels: Channel[];
+  agents: Agent[];
   selectedChannelId?: string;
   onProjectSelect: (projectId: string) => void;
   onChannelSelect: (channelId: string) => void;
@@ -34,7 +35,7 @@ export function DiscordLayout({
   onSettings,
 }: DiscordLayoutProps) {
   return (
-    <div className="flex h-screen bg-gray-700">
+    <div className="flex h-screen bg-background">
       {/* Project Sidebar */}
       <ProjectSidebar
         projects={projects}
@@ -56,7 +57,12 @@ export function DiscordLayout({
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">{children}</div>
+      <div className="flex-1 flex flex-col min-w-0 bg-background">{children}</div>
+      
+      {/* Right Panel (responsive) */}
+      <div className="w-70 bg-card border-l border-border hidden xl:block">
+        {/* Right panel content will be contextual */}
+      </div>
     </div>
   );
 }

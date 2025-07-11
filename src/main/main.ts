@@ -2,10 +2,10 @@ import path from "path";
 
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
-import { bootstrap } from "@/main/bootstrap";
-import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-import { EventBus } from "@/main/kernel/event-bus";
-import { db } from "@/main/persistence/db";
+// import { bootstrap } from "@/main/bootstrap";
+// import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
+// import { EventBus } from "@/main/kernel/event-bus";
+// import { db } from "@/main/persistence/db";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -45,12 +45,12 @@ const createWindow = () => {
 };
 
 app.on("ready", async () => {
-  console.log("[Main Process] Initializing business modules...");
-  const cqrsDispatcher = new CqrsDispatcher();
-  const eventBus = new EventBus();
+  // console.log("[Main Process] Initializing business modules...");
+  // const cqrsDispatcher = new CqrsDispatcher();
+  // const eventBus = new EventBus();
 
-  await bootstrap(cqrsDispatcher, eventBus, db);
-  console.log("[Main Process] All business modules initialized.");
+  // await bootstrap(cqrsDispatcher, eventBus, db);
+  // console.log("[Main Process] All business modules initialized.");
 
   createWindow();
 });

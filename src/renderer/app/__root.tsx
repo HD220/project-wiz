@@ -1,30 +1,71 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-import React from "react";
-
-// Exemplo de como um componente de layout poderia ser usado, se existir:
-// import { AppLayout } from '@/components/layout/AppLayout'; // Supondo que AppLayout exista
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { useState } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { DiscordLayout } from "@/components/layout/discord-layout";
+import { 
+  mockProjects, 
+  mockChannels, 
+  mockAgents, 
+  getChannelsByProject, 
+  getAgentsByProject 
+} from "@/lib/placeholders";
 
 export const Route = createRootRoute({
   component: RootComponent,
-  loader: () => {
-    // throw redirect({ to: "/app" });
-  },
 });
 
 function RootComponent() {
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(mockProjects[0]?.id);
+  const [selectedChannelId, setSelectedChannelId] = useState<string>();
+
+  const selectedProject = mockProjects.find(p => p.id === selectedProjectId);
+  const projectChannels = selectedProjectId ? getChannelsByProject(selectedProjectId) : [];
+  const projectAgents = selectedProjectId ? getAgentsByProject(selectedProjectId) : [];
+
+  const handleProjectSelect = (projectId: string) => {
+    setSelectedProjectId(projectId);
+    setSelectedChannelId(undefined);
+  };
+
+  const handleChannelSelect = (channelId: string) => {
+    setSelectedChannelId(channelId);
+  };
+
+  const handleAgentDMSelect = (agentId: string) => {
+    // Navigate to DM with agent
+    console.log('Opening DM with agent:', agentId);
+  };
+
+  const handleCreateProject = () => {
+    console.log('Creating new project');
+  };
+
+  const handleAddChannel = () => {
+    console.log('Adding new channel');
+  };
+
+  const handleSettings = () => {
+    console.log('Opening settings');
+  };
+
   return (
-    <>
-      {/*
-        Envolver o Outlet com componentes de layout globais ou provedores de contexto aqui, se necessário.
-        Exemplo:
-        <ThemeProvider>
-          <AppLayout> // Um componente de layout que você criaria
-            <Outlet />
-          </AppLayout>
-        </ThemeProvider>
-      */}
-      <Outlet />
-      <Link to={"."}>voltar</Link>
-    </>
+    <TooltipProvider>
+      <DiscordLayout
+        projects={mockProjects}
+        selectedProjectId={selectedProjectId}
+        projectName={selectedProject?.name || "Selecione um projeto"}
+        channels={projectChannels}
+        agents={projectAgents}
+        selectedChannelId={selectedChannelId}
+        onProjectSelect={handleProjectSelect}
+        onChannelSelect={handleChannelSelect}
+        onAgentDMSelect={handleAgentDMSelect}
+        onCreateProject={handleCreateProject}
+        onAddChannel={handleAddChannel}
+        onSettings={handleSettings}
+      >
+        <Outlet />
+      </DiscordLayout>
+    </TooltipProvider>
   );
 }
