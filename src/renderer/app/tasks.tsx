@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { KanbanBoard } from "../features";
+import { KanbanBoard } from "../features/task-management/components/kanban-board";
 
 export const Route = createFileRoute("/tasks")({
   component: TasksComponent,

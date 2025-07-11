@@ -3,8 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Input } from "@/renderer/components/ui/input";
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
+import { Input } from "@/ui/input";
+import { ScrollArea } from "@/ui/scroll-area";
 import { Search } from "lucide-react";
 
 interface DocViewerProps {
@@ -82,7 +82,10 @@ export function DocViewer({ content, title, isLoading }: DocViewerProps) {
               );
             },
             mark: ({ node, ...props }) => (
-              <mark style={{ backgroundColor: "yellow", color: "black" }} {...props} />
+              <mark
+                style={{ backgroundColor: "yellow", color: "black" }}
+                {...props}
+              />
             ),
           }}
         >

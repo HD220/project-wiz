@@ -14,7 +14,7 @@ export const personas = sqliteTable("personas", {
   objective: text("objective"),
   systemPrompt: text("system_prompt").notNull(),
   isBuiltIn: integer("is_built_in").notNull().default(0), // 0=false, 1=true
-  status: text("status").notNull().default('idle'), // 'idle', 'working', 'paused', 'error'
+  status: text("status").notNull().default("idle"), // 'idle', 'working', 'paused', 'error'
   currentTaskId: text("current_task_id"),
   worktreePath: text("worktree_path"), // caminho do git worktree atual
   maxConcurrentTasks: integer("max_concurrent_tasks").notNull().default(1),

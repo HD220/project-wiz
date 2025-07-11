@@ -35,6 +35,22 @@ import type {
   IpcUserSettingsListResponse,
   IpcUserSettingsSavePayload,
   IpcUserSettingsSaveResponse,
+  IpcFilesystemListDirectoryPayload,
+  IpcFilesystemListDirectoryResponse,
+  IpcFilesystemReadFilePayload,
+  IpcFilesystemReadFileResponse,
+  IpcFilesystemSearchFileContentPayload,
+  IpcFilesystemSearchFileContentResponse,
+  IpcFilesystemWriteFilePayload,
+  IpcFilesystemWriteFileResponse,
+  IpcGitIntegrationClonePayload,
+  IpcGitIntegrationCloneResponse,
+  IpcGitIntegrationInitializePayload,
+  IpcGitIntegrationInitializeResponse,
+  IpcGitIntegrationPullPayload,
+  IpcGitIntegrationPullResponse,
+  IpcAutomaticPersonaHiringHirePayload,
+  IpcAutomaticPersonaHiringHireResponse,
 } from "./ipc-payloads";
 
 export interface IpcContracts {
@@ -155,7 +171,6 @@ export interface IpcContracts {
     response: IpcAutomaticPersonaHiringHireResponse;
   };
 }
-
 
 export type IpcRequest<T extends IpcChannel> = IpcContracts[T]["request"];
 

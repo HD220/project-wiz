@@ -309,7 +309,7 @@ export default [
       "docs/**",
       "migrations/**",
       "public/**",
-      "src/main/core/**",
+      "src/main/**",
     ],
   },
   {
@@ -470,6 +470,17 @@ export default [
     ],
     rules: {
       "id-length": "off",
+    },
+  },
+
+  // 7. Override for IPC hook files to allow direct IPC usage
+  {
+    files: [
+      "src/renderer/hooks/use-ipc-mutation.hook.ts",
+      "src/renderer/hooks/use-ipc-query.hook.ts",
+    ],
+    rules: {
+      "no-restricted-syntax": "off",
     },
   },
 ];

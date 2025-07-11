@@ -1,8 +1,12 @@
 import React from "react";
 import { useIpcQuery } from "@/renderer/hooks/use-ipc-query.hook";
+import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
 import { IDirectMessage } from "@/shared/ipc-types/domain-types";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import type { IpcDirectMessagesListPayload } from "@/shared/ipc-types/ipc-payloads";
+import type {
+  IpcDirectMessagesListPayload,
+  IpcDirectMessagesSendPayload,
+} from "@/shared/ipc-types/ipc-payloads";
 import MessageList from "./message-list";
 import MessageInput from "./message-input";
 
@@ -13,14 +17,23 @@ interface ChatWindowProps {
 function ChatWindow({ conversationId }: ChatWindowProps) {
   const [senderId, receiverId] = conversationId.split("-");
 
-  const { data: messages, isLoading, error, refetch: fetchMessages } = useIpcQuery<IDirectMessage[], IpcDirectMessagesListPayload>({
+  const {
+    data: messages,
+    isLoading,
+    error,
+    refetch: fetchMessages,
+  } = useIpcQuery<IDirectMessage[], IpcDirectMessagesListPayload>({
     channel: IpcChannel.DIRECT_MESSAGES_LIST,
     payload: { senderId, receiverId },
   });
 
   const [newMessage, setNewMessage] = React.useState("");
 
-  const { mutate: sendMessage } = useIpcMutation<IDirectMessage, Error, IpcDirectMessagesSendPayload>({
+  const { mutate: sendMessage } = useIpcMutation<
+    IDirectMessage,
+    Error,
+    IpcDirectMessagesSendPayload
+  >({
     channel: IpcChannel.DIRECT_MESSAGES_SEND,
     onSuccess: () => {
       setNewMessage("");

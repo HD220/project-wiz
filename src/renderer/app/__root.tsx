@@ -1,26 +1,32 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { useState } from "react";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { DiscordLayout } from "@/components/layout/discord-layout";
-import { 
-  mockProjects, 
-  mockChannels, 
-  mockAgents, 
-  getChannelsByProject, 
-  getAgentsByProject 
-} from "@/lib/placeholders";
+import { TooltipProvider } from "@/ui/tooltip";
+import { DiscordLayout } from "@/renderer/components/layout/discord-layout";
+import {
+  mockProjects,
+  getChannelsByProject,
+  getAgentsByProject,
+} from "@/renderer/lib/placeholders";
 
 export const Route = createRootRoute({
   component: RootComponent,
 });
 
 function RootComponent() {
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(mockProjects[0]?.id);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(
+    mockProjects[0]?.id,
+  );
   const [selectedChannelId, setSelectedChannelId] = useState<string>();
 
-  const selectedProject = mockProjects.find(p => p.id === selectedProjectId);
-  const projectChannels = selectedProjectId ? getChannelsByProject(selectedProjectId) : [];
-  const projectAgents = selectedProjectId ? getAgentsByProject(selectedProjectId) : [];
+  const selectedProject = mockProjects.find(
+    (project) => project.id === selectedProjectId,
+  );
+  const projectChannels = selectedProjectId
+    ? getChannelsByProject(selectedProjectId)
+    : [];
+  const projectAgents = selectedProjectId
+    ? getAgentsByProject(selectedProjectId)
+    : [];
 
   const handleProjectSelect = (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -33,19 +39,19 @@ function RootComponent() {
 
   const handleAgentDMSelect = (agentId: string) => {
     // Navigate to DM with agent
-    console.log('Opening DM with agent:', agentId);
+    console.log("Opening DM with agent:", agentId);
   };
 
   const handleCreateProject = () => {
-    console.log('Creating new project');
+    console.log("Creating new project");
   };
 
   const handleAddChannel = () => {
-    console.log('Adding new channel');
+    console.log("Adding new channel");
   };
 
   const handleSettings = () => {
-    console.log('Opening settings');
+    console.log("Opening settings");
   };
 
   return (

@@ -7,18 +7,18 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Settings, 
-  Activity, 
+import {
+  Users,
+  Plus,
+  Search,
+  Settings,
+  Activity,
   MessageSquare,
   Play,
   Pause,
   MoreHorizontal,
   Filter,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { mockAgents, Agent } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
@@ -32,35 +32,49 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const filteredAgents = mockAgents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         agent.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === "all" || agent.status === filterStatus;
+  const filteredAgents = mockAgents.filter((agent) => {
+    const matchesSearch =
+      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter =
+      filterStatus === "all" || agent.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
-  const onlineAgents = mockAgents.filter(a => a.status !== 'offline');
-  const executingAgents = mockAgents.filter(a => a.isExecuting);
+  const onlineAgents = mockAgents.filter((a) => a.status !== "offline");
+  const executingAgents = mockAgents.filter((a) => a.isExecuting);
 
-  const getStatusColor = (status: Agent['status']) => {
+  const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
-      case 'online': return 'bg-green-500';
-      case 'executing': return 'bg-blue-500';
-      case 'busy': return 'bg-red-500';
-      case 'away': return 'bg-yellow-500';
-      case 'offline': return 'bg-gray-500';
-      default: return 'bg-gray-500';
+      case "online":
+        return "bg-green-500";
+      case "executing":
+        return "bg-blue-500";
+      case "busy":
+        return "bg-red-500";
+      case "away":
+        return "bg-yellow-500";
+      case "offline":
+        return "bg-gray-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
-  const getStatusText = (status: Agent['status']) => {
+  const getStatusText = (status: Agent["status"]) => {
     switch (status) {
-      case 'online': return 'Online';
-      case 'executing': return 'Executando';
-      case 'busy': return 'Ocupado';
-      case 'away': return 'Ausente';
-      case 'offline': return 'Offline';
-      default: return 'Desconhecido';
+      case "online":
+        return "Online";
+      case "executing":
+        return "Executando";
+      case "busy":
+        return "Ocupado";
+      case "away":
+        return "Ausente";
+      case "offline":
+        return "Offline";
+      default:
+        return "Desconhecido";
     }
   };
 
@@ -88,7 +102,9 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Agentes</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total de Agentes
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -102,7 +118,9 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{onlineAgents.length}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {onlineAgents.length}
+            </div>
           </CardContent>
         </Card>
 
@@ -112,7 +130,9 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
             <Play className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{executingAgents.length}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {executingAgents.length}
+            </div>
           </CardContent>
         </Card>
 
@@ -123,7 +143,7 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(mockAgents.map(a => a.type)).size}
+              {new Set(mockAgents.map((a) => a.type)).size}
             </div>
           </CardContent>
         </Card>
@@ -163,13 +183,13 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
                   <TabsTrigger value="busy">Ocupados</TabsTrigger>
                   <TabsTrigger value="offline">Offline</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value={filterStatus} className="mt-4">
                   <ScrollArea className="h-96">
                     <div className="space-y-3">
                       {filteredAgents.map((agent) => (
-                        <AgentCard 
-                          key={agent.id} 
+                        <AgentCard
+                          key={agent.id}
                           agent={agent}
                           isSelected={selectedAgent?.id === agent.id}
                           onSelect={() => setSelectedAgent(agent)}
@@ -194,7 +214,7 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
             </CardHeader>
             <CardContent>
               {selectedAgent ? (
-                <AgentDetails 
+                <AgentDetails
                   agent={selectedAgent}
                   getStatusColor={getStatusColor}
                   getStatusText={getStatusText}
@@ -221,23 +241,23 @@ interface AgentCardProps {
   isSelected: boolean;
   onSelect: () => void;
   onAction: (action: string, agent: Agent) => void;
-  getStatusColor: (status: Agent['status']) => string;
-  getStatusText: (status: Agent['status']) => string;
+  getStatusColor: (status: Agent["status"]) => string;
+  getStatusText: (status: Agent["status"]) => string;
 }
 
-function AgentCard({ 
-  agent, 
-  isSelected, 
-  onSelect, 
-  onAction, 
-  getStatusColor, 
-  getStatusText 
+function AgentCard({
+  agent,
+  isSelected,
+  onSelect,
+  onAction,
+  getStatusColor,
+  getStatusText,
 }: AgentCardProps) {
   return (
-    <div 
+    <div
       className={cn(
         "p-4 border rounded-lg cursor-pointer transition-colors",
-        isSelected ? "border-primary bg-accent" : "hover:bg-accent/50"
+        isSelected ? "border-primary bg-accent" : "hover:bg-accent/50",
       )}
       onClick={onSelect}
     >
@@ -250,12 +270,14 @@ function AgentCard({
                 {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className={cn(
-              "absolute -bottom-1 -right-1 w-4 h-4 border-2 border-background rounded-full",
-              getStatusColor(agent.status)
-            )} />
+            <div
+              className={cn(
+                "absolute -bottom-1 -right-1 w-4 h-4 border-2 border-background rounded-full",
+                getStatusColor(agent.status),
+              )}
+            />
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h4 className="font-medium truncate">{agent.name}</h4>
@@ -294,12 +316,17 @@ function AgentCard({
 
 interface AgentDetailsProps {
   agent: Agent;
-  getStatusColor: (status: Agent['status']) => string;
-  getStatusText: (status: Agent['status']) => string;
+  getStatusColor: (status: Agent["status"]) => string;
+  getStatusText: (status: Agent["status"]) => string;
   onAction: (action: string, agent: Agent) => void;
 }
 
-function AgentDetails({ agent, getStatusColor, getStatusText, onAction }: AgentDetailsProps) {
+function AgentDetails({
+  agent,
+  getStatusColor,
+  getStatusText,
+  onAction,
+}: AgentDetailsProps) {
   return (
     <div className="space-y-4">
       {/* Agent Header */}
@@ -311,10 +338,12 @@ function AgentDetails({ agent, getStatusColor, getStatusText, onAction }: AgentD
               {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className={cn(
-            "absolute -bottom-1 -right-1 w-5 h-5 border-2 border-background rounded-full",
-            getStatusColor(agent.status)
-          )} />
+          <div
+            className={cn(
+              "absolute -bottom-1 -right-1 w-5 h-5 border-2 border-background rounded-full",
+              getStatusColor(agent.status),
+            )}
+          />
         </div>
         <h3 className="font-semibold text-lg">{agent.name}</h3>
         <p className="text-sm text-muted-foreground">{agent.description}</p>
@@ -335,7 +364,9 @@ function AgentDetails({ agent, getStatusColor, getStatusText, onAction }: AgentD
         {agent.currentTask && (
           <div>
             <span className="text-sm font-medium">Tarefa Atual:</span>
-            <p className="text-sm text-muted-foreground mt-1">{agent.currentTask}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {agent.currentTask}
+            </p>
           </div>
         )}
 
@@ -364,20 +395,22 @@ function AgentDetails({ agent, getStatusColor, getStatusText, onAction }: AgentD
 
       {/* Actions */}
       <div className="space-y-2 pt-4 border-t">
-        <Button 
-          className="w-full" 
+        <Button
+          className="w-full"
           size="sm"
-          onClick={() => onAction('chat', agent)}
+          onClick={() => onAction("chat", agent)}
         >
           <MessageSquare className="w-4 h-4 mr-2" />
           Conversar
         </Button>
-        
+
         <div className="grid grid-cols-2 gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
-            onClick={() => onAction(agent.isExecuting ? 'pause' : 'start', agent)}
+            onClick={() =>
+              onAction(agent.isExecuting ? "pause" : "start", agent)
+            }
           >
             {agent.isExecuting ? (
               <>
@@ -391,11 +424,11 @@ function AgentDetails({ agent, getStatusColor, getStatusText, onAction }: AgentD
               </>
             )}
           </Button>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             size="sm"
-            onClick={() => onAction('settings', agent)}
+            onClick={() => onAction("settings", agent)}
           >
             <Settings className="w-4 h-4 mr-2" />
             Config

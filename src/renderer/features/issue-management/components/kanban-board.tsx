@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Button } from "@/renderer/components/ui/button";
-import { Input } from "@/renderer/components/ui/input";
-import { Badge } from "@/renderer/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/renderer/components/ui/card";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "react-beautiful-dnd";
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
+import { Badge } from "@/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { PlusCircle, Search, Filter, ArrowRightCircle } from "lucide-react";
+import { cn } from "@/renderer/lib/utils";
 
 interface Issue {
   id: string;
@@ -35,9 +41,15 @@ interface KanbanBoardProps {
   onAddIssue: () => void;
 }
 
-export function KanbanBoard({ issues, onIssueUpdate, onAddIssue }: KanbanBoardProps) {
+export function KanbanBoard({
+  issues,
+  onIssueUpdate,
+  onAddIssue,
+}: KanbanBoardProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<Issue["status"] | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<Issue["status"] | "all">(
+    "all",
+  );
 
   const getIssuesForColumn = (columnStatus: Issue["status"]) => {
     let filtered = issues.filter((issue) => {
@@ -65,7 +77,7 @@ export function KanbanBoard({ issues, onIssueUpdate, onAddIssue }: KanbanBoardPr
     return filtered;
   };
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) {
@@ -117,7 +129,10 @@ export function KanbanBoard({ issues, onIssueUpdate, onAddIssue }: KanbanBoardPr
             className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
           />
           {/* Filter dropdown could be added here */}
-          <Button onClick={onAddIssue} className="bg-brand-500 hover:bg-brand-600">
+          <Button
+            onClick={onAddIssue}
+            className="bg-brand-500 hover:bg-brand-600"
+          >
             <PlusCircle className="mr-2 h-4 w-4" /> Add Issue
           </Button>
         </div>
@@ -141,7 +156,11 @@ export function KanbanBoard({ issues, onIssueUpdate, onAddIssue }: KanbanBoardPr
                   </h2>
                   <div className="flex-1 overflow-y-auto space-y-3">
                     {getIssuesForColumn(column.status).map((issue, index) => (
-                      <Draggable draggableId={issue.id} index={index} key={issue.id}>
+                      <Draggable
+                        draggableId={issue.id}
+                        index={index}
+                        key={issue.id}
+                      >
                         {(provided) => (
                           <Card
                             ref={provided.innerRef}
@@ -156,7 +175,8 @@ export function KanbanBoard({ issues, onIssueUpdate, onAddIssue }: KanbanBoardPr
                             </CardHeader>
                             <CardContent className="text-sm text-gray-300">
                               <p className="mb-2 line-clamp-2">
-                                {issue.description || "No description provided."}
+                                {issue.description ||
+                                  "No description provided."}
                               </p>
                               <div className="flex items-center justify-between text-xs">
                                 <Badge

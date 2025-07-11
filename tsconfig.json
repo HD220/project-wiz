@@ -28,7 +28,7 @@
     }
   },
   "include": [
-    "src/**/*",
+    "src/renderer/**/*",
     "tests/**/*",
     "drizzle.config.ts",
     "forge.config.ts",

@@ -22,7 +22,11 @@ function CreateProjectModal({ onProjectCreated }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const { mutate: createProject, isPending, error } = useIpcMutation<IProject, Error, IpcProjectCreatePayload>({
+  const {
+    mutate: createProject,
+    isPending,
+    error,
+  } = useIpcMutation<IProject, Error, IpcProjectCreatePayload>({
     channel: IpcChannel.PROJECT_CREATE,
     onSuccess: () => {
       setProjectName("");

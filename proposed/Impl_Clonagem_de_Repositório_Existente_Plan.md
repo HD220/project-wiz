@@ -10,24 +10,24 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
 
 ### Componentes Existentes:
 
-*   **Módulo `git-integration` (`src/main/modules/git-integration`):**
-    *   **Comandos e Handlers:** `CloneRepositoryCommand` e `CloneRepositoryCommandHandler` já existem e encapsulam a lógica de execução do comando `git clone`.
-    *   **Serviço:** `GitService` fornece o método `clone(repoUrl: string, localPath: string)` que executa o comando Git real.
-    *   **IPC Handlers:** `GIT_INTEGRATION_CLONE` já está registrado para comunicação entre o processo principal e o de renderização.
-*   **Módulo `project-management` (`src/main/modules/project-management`):**
-    *   **`CreateProjectCommandHandler`:** Este handler já possui a lógica para chamar `gitIntegrationService.cloneRepository` se uma `remoteUrl` for fornecida durante a criação de um projeto. Isso significa que a integração backend para clonagem dentro do fluxo de criação de projeto já está estabelecida.
-    *   **Entidade `Project`:** A entidade `Project` e seu esquema de persistência (`DrizzleProjectRepository`) já incluem o campo `remoteUrl`, o que é fundamental para armazenar a origem do repositório clonado.
-*   **UI/UX (Frontend - `src/renderer`):**
-    *   Os componentes `CreateProjectModal` e `CreateProjectForm` (cujas modificações foram detalhadas no plano do Caso de Uso 1) já foram estendidos para incluir um campo `remoteUrl` e uma opção `gitOption` (`'new'` ou `'clone'`). Isso significa que a interface para inserir a URL de clonagem já existe.
+- **Módulo `git-integration` (`src/main/modules/git-integration`):**
+  - **Comandos e Handlers:** `CloneRepositoryCommand` e `CloneRepositoryCommandHandler` já existem e encapsulam a lógica de execução do comando `git clone`.
+  - **Serviço:** `GitService` fornece o método `clone(repoUrl: string, localPath: string)` que executa o comando Git real.
+  - **IPC Handlers:** `GIT_INTEGRATION_CLONE` já está registrado para comunicação entre o processo principal e o de renderização.
+- **Módulo `project-management` (`src/main/modules/project-management`):**
+  - **`CreateProjectCommandHandler`:** Este handler já possui a lógica para chamar `gitIntegrationService.cloneRepository` se uma `remoteUrl` for fornecida durante a criação de um projeto. Isso significa que a integração backend para clonagem dentro do fluxo de criação de projeto já está estabelecida.
+  - **Entidade `Project`:** A entidade `Project` e seu esquema de persistência (`DrizzleProjectRepository`) já incluem o campo `remoteUrl`, o que é fundamental para armazenar a origem do repositório clonado.
+- **UI/UX (Frontend - `src/renderer`):**
+  - Os componentes `CreateProjectModal` e `CreateProjectForm` (cujas modificações foram detalhadas no plano do Caso de Uso 1) já foram estendidos para incluir um campo `remoteUrl` e uma opção `gitOption` (`'new'` ou `'clone'`). Isso significa que a interface para inserir a URL de clonagem já existe.
 
 ### Gaps Identificados:
 
 1.  **Ponto de Entrada Dedicado na UI (Opcional, mas Recomendado):** Embora a funcionalidade de clonagem esteja integrada ao modal de criação de projeto, o caso de uso sugere uma opção explícita "Clonar Repositório". Isso pode ser um botão separado na interface principal que abre o modal de criação de projeto com a opção de clonagem pré-selecionada.
 2.  **Tratamento de Erros e Feedback ao Usuário (Frontend):** O feedback atual pode ser genérico. É crucial fornecer mensagens de erro mais específicas para cenários de clonagem, como:
-    *   URL de repositório inválida.
-    *   Erros de autenticação (credenciais, permissões).
-    *   Problemas de rede.
-    *   Diretório de destino não vazio ou já existente.
+    - URL de repositório inválida.
+    - Erros de autenticação (credenciais, permissões).
+    - Problemas de rede.
+    - Diretório de destino não vazio ou já existente.
 3.  **Feedback de Progresso durante a Clonagem:** Clonar repositórios grandes pode levar tempo. Não há um mecanismo explícito para fornecer feedback de progresso em tempo real (e.g., porcentagem, arquivos sendo baixados) para o usuário na UI.
 4.  **Validação de URL (Frontend e Backend):** Embora o campo `remoteUrl` exista, a validação da URL (formato, acessibilidade) precisa ser robusta tanto no frontend (para feedback imediato) quanto no backend (para segurança e integridade).
 
@@ -39,17 +39,17 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
 
 **Arquivos a Modificar:**
 
-*   `src/renderer/features/project-management/components/create-project-modal.tsx`
-*   `src/renderer/features/project-management/components/create-project-form.tsx`
-*   `src/renderer/app/__root.tsx` ou componente de layout principal (para o ponto de entrada)
-*   `src/shared/ipc-types/ipc-channels.ts` (para um novo canal de progresso, se implementado)
-*   `src/shared/ipc-types/ipc-payloads.ts` (para o payload do progresso, se implementado)
+- `src/renderer/features/project-management/components/create-project-modal.tsx`
+- `src/renderer/features/project-management/components/create-project-form.tsx`
+- `src/renderer/app/__root.tsx` ou componente de layout principal (para o ponto de entrada)
+- `src/shared/ipc-types/ipc-channels.ts` (para um novo canal de progresso, se implementado)
+- `src/shared/ipc-types/ipc-payloads.ts` (para o payload do progresso, se implementado)
 
 **Passos:**
 
 1.  **Ponto de Entrada "Clonar Repositório" (Opcional):**
-    *   Adicionar um botão ou item de menu na interface principal (e.g., na `ProjectSidebar` ou em um menu de "Arquivo") com o texto "Clonar Repositório".
-    *   Ao clicar, este botão deve abrir o `CreateProjectModal` e, idealmente, pré-selecionar a opção `gitOption` como `'clone'` e focar no campo `remoteUrl`.
+    - Adicionar um botão ou item de menu na interface principal (e.g., na `ProjectSidebar` ou em um menu de "Arquivo") com o texto "Clonar Repositório".
+    - Ao clicar, este botão deve abrir o `CreateProjectModal` e, idealmente, pré-selecionar a opção `gitOption` como `'clone'` e focar no campo `remoteUrl`.
 
     ```typescript
     // Exemplo: src/renderer/components/layout/project-sidebar.tsx
@@ -100,7 +100,7 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
     ```
 
 2.  **Validação de URL no Frontend:**
-    *   Adicionar validação de formato de URL ao campo `remoteUrl` no `CreateProjectForm` usando bibliotecas como `zod` ou regex simples. Fornecer feedback visual imediato ao usuário.
+    - Adicionar validação de formato de URL ao campo `remoteUrl` no `CreateProjectForm` usando bibliotecas como `zod` ou regex simples. Fornecer feedback visual imediato ao usuário.
 
     ```typescript
     // src/renderer/features/project-management/components/create-project-form.tsx
@@ -146,8 +146,8 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
     ```
 
 3.  **Feedback de Progresso (Frontend):**
-    *   Implementar um mecanismo para exibir o progresso da clonagem. Isso pode ser um `ProgressBar` ou uma mensagem de status detalhada dentro do `CreateProjectModal`.
-    *   Isso exigirá um novo canal IPC para o backend enviar atualizações de progresso.
+    - Implementar um mecanismo para exibir o progresso da clonagem. Isso pode ser um `ProgressBar` ou uma mensagem de status detalhada dentro do `CreateProjectModal`.
+    - Isso exigirá um novo canal IPC para o backend enviar atualizações de progresso.
 
     ```typescript
     // src/shared/ipc-types/ipc-channels.ts
@@ -164,7 +164,7 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
 
     // src/renderer/features/project-management/components/create-project-modal.tsx
     // ... imports ...
-    import { ProgressBar } from "@/renderer/components/ui/progress-bar"; // Exemplo
+    import { ProgressBar } from "@/ui/progress-bar"; // Exemplo
 
     function CreateProjectModal({ onProjectCreated, initialGitOption = 'new', children }: CreateProjectModalProps) {
       // ... estados existentes ...
@@ -207,15 +207,15 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
 
 **Arquivos a Modificar:**
 
-*   `src/main/modules/git-integration/domain/git.service.ts`
-*   `src/main/modules/git-integration/application/commands/clone-repository.command.ts` (se necessário, para tratamento de erros mais específico)
-*   `src/main/kernel/real-time-events.service.ts` (para emitir eventos de progresso)
+- `src/main/modules/git-integration/domain/git.service.ts`
+- `src/main/modules/git-integration/application/commands/clone-repository.command.ts` (se necessário, para tratamento de erros mais específico)
+- `src/main/kernel/real-time-events.service.ts` (para emitir eventos de progresso)
 
 **Passos:**
 
 1.  **Aprimorar `GitService.clone` para Emitir Progresso:**
-    *   O método `clone` no `GitService` precisará ser modificado para capturar a saída do `git clone` (que inclui mensagens de progresso) e emitir eventos via `RealTimeEventsService`.
-    *   Isso pode ser feito executando o comando `git clone` com a opção `--progress` e parseando a saída do stderr.
+    - O método `clone` no `GitService` precisará ser modificado para capturar a saída do `git clone` (que inclui mensagens de progresso) e emitir eventos via `RealTimeEventsService`.
+    - Isso pode ser feito executando o comando `git clone` com a opção `--progress` e parseando a saída do stderr.
 
     ```typescript
     // src/main/modules/git-integration/domain/git.service.ts
@@ -224,7 +224,9 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
     import { IpcChannel } from "@/shared/ipc-types/ipc-channels"; // Novo import
 
     export class GitService implements IGitService {
-      constructor(private readonly realTimeEventsService: RealTimeEventsService) {} // Injetar
+      constructor(
+        private readonly realTimeEventsService: RealTimeEventsService,
+      ) {} // Injetar
 
       async clone(repoUrl: string, localPath: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
@@ -234,13 +236,16 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
           try {
             const child = execaCommand(command, { cwd: process.cwd() }); // Executar no diretório raiz da aplicação
 
-            child.stderr?.on('data', (data) => {
+            child.stderr?.on("data", (data) => {
               const output = data.toString();
               // Exemplo de parsing de progresso (pode variar dependendo da versão do Git)
               const progressMatch = output.match(/Receiving objects: (\d+)%/);
               if (progressMatch && progressMatch[1]) {
                 const progress = parseInt(progressMatch[1], 10);
-                this.realTimeEventsService.emit(IpcChannel.GIT_INTEGRATION_CLONE_PROGRESS, { progress, message: output.trim() });
+                this.realTimeEventsService.emit(
+                  IpcChannel.GIT_INTEGRATION_CLONE_PROGRESS,
+                  { progress, message: output.trim() },
+                );
               }
               logger.debug(`Git clone stderr: ${output.trim()}`);
             });
@@ -252,12 +257,25 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
             }
 
             logger.info(`Git clone stdout: ${stdout}`);
-            this.realTimeEventsService.emit(IpcChannel.GIT_INTEGRATION_CLONE_PROGRESS, { progress: 100, message: "Clonagem concluída!" });
+            this.realTimeEventsService.emit(
+              IpcChannel.GIT_INTEGRATION_CLONE_PROGRESS,
+              { progress: 100, message: "Clonagem concluída!" },
+            );
             resolve(stdout);
           } catch (error) {
             logger.error(`Git clone failed: ${(error as Error).message}`);
-            this.realTimeEventsService.emit(IpcChannel.GIT_INTEGRATION_CLONE_PROGRESS, { progress: 0, message: `Erro na clonagem: ${(error as Error).message}` });
-            reject(new ApplicationError(`Failed to clone repository: ${(error as Error).message}`));
+            this.realTimeEventsService.emit(
+              IpcChannel.GIT_INTEGRATION_CLONE_PROGRESS,
+              {
+                progress: 0,
+                message: `Erro na clonagem: ${(error as Error).message}`,
+              },
+            );
+            reject(
+              new ApplicationError(
+                `Failed to clone repository: ${(error as Error).message}`,
+              ),
+            );
           }
         });
       }
@@ -266,8 +284,8 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
     ```
 
 2.  **Tratamento de Erros Específicos (Backend):**
-    *   No `CreateProjectCommandHandler` e no `CloneRepositoryCommandHandler`, capturar exceções específicas do `GitService` e re-lançar `ApplicationError` com mensagens mais descritivas para o frontend.
-    *   Por exemplo, se `git clone` falhar devido a um diretório não vazio, o `GitService` pode lançar um erro específico que o handler pode traduzir para uma mensagem amigável.
+    - No `CreateProjectCommandHandler` e no `CloneRepositoryCommandHandler`, capturar exceções específicas do `GitService` e re-lançar `ApplicationError` com mensagens mais descritivas para o frontend.
+    - Por exemplo, se `git clone` falhar devido a um diretório não vazio, o `GitService` pode lançar um erro específico que o handler pode traduzir para uma mensagem amigável.
 
 ### 3.3. Testes e Verificação
 
@@ -276,24 +294,24 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
 **Passos:**
 
 1.  **Testes Unitários:**
-    *   Testar `GitService.clone` para garantir que emite eventos de progresso e lida com diferentes cenários de erro (URL inválida, diretório existente).
-    *   Testar `CreateProjectCommandHandler` com `gitOption: 'clone'` para verificar o fluxo de clonagem e tratamento de erros.
+    - Testar `GitService.clone` para garantir que emite eventos de progresso e lida com diferentes cenários de erro (URL inválida, diretório existente).
+    - Testar `CreateProjectCommandHandler` com `gitOption: 'clone'` para verificar o fluxo de clonagem e tratamento de erros.
 
 2.  **Testes de Integração (Manual/E2E):**
-    *   Iniciar a aplicação.
-    *   Clicar no botão "Clonar Repositório" (se implementado).
-    *   Inserir uma URL de repositório Git pública válida (e.g., um repositório pequeno para teste).
-    *   Observar o feedback de progresso na UI.
-    *   Verificar se o projeto é criado e aparece na lista de projetos.
-    *   Tentar clonar um repositório com uma URL inválida e verificar a mensagem de erro.
-    *   Tentar clonar um repositório para um diretório local que já existe e não está vazio, e verificar a mensagem de erro.
-    *   (Opcional) Testar com um repositório que requer autenticação para verificar o fluxo de erro.
+    - Iniciar a aplicação.
+    - Clicar no botão "Clonar Repositório" (se implementado).
+    - Inserir uma URL de repositório Git pública válida (e.g., um repositório pequeno para teste).
+    - Observar o feedback de progresso na UI.
+    - Verificar se o projeto é criado e aparece na lista de projetos.
+    - Tentar clonar um repositório com uma URL inválida e verificar a mensagem de erro.
+    - Tentar clonar um repositório para um diretório local que já existe e não está vazio, e verificar a mensagem de erro.
+    - (Opcional) Testar com um repositório que requer autenticação para verificar o fluxo de erro.
 
 ## 4. Considerações Adicionais
 
-*   **Autenticação Git:** O caso de uso não especifica como lidar com repositórios privados que exigem autenticação. Isso é um gap significativo para futuras iterações. Pode envolver a integração com gerenciadores de credenciais Git ou a solicitação de tokens/usuário/senha ao usuário.
-*   **Tamanho do Repositório:** Para repositórios muito grandes, o processo de clonagem pode ser demorado e consumir muitos recursos. Considerar otimizações ou feedback mais granular.
-*   **Cancelamento da Clonagem:** Não há uma opção para cancelar uma operação de clonagem em andamento. Isso pode ser uma melhoria futura.
-*   **Reuso de Código:** O `CreateProjectCommandHandler` já utiliza o `GitIntegrationService`. Garantir que as melhorias no `GitService` (progresso, erros) sejam propagadas corretamente para o `CreateProjectCommandHandler`.
+- **Autenticação Git:** O caso de uso não especifica como lidar com repositórios privados que exigem autenticação. Isso é um gap significativo para futuras iterações. Pode envolver a integração com gerenciadores de credenciais Git ou a solicitação de tokens/usuário/senha ao usuário.
+- **Tamanho do Repositório:** Para repositórios muito grandes, o processo de clonagem pode ser demorado e consumir muitos recursos. Considerar otimizações ou feedback mais granular.
+- **Cancelamento da Clonagem:** Não há uma opção para cancelar uma operação de clonagem em andamento. Isso pode ser uma melhoria futura.
+- **Reuso de Código:** O `CreateProjectCommandHandler` já utiliza o `GitIntegrationService`. Garantir que as melhorias no `GitService` (progresso, erros) sejam propagadas corretamente para o `CreateProjectCommandHandler`.
 
 Este plano detalha as modificações necessárias para implementar o caso de uso "Clonagem de Repositório Existente", cobrindo tanto o frontend quanto o backend, e incluindo considerações sobre testes e boas práticas.

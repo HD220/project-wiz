@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -38,41 +42,41 @@ interface FileExplorerProps {
   onFileOpen?: (file: FileTreeItem) => void;
 }
 
-export function FileExplorer({ 
-  projectId, 
-  className, 
-  onFileSelect, 
-  onFileOpen 
+export function FileExplorer({
+  projectId,
+  className,
+  onFileSelect,
+  onFileOpen,
 }: FileExplorerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
 
   const getFileIcon = (item: FileTreeItem) => {
-    if (item.type === 'folder') {
+    if (item.type === "folder") {
       return <Folder className="w-4 h-4 text-blue-500" />;
     }
 
     const extension = item.extension?.toLowerCase();
     switch (extension) {
-      case 'tsx':
-      case 'ts':
-      case 'jsx':
-      case 'js':
+      case "tsx":
+      case "ts":
+      case "jsx":
+      case "js":
         return <Code className="w-4 h-4 text-yellow-500" />;
-      case 'json':
+      case "json":
         return <Settings className="w-4 h-4 text-green-500" />;
-      case 'md':
-      case 'txt':
+      case "md":
+      case "txt":
         return <FileText className="w-4 h-4 text-gray-500" />;
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-      case 'gif':
-      case 'svg':
+      case "png":
+      case "jpg":
+      case "jpeg":
+      case "gif":
+      case "svg":
         return <Image className="w-4 h-4 text-purple-500" />;
-      case 'zip':
-      case 'tar':
-      case 'gz':
+      case "zip":
+      case "tar":
+      case "gz":
         return <Archive className="w-4 h-4 text-orange-500" />;
       default:
         return <File className="w-4 h-4 text-gray-400" />;
@@ -80,20 +84,20 @@ export function FileExplorer({
   };
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '';
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    if (!bytes) return "";
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
   };
 
   const formatDate = (date?: Date) => {
-    if (!date) return '';
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+    if (!date) return "";
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
@@ -101,7 +105,7 @@ export function FileExplorer({
     setSelectedPath(item.path);
     onFileSelect?.(item);
 
-    if (item.type === 'file') {
+    if (item.type === "file") {
       onFileOpen?.(item);
     }
   };
@@ -112,7 +116,12 @@ export function FileExplorer({
   };
 
   return (
-    <div className={cn("h-full flex flex-col bg-card border-r border-border", className)}>
+    <div
+      className={cn(
+        "h-full flex flex-col bg-card border-r border-border",
+        className,
+      )}
+    >
       {/* Header */}
       <div className="p-3 border-b border-border">
         <div className="flex items-center justify-between mb-3">
@@ -126,7 +135,7 @@ export function FileExplorer({
             </Button>
           </div>
         </div>
-        
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
@@ -161,7 +170,10 @@ export function FileExplorer({
       {selectedPath && (
         <div className="p-3 border-t border-border bg-muted/30">
           {(() => {
-            const findItem = (items: FileTreeItem[], path: string): FileTreeItem | null => {
+            const findItem = (
+              items: FileTreeItem[],
+              path: string,
+            ): FileTreeItem | null => {
               for (const item of items) {
                 if (item.path === path) return item;
                 if (item.children) {
@@ -171,7 +183,7 @@ export function FileExplorer({
               }
               return null;
             };
-            
+
             const selectedItem = findItem(mockFileTree, selectedPath);
             if (!selectedItem) return null;
 
@@ -179,16 +191,20 @@ export function FileExplorer({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   {getFileIcon(selectedItem)}
-                  <span className="text-sm font-medium truncate">{selectedItem.name}</span>
+                  <span className="text-sm font-medium truncate">
+                    {selectedItem.name}
+                  </span>
                 </div>
-                
-                {selectedItem.type === 'file' && (
+
+                {selectedItem.type === "file" && (
                   <div className="text-xs text-muted-foreground space-y-1">
                     {selectedItem.size && (
                       <div>Tamanho: {formatFileSize(selectedItem.size)}</div>
                     )}
                     {selectedItem.lastModified && (
-                      <div>Modificado: {formatDate(selectedItem.lastModified)}</div>
+                      <div>
+                        Modificado: {formatDate(selectedItem.lastModified)}
+                      </div>
                     )}
                     {selectedItem.extension && (
                       <div>Tipo: {selectedItem.extension.toUpperCase()}</div>
@@ -225,20 +241,23 @@ function FileTreeNode({
 }: FileTreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(item.expanded ?? false);
 
-  const isVisible = !searchQuery || 
+  const isVisible =
+    !searchQuery ||
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.children?.some(child => 
-      child.name.toLowerCase().includes(searchQuery.toLowerCase())
-    ));
+    item.children?.some((child) =>
+      child.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
 
   if (!isVisible) return null;
 
-  const hasVisibleChildren = item.children?.some(child => 
-    !searchQuery || child.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const hasVisibleChildren = item.children?.some(
+    (child) =>
+      !searchQuery ||
+      child.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleToggle = () => {
-    if (item.type === 'folder') {
+    if (item.type === "folder") {
       setIsExpanded(!isExpanded);
     }
     onItemClick(item);
@@ -252,13 +271,13 @@ function FileTreeNode({
             variant="ghost"
             className={cn(
               "w-full justify-start px-1 py-1 h-auto text-left font-normal",
-              selectedPath === item.path && "bg-accent text-accent-foreground"
+              selectedPath === item.path && "bg-accent text-accent-foreground",
             )}
             style={{ paddingLeft: `${level * 12 + 4}px` }}
             onClick={handleToggle}
           >
             <div className="flex items-center gap-1 flex-1 min-w-0">
-              {item.type === 'folder' && (
+              {item.type === "folder" && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -279,10 +298,13 @@ function FileTreeNode({
                 {getFileIcon(item)}
               </div>
               <span className="truncate text-sm">{item.name}</span>
-              {item.type === 'file' && item.size && (
-                <Badge variant="outline" className="ml-auto text-xs px-1 py-0 shrink-0">
+              {item.type === "file" && item.size && (
+                <Badge
+                  variant="outline"
+                  className="ml-auto text-xs px-1 py-0 shrink-0"
+                >
                   {(() => {
-                    const sizes = ['B', 'KB', 'MB'];
+                    const sizes = ["B", "KB", "MB"];
                     const i = Math.floor(Math.log(item.size!) / Math.log(1024));
                     return `${(item.size! / Math.pow(1024, i)).toFixed(0)}${sizes[i]}`;
                   })()}
@@ -291,28 +313,30 @@ function FileTreeNode({
             </div>
           </Button>
         </ContextMenuTrigger>
-        
+
         <ContextMenuContent>
-          {item.type === 'file' ? (
+          {item.type === "file" ? (
             <>
-              <ContextMenuItem onClick={() => onContextAction('open', item)}>
+              <ContextMenuItem onClick={() => onContextAction("open", item)}>
                 <File className="w-4 h-4 mr-2" />
                 Abrir
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onContextAction('copy', item)}>
+              <ContextMenuItem onClick={() => onContextAction("copy", item)}>
                 <Copy className="w-4 h-4 mr-2" />
                 Copiar caminho
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onContextAction('download', item)}>
+              <ContextMenuItem
+                onClick={() => onContextAction("download", item)}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Baixar
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onContextAction('rename', item)}>
+              <ContextMenuItem onClick={() => onContextAction("rename", item)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Renomear
               </ContextMenuItem>
-              <ContextMenuItem 
-                onClick={() => onContextAction('delete', item)}
+              <ContextMenuItem
+                onClick={() => onContextAction("delete", item)}
                 className="text-destructive"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -321,24 +345,28 @@ function FileTreeNode({
             </>
           ) : (
             <>
-              <ContextMenuItem onClick={() => onContextAction('new-file', item)}>
+              <ContextMenuItem
+                onClick={() => onContextAction("new-file", item)}
+              >
                 <File className="w-4 h-4 mr-2" />
                 Novo arquivo
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onContextAction('new-folder', item)}>
+              <ContextMenuItem
+                onClick={() => onContextAction("new-folder", item)}
+              >
                 <Folder className="w-4 h-4 mr-2" />
                 Nova pasta
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onContextAction('copy', item)}>
+              <ContextMenuItem onClick={() => onContextAction("copy", item)}>
                 <Copy className="w-4 h-4 mr-2" />
                 Copiar caminho
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => onContextAction('rename', item)}>
+              <ContextMenuItem onClick={() => onContextAction("rename", item)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Renomear
               </ContextMenuItem>
-              <ContextMenuItem 
-                onClick={() => onContextAction('delete', item)}
+              <ContextMenuItem
+                onClick={() => onContextAction("delete", item)}
                 className="text-destructive"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -350,24 +378,27 @@ function FileTreeNode({
       </ContextMenu>
 
       {/* Children */}
-      {item.type === 'folder' && item.children && isExpanded && hasVisibleChildren && (
-        <Collapsible open={isExpanded}>
-          <CollapsibleContent>
-            {item.children.map((child) => (
-              <FileTreeNode
-                key={child.path}
-                item={child}
-                level={level + 1}
-                searchQuery={searchQuery}
-                selectedPath={selectedPath}
-                onItemClick={onItemClick}
-                onContextAction={onContextAction}
-                getFileIcon={getFileIcon}
-              />
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
-      )}
+      {item.type === "folder" &&
+        item.children &&
+        isExpanded &&
+        hasVisibleChildren && (
+          <Collapsible open={isExpanded}>
+            <CollapsibleContent>
+              {item.children.map((child) => (
+                <FileTreeNode
+                  key={child.path}
+                  item={child}
+                  level={level + 1}
+                  searchQuery={searchQuery}
+                  selectedPath={selectedPath}
+                  onItemClick={onItemClick}
+                  onContextAction={onContextAction}
+                  getFileIcon={getFileIcon}
+                />
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        )}
     </div>
   );
 }

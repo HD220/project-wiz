@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/renderer/components/ui/button";
-import { Input } from "@/renderer/components/ui/input";
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
 import { Send, Paperclip, Smile } from "lucide-react";
 
 interface MessageInputProps {
@@ -10,7 +10,7 @@ interface MessageInputProps {
 }
 
 export function MessageInput({
-  channelName,
+  channelName: _channelName,
   onSendMessage,
   placeholder = "Message",
 }: MessageInputProps) {
@@ -19,34 +19,47 @@ export function MessageInput({
   const handleSendMessage = () => {
     if (content.trim()) {
       // Basic mention detection for now. Can be expanded later.
-      const mentions = content.match(/@\w+/g)?.map((m) => m.substring(1));
+      const mentions = content
+        .match(/@\w+/g)
+        ?.map((match) => match.substring(1));
       onSendMessage(content, mentions);
       setContent("");
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
       handleSendMessage();
     }
   };
 
   return (
     <div className="flex items-center space-x-2 p-2 bg-gray-800 rounded-lg">
-      <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-gray-400 hover:text-white"
+      >
         <Paperclip className="h-5 w-5" />
       </Button>
       <Input
         className="flex-1 bg-gray-700 border-none text-white placeholder-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
         placeholder={placeholder}
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        onChange={(event) => setContent(event.target.value)}
         onKeyPress={handleKeyPress}
       />
-      <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-gray-400 hover:text-white"
+      >
         <Smile className="h-5 w-5" />
       </Button>
-      <Button onClick={handleSendMessage} className="bg-brand-500 hover:bg-brand-600">
+      <Button
+        onClick={handleSendMessage}
+        className="bg-brand-500 hover:bg-brand-600"
+      >
         <Send className="h-5 w-5" />
       </Button>
     </div>

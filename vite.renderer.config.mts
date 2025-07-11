@@ -30,12 +30,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@/ui": path.resolve(projectRoot, "./src/renderer/components/ui"),
-      "@/components": path.resolve(projectRoot, "src/renderer/components"),
-      "@/lib/*": path.resolve(projectRoot, "./src/renderer/lib"),
-      "@/hooks/*": path.resolve(projectRoot, "./src/renderer/hooks"),
-      "@/shared/*": path.resolve(projectRoot, "./src/shared"),
-      "@/": path.resolve(projectRoot, "./src"),
+      "@/ui": path.resolve(projectRoot, "./src/renderer/components/ui/"),
+      "@/components": path.resolve(projectRoot, "src/renderer/components/"),
+      "@/lib": path.resolve(projectRoot, "./src/renderer/lib/"),
+      "@/hooks": path.resolve(projectRoot, "./src/renderer/hooks/"),
+      "@/shared": path.resolve(projectRoot, "./src/shared/"),
+      "@": path.resolve(projectRoot, "./src/"),
     },
   },
 });

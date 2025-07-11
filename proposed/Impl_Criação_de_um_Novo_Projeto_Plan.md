@@ -10,27 +10,27 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
 
 ### Componentes Existentes:
 
-*   **Módulo `project-management` (`src/main/modules/project-management`):**
-    *   **Comandos e Handlers:** `CreateProjectCommand`, `CreateProjectCommandHandler`, `ListProjectsQuery`, `ListProjectsQueryHandler`, `RemoveProjectCommand`, `RemoveProjectCommandHandler`.
-    *   **Entidades e Repositórios:** `Project` entity, `IProjectRepository`, `DrizzleProjectRepository` (para persistência no banco de dados).
-    *   **Serviços:** `FilesystemService` (para operações de diretório), `GitIntegrationService` (para operações Git).
-    *   **IPC Handlers:** `PROJECT_CREATE`, `PROJECT_LIST`, `PROJECT_REMOVE` já estão configurados para comunicação entre o processo principal (main) e o processo de renderização (renderer).
-*   **Esquema do Banco de Dados (`src/main/modules/project-management/persistence/schema.ts`):**
-    *   A tabela `projects` já possui campos para `name`, `description`, `localPath`, `remoteUrl`, `createdAt`, `updatedAt`. Isso é excelente, pois não precisamos modificar o esquema do banco de dados para acomodar os novos requisitos.
-*   **UI/UX (Frontend - `src/renderer`):**
-    *   Componentes como `ProjectSidebar`, `CreateProjectModal` e `CreateProjectForm` já existem, indicando uma estrutura básica para a interface de criação e listagem de projetos.
+- **Módulo `project-management` (`src/main/modules/project-management`):**
+  - **Comandos e Handlers:** `CreateProjectCommand`, `CreateProjectCommandHandler`, `ListProjectsQuery`, `ListProjectsQueryHandler`, `RemoveProjectCommand`, `RemoveProjectCommandHandler`.
+  - **Entidades e Repositórios:** `Project` entity, `IProjectRepository`, `DrizzleProjectRepository` (para persistência no banco de dados).
+  - **Serviços:** `FilesystemService` (para operações de diretório), `GitIntegrationService` (para operações Git).
+  - **IPC Handlers:** `PROJECT_CREATE`, `PROJECT_LIST`, `PROJECT_REMOVE` já estão configurados para comunicação entre o processo principal (main) e o processo de renderização (renderer).
+- **Esquema do Banco de Dados (`src/main/modules/project-management/persistence/schema.ts`):**
+  - A tabela `projects` já possui campos para `name`, `description`, `localPath`, `remoteUrl`, `createdAt`, `updatedAt`. Isso é excelente, pois não precisamos modificar o esquema do banco de dados para acomodar os novos requisitos.
+- **UI/UX (Frontend - `src/renderer`):**
+  - Componentes como `ProjectSidebar`, `CreateProjectModal` e `CreateProjectForm` já existem, indicando uma estrutura básica para a interface de criação e listagem de projetos.
 
 ### Gaps Identificados:
 
 1.  **UI/UX - `CreateProjectForm`:** O formulário atual (`features/project-management/components/create-project-form.tsx`) aceita apenas o nome do projeto. Para atender ao caso de uso, ele precisa ser estendido para incluir:
-    *   Um campo opcional para a **descrição do projeto**.
-    *   Um campo opcional para a **URL de um repositório remoto** (para o caso de clonagem).
-    *   Lógica para alternar entre "criar novo repositório Git" e "clonar repositório existente" na UI, possivelmente com um `RadioGroup` ou `Switch`.
+    - Um campo opcional para a **descrição do projeto**.
+    - Um campo opcional para a **URL de um repositório remoto** (para o caso de clonagem).
+    - Lógica para alternar entre "criar novo repositório Git" e "clonar repositório existente" na UI, possivelmente com um `RadioGroup` ou `Switch`.
 2.  **Backend - `CreateProjectCommand`:** O payload do comando (`src/main/modules/project-management/application/commands/create-project.command.ts`) atualmente só contém o `name`. Ele precisa ser atualizado para incluir `description` (opcional) e `remoteUrl` (opcional). Além disso, um novo campo `gitOption` (e.g., `'new'` ou `'clone'`) será necessário para indicar a ação Git desejada.
 3.  **Backend - `CreateProjectCommandHandler`:** O handler (`src/main/modules/project-management/application/commands/create-project.handler.ts`) já possui a lógica para `git init` e `git clone`. No entanto, ele precisa ser adaptado para:
-    *   Receber os novos campos (`description`, `remoteUrl`, `gitOption`) do `CreateProjectCommand`.
-    *   Utilizar `remoteUrl` corretamente quando `gitOption` for `'clone'`.
-    *   Garantir que a lógica de criação de diretório e inicialização/clonagem Git seja condicional ao `gitOption`.
+    - Receber os novos campos (`description`, `remoteUrl`, `gitOption`) do `CreateProjectCommand`.
+    - Utilizar `remoteUrl` corretamente quando `gitOption` for `'clone'`.
+    - Garantir que a lógica de criação de diretório e inicialização/clonagem Git seja condicional ao `gitOption`.
 4.  **Criação de Canal de Comunicação Padrão:** O caso de uso especifica "O sistema cria um canal de comunicação padrão para o projeto (ex: `#general`)". Não há lógica explícita para isso no `CreateProjectCommandHandler`. O módulo `communication` (`src/main/modules/communication`) deve ser utilizado para criar este canal.
 
 ## 3. Plano de Implementação Detalhado
@@ -41,14 +41,14 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
 
 **Arquivos a Modificar:**
 
-*   `src/renderer/features/project-management/components/create-project-form.tsx`
-*   `src/renderer/features/project-management/components/create-project-modal.tsx`
-*   `src/shared/ipc-types/ipc-payloads.ts` (para o tipo `IpcProjectCreatePayload`)
+- `src/renderer/features/project-management/components/create-project-form.tsx`
+- `src/renderer/features/project-management/components/create-project-modal.tsx`
+- `src/shared/ipc-types/ipc-payloads.ts` (para o tipo `IpcProjectCreatePayload`)
 
 **Passos:**
 
 1.  **Atualizar `IpcProjectCreatePayload`:**
-    *   Adicionar `description?: string;` e `remoteUrl?: string;` e `gitOption: 'new' | 'clone';` ao tipo `IpcProjectCreatePayload` em `src/shared/ipc-types/ipc-payloads.ts`.
+    - Adicionar `description?: string;` e `remoteUrl?: string;` e `gitOption: 'new' | 'clone';` ao tipo `IpcProjectCreatePayload` em `src/shared/ipc-types/ipc-payloads.ts`.
 
     ```typescript
     // src/shared/ipc-types/ipc-payloads.ts
@@ -56,21 +56,21 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
       name: string;
       description?: string; // Novo campo
       remoteUrl?: string; // Novo campo
-      gitOption: 'new' | 'clone'; // Novo campo
+      gitOption: "new" | "clone"; // Novo campo
     }
     ```
 
 2.  **Modificar `CreateProjectForm`:**
-    *   Adicionar campos de input para `description` e `remoteUrl`.
-    *   Adicionar um componente para selecionar a opção Git (e.g., `RadioGroup` ou `Switch` do Shadcn UI) para `gitOption`.
-    *   A visibilidade do campo `remoteUrl` deve ser condicional à seleção de `gitOption` como `'clone'`.
-    *   Atualizar as props do componente para aceitar e gerenciar os novos estados.
+    - Adicionar campos de input para `description` e `remoteUrl`.
+    - Adicionar um componente para selecionar a opção Git (e.g., `RadioGroup` ou `Switch` do Shadcn UI) para `gitOption`.
+    - A visibilidade do campo `remoteUrl` deve ser condicional à seleção de `gitOption` como `'clone'`.
+    - Atualizar as props do componente para aceitar e gerenciar os novos estados.
 
     ```typescript
     // src/renderer/features/project-management/components/create-project-form.tsx
     // ... imports ...
-    import { RadioGroup, RadioGroupItem } from "@/renderer/components/ui/radio-group"; // Exemplo de import
-    import { Switch } from "@/renderer/components/ui/switch"; // Alternativa ao RadioGroup
+    import { RadioGroup, RadioGroupItem } from "@/ui/radio-group"; // Exemplo de import
+    import { Switch } from "@/ui/switch"; // Alternativa ao RadioGroup
 
     interface CreateProjectFormProps {
       projectName: string;
@@ -170,10 +170,10 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
     ```
 
 3.  **Modificar `CreateProjectModal`:**
-    *   Adicionar estados para `projectDescription`, `remoteUrl` e `gitOption`.
-    *   Passar esses estados e seus setters para o `CreateProjectForm`.
-    *   Atualizar a chamada `createProject` para incluir os novos dados no payload.
-    *   Adicionar validação básica para `remoteUrl` se `gitOption` for `'clone'`.
+    - Adicionar estados para `projectDescription`, `remoteUrl` e `gitOption`.
+    - Passar esses estados e seus setters para o `CreateProjectForm`.
+    - Atualizar a chamada `createProject` para incluir os novos dados no payload.
+    - Adicionar validação básica para `remoteUrl` se `gitOption` for `'clone'`.
 
     ```typescript
     // src/renderer/features/project-management/components/create-project-modal.tsx
@@ -258,17 +258,17 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
 
 **Arquivos a Modificar:**
 
-*   `src/main/modules/project-management/application/commands/create-project.command.ts`
-*   `src/main/modules/project-management/application/commands/create-project.handler.ts`
-*   `src/main/modules/project-management/domain/project.entity.ts` (se necessário, para refletir os novos campos no construtor)
-*   `src/main/modules/communication/application/commands/create-channel.command.ts` (se não existir, criar)
-*   `src/main/modules/communication/application/commands/create-channel.handler.ts` (se não existir, criar)
-*   `src/main/modules/communication/index.ts` (para registrar o novo comando/handler)
+- `src/main/modules/project-management/application/commands/create-project.command.ts`
+- `src/main/modules/project-management/application/commands/create-project.handler.ts`
+- `src/main/modules/project-management/domain/project.entity.ts` (se necessário, para refletir os novos campos no construtor)
+- `src/main/modules/communication/application/commands/create-channel.command.ts` (se não existir, criar)
+- `src/main/modules/communication/application/commands/create-channel.handler.ts` (se não existir, criar)
+- `src/main/modules/communication/index.ts` (para registrar o novo comando/handler)
 
 **Passos:**
 
 1.  **Atualizar `CreateProjectCommand`:**
-    *   Adicionar `description?: string;`, `remoteUrl?: string;` e `gitOption: 'new' | 'clone';` ao payload do comando.
+    - Adicionar `description?: string;`, `remoteUrl?: string;` e `gitOption: 'new' | 'clone';` ao payload do comando.
 
     ```typescript
     // src/main/modules/project-management/application/commands/create-project.command.ts
@@ -278,20 +278,22 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
       name: string;
       description?: string; // Novo campo
       remoteUrl?: string; // Novo campo
-      gitOption: 'new' | 'clone'; // Novo campo
+      gitOption: "new" | "clone"; // Novo campo
     }
 
-    export class CreateProjectCommand implements ICommand<ICreateProjectCommandPayload> {
+    export class CreateProjectCommand
+      implements ICommand<ICreateProjectCommandPayload>
+    {
       readonly type = "CreateProjectCommand";
       constructor(public payload: ICreateProjectCommandPayload) {}
     }
     ```
 
 2.  **Modificar `CreateProjectCommandHandler`:**
-    *   Injetar o `CqrsDispatcher` para poder despachar o comando de criação de canal.
-    *   Atualizar o método `handle` para desestruturar os novos campos do `command.payload`.
-    *   Ajustar a lógica de inicialização/clonagem Git com base em `gitOption`.
-    *   Adicionar a lógica para criar o canal de comunicação padrão.
+    - Injetar o `CqrsDispatcher` para poder despachar o comando de criação de canal.
+    - Atualizar o método `handle` para desestruturar os novos campos do `command.payload`.
+    - Ajustar a lógica de inicialização/clonagem Git com base em `gitOption`.
+    - Adicionar a lógica para criar o canal de comunicação padrão.
 
     ```typescript
     // src/main/modules/project-management/application/commands/create-project.handler.ts
@@ -301,7 +303,9 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
     import { CreateChannelCommand } from "@/main/modules/communication/application/commands/create-channel.command"; // Novo import
     import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher"; // Novo import
 
-    export class CreateProjectCommandHandler implements ICommandHandler<CreateProjectCommand, Project> {
+    export class CreateProjectCommandHandler
+      implements ICommandHandler<CreateProjectCommand, Project>
+    {
       constructor(
         private readonly projectRepository: IProjectRepository,
         private readonly filesystemService: FilesystemService, // Injetar FilesystemService
@@ -311,12 +315,17 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
 
       async handle(command: CreateProjectCommand): Promise<Project> {
         const { name, description, remoteUrl, gitOption } = command.payload;
-        const localPath = path.join(process.env.PROJECT_ROOT || './projects', name); // Exemplo de path
+        const localPath = path.join(
+          process.env.PROJECT_ROOT || "./projects",
+          name,
+        ); // Exemplo de path
 
         // 1. Verificar se o projeto já existe
         const existingProject = await this.projectRepository.findByName(name);
         if (existingProject) {
-          throw new ApplicationError(`Project with name "${name}" already exists.`);
+          throw new ApplicationError(
+            `Project with name "${name}" already exists.`,
+          );
         }
 
         // 2. Criar diretório do projeto
@@ -324,30 +333,45 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
         logger.info(`Created project directory: ${localPath}`);
 
         // 3. Inicializar ou clonar repositório Git
-        if (gitOption === 'clone') {
+        if (gitOption === "clone") {
           if (!remoteUrl) {
-            throw new ValidationError("Remote URL is required for cloning a repository.");
+            throw new ValidationError(
+              "Remote URL is required for cloning a repository.",
+            );
           }
-          await this.gitIntegrationService.cloneRepository(remoteUrl, localPath);
+          await this.gitIntegrationService.cloneRepository(
+            remoteUrl,
+            localPath,
+          );
           logger.info(`Cloned remote repository ${remoteUrl} to ${localPath}`);
-        } else { // gitOption === 'new'
+        } else {
+          // gitOption === 'new'
           await this.gitIntegrationService.initializeRepository(localPath);
           logger.info(`Initialized Git repository in ${localPath}`);
         }
 
         // 4. Criar entidade Project
-        const project = new Project({ name, description, localPath, remoteUrl });
+        const project = new Project({
+          name,
+          description,
+          localPath,
+          remoteUrl,
+        });
         await this.projectRepository.save(project);
         logger.info(`Saved project ${project.id} to database`);
 
         // 5. Criar canal de comunicação padrão (e.g., #general)
         // Assumindo que o módulo de comunicação tem um comando CreateChannelCommand
-        await this.cqrsDispatcher.dispatchCommand(new CreateChannelCommand({
-          projectId: project.id,
-          name: 'general',
-          type: 'text', // Ou outro tipo padrão
-        }));
-        logger.info(`Created default channel 'general' for project ${project.id}`);
+        await this.cqrsDispatcher.dispatchCommand(
+          new CreateChannelCommand({
+            projectId: project.id,
+            name: "general",
+            type: "text", // Ou outro tipo padrão
+          }),
+        );
+        logger.info(
+          `Created default channel 'general' for project ${project.id}`,
+        );
 
         return project;
       }
@@ -355,7 +379,7 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
     ```
 
 3.  **Atualizar `Project` entity (se necessário):**
-    *   Verificar se o construtor da entidade `Project` em `src/main/modules/project-management/domain/project.entity.ts` já aceita `description` e `remoteUrl`. Pela análise inicial, o esquema já os possui, então o construtor provavelmente já os aceita. Se não, adicione-os.
+    - Verificar se o construtor da entidade `Project` em `src/main/modules/project-management/domain/project.entity.ts` já aceita `description` e `remoteUrl`. Pela análise inicial, o esquema já os possui, então o construtor provavelmente já os aceita. Se não, adicione-os.
 
     ```typescript
     // src/main/modules/project-management/domain/project.entity.ts
@@ -379,7 +403,7 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
     ```
 
 4.  **Criar Comando e Handler para `CreateChannel` (se não existirem):**
-    *   Se o módulo `communication` ainda não tiver um comando para criar canais, crie `CreateChannelCommand` e `CreateChannelCommandHandler`.
+    - Se o módulo `communication` ainda não tiver um comando para criar canais, crie `CreateChannelCommand` e `CreateChannelCommandHandler`.
 
     ```typescript
     // src/main/modules/communication/application/commands/create-channel.command.ts
@@ -392,19 +416,26 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
       type: ChannelType;
     }
 
-    export class CreateChannelCommand implements ICommand<ICreateChannelCommandPayload> {
+    export class CreateChannelCommand
+      implements ICommand<ICreateChannelCommandPayload>
+    {
       readonly type = "CreateChannelCommand";
       constructor(public payload: ICreateChannelCommandPayload) {}
     }
 
     // src/main/modules/communication/application/commands/create-channel.handler.ts
     import { ICommandHandler } from "@/main/kernel/cqrs-dispatcher";
-    import { CreateChannelCommand, ICreateChannelCommandPayload } from "./create-channel.command";
+    import {
+      CreateChannelCommand,
+      ICreateChannelCommandPayload,
+    } from "./create-channel.command";
     import { IChannelRepository } from "@/main/modules/communication/domain/channel.repository"; // Crie este repositório se não existir
     import { Channel } from "@/main/modules/communication/domain/channel.entity";
     import { ApplicationError } from "@/main/errors/application.error";
 
-    export class CreateChannelCommandHandler implements ICommandHandler<CreateChannelCommand, Channel> {
+    export class CreateChannelCommandHandler
+      implements ICommandHandler<CreateChannelCommand, Channel>
+    {
       constructor(private readonly channelRepository: IChannelRepository) {}
 
       async handle(command: CreateChannelCommand): Promise<Channel> {
@@ -414,24 +445,34 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
           await this.channelRepository.save(channel);
           return channel;
         } catch (error) {
-          throw new ApplicationError(`Failed to create channel: ${(error as Error).message}`);
+          throw new ApplicationError(
+            `Failed to create channel: ${(error as Error).message}`,
+          );
         }
       }
     }
     ```
 
 5.  **Registrar `CreateChannelCommand` e `CreateChannelCommandHandler`:**
-    *   No `src/main/modules/communication/index.ts`, registre o novo comando e seu handler no `CqrsDispatcher`.
+    - No `src/main/modules/communication/index.ts`, registre o novo comando e seu handler no `CqrsDispatcher`.
 
     ```typescript
     // src/main/modules/communication/index.ts
     // ... imports existentes ...
-    import { CreateChannelCommand, CreateChannelCommandHandler } from "./application/commands/create-channel.command";
+    import {
+      CreateChannelCommand,
+      CreateChannelCommandHandler,
+    } from "./application/commands/create-channel.command";
     import { DrizzleChannelRepository } from "./persistence/drizzle-channel.repository"; // Crie este repositório se não existir
 
-    export function registerCommunicationModule(cqrsDispatcher: CqrsDispatcher, db: any) {
+    export function registerCommunicationModule(
+      cqrsDispatcher: CqrsDispatcher,
+      db: any,
+    ) {
       const channelRepository = new DrizzleChannelRepository(db); // Instanciar repositório
-      const createChannelCommandHandler = new CreateChannelCommandHandler(channelRepository);
+      const createChannelCommandHandler = new CreateChannelCommandHandler(
+        channelRepository,
+      );
 
       cqrsDispatcher.registerCommandHandler<CreateChannelCommand, Channel>(
         CreateChannelCommand.name,
@@ -449,33 +490,33 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
 **Passos:**
 
 1.  **Testes Unitários:**
-    *   Atualizar os testes existentes para `CreateProjectCommand` em `src/main/modules/project-management/project-management.test.ts` para incluir os novos campos (`description`, `remoteUrl`, `gitOption`).
-    *   Adicionar casos de teste para:
-        *   Criação de projeto com descrição.
-        *   Criação de projeto com inicialização Git (`gitOption: 'new'`).
-        *   Criação de projeto com clonagem Git (`gitOption: 'clone'`) e URL válida.
-        *   Criação de projeto com clonagem Git e URL inválida/vazia (deve falhar).
-        *   Verificar se o canal padrão (`#general`) é criado após a criação do projeto.
-    *   Se novos comandos/handlers foram criados para o módulo `communication`, escrever testes unitários para eles.
+    - Atualizar os testes existentes para `CreateProjectCommand` em `src/main/modules/project-management/project-management.test.ts` para incluir os novos campos (`description`, `remoteUrl`, `gitOption`).
+    - Adicionar casos de teste para:
+      - Criação de projeto com descrição.
+      - Criação de projeto com inicialização Git (`gitOption: 'new'`).
+      - Criação de projeto com clonagem Git (`gitOption: 'clone'`) e URL válida.
+      - Criação de projeto com clonagem Git e URL inválida/vazia (deve falhar).
+      - Verificar se o canal padrão (`#general`) é criado após a criação do projeto.
+    - Se novos comandos/handlers foram criados para o módulo `communication`, escrever testes unitários para eles.
 
 2.  **Testes de Integração (Manual/E2E):**
-    *   Iniciar a aplicação Electron.
-    *   Navegar até a interface de criação de projeto.
-    *   Testar a criação de um projeto com apenas o nome.
-    *   Testar a criação de um projeto com nome e descrição.
-    *   Testar a criação de um projeto com a opção "Criar novo repositório".
-    *   Testar a criação de um projeto com a opção "Clonar repositório existente" e uma URL de repositório válida (e.g., um repositório público de teste).
-    *   Testar a criação de um projeto com a opção "Clonar repositório existente" e uma URL inválida para verificar o tratamento de erros.
-    *   Verificar se os projetos criados aparecem na lista de projetos.
-    *   (Opcional) Inspecionar o banco de dados local para confirmar que os dados do projeto e do canal foram persistidos corretamente.
+    - Iniciar a aplicação Electron.
+    - Navegar até a interface de criação de projeto.
+    - Testar a criação de um projeto com apenas o nome.
+    - Testar a criação de um projeto com nome e descrição.
+    - Testar a criação de um projeto com a opção "Criar novo repositório".
+    - Testar a criação de um projeto com a opção "Clonar repositório existente" e uma URL de repositório válida (e.g., um repositório público de teste).
+    - Testar a criação de um projeto com a opção "Clonar repositório existente" e uma URL inválida para verificar o tratamento de erros.
+    - Verificar se os projetos criados aparecem na lista de projetos.
+    - (Opcional) Inspecionar o banco de dados local para confirmar que os dados do projeto e do canal foram persistidos corretamente.
 
 ## 4. Considerações Adicionais
 
-*   **Validação de URL:** A validação da URL do repositório remoto no frontend e no backend deve ser robusta. No frontend, pode-se usar regex ou bibliotecas de validação. No backend, o `GitIntegrationService` deve lidar com erros de URL inválida ou inacessível.
-*   **Feedback ao Usuário:** Melhorar o feedback visual na UI durante o processo de criação (e.g., spinners, mensagens de sucesso/erro mais detalhadas).
-*   **Caminho do Projeto:** O `localPath` no `CreateProjectCommandHandler` está usando `process.env.PROJECT_ROOT || './projects'`. É importante garantir que `PROJECT_ROOT` esteja configurado corretamente no ambiente de execução da aplicação.
-*   **Internacionalização (i18n):** Se a aplicação suporta múltiplos idiomas, as novas strings na UI e nas mensagens de erro devem ser adicionadas aos arquivos de internacionalização (`locales/`).
-*   **Segurança:** Garantir que a clonagem de repositórios remotos seja feita de forma segura, evitando injeção de comandos ou acesso a recursos não autorizados. O `GitIntegrationService` já parece usar `execa` para executar comandos Git, o que é uma boa prática.
-*   **Tratamento de Erros:** As mensagens de erro devem ser claras e úteis para o usuário, indicando o que deu errado e, se possível, como corrigir.
+- **Validação de URL:** A validação da URL do repositório remoto no frontend e no backend deve ser robusta. No frontend, pode-se usar regex ou bibliotecas de validação. No backend, o `GitIntegrationService` deve lidar com erros de URL inválida ou inacessível.
+- **Feedback ao Usuário:** Melhorar o feedback visual na UI durante o processo de criação (e.g., spinners, mensagens de sucesso/erro mais detalhadas).
+- **Caminho do Projeto:** O `localPath` no `CreateProjectCommandHandler` está usando `process.env.PROJECT_ROOT || './projects'`. É importante garantir que `PROJECT_ROOT` esteja configurado corretamente no ambiente de execução da aplicação.
+- **Internacionalização (i18n):** Se a aplicação suporta múltiplos idiomas, as novas strings na UI e nas mensagens de erro devem ser adicionadas aos arquivos de internacionalização (`locales/`).
+- **Segurança:** Garantir que a clonagem de repositórios remotos seja feita de forma segura, evitando injeção de comandos ou acesso a recursos não autorizados. O `GitIntegrationService` já parece usar `execa` para executar comandos Git, o que é uma boa prática.
+- **Tratamento de Erros:** As mensagens de erro devem ser claras e úteis para o usuário, indicando o que deu errado e, se possível, como corrigir.
 
 Este plano detalha as modificações necessárias para implementar o caso de uso "Criação de um Novo Projeto", cobrindo tanto o frontend quanto o backend, e incluindo considerações sobre testes e boas práticas.

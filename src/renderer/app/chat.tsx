@@ -6,10 +6,5 @@ export const Route = createFileRoute("/chat")({
 });
 
 function ChatComponent() {
-  return (
-    <ChatContainer 
-      channelId="channel-1"
-      channelName="geral"
-    />
-  );
+  return <ChatContainer channelId="channel-1" channelName="geral" />;
 }

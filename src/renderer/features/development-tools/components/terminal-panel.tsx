@@ -29,29 +29,32 @@ interface TerminalPanelProps {
   onToggleCollapse?: () => void;
 }
 
-export function TerminalPanel({ 
-  className, 
+export function TerminalPanel({
+  className,
   defaultHeight = 300,
   isCollapsed = false,
-  onToggleCollapse 
+  onToggleCollapse,
 }: TerminalPanelProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [tabs, setTabs] = useState([
-    { id: 1, name: 'Terminal 1', isActive: true }
+    { id: 1, name: "Terminal 1", isActive: true },
   ]);
   const [command, setCommand] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(mockTerminalLines);
+  const [terminalLines, setTerminalLines] =
+    useState<TerminalLine[]>(mockTerminalLines);
   const [isRunning, setIsRunning] = useState(false);
-  
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Auto-scroll to bottom when new lines are added
     if (scrollAreaRef.current) {
-      const scrollArea = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollArea = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]",
+      );
       if (scrollArea) {
         scrollArea.scrollTop = scrollArea.scrollHeight;
       }
@@ -62,71 +65,76 @@ export function TerminalPanel({
     if (!command.trim()) return;
 
     // Add command to history
-    setCommandHistory(prev => [...prev, command]);
+    setCommandHistory((prev) => [...prev, command]);
     setHistoryIndex(-1);
 
     // Add command line to terminal
     const newCommandLine: TerminalLine = {
       id: `cmd-${Date.now()}`,
       content: command,
-      type: 'command',
-      timestamp: new Date()
+      type: "command",
+      timestamp: new Date(),
     };
 
-    setTerminalLines(prev => [...prev, newCommandLine]);
+    setTerminalLines((prev) => [...prev, newCommandLine]);
     setIsRunning(true);
 
     // Simulate command execution
-    setTimeout(() => {
-      const outputLine: TerminalLine = {
-        id: `out-${Date.now()}`,
-        content: simulateCommandOutput(command),
-        type: 'output',
-        timestamp: new Date()
-      };
-      
-      setTerminalLines(prev => [...prev, outputLine]);
-      setIsRunning(false);
-    }, 1000 + Math.random() * 2000);
+    setTimeout(
+      () => {
+        const outputLine: TerminalLine = {
+          id: `out-${Date.now()}`,
+          content: simulateCommandOutput(command),
+          type: "output",
+          timestamp: new Date(),
+        };
+
+        setTerminalLines((prev) => [...prev, outputLine]);
+        setIsRunning(false);
+      },
+      1000 + Math.random() * 2000,
+    );
 
     setCommand("");
   };
 
   const simulateCommandOutput = (cmd: string): string => {
     const lowerCmd = cmd.toLowerCase().trim();
-    
-    if (lowerCmd === 'ls') {
-      return 'src/\npackage.json\nREADME.md\nnode_modules/\n.git/';
-    } else if (lowerCmd.startsWith('cd ')) {
-      return '';
-    } else if (lowerCmd === 'pwd') {
-      return '/home/user/project-wiz';
-    } else if (lowerCmd === 'git status') {
-      return 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean';
-    } else if (lowerCmd.startsWith('npm ')) {
-      return 'npm command executed successfully';
-    } else if (lowerCmd === 'clear') {
+
+    if (lowerCmd === "ls") {
+      return "src/\npackage.json\nREADME.md\nnode_modules/\n.git/";
+    } else if (lowerCmd.startsWith("cd ")) {
+      return "";
+    } else if (lowerCmd === "pwd") {
+      return "/home/user/project-wiz";
+    } else if (lowerCmd === "git status") {
+      return "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean";
+    } else if (lowerCmd.startsWith("npm ")) {
+      return "npm command executed successfully";
+    } else if (lowerCmd === "clear") {
       setTerminalLines([]);
-      return '';
-    } else if (lowerCmd === 'help') {
-      return 'Available commands: ls, cd, pwd, git, npm, clear, help';
-    } else {
-      return `Command '${cmd}' executed`;
+      return "";
+    } else if (lowerCmd === "help") {
+      return "Available commands: ls, cd, pwd, git, npm, clear, help";
     }
+    return `Command '${cmd}' executed`;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleCommand();
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length > 0) {
-        const newIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
+        const newIndex =
+          historyIndex === -1
+            ? commandHistory.length - 1
+            : Math.max(0, historyIndex - 1);
         setHistoryIndex(newIndex);
         setCommand(commandHistory[newIndex]);
       }
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
       if (historyIndex >= 0) {
         const newIndex = historyIndex + 1;
@@ -145,16 +153,16 @@ export function TerminalPanel({
     const newTab = {
       id: Date.now(),
       name: `Terminal ${tabs.length + 1}`,
-      isActive: false
+      isActive: false,
     };
-    setTabs(prev => [...prev, newTab]);
+    setTabs((prev) => [...prev, newTab]);
     setActiveTab(tabs.length);
   };
 
   const closeTab = (index: number) => {
     if (tabs.length === 1) return;
-    
-    setTabs(prev => prev.filter((_, i) => i !== index));
+
+    setTabs((prev) => prev.filter((_, i) => i !== index));
     if (activeTab >= index && activeTab > 0) {
       setActiveTab(activeTab - 1);
     }
@@ -164,22 +172,27 @@ export function TerminalPanel({
     setTerminalLines([]);
   };
 
-  const getLineColor = (type: TerminalLine['type']) => {
+  const getLineColor = (type: TerminalLine["type"]) => {
     switch (type) {
-      case 'command':
-        return 'text-blue-400';
-      case 'error':
-        return 'text-red-400';
-      case 'output':
-        return 'text-green-400';
+      case "command":
+        return "text-blue-400";
+      case "error":
+        return "text-red-400";
+      case "output":
+        return "text-green-400";
       default:
-        return 'text-green-400';
+        return "text-green-400";
     }
   };
 
   if (isCollapsed) {
     return (
-      <div className={cn("h-10 bg-card border-t border-border flex items-center px-4", className)}>
+      <div
+        className={cn(
+          "h-10 bg-card border-t border-border flex items-center px-4",
+          className,
+        )}
+      >
         <Button
           variant="ghost"
           size="sm"
@@ -194,7 +207,13 @@ export function TerminalPanel({
   }
 
   return (
-    <div className={cn("bg-black text-green-400 font-mono text-sm flex flex-col", className)} style={{ height: defaultHeight }}>
+    <div
+      className={cn(
+        "bg-black text-green-400 font-mono text-sm flex flex-col",
+        className,
+      )}
+      style={{ height: defaultHeight }}
+    >
       {/* Terminal Header */}
       <div className="flex items-center justify-between p-2 bg-gray-900 border-b border-gray-700">
         <div className="flex items-center gap-1">
@@ -212,9 +231,9 @@ export function TerminalPanel({
                 key={tab.id}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded text-xs cursor-pointer",
-                  activeTab === index 
-                    ? "bg-black text-green-400" 
-                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  activeTab === index
+                    ? "bg-black text-green-400"
+                    : "bg-gray-800 text-gray-400 hover:bg-gray-700",
                 )}
                 onClick={() => setActiveTab(index)}
               >
@@ -280,14 +299,17 @@ export function TerminalPanel({
       <ScrollArea className="flex-1 p-2" ref={scrollAreaRef}>
         <div className="space-y-1">
           {terminalLines.map((line) => (
-            <div key={line.id} className={cn("font-mono text-sm", getLineColor(line.type))}>
-              {line.type === 'command' && (
+            <div
+              key={line.id}
+              className={cn("font-mono text-sm", getLineColor(line.type))}
+            >
+              {line.type === "command" && (
                 <span className="text-blue-400">$ </span>
               )}
               <span className="whitespace-pre-wrap">{line.content}</span>
             </div>
           ))}
-          
+
           {/* Current command line */}
           <div className="flex items-center">
             <span className="text-blue-400">$ </span>
@@ -302,7 +324,10 @@ export function TerminalPanel({
               autoFocus
             />
             {isRunning && (
-              <Badge variant="outline" className="ml-2 text-xs border-green-400 text-green-400">
+              <Badge
+                variant="outline"
+                className="ml-2 text-xs border-green-400 text-green-400"
+              >
                 Executando...
               </Badge>
             )}

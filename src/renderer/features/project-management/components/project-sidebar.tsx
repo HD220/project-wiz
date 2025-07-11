@@ -7,11 +7,20 @@ import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
 import type { IpcProjectRemovePayload } from "@/shared/ipc-types/ipc-payloads";
 
 export function ProjectSidebar() {
-  const { data: projects, isLoading, error, refetch: fetchProjects } = useIpcQuery<IProject[]>({
+  const {
+    data: projects,
+    isLoading,
+    error,
+    refetch: fetchProjects,
+  } = useIpcQuery<IProject[]>({
     channel: IpcChannel.PROJECT_LIST,
   });
 
-  const { mutate: removeProject } = useIpcMutation<void, Error, IpcProjectRemovePayload>({
+  const { mutate: removeProject } = useIpcMutation<
+    void,
+    Error,
+    IpcProjectRemovePayload
+  >({
     channel: IpcChannel.PROJECT_REMOVE,
     onSuccess: () => {
       fetchProjects();

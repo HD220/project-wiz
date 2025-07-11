@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Hash,
   ChevronDown,
@@ -68,13 +68,15 @@ export function ChannelsSidebar({
     agent.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const onlineAgents = agents.filter(a => a.status !== "offline");
+  const onlineAgents = agents.filter((a) => a.status !== "offline");
 
   return (
     <div className="w-60 bg-card border-r border-border flex flex-col">
       {/* Project Header */}
       <div className="h-12 px-3 flex items-center justify-between border-b border-border shadow-sm">
-        <h2 className="font-semibold text-foreground truncate">{projectName}</h2>
+        <h2 className="font-semibold text-foreground truncate">
+          {projectName}
+        </h2>
         <Button variant="ghost" size="icon" className="w-6 h-6">
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
@@ -99,7 +101,10 @@ export function ChannelsSidebar({
           {/* Text Channels */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start px-1 py-1 h-auto">
+              <Button
+                variant="ghost"
+                className="w-full justify-start px-1 py-1 h-auto"
+              >
                 <ChevronDown className="w-3 h-3 mr-1" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Canais de Texto
@@ -121,15 +126,20 @@ export function ChannelsSidebar({
               {filteredChannels.map((channel) => (
                 <Button
                   key={channel.id}
-                  variant={selectedChannelId === channel.id ? "secondary" : "ghost"}
+                  variant={
+                    selectedChannelId === channel.id ? "secondary" : "ghost"
+                  }
                   className="w-full justify-start px-2 py-1.5 h-auto"
                   onClick={() => onChannelSelect(channel.id)}
                 >
                   <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
                   <span className="truncate">{channel.name}</span>
                   {channel.unreadCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center">
-                      {channel.unreadCount > 9 ? '9+' : channel.unreadCount}
+                    <Badge
+                      variant="destructive"
+                      className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
+                    >
+                      {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
                     </Badge>
                   )}
                 </Button>
@@ -140,7 +150,10 @@ export function ChannelsSidebar({
           {/* Direct Messages with Agents */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start px-1 py-1 h-auto">
+              <Button
+                variant="ghost"
+                className="w-full justify-start px-1 py-1 h-auto"
+              >
                 <ChevronDown className="w-3 h-3 mr-1" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Mensagens Diretas — {onlineAgents.length}
@@ -162,10 +175,12 @@ export function ChannelsSidebar({
                         {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className={cn(
-                      "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
-                      getStatusColor(agent.status)
-                    )} />
+                    <div
+                      className={cn(
+                        "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
+                        getStatusColor(agent.status),
+                      )}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -197,7 +212,9 @@ export function ChannelsSidebar({
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-foreground truncate">{mockUser.name}</div>
+            <div className="text-sm font-medium text-foreground truncate">
+              {mockUser.name}
+            </div>
             <div className="text-xs text-muted-foreground">Project Manager</div>
           </div>
           <div className="flex gap-1">

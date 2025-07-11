@@ -2,7 +2,10 @@ import { useCallback } from "react";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 import type { IPersona } from "@/shared/ipc-types/domain-types";
 import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
-import type { IpcPersonaRefineSuggestionPayload, IpcPersonaCreatePayload } from "@/shared/ipc-types/ipc-payloads";
+import type {
+  IpcPersonaRefineSuggestionPayload,
+  IpcPersonaCreatePayload,
+} from "@/shared/ipc-types/ipc-payloads";
 
 interface UsePersonaSubmissionProps {
   onSuccess: () => void;
@@ -15,7 +18,11 @@ export function usePersonaSubmission({
   onError,
   onFinally,
 }: UsePersonaSubmissionProps) {
-  const { mutate: createPersona } = useIpcMutation<IPersona, Error, IpcPersonaCreatePayload>({
+  const { mutate: createPersona } = useIpcMutation<
+    IPersona,
+    Error,
+    IpcPersonaCreatePayload
+  >({
     channel: IpcChannel.PERSONA_CREATE,
     onSuccess: () => {
       onSuccess();
@@ -26,7 +33,11 @@ export function usePersonaSubmission({
     onSettled: onFinally,
   });
 
-  const { mutate: refinePersonaSuggestion } = useIpcMutation<IPersona, Error, IpcPersonaRefineSuggestionPayload>({
+  const { mutate: refinePersonaSuggestion } = useIpcMutation<
+    IPersona,
+    Error,
+    IpcPersonaRefineSuggestionPayload
+  >({
     channel: IpcChannel.PERSONA_REFINE_SUGGESTION,
     onSuccess: (refinedPersona) => {
       createPersona({

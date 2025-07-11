@@ -1,24 +1,10 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/renderer/components/ui/avatar";
-import { Button } from "@/renderer/components/ui/button";
-import { Badge } from "@/renderer/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
+import { Button } from "@/ui/button";
+import { Badge } from "@/ui/badge";
 import { cn } from "@/renderer/lib/utils";
-import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Reply,
-  Pin,
-  Bot,
-  CheckCircle,
-  AlertCircle,
-  Info,
-} from "lucide-react";
+import { Edit, Trash2, Reply, Bot, CheckCircle, Info } from "lucide-react";
 
 interface Message {
   id: string;
@@ -31,8 +17,8 @@ interface Message {
   isEdited?: boolean;
   replyTo?: string;
   mentions?: string[];
-  attachments?: any[];
-  metadata?: any;
+  attachments?: unknown[];
+  metadata?: Record<string, unknown>;
 }
 
 interface MessageComponentProps {
@@ -155,9 +141,7 @@ export function MessageComponent({
           />
           <AvatarFallback
             className={cn(
-              message.senderType === "agent"
-                ? "bg-purple-500"
-                : "bg-brand-500",
+              message.senderType === "agent" ? "bg-purple-500" : "bg-brand-500",
             )}
           >
             {message.senderType === "agent" && <Bot className="h-5 w-5" />}

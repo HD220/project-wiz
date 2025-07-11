@@ -79,11 +79,11 @@ export function ProjectSidebar({
 
                   {/* Notification indicator */}
                   {project.unreadCount > 0 && (
-                    <Badge 
+                    <Badge
                       className="absolute -top-1 -right-1 w-5 h-5 p-0 text-xs flex items-center justify-center"
                       variant="destructive"
                     >
-                      {project.unreadCount > 9 ? '9+' : project.unreadCount}
+                      {project.unreadCount > 9 ? "9+" : project.unreadCount}
                     </Badge>
                   )}
 
