@@ -49,7 +49,15 @@ export function DiscordLayout({
 }: DiscordLayoutProps) {
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const { title, icon } = usePageTitle();
-  const { mode } = useSidebar();
+  const { mode, setMode } = useSidebar();
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      setMode("server");
+    } else {
+      setMode("user");
+    }
+  }, [selectedProjectId, setMode]);
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
