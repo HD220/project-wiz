@@ -1,4 +1,4 @@
-# Plano de Implementação Ultra-Detalhado: Reescrita do Project Wiz (Revisão 4)
+# Plano de Implementação Ultra-Detalhado: Reescrita do Project Wiz (Revisão 5)
 
 **Filosofia:** Este plano é um contrato de implementação. Cada passo deve ser seguido à risca para garantir a integridade da arquitetura e a funcionalidade do sistema. O foco é em clareza, previsibilidade e qualidade, com exemplos e fluxos detalhados para eliminar ambiguidades.
 
