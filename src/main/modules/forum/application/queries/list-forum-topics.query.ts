@@ -23,5 +23,6 @@ export class ListForumTopicsQueryHandler {
       throw new ApplicationError(
         `Failed to list forum topics: ${(error as Error).message}`,
       );
+    }
   }
 }

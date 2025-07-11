@@ -24,5 +24,6 @@ export class RemoveForumTopicCommandHandler {
       throw new ApplicationError(
         `Failed to remove forum topic: ${(error as Error).message}`,
       );
+    }
   }
 }

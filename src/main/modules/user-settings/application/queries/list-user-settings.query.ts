@@ -27,5 +27,6 @@ export class ListUserSettingsQueryHandler {
       throw new ApplicationError(
         `Failed to list user settings: ${(error as Error).message}`,
       );
+    }
   }
 }

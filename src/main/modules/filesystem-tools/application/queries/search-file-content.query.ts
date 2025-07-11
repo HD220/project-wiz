@@ -1,4 +1,4 @@
-import { IQuery }m "@/main/kernel/cqrs-dispatcher";
+import { IQuery } from "@/main/kernel/cqrs-dispatcher";
 import { ApplicationError } from "@/main/errors/application.error";
 import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 

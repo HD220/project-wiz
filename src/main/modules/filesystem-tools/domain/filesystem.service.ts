@@ -33,6 +33,7 @@ export class FilesystemService {
       throw new ApplicationError(
         `Failed to write file ${relativePath}: ${(error as Error).message}`,
       );
+    }
   }
 
   async listDirectory(relativePath: string): Promise<string[]> {
@@ -44,6 +45,7 @@ export class FilesystemService {
       throw new ApplicationError(
         `Failed to list directory ${relativePath}: ${(error as Error).message}`,
       );
+    }
   }
 
   async searchFileContent(
@@ -66,5 +68,6 @@ export class FilesystemService {
       throw new ApplicationError(
         `Failed to search file content in ${relativePath}: ${(error as Error).message}`,
       );
+    }
   }
 }

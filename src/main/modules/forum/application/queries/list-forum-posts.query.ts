@@ -27,5 +27,6 @@ export class ListForumPostsQueryHandler {
       throw new ApplicationError(
         `Failed to list forum posts: ${(error as Error).message}`,
       );
+    }
   }
 }

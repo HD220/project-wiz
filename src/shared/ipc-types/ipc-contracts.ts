@@ -122,4 +122,45 @@ export interface IpcContracts {
     request: IpcCodeAnalysisAnalyzeStackPayload;
     response: IpcCodeAnalysisAnalyzeStackResponse;
   };
+  [IpcChannel.FILESYSTEM_LIST_DIRECTORY]: {
+    request: IpcFilesystemListDirectoryPayload;
+    response: IpcFilesystemListDirectoryResponse;
+  };
+  [IpcChannel.FILESYSTEM_READ_FILE]: {
+    request: IpcFilesystemReadFilePayload;
+    response: IpcFilesystemReadFileResponse;
+  };
+  [IpcChannel.FILESYSTEM_SEARCH_FILE_CONTENT]: {
+    request: IpcFilesystemSearchFileContentPayload;
+    response: IpcFilesystemSearchFileContentResponse;
+  };
+  [IpcChannel.FILESYSTEM_WRITE_FILE]: {
+    request: IpcFilesystemWriteFilePayload;
+    response: IpcFilesystemWriteFileResponse;
+  };
+  [IpcChannel.GIT_INTEGRATION_CLONE]: {
+    request: IpcGitIntegrationClonePayload;
+    response: IpcGitIntegrationCloneResponse;
+  };
+  [IpcChannel.GIT_INTEGRATION_INITIALIZE]: {
+    request: IpcGitIntegrationInitializePayload;
+    response: IpcGitIntegrationInitializeResponse;
+  };
+  [IpcChannel.GIT_INTEGRATION_PULL]: {
+    request: IpcGitIntegrationPullPayload;
+    response: IpcGitIntegrationPullResponse;
+  };
+  [IpcChannel.AUTOMATIC_PERSONA_HIRING_HIRE]: {
+    request: IpcAutomaticPersonaHiringHirePayload;
+    response: IpcAutomaticPersonaHiringHireResponse;
+  };
+}
+
+
+export type IpcRequest<T extends IpcChannel> = IpcContracts[T]["request"];
+
+export interface IpcResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: { message: string };
 }

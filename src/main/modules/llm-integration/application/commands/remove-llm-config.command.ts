@@ -24,5 +24,6 @@ export class RemoveLlmConfigCommandHandler {
       throw new ApplicationError(
         `Failed to remove LLM config: ${(error as Error).message}`,
       );
+    }
   }
 }

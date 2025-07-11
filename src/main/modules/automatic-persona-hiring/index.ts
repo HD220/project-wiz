@@ -8,6 +8,7 @@ import { HirePersonasAutomaticallyCommand, HirePersonasAutomaticallyCommandHandl
 
 export function registerAutomaticPersonaHiringModule(
   cqrsDispatcher: CqrsDispatcher,
+  logger: any,
 ) {
   const hirePersonasAutomaticallyCommandHandler = new HirePersonasAutomaticallyCommandHandler(cqrsDispatcher);
 

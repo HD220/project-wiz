@@ -36,3 +36,4 @@ export function registerGitIntegrationHandlers(cqrsDispatcher: CqrsDispatcher) {
       await cqrsDispatcher.dispatchCommand(new PullRepositoryCommand());
     },
   );
+}

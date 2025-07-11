@@ -21,5 +21,6 @@ export class ListLlmConfigsQueryHandler {
       throw new ApplicationError(
         `Failed to list LLM configs: ${(error as Error).message}`,
       );
+    }
   }
 }

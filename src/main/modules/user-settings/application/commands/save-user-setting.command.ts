@@ -42,5 +42,6 @@ export class SaveUserSettingCommandHandler {
       throw new ApplicationError(
         `Failed to save user setting: ${(error as Error).message}`,
       );
+    }
   }
 }

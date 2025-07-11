@@ -6,12 +6,12 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   build: {
     rollupOptions: {
-      external: ["better-sqlite3", "@/main/core/domain/common/base.entity"],
+      external: ["better-sqlite3"],
     },
   },
   resolve: {
     alias: {
-      "@/": path.resolve(__dirname, "../.."),
+      "@/": path.resolve(__dirname, "src/"),
     },
   },
 });

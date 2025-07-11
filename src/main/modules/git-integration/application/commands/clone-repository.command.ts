@@ -32,5 +32,6 @@ export class CloneRepositoryCommandHandler {
       throw new ApplicationError(
         `Failed to clone repository: ${(error as Error).message}`,
       );
+    }
   }
 }

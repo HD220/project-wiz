@@ -18,5 +18,6 @@ export class RefinePersonaSuggestionHandler {
       throw new ApplicationError(
         `Failed to refine persona suggestion: ${(error as Error).message}`,
       );
+    }
   }
 }

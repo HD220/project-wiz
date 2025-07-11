@@ -23,5 +23,6 @@ export class InitializeRepositoryCommandHandler {
       throw new ApplicationError(
         `Failed to initialize repository: ${(error as Error).message}`,
       );
+    }
   }
 }

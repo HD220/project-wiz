@@ -5,15 +5,20 @@ import { UserSetting } from "@/main/modules/user-settings/domain/user-setting.en
 import type { IUserSettingsRepository } from "@/main/modules/user-settings/domain/user-settings.repository";
 import { userSettings } from "@/main/persistence/schema";
 import { BaseRepository } from "@/main/persistence/base.repository";
-import type { NodeSQLiteDatabase } from 'drizzle-orm/node-sqlite';
-import type { InferSelectModel } from 'drizzle-orm/sqlite-core';
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import type { InferSelectModel } from "drizzle-orm";
 
-export class DrizzleUserSettingsRepository extends BaseRepository<UserSetting, typeof userSettings> implements IUserSettingsRepository {
-  constructor(db: NodeSQLiteDatabase<any>) {
+export class DrizzleUserSettingsRepository
+  extends BaseRepository<UserSetting, typeof userSettings>
+  implements IUserSettingsRepository
+{
+  constructor(db: BetterSQLite3Database<any>) {
     super(db, userSettings);
   }
 
-  protected mapToDomainEntity(row: InferSelectModel<typeof userSettings>): UserSetting {
+  protected mapToDomainEntity(
+    row: InferSelectModel<typeof userSettings>,
+  ): UserSetting {
     return UserSetting.fromPersistence(row);
   }
 

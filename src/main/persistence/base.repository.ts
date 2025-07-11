@@ -1,11 +1,14 @@
-import type { SQLiteTableWithColumns, InferInsertModel, InferSelectModel } from 'drizzle-orm/sqlite-core';
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+import type { Table } from 'drizzle-orm';
 import type { BaseEntity } from '@kernel/domain/base.entity';
-import type { NodeSQLiteDatabase } from 'drizzle-orm/node-sqlite';
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { eq } from 'drizzle-orm';
 
-export abstract class BaseRepository<TEntity extends BaseEntity, TSchema extends SQLiteTableWithColumns> {
+import type { AnySQLiteTable } from 'drizzle-orm/sqlite-core';
+
+export abstract class BaseRepository<TEntity extends BaseEntity, TSchema extends AnySQLiteTable> {
   protected constructor(
-    protected db: NodeSQLiteDatabase<any>,
+    protected db: BetterSQLite3Database<any>,
     protected schema: TSchema
   ) {}
 

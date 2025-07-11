@@ -25,6 +25,7 @@ export class DrizzleDirectMessageRepository
       throw new ApplicationError(
         `Failed to save direct message: ${(error as Error).message}`,
       );
+    }
   }
 
   async findByConversation(
@@ -55,5 +56,6 @@ export class DrizzleDirectMessageRepository
       throw new ApplicationError(
         `Failed to find direct messages by conversation: ${(error as Error).message}`,
       );
+    }
   }
 }

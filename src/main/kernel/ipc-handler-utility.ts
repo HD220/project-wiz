@@ -1,14 +1,15 @@
 import { ipcMain } from 'electron';
-import type { CqrsDispatcher } from '@kernel/cqrs-dispatcher';
-import type { IpcChannels } from '@shared/ipc-types/ipc-channels';
-import type { IpcResponse } from '@shared/ipc-types/ipc-contracts';
+import type { CqrsDispatcher } from '@/kernel/cqrs-dispatcher';
+import type { IpcChannel } from '@/shared/ipc-types/ipc-channels';
+import { IpcResponse } from '@/shared/ipc-types/ipc-contracts';
+export type { IpcResponse };
 import { ApplicationError } from '@/main/errors/application.error';
 import { DomainError } from '@/main/errors/domain.error';
 import { NotFoundError } from '@/main/errors/not-found.error';
 import { ValidationError } from '@/main/errors/validation.error';
 
 export function createIpcHandler<TPayload, TResult>(
-  channel: IpcChannels,
+  channel: IpcChannel,
   cqrsDispatcher: CqrsDispatcher,
   handlerFn: (payload: TPayload) => Promise<TResult>,
 ): void {

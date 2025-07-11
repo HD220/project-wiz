@@ -1,32 +1,7 @@
 import { ICommand } from "@/main/kernel/cqrs-dispatcher";
-import { ApplicationError } from "@/main/errors/application.error";
-import { Project } from "@/main/modules/project-management/domain/project.entity";
-import { IProjectRepository } from "@/main/modules/project-management/domain/project.repository";
 
-export interface ICreateProjectCommandPayload {
-  name: string;
-}
-
-export class CreateProjectCommand
-  implements ICommand<ICreateProjectCommandPayload>
-{
+export class CreateProjectCommand implements ICommand {
   readonly type = "CreateProjectCommand";
-  constructor(public payload: ICreateProjectCommandPayload) {}
-}
 
-export class CreateProjectCommandHandler {
-  constructor(private projectRepository: IProjectRepository) {}
-
-  async handle(command: CreateProjectCommand): Promise<Project> {
-    const project = new Project({
-      name: command.payload.name,
-      createdAt: new Date(),
-    });
-    try {
-      return await this.projectRepository.save(project);
-    } catch (error) {
-      console.error(`Failed to create project:`, error);
-      throw new ApplicationError(`Failed to create project: ${(error as Error).message}`);
-    }
-  }
+  constructor(public readonly payload: { name: string; localPath: string; remoteUrl?: string }) {}
 }

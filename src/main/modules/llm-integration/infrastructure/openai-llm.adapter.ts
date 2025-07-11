@@ -15,5 +15,6 @@ export class OpenAILLMAdapter implements ILLMAdapter {
       throw new ApplicationError(
         `Failed to generate LLM response: ${(error as Error).message}`,
       );
+    }
   }
 }

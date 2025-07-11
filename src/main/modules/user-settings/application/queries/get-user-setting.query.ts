@@ -29,5 +29,6 @@ export class GetUserSettingQueryHandler {
       throw new ApplicationError(
         `Failed to get user setting: ${(error as Error).message}`,
       );
+    }
   }
 }

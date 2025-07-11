@@ -4,13 +4,13 @@ import { ApplicationError } from "@/main/errors/application.error";
 import { LlmConfig } from "@/main/modules/llm-integration/domain/llm-config.entity";
 import type { ILlmConfigRepository } from "@/main/modules/llm-integration/domain/llm-config.repository";
 import { BaseRepository } from "@/main/persistence/base.repository";
-import type { NodeSQLiteDatabase } from 'drizzle-orm/node-sqlite';
-import type { InferSelectModel } from 'drizzle-orm/sqlite-core';
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import type { InferSelectModel } from 'drizzle-orm';
 
 import { llmConfigs } from "./schema";
 
 export class DrizzleLlmConfigRepository extends BaseRepository<LlmConfig, typeof llmConfigs> implements ILlmConfigRepository {
-  constructor(db: NodeSQLiteDatabase<any>) {
+  constructor(db: BetterSQLite3Database<any>) {
     super(db, llmConfigs);
   }
 

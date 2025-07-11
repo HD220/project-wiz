@@ -4,13 +4,13 @@ import { ApplicationError } from "@/main/errors/application.error";
 import { ForumPost } from "@/main/modules/forum/domain/forum-post.entity";
 import type { IForumPostRepository } from "@/main/modules/forum/domain/forum-post.repository";
 import { BaseRepository } from "@/main/persistence/base.repository";
-import type { NodeSQLiteDatabase } from 'drizzle-orm/node-sqlite';
-import type { InferSelectModel } from 'drizzle-orm/sqlite-core';
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import type { InferSelectModel } from 'drizzle-orm';
 
 import { forumPosts } from "./schema";
 
 export class DrizzleForumPostRepository extends BaseRepository<ForumPost, typeof forumPosts> implements IForumPostRepository {
-  constructor(db: NodeSQLiteDatabase<any>) {
+  constructor(db: BetterSQLite3Database<any>) {
     super(db, forumPosts);
   }
 
