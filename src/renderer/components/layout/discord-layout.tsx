@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import { ProjectSidebar } from "./project-sidebar";
 import { ChannelsSidebar } from "./channels-sidebar";
+import { UserSidebar } from "./user-sidebar";
 import { Project, Channel, Agent } from "@/lib/placeholders";
 import {
   ResizablePanelGroup,
@@ -13,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Users, X, Loader2 } from "lucide-react";
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
+import { useSidebar } from "@/renderer/contexts/sidebar-context";
 
 interface DiscordLayoutProps {
   children: ReactNode;
@@ -47,6 +49,7 @@ export function DiscordLayout({
 }: DiscordLayoutProps) {
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const { title, icon } = usePageTitle();
+  const { mode } = useSidebar();
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
@@ -82,17 +85,25 @@ export function DiscordLayout({
 
       {/* Resizable area for Channels Sidebar and Main Content */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
-        {/* Channels Sidebar - Resizable */}
+        {/* Dynamic Sidebar - Resizable */}
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <ChannelsSidebar
-            projectName={projectName}
-            channels={channels}
-            agents={agents}
-            selectedChannelId={selectedChannelId}
-            onChannelSelect={onChannelSelect}
-            onAgentDMSelect={onAgentDMSelect}
-            onAddChannel={onAddChannel}
-          />
+          {mode === "server" ? (
+            <ChannelsSidebar
+              projectName={projectName}
+              channels={channels}
+              agents={agents}
+              selectedChannelId={selectedChannelId}
+              onChannelSelect={onChannelSelect}
+              onAgentDMSelect={onAgentDMSelect}
+              onAddChannel={onAddChannel}
+            />
+          ) : (
+            <UserSidebar
+              agents={agents}
+              onAgentDMSelect={onAgentDMSelect}
+              onSettings={onSettings}
+            />
+          )}
         </ResizablePanel>
 
         <ResizableHandle withHandle />

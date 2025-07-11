@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
   mockTasks,
 } from "@/renderer/lib/placeholders";
 import { PageTitle } from "@/components/page-title";
+import { useSidebar } from "@/renderer/contexts/sidebar-context";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,

@@ -12,41 +12,29 @@ import {
 } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Hash,
   ChevronDown,
-  ChevronRight,
   Plus,
   Search,
   Volume2,
   Settings,
   Loader2,
   Home,
-  Users,
   MessageSquare,
-  FileText,
-  CheckSquare,
+  Users,
 } from "lucide-react";
-import { Channel, Agent, mockUser } from "@/lib/placeholders";
+import { Agent, mockUser, mockAgents } from "@/lib/placeholders";
 
-interface ChannelsSidebarProps {
-  projectName: string;
-  channels: Channel[];
+interface UserSidebarProps {
   agents: Agent[];
-  selectedChannelId?: string;
-  onChannelSelect: (channelId: string) => void;
   onAgentDMSelect: (agentId: string) => void;
-  onAddChannel: () => void;
+  onSettings: () => void;
 }
 
-export function ChannelsSidebar({
-  projectName,
-  channels,
+export function UserSidebar({
   agents,
-  selectedChannelId,
-  onChannelSelect,
   onAgentDMSelect,
-  onAddChannel,
-}: ChannelsSidebarProps) {
+  onSettings,
+}: UserSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
 
@@ -67,22 +55,19 @@ export function ChannelsSidebar({
     }
   };
 
-  const filteredChannels = channels.filter((channel) =>
-    channel.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
   const filteredAgents = agents.filter((agent) =>
     agent.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const onlineAgents = agents.filter((a) => a.status !== "offline");
+  const onlineAgents = filteredAgents.filter((a) => a.status !== "offline");
+  const offlineAgents = filteredAgents.filter((a) => a.status === "offline");
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
-      {/* Project Header */}
+      {/* User Header */}
       <div className="h-12 px-3 flex items-center justify-between border-b border-border shadow-sm flex-none">
         <h2 className="font-semibold text-foreground truncate">
-          {projectName}
+          Mensagens Diretas
         </h2>
         <Button variant="ghost" size="icon" className="w-6 h-6">
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -94,7 +79,7 @@ export function ChannelsSidebar({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar canais e agentes"
+            placeholder="Buscar conversas"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 bg-background"
@@ -118,54 +103,32 @@ export function ChannelsSidebar({
               </Link>
             </Button>
             <Button
-              variant={location.pathname === "/agents" ? "secondary" : "ghost"}
+              variant="ghost"
               className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
+              onClick={onSettings}
             >
-              <Link to="/agents">
-                <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Agentes</span>
-              </Link>
-            </Button>
-            <Button
-              variant={location.pathname === "/tasks" ? "secondary" : "ghost"}
-              className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
-            >
-              <Link to="/tasks">
-                <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Tarefas</span>
-              </Link>
-            </Button>
-            <Button
-              variant={location.pathname === "/docs" ? "secondary" : "ghost"}
-              className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
-            >
-              <Link to="/docs">
-                <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Documentos</span>
-              </Link>
+              <Settings className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>Configurações</span>
             </Button>
           </div>
 
-          {/* Text Channels */}
+          {/* Direct Messages */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start px-1 py-1 h-auto"
+                className="w-full justify-start px-1 py-1 h-auto group"
               >
                 <ChevronDown className="w-3 h-3 mr-1" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Canais de Texto
+                  Mensagens Diretas — {onlineAgents.length}
                 </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onAddChannel();
+                    // TODO: Open new conversation modal
                   }}
                   className="ml-auto w-4 h-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-accent"
                 >
@@ -174,30 +137,80 @@ export function ChannelsSidebar({
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-0.5 mt-1">
-              {filteredChannels.map((channel) => (
+              {/* Online Agents */}
+              {onlineAgents.map((agent) => (
                 <Button
-                  key={channel.id}
-                  variant={
-                    selectedChannelId === channel.id ? "secondary" : "ghost"
-                  }
-                  className="w-full justify-start px-2 py-1.5 h-auto"
-                  onClick={() => onChannelSelect(channel.id)}
+                  key={agent.id}
+                  variant="ghost"
+                  className="w-full justify-start px-2 py-1.5 h-auto text-left"
+                  onClick={() => onAgentDMSelect(agent.id)}
                 >
-                  <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span className="truncate">{channel.name}</span>
-                  {channel.unreadCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
-                    >
-                      {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
-                    </Badge>
-                  )}
+                  <div className="w-6 h-6 mr-2 relative flex-shrink-0">
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage src={agent.avatar} />
+                      <AvatarFallback className="text-xs">
+                        {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div
+                      className={cn(
+                        "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
+                        getStatusColor(agent.status),
+                      )}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate font-medium">{agent.name}</span>
+                      {agent.isExecuting && (
+                        <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                      )}
+                    </div>
+                    {agent.currentTask && (
+                      <div className="text-xs text-muted-foreground truncate">
+                        {agent.currentTask}
+                      </div>
+                    )}
+                  </div>
                 </Button>
               ))}
+
+              {/* Offline Agents */}
+              {offlineAgents.length > 0 && (
+                <>
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 py-1 mt-2">
+                    Offline — {offlineAgents.length}
+                  </div>
+                  {offlineAgents.map((agent) => (
+                    <Button
+                      key={agent.id}
+                      variant="ghost"
+                      className="w-full justify-start px-2 py-1.5 h-auto text-left opacity-60"
+                      onClick={() => onAgentDMSelect(agent.id)}
+                    >
+                      <div className="w-6 h-6 mr-2 relative flex-shrink-0">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={agent.avatar} />
+                          <AvatarFallback className="text-xs">
+                            {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className={cn(
+                            "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
+                            getStatusColor(agent.status),
+                          )}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="truncate font-medium">{agent.name}</span>
+                      </div>
+                    </Button>
+                  ))}
+                </>
+              )}
             </CollapsibleContent>
           </Collapsible>
-
         </div>
       </ScrollArea>
 
@@ -220,10 +233,13 @@ export function ChannelsSidebar({
             <Button variant="ghost" size="icon" className="w-6 h-6">
               <Volume2 className="h-4 w-4 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="w-6 h-6" asChild>
-              <Link to="/settings">
-                <Settings className="h-4 w-4 text-muted-foreground" />
-              </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-6 h-6"
+              onClick={onSettings}
+            >
+              <Settings className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
         </div>
