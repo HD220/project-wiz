@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect } from "react"; // Will be removed if setMode is removed
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,20 +22,14 @@ import {
   mockTasks,
 } from "@/renderer/lib/placeholders";
 import { PageTitle } from "@/components/page-title";
-import { useSidebar } from "@/renderer/contexts/sidebar-context";
+// useSidebar import removed
 
-// Changed route to /user/ and component name to UserDashboardPage
 export const Route = createFileRoute("/user/")({
   component: UserDashboardPage,
 });
 
-// Renamed component to UserDashboardPage
 export function UserDashboardPage() {
-  const { setMode } = useSidebar();
-
-  useEffect(() => {
-    setMode("user");
-  }, [setMode]);
+  // useSidebar and useEffect for setMode removed
 
   return (
     <div className="flex flex-col flex-1 p-4">

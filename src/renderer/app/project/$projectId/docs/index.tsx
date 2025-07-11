@@ -225,7 +225,7 @@ Real-time updates using event-driven architecture:
   },
 ];
 
-export function ProjectDocsPage() { // Renamed component
+export function ProjectDocsPage() {
   const [selectedDoc, setSelectedDoc] = useState<DocFile | null>(mockDocs[0]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(["2", "4", "6"])

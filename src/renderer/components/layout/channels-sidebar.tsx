@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useSidebar } from "@/renderer/contexts/sidebar-context";
+import { useState } from "react"; // useEffect import removed
+// useSidebar import removed
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
 import { Channel, Agent, mockUser } from "@/lib/placeholders";
 
 interface ChannelsSidebarProps {
-  projectId: string; // Added projectId
+  projectId: string;
   projectName: string;
   channels: Channel[];
   agents: Agent[];
@@ -42,7 +42,7 @@ interface ChannelsSidebarProps {
 
 export function ChannelsSidebar({
   projectName,
-  projectId, // Added projectId
+  projectId,
   channels,
   agents,
   selectedChannelId,
@@ -52,11 +52,7 @@ export function ChannelsSidebar({
 }: ChannelsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
-  const { setMode } = useSidebar();
-
-  useEffect(() => {
-    setMode("server");
-  }, [setMode]);
+  // useSidebar and useEffect for setMode removed
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {

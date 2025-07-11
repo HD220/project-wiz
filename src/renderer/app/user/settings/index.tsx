@@ -29,7 +29,7 @@ export const Route = createFileRoute("/user/settings/")({
   component: UserSettingsPage,
 });
 
-export function UserSettingsPage() { // Renamed component
+export function UserSettingsPage() {
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     // User Settings
