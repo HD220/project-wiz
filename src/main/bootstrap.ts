@@ -14,6 +14,8 @@ import { registerAutomaticPersonaHiringModule } from "./modules/automatic-person
 import { registerGitIntegrationModule } from "./modules/git-integration";
 import { registerFilesystemToolsModule } from "./modules/filesystem-tools";
 import { registerForumModule } from "./modules/forum";
+import { registerTaskManagementModule } from "./modules/task-management";
+import { registerCommunicationModule } from "./modules/communication";
 
 // Import IPC handler registration functions
 import { registerForumIpcHandlers } from "@/main/modules/forum/infrastructure/forum.handler";
@@ -44,6 +46,8 @@ export async function bootstrap(
     registerGitIntegrationModule,
     registerFilesystemToolsModule,
     registerForumModule,
+    registerTaskManagementModule,
+    registerCommunicationModule,
   ];
 
   // Register all modules by iterating over the array

@@ -1,58 +1,17 @@
+// Export schemas from individual modules
+export * from '../modules/project-management/persistence/schema';
+export * from '../modules/persona-management/persistence/schema';
+export * from '../modules/task-management/persistence/schema';
+export * from '../modules/communication/persistence/schema';
+
+// Re-export for compatibility with existing code
+export { projects } from '../modules/project-management/persistence/schema';
+export { personas as agents } from '../modules/persona-management/persistence/schema';
+
+// Legacy schemas that will be migrated to modules
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-
-export const projects = sqliteTable('projects', {
-  id: text('id').primaryKey(), // UUID
-  name: text('name').notNull().unique(),
-  description: text('description'),
-  localPath: text('local_path').notNull(),
-  remoteUrl: text('remote_url'),
-  createdAt: integer('created_at').notNull(),
-  updatedAt: integer('updated_at').notNull(),
-});
-
-export const agents = sqliteTable('agents', {
-  id: text('id').primaryKey(), // UUID
-  name: text('name').notNull().unique(),
-  description: text('description'),
-  llmModel: text('llm_model').notNull(),
-  configJson: text('config_json'), // JSON string
-  createdAt: integer('created_at').notNull(),
-  updatedAt: integer('updated_at').notNull(),
-});
-
-export const tasks = sqliteTable('tasks', {
-  id: text('id').primaryKey(), // UUID
-  projectId: text('project_id').notNull().references(() => projects.id),
-  assignedAgentId: text('assigned_agent_id').references(() => agents.id),
-  title: text('title').notNull(),
-  description: text('description'),
-  status: text('status').notNull(), // e.g., 'pending', 'in_progress', 'completed', 'failed'
-  priority: text('priority').notNull(), // e.g., 'low', 'medium', 'high', 'critical'
-  type: text('type').notNull(), // e.g., 'feature', 'bug', 'refactor', 'documentation'
-  dueDate: integer('due_date'),
-  createdAt: integer('created_at').notNull(),
-  updatedAt: integer('updated_at').notNull(),
-});
-
-export const messages = sqliteTable('messages', {
-  id: text('id').primaryKey(), // UUID
-  projectId: text('project_id').notNull().references(() => projects.id),
-  senderId: text('sender_id').notNull(), // User ID or Agent ID
-  senderType: text('sender_type').notNull(), // 'user' or 'agent'
-  channelId: text('channel_id').notNull(), // UUID for channel or direct message conversation
-  content: text('content').notNull(),
-  timestamp: integer('timestamp').notNull(),
-  isRead: integer('is_read').notNull().default(0), // 0 for false, 1 for true
-});
-
-export const channels = sqliteTable('channels', {
-  id: text('id').primaryKey(), // UUID
-  projectId: text('project_id').notNull().references(() => projects.id),
-  name: text('name').notNull(),
-  type: text('type').notNull(), // 'text' or 'direct_message'
-  createdAt: integer('created_at').notNull(),
-  updatedAt: integer('updated_at').notNull(),
-});
+import { projects } from '../modules/project-management/persistence/schema';
+import { personas } from '../modules/persona-management/persistence/schema';
 
 export const issues = sqliteTable('issues', {
   id: text('id').primaryKey(), // UUID
@@ -61,7 +20,7 @@ export const issues = sqliteTable('issues', {
   description: text('description'),
   status: text('status').notNull(), // e.g., 'open', 'in_progress', 'resolved', 'closed'
   priority: text('priority').notNull(), // e.g., 'low', 'medium', 'high'
-  assignedToAgentId: text('assigned_to_agent_id').references(() => agents.id),
+  assignedToAgentId: text('assigned_to_agent_id').references(() => personas.id),
   createdByUserId: text('created_by_user_id'), // Optional, for future user management
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
