@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTheme } from "@/renderer/contexts/theme-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsComponent() {
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     // User Settings
     username: "Usuário",
@@ -42,7 +44,7 @@ function SettingsComponent() {
     temperature: 0.7,
     
     // Interface Settings
-    theme: "system",
+    theme: theme, // Initialize with current theme from context
     language: "pt-BR",
     compactMode: false,
     
@@ -61,6 +63,10 @@ function SettingsComponent() {
     maxConcurrentAgents: 5,
     autoSaveInterval: 30,
   });
+
+  useEffect(() => {
+    setTheme(settings.theme as "light" | "dark" | "system");
+  }, [settings.theme, setTheme]);
 
   const updateSetting = (key: string, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));

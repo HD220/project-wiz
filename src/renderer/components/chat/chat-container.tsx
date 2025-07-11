@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -213,8 +215,12 @@ function MessageItem({ message }: MessageItemProps) {
               {message.content}
             </div>
           ) : (
-            <div className="whitespace-pre-wrap break-words">
-              {message.content}
+            <div className="prose dark:prose-invert max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
           )}
         </div>

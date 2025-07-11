@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { ProjectSidebar } from "./project-sidebar";
 import { ChannelsSidebar } from "./channels-sidebar";
 import { UserSidebar } from "./user-sidebar";

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSidebar } from "@/renderer/contexts/sidebar-context";
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,11 @@ export function ChannelsSidebar({
 }: ChannelsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
+  const { setMode } = useSidebar();
+
+  useEffect(() => {
+    setMode("server");
+  }, [setMode]);
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
