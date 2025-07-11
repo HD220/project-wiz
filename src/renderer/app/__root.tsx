@@ -1,7 +1,9 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { TooltipProvider } from "@/ui/tooltip";
 import { DiscordLayout } from "@/renderer/components/layout/discord-layout";
+import { CreateProjectModal } from "@/renderer/components/modals/create-project-modal";
+import { CreateChannelModal } from "@/renderer/components/modals/create-channel-modal";
 import {
   mockProjects,
   getChannelsByProject,
@@ -13,10 +15,13 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const navigate = useNavigate();
   const [selectedProjectId, setSelectedProjectId] = useState<string>(
     mockProjects[0]?.id,
   );
   const [selectedChannelId, setSelectedChannelId] = useState<string>();
+  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+  const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
   const selectedProject = mockProjects.find(
     (project) => project.id === selectedProjectId,
@@ -31,27 +36,28 @@ function RootComponent() {
   const handleProjectSelect = (projectId: string) => {
     setSelectedProjectId(projectId);
     setSelectedChannelId(undefined);
+    navigate({ to: "/" });
   };
 
   const handleChannelSelect = (channelId: string) => {
     setSelectedChannelId(channelId);
+    navigate({ to: "/chat" });
   };
 
   const handleAgentDMSelect = (agentId: string) => {
-    // Navigate to DM with agent
-    console.log("Opening DM with agent:", agentId);
+    navigate({ to: "/chat" });
   };
 
   const handleCreateProject = () => {
-    console.log("Creating new project");
+    setShowCreateProjectModal(true);
   };
 
   const handleAddChannel = () => {
-    console.log("Adding new channel");
+    setShowCreateChannelModal(true);
   };
 
   const handleSettings = () => {
-    console.log("Opening settings");
+    navigate({ to: "/settings" });
   };
 
   return (
@@ -72,6 +78,16 @@ function RootComponent() {
       >
         <Outlet />
       </DiscordLayout>
+
+      {/* Modals */}
+      <CreateProjectModal
+        open={showCreateProjectModal}
+        onOpenChange={setShowCreateProjectModal}
+      />
+      <CreateChannelModal
+        open={showCreateChannelModal}
+        onOpenChange={setShowCreateChannelModal}
+      />
     </TooltipProvider>
   );
 }

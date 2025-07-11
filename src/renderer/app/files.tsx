@@ -27,8 +27,8 @@ function FilesComponent() {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      <ResizablePanelGroup direction="vertical">
+    <div className="flex-1 overflow-hidden">
+      <ResizablePanelGroup direction="vertical" className="h-full">
         {/* Main Content Area */}
         <ResizablePanel defaultSize={75}>
           <ResizablePanelGroup direction="horizontal">

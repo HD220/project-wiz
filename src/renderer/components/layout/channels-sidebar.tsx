@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,6 +20,11 @@ import {
   Volume2,
   Settings,
   Loader2,
+  Home,
+  Users,
+  MessageSquare,
+  FileText,
+  CheckSquare,
 } from "lucide-react";
 import { Channel, Agent, mockUser } from "@/lib/placeholders";
 
@@ -42,6 +48,7 @@ export function ChannelsSidebar({
   onAddChannel,
 }: ChannelsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const location = useLocation();
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
@@ -71,9 +78,9 @@ export function ChannelsSidebar({
   const onlineAgents = agents.filter((a) => a.status !== "offline");
 
   return (
-    <div className="w-60 bg-card border-r border-border flex flex-col">
+    <div className="w-60 bg-card border-r border-border flex flex-col h-full overflow-hidden">
       {/* Project Header */}
-      <div className="h-12 px-3 flex items-center justify-between border-b border-border shadow-sm">
+      <div className="h-12 px-3 flex items-center justify-between border-b border-border shadow-sm flex-none">
         <h2 className="font-semibold text-foreground truncate">
           {projectName}
         </h2>
@@ -83,7 +90,7 @@ export function ChannelsSidebar({
       </div>
 
       {/* Search */}
-      <div className="p-3 border-b border-border">
+      <div className="p-3 border-b border-border flex-none">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -96,8 +103,52 @@ export function ChannelsSidebar({
       </div>
 
       {/* Scrollable Content */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 overflow-hidden">
         <div className="p-2 space-y-1">
+          {/* Navigation Items */}
+          <div className="space-y-0.5 mb-4">
+            <Button
+              variant={location.pathname === "/" ? "secondary" : "ghost"}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              asChild
+            >
+              <Link to="/">
+                <Home className="w-4 h-4 mr-2 text-muted-foreground" />
+                <span>Dashboard</span>
+              </Link>
+            </Button>
+            <Button
+              variant={location.pathname === "/agents" ? "secondary" : "ghost"}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              asChild
+            >
+              <Link to="/agents">
+                <Users className="w-4 h-4 mr-2 text-muted-foreground" />
+                <span>Agentes</span>
+              </Link>
+            </Button>
+            <Button
+              variant={location.pathname === "/tasks" ? "secondary" : "ghost"}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              asChild
+            >
+              <Link to="/tasks">
+                <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
+                <span>Tarefas</span>
+              </Link>
+            </Button>
+            <Button
+              variant={location.pathname === "/files" ? "secondary" : "ghost"}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              asChild
+            >
+              <Link to="/files">
+                <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
+                <span>Arquivos</span>
+              </Link>
+            </Button>
+          </div>
+
           {/* Text Channels */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger asChild>
@@ -203,7 +254,7 @@ export function ChannelsSidebar({
       </ScrollArea>
 
       {/* User Area */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border flex-none">
         <div className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
             <AvatarImage src={mockUser.avatar} />
@@ -221,8 +272,10 @@ export function ChannelsSidebar({
             <Button variant="ghost" size="icon" className="w-6 h-6">
               <Volume2 className="h-4 w-4 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="w-6 h-6">
-              <Settings className="h-4 w-4 text-muted-foreground" />
+            <Button variant="ghost" size="icon" className="w-6 h-6" asChild>
+              <Link to="/settings">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+              </Link>
             </Button>
           </div>
         </div>

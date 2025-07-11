@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +27,7 @@ export function ProjectSidebar({
   onSettings,
 }: ProjectSidebarProps) {
   return (
-    <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2">
+    <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2 h-full flex-none">
       {/* Home/Dashboard */}
       <TooltipProvider>
         <Tooltip>
@@ -35,8 +36,11 @@ export function ProjectSidebar({
               variant="ghost"
               size="icon"
               className="w-12 h-12 rounded-2xl bg-primary hover:bg-primary/90 hover:rounded-xl transition-all duration-200"
+              asChild
             >
-              <Folder className="h-6 w-6 text-primary-foreground" />
+              <Link to="/">
+                <Folder className="h-6 w-6 text-primary-foreground" />
+              </Link>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">

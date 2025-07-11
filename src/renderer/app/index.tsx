@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   TrendingUp,
   MessageSquare,
+  FileText,
 } from "lucide-react";
 import {
   mockProjects,
@@ -34,7 +35,7 @@ function HomeComponent() {
   const completedTasks = mockTasks.filter((task) => task.status === "done");
 
   return (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="flex-1 overflow-auto p-6 space-y-6">
       {/* Welcome Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
@@ -150,8 +151,8 @@ function HomeComponent() {
                 </div>
               </div>
             ))}
-            <Button variant="outline" className="w-full">
-              Ver Todos os Projetos
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/files">Ver Todos os Projetos</Link>
             </Button>
           </CardContent>
         </Card>
@@ -211,8 +212,8 @@ function HomeComponent() {
                 </div>
               </div>
             ))}
-            <Button variant="outline" className="w-full">
-              Gerenciar Agentes
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/agents">Gerenciar Agentes</Link>
             </Button>
           </CardContent>
         </Card>
@@ -224,22 +225,36 @@ function HomeComponent() {
           <CardTitle>Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-24 flex-col gap-2">
-              <GitBranch className="w-6 h-6" />
-              Novo Projeto
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+              <Link to="/files">
+                <GitBranch className="w-6 h-6" />
+                Novo Projeto
+              </Link>
             </Button>
-            <Button variant="outline" className="h-24 flex-col gap-2">
-              <Users className="w-6 h-6" />
-              Criar Agente
+            <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+              <Link to="/agents">
+                <Users className="w-6 h-6" />
+                Criar Agente
+              </Link>
             </Button>
-            <Button variant="outline" className="h-24 flex-col gap-2">
-              <CheckCircle2 className="w-6 h-6" />
-              Nova Tarefa
+            <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+              <Link to="/tasks">
+                <CheckCircle2 className="w-6 h-6" />
+                Nova Tarefa
+              </Link>
             </Button>
-            <Button variant="outline" className="h-24 flex-col gap-2">
-              <MessageSquare className="w-6 h-6" />
-              Chat Rápido
+            <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+              <Link to="/chat">
+                <MessageSquare className="w-6 h-6" />
+                Chat Rápido
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+              <Link to="/files">
+                <FileText className="w-6 h-6" />
+                Explorar Arquivos
+              </Link>
             </Button>
           </div>
         </CardContent>

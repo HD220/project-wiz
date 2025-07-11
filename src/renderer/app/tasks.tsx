@@ -7,14 +7,13 @@ export const Route = createFileRoute("/tasks")({
 
 function TasksComponent() {
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border">
-        <h1 className="text-2xl font-bold">Gerenciamento de Tarefas</h1>
-        <p className="text-muted-foreground">
-          Organize e acompanhe o progresso das suas tarefas
-        </p>
+    <div className="flex-1 overflow-hidden">
+      <div className="h-12 px-6 flex items-center border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <h1 className="font-semibold">Gerenciamento de Tarefas</h1>
       </div>
-      <KanbanBoard />
+      <div className="flex-1 overflow-hidden">
+        <KanbanBoard />
+      </div>
     </div>
   );
 }

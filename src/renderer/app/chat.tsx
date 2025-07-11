@@ -6,5 +6,9 @@ export const Route = createFileRoute("/chat")({
 });
 
 function ChatComponent() {
-  return <ChatContainer channelId="channel-1" channelName="geral" />;
+  return (
+    <div className="flex-1 overflow-hidden">
+      <ChatContainer channelId="channel-1" channelName="geral" />
+    </div>
+  );
 }

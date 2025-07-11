@@ -6,5 +6,9 @@ export const Route = createFileRoute("/agents")({
 });
 
 function AgentsComponent() {
-  return <AgentDashboard />;
+  return (
+    <div className="flex-1 overflow-hidden">
+      <AgentDashboard />
+    </div>
+  );
 }
