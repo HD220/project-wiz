@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AgentDashboard } from "@/renderer/features/agent-management/components/agent-dashboard";
+import { PageTitle } from "@/components/page-title";
+import { Users } from "lucide-react";
 
 export const Route = createFileRoute("/agents")({
   component: AgentsComponent,
@@ -7,7 +9,8 @@ export const Route = createFileRoute("/agents")({
 
 function AgentsComponent() {
   return (
-    <div className="flex-1 overflow-hidden">
+    <div className="h-full">
+      <PageTitle title="Agentes" icon={<Users className="w-5 h-5 text-muted-foreground" />} />
       <AgentDashboard />
     </div>
   );

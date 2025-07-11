@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,7 @@ import {
   getMessagesByChannel,
 } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
+import { PageTitle } from "@/components/page-title";
 
 interface ChatContainerProps {
   channelId?: string;
@@ -61,63 +62,63 @@ export function ChatContainer({
   const displayName = channelName || agentName || "Chat";
   const isAgentChat = !!agentId;
 
+  const titleIcon = isAgentChat ? (
+    <Avatar className="w-5 h-5">
+      <AvatarFallback className="text-xs">
+        {displayName.slice(0, 2).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
+  ) : (
+    <Hash className="w-5 h-5 text-muted-foreground" />
+  );
+
   return (
-    <div className={cn("flex-1 flex flex-col bg-background", className)}>
-      {/* Chat Header */}
-      <div className="h-12 border-b border-border px-4 flex items-center gap-2 shadow-sm">
-        {isAgentChat ? (
-          <>
-            <Avatar className="w-6 h-6">
-              <AvatarFallback className="text-xs">
-                {displayName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex items-center gap-2">
-              <h1 className="font-semibold text-foreground">{displayName}</h1>
-              <Badge variant="secondary" className="text-xs">
-                Agente IA
-              </Badge>
-            </div>
-          </>
-        ) : (
-          <>
-            <Hash className="w-5 h-5 text-muted-foreground" />
-            <h1 className="font-semibold text-foreground">{displayName}</h1>
-          </>
-        )}
-      </div>
+    <div className={cn("flex flex-col h-full bg-background", className)}>
+      <PageTitle 
+        title={displayName} 
+        icon={titleIcon}
+      />
+      {isAgentChat && (
+        <div className="px-4 py-2 border-b">
+          <Badge variant="secondary" className="text-xs">
+            Agente IA
+          </Badge>
+        </div>
+      )}
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4 py-4">
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                {isAgentChat ? (
-                  <AtSign className="w-8 h-8 text-muted-foreground" />
-                ) : (
-                  <Hash className="w-8 h-8 text-muted-foreground" />
-                )}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full px-4">
+          <div className="space-y-4 py-4">
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  {isAgentChat ? (
+                    <AtSign className="w-8 h-8 text-muted-foreground" />
+                  ) : (
+                    <Hash className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <h3 className="font-semibold text-lg mb-2">
+                  {isAgentChat
+                    ? `Este é o início da sua conversa com ${displayName}`
+                    : `Bem-vindo ao #${displayName}!`}
+                </h3>
+                <p className="text-muted-foreground">
+                  {isAgentChat
+                    ? "Comece uma conversa enviando uma mensagem abaixo."
+                    : "Este é o início do canal. Envie uma mensagem para começar a discussão."}
+                </p>
               </div>
-              <h3 className="font-semibold text-lg mb-2">
-                {isAgentChat
-                  ? `Este é o início da sua conversa com ${displayName}`
-                  : `Bem-vindo ao #${displayName}!`}
-              </h3>
-              <p className="text-muted-foreground">
-                {isAgentChat
-                  ? "Comece uma conversa enviando uma mensagem abaixo."
-                  : "Este é o início do canal. Envie uma mensagem para começar a discussão."}
-              </p>
-            </div>
-          ) : (
-            messages.map((msg) => <MessageItem key={msg.id} message={msg} />)
-          )}
-        </div>
-      </ScrollArea>
+            ) : (
+              messages.map((msg) => <MessageItem key={msg.id} message={msg} />)
+            )}
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border flex-shrink-0">
         <div className="relative">
           <Textarea
             placeholder={

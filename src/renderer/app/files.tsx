@@ -9,6 +9,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { PageTitle } from "@/components/page-title";
+import { FileText } from "lucide-react";
 
 export const Route = createFileRoute("/files")({
   component: FilesComponent,
@@ -27,7 +29,8 @@ function FilesComponent() {
   };
 
   return (
-    <div className="flex-1 overflow-hidden">
+    <div className="h-full">
+      <PageTitle title="Arquivos" icon={<FileText className="w-5 h-5 text-muted-foreground" />} />
       <ResizablePanelGroup direction="vertical" className="h-full">
         {/* Main Content Area */}
         <ResizablePanel defaultSize={75}>

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/ui/tooltip";
 import { DiscordLayout } from "@/renderer/components/layout/discord-layout";
 import { CreateProjectModal } from "@/renderer/components/modals/create-project-modal";
 import { CreateChannelModal } from "@/renderer/components/modals/create-channel-modal";
+import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
 import {
   mockProjects,
   getChannelsByProject,
@@ -62,32 +63,34 @@ function RootComponent() {
 
   return (
     <TooltipProvider>
-      <DiscordLayout
-        projects={mockProjects}
-        selectedProjectId={selectedProjectId}
-        projectName={selectedProject?.name || "Selecione um projeto"}
-        channels={projectChannels}
-        agents={projectAgents}
-        selectedChannelId={selectedChannelId}
-        onProjectSelect={handleProjectSelect}
-        onChannelSelect={handleChannelSelect}
-        onAgentDMSelect={handleAgentDMSelect}
-        onCreateProject={handleCreateProject}
-        onAddChannel={handleAddChannel}
-        onSettings={handleSettings}
-      >
-        <Outlet />
-      </DiscordLayout>
+      <PageTitleProvider>
+        <DiscordLayout
+          projects={mockProjects}
+          selectedProjectId={selectedProjectId}
+          projectName={selectedProject?.name || "Selecione um projeto"}
+          channels={projectChannels}
+          agents={projectAgents}
+          selectedChannelId={selectedChannelId}
+          onProjectSelect={handleProjectSelect}
+          onChannelSelect={handleChannelSelect}
+          onAgentDMSelect={handleAgentDMSelect}
+          onCreateProject={handleCreateProject}
+          onAddChannel={handleAddChannel}
+          onSettings={handleSettings}
+        >
+          <Outlet />
+        </DiscordLayout>
 
-      {/* Modals */}
-      <CreateProjectModal
-        open={showCreateProjectModal}
-        onOpenChange={setShowCreateProjectModal}
-      />
-      <CreateChannelModal
-        open={showCreateChannelModal}
-        onOpenChange={setShowCreateChannelModal}
-      />
+        {/* Modals */}
+        <CreateProjectModal
+          open={showCreateProjectModal}
+          onOpenChange={setShowCreateProjectModal}
+        />
+        <CreateChannelModal
+          open={showCreateChannelModal}
+          onOpenChange={setShowCreateChannelModal}
+        />
+      </PageTitleProvider>
     </TooltipProvider>
   );
 }

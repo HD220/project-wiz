@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Users, X, Loader2 } from "lucide-react";
+import { usePageTitle } from "@/renderer/contexts/page-title-context";
 
 interface DiscordLayoutProps {
   children: ReactNode;
@@ -45,6 +46,7 @@ export function DiscordLayout({
   onSettings,
 }: DiscordLayoutProps) {
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const { title, icon } = usePageTitle();
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
@@ -98,8 +100,12 @@ export function DiscordLayout({
         {/* Main Content Area */}
         <ResizablePanel defaultSize={75} minSize={40}>
           <div className="flex flex-col h-full min-w-0 w-full bg-background overflow-hidden">
-            {/* Header with toggle button */}
-            <div className="flex justify-end p-2 border-b border-border">
+            {/* Header with channel title and toggle button */}
+            <div className="h-12 flex items-center justify-between px-4 border-b border-border flex-shrink-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                {icon && <div className="flex-shrink-0">{icon}</div>}
+                {title && <h1 className="font-semibold text-foreground truncate">{title}</h1>}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"

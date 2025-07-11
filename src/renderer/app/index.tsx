@@ -13,12 +13,14 @@ import {
   TrendingUp,
   MessageSquare,
   FileText,
+  Home,
 } from "lucide-react";
 import {
   mockProjects,
   mockAgents,
   mockTasks,
 } from "@/renderer/lib/placeholders";
+import { PageTitle } from "@/components/page-title";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -35,7 +37,9 @@ function HomeComponent() {
   const completedTasks = mockTasks.filter((task) => task.status === "done");
 
   return (
-    <div className="flex-1 overflow-auto p-6 space-y-6">
+    <div className="h-full overflow-auto">
+      <PageTitle title="Dashboard" icon={<Home className="w-5 h-5 text-muted-foreground" />} />
+      <div className="p-6 space-y-6">
       {/* Welcome Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
@@ -259,6 +263,7 @@ function HomeComponent() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

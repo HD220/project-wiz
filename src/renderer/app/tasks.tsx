@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { KanbanBoard } from "../features/task-management/components/kanban-board";
+import { PageTitle } from "@/components/page-title";
+import { CheckSquare } from "lucide-react";
 
 export const Route = createFileRoute("/tasks")({
   component: TasksComponent,
@@ -7,13 +9,9 @@ export const Route = createFileRoute("/tasks")({
 
 function TasksComponent() {
   return (
-    <div className="flex-1 overflow-hidden">
-      <div className="h-12 px-6 flex items-center border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <h1 className="font-semibold">Gerenciamento de Tarefas</h1>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <KanbanBoard />
-      </div>
+    <div className="h-full">
+      <PageTitle title="Tarefas" icon={<CheckSquare className="w-5 h-5 text-muted-foreground" />} />
+      <KanbanBoard />
     </div>
   );
 }
