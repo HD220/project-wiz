@@ -2,6 +2,11 @@ import { ReactNode } from "react";
 import { ProjectSidebar } from "./project-sidebar";
 import { ChannelsSidebar } from "./channels-sidebar";
 import { Project, Channel, Agent } from "@/lib/placeholders";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 
 interface DiscordLayoutProps {
   children: ReactNode;
@@ -36,7 +41,7 @@ export function DiscordLayout({
 }: DiscordLayoutProps) {
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
-      {/* Project Sidebar */}
+      {/* Project Sidebar - Fixed width */}
       <div className="flex-none">
         <ProjectSidebar
           projects={projects}
@@ -47,25 +52,32 @@ export function DiscordLayout({
         />
       </div>
 
-      {/* Channels Sidebar */}
-      <div className="flex-none">
-        <ChannelsSidebar
-          projectName={projectName}
-          channels={channels}
-          agents={agents}
-          selectedChannelId={selectedChannelId}
-          onChannelSelect={onChannelSelect}
-          onAgentDMSelect={onAgentDMSelect}
-          onAddChannel={onAddChannel}
-        />
-      </div>
+      {/* Resizable area for Channels Sidebar and Main Content */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
+        {/* Channels Sidebar - Resizable */}
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+          <ChannelsSidebar
+            projectName={projectName}
+            channels={channels}
+            agents={agents}
+            selectedChannelId={selectedChannelId}
+            onChannelSelect={onChannelSelect}
+            onAgentDMSelect={onAgentDMSelect}
+            onAddChannel={onAddChannel}
+          />
+        </ResizablePanel>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 w-full bg-background overflow-hidden">
-        {children}
-      </div>
+        <ResizableHandle withHandle />
 
-      {/* Right Panel (responsive) */}
+        {/* Main Content Area */}
+        <ResizablePanel defaultSize={75} minSize={40}>
+          <div className="flex flex-col h-full min-w-0 w-full bg-background overflow-hidden">
+            {children}
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+
+      {/* Right Panel (responsive) - Fixed width */}
       <div className="w-80 bg-card border-l border-border hidden xl:flex flex-col flex-none">
         {/* Right panel content will be contextual */}
         <div className="p-4 border-b border-border">

@@ -78,7 +78,7 @@ export function ChannelsSidebar({
   const onlineAgents = agents.filter((a) => a.status !== "offline");
 
   return (
-    <div className="w-60 bg-card border-r border-border flex flex-col h-full overflow-hidden">
+    <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
       {/* Project Header */}
       <div className="h-12 px-3 flex items-center justify-between border-b border-border shadow-sm flex-none">
         <h2 className="font-semibold text-foreground truncate">
