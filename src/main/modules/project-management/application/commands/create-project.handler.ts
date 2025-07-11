@@ -4,6 +4,7 @@ import { IProjectRepository } from "@/main/modules/project-management/domain/pro
 import { FilesystemService } from "@/main/modules/filesystem-tools/domain/filesystem.service";
 import { GitIntegrationService } from "@/main/modules/git-integration/domain/git-integration.service";
 import logger from "@/main/logger";
+import { ApplicationError } from "@/main/errors/application.error";
 
 export class CreateProjectCommandHandler {
   constructor(
@@ -14,6 +15,12 @@ export class CreateProjectCommandHandler {
 
   async handle(command: CreateProjectCommand): Promise<Project> {
     const { name, localPath, remoteUrl } = command.payload;
+
+    // Check if project with the same name already exists
+    const existingProject = await this.projectRepository.findByName(name);
+    if (existingProject) {
+      throw new ApplicationError(`Project with name "${name}" already exists.`);
+    }
 
     // 1. Create project directory
     await this.filesystemService.createDirectory(localPath);

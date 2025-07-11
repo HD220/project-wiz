@@ -2,8 +2,11 @@ import { Worker } from 'worker_threads';
 import path from 'path';
 import { EventBus } from '../event-bus';
 import { TaskQueueService } from '../../modules/task-management/application/services/task-queue.service';
-import { Task } from '../../modules/task-management/domain/entities/task.entity';
+import { PersonaService } from '../../modules/persona-management/application/services/persona.service';
+import { Persona } from '../../modules/persona-management/domain/entities/persona.entity';
+import { ProjectService } from '../../modules/project-management/application/services/project.service';
 import logger from '../../logger';
+import { AgentToolExecutorService } from './agent-tool-executor.service';
 
 interface ActiveAgent {
   workerId: string;
@@ -15,30 +18,24 @@ interface ActiveAgent {
   lastHeartbeat?: Date;
 }
 
-interface AgentConfig {
-  id: string;
-  name: string;
-  role: string;
-  systemPrompt: string;
-  llmModel: string;
-  capabilities: string[];
-  maxConcurrentTasks: number;
-}
-
 export class AgentRuntimeManager {
   private activeAgents = new Map<string, ActiveAgent>();
   private workerPath = path.join(__dirname, 'agent.worker.js');
   private taskCheckInterval: NodeJS.Timeout | null = null;
   private readonly CHECK_INTERVAL = 5000; // 5 segundos
+  private agentToolExecutorService: AgentToolExecutorService;
 
   constructor(
     private readonly eventBus: EventBus,
-    private readonly taskQueueService: TaskQueueService
+    private readonly taskQueueService: TaskQueueService,
+    private readonly personaService: PersonaService,
+    private readonly projectService: ProjectService
   ) {
+    this.agentToolExecutorService = new AgentToolExecutorService();
     this.setupEventListeners();
   }
 
-  async startAgent(agentId: string, agentConfig: AgentConfig): Promise<void> {
+  async startAgent(agentId: string, agentConfig: Persona): Promise<void> {
     if (this.activeAgents.has(agentId)) {
       throw new Error(`Agent ${agentId} is already running`);
     }
@@ -58,7 +55,6 @@ export class AgentRuntimeManager {
 
     this.activeAgents.set(agentId, activeAgent);
 
-    // Iniciar o loop de verificação de tarefas se não estiver rodando
     if (!this.taskCheckInterval) {
       this.startTaskCheckLoop();
     }
@@ -85,7 +81,6 @@ export class AgentRuntimeManager {
 
     this.activeAgents.delete(agentId);
     
-    // Parar o loop se não há agentes ativos
     if (this.activeAgents.size === 0 && this.taskCheckInterval) {
       clearInterval(this.taskCheckInterval);
       this.taskCheckInterval = null;
@@ -94,7 +89,7 @@ export class AgentRuntimeManager {
     this.eventBus.publish('agent.stopped', { agentId });
   }
 
-  async assignTaskToAgent(agentId: string, task: Task, agentConfig: AgentConfig): Promise<void> {
+  async assignTaskToAgent(agentId: string, task: Task, agentConfig: Persona): Promise<void> {
     const activeAgent = this.activeAgents.get(agentId);
     if (!activeAgent) {
       throw new Error(`Agent ${agentId} is not running`);
@@ -107,7 +102,12 @@ export class AgentRuntimeManager {
     await this.executeTaskInWorker(activeAgent, task, agentConfig);
   }
 
-  private async executeTaskInWorker(activeAgent: ActiveAgent, task: Task, agentConfig: AgentConfig): Promise<void> {
+  private async executeTaskInWorker(activeAgent: ActiveAgent, task: Task, agentConfig: Persona): Promise<void> {
+    const project = await this.projectService.getProjectById(task.projectId);
+    if (!project) {
+      throw new Error(`Project not found for task ${task.id}`);
+    }
+
     const workerData = {
       agentId: activeAgent.agentId,
       agentConfig: {
@@ -124,8 +124,8 @@ export class AgentRuntimeManager {
         type: task.type,
         priority: task.priority,
       },
-      projectPath: '/tmp/project', // TODO: buscar do banco
-      worktreePath: '/tmp/worktree', // TODO: criar worktree
+      projectPath: project.localPath,
+      worktreePath: path.join(project.localPath, 'worktrees', `${task.id}-${agentConfig.name}`),
     };
 
     const worker = new Worker(this.workerPath, { workerData });
@@ -157,7 +157,6 @@ export class AgentRuntimeManager {
   private async handleWorkerMessage(activeAgent: ActiveAgent, message: any): Promise<void> {
     const { type, data } = message;
 
-    // Atualizar heartbeat
     activeAgent.lastHeartbeat = new Date();
 
     switch (type) {
@@ -168,7 +167,7 @@ export class AgentRuntimeManager {
         this.handleProgressUpdate(activeAgent, data);
         break;
       case 'tool_call':
-        this.handleToolCall(activeAgent, message);
+        await this.handleToolCall(activeAgent, message);
         break;
       case 'log':
         this.handleLogMessage(activeAgent, data);
@@ -195,7 +194,6 @@ export class AgentRuntimeManager {
         result,
       });
     } else if (status === 'analyzing' || status === 'planning' || status === 'executing') {
-      // Atualizações de status intermediárias
       this.eventBus.publish('agent.status_update', {
         agentId: activeAgent.agentId,
         taskId,
@@ -231,7 +229,6 @@ export class AgentRuntimeManager {
   private handleLogMessage(activeAgent: ActiveAgent, data: any): void {
     const { level, message, metadata } = data;
 
-    // Usar método de log apropriado baseado no nível
     if (level === 'info') {
       logger.info('Agent log', { agentId: activeAgent.agentId, message, metadata });
     } else if (level === 'error') {
@@ -251,7 +248,7 @@ export class AgentRuntimeManager {
     });
   }
 
-  private handleToolCall(activeAgent: ActiveAgent, message: any): void {
+  private async handleToolCall(activeAgent: ActiveAgent, message: any): Promise<void> {
     const { tool, args, id } = message;
 
     logger.debug('Agent tool call', { 
@@ -260,23 +257,14 @@ export class AgentRuntimeManager {
       args 
     });
 
-    // TODO: Implementar handlers reais para cada ferramenta
-    // Por agora, enviar resposta mock
-    this.sendToolResponse(activeAgent, id, this.getMockToolResponse(tool, args));
-  }
-
-  private getMockToolResponse(tool: string, args: any): any {
-    switch (tool) {
-      case 'readFile':
-        return `// Mock content of file: ${args.path}`;
-      case 'writeFile':
-        return { success: true };
-      case 'listDirectory':
-        return ['src', 'package.json', 'README.md'];
-      case 'executeShell':
-        return { stdout: 'Command executed successfully', stderr: '', exitCode: 0 };
-      default:
-        return { error: `Unknown tool: ${tool}` };
+    let result: any;
+    try {
+      // Assuming args already contains projectPath from the worker
+      result = await this.agentToolExecutorService.executeTool(tool, args, args.projectPath);
+      this.sendToolResponse(activeAgent, id, result);
+    } catch (error: any) {
+      logger.error(`Error executing tool ${tool}: ${error.message}`, { agentId: activeAgent.agentId, tool, args, error: error.stack });
+      this.sendToolResponse(activeAgent, id, { error: error.message });
     }
   }
 
@@ -302,7 +290,6 @@ export class AgentRuntimeManager {
     if (activeAgent.currentTask) {
       await this.taskQueueService.failTask(activeAgent.currentTask.id, error.message);
     }
-
     this.eventBus.publish('agent.error', {
       agentId: activeAgent.agentId,
       error: error.message,
@@ -335,18 +322,13 @@ export class AgentRuntimeManager {
         try {
           const nextTask = await this.taskQueueService.dequeueNextTask(agentId);
           if (nextTask) {
-            // TODO: Buscar configuração do agente do banco
-            const mockAgentConfig: AgentConfig = {
-              id: agentId,
-              name: `Agent ${agentId}`,
-              role: 'developer',
-              systemPrompt: 'You are a helpful development assistant.',
-              llmModel: 'gpt-4',
-              capabilities: ['filesystem', 'shell', 'git'],
-              maxConcurrentTasks: 1,
-            };
+            const agentConfig = await this.personaService.getPersonaById(agentId);
+            if (!agentConfig) {
+              logger.error(`Agent configuration not found for ID: ${agentId}`);
+              continue;
+            }
 
-            await this.assignTaskToAgent(agentId, nextTask, mockAgentConfig);
+            await this.assignTaskToAgent(agentId, nextTask, agentConfig);
           }
         } catch (error: any) {
           logger.error('Failed to assign task to agent', { 
@@ -371,7 +353,6 @@ export class AgentRuntimeManager {
           lastHeartbeat: activeAgent.lastHeartbeat 
         });
 
-        // Marcar como erro e tentar reiniciar
         activeAgent.status = 'error';
         
         if (activeAgent.worker) {
@@ -383,7 +364,6 @@ export class AgentRuntimeManager {
 
   private setupEventListeners(): void {
     this.eventBus.subscribe('task.enqueued', async () => {
-      // Verificar se há agentes idle e processar imediatamente
       await this.checkForNewTasks();
     });
 

@@ -1,8 +1,13 @@
-import { useState } from 'react';
-import { cn } from '@/renderer/lib/utils';
-import { Button } from '@/renderer/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/renderer/components/ui/tooltip';
-import { Plus, Settings, Folder } from 'lucide-react';
+import { useState } from "react";
+import { cn } from "@/renderer/lib/utils";
+import { Button } from "@/renderer/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/renderer/components/ui/tooltip";
+import { Plus, Settings, Folder } from "lucide-react";
 
 interface Project {
   id: string;
@@ -63,12 +68,12 @@ export function ProjectSidebar({
                     "w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all duration-200 relative",
                     selectedProjectId === project.id
                       ? "bg-brand-500 rounded-[16px]"
-                      : "bg-gray-700 hover:bg-gray-600"
+                      : "bg-gray-700 hover:bg-gray-600",
                   )}
                 >
                   {project.avatarUrl ? (
-                    <img 
-                      src={project.avatarUrl} 
+                    <img
+                      src={project.avatarUrl}
                       alt={project.name}
                       className="w-full h-full rounded-inherit"
                     />
@@ -77,7 +82,7 @@ export function ProjectSidebar({
                       {project.name.charAt(0).toUpperCase()}
                     </span>
                   )}
-                  
+
                   {/* Notification indicator */}
                   {project.hasNotifications && (
                     <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-900" />
