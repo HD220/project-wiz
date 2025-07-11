@@ -16,7 +16,7 @@ export const Route = createFileRoute("/project/$projectId/files/")({
   component: ProjectFilesPage,
 });
 
-export function ProjectFilesPage() { // Renamed component
+export function ProjectFilesPage() {
   const [selectedFile, setSelectedFile] = useState<FileTreeItem | null>(null);
   const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(false);
 

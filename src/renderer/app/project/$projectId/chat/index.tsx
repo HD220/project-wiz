@@ -5,7 +5,7 @@ export const Route = createFileRoute("/project/$projectId/chat/")({
   component: ProjectChatPage,
 });
 
-export function ProjectChatPage() { // Renamed component
+export function ProjectChatPage() {
   return (
     <div className="h-full">
       <ChatContainer channelId="channel-1" channelName="geral" />

@@ -93,11 +93,11 @@ export function UserSidebar({
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
             <Button
-              variant={location.pathname === "/" ? "secondary" : "ghost"}
+              variant={location.pathname === "/user/" ? "secondary" : "ghost"}
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/">
+              <Link to="/user/">
                 <Home className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Dashboard</span>
               </Link>

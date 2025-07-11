@@ -7,7 +7,7 @@ export const Route = createFileRoute("/project/$projectId/agents/")({
   component: ProjectAgentsPage,
 });
 
-export function ProjectAgentsPage() { // Renamed component
+export function ProjectAgentsPage() {
   return (
     <div className="h-full">
       <PageTitle title="Agentes" icon={<Users className="w-5 h-5 text-muted-foreground" />} />
