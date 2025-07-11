@@ -1,4 +1,5 @@
 # PLANO DE IMPLEMENTAÇÃO DETALHADO - PROJECT WIZ
+
 ## 🏭 Fábrica de Software Autônoma Local
 
 **Filosofia de Implementação:** Este plano é um guia completo e detalhado para transformar o Project Wiz em uma "Fábrica de Software Autônoma Local". Cada tarefa contém instruções específicas, exemplos de código, estruturas de arquivos e critérios de verificação. O foco é em clareza, previsibilidade e qualidade, projetado para ser seguido por desenvolvedores de qualquer nível.
@@ -6,9 +7,11 @@
 ## 📋 VISÃO GERAL DO PROJETO
 
 ### **Objetivo Principal**
+
 Transformar a aplicação atual numa interface estilo Discord onde agentes LLM autônomos executam tarefas de desenvolvimento de software de forma colaborativa e inteligente.
 
 ### **Características Principais**
+
 - 🎮 **Interface estilo Discord** - Sidebar de projetos, canais de comunicação, chat em tempo real
 - 🤖 **Agentes LLM autônomos** - Executam tarefas em worker threads isolados
 - 📋 **Sistema de Issues/Sprints** - Metodologia Scrum integrada
@@ -17,6 +20,7 @@ Transformar a aplicação atual numa interface estilo Discord onde agentes LLM a
 - 🔧 **Ferramentas robustas** - Sistema de arquivos, shell, git seguro
 
 ### **Tecnologias Utilizadas (Mantidas)**
+
 - ✅ Electron.js + Vite
 - ✅ React + TypeScript + Tailwind CSS
 - ✅ TanStack Router + TanStack Query
@@ -29,15 +33,17 @@ Transformar a aplicação atual numa interface estilo Discord onde agentes LLM a
 ## 🏗️ ESTRUTURA DE IMPLEMENTAÇÃO
 
 ### **Metodologia**
+
 - **Desenvolvimento incremental** - Cada fase é completamente funcional
 - **Reutilização máxima** - Aproveitar toda estrutura existente
 - **Testes contínuos** - Cada funcionalidade é testada
 - **Documentação inline** - Código autodocumentado
 
 ### **Organização das Fases**
+
 ```
 FASE 1: Fundação do Sistema de Agentes
-FASE 2: Interface Estilo Discord  
+FASE 2: Interface Estilo Discord
 FASE 3: Sistema de Issues e Sprints
 FASE 4: Integração Avançada com Git
 FASE 5: Sistema de Documentação
@@ -49,13 +55,15 @@ FASE 8: Testes e Garantia de Qualidade
 ---
 
 ## **FASE 1: ✅ FUNDAÇÃO DO SISTEMA DE AGENTES (CONCLUÍDA)**
-*Objetivo: Criar a infraestrutura base para execução de agentes LLM autônomos com filas de tarefas e worker threads*
+
+_Objetivo: Criar a infraestrutura base para execução de agentes LLM autônomos com filas de tarefas e worker threads_
 
 **Status**: ✅ **COMPLETADA** - Infraestrutura base implementada com sucesso
 
 ### **1.1 ✅ Sistema de Filas de Tarefas e Task Management**
 
 #### **1.1.1 Criar Módulo Task Management**
+
 - [x] **Criar estrutura de diretórios**
   - **Localização**: `src/main/modules/task-management/`
   - **Estrutura necessária**:
@@ -75,59 +83,72 @@ FASE 8: Testes e Garantia de Qualidade
   - **Verificação**: ✅ Estrutura de pastas criada corretamente
 
 #### **1.1.2 Definir Schema do Banco de Dados para Tasks**
+
 - [x] **Criar schema de tasks**
   - **Arquivo**: `src/main/modules/task-management/persistence/schema.ts`
   - **Implementação**:
+
     ```typescript
-    import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-    import { projects } from '../../project-management/persistence/schema';
-    import { agents } from '../../persona-management/persistence/schema';
+    import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+    import { projects } from "../../project-management/persistence/schema";
+    import { agents } from "../../persona-management/persistence/schema";
 
-    export const tasks = sqliteTable('tasks', {
-      id: text('id').primaryKey(), // UUID
-      projectId: text('project_id').notNull().references(() => projects.id),
-      assignedAgentId: text('assigned_agent_id').references(() => agents.id),
-      title: text('title').notNull(),
-      description: text('description'),
-      status: text('status').notNull(), // 'pending', 'in_progress', 'completed', 'failed', 'cancelled'
-      priority: text('priority').notNull(), // 'low', 'medium', 'high', 'critical'
-      type: text('type').notNull(), // 'feature', 'bug', 'refactor', 'documentation', 'test'
-      parentTaskId: text('parent_task_id').references(() => tasks.id),
-      estimatedHours: integer('estimated_hours'),
-      actualHours: integer('actual_hours'),
-      progressPercentage: integer('progress_percentage').notNull().default(0),
-      dueDate: integer('due_date'),
-      startedAt: integer('started_at'),
-      completedAt: integer('completed_at'),
-      createdAt: integer('created_at').notNull(),
-      updatedAt: integer('updated_at').notNull(),
+    export const tasks = sqliteTable("tasks", {
+      id: text("id").primaryKey(), // UUID
+      projectId: text("project_id")
+        .notNull()
+        .references(() => projects.id),
+      assignedAgentId: text("assigned_agent_id").references(() => agents.id),
+      title: text("title").notNull(),
+      description: text("description"),
+      status: text("status").notNull(), // 'pending', 'in_progress', 'completed', 'failed', 'cancelled'
+      priority: text("priority").notNull(), // 'low', 'medium', 'high', 'critical'
+      type: text("type").notNull(), // 'feature', 'bug', 'refactor', 'documentation', 'test'
+      parentTaskId: text("parent_task_id").references(() => tasks.id),
+      estimatedHours: integer("estimated_hours"),
+      actualHours: integer("actual_hours"),
+      progressPercentage: integer("progress_percentage").notNull().default(0),
+      dueDate: integer("due_date"),
+      startedAt: integer("started_at"),
+      completedAt: integer("completed_at"),
+      createdAt: integer("created_at").notNull(),
+      updatedAt: integer("updated_at").notNull(),
     });
 
-    export const taskDependencies = sqliteTable('task_dependencies', {
-      taskId: text('task_id').notNull().references(() => tasks.id),
-      dependsOnTaskId: text('depends_on_task_id').notNull().references(() => tasks.id),
-      createdAt: integer('created_at').notNull(),
+    export const taskDependencies = sqliteTable("task_dependencies", {
+      taskId: text("task_id")
+        .notNull()
+        .references(() => tasks.id),
+      dependsOnTaskId: text("depends_on_task_id")
+        .notNull()
+        .references(() => tasks.id),
+      createdAt: integer("created_at").notNull(),
     });
 
-    export const taskLogs = sqliteTable('task_logs', {
-      id: text('id').primaryKey(),
-      taskId: text('task_id').notNull().references(() => tasks.id),
-      agentId: text('agent_id').references(() => agents.id),
-      logLevel: text('log_level').notNull(), // 'info', 'warning', 'error', 'debug'
-      message: text('message').notNull(),
-      metadata: text('metadata'), // JSON para dados adicionais
-      timestamp: integer('timestamp').notNull(),
+    export const taskLogs = sqliteTable("task_logs", {
+      id: text("id").primaryKey(),
+      taskId: text("task_id")
+        .notNull()
+        .references(() => tasks.id),
+      agentId: text("agent_id").references(() => agents.id),
+      logLevel: text("log_level").notNull(), // 'info', 'warning', 'error', 'debug'
+      message: text("message").notNull(),
+      metadata: text("metadata"), // JSON para dados adicionais
+      timestamp: integer("timestamp").notNull(),
     });
     ```
+
   - **Verificação**: ✅ Schema criado sem erros de tipo
 
 #### **1.1.3 Criar Entidade Task**
+
 - [x] **Implementar entidade Task**
   - **Arquivo**: `src/main/modules/task-management/domain/entities/task.entity.ts`
   - **Estrutura**:
+
     ```typescript
-    import { BaseEntity } from '@/main/kernel/domain/base.entity';
-    import { z } from 'zod';
+    import { BaseEntity } from "@/main/kernel/domain/base.entity";
+    import { z } from "zod";
 
     // Schema de validação Zod
     export const TaskPropsSchema = z.object({
@@ -135,9 +156,15 @@ FASE 8: Testes e Garantia de Qualidade
       assignedAgentId: z.string().uuid().optional(),
       title: z.string().min(1).max(200),
       description: z.string().optional(),
-      status: z.enum(['pending', 'in_progress', 'completed', 'failed', 'cancelled']),
-      priority: z.enum(['low', 'medium', 'high', 'critical']),
-      type: z.enum(['feature', 'bug', 'refactor', 'documentation', 'test']),
+      status: z.enum([
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "cancelled",
+      ]),
+      priority: z.enum(["low", "medium", "high", "critical"]),
+      type: z.enum(["feature", "bug", "refactor", "documentation", "test"]),
       // ... outros campos
     });
 
@@ -159,15 +186,18 @@ FASE 8: Testes e Garantia de Qualidade
       }
     }
     ```
+
   - **Verificação**: ✅ Entidade valida props com Zod e métodos funcionam
 
 #### **1.1.4 Criar Repository Interface**
+
 - [x] **Definir interface do repositório**
   - **Arquivo**: `src/main/modules/task-management/domain/repositories/task.repository.ts`
   - **Métodos principais**: `save()`, `findById()`, `findByProjectId()`, `getNextTaskInQueue()`, etc.
   - **Verificação**: ✅ Interface definida corretamente
 
 #### **1.1.5 Implementar Drizzle Repository**
+
 - [x] **Criar implementação do repositório**
   - **Arquivo**: `src/main/modules/task-management/persistence/drizzle-task.repository.ts`
   - **Estrutura**: Implementar interface `TaskRepository` diretamente
@@ -176,9 +206,10 @@ FASE 8: Testes e Garantia de Qualidade
   - **Verificação**: ✅ Repositório implementado e funcional
 
 #### **1.1.6 Criar Task Queue Service**
+
 - [x] **Implementar serviço de fila de tarefas**
   - **Arquivo**: `src/main/modules/task-management/application/services/task-queue.service.ts`
-  - **Responsabilidades**: 
+  - **Responsabilidades**:
     - Enfileirar tarefas (`enqueueTask()`)
     - Desenfileirar próxima tarefa (`dequeueNextTask()`)
     - Completar/falhar tarefas (`completeTask()`, `failTask()`)
@@ -189,6 +220,7 @@ FASE 8: Testes e Garantia de Qualidade
 ### **1.2 ✅ Sistema de Worker Threads para Agentes**
 
 #### **1.2.1 Atualizar Schema de Agentes**
+
 - [x] **Expandir schema de agentes para suportar runtime**
   - **Arquivo**: `src/main/modules/persona-management/persistence/schema.ts`
   - **Adicionar campos**:
@@ -209,14 +241,16 @@ FASE 8: Testes e Garantia de Qualidade
   - **Verificação**: ✅ Schema atualizado sem erros
 
 #### **1.2.2 Criar Agent Worker Script**
+
 - [x] **Implementar script do worker**
   - **Arquivo**: `src/main/kernel/agent-runtime/agent.worker.ts`
   - **Implementação**:
+
     ```typescript
-    import { parentPort, workerData } from 'worker_threads';
-    import { generateText } from 'ai';
-    import { Task } from '../../modules/task-management/domain/entities/task.entity';
-    import { Agent } from '../../modules/persona-management/domain/persona.entity';
+    import { parentPort, workerData } from "worker_threads";
+    import { generateText } from "ai";
+    import { Task } from "../../modules/task-management/domain/entities/task.entity";
+    import { Agent } from "../../modules/persona-management/domain/persona.entity";
 
     interface WorkerData {
       agentId: string;
@@ -235,7 +269,10 @@ FASE 8: Testes e Garantia de Qualidade
     interface AgentTools {
       readFile: (path: string) => Promise<string>;
       writeFile: (path: string, content: string) => Promise<void>;
-      executeShell: (command: string, args: string[]) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
+      executeShell: (
+        command: string,
+        args: string[],
+      ) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
       listDirectory: (path: string) => Promise<string[]>;
     }
 
@@ -252,40 +289,39 @@ FASE 8: Testes e Garantia de Qualidade
         const { task, agentConfig } = this.workerData;
 
         try {
-          this.sendMessage('status', { status: 'analyzing', taskId: task.id });
+          this.sendMessage("status", { status: "analyzing", taskId: task.id });
 
           // 1. Analisar a tarefa usando LLM
           const analysis = await this.analyzeTask(task, agentConfig);
-          
-          this.sendMessage('progress', { 
-            taskId: task.id, 
-            progress: 25, 
-            message: 'Task analysis completed' 
+
+          this.sendMessage("progress", {
+            taskId: task.id,
+            progress: 25,
+            message: "Task analysis completed",
           });
 
           // 2. Planejar subtarefas
           const plan = await this.planExecution(task, analysis, agentConfig);
-          
-          this.sendMessage('progress', { 
-            taskId: task.id, 
-            progress: 50, 
-            message: 'Execution plan created' 
+
+          this.sendMessage("progress", {
+            taskId: task.id,
+            progress: 50,
+            message: "Execution plan created",
           });
 
           // 3. Executar o plano
           await this.executePlan(plan);
 
-          this.sendMessage('status', { 
-            status: 'completed', 
+          this.sendMessage("status", {
+            status: "completed",
             taskId: task.id,
-            result: 'Task completed successfully'
+            result: "Task completed successfully",
           });
-
         } catch (error) {
-          this.sendMessage('error', { 
-            taskId: task.id, 
+          this.sendMessage("error", {
+            taskId: task.id,
             error: error.message,
-            stack: error.stack 
+            stack: error.stack,
           });
         }
       }
@@ -294,13 +330,13 @@ FASE 8: Testes e Garantia de Qualidade
         const prompt = `
         You are ${agentConfig.name}, a ${agentConfig.role}.
         ${agentConfig.systemPrompt}
-
+    
         Analyze this task:
         Title: ${task.title}
         Description: ${task.description}
         Type: ${task.type}
         Priority: ${task.priority}
-
+    
         Provide a detailed analysis of what needs to be done.
         `;
 
@@ -309,7 +345,11 @@ FASE 8: Testes e Garantia de Qualidade
         return `Analysis for task: ${task.title}`;
       }
 
-      private async planExecution(task: Task, analysis: string, agentConfig: any): Promise<any> {
+      private async planExecution(
+        task: Task,
+        analysis: string,
+        agentConfig: any,
+      ): Promise<any> {
         // Lógica de planejamento
         return { steps: [] };
       }
@@ -327,13 +367,13 @@ FASE 8: Testes e Garantia de Qualidade
             // Enviar mensagem para o main process via parentPort
             return new Promise((resolve, reject) => {
               const id = Math.random().toString(36);
-              parentPort?.postMessage({ 
-                type: 'tool_call', 
-                tool: 'readFile', 
-                args: { path }, 
-                id 
+              parentPort?.postMessage({
+                type: "tool_call",
+                tool: "readFile",
+                args: { path },
+                id,
               });
-              
+
               // Aguardar resposta (implementar sistema de callbacks)
             });
           },
@@ -343,12 +383,12 @@ FASE 8: Testes e Garantia de Qualidade
           },
           executeShell: async (command: string, args: string[]) => {
             // Similar implementação
-            return { stdout: '', stderr: '', exitCode: 0 };
+            return { stdout: "", stderr: "", exitCode: 0 };
           },
           listDirectory: async (path: string) => {
             // Similar implementação
             return [];
-          }
+          },
         };
       }
 
@@ -360,52 +400,55 @@ FASE 8: Testes e Garantia de Qualidade
     // Ponto de entrada do worker
     async function main() {
       if (!workerData) {
-        throw new Error('Worker data not provided');
+        throw new Error("Worker data not provided");
       }
 
       const worker = new AgentWorker(workerData as WorkerData);
       await worker.executeTask();
     }
 
-    main().catch(error => {
-      parentPort?.postMessage({ 
-        type: 'error', 
-        data: { error: error.message, stack: error.stack } 
+    main().catch((error) => {
+      parentPort?.postMessage({
+        type: "error",
+        data: { error: error.message, stack: error.stack },
       });
       process.exit(1);
     });
     ```
+
   - **Verificação**: ✅ Worker pode ser iniciado e se comunica com main process
 
 #### **1.2.3 Implementar Agent Runtime Manager**
+
 - [x] **Criar gerenciador de runtime dos agentes**
   - **Arquivo**: `src/main/kernel/agent-runtime/agent-runtime.manager.ts`
   - **Implementação**:
+
     ```typescript
-    import { Worker } from 'worker_threads';
-    import path from 'path';
-    import { EventBus } from '../event-bus';
-    import { TaskQueueService } from '../../modules/task-management/application/services/task-queue.service';
-    import { Task } from '../../modules/task-management/domain/entities/task.entity';
-    import logger from '../../logger';
+    import { Worker } from "worker_threads";
+    import path from "path";
+    import { EventBus } from "../event-bus";
+    import { TaskQueueService } from "../../modules/task-management/application/services/task-queue.service";
+    import { Task } from "../../modules/task-management/domain/entities/task.entity";
+    import logger from "../../logger";
 
     interface ActiveAgent {
       workerId: string;
       agentId: string;
       worker: Worker;
       currentTask?: Task;
-      status: 'idle' | 'working' | 'paused' | 'error';
+      status: "idle" | "working" | "paused" | "error";
       startedAt: Date;
     }
 
     export class AgentRuntimeManager {
       private activeAgents = new Map<string, ActiveAgent>();
-      private workerPath = path.join(__dirname, 'agent.worker.js');
+      private workerPath = path.join(__dirname, "agent.worker.js");
       private taskCheckInterval: NodeJS.Timeout | null = null;
 
       constructor(
         private readonly eventBus: EventBus,
-        private readonly taskQueueService: TaskQueueService
+        private readonly taskQueueService: TaskQueueService,
       ) {
         this.setupEventListeners();
       }
@@ -416,14 +459,14 @@ FASE 8: Testes e Garantia de Qualidade
         }
 
         const workerId = `${agentId}-${Date.now()}`;
-        
-        logger.info('Starting agent', { agentId, workerId });
+
+        logger.info("Starting agent", { agentId, workerId });
 
         const activeAgent: ActiveAgent = {
           workerId,
           agentId,
           worker: null as any, // será definido abaixo
-          status: 'idle',
+          status: "idle",
           startedAt: new Date(),
         };
 
@@ -434,7 +477,7 @@ FASE 8: Testes e Garantia de Qualidade
           this.startTaskCheckLoop();
         }
 
-        this.eventBus.publish('agent.started', { agentId, workerId });
+        this.eventBus.publish("agent.started", { agentId, workerId });
       }
 
       async stopAgent(agentId: string): Promise<void> {
@@ -443,21 +486,21 @@ FASE 8: Testes e Garantia de Qualidade
           throw new Error(`Agent ${agentId} is not running`);
         }
 
-        logger.info('Stopping agent', { agentId });
+        logger.info("Stopping agent", { agentId });
 
         if (activeAgent.worker) {
           await activeAgent.worker.terminate();
         }
 
         this.activeAgents.delete(agentId);
-        
+
         // Parar o loop se não há agentes ativos
         if (this.activeAgents.size === 0 && this.taskCheckInterval) {
           clearInterval(this.taskCheckInterval);
           this.taskCheckInterval = null;
         }
 
-        this.eventBus.publish('agent.stopped', { agentId });
+        this.eventBus.publish("agent.stopped", { agentId });
       }
 
       async assignTaskToAgent(agentId: string, task: Task): Promise<void> {
@@ -466,23 +509,28 @@ FASE 8: Testes e Garantia de Qualidade
           throw new Error(`Agent ${agentId} is not running`);
         }
 
-        if (activeAgent.status !== 'idle') {
-          throw new Error(`Agent ${agentId} is not available (status: ${activeAgent.status})`);
+        if (activeAgent.status !== "idle") {
+          throw new Error(
+            `Agent ${agentId} is not available (status: ${activeAgent.status})`,
+          );
         }
 
         await this.executeTaskInWorker(activeAgent, task);
       }
 
-      private async executeTaskInWorker(activeAgent: ActiveAgent, task: Task): Promise<void> {
+      private async executeTaskInWorker(
+        activeAgent: ActiveAgent,
+        task: Task,
+      ): Promise<void> {
         const workerData = {
           agentId: activeAgent.agentId,
           agentConfig: {
             // Buscar config do agente do banco
-            name: 'Agent',
-            role: 'developer',
-            systemPrompt: 'You are a helpful development assistant.',
-            llmModel: 'gpt-4',
-            capabilities: ['filesystem', 'shell', 'git'],
+            name: "Agent",
+            role: "developer",
+            systemPrompt: "You are a helpful development assistant.",
+            llmModel: "gpt-4",
+            capabilities: ["filesystem", "shell", "git"],
           },
           task: {
             id: task.id,
@@ -491,131 +539,140 @@ FASE 8: Testes e Garantia de Qualidade
             type: task.type,
             priority: task.priority,
           },
-          projectPath: '/project/path', // Buscar do banco
-          worktreePath: '/worktree/path', // Criar worktree
+          projectPath: "/project/path", // Buscar do banco
+          worktreePath: "/worktree/path", // Criar worktree
         };
 
         const worker = new Worker(this.workerPath, { workerData });
 
         activeAgent.worker = worker;
         activeAgent.currentTask = task;
-        activeAgent.status = 'working';
+        activeAgent.status = "working";
 
-        worker.on('message', (message) => {
+        worker.on("message", (message) => {
           this.handleWorkerMessage(activeAgent, message);
         });
 
-        worker.on('error', (error) => {
+        worker.on("error", (error) => {
           this.handleWorkerError(activeAgent, error);
         });
 
-        worker.on('exit', (code) => {
+        worker.on("exit", (code) => {
           this.handleWorkerExit(activeAgent, code);
         });
 
-        logger.info('Task assigned to agent worker', { 
-          agentId: activeAgent.agentId, 
-          taskId: task.id 
+        logger.info("Task assigned to agent worker", {
+          agentId: activeAgent.agentId,
+          taskId: task.id,
         });
       }
 
-      private handleWorkerMessage(activeAgent: ActiveAgent, message: any): void {
+      private handleWorkerMessage(
+        activeAgent: ActiveAgent,
+        message: any,
+      ): void {
         const { type, data } = message;
 
         switch (type) {
-          case 'status':
+          case "status":
             this.handleStatusUpdate(activeAgent, data);
             break;
-          case 'progress':
+          case "progress":
             this.handleProgressUpdate(activeAgent, data);
             break;
-          case 'tool_call':
+          case "tool_call":
             this.handleToolCall(activeAgent, message);
             break;
-          case 'error':
+          case "error":
             this.handleWorkerError(activeAgent, new Error(data.error));
             break;
           default:
-            logger.warn('Unknown worker message type', { type, agentId: activeAgent.agentId });
+            logger.warn("Unknown worker message type", {
+              type,
+              agentId: activeAgent.agentId,
+            });
         }
       }
 
       private handleStatusUpdate(activeAgent: ActiveAgent, data: any): void {
         const { status, taskId, result } = data;
 
-        if (status === 'completed') {
+        if (status === "completed") {
           this.taskQueueService.completeTask(taskId);
-          activeAgent.status = 'idle';
+          activeAgent.status = "idle";
           activeAgent.currentTask = undefined;
-          
-          this.eventBus.publish('agent.task_completed', {
+
+          this.eventBus.publish("agent.task_completed", {
             agentId: activeAgent.agentId,
             taskId,
             result,
           });
         }
 
-        logger.info('Agent status update', { 
-          agentId: activeAgent.agentId, 
-          status, 
-          taskId 
+        logger.info("Agent status update", {
+          agentId: activeAgent.agentId,
+          status,
+          taskId,
         });
       }
 
       private handleProgressUpdate(activeAgent: ActiveAgent, data: any): void {
         const { taskId, progress, message } = data;
 
-        this.eventBus.publish('agent.progress', {
+        this.eventBus.publish("agent.progress", {
           agentId: activeAgent.agentId,
           taskId,
           progress,
           message,
         });
 
-        logger.debug('Agent progress update', { 
-          agentId: activeAgent.agentId, 
-          taskId, 
+        logger.debug("Agent progress update", {
+          agentId: activeAgent.agentId,
+          taskId,
           progress,
-          message 
+          message,
         });
       }
 
       private handleToolCall(activeAgent: ActiveAgent, message: any): void {
         // Implementar chamadas de ferramentas (filesystem, shell, etc.)
         // Por agora, apenas log
-        logger.debug('Agent tool call', { 
-          agentId: activeAgent.agentId, 
+        logger.debug("Agent tool call", {
+          agentId: activeAgent.agentId,
           tool: message.tool,
-          args: message.args 
+          args: message.args,
         });
       }
 
       private handleWorkerError(activeAgent: ActiveAgent, error: Error): void {
-        logger.error('Agent worker error', { 
-          agentId: activeAgent.agentId, 
+        logger.error("Agent worker error", {
+          agentId: activeAgent.agentId,
           error: error.message,
-          stack: error.stack 
+          stack: error.stack,
         });
 
-        activeAgent.status = 'error';
-        
+        activeAgent.status = "error";
+
         if (activeAgent.currentTask) {
-          this.taskQueueService.failTask(activeAgent.currentTask.id, error.message);
+          this.taskQueueService.failTask(
+            activeAgent.currentTask.id,
+            error.message,
+          );
         }
 
-        this.eventBus.publish('agent.error', {
+        this.eventBus.publish("agent.error", {
           agentId: activeAgent.agentId,
           error: error.message,
         });
       }
 
       private handleWorkerExit(activeAgent: ActiveAgent, code: number): void {
-        logger.info('Agent worker exited', { 
-          agentId: activeAgent.agentId, 
-          exitCode: code 
+        logger.info("Agent worker exited", {
+          agentId: activeAgent.agentId,
+          exitCode: code,
         });
 
-        activeAgent.status = 'idle';
+        activeAgent.status = "idle";
         activeAgent.currentTask = undefined;
         activeAgent.worker = null as any;
       }
@@ -625,21 +682,22 @@ FASE 8: Testes e Garantia de Qualidade
           await this.checkForNewTasks();
         }, 5000); // Verificar a cada 5 segundos
 
-        logger.info('Task check loop started');
+        logger.info("Task check loop started");
       }
 
       private async checkForNewTasks(): Promise<void> {
         for (const [agentId, activeAgent] of this.activeAgents) {
-          if (activeAgent.status === 'idle') {
-            const nextTask = await this.taskQueueService.dequeueNextTask(agentId);
+          if (activeAgent.status === "idle") {
+            const nextTask =
+              await this.taskQueueService.dequeueNextTask(agentId);
             if (nextTask) {
               try {
                 await this.assignTaskToAgent(agentId, nextTask);
               } catch (error) {
-                logger.error('Failed to assign task to agent', { 
-                  agentId, 
-                  taskId: nextTask.id, 
-                  error: error.message 
+                logger.error("Failed to assign task to agent", {
+                  agentId,
+                  taskId: nextTask.id,
+                  error: error.message,
                 });
               }
             }
@@ -648,7 +706,7 @@ FASE 8: Testes e Garantia de Qualidade
       }
 
       private setupEventListeners(): void {
-        this.eventBus.subscribe('task.enqueued', (data) => {
+        this.eventBus.subscribe("task.enqueued", (data) => {
           // Verificar se há agentes idle e processar imediatamente
           this.checkForNewTasks();
         });
@@ -664,11 +722,13 @@ FASE 8: Testes e Garantia de Qualidade
       }
     }
     ```
+
   - **Verificação**: ✅ Manager gerencia workers corretamente e processa tarefas
 
 ### **1.3 ✅ Sistema de Comunicação em Tempo Real**
 
 #### **1.3.1 Criar Módulo de Comunicação**
+
 - [x] **Criar estrutura do módulo**
   - **Localização**: `src/main/modules/communication/`
   - **Estrutura necessária**:
@@ -687,56 +747,69 @@ FASE 8: Testes e Garantia de Qualidade
   - **Verificação**: ✅ Estrutura criada corretamente
 
 #### **1.3.2 Definir Schema de Channels e Messages**
+
 - [x] **Criar schema de comunicação**
   - **Arquivo**: `src/main/modules/communication/persistence/schema.ts`
   - **Implementação**:
+
     ```typescript
-    import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-    import { projects } from '../../project-management/persistence/schema';
+    import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+    import { projects } from "../../project-management/persistence/schema";
 
-    export const channels = sqliteTable('channels', {
-      id: text('id').primaryKey(),
-      projectId: text('project_id').notNull().references(() => projects.id),
-      name: text('name').notNull(), // 'general', 'development', 'qa', etc.
-      type: text('type').notNull(), // 'text', 'direct_message'
-      description: text('description'),
-      isDefault: integer('is_default').notNull().default(0), // canal padrão do projeto
-      createdAt: integer('created_at').notNull(),
-      updatedAt: integer('updated_at').notNull(),
+    export const channels = sqliteTable("channels", {
+      id: text("id").primaryKey(),
+      projectId: text("project_id")
+        .notNull()
+        .references(() => projects.id),
+      name: text("name").notNull(), // 'general', 'development', 'qa', etc.
+      type: text("type").notNull(), // 'text', 'direct_message'
+      description: text("description"),
+      isDefault: integer("is_default").notNull().default(0), // canal padrão do projeto
+      createdAt: integer("created_at").notNull(),
+      updatedAt: integer("updated_at").notNull(),
     });
 
-    export const messages = sqliteTable('messages', {
-      id: text('id').primaryKey(),
-      channelId: text('channel_id').notNull().references(() => channels.id),
-      senderId: text('sender_id').notNull(), // pode ser user ou agent id
-      senderType: text('sender_type').notNull(), // 'user' ou 'agent'
-      content: text('content').notNull(),
-      messageType: text('message_type').notNull(), // 'text', 'task_update', 'file_share', 'system'
-      metadata: text('metadata'), // JSON para attachments, mentions, etc.
-      replyToMessageId: text('reply_to_message_id').references(() => messages.id),
-      timestamp: integer('timestamp').notNull(),
-      isRead: integer('is_read').notNull().default(0),
-      isEdited: integer('is_edited').notNull().default(0),
-      editedAt: integer('edited_at'),
+    export const messages = sqliteTable("messages", {
+      id: text("id").primaryKey(),
+      channelId: text("channel_id")
+        .notNull()
+        .references(() => channels.id),
+      senderId: text("sender_id").notNull(), // pode ser user ou agent id
+      senderType: text("sender_type").notNull(), // 'user' ou 'agent'
+      content: text("content").notNull(),
+      messageType: text("message_type").notNull(), // 'text', 'task_update', 'file_share', 'system'
+      metadata: text("metadata"), // JSON para attachments, mentions, etc.
+      replyToMessageId: text("reply_to_message_id").references(
+        () => messages.id,
+      ),
+      timestamp: integer("timestamp").notNull(),
+      isRead: integer("is_read").notNull().default(0),
+      isEdited: integer("is_edited").notNull().default(0),
+      editedAt: integer("edited_at"),
     });
 
-    export const messageMentions = sqliteTable('message_mentions', {
-      messageId: text('message_id').notNull().references(() => messages.id),
-      mentionedId: text('mentioned_id').notNull(), // user ou agent id
-      mentionedType: text('mentioned_type').notNull(), // 'user' ou 'agent'
-      createdAt: integer('created_at').notNull(),
+    export const messageMentions = sqliteTable("message_mentions", {
+      messageId: text("message_id")
+        .notNull()
+        .references(() => messages.id),
+      mentionedId: text("mentioned_id").notNull(), // user ou agent id
+      mentionedType: text("mentioned_type").notNull(), // 'user' ou 'agent'
+      createdAt: integer("created_at").notNull(),
     });
     ```
+
   - **Verificação**: ✅ Schema criado sem erros
 
 #### **1.3.3 Implementar Real-Time Events Service**
+
 - [x] **Criar serviço de eventos em tempo real**
   - **Arquivo**: `src/main/kernel/real-time-events.service.ts`
   - **Implementação**:
+
     ```typescript
-    import { webContents } from 'electron';
-    import { EventBus } from './event-bus';
-    import logger from '../logger';
+    import { webContents } from "electron";
+    import { EventBus } from "./event-bus";
+    import logger from "../logger";
 
     export class RealTimeEventsService {
       constructor(private readonly eventBus: EventBus) {
@@ -745,7 +818,7 @@ FASE 8: Testes e Garantia de Qualidade
 
       async broadcastToChannel(channelId: string, event: any): Promise<void> {
         const payload = {
-          type: 'channel_event',
+          type: "channel_event",
           channelId,
           event,
           timestamp: Date.now(),
@@ -754,16 +827,19 @@ FASE 8: Testes e Garantia de Qualidade
         // Enviar para todas as janelas abertas
         webContents.getAllWebContents().forEach((contents) => {
           if (!contents.isDestroyed()) {
-            contents.send('real-time-event', payload);
+            contents.send("real-time-event", payload);
           }
         });
 
-        logger.debug('Event broadcasted to channel', { channelId, eventType: event.type });
+        logger.debug("Event broadcasted to channel", {
+          channelId,
+          eventType: event.type,
+        });
       }
 
       async sendToUser(userId: string, event: any): Promise<void> {
         const payload = {
-          type: 'user_event',
+          type: "user_event",
           userId,
           event,
           timestamp: Date.now(),
@@ -771,27 +847,27 @@ FASE 8: Testes e Garantia de Qualidade
 
         webContents.getAllWebContents().forEach((contents) => {
           if (!contents.isDestroyed()) {
-            contents.send('real-time-event', payload);
+            contents.send("real-time-event", payload);
           }
         });
 
-        logger.debug('Event sent to user', { userId, eventType: event.type });
+        logger.debug("Event sent to user", { userId, eventType: event.type });
       }
 
       async notifyAgentProgress(agentId: string, progress: any): Promise<void> {
         const event = {
-          type: 'agent_progress',
+          type: "agent_progress",
           agentId,
           progress,
           timestamp: Date.now(),
         };
 
-        await this.broadcastToChannel('system', event);
+        await this.broadcastToChannel("system", event);
       }
 
       async notifyNewMessage(channelId: string, message: any): Promise<void> {
         const event = {
-          type: 'new_message',
+          type: "new_message",
           channelId,
           message,
           timestamp: Date.now(),
@@ -802,31 +878,32 @@ FASE 8: Testes e Garantia de Qualidade
 
       private setupEventListeners(): void {
         // Escutar eventos de agentes
-        this.eventBus.subscribe('agent.progress', async (data) => {
+        this.eventBus.subscribe("agent.progress", async (data) => {
           await this.notifyAgentProgress(data.agentId, data);
         });
 
-        this.eventBus.subscribe('agent.task_completed', async (data) => {
+        this.eventBus.subscribe("agent.task_completed", async (data) => {
           await this.notifyAgentProgress(data.agentId, {
-            type: 'task_completed',
+            type: "task_completed",
             taskId: data.taskId,
             result: data.result,
           });
         });
 
-        this.eventBus.subscribe('task.enqueued', async (data) => {
-          await this.broadcastToChannel('system', {
-            type: 'task_enqueued',
+        this.eventBus.subscribe("task.enqueued", async (data) => {
+          await this.broadcastToChannel("system", {
+            type: "task_enqueued",
             taskId: data.taskId,
             agentId: data.agentId,
           });
         });
 
         // Outros eventos...
-        logger.info('Real-time events service initialized');
+        logger.info("Real-time events service initialized");
       }
     }
     ```
+
   - **Verificação**: ✅ Eventos são enviados corretamente via IPC
 
 ---
@@ -834,6 +911,7 @@ FASE 8: Testes e Garantia de Qualidade
 ## **✅ RESUMO DA FASE 1 - IMPLEMENTAÇÃO CONCLUÍDA**
 
 ### **🎯 Objetivos Alcançados**
+
 - ✅ **Sistema de Filas de Tarefas**: Módulo completo com entidade Task, repository, e queue service
 - ✅ **Worker Threads para Agentes**: Agentes executam em isolamento com comunicação bidirecional
 - ✅ **Comunicação em Tempo Real**: EventBus + IPC para atualizações live na UI
@@ -841,6 +919,7 @@ FASE 8: Testes e Garantia de Qualidade
 - ✅ **Infraestrutura Robusta**: Logging, validação Zod, error handling, heartbeat monitoring
 
 ### **🏗️ Arquivos Implementados**
+
 - `src/main/modules/task-management/` - Módulo completo de gerenciamento de tarefas
 - `src/main/modules/communication/` - Módulo de comunicação em tempo real
 - `src/main/kernel/agent-runtime/agent.worker.ts` - Script do worker isolado
@@ -849,6 +928,7 @@ FASE 8: Testes e Garantia de Qualidade
 - Schema atualizado e migrações aplicadas
 
 ### **🚀 Funcionalidades Ativas**
+
 - Agentes podem receber e processar tarefas automaticamente
 - Sistema de priorização e dependências entre tarefas
 - Monitoramento em tempo real de progresso e status
@@ -858,21 +938,29 @@ FASE 8: Testes e Garantia de Qualidade
 ---
 
 ## **FASE 2: 🎮 INTERFACE ESTILO DISCORD**
-*Objetivo: Criar a interface de usuário que simula o Discord para comunicação com agentes*
+
+_Objetivo: Criar a interface de usuário que simula o Discord para comunicação com agentes_
 
 ### **2.1 🏗️ Layout Principal Estilo Discord**
 
 #### **2.1.1 Criar Componente Sidebar de Projetos**
+
 - [ ] **Implementar sidebar de projetos**
   - **Arquivo**: `src/renderer/components/layout/project-sidebar.tsx`
   - **Funcionalidade**: Lista de projetos (equivalente aos "servidores" do Discord)
   - **Implementação**:
+
     ```tsx
-    import { useState } from 'react';
-    import { cn } from '@/renderer/lib/utils';
-    import { Button } from '@/renderer/components/ui/button';
-    import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/renderer/components/ui/tooltip';
-    import { Plus, Settings, Folder } from 'lucide-react';
+    import { useState } from "react";
+    import { cn } from "@/renderer/lib/utils";
+    import { Button } from "@/renderer/components/ui/button";
+    import {
+      Tooltip,
+      TooltipContent,
+      TooltipProvider,
+      TooltipTrigger,
+    } from "@/renderer/components/ui/tooltip";
+    import { Plus, Settings, Folder } from "lucide-react";
 
     interface Project {
       id: string;
@@ -933,12 +1021,12 @@ FASE 8: Testes e Garantia de Qualidade
                         "w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all duration-200 relative",
                         selectedProjectId === project.id
                           ? "bg-brand-500 rounded-[16px]"
-                          : "bg-gray-700 hover:bg-gray-600"
+                          : "bg-gray-700 hover:bg-gray-600",
                       )}
                     >
                       {project.avatarUrl ? (
-                        <img 
-                          src={project.avatarUrl} 
+                        <img
+                          src={project.avatarUrl}
                           alt={project.name}
                           className="w-full h-full rounded-inherit"
                         />
@@ -947,7 +1035,7 @@ FASE 8: Testes e Garantia de Qualidade
                           {project.name.charAt(0).toUpperCase()}
                         </span>
                       )}
-                      
+
                       {/* Notification indicator */}
                       {project.hasNotifications && (
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-900" />
@@ -1008,37 +1096,44 @@ FASE 8: Testes e Garantia de Qualidade
       );
     }
     ```
+
   - **Verificação**: Sidebar renderiza projetos corretamente
 
 #### **2.1.2 Criar Componente de Channels**
+
 - [ ] **Implementar sidebar de canais**
   - **Arquivo**: `src/renderer/components/layout/channels-sidebar.tsx`
   - **Funcionalidade**: Lista de canais do projeto + agentes para DM
   - **Implementação**:
+
     ```tsx
-    import { useState } from 'react';
-    import { cn } from '@/renderer/lib/utils';
-    import { Button } from '@/renderer/components/ui/button';
-    import { Input } from '@/renderer/components/ui/input';
-    import { Avatar, AvatarFallback, AvatarImage } from '@/renderer/components/ui/avatar';
-    import { 
-      Hash, 
-      MessageCircle, 
-      ChevronDown, 
-      ChevronRight, 
+    import { useState } from "react";
+    import { cn } from "@/renderer/lib/utils";
+    import { Button } from "@/renderer/components/ui/button";
+    import { Input } from "@/renderer/components/ui/input";
+    import {
+      Avatar,
+      AvatarFallback,
+      AvatarImage,
+    } from "@/renderer/components/ui/avatar";
+    import {
+      Hash,
+      MessageCircle,
+      ChevronDown,
+      ChevronRight,
       Plus,
       Search,
       Volume2,
       VolumeX,
       Settings,
       UserPlus,
-      Circle
-    } from 'lucide-react';
+      Circle,
+    } from "lucide-react";
 
     interface Channel {
       id: string;
       name: string;
-      type: 'text' | 'voice';
+      type: "text" | "voice";
       hasNotifications?: boolean;
       mentionCount?: number;
     }
@@ -1046,7 +1141,7 @@ FASE 8: Testes e Garantia de Qualidade
     interface Agent {
       id: string;
       name: string;
-      status: 'online' | 'idle' | 'working' | 'offline';
+      status: "online" | "idle" | "working" | "offline";
       avatar?: string;
       currentTask?: string;
     }
@@ -1072,34 +1167,44 @@ FASE 8: Testes e Garantia de Qualidade
     }: ChannelsSidebarProps) {
       const [textChannelsCollapsed, setTextChannelsCollapsed] = useState(false);
       const [agentsCollapsed, setAgentsCollapsed] = useState(false);
-      const [searchQuery, setSearchQuery] = useState('');
+      const [searchQuery, setSearchQuery] = useState("");
 
-      const getStatusColor = (status: Agent['status']) => {
+      const getStatusColor = (status: Agent["status"]) => {
         switch (status) {
-          case 'online': return 'bg-green-500';
-          case 'idle': return 'bg-yellow-500';
-          case 'working': return 'bg-blue-500';
-          case 'offline': return 'bg-gray-500';
-          default: return 'bg-gray-500';
+          case "online":
+            return "bg-green-500";
+          case "idle":
+            return "bg-yellow-500";
+          case "working":
+            return "bg-blue-500";
+          case "offline":
+            return "bg-gray-500";
+          default:
+            return "bg-gray-500";
         }
       };
 
-      const getStatusText = (status: Agent['status']) => {
+      const getStatusText = (status: Agent["status"]) => {
         switch (status) {
-          case 'online': return 'Available';
-          case 'idle': return 'Idle';
-          case 'working': return 'Working';
-          case 'offline': return 'Offline';
-          default: return 'Unknown';
+          case "online":
+            return "Available";
+          case "idle":
+            return "Idle";
+          case "working":
+            return "Working";
+          case "offline":
+            return "Offline";
+          default:
+            return "Unknown";
         }
       };
 
-      const filteredChannels = channels.filter(channel =>
-        channel.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filteredChannels = channels.filter((channel) =>
+        channel.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
-      const filteredAgents = agents.filter(agent =>
-        agent.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filteredAgents = agents.filter((agent) =>
+        agent.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
       return (
@@ -1135,7 +1240,11 @@ FASE 8: Testes e Garantia de Qualidade
                 onClick={() => setTextChannelsCollapsed(!textChannelsCollapsed)}
                 className="w-full justify-start text-xs font-semibold text-gray-400 hover:text-gray-300 uppercase tracking-wide"
               >
-                {textChannelsCollapsed ? <ChevronRight className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
+                {textChannelsCollapsed ? (
+                  <ChevronRight className="h-3 w-3 mr-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 mr-1" />
+                )}
                 Text Channels
                 <Button
                   variant="ghost"
@@ -1160,7 +1269,8 @@ FASE 8: Testes e Garantia de Qualidade
                       onClick={() => onChannelSelect(channel.id)}
                       className={cn(
                         "w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700",
-                        selectedChannelId === channel.id && "bg-gray-700 text-white"
+                        selectedChannelId === channel.id &&
+                          "bg-gray-700 text-white",
                       )}
                     >
                       <Hash className="h-4 w-4 mr-2 text-gray-400" />
@@ -1169,7 +1279,9 @@ FASE 8: Testes e Garantia de Qualidade
                         <div className="ml-auto">
                           {channel.mentionCount ? (
                             <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
-                              {channel.mentionCount > 99 ? '99+' : channel.mentionCount}
+                              {channel.mentionCount > 99
+                                ? "99+"
+                                : channel.mentionCount}
                             </span>
                           ) : (
                             <div className="w-2 h-2 bg-red-500 rounded-full" />
@@ -1190,8 +1302,12 @@ FASE 8: Testes e Garantia de Qualidade
                 onClick={() => setAgentsCollapsed(!agentsCollapsed)}
                 className="w-full justify-start text-xs font-semibold text-gray-400 hover:text-gray-300 uppercase tracking-wide"
               >
-                {agentsCollapsed ? <ChevronRight className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
-                Agents ({agents.filter(a => a.status !== 'offline').length})
+                {agentsCollapsed ? (
+                  <ChevronRight className="h-3 w-3 mr-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 mr-1" />
+                )}
+                Agents ({agents.filter((a) => a.status !== "offline").length})
               </Button>
 
               {!agentsCollapsed && (
@@ -1211,14 +1327,18 @@ FASE 8: Testes e Garantia de Qualidade
                             {agent.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div className={cn(
-                          "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-800",
-                          getStatusColor(agent.status)
-                        )} />
+                        <div
+                          className={cn(
+                            "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-800",
+                            getStatusColor(agent.status),
+                          )}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center">
-                          <span className="truncate font-medium">{agent.name}</span>
+                          <span className="truncate font-medium">
+                            {agent.name}
+                          </span>
                           <span className="ml-2 text-xs text-gray-500">
                             {getStatusText(agent.status)}
                           </span>
@@ -1240,7 +1360,9 @@ FASE 8: Testes e Garantia de Qualidade
           <div className="p-2 border-t border-gray-700">
             <div className="flex items-center space-x-2">
               <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-brand-500 text-white">U</AvatarFallback>
+                <AvatarFallback className="bg-brand-500 text-white">
+                  U
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-white">User</div>
@@ -1260,17 +1382,20 @@ FASE 8: Testes e Garantia de Qualidade
       );
     }
     ```
+
   - **Verificação**: Sidebar de canais funciona com agentes e canais
 
 #### **2.1.3 Criar Layout Principal Discord**
+
 - [ ] **Implementar layout principal**
   - **Arquivo**: `src/renderer/components/layout/discord-layout.tsx`
   - **Funcionalidade**: Layout principal que combina todas as sidebars + área de chat
   - **Implementação**:
+
     ```tsx
-    import { ReactNode } from 'react';
-    import { ProjectSidebar } from './project-sidebar';
-    import { ChannelsSidebar } from './channels-sidebar';
+    import { ReactNode } from "react";
+    import { ProjectSidebar } from "./project-sidebar";
+    import { ChannelsSidebar } from "./channels-sidebar";
 
     interface DiscordLayoutProps {
       children: ReactNode;
@@ -1326,39 +1451,44 @@ FASE 8: Testes e Garantia de Qualidade
           />
 
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col min-w-0">
-            {children}
-          </div>
+          <div className="flex-1 flex flex-col min-w-0">{children}</div>
         </div>
       );
     }
     ```
+
   - **Verificação**: Layout principal funciona corretamente
 
 ### **2.2 💬 Sistema de Chat Avançado**
 
 #### **2.2.1 Criar Componente de Área de Chat**
+
 - [ ] **Implementar área principal de chat**
   - **Arquivo**: `src/renderer/components/chat/chat-area.tsx`
   - **Funcionalidade**: Área principal onde as mensagens são exibidas
   - **Implementação**:
+
     ```tsx
-    import { useEffect, useRef, useState } from 'react';
-    import { Button } from '@/renderer/components/ui/button';
-    import { Input } from '@/renderer/components/ui/input';
-    import { Avatar, AvatarFallback, AvatarImage } from '@/renderer/components/ui/avatar';
-    import { Badge } from '@/renderer/components/ui/badge';
-    import { MessageComponent } from './message-component';
-    import { MessageInput } from './message-input';
-    import { Hash, Users, Search, Inbox, Question, Pin } from 'lucide-react';
+    import { useEffect, useRef, useState } from "react";
+    import { Button } from "@/renderer/components/ui/button";
+    import { Input } from "@/renderer/components/ui/input";
+    import {
+      Avatar,
+      AvatarFallback,
+      AvatarImage,
+    } from "@/renderer/components/ui/avatar";
+    import { Badge } from "@/renderer/components/ui/badge";
+    import { MessageComponent } from "./message-component";
+    import { MessageInput } from "./message-input";
+    import { Hash, Users, Search, Inbox, Question, Pin } from "lucide-react";
 
     interface Message {
       id: string;
       content: string;
       senderId: string;
       senderName: string;
-      senderType: 'user' | 'agent';
-      messageType: 'text' | 'task_update' | 'system' | 'file_share';
+      senderType: "user" | "agent";
+      messageType: "text" | "task_update" | "system" | "file_share";
       timestamp: Date;
       isEdited?: boolean;
       replyTo?: string;
@@ -1369,7 +1499,7 @@ FASE 8: Testes e Garantia de Qualidade
 
     interface ChatAreaProps {
       channelName: string;
-      channelType: 'text' | 'direct_message';
+      channelType: "text" | "direct_message";
       channelDescription?: string;
       messages: Message[];
       onSendMessage: (content: string, mentions?: string[]) => void;
@@ -1394,7 +1524,7 @@ FASE 8: Testes e Garantia de Qualidade
       const [isNearBottom, setIsNearBottom] = useState(true);
 
       const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       };
 
       useEffect(() => {
@@ -1414,7 +1544,7 @@ FASE 8: Testes e Garantia de Qualidade
           {/* Channel Header */}
           <div className="h-12 px-4 flex items-center justify-between border-b border-gray-600 bg-gray-800 shadow-sm">
             <div className="flex items-center space-x-3">
-              {channelType === 'text' ? (
+              {channelType === "text" ? (
                 <Hash className="h-5 w-5 text-gray-400" />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-green-500" />
@@ -1448,7 +1578,7 @@ FASE 8: Testes e Garantia de Qualidade
           </div>
 
           {/* Messages Area */}
-          <div 
+          <div
             className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
             onScroll={handleScroll}
           >
@@ -1459,7 +1589,7 @@ FASE 8: Testes e Garantia de Qualidade
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mb-4">
-                  {channelType === 'text' ? (
+                  {channelType === "text" ? (
                     <Hash className="h-8 w-8 text-gray-400" />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-green-500" />
@@ -1469,10 +1599,11 @@ FASE 8: Testes e Garantia de Qualidade
                   Welcome to #{channelName}!
                 </h3>
                 <p className="text-gray-400 max-w-md">
-                  {channelType === 'text' 
-                    ? "This is the beginning of the #" + channelName + " channel."
-                    : "This is the beginning of your direct message history."
-                  }
+                  {channelType === "text"
+                    ? "This is the beginning of the #" +
+                      channelName +
+                      " channel."
+                    : "This is the beginning of your direct message history."}
                 </p>
               </div>
             ) : (
@@ -1485,7 +1616,7 @@ FASE 8: Testes e Garantia de Qualidade
                     onDelete={onDeleteMessage}
                   />
                 ))}
-                
+
                 {/* Typing Indicators */}
                 {typingUsers.length > 0 && (
                   <div className="flex items-center space-x-2 text-gray-400 text-sm">
@@ -1495,14 +1626,13 @@ FASE 8: Testes e Garantia de Qualidade
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150" />
                     </div>
                     <span>
-                      {typingUsers.length === 1 
+                      {typingUsers.length === 1
                         ? `${typingUsers[0]} is typing...`
-                        : `${typingUsers.slice(0, -1).join(', ')} and ${typingUsers[typingUsers.length - 1]} are typing...`
-                      }
+                        : `${typingUsers.slice(0, -1).join(", ")} and ${typingUsers[typingUsers.length - 1]} are typing...`}
                     </span>
                   </div>
                 )}
-                
+
                 <div ref={messagesEndRef} />
               </>
             )}
@@ -1520,39 +1650,46 @@ FASE 8: Testes e Garantia de Qualidade
       );
     }
     ```
+
   - **Verificação**: Área de chat renderiza mensagens corretamente
 
 #### **2.2.2 Criar Componente de Mensagem**
+
 - [ ] **Implementar componente individual de mensagem**
   - **Arquivo**: `src/renderer/components/chat/message-component.tsx`
   - **Funcionalidade**: Renderizar mensagem individual com diferentes tipos
   - **Implementação**:
+
     ```tsx
-    import { useState } from 'react';
-    import { format } from 'date-fns';
-    import { Avatar, AvatarFallback, AvatarImage } from '@/renderer/components/ui/avatar';
-    import { Button } from '@/renderer/components/ui/button';
-    import { Badge } from '@/renderer/components/ui/badge';
-    import { cn } from '@/renderer/lib/utils';
-    import { 
-      MoreHorizontal, 
-      Edit, 
-      Trash2, 
-      Reply, 
+    import { useState } from "react";
+    import { format } from "date-fns";
+    import {
+      Avatar,
+      AvatarFallback,
+      AvatarImage,
+    } from "@/renderer/components/ui/avatar";
+    import { Button } from "@/renderer/components/ui/button";
+    import { Badge } from "@/renderer/components/ui/badge";
+    import { cn } from "@/renderer/lib/utils";
+    import {
+      MoreHorizontal,
+      Edit,
+      Trash2,
+      Reply,
       Pin,
       Bot,
       CheckCircle,
       AlertCircle,
-      Info
-    } from 'lucide-react';
+      Info,
+    } from "lucide-react";
 
     interface Message {
       id: string;
       content: string;
       senderId: string;
       senderName: string;
-      senderType: 'user' | 'agent';
-      messageType: 'text' | 'task_update' | 'system' | 'file_share';
+      senderType: "user" | "agent";
+      messageType: "text" | "task_update" | "system" | "file_share";
       timestamp: Date;
       isEdited?: boolean;
       replyTo?: string;
@@ -1589,9 +1726,9 @@ FASE 8: Testes e Garantia de Qualidade
 
       const getMessageIcon = () => {
         switch (message.messageType) {
-          case 'task_update':
+          case "task_update":
             return <CheckCircle className="h-4 w-4 text-green-500" />;
-          case 'system':
+          case "system":
             return <Info className="h-4 w-4 text-blue-500" />;
           default:
             return null;
@@ -1599,14 +1736,18 @@ FASE 8: Testes e Garantia de Qualidade
       };
 
       const getMessageBadge = () => {
-        if (message.senderType === 'agent') {
-          return <Badge variant="secondary" className="ml-2 text-xs">BOT</Badge>;
+        if (message.senderType === "agent") {
+          return (
+            <Badge variant="secondary" className="ml-2 text-xs">
+              BOT
+            </Badge>
+          );
         }
         return null;
       };
 
       const renderMessageContent = () => {
-        if (message.messageType === 'task_update') {
+        if (message.messageType === "task_update") {
           const metadata = message.metadata;
           return (
             <div className="bg-gray-600 border-l-4 border-green-500 p-3 rounded-r">
@@ -1625,7 +1766,7 @@ FASE 8: Testes e Garantia de Qualidade
           );
         }
 
-        if (message.messageType === 'system') {
+        if (message.messageType === "system") {
           return (
             <div className="bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded-r">
               <div className="flex items-center space-x-2">
@@ -1639,16 +1780,16 @@ FASE 8: Testes e Garantia de Qualidade
         // Renderizar menções
         let content = message.content;
         if (message.mentions) {
-          message.mentions.forEach(mention => {
+          message.mentions.forEach((mention) => {
             content = content.replace(
-              new RegExp(`@${mention}`, 'g'),
-              `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`
+              new RegExp(`@${mention}`, "g"),
+              `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`,
             );
           });
         }
 
         return (
-          <div 
+          <div
             className="text-gray-300"
             dangerouslySetInnerHTML={{ __html: content }}
           />
@@ -1656,10 +1797,11 @@ FASE 8: Testes e Garantia de Qualidade
       };
 
       return (
-        <div 
+        <div
           className={cn(
             "group hover:bg-gray-600/30 p-2 rounded relative",
-            message.mentions?.includes('user') && "bg-yellow-500/10 border-l-2 border-yellow-500"
+            message.mentions?.includes("user") &&
+              "bg-yellow-500/10 border-l-2 border-yellow-500",
           )}
           onMouseEnter={() => setShowMenu(true)}
           onMouseLeave={() => setShowMenu(false)}
@@ -1667,12 +1809,23 @@ FASE 8: Testes e Garantia de Qualidade
           <div className="flex space-x-3">
             {/* Avatar */}
             <Avatar className="w-10 h-10 mt-1">
-              <AvatarImage src={message.senderType === 'agent' ? `/agents/${message.senderId}.png` : undefined} />
-              <AvatarFallback className={cn(
-                message.senderType === 'agent' ? 'bg-purple-500' : 'bg-brand-500'
-              )}>
-                {message.senderType === 'agent' && <Bot className="h-5 w-5" />}
-                {message.senderType === 'user' && message.senderName.charAt(0).toUpperCase()}
+              <AvatarImage
+                src={
+                  message.senderType === "agent"
+                    ? `/agents/${message.senderId}.png`
+                    : undefined
+                }
+              />
+              <AvatarFallback
+                className={cn(
+                  message.senderType === "agent"
+                    ? "bg-purple-500"
+                    : "bg-brand-500",
+                )}
+              >
+                {message.senderType === "agent" && <Bot className="h-5 w-5" />}
+                {message.senderType === "user" &&
+                  message.senderName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
@@ -1680,15 +1833,19 @@ FASE 8: Testes e Garantia de Qualidade
             <div className="flex-1 min-w-0">
               {/* Header */}
               <div className="flex items-center space-x-2 mb-1">
-                <span className={cn(
-                  "font-medium",
-                  message.senderType === 'agent' ? 'text-purple-300' : 'text-white'
-                )}>
+                <span
+                  className={cn(
+                    "font-medium",
+                    message.senderType === "agent"
+                      ? "text-purple-300"
+                      : "text-white",
+                  )}
+                >
                   {message.senderName}
                 </span>
                 {getMessageBadge()}
                 <span className="text-xs text-gray-500">
-                  {format(message.timestamp, 'HH:mm')}
+                  {format(message.timestamp, "HH:mm")}
                 </span>
                 {message.isEdited && (
                   <span className="text-xs text-gray-500">(edited)</span>
@@ -1706,8 +1863,14 @@ FASE 8: Testes e Garantia de Qualidade
                     rows={3}
                   />
                   <div className="flex space-x-2">
-                    <Button size="sm" onClick={handleEdit}>Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
+                    <Button size="sm" onClick={handleEdit}>
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setIsEditing(false)}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -1729,7 +1892,7 @@ FASE 8: Testes e Garantia de Qualidade
               >
                 <Reply className="h-4 w-4" />
               </Button>
-              {message.senderType === 'user' && (
+              {message.senderType === "user" && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1753,14 +1916,17 @@ FASE 8: Testes e Garantia de Qualidade
       );
     }
     ```
+
   - **Verificação**: Mensagens são renderizadas com tipos diferentes
 
 ---
 
 ## **FASE 3: 📋 SISTEMA DE ISSUES E SPRINTS**
-*Objetivo: Implementar metodologia Scrum integrada ao sistema*
+
+_Objetivo: Implementar metodologia Scrum integrada ao sistema_
 
 ### **3.1 Criar Módulo Issue Management**
+
 - [ ] **Criar estrutura e schema de issues**
   - **Localização**: `src/main/modules/issue-management/`
   - **Schema**: Tabelas `issues`, `sprints`, `sprint_issues`, `issue_dependencies`
@@ -1768,6 +1934,7 @@ FASE 8: Testes e Garantia de Qualidade
   - **Verificação**: Issues podem ser criadas e gerenciadas
 
 ### **3.2 Interface Kanban Board**
+
 - [ ] **Implementar Kanban Board**
   - **Arquivo**: `src/renderer/features/issue-management/components/kanban-board.tsx`
   - **Colunas**: Backlog, To Do, In Progress, Done
@@ -1777,9 +1944,11 @@ FASE 8: Testes e Garantia de Qualidade
 ---
 
 ## **FASE 4: 🔄 INTEGRAÇÃO AVANÇADA COM GIT**
-*Objetivo: Implementar sistema robusto de controle de versão com worktrees*
+
+_Objetivo: Implementar sistema robusto de controle de versão com worktrees_
 
 ### **4.1 Sistema Git Worktrees**
+
 - [ ] **Implementar GitWorktreeService**
   - **Arquivo**: `src/main/modules/git-integration/domain/git-worktree.service.ts`
   - **Funcionalidades**: Criar/remover worktrees, isolar agentes
@@ -1787,6 +1956,7 @@ FASE 8: Testes e Garantia de Qualidade
   - **Verificação**: Agentes trabalham em worktrees isolados
 
 ### **4.2 Code Review Automático**
+
 - [ ] **Implementar agente reviewer**
   - **Persona**: Code Reviewer Agent especializado
   - **Trigger**: Automático antes de merge para main
@@ -1795,15 +1965,11 @@ FASE 8: Testes e Garantia de Qualidade
 ---
 
 ## **FASE 5: 📚 SISTEMA DE DOCUMENTAÇÃO INTEGRADA**
-*Objetivo: Gerar e exibir documentação automaticamente*
 
-### **5.1 Documentation Agent**
-- [ ] **Implementar agente documentador**
-  - **Responsabilidades**: Gerar READMEs, docs de API, guias
-  - **Triggers**: Após conclusão de features, mudanças na API
-  - **Verificação**: Documentação é gerada automaticamente
+_Objetivo: exibir documentação do repositorio na interface renderizada com markdown estilo github_
 
-### **5.2 Visualizador de Documentação**
+### **5.1 Visualizador de Documentação**
+
 - [ ] **Criar visualizador**
   - **Arquivo**: `src/renderer/features/documentation/components/doc-viewer.tsx`
   - **Funcionalidades**: Renderização Markdown, navegação, pesquisa
@@ -1812,39 +1978,17 @@ FASE 8: Testes e Garantia de Qualidade
 ---
 
 ## **FASE 6: 🤖 AGENTE ASSISTENTE BUILT-IN**
-*Objetivo: Criar o agente assistente que ajuda o usuário*
+
+_Objetivo: Criar o agente assistente que ajuda o usuário_
 
 ### **6.1 User Assistant Agent**
+
 - [ ] **Implementar assistente**
   - **Nome**: "Assistant"
   - **Papel**: Ajudar usuário, onboarding, sugestões
   - **Disponibilidade**: Sempre disponível em todos os projetos
   - **Verificação**: Assistente responde e ajuda efetivamente
-
----
-
-## **FASE 7: 🔧 FERRAMENTAS PARA AGENTES**
-*Objetivo: Fornecer ferramentas robustas para agentes*
-
-### **7.1 Ferramentas Expandidas**
-- [ ] **Expandir FilesystemService e ShellService**
-  - **Filesystem**: Watch, symlinks, permissions
-  - **Shell**: Whitelist de comandos, sandboxing seguro
-  - **Verificação**: Agentes usam ferramentas com segurança
-
----
-
-## **FASE 8: ✅ TESTES E GARANTIA DE QUALIDADE**
-*Objetivo: Garantir robustez e confiabilidade*
-
-### **8.1 Testes Abrangentes**
-- [ ] **Implementar testes de integração**
-  - **Fluxos completos**: Projeto → Tarefa → Agente → Resultado
-  - **Worker threads**: Isolamento e comunicação
-  - **Recuperação**: Falhas e recuperação automática
-  - **Verificação**: `npm test` passa com cobertura >80%
-
----
+  - **Observação**: O agente deve ser executado usando worker_thread/utilityProcess do electron, ele deve ler a fila dele, ou seja, as mensagens envidas pelo usuário vão para fila e o worker que da vida ao agente obtem essa atividade processa e devolve o resultado concluindo a execução e a mensagem é retornada para o usuario na interface.
 
 ## **📊 RESUMO DE DEPENDÊNCIAS ENTRE FASES**
 
@@ -1854,29 +1998,27 @@ graph TD
     A --> C[FASE 3: Issues/Sprints]
     B --> D[FASE 4: Git Avançado]
     C --> D
-    D --> E[FASE 5: Documentação]
     A --> F[FASE 6: Assistente]
-    D --> G[FASE 7: Ferramentas]
-    E --> H[FASE 8: Testes]
-    F --> H
-    G --> H
 ```
 
-## **🎯 CRITÉRIOS DE ACEITAÇÃO POR FASE**
+## **🎯 CRITÉRIOS DE ACEITAÇÃO POR FASE: SÓ DEVE SER VALIDADO NO FINAL DEPOIS DE TODA REFATORAÇÃO TER SIDO CONCLUIDA**
 
-### **✅ Fase 1 - Fundação Completa (IMPLEMENTADA)**
-- ✅ Worker threads funcionam isoladamente
-- ✅ Filas de tarefas processam automaticamente
-- ✅ Eventos em tempo real funcionam
-- ✅ Agentes podem ser iniciados/parados
+### **✅ Fase 1 - Fundação Completa**
 
-### **Fase 2 - Interface Funcional (PRÓXIMA)**
+- [ ] Worker threads funcionam isoladamente
+- [ ] Filas de tarefas processam automaticamente
+- [ ] Eventos em tempo real funcionam
+- [ ] Agentes podem ser iniciados/parados
+
+### **Fase 2 - Interface Funcional**
+
 - [ ] Layout Discord renderiza corretamente
 - [ ] Chat em tempo real funciona
 - [ ] Mensagens de agentes aparecem
 - [ ] Interface é responsiva
 
-### **Fases 3-8 - Funcionalidades Completas (PENDENTES)**
+### **Fases 3-8 - Funcionalidades Completas**
+
 - [ ] Cada fase entrega valor funcional
 - [ ] Integração com fases anteriores
 - [ ] Testes passando
@@ -1912,7 +2054,8 @@ npm run build
 
 ### **Próximos Passos Recomendados:**
 
-1. **Testar infraestrutura existente**: 
+1. **Testar infraestrutura existente**:
+
    ```bash
    npm run dev
    npm run type-check
@@ -1921,7 +2064,7 @@ npm run build
 
 2. **Iniciar Fase 2**: Interface estilo Discord
    - Começar com `src/renderer/components/layout/project-sidebar.tsx`
-   - Implementar `discord-layout.tsx` 
+   - Implementar `discord-layout.tsx`
    - Criar componentes de chat em tempo real
 
 3. **Conectar Backend com Frontend**:
@@ -1937,7 +2080,7 @@ npm run build
 ## **💡 CONSIDERAÇÕES IMPORTANTES**
 
 - **Reutilização**: Aproveitar máximo da estrutura existente
-- **Qualidade**: Não comprometer qualidade por velocidade  
+- **Qualidade**: Não comprometer qualidade por velocidade
 - **Testes**: Implementar testes junto com funcionalidades
 - **Segurança**: Validar todas as operações de agentes
 - **Performance**: Monitorar uso de recursos dos workers
