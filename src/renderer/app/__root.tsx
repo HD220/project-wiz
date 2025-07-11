@@ -8,6 +8,7 @@ import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
 import { ProjectSidebar } from "@/renderer/components/layout/project-sidebar";
 import { mockProjects } from "@/renderer/lib/placeholders";
 
+
 export const Route = createRootRoute({
   component: RootComponent,
 });
@@ -29,6 +30,14 @@ function RootComponent() {
 
   let currentSelectedProjectId: string | undefined = undefined;
   const pathParts = location.pathname.split('/');
+  if (pathParts.length > 2 && pathParts[1] === 'project') {
+    currentSelectedProjectId = pathParts[2];
+  }
+
+  // Determine selectedProjectId from URL for visual indication on ProjectSidebar
+  let currentSelectedProjectId: string | undefined = undefined;
+  const pathParts = location.pathname.split('/');
+  // Example path: /project/project-id-123/chat -> pathParts = ["", "project", "project-id-123", "chat"]
   if (pathParts.length > 2 && pathParts[1] === 'project') {
     currentSelectedProjectId = pathParts[2];
   }
