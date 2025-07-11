@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeHighlight from 'rehype-highlight';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -215,13 +217,29 @@ function MessageItem({ message }: MessageItemProps) {
               {message.content}
             </div>
           ) : (
-            <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-              >
-                {message.content}
-              </ReactMarkdown>
-            </div>
+            (() => {
+              let contentWithMentions = message.content;
+              if (message.mentions && Array.isArray(message.mentions)) {
+                message.mentions.forEach((mention) => {
+                  if (mention.name) {
+                    contentWithMentions = contentWithMentions.replace(
+                      new RegExp(`@${mention.name}`, "g"),
+                      `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention.name}</span>`,
+                    );
+                  }
+                });
+              }
+              return (
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                    // eslint-disable-next-line react/no-children-prop
+                    children={contentWithMentions}
+                  />
+                </div>
+              );
+            })()
           )}
         </div>
 

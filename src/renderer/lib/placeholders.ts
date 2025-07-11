@@ -305,7 +305,7 @@ export const mockMessages: Message[] = [
     id: "msg-3",
     content:
       "Claro! Vou analisar o componente de checkout. Aqui está o que encontrei:\n\n```typescript\n// Problemas identificados:\n1. Falta validação de entrada\n2. Sem tratamento de erro\n3. Estado não está sendo gerenciado corretamente\n\n// Sugestão de melhoria:\nconst CheckoutForm = () => {\n  const [isLoading, setIsLoading] = useState(false);\n  // ... resto do código\n};\n```",
-    type: "code",
+    type: "text",
     authorId: "agent-2",
     authorName: "Code Reviewer",
     authorAvatar: "👨‍💻",
