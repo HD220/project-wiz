@@ -25,11 +25,11 @@ import {
   TestTube,
 } from "lucide-react";
 
-export const Route = createFileRoute("/settings")({
-  component: SettingsComponent,
+export const Route = createFileRoute("/user/settings/")({
+  component: UserSettingsPage,
 });
 
-function SettingsComponent() {
+export function UserSettingsPage() { // Renamed component
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
     // User Settings
