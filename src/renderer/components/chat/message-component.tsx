@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
 import { Button } from "@/ui/button";
 import { Badge } from "@/ui/badge";
@@ -70,6 +73,17 @@ export function MessageComponent({
   };
 
   const renderMessageContent = () => {
+    // Process mentions first
+    let contentWithMentions = message.content;
+    if (message.mentions) {
+      message.mentions.forEach((mention) => {
+        contentWithMentions = contentWithMentions.replace(
+          new RegExp(`@${mention}`, "g"),
+          `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`,
+        );
+      });
+    }
+
     if (message.messageType === "task_update") {
       const metadata = message.metadata;
       return (
@@ -78,7 +92,14 @@ export function MessageComponent({
             <CheckCircle className="h-4 w-4 text-green-500" />
             <span className="font-medium text-green-400">Task Update</span>
           </div>
-          <p className="text-gray-300">{message.content}</p>
+          <ReactMarkdown
+            className="text-gray-300 prose prose-sm prose-invert max-w-none"
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            // eslint-disable-next-line react/no-children-prop
+            children={contentWithMentions} // Use content with processed mentions
+          />
+          {/* <p className="text-gray-300">{message.content}</p> */}
           {metadata && (
             <div className="mt-2 text-sm text-gray-400">
               <div>Task: {metadata.taskTitle}</div>
@@ -94,27 +115,36 @@ export function MessageComponent({
         <div className="bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded-r">
           <div className="flex items-center space-x-2">
             <Info className="h-4 w-4 text-blue-500" />
-            <span className="text-blue-300">{message.content}</span>
+            <ReactMarkdown
+              className="text-blue-300 prose prose-sm prose-invert max-w-none"
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              // eslint-disable-next-line react/no-children-prop
+              children={message.content} // System messages likely don't have mentions
+            />
+            {/* <span className="text-blue-300">{message.content}</span> */}
           </div>
         </div>
       );
     }
 
-    // Renderizar menções
-    let content = message.content;
-    if (message.mentions) {
-      message.mentions.forEach((mention) => {
-        content = content.replace(
-          new RegExp(`@${mention}`, "g"),
-          `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`,
-        );
-      });
-    }
-
+    // For regular text messages
     return (
-      <div
-        className="text-gray-300"
-        dangerouslySetInnerHTML={{ __html: content }}
+      <ReactMarkdown
+        className="text-gray-300 prose prose-sm prose-invert max-w-none"
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        // eslint-disable-next-line react/no-children-prop
+        children={contentWithMentions}
+        // Components prop can be used to customize rendering of specific elements
+        // e.g., to handle mentions if they were parsed as a specific markdown element
+        components={
+          {
+            // Example: Customizing how links are rendered
+            // a: ({node, ...props}) => <a {...props} className="text-blue-400 hover:underline" />
+            // With rehypeRaw, the explicitly created span for mentions should be rendered.
+          }
+        }
       />
     );
   };
