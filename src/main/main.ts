@@ -1,156 +1,82 @@
-import path from "path";
+import path from 'node:path'
+import { app, BrowserWindow } from 'electron'
+import { LlmProviderService } from './modules/llm-provider/application/llm-provider.service'
+import { LlmProviderIpcHandlers } from './modules/llm-provider/ipc/handlers'
+import { LlmProviderRepository } from './modules/llm-provider/persistence/llm-provider.repository'
+import { LlmProviderMapper } from './modules/llm-provider/llm-provider.mapper'
+import { db } from './persistence/db'
 
-import { app, BrowserWindow, ipcMain } from "electron";
-import squirrelStartup from "electron-squirrel-startup";
+// The built directory structure
+//
+// ├─┬─┬ dist
+// │ │ └── main.js
+// │ │
+// │ ├─┬ dist-electron
+// │ │ ├── main.js
+// │ │ └── preload.js
+// │
+process.env.DIST = path.join(__dirname, '../dist')
+process.env.VITE_PUBLIC = app.isPackaged
+  ? process.env.DIST
+  : path.join(process.env.DIST, '../public')
 
-import { ProjectRepository } from "./modules/project-management/persistence/repository";
-import { ProjectService } from "./modules/project-management/services/project.service";
-import { ProjectMapper } from "./modules/project-management/mappers/project.mapper";
-import { ProjectIpcHandlers } from "./modules/project-management/ipc/handlers";
-import { ConversationService } from "./modules/direct-messages/services/conversation.service";
-import { MessageService } from "./modules/direct-messages/services/message.service";
-import { DirectMessageIpcHandlers } from "./modules/direct-messages/ipc/handlers";
-import { ChannelRepository } from "./modules/communication/persistence/repository";
-import { ChannelService } from "./modules/communication/application/channel.service";
-import { ChannelMapper } from "./modules/communication/channel.mapper";
-import { ChannelIpcHandlers } from "./modules/communication/ipc/handlers";
-import { ChannelMessageRepository } from "./modules/channel-messaging/persistence/repository";
-import { ChannelMessageService } from "./modules/channel-messaging/application/channel-message.service";
-import { ChannelMessageMapper } from "./modules/channel-messaging/channel-message.mapper";
-import { ChannelMessageIpcHandlers } from "./modules/channel-messaging/ipc/handlers";
-import { LlmProviderRepository } from "./modules/llm-provider/persistence/llm-provider.repository";
-import { LlmProviderService } from "./modules/llm-provider/application/llm-provider.service";
-import { LlmProviderMapper } from "./modules/llm-provider/llm-provider.mapper";
-import { LlmProviderIpcHandlers } from "./modules/llm-provider/ipc/handlers";
+let win: BrowserWindow | null
+// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
+const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
-declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
-declare const MAIN_WINDOW_VITE_NAME: string;
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  })
 
-if (squirrelStartup) {
-  app.quit();
+  // Test active push message to Renderer-process.
+  win.webContents.on('did-finish-load', () => {
+    win?.webContents.send('main-process-message', (new Date).toLocaleString())
+  })
+
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL)
+  } else {
+    // win.loadFile('dist/index.html')
+    win.loadFile(path.join(process.env.DIST, 'index.html'))
+  }
 }
 
-let mainWindow: BrowserWindow | null = null;
-
-const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    frame: false,
-    titleBarStyle: "hiddenInset",
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
-  } else {
-    mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
-    );
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+    win = null
   }
+})
 
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.webContents.openDevTools();
-  }
-
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
-};
-
-// Window control handlers
-ipcMain.handle("window-minimize", () => {
-  if (mainWindow) {
-    mainWindow.minimize();
-  }
-});
-
-ipcMain.handle("window-maximize", () => {
-  if (mainWindow) {
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize();
-    } else {
-      mainWindow.maximize();
-    }
-  }
-});
-
-ipcMain.handle("window-close", () => {
-  if (mainWindow) {
-    mainWindow.close();
-  }
-});
-
-ipcMain.handle("window-is-maximized", () => {
-  return mainWindow ? mainWindow.isMaximized() : false;
-});
-
-app.on("ready", async () => {
-  createWindow();
-
-  // Initialize project management module
-  const projectRepository = new ProjectRepository();
-  const projectService = new ProjectService(projectRepository);
-  const projectMapper = new ProjectMapper();
-  const projectIpcHandlers = new ProjectIpcHandlers(projectService, projectMapper);
-  
-  // Initialize direct messages module
-  const conversationService = new ConversationService();
-  const messageService = new MessageService();
-  const directMessageIpcHandlers = new DirectMessageIpcHandlers(
-    conversationService,
-    messageService
-  );
-  
-  // Initialize communication module (channels)
-  const channelRepository = new ChannelRepository();
-  const channelMapper = new ChannelMapper();
-  const channelService = new ChannelService(channelRepository, channelMapper);
-  const channelIpcHandlers = new ChannelIpcHandlers(channelService, channelMapper);
-  
-  // Initialize channel messaging module
-  const channelMessageRepository = new ChannelMessageRepository();
-  const channelMessageMapper = new ChannelMessageMapper();
-  const channelMessageService = new ChannelMessageService(channelMessageRepository, channelMessageMapper);
-  const channelMessageIpcHandlers = new ChannelMessageIpcHandlers(channelMessageService, channelMessageMapper);
-  
-  // Initialize LLM provider module
-  const llmProviderRepository = new LlmProviderRepository();
-  const llmProviderMapper = new LlmProviderMapper();
-  const llmProviderService = new LlmProviderService(llmProviderRepository, llmProviderMapper);
-  const llmProviderIpcHandlers = new LlmProviderIpcHandlers(llmProviderService, llmProviderMapper);
-
-  // Register handlers
-  projectIpcHandlers.registerHandlers();
-  directMessageIpcHandlers.registerHandlers();
-  channelIpcHandlers.registerHandlers();
-  channelMessageIpcHandlers.registerHandlers();
-  llmProviderIpcHandlers.registerHandlers();
-});
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-app.on("activate", () => {
+app.on('activate', () => {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    createWindow()
   }
-});
+})
 
-app.on("will-quit", () => {});
+app.whenReady().then(() => {
+  const llmProviderRepository = new LlmProviderRepository(db)
+  const llmProviderMapper = new LlmProviderMapper()
+  const llmProviderService = new LlmProviderService(
+    llmProviderRepository,
+    llmProviderMapper,
+  )
+  const llmProviderIpcHandlers = new LlmProviderIpcHandlers(
+    llmProviderService,
+    llmProviderMapper,
+  )
 
-ipcMain.handle("app:is-dev", () => {
-  return (
-    process.env.NODE_ENV === "development" ||
-    !!process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL
-  );
-});
+  llmProviderService.registerProviders()
+  llmProviderIpcHandlers.registerHandlers()
 
-console.log("[Main Process] Main process script loaded.");
+  createWindow()
+})

@@ -6,12 +6,25 @@ import type {
   UpdateLlmProviderDto,
   LlmProviderFilterDto
 } from "../../../shared/types/llm-provider.types";
+import { PROVIDER_REGISTRY } from '../provider-registry';
 
 export class LlmProviderService {
   constructor(
     private repository: LlmProviderRepository,
     private mapper: LlmProviderMapper,
   ) {}
+
+  async registerProviders(): Promise<void> {
+    for (const [name, providerData] of PROVIDER_REGISTRY.entries()) {
+      const existing = await this.repository.findMany({ name });
+      if (existing.length === 0) {
+        await this.repository.save({
+          ...providerData,
+          apiKey: '',
+        } as CreateLlmProviderDto);
+      }
+    }
+  }
 
   async createLlmProvider(data: CreateLlmProviderDto): Promise<LlmProvider> {
     if (!LlmProvider.validateName(data.name)) {
