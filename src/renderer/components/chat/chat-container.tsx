@@ -5,11 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Hash, Send, Paperclip, Smile, AtSign } from "lucide-react";
-import {
-  Message,
-  mockMessages,
-  getMessagesByChannel,
-} from "@/lib/placeholders";
+import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/page-title";
 import { MessageItem } from "./message-item";
@@ -31,12 +27,8 @@ export function ChatContainer({
 }: ChatContainerProps) {
   const [message, setMessage] = useState("");
 
-  // Get messages based on channel or agent
-  const messages = channelId
-    ? getMessagesByChannel(channelId)
-    : mockMessages.filter(
-        (m) => m.authorId === agentId || m.channelId === "dm-" + agentId,
-      );
+  // Channel messages will be implemented later with proper backend integration
+  const messages: Message[] = [];
 
   const handleSend = () => {
     if (!message.trim()) return;

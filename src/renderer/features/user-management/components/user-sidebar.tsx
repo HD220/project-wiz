@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { CustomLink } from "@/components/custom-link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,63 +24,17 @@ import { NewConversationModal } from "../../direct-messages/components/new-conve
 import type { ConversationDto } from "../../../../shared/types/message.types";
 
 interface UserSidebarProps {
-  agents: Agent[];
-  onAgentDMSelect: (agentId: string) => void;
-  onSettings: () => void;
-  selectedConversationId?: string;
+  // No more props drilling needed!
 }
 
-export function UserSidebar({
-  agents,
-  onAgentDMSelect,
-  onSettings,
-  selectedConversationId,
-}: UserSidebarProps) {
+export function UserSidebar({}: UserSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const getStatusColor = (status: Agent["status"]) => {
-    switch (status) {
-      case "online":
-        return "bg-green-500";
-      case "away":
-        return "bg-yellow-500";
-      case "busy":
-        return "bg-red-500";
-      case "executing":
-        return "bg-blue-500";
-      case "offline":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
-  const filteredAgents = agents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const onlineAgents = filteredAgents.filter((a) => a.status !== "offline");
-  const offlineAgents = filteredAgents.filter((a) => a.status === "offline");
-
-  const handleConversationSelect = (conversation: ConversationDto) => {
-    navigate({ to: `/conversation/${conversation.id}` });
-  };
 
   const handleNewConversation = () => {
     setShowNewConversationModal(true);
   };
 
-  const handleConversationCreated = (conversationId: string) => {
-    navigate({ to: `/conversation/${conversationId}` });
-  };
-
-  // Extract conversationId from current path
-  const currentConversationId = location.pathname.includes('/conversation/') 
-    ? location.pathname.split('/conversation/')[1] 
-    : undefined;
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
@@ -113,24 +66,27 @@ export function UserSidebar({
         <div className="p-2 space-y-1">
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
-            <Button
-              variant={location.pathname === "/" ? "secondary" : "ghost"}
+            <CustomLink
+              to="/"
               className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
+              activeOptions={{ exact: true }}
+              activeProps={{ 
+                className: "bg-secondary text-secondary-foreground" 
+              }}
             >
-              <Link to="/">
-                <Home className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Dashboard</span>
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
+              <Home className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>Dashboard</span>
+            </CustomLink>
+            <CustomLink
+              to="/settings"
               className="w-full justify-start px-2 py-1.5 h-auto"
-              onClick={onSettings}
+              activeProps={{ 
+                className: "bg-secondary text-secondary-foreground" 
+              }}
             >
               <Settings className="w-4 h-4 mr-2 text-muted-foreground" />
               <span>Configurações</span>
-            </Button>
+            </CustomLink>
           </div>
 
           {/* Direct Messages */}
@@ -158,10 +114,7 @@ export function UserSidebar({
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-1">
-              <ConversationList
-                selectedConversationId={currentConversationId}
-                onConversationSelect={handleConversationSelect}
-              />
+              <ConversationList />
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -174,7 +127,6 @@ export function UserSidebar({
       <NewConversationModal
         open={showNewConversationModal}
         onOpenChange={setShowNewConversationModal}
-        onConversationCreated={handleConversationCreated}
       />
     </div>
   );

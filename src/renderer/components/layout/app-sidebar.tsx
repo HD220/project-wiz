@@ -10,17 +10,11 @@ import { Plus, Settings, Folder } from "lucide-react";
 import { ProjectSidebar } from "@/features/project-management/components/project-sidebar";
 
 interface AppSidebarProps {
-  selectedProjectId?: string;
-  onProjectSelect: (projectId: string) => void;
-  onCreateProject: () => void;
-  onSettings: () => void;
+  onCreateProject: () => void; // Keep this as it opens a modal
 }
 
 export function AppSidebar({
-  selectedProjectId,
-  onProjectSelect,
   onCreateProject,
-  onSettings,
 }: AppSidebarProps) {
   return (
     <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2 h-full flex-shrink-0">
@@ -50,10 +44,7 @@ export function AppSidebar({
 
       {/* Project List */}
       <div className="flex-1 overflow-hidden">
-        <ProjectSidebar
-          selectedProjectId={selectedProjectId}
-          onProjectSelect={onProjectSelect}
-        />
+        <ProjectSidebar />
       </div>
 
       {/* Add Project Button */}
@@ -82,10 +73,12 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={onSettings}
               className="w-12 h-12 rounded-2xl bg-muted hover:bg-muted/80 hover:rounded-xl transition-all duration-200"
+              asChild
             >
-              <Settings className="h-5 w-5 text-muted-foreground" />
+              <Link to="/settings">
+                <Settings className="h-5 w-5 text-muted-foreground" />
+              </Link>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">

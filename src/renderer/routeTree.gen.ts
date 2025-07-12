@@ -23,6 +23,8 @@ import { Route as ProjectProjectIdFilesIndexRouteImport } from './app/project/$p
 import { Route as ProjectProjectIdDocsIndexRouteImport } from './app/project/$projectId/docs/index'
 import { Route as ProjectProjectIdChatIndexRouteImport } from './app/project/$projectId/chat/index'
 import { Route as ProjectProjectIdAgentsIndexRouteImport } from './app/project/$projectId/agents/index'
+import { Route as ProjectProjectIdChatChannelIdRouteImport } from './app/project/$projectId/chat/$channelId'
+import { Route as ProjectProjectIdAgentAgentIdRouteImport } from './app/project/$projectId/agent/$agentId'
 
 const ProjectRouteImport = createFileRoute('/project')()
 
@@ -95,6 +97,18 @@ const ProjectProjectIdAgentsIndexRoute =
     path: '/agents/',
     getParentRoute: () => ProjectProjectIdRouteRoute,
   } as any)
+const ProjectProjectIdChatChannelIdRoute =
+  ProjectProjectIdChatChannelIdRouteImport.update({
+    id: '/chat/$channelId',
+    path: '/chat/$channelId',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
+const ProjectProjectIdAgentAgentIdRoute =
+  ProjectProjectIdAgentAgentIdRouteImport.update({
+    id: '/agent/$agentId',
+    path: '/agent/$agentId',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof userIndexRoute
@@ -103,6 +117,8 @@ export interface FileRoutesByFullPath {
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/settings': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
+  '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
+  '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
   '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
   '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
@@ -115,6 +131,8 @@ export interface FileRoutesByTo {
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/settings': typeof userSettingsIndexRoute
   '/project/$projectId': typeof ProjectProjectIdIndexRoute
+  '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
+  '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
   '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
   '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
@@ -131,6 +149,8 @@ export interface FileRoutesById {
   '/(user)/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/(user)/settings/': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
+  '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
+  '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
   '/project/$projectId/agents/': typeof ProjectProjectIdAgentsIndexRoute
   '/project/$projectId/chat/': typeof ProjectProjectIdChatIndexRoute
   '/project/$projectId/docs/': typeof ProjectProjectIdDocsIndexRoute
@@ -146,6 +166,8 @@ export interface FileRouteTypes {
     | '/conversation/$conversationId'
     | '/settings'
     | '/project/$projectId/'
+    | '/project/$projectId/agent/$agentId'
+    | '/project/$projectId/chat/$channelId'
     | '/project/$projectId/agents'
     | '/project/$projectId/chat'
     | '/project/$projectId/docs'
@@ -158,6 +180,8 @@ export interface FileRouteTypes {
     | '/conversation/$conversationId'
     | '/settings'
     | '/project/$projectId'
+    | '/project/$projectId/agent/$agentId'
+    | '/project/$projectId/chat/$channelId'
     | '/project/$projectId/agents'
     | '/project/$projectId/chat'
     | '/project/$projectId/docs'
@@ -173,6 +197,8 @@ export interface FileRouteTypes {
     | '/(user)/conversation/$conversationId'
     | '/(user)/settings/'
     | '/project/$projectId/'
+    | '/project/$projectId/agent/$agentId'
+    | '/project/$projectId/chat/$channelId'
     | '/project/$projectId/agents/'
     | '/project/$projectId/chat/'
     | '/project/$projectId/docs/'
@@ -279,6 +305,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectProjectIdAgentsIndexRouteImport
       parentRoute: typeof ProjectProjectIdRouteRoute
     }
+    '/project/$projectId/chat/$channelId': {
+      id: '/project/$projectId/chat/$channelId'
+      path: '/chat/$channelId'
+      fullPath: '/project/$projectId/chat/$channelId'
+      preLoaderRoute: typeof ProjectProjectIdChatChannelIdRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/project/$projectId/agent/$agentId': {
+      id: '/project/$projectId/agent/$agentId'
+      path: '/agent/$agentId'
+      fullPath: '/project/$projectId/agent/$agentId'
+      preLoaderRoute: typeof ProjectProjectIdAgentAgentIdRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
   }
 }
 
@@ -300,6 +340,8 @@ const userRouteRouteWithChildren = userRouteRoute._addFileChildren(
 
 interface ProjectProjectIdRouteRouteChildren {
   ProjectProjectIdIndexRoute: typeof ProjectProjectIdIndexRoute
+  ProjectProjectIdAgentAgentIdRoute: typeof ProjectProjectIdAgentAgentIdRoute
+  ProjectProjectIdChatChannelIdRoute: typeof ProjectProjectIdChatChannelIdRoute
   ProjectProjectIdAgentsIndexRoute: typeof ProjectProjectIdAgentsIndexRoute
   ProjectProjectIdChatIndexRoute: typeof ProjectProjectIdChatIndexRoute
   ProjectProjectIdDocsIndexRoute: typeof ProjectProjectIdDocsIndexRoute
@@ -309,6 +351,8 @@ interface ProjectProjectIdRouteRouteChildren {
 
 const ProjectProjectIdRouteRouteChildren: ProjectProjectIdRouteRouteChildren = {
   ProjectProjectIdIndexRoute: ProjectProjectIdIndexRoute,
+  ProjectProjectIdAgentAgentIdRoute: ProjectProjectIdAgentAgentIdRoute,
+  ProjectProjectIdChatChannelIdRoute: ProjectProjectIdChatChannelIdRoute,
   ProjectProjectIdAgentsIndexRoute: ProjectProjectIdAgentsIndexRoute,
   ProjectProjectIdChatIndexRoute: ProjectProjectIdChatIndexRoute,
   ProjectProjectIdDocsIndexRoute: ProjectProjectIdDocsIndexRoute,

@@ -3,8 +3,7 @@ import { ProjectSidebarItem } from "./project-sidebar-item";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProjectSidebarProps {
-  selectedProjectId?: string;
-  onProjectSelect: (projectId: string) => void;
+  // No more props drilling needed!
 }
 
 function ProjectListSkeleton() {
@@ -17,10 +16,7 @@ function ProjectListSkeleton() {
   );
 }
 
-export function ProjectSidebar({
-  selectedProjectId,
-  onProjectSelect,
-}: ProjectSidebarProps) {
+export function ProjectSidebar({}: ProjectSidebarProps) {
   const { projects, isLoading } = useProjects({ status: "active" });
 
   if (isLoading) {
@@ -33,8 +29,6 @@ export function ProjectSidebar({
         <ProjectSidebarItem
           key={project.id}
           project={project}
-          isSelected={selectedProjectId === project.id}
-          onSelect={onProjectSelect}
         />
       ))}
     </div>

@@ -278,52 +278,6 @@ export const mockAgents: Agent[] = [
   },
 ];
 
-export const mockMessages: Message[] = [
-  {
-    id: "msg-1",
-    content: "Olá! Como posso ajudá-lo hoje?",
-    type: "text",
-    authorId: "agent-1",
-    authorName: "Assistente",
-    authorAvatar: "🤖",
-    channelId: "channel-1",
-    timestamp: new Date("2024-01-15T10:30:00"),
-    reactions: [{ emoji: "👍", count: 2, userIds: ["user-1", "agent-2"] }],
-  },
-  {
-    id: "msg-2",
-    content:
-      "Preciso revisar o código do componente de checkout. Pode me ajudar?",
-    type: "text",
-    authorId: "user-1",
-    authorName: "João Silva",
-    authorAvatar: "https://github.com/shadcn.png",
-    channelId: "channel-1",
-    timestamp: new Date("2024-01-15T10:32:00"),
-  },
-  {
-    id: "msg-3",
-    content:
-      "Claro! Vou analisar o componente de checkout. Aqui está o que encontrei:\n\n```typescript\n// Problemas identificados:\n1. Falta validação de entrada\n2. Sem tratamento de erro\n3. Estado não está sendo gerenciado corretamente\n\n// Sugestão de melhoria:\nconst CheckoutForm = () => {\n  const [isLoading, setIsLoading] = useState(false);\n  // ... resto do código\n};\n```",
-    type: "text",
-    authorId: "agent-2",
-    authorName: "Code Reviewer",
-    authorAvatar: "👨‍💻",
-    channelId: "channel-1",
-    timestamp: new Date("2024-01-15T10:35:00"),
-  },
-  {
-    id: "msg-4",
-    content: "Excelente análise! Vou implementar essas melhorias.",
-    type: "text",
-    authorId: "user-1",
-    authorName: "João Silva",
-    authorAvatar: "https://github.com/shadcn.png",
-    channelId: "channel-1",
-    timestamp: new Date("2024-01-15T10:38:00"),
-    reactions: [{ emoji: "🚀", count: 1, userIds: ["agent-1"] }],
-  },
-];
 
 export const mockTasks: Task[] = [
   {
@@ -675,9 +629,6 @@ export const getTasksByStatus = (status: string): Task[] => {
   return mockTasks.filter((task) => task.status === status);
 };
 
-export const getMessagesByChannel = (channelId: string): Message[] => {
-  return mockMessages.filter((message) => message.channelId === channelId);
-};
 
 export const getAgentsByProject = (projectId: string): Agent[] => {
   return mockAgents.filter((agent) => agent.projectId === projectId);

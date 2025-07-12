@@ -14,21 +14,7 @@ import { mockAgents } from "@/renderer/lib/placeholders";
 import { UserSidebar } from "@/features/user-management/components/user-sidebar";
 
 function UserLayout() {
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const handleAgentDMSelect = (agentId: string) => {
-    console.log("Navigate to DM with agent:", agentId);
-  };
-
-  const handleSettings = () => {
-    navigate({ to: "/settings" });
-  };
-
-  // Extract conversationId from current path
-  const currentConversationId = location.pathname.includes('/conversation/') 
-    ? location.pathname.split('/conversation/')[1] 
-    : undefined;
 
   // Get page title based on current route
   const getPageTitle = () => {
@@ -52,12 +38,7 @@ function UserLayout() {
       <ResizablePanelGroup direction="horizontal">
         {/* User Sidebar - Resizable */}
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <UserSidebar
-            agents={mockAgents}
-            onAgentDMSelect={handleAgentDMSelect}
-            onSettings={handleSettings}
-            selectedConversationId={currentConversationId}
-          />
+          <UserSidebar />
         </ResizablePanel>
 
         <ResizableHandle />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
   const [message, setMessage] = useState("");
   const { messages, createMessage } = useMessages(conversationId);
   const { getConversationById } = useConversations();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadConversation = async () => {
@@ -28,6 +29,19 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
     };
     loadConversation();
   }, [conversationId, getConversationById]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   if (!conversation) {
     return (
@@ -57,6 +71,8 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
         conversationId,
       });
       setMessage("");
+      // Scroll to bottom after sending message
+      setTimeout(scrollToBottom, 100);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -103,26 +119,30 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
                 </p>
               </div>
             ) : (
-              messages.map((msg) => (
-                <MessageItem
-                  key={msg.id}
-                  message={{
-                    id: msg.id,
-                    content: msg.content,
-                    senderId: msg.senderId,
-                    senderName: msg.senderName,
-                    senderType: msg.senderType,
-                    messageType: "text",
-                    timestamp: msg.timestamp,
-                    isEdited: false,
-                    mentions: [],
-                  }}
-                  onEdit={(id, content) => console.log("Edit:", id, content)}
-                  onDelete={(id) => console.log("Delete:", id)}
-                  onReply={(id) => console.log("Reply:", id)}
-                  showActions={true}
-                />
-              ))
+              <>
+                {messages.map((msg) => (
+                  <MessageItem
+                    key={msg.id}
+                    message={{
+                      id: msg.id,
+                      content: msg.content,
+                      senderId: msg.senderId,
+                      senderName: msg.senderName,
+                      senderType: msg.senderType,
+                      messageType: "text",
+                      timestamp: msg.timestamp,
+                      isEdited: false,
+                      mentions: [],
+                    }}
+                    onEdit={(id, content) => console.log("Edit:", id, content)}
+                    onDelete={(id) => console.log("Delete:", id)}
+                    onReply={(id) => console.log("Reply:", id)}
+                    showActions={true}
+                  />
+                ))}
+                {/* Invisible element for auto-scroll */}
+                <div ref={messagesEndRef} />
+              </>
             )}
           </div>
         </ScrollArea>

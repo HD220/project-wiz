@@ -31,9 +31,6 @@ function ProjectLayout() {
   const { getProjectById } = useProjects();
   const channels = getChannelsByProject(projectId);
   const agents = getAgentsByProject(projectId);
-  const [selectedChannelId, setSelectedChannelId] = useState<
-    string | undefined
-  >(channels[0]?.id);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -48,16 +45,7 @@ function ProjectLayout() {
     loadProject();
   }, [projectId, getProjectById]);
 
-  const handleChannelSelect = (channelId: string) => {
-    setSelectedChannelId(channelId);
-    navigate({ to: "/project/$projectId/chat", params: { projectId } });
-    console.log(`Project ${projectId}: Select channel ${channelId}`);
-  };
-
-  const handleAgentDMSelect = (agentId: string) => {
-    navigate({ to: "/project/$projectId/chat", params: { projectId } });
-    console.log(`Project ${projectId}: Select DM with agent ${agentId}`);
-  };
+  // These handlers will be removed - components will use Link directly
 
   const handleAddChannel = () => {
     console.log(`Project ${projectId}: Add channel clicked`);
@@ -67,13 +55,27 @@ function ProjectLayout() {
   const getPageInfo = () => {
     const path = location.pathname;
 
-    if (path.includes("/chat")) {
-      const selectedChannel = channels.find((c) => c.id === selectedChannelId);
+    if (path.includes("/chat/")) {
+      // Extract channelId from URL: /project/123/chat/456
+      const channelId = path.split('/chat/')[1];
+      const selectedChannel = channels.find((c) => c.id === channelId);
       return {
         title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
         subtitle: selectedChannel?.name || "Canal de chat do projeto",
         type: "channel" as const,
         memberCount: selectedChannel?.unreadCount || 0,
+      };
+    }
+
+    if (path.includes("/agent/")) {
+      // Extract agentId from URL: /project/123/agent/456
+      const agentId = path.split('/agent/')[1];
+      const selectedAgent = agents.find((a) => a.id === agentId);
+      return {
+        title: selectedAgent ? `@${selectedAgent.name}` : "Mensagem Direta",
+        subtitle: selectedAgent ? `Conversa com ${selectedAgent.name}` : "Mensagem direta com agente",
+        type: "channel" as const,
+        memberCount: 1,
       };
     }
 
@@ -136,10 +138,6 @@ function ProjectLayout() {
             projectName={currentProject.name}
             projectId={projectId}
             channels={channels}
-            agents={agents}
-            selectedChannelId={selectedChannelId}
-            onChannelSelect={handleChannelSelect}
-            onAgentDMSelect={handleAgentDMSelect}
             onAddChannel={handleAddChannel}
           />
         </ResizablePanel>

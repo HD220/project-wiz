@@ -27,15 +27,6 @@ function RootComponent() {
     setShowCreateProjectModal(true);
   };
 
-  const handleProjectNavigation = (projectId: string) => {
-    navigate({ to: "/project/$projectId", params: { projectId } });
-  };
-
-  let currentSelectedProjectId: string | undefined = undefined;
-  const pathParts = location.pathname.split("/");
-  if (pathParts.length > 2 && pathParts[1] === "project") {
-    currentSelectedProjectId = pathParts[2];
-  }
 
   return (
     <TooltipProvider>
@@ -44,10 +35,7 @@ function RootComponent() {
           <TitleBar />
           <div className="flex flex-1 w-full overflow-hidden">
             <AppSidebar
-              selectedProjectId={currentSelectedProjectId}
-              onProjectSelect={handleProjectNavigation}
               onCreateProject={handleCreateProject}
-              onSettings={() => navigate({ to: "/settings" })}
             />
             <div className="flex-1 w-full overflow-hidden bg-background">
               <Outlet />

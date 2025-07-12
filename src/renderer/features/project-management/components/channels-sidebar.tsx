@@ -1,6 +1,6 @@
 import { useState } from "react"; // useEffect import removed
 // useSidebar import removed
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Hash,
   ChevronDown,
@@ -23,36 +22,28 @@ import {
   FileText,
   CheckSquare,
 } from "lucide-react";
-import { Channel, Agent, mockUser } from "@/lib/placeholders";
+import { Channel } from "@/lib/placeholders";
 import { UserArea } from "../../user-management/components/user-area";
 
 interface ChannelsSidebarProps {
   projectId: string;
   projectName: string;
   channels: Channel[];
-  agents: Agent[];
-  selectedChannelId?: string;
-  onChannelSelect: (channelId: string) => void;
-  onAgentDMSelect: (agentId: string) => void;
-  onAddChannel: () => void;
+  onAddChannel: () => void; // Keep this as it opens a modal
 }
 
 export function ChannelsSidebar({
   projectName,
   projectId,
   channels,
-  agents,
-  selectedChannelId,
-  onChannelSelect,
-  onAgentDMSelect,
   onAddChannel,
 }: ChannelsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const location = useLocation();
 
   const filteredChannels = channels.filter((channel) =>
     channel.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
@@ -71,7 +62,7 @@ export function ChannelsSidebar({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar canais e agentes"
+            placeholder="Buscar canais"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 bg-background"
@@ -84,58 +75,51 @@ export function ChannelsSidebar({
         <div className="p-2 space-y-1">
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
-            <Button
-              variant={
-                location.pathname === `/project/${projectId}/`
-                  ? "secondary"
-                  : "ghost"
-              }
-              className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
-            >
-              <Link to="/project/$projectId" params={{ projectId }}>
+            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
+              <Link 
+                to="/project/$projectId" 
+                params={{ projectId }}
+                activeOptions={{ exact: true }}
+                activeProps={{ 
+                  className: "bg-secondary text-secondary-foreground" 
+                }}
+              >
                 <Home className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Dashboard</span>
               </Link>
             </Button>
-            <Button
-              variant={
-                location.pathname === `/project/${projectId}/agents`
-                  ? "secondary"
-                  : "ghost"
-              }
-              className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
-            >
-              <Link to="/project/$projectId/agents" params={{ projectId }}>
+            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
+              <Link 
+                to="/project/$projectId/agents" 
+                params={{ projectId }}
+                activeProps={{ 
+                  className: "bg-secondary text-secondary-foreground" 
+                }}
+              >
                 <Users className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Agentes</span>
               </Link>
             </Button>
-            <Button
-              variant={
-                location.pathname === `/project/${projectId}/tasks/`
-                  ? "secondary"
-                  : "ghost"
-              }
-              className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
-            >
-              <Link to="/project/$projectId/tasks" params={{ projectId }}>
+            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
+              <Link 
+                to="/project/$projectId/tasks" 
+                params={{ projectId }}
+                activeProps={{ 
+                  className: "bg-secondary text-secondary-foreground" 
+                }}
+              >
                 <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Tarefas</span>
               </Link>
             </Button>
-            <Button
-              variant={
-                location.pathname === `/project/${projectId}/docs/`
-                  ? "secondary"
-                  : "ghost"
-              }
-              className="w-full justify-start px-2 py-1.5 h-auto"
-              asChild
-            >
-              <Link to="/project/$projectId/docs" params={{ projectId }}>
+            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
+              <Link 
+                to="/project/$projectId/docs" 
+                params={{ projectId }}
+                activeProps={{ 
+                  className: "bg-secondary text-secondary-foreground" 
+                }}
+              >
                 <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Documentos</span>
               </Link>
@@ -170,26 +154,33 @@ export function ChannelsSidebar({
               {filteredChannels.map((channel) => (
                 <Button
                   key={channel.id}
-                  variant={
-                    selectedChannelId === channel.id ? "secondary" : "ghost"
-                  }
+                  variant="ghost"
                   className="w-full justify-start px-2 py-1.5 h-auto"
-                  onClick={() => onChannelSelect(channel.id)}
+                  asChild
                 >
-                  <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span className="truncate">{channel.name}</span>
-                  {channel.unreadCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
-                    >
-                      {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
-                    </Badge>
-                  )}
+                  <Link 
+                    to="/project/$projectId/chat/$channelId" 
+                    params={{ projectId, channelId: channel.id }}
+                    activeProps={{ 
+                      className: "bg-secondary text-secondary-foreground" 
+                    }}
+                  >
+                    <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <span className="truncate">{channel.name}</span>
+                    {channel.unreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
+                      >
+                        {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
+                      </Badge>
+                    )}
+                  </Link>
                 </Button>
               ))}
             </CollapsibleContent>
           </Collapsible>
+
         </div>
       </ScrollArea>
 

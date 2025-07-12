@@ -11,21 +11,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessageSquare } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useConversations } from "../hooks/use-conversations.hook";
 
 interface NewConversationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConversationCreated?: (conversationId: string) => void;
 }
 
 export function NewConversationModal({
   open,
   onOpenChange,
-  onConversationCreated,
 }: NewConversationModalProps) {
   const [agentId, setAgentId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   const { findOrCreateDirectMessage } = useConversations();
 
@@ -39,9 +39,13 @@ export function NewConversationModal({
       const conversation = await findOrCreateDirectMessage(['user', agentId.trim()]);
       
       if (conversation) {
-        onConversationCreated?.(conversation.id);
         setAgentId("");
         onOpenChange(false);
+        // Navigate to the conversation automatically
+        navigate({ 
+          to: "/conversation/$conversationId", 
+          params: { conversationId: conversation.id } 
+        });
       }
     } catch (error) {
       console.error("Error creating conversation:", error);

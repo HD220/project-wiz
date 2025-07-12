@@ -41,7 +41,13 @@ class MessageStore {
         "dm:message:getByConversation",
         { conversationId, limit, offset },
       )) as MessageDto[];
-      this.setState({ messages, isLoading: false });
+      
+      // Sort messages by timestamp (oldest first) to ensure correct order
+      const sortedMessages = messages.sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+      
+      this.setState({ messages: sortedMessages, isLoading: false });
     } catch (error) {
       this.setState({
         error: (error as Error).message,
