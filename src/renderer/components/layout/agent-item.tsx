@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn, getAgentStatusColor } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Agent } from "@/lib/placeholders";
 
@@ -8,22 +8,6 @@ interface AgentItemProps {
   onAgentClick: (agentId: string) => void;
 }
 
-function getStatusColor(status: Agent["status"]) {
-  switch (status) {
-    case "online":
-      return "bg-green-500";
-    case "away":
-      return "bg-yellow-500";
-    case "busy":
-      return "bg-red-500";
-    case "executing":
-      return "bg-blue-500";
-    case "offline":
-      return "bg-gray-500";
-    default:
-      return "bg-gray-500";
-  }
-}
 
 export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
   const isOffline = agent.status === "offline";
@@ -46,7 +30,7 @@ export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
         <div
           className={cn(
             "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
-            getStatusColor(agent.status)
+            getAgentStatusColor(agent.status)
           )}
         />
       </div>

@@ -1,1 +1,0 @@
-export { ChatContainer as ChatArea } from "./chat-container";

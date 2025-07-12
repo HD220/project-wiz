@@ -1,12 +1,8 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeHighlight from "rehype-highlight";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Hash, Send, Paperclip, Smile, AtSign } from "lucide-react";
 import {
@@ -16,6 +12,7 @@ import {
 } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/page-title";
+import { MessageComponent } from "./message-component";
 
 interface ChatContainerProps {
   channelId?: string;
@@ -112,7 +109,26 @@ export function ChatContainer({
                 </p>
               </div>
             ) : (
-              messages.map((msg) => <MessageItem key={msg.id} message={msg} />)
+              messages.map((msg) => (
+                <MessageComponent
+                  key={msg.id}
+                  message={{
+                    id: msg.id,
+                    content: msg.content,
+                    senderId: msg.authorId,
+                    senderName: msg.authorName,
+                    senderType: msg.authorId.startsWith("agent-") ? "agent" : "user",
+                    messageType: msg.type === "code" ? "text" : (msg.type as any),
+                    timestamp: msg.timestamp,
+                    isEdited: msg.edited,
+                    mentions: msg.mentions
+                  }}
+                  onEdit={(id, content) => console.log("Edit:", id, content)}
+                  onDelete={(id) => console.log("Delete:", id)}
+                  onReply={(id) => console.log("Reply:", id)}
+                  showActions={true}
+                />
+              ))
             )}
           </div>
         </ScrollArea>
@@ -158,105 +174,3 @@ export function ChatContainer({
   );
 }
 
-interface MessageItemProps {
-  message: Message;
-}
-
-function MessageItem({ message }: MessageItemProps) {
-  const formatTime = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = diff / (1000 * 60 * 60);
-
-    if (hours < 24) {
-      return new Intl.DateTimeFormat("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    }
-    return new Intl.DateTimeFormat("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
-
-  return (
-    <div className="flex gap-3 hover:bg-muted/50 -mx-4 px-4 py-1 rounded">
-      <Avatar className="w-10 h-10 flex-shrink-0">
-        <AvatarImage src={message.authorAvatar} />
-        <AvatarFallback className="text-sm">
-          {message.authorAvatar || message.authorName.slice(0, 2).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="font-medium text-foreground">
-            {message.authorName}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {formatTime(message.timestamp)}
-          </span>
-          {message.edited && (
-            <Badge variant="outline" className="text-xs px-1 py-0">
-              editado
-            </Badge>
-          )}
-        </div>
-        <div className="text-sm text-foreground">
-          {message.type === "code" ? (
-            <pre className="bg-muted p-3 rounded-md overflow-x-auto border mt-2">
-              <code className="text-sm font-mono">{message.content}</code>
-            </pre>
-          ) : message.type === "system" ? (
-            <div className="text-muted-foreground italic">
-              {message.content}
-            </div>
-          ) : (
-            (() => {
-              let contentWithMentions = message.content;
-              if (message.mentions && Array.isArray(message.mentions)) {
-                message.mentions.forEach((mention) => {
-                  if (mention) {
-                    contentWithMentions = contentWithMentions.replace(
-                      new RegExp(`@${mention}`, "g"),
-                      `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`,
-                    );
-                  }
-                });
-              }
-              return (
-                <div className="prose dark:prose-invert max-w-none">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw, rehypeHighlight]}
-                    // eslint-disable-next-line react/no-children-prop
-                    children={contentWithMentions}
-                  />
-                </div>
-              );
-            })()
-          )}
-        </div>
-
-        {/* Reactions */}
-        {message.reactions && message.reactions.length > 0 && (
-          <div className="flex gap-1 mt-2">
-            {message.reactions.map((reaction, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="h-6 px-2 text-xs hover:bg-accent"
-              >
-                <span className="mr-1">{reaction.emoji}</span>
-                <span>{reaction.count}</span>
-              </Button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
