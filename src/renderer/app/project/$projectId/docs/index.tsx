@@ -10,8 +10,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
 export const Route = createFileRoute("/project/$projectId/docs/")({
   component: ProjectDocsPage,
@@ -309,15 +308,14 @@ export function ProjectDocsPage() {
                       {selectedDoc.path}
                     </p>
                   </div>
-                  <ScrollArea className="flex-1">
+                  <div className="flex-1 overflow-auto">
                     <div className="p-6 max-w-4xl mx-auto">
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {selectedDoc.content || ""}
-                        </ReactMarkdown>
-                      </div>
+                      <MarkdownRenderer
+                        content={selectedDoc.content || ""}
+                        className="min-h-0"
+                      />
                     </div>
-                  </ScrollArea>
+                  </div>
                 </div>
               </div>
             ) : (

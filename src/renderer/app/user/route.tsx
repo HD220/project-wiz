@@ -40,7 +40,7 @@ function UserLayout() {
     <div className="flex h-full">
       <ResizablePanelGroup direction="horizontal">
         {/* User Sidebar - Resizable */}
-        <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
           <UserSidebar
             agents={mockAgents}
             onAgentDMSelect={handleAgentDMSelect}
@@ -51,15 +51,13 @@ function UserLayout() {
         <ResizableHandle />
 
         {/* Main area with TopBar and content */}
-        <ResizablePanel defaultSize={agentsSidebarOpen ? 60 : 80}>
+        <ResizablePanel defaultSize={75}>
           <div className="flex flex-col h-full overflow-hidden">
-            {/* Top Bar */}
+            {/* Top Bar - No agents sidebar on user routes */}
             <TopBar
               title={getPageTitle()}
               subtitle={getPageSubtitle()}
               type="page"
-              onToggleAgentsSidebar={() => setAgentsSidebarOpen(!agentsSidebarOpen)}
-              agentsSidebarOpen={agentsSidebarOpen}
             />
 
             {/* Content area */}
@@ -68,19 +66,6 @@ function UserLayout() {
             </div>
           </div>
         </ResizablePanel>
-
-        {/* Agents Sidebar - Right side - Resizable when open */}
-        {agentsSidebarOpen && (
-          <>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
-              <AgentsSidebar
-                isOpen={agentsSidebarOpen}
-                onAgentSelect={(agent) => console.log("Selected agent:", agent)}
-              />
-            </ResizablePanel>
-          </>
-        )}
       </ResizablePanelGroup>
     </div>
   );

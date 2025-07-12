@@ -9,9 +9,10 @@ export const Route = createFileRoute("/project/$projectId/agents/")({
 
 export function ProjectAgentsPage() {
   return (
-    <div className="h-full">
-      <PageTitle title="Agentes" icon={<Users className="w-5 h-5 text-muted-foreground" />} />
-      <AgentDashboard />
+    <div className="h-full overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <AgentDashboard />
+      </div>
     </div>
   );
 }

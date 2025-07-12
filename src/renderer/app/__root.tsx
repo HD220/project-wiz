@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/ui/tooltip";
 import { CreateProjectModal } from "@/renderer/components/modals/create-project-modal";
 import { CreateChannelModal } from "@/renderer/components/modals/create-channel-modal";
 import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
+import { TitleBar } from "@/renderer/components/layout/title-bar";
 // SidebarProvider import removed
 import { ProjectSidebar } from "@/renderer/components/layout/project-sidebar";
 import { mockProjects } from "@/renderer/lib/placeholders";
@@ -42,16 +43,19 @@ function RootComponent() {
   return (
     <TooltipProvider>
       <PageTitleProvider>
-        <div className="flex h-screen w-full bg-background overflow-hidden">
-          <ProjectSidebar
-            projects={mockProjects}
-            selectedProjectId={currentSelectedProjectId}
-            onProjectSelect={handleProjectNavigation}
-            onCreateProject={handleCreateProject}
-            onSettings={() => navigate({ to: "/user/settings/" })}
-          />
-          <div className="flex-1 overflow-hidden">
-            <Outlet />
+        <div className="flex flex-col h-screen w-full bg-background overflow-hidden">
+          <TitleBar />
+          <div className="flex flex-1 overflow-hidden">
+            <ProjectSidebar
+              projects={mockProjects}
+              selectedProjectId={currentSelectedProjectId}
+              onProjectSelect={handleProjectNavigation}
+              onCreateProject={handleCreateProject}
+              onSettings={() => navigate({ to: "/user/settings/" })}
+            />
+            <div className="flex-1 overflow-hidden">
+              <Outlet />
+            </div>
           </div>
         </div>
 

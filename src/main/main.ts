@@ -20,6 +20,8 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    frame: false, // Remove Windows title bar
+    titleBarStyle: 'hiddenInset', // macOS equivalent
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -43,6 +45,33 @@ const createWindow = () => {
     mainWindow = null;
   });
 };
+
+// Window control handlers
+ipcMain.handle('window-minimize', () => {
+  if (mainWindow) {
+    mainWindow.minimize();
+  }
+});
+
+ipcMain.handle('window-maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+ipcMain.handle('window-close', () => {
+  if (mainWindow) {
+    mainWindow.close();
+  }
+});
+
+ipcMain.handle('window-is-maximized', () => {
+  return mainWindow ? mainWindow.isMaximized() : false;
+});
 
 app.on("ready", async () => {
   // console.log("[Main Process] Initializing business modules...");

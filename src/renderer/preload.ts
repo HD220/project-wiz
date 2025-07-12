@@ -16,6 +16,11 @@ export interface IElectronIPC {
   ) => () => void;
   send: (channel: string, ...args: unknown[]) => void;
   removeAllListeners: (channel: string) => void;
+  // Window control functions
+  windowMinimize: () => Promise<void>;
+  windowMaximize: () => Promise<void>;
+  windowClose: () => Promise<void>;
+  windowIsMaximized: () => Promise<boolean>;
 }
 
 const electronIPC: IElectronIPC = {
@@ -45,6 +50,23 @@ const electronIPC: IElectronIPC = {
 
   removeAllListeners: (channel: string): void => {
     ipcRenderer.removeAllListeners(channel);
+  },
+
+  // Window control functions
+  windowMinimize: (): Promise<void> => {
+    return ipcRenderer.invoke('window-minimize');
+  },
+
+  windowMaximize: (): Promise<void> => {
+    return ipcRenderer.invoke('window-maximize');
+  },
+
+  windowClose: (): Promise<void> => {
+    return ipcRenderer.invoke('window-close');
+  },
+
+  windowIsMaximized: (): Promise<boolean> => {
+    return ipcRenderer.invoke('window-is-maximized');
   },
 };
 

@@ -229,19 +229,6 @@ export function UserSidebar({
             </div>
             <div className="text-xs text-muted-foreground">Project Manager</div>
           </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="w-6 h-6">
-              <Volume2 className="h-4 w-4 text-muted-foreground" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-6 h-6"
-              onClick={onSettings}
-            >
-              <Settings className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </div>
         </div>
       </div>
     </div>

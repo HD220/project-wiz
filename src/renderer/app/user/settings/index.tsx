@@ -84,20 +84,15 @@ export function UserSettingsPage() {
 
   return (
     <div className="flex-1 overflow-hidden">
-      {/* Header */}
-      <div className="h-12 px-6 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center gap-2">
-          <Settings className="w-5 h-5 text-muted-foreground" />
-          <h1 className="font-semibold">Configurações</h1>
-        </div>
-        <Button onClick={handleSave} className="gap-2">
-          <Save className="w-4 h-4" />
-          Salvar Alterações
-        </Button>
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
+        {/* Save button moved to content area */}
+        <div className="flex justify-end mb-6">
+          <Button onClick={handleSave} className="gap-2">
+            <Save className="w-4 h-4" />
+            Salvar Alterações
+          </Button>
+        </div>
         <Tabs defaultValue="user" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="user" className="gap-2">

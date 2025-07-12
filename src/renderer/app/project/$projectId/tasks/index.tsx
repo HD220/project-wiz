@@ -9,9 +9,10 @@ export const Route = createFileRoute("/project/$projectId/tasks/")({
 
 export function ProjectTasksPage() {
   return (
-    <div className="h-full">
-      <PageTitle title="Tarefas" icon={<CheckSquare className="w-5 h-5 text-muted-foreground" />} />
-      <KanbanBoard />
+    <div className="h-full overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-auto">
+        <KanbanBoard />
+      </div>
     </div>
   );
 }
