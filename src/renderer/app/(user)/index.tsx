@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { CustomLink } from "@/components/custom-link";
 import {
   mockProjects,
   mockAgents,
@@ -34,15 +34,15 @@ export function UserDashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/">Start a new chat</Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/">View your tasks</Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/">Browse documentation</Link>
-            </Button>
+            <CustomLink to="/" variant="outline" className="w-full justify-start">
+              Start a new chat
+            </CustomLink>
+            <CustomLink to="/" variant="outline" className="w-full justify-start">
+              View your tasks
+            </CustomLink>
+            <CustomLink to="/" variant="outline" className="w-full justify-start">
+              Browse documentation
+            </CustomLink>
           </CardContent>
         </Card>
 

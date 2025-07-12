@@ -1,0 +1,24 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
+
+export function CreateChannelPage() {
+  const navigate = useNavigate();
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // Volta para a página anterior quando o modal é fechado
+      navigate({ to: ".." });
+    }
+  };
+
+  return (
+    <CreateChannelModal
+      open={true}
+      onOpenChange={handleOpenChange}
+    />
+  );
+}
+
+export const Route = createFileRoute("/create-channel")({
+  component: CreateChannelPage,
+});

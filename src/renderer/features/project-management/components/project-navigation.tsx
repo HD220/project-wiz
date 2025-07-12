@@ -2,6 +2,7 @@ import { useState } from "react"; // useEffect import removed
 // useSidebar import removed
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { CustomLink } from "@/components/custom-link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,19 +26,19 @@ import {
 import { Channel } from "@/lib/placeholders";
 import { UserArea } from "../../user-management/components/user-area";
 
-interface ChannelsSidebarProps {
+interface ProjectNavigationProps {
   projectId: string;
   projectName: string;
   channels: Channel[];
   onAddChannel: () => void; // Keep this as it opens a modal
 }
 
-export function ChannelsSidebar({
+export function ProjectNavigation({
   projectName,
   projectId,
   channels,
   onAddChannel,
-}: ChannelsSidebarProps) {
+}: ProjectNavigationProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredChannels = channels.filter((channel) =>
@@ -75,55 +76,51 @@ export function ChannelsSidebar({
         <div className="p-2 space-y-1">
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
-            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
-              <Link 
-                to="/project/$projectId" 
-                params={{ projectId }}
-                activeOptions={{ exact: true }}
-                activeProps={{ 
-                  className: "bg-secondary text-secondary-foreground" 
-                }}
-              >
-                <Home className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Dashboard</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
-              <Link 
-                to="/project/$projectId/agents" 
-                params={{ projectId }}
-                activeProps={{ 
-                  className: "bg-secondary text-secondary-foreground" 
-                }}
-              >
-                <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Agentes</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
-              <Link 
-                to="/project/$projectId/tasks" 
-                params={{ projectId }}
-                activeProps={{ 
-                  className: "bg-secondary text-secondary-foreground" 
-                }}
-              >
-                <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Tarefas</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start px-2 py-1.5 h-auto" asChild>
-              <Link 
-                to="/project/$projectId/docs" 
-                params={{ projectId }}
-                activeProps={{ 
-                  className: "bg-secondary text-secondary-foreground" 
-                }}
-              >
-                <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>Documentos</span>
-              </Link>
-            </Button>
+            <CustomLink
+              to="/project/$projectId" 
+              params={{ projectId }}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              activeOptions={{ exact: true }}
+              activeProps={{ 
+                className: "bg-secondary text-secondary-foreground" 
+              }}
+            >
+              <Home className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>Dashboard</span>
+            </CustomLink>
+            <CustomLink
+              to="/project/$projectId/agents" 
+              params={{ projectId }}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              activeProps={{ 
+                className: "bg-secondary text-secondary-foreground" 
+              }}
+            >
+              <Users className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>Agentes</span>
+            </CustomLink>
+            <CustomLink
+              to="/project/$projectId/tasks" 
+              params={{ projectId }}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              activeProps={{ 
+                className: "bg-secondary text-secondary-foreground" 
+              }}
+            >
+              <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>Tarefas</span>
+            </CustomLink>
+            <CustomLink
+              to="/project/$projectId/docs" 
+              params={{ projectId }}
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              activeProps={{ 
+                className: "bg-secondary text-secondary-foreground" 
+              }}
+            >
+              <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>Documentos</span>
+            </CustomLink>
           </div>
 
           {/* Text Channels */}
@@ -152,31 +149,26 @@ export function ChannelsSidebar({
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-0.5 mt-1">
               {filteredChannels.map((channel) => (
-                <Button
+                <CustomLink
                   key={channel.id}
-                  variant="ghost"
+                  to="/project/$projectId/chat/$channelId" 
+                  params={{ projectId, channelId: channel.id }}
                   className="w-full justify-start px-2 py-1.5 h-auto"
-                  asChild
+                  activeProps={{ 
+                    className: "bg-secondary text-secondary-foreground" 
+                  }}
                 >
-                  <Link 
-                    to="/project/$projectId/chat/$channelId" 
-                    params={{ projectId, channelId: channel.id }}
-                    activeProps={{ 
-                      className: "bg-secondary text-secondary-foreground" 
-                    }}
-                  >
-                    <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span className="truncate">{channel.name}</span>
-                    {channel.unreadCount > 0 && (
-                      <Badge
-                        variant="destructive"
-                        className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
-                      >
-                        {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
-                      </Badge>
-                    )}
-                  </Link>
-                </Button>
+                  <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <span className="truncate">{channel.name}</span>
+                  {channel.unreadCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
+                    >
+                      {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
+                    </Badge>
+                  )}
+                </CustomLink>
               ))}
             </CollapsibleContent>
           </Collapsible>

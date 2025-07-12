@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { CustomLink } from "@/components/custom-link";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,20 +9,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  ChevronDown,
-  Plus,
-  Search,
-  Settings,
-  Loader2,
-  Home,
-} from "lucide-react";
-import { Agent } from "@/lib/placeholders";
+import { ChevronDown, Plus, Search, Settings, Home } from "lucide-react";
 import { UserArea } from "./user-area";
 import { ConversationList } from "../../direct-messages/components/conversation-list";
-import { NewConversationModal } from "../../direct-messages/components/new-conversation-modal";
-import type { ConversationDto } from "../../../../shared/types/message.types";
 
 interface UserSidebarProps {
   // No more props drilling needed!
@@ -29,12 +19,6 @@ interface UserSidebarProps {
 
 export function UserSidebar({}: UserSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showNewConversationModal, setShowNewConversationModal] = useState(false);
-
-  const handleNewConversation = () => {
-    setShowNewConversationModal(true);
-  };
-
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
@@ -70,8 +54,8 @@ export function UserSidebar({}: UserSidebarProps) {
               to="/"
               className="w-full justify-start px-2 py-1.5 h-auto"
               activeOptions={{ exact: true }}
-              activeProps={{ 
-                className: "bg-secondary text-secondary-foreground" 
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
               }}
             >
               <Home className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -80,8 +64,8 @@ export function UserSidebar({}: UserSidebarProps) {
             <CustomLink
               to="/settings"
               className="w-full justify-start px-2 py-1.5 h-auto"
-              activeProps={{ 
-                className: "bg-secondary text-secondary-foreground" 
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
               }}
             >
               <Settings className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -100,17 +84,14 @@ export function UserSidebar({}: UserSidebarProps) {
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Mensagens Diretas
                 </span>
-                <Button
+                <CustomLink
+                  to="/new-conversation"
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNewConversation();
-                  }}
                   className="ml-auto w-4 h-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-accent"
                 >
                   <Plus className="h-3 w-3" />
-                </Button>
+                </CustomLink>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-1">
@@ -122,12 +103,6 @@ export function UserSidebar({}: UserSidebarProps) {
 
       {/* User Area */}
       <UserArea />
-
-      {/* New Conversation Modal */}
-      <NewConversationModal
-        open={showNewConversationModal}
-        onOpenChange={setShowNewConversationModal}
-      />
     </div>
   );
 }

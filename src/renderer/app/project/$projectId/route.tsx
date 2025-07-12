@@ -4,8 +4,8 @@ import {
   useNavigate,
   useLocation,
 } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { ChannelsSidebar } from "@/features/project-management/components/channels-sidebar";
+import { useState } from "react";
+import { ProjectNavigation } from "@/features/project-management/components/project-navigation";
 import { AgentsSidebar } from "@/features/project-management/components/agents-sidebar";
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {
@@ -19,31 +19,16 @@ import {
 } from "@/renderer/lib/placeholders";
 import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
 import { ProjectDto } from "@/shared/types/project.types";
+import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();
-  const navigate = useNavigate();
+  const { project: currentProject } = Route.useLoaderData();
   const location = useLocation();
   const [agentsSidebarOpen, setAgentsSidebarOpen] = useState(false);
-  const [currentProject, setCurrentProject] = useState<ProjectDto | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const { getProjectById } = useProjects();
   const channels = getChannelsByProject(projectId);
   const agents = getAgentsByProject(projectId);
-
-  useEffect(() => {
-    const loadProject = async () => {
-      if (projectId) {
-        setIsLoading(true);
-        const project = await getProjectById({ id: projectId });
-        setCurrentProject(project);
-        setIsLoading(false);
-      }
-    };
-
-    loadProject();
-  }, [projectId, getProjectById]);
 
   // These handlers will be removed - components will use Link directly
 
@@ -119,22 +104,15 @@ function ProjectLayout() {
     };
   };
 
-  if (isLoading) {
-    return <div>Carregando projeto...</div>;
-  }
-
-  if (!currentProject) {
-    return <div>Projeto não encontrado.</div>;
-  }
 
   const pageInfo = getPageInfo();
 
   return (
     <div className="flex h-full">
       <ResizablePanelGroup direction="horizontal">
-        {/* Channels Sidebar - Resizable */}
+        {/* Project Navigation - Resizable */}
         <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
-          <ChannelsSidebar
+          <ProjectNavigation
             projectName={currentProject.name}
             projectId={projectId}
             channels={channels}
@@ -186,4 +164,20 @@ function ProjectLayout() {
 
 export const Route = createFileRoute("/project/$projectId")({
   component: ProjectLayout,
+  pendingComponent: ProjectLayoutSkeleton,
+  loader: async ({ params }) => {
+    const { projectStore } = await import("@/features/project-management/stores/project.store");
+    const project = await projectStore.getProjectById({ id: params.projectId });
+    return {
+      project,
+    };
+  },
+  errorComponent: ({ error }) => (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center text-destructive">
+        <h3 className="font-semibold text-lg mb-2">Erro ao carregar projeto</h3>
+        <p>{error.message}</p>
+      </div>
+    </div>
+  ),
 });

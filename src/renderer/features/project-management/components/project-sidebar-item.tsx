@@ -5,8 +5,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { ProjectDto } from "../../../../shared/types/project.types";
 
 interface ProjectSidebarItemProps {
@@ -16,6 +17,11 @@ interface ProjectSidebarItemProps {
 export function ProjectSidebarItem({
   project,
 }: ProjectSidebarItemProps) {
+  const routerState = useRouterState();
+  
+  // Check if we're currently loading this specific project
+  const isLoadingThisProject = routerState.isLoading && 
+    routerState.location.pathname.includes(`/project/${project.id}`);
 
   return (
     <TooltipProvider>
@@ -30,7 +36,9 @@ export function ProjectSidebarItem({
             }}
             activeOptions={{ includeSearch: false }}
           >
-            {project.avatar ? (
+            {isLoadingThisProject ? (
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            ) : project.avatar ? (
               <img
                 src={project.avatar}
                 alt={project.name}

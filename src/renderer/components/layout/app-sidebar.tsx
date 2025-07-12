@@ -10,12 +10,10 @@ import { Plus, Settings, Folder } from "lucide-react";
 import { ProjectSidebar } from "@/features/project-management/components/project-sidebar";
 
 interface AppSidebarProps {
-  onCreateProject: () => void; // Keep this as it opens a modal
+  // Props drilling eliminated - using direct navigation
 }
 
-export function AppSidebar({
-  onCreateProject,
-}: AppSidebarProps) {
+export function AppSidebar({}: AppSidebarProps) {
   return (
     <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2 h-full flex-shrink-0">
       {/* Home/Dashboard */}
@@ -54,10 +52,12 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={onCreateProject}
               className="w-12 h-12 rounded-2xl border-2 border-dashed border-muted-foreground hover:border-solid hover:border-green-500 hover:bg-green-500/10 hover:rounded-xl transition-all duration-200"
+              asChild
             >
-              <Plus className="h-6 w-6 text-muted-foreground hover:text-green-500" />
+              <Link to="/create-project">
+                <Plus className="h-6 w-6 text-muted-foreground hover:text-green-500" />
+              </Link>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">

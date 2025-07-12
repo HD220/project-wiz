@@ -8,27 +8,17 @@ import { Send, Paperclip, Smile, AtSign } from "lucide-react";
 import { PageTitle } from "@/components/page-title";
 import { MessageItem } from "@/components/chat/message-item";
 import { useMessages } from "../hooks/use-messages.hook";
-import { useConversations } from "../hooks/use-conversations.hook";
 import type { ConversationDto } from "../../../../shared/types/message.types";
 
 interface ConversationViewProps {
   conversationId: string;
+  conversation: ConversationDto;
 }
 
-export function ConversationView({ conversationId }: ConversationViewProps) {
-  const [conversation, setConversation] = useState<ConversationDto | null>(null);
+export function ConversationView({ conversationId, conversation }: ConversationViewProps) {
   const [message, setMessage] = useState("");
   const { messages, createMessage } = useMessages(conversationId);
-  const { getConversationById } = useConversations();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const loadConversation = async () => {
-      const conv = await getConversationById(conversationId);
-      setConversation(conv);
-    };
-    loadConversation();
-  }, [conversationId, getConversationById]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -43,15 +33,6 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
     }
   };
 
-  if (!conversation) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center text-muted-foreground">
-          Carregando conversa...
-        </div>
-      </div>
-    );
-  }
 
   const getOtherParticipant = (conv: ConversationDto) => {
     return conv.participants.find((p: string) => p !== "user") || "Unknown";

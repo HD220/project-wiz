@@ -11,9 +11,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './app/__root'
+import { Route as CreateProjectRouteImport } from './app/create-project'
+import { Route as CreateChannelRouteImport } from './app/create-channel'
 import { Route as userRouteRouteImport } from './app/(user)/route'
 import { Route as userIndexRouteImport } from './app/(user)/index'
 import { Route as ProjectLayoutRouteImport } from './app/project/_layout'
+import { Route as userNewConversationRouteImport } from './app/(user)/new-conversation'
 import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
 import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
 import { Route as userSettingsIndexRouteImport } from './app/(user)/settings/index'
@@ -33,6 +36,16 @@ const ProjectRoute = ProjectRouteImport.update({
   path: '/project',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateProjectRoute = CreateProjectRouteImport.update({
+  id: '/create-project',
+  path: '/create-project',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateChannelRoute = CreateChannelRouteImport.update({
+  id: '/create-channel',
+  path: '/create-channel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const userRouteRoute = userRouteRouteImport.update({
   id: '/(user)',
   getParentRoute: () => rootRouteImport,
@@ -45,6 +58,11 @@ const userIndexRoute = userIndexRouteImport.update({
 const ProjectLayoutRoute = ProjectLayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => ProjectRoute,
+} as any)
+const userNewConversationRoute = userNewConversationRouteImport.update({
+  id: '/new-conversation',
+  path: '/new-conversation',
+  getParentRoute: () => userRouteRoute,
 } as any)
 const ProjectProjectIdRouteRoute = ProjectProjectIdRouteRouteImport.update({
   id: '/project/$projectId',
@@ -112,7 +130,10 @@ const ProjectProjectIdAgentAgentIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof userIndexRoute
+  '/create-channel': typeof CreateChannelRoute
+  '/create-project': typeof CreateProjectRoute
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
+  '/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectLayoutRoute
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/settings': typeof userSettingsIndexRoute
@@ -126,6 +147,9 @@ export interface FileRoutesByFullPath {
   '/project/$projectId/tasks': typeof ProjectProjectIdTasksIndexRoute
 }
 export interface FileRoutesByTo {
+  '/create-channel': typeof CreateChannelRoute
+  '/create-project': typeof CreateProjectRoute
+  '/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectLayoutRoute
   '/': typeof userIndexRoute
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
@@ -142,7 +166,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(user)': typeof userRouteRouteWithChildren
+  '/create-channel': typeof CreateChannelRoute
+  '/create-project': typeof CreateProjectRoute
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
+  '/(user)/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectRouteWithChildren
   '/project/_layout': typeof ProjectLayoutRoute
   '/(user)/': typeof userIndexRoute
@@ -161,7 +188,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/create-channel'
+    | '/create-project'
     | '/project/$projectId'
+    | '/new-conversation'
     | '/project'
     | '/conversation/$conversationId'
     | '/settings'
@@ -175,6 +205,9 @@ export interface FileRouteTypes {
     | '/project/$projectId/tasks'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/create-channel'
+    | '/create-project'
+    | '/new-conversation'
     | '/project'
     | '/'
     | '/conversation/$conversationId'
@@ -190,7 +223,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/(user)'
+    | '/create-channel'
+    | '/create-project'
     | '/project/$projectId'
+    | '/(user)/new-conversation'
     | '/project'
     | '/project/_layout'
     | '/(user)/'
@@ -208,6 +244,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   userRouteRoute: typeof userRouteRouteWithChildren
+  CreateChannelRoute: typeof CreateChannelRoute
+  CreateProjectRoute: typeof CreateProjectRoute
   ProjectProjectIdRouteRoute: typeof ProjectProjectIdRouteRouteWithChildren
   ProjectRoute: typeof ProjectRouteWithChildren
 }
@@ -219,6 +257,20 @@ declare module '@tanstack/react-router' {
       path: '/project'
       fullPath: '/project'
       preLoaderRoute: typeof ProjectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-project': {
+      id: '/create-project'
+      path: '/create-project'
+      fullPath: '/create-project'
+      preLoaderRoute: typeof CreateProjectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-channel': {
+      id: '/create-channel'
+      path: '/create-channel'
+      fullPath: '/create-channel'
+      preLoaderRoute: typeof CreateChannelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(user)': {
@@ -241,6 +293,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/project'
       preLoaderRoute: typeof ProjectLayoutRouteImport
       parentRoute: typeof ProjectRoute
+    }
+    '/(user)/new-conversation': {
+      id: '/(user)/new-conversation'
+      path: '/new-conversation'
+      fullPath: '/new-conversation'
+      preLoaderRoute: typeof userNewConversationRouteImport
+      parentRoute: typeof userRouteRoute
     }
     '/project/$projectId': {
       id: '/project/$projectId'
@@ -323,12 +382,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface userRouteRouteChildren {
+  userNewConversationRoute: typeof userNewConversationRoute
   userIndexRoute: typeof userIndexRoute
   userConversationConversationIdRoute: typeof userConversationConversationIdRoute
   userSettingsIndexRoute: typeof userSettingsIndexRoute
 }
 
 const userRouteRouteChildren: userRouteRouteChildren = {
+  userNewConversationRoute: userNewConversationRoute,
   userIndexRoute: userIndexRoute,
   userConversationConversationIdRoute: userConversationConversationIdRoute,
   userSettingsIndexRoute: userSettingsIndexRoute,
@@ -378,6 +439,8 @@ const ProjectRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   userRouteRoute: userRouteRouteWithChildren,
+  CreateChannelRoute: CreateChannelRoute,
+  CreateProjectRoute: CreateProjectRoute,
   ProjectProjectIdRouteRoute: ProjectProjectIdRouteRouteWithChildren,
   ProjectRoute: ProjectRouteWithChildren,
 }
