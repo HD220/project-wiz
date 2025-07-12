@@ -38,7 +38,7 @@ export function ProjectSidebar({
               className="w-12 h-12 rounded-2xl bg-primary hover:bg-primary/90 hover:rounded-xl transition-all duration-200"
               asChild
             >
-              <Link to="/">
+              <Link to="/user/">
                 <Folder className="h-6 w-6 text-primary-foreground" />
               </Link>
             </Button>

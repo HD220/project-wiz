@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ChatContainer } from "@/components/chat/chat-container";
 
-export const Route = createFileRoute("/chat")({
-  component: ChatComponent,
+export const Route = createFileRoute("/project/$projectId/chat/")({
+  component: ProjectChatPage,
 });
 
-function ChatComponent() {
+export function ProjectChatPage() {
   return (
     <div className="h-full">
       <ChatContainer channelId="channel-1" channelName="geral" />

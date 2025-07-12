@@ -1,15 +1,13 @@
-import { createRootRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 import { TooltipProvider } from "@/ui/tooltip";
-import { DiscordLayout } from "@/renderer/components/layout/discord-layout";
 import { CreateProjectModal } from "@/renderer/components/modals/create-project-modal";
 import { CreateChannelModal } from "@/renderer/components/modals/create-channel-modal";
 import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
-import {
-  mockProjects,
-  getChannelsByProject,
-  getAgentsByProject,
-} from "@/renderer/lib/placeholders";
+// SidebarProvider import removed
+import { ProjectSidebar } from "@/renderer/components/layout/project-sidebar";
+import { mockProjects } from "@/renderer/lib/placeholders";
+
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -17,71 +15,50 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const navigate = useNavigate();
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(
-    mockProjects[0]?.id,
-  );
-  const [selectedChannelId, setSelectedChannelId] = useState<string>();
+  const location = useLocation();
+
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
-
-  const selectedProject = mockProjects.find(
-    (project) => project.id === selectedProjectId,
-  );
-  const projectChannels = selectedProjectId
-    ? getChannelsByProject(selectedProjectId)
-    : [];
-  const projectAgents = selectedProjectId
-    ? getAgentsByProject(selectedProjectId)
-    : [];
-
-  const handleProjectSelect = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    setSelectedChannelId(undefined);
-    navigate({ to: "/" });
-  };
-
-  const handleChannelSelect = (channelId: string) => {
-    setSelectedChannelId(channelId);
-    navigate({ to: "/chat" });
-  };
-
-  const handleAgentDMSelect = (agentId: string) => {
-    navigate({ to: "/chat" });
-  };
 
   const handleCreateProject = () => {
     setShowCreateProjectModal(true);
   };
 
-  const handleAddChannel = () => {
-    setShowCreateChannelModal(true);
+  const handleProjectNavigation = (projectId: string) => {
+    navigate({ to: "/project/$projectId/", params: { projectId } });
   };
 
-  const handleSettings = () => {
-    navigate({ to: "/settings" });
-  };
+  let currentSelectedProjectId: string | undefined = undefined;
+  const pathParts = location.pathname.split('/');
+  if (pathParts.length > 2 && pathParts[1] === 'project') {
+    currentSelectedProjectId = pathParts[2];
+  }
+
+  // Determine selectedProjectId from URL for visual indication on ProjectSidebar
+  let currentSelectedProjectId: string | undefined = undefined;
+  const pathParts = location.pathname.split('/');
+  // Example path: /project/project-id-123/chat -> pathParts = ["", "project", "project-id-123", "chat"]
+  if (pathParts.length > 2 && pathParts[1] === 'project') {
+    currentSelectedProjectId = pathParts[2];
+  }
 
   return (
     <TooltipProvider>
       <PageTitleProvider>
-        <DiscordLayout
-          projects={mockProjects}
-          selectedProjectId={selectedProjectId}
-          projectName={selectedProject?.name || "Selecione um projeto"}
-          channels={projectChannels}
-          agents={projectAgents}
-          selectedChannelId={selectedChannelId}
-          onProjectSelect={handleProjectSelect}
-          onChannelSelect={handleChannelSelect}
-          onAgentDMSelect={handleAgentDMSelect}
-          onCreateProject={handleCreateProject}
-          onAddChannel={handleAddChannel}
-          onSettings={handleSettings}
-        >
-          <Outlet />
-        </DiscordLayout>
+        {/* SidebarProvider wrapper removed */}
+        <div className="flex h-screen w-full bg-background overflow-hidden">
+          <ProjectSidebar
+            projects={mockProjects}
+            selectedProjectId={currentSelectedProjectId}
+            onProjectSelect={handleProjectNavigation}
+            onCreateProject={handleCreateProject}
+            onSettings={() => navigate({ to: "/user/settings/" })}
+          />
+          <main className="flex-1 overflow-auto">
+            <Outlet />
+          </main>
+        </div>
 
-        {/* Modals */}
         <CreateProjectModal
           open={showCreateProjectModal}
           onOpenChange={setShowCreateProjectModal}

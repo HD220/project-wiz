@@ -12,11 +12,11 @@ import {
 import { PageTitle } from "@/components/page-title";
 import { FileText } from "lucide-react";
 
-export const Route = createFileRoute("/files")({
-  component: FilesComponent,
+export const Route = createFileRoute("/project/$projectId/files/")({
+  component: ProjectFilesPage,
 });
 
-function FilesComponent() {
+export function ProjectFilesPage() {
   const [selectedFile, setSelectedFile] = useState<FileTreeItem | null>(null);
   const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(false);
 

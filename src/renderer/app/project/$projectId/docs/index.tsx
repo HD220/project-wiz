@@ -13,8 +13,8 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export const Route = createFileRoute("/docs")({
-  component: DocsComponent,
+export const Route = createFileRoute("/project/$projectId/docs/")({
+  component: ProjectDocsPage,
 });
 
 interface DocFile {
@@ -225,7 +225,7 @@ Real-time updates using event-driven architecture:
   },
 ];
 
-function DocsComponent() {
+export function ProjectDocsPage() {
   const [selectedDoc, setSelectedDoc] = useState<DocFile | null>(mockDocs[0]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(["2", "4", "6"])

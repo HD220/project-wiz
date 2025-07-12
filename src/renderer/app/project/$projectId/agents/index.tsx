@@ -3,11 +3,11 @@ import { AgentDashboard } from "@/renderer/features/agent-management/components/
 import { PageTitle } from "@/components/page-title";
 import { Users } from "lucide-react";
 
-export const Route = createFileRoute("/agents")({
-  component: AgentsComponent,
+export const Route = createFileRoute("/project/$projectId/agents/")({
+  component: ProjectAgentsPage,
 });
 
-function AgentsComponent() {
+export function ProjectAgentsPage() {
   return (
     <div className="h-full">
       <PageTitle title="Agentes" icon={<Users className="w-5 h-5 text-muted-foreground" />} />
