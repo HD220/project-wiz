@@ -41,11 +41,11 @@ export function useProjects(filter?: ProjectFilterDto) {
   }), []);
 
   const queries = useMemo(() => ({
-    loadProjects: (newFilter?: ProjectFilterDto) => 
-      projectStore.loadProjects(newFilter || filterRef.current),
+    loadProjects: (newFilter?: ProjectFilterDto, forceReload?: boolean) => 
+      projectStore.loadProjects(newFilter || filterRef.current, forceReload),
     getProjectById: (data: { id: string }) => 
       projectStore.getProjectById(data),
-    refreshProjects: () => projectStore.loadProjects(filterRef.current),
+    refreshProjects: () => projectStore.loadProjects(filterRef.current, true),
   }), []);
 
   return {

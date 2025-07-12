@@ -31,9 +31,24 @@ class ProjectStore {
 
   getServerSnapshot = () => this.state;
 
-  async loadProjects(filter?: ProjectFilterDto): Promise<void> {
+  async loadProjects(filter?: ProjectFilterDto, forceReload = false): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
+      return;
+    }
+
+    // Don't show loading if we already have projects and it's not a forced reload
+    if (!forceReload && this.state.projects.length > 0) {
+      // Still fetch in background but don't show loading
+      try {
+        const projects = (await window.electronIPC.invoke(
+          "project:list",
+          filter,
+        )) as ProjectDto[];
+        this.setState({ projects, error: null });
+      } catch (error) {
+        this.setState({ error: (error as Error).message });
+      }
       return;
     }
 
@@ -56,7 +71,7 @@ class ProjectStore {
   async createProject(dto: CreateProjectDto): Promise<void> {
     try {
       await window.electronIPC.invoke("project:create", dto);
-      await this.loadProjects();
+      await this.loadProjects(undefined, true); // Force reload after creation
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }
@@ -65,7 +80,7 @@ class ProjectStore {
   async updateProject(dto: UpdateProjectDto): Promise<void> {
     try {
       await window.electronIPC.invoke("project:update", dto);
-      await this.loadProjects();
+      await this.loadProjects(undefined, true); // Force reload after update
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }
@@ -74,7 +89,7 @@ class ProjectStore {
   async deleteProject(data: { id: string }): Promise<void> {
     try {
       await window.electronIPC.invoke("project:delete", data);
-      await this.loadProjects();
+      await this.loadProjects(undefined, true); // Force reload after deletion
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }
@@ -83,7 +98,7 @@ class ProjectStore {
   async archiveProject(data: { id: string }): Promise<void> {
     try {
       await window.electronIPC.invoke("project:archive", data);
-      await this.loadProjects();
+      await this.loadProjects(undefined, true); // Force reload after archiving
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }

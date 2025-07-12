@@ -30,7 +30,7 @@ export function ProjectSidebarItem({
           <Link
             to="/project/$projectId"
             params={{ projectId: project.id }}
-            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl hover:rounded-xl transition-all duration-200 relative bg-muted hover:bg-muted/80 [&.active]:bg-primary [&.active]:rounded-xl [&.active]:before:content-[''] [&.active]:before:absolute [&.active]:before:left-0 [&.active]:before:top-1/2 [&.active]:before:-translate-y-1/2 [&.active]:before:-translate-x-1 [&.active]:before:w-1 [&.active]:before:h-8 [&.active]:before:bg-foreground [&.active]:before:rounded-r-full"
+            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl hover:rounded-xl transition-all duration-200 relative bg-muted hover:bg-muted/80 [&.active]:bg-primary [&.active]:text-primary-foreground [&.active]:rounded-xl [&.active]:shadow-lg [&.active]:before:content-[''] [&.active]:before:absolute [&.active]:before:left-0 [&.active]:before:top-1/2 [&.active]:before:-translate-y-1/2 [&.active]:before:-translate-x-1 [&.active]:before:w-1 [&.active]:before:h-8 [&.active]:before:bg-primary-foreground [&.active]:before:rounded-r-full"
             activeProps={{
               className: "active"
             }}
@@ -45,7 +45,7 @@ export function ProjectSidebarItem({
                 className="w-8 h-8 rounded-full object-cover"
               />
             ) : (
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-sm font-semibold text-foreground [.active_&]:text-primary-foreground">
                 {project.name.slice(0, 2).toUpperCase()}
               </span>
             )}

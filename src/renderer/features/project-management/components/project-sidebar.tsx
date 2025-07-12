@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useProjects } from "../hooks/use-projects.hook";
 import { ProjectSidebarItem } from "./project-sidebar-item";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +17,7 @@ function ProjectListSkeleton() {
   );
 }
 
-export function ProjectSidebar({}: ProjectSidebarProps) {
+const ProjectSidebarComponent = function ProjectSidebar({}: ProjectSidebarProps) {
   const { projects, isLoading } = useProjects({ status: "active" });
 
   if (isLoading) {
@@ -33,4 +34,6 @@ export function ProjectSidebar({}: ProjectSidebarProps) {
       ))}
     </div>
   );
-}
+};
+
+export const ProjectSidebar = memo(ProjectSidebarComponent);

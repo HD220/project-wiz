@@ -19,13 +19,31 @@ export function ConversationView({ conversationId, conversation }: ConversationV
   const [message, setMessage] = useState("");
   const { messages, createMessage } = useMessages(conversationId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isInitialLoad = useRef(true);
+  const previousMessagesLength = useRef(0);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      // First load: scroll instantly to bottom
+      if (isInitialLoad.current && messages.length > 0) {
+        messagesEndRef.current.scrollIntoView({ behavior: "instant" });
+        isInitialLoad.current = false;
+        previousMessagesLength.current = messages.length;
+      } 
+      // New message added: smooth scroll
+      else if (messages.length > previousMessagesLength.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        previousMessagesLength.current = messages.length;
+      }
     }
   }, [messages]);
+
+  // Reset for new conversation
+  useEffect(() => {
+    isInitialLoad.current = true;
+    previousMessagesLength.current = 0;
+  }, [conversationId]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -52,8 +70,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
         conversationId,
       });
       setMessage("");
-      // Scroll to bottom after sending message
-      setTimeout(scrollToBottom, 100);
+      // The useEffect will handle smooth scrolling automatically when messages update
     } catch (error) {
       console.error("Error sending message:", error);
     }
