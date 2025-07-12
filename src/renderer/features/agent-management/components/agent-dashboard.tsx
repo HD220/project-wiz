@@ -83,156 +83,158 @@ export function AgentDashboard({ className }: AgentDashboardProps) {
   };
 
   return (
-    <div className={cn("flex-1 p-6 space-y-6", className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Gerenciamento de Agentes</h1>
-          <p className="text-muted-foreground">
-            Monitore e gerencie todos os seus agentes IA
-          </p>
+    <ScrollArea className="h-full">
+      <div className={cn("p-6 space-y-6", className)}>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Gerenciamento de Agentes</h1>
+            <p className="text-muted-foreground">
+              Monitore e gerencie todos os seus agentes IA
+            </p>
+          </div>
+          <Button className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Novo Agente
+          </Button>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Novo Agente
-        </Button>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total de Agentes
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockAgents.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Online</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {onlineAgents.length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Executando</CardTitle>
-            <Play className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {executingAgents.length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tipos Únicos</CardTitle>
-            <Settings className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {new Set(mockAgents.map((a) => a.type)).size}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Agents List */}
-        <div className="lg:col-span-2">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Agentes</CardTitle>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar agentes..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-8 w-64"
-                    />
-                  </div>
-                  <Button variant="outline" size="sm">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtros
-                  </Button>
-                </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Agentes
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{mockAgents.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Online</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {onlineAgents.length}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Executando</CardTitle>
+              <Play className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <Tabs value={filterStatus} onValueChange={setFilterStatus}>
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="all">Todos</TabsTrigger>
-                  <TabsTrigger value="online">Online</TabsTrigger>
-                  <TabsTrigger value="executing">Executando</TabsTrigger>
-                  <TabsTrigger value="busy">Ocupados</TabsTrigger>
-                  <TabsTrigger value="offline">Offline</TabsTrigger>
-                </TabsList>
+              <div className="text-2xl font-bold text-blue-600">
+                {executingAgents.length}
+              </div>
+            </CardContent>
+          </Card>
 
-                <TabsContent value={filterStatus} className="mt-4">
-                  <ScrollArea className="h-96">
-                    <div className="space-y-3">
-                      {filteredAgents.map((agent) => (
-                        <AgentCard
-                          key={agent.id}
-                          agent={agent}
-                          isSelected={selectedAgent?.id === agent.id}
-                          onSelect={() => setSelectedAgent(agent)}
-                          onAction={handleAgentAction}
-                          getStatusColor={getStatusColor}
-                          getStatusText={getStatusText}
-                        />
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tipos Únicos</CardTitle>
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {new Set(mockAgents.map((a) => a.type)).size}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Agent Details */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Detalhes do Agente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedAgent ? (
-                <AgentDetails
-                  agent={selectedAgent}
-                  getStatusColor={getStatusColor}
-                  getStatusText={getStatusText}
-                  onAction={handleAgentAction}
-                />
-              ) : (
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    Selecione um agente para ver os detalhes
-                  </p>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Agents List */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Agentes</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar agentes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-8 w-64"
+                      />
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filtros
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={filterStatus} onValueChange={setFilterStatus}>
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="all">Todos</TabsTrigger>
+                    <TabsTrigger value="online">Online</TabsTrigger>
+                    <TabsTrigger value="executing">Executando</TabsTrigger>
+                    <TabsTrigger value="busy">Ocupados</TabsTrigger>
+                    <TabsTrigger value="offline">Offline</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value={filterStatus} className="mt-4">
+                    <ScrollArea className="h-96">
+                      <div className="space-y-3">
+                        {filteredAgents.map((agent) => (
+                          <AgentCard
+                            key={agent.id}
+                            agent={agent}
+                            isSelected={selectedAgent?.id === agent.id}
+                            onSelect={() => setSelectedAgent(agent)}
+                            onAction={handleAgentAction}
+                            getStatusColor={getStatusColor}
+                            getStatusText={getStatusText}
+                          />
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Agent Details */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalhes do Agente</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedAgent ? (
+                  <AgentDetails
+                    agent={selectedAgent}
+                    getStatusColor={getStatusColor}
+                    getStatusText={getStatusText}
+                    onAction={handleAgentAction}
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      Selecione um agente para ver os detalhes
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 

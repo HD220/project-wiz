@@ -46,36 +46,36 @@ export function KanbanBoard({ projectId, className }: KanbanBoardProps) {
   };
 
   return (
-    <div className={cn("flex-1 p-6", className)}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-full">
-        {taskColumns.map((column) => {
-          const tasks = getTasksByStatus(column.id);
+    <ScrollArea className="h-full">
+      <div className={cn("p-6 space-y-6", className)}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {taskColumns.map((column) => {
+            const tasks = getTasksByStatus(column.id);
 
-          return (
-            <div key={column.id} className="flex flex-col">
-              {/* Column Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className={cn("w-3 h-3 rounded-full", column.color)} />
-                  <h3 className="font-semibold text-foreground">
-                    {column.name}
-                  </h3>
-                  <Badge variant="secondary" className="ml-auto">
-                    {tasks.length}
-                  </Badge>
+            return (
+              <div key={column.id} className="flex flex-col">
+                {/* Column Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={cn("w-3 h-3 rounded-full", column.color)} />
+                    <h3 className="font-semibold text-foreground">
+                      {column.name}
+                    </h3>
+                    <Badge variant="secondary" className="ml-auto">
+                      {tasks.length}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-8 h-8"
+                    onClick={() => handleCreateTask(column.id)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-8 h-8"
-                  onClick={() => handleCreateTask(column.id)}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
 
-              {/* Tasks */}
-              <ScrollArea className="flex-1">
+                {/* Tasks */}
                 <div className="space-y-3">
                   {tasks.map((task) => (
                     <TaskCard key={task.id} task={task} />
@@ -100,12 +100,12 @@ export function KanbanBoard({ projectId, className }: KanbanBoardProps) {
                     </div>
                   )}
                 </div>
-              </ScrollArea>
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 

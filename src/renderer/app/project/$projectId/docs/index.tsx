@@ -276,65 +276,64 @@ export function ProjectDocsPage() {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col">
       <PageTitle
         title="Documentos"
         icon={<FileText className="w-5 h-5 text-muted-foreground" />}
       />
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        {/* Documentation Tree */}
-        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <div className="h-full flex flex-col border-r">
-            <div className="p-3 border-b">
-              <h3 className="font-semibold text-sm">Documentação</h3>
+      <div className="flex-1 min-h-0">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Documentation Tree */}
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+            <div className="h-full flex flex-col border-r">
+              <div className="p-3 border-b flex-shrink-0">
+                <h3 className="font-semibold text-sm">Documentação</h3>
+              </div>
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-2 space-y-1">{renderDocTree(mockDocs)}</div>
+              </ScrollArea>
             </div>
-            <ScrollArea className="flex-1">
-              <div className="p-2 space-y-1">{renderDocTree(mockDocs)}</div>
-            </ScrollArea>
-          </div>
-        </ResizablePanel>
+          </ResizablePanel>
 
-        <ResizableHandle />
+          <ResizableHandle />
 
-        {/* Document Viewer */}
-        <ResizablePanel defaultSize={75}>
-          <div className="h-full flex flex-col">
-            {selectedDoc ? (
-              <div className="flex-1 overflow-hidden">
-                <div className="h-full flex flex-col">
-                  <div className="p-4 border-b bg-muted/30">
+          {/* Document Viewer */}
+          <ResizablePanel defaultSize={75}>
+            <div className="h-full flex flex-col">
+              {selectedDoc ? (
+                <div className="flex-1 min-h-0 flex flex-col">
+                  <div className="p-4 border-b bg-muted/30 flex-shrink-0">
                     <h1 className="text-lg font-semibold">{selectedDoc.name}</h1>
                     <p className="text-sm text-muted-foreground">
                       {selectedDoc.path}
                     </p>
                   </div>
-                  <div className="flex-1 overflow-auto">
+                  <ScrollArea className="flex-1 min-h-0">
                     <div className="p-6 max-w-4xl mx-auto">
                       <MarkdownRenderer
                         content={selectedDoc.content || ""}
-                        className="min-h-0"
                       />
                     </div>
+                  </ScrollArea>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center">
+                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
+                      Selecione um documento
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Escolha um arquivo da árvore de documentação para
+                      visualizá-lo.
+                    </p>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">
-                    Selecione um documento
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Escolha um arquivo da árvore de documentação para
-                    visualizá-lo.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+              )}
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
     </div>
   );
 }
