@@ -2,10 +2,6 @@ import path from "path";
 
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
-// import { bootstrap } from "@/main/bootstrap";
-// import { CqrsDispatcher } from "@/main/kernel/cqrs-dispatcher";
-// import { EventBus } from "@/main/kernel/event-bus";
-// import { db } from "@/main/persistence/db";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -20,8 +16,8 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false, // Remove Windows title bar
-    titleBarStyle: 'hiddenInset', // macOS equivalent
+    frame: false,
+    titleBarStyle: "hiddenInset",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -47,13 +43,13 @@ const createWindow = () => {
 };
 
 // Window control handlers
-ipcMain.handle('window-minimize', () => {
+ipcMain.handle("window-minimize", () => {
   if (mainWindow) {
     mainWindow.minimize();
   }
 });
 
-ipcMain.handle('window-maximize', () => {
+ipcMain.handle("window-maximize", () => {
   if (mainWindow) {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize();
@@ -63,24 +59,17 @@ ipcMain.handle('window-maximize', () => {
   }
 });
 
-ipcMain.handle('window-close', () => {
+ipcMain.handle("window-close", () => {
   if (mainWindow) {
     mainWindow.close();
   }
 });
 
-ipcMain.handle('window-is-maximized', () => {
+ipcMain.handle("window-is-maximized", () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
 app.on("ready", async () => {
-  // console.log("[Main Process] Initializing business modules...");
-  // const cqrsDispatcher = new CqrsDispatcher();
-  // const eventBus = new EventBus();
-
-  // await bootstrap(cqrsDispatcher, eventBus, db);
-  // console.log("[Main Process] All business modules initialized.");
-
   createWindow();
 });
 

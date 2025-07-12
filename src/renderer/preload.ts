@@ -1,21 +1,21 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
 // Define a type for the exposed Electron IPC API
-import { IpcContracts } from "@/shared/ipc-types/ipc-contracts";
 
 export interface IElectronIPC {
-  invoke: <Channel extends keyof IpcContracts>(
+  invoke: <Channel, Payload, Response>(
     channel: Channel,
-    ...args: IpcContracts[Channel]["request"] extends void
-      ? []
-      : [IpcContracts[Channel]["request"]]
-  ) => Promise<IpcContracts[Channel]["response"]>;
+    ...args: Payload[]
+  ) => Promise<Response>;
   on: (
     channel: string,
-    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
+    listener: <EventResponse>(
+      event: IpcRendererEvent,
+      ...args: EventResponse[]
+    ) => void,
   ) => () => void;
-  send: (channel: string, ...args: unknown[]) => void;
-  removeAllListeners: (channel: string) => void;
+  send: <Channel, Payload>(channel: Channel, ...args: Payload[]) => void;
+  removeAllListeners: <Channel>(channel: Channel) => void;
   // Window control functions
   windowMinimize: () => Promise<void>;
   windowMaximize: () => Promise<void>;
@@ -24,49 +24,46 @@ export interface IElectronIPC {
 }
 
 const electronIPC: IElectronIPC = {
-  invoke: <T = unknown>(channel: string, ...args: unknown[]): Promise<T> => {
-    return ipcRenderer.invoke(channel, ...args);
+  invoke: function <Channel, Payload, Response>(
+    channel: Channel,
+    ...args: Payload[]
+  ): Promise<Response> {
+    throw new Error("Function not implemented.");
   },
-
-  /**
-   * Subscribes to an IPC channel.
-   * @param channel The channel to subscribe to.
-   * @param listener The function to call when an event is received on the channel.
-   * @returns A function to unsubscribe the listener from the channel.
-   */
-  on: (
+  on: function (
     channel: string,
-    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
-  ): (() => void) => {
-    ipcRenderer.on(channel, listener);
-    return () => {
-      ipcRenderer.removeListener(channel, listener);
-    };
+    listener: <EventResponse>(
+      event: IpcRendererEvent,
+      ...args: EventResponse[]
+    ) => void,
+  ): () => void {
+    throw new Error("Function not implemented.");
   },
-
-  send: (channel: string, ...args: unknown[]): void => {
-    ipcRenderer.send(channel, ...args);
+  send: function <Channel, Payload>(
+    channel: Channel,
+    ...args: Payload[]
+  ): void {
+    throw new Error("Function not implemented.");
   },
-
-  removeAllListeners: (channel: string): void => {
-    ipcRenderer.removeAllListeners(channel);
+  removeAllListeners: function <Channel>(channel: Channel): void {
+    throw new Error("Function not implemented.");
   },
 
   // Window control functions
   windowMinimize: (): Promise<void> => {
-    return ipcRenderer.invoke('window-minimize');
+    return ipcRenderer.invoke("window-minimize");
   },
 
   windowMaximize: (): Promise<void> => {
-    return ipcRenderer.invoke('window-maximize');
+    return ipcRenderer.invoke("window-maximize");
   },
 
   windowClose: (): Promise<void> => {
-    return ipcRenderer.invoke('window-close');
+    return ipcRenderer.invoke("window-close");
   },
 
   windowIsMaximized: (): Promise<boolean> => {
-    return ipcRenderer.invoke('window-is-maximized');
+    return ipcRenderer.invoke("window-is-maximized");
   },
 };
 

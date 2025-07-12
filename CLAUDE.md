@@ -19,17 +19,6 @@ O **Project Wiz** é uma aplicação desktop inovadora que atua como uma "fábri
 - **ESLint:** Ferramenta de linting para identificar e reportar padrões problemáticos encontrados no código JavaScript/TypeScript. Ajuda a manter a qualidade e consistência do código.
 - **LinguiJS:** Biblioteca para internacionalização (i18n) e localização (l10n) de aplicações React. Permite que a aplicação suporte múltiplos idiomas.
 
-## Contexto no Ecossistema
-
-O Project Wiz é uma aplicação desktop autônoma, o que significa que ele reside e opera diretamente no computador do desenvolvedor. Ele interage com o sistema de arquivos local para analisar e modificar código, e se conecta a serviços externos de LLM (como OpenAI ou DeepSeek) via API para realizar suas tarefas inteligentes.
-
-## Links Úteis
-
-- [Documentação do Usuário](D:/Documentos/Pessoal/Github/project-wiz/docs/user/README.md)
-- [Documentação Técnica](D:/Documentos/Pessoal/Github/project-wiz/docs/developer/reference/software-architecture.md)
-- [Guia de Contribuição](D:/Documentos/Pessoal/Github/project-wiz/docs/developer/community/contribution-guide.md)
-- [Código de Conduta](D:/Documentos/Pessoal/Github/project-wiz/docs/developer/community/code-of-conduct.md)
-
 # Arquitetura do Sistema
 
 O Project Wiz é uma aplicação desktop construída com Electron, o que significa que ela possui dois processos principais: o **Processo Principal (Main Process)** e o **Processo de Renderização (Renderer Process)**. A arquitetura segue princípios de Clean Architecture e Domain-Driven Design (DDD), com uma forte separação de responsabilidades e o uso do padrão CQRS (Command Query Responsibility Segregation).
@@ -52,57 +41,12 @@ O Project Wiz é uma aplicação desktop construída com Electron, o que signifi
   - O Drizzle ORM é utilizado para uma interação segura e tipada com o banco de dados.
 
 - **Serviços de LLM Externos:**
-  - Modelos de Linguagem Grandes (LLMs) como OpenAI e DeepSeek.
+  - Modelos de Linguagem Grandes (LLMs) como OpenAI e DeepSeek usando a lib `ai-sdk`.
   - O Processo Principal se comunica com esses serviços via APIs para realizar tarefas inteligentes, como geração de código, análise e planejamento.
-
-## Fluxo de Dados Simplificado
-
-Imagine que você clica em um botão na interface para "Criar um novo Tópico no Fórum":
-
-1.  **UI (Renderer Process):** O clique no botão é capturado pela interface do usuário.
-2.  **IPC (Inter-Process Communication):** É como um "telefone" que permite que o Processo de Renderização (UI) e o Processo Principal (lógica de negócio) conversem entre si. O Renderer Process envia uma mensagem (ex: `forum:create-topic`) para o Processo Principal, contendo os dados necessários (título, ID do autor).
-3.  **IPC Handler (Main Process):** No Processo Principal, um `ipcMain.handle` (como `forum.handler.ts`) recebe essa mensagem.
-4.  **CQRS Dispatcher (Main Process):** O handler utiliza um `CqrsDispatcher` para despachar um `Command` (ex: `CreateForumTopicCommand`). Este `Command` é um objeto que encapsula a intenção da ação.
-5.  **Application Layer (Main Process):** O `Command` é processado por um `UseCase` ou `Application Service` correspondente. Este serviço orquestra a lógica de negócio, interagindo com o domínio.
-6.  **Domain Layer (Main Process):** A lógica de negócio central é executada. Entidades e serviços de domínio são utilizados para validar dados, aplicar regras de negócio e realizar operações.
-7.  **Persistence Layer (Main Process):** Se a operação envolver dados, o Domain Layer interage com a Persistence Layer (através de interfaces de repositório) para salvar ou recuperar dados do banco de dados (SQLite via Drizzle ORM).
-8.  **Resposta:** O resultado da operação (sucesso/falha, dados criados/atualizados) é retornado através do `CqrsDispatcher` para o IPC Handler, que então envia a resposta de volta para o Renderer Process.
-9.  **Atualização da UI:** O Renderer Process recebe a resposta e atualiza a interface do usuário, mostrando o novo tópico ou uma mensagem de erro.
-
-## Estilo Arquitetural
-
-O projeto adota uma arquitetura modular baseada em **Clean Architecture** e **Domain-Driven Design (DDD)**. Isso significa que:
-
-- **Separação de Camadas:** A lógica de negócio (Domínio) é mantida isolada das preocupações de infraestrutura (banco de dados, APIs externas, UI). Isso torna o código mais testável, manutenível e flexível a mudanças.
-- **Módulos Bounded Contexts:** O sistema é dividido em módulos independentes (ex: `forum`, `llm-integration`, `persona-management`), cada um representando um "contexto delimitado" com suas próprias responsabilidades e lógica de domínio.
-- **CQRS (Command Query Responsibility Segregation):** As operações que modificam o estado do sistema (Comandos) são separadas das operações que apenas leem dados (Queries). Isso otimiza a performance e a clareza das intenções.
-
-## Considerações Importantes
-
-- **Tratamento de Erros:** Erros são capturados nos IPC Handlers e retornados ao Renderer Process para serem exibidos ao usuário, garantindo uma experiência robusta.
-- **Segurança:** A aplicação lida com hash de senhas (bcrypt) e tokens JWT para autenticação, garantindo a segurança das operações internas e de dados sensíveis.
 
 # Padrões de Design e Boas Práticas
 
 O Project Wiz segue rigorosamente diversos padrões de design e boas práticas para garantir um código de alta qualidade, manutenível e escalável.
-
-## Padrões Comuns no Projeto
-
-- **Clean Architecture / Domain-Driven Design (DDD):**
-  - **Explicação:** Este é o padrão arquitetural central. Ele organiza o código em camadas concêntricas, onde as dependências fluem de fora para dentro. O "coração" é o Domínio (lógica de negócio pura), cercado pela Camada de Aplicação (casos de uso), e depois pelas camadas de Infraestrutura e Apresentação. O DDD foca em modelar o software em torno do domínio do negócio, usando uma linguagem ubíqua.
-  - **Exemplo no Projeto:** Você verá isso na estrutura de cada módulo (`src/main/modules/<nome-do-modulo>/`), que contém subdiretórios como `domain/`, `application/`, `persistence/` e `infrastructure/`.
-    - `domain/`: Contém as entidades, agregados e serviços de domínio (a lógica de negócio principal, independente de tecnologia).
-    - `application/`: Contém os casos de uso (Use Cases) e serviços de aplicação que orquestram as operações do domínio.
-    - `persistence/`: Contém as implementações dos repositórios que interagem com o banco de dados.
-    - `infrastructure/`: Contém implementações de interfaces que dependem de tecnologias externas (ex: clientes de API de LLM).
-
-- **CQRS (Command Query Responsibility Segregation):**
-  - **Explicação:** Pense no CQRS como ter duas "portas" diferentes para interagir com o sistema: uma para **Comandos** (ações que mudam algo, como "Criar Usuário") e outra para **Queries** (ações que apenas perguntam algo, como "Listar Usuários"). Isso ajuda a manter o código mais organizado, claro e, em sistemas maiores, pode melhorar o desempenho.
-  - **Exemplo no Projeto:** Nos IPC Handlers (ex: `src/main/ipc-handlers/forum.handler.ts`), você verá chamadas para `cqrsDispatcher.dispatchCommand()` para ações como `CreateForumTopicCommand` e `cqrsDispatcher.dispatchQuery()` para leituras como `ListForumTopicsQuery`. Dentro dos módulos, a camada `application/` é dividida em `commands/` e `queries/`.
-
-- **Injeção de Dependência (Dependency Injection - DI):**
-  - **Explicação:** Em vez de uma classe criar suas próprias dependências, elas são "injetadas" (passadas) para ela, geralmente através do construtor. Isso promove o baixo acoplamento, tornando o código mais modular, testável e fácil de manter.
-  - **Exemplo no Projeto:** O `CqrsDispatcher` é injetado nos IPC Handlers (ex: `registerForumIpcHandlers(cqrsDispatcher: CqrsDispatcher)`). Isso permite que o handler utilize o dispatcher sem precisar saber como ele é criado.
 
 ## Convenções de Código
 
@@ -129,7 +73,7 @@ A organização do repositório segue uma estrutura clara e modular, facilitando
 project-wiz/
 ├── .env.example             # Exemplo de arquivo de variáveis de ambiente
 ├── .gitignore               # Arquivo para ignorar arquivos e diretórios no Git
-├── AGENTS.md                # Este documento!
+├── CLAUDE.md                # Este documento!
 ├── components.json          # Configuração para componentes UI (shadcn/ui)
 ├── drizzle.config.ts        # Configuração do Drizzle ORM para banco de dados
 ├── eslint.config.js         # Configuração do ESLint para linting de código
@@ -145,116 +89,25 @@ project-wiz/
 ├── vite.renderer.config.mts # Configuração do Vite para o processo de renderização (UI)
 ├── vitest.config.mts        # Configuração do Vitest para testes
 ├── docs/                    # Documentação do projeto (usuário, desenvolvedor, arquitetura)
-│   ├── developer/           # Documentação para desenvolvedores
-│   │   └── reference/       # Referências técnicas, ADRs (Architectural Decision Records)
-│   └── user/                # Guias e tutoriais para usuários
 └── src/                     # Código-fonte principal da aplicação
     ├── main/                # Código do Processo Principal (Node.js/Electron)
-    │   ├── bootstrap.ts     # Ponto de entrada e inicialização do processo principal
-    │   ├── electron-main-composition.ts # Composição de dependências e inicialização de módulos
-    │   ├── ipc-handlers/    # Handlers para comunicação IPC entre Renderer e Main
-    │   │   └── forum.handler.ts # Exemplo de handler para o módulo de fórum
-    │   ├── kernel/          # Componentes centrais do sistema, como o CQRS Dispatcher
-    │   │   └── cqrs-dispatcher.ts # Despachador de Comandos e Queries
     │   ├── modules/         # Módulos de domínio (bounded contexts)
-    │   │   ├── automatic-persona-hiring/ # Lógica para contratação automática de personas
-    │   │   │   ├── application/ # Casos de uso e serviços de aplicação
-    │   │   │   ├── domain/      # Entidades e lógica de domínio
-    │   │   │   └── persistence/ # Implementações de repositório
-    │   │   ├── code-analysis/    # Módulo para análise de código
-    │   │   ├── direct-messages/  # Módulo para mensagens diretas
-    │   │   ├── filesystem-tools/ # Ferramentas para interação com o sistema de arquivos
-    │   │   ├── forum/            # Módulo do sistema de fórum
-    │   │   │   ├── application/  # Comandos e Queries do fórum
-    │   │   │   │   ├── commands/ # Comandos (ex: CreateForumTopicCommand)
-    │   │   │   │   └── queries/  # Queries (ex: ListForumTopicsQuery)
-    │   │   │   ├── domain/       # Lógica de domínio do fórum
-    │   │   │   └── persistence/  # Repositórios do fórum
-    │   │   ├── git-integration/  # Módulo para integração com Git
-    │   │   ├── llm-integration/  # Módulo para integração com LLMs
-    │   │   │   ├── application/  # Casos de uso de LLM
-    │   │   │   ├── domain/       # Lógica de domínio de LLM
-    │   │   │   ├── infrastructure/ # Implementações de clientes de LLM (ex: OpenAI API)
-    │   │   │   └── persistence/  # Repositórios de LLM
-    │   │   ├── persona-management/ # Módulo para gestão de personas
-    │   │   ├── project-management/ # Módulo para gestão de projetos
-    │   │   └── user-settings/    # Módulo para configurações do usuário
     │   └── persistence/     # Configuração global de persistência (Drizzle, migrações)
     │       ├── db.ts        # Configuração da conexão com o banco de dados
-    │       ├── schema.ts    # Esquema global do banco de dados
     │       └── migrations/  # Arquivos de migração do banco de dados
-    ├── presentation/        # Camada de apresentação (UI)
-    │   └── ui/              # Componentes de UI reutilizáveis (shadcn/ui)
     ├── renderer/            # Código do Processo de Renderização (React UI)
-    │   ├── app/             # Componentes principais da aplicação React
+    │   ├── app/             # Paginas/Rotas da aplicação
     │   ├── components/      # Componentes React específicos da aplicação
     │   ├── features/        # Módulos de funcionalidades da UI (ex: direct-messages, forum)
     │   ├── hooks/           # Hooks React personalizados
     │   ├── lib/             # Funções utilitárias
     │   └── styles/          # Estilos globais (Tailwind CSS)
     └── shared/              # Código compartilhado entre Main e Renderer (apenas tipos e interfaces para comunicação IPC. **Importante: Este diretório não deve conter lógica de negócio ou implementações, apenas definições de tipos, para evitar dependências cíclicas e garantir a separação entre os processos Main e Renderer do Electron**)
-        ├── common/          # Tipos comuns (ex: BaseEntity)
-        └── ipc-types/       # Definições de tipos para comunicação IPC
 ```
 
 # Guia de Desenvolvimento Local
 
 Este guia irá ajudá-lo a configurar o ambiente de desenvolvimento do Project Wiz em sua máquina.
-
-## Pré-requisitos Obrigatórios
-
-Para rodar o Project Wiz localmente, você precisará ter as seguintes ferramentas instaladas:
-
-- **Git:** Sistema de controle de versão.
-  - [Download Git](https://git-scm.com/downloads)
-- **Node.js (versão 20.x ou superior):** Ambiente de execução JavaScript.
-  - [Download Node.js](https://nodejs.org/en/download/)
-- **npm (geralmente vem com o Node.js):** Gerenciador de pacotes do Node.js.
-- **VS Code (Recomendado):** Editor de código com bom suporte a TypeScript e extensões úteis.
-  - [Download VS Code](https://code.visualstudio.com/download)
-
-## Passo a Passo de Configuração do Ambiente
-
-1.  **Clonar o Repositório:**
-    Abra seu terminal ou prompt de comando e execute:
-
-    ```bash
-    git clone https://github.com/HD220/project-wiz.git
-    cd project-wiz
-    ```
-
-    _Isso baixa todo o código do projeto para uma pasta no seu computador e entra nessa pasta._
-
-2.  **Instalar Dependências:**
-    Dentro da pasta `project-wiz`, execute:
-
-    ```bash
-    npm install
-    ```
-
-    _Este comando lê o arquivo `package.json` e baixa todas as bibliotecas e ferramentas que o projeto precisa para funcionar e para o desenvolvimento._
-
-3.  **Configurar Variáveis de Ambiente:**
-    O projeto utiliza variáveis de ambiente para configurações sensíveis (como chaves de API de LLMs).
-    - Crie um arquivo chamado `.env` na raiz do projeto (na mesma pasta onde está o `package.json`).
-    - Copie o conteúdo do arquivo `.env.example` para o seu novo arquivo `.env`.
-    - Preencha as variáveis necessárias, como as chaves de API para OpenAI ou DeepSeek, se for usar esses serviços.
-      _Exemplo de `.env` (apenas para ilustração, consulte `.env.example` para o conteúdo completo):_
-
-    ```
-    OPENAI_API_KEY=sua_chave_aqui
-    DEEPSEEK_API_KEY=sua_chave_aqui
-    ```
-
-    _Este passo é crucial para que a aplicação possa se conectar aos serviços externos e funcionar corretamente._
-
-4.  **Configurar Banco de Dados (SQLite):**
-    O Project Wiz usa SQLite, que é um banco de dados baseado em arquivo. Ele será criado automaticamente na primeira execução se não existir. No entanto, você pode precisar gerar as migrações do banco de dados.
-    ```bash
-    npm run db:generate
-    npm run db:migrate
-    ```
-    _`db:generate` cria os arquivos de migração com base no seu esquema de banco de dados. `db:migrate` aplica essas migrações ao seu arquivo de banco de dados SQLite (`project-wiz.db`), criando as tabelas necessárias._
 
 ## Comandos Essenciais
 
@@ -350,6 +203,7 @@ Aqui estão algumas das bibliotecas e frameworks mais importantes que o Project 
 - **@tanstack/react-query:** Biblioteca para gerenciamento de estado assíncrono, cache e sincronização de dados no React. Essencial para lidar com a comunicação com o backend e APIs externas.
 - **@hookform/resolvers, react-hook-form:** Bibliotecas para construção e validação de formulários no React, integradas com esquemas de validação como Zod.
 - **zod:** Biblioteca de declaração e validação de esquemas com segurança de tipo. Usada para garantir que os dados de entrada e saída estejam no formato correto.
+- **zustand:** Biblioteca de gerenciamento de estado global.
 - **@libsql/client, better-sqlite3, drizzle-orm:** Conjunto de ferramentas para interagir com o banco de dados SQLite. `better-sqlite3` é o driver, `@libsql/client` é um cliente para o banco de dados, e `drizzle-orm` é o ORM que facilita a manipulação dos dados.
 - **bcrypt, bcryptjs, jsonwebtoken:** Bibliotecas para segurança. `bcrypt` e `bcryptjs` são usadas para hash de senhas, e `jsonwebtoken` para geração e verificação de tokens de autenticação (JWT).
 - **electron-forge:** Ferramenta completa para empacotar e distribuir aplicações Electron.
@@ -390,28 +244,6 @@ Seguimos o padrão [Conventional Commits](https://www.conventionalcommits.org/en
   - `docs(readme): Atualiza seção de instalação`
   - `refactor(core): Otimiza lógica de dispatch de comandos`
 
-## Ciclo de Vida do PR
-
-- **Revisão:** Após abrir o PR, outros desenvolvedores irão revisá-lo. Eles podem deixar comentários, sugestões ou pedir alterações.
-- **Endereçando Comentários:** Responda a todos os comentários e faça as alterações solicitadas. Se discordar de uma sugestão, explique o seu raciocínio.
-- **Aprovação:** O PR será aprovado quando os revisores estiverem satisfeitos com as mudanças.
-- **Merge:** Uma vez aprovado, o PR será mesclado na branch principal (geralmente `main`).
-
-# Funcionalidades Chave e Módulos
-
-O Project Wiz é composto por diversos módulos, cada um responsável por um conjunto específico de funcionalidades. Essa modularização ajuda a organizar o código e a separar as responsabilidades.
-
-- **`automatic-persona-hiring`:** Lógica relacionada à contratação e gerenciamento automático de personas de IA.
-- **`code-analysis`:** Módulo responsável por analisar o código-fonte do projeto, identificando padrões, problemas ou oportunidades de melhoria.
-- **`direct-messages`:** Gerencia a funcionalidade de mensagens diretas dentro da aplicação, permitindo a comunicação entre usuários ou com agentes específicos.
-- **`filesystem-tools`:** Fornece ferramentas e utilitários para interagir com o sistema de arquivos local, como leitura, escrita e manipulação de arquivos e diretórios.
-- **`forum`:** Implementa o sistema de fórum interno da aplicação, onde os usuários podem criar tópicos e posts.
-- **`git-integration`:** Módulo para integração com o sistema de controle de versão Git, permitindo operações como clonagem, commit, push, etc.
-- **`llm-integration`:** Gerencia a integração com diferentes Large Language Models (LLMs), configurando e utilizando as APIs para comunicação com modelos como OpenAI e DeepSeek.
-- **`persona-management`:** Responsável pela criação, configuração, ativação e desativação das personas de IA que atuam no Project Wiz.
-- **`project-management`:** Lida com a gestão de projetos dentro da aplicação, incluindo a criação, abertura e organização de bases de código.
-- **`user-settings`:** Gerencia as configurações e preferências do usuário dentro da aplicação.
-
 # Como Manter Este Documento Atualizado (Para Todos os Contribuidores)
 
 Este documento é a "bússola" do nosso projeto. Para garantir que ele continue útil e preciso para **todos, especialmente para quem está começando**, é crucial mantê-lo sempre atualizado e didático.
@@ -434,7 +266,7 @@ Este documento é a "bússola" do nosso projeto. Para garantir que ele continue 
   - A **estrutura de diretórios** do repositório for alterada.
 - **Processo (Passos Práticos):**
   1.  **Identifique a Necessidade:** Antes de abrir um Pull Request com suas mudanças no código, pense: "Minhas alterações afetam alguma parte deste documento?"
-  2.  **Edite o Documento:** Abra este arquivo (`AGENTS.md`) em seu editor.
+  2.  **Edite o Documento:** Abra este arquivo (`CLAUDE.md`) em seu editor.
   3.  **Atualize as Seções Relevantes:**
       - Adicione novas dependências em `# Principais Dependências`.
       - Modifique comandos em `# Guia de Desenvolvimento Local`.

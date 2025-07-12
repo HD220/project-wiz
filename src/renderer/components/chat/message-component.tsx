@@ -92,13 +92,14 @@ export function MessageComponent({
             <CheckCircle className="h-4 w-4 text-green-500" />
             <span className="font-medium text-green-400">Task Update</span>
           </div>
-          <ReactMarkdown
-            className="text-gray-300 prose prose-sm prose-invert max-w-none"
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
-            // eslint-disable-next-line react/no-children-prop
-            children={contentWithMentions} // Use content with processed mentions
-          />
+          <div className="text-gray-300 prose prose-sm prose-invert max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              // eslint-disable-next-line react/no-children-prop
+              children={contentWithMentions} // Use content with processed mentions
+            />
+          </div>
           {/* <p className="text-gray-300">{message.content}</p> */}
           {metadata && (
             <div className="mt-2 text-sm text-gray-400">
@@ -115,13 +116,14 @@ export function MessageComponent({
         <div className="bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded-r">
           <div className="flex items-center space-x-2">
             <Info className="h-4 w-4 text-blue-500" />
-            <ReactMarkdown
-              className="text-blue-300 prose prose-sm prose-invert max-w-none"
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              // eslint-disable-next-line react/no-children-prop
-              children={message.content} // System messages likely don't have mentions
-            />
+            <div className="text-blue-300 prose prose-sm prose-invert max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                // eslint-disable-next-line react/no-children-prop
+                children={message.content} // System messages likely don't have mentions
+              />
+            </div>
             {/* <span className="text-blue-300">{message.content}</span> */}
           </div>
         </div>
@@ -130,22 +132,23 @@ export function MessageComponent({
 
     // For regular text messages
     return (
-      <ReactMarkdown
-        className="text-gray-300 prose prose-sm prose-invert max-w-none"
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        // eslint-disable-next-line react/no-children-prop
-        children={contentWithMentions}
-        // Components prop can be used to customize rendering of specific elements
-        // e.g., to handle mentions if they were parsed as a specific markdown element
-        components={
-          {
-            // Example: Customizing how links are rendered
-            // a: ({node, ...props}) => <a {...props} className="text-blue-400 hover:underline" />
-            // With rehypeRaw, the explicitly created span for mentions should be rendered.
+      <div className="text-gray-300 prose prose-sm prose-invert max-w-none">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+          // eslint-disable-next-line react/no-children-prop
+          children={contentWithMentions}
+          // Components prop can be used to customize rendering of specific elements
+          // e.g., to handle mentions if they were parsed as a specific markdown element
+          components={
+            {
+              // Example: Customizing how links are rendered
+              // a: ({node, ...props}) => <a {...props} className="text-blue-400 hover:underline" />
+              // With rehypeRaw, the explicitly created span for mentions should be rendered.
+            }
           }
-        }
-      />
+        />
+      </div>
     );
   };
 
