@@ -24,7 +24,6 @@ function RootComponent() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
-  console.log("Root component rendering, path:", location.pathname);
 
   const handleCreateProject = () => {
     setShowCreateProjectModal(true);
