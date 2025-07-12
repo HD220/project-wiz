@@ -21,7 +21,7 @@ O **Project Wiz** é uma aplicação desktop inovadora que atua como uma "fábri
 
 # Arquitetura do Sistema
 
-O Project Wiz é uma aplicação desktop construída com Electron, o que significa que ela possui dois processos principais: o **Processo Principal (Main Process)** e o **Processo de Renderização (Renderer Process)**. A arquitetura segue princípios de Clean Architecture e Domain-Driven Design (DDD), com uma forte separação de responsabilidades e o uso do padrão CQRS (Command Query Responsibility Segregation).
+O Project Wiz é uma aplicação desktop construída com Electron, o que significa que ela possui dois processos principais: o **Processo Principal (Main Process)** e o **Processo de Renderização (Renderer Process)**.
 
 ## Componentes Principais
 

@@ -2,7 +2,7 @@
 
 ## 📋 Resumo Executivo
 
-Esta documentação detalha o planejamento completo para implementação da funcionalidade de **criação e listagem de projetos** no Project Wiz, seguindo os padrões arquiteturais existentes e princípios de Clean Architecture, DDD e Object Calisthenics.
+Esta documentação detalha o planejamento completo para implementação da funcionalidade de **criação e listagem de projetos** no Project Wiz, seguindo uma arquitetura simples e pragmática com Object Calisthenics e validações Zod.
 
 ## 🎯 Objetivos
 
@@ -10,46 +10,27 @@ Esta documentação detalha o planejamento completo para implementação da func
 2. **Comunicação IPC** tipada entre frontend e main process
 3. **Interface reativa** usando `useSyncExternalStore` para listagem
 4. **Código modular** seguindo Object Calisthenics e boas práticas
-5. **Manter consistência** com padrões existentes do projeto
+5. **Validações** usando Zod sempre que possível
+6. **Arquitetura simples** sem over-engineering
 
-## 🏗️ Arquitetura Proposta
+## 🏗️ Arquitetura Proposta (Simplificada)
 
-### 1. Estrutura de Módulos (Domain-Driven Design)
+### 1. Estrutura de Módulos
 
 ```
 src/main/modules/project-management/
-├── application/
-│   ├── commands/
-│   │   ├── create-project.command.ts
-│   │   └── delete-project.command.ts
-│   ├── queries/
-│   │   ├── get-project-by-id.query.ts
-│   │   └── list-projects.query.ts
-│   └── handlers/
-│       ├── create-project.handler.ts
-│       ├── delete-project.handler.ts
-│       ├── get-project-by-id.handler.ts
-│       └── list-projects.handler.ts
-├── domain/
-│   ├── entities/
-│   │   └── project.entity.ts
-│   ├── value-objects/
-│   │   ├── project-id.vo.ts
-│   │   ├── project-name.vo.ts
-│   │   └── git-url.vo.ts
-│   ├── repositories/
-│   │   └── project.repository.interface.ts
-│   └── services/
-│       └── project-validation.service.ts
-├── infrastructure/
-│   ├── persistence/
-│   │   ├── schema.ts
-│   │   ├── project.repository.ts
-│   │   └── mappers/
-│   │       └── project.mapper.ts
-│   └── ipc/
-│       └── project.ipc-handler.ts
-└── index.ts
+├── entities/
+│   ├── project.entity.ts
+│   └── project.schema.ts
+├── services/
+│   └── project.service.ts
+├── mappers/
+│   └── project.mapper.ts
+├── persistence/
+│   ├── schema.ts
+│   └── repository.ts
+└── ipc/
+    └── handlers.ts
 ```
 
 ### 2. Tipos Compartilhados (IPC Communication)
@@ -73,9 +54,7 @@ src/renderer/
 │   │   ├── project-card.component.tsx
 │   │   └── create-project-form.component.tsx
 │   ├── hooks/
-│   │   ├── use-projects.hook.ts
-│   │   ├── use-create-project.hook.ts
-│   │   └── use-project-store.hook.ts
+│   │   └── use-projects.hook.ts
 │   └── stores/
 │       └── project.store.ts
 └── hooks/
@@ -88,22 +67,26 @@ src/renderer/
 ### Schema Drizzle (src/main/modules/project-management/infrastructure/persistence/schema.ts)
 
 ```typescript
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { createId } from '@paralleldrive/cuid2';
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { createId } from "@paralleldrive/cuid2";
 
-export const projects = sqliteTable('projects', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  name: text('name').notNull(),
-  description: text('description'),
-  gitUrl: text('git_url'),
-  status: text('status', { 
-    enum: ['active', 'inactive', 'archived'] 
-  }).notNull().default('active'),
-  avatar: text('avatar'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+export const projects = sqliteTable("projects", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  name: text("name").notNull(),
+  description: text("description"),
+  gitUrl: text("git_url"),
+  status: text("status", {
+    enum: ["active", "inactive", "archived"],
+  })
+    .notNull()
+    .default("active"),
+  avatar: text("avatar"),
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
+  updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
@@ -112,152 +95,207 @@ export type ProjectSchema = typeof projects.$inferSelect;
 export type CreateProjectSchema = typeof projects.$inferInsert;
 ```
 
-## 🎨 Entidades de Domínio
+## 🎨 Entidades com Validação Zod
 
-### 1. Entidade Project (src/main/modules/project-management/domain/entities/project.entity.ts)
+### 1. Schema Zod para Validação
 
 ```typescript
+// src/main/modules/project-management/entities/project.schema.ts
+import { z } from "zod";
+import { createId } from "@paralleldrive/cuid2";
+
+export const ProjectSchema = z.object({
+  id: z
+    .string()
+    .cuid2()
+    .default(() => createId()),
+  name: z
+    .string()
+    .min(1, "Project name cannot be empty")
+    .max(100, "Project name too long")
+    .transform((val) => val.trim()),
+  description: z.string().optional(),
+  gitUrl: z.string().url("Invalid Git URL format").optional(),
+  status: z.enum(["active", "inactive", "archived"]).default("active"),
+  avatar: z.string().optional(),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+});
+
+export const CreateProjectSchema = ProjectSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const UpdateProjectSchema = ProjectSchema.partial().extend({
+  id: z.string().cuid2(),
+  updatedAt: z.date().default(() => new Date()),
+});
+
+export type ProjectData = z.infer<typeof ProjectSchema>;
+export type CreateProjectData = z.infer<typeof CreateProjectSchema>;
+export type UpdateProjectData = z.infer<typeof UpdateProjectSchema>;
+```
+
+### 2. Entidade Project (src/main/modules/project-management/entities/project.entity.ts)
+
+```typescript
+import {
+  ProjectSchema,
+  ProjectData,
+  UpdateProjectSchema,
+} from "./project.schema";
+
 export class ProjectEntity {
-  private constructor(
-    private readonly props: ProjectProps
-  ) {}
+  private props: ProjectData;
 
-  static create(props: CreateProjectProps): Result<ProjectEntity> {
-    // Validações e criação da entidade
+  constructor(data: Partial<ProjectData> | ProjectData) {
+    // Valida automaticamente no construtor
+    this.props = ProjectSchema.parse(data);
   }
 
-  static restore(props: ProjectProps): ProjectEntity {
-    // Restaurar entidade do banco
+  // Getters seguindo Object Calisthenics (sem abreviações)
+  getId(): string {
+    return this.props.id;
+  }
+  getName(): string {
+    return this.props.name;
+  }
+  getDescription(): string | undefined {
+    return this.props.description;
+  }
+  getGitUrl(): string | undefined {
+    return this.props.gitUrl;
+  }
+  getStatus(): "active" | "inactive" | "archived" {
+    return this.props.status;
+  }
+  getAvatar(): string | undefined {
+    return this.props.avatar;
+  }
+  getCreatedAt(): Date {
+    return this.props.createdAt;
+  }
+  getUpdatedAt(): Date {
+    return this.props.updatedAt;
   }
 
-  // Getters
-  get id(): ProjectId { return this.props.id; }
-  get name(): ProjectName { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get gitUrl(): GitUrl | undefined { return this.props.gitUrl; }
-  get status(): ProjectStatus { return this.props.status; }
-  get avatar(): string | undefined { return this.props.avatar; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  // Update methods with Zod validation
+  updateName(data: { name: string }): void {
+    const validated = z.object({ name: ProjectSchema.shape.name }).parse(data);
+    this.props.name = validated.name;
+    this.props.updatedAt = new Date();
+  }
 
-  // Methods
-  updateName(name: ProjectName): void;
-  updateDescription(description: string): void;
-  updateGitUrl(gitUrl: GitUrl): void;
-  archive(): void;
-  activate(): void;
-  toPlainObject(): ProjectPlainObject;
-}
-```
+  updateDescription(data: { description?: string }): void {
+    const validated = z
+      .object({
+        description: ProjectSchema.shape.description,
+      })
+      .parse(data);
+    this.props.description = validated.description;
+    this.props.updatedAt = new Date();
+  }
 
-### 2. Value Objects
+  updateGitUrl(data: { gitUrl?: string }): void {
+    const validated = z
+      .object({
+        gitUrl: ProjectSchema.shape.gitUrl,
+      })
+      .parse(data);
+    this.props.gitUrl = validated.gitUrl;
+    this.props.updatedAt = new Date();
+  }
 
-```typescript
-// project-id.vo.ts
-export class ProjectId {
-  private constructor(private readonly value: string) {}
-  
-  static create(value?: string): ProjectId {
-    return new ProjectId(value || createId());
+  archive(): void {
+    this.props.status = "archived";
+    this.props.updatedAt = new Date();
   }
-  
-  toString(): string {
-    return this.value;
-  }
-}
 
-// project-name.vo.ts
-export class ProjectName {
-  private constructor(private readonly value: string) {}
-  
-  static create(value: string): Result<ProjectName> {
-    if (!value.trim()) {
-      return Result.fail('Project name cannot be empty');
-    }
-    if (value.length > 100) {
-      return Result.fail('Project name too long');
-    }
-    return Result.ok(new ProjectName(value.trim()));
+  activate(): void {
+    this.props.status = "active";
+    this.props.updatedAt = new Date();
   }
-  
-  toString(): string {
-    return this.value;
-  }
-}
 
-// git-url.vo.ts
-export class GitUrl {
-  private constructor(private readonly value: string) {}
-  
-  static create(value: string): Result<GitUrl> {
-    if (!this.isValidGitUrl(value)) {
-      return Result.fail('Invalid Git URL format');
-    }
-    return Result.ok(new GitUrl(value));
-  }
-  
-  private static isValidGitUrl(url: string): boolean {
-    // Validação de URL Git
-  }
-  
-  toString(): string {
-    return this.value;
+  toPlainObject(): ProjectData {
+    return { ...this.props };
   }
 }
 ```
 
-## 🔄 Camada de Aplicação (CQRS)
-
-### 1. Commands
+## 🔄 Service Layer (Simplificado)
 
 ```typescript
-// create-project.command.ts
-export class CreateProjectCommand {
-  constructor(
-    public readonly name: string,
-    public readonly description?: string,
-    public readonly gitUrl?: string,
-    public readonly avatar?: string
-  ) {}
-}
+// src/main/modules/project-management/services/project.service.ts
+import { ProjectEntity } from "../entities/project.entity";
+import { ProjectRepository } from "../persistence/repository";
+import {
+  CreateProjectData,
+  UpdateProjectData,
+  ProjectData,
+} from "../entities/project.schema";
 
-// create-project.handler.ts
-export class CreateProjectHandler {
-  constructor(
-    private readonly projectRepository: ProjectRepositoryInterface,
-    private readonly eventBus: EventBusInterface
-  ) {}
+export class ProjectService {
+  private projectEntity: ProjectEntity;
 
-  async handle(command: CreateProjectCommand): Promise<Result<ProjectEntity>> {
-    // 1. Criar value objects
-    // 2. Criar entidade
-    // 3. Persistir no repositório
-    // 4. Emitir evento de domínio
-    // 5. Retornar resultado
+  constructor(private repository: ProjectRepository) {
+    this.projectEntity = new ProjectEntity();
   }
-}
-```
 
-### 2. Queries
+  async createProject(data: CreateProjectData): Promise<ProjectData> {
+    const project = this.projectEntity.create(data);
+    const saved = await this.repository.save(project.toPlainObject());
+    return saved;
+  }
 
-```typescript
-// list-projects.query.ts
-export class ListProjectsQuery {
-  constructor(
-    public readonly status?: ProjectStatus,
-    public readonly limit?: number,
-    public readonly offset?: number
-  ) {}
-}
+  async listProjects(filter?: {
+    status?: "active" | "inactive" | "archived";
+    limit?: number;
+    offset?: number;
+  }): Promise<ProjectData[]> {
+    return this.repository.findMany(filter);
+  }
 
-// list-projects.handler.ts
-export class ListProjectsHandler {
-  constructor(
-    private readonly projectRepository: ProjectRepositoryInterface
-  ) {}
+  async getProjectById(data: { id: string }): Promise<ProjectData | null> {
+    return this.repository.findById(data.id);
+  }
 
-  async handle(query: ListProjectsQuery): Promise<ProjectEntity[]> {
-    return this.projectRepository.findMany(query);
+  async updateProject(data: UpdateProjectData): Promise<ProjectData> {
+    const existing = await this.repository.findById(data.id);
+    if (!existing) {
+      throw new Error("Project not found");
+    }
+
+    const project = this.projectEntity.restore(existing);
+
+    if (data.name !== undefined) {
+      project.updateName({ name: data.name });
+    }
+    if (data.description !== undefined) {
+      project.updateDescription({ description: data.description });
+    }
+    if (data.gitUrl !== undefined) {
+      project.updateGitUrl({ gitUrl: data.gitUrl });
+    }
+
+    return this.repository.update(project.toPlainObject());
+  }
+
+  async deleteProject(data: { id: string }): Promise<void> {
+    await this.repository.delete(data.id);
+  }
+
+  async archiveProject(data: { id: string }): Promise<ProjectData> {
+    const existing = await this.repository.findById(data.id);
+    if (!existing) {
+      throw new Error("Project not found");
+    }
+
+    const project = this.projectEntity.restore(existing);
+    project.archive();
+
+    return this.repository.update(project.toPlainObject());
   }
 }
 ```
@@ -272,7 +310,7 @@ export interface ProjectDto {
   name: string;
   description?: string;
   gitUrl?: string;
-  status: 'active' | 'inactive' | 'archived';
+  status: "active" | "inactive" | "archived";
   avatar?: string;
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
@@ -296,42 +334,117 @@ export interface UpdateProjectDto {
 }
 
 export interface ProjectFilterDto {
-  status?: 'active' | 'inactive' | 'archived';
+  status?: "active" | "inactive" | "archived";
   limit?: number;
   offset?: number;
 }
 ```
 
-### 2. IPC Handlers (src/main/modules/project-management/infrastructure/ipc/project.ipc-handler.ts)
+### 2. IPC Handlers (src/main/modules/project-management/ipc/handlers.ts)
 
 ```typescript
-export class ProjectIpcHandler {
+import { ipcMain, IpcMainInvokeEvent } from 'electron';
+import { ProjectService } from '../services/project.service';
+import { ProjectMapper } from '../mappers/project.mapper';
+import { CreateProjectDto, UpdateProjectDto, ProjectFilterDto } from '../../../shared/types/project.types';
+
+export class ProjectIpcHandlers {
   constructor(
-    private readonly createProjectHandler: CreateProjectHandler,
-    private readonly listProjectsHandler: ListProjectsHandler,
-    private readonly getProjectByIdHandler: GetProjectByIdHandler,
-    private readonly deleteProjectHandler: DeleteProjectHandler
+    private projectService: ProjectService,
+    private projectMapper: ProjectMapper
   ) {}
 
   registerHandlers(): void {
     ipcMain.handle('project:create', this.handleCreateProject.bind(this));
     ipcMain.handle('project:list', this.handleListProjects.bind(this));
     ipcMain.handle('project:getById', this.handleGetProjectById.bind(this));
+    ipcMain.handle('project:update', this.handleUpdateProject.bind(this));
     ipcMain.handle('project:delete', this.handleDeleteProject.bind(this));
+    ipcMain.handle('project:archive', this.handleArchiveProject.bind(this));
   }
 
   private async handleCreateProject(
     event: IpcMainInvokeEvent,
-    dto: CreateProjectDto
-  ): Promise<Result<ProjectDto>> {
-    // Implementação
+    data: CreateProjectDto
+  ): Promise<ProjectDto> {
+    try {
+      const project = await this.projectService.createProject(data);
+      return this.projectMapper.toDto(project);
+    } catch (error) {
+      throw new Error(`Failed to create project: ${error.message}`);
+    }
   }
 
   private async handleListProjects(
     event: IpcMainInvokeEvent,
     filter?: ProjectFilterDto
   ): Promise<ProjectDto[]> {
-    // Implementação
+    const projects = await this.projectService.listProjects(filter);
+    return projects.map(project => this.projectMapper.toDto(project));
+  }
+
+  private async handleGetProjectById(
+    event: IpcMainInvokeEvent,
+    data: { id: string }
+  ): Promise<ProjectDto | null> {
+    const project = await this.projectService.getProjectById(data);
+    return project ? this.projectMapper.toDto(project) : null;
+  }
+
+  private async handleUpdateProject(
+    event: IpcMainInvokeEvent,
+    data: UpdateProjectDto
+  ): Promise<ProjectDto> {
+    const project = await this.projectService.updateProject(data);
+    return this.projectMapper.toDto(project);
+  }
+
+  private async handleDeleteProject(
+    event: IpcMainInvokeEvent,
+    data: { id: string }
+  ): Promise<void> {
+    await this.projectService.deleteProject(data);
+  }
+
+  private async handleArchiveProject(
+    event: IpcMainInvokeEvent,
+    data: { id: string }
+  ): Promise<ProjectDto> {
+    const project = await this.projectService.archiveProject(data);
+    return this.projectMapper.toDto(project);
+  }
+}
+```
+
+### 3. Mapper Separado (src/main/modules/project-management/mappers/project.mapper.ts)
+
+```typescript
+import { ProjectData } from '../entities/project.schema';
+import { ProjectDto } from '../../../shared/types/project.types';
+
+export class ProjectMapper {
+  toDto(project: ProjectData): ProjectDto {
+    return {
+      id: project.id,
+      name: project.name,
+      description: project.description,
+      gitUrl: project.gitUrl,
+      status: project.status,
+      avatar: project.avatar,
+      createdAt: project.createdAt.toISOString(),
+      updatedAt: project.updatedAt.toISOString(),
+      unreadCount: 0, // Default para compatibilidade com UI
+      lastActivity: project.updatedAt.toISOString(),
+    };
+  }
+
+  fromDto(dto: CreateProjectDto): Partial<ProjectData> {
+    return {
+      name: dto.name,
+      description: dto.description,
+      gitUrl: dto.gitUrl,
+      avatar: dto.avatar,
+    };
   }
 }
 ```
@@ -372,21 +485,21 @@ class ProjectStore {
   // Actions
   async loadProjects(filter?: ProjectFilterDto): Promise<void> {
     this.setState({ isLoading: true, error: null });
-    
+
     try {
-      const projects = await window.electronIPC.invoke('project:list', filter);
+      const projects = await window.electronIPC.invoke("project:list", filter);
       this.setState({ projects, isLoading: false });
     } catch (error) {
-      this.setState({ 
-        error: error.message, 
-        isLoading: false 
+      this.setState({
+        error: error.message,
+        isLoading: false,
       });
     }
   }
 
   async createProject(dto: CreateProjectDto): Promise<void> {
     try {
-      const result = await window.electronIPC.invoke('project:create', dto);
+      const result = await window.electronIPC.invoke("project:create", dto);
       if (result.isSuccess) {
         await this.loadProjects(); // Recarregar lista
       } else {
@@ -399,14 +512,14 @@ class ProjectStore {
 
   private setState(partialState: Partial<ProjectStoreState>): void {
     this.state = { ...this.state, ...partialState };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 }
 
 export const projectStore = new ProjectStore();
 ```
 
-### 2. Hook personalizado
+### 2. Hook Único para Projetos
 
 ```typescript
 // src/renderer/features/project-management/hooks/use-projects.hook.ts
@@ -414,34 +527,41 @@ export function useProjects(filter?: ProjectFilterDto) {
   const state = useSyncExternalStore(
     projectStore.subscribe,
     projectStore.getSnapshot,
-    projectStore.getServerSnapshot
+    projectStore.getServerSnapshot,
   );
 
-  const loadProjects = useCallback(
-    (newFilter?: ProjectFilterDto) => {
-      return projectStore.loadProjects(newFilter || filter);
-    },
-    [filter]
-  );
+  // Mutations (operações que modificam dados)
+  const mutations = useMemo(() => ({
+    createProject: (data: CreateProjectDto) => projectStore.createProject(data),
+    updateProject: (data: UpdateProjectDto) => projectStore.updateProject(data),
+    deleteProject: (data: { id: string }) => projectStore.deleteProject(data),
+    archiveProject: (data: { id: string }) => projectStore.archiveProject(data),
+  }), []);
 
-  const createProject = useCallback(
-    (dto: CreateProjectDto) => {
-      return projectStore.createProject(dto);
-    },
-    []
-  );
+  // Queries (operações de busca/listagem)
+  const queries = useMemo(() => ({
+    loadProjects: (newFilter?: ProjectFilterDto) => 
+      projectStore.loadProjects(newFilter || filter),
+    getProjectById: (data: { id: string }) => 
+      projectStore.getProjectById(data),
+    refreshProjects: () => projectStore.loadProjects(filter),
+  }), [filter]);
 
+  // Auto-load na inicialização
   useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+    queries.loadProjects();
+  }, [queries.loadProjects]);
 
   return {
+    // Estado
     projects: state.projects,
     isLoading: state.isLoading,
     error: state.error,
     selectedProject: state.selectedProject,
-    loadProjects,
-    createProject,
+    
+    // Operações
+    ...mutations,
+    ...queries,
   };
 }
 ```
@@ -451,12 +571,12 @@ export function useProjects(filter?: ProjectFilterDto) {
 ```typescript
 // src/renderer/features/project-management/components/project-list.component.tsx
 export function ProjectList() {
-  const { projects, isLoading, error, loadProjects } = useProjects({
+  const { projects, isLoading, error, refreshProjects } = useProjects({
     status: 'active'
   });
 
   if (isLoading) return <ProjectListSkeleton />;
-  if (error) return <ErrorMessage error={error} onRetry={loadProjects} />;
+  if (error) return <ErrorMessage error={error} onRetry={refreshProjects} />;
 
   return (
     <div className="space-y-2">
@@ -495,6 +615,17 @@ export function ProjectCard({ project }: ProjectCardProps) {
 }
 ```
 
+## 📋 Observações sobre Testes
+
+**Decisão**: Não implementar testes neste momento - muito cedo no desenvolvimento.
+
+**Futuramente considerar**:
+
+- Testes de unidade para service layer
+- Testes de integração para IPC
+- Testes de validação Zod
+- Testes de UI quando interface estabilizar
+
 ## 🧪 Object Calisthenics Aplicado
 
 ### Regras Seguidas:
@@ -521,16 +652,16 @@ export class ProjectService {
           if (this.isValidGit(git)) {
             return this.repo.save({ name, desc, git, avt });
           } else {
-            throw new Error('Invalid git');
+            throw new Error("Invalid git");
           }
         } else {
           return this.repo.save({ name, desc, avt });
         }
       } else {
-        throw new Error('Name too long');
+        throw new Error("Name too long");
       }
     } else {
-      throw new Error('Name required');
+      throw new Error("Name required");
     }
   }
 }
@@ -572,50 +703,56 @@ export class CreateProjectHandler {
 ## 📝 Testes Planejados
 
 ### 1. Testes de Unidade
+
 - Value Objects (ProjectName, GitUrl, ProjectId)
 - Entidade Project
 - Handlers (Commands/Queries)
 - Repository implementation
 
 ### 2. Testes de Integração
+
 - IPC communication
 - Database operations
 - End-to-end project creation flow
 
 ### 3. Testes de UI
+
 - Components rendering
 - User interactions
 - State management
 
-## 🚀 Plano de Implementação
+## 🚀 Plano de Implementação (Simplificado)
 
 ### Fase 1: Infraestrutura Base
-1. ✅ Criar schema Drizzle
-2. ✅ Implementar entidade de domínio
-3. ✅ Implementar value objects
-4. ✅ Criar interfaces de repositório
 
-### Fase 2: Camada de Aplicação
-1. ✅ Implementar commands e queries
-2. ✅ Implementar handlers
-3. ✅ Configurar repository concrete
+1. ✅ Criar schema Drizzle
+2. ✅ Implementar schemas Zod para validação
+3. ✅ Implementar entidade Project
+4. ✅ Criar repository
+
+### Fase 2: Service Layer
+
+1. ✅ Implementar ProjectService
+2. ✅ Configurar dependências
 
 ### Fase 3: Comunicação IPC
+
 1. ✅ Definir tipos compartilhados
 2. ✅ Implementar IPC handlers
 3. ✅ Atualizar preload script
 
 ### Fase 4: Frontend
+
 1. ✅ Implementar store com useSyncExternalStore
 2. ✅ Criar hooks personalizados
 3. ✅ Atualizar componentes existentes
 4. ✅ Conectar modal de criação
 
-### Fase 5: Testes e Refinamento
-1. ✅ Escrever testes unitários
-2. ✅ Escrever testes de integração
-3. ✅ Testes de UI
-4. ✅ Refinamentos e otimizações
+### Fase 5: Refinamento
+
+1. ✅ Testes manuais
+2. ✅ Otimizações de performance
+3. ✅ Melhorias de UX
 
 ## 📊 Critérios de Sucesso
 
@@ -630,15 +767,17 @@ export class CreateProjectHandler {
 ## 🔧 Configurações Necessárias
 
 ### 1. Atualizar drizzle.config.ts
+
 ```typescript
 schema: [
   "./src/main/persistence/schema.ts",
   "./src/main/modules/project-management/infrastructure/persistence/schema.ts",
   // ... outros schemas
-]
+];
 ```
 
 ### 2. Adicionar ao package.json (se necessário)
+
 ```json
 {
   "dependencies": {
@@ -648,6 +787,7 @@ schema: [
 ```
 
 ### 3. Atualizar tipos do preload
+
 ```typescript
 // src/renderer/preload.ts - adicionar novos métodos IPC
 ```
