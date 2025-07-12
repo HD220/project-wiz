@@ -26,6 +26,7 @@ import {
   Save,
   TestTube,
 } from "lucide-react";
+import { LlmProviderManagement } from "@/renderer/features/llm-provider-management/components/llm-provider-management";
 
 export const Route = createFileRoute("/(user)/settings/")({
   component: UserSettingsPage,
@@ -158,157 +159,8 @@ export function UserSettingsPage() {
             </Card>
           </TabsContent>
 
-          {/* LLM Settings */}
           <TabsContent value="llm" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  Configurações de LLM
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Default LLM */}
-                <div className="space-y-2">
-                  <Label>Provedor Padrão</Label>
-                  <Select
-                    value={settings.defaultLLM}
-                    onValueChange={(value) =>
-                      updateSetting("defaultLLM", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="openai">OpenAI</SelectItem>
-                      <SelectItem value="deepseek">DeepSeek</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Separator />
-
-                {/* OpenAI Settings */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">OpenAI</h4>
-                    <Badge
-                      variant={settings.openaiApiKey ? "default" : "secondary"}
-                    >
-                      {settings.openaiApiKey
-                        ? "Configurado"
-                        : "Não configurado"}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="col-span-2 space-y-2">
-                      <Label htmlFor="openai-key">Chave da API</Label>
-                      <Input
-                        id="openai-key"
-                        type="password"
-                        placeholder="sk-..."
-                        value={settings.openaiApiKey}
-                        onChange={(e) =>
-                          updateSetting("openaiApiKey", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        variant="outline"
-                        onClick={() => testLLMConnection("openai")}
-                        className="w-full gap-2"
-                      >
-                        <TestTube className="w-4 h-4" />
-                        Testar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* DeepSeek Settings */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">DeepSeek</h4>
-                    <Badge
-                      variant={
-                        settings.deepseekApiKey ? "default" : "secondary"
-                      }
-                    >
-                      {settings.deepseekApiKey
-                        ? "Configurado"
-                        : "Não configurado"}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="col-span-2 space-y-2">
-                      <Label htmlFor="deepseek-key">Chave da API</Label>
-                      <Input
-                        id="deepseek-key"
-                        type="password"
-                        placeholder="sk-..."
-                        value={settings.deepseekApiKey}
-                        onChange={(e) =>
-                          updateSetting("deepseekApiKey", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        variant="outline"
-                        onClick={() => testLLMConnection("deepseek")}
-                        className="w-full gap-2"
-                      >
-                        <TestTube className="w-4 h-4" />
-                        Testar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Generation Settings */}
-                <div className="space-y-4">
-                  <h4 className="font-medium">Parâmetros de Geração</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="max-tokens">Máximo de Tokens</Label>
-                      <Input
-                        id="max-tokens"
-                        type="number"
-                        min={100}
-                        max={8000}
-                        value={settings.maxTokens}
-                        onChange={(e) =>
-                          updateSetting("maxTokens", parseInt(e.target.value))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="temperature">Temperatura</Label>
-                      <Input
-                        id="temperature"
-                        type="number"
-                        min={0}
-                        max={2}
-                        step={0.1}
-                        value={settings.temperature}
-                        onChange={(e) =>
-                          updateSetting(
-                            "temperature",
-                            parseFloat(e.target.value),
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <LlmProviderManagement />
           </TabsContent>
 
           {/* Interface Settings */}

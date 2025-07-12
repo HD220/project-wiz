@@ -18,6 +18,10 @@ import { ChannelMessageRepository } from "./modules/channel-messaging/persistenc
 import { ChannelMessageService } from "./modules/channel-messaging/application/channel-message.service";
 import { ChannelMessageMapper } from "./modules/channel-messaging/channel-message.mapper";
 import { ChannelMessageIpcHandlers } from "./modules/channel-messaging/ipc/handlers";
+import { LlmProviderRepository } from "./modules/llm-provider/persistence/llm-provider.repository";
+import { LlmProviderService } from "./modules/llm-provider/application/llm-provider.service";
+import { LlmProviderMapper } from "./modules/llm-provider/llm-provider.mapper";
+import { LlmProviderIpcHandlers } from "./modules/llm-provider/ipc/handlers";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -114,10 +118,18 @@ app.on("ready", async () => {
   const channelMessageService = new ChannelMessageService(channelMessageRepository, channelMessageMapper);
   const channelMessageIpcHandlers = new ChannelMessageIpcHandlers(channelMessageService, channelMessageMapper);
   
+  // Initialize LLM provider module
+  const llmProviderRepository = new LlmProviderRepository();
+  const llmProviderMapper = new LlmProviderMapper();
+  const llmProviderService = new LlmProviderService(llmProviderRepository, llmProviderMapper);
+  const llmProviderIpcHandlers = new LlmProviderIpcHandlers(llmProviderService, llmProviderMapper);
+
+  // Register handlers
   projectIpcHandlers.registerHandlers();
   directMessageIpcHandlers.registerHandlers();
   channelIpcHandlers.registerHandlers();
   channelMessageIpcHandlers.registerHandlers();
+  llmProviderIpcHandlers.registerHandlers();
 });
 
 app.on("window-all-closed", () => {
