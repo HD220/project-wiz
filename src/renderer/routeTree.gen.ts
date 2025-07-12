@@ -17,6 +17,7 @@ import { Route as ProjectLayoutRouteImport } from './app/project/_layout'
 import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
 import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
 import { Route as userSettingsIndexRouteImport } from './app/(user)/settings/index'
+import { Route as userConversationConversationIdRouteImport } from './app/(user)/conversation/$conversationId'
 import { Route as ProjectProjectIdTasksIndexRouteImport } from './app/project/$projectId/tasks/index'
 import { Route as ProjectProjectIdFilesIndexRouteImport } from './app/project/$projectId/files/index'
 import { Route as ProjectProjectIdDocsIndexRouteImport } from './app/project/$projectId/docs/index'
@@ -58,6 +59,12 @@ const userSettingsIndexRoute = userSettingsIndexRouteImport.update({
   path: '/settings/',
   getParentRoute: () => userRouteRoute,
 } as any)
+const userConversationConversationIdRoute =
+  userConversationConversationIdRouteImport.update({
+    id: '/conversation/$conversationId',
+    path: '/conversation/$conversationId',
+    getParentRoute: () => userRouteRoute,
+  } as any)
 const ProjectProjectIdTasksIndexRoute =
   ProjectProjectIdTasksIndexRouteImport.update({
     id: '/tasks/',
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/': typeof userIndexRoute
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
   '/project': typeof ProjectLayoutRoute
+  '/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/settings': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/project': typeof ProjectLayoutRoute
   '/': typeof userIndexRoute
+  '/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/settings': typeof userSettingsIndexRoute
   '/project/$projectId': typeof ProjectProjectIdIndexRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
@@ -119,6 +128,7 @@ export interface FileRoutesById {
   '/project': typeof ProjectRouteWithChildren
   '/project/_layout': typeof ProjectLayoutRoute
   '/(user)/': typeof userIndexRoute
+  '/(user)/conversation/$conversationId': typeof userConversationConversationIdRoute
   '/(user)/settings/': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
   '/project/$projectId/agents/': typeof ProjectProjectIdAgentsIndexRoute
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/'
     | '/project/$projectId'
     | '/project'
+    | '/conversation/$conversationId'
     | '/settings'
     | '/project/$projectId/'
     | '/project/$projectId/agents'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
   to:
     | '/project'
     | '/'
+    | '/conversation/$conversationId'
     | '/settings'
     | '/project/$projectId'
     | '/project/$projectId/agents'
@@ -158,6 +170,7 @@ export interface FileRouteTypes {
     | '/project'
     | '/project/_layout'
     | '/(user)/'
+    | '/(user)/conversation/$conversationId'
     | '/(user)/settings/'
     | '/project/$projectId/'
     | '/project/$projectId/agents/'
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof userSettingsIndexRouteImport
       parentRoute: typeof userRouteRoute
     }
+    '/(user)/conversation/$conversationId': {
+      id: '/(user)/conversation/$conversationId'
+      path: '/conversation/$conversationId'
+      fullPath: '/conversation/$conversationId'
+      preLoaderRoute: typeof userConversationConversationIdRouteImport
+      parentRoute: typeof userRouteRoute
+    }
     '/project/$projectId/tasks/': {
       id: '/project/$projectId/tasks/'
       path: '/tasks'
@@ -264,11 +284,13 @@ declare module '@tanstack/react-router' {
 
 interface userRouteRouteChildren {
   userIndexRoute: typeof userIndexRoute
+  userConversationConversationIdRoute: typeof userConversationConversationIdRoute
   userSettingsIndexRoute: typeof userSettingsIndexRoute
 }
 
 const userRouteRouteChildren: userRouteRouteChildren = {
   userIndexRoute: userIndexRoute,
+  userConversationConversationIdRoute: userConversationConversationIdRoute,
   userSettingsIndexRoute: userSettingsIndexRoute,
 }
 

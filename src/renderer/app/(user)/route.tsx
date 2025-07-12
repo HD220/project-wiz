@@ -25,11 +25,17 @@ function UserLayout() {
     navigate({ to: "/settings" });
   };
 
+  // Extract conversationId from current path
+  const currentConversationId = location.pathname.includes('/conversation/') 
+    ? location.pathname.split('/conversation/')[1] 
+    : undefined;
+
   // Get page title based on current route
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === "/") return "Dashboard";
     if (path.includes("/settings")) return "Configurações";
+    if (path.includes("/conversation/")) return "Conversa";
     return "Usuário";
   };
 
@@ -37,6 +43,7 @@ function UserLayout() {
     const path = location.pathname;
     if (path === "/") return "Visão geral e estatísticas";
     if (path.includes("/settings")) return "Configurações do usuário e sistema";
+    if (path.includes("/conversation/")) return "Mensagem direta";
     return undefined;
   };
 
@@ -49,6 +56,7 @@ function UserLayout() {
             agents={mockAgents}
             onAgentDMSelect={handleAgentDMSelect}
             onSettings={handleSettings}
+            selectedConversationId={currentConversationId}
           />
         </ResizablePanel>
 

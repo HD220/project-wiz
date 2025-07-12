@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,16 +11,43 @@ import {
   Activity,
   GitBranch,
 } from "lucide-react";
+import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+import { ProjectDto } from "@/shared/types/project.types";
 
 export function ProjectIndexPage() {
   const { projectId } = Route.useParams();
+  const [currentProject, setCurrentProject] = useState<ProjectDto | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const { getProjectById } = useProjects();
+
+  useEffect(() => {
+    const loadProject = async () => {
+      if (projectId) {
+        setIsLoading(true);
+        const project = await getProjectById({ id: projectId });
+        setCurrentProject(project);
+        setIsLoading(false);
+      }
+    };
+
+    loadProject();
+  }, [projectId, getProjectById]);
+
+  if (isLoading) {
+    return <div className="p-4">Carregando projeto...</div>;
+  }
+
+  if (!currentProject) {
+    return <div className="p-4">Projeto não encontrado.</div>;
+  }
 
   return (
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Projeto {projectId}</h1>
-          <p className="text-muted-foreground">Visão geral do projeto</p>
+          <h1 className="text-3xl font-bold">{currentProject.name}</h1>
+          <p className="text-muted-foreground">{currentProject.description || "Visão geral do projeto"}</p>
         </div>
         <Button variant="outline" size="sm">
           <Settings className="w-4 h-4 mr-2" />

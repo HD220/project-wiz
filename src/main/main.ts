@@ -7,6 +7,9 @@ import { ProjectRepository } from "./modules/project-management/persistence/repo
 import { ProjectService } from "./modules/project-management/services/project.service";
 import { ProjectMapper } from "./modules/project-management/mappers/project.mapper";
 import { ProjectIpcHandlers } from "./modules/project-management/ipc/handlers";
+import { ConversationService } from "./modules/direct-messages/services/conversation.service";
+import { MessageService } from "./modules/direct-messages/services/message.service";
+import { DirectMessageIpcHandlers } from "./modules/direct-messages/ipc/handlers";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -83,7 +86,16 @@ app.on("ready", async () => {
   const projectMapper = new ProjectMapper();
   const projectIpcHandlers = new ProjectIpcHandlers(projectService, projectMapper);
   
+  // Initialize direct messages module
+  const conversationService = new ConversationService();
+  const messageService = new MessageService();
+  const directMessageIpcHandlers = new DirectMessageIpcHandlers(
+    conversationService,
+    messageService
+  );
+  
   projectIpcHandlers.registerHandlers();
+  directMessageIpcHandlers.registerHandlers();
 });
 
 app.on("window-all-closed", () => {

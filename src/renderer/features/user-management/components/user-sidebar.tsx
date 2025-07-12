@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,20 +20,27 @@ import {
 } from "lucide-react";
 import { Agent } from "@/lib/placeholders";
 import { UserArea } from "./user-area";
+import { ConversationList } from "../../direct-messages/components/conversation-list";
+import { NewConversationModal } from "../../direct-messages/components/new-conversation-modal";
+import type { ConversationDto } from "../../../../shared/types/message.types";
 
 interface UserSidebarProps {
   agents: Agent[];
   onAgentDMSelect: (agentId: string) => void;
   onSettings: () => void;
+  selectedConversationId?: string;
 }
 
 export function UserSidebar({
   agents,
   onAgentDMSelect,
   onSettings,
+  selectedConversationId,
 }: UserSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getStatusColor = (status: Agent["status"]) => {
     switch (status) {
@@ -58,6 +65,23 @@ export function UserSidebar({
 
   const onlineAgents = filteredAgents.filter((a) => a.status !== "offline");
   const offlineAgents = filteredAgents.filter((a) => a.status === "offline");
+
+  const handleConversationSelect = (conversation: ConversationDto) => {
+    navigate({ to: `/conversation/${conversation.id}` });
+  };
+
+  const handleNewConversation = () => {
+    setShowNewConversationModal(true);
+  };
+
+  const handleConversationCreated = (conversationId: string) => {
+    navigate({ to: `/conversation/${conversationId}` });
+  };
+
+  // Extract conversationId from current path
+  const currentConversationId = location.pathname.includes('/conversation/') 
+    ? location.pathname.split('/conversation/')[1] 
+    : undefined;
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
@@ -118,14 +142,14 @@ export function UserSidebar({
               >
                 <ChevronDown className="w-3 h-3 mr-1" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Mensagens Diretas — {onlineAgents.length}
+                  Mensagens Diretas
                 </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // TODO: Open new conversation modal
+                    handleNewConversation();
                   }}
                   className="ml-auto w-4 h-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-accent"
                 >
@@ -133,82 +157,11 @@ export function UserSidebar({
                 </Button>
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-0.5 mt-1">
-              {/* Online Agents */}
-              {onlineAgents.map((agent) => (
-                <Button
-                  key={agent.id}
-                  variant="ghost"
-                  className="w-full justify-start px-2 py-1.5 h-auto text-left"
-                  onClick={() => onAgentDMSelect(agent.id)}
-                >
-                  <div className="w-6 h-6 mr-2 relative flex-shrink-0">
-                    <Avatar className="w-6 h-6">
-                      <AvatarImage src={agent.avatar} />
-                      <AvatarFallback className="text-xs">
-                        {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div
-                      className={cn(
-                        "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
-                        getStatusColor(agent.status),
-                      )}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-medium">{agent.name}</span>
-                      {agent.isExecuting && (
-                        <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
-                      )}
-                    </div>
-                    {agent.currentTask && (
-                      <div className="text-xs text-muted-foreground truncate">
-                        {agent.currentTask}
-                      </div>
-                    )}
-                  </div>
-                </Button>
-              ))}
-
-              {/* Offline Agents */}
-              {offlineAgents.length > 0 && (
-                <>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 py-1 mt-2">
-                    Offline — {offlineAgents.length}
-                  </div>
-                  {offlineAgents.map((agent) => (
-                    <Button
-                      key={agent.id}
-                      variant="ghost"
-                      className="w-full justify-start px-2 py-1.5 h-auto text-left opacity-60"
-                      onClick={() => onAgentDMSelect(agent.id)}
-                    >
-                      <div className="w-6 h-6 mr-2 relative flex-shrink-0">
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage src={agent.avatar} />
-                          <AvatarFallback className="text-xs">
-                            {agent.avatar ||
-                              agent.name.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div
-                          className={cn(
-                            "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
-                            getStatusColor(agent.status),
-                          )}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="truncate font-medium">
-                          {agent.name}
-                        </span>
-                      </div>
-                    </Button>
-                  ))}
-                </>
-              )}
+            <CollapsibleContent className="mt-1">
+              <ConversationList
+                selectedConversationId={currentConversationId}
+                onConversationSelect={handleConversationSelect}
+              />
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -216,6 +169,13 @@ export function UserSidebar({
 
       {/* User Area */}
       <UserArea />
+
+      {/* New Conversation Modal */}
+      <NewConversationModal
+        open={showNewConversationModal}
+        onOpenChange={setShowNewConversationModal}
+        onConversationCreated={handleConversationCreated}
+      />
     </div>
   );
 }

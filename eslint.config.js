@@ -309,7 +309,6 @@ export default [
       "docs/**",
       "migrations/**",
       "public/**",
-      "src/main/**",
     ],
   },
   {
