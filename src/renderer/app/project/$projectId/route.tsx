@@ -14,10 +14,11 @@ import {
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 import {
-  getChannelsByProject,
   getAgentsByProject,
 } from "@/renderer/lib/placeholders";
 import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+import { useProjectChannels } from "@/features/communication/hooks/use-channels.hook";
+import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
 import { ProjectDto } from "@/shared/types/project.types";
 import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
 
@@ -26,14 +27,13 @@ function ProjectLayout() {
   const { project: currentProject } = Route.useLoaderData();
   const location = useLocation();
   const [agentsSidebarOpen, setAgentsSidebarOpen] = useState(false);
+  const [createChannelModalOpen, setCreateChannelModalOpen] = useState(false);
 
-  const channels = getChannelsByProject(projectId);
+  const { channels } = useProjectChannels(projectId);
   const agents = getAgentsByProject(projectId);
 
-  // These handlers will be removed - components will use Link directly
-
   const handleAddChannel = () => {
-    console.log(`Project ${projectId}: Add channel clicked`);
+    setCreateChannelModalOpen(true);
   };
 
   // Get page title and info based on current route
@@ -48,7 +48,7 @@ function ProjectLayout() {
         title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
         subtitle: selectedChannel?.name || "Canal de chat do projeto",
         type: "channel" as const,
-        memberCount: selectedChannel?.unreadCount || 0,
+        memberCount: 0, // TODO: Implementar contagem de membros
       };
     }
 
@@ -113,7 +113,7 @@ function ProjectLayout() {
         {/* Project Navigation - Resizable */}
         <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
           <ProjectNavigation
-            projectName={currentProject.name}
+            projectName={currentProject?.name || "Projeto"}
             projectId={projectId}
             channels={channels}
             onAddChannel={handleAddChannel}
@@ -158,6 +158,13 @@ function ProjectLayout() {
           </>
         )}
       </ResizablePanelGroup>
+
+      {/* Modal de criação de canal */}
+      <CreateChannelModal
+        open={createChannelModalOpen}
+        onOpenChange={setCreateChannelModalOpen}
+        projectId={projectId}
+      />
     </div>
   );
 }

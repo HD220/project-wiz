@@ -3,6 +3,8 @@ import { CreateChannelModal } from "@/features/project-management/components/cre
 
 export function CreateChannelPage() {
   const navigate = useNavigate();
+  // TODO: Get projectId from route params or context
+  const projectId = "temp-project-id"; // Placeholder
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -15,6 +17,7 @@ export function CreateChannelPage() {
     <CreateChannelModal
       open={true}
       onOpenChange={handleOpenChange}
+      projectId={projectId}
     />
   );
 }

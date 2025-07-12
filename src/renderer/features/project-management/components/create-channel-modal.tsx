@@ -18,34 +18,65 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Hash, Volume2, Lock } from "lucide-react";
+import { Hash, Volume2, Lock, CheckSquare, Bot } from "lucide-react";
+import { useProjectChannels } from "../../communication/hooks/use-channels.hook";
+import type { ChannelTypeEnum } from "../../../../shared/types/channel.types";
 
 interface CreateChannelModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projectId: string;
 }
 
 export function CreateChannelModal({
   open,
   onOpenChange,
+  projectId,
 }: CreateChannelModalProps) {
   const [channelName, setChannelName] = useState("");
   const [channelDescription, setChannelDescription] = useState("");
-  const [channelType, setChannelType] = useState("text");
+  const [channelType, setChannelType] = useState<ChannelTypeEnum>("general");
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { createChannel, error, clearError } = useProjectChannels(projectId);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement channel creation logic
-    console.log("Creating channel:", {
-      name: channelName,
-      description: channelDescription,
-      type: channelType,
-    });
-    onOpenChange(false);
-    // Reset form
+    
+    if (!channelName.trim()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    clearError();
+
+    try {
+      await createChannel({
+        name: channelName.trim(),
+        description: channelDescription.trim() || undefined,
+        type: channelType,
+        isPrivate,
+        createdBy: 'current-user', // TODO: Get from user context
+      });
+
+      // Success - close modal and reset form
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      // Error is handled by the store
+      console.error("Error creating channel:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
     setChannelName("");
     setChannelDescription("");
-    setChannelType("text");
+    setChannelType("general");
+    setIsPrivate(false);
+    clearError();
   };
 
   return (
@@ -64,27 +95,33 @@ export function CreateChannelModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="channel-type">Tipo de Canal</Label>
-            <Select value={channelType} onValueChange={setChannelType}>
+            <Select value={channelType} onValueChange={(value: ChannelTypeEnum) => setChannelType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="text">
+                <SelectItem value="general">
                   <div className="flex items-center gap-2">
                     <Hash className="w-4 h-4" />
-                    Canal de Texto
+                    Canal Geral
                   </div>
                 </SelectItem>
-                <SelectItem value="voice">
+                <SelectItem value="task">
                   <div className="flex items-center gap-2">
-                    <Volume2 className="w-4 h-4" />
-                    Canal de Voz
+                    <CheckSquare className="w-4 h-4" />
+                    Canal de Tarefas
                   </div>
                 </SelectItem>
-                <SelectItem value="private">
+                <SelectItem value="agent">
                   <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" />
-                    Canal Privado
+                    <Bot className="w-4 h-4" />
+                    Canal de Agente
+                  </div>
+                </SelectItem>
+                <SelectItem value="custom">
+                  <div className="flex items-center gap-2">
+                    <Hash className="w-4 h-4" />
+                    Canal Personalizado
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -117,16 +154,42 @@ export function CreateChannelModal({
             />
           </div>
 
+          <div className="flex items-center space-x-2">
+            <input
+              id="channel-private"
+              type="checkbox"
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(e.target.checked)}
+              className="rounded border-input"
+            />
+            <Label htmlFor="channel-private" className="text-sm font-normal">
+              Canal Privado
+            </Label>
+          </div>
+
+          {error && (
+            <div className="text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+                resetForm();
+              }}
+              disabled={isSubmitting}
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={!channelName}>
-              Criar Canal
+            <Button 
+              type="submit" 
+              disabled={!channelName.trim() || isSubmitting}
+            >
+              {isSubmitting ? "Criando..." : "Criar Canal"}
             </Button>
           </DialogFooter>
         </form>

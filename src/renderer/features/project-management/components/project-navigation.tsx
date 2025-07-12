@@ -23,13 +23,13 @@ import {
   FileText,
   CheckSquare,
 } from "lucide-react";
-import { Channel } from "@/lib/placeholders";
 import { UserArea } from "../../user-management/components/user-area";
+import type { ChannelDto } from "../../../../shared/types/channel.types";
 
 interface ProjectNavigationProps {
   projectId: string;
   projectName: string;
-  channels: Channel[];
+  channels: ChannelDto[];
   onAddChannel: () => void; // Keep this as it opens a modal
 }
 
@@ -128,7 +128,7 @@ export function ProjectNavigation({
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start px-1 py-1 h-auto"
+                className="w-full justify-start px-1 py-1 h-auto group"
               >
                 <ChevronDown className="w-3 h-3 mr-1" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -160,14 +160,7 @@ export function ProjectNavigation({
                 >
                   <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
                   <span className="truncate">{channel.name}</span>
-                  {channel.unreadCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="ml-auto w-5 h-5 p-0 text-xs flex items-center justify-center"
-                    >
-                      {channel.unreadCount > 9 ? "9+" : channel.unreadCount}
-                    </Badge>
-                  )}
+                  {/* TODO: Implementar contador de mensagens não lidas */}
                 </CustomLink>
               ))}
             </CollapsibleContent>

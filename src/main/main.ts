@@ -10,6 +10,10 @@ import { ProjectIpcHandlers } from "./modules/project-management/ipc/handlers";
 import { ConversationService } from "./modules/direct-messages/services/conversation.service";
 import { MessageService } from "./modules/direct-messages/services/message.service";
 import { DirectMessageIpcHandlers } from "./modules/direct-messages/ipc/handlers";
+import { ChannelRepository } from "./modules/communication/persistence/repository";
+import { ChannelService } from "./modules/communication/application/channel.service";
+import { ChannelMapper } from "./modules/communication/channel.mapper";
+import { ChannelIpcHandlers } from "./modules/communication/ipc/handlers";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -94,8 +98,15 @@ app.on("ready", async () => {
     messageService
   );
   
+  // Initialize communication module (channels)
+  const channelRepository = new ChannelRepository();
+  const channelMapper = new ChannelMapper();
+  const channelService = new ChannelService(channelRepository, channelMapper);
+  const channelIpcHandlers = new ChannelIpcHandlers(channelService, channelMapper);
+  
   projectIpcHandlers.registerHandlers();
   directMessageIpcHandlers.registerHandlers();
+  channelIpcHandlers.registerHandlers();
 });
 
 app.on("window-all-closed", () => {
