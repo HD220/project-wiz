@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Users, X, Loader2 } from "lucide-react";
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
-import { useSidebar } from "@/renderer/contexts/sidebar-context";
 
 interface DiscordLayoutProps {
   children: ReactNode;
@@ -123,7 +122,11 @@ export function DiscordLayout({
             <div className="h-12 flex items-center justify-between px-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 {icon && <div className="flex-shrink-0">{icon}</div>}
-                {title && <h1 className="font-semibold text-foreground truncate">{title}</h1>}
+                {title && (
+                  <h1 className="font-semibold text-foreground truncate">
+                    {title}
+                  </h1>
+                )}
               </div>
               <Button
                 variant="ghost"
@@ -138,11 +141,9 @@ export function DiscordLayout({
                 )}
               </Button>
             </div>
-            
+
             {/* Main content */}
-            <div className="flex-1 overflow-auto">
-              {children}
-            </div>
+            <div className="flex-1 overflow-auto">{children}</div>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

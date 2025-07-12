@@ -22,9 +22,8 @@ import {
   mockTasks,
 } from "@/renderer/lib/placeholders";
 import { PageTitle } from "@/components/page-title";
-import { useSidebar } from "@/renderer/contexts/sidebar-context";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/legacy_index")({
   component: HomeComponent,
 });
 
@@ -118,5 +117,3 @@ function HomeComponent() {
     </div>
   );
 }
-
-

@@ -6,7 +6,6 @@ import "./globals.css";
 // import { detectLocale, dynamicActivate } from '@/config/i18n';
 
 import { routeTree } from "./routeTree.gen";
-import { SidebarProvider } from "./contexts/sidebar-context";
 import { ThemeProvider } from "./contexts/theme-context";
 
 const router = createRouter({ routeTree });
@@ -27,9 +26,7 @@ const root = ReactDOMClient.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <SidebarProvider>
-        <RouterProvider router={router} />
-      </SidebarProvider>
+      <RouterProvider router={router} />
     </ThemeProvider>
   </React.StrictMode>,
 );

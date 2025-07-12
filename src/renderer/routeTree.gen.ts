@@ -8,174 +8,336 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './app/__root'
-import { Route as TasksRouteImport } from './app/tasks'
-import { Route as SettingsRouteImport } from './app/settings'
-import { Route as FilesRouteImport } from './app/files'
-import { Route as DocsRouteImport } from './app/docs'
-import { Route as ChatRouteImport } from './app/chat'
-import { Route as AgentsRouteImport } from './app/agents'
-import { Route as IndexRouteImport } from './app/index'
+import { createFileRoute } from '@tanstack/react-router'
 
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
+import { Route as rootRouteImport } from './app/__root'
+import { Route as Legacy_indexRouteImport } from './app/legacy_index'
+import { Route as UserRouteRouteImport } from './app/user/route'
+import { Route as UserIndexRouteImport } from './app/user/index'
+import { Route as ProjectLayoutRouteImport } from './app/project/_layout'
+import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
+import { Route as UserSettingsIndexRouteImport } from './app/user/settings/index'
+import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
+import { Route as ProjectProjectIdTasksIndexRouteImport } from './app/project/$projectId/tasks/index'
+import { Route as ProjectProjectIdFilesIndexRouteImport } from './app/project/$projectId/files/index'
+import { Route as ProjectProjectIdDocsIndexRouteImport } from './app/project/$projectId/docs/index'
+import { Route as ProjectProjectIdChatIndexRouteImport } from './app/project/$projectId/chat/index'
+import { Route as ProjectProjectIdAgentsIndexRouteImport } from './app/project/$projectId/agents/index'
+
+const ProjectRouteImport = createFileRoute('/project')()
+
+const Legacy_indexRoute = Legacy_indexRouteImport.update({
+  id: '/legacy_index',
+  path: '/legacy_index',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const ProjectRoute = ProjectRouteImport.update({
+  id: '/project',
+  path: '/project',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FilesRoute = FilesRouteImport.update({
-  id: '/files',
-  path: '/files',
+const UserRouteRoute = UserRouteRouteImport.update({
+  id: '/user',
+  path: '/user',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DocsRoute = DocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgentsRoute = AgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const UserIndexRoute = UserIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => UserRouteRoute,
+} as any)
+const ProjectLayoutRoute = ProjectLayoutRouteImport.update({
+  id: '/_layout',
+  getParentRoute: () => ProjectRoute,
+} as any)
+const ProjectProjectIdRouteRoute = ProjectProjectIdRouteRouteImport.update({
+  id: '/project/$projectId',
+  path: '/project/$projectId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserSettingsIndexRoute = UserSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => UserRouteRoute,
+} as any)
+const ProjectProjectIdIndexRoute = ProjectProjectIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProjectProjectIdRouteRoute,
+} as any)
+const ProjectProjectIdTasksIndexRoute =
+  ProjectProjectIdTasksIndexRouteImport.update({
+    id: '/tasks/',
+    path: '/tasks/',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
+const ProjectProjectIdFilesIndexRoute =
+  ProjectProjectIdFilesIndexRouteImport.update({
+    id: '/files/',
+    path: '/files/',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
+const ProjectProjectIdDocsIndexRoute =
+  ProjectProjectIdDocsIndexRouteImport.update({
+    id: '/docs/',
+    path: '/docs/',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
+const ProjectProjectIdChatIndexRoute =
+  ProjectProjectIdChatIndexRouteImport.update({
+    id: '/chat/',
+    path: '/chat/',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
+const ProjectProjectIdAgentsIndexRoute =
+  ProjectProjectIdAgentsIndexRouteImport.update({
+    id: '/agents/',
+    path: '/agents/',
+    getParentRoute: () => ProjectProjectIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
-  '/chat': typeof ChatRoute
-  '/docs': typeof DocsRoute
-  '/files': typeof FilesRoute
-  '/settings': typeof SettingsRoute
-  '/tasks': typeof TasksRoute
+  '/user': typeof UserRouteRouteWithChildren
+  '/legacy_index': typeof Legacy_indexRoute
+  '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
+  '/project': typeof ProjectLayoutRoute
+  '/user/': typeof UserIndexRoute
+  '/project/$projectId/': typeof ProjectProjectIdIndexRoute
+  '/user/settings': typeof UserSettingsIndexRoute
+  '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
+  '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
+  '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
+  '/project/$projectId/files': typeof ProjectProjectIdFilesIndexRoute
+  '/project/$projectId/tasks': typeof ProjectProjectIdTasksIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
-  '/chat': typeof ChatRoute
-  '/docs': typeof DocsRoute
-  '/files': typeof FilesRoute
-  '/settings': typeof SettingsRoute
-  '/tasks': typeof TasksRoute
+  '/legacy_index': typeof Legacy_indexRoute
+  '/project': typeof ProjectLayoutRoute
+  '/user': typeof UserIndexRoute
+  '/project/$projectId': typeof ProjectProjectIdIndexRoute
+  '/user/settings': typeof UserSettingsIndexRoute
+  '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
+  '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
+  '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
+  '/project/$projectId/files': typeof ProjectProjectIdFilesIndexRoute
+  '/project/$projectId/tasks': typeof ProjectProjectIdTasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
-  '/chat': typeof ChatRoute
-  '/docs': typeof DocsRoute
-  '/files': typeof FilesRoute
-  '/settings': typeof SettingsRoute
-  '/tasks': typeof TasksRoute
+  '/user': typeof UserRouteRouteWithChildren
+  '/legacy_index': typeof Legacy_indexRoute
+  '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
+  '/project': typeof ProjectRouteWithChildren
+  '/project/_layout': typeof ProjectLayoutRoute
+  '/user/': typeof UserIndexRoute
+  '/project/$projectId/': typeof ProjectProjectIdIndexRoute
+  '/user/settings/': typeof UserSettingsIndexRoute
+  '/project/$projectId/agents/': typeof ProjectProjectIdAgentsIndexRoute
+  '/project/$projectId/chat/': typeof ProjectProjectIdChatIndexRoute
+  '/project/$projectId/docs/': typeof ProjectProjectIdDocsIndexRoute
+  '/project/$projectId/files/': typeof ProjectProjectIdFilesIndexRoute
+  '/project/$projectId/tasks/': typeof ProjectProjectIdTasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/agents'
-    | '/chat'
-    | '/docs'
-    | '/files'
-    | '/settings'
-    | '/tasks'
+    | '/user'
+    | '/legacy_index'
+    | '/project/$projectId'
+    | '/project'
+    | '/user/'
+    | '/project/$projectId/'
+    | '/user/settings'
+    | '/project/$projectId/agents'
+    | '/project/$projectId/chat'
+    | '/project/$projectId/docs'
+    | '/project/$projectId/files'
+    | '/project/$projectId/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agents' | '/chat' | '/docs' | '/files' | '/settings' | '/tasks'
+  to:
+    | '/legacy_index'
+    | '/project'
+    | '/user'
+    | '/project/$projectId'
+    | '/user/settings'
+    | '/project/$projectId/agents'
+    | '/project/$projectId/chat'
+    | '/project/$projectId/docs'
+    | '/project/$projectId/files'
+    | '/project/$projectId/tasks'
   id:
     | '__root__'
-    | '/'
-    | '/agents'
-    | '/chat'
-    | '/docs'
-    | '/files'
-    | '/settings'
-    | '/tasks'
+    | '/user'
+    | '/legacy_index'
+    | '/project/$projectId'
+    | '/project'
+    | '/project/_layout'
+    | '/user/'
+    | '/project/$projectId/'
+    | '/user/settings/'
+    | '/project/$projectId/agents/'
+    | '/project/$projectId/chat/'
+    | '/project/$projectId/docs/'
+    | '/project/$projectId/files/'
+    | '/project/$projectId/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AgentsRoute: typeof AgentsRoute
-  ChatRoute: typeof ChatRoute
-  DocsRoute: typeof DocsRoute
-  FilesRoute: typeof FilesRoute
-  SettingsRoute: typeof SettingsRoute
-  TasksRoute: typeof TasksRoute
+  UserRouteRoute: typeof UserRouteRouteWithChildren
+  Legacy_indexRoute: typeof Legacy_indexRoute
+  ProjectProjectIdRouteRoute: typeof ProjectProjectIdRouteRouteWithChildren
+  ProjectRoute: typeof ProjectRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tasks': {
-      id: '/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
+    '/legacy_index': {
+      id: '/legacy_index'
+      path: '/legacy_index'
+      fullPath: '/legacy_index'
+      preLoaderRoute: typeof Legacy_indexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/project': {
+      id: '/project'
+      path: '/project'
+      fullPath: '/project'
+      preLoaderRoute: typeof ProjectRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/files': {
-      id: '/files'
-      path: '/files'
-      fullPath: '/files'
-      preLoaderRoute: typeof FilesRouteImport
+    '/user': {
+      id: '/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof UserRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/docs': {
-      id: '/docs'
-      path: '/docs'
-      fullPath: '/docs'
-      preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agents': {
-      id: '/agents'
-      path: '/agents'
-      fullPath: '/agents'
-      preLoaderRoute: typeof AgentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/user/': {
+      id: '/user/'
       path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      fullPath: '/user/'
+      preLoaderRoute: typeof UserIndexRouteImport
+      parentRoute: typeof UserRouteRoute
+    }
+    '/project/_layout': {
+      id: '/project/_layout'
+      path: '/project'
+      fullPath: '/project'
+      preLoaderRoute: typeof ProjectLayoutRouteImport
+      parentRoute: typeof ProjectRoute
+    }
+    '/project/$projectId': {
+      id: '/project/$projectId'
+      path: '/project/$projectId'
+      fullPath: '/project/$projectId'
+      preLoaderRoute: typeof ProjectProjectIdRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/user/settings/': {
+      id: '/user/settings/'
+      path: '/settings'
+      fullPath: '/user/settings'
+      preLoaderRoute: typeof UserSettingsIndexRouteImport
+      parentRoute: typeof UserRouteRoute
+    }
+    '/project/$projectId/': {
+      id: '/project/$projectId/'
+      path: '/'
+      fullPath: '/project/$projectId/'
+      preLoaderRoute: typeof ProjectProjectIdIndexRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/project/$projectId/tasks/': {
+      id: '/project/$projectId/tasks/'
+      path: '/tasks'
+      fullPath: '/project/$projectId/tasks'
+      preLoaderRoute: typeof ProjectProjectIdTasksIndexRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/project/$projectId/files/': {
+      id: '/project/$projectId/files/'
+      path: '/files'
+      fullPath: '/project/$projectId/files'
+      preLoaderRoute: typeof ProjectProjectIdFilesIndexRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/project/$projectId/docs/': {
+      id: '/project/$projectId/docs/'
+      path: '/docs'
+      fullPath: '/project/$projectId/docs'
+      preLoaderRoute: typeof ProjectProjectIdDocsIndexRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/project/$projectId/chat/': {
+      id: '/project/$projectId/chat/'
+      path: '/chat'
+      fullPath: '/project/$projectId/chat'
+      preLoaderRoute: typeof ProjectProjectIdChatIndexRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/project/$projectId/agents/': {
+      id: '/project/$projectId/agents/'
+      path: '/agents'
+      fullPath: '/project/$projectId/agents'
+      preLoaderRoute: typeof ProjectProjectIdAgentsIndexRouteImport
+      parentRoute: typeof ProjectProjectIdRouteRoute
     }
   }
 }
 
+interface UserRouteRouteChildren {
+  UserIndexRoute: typeof UserIndexRoute
+  UserSettingsIndexRoute: typeof UserSettingsIndexRoute
+}
+
+const UserRouteRouteChildren: UserRouteRouteChildren = {
+  UserIndexRoute: UserIndexRoute,
+  UserSettingsIndexRoute: UserSettingsIndexRoute,
+}
+
+const UserRouteRouteWithChildren = UserRouteRoute._addFileChildren(
+  UserRouteRouteChildren,
+)
+
+interface ProjectProjectIdRouteRouteChildren {
+  ProjectProjectIdIndexRoute: typeof ProjectProjectIdIndexRoute
+  ProjectProjectIdAgentsIndexRoute: typeof ProjectProjectIdAgentsIndexRoute
+  ProjectProjectIdChatIndexRoute: typeof ProjectProjectIdChatIndexRoute
+  ProjectProjectIdDocsIndexRoute: typeof ProjectProjectIdDocsIndexRoute
+  ProjectProjectIdFilesIndexRoute: typeof ProjectProjectIdFilesIndexRoute
+  ProjectProjectIdTasksIndexRoute: typeof ProjectProjectIdTasksIndexRoute
+}
+
+const ProjectProjectIdRouteRouteChildren: ProjectProjectIdRouteRouteChildren = {
+  ProjectProjectIdIndexRoute: ProjectProjectIdIndexRoute,
+  ProjectProjectIdAgentsIndexRoute: ProjectProjectIdAgentsIndexRoute,
+  ProjectProjectIdChatIndexRoute: ProjectProjectIdChatIndexRoute,
+  ProjectProjectIdDocsIndexRoute: ProjectProjectIdDocsIndexRoute,
+  ProjectProjectIdFilesIndexRoute: ProjectProjectIdFilesIndexRoute,
+  ProjectProjectIdTasksIndexRoute: ProjectProjectIdTasksIndexRoute,
+}
+
+const ProjectProjectIdRouteRouteWithChildren =
+  ProjectProjectIdRouteRoute._addFileChildren(
+    ProjectProjectIdRouteRouteChildren,
+  )
+
+interface ProjectRouteChildren {
+  ProjectLayoutRoute: typeof ProjectLayoutRoute
+}
+
+const ProjectRouteChildren: ProjectRouteChildren = {
+  ProjectLayoutRoute: ProjectLayoutRoute,
+}
+
+const ProjectRouteWithChildren =
+  ProjectRoute._addFileChildren(ProjectRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AgentsRoute: AgentsRoute,
-  ChatRoute: ChatRoute,
-  DocsRoute: DocsRoute,
-  FilesRoute: FilesRoute,
-  SettingsRoute: SettingsRoute,
-  TasksRoute: TasksRoute,
+  UserRouteRoute: UserRouteRouteWithChildren,
+  Legacy_indexRoute: Legacy_indexRoute,
+  ProjectProjectIdRouteRoute: ProjectProjectIdRouteRouteWithChildren,
+  ProjectRoute: ProjectRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

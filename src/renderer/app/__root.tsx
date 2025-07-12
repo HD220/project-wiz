@@ -1,4 +1,9 @@
-import { createRootRoute, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  Outlet,
+  useNavigate,
+  useLocation,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { TooltipProvider } from "@/ui/tooltip";
 import { CreateProjectModal } from "@/renderer/components/modals/create-project-modal";
@@ -7,7 +12,6 @@ import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
 // SidebarProvider import removed
 import { ProjectSidebar } from "@/renderer/components/layout/project-sidebar";
 import { mockProjects } from "@/renderer/lib/placeholders";
-
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -20,6 +24,8 @@ function RootComponent() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
+  console.log("Root component rendering, path:", location.pathname);
+
   const handleCreateProject = () => {
     setShowCreateProjectModal(true);
   };
@@ -29,23 +35,14 @@ function RootComponent() {
   };
 
   let currentSelectedProjectId: string | undefined = undefined;
-  const pathParts = location.pathname.split('/');
-  if (pathParts.length > 2 && pathParts[1] === 'project') {
-    currentSelectedProjectId = pathParts[2];
-  }
-
-  // Determine selectedProjectId from URL for visual indication on ProjectSidebar
-  let currentSelectedProjectId: string | undefined = undefined;
-  const pathParts = location.pathname.split('/');
-  // Example path: /project/project-id-123/chat -> pathParts = ["", "project", "project-id-123", "chat"]
-  if (pathParts.length > 2 && pathParts[1] === 'project') {
+  const pathParts = location.pathname.split("/");
+  if (pathParts.length > 2 && pathParts[1] === "project") {
     currentSelectedProjectId = pathParts[2];
   }
 
   return (
     <TooltipProvider>
       <PageTitleProvider>
-        {/* SidebarProvider wrapper removed */}
         <div className="flex h-screen w-full bg-background overflow-hidden">
           <ProjectSidebar
             projects={mockProjects}
@@ -54,9 +51,9 @@ function RootComponent() {
             onCreateProject={handleCreateProject}
             onSettings={() => navigate({ to: "/user/settings/" })}
           />
-          <main className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-hidden">
             <Outlet />
-          </main>
+          </div>
         </div>
 
         <CreateProjectModal
