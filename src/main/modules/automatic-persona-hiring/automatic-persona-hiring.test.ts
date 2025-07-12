@@ -104,7 +104,7 @@ describe("Automatic Persona Hiring Module", () => {
   it("should hire personas automatically based on project stack (React)", async () => {
     const command = new HirePersonasAutomaticallyCommand({
       projectId: "proj1",
-      projectPath: "/user/projects/my-react-app",
+      projectPath: "/projects/my-react-app",
     });
     const result = await cqrsDispatcher.dispatchCommand<
       HirePersonasAutomaticallyCommand,
@@ -117,7 +117,7 @@ describe("Automatic Persona Hiring Module", () => {
   it("should hire personas automatically based on project stack (Node.js)", async () => {
     const command = new HirePersonasAutomaticallyCommand({
       projectId: "proj2",
-      projectPath: "/user/projects/my-node-api",
+      projectPath: "/projects/my-node-api",
     });
     const result = await cqrsDispatcher.dispatchCommand<
       HirePersonasAutomaticallyCommand,
@@ -132,7 +132,7 @@ describe("Automatic Persona Hiring Module", () => {
 
     const command = new HirePersonasAutomaticallyCommand({
       projectId: "proj3",
-      projectPath: "/user/projects/any-app",
+      projectPath: "/projects/any-app",
     });
 
     await expect(

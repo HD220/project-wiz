@@ -8,8 +8,6 @@ import {
   Settings,
   MoreHorizontal,
   Home,
-  FileText,
-  CheckSquare,
   Code,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,7 +39,7 @@ export function TopBar({
 }: TopBarProps) {
   const getIcon = () => {
     if (icon) return icon;
-    
+
     switch (type) {
       case "channel":
         return <Hash className="w-5 h-5 text-muted-foreground" />;
@@ -70,10 +68,12 @@ export function TopBar({
   };
 
   return (
-    <div className={cn(
-      "h-12 px-4 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-none",
-      className
-    )}>
+    <div
+      className={cn(
+        "h-12 px-4 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-none",
+        className,
+      )}
+    >
       {/* Left side - Title and info */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Avatar or Icon */}
@@ -89,24 +89,20 @@ export function TopBar({
               <div
                 className={cn(
                   "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-background rounded-full",
-                  getStatusColor()
+                  getStatusColor(),
                 )}
               />
             )}
           </div>
         ) : (
-          <div className="flex-shrink-0">
-            {getIcon()}
-          </div>
+          <div className="flex-shrink-0">{getIcon()}</div>
         )}
 
         {/* Title and subtitle */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="font-semibold text-foreground truncate">
-              {title}
-            </h1>
-            
+            <h1 className="font-semibold text-foreground truncate">{title}</h1>
+
             {/* Member count for channels */}
             {type === "channel" && memberCount && (
               <Badge variant="secondary" className="text-xs">
@@ -114,7 +110,7 @@ export function TopBar({
                 {memberCount}
               </Badge>
             )}
-            
+
             {/* Status badge for DMs */}
             {type === "dm" && status && (
               <Badge variant="outline" className="text-xs">
@@ -122,11 +118,9 @@ export function TopBar({
               </Badge>
             )}
           </div>
-          
+
           {subtitle && (
-            <p className="text-sm text-muted-foreground truncate">
-              {subtitle}
-            </p>
+            <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
           )}
         </div>
       </div>

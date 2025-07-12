@@ -7,25 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
-  Settings,
   User,
   Zap,
   Palette,
   Bell,
   Shield,
   Database,
-  Key,
-  Globe,
-  Monitor,
   Save,
   TestTube,
 } from "lucide-react";
 
-export const Route = createFileRoute("/user/settings/")({
+export const Route = createFileRoute("/(user)/settings/")({
   component: UserSettingsPage,
 });
 
@@ -35,29 +37,29 @@ export function UserSettingsPage() {
     // User Settings
     username: "Usuário",
     email: "usuario@example.com",
-    
+
     // LLM Settings
     defaultLLM: "openai",
     openaiApiKey: "",
     deepseekApiKey: "",
     maxTokens: 4000,
     temperature: 0.7,
-    
+
     // Interface Settings
     theme: theme, // Initialize with current theme from context
     language: "pt-BR",
     compactMode: false,
-    
+
     // Notification Settings
     enableNotifications: true,
     soundNotifications: true,
     agentStatusUpdates: true,
     taskCompletionAlerts: true,
-    
+
     // Security Settings
     autoLock: false,
     lockTimeout: 15,
-    
+
     // Advanced Settings
     enableDebugMode: false,
     maxConcurrentAgents: 5,
@@ -69,7 +71,7 @@ export function UserSettingsPage() {
   }, [settings.theme, setTheme]);
 
   const updateSetting = (key: string, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
@@ -137,7 +139,9 @@ export function UserSettingsPage() {
                     <Input
                       id="username"
                       value={settings.username}
-                      onChange={(e) => updateSetting("username", e.target.value)}
+                      onChange={(e) =>
+                        updateSetting("username", e.target.value)
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -169,7 +173,9 @@ export function UserSettingsPage() {
                   <Label>Provedor Padrão</Label>
                   <Select
                     value={settings.defaultLLM}
-                    onValueChange={(value) => updateSetting("defaultLLM", value)}
+                    onValueChange={(value) =>
+                      updateSetting("defaultLLM", value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -187,8 +193,12 @@ export function UserSettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium">OpenAI</h4>
-                    <Badge variant={settings.openaiApiKey ? "default" : "secondary"}>
-                      {settings.openaiApiKey ? "Configurado" : "Não configurado"}
+                    <Badge
+                      variant={settings.openaiApiKey ? "default" : "secondary"}
+                    >
+                      {settings.openaiApiKey
+                        ? "Configurado"
+                        : "Não configurado"}
                     </Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
@@ -199,12 +209,14 @@ export function UserSettingsPage() {
                         type="password"
                         placeholder="sk-..."
                         value={settings.openaiApiKey}
-                        onChange={(e) => updateSetting("openaiApiKey", e.target.value)}
+                        onChange={(e) =>
+                          updateSetting("openaiApiKey", e.target.value)
+                        }
                       />
                     </div>
                     <div className="flex items-end">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => testLLMConnection("openai")}
                         className="w-full gap-2"
                       >
@@ -221,8 +233,14 @@ export function UserSettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium">DeepSeek</h4>
-                    <Badge variant={settings.deepseekApiKey ? "default" : "secondary"}>
-                      {settings.deepseekApiKey ? "Configurado" : "Não configurado"}
+                    <Badge
+                      variant={
+                        settings.deepseekApiKey ? "default" : "secondary"
+                      }
+                    >
+                      {settings.deepseekApiKey
+                        ? "Configurado"
+                        : "Não configurado"}
                     </Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
@@ -233,12 +251,14 @@ export function UserSettingsPage() {
                         type="password"
                         placeholder="sk-..."
                         value={settings.deepseekApiKey}
-                        onChange={(e) => updateSetting("deepseekApiKey", e.target.value)}
+                        onChange={(e) =>
+                          updateSetting("deepseekApiKey", e.target.value)
+                        }
                       />
                     </div>
                     <div className="flex items-end">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => testLLMConnection("deepseek")}
                         className="w-full gap-2"
                       >
@@ -263,7 +283,9 @@ export function UserSettingsPage() {
                         min={100}
                         max={8000}
                         value={settings.maxTokens}
-                        onChange={(e) => updateSetting("maxTokens", parseInt(e.target.value))}
+                        onChange={(e) =>
+                          updateSetting("maxTokens", parseInt(e.target.value))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -275,7 +297,12 @@ export function UserSettingsPage() {
                         max={2}
                         step={0.1}
                         value={settings.temperature}
-                        onChange={(e) => updateSetting("temperature", parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          updateSetting(
+                            "temperature",
+                            parseFloat(e.target.value),
+                          )
+                        }
                       />
                     </div>
                   </div>
@@ -315,7 +342,9 @@ export function UserSettingsPage() {
                     <Label>Idioma</Label>
                     <Select
                       value={settings.language}
-                      onValueChange={(value) => updateSetting("language", value)}
+                      onValueChange={(value) =>
+                        updateSetting("language", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -339,7 +368,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.compactMode}
-                    onCheckedChange={(checked) => updateSetting("compactMode", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("compactMode", checked)
+                    }
                   />
                 </div>
               </CardContent>
@@ -365,7 +396,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.enableNotifications}
-                    onCheckedChange={(checked) => updateSetting("enableNotifications", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("enableNotifications", checked)
+                    }
                   />
                 </div>
 
@@ -380,7 +413,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.soundNotifications}
-                    onCheckedChange={(checked) => updateSetting("soundNotifications", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("soundNotifications", checked)
+                    }
                   />
                 </div>
 
@@ -393,7 +428,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.agentStatusUpdates}
-                    onCheckedChange={(checked) => updateSetting("agentStatusUpdates", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("agentStatusUpdates", checked)
+                    }
                   />
                 </div>
 
@@ -406,7 +443,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.taskCompletionAlerts}
-                    onCheckedChange={(checked) => updateSetting("taskCompletionAlerts", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("taskCompletionAlerts", checked)
+                    }
                   />
                 </div>
               </CardContent>
@@ -432,7 +471,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.autoLock}
-                    onCheckedChange={(checked) => updateSetting("autoLock", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("autoLock", checked)
+                    }
                   />
                 </div>
 
@@ -440,14 +481,18 @@ export function UserSettingsPage() {
                   <>
                     <Separator />
                     <div className="space-y-2">
-                      <Label htmlFor="lock-timeout">Tempo de Bloqueio (minutos)</Label>
+                      <Label htmlFor="lock-timeout">
+                        Tempo de Bloqueio (minutos)
+                      </Label>
                       <Input
                         id="lock-timeout"
                         type="number"
                         min={1}
                         max={60}
                         value={settings.lockTimeout}
-                        onChange={(e) => updateSetting("lockTimeout", parseInt(e.target.value))}
+                        onChange={(e) =>
+                          updateSetting("lockTimeout", parseInt(e.target.value))
+                        }
                       />
                     </div>
                   </>
@@ -475,7 +520,9 @@ export function UserSettingsPage() {
                   </div>
                   <Switch
                     checked={settings.enableDebugMode}
-                    onCheckedChange={(checked) => updateSetting("enableDebugMode", checked)}
+                    onCheckedChange={(checked) =>
+                      updateSetting("enableDebugMode", checked)
+                    }
                   />
                 </div>
 
@@ -483,25 +530,39 @@ export function UserSettingsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="max-agents">Máximo de Agentes Simultâneos</Label>
+                    <Label htmlFor="max-agents">
+                      Máximo de Agentes Simultâneos
+                    </Label>
                     <Input
                       id="max-agents"
                       type="number"
                       min={1}
                       max={20}
                       value={settings.maxConcurrentAgents}
-                      onChange={(e) => updateSetting("maxConcurrentAgents", parseInt(e.target.value))}
+                      onChange={(e) =>
+                        updateSetting(
+                          "maxConcurrentAgents",
+                          parseInt(e.target.value),
+                        )
+                      }
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="autosave">Intervalo de Auto-Save (segundos)</Label>
+                    <Label htmlFor="autosave">
+                      Intervalo de Auto-Save (segundos)
+                    </Label>
                     <Input
                       id="autosave"
                       type="number"
                       min={10}
                       max={300}
                       value={settings.autoSaveInterval}
-                      onChange={(e) => updateSetting("autoSaveInterval", parseInt(e.target.value))}
+                      onChange={(e) =>
+                        updateSetting(
+                          "autoSaveInterval",
+                          parseInt(e.target.value),
+                        )
+                      }
                     />
                   </div>
                 </div>

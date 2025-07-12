@@ -18,7 +18,7 @@ A análise da base de código revelou que grande parte da infraestrutura necess�
 - **Esquema do Banco de Dados (`src/main/modules/project-management/persistence/schema.ts`):**
   - A tabela `projects` já possui campos para `name`, `description`, `localPath`, `remoteUrl`, `createdAt`, `updatedAt`. Isso é excelente, pois não precisamos modificar o esquema do banco de dados para acomodar os novos requisitos.
 - **UI/UX (Frontend - `src/renderer`):**
-  - Componentes como `ProjectSidebar`, `CreateProjectModal` e `CreateProjectForm` já existem, indicando uma estrutura básica para a interface de criação e listagem de projetos.
+  - Componentes como `AppSidebar`, `CreateProjectModal` e `CreateProjectForm` já existem, indicando uma estrutura básica para a interface de criação e listagem de projetos.
 
 ### Gaps Identificados:
 

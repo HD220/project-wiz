@@ -9,8 +9,9 @@ Este é o frontend do Project Wiz implementado com uma interface similar ao Disc
 ### Componentes Principais
 
 #### Layout Components
+
 - **DiscordLayout**: Layout principal que organiza a interface em sidebars e área de conteúdo
-- **ProjectSidebar**: Sidebar esquerda com lista de projetos (72px de largura)
+- **AppSidebar**: Sidebar esquerda com lista de projetos (72px de largura)
 - **ChannelsSidebar**: Sidebar central com canais e agentes (240px de largura)
 
 #### Features Implementadas
@@ -80,7 +81,7 @@ O layout é totalmente responsivo usando classes TailwindCSS:
 
 ```
 Mobile (< 768px):     [Projects] overlay + [Main Content]
-Tablet (768-1024px):  [Projects] + [Main Content]  
+Tablet (768-1024px):  [Projects] + [Main Content]
 Desktop (1024px+):    [Projects] + [Channels] + [Main Content]
 Wide (>= 1440px):     [Projects] + [Channels] + [Main Content] + [Right Panel]
 ```
@@ -88,30 +89,35 @@ Wide (>= 1440px):     [Projects] + [Channels] + [Main Content] + [Right Panel]
 ## Componentes Customizados
 
 ### Chat System
+
 - Suporte a diferentes tipos de mensagem (texto, código, sistema)
 - Reações em mensagens
 - Indicadores de typing
 - Formatação markdown básica
 
 ### Kanban Board
+
 - Drag & drop ready (estrutura preparada)
 - Filtros por status e assignee
 - Badges de prioridade coloridos
 - Progress tracking visual
 
 ### File Explorer
+
 - Navegação em árvore com expand/collapse
 - Context menus com ações
 - Integração com terminal
 - Preview de arquivos
 
 ### Terminal Panel
+
 - Múltiplas abas de terminal
 - Histórico de comandos (seta para cima/baixo)
 - Simulação de execução de comandos
 - Status bar com informações
 
 ### Agent Dashboard
+
 - Grid responsivo de agents cards
 - Filtros por status (online, executing, busy, offline)
 - Detalhes expandidos com capacidades
@@ -122,10 +128,9 @@ Wide (>= 1440px):     [Projects] + [Channels] + [Main Content] + [Right Panel]
 Usa variáveis CSS do shadcn/ui com tema Discord-inspired:
 
 ```css
---background: 220 13% 18%    /* Discord dark background */
---card: 220 13% 23%          /* Discord card background */
---sidebar: 220 13% 15%       /* Discord sidebar */
---primary: 235 85.6% 64.7%   /* Discord blue */
+--background: 220 13% 18% /* Discord dark background */ --card: 220 13% 23%
+  /* Discord card background */ --sidebar: 220 13% 15% /* Discord sidebar */
+  --primary: 235 85.6% 64.7% /* Discord blue */;
 ```
 
 ## Como Usar
@@ -140,17 +145,20 @@ Usa variáveis CSS do shadcn/ui com tema Discord-inspired:
 ## Funcionalidades Destacadas
 
 ### Real-time Status
+
 - Indicadores de status de agentes (online, executing, busy, away, offline)
 - Progress bars para tarefas em execução
 - Badges de notificação em projetos e canais
 
 ### Interatividade
+
 - Hover effects em todos os componentes
 - Context menus no file explorer
 - Resizable panels no layout de arquivos
 - Collapsible sections nas sidebars
 
 ### Acessibilidade
+
 - Suporte a navegação por teclado
 - Tooltips informativos
 - Contraste adequado

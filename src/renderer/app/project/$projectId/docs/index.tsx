@@ -4,7 +4,6 @@ import { PageTitle } from "@/components/page-title";
 import { FileText, Folder, FolderOpen, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -79,7 +78,7 @@ For help and support, check our community guidelines or contact the development 
       {
         id: "3",
         name: "getting-started.md",
-        path: "/docs/user/getting-started.md",
+        path: "/docs/getting-started.md",
         type: "file",
         content: `# Getting Started Guide
 
@@ -121,13 +120,13 @@ The chat system allows real-time communication with your agents:
       {
         id: "4",
         name: "tutorials",
-        path: "/docs/user/tutorials",
+        path: "/docs/tutorials",
         type: "folder",
         children: [
           {
             id: "5",
             name: "first-project.md",
-            path: "/docs/user/tutorials/first-project.md",
+            path: "/docs/tutorials/first-project.md",
             type: "file",
             content: `# Creating Your First Project
 
@@ -227,7 +226,7 @@ Real-time updates using event-driven architecture:
 export function ProjectDocsPage() {
   const [selectedDoc, setSelectedDoc] = useState<DocFile | null>(mockDocs[0]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    new Set(["2", "4", "6"])
+    new Set(["2", "4", "6"]),
   );
 
   const toggleFolder = (folderId: string) => {
@@ -303,16 +302,16 @@ export function ProjectDocsPage() {
               {selectedDoc ? (
                 <div className="flex-1 min-h-0 flex flex-col">
                   <div className="p-4 border-b bg-muted/30 flex-shrink-0">
-                    <h1 className="text-lg font-semibold">{selectedDoc.name}</h1>
+                    <h1 className="text-lg font-semibold">
+                      {selectedDoc.name}
+                    </h1>
                     <p className="text-sm text-muted-foreground">
                       {selectedDoc.path}
                     </p>
                   </div>
                   <ScrollArea className="flex-1 min-h-0">
                     <div className="p-6 max-w-4xl mx-auto">
-                      <MarkdownRenderer
-                        content={selectedDoc.content || ""}
-                      />
+                      <MarkdownRenderer content={selectedDoc.content || ""} />
                     </div>
                   </ScrollArea>
                 </div>

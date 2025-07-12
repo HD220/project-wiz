@@ -1,4 +1,3 @@
-import React from "react";
 import PersonaForm from "./components/persona-form";
 import { usePersonaWizard } from "./hooks/use-persona-wizard";
 

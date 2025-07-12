@@ -9,17 +9,17 @@ export function TopicList() {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Error: {error.message}</div>;
   }
 
   return (
     <div>
       <h2>Topics</h2>
-      {topics.length === 0 ? (
+      {topics?.length === 0 ? (
         <p>No topics available.</p>
       ) : (
         <ul>
-          {topics.map((topic) => (
+          {topics?.map((topic) => (
             <li key={topic.id}>{topic.title}</li>
           ))}
         </ul>

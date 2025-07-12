@@ -48,7 +48,7 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
 **Passos:**
 
 1.  **Ponto de Entrada "Clonar Repositório" (Opcional):**
-    - Adicionar um botão ou item de menu na interface principal (e.g., na `ProjectSidebar` ou em um menu de "Arquivo") com o texto "Clonar Repositório".
+    - Adicionar um botão ou item de menu na interface principal (e.g., na `AppSidebar` ou em um menu de "Arquivo") com o texto "Clonar Repositório".
     - Ao clicar, este botão deve abrir o `CreateProjectModal` e, idealmente, pré-selecionar a opção `gitOption` como `'clone'` e focar no campo `remoteUrl`.
 
     ```typescript
@@ -56,7 +56,7 @@ A análise da base de código revelou que a funcionalidade central de clonagem G
     // ... imports ...
     import { CreateProjectModal } from "@/renderer/features/project-management/components/create-project-modal";
 
-    export function ProjectSidebar() {
+    export function AppSidebar() {
       // ... código existente ...
 
       return (

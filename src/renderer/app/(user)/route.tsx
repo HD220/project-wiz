@@ -1,38 +1,42 @@
-import { createFileRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
-import { useState } from "react";
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useLocation,
+} from "@tanstack/react-router";
 import { UserSidebar } from "@/renderer/components/layout/user-sidebar";
-import { AgentsSidebar } from "@/renderer/components/layout/agents-sidebar";
 import { TopBar } from "@/renderer/components/layout/top-bar";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/renderer/components/ui/resizable";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/renderer/components/ui/resizable";
 import { mockAgents } from "@/renderer/lib/placeholders";
 
 function UserLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [agentsSidebarOpen, setAgentsSidebarOpen] = useState(false);
-  
 
   const handleAgentDMSelect = (agentId: string) => {
     console.log("Navigate to DM with agent:", agentId);
-    // navigate({ to: '/user/dm/$agentId', params: { agentId } });
   };
 
   const handleSettings = () => {
-    navigate({ to: "/user/settings/" });
+    navigate({ to: "/settings" });
   };
 
   // Get page title based on current route
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === "/user/") return "Dashboard";
-    if (path.includes("/user/settings")) return "Configurações";
+    if (path === "/") return "Dashboard";
+    if (path.includes("/settings")) return "Configurações";
     return "Usuário";
   };
 
   const getPageSubtitle = () => {
     const path = location.pathname;
-    if (path === "/user/") return "Visão geral e estatísticas";
-    if (path.includes("/user/settings")) return "Configurações do usuário e sistema";
+    if (path === "/") return "Visão geral e estatísticas";
+    if (path.includes("/settings")) return "Configurações do usuário e sistema";
     return undefined;
   };
 
@@ -71,6 +75,6 @@ function UserLayout() {
   );
 }
 
-export const Route = createFileRoute('/user')({
+export const Route = createFileRoute("/(user)")({
   component: UserLayout,
-})
+});

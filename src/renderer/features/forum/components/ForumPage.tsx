@@ -11,10 +11,10 @@ export function ForumPage() {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Error: {error.message}</div>;
   }
 
-  const selectedTopicId = topics.length > 0 ? topics[0].id : undefined;
+  const selectedTopicId = topics!.length > 0 ? topics![0].id : undefined;
 
   return (
     <div>

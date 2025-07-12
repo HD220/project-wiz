@@ -1,5 +1,3 @@
-import React from "react";
-
 import type { IProject } from "@/shared/ipc-types/domain-types";
 import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
 import { useIpcQuery } from "@/renderer/hooks/use-ipc-query.hook";

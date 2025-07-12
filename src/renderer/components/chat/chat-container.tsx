@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import rehypeHighlight from 'rehype-highlight';
+import rehypeHighlight from "rehype-highlight";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -78,10 +78,7 @@ export function ChatContainer({
 
   return (
     <div className={cn("flex flex-col h-full bg-background", className)}>
-      <PageTitle 
-        title={displayName} 
-        icon={titleIcon}
-      />
+      <PageTitle title={displayName} icon={titleIcon} />
       {isAgentChat && (
         <div className="px-4 py-2 border-b">
           <Badge variant="secondary" className="text-xs">
@@ -221,10 +218,10 @@ function MessageItem({ message }: MessageItemProps) {
               let contentWithMentions = message.content;
               if (message.mentions && Array.isArray(message.mentions)) {
                 message.mentions.forEach((mention) => {
-                  if (mention.name) {
+                  if (mention) {
                     contentWithMentions = contentWithMentions.replace(
-                      new RegExp(`@${mention.name}`, "g"),
-                      `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention.name}</span>`,
+                      new RegExp(`@${mention}`, "g"),
+                      `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`,
                     );
                   }
                 });

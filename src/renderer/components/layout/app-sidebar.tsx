@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Folder } from "lucide-react";
 import { Project } from "@/lib/placeholders";
 
-interface ProjectSidebarProps {
+interface AppSidebarProps {
   projects: Project[];
   selectedProjectId?: string;
   onProjectSelect: (projectId: string) => void;
@@ -19,13 +19,13 @@ interface ProjectSidebarProps {
   onSettings: () => void;
 }
 
-export function ProjectSidebar({
+export function AppSidebar({
   projects,
   selectedProjectId,
   onProjectSelect,
   onCreateProject,
   onSettings,
-}: ProjectSidebarProps) {
+}: AppSidebarProps) {
   return (
     <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2 h-full flex-none">
       {/* Home/Dashboard */}
@@ -38,7 +38,7 @@ export function ProjectSidebar({
               className="w-12 h-12 rounded-2xl bg-primary hover:bg-primary/90 hover:rounded-xl transition-all duration-200"
               asChild
             >
-              <Link to="/user/">
+              <Link to="/">
                 <Folder className="h-6 w-6 text-primary-foreground" />
               </Link>
             </Button>

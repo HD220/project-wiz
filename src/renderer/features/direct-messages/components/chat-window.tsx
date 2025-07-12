@@ -1,12 +1,5 @@
-import React from "react";
-import { useIpcQuery } from "@/renderer/hooks/use-ipc-query.hook";
-import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
-import { IDirectMessage } from "@/shared/ipc-types/domain-types";
-import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import type {
-  IpcDirectMessagesListPayload,
-  IpcDirectMessagesSendPayload,
-} from "@/shared/ipc-types/ipc-payloads";
+import { useChatData } from "../hooks/use-chat-data";
+import { AsyncBoundary } from "@/renderer/components/common/async-boundary";
 import MessageList from "./message-list";
 import MessageInput from "./message-input";
 
@@ -15,54 +8,26 @@ interface ChatWindowProps {
 }
 
 function ChatWindow({ conversationId }: ChatWindowProps) {
-  const [senderId, receiverId] = conversationId.split("-");
-
   const {
-    data: messages,
+    messages,
     isLoading,
     error,
-    refetch: fetchMessages,
-  } = useIpcQuery<IDirectMessage[], IpcDirectMessagesListPayload>({
-    channel: IpcChannel.DIRECT_MESSAGES_LIST,
-    payload: { senderId, receiverId },
-  });
-
-  const [newMessage, setNewMessage] = React.useState("");
-
-  const { mutate: sendMessage } = useIpcMutation<
-    IDirectMessage,
-    Error,
-    IpcDirectMessagesSendPayload
-  >({
-    channel: IpcChannel.DIRECT_MESSAGES_SEND,
-    onSuccess: () => {
-      setNewMessage("");
-      fetchMessages();
-    },
-    onError: (err) => {
-      alert(`Error sending message: ${err.message}`);
-    },
-  });
-
-  const handleSendMessage = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!newMessage.trim()) {
-      return;
-    }
-    sendMessage({ senderId, receiverId, content: newMessage });
-  };
-
-  if (isLoading) return <div>Loading messages...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+    newMessage,
+    setNewMessage,
+    handleSendMessage,
+    senderId,
+  } = useChatData({ conversationId });
 
   return (
     <div className="flex flex-col h-full p-4">
-      <MessageList messages={messages || []} senderId={senderId} />
-      <MessageInput
-        newMessage={newMessage}
-        setNewMessage={setNewMessage}
-        handleSendMessage={handleSendMessage}
-      />
+      <AsyncBoundary isLoading={isLoading} error={error}>
+        <MessageList messages={messages} senderId={senderId} />
+        <MessageInput
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          handleSendMessage={handleSendMessage}
+        />
+      </AsyncBoundary>
     </div>
   );
 }

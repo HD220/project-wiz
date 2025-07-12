@@ -1,7 +1,6 @@
 import { useState } from "react"; // useEffect import removed
 // useSidebar import removed
 import { Link, useLocation } from "@tanstack/react-router";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -15,15 +14,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Hash,
   ChevronDown,
-  ChevronRight,
   Plus,
   Search,
   Volume2,
   Settings,
-  Loader2,
   Home,
   Users,
-  MessageSquare,
   FileText,
   CheckSquare,
 } from "lucide-react";
@@ -112,41 +108,57 @@ export function ChannelsSidebar({
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
             <Button
-              variant={location.pathname === `/project/${projectId}/` ? "secondary" : "ghost"}
+              variant={
+                location.pathname === `/project/${projectId}/`
+                  ? "secondary"
+                  : "ghost"
+              }
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/project/$projectId/" params={{ projectId }}>
+              <Link to="/project/$projectId" params={{ projectId }}>
                 <Home className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Dashboard</span>
               </Link>
             </Button>
             <Button
-              variant={location.pathname === `/project/${projectId}/agents/` ? "secondary" : "ghost"}
+              variant={
+                location.pathname === `/project/${projectId}/agents`
+                  ? "secondary"
+                  : "ghost"
+              }
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/project/$projectId/agents/" params={{ projectId }}>
+              <Link to="/project/$projectId/agents" params={{ projectId }}>
                 <Users className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Agentes</span>
               </Link>
             </Button>
             <Button
-              variant={location.pathname === `/project/${projectId}/tasks/` ? "secondary" : "ghost"}
+              variant={
+                location.pathname === `/project/${projectId}/tasks/`
+                  ? "secondary"
+                  : "ghost"
+              }
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/project/$projectId/tasks/" params={{ projectId }}>
+              <Link to="/project/$projectId/tasks" params={{ projectId }}>
                 <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Tarefas</span>
               </Link>
             </Button>
             <Button
-              variant={location.pathname === `/project/${projectId}/docs/` ? "secondary" : "ghost"}
+              variant={
+                location.pathname === `/project/${projectId}/docs/`
+                  ? "secondary"
+                  : "ghost"
+              }
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/project/$projectId/docs/" params={{ projectId }}>
+              <Link to="/project/$projectId/docs" params={{ projectId }}>
                 <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Documentos</span>
               </Link>
@@ -201,7 +213,6 @@ export function ChannelsSidebar({
               ))}
             </CollapsibleContent>
           </Collapsible>
-
         </div>
       </ScrollArea>
 
@@ -225,7 +236,7 @@ export function ChannelsSidebar({
               <Volume2 className="h-4 w-4 text-muted-foreground" />
             </Button>
             <Button variant="ghost" size="icon" className="w-6 h-6" asChild>
-              <Link to="/user/settings/">
+              <Link to="/settings">
                 <Settings className="h-4 w-4 text-muted-foreground" />
               </Link>
             </Button>

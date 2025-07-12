@@ -3,22 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import {
-  Play,
-  Square,
-  Trash2,
-  Copy,
-  Settings,
-  Plus,
-  X,
-  Maximize2,
-  Minimize2,
-} from "lucide-react";
+import { Play, Trash2, Settings, Plus, X, Minimize2 } from "lucide-react";
 import { TerminalLine, mockTerminalLines } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
@@ -106,7 +91,7 @@ export function TerminalPanel({
     } else if (lowerCmd.startsWith("cd ")) {
       return "";
     } else if (lowerCmd === "pwd") {
-      return "/home/user/project-wiz";
+      return "/home/project-wiz";
     } else if (lowerCmd === "git status") {
       return "On branch main\nYour branch is up to date with 'origin/main'.\n\nnothing to commit, working tree clean";
     } else if (lowerCmd.startsWith("npm ")) {

@@ -11,13 +11,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './app/__root'
-import { Route as Legacy_indexRouteImport } from './app/legacy_index'
-import { Route as UserRouteRouteImport } from './app/user/route'
-import { Route as UserIndexRouteImport } from './app/user/index'
+import { Route as userRouteRouteImport } from './app/(user)/route'
+import { Route as userIndexRouteImport } from './app/(user)/index'
 import { Route as ProjectLayoutRouteImport } from './app/project/_layout'
 import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
-import { Route as UserSettingsIndexRouteImport } from './app/user/settings/index'
 import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
+import { Route as userSettingsIndexRouteImport } from './app/(user)/settings/index'
 import { Route as ProjectProjectIdTasksIndexRouteImport } from './app/project/$projectId/tasks/index'
 import { Route as ProjectProjectIdFilesIndexRouteImport } from './app/project/$projectId/files/index'
 import { Route as ProjectProjectIdDocsIndexRouteImport } from './app/project/$projectId/docs/index'
@@ -26,25 +25,19 @@ import { Route as ProjectProjectIdAgentsIndexRouteImport } from './app/project/$
 
 const ProjectRouteImport = createFileRoute('/project')()
 
-const Legacy_indexRoute = Legacy_indexRouteImport.update({
-  id: '/legacy_index',
-  path: '/legacy_index',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProjectRoute = ProjectRouteImport.update({
   id: '/project',
   path: '/project',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserRouteRoute = UserRouteRouteImport.update({
-  id: '/user',
-  path: '/user',
+const userRouteRoute = userRouteRouteImport.update({
+  id: '/(user)',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserIndexRoute = UserIndexRouteImport.update({
+const userIndexRoute = userIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => UserRouteRoute,
+  getParentRoute: () => userRouteRoute,
 } as any)
 const ProjectLayoutRoute = ProjectLayoutRouteImport.update({
   id: '/_layout',
@@ -55,15 +48,15 @@ const ProjectProjectIdRouteRoute = ProjectProjectIdRouteRouteImport.update({
   path: '/project/$projectId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserSettingsIndexRoute = UserSettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
-  getParentRoute: () => UserRouteRoute,
-} as any)
 const ProjectProjectIdIndexRoute = ProjectProjectIdIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ProjectProjectIdRouteRoute,
+} as any)
+const userSettingsIndexRoute = userSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => userRouteRoute,
 } as any)
 const ProjectProjectIdTasksIndexRoute =
   ProjectProjectIdTasksIndexRouteImport.update({
@@ -97,13 +90,11 @@ const ProjectProjectIdAgentsIndexRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/user': typeof UserRouteRouteWithChildren
-  '/legacy_index': typeof Legacy_indexRoute
+  '/': typeof userIndexRoute
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
   '/project': typeof ProjectLayoutRoute
-  '/user/': typeof UserIndexRoute
+  '/settings': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
-  '/user/settings': typeof UserSettingsIndexRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
   '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
   '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
@@ -111,11 +102,10 @@ export interface FileRoutesByFullPath {
   '/project/$projectId/tasks': typeof ProjectProjectIdTasksIndexRoute
 }
 export interface FileRoutesByTo {
-  '/legacy_index': typeof Legacy_indexRoute
   '/project': typeof ProjectLayoutRoute
-  '/user': typeof UserIndexRoute
+  '/': typeof userIndexRoute
+  '/settings': typeof userSettingsIndexRoute
   '/project/$projectId': typeof ProjectProjectIdIndexRoute
-  '/user/settings': typeof UserSettingsIndexRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
   '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
   '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
@@ -124,14 +114,13 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/user': typeof UserRouteRouteWithChildren
-  '/legacy_index': typeof Legacy_indexRoute
+  '/(user)': typeof userRouteRouteWithChildren
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
   '/project': typeof ProjectRouteWithChildren
   '/project/_layout': typeof ProjectLayoutRoute
-  '/user/': typeof UserIndexRoute
+  '/(user)/': typeof userIndexRoute
+  '/(user)/settings/': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
-  '/user/settings/': typeof UserSettingsIndexRoute
   '/project/$projectId/agents/': typeof ProjectProjectIdAgentsIndexRoute
   '/project/$projectId/chat/': typeof ProjectProjectIdChatIndexRoute
   '/project/$projectId/docs/': typeof ProjectProjectIdDocsIndexRoute
@@ -141,13 +130,11 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/user'
-    | '/legacy_index'
+    | '/'
     | '/project/$projectId'
     | '/project'
-    | '/user/'
+    | '/settings'
     | '/project/$projectId/'
-    | '/user/settings'
     | '/project/$projectId/agents'
     | '/project/$projectId/chat'
     | '/project/$projectId/docs'
@@ -155,11 +142,10 @@ export interface FileRouteTypes {
     | '/project/$projectId/tasks'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/legacy_index'
     | '/project'
-    | '/user'
+    | '/'
+    | '/settings'
     | '/project/$projectId'
-    | '/user/settings'
     | '/project/$projectId/agents'
     | '/project/$projectId/chat'
     | '/project/$projectId/docs'
@@ -167,14 +153,13 @@ export interface FileRouteTypes {
     | '/project/$projectId/tasks'
   id:
     | '__root__'
-    | '/user'
-    | '/legacy_index'
+    | '/(user)'
     | '/project/$projectId'
     | '/project'
     | '/project/_layout'
-    | '/user/'
+    | '/(user)/'
+    | '/(user)/settings/'
     | '/project/$projectId/'
-    | '/user/settings/'
     | '/project/$projectId/agents/'
     | '/project/$projectId/chat/'
     | '/project/$projectId/docs/'
@@ -183,21 +168,13 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  UserRouteRoute: typeof UserRouteRouteWithChildren
-  Legacy_indexRoute: typeof Legacy_indexRoute
+  userRouteRoute: typeof userRouteRouteWithChildren
   ProjectProjectIdRouteRoute: typeof ProjectProjectIdRouteRouteWithChildren
   ProjectRoute: typeof ProjectRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/legacy_index': {
-      id: '/legacy_index'
-      path: '/legacy_index'
-      fullPath: '/legacy_index'
-      preLoaderRoute: typeof Legacy_indexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/project': {
       id: '/project'
       path: '/project'
@@ -205,19 +182,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user': {
-      id: '/user'
-      path: '/user'
-      fullPath: '/user'
-      preLoaderRoute: typeof UserRouteRouteImport
+    '/(user)': {
+      id: '/(user)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof userRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/': {
-      id: '/user/'
+    '/(user)/': {
+      id: '/(user)/'
       path: '/'
-      fullPath: '/user/'
-      preLoaderRoute: typeof UserIndexRouteImport
-      parentRoute: typeof UserRouteRoute
+      fullPath: '/'
+      preLoaderRoute: typeof userIndexRouteImport
+      parentRoute: typeof userRouteRoute
     }
     '/project/_layout': {
       id: '/project/_layout'
@@ -233,19 +210,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectProjectIdRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/settings/': {
-      id: '/user/settings/'
-      path: '/settings'
-      fullPath: '/user/settings'
-      preLoaderRoute: typeof UserSettingsIndexRouteImport
-      parentRoute: typeof UserRouteRoute
-    }
     '/project/$projectId/': {
       id: '/project/$projectId/'
       path: '/'
       fullPath: '/project/$projectId/'
       preLoaderRoute: typeof ProjectProjectIdIndexRouteImport
       parentRoute: typeof ProjectProjectIdRouteRoute
+    }
+    '/(user)/settings/': {
+      id: '/(user)/settings/'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof userSettingsIndexRouteImport
+      parentRoute: typeof userRouteRoute
     }
     '/project/$projectId/tasks/': {
       id: '/project/$projectId/tasks/'
@@ -285,18 +262,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface UserRouteRouteChildren {
-  UserIndexRoute: typeof UserIndexRoute
-  UserSettingsIndexRoute: typeof UserSettingsIndexRoute
+interface userRouteRouteChildren {
+  userIndexRoute: typeof userIndexRoute
+  userSettingsIndexRoute: typeof userSettingsIndexRoute
 }
 
-const UserRouteRouteChildren: UserRouteRouteChildren = {
-  UserIndexRoute: UserIndexRoute,
-  UserSettingsIndexRoute: UserSettingsIndexRoute,
+const userRouteRouteChildren: userRouteRouteChildren = {
+  userIndexRoute: userIndexRoute,
+  userSettingsIndexRoute: userSettingsIndexRoute,
 }
 
-const UserRouteRouteWithChildren = UserRouteRoute._addFileChildren(
-  UserRouteRouteChildren,
+const userRouteRouteWithChildren = userRouteRoute._addFileChildren(
+  userRouteRouteChildren,
 )
 
 interface ProjectProjectIdRouteRouteChildren {
@@ -334,8 +311,7 @@ const ProjectRouteWithChildren =
   ProjectRoute._addFileChildren(ProjectRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  UserRouteRoute: UserRouteRouteWithChildren,
-  Legacy_indexRoute: Legacy_indexRoute,
+  userRouteRoute: userRouteRouteWithChildren,
   ProjectProjectIdRouteRoute: ProjectProjectIdRouteRouteWithChildren,
   ProjectRoute: ProjectRouteWithChildren,
 }

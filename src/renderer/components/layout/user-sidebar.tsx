@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -15,12 +14,9 @@ import {
   ChevronDown,
   Plus,
   Search,
-  Volume2,
   Settings,
   Loader2,
   Home,
-  MessageSquare,
-  Users,
 } from "lucide-react";
 import { Agent, mockUser, mockAgents } from "@/lib/placeholders";
 
@@ -93,11 +89,11 @@ export function UserSidebar({
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
             <Button
-              variant={location.pathname === "/user/" ? "secondary" : "ghost"}
+              variant={location.pathname === "/" ? "secondary" : "ghost"}
               className="w-full justify-start px-2 py-1.5 h-auto"
               asChild
             >
-              <Link to="/user/">
+              <Link to="/">
                 <Home className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>Dashboard</span>
               </Link>
@@ -192,7 +188,8 @@ export function UserSidebar({
                         <Avatar className="w-6 h-6">
                           <AvatarImage src={agent.avatar} />
                           <AvatarFallback className="text-xs">
-                            {agent.avatar || agent.name.slice(0, 2).toUpperCase()}
+                            {agent.avatar ||
+                              agent.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div
@@ -203,7 +200,9 @@ export function UserSidebar({
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="truncate font-medium">{agent.name}</span>
+                        <span className="truncate font-medium">
+                          {agent.name}
+                        </span>
                       </div>
                     </Button>
                   ))}

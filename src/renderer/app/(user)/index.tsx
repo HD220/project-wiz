@@ -1,36 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import {
-  Activity,
-  GitBranch,
-  Clock,
-  Users,
-  CheckCircle2,
-  TrendingUp,
-  MessageSquare,
-  FileText,
-  Home,
-} from "lucide-react";
 import {
   mockProjects,
   mockAgents,
   mockTasks,
 } from "@/renderer/lib/placeholders";
 import { PageTitle } from "@/components/page-title";
-// useSidebar import removed
 
-export const Route = createFileRoute("/user/")({
+export const Route = createFileRoute("/(user)/")({
   component: UserDashboardPage,
 });
 
 export function UserDashboardPage() {
-  // useSidebar and useEffect for setMode removed
-
   return (
     <div className="p-4">
       <PageTitle title="Dashboard" />
@@ -52,13 +35,13 @@ export function UserDashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/chat">Start a new chat</Link>
+              <Link to="/">Start a new chat</Link>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/tasks">View your tasks</Link>
+              <Link to="/">View your tasks</Link>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/docs">Browse documentation</Link>
+              <Link to="/">Browse documentation</Link>
             </Button>
           </CardContent>
         </Card>
@@ -71,11 +54,9 @@ export function UserDashboardPage() {
             <ul className="space-y-2">
               {mockTasks.slice(0, 3).map((task) => (
                 <li key={task.id} className="flex items-center justify-between">
-                  <span className="text-sm">{task.name}</span>
+                  <span className="text-sm">{task.description}</span>
                   <Badge
-                    variant={
-                      task.status === "completed" ? "default" : "secondary"
-                    }
+                    variant={task.status === "todo" ? "default" : "secondary"}
                   >
                     {task.status}
                   </Badge>

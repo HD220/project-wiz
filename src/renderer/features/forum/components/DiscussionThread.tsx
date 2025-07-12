@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForum } from "@/renderer/hooks/use-forum";
 import { IForumPost } from "@/shared/ipc-types/domain-types";
 
@@ -25,7 +25,7 @@ export function DiscussionThread({ topicId }: DiscussionThreadProps) {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Error: {error.message}</div>;
   }
 
   return (

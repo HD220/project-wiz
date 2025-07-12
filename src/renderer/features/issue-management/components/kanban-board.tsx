@@ -9,7 +9,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Badge } from "@/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { PlusCircle, Search, Filter, ArrowRightCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { cn } from "@/renderer/lib/utils";
 
 interface Issue {
@@ -142,7 +142,7 @@ export function KanbanBoard({
         <div className="flex flex-1 space-x-4 overflow-x-auto">
           {initialColumns.map((column) => (
             <Droppable droppableId={column.id} key={column.id}>
-              {(provided) => (
+              {(provided: any) => (
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
@@ -161,7 +161,7 @@ export function KanbanBoard({
                         index={index}
                         key={issue.id}
                       >
-                        {(provided) => (
+                        {(provided: any) => (
                           <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}

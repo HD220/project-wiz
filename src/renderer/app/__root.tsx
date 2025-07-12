@@ -11,7 +11,7 @@ import { CreateChannelModal } from "@/renderer/components/modals/create-channel-
 import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
 import { TitleBar } from "@/renderer/components/layout/title-bar";
 // SidebarProvider import removed
-import { ProjectSidebar } from "@/renderer/components/layout/project-sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
 import { mockProjects } from "@/renderer/lib/placeholders";
 
 export const Route = createRootRoute({
@@ -25,13 +25,12 @@ function RootComponent() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
-
   const handleCreateProject = () => {
     setShowCreateProjectModal(true);
   };
 
   const handleProjectNavigation = (projectId: string) => {
-    navigate({ to: "/project/$projectId/", params: { projectId } });
+    navigate({ to: "/project/$projectId", params: { projectId } });
   };
 
   let currentSelectedProjectId: string | undefined = undefined;
@@ -46,12 +45,12 @@ function RootComponent() {
         <div className="flex flex-col h-screen w-full bg-background overflow-hidden">
           <TitleBar />
           <div className="flex flex-1 overflow-hidden">
-            <ProjectSidebar
+            <AppSidebar
               projects={mockProjects}
               selectedProjectId={currentSelectedProjectId}
               onProjectSelect={handleProjectNavigation}
               onCreateProject={handleCreateProject}
-              onSettings={() => navigate({ to: "/user/settings/" })}
+              onSettings={() => navigate({ to: "/settings" })}
             />
             <div className="flex-1 overflow-hidden">
               <Outlet />
