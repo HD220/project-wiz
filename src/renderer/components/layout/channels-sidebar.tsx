@@ -24,6 +24,7 @@ import {
   CheckSquare,
 } from "lucide-react";
 import { Channel, Agent, mockUser } from "@/lib/placeholders";
+import { UserArea } from "../common/user-area";
 
 interface ChannelsSidebarProps {
   projectId: string;
@@ -48,34 +49,10 @@ export function ChannelsSidebar({
 }: ChannelsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
-  // useSidebar and useEffect for setMode removed
-
-  const getStatusColor = (status: Agent["status"]) => {
-    switch (status) {
-      case "online":
-        return "bg-green-500";
-      case "away":
-        return "bg-yellow-500";
-      case "busy":
-        return "bg-red-500";
-      case "executing":
-        return "bg-blue-500";
-      case "offline":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
 
   const filteredChannels = channels.filter((channel) =>
     channel.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  const filteredAgents = agents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const onlineAgents = agents.filter((a) => a.status !== "offline");
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
@@ -217,32 +194,7 @@ export function ChannelsSidebar({
       </ScrollArea>
 
       {/* User Area */}
-      <div className="p-3 border-t border-border flex-none">
-        <div className="flex items-center gap-2">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={mockUser.avatar} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {mockUser.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-foreground truncate">
-              {mockUser.name}
-            </div>
-            <div className="text-xs text-muted-foreground">Project Manager</div>
-          </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="w-6 h-6">
-              <Volume2 className="h-4 w-4 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon" className="w-6 h-6" asChild>
-              <Link to="/settings">
-                <Settings className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <UserArea />
     </div>
   );
 }
