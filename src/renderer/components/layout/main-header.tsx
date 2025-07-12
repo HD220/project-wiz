@@ -7,7 +7,10 @@ interface MainHeaderProps {
   onToggleRightPanel: () => void;
 }
 
-export function MainHeader({ isRightPanelOpen, onToggleRightPanel }: MainHeaderProps) {
+export function MainHeader({
+  isRightPanelOpen,
+  onToggleRightPanel,
+}: MainHeaderProps) {
   const { title, icon } = usePageTitle();
 
   return (
@@ -15,9 +18,7 @@ export function MainHeader({ isRightPanelOpen, onToggleRightPanel }: MainHeaderP
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {icon && <div className="flex-shrink-0">{icon}</div>}
         {title && (
-          <h1 className="font-semibold text-foreground truncate">
-            {title}
-          </h1>
+          <h1 className="font-semibold text-foreground truncate">{title}</h1>
         )}
       </div>
       <Button

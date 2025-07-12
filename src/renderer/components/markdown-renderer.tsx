@@ -57,47 +57,46 @@ export function MarkdownRenderer({
               {children}
             </h6>
           ),
-          
+
           // Paragraphs
           p: ({ children }) => (
-            <p className={cn(
-              "text-foreground leading-relaxed",
-              compact ? "mb-2" : "mb-4"
-            )}>
+            <p
+              className={cn(
+                "text-foreground leading-relaxed",
+                compact ? "mb-2" : "mb-4",
+              )}
+            >
               {children}
             </p>
           ),
-          
+
           // Lists
           ul: ({ children }) => (
-            <ul className={cn(
-              "list-disc ml-6 text-foreground",
-              compact ? "mb-2" : "mb-4"
-            )}>
+            <ul
+              className={cn(
+                "list-disc ml-6 text-foreground",
+                compact ? "mb-2" : "mb-4",
+              )}
+            >
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className={cn(
-              "list-decimal ml-6 text-foreground",
-              compact ? "mb-2" : "mb-4"
-            )}>
+            <ol
+              className={cn(
+                "list-decimal ml-6 text-foreground",
+                compact ? "mb-2" : "mb-4",
+              )}
+            >
               {children}
             </ol>
           ),
           li: ({ children }) => (
             <li className="mb-1 text-foreground">{children}</li>
           ),
-          
+
           // Code
-          code: ({ inline, children, className }) => {
-            if (inline) {
-              return (
-                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground border">
-                  {children}
-                </code>
-              );
-            }
+          code: ({ children, className }) => {
             return (
               <code className={cn("font-mono text-sm", className)}>
                 {children}
@@ -109,14 +108,14 @@ export function MarkdownRenderer({
               {children}
             </pre>
           ),
-          
+
           // Blockquotes
           blockquote: ({ children }) => (
             <blockquote className="border-l-4 border-primary pl-4 py-2 bg-muted/50 rounded-r mb-4 italic text-muted-foreground">
               {children}
             </blockquote>
           ),
-          
+
           // Tables
           table: ({ children }) => (
             <div className="overflow-x-auto mb-4">
@@ -128,9 +127,7 @@ export function MarkdownRenderer({
           thead: ({ children }) => (
             <thead className="bg-muted">{children}</thead>
           ),
-          tbody: ({ children }) => (
-            <tbody>{children}</tbody>
-          ),
+          tbody: ({ children }) => <tbody>{children}</tbody>,
           tr: ({ children }) => (
             <tr className="border-b border-border">{children}</tr>
           ),
@@ -144,7 +141,7 @@ export function MarkdownRenderer({
               {children}
             </td>
           ),
-          
+
           // Links
           a: ({ href, children }) => (
             <a
@@ -156,7 +153,7 @@ export function MarkdownRenderer({
               {children}
             </a>
           ),
-          
+
           // Images
           img: ({ src, alt }) => (
             <img
@@ -165,20 +162,20 @@ export function MarkdownRenderer({
               className="max-w-full h-auto rounded-lg border border-border mb-4"
             />
           ),
-          
+
           // Horizontal rule
-          hr: () => (
-            <Separator className="my-6" />
-          ),
-          
+          hr: () => <Separator className="my-6" />,
+
           // Emphasis
           em: ({ children }) => (
             <em className="italic text-foreground">{children}</em>
           ),
           strong: ({ children }) => (
-            <strong className="font-semibold text-foreground">{children}</strong>
+            <strong className="font-semibold text-foreground">
+              {children}
+            </strong>
           ),
-          
+
           // Strikethrough
           del: ({ children }) => (
             <del className="line-through text-muted-foreground">{children}</del>

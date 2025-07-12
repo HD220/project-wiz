@@ -4,7 +4,6 @@ import {
   useNavigate,
   useLocation,
 } from "@tanstack/react-router";
-import { UserSidebar } from "@/renderer/components/layout/user-sidebar";
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {
   ResizablePanelGroup,
@@ -12,6 +11,7 @@ import {
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 import { mockAgents } from "@/renderer/lib/placeholders";
+import { UserSidebar } from "@/features/user-management/components/user-sidebar";
 
 function UserLayout() {
   const navigate = useNavigate();

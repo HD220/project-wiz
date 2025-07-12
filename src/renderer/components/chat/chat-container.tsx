@@ -12,7 +12,7 @@ import {
 } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/page-title";
-import { MessageComponent } from "./message-component";
+import { MessageItem } from "./message-item";
 
 interface ChatContainerProps {
   channelId?: string;
@@ -110,18 +110,21 @@ export function ChatContainer({
               </div>
             ) : (
               messages.map((msg) => (
-                <MessageComponent
+                <MessageItem
                   key={msg.id}
                   message={{
                     id: msg.id,
                     content: msg.content,
                     senderId: msg.authorId,
                     senderName: msg.authorName,
-                    senderType: msg.authorId.startsWith("agent-") ? "agent" : "user",
-                    messageType: msg.type === "code" ? "text" : (msg.type as any),
+                    senderType: msg.authorId.startsWith("agent-")
+                      ? "agent"
+                      : "user",
+                    messageType:
+                      msg.type === "code" ? "text" : (msg.type as any),
                     timestamp: msg.timestamp,
                     isEdited: msg.edited,
-                    mentions: msg.mentions
+                    mentions: msg.mentions,
                   }}
                   onEdit={(id, content) => console.log("Edit:", id, content)}
                   onDelete={(id) => console.log("Delete:", id)}
@@ -173,4 +176,3 @@ export function ChatContainer({
     </div>
   );
 }
-

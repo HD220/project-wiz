@@ -28,7 +28,7 @@ const electronIPC: IElectronIPC = {
     channel: Channel,
     ...args: Payload[]
   ): Promise<Response> {
-    throw new Error("Function not implemented.");
+    return ipcRenderer.invoke(channel as string, ...args);
   },
   on: function (
     channel: string,
@@ -37,16 +37,17 @@ const electronIPC: IElectronIPC = {
       ...args: EventResponse[]
     ) => void,
   ): () => void {
-    throw new Error("Function not implemented.");
+    ipcRenderer.on(channel, listener);
+    return () => ipcRenderer.removeListener(channel, listener);
   },
   send: function <Channel, Payload>(
     channel: Channel,
     ...args: Payload[]
   ): void {
-    throw new Error("Function not implemented.");
+    ipcRenderer.send(channel as string, ...args);
   },
   removeAllListeners: function <Channel>(channel: Channel): void {
-    throw new Error("Function not implemented.");
+    ipcRenderer.removeAllListeners(channel as string);
   },
 
   // Window control functions

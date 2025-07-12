@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -7,12 +6,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Settings, Folder } from "lucide-react";
-import { Project } from "@/lib/placeholders";
+import { ProjectSidebar } from "@/features/project-management/components/project-sidebar";
 
 interface AppSidebarProps {
-  projects: Project[];
   selectedProjectId?: string;
   onProjectSelect: (projectId: string) => void;
   onCreateProject: () => void;
@@ -20,14 +17,13 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({
-  projects,
   selectedProjectId,
   onProjectSelect,
   onCreateProject,
   onSettings,
 }: AppSidebarProps) {
   return (
-    <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2 h-full flex-none">
+    <div className="w-18 bg-sidebar border-r border-border flex flex-col items-center py-3 space-y-2 h-full flex-shrink-0">
       {/* Home/Dashboard */}
       <TooltipProvider>
         <Tooltip>
@@ -53,56 +49,11 @@ export function AppSidebar({
       <div className="w-8 h-0.5 bg-border rounded-full" />
 
       {/* Project List */}
-      <div className="flex flex-col space-y-2 flex-1">
-        {projects.map((project) => (
-          <TooltipProvider key={project.id}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onProjectSelect(project.id)}
-                  className={cn(
-                    "w-12 h-12 rounded-2xl hover:rounded-xl transition-all duration-200 relative",
-                    selectedProjectId === project.id
-                      ? "bg-primary rounded-xl"
-                      : "bg-muted hover:bg-muted/80",
-                  )}
-                >
-                  {project.avatar ? (
-                    <img
-                      src={project.avatar}
-                      alt={project.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-sm font-semibold text-foreground">
-                      {project.name.slice(0, 2).toUpperCase()}
-                    </span>
-                  )}
-
-                  {/* Notification indicator */}
-                  {project.unreadCount > 0 && (
-                    <Badge
-                      className="absolute -top-1 -right-1 w-5 h-5 p-0 text-xs flex items-center justify-center"
-                      variant="destructive"
-                    >
-                      {project.unreadCount > 9 ? "9+" : project.unreadCount}
-                    </Badge>
-                  )}
-
-                  {/* Selection indicator */}
-                  {selectedProjectId === project.id && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-1 h-8 bg-foreground rounded-r-full" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>{project.name}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))}
+      <div className="flex-1 overflow-hidden">
+        <ProjectSidebar
+          selectedProjectId={selectedProjectId}
+          onProjectSelect={onProjectSelect}
+        />
       </div>
 
       {/* Add Project Button */}

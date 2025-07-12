@@ -8,7 +8,6 @@ interface AgentItemProps {
   onAgentClick: (agentId: string) => void;
 }
 
-
 export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
   const isOffline = agent.status === "offline";
 
@@ -16,7 +15,7 @@ export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
     <div
       className={cn(
         "flex items-start gap-3 p-2 rounded-md hover:bg-accent/50 cursor-pointer",
-        isOffline && "opacity-60"
+        isOffline && "opacity-60",
       )}
       onClick={() => onAgentClick(agent.id)}
     >
@@ -30,15 +29,13 @@ export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
         <div
           className={cn(
             "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
-            getAgentStatusColor(agent.status)
+            getAgentStatusColor(agent.status),
           )}
         />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
-          <span className="text-sm font-medium truncate">
-            {agent.name}
-          </span>
+          <span className="text-sm font-medium truncate">{agent.name}</span>
           {agent.isExecuting && (
             <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
           )}

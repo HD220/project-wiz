@@ -19,7 +19,7 @@ import {
   Home,
 } from "lucide-react";
 import { Agent } from "@/lib/placeholders";
-import { UserArea } from "../common/user-area";
+import { UserArea } from "./user-area";
 
 interface UserSidebarProps {
   agents: Agent[];

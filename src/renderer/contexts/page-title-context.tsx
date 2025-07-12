@@ -6,7 +6,9 @@ interface PageTitleContextType {
   setPageTitle: (title: string, icon?: ReactNode) => void;
 }
 
-const PageTitleContext = createContext<PageTitleContextType | undefined>(undefined);
+const PageTitleContext = createContext<PageTitleContextType | undefined>(
+  undefined,
+);
 
 export function PageTitleProvider({ children }: { children: ReactNode }) {
   const [title, setTitle] = useState("");

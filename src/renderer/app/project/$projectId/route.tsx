@@ -4,9 +4,9 @@ import {
   useNavigate,
   useLocation,
 } from "@tanstack/react-router";
-import { useState } from "react";
-import { ChannelsSidebar } from "@/renderer/components/layout/channels-sidebar";
-import { AgentsSidebar } from "@/renderer/components/layout/agents-sidebar";
+import { useState, useEffect } from "react";
+import { ChannelsSidebar } from "@/features/project-management/components/channels-sidebar";
+import { AgentsSidebar } from "@/features/project-management/components/agents-sidebar";
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {
   ResizablePanelGroup,
@@ -14,23 +14,39 @@ import {
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 import {
-  mockProjects,
   getChannelsByProject,
   getAgentsByProject,
 } from "@/renderer/lib/placeholders";
+import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+import { ProjectDto } from "@/shared/types/project.types";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [agentsSidebarOpen, setAgentsSidebarOpen] = useState(false);
+  const [currentProject, setCurrentProject] = useState<ProjectDto | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const currentProject = mockProjects.find((p) => p.id === projectId);
+  const { getProjectById } = useProjects();
   const channels = getChannelsByProject(projectId);
   const agents = getAgentsByProject(projectId);
   const [selectedChannelId, setSelectedChannelId] = useState<
     string | undefined
   >(channels[0]?.id);
+
+  useEffect(() => {
+    const loadProject = async () => {
+      if (projectId) {
+        setIsLoading(true);
+        const project = await getProjectById({ id: projectId });
+        setCurrentProject(project);
+        setIsLoading(false);
+      }
+    };
+
+    loadProject();
+  }, [projectId, getProjectById]);
 
   const handleChannelSelect = (channelId: string) => {
     setSelectedChannelId(channelId);
@@ -100,6 +116,10 @@ function ProjectLayout() {
       type: "project" as const,
     };
   };
+
+  if (isLoading) {
+    return <div>Carregando projeto...</div>;
+  }
 
   if (!currentProject) {
     return <div>Projeto não encontrado.</div>;

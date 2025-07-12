@@ -6,13 +6,11 @@ import {
 } from "@tanstack/react-router";
 import { useState } from "react";
 import { TooltipProvider } from "@/ui/tooltip";
-import { CreateProjectModal } from "@/renderer/components/modals/create-project-modal";
-import { CreateChannelModal } from "@/renderer/components/modals/create-channel-modal";
+import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
 import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
 import { TitleBar } from "@/renderer/components/layout/title-bar";
-// SidebarProvider import removed
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { mockProjects } from "@/renderer/lib/placeholders";
+import { CreateProjectModal } from "@/features/project-management/components/create-project-modal";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -42,17 +40,16 @@ function RootComponent() {
   return (
     <TooltipProvider>
       <PageTitleProvider>
-        <div className="flex flex-col h-screen w-full bg-background overflow-hidden">
+        <div className="flex flex-col h-screen w-screen bg-background overflow-hidden">
           <TitleBar />
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 w-full overflow-hidden">
             <AppSidebar
-              projects={mockProjects}
               selectedProjectId={currentSelectedProjectId}
               onProjectSelect={handleProjectNavigation}
               onCreateProject={handleCreateProject}
               onSettings={() => navigate({ to: "/settings" })}
             />
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 w-full overflow-hidden bg-background">
               <Outlet />
             </div>
           </div>

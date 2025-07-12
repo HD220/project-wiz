@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -17,7 +23,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const updateTheme = () => {
       if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+          .matches
+          ? "dark"
+          : "light";
         setActualTheme(systemTheme);
         document.documentElement.className = systemTheme;
       } else {

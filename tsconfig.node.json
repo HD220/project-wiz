@@ -3,9 +3,15 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./src/*"],      
+    }
   },
   "include": [
+    "src/**/*",
     "vite.main.config.mts",
     "vite.preload.config.mts",
     "vite.renderer.config.mts",

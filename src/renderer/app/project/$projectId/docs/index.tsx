@@ -9,7 +9,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 export const Route = createFileRoute("/project/$projectId/docs/")({
   component: ProjectDocsPage,

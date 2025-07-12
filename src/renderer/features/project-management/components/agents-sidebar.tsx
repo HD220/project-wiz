@@ -26,18 +26,25 @@ interface AgentsSidebarProps {
   projectId?: string;
 }
 
-export function AgentsSidebar({ isOpen, onAgentSelect, projectId }: AgentsSidebarProps) {
+export function AgentsSidebar({
+  isOpen,
+  onAgentSelect,
+  projectId,
+}: AgentsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
   // Filter agents - if projectId is provided, get agents for that project
-  const relevantAgents = projectId 
-    ? mockAgents.filter(agent => agent.projectId === projectId || !agent.projectId) // Show project-specific + global agents
+  const relevantAgents = projectId
+    ? mockAgents.filter(
+        (agent) => agent.projectId === projectId || !agent.projectId,
+      ) // Show project-specific + global agents
     : mockAgents;
 
-  const filteredAgents = relevantAgents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    agent.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAgents = relevantAgents.filter(
+    (agent) =>
+      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const onlineAgents = filteredAgents.filter((a) => a.status !== "offline");
@@ -73,9 +80,7 @@ export function AgentsSidebar({ isOpen, onAgentSelect, projectId }: AgentsSideba
       <div className="h-12 px-3 flex items-center border-b border-border shadow-sm flex-none">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-semibold text-foreground truncate">
-            Agentes
-          </h2>
+          <h2 className="font-semibold text-foreground truncate">Agentes</h2>
         </div>
       </div>
 
@@ -83,15 +88,21 @@ export function AgentsSidebar({ isOpen, onAgentSelect, projectId }: AgentsSideba
       <div className="p-2 border-b border-border flex-none">
         <div className="grid grid-cols-3 gap-1 text-center">
           <div className="min-w-0">
-            <div className="text-sm font-bold truncate">{relevantAgents.length}</div>
+            <div className="text-sm font-bold truncate">
+              {relevantAgents.length}
+            </div>
             <div className="text-xs text-muted-foreground truncate">Total</div>
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-bold text-green-600 truncate">{onlineAgents.length}</div>
+            <div className="text-sm font-bold text-green-600 truncate">
+              {onlineAgents.length}
+            </div>
             <div className="text-xs text-muted-foreground truncate">Online</div>
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-bold text-blue-600 truncate">{executingAgents.length}</div>
+            <div className="text-sm font-bold text-blue-600 truncate">
+              {executingAgents.length}
+            </div>
             <div className="text-xs text-muted-foreground truncate">Ativo</div>
           </div>
         </div>
@@ -118,7 +129,7 @@ export function AgentsSidebar({ isOpen, onAgentSelect, projectId }: AgentsSideba
               key={agent.id}
               className={cn(
                 "p-2 rounded-lg cursor-pointer transition-colors hover:bg-accent/50",
-                selectedAgent?.id === agent.id && "bg-accent"
+                selectedAgent?.id === agent.id && "bg-accent",
               )}
               onClick={() => handleAgentClick(agent)}
             >
@@ -133,14 +144,16 @@ export function AgentsSidebar({ isOpen, onAgentSelect, projectId }: AgentsSideba
                   <div
                     className={cn(
                       "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-card rounded-full",
-                      getStatusColor(agent.status)
+                      getStatusColor(agent.status),
                     )}
                   />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium truncate">{agent.name}</span>
+                    <span className="text-sm font-medium truncate">
+                      {agent.name}
+                    </span>
                     {agent.isExecuting && (
                       <Loader2 className="w-3 h-3 animate-spin text-blue-500 flex-shrink-0" />
                     )}
@@ -160,7 +173,7 @@ export function AgentsSidebar({ isOpen, onAgentSelect, projectId }: AgentsSideba
               )}
             </div>
           ))}
-          
+
           {filteredAgents.length === 0 && (
             <div className="text-center py-8">
               <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />

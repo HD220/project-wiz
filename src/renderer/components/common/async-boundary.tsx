@@ -32,9 +32,7 @@ export function AsyncBoundary({
     return (
       errorComponent || (
         <Alert variant="destructive">
-          <AlertDescription>
-            Error: {error.message}
-          </AlertDescription>
+          <AlertDescription>Error: {error.message}</AlertDescription>
         </Alert>
       )
     );

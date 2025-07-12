@@ -11,7 +11,7 @@ export function PageTitle({ title, icon }: PageTitleProps) {
 
   useEffect(() => {
     setPageTitle(title, icon);
-    
+
     // Cleanup on unmount
     return () => {
       setPageTitle("");

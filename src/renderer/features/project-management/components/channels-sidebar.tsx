@@ -24,7 +24,7 @@ import {
   CheckSquare,
 } from "lucide-react";
 import { Channel, Agent, mockUser } from "@/lib/placeholders";
-import { UserArea } from "../common/user-area";
+import { UserArea } from "../../user-management/components/user-area";
 
 interface ChannelsSidebarProps {
   projectId: string;

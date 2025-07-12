@@ -23,6 +23,7 @@
       "@/ui/*": ["./src/renderer/components/ui/*"],
       "@/lib/*": ["./src/renderer/lib/*"],
       "@/hooks/*": ["./src/renderer/hooks/*"],
+      "@/features/*": ["./src/renderer/features/*"],
       "@/shared/*": ["./src/shared/*"],
       "@/*": ["./src/*"],      
     }

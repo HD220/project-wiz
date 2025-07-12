@@ -1,5 +1,9 @@
 import { mockUser } from "@/lib/placeholders";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../components/ui/avatar";
 
 export function UserArea() {
   return (

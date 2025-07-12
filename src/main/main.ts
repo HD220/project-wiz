@@ -3,6 +3,11 @@ import path from "path";
 import { app, BrowserWindow, ipcMain } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
 
+import { ProjectRepository } from "./modules/project-management/persistence/repository";
+import { ProjectService } from "./modules/project-management/services/project.service";
+import { ProjectMapper } from "./modules/project-management/mappers/project.mapper";
+import { ProjectIpcHandlers } from "./modules/project-management/ipc/handlers";
+
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
@@ -71,6 +76,14 @@ ipcMain.handle("window-is-maximized", () => {
 
 app.on("ready", async () => {
   createWindow();
+
+  // Initialize project management module
+  const projectRepository = new ProjectRepository();
+  const projectService = new ProjectService(projectRepository);
+  const projectMapper = new ProjectMapper();
+  const projectIpcHandlers = new ProjectIpcHandlers(projectService, projectMapper);
+  
+  projectIpcHandlers.registerHandlers();
 });
 
 app.on("window-all-closed", () => {

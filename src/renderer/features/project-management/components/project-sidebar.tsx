@@ -1,59 +1,42 @@
-import type { IProject } from "@/shared/ipc-types/domain-types";
-import { IpcChannel } from "@/shared/ipc-types/ipc-channels";
-import { useIpcQuery } from "@/renderer/hooks/use-ipc-query.hook";
-import { useIpcMutation } from "@/renderer/hooks/use-ipc-mutation.hook";
-import type { IpcProjectRemovePayload } from "@/shared/ipc-types/ipc-payloads";
+import { useProjects } from "../hooks/use-projects.hook";
+import { ProjectSidebarItem } from "./project-sidebar-item";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProjectSidebar() {
-  const {
-    data: projects,
-    isLoading,
-    error,
-    refetch: fetchProjects,
-  } = useIpcQuery<IProject[]>({
-    channel: IpcChannel.PROJECT_LIST,
-  });
+interface ProjectSidebarProps {
+  selectedProjectId?: string;
+  onProjectSelect: (projectId: string) => void;
+}
 
-  const { mutate: removeProject } = useIpcMutation<
-    void,
-    Error,
-    IpcProjectRemovePayload
-  >({
-    channel: IpcChannel.PROJECT_REMOVE,
-    onSuccess: () => {
-      fetchProjects();
-    },
-    onError: (err) => {
-      alert(`Error removing project: ${err.message}`);
-    },
-  });
+function ProjectListSkeleton() {
+  return (
+    <div className="flex flex-col space-y-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} className="w-12 h-12 rounded-2xl" />
+      ))}
+    </div>
+  );
+}
 
-  const handleRemoveProject = (id: string) => {
-    removeProject({ id });
-  };
+export function ProjectSidebar({
+  selectedProjectId,
+  onProjectSelect,
+}: ProjectSidebarProps) {
+  const { projects, isLoading } = useProjects({ status: "active" });
 
-  if (isLoading) return <div>Loading projects...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) {
+    return <ProjectListSkeleton />;
+  }
 
   return (
-    <div className="w-64 bg-gray-100 p-4 border-r border-gray-200">
-      <h2 className="text-xl font-semibold mb-4">Projects</h2>
-      <ul>
-        {projects?.map((project) => (
-          <li
-            key={project.id}
-            className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"
-          >
-            <span>{project.name}</span>
-            <button
-              onClick={() => handleRemoveProject(project.id)}
-              className="text-red-500 hover:text-red-700 text-sm"
-            >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col space-y-2 h-full overflow-y-auto">
+      {projects.map((project) => (
+        <ProjectSidebarItem
+          key={project.id}
+          project={project}
+          isSelected={selectedProjectId === project.id}
+          onSelect={onProjectSelect}
+        />
+      ))}
     </div>
   );
 }

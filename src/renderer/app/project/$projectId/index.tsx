@@ -1,19 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  MessageSquare, 
-  Users, 
-  FileText, 
+import {
+  MessageSquare,
+  Users,
+  FileText,
   Settings,
   Activity,
-  GitBranch 
+  GitBranch,
 } from "lucide-react";
 
 export function ProjectIndexPage() {
   const { projectId } = Route.useParams();
-  
+
   return (
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
@@ -26,7 +26,7 @@ export function ProjectIndexPage() {
           Configurações
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -35,25 +35,23 @@ export function ProjectIndexPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">
-              +2 desde ontem
-            </p>
+            <p className="text-xs text-muted-foreground">+2 desde ontem</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Agentes Ativos</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Agentes Ativos
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground">
-              3 online agora
-            </p>
+            <p className="text-xs text-muted-foreground">3 online agora</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Atividade</CardTitle>
@@ -61,13 +59,11 @@ export function ProjectIndexPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">89%</div>
-            <p className="text-xs text-muted-foreground">
-              Última semana
-            </p>
+            <p className="text-xs text-muted-foreground">Última semana</p>
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -99,7 +95,7 @@ export function ProjectIndexPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Status dos Agentes</CardTitle>
@@ -126,6 +122,6 @@ export function ProjectIndexPage() {
   );
 }
 
-export const Route = createFileRoute('/project/$projectId/')({
-  component: ProjectIndexPage
+export const Route = createFileRoute("/project/$projectId/")({
+  component: ProjectIndexPage,
 });

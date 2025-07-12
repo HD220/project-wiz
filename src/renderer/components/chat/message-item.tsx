@@ -24,7 +24,7 @@ interface Message {
   metadata?: Record<string, unknown>;
 }
 
-interface MessageComponentProps {
+interface MessageItemProps {
   message: Message;
   onEdit: (messageId: string, content: string) => void;
   onDelete: (messageId: string) => void;
@@ -32,13 +32,13 @@ interface MessageComponentProps {
   showActions?: boolean;
 }
 
-export function MessageComponent({
+export function MessageItem({
   message,
   onEdit,
   onDelete,
   onReply,
   showActions = true,
-}: MessageComponentProps) {
+}: MessageItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
@@ -82,33 +82,6 @@ export function MessageComponent({
           `<span class="bg-brand-500/20 text-brand-400 px-1 rounded">@${mention}</span>`,
         );
       });
-    }
-
-    if (message.messageType === "task_update") {
-      const metadata = message.metadata;
-      return (
-        <div className="bg-gray-600 border-l-4 border-green-500 p-3 rounded-r">
-          <div className="flex items-center space-x-2 mb-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span className="font-medium text-green-400">Task Update</span>
-          </div>
-          <div className="text-gray-300 prose prose-sm prose-invert max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              // eslint-disable-next-line react/no-children-prop
-              children={contentWithMentions} // Use content with processed mentions
-            />
-          </div>
-          {/* <p className="text-gray-300">{message.content}</p> */}
-          {metadata && (
-            <div className="mt-2 text-sm text-gray-400">
-              <div>Task: {metadata.taskTitle}</div>
-              <div>Progress: {metadata.progress}%</div>
-            </div>
-          )}
-        </div>
-      );
     }
 
     if (message.messageType === "system") {

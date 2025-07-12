@@ -1,13 +1,13 @@
 import { beforeAll as _beforeAll, beforeEach, afterAll } from "vitest";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { initializeDb, setTestDb } from "../src/main/persistence/db";
+import { initializeDb } from "../src/main/persistence/db";
 import path from "path";
 
 let testDb: ReturnType<typeof initializeDb>;
 
 beforeEach(() => {
   testDb = initializeDb(":memory:");
-  setTestDb(testDb);
+  // setTestDb(testDb); // Removed as it doesn't exist
   migrate(testDb, {
     migrationsFolder: path.resolve(
       __dirname,

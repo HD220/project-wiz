@@ -11,7 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Hash, Volume2, Lock } from "lucide-react";
 
 interface CreateChannelModalProps {
@@ -19,7 +25,10 @@ interface CreateChannelModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function CreateChannelModal({ open, onOpenChange }: CreateChannelModalProps) {
+export function CreateChannelModal({
+  open,
+  onOpenChange,
+}: CreateChannelModalProps) {
   const [channelName, setChannelName] = useState("");
   const [channelDescription, setChannelDescription] = useState("");
   const [channelType, setChannelType] = useState("text");
@@ -48,7 +57,8 @@ export function CreateChannelModal({ open, onOpenChange }: CreateChannelModalPro
             Criar Novo Canal
           </DialogTitle>
           <DialogDescription>
-            Adicione um novo canal ao seu projeto para organizar conversas e atividades.
+            Adicione um novo canal ao seu projeto para organizar conversas e
+            atividades.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,11 +97,15 @@ export function CreateChannelModal({ open, onOpenChange }: CreateChannelModalPro
               id="channel-name"
               placeholder="geral, desenvolvimento, discussoes"
               value={channelName}
-              onChange={(e) => setChannelName(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
+              onChange={(e) =>
+                setChannelName(
+                  e.target.value.toLowerCase().replace(/\s+/g, "-"),
+                )
+              }
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="channel-description">Descrição (Opcional)</Label>
             <Textarea

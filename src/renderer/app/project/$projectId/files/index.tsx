@@ -30,7 +30,10 @@ export function ProjectFilesPage() {
 
   return (
     <div className="h-full">
-      <PageTitle title="Arquivos" icon={<FileText className="w-5 h-5 text-muted-foreground" />} />
+      <PageTitle
+        title="Arquivos"
+        icon={<FileText className="w-5 h-5 text-muted-foreground" />}
+      />
       <ResizablePanelGroup direction="vertical" className="h-full">
         {/* Main Content Area */}
         <ResizablePanel defaultSize={75}>
