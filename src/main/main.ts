@@ -14,6 +14,10 @@ import { ChannelRepository } from "./modules/communication/persistence/repositor
 import { ChannelService } from "./modules/communication/application/channel.service";
 import { ChannelMapper } from "./modules/communication/channel.mapper";
 import { ChannelIpcHandlers } from "./modules/communication/ipc/handlers";
+import { ChannelMessageRepository } from "./modules/channel-messaging/persistence/repository";
+import { ChannelMessageService } from "./modules/channel-messaging/application/channel-message.service";
+import { ChannelMessageMapper } from "./modules/channel-messaging/channel-message.mapper";
+import { ChannelMessageIpcHandlers } from "./modules/channel-messaging/ipc/handlers";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -104,9 +108,16 @@ app.on("ready", async () => {
   const channelService = new ChannelService(channelRepository, channelMapper);
   const channelIpcHandlers = new ChannelIpcHandlers(channelService, channelMapper);
   
+  // Initialize channel messaging module
+  const channelMessageRepository = new ChannelMessageRepository();
+  const channelMessageMapper = new ChannelMessageMapper();
+  const channelMessageService = new ChannelMessageService(channelMessageRepository, channelMessageMapper);
+  const channelMessageIpcHandlers = new ChannelMessageIpcHandlers(channelMessageService, channelMessageMapper);
+  
   projectIpcHandlers.registerHandlers();
   directMessageIpcHandlers.registerHandlers();
   channelIpcHandlers.registerHandlers();
+  channelMessageIpcHandlers.registerHandlers();
 });
 
 app.on("window-all-closed", () => {
