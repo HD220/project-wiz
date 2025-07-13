@@ -46,16 +46,19 @@ export class ChannelMessageRepository {
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(asc(channelMessages.createdAt)); // Ordem cronológica
 
+    // Build final query with pagination
+    let finalQuery = query;
+    
     // Aplicar paginação
     if (filter?.limit) {
-      query = query.limit(filter.limit);
+      finalQuery = finalQuery.limit(filter.limit);
     }
 
     if (filter?.offset) {
-      query = query.offset(filter.offset);
+      finalQuery = finalQuery.offset(filter.offset);
     }
 
-    return await query;
+    return await finalQuery;
   }
 
   // READ (por canal - método helper)

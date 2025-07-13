@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,8 @@ import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/page-title";
 import { MessageItem } from "./message-item";
+import { useChannelMessagesById } from "@/features/channel-messaging/hooks/use-channel-messages.hook";
+import type { ChannelMessageDto } from "../../../shared/types/channel-message.types";
 
 interface ChatContainerProps {
   channelId?: string;
@@ -26,16 +28,40 @@ export function ChatContainer({
   className,
 }: ChatContainerProps) {
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  // Channel messages will be implemented later with proper backend integration
-  const messages: Message[] = [];
+  // Use channel messages hook only for channel chat (not agent chat)
+  const channelMessagesHook = channelId ? useChannelMessagesById(channelId) : null;
+  
+  // For agent chat, continue using placeholder data
+  const agentMessages: Message[] = [];
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const messages = channelId ? channelMessagesHook?.messages || [] : agentMessages;
 
-    // TODO: Implement sending message
-    console.log("Sending message:", message);
-    setMessage("");
+  const handleSend = async () => {
+    if (!message.trim() || isSending) return;
+
+    if (channelId && channelMessagesHook) {
+      // Send message to channel
+      setIsSending(true);
+      try {
+        await channelMessagesHook.sendTextMessage(
+          message.trim(),
+          'current-user-id', // TODO: Get from user context
+          'Usuário Atual' // TODO: Get from user context
+        );
+        setMessage("");
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        // Error is handled by the store
+      } finally {
+        setIsSending(false);
+      }
+    } else if (agentId) {
+      // Handle agent messages (placeholder)
+      console.log("Sending message to agent:", message);
+      setMessage("");
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -54,6 +80,8 @@ export function ChatContainer({
 
   const displayName = channelName || agentName || "Chat";
   const isAgentChat = !!agentId;
+  const isLoading = channelMessagesHook?.isLoading || false;
+  const error = channelMessagesHook?.error;
 
   const titleIcon = isAgentChat ? (
     <Avatar className="w-5 h-5">
@@ -80,7 +108,30 @@ export function ChatContainer({
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full px-4">
           <div className="space-y-4 py-4">
-            {messages.length === 0 ? (
+            {isLoading && messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Hash className="w-8 h-8 text-muted-foreground animate-pulse" />
+                </div>
+                <p className="text-muted-foreground">Carregando mensagens...</p>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+                  <Hash className="w-8 h-8 text-destructive" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2 text-destructive">Erro ao carregar mensagens</h3>
+                <p className="text-muted-foreground">{error}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4"
+                  onClick={() => channelMessagesHook?.refetch()}
+                >
+                  Tentar novamente
+                </Button>
+              </div>
+            ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                   {isAgentChat ? (
@@ -101,29 +152,66 @@ export function ChatContainer({
                 </p>
               </div>
             ) : (
-              messages.map((msg) => (
-                <MessageItem
-                  key={msg.id}
-                  message={{
-                    id: msg.id,
-                    content: msg.content,
-                    senderId: msg.authorId,
-                    senderName: msg.authorName,
-                    senderType: msg.authorId.startsWith("agent-")
-                      ? "agent"
-                      : "user",
-                    messageType:
-                      msg.type === "code" ? "text" : (msg.type as any),
-                    timestamp: msg.timestamp,
-                    isEdited: msg.edited,
-                    mentions: msg.mentions,
-                  }}
-                  onEdit={(id, content) => console.log("Edit:", id, content)}
-                  onDelete={(id) => console.log("Delete:", id)}
-                  onReply={(id) => console.log("Reply:", id)}
-                  showActions={true}
-                />
-              ))
+              messages.map((msg) => {
+                // Convert ChannelMessageDto to MessageItem format
+                const isChannelMessage = 'channelId' in msg;
+                
+                if (isChannelMessage) {
+                  const channelMsg = msg as ChannelMessageDto;
+                  return (
+                    <MessageItem
+                      key={channelMsg.id}
+                      message={{
+                        id: channelMsg.id,
+                        content: channelMsg.content,
+                        senderId: channelMsg.authorId,
+                        senderName: channelMsg.authorName,
+                        senderType: channelMsg.authorId === 'system' ? "system" : 
+                                   channelMsg.authorId.startsWith("agent-") ? "agent" : "user",
+                        messageType: channelMsg.type === "code" ? "code" : "text",
+                        timestamp: channelMsg.createdAt,
+                        isEdited: channelMsg.isEdited,
+                        mentions: [], // TODO: Implement mentions
+                      }}
+                      onEdit={(id, content) => {
+                        if (channelMessagesHook) {
+                          channelMessagesHook.updateMessage({ id, content });
+                        }
+                      }}
+                      onDelete={(id) => {
+                        if (channelMessagesHook) {
+                          channelMessagesHook.deleteMessage(id);
+                        }
+                      }}
+                      onReply={(id) => console.log("Reply:", id)}
+                      showActions={true}
+                    />
+                  );
+                } else {
+                  // Handle agent messages (legacy format)
+                  const legacyMsg = msg as Message;
+                  return (
+                    <MessageItem
+                      key={legacyMsg.id}
+                      message={{
+                        id: legacyMsg.id,
+                        content: legacyMsg.content,
+                        senderId: legacyMsg.authorId,
+                        senderName: legacyMsg.authorName,
+                        senderType: legacyMsg.authorId.startsWith("agent-") ? "agent" : "user",
+                        messageType: legacyMsg.type === "code" ? "text" : (legacyMsg.type as any),
+                        timestamp: legacyMsg.timestamp,
+                        isEdited: legacyMsg.edited || false,
+                        mentions: legacyMsg.mentions || [],
+                      }}
+                      onEdit={(id, content) => console.log("Edit:", id, content)}
+                      onDelete={(id) => console.log("Delete:", id)}
+                      onReply={(id) => console.log("Reply:", id)}
+                      showActions={true}
+                    />
+                  );
+                }
+              })
             )}
           </div>
         </ScrollArea>
@@ -154,7 +242,7 @@ export function ChatContainer({
               size="icon"
               className="w-8 h-8"
               onClick={handleSend}
-              disabled={!message.trim()}
+              disabled={!message.trim() || isSending}
             >
               <Send className="w-4 h-4" />
             </Button>

@@ -83,8 +83,8 @@ class ChannelMessageStore {
       const pagination = (await window.electronIPC.invoke(
         "channelMessage:listByChannel",
         channelId,
-        limit,
-        offset,
+        limit.toString(),
+        offset.toString(),
       )) as ChannelMessagePaginationDto;
       
       this.setState({ 
@@ -114,7 +114,7 @@ class ChannelMessageStore {
       const messages = (await window.electronIPC.invoke(
         "channelMessage:getLatest",
         channelId,
-        limit,
+        limit.toString(),
       )) as ChannelMessageDto[];
       
       this.setState({ 
@@ -258,7 +258,7 @@ class ChannelMessageStore {
         "channelMessage:search",
         channelId,
         searchTerm,
-        limit,
+        limit.toString(),
       )) as ChannelMessageDto[];
     } catch (error) {
       this.setState({ error: (error as Error).message });

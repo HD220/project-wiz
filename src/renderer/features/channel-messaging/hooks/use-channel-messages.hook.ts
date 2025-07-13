@@ -146,7 +146,7 @@ export function useChannelMessagesById(channelId: string) {
     loadMessages: (limit?: number, offset?: number, forceReload?: boolean) => 
       channelMessageStore.loadMessagesByChannel(channelId, limit, offset, forceReload),
       
-    loadLatestMessages: (limit?: number) =>
+    loadLatestMessages: (limit?: number, forceReload?: boolean) =>
       channelMessageStore.loadLatestMessages(channelId, limit),
       
     searchMessages: (searchTerm: string, limit?: number) =>
@@ -156,6 +156,6 @@ export function useChannelMessagesById(channelId: string) {
       channelMessageStore.getLastMessage(channelId),
       
     getMessageById: channelMessageStore.getMessageById,
-    refetch: () => channelMessageStore.loadLatestMessages(channelId, 50, true),
+    refetch: () => channelMessageStore.loadLatestMessages(channelId, 50),
   };
 }

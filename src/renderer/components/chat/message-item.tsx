@@ -14,8 +14,8 @@ interface Message {
   content: string;
   senderId: string;
   senderName: string;
-  senderType: "user" | "agent";
-  messageType: "text" | "task_update" | "system" | "file_share";
+  senderType: "user" | "agent" | "system";
+  messageType: "text" | "task_update" | "system" | "file_share" | "code";
   timestamp: Date;
   isEdited?: boolean;
   replyTo?: string;
