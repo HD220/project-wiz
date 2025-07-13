@@ -1,5 +1,5 @@
 import { Agent } from "./domain/agent.entity";
-import type { AgentSchema } from "./persistence/schema";
+import type { AgentSchema } from "../../persistence/schemas/agents.schema";
 
 export class AgentMapper {
   toDomain(schema: AgentSchema): Agent {
@@ -13,6 +13,7 @@ export class AgentMapper {
       schema.temperature,
       schema.maxTokens,
       schema.isActive,
+      schema.isDefault || false,
       new Date(schema.createdAt),
       new Date(schema.updatedAt)
     );
@@ -28,6 +29,7 @@ export class AgentMapper {
       temperature: agent.temperature,
       maxTokens: agent.maxTokens,
       isActive: agent.isActive,
+      isDefault: agent.isDefault,
     };
   }
 }

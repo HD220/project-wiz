@@ -26,7 +26,6 @@ export interface CreateAgentDto {
 }
 
 export interface UpdateAgentDto {
-  id: string;
   name?: string;
   role?: string;
   goal?: string;

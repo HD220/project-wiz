@@ -1,12 +1,17 @@
-import { IModule } from './interfaces/module.interface';
+import { IModule, IModuleContainer } from './interfaces/module.interface';
 import { EventBus, IEvent, EventListener } from './event-bus';
 
 export abstract class BaseModule implements IModule {
   protected initialized = false;
   protected eventBus: EventBus;
+  protected container!: IModuleContainer;
 
   constructor() {
     this.eventBus = EventBus.getInstance();
+  }
+
+  setContainer(container: IModuleContainer): void {
+    this.container = container;
   }
 
   abstract getName(): string;

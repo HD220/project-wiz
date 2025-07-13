@@ -21,13 +21,18 @@ export class AgentManagementModule extends BaseModule {
   }
 
   getDependencies(): string[] {
-    return []; // No dependencies for now
+    return ['llm-provider']; // Depends on LLM provider module
   }
 
   protected async onInitialize(): Promise<void> {
     this.agentRepository = new AgentRepository();
     this.agentMapper = new AgentMapper();
-    this.agentService = new AgentService(this.agentRepository, this.agentMapper);
+    
+    // Get LLM provider service from dependency container
+    const llmProviderModule = this.container.get('llm-provider') as any;
+    const llmProviderService = llmProviderModule.getLlmProviderService();
+    
+    this.agentService = new AgentService(this.agentRepository, this.agentMapper, llmProviderService);
     this.agentIpcHandlers = new AgentIpcHandlers(
       this.agentService,
       this.agentMapper,

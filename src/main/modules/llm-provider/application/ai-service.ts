@@ -10,6 +10,11 @@ interface AIServiceConfig {
   systemPrompt?: string;
 }
 
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 interface GenerateTextOptions {
   messages: CoreMessage[];
   temperature?: number;

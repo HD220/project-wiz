@@ -182,6 +182,7 @@ INSTRUÇÕES:
       this.temperature,
       this.maxTokens,
       this.isActive,
+      this.isDefault,
       this.createdAt,
       new Date()
     );
@@ -207,6 +208,7 @@ INSTRUÇÕES:
       newTemperature,
       newMaxTokens,
       this.isActive,
+      this.isDefault,
       this.createdAt,
       new Date()
     );
@@ -223,6 +225,7 @@ INSTRUÇÕES:
       this.temperature,
       this.maxTokens,
       true,
+      this.isDefault,
       this.createdAt,
       new Date()
     );
@@ -239,6 +242,7 @@ INSTRUÇÕES:
       this.temperature,
       this.maxTokens,
       false,
+      this.isDefault,
       this.createdAt,
       new Date()
     );

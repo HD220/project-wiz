@@ -1,6 +1,6 @@
 import { LlmProvider } from "./domain/llm-provider.entity";
 import type { LlmProviderDto } from "../../../shared/types/llm-provider.types";
-import type { LlmProviderSchema } from "./persistence/schema";
+import type { LlmProviderSchema } from "../../persistence/schemas/llm-providers.schema";
 
 export class LlmProviderMapper {
   toDomain(schema: LlmProviderSchema): LlmProvider {

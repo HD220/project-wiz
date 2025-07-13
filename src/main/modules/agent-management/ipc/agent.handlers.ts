@@ -20,6 +20,7 @@ export class AgentIpcHandlers {
       temperature: agent.temperature,
       maxTokens: agent.maxTokens,
       isActive: agent.isActive,
+      isDefault: agent.isDefault,
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
     };
@@ -73,7 +74,7 @@ export class AgentIpcHandlers {
     // List agents
     ipcMain.handle("agent:list", async (_, filter) => {
       try {
-        const agents = await this.agentService.listAgents(filter);
+        const agents = await this.agentService.getAllAgents(filter);
         return agents.map(agent => this.mapAgentToDto(agent));
       } catch (error) {
         console.error("Error listing agents:", error);
@@ -106,8 +107,10 @@ export class AgentIpcHandlers {
     // Activate agent
     ipcMain.handle("agent:activate", async (_, { id }) => {
       try {
-        const agent = await this.agentService.activateAgent(id);
-        return this.mapAgentToDto(agent);
+        await this.agentService.activateAgent(id);
+        // Get updated agent to return
+        const agent = await this.agentService.getAgentById(id);
+        return agent ? this.mapAgentToDto(agent) : null;
       } catch (error) {
         console.error("Error activating agent:", error);
         throw error;
@@ -117,8 +120,10 @@ export class AgentIpcHandlers {
     // Deactivate agent
     ipcMain.handle("agent:deactivate", async (_, { id }) => {
       try {
-        const agent = await this.agentService.deactivateAgent(id);
-        return this.mapAgentToDto(agent);
+        await this.agentService.deactivateAgent(id);
+        // Get updated agent to return
+        const agent = await this.agentService.getAgentById(id);
+        return agent ? this.mapAgentToDto(agent) : null;
       } catch (error) {
         console.error("Error deactivating agent:", error);
         throw error;
@@ -128,7 +133,8 @@ export class AgentIpcHandlers {
     // Check if agent exists by name
     ipcMain.handle("agent:existsByName", async (_, { name }) => {
       try {
-        return await this.agentService.existsByName(name);
+        const agent = await this.agentService.getAgentByName(name);
+        return !!agent;
       } catch (error) {
         console.error("Error checking if agent exists by name:", error);
         throw error;

@@ -5,6 +5,11 @@ export { DomainError } from './domain.error';
 export { NotFoundError } from './not-found.error';
 export { ValidationError, type ValidationIssue } from './validation.error';
 
+// Import the error classes for internal use
+import { BaseError } from './base.error';
+import { ValidationError } from './validation.error';
+import { NotFoundError } from './not-found.error';
+
 // Error handling utilities
 export class ErrorHandler {
   /**
@@ -34,11 +39,11 @@ export class ErrorHandler {
    */
   static logError(error: unknown, logger: any): void {
     if (error instanceof ValidationError) {
-      logger.warn('Validation error:', error.toJSON());
+      logger.warn('Validation error:', (error as ValidationError).toJSON());
     } else if (error instanceof NotFoundError) {
-      logger.info('Resource not found:', error.toJSON());
+      logger.info('Resource not found:', (error as NotFoundError).toJSON());
     } else if (error instanceof BaseError) {
-      logger.error('Application error:', error.toJSON());
+      logger.error('Application error:', (error as BaseError).toJSON());
     } else {
       logger.error('Unexpected error:', error);
     }
@@ -57,24 +62,26 @@ export class ErrorHandler {
     };
   } {
     if (error instanceof ValidationError) {
+      const validationError = error as ValidationError;
       return {
         success: false,
         error: {
-          name: error.name,
-          message: error.getUserMessage(),
-          code: error.metadata.code,
-          issues: error.getFormattedIssues(),
+          name: validationError.name,
+          message: validationError.getUserMessage(),
+          code: validationError.metadata.code,
+          issues: validationError.getFormattedIssues(),
         },
       };
     }
 
     if (error instanceof BaseError) {
+      const baseError = error as BaseError;
       return {
         success: false,
         error: {
-          name: error.name,
-          message: error.getUserMessage(),
-          code: error.metadata.code,
+          name: baseError.name,
+          message: baseError.getUserMessage(),
+          code: baseError.metadata.code,
         },
       };
     }

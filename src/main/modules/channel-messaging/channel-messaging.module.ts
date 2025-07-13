@@ -1,6 +1,6 @@
 import { BaseModule } from '../../kernel/base-module';
 import { DependencyContainer } from '../../kernel/dependency-container';
-import { ChannelMessageRepository } from './persistence/repository';
+import { ChannelMessageRepository } from './persistence/channel-message.repository';
 import { ChannelMessageService } from './application/channel-message.service';
 import { AIChatService } from './application/ai-chat.service';
 import { ChannelMessageMapper } from './channel-message.mapper';

@@ -43,7 +43,7 @@ export class AgentRepository implements IAgentRepository {
     return result || null;
   }
 
-  async findMany(filter?: AgentFilterDto): Promise<AgentSchema[]> {
+  async findAll(filter?: AgentFilterDto): Promise<AgentSchema[]> {
     const conditions = [];
 
     if (filter?.name) {
@@ -74,7 +74,35 @@ export class AgentRepository implements IAgentRepository {
   }
 
   async findActiveAgents(): Promise<AgentSchema[]> {
-    return this.findMany({ isActive: true });
+    return this.findAll({ isActive: true });
+  }
+
+  async findByLlmProviderId(llmProviderId: string): Promise<AgentSchema[]> {
+    return this.findAll({ llmProviderId });
+  }
+
+  async setDefaultAgent(id: string): Promise<void> {
+    // First, remove default from all agents
+    await db
+      .update(agentSchema)
+      .set({ isDefault: false, updatedAt: new Date().toISOString() })
+      .where(eq(agentSchema.isDefault, true));
+    
+    // Then set the specified agent as default
+    await db
+      .update(agentSchema)
+      .set({ isDefault: true, updatedAt: new Date().toISOString() })
+      .where(eq(agentSchema.id, id));
+  }
+
+  async getDefaultAgent(): Promise<AgentSchema | null> {
+    const [result] = await db
+      .select()
+      .from(agentSchema)
+      .where(eq(agentSchema.isDefault, true))
+      .limit(1);
+
+    return result || null;
   }
 
   async update(id: string, data: Partial<CreateAgentSchema>): Promise<AgentSchema> {

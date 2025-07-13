@@ -3,6 +3,7 @@ import { logger } from '../logger';
 export interface IEvent {
   type: string;
   id?: string;
+  entityId?: string;
   timestamp?: Date;
 }
 

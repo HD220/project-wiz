@@ -1,57 +1,79 @@
 // Central export file for all database schemas
 // This is the single source of truth for Drizzle schemas
 
-// Projects
-export {
+// Import individual schemas
+import {
   projects,
   type ProjectSchema,
   type CreateProjectSchema
 } from './projects.schema';
 
-// Agents (formerly personas)
-export {
+import {
   agents,
   type AgentSchema,
   type CreateAgentSchema
 } from './agents.schema';
 
-// LLM Providers
-export {
+import {
   llmProviders,
   type LlmProviderSchema,
   type CreateLlmProviderSchema
 } from './llm-providers.schema';
 
-// Communication - Channels
-export {
+import {
   channels,
   channelsRelations,
   type ChannelSchema,
   type CreateChannelSchema
 } from './channels.schema';
 
-// Channel Messages
-export {
+import {
   channelMessages,
   channelMessagesRelations,
   type ChannelMessageSchema,
   type CreateChannelMessageSchema
 } from './channel-messages.schema';
 
-// Direct Messages - Conversations
-export {
+import {
   conversations,
   type ConversationSchema,
   type CreateConversationSchema
 } from './conversations.schema';
 
-// Direct Messages - Messages
-export {
+import {
   messages,
   messagesRelations,
   type MessageSchema,
   type CreateMessageSchema
 } from './messages.schema';
+
+// Re-export everything
+export {
+  projects,
+  type ProjectSchema,
+  type CreateProjectSchema,
+  agents,
+  type AgentSchema,
+  type CreateAgentSchema,
+  llmProviders,
+  type LlmProviderSchema,
+  type CreateLlmProviderSchema,
+  channels,
+  channelsRelations,
+  type ChannelSchema,
+  type CreateChannelSchema,
+  channelMessages,
+  channelMessagesRelations,
+  type ChannelMessageSchema,
+  type CreateChannelMessageSchema,
+  conversations,
+  type ConversationSchema,
+  type CreateConversationSchema,
+  messages,
+  messagesRelations,
+  type MessageSchema,
+  type CreateMessageSchema
+};
 
 // Export all tables for Drizzle migrations
 export const allTables = {

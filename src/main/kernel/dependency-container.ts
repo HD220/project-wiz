@@ -22,6 +22,7 @@ export class DependencyContainer implements IModuleContainer {
     }
     
     logger.info(`Registering module: ${name}`);
+    module.setContainer(this);
     this.modules.set(name, module);
   }
 

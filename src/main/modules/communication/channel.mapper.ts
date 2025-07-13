@@ -1,6 +1,6 @@
 import { Channel } from "./domain/channel.entity";
 import type { ChannelDto } from "../../../shared/types/channel.types";
-import type { ChannelSchema } from "./persistence/schema";
+import type { ChannelSchema } from "../../persistence/schemas/channels.schema";
 
 export class ChannelMapper {
   
