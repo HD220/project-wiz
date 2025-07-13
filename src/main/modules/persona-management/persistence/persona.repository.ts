@@ -1,11 +1,17 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, notInArray } from "drizzle-orm";
 import { db } from "../../../persistence/db";
 import {
   personasTable,
+  projectPersonasTable,
   type PersonaSchema,
   type PersonaInsert,
+  type ProjectPersonaSchema,
+  type ProjectPersonaInsert,
 } from "./schema";
-import type { PersonaFilterDto } from "../../../../shared/types/persona.types";
+import type {
+  PersonaFilterDto,
+  ProjectPersonaFilterDto,
+} from "../../../../shared/types/persona.types";
 
 export class PersonaRepository {
   async save(
@@ -58,8 +64,25 @@ export class PersonaRepository {
       conditions.push(eq(personasTable.llmProviderId, filter.llmProviderId));
     }
 
+    // Filter by project if specified
+    if (filter?.projectId) {
+      const projectPersonas = await db
+        .select({ personaId: projectPersonasTable.personaId })
+        .from(projectPersonasTable)
+        .where(eq(projectPersonasTable.projectId, filter.projectId));
+      
+      const personaIds = projectPersonas.map(pp => pp.personaId);
+      
+      if (personaIds.length > 0) {
+        conditions.push(inArray(personasTable.id, personaIds));
+      } else {
+        // No personas for this project, return empty array
+        return [];
+      }
+    }
+
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await query.where(and(...conditions));
     }
 
     return await query;
@@ -93,5 +116,98 @@ export class PersonaRepository {
       .where(eq(personasTable.isActive, true));
     console.log('[PersonaRepository] Found personas in DB:', result.length, result.map(p => ({ id: p.id, nome: p.nome, isActive: p.isActive })));
     return result;
+  }
+
+  // Project-Persona relationship methods
+  async addPersonaToProject(
+    data: Omit<ProjectPersonaInsert, "addedAt">,
+  ): Promise<ProjectPersonaSchema> {
+    const [saved] = await db
+      .insert(projectPersonasTable)
+      .values({
+        ...data,
+        addedAt: new Date(),
+      })
+      .returning();
+
+    return saved;
+  }
+
+  async removePersonaFromProject(
+    projectId: string,
+    personaId: string,
+  ): Promise<void> {
+    await db
+      .delete(projectPersonasTable)
+      .where(
+        and(
+          eq(projectPersonasTable.projectId, projectId),
+          eq(projectPersonasTable.personaId, personaId),
+        ),
+      );
+  }
+
+  async findProjectPersonas(
+    filter?: ProjectPersonaFilterDto,
+  ): Promise<ProjectPersonaSchema[]> {
+    let query = db.select().from(projectPersonasTable);
+
+    const conditions = [];
+
+    if (filter?.projectId) {
+      conditions.push(eq(projectPersonasTable.projectId, filter.projectId));
+    }
+
+    if (filter?.personaId) {
+      conditions.push(eq(projectPersonasTable.personaId, filter.personaId));
+    }
+
+    if (conditions.length > 0) {
+      return await query.where(and(...conditions));
+    }
+
+    return await query;
+  }
+
+  async isPersonaInProject(
+    projectId: string,
+    personaId: string,
+  ): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(projectPersonasTable)
+      .where(
+        and(
+          eq(projectPersonasTable.projectId, projectId),
+          eq(projectPersonasTable.personaId, personaId),
+        ),
+      )
+      .limit(1);
+
+    return !!result;
+  }
+
+  async findPersonasNotInProject(projectId: string): Promise<PersonaSchema[]> {
+    const projectPersonas = await db
+      .select({ personaId: projectPersonasTable.personaId })
+      .from(projectPersonasTable)
+      .where(eq(projectPersonasTable.projectId, projectId));
+
+    const personaIdsInProject = projectPersonas.map(pp => pp.personaId);
+
+    if (personaIdsInProject.length === 0) {
+      // If no personas in project, return all active personas
+      return this.findActivePersonas();
+    }
+
+    return await db
+      .select()
+      .from(personasTable)
+      .where(
+        and(
+          eq(personasTable.isActive, true),
+          notInArray(personasTable.id, personaIdsInProject),
+        ),
+      );
   }
 }

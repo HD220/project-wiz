@@ -5,6 +5,9 @@ import type {
   CreatePersonaDto,
   UpdatePersonaDto,
   PersonaFilterDto,
+  AddPersonaToProjectDto,
+  RemovePersonaFromProjectDto,
+  ProjectPersonaFilterDto,
 } from "../../../../shared/types/persona.types";
 
 export class PersonaService {
@@ -131,5 +134,62 @@ export class PersonaService {
     });
 
     return this.mapper.toDomain(updated);
+  }
+
+  // Project-Persona relationship methods
+  async addPersonaToProject(data: AddPersonaToProjectDto): Promise<void> {
+    // Validate that persona exists and is active
+    const persona = await this.repository.findById(data.personaId);
+    if (!persona) {
+      throw new Error("Persona não encontrada");
+    }
+
+    if (!persona.isActive) {
+      throw new Error("Não é possível adicionar uma persona inativa ao projeto");
+    }
+
+    // Check if persona is already in the project
+    const isAlreadyInProject = await this.repository.isPersonaInProject(
+      data.projectId,
+      data.personaId,
+    );
+
+    if (isAlreadyInProject) {
+      throw new Error("Esta persona já está no projeto");
+    }
+
+    await this.repository.addPersonaToProject({
+      projectId: data.projectId,
+      personaId: data.personaId,
+      addedBy: data.addedBy,
+    });
+  }
+
+  async removePersonaFromProject(data: RemovePersonaFromProjectDto): Promise<void> {
+    // Check if persona is in the project
+    const isInProject = await this.repository.isPersonaInProject(
+      data.projectId,
+      data.personaId,
+    );
+
+    if (!isInProject) {
+      throw new Error("Esta persona não está no projeto");
+    }
+
+    await this.repository.removePersonaFromProject(data.projectId, data.personaId);
+  }
+
+  async getProjectPersonas(projectId: string): Promise<Persona[]> {
+    const schemas = await this.repository.findMany({ projectId });
+    return schemas.map((schema) => this.mapper.toDomain(schema));
+  }
+
+  async getPersonasNotInProject(projectId: string): Promise<Persona[]> {
+    const schemas = await this.repository.findPersonasNotInProject(projectId);
+    return schemas.map((schema) => this.mapper.toDomain(schema));
+  }
+
+  async isPersonaInProject(projectId: string, personaId: string): Promise<boolean> {
+    return this.repository.isPersonaInProject(projectId, personaId);
   }
 }

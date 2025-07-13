@@ -43,7 +43,7 @@ export const usePersonaChat = ({ conversationId, conversation }: UsePersonaChatP
     // 2. Try to get default provider
     try {
       const defaultProvider = await window.electronIPC?.invoke('llm-provider:getDefault');
-      if (defaultProvider?.id) {
+      if (defaultProvider && typeof defaultProvider === 'object' && 'id' in defaultProvider && defaultProvider.id) {
         return defaultProvider.id;
       }
     } catch (error) {
@@ -58,7 +58,9 @@ export const usePersonaChat = ({ conversationId, conversation }: UsePersonaChatP
   
   // Initialize provider selection
   React.useEffect(() => {
-    getSelectedLlmProvider().then(setSelectedLlmProvider);
+    getSelectedLlmProvider().then((providerId) => {
+      setSelectedLlmProvider(providerId);
+    });
   }, [persona?.llmProviderId, llmProviders]);
   
   // Use the new channel chat hook with persona-specific configuration

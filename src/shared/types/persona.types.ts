@@ -28,4 +28,29 @@ export interface PersonaFilterDto {
   papel?: string;
   isActive?: boolean;
   llmProviderId?: string;
+  projectId?: string;
+}
+
+// Project-Persona relationship types
+export interface ProjectPersonaDto {
+  projectId: string;
+  personaId: string;
+  addedAt: Date;
+  addedBy: string;
+}
+
+export interface AddPersonaToProjectDto {
+  projectId: string;
+  personaId: string;
+  addedBy: string;
+}
+
+export interface RemovePersonaFromProjectDto {
+  projectId: string;
+  personaId: string;
+}
+
+export interface ProjectPersonaFilterDto {
+  projectId?: string;
+  personaId?: string;
 }

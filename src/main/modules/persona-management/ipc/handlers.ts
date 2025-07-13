@@ -6,6 +6,8 @@ import type {
   UpdatePersonaDto,
   PersonaDto,
   PersonaFilterDto,
+  AddPersonaToProjectDto,
+  RemovePersonaFromProjectDto,
 } from "../../../../shared/types/persona.types";
 
 export class PersonaIpcHandlers {
@@ -27,6 +29,28 @@ export class PersonaIpcHandlers {
     ipcMain.handle(
       "persona:toggleStatus",
       this.handleTogglePersonaStatus.bind(this),
+    );
+    
+    // Project-Persona relationship handlers
+    ipcMain.handle(
+      "persona:addToProject",
+      this.handleAddPersonaToProject.bind(this),
+    );
+    ipcMain.handle(
+      "persona:removeFromProject",
+      this.handleRemovePersonaFromProject.bind(this),
+    );
+    ipcMain.handle(
+      "persona:listByProject",
+      this.handleListProjectPersonas.bind(this),
+    );
+    ipcMain.handle(
+      "persona:listNotInProject",
+      this.handleListPersonasNotInProject.bind(this),
+    );
+    ipcMain.handle(
+      "persona:isInProject",
+      this.handleIsPersonaInProject.bind(this),
     );
   }
 
@@ -119,6 +143,75 @@ export class PersonaIpcHandlers {
     } catch (error) {
       throw new Error(
         `Falha ao alterar status da persona: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  // Project-Persona relationship handlers
+  private async handleAddPersonaToProject(
+    event: IpcMainInvokeEvent,
+    data: AddPersonaToProjectDto,
+  ): Promise<void> {
+    try {
+      await this.personaService.addPersonaToProject(data);
+    } catch (error) {
+      throw new Error(
+        `Falha ao adicionar persona ao projeto: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  private async handleRemovePersonaFromProject(
+    event: IpcMainInvokeEvent,
+    data: RemovePersonaFromProjectDto,
+  ): Promise<void> {
+    try {
+      await this.personaService.removePersonaFromProject(data);
+    } catch (error) {
+      throw new Error(
+        `Falha ao remover persona do projeto: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  private async handleListProjectPersonas(
+    event: IpcMainInvokeEvent,
+    projectId: string,
+  ): Promise<PersonaDto[]> {
+    try {
+      const personas = await this.personaService.getProjectPersonas(projectId);
+      return personas.map((persona) => this.personaMapper.toDto(persona));
+    } catch (error) {
+      throw new Error(
+        `Falha ao listar personas do projeto: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  private async handleListPersonasNotInProject(
+    event: IpcMainInvokeEvent,
+    projectId: string,
+  ): Promise<PersonaDto[]> {
+    try {
+      const personas = await this.personaService.getPersonasNotInProject(projectId);
+      return personas.map((persona) => this.personaMapper.toDto(persona));
+    } catch (error) {
+      throw new Error(
+        `Falha ao listar personas não vinculadas: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  private async handleIsPersonaInProject(
+    event: IpcMainInvokeEvent,
+    projectId: string,
+    personaId: string,
+  ): Promise<boolean> {
+    try {
+      return await this.personaService.isPersonaInProject(projectId, personaId);
+    } catch (error) {
+      throw new Error(
+        `Falha ao verificar persona no projeto: ${(error as Error).message}`,
       );
     }
   }

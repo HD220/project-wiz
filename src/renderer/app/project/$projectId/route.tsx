@@ -151,7 +151,7 @@ function ProjectLayout() {
             <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
               <AgentsSidebar
                 isOpen={agentsSidebarOpen}
-                onAgentSelect={(agent) => console.log("Selected agent:", agent)}
+                onPersonaSelect={(persona) => console.log("Selected persona:", persona)}
                 projectId={projectId}
               />
             </ResizablePanel>

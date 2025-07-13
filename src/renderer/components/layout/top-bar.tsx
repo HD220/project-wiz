@@ -128,21 +128,6 @@ export function TopBar({
       {/* Right side - Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {/* Channel/DM specific actions */}
-        {(type === "channel" || type === "dm") && (
-          <>
-            <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Users className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Settings className="w-4 h-4" />
-            </Button>
-          </>
-        )}
-
-        {/* More actions */}
-        <Button variant="ghost" size="icon" className="w-8 h-8">
-          <MoreHorizontal className="w-4 h-4" />
-        </Button>
 
         {/* Agents sidebar toggle */}
         {onToggleAgentsSidebar && (
