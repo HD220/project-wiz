@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
 import { useConversations } from "../hooks/use-conversations.hook";
+import { usePersonas } from "../../persona-management/hooks/use-personas.hook";
 import type { ConversationDto } from "../../../../shared/types/message.types";
 import { cn } from "@/lib/utils";
 

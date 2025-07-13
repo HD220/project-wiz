@@ -10,7 +10,7 @@ function EditLlmProvider() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { llmProviderId } = useParams({ from: "/(user)/settings/edit-llm-provider/$llmProviderId" });
   const { llmProviders } = useLlmProviders();
-  const provider = llmProviders.find((p) => p.id === llmProviderId);
+  const provider = llmProviders?.find((p) => p.id === llmProviderId) || null;
 
   return (
     <LlmProviderFormModal

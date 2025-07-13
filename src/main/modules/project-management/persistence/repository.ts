@@ -51,6 +51,9 @@ export class ProjectRepository {
 
     return results.map((project) => ({
       ...project,
+      description: project.description || undefined,
+      gitUrl: project.gitUrl || undefined,
+      avatar: project.avatar || undefined,
       createdAt: new Date(project.createdAt),
       updatedAt: new Date(project.updatedAt),
     }));
@@ -69,6 +72,9 @@ export class ProjectRepository {
 
     return {
       ...result,
+      description: result.description || undefined,
+      gitUrl: result.gitUrl || undefined,
+      avatar: result.avatar || undefined,
       createdAt: new Date(result.createdAt),
       updatedAt: new Date(result.updatedAt),
     };
@@ -90,6 +96,9 @@ export class ProjectRepository {
 
     return {
       ...updated,
+      description: updated.description || undefined,
+      gitUrl: updated.gitUrl || undefined,
+      avatar: updated.avatar || undefined,
       createdAt: new Date(updated.createdAt),
       updatedAt: new Date(updated.updatedAt),
     };

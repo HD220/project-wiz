@@ -90,8 +90,13 @@ class LlmProviderStore {
         data,
       )) as LlmProviderDto;
 
+      // If the new provider is set as default, update other providers to not be default
+      const updatedProviders = newLlmProvider.isDefault 
+        ? this.state.llmProviders.map(p => ({ ...p, isDefault: false }))
+        : this.state.llmProviders;
+
       this.setState({
-        llmProviders: [...this.state.llmProviders, newLlmProvider],
+        llmProviders: [...updatedProviders, newLlmProvider],
         isLoading: false,
       });
     } catch (error) {
@@ -114,9 +119,14 @@ class LlmProviderStore {
         data,
       )) as LlmProviderDto;
 
+      // If the updated provider is set as default, update other providers to not be default
       this.setState({
         llmProviders: this.state.llmProviders.map(p =>
-          p.id === updatedLlmProvider.id ? updatedLlmProvider : p
+          p.id === updatedLlmProvider.id 
+            ? updatedLlmProvider 
+            : updatedLlmProvider.isDefault 
+              ? { ...p, isDefault: false }
+              : p
         ),
         isLoading: false,
       });
@@ -152,6 +162,47 @@ class LlmProviderStore {
 
   setSelectedLlmProvider(llmProvider: LlmProviderDto | null) {
     this.setState({ selectedLlmProvider: llmProvider });
+  }
+
+  async getDefaultProvider(): Promise<LlmProviderDto | null> {
+    if (!window.electronIPC) return null;
+
+    try {
+      return (await window.electronIPC.invoke(
+        "llm-provider:getDefault",
+      )) as LlmProviderDto | null;
+    } catch (error) {
+      this.setState({ error: (error as Error).message });
+      return null;
+    }
+  }
+
+  async setDefaultProvider(id: string): Promise<void> {
+    if (!window.electronIPC) return;
+
+    this.setState({ isLoading: true, error: null });
+
+    try {
+      const updatedProvider = (await window.electronIPC.invoke(
+        "llm-provider:setDefault",
+        id,
+      )) as LlmProviderDto;
+
+      // Update all providers: set the selected one as default and others as not default
+      this.setState({
+        llmProviders: this.state.llmProviders.map(p => ({
+          ...p,
+          isDefault: p.id === id
+        })),
+        isLoading: false,
+      });
+    } catch (error) {
+      this.setState({
+        error: (error as Error).message,
+        isLoading: false,
+      });
+      throw error;
+    }
   }
 
   clearError() {

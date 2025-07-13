@@ -1,11 +1,10 @@
 import { forwardRef } from "react";
 import { Link, LinkProps } from "@tanstack/react-router";
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-interface CustomLinkProps extends Omit<LinkProps, "className"> {
-  variant?: ButtonProps["variant"];
-  size?: ButtonProps["size"];
+interface CustomLinkProps extends Omit<LinkProps, "className">, VariantProps<typeof buttonVariants> {
   className?: string;
   children: React.ReactNode;
 }

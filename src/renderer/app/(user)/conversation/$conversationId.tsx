@@ -6,6 +6,17 @@ export function ConversationPage() {
   const { conversationId } = Route.useParams();
   const { conversation } = Route.useLoaderData();
 
+  if (!conversation) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center text-muted-foreground">
+          <h3 className="font-semibold text-lg mb-2">Conversa não encontrada</h3>
+          <p>A conversa solicitada não foi encontrada.</p>
+        </div>
+      </div>
+    );
+  }
+
   return <ConversationView conversationId={conversationId} conversation={conversation} />;
 }
 

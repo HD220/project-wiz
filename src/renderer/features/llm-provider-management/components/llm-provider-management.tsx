@@ -9,11 +9,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap } from "lucide-react";
+import { Zap, Star, StarOff } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 export function LlmProviderManagement() {
-  const { llmProviders, isLoading, error, deleteLlmProvider } = useLlmProviders();
+  const { llmProviders, isLoading, error, deleteLlmProvider, setDefaultProvider } = useLlmProviders();
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -41,29 +41,58 @@ export function LlmProviderManagement() {
               <TableHead>Name</TableHead>
               <TableHead>Provider</TableHead>
               <TableHead>Model</TableHead>
+              <TableHead>Default</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {llmProviders.map((provider) => (
               <TableRow key={provider.id}>
-                <TableCell>{provider.name}</TableCell>
+                <TableCell className="font-medium">
+                  {provider.name}
+                  {provider.isDefault && (
+                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                      Padrao
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell>{provider.provider}</TableCell>
                 <TableCell>{provider.model}</TableCell>
                 <TableCell>
-                  <Link to={`/settings/edit-llm-provider/${provider.id}`}>
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                  </Link>
                   <Button
-                    variant="destructive"
+                    variant={provider.isDefault ? "default" : "outline"}
                     size="sm"
-                    onClick={() => deleteLlmProvider(provider.id)}
-                    className="ml-2"
+                    onClick={() => setDefaultProvider(provider.id)}
+                    disabled={provider.isDefault}
+                    className="flex items-center gap-1"
                   >
-                    Delete
+                    {provider.isDefault ? (
+                      <Star className="w-3 h-3 fill-current" />
+                    ) : (
+                      <StarOff className="w-3 h-3" />
+                    )}
+                    {provider.isDefault ? "Padrao" : "Definir como padrao"}
                   </Button>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Link 
+                      to="/settings/edit-llm-provider/$llmProviderId" 
+                      params={{ llmProviderId: provider.id }}
+                    >
+                      <Button variant="outline" size="sm">
+                        Editar
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteLlmProvider(provider.id)}
+                      disabled={provider.isDefault}
+                    >
+                      Excluir
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

@@ -48,7 +48,7 @@ export function ChatContainer({
         await channelMessagesHook.sendTextMessage(
           message.trim(),
           'current-user-id', // TODO: Get from user context
-          'Usuário Atual' // TODO: Get from user context
+          'João Silva' // TODO: Get from user context
         );
         setMessage("");
       } catch (error) {

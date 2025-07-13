@@ -17,6 +17,7 @@ import { Route as userRouteRouteImport } from './app/(user)/route'
 import { Route as userIndexRouteImport } from './app/(user)/index'
 import { Route as ProjectLayoutRouteImport } from './app/project/_layout'
 import { Route as userNewConversationRouteImport } from './app/(user)/new-conversation'
+import { Route as userAiChatTestRouteImport } from './app/(user)/ai-chat-test'
 import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
 import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
 import { Route as userSettingsIndexRouteImport } from './app/(user)/settings/index'
@@ -64,6 +65,11 @@ const ProjectLayoutRoute = ProjectLayoutRouteImport.update({
 const userNewConversationRoute = userNewConversationRouteImport.update({
   id: '/new-conversation',
   path: '/new-conversation',
+  getParentRoute: () => userRouteRoute,
+} as any)
+const userAiChatTestRoute = userAiChatTestRouteImport.update({
+  id: '/ai-chat-test',
+  path: '/ai-chat-test',
   getParentRoute: () => userRouteRoute,
 } as any)
 const ProjectProjectIdRouteRoute = ProjectProjectIdRouteRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/create-channel': typeof CreateChannelRoute
   '/create-project': typeof CreateProjectRoute
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
+  '/ai-chat-test': typeof userAiChatTestRoute
   '/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectLayoutRoute
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/create-channel': typeof CreateChannelRoute
   '/create-project': typeof CreateProjectRoute
+  '/ai-chat-test': typeof userAiChatTestRoute
   '/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectLayoutRoute
   '/': typeof userIndexRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/create-channel': typeof CreateChannelRoute
   '/create-project': typeof CreateProjectRoute
   '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
+  '/(user)/ai-chat-test': typeof userAiChatTestRoute
   '/(user)/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectRouteWithChildren
   '/project/_layout': typeof ProjectLayoutRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/create-channel'
     | '/create-project'
     | '/project/$projectId'
+    | '/ai-chat-test'
     | '/new-conversation'
     | '/project'
     | '/conversation/$conversationId'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
   to:
     | '/create-channel'
     | '/create-project'
+    | '/ai-chat-test'
     | '/new-conversation'
     | '/project'
     | '/'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/create-channel'
     | '/create-project'
     | '/project/$projectId'
+    | '/(user)/ai-chat-test'
     | '/(user)/new-conversation'
     | '/project'
     | '/project/_layout'
@@ -325,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/new-conversation'
       fullPath: '/new-conversation'
       preLoaderRoute: typeof userNewConversationRouteImport
+      parentRoute: typeof userRouteRoute
+    }
+    '/(user)/ai-chat-test': {
+      id: '/(user)/ai-chat-test'
+      path: '/ai-chat-test'
+      fullPath: '/ai-chat-test'
+      preLoaderRoute: typeof userAiChatTestRouteImport
       parentRoute: typeof userRouteRoute
     }
     '/project/$projectId': {
@@ -422,6 +441,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface userRouteRouteChildren {
+  userAiChatTestRoute: typeof userAiChatTestRoute
   userNewConversationRoute: typeof userNewConversationRoute
   userIndexRoute: typeof userIndexRoute
   userConversationConversationIdRoute: typeof userConversationConversationIdRoute
@@ -431,6 +451,7 @@ interface userRouteRouteChildren {
 }
 
 const userRouteRouteChildren: userRouteRouteChildren = {
+  userAiChatTestRoute: userAiChatTestRoute,
   userNewConversationRoute: userNewConversationRoute,
   userIndexRoute: userIndexRoute,
   userConversationConversationIdRoute: userConversationConversationIdRoute,

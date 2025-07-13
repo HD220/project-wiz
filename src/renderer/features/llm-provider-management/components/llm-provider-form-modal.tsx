@@ -10,8 +10,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
 import { useNavigate } from "@tanstack/react-router";
+
+const SUPPORTED_PROVIDERS = [
+  { value: "openai", label: "OpenAI", models: ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"] },
+  { value: "deepseek", label: "DeepSeek", models: ["deepseek-chat", "deepseek-coder"] },
+  { value: "custom", label: "Custom Provider", models: [] },
+];
 
 interface LlmProviderFormModalProps {
   provider: LlmProviderDto | null;
@@ -31,7 +45,10 @@ export function LlmProviderFormModal({
     provider: "",
     model: "",
     apiKey: "",
+    isDefault: false,
   });
+  const [selectedProvider, setSelectedProvider] = useState<string>("");
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
 
   useEffect(() => {
     if (provider) {
@@ -40,20 +57,39 @@ export function LlmProviderFormModal({
         provider: provider.provider,
         model: provider.model,
         apiKey: provider.apiKey,
+        isDefault: provider.isDefault,
       });
+      setSelectedProvider(provider.provider);
+      const providerConfig = SUPPORTED_PROVIDERS.find(p => p.value === provider.provider);
+      setAvailableModels(providerConfig?.models || []);
     } else {
       setFormData({
         name: "",
         provider: "",
         model: "",
         apiKey: "",
+        isDefault: false,
       });
+      setSelectedProvider("");
+      setAvailableModels([]);
     }
   }, [provider]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleProviderChange = (value: string) => {
+    setSelectedProvider(value);
+    setFormData((prev) => ({ ...prev, provider: value, model: "" }));
+    
+    const providerConfig = SUPPORTED_PROVIDERS.find(p => p.value === value);
+    setAvailableModels(providerConfig?.models || []);
+  };
+
+  const handleModelChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, model: value }));
   };
 
   const handleSubmit = async () => {
@@ -74,16 +110,55 @@ export function LlmProviderFormModal({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={formData.name} onChange={handleChange} />
+            <Input 
+              id="name" 
+              value={formData.name} 
+              onChange={handleChange}
+              placeholder="My AI Provider"
+            />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="provider">Provider</Label>
-            <Input id="provider" value={formData.provider} onChange={handleChange} />
+            <Label>Provider</Label>
+            <Select value={selectedProvider} onValueChange={handleProviderChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a provider" />
+              </SelectTrigger>
+              <SelectContent>
+                {SUPPORTED_PROVIDERS.map((provider) => (
+                  <SelectItem key={provider.value} value={provider.value}>
+                    {provider.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="model">Model</Label>
-            <Input id="model" value={formData.model} onChange={handleChange} />
+            <Label>Model</Label>
+            {availableModels.length > 0 ? (
+              <Select value={formData.model} onValueChange={handleModelChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableModels.map((model) => (
+                    <SelectItem key={model} value={model}>
+                      {model}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input 
+                id="model" 
+                value={formData.model} 
+                onChange={handleChange}
+                placeholder="Enter custom model name"
+              />
+            )}
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="apiKey">API Key</Label>
             <Input
@@ -91,7 +166,21 @@ export function LlmProviderFormModal({
               type="password"
               value={formData.apiKey}
               onChange={handleChange}
+              placeholder="sk-..."
             />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="isDefault" 
+              checked={formData.isDefault}
+              onCheckedChange={(checked) => 
+                setFormData(prev => ({ ...prev, isDefault: checked as boolean }))
+              }
+            />
+            <Label htmlFor="isDefault" className="text-sm font-normal">
+              Definir como provedor padrão
+            </Label>
           </div>
         </div>
         <DialogFooter>

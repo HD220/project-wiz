@@ -52,6 +52,12 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
     getLlmProviderById: (id: string) =>
       llmProviderStore.getLlmProviderById(id),
 
+    getDefaultProvider: () =>
+      llmProviderStore.getDefaultProvider(),
+
+    setDefaultProvider: (id: string) =>
+      llmProviderStore.setDefaultProvider(id),
+
     refetch: () =>
       llmProviderStore.loadLlmProviders(filterRef.current, true),
   }), []);

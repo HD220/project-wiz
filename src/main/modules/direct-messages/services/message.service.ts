@@ -25,8 +25,8 @@ export class MessageService {
 
   async getConversationMessages(
     conversationId: string,
-    limit?: number,
-    offset?: number
+    limit: number = 50,
+    offset: number = 0
   ): Promise<MessageDto[]> {
     return await this.messageRepository.findByConversationId(
       conversationId,

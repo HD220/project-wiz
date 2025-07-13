@@ -37,24 +37,17 @@ export class MessageRepository {
 
   async findByConversationId(
     conversationId: string,
-    limit?: number,
-    offset?: number
+    limit: number = 50,
+    offset: number = 0
   ): Promise<MessageDto[]> {
-    let query = db
+    const results = await db
       .select()
       .from(messages)
       .where(eq(messages.conversationId, conversationId))
-      .orderBy(desc(messages.createdAt));
+      .orderBy(desc(messages.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-    if (limit !== undefined) {
-      query = query.limit(limit);
-    }
-
-    if (offset !== undefined) {
-      query = query.offset(offset);
-    }
-
-    const results = await query;
     return results.map(this.mapToDto);
   }
 

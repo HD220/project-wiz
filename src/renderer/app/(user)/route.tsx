@@ -12,24 +12,40 @@ import {
 } from "@/renderer/components/ui/resizable";
 import { mockAgents } from "@/renderer/lib/placeholders";
 import { UserSidebar } from "@/features/user-management/components/user-sidebar";
+import { usePageTitle } from "@/renderer/contexts/page-title-context";
 
 function UserLayout() {
   const location = useLocation();
+  const { title: pageTitle, icon: pageIcon } = usePageTitle();
 
-  // Get page title based on current route
+  // Get page title based on current route - use PageTitle context if available
   const getPageTitle = () => {
+    // If PageTitle is set by child components, use it
+    if (pageTitle) return pageTitle;
+    
     const path = location.pathname;
     if (path === "/") return "Dashboard";
     if (path.includes("/settings")) return "Configurações";
     if (path.includes("/conversation/")) return "Conversa";
+    if (path.includes("/ai-chat-test")) return "AI Chat Test";
     return "Usuário";
   };
 
   const getPageSubtitle = () => {
+    // Don't show subtitle for conversations since we have the persona name as title
+    if (pageTitle && location.pathname.includes("/conversation/")) return undefined;
+    
     const path = location.pathname;
     if (path === "/") return "Visão geral e estatísticas";
     if (path.includes("/settings")) return "Configurações do usuário e sistema";
     if (path.includes("/conversation/")) return "Mensagem direta";
+    if (path.includes("/ai-chat-test")) return "Teste de integração AI Chat para canais";
+    return undefined;
+  };
+
+  const getPageIcon = () => {
+    // If PageTitle has an icon, use it
+    if (pageIcon) return pageIcon;
     return undefined;
   };
 
@@ -51,6 +67,7 @@ function UserLayout() {
               title={getPageTitle()}
               subtitle={getPageSubtitle()}
               type="page"
+              icon={getPageIcon()}
             />
 
             {/* Content area */}

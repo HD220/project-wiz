@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Search, Settings, Home } from "lucide-react";
+import { ChevronDown, Plus, Search, Settings, Home, MessageSquare } from "lucide-react";
 import { UserArea } from "./user-area";
 import { ConversationList } from "../../direct-messages/components/conversation-list";
 
@@ -70,6 +70,16 @@ export function UserSidebar({}: UserSidebarProps) {
             >
               <Settings className="w-4 h-4 mr-2 text-muted-foreground" />
               <span>Configurações</span>
+            </CustomLink>
+            <CustomLink
+              to="/ai-chat-test"
+              className="w-full justify-start px-2 py-1.5 h-auto"
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
+              }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2 text-muted-foreground" />
+              <span>AI Chat Test</span>
             </CustomLink>
           </div>
 

@@ -9,6 +9,8 @@ export const llmProviders = sqliteTable("llm_providers", {
   provider: text("provider").notNull(),
   model: text("model").notNull(),
   apiKey: text("api_key").notNull(),
+  isDefault: integer("is_default", { mode: "boolean" })
+    .default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

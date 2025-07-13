@@ -1,5 +1,6 @@
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
 import { ChannelMessageService } from "../application/channel-message.service";
+import { AIChatService } from "../application/ai-chat.service";
 import { ChannelMessageMapper } from "../channel-message.mapper";
 import type { 
   CreateChannelMessageDto, 
@@ -13,6 +14,7 @@ export class ChannelMessageIpcHandlers {
   constructor(
     private channelMessageService: ChannelMessageService,
     private channelMessageMapper: ChannelMessageMapper,
+    private aiChatService?: AIChatService,
   ) {}
 
   registerHandlers(): void {
@@ -31,6 +33,13 @@ export class ChannelMessageIpcHandlers {
     ipcMain.handle("channelMessage:createCode", this.handleCreateCodeMessage.bind(this));
     ipcMain.handle("channelMessage:createSystem", this.handleCreateSystemMessage.bind(this));
     ipcMain.handle("channelMessage:createFile", this.handleCreateFileMessage.bind(this));
+    
+    // AI Chat integration handlers
+    ipcMain.handle("channelMessage:ai:sendMessage", this.handleAISendMessage.bind(this));
+    ipcMain.handle("channelMessage:ai:regenerateMessage", this.handleAIRegenerateMessage.bind(this));
+    ipcMain.handle("channelMessage:ai:validateProvider", this.handleAIValidateProvider.bind(this));
+    ipcMain.handle("channelMessage:ai:getConversationSummary", this.handleAIGetConversationSummary.bind(this));
+    ipcMain.handle("channelMessage:ai:clearMessages", this.handleAIClearMessages.bind(this));
   }
 
   private async handleCreateMessage(
@@ -203,6 +212,139 @@ export class ChannelMessageIpcHandlers {
       return this.channelMessageMapper.toDto(message);
     } catch (error) {
       throw new Error(`Failed to create file message: ${(error as Error).message}`);
+    }
+  }
+
+  // AI Chat Integration Handlers
+  private async handleAISendMessage(
+    event: IpcMainInvokeEvent,
+    data: {
+      content: string;
+      channelId: string;
+      llmProviderId: string;
+      authorId: string;
+      authorName: string;
+      aiName?: string;
+      systemPrompt?: string;
+      temperature?: number;
+      maxTokens?: number;
+      includeHistory?: boolean;
+      historyLimit?: number;
+    },
+  ): Promise<{ userMessage: ChannelMessageDto; aiMessage: ChannelMessageDto }> {
+    try {
+      if (!this.aiChatService) {
+        throw new Error("AI Chat service não está disponível");
+      }
+
+      const result = await this.aiChatService.sendUserMessage(
+        data.content,
+        {
+          channelId: data.channelId,
+          llmProviderId: data.llmProviderId,
+          authorId: data.authorId,
+          authorName: data.authorName,
+          systemPrompt: data.systemPrompt,
+        },
+        {
+          temperature: data.temperature,
+          maxTokens: data.maxTokens,
+          includeHistory: data.includeHistory,
+          historyLimit: data.historyLimit,
+          aiName: data.aiName,
+        },
+      );
+
+      return {
+        userMessage: this.channelMessageMapper.toDto(result.userMessage),
+        aiMessage: this.channelMessageMapper.toDto(result.aiMessage),
+      };
+    } catch (error) {
+      throw new Error(`Failed to send AI message: ${(error as Error).message}`);
+    }
+  }
+
+  private async handleAIRegenerateMessage(
+    event: IpcMainInvokeEvent,
+    data: {
+      channelId: string;
+      llmProviderId: string;
+      authorId: string;
+      authorName: string;
+      systemPrompt?: string;
+      temperature?: number;
+      maxTokens?: number;
+    },
+  ): Promise<ChannelMessageDto> {
+    try {
+      if (!this.aiChatService) {
+        throw new Error("AI Chat service não está disponível");
+      }
+
+      const regeneratedMessage = await this.aiChatService.regenerateLastAIMessage(
+        {
+          channelId: data.channelId,
+          llmProviderId: data.llmProviderId,
+          authorId: data.authorId,
+          authorName: data.authorName,
+          systemPrompt: data.systemPrompt,
+        },
+        {
+          temperature: data.temperature,
+          maxTokens: data.maxTokens,
+        },
+      );
+
+      return this.channelMessageMapper.toDto(regeneratedMessage);
+    } catch (error) {
+      throw new Error(`Failed to regenerate AI message: ${(error as Error).message}`);
+    }
+  }
+
+  private async handleAIValidateProvider(
+    event: IpcMainInvokeEvent,
+    llmProviderId: string,
+  ): Promise<boolean> {
+    try {
+      if (!this.aiChatService) {
+        return false;
+      }
+
+      return await this.aiChatService.validateAIProvider(llmProviderId);
+    } catch (error) {
+      console.error(`Failed to validate AI provider ${llmProviderId}:`, error);
+      return false;
+    }
+  }
+
+  private async handleAIGetConversationSummary(
+    event: IpcMainInvokeEvent,
+    channelId: string,
+    messageLimit?: string,
+  ): Promise<string> {
+    try {
+      if (!this.aiChatService) {
+        throw new Error("AI Chat service não está disponível");
+      }
+
+      return await this.aiChatService.getConversationSummary(channelId, messageLimit ? parseInt(messageLimit) : undefined);
+    } catch (error) {
+      throw new Error(`Failed to get conversation summary: ${(error as Error).message}`);
+    }
+  }
+
+  private async handleAIClearMessages(
+    event: IpcMainInvokeEvent,
+    channelId: string,
+  ): Promise<number> {
+    try {
+      if (!this.aiChatService) {
+        throw new Error("AI Chat service não está disponível");
+      }
+
+      return await this.aiChatService.clearAIMessages(channelId);
+    } catch (error) {
+      throw new Error(`Failed to clear AI messages: ${(error as Error).message}`);
     }
   }
 }

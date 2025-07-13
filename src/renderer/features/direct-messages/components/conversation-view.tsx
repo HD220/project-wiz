@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Paperclip, Smile, AtSign } from "lucide-react";
 import { PageTitle } from "@/components/page-title";
 import { MessageItem } from "@/components/chat/message-item";
-import { useMessages } from "../hooks/use-messages.hook";
+import { usePersonaChat } from "../hooks/use-persona-chat.hook";
+import { usePersonas } from "../../persona-management/hooks/use-personas.hook";
 import type { ConversationDto } from "../../../../shared/types/message.types";
+import type { ChannelMessageDto } from "../../../../shared/types/channel-message.types";
 
 interface ConversationViewProps {
   conversationId: string;
@@ -16,13 +18,29 @@ interface ConversationViewProps {
 }
 
 export function ConversationView({ conversationId, conversation }: ConversationViewProps) {
-  const [message, setMessage] = useState("");
-  const { messages, createMessage } = useMessages(conversationId);
+  const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
   const previousMessagesLength = useRef(0);
 
-  // Auto-scroll to bottom when messages change
+  // Use persona chat hook which handles LLM provider selection based on persona
+  const {
+    messages,
+    isSending,
+    isRegenerating,
+    isTyping,
+    error,
+    sendMessage,
+    regenerateLastMessage,
+    clearError,
+    persona,
+    fullPersona,
+  } = usePersonaChat({
+    conversationId,
+    conversation,
+  });
+
+  // Auto-scroll to bottom when messages change or typing indicator appears
   useEffect(() => {
     if (messagesEndRef.current) {
       // First load: scroll instantly to bottom
@@ -32,12 +50,12 @@ export function ConversationView({ conversationId, conversation }: ConversationV
         previousMessagesLength.current = messages.length;
       } 
       // New message added: smooth scroll
-      else if (messages.length > previousMessagesLength.current) {
+      else if (messages.length > previousMessagesLength.current || isTyping) {
         messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         previousMessagesLength.current = messages.length;
       }
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   // Reset for new conversation
   useEffect(() => {
@@ -52,65 +70,85 @@ export function ConversationView({ conversationId, conversation }: ConversationV
   };
 
 
-  const getOtherParticipant = (conv: ConversationDto) => {
-    return conv.participants.find((p: string) => p !== "user") || "Unknown";
-  };
 
-  const otherParticipant = getOtherParticipant(conversation);
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageInput.trim() || !fullPersona) return;
 
-  const handleSend = async () => {
-    if (!message.trim()) return;
+    const messageToSend = messageInput.trim();
+    // Limpar input imediatamente
+    setMessageInput("");
 
     try {
-      await createMessage({
-        content: message.trim(),
-        senderId: "user",
-        senderName: "Usuário",
-        senderType: "user",
-        conversationId,
-      });
-      setMessage("");
-      // The useEffect will handle smooth scrolling automatically when messages update
-    } catch (error) {
-      console.error("Error sending message:", error);
+      await sendMessage(messageToSend);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      // Em caso de erro, restaurar a mensagem no input
+      setMessageInput(messageToSend);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSend(e as any);
     }
   };
+
+
+  // Convert ChannelMessageDto to format expected by MessageItem
+  const convertToMessageFormat = (msg: ChannelMessageDto) => ({
+    id: msg.id,
+    content: msg.content,
+    senderId: msg.authorId,
+    senderName: msg.authorId === "user" ? "João Silva" : persona.name,
+    senderType: msg.authorId === "user" ? "user" as const : "agent" as const,
+    messageType: "text" as const,
+    timestamp: new Date(msg.createdAt),
+    isEdited: false,
+    mentions: [],
+  });
 
   const titleIcon = (
     <Avatar className="w-5 h-5">
       <AvatarFallback className="text-xs">
-        {otherParticipant.slice(0, 2).toUpperCase()}
+        {persona.name.slice(0, 2).toUpperCase()}
       </AvatarFallback>
     </Avatar>
   );
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <PageTitle title={otherParticipant} icon={titleIcon} />
-      <div className="px-4 py-2 border-b">
-        <Badge variant="secondary" className="text-xs">
-          Agente IA
-        </Badge>
-      </div>
+      <PageTitle title={persona.name} icon={titleIcon} />
 
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full px-4">
           <div className="space-y-4 py-4">
+            {/* Error display */}
+            {error && (
+              <div className="flex items-center justify-between bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
+                <span>{error}</span>
+                <Button variant="ghost" size="sm" onClick={clearError}>
+                  Limpar
+                </Button>
+              </div>
+            )}
+            
+            {/* Warning for missing persona or LLM provider */}
+            {!fullPersona && (
+              <div className="flex items-center justify-center bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+                ⚠️ Persona não encontrada para esta conversa.
+              </div>
+            )}
+            
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                   <AtSign className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">
-                  Este é o início da sua conversa com {otherParticipant}
+                  Este é o início da sua conversa com {persona.name}
                 </h3>
                 <p className="text-muted-foreground">
                   Comece uma conversa enviando uma mensagem abaixo.
@@ -121,23 +159,30 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                 {messages.map((msg) => (
                   <MessageItem
                     key={msg.id}
-                    message={{
-                      id: msg.id,
-                      content: msg.content,
-                      senderId: msg.senderId,
-                      senderName: msg.senderName,
-                      senderType: msg.senderType,
-                      messageType: "text",
-                      timestamp: msg.timestamp,
-                      isEdited: false,
-                      mentions: [],
-                    }}
+                    message={convertToMessageFormat(msg)}
                     onEdit={(id, content) => console.log("Edit:", id, content)}
                     onDelete={(id) => console.log("Delete:", id)}
                     onReply={(id) => console.log("Reply:", id)}
                     showActions={true}
                   />
                 ))}
+                {isTyping && (
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className="bg-purple-500">
+                        {persona.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-lg px-3 py-2">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                      <span className="text-sm">{persona.name} está digitando...</span>
+                    </div>
+                  </div>
+                )}
                 {/* Invisible element for auto-scroll */}
                 <div ref={messagesEndRef} />
               </>
@@ -148,31 +193,38 @@ export function ConversationView({ conversationId, conversation }: ConversationV
 
       {/* Message Input */}
       <div className="p-4 border-t border-border flex-shrink-0">
-        <div className="relative">
-          <Textarea
-            placeholder={`Mensagem para ${otherParticipant}`}
-            className="min-h-[44px] max-h-32 resize-none pr-12 py-3"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <div className="absolute right-2 bottom-2 flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Paperclip className="w-4 h-4 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Smile className="w-4 h-4 text-muted-foreground" />
-            </Button>
-            <Button
-              size="icon"
-              className="w-8 h-8"
-              onClick={handleSend}
-              disabled={!message.trim()}
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+        <form onSubmit={handleSend}>
+          <div className="relative">
+            <Textarea
+              placeholder={
+                !fullPersona 
+                  ? "Persona não encontrada..."
+                  : `Mensagem para ${persona.name}`
+              }
+              className="min-h-[44px] max-h-32 resize-none pr-12 py-3"
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={!fullPersona}
+            />
+            <div className="absolute right-2 bottom-2 flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <Paperclip className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <Smile className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <Button
+                type="submit"
+                size="icon"
+                className="w-8 h-8"
+                disabled={!messageInput.trim() || !fullPersona}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        </form>
         <div className="flex justify-between text-xs text-muted-foreground mt-2">
           <span>Use **negrito**, *itálico*, `código` para formatar</span>
           <span>Enter para enviar, Shift+Enter para nova linha</span>

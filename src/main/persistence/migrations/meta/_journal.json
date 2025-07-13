@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1752325715894,
-      "tag": "0000_mighty_spyke",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1752339146802,
-      "tag": "0001_reflective_ken_ellis",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1752345482299,
-      "tag": "0002_tidy_agent_brand",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1752355345622,
-      "tag": "0003_happy_power_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1752356745741,
-      "tag": "0004_left_norrin_radd",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1752370174588,
-      "tag": "0005_youthful_tyrannus",
+      "when": 1752408740413,
+      "tag": "0000_quiet_krista_starr",
       "breakpoints": true
     }
   ]

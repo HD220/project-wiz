@@ -62,13 +62,7 @@ export function MessageItem({
   };
 
   const getMessageBadge = () => {
-    if (message.senderType === "agent") {
-      return (
-        <Badge variant="secondary" className="ml-2 text-xs">
-          BOT
-        </Badge>
-      );
-    }
+    // Removed BOT badge for agents
     return null;
   };
 
@@ -150,9 +144,9 @@ export function MessageItem({
               message.senderType === "agent" ? "bg-purple-500" : "bg-brand-500",
             )}
           >
-            {message.senderType === "agent" && <Bot className="h-5 w-5" />}
-            {message.senderType === "user" &&
-              message.senderName.charAt(0).toUpperCase()}
+            {message.senderType === "agent" 
+              ? message.senderName.slice(0, 2).toUpperCase()
+              : message.senderName.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
 

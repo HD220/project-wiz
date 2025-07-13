@@ -3,6 +3,7 @@ export interface CreateLlmProviderDto {
   provider: string;
   model: string;
   apiKey: string;
+  isDefault?: boolean;
 }
 
 export interface UpdateLlmProviderDto extends Partial<CreateLlmProviderDto> {
@@ -15,6 +16,7 @@ export interface LlmProviderDto {
   provider: string;
   model: string;
   apiKey: string;
+  isDefault: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,4 +24,16 @@ export interface LlmProviderDto {
 export interface LlmProviderFilterDto {
   name?: string;
   provider?: string;
+  isDefault?: boolean;
+}
+
+export interface GenerateTextRequestDto {
+  providerId: string;
+  messages: Array<{
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+  }>;
+  systemPrompt?: string;
+  temperature?: number;
+  maxTokens?: number;
 }
