@@ -1,6 +1,6 @@
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
-import { LlmProviderService } from "../application/llm-provider.service";
-import { LlmProviderMapper } from "../llm-provider.mapper";
+import { LlmProviderService } from "../services/llm-provider.service";
+import { LlmProviderMapper } from "../mappers/llm-provider.mapper";
 import type {
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
@@ -28,7 +28,7 @@ export class LlmProviderIpcHandlers {
   ): Promise<LlmProviderDto> {
     try {
       const llmProvider = await this.llmProviderService.createLlmProvider(data);
-      return this.llmProviderMapper.toDto(llmProvider);
+      return this.llmProviderMapper.toDtoFromData(llmProvider);
     } catch (error) {
       throw new Error(`Failed to create LLM provider: ${(error as Error).message}`);
     }
@@ -40,7 +40,7 @@ export class LlmProviderIpcHandlers {
   ): Promise<LlmProviderDto[]> {
     try {
       const llmProviders = await this.llmProviderService.listLlmProviders(filter);
-      return llmProviders.map(llmProvider => this.llmProviderMapper.toDto(llmProvider));
+      return llmProviders.map(llmProvider => this.llmProviderMapper.toDtoFromData(llmProvider));
     } catch (error) {
       throw new Error(`Failed to list LLM providers: ${(error as Error).message}`);
     }
@@ -51,8 +51,8 @@ export class LlmProviderIpcHandlers {
     id: string,
   ): Promise<LlmProviderDto | null> {
     try {
-      const llmProvider = await this.llmProviderService.getLlmProviderById(id);
-      return llmProvider ? this.llmProviderMapper.toDto(llmProvider) : null;
+      const llmProvider = await this.llmProviderService.getLlmProviderById({ id });
+      return llmProvider ? this.llmProviderMapper.toDtoFromData(llmProvider) : null;
     } catch (error) {
       throw new Error(`Failed to get LLM provider: ${(error as Error).message}`);
     }
@@ -64,7 +64,7 @@ export class LlmProviderIpcHandlers {
   ): Promise<LlmProviderDto> {
     try {
       const llmProvider = await this.llmProviderService.updateLlmProvider(data);
-      return this.llmProviderMapper.toDto(llmProvider);
+      return this.llmProviderMapper.toDtoFromData(llmProvider);
     } catch (error) {
       throw new Error(`Failed to update LLM provider: ${(error as Error).message}`);
     }
@@ -75,7 +75,7 @@ export class LlmProviderIpcHandlers {
     id: string,
   ): Promise<void> {
     try {
-      await this.llmProviderService.deleteLlmProvider(id);
+      await this.llmProviderService.deleteLlmProvider({ id });
     } catch (error) {
       throw new Error(`Failed to delete LLM provider: ${(error as Error).message}`);
     }
