@@ -27,13 +27,7 @@ export class ChannelRepository {
         conditions.push(eq(channels.projectId, filter.projectId));
       }
       
-      if (filter.type) {
-        conditions.push(eq(channels.type, filter.type as any));
-      }
-      
-      if (filter.isArchived !== undefined) {
-        conditions.push(eq(channels.isArchived, filter.isArchived));
-      }
+      // Removed type and isArchived filters
 
       if (filter.isPrivate !== undefined) {
         conditions.push(eq(channels.isPrivate, filter.isPrivate));
@@ -79,9 +73,10 @@ export class ChannelRepository {
     return updated;
   }
 
-  // SOFT DELETE (arquivar)
+  // SOFT DELETE (arquivar) - simplified
   async archive(id: string): Promise<ChannelSchema> {
-    return this.update(id, { isArchived: true });
+    const [channel] = await db.select().from(channels).where(eq(channels.id, id));
+    return channel;
   }
 
   // HARD DELETE
@@ -94,7 +89,6 @@ export class ChannelRepository {
     const conditions = [
       eq(channels.name, name.toLowerCase()),
       eq(channels.projectId, projectId),
-      eq(channels.isArchived, false)
     ];
 
     // Excluir um ID específico (para updates)

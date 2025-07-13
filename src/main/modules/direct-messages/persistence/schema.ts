@@ -20,7 +20,7 @@ export const messages = sqliteTable("messages", {
   senderId: text("sender_id").notNull(),
   senderName: text("sender_name").notNull(),
   senderType: text("sender_type", {
-    enum: ["user", "agent"],
+    enum: ["user", "agent", "system"],
   }).notNull(),
   conversationId: text("conversation_id").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })

@@ -1,13 +1,12 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 import { ConversationService } from "../services/conversation.service";
 import { MessageService } from "../services/message.service";
-import { AIMessageService } from "../services/ai-message.service";
+import { AgentConversationService } from "../services/agent-conversation.service";
 import {
   CreateConversationDto,
   ConversationFilterDto,
   ConversationDto,
   CreateMessageDto,
-  MessageFilterDto,
   MessageDto,
 } from "../../../../shared/types/message.types";
 
@@ -15,7 +14,7 @@ export class DirectMessageIpcHandlers {
   constructor(
     private conversationService: ConversationService,
     private messageService: MessageService,
-    private aiMessageService: AIMessageService,
+    private agentConversationService: AgentConversationService,
   ) {}
 
   registerHandlers(): void {
@@ -29,11 +28,12 @@ export class DirectMessageIpcHandlers {
     ipcMain.handle("dm:message:create", this.handleCreateMessage.bind(this));
     ipcMain.handle("dm:message:getById", this.handleGetMessageById.bind(this));
     ipcMain.handle("dm:message:getByConversation", this.handleGetConversationMessages.bind(this));
+    ipcMain.handle("dm:message:delete", this.handleDeleteMessage.bind(this));
     
-    // AI Message handlers
-    ipcMain.handle("dm:ai:processUserMessage", this.handleProcessUserMessage.bind(this));
-    ipcMain.handle("dm:ai:regenerateResponse", this.handleRegenerateResponse.bind(this));
-    ipcMain.handle("dm:ai:validatePersona", this.handleValidatePersona.bind(this));
+    // Agent conversation handlers (new simplified interface)
+    ipcMain.handle("dm:agent:sendMessage", this.handleSendMessageToAgent.bind(this));
+    ipcMain.handle("dm:agent:regenerateResponse", this.handleRegenerateResponse.bind(this));
+    ipcMain.handle("dm:agent:validateConversation", this.handleValidateConversation.bind(this));
   }
 
   // Conversation handlers
@@ -91,20 +91,27 @@ export class DirectMessageIpcHandlers {
     );
   }
 
-  // AI Message handlers
-  private async handleProcessUserMessage(
+  private async handleDeleteMessage(
+    event: IpcMainInvokeEvent,
+    data: { id: string },
+  ): Promise<void> {
+    return await this.messageService.deleteMessage(data.id);
+  }
+
+  // Agent conversation handlers (new simplified interface)
+  private async handleSendMessageToAgent(
     event: IpcMainInvokeEvent,
     data: { conversationId: string; message: string; userId?: string }
-  ): Promise<ReadableStream> {
+  ): Promise<{ userMessage: MessageDto; agentMessage: MessageDto }> {
     try {
-      console.log('[DM IPC] Processing user message:', data);
-      const stream = await this.aiMessageService.processUserMessage(
-        data.conversationId,
-        data.message,
-        data.userId
-      );
-      console.log('[DM IPC] Returning stream for:', data.conversationId);
-      return stream;
+      console.log('[DM IPC] Processing user message to agent:', data);
+      const result = await this.agentConversationService.processUserMessage({
+        conversationId: data.conversationId,
+        userMessage: data.message,
+        userId: data.userId,
+      });
+      console.log('[DM IPC] Agent response generated successfully');
+      return result;
     } catch (error) {
       console.error('[DM IPC] Error processing user message:', error);
       throw new Error(`Failed to process message: ${(error as Error).message}`);
@@ -114,23 +121,23 @@ export class DirectMessageIpcHandlers {
   private async handleRegenerateResponse(
     event: IpcMainInvokeEvent,
     data: { conversationId: string }
-  ): Promise<MessageDto | null> {
+  ): Promise<MessageDto> {
     try {
-      return await this.aiMessageService.regenerateLastResponse(data.conversationId);
+      return await this.agentConversationService.regenerateLastResponse(data.conversationId);
     } catch (error) {
       console.error('Error regenerating response:', error);
       throw new Error(`Failed to regenerate response: ${(error as Error).message}`);
     }
   }
 
-  private async handleValidatePersona(
+  private async handleValidateConversation(
     event: IpcMainInvokeEvent,
-    data: { personaId: string }
+    data: { conversationId: string }
   ): Promise<boolean> {
     try {
-      return await this.aiMessageService.validatePersonaForMessaging(data.personaId);
+      return await this.agentConversationService.validateAgentForConversation(data.conversationId);
     } catch (error) {
-      console.error('Error validating persona:', error);
+      console.error('Error validating conversation:', error);
       return false;
     }
   }

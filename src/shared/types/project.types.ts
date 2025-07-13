@@ -16,6 +16,7 @@ export interface CreateProjectDto {
   description?: string;
   gitUrl?: string;
   avatar?: string;
+  status?: "active" | "inactive" | "archived";
 }
 
 export interface UpdateProjectDto {
@@ -24,6 +25,8 @@ export interface UpdateProjectDto {
   description?: string;
   gitUrl?: string;
   avatar?: string;
+  status?: "active" | "inactive" | "archived";
+  updatedAt?: Date;
 }
 
 export interface ProjectFilterDto {

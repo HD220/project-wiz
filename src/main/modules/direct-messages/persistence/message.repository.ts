@@ -1,6 +1,6 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { messages, MessageSchema, CreateMessageSchema } from "./schema";
+import { messagesSchema, MessageSchema, CreateMessageSchema } from "../../messaging/persistence/schema";
 import type {
   MessageDto,
   CreateMessageDto,
@@ -14,11 +14,14 @@ export class MessageRepository {
       senderId: data.senderId,
       senderName: data.senderName,
       senderType: data.senderType,
-      conversationId: data.conversationId,
+      contextType: data.contextType || "direct",
+      contextId: data.contextId || data.conversationId!, // Use contextId or fallback to conversationId for compatibility
+      type: data.type || "text",
+      metadata: data.metadata ? JSON.stringify(data.metadata) : undefined,
     };
 
     const [message] = await db
-      .insert(messages)
+      .insert(messagesSchema)
       .values(messageData)
       .returning();
 
@@ -28,8 +31,8 @@ export class MessageRepository {
   async findById(id: string): Promise<MessageDto | null> {
     const message = await db
       .select()
-      .from(messages)
-      .where(eq(messages.id, id))
+      .from(messagesSchema)
+      .where(eq(messagesSchema.id, id))
       .limit(1);
 
     return message.length > 0 ? this.mapToDto(message[0]) : null;
@@ -42,13 +45,22 @@ export class MessageRepository {
   ): Promise<MessageDto[]> {
     const results = await db
       .select()
-      .from(messages)
-      .where(eq(messages.conversationId, conversationId))
-      .orderBy(desc(messages.createdAt))
+      .from(messagesSchema)
+      .where(
+        and(
+          eq(messagesSchema.contextType, "direct"),
+          eq(messagesSchema.contextId, conversationId)
+        )
+      )
+      .orderBy(desc(messagesSchema.createdAt))
       .limit(limit)
       .offset(offset);
 
     return results.map(this.mapToDto);
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.delete(messagesSchema).where(eq(messagesSchema.id, id));
   }
 
   private mapToDto(message: MessageSchema): MessageDto {
@@ -58,8 +70,16 @@ export class MessageRepository {
       senderId: message.senderId,
       senderName: message.senderName,
       senderType: message.senderType,
-      conversationId: message.conversationId,
-      timestamp: message.createdAt,
+      contextType: message.contextType,
+      contextId: message.contextId,
+      type: message.type,
+      metadata: message.metadata ? JSON.parse(message.metadata) : undefined,
+      isEdited: message.isEdited,
+      createdAt: new Date(message.createdAt),
+      updatedAt: new Date(message.updatedAt),
+      // Legacy compatibility
+      conversationId: message.contextType === "direct" ? message.contextId : undefined,
+      timestamp: new Date(message.createdAt),
     };
   }
 }

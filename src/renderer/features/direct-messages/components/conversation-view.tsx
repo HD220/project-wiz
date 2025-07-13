@@ -7,10 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Paperclip, Smile, AtSign } from "lucide-react";
 import { PageTitle } from "@/components/page-title";
 import { MessageItem } from "@/components/chat/message-item";
-import { usePersonaChat } from "../hooks/use-persona-chat.hook";
-import { usePersonas } from "../../persona-management/hooks/use-personas.hook";
-import type { ConversationDto } from "../../../../shared/types/message.types";
-import type { ChannelMessageDto } from "../../../../shared/types/channel-message.types";
+import { useAgentChat } from "../hooks/use-agent-chat.hook";
+import type { ConversationDto, MessageDto } from "../../../../shared/types/message.types";
 
 interface ConversationViewProps {
   conversationId: string;
@@ -23,19 +21,18 @@ export function ConversationView({ conversationId, conversation }: ConversationV
   const isInitialLoad = useRef(true);
   const previousMessagesLength = useRef(0);
 
-  // Use persona chat hook which handles LLM provider selection based on persona
+  // Use agent chat hook which handles LLM provider selection based on agent
   const {
     messages,
     isSending,
-    isRegenerating,
     isTyping,
     error,
     sendMessage,
     regenerateLastMessage,
     clearError,
-    persona,
-    fullPersona,
-  } = usePersonaChat({
+    agent,
+    fullAgent,
+  } = useAgentChat({
     conversationId,
     conversation,
   });
@@ -96,15 +93,15 @@ export function ConversationView({ conversationId, conversation }: ConversationV
   };
 
 
-  // Convert ChannelMessageDto to format expected by MessageItem
-  const convertToMessageFormat = (msg: ChannelMessageDto) => ({
+  // Convert MessageDto to format expected by MessageItem
+  const convertToMessageFormat = (msg: MessageDto) => ({
     id: msg.id,
     content: msg.content,
-    senderId: msg.authorId,
-    senderName: msg.authorId === "user" ? "João Silva" : persona.name,
-    senderType: msg.authorId === "user" ? "user" as const : "agent" as const,
+    senderId: msg.senderId,
+    senderName: msg.senderId === "user" ? "João Silva" : agent.name,
+    senderType: msg.senderType,
     messageType: "text" as const,
-    timestamp: new Date(msg.createdAt),
+    timestamp: new Date(msg.timestamp || msg.createdAt),
     isEdited: false,
     mentions: [],
   });
@@ -112,14 +109,14 @@ export function ConversationView({ conversationId, conversation }: ConversationV
   const titleIcon = (
     <Avatar className="w-5 h-5">
       <AvatarFallback className="text-xs">
-        {persona.name.slice(0, 2).toUpperCase()}
+        {agent.name.slice(0, 2).toUpperCase()}
       </AvatarFallback>
     </Avatar>
   );
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <PageTitle title={persona.name} icon={titleIcon} />
+      <PageTitle title={agent.name} icon={titleIcon} />
 
       {/* Messages Area */}
       <div className="flex-1 overflow-hidden">
@@ -135,7 +132,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
               </div>
             )}
             
-            {/* Warning for missing persona or LLM provider */}
+            {/* Warning for missing agent or LLM provider */}
             {!fullPersona && (
               <div className="flex items-center justify-center bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
                 ⚠️ Persona não encontrada para esta conversa.
@@ -148,7 +145,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                   <AtSign className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">
-                  Este é o início da sua conversa com {persona.name}
+                  Este é o início da sua conversa com {agent.name}
                 </h3>
                 <p className="text-muted-foreground">
                   Comece uma conversa enviando uma mensagem abaixo.
@@ -170,7 +167,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                   <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10">
                       <AvatarFallback className="bg-purple-500">
-                        {persona.name.slice(0, 2).toUpperCase()}
+                        {agent.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-lg px-3 py-2">
@@ -179,7 +176,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
-                      <span className="text-sm">{persona.name} está digitando...</span>
+                      <span className="text-sm">{agent.name} está digitando...</span>
                     </div>
                   </div>
                 )}
@@ -199,7 +196,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
               placeholder={
                 !fullPersona 
                   ? "Persona não encontrada..."
-                  : `Mensagem para ${persona.name}`
+                  : `Mensagem para ${agent.name}`
               }
               className="min-h-[44px] max-h-32 resize-none pr-12 py-3"
               value={messageInput}

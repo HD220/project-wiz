@@ -13,8 +13,11 @@ export class MessageService {
   async createMessage(data: CreateMessageDto): Promise<MessageDto> {
     const message = await this.messageRepository.create(data);
     
-    // Update conversation's last message time
-    await this.conversationService.updateLastMessageTime(data.conversationId);
+    // Update conversation's last message time if this is a direct message
+    const conversationId = data.contextId || data.conversationId;
+    if (conversationId && (data.contextType === "direct" || data.conversationId)) {
+      await this.conversationService.updateLastMessageTime(conversationId);
+    }
     
     return message;
   }
@@ -33,5 +36,14 @@ export class MessageService {
       limit,
       offset
     );
+  }
+
+  async deleteMessage(id: string): Promise<void> {
+    const message = await this.messageRepository.findById(id);
+    if (!message) {
+      throw new Error("Mensagem não encontrada");
+    }
+
+    await this.messageRepository.delete(id);
   }
 }

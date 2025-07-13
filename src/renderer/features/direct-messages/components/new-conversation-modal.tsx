@@ -21,7 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MessageSquare, User, Target, BookOpen } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useConversations } from "../hooks/use-conversations.hook";
-import { usePersonas } from "../../persona-management/hooks/use-personas.hook";
+import { useAgents } from "../../agent-management/hooks/use-agents.hook";
 
 interface NewConversationModalProps {
   open: boolean;
@@ -32,30 +32,30 @@ export function NewConversationModal({
   open,
   onOpenChange,
 }: NewConversationModalProps) {
-  const [selectedPersonaId, setSelectedPersonaId] = useState("");
+  const [selectedAgentId, setSelectedAgentId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   
   const { findOrCreateDirectMessage } = useConversations();
-  const { activePersonas, isLoading: isLoadingActivePersonas } = usePersonas();
+  const { activeAgents, isLoading: isLoadingAgents } = useAgents();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPersonaId.trim()) return;
+    if (!selectedAgentId.trim()) return;
 
     setIsSubmitting(true);
     try {
-      // Create conversation with selected persona
-      const selectedPersona = activePersonas?.find(p => p.id === selectedPersonaId);
-      if (!selectedPersona) {
-        console.error("Selected persona not found");
+      // Create conversation with selected agent
+      const selectedAgent = activeAgents?.find(a => a.id === selectedAgentId);
+      if (!selectedAgent) {
+        console.error("Selected agent not found");
         return;
       }
       
-      const conversation = await findOrCreateDirectMessage(['user', selectedPersona.nome]);
+      const conversation = await findOrCreateDirectMessage(['user', selectedAgent.name]);
       
       if (conversation) {
-        setSelectedPersonaId("");
+        setSelectedAgentId("");
         onOpenChange(false);
         // Navigate to the conversation automatically
         navigate({ 
@@ -72,12 +72,12 @@ export function NewConversationModal({
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setSelectedPersonaId("");
+      setSelectedAgentId("");
       onOpenChange(false);
     }
   };
 
-  const selectedPersona = activePersonas?.find(persona => persona.id === selectedPersonaId);
+  const selectedAgent = activeAgents?.find(agent => agent.id === selectedAgentId);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -88,29 +88,29 @@ export function NewConversationModal({
             Nova Conversa
           </DialogTitle>
           <DialogDescription>
-            Selecione uma persona para iniciar uma nova conversa direta.
+            Selecione um agente para iniciar uma nova conversa direta.
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Selecionar Persona</Label>
+            <Label>Selecionar Agente</Label>
             <Select 
-              value={selectedPersonaId} 
-              onValueChange={setSelectedPersonaId}
-              disabled={isLoadingActivePersonas}
+              value={selectedAgentId} 
+              onValueChange={setSelectedAgentId}
+              disabled={isLoadingAgents}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Escolha uma persona..." />
+                <SelectValue placeholder="Escolha um agente..." />
               </SelectTrigger>
               <SelectContent>
-                {activePersonas?.map((persona) => (
-                  <SelectItem key={persona.id} value={persona.id}>
+                {activeAgents?.map((agent) => (
+                  <SelectItem key={agent.id} value={agent.id}>
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4" />
                       <div>
-                        <div className="font-medium">{persona.nome}</div>
-                        <div className="text-xs text-muted-foreground">{persona.papel}</div>
+                        <div className="font-medium">{agent.name}</div>
+                        <div className="text-xs text-muted-foreground">{agent.role}</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -119,15 +119,15 @@ export function NewConversationModal({
             </Select>
           </div>
 
-          {selectedPersona && (
+          {selectedAgent && (
             <Card className="border-muted">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  {selectedPersona.nome}
+                  {selectedAgent.name}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  {selectedPersona.papel}
+                  {selectedAgent.role}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
@@ -135,17 +135,17 @@ export function NewConversationModal({
                   <div className="flex items-start gap-2">
                     <Target className="w-3 h-3 mt-1 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">
-                      {selectedPersona.goal.length > 100 
-                        ? `${selectedPersona.goal.substring(0, 100)}...` 
-                        : selectedPersona.goal}
+                      {selectedAgent.goal.length > 100 
+                        ? `${selectedAgent.goal.substring(0, 100)}...` 
+                        : selectedAgent.goal}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <BookOpen className="w-3 h-3 mt-1 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">
-                      {selectedPersona.backstory.length > 100 
-                        ? `${selectedPersona.backstory.substring(0, 100)}...` 
-                        : selectedPersona.backstory}
+                      {selectedAgent.backstory.length > 100 
+                        ? `${selectedAgent.backstory.substring(0, 100)}...` 
+                        : selectedAgent.backstory}
                     </p>
                   </div>
                 </div>
@@ -162,7 +162,7 @@ export function NewConversationModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={!selectedPersonaId.trim() || isSubmitting}>
+            <Button type="submit" disabled={!selectedAgentId.trim() || isSubmitting}>
               {isSubmitting ? "Criando..." : "Iniciar Conversa"}
             </Button>
           </DialogFooter>

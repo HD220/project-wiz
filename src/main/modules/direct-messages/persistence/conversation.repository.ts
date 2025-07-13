@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { conversations, ConversationSchema, CreateConversationSchema } from "./schema";
+import { conversationsSchema, ConversationSchema, CreateConversationSchema } from "../../messaging/persistence/schema";
 import type {
   ConversationDto,
   CreateConversationDto,
@@ -10,11 +10,12 @@ import type {
 export class ConversationRepository {
   async create(data: CreateConversationDto): Promise<ConversationDto> {
     const conversationData: CreateConversationSchema = {
+      type: data.type || "direct",
       participants: JSON.stringify(data.participants),
     };
 
     const [conversation] = await db
-      .insert(conversations)
+      .insert(conversationsSchema)
       .values(conversationData)
       .returning();
 
@@ -24,8 +25,8 @@ export class ConversationRepository {
   async findById(id: string): Promise<ConversationDto | null> {
     const conversation = await db
       .select()
-      .from(conversations)
-      .where(eq(conversations.id, id))
+      .from(conversationsSchema)
+      .where(eq(conversationsSchema.id, id))
       .limit(1);
 
     return conversation.length > 0 ? this.mapToDto(conversation[0]) : null;
@@ -34,7 +35,7 @@ export class ConversationRepository {
   async findAll(filter?: ConversationFilterDto): Promise<ConversationDto[]> {
     const allConversations = await db
       .select()
-      .from(conversations);
+      .from(conversationsSchema);
 
     let filtered = allConversations;
 
@@ -53,7 +54,7 @@ export class ConversationRepository {
     
     const allConversations = await db
       .select()
-      .from(conversations);
+      .from(conversationsSchema);
 
     const conversation = allConversations.find((conv: ConversationSchema) => {
       const convParticipants = JSON.parse(conv.participants);
@@ -65,17 +66,18 @@ export class ConversationRepository {
 
   async updateLastMessageAt(id: string): Promise<void> {
     await db
-      .update(conversations)
-      .set({ lastMessageAt: new Date() })
-      .where(eq(conversations.id, id));
+      .update(conversationsSchema)
+      .set({ lastMessageAt: new Date().toISOString() })
+      .where(eq(conversationsSchema.id, id));
   }
 
   private mapToDto(conversation: ConversationSchema): ConversationDto {
     return {
       id: conversation.id,
+      type: conversation.type,
       participants: JSON.parse(conversation.participants),
-      lastMessageAt: conversation.lastMessageAt || undefined,
-      createdAt: conversation.createdAt,
+      lastMessageAt: conversation.lastMessageAt ? new Date(conversation.lastMessageAt) : undefined,
+      createdAt: new Date(conversation.createdAt),
     };
   }
 }

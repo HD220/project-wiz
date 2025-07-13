@@ -28,7 +28,8 @@ export class ProjectIpcHandlers {
     data: CreateProjectDto,
   ): Promise<ProjectDto> {
     try {
-      const project = await this.projectService.createProject(data);
+      const projectData = { ...data, status: data.status || "active" };
+      const project = await this.projectService.createProject(projectData);
       return this.projectMapper.toDto(project);
     } catch (error) {
       throw new Error(`Failed to create project: ${(error as Error).message}`);
@@ -55,7 +56,8 @@ export class ProjectIpcHandlers {
     event: IpcMainInvokeEvent,
     data: UpdateProjectDto,
   ): Promise<ProjectDto> {
-    const project = await this.projectService.updateProject(data);
+    const projectData = { ...data, updatedAt: new Date() };
+    const project = await this.projectService.updateProject(projectData);
     return this.projectMapper.toDto(project);
   }
 

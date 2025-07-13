@@ -12,56 +12,51 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useProjectPersonas } from "../hooks/use-project-personas.hook";
-import { AddPersonaModal } from "./add-persona-modal";
-import type { PersonaDto } from "../../../../shared/types/persona.types";
+import { useAgents } from "../../agent-management/hooks/use-agents.hook";
+import { AddAgentModal } from "./add-agent-modal";
+import type { AgentDto } from "../../../../shared/types/agent.types";
 
 interface AgentsSidebarProps {
   isOpen: boolean;
-  onPersonaSelect?: (persona: PersonaDto) => void;
+  onAgentSelect?: (agent: AgentDto) => void;
   projectId?: string;
 }
 
 export function AgentsSidebar({
   isOpen,
-  onPersonaSelect,
+  onAgentSelect,
   projectId,
 }: AgentsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Use project personas hook
+  // Use agents hook
   const {
-    projectPersonas,
+    activeAgents,
     isLoading,
     error,
-    removePersonaFromProject,
-    clearError,
-  } = useProjectPersonas(projectId);
+    deleteAgent,
+  } = useAgents();
 
-  // Filter personas based on search query
-  const filteredPersonas = projectPersonas.filter(
-    (persona) =>
-      persona.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.papel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.goal.toLowerCase().includes(searchQuery.toLowerCase()),
+  // Filter agents based on search query
+  const filteredAgents = activeAgents.filter(
+    (agent) =>
+      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.goal.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const activePersonas = filteredPersonas.filter((p) => p.isActive);
-
-  const handleRemovePersona = async (personaId: string) => {
-    if (!projectId) return;
-    
+  const handleRemoveAgent = async (agentId: string) => {
     try {
-      await removePersonaFromProject(personaId);
+      await deleteAgent(agentId);
     } catch (error) {
-      console.error("Failed to remove persona:", error);
+      console.error("Failed to remove agent:", error);
     }
   };
 
-  const handlePersonaAdded = (persona: PersonaDto) => {
+  const handleAgentAdded = (agent: AgentDto) => {
     // Notify parent if needed
-    onPersonaSelect?.(persona);
+    onAgentSelect?.(agent);
   };
 
   // This component is only rendered when open, so we don't need the collapsed state
@@ -72,7 +67,7 @@ export function AgentsSidebar({
       <div className="h-12 px-3 flex items-center justify-between border-b border-border shadow-sm flex-none">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-semibold text-foreground truncate">Personas</h2>
+          <h2 className="font-semibold text-foreground truncate">Agentes</h2>
         </div>
         {projectId && (
           <Button
@@ -91,13 +86,13 @@ export function AgentsSidebar({
         <div className="grid grid-cols-2 gap-1 text-center">
           <div className="min-w-0">
             <div className="text-sm font-bold truncate">
-              {projectPersonas.length}
+              {activeAgents.length}
             </div>
             <div className="text-xs text-muted-foreground truncate">Total</div>
           </div>
           <div className="min-w-0">
             <div className="text-sm font-bold text-green-600 truncate">
-              {activePersonas.length}
+              {filteredAgents.length}
             </div>
             <div className="text-xs text-muted-foreground truncate">Ativas</div>
           </div>
@@ -109,7 +104,7 @@ export function AgentsSidebar({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar personas..."
+            placeholder="Buscar agentes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 bg-background h-8"
@@ -125,7 +120,7 @@ export function AgentsSidebar({
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearError}
+              onClick={() => {/* clearError functionality to be implemented */}}
               className="h-6 w-6 p-0"
             >
               <X className="h-3 w-3" />
@@ -134,7 +129,7 @@ export function AgentsSidebar({
         </div>
       )}
 
-      {/* Persona List */}
+      {/* Agent List */}
       <ScrollArea className="flex-1 overflow-hidden">
         <div className="px-1.5 py-2 space-y-0.5">
           {isLoading ? (
@@ -142,11 +137,11 @@ export function AgentsSidebar({
               <Loader2 className="h-6 w-6 animate-spin" />
               <span className="ml-2 text-sm text-muted-foreground">Carregando...</span>
             </div>
-          ) : filteredPersonas.length === 0 ? (
+          ) : filteredAgents.length === 0 ? (
             <div className="text-center py-8">
               <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                {searchQuery ? "Nenhuma persona encontrada" : "Nenhuma persona no projeto"}
+                {searchQuery ? "Nenhum agente encontrado" : "Nenhum agente disponível"}
               </p>
               {projectId && !searchQuery && (
                 <Button
@@ -156,14 +151,14 @@ export function AgentsSidebar({
                   className="mt-2"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Adicionar Persona
+                  Adicionar Agente
                 </Button>
               )}
             </div>
           ) : (
-            filteredPersonas.map((persona) => (
+            filteredAgents.map((agent) => (
               <div
-                key={persona.id}
+                key={agent.id}
                 className="group relative px-1.5 py-1 rounded-md hover:bg-accent/50 transition-colors"
               >
                 <div className="grid grid-cols-[auto_1fr_auto] gap-1.5 items-center w-full">
@@ -171,13 +166,13 @@ export function AgentsSidebar({
                   <div className="relative">
                     <Avatar className="w-5 h-5">
                       <AvatarFallback className="text-xs">
-                        {persona.nome.slice(0, 2).toUpperCase()}
+                        {agent.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div
                       className={cn(
                         "absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border border-card rounded-full",
-                        persona.isActive ? "bg-green-500" : "bg-gray-500",
+                        agent.isActive ? "bg-green-500" : "bg-gray-500",
                       )}
                     />
                   </div>
@@ -185,10 +180,10 @@ export function AgentsSidebar({
                   {/* Texto - largura flexível com truncamento */}
                   <div className="min-w-0 overflow-hidden">
                     <div className="text-xs font-medium truncate leading-3">
-                      {persona.nome}
+                      {agent.name}
                     </div>
                     <div className="text-xs text-muted-foreground truncate leading-3 mt-0.5">
-                      {persona.papel}
+                      {agent.role}
                     </div>
                   </div>
 
@@ -200,7 +195,7 @@ export function AgentsSidebar({
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleRemovePersona(persona.id);
+                          handleRemoveAgent(agent.id);
                         }}
                         className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
@@ -215,15 +210,13 @@ export function AgentsSidebar({
         </div>
       </ScrollArea>
 
-      {/* Add Persona Modal */}
-      {projectId && (
-        <AddPersonaModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          projectId={projectId}
-          onPersonaAdded={handlePersonaAdded}
-        />
-      )}
+      {/* Add Agent Modal */}
+      <AddAgentModal
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        projectId={projectId}
+        onAgentAdded={handleAgentAdded}
+      />
     </div>
   );
 }

@@ -1,14 +1,10 @@
-import type { ChannelTypeEnum } from "../../../../shared/types/channel.types";
-
 export class Channel {
   constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly projectId: string,
-    public readonly type: ChannelTypeEnum,
     public readonly createdBy: string,
     public readonly isPrivate: boolean = false,
-    public readonly isArchived: boolean = false,
     public readonly description?: string,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
@@ -55,11 +51,11 @@ export class Channel {
   }
 
   isEditable(): boolean {
-    return !this.isArchived;
+    return true; // All channels are editable now
   }
 
   canBeDeleted(): boolean {
-    return !this.isArchived && this.type !== 'general';
+    return true; // All channels can be deleted
   }
 
   // Normalizar nome (sempre minúsculo, substituir espaços por hífens)
@@ -79,37 +75,9 @@ export class Channel {
       '', // ID será gerado pelo banco
       'geral',
       projectId,
-      'general',
       createdBy,
-      false,
       false,
       'Canal principal do projeto'
-    );
-  }
-
-  static createTask(name: string, projectId: string, createdBy: string, description?: string): Channel {
-    return new Channel(
-      '', // ID será gerado pelo banco
-      Channel.normalizeName(name),
-      projectId,
-      'task',
-      createdBy,
-      false,
-      false,
-      description
-    );
-  }
-
-  static createAgent(name: string, projectId: string, createdBy: string, description?: string): Channel {
-    return new Channel(
-      '', // ID será gerado pelo banco
-      Channel.normalizeName(name),
-      projectId,
-      'agent',
-      createdBy,
-      false,
-      false,
-      description
     );
   }
 
@@ -118,10 +86,8 @@ export class Channel {
       '', // ID será gerado pelo banco
       Channel.normalizeName(name),
       projectId,
-      'custom',
       createdBy,
       isPrivate,
-      false,
       description
     );
   }
@@ -132,10 +98,8 @@ export class Channel {
       id: this.id,
       name: this.name,
       projectId: this.projectId,
-      type: this.type,
       createdBy: this.createdBy,
       isPrivate: this.isPrivate,
-      isArchived: this.isArchived,
       description: this.description,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

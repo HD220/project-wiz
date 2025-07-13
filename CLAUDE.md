@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Visão Geral do Projeto
 
 ## Propósito e Porquê
@@ -116,9 +120,9 @@ Aqui estão os comandos mais importantes que você usará durante o desenvolvime
 - **Para Iniciar a Aplicação Localmente (Modo Desenvolvimento):**
 
   ```bash
-  npm start
-  # ou
   npm run dev
+  # ou
+  npm start (alias para npm run dev)
   ```
 
   _Isso inicia a aplicação Electron em modo de desenvolvimento, com recarregamento automático de código. Você verá a janela do Project Wiz aparecer._
@@ -193,6 +197,24 @@ Aqui estão os comandos mais importantes que você usará durante o desenvolvime
   ```
   _Inicia uma interface web que permite visualizar e interagir com os dados do seu banco de dados SQLite._
 
+- **Para Formatar o Código:**
+  ```bash
+  npm run format
+  ```
+  _Formata automaticamente o código usando Prettier._
+
+- **Para Verificar Formatação:**
+  ```bash
+  npm run format:check
+  ```
+  _Verifica se o código está formatado corretamente sem fazer alterações._
+
+- **Para Recompilar Dependências Nativas:**
+  ```bash
+  npm run rebuild
+  ```
+  _Recompila dependências nativas como better-sqlite3 quando necessário._
+
 # Principais Dependências
 
 Aqui estão algumas das bibliotecas e frameworks mais importantes que o Project Wiz utiliza, com uma breve explicação do seu propósito:
@@ -210,13 +232,49 @@ Aqui estão algumas das bibliotecas e frameworks mais importantes que o Project 
 - **lucide-react:** Coleção de ícones bonitos e personalizáveis para React.
 - **react-markdown, remark-gfm, rehype-highlight, rehype-sanitize:** Bibliotecas para renderizar conteúdo Markdown na interface do usuário, com suporte a tabelas, listas de tarefas e realce de sintaxe.
 
+# Módulos de Domínio e Arquitetura
+
+O Project Wiz segue uma arquitetura modular baseada em Domain-Driven Design (DDD), onde cada módulo representa um bounded context específico:
+
+## Módulos Principais
+
+- **agent-management:** Gerenciamento de agentes de IA (Personas) - entidades, serviços e persistência para criação e configuração de agentes
+- **channel-messaging:** Sistema de mensagens em canais com suporte a chat de IA, incluindo serviços de chat e tipagem em tempo real
+- **communication:** Gerenciamento de canais de comunicação entre usuários e agentes
+- **direct-messages:** Sistema de mensagens diretas e conversas privadas entre usuários e agentes
+- **llm-provider:** Integração com provedores de Large Language Models (OpenAI, DeepSeek), incluindo serviços de criptografia e geração de texto
+- **project-management:** Gerenciamento de projetos, incluindo entidades, repositórios e serviços
+
+## Padrões Arquiteturais
+
+### Estrutura de Módulo Padrão
+Cada módulo segue a estrutura:
+```
+module-name/
+├── domain/           # Entidades de domínio e regras de negócio
+├── application/      # Serviços de aplicação e casos de uso
+├── persistence/      # Repositórios e esquemas de banco de dados
+├── ipc/             # Handlers para comunicação Inter-Process Communication
+└── *.mapper.ts      # Mapeadores entre camadas (domain <-> persistence <-> dto)
+```
+
+### Comunicação IPC (Inter-Process Communication)
+- O frontend (renderer) se comunica com o backend (main) via IPC handlers
+- Cada módulo possui seus próprios handlers em `ipc/handlers.ts`
+- Tipos compartilhados ficam em `src/shared/types/` (apenas tipos, sem lógica)
+
+### Gerenciamento de Estado no Frontend
+- **Zustand:** Para estado global da aplicação
+- **TanStack Query:** Para cache e sincronização de dados assíncronos
+- **React Hook Form + Zod:** Para validação e gerenciamento de formulários
+
 # Workflows e Processos de Contribuição
 
 ## Como Contribuir
 
 Este guia passo a passo irá ajudá-lo a fazer suas primeiras contribuições ao Project Wiz.
 
-1.  `git pull origin main`: _Sempre comece com o código mais recente da branch principal para evitar conflitos._
+1.  `git pull origin jules-new-archtecture`: _Sempre comece com o código mais recente da branch principal (atualmente jules-new-archtecture) para evitar conflitos._
 2.  `git checkout -b feature/minha-nova-funcionalidade`: _Crie um novo branch para sua tarefa. Use nomes descritivos como `feature/adicionar-autenticacao` ou `fix/corrigir-bug-login`._
 3.  **Implemente sua funcionalidade/correção:** Escreva o código necessário para a sua tarefa.
 4.  **Escreva testes para sua mudança:** Garanta que sua nova funcionalidade ou correção esteja coberta por testes de unidade e/ou integração. Isso ajuda a prevenir regressões e garante a qualidade do código.

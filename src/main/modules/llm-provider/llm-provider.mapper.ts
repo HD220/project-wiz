@@ -10,7 +10,7 @@ export class LlmProviderMapper {
       schema.provider,
       schema.model,
       schema.apiKey,
-      schema.isDefault,
+      schema.isDefault ?? false,
       schema.createdAt,
       schema.updatedAt,
     );
@@ -36,7 +36,7 @@ export class LlmProviderMapper {
       provider: schema.provider,
       model: schema.model,
       apiKey: schema.apiKey,
-      isDefault: schema.isDefault,
+      isDefault: schema.isDefault ?? false,
       createdAt: schema.createdAt,
       updatedAt: schema.updatedAt,
     };

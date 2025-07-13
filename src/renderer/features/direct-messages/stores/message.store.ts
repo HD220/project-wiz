@@ -44,7 +44,7 @@ class MessageStore {
       
       // Sort messages by timestamp (oldest first) to ensure correct order
       const sortedMessages = messages.sort((a, b) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        new Date(a.timestamp || a.createdAt).getTime() - new Date(b.timestamp || b.createdAt).getTime()
       );
       
       this.setState({ messages: sortedMessages, isLoading: false });
@@ -59,7 +59,7 @@ class MessageStore {
   async createMessage(dto: CreateMessageDto): Promise<void> {
     try {
       await window.electronIPC.invoke("dm:message:create", dto);
-      await this.loadMessages(dto.conversationId);
+      await this.loadMessages(dto.conversationId || dto.contextId || "");
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }

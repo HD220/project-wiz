@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "fb154a2c-04d2-4000-a1a2-f4871a09ffd9",
-  "prevId": "bb675290-1328-4a5a-99e4-257eab1b38a1",
+  "id": "a7bd8b71-b7b7-4e2f-964f-7f1df1cf41ff",
+  "prevId": "fb154a2c-04d2-4000-a1a2-f4871a09ffd9",
   "tables": {
     "agents": {
       "name": "agents",
@@ -72,6 +72,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": true
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -429,7 +437,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": 0
+          "default": false
         },
         "created_at": {
           "name": "created_at",

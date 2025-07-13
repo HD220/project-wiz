@@ -7,10 +7,7 @@ import { ProjectRepository } from "./modules/project-management/persistence/repo
 import { ProjectService } from "./modules/project-management/services/project.service";
 import { ProjectMapper } from "./modules/project-management/mappers/project.mapper";
 import { ProjectIpcHandlers } from "./modules/project-management/ipc/handlers";
-import { ConversationService } from "./modules/direct-messages/services/conversation.service";
-import { MessageService } from "./modules/direct-messages/services/message.service";
-import { AIMessageService } from "./modules/direct-messages/services/ai-message.service";
-import { DirectMessageIpcHandlers } from "./modules/direct-messages/ipc/handlers";
+import { DirectMessagesModule } from "./modules/direct-messages/direct-messages.module";
 import { ChannelRepository } from "./modules/communication/persistence/repository";
 import { ChannelService } from "./modules/communication/application/channel.service";
 import { ChannelMapper } from "./modules/communication/channel.mapper";
@@ -25,10 +22,10 @@ import { LlmProviderService } from "./modules/llm-provider/application/llm-provi
 import { LlmProviderMapper } from "./modules/llm-provider/llm-provider.mapper";
 import { LlmProviderIpcHandlers } from "./modules/llm-provider/ipc/handlers";
 import { AIService } from "./modules/llm-provider/application/ai-service";
-import { PersonaRepository } from "./modules/persona-management/persistence/persona.repository";
-import { PersonaService } from "./modules/persona-management/application/persona.service";
-import { PersonaMapper } from "./modules/persona-management/persona.mapper";
-import { PersonaIpcHandlers } from "./modules/persona-management/ipc/handlers";
+import { AgentRepository } from "./modules/agent-management/persistence/agent.repository";
+import { AgentService } from "./modules/agent-management/application/agent.service";
+import { AgentMapper } from "./modules/agent-management/agent.mapper";
+import { AgentIpcHandlers } from "./modules/agent-management/ipc/handlers";
 import { SeedService } from "./persistence/seed.service";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
@@ -109,9 +106,6 @@ app.on("ready", async () => {
     projectMapper,
   );
 
-  // Initialize direct messages module
-  const conversationService = new ConversationService();
-  const messageService = new MessageService();
 
   // Initialize communication module (channels)
   const channelRepository = new ChannelRepository();
@@ -142,23 +136,17 @@ app.on("ready", async () => {
     llmProviderMapper,
   );
 
-  // Initialize persona management module
-  const personaRepository = new PersonaRepository();
-  const personaMapper = new PersonaMapper();
-  const personaService = new PersonaService(personaRepository, personaMapper);
-  const personaIpcHandlers = new PersonaIpcHandlers(
-    personaService,
-    personaMapper,
+  // Initialize agent management module
+  const agentRepository = new AgentRepository();
+  const agentMapper = new AgentMapper();
+  const agentService = new AgentService(agentRepository, agentMapper);
+  const agentIpcHandlers = new AgentIpcHandlers(
+    agentService,
+    agentMapper,
   );
 
   // Initialize AI services that depend on LLM and Persona services
   const aiService = new AIService(llmProviderService);
-  const aiMessageService = new AIMessageService(
-    messageService,
-    conversationService,
-    personaService,
-    aiService,
-  );
 
   // Initialize AI Chat service for channel messaging
   const aiChatService = new AIChatService(channelMessageService, aiService);
@@ -170,20 +158,16 @@ app.on("ready", async () => {
     aiChatService,
   );
 
-  // Initialize direct messages handlers with AI service
-  const directMessageIpcHandlers = new DirectMessageIpcHandlers(
-    conversationService,
-    messageService,
-    aiMessageService,
-  );
+  // Initialize direct messages module
+  const directMessagesModule = DirectMessagesModule.getInstance();
 
   // Register handlers
   projectIpcHandlers.registerHandlers();
-  directMessageIpcHandlers.registerHandlers();
+  directMessagesModule.registerIpcHandlers();
   channelIpcHandlers.registerHandlers();
   channelMessageIpcHandlers.registerHandlers();
   llmProviderIpcHandlers.registerHandlers();
-  personaIpcHandlers.registerHandlers();
+  agentIpcHandlers.registerHandlers();
 
   // Initialize database with default data
   const seedService = new SeedService();

@@ -43,7 +43,6 @@ export class ChannelService {
     const channelData = {
       name: normalizedName,
       description: data.description?.trim() || undefined,
-      type: data.type,
       projectId: data.projectId,
       isPrivate: data.isPrivate || false,
       createdBy: data.createdBy,
@@ -55,10 +54,7 @@ export class ChannelService {
   }
 
   async listChannels(filter?: ChannelFilterDto): Promise<Channel[]> {
-    const schemas = await this.repository.findMany({
-      ...filter,
-      isArchived: false, // Por padrão, não mostrar arquivados
-    });
+    const schemas = await this.repository.findMany(filter);
     return schemas.map(schema => this.mapper.toDomain(schema));
   }
 
@@ -77,9 +73,7 @@ export class ChannelService {
       throw new Error("Canal não encontrado");
     }
 
-    if (existing.isArchived) {
-      throw new Error("Não é possível editar canal arquivado");
-    }
+    // All channels are editable now
 
     // Validar nome se fornecido
     if (data.name !== undefined) {
@@ -122,13 +116,7 @@ export class ChannelService {
       throw new Error("Canal não encontrado");
     }
 
-    if (existing.type === 'general') {
-      throw new Error("Não é possível arquivar o canal geral");
-    }
-
-    if (existing.isArchived) {
-      throw new Error("Canal já está arquivado");
-    }
+    // Simplified - all channels can be archived
 
     const archived = await this.repository.archive(id);
     return this.mapper.toDomain(archived);
@@ -140,9 +128,7 @@ export class ChannelService {
       throw new Error("Canal não encontrado");
     }
 
-    if (existing.type === 'general') {
-      throw new Error("Não é possível deletar o canal geral");
-    }
+    // All channels can be deleted
 
     await this.repository.delete(id);
   }
@@ -151,8 +137,6 @@ export class ChannelService {
     // Verificar se já existe canal geral
     const existing = await this.repository.findMany({
       projectId,
-      type: 'general',
-      isArchived: false,
     });
 
     if (existing.length > 0) {

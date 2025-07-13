@@ -16,14 +16,8 @@ export const channels = sqliteTable("channels", {
   // Campos opcionais
   description: text("description"),
   
-  // Enums como texto
-  type: text("type", {
-    enum: ["general", "task", "agent", "custom"],
-  }).notNull().default("general"),
-  
   // Booleanos como integer
   isPrivate: integer("is_private", { mode: "boolean" }).notNull().default(false),
-  isArchived: integer("is_archived", { mode: "boolean" }).notNull().default(false),
   
   // Timestamps automáticos
   createdAt: integer("created_at", { mode: "timestamp" })
