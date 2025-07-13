@@ -1,6 +1,7 @@
 import { eq, and, desc, like } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { agentSchema, type AgentSchema, type CreateAgentSchema } from "./schema";
+import { agents as agentSchema, type AgentSchema, type CreateAgentSchema } from "../../../persistence/schemas";
+import { IAgentRepository } from "../../../interfaces/repositories";
 
 export interface AgentFilterDto {
   name?: string;
@@ -9,7 +10,7 @@ export interface AgentFilterDto {
   isActive?: boolean;
 }
 
-export class AgentRepository {
+export class AgentRepository implements IAgentRepository {
   async save(data: CreateAgentSchema): Promise<AgentSchema> {
     const [saved] = await db
       .insert(agentSchema)

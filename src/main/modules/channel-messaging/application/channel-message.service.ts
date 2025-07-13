@@ -1,4 +1,4 @@
-import { ChannelMessageRepository } from "../persistence/repository";
+import { ChannelMessageRepository } from "../persistence/channel-message.repository";
 import { ChannelMessage } from "../domain/channel-message.entity";
 import { ChannelMessageMapper } from "../channel-message.mapper";
 import type { 

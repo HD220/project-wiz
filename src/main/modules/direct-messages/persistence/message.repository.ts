@@ -1,6 +1,6 @@
 import { eq, desc, and } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { messagesSchema, MessageSchema, CreateMessageSchema } from "../../messaging/persistence/schema";
+import { messages, MessageSchema, CreateMessageSchema } from "../../../persistence/schemas";
 import type {
   MessageDto,
   CreateMessageDto,
@@ -21,7 +21,7 @@ export class MessageRepository {
     };
 
     const [message] = await db
-      .insert(messagesSchema)
+      .insert(messages)
       .values(messageData)
       .returning();
 
@@ -31,8 +31,8 @@ export class MessageRepository {
   async findById(id: string): Promise<MessageDto | null> {
     const message = await db
       .select()
-      .from(messagesSchema)
-      .where(eq(messagesSchema.id, id))
+      .from(messages)
+      .where(eq(messages.id, id))
       .limit(1);
 
     return message.length > 0 ? this.mapToDto(message[0]) : null;
@@ -45,14 +45,14 @@ export class MessageRepository {
   ): Promise<MessageDto[]> {
     const results = await db
       .select()
-      .from(messagesSchema)
+      .from(messages)
       .where(
         and(
-          eq(messagesSchema.contextType, "direct"),
-          eq(messagesSchema.contextId, conversationId)
+          eq(messages.contextType, "direct"),
+          eq(messages.contextId, conversationId)
         )
       )
-      .orderBy(desc(messagesSchema.createdAt))
+      .orderBy(desc(messages.createdAt))
       .limit(limit)
       .offset(offset);
 
@@ -60,7 +60,7 @@ export class MessageRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await db.delete(messagesSchema).where(eq(messagesSchema.id, id));
+    await db.delete(messages).where(eq(messages.id, id));
   }
 
   private mapToDto(message: MessageSchema): MessageDto {

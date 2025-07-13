@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { conversationsSchema, ConversationSchema, CreateConversationSchema } from "../../messaging/persistence/schema";
+import { conversations, ConversationSchema, CreateConversationSchema } from "../../../persistence/schemas";
 import type {
   ConversationDto,
   CreateConversationDto,
@@ -15,7 +15,7 @@ export class ConversationRepository {
     };
 
     const [conversation] = await db
-      .insert(conversationsSchema)
+      .insert(conversations)
       .values(conversationData)
       .returning();
 
@@ -25,8 +25,8 @@ export class ConversationRepository {
   async findById(id: string): Promise<ConversationDto | null> {
     const conversation = await db
       .select()
-      .from(conversationsSchema)
-      .where(eq(conversationsSchema.id, id))
+      .from(conversations)
+      .where(eq(conversations.id, id))
       .limit(1);
 
     return conversation.length > 0 ? this.mapToDto(conversation[0]) : null;
@@ -35,7 +35,7 @@ export class ConversationRepository {
   async findAll(filter?: ConversationFilterDto): Promise<ConversationDto[]> {
     const allConversations = await db
       .select()
-      .from(conversationsSchema);
+      .from(conversations);
 
     let filtered = allConversations;
 
@@ -54,7 +54,7 @@ export class ConversationRepository {
     
     const allConversations = await db
       .select()
-      .from(conversationsSchema);
+      .from(conversations);
 
     const conversation = allConversations.find((conv: ConversationSchema) => {
       const convParticipants = JSON.parse(conv.participants);
@@ -66,9 +66,9 @@ export class ConversationRepository {
 
   async updateLastMessageAt(id: string): Promise<void> {
     await db
-      .update(conversationsSchema)
+      .update(conversations)
       .set({ lastMessageAt: new Date().toISOString() })
-      .where(eq(conversationsSchema.id, id));
+      .where(eq(conversations.id, id));
   }
 
   private mapToDto(conversation: ConversationSchema): ConversationDto {

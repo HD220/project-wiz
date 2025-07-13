@@ -1,29 +1,38 @@
-import { AgentRepository } from "../persistence/agent.repository";
 import { Agent } from "../domain/agent.entity";
 import { AgentMapper } from "../agent.mapper";
-import { LlmProviderService } from "../../llm-provider/application/llm-provider.service";
+import { EventBus } from "../../../kernel/event-bus";
+import { AgentCreatedEvent, AgentUpdatedEvent, AgentDeletedEvent } from "../../../kernel/events";
+import { IAgentRepository, ILlmProviderService, IAgentService } from "../../../interfaces";
+import { NotFoundError, ValidationError, DomainError } from "../../../errors";
 import type { CreateAgentDto, UpdateAgentDto, AgentFilterDto } from "../../../../shared/types/agent.types";
 
 export { CreateAgentDto, UpdateAgentDto, AgentFilterDto };
 
-export class AgentService {
+export class AgentService implements IAgentService {
+  private eventBus: EventBus;
+
   constructor(
-    private repository: AgentRepository,
+    private repository: IAgentRepository,
     private mapper: AgentMapper,
-    private llmProviderService: LlmProviderService,
-  ) {}
+    private llmProviderService: ILlmProviderService,
+  ) {
+    this.eventBus = EventBus.getInstance();
+  }
 
   async createAgent(data: CreateAgentDto): Promise<Agent> {
     // Validate LLM provider exists
     const llmProvider = await this.llmProviderService.getLlmProviderById(data.llmProviderId);
     if (!llmProvider) {
-      throw new Error("LLM Provider não encontrado");
+      throw NotFoundError.entityNotFound('LLM Provider', data.llmProviderId);
     }
 
     // Check if agent already exists with this name
     const existingAgent = await this.repository.findByName(data.name);
     if (existingAgent) {
-      throw new Error("Já existe um agente com este nome");
+      throw DomainError.invalidBusinessRule(
+        'Agent name must be unique', 
+        { name: data.name, existingAgentId: existingAgent.id }
+      );
     }
 
     // Create agent with default values
@@ -41,13 +50,23 @@ export class AgentService {
     // Validate agent data
     const validation = Agent.validate(agentData);
     if (!validation.isValid) {
-      throw new Error(validation.error);
+      throw ValidationError.singleField('agent', validation.error);
     }
 
     // Save agent
     const saved = await this.repository.save(agentData);
-
-    return this.mapper.toDomain(saved);
+    const agent = this.mapper.toDomain(saved);
+    
+    // Publish agent created event
+    await this.eventBus.publish(new AgentCreatedEvent(saved.id, {
+      name: saved.name,
+      role: saved.role,
+      goal: saved.goal,
+      backstory: saved.backstory,
+      llmProviderId: saved.llmProviderId,
+    }));
+    
+    return agent;
   }
 
   async getAgentById(id: string): Promise<Agent | null> {

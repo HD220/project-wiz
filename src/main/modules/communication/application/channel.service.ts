@@ -1,4 +1,4 @@
-import { ChannelRepository } from "../persistence/repository";
+import { ChannelRepository } from "../persistence/channel.repository";
 import { Channel } from "../domain/channel.entity";
 import { ChannelMapper } from "../channel.mapper";
 import type { 

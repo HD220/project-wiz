@@ -1,80 +1,102 @@
-// Direct Messages Module - Dependency Injection Setup
-import { ConversationService } from "./services/conversation.service";
-import { MessageService } from "./services/message.service";
-import { AgentConversationService } from "./services/agent-conversation.service";
+import { BaseModule } from '../../kernel/base-module';
+import { DependencyContainer } from '../../kernel/dependency-container';
+import { ConversationService } from "./application/conversation.service";
+import { MessageService } from "./application/message.service";
+import { AgentConversationService } from "./application/agent-conversation.service";
 import { DirectMessageIpcHandlers } from "./ipc/handlers";
-
-// Agent Management dependencies
-import { AgentService } from "../agent-management/application/agent.service";
-import { AgentRepository } from "../agent-management/persistence/agent.repository";
-import { AgentMapper } from "../agent-management/agent.mapper";
-
-
-// LLM Provider dependencies
-import { LlmProviderService } from "../llm-provider/application/llm-provider.service";
-import { LlmProviderRepository } from "../llm-provider/persistence/llm-provider.repository";
-import { LlmProviderMapper } from "../llm-provider/llm-provider.mapper";
-import { EncryptionService } from "../llm-provider/application/encryption.service";
 import { TextGenerationService } from "../llm-provider/application/text-generation.service";
+import { AgentManagementModule } from '../agent-management/agent-management.module';
+import { LlmProviderModule } from '../llm-provider/llm-provider.module';
+import { 
+  AgentCreatedEvent,
+  MessageSentEvent,
+  ConversationStartedEvent,
+  EVENT_TYPES 
+} from '../../kernel/events';
 
-export class DirectMessagesModule {
-  private static instance: DirectMessagesModule;
+export class DirectMessagesModule extends BaseModule {
+  private conversationService!: ConversationService;
+  private messageService!: MessageService;
+  private agentConversationService!: AgentConversationService;
+  private textGenerationService!: TextGenerationService;
   private handlers!: DirectMessageIpcHandlers;
 
-  private constructor() {
-    this.initializeServices();
+  getName(): string {
+    return 'direct-messages';
   }
 
-  static getInstance(): DirectMessagesModule {
-    if (!DirectMessagesModule.instance) {
-      DirectMessagesModule.instance = new DirectMessagesModule();
-    }
-    return DirectMessagesModule.instance;
+  getDependencies(): string[] {
+    return ['agent-management', 'llm-provider'];
   }
 
-  private initializeServices(): void {
-    // Initialize repositories and mappers
-    const agentRepository = new AgentRepository();
-    const agentMapper = new AgentMapper();
-    const llmProviderRepository = new LlmProviderRepository();
-    const llmProviderMapper = new LlmProviderMapper();
-    const encryptionService = new EncryptionService();
+  protected async onInitialize(): Promise<void> {
+    // Get dependencies from container
+    const container = DependencyContainer.getInstance();
+    const agentModule = container.get<AgentManagementModule>('agent-management');
+    const llmProviderModule = container.get<LlmProviderModule>('llm-provider');
 
-    // Initialize core services
-    const llmProviderService = new LlmProviderService(
-      llmProviderRepository,
-      llmProviderMapper
-    );
-    const agentService = new AgentService(
-      agentRepository,
-      agentMapper
-    );
-    const textGenerationService = new TextGenerationService(llmProviderService);
+    // Get services from other modules
+    const agentService = agentModule.getAgentService();
+    const llmProviderService = llmProviderModule.getLlmProviderService();
+
+    // Initialize text generation service
+    this.textGenerationService = new TextGenerationService(llmProviderService);
 
     // Initialize direct messages services
-    const conversationService = new ConversationService();
-    const messageService = new MessageService();
-    const agentConversationService = new AgentConversationService(
-      messageService,
-      conversationService,
+    this.conversationService = new ConversationService();
+    this.messageService = new MessageService();
+    this.agentConversationService = new AgentConversationService(
+      this.messageService,
+      this.conversationService,
       agentService,
-      textGenerationService
+      this.textGenerationService
     );
 
     // Initialize IPC handlers
     this.handlers = new DirectMessageIpcHandlers(
-      conversationService,
-      messageService,
-      agentConversationService
+      this.conversationService,
+      this.messageService,
+      this.agentConversationService
     );
   }
 
-  registerIpcHandlers(): void {
+  protected subscribeToEvents(): void {
+    // Listen to agent creation events to prepare conversation capabilities
+    this.subscribeToEvent(EVENT_TYPES.AGENT_CREATED, async (event: AgentCreatedEvent) => {
+      console.log(`New agent created: ${event.agent.name} (${event.entityId}), ready for conversations`);
+      // Could pre-create conversation objects or setup agent context
+    });
+
+    // Listen to message events for analytics or logging
+    this.subscribeToEvent(EVENT_TYPES.MESSAGE_SENT, async (event: MessageSentEvent) => {
+      console.log(`Message sent in conversation: ${event.message.conversationId}`);
+      // Could trigger analytics, notifications, or other side effects
+    });
+  }
+
+  protected onRegisterIpcHandlers(): void {
     this.handlers.registerHandlers();
   }
 
-  // Getter methods for services (useful for testing or external access)
-  getHandlers(): DirectMessageIpcHandlers {
-    return this.handlers;
+  // Public getters for other modules
+  getConversationService(): ConversationService {
+    if (!this.isInitialized()) {
+      throw new Error('DirectMessagesModule must be initialized first');
+    }
+    return this.conversationService;
+  }
+
+  getMessageService(): MessageService {
+    if (!this.isInitialized()) {
+      throw new Error('DirectMessagesModule must be initialized first');
+    }
+    return this.messageService;
+  }
+
+  getAgentConversationService(): AgentConversationService {
+    if (!this.isInitialized()) {
+      throw new Error('DirectMessagesModule must be initialized first');
+    }
+    return this.agentConversationService;
   }
 }
