@@ -5,7 +5,6 @@ import type {
   UpdateLlmProviderDto,
   LlmProviderFilterDto
 } from "../../../../shared/types/llm-provider.types";
-import { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
 
 export function useLlmProviders(filter?: LlmProviderFilterDto) {
   const state = useSyncExternalStore(
@@ -16,7 +15,10 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
 
   const hasLoadedRef = useRef(false);
   const filterRef = useRef(filter);
-  filterRef.current = filter;
+
+  useEffect(() => {
+    filterRef.current = filter;
+  }, [filter]);
 
   useEffect(() => {
     const loadInitialLlmProviders = async () => {
@@ -38,11 +40,6 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
 
     deleteLlmProvider: (id: string) =>
       llmProviderStore.deleteLlmProvider(id),
-
-    setSelectedLlmProvider: (llmProvider: LlmProviderDto | null) =>
-      llmProviderStore.setSelectedLlmProvider(llmProvider),
-
-    clearError: () => llmProviderStore.clearError(),
   }), []);
 
   const queries = useMemo(() => ({
@@ -54,13 +51,12 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
 
     refetch: () =>
       llmProviderStore.loadLlmProviders(filterRef.current, true),
-  }), []);
+  }), [filter]);
 
   return {
     llmProviders: state.llmProviders,
     isLoading: state.isLoading,
     error: state.error,
-    selectedLlmProvider: state.selectedLlmProvider,
     ...mutations,
     ...queries,
   };

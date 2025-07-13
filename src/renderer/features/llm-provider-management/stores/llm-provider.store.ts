@@ -9,7 +9,6 @@ interface LlmProviderStoreState {
   llmProviders: LlmProviderDto[];
   isLoading: boolean;
   error: string | null;
-  selectedLlmProvider: LlmProviderDto | null;
 }
 
 class LlmProviderStore {
@@ -17,7 +16,6 @@ class LlmProviderStore {
     llmProviders: [],
     isLoading: false,
     error: null,
-    selectedLlmProvider: null,
   };
 
   private listeners = new Set<() => void>();
@@ -41,7 +39,16 @@ class LlmProviderStore {
       return;
     }
 
-    if (!forceReload && this.state.llmProviders.length > 0 && !this.state.isLoading) {
+    if (!forceReload && this.state.llmProviders.length > 0) {
+      try {
+        const llmProviders = (await window.electronIPC.invoke(
+          "llm-provider:list",
+          filter,
+        )) as LlmProviderDto[];
+        this.setState({ llmProviders, error: null });
+      } catch (error) {
+        this.setState({ error: (error as Error).message });
+      }
       return;
     }
 
@@ -82,23 +89,11 @@ class LlmProviderStore {
   async createLlmProvider(data: CreateLlmProviderDto): Promise<void> {
     if (!window.electronIPC) return;
 
-    this.setState({ isLoading: true, error: null });
-
     try {
-      const newLlmProvider = (await window.electronIPC.invoke(
-        "llm-provider:create",
-        data,
-      )) as LlmProviderDto;
-
-      this.setState({
-        llmProviders: [...this.state.llmProviders, newLlmProvider],
-        isLoading: false,
-      });
+      await window.electronIPC.invoke("llm-provider:create", data);
+      await this.loadLlmProviders(undefined, true);
     } catch (error) {
-      this.setState({
-        error: (error as Error).message,
-        isLoading: false,
-      });
+      this.setState({ error: (error as Error).message });
       throw error;
     }
   }
@@ -106,25 +101,11 @@ class LlmProviderStore {
   async updateLlmProvider(data: UpdateLlmProviderDto): Promise<void> {
     if (!window.electronIPC) return;
 
-    this.setState({ isLoading: true, error: null });
-
     try {
-      const updatedLlmProvider = (await window.electronIPC.invoke(
-        "llm-provider:update",
-        data,
-      )) as LlmProviderDto;
-
-      this.setState({
-        llmProviders: this.state.llmProviders.map(p =>
-          p.id === updatedLlmProvider.id ? updatedLlmProvider : p
-        ),
-        isLoading: false,
-      });
+      await window.electronIPC.invoke("llm-provider:update", data);
+      await this.loadLlmProviders(undefined, true);
     } catch (error) {
-      this.setState({
-        error: (error as Error).message,
-        isLoading: false,
-      });
+      this.setState({ error: (error as Error).message });
       throw error;
     }
   }
@@ -132,26 +113,13 @@ class LlmProviderStore {
   async deleteLlmProvider(id: string): Promise<void> {
     if (!window.electronIPC) return;
 
-    this.setState({ isLoading: true, error: null });
-
     try {
       await window.electronIPC.invoke("llm-provider:delete", id);
-
-      this.setState({
-        llmProviders: this.state.llmProviders.filter(p => p.id !== id),
-        isLoading: false,
-      });
+      await this.loadLlmProviders(undefined, true);
     } catch (error) {
-      this.setState({
-        error: (error as Error).message,
-        isLoading: false,
-      });
+      this.setState({ error: (error as Error).message });
       throw error;
     }
-  }
-
-  setSelectedLlmProvider(llmProvider: LlmProviderDto | null) {
-    this.setState({ selectedLlmProvider: llmProvider });
   }
 
   clearError() {
