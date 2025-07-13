@@ -20,6 +20,7 @@ import { Route as userNewConversationRouteImport } from './app/(user)/new-conver
 import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
 import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
 import { Route as userSettingsIndexRouteImport } from './app/(user)/settings/index'
+import { Route as userSettingsNewLlmProviderRouteImport } from './app/(user)/settings/new-llm-provider'
 import { Route as userConversationConversationIdRouteImport } from './app/(user)/conversation/$conversationId'
 import { Route as ProjectProjectIdTasksIndexRouteImport } from './app/project/$projectId/tasks/index'
 import { Route as ProjectProjectIdFilesIndexRouteImport } from './app/project/$projectId/files/index'
@@ -28,6 +29,7 @@ import { Route as ProjectProjectIdChatIndexRouteImport } from './app/project/$pr
 import { Route as ProjectProjectIdAgentsIndexRouteImport } from './app/project/$projectId/agents/index'
 import { Route as ProjectProjectIdChatChannelIdRouteImport } from './app/project/$projectId/chat/$channelId'
 import { Route as ProjectProjectIdAgentAgentIdRouteImport } from './app/project/$projectId/agent/$agentId'
+import { Route as userSettingsEditLlmProviderLlmProviderIdRouteImport } from './app/(user)/settings/edit-llm-provider.$llmProviderId'
 
 const ProjectRouteImport = createFileRoute('/project')()
 
@@ -79,6 +81,12 @@ const userSettingsIndexRoute = userSettingsIndexRouteImport.update({
   path: '/settings/',
   getParentRoute: () => userRouteRoute,
 } as any)
+const userSettingsNewLlmProviderRoute =
+  userSettingsNewLlmProviderRouteImport.update({
+    id: '/settings/new-llm-provider',
+    path: '/settings/new-llm-provider',
+    getParentRoute: () => userRouteRoute,
+  } as any)
 const userConversationConversationIdRoute =
   userConversationConversationIdRouteImport.update({
     id: '/conversation/$conversationId',
@@ -127,6 +135,12 @@ const ProjectProjectIdAgentAgentIdRoute =
     path: '/agent/$agentId',
     getParentRoute: () => ProjectProjectIdRouteRoute,
   } as any)
+const userSettingsEditLlmProviderLlmProviderIdRoute =
+  userSettingsEditLlmProviderLlmProviderIdRouteImport.update({
+    id: '/settings/edit-llm-provider/$llmProviderId',
+    path: '/settings/edit-llm-provider/$llmProviderId',
+    getParentRoute: () => userRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof userIndexRoute
@@ -136,8 +150,10 @@ export interface FileRoutesByFullPath {
   '/new-conversation': typeof userNewConversationRoute
   '/project': typeof ProjectLayoutRoute
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
+  '/settings/new-llm-provider': typeof userSettingsNewLlmProviderRoute
   '/settings': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
+  '/settings/edit-llm-provider/$llmProviderId': typeof userSettingsEditLlmProviderLlmProviderIdRoute
   '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
   '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
@@ -153,8 +169,10 @@ export interface FileRoutesByTo {
   '/project': typeof ProjectLayoutRoute
   '/': typeof userIndexRoute
   '/conversation/$conversationId': typeof userConversationConversationIdRoute
+  '/settings/new-llm-provider': typeof userSettingsNewLlmProviderRoute
   '/settings': typeof userSettingsIndexRoute
   '/project/$projectId': typeof ProjectProjectIdIndexRoute
+  '/settings/edit-llm-provider/$llmProviderId': typeof userSettingsEditLlmProviderLlmProviderIdRoute
   '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
   '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
   '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
@@ -174,8 +192,10 @@ export interface FileRoutesById {
   '/project/_layout': typeof ProjectLayoutRoute
   '/(user)/': typeof userIndexRoute
   '/(user)/conversation/$conversationId': typeof userConversationConversationIdRoute
+  '/(user)/settings/new-llm-provider': typeof userSettingsNewLlmProviderRoute
   '/(user)/settings/': typeof userSettingsIndexRoute
   '/project/$projectId/': typeof ProjectProjectIdIndexRoute
+  '/(user)/settings/edit-llm-provider/$llmProviderId': typeof userSettingsEditLlmProviderLlmProviderIdRoute
   '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
   '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
   '/project/$projectId/agents/': typeof ProjectProjectIdAgentsIndexRoute
@@ -194,8 +214,10 @@ export interface FileRouteTypes {
     | '/new-conversation'
     | '/project'
     | '/conversation/$conversationId'
+    | '/settings/new-llm-provider'
     | '/settings'
     | '/project/$projectId/'
+    | '/settings/edit-llm-provider/$llmProviderId'
     | '/project/$projectId/agent/$agentId'
     | '/project/$projectId/chat/$channelId'
     | '/project/$projectId/agents'
@@ -211,8 +233,10 @@ export interface FileRouteTypes {
     | '/project'
     | '/'
     | '/conversation/$conversationId'
+    | '/settings/new-llm-provider'
     | '/settings'
     | '/project/$projectId'
+    | '/settings/edit-llm-provider/$llmProviderId'
     | '/project/$projectId/agent/$agentId'
     | '/project/$projectId/chat/$channelId'
     | '/project/$projectId/agents'
@@ -231,8 +255,10 @@ export interface FileRouteTypes {
     | '/project/_layout'
     | '/(user)/'
     | '/(user)/conversation/$conversationId'
+    | '/(user)/settings/new-llm-provider'
     | '/(user)/settings/'
     | '/project/$projectId/'
+    | '/(user)/settings/edit-llm-provider/$llmProviderId'
     | '/project/$projectId/agent/$agentId'
     | '/project/$projectId/chat/$channelId'
     | '/project/$projectId/agents/'
@@ -322,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof userSettingsIndexRouteImport
       parentRoute: typeof userRouteRoute
     }
+    '/(user)/settings/new-llm-provider': {
+      id: '/(user)/settings/new-llm-provider'
+      path: '/settings/new-llm-provider'
+      fullPath: '/settings/new-llm-provider'
+      preLoaderRoute: typeof userSettingsNewLlmProviderRouteImport
+      parentRoute: typeof userRouteRoute
+    }
     '/(user)/conversation/$conversationId': {
       id: '/(user)/conversation/$conversationId'
       path: '/conversation/$conversationId'
@@ -378,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectProjectIdAgentAgentIdRouteImport
       parentRoute: typeof ProjectProjectIdRouteRoute
     }
+    '/(user)/settings/edit-llm-provider/$llmProviderId': {
+      id: '/(user)/settings/edit-llm-provider/$llmProviderId'
+      path: '/settings/edit-llm-provider/$llmProviderId'
+      fullPath: '/settings/edit-llm-provider/$llmProviderId'
+      preLoaderRoute: typeof userSettingsEditLlmProviderLlmProviderIdRouteImport
+      parentRoute: typeof userRouteRoute
+    }
   }
 }
 
@@ -385,14 +425,19 @@ interface userRouteRouteChildren {
   userNewConversationRoute: typeof userNewConversationRoute
   userIndexRoute: typeof userIndexRoute
   userConversationConversationIdRoute: typeof userConversationConversationIdRoute
+  userSettingsNewLlmProviderRoute: typeof userSettingsNewLlmProviderRoute
   userSettingsIndexRoute: typeof userSettingsIndexRoute
+  userSettingsEditLlmProviderLlmProviderIdRoute: typeof userSettingsEditLlmProviderLlmProviderIdRoute
 }
 
 const userRouteRouteChildren: userRouteRouteChildren = {
   userNewConversationRoute: userNewConversationRoute,
   userIndexRoute: userIndexRoute,
   userConversationConversationIdRoute: userConversationConversationIdRoute,
+  userSettingsNewLlmProviderRoute: userSettingsNewLlmProviderRoute,
   userSettingsIndexRoute: userSettingsIndexRoute,
+  userSettingsEditLlmProviderLlmProviderIdRoute:
+    userSettingsEditLlmProviderLlmProviderIdRoute,
 }
 
 const userRouteRouteWithChildren = userRouteRoute._addFileChildren(
