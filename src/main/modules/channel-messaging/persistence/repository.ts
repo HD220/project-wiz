@@ -1,40 +1,47 @@
 import { eq, and, desc, asc, like } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { channelMessages, type ChannelMessageSchema, type CreateChannelMessageSchema } from "./schema";
+import { channelMessages } from "./schema";
+import { ChannelMessageData } from "../entities/channel-message.schema";
 import type { ChannelMessageFilterDto } from "../../../../shared/types/channel-message.types";
 
 export class ChannelMessageRepository {
-  
-  // CREATE
-  async save(data: CreateChannelMessageSchema): Promise<ChannelMessageSchema> {
-    const [message] = await db
+  async save(data: ChannelMessageData): Promise<ChannelMessageData> {
+    const [inserted] = await db
       .insert(channelMessages)
       .values({
-        ...data,
-        updatedAt: new Date(),
+        id: data.id,
+        content: data.content,
+        channelId: data.channelId,
+        authorId: data.authorId,
+        authorName: data.authorName,
+        type: data.type,
+        isEdited: data.isEdited,
+        metadata: data.metadata,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
       })
       .returning();
-    return message;
+
+    return {
+      ...inserted,
+      createdAt: new Date(inserted.createdAt),
+      updatedAt: new Date(inserted.updatedAt),
+    };
   }
 
-  // READ (lista com filtros e paginação)
-  async findMany(filter?: ChannelMessageFilterDto): Promise<ChannelMessageSchema[]> {
+  async findMany(filter?: ChannelMessageFilterDto): Promise<ChannelMessageData[]> {
     const conditions = [];
-    
-    // Aplicar filtros se existirem
+
     if (filter) {
       if (filter.channelId) {
         conditions.push(eq(channelMessages.channelId, filter.channelId));
       }
-      
       if (filter.authorId) {
         conditions.push(eq(channelMessages.authorId, filter.authorId));
       }
-      
       if (filter.type) {
-        conditions.push(eq(channelMessages.type, filter.type as any));
+        conditions.push(eq(channelMessages.type, filter.type));
       }
-
       if (filter.searchContent) {
         conditions.push(like(channelMessages.content, `%${filter.searchContent}%`));
       }
@@ -44,9 +51,8 @@ export class ChannelMessageRepository {
       .select()
       .from(channelMessages)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(asc(channelMessages.createdAt)); // Ordem cronológica
+      .orderBy(asc(channelMessages.createdAt));
 
-    // Aplicar paginação
     if (filter?.limit) {
       query = query.limit(filter.limit);
     }
@@ -55,94 +61,52 @@ export class ChannelMessageRepository {
       query = query.offset(filter.offset);
     }
 
-    return await query;
+    const results = await query;
+
+    return results.map((message) => ({
+      ...message,
+      createdAt: new Date(message.createdAt),
+      updatedAt: new Date(message.updatedAt),
+    }));
   }
 
-  // READ (por canal - método helper)
-  async findByChannel(channelId: string, limit = 50, offset = 0): Promise<ChannelMessageSchema[]> {
-    return this.findMany({ channelId, limit, offset });
-  }
-
-  // READ (por ID)
-  async findById(id: string): Promise<ChannelMessageSchema | null> {
-    const [message] = await db
+  async findById(id: string): Promise<ChannelMessageData | null> {
+    const [result] = await db
       .select()
       .from(channelMessages)
       .where(eq(channelMessages.id, id))
       .limit(1);
-    
-    return message || null;
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      ...result,
+      createdAt: new Date(result.createdAt),
+      updatedAt: new Date(result.updatedAt),
+    };
   }
 
-  // READ (contagem total por canal)
-  async countByChannel(channelId: string): Promise<number> {
-    const [result] = await db
-      .select({ count: channelMessages.id })
-      .from(channelMessages)
-      .where(eq(channelMessages.channelId, channelId));
-    
-    return result?.count ? 1 : 0; // better-sqlite3 returns 1 for count, not actual count
-  }
-
-  // READ (mensagens mais recentes por canal)
-  async findLatestByChannel(channelId: string, limit = 50): Promise<ChannelMessageSchema[]> {
-    return await db
-      .select()
-      .from(channelMessages)
-      .where(eq(channelMessages.channelId, channelId))
-      .orderBy(desc(channelMessages.createdAt))
-      .limit(limit);
-  }
-
-  // READ (última mensagem do canal)
-  async findLastMessageByChannel(channelId: string): Promise<ChannelMessageSchema | null> {
-    const [message] = await db
-      .select()
-      .from(channelMessages)
-      .where(eq(channelMessages.channelId, channelId))
-      .orderBy(desc(channelMessages.createdAt))
-      .limit(1);
-    
-    return message || null;
-  }
-
-  // UPDATE
-  async update(id: string, data: Partial<CreateChannelMessageSchema>): Promise<ChannelMessageSchema> {
+  async update(data: ChannelMessageData): Promise<ChannelMessageData> {
     const [updated] = await db
       .update(channelMessages)
       .set({
-        ...data,
-        updatedAt: new Date(),
-        isEdited: true, // Marcar como editada
+        content: data.content,
+        isEdited: data.isEdited,
+        updatedAt: data.updatedAt,
       })
-      .where(eq(channelMessages.id, id))
+      .where(eq(channelMessages.id, data.id))
       .returning();
-    
-    return updated;
+
+    return {
+      ...updated,
+      createdAt: new Date(updated.createdAt),
+      updatedAt: new Date(updated.updatedAt),
+    };
   }
 
-  // DELETE
   async delete(id: string): Promise<void> {
     await db.delete(channelMessages).where(eq(channelMessages.id, id));
-  }
-
-  // DELETE por canal (útil para limpeza)
-  async deleteByChannel(channelId: string): Promise<void> {
-    await db.delete(channelMessages).where(eq(channelMessages.channelId, channelId));
-  }
-
-  // SEARCH (busca de texto nas mensagens)
-  async searchInChannel(channelId: string, searchTerm: string, limit = 20): Promise<ChannelMessageSchema[]> {
-    return await db
-      .select()
-      .from(channelMessages)
-      .where(
-        and(
-          eq(channelMessages.channelId, channelId),
-          like(channelMessages.content, `%${searchTerm}%`)
-        )
-      )
-      .orderBy(desc(channelMessages.createdAt))
-      .limit(limit);
   }
 }

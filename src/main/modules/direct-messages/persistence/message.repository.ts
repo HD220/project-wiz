@@ -1,45 +1,57 @@
 import { eq, desc } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { messages, MessageSchema, CreateMessageSchema } from "./schema";
-import type {
-  MessageDto,
-  CreateMessageDto,
-  MessageFilterDto,
-} from "../../../../shared/types/message.types";
+import { messages } from "./schema";
+import { MessageData } from "../entities/message.schema";
 
 export class MessageRepository {
-  async create(data: CreateMessageDto): Promise<MessageDto> {
-    const messageData: CreateMessageSchema = {
-      content: data.content,
-      senderId: data.senderId,
-      senderName: data.senderName,
-      senderType: data.senderType,
-      conversationId: data.conversationId,
-    };
-
-    const [message] = await db
+  async save(data: MessageData): Promise<MessageData> {
+    const [inserted] = await db
       .insert(messages)
-      .values(messageData)
+      .values({
+        id: data.id,
+        content: data.content,
+        conversationId: data.conversationId,
+        senderId: data.senderId,
+        receiverId: data.receiverId,
+        type: data.type,
+        isEdited: data.isEdited,
+        isRead: data.isRead,
+        metadata: data.metadata,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      })
       .returning();
 
-    return this.mapToDto(message);
+    return {
+      ...inserted,
+      createdAt: new Date(inserted.createdAt),
+      updatedAt: new Date(inserted.updatedAt),
+    };
   }
 
-  async findById(id: string): Promise<MessageDto | null> {
-    const message = await db
+  async findById(id: string): Promise<MessageData | null> {
+    const [result] = await db
       .select()
       .from(messages)
       .where(eq(messages.id, id))
       .limit(1);
 
-    return message.length > 0 ? this.mapToDto(message[0]) : null;
+    if (!result) {
+      return null;
+    }
+
+    return {
+      ...result,
+      createdAt: new Date(result.createdAt),
+      updatedAt: new Date(result.updatedAt),
+    };
   }
 
   async findByConversationId(
     conversationId: string,
     limit?: number,
     offset?: number
-  ): Promise<MessageDto[]> {
+  ): Promise<MessageData[]> {
     let query = db
       .select()
       .from(messages)
@@ -55,18 +67,33 @@ export class MessageRepository {
     }
 
     const results = await query;
-    return results.map(this.mapToDto);
+    return results.map((message) => ({
+      ...message,
+      createdAt: new Date(message.createdAt),
+      updatedAt: new Date(message.updatedAt),
+    }));
   }
 
-  private mapToDto(message: MessageSchema): MessageDto {
+  async update(data: MessageData): Promise<MessageData> {
+    const [updated] = await db
+      .update(messages)
+      .set({
+        content: data.content,
+        isEdited: data.isEdited,
+        isRead: data.isRead,
+        updatedAt: data.updatedAt,
+      })
+      .where(eq(messages.id, data.id))
+      .returning();
+
     return {
-      id: message.id,
-      content: message.content,
-      senderId: message.senderId,
-      senderName: message.senderName,
-      senderType: message.senderType,
-      conversationId: message.conversationId,
-      timestamp: message.createdAt,
+      ...updated,
+      createdAt: new Date(updated.createdAt),
+      updatedAt: new Date(updated.updatedAt),
     };
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.delete(messages).where(eq(messages.id, id));
   }
 }

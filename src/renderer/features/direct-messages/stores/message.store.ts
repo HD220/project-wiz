@@ -1,7 +1,7 @@
 import type {
   MessageDto,
   CreateMessageDto,
-  MessageFilterDto,
+  UpdateMessageDto,
 } from "../../../../shared/types/message.types";
 
 interface MessageStoreState {
@@ -28,9 +28,22 @@ class MessageStore {
 
   getServerSnapshot = () => this.state;
 
-  async loadMessages(conversationId: string, limit?: number, offset?: number): Promise<void> {
+  async loadMessages(conversationId: string, forceReload = false): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
+      return;
+    }
+
+    if (!forceReload && this.state.messages.length > 0) {
+      try {
+        const messages = (await window.electronIPC.invoke(
+          "dm:message:listByConversation",
+          { conversationId },
+        )) as MessageDto[];
+        this.setState({ messages, error: null });
+      } catch (error) {
+        this.setState({ error: (error as Error).message });
+      }
       return;
     }
 
@@ -38,16 +51,10 @@ class MessageStore {
 
     try {
       const messages = (await window.electronIPC.invoke(
-        "dm:message:getByConversation",
-        { conversationId, limit, offset },
+        "dm:message:listByConversation",
+        { conversationId },
       )) as MessageDto[];
-      
-      // Sort messages by timestamp (oldest first) to ensure correct order
-      const sortedMessages = messages.sort((a, b) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-      
-      this.setState({ messages: sortedMessages, isLoading: false });
+      this.setState({ messages, isLoading: false });
     } catch (error) {
       this.setState({
         error: (error as Error).message,
@@ -59,7 +66,31 @@ class MessageStore {
   async createMessage(dto: CreateMessageDto): Promise<void> {
     try {
       await window.electronIPC.invoke("dm:message:create", dto);
-      await this.loadMessages(dto.conversationId);
+      await this.loadMessages(dto.conversationId, true);
+    } catch (error) {
+      this.setState({ error: (error as Error).message });
+    }
+  }
+
+  async updateMessage(dto: UpdateMessageDto): Promise<void> {
+    try {
+      await window.electronIPC.invoke("dm:message:update", dto);
+      const message = await this.getMessageById(dto.id);
+      if (message) {
+        await this.loadMessages(message.conversationId, true);
+      }
+    } catch (error) {
+      this.setState({ error: (error as Error).message });
+    }
+  }
+
+  async deleteMessage(id: string): Promise<void> {
+    try {
+      const message = await this.getMessageById(id);
+      if (message) {
+        await window.electronIPC.invoke("dm:message:delete", { id });
+        await this.loadMessages(message.conversationId, true);
+      }
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }

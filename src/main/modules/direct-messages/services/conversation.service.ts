@@ -1,36 +1,33 @@
+import { ConversationEntity } from "../entities/conversation.entity";
 import { ConversationRepository } from "../persistence/conversation.repository";
-import type {
-  ConversationDto,
-  CreateConversationDto,
-  ConversationFilterDto,
-} from "../../../../shared/types/message.types";
+import {
+  CreateConversationData,
+  ConversationData,
+} from "../entities/conversation.schema";
 
 export class ConversationService {
-  private conversationRepository = new ConversationRepository();
+  constructor(private repository: ConversationRepository) {}
 
-  async createConversation(data: CreateConversationDto): Promise<ConversationDto> {
-    return await this.conversationRepository.create(data);
+  async createConversation(data: CreateConversationData): Promise<ConversationData> {
+    const conversation = new ConversationEntity(data);
+    const saved = await this.repository.save(conversation.toPlainObject());
+    return saved;
   }
 
-  async getConversationById(id: string): Promise<ConversationDto | null> {
-    return await this.conversationRepository.findById(id);
-  }
-
-  async listConversations(filter?: ConversationFilterDto): Promise<ConversationDto[]> {
-    return await this.conversationRepository.findAll(filter);
-  }
-
-  async findOrCreateDirectMessage(participants: string[]): Promise<ConversationDto> {
-    const existing = await this.conversationRepository.findByParticipants(participants);
-
+  async findOrCreateConversation(data: { userId1: string, userId2: string }): Promise<ConversationData> {
+    const existing = await this.repository.findByUsers(data.userId1, data.userId2);
     if (existing) {
       return existing;
     }
 
-    return await this.conversationRepository.create({ participants });
+    return this.createConversation(data);
   }
 
-  async updateLastMessageTime(conversationId: string): Promise<void> {
-    await this.conversationRepository.updateLastMessageAt(conversationId);
+  async getConversationById(data: { id: string }): Promise<ConversationData | null> {
+    return this.repository.findById(data.id);
+  }
+
+  async deleteConversation(data: { id: string }): Promise<void> {
+    await this.repository.delete(data.id);
   }
 }

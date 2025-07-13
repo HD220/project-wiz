@@ -1,12 +1,11 @@
 import { eq, and, desc, ne } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { channels, type ChannelSchema, type CreateChannelSchema } from "./schema";
+import { channels, type ChannelSchema } from "./schema";
 import type { ChannelFilterDto } from "../../../../shared/types/channel.types";
+import { ChannelData } from "../entities/channel.schema";
 
 export class ChannelRepository {
-  
-  // CREATE
-  async save(data: CreateChannelSchema): Promise<ChannelSchema> {
+  async save(data: ChannelData): Promise<ChannelData> {
     const [channel] = await db
       .insert(channels)
       .values({
@@ -14,21 +13,23 @@ export class ChannelRepository {
         updatedAt: new Date(),
       })
       .returning();
-    return channel;
+    return {
+        ...channel,
+        createdAt: new Date(channel.createdAt),
+        updatedAt: new Date(channel.updatedAt),
+    };
   }
 
-  // READ (lista com filtros)
-  async findMany(filter?: ChannelFilterDto): Promise<ChannelSchema[]> {
+  async findMany(filter?: ChannelFilterDto): Promise<ChannelData[]> {
     const conditions = [];
     
-    // Aplicar filtros se existirem
     if (filter) {
       if (filter.projectId) {
         conditions.push(eq(channels.projectId, filter.projectId));
       }
       
       if (filter.type) {
-        conditions.push(eq(channels.type, filter.type as any));
+        conditions.push(eq(channels.type, filter.type));
       }
       
       if (filter.isArchived !== undefined) {
@@ -46,50 +47,54 @@ export class ChannelRepository {
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(channels.createdAt));
 
-    return await query;
+    const results = await query;
+
+    return results.map((channel) => ({
+        ...channel,
+        createdAt: new Date(channel.createdAt),
+        updatedAt: new Date(channel.updatedAt),
+    }));
   }
 
-  // READ (por ID)
-  async findById(id: string): Promise<ChannelSchema | null> {
+  async findById(id: string): Promise<ChannelData | null> {
     const [channel] = await db
       .select()
       .from(channels)
       .where(eq(channels.id, id))
       .limit(1);
     
-    return channel || null;
+    if (!channel) {
+        return null;
+    }
+
+    return {
+        ...channel,
+        createdAt: new Date(channel.createdAt),
+        updatedAt: new Date(channel.updatedAt),
+    };
   }
 
-  // READ (por projeto - método helper)
-  async findByProject(projectId: string): Promise<ChannelSchema[]> {
-    return this.findMany({ projectId, isArchived: false });
-  }
-
-  // UPDATE
-  async update(id: string, data: Partial<CreateChannelSchema>): Promise<ChannelSchema> {
+  async update(data: ChannelData): Promise<ChannelData> {
     const [updated] = await db
       .update(channels)
       .set({
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(channels.id, id))
+      .where(eq(channels.id, data.id))
       .returning();
     
-    return updated;
+    return {
+        ...updated,
+        createdAt: new Date(updated.createdAt),
+        updatedAt: new Date(updated.updatedAt),
+    };
   }
 
-  // SOFT DELETE (arquivar)
-  async archive(id: string): Promise<ChannelSchema> {
-    return this.update(id, { isArchived: true });
-  }
-
-  // HARD DELETE
   async delete(id: string): Promise<void> {
     await db.delete(channels).where(eq(channels.id, id));
   }
 
-  // Verificar se nome existe no projeto
   async existsByNameInProject(name: string, projectId: string, excludeId?: string): Promise<boolean> {
     const conditions = [
       eq(channels.name, name.toLowerCase()),
@@ -97,7 +102,6 @@ export class ChannelRepository {
       eq(channels.isArchived, false)
     ];
 
-    // Excluir um ID específico (para updates)
     if (excludeId) {
       conditions.push(ne(channels.id, excludeId));
     }

@@ -1,7 +1,6 @@
 import type {
   ConversationDto,
   CreateConversationDto,
-  ConversationFilterDto,
 } from "../../../../shared/types/message.types";
 
 interface ConversationStoreState {
@@ -30,9 +29,21 @@ class ConversationStore {
 
   getServerSnapshot = () => this.state;
 
-  async loadConversations(filter?: ConversationFilterDto): Promise<void> {
+  async loadConversations(forceReload = false): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
+      return;
+    }
+
+    if (!forceReload && this.state.conversations.length > 0) {
+      try {
+        const conversations = (await window.electronIPC.invoke(
+          "dm:conversation:list",
+        )) as ConversationDto[];
+        this.setState({ conversations, error: null });
+      } catch (error) {
+        this.setState({ error: (error as Error).message });
+      }
       return;
     }
 
@@ -41,7 +52,6 @@ class ConversationStore {
     try {
       const conversations = (await window.electronIPC.invoke(
         "dm:conversation:list",
-        filter,
       )) as ConversationDto[];
       this.setState({ conversations, isLoading: false });
     } catch (error) {
@@ -55,18 +65,16 @@ class ConversationStore {
   async createConversation(dto: CreateConversationDto): Promise<void> {
     try {
       await window.electronIPC.invoke("dm:conversation:create", dto);
-      await this.loadConversations();
+      await this.loadConversations(true);
     } catch (error) {
       this.setState({ error: (error as Error).message });
     }
   }
 
-  async findOrCreateDirectMessage(participants: string[]): Promise<ConversationDto | null> {
+  async findOrCreateConversation(data: { userId1: string, userId2: string }): Promise<ConversationDto | null> {
     try {
-      const conversation = await window.electronIPC.invoke("dm:conversation:findOrCreate", {
-        participants,
-      }) as ConversationDto;
-      await this.loadConversations();
+      const conversation = await window.electronIPC.invoke("dm:conversation:findOrCreate", data) as ConversationDto;
+      await this.loadConversations(true);
       return conversation;
     } catch (error) {
       this.setState({ error: (error as Error).message });
@@ -80,6 +88,15 @@ class ConversationStore {
     } catch (error) {
       this.setState({ error: (error as Error).message });
       return null;
+    }
+  }
+
+  async deleteConversation(id: string): Promise<void> {
+    try {
+      await window.electronIPC.invoke("dm:conversation:delete", { id });
+      await this.loadConversations(true);
+    } catch (error) {
+      this.setState({ error: (error as Error).message });
     }
   }
 
