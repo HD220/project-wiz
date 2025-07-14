@@ -31,7 +31,10 @@ class ProjectStore {
 
   getServerSnapshot = () => this.state;
 
-  async loadProjects(filter?: ProjectFilterDto, forceReload = false): Promise<void> {
+  async loadProjects(
+    filter?: ProjectFilterDto,
+    forceReload = false,
+  ): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;

@@ -16,7 +16,9 @@ export const agents = sqliteTable("agents", {
   maxTokens: integer("max_tokens").notNull().default(1000),
   // Status and metadata
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+  isDefault: integer("is_default", { mode: "boolean" })
+    .notNull()
+    .default(false),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

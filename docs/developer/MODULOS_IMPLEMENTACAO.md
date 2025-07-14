@@ -14,6 +14,7 @@ O Project Wiz segue uma **arquitetura Electron** com dois processos principais:
 ### Comunicação Entre Processos
 
 A comunicação acontece via **IPC (Inter-Process Communication)**:
+
 ```
 Renderer ←→ IPC ←→ Main Process ←→ Database/APIs
 ```
@@ -65,7 +66,7 @@ src/main/modules/[nome-do-modulo]/
 export interface CreateChannelDto {
   name: string;
   description?: string;
-  type: 'general' | 'task' | 'agent' | 'custom';
+  type: "general" | "task" | "agent" | "custom";
   projectId: string;
   isPrivate?: boolean;
 }
@@ -116,24 +117,30 @@ export const channels = sqliteTable("channels", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => randomUUID()),
-  
+
   // Campos obrigatórios
   name: text("name").notNull(),
   projectId: text("project_id").notNull(),
   createdBy: text("created_by").notNull(),
-  
+
   // Campos opcionais
   description: text("description"),
-  
+
   // Enums como texto
   type: text("type", {
     enum: ["general", "task", "agent", "custom"],
-  }).notNull().default("general"),
-  
+  })
+    .notNull()
+    .default("general"),
+
   // Booleanos como integer
-  isPrivate: integer("is_private", { mode: "boolean" }).notNull().default(false),
-  isArchived: integer("is_archived", { mode: "boolean" }).notNull().default(false),
-  
+  isPrivate: integer("is_private", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  isArchived: integer("is_archived", { mode: "boolean" })
+    .notNull()
+    .default(false),
+
   // Timestamps automáticos
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -149,6 +156,7 @@ export type CreateChannelSchema = typeof channels.$inferInsert;
 ```
 
 **💡 Convenções obrigatórias**:
+
 - Nomes de tabela: plural em inglês (`channels`, `users`, `projects`)
 - IDs: sempre UUID com `randomUUID()`
 - Timestamps: `created_at` e `updated_at` automáticos
@@ -172,11 +180,14 @@ npm run db:migrate
 // Exemplo: /src/main/modules/communication/persistence/repository.ts
 import { eq, and, desc } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { channels, type ChannelSchema, type CreateChannelSchema } from "./schema";
+import {
+  channels,
+  type ChannelSchema,
+  type CreateChannelSchema,
+} from "./schema";
 import type { ChannelFilterDto } from "../../../../shared/types/channel.types";
 
 export class ChannelRepository {
-  
   // CREATE
   async save(data: CreateChannelSchema): Promise<ChannelSchema> {
     const [channel] = await db
@@ -196,15 +207,15 @@ export class ChannelRepository {
     // Aplicar filtros se existirem
     if (filter) {
       const conditions = [];
-      
+
       if (filter.projectId) {
         conditions.push(eq(channels.projectId, filter.projectId));
       }
-      
+
       if (filter.type) {
         conditions.push(eq(channels.type, filter.type));
       }
-      
+
       if (filter.isArchived !== undefined) {
         conditions.push(eq(channels.isArchived, filter.isArchived));
       }
@@ -224,12 +235,15 @@ export class ChannelRepository {
       .from(channels)
       .where(eq(channels.id, id))
       .limit(1);
-    
+
     return channel || null;
   }
 
   // UPDATE
-  async update(id: string, data: Partial<CreateChannelSchema>): Promise<ChannelSchema> {
+  async update(
+    id: string,
+    data: Partial<CreateChannelSchema>,
+  ): Promise<ChannelSchema> {
     const [updated] = await db
       .update(channels)
       .set({
@@ -238,7 +252,7 @@ export class ChannelRepository {
       })
       .where(eq(channels.id, id))
       .returning();
-    
+
     return updated;
   }
 
@@ -250,6 +264,7 @@ export class ChannelRepository {
 ```
 
 **💡 Padrões do Repository**:
+
 - Sempre use `.returning()` em INSERT/UPDATE
 - Filtros opcionais com `and(...conditions)`
 - Ordem por `created_at` descendente
@@ -266,7 +281,7 @@ export class Channel {
     public readonly id: string,
     public readonly name: string,
     public readonly projectId: string,
-    public readonly type: 'general' | 'task' | 'agent' | 'custom',
+    public readonly type: "general" | "task" | "agent" | "custom",
     public readonly isPrivate: boolean = false,
     public readonly isArchived: boolean = false,
     public readonly description?: string,
@@ -277,7 +292,9 @@ export class Channel {
 
   // Métodos de lógica de negócio
   static validateName(name: string): boolean {
-    return name.length >= 2 && name.length <= 50 && /^[a-zA-Z0-9-_]+$/.test(name);
+    return (
+      name.length >= 2 && name.length <= 50 && /^[a-zA-Z0-9-_]+$/.test(name)
+    );
   }
 
   canBeAccessedBy(userId: string): boolean {
@@ -290,22 +307,27 @@ export class Channel {
   }
 
   // Factory methods
-  static createGeneral(name: string, projectId: string, createdBy: string): Channel {
+  static createGeneral(
+    name: string,
+    projectId: string,
+    createdBy: string,
+  ): Channel {
     return new Channel(
-      '', // ID será gerado pelo banco
+      "", // ID será gerado pelo banco
       name,
       projectId,
-      'general',
+      "general",
       false,
       false,
       undefined,
-      createdBy
+      createdBy,
     );
   }
 }
 ```
 
 **💡 Regras da Entity**:
+
 - Apenas lógica de domínio (validações, regras de negócio)
 - Imutável (readonly properties)
 - Factory methods para casos específicos
@@ -322,14 +344,13 @@ import type { ChannelDto } from "../../shared/types/channel.types";
 import type { ChannelSchema } from "./persistence/schema";
 
 export class ChannelMapper {
-  
   // Schema → Entity
   toDomain(schema: ChannelSchema): Channel {
     return new Channel(
       schema.id,
       schema.name,
       schema.projectId,
-      schema.type as 'general' | 'task' | 'agent' | 'custom',
+      schema.type as "general" | "task" | "agent" | "custom",
       schema.isPrivate,
       schema.isArchived,
       schema.description || undefined,
@@ -349,7 +370,7 @@ export class ChannelMapper {
       isPrivate: entity.isPrivate,
       isArchived: entity.isArchived,
       description: entity.description,
-      createdBy: entity.createdBy || '',
+      createdBy: entity.createdBy || "",
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
@@ -382,10 +403,10 @@ export class ChannelMapper {
 import { ChannelRepository } from "../persistence/repository";
 import { Channel } from "../domain/channel.entity";
 import { ChannelMapper } from "../channel.mapper";
-import type { 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelFilterDto 
+import type {
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelFilterDto,
 } from "../../../shared/types/channel.types";
 
 export class ChannelService {
@@ -404,8 +425,10 @@ export class ChannelService {
     const existing = await this.repository.findMany({
       projectId: data.projectId,
     });
-    
-    if (existing.some(ch => ch.name.toLowerCase() === data.name.toLowerCase())) {
+
+    if (
+      existing.some((ch) => ch.name.toLowerCase() === data.name.toLowerCase())
+    ) {
       throw new Error("Já existe um canal com este nome neste projeto");
     }
 
@@ -416,7 +439,7 @@ export class ChannelService {
       type: data.type,
       projectId: data.projectId,
       isPrivate: data.isPrivate || false,
-      createdBy: data.createdBy || 'system',
+      createdBy: data.createdBy || "system",
     });
 
     return this.mapper.toDomain(saved);
@@ -424,7 +447,7 @@ export class ChannelService {
 
   async listChannels(filter?: ChannelFilterDto): Promise<Channel[]> {
     const schemas = await this.repository.findMany(filter);
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 
   async getChannelById(id: string): Promise<Channel | null> {
@@ -458,6 +481,7 @@ export class ChannelService {
 ```
 
 **💡 Responsabilidades do Service**:
+
 - Orquestrar operações complexas
 - Aplicar regras de negócio
 - Validar dados antes de persistir
@@ -472,11 +496,11 @@ export class ChannelService {
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
 import { ChannelService } from "../application/channel.service";
 import { ChannelMapper } from "../channel.mapper";
-import type { 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelDto, 
-  ChannelFilterDto 
+import type {
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelDto,
+  ChannelFilterDto,
 } from "../../../shared/types/channel.types";
 
 export class ChannelIpcHandlers {
@@ -511,7 +535,7 @@ export class ChannelIpcHandlers {
   ): Promise<ChannelDto[]> {
     try {
       const channels = await this.channelService.listChannels(filter);
-      return channels.map(channel => this.channelMapper.toDto(channel));
+      return channels.map((channel) => this.channelMapper.toDto(channel));
     } catch (error) {
       throw new Error(`Failed to list channels: ${(error as Error).message}`);
     }
@@ -555,6 +579,7 @@ export class ChannelIpcHandlers {
 ```
 
 **💡 Convenções dos Handlers**:
+
 - Canais IPC: `modulo:operacao` (ex: `channel:create`)
 - Sempre try/catch com mensagens descritivas
 - Bind dos métodos no constructor
@@ -581,8 +606,11 @@ app.on("ready", async () => {
   const channelRepository = new ChannelRepository();
   const channelMapper = new ChannelMapper();
   const channelService = new ChannelService(channelRepository, channelMapper);
-  const channelIpcHandlers = new ChannelIpcHandlers(channelService, channelMapper);
-  
+  const channelIpcHandlers = new ChannelIpcHandlers(
+    channelService,
+    channelMapper,
+  );
+
   // Registrar handlers
   channelIpcHandlers.registerHandlers();
 });
@@ -596,11 +624,11 @@ app.on("ready", async () => {
 
 ```typescript
 // Exemplo: /src/renderer/features/communication/stores/channel.store.ts
-import type { 
-  ChannelDto, 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelFilterDto 
+import type {
+  ChannelDto,
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelFilterDto,
 } from "../../../../shared/types/channel.types";
 
 interface ChannelStoreState {
@@ -632,18 +660,25 @@ class ChannelStore {
   // Atualizar estado e notificar listeners
   private setState(newState: Partial<ChannelStoreState>) {
     this.state = { ...this.state, ...newState };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
   // QUERIES (buscar dados)
-  async loadChannels(filter?: ChannelFilterDto, forceReload = false): Promise<void> {
+  async loadChannels(
+    filter?: ChannelFilterDto,
+    forceReload = false,
+  ): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
     }
 
     // Evitar recarregamentos desnecessários
-    if (!forceReload && this.state.channels.length > 0 && !this.state.isLoading) {
+    if (
+      !forceReload &&
+      this.state.channels.length > 0 &&
+      !this.state.isLoading
+    ) {
       return;
     }
 
@@ -654,10 +689,10 @@ class ChannelStore {
         "channel:list",
         filter,
       )) as ChannelDto[];
-      
-      this.setState({ 
-        channels, 
-        isLoading: false 
+
+      this.setState({
+        channels,
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -720,8 +755,8 @@ class ChannelStore {
 
       // Atualizar no estado
       this.setState({
-        channels: this.state.channels.map(ch => 
-          ch.id === updatedChannel.id ? updatedChannel : ch
+        channels: this.state.channels.map((ch) =>
+          ch.id === updatedChannel.id ? updatedChannel : ch,
         ),
         isLoading: false,
       });
@@ -744,7 +779,7 @@ class ChannelStore {
 
       // Remover do estado
       this.setState({
-        channels: this.state.channels.filter(ch => ch.id !== id),
+        channels: this.state.channels.filter((ch) => ch.id !== id),
         isLoading: false,
       });
     } catch (error) {
@@ -771,6 +806,7 @@ export const channelStore = new ChannelStore();
 ```
 
 **💡 Padrões do Store**:
+
 - Estado tipado com interface
 - `useSyncExternalStore` pattern
 - Separação entre queries e mutations
@@ -785,10 +821,10 @@ export const channelStore = new ChannelStore();
 // Exemplo: /src/renderer/features/communication/hooks/use-channels.hook.ts
 import { useSyncExternalStore, useEffect, useMemo, useRef } from "react";
 import { channelStore } from "../stores/channel.store";
-import type { 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelFilterDto 
+import type {
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelFilterDto,
 } from "../../../../shared/types/channel.types";
 
 export function useChannels(filter?: ChannelFilterDto) {
@@ -815,33 +851,36 @@ export function useChannels(filter?: ChannelFilterDto) {
   }, []);
 
   // Mutations - memoizadas para evitar re-renders
-  const mutations = useMemo(() => ({
-    createChannel: (data: CreateChannelDto) => 
-      channelStore.createChannel(data),
-    
-    updateChannel: (data: UpdateChannelDto) => 
-      channelStore.updateChannel(data),
-    
-    deleteChannel: (id: string) => 
-      channelStore.deleteChannel(id),
-      
-    setSelectedChannel: (channel: ChannelDto | null) => 
-      channelStore.setSelectedChannel(channel),
-      
-    clearError: () => channelStore.clearError(),
-  }), []);
+  const mutations = useMemo(
+    () => ({
+      createChannel: (data: CreateChannelDto) =>
+        channelStore.createChannel(data),
+
+      updateChannel: (data: UpdateChannelDto) =>
+        channelStore.updateChannel(data),
+
+      deleteChannel: (id: string) => channelStore.deleteChannel(id),
+
+      setSelectedChannel: (channel: ChannelDto | null) =>
+        channelStore.setSelectedChannel(channel),
+
+      clearError: () => channelStore.clearError(),
+    }),
+    [],
+  );
 
   // Queries - memoizadas
-  const queries = useMemo(() => ({
-    loadChannels: (newFilter?: ChannelFilterDto, forceReload?: boolean) => 
-      channelStore.loadChannels(newFilter || filterRef.current, forceReload),
-      
-    getChannelById: (id: string) => 
-      channelStore.getChannelById(id),
-      
-    refetch: () => 
-      channelStore.loadChannels(filterRef.current, true),
-  }), []);
+  const queries = useMemo(
+    () => ({
+      loadChannels: (newFilter?: ChannelFilterDto, forceReload?: boolean) =>
+        channelStore.loadChannels(newFilter || filterRef.current, forceReload),
+
+      getChannelById: (id: string) => channelStore.getChannelById(id),
+
+      refetch: () => channelStore.loadChannels(filterRef.current, true),
+    }),
+    [],
+  );
 
   return {
     // Estado
@@ -849,7 +888,7 @@ export function useChannels(filter?: ChannelFilterDto) {
     isLoading: state.isLoading,
     error: state.error,
     selectedChannel: state.selectedChannel,
-    
+
     // Operações
     ...mutations,
     ...queries,
@@ -858,6 +897,7 @@ export function useChannels(filter?: ChannelFilterDto) {
 ```
 
 **💡 Benefícios do Hook**:
+
 - Auto-loading inteligente
 - Memoização para performance
 - Separação conceptual mutations/queries
@@ -870,12 +910,12 @@ export function useChannels(filter?: ChannelFilterDto) {
 import { useChannels } from "../hooks/use-channels.hook";
 
 function ChannelList({ projectId }: { projectId: string }) {
-  const { 
-    channels, 
-    isLoading, 
-    error, 
-    createChannel, 
-    loadChannels 
+  const {
+    channels,
+    isLoading,
+    error,
+    createChannel,
+    loadChannels
   } = useChannels({ projectId });
 
   const handleCreateChannel = async (name: string) => {
@@ -909,6 +949,7 @@ function ChannelList({ projectId }: { projectId: string }) {
 ## ✅ Checklist de Implementação
 
 ### Backend (Main Process)
+
 - [ ] Tipos compartilhados em `/src/shared/types/`
 - [ ] Schema Drizzle com convenções corretas
 - [ ] Migração gerada e aplicada
@@ -920,6 +961,7 @@ function ChannelList({ projectId }: { projectId: string }) {
 - [ ] Registro no main.ts
 
 ### Frontend (Renderer Process)
+
 - [ ] Store com estado tipado
 - [ ] Hook personalizado com auto-loading
 - [ ] Integração em componentes
@@ -927,6 +969,7 @@ function ChannelList({ projectId }: { projectId: string }) {
 - [ ] Mutations e queries funcionando
 
 ### Integração
+
 - [ ] Comunicação IPC funcionando
 - [ ] Estados sincronizados
 - [ ] Error handling end-to-end
@@ -945,6 +988,7 @@ function ChannelList({ projectId }: { projectId: string }) {
 ## 📚 Próximos Passos
 
 Depois de dominar este padrão, você pode explorar:
+
 - **Relacionamentos entre entidades** (1:N, N:N)
 - **Eventos do Event Bus** para comunicação interna
 - **Validação com Zod** schemas

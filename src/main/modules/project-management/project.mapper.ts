@@ -9,10 +9,10 @@ export class ProjectMapper {
     return {
       id: project.id,
       name: project.name,
-      description: project.description,
-      gitUrl: project.gitUrl,
+      description: project.description ?? undefined,
+      gitUrl: project.gitUrl ?? undefined,
       status: project.status,
-      avatar: project.avatar,
+      avatar: project.avatar ?? undefined,
       createdAt: project.createdAt.toISOString(),
       updatedAt: project.updatedAt.toISOString(),
       unreadCount: 0,

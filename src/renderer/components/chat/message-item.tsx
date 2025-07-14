@@ -144,7 +144,7 @@ export function MessageItem({
               message.senderType === "agent" ? "bg-purple-500" : "bg-brand-500",
             )}
           >
-            {message.senderType === "agent" 
+            {message.senderType === "agent"
               ? message.senderName.slice(0, 2).toUpperCase()
               : message.senderName.slice(0, 2).toUpperCase()}
           </AvatarFallback>

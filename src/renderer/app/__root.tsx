@@ -19,7 +19,6 @@ function RootComponent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-
   return (
     <TooltipProvider>
       <PageTitleProvider>

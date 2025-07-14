@@ -6,7 +6,7 @@ export interface CreateChannelMessageDto {
   channelId: string;
   authorId: string;
   authorName: string;
-  type?: 'text' | 'code' | 'file' | 'system';
+  type?: "text" | "code" | "file" | "system";
   metadata?: Record<string, any>;
 }
 
@@ -43,13 +43,14 @@ export interface ChannelMessageFilterDto {
 
 // Enum para tipos de mensagem
 export const ChannelMessageType = {
-  TEXT: 'text',
-  CODE: 'code',
-  FILE: 'file',
-  SYSTEM: 'system',
+  TEXT: "text",
+  CODE: "code",
+  FILE: "file",
+  SYSTEM: "system",
 } as const;
 
-export type ChannelMessageTypeEnum = typeof ChannelMessageType[keyof typeof ChannelMessageType];
+export type ChannelMessageTypeEnum =
+  (typeof ChannelMessageType)[keyof typeof ChannelMessageType];
 
 // DTO para paginação
 export interface ChannelMessagePaginationDto {

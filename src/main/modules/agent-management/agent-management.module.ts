@@ -1,14 +1,14 @@
-import { BaseModule } from '../../kernel/base-module';
-import { AgentRepository } from './persistence/agent.repository';
-import { AgentService } from './application/agent.service';
-import { AgentMapper } from './agent.mapper';
-import { AgentIpcHandlers } from './ipc/agent.handlers';
-import { 
-  AgentCreatedEvent, 
-  AgentUpdatedEvent, 
+import { BaseModule } from "../../kernel/base-module";
+import { AgentRepository } from "./persistence/agent.repository";
+import { AgentService } from "./application/agent.service";
+import { AgentMapper } from "./agent.mapper";
+import { AgentIpcHandlers } from "./ipc/agent.handlers";
+import {
+  AgentCreatedEvent,
+  AgentUpdatedEvent,
   AgentDeletedEvent,
-  EVENT_TYPES 
-} from '../../kernel/events';
+  EVENT_TYPES,
+} from "../../kernel/events";
 
 export class AgentManagementModule extends BaseModule {
   private agentRepository!: AgentRepository;
@@ -17,22 +17,26 @@ export class AgentManagementModule extends BaseModule {
   private agentIpcHandlers!: AgentIpcHandlers;
 
   getName(): string {
-    return 'agent-management';
+    return "agent-management";
   }
 
   getDependencies(): string[] {
-    return ['llm-provider']; // Depends on LLM provider module
+    return ["llm-provider"]; // Depends on LLM provider module
   }
 
   protected async onInitialize(): Promise<void> {
     this.agentRepository = new AgentRepository();
     this.agentMapper = new AgentMapper();
-    
+
     // Get LLM provider service from dependency container
-    const llmProviderModule = this.container.get('llm-provider') as any;
+    const llmProviderModule = this.container.get("llm-provider") as any;
     const llmProviderService = llmProviderModule.getLlmProviderService();
-    
-    this.agentService = new AgentService(this.agentRepository, this.agentMapper, llmProviderService);
+
+    this.agentService = new AgentService(
+      this.agentRepository,
+      this.agentMapper,
+      llmProviderService,
+    );
     this.agentIpcHandlers = new AgentIpcHandlers(
       this.agentService,
       this.agentMapper,
@@ -43,7 +47,9 @@ export class AgentManagementModule extends BaseModule {
     // Listen to LLM provider changes to update agent configurations
     this.subscribeToEvent(EVENT_TYPES.LLM_PROVIDER_DELETED, async (event) => {
       // Handle agent updates when their LLM provider is deleted
-      console.log(`LLM Provider ${event.entityId} deleted, checking agent dependencies...`);
+      console.log(
+        `LLM Provider ${event.entityId} deleted, checking agent dependencies...`,
+      );
       // TODO: Implement logic to handle agents using deleted LLM provider
     });
   }
@@ -55,14 +61,14 @@ export class AgentManagementModule extends BaseModule {
   // Public getters for other modules
   getAgentService(): AgentService {
     if (!this.isInitialized()) {
-      throw new Error('AgentManagementModule must be initialized first');
+      throw new Error("AgentManagementModule must be initialized first");
     }
     return this.agentService;
   }
 
   getAgentRepository(): AgentRepository {
     if (!this.isInitialized()) {
-      throw new Error('AgentManagementModule must be initialized first');
+      throw new Error("AgentManagementModule must be initialized first");
     }
     return this.agentRepository;
   }

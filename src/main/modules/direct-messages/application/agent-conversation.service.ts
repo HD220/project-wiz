@@ -24,13 +24,19 @@ export class AgentConversationService {
     private textGenerationService: TextGenerationService,
   ) {}
 
-  async processUserMessage(request: ProcessUserMessageRequest): Promise<ProcessUserMessageResponse> {
+  async processUserMessage(
+    request: ProcessUserMessageRequest,
+  ): Promise<ProcessUserMessageResponse> {
     const { conversationId, userMessage, userId = "user" } = request;
 
-    console.log('[AgentConversationService] Processing user message:', { conversationId, userMessage, userId });
+    console.log("[AgentConversationService] Processing user message:", {
+      conversationId,
+      userMessage,
+      userId,
+    });
 
     // 1. Save the user message first
-    console.log('[AgentConversationService] Saving user message...');
+    console.log("[AgentConversationService] Saving user message...");
     const savedUserMessage = await this.messageService.createMessage({
       content: userMessage,
       senderId: userId,
@@ -40,51 +46,68 @@ export class AgentConversationService {
       contextId: conversationId,
       conversationId, // Legacy compatibility
     });
-    console.log('[AgentConversationService] User message saved:', savedUserMessage.id);
+    console.log(
+      "[AgentConversationService] User message saved:",
+      savedUserMessage.id,
+    );
 
     // 2. Get conversation details to identify the agent
-    console.log('[AgentConversationService] Getting conversation details...');
-    const conversation = await this.conversationService.getConversationById(conversationId);
+    console.log("[AgentConversationService] Getting conversation details...");
+    const conversation =
+      await this.conversationService.getConversationById(conversationId);
     if (!conversation) {
       throw new Error("Conversa não encontrada");
     }
-    console.log('[AgentConversationService] Conversation found, participants:', conversation.participants);
+    console.log(
+      "[AgentConversationService] Conversation found, participants:",
+      conversation.participants,
+    );
 
     // 3. Extract persona ID from conversation participants (assuming format: ['user', 'personaId'])
     const personaId = conversation.participants.find((p) => p !== userId);
     if (!personaId) {
       throw new Error("Nenhuma persona encontrada na conversa");
     }
-    console.log('[AgentConversationService] Persona ID found:', personaId);
+    console.log("[AgentConversationService] Persona ID found:", personaId);
 
     // 4. Get agent by ID or name (for backward compatibility)
-    console.log('[AgentConversationService] Getting agent...');
+    console.log("[AgentConversationService] Getting agent...");
     let agent = await this.agentService.getAgentById(personaId);
-    
+
     // If not found by ID, try to find by name (for backward compatibility with old conversations)
     if (!agent) {
-      console.log('[AgentConversationService] Agent not found by ID, trying by name...');
+      console.log(
+        "[AgentConversationService] Agent not found by ID, trying by name...",
+      );
       agent = await this.agentService.getAgentByName(personaId);
     }
-    
+
     if (!agent || !agent.isActive) {
       throw new Error("Agente não encontrado ou inativo");
     }
-    console.log('[AgentConversationService] Agent found:', { id: agent.id, agentName: agent.name });
+    console.log("[AgentConversationService] Agent found:", {
+      id: agent.id,
+      agentName: agent.name,
+    });
 
     try {
       // 5. Build conversation context for AI
-      const conversationHistory = await this.buildConversationContext(conversationId);
+      const conversationHistory =
+        await this.buildConversationContext(conversationId);
 
-      // 6. Generate AI response using the new text generation service
+      // 6. Generate AI response using the text generation service
+      // The service will automatically handle fallback to default provider if needed
       const agentResponse = await this.textGenerationService.generateText(
         { llmProviderId: agent.llmProviderId },
         {
           systemPrompt: agent.getSystemPrompt(),
-          messages: [...conversationHistory, { role: "user", content: userMessage }],
+          messages: [
+            ...conversationHistory,
+            { role: "user", content: userMessage },
+          ],
           temperature: agent.temperature,
           maxTokens: agent.maxTokens,
-        }
+        },
       );
 
       if (!agentResponse) {
@@ -102,7 +125,9 @@ export class AgentConversationService {
         conversationId, // Legacy compatibility
       });
 
-      console.log('[AgentConversationService] Agent response generated and saved successfully');
+      console.log(
+        "[AgentConversationService] Agent response generated and saved successfully",
+      );
 
       return {
         userMessage: savedUserMessage,
@@ -110,7 +135,7 @@ export class AgentConversationService {
       };
     } catch (error) {
       console.error("Error generating agent response:", error);
-      
+
       // Create error message for user feedback
       const errorMessage = await this.messageService.createMessage({
         content: `❌ Erro ao gerar resposta: ${(error as Error).message}`,
@@ -122,11 +147,15 @@ export class AgentConversationService {
         conversationId, // Legacy compatibility
       });
 
-      throw new Error(`Falha ao processar mensagem: ${(error as Error).message}`);
+      throw new Error(
+        `Falha ao processar mensagem: ${(error as Error).message}`,
+      );
     }
   }
 
-  private async buildConversationContext(conversationId: string): Promise<CoreMessage[]> {
+  private async buildConversationContext(
+    conversationId: string,
+  ): Promise<CoreMessage[]> {
     try {
       // Get recent messages (last 20 for context)
       const messages = await this.messageService.getConversationMessages(
@@ -139,9 +168,12 @@ export class AgentConversationService {
       // Exclude system messages from context
       const coreMessages: CoreMessage[] = messages
         .reverse()
-        .filter(msg => msg.senderType !== "system")
+        .filter((msg) => msg.senderType !== "system")
         .map((msg) => ({
-          role: msg.senderType === "user" ? ("user" as const) : ("assistant" as const),
+          role:
+            msg.senderType === "user"
+              ? ("user" as const)
+              : ("assistant" as const),
           content: msg.content,
         }));
 
@@ -172,7 +204,9 @@ export class AgentConversationService {
         lastMessage.senderType !== "agent" ||
         previousMessage.senderType !== "user"
       ) {
-        throw new Error("Não é possível regenerar: sequência de mensagens inválida");
+        throw new Error(
+          "Não é possível regenerar: sequência de mensagens inválida",
+        );
       }
 
       // Delete the last agent message
@@ -188,13 +222,16 @@ export class AgentConversationService {
       return result.agentMessage;
     } catch (error) {
       console.error("Error regenerating response:", error);
-      throw new Error(`Falha ao regenerar resposta: ${(error as Error).message}`);
+      throw new Error(
+        `Falha ao regenerar resposta: ${(error as Error).message}`,
+      );
     }
   }
 
   async validateAgentForConversation(conversationId: string): Promise<boolean> {
     try {
-      const conversation = await this.conversationService.getConversationById(conversationId);
+      const conversation =
+        await this.conversationService.getConversationById(conversationId);
       if (!conversation) {
         return false;
       }
@@ -205,17 +242,19 @@ export class AgentConversationService {
       }
 
       let agent = await this.agentService.getAgentById(personaId);
-      
+
       // If not found by ID, try to find by name (for backward compatibility)
       if (!agent) {
         agent = await this.agentService.getAgentByName(personaId);
       }
-      
+
       if (!agent || !agent.isActive) {
         return false;
       }
 
-      return await this.textGenerationService.validateProvider(agent.llmProviderId);
+      return await this.textGenerationService.validateProvider(
+        agent.llmProviderId,
+      );
     } catch (error) {
       console.error("Error validating agent for conversation:", error);
       return false;

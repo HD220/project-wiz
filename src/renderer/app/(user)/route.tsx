@@ -22,7 +22,7 @@ function UserLayout() {
   const getPageTitle = () => {
     // If PageTitle is set by child components, use it
     if (pageTitle) return pageTitle;
-    
+
     const path = location.pathname;
     if (path === "/") return "Dashboard";
     if (path.includes("/settings")) return "Configurações";
@@ -33,13 +33,15 @@ function UserLayout() {
 
   const getPageSubtitle = () => {
     // Don't show subtitle for conversations since we have the persona name as title
-    if (pageTitle && location.pathname.includes("/conversation/")) return undefined;
-    
+    if (pageTitle && location.pathname.includes("/conversation/"))
+      return undefined;
+
     const path = location.pathname;
     if (path === "/") return "Visão geral e estatísticas";
     if (path.includes("/settings")) return "Configurações do usuário e sistema";
     if (path.includes("/conversation/")) return "Mensagem direta";
-    if (path.includes("/ai-chat-test")) return "Teste de integração AI Chat para canais";
+    if (path.includes("/ai-chat-test"))
+      return "Teste de integração AI Chat para canais";
     return undefined;
   };
 

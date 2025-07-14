@@ -21,22 +21,28 @@ export function useMessages(conversationId?: string) {
     }
   }, [conversationId]);
 
-  const mutations = useMemo(() => ({
-    createMessage: (data: CreateMessageDto) => messageStore.createMessage(data),
-  }), []);
+  const mutations = useMemo(
+    () => ({
+      createMessage: (data: CreateMessageDto) =>
+        messageStore.createMessage(data),
+    }),
+    [],
+  );
 
-  const queries = useMemo(() => ({
-    loadMessages: (convId: string, limit?: number, offset?: number) => 
-      messageStore.loadMessages(convId, limit, offset),
-    getMessageById: (id: string) => 
-      messageStore.getMessageById(id),
-  }), []);
+  const queries = useMemo(
+    () => ({
+      loadMessages: (convId: string, limit?: number, offset?: number) =>
+        messageStore.loadMessages(convId, limit, offset),
+      getMessageById: (id: string) => messageStore.getMessageById(id),
+    }),
+    [],
+  );
 
   return {
     messages: state.messages,
     isLoading: state.isLoading,
     error: state.error,
-    
+
     ...mutations,
     ...queries,
   };

@@ -8,24 +8,26 @@ export const channelMessages = sqliteTable("channel_messages", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => randomUUID()),
-  
+
   // Campos obrigatórios
   content: text("content").notNull(),
   channelId: text("channel_id").notNull(),
   authorId: text("author_id").notNull(),
   authorName: text("author_name").notNull(),
-  
+
   // Tipo de mensagem
   type: text("type", {
     enum: ["text", "code", "file", "system"],
-  }).notNull().default("text"),
-  
+  })
+    .notNull()
+    .default("text"),
+
   // Metadados opcionais (JSON)
   metadata: text("metadata"), // Stored as JSON string
-  
+
   // Flags
   isEdited: integer("is_edited", { mode: "boolean" }).notNull().default(false),
-  
+
   // Timestamps automáticos
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -36,12 +38,15 @@ export const channelMessages = sqliteTable("channel_messages", {
 });
 
 // Relações
-export const channelMessagesRelations = relations(channelMessages, ({ one }) => ({
-  channel: one(channels, {
-    fields: [channelMessages.channelId],
-    references: [channels.id],
+export const channelMessagesRelations = relations(
+  channelMessages,
+  ({ one }) => ({
+    channel: one(channels, {
+      fields: [channelMessages.channelId],
+      references: [channels.id],
+    }),
   }),
-}));
+);
 
 // Tipos inferidos automaticamente
 export type ChannelMessageSchema = typeof channelMessages.$inferSelect;

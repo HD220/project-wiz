@@ -1,8 +1,8 @@
-import { BaseModule } from '../../kernel/base-module';
-import { ProjectRepository } from './persistence/project.repository';
-import { ProjectService } from './application/project.service';
-import { ProjectMapper } from './project.mapper';
-import { ProjectIpcHandlers } from './ipc/handlers';
+import { BaseModule } from "../../kernel/base-module";
+import { ProjectRepository } from "./persistence/project.repository";
+import { ProjectService } from "./application/project.service";
+import { ProjectMapper } from "./project.mapper";
+import { ProjectIpcHandlers } from "./ipc/handlers";
 
 export class ProjectManagementModule extends BaseModule {
   private projectRepository!: ProjectRepository;
@@ -11,7 +11,7 @@ export class ProjectManagementModule extends BaseModule {
   private projectIpcHandlers!: ProjectIpcHandlers;
 
   getName(): string {
-    return 'project-management';
+    return "project-management";
   }
 
   getDependencies(): string[] {
@@ -35,14 +35,14 @@ export class ProjectManagementModule extends BaseModule {
   // Public getters for other modules to access services
   getProjectService(): ProjectService {
     if (!this.isInitialized()) {
-      throw new Error('ProjectManagementModule must be initialized first');
+      throw new Error("ProjectManagementModule must be initialized first");
     }
     return this.projectService;
   }
 
   getProjectRepository(): ProjectRepository {
     if (!this.isInitialized()) {
-      throw new Error('ProjectManagementModule must be initialized first');
+      throw new Error("ProjectManagementModule must be initialized first");
     }
     return this.projectRepository;
   }

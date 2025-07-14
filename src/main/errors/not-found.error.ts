@@ -1,30 +1,33 @@
-import { BaseError } from './base.error';
+import { BaseError } from "./base.error";
 
 export class NotFoundError extends BaseError {
   constructor(message: string, code?: string, context?: Record<string, any>) {
-    super(message, 'NotFoundError', {
+    super(message, "NotFoundError", {
       code,
       context,
     });
   }
 
-  static entityNotFound(entityType: string, identifier: string | number): NotFoundError {
+  static entityNotFound(
+    entityType: string,
+    identifier: string | number,
+  ): NotFoundError {
     return new NotFoundError(
       `${entityType} with identifier '${identifier}' was not found`,
-      'ENTITY_NOT_FOUND',
-      { entityType, identifier }
+      "ENTITY_NOT_FOUND",
+      { entityType, identifier },
     );
   }
 
   static resourceNotFound(resource: string, path?: string): NotFoundError {
     return new NotFoundError(
-      `Resource '${resource}' not found${path ? ` at path: ${path}` : ''}`,
-      'RESOURCE_NOT_FOUND',
-      { resource, path }
+      `Resource '${resource}' not found${path ? ` at path: ${path}` : ""}`,
+      "RESOURCE_NOT_FOUND",
+      { resource, path },
     );
   }
 
   getUserMessage(): string {
-    return 'The requested item could not be found.';
+    return "The requested item could not be found.";
   }
 }

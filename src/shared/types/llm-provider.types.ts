@@ -30,7 +30,7 @@ export interface LlmProviderFilterDto {
 export interface GenerateTextRequestDto {
   providerId: string;
   messages: Array<{
-    role: 'system' | 'user' | 'assistant';
+    role: "system" | "user" | "assistant";
     content: string;
   }>;
   systemPrompt?: string;

@@ -33,29 +33,31 @@ export class ProjectRepository {
   }
 
   async findMany(filter?: ProjectFilterOptions): Promise<ProjectData[]> {
-    const baseQuery = db.select().from(projects).orderBy(desc(projects.updatedAt));
+    const baseQuery = db
+      .select()
+      .from(projects)
+      .orderBy(desc(projects.updatedAt));
 
-    let query = baseQuery;
-    
-    if (filter?.status) {
-      query = query.where(eq(projects.status, filter.status));
-    }
+    // Apply conditions
+    const conditionalQuery = filter?.status
+      ? baseQuery.where(eq(projects.status, filter.status))
+      : baseQuery;
 
-    if (filter?.limit) {
-      query = query.limit(filter.limit);
-    }
+    // Apply pagination if provided
+    const limitQuery =
+      filter?.limit !== undefined
+        ? conditionalQuery.limit(filter.limit)
+        : conditionalQuery;
 
-    if (filter?.offset) {
-      query = query.offset(filter.offset);
-    }
+    const finalQuery =
+      filter?.offset !== undefined
+        ? limitQuery.offset(filter.offset)
+        : limitQuery;
 
-    const results = await query;
+    const results = await finalQuery;
 
     return results.map((project) => ({
       ...project,
-      description: project.description || undefined,
-      gitUrl: project.gitUrl || undefined,
-      avatar: project.avatar || undefined,
       createdAt: new Date(project.createdAt),
       updatedAt: new Date(project.updatedAt),
     }));
@@ -74,9 +76,6 @@ export class ProjectRepository {
 
     return {
       ...result,
-      description: result.description || undefined,
-      gitUrl: result.gitUrl || undefined,
-      avatar: result.avatar || undefined,
       createdAt: new Date(result.createdAt),
       updatedAt: new Date(result.updatedAt),
     };
@@ -98,9 +97,6 @@ export class ProjectRepository {
 
     return {
       ...updated,
-      description: updated.description || undefined,
-      gitUrl: updated.gitUrl || undefined,
-      avatar: updated.avatar || undefined,
       createdAt: new Date(updated.createdAt),
       updatedAt: new Date(updated.updatedAt),
     };

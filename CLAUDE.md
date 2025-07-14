@@ -192,21 +192,27 @@ Aqui estão os comandos mais importantes que você usará durante o desenvolvime
   _Aplica as migrações pendentes ao seu banco de dados SQLite, atualizando a estrutura das tabelas._
 
 - **Para Abrir o Drizzle Studio (Interface Web para o DB):**
+
   ```bash
   npm run db:studio
   ```
+
   _Inicia uma interface web que permite visualizar e interagir com os dados do seu banco de dados SQLite._
 
 - **Para Formatar o Código:**
+
   ```bash
   npm run format
   ```
+
   _Formata automaticamente o código usando Prettier._
 
 - **Para Verificar Formatação:**
+
   ```bash
   npm run format:check
   ```
+
   _Verifica se o código está formatado corretamente sem fazer alterações._
 
 - **Para Recompilar Dependências Nativas:**
@@ -248,7 +254,9 @@ O Project Wiz segue uma arquitetura modular baseada em Domain-Driven Design (DDD
 ## Padrões Arquiteturais
 
 ### Estrutura de Módulo Padrão
+
 Cada módulo segue a estrutura:
+
 ```
 module-name/
 ├── domain/           # Entidades de domínio e regras de negócio
@@ -259,11 +267,13 @@ module-name/
 ```
 
 ### Comunicação IPC (Inter-Process Communication)
+
 - O frontend (renderer) se comunica com o backend (main) via IPC handlers
 - Cada módulo possui seus próprios handlers em `ipc/handlers.ts`
 - Tipos compartilhados ficam em `src/shared/types/` (apenas tipos, sem lógica)
 
 ### Gerenciamento de Estado no Frontend
+
 - **Zustand:** Para estado global da aplicação
 - **TanStack Query:** Para cache e sincronização de dados assíncronos
 - **React Hook Form + Zod:** Para validação e gerenciamento de formulários

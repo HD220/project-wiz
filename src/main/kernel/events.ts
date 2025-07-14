@@ -1,47 +1,47 @@
-import { IEvent } from './event-bus';
+import { IEvent } from "./event-bus";
 
 // Event Types Constants
 export const EVENT_TYPES = {
   // Agent Events
-  AGENT_CREATED: 'agent.created',
-  AGENT_UPDATED: 'agent.updated',
-  AGENT_DELETED: 'agent.deleted',
-  AGENT_ACTIVATED: 'agent.activated',
-  AGENT_DEACTIVATED: 'agent.deactivated',
-  
+  AGENT_CREATED: "agent.created",
+  AGENT_UPDATED: "agent.updated",
+  AGENT_DELETED: "agent.deleted",
+  AGENT_ACTIVATED: "agent.activated",
+  AGENT_DEACTIVATED: "agent.deactivated",
+
   // LLM Provider Events
-  LLM_PROVIDER_CREATED: 'llm-provider.created',
-  LLM_PROVIDER_UPDATED: 'llm-provider.updated',
-  LLM_PROVIDER_DELETED: 'llm-provider.deleted',
-  
+  LLM_PROVIDER_CREATED: "llm-provider.created",
+  LLM_PROVIDER_UPDATED: "llm-provider.updated",
+  LLM_PROVIDER_DELETED: "llm-provider.deleted",
+
   // Project Events
-  PROJECT_CREATED: 'project.created',
-  PROJECT_UPDATED: 'project.updated',
-  PROJECT_DELETED: 'project.deleted',
-  
+  PROJECT_CREATED: "project.created",
+  PROJECT_UPDATED: "project.updated",
+  PROJECT_DELETED: "project.deleted",
+
   // Channel Events
-  CHANNEL_CREATED: 'channel.created',
-  CHANNEL_UPDATED: 'channel.updated',
-  CHANNEL_DELETED: 'channel.deleted',
-  
+  CHANNEL_CREATED: "channel.created",
+  CHANNEL_UPDATED: "channel.updated",
+  CHANNEL_DELETED: "channel.deleted",
+
   // Message Events
-  MESSAGE_SENT: 'message.sent',
-  MESSAGE_UPDATED: 'message.updated',
-  MESSAGE_DELETED: 'message.deleted',
-  
+  MESSAGE_SENT: "message.sent",
+  MESSAGE_UPDATED: "message.updated",
+  MESSAGE_DELETED: "message.deleted",
+
   // Conversation Events
-  CONVERSATION_STARTED: 'conversation.started',
-  CONVERSATION_ENDED: 'conversation.ended',
+  CONVERSATION_STARTED: "conversation.started",
+  CONVERSATION_ENDED: "conversation.ended",
 } as const;
 
 // Base Event Classes
 export abstract class BaseEvent implements IEvent {
   public readonly timestamp: Date;
-  
+
   constructor(
     public readonly type: string,
     public readonly entityId: string,
-    public readonly id?: string
+    public readonly id?: string,
   ) {
     this.timestamp = new Date();
   }
@@ -58,7 +58,7 @@ export class AgentCreatedEvent extends BaseEvent {
       goal: string;
       backstory: string;
       llmProviderId: string;
-    }
+    },
   ) {
     super(EVENT_TYPES.AGENT_CREATED, entityId);
   }
@@ -76,7 +76,7 @@ export class AgentUpdatedEvent extends BaseEvent {
       temperature: number;
       maxTokens: number;
       isActive: boolean;
-    }>
+    }>,
   ) {
     super(EVENT_TYPES.AGENT_UPDATED, entityId);
   }
@@ -166,7 +166,7 @@ export class MessageSentEvent extends BaseEvent {
       content: string;
       senderId: string;
       conversationId?: string;
-    }
+    },
   ) {
     super(EVENT_TYPES.MESSAGE_SENT, entityId);
   }

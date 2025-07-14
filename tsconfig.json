@@ -25,7 +25,7 @@
       "@/hooks/*": ["./src/renderer/hooks/*"],
       "@/features/*": ["./src/renderer/features/*"],
       "@/shared/*": ["./src/shared/*"],
-      "@/*": ["./src/*"],      
+      "@/*": ["./src/*"]
     }
   },
   "include": [

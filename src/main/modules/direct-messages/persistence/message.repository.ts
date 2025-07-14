@@ -1,6 +1,10 @@
 import { eq, desc, and } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { messages, MessageSchema, CreateMessageSchema } from "../../../persistence/schemas";
+import {
+  messages,
+  MessageSchema,
+  CreateMessageSchema,
+} from "../../../persistence/schemas";
 import type {
   MessageDto,
   CreateMessageDto,
@@ -14,16 +18,14 @@ export class MessageRepository {
       senderId: data.senderId,
       senderName: data.senderName,
       senderType: data.senderType,
+      conversationId: data.conversationId,
       contextType: data.contextType || "direct",
-      contextId: data.contextId || data.conversationId!, // Use contextId or fallback to conversationId for compatibility
+      contextId: data.contextId || data.conversationId,
       type: data.type || "text",
       metadata: data.metadata ? JSON.stringify(data.metadata) : undefined,
     };
 
-    const [message] = await db
-      .insert(messages)
-      .values(messageData)
-      .returning();
+    const [message] = await db.insert(messages).values(messageData).returning();
 
     return this.mapToDto(message);
   }
@@ -41,7 +43,7 @@ export class MessageRepository {
   async findByConversationId(
     conversationId: string,
     limit: number = 50,
-    offset: number = 0
+    offset: number = 0,
   ): Promise<MessageDto[]> {
     const results = await db
       .select()
@@ -49,8 +51,8 @@ export class MessageRepository {
       .where(
         and(
           eq(messages.contextType, "direct"),
-          eq(messages.contextId, conversationId)
-        )
+          eq(messages.contextId, conversationId),
+        ),
       )
       .orderBy(desc(messages.createdAt))
       .limit(limit)
@@ -77,8 +79,8 @@ export class MessageRepository {
       isEdited: message.isEdited,
       createdAt: new Date(message.createdAt),
       updatedAt: new Date(message.updatedAt),
-      // Legacy compatibility
-      conversationId: message.contextType === "direct" ? message.contextId : undefined,
+      // Legacy compatibility - use conversationId from schema directly
+      conversationId: message.conversationId,
       timestamp: new Date(message.createdAt),
     };
   }

@@ -1,10 +1,10 @@
 import { ChannelRepository } from "../persistence/channel.repository";
 import { Channel } from "../domain/channel.entity";
 import { ChannelMapper } from "../channel.mapper";
-import type { 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelFilterDto 
+import type {
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelFilterDto,
 } from "../../../../shared/types/channel.types";
 
 export class ChannelService {
@@ -31,10 +31,10 @@ export class ChannelService {
 
     // Verificar se já existe canal com esse nome no projeto
     const nameExists = await this.repository.existsByNameInProject(
-      normalizedName, 
-      data.projectId
+      normalizedName,
+      data.projectId,
     );
-    
+
     if (nameExists) {
       throw new Error("Já existe um canal com este nome neste projeto");
     }
@@ -55,7 +55,7 @@ export class ChannelService {
 
   async listChannels(filter?: ChannelFilterDto): Promise<Channel[]> {
     const schemas = await this.repository.findMany(filter);
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 
   async listChannelsByProject(projectId: string): Promise<Channel[]> {
@@ -83,14 +83,14 @@ export class ChannelService {
       }
 
       const normalizedName = Channel.normalizeName(data.name);
-      
+
       // Verificar se novo nome já existe (excluindo o próprio canal)
       const nameExists = await this.repository.existsByNameInProject(
-        normalizedName, 
-        existing.projectId, 
-        data.id
+        normalizedName,
+        existing.projectId,
+        data.id,
       );
-      
+
       if (nameExists) {
         throw new Error("Já existe um canal com este nome neste projeto");
       }
@@ -133,7 +133,10 @@ export class ChannelService {
     await this.repository.delete(id);
   }
 
-  async createDefaultChannelForProject(projectId: string, createdBy: string): Promise<Channel> {
+  async createDefaultChannelForProject(
+    projectId: string,
+    createdBy: string,
+  ): Promise<Channel> {
     // Verificar se já existe canal geral
     const existing = await this.repository.findMany({
       projectId,

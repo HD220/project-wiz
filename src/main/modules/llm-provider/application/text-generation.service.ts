@@ -22,9 +22,11 @@ export class TextGenerationService {
 
   async generateText(
     config: TextGenerationConfig,
-    request: TextGenerationRequest
+    request: TextGenerationRequest,
   ): Promise<string> {
-    const languageModel = await this.getOrInitializeProvider(config.llmProviderId);
+    const languageModel = await this.getOrInitializeProvider(
+      config.llmProviderId,
+    );
 
     const messages: CoreMessage[] = [];
 
@@ -49,16 +51,35 @@ export class TextGenerationService {
     return result.text;
   }
 
-  private async getOrInitializeProvider(providerId: string): Promise<LanguageModel> {
+  private async getOrInitializeProvider(
+    providerId: string,
+  ): Promise<LanguageModel> {
     // Check if provider is already initialized
     if (this.providerRegistry.has(providerId)) {
       return this.providerRegistry.get(providerId)!;
     }
 
     // Get provider configuration from database
-    const llmProvider = await this.llmProviderService.getLlmProviderById(providerId);
-    if (!llmProvider) {
-      throw new Error(`LLM Provider with ID ${providerId} not found`);
+    let llmProvider = await this.llmProviderService.getLlmProviderById(providerId);
+    
+    // If provider not found or is invalid, try to use default provider
+    if (!llmProvider || providerId === "default" || !providerId || providerId.trim() === "") {
+      console.log(`[TextGenerationService] Provider '${providerId}' not found or invalid, trying default provider...`);
+      llmProvider = await this.llmProviderService.getDefaultProvider();
+      
+      if (!llmProvider) {
+        throw new Error("Nenhum provedor LLM configurado. Configure um provedor LLM e defina-o como padrão.");
+      }
+      
+      console.log(`[TextGenerationService] Using default provider: ${llmProvider.name} (${llmProvider.id})`);
+      
+      // Use the default provider ID for caching
+      providerId = llmProvider.id;
+      
+      // Check if default provider is already cached
+      if (this.providerRegistry.has(providerId)) {
+        return this.providerRegistry.get(providerId)!;
+      }
     }
 
     // Create the appropriate provider based on configuration
@@ -106,9 +127,9 @@ export class TextGenerationService {
         {
           messages: [{ role: "user", content: "Hello" }],
           maxTokens: 10,
-        }
+        },
       );
-      return typeof result === 'string' && result.length > 0;
+      return typeof result === "string" && result.length > 0;
     } catch (error) {
       console.error(`Failed to validate provider ${providerId}:`, error);
       return false;

@@ -12,13 +12,16 @@ export class MessageService {
 
   async createMessage(data: CreateMessageDto): Promise<MessageDto> {
     const message = await this.messageRepository.create(data);
-    
+
     // Update conversation's last message time if this is a direct message
     const conversationId = data.contextId || data.conversationId;
-    if (conversationId && (data.contextType === "direct" || data.conversationId)) {
+    if (
+      conversationId &&
+      (data.contextType === "direct" || data.conversationId)
+    ) {
       await this.conversationService.updateLastMessageTime(conversationId);
     }
-    
+
     return message;
   }
 
@@ -29,12 +32,12 @@ export class MessageService {
   async getConversationMessages(
     conversationId: string,
     limit: number = 50,
-    offset: number = 0
+    offset: number = 0,
   ): Promise<MessageDto[]> {
     return await this.messageRepository.findByConversationId(
       conversationId,
       limit,
-      offset
+      offset,
     );
   }
 

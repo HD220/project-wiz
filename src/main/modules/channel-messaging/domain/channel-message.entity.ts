@@ -15,25 +15,37 @@ export class ChannelMessage {
   ) {}
 
   // Validações de lógica de negócio
-  static validateContent(content: string): { isValid: boolean; error?: string } {
+  static validateContent(content: string): {
+    isValid: boolean;
+    error?: string;
+  } {
     if (!content || content.trim().length === 0) {
       return { isValid: false, error: "Conteúdo da mensagem é obrigatório" };
     }
 
     if (content.length > 4000) {
-      return { isValid: false, error: "Mensagem deve ter no máximo 4000 caracteres" };
+      return {
+        isValid: false,
+        error: "Mensagem deve ter no máximo 4000 caracteres",
+      };
     }
 
     return { isValid: true };
   }
 
-  static validateAuthorName(authorName: string): { isValid: boolean; error?: string } {
+  static validateAuthorName(authorName: string): {
+    isValid: boolean;
+    error?: string;
+  } {
     if (!authorName || authorName.trim().length === 0) {
       return { isValid: false, error: "Nome do autor é obrigatório" };
     }
 
     if (authorName.length > 100) {
-      return { isValid: false, error: "Nome do autor deve ter no máximo 100 caracteres" };
+      return {
+        isValid: false,
+        error: "Nome do autor deve ter no máximo 100 caracteres",
+      };
     }
 
     return { isValid: true };
@@ -41,31 +53,31 @@ export class ChannelMessage {
 
   // Métodos de lógica de negócio
   canBeEditedBy(userId: string): boolean {
-    return this.authorId === userId && this.type !== 'system';
+    return this.authorId === userId && this.type !== "system";
   }
 
   canBeDeletedBy(userId: string): boolean {
-    return this.authorId === userId && this.type !== 'system';
+    return this.authorId === userId && this.type !== "system";
   }
 
   isSystemMessage(): boolean {
-    return this.type === 'system';
+    return this.type === "system";
   }
 
   isCodeMessage(): boolean {
-    return this.type === 'code';
+    return this.type === "code";
   }
 
   isFileMessage(): boolean {
-    return this.type === 'file';
+    return this.type === "file";
   }
 
   getDisplayContent(): string {
-    if (this.type === 'system') {
+    if (this.type === "system") {
       return `🤖 ${this.content}`;
     }
-    
-    if (this.type === 'code') {
+
+    if (this.type === "code") {
       return `\`\`\`\n${this.content}\n\`\`\``;
     }
 
@@ -76,8 +88,8 @@ export class ChannelMessage {
   static sanitizeContent(content: string): string {
     return content
       .trim()
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Remove scripts
+      .replace(/<[^>]*>/g, "") // Remove HTML tags
       .substring(0, 4000); // Limitar tamanho
   }
 
@@ -87,17 +99,17 @@ export class ChannelMessage {
     channelId: string,
     authorId: string,
     authorName: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): ChannelMessage {
     return new ChannelMessage(
-      '', // ID será gerado pelo banco
+      "", // ID será gerado pelo banco
       ChannelMessage.sanitizeContent(content),
       channelId,
       authorId,
       authorName,
-      'text',
+      "text",
       false,
-      metadata
+      metadata,
     );
   }
 
@@ -106,34 +118,34 @@ export class ChannelMessage {
     language: string,
     channelId: string,
     authorId: string,
-    authorName: string
+    authorName: string,
   ): ChannelMessage {
     return new ChannelMessage(
-      '', // ID será gerado pelo banco
+      "", // ID será gerado pelo banco
       code,
       channelId,
       authorId,
       authorName,
-      'code',
+      "code",
       false,
-      { language }
+      { language },
     );
   }
 
   static createSystemMessage(
     content: string,
     channelId: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): ChannelMessage {
     return new ChannelMessage(
-      '', // ID será gerado pelo banco
+      "", // ID será gerado pelo banco
       content,
       channelId,
-      'system',
-      'Sistema',
-      'system',
+      "system",
+      "Sistema",
+      "system",
       false,
-      metadata
+      metadata,
     );
   }
 
@@ -142,17 +154,17 @@ export class ChannelMessage {
     fileUrl: string,
     channelId: string,
     authorId: string,
-    authorName: string
+    authorName: string,
   ): ChannelMessage {
     return new ChannelMessage(
-      '', // ID será gerado pelo banco
+      "", // ID será gerado pelo banco
       `Arquivo: ${fileName}`,
       channelId,
       authorId,
       authorName,
-      'file',
+      "file",
       false,
-      { fileName, fileUrl }
+      { fileName, fileUrl },
     );
   }
 
@@ -184,7 +196,7 @@ export class ChannelMessage {
       data.isEdited,
       data.metadata ? JSON.parse(data.metadata) : undefined,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
   }
 }

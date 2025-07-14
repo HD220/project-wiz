@@ -28,7 +28,11 @@ class MessageStore {
 
   getServerSnapshot = () => this.state;
 
-  async loadMessages(conversationId: string, limit?: number, offset?: number): Promise<void> {
+  async loadMessages(
+    conversationId: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
@@ -41,12 +45,14 @@ class MessageStore {
         "dm:message:getByConversation",
         { conversationId, limit, offset },
       )) as MessageDto[];
-      
+
       // Sort messages by timestamp (oldest first) to ensure correct order
-      const sortedMessages = messages.sort((a, b) => 
-        new Date(a.timestamp || a.createdAt).getTime() - new Date(b.timestamp || b.createdAt).getTime()
+      const sortedMessages = messages.sort(
+        (a, b) =>
+          new Date(a.timestamp || a.createdAt).getTime() -
+          new Date(b.timestamp || b.createdAt).getTime(),
       );
-      
+
       this.setState({ messages: sortedMessages, isLoading: false });
     } catch (error) {
       this.setState({

@@ -1,4 +1,4 @@
-import type { ChatMessage } from '../../modules/llm-provider/application/ai-service';
+import type { ChatMessage } from "../../modules/llm-provider/application/ai-service";
 
 export interface IAIService {
   generateResponse(
@@ -8,11 +8,11 @@ export interface IAIService {
       temperature?: number;
       maxTokens?: number;
       systemPrompt?: string;
-    }
+    },
   ): Promise<string>;
-  
+
   validateLlmProviderConfiguration(llmProviderId: string): Promise<boolean>;
-  
+
   streamResponse(
     messages: ChatMessage[],
     llmProviderId?: string,
@@ -20,6 +20,6 @@ export interface IAIService {
       temperature?: number;
       maxTokens?: number;
       systemPrompt?: string;
-    }
+    },
   ): AsyncIterable<string>;
 }

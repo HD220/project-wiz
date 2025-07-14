@@ -28,36 +28,40 @@ function ConversationListSkeleton() {
 }
 
 export function ConversationList({}: ConversationListProps) {
-  const { conversations, isLoading } = useConversations({ participantId: "user" });
+  const { conversations, isLoading } = useConversations({
+    participantId: "user",
+  });
 
   if (isLoading) {
     return <ConversationListSkeleton />;
   }
 
   const getOtherParticipant = (conversation: ConversationDto) => {
-    return conversation.participants.find((p: string) => p !== "user") || "Unknown";
+    return (
+      conversation.participants.find((p: string) => p !== "user") || "Unknown"
+    );
   };
 
   const formatLastMessageTime = (date?: Date) => {
     if (!date) return "";
-    
+
     const now = new Date();
     const diff = now.getTime() - new Date(date).getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days === 0) {
-      return new Date(date).toLocaleTimeString("pt-BR", { 
-        hour: "2-digit", 
-        minute: "2-digit" 
+      return new Date(date).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } else if (days === 1) {
       return "Ontem";
     } else if (days < 7) {
       return `${days}d atrás`;
     } else {
-      return new Date(date).toLocaleDateString("pt-BR", { 
-        day: "2-digit", 
-        month: "2-digit" 
+      return new Date(date).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
       });
     }
   };
@@ -67,7 +71,7 @@ export function ConversationList({}: ConversationListProps) {
       <div className="space-y-1 p-2">
         {conversations.map((conversation) => {
           const otherParticipant = getOtherParticipant(conversation);
-          
+
           return (
             <Link
               key={conversation.id}
@@ -75,7 +79,8 @@ export function ConversationList({}: ConversationListProps) {
               params={{ conversationId: conversation.id }}
               className="block w-full px-2 py-3 text-left rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
               activeProps={{
-                className: "block w-full px-2 py-3 text-left rounded-md transition-colors bg-secondary text-secondary-foreground"
+                className:
+                  "block w-full px-2 py-3 text-left rounded-md transition-colors bg-secondary text-secondary-foreground",
               }}
             >
               <div className="flex items-center">
@@ -87,7 +92,7 @@ export function ConversationList({}: ConversationListProps) {
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="truncate font-medium text-sm">
@@ -107,7 +112,7 @@ export function ConversationList({}: ConversationListProps) {
             </Link>
           );
         })}
-        
+
         {conversations.length === 0 && (
           <div className="text-center text-muted-foreground text-sm py-8">
             Nenhuma conversa encontrada.

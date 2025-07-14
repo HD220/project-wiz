@@ -19,10 +19,14 @@ export class AIMessageService {
     userId: string = "user",
   ): Promise<MessageDto | null> {
     try {
-      console.log('[AIMessageService] Processing user message:', { conversationId, userMessage, userId });
-      
+      console.log("[AIMessageService] Processing user message:", {
+        conversationId,
+        userMessage,
+        userId,
+      });
+
       // 1. Save the user message first
-      console.log('[AIMessageService] Saving user message...');
+      console.log("[AIMessageService] Saving user message...");
       const savedUserMessage = await this.messageService.createMessage({
         content: userMessage,
         senderId: userId,
@@ -32,42 +36,63 @@ export class AIMessageService {
         contextId: conversationId,
         conversationId, // Legacy compatibility
       });
-      console.log('[AIMessageService] User message saved:', savedUserMessage.id);
+      console.log(
+        "[AIMessageService] User message saved:",
+        savedUserMessage.id,
+      );
 
       // 2. Get conversation details to identify the persona
-      console.log('[AIMessageService] Getting conversation details...');
+      console.log("[AIMessageService] Getting conversation details...");
       const conversation =
         await this.conversationService.getConversationById(conversationId);
       if (!conversation) {
-        console.error("[AIMessageService] Conversation not found:", conversationId);
+        console.error(
+          "[AIMessageService] Conversation not found:",
+          conversationId,
+        );
         return null;
       }
-      console.log('[AIMessageService] Conversation found, participants:', conversation.participants);
+      console.log(
+        "[AIMessageService] Conversation found, participants:",
+        conversation.participants,
+      );
 
       // 3. Extract agent ID from conversation participants (assuming format: ['user', 'agentId'])
       const agentId = conversation.participants.find((p) => p !== userId);
       if (!agentId) {
-        console.error("[AIMessageService] No agent found in conversation participants");
+        console.error(
+          "[AIMessageService] No agent found in conversation participants",
+        );
         return null;
       }
-      console.log('[AIMessageService] Agent ID found:', agentId);
+      console.log("[AIMessageService] Agent ID found:", agentId);
 
       // 4. Get agent details (try by ID first, then by name for backward compatibility)
-      console.log('[AIMessageService] Getting agent details...');
+      console.log("[AIMessageService] Getting agent details...");
       let agent = await this.agentService.getAgentById(agentId);
-      
+
       // If not found by ID, try to find by name (for backward compatibility)
       if (!agent) {
-        console.log('[AIMessageService] Agent not found by ID, trying by name...', agentId);
+        console.log(
+          "[AIMessageService] Agent not found by ID, trying by name...",
+          agentId,
+        );
         agent = await this.agentService.getAgentByName(agentId);
       }
-      
+
       if (!agent || !agent.isActive) {
-        console.error("[AIMessageService] Agent not found or inactive:", agentId);
+        console.error(
+          "[AIMessageService] Agent not found or inactive:",
+          agentId,
+        );
         return null;
       }
-      
-      console.log('[AIMessageService] Agent found:', { id: agent.id, name: agent.name, isActive: agent.isActive });
+
+      console.log("[AIMessageService] Agent found:", {
+        id: agent.id,
+        name: agent.name,
+        isActive: agent.isActive,
+      });
 
       // 5. Build conversation context for AI
       const conversationHistory =
@@ -211,19 +236,19 @@ export class AIMessageService {
   async validateAgentForMessaging(agentId: string): Promise<boolean> {
     try {
       let agent = await this.agentService.getAgentById(agentId);
-      
+
       // If not found by ID, try to find by name (for backward compatibility)
       if (!agent) {
         agent = await this.agentService.getAgentByName(agentId);
       }
-      
+
       if (!agent || !agent.isActive) {
         return false;
       }
 
       // Check if the agent's LLM provider is available
       const providers = await this.aiService.getAvailableProviders();
-      return providers.some(p => p.id === agent.llmProviderId);
+      return providers.some((p) => p.id === agent.llmProviderId);
     } catch (error) {
       console.error("Error validating agent for messaging:", error);
       return false;

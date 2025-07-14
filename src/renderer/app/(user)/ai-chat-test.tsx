@@ -14,13 +14,13 @@ function AIChatTestPage() {
           AI Chat Integration Test
         </h1>
         <p className="text-muted-foreground">
-          Esta página permite testar a integração completa do sistema AI Chat 
-          com canais. Configure um LLM Provider nas configurações e teste 
-          todas as funcionalidades.
+          Esta página permite testar a integração completa do sistema AI Chat
+          com canais. Configure um LLM Provider nas configurações e teste todas
+          as funcionalidades.
         </p>
       </div>
 
-      <AIChatExample 
+      <AIChatExample
         channelId={testChannelId}
         authorId={testAuthorId}
         authorName={testAuthorName}

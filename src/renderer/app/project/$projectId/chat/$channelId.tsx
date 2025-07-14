@@ -5,9 +5,9 @@ import { useProjectChannels } from "@/features/communication/hooks/use-channels.
 export function ChannelChatPage() {
   const { projectId, channelId } = Route.useParams();
   const { channels } = useProjectChannels(projectId);
-  
+
   // Find the current channel to get its real name
-  const currentChannel = channels.find(ch => ch.id === channelId);
+  const currentChannel = channels.find((ch) => ch.id === channelId);
 
   return (
     <ChatContainer

@@ -46,7 +46,11 @@ INSTRUÇÕES:
     return backstory.length >= 10 && backstory.length <= 2000;
   }
 
-  static validateLlmConfig(llmProviderId: string, temperature: number, maxTokens: number): { isValid: boolean; error?: string } {
+  static validateLlmConfig(
+    llmProviderId: string,
+    temperature: number,
+    maxTokens: number,
+  ): { isValid: boolean; error?: string } {
     if (!llmProviderId) {
       return { isValid: false, error: "LLM Provider é obrigatório" };
     }
@@ -73,22 +77,38 @@ INSTRUÇÕES:
     maxTokens: number;
   }): { isValid: boolean; error?: string } {
     if (!Agent.validateName(data.name)) {
-      return { isValid: false, error: "Nome deve ter entre 2 e 100 caracteres" };
+      return {
+        isValid: false,
+        error: "Nome deve ter entre 2 e 100 caracteres",
+      };
     }
 
     if (!Agent.validateRole(data.role)) {
-      return { isValid: false, error: "Papel deve ter entre 2 e 200 caracteres" };
+      return {
+        isValid: false,
+        error: "Papel deve ter entre 2 e 200 caracteres",
+      };
     }
 
     if (!Agent.validateGoal(data.goal)) {
-      return { isValid: false, error: "Goal deve ter entre 10 e 1000 caracteres" };
+      return {
+        isValid: false,
+        error: "Goal deve ter entre 10 e 1000 caracteres",
+      };
     }
 
     if (!Agent.validateBackstory(data.backstory)) {
-      return { isValid: false, error: "Backstory deve ter entre 10 e 2000 caracteres" };
+      return {
+        isValid: false,
+        error: "Backstory deve ter entre 10 e 2000 caracteres",
+      };
     }
 
-    const llmValidation = Agent.validateLlmConfig(data.llmProviderId, data.temperature, data.maxTokens);
+    const llmValidation = Agent.validateLlmConfig(
+      data.llmProviderId,
+      data.temperature,
+      data.maxTokens,
+    );
     if (!llmValidation.isValid) {
       return llmValidation;
     }
@@ -110,25 +130,41 @@ INSTRUÇÕES:
   }): { isValid: boolean; agent?: Agent; error?: string } {
     // Validate all fields
     if (!Agent.validateName(data.name)) {
-      return { isValid: false, error: "Nome deve ter entre 2 e 100 caracteres" };
+      return {
+        isValid: false,
+        error: "Nome deve ter entre 2 e 100 caracteres",
+      };
     }
 
     if (!Agent.validateRole(data.role)) {
-      return { isValid: false, error: "Papel deve ter entre 2 e 200 caracteres" };
+      return {
+        isValid: false,
+        error: "Papel deve ter entre 2 e 200 caracteres",
+      };
     }
 
     if (!Agent.validateGoal(data.goal)) {
-      return { isValid: false, error: "Objetivo deve ter entre 10 e 1000 caracteres" };
+      return {
+        isValid: false,
+        error: "Objetivo deve ter entre 10 e 1000 caracteres",
+      };
     }
 
     if (!Agent.validateBackstory(data.backstory)) {
-      return { isValid: false, error: "Background deve ter entre 10 e 2000 caracteres" };
+      return {
+        isValid: false,
+        error: "Background deve ter entre 10 e 2000 caracteres",
+      };
     }
 
     const temperature = data.temperature ?? 0.7;
     const maxTokens = data.maxTokens ?? 1000;
 
-    const llmValidation = Agent.validateLlmConfig(data.llmProviderId, temperature, maxTokens);
+    const llmValidation = Agent.validateLlmConfig(
+      data.llmProviderId,
+      temperature,
+      maxTokens,
+    );
     if (!llmValidation.isValid) {
       return { isValid: false, error: llmValidation.error };
     }
@@ -150,7 +186,12 @@ INSTRUÇÕES:
   }
 
   // Update methods
-  updateIdentity(name?: string, role?: string, goal?: string, backstory?: string): Agent {
+  updateIdentity(
+    name?: string,
+    role?: string,
+    goal?: string,
+    backstory?: string,
+  ): Agent {
     const newName = name ?? this.name;
     const newRole = role ?? this.role;
     const newGoal = goal ?? this.goal;
@@ -184,16 +225,24 @@ INSTRUÇÕES:
       this.isActive,
       this.isDefault,
       this.createdAt,
-      new Date()
+      new Date(),
     );
   }
 
-  updateLlmConfig(llmProviderId?: string, temperature?: number, maxTokens?: number): Agent {
+  updateLlmConfig(
+    llmProviderId?: string,
+    temperature?: number,
+    maxTokens?: number,
+  ): Agent {
     const newLlmProviderId = llmProviderId ?? this.llmProviderId;
     const newTemperature = temperature ?? this.temperature;
     const newMaxTokens = maxTokens ?? this.maxTokens;
 
-    const validation = Agent.validateLlmConfig(newLlmProviderId, newTemperature, newMaxTokens);
+    const validation = Agent.validateLlmConfig(
+      newLlmProviderId,
+      newTemperature,
+      newMaxTokens,
+    );
     if (!validation.isValid) {
       throw new Error(validation.error);
     }
@@ -210,7 +259,7 @@ INSTRUÇÕES:
       this.isActive,
       this.isDefault,
       this.createdAt,
-      new Date()
+      new Date(),
     );
   }
 
@@ -227,7 +276,7 @@ INSTRUÇÕES:
       true,
       this.isDefault,
       this.createdAt,
-      new Date()
+      new Date(),
     );
   }
 
@@ -244,7 +293,7 @@ INSTRUÇÕES:
       false,
       this.isDefault,
       this.createdAt,
-      new Date()
+      new Date(),
     );
   }
 }

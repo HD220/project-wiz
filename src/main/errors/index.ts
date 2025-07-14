@@ -1,14 +1,14 @@
 // Central export for all error classes
-export { BaseError, type ErrorMetadata } from './base.error';
-export { ApplicationError } from './application.error';
-export { DomainError } from './domain.error';
-export { NotFoundError } from './not-found.error';
-export { ValidationError, type ValidationIssue } from './validation.error';
+export { BaseError, type ErrorMetadata } from "./base.error";
+export { ApplicationError } from "./application.error";
+export { DomainError } from "./domain.error";
+export { NotFoundError } from "./not-found.error";
+export { ValidationError, type ValidationIssue } from "./validation.error";
 
 // Import the error classes for internal use
-import { BaseError } from './base.error';
-import { ValidationError } from './validation.error';
-import { NotFoundError } from './not-found.error';
+import { BaseError } from "./base.error";
+import { ValidationError } from "./validation.error";
+import { NotFoundError } from "./not-found.error";
 
 // Error handling utilities
 export class ErrorHandler {
@@ -26,12 +26,12 @@ export class ErrorHandler {
     if (error instanceof BaseError) {
       return error.getUserMessage();
     }
-    
+
     if (error instanceof Error) {
-      return 'An unexpected error occurred. Please try again.';
+      return "An unexpected error occurred. Please try again.";
     }
-    
-    return 'An unknown error occurred.';
+
+    return "An unknown error occurred.";
   }
 
   /**
@@ -39,13 +39,13 @@ export class ErrorHandler {
    */
   static logError(error: unknown, logger: any): void {
     if (error instanceof ValidationError) {
-      logger.warn('Validation error:', (error as ValidationError).toJSON());
+      logger.warn("Validation error:", (error as ValidationError).toJSON());
     } else if (error instanceof NotFoundError) {
-      logger.info('Resource not found:', (error as NotFoundError).toJSON());
+      logger.info("Resource not found:", (error as NotFoundError).toJSON());
     } else if (error instanceof BaseError) {
-      logger.error('Application error:', (error as BaseError).toJSON());
+      logger.error("Application error:", (error as BaseError).toJSON());
     } else {
-      logger.error('Unexpected error:', error);
+      logger.error("Unexpected error:", error);
     }
   }
 
@@ -89,8 +89,8 @@ export class ErrorHandler {
     return {
       success: false,
       error: {
-        name: 'UnknownError',
-        message: 'An unexpected error occurred.',
+        name: "UnknownError",
+        message: "An unexpected error occurred.",
       },
     };
   }

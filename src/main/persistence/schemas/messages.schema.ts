@@ -17,11 +17,15 @@ export const messages = sqliteTable("messages", {
   // Additional fields for compatibility with messaging module
   contextType: text("context_type", {
     enum: ["direct", "channel", "group"],
-  }).notNull().default("direct"),
+  })
+    .notNull()
+    .default("direct"),
   contextId: text("context_id").notNull(),
   type: text("type", {
     enum: ["text", "code", "file", "system"],
-  }).notNull().default("text"),
+  })
+    .notNull()
+    .default("text"),
   metadata: text("metadata"), // JSON string for additional data
   isEdited: integer("is_edited", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at")

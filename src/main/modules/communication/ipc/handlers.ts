@@ -1,11 +1,11 @@
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
 import { ChannelService } from "../application/channel.service";
 import { ChannelMapper } from "../channel.mapper";
-import type { 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelDto, 
-  ChannelFilterDto 
+import type {
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelDto,
+  ChannelFilterDto,
 } from "../../../../shared/types/channel.types";
 
 export class ChannelIpcHandlers {
@@ -17,12 +17,18 @@ export class ChannelIpcHandlers {
   registerHandlers(): void {
     ipcMain.handle("channel:create", this.handleCreateChannel.bind(this));
     ipcMain.handle("channel:list", this.handleListChannels.bind(this));
-    ipcMain.handle("channel:listByProject", this.handleListChannelsByProject.bind(this));
+    ipcMain.handle(
+      "channel:listByProject",
+      this.handleListChannelsByProject.bind(this),
+    );
     ipcMain.handle("channel:getById", this.handleGetChannelById.bind(this));
     ipcMain.handle("channel:update", this.handleUpdateChannel.bind(this));
     ipcMain.handle("channel:archive", this.handleArchiveChannel.bind(this));
     ipcMain.handle("channel:delete", this.handleDeleteChannel.bind(this));
-    ipcMain.handle("channel:createDefault", this.handleCreateDefaultChannel.bind(this));
+    ipcMain.handle(
+      "channel:createDefault",
+      this.handleCreateDefaultChannel.bind(this),
+    );
   }
 
   private async handleCreateChannel(
@@ -54,10 +60,13 @@ export class ChannelIpcHandlers {
     projectId: string,
   ): Promise<ChannelDto[]> {
     try {
-      const channels = await this.channelService.listChannelsByProject(projectId);
+      const channels =
+        await this.channelService.listChannelsByProject(projectId);
       return this.channelMapper.entityToDtoArray(channels);
     } catch (error) {
-      throw new Error(`Failed to list channels by project: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to list channels by project: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -114,10 +123,15 @@ export class ChannelIpcHandlers {
     createdBy: string,
   ): Promise<ChannelDto> {
     try {
-      const channel = await this.channelService.createDefaultChannelForProject(projectId, createdBy);
+      const channel = await this.channelService.createDefaultChannelForProject(
+        projectId,
+        createdBy,
+      );
       return this.channelMapper.toDto(channel);
     } catch (error) {
-      throw new Error(`Failed to create default channel: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to create default channel: ${(error as Error).message}`,
+      );
     }
   }
 }

@@ -1,4 +1,4 @@
-import { logger } from '../logger';
+import { logger } from "../logger";
 
 export interface IEvent {
   type: string;
@@ -7,7 +7,9 @@ export interface IEvent {
   timestamp?: Date;
 }
 
-export type EventListener<T extends IEvent> = (event: T) => void | Promise<void>;
+export type EventListener<T extends IEvent> = (
+  event: T,
+) => void | Promise<void>;
 
 export class EventBus {
   private static instance: EventBus;
@@ -51,7 +53,7 @@ export class EventBus {
     const eventListeners = this.listeners.get(event.type);
     if (eventListeners && eventListeners.length > 0) {
       logger.debug(`Publishing event: ${event.type}`, { eventId: event.id });
-      
+
       // Execute all listeners, handling both sync and async
       const promises = eventListeners.map(async (listener) => {
         try {

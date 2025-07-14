@@ -33,28 +33,36 @@ export function useConversations(filter?: ConversationFilterDto) {
     loadInitialConversations();
   }, []);
 
-  const mutations = useMemo(() => ({
-    createConversation: (data: CreateConversationDto) => conversationStore.createConversation(data),
-    findOrCreateDirectMessage: (participants: string[]) => 
-      conversationStore.findOrCreateDirectMessage(participants),
-    setSelectedConversation: (conversation: ConversationDto | null) =>
-      conversationStore.setSelectedConversation(conversation),
-  }), []);
+  const mutations = useMemo(
+    () => ({
+      createConversation: (data: CreateConversationDto) =>
+        conversationStore.createConversation(data),
+      findOrCreateDirectMessage: (participants: string[]) =>
+        conversationStore.findOrCreateDirectMessage(participants),
+      setSelectedConversation: (conversation: ConversationDto | null) =>
+        conversationStore.setSelectedConversation(conversation),
+    }),
+    [],
+  );
 
-  const queries = useMemo(() => ({
-    loadConversations: (newFilter?: ConversationFilterDto) => 
-      conversationStore.loadConversations(newFilter || filterRef.current),
-    getConversationById: (id: string) => 
-      conversationStore.getConversationById(id),
-    refreshConversations: () => conversationStore.loadConversations(filterRef.current),
-  }), []);
+  const queries = useMemo(
+    () => ({
+      loadConversations: (newFilter?: ConversationFilterDto) =>
+        conversationStore.loadConversations(newFilter || filterRef.current),
+      getConversationById: (id: string) =>
+        conversationStore.getConversationById(id),
+      refreshConversations: () =>
+        conversationStore.loadConversations(filterRef.current),
+    }),
+    [],
+  );
 
   return {
     conversations: state.conversations,
     isLoading: state.isLoading,
     error: state.error,
     selectedConversation: state.selectedConversation,
-    
+
     ...mutations,
     ...queries,
   };

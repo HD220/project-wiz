@@ -1,5 +1,5 @@
-import { IModule, IModuleContainer } from './interfaces/module.interface';
-import { EventBus, IEvent, EventListener } from './event-bus';
+import { IModule, IModuleContainer } from "./interfaces/module.interface";
+import { EventBus, IEvent, EventListener } from "./event-bus";
 
 export abstract class BaseModule implements IModule {
   protected initialized = false;
@@ -16,12 +16,12 @@ export abstract class BaseModule implements IModule {
 
   abstract getName(): string;
   abstract getDependencies(): string[];
-  
+
   async initialize(): Promise<void> {
     if (this.initialized) {
       return;
     }
-    
+
     await this.onInitialize();
     this.subscribeToEvents();
     this.initialized = true;
@@ -29,9 +29,11 @@ export abstract class BaseModule implements IModule {
 
   registerIpcHandlers(): void {
     if (!this.initialized) {
-      throw new Error(`Module ${this.getName()} must be initialized before registering IPC handlers`);
+      throw new Error(
+        `Module ${this.getName()} must be initialized before registering IPC handlers`,
+      );
     }
-    
+
     this.onRegisterIpcHandlers();
   }
 
@@ -49,7 +51,7 @@ export abstract class BaseModule implements IModule {
 
   protected subscribeToEvent<T extends IEvent>(
     eventType: T["type"],
-    listener: EventListener<T>
+    listener: EventListener<T>,
   ): void {
     this.eventBus.subscribe(eventType, listener);
   }

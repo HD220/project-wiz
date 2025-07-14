@@ -3,7 +3,7 @@ import { llmProviderStore } from "../stores/llm-provider.store";
 import type {
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
-  LlmProviderFilterDto
+  LlmProviderFilterDto,
 } from "../../../../shared/types/llm-provider.types";
 import { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
 
@@ -29,42 +29,52 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
     loadInitialLlmProviders();
   }, []);
 
-  const mutations = useMemo(() => ({
-    createLlmProvider: (data: CreateLlmProviderDto) =>
-      llmProviderStore.createLlmProvider(data),
+  const mutations = useMemo(
+    () => ({
+      createLlmProvider: (data: CreateLlmProviderDto) =>
+        llmProviderStore.createLlmProvider(data),
 
-    updateLlmProvider: (data: UpdateLlmProviderDto) =>
-      llmProviderStore.updateLlmProvider(data),
+      updateLlmProvider: (data: UpdateLlmProviderDto) =>
+        llmProviderStore.updateLlmProvider(data),
 
-    deleteLlmProvider: (id: string) =>
-      llmProviderStore.deleteLlmProvider(id),
+      deleteLlmProvider: (id: string) => llmProviderStore.deleteLlmProvider(id),
 
-    setSelectedLlmProvider: (llmProvider: LlmProviderDto | null) =>
-      llmProviderStore.setSelectedLlmProvider(llmProvider),
+      setSelectedLlmProvider: (llmProvider: LlmProviderDto | null) =>
+        llmProviderStore.setSelectedLlmProvider(llmProvider),
 
-    clearError: () => llmProviderStore.clearError(),
-  }), []);
+      clearError: () => llmProviderStore.clearError(),
+    }),
+    [],
+  );
 
-  const queries = useMemo(() => ({
-    loadLlmProviders: (newFilter?: LlmProviderFilterDto, forceReload?: boolean) =>
-      llmProviderStore.loadLlmProviders(newFilter || filterRef.current, forceReload),
+  const queries = useMemo(
+    () => ({
+      loadLlmProviders: (
+        newFilter?: LlmProviderFilterDto,
+        forceReload?: boolean,
+      ) =>
+        llmProviderStore.loadLlmProviders(
+          newFilter || filterRef.current,
+          forceReload,
+        ),
 
-    getLlmProviderById: (id: string) =>
-      llmProviderStore.getLlmProviderById(id),
+      getLlmProviderById: (id: string) =>
+        llmProviderStore.getLlmProviderById(id),
 
-    getDefaultProvider: () =>
-      llmProviderStore.getDefaultProvider(),
+      getDefaultProvider: () => llmProviderStore.getDefaultProvider(),
 
-    setDefaultProvider: (id: string) =>
-      llmProviderStore.setDefaultProvider(id),
+      setDefaultProvider: (id: string) =>
+        llmProviderStore.setDefaultProvider(id),
 
-    refetch: () =>
-      llmProviderStore.loadLlmProviders(filterRef.current, true),
-  }), []);
+      refetch: () => llmProviderStore.loadLlmProviders(filterRef.current, true),
+    }),
+    [],
+  );
 
   // Computed properties for compatibility
   const providers = state.llmProviders;
-  const defaultProvider = providers.find(p => p.isDefault) || providers[0] || null;
+  const defaultProvider =
+    providers.find((p) => p.isDefault) || providers[0] || null;
 
   return {
     llmProviders: state.llmProviders,

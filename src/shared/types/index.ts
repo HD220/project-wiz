@@ -1,16 +1,16 @@
 // Central export for all shared types
-export * from './agent.types';
-export * from './llm-provider.types';
-export * from './message.types';
-export * from './project.types';
+export * from "./agent.types";
+export * from "./llm-provider.types";
+export * from "./message.types";
+export * from "./project.types";
 
 // Re-export channel types to avoid conflicts
 export {
   ChannelDto,
   CreateChannelDto,
   UpdateChannelDto,
-  ChannelFilterDto
-} from './channel.types';
+  ChannelFilterDto,
+} from "./channel.types";
 
 // Re-export channel message types to avoid conflicts
 export {
@@ -24,5 +24,5 @@ export {
   AISendMessageRequestDto,
   AISendMessageResponseDto,
   AIRegenerateMessageRequestDto,
-  AIChatConfigDto
-} from './channel-message.types';
+  AIChatConfigDto,
+} from "./channel-message.types";

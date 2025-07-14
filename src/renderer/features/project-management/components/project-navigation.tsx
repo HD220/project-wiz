@@ -45,7 +45,6 @@ export function ProjectNavigation({
     channel.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-
   return (
     <div className="w-full bg-card border-r border-border flex flex-col h-full overflow-hidden">
       {/* Project Header */}
@@ -77,45 +76,45 @@ export function ProjectNavigation({
           {/* Navigation Items */}
           <div className="space-y-0.5 mb-4">
             <CustomLink
-              to="/project/$projectId" 
+              to="/project/$projectId"
               params={{ projectId }}
               className="w-full justify-start px-2 py-1.5 h-auto"
               activeOptions={{ exact: true }}
-              activeProps={{ 
-                className: "bg-secondary text-secondary-foreground" 
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
               }}
             >
               <Home className="w-4 h-4 mr-2 text-muted-foreground" />
               <span>Dashboard</span>
             </CustomLink>
             <CustomLink
-              to="/project/$projectId/agents" 
+              to="/project/$projectId/agents"
               params={{ projectId }}
               className="w-full justify-start px-2 py-1.5 h-auto"
-              activeProps={{ 
-                className: "bg-secondary text-secondary-foreground" 
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
               }}
             >
               <Users className="w-4 h-4 mr-2 text-muted-foreground" />
               <span>Agentes</span>
             </CustomLink>
             <CustomLink
-              to="/project/$projectId/tasks" 
+              to="/project/$projectId/tasks"
               params={{ projectId }}
               className="w-full justify-start px-2 py-1.5 h-auto"
-              activeProps={{ 
-                className: "bg-secondary text-secondary-foreground" 
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
               }}
             >
               <CheckSquare className="w-4 h-4 mr-2 text-muted-foreground" />
               <span>Tarefas</span>
             </CustomLink>
             <CustomLink
-              to="/project/$projectId/docs" 
+              to="/project/$projectId/docs"
               params={{ projectId }}
               className="w-full justify-start px-2 py-1.5 h-auto"
-              activeProps={{ 
-                className: "bg-secondary text-secondary-foreground" 
+              activeProps={{
+                className: "bg-secondary text-secondary-foreground",
               }}
             >
               <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -151,11 +150,11 @@ export function ProjectNavigation({
               {filteredChannels.map((channel) => (
                 <CustomLink
                   key={channel.id}
-                  to="/project/$projectId/chat/$channelId" 
+                  to="/project/$projectId/chat/$channelId"
                   params={{ projectId, channelId: channel.id }}
                   className="w-full justify-start px-2 py-1.5 h-auto"
-                  activeProps={{ 
-                    className: "bg-secondary text-secondary-foreground" 
+                  activeProps={{
+                    className: "bg-secondary text-secondary-foreground",
                   }}
                 >
                   <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -165,7 +164,6 @@ export function ProjectNavigation({
               ))}
             </CollapsibleContent>
           </Collapsible>
-
         </div>
       </ScrollArea>
 

@@ -1,5 +1,9 @@
-import type { Agent } from '../../modules/agent-management/domain/agent.entity';
-import type { CreateAgentDto, UpdateAgentDto, AgentFilterDto } from '../../../shared/types/agent.types';
+import type { Agent } from "../../modules/agent-management/domain/agent.entity";
+import type {
+  CreateAgentDto,
+  UpdateAgentDto,
+  AgentFilterDto,
+} from "../../../shared/types/agent.types";
 
 export interface IAgentService {
   createAgent(data: CreateAgentDto): Promise<Agent>;

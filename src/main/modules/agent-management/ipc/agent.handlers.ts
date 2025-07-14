@@ -75,7 +75,7 @@ export class AgentIpcHandlers {
     ipcMain.handle("agent:list", async (_, filter) => {
       try {
         const agents = await this.agentService.getAllAgents(filter);
-        return agents.map(agent => this.mapAgentToDto(agent));
+        return agents.map((agent) => this.mapAgentToDto(agent));
       } catch (error) {
         console.error("Error listing agents:", error);
         throw error;
@@ -86,7 +86,7 @@ export class AgentIpcHandlers {
     ipcMain.handle("agent:listActive", async () => {
       try {
         const agents = await this.agentService.getActiveAgents();
-        return agents.map(agent => this.mapAgentToDto(agent));
+        return agents.map((agent) => this.mapAgentToDto(agent));
       } catch (error) {
         console.error("Error getting active agents:", error);
         throw error;

@@ -1,6 +1,10 @@
 import { eq, and, desc } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { llmProviders, type LlmProviderSchema, type CreateLlmProviderSchema } from "../../../persistence/schemas";
+import {
+  llmProviders,
+  type LlmProviderSchema,
+  type CreateLlmProviderSchema,
+} from "../../../persistence/schemas";
 import type { LlmProviderFilterDto } from "../../../../shared/types/llm-provider.types";
 
 export class LlmProviderRepository {
@@ -52,7 +56,10 @@ export class LlmProviderRepository {
     return llmProvider || null;
   }
 
-  async update(id: string, data: Partial<CreateLlmProviderSchema>): Promise<LlmProviderSchema> {
+  async update(
+    id: string,
+    data: Partial<CreateLlmProviderSchema>,
+  ): Promise<LlmProviderSchema> {
     const [updated] = await db
       .update(llmProviders)
       .set({

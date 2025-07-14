@@ -1,8 +1,8 @@
-import { BaseModule } from '../../kernel/base-module';
-import { ChannelRepository } from './persistence/channel.repository';
-import { ChannelService } from './application/channel.service';
-import { ChannelMapper } from './channel.mapper';
-import { ChannelIpcHandlers } from './ipc/handlers';
+import { BaseModule } from "../../kernel/base-module";
+import { ChannelRepository } from "./persistence/channel.repository";
+import { ChannelService } from "./application/channel.service";
+import { ChannelMapper } from "./channel.mapper";
+import { ChannelIpcHandlers } from "./ipc/handlers";
 
 export class CommunicationModule extends BaseModule {
   private channelRepository!: ChannelRepository;
@@ -11,7 +11,7 @@ export class CommunicationModule extends BaseModule {
   private channelIpcHandlers!: ChannelIpcHandlers;
 
   getName(): string {
-    return 'communication';
+    return "communication";
   }
 
   getDependencies(): string[] {
@@ -21,7 +21,10 @@ export class CommunicationModule extends BaseModule {
   protected async onInitialize(): Promise<void> {
     this.channelRepository = new ChannelRepository();
     this.channelMapper = new ChannelMapper();
-    this.channelService = new ChannelService(this.channelRepository, this.channelMapper);
+    this.channelService = new ChannelService(
+      this.channelRepository,
+      this.channelMapper,
+    );
     this.channelIpcHandlers = new ChannelIpcHandlers(
       this.channelService,
       this.channelMapper,
@@ -35,14 +38,14 @@ export class CommunicationModule extends BaseModule {
   // Public getters for other modules
   getChannelService(): ChannelService {
     if (!this.isInitialized()) {
-      throw new Error('CommunicationModule must be initialized first');
+      throw new Error("CommunicationModule must be initialized first");
     }
     return this.channelService;
   }
 
   getChannelRepository(): ChannelRepository {
     if (!this.isInitialized()) {
-      throw new Error('CommunicationModule must be initialized first');
+      throw new Error("CommunicationModule must be initialized first");
     }
     return this.channelRepository;
   }

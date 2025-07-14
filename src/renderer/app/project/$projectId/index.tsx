@@ -18,7 +18,7 @@ export function ProjectIndexPage() {
   const { projectId } = Route.useParams();
   const [currentProject, setCurrentProject] = useState<ProjectDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const { getProjectById } = useProjects();
 
   useEffect(() => {
@@ -47,7 +47,9 @@ export function ProjectIndexPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{currentProject.name}</h1>
-          <p className="text-muted-foreground">{currentProject.description || "Visão geral do projeto"}</p>
+          <p className="text-muted-foreground">
+            {currentProject.description || "Visão geral do projeto"}
+          </p>
         </div>
         <Button variant="outline" size="sm">
           <Settings className="w-4 h-4 mr-2" />

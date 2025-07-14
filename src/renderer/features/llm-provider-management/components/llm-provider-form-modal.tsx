@@ -22,8 +22,16 @@ import { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
 import { useNavigate } from "@tanstack/react-router";
 
 const SUPPORTED_PROVIDERS = [
-  { value: "openai", label: "OpenAI", models: ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"] },
-  { value: "deepseek", label: "DeepSeek", models: ["deepseek-chat", "deepseek-coder"] },
+  {
+    value: "openai",
+    label: "OpenAI",
+    models: ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"],
+  },
+  {
+    value: "deepseek",
+    label: "DeepSeek",
+    models: ["deepseek-chat", "deepseek-coder"],
+  },
   { value: "custom", label: "Custom Provider", models: [] },
 ];
 
@@ -60,7 +68,9 @@ export function LlmProviderFormModal({
         isDefault: provider.isDefault,
       });
       setSelectedProvider(provider.provider);
-      const providerConfig = SUPPORTED_PROVIDERS.find(p => p.value === provider.provider);
+      const providerConfig = SUPPORTED_PROVIDERS.find(
+        (p) => p.value === provider.provider,
+      );
       setAvailableModels(providerConfig?.models || []);
     } else {
       setFormData({
@@ -83,8 +93,8 @@ export function LlmProviderFormModal({
   const handleProviderChange = (value: string) => {
     setSelectedProvider(value);
     setFormData((prev) => ({ ...prev, provider: value, model: "" }));
-    
-    const providerConfig = SUPPORTED_PROVIDERS.find(p => p.value === value);
+
+    const providerConfig = SUPPORTED_PROVIDERS.find((p) => p.value === value);
     setAvailableModels(providerConfig?.models || []);
   };
 
@@ -110,17 +120,20 @@ export function LlmProviderFormModal({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
-            <Input 
-              id="name" 
-              value={formData.name} 
+            <Input
+              id="name"
+              value={formData.name}
               onChange={handleChange}
               placeholder="My AI Provider"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label>Provider</Label>
-            <Select value={selectedProvider} onValueChange={handleProviderChange}>
+            <Select
+              value={selectedProvider}
+              onValueChange={handleProviderChange}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a provider" />
               </SelectTrigger>
@@ -150,15 +163,15 @@ export function LlmProviderFormModal({
                 </SelectContent>
               </Select>
             ) : (
-              <Input 
-                id="model" 
-                value={formData.model} 
+              <Input
+                id="model"
+                value={formData.model}
                 onChange={handleChange}
                 placeholder="Enter custom model name"
               />
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="apiKey">API Key</Label>
             <Input
@@ -169,13 +182,16 @@ export function LlmProviderFormModal({
               placeholder="sk-..."
             />
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="isDefault" 
+            <Checkbox
+              id="isDefault"
               checked={formData.isDefault}
-              onCheckedChange={(checked) => 
-                setFormData(prev => ({ ...prev, isDefault: checked as boolean }))
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isDefault: checked as boolean,
+                }))
               }
             />
             <Label htmlFor="isDefault" className="text-sm font-normal">

@@ -31,12 +31,16 @@ export function ChatContainer({
   const [isSending, setIsSending] = useState(false);
 
   // Use channel messages hook only for channel chat (not agent chat)
-  const channelMessagesHook = channelId ? useChannelMessagesById(channelId) : null;
-  
+  const channelMessagesHook = channelId
+    ? useChannelMessagesById(channelId)
+    : null;
+
   // For agent chat, continue using placeholder data
   const agentMessages: Message[] = [];
 
-  const messages = channelId ? channelMessagesHook?.messages || [] : agentMessages;
+  const messages = channelId
+    ? channelMessagesHook?.messages || []
+    : agentMessages;
 
   const handleSend = async () => {
     if (!message.trim() || isSending) return;
@@ -47,8 +51,8 @@ export function ChatContainer({
       try {
         await channelMessagesHook.sendTextMessage(
           message.trim(),
-          'current-user-id', // TODO: Get from user context
-          'João Silva' // TODO: Get from user context
+          "current-user-id", // TODO: Get from user context
+          "João Silva", // TODO: Get from user context
         );
         setMessage("");
       } catch (error) {
@@ -120,11 +124,13 @@ export function ChatContainer({
                 <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
                   <Hash className="w-8 h-8 text-destructive" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-destructive">Erro ao carregar mensagens</h3>
+                <h3 className="font-semibold text-lg mb-2 text-destructive">
+                  Erro ao carregar mensagens
+                </h3>
                 <p className="text-muted-foreground">{error}</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="mt-4"
                   onClick={() => channelMessagesHook?.refetch()}
                 >
@@ -154,8 +160,8 @@ export function ChatContainer({
             ) : (
               messages.map((msg) => {
                 // Convert ChannelMessageDto to MessageItem format
-                const isChannelMessage = 'channelId' in msg;
-                
+                const isChannelMessage = "channelId" in msg;
+
                 if (isChannelMessage) {
                   const channelMsg = msg as ChannelMessageDto;
                   return (
@@ -166,9 +172,14 @@ export function ChatContainer({
                         content: channelMsg.content,
                         senderId: channelMsg.authorId,
                         senderName: channelMsg.authorName,
-                        senderType: channelMsg.authorId === 'system' ? "system" : 
-                                   channelMsg.authorId.startsWith("agent-") ? "agent" : "user",
-                        messageType: channelMsg.type === "code" ? "code" : "text",
+                        senderType:
+                          channelMsg.authorId === "system"
+                            ? "system"
+                            : channelMsg.authorId.startsWith("agent-")
+                              ? "agent"
+                              : "user",
+                        messageType:
+                          channelMsg.type === "code" ? "code" : "text",
                         timestamp: channelMsg.createdAt,
                         isEdited: channelMsg.isEdited,
                         mentions: [], // TODO: Implement mentions
@@ -198,13 +209,20 @@ export function ChatContainer({
                         content: legacyMsg.content,
                         senderId: legacyMsg.authorId,
                         senderName: legacyMsg.authorName,
-                        senderType: legacyMsg.authorId.startsWith("agent-") ? "agent" : "user",
-                        messageType: legacyMsg.type === "code" ? "text" : (legacyMsg.type as any),
+                        senderType: legacyMsg.authorId.startsWith("agent-")
+                          ? "agent"
+                          : "user",
+                        messageType:
+                          legacyMsg.type === "code"
+                            ? "text"
+                            : (legacyMsg.type as any),
                         timestamp: legacyMsg.timestamp,
                         isEdited: legacyMsg.edited || false,
                         mentions: legacyMsg.mentions || [],
                       }}
-                      onEdit={(id, content) => console.log("Edit:", id, content)}
+                      onEdit={(id, content) =>
+                        console.log("Edit:", id, content)
+                      }
                       onDelete={(id) => console.log("Delete:", id)}
                       onReply={(id) => console.log("Reply:", id)}
                       showActions={true}

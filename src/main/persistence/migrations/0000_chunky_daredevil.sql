@@ -8,6 +8,7 @@ CREATE TABLE `agents` (
 	`temperature` real DEFAULT 0.7 NOT NULL,
 	`max_tokens` integer DEFAULT 1000 NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
+	`is_default` integer DEFAULT false NOT NULL,
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL
 );
@@ -28,12 +29,12 @@ CREATE TABLE `channel_messages` (
 CREATE TABLE `channels` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`description` text,
 	`project_id` text NOT NULL,
-	`is_private` integer DEFAULT false NOT NULL,
 	`created_by` text NOT NULL,
-	`created_at` text NOT NULL,
-	`updated_at` text NOT NULL
+	`description` text,
+	`is_private` integer DEFAULT false NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `conversations` (
@@ -44,49 +45,31 @@ CREATE TABLE `conversations` (
 	`created_at` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `messages` (
-	`id` text PRIMARY KEY NOT NULL,
-	`content` text NOT NULL,
-	`sender_id` text NOT NULL,
-	`sender_name` text NOT NULL,
-	`sender_type` text NOT NULL,
-	`context_type` text NOT NULL,
-	`context_id` text NOT NULL,
-	`type` text DEFAULT 'text' NOT NULL,
-	`metadata` text,
-	`is_edited` integer DEFAULT false NOT NULL,
-	`created_at` text NOT NULL,
-	`updated_at` text NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE `llm_providers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`provider` text NOT NULL,
 	`model` text NOT NULL,
 	`api_key` text NOT NULL,
-	`is_default` integer DEFAULT 0,
+	`is_default` integer DEFAULT false,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `personas` (
+CREATE TABLE `messages` (
 	`id` text PRIMARY KEY NOT NULL,
-	`nome` text NOT NULL,
-	`papel` text NOT NULL,
-	`goal` text NOT NULL,
-	`backstory` text NOT NULL,
-	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE `project_personas` (
-	`project_id` text NOT NULL,
-	`persona_id` text NOT NULL,
-	`added_at` integer NOT NULL,
-	`added_by` text NOT NULL,
-	PRIMARY KEY(`project_id`, `persona_id`)
+	`content` text NOT NULL,
+	`sender_id` text NOT NULL,
+	`sender_name` text NOT NULL,
+	`sender_type` text NOT NULL,
+	`conversation_id` text NOT NULL,
+	`context_type` text DEFAULT 'direct' NOT NULL,
+	`context_id` text NOT NULL,
+	`type` text DEFAULT 'text' NOT NULL,
+	`metadata` text,
+	`is_edited` integer DEFAULT false NOT NULL,
+	`created_at` text NOT NULL,
+	`updated_at` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `projects` (

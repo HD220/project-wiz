@@ -36,7 +36,7 @@ export interface PaginationMetadata {
 // Filter and sort interfaces
 export interface SortParams {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
 }
 
 export interface FilterParams {
@@ -86,7 +86,7 @@ export interface WindowState {
 
 // Application configuration interface
 export interface AppConfig {
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   language: string;
   notifications: {
     enabled: boolean;
@@ -161,7 +161,7 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   timestamp: Date;
   read: boolean;
   actions?: NotificationAction[];

@@ -27,7 +27,7 @@ export function CreateProjectModal({
   const [description, setDescription] = useState("");
   const [gitUrl, setGitUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { createProject } = useProjects();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +41,7 @@ export function CreateProjectModal({
         description: description.trim() || undefined,
         gitUrl: gitUrl.trim() || undefined,
       });
-      
+
       // Reset form
       setName("");
       setDescription("");
@@ -75,7 +75,7 @@ export function CreateProjectModal({
             Configure um novo projeto para começar a trabalhar.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Projeto</Label>

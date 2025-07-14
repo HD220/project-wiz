@@ -4,7 +4,13 @@ import { useLlmProviders } from "../../features/llm-provider-management/hooks/us
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Loader2, MessageSquare, Bot, User } from "lucide-react";
 
@@ -14,14 +20,16 @@ interface AIChatExampleProps {
   authorName?: string;
 }
 
-export function AIChatExample({ 
-  channelId, 
-  authorId = "test-user", 
-  authorName = "Test User" 
+export function AIChatExample({
+  channelId,
+  authorId = "test-user",
+  authorName = "Test User",
 }: AIChatExampleProps) {
   const [selectedLlmProvider, setSelectedLlmProvider] = useState<string>("");
   const [messageInput, setMessageInput] = useState("");
-  const [systemPrompt, setSystemPrompt] = useState("Você é um assistente útil e amigável.");
+  const [systemPrompt, setSystemPrompt] = useState(
+    "Você é um assistente útil e amigável.",
+  );
 
   // Carregar LLM providers disponíveis
   const { llmProviders, isLoading: loadingProviders } = useLlmProviders();
@@ -78,7 +86,7 @@ export function AIChatExample({
 
   const handleValidateProvider = async () => {
     if (!selectedLlmProvider) return;
-    
+
     try {
       const isValid = await validateProvider(selectedLlmProvider);
       alert(isValid ? "Provider válido!" : "Provider inválido!");
@@ -110,7 +118,9 @@ export function AIChatExample({
         {!loadingProviders && llmProviders.length === 0 && (
           <Alert>
             <AlertDescription>
-              ⚠️ Nenhum LLM Provider configurado. Vá para <strong>Configurações</strong> para adicionar um provider antes de testar o chat.
+              ⚠️ Nenhum LLM Provider configurado. Vá para{" "}
+              <strong>Configurações</strong> para adicionar um provider antes de
+              testar o chat.
             </AlertDescription>
           </Alert>
         )}
@@ -119,19 +129,28 @@ export function AIChatExample({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">
-              LLM Provider {loadingProviders && <span className="text-xs text-muted-foreground">(carregando...)</span>}
+              LLM Provider{" "}
+              {loadingProviders && (
+                <span className="text-xs text-muted-foreground">
+                  (carregando...)
+                </span>
+              )}
             </label>
-            <Select 
-              value={selectedLlmProvider} 
+            <Select
+              value={selectedLlmProvider}
               onValueChange={setSelectedLlmProvider}
               disabled={loadingProviders || llmProviders.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={
-                  loadingProviders ? "Carregando..." : 
-                  llmProviders.length === 0 ? "Nenhum provider disponível" :
-                  "Selecione um provider"
-                } />
+                <SelectValue
+                  placeholder={
+                    loadingProviders
+                      ? "Carregando..."
+                      : llmProviders.length === 0
+                        ? "Nenhum provider disponível"
+                        : "Selecione um provider"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {llmProviders.map((provider) => (
@@ -142,7 +161,7 @@ export function AIChatExample({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <label className="text-sm font-medium">System Prompt</label>
             <Input
@@ -155,7 +174,7 @@ export function AIChatExample({
 
         {/* Status e controles */}
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={handleValidateProvider}
             disabled={!selectedLlmProvider}
             variant="outline"
@@ -163,14 +182,16 @@ export function AIChatExample({
           >
             Testar Provider
           </Button>
-          
-          <Button 
+
+          <Button
             onClick={handleRegenerateLastMessage}
             disabled={!canRegenerate || isRegenerating}
             variant="outline"
             size="sm"
           >
-            {isRegenerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isRegenerating && (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            )}
             Regenerar Última
           </Button>
         </div>
@@ -180,10 +201,10 @@ export function AIChatExample({
           <Alert variant="destructive">
             <AlertDescription>
               {error}
-              <Button 
-                onClick={clearError} 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                onClick={clearError}
+                variant="ghost"
+                size="sm"
                 className="ml-2"
               >
                 Limpar
@@ -195,10 +216,9 @@ export function AIChatExample({
         {/* Status de configuração */}
         {currentConfig && (
           <div className="text-sm text-muted-foreground">
-            Configuração: {currentConfig.llmProviderId} | 
-            Temp: {currentConfig.temperature} | 
-            Max Tokens: {currentConfig.maxTokens} |
-            História: {currentConfig.includeHistory ? "Sim" : "Não"}
+            Configuração: {currentConfig.llmProviderId} | Temp:{" "}
+            {currentConfig.temperature} | Max Tokens: {currentConfig.maxTokens}{" "}
+            | História: {currentConfig.includeHistory ? "Sim" : "Não"}
           </div>
         )}
 
@@ -209,7 +229,7 @@ export function AIChatExample({
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
           )}
-          
+
           {messages.map((message) => (
             <div
               key={message.id}
@@ -257,14 +277,16 @@ export function AIChatExample({
             onChange={(e) => setMessageInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={
-              !selectedLlmProvider ? "Selecione um provider primeiro..." : 
-              isSending ? "Enviando..." : 
-              "Digite sua mensagem..."
+              !selectedLlmProvider
+                ? "Selecione um provider primeiro..."
+                : isSending
+                  ? "Enviando..."
+                  : "Digite sua mensagem..."
             }
             disabled={isSending || !selectedLlmProvider}
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={handleSendMessage}
             disabled={!messageInput.trim() || isSending || !selectedLlmProvider}
           >
@@ -276,7 +298,8 @@ export function AIChatExample({
         {/* Status do provider selecionado */}
         {selectedLlmProvider && (
           <div className="text-sm text-muted-foreground">
-            ✅ Provider ativo: {llmProviders.find(p => p.id === selectedLlmProvider)?.name}
+            ✅ Provider ativo:{" "}
+            {llmProviders.find((p) => p.id === selectedLlmProvider)?.name}
           </div>
         )}
 
@@ -284,16 +307,20 @@ export function AIChatExample({
         <details className="text-xs text-muted-foreground">
           <summary className="cursor-pointer">Debug Info</summary>
           <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
-            {JSON.stringify({
-              channelId,
-              selectedLlmProvider,
-              messageCount: messages.length,
-              isLoading,
-              isSending,
-              isRegenerating,
-              hasError: !!error,
-              currentConfig,
-            }, null, 2)}
+            {JSON.stringify(
+              {
+                channelId,
+                selectedLlmProvider,
+                messageCount: messages.length,
+                isLoading,
+                isSending,
+                isRegenerating,
+                hasError: !!error,
+                currentConfig,
+              },
+              null,
+              2,
+            )}
           </pre>
         </details>
       </CardContent>

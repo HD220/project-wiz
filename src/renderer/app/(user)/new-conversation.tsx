@@ -11,12 +11,7 @@ export function NewConversationPage() {
     }
   };
 
-  return (
-    <NewConversationModal
-      open={true}
-      onOpenChange={handleOpenChange}
-    />
-  );
+  return <NewConversationModal open={true} onOpenChange={handleOpenChange} />;
 }
 
 export const Route = createFileRoute("/(user)/new-conversation")({

@@ -1,12 +1,15 @@
 import { ProjectEntity } from "../domain/project.entity";
-import { ProjectRepository, ProjectFilterOptions } from "../persistence/project.repository";
+import {
+  ProjectRepository,
+  ProjectFilterOptions,
+} from "../persistence/project.repository";
 import {
   CreateProjectSchema as CreateProjectData,
   ProjectSchema as ProjectData,
-  type ProjectSchema
+  type ProjectSchema,
 } from "../../../persistence/schemas/projects.schema";
 
-type UpdateProjectData = Partial<CreateProjectData>;
+type UpdateProjectData = Partial<CreateProjectData> & { id: string };
 
 export class ProjectService {
   constructor(private repository: ProjectRepository) {}
@@ -37,10 +40,10 @@ export class ProjectService {
       project.updateName({ name: data.name });
     }
     if (data.description !== undefined) {
-      project.updateDescription({ description: data.description });
+      project.updateDescription({ description: data.description ?? undefined });
     }
     if (data.gitUrl !== undefined) {
-      project.updateGitUrl({ gitUrl: data.gitUrl });
+      project.updateGitUrl({ gitUrl: data.gitUrl ?? undefined });
     }
 
     return this.repository.update(project.toPlainObject());

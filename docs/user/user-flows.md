@@ -11,8 +11,8 @@ Um projeto é um espaço de trabalho para organizar suas conversas, agentes e ou
 1.  Na barra lateral esquerda, clique no ícone **"Projetos"** (geralmente um ícone de pasta ou maleta).
 2.  Na tela de Projetos, localize e clique no botão **"Novo Projeto"** (ou similar, pode ser um `+` ou um botão com texto).
 3.  Uma janela ou formulário será exibido. Preencha os campos:
-    -   **Nome do Projeto:** Um nome descritivo para o seu projeto (ex: "Desenvolvimento do App X", "Pesquisa de Mercado").
-    -   **Descrição (Opcional):** Uma breve descrição do objetivo do projeto.
+    - **Nome do Projeto:** Um nome descritivo para o seu projeto (ex: "Desenvolvimento do App X", "Pesquisa de Mercado").
+    - **Descrição (Opcional):** Uma breve descrição do objetivo do projeto.
 4.  Clique no botão **"Salvar"** ou **"Criar Projeto"**.
 5.  O novo projeto será criado e você será redirecionado(a) para a tela do projeto, onde poderá começar a adicionar agentes e conversas.
 
@@ -27,9 +27,9 @@ Para que o **project-wiz** possa interagir com a inteligência artificial, você
 3.  Clique no botão **"Adicionar Novo Provedor"**.
 4.  Selecione o **Tipo de Provedor** na lista (ex: OpenAI, Anthropic, Google Gemini).
 5.  Preencha os campos necessários:
-    -   **Nome:** Um nome para identificar este provedor (ex: "Minha Conta OpenAI").
-    -   **Chave de API (API Key):** Insira sua chave de API fornecida pelo provedor. **Mantenha esta chave em segurança e nunca a compartilhe.**
-    -   Outras configurações específicas do provedor (ex: URL do endpoint, modelo padrão).
+    - **Nome:** Um nome para identificar este provedor (ex: "Minha Conta OpenAI").
+    - **Chave de API (API Key):** Insira sua chave de API fornecida pelo provedor. **Mantenha esta chave em segurança e nunca a compartilhe.**
+    - Outras configurações específicas do provedor (ex: URL do endpoint, modelo padrão).
 6.  (Opcional) Marque a opção **"Definir como Padrão"** se desejar que este seja o provedor usado por padrão para novas interações.
 7.  Clique em **"Salvar"** ou **"Adicionar Provedor"**.
 8.  O provedor será adicionado à sua lista. Você pode testar a conexão ou editá-lo a qualquer momento.
@@ -43,13 +43,13 @@ Agentes são configurações de IA com um propósito e personalidade definidos, 
 1.  Na barra lateral esquerda, clique no ícone **"Agentes"**.
 2.  Na tela de Agentes, clique no botão **"Novo Agente"**.
 3.  Preencha os detalhes do agente:
-    -   **Nome:** Um nome para o seu agente (ex: "Revisor de Código", "Gerador de Ideias").
-    -   **Função (Role):** A função principal do agente (ex: "Especialista em Python", "Redator Criativo").
-    -   **Objetivo (Goal):** O que você espera que este agente faça (ex: "Revisar código Python para boas práticas", "Gerar ideias de marketing para produtos").
-    -   **História/Contexto (Backstory):** Uma breve descrição do "passado" ou "personalidade" do agente, que pode influenciar suas respostas.
-    -   **Provedor de LLM:** Selecione um dos provedores de LLM que você configurou.
-    -   **Temperatura:** Controla a aleatoriedade das respostas (0.0 para mais determinístico, 1.0 para mais criativo).
-    -   **Tokens Máximos:** Limite de tokens para a resposta do agente.
+    - **Nome:** Um nome para o seu agente (ex: "Revisor de Código", "Gerador de Ideias").
+    - **Função (Role):** A função principal do agente (ex: "Especialista em Python", "Redator Criativo").
+    - **Objetivo (Goal):** O que você espera que este agente faça (ex: "Revisar código Python para boas práticas", "Gerar ideias de marketing para produtos").
+    - **História/Contexto (Backstory):** Uma breve descrição do "passado" ou "personalidade" do agente, que pode influenciar suas respostas.
+    - **Provedor de LLM:** Selecione um dos provedores de LLM que você configurou.
+    - **Temperatura:** Controla a aleatoriedade das respostas (0.0 para mais determinístico, 1.0 para mais criativo).
+    - **Tokens Máximos:** Limite de tokens para a resposta do agente.
 4.  Clique em **"Salvar"** ou **"Criar Agente"**.
 5.  Seu novo agente estará disponível para ser usado em conversas diretas ou canais.
 

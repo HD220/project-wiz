@@ -19,7 +19,7 @@ export function GlobalPending() {
                 <div className="h-12 px-4 flex items-center border-b border-border">
                   <Skeleton className="h-6 w-32" />
                 </div>
-                
+
                 {/* Content skeleton */}
                 <div className="flex-1 p-6 space-y-4">
                   <Skeleton className="h-4 w-full" />

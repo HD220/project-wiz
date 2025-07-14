@@ -1,8 +1,8 @@
-import type { 
-  ChannelDto, 
-  CreateChannelDto, 
-  UpdateChannelDto, 
-  ChannelFilterDto 
+import type {
+  ChannelDto,
+  CreateChannelDto,
+  UpdateChannelDto,
+  ChannelFilterDto,
 } from "../../../../shared/types/channel.types";
 
 interface ChannelStoreState {
@@ -34,18 +34,25 @@ class ChannelStore {
   // Atualizar estado e notificar listeners
   private setState(newState: Partial<ChannelStoreState>) {
     this.state = { ...this.state, ...newState };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
   // QUERIES (buscar dados)
-  loadChannels = async (filter?: ChannelFilterDto, forceReload = false): Promise<void> => {
+  loadChannels = async (
+    filter?: ChannelFilterDto,
+    forceReload = false,
+  ): Promise<void> => {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
     }
 
     // Evitar recarregamentos desnecessários
-    if (!forceReload && this.state.channels.length > 0 && !this.state.isLoading) {
+    if (
+      !forceReload &&
+      this.state.channels.length > 0 &&
+      !this.state.isLoading
+    ) {
       return;
     }
 
@@ -56,10 +63,10 @@ class ChannelStore {
         "channel:list",
         filter,
       )) as ChannelDto[];
-      
-      this.setState({ 
-        channels, 
-        isLoading: false 
+
+      this.setState({
+        channels,
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -67,17 +74,26 @@ class ChannelStore {
         isLoading: false,
       });
     }
-  }
+  };
 
-  loadChannelsByProject = async (projectId: string, forceReload = false): Promise<void> => {
+  loadChannelsByProject = async (
+    projectId: string,
+    forceReload = false,
+  ): Promise<void> => {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
     }
 
     // Evitar recarregamentos desnecessários
-    if (!forceReload && this.state.channels.length > 0 && !this.state.isLoading) {
-      const currentProjectChannels = this.state.channels.filter(ch => ch.projectId === projectId);
+    if (
+      !forceReload &&
+      this.state.channels.length > 0 &&
+      !this.state.isLoading
+    ) {
+      const currentProjectChannels = this.state.channels.filter(
+        (ch) => ch.projectId === projectId,
+      );
       if (currentProjectChannels.length > 0) {
         return;
       }
@@ -90,10 +106,10 @@ class ChannelStore {
         "channel:listByProject",
         projectId,
       )) as ChannelDto[];
-      
-      this.setState({ 
-        channels, 
-        isLoading: false 
+
+      this.setState({
+        channels,
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -101,7 +117,7 @@ class ChannelStore {
         isLoading: false,
       });
     }
-  }
+  };
 
   getChannelById = async (id: string): Promise<ChannelDto | null> => {
     if (!window.electronIPC) return null;
@@ -115,7 +131,7 @@ class ChannelStore {
       this.setState({ error: (error as Error).message });
       return null;
     }
-  }
+  };
 
   // MUTATIONS (modificar dados)
   createChannel = async (data: CreateChannelDto): Promise<void> => {
@@ -141,7 +157,7 @@ class ChannelStore {
       });
       throw error; // Re-throw para o componente lidar
     }
-  }
+  };
 
   updateChannel = async (data: UpdateChannelDto): Promise<void> => {
     if (!window.electronIPC) return;
@@ -156,8 +172,8 @@ class ChannelStore {
 
       // Atualizar no estado
       this.setState({
-        channels: this.state.channels.map(ch => 
-          ch.id === updatedChannel.id ? updatedChannel : ch
+        channels: this.state.channels.map((ch) =>
+          ch.id === updatedChannel.id ? updatedChannel : ch,
         ),
         isLoading: false,
       });
@@ -168,7 +184,7 @@ class ChannelStore {
       });
       throw error;
     }
-  }
+  };
 
   archiveChannel = async (id: string): Promise<void> => {
     if (!window.electronIPC) return;
@@ -183,7 +199,7 @@ class ChannelStore {
 
       // Remover do estado (já que listamos apenas não-arquivados)
       this.setState({
-        channels: this.state.channels.filter(ch => ch.id !== id),
+        channels: this.state.channels.filter((ch) => ch.id !== id),
         isLoading: false,
       });
     } catch (error) {
@@ -193,7 +209,7 @@ class ChannelStore {
       });
       throw error;
     }
-  }
+  };
 
   deleteChannel = async (id: string): Promise<void> => {
     if (!window.electronIPC) return;
@@ -205,7 +221,7 @@ class ChannelStore {
 
       // Remover do estado
       this.setState({
-        channels: this.state.channels.filter(ch => ch.id !== id),
+        channels: this.state.channels.filter((ch) => ch.id !== id),
         isLoading: false,
       });
     } catch (error) {
@@ -215,9 +231,12 @@ class ChannelStore {
       });
       throw error;
     }
-  }
+  };
 
-  createDefaultChannel = async (projectId: string, createdBy: string): Promise<ChannelDto> => {
+  createDefaultChannel = async (
+    projectId: string,
+    createdBy: string,
+  ): Promise<ChannelDto> => {
     if (!window.electronIPC) throw new Error("ElectronIPC not available");
 
     try {
@@ -228,7 +247,9 @@ class ChannelStore {
       )) as ChannelDto;
 
       // Adicionar ao estado se não existir
-      const exists = this.state.channels.some(ch => ch.id === defaultChannel.id);
+      const exists = this.state.channels.some(
+        (ch) => ch.id === defaultChannel.id,
+      );
       if (!exists) {
         this.setState({
           channels: [...this.state.channels, defaultChannel],
@@ -240,26 +261,32 @@ class ChannelStore {
       this.setState({ error: (error as Error).message });
       throw error;
     }
-  }
+  };
 
   // Ações locais
   setSelectedChannel = (channel: ChannelDto | null) => {
     this.setState({ selectedChannel: channel });
-  }
+  };
 
   clearError = () => {
     this.setState({ error: null });
-  }
+  };
 
   // Getters de conveniência
   getChannelsByProject = (projectId: string): ChannelDto[] => {
-    return this.state.channels.filter(ch => ch.projectId === projectId);
-  }
+    return this.state.channels.filter((ch) => ch.projectId === projectId);
+  };
 
   getGeneralChannel = (projectId: string): ChannelDto | null => {
-    const projectChannels = this.state.channels.filter(ch => ch.projectId === projectId);
-    return projectChannels.find(ch => ch.name.toLowerCase() === 'general') || projectChannels[0] || null;
-  }
+    const projectChannels = this.state.channels.filter(
+      (ch) => ch.projectId === projectId,
+    );
+    return (
+      projectChannels.find((ch) => ch.name.toLowerCase() === "general") ||
+      projectChannels[0] ||
+      null
+    );
+  };
 
   // Reset state (útil ao trocar de projeto)
   resetState = () => {
@@ -269,7 +296,7 @@ class ChannelStore {
       error: null,
       selectedChannel: null,
     });
-  }
+  };
 }
 
 // Instância singleton

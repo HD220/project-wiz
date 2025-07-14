@@ -45,7 +45,7 @@ export class LlmProviderIpcHandlers {
       "ai:validate-provider",
       this.handleValidateProvider.bind(this),
     );
-    
+
     // Default provider handlers
     ipcMain.handle(
       "llm-provider:getDefault",
@@ -173,8 +173,11 @@ export class LlmProviderIpcHandlers {
     event: IpcMainInvokeEvent,
   ): Promise<LlmProviderDto | null> {
     try {
-      const defaultProvider = await this.llmProviderService.getDefaultProvider();
-      return defaultProvider ? this.llmProviderMapper.toDto(defaultProvider) : null;
+      const defaultProvider =
+        await this.llmProviderService.getDefaultProvider();
+      return defaultProvider
+        ? this.llmProviderMapper.toDto(defaultProvider)
+        : null;
     } catch (error) {
       throw new Error(
         `Failed to get default provider: ${(error as Error).message}`,
@@ -187,7 +190,8 @@ export class LlmProviderIpcHandlers {
     id: string,
   ): Promise<LlmProviderDto> {
     try {
-      const defaultProvider = await this.llmProviderService.setDefaultProvider(id);
+      const defaultProvider =
+        await this.llmProviderService.setDefaultProvider(id);
       return this.llmProviderMapper.toDto(defaultProvider);
     } catch (error) {
       throw new Error(

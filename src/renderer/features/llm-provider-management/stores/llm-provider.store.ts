@@ -2,7 +2,7 @@ import type {
   LlmProviderDto,
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
-  LlmProviderFilterDto
+  LlmProviderFilterDto,
 } from "../../../../shared/types/llm-provider.types";
 
 interface LlmProviderStoreState {
@@ -32,16 +32,23 @@ class LlmProviderStore {
 
   private setState(newState: Partial<LlmProviderStoreState>) {
     this.state = { ...this.state, ...newState };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
-  async loadLlmProviders(filter?: LlmProviderFilterDto, forceReload = false): Promise<void> {
+  async loadLlmProviders(
+    filter?: LlmProviderFilterDto,
+    forceReload = false,
+  ): Promise<void> {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
     }
 
-    if (!forceReload && this.state.llmProviders.length > 0 && !this.state.isLoading) {
+    if (
+      !forceReload &&
+      this.state.llmProviders.length > 0 &&
+      !this.state.isLoading
+    ) {
       return;
     }
 
@@ -55,7 +62,7 @@ class LlmProviderStore {
 
       this.setState({
         llmProviders,
-        isLoading: false
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -91,8 +98,8 @@ class LlmProviderStore {
       )) as LlmProviderDto;
 
       // If the new provider is set as default, update other providers to not be default
-      const updatedProviders = newLlmProvider.isDefault 
-        ? this.state.llmProviders.map(p => ({ ...p, isDefault: false }))
+      const updatedProviders = newLlmProvider.isDefault
+        ? this.state.llmProviders.map((p) => ({ ...p, isDefault: false }))
         : this.state.llmProviders;
 
       this.setState({
@@ -121,12 +128,12 @@ class LlmProviderStore {
 
       // If the updated provider is set as default, update other providers to not be default
       this.setState({
-        llmProviders: this.state.llmProviders.map(p =>
-          p.id === updatedLlmProvider.id 
-            ? updatedLlmProvider 
-            : updatedLlmProvider.isDefault 
+        llmProviders: this.state.llmProviders.map((p) =>
+          p.id === updatedLlmProvider.id
+            ? updatedLlmProvider
+            : updatedLlmProvider.isDefault
               ? { ...p, isDefault: false }
-              : p
+              : p,
         ),
         isLoading: false,
       });
@@ -148,7 +155,7 @@ class LlmProviderStore {
       await window.electronIPC.invoke("llm-provider:delete", id);
 
       this.setState({
-        llmProviders: this.state.llmProviders.filter(p => p.id !== id),
+        llmProviders: this.state.llmProviders.filter((p) => p.id !== id),
         isLoading: false,
       });
     } catch (error) {
@@ -190,9 +197,9 @@ class LlmProviderStore {
 
       // Update all providers: set the selected one as default and others as not default
       this.setState({
-        llmProviders: this.state.llmProviders.map(p => ({
+        llmProviders: this.state.llmProviders.map((p) => ({
           ...p,
-          isDefault: p.id === id
+          isDefault: p.id === id,
         })),
         isLoading: false,
       });

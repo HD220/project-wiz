@@ -34,13 +34,25 @@ export function UserDashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            <CustomLink to="/" variant="outline" className="w-full justify-start">
+            <CustomLink
+              to="/"
+              variant="outline"
+              className="w-full justify-start"
+            >
               Start a new chat
             </CustomLink>
-            <CustomLink to="/" variant="outline" className="w-full justify-start">
+            <CustomLink
+              to="/"
+              variant="outline"
+              className="w-full justify-start"
+            >
               View your tasks
             </CustomLink>
-            <CustomLink to="/" variant="outline" className="w-full justify-start">
+            <CustomLink
+              to="/"
+              variant="outline"
+              className="w-full justify-start"
+            >
               Browse documentation
             </CustomLink>
           </CardContent>

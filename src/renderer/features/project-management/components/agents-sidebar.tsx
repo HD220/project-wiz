@@ -3,14 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Users,
-  Search,
-  Loader2,
-  X,
-  UserPlus,
-  Trash2,
-} from "lucide-react";
+import { Users, Search, Loader2, X, UserPlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAgents } from "../../agent-management/hooks/use-agents.hook";
 import { AddAgentModal } from "./add-agent-modal";
@@ -31,12 +24,7 @@ export function AgentsSidebar({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Use agents hook
-  const {
-    activeAgents,
-    isLoading,
-    error,
-    deleteAgent,
-  } = useAgents();
+  const { activeAgents, isLoading, error, deleteAgent } = useAgents();
 
   // Filter agents based on search query
   const filteredAgents = activeAgents.filter(
@@ -120,7 +108,9 @@ export function AgentsSidebar({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {/* clearError functionality to be implemented */}}
+              onClick={() => {
+                /* clearError functionality to be implemented */
+              }}
               className="h-6 w-6 p-0"
             >
               <X className="h-3 w-3" />
@@ -135,13 +125,17 @@ export function AgentsSidebar({
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2 text-sm text-muted-foreground">Carregando...</span>
+              <span className="ml-2 text-sm text-muted-foreground">
+                Carregando...
+              </span>
             </div>
           ) : filteredAgents.length === 0 ? (
             <div className="text-center py-8">
               <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                {searchQuery ? "Nenhum agente encontrado" : "Nenhum agente disponível"}
+                {searchQuery
+                  ? "Nenhum agente encontrado"
+                  : "Nenhum agente disponível"}
               </p>
               {projectId && !searchQuery && (
                 <Button

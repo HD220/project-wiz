@@ -8,7 +8,9 @@ import type {
 export class ConversationService {
   private conversationRepository = new ConversationRepository();
 
-  async createConversation(data: CreateConversationDto): Promise<ConversationDto> {
+  async createConversation(
+    data: CreateConversationDto,
+  ): Promise<ConversationDto> {
     return await this.conversationRepository.create(data);
   }
 
@@ -16,12 +18,17 @@ export class ConversationService {
     return await this.conversationRepository.findById(id);
   }
 
-  async listConversations(filter?: ConversationFilterDto): Promise<ConversationDto[]> {
+  async listConversations(
+    filter?: ConversationFilterDto,
+  ): Promise<ConversationDto[]> {
     return await this.conversationRepository.findAll(filter);
   }
 
-  async findOrCreateDirectMessage(participants: string[]): Promise<ConversationDto> {
-    const existing = await this.conversationRepository.findByParticipants(participants);
+  async findOrCreateDirectMessage(
+    participants: string[],
+  ): Promise<ConversationDto> {
+    const existing =
+      await this.conversationRepository.findByParticipants(participants);
 
     if (existing) {
       return existing;

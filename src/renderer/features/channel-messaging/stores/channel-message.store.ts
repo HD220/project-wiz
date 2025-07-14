@@ -1,9 +1,9 @@
-import type { 
-  ChannelMessageDto, 
-  CreateChannelMessageDto, 
-  UpdateChannelMessageDto, 
+import type {
+  ChannelMessageDto,
+  CreateChannelMessageDto,
+  UpdateChannelMessageDto,
   ChannelMessageFilterDto,
-  ChannelMessagePaginationDto
+  ChannelMessagePaginationDto,
 } from "../../../../shared/types/channel-message.types";
 
 interface ChannelMessageStoreState {
@@ -37,11 +37,14 @@ class ChannelMessageStore {
   // Atualizar estado e notificar listeners
   private setState(newState: Partial<ChannelMessageStoreState>) {
     this.state = { ...this.state, ...newState };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
   // QUERIES (buscar dados)
-  loadMessages = async (filter?: ChannelMessageFilterDto, forceReload = false): Promise<void> => {
+  loadMessages = async (
+    filter?: ChannelMessageFilterDto,
+    forceReload = false,
+  ): Promise<void> => {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
@@ -54,9 +57,9 @@ class ChannelMessageStore {
         "channelMessage:list",
         filter,
       )) as ChannelMessageDto[];
-      
-      this.setState({ 
-        isLoading: false 
+
+      this.setState({
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -64,16 +67,25 @@ class ChannelMessageStore {
         isLoading: false,
       });
     }
-  }
+  };
 
-  loadMessagesByChannel = async (channelId: string, limit = 50, offset = 0, forceReload = false): Promise<void> => {
+  loadMessagesByChannel = async (
+    channelId: string,
+    limit = 50,
+    offset = 0,
+    forceReload = false,
+  ): Promise<void> => {
     if (!window.electronIPC) {
       console.warn("ElectronIPC not available yet");
       return;
     }
 
     // Evitar recarregamentos desnecessários
-    if (!forceReload && this.state.messagesByChannel[channelId] && !this.state.isLoading) {
+    if (
+      !forceReload &&
+      this.state.messagesByChannel[channelId] &&
+      !this.state.isLoading
+    ) {
       return;
     }
 
@@ -86,13 +98,13 @@ class ChannelMessageStore {
         limit.toString(),
         offset.toString(),
       )) as ChannelMessagePaginationDto;
-      
-      this.setState({ 
+
+      this.setState({
         messagesByChannel: {
           ...this.state.messagesByChannel,
           [channelId]: pagination.messages,
         },
-        isLoading: false 
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -100,7 +112,7 @@ class ChannelMessageStore {
         isLoading: false,
       });
     }
-  }
+  };
 
   loadLatestMessages = async (channelId: string, limit = 50): Promise<void> => {
     if (!window.electronIPC) {
@@ -116,13 +128,13 @@ class ChannelMessageStore {
         channelId,
         limit.toString(),
       )) as ChannelMessageDto[];
-      
-      this.setState({ 
+
+      this.setState({
         messagesByChannel: {
           ...this.state.messagesByChannel,
           [channelId]: messages,
         },
-        isLoading: false 
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
@@ -130,7 +142,7 @@ class ChannelMessageStore {
         isLoading: false,
       });
     }
-  }
+  };
 
   getMessageById = async (id: string): Promise<ChannelMessageDto | null> => {
     if (!window.electronIPC) return null;
@@ -144,7 +156,7 @@ class ChannelMessageStore {
       this.setState({ error: (error as Error).message });
       return null;
     }
-  }
+  };
 
   // MUTATIONS (modificar dados)
   createMessage = async (data: CreateChannelMessageDto): Promise<void> => {
@@ -159,8 +171,9 @@ class ChannelMessageStore {
       )) as ChannelMessageDto;
 
       // Adicionar mensagem ao canal correspondente
-      const channelMessages = this.state.messagesByChannel[data.channelId] || [];
-      
+      const channelMessages =
+        this.state.messagesByChannel[data.channelId] || [];
+
       this.setState({
         messagesByChannel: {
           ...this.state.messagesByChannel,
@@ -173,9 +186,14 @@ class ChannelMessageStore {
       });
       throw error; // Re-throw para o componente lidar
     }
-  }
+  };
 
-  createTextMessage = async (content: string, channelId: string, authorId: string, authorName: string): Promise<void> => {
+  createTextMessage = async (
+    content: string,
+    channelId: string,
+    authorId: string,
+    authorName: string,
+  ): Promise<void> => {
     if (!window.electronIPC) return;
 
     try {
@@ -189,7 +207,7 @@ class ChannelMessageStore {
 
       // Adicionar mensagem ao canal correspondente
       const channelMessages = this.state.messagesByChannel[channelId] || [];
-      
+
       this.setState({
         messagesByChannel: {
           ...this.state.messagesByChannel,
@@ -200,7 +218,7 @@ class ChannelMessageStore {
       this.setState({ error: (error as Error).message });
       throw error;
     }
-  }
+  };
 
   updateMessage = async (data: UpdateChannelMessageDto): Promise<void> => {
     if (!window.electronIPC) return;
@@ -213,10 +231,10 @@ class ChannelMessageStore {
 
       // Atualizar mensagem em todos os canais (caso esteja cached em múltiplos)
       const newMessagesByChannel = { ...this.state.messagesByChannel };
-      
-      Object.keys(newMessagesByChannel).forEach(channelId => {
-        newMessagesByChannel[channelId] = newMessagesByChannel[channelId].map(msg => 
-          msg.id === updatedMessage.id ? updatedMessage : msg
+
+      Object.keys(newMessagesByChannel).forEach((channelId) => {
+        newMessagesByChannel[channelId] = newMessagesByChannel[channelId].map(
+          (msg) => (msg.id === updatedMessage.id ? updatedMessage : msg),
         );
       });
 
@@ -227,7 +245,7 @@ class ChannelMessageStore {
       this.setState({ error: (error as Error).message });
       throw error;
     }
-  }
+  };
 
   deleteMessage = async (id: string, channelId: string): Promise<void> => {
     if (!window.electronIPC) return;
@@ -237,20 +255,24 @@ class ChannelMessageStore {
 
       // Remover mensagem do canal
       const channelMessages = this.state.messagesByChannel[channelId] || [];
-      
+
       this.setState({
         messagesByChannel: {
           ...this.state.messagesByChannel,
-          [channelId]: channelMessages.filter(msg => msg.id !== id),
+          [channelId]: channelMessages.filter((msg) => msg.id !== id),
         },
       });
     } catch (error) {
       this.setState({ error: (error as Error).message });
       throw error;
     }
-  }
+  };
 
-  searchMessages = async (channelId: string, searchTerm: string, limit = 20): Promise<ChannelMessageDto[]> => {
+  searchMessages = async (
+    channelId: string,
+    searchTerm: string,
+    limit = 20,
+  ): Promise<ChannelMessageDto[]> => {
     if (!window.electronIPC) return [];
 
     try {
@@ -264,9 +286,11 @@ class ChannelMessageStore {
       this.setState({ error: (error as Error).message });
       return [];
     }
-  }
+  };
 
-  getLastMessage = async (channelId: string): Promise<ChannelMessageDto | null> => {
+  getLastMessage = async (
+    channelId: string,
+  ): Promise<ChannelMessageDto | null> => {
     if (!window.electronIPC) return null;
 
     try {
@@ -278,21 +302,21 @@ class ChannelMessageStore {
       this.setState({ error: (error as Error).message });
       return null;
     }
-  }
+  };
 
   // Ações locais
   setSelectedMessage = (message: ChannelMessageDto | null) => {
     this.setState({ selectedMessage: message });
-  }
+  };
 
   clearError = () => {
     this.setState({ error: null });
-  }
+  };
 
   // Getters de conveniência
   getMessagesByChannel = (channelId: string): ChannelMessageDto[] => {
     return this.state.messagesByChannel[channelId] || [];
-  }
+  };
 
   // Reset state (útil ao trocar de canal/projeto)
   resetState = () => {
@@ -303,16 +327,16 @@ class ChannelMessageStore {
       selectedMessage: null,
       isLoadingMore: false,
     });
-  }
+  };
 
   resetChannel = (channelId: string) => {
     const newMessagesByChannel = { ...this.state.messagesByChannel };
     delete newMessagesByChannel[channelId];
-    
+
     this.setState({
       messagesByChannel: newMessagesByChannel,
     });
-  }
+  };
 }
 
 // Instância singleton

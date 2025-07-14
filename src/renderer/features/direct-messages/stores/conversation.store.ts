@@ -61,11 +61,16 @@ class ConversationStore {
     }
   }
 
-  async findOrCreateDirectMessage(participants: string[]): Promise<ConversationDto | null> {
+  async findOrCreateDirectMessage(
+    participants: string[],
+  ): Promise<ConversationDto | null> {
     try {
-      const conversation = await window.electronIPC.invoke("dm:conversation:findOrCreate", {
-        participants,
-      }) as ConversationDto;
+      const conversation = (await window.electronIPC.invoke(
+        "dm:conversation:findOrCreate",
+        {
+          participants,
+        },
+      )) as ConversationDto;
       await this.loadConversations();
       return conversation;
     } catch (error) {

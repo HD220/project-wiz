@@ -17,7 +17,7 @@ export function ProjectLayoutSkeleton() {
               <Skeleton className="h-5 w-32" />
               <Skeleton className="h-6 w-6 rounded" />
             </div>
-            
+
             {/* Channel sections */}
             <div className="flex-1 p-3 space-y-4">
               {/* Text Channels */}
@@ -29,7 +29,7 @@ export function ProjectLayoutSkeleton() {
                   <Skeleton className="h-8 w-full rounded" />
                 </div>
               </div>
-              
+
               {/* Voice Channels */}
               <div className="space-y-2">
                 <Skeleton className="h-4 w-28" />
@@ -62,7 +62,7 @@ export function ProjectLayoutSkeleton() {
                 <Skeleton className="h-8 w-8 rounded" />
               </div>
             </div>
-            
+
             {/* Content Area Skeleton */}
             <div className="flex-1 p-4 space-y-4">
               <div className="space-y-3">

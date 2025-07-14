@@ -11,12 +11,7 @@ export function CreateProjectPage() {
     }
   };
 
-  return (
-    <CreateProjectModal
-      open={true}
-      onOpenChange={handleOpenChange}
-    />
-  );
+  return <CreateProjectModal open={true} onOpenChange={handleOpenChange} />;
 }
 
 export const Route = createFileRoute("/create-project")({

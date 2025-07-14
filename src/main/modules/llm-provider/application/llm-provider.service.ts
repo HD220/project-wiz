@@ -119,7 +119,9 @@ export class LlmProviderService {
 
   // Remove default flag from all providers
   private async clearDefaultProvider(): Promise<void> {
-    const defaultProviders = await this.repository.findMany({ isDefault: true });
+    const defaultProviders = await this.repository.findMany({
+      isDefault: true,
+    });
     for (const provider of defaultProviders) {
       await this.repository.update(provider.id, { isDefault: false });
     }

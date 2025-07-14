@@ -1,11 +1,11 @@
-import { DependencyContainer } from './dependency-container';
-import { ProjectManagementModule } from '../modules/project-management/project-management.module';
-import { CommunicationModule } from '../modules/communication/communication.module';
-import { ChannelMessagingModule } from '../modules/channel-messaging/channel-messaging.module';
-import { LlmProviderModule } from '../modules/llm-provider/llm-provider.module';
-import { AgentManagementModule } from '../modules/agent-management/agent-management.module';
-import { DirectMessagesModule } from '../modules/direct-messages/direct-messages.module';
-import { logger } from '../logger';
+import { DependencyContainer } from "./dependency-container";
+import { ProjectManagementModule } from "../modules/project-management/project-management.module";
+import { CommunicationModule } from "../modules/communication/communication.module";
+import { ChannelMessagingModule } from "../modules/channel-messaging/channel-messaging.module";
+import { LlmProviderModule } from "../modules/llm-provider/llm-provider.module";
+import { AgentManagementModule } from "../modules/agent-management/agent-management.module";
+import { DirectMessagesModule } from "../modules/direct-messages/direct-messages.module";
+import { logger } from "../logger";
 
 export class ModuleLoader {
   private container: DependencyContainer;
@@ -16,17 +16,17 @@ export class ModuleLoader {
 
   async loadAndInitializeModules(): Promise<void> {
     try {
-      logger.info('Starting module loading...');
-      
+      logger.info("Starting module loading...");
+
       // Register all modules
       this.registerModules();
-      
+
       // Initialize all modules in dependency order
       await this.container.initializeAll();
-      
-      logger.info('All modules loaded and initialized successfully');
+
+      logger.info("All modules loaded and initialized successfully");
     } catch (error) {
-      logger.error('Failed to load modules:', error);
+      logger.error("Failed to load modules:", error);
       throw error;
     }
   }
@@ -39,8 +39,8 @@ export class ModuleLoader {
     this.container.register(new AgentManagementModule());
     this.container.register(new ChannelMessagingModule());
     this.container.register(new DirectMessagesModule());
-    
-    logger.info('All modules registered');
+
+    logger.info("All modules registered");
   }
 
   getContainer(): DependencyContainer {

@@ -5,6 +5,7 @@
 O **project-wiz** é uma aplicação de desktop multiplataforma (Windows, macOS, Linux) construída com Electron, React e TypeScript. Seu principal objetivo é fornecer uma interface integrada para que desenvolvedores e equipes possam interagir com modelos de linguagem grande (LLMs), gerenciar projetos de software e se comunicar de forma eficiente.
 
 A aplicação funciona como um assistente de desenvolvimento, permitindo aos usuários:
+
 - Conectar-se a diferentes provedores de LLM (como OpenAI, Anthropic, etc.).
 - Criar e gerenciar projetos, organizando conversas e interações com a IA.
 - Manter conversas com agentes de IA em canais ou mensagens diretas.

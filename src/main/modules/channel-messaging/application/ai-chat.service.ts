@@ -52,17 +52,21 @@ export class AIChatService {
 
       if (includeHistory) {
         // Get recent message history for context
-        const recentMessages = await this.channelMessageService.getLatestMessages(
-          config.channelId,
-          historyLimit,
-        );
+        const recentMessages =
+          await this.channelMessageService.getLatestMessages(
+            config.channelId,
+            historyLimit,
+          );
 
         // Convert to CoreMessage format (exclude system messages from history)
         const historyMessages = recentMessages
-          .filter(msg => msg.type !== 'system')
+          .filter((msg) => msg.type !== "system")
           .slice(-historyLimit) // Ensure we don't exceed limit
-          .map(msg => ({
-            role: msg.authorId === 'ai' ? 'assistant' as const : 'user' as const,
+          .map((msg) => ({
+            role:
+              msg.authorId === "ai"
+                ? ("assistant" as const)
+                : ("user" as const),
             content: msg.content,
           }));
 
@@ -70,10 +74,13 @@ export class AIChatService {
       }
 
       // Add current user message if not already in history
-      if (!includeHistory || messages.length === 0 || 
-          messages[messages.length - 1]?.content !== content) {
+      if (
+        !includeHistory ||
+        messages.length === 0 ||
+        messages[messages.length - 1]?.content !== content
+      ) {
         messages.push({
-          role: 'user',
+          role: "user",
           content,
         });
       }
@@ -95,8 +102,8 @@ export class AIChatService {
       const aiMessage = await this.channelMessageService.createTextMessage(
         aiResponse,
         config.channelId,
-        'ai',
-        aiName || 'AI Assistant',
+        "ai",
+        aiName || "AI Assistant",
       );
 
       return {
@@ -105,13 +112,13 @@ export class AIChatService {
       };
     } catch (error) {
       // Log error and create error message
-      console.error('Failed to generate AI response:', error);
-      
+      console.error("Failed to generate AI response:", error);
+
       const errorMessage = await this.channelMessageService.createSystemMessage(
         `❌ Falha ao gerar resposta da IA: ${(error as Error).message}`,
         config.channelId,
-        { 
-          error: true, 
+        {
+          error: true,
           originalUserMessageId: userMessage.id,
           llmProviderId: config.llmProviderId,
         },
@@ -132,19 +139,21 @@ export class AIChatService {
     );
 
     if (recentMessages.length < 2) {
-      throw new Error('Não há mensagens suficientes para regenerar');
+      throw new Error("Não há mensagens suficientes para regenerar");
     }
 
     const [userMessage, aiMessage] = recentMessages;
 
     // Validate that the last message is from AI
-    if (aiMessage.authorId !== 'ai') {
-      throw new Error('A última mensagem não é da IA');
+    if (aiMessage.authorId !== "ai") {
+      throw new Error("A última mensagem não é da IA");
     }
 
     // Validate that the second-to-last is from user
-    if (userMessage.authorId === 'ai' || userMessage.type === 'system') {
-      throw new Error('Não foi possível encontrar a mensagem do usuário para regenerar');
+    if (userMessage.authorId === "ai" || userMessage.type === "system") {
+      throw new Error(
+        "Não foi possível encontrar a mensagem do usuário para regenerar",
+      );
     }
 
     try {
@@ -168,8 +177,10 @@ export class AIChatService {
 
       return result.aiMessage;
     } catch (error) {
-      console.error('Failed to regenerate AI message:', error);
-      throw new Error(`Falha ao regenerar mensagem: ${(error as Error).message}`);
+      console.error("Failed to regenerate AI message:", error);
+      throw new Error(
+        `Falha ao regenerar mensagem: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -198,14 +209,16 @@ export class AIChatService {
 
       // Format messages for summary
       const formattedMessages = messages
-        .filter(msg => msg.type !== 'system') // Exclude system messages
-        .map(msg => `${msg.authorName}: ${msg.content}`)
-        .join('\n');
+        .filter((msg) => msg.type !== "system") // Exclude system messages
+        .map((msg) => `${msg.authorName}: ${msg.content}`)
+        .join("\n");
 
       return formattedMessages;
     } catch (error) {
-      console.error('Failed to get conversation summary:', error);
-      throw new Error(`Falha ao obter resumo da conversa: ${(error as Error).message}`);
+      console.error("Failed to get conversation summary:", error);
+      throw new Error(
+        `Falha ao obter resumo da conversa: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -215,8 +228,8 @@ export class AIChatService {
         channelId,
       });
 
-      const aiMessages = allMessages.filter(msg => msg.authorId === 'ai');
-      
+      const aiMessages = allMessages.filter((msg) => msg.authorId === "ai");
+
       let deletedCount = 0;
       for (const message of aiMessages) {
         try {
@@ -229,8 +242,10 @@ export class AIChatService {
 
       return deletedCount;
     } catch (error) {
-      console.error('Failed to clear AI messages:', error);
-      throw new Error(`Falha ao limpar mensagens da IA: ${(error as Error).message}`);
+      console.error("Failed to clear AI messages:", error);
+      throw new Error(
+        `Falha ao limpar mensagens da IA: ${(error as Error).message}`,
+      );
     }
   }
 }

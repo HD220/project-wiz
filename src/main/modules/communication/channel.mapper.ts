@@ -3,7 +3,6 @@ import type { ChannelDto } from "../../../shared/types/channel.types";
 import type { ChannelSchema } from "../../persistence/schemas/channels.schema";
 
 export class ChannelMapper {
-  
   // Schema → Entity
   toDomain(schema: ChannelSchema): Channel {
     return new Channel(
@@ -48,11 +47,11 @@ export class ChannelMapper {
 
   // Array de Schema → Array de DTO (otimizado)
   schemaToDtoArray(schemas: ChannelSchema[]): ChannelDto[] {
-    return schemas.map(schema => this.schemaToDtoFast(schema));
+    return schemas.map((schema) => this.schemaToDtoFast(schema));
   }
 
   // Array de Entity → Array de DTO
   entityToDtoArray(entities: Channel[]): ChannelDto[] {
-    return entities.map(entity => this.toDto(entity));
+    return entities.map((entity) => this.toDto(entity));
   }
 }

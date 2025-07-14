@@ -1,6 +1,10 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { conversations, ConversationSchema, CreateConversationSchema } from "../../../persistence/schemas";
+import {
+  conversations,
+  ConversationSchema,
+  CreateConversationSchema,
+} from "../../../persistence/schemas";
 import type {
   ConversationDto,
   CreateConversationDto,
@@ -33,9 +37,7 @@ export class ConversationRepository {
   }
 
   async findAll(filter?: ConversationFilterDto): Promise<ConversationDto[]> {
-    const allConversations = await db
-      .select()
-      .from(conversations);
+    const allConversations = await db.select().from(conversations);
 
     let filtered = allConversations;
 
@@ -49,16 +51,19 @@ export class ConversationRepository {
     return filtered.map(this.mapToDto);
   }
 
-  async findByParticipants(participants: string[]): Promise<ConversationDto | null> {
+  async findByParticipants(
+    participants: string[],
+  ): Promise<ConversationDto | null> {
     const sortedParticipants = participants.sort();
-    
-    const allConversations = await db
-      .select()
-      .from(conversations);
+
+    const allConversations = await db.select().from(conversations);
 
     const conversation = allConversations.find((conv: ConversationSchema) => {
       const convParticipants = JSON.parse(conv.participants);
-      return JSON.stringify(convParticipants.sort()) === JSON.stringify(sortedParticipants);
+      return (
+        JSON.stringify(convParticipants.sort()) ===
+        JSON.stringify(sortedParticipants)
+      );
     });
 
     return conversation ? this.mapToDto(conversation) : null;
@@ -76,7 +81,9 @@ export class ConversationRepository {
       id: conversation.id,
       type: conversation.type,
       participants: JSON.parse(conversation.participants),
-      lastMessageAt: conversation.lastMessageAt ? new Date(conversation.lastMessageAt) : undefined,
+      lastMessageAt: conversation.lastMessageAt
+        ? new Date(conversation.lastMessageAt)
+        : undefined,
       createdAt: new Date(conversation.createdAt),
     };
   }

@@ -13,9 +13,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
-import {
-  getAgentsByProject,
-} from "@/renderer/lib/placeholders";
+import { getAgentsByProject } from "@/renderer/lib/placeholders";
 import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
 import { useProjectChannels } from "@/features/communication/hooks/use-channels.hook";
 import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
@@ -42,7 +40,7 @@ function ProjectLayout() {
 
     if (path.includes("/chat/")) {
       // Extract channelId from URL: /project/123/chat/456
-      const channelId = path.split('/chat/')[1];
+      const channelId = path.split("/chat/")[1];
       const selectedChannel = channels.find((c) => c.id === channelId);
       return {
         title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
@@ -54,11 +52,13 @@ function ProjectLayout() {
 
     if (path.includes("/agent/")) {
       // Extract agentId from URL: /project/123/agent/456
-      const agentId = path.split('/agent/')[1];
+      const agentId = path.split("/agent/")[1];
       const selectedAgent = agents.find((a) => a.id === agentId);
       return {
         title: selectedAgent ? `@${selectedAgent.name}` : "Mensagem Direta",
-        subtitle: selectedAgent ? `Conversa com ${selectedAgent.name}` : "Mensagem direta com agente",
+        subtitle: selectedAgent
+          ? `Conversa com ${selectedAgent.name}`
+          : "Mensagem direta com agente",
         type: "channel" as const,
         memberCount: 1,
       };
@@ -103,7 +103,6 @@ function ProjectLayout() {
       type: "project" as const,
     };
   };
-
 
   const pageInfo = getPageInfo();
 
@@ -173,7 +172,9 @@ export const Route = createFileRoute("/project/$projectId")({
   component: ProjectLayout,
   pendingComponent: ProjectLayoutSkeleton,
   loader: async ({ params }) => {
-    const { projectStore } = await import("@/features/project-management/stores/project.store");
+    const { projectStore } = await import(
+      "@/features/project-management/stores/project.store"
+    );
     const project = await projectStore.getProjectById({ id: params.projectId });
     return {
       project,

@@ -1,11 +1,11 @@
 import { ChannelMessageRepository } from "../persistence/channel-message.repository";
 import { ChannelMessage } from "../domain/channel-message.entity";
 import { ChannelMessageMapper } from "../channel-message.mapper";
-import type { 
-  CreateChannelMessageDto, 
-  UpdateChannelMessageDto, 
+import type {
+  CreateChannelMessageDto,
+  UpdateChannelMessageDto,
   ChannelMessageFilterDto,
-  ChannelMessagePaginationDto
+  ChannelMessagePaginationDto,
 } from "../../../../shared/types/channel-message.types";
 
 export class ChannelMessageService {
@@ -36,7 +36,7 @@ export class ChannelMessageService {
       channelId: data.channelId,
       authorId: data.authorId,
       authorName: data.authorName.trim(),
-      type: data.type || 'text',
+      type: data.type || "text",
       metadata: data.metadata ? JSON.stringify(data.metadata) : undefined,
     };
 
@@ -45,22 +45,32 @@ export class ChannelMessageService {
     return this.mapper.toDomain(saved);
   }
 
-  async listMessages(filter?: ChannelMessageFilterDto): Promise<ChannelMessage[]> {
+  async listMessages(
+    filter?: ChannelMessageFilterDto,
+  ): Promise<ChannelMessage[]> {
     const schemas = await this.repository.findMany(filter);
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 
-  async listMessagesByChannel(channelId: string, limit = 50, offset = 0): Promise<ChannelMessagePaginationDto> {
+  async listMessagesByChannel(
+    channelId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<ChannelMessagePaginationDto> {
     // Buscar mensagens
-    const messages = await this.repository.findByChannel(channelId, limit + 1, offset); // +1 para verificar se tem mais
-    
+    const messages = await this.repository.findByChannel(
+      channelId,
+      limit + 1,
+      offset,
+    ); // +1 para verificar se tem mais
+
     // Verificar se tem mais mensagens
     const hasMore = messages.length > limit;
     const actualMessages = hasMore ? messages.slice(0, limit) : messages;
-    
+
     // Converter para DTOs
     const messageDtos = this.mapper.schemaToDtoArray(actualMessages);
-    
+
     return {
       messages: messageDtos,
       totalCount: actualMessages.length, // TODO: Implementar contagem real se necessário
@@ -69,10 +79,13 @@ export class ChannelMessageService {
     };
   }
 
-  async getLatestMessages(channelId: string, limit = 50): Promise<ChannelMessage[]> {
+  async getLatestMessages(
+    channelId: string,
+    limit = 50,
+  ): Promise<ChannelMessage[]> {
     const schemas = await this.repository.findLatestByChannel(channelId, limit);
     // Reverter ordem para cronológica (mais antiga primeiro)
-    return schemas.reverse().map(schema => this.mapper.toDomain(schema));
+    return schemas.reverse().map((schema) => this.mapper.toDomain(schema));
   }
 
   async getMessageById(id: string): Promise<ChannelMessage | null> {
@@ -119,13 +132,21 @@ export class ChannelMessageService {
     await this.repository.delete(id);
   }
 
-  async searchMessages(channelId: string, searchTerm: string, limit = 20): Promise<ChannelMessage[]> {
+  async searchMessages(
+    channelId: string,
+    searchTerm: string,
+    limit = 20,
+  ): Promise<ChannelMessage[]> {
     if (!searchTerm.trim()) {
       return [];
     }
 
-    const schemas = await this.repository.searchInChannel(channelId, searchTerm.trim(), limit);
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    const schemas = await this.repository.searchInChannel(
+      channelId,
+      searchTerm.trim(),
+      limit,
+    );
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 
   async getLastMessage(channelId: string): Promise<ChannelMessage | null> {
@@ -134,45 +155,66 @@ export class ChannelMessageService {
   }
 
   // Métodos de conveniência para diferentes tipos de mensagem
-  async createTextMessage(content: string, channelId: string, authorId: string, authorName: string): Promise<ChannelMessage> {
+  async createTextMessage(
+    content: string,
+    channelId: string,
+    authorId: string,
+    authorName: string,
+  ): Promise<ChannelMessage> {
     return this.createMessage({
       content,
       channelId,
       authorId,
       authorName,
-      type: 'text',
+      type: "text",
     });
   }
 
-  async createCodeMessage(code: string, language: string, channelId: string, authorId: string, authorName: string): Promise<ChannelMessage> {
+  async createCodeMessage(
+    code: string,
+    language: string,
+    channelId: string,
+    authorId: string,
+    authorName: string,
+  ): Promise<ChannelMessage> {
     return this.createMessage({
       content: code,
       channelId,
       authorId,
       authorName,
-      type: 'code',
+      type: "code",
       metadata: { language },
     });
   }
 
-  async createSystemMessage(content: string, channelId: string, metadata?: Record<string, any>): Promise<ChannelMessage> {
+  async createSystemMessage(
+    content: string,
+    channelId: string,
+    metadata?: Record<string, any>,
+  ): Promise<ChannelMessage> {
     return this.createMessage({
       content,
       channelId,
-      authorId: 'system',
-      authorName: 'Sistema',
-      type: 'system',
+      authorId: "system",
+      authorName: "Sistema",
+      type: "system",
       metadata,
     });
   }
 
-  async createFileMessage(fileName: string, fileUrl: string, channelId: string, authorId: string, authorName: string): Promise<ChannelMessage> {
+  async createFileMessage(
+    fileName: string,
+    fileUrl: string,
+    channelId: string,
+    authorId: string,
+    authorName: string,
+  ): Promise<ChannelMessage> {
     return this.createMessage({
       content: `Arquivo: ${fileName}`,
       channelId,
       authorId,
       authorName,
-      type: 'file',
+      type: "file",
       metadata: { fileName, fileUrl },
     });
   }

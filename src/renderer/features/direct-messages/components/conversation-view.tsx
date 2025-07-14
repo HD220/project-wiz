@@ -8,14 +8,20 @@ import { Send, Paperclip, Smile, AtSign } from "lucide-react";
 import { PageTitle } from "@/components/page-title";
 import { MessageItem } from "@/components/chat/message-item";
 import { useAgentChat } from "../hooks/use-agent-chat.hook";
-import type { ConversationDto, MessageDto } from "../../../../shared/types/message.types";
+import type {
+  ConversationDto,
+  MessageDto,
+} from "../../../../shared/types/message.types";
 
 interface ConversationViewProps {
   conversationId: string;
   conversation: ConversationDto;
 }
 
-export function ConversationView({ conversationId, conversation }: ConversationViewProps) {
+export function ConversationView({
+  conversationId,
+  conversation,
+}: ConversationViewProps) {
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
@@ -45,7 +51,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
         messagesEndRef.current.scrollIntoView({ behavior: "instant" });
         isInitialLoad.current = false;
         previousMessagesLength.current = messages.length;
-      } 
+      }
       // New message added: smooth scroll
       else if (messages.length > previousMessagesLength.current || isTyping) {
         messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -65,8 +71,6 @@ export function ConversationView({ conversationId, conversation }: ConversationV
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +95,6 @@ export function ConversationView({ conversationId, conversation }: ConversationV
       handleSend(e as any);
     }
   };
-
 
   // Convert MessageDto to format expected by MessageItem
   const convertToMessageFormat = (msg: MessageDto) => ({
@@ -131,14 +134,14 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                 </Button>
               </div>
             )}
-            
+
             {/* Warning for missing agent or LLM provider */}
             {!fullAgent && (
               <div className="flex items-center justify-center bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
                 ⚠️ Persona não encontrada para esta conversa.
               </div>
             )}
-            
+
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
@@ -172,11 +175,22 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                     </Avatar>
                     <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-lg px-3 py-2">
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <div
+                          className="w-2 h-2 bg-current rounded-full animate-bounce"
+                          style={{ animationDelay: "0ms" }}
+                        />
+                        <div
+                          className="w-2 h-2 bg-current rounded-full animate-bounce"
+                          style={{ animationDelay: "150ms" }}
+                        />
+                        <div
+                          className="w-2 h-2 bg-current rounded-full animate-bounce"
+                          style={{ animationDelay: "300ms" }}
+                        />
                       </div>
-                      <span className="text-sm">{agent.name} está digitando...</span>
+                      <span className="text-sm">
+                        {agent.name} está digitando...
+                      </span>
                     </div>
                   </div>
                 )}
@@ -194,7 +208,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
           <div className="relative">
             <Textarea
               placeholder={
-                !fullAgent 
+                !fullAgent
                   ? "Persona não encontrada..."
                   : `Mensagem para ${agent.name}`
               }

@@ -1,6 +1,10 @@
 import { eq, and, desc, like } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { agents as agentSchema, type AgentSchema, type CreateAgentSchema } from "../../../persistence/schemas";
+import {
+  agents as agentSchema,
+  type AgentSchema,
+  type CreateAgentSchema,
+} from "../../../persistence/schemas";
 import { IAgentRepository } from "../../../interfaces/repositories";
 
 export interface AgentFilterDto {
@@ -69,7 +73,7 @@ export class AgentRepository implements IAgentRepository {
         .where(and(...conditions))
         .orderBy(desc(agentSchema.createdAt));
     }
-    
+
     return await db
       .select()
       .from(agentSchema)
@@ -90,7 +94,7 @@ export class AgentRepository implements IAgentRepository {
       .update(agentSchema)
       .set({ isDefault: false, updatedAt: new Date().toISOString() })
       .where(eq(agentSchema.isDefault, true));
-    
+
     // Then set the specified agent as default
     await db
       .update(agentSchema)
@@ -108,7 +112,10 @@ export class AgentRepository implements IAgentRepository {
     return result || null;
   }
 
-  async update(id: string, data: Partial<CreateAgentSchema>): Promise<AgentSchema> {
+  async update(
+    id: string,
+    data: Partial<CreateAgentSchema>,
+  ): Promise<AgentSchema> {
     const [updated] = await db
       .update(agentSchema)
       .set({

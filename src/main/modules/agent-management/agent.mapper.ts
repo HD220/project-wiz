@@ -15,7 +15,7 @@ export class AgentMapper {
       schema.isActive,
       schema.isDefault || false,
       new Date(schema.createdAt),
-      new Date(schema.updatedAt)
+      new Date(schema.updatedAt),
     );
   }
 

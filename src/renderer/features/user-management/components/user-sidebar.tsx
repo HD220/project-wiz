@@ -9,7 +9,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Search, Settings, Home, MessageSquare } from "lucide-react";
+import {
+  ChevronDown,
+  Plus,
+  Search,
+  Settings,
+  Home,
+  MessageSquare,
+} from "lucide-react";
 import { UserArea } from "./user-area";
 import { ConversationList } from "../../direct-messages/components/conversation-list";
 

@@ -34,4 +34,3 @@ export interface ChannelFilterDto {
   projectId?: string;
   isPrivate?: boolean;
 }
-

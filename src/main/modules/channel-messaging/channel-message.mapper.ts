@@ -3,7 +3,6 @@ import type { ChannelMessageDto } from "../../../shared/types/channel-message.ty
 import type { ChannelMessageSchema } from "../../persistence/schemas/channel-messages.schema";
 
 export class ChannelMessageMapper {
-  
   // Schema → Entity
   toDomain(schema: ChannelMessageSchema): ChannelMessage {
     return new ChannelMessage(
@@ -54,11 +53,11 @@ export class ChannelMessageMapper {
 
   // Array de Schema → Array de DTO (otimizado)
   schemaToDtoArray(schemas: ChannelMessageSchema[]): ChannelMessageDto[] {
-    return schemas.map(schema => this.schemaToDtoFast(schema));
+    return schemas.map((schema) => this.schemaToDtoFast(schema));
   }
 
   // Array de Entity → Array de DTO
   entityToDtoArray(entities: ChannelMessage[]): ChannelMessageDto[] {
-    return entities.map(entity => this.toDto(entity));
+    return entities.map((entity) => this.toDto(entity));
   }
 }

@@ -1,10 +1,22 @@
 import { Agent } from "../domain/agent.entity";
 import { AgentMapper } from "../agent.mapper";
 import { EventBus } from "../../../kernel/event-bus";
-import { AgentCreatedEvent, AgentUpdatedEvent, AgentDeletedEvent } from "../../../kernel/events";
-import { IAgentRepository, ILlmProviderService, IAgentService } from "../../../interfaces";
+import {
+  AgentCreatedEvent,
+  AgentUpdatedEvent,
+  AgentDeletedEvent,
+} from "../../../kernel/events";
+import {
+  IAgentRepository,
+  ILlmProviderService,
+  IAgentService,
+} from "../../../interfaces";
 import { NotFoundError, ValidationError, DomainError } from "../../../errors";
-import type { CreateAgentDto, UpdateAgentDto, AgentFilterDto } from "../../../../shared/types/agent.types";
+import type {
+  CreateAgentDto,
+  UpdateAgentDto,
+  AgentFilterDto,
+} from "../../../../shared/types/agent.types";
 
 export { CreateAgentDto, UpdateAgentDto, AgentFilterDto };
 
@@ -22,19 +34,21 @@ export class AgentService implements IAgentService {
   async createAgent(data: CreateAgentDto): Promise<Agent> {
     // Validate LLM provider exists if provided
     if (data.llmProviderId) {
-      const llmProvider = await this.llmProviderService.getLlmProviderById(data.llmProviderId);
+      const llmProvider = await this.llmProviderService.getLlmProviderById(
+        data.llmProviderId,
+      );
       if (!llmProvider) {
-        throw NotFoundError.entityNotFound('LLM Provider', data.llmProviderId);
+        throw NotFoundError.entityNotFound("LLM Provider", data.llmProviderId);
       }
     }
 
     // Check if agent already exists with this name
     const existingAgent = await this.repository.findByName(data.name);
     if (existingAgent) {
-      throw DomainError.invalidBusinessRule(
-        'Agent name must be unique', 
-        { name: data.name, existingAgentId: existingAgent.id }
-      );
+      throw DomainError.invalidBusinessRule("Agent name must be unique", {
+        name: data.name,
+        existingAgentId: existingAgent.id,
+      });
     }
 
     // Create agent with default values
@@ -52,22 +66,28 @@ export class AgentService implements IAgentService {
     // Validate agent data
     const validation = Agent.validate(agentData);
     if (!validation.isValid) {
-      throw ValidationError.singleField('agent', validation.error || 'Invalid agent data');
+      throw ValidationError.singleField(
+        "agent",
+        validation.error || "Invalid agent data",
+      );
     }
 
     // Save agent
     const saved = await this.repository.save(agentData);
     const agent = this.mapper.toDomain(saved);
-    
+
     // Publish agent created event
-    await this.eventBus.publish(new AgentCreatedEvent(saved.id, {
-      name: saved.name,
-      role: saved.role,
-      goal: saved.goal,
-      backstory: saved.backstory,
-      llmProviderId: saved.llmProviderId,
-    }));
-    
+    await this.eventBus.publish(
+      new AgentCreatedEvent(saved.id, {
+        id: saved.id,
+        name: saved.name,
+        role: saved.role,
+        goal: saved.goal,
+        backstory: saved.backstory,
+        llmProviderId: saved.llmProviderId,
+      }),
+    );
+
     return agent;
   }
 
@@ -83,25 +103,27 @@ export class AgentService implements IAgentService {
 
   async getAllAgents(filter?: AgentFilterDto): Promise<Agent[]> {
     const schemas = await this.repository.findAll(filter);
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 
   async getActiveAgents(): Promise<Agent[]> {
     const schemas = await this.repository.findAll({ isActive: true });
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 
   async updateAgent(id: string, data: UpdateAgentDto): Promise<Agent> {
     const existing = await this.repository.findById(id);
     if (!existing) {
-      throw NotFoundError.entityNotFound('Agent', id);
+      throw NotFoundError.entityNotFound("Agent", id);
     }
 
     // Validate LLM provider if being updated
     if (data.llmProviderId) {
-      const llmProvider = await this.llmProviderService.getLlmProviderById(data.llmProviderId);
+      const llmProvider = await this.llmProviderService.getLlmProviderById(
+        data.llmProviderId,
+      );
       if (!llmProvider) {
-        throw NotFoundError.entityNotFound('LLM Provider', data.llmProviderId);
+        throw NotFoundError.entityNotFound("LLM Provider", data.llmProviderId);
       }
     }
 
@@ -109,7 +131,9 @@ export class AgentService implements IAgentService {
     if (data.name && data.name !== existing.name) {
       const existingByName = await this.repository.findByName(data.name);
       if (existingByName) {
-        throw DomainError.invalidBusinessRule('Agent name must be unique', { name: data.name });
+        throw DomainError.invalidBusinessRule("Agent name must be unique", {
+          name: data.name,
+        });
       }
     }
 
@@ -156,6 +180,6 @@ export class AgentService implements IAgentService {
 
   async getAgentsByLlmProvider(llmProviderId: string): Promise<Agent[]> {
     const schemas = await this.repository.findByLlmProviderId(llmProviderId);
-    return schemas.map(schema => this.mapper.toDomain(schema));
+    return schemas.map((schema) => this.mapper.toDomain(schema));
   }
 }

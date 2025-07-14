@@ -4,7 +4,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-interface CustomLinkProps extends Omit<LinkProps, "className">, VariantProps<typeof buttonVariants> {
+interface CustomLinkProps
+  extends Omit<LinkProps, "className">,
+    VariantProps<typeof buttonVariants> {
   className?: string;
   children: React.ReactNode;
 }
@@ -18,7 +20,7 @@ export const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(
         </Link>
       </Button>
     );
-  }
+  },
 );
 
 CustomLink.displayName = "CustomLink";

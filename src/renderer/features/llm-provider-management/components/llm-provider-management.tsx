@@ -13,7 +13,13 @@ import { Zap, Star, StarOff } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 export function LlmProviderManagement() {
-  const { llmProviders, isLoading, error, deleteLlmProvider, setDefaultProvider } = useLlmProviders();
+  const {
+    llmProviders,
+    isLoading,
+    error,
+    deleteLlmProvider,
+    setDefaultProvider,
+  } = useLlmProviders();
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -76,8 +82,8 @@ export function LlmProviderManagement() {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Link 
-                      to="/settings/edit-llm-provider/$llmProviderId" 
+                    <Link
+                      to="/settings/edit-llm-provider/$llmProviderId"
                       params={{ llmProviderId: provider.id }}
                     >
                       <Button variant="outline" size="sm">

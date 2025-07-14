@@ -85,7 +85,7 @@ app.on("ready", async () => {
     // Initialize database with default data
     const seedService = new SeedService();
     await seedService.runAllSeeds();
-    
+
     logger.info("Application initialized successfully");
   } catch (error) {
     logger.error("Failed to initialize application:", error);

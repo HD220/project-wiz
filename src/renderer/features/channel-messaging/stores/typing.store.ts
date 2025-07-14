@@ -19,12 +19,12 @@ class TypingStore {
 
   private setState(newState: TypingState) {
     this.state = { ...newState };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
   setTyping(channelId: string, isTyping: boolean) {
     const newState = { ...this.state };
-    
+
     if (isTyping) {
       newState[channelId] = {
         isTyping: true,
@@ -33,20 +33,20 @@ class TypingStore {
     } else {
       delete newState[channelId];
     }
-    
+
     this.setState(newState);
   }
 
   isChannelTyping(channelId: string): boolean {
     const typingInfo = this.state[channelId];
     if (!typingInfo) return false;
-    
+
     // Check if expired (will be cleaned up by cleanup method)
     const isExpired = Date.now() - typingInfo.timestamp > 30000;
     if (isExpired) {
       return false;
     }
-    
+
     return typingInfo.isTyping;
   }
 
@@ -55,15 +55,15 @@ class TypingStore {
     const now = Date.now();
     const newState = { ...this.state };
     let hasChanges = false;
-    
-    Object.keys(newState).forEach(channelId => {
+
+    Object.keys(newState).forEach((channelId) => {
       const typingInfo = newState[channelId];
       if (now - typingInfo.timestamp > 30000) {
         delete newState[channelId];
         hasChanges = true;
       }
     });
-    
+
     if (hasChanges) {
       this.setState(newState);
     }

@@ -4,11 +4,11 @@ import { allTables, allRelations } from "./schemas";
 
 export function initializeDb(dbPath: string = "project-wiz.db") {
   const sqlite = new Database(dbPath);
-  return drizzle(sqlite, { 
-    schema: { 
-      ...allTables, 
-      ...allRelations 
-    } 
+  return drizzle(sqlite, {
+    schema: {
+      ...allTables,
+      ...allRelations,
+    },
   });
 }
 

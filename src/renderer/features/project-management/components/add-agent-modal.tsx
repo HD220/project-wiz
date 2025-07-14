@@ -11,7 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, User, Brain, Target, BookOpen } from "lucide-react";
 import { useAgents } from "../../agent-management/hooks/use-agents.hook";
@@ -33,7 +39,7 @@ export function AddAgentModal({
 }: AddAgentModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState<CreateAgentDto>({
     name: "",
@@ -53,33 +59,33 @@ export function AddAgentModal({
   // Set default LLM provider when modal opens
   useEffect(() => {
     if (isOpen && defaultProvider && !formData.llmProviderId) {
-      setFormData(prev => ({ ...prev, llmProviderId: defaultProvider.id }));
+      setFormData((prev) => ({ ...prev, llmProviderId: defaultProvider.id }));
     }
   }, [isOpen, defaultProvider, formData.llmProviderId]);
 
   const handleInputChange = (field: keyof CreateAgentDto, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       setError("Nome é obrigatório");
       return;
     }
-    
+
     if (!formData.role.trim()) {
       setError("Papel é obrigatório");
       return;
     }
-    
+
     if (!formData.goal.trim()) {
       setError("Objetivo é obrigatório");
       return;
     }
-    
+
     if (!formData.backstory.trim()) {
       setError("Background é obrigatório");
       return;
@@ -95,7 +101,7 @@ export function AddAgentModal({
 
     try {
       const newAgent = await createAgent(formData);
-      
+
       // Reset form
       setFormData({
         name: "",
@@ -108,7 +114,7 @@ export function AddAgentModal({
         isActive: true,
         isDefault: false,
       });
-      
+
       onAgentAdded?.(newAgent);
       onOpenChange(false);
     } catch (err) {
@@ -219,7 +225,9 @@ export function AddAgentModal({
               <Label htmlFor="llmProvider">Provedor LLM *</Label>
               <Select
                 value={formData.llmProviderId}
-                onValueChange={(value) => handleInputChange("llmProviderId", value)}
+                onValueChange={(value) =>
+                  handleInputChange("llmProviderId", value)
+                }
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
@@ -246,7 +254,9 @@ export function AddAgentModal({
                 max="2"
                 step="0.1"
                 value={formData.temperature}
-                onChange={(e) => handleInputChange("temperature", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleInputChange("temperature", parseFloat(e.target.value))
+                }
                 disabled={isSubmitting}
               />
               <div className="text-xs text-muted-foreground">
@@ -262,7 +272,12 @@ export function AddAgentModal({
                 min="100"
                 max="10000"
                 value={formData.maxTokens}
-                onChange={(e) => handleInputChange("maxTokens", parseInt(e.target.value) || 1000)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "maxTokens",
+                    parseInt(e.target.value) || 1000,
+                  )
+                }
                 disabled={isSubmitting}
               />
             </div>
@@ -274,7 +289,9 @@ export function AddAgentModal({
               <Checkbox
                 id="isActive"
                 checked={formData.isActive}
-                onCheckedChange={(checked) => handleInputChange("isActive", checked)}
+                onCheckedChange={(checked) =>
+                  handleInputChange("isActive", checked)
+                }
                 disabled={isSubmitting}
               />
               <Label htmlFor="isActive">Agente ativo</Label>
@@ -284,7 +301,9 @@ export function AddAgentModal({
               <Checkbox
                 id="isDefault"
                 checked={formData.isDefault}
-                onCheckedChange={(checked) => handleInputChange("isDefault", checked)}
+                onCheckedChange={(checked) =>
+                  handleInputChange("isDefault", checked)
+                }
                 disabled={isSubmitting}
               />
               <Label htmlFor="isDefault">Agente padrão</Label>
@@ -308,7 +327,9 @@ export function AddAgentModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Criar Agente
             </Button>
           </DialogFooter>

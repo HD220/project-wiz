@@ -1,16 +1,14 @@
 import { z } from "zod";
-import {
-  ProjectSchema as ProjectData,
-} from "../../../persistence/schemas/projects.schema";
+import { ProjectSchema as ProjectData } from "../../../persistence/schemas/projects.schema";
 
 // Create a basic validation schema for project
 const ProjectValidationSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1),
-  description: z.string().optional(),
-  gitUrl: z.string().optional(),
-  status: z.string().default('active'),
-  avatar: z.string().optional(),
+  description: z.string().nullable().optional(),
+  gitUrl: z.string().nullable().optional(),
+  status: z.string().default("active"),
+  avatar: z.string().nullable().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -19,7 +17,27 @@ export class ProjectEntity {
   private props: ProjectData;
 
   constructor(data: Partial<ProjectData> | ProjectData) {
-    this.props = ProjectValidationSchema.parse(data) as ProjectData;
+    // Convert data to match validation schema requirements
+    const normalizedData = {
+      ...data,
+      createdAt:
+        typeof data.createdAt === "string"
+          ? data.createdAt
+          : data.createdAt?.toISOString(),
+      updatedAt:
+        typeof data.updatedAt === "string"
+          ? data.updatedAt
+          : data.updatedAt?.toISOString(),
+    };
+
+    const parsed = ProjectValidationSchema.parse(normalizedData);
+
+    // Convert back to proper ProjectData format
+    this.props = {
+      ...parsed,
+      createdAt: parsed.createdAt ? new Date(parsed.createdAt) : new Date(),
+      updatedAt: parsed.updatedAt ? new Date(parsed.updatedAt) : new Date(),
+    } as ProjectData;
   }
 
   getId(): string {
@@ -31,11 +49,11 @@ export class ProjectEntity {
   }
 
   getDescription(): string | undefined {
-    return this.props.description;
+    return this.props.description ?? undefined;
   }
 
   getGitUrl(): string | undefined {
-    return this.props.gitUrl;
+    return this.props.gitUrl ?? undefined;
   }
 
   getStatus(): "active" | "inactive" | "archived" {
@@ -43,7 +61,7 @@ export class ProjectEntity {
   }
 
   getAvatar(): string | undefined {
-    return this.props.avatar;
+    return this.props.avatar ?? undefined;
   }
 
   getCreatedAt(): Date {
@@ -55,7 +73,7 @@ export class ProjectEntity {
   }
 
   updateName(data: { name: string }): void {
-    const validated = z.object({ name: ProjectSchema.shape.name }).parse(data);
+    const validated = z.object({ name: z.string().min(1) }).parse(data);
     this.props.name = validated.name;
     this.props.updatedAt = new Date();
   }
@@ -63,20 +81,20 @@ export class ProjectEntity {
   updateDescription(data: { description?: string }): void {
     const validated = z
       .object({
-        description: ProjectSchema.shape.description,
+        description: z.string().nullable().optional(),
       })
       .parse(data);
-    this.props.description = validated.description;
+    this.props.description = validated.description ?? null;
     this.props.updatedAt = new Date();
   }
 
   updateGitUrl(data: { gitUrl?: string }): void {
     const validated = z
       .object({
-        gitUrl: ProjectSchema.shape.gitUrl,
+        gitUrl: z.string().nullable().optional(),
       })
       .parse(data);
-    this.props.gitUrl = validated.gitUrl;
+    this.props.gitUrl = validated.gitUrl ?? null;
     this.props.updatedAt = new Date();
   }
 

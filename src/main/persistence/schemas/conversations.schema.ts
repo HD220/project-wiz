@@ -7,7 +7,9 @@ export const conversations = sqliteTable("conversations", {
     .$defaultFn(() => randomUUID()),
   type: text("type", {
     enum: ["direct", "group"],
-  }).notNull().default("direct"),
+  })
+    .notNull()
+    .default("direct"),
   participants: text("participants").notNull(), // JSON string array
   lastMessageAt: text("last_message_at"),
   createdAt: text("created_at")

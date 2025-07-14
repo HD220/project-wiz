@@ -1,10 +1,10 @@
 import { useSyncExternalStore, useEffect, useMemo, useRef } from "react";
 import { channelStore } from "../stores/channel.store";
-import type { 
-  CreateChannelDto, 
-  UpdateChannelDto, 
+import type {
+  CreateChannelDto,
+  UpdateChannelDto,
   ChannelFilterDto,
-  ChannelDto 
+  ChannelDto,
 } from "../../../../shared/types/channel.types";
 
 export function useChannels(filter?: ChannelFilterDto) {
@@ -31,53 +31,58 @@ export function useChannels(filter?: ChannelFilterDto) {
   }, []);
 
   // Mutations - memoizadas para evitar re-renders
-  const mutations = useMemo(() => ({
-    createChannel: (data: CreateChannelDto) => 
-      channelStore.createChannel(data),
-    
-    updateChannel: (data: UpdateChannelDto) => 
-      channelStore.updateChannel(data),
-    
-    archiveChannel: (id: string) => 
-      channelStore.archiveChannel(id),
-    
-    deleteChannel: (id: string) => 
-      channelStore.deleteChannel(id),
-      
-    setSelectedChannel: (channel: ChannelDto | null) => 
-      channelStore.setSelectedChannel(channel),
-      
-    clearError: () => channelStore.clearError(),
+  const mutations = useMemo(
+    () => ({
+      createChannel: (data: CreateChannelDto) =>
+        channelStore.createChannel(data),
 
-    createDefaultChannel: (projectId: string, createdBy: string) =>
-      channelStore.createDefaultChannel(projectId, createdBy),
+      updateChannel: (data: UpdateChannelDto) =>
+        channelStore.updateChannel(data),
 
-    resetState: () => channelStore.resetState(),
-  }), []);
+      archiveChannel: (id: string) => channelStore.archiveChannel(id),
+
+      deleteChannel: (id: string) => channelStore.deleteChannel(id),
+
+      setSelectedChannel: (channel: ChannelDto | null) =>
+        channelStore.setSelectedChannel(channel),
+
+      clearError: () => channelStore.clearError(),
+
+      createDefaultChannel: (projectId: string, createdBy: string) =>
+        channelStore.createDefaultChannel(projectId, createdBy),
+
+      resetState: () => channelStore.resetState(),
+    }),
+    [],
+  );
 
   // Queries - memoizadas
-  const queries = useMemo(() => ({
-    loadChannels: (newFilter?: ChannelFilterDto, forceReload?: boolean) => 
-      channelStore.loadChannels(newFilter || filterRef.current, forceReload),
-      
-    loadChannelsByProject: (projectId: string, forceReload?: boolean) =>
-      channelStore.loadChannelsByProject(projectId, forceReload),
-      
-    getChannelById: (id: string) => 
-      channelStore.getChannelById(id),
-      
-    refetch: () => 
-      channelStore.loadChannels(filterRef.current, true),
-  }), []);
+  const queries = useMemo(
+    () => ({
+      loadChannels: (newFilter?: ChannelFilterDto, forceReload?: boolean) =>
+        channelStore.loadChannels(newFilter || filterRef.current, forceReload),
+
+      loadChannelsByProject: (projectId: string, forceReload?: boolean) =>
+        channelStore.loadChannelsByProject(projectId, forceReload),
+
+      getChannelById: (id: string) => channelStore.getChannelById(id),
+
+      refetch: () => channelStore.loadChannels(filterRef.current, true),
+    }),
+    [],
+  );
 
   // Getters de conveniência - memoizados
-  const getters = useMemo(() => ({
-    getChannelsByProject: (projectId: string) =>
-      channelStore.getChannelsByProject(projectId),
-      
-    getGeneralChannel: (projectId: string) =>
-      channelStore.getGeneralChannel(projectId),
-  }), [state.channels]);
+  const getters = useMemo(
+    () => ({
+      getChannelsByProject: (projectId: string) =>
+        channelStore.getChannelsByProject(projectId),
+
+      getGeneralChannel: (projectId: string) =>
+        channelStore.getGeneralChannel(projectId),
+    }),
+    [state.channels],
+  );
 
   return {
     // Estado
@@ -85,7 +90,7 @@ export function useChannels(filter?: ChannelFilterDto) {
     isLoading: state.isLoading,
     error: state.error,
     selectedChannel: state.selectedChannel,
-    
+
     // Operações
     ...mutations,
     ...queries,
@@ -103,7 +108,7 @@ export function useProjectChannels(projectId: string) {
 
   const hasLoadedRef = useRef(false);
   const projectIdRef = useRef(projectId);
-  
+
   // Resetar se o projeto mudou
   useEffect(() => {
     if (projectIdRef.current !== projectId) {
@@ -126,15 +131,18 @@ export function useProjectChannels(projectId: string) {
   }, [projectId]);
 
   // Filtrar canais apenas do projeto atual
-  const projectChannels = useMemo(() => 
-    state.channels.filter(ch => ch.projectId === projectId),
-    [state.channels, projectId]
+  const projectChannels = useMemo(
+    () => state.channels.filter((ch) => ch.projectId === projectId),
+    [state.channels, projectId],
   );
 
   // Canal geral do projeto (first channel or one named 'general')
-  const generalChannel = useMemo(() => 
-    projectChannels.find(ch => ch.name.toLowerCase() === 'general') || projectChannels[0] || null,
-    [projectChannels]
+  const generalChannel = useMemo(
+    () =>
+      projectChannels.find((ch) => ch.name.toLowerCase() === "general") ||
+      projectChannels[0] ||
+      null,
+    [projectChannels],
   );
 
   return {
@@ -144,24 +152,24 @@ export function useProjectChannels(projectId: string) {
     isLoading: state.isLoading,
     error: state.error,
     selectedChannel: state.selectedChannel,
-    
+
     // Mutations específicas do projeto
-    createChannel: (data: Omit<CreateChannelDto, 'projectId'>) => 
+    createChannel: (data: Omit<CreateChannelDto, "projectId">) =>
       channelStore.createChannel({ ...data, projectId }),
-    
+
     updateChannel: channelStore.updateChannel,
     archiveChannel: channelStore.archiveChannel,
     deleteChannel: channelStore.deleteChannel,
     setSelectedChannel: channelStore.setSelectedChannel,
     clearError: channelStore.clearError,
-    
+
     createDefaultChannel: (createdBy: string) =>
       channelStore.createDefaultChannel(projectId, createdBy),
-    
+
     // Queries específicas do projeto
-    loadChannels: (forceReload?: boolean) => 
+    loadChannels: (forceReload?: boolean) =>
       channelStore.loadChannelsByProject(projectId, forceReload),
-      
+
     getChannelById: channelStore.getChannelById,
     refetch: () => channelStore.loadChannelsByProject(projectId, true),
   };

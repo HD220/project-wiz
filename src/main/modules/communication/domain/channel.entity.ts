@@ -26,20 +26,32 @@ export class Channel {
 
     // Permitir apenas letras, números, hífens e underscores
     if (!/^[a-zA-Z0-9-_]+$/.test(name)) {
-      return { isValid: false, error: "Nome pode conter apenas letras, números, hífens e underscores" };
+      return {
+        isValid: false,
+        error: "Nome pode conter apenas letras, números, hífens e underscores",
+      };
     }
 
     // Não pode começar ou terminar com hífen ou underscore
     if (/^[-_]|[-_]$/.test(name)) {
-      return { isValid: false, error: "Nome não pode começar ou terminar com hífen ou underscore" };
+      return {
+        isValid: false,
+        error: "Nome não pode começar ou terminar com hífen ou underscore",
+      };
     }
 
     return { isValid: true };
   }
 
-  static validateDescription(description?: string): { isValid: boolean; error?: string } {
+  static validateDescription(description?: string): {
+    isValid: boolean;
+    error?: string;
+  } {
     if (description && description.length > 500) {
-      return { isValid: false, error: "Descrição deve ter no máximo 500 caracteres" };
+      return {
+        isValid: false,
+        error: "Descrição deve ter no máximo 500 caracteres",
+      };
     }
     return { isValid: true };
   }
@@ -63,32 +75,38 @@ export class Channel {
     return name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-_]/g, '')
-      .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-_]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
 
   // Factory methods
   static createGeneral(projectId: string, createdBy: string): Channel {
     return new Channel(
-      '', // ID será gerado pelo banco
-      'geral',
+      "", // ID será gerado pelo banco
+      "geral",
       projectId,
       createdBy,
       false,
-      'Canal principal do projeto'
+      "Canal principal do projeto",
     );
   }
 
-  static createCustom(name: string, projectId: string, createdBy: string, isPrivate: boolean = false, description?: string): Channel {
+  static createCustom(
+    name: string,
+    projectId: string,
+    createdBy: string,
+    isPrivate: boolean = false,
+    description?: string,
+  ): Channel {
     return new Channel(
-      '', // ID será gerado pelo banco
+      "", // ID será gerado pelo banco
       Channel.normalizeName(name),
       projectId,
       createdBy,
       isPrivate,
-      description
+      description,
     );
   }
 

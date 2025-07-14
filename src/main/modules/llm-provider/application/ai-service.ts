@@ -11,7 +11,7 @@ interface AIServiceConfig {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
@@ -108,7 +108,6 @@ export class AIService {
     return result.text;
   }
 
-
   // Get all available providers for frontend
   async getAvailableProviders(): Promise<LlmProvider[]> {
     return this.llmProviderService.listLlmProviders();
@@ -133,7 +132,7 @@ export class AIService {
           maxTokens: 10,
         },
       );
-      return typeof result === 'string' && result.length > 0;
+      return typeof result === "string" && result.length > 0;
     } catch (error) {
       console.error(`Failed to validate provider ${providerId}:`, error);
       return false;

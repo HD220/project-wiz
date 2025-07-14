@@ -1,10 +1,13 @@
 import { eq, and, desc, ne } from "drizzle-orm";
 import { db } from "../../../persistence/db";
-import { channels, type ChannelSchema, type CreateChannelSchema } from "../../../persistence/schemas";
+import {
+  channels,
+  type ChannelSchema,
+  type CreateChannelSchema,
+} from "../../../persistence/schemas";
 import type { ChannelFilterDto } from "../../../../shared/types/channel.types";
 
 export class ChannelRepository {
-  
   // CREATE
   async save(data: CreateChannelSchema): Promise<ChannelSchema> {
     const [channel] = await db
@@ -20,13 +23,13 @@ export class ChannelRepository {
   // READ (lista com filtros)
   async findMany(filter?: ChannelFilterDto): Promise<ChannelSchema[]> {
     const conditions = [];
-    
+
     // Aplicar filtros se existirem
     if (filter) {
       if (filter.projectId) {
         conditions.push(eq(channels.projectId, filter.projectId));
       }
-      
+
       // Removed type and isArchived filters
 
       if (filter.isPrivate !== undefined) {
@@ -50,7 +53,7 @@ export class ChannelRepository {
       .from(channels)
       .where(eq(channels.id, id))
       .limit(1);
-    
+
     return channel || null;
   }
 
@@ -60,7 +63,10 @@ export class ChannelRepository {
   }
 
   // UPDATE
-  async update(id: string, data: Partial<CreateChannelSchema>): Promise<ChannelSchema> {
+  async update(
+    id: string,
+    data: Partial<CreateChannelSchema>,
+  ): Promise<ChannelSchema> {
     const [updated] = await db
       .update(channels)
       .set({
@@ -69,13 +75,16 @@ export class ChannelRepository {
       })
       .where(eq(channels.id, id))
       .returning();
-    
+
     return updated;
   }
 
   // SOFT DELETE (arquivar) - simplified
   async archive(id: string): Promise<ChannelSchema> {
-    const [channel] = await db.select().from(channels).where(eq(channels.id, id));
+    const [channel] = await db
+      .select()
+      .from(channels)
+      .where(eq(channels.id, id));
     return channel;
   }
 
@@ -85,7 +94,11 @@ export class ChannelRepository {
   }
 
   // Verificar se nome existe no projeto
-  async existsByNameInProject(name: string, projectId: string, excludeId?: string): Promise<boolean> {
+  async existsByNameInProject(
+    name: string,
+    projectId: string,
+    excludeId?: string,
+  ): Promise<boolean> {
     const conditions = [
       eq(channels.name, name.toLowerCase()),
       eq(channels.projectId, projectId),
@@ -101,7 +114,7 @@ export class ChannelRepository {
       .from(channels)
       .where(and(...conditions))
       .limit(1);
-      
+
     return !!existing;
   }
 }

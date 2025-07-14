@@ -35,7 +35,9 @@ export function CreateChannelModal({
 }: CreateChannelModalProps) {
   const [channelName, setChannelName] = useState("");
   const [channelDescription, setChannelDescription] = useState("");
-  const [channelType, setChannelType] = useState<ChannelTypeEnum>("general");
+  const [channelType, setChannelType] = useState<"general" | "task" | "agent">(
+    "general",
+  );
   const [isPrivate, setIsPrivate] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,7 +45,7 @@ export function CreateChannelModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!channelName.trim()) {
       return;
     }
@@ -56,7 +58,7 @@ export function CreateChannelModal({
         name: channelName.trim(),
         description: channelDescription.trim() || undefined,
         isPrivate,
-        createdBy: 'current-user', // TODO: Get from user context
+        createdBy: "current-user", // TODO: Get from user context
       });
 
       // Success - close modal and reset form
@@ -94,7 +96,12 @@ export function CreateChannelModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="channel-type">Tipo de Canal</Label>
-            <Select value={channelType} onValueChange={(value: ChannelTypeEnum) => setChannelType(value)}>
+            <Select
+              value={channelType}
+              onValueChange={(value: "general" | "task" | "agent") =>
+                setChannelType(value)
+              }
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -166,11 +173,7 @@ export function CreateChannelModal({
             </Label>
           </div>
 
-          {error && (
-            <div className="text-sm text-destructive">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-sm text-destructive">{error}</div>}
 
           <DialogFooter>
             <Button
@@ -184,8 +187,8 @@ export function CreateChannelModal({
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={!channelName.trim() || isSubmitting}
             >
               {isSubmitting ? "Criando..." : "Criar Canal"}

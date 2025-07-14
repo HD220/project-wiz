@@ -278,7 +278,6 @@ export const mockAgents: Agent[] = [
   },
 ];
 
-
 export const mockTasks: Task[] = [
   {
     id: "task-1",
@@ -628,7 +627,6 @@ export const getAgentById = (id: string): Agent | undefined => {
 export const getTasksByStatus = (status: string): Task[] => {
   return mockTasks.filter((task) => task.status === status);
 };
-
 
 export const getAgentsByProject = (projectId: string): Agent[] => {
   return mockAgents.filter((agent) => agent.projectId === projectId);

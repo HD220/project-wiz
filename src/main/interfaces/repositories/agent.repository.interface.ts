@@ -1,5 +1,5 @@
-import type { AgentSchema, CreateAgentSchema } from '../../persistence/schemas';
-import type { AgentFilterDto } from '../../../shared/types/agent.types';
+import type { AgentSchema, CreateAgentSchema } from "../../persistence/schemas";
+import type { AgentFilterDto } from "../../../shared/types/agent.types";
 
 export interface IAgentRepository {
   save(data: CreateAgentSchema): Promise<AgentSchema>;

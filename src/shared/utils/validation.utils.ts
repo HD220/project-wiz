@@ -5,7 +5,8 @@ export class ValidationUtils {
    * Validates if a string is a valid UUID
    */
   static isValidUUID(value: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(value);
   }
 
@@ -13,28 +14,28 @@ export class ValidationUtils {
    * Validates if a string is not empty or just whitespace
    */
   static isNonEmptyString(value: string): boolean {
-    return typeof value === 'string' && value.trim().length > 0;
+    return typeof value === "string" && value.trim().length > 0;
   }
 
   /**
    * Validates if a string has minimum length
    */
   static hasMinLength(value: string, minLength: number): boolean {
-    return typeof value === 'string' && value.length >= minLength;
+    return typeof value === "string" && value.length >= minLength;
   }
 
   /**
    * Validates if a string has maximum length
    */
   static hasMaxLength(value: string, maxLength: number): boolean {
-    return typeof value === 'string' && value.length <= maxLength;
+    return typeof value === "string" && value.length <= maxLength;
   }
 
   /**
    * Validates if a number is within range
    */
   static isInRange(value: number, min: number, max: number): boolean {
-    return typeof value === 'number' && value >= min && value <= max;
+    return typeof value === "number" && value >= min && value <= max;
   }
 
   /**
@@ -84,8 +85,8 @@ export class ValidationUtils {
    */
   static sanitizeString(value: string): string {
     return value
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/[<>]/g, '')
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/[<>]/g, "")
       .trim();
   }
 
@@ -99,13 +100,17 @@ export class ValidationUtils {
       minLength?: number;
       maxLength?: number;
       sanitize?: boolean;
-    } = {}
+    } = {},
   ): { isValid: boolean; value: string; error?: string } {
     let processedValue = value;
 
     // Check if required and empty
     if (options.required && !this.isNonEmptyString(value)) {
-      return { isValid: false, value: processedValue, error: 'This field is required' };
+      return {
+        isValid: false,
+        value: processedValue,
+        error: "This field is required",
+      };
     }
 
     // Skip other validations if not required and empty
@@ -119,20 +124,26 @@ export class ValidationUtils {
     }
 
     // Check minimum length
-    if (options.minLength && !this.hasMinLength(processedValue, options.minLength)) {
-      return { 
-        isValid: false, 
-        value: processedValue, 
-        error: `Must be at least ${options.minLength} characters long` 
+    if (
+      options.minLength &&
+      !this.hasMinLength(processedValue, options.minLength)
+    ) {
+      return {
+        isValid: false,
+        value: processedValue,
+        error: `Must be at least ${options.minLength} characters long`,
       };
     }
 
     // Check maximum length
-    if (options.maxLength && !this.hasMaxLength(processedValue, options.maxLength)) {
-      return { 
-        isValid: false, 
-        value: processedValue, 
-        error: `Must be no more than ${options.maxLength} characters long` 
+    if (
+      options.maxLength &&
+      !this.hasMaxLength(processedValue, options.maxLength)
+    ) {
+      return {
+        isValid: false,
+        value: processedValue,
+        error: `Must be no more than ${options.maxLength} characters long`,
       };
     }
 

@@ -10,9 +10,9 @@ export abstract class BaseError extends Error {
   public readonly metadata: ErrorMetadata;
 
   constructor(
-    message: string, 
-    public readonly name: string = 'BaseError',
-    metadata: ErrorMetadata = {}
+    message: string,
+    public readonly name: string = "BaseError",
+    metadata: ErrorMetadata = {},
   ) {
     super(message);
     this.timestamp = metadata.timestamp || new Date();
@@ -20,10 +20,10 @@ export abstract class BaseError extends Error {
       ...metadata,
       timestamp: this.timestamp,
     };
-    
+
     // Ensure proper prototype chain for instanceof checks
     Object.setPrototypeOf(this, new.target.prototype);
-    
+
     // Capture stack trace if available
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);

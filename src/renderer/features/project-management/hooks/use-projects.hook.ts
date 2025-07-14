@@ -33,27 +33,36 @@ export function useProjects(filter?: ProjectFilterDto) {
     loadInitialProjects();
   }, []);
 
-  const mutations = useMemo(() => ({
-    createProject: (data: CreateProjectDto) => projectStore.createProject(data),
-    updateProject: (data: UpdateProjectDto) => projectStore.updateProject(data),
-    deleteProject: (data: { id: string }) => projectStore.deleteProject(data),
-    archiveProject: (data: { id: string }) => projectStore.archiveProject(data),
-  }), []);
+  const mutations = useMemo(
+    () => ({
+      createProject: (data: CreateProjectDto) =>
+        projectStore.createProject(data),
+      updateProject: (data: UpdateProjectDto) =>
+        projectStore.updateProject(data),
+      deleteProject: (data: { id: string }) => projectStore.deleteProject(data),
+      archiveProject: (data: { id: string }) =>
+        projectStore.archiveProject(data),
+    }),
+    [],
+  );
 
-  const queries = useMemo(() => ({
-    loadProjects: (newFilter?: ProjectFilterDto, forceReload?: boolean) => 
-      projectStore.loadProjects(newFilter || filterRef.current, forceReload),
-    getProjectById: (data: { id: string }) => 
-      projectStore.getProjectById(data),
-    refreshProjects: () => projectStore.loadProjects(filterRef.current, true),
-  }), []);
+  const queries = useMemo(
+    () => ({
+      loadProjects: (newFilter?: ProjectFilterDto, forceReload?: boolean) =>
+        projectStore.loadProjects(newFilter || filterRef.current, forceReload),
+      getProjectById: (data: { id: string }) =>
+        projectStore.getProjectById(data),
+      refreshProjects: () => projectStore.loadProjects(filterRef.current, true),
+    }),
+    [],
+  );
 
   return {
     projects: state.projects,
     isLoading: state.isLoading,
     error: state.error,
     selectedProject: state.selectedProject,
-    
+
     ...mutations,
     ...queries,
   };

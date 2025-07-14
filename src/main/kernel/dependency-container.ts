@@ -1,5 +1,5 @@
-import { IModule, IModuleContainer } from './interfaces/module.interface';
-import { logger } from '../logger';
+import { IModule, IModuleContainer } from "./interfaces/module.interface";
+import { logger } from "../logger";
 
 export class DependencyContainer implements IModuleContainer {
   private static instance: DependencyContainer;
@@ -20,7 +20,7 @@ export class DependencyContainer implements IModuleContainer {
     if (this.modules.has(name)) {
       throw new Error(`Module ${name} is already registered`);
     }
-    
+
     logger.info(`Registering module: ${name}`);
     module.setContainer(this);
     this.modules.set(name, module);
@@ -35,23 +35,23 @@ export class DependencyContainer implements IModuleContainer {
   }
 
   async initializeAll(): Promise<void> {
-    logger.info('Starting module initialization...');
-    
+    logger.info("Starting module initialization...");
+
     // Topological sort based on dependencies
     const sortedModules = this.topologicalSort();
-    
+
     for (const moduleName of sortedModules) {
       await this.initializeModule(moduleName);
     }
-    
+
     // Register all IPC handlers after initialization
     for (const moduleName of sortedModules) {
       const module = this.modules.get(moduleName)!;
       logger.info(`Registering IPC handlers for module: ${moduleName}`);
       module.registerIpcHandlers();
     }
-    
-    logger.info('All modules initialized and IPC handlers registered');
+
+    logger.info("All modules initialized and IPC handlers registered");
   }
 
   private async initializeModule(name: string): Promise<void> {
@@ -81,17 +81,17 @@ export class DependencyContainer implements IModuleContainer {
 
     const visit = (name: string) => {
       if (visited.has(name)) return;
-      
+
       const module = this.modules.get(name);
       if (!module) return;
 
       visited.add(name);
-      
+
       // Visit dependencies first
       for (const dep of module.getDependencies()) {
         visit(dep);
       }
-      
+
       result.push(name);
     };
 

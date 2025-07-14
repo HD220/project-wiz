@@ -1,9 +1,9 @@
-import { BaseModule } from '../../kernel/base-module';
-import { LlmProviderRepository } from './persistence/llm-provider.repository';
-import { LlmProviderService } from './application/llm-provider.service';
-import { LlmProviderMapper } from './llm-provider.mapper';
-import { LlmProviderIpcHandlers } from './ipc/handlers';
-import { AIService } from './application/ai-service';
+import { BaseModule } from "../../kernel/base-module";
+import { LlmProviderRepository } from "./persistence/llm-provider.repository";
+import { LlmProviderService } from "./application/llm-provider.service";
+import { LlmProviderMapper } from "./llm-provider.mapper";
+import { LlmProviderIpcHandlers } from "./ipc/handlers";
+import { AIService } from "./application/ai-service";
 
 export class LlmProviderModule extends BaseModule {
   private llmProviderRepository!: LlmProviderRepository;
@@ -13,7 +13,7 @@ export class LlmProviderModule extends BaseModule {
   private aiService!: AIService;
 
   getName(): string {
-    return 'llm-provider';
+    return "llm-provider";
   }
 
   getDependencies(): string[] {
@@ -31,7 +31,7 @@ export class LlmProviderModule extends BaseModule {
       this.llmProviderService,
       this.llmProviderMapper,
     );
-    
+
     // Initialize AI Service that depends on LLM provider service
     this.aiService = new AIService(this.llmProviderService);
   }
@@ -43,14 +43,14 @@ export class LlmProviderModule extends BaseModule {
   // Public getters for other modules
   getLlmProviderService(): LlmProviderService {
     if (!this.isInitialized()) {
-      throw new Error('LlmProviderModule must be initialized first');
+      throw new Error("LlmProviderModule must be initialized first");
     }
     return this.llmProviderService;
   }
 
   getAIService(): AIService {
     if (!this.isInitialized()) {
-      throw new Error('LlmProviderModule must be initialized first');
+      throw new Error("LlmProviderModule must be initialized first");
     }
     return this.aiService;
   }
