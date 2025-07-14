@@ -110,35 +110,30 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Sistema de Configuração
-
 - [ ] `ConfigurationManager` com carregamento de config
 - [ ] `ConfigurationSchema` para estrutura
 - [ ] `EnvironmentManager` para diferentes ambientes
 - [ ] `ConfigurationValidator` para validação
 
 ### Sistema de Validação
-
 - [ ] `ValidationService` centralizado
 - [ ] `ValidationRule` para regras customizadas
 - [ ] `ValidationResult` para resultados
 - [ ] `SchemaValidator` baseado em Zod
 
 ### Schemas Zod Específicos
-
 - [ ] `EmailSchema` usando `z.string().email()`
 - [ ] `PasswordSchema` com `.min()`, `.regex()` e `.refine()`
 - [ ] `FileSchema` para validação de uploads
 - [ ] `AgentSchema` para validação de configurações de agentes
 
 ### Schemas Zod para Entidades
-
 - [ ] `AgentSchema` para Agent entity usando `z.object()`
 - [ ] `ProjectSchema` para Project entity usando `z.object()`
 - [ ] `MessageSchema` para Message entity usando `z.object()`
 - [ ] `ConfigurationSchema` para configurações do sistema
 
 ### Integração e Qualidade
-
 - [ ] Arquivo `core/infrastructure/index.ts` atualizado
 - [ ] Integração com sistema de erros
 - [ ] Integração com logging
@@ -147,7 +142,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] ConfigurationManager funciona corretamente
 - [ ] ValidationService funciona corretamente
 - [ ] Cada schema Zod funciona corretamente
@@ -157,14 +151,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Centralized**: Configuração e validação centralizadas
 - **Type Safe**: Validação com type safety
 - **Descriptive**: Mensagens de erro claras
 - **Flexible**: Configuração flexível por ambiente
 
 ### Desejáveis
-
 - **Hot Reload**: Recarregamento de configurações
 - **Async Validation**: Validação assíncrona
 - **Custom Rules**: Regras customizadas fáceis

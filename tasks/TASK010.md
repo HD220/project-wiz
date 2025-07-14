@@ -172,13 +172,11 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Estrutura do Módulo
-
 - [ ] Pasta `modules/llm-integration/` criada
 - [ ] Subpastas domain/, application/, infrastructure/, presentation/
 - [ ] Arquivos de índice criados
 
 ### Domain Layer
-
 - [ ] `LLMProvider` entity com comportamentos
 - [ ] `TextGenerationRequest` entity
 - [ ] `ProviderId` value object
@@ -190,7 +188,6 @@ A tarefa estará completa quando:
 - [ ] `TextGenerated` event
 
 ### Application Layer
-
 - [ ] `ConfigureProviderCommand` estruturado
 - [ ] `GenerateTextCommand` estruturado
 - [ ] `GetProviderQuery` estruturado
@@ -199,7 +196,6 @@ A tarefa estará completa quando:
 - [ ] `GenerateTextHandler` implementado
 
 ### Infrastructure Layer
-
 - [ ] `LLMProviderRepository` implementado
 - [ ] `OpenAIAdapter` implementado
 - [ ] `DeepSeekAdapter` implementado
@@ -208,13 +204,11 @@ A tarefa estará completa quando:
 - [ ] Esquema de banco atualizado
 
 ### Presentation Layer
-
 - [ ] `LLMProviderIpcHandlers` implementados
 - [ ] Integração com mediator
 - [ ] Validação de entrada
 
 ### Integração e Qualidade
-
 - [ ] Módulo registrado no sistema
 - [ ] Integração com core components
 - [ ] `npm run format` executado sem erros
@@ -222,7 +216,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] Entities funcionam corretamente
 - [ ] Services funcionam corretamente
 - [ ] Adapters funcionam corretamente
@@ -233,14 +226,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Extensible**: Fácil adição de novos provedores
 - **Secure**: Armazenamento seguro de chaves API
 - **Reliable**: Tolerância a falhas
 - **Maintainable**: Fácil de manter
 
 ### Desejáveis
-
 - **Performance**: Geração eficiente de texto
 - **Monitored**: Métricas de uso
 - **Rate Limited**: Controle de taxa

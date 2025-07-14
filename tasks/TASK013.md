@@ -177,13 +177,11 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Sistema de Módulos
-
 - [ ] Pasta `core/modules/` criada
 - [ ] Subpastas container/, lifecycle/, registration/, interfaces/, decorators/
 - [ ] Arquivos de índice criados
 
 ### Dependency Injection Container
-
 - [ ] `DependencyContainer` implementado
 - [ ] `ServiceLocator` implementado
 - [ ] `BindingRegistry` implementado
@@ -191,7 +189,6 @@ A tarefa estará completa quando:
 - [ ] Resolução de dependências funcionando
 
 ### Sistema de Lifecycle
-
 - [ ] `ModuleLifecycle` implementado
 - [ ] `StartupManager` implementado
 - [ ] `ShutdownManager` implementado
@@ -199,28 +196,24 @@ A tarefa estará completa quando:
 - [ ] Ordem de inicialização correta
 
 ### Registros
-
 - [ ] `ModuleRegistry` implementado
 - [ ] `ServiceRegistry` implementado
 - [ ] `HandlerRegistry` implementado
 - [ ] Validação de dependências
 
 ### Decorators
-
 - [ ] `@Injectable` decorator implementado
 - [ ] `@Module` decorator implementado
 - [ ] `@Service` decorator implementado
 - [ ] Metadata extraction funcionando
 
 ### Interfaces
-
 - [ ] `IModule` interface definida
 - [ ] `IService` interface definida
 - [ ] `ILifecycle` interface definida
 - [ ] `IContainer` interface definida
 
 ### Integração e Qualidade
-
 - [ ] Integração com todos os módulos
 - [ ] Substituição do sistema atual
 - [ ] `npm run format` executado sem erros
@@ -228,7 +221,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] Container funciona corretamente
 - [ ] Lifecycle funciona corretamente
 - [ ] Registros funcionam corretamente
@@ -238,14 +230,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Dependency Injection**: Injeção de dependências funcional
 - **Lifecycle Management**: Gerenciamento de ciclo de vida
 - **Module System**: Sistema de módulos robusto
 - **Error Handling**: Tratamento de erros
 
 ### Desejáveis
-
 - **Performance**: Resolução eficiente
 - **Monitoring**: Monitoramento de saúde
 - **Configuration**: Configuração flexível

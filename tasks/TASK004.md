@@ -106,14 +106,12 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Sistema de Logging
-
 - [ ] `Logger` classe principal implementada
 - [ ] `LogLevel` enum com todos os níveis
 - [ ] `LogEntry` estrutura para entradas
 - [ ] `LogTransport` interface para destinos
 
 ### Níveis de Log (Pino.js)
-
 - [ ] `fatal` - erros fatais (nível 60)
 - [ ] `error` - erros críticos (nível 50)
 - [ ] `warn` - avisos importantes (nível 40)
@@ -122,19 +120,16 @@ A tarefa estará completa quando:
 - [ ] `trace` - informações detalhadas (nível 10)
 
 ### Transports (Pino.js)
-
 - [ ] Console Transport com pino-pretty (desenvolvimento)
 - [ ] File Transport com Pino file transport (produção)
 - [ ] Configuração de transports por ambiente via Pino options
 
 ### LoggerFactory (Pino.js)
-
 - [ ] Criação de child loggers com contexto
 - [ ] Configuração por módulo usando Pino child()
 - [ ] Herança de configurações via Pino bindings
 
 ### Integração e Qualidade
-
 - [ ] Arquivo `core/infrastructure/index.ts` atualizado
 - [ ] Integração com sistema de erros
 - [ ] `npm run format` executado sem erros
@@ -142,7 +137,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] Logger funciona corretamente
 - [ ] Cada transport funciona corretamente
 - [ ] Performance adequada
@@ -151,14 +145,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Structured Logs**: Logs estruturados em JSON
 - **Performance**: Logging não impacta performance
 - **Contextual**: Informações de contexto úteis
 - **Configurable**: Configuração flexível
 
 ### Desejáveis
-
 - **Async Processing**: Processamento assíncrono
 - **Log Aggregation**: Agregação de logs
 - **Monitoring**: Integração com ferramentas de monitoramento

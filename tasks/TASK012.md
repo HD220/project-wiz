@@ -174,13 +174,11 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Estrutura da Camada
-
 - [ ] Pasta `application/` criada
 - [ ] Subpastas services/, queries/, commands/, sagas/, dtos/
 - [ ] Arquivos de índice criados
 
 ### Serviços de Orquestração
-
 - [ ] `ProjectSetupService` implementado
 - [ ] `AgentCollaborationService` implementado
 - [ ] `AIConversationService` implementado
@@ -189,7 +187,6 @@ A tarefa estará completa quando:
 - [ ] `SagaCoordinatorService` implementado
 
 ### Queries Cross-Module
-
 - [ ] `ProjectOverviewQuery` estruturado
 - [ ] `AgentActivityQuery` estruturado
 - [ ] `ConversationHistoryQuery` estruturado
@@ -197,7 +194,6 @@ A tarefa estará completa quando:
 - [ ] `AgentActivityHandler` implementado
 
 ### Commands de Workflow
-
 - [ ] `SetupProjectWithAgentsCommand` estruturado
 - [ ] `StartAIConversationCommand` estruturado
 - [ ] `ConfigureAgentForProjectCommand` estruturado
@@ -205,20 +201,17 @@ A tarefa estará completa quando:
 - [ ] `StartAIConversationHandler` implementado
 
 ### Sagas
-
 - [ ] `ProjectSetupSaga` implementado
 - [ ] `AgentOnboardingSaga` implementado
 - [ ] `ConversationFlowSaga` implementado
 - [ ] Lógica de compensação implementada
 
 ### DTOs
-
 - [ ] `ProjectOverviewDto` estruturado
 - [ ] `AgentActivityDto` estruturado
 - [ ] `ConversationSummaryDto` estruturado
 
 ### Integração e Qualidade
-
 - [ ] Integração com todos os módulos
 - [ ] Integração com mediator
 - [ ] `npm run format` executado sem erros
@@ -226,7 +219,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] Serviços funcionam corretamente
 - [ ] Handlers funcionam corretamente
 - [ ] Sagas funcionam corretamente
@@ -236,14 +228,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Orchestrated**: Casos de uso complexos orquestrados
 - **Consistent**: Consistência entre módulos
 - **Resilient**: Resiliência a falhas
 - **Maintainable**: Fácil de manter
 
 ### Desejáveis
-
 - **Monitored**: Métricas e alertas
 - **Scalable**: Escalabilidade horizontal
 - **Optimized**: Performance otimizada

@@ -189,13 +189,11 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Estrutura do Módulo
-
 - [ ] Pasta `modules/messaging/` criada
 - [ ] Subpastas domain/, application/, infrastructure/, presentation/
 - [ ] Arquivos de índice criados
 
 ### Domain Layer
-
 - [ ] `Channel` entity com comportamentos
 - [ ] `Message` entity com tipos
 - [ ] `Conversation` entity para privadas
@@ -212,7 +210,6 @@ A tarefa estará completa quando:
 - [ ] `ConversationStarted` event
 
 ### Application Layer
-
 - [ ] `SendMessageCommand` estruturado
 - [ ] `CreateChannelCommand` estruturado
 - [ ] `StartConversationCommand` estruturado
@@ -224,7 +221,6 @@ A tarefa estará completa quando:
 - [ ] `GetMessagesHandler` implementado
 
 ### Infrastructure Layer
-
 - [ ] `MessageRepository` implementado
 - [ ] `ChannelRepository` implementado
 - [ ] `ConversationRepository` implementado
@@ -234,13 +230,11 @@ A tarefa estará completa quando:
 - [ ] Esquema de banco atualizado
 
 ### Presentation Layer
-
 - [ ] `MessagingIpcHandlers` implementados
 - [ ] Integração com mediator
 - [ ] Validação de entrada
 
 ### Integração e Qualidade
-
 - [ ] Módulo registrado no sistema
 - [ ] Integração com módulos existentes
 - [ ] `npm run format` executado sem erros
@@ -248,7 +242,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] Entities funcionam corretamente
 - [ ] Services funcionam corretamente
 - [ ] Handlers funcionam corretamente
@@ -258,14 +251,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Unified**: Modelo unificado para messaging
 - **Real-Time**: Comunicação em tempo real
 - **Scalable**: Escalável para muitas mensagens
 - **Maintainable**: Fácil de manter
 
 ### Desejáveis
-
 - **Search**: Busca eficiente de mensagens
 - **Offline**: Suporte a modo offline
 - **Notifications**: Sistema de notificações

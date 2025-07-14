@@ -111,35 +111,30 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Sistema de Eventos
-
 - [ ] `EventBus` com publish/subscribe
 - [ ] `EventHandler` interface implementada
 - [ ] `EventSubscription` para gestão
 - [ ] `EventDispatcher` para despacho
 
 ### Mediator Pattern
-
 - [ ] `Mediator` implementação central
 - [ ] `RequestHandler` para requests
 - [ ] `NotificationHandler` para notifications
 - [ ] `Pipeline` para processamento
 
 ### CQRS
-
 - [ ] `IQuery<T>` interface definida
 - [ ] `ICommand<T>` interface definida
 - [ ] `QueryHandler<TQuery, TResult>` base
 - [ ] `CommandHandler<TCommand>` base
 
 ### Eventos de Domínio
-
 - [ ] `DomainEvent` classe base
 - [ ] `DomainEventHandler` para handlers
 - [ ] `DomainEventPublisher` para publicação
 - [ ] Integração com entidades
 
 ### Integração e Qualidade
-
 - [ ] Arquivo `core/infrastructure/index.ts` atualizado
 - [ ] Arquivo `core/application/index.ts` criado
 - [ ] Integração com logging
@@ -148,7 +143,6 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
-
 - [ ] EventBus funciona corretamente
 - [ ] Mediator funciona corretamente
 - [ ] CQRS handlers funcionam corretamente
@@ -158,7 +152,6 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Decoupled**: Módulos comunicam via eventos
 - **CQRS**: Separação clara de queries/commands
 - **Reliable**: Entrega confiável de eventos

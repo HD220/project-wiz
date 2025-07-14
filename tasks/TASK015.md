@@ -167,7 +167,6 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Validação do Sistema
-
 - [ ] Fluxos end-to-end funcionando corretamente
 - [ ] Performance analisada e otimizada
 - [ ] Concorrência funcionando corretamente
@@ -175,7 +174,6 @@ A tarefa estará completa quando:
 - [ ] Qualidade do código validada
 
 ### Validação de Arquitetura
-
 - [ ] Princípios SOLID validados
 - [ ] Separação de responsabilidades verificada
 - [ ] Acoplamento entre módulos minimizado
@@ -183,7 +181,6 @@ A tarefa estará completa quando:
 - [ ] Complexidade ciclomática reduzida
 
 ### Otimização de Performance
-
 - [ ] Queries de banco otimizadas
 - [ ] Cache implementado estrategicamente
 - [ ] Memory usage otimizado
@@ -191,7 +188,6 @@ A tarefa estará completa quando:
 - [ ] Benchmarks executados
 
 ### Documentação
-
 - [ ] CLAUDE.md atualizado
 - [ ] Arquitetura documentada
 - [ ] Guias de desenvolvimento criados
@@ -199,7 +195,6 @@ A tarefa estará completa quando:
 - [ ] README atualizado
 
 ### Métricas de Sucesso
-
 - [ ] Duplicação de código reduzida > 60%
 - [ ] Manutenibilidade melhorada
 - [ ] Performance igual ou melhor
@@ -207,7 +202,6 @@ A tarefa estará completa quando:
 - [ ] Complexidade reduzida > 30%
 
 ### Qualidade Final
-
 - [ ] `npm run format` executado sem erros
 - [ ] `npm run lint` executado sem erros
 - [ ] `npm run type-check` executado sem erros
@@ -215,7 +209,6 @@ A tarefa estará completa quando:
 - [ ] `npm run build` executado com sucesso
 
 ### Funcionalidade Completa
-
 - [ ] Todos os fluxos principais funcionando
 - [ ] Interface funcionando corretamente
 - [ ] Integração com LLM funcionando
@@ -227,14 +220,12 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
-
 - **Functional**: Toda funcionalidade funcionando
 - **Validated**: Sistema completamente validado
 - **Performant**: Performance igual ou melhor
 - **Documented**: Documentação completa
 
 ### Desejáveis
-
 - **Optimized**: Performance otimizada
 - **Monitored**: Monitoramento implementado
 - **Scalable**: Preparado para escalar

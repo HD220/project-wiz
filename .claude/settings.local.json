@@ -6,8 +6,7 @@
       "Bash(npx drizzle-kit:*)",
       "Bash(npm install:*)",
       "Bash(printf \"\\n\")",
-      "Bash(npx eslint:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   }
