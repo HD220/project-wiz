@@ -318,9 +318,7 @@ export class SchemaValidator {
           ValidationError.invalidFormat(
             "schema_validation",
             "validation_failed",
-            error instanceof Error
-              ? error.message
-              : "Schema validation failed",
+            error instanceof Error ? error.message : "Schema validation failed",
           ),
         ],
         warnings: [],
