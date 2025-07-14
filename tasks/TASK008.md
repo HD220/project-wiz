@@ -150,11 +150,13 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Estrutura do Módulo
+
 - [ ] Pasta `modules/agent/` criada
 - [ ] Subpastas domain/, application/, infrastructure/, presentation/
 - [ ] Arquivos de índice criados
 
 ### Domain Layer
+
 - [ ] `Agent` entity com comportamentos
 - [ ] `AgentConfiguration` entity
 - [ ] `AgentId` value object
@@ -165,6 +167,7 @@ A tarefa estará completa quando:
 - [ ] `AgentUpdated` event
 
 ### Application Layer
+
 - [ ] `CreateAgentCommand` estruturado
 - [ ] `UpdateAgentCommand` estruturado
 - [ ] `GetAgentQuery` estruturado
@@ -173,16 +176,19 @@ A tarefa estará completa quando:
 - [ ] `GetAgentHandler` implementado
 
 ### Infrastructure Layer
+
 - [ ] `AgentRepository` implementado
 - [ ] `AgentMapper` para conversões
 - [ ] Esquema de banco atualizado
 
 ### Presentation Layer
+
 - [ ] `AgentIpcHandlers` implementados
 - [ ] Integração com mediator
 - [ ] Validação de entrada
 
 ### Integração e Qualidade
+
 - [ ] Módulo registrado no sistema
 - [ ] Integração com core components
 - [ ] `npm run format` executado sem erros
@@ -190,6 +196,7 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
+
 - [ ] Entities funcionam corretamente
 - [ ] Services funcionam corretamente
 - [ ] Handlers funcionam corretamente
@@ -199,12 +206,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Domain-Driven**: Implementação orientada pelo domínio
 - **CQRS**: Separação clara de comandos e queries
 - **Event-Driven**: Comunicação via eventos
 - **Maintainable**: Fácil de manter
 
 ### Desejáveis
+
 - **Performance**: Operações otimizadas
 - **Scalable**: Escalável para múltiplos agentes
 - **Auditable**: Auditoria de operações

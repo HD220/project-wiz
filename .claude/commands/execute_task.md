@@ -1,8 +1,8 @@
-
 ## Contexto do Sistema
 
 Você está implementando uma refatoração completa do **Project Wiz**, uma aplicação Electron que atua como uma "fábrica de software autônoma"
 usando agentes de IA. O sistema atual tem problemas de:
+
 - Violações dos princípios SOLID, KISS, YAGNI
 - Duplicação massiva de código (60-70%)
 - Acoplamento forte entre módulos
@@ -18,14 +18,17 @@ Esta é uma refatoração **sequencial** - não há necessidade de manter compat
 ### 1. Leitura e Análise
 
 # Leia a tarefa específica
+
 Read: $ARGUMENTS
 
 1. Preparação
+
 - Analise as dependências listadas
 - Verifique se todas as dependências estão 100% completas
 - Se alguma dependência não estiver completa, PARE e informe
 
 2. Planejamento da Implementação
+
 - Crie um plano detalhado baseado na tarefa
 - TodoWrite: Criar todos os itens do checklist como tarefas individuais
 - Organize as tarefas na ordem lógica de implementação
@@ -36,29 +39,39 @@ Read: $ARGUMENTS
 SEMPRE siga esta ordem:
 
 1. Estrutura de Pastas
+
 - Crie todas as pastas necessárias
 - Siga exatamente a estrutura especificada na tarefa
+
 2. Interfaces e Abstrações
+
 - Implemente interfaces primeiro
 - Use TypeScript rigorosamente
 - Documente com JSDoc
+
 3. Implementações Concretas
+
 - Implemente classes base
 - Siga princípios SOLID
 - Use padrões especificados
+
 4. Integração
+
 - Atualize arquivos de índice
 - Registre novos componentes
 - Valide integrações
+
 5. Padrões Obrigatórios
 
 Convenções de Código:
+
 - Variáveis/funções: camelCase
 - Classes/Tipos: PascalCase
 - Constantes: SCREAMING_SNAKE_CASE
 - Arquivos: kebab-case
 
 Princípios SOLID:
+
 - SRP: Uma responsabilidade por classe
 - OCP: Aberto para extensão, fechado para modificação
 - LSP: Substituição de Liskov
@@ -66,6 +79,7 @@ Princípios SOLID:
 - DIP: Inversão de dependências
 
 Padrões de Qualidade:
+
 - Classes pequenas (< 200 linhas)
 - Métodos pequenos (< 20 linhas)
 - Sem aninhamento > 3 níveis
@@ -74,7 +88,9 @@ Padrões de Qualidade:
 5. Validação Obrigatória
 
 Após cada implementação:
+
 # Execute comandos de qualidade
+
 npm run format
 npm run lint
 npm run type-check
@@ -113,26 +129,33 @@ Formato de Resposta
 # Implementação da [NOME_DA_TAREFA]
 
 ## 📋 Análise da Tarefa
+
 [Resumo da tarefa e dependências validadas]
 
 ## 🎯 Plano de Implementação
+
 [TodoWrite com todos os itens do checklist]
 
 ## 🔧 Implementação
 
 ### Estrutura de Pastas
+
 [Criação das pastas necessárias]
 
 ### Implementação dos Componentes
+
 [Implementação sequencial de cada componente]
 
 ### Integração
+
 [Integração com sistema existente]
 
 ## ✅ Validação Final
+
 [Execução de todos os comandos de qualidade]
 
 ## 📝 Conclusão
+
 [Resumo do que foi implementado e próximos passos]
 
 Critérios de Sucesso
@@ -155,4 +178,5 @@ Lembre-se
 - Mantenha foco na tarefa específica
 
 ---
+
 Agora execute a tarefa em $ARGUMENTS seguindo estas diretrizes rigorosamente.

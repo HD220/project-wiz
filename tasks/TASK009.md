@@ -157,11 +157,13 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Estrutura do Módulo
+
 - [ ] Pasta `modules/project/` criada
 - [ ] Subpastas domain/, application/, infrastructure/, presentation/
 - [ ] Arquivos de índice criados
 
 ### Domain Layer
+
 - [ ] `Project` entity com comportamentos
 - [ ] `ProjectMember` entity para relacionamentos
 - [ ] `ProjectId` value object
@@ -173,6 +175,7 @@ A tarefa estará completa quando:
 - [ ] `AgentAddedToProject` event
 
 ### Application Layer
+
 - [ ] `CreateProjectCommand` estruturado
 - [ ] `UpdateProjectCommand` estruturado
 - [ ] `AddAgentToProjectCommand` estruturado
@@ -184,17 +187,20 @@ A tarefa estará completa quando:
 - [ ] `AddAgentToProjectHandler` implementado
 
 ### Infrastructure Layer
+
 - [ ] `ProjectRepository` implementado
 - [ ] `ProjectMemberRepository` implementado
 - [ ] `ProjectMapper` para conversões
 - [ ] Esquema de banco atualizado
 
 ### Presentation Layer
+
 - [ ] `ProjectIpcHandlers` implementados
 - [ ] Integração com mediator
 - [ ] Validação de entrada
 
 ### Integração e Qualidade
+
 - [ ] Módulo registrado no sistema
 - [ ] Integração com módulo de agentes
 - [ ] `npm run format` executado sem erros
@@ -202,6 +208,7 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
+
 - [ ] Entities funcionam corretamente
 - [ ] Services funcionam corretamente
 - [ ] Handlers funcionam corretamente
@@ -211,12 +218,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Domain-Driven**: Implementação orientada pelo domínio
 - **CQRS**: Separação clara de comandos e queries
 - **Event-Driven**: Comunicação via eventos
 - **Maintainable**: Fácil de manter
 
 ### Desejáveis
+
 - **Performance**: Operações otimizadas
 - **Scalable**: Escalável para múltiplos projetos
 - **Auditable**: Auditoria de operações

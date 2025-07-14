@@ -28,6 +28,7 @@ src/main/core/
 ### 2. Implementar interfaces básicas
 
 Criar as seguintes interfaces em `core/abstractions/`:
+
 - `IRepository<T, ID>` - Contrato para repositórios
 - `IService<T>` - Contrato para serviços
 - `IMapper<Domain, Dto>` - Contrato para mappers
@@ -38,6 +39,7 @@ Criar as seguintes interfaces em `core/abstractions/`:
 ### 3. Criar tipos básicos
 
 Em `core/abstractions/`, criar:
+
 - `Result<T, E>` - Tipo para representar sucesso/erro
 - `Entity` - Tipo base para entidades
 - `ValueObject` - Tipo base para value objects
@@ -48,6 +50,7 @@ Em `core/abstractions/`, criar:
 ### Estrutura de Arquivos
 
 1. **Criar pasta core**:
+
    ```bash
    mkdir -p src/main/core/{abstractions,base,infrastructure,errors,shared}
    ```
@@ -101,11 +104,13 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Estrutura de Arquivos
+
 - [ ] Pasta `src/main/core/` criada
 - [ ] Subpastas `abstractions/`, `base/`, `infrastructure/`, `errors/`, `shared/` criadas
 - [ ] Arquivo `core/abstractions/index.ts` criado
 
 ### Interfaces Implementadas
+
 - [ ] `IRepository<T, ID>` com métodos básicos CRUD
 - [ ] `IService<T>` com métodos de negócio
 - [ ] `IMapper<Domain, Dto>` com métodos de conversão
@@ -114,12 +119,14 @@ A tarefa estará completa quando:
 - [ ] `ICommand<T>` para comandos CQRS
 
 ### Tipos Básicos
+
 - [ ] `Result<T, E>` implementado
 - [ ] `Entity` base definida
 - [ ] `ValueObject` base definida
 - [ ] `DomainEvent` base definida
 
 ### Qualidade do Código
+
 - [ ] `npm run format` executado sem erros
 - [ ] `npm run lint` executado sem erros
 - [ ] `npm run type-check` executado sem erros
@@ -127,6 +134,7 @@ A tarefa estará completa quando:
 - [ ] Exports organizados no index.ts
 
 ### Validação
+
 - [ ] Interfaces compilam sem erros
 - [ ] Todos os tipos são válidos
 - [ ] Exports funcionam corretamente
@@ -134,12 +142,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Compilação**: Código compila sem erros TypeScript
 - **Linting**: Sem warnings de ESLint
 - **Formatação**: Código formatado corretamente
 - **Estrutura**: Pastas e arquivos na estrutura correta
 
 ### Desejáveis
+
 - **Documentação**: Interfaces documentadas com JSDoc
 - **Consistência**: Padrões consistentes de nomenclatura
 - **Extensibilidade**: Interfaces facilmente extensíveis

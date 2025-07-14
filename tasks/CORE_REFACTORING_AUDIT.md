@@ -5,6 +5,7 @@
 A análise da arquitetura atual dos módulos em `src/main/modules/` revelou uma estrutura com boas intenções arquiteturais, mas que sofre de problemas comuns em aplicações em crescimento: duplicação de código, acoplamento forte, responsabilidades espalhadas e violações dos princípios SOLID, KISS, YAGNI e Object Calisthenics.
 
 **Problemas Críticos Identificados:**
+
 - 🔴 **Violações SOLID**: Responsabilidades múltiplas em services, dependências de implementações concretas
 - 🔴 **Duplicação de Código**: Padrões repetitivos em repositórios, mappers e handlers IPC
 - 🔴 **Acoplamento Forte**: Módulos dependem diretamente uns dos outros
@@ -20,13 +21,14 @@ A análise da arquitetura atual dos módulos em `src/main/modules/` revelou uma 
 src/main/modules/
 ├── agent-management/           # Gerenciamento de agentes/personas
 ├── channel-messaging/          # Mensagens em canais + IA
-├── communication/              # Gerenciamento de canais  
+├── communication/              # Gerenciamento de canais
 ├── direct-messages/            # Mensagens privadas
 ├── llm-provider/              # Provedores LLM e serviços IA
 └── project-management/         # Gerenciamento de projetos
 ```
 
 **Padrão Arquitetural Tentado:**
+
 - `domain/` - Entidades e lógica de negócio
 - `application/` - Serviços e casos de uso
 - `persistence/` - Repositórios
@@ -46,60 +48,71 @@ src/main/modules/
 #### 1. **Violações dos Princípios SOLID**
 
 **Single Responsibility Principle (SRP):**
+
 - `AgentService`: Criação + Validação + CRUD + Eventos + Configuração LLM
 - `AIChatService`: Lógica de chat + Persistência + Geração de resposta + Validação
 - `ChannelMessageIpcHandlers`: 25+ métodos com responsabilidades diferentes
 
 **Open/Closed Principle (OCP):**
+
 - `AIService.createLanguageModel()`: Requer modificação para novos provedores LLM
 - Validação hardcoded em construtores de entidades
 
 **Dependency Inversion Principle (DIP):**
+
 - Services dependem de implementações concretas
 - Instanciação direta: `new EncryptionService()`
 
 #### 2. **Duplicação de Código Massiva**
 
 **Padrões Repetitivos:**
+
 - ❌ Boilerplate de error handling em todos os IPC handlers
 - ❌ Operações CRUD similares em todos os repositórios
 - ❌ Implementações idênticas de mappers
 - ❌ Inicialização de módulos com mesma estrutura
 
 **Validação Duplicada:**
+
 - Lógica de validação duplicada em entidades e services
 - Padrões de validação similares em diferentes entidades
 
 #### 3. **Violações KISS/YAGNI**
 
 **Over-Engineering:**
+
 - Sistema de eventos complexo com uso limitado
 - Abstrações desnecessárias (mappers para transformações simples)
 - Inicialização de módulos com ordenação topológica complexa
 
 **Otimizações Prematuras:**
+
 - Cache de provider registry com uso limitado
 - Lógica complexa de filtering em repositories
 
 #### 4. **Violações Object Calisthenics**
 
 **Métodos Muito Longos:**
+
 - `Agent.create()`: 60+ linhas
 - `AIChatService.sendUserMessage()`: 100+ linhas
 - Métodos em `ChannelMessageIpcHandlers` muito extensos
 
 **Aninhamento Profundo:**
+
 - Lógica condicional com 3+ níveis de aninhamento
 - Branches complexas em validação
 
 #### 5. **Problemas de Acoplamento e Coesão**
 
 **Alto Acoplamento:**
+
 - `direct-messages` depende diretamente de `agent-management` e `llm-provider`
 - Services instanciam dependências diretamente
 - EventBus cria acoplamento implícito entre módulos
 
 **Baixa Coesão:**
+
 - IPC handlers misturam validação e lógica de negócio
 - `AgentService` trata responsabilidades não relacionadas
 - Lógica de processamento de mensagens espalhada
@@ -142,13 +155,13 @@ src/main/
 
 ### Impacto das Mudanças
 
-| Área | Impacto Atual | Benefício Esperado | Prioridade |
-|------|---------------|-------------------|------------|
-| **Duplicação de Código** | 🔴 Alto | 🟢 Redução 60-70% | **P0** |
-| **Acoplamento entre Módulos** | 🔴 Alto | 🟢 Módulos independentes | **P0** |
-| **Complexidade Cognitiva** | 🔴 Alto | 🟢 Código mais legível | **P1** |
-| **Testabilidade** | 🟡 Médio | 🟢 Testes mais fáceis | **P1** |
-| **Manutenibilidade** | 🔴 Alto | 🟢 Mudanças mais simples | **P0** |
+| Área                          | Impacto Atual | Benefício Esperado       | Prioridade |
+| ----------------------------- | ------------- | ------------------------ | ---------- |
+| **Duplicação de Código**      | 🔴 Alto       | 🟢 Redução 60-70%        | **P0**     |
+| **Acoplamento entre Módulos** | 🔴 Alto       | 🟢 Módulos independentes | **P0**     |
+| **Complexidade Cognitiva**    | 🔴 Alto       | 🟢 Código mais legível   | **P1**     |
+| **Testabilidade**             | 🟡 Médio      | 🟢 Testes mais fáceis    | **P1**     |
+| **Manutenibilidade**          | 🔴 Alto       | 🟢 Mudanças mais simples | **P0**     |
 
 ### Componentes Faltantes Críticos
 
@@ -210,12 +223,14 @@ src/main/
 ## 🎯 BENEFÍCIOS ESPERADOS
 
 ### Quantitativos
+
 - **Redução de 60-70% na duplicação de código**
 - **Diminuição de 50% no tempo de desenvolvimento de novas features**
 - **Melhoria de 40% na cobertura de testes**
 - **Redução de 30% na complexidade cognitiva**
 
 ### Qualitativos
+
 - **Código mais legível e manutenível**
 - **Módulos verdadeiramente independentes**
 - **Facilidade para adicionar novos provedores LLM**
@@ -227,12 +242,14 @@ src/main/
 ## 📈 MÉTRICAS DE SUCESSO
 
 ### Métricas Técnicas
+
 - **Complexidade Ciclomática**: Redução de 30%
 - **Cobertura de Testes**: Aumento para 85%+
 - **Duplicação de Código**: Redução para <5%
 - **Acoplamento**: Redução de dependências entre módulos
 
 ### Métricas de Produtividade
+
 - **Tempo de Build**: Redução de 20%
 - **Tempo de Desenvolvimento**: Redução de 30% para novas features
 - **Tempo de Onboarding**: Redução de 50%
@@ -273,4 +290,4 @@ O investimento em refatoração agora evitará custos muito maiores no futuro e 
 
 ---
 
-*Este documento deve ser revisado e atualizado conforme o progresso da refatoração.*
+_Este documento deve ser revisado e atualizado conforme o progresso da refatoração._

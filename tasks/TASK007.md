@@ -103,24 +103,28 @@ A tarefa estará completa quando:
 ## 🧪 Checklist de Validação
 
 ### Sistema de Persistência Drizzle
+
 - [ ] `DatabaseManager` com conexão Drizzle configurada
 - [ ] `TransactionManager` para controle de transações Drizzle
 - [ ] `DrizzleQueryBuilder` wrapper para queries
 - [ ] `MigrationManager` para migrações Drizzle
 
 ### Repository System Drizzle
+
 - [ ] `DrizzleBaseRepository<T, ID>` implementado
 - [ ] `RepositoryFactory` para criação de repositories Drizzle
 - [ ] `UnitOfWork` para transações Drizzle
 - [ ] `QuerySpecification` para queries Drizzle reutilizáveis
 
 ### Sistema de Auditoria
+
 - [ ] `AuditTrail` para trilha
 - [ ] `AuditLogger` para logging
 - [ ] `ChangeTracker` para mudanças
 - [ ] `DataVersion` para versionamento
 
 ### Integração e Qualidade
+
 - [ ] Arquivo `core/infrastructure/index.ts` atualizado
 - [ ] Integração com Drizzle ORM
 - [ ] Integração com logging
@@ -129,6 +133,7 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
+
 - [ ] DatabaseManager funciona corretamente
 - [ ] DrizzleBaseRepository funciona corretamente
 - [ ] Sistema de auditoria funciona corretamente
@@ -138,12 +143,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Generic**: Repository genérico reutilizável baseado em Drizzle
 - **Transactional**: Suporte a transações Drizzle
 - **Auditable**: Auditoria de mudanças
 - **Type-Safe**: Type safety completa com Drizzle
 
 ### Desejáveis
+
 - **Optimized**: Queries Drizzle otimizadas
 - **Monitored**: Métricas de performance
 - **Scalable**: Escalável para múltiplas conexões

@@ -92,11 +92,12 @@ A tarefa estará completa quando:
 2. ✅ Sistema de códigos de erro criado
 3. ✅ ErrorHandler centralizado implementado
 4. ✅ Documentação completa
-6. ✅ Comandos de qualidade executados sem erros
+5. ✅ Comandos de qualidade executados sem erros
 
 ## 🧪 Checklist de Validação
 
 ### Hierarquia de Erros
+
 - [ ] `DomainError` classe base implementada
 - [ ] `ValidationError` com códigos específicos
 - [ ] `NotFoundError` com mensagens padronizadas
@@ -105,18 +106,21 @@ A tarefa estará completa quando:
 - [ ] `InternalError` com informações técnicas
 
 ### Sistema de Códigos
+
 - [ ] Códigos únicos para cada erro
 - [ ] Mapeamento código → mensagem
 - [ ] Suporte a diferentes idiomas
 - [ ] Documentação de códigos
 
 ### ErrorHandler
+
 - [ ] Método `handle()` implementado
 - [ ] Método `transform()` implementado
 - [ ] Logging estruturado
 - [ ] Serialização JSON
 
 ### Integração e Qualidade
+
 - [ ] Arquivo `core/errors/index.ts` criado
 - [ ] Integração com BaseService/BaseRepository
 - [ ] `npm run format` executado sem erros
@@ -124,6 +128,7 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
+
 - [ ] Cada tipo de erro funciona corretamente
 - [ ] ErrorHandler funciona corretamente
 - [ ] Serialização funciona corretamente
@@ -132,12 +137,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Consistência**: Todos os erros seguem o mesmo padrão
 - **Debugging**: Informações úteis para debugging
 - **Usabilidade**: Mensagens claras para usuários
 - **Performance**: Criação de erros eficiente
 
 ### Desejáveis
+
 - **Monitoramento**: Integração com ferramentas de monitoramento
 - **Analytics**: Métricas de erros
 - **Recovery**: Sugestões de recuperação

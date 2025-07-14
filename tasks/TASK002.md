@@ -27,6 +27,7 @@ Criar implementações base que contenham lógica comum reutilizável, seguindo 
 ### 2. Implementar utilitários compartilhados
 
 Em `core/shared/`:
+
 - `Logger` - Sistema de logging padronizado
 - `DateUtils` - Utilitários para datas
 - `ValidationUtils` - Utilitários de validação
@@ -36,7 +37,7 @@ Em `core/shared/`:
 
 ### Estrutura de Implementação
 
-1. **BaseEntity**: 
+1. **BaseEntity**:
    - Propriedades: `id`, `createdAt`, `updatedAt`
    - Métodos: `equals()`, `isNew()`, `touch()`
    - Suporte a eventos de domínio
@@ -93,12 +94,13 @@ A tarefa estará completa quando:
 1. ✅ Todas as classes base implementadas
 2. ✅ Utilitários compartilhados criados
 3. ✅ Documentação JSDoc completa
-5. ✅ Integração com interfaces da TASK001
-6. ✅ Comandos de qualidade executados sem erros
+4. ✅ Integração com interfaces da TASK001
+5. ✅ Comandos de qualidade executados sem erros
 
 ## 🧪 Checklist de Validação
 
 ### Classes Base Implementadas
+
 - [ ] `BaseEntity` com propriedades e métodos básicos
 - [ ] `BaseValueObject` com validação de imutabilidade
 - [ ] `BaseRepository<T, ID>` com CRUD básico
@@ -108,12 +110,14 @@ A tarefa estará completa quando:
 - [ ] `BaseIpcHandler` com tratamento de erro
 
 ### Utilitários Compartilhados
+
 - [ ] `Logger` com níveis de log estruturados
 - [ ] `DateUtils` com operações básicas
 - [ ] `ValidationUtils` com validações comuns
 - [ ] `StringUtils` com manipulação de strings
 
 ### Integração e Qualidade
+
 - [ ] Classes implementam interfaces da TASK001
 - [ ] Arquivo `core/base/index.ts` criado
 - [ ] Arquivo `core/shared/index.ts` criado
@@ -122,6 +126,7 @@ A tarefa estará completa quando:
 - [ ] `npm run type-check` executado sem erros
 
 ### Validação
+
 - [ ] BaseEntity funciona corretamente
 - [ ] BaseValueObject funciona corretamente
 - [ ] Utilitários funcionam corretamente
@@ -130,12 +135,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Herança**: Classes base são herdáveis
 - **Reutilização**: Lógica comum implementada uma vez
 - **Consistência**: Comportamento padronizado
 - **Reusabilidade**: Classes facilmente reutilizáveis
 
 ### Desejáveis
+
 - **Extensibilidade**: Fácil de estender para novos casos
 - **Performance**: Operações eficientes
 - **Debugging**: Logs úteis para debugging

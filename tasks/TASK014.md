@@ -29,6 +29,7 @@ Realizar a migração completa do sistema antigo para a nova arquitetura, substi
 ### 1. Remover módulos antigos
 
 Remover os seguintes módulos do `src/main/modules/`:
+
 - `agent-management/`
 - `channel-messaging/`
 - `communication/`
@@ -133,11 +134,12 @@ A tarefa estará completa quando:
 4. ✅ Sistema de eventos atualizado
 5. ✅ IPC handlers atualizados
 6. ✅ Aplicação funcionando corretamente
-8. ✅ Comandos de qualidade executados sem erros
+7. ✅ Comandos de qualidade executados sem erros
 
 ## 🧪 Checklist de Validação
 
 ### Remoção de Módulos Antigos
+
 - [ ] `agent-management/` removido
 - [ ] `channel-messaging/` removido
 - [ ] `communication/` removido
@@ -146,6 +148,7 @@ A tarefa estará completa quando:
 - [ ] `project-management/` removido
 
 ### Sistema de Inicialização
+
 - [ ] `main.ts` atualizado para novo sistema
 - [ ] `module-loader.ts` atualizado
 - [ ] `dependency-container.ts` atualizado
@@ -153,30 +156,35 @@ A tarefa estará completa quando:
 - [ ] Ordem de inicialização correta
 
 ### Migração de Banco de Dados
+
 - [ ] Schemas atualizados se necessário
 - [ ] Migrações executadas
 - [ ] Dados preservados
 - [ ] Integridade validada
 
 ### Sistema de Eventos
+
 - [ ] `event-bus.ts` substituído
 - [ ] Handlers migrados
 - [ ] Eventos atualizados
 - [ ] Comunicação entre módulos funcionando
 
 ### IPC Handlers
+
 - [ ] Handlers migrados para nova estrutura
 - [ ] Compatibilidade com frontend mantida
 - [ ] Validação de entrada atualizada
 - [ ] Respostas no formato correto
 
 ### Validação
+
 - [ ] Código antigo removido
 - [ ] Nova implementação funcionando
 - [ ] Todas as funcionalidades funcionam
 - [ ] Aplicação estável
 
 ### Funcionalidade
+
 - [ ] Criação de agentes funcionando
 - [ ] Criação de projetos funcionando
 - [ ] Adição de agentes a projetos funcionando
@@ -185,6 +193,7 @@ A tarefa estará completa quando:
 - [ ] Conversas com IA funcionando
 
 ### Qualidade
+
 - [ ] `npm run format` executado sem erros
 - [ ] `npm run lint` executado sem erros
 - [ ] `npm run type-check` executado sem erros
@@ -194,12 +203,14 @@ A tarefa estará completa quando:
 ## 🚨 Critérios de Aceitação
 
 ### Obrigatórios
+
 - **Functional**: Toda funcionalidade existente funciona
 - **Compatible**: Compatível com frontend existente
 - **Stable**: Sistema estável sem crashes
 - **Performant**: Performance igual ou melhor
 
 ### Desejáveis
+
 - **Improved**: Melhorias na qualidade do código
 - **Maintainable**: Código mais manutenível
 - **Testable**: Maior cobertura de testes
