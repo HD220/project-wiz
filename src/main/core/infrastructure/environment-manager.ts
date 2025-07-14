@@ -102,10 +102,7 @@ export interface EnvironmentSpecificConfig {
  */
 export class EnvironmentManager {
   private readonly logger: Logger;
-  private readonly options: Omit<
-    Required<EnvironmentManagerOptions>,
-    "forceEnvironment"
-  > & { forceEnvironment?: EnvironmentType };
+  private readonly options: Omit<Required<EnvironmentManagerOptions>, 'forceEnvironment'> & { forceEnvironment?: EnvironmentType };
   private currentEnvironment: EnvironmentInfo | null = null;
   private loadedVariables: EnvironmentVariables | null = null;
   private readonly loadHistory: EnvironmentLoadResult[] = [];
@@ -263,7 +260,9 @@ export class EnvironmentManager {
       throw InternalError.configuration(
         "EnvironmentManager",
         "detection_failed",
-        error instanceof Error ? error.message : "Environment detection failed",
+        error instanceof Error
+          ? error.message
+          : "Environment detection failed",
       );
     }
   }
@@ -413,7 +412,7 @@ export class EnvironmentManager {
    */
   getEnvironmentVariable(name: keyof EnvironmentVariables): string | undefined {
     const value = this.loadedVariables?.[name];
-    return typeof value === "string" ? value : undefined;
+    return typeof value === 'string' ? value : undefined;
   }
 
   /**
