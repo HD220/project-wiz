@@ -84,7 +84,10 @@ export class Logger {
         log: (object: Record<string, unknown>) => {
           // Adiciona contexto padrão
           if (this.config.context) {
-            object.context = { ...this.config.context, ...(object.context as LogContext) };
+            object.context = {
+              ...this.config.context,
+              ...(object.context as LogContext),
+            };
           }
 
           // Adiciona IDs de correlação
