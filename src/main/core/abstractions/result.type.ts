@@ -7,8 +7,6 @@
 export interface ISuccess<T> {
   readonly success: true;
   readonly value: T;
-  readonly isSuccess: true;
-  readonly isFailure: false;
 }
 
 /**
@@ -20,8 +18,6 @@ export interface ISuccess<T> {
 export interface IError<E> {
   readonly success: false;
   readonly error: E;
-  readonly isSuccess: false;
-  readonly isFailure: true;
 }
 
 /**
@@ -31,13 +27,13 @@ export interface IError<E> {
  * @template T - Type of the success value
  * @template E - Type of the error
  */
-export type ResultType<T, E = Error> = ISuccess<T> | IError<E>;
+export type Result<T, E = Error> = ISuccess<T> | IError<E>;
 
 /**
- * Result utility class for creating and working with Result instances
+ * Utility class for creating Result instances
  * Provides static methods for creating success and error results
  */
-export class Result {
+export class ResultUtils {
   /**
    * Create a success result
    * @param value - Success value
@@ -47,8 +43,6 @@ export class Result {
     return {
       success: true,
       value,
-      isSuccess: true,
-      isFailure: false,
     };
   }
 
@@ -57,22 +51,11 @@ export class Result {
    * @param error - Error value
    * @returns Error result
    */
-  static failure<E>(error: E): IError<E> {
+  static error<E>(error: E): IError<E> {
     return {
       success: false,
       error,
-      isSuccess: false,
-      isFailure: true,
     };
-  }
-
-  /**
-   * Create an error result (alias for failure)
-   * @param error - Error value
-   * @returns Error result
-   */
-  static error<E>(error: E): IError<E> {
-    return Result.failure(error);
   }
 
   /**
@@ -80,7 +63,7 @@ export class Result {
    * @param result - Result to check
    * @returns True if result is successful
    */
-  static isSuccess<T, E>(result: ResultType<T, E>): result is ISuccess<T> {
+  static isSuccess<T, E>(result: Result<T, E>): result is ISuccess<T> {
     return result.success === true;
   }
 
@@ -89,16 +72,7 @@ export class Result {
    * @param result - Result to check
    * @returns True if result is an error
    */
-  static isError<T, E>(result: ResultType<T, E>): result is IError<E> {
-    return result.success === false;
-  }
-
-  /**
-   * Check if result is an error (alias for isError)
-   * @param result - Result to check
-   * @returns True if result is an error
-   */
-  static isFailure<T, E>(result: ResultType<T, E>): result is IError<E> {
+  static isError<T, E>(result: Result<T, E>): result is IError<E> {
     return result.success === false;
   }
 
@@ -108,8 +82,8 @@ export class Result {
    * @param defaultValue - Default value if result is error
    * @returns Success value or default value
    */
-  static getValueOrDefault<T, E>(result: ResultType<T, E>, defaultValue: T): T {
-    return Result.isSuccess(result) ? result.value : defaultValue;
+  static getValueOrDefault<T, E>(result: Result<T, E>, defaultValue: T): T {
+    return ResultUtils.isSuccess(result) ? result.value : defaultValue;
   }
 
   /**
@@ -118,16 +92,7 @@ export class Result {
    * @param defaultError - Default error if result is success
    * @returns Error value or default error
    */
-  static getErrorOrDefault<T, E>(result: ResultType<T, E>, defaultError: E): E {
-    return Result.isError(result) ? result.error : defaultError;
+  static getErrorOrDefault<T, E>(result: Result<T, E>, defaultError: E): E {
+    return ResultUtils.isError(result) ? result.error : defaultError;
   }
 }
-
-// Export the type as Result for convenience
-export type Result<T, E = Error> = ResultType<T, E>;
-
-/**
- * Utility class for creating Result instances
- * @deprecated Use Result class instead
- */
-export class ResultUtils extends Result {}

@@ -44,12 +44,6 @@ export interface ICommandHandler<TCommand extends ICommand<TResult>, TResult> {
    * @returns Promise resolving to Result with command result or error
    */
   handle(command: TCommand): Promise<Result<TResult, Error>>;
-
-  /**
-   * Get the command type this handler processes
-   * @returns Command type identifier
-   */
-  getCommandType(): string;
 }
 
 /**
