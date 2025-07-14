@@ -1,11 +1,12 @@
-import { DependencyContainer } from "./dependency-container";
-import { ProjectManagementModule } from "../modules/project-management/project-management.module";
-import { CommunicationModule } from "../modules/communication/communication.module";
-import { ChannelMessagingModule } from "../modules/channel-messaging/channel-messaging.module";
-import { LlmProviderModule } from "../modules/llm-provider/llm-provider.module";
-import { AgentManagementModule } from "../modules/agent-management/agent-management.module";
-import { DirectMessagesModule } from "../modules/direct-messages/direct-messages.module";
 import { logger } from "../logger";
+import { AgentManagementModule } from "../modules/agent-management/agent-management.module";
+import { ChannelMessagingModule } from "../modules/channel-messaging/channel-messaging.module";
+import { CommunicationModule } from "../modules/communication/communication.module";
+import { DirectMessagesModule } from "../modules/direct-messages/direct-messages.module";
+import { LlmProviderModule } from "../modules/llm-provider/llm-provider.module";
+import { ProjectManagementModule } from "../modules/project-management/project-management.module";
+
+import { DependencyContainer } from "./dependency-container";
 
 export class ModuleLoader {
   private container: DependencyContainer;

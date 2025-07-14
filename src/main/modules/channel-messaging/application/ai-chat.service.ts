@@ -1,7 +1,9 @@
-import { ChannelMessageService } from "./channel-message.service";
 import { AIService } from "../../llm-provider/application/ai-service";
-import type { CoreMessage } from "ai";
+
+import { ChannelMessageService } from "./channel-message.service";
+
 import type { ChannelMessage } from "../domain/channel-message.entity";
+import type { CoreMessage } from "ai";
 
 interface AIChatConfig {
   channelId: string;

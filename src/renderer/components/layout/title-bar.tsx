@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Minus, Square, X, Copy } from "lucide-react";
+import { useState, useEffect } from "react";
+
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface TitleBarProps {

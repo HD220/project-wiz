@@ -1,8 +1,10 @@
-import { forwardRef } from "react";
 import { Link, LinkProps } from "@tanstack/react-router";
+import { forwardRef } from "react";
+
 import { Button, buttonVariants } from "@/components/ui/button";
-import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+
+import type { VariantProps } from "class-variance-authority";
 
 interface CustomLinkProps
   extends Omit<LinkProps, "className">,

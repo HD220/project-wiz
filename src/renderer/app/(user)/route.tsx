@@ -4,15 +4,17 @@ import {
   useNavigate,
   useLocation,
 } from "@tanstack/react-router";
+
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
-import { mockAgents } from "@/renderer/lib/placeholders";
-import { UserSidebar } from "@/features/user-management/components/user-sidebar";
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
+import { mockAgents } from "@/renderer/lib/placeholders";
+
+import { UserSidebar } from "@/features/user-management/components/user-sidebar";
 
 function UserLayout() {
   const location = useLocation();

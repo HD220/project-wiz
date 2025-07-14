@@ -1,8 +1,10 @@
-import { useProjects } from "../hooks/use-projects.hook";
-import { ProjectCard } from "./project-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { useProjects } from "../hooks/use-projects.hook";
+
+import { ProjectCard } from "./project-card";
 
 function ProjectListSkeleton() {
   return (

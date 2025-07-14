@@ -1,7 +1,9 @@
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
-import { ChannelMessageService } from "../application/channel-message.service";
+
 import { AIChatService } from "../application/ai-chat.service";
+import { ChannelMessageService } from "../application/channel-message.service";
 import { ChannelMessageMapper } from "../channel-message.mapper";
+
 import type {
   CreateChannelMessageDto,
   UpdateChannelMessageDto,

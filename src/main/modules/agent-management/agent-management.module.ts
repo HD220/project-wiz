@@ -1,14 +1,15 @@
 import { BaseModule } from "../../kernel/base-module";
-import { AgentRepository } from "./persistence/agent.repository";
-import { AgentService } from "./application/agent.service";
-import { AgentMapper } from "./agent.mapper";
-import { AgentIpcHandlers } from "./ipc/agent.handlers";
 import {
   AgentCreatedEvent,
   AgentUpdatedEvent,
   AgentDeletedEvent,
   EVENT_TYPES,
 } from "../../kernel/events";
+
+import { AgentMapper } from "./agent.mapper";
+import { AgentService } from "./application/agent.service";
+import { AgentIpcHandlers } from "./ipc/agent.handlers";
+import { AgentRepository } from "./persistence/agent.repository";
 
 export class AgentManagementModule extends BaseModule {
   private agentRepository!: AgentRepository;

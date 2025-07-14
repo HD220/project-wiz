@@ -1,9 +1,11 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
-import type { CoreMessage, LanguageModel } from "ai";
+
 import { LlmProviderService } from "./llm-provider.service";
+
 import type { LlmProvider } from "../domain/llm-provider.entity";
+import type { CoreMessage, LanguageModel } from "ai";
 
 interface AIServiceConfig {
   providerId: string;

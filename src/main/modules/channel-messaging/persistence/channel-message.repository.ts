@@ -1,10 +1,12 @@
 import { eq, and, desc, asc, like } from "drizzle-orm";
+
 import { db } from "../../../persistence/db";
 import {
   channelMessages,
   type ChannelMessageSchema,
   type CreateChannelMessageSchema,
 } from "../../../persistence/schemas";
+
 import type { ChannelMessageFilterDto } from "../../../../shared/types/channel-message.types";
 
 export class ChannelMessageRepository {

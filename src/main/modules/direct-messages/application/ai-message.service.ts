@@ -1,9 +1,11 @@
-import { MessageService } from "./message.service";
-import { ConversationService } from "./conversation.service";
 import { AgentService } from "../../agent-management/application/agent.service";
 import { AIService } from "../../llm-provider/application/ai-service";
-import type { CoreMessage } from "ai";
+
+import { ConversationService } from "./conversation.service";
+import { MessageService } from "./message.service";
+
 import type { MessageDto } from "../../../../shared/types/message.types";
+import type { CoreMessage } from "ai";
 
 export class AIMessageService {
   constructor(

@@ -1,9 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectLayoutSkeleton() {
   return (

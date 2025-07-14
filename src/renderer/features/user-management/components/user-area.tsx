@@ -1,4 +1,5 @@
 import { mockUser } from "@/lib/placeholders";
+
 import {
   Avatar,
   AvatarFallback,

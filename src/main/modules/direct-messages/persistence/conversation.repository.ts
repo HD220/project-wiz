@@ -1,10 +1,12 @@
 import { eq, and } from "drizzle-orm";
+
 import { db } from "../../../persistence/db";
 import {
   conversations,
   ConversationSchema,
   CreateConversationSchema,
 } from "../../../persistence/schemas";
+
 import type {
   ConversationDto,
   CreateConversationDto,

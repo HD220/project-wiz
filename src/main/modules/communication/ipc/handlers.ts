@@ -1,6 +1,8 @@
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
+
 import { ChannelService } from "../application/channel.service";
 import { ChannelMapper } from "../channel.mapper";
+
 import type {
   CreateChannelDto,
   UpdateChannelDto,

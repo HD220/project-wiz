@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
 
 interface PageTitleProps {

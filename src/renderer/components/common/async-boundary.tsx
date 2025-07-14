@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
+import { ReactNode } from "react";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AsyncBoundaryProps {

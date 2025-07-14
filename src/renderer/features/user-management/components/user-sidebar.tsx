@@ -1,13 +1,3 @@
-import { useState } from "react";
-import { CustomLink } from "@/components/custom-link";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   ChevronDown,
   Plus,
@@ -16,8 +6,21 @@ import {
   Home,
   MessageSquare,
 } from "lucide-react";
-import { UserArea } from "./user-area";
+import { useState } from "react";
+
+import { CustomLink } from "@/components/custom-link";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { ConversationList } from "../../direct-messages/components/conversation-list";
+
+import { UserArea } from "./user-area";
 
 interface UserSidebarProps {
   className?: string;

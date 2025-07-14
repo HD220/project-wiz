@@ -1,15 +1,18 @@
+import { Hash, Send, Paperclip, Smile, AtSign } from "lucide-react";
 import { useState, useEffect } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
+import { PageTitle } from "@/components/page-title";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Hash, Send, Paperclip, Smile, AtSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { useChannelMessagesById } from "@/features/channel-messaging/hooks/use-channel-messages.hook";
 import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
-import { PageTitle } from "@/components/page-title";
+
 import { MessageItem } from "./message-item";
-import { useChannelMessagesById } from "@/features/channel-messaging/hooks/use-channel-messages.hook";
+
 import type { ChannelMessageDto } from "../../../shared/types/channel-message.types";
 
 interface ChatContainerProps {

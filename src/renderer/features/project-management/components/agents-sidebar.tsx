@@ -1,12 +1,16 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, Search, Loader2, X, UserPlus, Trash2 } from "lucide-react";
+import { useState } from "react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+
 import { useAgents } from "../../agent-management/hooks/use-agents.hook";
+
 import { AddAgentModal } from "./add-agent-modal";
+
 import type { AgentDto } from "../../../../shared/types/agent.types";
 
 interface AgentsSidebarProps {

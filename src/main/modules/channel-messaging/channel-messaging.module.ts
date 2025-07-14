@@ -1,11 +1,12 @@
 import { BaseModule } from "../../kernel/base-module";
 import { DependencyContainer } from "../../kernel/dependency-container";
-import { ChannelMessageRepository } from "./persistence/channel-message.repository";
-import { ChannelMessageService } from "./application/channel-message.service";
+import { LlmProviderModule } from "../llm-provider/llm-provider.module";
+
 import { AIChatService } from "./application/ai-chat.service";
+import { ChannelMessageService } from "./application/channel-message.service";
 import { ChannelMessageMapper } from "./channel-message.mapper";
 import { ChannelMessageIpcHandlers } from "./ipc/handlers";
-import { LlmProviderModule } from "../llm-provider/llm-provider.module";
+import { ChannelMessageRepository } from "./persistence/channel-message.repository";
 
 export class ChannelMessagingModule extends BaseModule {
   private channelMessageRepository!: ChannelMessageRepository;

@@ -1,6 +1,7 @@
-import { ChannelRepository } from "../persistence/channel.repository";
-import { Channel } from "../domain/channel.entity";
 import { ChannelMapper } from "../channel.mapper";
+import { Channel } from "../domain/channel.entity";
+import { ChannelRepository } from "../persistence/channel.repository";
+
 import type {
   CreateChannelDto,
   UpdateChannelDto,

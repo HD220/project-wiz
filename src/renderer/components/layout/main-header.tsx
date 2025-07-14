@@ -1,6 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { Users, X } from "lucide-react";
+
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
+
+import { Button } from "@/components/ui/button";
 
 interface MainHeaderProps {
   isRightPanelOpen: boolean;

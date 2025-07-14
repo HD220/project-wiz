@@ -1,8 +1,8 @@
-import { ProjectSchema as ProjectData } from "../../persistence/schemas/projects.schema";
 import {
   ProjectDto,
   CreateProjectDto,
 } from "../../../shared/types/project.types";
+import { ProjectSchema as ProjectData } from "../../persistence/schemas/projects.schema";
 
 export class ProjectMapper {
   toDto(project: ProjectData): ProjectDto {

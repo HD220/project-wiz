@@ -1,5 +1,5 @@
-import { IModule, IModuleContainer } from "./interfaces/module.interface";
 import { EventBus, IEvent, EventListener } from "./event-bus";
+import { IModule, IModuleContainer } from "./interfaces/module.interface";
 
 export abstract class BaseModule implements IModule {
   protected initialized = false;

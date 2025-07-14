@@ -1,9 +1,10 @@
-import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface MarkdownRendererProps {
   content: string;

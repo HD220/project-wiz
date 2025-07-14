@@ -5,8 +5,8 @@ import ReactDOMClient from "react-dom/client";
 import "./globals.css";
 // import { detectLocale, dynamicActivate } from '@/config/i18n';
 
-import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "./contexts/theme-context";
+import { routeTree } from "./routeTree.gen";
 
 const router = createRouter({ routeTree });
 

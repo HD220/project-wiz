@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import { AIChatExample } from "@/components/chat/ai-chat-example";
 
 function AIChatTestPage() {

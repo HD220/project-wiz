@@ -1,11 +1,14 @@
+import { Link } from "@tanstack/react-router";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "@tanstack/react-router";
-import { useConversations } from "../hooks/use-conversations.hook";
-import type { ConversationDto } from "../../../../shared/types/message.types";
 import { cn } from "@/lib/utils";
+
+import { useConversations } from "../hooks/use-conversations.hook";
+
+import type { ConversationDto } from "../../../../shared/types/message.types";
 
 interface ConversationListProps {
   // No more callback props needed!

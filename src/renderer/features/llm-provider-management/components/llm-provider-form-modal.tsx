@@ -1,5 +1,8 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { useLlmProviders } from "../hooks/use-llm-provider.hook";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +10,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -18,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
-import { useNavigate } from "@tanstack/react-router";
+import { useLlmProviders } from "../hooks/use-llm-provider.hook";
 
 const SUPPORTED_PROVIDERS = [
   {

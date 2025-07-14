@@ -1,10 +1,12 @@
 import { eq, and, desc, ne } from "drizzle-orm";
+
 import { db } from "../../../persistence/db";
 import {
   channels,
   type ChannelSchema,
   type CreateChannelSchema,
 } from "../../../persistence/schemas";
+
 import type { ChannelFilterDto } from "../../../../shared/types/channel.types";
 
 export class ChannelRepository {

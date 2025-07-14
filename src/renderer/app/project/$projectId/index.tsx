@@ -1,8 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
   Users,
@@ -11,7 +7,13 @@ import {
   Activity,
   GitBranch,
 } from "lucide-react";
+import { useState, useEffect } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+
 import { ProjectDto } from "@/shared/types/project.types";
 
 export function ProjectIndexPage() {

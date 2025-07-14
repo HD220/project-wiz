@@ -7,8 +7,8 @@ export { ValidationError, type ValidationIssue } from "./validation.error";
 
 // Import the error classes for internal use
 import { BaseError } from "./base.error";
-import { ValidationError } from "./validation.error";
 import { NotFoundError } from "./not-found.error";
+import { ValidationError } from "./validation.error";
 
 // Error handling utilities
 export class ErrorHandler {

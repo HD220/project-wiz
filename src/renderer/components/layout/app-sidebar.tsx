@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { Plus, Settings, Folder } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -6,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Plus, Settings, Folder } from "lucide-react";
 import { ProjectSidebar } from "@/features/project-management/components/project-sidebar";
 
 interface AppSidebarProps {

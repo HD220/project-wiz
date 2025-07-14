@@ -21,24 +21,6 @@ const baseRecommendedRules = {
   ...jsxA11yPlugin.configs.recommended.rules,
 };
 
-const customRules = {
-  "no-restricted-syntax": [
-    "error",
-    {
-      selector:
-        "CallExpression[callee.object.name='ipcMain'][callee.property.name='handle']",
-      message:
-        "Direct use of ipcMain.handle is forbidden. Use createIpcHandler from @/main/kernel/ipc-handler-utility instead.",
-    },
-    {
-      selector:
-        "CallExpression[callee.object.property.name='electronIPC'][callee.property.name='invoke']",
-      message:
-        "Direct use of window.electronIPC.invoke is forbidden. Use useIpcQuery or useIpcMutation hooks instead.",
-    },
-  ],
-};
-
 const typeScriptSpecificRules = {
   "@typescript-eslint/no-unused-vars": [
     "warn",
@@ -119,9 +101,9 @@ const typeScriptSpecificRules = {
 };
 
 const reactSpecificRules = {
-  "react/react-in-jsx-scope": "off",
+  "react/react-in-jsx-scope": "error",
   "react-hooks/rules-of-hooks": "error",
-  "react-hooks/exhaustive-deps": "warn",
+  "react-hooks/exhaustive-deps": "error",
 };
 
 const importAndBoundaryRules = {
@@ -140,16 +122,8 @@ const importAndBoundaryRules = {
         "object",
       ],
       pathGroups: [
-        { pattern: "@ui/*", group: "internal" },
-        { pattern: "@/core/**", group: "internal", position: "before" },
-        { pattern: "@/domain/**", group: "internal", position: "before" },
-        { pattern: "@/application/**", group: "internal", position: "before" },
-        {
-          pattern: "@/infrastructure/**",
-          group: "internal",
-          position: "before",
-        },
-        { pattern: "@/presentation/**", group: "internal", position: "before" },
+        { pattern: "@/main/**", group: "internal", position: "before" },
+        { pattern: "@/renderer/**", group: "internal", position: "before" },
         { pattern: "@/shared/**", group: "internal", position: "after" },
       ],
       pathGroupsExcludedImportTypes: [],
@@ -162,100 +136,6 @@ const importAndBoundaryRules = {
     {
       default: "allow",
       rules: [
-        {
-          from: ["domain"],
-          allow: ["shared", "zod-lib"],
-          disallow: ["application", "infrastructure", "presentation"],
-          message:
-            "DOMAIN: Proibido importar de ${dependency.type} (permitido: shared, zod-lib).",
-        },
-        {
-          from: ["application"],
-          allow: ["domain", "shared"],
-          disallow: ["infrastructure", "presentation"],
-          message:
-            "APPLICATION: Proibido importar de ${dependency.type} (permitido: domain, shared).",
-        },
-        {
-          from: ["infrastructure"],
-          allow: ["domain", "application", "shared"],
-          disallow: ["presentation"],
-          message:
-            "INFRA: Proibido importar de ${dependency.type} (permitido: domain, application, shared).",
-        },
-        {
-          from: ["presentation"],
-          allow: ["domain", "application", "infrastructure", "shared"],
-          disallow: ["ui-components", "ui-lib", "ui-hooks", "ui-features"],
-          message:
-            "PRESENTATION: Proibido importar de ${dependency.type} (permitido: domain, application, infrastructure, shared, mas não de UI).",
-        },
-        {
-          from: ["shared"],
-          allow: ["application", "infrastructure"],
-          disallow: [
-            "domain",
-            "presentation",
-            "ui-components",
-            "ui-lib",
-            "ui-hooks",
-            "ui-features",
-          ],
-          message:
-            "SHARED: Proibido importar de camadas específicas (${dependency.type}).",
-        },
-        {
-          from: ["ui-components"],
-          allow: ["ui-lib", "shared"],
-          disallow: [
-            "domain",
-            "application",
-            "infrastructure",
-            "presentation",
-            "ui-features",
-          ],
-          message:
-            "UI-COMPONENTS: Violação de dependência com ${dependency.type}.",
-        },
-        {
-          from: ["ui-features"],
-          allow: [
-            "ui-components",
-            "ui-lib",
-            "ui-hooks",
-            "application",
-            "domain",
-            "shared",
-          ],
-          disallow: ["infrastructure", "presentation"],
-          message:
-            "UI-FEATURES: Violação de dependência com ${dependency.type}.",
-        },
-        {
-          from: ["ui-lib"],
-          allow: ["shared"],
-          disallow: [
-            "domain",
-            "application",
-            "infrastructure",
-            "presentation",
-            "ui-components",
-            "ui-features",
-            "ui-hooks",
-          ],
-          message: "UI-LIB: Violação de dependência com ${dependency.type}.",
-        },
-        {
-          from: ["ui-hooks"],
-          allow: ["ui-lib", "application", "domain", "shared"],
-          disallow: [
-            "infrastructure",
-            "presentation",
-            "ui-components",
-            "ui-features",
-          ],
-          message: "UI-HOOKS: Violação de dependência com ${dependency.type}.",
-        },
         {
           from: ["renderer"],
           allow: ["shared"],
@@ -311,13 +191,14 @@ export default [
       "*.mts",
       "index.html",
       "docs/**",
-      "migrations/**",
       "public/**",
+      "src/renderer/components/ui/**/*.tsx",
+      "src/**/routeTree.gen.ts",
+      "src/**/locales/*.ts",
     ],
   },
   {
     files: ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"],
-    ignores: ["src/renderer/components/ui/**/*.tsx"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -351,7 +232,7 @@ export default [
       ...reactSpecificRules,
       ...codeStyleAndQualityRules,
       ...testingSpecificRules,
-      ...customRules,
+      ...importAndBoundaryRules,
       "prettier/prettier": "error",
     },
     settings: {
@@ -362,26 +243,10 @@ export default [
         },
       },
       "boundaries/elements": [
-        { type: "domain", pattern: "src/main/core/domain" },
-        { type: "application", pattern: "src/main/core/application" },
-        { type: "infrastructure", pattern: "src/main/infrastructure" },
-        { type: "presentation", pattern: "src/main/presentation" },
         { type: "shared", pattern: "src/shared" },
-        { type: "zod-lib", pattern: "zod" }, // Added for Zod
-        {
-          type: "ui-components",
-          pattern: "src/renderer/components/ui",
-        },
-        { type: "ui-features", pattern: "src/renderer/features" },
-        { type: "ui-lib", pattern: "src/renderer/lib" },
-        {
-          type: "ui-hooks",
-          pattern: "src/renderer/hooks",
-        },
         { type: "main", pattern: "src/main" },
         { type: "renderer", pattern: "src/renderer" },
       ],
-      "boundaries/ignore": ["src/renderer/routeTree.gen.ts"],
       react: {
         version: "detect",
       },
@@ -391,12 +256,12 @@ export default [
   // 3. Consolidated Override for Application .tsx files
   {
     files: ["src/**/*.tsx"],
-    ignores: [
-      "src/renderer/components/ui/**/*.tsx",
-      "**/*.test.tsx",
-      "**/*.spec.tsx",
-    ],
+    ignores: ["**/*.test.tsx", "**/*.spec.tsx"],
     rules: {
+      "max-lines-per-function": [
+        "warn",
+        { max: 150, skipBlankLines: true, skipComments: true },
+      ],
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -431,59 +296,6 @@ export default [
         { max: 120, skipBlankLines: true, skipComments: true },
       ],
       "max-statements": "off",
-    },
-  },
-
-  // 5. Override for ShadCN UI components
-  {
-    files: [
-      "src/renderer/components/ui/**/*.tsx",
-      "src/**/*.gen.ts",
-      "src/**/locales/*.ts",
-    ],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        project: "./tsconfig.json",
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    rules: {
-      "@typescript-eslint/naming-convention": "off",
-      "max-lines-per-function": "off",
-      "max-lines": "off",
-      "max-statements": "off",
-      "no-inline-comments": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "react/prop-types": "off",
-      "no-undef": "off", // Allow React to be undefined in Shadcn UI components
-    },
-  },
-
-  // 6. Override for specific files to allow single-character identifiers
-  {
-    files: [
-      "src/main/kernel/kernel.test.ts",
-      "src/renderer/features/direct-messages/components/ChatWindow.tsx",
-      "src/renderer/features/persona-creation-wizard/components/step1.tsx",
-      "src/renderer/features/persona-creation-wizard/components/step2.tsx",
-      "src/renderer/features/persona-creation-wizard/index.tsx",
-      "src/renderer/features/project-management/components/CreateProjectModal.tsx",
-      "src/shared/common/base.entity.ts",
-    ],
-    rules: {
-      "id-length": "off",
-    },
-  },
-
-  // 7. Override for IPC hook files to allow direct IPC usage
-  {
-    files: [
-      "src/renderer/hooks/use-ipc-mutation.hook.ts",
-      "src/renderer/hooks/use-ipc-query.hook.ts",
-    ],
-    rules: {
-      "no-restricted-syntax": "off",
     },
   },
 ];

@@ -1,17 +1,18 @@
-import { Agent } from "../domain/agent.entity";
-import { AgentMapper } from "../agent.mapper";
+import { NotFoundError, ValidationError, DomainError } from "../../../errors";
+import {
+  IAgentRepository,
+  ILlmProviderService,
+  IAgentService,
+} from "../../../interfaces";
 import { EventBus } from "../../../kernel/event-bus";
 import {
   AgentCreatedEvent,
   AgentUpdatedEvent,
   AgentDeletedEvent,
 } from "../../../kernel/events";
-import {
-  IAgentRepository,
-  ILlmProviderService,
-  IAgentService,
-} from "../../../interfaces";
-import { NotFoundError, ValidationError, DomainError } from "../../../errors";
+import { AgentMapper } from "../agent.mapper";
+import { Agent } from "../domain/agent.entity";
+
 import type {
   CreateAgentDto,
   UpdateAgentDto,

@@ -1,7 +1,10 @@
 import { memo } from "react";
-import { useProjects } from "../hooks/use-projects.hook";
-import { ProjectSidebarItem } from "./project-sidebar-item";
+
 import { Skeleton } from "@/components/ui/skeleton";
+
+import { useProjects } from "../hooks/use-projects.hook";
+
+import { ProjectSidebarItem } from "./project-sidebar-item";
 
 interface ProjectSidebarProps {
   className?: string;

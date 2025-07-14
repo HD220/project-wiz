@@ -1,13 +1,15 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Link, useRouterState } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+
 import { ProjectDto } from "../../../../shared/types/project.types";
 
 interface ProjectSidebarItemProps {

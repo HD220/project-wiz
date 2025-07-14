@@ -1,13 +1,13 @@
-import { ProjectEntity } from "../domain/project.entity";
-import {
-  ProjectRepository,
-  ProjectFilterOptions,
-} from "../persistence/project.repository";
 import {
   CreateProjectSchema as CreateProjectData,
   ProjectSchema as ProjectData,
   type ProjectSchema,
 } from "../../../persistence/schemas/projects.schema";
+import { ProjectEntity } from "../domain/project.entity";
+import {
+  ProjectRepository,
+  ProjectFilterOptions,
+} from "../persistence/project.repository";
 
 type UpdateProjectData = Partial<CreateProjectData> & { id: string };
 

@@ -1,9 +1,10 @@
 import { BaseModule } from "../../kernel/base-module";
-import { LlmProviderRepository } from "./persistence/llm-provider.repository";
-import { LlmProviderService } from "./application/llm-provider.service";
-import { LlmProviderMapper } from "./llm-provider.mapper";
-import { LlmProviderIpcHandlers } from "./ipc/handlers";
+
 import { AIService } from "./application/ai-service";
+import { LlmProviderService } from "./application/llm-provider.service";
+import { LlmProviderIpcHandlers } from "./ipc/handlers";
+import { LlmProviderMapper } from "./llm-provider.mapper";
+import { LlmProviderRepository } from "./persistence/llm-provider.repository";
 
 export class LlmProviderModule extends BaseModule {
   private llmProviderRepository!: LlmProviderRepository;

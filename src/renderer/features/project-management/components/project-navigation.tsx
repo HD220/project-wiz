@@ -1,16 +1,4 @@
-import { useState } from "react"; // useEffect import removed
-// useSidebar import removed
 import { Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { CustomLink } from "@/components/custom-link";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Hash,
   ChevronDown,
@@ -23,7 +11,22 @@ import {
   FileText,
   CheckSquare,
 } from "lucide-react";
+import { useState } from "react"; // useEffect import removed
+
+// useSidebar import removed
+import { CustomLink } from "@/components/custom-link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { UserArea } from "../../user-management/components/user-area";
+
 import type { ChannelDto } from "../../../../shared/types/channel.types";
 
 interface ProjectNavigationProps {

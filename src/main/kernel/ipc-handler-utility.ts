@@ -1,4 +1,5 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
+
 import { logger } from "../logger";
 
 export type IpcHandler<TRequest = unknown, TResponse = unknown> = (
@@ -13,7 +14,6 @@ export function createIpcHandler<TRequest = unknown, TResponse = unknown>(
   channel: string,
   handler: IpcHandler<TRequest, TResponse>,
 ): void {
-  // eslint-disable-next-line no-restricted-syntax
   ipcMain.handle(
     channel,
     async (event: IpcMainInvokeEvent, request: TRequest) => {

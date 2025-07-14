@@ -33,7 +33,7 @@ O Project Wiz é uma aplicação desktop construída com Electron, o que signifi
   - É o "cérebro" da aplicação. Escrito em Node.js/TypeScript.
   - Responsável pela orquestração geral, lógica de negócio, interação com o sistema de arquivos, acesso ao banco de dados (SQLite via Drizzle ORM) e comunicação com serviços externos (como LLMs).
   - Gerencia o ciclo de vida da aplicação Electron e as janelas.
-  - Contém a implementação dos módulos de domínio (ex: `persona-management`, `llm-integration`).
+  - Contém a implementação dos domínios de negócio: `projects`, `agents`, `users`, e `llm`.
 
 - **Processo de Renderização (Renderer Process):**
   - É a interface do usuário (UI) da aplicação. Construído com React, TypeScript e Tailwind CSS.
@@ -65,13 +65,195 @@ O Project Wiz segue rigorosamente diversos padrões de design e boas práticas p
 
 ## Princípios Aplicados
 
-- **DRY (Don't Repeat Yourself):** Evitar duplicação de código, promovendo a reutilização e a manutenibilidade.
-- **KISS (Keep It Simple, Stupid):** Priorizar soluções simples e diretas em vez de complexas, mesmo que pareçam "elegantes".
-- **SOLID:** Um conjunto de cinco princípios de design de software que visam tornar os designs de software mais compreensíveis, flexíveis e manuteníveis. (Embora não explicitamente listado, é uma meta implícita de Clean Architecture/DDD).
+### 1. Responsabilidade Única (Conceitual)
 
-# Estrutura do Repositório
+- Cada classe/método deve ter uma única razão para mudar
+- Foque no propósito conceitual, não na implementação técnica
+- Separe claramente: o que faz vs como faz
 
-A organização do repositório segue uma estrutura clara e modular, facilitando a localização de arquivos e o entendimento das responsabilidades de cada parte do sistema.
+### 2. Evitar Métodos Estáticos
+
+- Use métodos estáticos apenas para padrão Singleton
+- Prefira injeção de dependência para facilitar testes
+- Mantenha flexibilidade para mudanças futuras
+
+### 3. Domain-Driven Design (DDD)
+
+- Modele o domínio primeiro, persistência depois
+- Use linguagem ubíqua (termos do negócio)
+- Entidades devem conter lógica de negócio, não apenas dados
+
+### 4. Object Calisthenics (Melhoria Iterativa)
+
+- **Não aplicar tudo de primeira** - faça loops de refatoração
+- Primeiro funcione, depois melhore iterativamente
+- Foque nos pontos que mais impactam: indentação, métodos pequenos, poucos parâmetros
+- Repense e melhore a cada iteração
+
+### 5. Desacoplamento Domínio/Persistência
+
+- Nunca misture regras de negócio com código de banco
+- Use repositórios/interfaces para abstrair persistência
+- Domínio deve ser independente de infraestrutura
+
+## Abordagem de Desenvolvimento
+
+### Clean Code + KISS
+
+- **Simplicidade acima de tudo** - evite over-engineering
+- Código deve ser legível como prosa
+- Nomes descritivos eliminam necessidade de comentários
+- Prefira várias funções pequenas a uma função grande
+
+### Sem Comentários
+
+- Código deve ser autodocumentado
+- Use nomes de variáveis/métodos que explicam o propósito
+- Se precisa comentar, provavelmente o código pode ser mais claro
+
+### Ferramentas de Qualidade Automática
+
+- Configure lint para capturar problemas antes do commit
+- Use Prettier para manter formatação consistente
+- Type-check rigoroso para evitar erros em runtime
+- Automatize verificações no processo de desenvolvimento
+
+### Documentação Viva
+
+- Mantenha README e documentação técnica sempre atualizados
+- Documente decisões arquiteturais importantes (ADRs simples)
+- Atualize documentação junto com mudanças no código
+- Foque em documentar o "porquê", não o "como"
+
+### Validação de Entrada
+
+- Valide dados na entrada dos métodos
+- Falhe rápido com mensagens claras
+- Use tipos específicos do domínio ao invés de primitivos
+
+### Gestão de Exceções Pragmática
+
+- Use exceções específicas do domínio
+- Mensagens de erro que ajudem a entender o problema
+- Não capture exceções só para re-lançar
+
+### Performance Pragmática
+
+- Otimize apenas quando necessário (medir primeiro)
+- Evite otimizações prematuras
+- Simplicidade geralmente é mais rápida
+
+### Nomenclatura Consistente
+
+- Mantenha padrões de nomenclatura em todo o projeto
+- Use verbos para métodos, substantivos para classes
+- Evite abreviações desnecessárias
+
+### Logging Estratégico
+
+- Log apenas informações úteis para debug/monitoramento
+- Evite logs excessivos que poluem
+- Use níveis apropriados (info, warn, error)
+
+### Configuração Centralizada
+
+- Não hardcode valores no código
+- Centralize configurações em local específico
+- Facilite mudanças entre ambientes
+
+### Tratamento de Nulls
+
+- Valide parâmetros nulos logo no início
+- Use Optional/nullable types quando apropriado
+- Evite null pointer exceptions
+
+### Versionamento Semântico
+
+- Commits descritivos que explicam o que mudou
+- Use conventional commits se possível
+- Facilite rastreamento de mudanças
+
+### Segurança Básica
+
+- Nunca commite senhas/tokens
+- Valide inputs de usuário
+- Sanitize dados sensíveis em logs
+
+### Regra do Escoteiro
+
+- **Sempre que tocar em código, deixe-o melhor**
+- Simplifique complexidades desnecessárias
+- Extraia conceitos duplicados
+- Padronize nomenclaturas e estruturas
+- Remova código morto
+
+### Reaproveitamento Máximo
+
+- **Antes de criar, analise o que existe**
+- Identifique padrões repetidos para extrair
+- Refatore código similar para ser compartilhado
+- Simplifique e organize estruturas existentes
+- Prefira composição a herança
+
+## Fluxo de Trabalho Sugerido
+
+### 1. Análise Inicial
+
+- Entenda o domínio e linguagem do negócio
+- Identifique entidades e conceitos principais
+- Mapeie responsabilidades conceituais
+
+### 2. Primeira Implementação
+
+- Foque em fazer funcionar primeiro
+- Mantenha simplicidade (KISS)
+- Separe domínio de persistência
+
+### 3. Loops de Refatoração
+
+- Aplique Object Calisthenics gradualmente
+- Identifique oportunidades de reaproveitamento
+- Simplifique complexidades encontradas
+- Melhore legibilidade e organização
+
+### 4. Validação Contínua
+
+- Código deve contar a história do negócio
+- Facilite testes e manutenção
+- Mantenha baixo acoplamento
+
+## Checklist de Qualidade
+
+### Antes de Finalizar:
+
+- [ ] Responsabilidades estão bem definidas?
+- [ ] Domínio está desacoplado da infraestrutura?
+- [ ] Nomes são claros e autodocumentados?
+- [ ] Existe código duplicado que pode ser extraído?
+- [ ] Complexidades desnecessárias foram removidas?
+- [ ] Segue princípios KISS e Clean Code?
+- [ ] Pode ser testado facilmente?
+
+### Perguntas para Refatoração:
+
+- O que este código está tentando fazer?
+- Posso simplificar sem perder funcionalidade?
+- Existe padrão similar que posso reutilizar?
+- O nome explica claramente o propósito?
+- Posso extrair conceitos para melhorar clareza?
+
+## Lembre-se:
+
+- **Prático > Perfeito**: Funcione primeiro, refine depois
+- **Simplicidade**: Evite soluções complexas para problemas simples
+- **Melhoria contínua**: Cada toque no código é uma oportunidade
+- **Reaproveitamento**: Analyze, extraia, compartilhe e organize
+
+# Arquitetura e Organização do Código
+
+O Project Wiz está evoluindo para uma **arquitetura simplificada baseada em domínios de negócio** seguindo padrões de Object Calisthenics e DDD pragmático.
+
+## Estrutura Target (Nova Arquitetura)
 
 ```
 project-wiz/
@@ -95,18 +277,86 @@ project-wiz/
 ├── docs/                    # Documentação do projeto (usuário, desenvolvedor, arquitetura)
 └── src/                     # Código-fonte principal da aplicação
     ├── main/                # Código do Processo Principal (Node.js/Electron)
-    │   ├── modules/         # Módulos de domínio (bounded contexts)
+    │   ├── domains/         # 🆕 Domínios de negócio (organização por contexto)
+    │   │   ├── projects/    # Container de colaboração
+    │   │   │   ├── project.entity.ts       # Entidades ricas com comportamento
+    │   │   │   ├── channel.entity.ts       # Canais dentro de projetos
+    │   │   │   ├── project-message.entity.ts # Mensagens de projeto
+    │   │   │   ├── project.functions.ts    # Funções simples CRUD
+    │   │   │   └── value-objects/          # Value Objects específicos
+    │   │   │       ├── project-name.vo.ts
+    │   │   │       ├── project-identity.vo.ts
+    │   │   │       └── project-workspace.vo.ts
+    │   │   ├── agents/      # Workers autônomos
+    │   │   │   ├── agent.entity.ts        # Entidade rica principal
+    │   │   │   ├── agent.worker.ts        # Execução de tarefas
+    │   │   │   ├── agent.queue.ts         # Gerenciamento de fila
+    │   │   │   ├── agent.functions.ts     # Funções simples CRUD
+    │   │   │   └── value-objects/
+    │   │   │       └── agent-properties.vo.ts
+    │   │   ├── users/       # Espaço pessoal
+    │   │   │   ├── user.entity.ts        # Entidade rica principal
+    │   │   │   ├── direct-message.entity.ts
+    │   │   │   ├── user-preferences.entity.ts
+    │   │   │   ├── user.functions.ts     # Funções simples CRUD
+    │   │   │   └── value-objects/
+    │   │   │       ├── user-identity.vo.ts
+    │   │   │       └── user-settings.vo.ts
+    │   │   └── llm/         # Infraestrutura compartilhada
+    │   │       ├── llm-provider.entity.ts
+    │   │       ├── text-generation.service.ts
+    │   │       ├── provider.registry.ts
+    │   │       └── value-objects/
+    │   │           ├── temperature.vo.ts
+    │   │           ├── max-tokens.vo.ts
+    │   │           └── model-config.vo.ts
+    │   ├── infrastructure/  # 🆕 Infraestrutura transparente
+    │   │   ├── database.ts  # getDatabase() function
+    │   │   ├── logger.ts    # getLogger(context) function
+    │   │   └── events.ts    # publishEvent() function
+    │   ├── kernel/          # Sistema de módulos e eventos (existente)
     │   └── persistence/     # Configuração global de persistência (Drizzle, migrações)
     │       ├── db.ts        # Configuração da conexão com o banco de dados
     │       └── migrations/  # Arquivos de migração do banco de dados
     ├── renderer/            # Código do Processo de Renderização (React UI)
     │   ├── app/             # Paginas/Rotas da aplicação
     │   ├── components/      # Componentes React específicos da aplicação
-    │   ├── features/        # Módulos de funcionalidades da UI (ex: direct-messages, forum)
+    │   ├── features/        # Módulos de funcionalidades da UI organizados por domínio
+    │   │   ├── projects/    # Features relacionadas a projetos
+    │   │   ├── agents/      # Features relacionadas a agentes
+    │   │   ├── users/       # Features relacionadas a usuários
+    │   │   └── llm/         # Features relacionadas a LLM
     │   ├── hooks/           # Hooks React personalizados
     │   ├── lib/             # Funções utilitárias
     │   └── styles/          # Estilos globais (Tailwind CSS)
-    └── shared/              # Código compartilhado entre Main e Renderer (apenas tipos e interfaces para comunicação IPC. **Importante: Este diretório não deve conter lógica de negócio ou implementações, apenas definições de tipos, para evitar dependências cíclicas e garantir a separação entre os processos Main e Renderer do Electron**)
+    └── shared/              # Código compartilhado entre Main e Renderer
+        └── types/           # Tipos organizados por domínio
+            ├── domains/     # 🆕 Tipos organizados por domínio
+            │   ├── projects/
+            │   ├── agents/
+            │   ├── users/
+            │   └── llm/
+            └── common.types.ts # Tipos comuns
+```
+
+### Estrutura Atual em Transição
+
+Durante a migração, ambas as estruturas coexistirão:
+
+```
+src/main/
+├── modules/         # 📦 Estrutura atual (em migração)
+│   ├── agent-management/
+│   ├── channel-messaging/
+│   ├── communication/
+│   ├── direct-messages/
+│   ├── llm-provider/
+│   └── project-management/
+└── domains/         # 🆕 Nova estrutura (sendo implementada)
+    ├── projects/
+    ├── agents/
+    ├── users/
+    └── llm/
 ```
 
 # Guia de Desenvolvimento Local
@@ -216,10 +466,18 @@ Aqui estão os comandos mais importantes que você usará durante o desenvolvime
   _Verifica se o código está formatado corretamente sem fazer alterações._
 
 - **Para Recompilar Dependências Nativas:**
+
   ```bash
   npm run rebuild
   ```
+
   _Recompila dependências nativas como better-sqlite3 quando necessário._
+
+- **Para Validação da Nova Arquitetura:**
+  ```bash
+  npm run quality:check
+  ```
+  _Executa validação completa incluindo Object Calisthenics rules e nova estrutura de domínios._
 
 # Principais Dependências
 
@@ -238,64 +496,96 @@ Aqui estão algumas das bibliotecas e frameworks mais importantes que o Project 
 - **lucide-react:** Coleção de ícones bonitos e personalizáveis para React.
 - **react-markdown, remark-gfm, rehype-highlight, rehype-sanitize:** Bibliotecas para renderizar conteúdo Markdown na interface do usuário, com suporte a tabelas, listas de tarefas e realce de sintaxe.
 
-# Módulos de Domínio e Arquitetura
+# Arquitetura de Domínios Simplificada
 
-O Project Wiz segue uma arquitetura modular baseada em Domain-Driven Design (DDD), onde cada módulo representa um bounded context específico:
+O Project Wiz segue uma **arquitetura simplificada baseada em domínios de negócio** com Object Calisthenics e DDD pragmático:
 
-## Módulos Principais
+## Domínios Principais
 
-- **agent-management:** Gerenciamento de agentes de IA (Personas) - entidades, serviços e persistência para criação e configuração de agentes
-- **channel-messaging:** Sistema de mensagens em canais com suporte a chat de IA, incluindo serviços de chat e tipagem em tempo real
-- **communication:** Gerenciamento de canais de comunicação entre usuários e agentes
-- **direct-messages:** Sistema de mensagens diretas e conversas privadas entre usuários e agentes
-- **llm-provider:** Integração com provedores de Large Language Models (OpenAI, DeepSeek), incluindo serviços de criptografia e geração de texto
-- **project-management:** Gerenciamento de projetos, incluindo entidades, repositórios e serviços
+### 1. **Projects** - Container de Colaboração
 
-## Padrões Arquiteturais
+- **Propósito:** Espaços de trabalho colaborativo onde usuários e agentes trabalham juntos
+- **Entidades Principais:** `Project`, `Channel`, `ProjectMessage`
+- **Responsabilidades:** Criação de projetos, gerenciamento de canais, mensagens de equipe
 
-### Estrutura de Módulo Padrão
+### 2. **Agents** - Workers Autônomos
 
-Cada módulo segue a estrutura:
+- **Propósito:** Agentes de IA que executam tarefas de forma autônoma
+- **Entidades Principais:** `Agent`, `AgentWorker`, `AgentQueue`
+- **Responsabilidades:** Execução de tarefas, gerenciamento de filas, processamento de trabalho
+
+### 3. **Users** - Espaço Pessoal
+
+- **Propósito:** Área pessoal dos usuários para conversas diretas e configurações
+- **Entidades Principais:** `User`, `DirectMessage`, `UserPreferences`
+- **Responsabilidades:** Mensagens diretas, configurações pessoais, histórico de conversas
+
+### 4. **LLM** - Infraestrutura Compartilhada
+
+- **Propósito:** Integração com provedores de Large Language Models
+- **Entidades Principais:** `LLMProvider`, `TextGeneration`, `ProviderRegistry`
+- **Responsabilidades:** Geração de texto, gerenciamento de provedores, configuração de modelos
+
+## Padrões Arquiteturais Simplificados
+
+### Estrutura de Domínio
+
+Cada domínio segue a estrutura simplificada:
 
 ```
-module-name/
-├── domain/           # Entidades de domínio e regras de negócio
-├── application/      # Serviços de aplicação e casos de uso
-├── persistence/      # Repositórios e esquemas de banco de dados
-├── ipc/             # Handlers para comunicação Inter-Process Communication
-└── *.mapper.ts      # Mapeadores entre camadas (domain <-> persistence <-> dto)
+domain-name/
+├── *.entity.ts           # Entidades ricas com comportamento (≤50 linhas)
+├── *.functions.ts        # Funções simples CRUD (sem classes)
+├── value-objects/        # Value Objects para primitivos
+│   ├── domain-name.vo.ts
+│   └── domain-id.vo.ts
+└── *.worker.ts          # Workers específicos (quando necessário)
 ```
 
-### Comunicação IPC (Inter-Process Communication)
+### Object Calisthenics Aplicados
 
-- O frontend (renderer) se comunica com o backend (main) via IPC handlers
-- Cada módulo possui seus próprios handlers em `ipc/handlers.ts`
-- Tipos compartilhados ficam em `src/shared/types/` (apenas tipos, sem lógica)
+**Entidades Ricas:**
+
+- Máximo 2 variáveis de instância por classe
+- Métodos com máximo 10 linhas
+- Máximo 1 nível de indentação
+- Sem uso de ELSE (guard clauses, early returns)
+- Primitivos encapsulados em Value Objects
+- Classes com máximo 50 linhas
+
+**Funções Simples:**
+
+- Uma responsabilidade por função
+- Acesso transparente à infraestrutura: `getDatabase()`, `getLogger()`, `publishEvent()`
+- Sem dependency injection para utilitários
+
+### Infraestrutura Transparente
+
+**Utilitários Globais:**
+
+- `getDatabase()` - Acesso ao banco de dados
+- `getLogger(context)` - Logging contextual
+- `publishEvent(event, data)` - Publicação de eventos
+
+**Sem Dependency Injection para:**
+
+- Database access
+- Logging
+- Event publishing
+- Validação (Zod direto)
+
+### Comunicação IPC Simplificada
+
+- Frontend se comunica com funções de domínio diretamente
+- Handlers IPC mínimos, apenas como proxy
+- Tipos organizados por domínio em `src/shared/types/domains/`
 
 ### Gerenciamento de Estado no Frontend
 
 - **Zustand:** Para estado global da aplicação
 - **TanStack Query:** Para cache e sincronização de dados assíncronos
 - **React Hook Form + Zod:** Para validação e gerenciamento de formulários
-
-# Workflows e Processos de Contribuição
-
-## Como Contribuir
-
-Este guia passo a passo irá ajudá-lo a fazer suas primeiras contribuições ao Project Wiz.
-
-1.  `git pull origin jules-new-archtecture`: _Sempre comece com o código mais recente da branch principal (atualmente jules-new-archtecture) para evitar conflitos._
-2.  `git checkout -b feature/minha-nova-funcionalidade`: _Crie um novo branch para sua tarefa. Use nomes descritivos como `feature/adicionar-autenticacao` ou `fix/corrigir-bug-login`._
-3.  **Implemente sua funcionalidade/correção:** Escreva o código necessário para a sua tarefa.
-4.  **Escreva testes para sua mudança:** Garanta que sua nova funcionalidade ou correção esteja coberta por testes de unidade e/ou integração. Isso ajuda a prevenir regressões e garante a qualidade do código.
-5.  `git add .` e `git commit -m "feat: Adiciona nova funcionalidade X"`: _Adicione os arquivos modificados ao stage e crie um commit com uma mensagem clara e concisa. Siga as convenções de commit (veja abaixo)._
-6.  `git push origin feature/minha-nova-funcionalidade`: _Envie seu branch para o repositório remoto no GitHub._
-7.  **Abrir um Pull Request (PR):**
-    - Vá para a página do repositório no GitHub.
-    - Você verá uma opção para "Compare & pull request" ou "New pull request" para o seu branch recém-enviado.
-    - Preencha a descrição do PR, explicando o que foi feito, por que foi feito e quaisquer considerações importantes.
-    - Link para a issue correspondente, se houver (ex: `Closes #123`).
-    - Peça a revisão de pelo menos um outro desenvolvedor da equipe.
+- **Features organizadas por domínio** em `src/renderer/features/`
 
 ## Mensagens de Commit
 
@@ -303,14 +593,15 @@ Seguimos o padrão [Conventional Commits](https://www.conventionalcommits.org/en
 
 - **Formato:** `<tipo>(<escopo>): <descrição>`
   - **tipo:** `feat` (nova funcionalidade), `fix` (correção de bug), `docs` (mudanças na documentação), `style` (formatação, sem mudança de código), `refactor` (refatoração de código), `test` (adição/correção de testes), `chore` (tarefas de build, dependências, etc.).
-  - **escopo (opcional):** O módulo ou parte do sistema afetada (ex: `agent`, `ui`, `forum`).
+  - **escopo (opcional):** O domínio ou parte do sistema afetada (ex: `projects`, `agents`, `users`, `llm`).
   - **descrição:** Uma breve descrição da mudança no imperativo.
 
 - **Exemplos:**
-  - `feat(agent): Adiciona capacidade de pausar um agente`
-  - `fix(login): Corrige erro de autenticação com credenciais inválidas`
+  - `feat(agents): Adiciona capacidade de pausar um agente`
+  - `fix(users): Corrige erro de autenticação com credenciais inválidas`
   - `docs(readme): Atualiza seção de instalação`
-  - `refactor(core): Otimiza lógica de dispatch de comandos`
+  - `refactor(projects): Migra para entidades ricas com Object Calisthenics`
+  - `feat(llm): Implementa infraestrutura transparente para providers`
 
 # Como Manter Este Documento Atualizado (Para Todos os Contribuidores)
 

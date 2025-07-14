@@ -1,6 +1,7 @@
-import { ChannelMessageRepository } from "../persistence/channel-message.repository";
-import { ChannelMessage } from "../domain/channel-message.entity";
 import { ChannelMessageMapper } from "../channel-message.mapper";
+import { ChannelMessage } from "../domain/channel-message.entity";
+import { ChannelMessageRepository } from "../persistence/channel-message.repository";
+
 import type {
   CreateChannelMessageDto,
   UpdateChannelMessageDto,

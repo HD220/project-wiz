@@ -1,9 +1,10 @@
+import { Play, Trash2, Settings, Plus, X, Minimize2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Play, Trash2, Settings, Plus, X, Minimize2 } from "lucide-react";
 import { TerminalLine, mockTerminalLines } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 

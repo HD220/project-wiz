@@ -1,4 +1,5 @@
 import { Agent } from "./domain/agent.entity";
+
 import type { AgentSchema } from "../../persistence/schemas/agents.schema";
 
 export class AgentMapper {

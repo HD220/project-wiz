@@ -1,18 +1,19 @@
 import { BaseModule } from "../../kernel/base-module";
 import { DependencyContainer } from "../../kernel/dependency-container";
-import { ConversationService } from "./application/conversation.service";
-import { MessageService } from "./application/message.service";
-import { AgentConversationService } from "./application/agent-conversation.service";
-import { DirectMessageIpcHandlers } from "./ipc/handlers";
-import { TextGenerationService } from "../llm-provider/application/text-generation.service";
-import { AgentManagementModule } from "../agent-management/agent-management.module";
-import { LlmProviderModule } from "../llm-provider/llm-provider.module";
 import {
   AgentCreatedEvent,
   MessageSentEvent,
   ConversationStartedEvent,
   EVENT_TYPES,
 } from "../../kernel/events";
+import { AgentManagementModule } from "../agent-management/agent-management.module";
+import { TextGenerationService } from "../llm-provider/application/text-generation.service";
+import { LlmProviderModule } from "../llm-provider/llm-provider.module";
+
+import { AgentConversationService } from "./application/agent-conversation.service";
+import { ConversationService } from "./application/conversation.service";
+import { MessageService } from "./application/message.service";
+import { DirectMessageIpcHandlers } from "./ipc/handlers";
 
 export class DirectMessagesModule extends BaseModule {
   private conversationService!: ConversationService;

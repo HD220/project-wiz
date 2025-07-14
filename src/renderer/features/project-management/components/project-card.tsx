@@ -1,6 +1,7 @@
-import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+
 import { ProjectDto } from "../../../../shared/types/project.types";
 
 interface ProjectCardProps {

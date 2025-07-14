@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { PageTitle } from "@/components/page-title";
 import { FileText, Folder, FolderOpen, File } from "lucide-react";
+import { useState } from "react";
+
+import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const Route = createFileRoute("/project/$projectId/docs/")({
   component: ProjectDocsPage,

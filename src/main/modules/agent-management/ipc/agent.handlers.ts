@@ -1,6 +1,8 @@
 import { ipcMain } from "electron";
-import { AgentService } from "../application/agent.service";
+
 import { AgentMapper } from "../agent.mapper";
+import { AgentService } from "../application/agent.service";
+
 import type { AgentDto } from "../../../../shared/types/agent.types";
 
 export class AgentIpcHandlers {

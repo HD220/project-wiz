@@ -1,6 +1,8 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { relations } from "drizzle-orm";
 import { randomUUID } from "crypto";
+
+import { relations } from "drizzle-orm";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+
 import { projects } from "./projects.schema";
 
 export const channels = sqliteTable("channels", {

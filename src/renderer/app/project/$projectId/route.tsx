@@ -5,8 +5,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { useState } from "react";
-import { ProjectNavigation } from "@/features/project-management/components/project-navigation";
-import { AgentsSidebar } from "@/features/project-management/components/agents-sidebar";
+
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {
   ResizablePanelGroup,
@@ -14,11 +13,15 @@ import {
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 import { getAgentsByProject } from "@/renderer/lib/placeholders";
-import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
-import { useProjectChannels } from "@/features/communication/hooks/use-channels.hook";
-import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
-import { ProjectDto } from "@/shared/types/project.types";
+
 import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
+import { useProjectChannels } from "@/features/communication/hooks/use-channels.hook";
+import { AgentsSidebar } from "@/features/project-management/components/agents-sidebar";
+import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
+import { ProjectNavigation } from "@/features/project-management/components/project-navigation";
+import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+
+import { ProjectDto } from "@/shared/types/project.types";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();

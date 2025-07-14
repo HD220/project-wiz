@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { ProjectSchema as ProjectData } from "../../../persistence/schemas/projects.schema";
 
 // Create a basic validation schema for project

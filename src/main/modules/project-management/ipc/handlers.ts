@@ -1,12 +1,13 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
-import { ProjectService } from "../application/project.service";
-import { ProjectMapper } from "../project.mapper";
+
 import {
   CreateProjectDto,
   UpdateProjectDto,
   ProjectFilterDto,
   ProjectDto,
 } from "../../../../shared/types/project.types";
+import { ProjectService } from "../application/project.service";
+import { ProjectMapper } from "../project.mapper";
 
 export class ProjectIpcHandlers {
   constructor(

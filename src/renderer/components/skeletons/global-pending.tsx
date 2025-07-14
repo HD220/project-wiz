@@ -1,8 +1,9 @@
-import { TooltipProvider } from "@/ui/tooltip";
-import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
 import { TitleBar } from "@/renderer/components/layout/title-bar";
+import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
+
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TooltipProvider } from "@/ui/tooltip";
 
 export function GlobalPending() {
   return (

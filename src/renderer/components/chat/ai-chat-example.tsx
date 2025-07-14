@@ -1,9 +1,12 @@
+import { Loader2, MessageSquare, Bot, User } from "lucide-react";
 import React, { useState } from "react";
+
 import { useChannelChat } from "../../features/channel-messaging/hooks/use-channel-chat.hook";
 import { useLlmProviders } from "../../features/llm-provider-management/hooks/use-llm-provider.hook";
+import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -11,8 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Alert, AlertDescription } from "../ui/alert";
-import { Loader2, MessageSquare, Bot, User } from "lucide-react";
 
 interface AIChatExampleProps {
   channelId: string;

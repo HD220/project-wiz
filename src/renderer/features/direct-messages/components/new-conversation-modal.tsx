@@ -1,5 +1,15 @@
+import { useNavigate } from "@tanstack/react-router";
+import { MessageSquare, User, Target, BookOpen } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -17,17 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { MessageSquare, User, Target, BookOpen } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
-import { useConversations } from "../hooks/use-conversations.hook";
+
 import { useAgents } from "../../agent-management/hooks/use-agents.hook";
+import { useConversations } from "../hooks/use-conversations.hook";
 
 interface NewConversationModalProps {
   open: boolean;

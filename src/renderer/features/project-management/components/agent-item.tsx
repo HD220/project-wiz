@@ -1,7 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn, getAgentStatusColor } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Agent } from "@/lib/placeholders";
+import { cn, getAgentStatusColor } from "@/lib/utils";
 
 interface AgentItemProps {
   agent: Agent;

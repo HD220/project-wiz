@@ -1,9 +1,8 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -12,8 +11,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useProjects } from "../hooks/use-projects.hook";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
 import { CreateProjectDto } from "../../../../shared/types/project.types";
+import { useProjects } from "../hooks/use-projects.hook";
 
 const createProjectSchema = z.object({
   name: z

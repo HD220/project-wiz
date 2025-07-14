@@ -1,11 +1,12 @@
 import { eq, and, desc, like } from "drizzle-orm";
+
+import { IAgentRepository } from "../../../interfaces/repositories";
 import { db } from "../../../persistence/db";
 import {
   agents as agentSchema,
   type AgentSchema,
   type CreateAgentSchema,
 } from "../../../persistence/schemas";
-import { IAgentRepository } from "../../../interfaces/repositories";
 
 export interface AgentFilterDto {
   name?: string;

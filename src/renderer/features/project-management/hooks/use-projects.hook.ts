@@ -1,10 +1,11 @@
 import { useSyncExternalStore, useMemo, useRef, useEffect } from "react";
-import { projectStore } from "../stores/project.store";
+
 import {
   ProjectFilterDto,
   CreateProjectDto,
   UpdateProjectDto,
 } from "../../../../shared/types/project.types";
+import { projectStore } from "../stores/project.store";
 
 export function useProjects(filter?: ProjectFilterDto) {
   const state = useSyncExternalStore(

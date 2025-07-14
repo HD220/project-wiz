@@ -4,11 +4,13 @@ import {
   useNavigate,
   useLocation,
 } from "@tanstack/react-router";
-import { TooltipProvider } from "@/ui/tooltip";
-import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
+
 import { TitleBar } from "@/renderer/components/layout/title-bar";
+import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
+
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { GlobalPending } from "@/components/skeletons/global-pending";
+import { TooltipProvider } from "@/ui/tooltip";
 
 export const Route = createRootRoute({
   component: RootComponent,

@@ -1,5 +1,8 @@
+import { Loader2, User, Brain, Target, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -18,10 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, User, Brain, Target, BookOpen } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+
 import { useAgents } from "../../agent-management/hooks/use-agents.hook";
 import { useLlmProviders } from "../../llm-provider-management/hooks/use-llm-provider.hook";
+
 import type { CreateAgentDto } from "../../../../shared/types/agent.types";
 
 interface AddAgentModalProps {

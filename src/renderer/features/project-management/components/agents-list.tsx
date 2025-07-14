@@ -1,4 +1,5 @@
 import { Agent } from "@/lib/placeholders";
+
 import { AgentItem } from "./agent-item";
 
 interface AgentsListProps {

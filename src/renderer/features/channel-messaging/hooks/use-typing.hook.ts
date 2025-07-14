@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import { typingStore } from "../stores/typing.store";
 
 export function useTyping(channelId: string) {

@@ -1,4 +1,5 @@
 import { ChannelMessage } from "./domain/channel-message.entity";
+
 import type { ChannelMessageDto } from "../../../shared/types/channel-message.types";
 import type { ChannelMessageSchema } from "../../persistence/schemas/channel-messages.schema";
 

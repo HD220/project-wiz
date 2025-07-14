@@ -1,7 +1,5 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
-import { ConversationService } from "../application/conversation.service";
-import { MessageService } from "../application/message.service";
-import { AgentConversationService } from "../application/agent-conversation.service";
+
 import {
   CreateConversationDto,
   ConversationFilterDto,
@@ -9,6 +7,9 @@ import {
   CreateMessageDto,
   MessageDto,
 } from "../../../../shared/types/message.types";
+import { AgentConversationService } from "../application/agent-conversation.service";
+import { ConversationService } from "../application/conversation.service";
+import { MessageService } from "../application/message.service";
 
 export class DirectMessageIpcHandlers {
   constructor(

@@ -1,8 +1,8 @@
-import type { LlmProvider } from "../../modules/llm-provider/domain/llm-provider.entity";
 import type {
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
 } from "../../../shared/types/llm-provider.types";
+import type { LlmProvider } from "../../modules/llm-provider/domain/llm-provider.entity";
 
 export interface ILlmProviderService {
   createLlmProvider(data: CreateLlmProviderDto): Promise<LlmProvider>;

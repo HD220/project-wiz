@@ -1,5 +1,6 @@
-import { IModule, IModuleContainer } from "./interfaces/module.interface";
 import { logger } from "../logger";
+
+import { IModule, IModuleContainer } from "./interfaces/module.interface";
 
 export class DependencyContainer implements IModuleContainer {
   private static instance: DependencyContainer;

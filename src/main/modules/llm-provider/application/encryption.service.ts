@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+
 import { app } from "electron";
 
 const ALGORITHM = "aes-256-gcm";

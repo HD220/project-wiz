@@ -1,7 +1,9 @@
-import { beforeAll as _beforeAll, beforeEach, afterAll } from "vitest";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { initializeDb } from "../src/main/persistence/db";
 import path from "path";
+
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { beforeAll as _beforeAll, beforeEach, afterAll } from "vitest";
+
+import { initializeDb } from "../src/main/persistence/db";
 
 let testDb: ReturnType<typeof initializeDb>;
 

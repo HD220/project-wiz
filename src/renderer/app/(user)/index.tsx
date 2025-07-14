@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CustomLink } from "@/components/custom-link";
+
 import {
   mockProjects,
   mockAgents,
   mockTasks,
 } from "@/renderer/lib/placeholders";
+
+import { CustomLink } from "@/components/custom-link";
 import { PageTitle } from "@/components/page-title";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/(user)/")({
   component: UserDashboardPage,

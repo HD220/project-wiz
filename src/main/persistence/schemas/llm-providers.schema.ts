@@ -1,5 +1,6 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { randomUUID } from "crypto";
+
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const llmProviders = sqliteTable("llm_providers", {
   id: text("id")

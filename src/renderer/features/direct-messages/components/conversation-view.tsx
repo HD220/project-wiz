@@ -1,13 +1,16 @@
+import { Send, Paperclip, Smile, AtSign } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
+import { MessageItem } from "@/components/chat/message-item";
+import { PageTitle } from "@/components/page-title";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, Paperclip, Smile, AtSign } from "lucide-react";
-import { PageTitle } from "@/components/page-title";
-import { MessageItem } from "@/components/chat/message-item";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+
 import { useAgentChat } from "../hooks/use-agent-chat.hook";
+
 import type {
   ConversationDto,
   MessageDto,

@@ -18,6 +18,7 @@ Este guia fornece exemplos práticos de código baseados na codebase atual do Pr
 ### Nova Organização vs. Atual
 
 **Estrutura Atual (Concerns Técnicos):**
+
 ```
 src/main/modules/
 ├── agent-management/
@@ -29,6 +30,7 @@ src/main/modules/
 ```
 
 **Nova Estrutura (Domínios de Negócio):**
+
 ```
 src/main/domains/
 ├── projects/                    # Container de colaboração
@@ -72,6 +74,7 @@ src/main/domains/
 ### Exemplo 1: ProjectName (baseado em validation.utils.ts atual)
 
 **Código Atual (Primitivo):**
+
 ```typescript
 // src/main/modules/project-management/application/project.service.ts:15
 async createProject(data: CreateProjectDto): Promise<ProjectDto> {
@@ -83,15 +86,17 @@ async createProject(data: CreateProjectDto): Promise<ProjectDto> {
 ```
 
 **Nova Implementação (Value Object):**
+
 ```typescript
 // src/main/domains/projects/value-objects/project-name.vo.ts
-import { z } from 'zod';
+import { z } from "zod";
 
-const ProjectNameSchema = z.string()
+const ProjectNameSchema = z
+  .string()
   .min(1, "Nome não pode estar vazio")
   .max(100, "Nome muito longo (máximo 100 caracteres)")
   .regex(/^[a-zA-Z0-9\s\-_]+$/, "Nome contém caracteres inválidos")
-  .transform(str => str.trim());
+  .transform((str) => str.trim());
 
 export class ProjectName {
   constructor(name: string) {
@@ -118,6 +123,7 @@ export class ProjectName {
 ### Exemplo 2: Temperature (baseado em validation.utils.ts existente)
 
 **Código Atual:**
+
 ```typescript
 // src/shared/utils/validation.utils.ts:47
 static isValidTemperature(temperature: number): boolean {
@@ -126,6 +132,7 @@ static isValidTemperature(temperature: number): boolean {
 ```
 
 **Nova Implementação (Value Object):**
+
 ```typescript
 // src/main/domains/llm/value-objects/temperature.vo.ts
 export class Temperature {
@@ -134,7 +141,9 @@ export class Temperature {
 
   constructor(temp: number) {
     if (temp < this.MIN || temp > this.MAX) {
-      throw new DomainError(`Temperature deve estar entre ${this.MIN} e ${this.MAX}`);
+      throw new DomainError(
+        `Temperature deve estar entre ${this.MIN} e ${this.MAX}`,
+      );
     }
     this.value = temp;
   }
@@ -158,6 +167,7 @@ export class Temperature {
 ### Exemplo 1: Agent Entity (baseado em agent.entity.ts atual)
 
 **Código Atual (Parcialmente Rico, mas com violações):**
+
 ```typescript
 // src/main/modules/agent-management/domain/agent.entity.ts
 export class Agent {
@@ -181,12 +191,13 @@ export class Agent {
 ```
 
 **Nova Implementação (Object Calisthenics):**
+
 ```typescript
 // src/main/domains/agents/agent.entity.ts
 export class Agent {
   constructor(
     private id: string,
-    private properties: AgentProperties
+    private properties: AgentProperties,
   ) {}
 
   activate(): Agent {
@@ -197,7 +208,10 @@ export class Agent {
     return this.properties.buildSystemPrompt();
   }
 
-  async processUserMessage(message: string, llmProvider: LLMProvider): Promise<string> {
+  async processUserMessage(
+    message: string,
+    llmProvider: LLMProvider,
+  ): Promise<string> {
     const prompt = this.generateSystemPrompt();
     return await llmProvider.generateResponse(prompt, message);
   }
@@ -207,7 +221,7 @@ export class Agent {
 export class AgentProperties {
   constructor(
     private name: string,
-    private role: string
+    private role: string,
   ) {}
 
   activate(): AgentProperties {
@@ -228,6 +242,7 @@ export interface LLMProvider {
 ### Exemplo 2: Project Entity (evolução do atual)
 
 **Código Atual (Anêmico):**
+
 ```typescript
 // src/main/modules/project-management/domain/project.entity.ts - anêmico
 export class Project {
@@ -244,12 +259,13 @@ export class Project {
 ```
 
 **Nova Implementação (Rico + Object Calisthenics):**
+
 ```typescript
 // src/main/domains/projects/project.entity.ts
 export class Project {
   constructor(
     private id: string,
-    private name: string
+    private name: string,
   ) {}
 
   createChannel(channelName: string): string {
@@ -277,6 +293,7 @@ export class Project {
 ### Exemplo 1: Criação de Projeto (baseado em project.service.ts atual)
 
 **Código Atual (Service Complexo):**
+
 ```typescript
 // src/main/modules/project-management/application/project.service.ts:15-43
 async createProject(data: CreateProjectDto): Promise<ProjectDto> {
@@ -284,7 +301,7 @@ async createProject(data: CreateProjectDto): Promise<ProjectDto> {
   if (!data.name || data.name.trim().length === 0) {
     throw new ValidationError("Nome é obrigatório");
   }
-  
+
   // Verificação de existência
   const existingProject = await this.projectRepository.findByName(data.name);
   if (existingProject) {
@@ -303,33 +320,34 @@ async createProject(data: CreateProjectDto): Promise<ProjectDto> {
   };
 
   const savedProject = await this.projectRepository.save(projectData);
-  
+
   // Eventos
   this.eventBus.publish("project:created", savedProject);
-  
+
   return this.projectMapper.toDto(savedProject);
 }
 ```
 
 **Nova Implementação (Função Simples):**
+
 ```typescript
 // src/main/domains/projects/project.functions.ts
-import { getDatabase } from '../../infrastructure/database';
-import { getLogger } from '../../infrastructure/logger';
-import { publishEvent } from '../../infrastructure/events';
+import { getDatabase } from "../../infrastructure/database";
+import { getLogger } from "../../infrastructure/logger";
+import { publishEvent } from "../../infrastructure/events";
 
 export async function createProject(
-  name: string, 
-  ownerId: string, 
-  description?: string
+  name: string,
+  ownerId: string,
+  description?: string,
 ): Promise<Project> {
-  const logger = getLogger('CreateProject');
+  const logger = getLogger("CreateProject");
   const projectName = new ProjectName(name);
   await ensureProjectNameIsUnique(projectName);
-  
+
   const projectId = crypto.randomUUID();
   const project = new Project(projectId, projectName.toString());
-  
+
   const db = getDatabase();
   await db.insert(projectsTable).values({
     id: projectId,
@@ -341,18 +359,19 @@ export async function createProject(
     updatedAt: new Date(),
   });
 
-  await publishEvent('project:created', { projectId });
-  
+  await publishEvent("project:created", { projectId });
+
   logger.info(`Projeto criado: ${projectName.toString()}`);
   return project;
 }
 
 async function ensureProjectNameIsUnique(name: ProjectName): Promise<void> {
   const db = getDatabase();
-  const existing = await db.select()
+  const existing = await db
+    .select()
     .from(projectsTable)
     .where(eq(projectsTable.name, name.toString()));
-    
+
   if (existing.length > 0) {
     throw new DomainError(`Projeto com nome '${name.toString()}' já existe`);
   }
@@ -362,6 +381,7 @@ async function ensureProjectNameIsUnique(name: ProjectName): Promise<void> {
 ### Exemplo 2: Busca de Agent (baseado em agent.repository.ts atual)
 
 **Código Atual (Repository com DI):**
+
 ```typescript
 // src/main/modules/agent-management/persistence/agent.repository.ts:25-35
 async findById(id: string): Promise<AgentSchema | null> {
@@ -375,13 +395,14 @@ async findById(id: string): Promise<AgentSchema | null> {
 ```
 
 **Nova Implementação (Função Simples):**
+
 ```typescript
 // src/main/domains/agents/agent.functions.ts
 export async function findAgentById(id: AgentId): Promise<Agent | null> {
   const db = getDatabase();
-  
-  
-  const result = await db.select()
+
+  const result = await db
+    .select()
     .from(agentsTable)
     .where(eq(agentsTable.id, id.getValue()));
 
@@ -393,11 +414,12 @@ export async function findAgentById(id: AgentId): Promise<Agent | null> {
 }
 
 export async function findAgentsByCapability(
-  capability: AgentCapability
+  capability: AgentCapability,
 ): Promise<Agent[]> {
   const db = getDatabase();
-  
-  const results = await db.select()
+
+  const results = await db
+    .select()
     .from(agentsTable)
     .where(like(agentsTable.capabilities, `%${capability.toString()}%`));
 
@@ -417,6 +439,7 @@ function mapToAgent(schema: AgentSchema): Agent {
 ### Exemplo 1: Database Access (baseado em db.ts atual)
 
 **Código Atual:**
+
 ```typescript
 // src/main/persistence/db.ts
 const db = drizzle(new Database(DB_PATH));
@@ -424,11 +447,12 @@ export { db };
 ```
 
 **Nova Implementação (Transparente):**
+
 ```typescript
 // src/main/infrastructure/database.ts
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import { DB_PATH } from '../config';
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
+import { DB_PATH } from "../config";
 
 let _database: ReturnType<typeof drizzle> | null = null;
 
@@ -449,24 +473,27 @@ export async function createProject(name: string): Promise<Project> {
 ### Exemplo 2: Logging (baseado em logger.ts atual)
 
 **Código Atual:**
+
 ```typescript
 // src/main/logger.ts - logger global
 export const logger = pino({
-  level: isDev ? 'debug' : 'info',
-  transport: isDev ? { target: 'pino-pretty' } : undefined,
+  level: isDev ? "debug" : "info",
+  transport: isDev ? { target: "pino-pretty" } : undefined,
 });
 ```
 
 **Nova Implementação (Transparente):**
+
 ```typescript
 // src/main/infrastructure/logger.ts
-import pino from 'pino';
+import pino from "pino";
 
 const baseLogger = pino({
-  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-  transport: process.env.NODE_ENV === 'development' 
-    ? { target: 'pino-pretty' } 
-    : undefined,
+  level: process.env.NODE_ENV === "development" ? "debug" : "info",
+  transport:
+    process.env.NODE_ENV === "development"
+      ? { target: "pino-pretty" }
+      : undefined,
 });
 
 export function getLogger(context: string) {
@@ -475,10 +502,10 @@ export function getLogger(context: string) {
 
 // Uso nas entidades e funções
 export class Agent {
-  private logger = getLogger('Agent'); // Acesso transparente
-  
+  private logger = getLogger("Agent"); // Acesso transparente
+
   generateResponse(): string {
-    this.logger.info('Gerando resposta para usuário');
+    this.logger.info("Gerando resposta para usuário");
     return "Agent response";
   }
 }
@@ -487,15 +514,17 @@ export class Agent {
 ### Exemplo 3: Event Publishing (baseado em event-bus.ts atual)
 
 **Código Atual (DI):**
+
 ```typescript
 // src/main/modules/agent-management/application/agent.service.ts:85
 this.eventBus.publish("agent:created", agent);
 ```
 
 **Nova Implementação (Transparente):**
+
 ```typescript
 // src/main/infrastructure/events.ts
-import { EventBus } from '../kernel/event-bus';
+import { EventBus } from "../kernel/event-bus";
 
 let _eventBus: EventBus | null = null;
 
@@ -509,11 +538,11 @@ export async function publishEvent(event: string, data: any): Promise<void> {
 // Uso nas funções
 export async function createAgent(name: string, role: string): Promise<Agent> {
   const db = getDatabase();
-  
+
   const agentId = crypto.randomUUID();
   const properties = new AgentProperties(name, role);
   const agent = new Agent(agentId, properties);
-  
+
   await db.insert(agentsTable).values({
     id: agentId,
     name: name,
@@ -522,9 +551,9 @@ export async function createAgent(name: string, role: string): Promise<Agent> {
     createdAt: new Date(),
     updatedAt: new Date(),
   });
-  
-  await publishEvent('agent:created', { agentId });
-  
+
+  await publishEvent("agent:created", { agentId });
+
   return agent;
 }
 ```
@@ -536,6 +565,7 @@ export async function createAgent(name: string, role: string): Promise<Agent> {
 ### Migração Incremental - Exemplo Prático
 
 **Fase 1: Criar Nova Estrutura (Paralela)**
+
 ```typescript
 // Manter estrutura atual funcionando
 src/main/modules/agent-management/ // ← Mantém funcionando
@@ -545,6 +575,7 @@ src/main/domains/agents/ // ← Nova implementação
 ```
 
 **Fase 2: Redirecionar Gradualmente**
+
 ```typescript
 // src/main/modules/agent-management/application/agent.service.ts
 export class AgentService {
@@ -553,12 +584,13 @@ export class AgentService {
     const agent = await createAgent(data.name, data.role, data.capabilities);
     return this.legacyMapper.toDto(agent);
   }
-  
+
   // Métodos antigos mantidos para compatibilidade
 }
 ```
 
 **Fase 3: Deprecar e Remover**
+
 ```typescript
 // Após validação completa, remover:
 // src/main/modules/agent-management/
@@ -572,6 +604,7 @@ export class AgentService {
 ### Checklist de Implementação
 
 **Para Cada Classe:**
+
 - [ ] ✅ Máximo 1 nível de indentação por método
 - [ ] ✅ Sem uso de ELSE (guard clauses, early returns)
 - [ ] ✅ Máximo 2 variáveis de instância
@@ -583,6 +616,7 @@ export class AgentService {
 - [ ] ✅ Nomes expressivos sem abreviações
 
 **Exemplo de Método Conforme:**
+
 ```typescript
 // ✅ CORRETO - Object Calisthenics
 processMessage(content: string): string {
@@ -616,40 +650,45 @@ processMessage(content: string): string | null {
 ### Ferramentas de Validação Automática
 
 **ESLint Customizado para Object Calisthenics:**
+
 ```javascript
 // .eslintrc.calisthenics.js
 module.exports = {
   rules: {
-    'max-depth': ['error', 1], // Máximo 1 nível indentação
-    'max-lines-per-function': ['error', 10], // Máximo 10 linhas por método
-    'max-params': ['error', 2], // Força Value Objects
-    'no-else-return': 'error', // Proíbe else desnecessário
-    'prefer-early-return': 'error', // Força early returns
-  }
+    "max-depth": ["error", 1], // Máximo 1 nível indentação
+    "max-lines-per-function": ["error", 10], // Máximo 10 linhas por método
+    "max-params": ["error", 2], // Força Value Objects
+    "no-else-return": "error", // Proíbe else desnecessário
+    "prefer-early-return": "error", // Força early returns
+  },
 };
 ```
 
 ### Validação de Estrutura
 
 **Verificação de Compliance:**
+
 ```typescript
 // Função utilitária para verificar Object Calisthenics
 export function validateEntityStructure(entityClass: any): ValidationResult {
   const issues: string[] = [];
-  
+
   // Verificar número de propriedades de instância
   const instanceProps = Object.getOwnPropertyNames(new entityClass());
   if (instanceProps.length > 2) {
-    issues.push(`Entity tem ${instanceProps.length} propriedades, máximo permitido: 2`);
+    issues.push(
+      `Entity tem ${instanceProps.length} propriedades, máximo permitido: 2`,
+    );
   }
-  
+
   // Verificar métodos estáticos (deve ser zero)
-  const staticMethods = Object.getOwnPropertyNames(entityClass)
-    .filter(name => typeof entityClass[name] === 'function' && name !== 'constructor');
+  const staticMethods = Object.getOwnPropertyNames(entityClass).filter(
+    (name) => typeof entityClass[name] === "function" && name !== "constructor",
+  );
   if (staticMethods.length > 0) {
-    issues.push(`Entity tem métodos estáticos: ${staticMethods.join(', ')}`);
+    issues.push(`Entity tem métodos estáticos: ${staticMethods.join(", ")}`);
   }
-  
+
   return { isValid: issues.length === 0, issues };
 }
 ```
@@ -664,19 +703,20 @@ export function validateEntityStructure(entityClass: any): ValidationResult {
 // .eslintrc.js - regras customizadas
 module.exports = {
   rules: {
-    'max-depth': ['error', 1], // Máximo 1 nível de indentação
-    'max-lines-per-function': ['error', 10], // Máximo 10 linhas por método
-    'max-params': ['error', 2], // Máximo 2 parâmetros (força Value Objects)
-    'complexity': ['error', 3], // Baixa complexidade ciclomática
-    'no-else-return': 'error', // Proíbe else desnecessário
-    'prefer-early-return': 'error', // Força early returns
-  }
+    "max-depth": ["error", 1], // Máximo 1 nível de indentação
+    "max-lines-per-function": ["error", 10], // Máximo 10 linhas por método
+    "max-params": ["error", 2], // Máximo 2 parâmetros (força Value Objects)
+    complexity: ["error", 3], // Baixa complexidade ciclomática
+    "no-else-return": "error", // Proíbe else desnecessário
+    "prefer-early-return": "error", // Força early returns
+  },
 };
 ```
 
 ### Comandos de Validação
 
 **Scripts disponíveis:**
+
 - `npm run quality:check` - Verificação completa (código, tipos, formato)
 - `npm run lint:check` - Verificação apenas de linting
 - `npm run type-check` - Verificação apenas de tipos TypeScript
