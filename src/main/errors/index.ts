@@ -1,5 +1,5 @@
 // Central export for all error classes
-export { BaseError, type ErrorMetadata } from "./base.error";
+export { BaseError, type ErrorMetadata, type ErrorContext } from "./base.error";
 export { ApplicationError } from "./application.error";
 export { DomainError } from "./domain.error";
 export { NotFoundError } from "./not-found.error";
@@ -37,7 +37,14 @@ export class ErrorHandler {
   /**
    * Logs error with appropriate level based on error type
    */
-  static logError(error: unknown, logger: any): void {
+  static logError(
+    error: unknown,
+    logger: {
+      warn: (message: string, data?: unknown) => void;
+      info: (message: string, data?: unknown) => void;
+      error: (message: string, data?: unknown) => void;
+    },
+  ): void {
     if (error instanceof ValidationError) {
       logger.warn("Validation error:", (error as ValidationError).toJSON());
     } else if (error instanceof NotFoundError) {
@@ -58,7 +65,7 @@ export class ErrorHandler {
       name: string;
       message: string;
       code?: string;
-      issues?: any;
+      issues?: Record<string, string[]>;
     };
   } {
     if (error instanceof ValidationError) {

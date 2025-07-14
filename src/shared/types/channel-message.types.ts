@@ -1,5 +1,10 @@
 // DTOs para mensagens de canal - módulo independente
 
+export type ChannelMessageMetadata = Record<
+  string,
+  string | number | boolean | null
+>;
+
 // DTO para criar uma nova mensagem no canal
 export interface CreateChannelMessageDto {
   content: string;
@@ -7,14 +12,14 @@ export interface CreateChannelMessageDto {
   authorId: string;
   authorName: string;
   type?: "text" | "code" | "file" | "system";
-  metadata?: Record<string, any>;
+  metadata?: ChannelMessageMetadata;
 }
 
 // DTO para atualizar mensagem existente
 export interface UpdateChannelMessageDto {
   id: string;
   content?: string;
-  metadata?: Record<string, any>;
+  metadata?: ChannelMessageMetadata;
 }
 
 // DTO para resposta (output)
@@ -25,7 +30,7 @@ export interface ChannelMessageDto {
   authorId: string;
   authorName: string;
   type: string;
-  metadata?: Record<string, any>;
+  metadata?: ChannelMessageMetadata;
   isEdited: boolean;
   createdAt: Date;
   updatedAt: Date;

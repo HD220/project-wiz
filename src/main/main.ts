@@ -1,11 +1,12 @@
 import path from "path";
 
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
 
 import { ModuleLoader } from "./kernel/module-loader";
 import { SeedService } from "./persistence/seed.service";
 import { logger } from "./logger";
+import { createSimpleIpcHandler } from "./kernel/ipc-handler-utility";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -47,13 +48,13 @@ const createWindow = () => {
 };
 
 // Window control handlers
-ipcMain.handle("window-minimize", () => {
+createSimpleIpcHandler("window-minimize", () => {
   if (mainWindow) {
     mainWindow.minimize();
   }
 });
 
-ipcMain.handle("window-maximize", () => {
+createSimpleIpcHandler("window-maximize", () => {
   if (mainWindow) {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize();
@@ -63,13 +64,13 @@ ipcMain.handle("window-maximize", () => {
   }
 });
 
-ipcMain.handle("window-close", () => {
+createSimpleIpcHandler("window-close", () => {
   if (mainWindow) {
     mainWindow.close();
   }
 });
 
-ipcMain.handle("window-is-maximized", () => {
+createSimpleIpcHandler("window-is-maximized", () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
@@ -107,7 +108,7 @@ app.on("activate", () => {
 
 app.on("will-quit", () => {});
 
-ipcMain.handle("app:is-dev", () => {
+createSimpleIpcHandler("app:is-dev", () => {
   return (
     process.env.NODE_ENV === "development" ||
     !!process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL

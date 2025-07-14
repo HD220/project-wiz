@@ -2,6 +2,7 @@ import {
   EntityCreatedEvent,
   EntityUpdatedEvent,
   EntityDeletedEvent,
+  EntityData,
 } from "./base.events";
 
 // Project Events
@@ -26,8 +27,8 @@ export class ProjectUpdatedEvent extends EntityUpdatedEvent {
 
   constructor(
     projectId: string,
-    changes: Record<string, any>,
-    previousData?: Record<string, any>,
+    changes: EntityData,
+    previousData?: EntityData,
   ) {
     super(projectId, "project", changes, previousData);
   }
@@ -36,7 +37,7 @@ export class ProjectUpdatedEvent extends EntityUpdatedEvent {
 export class ProjectDeletedEvent extends EntityDeletedEvent {
   type = "project.deleted" as const;
 
-  constructor(projectId: string, deletedProject: Record<string, any>) {
+  constructor(projectId: string, deletedProject: EntityData) {
     super(projectId, "project", deletedProject);
   }
 }
