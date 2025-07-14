@@ -131,9 +131,9 @@ export function useProjectChannels(projectId: string) {
     [state.channels, projectId]
   );
 
-  // Canal geral do projeto
+  // Canal geral do projeto (first channel or one named 'general')
   const generalChannel = useMemo(() => 
-    projectChannels.find(ch => ch.type === 'general') || null,
+    projectChannels.find(ch => ch.name.toLowerCase() === 'general') || projectChannels[0] || null,
     [projectChannels]
   );
 

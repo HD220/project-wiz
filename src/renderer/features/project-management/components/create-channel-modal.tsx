@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Hash, Volume2, Lock, CheckSquare, Bot } from "lucide-react";
 import { useProjectChannels } from "../../communication/hooks/use-channels.hook";
-import type { ChannelTypeEnum } from "../../../../shared/types/channel.types";
+// Removed ChannelTypeEnum - channels are text-only
 
 interface CreateChannelModalProps {
   open: boolean;
@@ -55,7 +55,6 @@ export function CreateChannelModal({
       await createChannel({
         name: channelName.trim(),
         description: channelDescription.trim() || undefined,
-        type: channelType,
         isPrivate,
         createdBy: 'current-user', // TODO: Get from user context
       });

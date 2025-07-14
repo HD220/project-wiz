@@ -1,7 +1,7 @@
 import { BaseModule } from '../../kernel/base-module';
-import { ProjectRepository } from './persistence/repository';
+import { ProjectRepository } from './persistence/project.repository';
 import { ProjectService } from './application/project.service';
-import { ProjectMapper } from './domain/project.mapper';
+import { ProjectMapper } from './project.mapper';
 import { ProjectIpcHandlers } from './ipc/handlers';
 
 export class ProjectManagementModule extends BaseModule {

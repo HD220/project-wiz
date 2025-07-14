@@ -1,6 +1,6 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
-import { ProjectService } from "../services/project.service";
-import { ProjectMapper } from "../mappers/project.mapper";
+import { ProjectService } from "../application/project.service";
+import { ProjectMapper } from "../project.mapper";
 import {
   CreateProjectDto,
   UpdateProjectDto,

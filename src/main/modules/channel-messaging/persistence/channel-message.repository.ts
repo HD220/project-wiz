@@ -40,16 +40,17 @@ export class ChannelMessageRepository {
       }
     }
 
-    let query = db
+    // Build query with all conditions and pagination
+    const baseQuery = db
       .select()
       .from(channelMessages)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(asc(channelMessages.createdAt)); // Ordem cronológica
+      .orderBy(asc(channelMessages.createdAt));
 
-    // Build final query with pagination
-    let finalQuery = query;
+    let finalQuery = conditions.length > 0 
+      ? baseQuery.where(and(...conditions))
+      : baseQuery;
     
-    // Aplicar paginação
+    // Apply pagination
     if (filter?.limit) {
       finalQuery = finalQuery.limit(filter.limit);
     }

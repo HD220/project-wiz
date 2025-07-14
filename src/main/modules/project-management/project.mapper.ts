@@ -1,4 +1,4 @@
-import { ProjectData } from "./project.schema";
+import { ProjectSchema as ProjectData } from "../../persistence/schemas/projects.schema";
 import {
   ProjectDto,
   CreateProjectDto,

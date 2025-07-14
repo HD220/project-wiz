@@ -1,5 +1,5 @@
 import { BaseModule } from '../../kernel/base-module';
-import { ChannelRepository } from './persistence/repository';
+import { ChannelRepository } from './persistence/channel.repository';
 import { ChannelService } from './application/channel.service';
 import { ChannelMapper } from './channel.mapper';
 import { ChannelIpcHandlers } from './ipc/handlers';

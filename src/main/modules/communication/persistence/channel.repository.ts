@@ -56,7 +56,7 @@ export class ChannelRepository {
 
   // READ (por projeto - método helper)
   async findByProject(projectId: string): Promise<ChannelSchema[]> {
-    return this.findMany({ projectId, isArchived: false });
+    return this.findMany({ projectId });
   }
 
   // UPDATE

@@ -226,7 +226,7 @@ export function AddAgentModal({
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {providers.map((provider) => (
+                  {providers.map((provider: any) => (
                     <SelectItem key={provider.id} value={provider.id}>
                       {provider.name} {provider.isDefault && "(Padrão)"}
                     </SelectItem>

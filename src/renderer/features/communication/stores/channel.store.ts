@@ -257,9 +257,8 @@ class ChannelStore {
   }
 
   getGeneralChannel = (projectId: string): ChannelDto | null => {
-    return this.state.channels.find(ch => 
-      ch.projectId === projectId && ch.type === 'general'
-    ) || null;
+    const projectChannels = this.state.channels.filter(ch => ch.projectId === projectId);
+    return projectChannels.find(ch => ch.name.toLowerCase() === 'general') || projectChannels[0] || null;
   }
 
   // Reset state (útil ao trocar de projeto)

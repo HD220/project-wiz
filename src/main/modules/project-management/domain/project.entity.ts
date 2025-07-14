@@ -1,14 +1,25 @@
 import { z } from "zod";
 import {
-  ProjectSchema,
-  ProjectData,
-} from "./project.schema";
+  ProjectSchema as ProjectData,
+} from "../../../persistence/schemas/projects.schema";
+
+// Create a basic validation schema for project
+const ProjectValidationSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  gitUrl: z.string().optional(),
+  status: z.string().default('active'),
+  avatar: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
 
 export class ProjectEntity {
   private props: ProjectData;
 
   constructor(data: Partial<ProjectData> | ProjectData) {
-    this.props = ProjectSchema.parse(data);
+    this.props = ProjectValidationSchema.parse(data) as ProjectData;
   }
 
   getId(): string {

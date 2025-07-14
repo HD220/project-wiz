@@ -1,7 +1,7 @@
 import { eq, and, desc } from "drizzle-orm";
 import { db } from "../../../persistence/db";
 import { projects } from "../../../persistence/schemas";
-import { ProjectData } from "../entities/project.schema";
+import { ProjectSchema as ProjectData } from "../../../persistence/schemas/projects.schema";
 
 export interface ProjectFilterOptions {
   status?: "active" | "inactive" | "archived";
@@ -33,8 +33,10 @@ export class ProjectRepository {
   }
 
   async findMany(filter?: ProjectFilterOptions): Promise<ProjectData[]> {
-    let query = db.select().from(projects).orderBy(desc(projects.updatedAt));
+    const baseQuery = db.select().from(projects).orderBy(desc(projects.updatedAt));
 
+    let query = baseQuery;
+    
     if (filter?.status) {
       query = query.where(eq(projects.status, filter.status));
     }

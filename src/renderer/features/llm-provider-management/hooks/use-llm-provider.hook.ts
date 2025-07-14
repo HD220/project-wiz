@@ -62,8 +62,14 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
       llmProviderStore.loadLlmProviders(filterRef.current, true),
   }), []);
 
+  // Computed properties for compatibility
+  const providers = state.llmProviders;
+  const defaultProvider = providers.find(p => p.isDefault) || providers[0] || null;
+
   return {
     llmProviders: state.llmProviders,
+    providers, // alias for compatibility
+    defaultProvider,
     isLoading: state.isLoading,
     error: state.error,
     selectedLlmProvider: state.selectedLlmProvider,

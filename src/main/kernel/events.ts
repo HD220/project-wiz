@@ -28,6 +28,10 @@ export const EVENT_TYPES = {
   MESSAGE_SENT: 'message.sent',
   MESSAGE_UPDATED: 'message.updated',
   MESSAGE_DELETED: 'message.deleted',
+  
+  // Conversation Events
+  CONVERSATION_STARTED: 'conversation.started',
+  CONVERSATION_ENDED: 'conversation.ended',
 } as const;
 
 // Base Event Classes
@@ -47,7 +51,8 @@ export abstract class BaseEvent implements IEvent {
 export class AgentCreatedEvent extends BaseEvent {
   constructor(
     entityId: string,
-    public readonly agentData: {
+    public readonly agent: {
+      id: string;
       name: string;
       role: string;
       goal: string;
@@ -154,7 +159,15 @@ export class ChannelDeletedEvent extends BaseEvent {
 
 // Message Events
 export class MessageSentEvent extends BaseEvent {
-  constructor(entityId: string) {
+  constructor(
+    entityId: string,
+    public readonly message: {
+      id: string;
+      content: string;
+      senderId: string;
+      conversationId?: string;
+    }
+  ) {
     super(EVENT_TYPES.MESSAGE_SENT, entityId);
   }
 }
@@ -168,5 +181,18 @@ export class MessageUpdatedEvent extends BaseEvent {
 export class MessageDeletedEvent extends BaseEvent {
   constructor(entityId: string) {
     super(EVENT_TYPES.MESSAGE_DELETED, entityId);
+  }
+}
+
+// Conversation Events
+export class ConversationStartedEvent extends BaseEvent {
+  constructor(entityId: string) {
+    super(EVENT_TYPES.CONVERSATION_STARTED, entityId);
+  }
+}
+
+export class ConversationEndedEvent extends BaseEvent {
+  constructor(entityId: string) {
+    super(EVENT_TYPES.CONVERSATION_ENDED, entityId);
   }
 }

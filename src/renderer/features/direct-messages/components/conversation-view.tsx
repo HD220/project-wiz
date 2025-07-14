@@ -70,7 +70,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || !fullPersona) return;
+    if (!messageInput.trim() || !fullAgent) return;
 
     const messageToSend = messageInput.trim();
     // Limpar input imediatamente
@@ -133,7 +133,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
             )}
             
             {/* Warning for missing agent or LLM provider */}
-            {!fullPersona && (
+            {!fullAgent && (
               <div className="flex items-center justify-center bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
                 ⚠️ Persona não encontrada para esta conversa.
               </div>
@@ -194,7 +194,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
           <div className="relative">
             <Textarea
               placeholder={
-                !fullPersona 
+                !fullAgent 
                   ? "Persona não encontrada..."
                   : `Mensagem para ${agent.name}`
               }
@@ -202,7 +202,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={!fullPersona}
+              disabled={!fullAgent}
             />
             <div className="absolute right-2 bottom-2 flex items-center gap-1">
               <Button variant="ghost" size="icon" className="w-8 h-8">
@@ -215,7 +215,7 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                 type="submit"
                 size="icon"
                 className="w-8 h-8"
-                disabled={!messageInput.trim() || !fullPersona}
+                disabled={!messageInput.trim() || !fullAgent}
               >
                 <Send className="w-4 h-4" />
               </Button>

@@ -1,10 +1,12 @@
 import { ProjectEntity } from "../domain/project.entity";
 import { ProjectRepository, ProjectFilterOptions } from "../persistence/project.repository";
 import {
-  CreateProjectData,
-  UpdateProjectData,
-  ProjectData,
-} from "../domain/project.schema";
+  CreateProjectSchema as CreateProjectData,
+  ProjectSchema as ProjectData,
+  type ProjectSchema
+} from "../../../persistence/schemas/projects.schema";
+
+type UpdateProjectData = Partial<CreateProjectData>;
 
 export class ProjectService {
   constructor(private repository: ProjectRepository) {}

@@ -16,11 +16,9 @@ export class LlmProviderRepository {
   }
 
   async findMany(filter?: LlmProviderFilterDto): Promise<LlmProviderSchema[]> {
-    let query = db.select().from(llmProviders);
+    const conditions = [];
 
     if (filter) {
-      const conditions = [];
-
       if (filter.name) {
         conditions.push(eq(llmProviders.name, filter.name));
       }
@@ -28,13 +26,20 @@ export class LlmProviderRepository {
       if (filter.provider) {
         conditions.push(eq(llmProviders.provider, filter.provider));
       }
-
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
     }
 
-    return query.orderBy(desc(llmProviders.createdAt));
+    if (conditions.length > 0) {
+      return await db
+        .select()
+        .from(llmProviders)
+        .where(and(...conditions))
+        .orderBy(desc(llmProviders.createdAt));
+    }
+
+    return await db
+      .select()
+      .from(llmProviders)
+      .orderBy(desc(llmProviders.createdAt));
   }
 
   async findById(id: string): Promise<LlmProviderSchema | null> {

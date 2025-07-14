@@ -62,15 +62,18 @@ export class AgentRepository implements IAgentRepository {
       conditions.push(eq(agentSchema.isActive, filter.isActive));
     }
 
-    let query = db.select().from(agentSchema);
-    
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db
+        .select()
+        .from(agentSchema)
+        .where(and(...conditions))
+        .orderBy(desc(agentSchema.createdAt));
     }
     
-    query = query.orderBy(desc(agentSchema.createdAt));
-
-    return await query;
+    return await db
+      .select()
+      .from(agentSchema)
+      .orderBy(desc(agentSchema.createdAt));
   }
 
   async findActiveAgents(): Promise<AgentSchema[]> {
