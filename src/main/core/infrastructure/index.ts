@@ -2,15 +2,11 @@
  * @fileoverview Exportações centralizadas do sistema de infrastructure
  *
  * Este arquivo centraliza todas as exportações do sistema de infrastructure,
- * incluindo logging, transports, configuração, validação e utilitários relacionados.
+ * incluindo logging, transports e utilitários relacionados.
  *
  * @version 1.0.0
  * @since 2024-01-01
  */
-
-// =============================================================================
-// LOGGING SYSTEM
-// =============================================================================
 
 // Logging Core
 export { Logger, LoggerConfig } from "./logger";
@@ -48,6 +44,7 @@ export {
 export { ConsoleTransport } from "./console-transport";
 export { FileTransport } from "./file-transport";
 
+<<<<<<< HEAD
 // =============================================================================
 // CONFIGURATION SYSTEM
 // =============================================================================
@@ -258,6 +255,8 @@ export {
 // UTILITY FUNCTIONS
 // =============================================================================
 
+=======
+>>>>>>> parent of df3e719d (TASK005)
 // Tipos utilitários
 export type {
   LoggerConfig as ILoggerConfig,
@@ -275,7 +274,10 @@ export function createDevelopmentLogger(module: string) {
 /**
  * Utilitário para criar logger padrão de produção
  */
-export function createProductionLogger(module: string, logPath?: string) {
+export function createProductionLogger(
+  module: string,
+  logPath?: string,
+) {
   const factory = new LoggerFactory(
     LoggerFactory.createProductionConfig(logPath),
   );
@@ -293,135 +295,4 @@ export function createEnvironmentLogger(module: string, env?: string) {
   }
 
   return createDevelopmentLogger(module);
-}
-
-/**
- * Utilitário para criar configuração completa
- */
-export async function createSystemConfiguration(
-  options?: Partial<ConfigurationManagerOptions>,
-): Promise<SystemConfiguration> {
-  const configManager = new ConfigurationManager(options);
-  const environmentManager = new EnvironmentManager();
-
-  // Detectar ambiente
-  const envInfo = environmentManager.detectEnvironment();
-
-  // Carregar variáveis de ambiente
-  await environmentManager.loadEnvironmentVariables();
-
-  // Carregar configuração
-  const config = await configManager.load();
-
-  return config;
-}
-
-/**
- * Utilitário para criar validador completo
- */
-export function createValidationService(
-  cacheConfig?: Partial<ValidationCacheConfig>,
-): ValidationService {
-  const validationService = new ValidationService(cacheConfig);
-
-  // Adicionar validadores customizados padrão
-  validationService.addCustomValidator({
-    name: "email",
-    description: "Email validation",
-    schema: EmailSchema,
-  });
-
-  validationService.addCustomValidator({
-    name: "password",
-    description: "Password validation",
-    schema: PasswordSchema,
-  });
-
-  validationService.addCustomValidator({
-    name: "strong-password",
-    description: "Strong password validation",
-    schema: StrongPasswordSchema,
-  });
-
-  validationService.addCustomValidator({
-    name: "uuid",
-    description: "UUID validation",
-    schema: UUIDSchema,
-  });
-
-  validationService.addCustomValidator({
-    name: "url",
-    description: "URL validation",
-    schema: URLSchema,
-  });
-
-  return validationService;
-}
-
-/**
- * Utilitário para criar schema validator completo
- */
-export function createSchemaValidator(
-  config?: Partial<SchemaValidatorConfig>,
-): SchemaValidator {
-  const schemaValidator = new SchemaValidator(config);
-
-  // Registrar schemas padrão
-  schemaValidator.registerSchema("email", EmailSchema);
-  schemaValidator.registerSchema("password", PasswordSchema);
-  schemaValidator.registerSchema("strong-password", StrongPasswordSchema);
-  schemaValidator.registerSchema("file", FileSchema);
-  schemaValidator.registerSchema("url", URLSchema);
-  schemaValidator.registerSchema("uuid", UUIDSchema);
-  schemaValidator.registerSchema("date", DateSchema);
-  schemaValidator.registerSchema("slug", SlugSchema);
-  schemaValidator.registerSchema("agent", AgentSchema);
-  schemaValidator.registerSchema("project", ProjectSchema);
-  schemaValidator.registerSchema("message", MessageSchema);
-  schemaValidator.registerSchema("channel", ChannelSchema);
-
-  return schemaValidator;
-}
-
-/**
- * Utilitário para criar sistema completo de configuração e validação
- */
-export async function createInfrastructureSystem(
-  configOptions?: Partial<ConfigurationManagerOptions>,
-  validationCacheConfig?: Partial<ValidationCacheConfig>,
-  schemaValidatorConfig?: Partial<SchemaValidatorConfig>,
-) {
-  // Criar configuração do sistema
-  const configuration = await createSystemConfiguration(configOptions);
-
-  // Criar serviços de validação
-  const validationService = createValidationService(validationCacheConfig);
-  const schemaValidator = createSchemaValidator(schemaValidatorConfig);
-
-  // Criar logger baseado na configuração
-  const logger = createEnvironmentLogger(
-    "Infrastructure",
-    configuration.environment,
-  );
-
-  // Criar validador de configuração
-  const configValidator = new ConfigurationValidator();
-
-  // Criar gerenciador de ambiente
-  const environmentManager = new EnvironmentManager();
-
-  logger.info("Infrastructure system initialized", {
-    environment: configuration.environment,
-    logLevel: configuration.logLevel,
-    debug: configuration.debug,
-  });
-
-  return {
-    configuration,
-    validationService,
-    schemaValidator,
-    configValidator,
-    environmentManager,
-    logger,
-  };
 }

@@ -326,7 +326,7 @@ export class FileTransport implements LogTransport {
    * Sincroniza arquivo
    */
   private syncFile(): void {
-    if (this.writeStream && "sync" in this.writeStream) {
+    if (this.writeStream && 'sync' in this.writeStream) {
       (this.writeStream as any).sync();
     }
   }
