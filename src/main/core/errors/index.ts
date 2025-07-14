@@ -102,19 +102,24 @@ export const ErrorFactory = {
 
   // Conflict errors
   duplicate: ConflictError.duplicate.bind(ConflictError),
-  concurrentModification: ConflictError.concurrentModification.bind(ConflictError),
+  concurrentModification:
+    ConflictError.concurrentModification.bind(ConflictError),
   stateConflict: ConflictError.stateConflict.bind(ConflictError),
   businessRule: ConflictError.businessRule.bind(ConflictError),
   versionConflict: ConflictError.versionConflict.bind(ConflictError),
   uniqueConstraint: ConflictError.uniqueConstraint.bind(ConflictError),
 
   // Unauthorized errors
-  authenticationRequired: UnauthorizedError.authenticationRequired.bind(UnauthorizedError),
-  invalidCredentials: UnauthorizedError.invalidCredentials.bind(UnauthorizedError),
+  authenticationRequired:
+    UnauthorizedError.authenticationRequired.bind(UnauthorizedError),
+  invalidCredentials:
+    UnauthorizedError.invalidCredentials.bind(UnauthorizedError),
   tokenExpired: UnauthorizedError.tokenExpired.bind(UnauthorizedError),
   tokenInvalid: UnauthorizedError.tokenInvalid.bind(UnauthorizedError),
-  insufficientPermissions: UnauthorizedError.insufficientPermissions.bind(UnauthorizedError),
-  resourceAccessDenied: UnauthorizedError.resourceAccessDenied.bind(UnauthorizedError),
+  insufficientPermissions:
+    UnauthorizedError.insufficientPermissions.bind(UnauthorizedError),
+  resourceAccessDenied:
+    UnauthorizedError.resourceAccessDenied.bind(UnauthorizedError),
   roleRequired: UnauthorizedError.roleRequired.bind(UnauthorizedError),
   accountDisabled: UnauthorizedError.accountDisabled.bind(UnauthorizedError),
 
