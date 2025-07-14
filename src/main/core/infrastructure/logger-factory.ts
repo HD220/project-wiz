@@ -323,9 +323,7 @@ export class LoggerFactory {
     // Estatísticas dos transports
     for (const transport of this.defaultTransports) {
       if ("getStats" in transport) {
-        stats[`transport_${transport.name}`] = (
-          transport as { getStats(): unknown }
-        ).getStats();
+        stats[`transport_${transport.name}`] = (transport as { getStats(): unknown }).getStats();
       }
     }
 
