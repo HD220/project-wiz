@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CustomLink } from "@/components/custom-link";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -20,10 +21,10 @@ import { UserArea } from "./user-area";
 import { ConversationList } from "../../direct-messages/components/conversation-list";
 
 interface UserSidebarProps {
-  className?: string;
+  // No more props drilling needed!
 }
 
-export function UserSidebar({ className }: UserSidebarProps) {
+export function UserSidebar({}: UserSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (

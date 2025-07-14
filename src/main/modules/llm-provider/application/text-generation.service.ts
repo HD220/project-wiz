@@ -60,34 +60,22 @@ export class TextGenerationService {
     }
 
     // Get provider configuration from database
-    let llmProvider =
-      await this.llmProviderService.getLlmProviderById(providerId);
-
+    let llmProvider = await this.llmProviderService.getLlmProviderById(providerId);
+    
     // If provider not found or is invalid, try to use default provider
-    if (
-      !llmProvider ||
-      providerId === "default" ||
-      !providerId ||
-      providerId.trim() === ""
-    ) {
-      console.log(
-        `[TextGenerationService] Provider '${providerId}' not found or invalid, trying default provider...`,
-      );
+    if (!llmProvider || providerId === "default" || !providerId || providerId.trim() === "") {
+      console.log(`[TextGenerationService] Provider '${providerId}' not found or invalid, trying default provider...`);
       llmProvider = await this.llmProviderService.getDefaultProvider();
-
+      
       if (!llmProvider) {
-        throw new Error(
-          "Nenhum provedor LLM configurado. Configure um provedor LLM e defina-o como padrão.",
-        );
+        throw new Error("Nenhum provedor LLM configurado. Configure um provedor LLM e defina-o como padrão.");
       }
-
-      console.log(
-        `[TextGenerationService] Using default provider: ${llmProvider.name} (${llmProvider.id})`,
-      );
-
+      
+      console.log(`[TextGenerationService] Using default provider: ${llmProvider.name} (${llmProvider.id})`);
+      
       // Use the default provider ID for caching
       providerId = llmProvider.id;
-
+      
       // Check if default provider is already cached
       if (this.providerRegistry.has(providerId)) {
         return this.providerRegistry.get(providerId)!;

@@ -44,8 +44,9 @@ export class DateUtils {
       return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
     } else if (diffDays < 7) {
       return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+    } else {
+      return this.formatForDisplay(dateObj);
     }
-    return this.formatForDisplay(dateObj);
   }
 
   /**

@@ -1,11 +1,6 @@
-export type ErrorContext = Record<
-  string,
-  string | number | boolean | null | undefined
->;
-
 export interface ErrorMetadata {
   code?: string;
-  context?: ErrorContext;
+  context?: Record<string, any>;
   timestamp?: Date;
   stack?: string;
 }
@@ -36,13 +31,7 @@ export abstract class BaseError extends Error {
   }
 
   // Serializable error for logging and API responses
-  toJSON(): {
-    name: string;
-    message: string;
-    timestamp: string;
-    metadata: ErrorMetadata;
-    stack?: string;
-  } {
+  toJSON(): Record<string, any> {
     return {
       name: this.name,
       message: this.message,

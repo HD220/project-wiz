@@ -58,11 +58,12 @@ export function ConversationList({}: ConversationListProps) {
       return "Ontem";
     } else if (days < 7) {
       return `${days}d atrás`;
+    } else {
+      return new Date(date).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      });
     }
-    return new Date(date).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-    });
   };
 
   return (

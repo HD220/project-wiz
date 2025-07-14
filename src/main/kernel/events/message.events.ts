@@ -40,9 +40,7 @@ export class ConversationStartedEvent extends EntityCreatedEvent {
     conversationId: string,
     public readonly participants: string[],
   ) {
-    super(conversationId, "conversation", {
-      participantsCount: participants.length,
-    });
+    super(conversationId, "conversation", { participants });
   }
 }
 

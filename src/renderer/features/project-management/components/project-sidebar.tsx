@@ -4,7 +4,7 @@ import { ProjectSidebarItem } from "./project-sidebar-item";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProjectSidebarProps {
-  className?: string;
+  // No more props drilling needed!
 }
 
 function ProjectListSkeleton() {
@@ -17,22 +17,21 @@ function ProjectListSkeleton() {
   );
 }
 
-const ProjectSidebarComponent = function ProjectSidebar({
-  className,
-}: ProjectSidebarProps) {
-  const { projects, isLoading } = useProjects({ status: "active" });
+const ProjectSidebarComponent =
+  function ProjectSidebar({}: ProjectSidebarProps) {
+    const { projects, isLoading } = useProjects({ status: "active" });
 
-  if (isLoading) {
-    return <ProjectListSkeleton />;
-  }
+    if (isLoading) {
+      return <ProjectListSkeleton />;
+    }
 
-  return (
-    <div className="flex flex-col space-y-2 h-full overflow-y-auto">
-      {projects.map((project) => (
-        <ProjectSidebarItem key={project.id} project={project} />
-      ))}
-    </div>
-  );
-};
+    return (
+      <div className="flex flex-col space-y-2 h-full overflow-y-auto">
+        {projects.map((project) => (
+          <ProjectSidebarItem key={project.id} project={project} />
+        ))}
+      </div>
+    );
+  };
 
 export const ProjectSidebar = memo(ProjectSidebarComponent);

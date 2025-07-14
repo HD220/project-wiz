@@ -1,11 +1,5 @@
 import { IEvent } from "../event-bus";
 
-// Generic entity data type for events
-export type EntityData = Record<
-  string,
-  string | number | boolean | null | undefined | Date
->;
-
 // Base event classes for domain events
 export abstract class DomainEvent implements IEvent {
   abstract type: string;
@@ -23,7 +17,7 @@ export abstract class EntityCreatedEvent extends DomainEvent {
   constructor(
     public readonly entityId: string,
     public readonly entityType: string,
-    public readonly data: EntityData,
+    public readonly data: Record<string, any>,
   ) {
     super();
   }
@@ -34,8 +28,8 @@ export abstract class EntityUpdatedEvent extends DomainEvent {
   constructor(
     public readonly entityId: string,
     public readonly entityType: string,
-    public readonly changes: EntityData,
-    public readonly previousData?: EntityData,
+    public readonly changes: Record<string, any>,
+    public readonly previousData?: Record<string, any>,
   ) {
     super();
   }
@@ -46,7 +40,7 @@ export abstract class EntityDeletedEvent extends DomainEvent {
   constructor(
     public readonly entityId: string,
     public readonly entityType: string,
-    public readonly deletedData: EntityData,
+    public readonly deletedData: Record<string, any>,
   ) {
     super();
   }

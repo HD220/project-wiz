@@ -1,5 +1,3 @@
-export type MessageMetadata = Record<string, string | number | boolean | null>;
-
 export interface MessageDto {
   id: string;
   content: string;
@@ -12,7 +10,7 @@ export interface MessageDto {
   contextType?: "direct" | "channel" | "group";
   contextId?: string;
   type?: "text" | "code" | "file" | "system";
-  metadata?: MessageMetadata;
+  metadata?: Record<string, any>;
   isEdited?: boolean;
   updatedAt?: Date;
   timestamp?: Date;
@@ -28,7 +26,7 @@ export interface CreateMessageDto {
   contextType?: "direct" | "channel" | "group";
   contextId?: string;
   type?: "text" | "code" | "file" | "system";
-  metadata?: MessageMetadata;
+  metadata?: Record<string, any>;
 }
 
 export interface MessageFilterDto {

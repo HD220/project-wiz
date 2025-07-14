@@ -2,7 +2,6 @@ import {
   EntityCreatedEvent,
   EntityUpdatedEvent,
   EntityDeletedEvent,
-  EntityData,
 } from "./base.events";
 
 // LLM Provider Events
@@ -27,8 +26,8 @@ export class LlmProviderUpdatedEvent extends EntityUpdatedEvent {
 
   constructor(
     providerId: string,
-    changes: EntityData,
-    previousData?: EntityData,
+    changes: Record<string, any>,
+    previousData?: Record<string, any>,
   ) {
     super(providerId, "llm-provider", changes, previousData);
   }
@@ -37,7 +36,7 @@ export class LlmProviderUpdatedEvent extends EntityUpdatedEvent {
 export class LlmProviderDeletedEvent extends EntityDeletedEvent {
   type = "llm-provider.deleted" as const;
 
-  constructor(providerId: string, deletedProvider: EntityData) {
+  constructor(providerId: string, deletedProvider: Record<string, any>) {
     super(providerId, "llm-provider", deletedProvider);
   }
 }

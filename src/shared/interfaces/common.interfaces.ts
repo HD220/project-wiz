@@ -1,7 +1,7 @@
 // Common interfaces shared between main and renderer processes
 
 // Generic API Response interface
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: {
@@ -41,7 +41,7 @@ export interface SortParams {
 
 export interface FilterParams {
   search?: string;
-  filters?: Record<string, string | number | boolean>;
+  filters?: Record<string, any>;
   dateRange?: {
     start: string;
     end: string;
@@ -56,14 +56,14 @@ export interface EntityMetadata {
 }
 
 // IPC communication interfaces
-export interface IpcRequest<T = unknown> {
+export interface IpcRequest<T = any> {
   id: string;
   channel: string;
   data?: T;
   timestamp: string;
 }
 
-export interface IpcResponse<T = unknown> {
+export interface IpcResponse<T = any> {
   id: string;
   success: boolean;
   data?: T;
@@ -153,7 +153,7 @@ export interface BaseEvent {
 export interface UserAction extends BaseEvent {
   userId: string;
   action: string;
-  context?: Record<string, string | number | boolean>;
+  context?: Record<string, any>;
 }
 
 // Notification interfaces
@@ -170,5 +170,5 @@ export interface Notification {
 export interface NotificationAction {
   label: string;
   action: string;
-  data?: Record<string, unknown>;
+  data?: any;
 }

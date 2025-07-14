@@ -198,34 +198,37 @@ export function ChatContainer({
                       showActions={true}
                     />
                   );
+                } else {
+                  // Handle agent messages (legacy format)
+                  const legacyMsg = msg as Message;
+                  return (
+                    <MessageItem
+                      key={legacyMsg.id}
+                      message={{
+                        id: legacyMsg.id,
+                        content: legacyMsg.content,
+                        senderId: legacyMsg.authorId,
+                        senderName: legacyMsg.authorName,
+                        senderType: legacyMsg.authorId.startsWith("agent-")
+                          ? "agent"
+                          : "user",
+                        messageType:
+                          legacyMsg.type === "code"
+                            ? "text"
+                            : (legacyMsg.type as any),
+                        timestamp: legacyMsg.timestamp,
+                        isEdited: legacyMsg.edited || false,
+                        mentions: legacyMsg.mentions || [],
+                      }}
+                      onEdit={(id, content) =>
+                        console.log("Edit:", id, content)
+                      }
+                      onDelete={(id) => console.log("Delete:", id)}
+                      onReply={(id) => console.log("Reply:", id)}
+                      showActions={true}
+                    />
+                  );
                 }
-                // Handle agent messages (legacy format)
-                const legacyMsg = msg as Message;
-                return (
-                  <MessageItem
-                    key={legacyMsg.id}
-                    message={{
-                      id: legacyMsg.id,
-                      content: legacyMsg.content,
-                      senderId: legacyMsg.authorId,
-                      senderName: legacyMsg.authorName,
-                      senderType: legacyMsg.authorId.startsWith("agent-")
-                        ? "agent"
-                        : "user",
-                      messageType:
-                        legacyMsg.type === "code"
-                          ? "text"
-                          : (legacyMsg.type as any),
-                      timestamp: legacyMsg.timestamp,
-                      isEdited: legacyMsg.edited || false,
-                      mentions: legacyMsg.mentions || [],
-                    }}
-                    onEdit={(id, content) => console.log("Edit:", id, content)}
-                    onDelete={(id) => console.log("Delete:", id)}
-                    onReply={(id) => console.log("Reply:", id)}
-                    showActions={true}
-                  />
-                );
               })
             )}
           </div>
