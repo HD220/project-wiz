@@ -194,64 +194,6 @@ export type {
 } from "./validation-schemas";
 
 // =============================================================================
-// EVENT SYSTEM AND MESSAGING
-// =============================================================================
-
-// Event Bus
-export {
-  EventBus,
-  IEvent,
-  EventHandler,
-  EventSubscription,
-  EventDispatchResult,
-  EventBusOptions,
-} from "./event-bus";
-
-// Event Dispatcher
-export {
-  EventDispatcher,
-  DispatchStrategy,
-  DispatchOptions,
-  DispatchResult,
-} from "./event-dispatcher";
-
-// Mediator Pattern
-export {
-  Mediator,
-  IRequest,
-  INotification,
-  IRequestHandler,
-  INotificationHandler,
-  IPipelineBehavior,
-  MediatorOptions,
-  RequestContext,
-} from "./mediator";
-
-// Pipeline
-export {
-  Pipeline,
-  IPipelineStep,
-  PipelineContext,
-  PipelineResult,
-  PipelineOptions,
-  PipelineBehaviors,
-} from "./pipeline";
-
-// Domain Events
-export {
-  DomainEventBus,
-  DomainEventPublisher,
-  DomainEventAdapter,
-} from "./domain-event-publisher";
-
-// Event Store
-export {
-  InMemoryEventStore,
-  EventStoreEntry,
-  EventStoreOptions,
-} from "./event-store";
-
-// =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
 

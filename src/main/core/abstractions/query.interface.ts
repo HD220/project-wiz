@@ -44,12 +44,6 @@ export interface IQueryHandler<TQuery extends IQuery<TResult>, TResult> {
    * @returns Promise resolving to Result with query result or error
    */
   handle(query: TQuery): Promise<Result<TResult, Error>>;
-
-  /**
-   * Get the query type this handler processes
-   * @returns Query type identifier
-   */
-  getQueryType(): string;
 }
 
 /**
