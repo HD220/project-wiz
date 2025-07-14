@@ -2,6 +2,7 @@ import {
   EntityCreatedEvent,
   EntityUpdatedEvent,
   EntityDeletedEvent,
+  EntityData,
 } from "./base.events";
 
 // Agent Events
@@ -26,11 +27,7 @@ export class AgentCreatedEvent extends EntityCreatedEvent {
 export class AgentUpdatedEvent extends EntityUpdatedEvent {
   type = "agent.updated" as const;
 
-  constructor(
-    agentId: string,
-    changes: Record<string, any>,
-    previousData?: Record<string, any>,
-  ) {
+  constructor(agentId: string, changes: EntityData, previousData?: EntityData) {
     super(agentId, "agent", changes, previousData);
   }
 }
@@ -38,7 +35,7 @@ export class AgentUpdatedEvent extends EntityUpdatedEvent {
 export class AgentDeletedEvent extends EntityDeletedEvent {
   type = "agent.deleted" as const;
 
-  constructor(agentId: string, deletedAgent: Record<string, any>) {
+  constructor(agentId: string, deletedAgent: EntityData) {
     super(agentId, "agent", deletedAgent);
   }
 }

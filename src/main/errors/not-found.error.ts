@@ -1,7 +1,7 @@
-import { BaseError } from "./base.error";
+import { BaseError, ErrorContext } from "./base.error";
 
 export class NotFoundError extends BaseError {
-  constructor(message: string, code?: string, context?: Record<string, any>) {
+  constructor(message: string, code?: string, context?: ErrorContext) {
     super(message, "NotFoundError", {
       code,
       context,

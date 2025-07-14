@@ -8,446 +8,446 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-import { Route as rootRouteImport } from './app/__root'
-import { Route as CreateProjectRouteImport } from './app/create-project'
-import { Route as CreateChannelRouteImport } from './app/create-channel'
-import { Route as userRouteRouteImport } from './app/(user)/route'
-import { Route as userIndexRouteImport } from './app/(user)/index'
-import { Route as ProjectLayoutRouteImport } from './app/project/_layout'
-import { Route as userNewConversationRouteImport } from './app/(user)/new-conversation'
-import { Route as userAiChatTestRouteImport } from './app/(user)/ai-chat-test'
-import { Route as ProjectProjectIdRouteRouteImport } from './app/project/$projectId/route'
-import { Route as ProjectProjectIdIndexRouteImport } from './app/project/$projectId/index'
-import { Route as userSettingsIndexRouteImport } from './app/(user)/settings/index'
-import { Route as userSettingsNewLlmProviderRouteImport } from './app/(user)/settings/new-llm-provider'
-import { Route as userConversationConversationIdRouteImport } from './app/(user)/conversation/$conversationId'
-import { Route as ProjectProjectIdTasksIndexRouteImport } from './app/project/$projectId/tasks/index'
-import { Route as ProjectProjectIdFilesIndexRouteImport } from './app/project/$projectId/files/index'
-import { Route as ProjectProjectIdDocsIndexRouteImport } from './app/project/$projectId/docs/index'
-import { Route as ProjectProjectIdChatIndexRouteImport } from './app/project/$projectId/chat/index'
-import { Route as ProjectProjectIdAgentsIndexRouteImport } from './app/project/$projectId/agents/index'
-import { Route as ProjectProjectIdChatChannelIdRouteImport } from './app/project/$projectId/chat/$channelId'
-import { Route as ProjectProjectIdAgentAgentIdRouteImport } from './app/project/$projectId/agent/$agentId'
-import { Route as userSettingsEditLlmProviderLlmProviderIdRouteImport } from './app/(user)/settings/edit-llm-provider.$llmProviderId'
+import { Route as rootRouteImport } from "./app/__root";
+import { Route as CreateProjectRouteImport } from "./app/create-project";
+import { Route as CreateChannelRouteImport } from "./app/create-channel";
+import { Route as userRouteRouteImport } from "./app/(user)/route";
+import { Route as userIndexRouteImport } from "./app/(user)/index";
+import { Route as ProjectLayoutRouteImport } from "./app/project/_layout";
+import { Route as userNewConversationRouteImport } from "./app/(user)/new-conversation";
+import { Route as userAiChatTestRouteImport } from "./app/(user)/ai-chat-test";
+import { Route as ProjectProjectIdRouteRouteImport } from "./app/project/$projectId/route";
+import { Route as ProjectProjectIdIndexRouteImport } from "./app/project/$projectId/index";
+import { Route as userSettingsIndexRouteImport } from "./app/(user)/settings/index";
+import { Route as userSettingsNewLlmProviderRouteImport } from "./app/(user)/settings/new-llm-provider";
+import { Route as userConversationConversationIdRouteImport } from "./app/(user)/conversation/$conversationId";
+import { Route as ProjectProjectIdTasksIndexRouteImport } from "./app/project/$projectId/tasks/index";
+import { Route as ProjectProjectIdFilesIndexRouteImport } from "./app/project/$projectId/files/index";
+import { Route as ProjectProjectIdDocsIndexRouteImport } from "./app/project/$projectId/docs/index";
+import { Route as ProjectProjectIdChatIndexRouteImport } from "./app/project/$projectId/chat/index";
+import { Route as ProjectProjectIdAgentsIndexRouteImport } from "./app/project/$projectId/agents/index";
+import { Route as ProjectProjectIdChatChannelIdRouteImport } from "./app/project/$projectId/chat/$channelId";
+import { Route as ProjectProjectIdAgentAgentIdRouteImport } from "./app/project/$projectId/agent/$agentId";
+import { Route as userSettingsEditLlmProviderLlmProviderIdRouteImport } from "./app/(user)/settings/edit-llm-provider.$llmProviderId";
 
-const ProjectRouteImport = createFileRoute('/project')()
+const ProjectRouteImport = createFileRoute("/project")();
 
 const ProjectRoute = ProjectRouteImport.update({
-  id: '/project',
-  path: '/project',
+  id: "/project",
+  path: "/project",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CreateProjectRoute = CreateProjectRouteImport.update({
-  id: '/create-project',
-  path: '/create-project',
+  id: "/create-project",
+  path: "/create-project",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CreateChannelRoute = CreateChannelRouteImport.update({
-  id: '/create-channel',
-  path: '/create-channel',
+  id: "/create-channel",
+  path: "/create-channel",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const userRouteRoute = userRouteRouteImport.update({
-  id: '/(user)',
+  id: "/(user)",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const userIndexRoute = userIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => userRouteRoute,
-} as any)
+} as any);
 const ProjectLayoutRoute = ProjectLayoutRouteImport.update({
-  id: '/_layout',
+  id: "/_layout",
   getParentRoute: () => ProjectRoute,
-} as any)
+} as any);
 const userNewConversationRoute = userNewConversationRouteImport.update({
-  id: '/new-conversation',
-  path: '/new-conversation',
+  id: "/new-conversation",
+  path: "/new-conversation",
   getParentRoute: () => userRouteRoute,
-} as any)
+} as any);
 const userAiChatTestRoute = userAiChatTestRouteImport.update({
-  id: '/ai-chat-test',
-  path: '/ai-chat-test',
+  id: "/ai-chat-test",
+  path: "/ai-chat-test",
   getParentRoute: () => userRouteRoute,
-} as any)
+} as any);
 const ProjectProjectIdRouteRoute = ProjectProjectIdRouteRouteImport.update({
-  id: '/project/$projectId',
-  path: '/project/$projectId',
+  id: "/project/$projectId",
+  path: "/project/$projectId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProjectProjectIdIndexRoute = ProjectProjectIdIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => ProjectProjectIdRouteRoute,
-} as any)
+} as any);
 const userSettingsIndexRoute = userSettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
+  id: "/settings/",
+  path: "/settings/",
   getParentRoute: () => userRouteRoute,
-} as any)
+} as any);
 const userSettingsNewLlmProviderRoute =
   userSettingsNewLlmProviderRouteImport.update({
-    id: '/settings/new-llm-provider',
-    path: '/settings/new-llm-provider',
+    id: "/settings/new-llm-provider",
+    path: "/settings/new-llm-provider",
     getParentRoute: () => userRouteRoute,
-  } as any)
+  } as any);
 const userConversationConversationIdRoute =
   userConversationConversationIdRouteImport.update({
-    id: '/conversation/$conversationId',
-    path: '/conversation/$conversationId',
+    id: "/conversation/$conversationId",
+    path: "/conversation/$conversationId",
     getParentRoute: () => userRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdTasksIndexRoute =
   ProjectProjectIdTasksIndexRouteImport.update({
-    id: '/tasks/',
-    path: '/tasks/',
+    id: "/tasks/",
+    path: "/tasks/",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdFilesIndexRoute =
   ProjectProjectIdFilesIndexRouteImport.update({
-    id: '/files/',
-    path: '/files/',
+    id: "/files/",
+    path: "/files/",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdDocsIndexRoute =
   ProjectProjectIdDocsIndexRouteImport.update({
-    id: '/docs/',
-    path: '/docs/',
+    id: "/docs/",
+    path: "/docs/",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdChatIndexRoute =
   ProjectProjectIdChatIndexRouteImport.update({
-    id: '/chat/',
-    path: '/chat/',
+    id: "/chat/",
+    path: "/chat/",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdAgentsIndexRoute =
   ProjectProjectIdAgentsIndexRouteImport.update({
-    id: '/agents/',
-    path: '/agents/',
+    id: "/agents/",
+    path: "/agents/",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdChatChannelIdRoute =
   ProjectProjectIdChatChannelIdRouteImport.update({
-    id: '/chat/$channelId',
-    path: '/chat/$channelId',
+    id: "/chat/$channelId",
+    path: "/chat/$channelId",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const ProjectProjectIdAgentAgentIdRoute =
   ProjectProjectIdAgentAgentIdRouteImport.update({
-    id: '/agent/$agentId',
-    path: '/agent/$agentId',
+    id: "/agent/$agentId",
+    path: "/agent/$agentId",
     getParentRoute: () => ProjectProjectIdRouteRoute,
-  } as any)
+  } as any);
 const userSettingsEditLlmProviderLlmProviderIdRoute =
   userSettingsEditLlmProviderLlmProviderIdRouteImport.update({
-    id: '/settings/edit-llm-provider/$llmProviderId',
-    path: '/settings/edit-llm-provider/$llmProviderId',
+    id: "/settings/edit-llm-provider/$llmProviderId",
+    path: "/settings/edit-llm-provider/$llmProviderId",
     getParentRoute: () => userRouteRoute,
-  } as any)
+  } as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof userIndexRoute
-  '/create-channel': typeof CreateChannelRoute
-  '/create-project': typeof CreateProjectRoute
-  '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
-  '/ai-chat-test': typeof userAiChatTestRoute
-  '/new-conversation': typeof userNewConversationRoute
-  '/project': typeof ProjectLayoutRoute
-  '/conversation/$conversationId': typeof userConversationConversationIdRoute
-  '/settings/new-llm-provider': typeof userSettingsNewLlmProviderRoute
-  '/settings': typeof userSettingsIndexRoute
-  '/project/$projectId/': typeof ProjectProjectIdIndexRoute
-  '/settings/edit-llm-provider/$llmProviderId': typeof userSettingsEditLlmProviderLlmProviderIdRoute
-  '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
-  '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
-  '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
-  '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
-  '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
-  '/project/$projectId/files': typeof ProjectProjectIdFilesIndexRoute
-  '/project/$projectId/tasks': typeof ProjectProjectIdTasksIndexRoute
+  "/": typeof userIndexRoute;
+  "/create-channel": typeof CreateChannelRoute;
+  "/create-project": typeof CreateProjectRoute;
+  "/project/$projectId": typeof ProjectProjectIdRouteRouteWithChildren;
+  "/ai-chat-test": typeof userAiChatTestRoute;
+  "/new-conversation": typeof userNewConversationRoute;
+  "/project": typeof ProjectLayoutRoute;
+  "/conversation/$conversationId": typeof userConversationConversationIdRoute;
+  "/settings/new-llm-provider": typeof userSettingsNewLlmProviderRoute;
+  "/settings": typeof userSettingsIndexRoute;
+  "/project/$projectId/": typeof ProjectProjectIdIndexRoute;
+  "/settings/edit-llm-provider/$llmProviderId": typeof userSettingsEditLlmProviderLlmProviderIdRoute;
+  "/project/$projectId/agent/$agentId": typeof ProjectProjectIdAgentAgentIdRoute;
+  "/project/$projectId/chat/$channelId": typeof ProjectProjectIdChatChannelIdRoute;
+  "/project/$projectId/agents": typeof ProjectProjectIdAgentsIndexRoute;
+  "/project/$projectId/chat": typeof ProjectProjectIdChatIndexRoute;
+  "/project/$projectId/docs": typeof ProjectProjectIdDocsIndexRoute;
+  "/project/$projectId/files": typeof ProjectProjectIdFilesIndexRoute;
+  "/project/$projectId/tasks": typeof ProjectProjectIdTasksIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/create-channel': typeof CreateChannelRoute
-  '/create-project': typeof CreateProjectRoute
-  '/ai-chat-test': typeof userAiChatTestRoute
-  '/new-conversation': typeof userNewConversationRoute
-  '/project': typeof ProjectLayoutRoute
-  '/': typeof userIndexRoute
-  '/conversation/$conversationId': typeof userConversationConversationIdRoute
-  '/settings/new-llm-provider': typeof userSettingsNewLlmProviderRoute
-  '/settings': typeof userSettingsIndexRoute
-  '/project/$projectId': typeof ProjectProjectIdIndexRoute
-  '/settings/edit-llm-provider/$llmProviderId': typeof userSettingsEditLlmProviderLlmProviderIdRoute
-  '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
-  '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
-  '/project/$projectId/agents': typeof ProjectProjectIdAgentsIndexRoute
-  '/project/$projectId/chat': typeof ProjectProjectIdChatIndexRoute
-  '/project/$projectId/docs': typeof ProjectProjectIdDocsIndexRoute
-  '/project/$projectId/files': typeof ProjectProjectIdFilesIndexRoute
-  '/project/$projectId/tasks': typeof ProjectProjectIdTasksIndexRoute
+  "/create-channel": typeof CreateChannelRoute;
+  "/create-project": typeof CreateProjectRoute;
+  "/ai-chat-test": typeof userAiChatTestRoute;
+  "/new-conversation": typeof userNewConversationRoute;
+  "/project": typeof ProjectLayoutRoute;
+  "/": typeof userIndexRoute;
+  "/conversation/$conversationId": typeof userConversationConversationIdRoute;
+  "/settings/new-llm-provider": typeof userSettingsNewLlmProviderRoute;
+  "/settings": typeof userSettingsIndexRoute;
+  "/project/$projectId": typeof ProjectProjectIdIndexRoute;
+  "/settings/edit-llm-provider/$llmProviderId": typeof userSettingsEditLlmProviderLlmProviderIdRoute;
+  "/project/$projectId/agent/$agentId": typeof ProjectProjectIdAgentAgentIdRoute;
+  "/project/$projectId/chat/$channelId": typeof ProjectProjectIdChatChannelIdRoute;
+  "/project/$projectId/agents": typeof ProjectProjectIdAgentsIndexRoute;
+  "/project/$projectId/chat": typeof ProjectProjectIdChatIndexRoute;
+  "/project/$projectId/docs": typeof ProjectProjectIdDocsIndexRoute;
+  "/project/$projectId/files": typeof ProjectProjectIdFilesIndexRoute;
+  "/project/$projectId/tasks": typeof ProjectProjectIdTasksIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/(user)': typeof userRouteRouteWithChildren
-  '/create-channel': typeof CreateChannelRoute
-  '/create-project': typeof CreateProjectRoute
-  '/project/$projectId': typeof ProjectProjectIdRouteRouteWithChildren
-  '/(user)/ai-chat-test': typeof userAiChatTestRoute
-  '/(user)/new-conversation': typeof userNewConversationRoute
-  '/project': typeof ProjectRouteWithChildren
-  '/project/_layout': typeof ProjectLayoutRoute
-  '/(user)/': typeof userIndexRoute
-  '/(user)/conversation/$conversationId': typeof userConversationConversationIdRoute
-  '/(user)/settings/new-llm-provider': typeof userSettingsNewLlmProviderRoute
-  '/(user)/settings/': typeof userSettingsIndexRoute
-  '/project/$projectId/': typeof ProjectProjectIdIndexRoute
-  '/(user)/settings/edit-llm-provider/$llmProviderId': typeof userSettingsEditLlmProviderLlmProviderIdRoute
-  '/project/$projectId/agent/$agentId': typeof ProjectProjectIdAgentAgentIdRoute
-  '/project/$projectId/chat/$channelId': typeof ProjectProjectIdChatChannelIdRoute
-  '/project/$projectId/agents/': typeof ProjectProjectIdAgentsIndexRoute
-  '/project/$projectId/chat/': typeof ProjectProjectIdChatIndexRoute
-  '/project/$projectId/docs/': typeof ProjectProjectIdDocsIndexRoute
-  '/project/$projectId/files/': typeof ProjectProjectIdFilesIndexRoute
-  '/project/$projectId/tasks/': typeof ProjectProjectIdTasksIndexRoute
+  __root__: typeof rootRouteImport;
+  "/(user)": typeof userRouteRouteWithChildren;
+  "/create-channel": typeof CreateChannelRoute;
+  "/create-project": typeof CreateProjectRoute;
+  "/project/$projectId": typeof ProjectProjectIdRouteRouteWithChildren;
+  "/(user)/ai-chat-test": typeof userAiChatTestRoute;
+  "/(user)/new-conversation": typeof userNewConversationRoute;
+  "/project": typeof ProjectRouteWithChildren;
+  "/project/_layout": typeof ProjectLayoutRoute;
+  "/(user)/": typeof userIndexRoute;
+  "/(user)/conversation/$conversationId": typeof userConversationConversationIdRoute;
+  "/(user)/settings/new-llm-provider": typeof userSettingsNewLlmProviderRoute;
+  "/(user)/settings/": typeof userSettingsIndexRoute;
+  "/project/$projectId/": typeof ProjectProjectIdIndexRoute;
+  "/(user)/settings/edit-llm-provider/$llmProviderId": typeof userSettingsEditLlmProviderLlmProviderIdRoute;
+  "/project/$projectId/agent/$agentId": typeof ProjectProjectIdAgentAgentIdRoute;
+  "/project/$projectId/chat/$channelId": typeof ProjectProjectIdChatChannelIdRoute;
+  "/project/$projectId/agents/": typeof ProjectProjectIdAgentsIndexRoute;
+  "/project/$projectId/chat/": typeof ProjectProjectIdChatIndexRoute;
+  "/project/$projectId/docs/": typeof ProjectProjectIdDocsIndexRoute;
+  "/project/$projectId/files/": typeof ProjectProjectIdFilesIndexRoute;
+  "/project/$projectId/tasks/": typeof ProjectProjectIdTasksIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/create-channel'
-    | '/create-project'
-    | '/project/$projectId'
-    | '/ai-chat-test'
-    | '/new-conversation'
-    | '/project'
-    | '/conversation/$conversationId'
-    | '/settings/new-llm-provider'
-    | '/settings'
-    | '/project/$projectId/'
-    | '/settings/edit-llm-provider/$llmProviderId'
-    | '/project/$projectId/agent/$agentId'
-    | '/project/$projectId/chat/$channelId'
-    | '/project/$projectId/agents'
-    | '/project/$projectId/chat'
-    | '/project/$projectId/docs'
-    | '/project/$projectId/files'
-    | '/project/$projectId/tasks'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/create-channel"
+    | "/create-project"
+    | "/project/$projectId"
+    | "/ai-chat-test"
+    | "/new-conversation"
+    | "/project"
+    | "/conversation/$conversationId"
+    | "/settings/new-llm-provider"
+    | "/settings"
+    | "/project/$projectId/"
+    | "/settings/edit-llm-provider/$llmProviderId"
+    | "/project/$projectId/agent/$agentId"
+    | "/project/$projectId/chat/$channelId"
+    | "/project/$projectId/agents"
+    | "/project/$projectId/chat"
+    | "/project/$projectId/docs"
+    | "/project/$projectId/files"
+    | "/project/$projectId/tasks";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/create-channel'
-    | '/create-project'
-    | '/ai-chat-test'
-    | '/new-conversation'
-    | '/project'
-    | '/'
-    | '/conversation/$conversationId'
-    | '/settings/new-llm-provider'
-    | '/settings'
-    | '/project/$projectId'
-    | '/settings/edit-llm-provider/$llmProviderId'
-    | '/project/$projectId/agent/$agentId'
-    | '/project/$projectId/chat/$channelId'
-    | '/project/$projectId/agents'
-    | '/project/$projectId/chat'
-    | '/project/$projectId/docs'
-    | '/project/$projectId/files'
-    | '/project/$projectId/tasks'
+    | "/create-channel"
+    | "/create-project"
+    | "/ai-chat-test"
+    | "/new-conversation"
+    | "/project"
+    | "/"
+    | "/conversation/$conversationId"
+    | "/settings/new-llm-provider"
+    | "/settings"
+    | "/project/$projectId"
+    | "/settings/edit-llm-provider/$llmProviderId"
+    | "/project/$projectId/agent/$agentId"
+    | "/project/$projectId/chat/$channelId"
+    | "/project/$projectId/agents"
+    | "/project/$projectId/chat"
+    | "/project/$projectId/docs"
+    | "/project/$projectId/files"
+    | "/project/$projectId/tasks";
   id:
-    | '__root__'
-    | '/(user)'
-    | '/create-channel'
-    | '/create-project'
-    | '/project/$projectId'
-    | '/(user)/ai-chat-test'
-    | '/(user)/new-conversation'
-    | '/project'
-    | '/project/_layout'
-    | '/(user)/'
-    | '/(user)/conversation/$conversationId'
-    | '/(user)/settings/new-llm-provider'
-    | '/(user)/settings/'
-    | '/project/$projectId/'
-    | '/(user)/settings/edit-llm-provider/$llmProviderId'
-    | '/project/$projectId/agent/$agentId'
-    | '/project/$projectId/chat/$channelId'
-    | '/project/$projectId/agents/'
-    | '/project/$projectId/chat/'
-    | '/project/$projectId/docs/'
-    | '/project/$projectId/files/'
-    | '/project/$projectId/tasks/'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/(user)"
+    | "/create-channel"
+    | "/create-project"
+    | "/project/$projectId"
+    | "/(user)/ai-chat-test"
+    | "/(user)/new-conversation"
+    | "/project"
+    | "/project/_layout"
+    | "/(user)/"
+    | "/(user)/conversation/$conversationId"
+    | "/(user)/settings/new-llm-provider"
+    | "/(user)/settings/"
+    | "/project/$projectId/"
+    | "/(user)/settings/edit-llm-provider/$llmProviderId"
+    | "/project/$projectId/agent/$agentId"
+    | "/project/$projectId/chat/$channelId"
+    | "/project/$projectId/agents/"
+    | "/project/$projectId/chat/"
+    | "/project/$projectId/docs/"
+    | "/project/$projectId/files/"
+    | "/project/$projectId/tasks/";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  userRouteRoute: typeof userRouteRouteWithChildren
-  CreateChannelRoute: typeof CreateChannelRoute
-  CreateProjectRoute: typeof CreateProjectRoute
-  ProjectProjectIdRouteRoute: typeof ProjectProjectIdRouteRouteWithChildren
-  ProjectRoute: typeof ProjectRouteWithChildren
+  userRouteRoute: typeof userRouteRouteWithChildren;
+  CreateChannelRoute: typeof CreateChannelRoute;
+  CreateProjectRoute: typeof CreateProjectRoute;
+  ProjectProjectIdRouteRoute: typeof ProjectProjectIdRouteRouteWithChildren;
+  ProjectRoute: typeof ProjectRouteWithChildren;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/project': {
-      id: '/project'
-      path: '/project'
-      fullPath: '/project'
-      preLoaderRoute: typeof ProjectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create-project': {
-      id: '/create-project'
-      path: '/create-project'
-      fullPath: '/create-project'
-      preLoaderRoute: typeof CreateProjectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/create-channel': {
-      id: '/create-channel'
-      path: '/create-channel'
-      fullPath: '/create-channel'
-      preLoaderRoute: typeof CreateChannelRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(user)': {
-      id: '/(user)'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof userRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(user)/': {
-      id: '/(user)/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof userIndexRouteImport
-      parentRoute: typeof userRouteRoute
-    }
-    '/project/_layout': {
-      id: '/project/_layout'
-      path: '/project'
-      fullPath: '/project'
-      preLoaderRoute: typeof ProjectLayoutRouteImport
-      parentRoute: typeof ProjectRoute
-    }
-    '/(user)/new-conversation': {
-      id: '/(user)/new-conversation'
-      path: '/new-conversation'
-      fullPath: '/new-conversation'
-      preLoaderRoute: typeof userNewConversationRouteImport
-      parentRoute: typeof userRouteRoute
-    }
-    '/(user)/ai-chat-test': {
-      id: '/(user)/ai-chat-test'
-      path: '/ai-chat-test'
-      fullPath: '/ai-chat-test'
-      preLoaderRoute: typeof userAiChatTestRouteImport
-      parentRoute: typeof userRouteRoute
-    }
-    '/project/$projectId': {
-      id: '/project/$projectId'
-      path: '/project/$projectId'
-      fullPath: '/project/$projectId'
-      preLoaderRoute: typeof ProjectProjectIdRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/project/$projectId/': {
-      id: '/project/$projectId/'
-      path: '/'
-      fullPath: '/project/$projectId/'
-      preLoaderRoute: typeof ProjectProjectIdIndexRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/(user)/settings/': {
-      id: '/(user)/settings/'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof userSettingsIndexRouteImport
-      parentRoute: typeof userRouteRoute
-    }
-    '/(user)/settings/new-llm-provider': {
-      id: '/(user)/settings/new-llm-provider'
-      path: '/settings/new-llm-provider'
-      fullPath: '/settings/new-llm-provider'
-      preLoaderRoute: typeof userSettingsNewLlmProviderRouteImport
-      parentRoute: typeof userRouteRoute
-    }
-    '/(user)/conversation/$conversationId': {
-      id: '/(user)/conversation/$conversationId'
-      path: '/conversation/$conversationId'
-      fullPath: '/conversation/$conversationId'
-      preLoaderRoute: typeof userConversationConversationIdRouteImport
-      parentRoute: typeof userRouteRoute
-    }
-    '/project/$projectId/tasks/': {
-      id: '/project/$projectId/tasks/'
-      path: '/tasks'
-      fullPath: '/project/$projectId/tasks'
-      preLoaderRoute: typeof ProjectProjectIdTasksIndexRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/project/$projectId/files/': {
-      id: '/project/$projectId/files/'
-      path: '/files'
-      fullPath: '/project/$projectId/files'
-      preLoaderRoute: typeof ProjectProjectIdFilesIndexRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/project/$projectId/docs/': {
-      id: '/project/$projectId/docs/'
-      path: '/docs'
-      fullPath: '/project/$projectId/docs'
-      preLoaderRoute: typeof ProjectProjectIdDocsIndexRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/project/$projectId/chat/': {
-      id: '/project/$projectId/chat/'
-      path: '/chat'
-      fullPath: '/project/$projectId/chat'
-      preLoaderRoute: typeof ProjectProjectIdChatIndexRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/project/$projectId/agents/': {
-      id: '/project/$projectId/agents/'
-      path: '/agents'
-      fullPath: '/project/$projectId/agents'
-      preLoaderRoute: typeof ProjectProjectIdAgentsIndexRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/project/$projectId/chat/$channelId': {
-      id: '/project/$projectId/chat/$channelId'
-      path: '/chat/$channelId'
-      fullPath: '/project/$projectId/chat/$channelId'
-      preLoaderRoute: typeof ProjectProjectIdChatChannelIdRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/project/$projectId/agent/$agentId': {
-      id: '/project/$projectId/agent/$agentId'
-      path: '/agent/$agentId'
-      fullPath: '/project/$projectId/agent/$agentId'
-      preLoaderRoute: typeof ProjectProjectIdAgentAgentIdRouteImport
-      parentRoute: typeof ProjectProjectIdRouteRoute
-    }
-    '/(user)/settings/edit-llm-provider/$llmProviderId': {
-      id: '/(user)/settings/edit-llm-provider/$llmProviderId'
-      path: '/settings/edit-llm-provider/$llmProviderId'
-      fullPath: '/settings/edit-llm-provider/$llmProviderId'
-      preLoaderRoute: typeof userSettingsEditLlmProviderLlmProviderIdRouteImport
-      parentRoute: typeof userRouteRoute
-    }
+    "/project": {
+      id: "/project";
+      path: "/project";
+      fullPath: "/project";
+      preLoaderRoute: typeof ProjectRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/create-project": {
+      id: "/create-project";
+      path: "/create-project";
+      fullPath: "/create-project";
+      preLoaderRoute: typeof CreateProjectRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/create-channel": {
+      id: "/create-channel";
+      path: "/create-channel";
+      fullPath: "/create-channel";
+      preLoaderRoute: typeof CreateChannelRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(user)": {
+      id: "/(user)";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof userRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(user)/": {
+      id: "/(user)/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof userIndexRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
+    "/project/_layout": {
+      id: "/project/_layout";
+      path: "/project";
+      fullPath: "/project";
+      preLoaderRoute: typeof ProjectLayoutRouteImport;
+      parentRoute: typeof ProjectRoute;
+    };
+    "/(user)/new-conversation": {
+      id: "/(user)/new-conversation";
+      path: "/new-conversation";
+      fullPath: "/new-conversation";
+      preLoaderRoute: typeof userNewConversationRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
+    "/(user)/ai-chat-test": {
+      id: "/(user)/ai-chat-test";
+      path: "/ai-chat-test";
+      fullPath: "/ai-chat-test";
+      preLoaderRoute: typeof userAiChatTestRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
+    "/project/$projectId": {
+      id: "/project/$projectId";
+      path: "/project/$projectId";
+      fullPath: "/project/$projectId";
+      preLoaderRoute: typeof ProjectProjectIdRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/$projectId/": {
+      id: "/project/$projectId/";
+      path: "/";
+      fullPath: "/project/$projectId/";
+      preLoaderRoute: typeof ProjectProjectIdIndexRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/(user)/settings/": {
+      id: "/(user)/settings/";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof userSettingsIndexRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
+    "/(user)/settings/new-llm-provider": {
+      id: "/(user)/settings/new-llm-provider";
+      path: "/settings/new-llm-provider";
+      fullPath: "/settings/new-llm-provider";
+      preLoaderRoute: typeof userSettingsNewLlmProviderRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
+    "/(user)/conversation/$conversationId": {
+      id: "/(user)/conversation/$conversationId";
+      path: "/conversation/$conversationId";
+      fullPath: "/conversation/$conversationId";
+      preLoaderRoute: typeof userConversationConversationIdRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
+    "/project/$projectId/tasks/": {
+      id: "/project/$projectId/tasks/";
+      path: "/tasks";
+      fullPath: "/project/$projectId/tasks";
+      preLoaderRoute: typeof ProjectProjectIdTasksIndexRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/project/$projectId/files/": {
+      id: "/project/$projectId/files/";
+      path: "/files";
+      fullPath: "/project/$projectId/files";
+      preLoaderRoute: typeof ProjectProjectIdFilesIndexRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/project/$projectId/docs/": {
+      id: "/project/$projectId/docs/";
+      path: "/docs";
+      fullPath: "/project/$projectId/docs";
+      preLoaderRoute: typeof ProjectProjectIdDocsIndexRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/project/$projectId/chat/": {
+      id: "/project/$projectId/chat/";
+      path: "/chat";
+      fullPath: "/project/$projectId/chat";
+      preLoaderRoute: typeof ProjectProjectIdChatIndexRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/project/$projectId/agents/": {
+      id: "/project/$projectId/agents/";
+      path: "/agents";
+      fullPath: "/project/$projectId/agents";
+      preLoaderRoute: typeof ProjectProjectIdAgentsIndexRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/project/$projectId/chat/$channelId": {
+      id: "/project/$projectId/chat/$channelId";
+      path: "/chat/$channelId";
+      fullPath: "/project/$projectId/chat/$channelId";
+      preLoaderRoute: typeof ProjectProjectIdChatChannelIdRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/project/$projectId/agent/$agentId": {
+      id: "/project/$projectId/agent/$agentId";
+      path: "/agent/$agentId";
+      fullPath: "/project/$projectId/agent/$agentId";
+      preLoaderRoute: typeof ProjectProjectIdAgentAgentIdRouteImport;
+      parentRoute: typeof ProjectProjectIdRouteRoute;
+    };
+    "/(user)/settings/edit-llm-provider/$llmProviderId": {
+      id: "/(user)/settings/edit-llm-provider/$llmProviderId";
+      path: "/settings/edit-llm-provider/$llmProviderId";
+      fullPath: "/settings/edit-llm-provider/$llmProviderId";
+      preLoaderRoute: typeof userSettingsEditLlmProviderLlmProviderIdRouteImport;
+      parentRoute: typeof userRouteRoute;
+    };
   }
 }
 
 interface userRouteRouteChildren {
-  userAiChatTestRoute: typeof userAiChatTestRoute
-  userNewConversationRoute: typeof userNewConversationRoute
-  userIndexRoute: typeof userIndexRoute
-  userConversationConversationIdRoute: typeof userConversationConversationIdRoute
-  userSettingsNewLlmProviderRoute: typeof userSettingsNewLlmProviderRoute
-  userSettingsIndexRoute: typeof userSettingsIndexRoute
-  userSettingsEditLlmProviderLlmProviderIdRoute: typeof userSettingsEditLlmProviderLlmProviderIdRoute
+  userAiChatTestRoute: typeof userAiChatTestRoute;
+  userNewConversationRoute: typeof userNewConversationRoute;
+  userIndexRoute: typeof userIndexRoute;
+  userConversationConversationIdRoute: typeof userConversationConversationIdRoute;
+  userSettingsNewLlmProviderRoute: typeof userSettingsNewLlmProviderRoute;
+  userSettingsIndexRoute: typeof userSettingsIndexRoute;
+  userSettingsEditLlmProviderLlmProviderIdRoute: typeof userSettingsEditLlmProviderLlmProviderIdRoute;
 }
 
 const userRouteRouteChildren: userRouteRouteChildren = {
@@ -459,21 +459,21 @@ const userRouteRouteChildren: userRouteRouteChildren = {
   userSettingsIndexRoute: userSettingsIndexRoute,
   userSettingsEditLlmProviderLlmProviderIdRoute:
     userSettingsEditLlmProviderLlmProviderIdRoute,
-}
+};
 
 const userRouteRouteWithChildren = userRouteRoute._addFileChildren(
   userRouteRouteChildren,
-)
+);
 
 interface ProjectProjectIdRouteRouteChildren {
-  ProjectProjectIdIndexRoute: typeof ProjectProjectIdIndexRoute
-  ProjectProjectIdAgentAgentIdRoute: typeof ProjectProjectIdAgentAgentIdRoute
-  ProjectProjectIdChatChannelIdRoute: typeof ProjectProjectIdChatChannelIdRoute
-  ProjectProjectIdAgentsIndexRoute: typeof ProjectProjectIdAgentsIndexRoute
-  ProjectProjectIdChatIndexRoute: typeof ProjectProjectIdChatIndexRoute
-  ProjectProjectIdDocsIndexRoute: typeof ProjectProjectIdDocsIndexRoute
-  ProjectProjectIdFilesIndexRoute: typeof ProjectProjectIdFilesIndexRoute
-  ProjectProjectIdTasksIndexRoute: typeof ProjectProjectIdTasksIndexRoute
+  ProjectProjectIdIndexRoute: typeof ProjectProjectIdIndexRoute;
+  ProjectProjectIdAgentAgentIdRoute: typeof ProjectProjectIdAgentAgentIdRoute;
+  ProjectProjectIdChatChannelIdRoute: typeof ProjectProjectIdChatChannelIdRoute;
+  ProjectProjectIdAgentsIndexRoute: typeof ProjectProjectIdAgentsIndexRoute;
+  ProjectProjectIdChatIndexRoute: typeof ProjectProjectIdChatIndexRoute;
+  ProjectProjectIdDocsIndexRoute: typeof ProjectProjectIdDocsIndexRoute;
+  ProjectProjectIdFilesIndexRoute: typeof ProjectProjectIdFilesIndexRoute;
+  ProjectProjectIdTasksIndexRoute: typeof ProjectProjectIdTasksIndexRoute;
 }
 
 const ProjectProjectIdRouteRouteChildren: ProjectProjectIdRouteRouteChildren = {
@@ -485,23 +485,23 @@ const ProjectProjectIdRouteRouteChildren: ProjectProjectIdRouteRouteChildren = {
   ProjectProjectIdDocsIndexRoute: ProjectProjectIdDocsIndexRoute,
   ProjectProjectIdFilesIndexRoute: ProjectProjectIdFilesIndexRoute,
   ProjectProjectIdTasksIndexRoute: ProjectProjectIdTasksIndexRoute,
-}
+};
 
 const ProjectProjectIdRouteRouteWithChildren =
   ProjectProjectIdRouteRoute._addFileChildren(
     ProjectProjectIdRouteRouteChildren,
-  )
+  );
 
 interface ProjectRouteChildren {
-  ProjectLayoutRoute: typeof ProjectLayoutRoute
+  ProjectLayoutRoute: typeof ProjectLayoutRoute;
 }
 
 const ProjectRouteChildren: ProjectRouteChildren = {
   ProjectLayoutRoute: ProjectLayoutRoute,
-}
+};
 
 const ProjectRouteWithChildren =
-  ProjectRoute._addFileChildren(ProjectRouteChildren)
+  ProjectRoute._addFileChildren(ProjectRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   userRouteRoute: userRouteRouteWithChildren,
@@ -509,7 +509,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateProjectRoute: CreateProjectRoute,
   ProjectProjectIdRouteRoute: ProjectProjectIdRouteRouteWithChildren,
   ProjectRoute: ProjectRouteWithChildren,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

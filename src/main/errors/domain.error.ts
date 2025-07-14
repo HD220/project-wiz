@@ -1,7 +1,7 @@
-import { BaseError } from "./base.error";
+import { BaseError, ErrorContext } from "./base.error";
 
 export class DomainError extends BaseError {
-  constructor(message: string, code?: string, context?: Record<string, any>) {
+  constructor(message: string, code?: string, context?: ErrorContext) {
     super(message, "DomainError", {
       code,
       context,
@@ -10,7 +10,7 @@ export class DomainError extends BaseError {
 
   static invalidBusinessRule(
     rule: string,
-    details?: Record<string, any>,
+    details?: ErrorContext,
   ): DomainError {
     return new DomainError(
       `Business rule violation: ${rule}`,
