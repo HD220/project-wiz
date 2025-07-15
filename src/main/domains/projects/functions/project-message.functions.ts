@@ -1,8 +1,9 @@
 import { eq, desc, and } from "drizzle-orm";
+
 import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
-import { ProjectMessage } from "../entities";
 import { channelMessages as MessageTable } from "../../../persistence/schemas/channel-messages.schema";
+import { ProjectMessage } from "../entities";
 
 const logger = getLogger("project-messages.functions");
 
@@ -21,14 +22,17 @@ export async function createProjectMessage(data: {
       authorId: data.authorId,
       authorName: data.authorName,
       type: data.type,
-      metadata: data.metadata
+      metadata: data.metadata,
     });
 
     const db = getDatabase();
-    const saved = await db.insert(MessageTable).values(message.toPlainObject()).returning();
-    
+    const saved = await db
+      .insert(MessageTable)
+      .values(message.toPlainObject())
+      .returning();
+
     logger.info(`Project message created: ${message.getId()}`);
-    
+
     return saved[0];
   } catch (error) {
     logger.error("Failed to create project message", { error, data });
@@ -39,8 +43,11 @@ export async function createProjectMessage(data: {
 export async function findMessageById(id: string): Promise<any | null> {
   try {
     const db = getDatabase();
-    const results = await db.select().from(MessageTable).where(eq(MessageTable.id, id));
-    
+    const results = await db
+      .select()
+      .from(MessageTable)
+      .where(eq(MessageTable.id, id));
+
     if (results.length === 0) {
       logger.warn(`Message not found: ${id}`);
       return null;
@@ -53,14 +60,19 @@ export async function findMessageById(id: string): Promise<any | null> {
   }
 }
 
-export async function findMessagesByChannel(channelId: string, limit: number = 50): Promise<any[]> {
+export async function findMessagesByChannel(
+  channelId: string,
+  limit: number = 50,
+): Promise<any[]> {
   try {
     const db = getDatabase();
-    const results = await db.select().from(MessageTable)
+    const results = await db
+      .select()
+      .from(MessageTable)
       .where(eq(MessageTable.channelId, channelId))
       .orderBy(desc(MessageTable.createdAt))
       .limit(limit);
-    
+
     logger.info(`Found ${results.length} messages for channel: ${channelId}`);
     return results.reverse(); // Return in chronological order
   } catch (error) {
@@ -69,28 +81,37 @@ export async function findMessagesByChannel(channelId: string, limit: number = 5
   }
 }
 
-export async function findMessagesByAuthor(authorId: string, channelId?: string): Promise<any[]> {
+export async function findMessagesByAuthor(
+  authorId: string,
+  channelId?: string,
+): Promise<any[]> {
   try {
     const db = getDatabase();
-    
+
     let whereCondition;
     if (channelId) {
       whereCondition = and(
         eq(MessageTable.authorId, authorId),
-        eq(MessageTable.channelId, channelId)
+        eq(MessageTable.channelId, channelId),
       );
     } else {
       whereCondition = eq(MessageTable.authorId, authorId);
     }
-    
-    const results = await db.select().from(MessageTable)
+
+    const results = await db
+      .select()
+      .from(MessageTable)
       .where(whereCondition)
       .orderBy(desc(MessageTable.createdAt));
-    
+
     logger.info(`Found ${results.length} messages by author: ${authorId}`);
     return results;
   } catch (error) {
-    logger.error("Failed to find messages by author", { error, authorId, channelId });
+    logger.error("Failed to find messages by author", {
+      error,
+      authorId,
+      channelId,
+    });
     throw error;
   }
 }
@@ -109,7 +130,7 @@ export async function deleteMessage(id: string, userId: string): Promise<void> {
 
     const db = getDatabase();
     await db.delete(MessageTable).where(eq(MessageTable.id, id));
-    
+
     logger.info(`Message deleted: ${id} by user: ${userId}`);
   } catch (error) {
     logger.error("Failed to delete message", { error, id, userId });

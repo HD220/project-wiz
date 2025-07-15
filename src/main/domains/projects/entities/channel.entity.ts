@@ -1,8 +1,8 @@
-import { 
-  ChannelName, 
-  ChannelDescription, 
+import {
+  ChannelName,
+  ChannelDescription,
   ChannelPrivacy,
-  ProjectIdentity 
+  ProjectIdentity,
 } from "../value-objects";
 
 interface ChannelData {
@@ -41,7 +41,7 @@ export class Channel {
       projectId: new ProjectIdentity(props.projectId),
       createdBy: props.createdBy,
       createdAt: props.createdAt || new Date(),
-      updatedAt: props.updatedAt || new Date()
+      updatedAt: props.updatedAt || new Date(),
     };
   }
 
@@ -84,7 +84,7 @@ export class Channel {
       projectId,
       createdBy,
       isPrivate: false,
-      description: "Canal principal do projeto"
+      description: "Canal principal do projeto",
     });
   }
 
@@ -97,7 +97,7 @@ export class Channel {
       isPrivate: this.data.privacy.getValue(),
       description: this.data.description.getValue(),
       createdAt: this.data.createdAt,
-      updatedAt: this.data.updatedAt
+      updatedAt: this.data.updatedAt,
     };
   }
 }

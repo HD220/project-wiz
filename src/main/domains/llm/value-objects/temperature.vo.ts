@@ -1,18 +1,20 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const TemperatureSchema = z.number()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const TemperatureSchema = z
+  .number()
   .min(0.0, "Temperature must be between 0.0 and 2.0")
   .max(2.0, "Temperature must be between 0.0 and 2.0")
   .refine(
     (temp) => ValidationUtils.isValidTemperature(temp),
-    "Invalid temperature value"
+    "Invalid temperature value",
   );
 
 export class Temperature {
   private readonly value: number;
-  
+
   static readonly DEFAULT = new Temperature(0.7);
   static readonly MIN = 0.0;
   static readonly MAX = 2.0;
@@ -23,7 +25,11 @@ export class Temperature {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("temperature", firstError.message, temperature);
+        throw ValidationError.singleField(
+          "temperature",
+          firstError.message,
+          temperature,
+        );
       }
       throw error;
     }
@@ -69,7 +75,11 @@ export class Temperature {
   static fromString(temperatureStr: string): Temperature {
     const parsed = parseFloat(temperatureStr);
     if (isNaN(parsed)) {
-      throw ValidationError.invalidFormat("temperature", "number", temperatureStr);
+      throw ValidationError.invalidFormat(
+        "temperature",
+        "number",
+        temperatureStr,
+      );
     }
     return new Temperature(parsed);
   }

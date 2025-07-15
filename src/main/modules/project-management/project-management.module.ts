@@ -23,10 +23,7 @@ export class ProjectManagementModule extends BaseModule {
     this.projectRepository = new ProjectRepository();
     this.projectService = new ProjectService(this.projectRepository);
     this.projectMapper = new ProjectMapper();
-    this.projectIpcHandlers = new ProjectIpcHandlers(
-      this.projectService,
-      this.projectMapper,
-    );
+    this.projectIpcHandlers = new ProjectIpcHandlers();
   }
 
   protected onRegisterIpcHandlers(): void {

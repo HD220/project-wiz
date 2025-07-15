@@ -6,14 +6,18 @@ import {
   ProjectFilterDto,
   ProjectDto,
 } from "../../../../shared/types/project.types";
-import { ProjectService } from "../application/project.service";
-import { ProjectMapper } from "../project.mapper";
+import {
+  createProject,
+  findAllProjects,
+  findProjectById,
+  updateProject,
+  deleteProject,
+  archiveProject,
+} from "../../../domains/projects/functions/project.functions";
+import { projectToDto } from "../../../domains/projects/functions/project.mapper";
 
 export class ProjectIpcHandlers {
-  constructor(
-    private projectService: ProjectService,
-    private projectMapper: ProjectMapper,
-  ) {}
+  constructor() {}
 
   registerHandlers(): void {
     ipcMain.handle("project:create", this.handleCreateProject.bind(this));
@@ -29,9 +33,12 @@ export class ProjectIpcHandlers {
     data: CreateProjectDto,
   ): Promise<ProjectDto> {
     try {
-      const projectData = { ...data, status: data.status || "active" };
-      const project = await this.projectService.createProject(projectData);
-      return this.projectMapper.toDto(project);
+      const project = await createProject({
+        name: data.name,
+        description: data.description,
+        gitUrl: data.gitUrl,
+      });
+      return projectToDto(project);
     } catch (error) {
       throw new Error(`Failed to create project: ${(error as Error).message}`);
     }
@@ -41,39 +48,43 @@ export class ProjectIpcHandlers {
     event: IpcMainInvokeEvent,
     filter?: ProjectFilterDto,
   ): Promise<ProjectDto[]> {
-    const projects = await this.projectService.listProjects(filter);
-    return projects.map((project) => this.projectMapper.toDto(project));
+    const projects = await findAllProjects(filter);
+    return projects.map((project: any) => projectToDto(project));
   }
 
   private async handleGetProjectById(
     event: IpcMainInvokeEvent,
     data: { id: string },
   ): Promise<ProjectDto | null> {
-    const project = await this.projectService.getProjectById(data);
-    return project ? this.projectMapper.toDto(project) : null;
+    const project = await findProjectById(data.id);
+    return project ? projectToDto(project) : null;
   }
 
   private async handleUpdateProject(
     event: IpcMainInvokeEvent,
     data: UpdateProjectDto,
   ): Promise<ProjectDto> {
-    const projectData = { ...data, updatedAt: new Date() };
-    const project = await this.projectService.updateProject(projectData);
-    return this.projectMapper.toDto(project);
+    const project = await updateProject({
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      gitUrl: data.gitUrl,
+    });
+    return projectToDto(project);
   }
 
   private async handleDeleteProject(
     event: IpcMainInvokeEvent,
     data: { id: string },
   ): Promise<void> {
-    await this.projectService.deleteProject(data);
+    await deleteProject(data.id);
   }
 
   private async handleArchiveProject(
     event: IpcMainInvokeEvent,
     data: { id: string },
   ): Promise<ProjectDto> {
-    const project = await this.projectService.archiveProject(data);
-    return this.projectMapper.toDto(project);
+    const project = await archiveProject(data.id);
+    return projectToDto(project);
   }
 }

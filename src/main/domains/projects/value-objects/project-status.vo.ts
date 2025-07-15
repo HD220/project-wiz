@@ -1,8 +1,11 @@
 import { z } from "zod";
+
 import { ValidationError } from "../../../errors/validation.error";
 
 const ProjectStatusSchema = z.enum(["active", "inactive", "archived"], {
-  errorMap: () => ({ message: "Project status must be active, inactive, or archived" })
+  errorMap: () => ({
+    message: "Project status must be active, inactive, or archived",
+  }),
 });
 
 export type ProjectStatusType = z.infer<typeof ProjectStatusSchema>;
@@ -16,7 +19,11 @@ export class ProjectStatus {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("projectStatus", firstError.message, status);
+        throw ValidationError.singleField(
+          "projectStatus",
+          firstError.message,
+          status,
+        );
       }
       throw error;
     }

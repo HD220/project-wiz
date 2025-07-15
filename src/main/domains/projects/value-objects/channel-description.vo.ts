@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const ChannelDescriptionSchema = z.string()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const ChannelDescriptionSchema = z
+  .string()
   .max(500, "Channel description cannot exceed 500 characters")
   .nullable()
   .optional();
@@ -17,13 +19,17 @@ export class ChannelDescription {
     }
 
     const sanitized = ValidationUtils.sanitizeString(description);
-    
+
     try {
       this.value = ChannelDescriptionSchema.parse(sanitized) ?? null;
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("channelDescription", firstError.message, description);
+        throw ValidationError.singleField(
+          "channelDescription",
+          firstError.message,
+          description,
+        );
       }
       throw error;
     }

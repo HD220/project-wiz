@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const ProjectDescriptionSchema = z.string()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const ProjectDescriptionSchema = z
+  .string()
   .max(500, "Project description cannot exceed 500 characters")
   .nullable()
   .optional();
@@ -17,13 +19,17 @@ export class ProjectDescription {
     }
 
     const sanitized = ValidationUtils.sanitizeString(description);
-    
+
     try {
       this.value = ProjectDescriptionSchema.parse(sanitized) ?? null;
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("projectDescription", firstError.message, description);
+        throw ValidationError.singleField(
+          "projectDescription",
+          firstError.message,
+          description,
+        );
       }
       throw error;
     }

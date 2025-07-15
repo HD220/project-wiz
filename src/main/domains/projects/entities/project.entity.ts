@@ -1,9 +1,9 @@
-import { 
-  ProjectName, 
-  ProjectDescription, 
-  ProjectGitUrl, 
-  ProjectStatus, 
-  ProjectIdentity 
+import {
+  ProjectName,
+  ProjectDescription,
+  ProjectGitUrl,
+  ProjectStatus,
+  ProjectIdentity,
 } from "../value-objects";
 
 interface ProjectData {
@@ -42,7 +42,7 @@ export class Project {
       status: new ProjectStatus(props.status || "active"),
       avatar: props.avatar || null,
       createdAt: props.createdAt || new Date(),
-      updatedAt: props.updatedAt || new Date()
+      updatedAt: props.updatedAt || new Date(),
     };
   }
 
@@ -100,7 +100,7 @@ export class Project {
       status: this.data.status.getValue(),
       avatar: this.data.avatar,
       createdAt: this.data.createdAt,
-      updatedAt: this.data.updatedAt
+      updatedAt: this.data.updatedAt,
     };
   }
 }

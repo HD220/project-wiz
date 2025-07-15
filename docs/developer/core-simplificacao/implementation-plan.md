@@ -192,16 +192,16 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🔍 Manter APIs atuais funcionando
-- [ ] 🤖 Redirecionar chamadas internas para novas functions
-- [ ] 🤖🔍 Atualizar IPC handlers gradualmente
-- [ ] 🔍 Validar frontend continua funcionando
+- [x] 🔍 Manter APIs atuais funcionando
+- [x] 🤖 Redirecionar chamadas internas para novas functions
+- [x] 🤖🔍 Atualizar IPC handlers gradualmente
+- [x] 🔍 Validar frontend continua funcionando
 
 **Critérios de Aceite:**
 
-- [ ] Zero breaking changes para frontend
-- [ ] Performance mantida ou melhorada
-- [ ] Logs indicam uso da nova estrutura
+- [x] Zero breaking changes para frontend
+- [x] Performance mantida ou melhorada
+- [x] Logs indicam uso da nova estrutura
 
 **Comandos de Validação:**
 

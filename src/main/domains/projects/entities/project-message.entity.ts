@@ -40,7 +40,7 @@ export class ProjectMessage {
       createdAt: props.createdAt || new Date(),
       updatedAt: props.updatedAt || new Date(),
       metadata: props.metadata || {},
-      isEdited: props.isEdited || false
+      isEdited: props.isEdited || false,
     };
   }
 
@@ -91,7 +91,7 @@ export class ProjectMessage {
       createdAt: this.data.createdAt,
       updatedAt: this.data.updatedAt,
       metadata: this.data.metadata ? JSON.stringify(this.data.metadata) : null,
-      isEdited: this.data.isEdited
+      isEdited: this.data.isEdited,
     };
   }
 }

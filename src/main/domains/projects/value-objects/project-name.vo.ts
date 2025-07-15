@@ -1,13 +1,15 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const ProjectNameSchema = z.string()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const ProjectNameSchema = z
+  .string()
   .min(1, "Project name cannot be empty")
   .max(100, "Project name cannot exceed 100 characters")
   .refine(
     (name) => ValidationUtils.isNonEmptyString(name.trim()),
-    "Project name must contain non-whitespace characters"
+    "Project name must contain non-whitespace characters",
   );
 
 export class ProjectName {
@@ -15,13 +17,17 @@ export class ProjectName {
 
   constructor(name: string) {
     const sanitized = ValidationUtils.sanitizeString(name);
-    
+
     try {
       this.value = ProjectNameSchema.parse(sanitized);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("projectName", firstError.message, name);
+        throw ValidationError.singleField(
+          "projectName",
+          firstError.message,
+          name,
+        );
       }
       throw error;
     }

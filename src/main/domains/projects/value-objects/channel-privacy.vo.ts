@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { ValidationError } from "../../../errors/validation.error";
 
 const ChannelPrivacySchema = z.boolean();
@@ -12,7 +13,11 @@ export class ChannelPrivacy {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("channelPrivacy", firstError.message, isPrivate);
+        throw ValidationError.singleField(
+          "channelPrivacy",
+          firstError.message,
+          isPrivate,
+        );
       }
       throw error;
     }

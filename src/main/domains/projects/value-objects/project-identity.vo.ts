@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const ProjectIdentitySchema = z.string()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const ProjectIdentitySchema = z
+  .string()
   .min(1, "Project ID cannot be empty")
   .uuid("Project ID must be a valid UUID");
 
@@ -11,7 +13,7 @@ export class ProjectIdentity {
 
   constructor(id: string) {
     const sanitized = ValidationUtils.sanitizeString(id);
-    
+
     try {
       this.value = ProjectIdentitySchema.parse(sanitized);
     } catch (error) {

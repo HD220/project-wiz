@@ -1,14 +1,19 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const ChannelNameSchema = z.string()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const ChannelNameSchema = z
+  .string()
   .min(2, "Channel name must have at least 2 characters")
   .max(50, "Channel name cannot exceed 50 characters")
-  .regex(/^[a-zA-Z0-9-_]+$/, "Channel name can only contain letters, numbers, hyphens and underscores")
+  .regex(
+    /^[a-zA-Z0-9-_]+$/,
+    "Channel name can only contain letters, numbers, hyphens and underscores",
+  )
   .refine(
     (name) => !/^[-_]|[-_]$/.test(name),
-    "Channel name cannot start or end with hyphen or underscore"
+    "Channel name cannot start or end with hyphen or underscore",
   );
 
 export class ChannelName {
@@ -16,13 +21,17 @@ export class ChannelName {
 
   constructor(name: string) {
     const normalized = this.normalizeName(name);
-    
+
     try {
       this.value = ChannelNameSchema.parse(normalized);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("channelName", firstError.message, name);
+        throw ValidationError.singleField(
+          "channelName",
+          firstError.message,
+          name,
+        );
       }
       throw error;
     }

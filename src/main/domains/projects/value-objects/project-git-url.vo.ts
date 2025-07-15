@@ -1,12 +1,18 @@
 import { z } from "zod";
-import { ValidationError } from "../../../errors/validation.error";
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 
-const ProjectGitUrlSchema = z.string()
+import { ValidationUtils } from "../../../../shared/utils/validation.utils";
+import { ValidationError } from "../../../errors/validation.error";
+
+const ProjectGitUrlSchema = z
+  .string()
   .url("Invalid Git URL format")
   .refine(
-    (url) => url.includes('github.com') || url.includes('gitlab.com') || url.includes('bitbucket.org') || url.includes('.git'),
-    "URL must be a valid Git repository URL"
+    (url) =>
+      url.includes("github.com") ||
+      url.includes("gitlab.com") ||
+      url.includes("bitbucket.org") ||
+      url.includes(".git"),
+    "URL must be a valid Git repository URL",
   )
   .nullable()
   .optional();
@@ -21,13 +27,17 @@ export class ProjectGitUrl {
     }
 
     const sanitized = ValidationUtils.sanitizeString(gitUrl);
-    
+
     try {
       this.value = ProjectGitUrlSchema.parse(sanitized) ?? null;
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
-        throw ValidationError.singleField("projectGitUrl", firstError.message, gitUrl);
+        throw ValidationError.singleField(
+          "projectGitUrl",
+          firstError.message,
+          gitUrl,
+        );
       }
       throw error;
     }
