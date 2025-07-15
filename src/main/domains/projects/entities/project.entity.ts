@@ -34,7 +34,15 @@ export class Project {
     this.data = this.buildProjectData(props);
   }
 
-  private buildProjectData(props: any): ProjectData {
+  private buildProjectData(props: {
+    name: string;
+    description?: string | null;
+    gitUrl?: string | null;
+    status?: string;
+    avatar?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }): ProjectData {
     return {
       name: new ProjectName(props.name),
       description: new ProjectDescription(props.description),
@@ -91,14 +99,23 @@ export class Project {
     this.data.updatedAt = new Date();
   }
 
-  toPlainObject(): any {
+  toPlainObject(): {
+    id: string;
+    name: string;
+    description: string | null;
+    gitUrl: string | null;
+    status: "active" | "inactive" | "archived";
+    avatar: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } {
     return {
       id: this.identity.getValue(),
       name: this.data.name.getValue(),
       description: this.data.description.getValue(),
       gitUrl: this.data.gitUrl.getValue(),
-      status: this.data.status.getValue(),
-      avatar: this.data.avatar,
+      status: this.data.status.getValue() as "active" | "inactive" | "archived",
+      avatar: this.data.avatar || null,
       createdAt: this.data.createdAt,
       updatedAt: this.data.updatedAt,
     };

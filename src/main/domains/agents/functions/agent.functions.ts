@@ -38,7 +38,9 @@ export type AgentWithData = Agent & {
 
 const logger = getLogger("agent.functions");
 
-export async function createAgent(data: CreateAgentDto): Promise<AgentWithData> {
+export async function createAgent(
+  data: CreateAgentDto,
+): Promise<AgentWithData> {
   const db = getDatabase();
 
   // Check if agent already exists with this name
@@ -87,7 +89,9 @@ export async function findAgentById(id: string): Promise<AgentWithData | null> {
   return agent ? createAgentFromData(agent) : null;
 }
 
-export async function findAgentByName(name: string): Promise<AgentWithData | null> {
+export async function findAgentByName(
+  name: string,
+): Promise<AgentWithData | null> {
   const db = getDatabase();
 
   const [agent] = await db.select().from(agents).where(eq(agents.name, name));
@@ -95,7 +99,9 @@ export async function findAgentByName(name: string): Promise<AgentWithData | nul
   return agent ? createAgentFromData(agent) : null;
 }
 
-export async function findAllAgents(filter?: AgentFilterDto): Promise<AgentWithData[]> {
+export async function findAllAgents(
+  filter?: AgentFilterDto,
+): Promise<AgentWithData[]> {
   const db = getDatabase();
 
   const query = db.select().from(agents);
@@ -192,12 +198,17 @@ export async function setDefaultAgent(id: string): Promise<void> {
 export async function findDefaultAgent(): Promise<AgentWithData | null> {
   const db = getDatabase();
 
-  const [agent] = await db.select().from(agents).where(eq(agents.isDefault, true));
+  const [agent] = await db
+    .select()
+    .from(agents)
+    .where(eq(agents.isDefault, true));
 
   return agent ? createAgentFromData(agent) : null;
 }
 
-export async function findAgentsByLlmProvider(llmProviderId: string): Promise<AgentWithData[]> {
+export async function findAgentsByLlmProvider(
+  llmProviderId: string,
+): Promise<AgentWithData[]> {
   const db = getDatabase();
 
   const results = await db

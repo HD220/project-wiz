@@ -41,11 +41,7 @@ import {
   type ProjectSchema,
   type CreateProjectSchema,
 } from "./projects.schema";
-import {
-  users,
-  type UserSchema,
-  type CreateUserSchema,
-} from "./users.schema";
+import { users, type UserSchema, type CreateUserSchema } from "./users.schema";
 
 // Re-export everything
 export {

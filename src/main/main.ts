@@ -3,6 +3,7 @@ import path from "path";
 import { app, BrowserWindow } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
 
+import { registerDomainHandlers } from "./ipc";
 import { createSimpleIpcHandler } from "./kernel/ipc-handler-utility";
 import { ModuleLoader } from "./kernel/module-loader";
 import { logger } from "./logger";
@@ -78,7 +79,10 @@ app.on("ready", async () => {
   try {
     createWindow();
 
-    // Load and initialize all modules using the new modular system
+    // Register domain handlers directly (simplified architecture)
+    registerDomainHandlers();
+
+    // Load and initialize remaining modules
     logger.info("Starting application initialization...");
     const moduleLoader = new ModuleLoader();
     await moduleLoader.loadAndInitializeModules();

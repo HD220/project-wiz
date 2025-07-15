@@ -1,8 +1,11 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
-import { channels as ChannelTable } from "../../../persistence/schemas/channels.schema";
+import {
+  channels,
+  type ChannelSchema,
+} from "../../../persistence/schemas/channels.schema";
 import { Channel } from "../entities";
 
 const logger = getLogger("channels.functions");
@@ -13,7 +16,7 @@ export async function createChannel(data: {
   createdBy: string;
   isPrivate?: boolean;
   description?: string | null;
-}): Promise<any> {
+}): Promise<ChannelSchema> {
   try {
     const channel = new Channel({
       name: data.name,
@@ -25,7 +28,7 @@ export async function createChannel(data: {
 
     const db = getDatabase();
     const saved = await db
-      .insert(ChannelTable)
+      .insert(channels)
       .values(channel.toPlainObject())
       .returning();
 
@@ -38,13 +41,12 @@ export async function createChannel(data: {
   }
 }
 
-export async function findChannelById(id: string): Promise<any | null> {
+export async function findChannelById(
+  id: string,
+): Promise<ChannelSchema | null> {
   try {
     const db = getDatabase();
-    const results = await db
-      .select()
-      .from(ChannelTable)
-      .where(eq(ChannelTable.id, id));
+    const results = await db.select().from(channels).where(eq(channels.id, id));
 
     if (results.length === 0) {
       logger.warn(`Channel not found: ${id}`);
@@ -58,13 +60,15 @@ export async function findChannelById(id: string): Promise<any | null> {
   }
 }
 
-export async function findChannelsByProject(projectId: string): Promise<any[]> {
+export async function findChannelsByProject(
+  projectId: string,
+): Promise<ChannelSchema[]> {
   try {
     const db = getDatabase();
     const results = await db
       .select()
-      .from(ChannelTable)
-      .where(eq(ChannelTable.projectId, projectId));
+      .from(channels)
+      .where(eq(channels.projectId, projectId));
 
     logger.info(`Found ${results.length} channels for project: ${projectId}`);
     return results;
@@ -77,7 +81,7 @@ export async function findChannelsByProject(projectId: string): Promise<any[]> {
 export async function findAccessibleChannels(
   projectId: string,
   userId: string,
-): Promise<any[]> {
+): Promise<ChannelSchema[]> {
   try {
     const allChannels = await findChannelsByProject(projectId);
 
@@ -103,13 +107,13 @@ export async function findAccessibleChannels(
 export async function createGeneralChannel(
   projectId: string,
   createdBy: string,
-): Promise<any> {
+): Promise<ChannelSchema> {
   try {
     const channel = Channel.createGeneral(projectId, createdBy);
 
     const db = getDatabase();
     const saved = await db
-      .insert(ChannelTable)
+      .insert(channels)
       .values(channel.toPlainObject())
       .returning();
 
@@ -134,7 +138,7 @@ export async function deleteChannel(id: string): Promise<void> {
     }
 
     const db = getDatabase();
-    await db.delete(ChannelTable).where(eq(ChannelTable.id, id));
+    await db.delete(channels).where(eq(channels.id, id));
 
     logger.info(`Channel deleted: ${id}`);
   } catch (error) {

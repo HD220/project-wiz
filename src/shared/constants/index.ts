@@ -60,7 +60,7 @@ export const CONTEXT_TYPES = {
   GROUP: "group",
 } as const;
 
-// IPC Channel Names
+// IPC Channel Names - Sincronizados com handlers implementados
 export const IPC_CHANNELS = {
   // Window controls
   WINDOW_MINIMIZE: "window-minimize",
@@ -73,35 +73,70 @@ export const IPC_CHANNELS = {
 
   // Agent management
   AGENT_CREATE: "agent:create",
-  AGENT_GET_ALL: "agent:get-all",
-  AGENT_GET_BY_ID: "agent:get-by-id",
+  AGENT_GET_BY_ID: "agent:getById",
+  AGENT_GET_BY_NAME: "agent:getByName",
+  AGENT_LIST: "agent:list",
+  AGENT_LIST_ACTIVE: "agent:listActive",
   AGENT_UPDATE: "agent:update",
   AGENT_DELETE: "agent:delete",
+  AGENT_ACTIVATE: "agent:activate",
+  AGENT_DEACTIVATE: "agent:deactivate",
+  AGENT_SET_DEFAULT: "agent:setDefault",
+  AGENT_GET_DEFAULT: "agent:getDefault",
 
   // Project management
   PROJECT_CREATE: "project:create",
-  PROJECT_GET_ALL: "project:get-all",
-  PROJECT_GET_BY_ID: "project:get-by-id",
+  PROJECT_GET_BY_ID: "project:getById",
+  PROJECT_LIST: "project:list",
   PROJECT_UPDATE: "project:update",
   PROJECT_DELETE: "project:delete",
+  PROJECT_ARCHIVE: "project:archive",
+
+  // Channel management
+  CHANNEL_CREATE: "channel:create",
+  CHANNEL_GET_BY_ID: "channel:getById",
+  CHANNEL_LIST_BY_PROJECT: "channel:listByProject",
+  CHANNEL_LIST_ACCESSIBLE: "channel:listAccessible",
+  CHANNEL_CREATE_GENERAL: "channel:createGeneral",
+  CHANNEL_DELETE: "channel:delete",
+
+  // Channel messaging
+  CHANNEL_MESSAGE_CREATE: "channelMessage:create",
+  CHANNEL_MESSAGE_GET_BY_ID: "channelMessage:getById",
+  CHANNEL_MESSAGE_LIST_BY_CHANNEL: "channelMessage:listByChannel",
+  CHANNEL_MESSAGE_LIST_BY_AUTHOR: "channelMessage:listByAuthor",
+  CHANNEL_MESSAGE_DELETE: "channelMessage:delete",
+  CHANNEL_MESSAGE_CREATE_TEXT: "channelMessage:createText",
+  CHANNEL_MESSAGE_CREATE_CODE: "channelMessage:createCode",
+  CHANNEL_MESSAGE_CREATE_SYSTEM: "channelMessage:createSystem",
+
+  // User management
+  USER_CREATE: "user:create",
+  USER_GET_BY_ID: "user:getById",
+  USER_UPDATE_PROFILE: "user:updateProfile",
+  USER_UPDATE_SETTINGS: "user:updateSettings",
+  USER_GET_PREFERENCES: "user:getPreferences",
+  USER_DELETE: "user:delete",
+
+  // Direct messages - Conversations
+  DM_CONVERSATION_CREATE: "dm:conversation:create",
+  DM_CONVERSATION_GET_BY_ID: "dm:conversation:getById",
+  DM_CONVERSATION_LIST: "dm:conversation:list",
+  DM_CONVERSATION_FIND_OR_CREATE: "dm:conversation:findOrCreate",
+
+  // Direct messages - Messages
+  DM_MESSAGE_CREATE: "dm:message:create",
+  DM_MESSAGE_LIST_BY_CONVERSATION: "dm:message:listByConversation",
+  DM_AI_SEND_MESSAGE: "dm:ai:sendMessage",
+  DM_AGENT_SEND_MESSAGE: "dm:agent:sendMessage",
+  DM_AGENT_REGENERATE_RESPONSE: "dm:agent:regenerateResponse",
 
   // LLM Provider management
   LLM_PROVIDER_CREATE: "llm-provider:create",
-  LLM_PROVIDER_GET_ALL: "llm-provider:get-all",
-  LLM_PROVIDER_GET_BY_ID: "llm-provider:get-by-id",
+  LLM_PROVIDER_GET_BY_ID: "llm-provider:getById",
+  LLM_PROVIDER_LIST: "llm-provider:list",
   LLM_PROVIDER_UPDATE: "llm-provider:update",
   LLM_PROVIDER_DELETE: "llm-provider:delete",
-
-  // Direct messages
-  CONVERSATION_CREATE: "conversation:create",
-  CONVERSATION_GET_ALL: "conversation:get-all",
-  CONVERSATION_GET_BY_ID: "conversation:get-by-id",
-  MESSAGE_SEND: "message:send",
-  MESSAGE_GET_BY_CONVERSATION: "message:get-by-conversation",
-
-  // Channel messaging
-  CHANNEL_CREATE: "channel:create",
-  CHANNEL_GET_ALL: "channel:get-all",
-  CHANNEL_MESSAGE_SEND: "channel-message:send",
-  CHANNEL_MESSAGE_GET_BY_CHANNEL: "channel-message:get-by-channel",
+  LLM_PROVIDER_SET_DEFAULT: "llm-provider:setDefault",
+  LLM_PROVIDER_GET_DEFAULT: "llm-provider:getDefault",
 } as const;

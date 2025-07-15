@@ -1,11 +1,15 @@
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
-import { publishEvent } from "../../../infrastructure/events";
 import { getLogger } from "../../../infrastructure/logger";
 import { llmProviders } from "../../../persistence/schemas";
 import { LLMProvider } from "../entities";
-import { ProviderType, ModelConfig, Temperature, MaxTokens } from "../value-objects";
+import {
+  ProviderType,
+  ModelConfig,
+  Temperature,
+  MaxTokens,
+} from "../value-objects";
 
 import type {
   CreateLlmProviderDto,
@@ -26,7 +30,9 @@ export type LlmProviderWithData = LLMProvider & {
   updatedAt: Date;
 };
 
-export async function createLlmProvider(data: CreateLlmProviderDto): Promise<LlmProviderWithData> {
+export async function createLlmProvider(
+  data: CreateLlmProviderDto,
+): Promise<LlmProviderWithData> {
   const db = getDatabase();
 
   // Check if provider already exists with this name
@@ -45,40 +51,67 @@ export async function createLlmProvider(data: CreateLlmProviderDto): Promise<Llm
     updatedAt: new Date(),
   };
 
-  const [saved] = await db.insert(llmProviders).values(providerData).returning();
+  const [saved] = await db
+    .insert(llmProviders)
+    .values(providerData)
+    .returning();
 
-  logger.info("LLM provider created", { providerId: saved.id, name: saved.name });
+  logger.info("LLM provider created", {
+    providerId: saved.id,
+    name: saved.name,
+  });
 
   return createLlmProviderFromData(saved);
 }
 
-export async function findLlmProviderById(id: string): Promise<LlmProviderWithData | null> {
+export async function findLlmProviderById(
+  id: string,
+): Promise<LlmProviderWithData | null> {
   const db = getDatabase();
 
-  const [provider] = await db.select().from(llmProviders).where(eq(llmProviders.id, id));
+  const [provider] = await db
+    .select()
+    .from(llmProviders)
+    .where(eq(llmProviders.id, id));
 
   return provider ? createLlmProviderFromData(provider) : null;
 }
 
-export async function findLlmProviderByName(name: string): Promise<LlmProviderWithData | null> {
+export async function findLlmProviderByName(
+  name: string,
+): Promise<LlmProviderWithData | null> {
   const db = getDatabase();
 
-  const [provider] = await db.select().from(llmProviders).where(eq(llmProviders.name, name));
+  const [provider] = await db
+    .select()
+    .from(llmProviders)
+    .where(eq(llmProviders.name, name));
 
   return provider ? createLlmProviderFromData(provider) : null;
 }
 
-export async function findAllLlmProviders(filter?: LlmProviderFilterDto): Promise<LlmProviderWithData[]> {
+export async function findAllLlmProviders(
+  filter?: LlmProviderFilterDto,
+): Promise<LlmProviderWithData[]> {
   const db = getDatabase();
 
   let results;
-  
+
   if (filter?.name) {
-    results = await db.select().from(llmProviders).where(eq(llmProviders.name, filter.name));
+    results = await db
+      .select()
+      .from(llmProviders)
+      .where(eq(llmProviders.name, filter.name));
   } else if (filter?.provider) {
-    results = await db.select().from(llmProviders).where(eq(llmProviders.provider, filter.provider));
+    results = await db
+      .select()
+      .from(llmProviders)
+      .where(eq(llmProviders.provider, filter.provider));
   } else if (filter?.isDefault !== undefined) {
-    results = await db.select().from(llmProviders).where(eq(llmProviders.isDefault, filter.isDefault));
+    results = await db
+      .select()
+      .from(llmProviders)
+      .where(eq(llmProviders.isDefault, filter.isDefault));
   } else {
     results = await db.select().from(llmProviders);
   }
@@ -134,7 +167,9 @@ export async function deleteLlmProvider(id: string): Promise<void> {
   logger.info("LLM provider deleted", { providerId: id });
 }
 
-export async function setDefaultLlmProvider(id: string): Promise<LlmProviderWithData> {
+export async function setDefaultLlmProvider(
+  id: string,
+): Promise<LlmProviderWithData> {
   const db = getDatabase();
 
   const existing = await findLlmProviderById(id);
@@ -146,7 +181,10 @@ export async function setDefaultLlmProvider(id: string): Promise<LlmProviderWith
     // Remove default flag from all providers
     await tx.update(llmProviders).set({ isDefault: false });
     // Set this provider as default
-    await tx.update(llmProviders).set({ isDefault: true }).where(eq(llmProviders.id, id));
+    await tx
+      .update(llmProviders)
+      .set({ isDefault: true })
+      .where(eq(llmProviders.id, id));
   });
 
   logger.info("Default LLM provider set", { providerId: id });
@@ -157,17 +195,24 @@ export async function setDefaultLlmProvider(id: string): Promise<LlmProviderWith
 export async function findDefaultLlmProvider(): Promise<LlmProviderWithData | null> {
   const db = getDatabase();
 
-  const [provider] = await db.select().from(llmProviders).where(eq(llmProviders.isDefault, true));
+  const [provider] = await db
+    .select()
+    .from(llmProviders)
+    .where(eq(llmProviders.isDefault, true));
 
   return provider ? createLlmProviderFromData(provider) : null;
 }
 
-function createLlmProviderFromData(data: Record<string, unknown>): LlmProviderWithData {
+function createLlmProviderFromData(
+  data: Record<string, unknown>,
+): LlmProviderWithData {
   // For now, use a simple approach without complex value objects
-  const providerType = new ProviderType(data.provider as any);
+  const providerType = new ProviderType(
+    data.provider as "openai" | "deepseek" | "anthropic" | "ollama",
+  );
   const modelConfig = new ModelConfig(
     new Temperature(0.7),
-    new MaxTokens(1000)
+    new MaxTokens(1000),
   );
 
   const provider = new LLMProvider(providerType, modelConfig);

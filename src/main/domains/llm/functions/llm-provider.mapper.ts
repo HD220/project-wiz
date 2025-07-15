@@ -1,7 +1,9 @@
-import type { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
 import type { LlmProviderWithData } from "./llm-provider.functions";
+import type { LlmProviderDto } from "../../../../shared/types/llm-provider.types";
 
-export function llmProviderToDto(provider: LlmProviderWithData): LlmProviderDto {
+export function llmProviderToDto(
+  provider: LlmProviderWithData,
+): LlmProviderDto {
   return {
     id: provider.id,
     name: provider.name,

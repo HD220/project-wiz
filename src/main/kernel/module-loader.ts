@@ -1,11 +1,4 @@
 import { logger } from "../logger";
-import { AgentManagementModule } from "../modules/agent-management/agent-management.module";
-import { ChannelMessagingModule } from "../modules/channel-messaging/channel-messaging.module";
-import { CommunicationModule } from "../modules/communication/communication.module";
-import { DirectMessagesModule } from "../modules/direct-messages/direct-messages.module";
-import { LlmProviderModule } from "../modules/llm-provider/llm-provider.module";
-import { ProjectManagementModule } from "../modules/project-management/project-management.module";
-import { UserManagementModule } from "../modules/user-management/user-management.module";
 
 import { DependencyContainer } from "./dependency-container";
 
@@ -34,16 +27,11 @@ export class ModuleLoader {
   }
 
   private registerModules(): void {
-    // Register modules in any order - the container will handle dependencies
-    this.container.register(new ProjectManagementModule());
-    this.container.register(new CommunicationModule());
-    this.container.register(new LlmProviderModule());
-    this.container.register(new AgentManagementModule());
-    this.container.register(new ChannelMessagingModule());
-    this.container.register(new DirectMessagesModule());
-    this.container.register(new UserManagementModule());
-
-    logger.info("All modules registered");
+    // All modules successfully migrated to domain architecture
+    // Domain handlers are registered directly in main.ts via registerDomainHandlers()
+    logger.info(
+      "Module-based architecture fully migrated to domain architecture",
+    );
   }
 
   getContainer(): DependencyContainer {

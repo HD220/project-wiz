@@ -251,9 +251,9 @@ O Project Wiz segue rigorosamente diversos padrões de design e boas práticas p
 
 # Arquitetura e Organização do Código
 
-O Project Wiz está evoluindo para uma **arquitetura simplificada baseada em domínios de negócio** seguindo padrões de Object Calisthenics e DDD pragmático.
+O Project Wiz foi migrado para uma **arquitetura simplificada baseada em domínios de negócio** seguindo padrões de Object Calisthenics e DDD pragmático.
 
-## Estrutura Target (Nova Arquitetura)
+## Estrutura Atual (Nova Arquitetura Implementada)
 
 ```
 project-wiz/
@@ -339,24 +339,35 @@ project-wiz/
             └── common.types.ts # Tipos comuns
 ```
 
-### Estrutura Atual em Transição
+### Status da Migração (Sprint 8.2 - Cleanup Executado)
 
-Durante a migração, ambas as estruturas coexistirão:
+**✅ Módulos Migrados Completamente (Removidos):**
+
+- `agent-management/` → `domains/agents/`
+- `project-management/` → `domains/projects/`
+- `llm-provider/` → `domains/llm/`
+- `user-management/` → `domains/users/`
+
+**⚠️ Módulos Restantes (Aguardando Migração Completa):**
+
+- `channel-messaging/` - Handlers IPC ainda necessários
+- `communication/` - Handlers IPC ainda necessários
+- `direct-messages/` - Handlers IPC ainda necessários
+
+**🆕 Nova Estrutura Implementada:**
 
 ```
 src/main/
-├── modules/         # 📦 Estrutura atual (em migração)
-│   ├── agent-management/
-│   ├── channel-messaging/
-│   ├── communication/
-│   ├── direct-messages/
-│   ├── llm-provider/
-│   └── project-management/
-└── domains/         # 🆕 Nova estrutura (sendo implementada)
-    ├── projects/
-    ├── agents/
-    ├── users/
-    └── llm/
+├── domains/         # ✅ Estrutura nova (implementada)
+│   ├── projects/    # ✅ Completo
+│   ├── agents/      # ✅ Completo
+│   ├── users/       # ✅ Completo
+│   └── llm/         # ✅ Completo
+├── ipc/             # ✅ Handlers diretos para domínios
+└── modules/         # ⚠️ Módulos restantes (IPC adapters)
+    ├── channel-messaging/
+    ├── communication/
+    └── direct-messages/
 ```
 
 # Guia de Desenvolvimento Local

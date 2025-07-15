@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
+
 import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
 import { publishEvent } from "../../../infrastructure/events";
-import { users, type UserSchema, type CreateUserSchema } from "../../../persistence/schemas";
-import { UserIdentity, UserSettings } from "../value-objects";
+import { getLogger } from "../../../infrastructure/logger";
+import { users } from "../../../persistence/schemas";
 import { User, UserPreferences } from "../entities";
+import { UserIdentity, UserSettings } from "../value-objects";
 
 const logger = getLogger("users.functions");
 
@@ -14,10 +15,10 @@ export async function createUser(userData: {
   avatar?: string;
 }): Promise<User> {
   logger.info("Creating new user", { name: userData.name });
-  
+
   const database = getDatabase();
-  
-  const createUserData: CreateUserSchema = {
+
+  const createUserData = {
     name: userData.name,
     email: userData.email,
     avatar: userData.avatar,
@@ -29,7 +30,9 @@ export async function createUser(userData: {
     .returning();
 
   const userIdentity = new UserIdentity(insertedUser.id);
-  const userSettings = new UserSettings(insertedUser.settings as any);
+  const userSettings = new UserSettings(
+    insertedUser.settings as Record<string, unknown>,
+  );
   const user = new User(userIdentity, userSettings);
 
   publishEvent({
@@ -45,7 +48,7 @@ export async function createUser(userData: {
 
 export async function findUserById(userId: string): Promise<User | null> {
   const database = getDatabase();
-  
+
   const [userRecord] = await database
     .select()
     .from(users)
@@ -57,19 +60,21 @@ export async function findUserById(userId: string): Promise<User | null> {
   }
 
   const userIdentity = new UserIdentity(userRecord.id);
-  const userSettings = new UserSettings(userRecord.settings as any);
-  
+  const userSettings = new UserSettings(
+    userRecord.settings as Record<string, unknown>,
+  );
+
   return new User(userIdentity, userSettings);
 }
 
 export async function updateUserSettings(
   userId: string,
-  settings: UserSettings
+  settings: UserSettings,
 ): Promise<void> {
   logger.info("Updating user settings", { userId });
-  
+
   const database = getDatabase();
-  
+
   await database
     .update(users)
     .set({
@@ -93,12 +98,12 @@ export async function updateUserProfile(
     name?: string;
     email?: string;
     avatar?: string;
-  }
+  },
 ): Promise<void> {
   logger.info("Updating user profile", { userId });
-  
+
   const database = getDatabase();
-  
+
   await database
     .update(users)
     .set({
@@ -116,9 +121,11 @@ export async function updateUserProfile(
   });
 }
 
-export async function getUserPreferences(userId: string): Promise<UserPreferences | null> {
+export async function getUserPreferences(
+  userId: string,
+): Promise<UserPreferences | null> {
   const user = await findUserById(userId);
-  
+
   if (!user) {
     return null;
   }
@@ -128,12 +135,10 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
 
 export async function deleteUser(userId: string): Promise<void> {
   logger.info("Deleting user", { userId });
-  
+
   const database = getDatabase();
-  
-  await database
-    .delete(users)
-    .where(eq(users.id, userId));
+
+  await database.delete(users).where(eq(users.id, userId));
 
   publishEvent({
     type: "user.deleted",

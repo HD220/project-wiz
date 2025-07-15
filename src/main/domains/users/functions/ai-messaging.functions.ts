@@ -19,7 +19,7 @@ export async function processUserMessage(
   userId: string = "user",
 ): Promise<MessageDto | null> {
   try {
-    const savedUserMessage = await createDirectMessage({
+    const _savedUserMessage = await createDirectMessage({
       content: userMessage,
       senderId: userId,
       senderName: "User",
@@ -73,7 +73,7 @@ function extractAgentFromParticipants(
   participants: string[],
   userId: string,
 ): string | null {
-  return participants.find((p) => p !== userId) || null;
+  return participants.find((participant) => participant !== userId) || null;
 }
 
 async function buildConversationContext(
@@ -89,7 +89,7 @@ async function buildConversationContext(
 }
 
 async function generateAgentResponse(
-  agent: import('../../agents/entities').Agent,
+  agent: import("../../agents/entities").Agent,
   conversationHistory: CoreMessage[],
   currentMessage: string,
 ): Promise<string | null> {

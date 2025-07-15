@@ -6,7 +6,7 @@ interface MessageData {
   type: "text" | "code" | "file" | "system";
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   isEdited: boolean;
 }
 
@@ -23,14 +23,24 @@ export class ProjectMessage {
     type?: "text" | "code" | "file" | "system";
     createdAt?: Date;
     updatedAt?: Date;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     isEdited?: boolean;
   }) {
     this.identity = props.id || crypto.randomUUID();
     this.data = this.buildMessageData(props);
   }
 
-  private buildMessageData(props: any): MessageData {
+  private buildMessageData(props: {
+    content: string;
+    channelId: string;
+    authorId: string;
+    authorName: string;
+    type?: "text" | "code" | "file" | "system";
+    createdAt?: Date;
+    updatedAt?: Date;
+    metadata?: Record<string, unknown>;
+    isEdited?: boolean;
+  }): MessageData {
     return {
       content: props.content.trim(),
       channelId: props.channelId,
@@ -80,7 +90,18 @@ export class ProjectMessage {
     return this.data.authorId === userId;
   }
 
-  toPlainObject(): any {
+  toPlainObject(): {
+    id: string;
+    content: string;
+    channelId: string;
+    authorId: string;
+    authorName: string;
+    type: "text" | "code" | "file" | "system";
+    createdAt: Date;
+    updatedAt: Date;
+    metadata: string | null;
+    isEdited: boolean;
+  } {
     return {
       id: this.identity,
       content: this.data.content,

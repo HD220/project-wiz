@@ -39,10 +39,7 @@ class ConversationStore {
     this.setState({ isLoading: true, error: null });
 
     try {
-      const conversations = (await window.electronIPC.invoke(
-        "dm:conversation:list",
-        filter,
-      )) as ConversationDto[];
+      const conversations = await window.electronIPC.conversations.list();
       this.setState({ conversations, isLoading: false });
     } catch (error) {
       this.setState({
@@ -54,7 +51,7 @@ class ConversationStore {
 
   async createConversation(dto: CreateConversationDto): Promise<void> {
     try {
-      await window.electronIPC.invoke("dm:conversation:create", dto);
+      await window.electronIPC.conversations.create(dto);
       await this.loadConversations();
     } catch (error) {
       this.setState({ error: (error as Error).message });
@@ -65,12 +62,7 @@ class ConversationStore {
     participants: string[],
   ): Promise<ConversationDto | null> {
     try {
-      const conversation = (await window.electronIPC.invoke(
-        "dm:conversation:findOrCreate",
-        {
-          participants,
-        },
-      )) as ConversationDto;
+      const conversation = await window.electronIPC.conversations.findOrCreate(participants);
       await this.loadConversations();
       return conversation;
     } catch (error) {
@@ -81,7 +73,7 @@ class ConversationStore {
 
   async getConversationById(id: string): Promise<ConversationDto | null> {
     try {
-      return await window.electronIPC.invoke("dm:conversation:getById", { id });
+      return await window.electronIPC.conversations.getById(id);
     } catch (error) {
       this.setState({ error: (error as Error).message });
       return null;

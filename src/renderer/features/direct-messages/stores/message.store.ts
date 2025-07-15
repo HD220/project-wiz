@@ -41,10 +41,11 @@ class MessageStore {
     this.setState({ isLoading: true, error: null });
 
     try {
-      const messages = (await window.electronIPC.invoke(
-        "dm:message:getByConversation",
-        { conversationId, limit, offset },
-      )) as MessageDto[];
+      const messages = await window.electronIPC.directMessages.listByConversation(
+        conversationId,
+        limit,
+        offset
+      );
 
       // Sort messages by timestamp (oldest first) to ensure correct order
       const sortedMessages = messages.sort(
@@ -64,7 +65,7 @@ class MessageStore {
 
   async createMessage(dto: CreateMessageDto): Promise<void> {
     try {
-      await window.electronIPC.invoke("dm:message:create", dto);
+      await window.electronIPC.directMessages.create(dto);
       await this.loadMessages(dto.conversationId || dto.contextId || "");
     } catch (error) {
       this.setState({ error: (error as Error).message });
@@ -73,6 +74,7 @@ class MessageStore {
 
   async getMessageById(id: string): Promise<MessageDto | null> {
     try {
+      // Note: Este método não está implementado no preload ainda
       return await window.electronIPC.invoke("dm:message:getById", { id });
     } catch (error) {
       this.setState({ error: (error as Error).message });

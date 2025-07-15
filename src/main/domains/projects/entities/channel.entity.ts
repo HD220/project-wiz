@@ -33,7 +33,15 @@ export class Channel {
     this.data = this.buildChannelData(props);
   }
 
-  private buildChannelData(props: any): ChannelData {
+  private buildChannelData(props: {
+    name: string;
+    projectId: string;
+    createdBy: string;
+    isPrivate?: boolean;
+    description?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }): ChannelData {
     return {
       name: new ChannelName(props.name),
       description: new ChannelDescription(props.description),
@@ -88,7 +96,16 @@ export class Channel {
     });
   }
 
-  toPlainObject(): any {
+  toPlainObject(): {
+    id: string;
+    name: string;
+    projectId: string;
+    createdBy: string;
+    isPrivate: boolean;
+    description: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } {
     return {
       id: this.identity,
       name: this.data.name.getValue(),

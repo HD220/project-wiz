@@ -229,6 +229,7 @@ export class ProjectName {
 - [x] 🤖 Quebrar métodos longos em métodos ≤10 linhas
 
 **✅ Implementado em 2025-07-15**
+
 - Arquivos criados: `src/main/domains/agents/entities/agent.entity.ts`, value objects, functions
 - Infraestrutura transparente: getDatabase(), getLogger(), publishEvent()
 - Object Calisthenics aplicado: ≤2 variáveis instância, ≤10 linhas/método
@@ -255,6 +256,7 @@ export class ProjectName {
 - [x] 🤖🔍 Integrar com system de eventos existente
 
 **✅ Implementado em 2025-07-15**
+
 - Arquivos: `agent.worker.ts`, `agent.queue.ts`, `agent-task.entity.ts`
 - Value Objects: TaskStatus, TaskPriority com validações Zod
 - Object Calisthenics: ≤2 variáveis instância, ≤50 linhas/classe
@@ -281,6 +283,7 @@ export class ProjectName {
 - [x] 🤖 Eliminar código duplicado
 
 **✅ Implementado em 2025-07-15**
+
 - Domínio LLM criado: `src/main/domains/llm/`
 - Value Objects: Temperature, MaxTokens, ModelConfig, ProviderType
 - Entidades: LLMProvider com Object Calisthenics
@@ -303,6 +306,7 @@ export class ProjectName {
 - [x] 🔍 Code review detalhado da nova estrutura
 
 **✅ Implementado em 2025-07-15**
+
 - Sprint 5-6 COMPLETO: Domínio Agents migrado
 - Object Calisthenics validado: ≤2 variáveis instância, ≤10 linhas/método, ≤50 linhas/classe
 - Worker/Queue infrastructure operacional
@@ -337,6 +341,7 @@ export class ProjectName {
 - [x] 🤖 Consolidar com `conversation.service.ts` existente
 
 **✅ Implementado em 2025-07-15**
+
 - Value Objects: UserIdentity, MessageContent, SenderType, ConversationType, UserSettings
 - Entidades: DirectMessage, User, UserPreferences (Object Calisthenics: ≤2 variáveis instância, ≤10 linhas/método)
 - Funções: createDirectMessage, getConversationMessages, processUserMessage, findConversationById
@@ -360,6 +365,7 @@ export class ProjectName {
 - [x] 🔍 Integração com autenticação existente
 
 **✅ Implementado em 2025-07-15**
+
 - Database schema: users table com settings JSON
 - User functions: createUser, updateUserProfile, updateUserSettings, getUserPreferences
 - IPC handlers: user:create, user:updateProfile, user:updateSettings, user:getPreferences
@@ -385,6 +391,7 @@ export class ProjectName {
 - [x] 🤖 `Temperature`, `MaxTokens`, `ModelConfig` value objects
 
 **✅ Implementado anteriormente**
+
 - LLMProvider entity: Object Calisthenics aplicado (≤2 variáveis instância, ≤50 linhas)
 - ProviderRegistry: Padrão singleton, suporte OpenAI e DeepSeek
 - Value Objects: Temperature, MaxTokens, ModelConfig, ProviderType com validações Zod

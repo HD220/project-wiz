@@ -1,6 +1,10 @@
-import { UserDto, UserSettingsDto, UserPreferencesDto } from "../../../../shared/types/user.types";
-import { User, UserPreferences } from "../entities";
+import {
+  UserDto,
+  UserSettingsDto,
+  UserPreferencesDto,
+} from "../../../../shared/types/user.types";
 import { UserSchema } from "../../../persistence/schemas";
+import { User, UserPreferences } from "../entities";
 
 export function userToDto(userRecord: UserSchema): UserDto {
   return {
@@ -25,7 +29,9 @@ export function userEntityToDto(user: User): UserDto {
   };
 }
 
-export function userPreferencesToDto(preferences: UserPreferences): UserPreferencesDto {
+export function userPreferencesToDto(
+  preferences: UserPreferences,
+): UserPreferencesDto {
   const settings = preferences.getSettings();
   return {
     userId: preferences.getUserId().getValue(),

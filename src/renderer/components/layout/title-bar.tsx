@@ -14,8 +14,8 @@ export function TitleBar({ className }: TitleBarProps) {
   useEffect(() => {
     // Check initial maximized state
     const checkMaximized = async () => {
-      if (window.electronIPC?.windowIsMaximized) {
-        const maximized = await window.electronIPC.windowIsMaximized();
+      if (window.electronIPC?.window?.isMaximized) {
+        const maximized = await window.electronIPC.window.isMaximized();
         setIsMaximized(maximized);
       }
     };
@@ -24,22 +24,22 @@ export function TitleBar({ className }: TitleBarProps) {
   }, []);
 
   const handleMinimize = async () => {
-    if (window.electronIPC?.windowMinimize) {
-      await window.electronIPC.windowMinimize();
+    if (window.electronIPC?.window?.minimize) {
+      await window.electronIPC.window.minimize();
     }
   };
 
   const handleMaximize = async () => {
-    if (window.electronIPC?.windowMaximize) {
-      await window.electronIPC.windowMaximize();
+    if (window.electronIPC?.window?.maximize) {
+      await window.electronIPC.window.maximize();
       // Toggle the state
       setIsMaximized(!isMaximized);
     }
   };
 
   const handleClose = async () => {
-    if (window.electronIPC?.windowClose) {
-      await window.electronIPC.windowClose();
+    if (window.electronIPC?.window?.close) {
+      await window.electronIPC.window.close();
     }
   };
 

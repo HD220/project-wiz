@@ -39,9 +39,7 @@ class UserStore {
     this.setState({ isLoading: true, error: null });
 
     try {
-      const user = (await window.electronIPC.invoke("user:getById", {
-        id: userId,
-      })) as UserDto | null;
+      const user = await window.electronIPC.users.getById(userId);
       this.setState({ currentUser: user, isLoading: false });
     } catch (error) {
       this.setState({
@@ -53,10 +51,7 @@ class UserStore {
 
   async createUser(dto: CreateUserDto): Promise<UserDto | null> {
     try {
-      const user = (await window.electronIPC.invoke(
-        "user:create",
-        dto,
-      )) as UserDto;
+      const user = await window.electronIPC.users.create(dto);
       this.setState({ currentUser: user });
       return user;
     } catch (error) {
@@ -67,7 +62,7 @@ class UserStore {
 
   async updateProfile(dto: UpdateUserDto): Promise<void> {
     try {
-      await window.electronIPC.invoke("user:updateProfile", dto);
+      await window.electronIPC.users.updateProfile(dto.id, dto);
       if (this.state.currentUser) {
         await this.loadCurrentUser(this.state.currentUser.id);
       }
@@ -78,7 +73,7 @@ class UserStore {
 
   async updateSettings(dto: UpdateUserSettingsDto): Promise<void> {
     try {
-      await window.electronIPC.invoke("user:updateSettings", dto);
+      await window.electronIPC.users.updateSettings(dto.id, dto.settings);
       if (this.state.currentUser) {
         this.setState({
           currentUser: {
@@ -94,9 +89,7 @@ class UserStore {
 
   async getPreferences(userId: string): Promise<UserPreferencesDto | null> {
     try {
-      return await window.electronIPC.invoke("user:getPreferences", {
-        userId,
-      });
+      return await window.electronIPC.users.getPreferences(userId);
     } catch (error) {
       this.setState({ error: (error as Error).message });
       return null;
@@ -105,7 +98,7 @@ class UserStore {
 
   async deleteUser(userId: string): Promise<void> {
     try {
-      await window.electronIPC.invoke("user:delete", { id: userId });
+      await window.electronIPC.users.delete(userId);
       this.setState({ currentUser: null });
     } catch (error) {
       this.setState({ error: (error as Error).message });

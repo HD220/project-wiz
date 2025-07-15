@@ -23,7 +23,7 @@ export async function createDirectMessage(data: {
   const senderType = new SenderType(data.senderType);
   const messageId = new UserIdentity(crypto.randomUUID());
 
-  const message = new DirectMessage(messageId, content);
+  const _message = new DirectMessage(messageId, content);
 
   const result = await db
     .insert(messages)

@@ -2,7 +2,10 @@ import { eq, desc, and } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
-import { channelMessages as MessageTable } from "../../../persistence/schemas/channel-messages.schema";
+import {
+  channelMessages,
+  type ChannelMessageSchema,
+} from "../../../persistence/schemas/channel-messages.schema";
 import { ProjectMessage } from "../entities";
 
 const logger = getLogger("project-messages.functions");
@@ -13,8 +16,8 @@ export async function createProjectMessage(data: {
   authorId: string;
   authorName: string;
   type?: "text" | "code" | "file" | "system";
-  metadata?: Record<string, any>;
-}): Promise<any> {
+  metadata?: Record<string, unknown>;
+}): Promise<ChannelMessageSchema> {
   try {
     const message = new ProjectMessage({
       content: data.content,
@@ -27,7 +30,7 @@ export async function createProjectMessage(data: {
 
     const db = getDatabase();
     const saved = await db
-      .insert(MessageTable)
+      .insert(channelMessages)
       .values(message.toPlainObject())
       .returning();
 
@@ -40,13 +43,15 @@ export async function createProjectMessage(data: {
   }
 }
 
-export async function findMessageById(id: string): Promise<any | null> {
+export async function findMessageById(
+  id: string,
+): Promise<ChannelMessageSchema | null> {
   try {
     const db = getDatabase();
     const results = await db
       .select()
-      .from(MessageTable)
-      .where(eq(MessageTable.id, id));
+      .from(channelMessages)
+      .where(eq(channelMessages.id, id));
 
     if (results.length === 0) {
       logger.warn(`Message not found: ${id}`);
@@ -63,14 +68,14 @@ export async function findMessageById(id: string): Promise<any | null> {
 export async function findMessagesByChannel(
   channelId: string,
   limit: number = 50,
-): Promise<any[]> {
+): Promise<ChannelMessageSchema[]> {
   try {
     const db = getDatabase();
     const results = await db
       .select()
-      .from(MessageTable)
-      .where(eq(MessageTable.channelId, channelId))
-      .orderBy(desc(MessageTable.createdAt))
+      .from(channelMessages)
+      .where(eq(channelMessages.channelId, channelId))
+      .orderBy(desc(channelMessages.createdAt))
       .limit(limit);
 
     logger.info(`Found ${results.length} messages for channel: ${channelId}`);
@@ -84,25 +89,25 @@ export async function findMessagesByChannel(
 export async function findMessagesByAuthor(
   authorId: string,
   channelId?: string,
-): Promise<any[]> {
+): Promise<ChannelMessageSchema[]> {
   try {
     const db = getDatabase();
 
     let whereCondition;
     if (channelId) {
       whereCondition = and(
-        eq(MessageTable.authorId, authorId),
-        eq(MessageTable.channelId, channelId),
+        eq(channelMessages.authorId, authorId),
+        eq(channelMessages.channelId, channelId),
       );
     } else {
-      whereCondition = eq(MessageTable.authorId, authorId);
+      whereCondition = eq(channelMessages.authorId, authorId);
     }
 
     const results = await db
       .select()
-      .from(MessageTable)
+      .from(channelMessages)
       .where(whereCondition)
-      .orderBy(desc(MessageTable.createdAt));
+      .orderBy(desc(channelMessages.createdAt));
 
     logger.info(`Found ${results.length} messages by author: ${authorId}`);
     return results;
@@ -123,13 +128,16 @@ export async function deleteMessage(id: string, userId: string): Promise<void> {
       throw new Error("Message not found");
     }
 
-    const message = new ProjectMessage(existing);
+    const message = new ProjectMessage({
+      ...existing,
+      metadata: existing.metadata ? JSON.parse(existing.metadata) : undefined,
+    });
     if (!message.canBeDeletedBy(userId)) {
       throw new Error("User cannot delete this message");
     }
 
     const db = getDatabase();
-    await db.delete(MessageTable).where(eq(MessageTable.id, id));
+    await db.delete(channelMessages).where(eq(channelMessages.id, id));
 
     logger.info(`Message deleted: ${id} by user: ${userId}`);
   } catch (error) {

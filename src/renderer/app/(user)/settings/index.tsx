@@ -12,8 +12,8 @@ import {
 import { useState, useEffect } from "react";
 
 import { useTheme } from "@/renderer/contexts/theme-context";
-import { useUser } from "@/renderer/features/user-management/hooks/use-user.hook";
 import { LlmProviderManagement } from "@/renderer/features/llm-provider-management/components/llm-provider-management";
+import { useUser } from "@/renderer/features/user-management/hooks/use-user.hook";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,7 @@ export function UserSettingsPage() {
       // For now, create a default user if none exists
       // In a real app, you'd have proper user authentication
       const userId = currentUser?.id || "default-user";
-      
+
       // Update user profile
       await updateProfile({
         id: userId,

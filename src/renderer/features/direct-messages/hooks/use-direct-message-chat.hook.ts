@@ -90,13 +90,10 @@ export function useDirectMessageChat({
         setIsTyping(true);
 
         // Enviar mensagem para o agente via IPC
-        const response = await window.electronIPC.invoke(
-          "dm:agent:sendMessage",
-          {
-            conversationId,
-            message: content.trim(),
-            userId: "user",
-          },
+        const response = await window.electronIPC.directMessages.sendAgent(
+          conversationId,
+          content.trim(),
+          "user"
         );
 
         // Remover mensagens otimistas e recarregar do banco
@@ -130,11 +127,9 @@ export function useDirectMessageChat({
     setIsTyping(true);
 
     try {
-      const regeneratedMessage = await window.electronIPC.invoke(
-        "dm:agent:regenerateResponse",
-        {
-          conversationId,
-        },
+      const regeneratedMessage = await window.electronIPC.directMessages.regenerateResponse(
+        conversationId,
+        "user"
       );
 
       // Recarregar mensagens

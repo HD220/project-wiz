@@ -103,3 +103,20 @@ export async function findOrCreateDirectMessage(
 
   return await createConversation({ participants });
 }
+
+export async function findAllConversations(): Promise<ConversationDto[]> {
+  const db = getDatabase();
+
+  const result = await db
+    .select()
+    .from(conversations);
+
+  return result.map((conversation) => ({
+    ...conversation,
+    participants: JSON.parse(conversation.participants),
+    createdAt: new Date(conversation.createdAt),
+    lastMessageAt: conversation.lastMessageAt
+      ? new Date(conversation.lastMessageAt)
+      : undefined,
+  }));
+}

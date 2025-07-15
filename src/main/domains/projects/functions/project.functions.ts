@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
-import { publishEvent } from "../../../infrastructure/events";
 import { getLogger } from "../../../infrastructure/logger";
-import { projects as ProjectTable } from "../../../persistence/schemas/projects.schema";
+import {
+  projects,
+  type ProjectSchema,
+} from "../../../persistence/schemas/projects.schema";
 import { Project } from "../entities";
 
 const logger = getLogger("projects.functions");
@@ -13,7 +15,7 @@ export async function createProject(data: {
   description?: string | null;
   gitUrl?: string | null;
   createdBy?: string;
-}): Promise<any> {
+}): Promise<ProjectSchema> {
   try {
     const project = new Project({
       name: data.name,
@@ -23,7 +25,7 @@ export async function createProject(data: {
 
     const db = getDatabase();
     const saved = await db
-      .insert(ProjectTable)
+      .insert(projects)
       .values(project.toPlainObject())
       .returning();
 
@@ -36,13 +38,12 @@ export async function createProject(data: {
   }
 }
 
-export async function findProjectById(id: string): Promise<any | null> {
+export async function findProjectById(
+  id: string,
+): Promise<ProjectSchema | null> {
   try {
     const db = getDatabase();
-    const results = await db
-      .select()
-      .from(ProjectTable)
-      .where(eq(ProjectTable.id, id));
+    const results = await db.select().from(projects).where(eq(projects.id, id));
 
     if (results.length === 0) {
       logger.warn(`Project not found: ${id}`);
@@ -58,13 +59,13 @@ export async function findProjectById(id: string): Promise<any | null> {
 
 export async function findProjectsByStatus(
   status: "active" | "inactive" | "archived" = "active",
-): Promise<any[]> {
+): Promise<ProjectSchema[]> {
   try {
     const db = getDatabase();
     const results = await db
       .select()
-      .from(ProjectTable)
-      .where(eq(ProjectTable.status, status));
+      .from(projects)
+      .where(eq(projects.status, status));
 
     logger.info(`Found ${results.length} projects with status: ${status}`);
     return results;
@@ -78,15 +79,15 @@ export async function findAllProjects(filter?: {
   status?: "active" | "inactive" | "archived";
   limit?: number;
   offset?: number;
-}): Promise<any[]> {
+}): Promise<ProjectSchema[]> {
   try {
     const db = getDatabase();
 
     if (filter?.status) {
       const results = await db
         .select()
-        .from(ProjectTable)
-        .where(eq(ProjectTable.status, filter.status))
+        .from(projects)
+        .where(eq(projects.status, filter.status))
         .limit(filter.limit || 1000)
         .offset(filter.offset || 0);
 
@@ -96,7 +97,7 @@ export async function findAllProjects(filter?: {
 
     const results = await db
       .select()
-      .from(ProjectTable)
+      .from(projects)
       .limit(filter?.limit || 1000)
       .offset(filter?.offset || 0);
 
@@ -113,7 +114,7 @@ export async function updateProject(data: {
   name?: string;
   description?: string | null;
   gitUrl?: string | null;
-}): Promise<any> {
+}): Promise<ProjectSchema> {
   try {
     const existing = await findProjectById(data.id);
     if (!existing) {
@@ -134,9 +135,9 @@ export async function updateProject(data: {
 
     const db = getDatabase();
     const updated = await db
-      .update(ProjectTable)
+      .update(projects)
       .set(project.toPlainObject())
-      .where(eq(ProjectTable.id, data.id))
+      .where(eq(projects.id, data.id))
       .returning();
 
     logger.info(`Project updated: ${data.id}`);
@@ -156,7 +157,7 @@ export async function deleteProject(id: string): Promise<void> {
     }
 
     const db = getDatabase();
-    await db.delete(ProjectTable).where(eq(ProjectTable.id, id));
+    await db.delete(projects).where(eq(projects.id, id));
 
     logger.info(`Project deleted: ${id}`);
   } catch (error) {
@@ -165,7 +166,7 @@ export async function deleteProject(id: string): Promise<void> {
   }
 }
 
-export async function archiveProject(id: string): Promise<any> {
+export async function archiveProject(id: string): Promise<ProjectSchema> {
   try {
     const existing = await findProjectById(id);
     if (!existing) {
@@ -177,9 +178,9 @@ export async function archiveProject(id: string): Promise<any> {
 
     const db = getDatabase();
     const updated = await db
-      .update(ProjectTable)
+      .update(projects)
       .set(project.toPlainObject())
-      .where(eq(ProjectTable.id, id))
+      .where(eq(projects.id, id))
       .returning();
 
     logger.info(`Project archived: ${id}`);
