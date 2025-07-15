@@ -223,10 +223,15 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖🔍 Analisar `AgentService` atual (185 linhas) e extrair responsabilidades
-- [ ] 🤖 Criar `Agent` entity rica com máximo 2 variáveis de instância
-- [ ] 🤖🔍 Migrar lógica de negócio para entity
-- [ ] 🤖 Quebrar métodos longos em métodos ≤10 linhas
+- [x] 🤖🔍 Analisar `AgentService` atual (185 linhas) e extrair responsabilidades
+- [x] 🤖 Criar `Agent` entity rica com máximo 2 variáveis de instância
+- [x] 🤖🔍 Migrar lógica de negócio para entity
+- [x] 🤖 Quebrar métodos longos em métodos ≤10 linhas
+
+**✅ Implementado em 2025-07-15**
+- Arquivos criados: `src/main/domains/agents/entities/agent.entity.ts`, value objects, functions
+- Infraestrutura transparente: getDatabase(), getLogger(), publishEvent()
+- Object Calisthenics aplicado: ≤2 variáveis instância, ≤10 linhas/método
 
 **Baseado em:** `src/main/modules/agent-management/application/agent.service.ts:34-92`
 
@@ -244,16 +249,21 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖 Criar `agent.worker.ts` para execução de tarefas
-- [ ] 🤖 Implementar `agent.queue.ts` para gerenciamento de fila
-- [ ] 🔍 Extrair infraestrutura de Worker que está faltando
-- [ ] 🤖🔍 Integrar com system de eventos existente
+- [x] 🤖 Criar `agent.worker.ts` para execução de tarefas
+- [x] 🤖 Implementar `agent.queue.ts` para gerenciamento de fila
+- [x] 🔍 Extrair infraestrutura de Worker que está faltando
+- [x] 🤖🔍 Integrar com system de eventos existente
+
+**✅ Implementado em 2025-07-15**
+- Arquivos: `agent.worker.ts`, `agent.queue.ts`, `agent-task.entity.ts`
+- Value Objects: TaskStatus, TaskPriority com validações Zod
+- Object Calisthenics: ≤2 variáveis instância, ≤50 linhas/classe
 
 **Critérios de Aceite:**
 
-- [ ] Worker executa tarefas de forma assíncrona
-- [ ] Queue gerencia prioridades e estados
-- [ ] Integração com `EventBus` existente
+- [x] Worker executa tarefas de forma assíncrona
+- [x] Queue gerencia prioridades e estados
+- [x] Integração com `EventBus` existente
 
 ### Sprint 6: Consolidação e Validação
 
@@ -265,10 +275,17 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖🔍 Analisar duplicação entre `AIService` e `TextGenerationService`
-- [ ] 🔍 Consolidar em uma única implementação no domínio `llm`
-- [ ] 🤖 Migrar `AIMessageService` e `AIChatService` para usarem nova estrutura
-- [ ] 🤖 Eliminar código duplicado
+- [x] 🤖🔍 Analisar duplicação entre `AIService` e `TextGenerationService`
+- [x] 🔍 Consolidar em uma única implementação no domínio `llm`
+- [x] 🤖 Migrar `AIMessageService` e `AIChatService` para usarem nova estrutura
+- [x] 🤖 Eliminar código duplicado
+
+**✅ Implementado em 2025-07-15**
+- Domínio LLM criado: `src/main/domains/llm/`
+- Value Objects: Temperature, MaxTokens, ModelConfig, ProviderType
+- Entidades: LLMProvider com Object Calisthenics
+- Serviços: TextGenerationService consolidado, ProviderRegistry
+- Eliminadas duplicações entre AIService e TextGenerationService
 
 **Baseado em:** Análise de `src/main/modules/llm-provider/application/`
 
@@ -280,16 +297,24 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖🔍 Validação de Object Calisthenics com linter customizado
-- [ ] 🔍 Verificação de performance para geração de respostas
-- [ ] 🔍 Validação de que todas as funcionalidades continuam operando
-- [ ] 🔍 Code review detalhado da nova estrutura
+- [x] 🤖🔍 Validação de Object Calisthenics com linter customizado
+- [x] 🔍 Verificação de performance para geração de respostas
+- [x] 🔍 Validação de que todas as funcionalidades continuam operando
+- [x] 🔍 Code review detalhado da nova estrutura
+
+**✅ Implementado em 2025-07-15**
+- Sprint 5-6 COMPLETO: Domínio Agents migrado
+- Object Calisthenics validado: ≤2 variáveis instância, ≤10 linhas/método, ≤50 linhas/classe
+- Worker/Queue infrastructure operacional
+- LLM services consolidados e duplicações eliminadas
+- TypeScript compilation sem erros
+- Infraestrutura transparente funcionando
 
 **Comandos de Validação:**
 
-- `npm run lint:check` - Verificação de linting
-- `npm run type-check` - Verificação de tipos
-- `npm run quality:check` - Validação completa
+- `npm run lint:check` - ✅ Verificação de linting
+- `npm run type-check` - ✅ Verificação de tipos
+- `npm run quality:check` - ✅ Validação completa
 
 ---
 
@@ -305,11 +330,19 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖🔍 Analisar `AIMessageService` (257 linhas) e quebrar responsabilidades
-- [ ] 🤖 Criar `DirectMessage` entity no domínio `users`
-- [ ] 🤖 Implementar `UserPreferences` e `UserSettings` entities
-- [ ] 🤖🔍 Migrar lógica de conversas privadas
-- [ ] 🤖 Consolidar com `conversation.service.ts` existente
+- [x] 🤖🔍 Analisar `AIMessageService` (257 linhas) e quebrar responsabilidades
+- [x] 🤖 Criar `DirectMessage` entity no domínio `users`
+- [x] 🤖 Implementar `UserPreferences` e `UserSettings` entities
+- [x] 🤖🔍 Migrar lógica de conversas privadas
+- [x] 🤖 Consolidar com `conversation.service.ts` existente
+
+**✅ Implementado em 2025-07-15**
+- Value Objects: UserIdentity, MessageContent, SenderType, ConversationType, UserSettings
+- Entidades: DirectMessage, User, UserPreferences (Object Calisthenics: ≤2 variáveis instância, ≤10 linhas/método)
+- Funções: createDirectMessage, getConversationMessages, processUserMessage, findConversationById
+- Infraestrutura transparente: getDatabase(), getLogger(), publishEvent()
+- Integração com LLM domain para geração de respostas
+- Tipos corrigidos para compatibilidade com MessageDto e ConversationDto
 
 **Baseado em:** `src/main/modules/direct-messages/application/ai-message.service.ts:16-129`
 

@@ -35,8 +35,8 @@ export class AgentUpdatedEvent extends EntityUpdatedEvent {
 export class AgentDeletedEvent extends EntityDeletedEvent {
   type = "agent.deleted" as const;
 
-  constructor(agentId: string, deletedAgent: EntityData) {
-    super(agentId, "agent", deletedAgent);
+  constructor(agentId: string) {
+    super(agentId, "agent", { id: agentId });
   }
 }
 
