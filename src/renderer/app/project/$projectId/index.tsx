@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+import { useProjects } from "@/domains/projects/hooks/use-projects.hook";
 
 import { ProjectDto } from "@/shared/types";
 

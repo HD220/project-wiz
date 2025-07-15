@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ProjectSidebar } from "@/features/project-management/components/project-sidebar";
+import { ProjectSidebar } from "@/domains/projects/components/project-sidebar";
 
 interface AppSidebarProps {
   // Props drilling eliminated - using direct navigation

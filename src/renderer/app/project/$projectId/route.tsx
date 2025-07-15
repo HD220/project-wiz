@@ -15,11 +15,11 @@ import {
 import { getAgentsByProject } from "@/renderer/lib/placeholders";
 
 import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
-import { useProjectChannels } from "@/features/communication/hooks/use-channels.hook";
-import { AgentsSidebar } from "@/features/project-management/components/agents-sidebar";
-import { CreateChannelModal } from "@/features/project-management/components/create-channel-modal";
-import { ProjectNavigation } from "@/features/project-management/components/project-navigation";
-import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
+import { useProjectChannels } from "@/domains/projects/hooks/use-project-channels.hook";
+import { AgentsSidebar } from "@/domains/agents/components/agents-sidebar";
+import { CreateChannelModal } from "@/domains/projects/components/create-channel-modal";
+import { ProjectNavigation } from "@/domains/projects/components/project-navigation";
+import { useProjects } from "@/domains/projects/hooks/use-projects.hook";
 
 import { ProjectDto } from "@/shared/types";
 

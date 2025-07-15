@@ -33,10 +33,10 @@ export const Route = createFileRoute("/(user)/conversation/$conversationId")({
   component: ConversationPage,
   pendingComponent: ConversationSkeleton,
   loader: async ({ params }) => {
-    const { conversationStore } = await import(
-      "../../../features/direct-messages/stores/conversation.store"
+    const { conversationService } = await import(
+      "../../../domains/users/services/conversation.service"
     );
-    const conversation = await conversationStore.getConversationById(
+    const conversation = await conversationService.getById(
       params.conversationId,
     );
     return {

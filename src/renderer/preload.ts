@@ -1,12 +1,12 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
-// Import types from shared
-import type { AgentDto, CreateAgentDto, UpdateAgentDto } from "../shared/types/agent.types";
-import type { ProjectDto, CreateProjectDto, UpdateProjectDto } from "../shared/types/project.types";
-import type { UserDto, CreateUserDto, UpdateUserDto, UserPreferencesDto } from "../shared/types/user.types";
-import type { LlmProviderDto, CreateLlmProviderDto, UpdateLlmProviderDto } from "../shared/types/llm-provider.types";
-import type { ConversationDto, CreateConversationDto, MessageDto, CreateMessageDto } from "../shared/types/message.types";
-import type { ChannelDto, CreateChannelDto } from "../shared/types/channel.types";
+// Import types from shared (organized by domains)
+import type { AgentDto, CreateAgentDto, UpdateAgentDto } from "../shared/types/domains/agents/agent.types";
+import type { ProjectDto, CreateProjectDto, UpdateProjectDto } from "../shared/types/domains/projects/project.types";
+import type { UserDto, CreateUserDto, UpdateUserDto, UserPreferencesDto } from "../shared/types/domains/users/user.types";
+import type { LlmProviderDto, CreateLlmProviderDto, UpdateLlmProviderDto } from "../shared/types/domains/llm/llm-provider.types";
+import type { ConversationDto, CreateConversationDto, MessageDto, CreateMessageDto } from "../shared/types/domains/users/message.types";
+import type { ChannelDto, CreateChannelDto } from "../shared/types/domains/projects/channel.types";
 
 // Import constants
 import { IPC_CHANNELS } from "../shared/constants";
