@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
 
-import { ProjectDto } from "@/shared/types/project.types";
+import { ProjectDto } from "@/shared/types";
 
 export function ProjectIndexPage() {
   const { projectId } = Route.useParams();

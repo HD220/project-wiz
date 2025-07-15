@@ -7,7 +7,7 @@ import { messages } from "../../../persistence/schemas";
 import { DirectMessage } from "../entities";
 import { MessageContent, SenderType, UserIdentity } from "../value-objects";
 
-import type { MessageDto } from "../../../../shared/types/message.types";
+import type { MessageDto } from "../../../../shared/types";
 
 const logger = getLogger("DirectMessageFunctions");
 

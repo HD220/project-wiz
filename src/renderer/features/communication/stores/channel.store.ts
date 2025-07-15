@@ -3,7 +3,7 @@ import type {
   CreateChannelDto,
   UpdateChannelDto,
   ChannelFilterDto,
-} from "../../../../shared/types/channel.types";
+} from "@/shared/types";
 
 interface ChannelStoreState {
   channels: ChannelDto[];

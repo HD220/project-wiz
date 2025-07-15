@@ -1,9 +1,9 @@
-// Central export for all shared types
-export * from "./agent.types";
-export * from "./llm-provider.types";
-export * from "./message.types";
-export * from "./project.types";
-export * from "./user.types";
+// Central export for all shared types organized by domains
+export * from "./domains/agents/agent.types";
+export * from "./domains/llm/llm-provider.types";
+export * from "./domains/users/message.types";
+export * from "./domains/projects/project.types";
+export * from "./domains/users/user.types";
 
 // Re-export channel types to avoid conflicts
 export {
@@ -11,7 +11,7 @@ export {
   CreateChannelDto,
   UpdateChannelDto,
   ChannelFilterDto,
-} from "./channel.types";
+} from "./domains/projects/channel.types";
 
 // Re-export channel message types to avoid conflicts
 export {
@@ -26,4 +26,4 @@ export {
   AISendMessageResponseDto,
   AIRegenerateMessageRequestDto,
   AIChatConfigDto,
-} from "./channel-message.types";
+} from "./domains/projects/channel-message.types";

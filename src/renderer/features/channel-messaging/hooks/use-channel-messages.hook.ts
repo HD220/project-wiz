@@ -7,7 +7,7 @@ import type {
   UpdateChannelMessageDto,
   ChannelMessageFilterDto,
   ChannelMessageDto,
-} from "../../../../shared/types/channel-message.types";
+} from "@/shared/types";
 
 export function useChannelMessages(filter?: ChannelMessageFilterDto) {
   const state = useSyncExternalStore(

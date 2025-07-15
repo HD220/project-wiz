@@ -11,10 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { useAgentChat } from "../hooks/use-agent-chat.hook";
 
-import type {
-  ConversationDto,
-  MessageDto,
-} from "../../../../shared/types/message.types";
+import type { ConversationDto, MessageDto } from "@/shared/types";
 
 interface ConversationViewProps {
   conversationId: string;

@@ -8,7 +8,7 @@ import {
   getConversationMessages,
 } from "./direct-message.functions";
 
-import type { MessageDto } from "../../../../shared/types/message.types";
+import type { MessageDto } from "../../../../shared/types";
 import type { CoreMessage } from "ai";
 
 const logger = getLogger("AIMessagingFunctions");

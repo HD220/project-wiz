@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { MessageItem } from "./message-item";
 
-import type { ChannelMessageDto } from "../../../shared/types/channel-message.types";
+import type { ChannelMessageDto } from "@/shared/types";
 
 interface ChatContainerProps {
   channelId?: string;

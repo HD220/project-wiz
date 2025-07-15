@@ -9,7 +9,7 @@ import { UserIdentity } from "../value-objects";
 import type {
   ConversationDto,
   CreateConversationDto,
-} from "../../../../shared/types/message.types";
+} from "../../../../shared/types";
 
 const logger = getLogger("ConversationFunctions");
 

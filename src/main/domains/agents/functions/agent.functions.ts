@@ -23,7 +23,7 @@ import type {
   CreateAgentDto,
   UpdateAgentDto,
   AgentFilterDto,
-} from "../../../../shared/types/agent.types";
+} from "../../../../shared/types";
 
 export type AgentWithData = Agent & {
   id: string;

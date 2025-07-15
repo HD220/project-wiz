@@ -1,4 +1,4 @@
-import { ProjectDto } from "../../../../shared/types/project.types";
+import { ProjectDto } from "../../../../shared/types";
 import { ProjectSchema } from "../../../persistence/schemas/projects.schema";
 
 export function projectToDto(project: ProjectSchema): ProjectDto {

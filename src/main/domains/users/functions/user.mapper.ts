@@ -2,7 +2,7 @@ import {
   UserDto,
   UserSettingsDto,
   UserPreferencesDto,
-} from "../../../../shared/types/user.types";
+} from "../../../../shared/types";
 import { UserSchema } from "../../../persistence/schemas";
 import { User, UserPreferences } from "../entities";
 

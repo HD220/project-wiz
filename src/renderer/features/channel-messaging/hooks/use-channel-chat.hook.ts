@@ -9,7 +9,7 @@ import type {
   AISendMessageResponseDto,
   AIRegenerateMessageRequestDto,
   AIChatConfigDto,
-} from "../../../../shared/types/channel-message.types";
+} from "@/shared/types";
 
 interface UseChannelChatProps {
   channelId: string;

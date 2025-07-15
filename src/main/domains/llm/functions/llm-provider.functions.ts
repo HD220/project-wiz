@@ -15,7 +15,7 @@ import type {
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
   LlmProviderFilterDto,
-} from "../../../../shared/types/llm-provider.types";
+} from "../../../../shared/types";
 
 const logger = getLogger("llm-provider.functions");
 

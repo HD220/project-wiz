@@ -58,28 +58,4 @@ export interface ConversationFilterDto {
   participantId?: string;
 }
 
-// Channels (for project channels)
-export interface ChannelDto {
-  id: string;
-  name: string;
-  description?: string;
-  projectId: string;
-  isPrivate: boolean;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateChannelDto {
-  name: string;
-  description?: string;
-  projectId: string;
-  isPrivate?: boolean;
-  createdBy: string;
-}
-
-export interface ChannelFilterDto {
-  projectId?: string;
-  isPrivate?: boolean;
-  createdBy?: string;
-}
+// Note: Channel types are now in domains/projects/channel.types.ts

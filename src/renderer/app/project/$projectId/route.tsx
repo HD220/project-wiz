@@ -21,7 +21,7 @@ import { CreateChannelModal } from "@/features/project-management/components/cre
 import { ProjectNavigation } from "@/features/project-management/components/project-navigation";
 import { useProjects } from "@/features/project-management/hooks/use-projects.hook";
 
-import { ProjectDto } from "@/shared/types/project.types";
+import { ProjectDto } from "@/shared/types";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();

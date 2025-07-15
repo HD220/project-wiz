@@ -7,7 +7,7 @@ import type {
   UpdateChannelDto,
   ChannelFilterDto,
   ChannelDto,
-} from "../../../../shared/types/channel.types";
+} from "@/shared/types";
 
 export function useChannels(filter?: ChannelFilterDto) {
   const state = useSyncExternalStore(

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { useConversations } from "../hooks/use-conversations.hook";
 
-import type { ConversationDto } from "../../../../shared/types/message.types";
+import type { ConversationDto } from "@/shared/types";
 
 interface ConversationListProps {
   // No more callback props needed!

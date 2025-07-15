@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import type { AgentDto } from "../../../../shared/types/agent.types";
+import type { AgentDto } from "@/shared/types";
 
 interface UseAgentsReturn {
   agents: AgentDto[];

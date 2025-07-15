@@ -4,7 +4,7 @@ import type {
   UpdateChannelMessageDto,
   ChannelMessageFilterDto,
   ChannelMessagePaginationDto,
-} from "../../../../shared/types/channel-message.types";
+} from "@/shared/types";
 
 interface ChannelMessageStoreState {
   messagesByChannel: Record<string, ChannelMessageDto[]>;
