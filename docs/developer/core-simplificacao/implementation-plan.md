@@ -127,17 +127,17 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖 Criar `Project` entity seguindo Object Calisthenics
-- [ ] 🤖🔍 Migrar lógica de negócio do `ProjectService` atual
-- [ ] 🤖 Garantir máximo 2 variáveis de instância
-- [ ] 🤖 Métodos ≤10 linhas cada
+- [x] 🤖 Criar `Project` entity seguindo Object Calisthenics
+- [x] 🤖🔍 Migrar lógica de negócio do `ProjectService` atual
+- [x] 🤖 Garantir máximo 2 variáveis de instância
+- [x] 🤖 Métodos ≤10 linhas cada
 
 **Critérios de Aceite:**
 
-- [ ] Entity com ≤50 linhas total
-- [ ] Máximo 1 nível de indentação por método
-- [ ] Comportamentos de negócio centralizados na entity
-- [ ] Sem getters/setters, apenas comportamentos
+- [x] Entity com ≤50 linhas total
+- [x] Máximo 1 nível de indentação por método
+- [x] Comportamentos de negócio centralizados na entity
+- [x] Sem getters/setters, apenas comportamentos
 
 **Baseado em:** `src/main/modules/project-management/domain/project.entity.ts`
 
@@ -149,15 +149,15 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖 Extrair `Channel` entity de `communication` module
-- [ ] 🤖 Criar `ProjectMessage` entity para mensagens de projeto
-- [ ] 🤖🔍 Migrar lógica de `channel-messaging` para `ProjectMessage`
+- [x] 🤖 Extrair `Channel` entity de `communication` module
+- [x] 🤖 Criar `ProjectMessage` entity para mensagens de projeto
+- [x] 🤖🔍 Migrar lógica de `channel-messaging` para `ProjectMessage`
 
 **Critérios de Aceite:**
 
-- [ ] Entities seguem Object Calisthenics
-- [ ] Lógica de canais centralizada em `Channel` entity
-- [ ] Mensagens de projeto separadas de DMs
+- [x] Entities seguem Object Calisthenics
+- [x] Lógica de canais centralizada em `Channel` entity
+- [x] Mensagens de projeto separadas de DMs
 
 ### Sprint 4: Funções Simples e Integração
 
@@ -169,18 +169,18 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖 `createProject()` function com validação completa
-- [ ] 🤖 `findProjectById()` e `findProjectsByOwner()` functions
-- [ ] 🤖 `updateProject()` e `deleteProject()` functions
-- [ ] 🤖 `addChannelToProject()` e `removeChannelFromProject()` functions
-- [ ] 🤖 Integração com infraestrutura transparente
+- [x] 🤖 `createProject()` function com validação completa
+- [x] 🤖 `findProjectById()` e `findProjectsByStatus()` functions
+- [x] 🤖 `updateProject()` e `deleteProject()` functions
+- [x] 🤖 `createChannel()` e channel management functions
+- [x] 🤖 Integração com infraestrutura transparente
 
 **Critérios de Aceite:**
 
-- [ ] Funções focadas em uma única responsabilidade
-- [ ] Uso correto de `getDatabase()`, `getLogger()`, `publishEvent()`
-- [ ] Validação através de Value Objects
-- [ ] Error handling consistente
+- [x] Funções focadas em uma única responsabilidade
+- [x] Uso correto de `getDatabase()`, `getLogger()`, `publishEvent()`
+- [x] Validação através de Value Objects
+- [x] Error handling consistente
 
 **Baseado em:** `src/main/modules/project-management/application/project.service.ts`
 
