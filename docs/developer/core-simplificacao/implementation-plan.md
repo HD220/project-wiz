@@ -32,16 +32,16 @@ Este plano detalha a execução da simplificação e reorganização do core do 
 
 **Tarefas:**
 
-- [ ] 🤖 Criar estrutura `/src/main/domains/`
-- [ ] 🤖 Setup de diretórios: `projects/`, `agents/`, `users/`, `llm/`
-- [ ] 🤖 Criar subdiretorios padrão: `value-objects/`, `entities/`, `functions/`
-- [ ] 🤖 Configurar imports e paths no TypeScript
+- [x] 🤖 Criar estrutura `/src/main/domains/`
+- [x] 🤖 Setup de diretórios: `projects/`, `agents/`, `users/`, `llm/`
+- [x] 🤖 Criar subdiretorios padrão: `value-objects/`, `entities/`, `functions/`
+- [x] 🤖 Configurar imports e paths no TypeScript
 
 **Critérios de Aceite:**
 
-- [ ] Estrutura de diretórios criada conforme implementation-guide.md
-- [ ] TypeScript compila sem erros
-- [ ] Imports relativos configurados corretamente
+- [x] Estrutura de diretórios criada conforme implementation-guide.md
+- [x] TypeScript compila sem erros
+- [x] Imports relativos configurados corretamente
 
 **Comandos de Validação:**
 
@@ -56,18 +56,18 @@ Este plano detalha a execução da simplificação e reorganização do core do 
 
 **Tarefas:**
 
-- [ ] 🤖 Implementar `getDatabase()` em `src/main/infrastructure/database.ts`
-- [ ] 🤖 Implementar `getLogger(context)` em `src/main/infrastructure/logger.ts`
-- [ ] 🤖 Implementar `publishEvent()` em `src/main/infrastructure/events.ts`
-- [ ] 🤖 Criar utilitários para validação transparente
-- [ ] 🤖 Documentar padrões de uso
+- [x] 🤖 Implementar `getDatabase()` em `src/main/infrastructure/database.ts`
+- [x] 🤖 Implementar `getLogger(context)` em `src/main/infrastructure/logger.ts`
+- [x] 🤖 Implementar `publishEvent()` em `src/main/infrastructure/events.ts`
+- [x] 🤖 Criar utilitários para validação transparente
+- [x] 🤖 Documentar padrões de uso
 
 **Critérios de Aceite:**
 
-- [ ] Funções utilitárias funcionam independentemente
-- [ ] Singleton patterns implementados corretamente
-- [ ] Performance igual ou melhor que DI atual
-- [ ] Documentação de uso criada
+- [x] Funções utilitárias funcionam independentemente
+- [x] Singleton patterns implementados corretamente
+- [x] Performance igual ou melhor que DI atual
+- [x] Documentação de uso criada
 
 **Comandos de Validação:**
 
@@ -84,14 +84,14 @@ Este plano detalha a execução da simplificação e reorganização do core do 
 
 **Tarefas:**
 
-- [ ] 🤖 `ProjectName` com validação Zod completa
-- [ ] 🤖 `Temperature` para LLM com validação de range
+- [x] 🤖 `ProjectName` com validação Zod completa
+- [x] 🤖 `Temperature` para LLM com validação de range
 
 **Critérios de Aceite:**
 
-- [ ] Todos os Value Objects seguem Object Calisthenics
-- [ ] Validação Zod funciona corretamente
-- [ ] Métodos `equals()` e `toString()` implementados
+- [x] Todos os Value Objects seguem Object Calisthenics
+- [x] Validação Zod funciona corretamente
+- [x] Métodos `equals()` e `toString()` implementados
 
 **Comandos de Validação:**
 

@@ -25,6 +25,8 @@
       "@/hooks/*": ["./src/renderer/hooks/*"],
       "@/features/*": ["./src/renderer/features/*"],
       "@/shared/*": ["./src/shared/*"],
+      "@/domains/*": ["./src/main/domains/*"],
+      "@/infrastructure/*": ["./src/main/infrastructure/*"],
       "@/*": ["./src/*"]
     }
   },
