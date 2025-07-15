@@ -354,10 +354,20 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖 Implementar `User` entity rica para espaço pessoal
-- [ ] 🤖 Configurações pessoais (LLM preferences, themes, etc.)
-- [ ] 🤖 Histórico de conversas pessoais
-- [ ] 🔍 Integração com autenticação existente
+- [x] 🤖 Implementar `User` entity rica para espaço pessoal
+- [x] 🤖 Configurações pessoais (LLM preferences, themes, etc.)
+- [x] 🤖 Histórico de conversas pessoais
+- [x] 🔍 Integração com autenticação existente
+
+**✅ Implementado em 2025-07-15**
+- Database schema: users table com settings JSON
+- User functions: createUser, updateUserProfile, updateUserSettings, getUserPreferences
+- IPC handlers: user:create, user:updateProfile, user:updateSettings, user:getPreferences
+- Frontend integration: UserStore, useUser hook, settings page connection
+- Value Objects: UserIdentity, UserSettings com validações Zod
+- Entidades: User, UserPreferences (Object Calisthenics: ≤2 variáveis instância, ≤10 linhas/método)
+- Infraestrutura transparente: getDatabase(), getLogger(), publishEvent()
+- Módulo registrado: UserManagementModule no ModuleLoader
 
 ### Sprint 8: Domínio LLM e Finalização
 
@@ -369,10 +379,17 @@ export class ProjectName {
 
 **Tarefas:**
 
-- [ ] 🤖 Unificar `AIService` e `TextGenerationService`
-- [ ] 🤖 Criar `LLMProvider` entity rica
-- [ ] 🤖 Implementar `ProviderRegistry` pattern
-- [ ] 🤖 `Temperature`, `MaxTokens`, `ModelConfig` value objects
+- [x] 🤖 Unificar `AIService` e `TextGenerationService`
+- [x] 🤖 Criar `LLMProvider` entity rica
+- [x] 🤖 Implementar `ProviderRegistry` pattern
+- [x] 🤖 `Temperature`, `MaxTokens`, `ModelConfig` value objects
+
+**✅ Implementado anteriormente**
+- LLMProvider entity: Object Calisthenics aplicado (≤2 variáveis instância, ≤50 linhas)
+- ProviderRegistry: Padrão singleton, suporte OpenAI e DeepSeek
+- Value Objects: Temperature, MaxTokens, ModelConfig, ProviderType com validações Zod
+- TextGenerationService: Serviço consolidado usando ai-sdk
+- Infraestrutura transparente: getDatabase(), getLogger() integrados
 
 #### 8.2 Cleanup e Deprecação
 

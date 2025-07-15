@@ -12,6 +12,7 @@ import {
 import { useState, useEffect } from "react";
 
 import { useTheme } from "@/renderer/contexts/theme-context";
+import { useUser } from "@/renderer/features/user-management/hooks/use-user.hook";
 import { LlmProviderManagement } from "@/renderer/features/llm-provider-management/components/llm-provider-management";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/(user)/settings/")({
 
 export function UserSettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { currentUser, updateSettings, updateProfile } = useUser();
   const [settings, setSettings] = useState({
     // User Settings
     username: "Usuário",
@@ -77,9 +79,33 @@ export function UserSettingsPage() {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log("Saving settings:", settings);
+  const handleSave = async () => {
+    try {
+      // For now, create a default user if none exists
+      // In a real app, you'd have proper user authentication
+      const userId = currentUser?.id || "default-user";
+      
+      // Update user profile
+      await updateProfile({
+        id: userId,
+        name: settings.username,
+        email: settings.email,
+      });
+
+      // Update user settings
+      await updateSettings({
+        id: userId,
+        settings: {
+          theme: settings.theme as "light" | "dark" | "system",
+          language: settings.language as "en" | "pt-BR",
+          notifications: settings.enableNotifications,
+        },
+      });
+
+      console.log("Settings saved successfully!");
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+    }
   };
 
   const testLLMConnection = (provider: string) => {

@@ -38,11 +38,10 @@ export class DirectMessagesModule extends BaseModule {
     const llmProviderModule = container.get<LlmProviderModule>("llm-provider");
 
     // Get services from other modules
-    const agentService = agentModule.getAgentService();
-    const llmProviderService = llmProviderModule.getLlmProviderService();
+    const aiService = llmProviderModule.getAIService();
 
     // Initialize text generation service
-    this.textGenerationService = new TextGenerationService(llmProviderService);
+    this.textGenerationService = new TextGenerationService(aiService);
 
     // Initialize direct messages services
     this.conversationService = new ConversationService();
@@ -50,7 +49,6 @@ export class DirectMessagesModule extends BaseModule {
     this.agentConversationService = new AgentConversationService(
       this.messageService,
       this.conversationService,
-      agentService,
       this.textGenerationService,
     );
 

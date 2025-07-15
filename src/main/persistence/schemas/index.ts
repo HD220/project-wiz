@@ -41,6 +41,11 @@ import {
   type ProjectSchema,
   type CreateProjectSchema,
 } from "./projects.schema";
+import {
+  users,
+  type UserSchema,
+  type CreateUserSchema,
+} from "./users.schema";
 
 // Re-export everything
 export {
@@ -68,6 +73,9 @@ export {
   messagesRelations,
   type MessageSchema,
   type CreateMessageSchema,
+  users,
+  type UserSchema,
+  type CreateUserSchema,
 };
 
 // Export all tables for Drizzle migrations
@@ -79,6 +87,7 @@ export const allTables = {
   channelMessages,
   conversations,
   messages,
+  users,
 };
 
 // Export all relations for Drizzle

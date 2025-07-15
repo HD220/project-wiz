@@ -3,6 +3,7 @@ export * from "./agent.types";
 export * from "./llm-provider.types";
 export * from "./message.types";
 export * from "./project.types";
+export * from "./user.types";
 
 // Re-export channel types to avoid conflicts
 export {

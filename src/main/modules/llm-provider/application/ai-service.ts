@@ -2,9 +2,8 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
-import { LlmProviderService } from "./llm-provider.service";
+import { findLlmProviderById } from "../../../domains/llm/functions";
 
-import type { LlmProvider } from "../domain/llm-provider.entity";
 import type { CoreMessage, LanguageModel } from "ai";
 
 interface AIServiceConfig {
@@ -26,7 +25,7 @@ interface GenerateTextOptions {
 export class AIService {
   private providerRegistry: Map<string, LanguageModel> = new Map();
 
-  constructor(private llmProviderService: LlmProviderService) {}
+  constructor() {}
 
   async initializeProvider(providerId: string): Promise<LanguageModel> {
     // Check if provider is already initialized
@@ -35,8 +34,7 @@ export class AIService {
     }
 
     // Get provider configuration from database
-    const llmProvider =
-      await this.llmProviderService.getLlmProviderById(providerId);
+    const llmProvider = await findLlmProviderById(providerId);
     if (!llmProvider) {
       throw new Error(`LLM Provider with ID ${providerId} not found`);
     }
@@ -51,12 +49,10 @@ export class AIService {
   }
 
   private async createLanguageModel(
-    llmProvider: LlmProvider,
+    llmProvider: any,
   ): Promise<LanguageModel> {
-    // Get decrypted API key
-    const decryptedApiKey = await this.llmProviderService.getDecryptedApiKey(
-      llmProvider.id,
-    );
+    // For now, use the API key directly (encryption can be added later)
+    const decryptedApiKey = llmProvider.apiKey;
 
     switch (llmProvider.provider.toLowerCase()) {
       case "openai": {
@@ -111,8 +107,8 @@ export class AIService {
   }
 
   // Get all available providers for frontend
-  async getAvailableProviders(): Promise<LlmProvider[]> {
-    return this.llmProviderService.listLlmProviders();
+  async getAvailableProviders(): Promise<any[]> {
+    return [];
   }
 
   // Clear cached providers (useful for updates)

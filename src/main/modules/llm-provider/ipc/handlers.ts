@@ -1,8 +1,16 @@
 import { ipcMain, type IpcMainInvokeEvent } from "electron";
 
 import { AIService } from "../application/ai-service";
-import { LlmProviderService } from "../application/llm-provider.service";
-import { LlmProviderMapper } from "../llm-provider.mapper";
+import {
+  createLlmProvider,
+  findLlmProviderById,
+  findAllLlmProviders,
+  updateLlmProvider,
+  deleteLlmProvider,
+  setDefaultLlmProvider,
+  findDefaultLlmProvider,
+  llmProviderToDto,
+} from "../../../domains/llm/functions";
 
 import type {
   CreateLlmProviderDto,
@@ -15,11 +23,8 @@ import type { CoreMessage } from "ai";
 export class LlmProviderIpcHandlers {
   private aiService: AIService;
 
-  constructor(
-    private llmProviderService: LlmProviderService,
-    private llmProviderMapper: LlmProviderMapper,
-  ) {
-    this.aiService = new AIService(llmProviderService);
+  constructor() {
+    this.aiService = new AIService();
   }
 
   registerHandlers(): void {
@@ -64,8 +69,8 @@ export class LlmProviderIpcHandlers {
     data: CreateLlmProviderDto,
   ): Promise<LlmProviderDto> {
     try {
-      const llmProvider = await this.llmProviderService.createLlmProvider(data);
-      return this.llmProviderMapper.toDto(llmProvider);
+      const llmProvider = await createLlmProvider(data);
+      return llmProviderToDto(llmProvider);
     } catch (error) {
       throw new Error(
         `Failed to create LLM provider: ${(error as Error).message}`,
@@ -78,11 +83,8 @@ export class LlmProviderIpcHandlers {
     filter?: LlmProviderFilterDto,
   ): Promise<LlmProviderDto[]> {
     try {
-      const llmProviders =
-        await this.llmProviderService.listLlmProviders(filter);
-      return llmProviders.map((llmProvider) =>
-        this.llmProviderMapper.toDto(llmProvider),
-      );
+      const llmProviders = await findAllLlmProviders(filter);
+      return llmProviders.map((llmProvider) => llmProviderToDto(llmProvider));
     } catch (error) {
       throw new Error(
         `Failed to list LLM providers: ${(error as Error).message}`,
@@ -95,8 +97,8 @@ export class LlmProviderIpcHandlers {
     id: string,
   ): Promise<LlmProviderDto | null> {
     try {
-      const llmProvider = await this.llmProviderService.getLlmProviderById(id);
-      return llmProvider ? this.llmProviderMapper.toDto(llmProvider) : null;
+      const llmProvider = await findLlmProviderById(id);
+      return llmProvider ? llmProviderToDto(llmProvider) : null;
     } catch (error) {
       throw new Error(
         `Failed to get LLM provider: ${(error as Error).message}`,
@@ -109,8 +111,8 @@ export class LlmProviderIpcHandlers {
     data: UpdateLlmProviderDto,
   ): Promise<LlmProviderDto> {
     try {
-      const llmProvider = await this.llmProviderService.updateLlmProvider(data);
-      return this.llmProviderMapper.toDto(llmProvider);
+      const llmProvider = await updateLlmProvider(data.id, data);
+      return llmProviderToDto(llmProvider);
     } catch (error) {
       throw new Error(
         `Failed to update LLM provider: ${(error as Error).message}`,
@@ -123,7 +125,7 @@ export class LlmProviderIpcHandlers {
     id: string,
   ): Promise<void> {
     try {
-      await this.llmProviderService.deleteLlmProvider(id);
+      await deleteLlmProvider(id);
     } catch (error) {
       throw new Error(
         `Failed to delete LLM provider: ${(error as Error).message}`,
@@ -175,11 +177,8 @@ export class LlmProviderIpcHandlers {
     event: IpcMainInvokeEvent,
   ): Promise<LlmProviderDto | null> {
     try {
-      const defaultProvider =
-        await this.llmProviderService.getDefaultProvider();
-      return defaultProvider
-        ? this.llmProviderMapper.toDto(defaultProvider)
-        : null;
+      const defaultProvider = await findDefaultLlmProvider();
+      return defaultProvider ? llmProviderToDto(defaultProvider) : null;
     } catch (error) {
       throw new Error(
         `Failed to get default provider: ${(error as Error).message}`,
@@ -192,9 +191,8 @@ export class LlmProviderIpcHandlers {
     id: string,
   ): Promise<LlmProviderDto> {
     try {
-      const defaultProvider =
-        await this.llmProviderService.setDefaultProvider(id);
-      return this.llmProviderMapper.toDto(defaultProvider);
+      const defaultProvider = await setDefaultLlmProvider(id);
+      return llmProviderToDto(defaultProvider);
     } catch (error) {
       throw new Error(
         `Failed to set default provider: ${(error as Error).message}`,

@@ -25,10 +25,27 @@ import type {
   AgentFilterDto,
 } from "../../../../shared/types/agent.types";
 
+export type AgentWithData = Agent & {
+  id: string;
+  llmProviderId: string;
+  temperature: number;
+  maxTokens: number;
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 const logger = getLogger("agent.functions");
 
-export async function createAgent(data: CreateAgentDto): Promise<Agent> {
+export async function createAgent(data: CreateAgentDto): Promise<AgentWithData> {
   const db = getDatabase();
+
+  // Check if agent already exists with this name
+  const existingAgent = await findAgentByName(data.name);
+  if (existingAgent) {
+    throw new Error(`Agent with name '${data.name}' already exists`);
+  }
 
   const agentData = {
     name: data.name,
@@ -62,7 +79,7 @@ export async function createAgent(data: CreateAgentDto): Promise<Agent> {
   return createAgentFromData(saved);
 }
 
-export async function findAgentById(id: string): Promise<Agent | null> {
+export async function findAgentById(id: string): Promise<AgentWithData | null> {
   const db = getDatabase();
 
   const [agent] = await db.select().from(agents).where(eq(agents.id, id));
@@ -70,7 +87,7 @@ export async function findAgentById(id: string): Promise<Agent | null> {
   return agent ? createAgentFromData(agent) : null;
 }
 
-export async function findAgentByName(name: string): Promise<Agent | null> {
+export async function findAgentByName(name: string): Promise<AgentWithData | null> {
   const db = getDatabase();
 
   const [agent] = await db.select().from(agents).where(eq(agents.name, name));
@@ -78,7 +95,7 @@ export async function findAgentByName(name: string): Promise<Agent | null> {
   return agent ? createAgentFromData(agent) : null;
 }
 
-export async function findAllAgents(filter?: AgentFilterDto): Promise<Agent[]> {
+export async function findAllAgents(filter?: AgentFilterDto): Promise<AgentWithData[]> {
   const db = getDatabase();
 
   const query = db.select().from(agents);
@@ -95,8 +112,21 @@ export async function findAllAgents(filter?: AgentFilterDto): Promise<Agent[]> {
 export async function updateAgent(
   id: string,
   data: UpdateAgentDto,
-): Promise<Agent> {
+): Promise<AgentWithData> {
   const db = getDatabase();
+
+  const existing = await findAgentById(id);
+  if (!existing) {
+    throw new Error(`Agent with id '${id}' not found`);
+  }
+
+  // If name is being updated, check for conflicts
+  if (data.name) {
+    const existingByName = await findAgentByName(data.name);
+    if (existingByName && existingByName.getName() !== existing.getName()) {
+      throw new Error(`Agent with name '${data.name}' already exists`);
+    }
+  }
 
   const updateData = {
     ...data,
@@ -119,6 +149,11 @@ export async function updateAgent(
 export async function deleteAgent(id: string): Promise<void> {
   const db = getDatabase();
 
+  const existing = await findAgentById(id);
+  if (!existing) {
+    throw new Error(`Agent with id '${id}' not found`);
+  }
+
   const [deleted] = await db
     .delete(agents)
     .where(eq(agents.id, id))
@@ -131,7 +166,49 @@ export async function deleteAgent(id: string): Promise<void> {
   logger.info("Agent deleted", { agentId: id });
 }
 
-function createAgentFromData(data: Record<string, unknown>): Agent {
+export async function findActiveAgents(): Promise<AgentWithData[]> {
+  return findAllAgents({ isActive: true });
+}
+
+export async function activateAgent(id: string): Promise<AgentWithData> {
+  return updateAgent(id, { isActive: true });
+}
+
+export async function deactivateAgent(id: string): Promise<AgentWithData> {
+  return updateAgent(id, { isActive: false });
+}
+
+export async function setDefaultAgent(id: string): Promise<void> {
+  const db = getDatabase();
+
+  await db.transaction(async (tx) => {
+    await tx.update(agents).set({ isDefault: false });
+    await tx.update(agents).set({ isDefault: true }).where(eq(agents.id, id));
+  });
+
+  logger.info("Default agent set", { agentId: id });
+}
+
+export async function findDefaultAgent(): Promise<AgentWithData | null> {
+  const db = getDatabase();
+
+  const [agent] = await db.select().from(agents).where(eq(agents.isDefault, true));
+
+  return agent ? createAgentFromData(agent) : null;
+}
+
+export async function findAgentsByLlmProvider(llmProviderId: string): Promise<AgentWithData[]> {
+  const db = getDatabase();
+
+  const results = await db
+    .select()
+    .from(agents)
+    .where(eq(agents.llmProviderId, llmProviderId));
+
+  return results.map(createAgentFromData);
+}
+
+function createAgentFromData(data: Record<string, unknown>): AgentWithData {
   const identity = new AgentIdentity(
     new AgentName(data.name as string),
     new AgentRole(data.role as string),
@@ -142,5 +219,17 @@ function createAgentFromData(data: Record<string, unknown>): Agent {
     new AgentBackstory(data.backstory as string),
   );
 
-  return new Agent(identity, behavior);
+  const agent = new Agent(identity, behavior);
+
+  // Extend the agent with database fields
+  return Object.assign(agent, {
+    id: data.id as string,
+    llmProviderId: data.llmProviderId as string,
+    temperature: data.temperature as number,
+    maxTokens: data.maxTokens as number,
+    isActive: data.isActive as boolean,
+    isDefault: data.isDefault as boolean,
+    createdAt: data.createdAt as string,
+    updatedAt: data.updatedAt as string,
+  });
 }

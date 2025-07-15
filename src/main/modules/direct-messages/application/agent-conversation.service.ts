@@ -1,5 +1,5 @@
-import { AgentService } from "../../agent-management/application/agent.service";
 import { TextGenerationService } from "../../llm-provider/application/text-generation.service";
+import { findDefaultAgent, findAgentById, findAgentByName } from "../../../domains/agents/functions";
 
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
@@ -22,7 +22,6 @@ export class AgentConversationService {
   constructor(
     private messageService: MessageService,
     private conversationService: ConversationService,
-    private agentService: AgentService,
     private textGenerationService: TextGenerationService,
   ) {}
 
@@ -74,14 +73,14 @@ export class AgentConversationService {
 
     // 4. Get agent by ID or name (for backward compatibility)
     console.log("[AgentConversationService] Getting agent...");
-    let agent = await this.agentService.getAgentById(personaId);
+    let agent = await findAgentById(personaId);
 
     // If not found by ID, try to find by name (for backward compatibility with old conversations)
     if (!agent) {
       console.log(
         "[AgentConversationService] Agent not found by ID, trying by name...",
       );
-      agent = await this.agentService.getAgentByName(personaId);
+      agent = await findAgentByName(personaId);
     }
 
     if (!agent || !agent.isActive) {
@@ -89,7 +88,7 @@ export class AgentConversationService {
     }
     console.log("[AgentConversationService] Agent found:", {
       id: agent.id,
-      agentName: agent.name,
+      agentName: agent.getName(),
     });
 
     try {
@@ -102,7 +101,7 @@ export class AgentConversationService {
       const agentResponse = await this.textGenerationService.generateText(
         { llmProviderId: agent.llmProviderId },
         {
-          systemPrompt: agent.getSystemPrompt(),
+          systemPrompt: agent.generateSystemPrompt(),
           messages: [
             ...conversationHistory,
             { role: "user", content: userMessage },
@@ -120,7 +119,7 @@ export class AgentConversationService {
       const agentMessage = await this.messageService.createMessage({
         content: agentResponse,
         senderId: agent.id, // Use the actual agent ID, not the name
-        senderName: agent.name,
+        senderName: agent.getName(),
         senderType: "agent",
         contextType: "direct",
         contextId: conversationId,
@@ -243,11 +242,11 @@ export class AgentConversationService {
         return false;
       }
 
-      let agent = await this.agentService.getAgentById(personaId);
+      let agent = await findAgentById(personaId);
 
       // If not found by ID, try to find by name (for backward compatibility)
       if (!agent) {
-        agent = await this.agentService.getAgentByName(personaId);
+        agent = await findAgentByName(personaId);
       }
 
       if (!agent || !agent.isActive) {

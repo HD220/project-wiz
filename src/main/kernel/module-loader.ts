@@ -5,6 +5,7 @@ import { CommunicationModule } from "../modules/communication/communication.modu
 import { DirectMessagesModule } from "../modules/direct-messages/direct-messages.module";
 import { LlmProviderModule } from "../modules/llm-provider/llm-provider.module";
 import { ProjectManagementModule } from "../modules/project-management/project-management.module";
+import { UserManagementModule } from "../modules/user-management/user-management.module";
 
 import { DependencyContainer } from "./dependency-container";
 
@@ -40,6 +41,7 @@ export class ModuleLoader {
     this.container.register(new AgentManagementModule());
     this.container.register(new ChannelMessagingModule());
     this.container.register(new DirectMessagesModule());
+    this.container.register(new UserManagementModule());
 
     logger.info("All modules registered");
   }
