@@ -127,6 +127,16 @@ A aplicação está em crescimento e precisa de uma arquitetura frontend mais li
 
 **Impacto:** Melhor performance, separação de conceitos e reaproveitamento de funcionalidades.
 
+### Decisão 3: Migração Arquivo por Arquivo com Refatoração Completa
+
+**Descrição:** Reestruturação arquitetural do frontend deve ser feita arquivo por arquivo, aplicando todas as melhorias necessárias para a nova arquitetura e removendo o arquivo refatorado na conclusão.
+
+**Justificativa:** Abordagem incremental reduz riscos, permite validação contínua e garante que cada arquivo migrado esteja completamente alinhado com a nova arquitetura.
+
+**Alternativas Consideradas:** Migração em lotes por feature ou big bang migration.
+
+**Impacto:** Processo mais controlado, validação contínua de integração IPC, garantia de funcionalidade completa a cada migração.
+
 ---
 
 ## Considerações e Observações
@@ -563,3 +573,126 @@ src/renderer/
    - `direct-messages` → parte de `users`
    - `task-management` → parte de `projects`
    - `development-tools` → parte de `projects`
+
+## Estratégia de Migração Arquivo por Arquivo
+
+### Processo de Migração Individual
+
+**Para cada arquivo a ser migrado:**
+
+1. **Análise do Arquivo Atual**
+   - Identificar dependências e responsabilidades
+   - Mapear integrações IPC necessárias
+   - Verificar funcionalidades que precisam ser mantidas
+
+2. **Criação na Nova Estrutura**
+   - Criar arquivo na nova localização (domínios organizados)
+   - Aplicar Object Calisthenics (≤50 linhas por classe, ≤10 linhas por método)
+   - Implementar Clean Code (nomes descritivos, responsabilidade única)
+   - Refatorar para Zustand slim + TanStack Query (quando aplicável)
+   - Garantir type safety completa
+
+3. **Validação de Integração**
+   - Verificar comunicação IPC funcionando
+   - Confirmar que main process tem todas as funções necessárias
+   - Testar funcionalidade completa end-to-end
+   - Validar que não há regressões
+
+4. **Finalização**
+   - Atualizar imports/exports nos arquivos dependentes
+   - Remover arquivo antigo completamente
+   - Documentar mudanças se necessário
+
+### Princípios da Migração
+
+**Object Calisthenics Aplicados:**
+- Máximo 2 variáveis de instância por classe
+- Métodos com máximo 10 linhas
+- Classes com máximo 50 linhas
+- Sem uso de ELSE (guard clauses)
+- Primitivos encapsulados em Value Objects quando aplicável
+
+**Clean Code Aplicado:**
+- Nomes descritivos e autodocumentados
+- Responsabilidade única por função/classe
+- Funções pequenas e focadas
+- Evitar duplicação de código
+
+**Padrão Zustand + Query:**
+- Zustand para estado local do renderer (seleções, UI state)
+- TanStack Query para fetch/cache de dados do backend
+- Hooks separados por responsabilidade
+
+### Verificações de Integração IPC
+
+**Para cada migração, verificar:**
+
+1. **Comunicação Main-Renderer**
+   - APIs IPC necessárias existem no main
+   - Tipos compartilhados estão atualizados
+   - Error handling apropriado
+
+2. **Funcionalidade dos Domínios**
+   - `projects`: CRUD projetos, canais, mensagens
+   - `agents`: CRUD agentes, execução tarefas
+   - `users`: CRUD usuários, conversas, preferências
+   - `llm`: CRUD providers, configurações, text generation
+
+3. **Padrões de Comunicação**
+   - Uso correto de `window.electronIPC.[domain].[method]`
+   - Fallback para `window.electronIPC.invoke` quando necessário
+   - Loading states e error boundaries
+
+### Critérios de Sucesso por Arquivo
+
+**Arquivo considerado migrado com sucesso quando:**
+- ✅ Localizado na nova estrutura de domínios
+- ✅ Aplicando Object Calisthenics e Clean Code
+- ✅ Integração IPC funcionando perfeitamente
+- ✅ Funcionalidade completa preservada
+- ✅ Type safety mantida
+- ✅ Arquivo antigo removido
+- ✅ Dependências atualizadas
+
+### Ordem de Migração Sugerida
+
+**Baseado em dependências e impacto:**
+
+1. **Infraestrutura Base**
+   - `main.tsx` (setup TanStack Query)
+   - `providers/` (query-client, theme, router)
+   - Estrutura de pastas `domains/`
+
+2. **Utilitários e Shared**
+   - `contexts/` → `shared/contexts/`
+   - `lib/` → `shared/utils/`
+   - `hooks/use-mobile.hook.ts` → `shared/hooks/`
+
+3. **Stores Críticos** (alta dependência)
+   - `project.store.ts` → `domains/projects/store.ts`
+   - `conversation.store.ts` → `domains/users/store.ts`
+   - `llm-provider.store.ts` → `domains/llm/store.ts`
+
+4. **Hooks Dependentes**
+   - Hooks que usam os stores migrados
+   - Hooks com lógica de negócio complexa
+   - Hooks de integração IPC
+
+5. **Componentes por Domínio**
+   - Componentes simples primeiro
+   - Componentes complexos por último
+   - Componentes shared para `shared/components/`
+
+6. **Rotas e Navegação**
+   - Rotas simples primeiro
+   - Rotas com preload
+   - Layouts e navegação complexa
+
+### Validação Contínua
+
+**A cada arquivo migrado:**
+- Executar `npm run dev` para verificar funcionamento
+- Testar funcionalidade específica do arquivo
+- Verificar se não há erros de TypeScript
+- Confirmar que integrações IPC funcionam
+- Validar que a aplicação continua executando sem erros
