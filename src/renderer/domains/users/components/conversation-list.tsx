@@ -1,4 +1,5 @@
-import { ScrollArea } from '@/ui/scroll-area'
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { useConversationUtils } from "../hooks/use-conversation-utils.hook";
 import { useConversations } from "../hooks/use-conversations.hook";
 
@@ -6,9 +7,7 @@ import { ConversationListEmptyState } from "./conversation-list-empty-state";
 import { ConversationListItem } from "./conversation-list-item";
 import { ConversationListSkeleton } from "./conversation-list-skeleton";
 
-interface ConversationListProps {}
-
-export function ConversationList({}: ConversationListProps) {
+export function ConversationList() {
   const { conversations, isLoading } = useConversations({
     participantId: "user",
   });

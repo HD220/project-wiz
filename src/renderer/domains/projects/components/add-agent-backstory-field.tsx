@@ -1,13 +1,16 @@
 import { BookOpen } from "lucide-react";
 
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/ui/textarea'
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/ui/textarea";
 
 import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
 
 interface AddAgentBackstoryFieldProps {
   formData: CreateAgentDto;
-  updateField: <K extends keyof CreateAgentDto>(field: K, value: CreateAgentDto[K]) => void;
+  updateField: <K extends keyof CreateAgentDto>(
+    field: K,
+    value: CreateAgentDto[K],
+  ) => void;
 }
 
 export function AddAgentBackstoryField({

@@ -1,5 +1,6 @@
-import { ScrollArea } from '../../../components/ui/scroll-area'
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
+
+import { ScrollArea } from "../../../components/ui/scroll-area";
 import { useFileExplorerState } from "../hooks/use-file-explorer-state.hook";
 
 import { FileExplorerHeader } from "./file-explorer-header";

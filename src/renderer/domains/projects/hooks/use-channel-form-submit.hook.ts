@@ -5,8 +5,15 @@ interface ChannelFormData {
   setIsSubmitting: (value: boolean) => void;
 }
 
+interface CreateChannelData {
+  name: string;
+  description?: string;
+  isPrivate: boolean;
+  createdBy: string;
+}
+
 interface ChannelCreator {
-  createChannel: (data: any) => Promise<void>;
+  createChannel: (data: CreateChannelData) => Promise<void>;
   clearError: () => void;
 }
 
@@ -18,8 +25,8 @@ export function useChannelFormSubmit(
     return !!formData.channelName.trim();
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<boolean> => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent): Promise<boolean> => {
+    event.preventDefault();
 
     if (!validateForm()) {
       return false;

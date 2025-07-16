@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { fileExplorerPlaceholders } from '@/lib/placeholders'
+import { fileExplorerPlaceholders } from "@/lib/placeholders";
 
 interface UseFileExplorerStateProps {
   onFileSelect?: (file: FileTreeItem) => void;

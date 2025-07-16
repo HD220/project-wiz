@@ -1,13 +1,17 @@
 import { Brain } from "lucide-react";
 
-import { Input } from '../../../components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Label } from "@/components/ui/label";
+
+import { Input } from "../../../components/ui/input";
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentRoleFieldProps {
   formData: CreateAgentDto;
-  updateField: <T extends keyof CreateAgentDto>(field: T, value: CreateAgentDto[T]) => void;
+  updateField: <T extends keyof CreateAgentDto>(
+    field: T,
+    value: CreateAgentDto[T],
+  ) => void;
 }
 
 export function AddAgentRoleField({

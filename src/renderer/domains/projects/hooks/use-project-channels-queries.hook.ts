@@ -5,7 +5,6 @@ import { channelService } from "../services/channel.service";
 import type {
   ChannelDto,
   CreateChannelDto,
-  UpdateChannelDto,
 } from "../../../../shared/types/domains/projects/channel.types";
 
 export function useProjectChannelsQueries(projectId: string) {

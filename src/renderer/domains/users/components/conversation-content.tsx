@@ -1,19 +1,21 @@
-import { ScrollArea } from '@/ui/scroll-area'
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { ConversationErrorDisplay } from "./conversation-error-display";
 import { ConversationMessagesList } from "./conversation-messages-list";
 import { ConversationMissingAgentWarning } from "./conversation-missing-agent-warning";
 
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 import type { MessageDto } from "../../../../shared/types/domains/users/user.types";
+import type { Message } from "../../../components/chat/message-item-types";
 
 interface ConversationContentProps {
   messages: MessageDto[];
   agentName: string;
   isTyping: boolean;
   error: string | null;
-  fullAgent: any;
+  fullAgent: AgentDto | null;
   messagesEndRef: React.RefObject<HTMLDivElement>;
-  convertToMessageFormat: (msg: MessageDto) => any;
+  convertToMessageFormat: (msg: MessageDto) => Message;
   onClearError: () => void;
 }
 

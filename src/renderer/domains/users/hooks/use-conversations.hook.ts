@@ -16,10 +16,10 @@ import type {
 
 export function useConversations(filter?: ConversationFilterDto) {
   const selectedConversation = useConversationStore(
-    (state: any) => state.selectedConversation,
+    (state) => state.selectedConversation,
   );
   const setSelectedConversation = useConversationStore(
-    (state: any) => state.setSelectedConversation,
+    (state) => state.setSelectedConversation,
   );
 
   const conversationsQuery = useConversationsQuery(filter);

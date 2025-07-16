@@ -57,10 +57,7 @@ function SystemMessage({ content: markdownContent }: { content: string }) {
 function RegularMessage({ content: markdownContent }: { content: string }) {
   return (
     <div className="text-gray-300 prose prose-sm prose-invert max-w-none">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
         {markdownContent}
       </ReactMarkdown>
     </div>

@@ -21,7 +21,7 @@ export * from "./use-file-explorer-state.hook";
 export * from "./use-file-icons.hook";
 export * from "./use-project-channels-queries.hook";
 export * from "./use-project-channels.hook";
-export * from './use-projects-query.hook'
+export * from "./use-projects-query.hook";
 export * from "./use-projects.hook";
 export * from "./use-simple-channel-chat.hook";
 export * from "./use-terminal-commands.hook";

@@ -19,11 +19,7 @@ interface UseChannelChatSendProps {
   historyLimit?: number;
 }
 
-export function useChannelChatSend(
-  props: UseChannelChatSendProps,
-  addOptimisticMessage: (message: ChannelMessageDto) => void,
-  clearOptimisticMessages: () => void,
-) {
+export function useChannelChatSend(props: UseChannelChatSendProps) {
   const { setTyping } = useTyping(props.channelId);
   const mutations = useAiChatMutations(props.channelId);
   const config = useAiChatConfig(props);

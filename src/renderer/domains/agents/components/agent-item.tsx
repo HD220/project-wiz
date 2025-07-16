@@ -24,6 +24,6 @@ export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
     >
       <AgentItemAvatar agent={agent} />
       <AgentItemContent agent={agent} isOffline={isOffline} />
-    </div>
+    </button>
   );
 }

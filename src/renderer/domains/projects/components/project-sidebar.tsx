@@ -19,7 +19,9 @@ const ProjectSidebarComponent = function ProjectSidebar({
   }
 
   return (
-    <div className={`flex flex-col space-y-2 h-full overflow-y-auto ${className}`}>
+    <div
+      className={`flex flex-col space-y-2 h-full overflow-y-auto ${className}`}
+    >
       {projects.map((project) => (
         <ProjectSidebarItem key={project.id} project={project} />
       ))}

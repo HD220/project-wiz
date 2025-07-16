@@ -16,8 +16,8 @@ export function useCreateProjectModal() {
     setGitUrl("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!name.trim()) return;
 
     setIsSubmitting(true);

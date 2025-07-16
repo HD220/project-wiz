@@ -1,16 +1,20 @@
 import { useEffect } from "react";
 
-import { useAgents } from '../../agents/hooks/use-agents.hook'
+import {
+  AgentDto,
+  CreateAgentDto,
+} from "../../../../shared/types/domains/agents/agent.types";
+import { useAgents } from "../../agents/hooks/use-agents.hook";
 
 interface UseAddAgentSubmitProps {
   form: {
-    formData: any;
+    formData: CreateAgentDto;
     validateForm: () => string | null;
     setError: (error: string | null) => void;
     setIsSubmitting: (submitting: boolean) => void;
     resetForm: () => void;
   };
-  onAgentAdded?: (agent: any) => void;
+  onAgentAdded?: (agent: AgentDto) => void;
   onOpenChange: (open: boolean) => void;
   isOpen: boolean;
 }
@@ -27,10 +31,10 @@ export function useAddAgentSubmit({
     if (!isOpen) {
       form.resetForm();
     }
-  }, [isOpen]);
+  }, [isOpen, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
     const validationError = form.validateForm();
     if (validationError) {

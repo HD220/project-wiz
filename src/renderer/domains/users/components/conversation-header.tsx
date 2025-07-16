@@ -1,5 +1,9 @@
-import { PageTitle } from '@/components/page-title'
-import { Avatar, AvatarFallback, AvatarImage } from '@/ui/avatar'
+import { PageTitle } from "../../../../components/page-title";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../../components/ui/avatar";
 
 interface ConversationHeaderProps {
   agentName: string;

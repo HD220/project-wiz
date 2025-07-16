@@ -1,4 +1,4 @@
-import { MessageItem } from '@/components/chat/message-item'
+import { MessageItem } from "@/components/chat/message-item";
 
 import { ConversationEmptyState } from "./conversation-empty-state";
 import { ConversationTypingIndicator } from "./conversation-typing-indicator";

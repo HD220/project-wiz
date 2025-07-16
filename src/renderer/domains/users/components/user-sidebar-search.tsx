@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 
-import { Input } from '@/ui/input'
+import { Input } from "@/ui/input";
 
 interface UserSidebarSearchProps {
   searchQuery: string;

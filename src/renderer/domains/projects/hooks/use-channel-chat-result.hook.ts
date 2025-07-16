@@ -1,11 +1,50 @@
+interface ChatMessage {
+  id: string;
+  content: string;
+}
+
+interface HookError extends Error {}
+
+interface MessagesHook {
+  messages: ChatMessage[];
+  isLoading: boolean;
+  error: HookError | null;
+  clearError: () => void;
+}
+
+interface SendHookMutations {
+  sendError: HookError | null;
+  regenerateError: HookError | null;
+  isSending: boolean;
+  isRegenerating: boolean;
+  clearMessages: () => void;
+  regenerateMessage: () => void;
+}
+
+interface SendHook {
+  mutations: SendHookMutations;
+}
+
+// TODO: Refine this type with specific chat configuration properties.
+// This is a temporary placeholder to address @typescript-eslint/no-explicit-any
+// if Record<string, unknown> is being flagged as too broad or implicitly 'any'.
+type TemporaryChatConfig = Record<string, unknown>;
+
+interface ConfigHook {
+  currentConfig: ChatConfig;
+  updateConfig: (newConfig: ChatConfig) => void;
+}
+
+interface UtilitiesHook {}
+
 export function useChannelChatResult(
-  messagesHook: any,
-  sendHook: any,
+  messagesHook: MessagesHook,
+  sendHook: SendHook,
   isTyping: boolean,
-  setTyping: any,
-  sendMessage: any,
-  config: any,
-  utilities: any,
+  setTyping: (value: boolean) => void,
+  sendMessage: (message: string) => void,
+  config: ConfigHook,
+  utilities: UtilitiesHook,
 ) {
   const error =
     messagesHook.error ||

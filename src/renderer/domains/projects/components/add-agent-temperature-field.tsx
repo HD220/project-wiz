@@ -1,11 +1,14 @@
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentTemperatureFieldProps {
   formData: CreateAgentDto;
-  updateField: <K extends keyof CreateAgentDto>(field: K, value: CreateAgentDto[K]) => void;
+  updateField: <K extends keyof CreateAgentDto>(
+    field: K,
+    value: CreateAgentDto[K],
+  ) => void;
 }
 
 export function AddAgentTemperatureField({
@@ -22,7 +25,9 @@ export function AddAgentTemperatureField({
         max="2"
         step="0.1"
         value={formData.temperature}
-        onChange={(event) => updateField("temperature", parseFloat(event.target.value))}
+        onChange={(event) =>
+          updateField("temperature", parseFloat(event.target.value))
+        }
       />
     </div>
   );

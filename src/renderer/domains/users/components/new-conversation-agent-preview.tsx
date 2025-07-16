@@ -1,6 +1,6 @@
 import { User, Target, BookOpen } from "lucide-react";
 
-import { Card, CardContent } from '@/ui/card'
+import { Card, CardContent } from "@/ui/card";
 
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 

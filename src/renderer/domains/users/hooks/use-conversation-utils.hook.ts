@@ -1,4 +1,4 @@
-import type { ConversationDto } from "../../../../shared/types/domains/users/user.types";
+import type { ConversationDto } from "../../../../shared/types/domains/users/message.types";
 
 export function useConversationUtils() {
   const getOtherParticipant = (conversation: ConversationDto) => {

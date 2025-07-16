@@ -9,7 +9,10 @@ import type { LlmProviderDto } from "../../../../shared/types/domains/llm/llm-pr
 
 interface AddAgentBasicFieldsProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: CreateAgentDto[keyof CreateAgentDto]) => void;
+  updateField: (
+    field: keyof CreateAgentDto,
+    value: CreateAgentDto[keyof CreateAgentDto],
+  ) => void;
   llmProviders: LlmProviderDto[];
 }
 

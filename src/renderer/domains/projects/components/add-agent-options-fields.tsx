@@ -1,11 +1,14 @@
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentOptionsFieldsProps {
   formData: CreateAgentDto;
-  updateField: <T extends keyof CreateAgentDto>(field: T, value: CreateAgentDto[T]) => void;
+  updateField: <T extends keyof CreateAgentDto>(
+    field: T,
+    value: CreateAgentDto[T],
+  ) => void;
 }
 
 export function AddAgentOptionsFields({

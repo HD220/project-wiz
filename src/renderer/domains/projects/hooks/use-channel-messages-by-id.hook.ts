@@ -1,3 +1,5 @@
+import { UpdateChannelMessageDto } from "@/shared/types/domains/projects/channel-message/crud.types";
+
 import { channelMessageService } from "../services/channel-message.service";
 import { useChannelMessageStore } from "../stores/channel-message.store";
 
@@ -7,7 +9,7 @@ export function useChannelMessagesById(channelId: string) {
   const queriesResult = useChannelMessagesByIdQueries(channelId);
   const { selectedMessage, setSelectedMessage } = useChannelMessageStore();
 
-  const updateMessage = async (data: any) => {
+  const updateMessage = async (data: UpdateChannelMessageDto) => {
     await channelMessageService.update(data);
     queriesResult.refetch();
   };

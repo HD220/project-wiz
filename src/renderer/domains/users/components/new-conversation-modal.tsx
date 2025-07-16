@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@/ui/dialog'
+import { Dialog, DialogContent } from "@/ui/dialog";
 
 import { NewConversationAgentSelector } from "./new-conversation-agent-selector";
 import { NewConversationModalHeader } from "./new-conversation-modal-header";

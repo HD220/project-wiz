@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 
-import { useProjectsQueries } from './use-projects-queries.hook'
-
 import type {
   CreateProjectDto,
   UpdateProjectDto,
 } from "../../../../shared/types/domains/projects/project.types";
+
+import { useProjectsQueries } from "@/domains/projects/hooks/use-projects-queries.hook";
 
 export function useProjectsMutations() {
   const createMutation = useCreateProjectMutation();

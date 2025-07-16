@@ -20,7 +20,10 @@ function getButtonClassNames(buttonVariant: string, defaultClassNames: any) {
   };
 }
 
-function getMonthCaptionClassNames(captionLayout: string, defaultClassNames: any) {
+function getMonthCaptionClassNames(
+  captionLayout: string,
+  defaultClassNames: any,
+) {
   return {
     month_caption: cn(
       "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)",
@@ -92,8 +95,14 @@ export function getCalendarClassNames(
 ) {
   const defaultClassNames = getDefaultClassNames();
 
-  const buttonClassNames = getButtonClassNames(buttonVariant, defaultClassNames);
-  const monthCaptionClassNames = getMonthCaptionClassNames(captionLayout, defaultClassNames);
+  const buttonClassNames = getButtonClassNames(
+    buttonVariant,
+    defaultClassNames,
+  );
+  const monthCaptionClassNames = getMonthCaptionClassNames(
+    captionLayout,
+    defaultClassNames,
+  );
   const dayWeekClassNames = getDayWeekClassNames(defaultClassNames);
 
   return {

@@ -28,14 +28,14 @@ export function useTerminalCommands(props: UseTerminalCommandsProps) {
   const { handleArrowUp, handleArrowDown } = useTerminalHistory(props);
   const { handleCommand } = useTerminalExecution(props);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
       handleCommand();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
       handleArrowUp();
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
       handleArrowDown();
     }
   };

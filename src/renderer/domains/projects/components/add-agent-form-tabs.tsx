@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AddAgentAdvancedFields } from "./add-agent-advanced-fields";
 import { AddAgentBasicFields } from "./add-agent-basic-fields";
@@ -8,7 +8,10 @@ import type { LlmProviderDto } from "../../../../shared/types/domains/llm/llm-pr
 
 interface AddAgentFormTabsProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: CreateAgentDto[keyof CreateAgentDto]) => void;
+  updateField: (
+    field: keyof CreateAgentDto,
+    value: CreateAgentDto[keyof CreateAgentDto],
+  ) => void;
   llmProviders: LlmProviderDto[];
 }
 

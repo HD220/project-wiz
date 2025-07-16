@@ -1,5 +1,10 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { cn } from '@/lib/utils'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { cn } from "@/lib/utils";
 
 import { FileExplorerItemActions } from "./file-explorer-item-actions";
 import { FileExplorerItemContent } from "./file-explorer-item-content";
@@ -38,12 +43,12 @@ export function FileExplorerItem({
           onClick={onClick}
           onDoubleClick={onDoubleClick}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
+            if (event.key === "Enter" || event.key === " ") {
               onClick();
             }
           }}
           onKeyUp={(event) => {
-            if (event.key === 'Enter') {
+            if (event.key === "Enter") {
               onDoubleClick();
             }
           }}
@@ -51,7 +56,7 @@ export function FileExplorerItem({
           <FileExplorerItemIcon item={item} isExpanded={isExpanded} />
           <FileExplorerItemContent item={item} />
           <FileExplorerItemActions />
-        </div>
+        </button>
       </ContextMenuTrigger>
       <FileExplorerItemContextMenu />
     </ContextMenu>

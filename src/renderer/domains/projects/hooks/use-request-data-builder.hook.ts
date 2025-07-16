@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, type MutableRefObject } from "react";
 
 import type {
   AISendMessageRequestDto,
@@ -11,7 +11,7 @@ interface UseRequestDataBuilderProps {
   authorId: string;
   authorName: string;
   aiName?: string;
-  propsRef: any;
+  propsRef: MutableRefObject<AIChatConfigDto>;
 }
 
 export function useRequestDataBuilder(props: UseRequestDataBuilderProps) {

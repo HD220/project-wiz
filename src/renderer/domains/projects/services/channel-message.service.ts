@@ -1,10 +1,18 @@
+import { IChannelMessageService } from "@/shared/types/domains/projects/channel-message/channel-message-service.interface";
+import { ChannelMessage } from "@/shared/types/domains/projects/channel-message/channel-message.types";
+import {
+  ChannelMessageFilterDto,
+  CreateChannelMessageDto,
+  UpdateChannelMessageDto,
+} from "@/shared/types/domains/projects/channel-message/crud.types";
+
 export * from "./channel-message-list.service";
 export * from "./channel-message-crud.service";
 export * from "./channel-message-search.service";
 
 // Backward compatibility object
-export const channelMessageService = {
-  list: async (filter?: any) => {
+export const channelMessageService: IChannelMessageService = {
+  list: async (filter?: ChannelMessageFilterDto) => {
     const { listChannelMessages } = await import(
       "./channel-message-list.service"
     );
@@ -28,7 +36,7 @@ export const channelMessageService = {
     );
     return getChannelMessageById(id);
   },
-  create: async (data: any) => {
+  create: async (data: CreateChannelMessageDto) => {
     const { createChannelMessage } = await import(
       "./channel-message-crud.service"
     );
@@ -45,7 +53,7 @@ export const channelMessageService = {
     );
     return createTextChannelMessage(content, channelId, authorId, authorName);
   },
-  update: async (data: any) => {
+  update: async (data: UpdateChannelMessageDto) => {
     const { updateChannelMessage } = await import(
       "./channel-message-crud.service"
     );

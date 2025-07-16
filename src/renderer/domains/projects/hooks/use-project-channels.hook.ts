@@ -1,3 +1,4 @@
+import { UpdateChannelDto } from "../../../../shared/types/domains/projects/channel.types";
 import { channelService } from "../services/channel.service";
 import { useChannelStore } from "../stores/channel.store";
 
@@ -7,7 +8,7 @@ export function useProjectChannels(projectId: string) {
   const queriesResult = useProjectChannelsQueries(projectId);
   const { selectedChannel, setSelectedChannel } = useChannelStore();
 
-  const updateChannel = async (data: any) => {
+  const updateChannel = async (data: UpdateChannelDto) => {
     await channelService.update(data);
     queriesResult.refetch();
   };

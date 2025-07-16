@@ -1,11 +1,11 @@
-import { useProjectStore } from "../stores/project.store";
+import { useProjectStore, ProjectState } from "../stores/project.store";
 
 export function useProjectsState() {
   const selectedProject = useProjectStore(
-    (state: any) => state.selectedProject,
+    (state: ProjectState) => state.selectedProject,
   );
   const setSelectedProject = useProjectStore(
-    (state: any) => state.setSelectedProject,
+    (state: ProjectState) => state.setSelectedProject,
   );
 
   return {

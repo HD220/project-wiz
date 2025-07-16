@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { agentPlaceholders } from '../../../lib/placeholders'
+import { agentPlaceholders } from "../../../lib/placeholders";
 
 export function useAgentDashboardState() {
   const [searchQuery, setSearchQuery] = useState("");
