@@ -6,6 +6,7 @@ import {
   channelMessages,
   type ChannelMessageSchema,
 } from "../../../persistence/schemas/channel-messages.schema";
+import { ProjectMessage } from "../entities/project-message.entity";
 
 const logger = getLogger("project-messages.operations");
 
@@ -45,11 +46,41 @@ function buildAuthorWhereCondition(authorId: string, channelId?: string) {
   return eq(channelMessages.authorId, authorId);
 }
 
-export async function createProjectMessage(
-  data: Partial<ChannelMessageSchema>,
-): Promise<ChannelMessageSchema> {
-  logger.warn("createProjectMessage not implemented yet.");
-  return data as ChannelMessageSchema;
+export async function createProjectMessage(data: {
+  content: string;
+  channelId: string;
+  authorId: string;
+  authorName: string;
+  type?: "text" | "code" | "file" | "system";
+  metadata?: Record<string, unknown>;
+}): Promise<ChannelMessageSchema> {
+  try {
+    const message = ProjectMessage.create(data);
+    const plainObject = message.toPlainObject();
+
+    const db = getDatabase();
+    const [insertedMessage] = await db
+      .insert(channelMessages)
+      .values({
+        id: plainObject.id,
+        content: plainObject.content,
+        channelId: plainObject.channelId,
+        authorId: plainObject.authorId,
+        authorName: plainObject.authorName,
+        type: plainObject.type,
+        metadata: plainObject.metadata,
+        isEdited: plainObject.isEdited,
+        createdAt: plainObject.createdAt,
+        updatedAt: plainObject.updatedAt,
+      })
+      .returning();
+
+    logger.info(`Created message: ${insertedMessage.id}`);
+    return insertedMessage;
+  } catch (error) {
+    logger.error("Failed to create project message", { error, data });
+    throw error;
+  }
 }
 
 export async function findMessageById(
