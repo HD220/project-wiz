@@ -1,56 +1,46 @@
-import {
-  EntityCreatedEvent,
-  EntityUpdatedEvent,
-  EntityDeletedEvent,
-  EntityData,
-} from "./base.events";
+import { BaseEvent } from "./base.events";
+import { EVENT_TYPES } from "./event-types";
 
-// LLM Provider Events
-export class LlmProviderCreatedEvent extends EntityCreatedEvent {
-  type = "llm-provider.created" as const;
-
+export class LlmProviderCreatedEvent extends BaseEvent {
   constructor(
-    providerId: string,
-    public readonly provider: {
-      name: string;
-      provider: string;
-      model: string;
-      isDefault: boolean;
-    },
+    entityId: string,
+    public readonly provider: LlmProviderEventData,
   ) {
-    super(providerId, "llm-provider", provider);
+    super(EVENT_TYPES.LLM_PROVIDER_CREATED, entityId);
   }
 }
 
-export class LlmProviderUpdatedEvent extends EntityUpdatedEvent {
-  type = "llm-provider.updated" as const;
-
+export class LlmProviderUpdatedEvent extends BaseEvent {
   constructor(
-    providerId: string,
-    changes: EntityData,
-    previousData?: EntityData,
+    entityId: string,
+    public readonly updates: LlmProviderUpdateData,
   ) {
-    super(providerId, "llm-provider", changes, previousData);
+    super(EVENT_TYPES.LLM_PROVIDER_UPDATED, entityId);
   }
 }
 
-export class LlmProviderDeletedEvent extends EntityDeletedEvent {
-  type = "llm-provider.deleted" as const;
-
-  constructor(providerId: string, deletedProvider: EntityData) {
-    super(providerId, "llm-provider", deletedProvider);
+export class LlmProviderDeletedEvent extends BaseEvent {
+  constructor(entityId: string) {
+    super(EVENT_TYPES.LLM_PROVIDER_DELETED, entityId);
   }
 }
 
-export class LlmProviderSetAsDefaultEvent extends EntityUpdatedEvent {
-  type = "llm-provider.set-as-default" as const;
+interface LlmProviderEventData {
+  id: string;
+  name: string;
+  provider: string;
+  model: string;
+  apiKey: string;
+  isDefault: boolean;
+}
 
-  constructor(providerId: string, previousDefaultId?: string) {
-    super(
-      providerId,
-      "llm-provider",
-      { isDefault: true },
-      { previousDefaultId },
-    );
-  }
+interface LlmProviderUpdateData {
+  name?: string;
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+  isDefault?: boolean;
+  temperature?: number;
+  maxTokens?: number;
+  isActive?: boolean;
 }

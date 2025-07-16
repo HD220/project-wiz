@@ -15,13 +15,14 @@ import {
 import { getAgentsByProject } from "@/renderer/lib/placeholders";
 
 import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
-import { useProjectChannels } from "@/domains/projects/hooks/use-project-channels.hook";
+
+import { ProjectDto } from "@/shared/types";
+
 import { AgentsSidebar } from "@/domains/agents/components/agents-sidebar";
 import { CreateChannelModal } from "@/domains/projects/components/create-channel-modal";
 import { ProjectNavigation } from "@/domains/projects/components/project-navigation";
+import { useProjectChannels } from "@/domains/projects/hooks/use-project-channels.hook";
 import { useProjects } from "@/domains/projects/hooks/use-projects.hook";
-
-import { ProjectDto } from "@/shared/types";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();

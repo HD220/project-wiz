@@ -1,6 +1,6 @@
+import { AgentTaskProcessor } from "./agent-task-processor";
 import { AgentQueue } from "./agent.queue";
 import { AgentTask } from "./entities/agent-task.entity";
-import { AgentTaskProcessor } from "./agent-task-processor";
 
 export class AgentWorkerQueue {
   constructor() {

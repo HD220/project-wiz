@@ -1,7 +1,8 @@
+import type { Task } from "@/renderer/lib/placeholders";
+
 import { KanbanColumnHeader } from "./kanban-column-header";
 import { KanbanEmptyState } from "./kanban-empty-state";
 import { TaskCard } from "./task-card";
-import type { Task } from "@/renderer/lib/placeholders";
 
 interface TaskColumn {
   id: string;
@@ -15,7 +16,11 @@ interface KanbanColumnProps {
   onCreateTask: (columnId: string) => void;
 }
 
-export function KanbanColumn({ column, tasks, onCreateTask }: KanbanColumnProps) {
+export function KanbanColumn({
+  column,
+  tasks,
+  onCreateTask,
+}: KanbanColumnProps) {
   return (
     <div className="flex flex-col">
       <KanbanColumnHeader

@@ -1,7 +1,7 @@
-import { ChannelCore } from "./channel-core.entity";
 import { ChannelAccess } from "./channel-access";
-import { ChannelSerializer } from "./channel-serializer";
+import { ChannelCore } from "./channel-core.entity";
 import { ChannelFactory } from "./channel-factory";
+import { ChannelSerializer } from "./channel-serializer";
 
 export class Channel {
   constructor(private readonly core: ChannelCore) {}
@@ -44,6 +44,9 @@ export class Channel {
   }
 
   toPlainObject() {
-    return ChannelSerializer.toPlainObject(this.core.getId(), this.core.getData());
+    return ChannelSerializer.toPlainObject(
+      this.core.getId(),
+      this.core.getData(),
+    );
   }
 }

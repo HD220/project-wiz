@@ -1,47 +1,21 @@
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { MessageAvatar } from "./message-avatar";
-import { MessageHeader } from "./message-header";
-import { MessageContent } from "./message-content";
 import { MessageActions } from "./message-actions";
+import { MessageAvatar } from "./message-avatar";
+import { MessageContent } from "./message-content";
 import { MessageEditForm } from "./message-edit-form";
+import { MessageHeader } from "./message-header";
+import { createMessageItemHandlers } from "./message-item-handlers";
+import { useMessageItemState } from "./message-item-state.hook";
+import { getMessageItemStyles } from "./message-item-styles";
+import { MessageItemProps } from "./message-item-types";
 
-interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  senderName: string;
-  senderType: "user" | "agent" | "system";
-  messageType: "text" | "task_update" | "system" | "file_share" | "code";
-  timestamp: Date;
-  isEdited?: boolean;
-  replyTo?: string;
-  mentions?: string[];
-  attachments?: unknown[];
-  metadata?: Record<string, unknown>;
-}
+export function MessageItem(props: MessageItemProps) {
+  const { message, onEdit, onDelete, onReply, showActions = true } = props;
+  const { showMenu, setShowMenu, isEditing, setIsEditing } =
+    useMessageItemState();
+  const { handleEditSave, handleEditCancel, handleEditStart } =
+    createMessageItemHandlers(message.id, onEdit, setIsEditing);
 
-interface MessageItemProps {
-  message: Message;
-  onEdit: (messageId: string, content: string) => void;
-  onDelete: (messageId: string) => void;
-  onReply?: (messageId: string) => void;
-  showActions?: boolean;
-}
-
-export function MessageItem({ message, onEdit, onDelete, onReply, showActions = true }: MessageItemProps) {
-  const [showMenu, setShowMenu] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleEditSave = (content: string) => {
-    onEdit(message.id, content);
-    setIsEditing(false);
-  };
-
-  const containerClasses = cn(
-    "group hover:bg-gray-600/30 p-2 rounded relative",
-    message.mentions?.includes("user") && "bg-yellow-500/10 border-l-2 border-yellow-500",
-  );
+  const containerClasses = getMessageItemStyles(message.mentions);
 
   return (
     <div
@@ -67,7 +41,7 @@ export function MessageItem({ message, onEdit, onDelete, onReply, showActions = 
             <MessageEditForm
               initialContent={message.content}
               onSave={handleEditSave}
-              onCancel={() => setIsEditing(false)}
+              onCancel={handleEditCancel}
             />
           ) : (
             <MessageContent
@@ -82,7 +56,7 @@ export function MessageItem({ message, onEdit, onDelete, onReply, showActions = 
         <MessageActions
           messageId={message.id}
           senderType={message.senderType}
-          onEdit={() => setIsEditing(true)}
+          onEdit={handleEditStart}
           onDelete={onDelete}
           onReply={onReply}
         />

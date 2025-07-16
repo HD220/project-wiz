@@ -1,7 +1,7 @@
-import { 
-  ProjectStatusType, 
-  validateProjectStatus, 
-  isValidProjectStatus 
+import {
+  ProjectStatusType,
+  validateProjectStatus,
+  isValidProjectStatus,
 } from "./project-status-operations.functions";
 
 export class ProjectStatus {

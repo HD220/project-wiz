@@ -5,9 +5,9 @@ export * from "./projects";
 export * from "./agents";
 
 // Legacy compatibility re-exports
-import { mockUser } from "./users";
-import { mockProjects, getProjectById } from "./projects";
 import { mockAgents, getAgentById, getAgentsByProject } from "./agents";
+import { mockProjects, getProjectById } from "./projects";
+import { mockUser } from "./users";
 
 export {
   // Users

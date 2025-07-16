@@ -1,6 +1,6 @@
-import { useMessages } from "./use-messages.hook";
-import { useDirectMessageChatState } from "./use-direct-message-chat-state.hook";
 import { useDirectMessageChatActions } from "./use-direct-message-chat-actions.hook";
+import { useDirectMessageChatState } from "./use-direct-message-chat-state.hook";
+import { useMessages } from "./use-messages.hook";
 
 import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
 

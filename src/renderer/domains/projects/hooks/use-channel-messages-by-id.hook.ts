@@ -1,6 +1,7 @@
-import { useChannelMessagesByIdQueries } from "./use-channel-messages-by-id-queries.hook";
-import { useChannelMessageStore } from "../stores/channel-message.store";
 import { channelMessageService } from "../services/channel-message.service";
+import { useChannelMessageStore } from "../stores/channel-message.store";
+
+import { useChannelMessagesByIdQueries } from "./use-channel-messages-by-id-queries.hook";
 
 export function useChannelMessagesById(channelId: string) {
   const queriesResult = useChannelMessagesByIdQueries(channelId);

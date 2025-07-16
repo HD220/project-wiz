@@ -3,6 +3,7 @@
 ### 1. ANÁLISE REAL DA SITUAÇÃO
 
 **Mapeie os problemas reais:**
+
 - Onde está difícil de encontrar código?
 - Quais arquivos estão grandes demais?
 - Onde tem código duplicado?
@@ -11,6 +12,7 @@
 - Quais componentes fazem coisa demais?
 
 **Identifique por dor real:**
+
 - **URGENTE**: Código que quebra frequentemente
 - **IMPORTANTE**: Código difícil de manter/encontrar
 - **ÚTIL**: Melhorias que facilitam desenvolvimento
@@ -21,6 +23,7 @@
 **Para cada execução, escolha uma área que dói:**
 
 #### B. Simplificação de Layouts e Rotas
+
 - Criar 2-3 layouts máximo (MainLayout, AuthLayout, etc.)
 - Rotas agrupadas por funcionalidade
 - Lazy loading onde faz sentido
@@ -28,6 +31,7 @@
 - Navegação clara e previsível
 
 #### C. Estado e Dados Organizados
+
 - Store Zustand por feature quando necessário
 - Estado React local quando faz sentido
 - Eliminação de prop drilling óbvio
@@ -35,6 +39,7 @@
 - Forms com React Hook Form bem estruturados
 
 #### D. Componentes Práticos
+
 - Componentes pequenos e focados
 - Máximo 100 linhas por componente
 - Nomes descritivos e óbvios
@@ -42,6 +47,7 @@
 - Reutilização real, não forçada
 
 #### E. Comunicação Main/Renderer Simples
+
 - IPC organizado por funcionalidade
 - Tipos compartilhados
 - Error handling adequado
@@ -50,6 +56,7 @@
 ### 3. DIRETRIZES PRÁTICAS
 
 **Object Calisthenics aplicados na prática:**
+
 - Indentação máxima de 2 níveis
 - Evitar else (usar early returns)
 - Objetos pequenos e focados
@@ -57,6 +64,7 @@
 - Funções pequenas (máximo 20 linhas)
 
 **KISS aplicado:**
+
 - Se não está quebrado, não mexe
 - Solução mais simples que funciona
 - Evitar abstrações desnecessárias
@@ -64,6 +72,7 @@
 - Convenções óbvias
 
 **Organização por funcionalidade:**
+
 - Agrupar por feature, não por tipo de arquivo
 - Colocar junto o que muda junto
 - Separar apenas quando necessário
@@ -78,6 +87,7 @@
 3. **Faça um plano simples** de reorganização
 
 **Exemplo de saída esperada:**
+
 ```
 PROBLEMA IDENTIFICADO: Componentes de formulário espalhados e duplicados
 ARQUIVOS ANALISADOS: 15 arquivos com forms similares
@@ -93,6 +103,7 @@ PRÓXIMA DOR: Estados sendo passados por 4 níveis de componentes
 ### 5. CRITÉRIOS DE QUALIDADE REAL
 
 **Cada refatoração deve:**
+
 - Resolver uma dor real
 - Manter funcionalidade exata
 - Deixar código mais fácil de entender
@@ -101,6 +112,7 @@ PRÓXIMA DOR: Estados sendo passados por 4 níveis de componentes
 - Facilitar manutenção
 
 **Sinais de que está no caminho certo:**
+
 - Menos linhas de código total
 - Mais fácil encontrar onde mexer
 - Menos bugs aparecem
@@ -108,6 +120,7 @@ PRÓXIMA DOR: Estados sendo passados por 4 níveis de componentes
 - Menos tempo para entender código
 
 **Evite:**
+
 - Abstrações complexas
 - Patterns desnecessários
 - Separação excessiva
@@ -138,6 +151,7 @@ PRÓXIMA DOR: Estados sendo passados por 4 níveis de componentes
 Analise a codebase e identifique qual é a maior dor atual para desenvolver e manter. Foque em resolver esse problema específico com a solução mais simples possível, mantendo a funcionalidade exata mas melhorando significativamente a experiência de desenvolvimento.
 
 Siga as diretrizes práticas acima para:
+
 1. Identificar problemas reais (não teóricos)
 2. Implementar soluções simples e efetivas
 3. Manter funcionalidade exata

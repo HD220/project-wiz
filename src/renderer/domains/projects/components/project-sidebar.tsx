@@ -1,5 +1,7 @@
 import { memo } from "react";
+
 import { useProjects } from "../hooks/use-projects.hook";
+
 import { ProjectSidebarItem } from "./project-sidebar-item";
 import { ProjectSidebarSkeleton } from "./project-sidebar-skeleton";
 

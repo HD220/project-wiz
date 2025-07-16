@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+
 import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
 export function useChannelChatSendMessage(

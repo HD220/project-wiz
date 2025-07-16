@@ -1,7 +1,8 @@
 import { useAgentChat } from "./use-agent-chat.hook";
 import { useConversationAutoScroll } from "./use-conversation-auto-scroll.hook";
-import { useConversationMessageHandler } from "./use-conversation-message-handler.hook";
 import { useConversationMessageFormat } from "./use-conversation-message-format.hook";
+import { useConversationMessageHandler } from "./use-conversation-message-handler.hook";
+
 import type { ConversationDto } from "../../../../shared/types/domains/users/user.types";
 
 interface UseConversationViewStateProps {

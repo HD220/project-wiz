@@ -4,8 +4,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../../../components/ui/tabs";
-import { AddAgentBasicFields } from "./add-agent-basic-fields";
+
 import { AddAgentAdvancedFields } from "./add-agent-advanced-fields";
+import { AddAgentBasicFields } from "./add-agent-basic-fields";
 
 interface AddAgentFormTabsProps {
   formData: any;
@@ -22,9 +23,7 @@ export function AddAgentFormTabs({
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
-        <TabsTrigger value="advanced">
-          Configurações Avançadas
-        </TabsTrigger>
+        <TabsTrigger value="advanced">Configurações Avançadas</TabsTrigger>
       </TabsList>
 
       <TabsContent value="basic" className="space-y-4 mt-4">
@@ -36,10 +35,7 @@ export function AddAgentFormTabs({
       </TabsContent>
 
       <TabsContent value="advanced" className="space-y-4 mt-4">
-        <AddAgentAdvancedFields
-          formData={formData}
-          updateField={updateField}
-        />
+        <AddAgentAdvancedFields formData={formData} updateField={updateField} />
       </TabsContent>
     </Tabs>
   );

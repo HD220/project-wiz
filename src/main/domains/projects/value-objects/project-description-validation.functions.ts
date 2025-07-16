@@ -10,7 +10,7 @@ const ProjectDescriptionSchema = z
   .optional();
 
 export function validateProjectDescription(
-  description?: string | null
+  description?: string | null,
 ): string | null {
   if (!description) {
     return null;
@@ -34,7 +34,7 @@ export function validateProjectDescription(
 }
 
 export function isValidProjectDescription(
-  description?: string | null
+  description?: string | null,
 ): boolean {
   try {
     if (!description) return true;

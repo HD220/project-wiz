@@ -1,4 +1,7 @@
-import { validateProjectName, isValidProjectName } from "./project-name-validation.functions";
+import {
+  validateProjectName,
+  isValidProjectName,
+} from "./project-name-validation.functions";
 
 export class ProjectName {
   private readonly value: string;

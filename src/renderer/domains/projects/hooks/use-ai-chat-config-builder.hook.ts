@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+
 import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
 interface ConfigBuilderProps {

@@ -1,6 +1,6 @@
-import { 
-  validateProjectDescription, 
-  isValidProjectDescription 
+import {
+  validateProjectDescription,
+  isValidProjectDescription,
 } from "./project-description-validation.functions";
 
 export class ProjectDescription {

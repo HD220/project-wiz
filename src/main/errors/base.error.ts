@@ -1,18 +1,10 @@
-export type ErrorContext = Record<
-  string,
-  string | number | boolean | null | undefined
->;
-
-export interface ErrorMetadata {
-  code?: string;
-  context?: ErrorContext;
-  timestamp?: Date;
-  stack?: string;
-}
+import { ErrorMetadata } from "./error-metadata.interface";
+import { setupErrorPrototype } from "./error-prototype.helper";
+import { serializeError } from "./error-serialization.helper";
 
 export abstract class BaseError extends Error {
-  public readonly timestamp: Date;
-  public readonly metadata: ErrorMetadata;
+  timestamp: Date;
+  metadata: ErrorMetadata;
 
   constructor(
     message: string,
@@ -26,16 +18,9 @@ export abstract class BaseError extends Error {
       timestamp: this.timestamp,
     };
 
-    // Ensure proper prototype chain for instanceof checks
-    Object.setPrototypeOf(this, new.target.prototype);
-
-    // Capture stack trace if available
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
+    setupErrorPrototype(this, new.target as any);
   }
 
-  // Serializable error for logging and API responses
   toJSON(): {
     name: string;
     message: string;
@@ -43,16 +28,15 @@ export abstract class BaseError extends Error {
     metadata: ErrorMetadata;
     stack?: string;
   } {
-    return {
-      name: this.name,
-      message: this.message,
-      timestamp: this.timestamp.toISOString(),
-      metadata: this.metadata,
-      stack: this.stack,
-    };
+    return serializeError(
+      this.name,
+      this.message,
+      this.timestamp,
+      this.metadata,
+      this.stack,
+    );
   }
 
-  // Get user-friendly message
   getUserMessage(): string {
     return this.message;
   }

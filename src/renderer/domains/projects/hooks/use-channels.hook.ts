@@ -1,5 +1,7 @@
-import { useChannelsQueries } from "./use-channels-queries.hook";
 import { useChannelStore } from "../stores/channel.store";
+
+import { useChannelsQueries } from "./use-channels-queries.hook";
+
 import type { ChannelFilterDto } from "../../../../shared/types/domains/projects/channel.types";
 
 export function useChannels(filter?: ChannelFilterDto) {

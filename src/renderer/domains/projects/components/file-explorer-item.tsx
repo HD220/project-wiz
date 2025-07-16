@@ -1,9 +1,14 @@
-import { ContextMenu, ContextMenuTrigger } from "../../../../components/ui/context-menu";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+} from "../../../../components/ui/context-menu";
 import { cn } from "../../../../lib/utils";
-import { FileExplorerItemIcon } from "./file-explorer-item-icon";
-import { FileExplorerItemContent } from "./file-explorer-item-content";
+
 import { FileExplorerItemActions } from "./file-explorer-item-actions";
+import { FileExplorerItemContent } from "./file-explorer-item-content";
 import { FileExplorerItemContextMenu } from "./file-explorer-item-context-menu";
+import { FileExplorerItemIcon } from "./file-explorer-item-icon";
+
 import type { FileTreeItem } from "../../../../lib/placeholders";
 
 interface FileExplorerItemProps {

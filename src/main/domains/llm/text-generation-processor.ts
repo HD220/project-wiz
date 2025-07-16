@@ -1,4 +1,5 @@
 import { generateText, CoreMessage } from "ai";
+
 import { getLogger } from "../../infrastructure/logger";
 
 const logger = getLogger("text-generation.processor");

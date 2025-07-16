@@ -1,6 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useSidebar } from "./sidebar-context";
 import { SIDEBAR_WIDTH_MOBILE } from "./sidebar-constants";
 
@@ -10,56 +16,75 @@ interface SidebarProps extends React.ComponentProps<"div"> {
   collapsible?: "offcanvas" | "icon" | "none";
 }
 
-export function Sidebar({
-  side = "left",
-  variant = "sidebar",
-  collapsible = "offcanvas",
+function NonCollapsibleSidebar({
   className,
   children,
   ...props
-}: SidebarProps) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sidebar"
+      className={cn(
+        "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
 
-  if (collapsible === "none") {
-    return (
-      <div
+function MobileSidebar({
+  side,
+  openMobile,
+  setOpenMobile,
+  children,
+  ...props
+}: {
+  side: "left" | "right";
+  openMobile: boolean;
+  setOpenMobile: (open: boolean) => void;
+  children: React.ReactNode;
+} & React.ComponentProps<"div">) {
+  return (
+    <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+      <SheetContent
+        data-sidebar="sidebar"
         data-slot="sidebar"
-        className={cn(
-          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
-          className,
-        )}
-        {...props}
+        data-mobile="true"
+        className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+        style={
+          {
+            "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+          } as React.CSSProperties
+        }
+        side={side}
       >
-        {children}
-      </div>
-    );
-  }
+        <SheetHeader className="sr-only">
+          <SheetTitle>Sidebar</SheetTitle>
+          <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+        </SheetHeader>
+        <div className="flex h-full w-full flex-col">{children}</div>
+      </SheetContent>
+    </Sheet>
+  );
+}
 
-  if (isMobile) {
-    return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-        <SheetContent
-          data-sidebar="sidebar"
-          data-slot="sidebar"
-          data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
-          side={side}
-        >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
+function DesktopSidebar({
+  side,
+  variant,
+  state,
+  collapsible,
+  className,
+  children,
+  ...props
+}: {
+  side: "left" | "right";
+  variant: "sidebar" | "floating" | "inset";
+  state: string;
+  collapsible: "offcanvas" | "icon" | "none";
+} & React.ComponentProps<"div">) {
   return (
     <div
       className="group peer text-sidebar-foreground hidden md:block"
@@ -103,5 +128,51 @@ export function Sidebar({
         </div>
       </div>
     </div>
+  );
+}
+
+export function Sidebar(props: SidebarProps) {
+  const {
+    side = "left",
+    variant = "sidebar",
+    collapsible = "offcanvas",
+    className,
+    children,
+    ...rest
+  } = props;
+  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+
+  if (collapsible === "none") {
+    return (
+      <NonCollapsibleSidebar className={className} {...rest}>
+        {children}
+      </NonCollapsibleSidebar>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <MobileSidebar
+        side={side}
+        openMobile={openMobile}
+        setOpenMobile={setOpenMobile}
+        {...rest}
+      >
+        {children}
+      </MobileSidebar>
+    );
+  }
+
+  return (
+    <DesktopSidebar
+      side={side}
+      variant={variant}
+      state={state}
+      collapsible={collapsible}
+      className={className}
+      {...rest}
+    >
+      {children}
+    </DesktopSidebar>
   );
 }

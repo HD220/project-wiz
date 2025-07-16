@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 import type { TerminalLine } from "../../../../lib/placeholders";
 
 interface UseTerminalScrollProps {

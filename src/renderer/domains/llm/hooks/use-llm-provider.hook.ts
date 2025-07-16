@@ -1,8 +1,11 @@
 import { useCallback } from "react";
+
 import { useLlmProviderStore } from "../stores/llm-provider.store";
-import { useLlmProvidersQuery } from "./use-llm-provider-queries.hook";
-import { useLlmProviderMutations } from "./use-llm-provider-mutations.hook";
+
 import { useLlmProviderDefault } from "./use-llm-provider-default.hook";
+import { useLlmProviderMutations } from "./use-llm-provider-mutations.hook";
+import { useLlmProvidersQuery } from "./use-llm-provider-queries.hook";
+
 import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
 
 export function useLlmProviders(filter?: LlmProviderFilterDto) {
@@ -14,7 +17,8 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
   );
 
   const providersQuery = useLlmProvidersQuery(filter);
-  const { defaultProvider, defaultProviderQuery } = useLlmProviderDefault(filter);
+  const { defaultProvider, defaultProviderQuery } =
+    useLlmProviderDefault(filter);
   const {
     createLlmProvider,
     updateLlmProvider,

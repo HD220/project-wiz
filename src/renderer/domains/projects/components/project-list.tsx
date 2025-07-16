@@ -1,7 +1,8 @@
 import { useProjects } from "../hooks/use-projects.hook";
+
 import { ProjectCard } from "./project-card";
-import { ProjectListSkeleton } from "./project-list-skeleton";
 import { ProjectListError } from "./project-list-error";
+import { ProjectListSkeleton } from "./project-list-skeleton";
 
 export function ProjectList() {
   const { projects, isLoading, error, refreshProjects } = useProjects({

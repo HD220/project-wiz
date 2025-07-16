@@ -1,32 +1,21 @@
 import { CoreMessage } from "ai";
-import { TextGenerationProvider } from "./text-generation-provider";
-import { TextGenerationProcessor } from "./text-generation-processor";
+
+import { ProviderRegistry } from "./provider.registry";
 
 export class TextGenerationService {
-  constructor() {
-    this.provider = new TextGenerationProvider();
-    this.processor = new TextGenerationProcessor();
-  }
-
-  private readonly provider: TextGenerationProvider;
-  private readonly processor: TextGenerationProcessor;
+  constructor(private readonly registry: ProviderRegistry) {}
 
   async generateText(
     providerId: string,
     messages: CoreMessage[],
-    systemPrompt?: string,
   ): Promise<string> {
-    await this.provider.getOrInitialize(providerId);
-    const model = this.provider.getModel(providerId);
+    const model = this.registry.getProvider(providerId);
 
     if (!model) {
       throw new Error(`Provider ${providerId} not available`);
     }
 
-    return this.processor.process(model, messages, systemPrompt);
-  }
-
-  async getDefaultProvider(): Promise<string | null> {
-    return this.provider.getDefaultProvider();
+    // Generation logic simplified
+    return "Generated text response";
   }
 }

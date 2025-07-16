@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useUserStore } from "../stores/user.store";
-import { userService } from "../services/user.service";
+
 import {
   CreateUserDto,
   UpdateUserDto,
   UpdateUserSettingsDto,
 } from "../../../../shared/types/domains/users/user.types";
+import { userService } from "../services/user.service";
+import { useUserStore } from "../stores/user.store";
 
 export function useUser(userId?: string) {
   const currentUser = useUserStore((state) => state.currentUser);

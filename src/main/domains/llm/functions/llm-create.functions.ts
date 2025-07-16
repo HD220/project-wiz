@@ -1,7 +1,11 @@
 import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
 import { llmProviders } from "../../../persistence/schemas";
-import { createLlmProviderFromData, LlmProviderWithData } from "./llm-factory.functions";
+
+import {
+  createLlmProviderFromData,
+  LlmProviderWithData,
+} from "./llm-factory.functions";
 import { findLlmProviderByName } from "./llm-query.functions";
 
 import type { CreateLlmProviderDto } from "../../../../shared/types";
@@ -32,7 +36,9 @@ function buildProviderData(data: CreateLlmProviderDto) {
   };
 }
 
-async function saveNewProvider(providerData: any): Promise<LlmProviderWithData> {
+async function saveNewProvider(
+  providerData: any,
+): Promise<LlmProviderWithData> {
   const db = getDatabase();
   const [saved] = await db
     .insert(llmProviders)

@@ -1,9 +1,10 @@
-import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import { AddAgentBackstoryField } from "./add-agent-backstory-field";
+import { AddAgentGoalField } from "./add-agent-goal-field";
+import { AddAgentLlmProviderField } from "./add-agent-llm-provider-field";
 import { AddAgentNameField } from "./add-agent-name-field";
 import { AddAgentRoleField } from "./add-agent-role-field";
-import { AddAgentGoalField } from "./add-agent-goal-field";
-import { AddAgentBackstoryField } from "./add-agent-backstory-field";
-import { AddAgentLlmProviderField } from "./add-agent-llm-provider-field";
+
+import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentBasicFieldsProps {
   formData: CreateAgentDto;

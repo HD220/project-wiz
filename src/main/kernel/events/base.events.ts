@@ -1,53 +1,13 @@
 import { IEvent } from "../event-bus";
 
-// Generic entity data type for events
-export type EntityData = Record<
-  string,
-  string | number | boolean | null | undefined | Date
->;
-
-// Base event classes for domain events
-export abstract class DomainEvent implements IEvent {
-  abstract type: string;
+export abstract class BaseEvent implements IEvent {
   public readonly timestamp: Date;
-  public readonly id: string;
 
-  constructor() {
+  constructor(
+    public readonly type: string,
+    public readonly entityId: string,
+    public readonly id?: string,
+  ) {
     this.timestamp = new Date();
-    this.id = crypto.randomUUID();
-  }
-}
-
-// Base event for entity creation
-export abstract class EntityCreatedEvent extends DomainEvent {
-  constructor(
-    public readonly entityId: string,
-    public readonly entityType: string,
-    public readonly data: EntityData,
-  ) {
-    super();
-  }
-}
-
-// Base event for entity updates
-export abstract class EntityUpdatedEvent extends DomainEvent {
-  constructor(
-    public readonly entityId: string,
-    public readonly entityType: string,
-    public readonly changes: EntityData,
-    public readonly previousData?: EntityData,
-  ) {
-    super();
-  }
-}
-
-// Base event for entity deletion
-export abstract class EntityDeletedEvent extends DomainEvent {
-  constructor(
-    public readonly entityId: string,
-    public readonly entityType: string,
-    public readonly deletedData: EntityData,
-  ) {
-    super();
   }
 }

@@ -1,4 +1,5 @@
 import { getLogger } from "../../infrastructure/logger";
+
 import { Agent } from "./entities/agent.entity";
 
 const logger = getLogger("agent.worker.state");

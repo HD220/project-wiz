@@ -11,17 +11,15 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
-export function ChatInput({
-  displayName,
-  isAgentChat,
-  onSendMessage,
-  disabled = false,
-}: ChatInputProps) {
+export function ChatInput(props: ChatInputProps) {
+  const { displayName, isAgentChat, onSendMessage, disabled = false } = props;
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
 
   const handleSend = async () => {
-    if (!message.trim() || isSending || disabled) return;
+    if (!message.trim() || isSending || disabled) {
+      return;
+    }
 
     setIsSending(true);
     try {

@@ -1,4 +1,5 @@
 import { useTerminalPanelState } from "../hooks/use-terminal-panel-state.hook";
+
 import { TerminalPanelCollapsed } from "./terminal-panel-collapsed";
 import { TerminalPanelExpanded } from "./terminal-panel-expanded";
 

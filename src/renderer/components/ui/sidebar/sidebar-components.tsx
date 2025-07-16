@@ -6,11 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
 
-export function SidebarTrigger({
-  className,
-  onClick,
-  ...props
-}: React.ComponentProps<typeof Button>) {
+export function SidebarTrigger(props: React.ComponentProps<typeof Button>) {
+  const { className, onClick, ...rest } = props;
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -24,7 +21,7 @@ export function SidebarTrigger({
         onClick?.(event);
         toggleSidebar();
       }}
-      {...props}
+      {...rest}
     >
       <PanelLeftIcon />
       <span className="sr-only">Toggle Sidebar</span>
@@ -32,7 +29,8 @@ export function SidebarTrigger({
   );
 }
 
-export function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
+export function SidebarRail(props: React.ComponentProps<"button">) {
+  const { className, ...rest } = props;
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -52,12 +50,14 @@ export function SidebarRail({ className, ...props }: React.ComponentProps<"butto
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
         className,
       )}
-      {...props}
+      {...rest}
     />
   );
 }
 
-export function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+export function SidebarInset(props: React.ComponentProps<"main">) {
+  const { className, ...rest } = props;
+
   return (
     <main
       data-slot="sidebar-inset"
@@ -66,21 +66,20 @@ export function SidebarInset({ className, ...props }: React.ComponentProps<"main
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className,
       )}
-      {...props}
+      {...rest}
     />
   );
 }
 
-export function SidebarInput({
-  className,
-  ...props
-}: React.ComponentProps<typeof Input>) {
+export function SidebarInput(props: React.ComponentProps<typeof Input>) {
+  const { className, ...rest } = props;
+
   return (
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
       className={cn("bg-background h-8 w-full shadow-none", className)}
-      {...props}
+      {...rest}
     />
   );
 }

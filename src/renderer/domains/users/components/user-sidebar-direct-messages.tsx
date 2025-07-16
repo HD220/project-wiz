@@ -1,11 +1,13 @@
 import { ChevronDown, Plus } from "lucide-react";
+
+import { CustomLink } from "../../../../components/custom-link";
 import { Button } from "../../../../components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../../../../components/ui/collapsible";
-import { CustomLink } from "../../../../components/custom-link";
+
 import { ConversationList } from "./conversation-list";
 
 export function UserSidebarDirectMessages() {

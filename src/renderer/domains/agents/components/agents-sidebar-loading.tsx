@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AgentsSidebarLoading() {

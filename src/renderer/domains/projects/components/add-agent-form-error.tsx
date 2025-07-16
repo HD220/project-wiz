@@ -7,9 +7,5 @@ export function AddAgentFormError({ error }: AddAgentFormErrorProps) {
     return null;
   }
 
-  return (
-    <div className="text-destructive text-sm mt-4">
-      {error}
-    </div>
-  );
+  return <div className="text-destructive text-sm mt-4">{error}</div>;
 }

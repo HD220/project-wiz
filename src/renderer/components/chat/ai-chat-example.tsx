@@ -1,9 +1,11 @@
 import { useState } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useChannelChat } from "@/domains/projects/hooks/use-channel-chat.hook";
-import { AiChatProviderSelector } from "@/domains/projects/components/chat/ai-chat-provider-selector";
+
 import { AiChatInput } from "@/domains/projects/components/chat/ai-chat-input";
+import { AiChatProviderSelector } from "@/domains/projects/components/chat/ai-chat-provider-selector";
 import { AiChatStatus } from "@/domains/projects/components/chat/ai-chat-status";
+import { useChannelChat } from "@/domains/projects/hooks/use-channel-chat.hook";
 
 interface AIChatExampleProps {
   channelId: string;
@@ -11,11 +13,8 @@ interface AIChatExampleProps {
   authorName?: string;
 }
 
-export function AIChatExample({
-  channelId,
-  authorId = "test-user",
-  authorName = "Test User",
-}: AIChatExampleProps) {
+export function AIChatExample(props: AIChatExampleProps) {
+  const { channelId, authorId = "test-user", authorName = "Test User" } = props;
   const [selectedLlmProvider, setSelectedLlmProvider] = useState<string>("");
   const [messageInput, setMessageInput] = useState("");
 

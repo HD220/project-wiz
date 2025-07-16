@@ -14,7 +14,7 @@ const ProjectNameSchema = z
 
 export function validateProjectName(name: string): string {
   const sanitized = ValidationUtils.sanitizeString(name);
-  
+
   try {
     return ProjectNameSchema.parse(sanitized);
   } catch (error) {

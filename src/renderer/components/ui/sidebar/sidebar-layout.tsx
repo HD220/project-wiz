@@ -2,7 +2,10 @@ import * as React from "react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-export function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
+export function SidebarHeader({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-header"
@@ -13,7 +16,10 @@ export function SidebarHeader({ className, ...props }: React.ComponentProps<"div
   );
 }
 
-export function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
+export function SidebarFooter({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-footer"
@@ -38,7 +44,10 @@ export function SidebarSeparator({
   );
 }
 
-export function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
+export function SidebarContent({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-content"
@@ -52,7 +61,10 @@ export function SidebarContent({ className, ...props }: React.ComponentProps<"di
   );
 }
 
-export function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
+export function SidebarGroup({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-group"

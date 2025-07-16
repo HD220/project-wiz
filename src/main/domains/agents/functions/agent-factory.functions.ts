@@ -19,7 +19,9 @@ export type AgentWithData = Agent & {
   updatedAt: string;
 };
 
-export function createAgentFromData(data: Record<string, unknown>): AgentWithData {
+export function createAgentFromData(
+  data: Record<string, unknown>,
+): AgentWithData {
   const identity = new AgentIdentity(
     new AgentName(data.name as string),
     new AgentRole(data.role as string),

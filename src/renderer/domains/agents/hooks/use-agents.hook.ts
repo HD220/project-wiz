@@ -1,7 +1,12 @@
-import { useAgentsQuery, useActiveAgentsQuery, useAgentQuery, useAgentByNameQuery } from "./use-agents-queries.hook";
 import { useAgentsMutations } from "./use-agents-mutations.hook";
-import { useAgentsState } from "./use-agents-state.hook";
+import {
+  useAgentsQuery,
+  useActiveAgentsQuery,
+  useAgentQuery,
+  useAgentByNameQuery,
+} from "./use-agents-queries.hook";
 import { useAgentsRefetch } from "./use-agents-refetch.hook";
+import { useAgentsState } from "./use-agents-state.hook";
 
 export function useAgents() {
   const agentsQuery = useAgentsQuery();
@@ -14,7 +19,8 @@ export function useAgents() {
     agents: agentsQuery.data || [],
     activeAgents: activeAgentsQuery.data || [],
     isLoading: agentsQuery.isLoading || activeAgentsQuery.isLoading,
-    error: agentsQuery.error?.message || activeAgentsQuery.error?.message || null,
+    error:
+      agentsQuery.error?.message || activeAgentsQuery.error?.message || null,
     selectedAgent: state.selectedAgent,
     createAgent: mutations.createAgent,
     updateAgent: mutations.updateAgent,

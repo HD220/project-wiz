@@ -1,5 +1,4 @@
-// Shared types for mock data
-
+// User types
 export interface User {
   id: string;
   name: string;

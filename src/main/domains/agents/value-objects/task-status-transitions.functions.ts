@@ -1,8 +1,8 @@
 import { TaskStatusType } from "./task-status.vo";
 
 export function canTransitionBetween(
-  current: TaskStatusType, 
-  target: TaskStatusType
+  current: TaskStatusType,
+  target: TaskStatusType,
 ): boolean {
   const validTransitions: Record<TaskStatusType, TaskStatusType[]> = {
     pending: ["running", "cancelled"],

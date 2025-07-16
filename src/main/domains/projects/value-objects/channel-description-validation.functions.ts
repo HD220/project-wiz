@@ -10,7 +10,7 @@ const ChannelDescriptionSchema = z
   .optional();
 
 export function validateChannelDescription(
-  description?: string | null
+  description?: string | null,
 ): string | null {
   if (!description) {
     return null;
@@ -34,7 +34,7 @@ export function validateChannelDescription(
 }
 
 export function isValidChannelDescription(
-  description?: string | null
+  description?: string | null,
 ): boolean {
   try {
     if (!description) return true;

@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+
 import {
   Tooltip,
   TooltipContent,
@@ -6,8 +7,10 @@ import {
   TooltipTrigger,
 } from "../../../components/ui/tooltip";
 import { cn } from "../../../lib/utils";
+
 import { ProjectAvatar } from "./project-avatar";
 import { ProjectUnreadBadge } from "./project-unread-badge";
+
 import type { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
 
 interface ProjectSidebarItemProps {

@@ -1,4 +1,5 @@
 import { Plus, Minimize2, Settings } from "lucide-react";
+
 import { Button } from "../../../../components/ui/button";
 
 interface TerminalPanelHeaderProps {

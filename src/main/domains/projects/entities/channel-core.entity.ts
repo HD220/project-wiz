@@ -1,5 +1,5 @@
-import { ChannelData } from "./channel-data";
 import { ChannelBuilder } from "./channel-builder";
+import { ChannelData } from "./channel-data";
 
 export class ChannelCore {
   constructor(

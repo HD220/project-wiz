@@ -11,9 +11,7 @@ export function TaskCardTimeTracking({ task }: TaskCardTimeTrackingProps) {
     <div className="flex items-center gap-1">
       <span>{task.estimatedHours}h</span>
       {task.actualHours && (
-        <span className="text-muted-foreground/60">
-          / {task.actualHours}h
-        </span>
+        <span className="text-muted-foreground/60">/ {task.actualHours}h</span>
       )}
     </div>
   );

@@ -1,10 +1,10 @@
-import { useTyping } from "./use-typing.hook";
 import { useAiChatConfig } from "./use-ai-chat-config.hook";
 import { useAiChatUtilities } from "./use-ai-chat-utilities.hook";
 import { useChannelChatMessages } from "./use-channel-chat-messages.hook";
-import { useChannelChatSend } from "./use-channel-chat-send.hook";
 import { useChannelChatResult } from "./use-channel-chat-result.hook";
 import { useChannelChatSendMessage } from "./use-channel-chat-send-message.hook";
+import { useChannelChatSend } from "./use-channel-chat-send.hook";
+import { useTyping } from "./use-typing.hook";
 
 interface UseChannelChatProps {
   channelId: string;
@@ -29,7 +29,11 @@ export function useChannelChat(props: UseChannelChatProps) {
     messagesHook.addOptimisticMessage,
     messagesHook.clearOptimisticMessages,
   );
-  const sendMessage = useChannelChatSendMessage(sendHook, messagesHook, setTyping);
+  const sendMessage = useChannelChatSendMessage(
+    sendHook,
+    messagesHook,
+    setTyping,
+  );
 
   return useChannelChatResult(
     messagesHook,

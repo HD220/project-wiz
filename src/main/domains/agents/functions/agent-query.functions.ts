@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
 import { agents } from "../../../persistence/schemas";
+
 import { createAgentFromData, AgentWithData } from "./agent-factory.functions";
 
 import type { AgentFilterDto } from "../../../../shared/types";

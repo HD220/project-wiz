@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
 import { conversations } from "../../../persistence/schemas";
+
 import { createConversation } from "./conversation-crud.functions";
 
 import type { ConversationDto } from "../../../../shared/types";

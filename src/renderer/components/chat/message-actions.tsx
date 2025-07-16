@@ -1,4 +1,5 @@
 import { Edit, Trash2, Reply } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 interface MessageActionsProps {
@@ -9,7 +10,13 @@ interface MessageActionsProps {
   onReply?: (messageId: string) => void;
 }
 
-export function MessageActions({ messageId, senderType, onEdit, onDelete, onReply }: MessageActionsProps) {
+export function MessageActions({
+  messageId,
+  senderType,
+  onEdit,
+  onDelete,
+  onReply,
+}: MessageActionsProps) {
   return (
     <div className="absolute top-0 right-4 bg-gray-800 border border-gray-600 rounded shadow-lg flex">
       <Button

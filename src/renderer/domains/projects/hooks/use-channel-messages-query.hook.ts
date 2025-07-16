@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { channelMessageService } from "../services/channel-message.service";
 
 export function useChannelMessagesQuery(channelId: string) {

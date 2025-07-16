@@ -1,7 +1,7 @@
-import { ChannelTypeField } from "./channel-form-type-field";
-import { ChannelNameField } from "./channel-form-name-field";
 import { ChannelDescField } from "./channel-form-desc-field";
+import { ChannelNameField } from "./channel-form-name-field";
 import { ChannelPrivacyField } from "./channel-form-privacy-field";
+import { ChannelTypeField } from "./channel-form-type-field";
 
 interface ChannelFormFieldsProps {
   channelName: string;

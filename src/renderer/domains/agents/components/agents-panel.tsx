@@ -1,5 +1,7 @@
 import { ScrollArea } from "../../../components/ui/scroll-area";
+
 import { AgentsList } from "./agents-list";
+
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AgentsPanelProps {

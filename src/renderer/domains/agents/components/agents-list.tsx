@@ -1,4 +1,5 @@
 import { AgentItem } from "./agent-item";
+
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AgentsListProps {

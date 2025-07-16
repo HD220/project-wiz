@@ -3,7 +3,12 @@ import { eq } from "drizzle-orm";
 import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
 import { llmProviders } from "../../../persistence/schemas";
-import { findLlmProviderById, createLlmProviderFromData, LlmProviderWithData } from "./llm-provider-crud.functions";
+
+import {
+  findLlmProviderById,
+  createLlmProviderFromData,
+  LlmProviderWithData,
+} from "./llm-provider-crud.functions";
 
 const logger = getLogger("llm-provider.operations");
 
@@ -22,7 +27,7 @@ export async function setDefaultLlmProvider(
 
 async function updateDefaultProvider(id: string): Promise<void> {
   const db = getDatabase();
-  
+
   await db.transaction(async (tx) => {
     await tx.update(llmProviders).set({ isDefault: false });
     await tx

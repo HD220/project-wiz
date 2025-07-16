@@ -1,6 +1,7 @@
 import { AgentsSidebarHeader } from "./agents-sidebar-header";
-import { AgentsSidebarStats } from "./agents-sidebar-stats";
 import { AgentsSidebarSearch } from "./agents-sidebar-search";
+import { AgentsSidebarStats } from "./agents-sidebar-stats";
+
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AgentsSidebarTopSectionProps {
@@ -24,10 +25,7 @@ export function AgentsSidebarTopSection({
 }: AgentsSidebarTopSectionProps) {
   return (
     <>
-      <AgentsSidebarHeader
-        projectId={projectId}
-        onAddClick={onAddClick}
-      />
+      <AgentsSidebarHeader projectId={projectId} onAddClick={onAddClick} />
       <AgentsSidebarStats
         totalAgents={agents.activeAgents.length}
         filteredAgents={agents.filteredAgents.length}

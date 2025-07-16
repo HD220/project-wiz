@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+
 import type { ChannelMessageDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
 interface UseOptimisticMessageProps {

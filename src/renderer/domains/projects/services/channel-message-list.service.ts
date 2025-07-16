@@ -4,7 +4,9 @@ import type {
   ChannelMessagePaginationDto,
 } from "../../../../shared/types/domains/projects/channel-message.types";
 
-export async function listChannelMessages(filter?: ChannelMessageFilterDto): Promise<ChannelMessageDto[]> {
+export async function listChannelMessages(
+  filter?: ChannelMessageFilterDto,
+): Promise<ChannelMessageDto[]> {
   return window.electronIPC.invoke("channelMessage:list", filter);
 }
 
@@ -21,7 +23,10 @@ export async function listChannelMessagesByChannel(
   );
 }
 
-export async function getLatestChannelMessages(channelId: string, limit = 50): Promise<ChannelMessageDto[]> {
+export async function getLatestChannelMessages(
+  channelId: string,
+  limit = 50,
+): Promise<ChannelMessageDto[]> {
   return window.electronIPC.invoke(
     "channelMessage:getLatest",
     channelId,
@@ -29,10 +34,14 @@ export async function getLatestChannelMessages(channelId: string, limit = 50): P
   );
 }
 
-export async function getChannelMessageById(id: string): Promise<ChannelMessageDto | null> {
+export async function getChannelMessageById(
+  id: string,
+): Promise<ChannelMessageDto | null> {
   return window.electronIPC.invoke("channelMessage:getById", id);
 }
 
-export async function getLastChannelMessage(channelId: string): Promise<ChannelMessageDto | null> {
+export async function getLastChannelMessage(
+  channelId: string,
+): Promise<ChannelMessageDto | null> {
   return window.electronIPC.invoke("channelMessage:getLastMessage", channelId);
 }

@@ -1,6 +1,8 @@
 import { ChevronRight, ChevronDown, Folder } from "lucide-react";
+
 import { Button } from "../../../../components/ui/button";
 import { useFileIcons } from "../hooks/use-file-icons.hook";
+
 import type { FileTreeItem } from "../../../../lib/placeholders";
 
 interface FileExplorerItemIconProps {

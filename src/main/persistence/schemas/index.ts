@@ -1,78 +1,28 @@
 // Central export file for all database schemas
 // This is the single source of truth for Drizzle schemas
 
-// Import individual schemas
+export * from "./core/projects.exports";
+export * from "./core/agents.exports";
+export * from "./core/users.exports";
+export * from "./core/channels.exports";
+export * from "./core/llm.exports";
 
-import {
-  agents,
-  type AgentSchema,
-  type CreateAgentSchema,
-} from "./agents.schema";
-import {
-  channelMessages,
-  channelMessagesRelations,
-  type ChannelMessageSchema,
-  type CreateChannelMessageSchema,
-} from "./channel-messages.schema";
+// Import for collections
+import { agents } from "./core/agents.exports";
 import {
   channels,
-  channelsRelations,
-  type ChannelSchema,
-  type CreateChannelSchema,
-} from "./channels.schema";
-import {
-  conversations,
-  type ConversationSchema,
-  type CreateConversationSchema,
-} from "./conversations.schema";
-import {
-  llmProviders,
-  type LlmProviderSchema,
-  type CreateLlmProviderSchema,
-} from "./llm-providers.schema";
-import {
-  messages,
-  messagesRelations,
-  type MessageSchema,
-  type CreateMessageSchema,
-} from "./messages.schema";
-import {
-  projects,
-  type ProjectSchema,
-  type CreateProjectSchema,
-} from "./projects.schema";
-import { users, type UserSchema, type CreateUserSchema } from "./users.schema";
-
-// Re-export everything
-export {
-  projects,
-  type ProjectSchema,
-  type CreateProjectSchema,
-  agents,
-  type AgentSchema,
-  type CreateAgentSchema,
-  llmProviders,
-  type LlmProviderSchema,
-  type CreateLlmProviderSchema,
-  channels,
-  channelsRelations,
-  type ChannelSchema,
-  type CreateChannelSchema,
   channelMessages,
+  channelsRelations,
   channelMessagesRelations,
-  type ChannelMessageSchema,
-  type CreateChannelMessageSchema,
-  conversations,
-  type ConversationSchema,
-  type CreateConversationSchema,
-  messages,
-  messagesRelations,
-  type MessageSchema,
-  type CreateMessageSchema,
+} from "./core/channels.exports";
+import { llmProviders } from "./core/llm.exports";
+import { projects } from "./core/projects.exports";
+import {
   users,
-  type UserSchema,
-  type CreateUserSchema,
-};
+  conversations,
+  messages,
+  messagesRelations,
+} from "./core/users.exports";
 
 // Export all tables for Drizzle migrations
 export const allTables = {

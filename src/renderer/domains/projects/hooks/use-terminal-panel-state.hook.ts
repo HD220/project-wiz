@@ -1,5 +1,5 @@
-import { useTerminalState } from "./use-terminal-state.hook";
 import { useTerminalCommands } from "./use-terminal-commands.hook";
+import { useTerminalState } from "./use-terminal-state.hook";
 
 export function useTerminalPanelState() {
   const state = useTerminalState();

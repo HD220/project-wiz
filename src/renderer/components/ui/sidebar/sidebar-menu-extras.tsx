@@ -3,15 +3,13 @@ import { Slot } from "@radix-ui/react-slot";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-export function SidebarMenuAction({
-  className,
-  asChild = false,
-  showOnHover = false,
-  ...props
-}: React.ComponentProps<"button"> & {
-  asChild?: boolean;
-  showOnHover?: boolean;
-}) {
+export function SidebarMenuAction(
+  props: React.ComponentProps<"button"> & {
+    asChild?: boolean;
+    showOnHover?: boolean;
+  },
+) {
+  const { className, asChild = false, showOnHover = false, ...rest } = props;
   const Comp = asChild ? Slot : "button";
 
   return (
@@ -29,15 +27,14 @@ export function SidebarMenuAction({
           "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className,
       )}
-      {...props}
+      {...rest}
     />
   );
 }
 
-export function SidebarMenuBadge({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function SidebarMenuBadge(props: React.ComponentProps<"div">) {
+  const { className, ...rest } = props;
+
   return (
     <div
       data-slot="sidebar-menu-badge"
@@ -51,18 +48,17 @@ export function SidebarMenuBadge({
         "group-data-[collapsible=icon]:hidden",
         className,
       )}
-      {...props}
+      {...rest}
     />
   );
 }
 
-export function SidebarMenuSkeleton({
-  className,
-  showIcon = false,
-  ...props
-}: React.ComponentProps<"div"> & {
-  showIcon?: boolean;
-}) {
+export function SidebarMenuSkeleton(
+  props: React.ComponentProps<"div"> & {
+    showIcon?: boolean;
+  },
+) {
+  const { className, showIcon = false, ...rest } = props;
   const width = React.useMemo(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`;
   }, []);
@@ -72,7 +68,7 @@ export function SidebarMenuSkeleton({
       data-slot="sidebar-menu-skeleton"
       data-sidebar="menu-skeleton"
       className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)}
-      {...props}
+      {...rest}
     >
       {showIcon && (
         <Skeleton

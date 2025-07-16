@@ -1,5 +1,6 @@
-import { useAgentsSidebarHooks } from "./agents-sidebar-hooks";
 import { AgentsSidebarContent } from "./agents-sidebar-content";
+import { useAgentsSidebarHooks } from "./agents-sidebar-hooks";
+
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AgentsSidebarProps {

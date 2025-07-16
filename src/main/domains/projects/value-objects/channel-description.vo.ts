@@ -1,6 +1,6 @@
-import { 
-  validateChannelDescription, 
-  isValidChannelDescription 
+import {
+  validateChannelDescription,
+  isValidChannelDescription,
 } from "./channel-description-validation.functions";
 
 export class ChannelDescription {

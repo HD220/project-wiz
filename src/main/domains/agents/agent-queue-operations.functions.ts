@@ -14,8 +14,8 @@ export function sortTasksByPriority(tasks: AgentTask[]): AgentTask[] {
 }
 
 export function filterTasksByPriority(
-  tasks: AgentTask[], 
-  priority: TaskPriority
+  tasks: AgentTask[],
+  priority: TaskPriority,
 ): AgentTask[] {
   return tasks.filter((task) => task.getPriority().equals(priority));
 }

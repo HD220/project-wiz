@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { CheckCircle, Info } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface MessageHeaderProps {
@@ -10,7 +11,13 @@ interface MessageHeaderProps {
   isEdited?: boolean;
 }
 
-export function MessageHeader({ senderName, senderType, messageType, timestamp, isEdited }: MessageHeaderProps) {
+export function MessageHeader({
+  senderName,
+  senderType,
+  messageType,
+  timestamp,
+  isEdited,
+}: MessageHeaderProps) {
   const getMessageIcon = () => {
     switch (messageType) {
       case "task_update":
@@ -28,15 +35,11 @@ export function MessageHeader({ senderName, senderType, messageType, timestamp, 
 
   return (
     <div className="flex items-center space-x-2 mb-1">
-      <span className={cn("font-medium", getSenderColor())}>
-        {senderName}
-      </span>
+      <span className={cn("font-medium", getSenderColor())}>{senderName}</span>
       <span className="text-xs text-gray-500">
         {format(timestamp, "HH:mm")}
       </span>
-      {isEdited && (
-        <span className="text-xs text-gray-500">(edited)</span>
-      )}
+      {isEdited && <span className="text-xs text-gray-500">(edited)</span>}
       {getMessageIcon()}
     </div>
   );

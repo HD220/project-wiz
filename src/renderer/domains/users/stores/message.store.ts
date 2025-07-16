@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { MessageDto } from "../../../../shared/types/domains/users/message.types";
 
 interface MessageState {

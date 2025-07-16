@@ -1,6 +1,7 @@
-import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
-import { useDirectMessageSend } from "./use-direct-message-send.hook";
 import { useDirectMessageRegenerate } from "./use-direct-message-regenerate.hook";
+import { useDirectMessageSend } from "./use-direct-message-send.hook";
+
+import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
 
 interface DirectMessageChatActionsProps {
   conversationId: string;
@@ -13,7 +14,9 @@ interface DirectMessageChatActionsProps {
   loadMessages: (conversationId: string) => Promise<void>;
 }
 
-export function useDirectMessageChatActions(props: DirectMessageChatActionsProps) {
+export function useDirectMessageChatActions(
+  props: DirectMessageChatActionsProps,
+) {
   const { sendMessage } = useDirectMessageSend(props);
   const { regenerateLastMessage } = useDirectMessageRegenerate(props);
 

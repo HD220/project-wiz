@@ -1,4 +1,5 @@
 import { taskColumns, getTasksByStatus } from "@/renderer/lib/placeholders";
+
 import { KanbanColumn } from "./kanban-column";
 
 interface KanbanGridProps {

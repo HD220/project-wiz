@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { useMessages } from "./use-messages.hook";
+
 import { useConversation } from "./use-conversations.hook";
+import { useMessages } from "./use-messages.hook";
+
 import type { ConversationDto } from "../../../../shared/types/domains/users/message.types";
 
 interface UseAgentChatProps {

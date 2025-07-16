@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { channelMessageService } from "../services/channel-message.service";
+
 import { useChannelMessagesMutations } from "./use-channel-messages-mutations.hook";
-import type {
-  ChannelMessageFilterDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+
+import type { ChannelMessageFilterDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
 export function useChannelMessagesQueries(filter?: ChannelMessageFilterDto) {
   const messagesQuery = useQuery({

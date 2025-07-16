@@ -4,6 +4,7 @@ import {
   ChannelPrivacy,
   ProjectIdentity,
 } from "../value-objects";
+
 import { ChannelData } from "./channel-data";
 
 export class ChannelBuilder {

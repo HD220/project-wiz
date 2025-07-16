@@ -7,7 +7,10 @@ export function useChannelChatResult(
   config: any,
   utilities: any,
 ) {
-  const error = messagesHook.error || sendHook.mutations.sendError || sendHook.mutations.regenerateError;
+  const error =
+    messagesHook.error ||
+    sendHook.mutations.sendError ||
+    sendHook.mutations.regenerateError;
 
   return {
     messages: messagesHook.messages,

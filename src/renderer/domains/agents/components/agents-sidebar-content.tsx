@@ -1,30 +1,8 @@
 import { AddAgentModal } from "./add-agent-modal";
-import { AgentsSidebarTopSection } from "./agents-sidebar-top-section";
 import { AgentsSidebarMainSection } from "./agents-sidebar-main-section";
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import { AgentsSidebarTopSection } from "./agents-sidebar-top-section";
 
-interface AgentsSidebarContentProps {
-  projectId?: string;
-  agents: {
-    activeAgents: AgentDto[];
-    filteredAgents: AgentDto[];
-    isLoading: boolean;
-    error: string | null;
-  };
-  search: {
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
-  };
-  modal: {
-    isAddModalOpen: boolean;
-    setIsAddModalOpen: (open: boolean) => void;
-  };
-  actions: {
-    handleRemoveAgent: (agentId: string) => void;
-    handleAgentAdded: (agent: AgentDto) => void;
-  };
-  onAgentSelect?: (agent: AgentDto) => void;
-}
+import type { AgentsSidebarContentProps } from "./agents-sidebar-content-props";
 
 export function AgentsSidebarContent({
   projectId,

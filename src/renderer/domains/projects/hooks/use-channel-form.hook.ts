@@ -1,6 +1,6 @@
-import { useProjectChannels } from "./use-project-channels.hook";
 import { useChannelFormState } from "./use-channel-form-state.hook";
 import { useChannelFormSubmit } from "./use-channel-form-submit.hook";
+import { useProjectChannels } from "./use-project-channels.hook";
 
 export function useChannelForm(projectId: string) {
   const { createChannel, error, clearError } = useProjectChannels(projectId);
@@ -12,7 +12,7 @@ export function useChannelForm(projectId: string) {
       isPrivate: formState.isPrivate,
       setIsSubmitting: formState.setIsSubmitting,
     },
-    { createChannel, clearError }
+    { createChannel, clearError },
   );
 
   const resetForm = () => {

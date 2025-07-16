@@ -8,4 +8,8 @@ export { TaskStatus, TaskStatusType } from "./task-status.vo";
 export { TaskPriority } from "./task-priority.vo";
 
 // Function exports
-export { canTransitionBetween, isTerminalStatus, isActiveStatus } from "./task-status-transitions.functions";
+export {
+  canTransitionBetween,
+  isTerminalStatus,
+  isActiveStatus,
+} from "./task-status-transitions.functions";

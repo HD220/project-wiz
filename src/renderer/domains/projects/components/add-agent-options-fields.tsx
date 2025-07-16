@@ -1,5 +1,6 @@
 import { Checkbox } from "../../../../components/ui/checkbox";
 import { Label } from "../../../../components/ui/label";
+
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentOptionsFieldsProps {
@@ -26,9 +27,7 @@ export function AddAgentOptionsFields({
         <Checkbox
           id="allowDelegation"
           checked={formData.allowDelegation}
-          onCheckedChange={(checked) =>
-            updateField("allowDelegation", checked)
-          }
+          onCheckedChange={(checked) => updateField("allowDelegation", checked)}
         />
         <Label htmlFor="allowDelegation">
           Permitir delegação para outros agentes

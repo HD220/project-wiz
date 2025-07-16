@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 
 interface MessageEditFormProps {
@@ -7,7 +8,11 @@ interface MessageEditFormProps {
   onCancel: () => void;
 }
 
-export function MessageEditForm({ initialContent, onSave, onCancel }: MessageEditFormProps) {
+export function MessageEditForm({
+  initialContent,
+  onSave,
+  onCancel,
+}: MessageEditFormProps) {
   const [content, setContent] = useState(initialContent);
 
   const handleSave = () => {
@@ -29,11 +34,7 @@ export function MessageEditForm({ initialContent, onSave, onCancel }: MessageEdi
         <Button size="sm" onClick={handleSave}>
           Save
         </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onCancel}
-        >
+        <Button size="sm" variant="ghost" onClick={onCancel}>
           Cancel
         </Button>
       </div>

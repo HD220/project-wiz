@@ -1,7 +1,9 @@
 import { useConversationViewState } from "../hooks/use-conversation-view-state.hook";
-import { ConversationHeader } from "./conversation-header";
+
 import { ConversationContent } from "./conversation-content";
+import { ConversationHeader } from "./conversation-header";
 import { ConversationMessageInput } from "./conversation-message-input";
+
 import type { ConversationDto } from "../../../../shared/types/domains/users/user.types";
 
 interface ConversationViewProps {

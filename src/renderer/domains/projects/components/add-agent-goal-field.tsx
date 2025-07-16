@@ -1,6 +1,8 @@
 import { Target } from "lucide-react";
+
 import { Label } from "../../../../components/ui/label";
 import { Textarea } from "../../../../components/ui/textarea";
+
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentGoalFieldProps {

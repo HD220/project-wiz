@@ -4,7 +4,9 @@ import type {
   UpdateChannelMessageDto,
 } from "../../../../shared/types/domains/projects/channel-message.types";
 
-export async function createChannelMessage(data: CreateChannelMessageDto): Promise<ChannelMessageDto> {
+export async function createChannelMessage(
+  data: CreateChannelMessageDto,
+): Promise<ChannelMessageDto> {
   return window.electronIPC.invoke("channelMessage:create", data);
 }
 
@@ -23,7 +25,9 @@ export async function createTextChannelMessage(
   );
 }
 
-export async function updateChannelMessage(data: UpdateChannelMessageDto): Promise<ChannelMessageDto> {
+export async function updateChannelMessage(
+  data: UpdateChannelMessageDto,
+): Promise<ChannelMessageDto> {
   return window.electronIPC.invoke("channelMessage:update", data);
 }
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
+
 import { ScrollArea } from "../../../../components/ui/scroll-area";
-import { UserSidebarHeader } from "./user-sidebar-header";
-import { UserSidebarSearch } from "./user-sidebar-search";
-import { UserSidebarNavigation } from "./user-sidebar-navigation";
-import { UserSidebarDirectMessages } from "./user-sidebar-direct-messages";
+
 import { UserArea } from "./user-area";
+import { UserSidebarDirectMessages } from "./user-sidebar-direct-messages";
+import { UserSidebarHeader } from "./user-sidebar-header";
+import { UserSidebarNavigation } from "./user-sidebar-navigation";
+import { UserSidebarSearch } from "./user-sidebar-search";
 
 interface UserSidebarProps {
   className?: string;

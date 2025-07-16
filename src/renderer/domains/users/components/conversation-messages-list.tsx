@@ -1,6 +1,8 @@
 import { MessageItem } from "../../../../components/chat/message-item";
-import { ConversationTypingIndicator } from "./conversation-typing-indicator";
+
 import { ConversationEmptyState } from "./conversation-empty-state";
+import { ConversationTypingIndicator } from "./conversation-typing-indicator";
+
 import type { MessageDto } from "../../../../shared/types/domains/users/user.types";
 
 interface ConversationMessagesListProps {

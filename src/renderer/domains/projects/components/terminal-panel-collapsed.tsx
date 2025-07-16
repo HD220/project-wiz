@@ -1,4 +1,5 @@
 import { cn } from "../../../../lib/utils";
+
 import { TerminalPanelHeader } from "./terminal-panel-header";
 
 interface TerminalPanelCollapsedProps {

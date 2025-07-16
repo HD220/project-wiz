@@ -1,4 +1,5 @@
 import { File, FileText, Image, Code, Archive, Settings } from "lucide-react";
+
 import type { FileTreeItem } from "../../../../lib/placeholders";
 
 export function useFileIcons() {

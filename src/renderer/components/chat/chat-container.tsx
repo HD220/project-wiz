@@ -1,12 +1,13 @@
-import { useChannelMessagesById } from "@/features/channel-messaging/hooks/use-channel-messages.hook";
 import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
-import { ChatHeader } from "./chat-header";
-import { ChatMessages } from "./chat-messages";
-import { ChatInput } from "./chat-input";
-
 import type { ChannelMessageDto } from "@/shared/types";
+
+import { ChatHeader } from "./chat-header";
+import { ChatInput } from "./chat-input";
+import { ChatMessages } from "./chat-messages";
+
+import { useChannelMessagesById } from "@/features/channel-messaging/hooks/use-channel-messages.hook";
 
 interface ChatContainerProps {
   channelId?: string;
@@ -16,17 +17,17 @@ interface ChatContainerProps {
   className?: string;
 }
 
-export function ChatContainer({
-  channelId,
-  channelName,
-  agentId,
-  agentName,
-  className,
-}: ChatContainerProps) {
-  const channelMessagesHook = channelId ? useChannelMessagesById(channelId) : null;
+export function ChatContainer(props: ChatContainerProps) {
+  const { channelId, channelName, agentId, agentName, className } = props;
+
+  const channelMessagesHook = channelId
+    ? useChannelMessagesById(channelId)
+    : null;
   const agentMessages: Message[] = [];
-  
-  const messages = channelId ? channelMessagesHook?.messages || [] : agentMessages;
+
+  const messages = channelId
+    ? channelMessagesHook?.messages || []
+    : agentMessages;
   const displayName = channelName || agentName || "Chat";
   const isAgentChat = !!agentId;
   const isLoading = channelMessagesHook?.isLoading || false;
@@ -36,30 +37,35 @@ export function ChatContainer({
     if (channelId && channelMessagesHook) {
       await channelMessagesHook.sendTextMessage(
         messageText,
-        "current-user-id", // TODO: Get from user context
-        "João Silva", // TODO: Get from user context
+        "current-user-id",
+        "João Silva",
       );
-    } else if (agentId) {
+      return;
+    }
+
+    if (agentId) {
       console.log("Sending message to agent:", messageText);
     }
   };
 
   const handleEditMessage = (id: string, content: string) => {
-    if (channelMessagesHook) {
-      channelMessagesHook.updateMessage({ id, content });
+    if (!channelMessagesHook) {
+      return;
     }
+    channelMessagesHook.updateMessage({ id, content });
   };
 
   const handleDeleteMessage = (id: string) => {
-    if (channelMessagesHook) {
-      channelMessagesHook.deleteMessage(id);
+    if (!channelMessagesHook) {
+      return;
     }
+    channelMessagesHook.deleteMessage(id);
   };
 
   return (
     <div className={cn("flex flex-col h-full bg-background", className)}>
       <ChatHeader displayName={displayName} isAgentChat={isAgentChat} />
-      
+
       <ChatMessages
         messages={messages}
         displayName={displayName}
@@ -70,7 +76,7 @@ export function ChatContainer({
         onDeleteMessage={handleDeleteMessage}
         onRetry={() => channelMessagesHook?.refetch()}
       />
-      
+
       <ChatInput
         displayName={displayName}
         isAgentChat={isAgentChat}

@@ -1,5 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+
 import { KanbanGrid } from "./kanban-grid";
 
 interface KanbanBoardProps {
@@ -9,7 +10,12 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ projectId, className }: KanbanBoardProps) {
   const handleCreateTask = (columnId: string) => {
-    console.log("Creating task for column:", columnId, "in project:", projectId);
+    console.log(
+      "Creating task for column:",
+      columnId,
+      "in project:",
+      projectId,
+    );
   };
 
   return (

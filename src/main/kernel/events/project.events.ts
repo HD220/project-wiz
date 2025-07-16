@@ -1,60 +1,42 @@
-import {
-  EntityCreatedEvent,
-  EntityUpdatedEvent,
-  EntityDeletedEvent,
-  EntityData,
-} from "./base.events";
+import { BaseEvent } from "./base.events";
+import { EVENT_TYPES } from "./event-types";
 
-// Project Events
-export class ProjectCreatedEvent extends EntityCreatedEvent {
-  type = "project.created" as const;
-
+export class ProjectCreatedEvent extends BaseEvent {
   constructor(
-    projectId: string,
-    public readonly project: {
-      name: string;
-      description?: string;
-      gitUrl?: string;
-      status: "active" | "inactive" | "archived";
-    },
+    entityId: string,
+    public readonly project: ProjectEventData,
   ) {
-    super(projectId, "project", project);
+    super(EVENT_TYPES.PROJECT_CREATED, entityId);
   }
 }
 
-export class ProjectUpdatedEvent extends EntityUpdatedEvent {
-  type = "project.updated" as const;
-
+export class ProjectUpdatedEvent extends BaseEvent {
   constructor(
-    projectId: string,
-    changes: EntityData,
-    previousData?: EntityData,
+    entityId: string,
+    public readonly updates: ProjectUpdateData,
   ) {
-    super(projectId, "project", changes, previousData);
+    super(EVENT_TYPES.PROJECT_UPDATED, entityId);
   }
 }
 
-export class ProjectDeletedEvent extends EntityDeletedEvent {
-  type = "project.deleted" as const;
-
-  constructor(projectId: string, deletedProject: EntityData) {
-    super(projectId, "project", deletedProject);
+export class ProjectDeletedEvent extends BaseEvent {
+  constructor(entityId: string) {
+    super(EVENT_TYPES.PROJECT_DELETED, entityId);
   }
 }
 
-export class ProjectStatusChangedEvent extends EntityUpdatedEvent {
-  type = "project.status.changed" as const;
+interface ProjectEventData {
+  id: string;
+  name: string;
+  description: string;
+  gitUrl: string;
+  status: string;
+  createdBy: string;
+}
 
-  constructor(
-    projectId: string,
-    newStatus: "active" | "inactive" | "archived",
-    previousStatus: "active" | "inactive" | "archived",
-  ) {
-    super(
-      projectId,
-      "project",
-      { status: newStatus },
-      { status: previousStatus },
-    );
-  }
+interface ProjectUpdateData {
+  name?: string;
+  description?: string;
+  gitUrl?: string;
+  status?: string;
 }

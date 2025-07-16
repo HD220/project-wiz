@@ -1,20 +1,19 @@
-import { createDeepSeek } from "@ai-sdk/deepseek";
-import { createOpenAI } from "@ai-sdk/openai";
 import { LanguageModel } from "ai";
 
 import { getLogger } from "../../infrastructure/logger";
 
 import { LLMProvider } from "./entities";
-import { ProviderType } from "./value-objects";
+import { ProviderFactory } from "./provider-factory";
+import { ProviderRegistryStorage } from "./provider-registry-storage";
 
 const logger = getLogger("provider.registry");
 
 export class ProviderRegistry {
   constructor() {
-    this.providers = new Map();
+    this.storage = new ProviderRegistryStorage(new Map());
   }
 
-  private providers: Map<string, LanguageModel>;
+  private readonly storage: ProviderRegistryStorage;
 
   registerProvider(
     id: string,
@@ -22,8 +21,12 @@ export class ProviderRegistry {
     apiKey: string,
     model: string = "gpt-4o",
   ): void {
-    const languageModel = this.createLanguageModel(provider, apiKey, model);
-    this.providers.set(id, languageModel);
+    const languageModel = ProviderFactory.createLanguageModel(
+      provider,
+      apiKey,
+      model,
+    );
+    this.storage.store(id, languageModel);
 
     logger.info("Provider registered", {
       providerId: id,
@@ -32,45 +35,18 @@ export class ProviderRegistry {
   }
 
   getProvider(id: string): LanguageModel | null {
-    return this.providers.get(id) || null;
+    return this.storage.retrieve(id);
   }
 
   hasProvider(id: string): boolean {
-    return this.providers.has(id);
+    return this.storage.exists(id);
   }
 
   clearProviders(): void {
-    this.providers.clear();
-    logger.info("All providers cleared");
-  }
-
-  private createLanguageModel(
-    provider: LLMProvider,
-    apiKey: string,
-    model: string = "gpt-4o",
-  ): LanguageModel {
-    if (provider.isOpenAI()) {
-      const openaiProvider = createOpenAI({
-        apiKey,
-        baseURL: "https://api.openai.com/v1",
-      });
-      return openaiProvider(model);
-    }
-
-    if (provider.isDeepSeek()) {
-      const deepseekProvider = createDeepSeek({
-        apiKey,
-        baseURL: "https://api.deepseek.com",
-      });
-      return deepseekProvider("deepseek-chat");
-    }
-
-    throw new Error(
-      `Unsupported provider type: ${provider.getProviderType().getValue()}`,
-    );
+    this.storage.clear();
   }
 
   getRegisteredProviderIds(): string[] {
-    return Array.from(this.providers.keys());
+    return this.storage.getIds();
   }
 }

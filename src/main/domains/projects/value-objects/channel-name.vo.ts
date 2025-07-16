@@ -1,4 +1,7 @@
-import { validateChannelName, isValidChannelName } from "./channel-name-validation.functions";
+import {
+  validateChannelName,
+  isValidChannelName,
+} from "./channel-name-validation.functions";
 
 export class ChannelName {
   private readonly value: string;

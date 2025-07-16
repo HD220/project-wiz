@@ -1,6 +1,7 @@
 import { Tabs } from "@/components/ui/tabs";
-import { SettingsTabList } from "./settings-tab-list";
+
 import { SettingsTabContent } from "./settings-tab-content";
+import { SettingsTabList } from "./settings-tab-list";
 
 interface SettingsTabsProps {
   settings: any;

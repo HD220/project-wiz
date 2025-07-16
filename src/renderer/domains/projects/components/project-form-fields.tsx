@@ -1,10 +1,13 @@
-import { Form } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
+
+import { Form } from "@/components/ui/form";
+
 import { CreateProjectFormData } from "../schemas/create-project.schema";
-import { ProjectFormNameField } from "./project-form-name-field";
+
+import { ProjectFormAvatarField } from "./project-form-avatar-field";
 import { ProjectFormDescriptionField } from "./project-form-description-field";
 import { ProjectFormGitField } from "./project-form-git-field";
-import { ProjectFormAvatarField } from "./project-form-avatar-field";
+import { ProjectFormNameField } from "./project-form-name-field";
 import { ProjectFormSubmitButton } from "./project-form-submit-button";
 
 interface ProjectFormFieldsProps {

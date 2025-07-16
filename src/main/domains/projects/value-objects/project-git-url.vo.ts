@@ -1,6 +1,6 @@
-import { 
-  validateProjectGitUrl, 
-  isValidProjectGitUrl 
+import {
+  validateProjectGitUrl,
+  isValidProjectGitUrl,
 } from "./project-git-url-validation.functions";
 
 export class ProjectGitUrl {

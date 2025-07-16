@@ -18,10 +18,10 @@ export { agentToDto } from "./agent.mapper";
 export type { AgentWithData } from "./agent-factory.functions";
 
 // Queue operations
-export { 
-  sortTasksByPriority, 
+export {
+  sortTasksByPriority,
   filterTasksByPriority,
   logTaskEnqueued,
   logTaskDequeued,
-  logQueueCleared
+  logQueueCleared,
 } from "../agent-queue-operations.functions";

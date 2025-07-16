@@ -1,4 +1,5 @@
 import { User, Target, BookOpen } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -6,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../../components/ui/card";
+
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface NewConversationAgentPreviewProps {

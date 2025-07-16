@@ -22,10 +22,7 @@ export function CreateChannelModalFooter({
       >
         Cancelar
       </Button>
-      <Button
-        type="submit"
-        disabled={!channelName.trim() || isSubmitting}
-      >
+      <Button type="submit" disabled={!channelName.trim() || isSubmitting}>
         {isSubmitting ? "Criando..." : "Criar Canal"}
       </Button>
     </DialogFooter>

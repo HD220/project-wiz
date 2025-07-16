@@ -22,23 +22,44 @@ export class ProjectMessage {
     return new ProjectMessage(ProjectMessageCore.create(props));
   }
 
-  getId() { return this.core.getId(); }
-  getContent() { return this.core.getContent(); }
-  getChannelId() { return this.core.getChannelId(); }
-  getAuthorId() { return this.core.getAuthorId(); }
-  isText() { return this.core.isText(); }
-  isCode() { return this.core.isCode(); }
-  isSystem() { return this.core.isSystem(); }
+  getId() {
+    return this.core.getId();
+  }
+  getContent() {
+    return this.core.getContent();
+  }
+  getChannelId() {
+    return this.core.getChannelId();
+  }
+  getAuthorId() {
+    return this.core.getAuthorId();
+  }
+  isText() {
+    return this.core.isText();
+  }
+  isCode() {
+    return this.core.isCode();
+  }
+  isSystem() {
+    return this.core.isSystem();
+  }
 
   canBeEditedBy(userId: string): boolean {
-    return new ProjectMessagePermissions(this.core.getData()).canBeEditedBy(userId);
+    return new ProjectMessagePermissions(this.core.getData()).canBeEditedBy(
+      userId,
+    );
   }
 
   canBeDeletedBy(userId: string): boolean {
-    return new ProjectMessagePermissions(this.core.getData()).canBeDeletedBy(userId);
+    return new ProjectMessagePermissions(this.core.getData()).canBeDeletedBy(
+      userId,
+    );
   }
 
   toPlainObject() {
-    return ProjectMessageSerializer.toPlainObject(this.core.getId(), this.core.getData());
+    return ProjectMessageSerializer.toPlainObject(
+      this.core.getId(),
+      this.core.getData(),
+    );
   }
 }

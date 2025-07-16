@@ -1,12 +1,12 @@
-import { AgentTask } from "./entities/agent-task.entity";
-import { TaskPriority } from "./value-objects/task-priority.vo";
-import { 
-  sortTasksByPriority, 
+import {
+  sortTasksByPriority,
   filterTasksByPriority,
   logTaskEnqueued,
   logTaskDequeued,
-  logQueueCleared
+  logQueueCleared,
 } from "./agent-queue-operations.functions";
+import { AgentTask } from "./entities/agent-task.entity";
+import { TaskPriority } from "./value-objects/task-priority.vo";
 
 export class AgentQueue {
   private tasks: AgentTask[] = [];

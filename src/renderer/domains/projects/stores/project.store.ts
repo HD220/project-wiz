@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
 
 interface ProjectState {

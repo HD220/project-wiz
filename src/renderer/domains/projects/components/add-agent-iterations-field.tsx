@@ -1,5 +1,6 @@
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
+
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentIterationsFieldProps {
@@ -20,9 +21,7 @@ export function AddAgentIterationsField({
         min="1"
         max="50"
         value={formData.maxIterations}
-        onChange={(e) =>
-          updateField("maxIterations", parseInt(e.target.value))
-        }
+        onChange={(e) => updateField("maxIterations", parseInt(e.target.value))}
       />
     </div>
   );

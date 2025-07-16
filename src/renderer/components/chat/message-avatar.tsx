@@ -7,7 +7,11 @@ interface MessageAvatarProps {
   senderType: "user" | "agent" | "system";
 }
 
-export function MessageAvatar({ senderId, senderName, senderType }: MessageAvatarProps) {
+export function MessageAvatar({
+  senderId,
+  senderName,
+  senderType,
+}: MessageAvatarProps) {
   const getAvatarSrc = () => {
     return senderType === "agent" ? `/agents/${senderId}.png` : undefined;
   };

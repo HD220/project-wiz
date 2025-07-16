@@ -3,7 +3,9 @@ import { useState } from "react";
 export function useChannelFormState() {
   const [channelName, setChannelName] = useState("");
   const [channelDescription, setChannelDescription] = useState("");
-  const [channelType, setChannelType] = useState<"general" | "task" | "agent">("general");
+  const [channelType, setChannelType] = useState<"general" | "task" | "agent">(
+    "general",
+  );
   const [isPrivate, setIsPrivate] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

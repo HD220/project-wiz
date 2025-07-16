@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { ConversationDto } from "../../../../shared/types/domains/users/message.types";
 
 interface ConversationState {

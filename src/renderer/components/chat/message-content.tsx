@@ -9,7 +9,11 @@ interface MessageContentProps {
   mentions?: string[];
 }
 
-export function MessageContent({ content, messageType, mentions }: MessageContentProps) {
+export function MessageContent({
+  content,
+  messageType,
+  mentions,
+}: MessageContentProps) {
   const processedContent = processMentions(content, mentions);
 
   if (messageType === "system") {
@@ -21,7 +25,7 @@ export function MessageContent({ content, messageType, mentions }: MessageConten
 
 function processMentions(content: string, mentions?: string[]): string {
   if (!mentions) return content;
-  
+
   let result = content;
   mentions.forEach((mention) => {
     result = result.replace(
