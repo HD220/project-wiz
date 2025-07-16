@@ -5,12 +5,19 @@ import { ConversationTypingIndicator } from "./conversation-typing-indicator";
 
 import type { MessageDto } from "../../../../shared/types/domains/users/user.types";
 
+interface FormattedMessage {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+}
+
 interface ConversationMessagesListProps {
   messages: MessageDto[];
   agentName: string;
   isTyping: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement>;
-  convertToMessageFormat: (msg: MessageDto) => any;
+  convertToMessageFormat: (msg: MessageDto) => FormattedMessage;
 }
 
 export function ConversationMessagesList({

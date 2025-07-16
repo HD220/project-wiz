@@ -1,8 +1,8 @@
-import type { Task } from "@/renderer/lib/placeholders";
-
 import { KanbanColumnHeader } from "./kanban-column-header";
 import { KanbanEmptyState } from "./kanban-empty-state";
 import { TaskCard } from "./task-card";
+
+import type { Task } from "@/lib/mock-data/types";
 
 interface TaskColumn {
   id: string;

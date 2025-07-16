@@ -1,4 +1,4 @@
-import { Task } from "@/renderer/lib/placeholders";
+import type { Task } from "@/lib/mock-data/types";
 
 export const getDaysUntilDue = (dueDate?: Date) => {
   if (!dueDate) return null;

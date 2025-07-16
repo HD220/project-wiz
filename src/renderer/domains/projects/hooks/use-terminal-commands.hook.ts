@@ -2,7 +2,7 @@ import { useTerminalExecution } from "./use-terminal-execution.hook";
 import { useTerminalHistory } from "./use-terminal-history.hook";
 import { useTerminalScroll } from "./use-terminal-scroll.hook";
 
-import type { TerminalLine } from "../../../../lib/placeholders";
+import type { TerminalLine } from "@/lib/mock-data/types";
 
 interface UseTerminalCommandsProps {
   command: string;

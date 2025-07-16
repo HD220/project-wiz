@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 
-import type { FileTreeItem } from "../../../../lib/placeholders";
+import type { FileTreeItem } from "@/lib/mock-data/types";
 
 interface FileExplorerItemContentProps {
   item: FileTreeItem;

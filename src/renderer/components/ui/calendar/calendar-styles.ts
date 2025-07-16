@@ -5,7 +5,12 @@ import { cn } from "@/lib/utils";
 
 import { CalendarClassNames } from "@/shared/types/calendar.types";
 
-function getButtonClassNames(buttonVariant: string, defaultClassNames: any) {
+type DefaultClassNames = Record<string, string>;
+
+function getButtonClassNames(
+  buttonVariant: string,
+  defaultClassNames: DefaultClassNames,
+) {
   return {
     button_previous: cn(
       buttonVariants({ variant: buttonVariant }),
@@ -22,7 +27,7 @@ function getButtonClassNames(buttonVariant: string, defaultClassNames: any) {
 
 function getMonthCaptionClassNames(
   captionLayout: string,
-  defaultClassNames: any,
+  defaultClassNames: DefaultClassNames,
 ) {
   return {
     month_caption: cn(
@@ -48,7 +53,7 @@ function getMonthCaptionClassNames(
   };
 }
 
-function getDayWeekClassNames(defaultClassNames: any) {
+function getDayWeekClassNames(defaultClassNames: DefaultClassNames) {
   return {
     table: "w-full border-collapse",
     weekdays: cn("flex", defaultClassNames.weekdays),

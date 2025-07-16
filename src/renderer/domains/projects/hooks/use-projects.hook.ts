@@ -1,10 +1,10 @@
+import { useProjectQuery } from "./use-project-query.hook";
 import { useProjectsMutations } from "./use-projects-mutations.hook";
+import { useProjectsQuery } from "./use-projects-query.hook";
 import { useProjectsRefetch } from "./use-projects-refetch.hook";
 import { useProjectsState } from "./use-projects-state.hook";
 
 import type { ProjectFilterDto } from "../../../../shared/types/domains/projects/project.types";
-
-import { useProjectsQuery } from "@/domains/projects/hooks/use-projects-queries.hook";
 
 export function useProjects(filter?: ProjectFilterDto) {
   const projectsQuery = useProjectsQuery(filter);

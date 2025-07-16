@@ -10,16 +10,21 @@ import {
 
 import type { CreateMessageDto } from "../../../../shared/types/domains/users/message.types";
 
+interface MessageState {
+  currentConversationMessages: CreateMessageDto[];
+  setCurrentConversationMessages: (messages: CreateMessageDto[]) => void;
+}
+
 export function useMessages(
   conversationId?: string,
   limit?: number,
   offset?: number,
 ) {
   const currentConversationMessages = useMessageStore(
-    (state: any) => state.currentConversationMessages,
+    (state: MessageState) => state.currentConversationMessages,
   );
   const setCurrentConversationMessages = useMessageStore(
-    (state: any) => state.setCurrentConversationMessages,
+    (state: MessageState) => state.setCurrentConversationMessages,
   );
 
   const messagesQuery = useMessagesQuery(conversationId, limit, offset);

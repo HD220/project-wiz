@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { fileExplorerPlaceholders } from "@/lib/placeholders";
+import { mockFileTree } from "@/renderer/lib/mock-data/files";
+import type { FileTreeItem } from "@/renderer/lib/mock-data/types";
 
 interface UseFileExplorerStateProps {
   onFileSelect?: (file: FileTreeItem) => void;

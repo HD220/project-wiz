@@ -3,7 +3,9 @@ interface ChatMessage {
   content: string;
 }
 
-interface HookError extends Error {}
+interface HookError extends Error {
+  message: string;
+}
 
 interface MessagesHook {
   messages: ChatMessage[];
@@ -28,14 +30,16 @@ interface SendHook {
 // TODO: Refine this type with specific chat configuration properties.
 // This is a temporary placeholder to address @typescript-eslint/no-explicit-any
 // if Record<string, unknown> is being flagged as too broad or implicitly 'any'.
-type TemporaryChatConfig = Record<string, unknown>;
+type ChatConfig = Record<string, unknown>;
 
 interface ConfigHook {
   currentConfig: ChatConfig;
   updateConfig: (newConfig: ChatConfig) => void;
 }
 
-interface UtilitiesHook {}
+interface UtilitiesHook {
+  placeholder?: string;
+}
 
 export function useChannelChatResult(
   messagesHook: MessagesHook,

@@ -4,7 +4,6 @@ import { conversationService } from "../services/conversation.service";
 import { useConversationStore } from "../stores/conversation.store";
 
 import type {
-  ConversationDto,
   CreateConversationDto,
   ConversationFilterDto,
 } from "../../../../shared/types/domains/users/message.types";
@@ -37,10 +36,15 @@ export function useCreateConversationMutation() {
   });
 }
 
+interface ConversationState {
+  selectedConversation: string | null;
+  setSelectedConversation: (conversation: string | null) => void;
+}
+
 export function useFindOrCreateConversationMutation() {
   const queryClient = useQueryClient();
   const setSelectedConversation = useConversationStore(
-    (state: any) => state.setSelectedConversation,
+    (state: ConversationState) => state.setSelectedConversation,
   );
 
   return useMutation({

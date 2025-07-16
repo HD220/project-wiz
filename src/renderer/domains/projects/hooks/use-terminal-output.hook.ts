@@ -1,9 +1,8 @@
 import { useState, useRef } from "react";
 
-import {
-  mockTerminalLines,
-  type TerminalLine,
-} from "../../../lib/placeholders";
+import { mockTerminalLines } from "@/lib/mock-data/terminal";
+
+import type { TerminalLine } from "@/lib/mock-data/types";
 
 export function useTerminalOutput() {
   const [terminalLines, setTerminalLines] =

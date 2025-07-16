@@ -1,7 +1,7 @@
-import { Task } from "@/renderer/lib/placeholders";
-
 import { Badge } from "@/components/ui/badge";
 import { CardHeader, CardTitle } from "@/components/ui/card";
+
+import type { Task } from "@/lib/mock-data/types";
 
 interface TaskCardHeaderProps {
   task: Task;

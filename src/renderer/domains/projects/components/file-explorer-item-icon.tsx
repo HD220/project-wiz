@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 import { useFileIcons } from "../hooks/use-file-icons.hook";
 
-import type { FileTreeItem } from "../../../../lib/placeholders";
+import type { FileTreeItem } from "@/lib/mock-data/types";
 
 interface FileExplorerItemIconProps {
   item: FileTreeItem;

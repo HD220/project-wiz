@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 REPORT_FILE="report.txt"
 
 if [ ! -f "$REPORT_FILE" ]; then
@@ -25,7 +25,7 @@ while IFS= read -r line; do
     fi
 
     # Check if the line starts with the project path, indicating a new file
-    if [[ "$line" == "/mnt/d/Documentos/Pessoal/Github/project-wiz/"* ]]; then
+    if [[ "$line" == "/mnt/d/Documentos/Pessoal/Github/project-wiz"* ]]; then
         current_file="$line"
         # Initialize the entry for the new file if it doesn't exist
         if [[ -z "${file_errors_map[$current_file]}" ]]; then
@@ -35,7 +35,7 @@ while IFS= read -r line; do
         # This is an error detail line
         # Extract the error message (everything after the type, e.g., 'error' or 'warning')
         # Example:   21:7  error  React Hook "useChannelMessagesById" is called conditionally. ...
-        error_message=$(echo "$line" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ \t]*//')
+        error_message=$(echo "$line" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ 	]*//')
 
         if [[ -n "$current_file" && -n "$error_message" ]]; then
             # Append the error message to the current file's entry in the map
@@ -46,7 +46,8 @@ while IFS= read -r line; do
             file_errors_map[$current_file]+="$error_message"
         fi
     fi
-done < "$REPORT_FILE"
+done
+
 
 # Now iterate through the map and generate a command for each file
 for file_path in "${!file_errors_map[@]}"; do
@@ -54,6 +55,6 @@ for file_path in "${!file_errors_map[@]}"; do
     if [[ -n "$errors_for_file" ]]; then
         # Escape double quotes in the error messages for the prompt        # Replace " with \" so that it's correctly passed as part of the string to gemini -p        escaped_errors=$(echo "$errors_for_file" | sed 's/"/\"/g')        # Convert absolute path to relative path with @ prefix
         relative_file_path=$(echo "$file_path" | sed 's|/mnt/d/Documentos/Pessoal/Github/project-wiz/|@|')
-        echo "gemini --yolo --model=gemini-2.5-flash -p \"Corrija os seguintes problemas no arquivo $relative_file_path: $escaped_errors. Seguindo as diretrizes de @CLAUDE.md, NÃO EXECUTE NENHUM COMANDO DO NODEJS(LINT,TYPE-CHECK,ETC.)\" || "
+        echo "gemini --yolo --model=gemini-2.5-flash -p \"Corrija os seguintes problemas no arquivo $relative_file_path: $escaped_errors. Seguindo as diretrizes de @CLAUDE.md, NÃO EXECUTE NENHUM COMANDO DO NODEJS(LINT,TYPE-CHECK,ETC.)\" &"
     fi
 done

@@ -3,10 +3,16 @@ import { Tabs } from "@/components/ui/tabs";
 import { SettingsTabContent } from "./settings-tab-content";
 import { SettingsTabList } from "./settings-tab-list";
 
+interface UserSettings {
+  notifications: boolean;
+  autoSave: boolean;
+  language: string;
+}
+
 interface SettingsTabsProps {
-  settings: any;
+  settings: UserSettings;
   theme: string;
-  onUpdateSettings: (field: string, value: any) => void;
+  onUpdateSettings: (field: string, value: string | boolean) => void;
   onThemeChange: (theme: string) => void;
 }
 

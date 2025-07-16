@@ -2,10 +2,32 @@ import { useCallback } from "react";
 
 import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
+interface OptimisticMessage {
+  id: string;
+  content: string;
+  isOptimistic: boolean;
+}
+
+interface SendHookType {
+  createOptimisticMessage: (content: string) => OptimisticMessage;
+  createRequestData: (
+    content: string,
+    customConfig?: Partial<AIChatConfigDto>,
+  ) => unknown;
+  mutations: {
+    sendMessage: (requestData: unknown) => void;
+  };
+}
+
+interface MessagesHookType {
+  addOptimisticMessage: (message: OptimisticMessage) => void;
+  clearOptimisticMessages: () => void;
+}
+
 export function useChannelChatSendMessage(
-  sendHook: any,
-  messagesHook: any,
-  setTyping: any,
+  sendHook: SendHookType,
+  messagesHook: MessagesHookType,
+  setTyping: (isTyping: boolean) => void,
 ) {
   return useCallback(
     async (content: string, customConfig?: Partial<AIChatConfigDto>) => {

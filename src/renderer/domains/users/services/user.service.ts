@@ -19,7 +19,10 @@ export const userService = {
     return window.electronIPC.users.updateProfile(id, data);
   },
 
-  async updateSettings(id: string, settings: any): Promise<void> {
+  async updateSettings(
+    id: string,
+    settings: UpdateUserSettingsDto,
+  ): Promise<void> {
     return window.electronIPC.users.updateSettings(id, settings);
   },
 

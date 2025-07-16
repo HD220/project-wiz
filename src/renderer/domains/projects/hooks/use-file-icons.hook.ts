@@ -1,6 +1,6 @@
 import { File, FileText, Image, Code, Archive, Settings } from "lucide-react";
 
-import type { FileTreeItem } from "../../../../lib/placeholders";
+import type { FileTreeItem } from "@/lib/mock-data/types";
 
 export function useFileIcons() {
   const getFileIcon = (file: FileTreeItem) => {

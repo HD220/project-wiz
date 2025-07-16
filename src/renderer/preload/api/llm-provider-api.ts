@@ -4,12 +4,13 @@ import type {
   LlmProviderDto,
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
+  LlmProviderFilterDto,
 } from "../../../shared/types/domains/llm/llm-provider.types";
 
 export interface ILlmProviderAPI {
   create: (data: CreateLlmProviderDto) => Promise<LlmProviderDto>;
   getById: (id: string) => Promise<LlmProviderDto | null>;
-  list: (filter?: any) => Promise<LlmProviderDto[]>;
+  list: (filter?: LlmProviderFilterDto) => Promise<LlmProviderDto[]>;
   update: (id: string, data: UpdateLlmProviderDto) => Promise<LlmProviderDto>;
   delete: (id: string) => Promise<void>;
   setDefault: (id: string) => Promise<LlmProviderDto>;
@@ -38,7 +39,9 @@ function getLlmProviderById(id: string): Promise<LlmProviderDto | null> {
   return ipcRenderer.invoke("llm-provider:getById", { id });
 }
 
-function listLlmProviders(filter?: any): Promise<LlmProviderDto[]> {
+function listLlmProviders(
+  filter?: LlmProviderFilterDto,
+): Promise<LlmProviderDto[]> {
   return ipcRenderer.invoke("llm-provider:list", filter);
 }
 

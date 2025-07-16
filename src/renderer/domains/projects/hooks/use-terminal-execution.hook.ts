@@ -1,4 +1,4 @@
-import type { TerminalLine } from "../../../../lib/placeholders";
+import type { TerminalLine } from "@/lib/mock-data/types";
 
 interface UseTerminalExecutionProps {
   command: string;

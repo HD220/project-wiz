@@ -17,7 +17,6 @@ export * from "./navigation-channels";
 export * from "./create-project-form";
 export * from "./project-form-fields";
 export * from "./create-project-modal";
-export * from "./create-project-modal-fields";
 export * from "./create-channel-modal";
 export * from "./channel-form-fields";
 

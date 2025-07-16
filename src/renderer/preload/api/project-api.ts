@@ -4,12 +4,13 @@ import type {
   ProjectDto,
   CreateProjectDto,
   UpdateProjectDto,
+  ProjectFilterDto,
 } from "../../../shared/types/domains/projects/project.types";
 
 export interface IProjectAPI {
   create: (data: CreateProjectDto) => Promise<ProjectDto>;
   getById: (id: string) => Promise<ProjectDto | null>;
-  list: (filter?: any) => Promise<ProjectDto[]>;
+  list: (filter?: ProjectFilterDto) => Promise<ProjectDto[]>;
   update: (data: UpdateProjectDto) => Promise<ProjectDto>;
   delete: (id: string) => Promise<void>;
   archive: (id: string) => Promise<ProjectDto>;
@@ -34,7 +35,7 @@ function getProjectById(id: string): Promise<ProjectDto | null> {
   return ipcRenderer.invoke("project:getById", { id });
 }
 
-function listProjects(filter?: any): Promise<ProjectDto[]> {
+function listProjects(filter?: ProjectFilterDto): Promise<ProjectDto[]> {
   return ipcRenderer.invoke("project:list", filter);
 }
 

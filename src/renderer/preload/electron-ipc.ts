@@ -1,7 +1,5 @@
 import { ipcRenderer, IpcRendererEvent } from "electron";
 
-import { IPC_CHANNELS } from "../../shared/constants";
-
 import { createAgentAPI } from "./api/agent-api";
 import { createChannelAPI } from "./api/channel-api";
 import { createChannelMessageAPI } from "./api/channel-message-api";
@@ -12,16 +10,26 @@ import { createProjectAPI } from "./api/project-api";
 import { createUserAPI } from "./api/user-api";
 import { createWindowAPI } from "./api/window-api";
 
+import type { IAgentAPI } from "./api/agent-api";
+import type { IChannelAPI } from "./api/channel-api";
+import type { IChannelMessageAPI } from "./api/channel-message-api";
+import type { IConversationAPI } from "./api/conversation-api";
+import type { IDirectMessageAPI } from "./api/direct-message-api";
+import type { ILlmProviderAPI } from "./api/llm-provider-api";
+import type { IProjectAPI } from "./api/project-api";
+import type { IUserAPI } from "./api/user-api";
+import type { IWindowAPI } from "./api/window-api";
+
 export interface IElectronIPC {
-  agents: any;
-  projects: any;
-  channels: any;
-  channelMessages: any;
-  users: any;
-  conversations: any;
-  directMessages: any;
-  llmProviders: any;
-  window: any;
+  agents: IAgentAPI;
+  projects: IProjectAPI;
+  channels: IChannelAPI;
+  channelMessages: IChannelMessageAPI;
+  users: IUserAPI;
+  conversations: IConversationAPI;
+  directMessages: IDirectMessageAPI;
+  llmProviders: ILlmProviderAPI;
+  window: IWindowAPI;
   invoke: <Channel, Payload, Response>(
     channel: Channel,
     ...args: Payload[]

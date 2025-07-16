@@ -5,16 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface StatsCardProps {
   title: string;
   value: number;
-  icon: LucideIcon;
+  Icon: LucideIcon;
   className?: string;
 }
 
-export function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  className,
-}: StatsCardProps) {
+export function StatsCard({ title, value, Icon, className }: StatsCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

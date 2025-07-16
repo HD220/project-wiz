@@ -1,8 +1,14 @@
 import { useState } from "react";
 
+interface Agent {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+
 export function useConversationMessageHandler(
   sendMessage: (message: string) => Promise<void>,
-  fullAgent: any,
+  fullAgent: Agent | null,
 ) {
   const [messageInput, setMessageInput] = useState("");
 
@@ -21,10 +27,10 @@ export function useConversationMessageHandler(
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend(e as any);
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSend(event as unknown as React.FormEvent);
     }
   };
 

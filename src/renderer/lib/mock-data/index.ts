@@ -3,6 +3,9 @@ export * from "./types";
 export * from "./users";
 export * from "./projects";
 export * from "./agents";
+export * from "./files";
+export * from "./tasks";
+export * from "./terminal";
 
 // Legacy compatibility re-exports
 import { mockAgents, getAgentById, getAgentsByProject } from "./agents";

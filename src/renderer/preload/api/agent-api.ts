@@ -6,13 +6,14 @@ import type {
   AgentDto,
   CreateAgentDto,
   UpdateAgentDto,
+  AgentFilterDto,
 } from "../../../shared/types/domains/agents/agent.types";
 
 export interface IAgentAPI {
   create: (data: CreateAgentDto) => Promise<AgentDto>;
   getById: (id: string) => Promise<AgentDto | null>;
   getByName: (name: string) => Promise<AgentDto | null>;
-  list: (filter?: any) => Promise<AgentDto[]>;
+  list: (filter?: AgentFilterDto) => Promise<AgentDto[]>;
   listActive: () => Promise<AgentDto[]>;
   update: (id: string, data: UpdateAgentDto) => Promise<AgentDto>;
   delete: (id: string) => Promise<void>;
@@ -50,7 +51,7 @@ function getAgentByName(name: string): Promise<AgentDto | null> {
   return ipcRenderer.invoke(IPC_CHANNELS.AGENT_GET_BY_NAME, { name });
 }
 
-function listAgents(filter?: any): Promise<AgentDto[]> {
+function listAgents(filter?: AgentFilterDto): Promise<AgentDto[]> {
   return ipcRenderer.invoke(IPC_CHANNELS.AGENT_LIST, filter);
 }
 

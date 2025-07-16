@@ -1,4 +1,4 @@
-import { Task } from "@/renderer/lib/placeholders";
+import type { Task } from "@/lib/mock-data/types";
 
 interface TaskCardTimeTrackingProps {
   task: Task;

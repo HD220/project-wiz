@@ -1,9 +1,9 @@
+import { AddAgentModal } from "@/domains/projects/components/add-agent-modal";
+
 import { AgentsSidebarMainSection } from "./agents-sidebar-main-section";
 import { AgentsSidebarTopSection } from "./agents-sidebar-top-section";
 
 import type { AgentsSidebarContentProps } from "./agents-sidebar-content-props";
-
-import { AddAgentModal } from "@/domains/agents/components/add-agent-modal";
 
 export function AgentsSidebarContent({
   projectId,

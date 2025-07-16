@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { agentPlaceholders } from "../../../lib/placeholders";
+import { mockAgents } from "@/renderer/lib/mock-data/agents";
+import type { Agent } from "@/renderer/lib/mock-data/types";
 
 export function useAgentDashboardState() {
   const [searchQuery, setSearchQuery] = useState("");

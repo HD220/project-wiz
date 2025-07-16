@@ -10,11 +10,15 @@ interface AgentsSidebarProps {
 }
 
 export function AgentsSidebar({
-  _isOpen,
+  isOpen,
   onAgentSelect,
   projectId,
 }: AgentsSidebarProps) {
   const hooks = useAgentsSidebarHooks({ onAgentSelect });
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="w-full bg-card border-l border-border flex flex-col h-full min-w-0 overflow-hidden">

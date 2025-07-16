@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import type { TerminalLine } from "../../../../lib/placeholders";
+import type { TerminalLine } from "@/lib/mock-data/types";
 
 interface UseTerminalScrollProps {
   terminalLines: TerminalLine[];

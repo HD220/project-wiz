@@ -1,5 +1,4 @@
 import { useChannelMessagesById } from "@/domains/projects/hooks";
-import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
 import { ChatHeader } from "./chat-header";

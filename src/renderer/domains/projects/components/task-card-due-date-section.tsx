@@ -1,6 +1,6 @@
-import { Task } from "@/renderer/lib/placeholders";
-
 import { TaskCardDueDate } from "./task-card-due-date";
+
+import type { Task } from "@/lib/mock-data/types";
 
 interface TaskCardDueDateSectionProps {
   task: Task;

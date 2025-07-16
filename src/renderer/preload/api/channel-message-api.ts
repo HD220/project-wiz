@@ -5,6 +5,12 @@ import type {
   CreateMessageDto,
 } from "../../../shared/types/domains/users/message.types";
 
+interface MessageMetadata {
+  language?: string;
+  filename?: string;
+  source?: string;
+}
+
 export interface IChannelMessageAPI {
   create: (data: CreateMessageDto) => Promise<MessageDto>;
   getById: (id: string) => Promise<MessageDto | null>;
@@ -22,12 +28,12 @@ export interface IChannelMessageAPI {
     channelId: string,
     authorId: string,
     authorName: string,
-    metadata?: any,
+    metadata?: MessageMetadata,
   ) => Promise<MessageDto>;
   createSystem: (
     content: string,
     channelId: string,
-    metadata?: any,
+    metadata?: MessageMetadata,
   ) => Promise<MessageDto>;
 }
 
@@ -95,7 +101,7 @@ function createCodeMessage(
   channelId: string,
   authorId: string,
   authorName: string,
-  metadata?: any,
+  metadata?: MessageMetadata,
 ): Promise<MessageDto> {
   return ipcRenderer.invoke("channelMessage:createCode", {
     content,
@@ -109,7 +115,7 @@ function createCodeMessage(
 function createSystemMessage(
   content: string,
   channelId: string,
-  metadata?: any,
+  metadata?: MessageMetadata,
 ): Promise<MessageDto> {
   return ipcRenderer.invoke("channelMessage:createSystem", {
     content,

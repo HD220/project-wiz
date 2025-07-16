@@ -6,3 +6,205 @@
 > project-wiz@1.0.0 lint:check
 > eslint --ext .ts,.tsx .
 
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/chat-container.tsx
+  2:10  warning  'Message' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/ui/calendar/calendar-styles.ts
+   8:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/components/agent-dashboard-stats-card.tsx
+  15:9  warning  Parameter name `Icon` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/components/agents-sidebar-content.tsx
+  6:31  error  Unable to resolve path to module '@/domains/agents/components/add-agent-modal'  import/no-unresolved
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/components/agents-sidebar.tsx
+  13:3  error  '_isOpen' is missing in props validation  react/prop-types
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/hooks/use-agent-dashboard-state.hook.ts
+   3:10  warning  'agentPlaceholders' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   7:54  error    'Agent' is not defined                                                               no-undef
+  10:26  error    'mockAgents' is not defined                                                          no-undef
+  19:53  error    'Agent' is not defined                                                               no-undef
+  31:16  error    'mockAgents' is not defined                                                          no-undef
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/stores/agent.store.ts
+  1:18  warning  'SetState' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/add-agent-form-actions.tsx
+   4:10  warning  'DialogClose' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  16:6   error    'DialogFooter' is not defined                                                  react/jsx-no-undef
+  16:6   error    'DialogFooter' is not defined                                                  no-undef
+  24:7   error    'DialogFooter' is not defined                                                  no-undef
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/file-explorer-item-context-menu.tsx
+  4:3  warning  'ContextMenu' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  7:3  warning  'ContextMenuTrigger' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/file-explorer-item.tsx
+  3:3  warning  'ContextMenuContent' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:3  warning  'ContextMenuItem' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/index.ts
+  20:15  error  Unable to resolve path to module './create-project-modal-fields'  import/no-unresolved
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/project-sidebar-item.tsx
+  9:10  warning  'cn' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/terminal-panel-header.tsx
+  3:24  error  Unable to resolve path to module '../../../../components/ui/button'  import/no-unresolved
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-channel-chat-result.hook.ts
+   6:11  error    An interface declaring no members is equivalent to its supertype                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-empty-object-type
+  31:6   warning  'TemporaryChatConfig' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  34:18  error    'ChatConfig' is not defined                                                                                                                                                                                                                                                                                                                                                               no-undef
+  35:29  error    'ChatConfig' is not defined                                                                                                                                                                                                                                                                                                                                                               no-undef
+  38:11  error    An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-channel-chat-send-message.hook.ts
+  6:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  7:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  8:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-channel-chat-send.hook.ts
+  7:15  warning  'ChannelMessageDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-file-explorer-state.hook.ts
+   3:10  warning  'fileExplorerPlaceholders' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   6:25  error    'FileTreeItem' is not defined                                                               no-undef
+   7:23  error    'FileTreeItem' is not defined                                                               no-undef
+  30:34  error    'FileTreeItem' is not defined                                                               no-undef
+  39:40  error    'FileTreeItem' is not defined                                                               no-undef
+  45:24  error    'mockFileTree' is not defined                                                               no-undef
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-projects-mutations.hook.ts
+   8:10  warning  'useProjectsQueries' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   8:36  error    Unable to resolve path to module '@/domains/projects/hooks/use-projects-queries.hook'  import/no-unresolved
+  11:26  error    'useCreateProjectMutation' is not defined                                              no-undef
+  12:26  error    'useUpdateProjectMutation' is not defined                                              no-undef
+  13:26  error    'useDeleteProjectMutation' is not defined                                              no-undef
+  14:27  error    'useArchiveProjectMutation' is not defined                                             no-undef
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-projects-refetch.hook.ts
+  5:1   warning  `./use-projects-queries.hook` import should occur before type import of `../../../../shared/types/domains/projects/project.types`  import/order
+  5:34  error    Unable to resolve path to module './use-projects-queries.hook'                                                                     import/no-unresolved
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-projects.hook.ts
+   7:34  error  Unable to resolve path to module '@/domains/projects/hooks/use-projects-queries.hook'  import/no-unresolved
+  30:24  error  'useProjectQuery' is not defined                                                       no-undef
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/services/channel-message.service.ts
+  2:10  warning  'ChannelMessage' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/conversation-header.tsx
+  1:27  error    Unable to resolve path to module '../../../../components/page-title'           import/no-unresolved
+  5:3   warning  'AvatarImage' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  6:8   error    Unable to resolve path to module '../../../../components/ui/avatar'            import/no-unresolved
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/conversation-messages-list.tsx
+  13:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/conversation-typing-indicator.tsx
+  1:34  warning  'AvatarImage' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/new-conversation-agent-preview.tsx
+  16:8   error  'CardHeader' is not defined       react/jsx-no-undef
+  16:8   error  'CardHeader' is not defined       no-undef
+  17:10  error  'CardTitle' is not defined        react/jsx-no-undef
+  17:10  error  'CardTitle' is not defined        no-undef
+  20:11  error  'CardTitle' is not defined        no-undef
+  21:10  error  'CardDescription' is not defined  react/jsx-no-undef
+  21:10  error  'CardDescription' is not defined  no-undef
+  21:60  error  'CardDescription' is not defined  no-undef
+  22:9   error  'CardHeader' is not defined       no-undef
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/settings/settings-tabs.tsx
+  7:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  9:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/settings/user-settings-tab.tsx
+  25:24  warning  Identifier name 'e' is too short (< 2)  id-length
+  34:24  warning  Identifier name 'e' is too short (< 2)  id-length
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/user-sidebar-search.tsx
+  21:22  warning  Identifier name 'e' is too short (< 2)  id-length
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/user-sidebar.tsx
+  15:31  warning  'className' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-agent-chat.hook.ts
+  33:8  warning  Identifier name 'p' is too short (< 2)  id-length
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-conversation-message-handler.hook.ts
+   5:14  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   9:29  warning  Identifier name 'e' is too short (< 2)    id-length
+  24:26  warning  Identifier name 'e' is too short (< 2)    id-length
+  27:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-conversation-utils.hook.ts
+  6:39  warning  Identifier name 'p' is too short (< 2)  id-length
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-conversations-queries.hook.ts
+   7:3   warning  'ConversationDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  43:13  error    Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-messages.hook.ts
+  18:9   warning  'currentConversationMessages' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  19:13  error    Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  22:13  error    Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-new-conversation-form.hook.ts
+  17:31  warning  Identifier name 'e' is too short (< 2)  id-length
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/hooks/use-user.hook.ts
+  24:11  error  Parsing error: ';' expected
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/services/message.service.ts
+  4:3  warning  'MessageFilterDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/services/user.service.ts
+   5:3   warning  'UpdateUserSettingsDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  22:46  error    Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/preload/api/agent-api.ts
+  15:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/preload/api/channel-message-api.ts
+   25:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/preload/api/llm-provider-api.ts
+  12:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/preload/api/project-api.ts
+  12:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/preload/electron-ipc.ts
+   3:10  warning  'IPC_CHANNELS' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  16:11  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  17:13  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  18:13  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  19:20  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  20:10  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  21:18  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  22:19  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  23:17  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  24:11  error    Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/shared/utils/date/date-formatting.ts
+  19:8  warning  Function 'formatRelative' has too many statements (17). Maximum allowed is 15  max-statements
+
+✖ 107 problems (74 errors, 33 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

@@ -1,4 +1,4 @@
-import { taskColumns, getTasksByStatus } from "@/renderer/lib/placeholders";
+import { taskColumns, getTasksByStatus } from "@/lib/mock-data/tasks";
 
 import { KanbanColumn } from "./kanban-column";
 

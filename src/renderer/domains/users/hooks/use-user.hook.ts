@@ -20,10 +20,6 @@ export function useUser(userId?: string) {
   });
 
   const { data: userData } = queryResult;
-    queryKey: ["user", userId],
-    queryFn: () => userService.getById(userId!),
-    enabled: !!userId,
-  });
 
   const createUser = useMutation({
     mutationFn: userService.create,
@@ -42,8 +38,13 @@ export function useUser(userId?: string) {
   });
 
   const updateSettings = useMutation({
-    mutationFn: ({ id, settings }: { id: string; settings: UpdateUserSettingsDto }) =>
-      userService.updateSettings(id, settings),
+    mutationFn: ({
+      id,
+      settings,
+    }: {
+      id: string;
+      settings: UpdateUserSettingsDto;
+    }) => userService.updateSettings(id, settings),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["user", id] });
     },
