@@ -1,15 +1,8 @@
-import { Folder } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-import { ProjectForm } from "@/components/forms/project-form";
 import { useCreateProjectModal } from "../hooks/use-create-project-modal.hook";
+import { CreateProjectModalHeader } from "./create-project-modal-header";
+import { CreateProjectModalForm } from "./create-project-modal-form";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -49,17 +42,8 @@ export function CreateProjectModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Folder className="w-5 h-5" />
-            Criar Novo Projeto
-          </DialogTitle>
-          <DialogDescription>
-            Configure um novo projeto para começar a trabalhar.
-          </DialogDescription>
-        </DialogHeader>
-
-        <ProjectForm
+        <CreateProjectModalHeader />
+        <CreateProjectModalForm
           name={name}
           description={description}
           gitUrl={gitUrl}

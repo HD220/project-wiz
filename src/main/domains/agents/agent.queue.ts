@@ -1,27 +1,26 @@
-import { getLogger } from "../../infrastructure/logger";
-
 import { AgentTask } from "./entities/agent-task.entity";
 import { TaskPriority } from "./value-objects/task-priority.vo";
-
-const logger = getLogger("agent.queue");
+import { 
+  sortTasksByPriority, 
+  filterTasksByPriority,
+  logTaskEnqueued,
+  logTaskDequeued,
+  logQueueCleared
+} from "./agent-queue-operations.functions";
 
 export class AgentQueue {
-  constructor() {
-    this.tasks = [];
-  }
-
-  private tasks: AgentTask[];
+  private tasks: AgentTask[] = [];
 
   enqueue(task: AgentTask): void {
     this.tasks.push(task);
-    this.sortByPriority();
-    logger.info("Task enqueued", { taskId: task.getId() });
+    this.tasks = sortTasksByPriority(this.tasks);
+    logTaskEnqueued(task.getId());
   }
 
   dequeue(): AgentTask | null {
     const task = this.tasks.shift() || null;
     if (task) {
-      logger.info("Task dequeued", { taskId: task.getId() });
+      logTaskDequeued(task.getId());
     }
     return task;
   }
@@ -41,18 +40,10 @@ export class AgentQueue {
   clear(): void {
     const count = this.tasks.length;
     this.tasks = [];
-    logger.info("Queue cleared", { taskCount: count });
-  }
-
-  private sortByPriority(): void {
-    this.tasks.sort((a, b) => {
-      return (
-        b.getPriority().getNumericValue() - a.getPriority().getNumericValue()
-      );
-    });
+    logQueueCleared(count);
   }
 
   getTasksByPriority(priority: TaskPriority): AgentTask[] {
-    return this.tasks.filter((task) => task.getPriority().equals(priority));
+    return filterTasksByPriority(this.tasks, priority);
   }
 }

@@ -1,25 +1,12 @@
-import {
-  ChannelName,
-  ChannelDescription,
-  ChannelPrivacy,
-  ProjectIdentity,
-} from "../value-objects";
-
-interface ChannelData {
-  name: ChannelName;
-  description: ChannelDescription;
-  privacy: ChannelPrivacy;
-  projectId: ProjectIdentity;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { ChannelCore } from "./channel-core.entity";
+import { ChannelAccess } from "./channel-access";
+import { ChannelSerializer } from "./channel-serializer";
+import { ChannelFactory } from "./channel-factory";
 
 export class Channel {
-  private readonly identity: string;
-  private data: ChannelData;
+  constructor(private readonly core: ChannelCore) {}
 
-  constructor(props: {
+  static create(props: {
     id?: string;
     name: string;
     projectId: string;
@@ -28,93 +15,35 @@ export class Channel {
     description?: string | null;
     createdAt?: Date;
     updatedAt?: Date;
-  }) {
-    this.identity = props.id || crypto.randomUUID();
-    this.data = this.buildChannelData(props);
-  }
-
-  private buildChannelData(props: {
-    name: string;
-    projectId: string;
-    createdBy: string;
-    isPrivate?: boolean;
-    description?: string | null;
-    createdAt?: Date;
-    updatedAt?: Date;
-  }): ChannelData {
-    return {
-      name: new ChannelName(props.name),
-      description: new ChannelDescription(props.description),
-      privacy: new ChannelPrivacy(props.isPrivate || false),
-      projectId: new ProjectIdentity(props.projectId),
-      createdBy: props.createdBy,
-      createdAt: props.createdAt || new Date(),
-      updatedAt: props.updatedAt || new Date(),
-    };
+  }): Channel {
+    return new Channel(ChannelCore.create(props));
   }
 
   getId(): string {
-    return this.identity;
+    return this.core.getId();
   }
 
   getName(): string {
-    return this.data.name.getValue();
+    return this.core.getName();
   }
 
   getProjectId(): string {
-    return this.data.projectId.getValue();
+    return this.core.getProjectId();
   }
 
   canBeAccessedBy(userId: string): boolean {
-    if (this.data.privacy.isPublic()) return true;
-    return this.data.createdBy === userId;
+    return new ChannelAccess(this.core.getData()).canBeAccessedBy(userId);
   }
 
   isPrivate(): boolean {
-    return this.data.privacy.isPrivate();
-  }
-
-  isEditable(): boolean {
-    return true;
-  }
-
-  canBeDeleted(): boolean {
-    return true;
-  }
-
-  private touchUpdatedAt(): void {
-    this.data.updatedAt = new Date();
+    return new ChannelAccess(this.core.getData()).isPrivate();
   }
 
   static createGeneral(projectId: string, createdBy: string): Channel {
-    return new Channel({
-      name: "geral",
-      projectId,
-      createdBy,
-      isPrivate: false,
-      description: "Canal principal do projeto",
-    });
+    return ChannelFactory.createGeneral(projectId, createdBy);
   }
 
-  toPlainObject(): {
-    id: string;
-    name: string;
-    projectId: string;
-    createdBy: string;
-    isPrivate: boolean;
-    description: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  } {
-    return {
-      id: this.identity,
-      name: this.data.name.getValue(),
-      projectId: this.data.projectId.getValue(),
-      createdBy: this.data.createdBy,
-      isPrivate: this.data.privacy.getValue(),
-      description: this.data.description.getValue(),
-      createdAt: this.data.createdAt,
-      updatedAt: this.data.updatedAt,
-    };
+  toPlainObject() {
+    return ChannelSerializer.toPlainObject(this.core.getId(), this.core.getData());
   }
 }

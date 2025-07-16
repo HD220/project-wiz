@@ -48,7 +48,7 @@ export class LLMProvider {
     );
   }
 
-  updateConfig(modelConfig: ModelConfig): LLMProvider {
-    return new LLMProvider(this.providerType, modelConfig);
+  updateConfig(config: ModelConfig): LLMProvider {
+    return new LLMProvider(this.providerType, config);
   }
 }

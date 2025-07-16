@@ -1,32 +1,14 @@
-import { z } from "zod";
-
-import { ValidationError } from "../../../errors/validation.error";
-
-const ProjectStatusSchema = z.enum(["active", "inactive", "archived"], {
-  errorMap: () => ({
-    message: "Project status must be active, inactive, or archived",
-  }),
-});
-
-export type ProjectStatusType = z.infer<typeof ProjectStatusSchema>;
+import { 
+  ProjectStatusType, 
+  validateProjectStatus, 
+  isValidProjectStatus 
+} from "./project-status-operations.functions";
 
 export class ProjectStatus {
   private readonly value: ProjectStatusType;
 
   constructor(status: string = "active") {
-    try {
-      this.value = ProjectStatusSchema.parse(status);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const firstError = error.errors[0];
-        throw ValidationError.singleField(
-          "projectStatus",
-          firstError.message,
-          status,
-        );
-      }
-      throw error;
-    }
+    this.value = validateProjectStatus(status);
   }
 
   getValue(): ProjectStatusType {
@@ -58,11 +40,6 @@ export class ProjectStatus {
   }
 
   static isValid(status: string): boolean {
-    try {
-      ProjectStatusSchema.parse(status);
-      return true;
-    } catch {
-      return false;
-    }
+    return isValidProjectStatus(status);
   }
 }

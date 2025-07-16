@@ -1,5 +1,5 @@
-import { useMemo, useRef } from "react";
-import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
+import { useAiChatConfigBuilder } from "./use-ai-chat-config-builder.hook";
+import { useAiChatConfigState } from "./use-ai-chat-config-state.hook";
 
 interface UseAiChatConfigProps {
   channelId: string;
@@ -12,40 +12,12 @@ interface UseAiChatConfigProps {
 }
 
 export function useAiChatConfig(props: UseAiChatConfigProps) {
-  const propsRef = useRef(props);
-  propsRef.current = props;
-
-  const currentConfig: AIChatConfigDto | null = useMemo(
-    () =>
-      props.llmProviderId
-        ? {
-            channelId: props.channelId,
-            llmProviderId: props.llmProviderId,
-            systemPrompt: props.systemPrompt,
-            temperature: props.temperature || 0.7,
-            maxTokens: props.maxTokens || 1000,
-            includeHistory: props.includeHistory ?? true,
-            historyLimit: props.historyLimit || 10,
-          }
-        : null,
-    [
-      props.channelId,
-      props.llmProviderId,
-      props.systemPrompt,
-      props.temperature,
-      props.maxTokens,
-      props.includeHistory,
-      props.historyLimit,
-    ],
-  );
-
-  const updateConfig = (newConfig: Partial<UseAiChatConfigProps>) => {
-    propsRef.current = { ...propsRef.current, ...newConfig };
-  };
+  const builder = useAiChatConfigBuilder(props);
+  const state = useAiChatConfigState(props);
 
   return {
-    currentConfig,
-    propsRef,
-    updateConfig,
+    currentConfig: builder.currentConfig,
+    propsRef: state.propsRef,
+    updateConfig: state.updateConfig,
   };
 }

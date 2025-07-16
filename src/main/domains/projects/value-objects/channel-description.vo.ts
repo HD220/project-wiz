@@ -1,38 +1,13 @@
-import { z } from "zod";
-
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
-import { ValidationError } from "../../../errors/validation.error";
-
-const ChannelDescriptionSchema = z
-  .string()
-  .max(500, "Channel description cannot exceed 500 characters")
-  .nullable()
-  .optional();
+import { 
+  validateChannelDescription, 
+  isValidChannelDescription 
+} from "./channel-description-validation.functions";
 
 export class ChannelDescription {
   private readonly value: string | null;
 
   constructor(description?: string | null) {
-    if (!description) {
-      this.value = null;
-      return;
-    }
-
-    const sanitized = ValidationUtils.sanitizeString(description);
-
-    try {
-      this.value = ChannelDescriptionSchema.parse(sanitized) ?? null;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const firstError = error.errors[0];
-        throw ValidationError.singleField(
-          "channelDescription",
-          firstError.message,
-          description,
-        );
-      }
-      throw error;
-    }
+    this.value = validateChannelDescription(description);
   }
 
   getValue(): string | null {
@@ -52,13 +27,6 @@ export class ChannelDescription {
   }
 
   static isValid(description?: string | null): boolean {
-    try {
-      if (!description) return true;
-      const sanitized = ValidationUtils.sanitizeString(description);
-      ChannelDescriptionSchema.parse(sanitized);
-      return true;
-    } catch {
-      return false;
-    }
+    return isValidChannelDescription(description);
   }
 }

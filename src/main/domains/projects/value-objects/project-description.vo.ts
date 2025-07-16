@@ -1,38 +1,13 @@
-import { z } from "zod";
-
-import { ValidationUtils } from "../../../../shared/utils/validation.utils";
-import { ValidationError } from "../../../errors/validation.error";
-
-const ProjectDescriptionSchema = z
-  .string()
-  .max(500, "Project description cannot exceed 500 characters")
-  .nullable()
-  .optional();
+import { 
+  validateProjectDescription, 
+  isValidProjectDescription 
+} from "./project-description-validation.functions";
 
 export class ProjectDescription {
   private readonly value: string | null;
 
   constructor(description?: string | null) {
-    if (!description) {
-      this.value = null;
-      return;
-    }
-
-    const sanitized = ValidationUtils.sanitizeString(description);
-
-    try {
-      this.value = ProjectDescriptionSchema.parse(sanitized) ?? null;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const firstError = error.errors[0];
-        throw ValidationError.singleField(
-          "projectDescription",
-          firstError.message,
-          description,
-        );
-      }
-      throw error;
-    }
+    this.value = validateProjectDescription(description);
   }
 
   getValue(): string | null {
@@ -52,13 +27,6 @@ export class ProjectDescription {
   }
 
   static isValid(description?: string | null): boolean {
-    try {
-      if (!description) return true;
-      const sanitized = ValidationUtils.sanitizeString(description);
-      ProjectDescriptionSchema.parse(sanitized);
-      return true;
-    } catch {
-      return false;
-    }
+    return isValidProjectDescription(description);
   }
 }

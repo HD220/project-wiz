@@ -3,8 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/renderer/lib/placeholders";
 import { TaskCardHeader } from "./task-card-header";
 import { TaskCardLabels } from "./task-card-labels";
-import { TaskCardDueDate } from "./task-card-due-date";
 import { TaskCardAssignee } from "./task-card-assignee";
+import { TaskCardDescription } from "./task-card-description";
+import { TaskCardTimeTracking } from "./task-card-time-tracking";
+import { TaskCardDueDateSection } from "./task-card-due-date-section";
 import { getDaysUntilDue, getPriorityColor } from "./task-card-utils";
 
 interface TaskCardProps {
@@ -33,36 +35,17 @@ export function TaskCard({ task }: TaskCardProps) {
       />
 
       <CardContent className="pt-0 space-y-3">
-        {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {task.description}
-          </p>
-        )}
-
+        <TaskCardDescription description={task.description} />
         <TaskCardLabels labels={task.labels} />
-
+        
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            {task.dueDate && (
-              <TaskCardDueDate
-                dueDate={task.dueDate}
-                daysUntilDue={daysUntilDue}
-                isOverdue={isOverdue}
-                isDueSoon={isDueSoon}
-              />
-            )}
-          </div>
-
-          {task.estimatedHours && (
-            <div className="flex items-center gap-1">
-              <span>{task.estimatedHours}h</span>
-              {task.actualHours && (
-                <span className="text-muted-foreground/60">
-                  / {task.actualHours}h
-                </span>
-              )}
-            </div>
-          )}
+          <TaskCardDueDateSection 
+            task={task}
+            daysUntilDue={daysUntilDue}
+            isOverdue={isOverdue}
+            isDueSoon={isDueSoon}
+          />
+          <TaskCardTimeTracking task={task} />
         </div>
 
         <TaskCardAssignee

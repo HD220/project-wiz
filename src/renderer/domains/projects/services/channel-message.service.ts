@@ -1,85 +1,47 @@
-import type {
-  ChannelMessageDto,
-  CreateChannelMessageDto,
-  UpdateChannelMessageDto,
-  ChannelMessageFilterDto,
-  ChannelMessagePaginationDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+export * from "./channel-message-list.service";
+export * from "./channel-message-crud.service";
+export * from "./channel-message-search.service";
 
+// Backward compatibility object
 export const channelMessageService = {
-  async list(filter?: ChannelMessageFilterDto): Promise<ChannelMessageDto[]> {
-    return window.electronIPC.invoke("channelMessage:list", filter);
+  list: async (filter?: any) => {
+    const { listChannelMessages } = await import("./channel-message-list.service");
+    return listChannelMessages(filter);
   },
-
-  async listByChannel(
-    channelId: string,
-    limit = 50,
-    offset = 0,
-  ): Promise<ChannelMessagePaginationDto> {
-    return window.electronIPC.invoke(
-      "channelMessage:listByChannel",
-      channelId,
-      limit.toString(),
-      offset.toString(),
-    );
+  listByChannel: async (channelId: string, limit = 50, offset = 0) => {
+    const { listChannelMessagesByChannel } = await import("./channel-message-list.service");
+    return listChannelMessagesByChannel(channelId, limit, offset);
   },
-
-  async getLatest(channelId: string, limit = 50): Promise<ChannelMessageDto[]> {
-    return window.electronIPC.invoke(
-      "channelMessage:getLatest",
-      channelId,
-      limit.toString(),
-    );
+  getLatest: async (channelId: string, limit = 50) => {
+    const { getLatestChannelMessages } = await import("./channel-message-list.service");
+    return getLatestChannelMessages(channelId, limit);
   },
-
-  async getById(id: string): Promise<ChannelMessageDto | null> {
-    return window.electronIPC.invoke("channelMessage:getById", id);
+  getById: async (id: string) => {
+    const { getChannelMessageById } = await import("./channel-message-list.service");
+    return getChannelMessageById(id);
   },
-
-  async create(data: CreateChannelMessageDto): Promise<ChannelMessageDto> {
-    return window.electronIPC.invoke("channelMessage:create", data);
+  create: async (data: any) => {
+    const { createChannelMessage } = await import("./channel-message-crud.service");
+    return createChannelMessage(data);
   },
-
-  async createText(
-    content: string,
-    channelId: string,
-    authorId: string,
-    authorName: string,
-  ): Promise<ChannelMessageDto> {
-    return window.electronIPC.invoke(
-      "channelMessage:createText",
-      content,
-      channelId,
-      authorId,
-      authorName,
-    );
+  createText: async (content: string, channelId: string, authorId: string, authorName: string) => {
+    const { createTextChannelMessage } = await import("./channel-message-crud.service");
+    return createTextChannelMessage(content, channelId, authorId, authorName);
   },
-
-  async update(data: UpdateChannelMessageDto): Promise<ChannelMessageDto> {
-    return window.electronIPC.invoke("channelMessage:update", data);
+  update: async (data: any) => {
+    const { updateChannelMessage } = await import("./channel-message-crud.service");
+    return updateChannelMessage(data);
   },
-
-  async delete(id: string): Promise<void> {
-    return window.electronIPC.invoke("channelMessage:delete", id);
+  delete: async (id: string) => {
+    const { deleteChannelMessage } = await import("./channel-message-crud.service");
+    return deleteChannelMessage(id);
   },
-
-  async search(
-    channelId: string,
-    searchTerm: string,
-    limit = 20,
-  ): Promise<ChannelMessageDto[]> {
-    return window.electronIPC.invoke(
-      "channelMessage:search",
-      channelId,
-      searchTerm,
-      limit.toString(),
-    );
+  search: async (channelId: string, searchTerm: string, limit = 20) => {
+    const { searchChannelMessages } = await import("./channel-message-search.service");
+    return searchChannelMessages(channelId, searchTerm, limit);
   },
-
-  async getLastMessage(channelId: string): Promise<ChannelMessageDto | null> {
-    return window.electronIPC.invoke(
-      "channelMessage:getLastMessage",
-      channelId,
-    );
+  getLastMessage: async (channelId: string) => {
+    const { getLastChannelMessage } = await import("./channel-message-list.service");
+    return getLastChannelMessage(channelId);
   },
 };

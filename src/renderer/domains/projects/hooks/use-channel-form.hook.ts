@@ -1,77 +1,33 @@
-import { useState } from "react";
-
 import { useProjectChannels } from "./use-project-channels.hook";
+import { useChannelFormState } from "./use-channel-form-state.hook";
+import { useChannelFormSubmit } from "./use-channel-form-submit.hook";
 
 export function useChannelForm(projectId: string) {
-  const [channelName, setChannelName] = useState("");
-  const [channelDescription, setChannelDescription] = useState("");
-  const [channelType, setChannelType] = useState<"general" | "task" | "agent">(
-    "general",
-  );
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { createChannel, error, clearError } = useProjectChannels(projectId);
-
-  const handleFieldChange = (field: string, value: string | boolean) => {
-    switch (field) {
-      case "channelName":
-        setChannelName(value as string);
-        break;
-      case "channelDescription":
-        setChannelDescription(value as string);
-        break;
-      case "channelType":
-        setChannelType(value as "general" | "task" | "agent");
-        break;
-      case "isPrivate":
-        setIsPrivate(value as boolean);
-        break;
-    }
-  };
+  const formState = useChannelFormState();
+  const { handleSubmit } = useChannelFormSubmit(
+    {
+      channelName: formState.channelName,
+      channelDescription: formState.channelDescription,
+      isPrivate: formState.isPrivate,
+      setIsSubmitting: formState.setIsSubmitting,
+    },
+    { createChannel, clearError }
+  );
 
   const resetForm = () => {
-    setChannelName("");
-    setChannelDescription("");
-    setChannelType("general");
-    setIsPrivate(false);
+    formState.resetForm();
     clearError();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!channelName.trim()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    clearError();
-
-    try {
-      await createChannel({
-        name: channelName.trim(),
-        description: channelDescription.trim() || undefined,
-        isPrivate,
-        createdBy: "current-user",
-      });
-      return true;
-    } catch (error) {
-      console.error("Error creating channel:", error);
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return {
-    channelName,
-    channelDescription,
-    channelType,
-    isPrivate,
-    isSubmitting,
+    channelName: formState.channelName,
+    channelDescription: formState.channelDescription,
+    channelType: formState.channelType,
+    isPrivate: formState.isPrivate,
+    isSubmitting: formState.isSubmitting,
     error,
-    handleFieldChange,
+    handleFieldChange: formState.handleFieldChange,
     handleSubmit,
     resetForm,
   };

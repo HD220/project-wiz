@@ -1,24 +1,9 @@
-import {
-  ProjectName,
-  ProjectDescription,
-  ProjectGitUrl,
-  ProjectStatus,
-  ProjectIdentity,
-} from "../value-objects";
-
-interface ProjectData {
-  name: ProjectName;
-  description: ProjectDescription;
-  gitUrl: ProjectGitUrl;
-  status: ProjectStatus;
-  avatar?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Project as ProjectCore } from "./project-core.entity";
+import { ProjectOperations } from "./project-operations.entity";
 
 export class Project {
-  private readonly identity: ProjectIdentity;
-  private data: ProjectData;
+  private core: ProjectCore;
+  private operations: ProjectOperations;
 
   constructor(props: {
     id?: string;
@@ -30,94 +15,47 @@ export class Project {
     createdAt?: Date;
     updatedAt?: Date;
   }) {
-    this.identity = new ProjectIdentity(props.id || crypto.randomUUID());
-    this.data = this.buildProjectData(props);
-  }
-
-  private buildProjectData(props: {
-    name: string;
-    description?: string | null;
-    gitUrl?: string | null;
-    status?: string;
-    avatar?: string | null;
-    createdAt?: Date;
-    updatedAt?: Date;
-  }): ProjectData {
-    return {
-      name: new ProjectName(props.name),
-      description: new ProjectDescription(props.description),
-      gitUrl: new ProjectGitUrl(props.gitUrl),
-      status: new ProjectStatus(props.status || "active"),
-      avatar: props.avatar || null,
-      createdAt: props.createdAt || new Date(),
-      updatedAt: props.updatedAt || new Date(),
-    };
+    this.core = new ProjectCore(props);
+    this.operations = new ProjectOperations(this.core);
   }
 
   getId(): string {
-    return this.identity.getValue();
+    return this.core.getId();
   }
 
   getName(): string {
-    return this.data.name.getValue();
+    return this.core.getName();
   }
 
   updateName(newName: string): void {
-    this.data.name = new ProjectName(newName);
-    this.touchUpdatedAt();
+    this.core.updateName(newName);
   }
 
   updateDescription(newDescription?: string | null): void {
-    this.data.description = new ProjectDescription(newDescription);
-    this.touchUpdatedAt();
+    this.core.updateDescription(newDescription);
   }
 
   updateGitUrl(newGitUrl?: string | null): void {
-    this.data.gitUrl = new ProjectGitUrl(newGitUrl);
-    this.touchUpdatedAt();
+    this.core.updateGitUrl(newGitUrl);
   }
 
   archive(): void {
-    this.data.status = this.data.status.toArchived();
-    this.touchUpdatedAt();
+    this.operations.archive();
   }
 
   activate(): void {
-    this.data.status = this.data.status.toActive();
-    this.touchUpdatedAt();
+    this.operations.activate();
   }
 
   isActive(): boolean {
-    return this.data.status.isActive();
+    return this.operations.isActive();
   }
 
   isArchived(): boolean {
-    return this.data.status.isArchived();
+    return this.operations.isArchived();
   }
 
-  private touchUpdatedAt(): void {
-    this.data.updatedAt = new Date();
-  }
-
-  toPlainObject(): {
-    id: string;
-    name: string;
-    description: string | null;
-    gitUrl: string | null;
-    status: "active" | "inactive" | "archived";
-    avatar: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  } {
-    return {
-      id: this.identity.getValue(),
-      name: this.data.name.getValue(),
-      description: this.data.description.getValue(),
-      gitUrl: this.data.gitUrl.getValue(),
-      status: this.data.status.getValue() as "active" | "inactive" | "archived",
-      avatar: this.data.avatar || null,
-      createdAt: this.data.createdAt,
-      updatedAt: this.data.updatedAt,
-    };
+  toPlainObject() {
+    return this.operations.toPlainObject();
   }
 }

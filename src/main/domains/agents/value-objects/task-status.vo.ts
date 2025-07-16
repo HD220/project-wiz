@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { canTransitionBetween } from "./task-status-transitions.functions";
+
 const TaskStatusSchema = z.enum([
   "pending",
   "running",
@@ -11,12 +13,11 @@ const TaskStatusSchema = z.enum([
 export type TaskStatusType = z.infer<typeof TaskStatusSchema>;
 
 export class TaskStatus {
-  constructor(status: TaskStatusType) {
-    const validated = TaskStatusSchema.parse(status);
-    this.value = validated;
-  }
-
   private readonly value: TaskStatusType;
+
+  constructor(status: TaskStatusType) {
+    this.value = TaskStatusSchema.parse(status);
+  }
 
   getValue(): TaskStatusType {
     return this.value;
@@ -39,18 +40,7 @@ export class TaskStatus {
   }
 
   canTransitionTo(newStatus: TaskStatus): boolean {
-    const current = this.value;
-    const target = newStatus.value;
-
-    const validTransitions: Record<TaskStatusType, TaskStatusType[]> = {
-      pending: ["running", "cancelled"],
-      running: ["completed", "failed", "cancelled"],
-      completed: [],
-      failed: [],
-      cancelled: [],
-    };
-
-    return validTransitions[current].includes(target);
+    return canTransitionBetween(this.value, newStatus.value);
   }
 
   equals(other: TaskStatus): boolean {

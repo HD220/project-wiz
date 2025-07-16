@@ -1,61 +1,25 @@
-import { useCallback } from "react";
-import { useAgentStore } from "../stores/agent.store";
-import {
-  useAgentsQuery,
-  useActiveAgentsQuery,
-  useAgentQuery,
-  useAgentByNameQuery,
-  useCreateAgentMutation,
-  useUpdateAgentMutation,
-  useDeleteAgentMutation,
-} from "./use-agents-queries.hook";
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import { useAgentsQuery, useActiveAgentsQuery, useAgentQuery, useAgentByNameQuery } from "./use-agents-queries.hook";
+import { useAgentsMutations } from "./use-agents-mutations.hook";
+import { useAgentsState } from "./use-agents-state.hook";
+import { useAgentsRefetch } from "./use-agents-refetch.hook";
 
 export function useAgents() {
-  const selectedAgent = useAgentStore((state: any) => state.selectedAgent);
-  const setSelectedAgent = useAgentStore(
-    (state: any) => state.setSelectedAgent,
-  );
-
   const agentsQuery = useAgentsQuery();
   const activeAgentsQuery = useActiveAgentsQuery();
-  const createMutation = useCreateAgentMutation();
-  const updateMutation = useUpdateAgentMutation();
-  const deleteMutation = useDeleteAgentMutation();
-
-  const createAgent = useCallback(
-    (data: Partial<AgentDto>) => createMutation.mutateAsync(data),
-    [createMutation],
-  );
-
-  const updateAgent = useCallback(
-    (id: string, data: Partial<AgentDto>) =>
-      updateMutation.mutateAsync({ id, data }),
-    [updateMutation],
-  );
-
-  const deleteAgent = useCallback(
-    (id: string) => deleteMutation.mutateAsync(id),
-    [deleteMutation],
-  );
-
-  const refetch = useCallback(() => {
-    agentsQuery.refetch();
-    activeAgentsQuery.refetch();
-  }, [agentsQuery, activeAgentsQuery]);
+  const mutations = useAgentsMutations();
+  const state = useAgentsState();
+  const { refetch } = useAgentsRefetch();
 
   return {
     agents: agentsQuery.data || [],
     activeAgents: activeAgentsQuery.data || [],
     isLoading: agentsQuery.isLoading || activeAgentsQuery.isLoading,
-    error:
-      agentsQuery.error?.message || activeAgentsQuery.error?.message || null,
-    selectedAgent,
-
-    createAgent,
-    updateAgent,
-    deleteAgent,
-    setSelectedAgent,
+    error: agentsQuery.error?.message || activeAgentsQuery.error?.message || null,
+    selectedAgent: state.selectedAgent,
+    createAgent: mutations.createAgent,
+    updateAgent: mutations.updateAgent,
+    deleteAgent: mutations.deleteAgent,
+    setSelectedAgent: state.setSelectedAgent,
     refetch,
   };
 }

@@ -1,23 +1,9 @@
-import {
-  ChevronRight,
-  ChevronDown,
-  Folder,
-  Copy,
-  Trash2,
-  Edit,
-  Download,
-  MoreHorizontal,
-} from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "../../../../components/ui/context-menu";
-import { Badge } from "../../../../components/ui/badge";
+import { ContextMenu, ContextMenuTrigger } from "../../../../components/ui/context-menu";
 import { cn } from "../../../../lib/utils";
-import { useFileIcons } from "../hooks/use-file-icons.hook";
+import { FileExplorerItemIcon } from "./file-explorer-item-icon";
+import { FileExplorerItemContent } from "./file-explorer-item-content";
+import { FileExplorerItemActions } from "./file-explorer-item-actions";
+import { FileExplorerItemContextMenu } from "./file-explorer-item-context-menu";
 import type { FileTreeItem } from "../../../../lib/placeholders";
 
 interface FileExplorerItemProps {
@@ -37,9 +23,6 @@ export function FileExplorerItem({
   onClick,
   onDoubleClick,
 }: FileExplorerItemProps) {
-  const { getFileIcon } = useFileIcons();
-  const FileIcon = getFileIcon(item);
-
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -52,58 +35,12 @@ export function FileExplorerItem({
           onClick={onClick}
           onDoubleClick={onDoubleClick}
         >
-          {item.type === "folder" && (
-            <Button variant="ghost" size="icon" className="h-4 w-4 p-0">
-              {isExpanded ? (
-                <ChevronDown className="h-3 w-3" />
-              ) : (
-                <ChevronRight className="h-3 w-3" />
-              )}
-            </Button>
-          )}
-
-          {item.type === "folder" ? (
-            <Folder className="h-4 w-4 text-blue-500" />
-          ) : (
-            FileIcon && <FileIcon className="h-4 w-4 text-muted-foreground" />
-          )}
-
-          <span className="flex-1 truncate">{item.name}</span>
-
-          {item.isModified && (
-            <Badge variant="secondary" className="h-4 text-xs">
-              M
-            </Badge>
-          )}
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
-          >
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
+          <FileExplorerItemIcon item={item} isExpanded={isExpanded} />
+          <FileExplorerItemContent item={item} />
+          <FileExplorerItemActions />
         </div>
       </ContextMenuTrigger>
-
-      <ContextMenuContent>
-        <ContextMenuItem>
-          <Copy className="h-4 w-4 mr-2" />
-          Copiar
-        </ContextMenuItem>
-        <ContextMenuItem>
-          <Edit className="h-4 w-4 mr-2" />
-          Renomear
-        </ContextMenuItem>
-        <ContextMenuItem>
-          <Download className="h-4 w-4 mr-2" />
-          Download
-        </ContextMenuItem>
-        <ContextMenuItem className="text-destructive">
-          <Trash2 className="h-4 w-4 mr-2" />
-          Excluir
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <FileExplorerItemContextMenu />
     </ContextMenu>
   );
 }

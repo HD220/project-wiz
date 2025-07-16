@@ -1,19 +1,9 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useLlmProviderStore } from "../stores/llm-provider.store";
-import {
-  useLlmProvidersQuery,
-  useLlmProviderQuery,
-  useDefaultLlmProviderQuery,
-  useCreateLlmProviderMutation,
-  useUpdateLlmProviderMutation,
-  useDeleteLlmProviderMutation,
-  useSetDefaultLlmProviderMutation,
-} from "./use-llm-provider-queries.hook";
-import type {
-  CreateLlmProviderDto,
-  UpdateLlmProviderDto,
-  LlmProviderFilterDto,
-} from "../../../../shared/types/domains/llm/llm-provider.types";
+import { useLlmProvidersQuery } from "./use-llm-provider-queries.hook";
+import { useLlmProviderMutations } from "./use-llm-provider-mutations.hook";
+import { useLlmProviderDefault } from "./use-llm-provider-default.hook";
+import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
 
 export function useLlmProviders(filter?: LlmProviderFilterDto) {
   const selectedLlmProvider = useLlmProviderStore(
@@ -24,41 +14,13 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
   );
 
   const providersQuery = useLlmProvidersQuery(filter);
-  const defaultProviderQuery = useDefaultLlmProviderQuery();
-  const createMutation = useCreateLlmProviderMutation();
-  const updateMutation = useUpdateLlmProviderMutation();
-  const deleteMutation = useDeleteLlmProviderMutation();
-  const setDefaultMutation = useSetDefaultLlmProviderMutation();
-
-  const defaultProvider = useMemo(() => {
-    const providers = providersQuery.data || [];
-    return (
-      defaultProviderQuery.data ||
-      providers.find((p) => p.isDefault) ||
-      providers[0] ||
-      null
-    );
-  }, [providersQuery.data, defaultProviderQuery.data]);
-
-  const createLlmProvider = useCallback(
-    (data: CreateLlmProviderDto) => createMutation.mutateAsync(data),
-    [createMutation],
-  );
-
-  const updateLlmProvider = useCallback(
-    (data: UpdateLlmProviderDto) => updateMutation.mutateAsync(data),
-    [updateMutation],
-  );
-
-  const deleteLlmProvider = useCallback(
-    (id: string) => deleteMutation.mutateAsync(id),
-    [deleteMutation],
-  );
-
-  const setDefaultProvider = useCallback(
-    (id: string) => setDefaultMutation.mutateAsync(id),
-    [setDefaultMutation],
-  );
+  const { defaultProvider, defaultProviderQuery } = useLlmProviderDefault(filter);
+  const {
+    createLlmProvider,
+    updateLlmProvider,
+    deleteLlmProvider,
+    setDefaultProvider,
+  } = useLlmProviderMutations();
 
   const refetch = useCallback(() => {
     providersQuery.refetch();
@@ -75,7 +37,6 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
       defaultProviderQuery.error?.message ||
       null,
     selectedLlmProvider,
-
     createLlmProvider,
     updateLlmProvider,
     deleteLlmProvider,

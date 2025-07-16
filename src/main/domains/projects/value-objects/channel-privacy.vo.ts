@@ -8,15 +8,19 @@ export class ChannelPrivacy {
   private readonly value: boolean;
 
   constructor(isPrivate: boolean = false) {
+    this.value = this.validatePrivacy(isPrivate);
+  }
+
+  private validatePrivacy(privacy: boolean): boolean {
     try {
-      this.value = ChannelPrivacySchema.parse(isPrivate);
+      return ChannelPrivacySchema.parse(privacy);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.errors[0];
         throw ValidationError.singleField(
           "channelPrivacy",
           firstError.message,
-          isPrivate,
+          privacy,
         );
       }
       throw error;
