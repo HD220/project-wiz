@@ -4,8 +4,6 @@ import { useOptimisticMessage } from "./use-optimistic-message.hook";
 import { useRequestDataBuilder } from "./use-request-data-builder.hook";
 import { useTyping } from "./use-typing.hook";
 
-import type { ChannelMessageDto } from "../../../../shared/types/domains/projects/channel-message.types";
-
 interface UseChannelChatSendProps {
   channelId: string;
   llmProviderId?: string;

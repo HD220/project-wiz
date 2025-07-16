@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
-  CreateUserDto,
   UpdateUserDto,
   UpdateUserSettingsDto,
 } from "../../../../shared/types/domains/users/user.types";

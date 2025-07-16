@@ -1,3 +1,5 @@
+import type { PaginationMetadata } from "./pagination.interface";
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
@@ -16,13 +18,4 @@ export interface ApiMetadata {
   timestamp: string;
   requestId?: string;
   pagination?: PaginationMetadata;
-}
-
-export interface PaginationMetadata {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
 }

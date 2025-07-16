@@ -30,9 +30,9 @@ export function FileContentView({ selectedFile }: FileContentViewProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <span>{selectedFile.name}</span>
-              {selectedFile.extension && (
+              {selectedFile.name.includes(".") && (
                 <span className="text-sm text-muted-foreground">
-                  {selectedFile.extension.toUpperCase()}
+                  {selectedFile.name.split(".").pop()?.toUpperCase()}
                 </span>
               )}
             </CardTitle>
@@ -53,10 +53,10 @@ export function FileContentView({ selectedFile }: FileContentViewProps) {
                   </div>
                 )}
 
-                {selectedFile.lastModified && (
+                {selectedFile.modified && (
                   <div className="text-sm text-muted-foreground">
                     Última modificação:{" "}
-                    {selectedFile.lastModified.toLocaleString("pt-BR")}
+                    {selectedFile.modified.toLocaleString("pt-BR")}
                   </div>
                 )}
               </div>

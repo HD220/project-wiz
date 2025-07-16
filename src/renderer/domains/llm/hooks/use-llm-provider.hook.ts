@@ -3,33 +3,32 @@ import { useCallback } from "react";
 import { useLlmProviderStore } from "../stores/llm-provider.store";
 
 import { useLlmProviderDefault } from "./use-llm-provider-default.hook";
-import { useLlmProviderMutations } from "./use-llm-provider-mutations.hook";
+import {
+  useCreateLlmProviderMutation,
+  useUpdateLlmProviderMutation,
+  useDeleteLlmProviderMutation,
+  useSetDefaultLlmProviderMutation,
+} from "./use-llm-provider-mutations.hook";
 import { useLlmProvidersQuery } from "./use-llm-provider-queries.hook";
 
 import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
 
-interface LlmProviderStoreState {
-  selectedLlmProvider: string | null;
-  setSelectedLlmProvider: (provider: string | null) => void;
-}
-
 export function useLlmProviders(filter?: LlmProviderFilterDto) {
   const selectedLlmProvider = useLlmProviderStore(
-    (state: LlmProviderStoreState) => state.selectedLlmProvider,
+    (state) => state.selectedLlmProvider,
   );
   const setSelectedLlmProvider = useLlmProviderStore(
-    (state: LlmProviderStoreState) => state.setSelectedLlmProvider,
+    (state) => state.setSelectedLlmProvider,
   );
 
   const providersQuery = useLlmProvidersQuery(filter);
   const { defaultProvider, defaultProviderQuery } =
     useLlmProviderDefault(filter);
-  const {
-    createLlmProvider,
-    updateLlmProvider,
-    deleteLlmProvider,
-    setDefaultProvider,
-  } = useLlmProviderMutations();
+
+  const createLlmProviderMutation = useCreateLlmProviderMutation();
+  const updateLlmProviderMutation = useUpdateLlmProviderMutation();
+  const deleteLlmProviderMutation = useDeleteLlmProviderMutation();
+  const setDefaultLlmProviderMutation = useSetDefaultLlmProviderMutation();
 
   const refetch = useCallback(() => {
     providersQuery.refetch();
@@ -46,11 +45,11 @@ export function useLlmProviders(filter?: LlmProviderFilterDto) {
       defaultProviderQuery.error?.message ||
       null,
     selectedLlmProvider,
-    createLlmProvider,
-    updateLlmProvider,
-    deleteLlmProvider,
+    createLlmProvider: createLlmProviderMutation.mutate,
+    updateLlmProvider: updateLlmProviderMutation.mutate,
+    deleteLlmProvider: deleteLlmProviderMutation.mutate,
     setSelectedLlmProvider,
-    setDefaultProvider,
+    setDefaultProvider: setDefaultLlmProviderMutation.mutate,
     refetch,
   };
 }

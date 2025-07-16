@@ -7,7 +7,7 @@ interface UseTerminalHistoryProps {
 }
 
 export function useTerminalHistory({
-  _command,
+  command,
   setCommand,
   commandHistory,
   historyIndex,

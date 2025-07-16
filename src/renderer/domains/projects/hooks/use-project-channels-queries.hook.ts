@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { channelService } from "../services/channel.service";
 
 import type {
-  _ChannelDto,
-  _CreateChannelDto,
+  ChannelDto,
+  CreateChannelDto,
 } from "../../../../shared/types/domains/projects/channel.types";
 
 export function useProjectChannelsQueries(projectId: string) {
@@ -27,7 +27,7 @@ export function useProjectChannelsQueries(projectId: string) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<_CreateChannelDto, "projectId">) =>
+    mutationFn: (data: Omit<CreateChannelDto, "projectId">) =>
       channelService.create({ ...data, projectId }),
     onSuccess: () => {
       queryClient.invalidateQueries({

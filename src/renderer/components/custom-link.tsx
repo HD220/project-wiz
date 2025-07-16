@@ -10,6 +10,7 @@ interface CustomLinkProps
     VariantProps<typeof buttonVariants> {
   className?: string;
   children: React.ReactNode;
+  to: LinkProps["to"];
 }
 
 export const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(

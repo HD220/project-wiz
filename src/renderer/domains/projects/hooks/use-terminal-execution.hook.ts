@@ -25,9 +25,9 @@ export function useTerminalExecution({
     if (!command.trim()) return;
 
     const newLine: TerminalLine = {
-      id: Date.now(),
-      text: `$ ${command}`,
-      type: "command",
+      id: Date.now().toString(),
+      content: `$ ${command}`,
+      type: "input",
       timestamp: new Date(),
     };
 
@@ -38,12 +38,12 @@ export function useTerminalExecution({
 
     setTimeout(() => {
       const outputLine: TerminalLine = {
-        id: Date.now() + 1,
-        text: `Command executed: ${command}`,
+        id: (Date.now() + 1).toString(),
+        content: `Command executed: ${command}`,
         type: "output",
         timestamp: new Date(),
       };
-      setTerminalLines((prev) => [...prev, outputLine]);
+      setTerminalLines((prev: TerminalLine[]) => [...prev, outputLine]);
       setIsRunning(false);
     }, 1000);
 

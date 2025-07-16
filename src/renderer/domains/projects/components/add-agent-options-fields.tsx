@@ -19,22 +19,24 @@ export function AddAgentOptionsFields({
     <div className="space-y-3">
       <div className="flex items-center space-x-2">
         <Checkbox
-          id="verbose"
-          checked={formData.verbose}
-          onCheckedChange={(checked) => updateField("verbose", checked)}
+          id="isActive"
+          checked={formData.isActive ?? true}
+          onCheckedChange={(checked) =>
+            updateField("isActive", checked as boolean)
+          }
         />
-        <Label htmlFor="verbose">Modo verboso (logs detalhados)</Label>
+        <Label htmlFor="isActive">Agente ativo</Label>
       </div>
 
       <div className="flex items-center space-x-2">
         <Checkbox
-          id="allowDelegation"
-          checked={formData.allowDelegation}
-          onCheckedChange={(checked) => updateField("allowDelegation", checked)}
+          id="isDefault"
+          checked={formData.isDefault ?? false}
+          onCheckedChange={(checked) =>
+            updateField("isDefault", checked as boolean)
+          }
         />
-        <Label htmlFor="allowDelegation">
-          Permitir delegação para outros agentes
-        </Label>
+        <Label htmlFor="isDefault">Definir como agente padrão</Label>
       </div>
     </div>
   );
