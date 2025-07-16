@@ -1,6 +1,7 @@
 import { ModuleContainer } from "./base-module.container";
 import { ModuleEvents } from "./base-module.events";
 import { ModuleInitialization } from "./base-module.initialization";
+import { IModuleContainer } from "./interfaces/module.interface";
 
 export abstract class BaseModuleCore {
   protected initialization: ModuleInitialization;
@@ -13,7 +14,7 @@ export abstract class BaseModuleCore {
     this.container = new ModuleContainer();
   }
 
-  setContainer(container: any): void {
+  setContainer(container: IModuleContainer): void {
     this.container.setContainer(container);
   }
 

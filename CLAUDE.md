@@ -61,6 +61,15 @@ O Project Wiz segue rigorosamente diversos padrões de design e boas práticas p
   - Classes e Tipos: `PascalCase` (ex: `MyClass`, `UserInterface`).
   - Constantes globais: `SCREAMING_SNAKE_CASE` (ex: `API_KEY`).
   - Nome de arquivos: `kebab-case` (ex: `user.entity.ts`, `my-component.tsx`, `my-hook.hook.ts`).
+- **Importações:**
+  - Prefira aliases ao invés de caminhos relativos para melhor legibilidade e manutenibilidade.
+  - Use aliases configurados no `tsconfig.json` como `@/components`, `@/lib`, `@/shared` ao invés de `../../components`.
+  - Exemplo: `import { Button } from '@/components/ui/button'` ao invés de `import { Button } from '../../components/ui/button'`.
+- **Tipagem de `any`:**
+  - Nunca use `any` diretamente na definição de variáveis, parâmetros ou retornos de função.
+  - Crie tipos ou interfaces específicas, mesmo que temporárias, para casos que precisariam de `any`.
+  - Avalie se o tipo criado deve ser compartilhado em `src/shared/types/` ou mantido local.
+  - Exemplo: ao invés de `data: any`, crie `type UnknownApiResponse = any` e use `data: UnknownApiResponse`.
 - **Formatação:** O projeto provavelmente utiliza um formatador de código (como Prettier, embora não explicitamente no `package.json` scripts, é uma prática comum com ESLint) para garantir a formatação consistente.
 
 ## Princípios Aplicados

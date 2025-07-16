@@ -1,8 +1,6 @@
 import {
   createRootRoute,
   Outlet,
-  useNavigate,
-  useLocation,
 } from "@tanstack/react-router";
 
 import { TitleBar } from "@/renderer/components/layout/title-bar";
@@ -18,8 +16,6 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const navigate = useNavigate();
-  const location = useLocation();
 
   return (
     <TooltipProvider>

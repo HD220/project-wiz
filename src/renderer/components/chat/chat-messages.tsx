@@ -2,6 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "@/lib/placeholders";
 
 import type { ChannelMessageDto } from "@/shared/types";
+import type { MessageType } from "@/shared/types/message.types";
 
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatErrorState } from "./chat-error-state";
@@ -63,7 +64,7 @@ function renderLegacyMessage(legacyMsg: Message) {
         senderName: legacyMsg.authorName,
         senderType: legacyMsg.authorId.startsWith("agent-") ? "agent" : "user",
         messageType:
-          legacyMsg.type === "code" ? "text" : (legacyMsg.type as any),
+          legacyMsg.type === "code" ? "text" : (legacyMsg.type as MessageType),
         timestamp: legacyMsg.timestamp,
         isEdited: legacyMsg.edited || false,
         mentions: legacyMsg.mentions || [],

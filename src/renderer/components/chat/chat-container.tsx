@@ -1,13 +1,12 @@
 import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
-import type { ChannelMessageDto } from "@/shared/types";
 
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
 
-import { useChannelMessagesById } from "@/features/channel-messaging/hooks/use-channel-messages.hook";
+import { useChannelMessagesById } from "@/domains/projects/hooks/use-channel-messages-by-id.hook";
 
 interface ChatContainerProps {
   channelId?: string;

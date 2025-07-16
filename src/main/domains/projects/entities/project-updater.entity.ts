@@ -39,9 +39,9 @@ export class ProjectUpdater {
   }
 
   private updateField(
-    nameUpdater?: () => ProjectName,
-    gitUrlUpdater?: () => ProjectGitUrl,
-    statusUpdater?: () => ProjectStatus,
+    _nameUpdater?: () => ProjectName,
+    _gitUrlUpdater?: () => ProjectGitUrl,
+    _statusUpdater?: () => ProjectStatus,
   ): void {
     this.projectData.touchUpdatedAt();
   }

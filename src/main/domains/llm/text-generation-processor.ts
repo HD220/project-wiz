@@ -1,12 +1,16 @@
-import { generateText, CoreMessage } from "ai";
+import { generateText, CoreMessage, LanguageModel } from "ai";
 
 import { getLogger } from "../../infrastructure/logger";
 
 const logger = getLogger("text-generation.processor");
 
+interface TextGenerationResult {
+  text: string;
+}
+
 export class TextGenerationProcessor {
   async process(
-    model: any,
+    model: LanguageModel,
     messages: CoreMessage[],
     systemPrompt?: string,
   ): Promise<string> {
@@ -32,7 +36,10 @@ export class TextGenerationProcessor {
     return [{ role: "system", content: systemPrompt }, ...messages];
   }
 
-  private logGeneration(messages: CoreMessage[], result: any): void {
+  private logGeneration(
+    messages: CoreMessage[],
+    result: TextGenerationResult,
+  ): void {
     logger.info("Text generated", {
       messageCount: messages.length,
       responseLength: result.text.length,

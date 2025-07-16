@@ -1,5 +1,4 @@
 import { TaskPriority } from "../value-objects/task-priority.vo";
-import { TaskStatus } from "../value-objects/task-status.vo";
 
 import { AgentTaskCore } from "./agent-task-core.entity";
 import { AgentTaskTransitions } from "./agent-task-transitions.entity";

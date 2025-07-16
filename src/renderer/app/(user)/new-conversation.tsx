@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { NewConversationModal } from "../../features/direct-messages/components/new-conversation-modal";
+import { NewConversationModal } from "@/domains/users/components/new-conversation-modal";
 
 export function NewConversationPage() {
   const navigate = useNavigate();

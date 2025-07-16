@@ -1,7 +1,6 @@
 import {
   createFileRoute,
   Outlet,
-  useNavigate,
   useLocation,
 } from "@tanstack/react-router";
 
@@ -12,9 +11,8 @@ import {
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
-import { mockAgents } from "@/renderer/lib/placeholders";
 
-import { UserSidebar } from "@/features/user-management/components/user-sidebar";
+import { UserSidebar } from "@/domains/users/components/user-sidebar";
 
 function getPageTitle(
   pageTitle: string | undefined,

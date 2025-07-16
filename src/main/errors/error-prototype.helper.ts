@@ -1,6 +1,6 @@
 export function setupErrorPrototype(
   instance: Error,
-  constructor: new (...args: any[]) => Error,
+  constructor: new (...args: unknown[]) => Error,
 ): void {
   Object.setPrototypeOf(instance, constructor.prototype);
 

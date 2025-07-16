@@ -26,7 +26,7 @@ export function MessageEditForm({
     <div className="space-y-2">
       <textarea
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        onChange={(event) => setContent(event.target.value)}
         className="w-full p-2 bg-gray-600 border border-gray-500 rounded text-gray-300 resize-none"
         rows={3}
       />

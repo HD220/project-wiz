@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ElectronStyleProps, WindowControls as WindowControlsType } from "@/shared/types/electron.types";
 
 interface TitleBarProps {
   className?: string;
@@ -28,10 +29,7 @@ function useWindowState() {
 function WindowControls({
   isMaximized,
   setIsMaximized,
-}: {
-  isMaximized: boolean;
-  setIsMaximized: (maximized: boolean) => void;
-}) {
+}: WindowControlsType) {
   const handleMinimize = async () => {
     if (window.electronIPC?.window?.minimize) {
       await window.electronIPC.window.minimize();
@@ -54,7 +52,7 @@ function WindowControls({
   return (
     <div
       className="flex items-center flex-none"
-      style={{ WebkitAppRegion: "no-drag" } as any}
+      style={{ WebkitAppRegion: "no-drag" } as ElectronStyleProps}
     >
       <Button
         variant="ghost"
@@ -99,7 +97,7 @@ export function TitleBar({ className }: TitleBarProps) {
         "h-6 bg-background border-b border-border flex items-center justify-between select-none",
         className,
       )}
-      style={{ WebkitAppRegion: "drag" } as any}
+      style={{ WebkitAppRegion: "drag" } as ElectronStyleProps}
     >
       <div className="h-6 flex-1 justify-between items-center">
         <div className="flex-1" />

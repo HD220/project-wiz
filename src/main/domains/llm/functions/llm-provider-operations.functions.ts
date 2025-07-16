@@ -4,11 +4,8 @@ import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
 import { llmProviders } from "../../../persistence/schemas";
 
-import {
-  findLlmProviderById,
-  createLlmProviderFromData,
-  LlmProviderWithData,
-} from "./llm-provider-crud.functions";
+import { createLlmProviderFromData, LlmProviderWithData } from "./llm-factory.functions";
+import { findLlmProviderById } from "./llm-query.functions";
 
 const logger = getLogger("llm-provider.operations");
 

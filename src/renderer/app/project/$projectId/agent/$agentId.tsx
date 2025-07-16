@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChatContainer } from "../../../../components/chat/chat-container";
 
 export function AgentChatPage() {
-  const { projectId, agentId } = Route.useParams();
+  const { agentId } = Route.useParams();
 
   return (
     <ChatContainer

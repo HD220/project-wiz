@@ -4,8 +4,8 @@ import {
   useParams,
 } from "@tanstack/react-router";
 
-import { LlmProviderFormModal } from "@/renderer/features/llm-provider-management/components/llm-provider-form-modal";
-import { useLlmProviders } from "@/renderer/features/llm-provider-management/hooks/use-llm-provider.hook";
+import { LlmProviderFormModal } from "@/domains/llm/components/llm-provider-form-modal";
+import { useLlmProviders } from "@/domains/llm/hooks/use-llm-provider.hook";
 
 export const Route = createFileRoute(
   "/(user)/settings/edit-llm-provider/$llmProviderId",
@@ -19,7 +19,7 @@ function EditLlmProvider() {
     from: "/(user)/settings/edit-llm-provider/$llmProviderId",
   });
   const { llmProviders } = useLlmProviders();
-  const provider = llmProviders?.find((p) => p.id === llmProviderId) || null;
+  const provider = llmProviders?.find((provider) => provider.id === llmProviderId) || null;
 
   return (
     <LlmProviderFormModal

@@ -3,5 +3,4 @@ export * from "./user-operations.functions";
 export * from "./direct-message.functions";
 export * from "./conversation-crud.functions";
 export * from "./conversation-operations.functions";
-export * from "./ai-messaging.functions";
 export * from "./user.mapper";

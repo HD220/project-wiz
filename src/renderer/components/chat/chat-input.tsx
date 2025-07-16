@@ -32,9 +32,9 @@ export function ChatInput(props: ChatInputProps) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSend();
     }
   };
@@ -50,7 +50,7 @@ export function ChatInput(props: ChatInputProps) {
           placeholder={placeholder}
           className="min-h-[44px] max-h-32 resize-none pr-12 py-3"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(event) => setMessage(event.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
         />

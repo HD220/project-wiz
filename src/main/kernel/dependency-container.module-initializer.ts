@@ -2,7 +2,6 @@ import { logger } from "../logger";
 
 import { ModuleRegistry } from "./dependency-container.module-registry";
 import { TopologicalSort } from "./dependency-container.topological-sort";
-import { IModule } from "./interfaces/module.interface";
 
 export class ModuleInitializer {
   constructor(private registry: ModuleRegistry) {}

@@ -34,7 +34,7 @@ export const MarkdownComponents = {
     </h6>
   ),
   hr: () => <Separator className="my-4" />,
-  p: ({ children }: { children: React.ReactNode }) => (
+  paragraph: ({ children }: { children: React.ReactNode }) => (
     <p className="mb-4 text-foreground leading-relaxed">{children}</p>
   ),
   ul: ({ children }: { children: React.ReactNode }) => (

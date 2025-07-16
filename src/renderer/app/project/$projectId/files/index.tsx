@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { useState } from "react";
 
-import { FileExplorer } from "@/renderer/features/development-tools/components/file-explorer";
-import { TerminalPanel } from "@/renderer/features/development-tools/components/terminal-panel";
+import { FileExplorer } from "@/domains/projects/components/file-explorer";
+import { TerminalPanel } from "@/domains/projects/components/terminal-panel";
 
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

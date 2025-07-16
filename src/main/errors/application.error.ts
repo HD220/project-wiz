@@ -1,4 +1,4 @@
-import { BaseError, ErrorContext, ErrorMetadata } from "./base.error";
+import { BaseError, ErrorContext } from "./base.error";
 
 export class ApplicationError extends BaseError {
   constructor(message: string, code?: string, context?: ErrorContext) {

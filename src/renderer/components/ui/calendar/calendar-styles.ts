@@ -2,11 +2,12 @@ import { getDefaultClassNames } from "react-day-picker";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CalendarClassNames } from "@/shared/types/calendar.types";
 
 export function getCalendarClassNames(
   buttonVariant: string,
   captionLayout: string,
-  classNames: any,
+  classNames: CalendarClassNames,
 ) {
   const defaultClassNames = getDefaultClassNames();
 

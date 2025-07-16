@@ -24,7 +24,7 @@ export async function createLlmProvider(
   return saveNewProvider(providerData);
 }
 
-function buildProviderData(data: CreateLlmProviderDto) {
+function buildProviderData(data: CreateLlmProviderDto): LlmProviderCreateData {
   return {
     name: data.name,
     provider: data.provider,
@@ -36,8 +36,18 @@ function buildProviderData(data: CreateLlmProviderDto) {
   };
 }
 
+interface LlmProviderCreateData {
+  name: string;
+  provider: string;
+  model: string;
+  apiKey: string;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 async function saveNewProvider(
-  providerData: any,
+  providerData: LlmProviderCreateData,
 ): Promise<LlmProviderWithData> {
   const db = getDatabase();
   const [saved] = await db

@@ -1,12 +1,14 @@
+import { Channel, Agent, Project, PageInfo } from "@/shared/types/page-info.types";
+
 export function getPageInfo(
   pathname: string,
-  channels: any[],
-  agents: any[],
-  currentProject: any,
-) {
+  channels: Channel[],
+  agents: Agent[],
+  currentProject: Project | null,
+): PageInfo {
   if (pathname.includes("/chat/")) {
     const channelId = pathname.split("/chat/")[1];
-    const selectedChannel = channels.find((c) => c.id === channelId);
+    const selectedChannel = channels.find((channel) => channel.id === channelId);
     return {
       title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
       subtitle: selectedChannel?.name || "Canal de chat do projeto",
@@ -17,7 +19,7 @@ export function getPageInfo(
 
   if (pathname.includes("/agent/")) {
     const agentId = pathname.split("/agent/")[1];
-    const selectedAgent = agents.find((a) => a.id === agentId);
+    const selectedAgent = agents.find((agent) => agent.id === agentId);
     return {
       title: selectedAgent ? `@${selectedAgent.name}` : "Mensagem Direta",
       subtitle: selectedAgent

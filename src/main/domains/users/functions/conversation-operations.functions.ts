@@ -1,13 +1,18 @@
 import { sql } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
-import { conversations } from "../../../persistence/schemas";
+import {
+  conversations,
+  ConversationSchema,
+} from "../../../persistence/schemas";
 
 import { createConversation } from "./conversation-crud.functions";
 
 import type { ConversationDto } from "../../../../shared/types";
 
-function parseConversationResult(conversation: any): ConversationDto {
+function parseConversationResult(
+  conversation: ConversationSchema,
+): ConversationDto {
   return {
     ...conversation,
     participants: JSON.parse(conversation.participants),

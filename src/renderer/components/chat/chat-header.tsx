@@ -1,4 +1,4 @@
-import { Hash, AtSign } from "lucide-react";
+import { Hash } from "lucide-react";
 
 import { PageTitle } from "@/components/page-title";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

@@ -1,20 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { useTheme } from "@/contexts/theme-context";
 import { SettingsHeader } from "@/domains/users/components/settings/settings-header";
 import { SettingsTabs } from "@/domains/users/components/settings/settings-tabs";
 import { useUser } from "@/domains/users/hooks/use-user.hook";
+import { UserSettings, SettingsUpdateHandler } from "@/shared/types/settings.types";
 
 export const Route = createFileRoute("/(user)/settings/")({
   component: UserSettingsPage,
 });
 
 export function UserSettingsPage() {
-  const { theme, setTheme } = useTheme();
-  const { currentUser, updateSettings, updateProfile } = useUser();
+  const { updateSettings, updateProfile } = useUser();
 
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<UserSettings>({
     // User Settings
     username: "Usuário",
     email: "usuario@example.com",
@@ -28,7 +27,7 @@ export function UserSettingsPage() {
     desktopNotifications: false,
   });
 
-  const handleUpdateSettings = (field: string, value: any) => {
+  const handleUpdateSettings: SettingsUpdateHandler = (field: string, value: unknown) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -60,9 +59,7 @@ export function UserSettingsPage() {
         <SettingsHeader onSave={handleSave} />
         <SettingsTabs
           settings={settings}
-          theme={theme}
           onUpdateSettings={handleUpdateSettings}
-          onThemeChange={setTheme}
         />
       </div>
     </div>

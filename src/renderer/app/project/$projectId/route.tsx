@@ -1,7 +1,6 @@
 import {
   createFileRoute,
   Outlet,
-  useNavigate,
   useLocation,
 } from "@tanstack/react-router";
 import { useState } from "react";
@@ -16,13 +15,12 @@ import { getAgentsByProject } from "@/renderer/lib/placeholders";
 
 import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
 
-import { ProjectDto } from "@/shared/types";
+import { getPageInfo } from "./route-page-info";
 
 import { AgentsSidebar } from "@/domains/agents/components/agents-sidebar";
 import { CreateChannelModal } from "@/domains/projects/components/create-channel-modal";
 import { ProjectNavigation } from "@/domains/projects/components/project-navigation";
 import { useProjectChannels } from "@/domains/projects/hooks/use-project-channels.hook";
-import { useProjects } from "@/domains/projects/hooks/use-projects.hook";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();
@@ -38,77 +36,7 @@ function ProjectLayout() {
     setCreateChannelModalOpen(true);
   };
 
-  // Get page title and info based on current route
-  const getPageInfo = () => {
-    const path = location.pathname;
-
-    if (path.includes("/chat/")) {
-      // Extract channelId from URL: /project/123/chat/456
-      const channelId = path.split("/chat/")[1];
-      const selectedChannel = channels.find((c) => c.id === channelId);
-      return {
-        title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
-        subtitle: selectedChannel?.name || "Canal de chat do projeto",
-        type: "channel" as const,
-        memberCount: 0, // TODO: Implementar contagem de membros
-      };
-    }
-
-    if (path.includes("/agent/")) {
-      // Extract agentId from URL: /project/123/agent/456
-      const agentId = path.split("/agent/")[1];
-      const selectedAgent = agents.find((a) => a.id === agentId);
-      return {
-        title: selectedAgent ? `@${selectedAgent.name}` : "Mensagem Direta",
-        subtitle: selectedAgent
-          ? `Conversa com ${selectedAgent.name}`
-          : "Mensagem direta com agente",
-        type: "channel" as const,
-        memberCount: 1,
-      };
-    }
-
-    if (path.includes("/agents")) {
-      return {
-        title: "Agentes",
-        subtitle: `Gerenciamento de agentes do ${currentProject?.name}`,
-        type: "page" as const,
-      };
-    }
-
-    if (path.includes("/files")) {
-      return {
-        title: "Arquivos",
-        subtitle: "Explorador de arquivos do projeto",
-        type: "page" as const,
-      };
-    }
-
-    if (path.includes("/tasks")) {
-      return {
-        title: "Tarefas",
-        subtitle: "Gerenciamento de tarefas e issues",
-        type: "page" as const,
-      };
-    }
-
-    if (path.includes("/docs")) {
-      return {
-        title: "Documentação",
-        subtitle: "Documentos e wikis do projeto",
-        type: "page" as const,
-      };
-    }
-
-    // Project home
-    return {
-      title: currentProject?.name || "Projeto",
-      subtitle: "Visão geral do projeto",
-      type: "project" as const,
-    };
-  };
-
-  const pageInfo = getPageInfo();
+  const pageInfo = getPageInfo(location.pathname, channels, agents, currentProject);
 
   return (
     <div className="flex h-full">
@@ -177,7 +105,7 @@ export const Route = createFileRoute("/project/$projectId")({
   pendingComponent: ProjectLayoutSkeleton,
   loader: async ({ params }) => {
     const { projectStore } = await import(
-      "@/features/project-management/stores/project.store"
+      "@/domains/projects/stores/project.store"
     );
     const project = await projectStore.getProjectById({ id: params.projectId });
     return {

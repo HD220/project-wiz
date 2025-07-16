@@ -29,7 +29,7 @@ export function ProjectFormFields({
           id="name"
           placeholder="Nome do seu projeto"
           value={name}
-          onChange={(e) => onNameChange(e.target.value)}
+          onChange={(event) => onNameChange(event.target.value)}
           disabled={isSubmitting}
         />
       </div>
@@ -39,7 +39,7 @@ export function ProjectFormFields({
           id="description"
           placeholder="Uma breve descrição do projeto"
           value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
+          onChange={(event) => onDescriptionChange(event.target.value)}
           disabled={isSubmitting}
         />
       </div>
@@ -49,7 +49,7 @@ export function ProjectFormFields({
           id="gitUrl"
           placeholder="https://github.com/user/repo.git"
           value={gitUrl}
-          onChange={(e) => onGitUrlChange(e.target.value)}
+          onChange={(event) => onGitUrlChange(event.target.value)}
           disabled={isSubmitting}
         />
       </div>

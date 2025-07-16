@@ -7,7 +7,7 @@ export class TextGenerationService {
 
   async generateText(
     providerId: string,
-    messages: CoreMessage[],
+    _messages: CoreMessage[],
   ): Promise<string> {
     const model = this.registry.getProvider(providerId);
 

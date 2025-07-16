@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 
 export function getMessageItemStyles(
   mentions?: string[],
-  hasUserMention?: boolean,
 ) {
   return cn(
     "group hover:bg-gray-600/30 p-2 rounded relative",

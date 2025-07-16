@@ -1,0 +1,32 @@
+export interface CalendarClassNames {
+  root?: string;
+  months?: string;
+  month?: string;
+  nav?: string;
+  nav_button?: string;
+  nav_button_previous?: string;
+  nav_button_next?: string;
+  caption?: string;
+  caption_label?: string;
+  caption_dropdowns?: string;
+  dropdown?: string;
+  dropdown_month?: string;
+  dropdown_year?: string;
+  dropdown_icon?: string;
+  table?: string;
+  head?: string;
+  head_row?: string;
+  head_cell?: string;
+  body?: string;
+  row?: string;
+  cell?: string;
+  day?: string;
+  day_range_start?: string;
+  day_range_end?: string;
+  day_range_middle?: string;
+  day_selected?: string;
+  day_today?: string;
+  day_outside?: string;
+  day_disabled?: string;
+  day_hidden?: string;
+}
