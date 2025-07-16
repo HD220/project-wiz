@@ -2,7 +2,7 @@ import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
-} from "@/components/ui/resizable";
+} from "@/components/ui/resizable/resizable-core";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function ProjectNavigationSkeleton() {

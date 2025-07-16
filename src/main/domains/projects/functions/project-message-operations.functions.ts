@@ -44,3 +44,29 @@ function buildAuthorWhereCondition(authorId: string, channelId?: string) {
   }
   return eq(channelMessages.authorId, authorId);
 }
+
+export async function createProjectMessage(
+  data: Partial<ChannelMessageSchema>,
+): Promise<ChannelMessageSchema> {
+  logger.warn("createProjectMessage not implemented yet.");
+  return data as ChannelMessageSchema;
+}
+
+export async function findMessageById(
+  id: string,
+): Promise<ChannelMessageSchema | undefined> {
+  logger.warn("findMessageById not implemented yet.");
+  return undefined;
+}
+
+export async function findMessagesByChannel(
+  channelId: string,
+  limit?: number,
+): Promise<ChannelMessageSchema[]> {
+  logger.warn("findMessagesByChannel not implemented yet.");
+  return [];
+}
+
+export async function deleteMessage(id: string, userId: string): Promise<void> {
+  logger.warn("deleteMessage not implemented yet.");
+}

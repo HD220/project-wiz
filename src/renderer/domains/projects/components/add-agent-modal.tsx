@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
+export function AddAgentModal() {
   return <div>Simplified</div>;
 }

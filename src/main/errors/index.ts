@@ -1,5 +1,7 @@
 // Central export for all error classes
-export { BaseError, type ErrorMetadata, type ErrorContext } from "./base.error";
+export { BaseError } from "./base.error";
+export { type ErrorMetadata } from "./error-metadata.interface";
+export { type ErrorContext } from "./error-context.type";
 export { ApplicationError } from "./application.error";
 export { DomainError } from "./domain.error";
 export { NotFoundError } from "./not-found.error";

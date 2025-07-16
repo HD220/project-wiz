@@ -11,6 +11,6 @@ export const useMessageStore = create<MessageState>(
   (set: (state: MessageState) => void) => ({
     currentConversationMessages: [],
     setCurrentConversationMessages: (messages: MessageDto[]) =>
-      set({ currentConversationMessages: messages }),
+      set((state) => ({ ...state, currentConversationMessages: messages })),
   }),
 );

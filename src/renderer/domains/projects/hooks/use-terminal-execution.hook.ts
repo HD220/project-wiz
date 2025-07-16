@@ -1,4 +1,5 @@
 import type { TerminalLine } from "@/lib/mock-data/types";
+import { Dispatch, SetStateAction } from "react";
 
 interface UseTerminalExecutionProps {
   command: string;
@@ -7,7 +8,7 @@ interface UseTerminalExecutionProps {
   setCommandHistory: (history: string[]) => void;
   setHistoryIndex: (index: number) => void;
   terminalLines: TerminalLine[];
-  setTerminalLines: (lines: TerminalLine[]) => void;
+  setTerminalLines: Dispatch<SetStateAction<TerminalLine[]>>;
   setIsRunning: (running: boolean) => void;
 }
 

@@ -25,24 +25,40 @@ export class ProjectUpdater {
 
   updateDescription(newDescription?: string | null): void {
     const description = new ProjectDescription(newDescription);
-    this.updateField(() => description);
+    this.projectData = new ProjectData(
+      this.projectData.getName(),
+      description,
+      this.projectData.getGitUrl(),
+      this.projectData.getStatus(),
+      this.projectData.getAvatar(),
+      this.projectData.getCreatedAt(),
+      new Date(),
+    );
   }
 
   updateGitUrl(newGitUrl?: string | null): void {
     const gitUrl = new ProjectGitUrl(newGitUrl);
-    this.updateField(undefined, () => gitUrl);
+    this.projectData = new ProjectData(
+      this.projectData.getName(),
+      this.projectData.getDescription(),
+      gitUrl,
+      this.projectData.getStatus(),
+      this.projectData.getAvatar(),
+      this.projectData.getCreatedAt(),
+      new Date(),
+    );
   }
 
   updateStatus(newStatus: string): void {
     const status = new ProjectStatus(newStatus);
-    this.updateField(undefined, undefined, () => status);
-  }
-
-  private updateField(
-    _nameUpdater?: () => ProjectName,
-    _gitUrlUpdater?: () => ProjectGitUrl,
-    _statusUpdater?: () => ProjectStatus,
-  ): void {
-    this.projectData.touchUpdatedAt();
+    this.projectData = new ProjectData(
+      this.projectData.getName(),
+      this.projectData.getDescription(),
+      this.projectData.getGitUrl(),
+      status,
+      this.projectData.getAvatar(),
+      this.projectData.getCreatedAt(),
+      new Date(),
+    );
   }
 }

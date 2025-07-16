@@ -13,8 +13,12 @@ export interface Message {
   metadata?: Record<string, unknown>;
 }
 
+export interface FormattedMessage extends Message {
+  isUser: boolean;
+}
+
 export interface MessageItemProps {
-  message: Message;
+  message: FormattedMessage;
   onEdit: (messageId: string, content: string) => void;
   onDelete: (messageId: string) => void;
   onReply?: (messageId: string) => void;

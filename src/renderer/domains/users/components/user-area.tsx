@@ -4,7 +4,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "../../../components/ui/avatar";
+} from "../../../components/ui/avatar.tsx";
 
 export function UserArea() {
   return (

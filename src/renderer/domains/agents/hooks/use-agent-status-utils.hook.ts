@@ -1,4 +1,4 @@
-import type { Agent } from "../../../../lib/placeholders";
+import type { Agent } from "../../../shared/interfaces/agent.interface";
 
 export function useAgentStatusUtils() {
   const getStatusColor = (status: Agent["status"]) => {

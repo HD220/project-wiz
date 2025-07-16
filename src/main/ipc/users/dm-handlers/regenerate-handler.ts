@@ -1,12 +1,17 @@
 import {
   getConversationMessages,
   processUserMessage,
-} from "../../../domains/users/functions";
+} from "../../../domains/users/functions/direct-message.functions";
 
-export async function handleRegenerateResponse(_, data) {
+import type { DirectMessageDto } from "../../../../shared/types";
+
+export async function handleRegenerateResponse(
+  _: unknown,
+  data: { conversationId: string; userId: string },
+) {
   const messages = await getConversationMessages(data.conversationId, 10, 0);
   const lastUserMessage = messages
-    .filter((msg) => msg.senderType === "user")
+    .filter((msg: DirectMessageDto) => msg.senderType === "user")
     .pop();
 
   if (!lastUserMessage) {

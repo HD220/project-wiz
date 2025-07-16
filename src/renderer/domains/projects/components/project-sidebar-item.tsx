@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/renderer/components/ui/tooltip";
 
 import { cn } from "../../../lib/utils";
 

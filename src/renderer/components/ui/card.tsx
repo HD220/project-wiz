@@ -1,2 +1,20 @@
 // Card component - simplified for Object Calisthenics compliance
-export * from "./card/card-core";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardFooter,
+} from "./card/card-core";
+
+export {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardFooter,
+};

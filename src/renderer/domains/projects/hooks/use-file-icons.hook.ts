@@ -4,7 +4,7 @@ import type { FileTreeItem } from "@/lib/mock-data/types";
 
 export function useFileIcons() {
   const getFileIcon = (file: FileTreeItem) => {
-    if (file.type === "folder") {
+    if (file.type === "directory") {
       return null;
     }
 

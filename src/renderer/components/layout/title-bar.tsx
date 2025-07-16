@@ -1,13 +1,14 @@
 import { Minus, Square, X, Copy } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, CSSProperties } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import {
-  ElectronStyleProps,
-  WindowControls as WindowControlsType,
-} from "@/shared/types/electron.types";
+import { WindowControls as WindowControlsType } from "@/shared/types/electron.types";
+
+interface CustomCSSProperties extends CSSProperties {
+  WebkitAppRegion?: string;
+}
 
 interface TitleBarProps {
   className?: string;
@@ -53,7 +54,7 @@ function WindowControls({ isMaximized, setIsMaximized }: WindowControlsType) {
   return (
     <div
       className="flex items-center flex-none"
-      style={{ WebkitAppRegion: "no-drag" } as ElectronStyleProps}
+      style={{ WebkitAppRegion: "no-drag" } as CustomCSSProperties}
     >
       <Button
         variant="ghost"
@@ -98,7 +99,7 @@ export function TitleBar({ className }: TitleBarProps) {
         "h-6 bg-background border-b border-border flex items-center justify-between select-none",
         className,
       )}
-      style={{ WebkitAppRegion: "drag" } as ElectronStyleProps}
+      style={{ WebkitAppRegion: "drag" } as CustomCSSProperties}
     >
       <div className="h-6 flex-1 justify-between items-center">
         <div className="flex-1" />

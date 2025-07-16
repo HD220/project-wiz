@@ -1,1 +1,1 @@
-export * from "../input-otp.tsx.backup";
+export * from "../input-otp.tsx";

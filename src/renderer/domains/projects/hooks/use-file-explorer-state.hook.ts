@@ -29,7 +29,7 @@ export function useFileExplorerState({
   };
 
   const handleFileClick = (file: FileTreeItem) => {
-    if (file.type === "folder") {
+    if (file.type === "directory") {
       toggleFolder(file.path);
     } else {
       setSelectedPath(file.path);

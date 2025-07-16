@@ -1,7 +1,8 @@
-import { BaseError, ErrorContext } from "./base.error";
+import { BaseError } from "./base.error";
+import { ErrorMetadata } from "./error-metadata.interface";
 
 export class ApplicationError extends BaseError {
-  constructor(message: string, code?: string, context?: ErrorContext) {
+  constructor(message: string, code?: string, context?: ErrorMetadata) {
     super(message, "ApplicationError", {
       code,
       context,
@@ -10,7 +11,7 @@ export class ApplicationError extends BaseError {
 
   static serviceUnavailable(
     serviceName: string,
-    details?: ErrorContext,
+    details?: ErrorMetadata,
   ): ApplicationError {
     return new ApplicationError(
       `Service ${serviceName} is currently unavailable`,
@@ -21,7 +22,7 @@ export class ApplicationError extends BaseError {
 
   static configurationError(
     configKey: string,
-    details?: ErrorContext,
+    details?: ErrorMetadata,
   ): ApplicationError {
     return new ApplicationError(
       `Configuration error for key: ${configKey}`,

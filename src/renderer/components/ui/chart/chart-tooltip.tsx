@@ -50,7 +50,23 @@ export function ChartTooltip({
     return value;
   }, [label, labelFormatter, payload, hideLabel, labelKey, config]);
 
-  return null;
+  return (
+    <ChartTooltipContent
+      active={active}
+      payload={payload}
+      className={className}
+      indicator={indicator}
+      hideLabel={hideLabel}
+      hideIndicator={hideIndicator}
+      label={label}
+      labelFormatter={labelFormatter}
+      labelClassName={labelClassName}
+      formatter={formatter}
+      color={color}
+      nameKey={nameKey}
+      labelKey={labelKey}
+    />
+  );
 }
 
 export function ChartTooltipContent(
@@ -60,6 +76,8 @@ export function ChartTooltipContent(
     hideIndicator?: boolean;
     nameKey?: string;
     labelKey?: string;
+    className?: string;
+    color?: string;
   },
 ) {
   const {
@@ -86,11 +104,15 @@ export function ChartTooltipContent(
   return (
     <div className={cn("rounded-lg border bg-background p-2", className)}>
       <div className="space-y-1">
+        {!hideLabel && tooltipLabel && (
+          <div className={cn("mb-1 text-muted-foreground", labelClassName)}>
+            {tooltipLabel}
+          </div>
+        )}
         {payload.map((item: any, index: number) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
-          const indicatorColor =
-            color || item.payload?.[color || ""] || itemConfig?.color;
+          const indicatorColor = item.color || itemConfig?.color || color;
 
           return (
             <div key={index} className="flex items-center gap-2">

@@ -1,16 +1,14 @@
-import { create, SetState } from "zustand";
+import { create } from "zustand";
 
 import { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
 
-interface ProjectState {
+export interface ProjectState {
   selectedProject: ProjectDto | null;
   setSelectedProject: (project: ProjectDto | null) => void;
 }
 
-export const useProjectStore = create<ProjectState>(
-  (set: SetState<ProjectState>) => ({
-    selectedProject: null,
-    setSelectedProject: (project: ProjectDto | null) =>
-      set({ selectedProject: project }),
-  }),
-);
+export const useProjectStore = create<ProjectState>((set) => ({
+  selectedProject: null,
+  setSelectedProject: (project: ProjectDto | null) =>
+    set({ selectedProject: project }),
+}));

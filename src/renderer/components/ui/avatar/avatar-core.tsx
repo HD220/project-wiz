@@ -1,1 +1,1 @@
-export * from "../avatar.tsx.backup";
+export * from "../avatar.tsx";

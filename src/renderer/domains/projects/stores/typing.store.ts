@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type ChannelTypingInfo = { isTyping: boolean; timestamp: number };
 
-interface TypingState {
+export interface TypingState {
   typingChannels: Record<string, ChannelTypingInfo>;
   setTyping: (channelId: string, isTyping: boolean) => void;
 }

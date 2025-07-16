@@ -1,6 +1,6 @@
 import { KanbanColumnHeader } from "./kanban-column-header";
 import { KanbanEmptyState } from "./kanban-empty-state";
-import { TaskCard } from "./task-card";
+import { SimplifiedComponent } from "./task-card";
 
 import type { Task } from "@/lib/mock-data/types";
 
@@ -31,7 +31,7 @@ export function KanbanColumn({
 
       <div className="space-y-3">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <SimplifiedComponent key={task.id} task={task} />
         ))}
 
         {tasks.length === 0 && (

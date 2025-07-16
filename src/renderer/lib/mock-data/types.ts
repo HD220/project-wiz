@@ -93,6 +93,7 @@ export interface FileTreeItem {
   path: string;
   size?: number;
   modified?: Date;
+  extension?: string;
   children?: FileTreeItem[];
 }
 

@@ -13,7 +13,7 @@ export function FileExplorerItemContent({
     <>
       <span className="flex-1 truncate">{item.name}</span>
 
-      {item.isModified && (
+      {item.modified && (
         <Badge variant="secondary" className="h-4 text-xs">
           M
         </Badge>

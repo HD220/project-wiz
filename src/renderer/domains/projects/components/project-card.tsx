@@ -1,6 +1,10 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/avatar/avatar-core";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/card/card-core";
 
 import type { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
 

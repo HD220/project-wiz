@@ -4,7 +4,6 @@
 export * from "./kanban-board";
 export * from "./kanban-column-header";
 export * from "./kanban-empty-state";
-export * from "./task-card";
 
 // Navigation Components (MIGRATED)
 export * from "./project-navigation";

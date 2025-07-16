@@ -26,7 +26,7 @@ export function AgentsSidebarListRenderer({
             agent={agent}
             projectId={projectId}
             onRemoveAgent={onRemoveAgent}
-            onAgentSelect={onAgentSelect}
+            _onAgentSelect={onAgentSelect}
           />
         ))}
       </div>

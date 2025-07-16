@@ -9,11 +9,11 @@ export async function initializeAppServices(): Promise<void> {
 
 async function loadModules(): Promise<void> {
   const moduleLoader = new ModuleLoader();
-  await moduleLoader.loadModules();
+  await moduleLoader.loadAndInitializeModules();
 }
 
 async function seedDatabase(): Promise<void> {
   const seedService = new SeedService();
-  await seedService.seed();
+  await seedService.runAllSeeds();
   logger.info("Database seeded successfully");
 }

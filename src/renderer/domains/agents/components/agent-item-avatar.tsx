@@ -2,7 +2,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "../../../components/ui/avatar";
+} from "../../../components/ui/avatar/avatar-core";
 import { cn, getAgentStatusColor } from "../../../lib/utils";
 
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";

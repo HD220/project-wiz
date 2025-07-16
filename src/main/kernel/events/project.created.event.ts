@@ -1,4 +1,4 @@
-import { EntityCreatedEvent } from "./base.events";
+import { EntityCreatedEvent } from "./entity-created.event";
 
 export class ProjectCreatedEvent extends EntityCreatedEvent {
   type = "project.created" as const;

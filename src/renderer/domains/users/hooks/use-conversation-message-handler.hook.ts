@@ -1,10 +1,8 @@
 import { useState } from "react";
 
-interface Agent {
-  id: string;
-  name: string;
-  isActive: boolean;
-}
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+
+interface Agent extends AgentDto {}
 
 export function useConversationMessageHandler(
   sendMessage: (message: string) => Promise<void>,

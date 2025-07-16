@@ -37,7 +37,7 @@ export function AddAgentLlmProviderField({
         <SelectContent>
           {llmProviders.map((provider) => (
             <SelectItem key={provider.id} value={provider.id}>
-              {provider.name} ({provider.providerType})
+              {provider.name} ({provider.provider})
             </SelectItem>
           ))}
         </SelectContent>

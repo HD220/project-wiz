@@ -19,7 +19,7 @@ export function AgentsSidebarAgentActions({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(event) => {
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             onRemoveAgent(agentId);
           }}

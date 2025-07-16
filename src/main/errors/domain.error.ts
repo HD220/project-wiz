@@ -1,7 +1,8 @@
-import { BaseError, ErrorContext } from "./base.error";
+import { BaseError } from "./base.error";
+import { ErrorMetadata } from "./error-metadata.interface";
 
 export class DomainError extends BaseError {
-  constructor(message: string, code?: string, context?: ErrorContext) {
+  constructor(message: string, code?: string, context?: ErrorMetadata) {
     super(message, "DomainError", {
       code,
       context,

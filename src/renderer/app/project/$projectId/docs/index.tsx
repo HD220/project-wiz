@@ -7,12 +7,12 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { DocTree } from "@/domains/projects/components/docs/doc-tree";
+import { DocViewer } from "@/domains/projects/components/docs/doc-viewer";
 import {
-  DocTree,
-  DocViewer,
   mockDocs,
   type DocFile,
-} from "@/domains/projects/components";
+} from "@/domains/projects/components/docs/mock-docs-data";
 
 export const Route = createFileRoute("/project/$projectId/docs/")({
   component: ProjectDocsPage,
@@ -36,10 +36,7 @@ export function ProjectDocsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <PageTitle
-        title="Documentação"
-        subtitle="Documentação do projeto e guias"
-      />
+      <PageTitle title="Documentação" />
 
       <div className="flex-1 p-6">
         <ResizablePanelGroup direction="horizontal" className="h-full">

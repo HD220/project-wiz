@@ -1,4 +1,4 @@
-import type { Agent } from "../../../../lib/placeholders";
+import type { Agent } from "../../../lib/placeholders";
 
 export function calculateAgentStats(agents: Agent[]) {
   return {

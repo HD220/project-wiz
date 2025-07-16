@@ -1,4 +1,4 @@
-import { EntityUpdatedEvent } from "./base.events";
+import { EntityUpdatedEvent } from "./entity.events";
 
 export class ProjectStatusChangedEvent extends EntityUpdatedEvent {
   type = "project.status.changed" as const;

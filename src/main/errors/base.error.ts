@@ -18,7 +18,7 @@ export abstract class BaseError extends Error {
       timestamp: this.timestamp,
     };
 
-    setupErrorPrototype(this, new.target as new (...args: unknown[]) => Error);
+    setupErrorPrototype(this, new.target as any);
   }
 
   toJSON(): {

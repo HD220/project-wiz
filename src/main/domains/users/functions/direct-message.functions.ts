@@ -1,3 +1,3 @@
-export function placeholder() {
+export function directMessagePlaceholder() {
   return "simplified";
 }

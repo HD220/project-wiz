@@ -1,10 +1,15 @@
-import { EventBus, IEvent, EventListener } from "./event-bus";
+import {
+  EventBus,
+  IEvent,
+  EventListener,
+  EventBusSingleton,
+} from "./event-bus";
 
 export class ModuleEvents {
   eventBus: EventBus;
 
   constructor() {
-    this.eventBus = EventBus.getInstance();
+    this.eventBus = EventBusSingleton.getInstance();
   }
 
   publishEvent<T extends IEvent>(event: T): Promise<void> {

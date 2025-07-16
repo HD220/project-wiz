@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { channelService } from "../services/channel.service";
 
 import type {
-  _ChannelDto,
+  ChannelDto,
   CreateChannelDto,
   UpdateChannelDto,
   ChannelFilterDto,

@@ -24,11 +24,11 @@ export function useChannelChat(props: UseChannelChatProps) {
   const { isTyping, setTyping } = useTyping(props.channelId);
   const config = useAiChatConfig(props);
   const utilities = useAiChatUtilities(props.channelId, props.llmProviderId);
-  const sendHook = useChannelChatSend(
-    props,
-    messagesHook.addOptimisticMessage,
-    messagesHook.clearOptimisticMessages,
-  );
+  const sendHook = useChannelChatSend({
+    ...props,
+    addOptimisticMessage: messagesHook.addOptimisticMessage,
+    clearOptimisticMessages: messagesHook.clearOptimisticMessages,
+  });
   const sendMessage = useChannelChatSendMessage(
     sendHook,
     messagesHook,

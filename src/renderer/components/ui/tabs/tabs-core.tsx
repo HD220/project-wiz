@@ -1,1 +1,1 @@
-export * from "../tabs.tsx.backup";
+export * from "../tabs.tsx";

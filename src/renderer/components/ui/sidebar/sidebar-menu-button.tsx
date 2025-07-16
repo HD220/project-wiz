@@ -1,11 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import * as TooltipComponents from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
 
@@ -36,7 +32,7 @@ interface SidebarMenuButtonProps
     VariantProps<typeof sidebarMenuButtonVariants> {
   asChild?: boolean;
   isActive?: boolean;
-  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+  tooltip?: string | React.ComponentProps<typeof TooltipComponents.TooltipContent>;
 }
 
 export function SidebarMenuButton({
@@ -70,9 +66,9 @@ export function SidebarMenuButton({
     typeof tooltip === "string" ? { children: tooltip } : tooltip;
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
+    <TooltipComponents.Tooltip>
+      <TooltipComponents.TooltipTrigger asChild>{button}</TooltipComponents.TooltipTrigger>
+      <TooltipComponents.TooltipContent
         side="right"
         align="center"
         hidden={state !== "collapsed" || isMobile}

@@ -30,7 +30,7 @@ export function AiChatProviderSelector({
       <SelectContent>
         {providers.map((provider) => (
           <SelectItem key={provider.id} value={provider.id}>
-            {provider.name} ({provider.type})
+            {provider.name} ({provider.provider})
           </SelectItem>
         ))}
       </SelectContent>

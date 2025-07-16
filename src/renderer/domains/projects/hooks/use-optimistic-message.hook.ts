@@ -21,6 +21,7 @@ export function useOptimisticMessage(props: UseOptimisticMessageProps) {
       updatedAt: new Date(),
       isEdited: false,
       metadata: {},
+      isOptimistic: true as const,
     }),
     [props],
   );

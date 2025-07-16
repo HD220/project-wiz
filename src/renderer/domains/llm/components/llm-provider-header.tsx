@@ -2,7 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Zap } from "lucide-react";
 
 import { Button } from "../../../components/ui/button";
-import { CardHeader, CardTitle } from "../../../components/ui/card";
+import {
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card/card-core";
 
 export function LlmProviderHeader() {
   return (

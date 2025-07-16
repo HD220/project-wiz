@@ -1,1 +1,1 @@
-export * from "../toggle-group.tsx.backup";
+export * from "../toggle-group.tsx";

@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
+export function ConversationMessageInput() {
   return <div>Simplified</div>;
 }

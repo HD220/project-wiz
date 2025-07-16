@@ -3,7 +3,7 @@ import { Users, Activity, Play, Settings } from "lucide-react";
 import { calculateAgentStats } from "./agent-dashboard-stats-calculator";
 import { StatsCard } from "./agent-dashboard-stats-card";
 
-import type { Agent } from "../../../../lib/placeholders";
+import type { AgentDto as Agent } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AgentDashboardStatsProps {
   agents: Agent[];
@@ -17,24 +17,24 @@ export function AgentDashboardStats({ agents }: AgentDashboardStatsProps) {
       <StatsCard
         title="Total de Agentes"
         value={stats.totalAgents}
-        icon={Users}
+        Icon={Users}
       />
       <StatsCard
         title="Online"
         value={stats.onlineAgents}
-        icon={Activity}
+        Icon={Activity}
         className="text-green-600"
       />
       <StatsCard
         title="Executando"
         value={stats.executingAgents}
-        icon={Play}
+        Icon={Play}
         className="text-blue-600"
       />
       <StatsCard
         title="Tipos Únicos"
         value={stats.uniqueTypes}
-        icon={Settings}
+        Icon={Settings}
       />
     </div>
   );

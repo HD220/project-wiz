@@ -24,7 +24,10 @@ export function useRequestDataBuilder(props: UseRequestDataBuilderProps) {
       return {
         content: content.trim(),
         channelId: props.channelId,
-        llmProviderId: customConfig?.llmProviderId || props.llmProviderId!,
+        llmProviderId:
+          customConfig?.llmProviderId ||
+          props.llmProviderId ||
+          currentConfigValue.llmProviderId,
         authorId: props.authorId,
         authorName: props.authorName,
         aiName: props.aiName,

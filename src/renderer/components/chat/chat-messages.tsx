@@ -1,5 +1,4 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Message } from "@/lib/placeholders";
 
 import type { ChannelMessageDto } from "@/shared/types";
 import type { MessageType } from "@/shared/types/message.types";
@@ -10,7 +9,7 @@ import { ChatLoadingState } from "./chat-loading-state";
 import { MessageItem } from "./message-item";
 
 interface ChatMessagesProps {
-  messages: (ChannelMessageDto | Message)[];
+  messages: ChannelMessageDto[];
   displayName: string;
   isAgentChat: boolean;
   isLoading: boolean;
@@ -53,30 +52,6 @@ function renderChannelMessage(
   );
 }
 
-function renderLegacyMessage(legacyMsg: Message) {
-  return (
-    <MessageItem
-      key={legacyMsg.id}
-      message={{
-        id: legacyMsg.id,
-        content: legacyMsg.content,
-        senderId: legacyMsg.authorId,
-        senderName: legacyMsg.authorName,
-        senderType: legacyMsg.authorId.startsWith("agent-") ? "agent" : "user",
-        messageType:
-          legacyMsg.type === "code" ? "text" : (legacyMsg.type as MessageType),
-        timestamp: legacyMsg.timestamp,
-        isEdited: legacyMsg.edited || false,
-        mentions: legacyMsg.mentions || [],
-      }}
-      onEdit={(id, content) => console.log("Edit:", id, content)}
-      onDelete={(id) => console.log("Delete:", id)}
-      onReply={(id) => console.log("Reply:", id)}
-      showActions={true}
-    />
-  );
-}
-
 export function ChatMessages(props: ChatMessagesProps) {
   const {
     messages,
@@ -109,17 +84,7 @@ export function ChatMessages(props: ChatMessagesProps) {
 
   const renderMessages = () => {
     return messages.map((msg) => {
-      const isChannelMessage = "channelId" in msg;
-
-      if (isChannelMessage) {
-        return renderChannelMessage(
-          msg as ChannelMessageDto,
-          onEditMessage,
-          onDeleteMessage,
-        );
-      }
-
-      return renderLegacyMessage(msg as Message);
+      return renderChannelMessage(msg, onEditMessage, onDeleteMessage);
     });
   };
 

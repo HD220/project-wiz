@@ -9,11 +9,7 @@ import {
 } from "./use-messages-queries.hook";
 
 import type { CreateMessageDto } from "../../../../shared/types/domains/users/message.types";
-
-interface MessageState {
-  currentConversationMessages: CreateMessageDto[];
-  setCurrentConversationMessages: (messages: CreateMessageDto[]) => void;
-}
+import type { MessageState } from "../stores/message.store";
 
 export function useMessages(
   conversationId?: string,
@@ -44,6 +40,7 @@ export function useMessages(
     messages: messagesQuery.data || [],
     isLoading: messagesQuery.isLoading,
     error: messagesQuery.error?.message || null,
+    loadMessages: messagesQuery.refetch,
 
     createMessage,
     clearMessages,

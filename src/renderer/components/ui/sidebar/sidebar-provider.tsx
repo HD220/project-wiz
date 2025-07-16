@@ -1,5 +1,4 @@
 import * as React from "react";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile.hook";
 import { cn } from "@/lib/utils";
 import { SidebarContext, SidebarContextProps } from "./sidebar-context";

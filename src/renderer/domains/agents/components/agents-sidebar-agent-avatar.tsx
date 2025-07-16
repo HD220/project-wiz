@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";

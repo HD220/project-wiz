@@ -74,7 +74,8 @@ export async function handleUpdateUserProfile(
   _: IpcMainInvokeEvent,
   data: UpdateProfileData,
 ) {
-  await updateUserProfile(data.id, data);
+  const { id, ...profileData } = data;
+  await updateUserProfile(id, profileData);
 }
 
 export async function handleUpdateUserSettings(

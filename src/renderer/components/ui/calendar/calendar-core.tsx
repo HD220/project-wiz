@@ -44,13 +44,29 @@ export function Calendar(
       classNames={getCalendarClassNames(
         buttonVariant,
         captionLayout,
-        classNames,
+        classNames || {},
       )}
       components={{
-        Root: CalendarRoot,
-        Chevron: CalendarChevron,
+        Root: ({ className, rootRef, ...rootProps }) => (
+          <CalendarRoot
+            className={className || ""}
+            rootRef={rootRef}
+            {...rootProps}
+          />
+        ),
+        Chevron: ({ className, orientation, ...chevronProps }) => (
+          <CalendarChevron
+            className={className || ""}
+            orientation={orientation || "right"}
+            {...chevronProps}
+          />
+        ),
         DayButton: CalendarDayButton,
-        WeekNumber: CalendarWeekNumber,
+        WeekNumber: ({ children, week, ...weekNumberProps }) => (
+          <CalendarWeekNumber week={week} {...weekNumberProps}>
+            {children || null}
+          </CalendarWeekNumber>
+        ),
         ...components,
       }}
       {...rest}

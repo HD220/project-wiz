@@ -2,11 +2,7 @@ import { getLogger } from "../infrastructure/logger";
 
 import { registerAgentHandlers } from "./agents.handlers";
 import { registerLlmProviderHandlers } from "./llm.handlers";
-import {
-  registerProjectHandlers,
-  registerChannelHandlers,
-  registerChannelMessageHandlers,
-} from "./projects.handlers";
+import { registerProjectsHandlers } from "./projects.handlers";
 import {
   registerUserHandlers,
   registerDirectMessageHandlers,
@@ -20,9 +16,7 @@ export function registerDomainHandlers(): void {
   // Register all domain handlers
   registerAgentHandlers();
   registerLlmProviderHandlers();
-  registerProjectHandlers();
-  registerChannelHandlers();
-  registerChannelMessageHandlers();
+  registerProjectsHandlers();
   registerUserHandlers();
   registerDirectMessageHandlers();
 

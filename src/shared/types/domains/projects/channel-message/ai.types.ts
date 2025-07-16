@@ -31,7 +31,7 @@ export interface AIRegenerateMessageRequestDto {
 
 export interface AIChatConfigDto {
   channelId: string;
-  llmProviderId: string;
+  llmProviderId?: string;
   systemPrompt?: string;
   temperature?: number;
   maxTokens?: number;

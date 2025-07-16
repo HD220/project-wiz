@@ -52,6 +52,7 @@ export function ChartLegend(
     payload,
     verticalAlign = "bottom",
     nameKey,
+    ref, // Destructure ref to omit it from rest
     ...rest
   } = props;
   const { config } = useChart();
@@ -91,6 +92,7 @@ export function ChartLegendContent(
     payload,
     verticalAlign = "bottom",
     nameKey,
+    ref, // Destructure ref to omit it from rest
     ...rest
   } = props;
   const { config } = useChart();

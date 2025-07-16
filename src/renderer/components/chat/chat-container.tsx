@@ -18,7 +18,9 @@ export function ChatContainer(props: ChatContainerProps) {
 
   const channelMessagesHook = useChannelMessagesById(channelId || "");
 
-  const messages = channelId ? channelMessagesHook.messages || [] : [];
+  const messages: ChannelMessageDto[] = channelId
+    ? channelMessagesHook.messages || []
+    : [];
   const displayName = channelName || agentName || "Chat";
   const isAgentChat = !!agentId;
   const isLoading = channelId ? channelMessagesHook.isLoading || false : false;

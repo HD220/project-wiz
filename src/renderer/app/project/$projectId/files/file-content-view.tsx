@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card/card-core";
 import { FileTreeItem } from "@/lib/placeholders";
 
 import { getFilePreview } from "./file-preview-utils";

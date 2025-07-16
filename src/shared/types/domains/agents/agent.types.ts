@@ -11,6 +11,10 @@ export interface AgentDto {
   isDefault: boolean;
   createdAt: Date;
   updatedAt: Date;
+  status: string;
+  isExecuting: boolean;
+  currentTask?: string;
+  avatar?: string;
 }
 
 export interface CreateAgentDto {
@@ -19,10 +23,14 @@ export interface CreateAgentDto {
   goal: string;
   backstory: string;
   llmProviderId: string;
+  systemPrompt?: string;
   temperature?: number;
   maxTokens?: number;
   isActive?: boolean;
   isDefault?: boolean;
+  verbose?: boolean;
+  allowDelegation?: boolean;
+  maxIterations?: number;
 }
 
 export interface UpdateAgentDto {

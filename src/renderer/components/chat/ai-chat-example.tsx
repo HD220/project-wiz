@@ -7,7 +7,7 @@ import {
 } from "@/domains/projects/components";
 import { useChannelChat } from "@/domains/projects/hooks";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card/card-core";
 
 interface AIChatExampleProps {
   channelId: string;
@@ -20,7 +20,11 @@ export function AIChatExample(props: AIChatExampleProps) {
   const [selectedLlmProvider, setSelectedLlmProvider] = useState<string>("");
   const [messageInput, setMessageInput] = useState("");
 
-  const { sendMessage, isLoading, error } = useChannelChat(channelId);
+  const { sendMessage, isLoading, error } = useChannelChat({
+    channelId,
+    authorId,
+    authorName,
+  });
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedLlmProvider) return;
@@ -49,7 +53,7 @@ export function AIChatExample(props: AIChatExampleProps) {
           onProviderChange={setSelectedLlmProvider}
         />
 
-        <AiChatStatus isLoading={isLoading} error={error} />
+        <AiChatStatus isLoading={isLoading} error={error?.message} />
 
         <AiChatInput
           value={messageInput}

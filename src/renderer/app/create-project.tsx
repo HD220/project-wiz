@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { CreateProjectModal } from "@/domains/projects/components";
+import { CreateProjectForm } from "@/domains/projects/components";
 
 export function CreateProjectPage() {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export function CreateProjectPage() {
     }
   };
 
-  return <CreateProjectModal open={true} onOpenChange={handleOpenChange} />;
+  return <CreateProjectForm open={true} onOpenChange={handleOpenChange} />;
 }
 
 export const Route = createFileRoute("/create-project")({

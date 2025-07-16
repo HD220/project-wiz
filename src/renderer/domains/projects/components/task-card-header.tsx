@@ -1,19 +1,28 @@
 import { Badge } from "@/components/ui/badge";
-import { CardHeader, CardTitle } from "@/components/ui/card";
+import { CardHeader, CardTitle } from "@/components/ui/card/card-core";
 
 import type { Task } from "@/lib/mock-data/types";
 
 interface TaskCardHeaderProps {
   task: Task;
-  getPriorityColor: (priority: Task["priority"]) => string;
   onTaskClick: () => void;
 }
 
-export function TaskCardHeader({
-  task,
-  getPriorityColor,
-  onTaskClick,
-}: TaskCardHeaderProps) {
+export function TaskCardHeader({ task, onTaskClick }: TaskCardHeaderProps) {
+  const getPriorityVariant = (priority: Task["priority"]) => {
+    switch (priority) {
+      case "High":
+        return "destructive";
+      case "Urgent":
+        return "outline";
+      case "Medium":
+        return "secondary";
+      case "Low":
+      default:
+        return "default";
+    }
+  };
+
   return (
     <CardHeader className="pb-3">
       <div className="flex items-start justify-between gap-2">
@@ -26,7 +35,7 @@ export function TaskCardHeader({
           </CardTitle>
         </button>
         <Badge
-          variant={getPriorityColor(task.priority)}
+          variant={getPriorityVariant(task.priority)}
           className="text-xs shrink-0"
         >
           {task.priority}

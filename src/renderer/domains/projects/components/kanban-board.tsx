@@ -1,4 +1,4 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
+import ScrollArea from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 import { KanbanGrid } from "./kanban-grid";

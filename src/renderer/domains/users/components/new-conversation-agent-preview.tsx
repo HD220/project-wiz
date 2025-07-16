@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/components/ui/card/card-core";
 
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 

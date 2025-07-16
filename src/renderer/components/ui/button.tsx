@@ -1,2 +1,2 @@
-export { Button } from "./button-component";
-export { buttonVariants } from "./button-variants";
+export { Button } from "./button/button-component";
+export { buttonVariants } from "./button/button-variants";

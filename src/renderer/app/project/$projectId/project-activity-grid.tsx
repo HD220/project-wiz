@@ -1,7 +1,12 @@
 import { MessageSquare, FileText, GitBranch } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card/card-core";
 
 export function ProjectActivityGrid() {
   return (

@@ -88,7 +88,7 @@ export const CodeComponents = {
 };
 
 export const LinkComponents = {
-  a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
+  a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
     <a
       href={href}
       className="text-primary hover:text-primary/80 underline"

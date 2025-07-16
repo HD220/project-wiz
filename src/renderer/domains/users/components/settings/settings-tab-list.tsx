@@ -1,6 +1,6 @@
 import { User, Zap, Palette, Bell, Shield, Database } from "lucide-react";
 
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger } from "@/renderer/components/ui/tabs";
 
 export function SettingsTabList() {
   return (

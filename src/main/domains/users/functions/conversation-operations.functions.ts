@@ -6,7 +6,7 @@ import {
   ConversationSchema,
 } from "../../../persistence/schemas";
 
-import { createConversation } from "./conversation-crud.functions";
+import { createConversation } from "./conversation-crud.functions.js";
 
 import type { ConversationDto } from "../../../../shared/types";
 
@@ -49,4 +49,24 @@ export async function findOrCreateDirectMessage(
   }
 
   return await createConversation({ participants });
+}
+
+export async function getConversationMessages(
+  conversationId: string,
+  limit: number,
+  offset: number,
+) {
+  // Placeholder implementation
+  console.warn("getConversationMessages not implemented.");
+  return [];
+}
+
+export async function processUserMessage(
+  conversationId: string,
+  content: string,
+  userId: string,
+) {
+  // Placeholder implementation
+  console.warn("processUserMessage not implemented.");
+  return {};
 }

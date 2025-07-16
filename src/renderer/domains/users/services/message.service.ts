@@ -17,7 +17,7 @@ export const messageService = {
     );
 
     return messages.sort(
-      (a, b) =>
+      (a: MessageDto, b: MessageDto) =>
         new Date(a.timestamp || a.createdAt).getTime() -
         new Date(b.timestamp || b.createdAt).getTime(),
     );

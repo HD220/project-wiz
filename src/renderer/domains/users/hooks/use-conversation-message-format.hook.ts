@@ -1,4 +1,4 @@
-import type { MessageDto } from "../../../../shared/types/domains/users/user.types";
+import type { MessageDto } from "../../../../shared/types/domains/users/message-dto.type";
 
 export function useConversationMessageFormat(agentName: string) {
   const convertToMessageFormat = (msg: MessageDto) => ({

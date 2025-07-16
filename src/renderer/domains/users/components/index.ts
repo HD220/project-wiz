@@ -8,7 +8,7 @@ export { ConversationEmptyState } from "./conversation-empty-state";
 export { ConversationErrorDisplay } from "./conversation-error-display";
 export { ConversationHeader } from "./conversation-header";
 export { ConversationList } from "./conversation-list";
-export { ConversationListEmpty } from "./conversation-list-empty-state";
+export { ConversationListEmptyState } from "./conversation-list-empty-state";
 export { ConversationListItem } from "./conversation-list-item";
 export { ConversationListSkeleton } from "./conversation-list-skeleton";
 export { ConversationMessageInput } from "./conversation-message-input";

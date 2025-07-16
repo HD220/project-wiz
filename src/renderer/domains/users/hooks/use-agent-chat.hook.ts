@@ -1,18 +1,14 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useConversation } from "./use-conversations.hook";
 import { useMessages } from "./use-messages.hook";
 
-import type { ConversationDto } from "../../../../shared/types/domains/users/message.types";
+import type { ConversationDto } from "../../../../shared/types/domains/users/conversation-dto.type";
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface UseAgentChatProps {
   conversationId: string;
   conversation?: ConversationDto;
-}
-
-interface AgentInfo {
-  id: string;
-  name: string;
 }
 
 export function useAgentChat({
@@ -21,12 +17,17 @@ export function useAgentChat({
 }: UseAgentChatProps) {
   const messagesHook = useMessages(conversationId);
   const conversationHook = useConversation(conversationId);
+  const [isTyping, setIsTyping] = useState(false); // Placeholder for isTyping
 
   const currentConversation = conversation || conversationHook.conversation;
 
-  const agent = useMemo((): AgentInfo => {
+  const agent = useMemo((): AgentDto => {
     if (!currentConversation) {
-      return { id: "unknown", name: "AI Assistant" };
+      return {
+        id: "unknown",
+        name: "AI Assistant",
+        isActive: true,
+      } as AgentDto; // Default values, adjust as needed
     }
 
     const participantId = currentConversation.participants.find(
@@ -34,13 +35,20 @@ export function useAgentChat({
     );
 
     if (!participantId) {
-      return { id: "unknown", name: "AI Assistant" };
+      return {
+        id: "unknown",
+        name: "AI Assistant",
+        isActive: true,
+      } as AgentDto; // Default values, adjust as needed
     }
 
+    // This part needs to fetch the actual AgentDto based on participantId
+    // For now, returning a partial AgentDto
     return {
       id: participantId,
       name: participantId === "Leo" ? "Leo" : "AI Assistant",
-    };
+      isActive: true, // Placeholder
+    } as AgentDto;
   }, [currentConversation]);
 
   const validateAgent = useCallback(async (): Promise<boolean> => {
@@ -62,9 +70,11 @@ export function useAgentChat({
   return {
     ...messagesHook,
     agent,
-    fullAgent: agent,
+    fullAgent: agent, // fullAgent is now AgentDto
     validateAgent,
     regenerateLastResponse,
     regenerateLastMessage: regenerateLastResponse,
+    isTyping,
+    sendMessage: messagesHook.createMessage, // sendMessage is createMessage from messagesHook
   };
 }

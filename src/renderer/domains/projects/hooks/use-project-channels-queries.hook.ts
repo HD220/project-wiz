@@ -47,8 +47,8 @@ export function useProjectChannelsQueries(projectId: string) {
     generalChannel,
     isLoading: channelsQuery.isLoading,
     error: channelsQuery.error?.message || null,
-    createChannel: createMutation.mutate,
-    createDefaultChannel: createDefaultMutation.mutate,
+    createChannel: createMutation.mutateAsync,
+    createDefaultChannel: createDefaultMutation.mutateAsync,
     refetch: channelsQuery.refetch,
   };
 }

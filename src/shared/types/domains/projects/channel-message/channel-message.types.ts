@@ -1,14 +1,15 @@
 export interface ChannelMessage {
   id: string;
+  content: string;
   channelId: string;
   authorId: string;
   authorName: string;
-  content: string;
+  type: string;
+  metadata?: ChannelMessageMetadata;
+  isEdited: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
-
-export type ChannelMessageDto = ChannelMessage;
 
 export interface ChannelMessagePaginationDto {
   data: ChannelMessage[];
@@ -16,3 +17,5 @@ export interface ChannelMessagePaginationDto {
   limit: number;
   offset: number;
 }
+
+export interface ChannelMessageFilterDto {}

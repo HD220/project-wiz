@@ -36,15 +36,10 @@ export function useCreateConversationMutation() {
   });
 }
 
-interface ConversationState {
-  selectedConversation: string | null;
-  setSelectedConversation: (conversation: string | null) => void;
-}
-
 export function useFindOrCreateConversationMutation() {
   const queryClient = useQueryClient();
   const setSelectedConversation = useConversationStore(
-    (state: ConversationState) => state.setSelectedConversation,
+    (state) => state.setSelectedConversation,
   );
 
   return useMutation({
@@ -52,7 +47,7 @@ export function useFindOrCreateConversationMutation() {
       conversationService.findOrCreate(participants),
     onSuccess: (conversation) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      setSelectedConversation(conversation);
+      setSelectedConversation(conversation.id);
     },
   });
 }

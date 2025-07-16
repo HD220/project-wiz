@@ -6,7 +6,14 @@ import {
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export function CalendarRoot({ className, rootRef, ...props }) {
+export function CalendarRoot({
+  className,
+  rootRef,
+  ...props
+}: {
+  className?: string;
+  rootRef?: React.Ref<HTMLDivElement>;
+}) {
   return (
     <div
       data-slot="calendar"
@@ -17,7 +24,14 @@ export function CalendarRoot({ className, rootRef, ...props }) {
   );
 }
 
-export function CalendarChevron({ className, orientation, ...props }) {
+export function CalendarChevron({
+  className,
+  orientation,
+  ...props
+}: {
+  className?: string;
+  orientation?: "left" | "right";
+}) {
   if (orientation === "left") {
     return <ChevronLeftIcon className={cn("size-4", className)} {...props} />;
   }
@@ -29,7 +43,12 @@ export function CalendarChevron({ className, orientation, ...props }) {
   return <ChevronDownIcon className={cn("size-4", className)} {...props} />;
 }
 
-export function CalendarWeekNumber({ children, ...props }) {
+export function CalendarWeekNumber({
+  children,
+  ...props
+}: {
+  children?: React.ReactNode;
+}) {
   return (
     <td {...props}>
       <div className="flex size-(--cell-size) items-center justify-center text-center">

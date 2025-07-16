@@ -23,9 +23,9 @@ export function AddAgentIterationsField({
         type="number"
         min="1"
         max="50"
-        value={formData.maxIterations}
+        value={(formData as any).maxIterations}
         onChange={(event) =>
-          updateField("maxIterations", parseInt(event.target.value))
+          updateField("maxIterations", parseInt(event.target.value) as any)
         }
       />
     </div>

@@ -1,1 +1,1 @@
-export * from "../alert.tsx.backup";
+export * from "../alert.tsx";

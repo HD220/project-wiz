@@ -6,16 +6,37 @@
 > project-wiz@1.0.0 lint:check
 > eslint --ext .ts,.tsx .
 
-(node:30617) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/d/Documentos/Pessoal/Github/project-wiz/eslint.config.js?mtime=1752533405047 is not specified and it doesn't parse as CommonJS.
+(node:45611) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///mnt/d/Documentos/Pessoal/Github/project-wiz/eslint.config.js?mtime=1752533405047 is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /mnt/d/Documentos/Pessoal/Github/project-wiz/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/users/functions/user-crud.functions.ts
+  2:1  warning  There should be at least one empty line between import groups                                         import/order
+  3:1  warning  There should be at least one empty line between import groups                                         import/order
+  3:1  warning  `drizzle-orm` import should occur before import of `../../../infrastructure/database`                 import/order
+  5:1  warning  `../entities/user-preferences.entity` import should occur before import of `../entities/user.entity`  import/order
+  7:1  warning  There should be at least one empty line between import groups                                         import/order
+  8:1  warning  `zod` import should occur before import of `../../../infrastructure/database`                         import/order
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/ipc/users/user-handlers.ts
+  1:1  warning  There should be at least one empty line between import groups  import/order
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/create-channel.tsx
+   8:9  warning  'projectId' is assigned a value but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  10:9  warning  'handleOpenChange' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/components/agent-dashboard-stats-card.tsx
   12:43  warning  Parameter name `Icon` must match one of the following formats: camelCase  @typescript-eslint/naming-convention
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/project-sidebar-item.tsx
   10:10  warning  'cn' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-project-channels-queries.hook.ts
+  6:3  warning  'ChannelDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/hooks/use-terminal-history.hook.ts
+  10:3  warning  'command' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/services/channel-message.service.ts
   2:10  warning  'ChannelMessage' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
@@ -51,7 +72,8 @@ To eliminate this warning, add "type": "module" to /mnt/d/Documentos/Pessoal/Git
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/services/message.service.ts
   4:3  warning  'MessageFilterDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
 
-✖ 14 problems (0 errors, 14 warnings)
+✖ 25 problems (0 errors, 25 warnings)
+  0 errors and 7 warnings potentially fixable with the `--fix` option.
 
 
 > project-wiz@1.0.0 type-check
@@ -92,9 +114,17 @@ src/main/domains/projects/value-objects/index.ts(24,3): error TS2305: Module '".
 src/main/domains/projects/value-objects/index.ts(25,3): error TS2305: Module '"./channel-name-validation.functions"' has no exported member 'isValidChannelName'.
 src/main/domains/projects/value-objects/index.ts(26,3): error TS2305: Module '"./channel-name-validation.functions"' has no exported member 'normalizeChannelName'.
 src/main/domains/users/functions/conversation-operations.functions.ts(9,10): error TS2305: Module '"./conversation-crud.functions"' has no exported member 'createConversation'.
-src/main/domains/users/functions/index.ts(2,1): error TS2308: Module "./user-crud.functions" has already exported a member named 'placeholder'. Consider explicitly re-exporting to resolve the ambiguity.
-src/main/domains/users/functions/index.ts(3,1): error TS2308: Module "./user-crud.functions" has already exported a member named 'placeholder'. Consider explicitly re-exporting to resolve the ambiguity.
-src/main/domains/users/functions/index.ts(4,1): error TS2308: Module "./user-crud.functions" has already exported a member named 'placeholder'. Consider explicitly re-exporting to resolve the ambiguity.
+src/main/domains/users/functions/index.ts(3,1): error TS2308: Module "./user-operations.functions" has already exported a member named 'placeholder'. Consider explicitly re-exporting to resolve the ambiguity.
+src/main/domains/users/functions/index.ts(4,1): error TS2308: Module "./user-operations.functions" has already exported a member named 'placeholder'. Consider explicitly re-exporting to resolve the ambiguity.
+src/main/domains/users/functions/user-crud.functions.ts(2,10): error TS2305: Module '"../../../persistence/schemas"' has no exported member 'usersTable'.
+src/main/domains/users/functions/user-crud.functions.ts(60,33): error TS2339: Property 'create' does not exist on type 'typeof UserIdentity'.
+src/main/domains/users/functions/user-crud.functions.ts(61,33): error TS2339: Property 'create' does not exist on type 'typeof UserSettings'.
+src/main/domains/users/functions/user-crud.functions.ts(62,15): error TS2339: Property 'create' does not exist on type 'typeof User'.
+src/main/domains/users/functions/user-crud.functions.ts(75,33): error TS2339: Property 'create' does not exist on type 'typeof UserIdentity'.
+src/main/domains/users/functions/user-crud.functions.ts(76,33): error TS2339: Property 'create' does not exist on type 'typeof UserSettings'.
+src/main/domains/users/functions/user-crud.functions.ts(77,15): error TS2339: Property 'create' does not exist on type 'typeof User'.
+src/main/domains/users/functions/user-crud.functions.ts(118,33): error TS2339: Property 'create' does not exist on type 'typeof UserIdentity'.
+src/main/domains/users/functions/user-crud.functions.ts(120,26): error TS2339: Property 'create' does not exist on type 'typeof UserPreferences'.
 src/main/errors/application.error.ts(1,21): error TS2305: Module '"./base.error"' has no exported member 'ErrorContext'.
 src/main/errors/base.error.ts(21,31): error TS2352: Conversion of type 'typeof BaseError' to type 'new (...args: unknown[]) => Error' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
   Cannot assign an abstract constructor type to a non-abstract constructor type.
@@ -166,24 +196,6 @@ src/main/ipc/users/dm-handlers/regenerate-handler.ts(3,3): error TS2305: Module 
 src/main/ipc/users/dm-handlers/regenerate-handler.ts(6,48): error TS7006: Parameter '_' implicitly has an 'any' type.
 src/main/ipc/users/dm-handlers/regenerate-handler.ts(6,51): error TS7006: Parameter 'data' implicitly has an 'any' type.
 src/main/ipc/users/dm-handlers/regenerate-handler.ts(9,14): error TS7006: Parameter 'msg' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(2,3): error TS2305: Module '"../../domains/users/functions"' has no exported member 'createUser'.
-src/main/ipc/users/user-handlers.ts(3,3): error TS2305: Module '"../../domains/users/functions"' has no exported member 'findUserById'.
-src/main/ipc/users/user-handlers.ts(4,3): error TS2305: Module '"../../domains/users/functions"' has no exported member 'updateUserProfile'.
-src/main/ipc/users/user-handlers.ts(5,3): error TS2305: Module '"../../domains/users/functions"' has no exported member 'updateUserSettings'.
-src/main/ipc/users/user-handlers.ts(6,3): error TS2305: Module '"../../domains/users/functions"' has no exported member 'getUserPreferences'.
-src/main/ipc/users/user-handlers.ts(7,3): error TS2305: Module '"../../domains/users/functions"' has no exported member 'deleteUser'.
-src/main/ipc/users/user-handlers.ts(12,40): error TS7006: Parameter '_' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(12,43): error TS7006: Parameter 'data' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(17,41): error TS7006: Parameter '_' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(17,44): error TS7006: Parameter 'data' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(22,47): error TS7006: Parameter '_' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(22,50): error TS7006: Parameter 'data' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(26,48): error TS7006: Parameter '_' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(26,51): error TS7006: Parameter 'data' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(30,48): error TS7006: Parameter '_' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(30,51): error TS7006: Parameter 'data' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(35,40): error TS7006: Parameter '_' implicitly has an 'any' type.
-src/main/ipc/users/user-handlers.ts(35,43): error TS7006: Parameter 'data' implicitly has an 'any' type.
 src/main/kernel/base-module.events.ts(7,30): error TS2339: Property 'getInstance' does not exist on type 'typeof EventBus'.
 src/main/kernel/events/project.created.event.ts(1,10): error TS2305: Module '"./base.events"' has no exported member 'EntityCreatedEvent'.
 src/main/kernel/events/project.deleted.event.ts(1,10): error TS2305: Module '"./base.events"' has no exported member 'EntityDeletedEvent'.
@@ -204,7 +216,6 @@ src/renderer/app/(user)/settings/index.tsx(44,9): error TS2353: Object literal m
 src/renderer/app/(user)/settings/index.tsx(50,9): error TS2353: Object literal may only specify known properties, and 'preferences' does not exist in type '{ id: string; settings: UpdateUserSettingsDto; }'.
 src/renderer/app/(user)/settings/index.tsx(67,11): error TS2739: Type 'UserSettings' is missing the following properties from type 'UserSettings': notifications, autoSave
 src/renderer/app/__root.tsx(8,10): error TS2305: Module '"@/ui/tooltip"' has no exported member 'TooltipProvider'.
-src/renderer/app/create-channel.tsx(3,10): error TS2305: Module '"@/domains/projects/components"' has no exported member 'CreateChannelModal'.
 src/renderer/app/create-project.tsx(3,10): error TS2724: '"@/domains/projects/components"' has no exported member named 'CreateProjectModal'. Did you mean 'CreateProjectForm'?
 src/renderer/app/project/$projectId/docs/index.tsx(6,3): error TS2305: Module '"@/components/ui/resizable"' has no exported member 'ResizableHandle'.
 src/renderer/app/project/$projectId/docs/index.tsx(7,3): error TS2305: Module '"@/components/ui/resizable"' has no exported member 'ResizablePanel'.
@@ -217,10 +228,6 @@ src/renderer/app/project/$projectId/files/file-content-view.tsx(1,10): error TS2
 src/renderer/app/project/$projectId/files/file-content-view.tsx(1,16): error TS2305: Module '"@/components/ui/card"' has no exported member 'CardContent'.
 src/renderer/app/project/$projectId/files/file-content-view.tsx(1,29): error TS2305: Module '"@/components/ui/card"' has no exported member 'CardHeader'.
 src/renderer/app/project/$projectId/files/file-content-view.tsx(1,41): error TS2305: Module '"@/components/ui/card"' has no exported member 'CardTitle'.
-src/renderer/app/project/$projectId/files/file-content-view.tsx(33,29): error TS2339: Property 'extension' does not exist on type 'FileTreeItem'.
-src/renderer/app/project/$projectId/files/file-content-view.tsx(35,33): error TS2339: Property 'extension' does not exist on type 'FileTreeItem'.
-src/renderer/app/project/$projectId/files/file-content-view.tsx(56,31): error TS2551: Property 'lastModified' does not exist on type 'FileTreeItem'. Did you mean 'modified'?
-src/renderer/app/project/$projectId/files/file-content-view.tsx(59,35): error TS2551: Property 'lastModified' does not exist on type 'FileTreeItem'. Did you mean 'modified'?
 src/renderer/app/project/$projectId/files/file-preview-utils.ts(4,12): error TS2339: Property 'extension' does not exist on type 'FileTreeItem'.
 src/renderer/app/project/$projectId/files/file-preview-utils.ts(16,12): error TS2339: Property 'extension' does not exist on type 'FileTreeItem'.
 src/renderer/app/project/$projectId/files/file-preview-utils.ts(29,12): error TS2339: Property 'extension' does not exist on type 'FileTreeItem'.
@@ -276,7 +283,7 @@ src/renderer/components/chat/message-avatar.tsx(1,18): error TS2305: Module '"@/
 src/renderer/components/chat/message-avatar.tsx(1,34): error TS2305: Module '"@/components/ui/avatar"' has no exported member 'AvatarImage'.
 src/renderer/components/common/async-boundary.tsx(4,10): error TS2305: Module '"@/components/ui/alert"' has no exported member 'Alert'.
 src/renderer/components/common/async-boundary.tsx(4,17): error TS2305: Module '"@/components/ui/alert"' has no exported member 'AlertDescription'.
-src/renderer/components/custom-link.tsx(19,10): error TS2741: Property 'to' is missing in type '{ children: any; ref: ForwardedRef<HTMLAnchorElement>; }' but required in type 'RequiredToOptions<RouterCore<Route<any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, AnyContext, {}, undefined, RootRouteChildren, FileRouteTypes>, "never", false, RouterHistory, Record<...>>, string, undefined>'.
+src/renderer/components/custom-link.tsx(20,10): error TS2741: Property 'to' is missing in type '{ children: any; ref: ForwardedRef<HTMLAnchorElement>; }' but required in type 'RequiredToOptions<RouterCore<Route<any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, AnyContext, {}, undefined, RootRouteChildren, FileRouteTypes>, "never", false, RouterHistory, Record<...>>, string, undefined>'.
 src/renderer/components/layout/app-sidebar.tsx(6,3): error TS2305: Module '"@/components/ui/tooltip"' has no exported member 'Tooltip'.
 src/renderer/components/layout/app-sidebar.tsx(7,3): error TS2305: Module '"@/components/ui/tooltip"' has no exported member 'TooltipContent'.
 src/renderer/components/layout/app-sidebar.tsx(8,3): error TS2305: Module '"@/components/ui/tooltip"' has no exported member 'TooltipProvider'.
@@ -442,20 +449,6 @@ src/renderer/domains/llm/components/llm-provider-header.tsx(5,10): error TS2305:
 src/renderer/domains/llm/components/llm-provider-header.tsx(5,22): error TS2305: Module '"../../../components/ui/card"' has no exported member 'CardTitle'.
 src/renderer/domains/llm/components/llm-provider-management.tsx(1,10): error TS2305: Module '"../../../components/ui/card"' has no exported member 'Card'.
 src/renderer/domains/llm/components/llm-provider-management.tsx(1,16): error TS2305: Module '"../../../components/ui/card"' has no exported member 'CardContent'.
-src/renderer/domains/llm/hooks/index.ts(6,10): error TS2724: '"./use-llm-provider-mutations.hook"' has no exported member named 'useLlmProviderMutations'. Did you mean 'useCreateLlmProviderMutation'?
-src/renderer/domains/llm/hooks/use-llm-provider.hook.ts(6,10): error TS2724: '"./use-llm-provider-mutations.hook"' has no exported member named 'useLlmProviderMutations'. Did you mean 'useCreateLlmProviderMutation'?
-src/renderer/domains/llm/hooks/use-llm-provider.hook.ts(18,5): error TS2345: Argument of type '(state: LlmProviderStoreState) => string | null' is not assignable to parameter of type '(state: LlmProviderState) => string | null'.
-  Types of parameters 'state' and 'state' are incompatible.
-    Type 'LlmProviderState' is not assignable to type 'LlmProviderStoreState'.
-      Types of property 'selectedLlmProvider' are incompatible.
-        Type 'LlmProviderDto | null' is not assignable to type 'string | null'.
-          Type 'LlmProviderDto' is not assignable to type 'string'.
-src/renderer/domains/llm/hooks/use-llm-provider.hook.ts(21,5): error TS2345: Argument of type '(state: LlmProviderStoreState) => (provider: string | null) => void' is not assignable to parameter of type '(state: LlmProviderState) => (provider: string | null) => void'.
-  Types of parameters 'state' and 'state' are incompatible.
-    Type 'LlmProviderState' is not assignable to type 'LlmProviderStoreState'.
-      Types of property 'selectedLlmProvider' are incompatible.
-        Type 'LlmProviderDto | null' is not assignable to type 'string | null'.
-          Type 'LlmProviderDto' is not assignable to type 'string'.
 src/renderer/domains/projects/components/add-agent-form-tabs.tsx(1,10): error TS2305: Module '"@/components/ui/tabs"' has no exported member 'Tabs'.
 src/renderer/domains/projects/components/add-agent-form-tabs.tsx(1,16): error TS2305: Module '"@/components/ui/tabs"' has no exported member 'TabsContent'.
 src/renderer/domains/projects/components/add-agent-form-tabs.tsx(1,29): error TS2305: Module '"@/components/ui/tabs"' has no exported member 'TabsList'.
@@ -463,10 +456,6 @@ src/renderer/domains/projects/components/add-agent-form-tabs.tsx(1,39): error TS
 src/renderer/domains/projects/components/add-agent-iterations-field.tsx(26,25): error TS2339: Property 'maxIterations' does not exist on type 'CreateAgentDto'.
 src/renderer/domains/projects/components/add-agent-iterations-field.tsx(28,23): error TS2345: Argument of type '"maxIterations"' is not assignable to parameter of type 'keyof CreateAgentDto'.
 src/renderer/domains/projects/components/add-agent-llm-provider-field.tsx(40,42): error TS2551: Property 'providerType' does not exist on type 'LlmProviderDto'. Did you mean 'provider'?
-src/renderer/domains/projects/components/add-agent-options-fields.tsx(23,29): error TS2339: Property 'verbose' does not exist on type 'CreateAgentDto'.
-src/renderer/domains/projects/components/add-agent-options-fields.tsx(24,53): error TS2345: Argument of type '"verbose"' is not assignable to parameter of type 'keyof CreateAgentDto'.
-src/renderer/domains/projects/components/add-agent-options-fields.tsx(32,29): error TS2339: Property 'allowDelegation' does not exist on type 'CreateAgentDto'.
-src/renderer/domains/projects/components/add-agent-options-fields.tsx(33,53): error TS2345: Argument of type '"allowDelegation"' is not assignable to parameter of type 'keyof CreateAgentDto'.
 src/renderer/domains/projects/components/add-agent-system-prompt-field.tsx(23,25): error TS2339: Property 'systemPrompt' does not exist on type 'CreateAgentDto'.
 src/renderer/domains/projects/components/add-agent-system-prompt-field.tsx(24,42): error TS2345: Argument of type '"systemPrompt"' is not assignable to parameter of type 'keyof CreateAgentDto'.
 src/renderer/domains/projects/components/chat/ai-chat-provider-selector.tsx(33,40): error TS2339: Property 'type' does not exist on type 'LlmProviderDto'.
@@ -523,24 +512,15 @@ src/renderer/domains/projects/hooks/use-channel-chat.hook.ts(39,5): error TS2345
   Types of property 'error' are incompatible.
     Type 'string | null' is not assignable to type 'HookError | null'.
       Type 'string' is not assignable to type 'HookError'.
-src/renderer/domains/projects/hooks/use-channel-form.hook.ts(15,7): error TS2322: Type 'UseMutateFunction<ChannelDto, Error, Omit<_CreateChannelDto, "projectId">, unknown>' is not assignable to type '(data: CreateChannelData) => Promise<void>'.
+src/renderer/domains/projects/hooks/use-channel-form.hook.ts(15,7): error TS2322: Type 'UseMutateFunction<ChannelDto, Error, Omit<CreateChannelDto, "projectId">, unknown>' is not assignable to type '(data: CreateChannelData) => Promise<void>'.
   Type 'void' is not assignable to type 'Promise<void>'.
 src/renderer/domains/projects/hooks/use-channel-messages-by-id-queries.hook.ts(7,49): error TS2554: Expected 0 arguments, but got 1.
 src/renderer/domains/projects/hooks/use-channel-messages-by-id-queries.hook.ts(15,32): error TS2339: Property 'sendTextMessage' does not exist on type '{ createMessage: UseMutateFunction<ChannelMessage, Error, CreateChannelMessageDto, unknown>; createTextMessage: UseMutateFunction<...>; updateMessage: UseMutateFunction<...>; deleteMessage: UseMutateFunction<...>; }'.
 src/renderer/domains/projects/hooks/use-channels-queries.hook.ts(6,3): error TS2724: '"../../../../shared/types/domains/projects/channel.types"' has no exported member named '_ChannelDto'. Did you mean 'ChannelDto'?
 src/renderer/domains/projects/hooks/use-file-explorer-state.hook.ts(32,9): error TS2367: This comparison appears to be unintentional because the types '"file" | "directory"' and '"folder"' have no overlap.
 src/renderer/domains/projects/hooks/use-file-icons.hook.ts(7,9): error TS2367: This comparison appears to be unintentional because the types '"file" | "directory"' and '"folder"' have no overlap.
-src/renderer/domains/projects/hooks/use-project-channels-queries.hook.ts(6,3): error TS2724: '"../../../../shared/types/domains/projects/channel.types"' has no exported member named '_ChannelDto'. Did you mean 'ChannelDto'?
-src/renderer/domains/projects/hooks/use-project-channels-queries.hook.ts(7,3): error TS2724: '"../../../../shared/types/domains/projects/channel.types"' has no exported member named '_CreateChannelDto'. Did you mean 'CreateChannelDto'?
-src/renderer/domains/projects/hooks/use-project-channels-queries.hook.ts(31,29): error TS2345: Argument of type '{ projectId: string; }' is not assignable to parameter of type 'CreateChannelDto'.
-  Type '{ projectId: string; }' is missing the following properties from type 'CreateChannelDto': name, createdBy
 src/renderer/domains/projects/hooks/use-projects-state.hook.ts(1,27): error TS2459: Module '"../stores/project.store"' declares 'ProjectState' locally, but it is not exported.
-src/renderer/domains/projects/hooks/use-terminal-execution.hook.ts(28,7): error TS2322: Type 'number' is not assignable to type 'string'.
-src/renderer/domains/projects/hooks/use-terminal-execution.hook.ts(30,7): error TS2322: Type '"command"' is not assignable to type '"error" | "input" | "output"'.
-src/renderer/domains/projects/hooks/use-terminal-execution.hook.ts(41,9): error TS2322: Type 'number' is not assignable to type 'string'.
-src/renderer/domains/projects/hooks/use-terminal-execution.hook.ts(46,24): error TS2345: Argument of type '(prev: any) => any[]' is not assignable to parameter of type 'TerminalLine[]'.
-src/renderer/domains/projects/hooks/use-terminal-execution.hook.ts(46,25): error TS7006: Parameter 'prev' implicitly has an 'any' type.
-src/renderer/domains/projects/hooks/use-terminal-history.hook.ts(10,3): error TS2339: Property '_command' does not exist on type 'UseTerminalHistoryProps'.
+src/renderer/domains/projects/hooks/use-terminal-execution.hook.ts(46,24): error TS2345: Argument of type '(prev: TerminalLine[]) => TerminalLine[]' is not assignable to parameter of type 'TerminalLine[]'.
 src/renderer/domains/projects/hooks/use-terminal-panel-state.hook.ts(16,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<HTMLDivElement>'.
   Type 'HTMLDivElement | null' is not assignable to type 'HTMLDivElement'.
     Type 'null' is not assignable to type 'HTMLDivElement'.
@@ -633,4 +613,3 @@ src/renderer/domains/users/services/message.service.ts(20,8): error TS7006: Para
 src/renderer/domains/users/services/message.service.ts(20,11): error TS7006: Parameter 'b' implicitly has an 'any' type.
 src/renderer/domains/users/stores/message.store.ts(14,11): error TS2345: Argument of type '{ currentConversationMessages: MessageDto[]; }' is not assignable to parameter of type 'MessageState'.
   Property 'setCurrentConversationMessages' is missing in type '{ currentConversationMessages: MessageDto[]; }' but required in type 'MessageState'.
-src/shared/interfaces/common.interfaces.ts(3,1): error TS2308: Module "./api-response.interface" has already exported a member named 'PaginationMetadata'. Consider explicitly re-exporting to resolve the ambiguity.

@@ -3,14 +3,8 @@ import { MessageItem } from "@/components/chat/message-item";
 import { ConversationEmptyState } from "./conversation-empty-state";
 import { ConversationTypingIndicator } from "./conversation-typing-indicator";
 
-import type { MessageDto } from "../../../../shared/types/domains/users/user.types";
-
-interface FormattedMessage {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+import type { MessageDto } from "../../../../shared/types/domains/users/message-dto.type";
+import type { FormattedMessage } from "../../../components/chat/message-item-types";
 
 interface ConversationMessagesListProps {
   messages: MessageDto[];

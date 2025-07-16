@@ -3,7 +3,14 @@ import { z } from "zod";
 const UserSettingsSchema = z.object({
   theme: z.enum(["light", "dark", "system"]).default("system"),
   language: z.enum(["en", "pt-BR"]).default("en"),
-  notifications: z.boolean().default(true),
+  notifications: z
+    .object({
+      enabled: z.boolean().default(true),
+      email: z.boolean().default(false),
+      desktop: z.boolean().default(false),
+    })
+    .default({ enabled: true, email: false, desktop: false }),
+  autoSave: z.boolean().default(true),
 });
 
 export type UserSettingsValue = z.infer<typeof UserSettingsSchema>;

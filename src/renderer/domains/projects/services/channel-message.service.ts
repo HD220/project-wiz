@@ -1,5 +1,8 @@
 import { IChannelMessageService } from "@/shared/types/domains/projects/channel-message/channel-message-service.interface";
-import { ChannelMessage } from "@/shared/types/domains/projects/channel-message/channel-message.types";
+import {
+  ChannelMessage,
+  ChannelMessagePaginationDto,
+} from "@/shared/types/domains/projects/channel-message/channel-message.types";
 import {
   ChannelMessageFilterDto,
   CreateChannelMessageDto,
@@ -22,7 +25,8 @@ export const channelMessageService: IChannelMessageService = {
     const { listChannelMessagesByChannel } = await import(
       "./channel-message-list.service"
     );
-    return listChannelMessagesByChannel(channelId, limit, offset);
+    const result = await listChannelMessagesByChannel(channelId, limit, offset);
+    return result.messages;
   },
   getLatest: async (channelId: string, limit = 50) => {
     const { getLatestChannelMessages } = await import(

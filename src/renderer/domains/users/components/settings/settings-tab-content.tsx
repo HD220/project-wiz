@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
-  return <div>Simplified</div>;
+export function SettingsTabContent() {
+  return <div>Settings Tab Content</div>;
 }

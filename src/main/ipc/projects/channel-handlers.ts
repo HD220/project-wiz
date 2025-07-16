@@ -3,11 +3,13 @@ import { ipcMain } from "electron";
 import {
   createChannel,
   findChannelById,
+  deleteChannel,
+} from "../../domains/projects/functions/channel-crud.functions";
+import {
   findChannelsByProject,
   findAccessibleChannels,
   createGeneralChannel,
-  deleteChannel,
-} from "../../domains/projects/functions";
+} from "../../domains/projects/functions/channel-operations.functions";
 
 export function registerChannelHandlers(): void {
   ipcMain.handle("channel:create", async (_, data) => {

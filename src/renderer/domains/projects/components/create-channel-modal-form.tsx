@@ -4,7 +4,7 @@ import { CreateChannelModalFooter } from "./create-channel-modal-footer";
 interface CreateChannelModalFormProps {
   channelName: string;
   channelDescription: string;
-  channelType: string;
+  channelType: "agent" | "general" | "task";
   isPrivate: boolean;
   isSubmitting: boolean;
   error: string | null;

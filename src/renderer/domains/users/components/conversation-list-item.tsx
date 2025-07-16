@@ -18,10 +18,10 @@ export function ConversationListItem({
 }: ConversationListItemProps) {
   return (
     <Link
-      to="/project/$projectId/conversation/$conversationId"
+      to="/project/$projectId/chat/$channelId"
       params={{
         projectId: "1", // TODO: Get actual project ID
-        conversationId: conversation.id,
+        channelId: conversation.id,
       }}
       className={cn(
         "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",

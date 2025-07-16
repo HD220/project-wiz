@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
 
-import { useProjects } from "@/domains/projects/hooks";
-
-import { ProjectDto } from "@/shared/types";
+import { useProject } from "@/domains/projects/hooks";
 
 import { ProjectActivityGrid } from "./project-activity-grid";
 import { ProjectHeader } from "./project-header";
@@ -11,23 +8,7 @@ import { ProjectStatsGrid } from "./project-stats-grid";
 
 export function ProjectIndexPage() {
   const { projectId } = Route.useParams();
-  const [currentProject, setCurrentProject] = useState<ProjectDto | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { getProjectById } = useProjects();
-
-  useEffect(() => {
-    const loadProject = async () => {
-      if (projectId) {
-        setIsLoading(true);
-        const project = await getProjectById({ id: projectId });
-        setCurrentProject(project);
-        setIsLoading(false);
-      }
-    };
-
-    loadProject();
-  }, [projectId, getProjectById]);
+  const { project: currentProject, isLoading } = useProject(projectId);
 
   if (isLoading) {
     return <div className="p-4">Carregando projeto...</div>;

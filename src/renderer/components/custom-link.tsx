@@ -14,10 +14,13 @@ interface CustomLinkProps
 }
 
 export const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(
-  ({ variant = "ghost", size, className, children, ...linkProps }, ref) => {
+  (
+    { variant = "ghost", size, className, children, to, ...restLinkProps },
+    ref,
+  ) => {
     return (
       <Button variant={variant} size={size} className={className} asChild>
-        <Link ref={ref} {...linkProps}>
+        <Link ref={ref} to={to} {...restLinkProps}>
           {children}
         </Link>
       </Button>
