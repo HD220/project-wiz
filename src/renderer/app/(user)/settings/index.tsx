@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import {
+  UserSettings,
+  SettingsUpdateHandler,
+} from "@/shared/types/settings.types";
+
 import { SettingsHeader } from "@/domains/users/components/settings/settings-header";
 import { SettingsTabs } from "@/domains/users/components/settings/settings-tabs";
 import { useUser } from "@/domains/users/hooks/use-user.hook";
-import { UserSettings, SettingsUpdateHandler } from "@/shared/types/settings.types";
 
 export const Route = createFileRoute("/(user)/settings/")({
   component: UserSettingsPage,
@@ -27,7 +31,10 @@ export function UserSettingsPage() {
     desktopNotifications: false,
   });
 
-  const handleUpdateSettings: SettingsUpdateHandler = (field: string, value: unknown) => {
+  const handleUpdateSettings: SettingsUpdateHandler = (
+    field: string,
+    value: unknown,
+  ) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
   };
 

@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  Outlet,
-  useLocation,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {

@@ -1,12 +1,12 @@
-import { Project } from "./project.entity";
 import { ProjectData } from "./project-data.entity";
 import { ProjectUpdater } from "./project-updater.entity";
+import { Project } from "./project.entity";
 
 export class ProjectOperations {
   constructor(
     private project: Project,
     private projectData: ProjectData,
-    private projectUpdater: ProjectUpdater
+    private projectUpdater: ProjectUpdater,
   ) {}
 
   archive(): void {
@@ -40,7 +40,10 @@ export class ProjectOperations {
       name: this.project.getName(),
       description: this.projectData.getDescription().getValue(),
       gitUrl: this.projectData.getGitUrl().getValue(),
-      status: this.projectData.getStatus().getValue() as "active" | "inactive" | "archived",
+      status: this.projectData.getStatus().getValue() as
+        | "active"
+        | "inactive"
+        | "archived",
       avatar: this.projectData.getAvatar(),
       createdAt: this.projectData.getCreatedAt(),
       updatedAt: this.projectData.getUpdatedAt(),

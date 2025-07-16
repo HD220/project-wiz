@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  Outlet,
-  useLocation,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { TopBar } from "@/renderer/components/layout/top-bar";
@@ -36,7 +32,12 @@ function ProjectLayout() {
     setCreateChannelModalOpen(true);
   };
 
-  const pageInfo = getPageInfo(location.pathname, channels, agents, currentProject);
+  const pageInfo = getPageInfo(
+    location.pathname,
+    channels,
+    agents,
+    currentProject,
+  );
 
   return (
     <div className="flex h-full">

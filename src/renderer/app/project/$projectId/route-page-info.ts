@@ -1,4 +1,9 @@
-import { Channel, Agent, Project, PageInfo } from "@/shared/types/page-info.types";
+import {
+  Channel,
+  Agent,
+  Project,
+  PageInfo,
+} from "@/shared/types/page-info.types";
 
 export function getPageInfo(
   pathname: string,
@@ -8,7 +13,9 @@ export function getPageInfo(
 ): PageInfo {
   if (pathname.includes("/chat/")) {
     const channelId = pathname.split("/chat/")[1];
-    const selectedChannel = channels.find((channel) => channel.id === channelId);
+    const selectedChannel = channels.find(
+      (channel) => channel.id === channelId,
+    );
     return {
       title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
       subtitle: selectedChannel?.name || "Canal de chat do projeto",

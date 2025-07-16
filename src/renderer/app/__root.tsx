@@ -1,7 +1,4 @@
-import {
-  createRootRoute,
-  Outlet,
-} from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 
 import { TitleBar } from "@/renderer/components/layout/title-bar";
 import { PageTitleProvider } from "@/renderer/contexts/page-title-context";
@@ -16,7 +13,6 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-
   return (
     <TooltipProvider>
       <PageTitleProvider>

@@ -19,7 +19,8 @@ function EditLlmProvider() {
     from: "/(user)/settings/edit-llm-provider/$llmProviderId",
   });
   const { llmProviders } = useLlmProviders();
-  const provider = llmProviders?.find((provider) => provider.id === llmProviderId) || null;
+  const provider =
+    llmProviders?.find((provider) => provider.id === llmProviderId) || null;
 
   return (
     <LlmProviderFormModal

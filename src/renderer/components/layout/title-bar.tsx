@@ -3,7 +3,11 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ElectronStyleProps, WindowControls as WindowControlsType } from "@/shared/types/electron.types";
+
+import {
+  ElectronStyleProps,
+  WindowControls as WindowControlsType,
+} from "@/shared/types/electron.types";
 
 interface TitleBarProps {
   className?: string;
@@ -26,10 +30,7 @@ function useWindowState() {
   return { isMaximized, setIsMaximized };
 }
 
-function WindowControls({
-  isMaximized,
-  setIsMaximized,
-}: WindowControlsType) {
+function WindowControls({ isMaximized, setIsMaximized }: WindowControlsType) {
   const handleMinimize = async () => {
     if (window.electronIPC?.window?.minimize) {
       await window.electronIPC.window.minimize();

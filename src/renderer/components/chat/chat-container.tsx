@@ -1,7 +1,6 @@
 import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
-
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";

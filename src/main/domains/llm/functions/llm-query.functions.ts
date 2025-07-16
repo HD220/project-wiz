@@ -1,9 +1,16 @@
 import { eq } from "drizzle-orm";
+
 import { getDatabase } from "../../../infrastructure/database";
 import { llmProviders } from "../../../persistence/schemas";
-import { createLlmProviderFromData, LlmProviderWithData } from "./llm-factory.functions";
 
-export async function findLlmProviderById(id: string): Promise<LlmProviderWithData | null> {
+import {
+  createLlmProviderFromData,
+  LlmProviderWithData,
+} from "./llm-factory.functions";
+
+export async function findLlmProviderById(
+  id: string,
+): Promise<LlmProviderWithData | null> {
   const db = getDatabase();
   const [provider] = await db
     .select()
@@ -13,7 +20,9 @@ export async function findLlmProviderById(id: string): Promise<LlmProviderWithDa
   return provider ? createLlmProviderFromData(provider) : null;
 }
 
-export async function findLlmProviderByName(name: string): Promise<LlmProviderWithData | null> {
+export async function findLlmProviderByName(
+  name: string,
+): Promise<LlmProviderWithData | null> {
   const db = getDatabase();
   const [provider] = await db
     .select()

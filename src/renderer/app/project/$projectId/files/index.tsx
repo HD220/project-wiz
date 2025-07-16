@@ -2,9 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { useState } from "react";
 
-import { FileExplorer } from "@/domains/projects/components/file-explorer";
-import { TerminalPanel } from "@/domains/projects/components/terminal-panel";
-
 import { PageTitle } from "@/components/page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,6 +10,9 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { FileTreeItem } from "@/lib/placeholders";
+
+import { FileExplorer } from "@/domains/projects/components/file-explorer";
+import { TerminalPanel } from "@/domains/projects/components/terminal-panel";
 
 export const Route = createFileRoute("/project/$projectId/files/")({
   component: ProjectFilesPage,
