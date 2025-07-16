@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { messageService } from "../services/message.service";
 
 import type {
-  MessageDto,
+  MessageDto as _MessageDto,
   CreateMessageDto,
 } from "../../../../shared/types/domains/users/message.types";
 

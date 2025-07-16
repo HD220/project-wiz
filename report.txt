@@ -1,0 +1,8 @@
+
+> project-wiz@1.0.0 quality:check
+> npm run lint:check && npm run type-check && npm run format:check && npm run test
+
+
+> project-wiz@1.0.0 lint:check
+> eslint --ext .ts,.tsx .
+

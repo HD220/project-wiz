@@ -5,13 +5,14 @@ import type {
   CreateUserDto,
   UpdateUserDto,
   UserPreferencesDto,
+  UserSettingsDto,
 } from "../../../shared/types/domains/users/user.types";
 
 export interface IUserAPI {
   create: (data: CreateUserDto) => Promise<UserDto>;
   getById: (id: string) => Promise<UserDto | null>;
   updateProfile: (id: string, data: UpdateUserDto) => Promise<void>;
-  updateSettings: (id: string, settings: any) => Promise<void>;
+  updateSettings: (id: string, settings: UserSettingsDto) => Promise<void>;
   getPreferences: (userId: string) => Promise<UserPreferencesDto | null>;
   delete: (id: string) => Promise<void>;
 }
@@ -39,7 +40,10 @@ function updateUserProfile(id: string, data: UpdateUserDto): Promise<void> {
   return ipcRenderer.invoke("user:updateProfile", { ...data, id });
 }
 
-function updateUserSettings(id: string, settings: any): Promise<void> {
+function updateUserSettings(
+  id: string,
+  settings: UserSettingsDto,
+): Promise<void> {
   return ipcRenderer.invoke("user:updateSettings", { id, settings });
 }
 

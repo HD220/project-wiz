@@ -13,11 +13,13 @@ export function useUser(userId?: string) {
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
   const queryClient = useQueryClient();
 
-  const {
-    data: userData,
-    isLoading,
-    error,
-  } = useQuery({
+  const queryResult = useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => userService.getById(userId!),
+    enabled: !!userId,
+  });
+
+  const { data: userData } = queryResult;
     queryKey: ["user", userId],
     queryFn: () => userService.getById(userId!),
     enabled: !!userId,
@@ -40,7 +42,7 @@ export function useUser(userId?: string) {
   });
 
   const updateSettings = useMutation({
-    mutationFn: ({ id, settings }: { id: string; settings: any }) =>
+    mutationFn: ({ id, settings }: { id: string; settings: UpdateUserSettingsDto }) =>
       userService.updateSettings(id, settings),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["user", id] });
@@ -49,8 +51,8 @@ export function useUser(userId?: string) {
 
   return {
     user: userData || currentUser,
-    isLoading,
-    error,
+    isLoading: queryResult.isLoading,
+    error: queryResult.error,
     setCurrentUser,
     createUser: createUser.mutate,
     updateProfile: updateProfile.mutate,

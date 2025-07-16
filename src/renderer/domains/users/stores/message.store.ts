@@ -7,8 +7,10 @@ interface MessageState {
   setCurrentConversationMessages: (messages: MessageDto[]) => void;
 }
 
-export const useMessageStore = create<MessageState>((set: any) => ({
-  currentConversationMessages: [],
-  setCurrentConversationMessages: (messages: MessageDto[]) =>
-    set({ currentConversationMessages: messages }),
-}));
+export const useMessageStore = create<MessageState>(
+  (set: (state: MessageState) => void) => ({
+    currentConversationMessages: [],
+    setCurrentConversationMessages: (messages: MessageDto[]) =>
+      set({ currentConversationMessages: messages }),
+  }),
+);

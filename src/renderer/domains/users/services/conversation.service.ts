@@ -5,7 +5,7 @@ import {
 } from "../../../../shared/types/domains/users/message.types";
 
 export const conversationService = {
-  async list(filter?: ConversationFilterDto): Promise<ConversationDto[]> {
+  async list(_filter?: ConversationFilterDto): Promise<ConversationDto[]> {
     return window.electronIPC.conversations.list();
   },
 

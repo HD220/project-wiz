@@ -1,6 +1,6 @@
 import { MessageSquare } from "lucide-react";
 
-import { DialogHeader, DialogTitle } from "@/ui/dialog";
+import { DialogHeader, DialogTitle, DialogDescription } from "@/ui/dialog";
 
 export function NewConversationModalHeader() {
   return (

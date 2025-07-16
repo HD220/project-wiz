@@ -14,6 +14,7 @@ echo "# BE AWARE: The '--yolo' flag means Gemini will attempt to fix issues auto
 echo "# Review each command before execution if you are unsure."
 echo ""
 
+declare -A file_errors_map # Associative array to store errors per file
 current_file=""
 
 # Read the report file line by line
@@ -26,21 +27,33 @@ while IFS= read -r line; do
     # Check if the line starts with the project path, indicating a new file
     if [[ "$line" == "/mnt/d/Documentos/Pessoal/Github/project-wiz/"* ]]; then
         current_file="$line"
+        # Initialize the entry for the new file if it doesn't exist
+        if [[ -z "${file_errors_map[$current_file]}" ]]; then
+            file_errors_map[$current_file]=""
+        fi
     else
         # This is an error detail line
         # Extract the error message (everything after the type, e.g., 'error' or 'warning')
         # Example:   21:7  error  React Hook "useChannelMessagesById" is called conditionally. ...
-        error_message=$(echo "$line" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ 	]*//')
+        error_message=$(echo "$line" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ \t]*//')
 
         if [[ -n "$current_file" && -n "$error_message" ]]; then
-            # Construct the gemini CLI command
-            # Escape double quotes in the error message for the prompt
-            escaped_error_message=$(echo "$error_message" | sed 's/"/\"/g')
-            # Convert absolute path to relative path with @ prefix
-            relative_file_path=$(echo "$current_file" | sed 's|/mnt/d/Documentos/Pessoal/Github/project-wiz/|@|')
-            echo "gemini --yolo --model=gemini-2.5-flash -p \"Corrija o erro em $relative_file_path: $escaped_error_message, seguindo as diretrizes de @CLAUDE.md,, NÃO EXECUTE NENHUM COMANDO DO NODEJS(LINT,TYPE-CHECK,ETC.)\""
+            # Append the error message to the current file's entry in the map
+            # Add a separator if there are already errors for this file
+            if [[ -n "${file_errors_map[$current_file]}" ]]; then
+                file_errors_map[$current_file]+="; "
+            fi
+            file_errors_map[$current_file]+="$error_message"
         fi
-        # Do not reset current_file here, as multiple errors can be associated with one file.
-        # It will be overwritten when a new file path is encountered.
     fi
 done < "$REPORT_FILE"
+
+# Now iterate through the map and generate a command for each file
+for file_path in "${!file_errors_map[@]}"; do
+    errors_for_file="${file_errors_map[$file_path]}"
+    if [[ -n "$errors_for_file" ]]; then
+        # Escape double quotes in the error messages for the prompt        # Replace " with \" so that it's correctly passed as part of the string to gemini -p        escaped_errors=$(echo "$errors_for_file" | sed 's/"/\"/g')        # Convert absolute path to relative path with @ prefix
+        relative_file_path=$(echo "$file_path" | sed 's|/mnt/d/Documentos/Pessoal/Github/project-wiz/|@|')
+        echo "gemini --yolo --model=gemini-2.5-flash -p \"Corrija os seguintes problemas no arquivo $relative_file_path: $escaped_errors. Seguindo as diretrizes de @CLAUDE.md, NÃO EXECUTE NENHUM COMANDO DO NODEJS(LINT,TYPE-CHECK,ETC.)\" || "
+    fi
+done
