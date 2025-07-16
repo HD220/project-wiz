@@ -1,14 +1,17 @@
+import {
+  MessageIdentity,
+  MessageContent,
+  MessageLocation,
+  MessageState,
+  MessageType,
+} from "../value-objects";
+
 export class ProjectMessageCore {
   private constructor(
-    private readonly id: string,
-    private content: string,
-    private channelId: string,
-    private authorId: string,
-    private type: "text" | "code" | "file" | "system",
-    private createdAt: Date,
-    private updatedAt: Date,
-    private metadata: Record<string, unknown>,
-    private isEdited: boolean,
+    private readonly identity: MessageIdentity,
+    private readonly content: MessageContent,
+    private readonly location: MessageLocation,
+    private readonly state: MessageState,
   ) {}
 
   static create(props: {
@@ -16,71 +19,73 @@ export class ProjectMessageCore {
     content: string;
     channelId: string;
     authorId: string;
-    type?: "text" | "code" | "file" | "system";
+    type?: MessageType;
     createdAt?: Date;
     updatedAt?: Date;
     metadata?: Record<string, unknown>;
     isEdited?: boolean;
   }): ProjectMessageCore {
-    const id = props.id || crypto.randomUUID();
-    const createdAt = props.createdAt || new Date();
-    const updatedAt = props.updatedAt || new Date();
-    const type = props.type || "text";
-    const metadata = props.metadata || {};
-    const isEdited = props.isEdited || false;
+    const identity = MessageIdentity.create({
+      id: props.id,
+      createdAt: props.createdAt,
+      updatedAt: props.updatedAt,
+    });
 
-    return new ProjectMessageCore(
-      id,
-      props.content,
-      props.channelId,
-      props.authorId,
-      type,
-      createdAt,
-      updatedAt,
-      metadata,
-      isEdited,
-    );
+    const content = MessageContent.create({
+      content: props.content,
+      type: props.type,
+      metadata: props.metadata,
+    });
+
+    const location = MessageLocation.create({
+      channelId: props.channelId,
+      authorId: props.authorId,
+    });
+
+    const state = MessageState.create(props.isEdited);
+
+    return new ProjectMessageCore(identity, content, location, state);
   }
 
   getId(): string {
-    return this.id;
+    return this.identity.getId();
   }
 
   getContent(): string {
-    return this.content;
+    return this.content.getContent();
   }
 
   getChannelId(): string {
-    return this.channelId;
+    return this.location.getChannelId();
   }
 
   getAuthorId(): string {
-    return this.authorId;
+    return this.location.getAuthorId();
   }
 
   isText(): boolean {
-    return this.type === "text";
+    return this.content.isText();
   }
 
   isCode(): boolean {
-    return this.type === "code";
+    return this.content.isCode();
   }
 
   isSystem(): boolean {
-    return this.type === "system";
+    return this.content.isSystem();
   }
 
   getData() {
     return {
-      id: this.id,
-      content: this.content,
-      channelId: this.channelId,
-      authorId: this.authorId,
-      type: this.type,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      metadata: this.metadata,
-      isEdited: this.isEdited,
+      id: this.identity.getId(),
+      content: this.content.getContent(),
+      channelId: this.location.getChannelId(),
+      authorId: this.location.getAuthorId(),
+      type: this.content.getType(),
+      createdAt: this.identity.getCreatedAt(),
+      updatedAt: this.identity.getUpdatedAt(),
+      metadata: this.content.getMetadata(),
+      isEdited: this.state.isMessageEdited(),
     };
   }
 }

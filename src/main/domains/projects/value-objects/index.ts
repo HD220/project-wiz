@@ -5,6 +5,10 @@ export { ProjectStatus } from "./project-status.vo";
 export { ProjectIdentity } from "./project-identity.vo";
 export { ChannelName } from "./channel-name.vo";
 export { ChannelDescription } from "./channel-description.vo";
+export { MessageIdentity } from "./message-identity.vo";
+export { MessageContent, MessageType } from "./message-content.vo";
+export { MessageLocation } from "./message-location.vo";
+export { MessageState } from "./message-state.vo";
 
 // Function exports
 export {
