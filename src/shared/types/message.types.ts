@@ -1,6 +1,9 @@
-export type MessageType = "text" | "code" | "image" | "file" | "system";
+// Re-export from centralized message types
+// This file is kept for backward compatibility
+export * from "./domains/common/message-core.types";
 
+// Legacy type handler - consider removing in future refactor
 export interface MessageTypeHandler {
-  type: MessageType;
+  type: import("./domains/common/message-core.types").MessageType;
   content: string;
 }

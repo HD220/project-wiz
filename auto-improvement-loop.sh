@@ -31,34 +31,8 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Function to check if code is healthy (no lint/typescript errors)
-check_code_health() {
-    print_status "Checking code health..."
-    
-    local has_errors=false
-    
-    # Check TypeScript errors
-    if ! npm run type-check > /dev/null 2>&1; then
-        print_warning "TypeScript errors found"
-        has_errors=true
-    fi
-    
-    # Check ESLint errors
-    if ! npm run lint:check > /dev/null 2>&1; then
-        print_warning "ESLint errors found"
-        has_errors=true
-    fi
-    
-    if [ "$has_errors" = false ]; then
-        print_success "Code is healthy! ✅ No TypeScript or ESLint errors"
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to run Claude auto-improvement
-run_auto_improvement() {
+# Function to run Claude auto-improvement and check if code is healthy
+run_auto_improvement_and_check() {
     local iteration=$1
     
     print_status "🤖 Running Claude auto-improvement (iteration $iteration)..."
@@ -70,13 +44,44 @@ run_auto_improvement() {
         exit 1
     fi
     
-    # Execute Claude with auto-improvement command using correct CLI syntax
-    if cat .claude/commands/auto-improvement.md | claude --dangerously-skip-permissions -p 2>>"$ERROR_LOG"; then
+    # Create temporary file for Claude output
+    local claude_output=$(mktemp)
+    
+    # Create instruction to force JSON response
+    local json_instruction="
+
+---
+
+IMPORTANTE: Ao final da sua resposta, você DEVE incluir um JSON com o seguinte formato exato:
+{\"healthy\": true/false, \"summary\": \"breve resumo do que foi feito\", \"issues_remaining\": number}
+
+- healthy: true se o código está saudável e não precisa mais melhorias, false caso contrário
+- summary: resumo conciso das melhorias feitas ou problemas encontrados
+- issues_remaining: número estimado de problemas que ainda restam (0 se healthy=true)"
+
+    # Execute Claude with auto-improvement command plus JSON instruction
+    if (cat .claude/commands/auto-improvement.md; echo "$json_instruction") | claude --dangerously-skip-permissions --output-format json -p > "$claude_output" 2>>"$ERROR_LOG"; then
         print_success "Claude auto-improvement completed"
-        return 0
+        
+        # Extract healthy status from JSON response
+        local is_healthy=$(grep -o '"healthy"[[:space:]]*:[[:space:]]*[^,}]*' "$claude_output" | grep -o 'true\|false' | tail -1)
+        local summary=$(grep -o '"summary"[[:space:]]*:[[:space:]]*"[^"]*"' "$claude_output" | sed 's/.*"\(.*\)".*/\1/' | tail -1)
+        
+        if [ "$is_healthy" = "true" ]; then
+            print_success "Claude indicates code is healthy! ✅"
+            [ -n "$summary" ] && print_status "Summary: $summary"
+            rm -f "$claude_output"
+            return 0  # Code is healthy
+        else
+            print_status "Claude completed improvements, more work needed"
+            [ -n "$summary" ] && print_status "Status: $summary"
+            rm -f "$claude_output"
+            return 1  # Code needs more work
+        fi
     else
         local exit_code=$?
         print_error "Claude execution failed with exit code: $exit_code"
+        rm -f "$claude_output"
         
         # Check if it's a usage limit error
         if [ -f "$ERROR_LOG" ]; then
@@ -101,13 +106,7 @@ main() {
     # Clean up previous error log
     rm -f "$ERROR_LOG"
     
-    # Initial health check
-    if check_code_health; then
-        print_success "🎉 Code is already healthy! No improvements needed."
-        exit 0
-    fi
-    
-    print_status "Code needs improvement. Starting auto-improvement loop..."
+    print_status "Starting auto-improvement loop..."
     
     # Main improvement loop
     iteration=0
@@ -118,17 +117,23 @@ main() {
         echo "🔄 Iteration $iteration"
         echo "------------------------"
         
-        # Run auto-improvement
-        improvement_result=$(run_auto_improvement $iteration)
+        # Run auto-improvement and check health in one call
+        run_auto_improvement_and_check $iteration
         case $? in
             0)
-                # Success - Claude completed the improvement
-                print_success "Claude completed iteration $iteration"
+                # Code is healthy - stop
+                echo ""
+                echo "=========================================="
+                echo "🎯 AUTO-IMPROVEMENT COMPLETED"
+                echo "=========================================="
+                echo "Iterations completed: $iteration"
+                print_success "🎉 Mission accomplished! Code is healthy."
+                echo "=========================================="
+                exit 0
                 ;;
             1)
-                # Error but not usage limit - continue trying
-                print_warning "Claude encountered an error, but continuing..."
-                continue
+                # Code needs more work - continue
+                print_status "Code still needs improvement, continuing..."
                 ;;
             2)
                 # Usage limit reached - stop
@@ -137,24 +142,7 @@ main() {
                 ;;
         esac
         
-        # Wait a moment before checking health
-        sleep 2
-        
-        # Check if code is now healthy
-        if check_code_health; then
-            echo ""
-            echo "=========================================="
-            echo "🎯 AUTO-IMPROVEMENT COMPLETED"
-            echo "=========================================="
-            echo "Iterations completed: $iteration"
-            print_success "🎉 Mission accomplished! Code is healthy."
-            echo "=========================================="
-            exit 0
-        fi
-        
-        print_status "Code still needs improvement, continuing..."
-        
-        # Add small delay between iterations
+		# Add small delay between iterations
         sleep 3
     done
 }

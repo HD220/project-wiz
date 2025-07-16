@@ -1,21 +1,11 @@
-export interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  senderName: string;
-  senderType: "user" | "agent" | "system";
-  messageType: "text" | "task_update" | "system" | "file_share" | "code";
-  timestamp: Date;
-  isEdited?: boolean;
-  replyTo?: string;
-  mentions?: string[];
-  attachments?: unknown[];
-  metadata?: Record<string, unknown>;
-}
+// Use centralized message types instead of duplicating
+import type {
+  FormattedMessage as BaseFormattedMessage,
+  Message,
+} from "@/shared/types/domains/common";
 
-export interface FormattedMessage extends Message {
-  isUser: boolean;
-}
+// Re-export centralized types
+export type { Message, FormattedMessage } from "@/shared/types/domains/common";
 
 export interface MessageItemProps {
   message: FormattedMessage;

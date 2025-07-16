@@ -41,31 +41,17 @@ export interface Agent {
   executionProgress?: number;
 }
 
-export interface Message {
-  id: string;
-  content: string;
-  type: "text" | "code" | "file" | "system";
-  authorId: string;
-  authorName: string;
-  timestamp: Date;
+// Import centralized message types instead of duplicating
+import type {
+  Message as BaseMessage,
+  MessageReaction,
+  FileAttachment,
+} from "@/shared/types/domains/common";
+
+// Extend base message for mock data specifics
+export interface Message extends BaseMessage {
   channelId?: string;
   isRead: boolean;
-  reactions?: MessageReaction[];
-  attachments?: FileAttachment[];
-}
-
-export interface MessageReaction {
-  emoji: string;
-  users: User[];
-  count: number;
-}
-
-export interface FileAttachment {
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-  url: string;
 }
 
 export interface Task {

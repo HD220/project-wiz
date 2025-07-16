@@ -1,21 +1,13 @@
-export interface ChannelMessage {
-  id: string;
-  content: string;
-  channelId: string;
-  authorId: string;
-  authorName: string;
-  type: string;
-  metadata?: ChannelMessageMetadata;
-  isEdited: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Use centralized message types instead of duplicating
+import type {
+  ChannelMessage as BaseChannelMessage,
+  MessagePaginationDto,
+  MessageFilterDto,
+} from "@/shared/types/domains/common";
 
-export interface ChannelMessagePaginationDto {
-  data: ChannelMessage[];
-  total: number;
-  limit: number;
-  offset: number;
-}
+// Re-export centralized types for this domain
+export type ChannelMessage = BaseChannelMessage;
 
-export interface ChannelMessageFilterDto {}
+export type ChannelMessagePaginationDto = MessagePaginationDto<ChannelMessage>;
+
+export type ChannelMessageFilterDto = MessageFilterDto;
