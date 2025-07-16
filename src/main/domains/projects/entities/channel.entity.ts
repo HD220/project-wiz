@@ -1,52 +1,78 @@
-import { ChannelAccess } from "./channel-access";
-import { ChannelCore } from "./channel-core.entity";
-import { ChannelFactory } from "./channel-factory";
-import { ChannelSerializer } from "./channel-serializer";
+import {
+  ChannelName,
+  ChannelDescription,
+  ProjectIdentity,
+} from "../value-objects";
 
 export class Channel {
-  constructor(private readonly core: ChannelCore) {}
+  constructor(
+    private readonly identity: string,
+    private readonly name: ChannelName,
+    private readonly description: ChannelDescription,
+    private readonly projectId: ProjectIdentity,
+    private readonly createdAt: Date,
+    private readonly updatedAt: Date,
+  ) {}
 
   static create(props: {
     id?: string;
     name: string;
     projectId: string;
-    createdBy: string;
-    isPrivate?: boolean;
     description?: string | null;
     createdAt?: Date;
     updatedAt?: Date;
   }): Channel {
-    return new Channel(ChannelCore.create(props));
+    const identity = props.id || crypto.randomUUID();
+    return new Channel(
+      identity,
+      new ChannelName(props.name),
+      new ChannelDescription(props.description || null),
+      new ProjectIdentity(props.projectId),
+      props.createdAt || new Date(),
+      props.updatedAt || new Date(),
+    );
   }
 
   getId(): string {
-    return this.core.getId();
+    return this.identity;
   }
 
   getName(): string {
-    return this.core.getName();
+    return this.name.getValue();
+  }
+
+  getDescription(): string | null {
+    return this.description.getValue();
   }
 
   getProjectId(): string {
-    return this.core.getProjectId();
+    return this.projectId.getValue();
   }
 
-  canBeAccessedBy(userId: string): boolean {
-    return new ChannelAccess(this.core.getData()).canBeAccessedBy(userId);
+  getCreatedAt(): Date {
+    return this.createdAt;
   }
 
-  isPrivate(): boolean {
-    return new ChannelAccess(this.core.getData()).isPrivate();
+  getUpdatedAt(): Date {
+    return this.updatedAt;
   }
 
-  static createGeneral(projectId: string, createdBy: string): Channel {
-    return ChannelFactory.createGeneral(projectId, createdBy);
+  static createGeneral(projectId: string): Channel {
+    return Channel.create({
+      name: "general",
+      projectId,
+      description: "Canal geral do projeto",
+    });
   }
 
   toPlainObject() {
-    return ChannelSerializer.toPlainObject(
-      this.core.getId(),
-      this.core.getData(),
-    );
+    return {
+      id: this.identity,
+      name: this.getName(),
+      description: this.getDescription(),
+      projectId: this.getProjectId(),
+      createdAt: this.getCreatedAt(),
+      updatedAt: this.getUpdatedAt(),
+    };
   }
 }

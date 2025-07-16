@@ -15,6 +15,13 @@
       "when": 1752545541433,
       "tag": "0001_puzzling_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1752704819706,
+      "tag": "0002_tan_apocalypse",
+      "breakpoints": true
     }
   ]
 }

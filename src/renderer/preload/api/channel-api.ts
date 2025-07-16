@@ -6,27 +6,37 @@ import type {
 } from "../../../shared/types/domains/projects/channel.types";
 
 export interface IChannelAPI {
-  create: (data: CreateChannelDto) => Promise<ChannelDto>;
+  createForProject: (
+    projectId: string,
+    data: Omit<CreateChannelDto, "projectId">,
+  ) => Promise<ChannelDto>;
   getById: (id: string) => Promise<ChannelDto | null>;
   listByProject: (projectId: string) => Promise<ChannelDto[]>;
-  listAccessible: (projectId: string, userId: string) => Promise<ChannelDto[]>;
-  createGeneral: (projectId: string, createdBy: string) => Promise<ChannelDto>;
+  listAccessibleByProject: (projectId: string) => Promise<ChannelDto[]>;
+  createGeneralForProject: (projectId: string) => Promise<ChannelDto>;
   delete: (id: string) => Promise<void>;
 }
 
 export function createChannelAPI(): IChannelAPI {
   return {
-    create: createChannel,
+    createForProject: createChannelForProject,
     getById: getChannelById,
     listByProject: listChannelsByProject,
-    listAccessible: listAccessibleChannels,
-    createGeneral: createGeneralChannel,
+    listAccessibleByProject: listAccessibleChannelsByProject,
+    createGeneralForProject: createGeneralChannelForProject,
     delete: deleteChannel,
   };
 }
 
-function createChannel(data: CreateChannelDto): Promise<ChannelDto> {
-  return ipcRenderer.invoke("channel:create", data);
+function createChannelForProject(
+  projectId: string,
+  data: Omit<CreateChannelDto, "projectId">,
+): Promise<ChannelDto> {
+  return ipcRenderer.invoke("project:createChannel", {
+    projectId,
+    name: data.name,
+    description: data.description,
+  });
 }
 
 function getChannelById(id: string): Promise<ChannelDto | null> {
@@ -34,21 +44,19 @@ function getChannelById(id: string): Promise<ChannelDto | null> {
 }
 
 function listChannelsByProject(projectId: string): Promise<ChannelDto[]> {
-  return ipcRenderer.invoke("channel:listByProject", { projectId });
+  return ipcRenderer.invoke("project:listChannels", { projectId });
 }
 
-function listAccessibleChannels(
+function listAccessibleChannelsByProject(
   projectId: string,
-  userId: string,
 ): Promise<ChannelDto[]> {
-  return ipcRenderer.invoke("channel:listAccessible", { projectId, userId });
+  return ipcRenderer.invoke("project:listAccessibleChannels", { projectId });
 }
 
-function createGeneralChannel(
+function createGeneralChannelForProject(
   projectId: string,
-  createdBy: string,
 ): Promise<ChannelDto> {
-  return ipcRenderer.invoke("channel:createGeneral", { projectId, createdBy });
+  return ipcRenderer.invoke("project:createGeneralChannel", { projectId });
 }
 
 function deleteChannel(id: string): Promise<void> {

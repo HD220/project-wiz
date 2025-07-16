@@ -161,13 +161,10 @@ const codeStyleAndQualityRules = {
   "max-lines": ["warn", { max: 350, skipBlankLines: true, skipComments: true }],
   "max-lines-per-function": [
     "warn",
-    { max: 70, skipBlankLines: true, skipComments: true },
+    { max: 100, skipBlankLines: true, skipComments: true },
   ],
-  "max-statements": ["warn", { max: 15 }],
-  "id-length": [
-    "warn",
-    { min: 2, exceptions: ["i", "j", "k", "x", "y", "z", "a", "b", "_"] },
-  ],
+  "max-statements": ["warn", { max: 20 }],
+  "id-length": ["warn", { min: 2, exceptions: ["_"] }],
 };
 
 const testingSpecificRules = {

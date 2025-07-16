@@ -1,15 +1,13 @@
 interface ChannelFormData {
   channelName: string;
   channelDescription: string;
-  isPrivate: boolean;
   setIsSubmitting: (value: boolean) => void;
 }
 
 interface CreateChannelData {
   name: string;
   description?: string;
-  isPrivate: boolean;
-  createdBy: string;
+  projectId: string;
 }
 
 interface ChannelCreator {
@@ -20,6 +18,7 @@ interface ChannelCreator {
 export function useChannelFormSubmit(
   formData: ChannelFormData,
   channelCreator: ChannelCreator,
+  projectId: string,
 ) {
   const validateForm = (): boolean => {
     return !!formData.channelName.trim();
@@ -39,8 +38,7 @@ export function useChannelFormSubmit(
       await channelCreator.createChannel({
         name: formData.channelName.trim(),
         description: formData.channelDescription.trim() || undefined,
-        isPrivate: formData.isPrivate,
-        createdBy: "current-user",
+        projectId,
       });
       return true;
     } catch (error) {

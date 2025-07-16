@@ -1,7 +1,7 @@
 import { AgentWorkerQueue } from "./agent-worker-queue";
 import { AgentWorkerState } from "./agent-worker-state";
-import { AgentTask } from "./entities/agent-task.entity";
-import { Agent } from "./entities/agent.entity";
+import { AgentTask } from "../entities/agent-task.entity";
+import { Agent } from "../entities/agent.entity";
 
 export class AgentWorker {
   constructor(agent: Agent) {

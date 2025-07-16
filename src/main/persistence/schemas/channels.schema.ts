@@ -14,15 +14,9 @@ export const channels = sqliteTable("channels", {
   // Campos obrigatórios
   name: text("name").notNull(),
   projectId: text("project_id").notNull(),
-  createdBy: text("created_by").notNull(),
 
   // Campos opcionais
   description: text("description"),
-
-  // Booleanos como integer
-  isPrivate: integer("is_private", { mode: "boolean" })
-    .notNull()
-    .default(false),
 
   // Timestamps automáticos
   createdAt: integer("created_at", { mode: "timestamp" })

@@ -1,4 +1,5 @@
 import { ProjectIdentity, ProjectName } from "../value-objects";
+import { Channel } from "./channel.entity";
 
 export class Project {
   constructor(
@@ -12,6 +13,18 @@ export class Project {
 
   getName(): string {
     return this.name.getValue();
+  }
+
+  createChannel(props: { name: string; description?: string }): Channel {
+    return Channel.create({
+      name: props.name,
+      projectId: this.getId(),
+      description: props.description,
+    });
+  }
+
+  createGeneralChannel(): Channel {
+    return Channel.createGeneral(this.getId());
   }
 
   static create(props: { id?: string; name: string }): Project {

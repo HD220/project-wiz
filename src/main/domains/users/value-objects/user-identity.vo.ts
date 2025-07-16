@@ -1,26 +1,7 @@
-import { z } from "zod";
+import { createUuidValueObject } from "../../../shared/value-objects/base-value-object";
 
-const UserIdentitySchema = z
-  .string()
-  .uuid("User identity must be a valid UUID");
-
-export class UserIdentity {
-  constructor(id: string) {
-    const validated = UserIdentitySchema.parse(id);
-    this.value = validated;
-  }
-
-  private readonly value: string;
-
-  getValue(): string {
-    return this.value;
-  }
-
-  equals(other: UserIdentity): boolean {
-    return this.value === other.value;
-  }
-
-  toString(): string {
-    return this.value;
+export class UserIdentity extends createUuidValueObject() {
+  static create(id: string): UserIdentity {
+    return new UserIdentity(id);
   }
 }

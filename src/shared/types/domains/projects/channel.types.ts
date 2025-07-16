@@ -5,8 +5,6 @@ export interface CreateChannelDto {
   name: string;
   description?: string;
   projectId: string;
-  isPrivate?: boolean;
-  createdBy: string;
 }
 
 // DTO para atualizar canal existente
@@ -14,7 +12,6 @@ export interface UpdateChannelDto {
   id: string;
   name?: string;
   description?: string;
-  isPrivate?: boolean;
 }
 
 // DTO para resposta (output)
@@ -23,8 +20,6 @@ export interface ChannelDto {
   name: string;
   description?: string;
   projectId: string;
-  isPrivate: boolean;
-  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,5 +27,4 @@ export interface ChannelDto {
 // DTO para filtros de busca
 export interface ChannelFilterDto {
   projectId?: string;
-  isPrivate?: boolean;
 }

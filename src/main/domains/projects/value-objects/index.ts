@@ -5,7 +5,6 @@ export { ProjectStatus } from "./project-status.vo";
 export { ProjectIdentity } from "./project-identity.vo";
 export { ChannelName } from "./channel-name.vo";
 export { ChannelDescription } from "./channel-description.vo";
-export { ChannelPrivacy } from "./channel-privacy.vo";
 
 // Function exports
 export {
