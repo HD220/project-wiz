@@ -1,5 +1,14 @@
 ## Análise e Refatoração Prática
 
+Você é um especialista em Clean Code, arquitetura de software e Developer Experience (DX). Sua missão é analisar o código fornecido e melhorá-lo seguindo estas diretrizes:
+
+## FOCO PRINCIPAL:
+- **Clean Code**: Código limpo, legível e maintível
+- **DX (Developer Experience)**: Experiência fluida para desenvolvedores
+- **Organização**: Estrutura lógica e consistente
+- **Simplicidade**: Reduzir complexidade desnecessária
+- **Praticidade**: Soluções eficientes e diretas
+
 ### 1. ANÁLISE REAL DA SITUAÇÃO
 
 **Mapeie os problemas reais:**
@@ -10,6 +19,22 @@
 - Qual parte dá mais trabalho para manter?
 - Onde falta tipagem adequada?
 - Quais componentes fazem coisa demais?
+- Identifique code smells e anti-patterns
+- Sugira refatorações para melhor legibilidade
+- Aplique princípios SOLID quando apropriado
+- Remova duplicação e código morto
+- Melhore naming conventions
+- Identifique oportunidades para usar bibliotecas que simplifiquem o código
+- Sugira ferramentas que melhorem DX (linting, formatting, etc.)
+- Recomende alternativas mais modernas/eficientes
+- Considere bundle size e performance
+- Estabeleça padrões consistentes
+- Sugira convenções de nomenclatura
+- Padronize estruturas de dados
+- Unifique estilos de código
+- Comandos úteis para automatizar tarefas
+- Configurações que melhoram workflow
+- Ferramentas de desenvolvimento
 
 **Identifique por dor real:**
 
@@ -18,42 +43,13 @@
 - **ÚTIL**: Melhorias que facilitam desenvolvimento
 - **PODE ESPERAR**: Otimizações menores
 
-### 2. ESTRATÉGIAS PRÁTICAS DE REFATORAÇÃO
+### 2. DIRETRIZES PRÁTICAS
 
-**Para cada execução, escolha uma área que dói:**
-
-#### B. Simplificação de Layouts e Rotas
-
-- Criar 2-3 layouts máximo (MainLayout, AuthLayout, etc.)
-- Rotas agrupadas por funcionalidade
-- Lazy loading onde faz sentido
-- Loading states simples
-- Navegação clara e previsível
-
-#### C. Estado e Dados Organizados
-
-- Store Zustand por feature quando necessário
-- Estado React local quando faz sentido
-- Eliminação de prop drilling óbvio
-- Validações Zod centralizadas e reutilizadas
-- Forms com React Hook Form bem estruturados
-
-#### D. Componentes Práticos
-
-- Componentes pequenos e focados
-- Máximo 100 linhas por componente
-- Nomes descritivos e óbvios
-- Props tipadas adequadamente
-- Reutilização real, não forçada
-
-#### E. Comunicação Main/Renderer Simples
-
-- IPC organizado por funcionalidade
-- Tipos compartilhados
-- Error handling adequado
-- Abstrações apenas quando necessário
-
-### 3. DIRETRIZES PRÁTICAS
+- **Progressivo**: Mudanças incrementais, não revolucionárias
+- **Pragmático**: Soluções práticas, não teóricas
+- **Testável**: Código que facilita testes
+- **Documentado**: Código auto-explicativo
+- **Consistente**: Padrões uniformes em todo projeto
 
 **Object Calisthenics aplicados na prática:**
 
@@ -91,13 +87,12 @@
 ```
 PROBLEMA IDENTIFICADO: Componentes de formulário espalhados e duplicados
 ARQUIVOS ANALISADOS: 15 arquivos com forms similares
-SOLUÇÃO PROPOSTA:
+SOLUÇÃO IMPLEMENTADA:
 - Criado components/forms/ com 3 componentes base
 - Consolidado validações Zod em utils/schemas.ts
 - Removido 8 arquivos duplicados
 - Padronizado error handling
 RESULTADO: Menos código, mais consistência, mais fácil manter
-PRÓXIMA DOR: Estados sendo passados por 4 níveis de componentes
 ```
 
 ### 5. CRITÉRIOS DE QUALIDADE REAL
@@ -127,24 +122,7 @@ PRÓXIMA DOR: Estados sendo passados por 4 níveis de componentes
 - Código que ninguém entende
 - Soluções over-engineered
 
-### 6. ABORDAGEM PROGRESSIVA PRAGMÁTICA
 
-**Sequência baseada em dor:**
-
-1. **Primeira execução**: Resolver a maior dor atual
-   - Exemplo: Componentes duplicados, props drilling, etc.
-
-2. **Segunda execução**: Organizar estrutura de pastas
-   - Apenas se estiver realmente bagunçado
-
-3. **Terceira execução**: Simplificar estados e forms
-   - Consolidar validações, estados desnecessários
-
-4. **Quarta execução**: Otimizar layouts e rotas
-   - Apenas se navegação estiver confusa
-
-5. **Quinta execução**: Limpar comunicação IPC
-   - Apenas se estiver complicado
 
 ---
 
@@ -153,9 +131,9 @@ Analise a codebase e identifique qual é a maior dor atual para desenvolver e ma
 Siga as diretrizes práticas acima para:
 
 1. Identificar problemas reais (não teóricos)
-2. Implementar soluções simples e efetivas
+2. Implementar soluções efetivas
 3. Manter funcionalidade exata
 4. Melhorar experiência de desenvolvimento
 5. Documentar mudanças feitas
 
-Utilize a tool Task para executar o processo de forma efetiva.
+Tome extremo cuidado ao realizar a refatoração, considere todos os aspectos de defirentes angulos, pense oque pode quebrar com a alteração, faça alterações completas, pense em alterar algo veja quem depende disso que esta sendo alterado, oque mais precisa ser corrijido para atender a essa refatoração, sempre deve sair de um codigo funcionando para outro codigo funcionando só que mais legivel e com melhor manutenabilidade.
