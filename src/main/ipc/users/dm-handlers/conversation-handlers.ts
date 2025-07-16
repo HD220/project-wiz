@@ -5,8 +5,8 @@ import {
   findOrCreateDirectMessage,
 } from "../../../domains/users/functions";
 
-import type { IpcMainInvokeEvent } from "electron";
 import type { CreateConversationDto } from "../../../../shared/types";
+import type { IpcMainInvokeEvent } from "electron";
 
 export async function handleCreateConversation(
   _: IpcMainInvokeEvent,

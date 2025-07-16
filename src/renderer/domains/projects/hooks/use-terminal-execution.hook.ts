@@ -1,5 +1,6 @@
-import type { TerminalLine } from "@/lib/mock-data/types";
 import { Dispatch, SetStateAction } from "react";
+
+import type { TerminalLine } from "@/lib/mock-data/types";
 
 interface UseTerminalExecutionProps {
   command: string;

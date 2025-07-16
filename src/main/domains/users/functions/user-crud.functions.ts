@@ -1,11 +1,12 @@
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+
 import { getDatabase } from "../../../infrastructure/database";
 import { usersTable } from "../../../persistence/schemas";
-import { eq } from "drizzle-orm";
-import { User } from "../entities/user.entity";
 import { UserPreferences } from "../entities/user-preferences.entity";
+import { User } from "../entities/user.entity";
 import { UserIdentity } from "../value-objects/user-identity.vo";
 import { UserSettings } from "../value-objects/user-settings.vo";
-import { z } from "zod";
 
 const CreateUserSchema = z.object({
   id: z.string(),

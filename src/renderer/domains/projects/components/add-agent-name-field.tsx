@@ -1,7 +1,6 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { TextField } from "@/components/forms/form-fields";
 
-import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
 
 interface AddAgentNameFieldProps {
   formData: CreateAgentDto;
@@ -16,14 +15,13 @@ export function AddAgentNameField({
   updateField,
 }: AddAgentNameFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="name">Nome do Agente</Label>
-      <Input
-        id="name"
-        value={formData.name}
-        onChange={(evt) => updateField("name", evt.target.value)}
-        placeholder="ex: Analista de Código"
-      />
-    </div>
+    <TextField
+      id="name"
+      label="Nome do Agente"
+      value={formData.name}
+      onChange={(value) => updateField("name", value)}
+      placeholder="ex: Analista de Código"
+      required
+    />
   );
 }

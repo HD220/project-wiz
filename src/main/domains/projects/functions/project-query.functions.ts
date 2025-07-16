@@ -1,5 +1,5 @@
-import { Project } from "../entities/project.entity";
 import { ProjectDto } from "../../shared/types/project.types";
+import { Project } from "../entities/project.entity";
 
 export async function findProjectById(id: string): Promise<Project | null> {
   // Placeholder implementation

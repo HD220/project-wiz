@@ -3,8 +3,8 @@ import { useCallback, useMemo, useState } from "react";
 import { useConversation } from "./use-conversations.hook";
 import { useMessages } from "./use-messages.hook";
 
-import type { ConversationDto } from "../../../../shared/types/domains/users/conversation-dto.type";
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { ConversationDto } from "../../../../shared/types/domains/users/conversation-dto.type";
 
 interface UseAgentChatProps {
   conversationId: string;

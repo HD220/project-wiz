@@ -1,3 +1,5 @@
+import type { ErrorConstructor } from "@/shared/types/constructor.types";
+
 import { ErrorMetadata } from "./error-metadata.interface";
 import { setupErrorPrototype } from "./error-prototype.helper";
 import { serializeError } from "./error-serialization.helper";
@@ -18,7 +20,7 @@ export abstract class BaseError extends Error {
       timestamp: this.timestamp,
     };
 
-    setupErrorPrototype(this, new.target as any);
+    setupErrorPrototype(this, new.target as ErrorConstructor);
   }
 
   toJSON(): {

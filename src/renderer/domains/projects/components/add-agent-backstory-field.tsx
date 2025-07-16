@@ -1,7 +1,6 @@
 import { BookOpen } from "lucide-react";
 
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/ui/textarea";
+import { TextAreaField } from "@/components/forms/form-fields";
 
 import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
 
@@ -18,18 +17,14 @@ export function AddAgentBackstoryField({
   updateField,
 }: AddAgentBackstoryFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="backstory" className="flex items-center gap-2">
-        <BookOpen className="w-4 h-4" />
-        História de Fundo
-      </Label>
-      <Textarea
-        id="backstory"
-        value={formData.backstory}
-        onChange={(event) => updateField("backstory", event.target.value)}
-        placeholder="Contexto e experiência do agente..."
-        rows={3}
-      />
-    </div>
+    <TextAreaField
+      id="backstory"
+      label="História de Fundo"
+      value={formData.backstory}
+      onChange={(value) => updateField("backstory", value)}
+      placeholder="Contexto e experiência do agente..."
+      icon={BookOpen}
+      rows={3}
+    />
   );
 }
