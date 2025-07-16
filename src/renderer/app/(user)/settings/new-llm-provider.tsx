@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { LlmProviderFormModal } from "@/domains/llm/components/llm-provider-form-modal";
+import { LlmProviderFormModal } from "@/domains/llm/components";
 
 export const Route = createFileRoute("/(user)/settings/new-llm-provider")({
   component: NewLlmProvider,

@@ -1,11 +1,6 @@
 import { useCallback } from "react";
 
-import {
-  useCreateProjectMutation,
-  useUpdateProjectMutation,
-  useDeleteProjectMutation,
-  useArchiveProjectMutation,
-} from "./use-projects-queries.hook";
+import { useProjectsQueries } from './use-projects-queries.hook'
 
 import type {
   CreateProjectDto,

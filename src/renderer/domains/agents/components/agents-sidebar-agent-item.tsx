@@ -8,14 +8,14 @@ interface AgentItemProps {
   agent: AgentDto;
   projectId?: string;
   onRemoveAgent: (agentId: string) => void;
-  onAgentSelect?: (agent: AgentDto) => void;
+  _onAgentSelect?: (agent: AgentDto) => void;
 }
 
 export function AgentsSidebarAgentItem({
   agent,
   projectId,
   onRemoveAgent,
-  onAgentSelect,
+  _onAgentSelect,
 }: AgentItemProps) {
   return (
     <div

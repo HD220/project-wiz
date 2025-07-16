@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "../../../../components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/ui/avatar'
 
 interface ConversationTypingIndicatorProps {
   agentName: string;

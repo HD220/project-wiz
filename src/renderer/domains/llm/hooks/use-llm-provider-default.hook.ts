@@ -15,7 +15,7 @@ export function useLlmProviderDefault(filter?: LlmProviderFilterDto) {
     const providers = providersQuery.data || [];
     return (
       defaultProviderQuery.data ||
-      providers.find((p) => p.isDefault) ||
+      providers.find((provider) => provider.isDefault) ||
       providers[0] ||
       null
     );

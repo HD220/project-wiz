@@ -1,6 +1,6 @@
 import { Home, Settings, MessageSquare } from "lucide-react";
 
-import { CustomLink } from "../../../../components/custom-link";
+import { CustomLink } from '@/components/custom-link'
 
 export function UserSidebarNavigation() {
   return (

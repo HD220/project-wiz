@@ -14,7 +14,7 @@ export function ChannelDescField({ value, onChange }: ChannelDescFieldProps) {
         id="channel-description"
         placeholder="Para que serve este canal..."
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         rows={3}
       />
     </div>

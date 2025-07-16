@@ -39,7 +39,7 @@ export function ModelField({
         <Input
           id="model"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           placeholder="Enter custom model name"
         />
       )}

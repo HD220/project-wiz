@@ -22,9 +22,6 @@ const SIDEBAR_STYLES =
 
 export function ProjectSidebarItem({ project }: ProjectSidebarItemProps) {
   const routerState = useRouterState();
-  const isLoadingThisProject =
-    routerState.isLoading &&
-    routerState.location.pathname.includes(`/project/${project.id}`);
 
   return (
     <TooltipProvider>
@@ -37,7 +34,13 @@ export function ProjectSidebarItem({ project }: ProjectSidebarItemProps) {
             activeProps={{ className: "active" }}
             activeOptions={{ includeSearch: false }}
           >
-            <ProjectAvatar project={project} isLoading={isLoadingThisProject} />
+            <ProjectAvatar
+              project={project}
+              isLoading={
+                routerState.isLoading &&
+                routerState.location.pathname.includes(`/project/${project.id}`)
+              }
+            />
             <ProjectUnreadBadge unreadCount={project.unreadCount} />
           </Link>
         </TooltipTrigger>

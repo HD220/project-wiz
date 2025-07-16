@@ -1,11 +1,11 @@
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentIterationsFieldProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
+  updateField: <T extends keyof CreateAgentDto>(field: T, value: CreateAgentDto[T]) => void;
 }
 
 export function AddAgentIterationsField({
@@ -21,7 +21,7 @@ export function AddAgentIterationsField({
         min="1"
         max="50"
         value={formData.maxIterations}
-        onChange={(e) => updateField("maxIterations", parseInt(e.target.value))}
+        onChange={(event) => updateField("maxIterations", parseInt(event.target.value))}
       />
     </div>
   );

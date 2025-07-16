@@ -34,6 +34,8 @@ export default defineConfig({
       "@/lib": path.resolve(projectRoot, "./src/renderer/lib/"),
       "@/hooks": path.resolve(projectRoot, "./src/renderer/hooks/"),
       "@/features": path.resolve(projectRoot, "./src/renderer/features/"),
+      "@/domains": path.resolve(projectRoot, "./src/renderer/domains/"),
+      "@/main-domains": path.resolve(projectRoot, "./src/main/domains/"),
       "@/shared": path.resolve(projectRoot, "./src/shared/"),
       "@": path.resolve(projectRoot, "./src/"),
     },

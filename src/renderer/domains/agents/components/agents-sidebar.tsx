@@ -10,7 +10,7 @@ interface AgentsSidebarProps {
 }
 
 export function AgentsSidebar({
-  isOpen,
+  _isOpen,
   onAgentSelect,
   projectId,
 }: AgentsSidebarProps) {

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ChatContainer } from "../../../../components/chat/chat-container";
+import { useProjectChannels } from "@/domains/projects/hooks";
 
-import { useProjectChannels } from "@/domains/projects/hooks/use-project-channels.hook";
+import { ChatContainer } from "../../../../components/chat/chat-container";
 
 export function ChannelChatPage() {
   const { projectId, channelId } = Route.useParams();

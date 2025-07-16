@@ -8,7 +8,7 @@ import type { CreateAgentDto } from "../../../../shared/types/domains/agents/age
 
 interface AddAgentAdvancedFieldsProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
+  updateField: (field: keyof CreateAgentDto, value: CreateAgentDto[keyof CreateAgentDto]) => void;
 }
 
 export function AddAgentAdvancedFields({

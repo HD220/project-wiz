@@ -4,8 +4,8 @@ import {
   useParams,
 } from "@tanstack/react-router";
 
-import { LlmProviderFormModal } from "@/domains/llm/components/llm-provider-form-modal";
-import { useLlmProviders } from "@/domains/llm/hooks/use-llm-provider.hook";
+import { LlmProviderFormModal } from "@/domains/llm/components";
+import { useLlmProviders } from "@/domains/llm/hooks";
 
 export const Route = createFileRoute(
   "/(user)/settings/edit-llm-provider/$llmProviderId",

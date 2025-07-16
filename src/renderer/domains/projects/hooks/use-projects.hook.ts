@@ -1,5 +1,5 @@
 import { useProjectsMutations } from "./use-projects-mutations.hook";
-import { useProjectsQuery, useProjectQuery } from "./use-projects-queries.hook";
+import { useProjectsQuery } from './use-projects-queries.hook'
 import { useProjectsRefetch } from "./use-projects-refetch.hook";
 import { useProjectsState } from "./use-projects-state.hook";
 

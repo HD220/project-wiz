@@ -8,7 +8,7 @@ interface CreateChannelModalFormProps {
   isPrivate: boolean;
   isSubmitting: boolean;
   error: string | null;
-  onFieldChange: (field: string, value: any) => void;
+  onFieldChange: (field: string, value: string | boolean) => void;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   onCancel: () => void;
 }

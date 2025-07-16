@@ -18,7 +18,7 @@ export function AgentsSidebarSearch({
         <Input
           placeholder="Buscar agentes..."
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(event) => onSearchChange(event.target.value)}
           className="pl-9 bg-background h-8"
         />
       </div>

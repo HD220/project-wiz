@@ -1,5 +1,5 @@
-import { ScrollArea } from "../../../../components/ui/scroll-area";
-import { cn } from "../../../../lib/utils";
+import { ScrollArea } from '@/ui/scroll-area'
+import { cn } from '@/lib/utils'
 import { useAgentDashboardState } from "../hooks/use-agent-dashboard-state.hook";
 
 import { AgentDashboardHeader } from "./agent-dashboard-header";

@@ -18,9 +18,9 @@ export function AiChatInput({
   disabled = false,
   placeholder = "Digite sua mensagem...",
 }: AiChatInputProps) {
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       onSend();
     }
   };
@@ -29,7 +29,7 @@ export function AiChatInput({
     <div className="flex gap-2">
       <Input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         onKeyPress={handleKeyPress}
         placeholder={placeholder}
         disabled={disabled}

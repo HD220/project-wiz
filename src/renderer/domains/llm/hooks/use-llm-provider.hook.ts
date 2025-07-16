@@ -8,12 +8,17 @@ import { useLlmProvidersQuery } from "./use-llm-provider-queries.hook";
 
 import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
 
+interface LlmProviderStoreState {
+  selectedLlmProvider: string | null;
+  setSelectedLlmProvider: (provider: string | null) => void;
+}
+
 export function useLlmProviders(filter?: LlmProviderFilterDto) {
   const selectedLlmProvider = useLlmProviderStore(
-    (state: any) => state.selectedLlmProvider,
+    (state: LlmProviderStoreState) => state.selectedLlmProvider,
   );
   const setSelectedLlmProvider = useLlmProviderStore(
-    (state: any) => state.setSelectedLlmProvider,
+    (state: LlmProviderStoreState) => state.setSelectedLlmProvider,
   );
 
   const providersQuery = useLlmProvidersQuery(filter);

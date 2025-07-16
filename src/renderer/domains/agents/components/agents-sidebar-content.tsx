@@ -1,4 +1,4 @@
-import { AddAgentModal } from "./add-agent-modal";
+import { AddAgentModal } from '@/domains/agents/components/add-agent-modal'
 import { AgentsSidebarMainSection } from "./agents-sidebar-main-section";
 import { AgentsSidebarTopSection } from "./agents-sidebar-top-section";
 

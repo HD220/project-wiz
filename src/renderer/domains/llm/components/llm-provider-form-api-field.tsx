@@ -14,7 +14,7 @@ export function ApiKeyField({ value, onChange }: ApiKeyFieldProps) {
         id="apiKey"
         type="password"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         placeholder="sk-..."
       />
     </div>

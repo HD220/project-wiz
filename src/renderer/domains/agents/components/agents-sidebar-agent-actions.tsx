@@ -19,8 +19,8 @@ export function AgentsSidebarAgentActions({
         <Button
           variant="ghost"
           size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             onRemoveAgent(agentId);
           }}
           className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"

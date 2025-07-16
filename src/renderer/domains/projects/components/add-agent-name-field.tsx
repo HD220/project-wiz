@@ -1,11 +1,11 @@
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentNameFieldProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
+  updateField: <K extends keyof CreateAgentDto>(field: K, value: CreateAgentDto[K]) => void;
 }
 
 export function AddAgentNameField({
@@ -18,7 +18,7 @@ export function AddAgentNameField({
       <Input
         id="name"
         value={formData.name}
-        onChange={(e) => updateField("name", e.target.value)}
+        onChange={(evt) => updateField("name", evt.target.value)}
         placeholder="ex: Analista de Código"
       />
     </div>

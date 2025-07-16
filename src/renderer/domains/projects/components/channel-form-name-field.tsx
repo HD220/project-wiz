@@ -7,8 +7,8 @@ interface ChannelNameFieldProps {
 }
 
 export function ChannelNameField({ value, onChange }: ChannelNameFieldProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = e.target.value.toLowerCase().replace(/\s+/g, "-");
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = event.target.value.toLowerCase().replace(/\s+/g, "-");
     onChange(formatted);
   };
 

@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { SettingsHeader, SettingsTabs } from "@/domains/users/components";
+import { useUser } from "@/domains/users/hooks";
+
 import {
   UserSettings,
   SettingsUpdateHandler,
 } from "@/shared/types/settings.types";
-
-import { SettingsHeader } from "@/domains/users/components/settings/settings-header";
-import { SettingsTabs } from "@/domains/users/components/settings/settings-tabs";
-import { useUser } from "@/domains/users/hooks/use-user.hook";
 
 export const Route = createFileRoute("/(user)/settings/")({
   component: UserSettingsPage,

@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import {
   mockTerminalLines,
   type TerminalLine,
-} from "../../../../lib/placeholders";
+} from '@/lib/placeholders';
 
 export function useTerminalOutput() {
   const [terminalLines, setTerminalLines] =

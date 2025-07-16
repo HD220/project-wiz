@@ -9,10 +9,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { FileExplorer, TerminalPanel } from "@/domains/projects/components";
 import { FileTreeItem } from "@/lib/placeholders";
-
-import { FileExplorer } from "@/domains/projects/components/file-explorer";
-import { TerminalPanel } from "@/domains/projects/components/terminal-panel";
 
 export const Route = createFileRoute("/project/$projectId/files/")({
   component: ProjectFilesPage,

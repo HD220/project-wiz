@@ -1,7 +1,7 @@
 import { Search, Plus } from "lucide-react";
 
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface FileExplorerHeaderProps {
   searchQuery: string;
@@ -25,7 +25,7 @@ export function FileExplorerHeader({
         <Input
           placeholder="Buscar arquivos..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(event) => setSearchQuery(event.target.value)}
           className="pl-7 h-7 text-xs"
         />
       </div>

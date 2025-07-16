@@ -1,11 +1,13 @@
 import { useState } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import {
+  AiChatInput,
+  AiChatProviderSelector,
+  AiChatStatus,
+} from "@/domains/projects/components";
+import { useChannelChat } from "@/domains/projects/hooks";
 
-import { AiChatInput } from "@/domains/projects/components/chat/ai-chat-input";
-import { AiChatProviderSelector } from "@/domains/projects/components/chat/ai-chat-provider-selector";
-import { AiChatStatus } from "@/domains/projects/components/chat/ai-chat-status";
-import { useChannelChat } from "@/domains/projects/hooks/use-channel-chat.hook";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface AIChatExampleProps {
   channelId: string;

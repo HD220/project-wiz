@@ -1,11 +1,10 @@
+import { useChannelMessagesById } from "@/domains/projects/hooks";
 import { Message } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
-
-import { useChannelMessagesById } from "@/domains/projects/hooks/use-channel-messages-by-id.hook";
 
 interface ChatContainerProps {
   channelId?: string;
@@ -18,21 +17,16 @@ interface ChatContainerProps {
 export function ChatContainer(props: ChatContainerProps) {
   const { channelId, channelName, agentId, agentName, className } = props;
 
-  const channelMessagesHook = channelId
-    ? useChannelMessagesById(channelId)
-    : null;
-  const agentMessages: Message[] = [];
+  const channelMessagesHook = useChannelMessagesById(channelId || "");
 
-  const messages = channelId
-    ? channelMessagesHook?.messages || []
-    : agentMessages;
+  const messages = channelId ? channelMessagesHook.messages || [] : [];
   const displayName = channelName || agentName || "Chat";
   const isAgentChat = !!agentId;
-  const isLoading = channelMessagesHook?.isLoading || false;
-  const error = channelMessagesHook?.error;
+  const isLoading = channelId ? channelMessagesHook.isLoading || false : false;
+  const error = channelId ? channelMessagesHook.error : undefined;
 
   const handleSendMessage = async (messageText: string) => {
-    if (channelId && channelMessagesHook) {
+    if (channelId) {
       await channelMessagesHook.sendTextMessage(
         messageText,
         "current-user-id",
@@ -47,14 +41,14 @@ export function ChatContainer(props: ChatContainerProps) {
   };
 
   const handleEditMessage = (id: string, content: string) => {
-    if (!channelMessagesHook) {
+    if (!channelId) {
       return;
     }
     channelMessagesHook.updateMessage({ id, content });
   };
 
   const handleDeleteMessage = (id: string) => {
-    if (!channelMessagesHook) {
+    if (!channelId) {
       return;
     }
     channelMessagesHook.deleteMessage(id);

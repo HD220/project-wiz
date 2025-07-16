@@ -5,24 +5,8 @@ import { cn } from "@/lib/utils";
 
 import { CalendarClassNames } from "@/shared/types/calendar.types";
 
-export function getCalendarClassNames(
-  buttonVariant: string,
-  captionLayout: string,
-  classNames: CalendarClassNames,
-) {
-  const defaultClassNames = getDefaultClassNames();
-
+function getButtonClassNames(buttonVariant: string, defaultClassNames: any) {
   return {
-    root: cn("w-fit", defaultClassNames.root),
-    months: cn(
-      "flex gap-4 flex-col md:flex-row relative",
-      defaultClassNames.months,
-    ),
-    month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
-    nav: cn(
-      "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
-      defaultClassNames.nav,
-    ),
     button_previous: cn(
       buttonVariants({ variant: buttonVariant }),
       "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
@@ -33,6 +17,11 @@ export function getCalendarClassNames(
       "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
       defaultClassNames.button_next,
     ),
+  };
+}
+
+function getMonthCaptionClassNames(captionLayout: string, defaultClassNames: any) {
+  return {
     month_caption: cn(
       "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)",
       defaultClassNames.month_caption,
@@ -53,6 +42,11 @@ export function getCalendarClassNames(
         : "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:text-muted-foreground [&>svg]:size-3.5",
       defaultClassNames.caption_label,
     ),
+  };
+}
+
+function getDayWeekClassNames(defaultClassNames: any) {
+  return {
     table: "w-full border-collapse",
     weekdays: cn("flex", defaultClassNames.weekdays),
     weekday: cn(
@@ -88,6 +82,34 @@ export function getCalendarClassNames(
       defaultClassNames.disabled,
     ),
     hidden: cn("invisible", defaultClassNames.hidden),
+  };
+}
+
+export function getCalendarClassNames(
+  buttonVariant: string,
+  captionLayout: string,
+  classNames: CalendarClassNames,
+) {
+  const defaultClassNames = getDefaultClassNames();
+
+  const buttonClassNames = getButtonClassNames(buttonVariant, defaultClassNames);
+  const monthCaptionClassNames = getMonthCaptionClassNames(captionLayout, defaultClassNames);
+  const dayWeekClassNames = getDayWeekClassNames(defaultClassNames);
+
+  return {
+    root: cn("w-fit", defaultClassNames.root),
+    months: cn(
+      "flex gap-4 flex-col md:flex-row relative",
+      defaultClassNames.months,
+    ),
+    month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
+    nav: cn(
+      "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
+      defaultClassNames.nav,
+    ),
+    ...buttonClassNames,
+    ...monthCaptionClassNames,
+    ...dayWeekClassNames,
     ...classNames,
   };
 }

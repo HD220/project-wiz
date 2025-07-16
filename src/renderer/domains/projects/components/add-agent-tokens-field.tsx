@@ -1,11 +1,11 @@
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentTokensFieldProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
+  updateField: <K extends keyof CreateAgentDto>(field: K, value: CreateAgentDto[K]) => void;
 }
 
 export function AddAgentTokensField({
@@ -21,7 +21,7 @@ export function AddAgentTokensField({
         min="100"
         max="8000"
         value={formData.maxTokens}
-        onChange={(e) => updateField("maxTokens", parseInt(e.target.value))}
+        onChange={(event) => updateField("maxTokens", parseInt(event.target.value))}
       />
     </div>
   );

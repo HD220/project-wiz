@@ -15,7 +15,7 @@ export function ChannelPrivacyField({
         id="channel-private"
         type="checkbox"
         checked={value}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(event) => onChange(event.target.checked)}
         className="rounded border-input"
       />
       <Label htmlFor="channel-private" className="text-sm font-normal">

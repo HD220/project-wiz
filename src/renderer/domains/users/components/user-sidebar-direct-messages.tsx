@@ -1,12 +1,8 @@
 import { ChevronDown, Plus } from "lucide-react";
 
-import { CustomLink } from "../../../../components/custom-link";
-import { Button } from "../../../../components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../../../../components/ui/collapsible";
+import { CustomLink } from '@/components/custom-link'
+import { Button } from '@/ui/button'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/collapsible'
 
 import { ConversationList } from "./conversation-list";
 

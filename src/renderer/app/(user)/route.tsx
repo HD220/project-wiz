@@ -7,8 +7,7 @@ import {
   ResizableHandle,
 } from "@/renderer/components/ui/resizable";
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
-
-import { UserSidebar } from "@/domains/users/components/user-sidebar";
+import { UserSidebar } from "@/renderer/domains/users/components";
 
 function getPageTitle(
   pageTitle: string | undefined,

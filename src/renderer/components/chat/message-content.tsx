@@ -36,7 +36,7 @@ function processMentions(content: string, mentions?: string[]): string {
   return result;
 }
 
-function SystemMessage({ content }: { content: string }) {
+function SystemMessage({ content: markdownContent }: { content: string }) {
   return (
     <div className="bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded-r">
       <div className="flex items-center space-x-2">
@@ -45,22 +45,24 @@ function SystemMessage({ content }: { content: string }) {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
-            children={content}
-          />
+          >
+            {markdownContent}
+          </ReactMarkdown>
         </div>
       </div>
     </div>
   );
 }
 
-function RegularMessage({ content }: { content: string }) {
+function RegularMessage({ content: markdownContent }: { content: string }) {
   return (
     <div className="text-gray-300 prose prose-sm prose-invert max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
-        children={content}
-      />
+      >
+        {markdownContent}
+      </ReactMarkdown>
     </div>
   );
 }

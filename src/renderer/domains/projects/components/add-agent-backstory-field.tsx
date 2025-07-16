@@ -1,13 +1,13 @@
 import { BookOpen } from "lucide-react";
 
-import { Label } from "../../../../components/ui/label";
-import { Textarea } from "../../../../components/ui/textarea";
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/ui/textarea'
 
-import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
 
 interface AddAgentBackstoryFieldProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
+  updateField: <K extends keyof CreateAgentDto>(field: K, value: CreateAgentDto[K]) => void;
 }
 
 export function AddAgentBackstoryField({
@@ -23,7 +23,7 @@ export function AddAgentBackstoryField({
       <Textarea
         id="backstory"
         value={formData.backstory}
-        onChange={(e) => updateField("backstory", e.target.value)}
+        onChange={(event) => updateField("backstory", event.target.value)}
         placeholder="Contexto e experiência do agente..."
         rows={3}
       />

@@ -1,2 +1,13 @@
 // Domínio: LLM - Infraestrutura compartilhada
-// TODO: Exports will be added as components are migrated
+
+// Re-export all components
+export * from "./components";
+
+// Re-export all hooks
+export * from "./hooks";
+
+// Re-export all services
+export * from "./services/llm-provider.service";
+
+// Re-export all stores
+export * from "./stores";

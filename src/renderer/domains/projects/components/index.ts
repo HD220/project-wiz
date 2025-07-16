@@ -17,7 +17,7 @@ export * from "./navigation-channels";
 export * from "./create-project-form";
 export * from "./project-form-fields";
 export * from "./create-project-modal";
-export * from "./create-project-modal-fields";
+export * from './create-project-modal-fields'
 export * from "./create-channel-modal";
 export * from "./channel-form-fields";
 
@@ -43,3 +43,14 @@ export * from "./terminal-output";
 export * from "./terminal-panel-header";
 export * from "./terminal-panel";
 export * from "./terminal-tabs";
+
+// Docs Components
+export * from "./docs/doc-tree";
+export * from "./docs/doc-tree-item";
+export * from "./docs/doc-viewer";
+export * from "./docs/mock-docs-data";
+
+// Chat Components
+export * from "./chat/ai-chat-input";
+export * from "./chat/ai-chat-provider-selector";
+export * from "./chat/ai-chat-status";

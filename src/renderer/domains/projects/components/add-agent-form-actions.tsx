@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 
-import { Button } from "../../../../components/ui/button";
-import { DialogFooter } from "../../../../components/ui/dialog";
+import { Button } from '@/components/ui/button'
+import { DialogClose } from '@/components/ui/dialog'
 
 interface AddAgentFormActionsProps {
   isSubmitting: boolean;

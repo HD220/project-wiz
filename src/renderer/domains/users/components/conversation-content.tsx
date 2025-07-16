@@ -1,4 +1,4 @@
-import { ScrollArea } from "../../../../components/ui/scroll-area";
+import { ScrollArea } from '@/ui/scroll-area'
 
 import { ConversationErrorDisplay } from "./conversation-error-display";
 import { ConversationMessagesList } from "./conversation-messages-list";

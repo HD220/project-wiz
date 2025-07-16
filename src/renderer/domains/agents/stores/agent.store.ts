@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create, SetState } from "zustand";
 
 import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
@@ -7,7 +7,7 @@ interface AgentState {
   setSelectedAgent: (agent: AgentDto | null) => void;
 }
 
-export const useAgentStore = create<AgentState>((set: any) => ({
+export const useAgentStore = create<AgentState>((set) => ({
   selectedAgent: null,
   setSelectedAgent: (agent: AgentDto | null) => set({ selectedAgent: agent }),
 }));

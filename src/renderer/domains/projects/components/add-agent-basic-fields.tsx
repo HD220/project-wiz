@@ -5,11 +5,12 @@ import { AddAgentNameField } from "./add-agent-name-field";
 import { AddAgentRoleField } from "./add-agent-role-field";
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { LlmProviderDto } from "../../../../shared/types/domains/llm/llm-provider.types";
 
 interface AddAgentBasicFieldsProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
-  llmProviders: any[];
+  updateField: (field: keyof CreateAgentDto, value: CreateAgentDto[keyof CreateAgentDto]) => void;
+  llmProviders: LlmProviderDto[];
 }
 
 export function AddAgentBasicFields({

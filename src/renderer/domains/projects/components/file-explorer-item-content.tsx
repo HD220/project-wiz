@@ -1,4 +1,4 @@
-import { Badge } from "../../../../components/ui/badge";
+import { Badge } from '@/components/ui/badge'
 
 import type { FileTreeItem } from "../../../../lib/placeholders";
 

@@ -13,7 +13,7 @@ export function ProviderNameField({ value, onChange }: ProviderNameFieldProps) {
       <Input
         id="name"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         placeholder="My AI Provider"
       />
     </div>

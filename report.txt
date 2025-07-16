@@ -7,180 +7,18 @@
 > eslint --ext .ts,.tsx .
 
 
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/app/window-manager.ts
-  7:15  warning  'MAIN_WINDOW_VITE_NAME' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars [RESOLVIDO]
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/agents/entities/agent-task.entity.ts
-  2:10  warning  'TaskStatus' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars [RESOLVIDO]
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/llm/functions/llm-provider-operations.functions.ts
-  11:8  error  Unable to resolve path to module './llm-provider-crud.functions'  import/no-unresolved [RESOLVIDO]
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/llm/text-generation-processor.ts
-  7:11  warning  'TextGenerationOptions' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/llm/text-generation.service.ts
-  10:5  warning  'messages' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/projects/entities/project-operations.entity.ts
-  1:25  error  Unable to resolve path to module './project-core.entity'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/projects/entities/project-updater.entity.ts
-  42:5  warning  'nameUpdater' is defined but never used. Allowed unused args must match /^_/u    @typescript-eslint/no-unused-vars
-  43:5  warning  'gitUrlUpdater' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
-  44:5  warning  'statusUpdater' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/projects/functions/index.ts
-  7:15  error  Unable to resolve path to module './project-message-crud.functions'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/domains/users/functions/index.ts
-  6:15  error  Unable to resolve path to module './ai-messaging.functions'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/errors/application.error.ts
-  1:35  warning  'ErrorMetadata' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/kernel/dependency-container.module-initializer.ts
-  5:10  warning  'IModule' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/kernel/event-bus.ts
-  6:33  error  'EventBusSingleton' is not defined  no-undef
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/persistence/schemas/conversations.schema.ts
-  3:29  warning  'integer' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/(user)/conversation/$conversationId.tsx
-  5:34  error  Unable to resolve path to module '../../../features/direct-messages/components/conversation-view'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/(user)/new-conversation.tsx
-  3:38  error  Unable to resolve path to module '../../features/direct-messages/components/new-conversation-modal'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/(user)/route.tsx
-   4:3   warning  'useNavigate' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
-  15:10  warning  'mockAgents' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
-  17:29  error    Unable to resolve path to module '@/features/user-management/components/user-sidebar'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/(user)/settings/edit-llm-provider.$llmProviderId.tsx
-   7:38  error    Unable to resolve path to module '@/renderer/features/llm-provider-management/components/llm-provider-form-modal'  import/no-unresolved
-   8:33  error    Unable to resolve path to module '@/renderer/features/llm-provider-management/hooks/use-llm-provider.hook'         import/no-unresolved
-  22:40  warning  Identifier name 'p' is too short (< 2)                                                                             id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/(user)/settings/index.tsx
-   4:26  error    Unable to resolve path to module '@/contexts/theme-context'                             import/no-unresolved
-   5:32  error    Unable to resolve path to module '@/domains/users/components/settings/settings-header'  import/no-unresolved
-   6:30  error    Unable to resolve path to module '@/domains/users/components/settings/settings-tabs'    import/no-unresolved
-   7:25  error    Unable to resolve path to module '@/domains/users/hooks/use-user.hook'                  import/no-unresolved
-  15:11  warning  'currentUser' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-  31:55  error    Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/(user)/settings/new-llm-provider.tsx
-  3:38  error  Unable to resolve path to module '@/renderer/features/llm-provider-management/components/llm-provider-form-modal'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/__root.tsx
-  21:9  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-  22:9  warning  'location' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/create-channel.tsx
-  3:36  error  Unable to resolve path to module '@/domains/projects/components/create-channel-modal'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/create-project.tsx
-  3:36  error  Unable to resolve path to module '@/domains/projects/components/create-project-modal'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/agent/$agentId.tsx
-  6:11  warning  'projectId' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/agents/index.tsx
-  3:32  error  Unable to resolve path to module '@/renderer/features/agent-management/components/agent-dashboard'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/chat/$channelId.tsx
-  5:36  error  Unable to resolve path to module '@/features/communication/hooks/use-channels.hook'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/docs/index.tsx
-  11:25  error  Unable to resolve path to module '@/domains/projects/components/docs/doc-tree'        import/no-unresolved
-  12:27  error  Unable to resolve path to module '@/domains/projects/components/docs/doc-viewer'      import/no-unresolved
-  16:8   error  Unable to resolve path to module '@/domains/projects/components/docs/mock-docs-data'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/files/index.tsx
-  5:30  error  Unable to resolve path to module '@/renderer/features/development-tools/components/file-explorer'   import/no-unresolved
-  6:31  error  Unable to resolve path to module '@/renderer/features/development-tools/components/terminal-panel'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/index.tsx
-  10:29  error  Unable to resolve path to module '@/domains/projects/hooks/use-projects.hook'  import/no-unresolved
-
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/route-page-info.ts
-  1:8   warning  Function 'getPageInfo' has too many statements (17). Maximum allowed is 15  max-statements
-  3:13  error    Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
-  4:11  error    Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
-  5:19  error    Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
-  9:44  warning  Identifier name 'c' is too short (< 2)                                      id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/route.tsx
-    4:3   warning  'useNavigate' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
-   19:10  warning  'ProjectDto' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
-   21:31  error    Unable to resolve path to module '@/domains/agents/components/agents-sidebar'          import/no-unresolved
-   22:36  error    Unable to resolve path to module '@/domains/projects/components/create-channel-modal'  import/no-unresolved
-   23:35  error    Unable to resolve path to module '@/domains/projects/components/project-navigation'    import/no-unresolved
-   24:36  error    Unable to resolve path to module '@/domains/projects/hooks/use-project-channels.hook'  import/no-unresolved
-   25:10  warning  'useProjects' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
-   25:29  error    Unable to resolve path to module '@/domains/projects/hooks/use-projects.hook'          import/no-unresolved
-   42:23  warning  Arrow function has too many statements (18). Maximum allowed is 15                     max-statements
-   48:46  warning  Identifier name 'c' is too short (< 2)                                                 id-length
-  180:7   error    Unable to resolve path to module '@/features/project-management/stores/project.store'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/app/project/$projectId/tasks/index.tsx
-  3:29  error  Unable to resolve path to module '@/renderer/features/task-management/components/kanban-board'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/ai-chat-example.tsx
-  5:29  error  Unable to resolve path to module '@/domains/projects/components/chat/ai-chat-input'              import/no-unresolved
-  6:40  error  Unable to resolve path to module '@/domains/projects/components/chat/ai-chat-provider-selector'  import/no-unresolved
-  7:30  error  Unable to resolve path to module '@/domains/projects/components/chat/ai-chat-status'             import/no-unresolved
-  8:32  error  Unable to resolve path to module '@/domains/projects/hooks/use-channel-chat.hook'                import/no-unresolved
+  8:8  warning  Function 'getPageInfo' has too many statements (17). Maximum allowed is 15  max-statements
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/chat-container.tsx
-   4:15  warning  'ChannelMessageDto' is defined but never used. Allowed unused vars must match /^_/u                                                        @typescript-eslint/no-unused-vars
-  10:40  error    Unable to resolve path to module '@/features/channel-messaging/hooks/use-channel-messages.hook'                                            import/no-unresolved
-  24:7   error    React Hook "useChannelMessagesById" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/chat-header.tsx
-  1:16  warning  'AtSign' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/chat-input.tsx
-  35:26  warning  Identifier name 'e' is too short (< 2)  id-length
-  53:22  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/chat-messages.tsx
-  66:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:7  error  React Hook "useChannelMessagesById" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/message-content.tsx
   48:13  error  Do not pass children as props. Instead, nest children between the opening and closing tags  react/no-children-prop
   62:9   error  Do not pass children as props. Instead, nest children between the opening and closing tags  react/no-children-prop
 
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/message-edit-form.tsx
-  29:20  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/chat/message-item-styles.ts
-  5:3  warning  'hasUserMention' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/custom-link.tsx
-  5:10  warning  'cn' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/forms/project-form-fields.tsx
-  32:22  warning  Identifier name 'e' is too short (< 2)  id-length
-  42:22  warning  Identifier name 'e' is too short (< 2)  id-length
-  52:22  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/layout/app-sidebar.tsx
-  12:32  error  Unable to resolve path to module '@/domains/projects/components/project-sidebar'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/layout/title-bar.tsx
-   57:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  102:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/markdown-renderer/markdown-components.tsx
-  37:3  warning  Identifier name 'p' is too short (< 2)  id-length
-
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/components/ui/calendar/calendar-styles.ts
-  6:8   warning  Function 'getCalendarClassNames' has too many lines (85). Maximum allowed is 70  max-lines-per-function
-  9:15  error    Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  8:8  warning  Function 'getCalendarClassNames' has too many lines (85). Maximum allowed is 70  max-lines-per-function
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/components/agent-dashboard-header.tsx
   3:24  error  Unable to resolve path to module '../../../../components/ui/button'  import/no-unresolved
@@ -220,28 +58,7 @@
   6:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/agents/stores/agent.store.ts
-   1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-  10:55  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/llm/components/llm-provider-form-api-field.tsx
-  17:20  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/llm/components/llm-provider-form-model-field.tsx
-  42:22  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/llm/components/llm-provider-form-name-field.tsx
-  16:20  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/llm/hooks/use-llm-provider-default.hook.ts
-  18:23  warning  Identifier name 'p' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/llm/hooks/use-llm-provider.hook.ts
-  13:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  16:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/llm/stores/llm-provider.store.ts
-   1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-  10:67  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  10:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/add-agent-advanced-fields.tsx
   11:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -325,18 +142,12 @@
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/channel-form-desc-field.tsx
   17:20  warning  Identifier name 'e' is too short (< 2)  id-length
 
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/channel-form-name-field.tsx
-  10:25  warning  Identifier name 'e' is too short (< 2)  id-length
-
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/channel-form-privacy-field.tsx
   18:20  warning  Identifier name 'e' is too short (< 2)  id-length
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/chat/ai-chat-input.tsx
   21:27  warning  Identifier name 'e' is too short (< 2)  id-length
   32:20  warning  Identifier name 'e' is too short (< 2)  id-length
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/chat/ai-chat-provider-selector.tsx
-  9:33  error  Unable to resolve path to module '@/domains/llm/hooks/use-llm-provider.hook'  import/no-unresolved
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/components/create-channel-modal-form.tsx
   11:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -477,23 +288,12 @@
   31:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   48:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/stores/ai-chat.store.ts
-  1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/stores/channel-message.store.ts
-  1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/stores/channel.store.ts
-  1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/stores/project.store.ts
-   1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-  10:59  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  10:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/projects/stores/typing.store.ts
-   1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-   8:57  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
-  11:17  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   8:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/conversation-content.tsx
    1:28  error  Unable to resolve path to module '../../../../components/ui/scroll-area'  import/no-unresolved
@@ -530,6 +330,9 @@
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/new-conversation-modal-header.tsx
   7:8  error  Unable to resolve path to module '../../../../components/ui/dialog'  import/no-unresolved
+
+/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/new-conversation-modal.tsx
+  1:39  error  Unable to resolve path to module '../../../../components/ui/dialog'  import/no-unresolved
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/components/settings/settings-tabs.tsx
   7:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -604,15 +407,8 @@
    5:3   warning  'UpdateUserSettingsDto' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
   22:46  error    Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
 
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/stores/conversation.store.ts
-  1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/stores/message.store.ts
-   1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
-  10:59  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
-
-/mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/domains/users/stores/user.store.ts
-  1:24  error  Unable to resolve path to module 'zustand'  import/no-unresolved
+  10:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/renderer/preload/api/agent-api.ts
   15:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -651,5 +447,5 @@
 /mnt/d/Documentos/Pessoal/Github/project-wiz/src/shared/utils/date/date-formatting.ts
   19:8  warning  Function 'formatRelative' has too many statements (17). Maximum allowed is 15  max-statements
 
-✖ 313 problems (220 errors, 93 warnings)
+✖ 215 problems (161 errors, 54 warnings)
 

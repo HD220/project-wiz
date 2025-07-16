@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ConversationSkeleton } from "@/components/skeletons/conversation-skeleton";
-
-import { ConversationView } from "@/domains/users/components/conversation-view";
+import { ConversationView } from "@/domains/users/components";
 
 export function ConversationPage() {
   const { conversationId } = Route.useParams();

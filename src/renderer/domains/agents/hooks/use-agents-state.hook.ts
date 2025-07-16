@@ -1,9 +1,9 @@
 import { useAgentStore } from "../stores/agent.store";
 
 export function useAgentsState() {
-  const selectedAgent = useAgentStore((state: any) => state.selectedAgent);
+  const selectedAgent = useAgentStore((state) => state.selectedAgent);
   const setSelectedAgent = useAgentStore(
-    (state: any) => state.setSelectedAgent,
+    (state) => state.setSelectedAgent,
   );
 
   return {

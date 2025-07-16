@@ -1,9 +1,6 @@
 import { Copy, Trash2, Edit, Download } from "lucide-react";
 
-import {
-  ContextMenuContent,
-  ContextMenuItem,
-} from "../../../../components/ui/context-menu";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
 
 export function FileExplorerItemContextMenu() {
   return (

@@ -1,13 +1,13 @@
 import { Target } from "lucide-react";
 
-import { Label } from "../../../../components/ui/label";
-import { Textarea } from "../../../../components/ui/textarea";
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
-import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
 
 interface AddAgentGoalFieldProps {
   formData: CreateAgentDto;
-  updateField: (field: keyof CreateAgentDto, value: any) => void;
+  updateField: (field: keyof CreateAgentDto, value: CreateAgentDto[keyof CreateAgentDto]) => void;
 }
 
 export function AddAgentGoalField({
@@ -23,7 +23,7 @@ export function AddAgentGoalField({
       <Textarea
         id="goal"
         value={formData.goal}
-        onChange={(e) => updateField("goal", e.target.value)}
+        onChange={(event) => updateField("goal", event.target.value)}
         placeholder="Descreva o objetivo principal deste agente..."
         rows={3}
       />

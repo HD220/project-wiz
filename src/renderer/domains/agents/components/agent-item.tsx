@@ -14,7 +14,8 @@ export function AgentItem({ agent, onAgentClick }: AgentItemProps) {
   const isOffline = agent.status === "offline";
 
   return (
-    <div
+    <button
+      type="button"
       className={cn(
         "flex items-start gap-3 p-2 rounded-md hover:bg-accent/50 cursor-pointer",
         isOffline && "opacity-60",

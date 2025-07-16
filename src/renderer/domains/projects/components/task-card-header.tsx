@@ -17,9 +17,14 @@ export function TaskCardHeader({
   return (
     <CardHeader className="pb-3">
       <div className="flex items-start justify-between gap-2">
-        <CardTitle className="text-sm font-medium leading-tight group-hover:text-primary transition-colors">
-          {task.title}
-        </CardTitle>
+        <button
+          onClick={onTaskClick}
+          className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+        >
+          <CardTitle className="text-sm font-medium leading-tight group-hover:text-primary transition-colors">
+            {task.title}
+          </CardTitle>
+        </button>
         <Badge
           variant={getPriorityColor(task.priority)}
           className="text-xs shrink-0"

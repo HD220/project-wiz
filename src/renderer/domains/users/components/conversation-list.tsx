@@ -1,4 +1,4 @@
-import { ScrollArea } from "../../../../components/ui/scroll-area";
+import { ScrollArea } from '@/ui/scroll-area'
 import { useConversationUtils } from "../hooks/use-conversation-utils.hook";
 import { useConversations } from "../hooks/use-conversations.hook";
 

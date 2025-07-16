@@ -7,7 +7,7 @@ interface LlmProviderState {
   setSelectedLlmProvider: (provider: LlmProviderDto | null) => void;
 }
 
-export const useLlmProviderStore = create<LlmProviderState>((set: any) => ({
+export const useLlmProviderStore = create<LlmProviderState>((set) => ({
   selectedLlmProvider: null,
   setSelectedLlmProvider: (provider: LlmProviderDto | null) =>
     set({ selectedLlmProvider: provider }),

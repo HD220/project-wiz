@@ -19,7 +19,7 @@ export function useAddAgentForm() {
     systemPrompt: "",
   });
 
-  const updateField = (field: keyof CreateAgentDto, value: any) => {
+  const updateField = <T extends keyof CreateAgentDto>(field: T, value: CreateAgentDto[T]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
