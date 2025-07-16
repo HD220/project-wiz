@@ -1,5 +1,4 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { NumberField } from "@/components/forms/form-fields";
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
@@ -16,19 +15,15 @@ export function AddAgentTemperatureField({
   updateField,
 }: AddAgentTemperatureFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="temperature">Temperatura</Label>
-      <Input
-        id="temperature"
-        type="number"
-        min="0"
-        max="2"
-        step="0.1"
-        value={formData.temperature}
-        onChange={(event) =>
-          updateField("temperature", parseFloat(event.target.value))
-        }
-      />
-    </div>
+    <NumberField
+      id="temperature"
+      label="Temperatura"
+      value={formData.temperature}
+      onChange={(value) => updateField("temperature", value)}
+      min={0}
+      max={2}
+      step={0.1}
+      required
+    />
   );
 }

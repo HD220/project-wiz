@@ -1,5 +1,4 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { TextField } from "@/components/forms/form-fields";
 
 interface ApiKeyFieldProps {
   value: string;
@@ -8,15 +7,14 @@ interface ApiKeyFieldProps {
 
 export function ApiKeyField({ value, onChange }: ApiKeyFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="apiKey">API Key</Label>
-      <Input
-        id="apiKey"
-        type="password"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="sk-..."
-      />
-    </div>
+    <TextField
+      id="apiKey"
+      label="API Key"
+      type="password"
+      value={value}
+      onChange={onChange}
+      placeholder="sk-..."
+      required
+    />
   );
 }

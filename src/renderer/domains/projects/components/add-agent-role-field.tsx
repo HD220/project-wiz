@@ -1,7 +1,6 @@
 import { Brain } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { TextField } from "@/components/forms/form-fields";
 
 import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
@@ -18,17 +17,14 @@ export function AddAgentRoleField({
   updateField,
 }: AddAgentRoleFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="role" className="flex items-center gap-2">
-        <Brain className="w-4 h-4" />
-        Função/Especialidade
-      </Label>
-      <Input
-        id="role"
-        value={formData.role}
-        onChange={(event) => updateField("role", event.target.value)}
-        placeholder="ex: Senior Python Developer"
-      />
-    </div>
+    <TextField
+      id="role"
+      label="Função/Especialidade"
+      value={formData.role}
+      onChange={(value) => updateField("role", value)}
+      placeholder="ex: Senior Python Developer"
+      icon={Brain}
+      required
+    />
   );
 }

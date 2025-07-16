@@ -1,12 +1,4 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ModelField as BaseModelField } from "@/components/forms/form-fields";
 
 interface ModelFieldProps {
   value: string;
@@ -20,29 +12,15 @@ export function ModelField({
   onChange,
 }: ModelFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label>Model</Label>
-      {availableModels.length > 0 ? (
-        <Select value={value} onValueChange={onChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a model" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableModels.map((model) => (
-              <SelectItem key={model} value={model}>
-                {model}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <Input
-          id="model"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="Enter custom model name"
-        />
-      )}
-    </div>
+    <BaseModelField
+      id="model"
+      label="Model"
+      value={value}
+      onChange={onChange}
+      availableModels={availableModels}
+      selectPlaceholder="Select a model"
+      customPlaceholder="Enter custom model name"
+      required
+    />
   );
 }

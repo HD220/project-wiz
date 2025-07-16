@@ -1,5 +1,4 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { TextField } from "@/components/forms/form-fields";
 
 interface ProviderNameFieldProps {
   value: string;
@@ -8,14 +7,13 @@ interface ProviderNameFieldProps {
 
 export function ProviderNameField({ value, onChange }: ProviderNameFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="name">Name</Label>
-      <Input
-        id="name"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="My AI Provider"
-      />
-    </div>
+    <TextField
+      id="name"
+      label="Name"
+      value={value}
+      onChange={onChange}
+      placeholder="My AI Provider"
+      required
+    />
   );
 }
