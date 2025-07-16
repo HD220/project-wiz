@@ -1,8 +1,10 @@
-import type { ConversationDto } from '../../../../shared/types/domains/users/user.types';
+import type { ConversationDto } from "../../../../shared/types/domains/users/user.types";
 
 export function useConversationUtils() {
   const getOtherParticipant = (conversation: ConversationDto) => {
-    return conversation.participants.find((p: string) => p !== "user") || "Unknown";
+    return (
+      conversation.participants.find((p: string) => p !== "user") || "Unknown"
+    );
   };
 
   const formatLastMessageTime = (date?: Date) => {
@@ -18,15 +20,15 @@ export function useConversationUtils() {
         minute: "2-digit",
       });
     }
-    
+
     if (days === 1) {
       return "Ontem";
     }
-    
+
     if (days < 7) {
       return `${days}d atrás`;
     }
-    
+
     return new Date(date).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",

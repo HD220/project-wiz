@@ -98,9 +98,9 @@ export function registerDirectMessageHandlers(): void {
     // Para regenerar, vamos pegar a última mensagem do usuário e reprocessar
     const messages = await getConversationMessages(data.conversationId, 10, 0);
     const lastUserMessage = messages
-      .filter(msg => msg.senderType === "user")
+      .filter((msg) => msg.senderType === "user")
       .pop();
-    
+
     if (lastUserMessage) {
       return await processUserMessage(
         data.conversationId,
@@ -108,7 +108,7 @@ export function registerDirectMessageHandlers(): void {
         data.userId,
       );
     }
-    
+
     return null;
   });
 }

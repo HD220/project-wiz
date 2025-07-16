@@ -5,7 +5,7 @@
 **Data da Análise:** 2025-07-15  
 **Status Geral:** Pronto para iniciar migração arquivo por arquivo  
 **Arquitetura Backend:** 85% migrada (domínios implementados)  
-**Arquitetura Frontend:** 0% migrada (ainda na estrutura de features)  
+**Arquitetura Frontend:** 0% migrada (ainda na estrutura de features)
 
 ## Situação Atual Descoberta
 
@@ -58,22 +58,22 @@ O renderer ainda mantém a estrutura antiga:
 
 ### Arquivos por Prioridade
 
-| Prioridade | Quantidade | Descrição |
-|------------|------------|-----------|
-| 🔴 **Crítica** | 15 arquivos | >200 linhas, violações graves |
-| 🟡 **Moderada** | 23 arquivos | 100-200 linhas, refatoração necessária |
-| 🟢 **Simples** | 45 arquivos | <100 linhas, migração direta |
-| 🔵 **Manutenção** | 56 arquivos | Configuração, rotas, tipos |
+| Prioridade        | Quantidade  | Descrição                              |
+| ----------------- | ----------- | -------------------------------------- |
+| 🔴 **Crítica**    | 15 arquivos | >200 linhas, violações graves          |
+| 🟡 **Moderada**   | 23 arquivos | 100-200 linhas, refatoração necessária |
+| 🟢 **Simples**    | 45 arquivos | <100 linhas, migração direta           |
+| 🔵 **Manutenção** | 56 arquivos | Configuração, rotas, tipos             |
 
 ### Domínios de Destino
 
-| Domínio | Arquivos | Status | Complexidade |
-|---------|----------|--------|--------------|
-| **Users** | 10 arquivos | ❌ Pendente | Moderada |
-| **Projects** | 75 arquivos | ❌ Pendente | Alta |
-| **Agents** | 2 arquivos | ❌ Pendente | Alta |
-| **LLM** | 3 arquivos | ❌ Pendente | Moderada |
-| **Shared** | 49 arquivos | ❌ Pendente | Baixa |
+| Domínio      | Arquivos    | Status      | Complexidade |
+| ------------ | ----------- | ----------- | ------------ |
+| **Users**    | 10 arquivos | ❌ Pendente | Moderada     |
+| **Projects** | 75 arquivos | ❌ Pendente | Alta         |
+| **Agents**   | 2 arquivos  | ❌ Pendente | Alta         |
+| **LLM**      | 3 arquivos  | ❌ Pendente | Moderada     |
+| **Shared**   | 49 arquivos | ❌ Pendente | Baixa        |
 
 ### Arquivos Críticos Identificados
 
@@ -121,9 +121,9 @@ O renderer ainda mantém a estrutura antiga:
 
 ```typescript
 interface IElectronIPC {
-  agents: IAgentAPI;        // ✅ Domínio agents
-  projects: IProjectAPI;    // ✅ Domínio projects
-  users: IUserAPI;          // ✅ Domínio users
+  agents: IAgentAPI; // ✅ Domínio agents
+  projects: IProjectAPI; // ✅ Domínio projects
+  users: IUserAPI; // ✅ Domínio users
   llmProviders: ILlmProviderAPI; // ✅ Domínio llm
 }
 ```
@@ -134,14 +134,14 @@ interface IElectronIPC {
 
 ```typescript
 // ATUAL (flat)
-shared/types/user.types.ts
-shared/types/project.types.ts
-shared/types/agent.types.ts
+shared / types / user.types.ts;
+shared / types / project.types.ts;
+shared / types / agent.types.ts;
 
 // NECESSÁRIO (por domínio)
-shared/types/domains/users/user.types.ts
-shared/types/domains/projects/project.types.ts
-shared/types/domains/agents/agent.types.ts
+shared / types / domains / users / user.types.ts;
+shared / types / domains / projects / project.types.ts;
+shared / types / domains / agents / agent.types.ts;
 ```
 
 ## Tecnologias e Dependências
@@ -187,45 +187,50 @@ shared/types/domains/agents/agent.types.ts
 **Pendentes:** 139 arquivos (100%)  
 **Em Progresso:** 0 arquivos  
 **Concluídos:** 0 arquivos  
-**Removidos:** 0 arquivos  
+**Removidos:** 0 arquivos
 
 ### Violações Object Calisthenics
 
 **Arquivos >50 linhas:** 45 arquivos  
 **Métodos >10 linhas:** ~200 métodos  
 **Classes >2 variáveis:** ~25 classes  
-**Uso de else:** ~150 ocorrências  
+**Uso de else:** ~150 ocorrências
 
 ### Meta Pós-Migração
 
 **Arquivos >50 linhas:** 0  
 **Métodos >10 linhas:** 0  
 **Classes >2 variáveis:** 0  
-**Uso de else:** 0  
+**Uso de else:** 0
 
 ## Cronograma Atualizado
 
 ### Fase 1: Preparação (2-3 dias)
+
 - Criar estrutura de domínios
 - Migrar shared types
 - Configurar ferramentas
 
 ### Fase 2: Arquivos Críticos (12-15 dias)
+
 - 15 arquivos que requerem refatoração intensiva
 - Dividir componentes gigantes
 - Aplicar Object Calisthenics rigorosamente
 
 ### Fase 3: Arquivos Moderados (8-10 dias)
+
 - 23 arquivos com refatoração necessária
 - Simplificar stores complexos
 - Extrair hooks especializados
 
 ### Fase 4: Arquivos Simples (4-6 dias)
+
 - 45 arquivos com migração direta
 - Mover para nova estrutura
 - Verificar Object Calisthenics
 
 ### Fase 5: Finalização (3-4 dias)
+
 - Cleanup e validação
 - Testes de integração
 - Documentação final
@@ -273,6 +278,7 @@ npm run build         # Build funcionando
 ### Critérios de Aprovação
 
 **Arquivo aprovado apenas quando:**
+
 - ✅ Todas as validações passando
 - ✅ Code review aprovado
 - ✅ Testes funcionais OK
@@ -281,21 +287,25 @@ npm run build         # Build funcionando
 ## Próximos Passos
 
 ### Imediato (1-2 dias)
+
 1. Criar estrutura de domínios
 2. Migrar shared types
 3. Configurar ferramentas de validação
 
 ### Curto Prazo (1 semana)
+
 1. Iniciar migração dos arquivos críticos
 2. Implementar processo de validação
 3. Estabelecer métricas de progresso
 
 ### Médio Prazo (2-3 semanas)
+
 1. Concluir migração de arquivos críticos
 2. Processar arquivos moderados
 3. Validar integração contínua
 
 ### Longo Prazo (3-4 semanas)
+
 1. Finalizar arquivos simples
 2. Cleanup e otimização
 3. Documentação completa
@@ -303,6 +313,7 @@ npm run build         # Build funcionando
 ## Conclusão
 
 A migração está **pronta para iniciar** com:
+
 - **Backend sólido** (85% migrado)
 - **Frontend mapeado** (139 arquivos catalogados)
 - **Estratégia definida** (arquivo por arquivo)

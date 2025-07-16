@@ -1,10 +1,12 @@
-import { Avatar, AvatarFallback } from '../../../../components/ui/avatar';
+import { Avatar, AvatarFallback } from "../../../../components/ui/avatar";
 
 interface ConversationTypingIndicatorProps {
   agentName: string;
 }
 
-export function ConversationTypingIndicator({ agentName }: ConversationTypingIndicatorProps) {
+export function ConversationTypingIndicator({
+  agentName,
+}: ConversationTypingIndicatorProps) {
   return (
     <div className="flex items-center gap-3">
       <Avatar className="w-10 h-10">

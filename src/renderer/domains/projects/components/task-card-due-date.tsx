@@ -9,11 +9,11 @@ interface TaskCardDueDateProps {
   isDueSoon: boolean;
 }
 
-export function TaskCardDueDate({ 
-  dueDate, 
-  daysUntilDue, 
-  isOverdue, 
-  isDueSoon 
+export function TaskCardDueDate({
+  dueDate,
+  daysUntilDue,
+  isOverdue,
+  isDueSoon,
 }: TaskCardDueDateProps) {
   return (
     <div
@@ -23,9 +23,7 @@ export function TaskCardDueDate({
         isDueSoon && "text-yellow-600",
       )}
     >
-      {(isOverdue || isDueSoon) && (
-        <AlertCircle className="w-3 h-3" />
-      )}
+      {(isOverdue || isDueSoon) && <AlertCircle className="w-3 h-3" />}
       <Clock className="w-3 h-3" />
       <span>
         {isOverdue

@@ -20,22 +20,22 @@ export function ChannelFormFields({
 }: ChannelFormFieldsProps) {
   return (
     <>
-      <ChannelTypeField 
+      <ChannelTypeField
         value={channelType}
         onChange={(value) => onFieldChange("channelType", value)}
       />
 
-      <ChannelNameField 
+      <ChannelNameField
         value={channelName}
         onChange={(value) => onFieldChange("channelName", value)}
       />
 
-      <ChannelDescField 
+      <ChannelDescField
         value={channelDescription}
         onChange={(value) => onFieldChange("channelDescription", value)}
       />
 
-      <ChannelPrivacyField 
+      <ChannelPrivacyField
         value={isPrivate}
         onChange={(value) => onFieldChange("isPrivate", value)}
       />

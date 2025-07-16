@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import type { ChannelMessageDto } from '../../../../shared/types/domains/projects/channel-message.types';
+import { create } from "zustand";
+import type { ChannelMessageDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
 interface ChannelMessageState {
   selectedMessage: ChannelMessageDto | null;

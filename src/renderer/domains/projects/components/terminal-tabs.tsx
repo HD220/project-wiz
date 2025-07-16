@@ -1,6 +1,6 @@
-import { X } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { cn } from '../../../../lib/utils';
+import { X } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import { cn } from "../../../../lib/utils";
 
 interface TerminalTab {
   id: number;
@@ -15,7 +15,12 @@ interface TerminalTabsProps {
   onTabClose: (index: number) => void;
 }
 
-export function TerminalTabs({ tabs, activeTab, onTabSelect, onTabClose }: TerminalTabsProps) {
+export function TerminalTabs({
+  tabs,
+  activeTab,
+  onTabSelect,
+  onTabClose,
+}: TerminalTabsProps) {
   return (
     <div className="flex border-b bg-background">
       {tabs.map((tab, index) => (
@@ -23,12 +28,12 @@ export function TerminalTabs({ tabs, activeTab, onTabSelect, onTabClose }: Termi
           key={tab.id}
           className={cn(
             "flex items-center gap-2 px-3 py-2 cursor-pointer border-r text-sm group hover:bg-accent",
-            activeTab === index && "bg-accent text-accent-foreground"
+            activeTab === index && "bg-accent text-accent-foreground",
           )}
           onClick={() => onTabSelect(index)}
         >
           <span className="truncate max-w-24">{tab.name}</span>
-          
+
           {tabs.length > 1 && (
             <Button
               variant="ghost"

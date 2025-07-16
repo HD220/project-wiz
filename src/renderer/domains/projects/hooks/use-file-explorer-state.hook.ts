@@ -1,15 +1,20 @@
-import { useState } from 'react';
-import { mockFileTree, type FileTreeItem } from '../../../../lib/placeholders';
+import { useState } from "react";
+import { mockFileTree, type FileTreeItem } from "../../../../lib/placeholders";
 
 interface UseFileExplorerStateProps {
   onFileSelect?: (file: FileTreeItem) => void;
   onFileOpen?: (file: FileTreeItem) => void;
 }
 
-export function useFileExplorerState({ onFileSelect, onFileOpen }: UseFileExplorerStateProps) {
+export function useFileExplorerState({
+  onFileSelect,
+  onFileOpen,
+}: UseFileExplorerStateProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(["root"]));
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set(["root"]),
+  );
 
   const toggleFolder = (path: string) => {
     const newExpanded = new Set(expandedFolders);
@@ -36,8 +41,10 @@ export function useFileExplorerState({ onFileSelect, onFileOpen }: UseFileExplor
     }
   };
 
-  const filteredTree = mockFileTree.filter(item =>
-    searchQuery ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) : true
+  const filteredTree = mockFileTree.filter((item) =>
+    searchQuery
+      ? item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      : true,
   );
 
   return {

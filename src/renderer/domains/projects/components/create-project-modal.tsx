@@ -1,17 +1,15 @@
 import { Folder } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { ProjectForm } from "@/components/forms/project-form";
 import { useCreateProjectModal } from "../hooks/use-create-project-modal.hook";
-import { CreateProjectModalFields } from "./create-project-modal-fields";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -61,30 +59,17 @@ export function CreateProjectModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          <CreateProjectModalFields
-            name={name}
-            description={description}
-            gitUrl={gitUrl}
-            onNameChange={setName}
-            onDescriptionChange={setDescription}
-            onGitUrlChange={setGitUrl}
-          />
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={!name.trim() || isSubmitting}>
-              {isSubmitting ? "Criando..." : "Criar Projeto"}
-            </Button>
-          </DialogFooter>
-        </form>
+        <ProjectForm
+          name={name}
+          description={description}
+          gitUrl={gitUrl}
+          onNameChange={setName}
+          onDescriptionChange={setDescription}
+          onGitUrlChange={setGitUrl}
+          isSubmitting={isSubmitting}
+          onSubmit={handleFormSubmit}
+          onCancel={handleClose}
+        />
       </DialogContent>
     </Dialog>
   );

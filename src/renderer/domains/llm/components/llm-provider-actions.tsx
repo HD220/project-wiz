@@ -7,7 +7,10 @@ interface LlmProviderActionsProps {
   onDelete: (id: string) => void;
 }
 
-export function LlmProviderActions({ provider, onDelete }: LlmProviderActionsProps) {
+export function LlmProviderActions({
+  provider,
+  onDelete,
+}: LlmProviderActionsProps) {
   return (
     <div className="flex gap-2">
       <Link

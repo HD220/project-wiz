@@ -14,11 +14,13 @@ Este documento define os casos de uso para a refatoração completa do renderer,
 **Objetivo:** Decompor store monolítico em stores especializados usando Zustand slim + TanStack Query
 
 **Pré-condições:**
+
 - Store atual > 50 linhas (violação Object Calisthenics)
 - Múltiplas responsabilidades identificadas
 - Handlers IPC funcionando no backend
 
 **Fluxo Principal:**
+
 1. Identificar responsabilidades do store atual
 2. Extrair estado local para Zustand slim (≤50 linhas)
 3. Migrar operações de backend para TanStack Query
@@ -28,12 +30,14 @@ Este documento define os casos de uso para a refatoração completa do renderer,
 7. Remover store antigo
 
 **Pós-condições:**
+
 - Store Zustand ≤ 50 linhas
 - Hooks TanStack Query implementados
 - Separação clara de responsabilidades
 - Funcionalidade mantida 100%
 
 **Exemplo de Transformação:**
+
 ```typescript
 // ANTES: channel-message.store.ts (343 linhas - ARQUIVO REAL IDENTIFICADO)
 class ChannelMessageStore {
@@ -44,11 +48,11 @@ class ChannelMessageStore {
     selectedMessage: ChannelMessageDto | null,
     isLoadingMore: boolean,
   };
-  
+
   loadMessagesByChannel = async (channelId: string) => {
     // 38 linhas de lógica complexa - VIOLAÇÃO Object Calisthenics
   };
-  
+
   sendMessage = async (channelId: string, content: string) => {
     // 25 linhas de lógica complexa - VIOLAÇÃO Object Calisthenics
   };
@@ -69,7 +73,7 @@ const useChannelMessageStore = create<ChannelMessageState>((set) => ({
 // domains/projects/hooks/use-channel-messages.hook.ts
 export const useChannelMessages = (channelId: string) => {
   return useQuery({
-    queryKey: ['channel-messages', channelId],
+    queryKey: ["channel-messages", channelId],
     queryFn: () => window.electronIPC.channelMessages.list({ channelId }),
     enabled: !!channelId,
   });
@@ -78,17 +82,19 @@ export const useChannelMessages = (channelId: string) => {
 // domains/projects/hooks/use-send-message.hook.ts
 export const useSendMessage = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ channelId, content }: SendMessageDto) => {
       return window.electronIPC.channelMessages.create({
         channelId,
         content,
-        senderId: 'current-user-id',
+        senderId: "current-user-id",
       });
     },
     onSuccess: (_, { channelId }) => {
-      queryClient.invalidateQueries({ queryKey: ['channel-messages', channelId] });
+      queryClient.invalidateQueries({
+        queryKey: ["channel-messages", channelId],
+      });
     },
   });
 };
@@ -100,10 +106,12 @@ export const useSendMessage = () => {
 **Objetivo:** Migrar de classe store para padrão funcional
 
 **Pré-condições:**
+
 - Store implementado como classe
 - Violações Object Calisthenics identificadas
 
 **Fluxo Principal:**
+
 1. Identificar estado que permanece no cliente (seleções, UI state)
 2. Identificar operações que vão para TanStack Query (backend data)
 3. Criar interface Zustand com máximo 2 propriedades
@@ -112,6 +120,7 @@ export const useSendMessage = () => {
 6. Remover implementação de classe
 
 **Fluxo Alternativo:**
+
 - Se store tem apenas operações de backend → usar apenas TanStack Query
 - Se store tem apenas estado local → usar apenas Zustand
 
@@ -123,11 +132,13 @@ export const useSendMessage = () => {
 **Objetivo:** Decompor componente > 50 linhas em micro-componentes
 
 **Pré-condições:**
+
 - Componente > 50 linhas (violação Object Calisthenics)
 - Múltiplas responsabilidades identificadas
 - Funcionalidade bem definida
 
 **Fluxo Principal:**
+
 1. Identificar responsabilidades do componente
 2. Extrair lógica para hooks customizados
 3. Criar componentes especializados (≤50 linhas)
@@ -137,12 +148,14 @@ export const useSendMessage = () => {
 7. Remover componente antigo
 
 **Pós-condições:**
+
 - Componentes ≤ 50 linhas cada
 - Lógica extraída para hooks
 - Responsabilidades bem definidas
 - UI/UX mantidos idênticos
 
 **Exemplo de Transformação:**
+
 ```typescript
 // ANTES: conversation-view.tsx (249 linhas)
 export function ConversationView({ conversationId, conversation }) {
@@ -151,17 +164,17 @@ export function ConversationView({ conversationId, conversation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  
+
   // Lógica de scroll misturada
   useEffect(() => {
     // 15 linhas de lógica de scroll
   }, [messages, isTyping]);
-  
+
   // Handler de envio misturado
   const handleSend = async (e: React.FormEvent) => {
     // 15 linhas de lógica de envio
   };
-  
+
   // Renderização complexa
   return (
     <div className="conversation-view">
@@ -174,15 +187,15 @@ export function ConversationView({ conversationId, conversation }) {
 // domains/users/components/conversation-view.tsx (≤50 linhas)
 export function ConversationView({ conversationId }: ConversationViewProps) {
   const conversation = useConversation(conversationId);
-  
+
   if (!conversation) return <ConversationSkeleton />;
-  
+
   return (
     <ConversationContainer>
       <ConversationHeader conversation={conversation} />
       <MessageList conversationId={conversationId} />
       <TypingIndicator conversationId={conversationId} />
-      <MessageInput 
+      <MessageInput
         conversationId={conversationId}
         onSend={handleSendMessage}
       />
@@ -194,7 +207,7 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
 export function MessageList({ conversationId }: MessageListProps) {
   const { data: messages } = useMessages(conversationId);
   const { scrollRef } = useAutoScroll(messages);
-  
+
   return (
     <div ref={scrollRef} className="message-list">
       {messages?.map((message) => (
@@ -208,7 +221,7 @@ export function MessageList({ conversationId }: MessageListProps) {
 export function MessageInput({ conversationId, onSend }: MessageInputProps) {
   const { register, handleSubmit, reset } = useForm<SendMessageForm>();
   const sendMessage = useSendMessage();
-  
+
   const handleSendMessage = async (data: SendMessageForm) => {
     await sendMessage.mutateAsync({
       conversationId,
@@ -216,7 +229,7 @@ export function MessageInput({ conversationId, onSend }: MessageInputProps) {
     });
     reset();
   };
-  
+
   return (
     <form onSubmit={handleSubmit(handleSendMessage)}>
       <input {...register('content')} />
@@ -228,13 +241,13 @@ export function MessageInput({ conversationId, onSend }: MessageInputProps) {
 // domains/users/hooks/use-auto-scroll.hook.ts
 export const useAutoScroll = (messages: MessageDto[]) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
-  
+
   return { scrollRef };
 };
 ```
@@ -245,10 +258,12 @@ export const useAutoScroll = (messages: MessageDto[]) => {
 **Objetivo:** Extrair lógica de componentes para hooks reutilizáveis
 
 **Pré-condições:**
+
 - Componente com lógica complexa
 - Lógica reutilizável identificada
 
 **Fluxo Principal:**
+
 1. Identificar lógica que pode ser extraída
 2. Criar hook customizado single-purpose
 3. Implementar hook com máximo 10 linhas por função
@@ -264,11 +279,13 @@ export const useAutoScroll = (messages: MessageDto[]) => {
 **Objetivo:** Migrar feature da estrutura antiga para nova estrutura de domínios
 
 **Pré-condições:**
+
 - Feature na estrutura antiga (`src/renderer/features/`)
 - Domínio correspondente identificado
 - Handlers IPC funcionando
 
 **Fluxo Principal:**
+
 1. Identificar domínio de destino
 2. Criar estrutura de pastas no domínio
 3. Migrar componentes aplicando Object Calisthenics
@@ -279,12 +296,14 @@ export const useAutoScroll = (messages: MessageDto[]) => {
 8. Remover feature antiga
 
 **Pós-condições:**
+
 - Arquivo na nova estrutura de domínios
 - Object Calisthenics aplicado
 - Funcionalidade mantida 100%
 - Imports atualizados
 
 **Mapeamento de Migração:**
+
 ```
 features/agent-management/     → domains/agents/
 features/project-management/   → domains/projects/
@@ -303,10 +322,12 @@ features/development-tools/    → domains/projects/ (consolidação)
 **Objetivo:** Consolidar múltiplas features em um único domínio
 
 **Pré-condições:**
+
 - Features relacionadas identificadas
 - Domínio de destino definido
 
 **Fluxo Principal:**
+
 1. Identificar features que pertencem ao mesmo domínio
 2. Criar estrutura unificada no domínio
 3. Migrar componentes removendo duplicação
@@ -317,21 +338,22 @@ features/development-tools/    → domains/projects/ (consolidação)
 8. Remover features antigas
 
 **Exemplo de Consolidação:**
+
 ```typescript
 // ANTES: 3 features separadas
-features/channel-messaging/stores/channel-message.store.ts
-features/communication/stores/channel.store.ts
-features/project-management/stores/project.store.ts
+features / channel - messaging / stores / channel - message.store.ts;
+features / communication / stores / channel.store.ts;
+features / project - management / stores / project.store.ts;
 
 // DEPOIS: Domínio unificado
-domains/projects/stores/project.store.ts
-domains/projects/stores/channel.store.ts
-domains/projects/stores/message.store.ts
+domains / projects / stores / project.store.ts;
+domains / projects / stores / channel.store.ts;
+domains / projects / stores / message.store.ts;
 
 // Com shared hooks
-domains/projects/hooks/use-project-data.hook.ts
-domains/projects/hooks/use-channel-data.hook.ts
-domains/projects/hooks/use-message-data.hook.ts
+domains / projects / hooks / use - project - data.hook.ts;
+domains / projects / hooks / use - channel - data.hook.ts;
+domains / projects / hooks / use - message - data.hook.ts;
 ```
 
 ### UC04 - Padronização IPC
@@ -342,10 +364,12 @@ domains/projects/hooks/use-message-data.hook.ts
 **Objetivo:** Migrar de API legacy para API tipada
 
 **Pré-condições:**
+
 - Código usando `window.electronIPC.invoke()` legacy
 - API tipada disponível no preload
 
 **Fluxo Principal:**
+
 1. Identificar calls legacy no código
 2. Mapear para API tipada correspondente
 3. Atualizar calls para `window.electronIPC.domain.method()`
@@ -354,12 +378,14 @@ domains/projects/hooks/use-message-data.hook.ts
 6. Remover código legacy
 
 **Pós-condições:**
+
 - 100% uso de API tipada
 - Eliminação de calls legacy
 - Type safety completa
 - Funcionalidade mantida
 
 **Exemplo de Migração:**
+
 ```typescript
 // ANTES: API legacy
 const agents = await window.electronIPC.invoke("agent:list");
@@ -376,10 +402,12 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 **Objetivo:** Implementar error handling consistente
 
 **Pré-condições:**
+
 - Error handling inconsistente entre features
 - Padrões de erro definidos
 
 **Fluxo Principal:**
+
 1. Identificar padrões de erro inconsistentes
 2. Implementar error boundaries padronizados
 3. Padronizar tratamento em hooks
@@ -395,10 +423,12 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 **Objetivo:** Reorganizar rotas seguindo estrutura de domínios
 
 **Pré-condições:**
+
 - Rotas na estrutura antiga
 - Domínios bem definidos
 
 **Fluxo Principal:**
+
 1. Mapear rotas para domínios
 2. Criar nova estrutura de rotas
 3. Implementar layouts por domínio
@@ -408,6 +438,7 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 7. Remover rotas antigas
 
 **Pós-condições:**
+
 - Rotas organizadas por domínio
 - Preload otimizado implementado
 - Navegação funcionando
@@ -419,10 +450,12 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 **Objetivo:** Implementar code splitting por domínio
 
 **Pré-condições:**
+
 - Rotas organizadas por domínio
 - TanStack Router configurado
 
 **Fluxo Principal:**
+
 1. Configurar lazy loading por domínio
 2. Implementar preload para rotas críticas
 3. Configurar fallbacks de loading
@@ -437,6 +470,7 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 **Cenário:** Migração de arquivo resulta em funcionalidade quebrada
 
 **Ações:**
+
 1. Identificar causa da falha
 2. Reverter para versão anterior
 3. Analisar problemas de integração
@@ -448,6 +482,7 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 **Cenário:** Refatoração resulta em degradação de performance
 
 **Ações:**
+
 1. Identificar bottlenecks
 2. Implementar otimizações
 3. Considerar estratégias alternativas
@@ -459,6 +494,7 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 **Cenário:** Migração resulta em erros de TypeScript
 
 **Ações:**
+
 1. Identificar tipos incompatíveis
 2. Atualizar definições de tipos
 3. Corrigir implementações
@@ -470,30 +506,35 @@ const newAgent = await window.electronIPC.agents.create(agentData);
 ### Por Caso de Uso
 
 **UC01 - Migração de Stores:**
+
 - ✅ Store ≤ 50 linhas
 - ✅ Responsabilidades separadas
 - ✅ TanStack Query integrado
 - ✅ Funcionalidade mantida
 
 **UC02 - Decomposição de Componentes:**
+
 - ✅ Componentes ≤ 50 linhas
 - ✅ Lógica extraída para hooks
 - ✅ UI/UX mantidos
 - ✅ Responsabilidade única
 
 **UC03 - Reorganização Estrutural:**
+
 - ✅ Arquivo na nova estrutura
 - ✅ Object Calisthenics aplicado
 - ✅ Imports atualizados
 - ✅ Funcionalidade mantida
 
 **UC04 - Padronização IPC:**
+
 - ✅ API tipada utilizada
 - ✅ Error handling consistente
 - ✅ Type safety completa
 - ✅ Funcionalidade mantida
 
 **UC05 - Otimização de Rotas:**
+
 - ✅ Rotas organizadas por domínio
 - ✅ Preload implementado
 - ✅ Code splitting configurado

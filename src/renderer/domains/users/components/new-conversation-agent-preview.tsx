@@ -1,12 +1,20 @@
-import { User, Target, BookOpen } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../components/ui/card';
-import type { AgentDto } from '../../../../shared/types/domains/agents/agent.types';
+import { User, Target, BookOpen } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface NewConversationAgentPreviewProps {
   agent: AgentDto;
 }
 
-export function NewConversationAgentPreview({ agent }: NewConversationAgentPreviewProps) {
+export function NewConversationAgentPreview({
+  agent,
+}: NewConversationAgentPreviewProps) {
   return (
     <Card className="border-muted">
       <CardHeader className="pb-2">
@@ -14,9 +22,7 @@ export function NewConversationAgentPreview({ agent }: NewConversationAgentPrevi
           <User className="w-4 h-4" />
           {agent.name}
         </CardTitle>
-        <CardDescription className="text-xs">
-          {agent.role}
-        </CardDescription>
+        <CardDescription className="text-xs">{agent.role}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-2">

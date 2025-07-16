@@ -1,19 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useUserStore } from '../stores/user.store';
-import { userService } from '../services/user.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUserStore } from "../stores/user.store";
+import { userService } from "../services/user.service";
 import {
   CreateUserDto,
   UpdateUserDto,
   UpdateUserSettingsDto,
-} from '../../../../shared/types/domains/users/user.types';
+} from "../../../../shared/types/domains/users/user.types";
 
 export function useUser(userId?: string) {
   const currentUser = useUserStore((state) => state.currentUser);
   const setCurrentUser = useUserStore((state) => state.setCurrentUser);
   const queryClient = useQueryClient();
 
-  const { data: userData, isLoading, error } = useQuery({
-    queryKey: ['user', userId],
+  const {
+    data: userData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["user", userId],
     queryFn: () => userService.getById(userId!),
     enabled: !!userId,
   });
@@ -22,7 +26,7 @@ export function useUser(userId?: string) {
     mutationFn: userService.create,
     onSuccess: (user) => {
       setCurrentUser(user);
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
@@ -30,7 +34,7 @@ export function useUser(userId?: string) {
     mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
       userService.updateProfile(id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['user', id] });
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
     },
   });
 
@@ -38,7 +42,7 @@ export function useUser(userId?: string) {
     mutationFn: ({ id, settings }: { id: string; settings: any }) =>
       userService.updateSettings(id, settings),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['user', id] });
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
     },
   });
 

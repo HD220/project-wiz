@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { mockAgents, type Agent } from '../../../../lib/placeholders';
+import { useState } from "react";
+import { mockAgents, type Agent } from "../../../../lib/placeholders";
 
 export function useAgentDashboardState() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -10,7 +10,8 @@ export function useAgentDashboardState() {
     const matchesSearch =
       agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       agent.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === "all" || agent.status === filterStatus;
+    const matchesFilter =
+      filterStatus === "all" || agent.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 

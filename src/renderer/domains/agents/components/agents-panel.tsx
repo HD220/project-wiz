@@ -8,7 +8,11 @@ interface AgentsPanelProps {
   onAgentSelect: (agentId: string) => void;
 }
 
-export function AgentsPanel({ agents, isOpen, onAgentSelect }: AgentsPanelProps) {
+export function AgentsPanel({
+  agents,
+  isOpen,
+  onAgentSelect,
+}: AgentsPanelProps) {
   if (!isOpen) return null;
 
   const onlineAgents = agents.filter((a) => a.status !== "offline");

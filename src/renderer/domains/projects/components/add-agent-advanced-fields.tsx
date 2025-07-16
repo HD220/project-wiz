@@ -1,15 +1,18 @@
-import { Input } from '../../../../components/ui/input';
-import { Label } from '../../../../components/ui/label';
-import { Textarea } from '../../../../components/ui/textarea';
-import { Checkbox } from '../../../../components/ui/checkbox';
-import type { CreateAgentDto } from '../../../../shared/types/domains/agents/agent.types';
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Textarea } from "../../../../components/ui/textarea";
+import { Checkbox } from "../../../../components/ui/checkbox";
+import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentAdvancedFieldsProps {
   formData: CreateAgentDto;
   updateField: (field: keyof CreateAgentDto, value: any) => void;
 }
 
-export function AddAgentAdvancedFields({ formData, updateField }: AddAgentAdvancedFieldsProps) {
+export function AddAgentAdvancedFields({
+  formData,
+  updateField,
+}: AddAgentAdvancedFieldsProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -22,7 +25,9 @@ export function AddAgentAdvancedFields({ formData, updateField }: AddAgentAdvanc
             max="2"
             step="0.1"
             value={formData.temperature}
-            onChange={(e) => updateField("temperature", parseFloat(e.target.value))}
+            onChange={(e) =>
+              updateField("temperature", parseFloat(e.target.value))
+            }
           />
         </div>
 
@@ -47,7 +52,9 @@ export function AddAgentAdvancedFields({ formData, updateField }: AddAgentAdvanc
           min="1"
           max="50"
           value={formData.maxIterations}
-          onChange={(e) => updateField("maxIterations", parseInt(e.target.value))}
+          onChange={(e) =>
+            updateField("maxIterations", parseInt(e.target.value))
+          }
         />
       </div>
 
@@ -76,9 +83,13 @@ export function AddAgentAdvancedFields({ formData, updateField }: AddAgentAdvanc
           <Checkbox
             id="allowDelegation"
             checked={formData.allowDelegation}
-            onCheckedChange={(checked) => updateField("allowDelegation", checked)}
+            onCheckedChange={(checked) =>
+              updateField("allowDelegation", checked)
+            }
           />
-          <Label htmlFor="allowDelegation">Permitir delegação para outros agentes</Label>
+          <Label htmlFor="allowDelegation">
+            Permitir delegação para outros agentes
+          </Label>
         </div>
       </div>
     </div>

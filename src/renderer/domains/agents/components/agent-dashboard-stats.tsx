@@ -1,6 +1,11 @@
-import { Users, Activity, Play, Settings } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
-import type { Agent } from '../../../../lib/placeholders';
+import { Users, Activity, Play, Settings } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
+import type { Agent } from "../../../../lib/placeholders";
 
 interface AgentDashboardStatsProps {
   agents: Agent[];
@@ -15,7 +20,9 @@ export function AgentDashboardStats({ agents }: AgentDashboardStatsProps) {
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Agentes</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Total de Agentes
+          </CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -29,7 +36,9 @@ export function AgentDashboardStats({ agents }: AgentDashboardStatsProps) {
           <Activity className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">{onlineAgents.length}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {onlineAgents.length}
+          </div>
         </CardContent>
       </Card>
 
@@ -39,7 +48,9 @@ export function AgentDashboardStats({ agents }: AgentDashboardStatsProps) {
           <Play className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-blue-600">{executingAgents.length}</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {executingAgents.length}
+          </div>
         </CardContent>
       </Card>
 

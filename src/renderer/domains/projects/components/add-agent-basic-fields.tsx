@@ -1,9 +1,15 @@
-import { Brain, Target, BookOpen } from 'lucide-react';
-import { Input } from '../../../../components/ui/input';
-import { Label } from '../../../../components/ui/label';
-import { Textarea } from '../../../../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select';
-import type { CreateAgentDto } from '../../../../shared/types/domains/agents/agent.types';
+import { Brain, Target, BookOpen } from "lucide-react";
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Textarea } from "../../../../components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface AddAgentBasicFieldsProps {
   formData: CreateAgentDto;
@@ -11,7 +17,11 @@ interface AddAgentBasicFieldsProps {
   llmProviders: any[];
 }
 
-export function AddAgentBasicFields({ formData, updateField, llmProviders }: AddAgentBasicFieldsProps) {
+export function AddAgentBasicFields({
+  formData,
+  updateField,
+  llmProviders,
+}: AddAgentBasicFieldsProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -67,7 +77,10 @@ export function AddAgentBasicFields({ formData, updateField, llmProviders }: Add
 
       <div className="space-y-2">
         <Label>Provedor LLM</Label>
-        <Select value={formData.llmProviderId} onValueChange={(value) => updateField("llmProviderId", value)}>
+        <Select
+          value={formData.llmProviderId}
+          onValueChange={(value) => updateField("llmProviderId", value)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Selecione um provedor..." />
           </SelectTrigger>

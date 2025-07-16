@@ -34,7 +34,13 @@ export const channelService = {
     return window.electronIPC.invoke("channel:delete", { id });
   },
 
-  async createDefault(projectId: string, createdBy: string): Promise<ChannelDto> {
-    return window.electronIPC.invoke("channel:createDefault", { projectId, createdBy });
+  async createDefault(
+    projectId: string,
+    createdBy: string,
+  ): Promise<ChannelDto> {
+    return window.electronIPC.invoke("channel:createDefault", {
+      projectId,
+      createdBy,
+    });
   },
 };

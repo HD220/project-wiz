@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { useAgentStore } from '../stores/agent.store';
+import { useCallback } from "react";
+import { useAgentStore } from "../stores/agent.store";
 import {
   useAgentsQuery,
   useActiveAgentsQuery,
@@ -8,12 +8,14 @@ import {
   useCreateAgentMutation,
   useUpdateAgentMutation,
   useDeleteAgentMutation,
-} from './use-agents-queries.hook';
-import type { AgentDto } from '../../../../shared/types/domains/agents/agent.types';
+} from "./use-agents-queries.hook";
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 export function useAgents() {
   const selectedAgent = useAgentStore((state: any) => state.selectedAgent);
-  const setSelectedAgent = useAgentStore((state: any) => state.setSelectedAgent);
+  const setSelectedAgent = useAgentStore(
+    (state: any) => state.setSelectedAgent,
+  );
 
   const agentsQuery = useAgentsQuery();
   const activeAgentsQuery = useActiveAgentsQuery();
@@ -23,17 +25,18 @@ export function useAgents() {
 
   const createAgent = useCallback(
     (data: Partial<AgentDto>) => createMutation.mutateAsync(data),
-    [createMutation]
+    [createMutation],
   );
 
   const updateAgent = useCallback(
-    (id: string, data: Partial<AgentDto>) => updateMutation.mutateAsync({ id, data }),
-    [updateMutation]
+    (id: string, data: Partial<AgentDto>) =>
+      updateMutation.mutateAsync({ id, data }),
+    [updateMutation],
   );
 
   const deleteAgent = useCallback(
     (id: string) => deleteMutation.mutateAsync(id),
-    [deleteMutation]
+    [deleteMutation],
   );
 
   const refetch = useCallback(() => {
@@ -45,7 +48,8 @@ export function useAgents() {
     agents: agentsQuery.data || [],
     activeAgents: activeAgentsQuery.data || [],
     isLoading: agentsQuery.isLoading || activeAgentsQuery.isLoading,
-    error: agentsQuery.error?.message || activeAgentsQuery.error?.message || null,
+    error:
+      agentsQuery.error?.message || activeAgentsQuery.error?.message || null,
     selectedAgent,
 
     createAgent,

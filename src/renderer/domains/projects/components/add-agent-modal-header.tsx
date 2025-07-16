@@ -1,5 +1,9 @@
-import { User } from 'lucide-react';
-import { DialogHeader, DialogTitle, DialogDescription } from '../../../../components/ui/dialog';
+import { User } from "lucide-react";
+import {
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../../../components/ui/dialog";
 
 export function AddAgentModalHeader() {
   return (
@@ -9,7 +13,8 @@ export function AddAgentModalHeader() {
         Adicionar Agente ao Projeto
       </DialogTitle>
       <DialogDescription>
-        Configure um novo agente para este projeto. Preencha as informações básicas e avançadas.
+        Configure um novo agente para este projeto. Preencha as informações
+        básicas e avançadas.
       </DialogDescription>
     </DialogHeader>
   );

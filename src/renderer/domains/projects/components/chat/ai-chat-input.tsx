@@ -10,12 +10,12 @@ interface AiChatInputProps {
   placeholder?: string;
 }
 
-export function AiChatInput({ 
-  value, 
-  onChange, 
-  onSend, 
+export function AiChatInput({
+  value,
+  onChange,
+  onSend,
   disabled = false,
-  placeholder = "Digite sua mensagem..." 
+  placeholder = "Digite sua mensagem...",
 }: AiChatInputProps) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -34,11 +34,7 @@ export function AiChatInput({
         disabled={disabled}
         className="flex-1"
       />
-      <Button 
-        onClick={onSend} 
-        disabled={disabled || !value.trim()}
-        size="icon"
-      >
+      <Button onClick={onSend} disabled={disabled || !value.trim()} size="icon">
         <Send className="h-4 w-4" />
       </Button>
     </div>

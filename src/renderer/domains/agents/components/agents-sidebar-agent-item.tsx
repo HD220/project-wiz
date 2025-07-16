@@ -12,11 +12,11 @@ interface AgentItemProps {
   onAgentSelect?: (agent: AgentDto) => void;
 }
 
-export function AgentsSidebarAgentItem({ 
-  agent, 
-  projectId, 
-  onRemoveAgent, 
-  onAgentSelect 
+export function AgentsSidebarAgentItem({
+  agent,
+  projectId,
+  onRemoveAgent,
+  onAgentSelect,
 }: AgentItemProps) {
   return (
     <div

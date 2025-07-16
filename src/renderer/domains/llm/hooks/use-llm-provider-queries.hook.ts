@@ -1,15 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { llmProviderService } from '../services/llm-provider.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { llmProviderService } from "../services/llm-provider.service";
 import type {
   LlmProviderDto,
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
   LlmProviderFilterDto,
-} from '../../../../shared/types/domains/llm/llm-provider.types';
+} from "../../../../shared/types/domains/llm/llm-provider.types";
 
 export function useLlmProvidersQuery(filter?: LlmProviderFilterDto) {
   return useQuery({
-    queryKey: ['llmProviders', filter],
+    queryKey: ["llmProviders", filter],
     queryFn: () => llmProviderService.list(filter),
     staleTime: 5 * 60 * 1000,
   });
@@ -17,7 +17,7 @@ export function useLlmProvidersQuery(filter?: LlmProviderFilterDto) {
 
 export function useLlmProviderQuery(id: string) {
   return useQuery({
-    queryKey: ['llmProvider', id],
+    queryKey: ["llmProvider", id],
     queryFn: () => llmProviderService.getById(id),
     enabled: !!id,
   });
@@ -25,7 +25,7 @@ export function useLlmProviderQuery(id: string) {
 
 export function useDefaultLlmProviderQuery() {
   return useQuery({
-    queryKey: ['llmProvider', 'default'],
+    queryKey: ["llmProvider", "default"],
     queryFn: () => llmProviderService.getDefault(),
     staleTime: 2 * 60 * 1000,
   });
@@ -37,7 +37,7 @@ export function useCreateLlmProviderMutation() {
   return useMutation({
     mutationFn: (data: CreateLlmProviderDto) => llmProviderService.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['llmProviders'] });
+      queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
     },
   });
 }
@@ -48,8 +48,10 @@ export function useUpdateLlmProviderMutation() {
   return useMutation({
     mutationFn: (data: UpdateLlmProviderDto) => llmProviderService.update(data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['llmProviders'] });
-      queryClient.invalidateQueries({ queryKey: ['llmProvider', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
+      queryClient.invalidateQueries({
+        queryKey: ["llmProvider", variables.id],
+      });
     },
   });
 }
@@ -60,7 +62,7 @@ export function useDeleteLlmProviderMutation() {
   return useMutation({
     mutationFn: (id: string) => llmProviderService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['llmProviders'] });
+      queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
     },
   });
 }
@@ -71,8 +73,8 @@ export function useSetDefaultLlmProviderMutation() {
   return useMutation({
     mutationFn: (id: string) => llmProviderService.setDefault(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['llmProviders'] });
-      queryClient.invalidateQueries({ queryKey: ['llmProvider', 'default'] });
+      queryClient.invalidateQueries({ queryKey: ["llmProviders"] });
+      queryClient.invalidateQueries({ queryKey: ["llmProvider", "default"] });
     },
   });
 }

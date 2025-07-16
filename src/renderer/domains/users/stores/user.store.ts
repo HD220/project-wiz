@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { UserDto } from '../../../../shared/types/domains/users/user.types';
+import { create } from "zustand";
+import { UserDto } from "../../../../shared/types/domains/users/user.types";
 
 interface UserState {
   currentUser: UserDto | null;

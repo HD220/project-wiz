@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { useProjectStore } from '../stores/project.store';
+import { useCallback } from "react";
+import { useProjectStore } from "../stores/project.store";
 import {
   useProjectsQuery,
   useProjectQuery,
@@ -7,16 +7,20 @@ import {
   useUpdateProjectMutation,
   useDeleteProjectMutation,
   useArchiveProjectMutation,
-} from './use-projects-queries.hook';
+} from "./use-projects-queries.hook";
 import type {
   CreateProjectDto,
   UpdateProjectDto,
   ProjectFilterDto,
-} from '../../../../shared/types/domains/projects/project.types';
+} from "../../../../shared/types/domains/projects/project.types";
 
 export function useProjects(filter?: ProjectFilterDto) {
-  const selectedProject = useProjectStore((state: any) => state.selectedProject);
-  const setSelectedProject = useProjectStore((state: any) => state.setSelectedProject);
+  const selectedProject = useProjectStore(
+    (state: any) => state.selectedProject,
+  );
+  const setSelectedProject = useProjectStore(
+    (state: any) => state.setSelectedProject,
+  );
 
   const projectsQuery = useProjectsQuery(filter);
   const createMutation = useCreateProjectMutation();
@@ -26,27 +30,27 @@ export function useProjects(filter?: ProjectFilterDto) {
 
   const createProject = useCallback(
     (data: CreateProjectDto) => createMutation.mutateAsync(data),
-    [createMutation]
+    [createMutation],
   );
 
   const updateProject = useCallback(
     (data: UpdateProjectDto) => updateMutation.mutateAsync(data),
-    [updateMutation]
+    [updateMutation],
   );
 
   const deleteProject = useCallback(
     (id: string) => deleteMutation.mutateAsync(id),
-    [deleteMutation]
+    [deleteMutation],
   );
 
   const archiveProject = useCallback(
     (id: string) => archiveMutation.mutateAsync(id),
-    [archiveMutation]
+    [archiveMutation],
   );
 
   const refreshProjects = useCallback(
     () => projectsQuery.refetch(),
-    [projectsQuery]
+    [projectsQuery],
   );
 
   return {

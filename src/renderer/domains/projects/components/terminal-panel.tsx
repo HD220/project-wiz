@@ -1,10 +1,10 @@
-import { cn } from '../../../../lib/utils';
-import { useTerminalState } from '../hooks/use-terminal-state.hook';
-import { useTerminalCommands } from '../hooks/use-terminal-commands.hook';
-import { TerminalPanelHeader } from './terminal-panel-header';
-import { TerminalTabs } from './terminal-tabs';
-import { TerminalOutput } from './terminal-output';
-import { TerminalInput } from './terminal-input';
+import { cn } from "../../../../lib/utils";
+import { useTerminalState } from "../hooks/use-terminal-state.hook";
+import { useTerminalCommands } from "../hooks/use-terminal-commands.hook";
+import { TerminalPanelHeader } from "./terminal-panel-header";
+import { TerminalTabs } from "./terminal-tabs";
+import { TerminalOutput } from "./terminal-output";
+import { TerminalInput } from "./terminal-input";
 
 interface TerminalPanelProps {
   className?: string;
@@ -40,7 +40,10 @@ export function TerminalPanel({
   if (isCollapsed) {
     return (
       <div className={cn("bg-background border rounded-lg", className)}>
-        <TerminalPanelHeader onToggleCollapse={onToggleCollapse} onAddTab={state.addTab} />
+        <TerminalPanelHeader
+          onToggleCollapse={onToggleCollapse}
+          onAddTab={state.addTab}
+        />
       </div>
     );
   }
@@ -50,21 +53,24 @@ export function TerminalPanel({
       className={cn("bg-background border rounded-lg flex flex-col", className)}
       style={{ height: defaultHeight }}
     >
-      <TerminalPanelHeader onToggleCollapse={onToggleCollapse} onAddTab={state.addTab} />
-      
+      <TerminalPanelHeader
+        onToggleCollapse={onToggleCollapse}
+        onAddTab={state.addTab}
+      />
+
       <TerminalTabs
         tabs={state.tabs}
         activeTab={state.activeTab}
         onTabSelect={state.setActiveTab}
         onTabClose={state.closeTab}
       />
-      
+
       <TerminalOutput
         terminalLines={state.terminalLines}
         isRunning={state.isRunning}
         scrollAreaRef={state.scrollAreaRef}
       />
-      
+
       <TerminalInput
         command={state.command}
         setCommand={state.setCommand}

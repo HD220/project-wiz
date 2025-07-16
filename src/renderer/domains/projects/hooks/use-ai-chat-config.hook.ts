@@ -1,5 +1,5 @@
-import { useMemo, useRef } from 'react';
-import type { AIChatConfigDto } from '../../../../shared/types/domains/projects/channel-message.types';
+import { useMemo, useRef } from "react";
+import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
 
 interface UseAiChatConfigProps {
   channelId: string;
@@ -36,7 +36,7 @@ export function useAiChatConfig(props: UseAiChatConfigProps) {
       props.maxTokens,
       props.includeHistory,
       props.historyLimit,
-    ]
+    ],
   );
 
   const updateConfig = (newConfig: Partial<UseAiChatConfigProps>) => {

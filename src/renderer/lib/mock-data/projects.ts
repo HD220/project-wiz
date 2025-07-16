@@ -21,7 +21,7 @@ export const mockProjects: Project[] = [
   },
   {
     id: "proj-3",
-    name: "API Gateway", 
+    name: "API Gateway",
     description: "Microserviços com Node.js e Docker",
     unreadCount: 1,
     lastActivity: new Date("2024-01-13T09:15:00"),
@@ -38,5 +38,5 @@ export const mockProjects: Project[] = [
 ];
 
 export const getProjectById = (id: string): Project | undefined => {
-  return mockProjects.find(project => project.id === id);
+  return mockProjects.find((project) => project.id === id);
 };

@@ -14,19 +14,29 @@ interface TaskCardProps {
 export function TaskCard({ task }: TaskCardProps) {
   const daysUntilDue = getDaysUntilDue(task.dueDate);
   const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
-  const isDueSoon = daysUntilDue !== null && daysUntilDue <= 2 && daysUntilDue >= 0;
+  const isDueSoon =
+    daysUntilDue !== null && daysUntilDue <= 2 && daysUntilDue >= 0;
 
   const handleTaskClick = () => {
     console.log("Opening task:", task.id);
   };
 
   return (
-    <Card className="cursor-pointer hover:shadow-md transition-shadow group" onClick={handleTaskClick}>
-      <TaskCardHeader task={task} getPriorityColor={getPriorityColor} onTaskClick={handleTaskClick} />
+    <Card
+      className="cursor-pointer hover:shadow-md transition-shadow group"
+      onClick={handleTaskClick}
+    >
+      <TaskCardHeader
+        task={task}
+        getPriorityColor={getPriorityColor}
+        onTaskClick={handleTaskClick}
+      />
 
       <CardContent className="pt-0 space-y-3">
         {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {task.description}
+          </p>
         )}
 
         <TaskCardLabels labels={task.labels} />
@@ -34,7 +44,7 @@ export function TaskCard({ task }: TaskCardProps) {
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             {task.dueDate && (
-              <TaskCardDueDate 
+              <TaskCardDueDate
                 dueDate={task.dueDate}
                 daysUntilDue={daysUntilDue}
                 isOverdue={isOverdue}
@@ -47,13 +57,15 @@ export function TaskCard({ task }: TaskCardProps) {
             <div className="flex items-center gap-1">
               <span>{task.estimatedHours}h</span>
               {task.actualHours && (
-                <span className="text-muted-foreground/60">/ {task.actualHours}h</span>
+                <span className="text-muted-foreground/60">
+                  / {task.actualHours}h
+                </span>
               )}
             </div>
           )}
         </div>
 
-        <TaskCardAssignee 
+        <TaskCardAssignee
           assigneeId={task.assigneeId}
           assigneeName={task.assigneeName}
           assigneeAvatar={task.assigneeAvatar}

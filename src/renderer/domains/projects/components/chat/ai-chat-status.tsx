@@ -12,9 +12,7 @@ export function AiChatStatus({ isLoading, error, success }: AiChatStatusProps) {
     return (
       <Alert>
         <Loader2 className="h-4 w-4 animate-spin" />
-        <AlertDescription>
-          Processando mensagem...
-        </AlertDescription>
+        <AlertDescription>Processando mensagem...</AlertDescription>
       </Alert>
     );
   }

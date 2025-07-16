@@ -1,8 +1,12 @@
-import { ChevronDown, Plus } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../../../components/ui/collapsible';
-import { CustomLink } from '../../../../components/custom-link';
-import { ConversationList } from './conversation-list';
+import { ChevronDown, Plus } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../../../components/ui/collapsible";
+import { CustomLink } from "../../../../components/custom-link";
+import { ConversationList } from "./conversation-list";
 
 export function UserSidebarDirectMessages() {
   return (

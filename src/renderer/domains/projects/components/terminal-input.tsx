@@ -1,6 +1,6 @@
-import { Play, Trash2 } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
+import { Play, Trash2 } from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
 
 interface TerminalInputProps {
   command: string;
@@ -24,7 +24,7 @@ export function TerminalInput({
   return (
     <div className="flex items-center gap-2 p-3 border-t bg-muted/20">
       <span className="text-sm font-mono text-muted-foreground">$</span>
-      
+
       <Input
         ref={inputRef}
         value={command}
@@ -34,7 +34,7 @@ export function TerminalInput({
         className="font-mono text-sm border-none bg-transparent focus-visible:ring-0"
         disabled={isRunning}
       />
-      
+
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
@@ -45,7 +45,7 @@ export function TerminalInput({
         >
           <Play className="h-3 w-3" />
         </Button>
-        
+
         <Button
           variant="ghost"
           size="icon"

@@ -9,7 +9,11 @@ interface LlmProviderRowProps {
   onSetDefault: (id: string) => void;
 }
 
-export function LlmProviderRow({ provider, onDelete, onSetDefault }: LlmProviderRowProps) {
+export function LlmProviderRow({
+  provider,
+  onDelete,
+  onSetDefault,
+}: LlmProviderRowProps) {
   return (
     <TableRow key={provider.id}>
       <TableCell className="font-medium">
@@ -23,7 +27,10 @@ export function LlmProviderRow({ provider, onDelete, onSetDefault }: LlmProvider
       <TableCell>{provider.provider}</TableCell>
       <TableCell>{provider.model}</TableCell>
       <TableCell>
-        <LlmProviderDefaultButton provider={provider} onSetDefault={onSetDefault} />
+        <LlmProviderDefaultButton
+          provider={provider}
+          onSetDefault={onSetDefault}
+        />
       </TableCell>
       <TableCell>
         <LlmProviderActions provider={provider} onDelete={onDelete} />

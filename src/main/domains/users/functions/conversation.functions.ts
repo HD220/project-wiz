@@ -107,9 +107,7 @@ export async function findOrCreateDirectMessage(
 export async function findAllConversations(): Promise<ConversationDto[]> {
   const db = getDatabase();
 
-  const result = await db
-    .select()
-    .from(conversations);
+  const result = await db.select().from(conversations);
 
   return result.map((conversation) => ({
     ...conversation,

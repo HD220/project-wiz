@@ -14,7 +14,11 @@ interface ModelFieldProps {
   onChange: (value: string) => void;
 }
 
-export function ModelField({ value, availableModels, onChange }: ModelFieldProps) {
+export function ModelField({
+  value,
+  availableModels,
+  onChange,
+}: ModelFieldProps) {
   return (
     <div className="space-y-2">
       <Label>Model</Label>

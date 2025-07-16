@@ -1,12 +1,37 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
 // Import types from shared (organized by domains)
-import type { AgentDto, CreateAgentDto, UpdateAgentDto } from "../shared/types/domains/agents/agent.types";
-import type { ProjectDto, CreateProjectDto, UpdateProjectDto } from "../shared/types/domains/projects/project.types";
-import type { UserDto, CreateUserDto, UpdateUserDto, UserPreferencesDto } from "../shared/types/domains/users/user.types";
-import type { LlmProviderDto, CreateLlmProviderDto, UpdateLlmProviderDto } from "../shared/types/domains/llm/llm-provider.types";
-import type { ConversationDto, CreateConversationDto, MessageDto, CreateMessageDto } from "../shared/types/domains/users/message.types";
-import type { ChannelDto, CreateChannelDto } from "../shared/types/domains/projects/channel.types";
+import type {
+  AgentDto,
+  CreateAgentDto,
+  UpdateAgentDto,
+} from "../shared/types/domains/agents/agent.types";
+import type {
+  ProjectDto,
+  CreateProjectDto,
+  UpdateProjectDto,
+} from "../shared/types/domains/projects/project.types";
+import type {
+  UserDto,
+  CreateUserDto,
+  UpdateUserDto,
+  UserPreferencesDto,
+} from "../shared/types/domains/users/user.types";
+import type {
+  LlmProviderDto,
+  CreateLlmProviderDto,
+  UpdateLlmProviderDto,
+} from "../shared/types/domains/llm/llm-provider.types";
+import type {
+  ConversationDto,
+  CreateConversationDto,
+  MessageDto,
+  CreateMessageDto,
+} from "../shared/types/domains/users/message.types";
+import type {
+  ChannelDto,
+  CreateChannelDto,
+} from "../shared/types/domains/projects/channel.types";
 
 // Import constants
 import { IPC_CHANNELS } from "../shared/constants";
@@ -50,9 +75,24 @@ interface IChannelMessageAPI {
   listByChannel: (channelId: string, limit?: number) => Promise<MessageDto[]>;
   listByAuthor: (authorId: string, channelId?: string) => Promise<MessageDto[]>;
   delete: (id: string, userId: string) => Promise<void>;
-  createText: (content: string, channelId: string, authorId: string, authorName: string) => Promise<MessageDto>;
-  createCode: (content: string, channelId: string, authorId: string, authorName: string, metadata?: any) => Promise<MessageDto>;
-  createSystem: (content: string, channelId: string, metadata?: any) => Promise<MessageDto>;
+  createText: (
+    content: string,
+    channelId: string,
+    authorId: string,
+    authorName: string,
+  ) => Promise<MessageDto>;
+  createCode: (
+    content: string,
+    channelId: string,
+    authorId: string,
+    authorName: string,
+    metadata?: any,
+  ) => Promise<MessageDto>;
+  createSystem: (
+    content: string,
+    channelId: string,
+    metadata?: any,
+  ) => Promise<MessageDto>;
 }
 
 interface IUserAPI {
@@ -73,10 +113,25 @@ interface IConversationAPI {
 
 interface IDirectMessageAPI {
   create: (data: CreateMessageDto) => Promise<MessageDto>;
-  listByConversation: (conversationId: string, limit?: number, offset?: number) => Promise<MessageDto[]>;
-  sendAI: (conversationId: string, content: string, userId?: string) => Promise<MessageDto | null>;
-  sendAgent: (conversationId: string, message: string, userId?: string) => Promise<MessageDto | null>;
-  regenerateResponse: (conversationId: string, userId?: string) => Promise<MessageDto | null>;
+  listByConversation: (
+    conversationId: string,
+    limit?: number,
+    offset?: number,
+  ) => Promise<MessageDto[]>;
+  sendAI: (
+    conversationId: string,
+    content: string,
+    userId?: string,
+  ) => Promise<MessageDto | null>;
+  sendAgent: (
+    conversationId: string,
+    message: string,
+    userId?: string,
+  ) => Promise<MessageDto | null>;
+  regenerateResponse: (
+    conversationId: string,
+    userId?: string,
+  ) => Promise<MessageDto | null>;
 }
 
 interface ILlmProviderAPI {
@@ -109,7 +164,7 @@ export interface IElectronIPC {
   directMessages: IDirectMessageAPI;
   llmProviders: ILlmProviderAPI;
   window: IWindowAPI;
-  
+
   // Generic functions for advanced use
   invoke: <Channel, Payload, Response>(
     channel: Channel,
@@ -131,14 +186,18 @@ const electronIPC: IElectronIPC = {
   agents: {
     create: (data) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_CREATE, data),
     getById: (id) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_GET_BY_ID, { id }),
-    getByName: (name) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_GET_BY_NAME, { name }),
+    getByName: (name) =>
+      ipcRenderer.invoke(IPC_CHANNELS.AGENT_GET_BY_NAME, { name }),
     list: (filter) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_LIST, filter),
     listActive: () => ipcRenderer.invoke(IPC_CHANNELS.AGENT_LIST_ACTIVE),
-    update: (id, data) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_UPDATE, { id, ...data }),
+    update: (id, data) =>
+      ipcRenderer.invoke(IPC_CHANNELS.AGENT_UPDATE, { id, ...data }),
     delete: (id) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_DELETE, { id }),
     activate: (id) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_ACTIVATE, { id }),
-    deactivate: (id) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_DEACTIVATE, { id }),
-    setDefault: (id) => ipcRenderer.invoke(IPC_CHANNELS.AGENT_SET_DEFAULT, { id }),
+    deactivate: (id) =>
+      ipcRenderer.invoke(IPC_CHANNELS.AGENT_DEACTIVATE, { id }),
+    setDefault: (id) =>
+      ipcRenderer.invoke(IPC_CHANNELS.AGENT_SET_DEFAULT, { id }),
     getDefault: () => ipcRenderer.invoke(IPC_CHANNELS.AGENT_GET_DEFAULT),
   },
 
@@ -156,9 +215,12 @@ const electronIPC: IElectronIPC = {
   channels: {
     create: (data) => ipcRenderer.invoke("channel:create", data),
     getById: (id) => ipcRenderer.invoke("channel:getById", { id }),
-    listByProject: (projectId) => ipcRenderer.invoke("channel:listByProject", { projectId }),
-    listAccessible: (projectId, userId) => ipcRenderer.invoke("channel:listAccessible", { projectId, userId }),
-    createGeneral: (projectId, createdBy) => ipcRenderer.invoke("channel:createGeneral", { projectId, createdBy }),
+    listByProject: (projectId) =>
+      ipcRenderer.invoke("channel:listByProject", { projectId }),
+    listAccessible: (projectId, userId) =>
+      ipcRenderer.invoke("channel:listAccessible", { projectId, userId }),
+    createGeneral: (projectId, createdBy) =>
+      ipcRenderer.invoke("channel:createGeneral", { projectId, createdBy }),
     delete: (id) => ipcRenderer.invoke("channel:delete", { id }),
   },
 
@@ -166,21 +228,48 @@ const electronIPC: IElectronIPC = {
   channelMessages: {
     create: (data) => ipcRenderer.invoke("channelMessage:create", data),
     getById: (id) => ipcRenderer.invoke("channelMessage:getById", { id }),
-    listByChannel: (channelId, limit) => ipcRenderer.invoke("channelMessage:listByChannel", { channelId, limit }),
-    listByAuthor: (authorId, channelId) => ipcRenderer.invoke("channelMessage:listByAuthor", { authorId, channelId }),
-    delete: (id, userId) => ipcRenderer.invoke("channelMessage:delete", { id, userId }),
-    createText: (content, channelId, authorId, authorName) => ipcRenderer.invoke("channelMessage:createText", { content, channelId, authorId, authorName }),
-    createCode: (content, channelId, authorId, authorName, metadata) => ipcRenderer.invoke("channelMessage:createCode", { content, channelId, authorId, authorName, metadata }),
-    createSystem: (content, channelId, metadata) => ipcRenderer.invoke("channelMessage:createSystem", { content, channelId, metadata }),
+    listByChannel: (channelId, limit) =>
+      ipcRenderer.invoke("channelMessage:listByChannel", { channelId, limit }),
+    listByAuthor: (authorId, channelId) =>
+      ipcRenderer.invoke("channelMessage:listByAuthor", {
+        authorId,
+        channelId,
+      }),
+    delete: (id, userId) =>
+      ipcRenderer.invoke("channelMessage:delete", { id, userId }),
+    createText: (content, channelId, authorId, authorName) =>
+      ipcRenderer.invoke("channelMessage:createText", {
+        content,
+        channelId,
+        authorId,
+        authorName,
+      }),
+    createCode: (content, channelId, authorId, authorName, metadata) =>
+      ipcRenderer.invoke("channelMessage:createCode", {
+        content,
+        channelId,
+        authorId,
+        authorName,
+        metadata,
+      }),
+    createSystem: (content, channelId, metadata) =>
+      ipcRenderer.invoke("channelMessage:createSystem", {
+        content,
+        channelId,
+        metadata,
+      }),
   },
 
   // User API
   users: {
     create: (data) => ipcRenderer.invoke("user:create", data),
     getById: (id) => ipcRenderer.invoke("user:getById", { id }),
-    updateProfile: (id, data) => ipcRenderer.invoke("user:updateProfile", { ...data, id }),
-    updateSettings: (id, settings) => ipcRenderer.invoke("user:updateSettings", { id, settings }),
-    getPreferences: (userId) => ipcRenderer.invoke("user:getPreferences", { userId }),
+    updateProfile: (id, data) =>
+      ipcRenderer.invoke("user:updateProfile", { ...data, id }),
+    updateSettings: (id, settings) =>
+      ipcRenderer.invoke("user:updateSettings", { id, settings }),
+    getPreferences: (userId) =>
+      ipcRenderer.invoke("user:getPreferences", { userId }),
     delete: (id) => ipcRenderer.invoke("user:delete", { id }),
   },
 
@@ -189,16 +278,36 @@ const electronIPC: IElectronIPC = {
     create: (data) => ipcRenderer.invoke("dm:conversation:create", data),
     getById: (id) => ipcRenderer.invoke("dm:conversation:getById", { id }),
     list: () => ipcRenderer.invoke("dm:conversation:list"),
-    findOrCreate: (participants) => ipcRenderer.invoke("dm:conversation:findOrCreate", { participants }),
+    findOrCreate: (participants) =>
+      ipcRenderer.invoke("dm:conversation:findOrCreate", { participants }),
   },
 
   // Direct Message API
   directMessages: {
     create: (data) => ipcRenderer.invoke("dm:message:create", data),
-    listByConversation: (conversationId, limit, offset) => ipcRenderer.invoke("dm:message:listByConversation", { conversationId, limit, offset }),
-    sendAI: (conversationId, content, userId) => ipcRenderer.invoke("dm:ai:sendMessage", { conversationId, content, userId }),
-    sendAgent: (conversationId, message, userId) => ipcRenderer.invoke("dm:agent:sendMessage", { conversationId, message, userId }),
-    regenerateResponse: (conversationId, userId) => ipcRenderer.invoke("dm:agent:regenerateResponse", { conversationId, userId }),
+    listByConversation: (conversationId, limit, offset) =>
+      ipcRenderer.invoke("dm:message:listByConversation", {
+        conversationId,
+        limit,
+        offset,
+      }),
+    sendAI: (conversationId, content, userId) =>
+      ipcRenderer.invoke("dm:ai:sendMessage", {
+        conversationId,
+        content,
+        userId,
+      }),
+    sendAgent: (conversationId, message, userId) =>
+      ipcRenderer.invoke("dm:agent:sendMessage", {
+        conversationId,
+        message,
+        userId,
+      }),
+    regenerateResponse: (conversationId, userId) =>
+      ipcRenderer.invoke("dm:agent:regenerateResponse", {
+        conversationId,
+        userId,
+      }),
   },
 
   // LLM Provider API
@@ -206,7 +315,8 @@ const electronIPC: IElectronIPC = {
     create: (data) => ipcRenderer.invoke("llm-provider:create", data),
     getById: (id) => ipcRenderer.invoke("llm-provider:getById", { id }),
     list: (filter) => ipcRenderer.invoke("llm-provider:list", filter),
-    update: (id, data) => ipcRenderer.invoke("llm-provider:update", { ...data, id }),
+    update: (id, data) =>
+      ipcRenderer.invoke("llm-provider:update", { ...data, id }),
     delete: (id) => ipcRenderer.invoke("llm-provider:delete", { id }),
     setDefault: (id) => ipcRenderer.invoke("llm-provider:setDefault", { id }),
     getDefault: () => ipcRenderer.invoke("llm-provider:getDefault"),

@@ -9,7 +9,8 @@ export function ProjectList() {
   });
 
   if (isLoading) return <ProjectListSkeleton />;
-  if (error) return <ProjectListError error={error} onRetry={refreshProjects} />;
+  if (error)
+    return <ProjectListError error={error} onRetry={refreshProjects} />;
 
   if (projects.length === 0) {
     return (

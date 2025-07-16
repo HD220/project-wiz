@@ -1,39 +1,44 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { channelService } from '../services/channel.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { channelService } from "../services/channel.service";
 import type {
   ChannelDto,
   CreateChannelDto,
   UpdateChannelDto,
-} from '../../../../shared/types/domains/projects/channel.types';
+} from "../../../../shared/types/domains/projects/channel.types";
 
 export function useProjectChannelsQueries(projectId: string) {
   const queryClient = useQueryClient();
 
   const channelsQuery = useQuery({
-    queryKey: ['channels', 'project', projectId],
+    queryKey: ["channels", "project", projectId],
     queryFn: () => channelService.listByProject(projectId),
     enabled: !!projectId,
   });
 
   const createDefaultMutation = useMutation({
-    mutationFn: (createdBy: string) => 
+    mutationFn: (createdBy: string) =>
       channelService.createDefault(projectId, createdBy),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['channels', 'project', projectId] });
+      queryClient.invalidateQueries({
+        queryKey: ["channels", "project", projectId],
+      });
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<CreateChannelDto, 'projectId'>) => 
+    mutationFn: (data: Omit<CreateChannelDto, "projectId">) =>
       channelService.create({ ...data, projectId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['channels', 'project', projectId] });
+      queryClient.invalidateQueries({
+        queryKey: ["channels", "project", projectId],
+      });
     },
   });
 
   const channels = channelsQuery.data || [];
-  const generalChannel = channels.find((ch) => ch.name.toLowerCase() === 'general') || 
-    channels[0] || 
+  const generalChannel =
+    channels.find((ch) => ch.name.toLowerCase() === "general") ||
+    channels[0] ||
     null;
 
   return {

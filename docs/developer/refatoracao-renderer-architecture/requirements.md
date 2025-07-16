@@ -31,12 +31,14 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Incluído no Escopo
 
 **Estrutura de Arquivos:**
+
 - Reorganização completa de `src/renderer/features/` → `src/renderer/domains/`
 - Migração de todos os 93 arquivos identificados
 - Criação de nova estrutura `src/renderer/shared/`
 - Reorganização de rotas seguindo domínios
 
 **Código-fonte:**
+
 - Refatoração de 15 arquivos críticos violando Object Calisthenics (>200 linhas)
 - Decomposição de 23 arquivos moderados (100-200 linhas)
 - Migração de 45 arquivos simples (<100 linhas)
@@ -44,12 +46,14 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 - Aplicação de Clean Code em todos os 139 arquivos identificados
 
 **Integração IPC:**
+
 - Unificação para API tipada (`window.electronIPC.domain.method()`)
 - Eliminação de padrões legacy (`window.electronIPC.invoke()`)
 - Padronização de error handling
 - Implementação de validação de entrada
 
 **Padrões Arquiteturais:**
+
 - Implementação de Object Calisthenics completa
 - Padrão Zustand slim + TanStack Query
 - Decomposição em micro-componentes
@@ -58,6 +62,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Excluído do Escopo
 
 **Funcionalidades:**
+
 - Alteração de funcionalidades existentes
 - Adição de novas features
 - Modificação de fluxos de usuário
@@ -65,11 +70,13 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 - Modificação da arquitetura do main process (já implementada)
 
 **Testes:**
+
 - Criação de novos testes durante refatoração
 - Modificação de testes existentes
 - Implementação de test coverage
 
 **Backend:**
+
 - Alteração do main process (já migrado)
 - Modificação de handlers IPC (já organizados por domínio)
 - Mudança de schemas de banco (já implementados)
@@ -82,6 +89,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Reorganizar toda a estrutura de features para alinhar com os domínios do main process.
 
 **Critérios de Aceite:**
+
 - Features reorganizadas: `agent-management/` → `agents/`, `project-management/` → `projects/`, etc.
 - Alinhamento 100% com `src/main/domains/`
 - Eliminação de features híbridas (`channel-messaging/`, `communication/`)
@@ -94,6 +102,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Aplicar rigorosamente os princípios de Object Calisthenics em todo o código.
 
 **Critérios de Aceite:**
+
 - Máximo 50 linhas por classe/componente
 - Máximo 10 linhas por método/função
 - Máximo 2 variáveis de instância por classe
@@ -107,6 +116,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Refatorar stores monolíticos para padrão Zustand slim + TanStack Query.
 
 **Critérios de Aceite:**
+
 - Stores reduzidos a ≤50 linhas
 - Separação clara: Zustand para estado local, TanStack Query para backend
 - Eliminação de lógica de negócio em stores
@@ -119,6 +129,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Quebrar componentes monolíticos em micro-componentes focados.
 
 **Critérios de Aceite:**
+
 - Componentes ≤50 linhas
 - Responsabilidade única por componente
 - Lógica extraída para hooks customizados
@@ -131,6 +142,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Unificar comunicação IPC para API tipada consistente.
 
 **Critérios de Aceite:**
+
 - 100% dos calls usando `window.electronIPC.domain.method()`
 - Eliminação de `window.electronIPC.invoke()` legacy
 - Error handling padronizado
@@ -143,6 +155,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Reorganizar rotas seguindo estrutura de domínios com preload otimizado.
 
 **Critérios de Aceite:**
+
 - Rotas organizadas por domínio
 - Preload implementado em rotas críticas
 - Eliminação de layouts redundantes
@@ -157,6 +170,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Manter ou melhorar a performance atual da aplicação.
 
 **Critérios de Aceite:**
+
 - Tempo de carregamento inicial ≤ estado atual
 - Navegação entre rotas ≤ estado atual
 - Memory usage ≤ estado atual
@@ -169,6 +183,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Manter 100% compatibilidade com funcionalidades existentes.
 
 **Critérios de Aceite:**
+
 - Todos os fluxos de usuário funcionando
 - Integração IPC mantida
 - Dados persistidos corretamente
@@ -181,6 +196,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Melhorar significativamente a manutenibilidade do código.
 
 **Critérios de Aceite:**
+
 - Código autodocumentado
 - Padrões consistentes aplicados
 - Estrutura intuitiva para novos desenvolvedores
@@ -193,6 +209,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 **Descrição:** Manter type safety completa durante toda a refatoração.
 
 **Critérios de Aceite:**
+
 - Zero erros de TypeScript
 - Tipos compartilhados utilizados corretamente
 - Validação de tipos em tempo de compilação
@@ -205,11 +222,13 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Dependências Internas
 
 **Arquitetura Main Process:**
+
 - `src/main/domains/` deve estar estabilizada
 - Handlers IPC funcionando corretamente
 - Tipos compartilhados em `src/shared/types/` atualizados
 
 **Infraestrutura:**
+
 - TanStack Router configurado
 - Zustand implementado
 - Radix-UI/shadcn funcionando
@@ -218,6 +237,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Dependências Externas
 
 **Bibliotecas Principais:**
+
 - `@tanstack/react-query` para cache e sincronização
 - `@tanstack/react-router` para roteamento
 - `zustand` para estado global
@@ -225,6 +245,7 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 - `react-hook-form` para formulários
 
 **Ferramentas de Desenvolvimento:**
+
 - `TypeScript` para tipagem estática
 - `ESLint` para linting
 - `Prettier` para formatação
@@ -235,16 +256,19 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Riscos de Alto Impacto
 
 **R01 - Quebra de Funcionalidades**
+
 - **Impacto:** Alto
 - **Probabilidade:** Baixa (backend já migrado)
 - **Mitigação:** Migração arquivo por arquivo com validação contínua
 
 **R02 - Problemas de Performance**
-- **Impacto:** Médio  
+
+- **Impacto:** Médio
 - **Probabilidade:** Baixa
 - **Mitigação:** Monitoramento durante refatoração, benchmarks
 
 **R03 - Complexidade de Integração IPC**
+
 - **Impacto:** Baixo
 - **Probabilidade:** Muito Baixa
 - **Mitigação:** Handlers IPC já organizados por domínio e funcionando
@@ -252,11 +276,13 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Riscos de Médio Impacto
 
 **R04 - Regressões de UI**
+
 - **Impacto:** Médio
 - **Probabilidade:** Baixa
 - **Mitigação:** Testes manuais durante migração
 
 **R05 - Incompatibilidade de Tipos**
+
 - **Impacto:** Baixo
 - **Probabilidade:** Baixa
 - **Mitigação:** Tipos compartilhados já estão bem definidos
@@ -266,18 +292,21 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Critérios Técnicos
 
 **Qualidade de Código:**
+
 - ✅ 100% compliance com Object Calisthenics
 - ✅ Zero violações de ESLint
 - ✅ Zero erros de TypeScript
 - ✅ Duplicação de código ≤ 5%
 
 **Estrutura Arquitetural:**
+
 - ✅ Alinhamento 100% com domínios do main process
 - ✅ Stores ≤ 50 linhas cada
 - ✅ Componentes ≤ 50 linhas cada
 - ✅ Hooks single-purpose implementados
 
 **Performance:**
+
 - ✅ Tempo de carregamento mantido ou melhorado
 - ✅ Bundle size reduzido via code splitting
 - ✅ Memory usage otimizado
@@ -285,12 +314,14 @@ O Project Wiz possui uma arquitetura simplificada baseada em domínios no main p
 ### Critérios Funcionais
 
 **Funcionalidades:**
+
 - ✅ Todos os fluxos de usuário funcionando
 - ✅ Integração IPC 100% funcional
 - ✅ Dados persistidos corretamente
 - ✅ UI/UX idênticos ao estado atual
 
 **Manutenibilidade:**
+
 - ✅ Código autodocumentado
 - ✅ Padrões consistentes aplicados
 - ✅ Estrutura intuitiva para novos desenvolvedores

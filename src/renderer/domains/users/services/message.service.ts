@@ -8,18 +8,18 @@ export const messageService = {
   async listByConversation(
     conversationId: string,
     limit?: number,
-    offset?: number
+    offset?: number,
   ): Promise<MessageDto[]> {
     const messages = await window.electronIPC.directMessages.listByConversation(
       conversationId,
       limit,
-      offset
+      offset,
     );
 
     return messages.sort(
       (a, b) =>
         new Date(a.timestamp || a.createdAt).getTime() -
-        new Date(b.timestamp || b.createdAt).getTime()
+        new Date(b.timestamp || b.createdAt).getTime(),
     );
   },
 

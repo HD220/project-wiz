@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import type { LlmProviderDto } from '../../../../shared/types/domains/llm/llm-provider.types';
+import { create } from "zustand";
+import type { LlmProviderDto } from "../../../../shared/types/domains/llm/llm-provider.types";
 
 interface LlmProviderState {
   selectedLlmProvider: LlmProviderDto | null;
@@ -8,6 +8,6 @@ interface LlmProviderState {
 
 export const useLlmProviderStore = create<LlmProviderState>((set: any) => ({
   selectedLlmProvider: null,
-  setSelectedLlmProvider: (provider: LlmProviderDto | null) => 
+  setSelectedLlmProvider: (provider: LlmProviderDto | null) =>
     set({ selectedLlmProvider: provider }),
 }));

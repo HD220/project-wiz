@@ -1,6 +1,10 @@
-import { Link } from '@tanstack/react-router';
-import { Avatar, AvatarFallback, AvatarImage } from '../../../../components/ui/avatar';
-import type { ConversationDto } from '../../../../shared/types/domains/users/user.types';
+import { Link } from "@tanstack/react-router";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../../../components/ui/avatar";
+import type { ConversationDto } from "../../../../shared/types/domains/users/user.types";
 
 interface ConversationListItemProps {
   conversation: ConversationDto;
@@ -8,7 +12,11 @@ interface ConversationListItemProps {
   formattedTime: string;
 }
 
-export function ConversationListItem({ conversation, otherParticipant, formattedTime }: ConversationListItemProps) {
+export function ConversationListItem({
+  conversation,
+  otherParticipant,
+  formattedTime,
+}: ConversationListItemProps) {
   return (
     <Link
       key={conversation.id}
@@ -16,7 +24,8 @@ export function ConversationListItem({ conversation, otherParticipant, formatted
       params={{ conversationId: conversation.id }}
       className="block w-full px-2 py-3 text-left rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
       activeProps={{
-        className: "block w-full px-2 py-3 text-left rounded-md transition-colors bg-secondary text-secondary-foreground",
+        className:
+          "block w-full px-2 py-3 text-left rounded-md transition-colors bg-secondary text-secondary-foreground",
       }}
     >
       <div className="flex items-center">

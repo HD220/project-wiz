@@ -51,7 +51,7 @@ export function LlmProviderFormModal({
         <DialogHeader>
           <DialogTitle>{provider ? "Edit" : "Add"} LLM Provider</DialogTitle>
         </DialogHeader>
-        
+
         <LlmProviderFormFields
           formData={formData}
           selectedProvider={selectedProvider}
@@ -59,7 +59,7 @@ export function LlmProviderFormModal({
           onFieldChange={handleFieldChange}
           onProviderChange={handleProviderChange}
         />
-        
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel

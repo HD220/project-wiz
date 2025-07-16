@@ -9,10 +9,10 @@ interface TaskCardHeaderProps {
   onTaskClick: () => void;
 }
 
-export function TaskCardHeader({ 
-  task, 
-  getPriorityColor, 
-  onTaskClick 
+export function TaskCardHeader({
+  task,
+  getPriorityColor,
+  onTaskClick,
 }: TaskCardHeaderProps) {
   return (
     <CardHeader className="pb-3">

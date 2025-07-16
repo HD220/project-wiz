@@ -14,13 +14,22 @@ export const channelMessageService = {
   async listByChannel(
     channelId: string,
     limit = 50,
-    offset = 0
+    offset = 0,
   ): Promise<ChannelMessagePaginationDto> {
-    return window.electronIPC.invoke("channelMessage:listByChannel", channelId, limit.toString(), offset.toString());
+    return window.electronIPC.invoke(
+      "channelMessage:listByChannel",
+      channelId,
+      limit.toString(),
+      offset.toString(),
+    );
   },
 
   async getLatest(channelId: string, limit = 50): Promise<ChannelMessageDto[]> {
-    return window.electronIPC.invoke("channelMessage:getLatest", channelId, limit.toString());
+    return window.electronIPC.invoke(
+      "channelMessage:getLatest",
+      channelId,
+      limit.toString(),
+    );
   },
 
   async getById(id: string): Promise<ChannelMessageDto | null> {
@@ -35,9 +44,15 @@ export const channelMessageService = {
     content: string,
     channelId: string,
     authorId: string,
-    authorName: string
+    authorName: string,
   ): Promise<ChannelMessageDto> {
-    return window.electronIPC.invoke("channelMessage:createText", content, channelId, authorId, authorName);
+    return window.electronIPC.invoke(
+      "channelMessage:createText",
+      content,
+      channelId,
+      authorId,
+      authorName,
+    );
   },
 
   async update(data: UpdateChannelMessageDto): Promise<ChannelMessageDto> {
@@ -51,12 +66,20 @@ export const channelMessageService = {
   async search(
     channelId: string,
     searchTerm: string,
-    limit = 20
+    limit = 20,
   ): Promise<ChannelMessageDto[]> {
-    return window.electronIPC.invoke("channelMessage:search", channelId, searchTerm, limit.toString());
+    return window.electronIPC.invoke(
+      "channelMessage:search",
+      channelId,
+      searchTerm,
+      limit.toString(),
+    );
   },
 
   async getLastMessage(channelId: string): Promise<ChannelMessageDto | null> {
-    return window.electronIPC.invoke("channelMessage:getLastMessage", channelId);
+    return window.electronIPC.invoke(
+      "channelMessage:getLastMessage",
+      channelId,
+    );
   },
 };

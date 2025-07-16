@@ -13,7 +13,7 @@ export const Route = createFileRoute("/(user)/settings/")({
 export function UserSettingsPage() {
   const { theme, setTheme } = useTheme();
   const { currentUser, updateSettings, updateProfile } = useUser();
-  
+
   const [settings, setSettings] = useState({
     // User Settings
     username: "Usuário",
@@ -29,7 +29,7 @@ export function UserSettingsPage() {
   });
 
   const handleUpdateSettings = (field: string, value: any) => {
-    setSettings(prev => ({ ...prev, [field]: value }));
+    setSettings((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {

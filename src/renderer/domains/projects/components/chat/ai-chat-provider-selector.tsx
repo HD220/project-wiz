@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLlmProviders } from "@/domains/llm/hooks/use-llm-provider.hook";
 
 interface AiChatProviderSelectorProps {
@@ -6,9 +12,9 @@ interface AiChatProviderSelectorProps {
   onProviderChange: (provider: string) => void;
 }
 
-export function AiChatProviderSelector({ 
-  selectedProvider, 
-  onProviderChange 
+export function AiChatProviderSelector({
+  selectedProvider,
+  onProviderChange,
 }: AiChatProviderSelectorProps) {
   const { providers, isLoading } = useLlmProviders();
 

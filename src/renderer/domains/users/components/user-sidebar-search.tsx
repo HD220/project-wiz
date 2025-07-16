@@ -1,12 +1,15 @@
-import { Search } from 'lucide-react';
-import { Input } from '../../../../components/ui/input';
+import { Search } from "lucide-react";
+import { Input } from "../../../../components/ui/input";
 
 interface UserSidebarSearchProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 }
 
-export function UserSidebarSearch({ searchQuery, setSearchQuery }: UserSidebarSearchProps) {
+export function UserSidebarSearch({
+  searchQuery,
+  setSearchQuery,
+}: UserSidebarSearchProps) {
   return (
     <div className="p-3 border-b border-border flex-none">
       <div className="relative">

@@ -5,7 +5,10 @@ interface ChannelPrivacyFieldProps {
   onChange: (value: boolean) => void;
 }
 
-export function ChannelPrivacyField({ value, onChange }: ChannelPrivacyFieldProps) {
+export function ChannelPrivacyField({
+  value,
+  onChange,
+}: ChannelPrivacyFieldProps) {
   return (
     <div className="flex items-center space-x-2">
       <input

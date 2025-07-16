@@ -29,28 +29,25 @@ export function LlmProviderFormFields({
 }: LlmProviderFormFieldsProps) {
   return (
     <div className="space-y-4">
-      <ProviderNameField 
+      <ProviderNameField
         value={formData.name}
         onChange={(value) => onFieldChange("name", value)}
       />
 
-      <ProviderField 
-        value={selectedProvider}
-        onChange={onProviderChange}
-      />
+      <ProviderField value={selectedProvider} onChange={onProviderChange} />
 
-      <ModelField 
+      <ModelField
         value={formData.model}
         availableModels={availableModels}
         onChange={(value) => onFieldChange("model", value)}
       />
 
-      <ApiKeyField 
+      <ApiKeyField
         value={formData.apiKey}
         onChange={(value) => onFieldChange("apiKey", value)}
       />
 
-      <DefaultField 
+      <DefaultField
         value={formData.isDefault}
         onChange={(value) => onFieldChange("isDefault", value)}
       />

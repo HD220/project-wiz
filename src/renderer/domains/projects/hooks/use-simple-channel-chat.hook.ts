@@ -1,11 +1,11 @@
-import { useChannelChat } from './use-channel-chat.hook';
+import { useChannelChat } from "./use-channel-chat.hook";
 
 export function useSimpleChannelChat(
   channelId: string,
   llmProviderId: string,
   authorId: string,
   authorName: string,
-  systemPrompt?: string
+  systemPrompt?: string,
 ) {
   return useChannelChat({
     channelId,

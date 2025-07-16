@@ -30,7 +30,7 @@ export function AgentsSidebarList({
 
   if (agents.length === 0) {
     return (
-      <AgentsSidebarEmpty 
+      <AgentsSidebarEmpty
         searchQuery={searchQuery}
         projectId={projectId}
         onAddAgent={onAddAgent}

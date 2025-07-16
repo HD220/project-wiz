@@ -12,11 +12,11 @@ import { mockAgents, getAgentById, getAgentsByProject } from "./agents";
 export {
   // Users
   mockUser,
-  
+
   // Projects
   mockProjects,
   getProjectById,
-  
+
   // Agents
   mockAgents,
   getAgentById,

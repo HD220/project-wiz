@@ -209,7 +209,7 @@ class ProjectStore {
     error: null,
     selectedProject: null, // > 2 instance variables
   };
-  
+
   // Métodos > 10 linhas, classe > 50 linhas
 }
 
@@ -227,7 +227,7 @@ const useProjectStore = create<ProjectState>((set) => ({
 // TanStack Query para dados do backend
 const useProjects = () => {
   return useQuery({
-    queryKey: ['projects'],
+    queryKey: ["projects"],
     queryFn: () => window.electronIPC.projects.getAll(),
   });
 };
@@ -235,9 +235,10 @@ const useProjects = () => {
 const useCreateProject = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateProjectDto) => window.electronIPC.projects.create(data),
+    mutationFn: (data: CreateProjectDto) =>
+      window.electronIPC.projects.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 };
@@ -489,30 +490,35 @@ src/renderer/
 ## Estratégia de Migração por Fases
 
 ### **Fase 1: Infraestrutura (Semana 1)**
+
 1. Setup TanStack Query provider
 2. Criar estrutura de pastas nova
 3. Configurar preload básico
 4. Manter Zustand configurado
 
 ### **Fase 2: Stores Críticos (Semana 2-3)**
+
 1. Simplificar `project.store.ts` → Zustand slim + Query para fetch
 2. Simplificar `conversation.store.ts` → Zustand slim + Query para fetch
 3. Simplificar `llm-provider.store.ts` → Zustand slim + Query para fetch
 4. Aplicar Object Calisthenics nos stores refatorados
 
 ### **Fase 3: Reorganização Estrutural (Semana 4-5)**
+
 1. Mover features para domínios
 2. Reorganizar rotas por domínio
 3. Implementar preload otimizado
 4. Manter componentes Radix-UI/shadcn
 
 ### **Fase 4: Object Calisthenics (Semana 6-7)**
+
 1. Refatorar componentes grandes
 2. Simplificar hooks complexos
 3. Aplicar princípios consistentemente
 4. Sem criação de testes novos
 
 ### **Fase 5: Otimização e Cleanup (Semana 8)**
+
 1. Code splitting por domínio
 2. Remover código legacy
 3. Documentação atualizada
@@ -563,7 +569,7 @@ src/renderer/
 
 ### Observações Importantes
 
-1. **Missing Features**: 
+1. **Missing Features**:
    - `task-management` tem componente mas não tem store
    - `agent-management` tem hooks mas não tem store
    - `development-tools` tem componentes mas não tem hooks/stores
@@ -606,6 +612,7 @@ src/renderer/
 ### Princípios da Migração
 
 **Object Calisthenics Aplicados:**
+
 - Máximo 2 variáveis de instância por classe
 - Métodos com máximo 10 linhas
 - Classes com máximo 50 linhas
@@ -613,12 +620,14 @@ src/renderer/
 - Primitivos encapsulados em Value Objects quando aplicável
 
 **Clean Code Aplicado:**
+
 - Nomes descritivos e autodocumentados
 - Responsabilidade única por função/classe
 - Funções pequenas e focadas
 - Evitar duplicação de código
 
 **Padrão Zustand + Query:**
+
 - Zustand para estado local do renderer (seleções, UI state)
 - TanStack Query para fetch/cache de dados do backend
 - Hooks separados por responsabilidade
@@ -646,6 +655,7 @@ src/renderer/
 ### Critérios de Sucesso por Arquivo
 
 **Arquivo considerado migrado com sucesso quando:**
+
 - ✅ Localizado na nova estrutura de domínios
 - ✅ Aplicando Object Calisthenics e Clean Code
 - ✅ Integração IPC funcionando perfeitamente
@@ -691,6 +701,7 @@ src/renderer/
 ### Validação Contínua
 
 **A cada arquivo migrado:**
+
 - Executar `npm run dev` para verificar funcionamento
 - Testar funcionalidade específica do arquivo
 - Verificar se não há erros de TypeScript

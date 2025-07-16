@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { CreateAgentDto } from '../../../../shared/types/domains/agents/agent.types';
+import { useState } from "react";
+import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 export function useAddAgentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +19,7 @@ export function useAddAgentForm() {
   });
 
   const updateField = (field: keyof CreateAgentDto, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {

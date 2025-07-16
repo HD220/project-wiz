@@ -50,7 +50,7 @@ export function DocViewer({ selectedDoc }: DocViewerProps) {
           <h1 className="text-2xl font-bold">{selectedDoc.name}</h1>
           <p className="text-sm text-muted-foreground">{selectedDoc.path}</p>
         </div>
-        
+
         {selectedDoc.content && (
           <MarkdownRenderer content={selectedDoc.content} />
         )}

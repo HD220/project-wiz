@@ -66,8 +66,8 @@ src/renderer/
 
 ```typescript
 // domains/projects/stores/project.store.ts
-import { create } from 'zustand';
-import { ProjectDto } from '@/shared/types';
+import { create } from "zustand";
+import { ProjectDto } from "@/shared/types";
 
 interface ProjectState {
   selectedProject: ProjectDto | null;
@@ -84,12 +84,12 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
 ```typescript
 // domains/projects/hooks/use-projects.hook.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { projectService } from '../services/project.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { projectService } from "../services/project.service";
 
 export const useProjects = (filter?: ProjectFilterDto) => {
   return useQuery({
-    queryKey: ['projects', filter],
+    queryKey: ["projects", filter],
     queryFn: () => projectService.list(filter),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -97,7 +97,7 @@ export const useProjects = (filter?: ProjectFilterDto) => {
 
 export const useProject = (projectId: string) => {
   return useQuery({
-    queryKey: ['project', projectId],
+    queryKey: ["project", projectId],
     queryFn: () => projectService.getById(projectId),
     enabled: !!projectId,
   });
@@ -105,11 +105,11 @@ export const useProject = (projectId: string) => {
 
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: projectService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 };
@@ -119,25 +119,28 @@ export const useCreateProject = () => {
 
 ```typescript
 // domains/projects/services/project.service.ts
-import { ProjectDto, CreateProjectDto, ProjectFilterDto } from '@/shared/types';
+import { ProjectDto, CreateProjectDto, ProjectFilterDto } from "@/shared/types";
 
 export const projectService = {
   async list(filter?: ProjectFilterDto): Promise<ProjectDto[]> {
     return window.electronIPC.projects.list(filter);
   },
-  
+
   async getById(id: string): Promise<ProjectDto> {
     return window.electronIPC.projects.getById(id);
   },
-  
+
   async create(data: CreateProjectDto): Promise<ProjectDto> {
     return window.electronIPC.projects.create(data);
   },
-  
-  async update(id: string, data: Partial<CreateProjectDto>): Promise<ProjectDto> {
+
+  async update(
+    id: string,
+    data: Partial<CreateProjectDto>,
+  ): Promise<ProjectDto> {
     return window.electronIPC.projects.update(id, data);
   },
-  
+
   async delete(id: string): Promise<void> {
     return window.electronIPC.projects.delete(id);
   },
@@ -161,11 +164,11 @@ interface ProjectListProps {
 
 export function ProjectList({ filter }: ProjectListProps) {
   const { data: projects, isLoading, error } = useProjects(filter);
-  
+
   if (isLoading) return <ProjectListSkeleton />;
   if (error) throw error;
   if (!projects?.length) return <EmptyState message="No projects found" />;
-  
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
@@ -191,11 +194,11 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
-  
+
   const handleOpen = () => {
     navigate({ to: '/projects/$projectId', params: { projectId: project.id } });
   };
-  
+
   return (
     <Card className="cursor-pointer hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -223,30 +226,30 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
 ```typescript
 // domains/projects/hooks/use-project-navigation.hook.ts
-import { useNavigate } from '@tanstack/react-router';
-import { ProjectDto } from '@/shared/types';
+import { useNavigate } from "@tanstack/react-router";
+import { ProjectDto } from "@/shared/types";
 
 export const useProjectNavigation = () => {
   const navigate = useNavigate();
-  
+
   const navigateToProject = (projectId: string) => {
-    navigate({ to: '/projects/$projectId', params: { projectId } });
+    navigate({ to: "/projects/$projectId", params: { projectId } });
   };
-  
+
   const navigateToProjectAgent = (projectId: string, agentId: string) => {
-    navigate({ 
-      to: '/projects/$projectId/agents/$agentId', 
-      params: { projectId, agentId } 
+    navigate({
+      to: "/projects/$projectId/agents/$agentId",
+      params: { projectId, agentId },
     });
   };
-  
+
   const navigateToProjectChannel = (projectId: string, channelId: string) => {
-    navigate({ 
-      to: '/projects/$projectId/channels/$channelId', 
-      params: { projectId, channelId } 
+    navigate({
+      to: "/projects/$projectId/channels/$channelId",
+      params: { projectId, channelId },
     });
   };
-  
+
   return {
     navigateToProject,
     navigateToProjectAgent,
@@ -260,6 +263,7 @@ export const useProjectNavigation = () => {
 #### Exemplo: Migração de channel-message.store.ts
 
 **ANTES (343 linhas, violações Object Calisthenics):**
+
 ```typescript
 // features/channel-messaging/stores/channel-message.store.ts
 class ChannelMessageStore {
@@ -272,17 +276,17 @@ class ChannelMessageStore {
     hasMore: boolean,
     typingUsers: Record<string, string[]>,
   };
-  
+
   // 38 linhas - violação Object Calisthenics
   loadMessagesByChannel = async (channelId: string, limit = 50, offset = 0) => {
     // Lógica complexa misturada
   };
-  
+
   // 25 linhas - violação Object Calisthenics
   sendMessage = async (channelId: string, content: string) => {
     // Lógica complexa misturada
   };
-  
+
   // Múltiplas responsabilidades
   // - Cache management
   // - Loading states
@@ -296,8 +300,8 @@ class ChannelMessageStore {
 
 ```typescript
 // domains/projects/stores/channel-message.store.ts (≤50 linhas)
-import { create } from 'zustand';
-import { ChannelMessageDto } from '@/shared/types';
+import { create } from "zustand";
+import { ChannelMessageDto } from "@/shared/types";
 
 interface ChannelMessageState {
   selectedMessage: ChannelMessageDto | null;
@@ -317,21 +321,21 @@ interface TypingState {
 
 export const useTypingStore = create<TypingState>((set) => ({
   typingUsers: {},
-  setTypingUsers: (channelId, users) => 
+  setTypingUsers: (channelId, users) =>
     set((state) => ({
-      typingUsers: { ...state.typingUsers, [channelId]: users }
+      typingUsers: { ...state.typingUsers, [channelId]: users },
     })),
 }));
 ```
 
 ```typescript
 // domains/projects/hooks/use-channel-messages.hook.ts (≤50 linhas)
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { channelMessageService } from '../services/channel-message.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { channelMessageService } from "../services/channel-message.service";
 
 export const useChannelMessages = (channelId: string) => {
   return useQuery({
-    queryKey: ['channel-messages', channelId],
+    queryKey: ["channel-messages", channelId],
     queryFn: () => channelMessageService.list(channelId),
     enabled: !!channelId,
   });
@@ -339,12 +343,12 @@ export const useChannelMessages = (channelId: string) => {
 
 export const useSendChannelMessage = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: channelMessageService.create,
     onSuccess: (_, { channelId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['channel-messages', channelId] 
+      queryClient.invalidateQueries({
+        queryKey: ["channel-messages", channelId],
       });
     },
   });
@@ -356,6 +360,7 @@ export const useSendChannelMessage = () => {
 #### Exemplo: Migração de conversation-view.tsx
 
 **ANTES (249 linhas, violações Object Calisthenics):**
+
 ```typescript
 // features/direct-messages/components/conversation-view.tsx
 export function ConversationView({ conversationId, conversation }) {
@@ -364,17 +369,17 @@ export function ConversationView({ conversationId, conversation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  
+
   // 15 linhas - violação Object Calisthenics
   useEffect(() => {
     // Lógica de scroll complexa
   }, [messages, isTyping]);
-  
+
   // 15 linhas - violação Object Calisthenics
   const handleSend = async (e: React.FormEvent) => {
     // Lógica de envio complexa
   };
-  
+
   // 200+ linhas de JSX complexo
   return (
     <div className="conversation-view">
@@ -401,10 +406,10 @@ interface ConversationViewProps {
 
 export function ConversationView({ conversationId }: ConversationViewProps) {
   const { data: conversation, isLoading } = useConversation(conversationId);
-  
+
   if (isLoading) return <ConversationSkeleton />;
   if (!conversation) return null;
-  
+
   return (
     <div className="flex flex-col h-full">
       <ConversationHeader conversation={conversation} />
@@ -430,11 +435,11 @@ interface MessageListProps {
 export function MessageList({ conversationId }: MessageListProps) {
   const { data: messages, isLoading } = useMessages(conversationId);
   const { scrollRef } = useAutoScroll(messages);
-  
+
   if (isLoading) return <MessageListSkeleton />;
-  
+
   return (
-    <div 
+    <div
       ref={scrollRef}
       className="flex-1 overflow-y-auto p-4 space-y-4"
     >
@@ -448,18 +453,18 @@ export function MessageList({ conversationId }: MessageListProps) {
 
 ```typescript
 // domains/users/hooks/use-auto-scroll.hook.ts (≤50 linhas)
-import { useEffect, useRef } from 'react';
-import { MessageDto } from '@/shared/types';
+import { useEffect, useRef } from "react";
+import { MessageDto } from "@/shared/types";
 
 export const useAutoScroll = (messages?: MessageDto[]) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (scrollRef.current && messages) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
-  
+
   return { scrollRef };
 };
 ```
@@ -469,6 +474,7 @@ export const useAutoScroll = (messages?: MessageDto[]) => {
 #### Migração de API Legacy para API Tipada
 
 **ANTES (API Legacy):**
+
 ```typescript
 // features/agent-management/hooks/use-agents.hook.ts
 const loadAgents = async () => {
@@ -483,7 +489,7 @@ const loadAgents = async () => {
 const createAgent = async (data: CreateAgentDto) => {
   try {
     const agent = await window.electronIPC.invoke("agent:create", data);
-    setAgents(prev => [...prev, agent]);
+    setAgents((prev) => [...prev, agent]);
   } catch (error) {
     setError(error.message);
   }
@@ -491,14 +497,15 @@ const createAgent = async (data: CreateAgentDto) => {
 ```
 
 **DEPOIS (API Tipada + TanStack Query):**
+
 ```typescript
 // domains/agents/hooks/use-agents.hook.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { agentService } from '../services/agent.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { agentService } from "../services/agent.service";
 
 export const useAgents = () => {
   return useQuery({
-    queryKey: ['agents'],
+    queryKey: ["agents"],
     queryFn: agentService.list,
     staleTime: 5 * 60 * 1000,
   });
@@ -506,11 +513,11 @@ export const useAgents = () => {
 
 export const useCreateAgent = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: agentService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ["agents"] });
     },
   });
 };
@@ -518,25 +525,25 @@ export const useCreateAgent = () => {
 
 ```typescript
 // domains/agents/services/agent.service.ts
-import { AgentDto, CreateAgentDto } from '@/shared/types';
+import { AgentDto, CreateAgentDto } from "@/shared/types";
 
 export const agentService = {
   async list(): Promise<AgentDto[]> {
     return window.electronIPC.agents.list();
   },
-  
+
   async create(data: CreateAgentDto): Promise<AgentDto> {
     return window.electronIPC.agents.create(data);
   },
-  
+
   async getById(id: string): Promise<AgentDto> {
     return window.electronIPC.agents.getById(id);
   },
-  
+
   async update(id: string, data: Partial<CreateAgentDto>): Promise<AgentDto> {
     return window.electronIPC.agents.update(id, data);
   },
-  
+
   async delete(id: string): Promise<void> {
     return window.electronIPC.agents.delete(id);
   },
@@ -565,7 +572,7 @@ export const Route = createFileRoute('/users/_layout')({
 
 function UserLayout() {
   const { user } = Route.useLoaderData();
-  
+
   return (
     <div className="flex h-screen">
       <UserSidebar user={user} />
@@ -589,7 +596,7 @@ export const Route = createFileRoute('/projects/$projectId/_layout')({
     const project = await projectService.getById(params.projectId);
     const channels = await projectService.getChannels(params.projectId);
     const agents = await projectService.getAgents(params.projectId);
-    
+
     return { project, channels, agents };
   },
   component: ProjectLayout,
@@ -597,13 +604,13 @@ export const Route = createFileRoute('/projects/$projectId/_layout')({
 
 function ProjectLayout() {
   const { project, channels, agents } = Route.useLoaderData();
-  
+
   return (
     <div className="flex h-screen">
-      <ProjectSidebar 
-        project={project} 
-        channels={channels} 
-        agents={agents} 
+      <ProjectSidebar
+        project={project}
+        channels={channels}
+        agents={agents}
       />
       <main className="flex-1 overflow-hidden">
         <Outlet />
@@ -635,7 +642,7 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       },
     },
   }));
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       {children}
@@ -694,8 +701,8 @@ root.render(
 
 ```typescript
 // domains/projects/stores/project.store.ts
-import { create } from 'zustand';
-import { ProjectDto } from '@/shared/types';
+import { create } from "zustand";
+import { ProjectDto } from "@/shared/types";
 
 interface ProjectState {
   selectedProject: ProjectDto | null;
@@ -712,23 +719,23 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
 ```typescript
 // domains/projects/hooks/use-projects.hook.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { projectService } from '../services/project.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { projectService } from "../services/project.service";
 
 export const useProjects = () => {
   return useQuery({
-    queryKey: ['projects'],
+    queryKey: ["projects"],
     queryFn: projectService.list,
   });
 };
 
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: projectService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 };
@@ -743,9 +750,9 @@ import { ProjectCard } from './project-card';
 
 export function ProjectList() {
   const { data: projects, isLoading } = useProjects();
-  
+
   if (isLoading) return <div>Loading...</div>;
-  
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {projects?.map((project) => (
@@ -800,15 +807,16 @@ const agents = await window.electronIPC.agents.list();
 
 ```typescript
 // shared/hooks/use-error-handler.hook.ts
-import { useCallback } from 'react';
-import { toast } from 'sonner';
+import { useCallback } from "react";
+import { toast } from "sonner";
 
 export const useErrorHandler = () => {
   const handleError = useCallback((error: unknown) => {
-    const message = error instanceof Error ? error.message : 'An error occurred';
+    const message =
+      error instanceof Error ? error.message : "An error occurred";
     toast.error(message);
   }, []);
-  
+
   return { handleError };
 };
 ```
@@ -840,10 +848,10 @@ function ProjectsPage() {
 
 ```typescript
 // app/projects/$projectId/index.tsx
-import { createFileRoute } from '@tanstack/react-router';
-import { projectService } from '@/domains/projects/services/project.service';
+import { createFileRoute } from "@tanstack/react-router";
+import { projectService } from "@/domains/projects/services/project.service";
 
-export const Route = createFileRoute('/projects/$projectId/')({
+export const Route = createFileRoute("/projects/$projectId/")({
   beforeLoad: async ({ params }) => {
     const project = await projectService.getById(params.projectId);
     return { project };
@@ -855,30 +863,35 @@ export const Route = createFileRoute('/projects/$projectId/')({
 ## Checklist de Implementação
 
 ### ✅ Infraestrutura
+
 - [ ] TanStack Query configurado
 - [ ] Estrutura de domínios criada
 - [ ] Providers implementados
 - [ ] main.tsx atualizado
 
 ### ✅ Migração de Stores
+
 - [ ] project.store.ts migrado
 - [ ] conversation.store.ts migrado
 - [ ] llm-provider.store.ts migrado
 - [ ] channel-message.store.ts migrado
 
 ### ✅ Migração de Componentes
+
 - [ ] conversation-view.tsx decomposto
 - [ ] project-list.tsx simplificado
 - [ ] agent-dashboard.tsx refatorado
 - [ ] Componentes ≤50 linhas
 
 ### ✅ Padronização IPC
+
 - [ ] API legacy eliminada
 - [ ] API tipada implementada
 - [ ] Error handling padronizado
 - [ ] Validação de entrada
 
 ### ✅ Migração de Rotas
+
 - [ ] Rotas organizadas por domínio
 - [ ] Preload implementado
 - [ ] Code splitting configurado
@@ -887,18 +900,21 @@ export const Route = createFileRoute('/projects/$projectId/')({
 ## Validação
 
 ### Testes de Funcionalidade
+
 - [ ] Navegação entre rotas funciona
 - [ ] Operações CRUD funcionam
 - [ ] IPC communication funciona
 - [ ] Error handling funciona
 
 ### Testes de Performance
+
 - [ ] Carregamento inicial ≤ estado atual
 - [ ] Navegação rápida entre rotas
 - [ ] Memory usage otimizado
 - [ ] Bundle size reduzido
 
 ### Testes de Qualidade
+
 - [ ] Zero erros TypeScript
 - [ ] Zero violações ESLint
 - [ ] Object Calisthenics aplicado
@@ -909,18 +925,21 @@ export const Route = createFileRoute('/projects/$projectId/')({
 ### Problemas Comuns
 
 **Erro de tipos IPC:**
+
 ```typescript
 // Verificar se API está exposta no preload
 console.log(window.electronIPC.agents); // Deve estar definido
 ```
 
 **Erro de Query Client:**
+
 ```typescript
 // Verificar se QueryProvider está no nível correto
 // Deve estar acima de qualquer componente que use useQuery
 ```
 
 **Erro de navegação:**
+
 ```typescript
 // Verificar se rotas estão registradas corretamente
 // Verificar se routeTree.gen.ts está atualizado
@@ -932,11 +951,11 @@ console.log(window.electronIPC.agents); // Deve estar definido
 // Adicionar logging para debug
 export const useProjects = () => {
   return useQuery({
-    queryKey: ['projects'],
+    queryKey: ["projects"],
     queryFn: async () => {
-      console.log('Fetching projects...');
+      console.log("Fetching projects...");
       const result = await projectService.list();
-      console.log('Projects fetched:', result);
+      console.log("Projects fetched:", result);
       return result;
     },
   });

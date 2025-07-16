@@ -12,11 +12,11 @@ interface SettingsTabsProps {
   onThemeChange: (theme: string) => void;
 }
 
-export function SettingsTabs({ 
-  settings, 
-  theme, 
-  onUpdateSettings, 
-  onThemeChange 
+export function SettingsTabs({
+  settings,
+  theme,
+  onUpdateSettings,
+  onThemeChange,
 }: SettingsTabsProps) {
   return (
     <Tabs defaultValue="user" className="space-y-6">
@@ -48,16 +48,13 @@ export function SettingsTabs({
       </TabsList>
 
       <TabsContent value="user">
-        <UserSettingsTab 
-          settings={settings} 
-          onUpdate={onUpdateSettings} 
-        />
+        <UserSettingsTab settings={settings} onUpdate={onUpdateSettings} />
       </TabsContent>
-      
+
       <TabsContent value="llm">
         <LlmProviderManagement />
       </TabsContent>
-      
+
       <TabsContent value="interface">
         <InterfaceSettingsTab
           theme={theme}
@@ -66,18 +63,18 @@ export function SettingsTabs({
           onLanguageChange={(lang) => onUpdateSettings("language", lang)}
         />
       </TabsContent>
-      
+
       <TabsContent value="notifications">
         <NotificationSettingsTab
           settings={settings}
           onUpdate={onUpdateSettings}
         />
       </TabsContent>
-      
+
       <TabsContent value="security">
         <div>Security settings coming soon...</div>
       </TabsContent>
-      
+
       <TabsContent value="advanced">
         <div>Advanced settings coming soon...</div>
       </TabsContent>

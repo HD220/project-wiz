@@ -8,10 +8,10 @@ interface AgentsSidebarEmptyProps {
   onAddAgent: () => void;
 }
 
-export function AgentsSidebarEmpty({ 
-  searchQuery, 
-  projectId, 
-  onAddAgent 
+export function AgentsSidebarEmpty({
+  searchQuery,
+  projectId,
+  onAddAgent,
 }: AgentsSidebarEmptyProps) {
   return (
     <ScrollArea className="flex-1 overflow-hidden">

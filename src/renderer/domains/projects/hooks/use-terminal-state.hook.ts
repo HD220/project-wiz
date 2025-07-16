@@ -1,5 +1,8 @@
-import { useState, useRef } from 'react';
-import { mockTerminalLines, type TerminalLine } from '../../../../lib/placeholders';
+import { useState, useRef } from "react";
+import {
+  mockTerminalLines,
+  type TerminalLine,
+} from "../../../../lib/placeholders";
 
 interface TerminalTab {
   id: number;
@@ -15,7 +18,8 @@ export function useTerminalState() {
   const [command, setCommand] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(mockTerminalLines);
+  const [terminalLines, setTerminalLines] =
+    useState<TerminalLine[]>(mockTerminalLines);
   const [isRunning, setIsRunning] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -33,10 +37,10 @@ export function useTerminalState() {
 
   const closeTab = (index: number) => {
     if (tabs.length <= 1) return;
-    
+
     const newTabs = tabs.filter((_, i) => i !== index);
     setTabs(newTabs);
-    
+
     if (index === activeTab) {
       setActiveTab(Math.max(0, index - 1));
     } else if (index < activeTab) {

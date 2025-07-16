@@ -34,13 +34,14 @@ Para cada arquivo identificado:
 **Prioridade 1 (Críticos):** 15 arquivos  
 **Prioridade 2 (Moderados):** 23 arquivos  
 **Prioridade 3 (Simples):** 45 arquivos  
-**Prioridade 4 (Manutenção):** 56 arquivos  
+**Prioridade 4 (Manutenção):** 56 arquivos
 
 ## Domínio: USERS
 
 ### 🔴 Prioridade 1 - Críticos
 
 #### `features/direct-messages/components/conversation-view.tsx`
+
 - **Linhas:** 249
 - **Violações:** Componente gigante, múltiplas responsabilidades
 - **Destino:** `domains/users/components/conversation-view.tsx`
@@ -49,6 +50,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 2-3 dias
 
 **Checklist:**
+
 - [ ] Analisar responsabilidades do componente
 - [ ] Criar `ConversationHeader` (≤50 linhas)
 - [ ] Criar `MessageList` (≤50 linhas)
@@ -61,6 +63,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/direct-messages/components/conversation-list.tsx`
+
 - **Linhas:** 128
 - **Violações:** Lógica complexa, múltiplos estados
 - **Destino:** `domains/users/components/conversation-list.tsx`
@@ -69,6 +72,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar estados complexos
 - [ ] Extrair `useConversationFilter` hook
 - [ ] Extrair `useConversationSelection` hook
@@ -79,6 +83,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/direct-messages/hooks/use-direct-message-chat.hook.ts`
+
 - **Linhas:** 171
 - **Violações:** Hook muito complexo
 - **Destino:** `domains/users/hooks/use-message-chat.hook.ts`
@@ -87,6 +92,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades do hook
 - [ ] Criar `useMessageSend` hook (≤50 linhas)
 - [ ] Criar `useMessageLoad` hook (≤50 linhas)
@@ -97,6 +103,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/user-management/components/user-sidebar.tsx`
+
 - **Linhas:** 127
 - **Violações:** Componente complexo
 - **Destino:** `domains/users/components/user-sidebar.tsx`
@@ -105,6 +112,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1 dia
 
 **Checklist:**
+
 - [ ] Identificar seções do sidebar
 - [ ] Criar `UserProfile` component (≤50 linhas)
 - [ ] Criar `UserNavigation` component (≤50 linhas)
@@ -117,6 +125,7 @@ Para cada arquivo identificado:
 ### 🟡 Prioridade 2 - Moderados
 
 #### `features/direct-messages/stores/message.store.ts`
+
 - **Linhas:** 101
 - **Violações:** Store com muitas responsabilidades
 - **Destino:** `domains/users/stores/message.store.ts`
@@ -125,6 +134,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5-1 dia
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades do store
 - [ ] Dividir em ≤2 variáveis de instância
 - [ ] Métodos ≤10 linhas cada
@@ -135,6 +145,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/direct-messages/stores/conversation.store.ts`
+
 - **Linhas:** 99
 - **Violações:** Métodos grandes
 - **Destino:** `domains/users/stores/conversation.store.ts`
@@ -143,6 +154,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5-1 dia
 
 **Checklist:**
+
 - [ ] Identificar métodos grandes
 - [ ] Dividir métodos ≤10 linhas
 - [ ] Extrair lógica para functions
@@ -152,6 +164,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/user-management/stores/user.store.ts`
+
 - **Linhas:** 120
 - **Violações:** Store complexo
 - **Destino:** `domains/users/stores/user.store.ts`
@@ -160,6 +173,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5-1 dia
 
 **Checklist:**
+
 - [ ] Analisar complexidade do store
 - [ ] Dividir em ≤2 variáveis de instância
 - [ ] Métodos ≤10 linhas cada
@@ -172,6 +186,7 @@ Para cada arquivo identificado:
 ### 🟢 Prioridade 3 - Simples
 
 **📊 STATUS GERAL PRIORITY 3:**
+
 - ✅ **19 arquivos migrados** (2025-07-15)
 - 📦 **45 novos arquivos** criados seguindo nova arquitetura
 - 🔥 **25 arquivos originais** removidos
@@ -179,6 +194,7 @@ Para cada arquivo identificado:
 - 📋 **Em andamento:** `use-channels.hook.ts` (178 linhas → decomposição UC01.1)
 
 **🔥 EXECUÇÃO PERFEITA:**
+
 - ✅ Metodologia arquivo por arquivo funcionando
 - ✅ Object Calisthenics aplicado rigorosamente (≤50 linhas)
 - ✅ UC01.1 para stores complexas (service + store + hook + queries)
@@ -187,6 +203,7 @@ Para cada arquivo identificado:
 - ✅ Dependências documentadas e planejadas sequencialmente
 
 #### `features/direct-messages/hooks/use-conversations.hook.ts`
+
 - **Linhas:** 71
 - **Destino:** `domains/users/hooks/use-conversations.hook.ts`
 - **Ação:** Decomposição completa com UC01.1 (service + store + hook + queries)
@@ -194,8 +211,9 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Mover para nova estrutura
-- [x] Aplicar UC01.1: Decompor em service + store + hook + queries  
+- [x] Aplicar UC01.1: Decompor em service + store + hook + queries
 - [x] Criar conversation.service.ts (API layer)
 - [x] Criar conversation.store.ts (Zustand slim)
 - [x] Criar use-conversations-queries.hook.ts (TanStack Query)
@@ -204,11 +222,13 @@ Para cada arquivo identificado:
 - [x] Remover arquivos originais
 
 **Dependências Resolvidas:**
+
 - [x] `app/(user)/conversation/$conversationId.tsx` - atualizado para usar conversationService
 - [x] `features/direct-messages/components/conversation-list.tsx` - import atualizado
 - [x] `features/direct-messages/components/new-conversation-modal.tsx` - import atualizado
 
 #### `features/direct-messages/hooks/use-messages.hook.ts`
+
 - **Linhas:** 51
 - **Destino:** `domains/users/hooks/use-messages.hook.ts`
 - **Ação:** Decomposição completa com UC01.1 (service + store + hook + queries)
@@ -216,6 +236,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Aplicar UC01.1: Decompor message.store.ts (101 linhas) em service + store + hook + queries
 - [x] Criar message.service.ts (30 linhas) - API layer limpa
 - [x] Criar message.store.ts (11 linhas) - Zustand slim
@@ -224,6 +245,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivos originais
 
 #### `features/direct-messages/hooks/use-agent-chat.hook.ts`
+
 - **Linhas:** 65
 - **Destino:** `domains/users/hooks/use-agent-chat.hook.ts`
 - **Ação:** Refatoração completa com Object Calisthenics
@@ -231,6 +253,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Refatorar para 51 linhas (≤50 target)
 - [x] Aplicar Object Calisthenics (≤10 linhas por método, ≤2 variáveis)
 - [x] Usar novos hooks migrados (useMessages, useConversation)
@@ -239,6 +262,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/user-management/components/user-area.tsx`
+
 - **Linhas:** 28
 - **Destino:** `domains/users/components/user-area.tsx`
 - **Ação:** Migração direta
@@ -246,6 +270,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Mover para nova estrutura
 - [x] Verificar Object Calisthenics (já OK)
 - [x] Atualizar imports
@@ -253,10 +278,12 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 **Dependências Identificadas:**
+
 - [ ] `features/user-management/components/user-sidebar.tsx` (linha 23) - precisa migrar
 - [ ] `features/project-management/components/project-navigation.tsx` (linha 28) - precisa migrar
 
 #### `features/user-management/hooks/use-user.hook.ts`
+
 - **Linhas:** 44
 - **Destino:** `domains/users/hooks/use-user.hook.ts`
 - **Ação:** Migração direta
@@ -264,6 +291,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Mover para nova estrutura
 - [x] Verificar Object Calisthenics (já OK)
 - [x] Atualizar imports
@@ -271,6 +299,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 **Dependências Identificadas:**
+
 - [ ] `app/(user)/settings/index.tsx` (linha 16) - usa useUser hook, precisa ajustar import
 - [ ] `features/user-management/stores/user.store.ts` - precisa migrar o store
 
@@ -279,6 +308,7 @@ Para cada arquivo identificado:
 ### 🔴 Prioridade 1 - Críticos
 
 #### `features/project-management/components/add-agent-modal.tsx`
+
 - **Linhas:** 343
 - **Violações:** Componente gigante, formulário complexo
 - **Destino:** `domains/projects/components/add-agent-modal.tsx`
@@ -287,6 +317,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 2-3 dias
 
 **Checklist:**
+
 - [ ] Identificar seções do modal
 - [ ] Criar `AgentSelectionForm` (≤50 linhas)
 - [ ] Criar `AgentConfigurationForm` (≤50 linhas)
@@ -299,6 +330,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/project-management/components/agents-sidebar.tsx`
+
 - **Linhas:** 220
 - **Violações:** Lógica complexa de renderização
 - **Destino:** `domains/projects/components/agents-sidebar.tsx`
@@ -307,6 +339,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar seções do sidebar
 - [ ] Criar `AgentList` component (≤50 linhas)
 - [ ] Criar `AgentItem` component (≤50 linhas)
@@ -319,6 +352,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/project-management/components/create-channel-modal.tsx`
+
 - **Linhas:** 203
 - **Violações:** Modal complexo
 - **Destino:** `domains/projects/components/create-channel-modal.tsx`
@@ -327,6 +361,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades
 - [ ] Criar `ChannelForm` component (≤50 linhas)
 - [ ] Criar `ChannelValidation` component (≤50 linhas)
@@ -338,6 +373,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/project-management/components/project-navigation.tsx`
+
 - **Linhas:** 177
 - **Violações:** Navegação complexa
 - **Destino:** `domains/projects/components/project-navigation.tsx`
@@ -346,6 +382,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar seções de navegação
 - [ ] Criar `ProjectTabs` component (≤50 linhas)
 - [ ] Criar `ProjectBreadcrumb` component (≤50 linhas)
@@ -358,6 +395,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/development-tools/components/file-explorer.tsx`
+
 - **Linhas:** 401
 - **Violações:** Componente gigante
 - **Destino:** `domains/shared/components/file-explorer.tsx`
@@ -366,6 +404,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 2-3 dias
 
 **Checklist:**
+
 - [ ] Identificar estrutura de árvore
 - [ ] Criar `FileTree` component (≤50 linhas)
 - [ ] Criar `FileItem` component (≤50 linhas)
@@ -378,6 +417,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/development-tools/components/terminal-panel.tsx`
+
 - **Linhas:** 342
 - **Violações:** Painel complexo
 - **Destino:** `domains/shared/components/terminal-panel.tsx`
@@ -386,6 +426,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 2-3 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades do terminal
 - [ ] Criar `TerminalOutput` component (≤50 linhas)
 - [ ] Criar `TerminalInput` component (≤50 linhas)
@@ -398,6 +439,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/channel-messaging/hooks/use-channel-chat.hook.ts`
+
 - **Linhas:** 383
 - **Violações:** Hook gigante
 - **Destino:** `domains/projects/hooks/use-channel-chat.hook.ts`
@@ -406,6 +448,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 2-3 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades do hook
 - [ ] Criar `useChannelMessages` hook (≤50 linhas)
 - [ ] Criar `useChannelSend` hook (≤50 linhas)
@@ -417,6 +460,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/channel-messaging/stores/channel-message.store.ts`
+
 - **Linhas:** 343
 - **Violações:** Store complexo
 - **Destino:** `domains/projects/stores/channel-message.store.ts`
@@ -425,6 +469,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades do store
 - [ ] Dividir em ≤2 variáveis de instância
 - [ ] Métodos ≤10 linhas cada
@@ -435,6 +480,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/communication/stores/channel.store.ts`
+
 - **Linhas:** 303
 - **Violações:** Store complexo
 - **Destino:** `domains/projects/stores/channel.store.ts`
@@ -443,6 +489,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar métodos complexos
 - [ ] Dividir em ≤2 variáveis de instância
 - [ ] Métodos ≤10 linhas cada
@@ -453,6 +500,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/task-management/components/kanban-board.tsx`
+
 - **Linhas:** 252
 - **Violações:** Board complexo
 - **Destino:** `domains/projects/components/kanban-board.tsx`
@@ -461,6 +509,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar estrutura do board
 - [ ] Criar `KanbanColumn` component (≤50 linhas)
 - [ ] Criar `KanbanCard` component (≤50 linhas)
@@ -475,6 +524,7 @@ Para cada arquivo identificado:
 ### 🟡 Prioridade 2 - Moderados
 
 #### `features/project-management/components/create-project-form.tsx`
+
 - **Linhas:** 137
 - **Violações:** Formulário longo
 - **Destino:** `domains/projects/components/create-project-form.tsx`
@@ -483,6 +533,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1 dia
 
 **Checklist:**
+
 - [ ] Identificar seções do formulário
 - [ ] Dividir em ≤50 linhas
 - [ ] Métodos ≤10 linhas cada
@@ -493,6 +544,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/project-management/components/create-project-modal.tsx`
+
 - **Linhas:** 132
 - **Violações:** Modal complexo
 - **Destino:** `domains/projects/components/create-project-modal.tsx`
@@ -501,6 +553,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1 dia
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades
 - [ ] Dividir em ≤50 linhas
 - [ ] Métodos ≤10 linhas cada
@@ -511,6 +564,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/project-management/stores/project.store.ts`
+
 - **Linhas:** 131
 - **Violações:** Store com muitos métodos
 - **Destino:** `domains/projects/stores/project.store.ts`
@@ -519,6 +573,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1 dia
 
 **Checklist:**
+
 - [ ] Identificar métodos complexos
 - [ ] Dividir em ≤2 variáveis de instância
 - [ ] Métodos ≤10 linhas cada
@@ -531,6 +586,7 @@ Para cada arquivo identificado:
 ### 🟢 Prioridade 3 - Simples
 
 #### `features/project-management/hooks/use-projects.hook.ts`
+
 - **Linhas:** 70
 - **Destino:** `domains/projects/hooks/use-projects.hook.ts`
 - **Ação:** Decomposição completa com UC01.1 (service + store + hook + queries)
@@ -538,6 +594,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Aplicar UC01.1: Decompor project.store.ts (131 linhas) em service + store + hook + queries
 - [x] Criar project.service.ts (25 linhas) - API layer limpa
 - [x] Criar project.store.ts (11 linhas) - Zustand slim
@@ -552,6 +609,7 @@ Para cada arquivo identificado:
 ### 🔴 Prioridade 1 - Críticos
 
 #### `features/agent-management/components/agent-dashboard.tsx`
+
 - **Linhas:** 444
 - **Violações:** Componente gigante, múltiplas views
 - **Destino:** `domains/agents/components/agent-dashboard.tsx`
@@ -560,6 +618,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 3-4 dias
 
 **Checklist:**
+
 - [ ] Identificar seções do dashboard
 - [ ] Criar `AgentStats` component (≤50 linhas)
 - [ ] Criar `AgentTasks` component (≤50 linhas)
@@ -576,6 +635,7 @@ Para cada arquivo identificado:
 ### 🟢 Prioridade 3 - Simples
 
 #### `features/agent-management/hooks/use-agents.hook.ts`
+
 - **Linhas:** 125
 - **Destino:** `domains/agents/hooks/use-agents.hook.ts`
 - **Ação:** Decomposição completa com UC01.1 (service + store + hook + queries)
@@ -583,6 +643,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Aplicar UC01.1: Decompor use-agents.hook.ts (125 linhas) em service + store + hook + queries
 - [x] Criar agent.service.ts (28 linhas) - API layer limpa
 - [x] Criar agent.store.ts (11 linhas) - Zustand slim
@@ -595,6 +656,7 @@ Para cada arquivo identificado:
 ### 🟡 Prioridade 2 - Moderados
 
 #### `features/llm-provider-management/stores/llm-provider.store.ts`
+
 - **Linhas:** 220
 - **Violações:** Store muito complexo
 - **Destino:** `domains/llm/stores/llm-provider.store.ts`
@@ -603,6 +665,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades do store
 - [ ] Dividir em ≤2 variáveis de instância
 - [ ] Métodos ≤10 linhas cada
@@ -613,6 +676,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `features/llm-provider-management/components/llm-provider-form-modal.tsx`
+
 - **Linhas:** 213
 - **Violações:** Modal com formulário complexo
 - **Destino:** `domains/llm/components/llm-provider-form-modal.tsx`
@@ -621,6 +685,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1-2 dias
 
 **Checklist:**
+
 - [ ] Identificar responsabilidades
 - [ ] Criar `LlmProviderForm` component (≤50 linhas)
 - [ ] Criar `LlmProviderModal` component (≤50 linhas)
@@ -634,6 +699,7 @@ Para cada arquivo identificado:
 ### 🟢 Prioridade 3 - Simples
 
 #### `features/llm-provider-management/components/llm-provider-management.tsx`
+
 - **Linhas:** 112
 - **Destino:** `domains/llm/components/llm-provider-management.tsx`
 - **Ação:** Decomposição completa com UC02.1 (6 micro-componentes)
@@ -641,6 +707,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Aplicar UC02.1: Decompor LlmProviderManagement (112 linhas) em micro-componentes
 - [x] Criar llm-provider-header.tsx (15 linhas)
 - [x] Criar llm-provider-table-header.tsx (12 linhas)
@@ -651,6 +718,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/llm-provider-management/hooks/use-llm-provider.hook.ts`
+
 - **Linhas:** 91
 - **Destino:** `domains/llm/hooks/use-llm-provider.hook.ts`
 - **Ação:** Decomposição completa com UC01.1 (service + store + hook + queries)
@@ -658,6 +726,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.5 dia
 
 **Checklist:**
+
 - [x] Aplicar UC01.1: Decompor llm-provider.store.ts (220 linhas) e hook (91 linhas)
 - [x] Criar llm-provider.service.ts (30 linhas) - API layer limpa
 - [x] Criar llm-provider.store.ts (12 linhas) - Zustand slim
@@ -672,6 +741,7 @@ Para cada arquivo identificado:
 ### 🟢 Componentes Simples Descobertos (≤70 linhas)
 
 #### `features/project-management/components/agent-item.tsx`
+
 - **Linhas:** 52
 - **Destino:** `domains/agents/components/agent-item.tsx`
 - **Ação:** Migração direta com correção de tipos
@@ -679,6 +749,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.2 dia
 
 **Checklist:**
+
 - [x] Analisar violações Object Calisthenics: Nenhuma significativa
 - [x] Migrar para domínio correto (agents, não projects)
 - [x] Corrigir tipos: `Agent` → `AgentDto`
@@ -687,6 +758,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/project-management/components/project-card.tsx`
+
 - **Linhas:** 35
 - **Destino:** `domains/projects/components/project-card.tsx`
 - **Ação:** Migração direta (já respeitava Object Calisthenics)
@@ -694,6 +766,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.1 dia
 
 **Checklist:**
+
 - [x] Analisar Object Calisthenics: ✅ Já conforme (35 linhas ≤50)
 - [x] Migrar para domínio projects
 - [x] Ajustar imports relativos
@@ -701,6 +774,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/project-management/components/project-sidebar-item.tsx`
+
 - **Linhas:** 70
 - **Destino:** `domains/projects/components/` (3 arquivos)
 - **Ação:** Decomposição UC02.1 em micro-componentes
@@ -708,6 +782,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.3 dia
 
 **Checklist:**
+
 - [x] Analisar violações Object Calisthenics: className longa, lógica complexa
 - [x] Aplicar UC02.1: Decompor em micro-componentes
 - [x] Criar `project-sidebar-item.tsx` (44 linhas ≤50)
@@ -717,6 +792,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/project-management/components/project-list.tsx`
+
 - **Linhas:** 68
 - **Destino:** `domains/projects/components/` (3 arquivos)
 - **Ação:** Decomposição UC02.1 em micro-componentes
@@ -724,6 +800,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.3 dia
 
 **Checklist:**
+
 - [x] Analisar dependências: ProjectCard (já migrado ✅)
 - [x] Aplicar UC02.1: Decompor componente inline
 - [x] Criar `project-list.tsx` (26 linhas ≤50)
@@ -732,6 +809,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/project-management/components/agents-list.tsx`
+
 - **Linhas:** 30
 - **Destino:** `domains/agents/components/agents-list.tsx`
 - **Ação:** Migração direta com correção de tipos
@@ -739,6 +817,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.1 dia
 
 **Checklist:**
+
 - [x] Analisar dependências: AgentItem (já migrado ✅)
 - [x] Migrar para domínio correto (agents)
 - [x] Corrigir tipos: `Agent` → `AgentDto`
@@ -746,6 +825,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/project-management/components/project-sidebar.tsx`
+
 - **Linhas:** 41
 - **Destino:** `domains/projects/components/` (2 arquivos)
 - **Ação:** Decomposição UC02.1 - extrair skeleton
@@ -753,6 +833,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.2 dia
 
 **Checklist:**
+
 - [x] Analisar dependências: ProjectSidebarItem (já migrado ✅)
 - [x] Aplicar UC02.1: Extrair ProjectSidebarSkeleton
 - [x] Criar `project-sidebar.tsx` (25 linhas ≤50)
@@ -760,6 +841,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/project-management/components/right-panel.tsx` → `agents-panel.tsx`
+
 - **Linhas:** 36
 - **Destino:** `domains/agents/components/agents-panel.tsx`
 - **Ação:** Migração para domínio correto + correção tipos
@@ -767,6 +849,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.1 dia
 
 **Checklist:**
+
 - [x] Analisar dependências: AgentsList (já migrado ✅)
 - [x] Migrar para domínio correto (agents, não projects)
 - [x] Renomear: RightPanel → AgentsPanel
@@ -774,6 +857,7 @@ Para cada arquivo identificado:
 - [x] Remover arquivo original
 
 #### `features/channel-messaging/hooks/use-typing.hook.ts`
+
 - **Linhas:** 24
 - **Destino:** `domains/projects/hooks/use-typing.hook.ts`
 - **Ação:** UC01.1 - Decompor typing.store.ts (78 linhas)
@@ -781,13 +865,15 @@ Para cada arquivo identificado:
 - **Estimativa:** 0.3 dia
 
 **Checklist:**
+
 - [x] Analisar dependência: typing.store.ts (78 linhas viola Object Calisthenics)
 - [x] Aplicar UC01.1: Decompor store em Zustand slim
 - [x] Criar `typing.store.ts` (16 linhas ≤50) - Zustand
 - [x] Criar `use-typing.hook.ts` (17 linhas ≤50) - Hook simplificado
 - [x] Remover arquivos originais
 
-#### `features/communication/hooks/use-channels.hook.ts` 
+#### `features/communication/hooks/use-channels.hook.ts`
+
 - **Linhas:** 178
 - **Destino:** `domains/projects/hooks/use-channels.hook.ts`
 - **Ação:** UC01.1 - Decompor channel.store.ts (303 linhas) + hook complexo
@@ -795,6 +881,7 @@ Para cada arquivo identificado:
 - **Estimativa:** 1 dia
 
 **Checklist:**
+
 - [x] Analisar dependência: channel.store.ts (303 linhas! Viola gravemente)
 - [ ] Aplicar UC01.1: Decompor store gigante
 - [x] Criar `channel.service.ts` (35 linhas ≤50) - API layer
@@ -805,6 +892,7 @@ Para cada arquivo identificado:
 - [ ] Remover arquivos originais
 
 **📊 IMPACTO DOS DESCOBERTOS:**
+
 - **Arquivos descobertos:** 6 componentes/hooks adicionais
 - **Arquivos resultantes:** 11 arquivos (4 diretos + 7 decompostos)
 - **Object Calisthenics aplicado:** ✅ Todos ≤50 linhas
@@ -815,6 +903,7 @@ Para cada arquivo identificado:
 ### 📋 Estratégia de Continuação
 
 **METODOLOGIA APLICADA:**
+
 1. **Arquivo por arquivo** - Nunca fazer big bang
 2. **Object Calisthenics rigoroso** - ≤50 linhas, ≤10 linhas por método, ≤2 variáveis
 3. **Não atualizar arquivos antigos** - Evitar retrabalho, migrar dependências sequencialmente
@@ -825,16 +914,19 @@ Para cada arquivo identificado:
 **SEQUÊNCIA PLANEJADA:**
 
 #### PRÓXIMO: `features/project-management/components/project-list.tsx`
+
 - **Prioridade:** Alta (pode depender de ProjectCard)
 - **Análise necessária:** Verificar se usa ProjectCard, analisar linhas e complexidade
 - **Dependências potenciais:** project-card.tsx (já migrado ✅)
 
 #### DEPOIS: `features/project-management/components/agents-list.tsx`
+
 - **Prioridade:** Alta (pode depender de AgentItem)
 - **Análise necessária:** Verificar se usa AgentItem, analisar complexidade
 - **Dependências potenciais:** agent-item.tsx (já migrado ✅)
 
 #### EM SEGUIDA: Arquivos simples restantes
+
 - Buscar outros componentes ≤70 linhas em `features/**/*.tsx`
 - Priorizar por domínio para manter coesão
 - Analisar dependências antes de migrar
@@ -851,6 +943,7 @@ Para cada arquivo identificado:
 ### 📊 TRACKING DE PROGRESSO
 
 **CONCLUÍDO ATÉ AGORA:**
+
 - ✅ **19 arquivos migrados** (6 descobertos adicionalmente)
 - ✅ **45 novos arquivos criados** (seguindo nova arquitetura)
 - ✅ **25 arquivos originais removidos**
@@ -859,12 +952,14 @@ Para cada arquivo identificado:
 - ✅ **UC01.1 e UC02.1** aplicados conforme complexidade
 
 **SESSÃO ATUAL EM ANDAMENTO:**
+
 1. 🚧 **Decomposição UC01.1** do `use-channels.hook.ts` (178 linhas)
 2. 🚧 **Store gigante** `channel.store.ts` (303 linhas) sendo decomposta
 3. ✅ **Service layer criado** `channel.service.ts` (35 linhas)
 4. ⏳ **Próximo:** Finalizar decomposição e continuar com próximos arquivos
 
 **PRÓXIMA SEQUÊNCIA PLANEJADA:**
+
 1. Finalizar decomposição channels (store + queries + hooks)
 2. Buscar próximos arquivos ≤70 linhas restantes
 3. Continuar metodologia arquivo por arquivo
@@ -874,11 +969,13 @@ Para cada arquivo identificado:
 ### Migração de Rotas por Domínio
 
 #### Rotas USERS
+
 - `app/(user)/` → `app/users/`
 - `app/(user)/conversation/$conversationId.tsx` → `app/users/conversations/$conversationId.tsx`
 - `app/(user)/settings/` → `app/users/settings/`
 
 **Checklist por rota:**
+
 - [ ] Mover arquivo para nova estrutura
 - [ ] Atualizar imports
 - [ ] Testar navegação
@@ -886,11 +983,13 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### Rotas PROJECTS
+
 - `app/project/` → `app/projects/`
 - `app/create-project.tsx` → `app/projects/create.tsx`
 - `app/create-channel.tsx` → `app/projects/create-channel.tsx`
 
 **Checklist por rota:**
+
 - [ ] Mover arquivo para nova estrutura
 - [ ] Atualizar imports
 - [ ] Testar navegação
@@ -902,10 +1001,12 @@ Para cada arquivo identificado:
 ### Migração para Estrutura de Domínios
 
 #### `shared/types/user.types.ts`
+
 - **Destino:** `shared/types/domains/users/user.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Criar estrutura domains/users/
 - [ ] Mover arquivo
 - [ ] Atualizar todos os imports
@@ -913,10 +1014,12 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `shared/types/project.types.ts`
+
 - **Destino:** `shared/types/domains/projects/project.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Criar estrutura domains/projects/
 - [ ] Mover arquivo
 - [ ] Atualizar todos os imports
@@ -924,10 +1027,12 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `shared/types/agent.types.ts`
+
 - **Destino:** `shared/types/domains/agents/agent.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Criar estrutura domains/agents/
 - [ ] Mover arquivo
 - [ ] Atualizar todos os imports
@@ -935,10 +1040,12 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `shared/types/llm-provider.types.ts`
+
 - **Destino:** `shared/types/domains/llm/llm-provider.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Criar estrutura domains/llm/
 - [ ] Mover arquivo
 - [ ] Atualizar todos os imports
@@ -946,30 +1053,36 @@ Para cada arquivo identificado:
 - [ ] Remover arquivo original
 
 #### `shared/types/channel.types.ts`
+
 - **Destino:** `shared/types/domains/projects/channel.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Mover para domains/projects/
 - [ ] Atualizar todos os imports
 - [ ] Verificar compilação TypeScript
 - [ ] Remover arquivo original
 
 #### `shared/types/message.types.ts`
+
 - **Destino:** `shared/types/domains/users/message.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Mover para domains/users/
 - [ ] Atualizar todos os imports
 - [ ] Verificar compilação TypeScript
 - [ ] Remover arquivo original
 
 #### `shared/types/channel-message.types.ts`
+
 - **Destino:** `shared/types/domains/projects/channel-message.types.ts`
 - **Status:** ❌ Pendente
 
 **Checklist:**
+
 - [ ] Mover para domains/projects/
 - [ ] Atualizar todos os imports
 - [ ] Verificar compilação TypeScript
@@ -978,20 +1091,24 @@ Para cada arquivo identificado:
 ## Cronograma de Execução
 
 ### Sprint 1: Preparação (2-3 dias)
+
 - Criar estrutura de domínios
 - Migrar shared types
 - Configurar ferramentas de validação
 
 ### Sprint 2: Domínio LLM (3-4 dias)
+
 - `llm-provider.store.ts` (220 linhas)
 - `llm-provider-form-modal.tsx` (213 linhas)
 - Arquivos simples do domínio
 
 ### Sprint 3: Domínio AGENTS (4-5 dias)
+
 - `agent-dashboard.tsx` (444 linhas) - CRÍTICO
 - `use-agents.hook.ts` (125 linhas)
 
 ### Sprint 4: Domínio USERS (6-8 dias)
+
 - `conversation-view.tsx` (249 linhas) - CRÍTICO
 - `conversation-list.tsx` (128 linhas)
 - `use-direct-message-chat.hook.ts` (171 linhas)
@@ -999,23 +1116,27 @@ Para cada arquivo identificado:
 - Stores e hooks do domínio
 
 ### Sprint 5: Domínio PROJECTS - Parte 1 (8-10 dias)
+
 - `file-explorer.tsx` (401 linhas) - CRÍTICO
 - `terminal-panel.tsx` (342 linhas) - CRÍTICO
 - `use-channel-chat.hook.ts` (383 linhas) - CRÍTICO
 - `channel-message.store.ts` (343 linhas) - CRÍTICO
 
 ### Sprint 6: Domínio PROJECTS - Parte 2 (6-8 dias)
+
 - `add-agent-modal.tsx` (343 linhas) - CRÍTICO
 - `channel.store.ts` (303 linhas) - CRÍTICO
 - `kanban-board.tsx` (252 linhas) - CRÍTICO
 - `agents-sidebar.tsx` (220 linhas) - CRÍTICO
 
 ### Sprint 7: Domínio PROJECTS - Parte 3 (4-6 dias)
+
 - `create-channel-modal.tsx` (203 linhas) - CRÍTICO
 - `project-navigation.tsx` (177 linhas) - CRÍTICO
 - Componentes moderados restantes
 
 ### Sprint 8: Finalizações (3-4 dias)
+
 - Arquivos simples restantes
 - Migração de rotas
 - Cleanup e validação final
@@ -1027,6 +1148,7 @@ Para cada arquivo identificado:
 ## 🏆 STATUS FINAL DA REFATORAÇÃO
 
 **Status dos Arquivos:**
+
 - ❌ Pendente: 57 arquivos (refinamento futuro)
 - 🔄 Em Progresso: 0 arquivos
 - ✅ Concluído: 140+ arquivos migrados
@@ -1035,6 +1157,7 @@ Para cada arquivo identificado:
 ## 🚀 REFATORAÇÃO CONCLUÍDA COM SUCESSO TOTAL
 
 ### RESULTADOS PRINCIPAIS:
+
 - ✅ **Pasta `features/` ELIMINADA** completamente
 - ✅ **197 arquivos** organizados em `domains/`
 - ✅ **4 arquivos gigantes >400 linhas** decompostos agressivamente
@@ -1044,8 +1167,9 @@ Para cada arquivo identificado:
 ## 🚀 ACELERAÇÃO MÁXIMA COM TASK TOOL
 
 **MIGRAÇÃO EM LOTE DOS ARQUIVOS 30-37:** ✅ COMPLETA
+
 - `kanban-board.tsx` (252 linhas) → 4 arquivos
-- `agents-sidebar.tsx` (220 linhas) → 6 arquivos  
+- `agents-sidebar.tsx` (220 linhas) → 6 arquivos
 - `llm-provider-form-modal.tsx` (213 linhas) → 3 arquivos
 - `create-channel-modal.tsx` (203 linhas) → 3 arquivos
 - `use-direct-message-chat.hook.ts` (171 linhas) → 4 arquivos
@@ -1059,6 +1183,7 @@ Para cada arquivo identificado:
 **Últimos Arquivos Migrados (Arquivos 18-20):**
 
 #### **ARQUIVO 18: `use-typing.hook.ts` + `typing.store.ts`** ✅ MIGRADO
+
 - **Origem:** `features/communication/hooks/use-typing.hook.ts` (24 linhas) + `features/communication/stores/typing.store.ts` (78 linhas)
 - **Destino:** Decomposto com **UC01.1** em 2 arquivos:
   - `domains/projects/stores/typing.store.ts` (16 linhas) - Zustand slim
@@ -1066,6 +1191,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivos originais removidos
 
 #### **ARQUIVO 19: `use-channels.hook.ts` + `channel.store.ts`** ✅ MIGRADO
+
 - **Origem:** `features/communication/hooks/use-channels.hook.ts` (178 linhas) + `features/communication/stores/channel.store.ts` (303 linhas)
 - **Destino:** Decomposto com **UC01.1** em 5 arquivos:
   - `domains/projects/services/channel.service.ts` (40 linhas) - API layer
@@ -1076,6 +1202,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivos originais removidos
 
 #### **ARQUIVO 20: `use-channel-messages.hook.ts` + `channel-message.store.ts`** ✅ MIGRADO
+
 - **Origem:** `features/channel-messaging/hooks/use-channel-messages.hook.ts` (194 linhas) + `features/channel-messaging/stores/channel-message.store.ts` (343 linhas)
 - **Destino:** Decomposto com **UC01.1** em 6 arquivos:
   - `domains/projects/services/channel-message.service.ts` (48 linhas) - API layer
@@ -1087,6 +1214,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivos originais removidos
 
 #### **ARQUIVO 21: `use-channel-chat.hook.ts`** ✅ MIGRADO
+
 - **Origem:** `features/channel-messaging/hooks/use-channel-chat.hook.ts` (383 linhas)
 - **Destino:** Decomposto com **UC01.1** em 7 arquivos:
   - `domains/projects/services/ai-chat.service.ts` (25 linhas) - API layer AI
@@ -1099,6 +1227,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 22: `conversation-view.tsx`** ✅ MIGRADO
+
 - **Origem:** `features/direct-messages/components/conversation-view.tsx` (247 linhas)
 - **Destino:** Decomposto com **UC02.1** em 9 arquivos:
   - `domains/users/components/conversation-view.tsx` (47 linhas) - Componente principal
@@ -1113,6 +1242,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 23: `conversation-list.tsx`** ✅ MIGRADO
+
 - **Origem:** `features/direct-messages/components/conversation-list.tsx` (128 linhas)
 - **Destino:** Decomposto com **UC02.1** em 5 arquivos:
   - `domains/users/components/conversation-list.tsx` (34 linhas) - Componente principal
@@ -1123,6 +1253,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 24: `user-sidebar.tsx`** ✅ MIGRADO
+
 - **Origem:** `features/user-management/components/user-sidebar.tsx` (127 linhas)
 - **Destino:** Decomposto com **UC02.1** em 5 arquivos:
   - `domains/users/components/user-sidebar.tsx` (28 linhas) - Componente principal
@@ -1133,6 +1264,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 25: `new-conversation-modal.tsx`** ✅ MIGRADO
+
 - **Origem:** `features/direct-messages/components/new-conversation-modal.tsx` (191 linhas)
 - **Destino:** Decomposto com **UC02.1** em 5 arquivos:
   - `domains/users/components/new-conversation-modal.tsx` (47 linhas) - Componente principal
@@ -1143,6 +1275,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 26: `agent-dashboard.tsx`** ✅ MIGRADO (CRÍTICO)
+
 - **Origem:** `features/agent-management/components/agent-dashboard.tsx` (444 linhas) - ARQUIVO CRÍTICO
 - **Destino:** Decomposto com **UC02.1** em 5 arquivos:
   - `domains/agents/components/agent-dashboard.tsx` (25 linhas) - Componente principal simplificado
@@ -1154,6 +1287,7 @@ Para cada arquivo identificado:
 - **Observação:** Arquivo crítico com decomposição inicial. Funcionalidades avançadas serão implementadas incrementalmente.
 
 #### **ARQUIVO 27: `file-explorer.tsx`** ✅ MIGRADO (CRÍTICO)
+
 - **Origem:** `features/development-tools/components/file-explorer.tsx` (401 linhas) - ARQUIVO CRÍTICO
 - **Destino:** Decomposto com **UC02.1** em 5 arquivos:
   - `domains/projects/components/file-explorer.tsx` (41 linhas) - Componente principal
@@ -1164,6 +1298,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 28: `terminal-panel.tsx`** ✅ MIGRADO (CRÍTICO)
+
 - **Origem:** `features/development-tools/components/terminal-panel.tsx` (342 linhas) - ARQUIVO CRÍTICO
 - **Destino:** Decomposto com **UC02.1** em 7 arquivos:
   - `domains/projects/components/terminal-panel.tsx` (50 linhas) - Componente principal
@@ -1176,6 +1311,7 @@ Para cada arquivo identificado:
 - **Status:** ✅ **COMPLETO** - arquivo original removido
 
 #### **ARQUIVO 29: `add-agent-modal.tsx`** ✅ MIGRADO (CRÍTICO)
+
 - **Origem:** `features/project-management/components/add-agent-modal.tsx` (343 linhas) - ARQUIVO CRÍTICO
 - **Destino:** Decomposto com **UC02.1** em 5 arquivos:
   - `domains/projects/components/add-agent-modal.tsx` (50 linhas) - Componente principal
@@ -1188,12 +1324,14 @@ Para cada arquivo identificado:
 ### Métricas Object Calisthenics
 
 **Antes da Migração:**
+
 - Arquivos >50 linhas: 45 arquivos
 - Métodos >10 linhas: ~200 métodos
 - Classes >2 variáveis: ~25 classes
 - Uso de else: ~150 ocorrências
 
 **Meta Pós-Migração:**
+
 - Arquivos >50 linhas: 0
 - Métodos >10 linhas: 0
 - Classes >2 variáveis: 0
@@ -1235,6 +1373,7 @@ Para cada arquivo identificado:
 ### Critérios de Aprovação
 
 Arquivo aprovado apenas quando:
+
 - ✅ Todas as validações passando
 - ✅ Code review aprovado
 - ✅ Testes funcionais OK
@@ -1259,11 +1398,13 @@ Arquivo aprovado apenas quando:
 ### Plano de Rollback
 
 **Por Arquivo:**
+
 - Manter backup até validação final
 - Rollback independente possível
 - Não impacta outros arquivos
 
 **Por Domínio:**
+
 - Checkpoint por domínio
 - Rollback de domínio completo
 - Validação intensiva entre domínios

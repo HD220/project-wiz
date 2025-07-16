@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { MessageDto } from '../../../../shared/types/domains/users/message.types';
+import { create } from "zustand";
+import { MessageDto } from "../../../../shared/types/domains/users/message.types";
 
 interface MessageState {
   currentConversationMessages: MessageDto[];
@@ -8,6 +8,6 @@ interface MessageState {
 
 export const useMessageStore = create<MessageState>((set: any) => ({
   currentConversationMessages: [],
-  setCurrentConversationMessages: (messages: MessageDto[]) => 
+  setCurrentConversationMessages: (messages: MessageDto[]) =>
     set({ currentConversationMessages: messages }),
 }));

@@ -6,10 +6,10 @@ interface TaskCardAssigneeProps {
   assigneeAvatar?: string;
 }
 
-export function TaskCardAssignee({ 
+export function TaskCardAssignee({
   assigneeId,
-  assigneeName, 
-  assigneeAvatar 
+  assigneeName,
+  assigneeAvatar,
 }: TaskCardAssigneeProps) {
   if (!assigneeId) return null;
 
@@ -19,8 +19,7 @@ export function TaskCardAssignee({
         <Avatar className="w-6 h-6">
           <AvatarImage src={assigneeAvatar} />
           <AvatarFallback className="text-xs">
-            {assigneeAvatar ||
-              assigneeName?.slice(0, 2).toUpperCase()}
+            {assigneeAvatar || assigneeName?.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <span className="text-xs text-muted-foreground truncate">

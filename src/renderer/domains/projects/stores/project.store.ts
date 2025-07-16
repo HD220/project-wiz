@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { ProjectDto } from '../../../../shared/types/domains/projects/project.types';
+import { create } from "zustand";
+import { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
 
 interface ProjectState {
   selectedProject: ProjectDto | null;
@@ -8,5 +8,6 @@ interface ProjectState {
 
 export const useProjectStore = create<ProjectState>((set: any) => ({
   selectedProject: null,
-  setSelectedProject: (project: ProjectDto | null) => set({ selectedProject: project }),
+  setSelectedProject: (project: ProjectDto | null) =>
+    set({ selectedProject: project }),
 }));

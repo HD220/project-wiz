@@ -11,7 +11,10 @@ interface NotificationSettingsTabProps {
   onUpdate: (field: string, value: boolean) => void;
 }
 
-export function NotificationSettingsTab({ settings, onUpdate }: NotificationSettingsTabProps) {
+export function NotificationSettingsTab({
+  settings,
+  onUpdate,
+}: NotificationSettingsTabProps) {
   return (
     <Card>
       <CardHeader>
@@ -23,10 +26,12 @@ export function NotificationSettingsTab({ settings, onUpdate }: NotificationSett
           <Switch
             id="notifications"
             checked={settings.enableNotifications}
-            onCheckedChange={(checked) => onUpdate("enableNotifications", checked)}
+            onCheckedChange={(checked) =>
+              onUpdate("enableNotifications", checked)
+            }
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="sound">Som das notificações</Label>
           <Switch
@@ -35,13 +40,15 @@ export function NotificationSettingsTab({ settings, onUpdate }: NotificationSett
             onCheckedChange={(checked) => onUpdate("soundEnabled", checked)}
           />
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="desktop">Notificações desktop</Label>
           <Switch
             id="desktop"
             checked={settings.desktopNotifications}
-            onCheckedChange={(checked) => onUpdate("desktopNotifications", checked)}
+            onCheckedChange={(checked) =>
+              onUpdate("desktopNotifications", checked)
+            }
           />
         </div>
       </CardContent>

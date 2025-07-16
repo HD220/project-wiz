@@ -18,7 +18,7 @@ export function AIChatExample({
 }: AIChatExampleProps) {
   const [selectedLlmProvider, setSelectedLlmProvider] = useState<string>("");
   const [messageInput, setMessageInput] = useState("");
-  
+
   const { sendMessage, isLoading, error } = useChannelChat(channelId);
 
   const handleSendMessage = async () => {
@@ -47,12 +47,9 @@ export function AIChatExample({
           selectedProvider={selectedLlmProvider}
           onProviderChange={setSelectedLlmProvider}
         />
-        
-        <AiChatStatus 
-          isLoading={isLoading} 
-          error={error} 
-        />
-        
+
+        <AiChatStatus isLoading={isLoading} error={error} />
+
         <AiChatInput
           value={messageInput}
           onChange={setMessageInput}

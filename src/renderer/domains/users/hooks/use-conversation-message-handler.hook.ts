@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-export function useConversationMessageHandler(sendMessage: (message: string) => Promise<void>, fullAgent: any) {
+export function useConversationMessageHandler(
+  sendMessage: (message: string) => Promise<void>,
+  fullAgent: any,
+) {
   const [messageInput, setMessageInput] = useState("");
 
   const handleSend = async (e: React.FormEvent) => {

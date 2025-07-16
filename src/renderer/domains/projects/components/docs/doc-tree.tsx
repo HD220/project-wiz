@@ -36,19 +36,17 @@ export function DocTree({
           onSelect={onSelectDoc}
           onToggleFolder={onToggleFolder}
         />
-        {doc.type === "folder" && 
-         expandedFolders.has(doc.id) && 
-         doc.children && 
-         renderDocTree(doc.children, level + 1)}
+        {doc.type === "folder" &&
+          expandedFolders.has(doc.id) &&
+          doc.children &&
+          renderDocTree(doc.children, level + 1)}
       </div>
     ));
   };
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-4 space-y-1">
-        {renderDocTree(docs)}
-      </div>
+      <div className="p-4 space-y-1">{renderDocTree(docs)}</div>
     </ScrollArea>
   );
 }

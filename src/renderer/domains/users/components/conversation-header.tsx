@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback } from '../../../../components/ui/avatar';
-import { PageTitle } from '../../../../components/page-title';
+import { Avatar, AvatarFallback } from "../../../../components/ui/avatar";
+import { PageTitle } from "../../../../components/page-title";
 
 interface ConversationHeaderProps {
   agentName: string;

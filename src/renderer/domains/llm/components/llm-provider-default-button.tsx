@@ -7,7 +7,10 @@ interface LlmProviderDefaultButtonProps {
   onSetDefault: (id: string) => void;
 }
 
-export function LlmProviderDefaultButton({ provider, onSetDefault }: LlmProviderDefaultButtonProps) {
+export function LlmProviderDefaultButton({
+  provider,
+  onSetDefault,
+}: LlmProviderDefaultButtonProps) {
   return (
     <Button
       variant={provider.isDefault ? "default" : "outline"}

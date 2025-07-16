@@ -1,10 +1,24 @@
-import { ChevronRight, ChevronDown, Folder, Copy, Trash2, Edit, Download, MoreHorizontal } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../../../../components/ui/context-menu';
-import { Badge } from '../../../../components/ui/badge';
-import { cn } from '../../../../lib/utils';
-import { useFileIcons } from '../hooks/use-file-icons.hook';
-import type { FileTreeItem } from '../../../../lib/placeholders';
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  Copy,
+  Trash2,
+  Edit,
+  Download,
+  MoreHorizontal,
+} from "lucide-react";
+import { Button } from "../../../../components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "../../../../components/ui/context-menu";
+import { Badge } from "../../../../components/ui/badge";
+import { cn } from "../../../../lib/utils";
+import { useFileIcons } from "../hooks/use-file-icons.hook";
+import type { FileTreeItem } from "../../../../lib/placeholders";
 
 interface FileExplorerItemProps {
   item: FileTreeItem;
@@ -47,17 +61,21 @@ export function FileExplorerItem({
               )}
             </Button>
           )}
-          
+
           {item.type === "folder" ? (
             <Folder className="h-4 w-4 text-blue-500" />
           ) : (
             FileIcon && <FileIcon className="h-4 w-4 text-muted-foreground" />
           )}
-          
+
           <span className="flex-1 truncate">{item.name}</span>
-          
-          {item.isModified && <Badge variant="secondary" className="h-4 text-xs">M</Badge>}
-          
+
+          {item.isModified && (
+            <Badge variant="secondary" className="h-4 text-xs">
+              M
+            </Badge>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -67,7 +85,7 @@ export function FileExplorerItem({
           </Button>
         </div>
       </ContextMenuTrigger>
-      
+
       <ContextMenuContent>
         <ContextMenuItem>
           <Copy className="h-4 w-4 mr-2" />

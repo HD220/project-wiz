@@ -1,6 +1,6 @@
-import { useProjectChannelsQueries } from './use-project-channels-queries.hook';
-import { useChannelStore } from '../stores/channel.store';
-import { channelService } from '../services/channel.service';
+import { useProjectChannelsQueries } from "./use-project-channels-queries.hook";
+import { useChannelStore } from "../stores/channel.store";
+import { channelService } from "../services/channel.service";
 
 export function useProjectChannels(projectId: string) {
   const queriesResult = useProjectChannelsQueries(projectId);

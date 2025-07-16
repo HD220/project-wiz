@@ -1,6 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface InterfaceSettingsTabProps {
   theme: string;
@@ -9,11 +15,11 @@ interface InterfaceSettingsTabProps {
   onLanguageChange: (language: string) => void;
 }
 
-export function InterfaceSettingsTab({ 
-  theme, 
-  language, 
-  onThemeChange, 
-  onLanguageChange 
+export function InterfaceSettingsTab({
+  theme,
+  language,
+  onThemeChange,
+  onLanguageChange,
 }: InterfaceSettingsTabProps) {
   return (
     <Card>
@@ -34,7 +40,7 @@ export function InterfaceSettingsTab({
             </SelectContent>
           </Select>
         </div>
-        
+
         <div>
           <Label>Idioma</Label>
           <Select value={language} onValueChange={onLanguageChange}>

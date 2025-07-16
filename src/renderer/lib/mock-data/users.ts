@@ -13,7 +13,7 @@ export const mockUsers: User[] = [
   {
     id: "user-2",
     name: "Maria Santos",
-    email: "maria@example.com", 
+    email: "maria@example.com",
     avatar: "/avatars/user-2.jpg",
     status: "away",
   },
@@ -26,5 +26,5 @@ export const mockUsers: User[] = [
 ];
 
 export const getUserById = (id: string): User | undefined => {
-  return mockUsers.find(user => user.id === id);
+  return mockUsers.find((user) => user.id === id);
 };

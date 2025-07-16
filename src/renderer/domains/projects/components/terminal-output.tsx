@@ -1,7 +1,7 @@
-import { ScrollArea } from '../../../../components/ui/scroll-area';
-import { Badge } from '../../../../components/ui/badge';
-import { cn } from '../../../../lib/utils';
-import type { TerminalLine } from '../../../../lib/placeholders';
+import { ScrollArea } from "../../../../components/ui/scroll-area";
+import { Badge } from "../../../../components/ui/badge";
+import { cn } from "../../../../lib/utils";
+import type { TerminalLine } from "../../../../lib/placeholders";
 
 interface TerminalOutputProps {
   terminalLines: TerminalLine[];
@@ -9,7 +9,11 @@ interface TerminalOutputProps {
   scrollAreaRef: React.RefObject<HTMLDivElement>;
 }
 
-export function TerminalOutput({ terminalLines, isRunning, scrollAreaRef }: TerminalOutputProps) {
+export function TerminalOutput({
+  terminalLines,
+  isRunning,
+  scrollAreaRef,
+}: TerminalOutputProps) {
   const getLineStyle = (type: TerminalLine["type"]) => {
     switch (type) {
       case "command":
@@ -29,7 +33,10 @@ export function TerminalOutput({ terminalLines, isRunning, scrollAreaRef }: Term
     <ScrollArea className="flex-1 p-3" ref={scrollAreaRef}>
       <div className="space-y-1 font-mono text-sm">
         {terminalLines.map((line) => (
-          <div key={line.id} className={cn("flex items-start gap-2", getLineStyle(line.type))}>
+          <div
+            key={line.id}
+            className={cn("flex items-start gap-2", getLineStyle(line.type))}
+          >
             <span className="whitespace-pre-wrap break-all">{line.text}</span>
             {line.type === "error" && (
               <Badge variant="destructive" className="text-xs">
@@ -43,7 +50,7 @@ export function TerminalOutput({ terminalLines, isRunning, scrollAreaRef }: Term
             )}
           </div>
         ))}
-        
+
         {isRunning && (
           <div className="text-muted-foreground animate-pulse">
             Executando comando...

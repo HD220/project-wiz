@@ -10,9 +10,9 @@ import {
 
 import { DocTree } from "@/domains/projects/components/docs/doc-tree";
 import { DocViewer } from "@/domains/projects/components/docs/doc-viewer";
-import { 
-  mockDocs, 
-  type DocFile 
+import {
+  mockDocs,
+  type DocFile,
 } from "@/domains/projects/components/docs/mock-docs-data";
 
 export const Route = createFileRoute("/project/$projectId/docs/")({
@@ -37,11 +37,11 @@ export function ProjectDocsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <PageTitle 
-        title="Documentação" 
-        subtitle="Documentação do projeto e guias" 
+      <PageTitle
+        title="Documentação"
+        subtitle="Documentação do projeto e guias"
       />
-      
+
       <div className="flex-1 p-6">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={30} minSize={20}>
@@ -58,9 +58,9 @@ export function ProjectDocsPage() {
               />
             </div>
           </ResizablePanel>
-          
+
           <ResizableHandle />
-          
+
           <ResizablePanel defaultSize={70}>
             <div className="h-full border rounded-lg bg-background">
               <DocViewer selectedDoc={selectedDoc} />

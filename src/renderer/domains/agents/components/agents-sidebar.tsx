@@ -65,7 +65,9 @@ export function AgentsSidebar({
       {error && (
         <AgentsSidebarError
           error={error}
-          onClearError={() => {/* clearError functionality to be implemented */}}
+          onClearError={() => {
+            /* clearError functionality to be implemented */
+          }}
         />
       )}
 

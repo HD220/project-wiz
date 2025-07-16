@@ -1,4 +1,4 @@
-import { useTypingStore } from '../stores/typing.store';
+import { useTypingStore } from "../stores/typing.store";
 
 export function useTyping(channelId: string) {
   const typingChannels = useTypingStore((state: any) => state.typingChannels);

@@ -40,9 +40,11 @@ export function DocTreeItem({
 
   const renderIcon = () => {
     if (doc.type === "folder") {
-      return isExpanded ? 
-        <FolderOpen className="h-4 w-4 mr-2" /> : 
-        <Folder className="h-4 w-4 mr-2" />;
+      return isExpanded ? (
+        <FolderOpen className="h-4 w-4 mr-2" />
+      ) : (
+        <Folder className="h-4 w-4 mr-2" />
+      );
     }
     return <FileText className="h-4 w-4 mr-2" />;
   };

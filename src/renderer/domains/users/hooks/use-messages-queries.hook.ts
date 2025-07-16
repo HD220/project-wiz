@@ -1,18 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { messageService } from '../services/message.service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { messageService } from "../services/message.service";
 import type {
   MessageDto,
   CreateMessageDto,
-} from '../../../../shared/types/domains/users/message.types';
+} from "../../../../shared/types/domains/users/message.types";
 
 export function useMessagesQuery(
   conversationId?: string,
   limit?: number,
-  offset?: number
+  offset?: number,
 ) {
   return useQuery({
-    queryKey: ['messages', conversationId, limit, offset],
-    queryFn: () => messageService.listByConversation(conversationId!, limit, offset),
+    queryKey: ["messages", conversationId, limit, offset],
+    queryFn: () =>
+      messageService.listByConversation(conversationId!, limit, offset),
     enabled: !!conversationId,
     staleTime: 1 * 60 * 1000,
   });
@@ -20,7 +21,7 @@ export function useMessagesQuery(
 
 export function useMessageQuery(id: string) {
   return useQuery({
-    queryKey: ['message', id],
+    queryKey: ["message", id],
     queryFn: () => messageService.getById(id),
     enabled: !!id,
   });
@@ -34,8 +35,8 @@ export function useCreateMessageMutation() {
     onSuccess: (_, variables) => {
       const conversationId = variables.conversationId || variables.contextId;
       if (conversationId) {
-        queryClient.invalidateQueries({ 
-          queryKey: ['messages', conversationId] 
+        queryClient.invalidateQueries({
+          queryKey: ["messages", conversationId],
         });
       }
     },

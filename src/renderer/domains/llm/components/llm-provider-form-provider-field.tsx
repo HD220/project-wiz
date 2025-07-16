@@ -28,7 +28,9 @@ interface ProviderFieldProps {
 
 export function ProviderField({ value, onChange }: ProviderFieldProps) {
   const handleChange = (selectedValue: string) => {
-    const providerConfig = SUPPORTED_PROVIDERS.find((p) => p.value === selectedValue);
+    const providerConfig = SUPPORTED_PROVIDERS.find(
+      (p) => p.value === selectedValue,
+    );
     onChange(selectedValue, providerConfig?.models || []);
   };
 

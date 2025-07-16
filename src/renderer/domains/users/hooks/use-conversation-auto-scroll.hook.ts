@@ -1,7 +1,11 @@
-import { useEffect, useRef } from 'react';
-import type { MessageDto } from '../../../../shared/types/domains/users/message.types';
+import { useEffect, useRef } from "react";
+import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
 
-export function useConversationAutoScroll(messages: MessageDto[], isTyping: boolean, conversationId: string) {
+export function useConversationAutoScroll(
+  messages: MessageDto[],
+  isTyping: boolean,
+  conversationId: string,
+) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
   const previousMessagesLength = useRef(0);

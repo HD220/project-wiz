@@ -1,13 +1,16 @@
-import { Search, Plus } from 'lucide-react';
-import { Input } from '../../../../components/ui/input';
-import { Button } from '../../../../components/ui/button';
+import { Search, Plus } from "lucide-react";
+import { Input } from "../../../../components/ui/input";
+import { Button } from "../../../../components/ui/button";
 
 interface FileExplorerHeaderProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 }
 
-export function FileExplorerHeader({ searchQuery, setSearchQuery }: FileExplorerHeaderProps) {
+export function FileExplorerHeader({
+  searchQuery,
+  setSearchQuery,
+}: FileExplorerHeaderProps) {
   return (
     <div className="p-3 border-b space-y-3">
       <div className="flex items-center justify-between">

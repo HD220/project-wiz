@@ -1,7 +1,13 @@
-import { User } from 'lucide-react';
-import { Label } from '../../../../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select';
-import type { AgentDto } from '../../../../shared/types/domains/agents/agent.types';
+import { User } from "lucide-react";
+import { Label } from "../../../../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
 
 interface NewConversationAgentSelectorProps {
   selectedAgentId: string;

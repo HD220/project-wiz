@@ -1,22 +1,28 @@
-import { ScrollArea } from '../../../../components/ui/scroll-area';
-import { MessageItem } from '../../../../components/chat/message-item';
-import { useAgentChat } from '../hooks/use-agent-chat.hook';
-import { useConversationAutoScroll } from '../hooks/use-conversation-auto-scroll.hook';
-import { useConversationMessageHandler } from '../hooks/use-conversation-message-handler.hook';
-import { ConversationHeader } from './conversation-header';
-import { ConversationErrorDisplay } from './conversation-error-display';
-import { ConversationEmptyState } from './conversation-empty-state';
-import { ConversationTypingIndicator } from './conversation-typing-indicator';
-import { ConversationMissingAgentWarning } from './conversation-missing-agent-warning';
-import { ConversationMessageInput } from './conversation-message-input';
-import type { ConversationDto, MessageDto } from '../../../../shared/types/domains/users/user.types';
+import { ScrollArea } from "../../../../components/ui/scroll-area";
+import { MessageItem } from "../../../../components/chat/message-item";
+import { useAgentChat } from "../hooks/use-agent-chat.hook";
+import { useConversationAutoScroll } from "../hooks/use-conversation-auto-scroll.hook";
+import { useConversationMessageHandler } from "../hooks/use-conversation-message-handler.hook";
+import { ConversationHeader } from "./conversation-header";
+import { ConversationErrorDisplay } from "./conversation-error-display";
+import { ConversationEmptyState } from "./conversation-empty-state";
+import { ConversationTypingIndicator } from "./conversation-typing-indicator";
+import { ConversationMissingAgentWarning } from "./conversation-missing-agent-warning";
+import { ConversationMessageInput } from "./conversation-message-input";
+import type {
+  ConversationDto,
+  MessageDto,
+} from "../../../../shared/types/domains/users/user.types";
 
 interface ConversationViewProps {
   conversationId: string;
   conversation: ConversationDto;
 }
 
-export function ConversationView({ conversationId, conversation }: ConversationViewProps) {
+export function ConversationView({
+  conversationId,
+  conversation,
+}: ConversationViewProps) {
   const {
     messages,
     isSending,
@@ -29,7 +35,11 @@ export function ConversationView({ conversationId, conversation }: ConversationV
     fullAgent,
   } = useAgentChat({ conversationId, conversation });
 
-  const { messagesEndRef } = useConversationAutoScroll(messages, isTyping, conversationId);
+  const { messagesEndRef } = useConversationAutoScroll(
+    messages,
+    isTyping,
+    conversationId,
+  );
   const messageHandler = useConversationMessageHandler(sendMessage, fullAgent);
 
   const convertToMessageFormat = (msg: MessageDto) => ({
@@ -51,7 +61,12 @@ export function ConversationView({ conversationId, conversation }: ConversationV
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full px-4">
           <div className="space-y-4 py-4">
-            {error && <ConversationErrorDisplay error={error} onClearError={clearError} />}
+            {error && (
+              <ConversationErrorDisplay
+                error={error}
+                onClearError={clearError}
+              />
+            )}
             {!fullAgent && <ConversationMissingAgentWarning />}
 
             {messages.length === 0 ? (
@@ -68,7 +83,9 @@ export function ConversationView({ conversationId, conversation }: ConversationV
                     showActions={true}
                   />
                 ))}
-                {isTyping && <ConversationTypingIndicator agentName={agent.name} />}
+                {isTyping && (
+                  <ConversationTypingIndicator agentName={agent.name} />
+                )}
                 <div ref={messagesEndRef} />
               </>
             )}

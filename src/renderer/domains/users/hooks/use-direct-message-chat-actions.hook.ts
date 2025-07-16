@@ -66,7 +66,14 @@ export function useDirectMessageChatActions({
         setIsSending(false);
       }
     },
-    [conversationId, loadMessages, setError, setIsSending, setIsTyping, setOptimisticMessages],
+    [
+      conversationId,
+      loadMessages,
+      setError,
+      setIsSending,
+      setIsTyping,
+      setOptimisticMessages,
+    ],
   );
 
   const regenerateLastMessage = useCallback(async (): Promise<void> => {

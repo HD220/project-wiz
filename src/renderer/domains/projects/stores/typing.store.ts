@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface TypingState {
   typingChannels: Record<string, { isTyping: boolean; timestamp: number }>;

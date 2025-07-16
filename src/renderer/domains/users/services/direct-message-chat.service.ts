@@ -1,6 +1,4 @@
-import type {
-  MessageDto,
-} from "../../../../shared/types/domains/users/message.types";
+import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
 
 export class DirectMessageChatService {
   static async sendToAgent(
@@ -15,10 +13,7 @@ export class DirectMessageChatService {
     );
   }
 
-  static async regenerateResponse(
-    conversationId: string,
-    senderId: string,
-  ) {
+  static async regenerateResponse(conversationId: string, senderId: string) {
     return await window.electronIPC.directMessages.regenerateResponse(
       conversationId,
       senderId,
