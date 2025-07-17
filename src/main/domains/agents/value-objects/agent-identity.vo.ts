@@ -18,6 +18,10 @@ export class AgentIdentity {
     return this.role;
   }
 
+  getValue(): string {
+    return `${this.name.getValue()}-${this.role.getValue()}`;
+  }
+
   equals(other: AgentIdentity): boolean {
     return this.name.equals(other.name) && this.role.equals(other.role);
   }

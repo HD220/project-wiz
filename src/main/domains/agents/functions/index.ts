@@ -1,6 +1,5 @@
-export * from "./agent-create.functions";
-export * from "./agent-query.functions";
-export * from "./agent-update.functions";
+// CRUD operations (using factory)
+export * from "./agent-crud.functions";
 export * from "./agent-operations.functions";
 export * from "./agent.mapper";
 

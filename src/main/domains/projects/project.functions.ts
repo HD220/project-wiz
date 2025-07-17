@@ -1,36 +1,19 @@
-// Re-export das funções organizadas por agregado
+// Re-export all functions from the organized modules
 
-// PROJECT CRUD OPERATIONS (Aggregate Root)
-export {
-  createProject,
-  findProjectById,
-  findAllProjects,
-  updateProject,
-  deleteProject,
-  archiveProject,
-  CreateProjectSchema,
-  UpdateProjectSchema,
-  dbToProjectData,
-} from "./functions/project-crud.functions";
+// New organized functions
+export * from "./functions/project-create.functions";
+export * from "./functions/project-query.functions";
+export * from "./functions/project-update.functions";
+export * from "./functions/project-operations.functions";
+export * from "./functions/project.mapper";
 
-export type {
-  CreateProjectInput,
-  UpdateProjectInput,
-} from "./functions/project-crud.functions";
+// Channel functions
+export * from "./functions/channel-crud.functions";
+export * from "./functions/channel-operations.functions";
 
-// CHANNEL CRUD OPERATIONS (Pertence ao Project)
-export {
-  createChannel,
-  findChannelById,
-  findChannelsByProjectId,
-  updateChannel,
-  deleteChannel,
-  CreateChannelSchema,
-  UpdateChannelSchema,
-  dbToChannelData,
-} from "./functions/channel-crud.functions";
+// Message functions
+export * from "./functions/project-message-operations.functions";
 
-export type {
-  CreateChannelInput,
-  UpdateChannelInput,
-} from "./functions/channel-crud.functions";
+// For backward compatibility, also export types
+export type { CreateProjectInput } from "./functions/project-create.functions";
+export type { UpdateProjectInput } from "./functions/project-update.functions";

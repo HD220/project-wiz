@@ -148,6 +148,95 @@ export const STORAGE_KEYS = {
   LAST_PROJECT: "last-project-id",
 } as const;
 
+// IPC Channel Constants
+export const IPC_CHANNELS = {
+  // Agent channels
+  AGENT_CREATE: "agent:create",
+  AGENT_GET_BY_ID: "agent:getById",
+  AGENT_LIST: "agent:list",
+  AGENT_LIST_ACTIVE: "agent:listActive",
+  AGENT_UPDATE: "agent:update",
+  AGENT_DELETE: "agent:delete",
+  AGENT_ACTIVATE: "agent:activate",
+  AGENT_DEACTIVATE: "agent:deactivate",
+  AGENT_SET_DEFAULT: "agent:setDefault",
+  AGENT_GET_DEFAULT: "agent:getDefault",
+
+  // Project channels
+  PROJECT_CREATE: "project:create",
+  PROJECT_GET_BY_ID: "project:getById",
+  PROJECT_LIST: "project:list",
+  PROJECT_UPDATE: "project:update",
+  PROJECT_DELETE: "project:delete",
+  PROJECT_ARCHIVE: "project:archive",
+
+  // User channels
+  USER_CREATE: "user:create",
+  USER_GET_BY_ID: "user:getById",
+  USER_LIST: "user:list",
+  USER_UPDATE: "user:update",
+  USER_DELETE: "user:delete",
+
+  // LLM channels
+  LLM_CREATE_PROVIDER: "llm:createProvider",
+  LLM_GET_PROVIDER: "llm:getProvider",
+  LLM_LIST_PROVIDERS: "llm:listProviders",
+  LLM_UPDATE_PROVIDER: "llm:updateProvider",
+  LLM_DELETE_PROVIDER: "llm:deleteProvider",
+  LLM_SET_DEFAULT: "llm:setDefault",
+
+  // Window channels
+  WINDOW_MINIMIZE: "window:minimize",
+  WINDOW_MAXIMIZE: "window:maximize",
+  WINDOW_CLOSE: "window:close",
+  WINDOW_TOGGLE_MAXIMIZE: "window:toggleMaximize",
+  WINDOW_IS_MAXIMIZED: "window:isMaximized",
+
+  // App channels
+  APP_IS_DEV: "app:isDev",
+
+  // Legacy structured format (for compatibility)
+  AGENTS: {
+    CREATE: "agent:create",
+    GET_BY_ID: "agent:getById",
+    LIST: "agent:list",
+    LIST_ACTIVE: "agent:listActive",
+    UPDATE: "agent:update",
+    DELETE: "agent:delete",
+    ACTIVATE: "agent:activate",
+    DEACTIVATE: "agent:deactivate",
+  },
+  PROJECTS: {
+    CREATE: "project:create",
+    GET_BY_ID: "project:getById",
+    LIST: "project:list",
+    UPDATE: "project:update",
+    DELETE: "project:delete",
+    ARCHIVE: "project:archive",
+  },
+  USERS: {
+    CREATE: "user:create",
+    GET_BY_ID: "user:getById",
+    LIST: "user:list",
+    UPDATE: "user:update",
+    DELETE: "user:delete",
+  },
+  LLM: {
+    CREATE_PROVIDER: "llm:createProvider",
+    GET_PROVIDER: "llm:getProvider",
+    LIST_PROVIDERS: "llm:listProviders",
+    UPDATE_PROVIDER: "llm:updateProvider",
+    DELETE_PROVIDER: "llm:deleteProvider",
+    SET_DEFAULT: "llm:setDefault",
+  },
+  WINDOW: {
+    MINIMIZE: "window:minimize",
+    MAXIMIZE: "window:maximize",
+    CLOSE: "window:close",
+    TOGGLE_MAXIMIZE: "window:toggleMaximize",
+  },
+} as const;
+
 export default {
   APP: APP_CONSTANTS,
   DB: DB_CONSTANTS,
@@ -163,4 +252,5 @@ export default {
   REGEX: REGEX_PATTERNS,
   ENV: ENV_VARS,
   STORAGE: STORAGE_KEYS,
+  IPC: IPC_CHANNELS,
 } as const;
