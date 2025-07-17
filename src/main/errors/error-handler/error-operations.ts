@@ -1,8 +1,8 @@
 import { createErrorLogger } from "../error-logger";
 import { createErrorResponse } from "../error-response";
 
-export class ErrorOperations {
-  static logError(
+export const ErrorOperations = {
+  logError(
     error: unknown,
     logger: {
       warn: (message: string, data?: unknown) => void;
@@ -11,9 +11,9 @@ export class ErrorOperations {
     },
   ): void {
     createErrorLogger(logger).logError(error);
-  }
+  },
 
-  static toSafeResponse(error: unknown): {
+  toSafeResponse(error: unknown): {
     success: false;
     error: {
       name: string;
@@ -23,5 +23,5 @@ export class ErrorOperations {
     };
   } {
     return createErrorResponse(error);
-  }
-}
+  },
+};

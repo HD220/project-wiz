@@ -10,9 +10,9 @@ export { ValidationError, type ValidationIssue } from "./validation.error";
 import { ErrorDetection } from "./error-handler/error-detection";
 import { ErrorOperations } from "./error-handler/error-operations";
 
-export class ErrorHandler {
-  static isApplicationError = ErrorDetection.isApplicationError;
-  static getUserMessage = ErrorDetection.getUserMessage;
-  static logError = ErrorOperations.logError;
-  static toSafeResponse = ErrorOperations.toSafeResponse;
-}
+export const ErrorHandler = {
+  isApplicationError: ErrorDetection.isApplicationError,
+  getUserMessage: ErrorDetection.getUserMessage,
+  logError: ErrorOperations.logError,
+  toSafeResponse: ErrorOperations.toSafeResponse,
+};

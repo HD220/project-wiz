@@ -87,10 +87,12 @@ For more detailed setup instructions, please refer to the [Development Setup Gui
 
 Dive deeper into Project Wiz with our comprehensive documentation:
 
-- **[User Guide](./docs/user/README.md):** Introduces users to Project Wiz and how to use its features.
-- **[Technical Documentation](./docs/developer/reference/software-architecture.md):** Details the architecture, agent framework, and other technical aspects for developers.
-- **[Vision and Goals](./docs/project-overview/vision-and-goals.md):** Outlines the long-term vision and strategic objectives of Project Wiz.
-- **[Roadmap](./docs/project-overview/roadmap.md):** Shows the planned features and future development direction.
+- **[User Guide](https://github.com/HD220/project-wiz/blob/main/docs/user/README.md):** Introduces users to Project Wiz and how to use its features.
+- **[Technical Documentation](https://github.com/HD220/project-wiz/blob/main/docs/developer/architecture-guide.md):** Details the architecture, agent framework, and other technical aspects for developers.
+- **[Vision and Goals](https://github.com/HD220/project-wiz/blob/main/docs/project-overview/vision-and-goals.md):** Outlines the long-term vision and strategic objectives of Project Wiz.
+- **[Roadmap](https://github.com/HD220/project-wiz/blob/main/docs/project-overview/roadmap.md):** Shows the planned features and future development direction.
+
+For more detailed setup instructions, please refer to the [Development Setup Guide](https://github.com/HD220/project-wiz/blob/main/docs/developer/tutorials/01-development-setup.md) and the [Quick Start Guide](https://github.com/HD220/project-wiz/blob/main/docs/user/getting-started.md).
 
 ## Contributing
 

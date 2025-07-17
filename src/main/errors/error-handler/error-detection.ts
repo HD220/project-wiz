@@ -1,11 +1,11 @@
 import { BaseError } from "../base.error";
 
-export class ErrorDetection {
-  static isApplicationError(error: unknown): error is BaseError {
+export const ErrorDetection = {
+  isApplicationError(error: unknown): error is BaseError {
     return error instanceof BaseError;
-  }
+  },
 
-  static getUserMessage(error: unknown): string {
+  getUserMessage(error: unknown): string {
     if (error instanceof BaseError) {
       return error.getUserMessage();
     }
@@ -15,5 +15,5 @@ export class ErrorDetection {
     }
 
     return "An unknown error occurred.";
-  }
-}
+  },
+};

@@ -22,7 +22,7 @@ NC='\033[0m' # No Color
 # Prompt base para análise de DX e Clean Code
 BASE_PROMPT='Você é um especialista em Developer Experience (DX) e Clean Code. Sua tarefa é EXECUTAR melhorias no código e reportar o que foi feito.
 
-IMPORTANTE: Responda SEMPRE em formato JSON válido seguindo exatamente esta estrutura:
+IMPORTANTE: Responda SEMPRE em formato JSON válido seguindo exatamente esta estrutura, SOMENTE o JSON SEM QUAISQUER OUTROS DADOS ELE VAI SER DIRETAMENTE PARSEADO:
 
 {
   "health": 85,
@@ -210,11 +210,7 @@ execute_claude() {
     
     # Executa o Claude CLI e captura o resultado
     local result
-    result=$(echo "$prompt" | "$CLAUDE_CLI" \
-        --output-format "$OUTPUT_FORMAT" \
-        --dangerously-skip-permissions \
-        -p \
-        2>&1)
+    result=$(echo "$prompt" | "$CLAUDE_CLI" --dangerously-skip-permissions --output-format json -p 2>&1)
     
     local exit_code=$?
     
