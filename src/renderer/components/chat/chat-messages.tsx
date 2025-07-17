@@ -46,7 +46,10 @@ function renderChannelMessage(
       }}
       onEdit={onEditMessage || (() => {})}
       onDelete={onDeleteMessage || (() => {})}
-      onReply={(id) => console.log("Reply:", id)}
+      onReply={() => {
+        // TODO: Implement reply functionality
+        // This will open a reply context for the selected message
+      }}
       showActions={true}
     />
   );

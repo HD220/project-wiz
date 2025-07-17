@@ -3,6 +3,7 @@
 # Script para análise contínua de DX e Clean Code com Claude CLI
 # Autor: Assistente Claude
 # Data: $(date)
+# Uso: ./improve.sh [prompt_customizado]
 
 set -euo pipefail
 
@@ -12,6 +13,9 @@ OUTPUT_FORMAT="json"
 SLEEP_BETWEEN_RETRIES=30
 TARGET_HEALTH=90
 
+# Captura prompt customizado do argumento, se fornecido
+CUSTOM_PROMPT="${1:-}"
+
 # Cores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -20,7 +24,131 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Prompt base para análise de DX e Clean Code
-BASE_PROMPT='Você é um especialista em Developer Experience (DX) e Clean Code. Sua tarefa é EXECUTAR melhorias no código e reportar o que foi feito.
+BASE_PROMPT='## Análise e Refatoração Prática
+
+Você é um especialista em Clean Code, arquitetura de software e Developer Experience (DX). Sua missão é analisar o código fornecido e melhorá-lo seguindo estas diretrizes:
+
+## FOCO PRINCIPAL:
+
+- **Clean Code**: Código limpo, legível e maintível
+- **DX (Developer Experience)**: Experiência fluida para desenvolvedores
+- **Organização**: Estrutura lógica e consistente
+- **Simplicidade**: Reduzir complexidade desnecessária
+- **Praticidade**: Soluções eficientes e diretas
+
+### 1. ANÁLISE REAL DA SITUAÇÃO
+
+**Mapeie os problemas reais:**
+
+- Onde está difícil de encontrar código?
+- Quais arquivos estão grandes demais?
+- Onde tem código duplicado?
+- Qual parte dá mais trabalho para manter?
+- Onde falta tipagem adequada?
+- Quais componentes fazem coisa demais?
+- Identifique code smells e anti-patterns
+- Sugira refatorações para melhor legibilidade
+- Aplique princípios SOLID quando apropriado
+- Remova duplicação e código morto
+- Melhore naming conventions
+- Identifique oportunidades para usar bibliotecas que simplifiquem o código
+- Sugira ferramentas que melhorem DX (linting, formatting, etc.)
+- Recomende alternativas mais modernas/eficientes
+- Considere bundle size e performance
+- Estabeleça padrões consistentes
+- Sugira convenções de nomenclatura
+- Padronize estruturas de dados
+- Unifique estilos de código
+- Comandos úteis para automatizar tarefas
+- Configurações que melhoram workflow
+- Ferramentas de desenvolvimento
+
+**Identifique por dor real:**
+
+- **URGENTE**: Código que quebra frequentemente
+- **IMPORTANTE**: Código difícil de manter/encontrar
+- **ÚTIL**: Melhorias que facilitam desenvolvimento
+- **PODE ESPERAR**: Otimizações menores
+
+### 2. DIRETRIZES PRÁTICAS
+
+- **Progressivo**: Mudanças incrementais, não revolucionárias
+- **Pragmático**: Soluções práticas, não teóricas
+- **Testável**: Código que facilita testes
+- **Documentado**: Código auto-explicativo
+- **Consistente**: Padrões uniformes em todo projeto
+
+**Object Calisthenics aplicados na prática:**
+
+- Indentação máxima de 2 níveis
+- Evitar else (usar early returns)
+- Objetos pequenos e focados
+- Nomes que explicam o que fazem
+- Funções pequenas (máximo 20 linhas)
+
+**KISS aplicado:**
+
+- Se não está quebrado, não mexe
+- Solução mais simples que funciona
+- Evitar abstrações desnecessárias
+- Código que qualquer dev entende
+- Convenções óbvias
+
+**Organização por funcionalidade:**
+
+- Agrupar por feature, não por tipo de arquivo
+- Colocar junto o que muda junto
+- Separar apenas quando necessário
+- Estrutura que facilita encontrar código
+
+### 3. PROCESSO PRÁTICO DE EXECUÇÃO
+
+**Para cada execução:**
+
+1. **Identifique a dor** mais chata atualmente
+2. **Analise os arquivos** relacionados
+3. **Faça um plano simples** de reorganização
+
+### 4. CRITÉRIOS DE QUALIDADE REAL
+
+**Cada refatoração deve:**
+
+- Resolver uma dor real
+- Manter funcionalidade exata
+- Deixar código mais fácil de entender
+- Reduzir duplicação
+- Melhorar tipagem TypeScript
+- Facilitar manutenção
+
+**Sinais de que está no caminho certo:**
+
+- Menos linhas de código total
+- Mais fácil encontrar onde mexer
+- Menos bugs aparecem
+- Mais fácil adicionar features
+- Menos tempo para entender código
+
+**Evite:**
+
+- Abstrações complexas
+- Patterns desnecessários
+- Separação excessiva
+- Código que ninguém entende
+- Soluções over-engineered
+
+---
+
+Analise a codebase e identifique qual é a maior dor atual para desenvolver e manter. Foque em resolver esse problema específico com a solução mais simples possível, mantendo a funcionalidade exata mas melhorando significativamente a experiência de desenvolvimento.
+
+Siga as diretrizes práticas acima para:
+
+1. Identificar problemas reais (não teóricos)
+2. Implementar soluções efetivas
+3. Manter funcionalidade exata
+4. Melhorar experiência de desenvolvimento
+5. Documentar mudanças feitas
+
+Tome extremo cuidado ao realizar a refatoração, considere todos os aspectos de diferentes ângulos, pense o que pode quebrar com a alteração, faça alterações completas, pense em alterar algo veja quem depende disso que está sendo alterado, o que mais precisa ser corrigido para atender a essa refatoração, sempre deve sair de um código funcionando para outro código funcionando só que mais legível e com melhor manutenibilidade.
 
 IMPORTANTE: Responda SEMPRE em formato JSON válido seguindo exatamente esta estrutura, SOMENTE o JSON SEM QUAISQUER OUTROS DADOS ELE VAI SER DIRETAMENTE PARSEADO:
 
@@ -38,19 +166,11 @@ IMPORTANTE: Responda SEMPRE em formato JSON válido seguindo exatamente esta est
       "file": "src/components/Button.jsx",
       "description": "Removi código duplicado e criei hook customizado useButtonState()",
       "impact": "Reduziu complexidade e aumentou reutilização"
-    },
-    {
-      "type": "documentation",
-      "file": "README.md",
-      "description": "Adicionei seção de instalação e exemplos de uso",
-      "impact": "Melhorou DX para novos desenvolvedores"
     }
   ],
   "files_modified": [
     "src/utils/helper.js",
-    "src/components/Button.jsx", 
-    "README.md",
-    "package.json"
+    "src/components/Button.jsx"
   ],
   "improvements_made": {
     "dx_improvements": 3,
@@ -60,43 +180,9 @@ IMPORTANTE: Responda SEMPRE em formato JSON válido seguindo exatamente esta est
   },
   "next_steps": [
     "Implementar testes unitários para as funções refatoradas",
-    "Configurar ESLint com regras mais restritivas",
-    "Adicionar TypeScript para maior segurança de tipos"
+    "Configurar ESLint com regras mais restritivas"
   ]
 }
-
-INSTRUÇÕES PRINCIPAIS:
-
-1. **EXECUTE as melhorias** - Não apenas analise, mas FAÇA as modificações necessárias nos arquivos
-2. **REPORTE o que foi feito** - Liste todas as ações executadas com detalhes
-3. **CALCULE a nova saúde** - Após as melhorias, determine o novo score de saúde (0-100)
-4. **INDIQUE próximos passos** - O que ainda precisa ser feito para atingir 90%
-
-FOCO DE AÇÃO:
-
-1. **Developer Experience (DX):**
-   - EXECUTE: Melhore setup, documentação, scripts de build
-   - EXECUTE: Adicione/melhore ferramentas de desenvolvimento
-   - EXECUTE: Implemente melhor debugging e logs
-   - EXECUTE: Crie/melhore testes automatizados
-
-2. **Clean Code:**
-   - EXECUTE: Renomeie variáveis/funções para nomes mais claros
-   - EXECUTE: Refatore funções grandes em funções menores
-   - EXECUTE: Remova código duplicado
-   - EXECUTE: Aplique princípios SOLID
-
-3. **Maintainability:**
-   - EXECUTE: Reorganize estrutura de pastas
-   - EXECUTE: Separe responsabilidades
-   - EXECUTE: Crie componentes reutilizáveis
-   - EXECUTE: Adicione comentários onde necessário
-
-IMPORTANTE: 
-- Analise TODOS os arquivos do diretório atual recursivamente (ignore node_modules, .git, etc.)
-- EXECUTE as melhorias mais impactantes primeiro
-- O campo "health" deve refletir a saúde APÓS suas modificações
-- Continue executando melhorias até atingir 90% de saúde
 
 EXECUTE AS MELHORIAS AGORA:'
 
@@ -181,7 +267,8 @@ build_prompt() {
     local iteration="$1"
     local previous_result="$2"
     
-    local prompt="$BASE_PROMPT"
+    # Usa prompt customizado se fornecido, senão usa o BASE_PROMPT
+    local prompt="${CUSTOM_PROMPT:-$BASE_PROMPT}"
     
     # Se não é a primeira iteração, adiciona o resultado anterior
     if [[ $iteration -gt 1 && -n "$previous_result" ]]; then
@@ -210,9 +297,28 @@ execute_claude() {
     
     # Executa o Claude CLI e captura o resultado
     local result
-    result=$(echo "$prompt" | "$CLAUDE_CLI" --dangerously-skip-permissions --output-format json -p 2>&1)
+    result=$("$CLAUDE_CLI" --dangerously-skip-permissions --print "$prompt" --output-format json 2>&1)
     
     local exit_code=$?
+    
+    # Se a execução foi bem-sucedida, executa formatação e commit
+    if [[ $exit_code -eq 0 ]]; then
+        log "Formatando código e fazendo commit das alterações..."
+        
+        # Formatar código
+        if npm run format &>/dev/null; then
+            log "✅ Código formatado"
+        else
+            warning "⚠️ Erro ao formatar código"
+        fi
+        
+        # Adicionar arquivos e fazer commit
+        if git add . &>/dev/null && git commit -m "refatoração massiva" &>/dev/null; then
+            log "✅ Commit realizado com sucesso"
+        else
+            warning "⚠️ Nenhuma alteração para commitar ou erro no commit"
+        fi
+    fi
     
     # Retorna o resultado via stdout
     echo "$result"

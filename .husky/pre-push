@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run comprehensive quality checks before push
+echo "🚀 Running pre-push checks..."
+
+# Run full quality check
+npm run quality:check
+
+echo "✅ Pre-push checks passed! Ready to push."

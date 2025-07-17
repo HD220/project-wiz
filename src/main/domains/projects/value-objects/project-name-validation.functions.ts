@@ -2,14 +2,23 @@ import { z } from "zod";
 
 import { ValidationUtils } from "../../../../shared/utils/validation.utils";
 import { ValidationError } from "../../../errors/validation.error";
+import { VALIDATION_LIMITS } from "../../../../shared/constants";
 
 const ProjectNameSchema = z
   .string()
-  .min(1, "Project name cannot be empty")
-  .max(100, "Project name cannot exceed 100 characters")
+  .min(VALIDATION_LIMITS.NAME_MIN_LENGTH, "Project name cannot be empty")
+  .max(VALIDATION_LIMITS.NAME_MAX_LENGTH, `Project name cannot exceed ${VALIDATION_LIMITS.NAME_MAX_LENGTH} characters`)
   .refine(
     (name) => ValidationUtils.isNonEmptyString(name.trim()),
     "Project name must contain non-whitespace characters",
+  )
+  .refine(
+    (name) => !name.includes('\n') && !name.includes('\r'),
+    "Project name cannot contain line breaks",
+  )
+  .refine(
+    (name) => !/^\s|\s$/.test(name),
+    "Project name cannot start or end with whitespace",
   );
 
 export function validateProjectName(name: string): string {

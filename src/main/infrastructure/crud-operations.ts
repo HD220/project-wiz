@@ -138,19 +138,22 @@ export interface EntityCrudOperations<Entity, CreateInput, UpdateInput> {
   delete(id: string): Promise<void>;
 }
 
+// Type for database table record
+type TableRecord = Record<string, unknown>;
+
 // Factory for standardized CRUD operations
-export function createEntityCrud<Entity, CreateInput, UpdateInput>({
+export function createEntityCrud<Entity, CreateInput, UpdateInput, TTable extends AnySQLiteTable>({
   table,
   entityName,
   createSchema,
   updateSchema,
   entityFactory,
 }: {
-  table: any;
+  table: TTable;
   entityName: string;
   createSchema: z.ZodSchema<CreateInput>;
   updateSchema: z.ZodSchema<UpdateInput>;
-  entityFactory: (data: any) => Entity;
+  entityFactory: (data: TTable["$inferSelect"]) => Entity;
 }): EntityCrudOperations<Entity, CreateInput, UpdateInput> {
   const logger = getLogger(entityName.toLowerCase());
 
@@ -160,9 +163,9 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput>({
         const validated = createSchema.parse(input);
         const db = getDatabase();
 
-        const result = await db.insert(table).values(validated).returning();
+        const result = await db.insert(table).values(validated as TTable["$inferInsert"]).returning();
 
-        const entity = entityFactory(result[0]);
+        const entity = entityFactory(result[0] as TTable["$inferSelect"]);
         logger.info(`${entityName} created`);
         return entity;
       } catch (error) {
@@ -183,7 +186,7 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput>({
           .where(eq(table.id, id))
           .limit(1);
 
-        return result.length > 0 ? entityFactory(result[0]) : null;
+        return result.length > 0 ? entityFactory(result[0] as TTable["$inferSelect"]) : null;
       } catch (error) {
         logger.error(`Failed to find ${entityName.toLowerCase()}`, {
           error,
@@ -201,7 +204,7 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput>({
           .from(table)
           .orderBy(desc(table.createdAt));
 
-        return result.map(entityFactory);
+        return result.map((row) => entityFactory(row as TTable["$inferSelect"]));
       } catch (error) {
         logger.error(`Failed to find ${entityName.toLowerCase()}s`, { error });
         throw error;
@@ -223,7 +226,7 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput>({
           throw new EntityNotFoundError(entityName, id);
         }
 
-        const entity = entityFactory(result[0]);
+        const entity = entityFactory(result[0] as TTable["$inferSelect"]);
         logger.info(`${entityName} updated`);
         return entity;
       } catch (error) {
@@ -273,8 +276,11 @@ export const commonValidations = {
   },
 };
 
+// Type for entity schema fields
+type EntitySchemaFields = Record<string, z.ZodTypeAny>;
+
 // Helper for creating standardized entity schemas
-export function createEntitySchema<T extends Record<string, any>>(
+export function createEntitySchema<T extends EntitySchemaFields>(
   fields: T,
 ): z.ZodObject<
   T & {
@@ -299,10 +305,17 @@ export class EntityNotFoundError extends Error {
   }
 }
 
+// Type for validation error details
+type ValidationErrorDetails = {
+  field?: string;
+  value?: unknown;
+  errors?: string[];
+};
+
 export class DomainValidationError extends Error {
   constructor(
     message: string,
-    public details?: any,
+    public details?: ValidationErrorDetails,
   ) {
     super(message);
     this.name = "DomainValidationError";

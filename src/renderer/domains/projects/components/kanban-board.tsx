@@ -10,12 +10,10 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ projectId, className }: KanbanBoardProps) {
   const handleCreateTask = (columnId: string) => {
-    console.log(
-      "Creating task for column:",
-      columnId,
-      "in project:",
-      projectId,
-    );
+    // TODO: Implement task creation logic
+    // This will integrate with the task management system
+    // columnId: The column where the task should be created
+    // projectId: The project context for the new task
   };
 
   return (
