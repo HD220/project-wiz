@@ -1,6 +1,6 @@
 import { LanguageModel } from "ai";
 
-import { getLogger } from "../../../infrastructure/logger";
+import { getLogger } from "@/infrastructure/logger";
 
 import { LLMProvider } from "./entities";
 import { ProviderFactory } from "./provider-factory";

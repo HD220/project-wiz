@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
-import { agents } from "../../../persistence/schemas/agents.schema";
+import { getDatabase } from "@/infrastructure/database";
+import { getLogger } from "@/infrastructure/logger";
+import { agents } from "@/main/persistence/schemas/agents.schema";
 
 const logger = getLogger("agents.create");
 

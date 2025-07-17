@@ -1,3 +1,7 @@
+import type { ChannelDto } from "../../../../shared/types/domains/projects/channel.types";
+import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
+
 type PageInfo = {
   title: string;
   subtitle?: string;
@@ -7,9 +11,9 @@ type PageInfo = {
 
 export function getPageInfo(
   pathname: string,
-  channels: any[] = [],
-  agents: any[] = [],
-  currentProject: any = null,
+  channels: ChannelDto[] = [],
+  agents: AgentDto[] = [],
+  currentProject: ProjectDto | null = null,
 ): PageInfo {
   // Extract segments from path
   const segments = pathname.split("/").filter(Boolean);

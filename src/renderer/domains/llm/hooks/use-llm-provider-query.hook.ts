@@ -1,13 +1,16 @@
 import { createEntityQueryHooks } from "../../../hooks/use-query-factory.hook";
 import { llmProviderService } from "../services/llm-provider.service";
 
-import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
+import type {
+  LlmProviderFilterDto,
+  LlmProviderDto,
+} from "../../../../shared/types/domains/llm/llm-provider.types";
 
 // Criação automática dos hooks usando o factory
-const llmProviderQueryHooks = createEntityQueryHooks<any, LlmProviderFilterDto>(
-  "llmProvider",
-  llmProviderService,
-);
+const llmProviderQueryHooks = createEntityQueryHooks<
+  LlmProviderDto,
+  LlmProviderFilterDto
+>("llmProvider", llmProviderService);
 
 // Exportação dos hooks com nomes específicos para LLM providers
 export const useLlmProvidersQuery = llmProviderQueryHooks.useListQuery;

@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { eq, desc } from "drizzle-orm";
 
-import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
+import { getDatabase } from "@/infrastructure/database";
+import { getLogger } from "@/infrastructure/logger";
 import {
   projects,
   ProjectSchema,
-} from "../../../persistence/schemas/projects.schema";
-import { channels } from "../../../persistence/schemas/channels.schema";
+} from "@/main/persistence/schemas/projects.schema";
+import { channels } from "@/main/persistence/schemas/channels.schema";
 import { Project, ProjectData } from "../project.entity";
 
 const logger = getLogger("projects");

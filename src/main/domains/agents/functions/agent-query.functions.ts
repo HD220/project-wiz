@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 
-import { getDatabase } from "../../../infrastructure/database";
-import { agents } from "../../../persistence/schemas";
+import { getDatabase } from "@/infrastructure/database";
+import { agents } from "@/main/persistence/schemas";
 
 import { createAgentFromData, AgentWithData } from "./agent-factory.functions";
 
-import type { AgentFilterDto } from "../../../../shared/types";
+import type { AgentFilterDto } from "@/shared/types";
 
 export async function findAgentById(id: string): Promise<AgentWithData | null> {
   const db = getDatabase();

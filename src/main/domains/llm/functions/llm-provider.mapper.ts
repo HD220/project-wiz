@@ -1,5 +1,5 @@
 import type { LlmProviderWithData } from "./llm-provider-operations.functions";
-import type { LlmProviderDto } from "../../../../shared/types";
+import type { LlmProviderDto } from "@/shared/types";
 
 export function llmProviderToDto(
   provider: LlmProviderWithData,

@@ -1,6 +1,6 @@
 import { generateText, CoreMessage, LanguageModel } from "ai";
 
-import { getLogger } from "../../../infrastructure/logger";
+import { getLogger } from "@/infrastructure/logger";
 
 const logger = getLogger("text-generation.processor");
 

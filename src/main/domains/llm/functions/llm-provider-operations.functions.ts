@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 
-import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
-import { llmProviders } from "../../../persistence/schemas";
+import { getDatabase } from "@/infrastructure/database";
+import { getLogger } from "@/infrastructure/logger";
+import { llmProviders } from "@/main/persistence/schemas";
 
 import {
   createLlmProviderFromData,

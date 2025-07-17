@@ -1,5 +1,5 @@
 import type { AgentWithData } from "./agent-factory.functions";
-import type { AgentDto } from "../../../../shared/types";
+import type { AgentDto } from "@/shared/types";
 
 export function agentToDto(agent: AgentWithData): AgentDto {
   return {

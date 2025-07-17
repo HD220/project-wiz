@@ -8,9 +8,9 @@ import type { UseQueryOptions } from "@tanstack/react-query";
 
 interface EntityService<T, FilterType = void> {
   list: (filter?: FilterType) => Promise<T[]>;
-  getById: (id: string) => Promise<T>;
-  getByName?: (name: string) => Promise<T>;
-  getDefault?: () => Promise<T>;
+  getById: (id: string) => Promise<T | null>;
+  getByName?: (name: string) => Promise<T | null>;
+  getDefault?: () => Promise<T | null>;
   listActive?: () => Promise<T[]>;
 }
 

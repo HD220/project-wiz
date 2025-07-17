@@ -1,6 +1,6 @@
-import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
-import { llmProviders } from "../../../persistence/schemas";
+import { getDatabase } from "@/infrastructure/database";
+import { getLogger } from "@/infrastructure/logger";
+import { llmProviders } from "@/main/persistence/schemas";
 
 import {
   createLlmProviderFromData,
@@ -8,7 +8,7 @@ import {
 } from "./llm-factory.functions";
 import { findLlmProviderByName } from "./llm-query.functions";
 
-import type { CreateLlmProviderDto } from "../../../../shared/types";
+import type { CreateLlmProviderDto } from "@/shared/types";
 
 const logger = getLogger("llm-provider.create");
 

@@ -1,5 +1,5 @@
 import { TextField } from "@/components/forms/form-fields";
-import { fieldTransformers } from "@/components/forms/field-transformers";
+import { FieldUtils } from "@/lib/field-utils";
 
 interface ProviderNameFieldProps {
   value: string;
@@ -14,7 +14,7 @@ export function ProviderNameField({ value, onChange }: ProviderNameFieldProps) {
       value={value}
       onChange={onChange}
       placeholder="My AI Provider"
-      transformer={fieldTransformers.normalizeText}
+      transformer={FieldUtils.transformers.normalizeText}
       required
     />
   );

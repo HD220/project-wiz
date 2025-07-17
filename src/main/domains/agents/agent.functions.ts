@@ -65,6 +65,9 @@ export async function createAgent(input: CreateAgentInput): Promise<Agent> {
   const validated = validateCreateInput(input);
   const dbData = prepareAgentData(validated);
   const result = await insertAgentToDatabase(dbData);
+  if (!result[0]) {
+    throw new Error("Failed to create agent - no result returned");
+  }
   return buildAgentFromResult(result[0]);
 }
 
@@ -88,7 +91,21 @@ function prepareAgentData(validated: CreateAgentInput) {
   };
 }
 
-async function insertAgentToDatabase(dbData: any) {
+interface AgentInsertData {
+  name: string;
+  role: string;
+  goal: string;
+  backstory: string;
+  llmProviderId: string;
+  temperature: number;
+  maxTokens: number;
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function insertAgentToDatabase(dbData: AgentInsertData) {
   try {
     const db = getDatabase();
     const result = await db.insert(agents).values(dbData).returning();
@@ -102,7 +119,7 @@ async function insertAgentToDatabase(dbData: any) {
   }
 }
 
-function buildAgentFromResult(result: any): Agent {
+function buildAgentFromResult(result: AgentSchema): Agent {
   const agent = new Agent(dbToAgentData(result));
   logger.info(`Agent created: ${agent.getName()}`);
   return agent;
@@ -121,6 +138,9 @@ export async function findAgentById(id: string): Promise<Agent | null> {
       return null;
     }
 
+    if (!result[0]) {
+      throw new Error("Failed to find agent - no result returned");
+    }
     return new Agent(dbToAgentData(result[0]));
   } catch (error) {
     logger.error("Failed to find agent", { error, id });
@@ -150,6 +170,9 @@ export async function updateAgent(
   const validated = validateUpdateInput(input);
   const updateData = prepareUpdateData(validated);
   const result = await performAgentUpdate(id, updateData);
+  if (!result[0]) {
+    throw new Error("Failed to update agent - no result returned");
+  }
   return buildAgentFromUpdateResult(result[0]);
 }
 
@@ -169,7 +192,18 @@ function prepareUpdateData(validated: UpdateAgentInput) {
   };
 }
 
-async function performAgentUpdate(id: string, updateData: any) {
+interface AgentUpdateData {
+  name?: string | undefined;
+  role?: string | undefined;
+  goal?: string | undefined;
+  backstory?: string | undefined;
+  llmProviderId?: string | undefined;
+  temperature?: number | undefined;
+  maxTokens?: number | undefined;
+  updatedAt: string;
+}
+
+async function performAgentUpdate(id: string, updateData: AgentUpdateData) {
   try {
     const db = getDatabase();
     const result = await db
@@ -189,7 +223,7 @@ async function performAgentUpdate(id: string, updateData: any) {
   }
 }
 
-function buildAgentFromUpdateResult(result: any): Agent {
+function buildAgentFromUpdateResult(result: AgentSchema): Agent {
   const agent = new Agent(dbToAgentData(result));
   logger.info(`Agent updated: ${agent.getName()}`);
   return agent;
@@ -205,6 +239,10 @@ export async function deleteAgent(id: string): Promise<void> {
 
     if (result.length === 0) {
       throw new Error(`Agent not found: ${id}`);
+    }
+
+    if (!result[0]) {
+      throw new Error("Failed to delete agent - no result returned");
     }
 
     logger.info(`Agent deleted: ${result[0].name}`);

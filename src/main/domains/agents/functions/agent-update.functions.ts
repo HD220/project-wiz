@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { CrudOperations } from "../../../infrastructure/crud-operations";
-import { agents } from "../../../persistence/schemas/agents.schema";
+import { CrudOperations } from "@/infrastructure/crud-operations";
+import { agents } from "@/main/persistence/schemas/agents.schema";
 
 import { createAgentFromData, AgentWithData } from "./agent-factory.functions";
 

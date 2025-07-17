@@ -4,7 +4,7 @@ import {
   findChannelsByProject as findChannelsByProjectCrud,
 } from "./channel-crud.functions";
 import { findProjectById } from "./project-crud.functions";
-import type { ChannelDto } from "../../../../shared/types/domains/projects/channel.types";
+import type { ChannelDto } from "@/shared/types/domains/projects/channel.types";
 
 export function findChannelsByProject(projectId: string): ChannelDto[] {
   return findChannelsByProjectCrud(projectId);

@@ -1,4 +1,4 @@
-import { getLogger } from "../../../infrastructure/logger";
+import { getLogger } from "@/infrastructure/logger";
 import { AgentTask } from "../index";
 
 const logger = getLogger("agent.queue");

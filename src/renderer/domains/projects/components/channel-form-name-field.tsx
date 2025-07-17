@@ -1,5 +1,5 @@
 import { TextField } from "@/components/forms/form-fields";
-import { fieldTransformers } from "@/components/forms/field-transformers";
+import { FieldUtils } from "@/lib/field-utils";
 
 interface ChannelNameFieldProps {
   value: string;
@@ -14,7 +14,7 @@ export function ChannelNameField({ value, onChange }: ChannelNameFieldProps) {
       value={value}
       onChange={onChange}
       placeholder="geral, desenvolvimento, discussoes"
-      transformer={fieldTransformers.channelName}
+      transformer={FieldUtils.transformers.channelName}
       required
     />
   );

@@ -1,42 +1,22 @@
 import type { Agent } from "../../../shared/interfaces/agent.interface";
+import { StatusUtils } from "../../../lib/status-utils";
 
 export function useAgentStatusUtils() {
   const getStatusColor = (status: Agent["status"]) => {
-    switch (status) {
-      case "online":
-        return "bg-green-500";
-      case "executing":
-        return "bg-blue-500";
-      case "busy":
-        return "bg-red-500";
-      case "away":
-        return "bg-yellow-500";
-      case "offline":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-500";
-    }
+    return StatusUtils.getAgentStatusColor(status);
   };
 
   const getStatusText = (status: Agent["status"]) => {
-    switch (status) {
-      case "online":
-        return "Online";
-      case "executing":
-        return "Executando";
-      case "busy":
-        return "Ocupado";
-      case "away":
-        return "Ausente";
-      case "offline":
-        return "Offline";
-      default:
-        return "Desconhecido";
-    }
+    return StatusUtils.getAgentStatusText(status);
+  };
+
+  const getStatusInfo = (status: Agent["status"]) => {
+    return StatusUtils.getAgentStatusInfo(status);
   };
 
   return {
     getStatusColor,
     getStatusText,
+    getStatusInfo,
   };
 }
