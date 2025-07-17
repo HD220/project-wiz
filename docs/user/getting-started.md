@@ -4,14 +4,11 @@ Bem-vindo(a) ao **project-wiz**! Este guia rápido irá ajudá-lo(a) a entender 
 
 ## 1. O que é o project-wiz?
 
-O **project-wiz** é uma ferramenta de desktop projetada para ajudar desenvolvedores e equipes a interagir de forma eficiente com **Modelos de Linguagem Grande (LLMs)** e a gerenciar seus projetos de software. Pense nele como seu assistente de IA pessoal, que pode:
+O **project-wiz** é uma ferramenta de desktop projetada para ajudar desenvolvedores e equipes a interagir de forma eficiente com **Modelos de Linguagem Grande (LLMs)** e a gerenciar seus projetos de software. Pense nele como sua fabrica de software onde você é o chefe, e que pode:
 
 - **Conectar-se a diversos provedores de IA:** Configure e use diferentes modelos de linguagem (como OpenAI, Anthropic, etc.) em um só lugar.
 - **Gerenciar Projetos:** Organize suas conversas e interações com a IA em projetos dedicados, mantendo tudo organizado.
 - **Conversar com Agentes de IA:** Crie e interaja com agentes de IA personalizados para tarefas específicas, seja em canais de equipe ou em conversas diretas.
-- **Automatizar Tarefas:** Utilize a IA para auxiliar em tarefas de desenvolvimento, como geração de código, depuração, documentação e muito mais.
-
-Nosso objetivo é simplificar a integração da inteligência artificial no seu fluxo de trabalho diário, tornando-o(a) mais produtivo(a) e eficiente.
 
 ## 2. Requisitos Mínimos para Uso
 
@@ -19,7 +16,7 @@ Para usar o **project-wiz**, você precisará de:
 
 - Um computador com sistema operacional **Windows, macOS ou Linux**.
 - **Conexão com a internet** (necessária para interagir com os provedores de LLM).
-- **Contas em provedores de LLM** (ex: OpenAI, Google AI Studio, Anthropic) e suas respectivas chaves de API, caso deseje utilizar modelos externos. O aplicativo pode vir com modelos locais ou de demonstração, mas para uso completo, a configuração de provedores é essencial.
+- **Contas em provedores de LLM** (ex: OpenAI, Google AI Studio, Anthropic) e suas respectivas chaves de API, caso deseje utilizar modelos externos.
 
 ## 3. Como Instalar e Abrir a Aplicação
 
@@ -34,7 +31,7 @@ Para usar o **project-wiz**, você precisará de:
 
 Ao abrir o **project-wiz** pela primeira vez, você será guiado(a) por um processo de configuração inicial:
 
-1.  **Criação de Projeto (Opcional, mas Recomendado):** Você pode ser solicitado(a) a criar seu primeiro projeto. Um projeto é um espaço de trabalho para organizar suas conversas e agentes. Dê um nome significativo ao seu projeto (ex: "Meu Projeto de Desenvolvimento", "Estudos de IA").
+1.  **Criação de Projeto (Opcional, mas Recomendado):** Você pode ser solicitado(a) a criar seu primeiro projeto. Um projeto é um espaço de trabalho para organizar suas conversas, agentes, repositorio git. Dê um nome significativo ao seu projeto (ex: "Meu Projeto de Desenvolvimento", "Estudos de IA").
 
 2.  **Configuração de Provedores de LLM:** Para interagir com a IA, você precisará configurar pelo menos um provedor de LLM. Vá para a seção de **Configurações de LLM** (geralmente acessível por um ícone de engrenagem ou menu lateral).
     - Clique em "Adicionar Novo Provedor".
@@ -48,10 +45,10 @@ A interface do **project-wiz** é intuitiva e geralmente inclui as seguintes ár
 
 - **Barra Lateral Esquerda:** Contém a navegação principal:
   - **Projetos:** Lista seus projetos e permite alternar entre eles.
-  - **Agentes:** Gerencie seus agentes de IA personalizados.
-  - **Canais:** Acesse canais de comunicação (se houver).
+    - **Canais:** Acesse canais de comunicação (se houver).
   - **Mensagens Diretas:** Inicie conversas individuais com agentes.
-  - **Configurações:** Acesse as configurações gerais da aplicação, incluindo provedores de LLM.
+    - **Agentes:** Gerencie seus agentes de IA personalizados.
+    - **Configurações:** Acesse as configurações gerais da aplicação, incluindo provedores de LLM.
 
 - **Área Central:** É onde a maior parte da interação acontece. Dependendo da sua seleção na barra lateral, esta área exibirá:
   - A lista de projetos ou agentes.
@@ -60,4 +57,4 @@ A interface do **project-wiz** é intuitiva e geralmente inclui as seguintes ár
 
 - **Barra Superior/Inferior:** Pode conter ações contextuais, títulos de página ou informações adicionais.
 
-Agora você está pronto(a) para começar a explorar o **project-wiz** e aproveitar o poder da IA em seus projetos! Para aprender sobre fluxos de uso específicos, consulte o documento "Fluxos de Uso".
+Agora você está pronto(a) para começar a explorar o **project-wiz** e aproveitar o poder da IA em seus projetos! .

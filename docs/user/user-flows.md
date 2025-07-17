@@ -49,7 +49,6 @@ Agentes são configurações de IA com um propósito e personalidade definidos, 
     - **História/Contexto (Backstory):** Uma breve descrição do "passado" ou "personalidade" do agente, que pode influenciar suas respostas.
     - **Provedor de LLM:** Selecione um dos provedores de LLM que você configurou.
     - **Temperatura:** Controla a aleatoriedade das respostas (0.0 para mais determinístico, 1.0 para mais criativo).
-    - **Tokens Máximos:** Limite de tokens para a resposta do agente.
 4.  Clique em **"Salvar"** ou **"Criar Agente"**.
 5.  Seu novo agente estará disponível para ser usado em conversas diretas ou canais.
 
@@ -67,7 +66,7 @@ Converse diretamente com um agente de IA para obter ajuda em tarefas específica
 
 ## 5. Criar um Canal de Comunicação
 
-Canais são espaços para conversas em grupo, onde você pode interagir com múltiplos agentes ou outros usuários (se a funcionalidade for implementada).
+Canais são espaços para conversas em grupo, onde você pode interagir com múltiplos agentes.
 
 **Passo a passo:**
 
@@ -76,17 +75,17 @@ Canais são espaços para conversas em grupo, onde você pode interagir com múl
 3.  Preencha o **Nome do Canal** (ex: "Dúvidas de Código", "Brainstorming de Features").
 4.  (Opcional) Associe o canal a um projeto existente.
 5.  Clique em **"Criar Canal"**.
-6.  O canal será criado e você poderá começar a enviar mensagens. Você pode convidar agentes para participar do canal (se a funcionalidade estiver disponível).
+6.  O canal será criado e você poderá começar a enviar mensagens.
 
 ## 6. Enviar Mensagens em um Canal
 
-Interaja em um canal, seja com outros participantes ou com agentes de IA configurados para o canal.
+Interaja em um canal, seja com outros participantes ou com agentes de IA configurados para o projeto.
 
 **Passo a passo:**
 
 1.  Na barra lateral esquerda, selecione o **Canal** desejado.
 2.  Na caixa de texto na parte inferior da tela, digite sua mensagem.
 3.  Pressione `Enter` ou clique no botão de envio.
-4.  Sua mensagem aparecerá no histórico do chat. Se houver agentes configurados para responder no canal, eles poderão gerar uma resposta.
+4.  Sua mensagem aparecerá no histórico do chat. Se houver agentes configurados no projeto, eles poderão gerar uma resposta.
 
 Estes são os fluxos de uso mais comuns. Explore a aplicação para descobrir outras funcionalidades e como elas podem otimizar seu trabalho!

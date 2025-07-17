@@ -23,7 +23,7 @@ A filosofia do Project Wiz é simples: **abstrair a complexidade do desenvolvime
 
 ### Interface Familiar
 
-A interface se assemelha ao Discord/Slack que você já conhece:
+A interface se assemelha ao Discord que você já conhece:
 
 - **Projetos** na barra lateral (como "Servidores")
 - **Mensagens Diretas** para conversas pessoais
@@ -185,13 +185,6 @@ Múltiplas Agentes → Colaboram na solução
 - **Users**: Espaço pessoal (mensagens diretas, configurações)
 - **LLM**: Infraestrutura compartilhada (provedores, geração de texto)
 
-### Padrões Aplicados
-
-- **Object Calisthenics**: Código limpo e manutenível
-- **Domain-Driven Design**: Modelagem focada no negócio
-- **Event-Driven Architecture**: Comunicação desacoplada
-- **Clean Architecture**: Separação de responsabilidades
-
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Consulte nosso [Guia de Contribuição](./docs/developer/contributing.md) para detalhes sobre:
@@ -205,7 +198,6 @@ Contribuições são bem-vindas! Consulte nosso [Guia de Contribuição](./docs/
 
 - **[Guia do Usuário](./docs/user/)**: Como usar o Project Wiz
 - **[Guia do Desenvolvedor](./docs/developer/)**: Arquitetura e desenvolvimento
-- **[Guia de Início Rápido](./docs/developer/DEVELOPER_QUICKSTART.md)**: Configuração rápida
 
 ## 📄 Licença
 

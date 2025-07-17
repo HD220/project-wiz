@@ -78,17 +78,6 @@
 - **RN001:** [Referência à regra do requirements.md]
 - **RN002:** [Referência à regra do requirements.md]
 
-### Domínios Afetados
-
-- **[DOMINIO_1]:** [projects/agents/users/llm - como é afetado]
-- **[DOMINIO_2]:** [projects/agents/users/llm - como é afetado]
-
-### Object Calisthenics Aplicados
-
-- **Entidades Ricas:** [Quais entidades terão comportamentos específicos]
-- **Value Objects:** [Quais primitivos serão encapsulados]
-- **Functions vs Services:** [Quais operações serão implementadas como funções simples]
-
 ### Requisitos Relacionados
 
 - **RF001:** [Referência ao requisito funcional]
@@ -185,9 +174,6 @@ Tela Inicial -> [Ação] -> Tela UC001 -> [Sucesso] -> Tela Confirmação
 - [Aspectos importantes na implementação]
 - [Cuidados especiais com UX]
 - [Considerações de performance]
-- **Object Calisthenics:** [Métodos ≤10 linhas, máximo 1 nível indentação]
-- **Value Objects:** [Todos os primitivos devem ser encapsulados]
-- **Infraestrutura Transparente:** [Usar getDatabase(), getLogger(), publishEvent()]
 
 ### Casos Especiais
 

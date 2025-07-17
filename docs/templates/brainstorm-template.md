@@ -74,12 +74,6 @@
 - [Riscos identificados]
 - [Dependências críticas]
 
-### Questões em Aberto
-
-- [Pontos que ainda precisam ser resolvidos]
-- [Dúvidas que surgiram durante a discussão]
-- [Itens que precisam de mais investigação]
-
 ### Insights e Descobertas
 
 - [Descobertas importantes feitas durante o brainstorm]

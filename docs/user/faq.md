@@ -22,8 +22,8 @@ Um Agente no **project-wiz** é uma configuração personalizada de um modelo de
 
 ### 5. Qual a diferença entre "Canais" e "Mensagens Diretas"?
 
-- **Canais:** São espaços de comunicação projetados para interações em grupo ou discussões sobre tópicos específicos. Você pode ter múltiplos participantes (incluindo agentes) em um canal.
-- **Mensagens Diretas:** São conversas um-a-um, geralmente entre você e um agente de IA específico. É ideal para tarefas individuais ou quando você precisa de uma interação mais focada.
+- **Canais:** São espaços de comunicação projetados para interações em grupo. Todos participantes do projeto tem acesso e podem iteragir nos canais do projeto.
+- **Mensagens Diretas:** São conversas um-a-um (ou grupo), geralmente entre você e um agente de IA específico. É ideal para tarefas individuais ou quando você precisa de uma interação mais focada e que não esta necessariamente relacionada a um projeto.
 
 ### 6. Posso usar o project-wiz offline?
 
