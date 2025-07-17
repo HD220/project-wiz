@@ -13,7 +13,87 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 
 ## 🚀 Comandos Disponíveis
 
-### 1. `/quick-fix` - Correção Rápida de Problemas
+### 1. Arquitetura e Qualidade
+
+#### `/object-calisthenics-enforcer` - Validação de Object Calisthenics
+
+**Propósito:** Garantir compliance rigoroso com as 9 regras obrigatórias de Object Calisthenics.
+
+**Características:**
+
+- Validação automática das 9 regras
+- Refatoração para compliance
+- Relatórios detalhados de violações
+- Correções práticas e incrementais
+
+**Uso:**
+
+```bash
+/object-calisthenics-enforcer path/to/file.ts
+/object-calisthenics-enforcer --audit src/main/domains/
+```
+
+#### `/architecture-improvement` - Melhorias Arquiteturais
+
+**Propósito:** Analisar e melhorar a arquitetura seguindo padrões estabelecidos.
+
+**Características:**
+
+- Auditoria arquitetural completa
+- Aplicação de CRUD Consolidation
+- Implementação de Clean Architecture
+- Melhorias incrementais validadas
+
+**Uso:**
+
+```bash
+/architecture-improvement analyze
+/architecture-improvement improve src/main/domains/agents/
+```
+
+#### `/quality-validator` - Validação de Qualidade
+
+**Propósito:** Validar compliance com todos os padrões de qualidade do projeto.
+
+**Características:**
+
+- Validação automática e manual
+- Relatórios de qualidade detalhados
+- Métricas de compliance
+- Correções automáticas quando possível
+
+**Uso:**
+
+```bash
+/quality-validator --full
+/quality-validator --report
+/quality-validator --fix path/to/file.ts
+```
+
+### 2. Documentação
+
+#### `/documentation-generator` - Gerador de Documentação
+
+**Propósito:** Criar e manter documentação técnica consistente e atualizada.
+
+**Características:**
+
+- Geração automática de documentação
+- Padrões consistentes de formato
+- Exemplos funcionais e testados
+- Integração com código atual
+
+**Uso:**
+
+```bash
+/documentation-generator module src/main/domains/agents/
+/documentation-generator update
+/documentation-generator validate
+```
+
+### 3. Desenvolvimento
+
+#### `/quick-fix` - Correção Rápida de Problemas
 
 **Propósito:** Identificar e corrigir problemas específicos de forma eficiente e direta.
 
@@ -30,7 +110,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 /quick-fix "Erro de TypeScript no arquivo user.service.ts"
 ```
 
-### 2. `/debug-analyze` - Análise Profunda de Problemas
+#### `/debug-analyze` - Análise Profunda de Problemas
 
 **Propósito:** Investigar problemas complexos e fornecer diagnósticos detalhados.
 
@@ -47,7 +127,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 /debug-analyze "Aplicação trava ao carregar dados do banco"
 ```
 
-### 3. `/code-review` - Assistente de Revisão de Código
+#### `/code-review` - Assistente de Revisão de Código
 
 **Propósito:** Conduzir revisões de código profissionais e construtivas.
 

@@ -1,147 +1,88 @@
-import { z } from "zod";
+import { AgentIdentity } from "./value-objects/agent-identity.vo";
+import { AgentConfiguration } from "./value-objects/agent-configuration.vo";
+import { AgentRuntime } from "./value-objects/agent-runtime.vo";
+import { AgentExecutionContext } from "./value-objects/agent-execution-context.vo";
 
-// Schema consolidado
-const AgentSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(2).max(100),
-  role: z.string().min(2).max(100),
-  goal: z.string().min(10),
-  backstory: z.string().min(10),
-  llmProviderId: z.string(),
-  temperature: z.number().min(0).max(2).default(0.7),
-  maxTokens: z.number().min(100).max(4000).default(1000),
-  status: z.enum(["active", "inactive", "busy"]).default("inactive"),
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
-});
-
-export type AgentData = z.infer<typeof AgentSchema>;
+import { publishEvent } from "@/infrastructure/events";
 
 export class Agent {
-  private data: AgentData;
+  constructor(
+    private readonly identity: AgentIdentity,
+    private readonly configuration: AgentConfiguration,
+    private readonly runtime: AgentRuntime,
+  ) {}
 
-  constructor(data: AgentData) {
-    this.data = AgentSchema.parse(data);
-  }
+  public startWork(): void {
+    if (!this.canStartWork()) {
+      throw new Error(`Agent ${this.identity.getValue()} cannot start work`);
+    }
 
-  // Getters diretos (sem composição desnecessária)
-  getId(): string {
-    return this.data.id;
-  }
-
-  getName(): string {
-    return this.data.name;
-  }
-
-  getRole(): string {
-    return this.data.role;
-  }
-
-  getGoal(): string {
-    return this.data.goal;
-  }
-
-  getBackstory(): string {
-    return this.data.backstory;
-  }
-
-  getStatus(): string {
-    return this.data.status;
-  }
-
-  getLlmProviderId(): string {
-    return this.data.llmProviderId;
-  }
-
-  getTemperature(): number {
-    return this.data.temperature;
-  }
-
-  getMaxTokens(): number {
-    return this.data.maxTokens;
-  }
-
-  // Lógica de status simplificada
-  isActive(): boolean {
-    return this.data.status === "active";
-  }
-
-  isBusy(): boolean {
-    return this.data.status === "busy";
-  }
-
-  canStartTask(): boolean {
-    return this.data.status === "active";
-  }
-
-  // Lógica de negócio consolidada
-  isValidForExecution(): boolean {
-    return this.isActive() && this.data.llmProviderId.length > 0;
-  }
-
-  generateSystemPrompt(): string {
-    const header = `You are ${this.data.name}, a ${this.data.role}.`;
-    const goal = `Goal: ${this.data.goal}`;
-    const background = `Background: ${this.data.backstory}`;
-    const footer = "Please respond according to your role and expertise.";
-
-    return `${header}
-
-${goal}
-
-${background}
-
-${footer}`;
-  }
-
-  // Operações de estado (imutáveis)
-  activate(): Agent {
-    return new Agent({
-      ...this.data,
-      status: "active",
-      updatedAt: new Date(),
+    const newRuntime = this.runtime.updateStatus("busy");
+    publishEvent("agent.work.started", {
+      agentId: this.identity.getValue(),
+      timestamp: new Date(),
     });
   }
 
-  deactivate(): Agent {
-    return new Agent({
-      ...this.data,
-      status: "inactive",
-      updatedAt: new Date(),
+  public completeWork(): void {
+    if (!this.runtime.isBusy()) {
+      throw new Error(`Agent ${this.identity.getValue()} is not busy`);
+    }
+
+    const newRuntime = this.runtime.updateStatus("active");
+    publishEvent("agent.work.completed", {
+      agentId: this.identity.getValue(),
+      timestamp: new Date(),
     });
   }
 
-  setBusy(): Agent {
-    return new Agent({
-      ...this.data,
-      status: "busy",
-      updatedAt: new Date(),
+  public activate(): void {
+    if (this.runtime.isActive()) {
+      throw new Error(`Agent ${this.identity.getValue()} is already active`);
+    }
+
+    const newRuntime = this.runtime.updateStatus("active");
+    publishEvent("agent.activated", {
+      agentId: this.identity.getValue(),
+      timestamp: new Date(),
     });
   }
 
-  // Atualização de dados
-  updateConfig(
-    updates: Partial<
-      Pick<
-        AgentData,
-        "name" | "role" | "goal" | "backstory" | "temperature" | "maxTokens"
-      >
-    >,
-  ): Agent {
-    return new Agent({
-      ...this.data,
-      ...updates,
-      updatedAt: new Date(),
+  public deactivate(): void {
+    if (this.runtime.isInactive()) {
+      throw new Error(`Agent ${this.identity.getValue()} is already inactive`);
+    }
+
+    const newRuntime = this.runtime.updateStatus("inactive");
+    publishEvent("agent.deactivated", {
+      agentId: this.identity.getValue(),
+      timestamp: new Date(),
     });
   }
 
-  // Conversão para dados persistidos
-  toData(): AgentData {
-    return { ...this.data };
+  public canStartWork(): boolean {
+    return this.runtime.canAcceptNewTask() && this.configuration.isConfigured();
   }
 
-  // Comparação
-  equals(other: Agent): boolean {
-    return this.data.id === other.data.id;
+  public isValidForExecution(): boolean {
+    return this.canStartWork() && this.configuration.hasValidLLM();
+  }
+
+  public isOverloaded(): boolean {
+    return this.runtime.isOverloaded();
+  }
+
+  public toExecutionContext(): AgentExecutionContext {
+    return new AgentExecutionContext({
+      agentId: this.identity.getValue(),
+      promptTemplate: this.configuration.generateSystemPrompt(),
+      temperature: this.configuration.getTemperature(),
+      maxTokens: this.configuration.getMaxTokens(),
+      llmProviderId: this.configuration.getLlmProviderId(),
+    });
+  }
+
+  public equals(other: Agent): boolean {
+    return this.identity.equals(other.identity);
   }
 }

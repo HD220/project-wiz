@@ -411,6 +411,14 @@ Aqui estão os comandos mais importantes que você usará durante o desenvolvime
 
   _Verifica se há erros de tipagem no seu código TypeScript sem gerar arquivos JavaScript._
 
+- **Para Verificar Qualidade do Código:**
+
+  ```bash
+  npm run quality:check
+  ```
+
+  _Executa verificação completa: linting, type checking, formatação e testes._
+
 - **Para Gerar Migrações do Banco de Dados:**
 
   ```bash
@@ -459,11 +467,13 @@ Aqui estão os comandos mais importantes que você usará durante o desenvolvime
 
   _Recompila dependências nativas como better-sqlite3 quando necessário._
 
-- **Para Validação da Nova Arquitetura:**
+- **Para Limpar Arquivos de Build:**
+
   ```bash
-  npm run quality:check
+  npm run clean
   ```
-  _Executa validação completa incluindo Object Calisthenics rules e nova estrutura de domínios._
+
+  _Remove arquivos de build e reseta o banco de dados._
 
 # Principais Dependências
 
@@ -530,11 +540,73 @@ domain-name/
 
 ### Object Calisthenics Aplicados
 
-- **Entidades Ricas:**
-- **Funções Simples:**
-- **Classes e metodos pequenos**
-- **Poucos parametros no construtor**
-- **Simples e direto**
+**Exemplos de Refatoração Implementada:**
+
+```typescript
+// ❌ ANTES: Violava múltiplas regras (157 linhas)
+export function useTerminal() {
+  // Múltiplas responsabilidades
+  // Lógica complexa aninhada
+  // Mais de 10 linhas por método
+}
+
+// ✅ DEPOIS: Seguindo Object Calisthenics
+export function useTerminal() {
+  const state = useTerminalState();
+  const commands = useTerminalCommands();
+  const tabs = useTerminalTabs();
+  const scroll = useTerminalScroll();
+
+  return { state, commands, tabs, scroll };
+}
+```
+
+**Entidades Ricas com Value Objects:**
+
+```typescript
+// ❌ ANTES: Entidade anêmica com primitivos
+export class Agent {
+  constructor(
+    public id: string,
+    public name: string,
+    public role: string,
+    public isActive: boolean,
+    public temperature: number,
+  ) {}
+}
+
+// ✅ DEPOIS: Entidade rica com comportamentos
+export class Agent {
+  constructor(
+    private readonly identity: AgentIdentity,
+    private readonly configuration: AgentConfiguration,
+    private readonly runtime: AgentRuntime,
+  ) {}
+
+  public startWork(): void {
+    if (!this.canStartWork()) {
+      throw new Error(`Agent ${this.identity.getValue()} cannot start work`);
+    }
+    this.runtime.updateStatus("working");
+  }
+
+  private canStartWork(): boolean {
+    return this.runtime.isAvailable();
+  }
+}
+```
+
+**Aplicação das 9 Regras:**
+
+- ✅ **Máximo 1 nível de indentação** por método
+- ✅ **Sem palavra-chave ELSE**
+- ✅ **Primitivos encapsulados** em Value Objects
+- ✅ **Máximo 10 linhas por método**
+- ✅ **Máximo 2 variáveis de instância**
+- ✅ **Máximo 50 linhas por classe**
+- ✅ **Collections como first-class citizens**
+- ✅ **Sem getters/setters anêmicos**
+- ✅ **Sem métodos estáticos em entidades**
 
 ### Infraestrutura Transparente
 
@@ -579,6 +651,58 @@ Seguimos o padrão [Conventional Commits](https://www.conventionalcommits.org/en
   - `docs(readme): Atualiza seção de instalação`
   - `refactor(projects): Migra para entidades ricas com Object Calisthenics`
   - `feat(llm): Implementa infraestrutura transparente para providers`
+
+# Claude Code CLI Hooks
+
+O projeto usa hooks do Claude Code CLI para automatizar tarefas de qualidade. Os hooks estão configurados em `.claude/settings.hooks.json` e executam automaticamente durante o desenvolvimento.
+
+## Hooks Configurados
+
+### Auto-formatação Automática
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATHS\" =~ \\.(ts|tsx)$ ]]; then npx prettier --write \"$CLAUDE_FILE_PATHS\" 2>/dev/null || true; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Funcionalidade:**
+
+- Formata automaticamente arquivos TypeScript/TSX após edição
+- Usa Prettier para formatação consistente
+- Não falha se houver problemas (|| true)
+
+## Comandos Claude Especializados
+
+O projeto inclui comandos Claude especializados em `.claude/commands/`:
+
+- **`/object-calisthenics-enforcer`** - Valida compliance com Object Calisthenics
+- **`/architecture-improvement`** - Analisa e melhora arquitetura
+- **`/quality-validator`** - Validação completa de qualidade
+- **`/documentation-generator`** - Gera documentação técnica
+
+Ver [Claude Commands Guide](./docs/developer/claude-commands-guide.md) para detalhes completos.
+
+## Configuração Simplificada
+
+A configuração foi simplificada para:
+
+- **Foco na qualidade essencial** (formatação automática)
+- **Comandos que realmente existem** no package.json
+- **Configuração mínima mas funcional**
+- **Sem complexidade desnecessária**
 
 # Como Manter Este Documento Atualizado (Para Todos os Contribuidores)
 

@@ -33,16 +33,15 @@ That's it! The application should now be running. 🎉
 
 ```bash
 npm run dev              # Start app in development mode
-npm run dev:debug        # Start with debugging enabled
-npm run type-check:watch # Watch for TypeScript errors
+npm run type-check       # Check TypeScript errors
 ```
 
 ### Code Quality
 
 ```bash
-npm run quality:quick    # Quick lint + type check
 npm run quality:check    # Full quality check (lint, types, format, tests)
-npm run quality:fix      # Auto-fix issues where possible
+npm run lint             # Run linter with auto-fix
+npm run format           # Format code with Prettier
 ```
 
 ### Testing
@@ -50,7 +49,6 @@ npm run quality:fix      # Auto-fix issues where possible
 ```bash
 npm test                 # Run all tests
 npm run test:watch       # Run tests in watch mode
-npm run test:ui          # Open test UI
 npm run test:coverage    # Generate coverage report
 ```
 
@@ -60,14 +58,6 @@ npm run test:coverage    # Generate coverage report
 npm run db:studio        # Open database GUI
 npm run db:migrate       # Apply migrations
 npm run db:reset         # Reset database (caution!)
-```
-
-### Utilities
-
-```bash
-npm run deps:check       # Check for unused dependencies
-npm run deps:circular    # Check for circular dependencies
-npm run bundle:analyze   # Analyze bundle size
 ```
 
 ## 🏗️ Project Structure
@@ -115,14 +105,14 @@ src/
 2. **Follow the Architecture**: Keep business logic in domains, UI in components
 3. **Use Path Aliases**: Import with `@/components` instead of `../../components`
 4. **Check CLAUDE.md**: Our AI assistant uses this file for context
-5. **Run Quality Checks**: Before committing, run `npm run quality:quick`
+5. **Run Quality Checks**: Before committing, run `npm run quality:check`
 
 ## 🆘 Common Issues
 
 ### "Module not found" errors
 
 ```bash
-npm run clean:deps  # Clean install dependencies
+rm -rf node_modules package-lock.json && npm install
 ```
 
 ### Database errors

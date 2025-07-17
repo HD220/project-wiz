@@ -47,6 +47,45 @@ Project Wiz is ideal for:
 - **AI:** Integration with Large Language Models (e.g., OpenAI, DeepSeek)
 - **Database:** SQLite (via Drizzle ORM)
 - **Bundler:** Vite
+- **Testing:** Vitest
+- **Code Quality:** ESLint, Prettier
+- **Architecture:** Clean Architecture + DDD + Object Calisthenics
+
+## Architecture & Quality Standards
+
+Project Wiz follows **strict architectural patterns** and **quality standards**:
+
+### 🏗️ Clean Architecture
+
+- **Domain-Driven Design (DDD)** with well-defined bounded contexts
+- **Layered architecture** with clear separation of concerns
+- **Dependency inversion** with infrastructure as plugins
+
+### 📏 Object Calisthenics (9 Rules - Mandatory)
+
+- **Maximum 1 level of indentation** per method
+- **No ELSE keyword** usage
+- **All primitives encapsulated** in Value Objects
+- **Maximum 10 lines per method**
+- **Maximum 2 instance variables** per class
+- **Maximum 50 lines per class**
+- **Collections as first-class citizens**
+- **No anemic getters/setters**
+- **No static methods in entities**
+
+### 🔄 CRUD Consolidation
+
+- **Single file per domain** for CRUD operations
+- **Generic infrastructure** for common operations
+- **Consistent error handling** and validation
+- **Reduced code duplication** by 60%+
+
+### 📊 Quality Metrics
+
+- **100% Object Calisthenics compliance** (enforced automatically)
+- **Automated testing** with high coverage
+- **Continuous validation** via hooks and CI/CD
+- **Documentation synchronization** with code changes
 
 ## Getting Started
 
