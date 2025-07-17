@@ -3,7 +3,10 @@ import { eq, desc } from "drizzle-orm";
 
 import { getDatabase } from "../../../infrastructure/database";
 import { getLogger } from "../../../infrastructure/logger";
-import { projects, ProjectSchema } from "../../../persistence/schemas/projects.schema";
+import {
+  projects,
+  ProjectSchema,
+} from "../../../persistence/schemas/projects.schema";
 import { channels } from "../../../persistence/schemas/channels.schema";
 import { Project, ProjectData } from "../project.entity";
 
@@ -67,7 +70,7 @@ export async function createProject(
       createdAt: now,
       updatedAt: now,
     };
-    
+
     await db.insert(channels).values(channelData);
 
     logger.info(`Project created: ${project.getName()}`);

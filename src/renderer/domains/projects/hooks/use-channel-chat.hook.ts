@@ -27,7 +27,7 @@ export function useChannelChat(props: UseChannelChatProps) {
   const { isTyping, setTyping } = useTyping(props.channelId);
   const config = useAiChatConfig(props);
   const utilities = useAiChatUtilities(props.channelId, props.llmProviderId);
-  
+
   const mutations = useAiChatMutations(props.channelId);
   const { createOptimisticMessage } = useOptimisticMessage(props);
   const { createRequestData } = useRequestDataBuilder({
@@ -46,13 +46,17 @@ export function useChannelChat(props: UseChannelChatProps) {
       messagesHook.clearOptimisticMessages();
       setTyping(false);
     },
-    [createOptimisticMessage, createRequestData, mutations, messagesHook, setTyping],
+    [
+      createOptimisticMessage,
+      createRequestData,
+      mutations,
+      messagesHook,
+      setTyping,
+    ],
   );
 
   const error =
-    messagesHook.error ||
-    mutations.sendError ||
-    mutations.regenerateError;
+    messagesHook.error || mutations.sendError || mutations.regenerateError;
 
   return {
     messages: messagesHook.messages,

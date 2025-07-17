@@ -5,15 +5,16 @@
 
 // Application metadata
 export const APP_CONSTANTS = {
-  NAME: 'Project Wiz',
-  VERSION: '1.0.0',
-  DESCRIPTION: 'Aplicação desktop para automação do ciclo de vida de desenvolvimento de software com Agentes de IA.',
+  NAME: "Project Wiz",
+  VERSION: "1.0.0",
+  DESCRIPTION:
+    "Aplicação desktop para automação do ciclo de vida de desenvolvimento de software com Agentes de IA.",
 } as const;
 
 // Database configuration
 export const DB_CONSTANTS = {
-  DEFAULT_DB_NAME: 'project-wiz.db',
-  MIGRATIONS_PATH: './src/main/persistence/migrations',
+  DEFAULT_DB_NAME: "project-wiz.db",
+  MIGRATIONS_PATH: "./src/main/persistence/migrations",
   CONNECTION_TIMEOUT: 5000,
   MAX_CONNECTIONS: 10,
 } as const;
@@ -89,35 +90,35 @@ export const AGENT_CONSTANTS = {
   DEFAULT_ITERATIONS: 3,
   MIN_ITERATIONS: 1,
   MAX_ITERATIONS: 10,
-  DEFAULT_TASK_PRIORITY: 'medium',
+  DEFAULT_TASK_PRIORITY: "medium",
   TASK_STATUS_TRANSITIONS: {
-    pending: ['in_progress', 'cancelled'],
-    in_progress: ['completed', 'failed', 'paused'],
-    paused: ['in_progress', 'cancelled'],
+    pending: ["in_progress", "cancelled"],
+    in_progress: ["completed", "failed", "paused"],
+    paused: ["in_progress", "cancelled"],
     completed: [],
-    failed: ['pending'],
+    failed: ["pending"],
     cancelled: [],
   },
 } as const;
 
 // Error messages
 export const ERROR_MESSAGES = {
-  GENERIC: 'An unexpected error occurred. Please try again.',
-  NETWORK: 'Network error. Please check your connection.',
-  UNAUTHORIZED: 'You are not authorized to perform this action.',
-  NOT_FOUND: 'The requested resource was not found.',
-  VALIDATION: 'Please check your input and try again.',
-  SERVER: 'Server error. Please try again later.',
-  TIMEOUT: 'Request timed out. Please try again.',
+  GENERIC: "An unexpected error occurred. Please try again.",
+  NETWORK: "Network error. Please check your connection.",
+  UNAUTHORIZED: "You are not authorized to perform this action.",
+  NOT_FOUND: "The requested resource was not found.",
+  VALIDATION: "Please check your input and try again.",
+  SERVER: "Server error. Please try again later.",
+  TIMEOUT: "Request timed out. Please try again.",
 } as const;
 
 // Success messages
 export const SUCCESS_MESSAGES = {
-  SAVED: 'Changes saved successfully.',
-  CREATED: 'Created successfully.',
-  UPDATED: 'Updated successfully.',
-  DELETED: 'Deleted successfully.',
-  COPIED: 'Copied to clipboard.',
+  SAVED: "Changes saved successfully.",
+  CREATED: "Created successfully.",
+  UPDATED: "Updated successfully.",
+  DELETED: "Deleted successfully.",
+  COPIED: "Copied to clipboard.",
 } as const;
 
 // Regular expressions
@@ -131,20 +132,20 @@ export const REGEX_PATTERNS = {
 
 // Environment variable names
 export const ENV_VARS = {
-  OPENAI_API_KEY: 'OPENAI_API_KEY',
-  DEEPSEEK_API_KEY: 'DEEPSEEK_API_KEY',
-  DATABASE_URL: 'DATABASE_URL',
-  LOG_LEVEL: 'LOG_LEVEL',
-  NODE_ENV: 'NODE_ENV',
+  OPENAI_API_KEY: "OPENAI_API_KEY",
+  DEEPSEEK_API_KEY: "DEEPSEEK_API_KEY",
+  DATABASE_URL: "DATABASE_URL",
+  LOG_LEVEL: "LOG_LEVEL",
+  NODE_ENV: "NODE_ENV",
 } as const;
 
 // Storage keys
 export const STORAGE_KEYS = {
-  THEME: 'app-theme',
-  LANGUAGE: 'app-language',
-  USER_PREFERENCES: 'user-preferences',
-  AUTH_TOKEN: 'auth-token',
-  LAST_PROJECT: 'last-project-id',
+  THEME: "app-theme",
+  LANGUAGE: "app-language",
+  USER_PREFERENCES: "user-preferences",
+  AUTH_TOKEN: "auth-token",
+  LAST_PROJECT: "last-project-id",
 } as const;
 
 export default {

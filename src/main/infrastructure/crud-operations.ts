@@ -65,7 +65,6 @@ export class RecordUpdater<T extends AnySQLiteTable> {
   private logSuccess(id: string | number): void {
     this.logger.info(`Record updated: ${id}`);
   }
-
 }
 
 export class RecordDeleter<T extends AnySQLiteTable> {
@@ -114,7 +113,6 @@ export class RecordDeleter<T extends AnySQLiteTable> {
   private logSuccess(id: string | number): void {
     this.logger.info(`Record deleted: ${id}`);
   }
-
 }
 
 export class FieldToggler<T extends AnySQLiteTable> {
@@ -179,7 +177,6 @@ export class FieldToggler<T extends AnySQLiteTable> {
   ): void {
     this.logger.info(`Record ${String(field)} toggled to ${value}: ${id}`);
   }
-
 }
 
 export class BulkUpdater<T extends AnySQLiteTable> {
@@ -192,10 +189,7 @@ export class BulkUpdater<T extends AnySQLiteTable> {
     this.logger = getLogger(loggerContext);
   }
 
-  async execute(
-    where: SQL,
-    data: Partial<T["$inferInsert"]>,
-  ): Promise<void> {
+  async execute(where: SQL, data: Partial<T["$inferInsert"]>): Promise<void> {
     const updateData = this.prepareUpdateData(data);
     await this.performBulkUpdate(where, updateData);
     this.logSuccess();
@@ -288,7 +282,12 @@ export interface EntityCrudOperations<Entity, CreateInput, UpdateInput> {
 type TableRecord = Record<string, unknown>;
 
 // Factory for standardized CRUD operations
-export function createEntityCrud<Entity, CreateInput, UpdateInput, TTable extends AnySQLiteTable>({
+export function createEntityCrud<
+  Entity,
+  CreateInput,
+  UpdateInput,
+  TTable extends AnySQLiteTable,
+>({
   table,
   entityName,
   createSchema,
@@ -309,7 +308,10 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput, TTable extend
         const validated = createSchema.parse(input);
         const db = getDatabase();
 
-        const result = await db.insert(table).values(validated as TTable["$inferInsert"]).returning();
+        const result = await db
+          .insert(table)
+          .values(validated as TTable["$inferInsert"])
+          .returning();
 
         const entity = entityFactory(result[0] as TTable["$inferSelect"]);
         logger.info(`${entityName} created`);
@@ -332,7 +334,9 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput, TTable extend
           .where(eq(table.id, id))
           .limit(1);
 
-        return result.length > 0 ? entityFactory(result[0] as TTable["$inferSelect"]) : null;
+        return result.length > 0
+          ? entityFactory(result[0] as TTable["$inferSelect"])
+          : null;
       } catch (error) {
         logger.error(`Failed to find ${entityName.toLowerCase()}`, {
           error,
@@ -350,7 +354,9 @@ export function createEntityCrud<Entity, CreateInput, UpdateInput, TTable extend
           .from(table)
           .orderBy(desc(table.createdAt));
 
-        return result.map((row) => entityFactory(row as TTable["$inferSelect"]));
+        return result.map((row) =>
+          entityFactory(row as TTable["$inferSelect"]),
+        );
       } catch (error) {
         logger.error(`Failed to find ${entityName.toLowerCase()}s`, { error });
         throw error;

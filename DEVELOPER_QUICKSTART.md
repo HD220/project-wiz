@@ -30,6 +30,7 @@ That's it! The application should now be running. 🎉
 ## 📝 Essential Commands
 
 ### Development
+
 ```bash
 npm run dev              # Start app in development mode
 npm run dev:debug        # Start with debugging enabled
@@ -37,6 +38,7 @@ npm run type-check:watch # Watch for TypeScript errors
 ```
 
 ### Code Quality
+
 ```bash
 npm run quality:quick    # Quick lint + type check
 npm run quality:check    # Full quality check (lint, types, format, tests)
@@ -44,6 +46,7 @@ npm run quality:fix      # Auto-fix issues where possible
 ```
 
 ### Testing
+
 ```bash
 npm test                 # Run all tests
 npm run test:watch       # Run tests in watch mode
@@ -52,6 +55,7 @@ npm run test:coverage    # Generate coverage report
 ```
 
 ### Database
+
 ```bash
 npm run db:studio        # Open database GUI
 npm run db:migrate       # Apply migrations
@@ -59,6 +63,7 @@ npm run db:reset         # Reset database (caution!)
 ```
 
 ### Utilities
+
 ```bash
 npm run deps:check       # Check for unused dependencies
 npm run deps:circular    # Check for circular dependencies
@@ -90,14 +95,17 @@ src/
 ## 🐛 Debugging
 
 ### VS Code Launch Configurations
+
 1. Press `F5` to start debugging
 2. Use "Electron: Main" for backend debugging
 3. Use "Electron: Renderer" for frontend debugging
 
 ### Chrome DevTools
+
 - Press `Ctrl+Shift+I` (or `Cmd+Option+I` on Mac) in the app
 
 ### Logging
+
 - Main process logs: Check terminal output
 - Renderer logs: Check browser DevTools console
 
@@ -112,17 +120,20 @@ src/
 ## 🆘 Common Issues
 
 ### "Module not found" errors
+
 ```bash
 npm run clean:deps  # Clean install dependencies
 ```
 
 ### Database errors
+
 ```bash
 npm run db:reset    # Reset database
 npm run db:migrate  # Re-apply migrations
 ```
 
 ### Build errors
+
 ```bash
 npm run clean       # Clean build artifacts
 npm run rebuild     # Rebuild native dependencies

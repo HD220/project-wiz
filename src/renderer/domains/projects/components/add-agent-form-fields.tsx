@@ -1,6 +1,11 @@
 import { Brain, Loader2 } from "lucide-react";
 
-import { TextField, TextAreaField, NumberField, SelectField } from "@/components/forms/form-fields";
+import {
+  TextField,
+  TextAreaField,
+  NumberField,
+  SelectField,
+} from "@/components/forms/form-fields";
 import { fieldTransformers } from "@/components/forms/field-transformers";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -60,7 +65,10 @@ export function AddAgentGoalField({ formData, updateField }: FormFieldProps) {
   );
 }
 
-export function AddAgentBackstoryField({ formData, updateField }: FormFieldProps) {
+export function AddAgentBackstoryField({
+  formData,
+  updateField,
+}: FormFieldProps) {
   return (
     <TextAreaField
       id="backstory"
@@ -77,7 +85,11 @@ interface LlmProviderFieldProps extends FormFieldProps {
   llmProviders: LlmProviderDto[];
 }
 
-export function AddAgentLlmProviderField({ formData, updateField, llmProviders }: LlmProviderFieldProps) {
+export function AddAgentLlmProviderField({
+  formData,
+  updateField,
+  llmProviders,
+}: LlmProviderFieldProps) {
   return (
     <SelectField
       id="llmProviderId"
@@ -85,7 +97,7 @@ export function AddAgentLlmProviderField({ formData, updateField, llmProviders }
       value={formData.llmProviderId}
       onChange={(value) => updateField("llmProviderId", value)}
       placeholder="Selecione um provedor..."
-      options={llmProviders.map(provider => ({
+      options={llmProviders.map((provider) => ({
         value: provider.id,
         label: `${provider.name} (${provider.model})`,
       }))}
@@ -95,7 +107,10 @@ export function AddAgentLlmProviderField({ formData, updateField, llmProviders }
 }
 
 // Campos Avançados
-export function AddAgentTemperatureField({ formData, updateField }: FormFieldProps) {
+export function AddAgentTemperatureField({
+  formData,
+  updateField,
+}: FormFieldProps) {
   return (
     <NumberField
       id="temperature"
@@ -125,7 +140,10 @@ export function AddAgentTokensField({ formData, updateField }: FormFieldProps) {
   );
 }
 
-export function AddAgentIterationsField({ formData, updateField }: FormFieldProps) {
+export function AddAgentIterationsField({
+  formData,
+  updateField,
+}: FormFieldProps) {
   return (
     <NumberField
       id="maxIterations"
@@ -140,7 +158,10 @@ export function AddAgentIterationsField({ formData, updateField }: FormFieldProp
   );
 }
 
-export function AddAgentSystemPromptField({ formData, updateField }: FormFieldProps) {
+export function AddAgentSystemPromptField({
+  formData,
+  updateField,
+}: FormFieldProps) {
   return (
     <TextAreaField
       id="systemPrompt"
@@ -153,7 +174,10 @@ export function AddAgentSystemPromptField({ formData, updateField }: FormFieldPr
   );
 }
 
-export function AddAgentOptionsFields({ formData, updateField }: FormFieldProps) {
+export function AddAgentOptionsFields({
+  formData,
+  updateField,
+}: FormFieldProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-2">
@@ -185,7 +209,11 @@ export function AddAgentOptionsFields({ formData, updateField }: FormFieldProps)
 }
 
 // Grupos de Campos
-export function AddAgentBasicFields({ formData, updateField, llmProviders }: LlmProviderFieldProps) {
+export function AddAgentBasicFields({
+  formData,
+  updateField,
+  llmProviders,
+}: LlmProviderFieldProps) {
   return (
     <div className="space-y-4">
       <AddAgentNameField formData={formData} updateField={updateField} />
@@ -201,23 +229,36 @@ export function AddAgentBasicFields({ formData, updateField, llmProviders }: Llm
   );
 }
 
-export function AddAgentAdvancedFields({ formData, updateField }: FormFieldProps) {
+export function AddAgentAdvancedFields({
+  formData,
+  updateField,
+}: FormFieldProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <AddAgentTemperatureField formData={formData} updateField={updateField} />
+        <AddAgentTemperatureField
+          formData={formData}
+          updateField={updateField}
+        />
         <AddAgentTokensField formData={formData} updateField={updateField} />
       </div>
 
       <AddAgentIterationsField formData={formData} updateField={updateField} />
-      <AddAgentSystemPromptField formData={formData} updateField={updateField} />
+      <AddAgentSystemPromptField
+        formData={formData}
+        updateField={updateField}
+      />
       <AddAgentOptionsFields formData={formData} updateField={updateField} />
     </div>
   );
 }
 
 // Formulário com Tabs
-export function AddAgentFormTabs({ formData, updateField, llmProviders }: LlmProviderFieldProps) {
+export function AddAgentFormTabs({
+  formData,
+  updateField,
+  llmProviders,
+}: LlmProviderFieldProps) {
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -246,7 +287,10 @@ interface AddAgentFormActionsProps {
   onCancel: () => void;
 }
 
-export function AddAgentFormActions({ isSubmitting, onCancel }: AddAgentFormActionsProps) {
+export function AddAgentFormActions({
+  isSubmitting,
+  onCancel,
+}: AddAgentFormActionsProps) {
   return (
     <DialogFooter className="mt-6">
       <Button type="button" variant="outline" onClick={onCancel}>
@@ -267,7 +311,7 @@ interface AddAgentFormErrorProps {
 
 export function AddAgentFormError({ error }: AddAgentFormErrorProps) {
   if (!error) return null;
-  
+
   return (
     <div className="bg-red-50 border border-red-200 rounded-lg p-3">
       <p className="text-sm text-red-600">{error}</p>
@@ -281,9 +325,9 @@ interface AddAgentModalHeaderProps {
   description?: string;
 }
 
-export function AddAgentModalHeader({ 
-  title = "Criar Novo Agente", 
-  description = "Configure um novo agente para seu projeto" 
+export function AddAgentModalHeader({
+  title = "Criar Novo Agente",
+  description = "Configure um novo agente para seu projeto",
 }: AddAgentModalHeaderProps) {
   return (
     <div className="space-y-2">

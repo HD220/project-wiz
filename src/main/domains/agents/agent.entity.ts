@@ -161,16 +161,12 @@ export class Agent {
 
   // Lógica de negócio consolidada
   generateSystemPrompt(): string {
-    return new AgentPromptGenerator(
-      this.identity,
-      this.personality,
-    ).generate();
+    return new AgentPromptGenerator(this.identity, this.personality).generate();
   }
 
   isValidForExecution(): boolean {
     return (
-      this.status.isActive() &&
-      this.configuration.getLlmProviderId().length > 0
+      this.status.isActive() && this.configuration.getLlmProviderId().length > 0
     );
   }
 

@@ -7,13 +7,16 @@ import { VALIDATION_LIMITS } from "../../../../shared/constants";
 const ProjectNameSchema = z
   .string()
   .min(VALIDATION_LIMITS.NAME_MIN_LENGTH, "Project name cannot be empty")
-  .max(VALIDATION_LIMITS.NAME_MAX_LENGTH, `Project name cannot exceed ${VALIDATION_LIMITS.NAME_MAX_LENGTH} characters`)
+  .max(
+    VALIDATION_LIMITS.NAME_MAX_LENGTH,
+    `Project name cannot exceed ${VALIDATION_LIMITS.NAME_MAX_LENGTH} characters`,
+  )
   .refine(
     (name) => ValidationUtils.isNonEmptyString(name.trim()),
     "Project name must contain non-whitespace characters",
   )
   .refine(
-    (name) => !name.includes('\n') && !name.includes('\r'),
+    (name) => !name.includes("\n") && !name.includes("\r"),
     "Project name cannot contain line breaks",
   )
   .refine(
