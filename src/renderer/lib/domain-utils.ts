@@ -5,6 +5,13 @@
 import type { Task } from "@/lib/mock-data/types";
 import type { Agent } from "@/lib/placeholders";
 
+import {
+  StringUtils,
+  ColorUtils,
+  FormatUtils,
+  ValidationUtils,
+} from "./shared-utils";
+
 /**
  * Utilitários para domínio de Agentes
  */
@@ -12,14 +19,7 @@ export const AgentUtils = {
   /**
    * Gera iniciais do nome do agente
    */
-  getInitials: (name: string): string => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  },
+  getInitials: StringUtils.getInitials,
 
   /**
    * Verifica se o agente está ativo
@@ -38,10 +38,7 @@ export const AgentUtils = {
   /**
    * Formata descrição do agente
    */
-  formatDescription: (description: string, maxLength = 100): string => {
-    if (description.length <= maxLength) return description;
-    return description.substring(0, maxLength).trim() + "...";
-  },
+  formatDescription: StringUtils.truncate,
 } as const;
 
 /**
@@ -51,19 +48,16 @@ export const ProjectUtils = {
   /**
    * Gera slug do projeto
    */
-  generateSlug: (name: string): string => {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
-  },
+  generateSlug: StringUtils.generateSlug,
 
   /**
    * Valida nome do projeto
    */
   isValidName: (name: string): boolean => {
-    return name.trim().length >= 2 && name.trim().length <= 100;
+    return (
+      StringUtils.normalize(name).length >= 2 &&
+      StringUtils.normalize(name).length <= 100
+    );
   },
 
   /**
@@ -80,20 +74,7 @@ export const ProjectUtils = {
   /**
    * Retorna cor baseada no status do projeto
    */
-  getStatusColor: (status: string): string => {
-    switch (status) {
-      case "active":
-        return "bg-green-500";
-      case "completed":
-        return "bg-blue-500";
-      case "paused":
-        return "bg-yellow-500";
-      case "archived":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-400";
-    }
-  },
+  getStatusColor: ColorUtils.getStatusColor,
 } as const;
 
 /**
@@ -103,25 +84,12 @@ export const UserUtils = {
   /**
    * Gera iniciais do usuário
    */
-  getInitials: (name: string): string => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  },
+  getInitials: StringUtils.getInitials,
 
   /**
    * Formata nome de usuário
    */
-  formatDisplayName: (name: string): string => {
-    return name
-      .trim()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  },
+  formatDisplayName: StringUtils.formatDisplayName,
 
   /**
    * Verifica se o usuário está online
@@ -135,10 +103,7 @@ export const UserUtils = {
    * Gera avatar placeholder
    */
   generateAvatarPlaceholder: (name: string): string => {
-    const initials = UserUtils.getInitials(name);
-    const hue =
-      name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360;
-    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="hsl(${hue}, 70%, 50%)"/><text x="20" y="25" font-family="Arial" font-size="14" fill="white" text-anchor="middle">${initials}</text></svg>`;
+    return FormatUtils.generateAvatarPlaceholder(name);
   },
 } as const;
 
@@ -150,29 +115,23 @@ export const LLMUtils = {
    * Formata configuração de temperatura
    */
   formatTemperature: (temperature: number): string => {
-    return temperature.toFixed(1);
+    return FormatUtils.formatDecimal(temperature, 1);
   },
 
   /**
    * Valida configuração de temperatura
    */
-  isValidTemperature: (temperature: number): boolean => {
-    return temperature >= 0 && temperature <= 2;
-  },
+  isValidTemperature: ValidationUtils.isValidTemperature,
 
   /**
    * Formata max tokens
    */
-  formatMaxTokens: (maxTokens: number): string => {
-    return maxTokens.toLocaleString();
-  },
+  formatMaxTokens: FormatUtils.formatNumber,
 
   /**
    * Valida max tokens
    */
-  isValidMaxTokens: (maxTokens: number): boolean => {
-    return maxTokens > 0 && maxTokens <= 4096;
-  },
+  isValidMaxTokens: ValidationUtils.isValidMaxTokens,
 
   /**
    * Gera configuração padrão

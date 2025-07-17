@@ -16,14 +16,14 @@ export function TerminalPanel({
   isCollapsed = false,
   onToggleCollapse,
 }: TerminalPanelProps) {
-  const { state, commands } = useTerminalPanelState();
+  const { terminal } = useTerminalPanelState();
 
   if (isCollapsed) {
     return (
       <TerminalPanelCollapsed
         className={className}
         onToggleCollapse={onToggleCollapse}
-        onAddTab={state.addTab}
+        onAddTab={terminal.addTab}
       />
     );
   }
@@ -33,8 +33,7 @@ export function TerminalPanel({
       className={className}
       defaultHeight={defaultHeight}
       onToggleCollapse={onToggleCollapse}
-      state={state}
-      commands={commands}
+      terminal={terminal}
     />
   );
 }

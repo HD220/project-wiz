@@ -1,19 +1,23 @@
-import type { AgentWithData } from "./agent-factory.functions";
+import type { Agent } from "../agent.entity";
 import type { AgentDto } from "@/shared/types";
 
-export function agentToDto(agent: AgentWithData): AgentDto {
+export function agentToDto(agent: Agent): AgentDto {
+  const agentData = agent.toData();
+
   return {
-    id: agent.id,
+    id: agent.getId(),
     name: agent.getName(),
     role: agent.getRole(),
-    goal: agent.getBehavior().getGoal().getValue(),
-    backstory: agent.getBehavior().getBackstory().getValue(),
-    llmProviderId: agent.llmProviderId,
-    temperature: agent.temperature,
-    maxTokens: agent.maxTokens,
-    isActive: agent.isActive,
-    isDefault: agent.isDefault,
-    createdAt: new Date(agent.createdAt),
-    updatedAt: new Date(agent.updatedAt),
+    goal: agent.getGoal(),
+    backstory: agent.getBackstory(),
+    llmProviderId: agent.getLlmProviderId(),
+    temperature: agent.getTemperature(),
+    maxTokens: agent.getMaxTokens(),
+    status: agent.getStatus(),
+    isActive: agent.isActive(),
+    isDefault: false, // deprecated field
+    isExecuting: agent.isBusy(),
+    createdAt: agentData.createdAt,
+    updatedAt: agentData.updatedAt,
   };
 }

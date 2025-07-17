@@ -24,6 +24,5 @@ export * from "./use-project-channels.hook";
 export * from "./use-projects-query.hook";
 export * from "./use-projects.hook";
 export * from "./use-simple-channel-chat.hook";
-export * from "./use-terminal-commands.hook";
-export * from "./use-terminal-state.hook";
+export * from "./use-terminal.hook";
 export * from "./use-typing.hook";

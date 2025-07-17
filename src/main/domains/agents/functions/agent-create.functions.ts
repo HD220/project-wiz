@@ -39,7 +39,7 @@ export async function createAgent(
       .returning({ id: agents.id });
 
     logger.info(`Agent created: ${validated.name}`);
-    return result[0];
+    return result[0] || { id: "" };
   } catch (error) {
     logger.error("Failed to create agent", { error, data });
     throw error;
