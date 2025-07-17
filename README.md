@@ -1,146 +1,224 @@
 # Project Wiz
 
-**Your Autonomous Software Factory**
+**Sua Fábrica Autônoma de Software**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub issues](https://img.shields.io/github/issues/HD220/project-wiz)](https://github.com/HD220/project-wiz/issues)
 [![GitHub forks](https://img.shields.io/github/forks/HD220/project-wiz)](https://github.com/HD220/project-wiz/network)
 [![GitHub stars](https://img.shields.io/github/stars/HD220/project-wiz)](https://github.com/HD220/project-wiz/stargazers)
 
-Project Wiz is an innovative desktop application designed to function as an autonomous software factory. Built with ElectronJS and featuring a Discord-inspired interface, it leverages AI Agents (Personas) to automate and streamline various stages of the software development lifecycle.
+## 🚀 O que é o Project Wiz?
 
-## Vision
+O Project Wiz é uma plataforma de automação de engenharia de software que funciona como um **time de desenvolvimento de IA autônomo**. Imagine ter uma equipe completa de especialistas em IA trabalhando para você, onde você atua como Gerente de Produto ou Tech Lead, delegando tarefas através de conversas naturais.
 
-Our vision is to **transform fundamentally the software development lifecycle through intelligent collaboration between humans and autonomous AI agents.** We aim to create a platform where AI agents are integral, proactive members of development teams, capable of handling complex tasks from end to end, empowering human developers to focus on innovation and high-level problem-solving.
+## 🎯 A Metáfora Central
 
-## Key Features
+### Você é o Gerente, Agentes são sua Equipe
 
-- **AI-Powered Automation:** Utilizes AI Agents (Personas) to automate development tasks.
-- **Discord-Inspired UI:** Offers an intuitive and familiar user experience.
-- **Project Management:** Centralized environment for managing software projects.
-- **Customizable AI Agents (Personas):** Create and configure specialized AI agents for different roles and tasks.
-- **Job-Based Task Execution:** Define, assign, and track tasks (Jobs) for Personas.
-- **LLM Integration:** Supports integration with various Large Language Models.
-- **Extensible Tooling System:** Agents use tools to interact with files, code, and external systems.
-- **Workflow Automation:** Define and automate complex development workflows.
+A filosofia do Project Wiz é simples: **abstrair a complexidade do desenvolvimento de software**, permitindo que você gerencie projetos através de conversas e delegação de intenções, não comandos diretos.
 
-## Core Concepts
+- **🗣️ Interação Natural**: "Pessoal, precisamos implementar autenticação de dois fatores"
+- **🤖 Execução Autônoma**: O sistema analisa, planeja e executa automaticamente
+- **📊 Supervisão Inteligente**: Você monitora o progresso sem microgerenciamento
 
-- **Personas:** AI agents you define with specific roles, goals, and capabilities. They are like virtual team members that execute tasks. Learn more in the [Personas Guide](./docs/user-guide/05-personas-agents.md).
-- **Jobs:** Specific tasks assigned to Personas, ranging from code generation and analysis to documentation and testing. Jobs are the fundamental units of work in Project Wiz. Learn more in the [Jobs Guide](./docs/user-guide/06-jobs-automation.md).
-- **Tools:** Capabilities or functions that Personas can use to perform their jobs, such as file system operations, terminal commands, or code analysis.
+### Interface Familiar
 
-## Who is this for?
+A interface se assemelha ao Discord/Slack que você já conhece:
 
-Project Wiz is ideal for:
+- **Projetos** na barra lateral (como "Servidores")
+- **Mensagens Diretas** para conversas pessoais
+- **Canais** para discussões de projeto
+- **Fórum** para colaboração estruturada
 
-- **Developers & Development Teams:** Seeking to automate repetitive tasks and accelerate development.
-- **Project Managers:** Needing tools for orchestrating complex tasks and tracking progress.
-- **Software Companies:** Aiming to boost team productivity and optimize development workflows.
-- **AI & Automation Enthusiasts:** Interested in exploring AI's potential in software development.
+## ✨ Funcionalidades Principais
 
-## Tech Stack
+### 🏠 Espaço Pessoal
 
-- **Framework:** ElectronJS
-- **Frontend:** React, TypeScript, Tailwind CSS
-- **Backend/Core:** TypeScript, Node.js
-- **AI:** Integration with Large Language Models (e.g., OpenAI, DeepSeek)
-- **Database:** SQLite (via Drizzle ORM)
-- **Bundler:** Vite
-- **Testing:** Vitest
-- **Code Quality:** ESLint, Prettier
-- **Architecture:** Clean Architecture + DDD + Object Calisthenics
+- **Mensagens Diretas**: Conversas 1-para-1 com qualquer agente
+- **Configurações Globais**: Gerenciamento de conta, temas, notificações e chaves de API seguras
 
-## Architecture & Quality Standards
+### 📁 Gerenciamento de Projetos
 
-Project Wiz follows **strict architectural patterns** and **quality standards**:
+- **Workspaces Vivos**: Cada projeto é um ambiente independente com sua própria equipe
+- **Integração Git**: Crie novos projetos ou importe repositórios existentes
+- **Configurações Personalizadas**: Controle a "contratação automática" de Agentes
 
-### 🏗️ Clean Architecture
+### 🤖 Equipe de IA
 
-- **Domain-Driven Design (DDD)** with well-defined bounded contexts
-- **Layered architecture** with clear separation of concerns
-- **Dependency inversion** with infrastructure as plugins
+- **Contratação Automática**: O sistema analisa seu projeto e contrata especialistas relevantes
+- **Criação Manual**: Wizard assistido por IA para criar Agentes especializadas
+- **Gerenciamento de Equipe**: Visualize, edite e "demita" Agentes conforme necessário
 
-### 📏 Object Calisthenics (9 Rules - Mandatory)
+### 💬 Fórum de Discussão
 
-- **Maximum 1 level of indentation** per method
-- **No ELSE keyword** usage
-- **All primitives encapsulated** in Value Objects
-- **Maximum 10 lines per method**
-- **Maximum 2 instance variables** per class
-- **Maximum 50 lines per class**
-- **Collections as first-class citizens**
-- **No anemic getters/setters**
-- **No static methods in entities**
+- **Tópicos Estruturados**: Colaboração organizada para problemas complexos
+- **Base de Conhecimento**: Decisões e investigações ficam documentadas
+- **Colaboração Multi-Agente**: Múltiplos especialistas trabalham juntos
 
-### 🔄 CRUD Consolidation
+### ⚡ Fluxo de Trabalho Inteligente
 
-- **Single file per domain** for CRUD operations
-- **Generic infrastructure** for common operations
-- **Consistent error handling** and validation
-- **Reduced code duplication** by 60%+
+- **Iniciação Conversacional**: Expresse necessidades em linguagem natural
+- **Painel de Atividades**: Monitore status de Jobs sem microgerenciamento
+- **Intervenção de Exceção**: Pause ou cancele trabalhos quando necessário
 
-### 📊 Quality Metrics
+## 🔧 Stack Tecnológica
 
-- **100% Object Calisthenics compliance** (enforced automatically)
-- **Automated testing** with high coverage
-- **Continuous validation** via hooks and CI/CD
-- **Documentation synchronization** with code changes
+- **Framework**: ElectronJS (aplicação desktop multiplataforma)
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **Backend**: Node.js + TypeScript
+- **IA**: Large Language Models (OpenAI, DeepSeek)
+- **Banco de Dados**: SQLite com Drizzle ORM
+- **Build**: Vite
+- **Testes**: Vitest
+- **Qualidade**: ESLint + Prettier
 
-## Getting Started
+## 🎯 Para Quem é Destinado?
 
-To get Project Wiz up and running:
+### Desenvolvedores e Equipes
 
-1. **Clone the repository:**
+- Automatize tarefas repetitivas
+- Acelere o desenvolvimento
+- Foque em inovação e problemas complexos
+
+### Gerentes de Projeto
+
+- Orquestre tarefas complexas facilmente
+- Acompanhe progresso em tempo real
+- Delegue através de conversas naturais
+
+### Empresas de Software
+
+- Aumente produtividade da equipe
+- Otimize fluxos de trabalho
+- Reduza tempo de desenvolvimento
+
+### Entusiastas de IA
+
+- Explore o potencial da IA no desenvolvimento
+- Experimente colaboração humano-IA
+- Teste automação inteligente
+
+## 🚀 Iniciando
+
+### Pré-requisitos
+
+- Node.js 18+
+- npm ou yarn
+- Chaves de API para LLMs (OpenAI, DeepSeek)
+
+### Instalação
+
+1. **Clone o repositório**
 
    ```bash
    git clone https://github.com/HD220/project-wiz.git
    cd project-wiz
    ```
 
-2. **Install dependencies:**
+2. **Instale dependências**
 
    ```bash
    npm install
    ```
 
-3. **Configure Environment Variables:**
-   Create a `.env` file in the project root and copy the content from `.env.example`. Fill in necessary API keys.
+3. **Configure variáveis de ambiente**
 
-4. **Setup Database:**
+   ```bash
+   cp .env.example .env
+   # Edite .env com suas chaves de API
+   ```
+
+4. **Configure o banco de dados**
 
    ```bash
    npm run db:generate
    npm run db:migrate
    ```
 
-5. **Run the application:**
-
+5. **Execute a aplicação**
    ```bash
    npm run dev
    ```
 
-For more detailed setup instructions, please refer to the [Development Setup Guide](./docs/developer/tutorials/01-development-setup.md) and the [Quick Start Guide](./docs/user/guides/01-getting-started.md).
+## 💡 Fluxo de Trabalho Típico
 
-## Documentation
+### 1. Criação do Projeto
 
-Dive deeper into Project Wiz with our comprehensive documentation:
+```
+Usuário → Cria novo projeto ou importa repositório Git
+```
 
-- **[User Guide](https://github.com/HD220/project-wiz/blob/main/docs/user/README.md):** Introduces users to Project Wiz and how to use its features.
-- **[Technical Documentation](https://github.com/HD220/project-wiz/blob/main/docs/developer/architecture-guide.md):** Details the architecture, agent framework, and other technical aspects for developers.
-- **[Vision and Goals](https://github.com/HD220/project-wiz/blob/main/docs/project-overview/vision-and-goals.md):** Outlines the long-term vision and strategic objectives of Project Wiz.
-- **[Roadmap](https://github.com/HD220/project-wiz/blob/main/docs/project-overview/roadmap.md):** Shows the planned features and future development direction.
+### 2. Formação da Equipe
 
-For more detailed setup instructions, please refer to the [Development Setup Guide](https://github.com/HD220/project-wiz/blob/main/docs/developer/tutorials/01-development-setup.md) and the [Quick Start Guide](https://github.com/HD220/project-wiz/blob/main/docs/user/getting-started.md).
+```
+Sistema → Analisa código e contrata Agentes automaticamente
+Usuário → Pode criar Agentes adicionais manualmente
+```
 
-## Contributing
+### 3. Delegação de Tarefas
 
-We welcome contributions! Whether it's reporting a bug, suggesting a feature, improving documentation, or writing code, your help is appreciated.
+```
+Usuário → "Precisamos implementar autenticação OAuth"
+Sistema → Analisa intenção → Cria Jobs → Atribui ao especialista
+```
 
-Please read our [Contribution Guide](./docs/contribution-guide.md) to get started and review our [Code of Conduct](./docs/code-of-conduct.md).
+### 4. Execução Autônoma
 
-## Roadmap
+```
+Agente → Executa tarefa → Gera código → Commita alterações
+Sistema → Notifica usuário sobre progresso
+```
 
-## License
+### 5. Colaboração Estruturada
 
-Project Wiz is released under the MIT License.
+```
+Usuário → Cria tópico no fórum para discussão complexa
+Múltiplas Agentes → Colaboram na solução
+```
+
+## 🏗️ Arquitetura Simplificada
+
+### Domínios Principais
+
+- **Projects**: Container de colaboração (projetos, canais, mensagens)
+- **Agents**: Workers autônomos (agentes, filas, processamento)
+- **Users**: Espaço pessoal (mensagens diretas, configurações)
+- **LLM**: Infraestrutura compartilhada (provedores, geração de texto)
+
+### Padrões Aplicados
+
+- **Object Calisthenics**: Código limpo e manutenível
+- **Domain-Driven Design**: Modelagem focada no negócio
+- **Event-Driven Architecture**: Comunicação desacoplada
+- **Clean Architecture**: Separação de responsabilidades
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Consulte nosso [Guia de Contribuição](./docs/developer/contributing.md) para detalhes sobre:
+
+- Como configurar o ambiente de desenvolvimento
+- Padrões de código e boas práticas
+- Processo de submissão de Pull Requests
+- Testes e documentação
+
+## 📚 Documentação
+
+- **[Guia do Usuário](./docs/user/)**: Como usar o Project Wiz
+- **[Guia do Desenvolvedor](./docs/developer/)**: Arquitetura e desenvolvimento
+- **[Guia de Início Rápido](./docs/developer/DEVELOPER_QUICKSTART.md)**: Configuração rápida
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT - consulte o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 🚀 Roadmap
+
+- [ ] **v0.9**: Funcionalidades básicas de projeto e agentes
+- [ ] **v1.0**: Sistema completo de fórum e colaboração
+- [ ] **v1.1**: Integração com mais LLMs e ferramentas
+- [ ] **v1.2**: Análise avançada de código e contratação automática
+- [ ] **v2.0**: Recursos enterprise e colaboração em equipe
+
+---
+
+**Transforme seu desenvolvimento de software. Tenha uma equipe de IA trabalhando para você.**

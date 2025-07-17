@@ -3,7 +3,6 @@ import {
   AgentData,
   AgentDataSchema,
   AgentStatus,
-  AgentValidation,
 } from "./value-objects/agent-values";
 
 export interface AgentEntityData extends AgentData {
