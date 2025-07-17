@@ -1,4 +1,4 @@
-# /feature-plan [caminho] - Criar Documentação de Feature
+# Criar Documentação de Feature
 
 ## Instruções para Claude Code
 

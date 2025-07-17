@@ -1,4 +1,4 @@
-# /feature-plan-analyze [caminho] - Auditoria da Documentação de Feature
+# Auditoria da Documentação de Feature
 
 ## Instruções para Claude Code
 

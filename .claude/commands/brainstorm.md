@@ -1,4 +1,4 @@
-# /brainstorm - Iniciar Sessão de Brainstorm
+# Sessão de Brainstorm
 
 ## Instruções para Claude Code
 

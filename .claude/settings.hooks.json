@@ -1,0 +1,229 @@
+{
+  "hooks": [
+    {
+      "name": "pre-commit-quality-check",
+      "type": "PreToolUse",
+      "tool": "Bash",
+      "match": "git.*commit",
+      "command": "npm run quality:check && npm run type-check",
+      "description": "Run quality checks before git commits",
+      "continueOnFailure": false
+    },
+    {
+      "name": "auto-format-on-edit",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.(ts|tsx|js|jsx)$",
+      "command": "npm run format -- $TOOL_ARGS_FILE_PATH",
+      "description": "Auto-format TypeScript/JavaScript files after editing",
+      "continueOnFailure": true
+    },
+    {
+      "name": "test-on-function-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.(test|spec)\\.(ts|tsx|js|jsx)$",
+      "command": "npm test -- --testPathPattern=$TOOL_ARGS_FILE_PATH",
+      "description": "Run specific tests after test file changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "db-migrate-on-schema-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/main/persistence/schemas/.*\\.ts$",
+      "command": "npm run db:generate && npm run db:migrate",
+      "description": "Generate and apply database migrations when schema changes",
+      "continueOnFailure": false
+    },
+    {
+      "name": "build-check-on-main-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/main/.*\\.ts$",
+      "command": "npm run build:main",
+      "description": "Build main process after changes to main process files",
+      "continueOnFailure": true
+    },
+    {
+      "name": "lint-fix-on-save",
+      "type": "PostToolUse",
+      "tool": "Write",
+      "match": "\\.(ts|tsx|js|jsx)$",
+      "command": "npm run lint:fix -- $TOOL_ARGS_FILE_PATH",
+      "description": "Auto-fix linting issues after writing files",
+      "continueOnFailure": true
+    },
+    {
+      "name": "dependency-audit",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "package\\.json$",
+      "command": "npm audit --audit-level=moderate",
+      "description": "Run security audit after package.json changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "type-check-on-config-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "tsconfig.*\\.json$",
+      "command": "npm run type-check",
+      "description": "Run type checking after TypeScript config changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "backup-before-major-refactor",
+      "type": "PreToolUse",
+      "tool": "Edit",
+      "match": "refactor|migration|architecture",
+      "command": "git stash push -m \"Backup before major changes $(date)\"",
+      "description": "Create backup before major refactoring operations",
+      "continueOnFailure": true
+    },
+    {
+      "name": "generate-docs-on-api-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/main/domains/.*/.*\\.ts$",
+      "command": "npm run docs:generate",
+      "description": "Generate API documentation after domain changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "security-scan-on-sensitive-files",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "(auth|security|crypto|password|token)",
+      "command": "npm run security:scan",
+      "description": "Run security scan after changes to sensitive files",
+      "continueOnFailure": true
+    },
+    {
+      "name": "performance-benchmark",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/main/domains/.*/.*\\.ts$",
+      "command": "npm run benchmark -- --file=$TOOL_ARGS_FILE_PATH",
+      "description": "Run performance benchmarks after domain logic changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "integration-test-on-ipc-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/main/ipc/.*\\.ts$",
+      "command": "npm run test:integration -- --testPathPattern=ipc",
+      "description": "Run integration tests after IPC handler changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "renderer-build-on-ui-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/renderer/.*\\.(ts|tsx)$",
+      "command": "npm run build:renderer",
+      "description": "Build renderer process after UI changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "css-optimization",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.(css|scss|sass)$",
+      "command": "npm run css:optimize",
+      "description": "Optimize CSS after stylesheet changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "accessibility-check",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/renderer/.*\\.tsx$",
+      "command": "npm run a11y:check -- $TOOL_ARGS_FILE_PATH",
+      "description": "Run accessibility checks after React component changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "bundle-size-check",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/renderer/.*\\.(ts|tsx)$",
+      "command": "npm run bundle:analyze",
+      "description": "Analyze bundle size after renderer changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "translation-update",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/renderer/.*\\.(ts|tsx)$",
+      "command": "npm run i18n:extract && npm run i18n:compile",
+      "description": "Update translations after UI changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "git-hooks-validation",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.husky/.*",
+      "command": "npm run husky:validate",
+      "description": "Validate git hooks after changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "environment-validation",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.env.*",
+      "command": "npm run env:validate",
+      "description": "Validate environment variables after .env changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "architecture-compliance",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "src/main/domains/.*\\.ts$",
+      "command": "npm run architecture:validate",
+      "description": "Validate architecture compliance after domain changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "code-complexity-check",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.(ts|tsx)$",
+      "command": "npm run complexity:check -- $TOOL_ARGS_FILE_PATH",
+      "description": "Check code complexity after file changes",
+      "continueOnFailure": true
+    },
+    {
+      "name": "auto-changelog",
+      "type": "PostToolUse",
+      "tool": "Bash",
+      "match": "git.*commit.*feat:|fix:|chore:",
+      "command": "npm run changelog:generate",
+      "description": "Generate changelog after conventional commits",
+      "continueOnFailure": true
+    },
+    {
+      "name": "notify-team-on-critical-change",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "(src/main/domains/.*/.*\\.entity\\.ts|src/main/persistence/schemas/.*\\.ts)",
+      "command": "echo \"Critical change detected in $TOOL_ARGS_FILE_PATH\" | npm run notify:team",
+      "description": "Notify team of critical changes to entities or schemas",
+      "continueOnFailure": true
+    },
+    {
+      "name": "dead-code-detection",
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "match": "\\.(ts|tsx)$",
+      "command": "npm run deadcode:detect",
+      "description": "Detect dead code after file changes",
+      "continueOnFailure": true
+    }
+  ]
+}

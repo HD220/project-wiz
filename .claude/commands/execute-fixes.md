@@ -1,4 +1,4 @@
-# /execute-fixes - Resolver Issues da Lista
+# Resolver Issues da Lista
 
 ## Instruções para Claude Code
 
