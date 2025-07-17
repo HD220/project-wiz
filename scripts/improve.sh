@@ -212,7 +212,8 @@ execute_claude() {
     local result
     result=$(echo "$prompt" | "$CLAUDE_CLI" \
         --output-format "$OUTPUT_FORMAT" \
-        --dangerous-skip-permissions \
+        --dangerously-skip-permissions \
+        -p \
         2>&1)
     
     local exit_code=$?

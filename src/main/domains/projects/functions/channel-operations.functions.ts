@@ -3,7 +3,7 @@ import {
   createChannel,
   findChannelsByProject as findChannelsByProjectCrud,
 } from "./channel-crud.functions";
-import { findProjectById } from "./project-query.functions";
+import { findProjectById } from "./project-crud.functions";
 import type { ChannelDto } from "../../../../shared/types/domains/projects/channel.types";
 
 export function findChannelsByProject(projectId: string): ChannelDto[] {
@@ -15,18 +15,17 @@ export function findAccessibleChannels(projectId: string): ChannelDto[] {
   return findChannelsByProjectCrud(projectId);
 }
 
-export function createGeneralChannel(projectId: string): ChannelDto {
-  const projectData = findProjectById(projectId);
-  if (!projectData) {
+export async function createGeneralChannel(
+  projectId: string,
+): Promise<ChannelDto> {
+  const project = await findProjectById(projectId);
+  if (!project) {
     throw new Error(`Project with ID ${projectId} not found`);
   }
 
-  const project = Project.create({
-    id: projectData.id,
-    name: projectData.name,
-  });
-
-  const generalChannel = project.createGeneralChannel();
+  // Usar a factory estática do Channel para criar canal geral
+  const { Channel } = await import("../channel.entity");
+  const generalChannel = Channel.createGeneral(projectId);
 
   return createChannel({
     name: generalChannel.getName(),
@@ -35,21 +34,22 @@ export function createGeneralChannel(projectId: string): ChannelDto {
   });
 }
 
-export function createChannelForProject(
+export async function createChannelForProject(
   projectId: string,
   channelData: { name: string; description?: string },
-): ChannelDto {
-  const projectData = findProjectById(projectId);
-  if (!projectData) {
+): Promise<ChannelDto> {
+  const project = await findProjectById(projectId);
+  if (!project) {
     throw new Error(`Project with ID ${projectId} not found`);
   }
 
-  const project = Project.create({
-    id: projectData.id,
-    name: projectData.name,
+  // Usar a factory estática do Channel para criar canal
+  const { Channel } = await import("../channel.entity");
+  const channel = Channel.create({
+    name: channelData.name,
+    description: channelData.description,
+    projectId,
   });
-
-  const channel = project.createChannel(channelData);
 
   return createChannel({
     name: channel.getName(),
