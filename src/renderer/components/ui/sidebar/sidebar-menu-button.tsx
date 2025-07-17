@@ -32,7 +32,9 @@ interface SidebarMenuButtonProps
     VariantProps<typeof sidebarMenuButtonVariants> {
   asChild?: boolean;
   isActive?: boolean;
-  tooltip?: string | React.ComponentProps<typeof TooltipComponents.TooltipContent>;
+  tooltip?:
+    | string
+    | React.ComponentProps<typeof TooltipComponents.TooltipContent>;
 }
 
 export function SidebarMenuButton({
@@ -67,13 +69,15 @@ export function SidebarMenuButton({
 
   return (
     <TooltipComponents.Tooltip>
-      <TooltipComponents.TooltipTrigger asChild>{button}</TooltipComponents.TooltipTrigger>
+      <TooltipComponents.TooltipTrigger asChild>
+        {button}
+      </TooltipComponents.TooltipTrigger>
       <TooltipComponents.TooltipContent
         side="right"
         align="center"
         hidden={state !== "collapsed" || isMobile}
         {...tooltipProps}
       />
-    </Tooltip>
+    </TooltipComponents.Tooltip>
   );
 }

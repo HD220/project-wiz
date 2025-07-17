@@ -34,3 +34,12 @@ export async function findAllAgents(
   const results = await query;
   return results.map(createAgentFromData);
 }
+
+export async function findDefaultAgent(): Promise<AgentWithData | null> {
+  const db = getDatabase();
+  const [agent] = await db
+    .select()
+    .from(agents)
+    .where(eq(agents.isDefault, true));
+  return agent ? createAgentFromData(agent) : null;
+}

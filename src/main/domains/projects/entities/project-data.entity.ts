@@ -47,4 +47,32 @@ export class ProjectData {
   touchUpdatedAt(): void {
     this.updatedAt = new Date();
   }
+
+  static create(props: {
+    name: string;
+    description?: string | null;
+    gitUrl?: string | null;
+    status?: string;
+    avatar?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }): ProjectData {
+    const name = new ProjectName(props.name);
+    const description = new ProjectDescription(props.description || "");
+    const gitUrl = new ProjectGitUrl(props.gitUrl || "");
+    const status = new ProjectStatus(props.status || "active");
+    const avatar = props.avatar || null;
+    const createdAt = props.createdAt || new Date();
+    const updatedAt = props.updatedAt || new Date();
+
+    return new ProjectData(
+      name,
+      description,
+      gitUrl,
+      status,
+      avatar,
+      createdAt,
+      updatedAt,
+    );
+  }
 }

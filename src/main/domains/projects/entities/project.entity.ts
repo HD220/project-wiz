@@ -1,18 +1,44 @@
-import { ProjectIdentity, ProjectName } from "../value-objects";
+import { ProjectIdentity } from "../value-objects";
+
 import { Channel } from "./channel.entity";
+import { ProjectData } from "./project-data.entity";
 
 export class Project {
   constructor(
-    private readonly id: ProjectIdentity,
-    private readonly name: ProjectName,
+    private readonly identity: ProjectIdentity,
+    private readonly data: ProjectData,
   ) {}
 
   getId(): string {
-    return this.id.getValue();
+    return this.identity.getValue();
   }
 
   getName(): string {
-    return this.name.getValue();
+    return this.data.getName().getValue();
+  }
+
+  getDescription(): string {
+    return this.data.getDescription().getValue();
+  }
+
+  getGitUrl(): string | null {
+    return this.data.getGitUrl().getValue();
+  }
+
+  getStatus(): string {
+    return this.data.getStatus().getValue();
+  }
+
+  getAvatar(): string | null {
+    return this.data.getAvatar();
+  }
+
+  getCreatedAt(): Date {
+    return this.data.getCreatedAt();
+  }
+
+  getUpdatedAt(): Date {
+    return this.data.getUpdatedAt();
   }
 
   createChannel(props: { name: string; description?: string }): Channel {
@@ -27,9 +53,44 @@ export class Project {
     return Channel.createGeneral(this.getId());
   }
 
-  static create(props: { id?: string; name: string }): Project {
+  touchUpdatedAt(): void {
+    this.data.touchUpdatedAt();
+  }
+
+  toPlainObject() {
+    return {
+      id: this.getId(),
+      name: this.getName(),
+      description: this.getDescription(),
+      gitUrl: this.getGitUrl(),
+      status: this.getStatus(),
+      avatar: this.getAvatar(),
+      createdAt: this.getCreatedAt(),
+      updatedAt: this.getUpdatedAt(),
+    };
+  }
+
+  static create(props: {
+    id?: string;
+    name: string;
+    description?: string | null;
+    gitUrl?: string | null;
+    status?: string;
+    avatar?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }): Project {
     const identity = new ProjectIdentity(props.id || crypto.randomUUID());
-    const name = new ProjectName(props.name);
-    return new Project(identity, name);
+    const data = ProjectData.create({
+      name: props.name,
+      description: props.description,
+      gitUrl: props.gitUrl,
+      status: props.status,
+      avatar: props.avatar,
+      createdAt: props.createdAt,
+      updatedAt: props.updatedAt,
+    });
+
+    return new Project(identity, data);
   }
 }

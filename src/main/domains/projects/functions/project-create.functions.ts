@@ -15,7 +15,7 @@ export async function createProject(data: {
   createdBy?: string;
 }): Promise<ProjectSchema> {
   try {
-    const project = new Project({
+    const project = Project.create({
       name: data.name,
       description: data.description,
       gitUrl: data.gitUrl,

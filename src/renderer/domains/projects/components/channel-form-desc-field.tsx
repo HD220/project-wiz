@@ -1,5 +1,4 @@
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextAreaField } from "@/components/forms/form-fields";
 
 interface ChannelDescFieldProps {
   value: string;
@@ -8,15 +7,13 @@ interface ChannelDescFieldProps {
 
 export function ChannelDescField({ value, onChange }: ChannelDescFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="channel-description">Descrição (Opcional)</Label>
-      <Textarea
-        id="channel-description"
-        placeholder="Para que serve este canal..."
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        rows={3}
-      />
-    </div>
+    <TextAreaField
+      id="channel-description"
+      label="Descrição (Opcional)"
+      value={value}
+      onChange={onChange}
+      placeholder="Para que serve este canal..."
+      rows={3}
+    />
   );
 }

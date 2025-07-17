@@ -1,108 +1,52 @@
-import {
-  mockProjects,
-  mockAgents,
-  mockTasks,
-} from "@/renderer/lib/placeholders";
-
-import { CustomLink } from "@/components/custom-link";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-function WelcomeCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Welcome to Project Wiz!</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground">
-          Your personal AI-powered software engineering assistant.
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function QuickActionsCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <CustomLink to="/" variant="outline" className="w-full justify-start">
-          Start a new chat
-        </CustomLink>
-        <CustomLink to="/" variant="outline" className="w-full justify-start">
-          View your tasks
-        </CustomLink>
-        <CustomLink to="/" variant="outline" className="w-full justify-start">
-          Browse documentation
-        </CustomLink>
-      </CardContent>
-    </Card>
-  );
-}
-
-function RecentActivityCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-2">
-          {mockTasks.slice(0, 3).map((task) => (
-            <li key={task.id} className="flex items-center justify-between">
-              <span className="text-sm">{task.description}</span>
-              <Badge variant={task.status === "todo" ? "default" : "secondary"}>
-                {task.status}
-              </Badge>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ProjectOverviewCard() {
-  return (
-    <Card className="lg:col-span-3">
-      <CardHeader>
-        <CardTitle>Project Overview</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h3 className="font-semibold mb-2">Current Project:</h3>
-            <p className="text-muted-foreground">
-              {mockProjects[0].name} ({mockProjects[0].status})
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Active Agents:</h3>
-            <ul className="space-y-1 text-muted-foreground">
-              {mockAgents.map((agent) => (
-                <li key={agent.id}>
-                  {agent.name} ({agent.status})
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+import { Activity, Users, MessageSquare, Bot } from "lucide-react";
 
 export function DashboardCards() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <WelcomeCard />
-      <QuickActionsCard />
-      <RecentActivityCard />
-      <ProjectOverviewCard />
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">3</div>
+          <p className="text-xs text-muted-foreground">+2 from last month</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">12</div>
+          <p className="text-xs text-muted-foreground">+1 new this week</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Messages</CardTitle>
+          <MessageSquare className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">127</div>
+          <p className="text-xs text-muted-foreground">+23 since yesterday</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
+          <Bot className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">5</div>
+          <p className="text-xs text-muted-foreground">2 working on tasks</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

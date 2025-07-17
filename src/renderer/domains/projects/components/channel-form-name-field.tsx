@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { TextField } from "@/components/forms/form-fields";
+import { fieldTransformers } from "@/components/forms/field-transformers";
 
 interface ChannelNameFieldProps {
   value: string;
@@ -7,21 +7,15 @@ interface ChannelNameFieldProps {
 }
 
 export function ChannelNameField({ value, onChange }: ChannelNameFieldProps) {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = event.target.value.toLowerCase().replace(/\s+/g, "-");
-    onChange(formatted);
-  };
-
   return (
-    <div className="space-y-2">
-      <Label htmlFor="channel-name">Nome do Canal</Label>
-      <Input
-        id="channel-name"
-        placeholder="geral, desenvolvimento, discussoes"
-        value={value}
-        onChange={handleChange}
-        required
-      />
-    </div>
+    <TextField
+      id="channel-name"
+      label="Nome do Canal"
+      value={value}
+      onChange={onChange}
+      placeholder="geral, desenvolvimento, discussoes"
+      transformer={fieldTransformers.channelName}
+      required
+    />
   );
 }

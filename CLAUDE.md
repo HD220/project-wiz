@@ -70,7 +70,7 @@ O Project Wiz segue rigorosamente diversos padrões de design e boas práticas p
   - Crie tipos ou interfaces específicas, mesmo que temporárias, para casos que precisariam de `any`.
   - Avalie se o tipo criado deve ser compartilhado em `src/shared/types/` ou mantido local.
   - Exemplo: ao invés de `data: any`, crie `type UnknownApiResponse = any` e use `data: UnknownApiResponse`.
-- **Formatação:** O projeto provavelmente utiliza um formatador de código (como Prettier, embora não explicitamente no `package.json` scripts, é uma prática comum com ESLint) para garantir a formatação consistente.
+- **Formatação:** O projeto utiliza um formatador de código Prettier, script `npm run format` no `package.json`.
 
 ## Princípios Aplicados
 
@@ -92,14 +92,7 @@ O Project Wiz segue rigorosamente diversos padrões de design e boas práticas p
 - Use linguagem ubíqua (termos do negócio)
 - Entidades devem conter lógica de negócio, não apenas dados
 
-### 4. Object Calisthenics (Melhoria Iterativa)
-
-- **Não aplicar tudo de primeira** - faça loops de refatoração
-- Primeiro funcione, depois melhore iterativamente
-- Foque nos pontos que mais impactam: indentação, métodos pequenos, poucos parâmetros
-- Repense e melhore a cada iteração
-
-### 5. Desacoplamento Domínio/Persistência
+### 4. Desacoplamento Domínio/Persistência
 
 - Nunca misture regras de negócio com código de banco
 - Use repositórios/interfaces para abstrair persistência
@@ -203,33 +196,6 @@ O Project Wiz segue rigorosamente diversos padrões de design e boas práticas p
 - Refatore código similar para ser compartilhado
 - Simplifique e organize estruturas existentes
 - Prefira composição a herança
-
-## Fluxo de Trabalho Sugerido
-
-### 1. Análise Inicial
-
-- Entenda o domínio e linguagem do negócio
-- Identifique entidades e conceitos principais
-- Mapeie responsabilidades conceituais
-
-### 2. Primeira Implementação
-
-- Foque em fazer funcionar primeiro
-- Mantenha simplicidade (KISS)
-- Separe domínio de persistência
-
-### 3. Loops de Refatoração
-
-- Aplique Object Calisthenics gradualmente
-- Identifique oportunidades de reaproveitamento
-- Simplifique complexidades encontradas
-- Melhore legibilidade e organização
-
-### 4. Validação Contínua
-
-- Código deve contar a história do negócio
-- Facilite testes e manutenção
-- Mantenha baixo acoplamento
 
 ## Checklist de Qualidade
 
@@ -564,20 +530,11 @@ domain-name/
 
 ### Object Calisthenics Aplicados
 
-**Entidades Ricas:**
-
-- Máximo 2 variáveis de instância por classe
-- Métodos com máximo 10 linhas
-- Máximo 1 nível de indentação
-- Sem uso de ELSE (guard clauses, early returns)
-- Primitivos encapsulados em Value Objects
-- Classes com máximo 50 linhas
-
-**Funções Simples:**
-
-- Uma responsabilidade por função
-- Acesso transparente à infraestrutura: `getDatabase()`, `getLogger()`, `publishEvent()`
-- Sem dependency injection para utilitários
+- **Entidades Ricas:**
+- **Funções Simples:**
+- **Classes e metodos pequenos**
+- **Poucos parametros no construtor**
+- **Simples e direto**
 
 ### Infraestrutura Transparente
 
@@ -605,7 +562,7 @@ domain-name/
 - **Zustand:** Para estado global da aplicação
 - **TanStack Query:** Para cache e sincronização de dados assíncronos
 - **React Hook Form + Zod:** Para validação e gerenciamento de formulários
-- **Features organizadas por domínio** em `src/renderer/features/`
+- **Features organizadas por domínio** em `src/renderer/domain/`
 
 ## Mensagens de Commit
 
@@ -654,4 +611,3 @@ Este documento é a "bússola" do nosso projeto. Para garantir que ele continue 
       - Se uma nova funcionalidade for adicionada, detalhe-a em `# Funcionalidades Chave e Módulos`.
       - Se a estrutura de pastas mudar, atualize `# Estrutura do Repositório`.
   4.  **Teste as Instruções:** Se você alterou um comando ou um passo de configuração, tente executá-lo em um ambiente limpo para garantir que as instruções funcionam.
-  5.  **Peça Revisão:** Inclua este arquivo no seu Pull Request. Peça aos revisores que também verifiquem a precisão e clareza da documentação atualizada, focando na facilidade de entendimento para um júnior.

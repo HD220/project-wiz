@@ -5,7 +5,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-export default function ScrollArea({
+export function ScrollArea({
   className,
   children,
   ...props

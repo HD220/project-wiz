@@ -1,4 +1,5 @@
 import { TextField } from "@/components/forms/form-fields";
+import { fieldTransformers } from "@/components/forms/field-transformers";
 
 import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
 
@@ -21,6 +22,7 @@ export function AddAgentNameField({
       value={formData.name}
       onChange={(value) => updateField("name", value)}
       placeholder="ex: Analista de Código"
+      transformer={fieldTransformers.normalizeText}
       required
     />
   );

@@ -1,28 +1,28 @@
-import { getDatabase } from "../../infrastructure";
-import { projects } from "../../../persistence/schemas/projects.schema";
+import { getDatabase } from "../../../infrastructure/database";
+import {
+  projects,
+  type ProjectSchema,
+} from "../../../persistence/schemas/projects.schema";
 import { eq } from "drizzle-orm";
 import { Project } from "../entities/project.entity";
 
-export function findProjectById(
-  id: string,
-): { id: string; name: string } | null {
+export function findProjectById(id: string): ProjectSchema | null {
   const db = getDatabase();
   const result = db.select().from(projects).where(eq(projects.id, id)).get();
 
   if (!result) return null;
 
-  return {
-    id: result.id,
-    name: result.name,
-  };
+  return result;
 }
 
-export function findAllProjects(): { id: string; name: string }[] {
+export function findAllProjects(filter?: { status?: string }): ProjectSchema[] {
   const db = getDatabase();
-  const results = db.select().from(projects).all();
 
-  return results.map((result) => ({
-    id: result.id,
-    name: result.name,
-  }));
+  let query = db.select().from(projects);
+
+  if (filter?.status) {
+    query = query.where(eq(projects.status, filter.status));
+  }
+
+  return query.all();
 }

@@ -1,7 +1,7 @@
 import {
   getConversationMessages,
   processUserMessage,
-} from "../../../domains/users/functions/direct-message.functions";
+} from "../../../domains/users/functions/conversation-operations.functions";
 
 import type { DirectMessageDto } from "../../../../shared/types";
 

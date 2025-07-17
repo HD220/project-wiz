@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
-  return <div>Simplified</div>;
+export function DocTree() {
+  return <div>Doc Tree Component</div>;
 }

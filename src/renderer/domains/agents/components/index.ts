@@ -16,7 +16,7 @@ export { AgentsSidebarAgentAvatar } from "./agents-sidebar-agent-avatar";
 export { AgentsSidebarAgentInfo } from "./agents-sidebar-agent-info";
 export { AgentsSidebarAgentItem } from "./agents-sidebar-agent-item";
 export { AgentsSidebarContent } from "./agents-sidebar-content";
-export { AgentsSidebarContentProps } from "./agents-sidebar-content-props";
+export type { AgentsSidebarContentProps } from "./agents-sidebar-content-props";
 export { AgentsSidebarEmpty } from "./agents-sidebar-empty";
 export { useAgentsSidebarHooks } from "./agents-sidebar-hooks";
 export { AgentsSidebarList } from "./agents-sidebar-list";

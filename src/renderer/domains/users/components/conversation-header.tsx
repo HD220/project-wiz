@@ -10,8 +10,8 @@ export function ConversationHeader({ agentName }: ConversationHeaderProps) {
     <AvatarComponents.Avatar className="w-5 h-5">
       <AvatarComponents.AvatarFallback className="text-xs">
         {agentName.slice(0, 2).toUpperCase()}
-      </AvatarFallback>
-    </Avatar>
+      </AvatarComponents.AvatarFallback>
+    </AvatarComponents.Avatar>
   );
 
   return <PageTitle title={agentName} icon={titleIcon} />;

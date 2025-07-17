@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
-  return <div>Simplified</div>;
+export function ProjectNavigation() {
+  return <div>Project Navigation Component</div>;
 }

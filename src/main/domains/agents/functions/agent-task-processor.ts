@@ -1,4 +1,4 @@
-import { getLogger } from "../../infrastructure/logger";
+import { getLogger } from "../../../infrastructure/logger";
 
 import { AgentTask } from "./entities/agent-task.entity";
 

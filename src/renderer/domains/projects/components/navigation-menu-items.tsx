@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
-  return <div>Simplified</div>;
+export function NavigationMenuItems() {
+  return <div>Navigation Menu Items Component</div>;
 }

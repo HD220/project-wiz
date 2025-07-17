@@ -1,35 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-
+import { createEntityQueryHooks } from "../../../hooks/use-query-factory.hook";
 import { agentService } from "../services/agent.service";
 
-export function useAgentsQuery() {
-  return useQuery({
-    queryKey: ["agents"],
-    queryFn: () => agentService.list(),
-    staleTime: 2 * 60 * 1000,
-  });
-}
+// Criação automática dos hooks usando o factory
+const agentQueryHooks = createEntityQueryHooks("agent", agentService);
 
-export function useActiveAgentsQuery() {
-  return useQuery({
-    queryKey: ["agents", "active"],
-    queryFn: () => agentService.listActive(),
-    staleTime: 30 * 1000,
-  });
-}
-
-export function useAgentQuery(id: string) {
-  return useQuery({
-    queryKey: ["agent", id],
-    queryFn: () => agentService.getById(id),
-    enabled: !!id,
-  });
-}
-
-export function useAgentByNameQuery(name: string) {
-  return useQuery({
-    queryKey: ["agent", "name", name],
-    queryFn: () => agentService.getByName(name),
-    enabled: !!name,
-  });
-}
+// Exportação dos hooks com nomes específicos para agents
+export const useAgentsQuery = agentQueryHooks.useListQuery;
+export const useAgentQuery = agentQueryHooks.useByIdQuery;
+export const useAgentByNameQuery = agentQueryHooks.useByNameQuery!;
+export const useActiveAgentsQuery = agentQueryHooks.useActiveQuery!;

@@ -26,6 +26,7 @@ interface TextFieldProps {
   min?: string | number;
   max?: string | number;
   step?: string | number;
+  transformer?: (value: string) => string;
 }
 
 export function TextField({
@@ -40,14 +41,20 @@ export function TextField({
   min,
   max,
   step,
+  transformer,
 }: TextFieldProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = transformer ? transformer(e.target.value) : e.target.value;
+    onChange(newValue);
+  };
+
   return (
     <BaseField id={id} label={label} icon={icon} required={required}>
       <Input
         id={id}
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
         placeholder={placeholder}
         min={min}
         max={max}

@@ -1,103 +1,104 @@
-import {
-  Channel,
-  Agent,
-  Project,
-  PageInfo,
-} from "@/shared/types/page-info.types";
-
-function getChannelPageInfo(pathname: string, channels: Channel[]): PageInfo {
-  const channelId = pathname.split("/chat/")[1];
-  const selectedChannel = channels.find((channel) => channel.id === channelId);
-  return {
-    title: selectedChannel ? `#${selectedChannel.name}` : "Chat",
-    subtitle: selectedChannel?.name || "Canal de chat do projeto",
-    type: "channel" as const,
-    memberCount: 0,
-  };
-}
-
-function getAgentPageInfo(pathname: string, agents: Agent[]): PageInfo {
-  const agentId = pathname.split("/agent/")[1];
-  const selectedAgent = agents.find((agent) => agent.id === agentId);
-  return {
-    title: selectedAgent ? `@${selectedAgent.name}` : "Mensagem Direta",
-    subtitle: selectedAgent
-      ? `Conversa com ${selectedAgent.name}`
-      : "Mensagem direta com agente",
-    type: "channel" as const,
-    memberCount: 1,
-  };
-}
-
-function getAgentsPageInfo(currentProject: Project | null): PageInfo {
-  return {
-    title: "Agentes",
-    subtitle: `Gerenciamento de agentes do ${currentProject?.name}`,
-    type: "page" as const,
-  };
-}
-
-function getFilesPageInfo(): PageInfo {
-  return {
-    title: "Arquivos",
-    subtitle: "Explorador de arquivos do projeto",
-    type: "page" as const,
-  };
-}
-
-function getTasksPageInfo(): PageInfo {
-  return {
-    title: "Tarefas",
-    subtitle: "Gerenciamento de tarefas e issues",
-    type: "page" as const,
-  };
-}
-
-function getDocsPageInfo(): PageInfo {
-  return {
-    title: "Documentação",
-    subtitle: "Documentos e wikis do projeto",
-    type: "page" as const,
-  };
-}
-
-function getDefaultPageInfo(currentProject: Project | null): PageInfo {
-  return {
-    title: currentProject?.name || "Projeto",
-    subtitle: "Visão geral do projeto",
-    type: "project" as const,
-  };
-}
+type PageInfo = {
+  title: string;
+  subtitle?: string;
+  type: "project" | "channel" | "agent" | "chat" | "docs" | "files" | "tasks";
+  memberCount?: number;
+};
 
 export function getPageInfo(
   pathname: string,
-  channels: Channel[],
-  agents: Agent[],
-  currentProject: Project | null,
+  channels: any[] = [],
+  agents: any[] = [],
+  currentProject: any = null,
 ): PageInfo {
-  if (pathname.includes("/chat/")) {
-    return getChannelPageInfo(pathname, channels);
+  // Extract segments from path
+  const segments = pathname.split("/").filter(Boolean);
+
+  // Base project info
+  if (segments.length === 2 && segments[0] === "project") {
+    return {
+      title: currentProject?.name || "Project",
+      subtitle: "Dashboard",
+      type: "project",
+      memberCount: 5,
+    };
   }
 
-  if (pathname.includes("/agent/")) {
-    return getAgentPageInfo(pathname, agents);
+  // Chat channel
+  if (segments.includes("chat") && segments.length === 4) {
+    const channelId = segments[3];
+    const channel = channels.find((c) => c.id === channelId);
+    return {
+      title: channel?.name || "Channel",
+      subtitle: "Project Chat",
+      type: "channel",
+      memberCount: 3,
+    };
   }
 
-  if (pathname.includes("/agents")) {
-    return getAgentsPageInfo(currentProject);
+  // Agent page
+  if (segments.includes("agent") && segments.length === 4) {
+    const agentId = segments[3];
+    const agent = agents.find((a) => a.id === agentId);
+    return {
+      title: agent?.name || "Agent",
+      subtitle: "AI Assistant",
+      type: "agent",
+      memberCount: 1,
+    };
   }
 
-  if (pathname.includes("/files")) {
-    return getFilesPageInfo();
+  // Agents list
+  if (segments.includes("agents")) {
+    return {
+      title: "Agents",
+      subtitle: "AI Assistants",
+      type: "agent",
+      memberCount: agents.length,
+    };
   }
 
-  if (pathname.includes("/tasks")) {
-    return getTasksPageInfo();
+  // Chat index
+  if (segments.includes("chat") && segments.length === 3) {
+    return {
+      title: "Chat",
+      subtitle: "Team Communication",
+      type: "chat",
+      memberCount: 5,
+    };
   }
 
-  if (pathname.includes("/docs")) {
-    return getDocsPageInfo();
+  // Docs
+  if (segments.includes("docs")) {
+    return {
+      title: "Documentation",
+      subtitle: "Project Docs",
+      type: "docs",
+    };
   }
 
-  return getDefaultPageInfo(currentProject);
+  // Files
+  if (segments.includes("files")) {
+    return {
+      title: "Files",
+      subtitle: "Project Files",
+      type: "files",
+    };
+  }
+
+  // Tasks
+  if (segments.includes("tasks")) {
+    return {
+      title: "Tasks",
+      subtitle: "Project Tasks",
+      type: "tasks",
+    };
+  }
+
+  // Default fallback
+  return {
+    title: currentProject?.name || "Project",
+    subtitle: "Unknown Page",
+    type: "project",
+  };
 }

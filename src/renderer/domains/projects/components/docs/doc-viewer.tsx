@@ -1,3 +1,3 @@
-export function SimplifiedComponent() {
-  return <div>Simplified</div>;
+export function DocViewer() {
+  return <div>Doc Viewer Component</div>;
 }

@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/card/card-core";
 import { FileTreeItem } from "@/lib/placeholders";
 
-import { getFilePreview } from "./file-preview-utils";
+import { getFilePreview } from "@/lib/file-preview-utils";
 
 interface FileContentViewProps {
   selectedFile: FileTreeItem | null;

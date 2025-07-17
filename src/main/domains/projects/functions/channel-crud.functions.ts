@@ -1,4 +1,4 @@
-import { getDatabase } from "../../infrastructure";
+import { getDatabase } from "../../../infrastructure/database";
 import { Channel } from "../entities/channel.entity";
 import { channels } from "../../../persistence/schemas/channels.schema";
 import { eq } from "drizzle-orm";
