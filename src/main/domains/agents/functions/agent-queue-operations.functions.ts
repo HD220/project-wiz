@@ -1,23 +1,22 @@
 import { getLogger } from "../../../infrastructure/logger";
-
-import { AgentTask } from "./entities/agent-task.entity";
-import { TaskPriority } from "./value-objects/task-priority.vo";
+import { AgentTask } from "../index";
 
 const logger = getLogger("agent.queue");
 
+// Prioridades simplificadas
+const PRIORITY_VALUES = { low: 1, medium: 2, high: 3 };
+
 export function sortTasksByPriority(tasks: AgentTask[]): AgentTask[] {
   return tasks.sort((a, b) => {
-    return (
-      b.getPriority().getNumericValue() - a.getPriority().getNumericValue()
-    );
+    return PRIORITY_VALUES[b.priority] - PRIORITY_VALUES[a.priority];
   });
 }
 
 export function filterTasksByPriority(
   tasks: AgentTask[],
-  priority: TaskPriority,
+  priority: "low" | "medium" | "high",
 ): AgentTask[] {
-  return tasks.filter((task) => task.getPriority().equals(priority));
+  return tasks.filter((task) => task.priority === priority);
 }
 
 export function logTaskEnqueued(taskId: string): void {

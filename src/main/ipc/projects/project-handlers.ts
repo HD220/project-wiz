@@ -7,28 +7,27 @@ import {
   updateProject,
   deleteProject,
   archiveProject,
-  projectToDto,
-} from "../../domains/projects/functions";
+} from "../../domains/projects/project.functions";
 
 export function registerProjectHandlers(): void {
   ipcMain.handle("project:create", async (_, data) => {
     const project = await createProject(data);
-    return projectToDto(project);
+    return project.toData();
   });
 
   ipcMain.handle("project:getById", async (_, data) => {
     const project = await findProjectById(data.id);
-    return project ? projectToDto(project) : null;
+    return project ? project.toData() : null;
   });
 
-  ipcMain.handle("project:list", async (_, filter) => {
-    const projects = await findAllProjects(filter);
-    return projects.map(projectToDto);
+  ipcMain.handle("project:list", async (_) => {
+    const projects = await findAllProjects();
+    return projects.map((project) => project.toData());
   });
 
   ipcMain.handle("project:update", async (_, data) => {
-    const project = await updateProject(data);
-    return projectToDto(project);
+    const project = await updateProject(data.id, data);
+    return project.toData();
   });
 
   ipcMain.handle("project:delete", async (_, data) => {
@@ -37,6 +36,6 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle("project:archive", async (_, data) => {
     const project = await archiveProject(data.id);
-    return projectToDto(project);
+    return project.toData();
   });
 }
