@@ -3,7 +3,7 @@ import { eq, desc } from "drizzle-orm";
 
 import { getDatabase } from "../../infrastructure/database";
 import { getLogger } from "../../infrastructure/logger";
-import { agents } from "../../persistence/schemas/agents.schema";
+import { agents, AgentSchema } from "../../persistence/schemas/agents.schema";
 import { Agent, AgentData } from "./agent.entity";
 
 const logger = getLogger("agents");
@@ -25,7 +25,7 @@ type CreateAgentInput = z.infer<typeof CreateAgentSchema>;
 type UpdateAgentInput = z.infer<typeof UpdateAgentSchema>;
 
 // Helper para converter dados do banco para entidade
-function dbToAgentData(dbData: any): AgentData {
+function dbToAgentData(dbData: AgentSchema): AgentData {
   return {
     id: dbData.id,
     name: dbData.name,
@@ -62,28 +62,50 @@ function agentToDbData(agent: Agent) {
 
 // CRUD Operations
 export async function createAgent(input: CreateAgentInput): Promise<Agent> {
+  const validated = validateCreateInput(input);
+  const dbData = prepareAgentData(validated);
+  const result = await insertAgentToDatabase(dbData);
+  return buildAgentFromResult(result[0]);
+}
+
+function validateCreateInput(input: CreateAgentInput) {
   try {
-    const validated = CreateAgentSchema.parse(input);
-    const db = getDatabase();
-
-    const now = new Date().toISOString();
-    const dbData = {
-      ...validated,
-      isActive: false,
-      isDefault: false,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const result = await db.insert(agents).values(dbData).returning();
-
-    const agent = new Agent(dbToAgentData(result[0]));
-    logger.info(`Agent created: ${agent.getName()}`);
-    return agent;
+    return CreateAgentSchema.parse(input);
   } catch (error) {
-    logger.error("Failed to create agent", { error, input });
+    logger.error("Invalid agent input", { error, input });
     throw error;
   }
+}
+
+function prepareAgentData(validated: CreateAgentInput) {
+  const now = new Date().toISOString();
+  return {
+    ...validated,
+    isActive: false,
+    isDefault: false,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+async function insertAgentToDatabase(dbData: any) {
+  try {
+    const db = getDatabase();
+    const result = await db.insert(agents).values(dbData).returning();
+    if (!result[0]) {
+      throw new Error("Failed to create agent - no result returned");
+    }
+    return result;
+  } catch (error) {
+    logger.error("Failed to insert agent", { error, dbData });
+    throw error;
+  }
+}
+
+function buildAgentFromResult(result: any): Agent {
+  const agent = new Agent(dbToAgentData(result));
+  logger.info(`Agent created: ${agent.getName()}`);
+  return agent;
 }
 
 export async function findAgentById(id: string): Promise<Agent | null> {
@@ -125,15 +147,31 @@ export async function updateAgent(
   id: string,
   input: UpdateAgentInput,
 ): Promise<Agent> {
+  const validated = validateUpdateInput(input);
+  const updateData = prepareUpdateData(validated);
+  const result = await performAgentUpdate(id, updateData);
+  return buildAgentFromUpdateResult(result[0]);
+}
+
+function validateUpdateInput(input: UpdateAgentInput) {
   try {
-    const validated = UpdateAgentSchema.parse(input);
+    return UpdateAgentSchema.parse(input);
+  } catch (error) {
+    logger.error("Invalid update input", { error, input });
+    throw error;
+  }
+}
+
+function prepareUpdateData(validated: UpdateAgentInput) {
+  return {
+    ...validated,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+async function performAgentUpdate(id: string, updateData: any) {
+  try {
     const db = getDatabase();
-
-    const updateData = {
-      ...validated,
-      updatedAt: new Date().toISOString(),
-    };
-
     const result = await db
       .update(agents)
       .set(updateData)
@@ -144,13 +182,17 @@ export async function updateAgent(
       throw new Error(`Agent not found: ${id}`);
     }
 
-    const agent = new Agent(dbToAgentData(result[0]));
-    logger.info(`Agent updated: ${agent.getName()}`);
-    return agent;
+    return result;
   } catch (error) {
-    logger.error("Failed to update agent", { error, id, input });
+    logger.error("Failed to update agent", { error, id, updateData });
     throw error;
   }
+}
+
+function buildAgentFromUpdateResult(result: any): Agent {
+  const agent = new Agent(dbToAgentData(result));
+  logger.info(`Agent updated: ${agent.getName()}`);
+  return agent;
 }
 
 export async function deleteAgent(id: string): Promise<void> {
@@ -173,33 +215,28 @@ export async function deleteAgent(id: string): Promise<void> {
 }
 
 export async function activateAgent(id: string): Promise<Agent> {
+  const agent = await findAgentOrThrow(id);
+  const activatedAgent = agent.activate();
+  return await updateAgentData(activatedAgent);
+}
+
+async function findAgentOrThrow(id: string): Promise<Agent> {
   try {
     const agent = await findAgentById(id);
     if (!agent) {
       throw new Error(`Agent not found: ${id}`);
     }
-
-    const activatedAgent = agent.activate();
-    return await updateAgentData(activatedAgent);
+    return agent;
   } catch (error) {
-    logger.error("Failed to activate agent", { error, id });
+    logger.error("Failed to find agent", { error, id });
     throw error;
   }
 }
 
 export async function deactivateAgent(id: string): Promise<Agent> {
-  try {
-    const agent = await findAgentById(id);
-    if (!agent) {
-      throw new Error(`Agent not found: ${id}`);
-    }
-
-    const deactivatedAgent = agent.deactivate();
-    return await updateAgentData(deactivatedAgent);
-  } catch (error) {
-    logger.error("Failed to deactivate agent", { error, id });
-    throw error;
-  }
+  const agent = await findAgentOrThrow(id);
+  const deactivatedAgent = agent.deactivate();
+  return await updateAgentData(deactivatedAgent);
 }
 
 // Helper para atualizar usando dados da entidade
@@ -212,6 +249,10 @@ async function updateAgentData(agent: Agent): Promise<Agent> {
     .set(dbData)
     .where(eq(agents.id, dbData.id))
     .returning();
+
+  if (!result[0]) {
+    throw new Error("Failed to update agent - no result returned");
+  }
 
   return new Agent(dbToAgentData(result[0]));
 }

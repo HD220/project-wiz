@@ -17,62 +17,174 @@ const AgentSchema = z.object({
 
 export type AgentData = z.infer<typeof AgentSchema>;
 
-export class Agent {
-  constructor(private data: AgentData) {
-    this.data = AgentSchema.parse(data);
+class AgentIdentity {
+  constructor(
+    private id: string,
+    private name: string,
+    private role: string,
+  ) {}
+
+  getId(): string {
+    return this.id;
   }
 
-  // Getters essenciais
-  getId(): string {
-    return this.data.id;
-  }
   getName(): string {
-    return this.data.name;
+    return this.name;
   }
+
   getRole(): string {
-    return this.data.role;
+    return this.role;
   }
+}
+
+class AgentPersonality {
+  constructor(
+    private goal: string,
+    private backstory: string,
+  ) {}
+
   getGoal(): string {
-    return this.data.goal;
+    return this.goal;
   }
+
   getBackstory(): string {
-    return this.data.backstory;
+    return this.backstory;
   }
-  getStatus(): string {
-    return this.data.status;
-  }
+}
+
+class AgentConfiguration {
+  constructor(
+    private llmProviderId: string,
+    private temperature: number,
+    private maxTokens: number,
+  ) {}
+
   getLlmProviderId(): string {
-    return this.data.llmProviderId;
+    return this.llmProviderId;
   }
+
   getTemperature(): number {
-    return this.data.temperature;
+    return this.temperature;
   }
+
   getMaxTokens(): number {
-    return this.data.maxTokens;
+    return this.maxTokens;
+  }
+}
+
+class AgentStatus {
+  constructor(private status: string) {}
+
+  getStatus(): string {
+    return this.status;
+  }
+
+  isActive(): boolean {
+    return this.status === "active";
+  }
+
+  isBusy(): boolean {
+    return this.status === "busy";
+  }
+
+  canStartTask(): boolean {
+    return this.status === "active";
+  }
+
+  activate(): AgentStatus {
+    return new AgentStatus("active");
+  }
+
+  deactivate(): AgentStatus {
+    return new AgentStatus("inactive");
+  }
+
+  setBusy(): AgentStatus {
+    return new AgentStatus("busy");
+  }
+}
+
+export class Agent {
+  private identity: AgentIdentity;
+  private personality: AgentPersonality;
+  private configuration: AgentConfiguration;
+  private status: AgentStatus;
+
+  constructor(private data: AgentData) {
+    this.data = AgentSchema.parse(data);
+    this.identity = new AgentIdentity(data.id, data.name, data.role);
+    this.personality = new AgentPersonality(data.goal, data.backstory);
+    this.configuration = new AgentConfiguration(
+      data.llmProviderId,
+      data.temperature,
+      data.maxTokens,
+    );
+    this.status = new AgentStatus(data.status);
+  }
+
+  // Delegate to composed objects
+  getId(): string {
+    return this.identity.getId();
+  }
+
+  getName(): string {
+    return this.identity.getName();
+  }
+
+  getRole(): string {
+    return this.identity.getRole();
+  }
+
+  getGoal(): string {
+    return this.personality.getGoal();
+  }
+
+  getBackstory(): string {
+    return this.personality.getBackstory();
+  }
+
+  getStatus(): string {
+    return this.status.getStatus();
+  }
+
+  getLlmProviderId(): string {
+    return this.configuration.getLlmProviderId();
+  }
+
+  getTemperature(): number {
+    return this.configuration.getTemperature();
+  }
+
+  getMaxTokens(): number {
+    return this.configuration.getMaxTokens();
   }
 
   // Lógica de negócio consolidada
   generateSystemPrompt(): string {
-    return `You are ${this.data.name}, a ${this.data.role}.
-
-Goal: ${this.data.goal}
-
-Background: ${this.data.backstory}
-
-Please respond according to your role and expertise.`;
+    return new AgentPromptGenerator(
+      this.identity,
+      this.personality,
+    ).generate();
   }
 
   isValidForExecution(): boolean {
-    return this.data.status === "active" && this.data.llmProviderId.length > 0;
+    return (
+      this.status.isActive() &&
+      this.configuration.getLlmProviderId().length > 0
+    );
   }
 
   canStartTask(): boolean {
-    return this.data.status === "active";
+    return this.status.canStartTask();
   }
 
   // Operações de estado
   activate(): Agent {
-    return new Agent({ ...this.data, status: "active", updatedAt: new Date() });
+    return new Agent({
+      ...this.data,
+      status: "active",
+      updatedAt: new Date(),
+    });
   }
 
   deactivate(): Agent {
@@ -84,7 +196,11 @@ Please respond according to your role and expertise.`;
   }
 
   setBusy(): Agent {
-    return new Agent({ ...this.data, status: "busy", updatedAt: new Date() });
+    return new Agent({
+      ...this.data,
+      status: "busy",
+      updatedAt: new Date(),
+    });
   }
 
   // Atualização de dados
@@ -110,6 +226,44 @@ Please respond according to your role and expertise.`;
 
   // Comparação
   equals(other: Agent): boolean {
-    return this.data.id === other.data.id;
+    return this.identity.getId() === other.identity.getId();
+  }
+}
+
+class AgentPromptGenerator {
+  constructor(
+    private identity: AgentIdentity,
+    private personality: AgentPersonality,
+  ) {}
+
+  generate(): string {
+    const header = this.generateHeader();
+    const goal = this.generateGoal();
+    const background = this.generateBackground();
+    const footer = this.generateFooter();
+
+    return `${header}
+
+${goal}
+
+${background}
+
+${footer}`;
+  }
+
+  private generateHeader(): string {
+    return `You are ${this.identity.getName()}, a ${this.identity.getRole()}.`;
+  }
+
+  private generateGoal(): string {
+    return `Goal: ${this.personality.getGoal()}`;
+  }
+
+  private generateBackground(): string {
+    return `Background: ${this.personality.getBackstory()}`;
+  }
+
+  private generateFooter(): string {
+    return "Please respond according to your role and expertise.";
   }
 }

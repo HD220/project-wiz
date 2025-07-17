@@ -1,74 +1,166 @@
+import { z } from "zod";
+import { eq, desc } from "drizzle-orm";
+
 import { getDatabase } from "../../../infrastructure/database";
-import { Channel } from "../entities/channel.entity";
-import { channels } from "../../../persistence/schemas/channels.schema";
-import { eq } from "drizzle-orm";
-import type {
-  CreateChannelDto,
-  ChannelDto,
-} from "../../../../shared/types/domains/projects/channel.types";
+import { getLogger } from "../../../infrastructure/logger";
+import { channels, ChannelSchema } from "../../../persistence/schemas/channels.schema";
+import { Channel, ChannelData } from "../project.entity";
 
-export function createChannel(data: CreateChannelDto): ChannelDto {
-  const channel = Channel.create({
-    name: data.name,
-    projectId: data.projectId,
-    description: data.description,
-  });
+const logger = getLogger("projects");
 
-  const db = getDatabase();
-  db.insert(channels)
-    .values({
-      id: channel.getId(),
-      name: channel.getName(),
-      description: channel.getDescription(),
-      projectId: channel.getProjectId(),
-      createdAt: channel.getCreatedAt(),
-      updatedAt: channel.getUpdatedAt(),
-    })
-    .run();
+// Schemas para validação
+const CreateChannelSchema = z.object({
+  name: z.string().min(1).max(50),
+  description: z.string().default(""),
+  projectId: z.string().uuid(),
+  isGeneral: z.boolean().default(false),
+});
 
-  return channel.toPlainObject();
+const UpdateChannelSchema = CreateChannelSchema.partial().omit([
+  "projectId",
+  "isGeneral",
+]);
+
+type CreateChannelInput = z.infer<typeof CreateChannelSchema>;
+type UpdateChannelInput = z.infer<typeof UpdateChannelSchema>;
+
+// Helper para converter dados do banco para entidade Channel
+function dbToChannelData(dbData: ChannelSchema): ChannelData {
+  return {
+    id: dbData.id,
+    name: dbData.name,
+    description: dbData.description || "",
+    projectId: dbData.projectId,
+    isGeneral: dbData.isGeneral || false,
+    createdAt: dbData.createdAt,
+    updatedAt: dbData.updatedAt,
+  };
 }
 
-export function findChannelById(id: string): ChannelDto | null {
-  const db = getDatabase();
-  const result = db.select().from(channels).where(eq(channels.id, id)).get();
+// CHANNEL CRUD OPERATIONS
+export async function createChannel(
+  input: CreateChannelInput,
+): Promise<Channel> {
+  try {
+    const validated = CreateChannelSchema.parse(input);
+    const db = getDatabase();
 
-  if (!result) return null;
+    const now = new Date();
+    const channelData: Omit<ChannelData, "id"> = {
+      ...validated,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-  const channel = Channel.create({
-    id: result.id,
-    name: result.name,
-    projectId: result.projectId,
-    description: result.description,
-    createdAt: result.createdAt,
-    updatedAt: result.updatedAt,
-  });
+    const result = await db.insert(channels).values(channelData).returning();
 
-  return channel.toPlainObject();
-}
-
-export function findChannelsByProject(projectId: string): ChannelDto[] {
-  const db = getDatabase();
-  const results = db
-    .select()
-    .from(channels)
-    .where(eq(channels.projectId, projectId))
-    .all();
-
-  return results.map((result) => {
-    const channel = Channel.create({
-      id: result.id,
-      name: result.name,
-      projectId: result.projectId,
-      description: result.description,
-      createdAt: result.createdAt,
-      updatedAt: result.updatedAt,
+    const channel = new Channel({
+      id: result[0].id,
+      ...channelData,
     });
-    return channel.toPlainObject();
-  });
+
+    logger.info(
+      `Channel created: ${channel.getName()} in project ${channel.getProjectId()}`,
+    );
+    return channel;
+  } catch (error) {
+    logger.error("Failed to create channel", { error, input });
+    throw error;
+  }
 }
 
-export function deleteChannel(id: string): void {
-  const db = getDatabase();
-  db.delete(channels).where(eq(channels.id, id)).run();
+export async function findChannelById(id: string): Promise<Channel | null> {
+  try {
+    const db = getDatabase();
+    const result = await db
+      .select()
+      .from(channels)
+      .where(eq(channels.id, id))
+      .limit(1);
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    return new Channel(result[0] as ChannelData);
+  } catch (error) {
+    logger.error("Failed to find channel", { error, id });
+    throw error;
+  }
 }
+
+export async function findChannelsByProjectId(
+  projectId: string,
+): Promise<Channel[]> {
+  try {
+    const db = getDatabase();
+    const result = await db
+      .select()
+      .from(channels)
+      .where(eq(channels.projectId, projectId))
+      .orderBy(desc(channels.createdAt));
+
+    return result.map((data) => new Channel(data as ChannelData));
+  } catch (error) {
+    logger.error("Failed to find channels", { error, projectId });
+    throw error;
+  }
+}
+
+export async function updateChannel(
+  id: string,
+  input: UpdateChannelInput,
+): Promise<Channel> {
+  try {
+    const validated = UpdateChannelSchema.parse(input);
+    const db = getDatabase();
+
+    const updateData = {
+      ...validated,
+      updatedAt: new Date(),
+    };
+
+    const result = await db
+      .update(channels)
+      .set(updateData)
+      .where(eq(channels.id, id))
+      .returning();
+
+    if (result.length === 0) {
+      throw new Error(`Channel not found: ${id}`);
+    }
+
+    const channel = new Channel(result[0] as ChannelData);
+    logger.info(`Channel updated: ${channel.getName()}`);
+    return channel;
+  } catch (error) {
+    logger.error("Failed to update channel", { error, id, input });
+    throw error;
+  }
+}
+
+export async function deleteChannel(id: string): Promise<void> {
+  try {
+    const channel = await findChannelById(id);
+    if (!channel) {
+      throw new Error(`Channel not found: ${id}`);
+    }
+
+    if (!channel.canDelete()) {
+      throw new Error("Cannot delete general channel");
+    }
+
+    const db = getDatabase();
+    await db.delete(channels).where(eq(channels.id, id));
+
+    logger.info(`Channel deleted: ${channel.getName()}`);
+  } catch (error) {
+    logger.error("Failed to delete channel", { error, id });
+    throw error;
+  }
+}
+
+// Re-export schemas para compatibilidade
+export { CreateChannelSchema, UpdateChannelSchema };
+export type { CreateChannelInput, UpdateChannelInput };
+export { dbToChannelData };

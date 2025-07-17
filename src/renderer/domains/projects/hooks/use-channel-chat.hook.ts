@@ -1,9 +1,12 @@
+import { useCallback } from "react";
+
+import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
 import { useAiChatConfig } from "./use-ai-chat-config.hook";
+import { useAiChatMutations } from "./use-ai-chat-mutations.hook";
 import { useAiChatUtilities } from "./use-ai-chat-utilities.hook";
 import { useChannelChatMessages } from "./use-channel-chat-messages.hook";
-import { useChannelChatResult } from "./use-channel-chat-result.hook";
-import { useChannelChatSendMessage } from "./use-channel-chat-send-message.hook";
-import { useChannelChatSend } from "./use-channel-chat-send.hook";
+import { useOptimisticMessage } from "./use-optimistic-message.hook";
+import { useRequestDataBuilder } from "./use-request-data-builder.hook";
 import { useTyping } from "./use-typing.hook";
 
 interface UseChannelChatProps {
@@ -24,24 +27,47 @@ export function useChannelChat(props: UseChannelChatProps) {
   const { isTyping, setTyping } = useTyping(props.channelId);
   const config = useAiChatConfig(props);
   const utilities = useAiChatUtilities(props.channelId, props.llmProviderId);
-  const sendHook = useChannelChatSend({
+  
+  const mutations = useAiChatMutations(props.channelId);
+  const { createOptimisticMessage } = useOptimisticMessage(props);
+  const { createRequestData } = useRequestDataBuilder({
     ...props,
-    addOptimisticMessage: messagesHook.addOptimisticMessage,
-    clearOptimisticMessages: messagesHook.clearOptimisticMessages,
+    propsRef: config.propsRef,
   });
-  const sendMessage = useChannelChatSendMessage(
-    sendHook,
-    messagesHook,
-    setTyping,
+
+  const sendMessage = useCallback(
+    async (content: string, customConfig?: Partial<AIChatConfigDto>) => {
+      const optimisticMessage = createOptimisticMessage(content);
+      messagesHook.addOptimisticMessage(optimisticMessage);
+      setTyping(true);
+
+      const requestData = createRequestData(content, customConfig);
+      mutations.sendMessage(requestData);
+      messagesHook.clearOptimisticMessages();
+      setTyping(false);
+    },
+    [createOptimisticMessage, createRequestData, mutations, messagesHook, setTyping],
   );
 
-  return useChannelChatResult(
-    messagesHook,
-    sendHook,
+  const error =
+    messagesHook.error ||
+    mutations.sendError ||
+    mutations.regenerateError;
+
+  return {
+    messages: messagesHook.messages,
+    isLoading: messagesHook.isLoading,
+    isSending: mutations.isSending,
+    isRegenerating: mutations.isRegenerating,
+    error,
     isTyping,
-    setTyping,
     sendMessage,
-    config,
-    utilities,
-  );
+    clearError: messagesHook.clearError,
+    setTyping,
+    currentConfig: config.currentConfig,
+    updateConfig: config.updateConfig,
+    ...utilities,
+    clearAIMessages: mutations.clearMessages,
+    regenerateLastMessage: mutations.regenerateMessage,
+  };
 }

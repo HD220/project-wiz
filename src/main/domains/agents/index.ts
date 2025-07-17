@@ -21,12 +21,14 @@ export { AgentQueue } from "./functions/agent.queue";
 export { AgentTaskProcessor } from "./functions/agent-task-processor";
 
 // Simplified task management
+export type AgentTaskData = Record<string, unknown>;
+
 export interface AgentTask {
   id: string;
   agentId: string;
   status: "pending" | "running" | "completed" | "failed";
   priority: "low" | "medium" | "high";
-  data: any;
+  data: AgentTaskData;
   createdAt: Date;
   updatedAt: Date;
 }

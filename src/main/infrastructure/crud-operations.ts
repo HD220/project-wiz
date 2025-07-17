@@ -10,32 +10,44 @@ import type { SQL } from "drizzle-orm";
 /**
  * Operações CRUD genéricas para reduzir duplicação
  */
-export class CrudOperations<T extends AnySQLiteTable> {
+export class RecordUpdater<T extends AnySQLiteTable> {
   private logger;
 
   constructor(
     private table: T,
-    private loggerContext: string,
+    loggerContext: string,
   ) {
     this.logger = getLogger(loggerContext);
   }
 
-  async updateRecord(
+  async execute(
     id: string | number,
     data: Partial<T["$inferInsert"]>,
     idField: keyof T["_"]["columns"] = "id" as keyof T["_"]["columns"],
   ): Promise<T["$inferSelect"]> {
+    const updateData = this.prepareUpdateData(data);
+    const updated = await this.performUpdate(id, updateData, idField);
+    this.logSuccess(id);
+    return updated;
+  }
+
+  private prepareUpdateData(data: Partial<T["$inferInsert"]>) {
+    return {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private async performUpdate(
+    id: string | number,
+    data: Partial<T["$inferInsert"]>,
+    idField: keyof T["_"]["columns"],
+  ): Promise<T["$inferSelect"]> {
     try {
       const db = getDatabase();
-
-      const updateData = {
-        ...data,
-        updatedAt: new Date().toISOString(),
-      };
-
       const [updated] = await db
         .update(this.table)
-        .set(updateData)
+        .set(data)
         .where(eq(this.table[idField], id))
         .returning();
 
@@ -43,7 +55,6 @@ export class CrudOperations<T extends AnySQLiteTable> {
         throw new Error(`Record not found: ${id}`);
       }
 
-      this.logger.info(`Record updated: ${id}`);
       return updated;
     } catch (error) {
       this.logger.error("Failed to update record", { error, id, data });
@@ -51,27 +62,200 @@ export class CrudOperations<T extends AnySQLiteTable> {
     }
   }
 
-  async deleteRecord(
+  private logSuccess(id: string | number): void {
+    this.logger.info(`Record updated: ${id}`);
+  }
+
+}
+
+export class RecordDeleter<T extends AnySQLiteTable> {
+  private logger;
+
+  constructor(
+    private table: T,
+    loggerContext: string,
+  ) {
+    this.logger = getLogger(loggerContext);
+  }
+
+  async execute(
     id: string | number,
     idField: keyof T["_"]["columns"] = "id" as keyof T["_"]["columns"],
   ): Promise<void> {
+    const deleted = await this.performDelete(id, idField);
+    this.validateDeletion(deleted, id);
+    this.logSuccess(id);
+  }
+
+  private async performDelete(
+    id: string | number,
+    idField: keyof T["_"]["columns"],
+  ) {
     try {
       const db = getDatabase();
-
       const [deleted] = await db
         .delete(this.table)
         .where(eq(this.table[idField], id))
         .returning();
 
-      if (!deleted) {
-        throw new Error(`Record not found: ${id}`);
-      }
-
-      this.logger.info(`Record deleted: ${id}`);
+      return deleted;
     } catch (error) {
       this.logger.error("Failed to delete record", { error, id });
       throw error;
     }
+  }
+
+  private validateDeletion(deleted: any, id: string | number): void {
+    if (!deleted) {
+      throw new Error(`Record not found: ${id}`);
+    }
+  }
+
+  private logSuccess(id: string | number): void {
+    this.logger.info(`Record deleted: ${id}`);
+  }
+
+}
+
+export class FieldToggler<T extends AnySQLiteTable> {
+  private logger;
+
+  constructor(
+    private table: T,
+    loggerContext: string,
+  ) {
+    this.logger = getLogger(loggerContext);
+  }
+
+  async execute(
+    id: string | number,
+    field: keyof T["_"]["columns"],
+    value: boolean,
+    idField: keyof T["_"]["columns"] = "id" as keyof T["_"]["columns"],
+  ): Promise<void> {
+    const updateData = this.prepareToggleData(field, value);
+    const updated = await this.performToggle(id, updateData, idField);
+    this.validateToggle(updated, id);
+    this.logSuccess(field, value, id);
+  }
+
+  private prepareToggleData(field: keyof T["_"]["columns"], value: boolean) {
+    return {
+      [field]: value,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private async performToggle(
+    id: string | number,
+    data: any,
+    idField: keyof T["_"]["columns"],
+  ) {
+    try {
+      const db = getDatabase();
+      const [updated] = await db
+        .update(this.table)
+        .set(data)
+        .where(eq(this.table[idField], id))
+        .returning();
+
+      return updated;
+    } catch (error) {
+      this.logger.error("Failed to toggle field", { error, id, data });
+      throw error;
+    }
+  }
+
+  private validateToggle(updated: any, id: string | number): void {
+    if (!updated) {
+      throw new Error(`Record not found: ${id}`);
+    }
+  }
+
+  private logSuccess(
+    field: keyof T["_"]["columns"],
+    value: boolean,
+    id: string | number,
+  ): void {
+    this.logger.info(`Record ${String(field)} toggled to ${value}: ${id}`);
+  }
+
+}
+
+export class BulkUpdater<T extends AnySQLiteTable> {
+  private logger;
+
+  constructor(
+    private table: T,
+    loggerContext: string,
+  ) {
+    this.logger = getLogger(loggerContext);
+  }
+
+  async execute(
+    where: SQL,
+    data: Partial<T["$inferInsert"]>,
+  ): Promise<void> {
+    const updateData = this.prepareUpdateData(data);
+    await this.performBulkUpdate(where, updateData);
+    this.logSuccess();
+  }
+
+  private prepareUpdateData(data: Partial<T["$inferInsert"]>) {
+    return {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private async performBulkUpdate(
+    where: SQL,
+    data: Partial<T["$inferInsert"]>,
+  ): Promise<void> {
+    try {
+      const db = getDatabase();
+      await db.update(this.table).set(data).where(where);
+    } catch (error) {
+      this.logger.error("Failed to bulk update", { error, data });
+      throw error;
+    }
+  }
+
+  private logSuccess(): void {
+    this.logger.info("Bulk update completed");
+  }
+}
+
+// Facade para manter compatibilidade
+export class CrudOperations<T extends AnySQLiteTable> {
+  private updater: RecordUpdater<T>;
+  private deleter: RecordDeleter<T>;
+  private toggler: FieldToggler<T>;
+  private bulkUpdater: BulkUpdater<T>;
+
+  constructor(
+    private table: T,
+    private loggerContext: string,
+  ) {
+    this.updater = new RecordUpdater(table, loggerContext);
+    this.deleter = new RecordDeleter(table, loggerContext);
+    this.toggler = new FieldToggler(table, loggerContext);
+    this.bulkUpdater = new BulkUpdater(table, loggerContext);
+  }
+
+  async updateRecord(
+    id: string | number,
+    data: Partial<T["$inferInsert"]>,
+    idField: keyof T["_"]["columns"] = "id" as keyof T["_"]["columns"],
+  ): Promise<T["$inferSelect"]> {
+    return this.updater.execute(id, data, idField);
+  }
+
+  async deleteRecord(
+    id: string | number,
+    idField: keyof T["_"]["columns"] = "id" as keyof T["_"]["columns"],
+  ): Promise<void> {
+    return this.deleter.execute(id, idField);
   }
 
   async toggleField(
@@ -80,52 +264,14 @@ export class CrudOperations<T extends AnySQLiteTable> {
     value: boolean,
     idField: keyof T["_"]["columns"] = "id" as keyof T["_"]["columns"],
   ): Promise<void> {
-    try {
-      const db = getDatabase();
-
-      const [updated] = await db
-        .update(this.table)
-        .set({
-          [field]: value,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(this.table[idField], id))
-        .returning();
-
-      if (!updated) {
-        throw new Error(`Record not found: ${id}`);
-      }
-
-      this.logger.info(`Record ${field} toggled to ${value}: ${id}`);
-    } catch (error) {
-      this.logger.error(`Failed to toggle ${String(field)}`, {
-        error,
-        id,
-        value,
-      });
-      throw error;
-    }
+    return this.toggler.execute(id, field, value, idField);
   }
 
   async bulkUpdate(
     where: SQL,
     data: Partial<T["$inferInsert"]>,
   ): Promise<void> {
-    try {
-      const db = getDatabase();
-
-      const updateData = {
-        ...data,
-        updatedAt: new Date().toISOString(),
-      };
-
-      await db.update(this.table).set(updateData).where(where);
-
-      this.logger.info("Bulk update completed");
-    } catch (error) {
-      this.logger.error("Failed to bulk update", { error, data });
-      throw error;
-    }
+    return this.bulkUpdater.execute(where, data);
   }
 }
 

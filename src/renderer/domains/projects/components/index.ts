@@ -19,10 +19,8 @@ export * from "./create-project-modal";
 export * from "./create-channel-modal";
 export * from "./channel-form-fields";
 
-// Existing Components
-export * from "./add-agent-advanced-fields";
-export * from "./add-agent-basic-fields";
-export * from "./add-agent-modal-header";
+// Agent Components (CONSOLIDATED)
+export * from "./add-agent-form-fields";
 export * from "./add-agent-modal";
 export * from "./file-explorer-header";
 export * from "./file-explorer-item";
