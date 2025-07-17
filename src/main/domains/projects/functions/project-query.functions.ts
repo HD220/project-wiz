@@ -4,7 +4,7 @@ import {
   type ProjectSchema,
 } from "../../../persistence/schemas/projects.schema";
 import { eq } from "drizzle-orm";
-import { Project } from "../entities/project.entity";
+import { Project } from "../project.entity";
 
 export function findProjectById(id: string): ProjectSchema | null {
   const db = getDatabase();

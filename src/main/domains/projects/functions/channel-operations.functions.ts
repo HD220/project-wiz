@@ -1,4 +1,4 @@
-import { Project } from "../entities/project.entity";
+import { Project } from "../project.entity";
 import {
   createChannel,
   findChannelsByProject as findChannelsByProjectCrud,

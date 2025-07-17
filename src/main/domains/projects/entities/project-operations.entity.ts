@@ -1,6 +1,6 @@
 import { ProjectData } from "./project-data.entity";
 import { ProjectUpdater } from "./project-updater.entity";
-import { Project } from "./project.entity";
+import { Project } from "../project.entity";
 
 export class ProjectOperations {
   constructor(
