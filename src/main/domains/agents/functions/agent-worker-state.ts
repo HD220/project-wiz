@@ -19,12 +19,12 @@ export class AgentWorkerState {
     }
 
     this.isRunning = true;
-    logger.info("Worker started", { agentName: this.agent.getName() });
+    logger.info("Worker started", { agentName: this.agent.toData().name });
   }
 
   stop(): void {
     this.isRunning = false;
-    logger.info("Worker stopped", { agentName: this.agent.getName() });
+    logger.info("Worker stopped", { agentName: this.agent.toData().name });
   }
 
   isWorkerRunning(): boolean {

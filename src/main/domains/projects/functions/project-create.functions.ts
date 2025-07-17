@@ -1,14 +1,12 @@
 import { z } from "zod";
-import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
-import { projects } from "../../../persistence/schemas/projects.schema";
-import { channels } from "../../../persistence/schemas/channels.schema";
-import { Project } from "../project.entity";
-import { createProjectFromDbData } from "./project.mapper";
+import { getDatabase } from "@/infrastructure/database";
+import { getLogger } from "@/infrastructure/logger";
+import { projects } from "@/main/persistence/schemas/projects.schema";
+import { channels } from "@/main/persistence/schemas/channels.schema";
+import { Project, ProjectData } from "../project.entity";
 
-const logger = getLogger("projects");
+const logger = getLogger("projects.create");
 
-// Schema para validação
 const CreateProjectSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().default(""),
@@ -16,53 +14,56 @@ const CreateProjectSchema = z.object({
   avatar: z.string().nullable().optional(),
 });
 
-type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
+export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
 
 export async function createProject(
   input: CreateProjectInput,
 ): Promise<Project> {
-  const validated = validateProjectInput(input);
-  const projectData = prepareProjectData(validated);
-  const project = await insertProjectToDatabase(projectData);
-  await createGeneralChannel(project);
-  logger.info(`Project created: ${project.getName()}`);
-  return project;
-}
+  try {
+    const validated = CreateProjectSchema.parse(input);
+    const db = getDatabase();
 
-function validateProjectInput(input: CreateProjectInput) {
-  return CreateProjectSchema.parse(input);
-}
+    const now = new Date();
+    const dbData = {
+      ...validated,
+      gitUrl: validated.gitUrl || null,
+      avatar: validated.avatar || null,
+      status: "active" as const,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-function prepareProjectData(validated: CreateProjectInput) {
-  const now = new Date();
-  return {
-    ...validated,
-    gitUrl: validated.gitUrl || null,
-    avatar: validated.avatar || null,
-    status: "active" as const,
-    createdAt: now,
-    updatedAt: now,
-  };
-}
+    const result = await db.insert(projects).values(dbData).returning();
 
-async function insertProjectToDatabase(projectData: any) {
-  const db = getDatabase();
-  const result = await db.insert(projects).values(projectData).returning();
-  return createProjectFromDbData(result[0]);
-}
+    const projectData: ProjectData = {
+      id: result[0].id,
+      name: result[0].name,
+      description: result[0].description || "",
+      gitUrl: result[0].gitUrl,
+      status: result[0].status as "active" | "archived" | "maintenance",
+      avatar: result[0].avatar,
+      createdAt: result[0].createdAt,
+      updatedAt: result[0].updatedAt,
+    };
 
-async function createGeneralChannel(project: Project) {
-  const db = getDatabase();
-  const now = new Date();
-  const channelData = {
-    name: "general",
-    description: "Canal geral do projeto",
-    projectId: project.getId(),
-    isGeneral: true,
-    createdAt: now,
-    updatedAt: now,
-  };
-  await db.insert(channels).values(channelData);
-}
+    const project = new Project(projectData);
 
-export type { CreateProjectInput };
+    // Criar canal geral automaticamente
+    const channelData = {
+      name: "general",
+      description: "Canal geral do projeto",
+      projectId: project.getId(),
+      isGeneral: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.insert(channels).values(channelData);
+
+    logger.info(`Project created: ${project.getName()}`);
+    return project;
+  } catch (error) {
+    logger.error("Failed to create project", { error, input });
+    throw error;
+  }
+}

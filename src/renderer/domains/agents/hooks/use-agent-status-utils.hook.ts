@@ -1,5 +1,5 @@
-import type { Agent } from "../../../shared/interfaces/agent.interface";
-import { StatusUtils } from "../../../lib/status-utils";
+import type { Agent } from "@/shared/interfaces/agent.interface";
+import { StatusUtils } from "@/lib/status-utils";
 
 export function useAgentStatusUtils() {
   const getStatusColor = (status: Agent["status"]) => {

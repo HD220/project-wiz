@@ -6,15 +6,15 @@ export function agentToDto(agent: Agent): AgentDto {
   const agentData = agent.toData();
 
   return {
-    id: agent.getId(),
-    name: agent.getName(),
-    role: agent.getRole(),
-    goal: agent.getGoal(),
-    backstory: agent.getBackstory(),
-    llmProviderId: agent.getLlmProviderId(),
-    temperature: agent.getTemperature(),
-    maxTokens: agent.getMaxTokens(),
-    status: agent.getStatus(),
+    id: agentData.id,
+    name: agentData.name,
+    role: agentData.role,
+    goal: agentData.goal,
+    backstory: agentData.backstory,
+    llmProviderId: agentData.llmProviderId,
+    temperature: agentData.temperature,
+    maxTokens: agentData.maxTokens,
+    status: agentData.status,
     isActive: agent.isActive(),
     isDefault: false, // deprecated field
     isExecuting: agent.isBusy(),

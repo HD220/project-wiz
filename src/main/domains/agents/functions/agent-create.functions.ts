@@ -1,45 +1,57 @@
-import { z } from "zod";
-
 import { getDatabase } from "@/infrastructure/database";
 import { getLogger } from "@/infrastructure/logger";
 import { agents } from "@/main/persistence/schemas/agents.schema";
+import { Agent, AgentEntityData } from "../agent.entity";
+import { AgentDataSchema } from "../value-objects/agent-values";
 
 const logger = getLogger("agents.create");
 
-const CreateAgentSchema = z.object({
-  name: z.string().min(2).max(100),
-  role: z.string().min(2).max(100),
-  goal: z.string().min(10),
-  backstory: z.string().min(10),
-  llmProviderId: z.string(),
-  temperature: z.number().min(0).max(2).default(0.7),
-  maxTokens: z.number().min(100).max(4000).default(1000),
-});
+export type CreateAgentData = {
+  name: string;
+  role: string;
+  goal: string;
+  backstory: string;
+  llmProviderId: string;
+  temperature?: number;
+  maxTokens?: number;
+};
 
-type CreateAgentData = z.infer<typeof CreateAgentSchema>;
-
-export async function createAgent(
-  data: CreateAgentData,
-): Promise<{ id: string }> {
+export async function createAgent(data: CreateAgentData): Promise<Agent> {
   try {
-    const validated = CreateAgentSchema.parse(data);
+    // Validate using consolidated schema
+    const validated = AgentDataSchema.parse({
+      ...data,
+      status: "inactive" as const,
+    });
 
     const db = getDatabase();
+    const now = new Date();
+
     const result = await db
       .insert(agents)
       .values({
-        name: validated.name,
-        role: validated.role,
-        goal: validated.goal,
-        backstory: validated.backstory,
-        llmProviderId: validated.llmProviderId,
-        temperature: validated.temperature,
-        maxTokens: validated.maxTokens,
+        ...validated,
+        createdAt: now,
+        updatedAt: now,
       })
-      .returning({ id: agents.id });
+      .returning();
+
+    const agentData: AgentEntityData = {
+      id: result[0].id,
+      name: result[0].name,
+      role: result[0].role,
+      goal: result[0].goal,
+      backstory: result[0].backstory,
+      llmProviderId: result[0].llmProviderId,
+      temperature: result[0].temperature,
+      maxTokens: result[0].maxTokens,
+      status: result[0].status as "active" | "inactive" | "busy",
+      createdAt: result[0].createdAt,
+      updatedAt: result[0].updatedAt,
+    };
 
     logger.info(`Agent created: ${validated.name}`);
-    return result[0] || { id: "" };
+    return new Agent(agentData);
   } catch (error) {
     logger.error("Failed to create agent", { error, data });
     throw error;

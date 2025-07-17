@@ -1,86 +1,117 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { getDatabase } from "../../../infrastructure/database";
-import { getLogger } from "../../../infrastructure/logger";
-import { projects } from "../../../persistence/schemas/projects.schema";
-import { channels } from "../../../persistence/schemas/channels.schema";
-import { Project } from "../project.entity";
-import { createProjectFromDbData } from "./project.mapper";
+import { getDatabase } from "@/infrastructure/database";
+import { getLogger } from "@/infrastructure/logger";
+import { projects } from "@/main/persistence/schemas/projects.schema";
+import { Project, ProjectData } from "../project.entity";
+import { findProjectById } from "./project-query.functions";
 
-const logger = getLogger("projects");
+const logger = getLogger("projects.update");
 
-// Schema para validação
-const UpdateProjectSchema = z
-  .object({
-    name: z.string().min(1).max(100),
-    description: z.string().default(""),
-    gitUrl: z.string().url().optional().nullable(),
-    avatar: z.string().nullable().optional(),
-  })
-  .partial();
+const UpdateProjectSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().optional(),
+  gitUrl: z.string().url().optional().nullable(),
+  avatar: z.string().nullable().optional(),
+});
 
-type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;
 
 export async function updateProject(
   id: string,
   input: UpdateProjectInput,
 ): Promise<Project> {
-  const validated = validateUpdateInput(input);
-  const updateData = prepareUpdateData(validated);
-  const project = await performProjectUpdate(id, updateData);
-  logger.info(`Project updated: ${project.getName()}`);
-  return project;
-}
+  try {
+    const validated = UpdateProjectSchema.parse(input);
+    const db = getDatabase();
 
-function validateUpdateInput(input: UpdateProjectInput) {
-  return UpdateProjectSchema.parse(input);
-}
+    const existingProject = await findProjectById(id);
+    if (!existingProject) {
+      throw new Error(`Project not found: ${id}`);
+    }
 
-function prepareUpdateData(validated: UpdateProjectInput) {
-  return {
-    ...validated,
-    updatedAt: new Date(),
-  };
-}
+    const updateData = {
+      ...validated,
+      updatedAt: new Date(),
+    };
 
-async function performProjectUpdate(id: string, updateData: any) {
-  const db = getDatabase();
-  const result = await db
-    .update(projects)
-    .set(updateData)
-    .where(eq(projects.id, id))
-    .returning();
+    const result = await db
+      .update(projects)
+      .set(updateData)
+      .where(eq(projects.id, id))
+      .returning();
 
-  if (result.length === 0) {
-    throw new Error(`Project not found: ${id}`);
+    const projectData: ProjectData = {
+      id: result[0].id,
+      name: result[0].name,
+      description: result[0].description || "",
+      gitUrl: result[0].gitUrl,
+      status: result[0].status as "active" | "archived" | "maintenance",
+      avatar: result[0].avatar,
+      createdAt: result[0].createdAt,
+      updatedAt: result[0].updatedAt,
+    };
+
+    const updatedProject = new Project(projectData);
+
+    logger.info(`Project updated: ${updatedProject.getName()}`);
+    return updatedProject;
+  } catch (error) {
+    logger.error("Failed to update project", { error, id, input });
+    throw error;
   }
+}
 
-  return createProjectFromDbData(result[0]);
+export async function archiveProject(id: string): Promise<Project> {
+  try {
+    const db = getDatabase();
+
+    const existingProject = await findProjectById(id);
+    if (!existingProject) {
+      throw new Error(`Project not found: ${id}`);
+    }
+
+    const result = await db
+      .update(projects)
+      .set({ status: "archived", updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
+
+    const projectData: ProjectData = {
+      id: result[0].id,
+      name: result[0].name,
+      description: result[0].description || "",
+      gitUrl: result[0].gitUrl,
+      status: result[0].status as "active" | "archived" | "maintenance",
+      avatar: result[0].avatar,
+      createdAt: result[0].createdAt,
+      updatedAt: result[0].updatedAt,
+    };
+
+    const archivedProject = new Project(projectData);
+
+    logger.info(`Project archived: ${archivedProject.getName()}`);
+    return archivedProject;
+  } catch (error) {
+    logger.error("Failed to archive project", { error, id });
+    throw error;
+  }
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const db = getDatabase();
-  await deleteProjectChannels(id);
-  await deleteProjectRecord(id);
-}
+  try {
+    const db = getDatabase();
 
-async function deleteProjectChannels(projectId: string) {
-  const db = getDatabase();
-  await db.delete(channels).where(eq(channels.projectId, projectId));
-}
+    const existingProject = await findProjectById(id);
+    if (!existingProject) {
+      throw new Error(`Project not found: ${id}`);
+    }
 
-async function deleteProjectRecord(id: string) {
-  const db = getDatabase();
-  const result = await db
-    .delete(projects)
-    .where(eq(projects.id, id))
-    .returning({ name: projects.name });
+    await db.delete(projects).where(eq(projects.id, id));
 
-  if (result.length === 0) {
-    throw new Error(`Project not found: ${id}`);
+    logger.info(`Project deleted: ${id}`);
+  } catch (error) {
+    logger.error("Failed to delete project", { error, id });
+    throw error;
   }
-
-  logger.info(`Project deleted: ${result[0].name}`);
 }
-
-export type { UpdateProjectInput };

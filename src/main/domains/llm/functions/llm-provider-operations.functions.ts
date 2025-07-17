@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { getDatabase } from "@/infrastructure/database";
 import { getLogger } from "@/infrastructure/logger";
 import { llmProviders } from "@/main/persistence/schemas";
+import { LlmProviderNotFoundError } from "../errors/llm.errors";
 
 import {
   createLlmProviderFromData,
@@ -17,7 +18,7 @@ export async function setDefaultLlmProvider(
 ): Promise<LlmProviderWithData> {
   const existing = await findLlmProviderById(id);
   if (!existing) {
-    throw new Error(`LLM provider with id '${id}' not found`);
+    throw new LlmProviderNotFoundError(id);
   }
 
   await updateDefaultProvider(id);
