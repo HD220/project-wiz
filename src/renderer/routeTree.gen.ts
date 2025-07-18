@@ -15,7 +15,7 @@ import { Route as CreateProjectRouteImport } from "./app/create-project";
 import { Route as CreateChannelRouteImport } from "./app/create-channel";
 import { Route as userRouteRouteImport } from "./app/(user)/route";
 import { Route as userIndexRouteImport } from "./app/(user)/index";
-import { Route as ProjectLayoutRouteImport } from "./app/project/_layout";
+import { Route as ProjectLayoutRouteImport } from "./app/project/route";
 import { Route as userNewConversationRouteImport } from "./app/(user)/new-conversation";
 import { Route as userAiChatTestRouteImport } from "./app/(user)/ai-chat-test";
 import { Route as ProjectProjectIdRouteRouteImport } from "./app/project/$projectId/route";
@@ -26,9 +26,9 @@ import { Route as userConversationConversationIdRouteImport } from "./app/(user)
 import { Route as ProjectProjectIdTasksIndexRouteImport } from "./app/project/$projectId/tasks/index";
 import { Route as ProjectProjectIdFilesIndexRouteImport } from "./app/project/$projectId/files/index";
 import { Route as ProjectProjectIdDocsIndexRouteImport } from "./app/project/$projectId/docs/index";
-import { Route as ProjectProjectIdChatIndexRouteImport } from "./app/project/$projectId/chat/index";
+import { Route as ProjectProjectIdChatIndexRouteImport } from "./app/project/$projectId/channel/index";
 import { Route as ProjectProjectIdAgentsIndexRouteImport } from "./app/project/$projectId/agents/index";
-import { Route as ProjectProjectIdChatChannelIdRouteImport } from "./app/project/$projectId/chat/$channelId";
+import { Route as ProjectProjectIdChatChannelIdRouteImport } from "./app/project/$projectId/channel/$channelId";
 import { Route as ProjectProjectIdAgentAgentIdRouteImport } from "./app/project/$projectId/agent/$agentId";
 import { Route as userSettingsEditLlmProviderLlmProviderIdRouteImport } from "./app/(user)/settings/edit-llm-provider.$llmProviderId";
 
