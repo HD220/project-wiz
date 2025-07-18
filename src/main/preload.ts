@@ -121,6 +121,25 @@ const channelsAPI = {
   ) => ipcRenderer.invoke("channels:reorder", projectId, channelOrders, userId),
 };
 
+// Issues API
+const issuesAPI = {
+  create: (input: any) => ipcRenderer.invoke("issues:create", input),
+  findById: (id: string) => ipcRenderer.invoke("issues:get", id),
+  listByProject: (projectId: string) =>
+    ipcRenderer.invoke("issues:get-project-issues", projectId),
+  update: (id: string, input: any) =>
+    ipcRenderer.invoke("issues:update", id, input),
+  delete: (id: string) => ipcRenderer.invoke("issues:delete", id),
+  updateStatus: (id: string, status: string) =>
+    ipcRenderer.invoke("issues:update-status", id, status),
+  assign: (id: string, assigneeId: string, assigneeType: string) =>
+    ipcRenderer.invoke("issues:assign", id, assigneeId, assigneeType),
+  addComment: (issueId: string, content: string) =>
+    ipcRenderer.invoke("issues:add-comment", issueId, content),
+  listComments: (issueId: string) =>
+    ipcRenderer.invoke("issues:get-comments", issueId),
+};
+
 // Main API object
 const api = {
   auth: authAPI,
@@ -128,6 +147,7 @@ const api = {
   agents: agentsAPI,
   messages: messagesAPI,
   channels: channelsAPI,
+  issues: issuesAPI,
 };
 
 // Expose API to renderer process

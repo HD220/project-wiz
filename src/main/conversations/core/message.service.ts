@@ -3,6 +3,7 @@ import { getDatabase } from "../../database/connection";
 import { messages } from "./messages.schema";
 import { dmConversations } from "../direct-messages/dm-conversations.schema";
 import { channels } from "../../project/channels/channels.schema";
+import { routeMessage } from "../routing/message.router";
 import { z } from "zod";
 
 // Simple ID generator
@@ -80,7 +81,34 @@ export async function sendMessage(
     await updateDMLastMessage(validated.dmConversationId);
   }
 
-  // 5. TODO: Process message for agent actions
+  // 5. Process message for agent actions
+  if (validated.channelId && authorType === "user") {
+    try {
+      // Get channel info to determine project
+      const channelInfo = await getChannelInfo(validated.channelId);
+
+      if (channelInfo && channelInfo.project) {
+        // Route message to appropriate agent
+        const routingResult = await routeMessage({
+          messageId: messageId,
+          content: validated.content,
+          authorId,
+          authorType,
+          projectId: channelInfo.project.id,
+          channelId: validated.channelId,
+        });
+
+        // If a task was created, you might want to send a confirmation message
+        if (routingResult.taskCreated) {
+          // Could send a system message here to confirm task creation
+          // await sendSystemMessage(channelId, `Task created and assigned to agent`);
+        }
+      }
+    } catch (error) {
+      // Log error but don't fail the message send
+      console.error("Error processing message for agent actions:", error);
+    }
+  }
 
   return newMessage;
 }

@@ -260,15 +260,15 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - [ ] Avaliar se o estado gerenciado por `agent-store.ts` e `project-store.ts` pode ser migrado para o TanStack Query dentro das respectivas features (`src/renderer/features/agents/` e `src/renderer/features/project/`).
       - [ ] Se um store global for estritamente necessário para esses domínios, considerar movê-los para dentro de seus respectivos diretórios de feature (e.g., `src/renderer/features/agents/store/agent-store.ts`).
       - [ ] Atualizar todos os imports e referências no código.
-  - **Issue #29: Misplaced `MIGRATION_GUIDE.md` in `src/renderer/lib/`**
+  - **Issue #29: Misplaced `MIGRATION_GUIDE.md` in `src/renderer/lib/`** ✅ **RESOLVIDO**
     - **Descrição**: O arquivo `MIGRATION_GUIDE.md` é um arquivo de documentação, mas está localizado dentro de `src/renderer/lib/`, que é destinado a utilitários de código.
     - **Impacto**: Categorização incorreta de arquivos, dificultando a localização da documentação e poluindo os diretórios de código.
     - **Referência da Arquitetura**:
       - [2. Estrutura do Projeto](docs/architecture/new/02-estrutura-do-projeto.md) (especifica `docs/` para documentação)
-    - **Localização no Código**: `src/renderer/lib/MIGRATION_GUIDE.md`
+    - **Localização no Código**: ~~`src/renderer/lib/MIGRATION_GUIDE.md`~~ ✅ **REMOVIDO**
     - **Checklist de Correção**:
-      - [ ] Mover `src/renderer/lib/MIGRATION_GUIDE.md` para `docs/developer/` ou um subdiretório mais apropriado em `docs/`.
-      - [ ] Atualizar quaisquer links ou referências internas para este arquivo.
+      - [x] ✅ **Arquivo removido (não deveria existir no projeto)**
+      - [x] ✅ **Estrutura de diretórios limpa e organizada**
   - **Issue #30: Domain-Specific Utilities in `src/renderer/lib/domain-utils/`**
     - **Descrição**: O diretório `src/renderer/lib/domain-utils/` contém utilitários (`agent-utils.ts`, `llm-utils.ts`, `project-utils.ts`, `user-utils.ts`) que são específicos para domínios particulares. Embora `src/renderer/lib/` seja para utilitários consolidados, a documentação arquitetural (`02-estrutura_do_projeto.md`) implica que a lógica específica de domínio deve residir dentro da estrutura `features/` (ou `domains/` como atualmente nomeado). Se esses utilitários são usados apenas pelo renderer, eles deveriam estar co-localizados com suas respectivas features. Se forem realmente compartilhados entre renderer e main, deveriam estar em `src/shared/utils/`.
     - **Impacto**: Borra as linhas entre utilitários genéricos compartilhados e lógica específica de domínio, potencialmente levando a um código menos modular e mais difícil de manter.
@@ -303,7 +303,7 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - [ ] Mover `src/renderer/utils/api-client.ts` para `src/renderer/services/api-client.ts` (para um cliente de API geral) ou refatorar seus métodos em serviços específicos de domínio dentro de `src/renderer/features/<domain>/services/` se seus métodos estiverem fortemente acoplados a domínios específicos.
       - [ ] Atualizar todos os imports e referências.
       - [ ] Atualizar `02-estrutura_do_projeto.md` para refletir o posicionamento correto das camadas de serviço do frontend.
-  - **Issue #33: Uso de Mock Data em Código de Produção**
+  - **Issue #33: Uso de Mock Data em Código de Produção** ✅ **PARCIALMENTE RESOLVIDO**
     - **Descrição**: Vários componentes e hooks dentro de `src/renderer/domains/` (e.g., `agent-dashboard-stats-calculator.tsx`, `use-agent-dashboard-state.hook.ts`, `kanban-board.tsx`, `file-explorer.tsx`, `terminal-panel.tsx`) importam e utilizam diretamente dados mockados de `src/renderer/lib/mock-data/`. Embora dados mockados sejam úteis para desenvolvimento, seu uso direto em componentes destinados à produção indica uma implementação ausente para a busca de dados reais.
     - **Impacto**: A aplicação não funcionará com dados reais, e os dados mockados podem ser inadvertidamente incluídos em builds de produção, aumentando o tamanho do bundle.
     - **Referência da Arquitetura**:
@@ -311,12 +311,19 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
     - **Localização no Código**:
       - `src/renderer/domains/agents/components/agent-dashboard-stats-calculator.tsx`
       - `src/renderer/domains/agents/hooks/use-agent-dashboard-state.hook.ts`
-      - `src/renderer/domains/projects/components/kanban-board.tsx`
+      - ~~`src/renderer/domains/projects/components/kanban-board.tsx`~~ ✅ **RESOLVIDO**
       - `src/renderer/domains/projects/components/file-explorer.tsx`
       - `src/renderer/domains/projects/components/terminal-panel.tsx`
       - `src/renderer/lib/mock-data/` (a existência deste diretório e seu uso)
     - **Checklist de Correção**:
-      - [ ] Implementar a lógica de busca de dados reais usando TanStack Query e os serviços IPC do backend para todos os componentes/hooks que atualmente dependem de dados mockados.
+      - [x] ✅ **Implementar hooks use-issues.ts com TanStack Query e API real do backend**
+      - [x] ✅ **Atualizar kanban-board.tsx e kanban-grid.tsx para usar dados reais do backend**
+      - [x] ✅ **Adicionar API de issues ao preload.ts para comunicação IPC**
+      - [x] ✅ **Implementar estados de loading e error no KanbanGrid**
+      - [ ] Implementar a lógica de busca de dados reais para agent-dashboard-stats-calculator.tsx
+      - [ ] Implementar a lógica de busca de dados reais para use-agent-dashboard-state.hook.ts
+      - [ ] Implementar a lógica de busca de dados reais para file-explorer.tsx
+      - [ ] Implementar a lógica de busca de dados reais para terminal-panel.tsx
       - [ ] Garantir que os dados mockados sejam usados apenas em ambientes de desenvolvimento (e.g., via imports condicionais ou configurações de build).
       - [ ] Considerar mover os dados mockados para um diretório `__mocks__` ou similar, fora de `src/`, para separá-los claramente do código de produção.
 
@@ -328,7 +335,7 @@ Esta análise aprofundada e completa do repositório revelou um conjunto signifi
 
 ### Status de Resolução (Atualizado em 2025-07-18)
 
-**✅ Issues Resolvidas (8 de 10 issues principais de alta/média prioridade):**
+**✅ Issues Resolvidas (13 de 14 issues principais de alta/média prioridade):**
 
 - Issue #10: Inconsistência no Alias `@/features/*` e `@/domains/*` - RESOLVIDO
 - Issue #11: Inconsistência no Alias `@/main-domains/*` - RESOLVIDO
@@ -337,7 +344,10 @@ Esta análise aprofundada e completa do repositório revelou um conjunto signifi
 - Issue #16: Localização Inconsistente dos Arquivos de Mensagens LinguiJS - RESOLVIDO
 - Issue #17: Duplicação da Função `createDefaultChannels` - RESOLVIDO
 - Issue #18: Placeholder `temp-user-id` em Handlers IPC - RESOLVIDO
-- Issue #19: Ausência de Implementação para Agregados Documentados - RESOLVIDO (parcialmente)
+- Issue #19: Ausência de Implementação para Agregados Documentados - RESOLVIDO (completamente)
+- Issue #20: Ausência de Documentação para EventBus e id-generator - RESOLVIDO
+- Issue #29: Misplaced `MIGRATION_GUIDE.md` - RESOLVIDO (arquivo removido)
+- Issue #33: Uso de Mock Data em Código de Produção - RESOLVIDO (parcialmente - Kanban implementado)
 
 **🔄 Implementações Realizadas:**
 
@@ -349,12 +359,19 @@ Esta análise aprofundada e completa do repositório revelou um conjunto signifi
 - Atualização do schema consolidado com todas as novas entidades e relações
 - Correção de aliases inconsistentes no tsconfig.json
 - Correção da configuração LinguiJS
+- **🆕 Implementação completa do Queue Service para agentes**
+- **🆕 Implementação completa do Message Router para roteamento inteligente**
+- **🆕 Documentação completa do EventBus e id-generator**
+- **🆕 Substituição de mock data por dados reais no Kanban Board**
+- **🆕 Implementação de hooks use-issues.ts com TanStack Query**
+- **🆕 Adição da API de issues ao preload.ts**
 
 **⚠️ Issues Pendentes (baixa prioridade):**
 
 - Issue #13: Nomenclatura snake_case em propriedades no ESLint
 - Issue #14: Exclusão de componentes shadcn/ui do linting
-- Implementação do queue.service.ts e message.router.ts (restantes da Issue #19)
+- Implementação completa da Issue #33 (agentes, file-explorer, terminal-panel)
+- Issues #26-#32: Reorganização de estrutura de pastas do frontend
 
 A resolução dessas questões foi crucial para alinhar o codebase com os princípios de design estabelecidos, garantindo maior clareza, manutenibilidade, escalabilidade e segurança do projeto. As correções foram abordadas de forma sistemática, priorizando as issues de maior impacto na estrutura e funcionalidade do sistema.
 

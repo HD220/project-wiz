@@ -19,7 +19,7 @@ export function KanbanBoard({ projectId, className }: KanbanBoardProps) {
   return (
     <ScrollArea className="h-full">
       <div className={cn("p-6 space-y-6", className)}>
-        <KanbanGrid onCreateTask={handleCreateTask} />
+        <KanbanGrid projectId={projectId} onCreateTask={handleCreateTask} />
       </div>
     </ScrollArea>
   );

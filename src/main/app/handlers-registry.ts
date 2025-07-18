@@ -3,6 +3,7 @@ import { registerAuthHandlers } from "../user/authentication/auth.handlers";
 import { registerProjectHandlers } from "../project/project.handlers";
 import { registerChannelHandlers } from "../project/channels/channel.handlers";
 import { registerAgentHandlers } from "../agents/worker/agent.handlers";
+import { setupQueueHandlers } from "../agents/queue/queue.handlers";
 import { registerMessageHandlers } from "../conversations/core/message.handlers";
 import { registerLlmProviderHandlers } from "../agents/llm/llm.handlers";
 
@@ -18,6 +19,7 @@ export function registerAllHandlers(): void {
 
   // Agents bounded context
   registerAgentHandlers();
+  setupQueueHandlers();
 
   // Conversations bounded context
   registerMessageHandlers();
