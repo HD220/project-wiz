@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { users } from "../authentication/users.schema";
+import { users } from "../../user/authentication/users.schema";
 import { agents } from "../../agents/worker/agents.schema";
 
 export const dmConversations = sqliteTable("dm_conversations", {

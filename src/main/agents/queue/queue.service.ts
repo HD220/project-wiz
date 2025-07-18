@@ -184,13 +184,15 @@ class QueueService extends EventEmitter {
       const jobIndex = queue.findIndex((job) => job.id === jobId);
       if (jobIndex !== -1) {
         const job = queue[jobIndex];
-        job.status = "cancelled";
-        job.completedAt = new Date();
-        queue.splice(jobIndex, 1);
-        this.queues.set(agentId, queue);
-        this.jobHistory.set(jobId, job);
-        this.emit("job:cancelled", job);
-        return;
+        if (job) {
+          job.status = "cancelled";
+          job.completedAt = new Date();
+          queue.splice(jobIndex, 1);
+          this.queues.set(agentId, queue);
+          this.jobHistory.set(jobId, job);
+          this.emit("job:cancelled", job);
+          return;
+        }
       }
     }
 
@@ -366,5 +368,3 @@ export async function getQueueStats(): Promise<{
 }> {
   return queueService.getQueueStats();
 }
-
-export { queueService };

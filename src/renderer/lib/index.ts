@@ -10,7 +10,6 @@ export * from "./utils";
 export * from "./status-utils";
 export * from "./date-utils";
 export * from "./field-utils";
-export * from "./domain-utils";
 export * from "./ui-utils";
 
 // Existing utils

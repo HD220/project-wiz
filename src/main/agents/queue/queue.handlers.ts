@@ -10,7 +10,6 @@ import {
   completeJob,
   failJob,
   type CreateJobInput,
-  type Job,
 } from "./queue.service";
 
 /**
@@ -22,6 +21,9 @@ export function setupQueueHandlers(): void {
   ipcMain.handle("queue:create-job", async (event, input: CreateJobInput) => {
     try {
       const userId = extractUserId(event);
+      if (!userId) {
+        throw new Error("User authentication required");
+      }
       const jobInput = { ...input, createdBy: userId };
       const job = await enqueueJob(jobInput);
       return { success: true, data: job };
@@ -34,7 +36,7 @@ export function setupQueueHandlers(): void {
   });
 
   // Get job by ID
-  ipcMain.handle("queue:get-job", async (event, jobId: string) => {
+  ipcMain.handle("queue:get-job", async (_, jobId: string) => {
     try {
       const job = await getJob(jobId);
       return { success: true, data: job };
@@ -47,7 +49,7 @@ export function setupQueueHandlers(): void {
   });
 
   // Get jobs for agent
-  ipcMain.handle("queue:get-agent-jobs", async (event, agentId: string) => {
+  ipcMain.handle("queue:get-agent-jobs", async (_, agentId: string) => {
     try {
       const jobs = await getJobsForAgent(agentId);
       return { success: true, data: jobs };
@@ -61,7 +63,7 @@ export function setupQueueHandlers(): void {
   });
 
   // Get jobs for project
-  ipcMain.handle("queue:get-project-jobs", async (event, projectId: string) => {
+  ipcMain.handle("queue:get-project-jobs", async (_, projectId: string) => {
     try {
       const jobs = await getJobsForProject(projectId);
       return { success: true, data: jobs };
@@ -89,7 +91,7 @@ export function setupQueueHandlers(): void {
   });
 
   // Cancel job
-  ipcMain.handle("queue:cancel-job", async (event, jobId: string) => {
+  ipcMain.handle("queue:cancel-job", async (_, jobId: string) => {
     try {
       const userId = extractUserId(event);
 
@@ -117,7 +119,7 @@ export function setupQueueHandlers(): void {
   // Complete job (internal use by agents)
   ipcMain.handle(
     "queue:complete-job",
-    async (event, jobId: string, result?: any) => {
+    async (_, jobId: string, result?: any) => {
       try {
         await completeJob(jobId, result);
         return { success: true, data: null };
@@ -132,18 +134,15 @@ export function setupQueueHandlers(): void {
   );
 
   // Fail job (internal use by agents)
-  ipcMain.handle(
-    "queue:fail-job",
-    async (event, jobId: string, error: string) => {
-      try {
-        await failJob(jobId, error);
-        return { success: true, data: null };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to fail job",
-        };
-      }
-    },
-  );
+  ipcMain.handle("queue:fail-job", async (_, jobId: string, error: string) => {
+    try {
+      await failJob(jobId, error);
+      return { success: true, data: null };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to fail job",
+      };
+    }
+  });
 }
