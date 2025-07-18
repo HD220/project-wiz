@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-import { mockFileTree } from "@/renderer/lib/mock-data/files";
-import type { FileTreeItem } from "@/renderer/lib/mock-data/types";
+import type { FileTreeItem } from "@/shared/types/domains/projects/file-system.types";
+import { useProjectFiles } from "./use-file-system.hook";
 
 interface UseFileExplorerStateProps {
+  projectId: string;
   onFileSelect?: (file: FileTreeItem) => void;
   onFileOpen?: (file: FileTreeItem) => void;
 }
 
 export function useFileExplorerState({
+  projectId,
   onFileSelect,
   onFileOpen,
 }: UseFileExplorerStateProps) {
@@ -17,6 +19,8 @@ export function useFileExplorerState({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(["root"]),
   );
+
+  const { data: fileSystemData, isLoading, error } = useProjectFiles(projectId);
 
   const toggleFolder = (path: string) => {
     const newExpanded = new Set(expandedFolders);
@@ -43,11 +47,15 @@ export function useFileExplorerState({
     }
   };
 
-  const filteredTree = mockFileTree.filter((item) =>
-    searchQuery
-      ? item.name.toLowerCase().includes(searchQuery.toLowerCase())
-      : true,
-  );
+  const filteredTree = useMemo(() => {
+    if (!fileSystemData?.files) return [];
+
+    return fileSystemData.files.filter((item) =>
+      searchQuery
+        ? item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        : true,
+    );
+  }, [fileSystemData?.files, searchQuery]);
 
   return {
     searchQuery,
@@ -57,5 +65,7 @@ export function useFileExplorerState({
     filteredTree,
     handleFileClick,
     handleFileDoubleClick,
+    isLoading,
+    error,
   };
 }

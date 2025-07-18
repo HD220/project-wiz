@@ -140,6 +140,35 @@ const issuesAPI = {
     ipcRenderer.invoke("issues:get-comments", issueId),
 };
 
+// File System API
+const fileSystemAPI = {
+  getProjectFiles: (projectId: string) =>
+    ipcRenderer.invoke("fileSystem:getProjectFiles", { projectId }),
+  getFileContent: (filePath: string) =>
+    ipcRenderer.invoke("fileSystem:getFileContent", { filePath }),
+};
+
+// Terminal API
+const terminalAPI = {
+  createSession: (projectId: string, name: string, directory?: string) =>
+    ipcRenderer.invoke("terminal:createSession", {
+      projectId,
+      name,
+      directory,
+    }),
+  getSession: (sessionId: string) =>
+    ipcRenderer.invoke("terminal:getSession", { sessionId }),
+  getProjectSessions: (projectId: string) =>
+    ipcRenderer.invoke("terminal:getProjectSessions", { projectId }),
+  executeCommand: (sessionId: string, command: any) =>
+    ipcRenderer.invoke("terminal:executeCommand", { sessionId, command }),
+  closeSession: (sessionId: string) =>
+    ipcRenderer.invoke("terminal:closeSession", { sessionId }),
+  clearSession: (sessionId: string) =>
+    ipcRenderer.invoke("terminal:clearSession", { sessionId }),
+  getDefaultSessions: () => ipcRenderer.invoke("terminal:getDefaultSessions"),
+};
+
 // Main API object
 const api = {
   auth: authAPI,
@@ -148,6 +177,8 @@ const api = {
   messages: messagesAPI,
   channels: channelsAPI,
   issues: issuesAPI,
+  fileSystem: fileSystemAPI,
+  terminal: terminalAPI,
 };
 
 // Expose API to renderer process

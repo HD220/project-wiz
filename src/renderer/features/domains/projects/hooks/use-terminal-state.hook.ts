@@ -1,22 +1,33 @@
-import { useState, useRef } from "react";
-
-import { mockTerminalLines } from "@/lib/mock-data/terminal";
-
-import type { TerminalLine } from "@/lib/mock-data/types";
+import { useState, useRef, useMemo } from "react";
+import { useDefaultTerminalSessions } from "./use-terminal-sessions.hook";
+import type { TerminalLine } from "@/shared/types/domains/projects/terminal.types";
 
 export function useTerminalState() {
-  const [terminalLines, setTerminalLines] =
-    useState<TerminalLine[]>(mockTerminalLines);
+  const { data: defaultSessions, isLoading } = useDefaultTerminalSessions();
   const [isRunning, setIsRunning] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const terminalLines = useMemo(() => {
+    if (!defaultSessions || defaultSessions.length === 0) return [];
+    return defaultSessions[0]?.lines || [];
+  }, [defaultSessions]);
+
+  const setTerminalLines = (
+    lines: TerminalLine[] | ((prev: TerminalLine[]) => TerminalLine[]),
+  ) => {
+    // This is a placeholder - in a real implementation, this would update the session
+    console.log("Terminal lines updated:", lines);
+  };
+
   const addLine = (line: TerminalLine) => {
-    setTerminalLines((prev) => [...prev, line]);
+    // This is a placeholder - in a real implementation, this would add to the session
+    console.log("Line added:", line);
   };
 
   const clearLines = () => {
-    setTerminalLines([]);
+    // This is a placeholder - in a real implementation, this would clear the session
+    console.log("Lines cleared");
   };
 
   const startExecution = () => {
@@ -28,7 +39,8 @@ export function useTerminalState() {
   };
 
   const resetTerminal = () => {
-    setTerminalLines(mockTerminalLines);
+    // This is a placeholder - in a real implementation, this would reset the session
+    console.log("Terminal reset");
     setIsRunning(false);
   };
 
@@ -43,5 +55,6 @@ export function useTerminalState() {
     startExecution,
     stopExecution,
     resetTerminal,
+    isLoading,
   };
 }

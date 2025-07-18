@@ -1,10 +1,11 @@
-import type { Agent } from "../../../lib/placeholders";
+import type { AgentDto } from "@/shared/types/domains/agents/agent.types";
 
-export function calculateAgentStats(agents: Agent[]) {
+export function calculateAgentStats(agents: AgentDto[]) {
   return {
     totalAgents: agents.length,
     onlineAgents: agents.filter((a) => a.status !== "offline").length,
     executingAgents: agents.filter((a) => a.isExecuting).length,
-    uniqueTypes: new Set(agents.map((a) => a.type)).size,
+    activeAgents: agents.filter((a) => a.isActive).length,
+    uniqueRoles: new Set(agents.map((a) => a.role)).size,
   };
 }

@@ -1,23 +1,30 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-import { mockAgents } from "@/renderer/lib/mock-data/agents";
-import type { Agent } from "@/renderer/lib/mock-data/types";
+import type { AgentDto } from "@/shared/types/domains/agents/agent.types";
+import { useAgents } from "./use-agents.hook";
 
 export function useAgentDashboardState() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<AgentDto | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const filteredAgents = mockAgents.filter((agent) => {
-    const matchesSearch =
-      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter =
-      filterStatus === "all" || agent.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+  const { agents, isLoading, error } = useAgents();
 
-  const handleAgentAction = (action: string, agent: Agent) => {
+  const filteredAgents = useMemo(() => {
+    if (!agents) return [];
+
+    return agents.filter((agent) => {
+      const matchesSearch =
+        agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        agent.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        agent.goal.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesFilter =
+        filterStatus === "all" || agent.status === filterStatus;
+      return matchesSearch && matchesFilter;
+    });
+  }, [agents, searchQuery, filterStatus]);
+
+  const handleAgentAction = (action: string, agent: AgentDto) => {
     console.log(`${action} action for agent:`, agent.id);
   };
 
@@ -29,7 +36,9 @@ export function useAgentDashboardState() {
     filterStatus,
     setFilterStatus,
     filteredAgents,
-    allAgents: mockAgents,
+    allAgents: agents || [],
     handleAgentAction,
+    isLoading,
+    error,
   };
 }

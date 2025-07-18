@@ -6,22 +6,50 @@ import { useFileExplorerState } from "../hooks/use-file-explorer-state.hook";
 import { FileExplorerHeader } from "./file-explorer-header";
 import { FileExplorerItem } from "./file-explorer-item";
 
-import type { FileTreeItem } from "@/lib/mock-data/types";
+import type { FileTreeItem } from "@/shared/types/domains/projects/file-system.types";
 
 interface FileExplorerProps {
-  _projectId?: string;
+  projectId: string;
   className?: string;
   onFileSelect?: (file: FileTreeItem) => void;
   onFileOpen?: (file: FileTreeItem) => void;
 }
 
 export function FileExplorer({
-  _projectId,
+  projectId,
   className,
   onFileSelect,
   onFileOpen,
 }: FileExplorerProps) {
-  const state = useFileExplorerState({ onFileSelect, onFileOpen });
+  const state = useFileExplorerState({ projectId, onFileSelect, onFileOpen });
+
+  if (state.isLoading) {
+    return (
+      <div className={cn("bg-background border rounded-lg", className)}>
+        <FileExplorerHeader
+          searchQuery={state.searchQuery}
+          setSearchQuery={state.setSearchQuery}
+        />
+        <div className="p-4 text-center text-sm text-muted-foreground">
+          Loading files...
+        </div>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className={cn("bg-background border rounded-lg", className)}>
+        <FileExplorerHeader
+          searchQuery={state.searchQuery}
+          setSearchQuery={state.setSearchQuery}
+        />
+        <div className="p-4 text-center text-sm text-destructive">
+          Error loading files: {state.error.message}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("bg-background border rounded-lg", className)}>
@@ -43,6 +71,11 @@ export function FileExplorer({
               onDoubleClick={() => state.handleFileDoubleClick(item)}
             />
           ))}
+          {state.filteredTree.length === 0 && (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              No files found
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>

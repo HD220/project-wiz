@@ -9,7 +9,7 @@ import {
 } from "@/renderer/components/ui/resizable";
 import { getAgentsByProject } from "@/renderer/lib/placeholders";
 
-import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
+import { ProjectLayoutSkeleton } from "@/features/projects/components/skeletons/project-layout-skeleton";
 import { AgentsSidebar } from "@/features/agents/components";
 import {
   CreateChannelModal,
@@ -17,7 +17,7 @@ import {
 } from "@/features/projects/components";
 import { useProjectChannels } from "@/features/projects/hooks";
 
-import { getPageInfo } from "./route-page-info";
+import { getPageInfo } from "@/features/projects/utils/route-page-info";
 
 function ProjectLayout() {
   const { projectId } = Route.useParams();

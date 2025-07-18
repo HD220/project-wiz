@@ -4,6 +4,7 @@
 export * from "./use-create-project-form.hook";
 export * from "./use-create-project-modal.hook";
 export * from "./use-channel-form.hook";
+export * from "./project-form-behaviors";
 
 // Existing Hooks
 export * from "./use-add-agent-form.hook";

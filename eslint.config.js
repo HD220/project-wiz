@@ -189,7 +189,6 @@ export default [
       "index.html",
       "docs/**",
       "public/**",
-      "src/renderer/components/ui/**/*.tsx",
       "src/**/routeTree.gen.ts",
       "src/**/locales/*.ts",
     ],

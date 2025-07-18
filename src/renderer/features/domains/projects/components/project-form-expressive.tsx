@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   useProjectFormBehaviors,
   ProjectFormData,
-} from "./project-form-behaviors";
+} from "../hooks/project-form-behaviors";
 
 interface ProjectFormExpressiveProps {
   onSubmit: (data: ProjectFormData) => Promise<void>;

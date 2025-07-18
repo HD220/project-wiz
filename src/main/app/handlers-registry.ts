@@ -2,6 +2,8 @@
 import { registerAuthHandlers } from "../user/authentication/auth.handlers";
 import { registerProjectHandlers } from "../project/project.handlers";
 import { registerChannelHandlers } from "../project/channels/channel.handlers";
+import { setupFileSystemHandlers } from "../project/files/file-system.handlers";
+import { setupTerminalHandlers } from "../project/terminal/terminal.handlers";
 import { registerAgentHandlers } from "../agents/worker/agent.handlers";
 import { setupQueueHandlers } from "../agents/queue/queue.handlers";
 import { registerMessageHandlers } from "../conversations/core/message.handlers";
@@ -16,6 +18,8 @@ export function registerAllHandlers(): void {
   // Project bounded context
   registerProjectHandlers();
   registerChannelHandlers();
+  setupFileSystemHandlers();
+  setupTerminalHandlers();
 
   // Agents bounded context
   registerAgentHandlers();

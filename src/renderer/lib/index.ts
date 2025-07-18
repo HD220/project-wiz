@@ -15,7 +15,6 @@ export * from "./ui-utils";
 
 // Existing utils
 export * from "./file-preview-utils";
-export * from "./route-page-info";
 export * from "./placeholders";
 
 // Mock data (for development)

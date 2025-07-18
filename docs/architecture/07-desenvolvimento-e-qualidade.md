@@ -47,6 +47,12 @@ Nossos padrões visam a clareza e a consistência, alinhados com a arquitetura d
 - **Backend (Domain-Driven)**: A estrutura de pastas define o domínio. Ex: `src/main/project/project.service.ts`.
 - **Frontend (Features)**: A estrutura espelha o backend. Ex: `src/renderer/features/project/hooks/use-projects.ts`.
 - **Variáveis de Schema Drizzle**: `camelCase` com sufixo `Table` (ex: `projectsTable`, `usersTable`).
+- **Propriedades de Interface/Tipo**: `snake_case` é permitido para colunas de banco de dados e integração com APIs externas que usam essa convenção.
+
+### Padrões de Linting
+
+- **Componentes UI Customizados**: Todos os componentes em `src/renderer/components/ui/` são customizações do shadcn/ui específicas da aplicação e devem seguir as regras de linting para garantir qualidade e consistência.
+- **Arquivos Gerados**: Apenas arquivos realmente gerados (como `routeTree.gen.ts` e `locales/*.ts`) são excluídos do linting.
 
 ### Checklist de Qualidade Antes do Commit
 

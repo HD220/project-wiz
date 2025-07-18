@@ -1,5 +1,5 @@
 // Projects Utils - Utilitários relacionados ao domínio de projetos
-// @deprecated Use ProjectUtils from @/lib/domain-utils instead
 
-// Re-export from consolidated utils
-export { ProjectUtils } from "@/lib/domain-utils";
+// Domain-specific utilities
+export * from "./project-utils";
+export * from "./route-page-info";

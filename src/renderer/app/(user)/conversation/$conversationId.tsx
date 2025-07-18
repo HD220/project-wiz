@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ConversationSkeleton } from "@/components/skeletons/conversation-skeleton";
+import { ConversationSkeleton } from "@/features/users/components/skeletons/conversation-skeleton";
 import { ConversationView } from "@/features/users/components";
 
 export function ConversationPage() {
