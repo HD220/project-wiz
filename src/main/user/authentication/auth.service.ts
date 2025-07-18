@@ -3,29 +3,12 @@ import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import { usersTable, type SelectUser, type InsertUser } from "./users.schema";
-
-// Input types for authentication
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
-interface RegisterUserInput {
-  username: string;
-  name: string;
-  password: string;
-  avatar?: string;
-}
-
-interface AuthResult {
-  user: Omit<SelectUser, "passwordHash">;
-}
-
-interface SessionValidationResult {
-  valid: boolean;
-  user?: Omit<SelectUser, "passwordHash">;
-  error?: string;
-}
+import type {
+  LoginCredentials,
+  RegisterUserInput,
+  AuthResult,
+  SessionValidationResult,
+} from "./auth.types";
 
 // Simple in-memory session store for current user
 let currentUserId: string | null = null;

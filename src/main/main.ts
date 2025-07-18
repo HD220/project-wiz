@@ -4,6 +4,7 @@ import { app, BrowserWindow } from "electron";
 import squirrel from "electron-squirrel-startup";
 
 import { getLogger } from "./utils/logger";
+import { setupAuthHandlers } from "./user/authentication/auth.handlers";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -69,7 +70,12 @@ function createMainWindow(): void {
  * App event handlers
  */
 app.whenReady().then(() => {
-  logger.info("App is ready, initializing main window");
+  logger.info("App is ready, initializing IPC handlers and main window");
+
+  // Setup IPC handlers
+  setupAuthHandlers();
+  logger.info("Authentication IPC handlers registered");
+
   createMainWindow();
 
   // On macOS, re-create window when dock icon is clicked

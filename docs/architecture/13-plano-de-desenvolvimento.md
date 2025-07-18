@@ -113,13 +113,31 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - Sessão em memória é mais simples e adequada
     - Mantida segurança com bcrypt para hash de senhas
 
-- **1.3. Handlers IPC de Autenticação**
+- **1.3. Handlers IPC de Autenticação** ✅ **CONCLUÍDO**
   - **Descrição**: Criar os handlers IPC para expor os métodos de autenticação do `AuthService` ao frontend.
+  - **Status**: ✅ Implementado em 2025-07-18
+  - **Arquivos Criados**:
+    - `src/main/user/authentication/auth.handlers.ts` - Handlers IPC completos com tratamento de erro
+    - `src/main/user/authentication/auth.types.ts` - Tipos específicos de autenticação
+    - `src/main/types.ts` - Tipos globais do processo main (IpcResponse)
+    - Atualização do `src/main/main.ts` - Registro dos handlers no app.whenReady()
+    - Atualização do `src/renderer/preload.ts` - Exposição da API de autenticação
+    - Atualização do `src/renderer/window.d.ts` - Tipagem completa para window.api.auth
   - **Referências**:
     - [3. Camada Backend (Main Process) - 2. API Layer: Comunicação via IPC](docs/architecture/new/03-camada-backend.md#2-api-layer-comunicação-via-ipc)
     - [Estrutura de Arquivos - `src/main/user/authentication/auth.handlers.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/user/authentication/auth.handlers.ts)
-  - **Exemplo de Implementação**:
-    - `src/main/user/authentication/auth.handlers.ts`
+  - **Handlers IPC Implementados**:
+    - `auth:register` - Registro de novo usuário
+    - `auth:login` - Login com credenciais
+    - `auth:getCurrentUser` - Obter usuário da sessão atual
+    - `auth:logout` - Logout (limpar sessão)
+    - `auth:isLoggedIn` - Verificar se há usuário logado
+    - `auth:getUserById` - Buscar usuário por ID
+  - **Aprendizados**:
+    - Organização de tipos seguindo arquitetura definida (sem pasta shared/)
+    - IpcResponse como tipo global reutilizável para todos os handlers futuros
+    - Padrão de registro de handlers no main.ts via setupAuthHandlers()
+    - Exposição type-safe da API via preload.ts e window.d.ts
 
 - **1.4. Serviço de Perfil de Usuário (`ProfileService`)**
   - **Descrição**: Implementar a lógica para gerenciar as configurações e preferências do perfil do usuário.

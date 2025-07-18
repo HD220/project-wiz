@@ -513,3 +513,76 @@ export class AuthService {
 - **Simpler authentication = fewer bugs** and easier maintenance
 - **Still use bcrypt for password hashing** - essential for local security
 - **Session persists only while app runs** - expected behavior for desktop apps
+
+### IPC Handlers Implementation Patterns
+
+**Handlers IPC de Autenticação (Atividade 1.3) - Implementado 2025-07-18:**
+
+```typescript
+// ✅ Correct IPC Handler Pattern
+export function setupAuthHandlers(): void {
+  ipcMain.handle(
+    "auth:login",
+    async (_, credentials: LoginCredentials): Promise<IpcResponse> => {
+      try {
+        const result = await AuthService.login(credentials);
+        return { success: true, data: result };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Login failed",
+        };
+      }
+    },
+  );
+}
+```
+
+**Estrutura de Tipos Correta:**
+
+```typescript
+// ❌ ERRO CRÍTICO - Criar pasta shared/ que não existe na arquitetura
+src / shared / types / auth.types.ts;
+
+// ✅ CORRETO - Seguir estrutura definida na arquitetura
+src / main / types.ts; // Tipos globais (IpcResponse)
+src / main / user / authentication / auth.types.ts; // Tipos específicos do domínio
+```
+
+**Exposição IPC Type-Safe:**
+
+```typescript
+// preload.ts - Exposição da API
+contextBridge.exposeInMainWorld("api", {
+  auth: {
+    login: (credentials: LoginCredentials): Promise<IpcResponse> =>
+      ipcRenderer.invoke("auth:login", credentials),
+  },
+});
+
+// window.d.ts - Tipagem global
+declare global {
+  interface Window {
+    api: {
+      auth: {
+        login: (credentials: LoginCredentials) => Promise<IpcResponse>;
+      };
+    };
+  }
+}
+```
+
+**Aprendizados Críticos:**
+
+1. **SEMPRE seguir arquitetura definida** - Não criar estruturas que não existem no plano
+2. **IpcResponse como tipo global** - Reutilizável para todos os domínios futuros
+3. **Organização por domínio** - Tipos específicos ficam no próprio domínio
+4. **Registro centralizado** - Handlers registrados no main.ts via setup functions
+5. **Type-safety completa** - Do backend até o frontend via preload.ts e window.d.ts
+
+**Padrão para Próximos Handlers:**
+
+- Criar `dominio.handlers.ts` no respectivo domínio
+- Usar `IpcResponse<T>` de `@/main/types`
+- Registrar via `setupDominioHandlers()` no main.ts
+- Expor API tipada no preload.ts e window.d.ts
