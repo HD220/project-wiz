@@ -2,7 +2,7 @@
 
 **Versão:** 3.0  
 **Status:** Design Final  
-**Data:** 2025-01-17  
+**Data:** 2025-01-17
 
 ---
 
@@ -77,34 +77,88 @@ Project Wiz é uma aplicação Electron que replica a experiência do Discord/Sl
 
 ## 🎨 Interface Discord-Like
 
-### Layout Principal
+### Duas Áreas Principais da Aplicação
 
-A interface replica o Discord com adaptações para desenvolvimento:
+A aplicação possui duas rotas principais com layouts distintos:
+
+#### 1. Área do Usuário (Espaço Pessoal)
+- Dashboard pessoal com estatísticas
+- Conversas diretas com agentes
+- Configurações pessoais
+- Histórico de atividades
+
+#### 2. Área de Projetos (Espaço Colaborativo)
+- Interface estilo Discord para projetos
+- Canais de equipe
+- Issues e fórum
+- Colaboração com agentes
+
+### Layout da Área de Projetos
+
+A interface da área de projetos replica o Discord com adaptações para desenvolvimento:
 
 ```
 ┌────┬──────────────┬─────────────────────────────────┬────────┐
 │    │              │                                 │        │
-│ S  │   CANAIS     │         CHAT AREA              │ MEMBROS│
-│ E  │              │                                 │        │
-│ R  │ #general     │  ┌─────────────────────────────┐ │ Agents │
-│ V  │ #frontend    │  │                             │ │        │
-│ I  │ #backend     │  │      MESSAGE LIST           │ │ • Alex │
-│ D  │              │  │                             │ │ • Bot  │
-│ O  │ ──────────   │  │                             │ │        │
-│ R  │              │  └─────────────────────────────┘ │ Users  │
-│ E  │ 📋 ISSUES    │                                 │        │
-│ S  │ 💬 FORUM     │  ┌─────────────────────────────┐ │ • User │
-│    │ ⚙️  CONFIG   │  │      CHAT INPUT             │ │        │
-│    │              │  └─────────────────────────────┘ │        │
+│ P  │   CANAIS     │      ÁREA DE CONTEÚDO          │ MEMBROS│
+│ R  │              │                                 │        │
+│ O  │ #general     │  ┌─────────────────────────────┐ │ Agents │
+│ J  │ #frontend    │  │                             │ │        │
+│ E  │ #backend     │  │    CHAT AREA (Canais)      │ │ • Alex │
+│ T  │              │  │    ou                       │ │ • Bot  │
+│ O  │ ──────────   │  │    CONTEÚDO ESPECÍFICO      │ │        │
+│ S  │              │  │    (Issues, Fórum, etc)    │ │ Users  │
+│    │ 📋 ISSUES    │  │                             │ │        │
+│    │ 💬 FORUM     │  └─────────────────────────────┘ │ • User │
+│    │ ⚙️  CONFIG   │                                 │        │
+│    │              │  [CHAT INPUT - apenas em canais]│        │
 └────┴──────────────┴─────────────────────────────────┴────────┘
 ```
 
-### Componentes Principais
+### Layout da Área do Usuário
 
-1. **Server Sidebar** - Lista de projetos (como servidores do Discord)
+A área pessoal do usuário tem um layout mais limpo e focado:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    HEADER PESSOAL                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────┐  ┌─────────────────────────────────┐   │
+│  │   SIDEBAR       │  │        CONTEÚDO PRINCIPAL       │   │
+│  │                 │  │                                 │   │
+│  │ 💬 DMs          │  │  Dashboard / Conversas Diretas  │   │
+│  │ ⚙️  Settings    │  │                                 │   │
+│  │ 📊 Activity     │  │  ┌─────────────────────────────┐ │   │
+│  │                 │  │  │    CHAT AREA (DMs)         │ │   │
+│  │                 │  │  │    ou                       │ │   │
+│  │                 │  │  │    DASHBOARD CARDS          │ │   │
+│  │                 │  │  └─────────────────────────────┘ │   │
+│  │                 │  │                                 │   │
+│  └─────────────────┘  └─────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Componentes por Área
+
+#### Área de Projetos:
+1. **Project Sidebar** - Lista de projetos disponíveis
 2. **Channel Sidebar** - Canais, issues, fórum do projeto atual
-3. **Chat Area** - Área principal de mensagens
-4. **Member Sidebar** - Lista de agentes e usuários
+3. **Content Area** - Área dinâmica que muda conforme a seção
+   - **Chat Area** (apenas para canais de texto)
+   - **Issue Board** (para visualização de issues)
+   - **Forum View** (para discussões)
+   - **Config Panel** (para configurações)
+4. **Member Sidebar** - Lista de agentes e usuários do projeto
+
+#### Área do Usuário:
+1. **Personal Sidebar** - Navegação pessoal (DMs, Settings, Activity)
+2. **Main Content** - Área principal que pode ser:
+   - **Dashboard** com cards informativos
+   - **Chat Area** (apenas para mensagens diretas)
+   - **Settings Panel** (configurações pessoais)
+   - **Activity Feed** (histórico de atividades)
 
 ---
 
@@ -117,19 +171,19 @@ erDiagram
     USERS ||--o{ PROJECTS : owns
     USERS ||--o{ MESSAGES : sends
     USERS ||--o{ DM_CONVERSATIONS : participates
-    
+
     AGENTS ||--o{ MESSAGES : sends
     AGENTS ||--o{ ISSUES : assigned_to
     AGENTS }o--o{ PROJECTS : participates
-    
+
     PROJECTS ||--o{ CHANNELS : contains
     PROJECTS ||--o{ ISSUES : contains
     PROJECTS ||--o{ FORUM_TOPICS : contains
-    
+
     CHANNELS ||--o{ MESSAGES : contains
-    
+
     FORUM_TOPICS ||--o{ FORUM_POSTS : contains
-    
+
     ISSUES ||--o{ ISSUE_COMMENTS : contains
 ```
 
@@ -158,11 +212,11 @@ Frontend Request → IPC Channel → API Handler → Service → Database → Re
 // Frontend (Renderer)
 const project = await api.projects.create({
   name: "My Project",
-  description: "A new project"
+  description: "A new project",
 });
 
 // IPC Channel
-"projects:create"
+("projects:create");
 
 // Backend Handler (Main)
 ipcMain.handle("projects:create", async (_, data) => {
@@ -199,11 +253,11 @@ class AgentWorker {
   private agent: Agent;
   private llmClient: LLMClient;
   private taskQueue: TaskQueue;
-  
+
   async processMessage(message: string): Promise<string> {
     // Process with LLM using agent's personality/expertise
   }
-  
+
   async handleTask(task: Task): Promise<void> {
     // Execute task (code, documentation, testing, etc.)
   }
@@ -252,12 +306,14 @@ src/
 ## 🎯 Funcionalidades Principais
 
 ### 1. Gestão de Projetos
+
 - Criar/editar/arquivar projetos
 - Conectar repositórios Git
 - Gerenciar agentes do projeto
 - Configurações e permissões
 
 ### 2. Chat em Tempo Real
+
 - Canais de texto por projeto
 - DMs entre usuário e agentes
 - Mensagens persistentes
@@ -265,6 +321,7 @@ src/
 - Histórico de conversas
 
 ### 3. Sistema de Issues
+
 - Board Kanban visual
 - Atribuição para agentes
 - Tracking de tempo
@@ -272,6 +329,7 @@ src/
 - Comentários e discussões
 
 ### 4. Fórum de Discussões
+
 - Tópicos estruturados
 - Participação de múltiplos agentes
 - Consenso e tomada de decisões
@@ -279,6 +337,7 @@ src/
 - Criação de issues a partir de discussões
 
 ### 5. Integração Git
+
 - Worktrees para trabalho paralelo
 - Branches automáticas por issue
 - Commits automatizados
@@ -286,6 +345,7 @@ src/
 - Versionamento de mudanças
 
 ### 6. Autenticação Multi-conta
+
 - Login local simples
 - Troca entre contas
 - Configurações por usuário
@@ -321,6 +381,7 @@ src/
 ## 📈 Benefícios da Nova Arquitetura
 
 ### Para Desenvolvedores Juniores
+
 - ✅ Interface familiar (Discord)
 - ✅ Estrutura de arquivos intuitiva
 - ✅ Convenções claras e consistentes
@@ -328,6 +389,7 @@ src/
 - ✅ Exemplos práticos em toda parte
 
 ### Para Manutenibilidade
+
 - ✅ Responsabilidades bem definidas
 - ✅ Acoplamento baixo entre módulos
 - ✅ Testes unitários focados
@@ -335,6 +397,7 @@ src/
 - ✅ Debugging simplificado
 
 ### Para Performance
+
 - ✅ Bundle otimizado
 - ✅ Lazy loading de rotas
 - ✅ Estado eficiente
@@ -342,6 +405,7 @@ src/
 - ✅ Background workers isolados
 
 ### Para Escalabilidade
+
 - ✅ Base sólida para crescimento
 - ✅ Padrões consistentes
 - ✅ Arquitetura modular
@@ -350,14 +414,4 @@ src/
 
 ---
 
-## 📋 Próximos Passos
-
-1. **Documentação Detalhada** - Especificar cada componente da arquitetura
-2. **Schemas de Banco** - Definir estrutura completa com Drizzle
-3. **API Specification** - Documentar todas as interfaces IPC
-4. **Component Library** - Definir sistema de design com shadcn/ui
-5. **Implementation Plan** - Plano de migração step-by-step
-
----
-
-*Esta arquitetura foi projetada para ser a base definitiva do Project Wiz, priorizando simplicidade, manutenibilidade e experiência do desenvolvedor.*
+_Esta arquitetura foi projetada para ser a base definitiva do Project Wiz, priorizando simplicidade, manutenibilidade e experiência do desenvolvedor._
