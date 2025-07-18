@@ -1,20 +1,20 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import * as schema from './schema';
-import path from 'path';
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
+import * as schema from "./schema-consolidated";
+import path from "path";
 
 // Database file path
-const DB_PATH = process.env.DB_FILE_NAME || './project-wiz.db';
+const DB_PATH = process.env["DB_FILE_NAME"] || "./project-wiz.db";
 const dbPath = path.resolve(DB_PATH);
 
 // Initialize SQLite database
 const sqlite = new Database(dbPath);
 
 // Enable WAL mode for better concurrency
-sqlite.pragma('journal_mode = WAL');
+sqlite.pragma("journal_mode = WAL");
 
 // Enable foreign key constraints
-sqlite.pragma('foreign_keys = ON');
+sqlite.pragma("foreign_keys = ON");
 
 // Create Drizzle database instance
 export const db = drizzle(sqlite, { schema });

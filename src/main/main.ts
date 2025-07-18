@@ -1,6 +1,8 @@
 import { app, dialog } from "electron";
 import { AppInitializer } from "./app/app-initializer";
-import { logger } from "./logger";
+import { getLogger } from "./utils/logger";
+
+const logger = getLogger("main");
 
 // Global error handlers
 process.on("uncaughtException", (error) => {
@@ -78,7 +80,7 @@ app.on("activate", () => {
 });
 
 // Handle before quit
-app.on("before-quit", (event) => {
+app.on("before-quit", (_event) => {
   logger.info("Application is about to quit");
 
   // Perform cleanup if needed
@@ -86,7 +88,7 @@ app.on("before-quit", (event) => {
 });
 
 // Handle will quit
-app.on("will-quit", (event) => {
+app.on("will-quit", (_event) => {
   logger.info("Application will quit");
 
   // Last chance to prevent quit or perform cleanup

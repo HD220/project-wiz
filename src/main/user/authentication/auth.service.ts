@@ -1,229 +1,250 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { eq } from 'drizzle-orm';
-import { getDatabase } from '../../database/connection';
-import { users } from '../../database/schema/users.schema';
-import { generateId } from '../../utils/id-generator';
+import { eq } from "drizzle-orm";
+import * as bcrypt from "bcryptjs";
+import * as jwt from "jsonwebtoken";
+import { getDatabase } from "../../database/connection";
+import { users } from "./users.schema";
+import {
+  LoginSchema,
+  RegisterSchema,
+  type LoginInput,
+  type RegisterInput,
+} from "../../../shared/schemas/validation.schemas";
+import {
+  ValidationError,
+  AuthenticationError,
+  type User,
+} from "../../../shared/types/common";
+import { generateUserId } from "../../../shared/utils/id-generator";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'project-wiz-dev-secret';
-const SALT_ROUNDS = 12;
+const JWT_SECRET = process.env["JWT_SECRET"] || "project-wiz-secret-key";
 
-export interface LoginInput {
-  username: string;
-  password: string;
-}
-
-export interface RegisterInput {
-  username: string;
-  email?: string;
-  password: string;
-  displayName: string;
-}
-
-export interface AuthResult {
-  user: {
-    id: string;
-    username: string;
-    displayName: string;
-    email?: string;
-    avatarUrl?: string;
-    bio?: string;
-  };
+export interface AuthResponse {
+  user: User;
   token: string;
 }
 
-export class AuthService {
-  static async login(input: LoginInput): Promise<AuthResult> {
+/**
+ * Authenticate user with username/password
+ */
+export async function login(input: LoginInput): Promise<AuthResponse> {
+  // 1. Validate input
+  const validated = LoginSchema.parse(input);
+
+  // 2. Find user by username
+  const db = getDatabase();
+  const user = await db.query.users.findFirst({
+    where: eq(users.username, validated.username),
+  });
+
+  if (!user) {
+    throw new AuthenticationError("Invalid username or password");
+  }
+
+  // 3. Check if user is active
+  if (!user.isActive) {
+    throw new AuthenticationError("Account is deactivated");
+  }
+
+  // 4. Verify password
+  const isPasswordValid = await bcrypt.compare(
+    validated.password,
+    user.passwordHash,
+  );
+  if (!isPasswordValid) {
+    throw new AuthenticationError("Invalid username or password");
+  }
+
+  // 5. Update last login
+  await db
+    .update(users)
+    .set({
+      lastLoginAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, user.id));
+
+  // 6. Generate JWT token
+  const token = generateToken(user.id);
+
+  // 7. Remove sensitive data
+  const { passwordHash, ...userWithoutPassword } = user;
+
+  return {
+    user: {
+      ...userWithoutPassword,
+      preferences: user.preferences ? JSON.parse(user.preferences) : {},
+    },
+    token,
+  };
+}
+
+/**
+ * Register new user
+ */
+export async function register(input: RegisterInput): Promise<AuthResponse> {
+  // 1. Validate input
+  const validated = RegisterSchema.parse(input);
+
+  // 2. Check if username already exists
+  const db = getDatabase();
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.username, validated.username),
+  });
+
+  if (existingUser) {
+    throw new ValidationError("Username already exists");
+  }
+
+  // 3. Check if email already exists (if provided)
+  if (validated.email) {
+    const existingEmail = await db.query.users.findFirst({
+      where: eq(users.email, validated.email),
+    });
+
+    if (existingEmail) {
+      throw new ValidationError("Email already exists");
+    }
+  }
+
+  // 4. Hash password
+  const passwordHash = await bcrypt.hash(validated.password, 12);
+
+  // 5. Create user
+  const userId = generateUserId();
+  const now = new Date();
+
+  const newUser = {
+    id: userId,
+    username: validated.username,
+    email: validated.email,
+    passwordHash,
+    displayName: validated.displayName,
+    avatarUrl: null,
+    bio: null,
+    preferences: JSON.stringify({
+      theme: "dark",
+      notifications: true,
+      language: "en",
+    }),
+    isActive: true,
+    lastLoginAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await db.insert(users).values(newUser);
+
+  // 6. Generate JWT token
+  const token = generateToken(userId);
+
+  // 7. Return user without password
+  const { passwordHash: _, ...userWithoutPassword } = newUser;
+
+  return {
+    user: {
+      ...userWithoutPassword,
+      email: newUser.email || null,
+      preferences: JSON.parse(newUser.preferences),
+      avatarUrl: newUser.avatarUrl,
+      bio: newUser.bio,
+      lastLoginAt: newUser.lastLoginAt,
+    },
+    token,
+  };
+}
+
+/**
+ * Validate JWT token and return user
+ */
+export async function validateToken(token: string): Promise<User> {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
     const db = getDatabase();
-    
-    // Find user by username
+
     const user = await db.query.users.findFirst({
-      where: eq(users.username, input.username),
+      where: eq(users.id, decoded.userId),
     });
-    
-    if (!user) {
-      throw new Error('Invalid username or password');
+
+    if (!user || !user.isActive) {
+      throw new AuthenticationError("Invalid token");
     }
-    
-    if (!user.isActive) {
-      throw new Error('Account is disabled');
-    }
-    
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(input.password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new Error('Invalid username or password');
-    }
-    
-    // Update last login
-    await db.update(users)
-      .set({ 
-        lastLoginAt: new Date(),
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, user.id));
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-    
+
+    const { passwordHash, ...userWithoutPassword } = user;
+
     return {
-      user: {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-        bio: user.bio,
-      },
-      token,
-    };
-  }
-  
-  static async register(input: RegisterInput): Promise<AuthResult> {
-    const db = getDatabase();
-    
-    // Check if username already exists
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.username, input.username),
-    });
-    
-    if (existingUser) {
-      throw new Error('Username already exists');
-    }
-    
-    // Check if email already exists (if provided)
-    if (input.email) {
-      const existingEmail = await db.query.users.findFirst({
-        where: eq(users.email, input.email),
-      });
-      
-      if (existingEmail) {
-        throw new Error('Email already exists');
-      }
-    }
-    
-    // Hash password
-    const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
-    
-    // Create user
-    const userId = generateId();
-    const now = new Date();
-    
-    await db.insert(users).values({
-      id: userId,
-      username: input.username,
-      email: input.email,
-      passwordHash,
-      displayName: input.displayName,
-      isActive: true,
-      createdAt: now,
-      updatedAt: now,
-    });
-    
-    // Get created user
-    const newUser = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-    
-    if (!newUser) {
-      throw new Error('Failed to create user');
-    }
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: newUser.id, username: newUser.username },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-    
-    return {
-      user: {
-        id: newUser.id,
-        username: newUser.username,
-        displayName: newUser.displayName,
-        email: newUser.email,
-        avatarUrl: newUser.avatarUrl,
-        bio: newUser.bio,
-      },
-      token,
-    };
-  }
-  
-  static async validateToken(token: string): Promise<{ userId: string; username: string }> {
-    try {
-      const payload = jwt.verify(token, JWT_SECRET) as any;
-      return {
-        userId: payload.userId,
-        username: payload.username,
-      };
-    } catch (error) {
-      throw new Error('Invalid token');
-    }
-  }
-  
-  static async getCurrentUser(userId: string) {
-    const db = getDatabase();
-    
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-    
-    if (!user.isActive) {
-      throw new Error('Account is disabled');
-    }
-    
-    return {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-      bio: user.bio,
+      ...userWithoutPassword,
       preferences: user.preferences ? JSON.parse(user.preferences) : {},
     };
+  } catch (error) {
+    throw new AuthenticationError("Invalid token");
   }
-  
-  static async logout(userId: string): Promise<void> {
-    // For now, just a simple implementation
-    // In the future, we could maintain a token blacklist
-    return;
+}
+
+/**
+ * List all user accounts (for account switching)
+ */
+export async function listAccounts(): Promise<User[]> {
+  const db = getDatabase();
+
+  const allUsers = await db.query.users.findMany({
+    where: eq(users.isActive, true),
+    orderBy: [users.lastLoginAt, users.createdAt],
+  });
+
+  return allUsers.map((user) => {
+    const { passwordHash, ...userWithoutPassword } = user;
+    return {
+      ...userWithoutPassword,
+      preferences: user.preferences ? JSON.parse(user.preferences) : {},
+    };
+  });
+}
+
+/**
+ * Check if this is the first run (no users exist)
+ */
+export async function isFirstRun(): Promise<boolean> {
+  const db = getDatabase();
+
+  const userCount = await db.select({ count: users.id }).from(users);
+  return userCount.length === 0;
+}
+
+/**
+ * Create default account for first run
+ */
+export async function createDefaultAccount(): Promise<AuthResponse> {
+  const isFirst = await isFirstRun();
+
+  if (!isFirst) {
+    throw new ValidationError(
+      "Default account can only be created on first run",
+    );
   }
-  
-  static async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Get user
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-    
-    // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
-    if (!isCurrentPasswordValid) {
-      throw new Error('Current password is incorrect');
-    }
-    
-    // Hash new password
-    const newPasswordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    
-    // Update password
-    await db.update(users)
-      .set({ 
-        passwordHash: newPasswordHash,
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, userId));
+
+  return register({
+    username: "admin",
+    displayName: "Administrator",
+    password: "admin123",
+    email: "admin@project-wiz.local",
+  });
+}
+
+/**
+ * Extract user ID from JWT token
+ */
+export function extractUserIdFromToken(token: string): string | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    return decoded.userId;
+  } catch {
+    return null;
   }
+}
+
+/**
+ * Generate JWT token for user
+ */
+function generateToken(userId: string): string {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
 }

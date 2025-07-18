@@ -1,11 +1,16 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
-import { useAuthStore } from '../store/auth-store';
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useAuthStore } from "../store/auth-store";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Loader2 } from "lucide-react";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
     // This will be the main entry point that redirects based on auth state
   },
@@ -13,7 +18,14 @@ export const Route = createFileRoute('/')({
 });
 
 function IndexComponent() {
-  const { isAuthenticated, isLoading, validateToken, isFirstRun, createDefaultAccount, user } = useAuthStore();
+  const {
+    isAuthenticated,
+    isLoading,
+    validateToken,
+    isFirstRun,
+    createDefaultAccount,
+    user,
+  } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
   const [isFirstTime, setIsFirstTime] = useState(false);
 
@@ -22,7 +34,7 @@ function IndexComponent() {
       try {
         // Check if this is the first run
         const firstRun = await isFirstRun();
-        
+
         if (firstRun) {
           setIsFirstTime(true);
           setIsChecking(false);
@@ -32,14 +44,14 @@ function IndexComponent() {
         // Try to validate existing token
         if (await validateToken()) {
           // Redirect to dashboard if authenticated
-          window.location.hash = '/user';
+          window.location.hash = "/user";
         } else {
           // Redirect to login if not authenticated
-          window.location.hash = '/login';
+          window.location.hash = "/login";
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
-        window.location.hash = '/login';
+        console.error("Auth check failed:", error);
+        window.location.hash = "/login";
       } finally {
         setIsChecking(false);
       }
@@ -52,9 +64,9 @@ function IndexComponent() {
     try {
       await createDefaultAccount();
       // Redirect to dashboard after creating default account
-      window.location.hash = '/user';
+      window.location.hash = "/user";
     } catch (error) {
-      console.error('Failed to create default account:', error);
+      console.error("Failed to create default account:", error);
     }
   };
 
@@ -77,13 +89,12 @@ function IndexComponent() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Welcome to Project Wiz</CardTitle>
-            <p className="text-muted-foreground">
-              Let's set up your workspace
-            </p>
+            <p className="text-muted-foreground">Let's set up your workspace</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              This appears to be your first time using Project Wiz. We'll create a default administrator account for you to get started.
+              This appears to be your first time using Project Wiz. We'll create
+              a default administrator account for you to get started.
             </p>
             <div className="space-y-2">
               <p className="text-sm font-medium">Default Account:</p>
@@ -96,8 +107,8 @@ function IndexComponent() {
             <p className="text-xs text-muted-foreground">
               You can change these credentials later in the settings.
             </p>
-            <Button 
-              onClick={handleCreateDefaultAccount} 
+            <Button
+              onClick={handleCreateDefaultAccount}
               className="w-full"
               disabled={isLoading}
             >

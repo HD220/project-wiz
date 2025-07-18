@@ -20,26 +20,31 @@ export interface PaginationOptions {
 }
 
 // Common status types
-export type EntityStatus = 'active' | 'archived' | 'deleted';
-export type AgentStatus = 'online' | 'busy' | 'offline';
-export type IssueStatus = 'todo' | 'in_progress' | 'review' | 'done' | 'cancelled';
-export type IssuePriority = 'low' | 'medium' | 'high' | 'urgent';
-export type IssueType = 'task' | 'bug' | 'feature' | 'epic' | 'story';
-export type MessageType = 'text' | 'system' | 'task_result' | 'notification';
-export type AuthorType = 'user' | 'agent';
-export type ContentType = 'text' | 'markdown' | 'code' | 'image';
+export type EntityStatus = "active" | "archived" | "deleted";
+export type AgentStatus = "online" | "busy" | "offline";
+export type IssueStatus =
+  | "todo"
+  | "in_progress"
+  | "review"
+  | "done"
+  | "cancelled";
+export type IssuePriority = "low" | "medium" | "high" | "urgent";
+export type IssueType = "task" | "bug" | "feature" | "epic" | "story";
+export type MessageType = "text" | "system" | "task_result" | "notification";
+export type AuthorType = "user" | "agent";
+export type ContentType = "text" | "markdown" | "code" | "image";
 
 // User types
 export interface User {
   id: string;
   username: string;
   displayName: string;
-  email?: string;
-  avatarUrl?: string;
-  bio?: string;
-  preferences: Record<string, any>;
-  isActive: boolean;
-  lastLoginAt?: Date;
+  email: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  preferences: any;
+  isActive: boolean | null;
+  lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,7 +79,7 @@ export interface Project {
   localPath?: string;
   iconUrl?: string;
   iconEmoji?: string;
-  visibility: 'private' | 'internal';
+  visibility: "private" | "internal";
   status: EntityStatus;
   settings: Record<string, any>;
   ownerId: string;
@@ -88,7 +93,7 @@ export interface Channel {
   projectId: string;
   name: string;
   description?: string;
-  type: 'text';
+  type: "text";
   position: number;
   isPrivate: boolean;
   permissions?: Record<string, any>;
@@ -135,7 +140,7 @@ export interface ForumTopic {
   projectId: string;
   title: string;
   description?: string;
-  status: 'open' | 'closed' | 'resolved';
+  status: "open" | "closed" | "resolved";
   priority: IssuePriority;
   category?: string;
   tags: string[];
@@ -211,7 +216,7 @@ export interface IssueActivity {
   oldValue?: string;
   newValue?: string;
   actorId: string;
-  actorType: AuthorType | 'system';
+  actorType: AuthorType | "system";
   metadata?: Record<string, any>;
   createdAt: Date;
 }
@@ -231,7 +236,7 @@ export interface ProjectAgent {
 export interface ProjectUser {
   projectId: string;
   userId: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer';
+  role: "owner" | "admin" | "member" | "viewer";
   permissions: string[];
   joinedAt: Date;
   leftAt?: Date;
@@ -246,30 +251,56 @@ export class APIError extends Error {
     public details?: any,
   ) {
     super(message);
-    this.name = 'APIError';
+    this.name = "APIError";
   }
 }
 
 export class ValidationError extends APIError {
   constructor(message: string, details?: any) {
-    super(message, 'VALIDATION_ERROR', 400, details);
+    super(message, "VALIDATION_ERROR", 400, details);
   }
 }
 
 export class NotFoundError extends APIError {
   constructor(resource: string, id: string) {
-    super(`${resource} not found: ${id}`, 'NOT_FOUND', 404);
+    super(`${resource} not found: ${id}`, "NOT_FOUND", 404);
   }
 }
 
 export class AuthenticationError extends APIError {
-  constructor(message: string = 'Authentication required') {
-    super(message, 'AUTHENTICATION_ERROR', 401);
+  constructor(message: string = "Authentication required") {
+    super(message, "AUTHENTICATION_ERROR", 401);
   }
 }
 
 export class AuthorizationError extends APIError {
-  constructor(message: string = 'Insufficient permissions') {
-    super(message, 'AUTHORIZATION_ERROR', 403);
+  constructor(message: string = "Insufficient permissions") {
+    super(message, "AUTHORIZATION_ERROR", 403);
   }
+}
+
+// Re-export validation schema types for convenience
+export type {
+  LoginInput,
+  RegisterInput,
+  CreateAgentInput,
+  UpdateAgentInput,
+  CreateProjectInput,
+  UpdateProjectInput,
+  CreateChannelInput,
+  UpdateChannelInput,
+  SendMessageInput as CreateMessageInput,
+  CreateTopicInput,
+  UpdateTopicInput,
+  CreatePostInput,
+  CreateIssueInput,
+  UpdateIssueInput,
+  AddCommentInput,
+  ListOptions,
+} from "../schemas/validation.schemas";
+
+// Auth result type
+export interface AuthResult {
+  user: User;
+  token: string;
 }

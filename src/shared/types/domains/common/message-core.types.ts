@@ -1,6 +1,8 @@
 // Central message types - consolidates all Message interfaces across the codebase
 // Replaces 15+ scattered Message type definitions
 
+import { Message as CommonMessage } from "../../common";
+
 export type MessageType =
   | "text"
   | "code"
@@ -88,13 +90,13 @@ export interface UpdateMessageDto {
 }
 
 // UI-specific extensions
-export interface FormattedMessage extends Message {
+export interface FormattedMessage extends BaseMessage {
   isUser: boolean;
   isRead?: boolean;
 }
 
 // List/Pagination DTOs
-export interface MessagePaginationDto<T extends Message = Message> {
+export interface MessagePaginationDto<T extends BaseMessage = BaseMessage> {
   data: T[];
   total: number;
   limit: number;

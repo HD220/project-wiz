@@ -6,12 +6,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Project Wiz** is a desktop application built with Electron that serves as an "autonomous software factory" using AI agents to automate software development workflows. The application enables collaboration between human developers and AI agents through a Discord-Like interface.
 
+## Current Implementation Status
+
+This application is in **active development** with the following components already implemented:
+
+### ✅ Completed Features
+
+- **Multi-account Authentication System** - Local authentication with JWT tokens
+- **Database Schema** - Complete SQLite + Drizzle ORM implementation with all required tables
+- **Backend Services** - Authentication, project, agent, and chat services
+- **IPC Communication** - Type-safe communication between main and renderer processes
+- **Frontend Authentication** - Login/Register pages with Zustand state management
+- **Discord-like UI Structure** - Basic layout components and routing setup
+
+### 🚧 In Progress Features
+
+- **Agent Worker System** - Background AI workers for automated tasks
+- **Chat Components** - Real-time messaging between users and agents
+- **Project Management** - Full CRUD operations for projects and channels
+- **Forum System** - Structured discussions within projects
+- **Kanban Issues** - Task management with Git integration
+
 ## Core Architecture
 
 ### Technology Stack
 
 - **Electron** - Desktop application framework
-- **React + TypeScript** - Frontend with strict type safety
+- **React 19** - Frontend with strict type safety
+- **TypeScript** - Type-safe development throughout
 - **Tailwind CSS** - Utility-first styling
 - **Node.js** - Main process backend
 - **SQLite + Drizzle ORM** - Type-safe database layer
@@ -53,6 +75,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Update outdated patterns** to current standards
 - **Remove unused imports, variables, and functions**
 - **Improve variable names** to be more descriptive
+
+## Development Patterns
+
+### Implementation Guidelines
+
+When working with this codebase, follow these patterns:
+
+- **Use existing service layer patterns** - Follow the established AuthService pattern
+- **Maintain type safety** - All IPC communication must be type-safe
+- **Use the existing database schema** - Schema is complete and ready to use
+- **Follow KISS principles** - Keep implementations simple and focused
+- **Integrate with existing stores** - Use Zustand patterns already established
 
 ## Essential Commands
 
@@ -121,91 +155,103 @@ npm run extract
 npm run compile
 ```
 
-## Development Patterns
-
-### Code Quality Philosophy
-
-The Project Wiz codebase follows three fundamental principles that guide all development:
-
-#### 1. KISS in Practice
-
-```typescript
-// ❌ Over-engineered solution
-class ProjectValidatorFactory {
-  static createValidator(type: string): ProjectValidator {
-    switch (type) {
-      case "name":
-        return new ProjectNameValidator();
-      case "description":
-        return new ProjectDescriptionValidator();
-      default:
-        throw new Error("Unknown validator type");
-    }
-  }
-}
-
-// ✅ Simple solution
-const validateProjectName = (name: string): string => {
-  return ProjectNameSchema.parse(name);
-};
-```
-
-#### 2. Clean Code in Practice
-
-```typescript
-// ❌ Unclear and complex
-function proc(d: any): boolean {
-  if (d.n && d.n.length > 0) {
-    if (d.s === "active") {
-      return true;
-    }
-  }
-  return false;
-}
-
-// ✅ Clear and readable
-function canProjectStartWork(project: Project): boolean {
-  if (!project.hasValidName()) {
-    return false;
-  }
-
-  return project.isActive();
-}
-```
-
-#### 3. Boy Scout Rule in Practice
-
-```typescript
-// When you find this code...
-function createProject(name, desc, owner) {
-  // TODO: add validation
-  const proj = { name: name, description: desc, owner: owner };
-  db.insert(proj);
-  return proj;
-}
-
-// ...leave it better than you found it
-export async function createProject(data: CreateProjectDTO): Promise<Project> {
-  const validatedData = validate(CreateProjectSchema, data);
-
-  const project = new Project(
-    new ProjectIdentity(generateId()),
-    ProjectAttributes.fromCreateDTO(validatedData),
-  );
-
-  const db = getDatabase();
-  await db.insert(projectsSchema).values(project.toSchema());
-
-  return project;
-}
-```
-
 ### Environment Setup
 
 1. Copy `.env.example` to `.env`
 2. Add required API keys:
    - `DEEPSEEK_API_KEY` - DeepSeek API key
    - `DB_FILE_NAME` - Database file name (optional)
+
+## Current Architecture Implementation
+
+### Directory Structure
+
+```
+src/
+├── main/                           # Backend (Node.js/Electron)
+│   ├── user/                      # User bounded context
+│   │   ├── authentication/        # Auth handlers and services
+│   │   ├── profile/              # User profile management
+│   │   └── direct-messages/      # Direct messaging
+│   ├── project/                   # Project bounded context
+│   │   ├── core/                 # Core project functionality
+│   │   ├── channels/             # Channel management
+│   │   ├── members/              # Project membership
+│   │   ├── forums/               # Forum discussions
+│   │   └── issues/               # Issue management
+│   ├── conversations/             # Conversation bounded context
+│   │   ├── channels/             # Channel chat
+│   │   ├── direct-messages/      # Direct message chat
+│   │   ├── routing/              # Message routing
+│   │   └── core/                 # Core messaging
+│   ├── agents/                    # Agent bounded context
+│   │   ├── worker/               # AI worker agents
+│   │   └── queue/                # Job queue management
+│   ├── database/                  # Database layer
+│   │   ├── connection.ts         # Database connection
+│   │   ├── schema/               # All schema definitions
+│   │   └── migrations/           # Database migrations
+│   ├── services/                  # Business logic services
+│   ├── utils/                     # Backend utilities
+│   └── main.ts                    # Application entry point
+├── renderer/                      # Frontend (React)
+│   ├── app/                      # TanStack Router pages
+│   │   ├── login.tsx             # Authentication page
+│   │   ├── (user)/               # User area routes
+│   │   └── project/              # Project area routes
+│   ├── components/                # Shared components
+│   ├── store/                     # Zustand state management
+│   │   ├── auth-store.ts         # Authentication state
+│   │   ├── project-store.ts      # Project state
+│   │   └── ui-store.ts           # UI state
+│   └── utils/                     # Frontend utilities
+└── shared/                        # Shared code
+    ├── types/                     # TypeScript types
+    ├── schemas/                   # Zod validation schemas
+    └── utils/                     # Shared utilities
+```
+
+### Database Schema
+
+The application uses SQLite with Drizzle ORM and includes the following tables:
+
+- **users** - User accounts with local authentication
+- **agents** - AI agent definitions and configurations
+- **projects** - Project containers (Discord-like servers)
+- **channels** - Communication channels within projects
+- **messages** - Unified messaging for channels and DMs
+- **dm_conversations** - Direct message conversations
+- **forum_topics** & **forum_posts** - Structured forum discussions
+- **issues** & **issue_comments** - Kanban-style issue tracking
+- **project_agents** & **project_users** - Relationship tables
+
+### Authentication System
+
+Complete multi-account authentication system with:
+
+- **Local JWT authentication** - No external dependencies
+- **Account creation and login** - Full user registration flow
+- **Multi-user support** - Multiple accounts on same device
+- **Session management** - Persistent login sessions
+- **Security features** - Password hashing with bcrypt
+
+### Services Layer
+
+- **AuthService** - Complete authentication logic
+- **ProjectService** - Project management operations
+- **AgentService** - AI agent management
+- **ChatService** - Messaging functionality
+- **ChannelService** - Channel operations
+
+### IPC Communication
+
+Type-safe IPC handlers for:
+
+- **Authentication** - Login, register, validate token
+- **Projects** - CRUD operations for projects
+- **Agents** - Agent management
+- **Messages** - Chat functionality
+- **Users** - User operations
 
 ## File Structure Rules
 
@@ -214,12 +260,12 @@ export async function createProject(data: CreateProjectDTO): Promise<Project> {
 ```typescript
 // Frontend aliases
 import { Button } from "@/components/ui/button";
-import { useProject } from "@/hooks/use-project";
-import { ProjectService } from "@/domains/projects/services/project.service";
+import { useAuthStore } from "@/store/auth-store";
+import { AuthService } from "@/services/auth.service";
 
 // Backend aliases
-import { createProject } from "@/main-domains/projects/functions/create-project";
-import { getDatabase } from "@/infrastructure/database";
+import { getDatabase } from "@/main/database/connection";
+import { users } from "@/main/database/schema/users.schema";
 ```
 
 ## Code Quality Rules
@@ -281,49 +327,67 @@ export type NewProjectSchema = typeof projectsSchema.$inferInsert;
 
 ### Migration Workflow
 
-1. Modify schema in `src/main/persistence/schemas/`
+1. Modify schema in `src/main/database/schema/`
 2. Run `npm run db:generate` to create migration
 3. Run `npm run db:migrate` to apply migration
-4. Update entity mappings if needed
+4. Update service layer if needed
 
 ## IPC Communication
 
 ### Handler Pattern
 
 ```typescript
-// Main process handler
-export function setupProjectsHandlers(): void {
-  ipcMain.handle("projects:create", handleCreateProject);
-  ipcMain.handle("projects:findById", handleFindProjectById);
+// Main process handler setup
+export function setupAuthHandlers(): void {
+  ipcMain.handle("auth:login", async (event, data: LoginInput) => {
+    try {
+      const result = await AuthService.login(data);
+      return { success: true, data: result };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Login failed",
+      };
+    }
+  });
 }
 
-async function handleCreateProject(
-  event: Electron.IpcMainInvokeEvent,
-  data: CreateProjectDTO,
-): Promise<ProjectResponse> {
-  const project = await createProject(data);
-  return projectToResponse(project);
+// Service layer integration
+export class AuthService {
+  static async login(input: LoginInput): Promise<AuthResult> {
+    const db = getDatabase();
+    // Authentication logic...
+  }
 }
 ```
 
 ### Frontend API Usage
 
 ```typescript
-// Preload API definitions
-const api = {
-  projects: {
-    create: (data: CreateProjectDTO) =>
-      ipcRenderer.invoke("projects:create", data),
-    findById: (id: string) => ipcRenderer.invoke("projects:findById", id),
-  },
-};
+// Zustand store integration
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      login: async (input: LoginInput) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result: AuthResponse = await window.api.auth.login(input);
+          set({
+            user: result.user,
+            token: result.token,
+            isAuthenticated: true,
+          });
+        } catch (error) {
+          set({ error: error.message });
+        }
+      },
+    }),
+    { name: "auth-storage" },
+  ),
+);
 
-// React hook usage
-const { mutate: createProject } = useMutation({
-  mutationFn: window.api.projects.create,
-});
-
-// Tanstack router usage
+// React component usage
+const { login, isLoading, error } = useAuthStore();
 ```
 
 ## Internationalization
@@ -344,38 +408,6 @@ import { Trans } from "@lingui/macro";
 
 
 ```
-
-## Common Workflows
-
-### Code Quality Checklist
-
-Before committing any code, ensure you follow these quality principles:
-
-#### KISS Checklist
-
-- [ ] **Single Responsibility**: Each function/class has one clear purpose
-- [ ] **Simple Solutions**: Chose the simplest approach that works
-- [ ] **No Over-Engineering**: Avoided unnecessary abstractions
-- [ ] **Clear Names**: Function and variable names are self-explanatory
-- [ ] **No Premature Optimization**: Optimized only when necessary
-
-#### Clean Code Checklist
-
-- [ ] **Readable Code**: Code reads like well-written prose
-- [ ] **Small Functions**: Functions are small and focused
-- [ ] **Meaningful Names**: No abbreviations or unclear names
-- [ ] **No Magic Numbers**: Used named constants
-- [ ] **Error Handling**: Proper error handling with clear messages
-- [ ] **No Dead Code**: Removed unused code and imports
-
-#### Boy Scout Rule Checklist
-
-- [ ] **Improved Existing Code**: Made surrounding code better
-- [ ] **Extracted Duplicates**: Removed code duplication
-- [ ] **Simplified Complex Logic**: Broke down complex functions
-- [ ] **Updated Patterns**: Modernized outdated code patterns
-- [ ] **Better Variable Names**: Improved naming where possible
-- [ ] **Removed Technical Debt**: Fixed issues encountered
 
 ## Deployment
 
@@ -405,8 +437,9 @@ Production deployments should set:
 
 1. **Database locked errors**: Ensure no other instances are running
 2. **TypeScript errors**: Run `npm run type-check` for detailed errors
-3. **IPC communication failures**: Check handler registration in main process
+3. **IPC communication failures**: Check handler registration in `src/main/ipc/index.ts`
 4. **Build failures**: Clear cache with `npm run clean`
+5. **Authentication issues**: Check JWT_SECRET in environment variables
 
 ### Development Tips
 
@@ -414,3 +447,4 @@ Production deployments should set:
 - Use `npm run test:watch` for continuous testing
 - Use `npm run db:studio` for database inspection
 - Check ESLint output for architectural violations
+- Use the existing authentication system for testing (admin/admin123)

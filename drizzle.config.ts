@@ -1,8 +1,8 @@
 import type { Config } from "drizzle-kit";
 
 export default {
-  schema: "./src/main/persistence/schemas/*.schema.ts",
-  out: "./src/main/persistence/migrations",
+  schema: "./src/main/database/schema-consolidated.ts",
+  out: "./src/main/database/migrations",
   dialect: "sqlite",
   dbCredentials: {
     url: "./project-wiz.db",

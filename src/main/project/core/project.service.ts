@@ -1,366 +1,258 @@
-import { eq, and, desc } from 'drizzle-orm';
-import { getDatabase } from '../../database/connection';
-import { projects } from '../../database/schema/projects.schema';
-import { channels } from '../../database/schema/channels.schema';
-import { projectAgents, projectUsers } from '../../database/schema/relationships.schema';
-import { generateId } from '../../utils/id-generator';
+import { eq, and, ne } from "drizzle-orm";
+import { getDatabase } from "../../database/connection";
+import { projects } from "./projects.schema";
+import { channels } from "../channels/channels.schema";
+import { generateId } from "../../../shared/utils/id-generator";
+import { z } from "zod";
 
-export interface CreateProjectInput {
-  name: string;
-  description?: string;
-  gitUrl?: string;
-  localPath?: string;
-  iconUrl?: string;
-  iconEmoji?: string;
-  ownerId: string;
+// Simple validation schemas
+const CreateProjectSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().optional(),
+  gitUrl: z.string().url().optional(),
+  iconEmoji: z.string().optional(),
+});
+
+const UpdateProjectSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().optional(),
+  gitUrl: z.string().url().optional(),
+  iconEmoji: z.string().optional(),
+});
+
+export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;
+
+/**
+ * Create new project
+ * KISS approach: Simple function that does one thing well
+ */
+export async function createProject(
+  input: CreateProjectInput,
+  ownerId: string,
+): Promise<any> {
+  // 1. Validate input
+  const validated = CreateProjectSchema.parse(input);
+
+  // 2. Check business rules
+  await validateProjectLimits(ownerId);
+  await validateUniqueName(validated.name, ownerId);
+
+  // 3. Create project
+  const db = getDatabase();
+  const projectId = generateId();
+  const now = new Date();
+
+  const newProject = {
+    id: projectId,
+    name: validated.name,
+    description: validated.description,
+    gitUrl: validated.gitUrl,
+    iconEmoji: validated.iconEmoji,
+    visibility: "private" as const,
+    status: "active" as const,
+    settings: JSON.stringify({}),
+    ownerId,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await db.insert(projects).values(newProject);
+
+  // 4. Create default channels
+  await createDefaultChannels(projectId, ownerId);
+
+  // 5. TODO: Initialize Git if needed
+
+  return newProject;
 }
 
-export interface UpdateProjectInput {
-  name?: string;
-  description?: string;
-  gitUrl?: string;
-  localPath?: string;
-  iconUrl?: string;
-  iconEmoji?: string;
-  settings?: any;
+/**
+ * Find project by ID
+ */
+export async function findProjectById(projectId: string): Promise<any | null> {
+  const db = getDatabase();
+
+  const project = await db.query.projects.findFirst({
+    where: eq(projects.id, projectId),
+  });
+
+  if (!project) return null;
+
+  return {
+    ...project,
+    settings: project.settings ? JSON.parse(project.settings) : {},
+  };
 }
 
-export interface ProjectResponse {
-  id: string;
-  name: string;
-  description?: string;
-  gitUrl?: string;
-  localPath?: string;
-  iconUrl?: string;
-  iconEmoji?: string;
-  visibility: string;
-  status: string;
-  settings?: any;
-  ownerId: string;
-  createdAt: Date;
-  updatedAt: Date;
+/**
+ * Find projects by user
+ */
+export async function findProjectsByUser(userId: string): Promise<any[]> {
+  const db = getDatabase();
+
+  const userProjects = await db.query.projects.findMany({
+    where: and(eq(projects.ownerId, userId), eq(projects.status, "active")),
+    orderBy: [projects.updatedAt],
+  });
+
+  return userProjects.map((project) => ({
+    ...project,
+    settings: project.settings ? JSON.parse(project.settings) : {},
+  }));
 }
 
-export class ProjectService {
-  static async create(input: CreateProjectInput): Promise<ProjectResponse> {
-    const db = getDatabase();
-    
-    const projectId = generateId();
-    const now = new Date();
-    
-    // Create project
-    await db.insert(projects).values({
-      id: projectId,
-      name: input.name,
-      description: input.description,
-      gitUrl: input.gitUrl,
-      localPath: input.localPath,
-      iconUrl: input.iconUrl,
-      iconEmoji: input.iconEmoji,
-      visibility: 'private',
-      status: 'active',
-      ownerId: input.ownerId,
-      createdAt: now,
-      updatedAt: now,
-    });
-    
-    // Add owner as admin member
-    await db.insert(projectUsers).values({
-      projectId,
-      userId: input.ownerId,
-      role: 'owner',
-      permissions: JSON.stringify(['read', 'write', 'admin']),
-      joinedAt: now,
-    });
-    
-    // Create default general channel
-    const generalChannelId = generateId();
-    await db.insert(channels).values({
-      id: generalChannelId,
-      projectId,
-      name: 'general',
-      description: 'General project discussion',
-      type: 'text',
-      position: 0,
-      isPrivate: false,
-      createdBy: input.ownerId,
-      createdAt: now,
-      updatedAt: now,
-    });
-    
-    // Get created project
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      throw new Error('Failed to create project');
-    }
-    
-    return {
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      gitUrl: project.gitUrl,
-      localPath: project.localPath,
-      iconUrl: project.iconUrl,
-      iconEmoji: project.iconEmoji,
-      visibility: project.visibility,
-      status: project.status,
-      settings: project.settings ? JSON.parse(project.settings) : {},
-      ownerId: project.ownerId,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    };
+/**
+ * Update project
+ */
+export async function updateProject(
+  projectId: string,
+  input: UpdateProjectInput,
+  userId: string,
+): Promise<any> {
+  // 1. Validate input
+  const validated = UpdateProjectSchema.parse(input);
+
+  // 2. Check permissions
+  await validateProjectPermissions(projectId, userId);
+
+  // 3. Check unique name if changed
+  if (validated.name) {
+    await validateUniqueName(validated.name, userId, projectId);
   }
-  
-  static async findById(projectId: string): Promise<ProjectResponse | null> {
-    const db = getDatabase();
-    
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      return null;
-    }
-    
-    return {
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      gitUrl: project.gitUrl,
-      localPath: project.localPath,
-      iconUrl: project.iconUrl,
-      iconEmoji: project.iconEmoji,
-      visibility: project.visibility,
-      status: project.status,
-      settings: project.settings ? JSON.parse(project.settings) : {},
-      ownerId: project.ownerId,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    };
+
+  // 4. Update project
+  const db = getDatabase();
+  const updateData = {
+    ...validated,
+    updatedAt: new Date(),
+  };
+
+  await db.update(projects).set(updateData).where(eq(projects.id, projectId));
+
+  // 5. Return updated project
+  return await findProjectById(projectId);
+}
+
+/**
+ * Archive project
+ */
+export async function archiveProject(
+  projectId: string,
+  userId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  // Check permissions (only owner can archive)
+  await validateProjectPermissions(projectId, userId);
+
+  await db
+    .update(projects)
+    .set({
+      status: "archived",
+      updatedAt: new Date(),
+    })
+    .where(eq(projects.id, projectId));
+}
+
+/**
+ * Delete project (soft delete)
+ */
+export async function deleteProject(
+  projectId: string,
+  userId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  // Check permissions (only owner can delete)
+  await validateProjectPermissions(projectId, userId);
+
+  await db
+    .update(projects)
+    .set({
+      status: "deleted",
+      updatedAt: new Date(),
+    })
+    .where(eq(projects.id, projectId));
+}
+
+// Helper functions (kept simple and focused)
+
+async function validateProjectLimits(userId: string): Promise<void> {
+  const userProjects = await findProjectsByUser(userId);
+  const MAX_PROJECTS_PER_USER = 50;
+
+  if (userProjects.length >= MAX_PROJECTS_PER_USER) {
+    throw new Error(`Maximum of ${MAX_PROJECTS_PER_USER} projects per user`);
   }
-  
-  static async findByOwnerId(ownerId: string): Promise<ProjectResponse[]> {
-    const db = getDatabase();
-    
-    const userProjects = await db.query.projects.findMany({
-      where: and(
-        eq(projects.ownerId, ownerId),
-        eq(projects.status, 'active')
-      ),
-      orderBy: [desc(projects.updatedAt)],
-    });
-    
-    return userProjects.map(project => ({
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      gitUrl: project.gitUrl,
-      localPath: project.localPath,
-      iconUrl: project.iconUrl,
-      iconEmoji: project.iconEmoji,
-      visibility: project.visibility,
-      status: project.status,
-      settings: project.settings ? JSON.parse(project.settings) : {},
-      ownerId: project.ownerId,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    }));
+}
+
+async function validateUniqueName(
+  name: string,
+  userId: string,
+  excludeProjectId?: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  const whereConditions = [
+    eq(projects.ownerId, userId),
+    eq(projects.name, name),
+  ];
+
+  if (excludeProjectId) {
+    whereConditions.push(ne(projects.id, excludeProjectId));
   }
-  
-  static async findUserProjects(userId: string): Promise<ProjectResponse[]> {
-    const db = getDatabase();
-    
-    // Find projects where user is a member or owner
-    const userProjectRelations = await db.query.projectUsers.findMany({
-      where: eq(projectUsers.userId, userId),
-      with: {
-        project: true,
-      },
-    });
-    
-    const validProjects = userProjectRelations
-      .filter(relation => relation.project?.status === 'active')
-      .map(relation => {
-        const project = relation.project!;
-        return {
-          id: project.id,
-          name: project.name,
-          description: project.description,
-          gitUrl: project.gitUrl,
-          localPath: project.localPath,
-          iconUrl: project.iconUrl,
-          iconEmoji: project.iconEmoji,
-          visibility: project.visibility,
-          status: project.status,
-          settings: project.settings ? JSON.parse(project.settings) : {},
-          ownerId: project.ownerId,
-          createdAt: project.createdAt,
-          updatedAt: project.updatedAt,
-        };
-      });
-    
-    return validProjects;
+
+  const existing = await db.query.projects.findFirst({
+    where: and(...whereConditions),
+  });
+
+  if (existing) {
+    throw new Error("Project name already exists");
   }
-  
-  static async update(projectId: string, input: UpdateProjectInput, userId: string): Promise<ProjectResponse> {
-    const db = getDatabase();
-    
-    // Check if user can edit this project
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      throw new Error('Project not found');
-    }
-    
-    if (project.ownerId !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Update project
-    await db.update(projects)
-      .set({
-        ...input,
-        settings: input.settings ? JSON.stringify(input.settings) : undefined,
-        updatedAt: new Date(),
-      })
-      .where(eq(projects.id, projectId));
-    
-    // Get updated project
-    const updatedProject = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!updatedProject) {
-      throw new Error('Failed to update project');
-    }
-    
-    return {
-      id: updatedProject.id,
-      name: updatedProject.name,
-      description: updatedProject.description,
-      gitUrl: updatedProject.gitUrl,
-      localPath: updatedProject.localPath,
-      iconUrl: updatedProject.iconUrl,
-      iconEmoji: updatedProject.iconEmoji,
-      visibility: updatedProject.visibility,
-      status: updatedProject.status,
-      settings: updatedProject.settings ? JSON.parse(updatedProject.settings) : {},
-      ownerId: updatedProject.ownerId,
-      createdAt: updatedProject.createdAt,
-      updatedAt: updatedProject.updatedAt,
-    };
+}
+
+async function validateProjectPermissions(
+  projectId: string,
+  userId: string,
+): Promise<void> {
+  const project = await findProjectById(projectId);
+
+  if (!project) {
+    throw new Error("Project not found");
   }
-  
-  static async archive(projectId: string, userId: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Check if user can archive this project
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      throw new Error('Project not found');
-    }
-    
-    if (project.ownerId !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Archive project
-    await db.update(projects)
-      .set({
-        status: 'archived',
-        updatedAt: new Date(),
-      })
-      .where(eq(projects.id, projectId));
+
+  // For now, only owner can modify
+  if (project.ownerId !== userId) {
+    throw new Error("Only project owner can perform this action");
   }
-  
-  static async delete(projectId: string, userId: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Check if user can delete this project
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      throw new Error('Project not found');
-    }
-    
-    if (project.ownerId !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Soft delete project
-    await db.update(projects)
-      .set({
-        status: 'deleted',
-        updatedAt: new Date(),
-      })
-      .where(eq(projects.id, projectId));
-  }
-  
-  static async addAgent(projectId: string, agentId: string, role: string, userId: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Check if user can add agents to this project
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      throw new Error('Project not found');
-    }
-    
-    if (project.ownerId !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Add agent to project
-    await db.insert(projectAgents).values({
-      projectId,
-      agentId,
-      role,
-      permissions: JSON.stringify(['read', 'write']),
-      isActive: true,
-      addedBy: userId,
-      addedAt: new Date(),
-    });
-  }
-  
-  static async removeAgent(projectId: string, agentId: string, userId: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Check if user can remove agents from this project
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
-    
-    if (!project) {
-      throw new Error('Project not found');
-    }
-    
-    if (project.ownerId !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Remove agent from project
-    await db.update(projectAgents)
-      .set({
-        isActive: false,
-        removedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(projectAgents.projectId, projectId),
-          eq(projectAgents.agentId, agentId)
-        )
-      );
-  }
+}
+
+async function createDefaultChannels(
+  projectId: string,
+  createdBy: string,
+): Promise<void> {
+  const db = getDatabase();
+  const now = new Date();
+
+  const defaultChannels = [
+    { name: "general", description: "General discussion", position: 0 },
+    { name: "development", description: "Development discussion", position: 1 },
+    { name: "random", description: "Random conversations", position: 2 },
+  ];
+
+  const channelValues = defaultChannels.map((channel) => ({
+    id: generateId(),
+    projectId,
+    name: channel.name,
+    description: channel.description,
+    type: "text" as const,
+    position: channel.position,
+    isPrivate: false,
+    createdBy,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  await db.insert(channels).values(channelValues);
 }

@@ -3,17 +3,17 @@ import path from "path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { beforeAll as _beforeAll, beforeEach, afterAll } from "vitest";
 
-import { initializeDb } from "../src/main/persistence/db";
+import { getDatabase } from "../src/main/database/connection";
 
-let testDb: ReturnType<typeof initializeDb>;
+let testDb: ReturnType<typeof getDatabase>;
 
 beforeEach(() => {
-  testDb = initializeDb(":memory:");
+  testDb = getDatabase();
   // setTestDb(testDb); // Removed as it doesn't exist
   migrate(testDb, {
     migrationsFolder: path.resolve(
       __dirname,
-      "../src/main/persistence/migrations",
+      "../src/main/database/migrations",
     ),
   });
 });

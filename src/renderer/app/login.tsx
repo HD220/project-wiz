@@ -1,63 +1,74 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useAuthStore } from '../store/auth-store';
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Loader2, User, Lock, Mail, UserPlus } from 'lucide-react';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useAuthStore } from "../store/auth-store";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { Loader2, User, Lock, Mail, UserPlus } from "lucide-react";
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  displayName: z.string().min(1, 'Display name is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  displayName: z.string().min(1, "Display name is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
 type RegisterForm = z.infer<typeof registerSchema>;
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   component: LoginComponent,
 });
 
 function LoginComponent() {
   const navigate = useNavigate();
-  const { login, register, isLoading, error, clearError, isAuthenticated } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('login');
+  const { login, register, isLoading, error, clearError, isAuthenticated } =
+    useAuthStore();
+  const [activeTab, setActiveTab] = useState("login");
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
     },
   });
 
   const registerForm = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: '',
-      displayName: '',
-      password: '',
-      email: '',
+      username: "",
+      displayName: "",
+      password: "",
+      email: "",
     },
   });
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: '/user' });
+      navigate({ to: "/user" });
     }
   }, [isAuthenticated, navigate]);
 
@@ -69,7 +80,7 @@ function LoginComponent() {
   const onLogin = async (data: LoginForm) => {
     try {
       await login(data);
-      navigate({ to: '/user' });
+      navigate({ to: "/user" });
     } catch (error) {
       // Error is handled by the store
     }
@@ -82,7 +93,7 @@ function LoginComponent() {
         email: data.email || undefined,
       };
       await register(registerData);
-      navigate({ to: '/user' });
+      navigate({ to: "/user" });
     } catch (error) {
       // Error is handled by the store
     }
@@ -113,7 +124,10 @@ function LoginComponent() {
 
             {/* Login Tab */}
             <TabsContent value="login" className="space-y-4">
-              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+              <form
+                onSubmit={loginForm.handleSubmit(onLogin)}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="login-username">Username</Label>
                   <div className="relative">
@@ -122,7 +136,7 @@ function LoginComponent() {
                       id="login-username"
                       placeholder="Enter your username"
                       className="pl-10"
-                      {...loginForm.register('username')}
+                      {...loginForm.register("username")}
                     />
                   </div>
                   {loginForm.formState.errors.username && (
@@ -141,7 +155,7 @@ function LoginComponent() {
                       type="password"
                       placeholder="Enter your password"
                       className="pl-10"
-                      {...loginForm.register('password')}
+                      {...loginForm.register("password")}
                     />
                   </div>
                   {loginForm.formState.errors.password && (
@@ -152,7 +166,9 @@ function LoginComponent() {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  {isLoading && (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  )}
                   Sign In
                 </Button>
               </form>
@@ -165,7 +181,10 @@ function LoginComponent() {
 
             {/* Register Tab */}
             <TabsContent value="register" className="space-y-4">
-              <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+              <form
+                onSubmit={registerForm.handleSubmit(onRegister)}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="register-username">Username</Label>
                   <div className="relative">
@@ -174,7 +193,7 @@ function LoginComponent() {
                       id="register-username"
                       placeholder="Choose a username"
                       className="pl-10"
-                      {...registerForm.register('username')}
+                      {...registerForm.register("username")}
                     />
                   </div>
                   {registerForm.formState.errors.username && (
@@ -192,7 +211,7 @@ function LoginComponent() {
                       id="register-displayName"
                       placeholder="Your display name"
                       className="pl-10"
-                      {...registerForm.register('displayName')}
+                      {...registerForm.register("displayName")}
                     />
                   </div>
                   {registerForm.formState.errors.displayName && (
@@ -211,7 +230,7 @@ function LoginComponent() {
                       type="email"
                       placeholder="your@email.com"
                       className="pl-10"
-                      {...registerForm.register('email')}
+                      {...registerForm.register("email")}
                     />
                   </div>
                   {registerForm.formState.errors.email && (
@@ -230,7 +249,7 @@ function LoginComponent() {
                       type="password"
                       placeholder="Create a password"
                       className="pl-10"
-                      {...registerForm.register('password')}
+                      {...registerForm.register("password")}
                     />
                   </div>
                   {registerForm.formState.errors.password && (
@@ -241,7 +260,9 @@ function LoginComponent() {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  {isLoading && (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  )}
                   Create Account
                 </Button>
               </form>

@@ -1,15 +1,12 @@
-import { app } from "electron";
-
-import { createSimpleIpcHandler } from "../kernel/ipc-handler-utility";
-
+import { app, ipcMain } from "electron";
 import { WindowManager } from "./window-manager";
 
 export function setupWindowHandlers(windowManager: WindowManager): void {
-  createSimpleIpcHandler("window:minimize", () => {
+  ipcMain.handle("window:minimize", () => {
     windowManager.getMainWindow()?.minimize();
   });
 
-  createSimpleIpcHandler("window:maximize", () => {
+  ipcMain.handle("window:maximize", () => {
     const window = windowManager.getMainWindow();
     if (window?.isMaximized()) {
       window.unmaximize();
@@ -18,15 +15,15 @@ export function setupWindowHandlers(windowManager: WindowManager): void {
     }
   });
 
-  createSimpleIpcHandler("window:close", () => {
+  ipcMain.handle("window:close", () => {
     app.quit();
   });
 
-  createSimpleIpcHandler("window:is-maximized", () => {
+  ipcMain.handle("window:is-maximized", () => {
     return windowManager.getMainWindow()?.isMaximized() ?? false;
   });
 
-  createSimpleIpcHandler("app:is-dev", () => {
-    return process.env.NODE_ENV === "development";
+  ipcMain.handle("app:is-dev", () => {
+    return process.env["NODE_ENV"] === "development";
   });
 }

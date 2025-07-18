@@ -5,6 +5,16 @@ import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
 
+// TODO: Import proper types from shared types
+interface ChannelMessageDto {
+  id: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ChatContainerProps {
   channelId?: string;
   channelName?: string;

@@ -1,340 +1,349 @@
-import { eq, and, desc } from 'drizzle-orm';
-import { getDatabase } from '../../database/connection';
-import { agents } from '../../database/schema/agents.schema';
-import { projectAgents } from '../../database/schema/relationships.schema';
-import { generateId } from '../../utils/id-generator';
+import { eq, and } from "drizzle-orm";
+import { getDatabase } from "../../database/connection";
+import { agents } from "./agents.schema";
+import { projectAgents } from "../../project/members/project-agents.schema";
+import { z } from "zod";
 
-export interface CreateAgentInput {
-  name: string;
-  description?: string;
-  role: string;
-  expertise?: string[];
-  personality?: any;
-  systemPrompt: string;
-  avatarUrl?: string;
-  llmProvider?: string;
-  llmModel?: string;
-  temperature?: number;
-  maxTokens?: number;
-  createdBy: string;
+// Simple ID generator
+function generateId(): string {
+  return `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export interface UpdateAgentInput {
-  name?: string;
-  description?: string;
-  role?: string;
-  expertise?: string[];
-  personality?: any;
-  systemPrompt?: string;
-  avatarUrl?: string;
-  status?: string;
-  llmProvider?: string;
-  llmModel?: string;
-  temperature?: number;
-  maxTokens?: number;
+// Simple validation schemas
+const CreateAgentSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().optional(),
+  role: z.enum(["developer", "designer", "tester", "architect", "pm"]),
+  expertise: z.array(z.string()).optional(),
+  personality: z.string().optional(),
+  systemPrompt: z.string().optional(),
+  avatarUrl: z.string().url().optional(),
+  llmProvider: z.enum(["openai", "deepseek"]).default("deepseek"),
+  llmModel: z.string().default("deepseek-chat"),
+  temperature: z.number().min(0).max(2).default(0.7),
+  maxTokens: z.number().min(1).max(8000).default(4000),
+});
+
+export type CreateAgentInput = z.infer<typeof CreateAgentSchema>;
+
+/**
+ * Create new agent
+ * KISS approach: Simple function that does one thing well
+ */
+export async function createAgent(
+  input: CreateAgentInput,
+  createdBy: string,
+): Promise<any> {
+  // 1. Validate input
+  const validated = CreateAgentSchema.parse(input);
+
+  // 2. Check business rules
+  await validateAgentLimits(createdBy);
+
+  // 3. Create agent
+  const db = getDatabase();
+  const agentId = generateId();
+  const now = new Date();
+
+  const newAgent = {
+    id: agentId,
+    name: validated.name,
+    description: validated.description,
+    role: validated.role,
+    expertise: validated.expertise ? JSON.stringify(validated.expertise) : null,
+    personality: validated.personality,
+    systemPrompt:
+      validated.systemPrompt || generateDefaultSystemPrompt(validated),
+    avatarUrl: validated.avatarUrl,
+    status: "online" as const,
+    isGlobal: true,
+    llmProvider: validated.llmProvider,
+    llmModel: validated.llmModel,
+    temperature: validated.temperature,
+    maxTokens: validated.maxTokens,
+    createdBy,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await db.insert(agents).values(newAgent);
+
+  // 4. TODO: Start agent worker
+
+  return newAgent;
 }
 
-export interface AgentResponse {
-  id: string;
-  name: string;
-  description?: string;
-  role: string;
-  expertise: string[];
-  personality: any;
-  systemPrompt: string;
-  avatarUrl?: string;
-  status: string;
-  isGlobal: boolean;
-  llmProvider: string;
-  llmModel: string;
-  temperature: number;
-  maxTokens: number;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
+/**
+ * Find agent by ID
+ */
+export async function findAgentById(agentId: string): Promise<any | null> {
+  const db = getDatabase();
+
+  const agent = await db.query.agents.findFirst({
+    where: eq(agents.id, agentId),
+  });
+
+  if (!agent) return null;
+
+  return {
+    ...agent,
+    expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
+  };
 }
 
-export class AgentService {
-  static async create(input: CreateAgentInput): Promise<AgentResponse> {
-    const db = getDatabase();
-    
-    const agentId = generateId();
-    const now = new Date();
-    
-    await db.insert(agents).values({
-      id: agentId,
-      name: input.name,
-      description: input.description,
-      role: input.role,
-      expertise: input.expertise ? JSON.stringify(input.expertise) : null,
-      personality: input.personality ? JSON.stringify(input.personality) : null,
-      systemPrompt: input.systemPrompt,
-      avatarUrl: input.avatarUrl,
-      status: 'online',
-      isGlobal: true,
-      llmProvider: input.llmProvider || 'deepseek',
-      llmModel: input.llmModel || 'deepseek-chat',
-      temperature: input.temperature || 0.7,
-      maxTokens: input.maxTokens || 4000,
-      createdBy: input.createdBy,
-      createdAt: now,
-      updatedAt: now,
-    });
-    
-    const agent = await db.query.agents.findFirst({
-      where: eq(agents.id, agentId),
-    });
-    
-    if (!agent) {
-      throw new Error('Failed to create agent');
-    }
-    
-    return {
-      id: agent.id,
-      name: agent.name,
-      description: agent.description,
-      role: agent.role,
-      expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
-      personality: agent.personality ? JSON.parse(agent.personality) : {},
-      systemPrompt: agent.systemPrompt,
-      avatarUrl: agent.avatarUrl,
-      status: agent.status,
-      isGlobal: agent.isGlobal,
-      llmProvider: agent.llmProvider,
-      llmModel: agent.llmModel,
-      temperature: agent.temperature,
-      maxTokens: agent.maxTokens,
-      createdBy: agent.createdBy,
-      createdAt: agent.createdAt,
-      updatedAt: agent.updatedAt,
-    };
+/**
+ * Find agents by user
+ */
+export async function findAgentsByUser(userId: string): Promise<any[]> {
+  const db = getDatabase();
+
+  const userAgents = await db.query.agents.findMany({
+    where: and(eq(agents.createdBy, userId), eq(agents.isGlobal, true)),
+    orderBy: [agents.createdAt],
+  });
+
+  return userAgents.map((agent) => ({
+    ...agent,
+    expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
+  }));
+}
+
+/**
+ * Find agents by project
+ * TODO: Implement when projectAgents schema is moved to proper location
+ */
+export async function findAgentsByProject(projectId: string): Promise<any[]> {
+  // const db = getDatabase();
+
+  // const projectAgentsList = await db.query.projectAgents.findMany({
+  //   where: and(
+  //     eq(projectAgents.projectId, projectId),
+  //     eq(projectAgents.isActive, true)
+  //   ),
+  //   with: {
+  //     agent: true,
+  //   },
+  // });
+
+  // return projectAgentsList.map(pa => ({
+  //   ...(pa.agent as any),
+  //   expertise: (pa.agent as any).expertise ? JSON.parse((pa.agent as any).expertise) : [],
+  //   projectRole: pa.role,
+  // }));
+
+  // Temporary implementation
+  console.log("findAgentsByProject called with:", projectId);
+  return [];
+}
+
+/**
+ * Add agent to project
+ */
+export async function addAgentToProject(
+  agentId: string,
+  projectId: string,
+  role: string = "developer",
+  addedBy: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  // Check if agent exists
+  const agent = await findAgentById(agentId);
+  if (!agent) {
+    throw new Error("Agent not found");
   }
-  
-  static async findById(agentId: string): Promise<AgentResponse | null> {
-    const db = getDatabase();
-    
-    const agent = await db.query.agents.findFirst({
-      where: eq(agents.id, agentId),
-    });
-    
-    if (!agent) {
-      return null;
-    }
-    
-    return {
-      id: agent.id,
-      name: agent.name,
-      description: agent.description,
-      role: agent.role,
-      expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
-      personality: agent.personality ? JSON.parse(agent.personality) : {},
-      systemPrompt: agent.systemPrompt,
-      avatarUrl: agent.avatarUrl,
-      status: agent.status,
-      isGlobal: agent.isGlobal,
-      llmProvider: agent.llmProvider,
-      llmModel: agent.llmModel,
-      temperature: agent.temperature,
-      maxTokens: agent.maxTokens,
-      createdBy: agent.createdBy,
-      createdAt: agent.createdAt,
-      updatedAt: agent.updatedAt,
-    };
+
+  // Check if already in project
+  const existing = await db.query.projectAgents.findFirst({
+    where: and(
+      eq(projectAgents.agentId, agentId),
+      eq(projectAgents.projectId, projectId),
+    ),
+  });
+
+  if (existing && existing.isActive) {
+    throw new Error("Agent already in project");
   }
-  
-  static async findByCreator(creatorId: string): Promise<AgentResponse[]> {
-    const db = getDatabase();
-    
-    const userAgents = await db.query.agents.findMany({
-      where: eq(agents.createdBy, creatorId),
-      orderBy: [desc(agents.updatedAt)],
+
+  if (existing) {
+    // Reactivate if exists but inactive
+    await db
+      .update(projectAgents)
+      .set({
+        isActive: true,
+        role,
+        addedBy,
+        addedAt: new Date(),
+        removedAt: null,
+      })
+      .where(
+        and(
+          eq(projectAgents.agentId, agentId),
+          eq(projectAgents.projectId, projectId),
+        ),
+      );
+  } else {
+    // Create new relationship
+    await db.insert(projectAgents).values({
+      agentId,
+      projectId,
+      role,
+      permissions: JSON.stringify(["read", "write"]),
+      isActive: true,
+      addedBy,
+      addedAt: new Date(),
     });
-    
-    return userAgents.map(agent => ({
-      id: agent.id,
-      name: agent.name,
-      description: agent.description,
-      role: agent.role,
-      expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
-      personality: agent.personality ? JSON.parse(agent.personality) : {},
-      systemPrompt: agent.systemPrompt,
-      avatarUrl: agent.avatarUrl,
-      status: agent.status,
-      isGlobal: agent.isGlobal,
-      llmProvider: agent.llmProvider,
-      llmModel: agent.llmModel,
-      temperature: agent.temperature,
-      maxTokens: agent.maxTokens,
-      createdBy: agent.createdBy,
-      createdAt: agent.createdAt,
-      updatedAt: agent.updatedAt,
-    }));
   }
-  
-  static async findProjectAgents(projectId: string): Promise<AgentResponse[]> {
-    const db = getDatabase();
-    
-    const projectAgentRelations = await db.query.projectAgents.findMany({
-      where: and(
+}
+
+/**
+ * Remove agent from project
+ */
+export async function removeAgentFromProject(
+  agentId: string,
+  projectId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  await db
+    .update(projectAgents)
+    .set({
+      isActive: false,
+      removedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(projectAgents.agentId, agentId),
         eq(projectAgents.projectId, projectId),
-        eq(projectAgents.isActive, true)
       ),
-      with: {
-        agent: true,
-      },
-    });
-    
-    return projectAgentRelations
-      .filter(relation => relation.agent)
-      .map(relation => {
-        const agent = relation.agent!;
-        return {
-          id: agent.id,
-          name: agent.name,
-          description: agent.description,
-          role: agent.role,
-          expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
-          personality: agent.personality ? JSON.parse(agent.personality) : {},
-          systemPrompt: agent.systemPrompt,
-          avatarUrl: agent.avatarUrl,
-          status: agent.status,
-          isGlobal: agent.isGlobal,
-          llmProvider: agent.llmProvider,
-          llmModel: agent.llmModel,
-          temperature: agent.temperature,
-          maxTokens: agent.maxTokens,
-          createdBy: agent.createdBy,
-          createdAt: agent.createdAt,
-          updatedAt: agent.updatedAt,
-        };
-      });
+    );
+}
+
+/**
+ * Update agent status
+ */
+export async function updateAgentStatus(
+  agentId: string,
+  status: "online" | "busy" | "offline",
+  userId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  // Check permissions
+  const agent = await findAgentById(agentId);
+  if (!agent) {
+    throw new Error("Agent not found");
   }
-  
-  static async update(agentId: string, input: UpdateAgentInput, userId: string): Promise<AgentResponse> {
-    const db = getDatabase();
-    
-    // Check if user can edit this agent
-    const agent = await db.query.agents.findFirst({
-      where: eq(agents.id, agentId),
-    });
-    
-    if (!agent) {
-      throw new Error('Agent not found');
-    }
-    
-    if (agent.createdBy !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Update agent
-    await db.update(agents)
-      .set({
-        ...input,
-        expertise: input.expertise ? JSON.stringify(input.expertise) : undefined,
-        personality: input.personality ? JSON.stringify(input.personality) : undefined,
-        updatedAt: new Date(),
-      })
-      .where(eq(agents.id, agentId));
-    
-    // Get updated agent
-    const updatedAgent = await db.query.agents.findFirst({
-      where: eq(agents.id, agentId),
-    });
-    
-    if (!updatedAgent) {
-      throw new Error('Failed to update agent');
-    }
-    
-    return {
-      id: updatedAgent.id,
-      name: updatedAgent.name,
-      description: updatedAgent.description,
-      role: updatedAgent.role,
-      expertise: updatedAgent.expertise ? JSON.parse(updatedAgent.expertise) : [],
-      personality: updatedAgent.personality ? JSON.parse(updatedAgent.personality) : {},
-      systemPrompt: updatedAgent.systemPrompt,
-      avatarUrl: updatedAgent.avatarUrl,
-      status: updatedAgent.status,
-      isGlobal: updatedAgent.isGlobal,
-      llmProvider: updatedAgent.llmProvider,
-      llmModel: updatedAgent.llmModel,
-      temperature: updatedAgent.temperature,
-      maxTokens: updatedAgent.maxTokens,
-      createdBy: updatedAgent.createdBy,
-      createdAt: updatedAgent.createdAt,
-      updatedAt: updatedAgent.updatedAt,
-    };
+
+  if (agent.createdBy !== userId) {
+    throw new Error("Only agent creator can update status");
   }
-  
-  static async delete(agentId: string, userId: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Check if user can delete this agent
-    const agent = await db.query.agents.findFirst({
-      where: eq(agents.id, agentId),
-    });
-    
-    if (!agent) {
-      throw new Error('Agent not found');
-    }
-    
-    if (agent.createdBy !== userId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Remove from all projects first
-    await db.update(projectAgents)
-      .set({
-        isActive: false,
-        removedAt: new Date(),
-      })
-      .where(eq(projectAgents.agentId, agentId));
-    
-    // Delete agent
-    await db.delete(agents).where(eq(agents.id, agentId));
+
+  await db
+    .update(agents)
+    .set({
+      status,
+      updatedAt: new Date(),
+    })
+    .where(eq(agents.id, agentId));
+}
+
+/**
+ * Delete agent (soft delete)
+ */
+export async function deleteAgent(
+  agentId: string,
+  userId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  // Check permissions
+  const agent = await findAgentById(agentId);
+  if (!agent) {
+    throw new Error("Agent not found");
   }
-  
-  static async updateStatus(agentId: string, status: string): Promise<void> {
-    const db = getDatabase();
-    
-    await db.update(agents)
-      .set({
-        status,
-        updatedAt: new Date(),
-      })
-      .where(eq(agents.id, agentId));
+
+  if (agent.createdBy !== userId) {
+    throw new Error("Only agent creator can delete it");
   }
-  
-  static async getAvailableAgents(userId: string): Promise<AgentResponse[]> {
-    const db = getDatabase();
-    
-    // Get all agents created by user that are global
-    const availableAgents = await db.query.agents.findMany({
-      where: and(
-        eq(agents.createdBy, userId),
-        eq(agents.isGlobal, true)
-      ),
-      orderBy: [desc(agents.updatedAt)],
-    });
-    
-    return availableAgents.map(agent => ({
-      id: agent.id,
-      name: agent.name,
-      description: agent.description,
-      role: agent.role,
-      expertise: agent.expertise ? JSON.parse(agent.expertise) : [],
-      personality: agent.personality ? JSON.parse(agent.personality) : {},
-      systemPrompt: agent.systemPrompt,
-      avatarUrl: agent.avatarUrl,
-      status: agent.status,
-      isGlobal: agent.isGlobal,
-      llmProvider: agent.llmProvider,
-      llmModel: agent.llmModel,
-      temperature: agent.temperature,
-      maxTokens: agent.maxTokens,
-      createdBy: agent.createdBy,
-      createdAt: agent.createdAt,
-      updatedAt: agent.updatedAt,
-    }));
+
+  // Remove from all projects first
+  await db
+    .update(projectAgents)
+    .set({
+      isActive: false,
+      removedAt: new Date(),
+    })
+    .where(eq(projectAgents.agentId, agentId));
+
+  // Soft delete agent
+  await db
+    .update(agents)
+    .set({
+      status: "offline",
+      isGlobal: false,
+      updatedAt: new Date(),
+    })
+    .where(eq(agents.id, agentId));
+}
+
+/**
+ * Update agent configuration
+ */
+export async function updateAgent(
+  agentId: string,
+  input: Partial<CreateAgentInput>,
+  userId: string,
+): Promise<any> {
+  const db = getDatabase();
+
+  // Check permissions
+  const agent = await findAgentById(agentId);
+  if (!agent) {
+    throw new Error("Agent not found");
   }
+
+  if (agent.createdBy !== userId) {
+    throw new Error("Only agent creator can update it");
+  }
+
+  // Update agent
+  const updateData: any = {
+    ...input,
+    updatedAt: new Date(),
+  };
+
+  if (input.expertise) {
+    updateData.expertise = JSON.stringify(input.expertise);
+  }
+
+  await db.update(agents).set(updateData).where(eq(agents.id, agentId));
+
+  return await findAgentById(agentId);
+}
+
+// Helper functions
+
+async function validateAgentLimits(userId: string): Promise<void> {
+  const userAgents = await findAgentsByUser(userId);
+  const MAX_AGENTS_PER_USER = 10;
+
+  if (userAgents.length >= MAX_AGENTS_PER_USER) {
+    throw new Error(`Maximum of ${MAX_AGENTS_PER_USER} agents per user`);
+  }
+}
+
+function generateDefaultSystemPrompt(agent: CreateAgentInput): string {
+  return `You are ${agent.name}, a ${agent.role} AI assistant.
+
+Your expertise includes: ${agent.expertise?.join(", ") || "general software development"}.
+
+Your role is to help with software development tasks including:
+- Writing and reviewing code
+- Suggesting improvements
+- Debugging issues
+- Documenting features
+- Planning implementations
+
+Always be helpful, professional, and focused on delivering high-quality solutions.`;
 }

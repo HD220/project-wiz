@@ -1,6 +1,10 @@
-import { create } from 'zustand';
-import type { Project, CreateProjectInput, Agent } from '../../shared/types/common';
-import { ApiClient } from '../utils/api-client';
+import { create } from "zustand";
+import type {
+  Project,
+  CreateProjectInput,
+  Agent,
+} from "../../shared/types/common";
+import { ApiClient } from "../utils/api-client";
 
 interface ProjectState {
   // State
@@ -13,14 +17,27 @@ interface ProjectState {
   // Actions
   loadUserProjects: (userId: string) => Promise<void>;
   createProject: (input: CreateProjectInput) => Promise<Project>;
-  updateProject: (projectId: string, input: Partial<CreateProjectInput>, userId: string) => Promise<void>;
+  updateProject: (
+    projectId: string,
+    input: Partial<CreateProjectInput>,
+    userId: string,
+  ) => Promise<void>;
   archiveProject: (projectId: string, userId: string) => Promise<void>;
   deleteProject: (projectId: string, userId: string) => Promise<void>;
   setCurrentProject: (project: Project | null) => void;
   loadCurrentProject: (projectId: string) => Promise<void>;
   loadProjectAgents: (projectId: string) => Promise<void>;
-  addAgentToProject: (projectId: string, agentId: string, role: string, userId: string) => Promise<void>;
-  removeAgentFromProject: (projectId: string, agentId: string, userId: string) => Promise<void>;
+  addAgentToProject: (
+    projectId: string,
+    agentId: string,
+    role: string,
+    userId: string,
+  ) => Promise<void>;
+  removeAgentFromProject: (
+    projectId: string,
+    agentId: string,
+    userId: string,
+  ) => Promise<void>;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
 }
@@ -36,54 +53,70 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   // Actions
   loadUserProjects: async (userId: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const projects = await ApiClient.findUserProjects(userId);
       set({ projects, isLoading: false });
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to load projects',
+        error:
+          error instanceof Error ? error.message : "Failed to load projects",
       });
     }
   },
 
   createProject: async (input: CreateProjectInput): Promise<Project> => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const newProject = await ApiClient.createProject(input);
-      
+
       set((state) => ({
         projects: [newProject, ...state.projects],
         isLoading: false,
       }));
-      
+
       return newProject;
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to create project',
+        error:
+          error instanceof Error ? error.message : "Failed to create project",
       });
       throw error;
     }
   },
 
-  updateProject: async (projectId: string, input: Partial<CreateProjectInput>, userId: string) => {
+  updateProject: async (
+    projectId: string,
+    input: Partial<CreateProjectInput>,
+    userId: string,
+  ) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      const updatedProject = await ApiClient.updateProject({ projectId, input, userId });
-      
+      const updatedProject = await ApiClient.updateProject({
+        projectId,
+        input,
+        userId,
+      });
+
       set((state) => ({
-        projects: state.projects.map(p => p.id === projectId ? updatedProject : p),
-        currentProject: state.currentProject?.id === projectId ? updatedProject : state.currentProject,
+        projects: state.projects.map((p) =>
+          p.id === projectId ? updatedProject : p,
+        ),
+        currentProject:
+          state.currentProject?.id === projectId
+            ? updatedProject
+            : state.currentProject,
         isLoading: false,
       }));
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to update project',
+        error:
+          error instanceof Error ? error.message : "Failed to update project",
       });
       throw error;
     }
@@ -91,19 +124,21 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   archiveProject: async (projectId: string, userId: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       await ApiClient.archiveProject({ projectId, userId });
-      
+
       set((state) => ({
-        projects: state.projects.filter(p => p.id !== projectId),
-        currentProject: state.currentProject?.id === projectId ? null : state.currentProject,
+        projects: state.projects.filter((p) => p.id !== projectId),
+        currentProject:
+          state.currentProject?.id === projectId ? null : state.currentProject,
         isLoading: false,
       }));
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to archive project',
+        error:
+          error instanceof Error ? error.message : "Failed to archive project",
       });
       throw error;
     }
@@ -111,19 +146,21 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   deleteProject: async (projectId: string, userId: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       await ApiClient.deleteProject({ projectId, userId });
-      
+
       set((state) => ({
-        projects: state.projects.filter(p => p.id !== projectId),
-        currentProject: state.currentProject?.id === projectId ? null : state.currentProject,
+        projects: state.projects.filter((p) => p.id !== projectId),
+        currentProject:
+          state.currentProject?.id === projectId ? null : state.currentProject,
         isLoading: false,
       }));
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to delete project',
+        error:
+          error instanceof Error ? error.message : "Failed to delete project",
       });
       throw error;
     }
@@ -135,24 +172,25 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   loadCurrentProject: async (projectId: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const project = await ApiClient.findProjectById(projectId);
-      
+
       if (project) {
         set({ currentProject: project, isLoading: false });
       } else {
-        set({ 
-          currentProject: null, 
+        set({
+          currentProject: null,
           isLoading: false,
-          error: 'Project not found'
+          error: "Project not found",
         });
       }
     } catch (error) {
       set({
         currentProject: null,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to load project',
+        error:
+          error instanceof Error ? error.message : "Failed to load project",
       });
     }
   },
@@ -163,50 +201,77 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ projectAgents: agents });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Failed to load project agents',
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to load project agents",
       });
     }
   },
 
-  addAgentToProject: async (projectId: string, agentId: string, role: string, userId: string) => {
+  addAgentToProject: async (
+    projectId: string,
+    agentId: string,
+    role: string,
+    userId: string,
+  ) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      await window.electronAPI.addAgentToProject({ projectId, agentId, role, userId });
-      
+      await window.electronAPI.addAgentToProject({
+        projectId,
+        agentId,
+        role,
+        userId,
+      });
+
       // Reload project agents
       await get().loadProjectAgents(projectId);
-      
+
       set({ isLoading: false });
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to add agent to project',
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to add agent to project",
       });
       throw error;
     }
   },
 
-  removeAgentFromProject: async (projectId: string, agentId: string, userId: string) => {
+  removeAgentFromProject: async (
+    projectId: string,
+    agentId: string,
+    userId: string,
+  ) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      await window.electronAPI.removeAgentFromProject({ projectId, agentId, userId });
-      
+      await window.electronAPI.removeAgentFromProject({
+        projectId,
+        agentId,
+        userId,
+      });
+
       // Reload project agents
       await get().loadProjectAgents(projectId);
-      
+
       set({ isLoading: false });
     } catch (error) {
       set({
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to remove agent from project',
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to remove agent from project",
       });
       throw error;
     }
   },
 
   clearError: () => set({ error: null }),
-  
+
   setLoading: (loading: boolean) => set({ isLoading: loading }),
 }));

@@ -42,7 +42,7 @@ function getPageSubtitle(
   return undefined;
 }
 
-function getPageIcon(pageIcon: string | undefined) {
+function getPageIcon(pageIcon: string | undefined): React.ReactNode {
   if (pageIcon) {
     return pageIcon;
   }

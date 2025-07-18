@@ -1,82 +1,54 @@
-import { ipcMain } from 'electron';
-import { MessageService, CreateMessageInput } from './message.service';
+import { ipcMain } from "electron";
+import {
+  sendMessage,
+  getChannelMessages,
+  getDMMessages,
+  getOrCreateDMConversation,
+  getUserDMConversations,
+  markDMAsRead,
+  updateMessage,
+  deleteMessage,
+} from "./message.service";
 
-export function setupMessageHandlers(): void {
-  // Create message handler
-  ipcMain.handle('messages:create', async (event, data: CreateMessageInput) => {
-    try {
-      const result = await MessageService.create(data);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to create message' 
-      };
-    }
+export function registerMessageHandlers(): void {
+  ipcMain.handle("message:send", async (_, data) => {
+    const senderId = data.senderId || "temp-user-id";
+    return await sendMessage(data, senderId, data.senderType || "user");
   });
 
-  // Get channel messages handler
-  ipcMain.handle('messages:get-channel-messages', async (event, data: { channelId: string; limit?: number; before?: string }) => {
-    try {
-      const result = await MessageService.findChannelMessages(data.channelId, data.limit, data.before);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to get channel messages' 
-      };
-    }
+  ipcMain.handle("message:getChannelMessages", async (_, data) => {
+    return await getChannelMessages(data.channelId, {
+      limit: data.limit || 50,
+      before: data.before,
+    });
   });
 
-  // Get DM messages handler
-  ipcMain.handle('messages:get-dm-messages', async (event, data: { dmConversationId: string; limit?: number; before?: string }) => {
-    try {
-      const result = await MessageService.findDMMessages(data.dmConversationId, data.limit, data.before);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to get DM messages' 
-      };
-    }
+  ipcMain.handle("message:getDMMessages", async (_, data) => {
+    return await getDMMessages(data.conversationId, {
+      limit: data.limit || 50,
+      before: data.before,
+    });
   });
 
-  // Get message by ID handler
-  ipcMain.handle('messages:find-by-id', async (event, messageId: string) => {
-    try {
-      const result = await MessageService.findById(messageId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to find message' 
-      };
-    }
+  ipcMain.handle("message:getOrCreateDMConversation", async (_, data) => {
+    return await getOrCreateDMConversation(data.userId, data.agentId);
   });
 
-  // Update message handler
-  ipcMain.handle('messages:update', async (event, data: { messageId: string; content: string; authorId: string }) => {
-    try {
-      const result = await MessageService.update(data.messageId, data.content, data.authorId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update message' 
-      };
-    }
+  ipcMain.handle("message:getUserDMConversations", async (_, data) => {
+    return await getUserDMConversations(data.userId);
   });
 
-  // Delete message handler
-  ipcMain.handle('messages:delete', async (event, data: { messageId: string; authorId: string }) => {
-    try {
-      await MessageService.delete(data.messageId, data.authorId);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to delete message' 
-      };
-    }
+  ipcMain.handle("message:markDMAsRead", async (_, data) => {
+    return await markDMAsRead(data.conversationId, data.userId);
+  });
+
+  ipcMain.handle("message:update", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    return await updateMessage(data.id, data.content, userId);
+  });
+
+  ipcMain.handle("message:delete", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    await deleteMessage(data.id, userId);
   });
 }

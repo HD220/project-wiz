@@ -10,7 +10,7 @@ import { getStatusColor } from "./top-bar-status";
 
 interface TopBarProps {
   title: string;
-  subtitle?: string;
+  subtitle?: string | undefined;
   type?: "channel" | "dm" | "page" | "project";
   icon?: React.ReactNode;
   avatar?: string;

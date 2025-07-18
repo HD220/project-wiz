@@ -1,7 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User } from '../../shared/types/common';
-import type { LoginInput, RegisterInput } from '../../shared/schemas/validation.schemas';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { User } from "../../shared/types/common";
+import type {
+  LoginInput,
+  RegisterInput,
+} from "../../shared/schemas/validation.schemas";
 
 interface AuthResponse {
   user: User;
@@ -41,10 +44,10 @@ export const useAuthStore = create<AuthState>()(
       // Actions
       login: async (input: LoginInput) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const result: AuthResponse = await window.api.auth.login(input);
-          
+
           set({
             user: result.user,
             token: result.token,
@@ -58,7 +61,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Login failed',
+            error: error instanceof Error ? error.message : "Login failed",
           });
           throw error;
         }
@@ -66,10 +69,10 @@ export const useAuthStore = create<AuthState>()(
 
       register: async (input: RegisterInput) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const result: AuthResponse = await window.api.auth.register(input);
-          
+
           set({
             user: result.user,
             token: result.token,
@@ -83,7 +86,8 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Registration failed',
+            error:
+              error instanceof Error ? error.message : "Registration failed",
           });
           throw error;
         }
@@ -94,9 +98,9 @@ export const useAuthStore = create<AuthState>()(
           await window.api.auth.logout();
         } catch (error) {
           // Log error but continue with logout
-          console.error('Logout error:', error);
+          console.error("Logout error:", error);
         }
-        
+
         set({
           user: null,
           token: null,
@@ -107,20 +111,20 @@ export const useAuthStore = create<AuthState>()(
 
       validateToken: async (): Promise<boolean> => {
         const { token } = get();
-        
+
         if (!token) {
           return false;
         }
-        
+
         try {
           const user: User = await window.api.auth.validateToken(token);
-          
+
           set({
             user,
             isAuthenticated: true,
             error: null,
           });
-          
+
           return true;
         } catch (error) {
           // Token is invalid, clear auth state
@@ -138,7 +142,10 @@ export const useAuthStore = create<AuthState>()(
           return await window.api.auth.listAccounts();
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : 'Failed to list accounts',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to list accounts",
           });
           throw error;
         }
@@ -148,17 +155,18 @@ export const useAuthStore = create<AuthState>()(
         try {
           return await window.api.auth.isFirstRun();
         } catch (error) {
-          console.error('Failed to check first run:', error);
+          console.error("Failed to check first run:", error);
           return false;
         }
       },
 
       createDefaultAccount: async () => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          const result: AuthResponse = await window.api.auth.createDefaultAccount();
-          
+          const result: AuthResponse =
+            await window.api.auth.createDefaultAccount();
+
           set({
             user: result.user,
             token: result.token,
@@ -169,23 +177,26 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           set({
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to create default account',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to create default account",
           });
           throw error;
         }
       },
 
       clearError: () => set({ error: null }),
-      
+
       setLoading: (loading: boolean) => set({ isLoading: loading }),
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
-    }
-  )
+    },
+  ),
 );

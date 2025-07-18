@@ -153,6 +153,7 @@ export const IPC_CHANNELS = {
   // Agent channels
   AGENT_CREATE: "agent:create",
   AGENT_GET_BY_ID: "agent:getById",
+  AGENT_GET_BY_NAME: "agent:getByName",
   AGENT_LIST: "agent:list",
   AGENT_LIST_ACTIVE: "agent:listActive",
   AGENT_UPDATE: "agent:update",

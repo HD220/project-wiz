@@ -5,3 +5,7 @@ export { MessageFilterDto as UserMessageFilterDto } from "./message-filter-dto.t
 export { ConversationDto } from "./conversation-dto.type";
 export { CreateConversationDto } from "./create-conversation-dto.type";
 export { ConversationFilterDto } from "./conversation-filter-dto.type";
+
+// Re-export common names for backward compatibility
+export { MessageDto } from "./message-dto.type";
+export { CreateMessageDto } from "./create-message-dto.type";

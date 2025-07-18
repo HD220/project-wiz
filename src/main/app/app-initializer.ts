@@ -1,7 +1,7 @@
 import { app } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
 
-import { registerDomainHandlers } from "../ipc";
+import { registerAllHandlers } from "../ipc/main.handlers";
 
 import { setupAppEventHandlers } from "./app-event-handlers";
 import { initializeAppServices } from "./app-services";
@@ -37,7 +37,7 @@ export class AppInitializer {
   }
 
   private setupIpcHandlers(): void {
-    registerDomainHandlers();
+    registerAllHandlers();
     setupWindowHandlers(this.windowManager);
   }
 }

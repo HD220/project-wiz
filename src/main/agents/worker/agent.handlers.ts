@@ -1,108 +1,61 @@
-import { ipcMain } from 'electron';
-import { AgentService, CreateAgentInput, UpdateAgentInput } from './agent.service';
+import { ipcMain } from "electron";
+import {
+  createAgent,
+  findAgentById,
+  findAgentsByUser,
+  updateAgent,
+  deleteAgent,
+  updateAgentStatus,
+  addAgentToProject,
+  removeAgentFromProject,
+  findAgentsByProject,
+} from "./agent.service";
 
-export function setupAgentHandlers(): void {
-  // Create agent handler
-  ipcMain.handle('agents:create', async (event, data: CreateAgentInput) => {
-    try {
-      const result = await AgentService.create(data);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to create agent' 
-      };
-    }
+export function registerAgentHandlers(): void {
+  ipcMain.handle("agent:create", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    return await createAgent(data, userId);
   });
 
-  // Get agent by ID handler
-  ipcMain.handle('agents:find-by-id', async (event, agentId: string) => {
-    try {
-      const result = await AgentService.findById(agentId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to find agent' 
-      };
-    }
+  ipcMain.handle("agent:getById", async (_, data) => {
+    return await findAgentById(data.id);
   });
 
-  // Get agents by creator handler
-  ipcMain.handle('agents:find-by-creator', async (event, creatorId: string) => {
-    try {
-      const result = await AgentService.findByCreator(creatorId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to find agents' 
-      };
-    }
+  ipcMain.handle("agent:list", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    return await findAgentsByUser(userId);
   });
 
-  // Get project agents handler
-  ipcMain.handle('agents:find-project-agents', async (event, projectId: string) => {
-    try {
-      const result = await AgentService.findProjectAgents(projectId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to find project agents' 
-      };
-    }
+  ipcMain.handle("agent:listByProject", async (_, data) => {
+    return await findAgentsByProject(data.projectId);
   });
 
-  // Get available agents handler
-  ipcMain.handle('agents:get-available', async (event, userId: string) => {
-    try {
-      const result = await AgentService.getAvailableAgents(userId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to get available agents' 
-      };
-    }
+  ipcMain.handle("agent:update", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    return await updateAgent(data.id, data, userId);
   });
 
-  // Update agent handler
-  ipcMain.handle('agents:update', async (event, data: { agentId: string; input: UpdateAgentInput; userId: string }) => {
-    try {
-      const result = await AgentService.update(data.agentId, data.input, data.userId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update agent' 
-      };
-    }
+  ipcMain.handle("agent:delete", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    await deleteAgent(data.id, userId);
   });
 
-  // Update agent status handler
-  ipcMain.handle('agents:update-status', async (event, data: { agentId: string; status: string }) => {
-    try {
-      await AgentService.updateStatus(data.agentId, data.status);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update agent status' 
-      };
-    }
+  ipcMain.handle("agent:updateStatus", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    return await updateAgentStatus(data.id, data.status, userId);
   });
 
-  // Delete agent handler
-  ipcMain.handle('agents:delete', async (event, data: { agentId: string; userId: string }) => {
-    try {
-      await AgentService.delete(data.agentId, data.userId);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to delete agent' 
-      };
-    }
+  ipcMain.handle("agent:addToProject", async (_, data) => {
+    const userId = data.userId || "temp-user-id";
+    return await addAgentToProject(
+      data.agentId,
+      data.projectId,
+      data.role,
+      userId,
+    );
+  });
+
+  ipcMain.handle("agent:removeFromProject", async (_, data) => {
+    return await removeAgentFromProject(data.agentId, data.projectId);
   });
 }

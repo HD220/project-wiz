@@ -1,4 +1,4 @@
-import { APIError } from '../../shared/types/common';
+import { APIError } from "../../shared/types/common";
 
 /**
  * Handle errors for IPC communication
@@ -9,26 +9,28 @@ export function handleError(error: unknown): APIError {
   if (error instanceof APIError) {
     return error;
   }
-  
+
   // If it's a regular Error, convert to APIError
   if (error instanceof Error) {
-    return new APIError(error.message, 'INTERNAL_ERROR', 500);
+    return new APIError(error.message, "INTERNAL_ERROR", 500);
   }
-  
+
   // For unknown error types, create generic error
-  return new APIError('An unknown error occurred', 'UNKNOWN_ERROR', 500);
+  return new APIError("An unknown error occurred", "UNKNOWN_ERROR", 500);
 }
 
 /**
  * Extract user ID from IPC event (if authenticated)
  */
-export function extractUserId(event: Electron.IpcMainInvokeEvent): string | null {
+export function extractUserId(
+  _event: Electron.IpcMainInvokeEvent,
+): string | null {
   // In a real implementation, you would extract this from the session or token
   // For now, we'll implement a simple approach
-  
+
   // This would typically be stored in the renderer process and passed with requests
   // or extracted from a session/token system
-  
+
   // TODO: Implement proper authentication extraction
   return null;
 }

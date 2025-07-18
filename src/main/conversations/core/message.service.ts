@@ -1,270 +1,376 @@
-import { eq, and, desc, asc } from 'drizzle-orm';
-import { getDatabase } from '../../database/connection';
-import { messages } from '../../database/schema/messages.schema';
-import { dmConversations } from '../../database/schema/dm-conversations.schema';
-import { generateId } from '../../utils/id-generator';
+import { eq, and, desc, lt } from "drizzle-orm";
+import { getDatabase } from "../../database/connection";
+import { messages } from "./messages.schema";
+import { dmConversations } from "../../user/direct-messages/dm-conversations.schema";
+import { channels } from "../../project/channels/channels.schema";
+import { z } from "zod";
 
-export interface CreateMessageInput {
-  content: string;
-  contentType?: string;
-  authorId: string;
-  authorType: 'user' | 'agent';
-  messageType?: string;
-  channelId?: string;
-  dmConversationId?: string;
-  replyToId?: string;
-  metadata?: any;
+// Simple ID generator
+function generateId(): string {
+  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export interface MessageResponse {
-  id: string;
-  content: string;
-  contentType: string;
-  authorId: string;
-  authorType: 'user' | 'agent';
-  messageType: string;
-  channelId?: string;
-  dmConversationId?: string;
-  replyToId?: string;
-  threadId?: string;
-  metadata: any;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
-}
+// Simple validation schemas
+const SendMessageSchema = z.object({
+  content: z.string().min(1).max(4000),
+  contentType: z.enum(["text", "image", "file", "code"]).default("text"),
+  messageType: z
+    .enum(["text", "system", "task_result", "notification"])
+    .default("text"),
+  channelId: z.string().optional(),
+  dmConversationId: z.string().optional(),
+  replyToId: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
+});
 
-export class MessageService {
-  static async create(input: CreateMessageInput): Promise<MessageResponse> {
-    const db = getDatabase();
-    
-    if (!input.channelId && !input.dmConversationId) {
-      throw new Error('Message must belong to either a channel or DM conversation');
-    }
-    
-    const messageId = generateId();
-    const now = new Date();
-    
-    await db.insert(messages).values({
-      id: messageId,
-      channelId: input.channelId,
-      dmConversationId: input.dmConversationId,
-      content: input.content,
-      contentType: input.contentType || 'text',
-      authorId: input.authorId,
-      authorType: input.authorType,
-      messageType: input.messageType || 'text',
-      replyToId: input.replyToId,
-      metadata: input.metadata ? JSON.stringify(input.metadata) : null,
-      createdAt: now,
-    });
-    
-    // Update DM conversation if this is a DM
-    if (input.dmConversationId) {
-      await db.update(dmConversations)
-        .set({
-          lastMessageAt: now,
-          updatedAt: now,
-        })
-        .where(eq(dmConversations.id, input.dmConversationId));
-    }
-    
-    const message = await db.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-    });
-    
-    if (!message) {
-      throw new Error('Failed to create message');
-    }
-    
-    return {
-      id: message.id,
-      content: message.content,
-      contentType: message.contentType,
-      authorId: message.authorId,
-      authorType: message.authorType as 'user' | 'agent',
-      messageType: message.messageType,
-      channelId: message.channelId,
-      dmConversationId: message.dmConversationId,
-      replyToId: message.replyToId,
-      threadId: message.threadId,
-      metadata: message.metadata ? JSON.parse(message.metadata) : {},
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      deletedAt: message.deletedAt,
-    };
+export type SendMessageInput = z.infer<typeof SendMessageSchema>;
+
+/**
+ * Send message (user or agent)
+ * KISS approach: Simple function that handles both user and agent messages
+ */
+export async function sendMessage(
+  input: SendMessageInput,
+  authorId: string,
+  authorType: "user" | "agent" = "user",
+): Promise<any> {
+  // 1. Validate input
+  const validated = SendMessageSchema.parse(input);
+
+  // 2. Validate access
+  if (validated.channelId && validated.dmConversationId) {
+    throw new Error("Cannot specify both channelId and dmConversationId");
   }
-  
-  static async findChannelMessages(channelId: string, limit = 50, before?: string): Promise<MessageResponse[]> {
-    const db = getDatabase();
-    
-    let whereCondition = and(
+
+  if (!validated.channelId && !validated.dmConversationId) {
+    throw new Error("Must specify either channelId or dmConversationId");
+  }
+
+  if (validated.channelId) {
+    await validateChannelAccess(validated.channelId, authorId, authorType);
+  }
+
+  if (validated.dmConversationId) {
+    await validateDMAccess(validated.dmConversationId, authorId, authorType);
+  }
+
+  // 3. Create message
+  const db = getDatabase();
+  const messageId = generateId();
+  const now = new Date();
+
+  const newMessage = {
+    id: messageId,
+    content: validated.content,
+    contentType: validated.contentType,
+    messageType: validated.messageType,
+    channelId: validated.channelId,
+    dmConversationId: validated.dmConversationId,
+    authorId,
+    authorType,
+    replyToId: validated.replyToId,
+    metadata: validated.metadata ? JSON.stringify(validated.metadata) : null,
+    createdAt: now,
+  };
+
+  await db.insert(messages).values(newMessage);
+
+  // 4. Update DM conversation if needed
+  if (validated.dmConversationId) {
+    await updateDMLastMessage(validated.dmConversationId);
+  }
+
+  // 5. TODO: Process message for agent actions
+
+  return newMessage;
+}
+
+/**
+ * Get messages from channel
+ */
+export async function getChannelMessages(
+  channelId: string,
+  options: { limit?: number; before?: string } = {},
+): Promise<any[]> {
+  const db = getDatabase();
+  const { limit = 50, before } = options;
+
+  const messagesList = await db.query.messages.findMany({
+    where: and(
       eq(messages.channelId, channelId),
-      eq(messages.deletedAt, null)
+      before ? lt(messages.createdAt, new Date(before)) : undefined,
+    ),
+    orderBy: [desc(messages.createdAt)],
+    limit,
+  });
+
+  // Return in chronological order
+  return messagesList.reverse().map((msg) => ({
+    ...msg,
+    metadata: msg.metadata ? JSON.parse(msg.metadata) : null,
+  }));
+}
+
+/**
+ * Get messages from DM conversation
+ */
+export async function getDMMessages(
+  conversationId: string,
+  options: { limit?: number; before?: string } = {},
+): Promise<any[]> {
+  const db = getDatabase();
+  const { limit = 50, before } = options;
+
+  const messagesList = await db.query.messages.findMany({
+    where: and(
+      eq(messages.dmConversationId, conversationId),
+      before ? lt(messages.createdAt, new Date(before)) : undefined,
+    ),
+    orderBy: [desc(messages.createdAt)],
+    limit,
+  });
+
+  return messagesList.reverse().map((msg) => ({
+    ...msg,
+    metadata: msg.metadata ? JSON.parse(msg.metadata) : null,
+  }));
+}
+
+/**
+ * Get or create DM conversation between user and agent
+ */
+export async function getOrCreateDMConversation(
+  userId: string,
+  agentId: string,
+): Promise<string> {
+  const db = getDatabase();
+
+  // Try to find existing conversation
+  const existing = await db.query.dmConversations.findFirst({
+    where: and(
+      eq(dmConversations.userId, userId),
+      eq(dmConversations.agentId, agentId),
+      eq(dmConversations.isActive, true),
+    ),
+  });
+
+  if (existing) {
+    return existing.id;
+  }
+
+  // Create new conversation
+  const conversationId = generateId();
+  const now = new Date();
+
+  const newConversation = {
+    id: conversationId,
+    userId,
+    agentId,
+    isActive: true,
+    isPinned: false,
+    unreadCount: 0,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await db.insert(dmConversations).values(newConversation);
+
+  return conversationId;
+}
+
+/**
+ * Get user's DM conversations
+ */
+export async function getUserDMConversations(userId: string): Promise<any[]> {
+  const db = getDatabase();
+
+  const conversations = await db.query.dmConversations.findMany({
+    where: and(
+      eq(dmConversations.userId, userId),
+      eq(dmConversations.isActive, true),
+    ),
+    with: {
+      agent: true,
+    },
+    orderBy: [desc(dmConversations.lastMessageAt)],
+  });
+
+  return conversations.map((conv) => ({
+    ...conv,
+    agent: {
+      ...(conv.agent as any),
+      expertise: (conv.agent as any).expertise
+        ? JSON.parse((conv.agent as any).expertise)
+        : [],
+    },
+  }));
+}
+
+/**
+ * Mark DM conversation as read
+ */
+export async function markDMAsRead(
+  conversationId: string,
+  userId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  await db
+    .update(dmConversations)
+    .set({
+      lastReadAt: new Date(),
+      unreadCount: 0,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(dmConversations.id, conversationId),
+        eq(dmConversations.userId, userId),
+      ),
     );
-    
-    // TODO: Add pagination support with 'before' parameter if needed
-    
-    const channelMessages = await db.query.messages.findMany({
-      where: whereCondition,
-      orderBy: [asc(messages.createdAt)],
-      limit,
-    });
-    
-    return channelMessages.map(message => ({
-      id: message.id,
-      content: message.content,
-      contentType: message.contentType,
-      authorId: message.authorId,
-      authorType: message.authorType as 'user' | 'agent',
-      messageType: message.messageType,
-      channelId: message.channelId,
-      dmConversationId: message.dmConversationId,
-      replyToId: message.replyToId,
-      threadId: message.threadId,
-      metadata: message.metadata ? JSON.parse(message.metadata) : {},
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      deletedAt: message.deletedAt,
-    }));
+}
+
+/**
+ * Get channel info
+ */
+export async function getChannelInfo(channelId: string): Promise<any | null> {
+  const db = getDatabase();
+
+  const channel = await db.query.channels.findFirst({
+    where: eq(channels.id, channelId),
+    with: {
+      project: true,
+    },
+  });
+
+  if (!channel) return null;
+
+  return {
+    ...channel,
+    permissions: channel.permissions ? JSON.parse(channel.permissions) : null,
+  };
+}
+
+// Helper functions
+
+async function validateChannelAccess(
+  channelId: string,
+  _authorId: string,
+  _authorType: "user" | "agent",
+): Promise<void> {
+  const channel = await getChannelInfo(channelId);
+
+  if (!channel) {
+    throw new Error("Channel not found");
   }
-  
-  static async findDMMessages(dmConversationId: string, limit = 50, before?: string): Promise<MessageResponse[]> {
-    const db = getDatabase();
-    
-    let whereCondition = and(
-      eq(messages.dmConversationId, dmConversationId),
-      eq(messages.deletedAt, null)
-    );
-    
-    const dmMessages = await db.query.messages.findMany({
-      where: whereCondition,
-      orderBy: [asc(messages.createdAt)],
-      limit,
-    });
-    
-    return dmMessages.map(message => ({
-      id: message.id,
-      content: message.content,
-      contentType: message.contentType,
-      authorId: message.authorId,
-      authorType: message.authorType as 'user' | 'agent',
-      messageType: message.messageType,
-      channelId: message.channelId,
-      dmConversationId: message.dmConversationId,
-      replyToId: message.replyToId,
-      threadId: message.threadId,
-      metadata: message.metadata ? JSON.parse(message.metadata) : {},
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      deletedAt: message.deletedAt,
-    }));
+
+  // For now, simple validation - just check if channel exists
+  // TODO: Implement proper permission system
+}
+
+async function validateDMAccess(
+  conversationId: string,
+  authorId: string,
+  authorType: "user" | "agent",
+): Promise<void> {
+  const db = getDatabase();
+
+  const conversation = await db.query.dmConversations.findFirst({
+    where: eq(dmConversations.id, conversationId),
+  });
+
+  if (!conversation) {
+    throw new Error("DM conversation not found");
   }
-  
-  static async findById(messageId: string): Promise<MessageResponse | null> {
-    const db = getDatabase();
-    
-    const message = await db.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-    });
-    
-    if (!message) {
-      return null;
-    }
-    
-    return {
-      id: message.id,
-      content: message.content,
-      contentType: message.contentType,
-      authorId: message.authorId,
-      authorType: message.authorType as 'user' | 'agent',
-      messageType: message.messageType,
-      channelId: message.channelId,
-      dmConversationId: message.dmConversationId,
-      replyToId: message.replyToId,
-      threadId: message.threadId,
-      metadata: message.metadata ? JSON.parse(message.metadata) : {},
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      deletedAt: message.deletedAt,
-    };
+
+  // Check if author is participant
+  if (authorType === "user" && conversation.userId !== authorId) {
+    throw new Error("No access to this conversation");
   }
-  
-  static async update(messageId: string, content: string, authorId: string): Promise<MessageResponse> {
-    const db = getDatabase();
-    
-    // Check if user can edit this message
-    const message = await db.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-    });
-    
-    if (!message) {
-      throw new Error('Message not found');
-    }
-    
-    if (message.authorId !== authorId) {
-      throw new Error('Permission denied');
-    }
-    
-    if (message.deletedAt) {
-      throw new Error('Cannot edit deleted message');
-    }
-    
-    // Update message
-    await db.update(messages)
-      .set({
-        content,
-        updatedAt: new Date(),
-      })
-      .where(eq(messages.id, messageId));
-    
-    // Get updated message
-    const updatedMessage = await db.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-    });
-    
-    if (!updatedMessage) {
-      throw new Error('Failed to update message');
-    }
-    
-    return {
-      id: updatedMessage.id,
-      content: updatedMessage.content,
-      contentType: updatedMessage.contentType,
-      authorId: updatedMessage.authorId,
-      authorType: updatedMessage.authorType as 'user' | 'agent',
-      messageType: updatedMessage.messageType,
-      channelId: updatedMessage.channelId,
-      dmConversationId: updatedMessage.dmConversationId,
-      replyToId: updatedMessage.replyToId,
-      threadId: updatedMessage.threadId,
-      metadata: updatedMessage.metadata ? JSON.parse(updatedMessage.metadata) : {},
-      createdAt: updatedMessage.createdAt,
-      updatedAt: updatedMessage.updatedAt,
-      deletedAt: updatedMessage.deletedAt,
-    };
+
+  if (authorType === "agent" && conversation.agentId !== authorId) {
+    throw new Error("No access to this conversation");
   }
-  
-  static async delete(messageId: string, authorId: string): Promise<void> {
-    const db = getDatabase();
-    
-    // Check if user can delete this message
-    const message = await db.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-    });
-    
-    if (!message) {
-      throw new Error('Message not found');
-    }
-    
-    if (message.authorId !== authorId) {
-      throw new Error('Permission denied');
-    }
-    
-    // Soft delete message
-    await db.update(messages)
-      .set({
-        deletedAt: new Date(),
-      })
-      .where(eq(messages.id, messageId));
+}
+
+async function updateDMLastMessage(conversationId: string): Promise<void> {
+  const db = getDatabase();
+
+  await db
+    .update(dmConversations)
+    .set({
+      lastMessageAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(dmConversations.id, conversationId));
+}
+
+/**
+ * Update message content
+ */
+export async function updateMessage(
+  messageId: string,
+  content: string,
+  userId: string,
+): Promise<any> {
+  const db = getDatabase();
+
+  // Check if message exists and belongs to user
+  const message = await db
+    .select()
+    .from(messages)
+    .where(eq(messages.id, messageId))
+    .limit(1);
+
+  if (!message.length) {
+    throw new Error("Message not found");
   }
+
+  if (message[0]!.authorId !== userId || message[0]!.authorType !== "user") {
+    throw new Error("Not authorized to update this message");
+  }
+
+  // Update message
+  await db
+    .update(messages)
+    .set({
+      content,
+      updatedAt: new Date(),
+    })
+    .where(eq(messages.id, messageId));
+
+  return { ...message[0]!, content, updatedAt: new Date() };
+}
+
+/**
+ * Delete message
+ */
+export async function deleteMessage(
+  messageId: string,
+  userId: string,
+): Promise<void> {
+  const db = getDatabase();
+
+  // Check if message exists and belongs to user
+  const message = await db
+    .select()
+    .from(messages)
+    .where(eq(messages.id, messageId))
+    .limit(1);
+
+  if (!message.length) {
+    throw new Error("Message not found");
+  }
+
+  if (message[0]!.authorId !== userId || message[0]!.authorType !== "user") {
+    throw new Error("Not authorized to delete this message");
+  }
+
+  // Soft delete
+  await db
+    .update(messages)
+    .set({
+      deletedAt: new Date(),
+    })
+    .where(eq(messages.id, messageId));
 }

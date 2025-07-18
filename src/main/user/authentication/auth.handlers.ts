@@ -1,82 +1,40 @@
-import { ipcMain } from 'electron';
-import { AuthService, LoginInput, RegisterInput } from './auth.service';
+import { ipcMain } from "electron";
+import {
+  login,
+  register,
+  validateToken,
+  listAccounts,
+  createDefaultAccount,
+  isFirstRun,
+  extractUserIdFromToken,
+} from "./auth.service";
 
-export function setupAuthHandlers(): void {
-  // Login handler
-  ipcMain.handle('auth:login', async (event, data: LoginInput) => {
-    try {
-      const result = await AuthService.login(data);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Login failed' 
-      };
-    }
+export function registerAuthHandlers(): void {
+  ipcMain.handle("auth:login", async (_, data) => {
+    return await login(data);
   });
 
-  // Register handler
-  ipcMain.handle('auth:register', async (event, data: RegisterInput) => {
-    try {
-      const result = await AuthService.register(data);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Registration failed' 
-      };
-    }
+  ipcMain.handle("auth:register", async (_, data) => {
+    return await register(data);
   });
 
-  // Validate token handler
-  ipcMain.handle('auth:validate-token', async (event, token: string) => {
-    try {
-      const result = await AuthService.validateToken(token);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Token validation failed' 
-      };
-    }
+  ipcMain.handle("auth:validate-token", async (_, data) => {
+    return await validateToken(data.token);
   });
 
-  // Get current user handler
-  ipcMain.handle('auth:get-current-user', async (event, userId: string) => {
-    try {
-      const result = await AuthService.getCurrentUser(userId);
-      return { success: true, data: result };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to get current user' 
-      };
-    }
+  ipcMain.handle("auth:list-accounts", async () => {
+    return await listAccounts();
   });
 
-  // Logout handler
-  ipcMain.handle('auth:logout', async (event, userId: string) => {
-    try {
-      await AuthService.logout(userId);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Logout failed' 
-      };
-    }
+  ipcMain.handle("auth:create-default-account", async () => {
+    return await createDefaultAccount();
   });
 
-  // Change password handler
-  ipcMain.handle('auth:change-password', async (event, data: { userId: string; currentPassword: string; newPassword: string }) => {
-    try {
-      await AuthService.changePassword(data.userId, data.currentPassword, data.newPassword);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Password change failed' 
-      };
-    }
+  ipcMain.handle("auth:is-first-run", async () => {
+    return await isFirstRun();
+  });
+
+  ipcMain.handle("auth:extract-user-id", async (_, data) => {
+    return extractUserIdFromToken(data.token);
   });
 }
