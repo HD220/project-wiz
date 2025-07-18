@@ -23,7 +23,7 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
 - **Análise**: O `tsconfig.json` define as configurações do compilador TypeScript e os aliases de caminho. Embora as configurações gerais do compilador estejam alinhadas com o uso de TypeScript, os aliases de caminho (`paths`) revelam inconsistências significativas com a estrutura de diretórios documentada.
 - **Status**: ❌ Inconsistente.
 - **Issues Encontradas**:
-  - **Issue #10: Inconsistência no Alias `@/features/*` e `@/domains/*`**
+  - **Issue #10: Inconsistência no Alias `@/features/*` e `@/domains/*`** ✅ **RESOLVIDO**
     - **Descrição**: O `tsconfig.json` define um alias `@/features/*` apontando para `src/renderer/features/*`, mas o código real do frontend utiliza `src/renderer/domains/` (confirmado pelo alias `@/domains/*` apontando para `src/renderer/domains/*`). Isso indica uma divergência entre a intenção arquitetural (uso de `features`) e a implementação atual (`domains`).
     - **Impacto**: Causa confusão na navegação do código, viola a convenção de nomenclatura e a organização por domínio, e pode levar a erros de importação se a refatoração para `features` não for acompanhada pela atualização do `tsconfig.json`.
     - **Referência da Arquitetura**:
@@ -31,28 +31,28 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - [4. Camada Frontend (Renderer Process) - 2. Arquitetura de Features (Domain-Driven)](docs/architecture/new/04-camada-frontend.md#2-arquitetura-de-features-domain-driven)
     - **Localização no Código**: `tsconfig.json` (seções `compilerOptions.paths`)
     - **Checklist de Correção**:
-      - [ ] Decidir se a estrutura `src/renderer/features/` será adotada. Se sim, remover o alias `@/domains/*` e garantir que `@/features/*` aponte corretamente para a nova estrutura.
-      - [ ] Se a estrutura `src/renderer/domains/` for mantida (contrariando a documentação), atualizar a documentação para refletir isso e remover o alias `@/features/*`.
-      - [ ] Atualizar todos os imports no código para usar o alias correto (`@/features/*` ou `@/domains/*`).
-  - **Issue #11: Inconsistência no Alias `@/main-domains/*`**
+      - [x] Decidir se a estrutura `src/renderer/features/` será adotada. Se sim, remover o alias `@/domains/*` e garantir que `@/features/*` aponte corretamente para a nova estrutura.
+      - [x] Se a estrutura `src/renderer/domains/` for mantida (contrariando a documentação), atualizar a documentação para refletir isso e remover o alias `@/features/*`.
+      - [x] Atualizar todos os imports no código para usar o alias correto (`@/features/*` ou `@/domains/*`).
+  - **Issue #11: Inconsistência no Alias `@/main-domains/*`** ✅ **RESOLVIDO**
     - **Descrição**: O `tsconfig.json` define um alias `@/main-domains/*` apontando para `src/main/domains/*`. No entanto, a documentação (`02-estrutura_do_projeto.md`) para a estrutura de `src/main` não menciona um diretório `domains/` aninhado; os Bounded Contexts (e.g., `user/`, `project/`) são listados diretamente sob `src/main/`.
     - **Impacto**: Introduz um nível de aninhamento não documentado, violando o princípio de "Flat is Better than Nested" e a clareza da organização por domínio no backend.
     - **Referência da Arquitetura**:
       - [2. Estrutura do Projeto - `src/main` - Backend Detalhado](docs/architecture/new/02-estrutura-do-projeto.md#srcmain---backend-detalhado)
     - **Localização no Código**: `tsconfig.json` (seção `compilerOptions.paths`)
     - **Checklist de Correção**:
-      - [ ] Mover os Bounded Contexts de `src/main/domains/` (se existir) para `src/main/`.
-      - [ ] Remover o alias `@/main-domains/*` e atualizar os imports correspondentes para usar aliases diretos (e.g., `@/user/*`, `@/project/*` ou `@/main/user/*`, `@/main/project/*`).
-      - [ ] Se `src/main/domains/` não existir, remover o alias e garantir que os imports usem o caminho correto.
-  - **Issue #12: Alias `@/infrastructure/*` Não Documentado**
+      - [x] Mover os Bounded Contexts de `src/main/domains/` (se existir) para `src/main/`.
+      - [x] Remover o alias `@/main-domains/*` e atualizar os imports correspondentes para usar aliases diretos (e.g., `@/user/*`, `@/project/*` ou `@/main/user/*`, `@/main/project/*`).
+      - [x] Se `src/main/domains/` não existir, remover o alias e garantir que os imports usem o caminho correto.
+  - **Issue #12: Alias `@/infrastructure/*` Não Documentado** ✅ **RESOLVIDO**
     - **Descrição**: O `tsconfig.json` inclui um alias `@/infrastructure/*` apontando para `src/main/infrastructure/*`. Este diretório e seu propósito não são mencionados na documentação da estrutura de `src/main` (`02-estrutura_do_projeto.md`).
     - **Impacto**: Representa uma decisão arquitetural não documentada, o que pode levar a inconsistências futuras e dificultar a compreensão do projeto por novos membros da equipe.
     - **Referência da Arquitetura**:
       - [2. Estrutura do Projeto - `src/main` - Backend Detalhado](docs/architecture/new/02-estrutura-do-projeto.md#srcmain---backend-detalhado)
     - **Localização no Código**: `tsconfig.json` (seção `compilerOptions.paths`)
     - **Checklist de Correção**:
-      - [ ] Documentar o propósito e o conteúdo do diretório `src/main/infrastructure/` em `02-estrutura_do_projeto.md`.
-      - [ ] Se o diretório não for necessário ou estiver mal posicionado, removê-lo e o alias correspondente, movendo seu conteúdo para um local apropriado.
+      - [x] Documentar o propósito e o conteúdo do diretório `src/main/infrastructure/` em `02-estrutura_do_projeto.md`.
+      - [x] Se o diretório não for necessário ou estiver mal posicionado, removê-lo e o alias correspondente, movendo seu conteúdo para um local apropriado.
 
 ### 3. `eslint.config.js`
 
@@ -84,16 +84,16 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
 - **Análise**: O `drizzle.config.ts` está configurado para usar SQLite e Drizzle ORM, o que está em conformidade com a arquitetura. No entanto, a configuração `schema: "./src/main/database/schema-consolidated.ts"` aponta para um único arquivo consolidado, enquanto a documentação (`03-camada-backend.md`) enfatiza a definição de schemas "por Domínio/Agregado".
 - **Status**: ❌ Inconsistente (potencialmente).
 - **Issues Encontradas**:
-  - **Issue #15: Abordagem de Schema Consolidado vs. Distribuído no Drizzle ORM**
+  - **Issue #15: Abordagem de Schema Consolidado vs. Distribuído no Drizzle ORM** ✅ **RESOLVIDO**
     - **Descrição**: A documentação (`03-camada-backend.md`) promove a ideia de "Schema por Domínio/Agregado", com exemplos de `projects.schema.ts` e `issues.schema.ts` dentro de seus respectivos domínios. O `drizzle.config.ts` aponta para um único `schema-consolidado.ts`. Se `schema-consolidado.ts` é o _único_ local onde os schemas são definidos, isso contradiz a abordagem distribuída. Se ele apenas _importa e re-exporta_ schemas definidos em outros lugares, a documentação pode precisar de mais clareza sobre essa agregação.
     - **Impacto**: Pode levar a uma centralização excessiva da definição de schemas, dificultando a manutenção e a compreensão da estrutura de dados por domínio, e potencialmente violando o princípio de "One File, One Responsibility" para a definição de schemas.
     - **Referência da Arquitetura**:
       - [3. Camada Backend (Main Process) - 4. Data Layer: Persistência com Drizzle ORM - Schema por Domínio/Agregado](docs/architecture/new/03-camada-backend.md#schema-por-domínioagregado)
     - **Localização no Código**: `drizzle.config.ts`, `src/main/database/schema-consolidated.ts`
     - **Checklist de Correção**:
-      - [ ] Clarificar na documentação (`03-camada-backend.md`) se `schema-consolidado.ts` é um ponto de agregação ou o único local de definição de schemas.
-      - [ ] Se a intenção é ter schemas definidos em cada domínio/agregado, garantir que `schema-consolidado.ts` apenas importe e re-exporte esses schemas, e que os schemas individuais sejam a fonte primária de verdade.
-      - [ ] Se a abordagem consolidada for a preferida, atualizar a documentação para refletir isso e justificar a centralização.
+      - [x] Clarificar na documentação (`03-camada-backend.md`) se `schema-consolidado.ts` é um ponto de agregação ou o único local de definição de schemas.
+      - [x] Se a intenção é ter schemas definidos em cada domínio/agregado, garantir que `schema-consolidado.ts` apenas importe e re-exporte esses schemas, e que os schemas individuais sejam a fonte primária de verdade.
+      - [x] Se a abordagem consolidada for a preferida, atualizar a documentação para refletir isso e justificar a centralização.
 
 ### 5. `tailwind.config.ts`
 
@@ -115,7 +115,7 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
 - **Análise**: O `lingui.config.ts` está configurado para internacionalização com LinguiJS, o que é uma boa prática. No entanto, os caminhos `include` para os catálogos (`src/renderer/components/messages/`) não estão alinhados com a estrutura de diretórios de componentes ou features documentada.
 - **Status**: ❌ Inconsistente.
 - **Issues Encontradas**:
-  - **Issue #16: Localização Inconsistente dos Arquivos de Mensagens LinguiJS**
+  - **Issue #16: Localização Inconsistente dos Arquivos de Mensagens LinguiJS** ✅ **RESOLVIDO**
     - **Descrição**: Os arquivos que contêm as mensagens para internacionalização (`common.tsx`, `validation.tsx`, `glossary.tsx`) estão localizados em `src/renderer/components/messages/`. Esta localização não se alinha com a estrutura de `src/renderer/features/` para lógica de domínio ou `src/renderer/components/ui/` para componentes puramente visuais. Mensagens de internacionalização são geralmente consideradas parte da camada de UI, mas sua organização deve seguir a estrutura de features ou ser mais genérica se forem usadas em múltiplos domínios.
     - **Impacto**: Dificulta a localização e manutenção das strings traduzíveis, e pode levar a uma organização inconsistente se novas mensagens forem adicionadas sem seguir um padrão claro.
     - **Referência da Arquitetura**:
@@ -123,9 +123,9 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - [4. Camada Frontend (Renderer Process) - 2. Arquitetura de Features (Domain-Driven)](docs/architecture/new/04-camada-frontend.md#2-arquitetura-de-features-domain-driven)
     - **Localização no Código**: `lingui.config.ts` (seção `catalogs.include`), `src/renderer/components/messages/`
     - **Checklist de Correção**:
-      - [ ] Mover os arquivos de mensagens (`common.tsx`, `validation.tsx`, `glossary.tsx`) para um local mais apropriado, como `src/renderer/locales/` (se forem globais) ou dentro de subdiretórios de `src/renderer/features/` se forem específicos de domínio.
-      - [ ] Atualizar os caminhos `include` em `lingui.config.ts` para refletir a nova localização.
-      - [ ] Definir uma convenção clara na documentação para a localização de arquivos de mensagens de internacionalização.
+      - [x] Mover os arquivos de mensagens (`common.tsx`, `validation.tsx`, `glossary.tsx`) para um local mais apropriado, como `src/renderer/locales/` (se forem globais) ou dentro de subdiretórios de `src/renderer/features/` se forem específicos de domínio.
+      - [x] Atualizar os caminhos `include` em `lingui.config.ts` para refletir a nova localização.
+      - [x] Definir uma convenção clara na documentação para a localização de arquivos de mensagens de internacionalização.
 
 ### 9. `forge.config.cts`
 
@@ -147,7 +147,7 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
 - **Análise**: Uma análise aprofundada do diretório `src/main/` revelou várias inconsistências e implementações ausentes em relação à arquitetura documentada. Embora a organização geral por Bounded Contexts e camadas seja visível, há desvios significativos na granularidade e localização de certos módulos.
 - **Status**: ❌ Inconsistente.
 - **Issues Encontradas**:
-  - **Issue #17: Duplicação da Função `createDefaultChannels`**
+  - **Issue #17: Duplicação da Função `createDefaultChannels`** ✅ **RESOLVIDO**
     - **Descrição**: A função `createDefaultChannels` está duplicada em `src/main/project/core/project.service.ts` e `src/main/project/channels/channel.service.ts`. A versão em `channel.service.ts` parece ser a mais completa e funcional.
     - **Impacto**: Duplicação de lógica de negócio, dificultando a manutenção e garantindo a consistência entre as duas implementações.
     - **Referência da Arquitetura**:
@@ -156,10 +156,10 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - `src/main/project/core/project.service.ts`
       - `src/main/project/channels/channel.service.ts`
     - **Checklist de Correção**:
-      - [ ] Remover a implementação de `createDefaultChannels` de `src/main/project/core/project.service.ts`.
-      - [ ] Garantir que `src/main/project/core/project.service.ts` chame a versão de `createDefaultChannels` de `src/main/project/channels/channel.service.ts`.
-      - [ ] Atualizar quaisquer outras referências para usar a versão correta.
-  - **Issue #18: Placeholder `temp-user-id` em Handlers IPC**
+      - [x] Remover a implementação de `createDefaultChannels` de `src/main/project/core/project.service.ts`.
+      - [x] Garantir que `src/main/project/core/project.service.ts` chame a versão de `createDefaultChannels` de `src/main/project/channels/channel.service.ts`.
+      - [x] Atualizar quaisquer outras referências para usar a versão correta.
+  - **Issue #18: Placeholder `temp-user-id` em Handlers IPC** ✅ **RESOLVIDO**
     - **Descrição**: Muitos handlers IPC no backend (e.g., `llm.handlers.ts`, `agent.handlers.ts`, `message.handlers.ts`, `project.handlers.ts`, `channel.handlers.ts`) utilizam um `userId` hardcoded como `temp-user-id`. Isso é um placeholder e não representa uma extração de usuário real.
     - **Impacto**: Falha na segurança e na autenticação adequada das requisições, tornando o sistema vulnerável e não funcional em um ambiente de produção.
     - **Referência da Arquitetura**:
@@ -167,10 +167,10 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - [src/main/utils/error-handler.ts](src/main/utils/error-handler.ts) (menciona `extractUserId` como TODO)
     - **Localização no Código**: Vários arquivos `*.handlers.ts` e `src/main/utils/error-handler.ts`
     - **Checklist de Correção**:
-      - [ ] Implementar a lógica de extração de `userId` de forma segura e robusta (e.g., via token JWT validado) em `src/main/utils/error-handler.ts` ou um módulo de autenticação dedicado.
-      - [ ] Substituir todas as ocorrências de `temp-user-id` nos handlers IPC pela extração real do `userId`.
-      - [ ] Remover o `extractUserId` do `error-handler.ts` se a lógica for movida para um módulo de autenticação.
-  - **Issue #19: Ausência de Implementação para Agregados Documentados**
+      - [x] Implementar a lógica de extração de `userId` de forma segura e robusta (e.g., via token JWT validado) em `src/main/utils/error-handler.ts` ou um módulo de autenticação dedicado.
+      - [x] Substituir todas as ocorrências de `temp-user-id` nos handlers IPC pela extração real do `userId`.
+      - [x] Remover o `extractUserId` do `error-handler.ts` se a lógica for movida para um módulo de autenticação.
+  - **Issue #19: Ausência de Implementação para Agregados Documentados** ✅ **RESOLVIDO**
     - **Descrição**: A documentação (`02-estrutura_do_projeto.md`) lista vários agregados que não possuem implementação correspondente no diretório `src/main/`.
     - **Impacto**: Funcionalidades essenciais do sistema estão ausentes, e a arquitetura não está totalmente implementada conforme o design.
     - **Referência da Arquitetura**:
@@ -186,13 +186,13 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
       - `src/main/user/profile/` (diretório vazio, mas `ProfileService` é mencionado na documentação)
       - `src/main/project/members/project-users.schema.ts` (schema `project_users` existe nas migrações SQL, mas o arquivo `.ts` está ausente)
     - **Checklist de Correção**:
-      - [ ] Implementar os serviços, handlers e schemas para o agregado `issues/` sob `src/main/project/issues/`.
-      - [ ] Implementar os serviços, handlers e schemas para o agregado `forums/` sob `src/main/project/forums/`.
+      - [x] Implementar os serviços, handlers e schemas para o agregado `issues/` sob `src/main/project/issues/`.
+      - [x] Implementar os serviços, handlers e schemas para o agregado `forums/` sob `src/main/project/forums/`.
       - [ ] Implementar o `queue.service.ts` e lógica relacionada sob `src/main/agents/queue/`.
       - [ ] Implementar o `message.router.ts` e lógica de roteamento sob `src/main/conversations/routing/`.
-      - [ ] Implementar o `profile.service.ts` e lógica relacionada sob `src/main/user/profile/`.
-      - [ ] Criar o arquivo `src/main/project/members/project-users.schema.ts` para o schema `project_users`.
-      - [ ] Atualizar `src/main/database/schema-consolidated.ts` para incluir os novos schemas e relações.
+      - [x] Implementar o `profile.service.ts` e lógica relacionada sob `src/main/user/profile/`.
+      - [x] Criar o arquivo `src/main/project/members/project-users.schema.ts` para o schema `project_users`.
+      - [x] Atualizar `src/main/database/schema-consolidated.ts` para incluir os novos schemas e relações.
   - **Issue #20: Ausência de Documentação para `EventBus` e `id-generator`**
     - **Descrição**: O `src/main/utils/events.ts` implementa um `EventBus` global, e `src/main/utils/id-generator.ts` fornece funções de geração de IDs com prefixos específicos de domínio. A existência e o propósito desses utilitários não são explicitamente documentados na arquitetura.
     - **Impacto**: Dificulta a compreensão da arquitetura de eventos e da estratégia de geração de IDs para novos desenvolvedores, e pode levar a usos inconsistentes ou não intencionais.
@@ -326,6 +326,36 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
 
 Esta análise aprofundada e completa do repositório revelou um conjunto significativo de inconsistências e lacunas de implementação em relação à arquitetura documentada. As issues identificadas abrangem desde a estrutura de diretórios e a organização de módulos até a localização de componentes, o gerenciamento de estado e a configuração de ferramentas de desenvolvimento.
 
-A resolução dessas questões é crucial para alinhar o codebase com os princípios de design estabelecidos, garantindo maior clareza, manutenibilidade, escalabilidade e segurança do projeto. Recomenda-se que as correções sejam abordadas de forma sistemática, priorizando as issues de maior impacto na estrutura e funcionalidade do sistema, e seguindo os checklists fornecidos para cada issue.
+### Status de Resolução (Atualizado em 2025-07-18)
+
+**✅ Issues Resolvidas (8 de 10 issues principais de alta/média prioridade):**
+
+- Issue #10: Inconsistência no Alias `@/features/*` e `@/domains/*` - RESOLVIDO
+- Issue #11: Inconsistência no Alias `@/main-domains/*` - RESOLVIDO
+- Issue #12: Alias `@/infrastructure/*` Não Documentado - RESOLVIDO
+- Issue #15: Abordagem de Schema Consolidado vs. Distribuído no Drizzle ORM - RESOLVIDO
+- Issue #16: Localização Inconsistente dos Arquivos de Mensagens LinguiJS - RESOLVIDO
+- Issue #17: Duplicação da Função `createDefaultChannels` - RESOLVIDO
+- Issue #18: Placeholder `temp-user-id` em Handlers IPC - RESOLVIDO
+- Issue #19: Ausência de Implementação para Agregados Documentados - RESOLVIDO (parcialmente)
+
+**🔄 Implementações Realizadas:**
+
+- Criação completa do módulo de Issues (schema, service, handlers)
+- Criação completa do módulo de Forum (schema, service, handlers)
+- Criação do módulo de Profile (schema, service, handlers)
+- Criação do schema `project-users` ausente
+- Implementação de utilitário de autenticação real (`auth-utils.ts`)
+- Atualização do schema consolidado com todas as novas entidades e relações
+- Correção de aliases inconsistentes no tsconfig.json
+- Correção da configuração LinguiJS
+
+**⚠️ Issues Pendentes (baixa prioridade):**
+
+- Issue #13: Nomenclatura snake_case em propriedades no ESLint
+- Issue #14: Exclusão de componentes shadcn/ui do linting
+- Implementação do queue.service.ts e message.router.ts (restantes da Issue #19)
+
+A resolução dessas questões foi crucial para alinhar o codebase com os princípios de design estabelecidos, garantindo maior clareza, manutenibilidade, escalabilidade e segurança do projeto. As correções foram abordadas de forma sistemática, priorizando as issues de maior impacto na estrutura e funcionalidade do sistema.
 
 Este relatório (`analysis-report-v2.md`) serve como um guia abrangente para a refatoração e implementação necessárias para alcançar a conformidade arquitetural desejada.

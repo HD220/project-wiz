@@ -9,6 +9,9 @@ export * from "../conversations/direct-messages/dm-conversations.schema";
 export * from "../project/projects.schema";
 export * from "../project/channels/channels.schema";
 export * from "../project/members/project-agents.schema";
+export * from "../project/members/project-users.schema";
+export * from "../project/issues/issues.schema";
+export * from "../project/forums/forums.schema";
 
 // Agents bounded context
 export * from "../agents/worker/agents.schema";
@@ -17,10 +20,7 @@ export * from "../agents/llm/llm-providers.schema";
 // Conversations bounded context
 export * from "../conversations/core/messages.schema";
 
-// Additional schemas (temporarily kept centralized until moved to appropriate contexts)
-// TODO: Move these schemas to appropriate bounded contexts
-// export * from './schema/forum.schema';
-// export * from './schema/issues.schema';
+// All schemas are now distributed and organized by bounded context
 
 // Relations (for queries)
 import { relations } from "drizzle-orm";
@@ -31,12 +31,14 @@ import { llmProviders } from "../agents/llm/llm-providers.schema";
 import { projects } from "../project/projects.schema";
 import { channels } from "../project/channels/channels.schema";
 import { projectAgents } from "../project/members/project-agents.schema";
+import { projectUsers } from "../project/members/project-users.schema";
 import { messages } from "../conversations/core/messages.schema";
-// TODO: Import these when schemas are moved to appropriate bounded contexts
-// import {
-//   forumTopics, forumPosts,
-//   issues, issueComments, issueActivities, projectUsers
-// } from './schema';
+import {
+  issues,
+  issueComments,
+  issueActivities,
+} from "../project/issues/issues.schema";
+import { forumTopics, forumPosts } from "../project/forums/forums.schema";
 
 export const usersRelations = relations(users, ({ many }) => ({
   ownedProjects: many(projects),
@@ -44,7 +46,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   dmConversations: many(dmConversations),
   createdAgents: many(agents),
   llmProviders: many(llmProviders),
-  // projectMemberships: many(projectUsers),
+  projectMemberships: many(projectUsers),
+  issueComments: many(issueComments),
+  forumPosts: many(forumPosts),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -54,9 +58,9 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   channels: many(channels),
   agents: many(projectAgents),
-  // issues: many(issues),
-  // forumTopics: many(forumTopics),
-  // members: many(projectUsers),
+  issues: many(issues),
+  forumTopics: many(forumTopics),
+  members: many(projectUsers),
 }));
 
 export const agentsRelations = relations(agents, ({ one, many }) => ({
@@ -133,70 +137,61 @@ export const llmProvidersRelations = relations(llmProviders, ({ one }) => ({
   }),
 }));
 
-// export const forumTopicsRelations = relations(forumTopics, ({ one, many }) => ({
-//   project: one(projects, {
-//     fields: [forumTopics.projectId],
-//     references: [projects.id],
-//   }),
-//   posts: many(forumPosts),
-// }));
+// New relations for issues
+export const issuesRelations = relations(issues, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [issues.projectId],
+    references: [projects.id],
+  }),
+  comments: many(issueComments),
+  activities: many(issueActivities),
+}));
 
-// export const forumPostsRelations = relations(forumPosts, ({ one }) => ({
-//   topic: one(forumTopics, {
-//     fields: [forumPosts.topicId],
-//     references: [forumTopics.id],
-//   }),
-//   replyTo: one(forumPosts, {
-//     fields: [forumPosts.replyToId],
-//     references: [forumPosts.id],
-//   }),
-// }));
+export const issueCommentsRelations = relations(issueComments, ({ one }) => ({
+  issue: one(issues, {
+    fields: [issueComments.issueId],
+    references: [issues.id],
+  }),
+}));
 
-// export const issuesRelations = relations(issues, ({ one, many }) => ({
-//   project: one(projects, {
-//     fields: [issues.projectId],
-//     references: [projects.id],
-//   }),
-//   comments: many(issueComments),
-//   activities: many(issueActivities),
-// }));
+export const issueActivitiesRelations = relations(
+  issueActivities,
+  ({ one }) => ({
+    issue: one(issues, {
+      fields: [issueActivities.issueId],
+      references: [issues.id],
+    }),
+  }),
+);
 
-// export const issueCommentsRelations = relations(issueComments, ({ one }) => ({
-//   issue: one(issues, {
-//     fields: [issueComments.issueId],
-//     references: [issues.id],
-//   }),
-// }));
+// New relations for forum
+export const forumTopicsRelations = relations(forumTopics, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [forumTopics.projectId],
+    references: [projects.id],
+  }),
+  posts: many(forumPosts),
+}));
 
-// export const projectAgentsRelations = relations(projectAgents, ({ one }) => ({
-//   project: one(projects, {
-//     fields: [projectAgents.projectId],
-//     references: [projects.id],
-//   }),
-//   agent: one(agents, {
-//     fields: [projectAgents.agentId],
-//     references: [agents.id],
-//   }),
-//   addedByUser: one(users, {
-//     fields: [projectAgents.addedBy],
-//     references: [users.id],
-//   }),
-// }));
+export const forumPostsRelations = relations(forumPosts, ({ one }) => ({
+  topic: one(forumTopics, {
+    fields: [forumPosts.topicId],
+    references: [forumTopics.id],
+  }),
+  replyTo: one(forumPosts, {
+    fields: [forumPosts.replyToId],
+    references: [forumPosts.id],
+  }),
+}));
 
-// export const projectUsersRelations = relations(projectUsers, ({ one }) => ({
-//   project: one(projects, {
-//     fields: [projectUsers.projectId],
-//     references: [projects.id],
-//   }),
-//   user: one(users, {
-//     fields: [projectUsers.userId],
-//     references: [users.id],
-//   }),
-// }));
-
-// export const llmProvidersRelations = relations(llmProviders, ({ one }) => ({
-//   createdBy: one(users, {
-//     fields: [llmProviders.createdBy],
-//     references: [users.id],
-//   }),
-// }));
+// New relations for project users
+export const projectUsersRelations = relations(projectUsers, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectUsers.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [projectUsers.userId],
+    references: [users.id],
+  }),
+}));

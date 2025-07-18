@@ -9,10 +9,11 @@ import {
   updateMessage,
   deleteMessage,
 } from "./message.service";
+import { requireUserId } from "../../utils/auth-utils";
 
 export function registerMessageHandlers(): void {
   ipcMain.handle("message:send", async (_, data) => {
-    const senderId = data.senderId || "temp-user-id";
+    const senderId = requireUserId(data);
     return await sendMessage(data, senderId, data.senderType || "user");
   });
 
@@ -43,12 +44,12 @@ export function registerMessageHandlers(): void {
   });
 
   ipcMain.handle("message:update", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await updateMessage(data.id, data.content, userId);
   });
 
   ipcMain.handle("message:delete", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     await deleteMessage(data.id, userId);
   });
 }

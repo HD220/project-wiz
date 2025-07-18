@@ -8,17 +8,17 @@ export default defineConfig({
     {
       name: "common",
       path: "<rootDir>/src/renderer/locales/{locale}/common",
-      include: ["<rootDir>/src/renderer/components/messages/common.tsx"],
+      include: ["<rootDir>/src/renderer/**/*.{ts,tsx}"],
     },
     {
       name: "validation",
       path: "<rootDir>/src/renderer/locales/{locale}/validation",
-      include: ["<rootDir>/src/renderer/components/messages/validation.tsx"],
+      include: ["<rootDir>/src/renderer/**/*.{ts,tsx}"],
     },
     {
       name: "glossary",
       path: "<rootDir>/src/renderer/locales/{locale}/glossary",
-      include: ["<rootDir>/src/renderer/components/messages/glossary.tsx"],
+      include: ["<rootDir>/src/renderer/**/*.{ts,tsx}"],
     },
   ],
 });

@@ -10,10 +10,11 @@ import {
   removeAgentFromProject,
   findAgentsByProject,
 } from "./agent.service";
+import { requireUserId } from "../../utils/auth-utils";
 
 export function registerAgentHandlers(): void {
   ipcMain.handle("agent:create", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await createAgent(data, userId);
   });
 
@@ -22,7 +23,7 @@ export function registerAgentHandlers(): void {
   });
 
   ipcMain.handle("agent:list", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await findAgentsByUser(userId);
   });
 
@@ -31,22 +32,22 @@ export function registerAgentHandlers(): void {
   });
 
   ipcMain.handle("agent:update", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await updateAgent(data.id, data, userId);
   });
 
   ipcMain.handle("agent:delete", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     await deleteAgent(data.id, userId);
   });
 
   ipcMain.handle("agent:updateStatus", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await updateAgentStatus(data.id, data.status, userId);
   });
 
   ipcMain.handle("agent:addToProject", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await addAgentToProject(
       data.agentId,
       data.projectId,

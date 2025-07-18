@@ -6,10 +6,11 @@ import {
   updateChannel,
   deleteChannel,
 } from "./channel.service";
+import { requireUserId } from "../../utils/auth-utils";
 
 export function registerChannelHandlers(): void {
   ipcMain.handle("channel:create", async (_, data) => {
-    const userId = data.userId || "temp-user-id";
+    const userId = requireUserId(data);
     return await createChannel(data, userId);
   });
 

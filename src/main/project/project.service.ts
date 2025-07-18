@@ -1,7 +1,7 @@
 import { eq, and, ne } from "drizzle-orm";
 import { getDatabase } from "../../database/connection";
 import { projects } from "./projects.schema";
-import { channels } from "../channels/channels.schema";
+import { createDefaultChannels } from "../channels/channel.service";
 import { generateId } from "../../../shared/utils/id-generator";
 import { z } from "zod";
 
@@ -226,33 +226,4 @@ async function validateProjectPermissions(
   if (project.ownerId !== userId) {
     throw new Error("Only project owner can perform this action");
   }
-}
-
-async function createDefaultChannels(
-  projectId: string,
-  createdBy: string,
-): Promise<void> {
-  const db = getDatabase();
-  const now = new Date();
-
-  const defaultChannels = [
-    { name: "general", description: "General discussion", position: 0 },
-    { name: "development", description: "Development discussion", position: 1 },
-    { name: "random", description: "Random conversations", position: 2 },
-  ];
-
-  const channelValues = defaultChannels.map((channel) => ({
-    id: generateId(),
-    projectId,
-    name: channel.name,
-    description: channel.description,
-    type: "text" as const,
-    position: channel.position,
-    isPrivate: false,
-    createdBy,
-    createdAt: now,
-    updatedAt: now,
-  }));
-
-  await db.insert(channels).values(channelValues);
 }
