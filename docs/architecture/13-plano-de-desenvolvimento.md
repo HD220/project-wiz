@@ -78,23 +78,40 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
 
 **Objetivo**: Implementar a lógica de backend para gerenciamento de usuários, autenticação e perfis.
 
-- **1.1. Schema de Usuários e Autenticação**
+- **1.1. Schema de Usuários e Autenticação** ✅ **CONCLUÍDO**
   - **Descrição**: Definir o schema Drizzle para usuários e a estrutura de dados para autenticação.
+  - **Status**: ✅ Implementado em 2025-07-18
+  - **Arquivos Criados**:
+    - `src/main/user/authentication/users.schema.ts` - Schema completo com tipos TypeScript
+    - `src/main/database/migrations/0000_curvy_jack_power.sql` - Migração automática gerada
   - **Referências**:
     - [3. Camada Backend (Main Process) - 4. Data Layer: Persistência com Drizzle ORM](docs/architecture/new/03-camada-backend.md#4-data-layer-persistência-com-drizzle-orm)
     - [6. Autenticação e Fluxos de Usuário - 1. Sistema de Autenticação Local e Multi-Conta](docs/architecture/new/06-autenticacao-e-fluxos-de-usuario.md#1-sistema-de-autenticação-local-e-multi-conta)
     - [Estrutura de Arquivos - `src/main/user/users.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/user/users.schema.ts)
-  - **Exemplo de Implementação**:
-    - `src/main/user/users.schema.ts`
+  - **Aprendizados**:
+    - Usar `$inferSelect` e `$inferInsert` do Drizzle ao invés de tipos manuais
+    - Drizzle config automaticamente detecta schemas com pattern `./src/main/**/*.schema.ts`
 
-- **1.2. Serviço de Autenticação (`AuthService`)**
-  - **Descrição**: Implementar a lógica de negócio para registro, login, validação de senha (bcrypt) e geração de tokens JWT.
+- **1.2. Serviço de Autenticação (`AuthService`)** ✅ **CONCLUÍDO**
+  - **Descrição**: Implementar a lógica de negócio para registro, login, validação de senha (bcrypt) e sessão em memória.
+  - **Status**: ✅ Implementado em 2025-07-18
+  - **Arquivos Criados**:
+    - `src/main/user/authentication/auth.service.ts` - Serviço completo com métodos de autenticação
+  - **Decisão Arquitetural**: Removido JWT em favor de sessão em memória simples, mais adequado para aplicação desktop local
+  - **Métodos Implementados**:
+    - `register()` - Registro de novo usuário com hash bcrypt
+    - `login()` - Login com validação de credenciais
+    - `getCurrentUser()` - Obter usuário da sessão atual
+    - `logout()` - Limpar sessão
+    - `isLoggedIn()` - Verificar se há usuário logado
+    - `getUserById()` - Buscar usuário por ID
   - **Referências**:
     - [3. Camada Backend (Main Process) - 3. Service Layer: Lógica de Negócio do Domínio](docs/architecture/new/03-camada-backend.md#3-service-layer-lógica-de-negócio-do-domínio)
     - [6. Autenticação e Fluxos de Usuário - Fluxo de Autenticação (Login)](docs/architecture/new/06-autenticacao-e-fluxos-de-usuario.md#fluxo-de-autenticação-login)
-    - [Estrutura de Arquivos - `src/main/user/authentication/auth.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/user/authentication/auth.service.ts)
-  - **Exemplo de Implementação**:
-    - `src/main/user/authentication/auth.service.ts`
+  - **Aprendizados**:
+    - JWT desnecessário para aplicação Electron local
+    - Sessão em memória é mais simples e adequada
+    - Mantida segurança com bcrypt para hash de senhas
 
 - **1.3. Handlers IPC de Autenticação**
   - **Descrição**: Criar os handlers IPC para expor os métodos de autenticação do `AuthService` ao frontend.

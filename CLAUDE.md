@@ -442,3 +442,74 @@ Production deployments should set:
 - Use `npm run db:studio` for database inspection
 - Check ESLint output for architectural violations
 - Use the existing authentication system for testing (admin/admin123)
+
+## Lessons Learned from Implementation
+
+### Drizzle ORM Schema Patterns
+
+**Schema Definition Best Practices:**
+
+```typescript
+// ✅ Correct - Use proper type inference
+export type SelectUser = typeof usersTable.$inferSelect; // Has ALL fields including auto-generated
+export type InsertUser = typeof usersTable.$inferInsert; // Excludes auto-generated fields (id, createdAt, updatedAt)
+export type UpdateUser = Partial<InsertUser> & { id: string }; // Partial fields + required ID
+
+// ❌ Avoid redundant manual type definitions when Drizzle provides inference
+```
+
+**Key Insights:**
+
+- `$inferSelect` includes ALL fields (for reading from DB)
+- `$inferInsert` automatically excludes auto-generated fields (for inserting to DB)
+- Don't manually recreate types that Drizzle already provides
+- Update types need the ID to identify which record to update
+
+**Migration Workflow:**
+
+1. Create schema file: `src/main/**/*.schema.ts`
+2. Run `npm run db:generate` - Drizzle automatically detects schema files via config
+3. The `drizzle.config.ts` with `schema: "./src/main/**/*.schema.ts"` handles everything
+4. No manual schema registration needed in connection files
+
+**Architecture Compliance:**
+
+- Follow the established directory structure exactly as defined in architecture docs
+- Implement one activity at a time from the development plan sequentially
+- Don't create redundant abstractions when the framework already provides them
+
+### Authentication Service Patterns
+
+**Local Desktop Authentication Best Practices:**
+
+```typescript
+// ✅ Correct - Simple in-memory session for Electron apps
+let currentUserId: string | null = null;
+
+export class AuthService {
+  static async login(credentials: LoginCredentials): Promise<AuthResult> {
+    // Verify credentials with bcrypt
+    const isValid = await bcrypt.compare(password, hash);
+
+    // Set simple session
+    currentUserId = user.id;
+
+    return { user: userWithoutPassword };
+  }
+
+  static logout(): void {
+    currentUserId = null;
+  }
+}
+
+// ❌ Avoid JWT for local desktop applications
+// JWT adds unnecessary complexity for single-user desktop apps
+```
+
+**Key Insights:**
+
+- **JWT is overkill for local Electron apps** - designed for distributed systems
+- **In-memory sessions are perfect** for desktop apps that restart when closed
+- **Simpler authentication = fewer bugs** and easier maintenance
+- **Still use bcrypt for password hashing** - essential for local security
+- **Session persists only while app runs** - expected behavior for desktop apps
