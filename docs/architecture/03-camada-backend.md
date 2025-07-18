@@ -64,7 +64,10 @@ import { ChannelService } from "@/main/project/channels/channel.service";
 export class ProjectService {
   static async create(input: CreateProjectInput): Promise<Project> {
     // ... lógica de negócio
-    const [newProject] = await db.insert(projectsTable).values(input).returning();
+    const [newProject] = await db
+      .insert(projectsTable)
+      .values(input)
+      .returning();
 
     await ChannelService.createDefaultChannels(newProject.id);
 
