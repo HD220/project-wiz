@@ -695,3 +695,94 @@ import type { Theme } from "../authentication/users.schema";
 5. **Imports com Aliases**: Sempre usar `@/` para manter organização e evitar quebras de refatoração
 6. **Princípio KISS**: Implementar funcionalidade mínima primeiro (apenas tema) antes de expandir
 7. **Schema Type Safety**: Usar `.$type<CustomType>()` para tipos customizados no Drizzle
+
+### Schema de Projetos Patterns
+
+**Schema de Projetos Implementation Patterns (Atividade 2.1) - Implementado 2025-07-18:**
+
+```typescript
+// ✅ Correct - Project schema following established patterns
+export type ProjectStatus = "active" | "archived";
+
+export const projectsTable = sqliteTable("projects", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  avatarUrl: text("avatar_url"),
+  gitUrl: text("git_url"),
+  localPath: text("local_path").notNull(),
+  status: text("status").$type<ProjectStatus>().notNull().default("active"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type SelectProject = typeof projectsTable.$inferSelect;
+export type InsertProject = typeof projectsTable.$inferInsert;
+export type UpdateProject = Partial<InsertProject> & { id: string };
+
+export type CreateProjectInput = {
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  gitUrl?: string;
+  localPath: string;
+};
+```
+
+**Estrutura de Bounded Context:**
+
+```typescript
+// ✅ CORRETO - Organização por Bounded Context seguindo DDD
+src/main/project/               # Project Bounded Context
+├── projects.schema.ts          # Schema principal do domínio
+├── channels/                   # Aggregate: Channels (futuro)
+├── issues/                     # Aggregate: Issues (futuro)
+└── members/                    # Aggregate: Members (futuro)
+
+// ❌ EVITAR - Misturar domínios ou estruturas planas
+src/main/schemas/projects.ts    # Não seguir organização por domínio
+```
+
+**Workflow de Migração Drizzle:**
+
+```bash
+# ✅ CORRETO - Workflow automático completo
+npm run db:generate  # Detecta schemas automaticamente via drizzle.config.ts
+npm run db:migrate   # Aplica migrações ao banco SQLite
+
+# Arquivos gerados automaticamente:
+# - src/main/database/migrations/XXXX_migration_name.sql
+# - Meta files atualizados em migrations/meta/
+```
+
+**Tipos Customizados no Schema:**
+
+```typescript
+// ✅ CORRETO - Definir tipos customizados no schema para reutilização
+export type ProjectStatus = "active" | "archived";
+
+// Usar no campo com .$type<>()
+status: text("status").$type<ProjectStatus>()
+  .notNull()
+  .default("active"),
+
+// ❌ EVITAR - Hardcode de strings sem tipagem
+status: text("status").notNull().default("active"),
+```
+
+**Aprendizados Críticos:**
+
+1. **Detecção Automática de Schemas**: O `drizzle.config.ts` com pattern `./src/main/**/*.schema.ts` detecta todos os schemas automaticamente
+2. **Bounded Context Organization**: Manter schemas dentro de seus respectivos domínios para clareza arquitetural
+3. **Tipos Derivados Drizzle**: `$inferSelect` e `$inferInsert` eliminam duplicação e mantêm sincronização automática
+4. **Workflow de Migração**: `db:generate` → `db:migrate` é robusto e confiável para mudanças de schema
+5. **Tipos Customizados**: Usar `.$type<CustomType>()` para enums e tipos específicos do domínio
+6. **Nomenclatura Consistente**: Seguir padrão `{domain}Table` (ex: `projectsTable`, `usersTable`)
+7. **UUID Generation**: Usar `.$defaultFn(() => crypto.randomUUID())` para IDs únicos
+8. **Timestamps Padrão**: `sql\`CURRENT_TIMESTAMP\`` para campos de data automáticos

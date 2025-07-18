@@ -173,13 +173,26 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
 
 **Objetivo**: Implementar a lógica de backend para a criação, leitura, atualização e exclusão de projetos, incluindo a integração inicial com Git.
 
-- **2.1. Schema de Projetos**
+- **2.1. Schema de Projetos** ✅ **CONCLUÍDO**
   - **Descrição**: Definir o schema Drizzle para a tabela de projetos.
+  - **Status**: ✅ Implementado em 2025-07-18
+  - **Arquivos Criados**:
+    - `src/main/project/` - Diretório do Bounded Context
+    - `src/main/project/projects.schema.ts` - Schema completo com tipos TypeScript
+    - `src/main/database/migrations/0002_puzzling_jack_flag.sql` - Migração automática gerada
   - **Referências**:
     - [3. Camada Backend (Main Process) - 4. Data Layer: Persistência com Drizzle ORM](docs/architecture/03-camada-backend.md#4-data-layer-persistência-com-drizzle-orm)
     - [Estrutura de Arquivos - `src/main/project/projects.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/project/projects.schema.ts)
-  - **Exemplo de Implementação**:
-    - `src/main/project/projects.schema.ts`
+  - **Schema Implementado**:
+    - Tabela `projects` com campos: id, name, description, avatarUrl, gitUrl, localPath, status, createdAt, updatedAt
+    - Tipos: `SelectProject`, `InsertProject`, `UpdateProject`, `CreateProjectInput`
+    - Tipo customizado: `ProjectStatus = "active" | "archived"`
+    - Padrão estabelecido: ID gerado automaticamente, timestamps com `CURRENT_TIMESTAMP`
+  - **Aprendizados**:
+    - Detecção automática de schemas pelo Drizzle config funciona perfeitamente
+    - Padrão de organização por Bounded Context mantém clareza arquitetural
+    - Tipos derivados do Drizzle eliminam duplicação e mantêm consistência
+    - Workflow de migração (`db:generate` → `db:migrate`) é robusto e confiável
 
 - **2.2. Serviço de Projetos (`ProjectService`)**
   - **Descrição**: Implementar a lógica de negócio para operações CRUD de projetos, incluindo a inicialização de repositórios Git e a criação de canais padrão.
