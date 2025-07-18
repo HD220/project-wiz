@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { conversationService } from "../services/conversation.service";
 import { useConversationStore } from "../stores/conversation.store";
 
 import type {
-  CreateConversationDto,
   ConversationFilterDto,
-} from "../../../../shared/types/domains/users/message.types";
+  CreateConversationDto,
+} from "../../../../shared/types/users/message.types";
 
 export function useConversationsQuery(filter?: ConversationFilterDto) {
   return useQuery({

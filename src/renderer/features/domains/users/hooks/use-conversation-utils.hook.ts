@@ -1,5 +1,6 @@
-import type { ConversationDto } from "@/shared/types/domains/users/message.types";
 import { DateUtils } from "@/lib/date-utils";
+
+import type { ConversationDto } from "@/shared/types/users/message.types";
 
 export function useConversationUtils() {
   const getOtherParticipant = (conversation: ConversationDto) => {

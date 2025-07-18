@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import { useProjectsQuery } from "./use-projects-query.hook";
 
-import type { ProjectFilterDto } from "../../../../shared/types/domains/projects/project.types";
+import type { ProjectFilterDto } from "../../../../shared/types/projects/project.types";
 
 export function useProjectsRefetch(filter?: ProjectFilterDto) {
   const projectsQuery = useProjectsQuery(filter);

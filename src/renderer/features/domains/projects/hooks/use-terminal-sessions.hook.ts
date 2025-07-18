@@ -1,6 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import type { TerminalCommand } from "@/shared/types/projects/terminal.types";
+
 import { terminalService } from "../services/terminal.service";
-import type { TerminalCommand } from "@/shared/types/domains/projects/terminal.types";
 
 export function useTerminalSessions(projectId: string) {
   return useQuery({

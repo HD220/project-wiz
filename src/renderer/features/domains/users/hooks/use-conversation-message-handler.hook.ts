@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface Agent extends AgentDto {}
 

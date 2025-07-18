@@ -1,4 +1,4 @@
-import { UpdateChannelMessageDto } from "@/shared/types/domains/projects/channel-message/crud.types";
+import { UpdateChannelMessageDto } from "@/shared/types/projects/channel-message/crud.types";
 
 import { channelMessageService } from "../services/channel-message.service";
 import { useChannelMessageStore } from "../stores/channel-message.store";

@@ -1,7 +1,7 @@
 import { useDirectMessageRegenerate } from "./use-direct-message-regenerate.hook";
 import { useDirectMessageSend } from "./use-direct-message-send.hook";
 
-import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
+import type { MessageDto } from "../../../../shared/types/users/message.types";
 
 interface DirectMessageChatActionsProps {
   conversationId: string;

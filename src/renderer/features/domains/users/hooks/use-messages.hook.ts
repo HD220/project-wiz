@@ -3,12 +3,12 @@ import { useCallback } from "react";
 import { useMessageStore } from "../stores/message.store";
 
 import {
-  useMessagesQuery,
-  useMessageQuery,
   useCreateMessageMutation,
+  useMessageQuery,
+  useMessagesQuery,
 } from "./use-messages-queries.hook";
 
-import type { CreateMessageDto } from "../../../../shared/types/domains/users/message.types";
+import type { CreateMessageDto } from "../../../../shared/types/users/message.types";
 import type { MessageState } from "../stores/message.store";
 
 export function useMessages(

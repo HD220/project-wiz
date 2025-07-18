@@ -2,7 +2,7 @@ import { AgentsSidebarHeader } from "./agents-sidebar-header";
 import { AgentsSidebarSearch } from "./agents-sidebar-search";
 import { AgentsSidebarStats } from "./agents-sidebar-stats";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsSidebarTopSectionProps {
   projectId?: string;

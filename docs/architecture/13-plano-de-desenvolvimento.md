@@ -44,13 +44,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - Configurar `drizzle.config.ts`
     - Executar `npm run db:reset`
 
-- **0.3. Módulos Compartilhados (`src/shared/`)**
-  - **Descrição**: Definir tipos, schemas de validação (Zod) e utilitários que serão usados tanto no frontend quanto no backend.
-  - **Referências**:
-    - [2. Estrutura do Projeto - `src/shared/`](docs/architecture/new/02-estrutura-do-projeto.md#srcshared---código-compartilhado-backendfrontend)
-  - **Exemplo de Implementação**:
-    - `src/shared/types/index.ts`
-    - `src/shared/schemas/user.schema.ts` (ex: para validação de login)
+
     - `src/shared/utils/id-generator.ts`
 
 - **0.4. Ponto de Entrada do Processo Main (Backend)**

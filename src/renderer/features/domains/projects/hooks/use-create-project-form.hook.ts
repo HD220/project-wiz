@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { CreateProjectDto } from "../../../../shared/types/domains/projects/project.types";
+import { CreateProjectDto } from "../../../../shared/types/projects/project.types";
 import {
-  createProjectSchema,
   CreateProjectFormData,
+  createProjectSchema,
 } from "../schemas/create-project.schema";
 
 import { useProjects } from "./use-projects.hook";

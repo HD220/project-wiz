@@ -1,12 +1,14 @@
 import { Brain } from "lucide-react";
+
 import {
-  TextField,
-  TextAreaField,
   SelectField,
+  TextAreaField,
+  TextField,
 } from "@/components/forms/form-fields";
 import { FieldUtils } from "@/lib/field-utils";
-import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
-import type { LlmProviderDto } from "@/shared/types/domains/llm/llm-provider.types";
+
+import type { CreateAgentDto } from "@/shared/types/agents/agent.types";
+import type { LlmProviderDto } from "@/shared/types/llm/llm-provider.types";
 
 interface FormFieldProps {
   formData: CreateAgentDto;

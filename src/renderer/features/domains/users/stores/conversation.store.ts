@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { ConversationDto } from "../../../../shared/types/domains/users/message.types";
+import { ConversationDto } from "../../../../shared/types/users/message.types";
 
 interface ConversationState {
   selectedConversation: ConversationDto | null;

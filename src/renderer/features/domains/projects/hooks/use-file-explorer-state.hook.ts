@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
-import type { FileTreeItem } from "@/shared/types/domains/projects/file-system.types";
+import type { FileTreeItem } from "@/shared/types/projects/file-system.types";
+
 import { useProjectFiles } from "./use-file-system.hook";
 
 interface UseFileExplorerStateProps {

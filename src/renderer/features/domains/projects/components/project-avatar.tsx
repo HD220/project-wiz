@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 
-import type { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
+import type { ProjectDto } from "../../../../shared/types/projects/project.types";
 
 interface ProjectAvatarProps {
   project: ProjectDto;

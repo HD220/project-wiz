@@ -1,16 +1,12 @@
-import { IChannelMessageService } from "@/shared/types/domains/projects/channel-message/channel-message-service.interface";
-import {
-  ChannelMessage,
-  ChannelMessagePaginationDto,
-} from "@/shared/types/domains/projects/channel-message/channel-message.types";
+import { IChannelMessageService } from "@/shared/types/projects/channel-message/channel-message-service.interface";
 import {
   ChannelMessageFilterDto,
   CreateChannelMessageDto,
   UpdateChannelMessageDto,
-} from "@/shared/types/domains/projects/channel-message/crud.types";
+} from "@/shared/types/projects/channel-message/crud.types";
 
-export * from "./channel-message-list.service";
 export * from "./channel-message-crud.service";
+export * from "./channel-message-list.service";
 export * from "./channel-message-search.service";
 
 // Backward compatibility object

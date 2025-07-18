@@ -1,8 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AddAgentBasicFields } from "./add-agent-basic-fields";
+
+import type { CreateAgentDto } from "@/shared/types/agents/agent.types";
+import type { LlmProviderDto } from "@/shared/types/llm/llm-provider.types";
+
 import { AddAgentAdvancedFields } from "./add-agent-advanced-fields";
-import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
-import type { LlmProviderDto } from "@/shared/types/domains/llm/llm-provider.types";
+import { AddAgentBasicFields } from "./add-agent-basic-fields";
 
 interface AddAgentFormTabsProps {
   formData: CreateAgentDto;

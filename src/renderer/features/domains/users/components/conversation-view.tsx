@@ -4,7 +4,7 @@ import { ConversationContent } from "./conversation-content";
 import { ConversationHeader } from "./conversation-header";
 import { ConversationMessageInput } from "./conversation-message-input";
 
-import type { ConversationDto } from "../../../../shared/types/domains/users/user.types";
+import type { ConversationDto } from "../../../../shared/types/users/user.types";
 
 interface ConversationViewProps {
   conversationId: string;

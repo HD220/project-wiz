@@ -1,9 +1,9 @@
 import type {
-  ProjectDto,
   CreateProjectDto,
-  UpdateProjectDto,
+  ProjectDto,
   ProjectFilterDto,
-} from "../../../../shared/types/domains/projects/project.types";
+  UpdateProjectDto,
+} from "../../../../shared/types/projects/project.types";
 
 export const projectService = {
   async list(filter?: ProjectFilterDto): Promise<ProjectDto[]> {

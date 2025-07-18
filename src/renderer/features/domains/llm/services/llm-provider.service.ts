@@ -1,9 +1,9 @@
 import type {
-  LlmProviderDto,
   CreateLlmProviderDto,
-  UpdateLlmProviderDto,
+  LlmProviderDto,
   LlmProviderFilterDto,
-} from "../../../../shared/types/domains/llm/llm-provider.types";
+  UpdateLlmProviderDto,
+} from "../../../../shared/types/llm/llm-provider.types";
 
 export const llmProviderService = {
   async list(filter?: LlmProviderFilterDto): Promise<LlmProviderDto[]> {

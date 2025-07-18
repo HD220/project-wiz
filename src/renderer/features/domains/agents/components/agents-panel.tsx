@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { AgentsList } from "./agents-list";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsPanelProps {
   agents: AgentDto[];

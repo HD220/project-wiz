@@ -1,11 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { messageService } from "../services/message.service";
 
-import type {
-  MessageDto as _MessageDto,
-  CreateMessageDto,
-} from "../../../../shared/types/domains/users/message.types";
+import type { CreateMessageDto } from "../../../../shared/types/users/message.types";
 
 export function useMessagesQuery(
   conversationId?: string,

@@ -2,7 +2,7 @@ import { useDirectMessageChatActions } from "./use-direct-message-chat-actions.h
 import { useDirectMessageChatState } from "./use-direct-message-chat-state.hook";
 import { useMessages } from "./use-messages.hook";
 
-import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
+import type { MessageDto } from "../../../../shared/types/users/message.types";
 
 interface UseDirectMessageChatProps {
   conversationId: string;

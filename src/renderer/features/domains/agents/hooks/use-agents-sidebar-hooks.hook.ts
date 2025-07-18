@@ -3,7 +3,7 @@ import { useAgentsSidebarActions } from "../hooks/use-agents-sidebar-actions.hoo
 import { useAgentsSidebarState } from "../hooks/use-agents-sidebar-state.hook";
 import { useAgents } from "../hooks/use-agents.hook";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface UseAgentsSidebarHooksProps {
   onAgentSelect?: (agent: AgentDto) => void;

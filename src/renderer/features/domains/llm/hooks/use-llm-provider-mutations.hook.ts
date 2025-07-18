@@ -5,7 +5,7 @@ import { llmProviderService } from "../services/llm-provider.service";
 import type {
   CreateLlmProviderDto,
   UpdateLlmProviderDto,
-} from "../../../../shared/types/domains/llm/llm-provider.types";
+} from "../../../../shared/types/llm/llm-provider.types";
 
 export function useCreateLlmProviderMutation() {
   const queryClient = useQueryClient();

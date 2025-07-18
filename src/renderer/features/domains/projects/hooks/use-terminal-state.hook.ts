@@ -1,6 +1,8 @@
-import { useState, useRef, useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
+
+import type { TerminalLine } from "@/shared/types/projects/terminal.types";
+
 import { useDefaultTerminalSessions } from "./use-terminal-sessions.hook";
-import type { TerminalLine } from "@/shared/types/domains/projects/terminal.types";
 
 export function useTerminalState() {
   const { data: defaultSessions, isLoading } = useDefaultTerminalSessions();

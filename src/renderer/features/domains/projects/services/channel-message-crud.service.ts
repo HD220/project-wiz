@@ -2,7 +2,7 @@ import type {
   ChannelMessageDto,
   CreateChannelMessageDto,
   UpdateChannelMessageDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+} from "../../../../shared/types/projects/channel-message.types";
 
 export async function createChannelMessage(
   data: CreateChannelMessageDto,

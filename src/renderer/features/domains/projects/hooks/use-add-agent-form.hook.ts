@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { CreateAgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { CreateAgentDto } from "../../../../shared/types/agents/agent.types";
 
 export function useAddAgentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);

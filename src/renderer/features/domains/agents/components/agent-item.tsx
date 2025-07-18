@@ -3,7 +3,7 @@ import { cn } from "../../../lib/utils";
 import { AgentItemAvatar } from "./agent-item-avatar";
 import { AgentItemContent } from "./agent-item-content";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentItemProps {
   agent: AgentDto;

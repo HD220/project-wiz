@@ -1,8 +1,8 @@
 import type {
-  TerminalSession,
   TerminalCommand,
   TerminalCommandResponse,
-} from "@/shared/types/domains/projects/terminal.types";
+  TerminalSession,
+} from "@/shared/types/projects/terminal.types";
 
 export const terminalService = {
   async createSession(

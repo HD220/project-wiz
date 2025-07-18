@@ -1,4 +1,4 @@
-import type { LlmProviderDto } from "@/shared/types/domains/llm";
+import type { LlmProviderDto } from "@/shared/types/llm";
 
 import {
   Dialog,

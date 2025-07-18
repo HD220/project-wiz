@@ -30,7 +30,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 
 ```bash
 /object-calisthenics-enforcer path/to/file.ts
-/object-calisthenics-enforcer --audit src/main/domains/
+/object-calisthenics-enforcer --audit src/main/
 ```
 
 #### `/architecture-improvement` - Melhorias Arquiteturais
@@ -48,7 +48,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 
 ```bash
 /architecture-improvement analyze
-/architecture-improvement improve src/main/domains/agents/
+/architecture-improvement improve src/main/agents/
 ```
 
 #### `/quality-validator` - Validação de Qualidade
@@ -86,7 +86,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 **Uso:**
 
 ```bash
-/documentation-generator module src/main/domains/agents/
+/documentation-generator module src/main/agents/
 /documentation-generator update
 /documentation-generator validate
 ```
@@ -141,7 +141,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 **Uso:**
 
 ```bash
-/code-review "src/main/domains/agents/agent.entity.ts"
+/code-review "src/main/agents/agent.entity.ts"
 ```
 
 ### 4. `/architecture-analysis` - Análise e Design Arquitetural
@@ -175,7 +175,7 @@ Este documento fornece uma visão geral completa dos comandos e hooks do Claude 
 **Uso:**
 
 ```bash
-/test-generator "src/main/domains/users/user.entity.ts"
+/test-generator "src/main/users/user.entity.ts"
 ```
 
 ### 6. `/performance-optimizer` - Otimizador de Performance
@@ -304,7 +304,7 @@ Os hooks são configurados em `.claude/settings.hooks.json` e automatizam tarefa
 claude /quick-fix "Descrição do problema"
 
 # Comando com arquivo específico
-claude /code-review src/main/domains/users/user.entity.ts
+claude /code-review src/main/users/user.entity.ts
 
 # Comando com contexto adicional
 claude /architecture-analysis "Análise do domínio de projetos para melhorar escalabilidade"
@@ -323,7 +323,7 @@ claude /architecture-analysis "Análise do domínio de projetos para melhorar es
   "name": "custom-validation",
   "type": "PostToolUse",
   "tool": "Edit",
-  "match": "src/main/domains/.*\\.ts$",
+  "match": "src/main/.*\\.ts$",
   "command": "npm run validate-domain -- $TOOL_ARGS_FILE_PATH",
   "description": "Valida domínios após mudanças",
   "continueOnFailure": true
@@ -339,7 +339,7 @@ claude /architecture-analysis "Análise do domínio de projetos para melhorar es
 claude /debug-analyze "Erro 500 na API de usuários ao criar novo usuário"
 
 # Análise aprofundada
-claude /code-review src/main/domains/users/functions/user-create.functions.ts
+claude /code-review src/main/users/functions/user-create.functions.ts
 
 # Correção aplicada
 claude /quick-fix "Validação de email falhando com domínios específicos"

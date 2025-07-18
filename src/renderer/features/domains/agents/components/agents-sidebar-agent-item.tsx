@@ -2,7 +2,7 @@ import { AgentsSidebarAgentActions } from "./agents-sidebar-agent-actions";
 import { AgentsSidebarAgentAvatar } from "./agents-sidebar-agent-avatar";
 import { AgentsSidebarAgentInfo } from "./agents-sidebar-agent-info";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentItemProps {
   agent: AgentDto;

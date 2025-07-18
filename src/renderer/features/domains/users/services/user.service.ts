@@ -1,10 +1,10 @@
 import {
-  UserDto,
   CreateUserDto,
   UpdateUserDto,
   UpdateUserSettingsDto,
+  UserDto,
   UserPreferencesDto,
-} from "../../../../shared/types/domains/users/user.types";
+} from "../../../../shared/types/users/user.types";
 
 export const userService = {
   async getById(id: string): Promise<UserDto | null> {

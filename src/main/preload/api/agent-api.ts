@@ -4,10 +4,10 @@ import { IPC_CHANNELS } from "../../../shared/constants";
 
 import type {
   AgentDto,
+  AgentFilterDto,
   CreateAgentDto,
   UpdateAgentDto,
-  AgentFilterDto,
-} from "../../../shared/types/domains/agents/agent.types";
+} from "../../../shared/types/agents/agent.types";
 
 export interface IAgentAPI {
   create: (data: CreateAgentDto) => Promise<AgentDto>;

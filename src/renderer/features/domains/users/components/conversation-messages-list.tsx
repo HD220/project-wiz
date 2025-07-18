@@ -1,10 +1,10 @@
-import { MessageItem } from "@/components/chat/message-item";
-
 import { ConversationEmptyState } from "./conversation-empty-state";
 import { ConversationTypingIndicator } from "./conversation-typing-indicator";
 
-import type { MessageDto } from "../../../../shared/types/domains/users/message-dto.type";
+import type { MessageDto } from "../../../../shared/types/users/message-dto.type";
 import type { FormattedMessage } from "../../../components/chat/message-item-types";
+
+import { MessageItem } from "@/components/chat/message-item";
 
 interface ConversationMessagesListProps {
   messages: MessageDto[];

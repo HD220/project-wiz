@@ -1,9 +1,9 @@
-import { Users, Activity, Play, Settings } from "lucide-react";
+import { Activity, Play, Settings, Users } from "lucide-react";
 
 import { calculateAgentStats } from "./agent-dashboard-stats-calculator";
 import { StatsCard } from "./agent-dashboard-stats-card";
 
-import type { AgentDto as Agent } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto as Agent } from "../../../../shared/types/agents/agent.types";
 
 interface AgentDashboardStatsProps {
   agents: Agent[];

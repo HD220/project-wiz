@@ -1,10 +1,11 @@
 import { createEntityQueryHooks } from "@/hooks/use-query-factory.hook";
-import { llmProviderService } from "../services/llm-provider.service";
 
 import type {
-  LlmProviderFilterDto,
   LlmProviderDto,
-} from "@/shared/types/domains/llm/llm-provider.types";
+  LlmProviderFilterDto,
+} from "@/shared/types/llm/llm-provider.types";
+
+import { llmProviderService } from "../services/llm-provider.service";
 
 // Criação automática dos hooks usando o factory
 const llmProviderQueryHooks = createEntityQueryHooks<

@@ -1,4 +1,4 @@
-import type { ChannelMessageDto } from "../../../../shared/types/domains/projects/channel-message.types";
+import type { ChannelMessageDto } from "../../../../shared/types/projects/channel-message.types";
 
 export async function searchChannelMessages(
   channelId: string,

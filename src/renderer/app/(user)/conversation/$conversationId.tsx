@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ConversationSkeleton } from "@/features/users/components/skeletons/conversation-skeleton";
 import { ConversationView } from "@/features/users/components";
+import { ConversationSkeleton } from "@/features/users/components/skeletons/conversation-skeleton";
 
 export function ConversationPage() {
   const { conversationId } = Route.useParams();
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/(user)/conversation/$conversationId")({
   pendingComponent: ConversationSkeleton,
   loader: async ({ params }) => {
     const { conversationService } = await import(
-      "../../../domains/users/services/conversation.service"
+      "../../../users/services/conversation.service"
     );
     const conversation = await conversationService.getById(
       params.conversationId,

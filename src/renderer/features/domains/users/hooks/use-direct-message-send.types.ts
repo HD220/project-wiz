@@ -1,4 +1,4 @@
-import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
+import type { MessageDto } from "../../../../shared/types/users/message.types";
 
 export interface DirectMessageSendProps {
   conversationId: string;

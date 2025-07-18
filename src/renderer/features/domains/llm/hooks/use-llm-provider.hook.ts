@@ -5,13 +5,13 @@ import { useLlmProviderStore } from "../stores/llm-provider.store";
 import { useLlmProviderDefault } from "./use-llm-provider-default.hook";
 import {
   useCreateLlmProviderMutation,
-  useUpdateLlmProviderMutation,
   useDeleteLlmProviderMutation,
   useSetDefaultLlmProviderMutation,
+  useUpdateLlmProviderMutation,
 } from "./use-llm-provider-mutations.hook";
 import { useLlmProvidersQuery } from "./use-llm-provider-queries.hook";
 
-import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
+import type { LlmProviderFilterDto } from "../../../../shared/types/llm/llm-provider.types";
 
 export function useLlmProviders(filter?: LlmProviderFilterDto) {
   const selectedLlmProvider = useLlmProviderStore(

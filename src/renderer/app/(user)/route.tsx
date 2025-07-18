@@ -2,12 +2,12 @@ import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
 import { TopBar } from "@/renderer/components/layout/top-bar";
 import {
-  ResizablePanelGroup,
-  ResizablePanel,
   ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from "@/renderer/components/ui/resizable";
 import { usePageTitle } from "@/renderer/contexts/page-title-context";
-import { UserSidebar } from "@/renderer/domains/users/components";
+import { UserSidebar } from "@/renderer/users/components";
 
 function getPageTitle(
   pageTitle: string | undefined,

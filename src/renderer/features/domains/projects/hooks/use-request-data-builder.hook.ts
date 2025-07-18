@@ -1,9 +1,9 @@
 import { useCallback, type MutableRefObject } from "react";
 
 import type {
-  AISendMessageRequestDto,
   AIChatConfigDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+  AISendMessageRequestDto,
+} from "../../../../shared/types/projects/channel-message.types";
 
 interface UseRequestDataBuilderProps {
   channelId: string;

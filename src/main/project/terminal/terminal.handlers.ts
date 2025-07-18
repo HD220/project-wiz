@@ -1,8 +1,11 @@
 import { ipcMain } from "electron";
-import { terminalService } from "./terminal.service";
-import { logger } from "@/main/utils/logger";
+
 import { errorHandler } from "@/main/utils/error-handler";
-import type { TerminalCommand } from "@/shared/types/domains/projects/terminal.types";
+import { logger } from "@/main/utils/logger";
+
+import type { TerminalCommand } from "@/shared/types/projects/terminal.types";
+
+import { terminalService } from "./terminal.service";
 
 export function setupTerminalHandlers(): void {
   // Create terminal session

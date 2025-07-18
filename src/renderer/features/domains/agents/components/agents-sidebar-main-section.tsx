@@ -1,7 +1,7 @@
 import { AgentsSidebarError } from "./agents-sidebar-error";
 import { AgentsSidebarList } from "./agents-sidebar-list";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsSidebarMainSectionProps {
   projectId?: string;

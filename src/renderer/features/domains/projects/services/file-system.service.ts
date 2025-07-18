@@ -1,7 +1,7 @@
 import type {
-  FileSystemDto,
   FileContentDto,
-} from "@/shared/types/domains/projects/file-system.types";
+  FileSystemDto,
+} from "@/shared/types/projects/file-system.types";
 
 export const fileSystemService = {
   async getProjectFiles(projectId: string): Promise<FileSystemDto> {

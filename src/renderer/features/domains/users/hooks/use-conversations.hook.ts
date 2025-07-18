@@ -3,8 +3,8 @@ import { useCallback } from "react";
 import { useConversationStore } from "../stores/conversation.store";
 
 import {
-  useConversationsQuery,
   useConversationQuery,
+  useConversationsQuery,
   useCreateConversationMutation,
   useFindOrCreateConversationMutation,
 } from "./use-conversations-queries.hook";
@@ -12,7 +12,7 @@ import {
 import type {
   ConversationFilterDto,
   CreateConversationDto,
-} from "../../../../shared/types/domains/users/message.types";
+} from "../../../../shared/types/users/message.types";
 
 export function useConversations(filter?: ConversationFilterDto) {
   const selectedConversation = useConversationStore(

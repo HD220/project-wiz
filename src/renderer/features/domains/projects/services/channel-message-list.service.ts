@@ -2,7 +2,7 @@ import type {
   ChannelMessageDto,
   ChannelMessageFilterDto,
   ChannelMessagePaginationDto,
-} from "@/shared/types/domains/projects/channel-message/channel-message.types";
+} from "@/shared/types/projects/channel-message/channel-message.types";
 
 export async function listChannelMessages(
   filter?: ChannelMessageFilterDto,

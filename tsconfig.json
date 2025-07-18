@@ -35,8 +35,6 @@
       "@/lib/*": ["./src/renderer/lib/*"],
       "@/hooks/*": ["./src/renderer/hooks/*"],
       "@/features/*": ["./src/renderer/features/*"],
-      "@/shared/*": ["./src/shared/*"],
-      "@/main/*": ["./src/main/*"],
       "@/*": ["./src/*"]
     }
   },

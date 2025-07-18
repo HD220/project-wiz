@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import {
   AgentDto,
   CreateAgentDto,
-} from "../../../../shared/types/domains/agents/agent.types";
+} from "../../../../shared/types/agents/agent.types";
 import { useAgents } from "../../agents/hooks/use-agents.hook";
 
 interface UseAddAgentSubmitProps {

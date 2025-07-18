@@ -4,12 +4,9 @@ import { ConversationErrorDisplay } from "./conversation-error-display";
 import { ConversationMessagesList } from "./conversation-messages-list";
 import { ConversationMissingAgentWarning } from "./conversation-missing-agent-warning";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
-import type { MessageDto } from "../../../../shared/types/domains/users/message-dto.type";
-import type {
-  Message,
-  FormattedMessage,
-} from "../../../components/chat/message-item-types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
+import type { MessageDto } from "../../../../shared/types/users/message-dto.type";
+import type { FormattedMessage } from "../../../components/chat/message-item-types";
 
 interface ConversationContentProps {
   messages: MessageDto[];

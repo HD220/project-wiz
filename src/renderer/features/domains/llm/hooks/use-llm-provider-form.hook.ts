@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { LlmProviderDto } from "../../../../shared/types/domains/llm/llm-provider.types";
+import { LlmProviderDto } from "../../../../shared/types/llm/llm-provider.types";
 
 interface FormData {
   name: string;

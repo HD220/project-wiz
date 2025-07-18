@@ -1,4 +1,4 @@
-import { UpdateChannelDto } from "../../../../shared/types/domains/projects/channel.types";
+import { UpdateChannelDto } from "../../../../shared/types/projects/channel.types";
 import { channelService } from "../services/channel.service";
 import { useChannelStore } from "../stores/channel.store";
 

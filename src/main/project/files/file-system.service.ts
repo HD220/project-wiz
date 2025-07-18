@@ -1,12 +1,14 @@
 import { promises as fs } from "fs";
 import path from "path";
+
 import { generateId } from "@/main/utils/id-generator";
 import { getLogger } from "@/main/utils/logger";
+
 import type {
-  FileTreeItem,
-  FileSystemDto,
   FileContentDto,
-} from "@/shared/types/domains/projects/file-system.types";
+  FileSystemDto,
+  FileTreeItem,
+} from "@/shared/types/projects/file-system.types";
 
 const logger = getLogger("file-system-service");
 

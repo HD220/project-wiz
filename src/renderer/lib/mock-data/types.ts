@@ -42,11 +42,7 @@ export interface Agent {
 }
 
 // Import centralized message types instead of duplicating
-import type {
-  Message as BaseMessage,
-  MessageReaction,
-  FileAttachment,
-} from "@/shared/types/domains/common";
+import type { Message as BaseMessage } from "@/shared/types/common";
 
 // Extend base message for mock data specifics
 export interface Message extends BaseMessage {

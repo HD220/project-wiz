@@ -3,7 +3,7 @@ import { ipcRenderer } from "electron";
 import type {
   ConversationDto,
   CreateConversationDto,
-} from "../../../shared/types/domains/users/message.types";
+} from "../../../shared/types/users/message.types";
 
 export interface IConversationAPI {
   create: (data: CreateConversationDto) => Promise<ConversationDto>;

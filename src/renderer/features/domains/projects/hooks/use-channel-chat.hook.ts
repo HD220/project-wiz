@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 
-import type { AIChatConfigDto } from "../../../../shared/types/domains/projects/channel-message.types";
 import { useAiChatConfig } from "./use-ai-chat-config.hook";
 import { useAiChatMutations } from "./use-ai-chat-mutations.hook";
 import { useAiChatUtilities } from "./use-ai-chat-utilities.hook";
@@ -8,6 +7,8 @@ import { useChannelChatMessages } from "./use-channel-chat-messages.hook";
 import { useOptimisticMessage } from "./use-optimistic-message.hook";
 import { useRequestDataBuilder } from "./use-request-data-builder.hook";
 import { useTyping } from "./use-typing.hook";
+
+import type { AIChatConfigDto } from "../../../../shared/types/projects/channel-message.types";
 
 interface UseChannelChatProps {
   channelId: string;

@@ -1,11 +1,11 @@
 import { ipcRenderer } from "electron";
 
 import type {
-  LlmProviderDto,
   CreateLlmProviderDto,
-  UpdateLlmProviderDto,
+  LlmProviderDto,
   LlmProviderFilterDto,
-} from "../../../shared/types/domains/llm/llm-provider.types";
+  UpdateLlmProviderDto,
+} from "../../../shared/types/llm/llm-provider.types";
 
 export interface ILlmProviderAPI {
   create: (data: CreateLlmProviderDto) => Promise<LlmProviderDto>;

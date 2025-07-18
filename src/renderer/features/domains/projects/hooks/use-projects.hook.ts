@@ -4,7 +4,7 @@ import { useProjectsQuery } from "./use-projects-query.hook";
 import { useProjectsRefetch } from "./use-projects-refetch.hook";
 import { useProjectsState } from "./use-projects-state.hook";
 
-import type { ProjectFilterDto } from "../../../../shared/types/domains/projects/project.types";
+import type { ProjectFilterDto } from "../../../../shared/types/projects/project.types";
 
 export function useProjects(filter?: ProjectFilterDto) {
   const projectsQuery = useProjectsQuery(filter);

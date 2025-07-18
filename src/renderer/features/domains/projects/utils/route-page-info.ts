@@ -1,6 +1,6 @@
-import type { ChannelDto } from "../../../../shared/types/domains/projects/channel.types";
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
-import type { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
+import type { ChannelDto } from "../../../../shared/types/projects/channel.types";
+import type { ProjectDto } from "../../../../shared/types/projects/project.types";
 
 type PageInfo = {
   title: string;

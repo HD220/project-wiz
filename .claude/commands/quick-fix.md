@@ -9,7 +9,7 @@ O **Project Wiz** é uma aplicação Electron + React + TypeScript que segue arq
 ## Estrutura de Domínios
 
 ```
-src/main/domains/
+src/main/
 ├── projects/    # Container de colaboração
 ├── agents/      # Workers autônomos
 ├── users/       # Espaço pessoal

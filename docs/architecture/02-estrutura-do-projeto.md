@@ -19,7 +19,7 @@ A estrutura de arquivos do Project Wiz é um dos pilares da nossa filosofia de s
 
 ## 📁 Estrutura de Diretórios Completa
 
-A estrutura de código é organizada em `src` e dividida em `main` (backend), `renderer` (frontend) e `shared`. A organização interna segue uma abordagem de Domain-Driven Design (DDD) com Bounded Contexts e Aggregates.
+A estrutura de código é organizada em `src` e dividida em `main` (backend) e `renderer` (frontend). A organização interna segue uma abordagem de Domain-Driven Design (DDD) com Bounded Contexts e Aggregates.
 
 ```
 src/
@@ -55,43 +55,35 @@ src/
 │   │   └── index.ts
 │   └── main.ts                      # Ponto de entrada do Electron
 │
-├── renderer/                        # Frontend (React)
-│   ├── app/                         # Rotas (TanStack Router)
-│   │   ├── __root.tsx
-│   │   ├── index.tsx
-│   │   └── project/
-│   │       └── [project-id]/        # Rota de Projeto
-│   │           └── ...
-│   ├── features/                    # Features organizadas por domínio
-│   │   ├── user/
-│   │   │   └── authentication/      # Aggregate: Authentication
-│   │   │       ├── components/      # Componentes de Autenticação
-│   │   │       │   └── login-form.tsx
-│   │   │       ├── hooks/
-│   │   │       │   └── use-auth.ts
-│   │   │       └── store/
-│   │   │           └── auth-store.ts
-│   │   ├── project/               # Feature: Project
-│   │   │   ├── components/        # Componentes do projeto
-│   │   │   │   └── project-card.tsx
-│   │   │   ├── hooks/             # Hooks do projeto
-│   │   │   │   └── use-projects.ts
-│   │   │   └── issues/            # Aggregate: Issues
-│   │   │       ├── components/
-│   │   │       │   └── kanban-board.tsx
-│   │   │       └── hooks/
-│   │   │           └── use-issues.ts
-│   ├── components/                  # Componentes de UI compartilhados
-│   │   ├── layout/
-│   │   └── ui/                      # Componentes base (shadcn/ui)
-│   ├── hooks/                       # Hooks globais
-│   ├── store/                       # Stores globais
-│   └── utils/                       # Utilitários do Frontend
-│
-└── shared/                          # Código compartilhado (backend/frontend)
-    ├── types/                       # Definições de tipos TypeScript
-    ├── schemas/                     # Schemas de validação Zod
-    └── utils/                       # Utilitários compartilhados
+└── renderer/                        # Frontend (React)
+    ├── app/                         # Rotas (TanStack Router)
+    │   ├── __root.tsx
+    │   ├── index.tsx
+    │   └── project/
+    │       └── [project-id]/        # Rota de Projeto
+    │           └── ...
+    ├── features/                    # Features organizadas por domínio
+    │   ├── user/
+    │   │   └── authentication/      # Aggregate: Authentication
+    │   │       ├── components/      # Componentes de Autenticação
+    │   │       │   └── login-form.tsx
+    │   │       ├── hooks/
+    │   │       │   └── use-auth.ts
+    │   │       └── store/
+    │   │           └── auth-store.ts
+    │   ├── project/               # Feature: Project
+    │   │   ├── components/        # Componentes do projeto
+    │   │   │   ├── project-card.tsx
+    │   │   │   └── kanban-board.tsx  # Componente do agregado Issues
+    │   │   ├── hooks/             # Hooks do projeto
+    │   │   │   ├── use-projects.ts
+    │   │   │   └── use-issues.ts     # Hook do agregado Issues
+    ├── components/                  # Componentes de UI compartilhados
+    │   ├── layout/
+    │   └── ui/                      # Componentes base (shadcn/ui)
+    ├── hooks/                       # Hooks globais
+    ├── store/                       # Stores globais
+    └── utils/                       # Utilitários do Frontend
 ```
 
 ### `src/main` - Backend Detalhado

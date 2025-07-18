@@ -5,7 +5,7 @@ import {
 } from "../../../components/ui/avatar";
 import { cn, getAgentStatusColor } from "../../../lib/utils";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentItemAvatarProps {
   agent: AgentDto;

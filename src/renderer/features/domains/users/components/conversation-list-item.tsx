@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-import type { ConversationDto } from "../../../../shared/types/domains/users/message.types";
+import type { ConversationDto } from "../../../../shared/types/users/message.types";
 
 interface ConversationListItemProps {
   conversation: ConversationDto;

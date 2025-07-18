@@ -1,8 +1,8 @@
 import {
   ConversationDto,
-  CreateConversationDto,
   ConversationFilterDto,
-} from "../../../../shared/types/domains/users/message.types";
+  CreateConversationDto,
+} from "../../../../shared/types/users/message.types";
 
 export const conversationService = {
   async list(_filter?: ConversationFilterDto): Promise<ConversationDto[]> {

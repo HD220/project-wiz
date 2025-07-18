@@ -1,7 +1,7 @@
 import { AgentsSidebarContent } from "./agents-sidebar-content";
 import { useAgentsSidebarHooks } from "./agents-sidebar-hooks";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsSidebarProps {
   isOpen: boolean;

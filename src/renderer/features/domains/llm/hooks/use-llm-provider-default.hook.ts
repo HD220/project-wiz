@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 
 import {
-  useLlmProvidersQuery,
   useDefaultLlmProviderQuery,
+  useLlmProvidersQuery,
 } from "./use-llm-provider-queries.hook";
 
-import type { LlmProviderFilterDto } from "../../../../shared/types/domains/llm/llm-provider.types";
+import type { LlmProviderFilterDto } from "../../../../shared/types/llm/llm-provider.types";
 
 export function useLlmProviderDefault(filter?: LlmProviderFilterDto) {
   const providersQuery = useLlmProvidersQuery(filter);

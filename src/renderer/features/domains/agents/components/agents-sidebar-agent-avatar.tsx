@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsSidebarAgentAvatarProps {
   agent: AgentDto;

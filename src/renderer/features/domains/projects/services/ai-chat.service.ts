@@ -1,9 +1,9 @@
 import type {
+  AIRegenerateMessageRequestDto,
   AISendMessageRequestDto,
   AISendMessageResponseDto,
-  AIRegenerateMessageRequestDto,
   ChannelMessageDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+} from "../../../../shared/types/projects/channel-message.types";
 
 export const aiChatService = {
   async sendMessage(

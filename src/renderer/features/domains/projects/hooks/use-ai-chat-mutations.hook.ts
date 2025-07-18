@@ -3,9 +3,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { aiChatService } from "../services/ai-chat.service";
 
 import type {
-  AISendMessageRequestDto,
   AIRegenerateMessageRequestDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+  AISendMessageRequestDto,
+} from "../../../../shared/types/projects/channel-message.types";
 
 export function useAiChatMutations(channelId: string) {
   const queryClient = useQueryClient();

@@ -1,4 +1,4 @@
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsSidebarAgentInfoProps {
   agent: AgentDto;

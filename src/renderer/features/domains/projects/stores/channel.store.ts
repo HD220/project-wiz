@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { ChannelDto } from "../../../../shared/types/domains/projects/channel.types";
+import type { ChannelDto } from "../../../../shared/types/projects/channel.types";
 
 interface ChannelState {
   selectedChannel: ChannelDto | null;

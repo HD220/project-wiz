@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
-import type { AgentDto } from "@/shared/types/domains/agents/agent.types";
+import type { AgentDto } from "@/shared/types/agents/agent.types";
+
 import { useAgents } from "./use-agents.hook";
 
 export function useAgentDashboardState() {

@@ -1,9 +1,9 @@
 import type {
   ChannelDto,
+  ChannelFilterDto,
   CreateChannelDto,
   UpdateChannelDto,
-  ChannelFilterDto,
-} from "../../../../shared/types/domains/projects/channel.types";
+} from "../../../../shared/types/projects/channel.types";
 
 export const channelService = {
   async list(filter?: ChannelFilterDto): Promise<ChannelDto[]> {

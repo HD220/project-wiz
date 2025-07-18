@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
+import type { MessageDto } from "../../../../shared/types/users/message.types";
 
 export function useConversationAutoScroll(
   messages: MessageDto[],

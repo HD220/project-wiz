@@ -102,16 +102,16 @@ npm run test                   # Testes
 
 ### Regra 1: Indentação (2 violações)
 
-- `src/domains/agents/agent.entity.ts:45` - 2 níveis de indentação
-- `src/domains/projects/project.entity.ts:32` - 3 níveis de indentação
+- `src/agents/agent.entity.ts:45` - 2 níveis de indentação
+- `src/projects/project.entity.ts:32` - 3 níveis de indentação
 
 ### Regra 4: Linhas por método (1 violação)
 
-- `src/domains/users/user.entity.ts:23` - 15 linhas (máximo: 10)
+- `src/users/user.entity.ts:23` - 15 linhas (máximo: 10)
 
 ### Regra 6: Linhas por classe (2 violações)
 
-- `src/domains/llm/llm-provider.entity.ts` - 65 linhas (máximo: 50)
+- `src/llm/llm-provider.entity.ts` - 65 linhas (máximo: 50)
 - `src/renderer/hooks/use-terminal.hook.ts` - 157 linhas (máximo: 50)
 
 ## Ações Necessárias

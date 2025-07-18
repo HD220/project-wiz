@@ -5,7 +5,7 @@ import { channelMessageService } from "../services/channel-message.service";
 import type {
   CreateChannelMessageDto,
   UpdateChannelMessageDto,
-} from "../../../../shared/types/domains/projects/channel-message.types";
+} from "../../../../shared/types/projects/channel-message.types";
 
 export function useChannelMessagesMutations() {
   const queryClient = useQueryClient();

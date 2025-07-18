@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { MessageDto } from "../../../../shared/types/domains/users/message.types";
+import { MessageDto } from "../../../../shared/types/users/message.types";
 
 interface MessageState {
   currentConversationMessages: MessageDto[];

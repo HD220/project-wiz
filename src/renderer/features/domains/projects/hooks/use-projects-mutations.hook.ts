@@ -8,7 +8,7 @@ import { useUpdateProjectMutation } from "./use-update-project-mutation.hook";
 import type {
   CreateProjectDto,
   UpdateProjectDto,
-} from "../../../../shared/types/domains/projects/project.types";
+} from "../../../../shared/types/projects/project.types";
 
 export function useProjectsMutations() {
   const createMutation = useCreateProjectMutation();

@@ -7,12 +7,10 @@ import {
   TooltipTrigger,
 } from "@/renderer/components/ui/tooltip";
 
-import { cn } from "../../../lib/utils";
-
 import { ProjectAvatar } from "./project-avatar";
 import { ProjectUnreadBadge } from "./project-unread-badge";
 
-import type { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
+import type { ProjectDto } from "../../../../shared/types/projects/project.types";
 
 interface ProjectSidebarItemProps {
   project: ProjectDto;

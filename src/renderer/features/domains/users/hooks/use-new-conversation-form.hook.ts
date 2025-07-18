@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { useConversations } from "./use-conversations.hook";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 export function useNewConversationForm(
   onClose: () => void,

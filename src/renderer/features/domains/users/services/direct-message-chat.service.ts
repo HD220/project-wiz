@@ -1,4 +1,4 @@
-import type { MessageDto } from "../../../../shared/types/domains/users/message.types";
+import type { MessageDto } from "../../../../shared/types/users/message.types";
 
 export class DirectMessageChatService {
   static async sendToAgent(

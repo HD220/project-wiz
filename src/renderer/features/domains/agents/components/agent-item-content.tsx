@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentItemContentProps {
   agent: AgentDto;

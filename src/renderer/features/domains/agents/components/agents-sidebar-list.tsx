@@ -2,7 +2,7 @@ import { AgentsSidebarEmpty } from "./agents-sidebar-empty";
 import { AgentsSidebarListRenderer } from "./agents-sidebar-list-renderer";
 import { AgentsSidebarLoading } from "./agents-sidebar-loading";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface AgentsSidebarListProps {
   agents: AgentDto[];

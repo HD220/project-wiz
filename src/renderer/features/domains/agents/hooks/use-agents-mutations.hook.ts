@@ -2,11 +2,11 @@ import { useCallback } from "react";
 
 import {
   useCreateAgentMutation,
-  useUpdateAgentMutation,
   useDeleteAgentMutation,
+  useUpdateAgentMutation,
 } from "./use-agents-queries.hook";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 export function useAgentsMutations() {
   const createMutation = useCreateAgentMutation();

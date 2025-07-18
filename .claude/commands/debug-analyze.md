@@ -96,7 +96,7 @@ interface ExpectedType {
 }
 
 // Analisar imports
-import { Type } from "@/shared/types/domains/...";
+import { Type } from "@/shared/types/...";
 
 // Verificar implementações
 class Implementation implements Interface {
@@ -163,7 +163,7 @@ if (process.memoryUsage) {
 
 ```typescript
 // Verificar entidades
-src/main/domains/projects/
+src/main/projects/
 ├── project.entity.ts        # Verificar lógica de negócio
 ├── channel.entity.ts        # Verificar operações de canal
 ├── project.functions.ts     # Verificar CRUD operations
@@ -174,7 +174,7 @@ src/main/domains/projects/
 
 ```typescript
 // Verificar workers
-src/main/domains/agents/
+src/main/agents/
 ├── agent.entity.ts          # Verificar estado do agente
 ├── agent.worker.ts          # Verificar execução de tarefas
 ├── agent.queue.ts           # Verificar fila de trabalho
@@ -185,7 +185,7 @@ src/main/domains/agents/
 
 ```typescript
 // Verificar usuários
-src/main/domains/users/
+src/main/users/
 ├── user.entity.ts           # Verificar entidade usuário
 ├── direct-message.entity.ts # Verificar mensagens diretas
 └── user.functions.ts        # Verificar operações
@@ -195,7 +195,7 @@ src/main/domains/users/
 
 ```typescript
 // Verificar integração LLM
-src/main/domains/llm/
+src/main/llm/
 ├── llm-provider.entity.ts   # Verificar configuração
 ├── text-generation.service.ts # Verificar geração
 └── provider.registry.ts     # Verificar registro

@@ -1,5 +1,6 @@
 import { NumberField, TextAreaField } from "@/components/forms/form-fields";
-import type { CreateAgentDto } from "@/shared/types/domains/agents/agent.types";
+
+import type { CreateAgentDto } from "@/shared/types/agents/agent.types";
 
 interface FormFieldProps {
   formData: CreateAgentDto;

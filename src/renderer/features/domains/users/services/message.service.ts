@@ -1,8 +1,7 @@
 import type {
-  MessageDto,
   CreateMessageDto,
-  MessageFilterDto,
-} from "../../../../shared/types/domains/users/message.types";
+  MessageDto,
+} from "../../../../shared/types/users/message.types";
 
 export const messageService = {
   async listByConversation(

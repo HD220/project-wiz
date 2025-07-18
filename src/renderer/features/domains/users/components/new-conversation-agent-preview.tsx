@@ -1,14 +1,14 @@
-import { User, Target, BookOpen } from "lucide-react";
+import { BookOpen, Target, User } from "lucide-react";
 
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card/card-core";
 
-import type { AgentDto } from "../../../../shared/types/domains/agents/agent.types";
+import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 
 interface NewConversationAgentPreviewProps {
   agent: AgentDto;

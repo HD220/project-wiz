@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { ProjectDto } from "../../../../shared/types/domains/projects/project.types";
+import { ProjectDto } from "../../../../shared/types/projects/project.types";
 
 export interface ProjectState {
   selectedProject: ProjectDto | null;

@@ -3,7 +3,7 @@ import { ipcRenderer } from "electron";
 import type {
   ChannelDto,
   CreateChannelDto,
-} from "../../../shared/types/domains/projects/channel.types";
+} from "../../../shared/types/projects/channel.types";
 
 export interface IChannelAPI {
   createForProject: (

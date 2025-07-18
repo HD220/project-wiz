@@ -3,7 +3,7 @@ import { useConversationAutoScroll } from "./use-conversation-auto-scroll.hook";
 import { useConversationMessageFormat } from "./use-conversation-message-format.hook";
 import { useConversationMessageHandler } from "./use-conversation-message-handler.hook";
 
-import type { ConversationDto } from "../../../../shared/types/domains/users/conversation-dto.type";
+import type { ConversationDto } from "../../../../shared/types/users/conversation-dto.type";
 
 interface UseConversationViewStateProps {
   conversationId: string;

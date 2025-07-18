@@ -1,11 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { channelService } from "../services/channel.service";
 
-import type {
-  ChannelDto,
-  CreateChannelDto,
-} from "../../../../shared/types/domains/projects/channel.types";
+import type { CreateChannelDto } from "../../../../shared/types/projects/channel.types";
 
 export function useProjectChannelsQueries(projectId: string) {
   const queryClient = useQueryClient();

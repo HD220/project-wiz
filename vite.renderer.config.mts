@@ -1,8 +1,8 @@
-import path from "path";
-import tailwindcss from "@tailwindcss/vite";
 import { lingui } from "@lingui/vite-plugin";
-import react from "@vitejs/plugin-react-swc";
+import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
 import { defineConfig } from "vite";
 
 const projectRoot = path.resolve(__dirname);
@@ -34,9 +34,6 @@ export default defineConfig({
       "@/lib": path.resolve(projectRoot, "./src/renderer/lib/"),
       "@/hooks": path.resolve(projectRoot, "./src/renderer/hooks/"),
       "@/features": path.resolve(projectRoot, "./src/renderer/features/"),
-      "@/domains": path.resolve(projectRoot, "./src/renderer/domains/"),
-      "@/main-domains": path.resolve(projectRoot, "./src/main/domains/"),
-      "@/shared": path.resolve(projectRoot, "./src/shared/"),
       "@": path.resolve(projectRoot, "./src/"),
     },
   },

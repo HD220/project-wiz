@@ -1,12 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
+import type { FileTreeItem } from "@/shared/types/projects/file-system.types";
+
 import { useFileExplorerState } from "../hooks/use-file-explorer-state.hook";
 
 import { FileExplorerHeader } from "./file-explorer-header";
 import { FileExplorerItem } from "./file-explorer-item";
-
-import type { FileTreeItem } from "@/shared/types/domains/projects/file-system.types";
 
 interface FileExplorerProps {
   projectId: string;

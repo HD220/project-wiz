@@ -1,9 +1,9 @@
 import { ipcRenderer } from "electron";
 
 import type {
-  MessageDto,
   CreateMessageDto,
-} from "../../../shared/types/domains/users/message.types";
+  MessageDto,
+} from "../../../shared/types/users/message.types";
 
 export interface IDirectMessageAPI {
   create: (data: CreateMessageDto) => Promise<MessageDto>;

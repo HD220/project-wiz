@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { projectService } from "../services/project.service";
 
-import type { UpdateProjectDto } from "../../../../shared/types/domains/projects/project.types";
+import type { UpdateProjectDto } from "../../../../shared/types/projects/project.types";
 
 export function useUpdateProjectMutation() {
   const queryClient = useQueryClient();

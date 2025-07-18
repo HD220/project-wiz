@@ -1,12 +1,12 @@
 import { ipcRenderer } from "electron";
 
 import type {
-  UserDto,
   CreateUserDto,
   UpdateUserDto,
+  UserDto,
   UserPreferencesDto,
   UserSettingsDto,
-} from "../../../shared/types/domains/users/user.types";
+} from "../../../shared/types/users/user.types";
 
 export interface IUserAPI {
   create: (data: CreateUserDto) => Promise<UserDto>;

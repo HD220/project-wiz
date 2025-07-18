@@ -1,13 +1,15 @@
 import { spawn } from "child_process";
 import path from "path";
+
 import { generateId } from "@/main/utils/id-generator";
 import { logger } from "@/main/utils/logger";
+
 import type {
-  TerminalLine,
-  TerminalSession,
   TerminalCommand,
   TerminalCommandResponse,
-} from "@/shared/types/domains/projects/terminal.types";
+  TerminalLine,
+  TerminalSession,
+} from "@/shared/types/projects/terminal.types";
 
 class TerminalService {
   private sessions: Map<string, TerminalSession> = new Map();
