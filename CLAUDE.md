@@ -1,281 +1,112 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Project guidance for Claude Code when working with this repository.
 
 ## Project Overview
 
-**Project Wiz** is a desktop application built with Electron that serves as an "autonomous software factory" using AI agents to automate software development workflows. The application enables collaboration between human developers and AI agents through a Discord-Like interface.
+**Project Wiz** is an Electron desktop application serving as an "autonomous software factory" using AI agents to automate software development workflows. It enables collaboration between humans and AI agents through a Discord-like interface.
 
-## Current Implementation Status
+## Tech Stack
 
-This application is in **active development** with the following components already implemented:
-
-### ✅ Completed Features
-
-- **Multi-account Authentication System** - Local authentication with JWT tokens
-- **Database Schema** - Complete SQLite + Drizzle ORM implementation with all required tables
-- **Backend Services** - Authentication, project, agent, and chat services
-- **IPC Communication** - Type-safe communication between main and renderer processes
-- **Frontend Authentication** - Login/Register pages with Zustand state management
-- **Discord-like UI Structure** - Basic layout components and routing setup
-
-### 🚧 In Progress Features
-
-- **Agent Worker System** - Background AI workers for automated tasks
-- **Chat Components** - Real-time messaging between users and agents
-- **Project Management** - Full CRUD operations for projects and channels
-- **Forum System** - Structured discussions within projects
-- **Kanban Issues** - Task management with Git integration
-
-## Core Architecture
-
-### Technology Stack
-
-- **Electron** - Desktop application framework
-- **React 19** - Frontend with strict type safety
-- **TypeScript** - Type-safe development throughout
-- **Tailwind CSS** - Utility-first styling
-- **Node.js** - Main process backend
-- **SQLite + Drizzle ORM** - Type-safe database layer
-- **TanStack Router** - File-based routing
-- **TanStack Query** - Server state management
-- **Zustand** - Client state management
-- **Zod** - Runtime validation
-- **Shadcn/ui** - Component library
-- **Vitest** - Testing framework
+- **Electron** + **React 19** + **TypeScript** - Desktop framework with strict type safety
+- **Tailwind CSS** + **Shadcn/ui** - Styling and component library
+- **SQLite** + **Drizzle ORM** - Type-safe database layer
+- **TanStack Router** + **TanStack Query** - Routing and server state
+- **Zustand** + **Zod** - Client state and validation
 - **AI SDK** - LLM integrations (OpenAI, DeepSeek)
+- **Vitest** - Testing framework
 
-### KISS Principle (Keep It Simple, Stupid)
+## Development Principles
 
-- **Simplicity above all else** - avoid over-engineering
-- **Prefer simple solutions** to complex ones
+### KISS Principle
+
+- **Simplicity above all** - avoid over-engineering
 - **One responsibility per function/class**
-- **Avoid premature optimization**
-- **Use clear, descriptive names** that eliminate need for comments
-- **Break complex problems** into smaller, manageable pieces
+- **Clear, descriptive names** that eliminate comments need
+- **Prefer simple solutions** to complex ones
 
-### Clean Code Principles
+### Clean Code
 
-- **Code should read like prose** - readable by humans
-- **Functions should be small** and do one thing well
-- **Use meaningful names** for variables, functions, and classes
+- **Code reads like prose** - human readable
+- **Small functions** doing one thing well
 - **No magic numbers** - use named constants
-- **Consistent formatting** - use Prettier for automatic formatting
-- **Error handling** - fail fast with clear error messages
-- **No commented-out code** - remove dead code completely
+- **Fail fast** with clear error messages
+- **No commented-out code** - remove dead code
 
 ### Boy Scout Rule
 
-**"Always leave the campground cleaner than you found it"**
+**"Always leave code cleaner than you found it"**
 
-- **When touching existing code, improve it**
-- **Refactor while you work** - don't leave technical debt
+- **Refactor while working** - don't leave technical debt
 - **Extract duplicated code** into reusable functions
-- **Simplify complex logic** when you encounter it
-- **Update outdated patterns** to current standards
-- **Remove unused imports, variables, and functions**
-- **Improve variable names** to be more descriptive
-
-## Development Patterns
-
-### Implementation Guidelines
-
-When working with this codebase, follow these patterns:
-
-- **Use existing service layer patterns** - Follow the established AuthService pattern
-- **Maintain type safety** - All IPC communication must be type-safe
-- **Use the existing database schema** - Schema is complete and ready to use
-- **Follow KISS principles** - Keep implementations simple and focused
-- **Integrate with existing stores** - Use Zustand patterns already established
+- **Simplify complex logic** when encountered
+- **Remove unused imports/variables/functions**
 
 ## Essential Commands
 
-### Development
-
 ```bash
-# Start development server
-npm run dev
+# Development
+npm run dev              # Start development server
+npm run build            # Build for production
+npm test                 # Run tests
+npm run test:watch       # Watch tests
 
-# Build for production
-npm run build
+# Quality
+npm run lint             # Lint and fix code
+npm run type-check       # TypeScript checking
+npm run format           # Format code
+npm run quality:check    # Full quality check
 
-# Run tests
-npm test
-npm run test:watch
-npm run test:coverage
+# Database
+npm run db:generate      # Generate migrations
+npm run db:migrate       # Apply migrations
+npm run db:studio        # Open database studio
+
+# Environment
+cp .env.example .env     # Setup environment
+# Add DEEPSEEK_API_KEY
 ```
 
-### Code Quality
-
-```bash
-# Lint and fix code
-npm run lint
-npm run lint:fix
-
-# Type checking
-npm run type-check
-
-# Format code
-npm run format
-npm run format:check
-
-# Full quality check
-npm run quality:check
-```
-
-### Database Operations
-
-```bash
-# Generate database migrations
-npm run db:generate
-
-# Run migrations
-npm run db:migrate
-
-# Open database studio
-npm run db:studio
-
-# Reset database
-npm run db:reset
-```
-
-### Utilities
-
-```bash
-# Rebuild native dependencies
-npm run rebuild
-
-# Clean build artifacts
-npm run clean
-
-# Extract i18n messages
-npm run extract
-
-# Compile i18n messages
-npm run compile
-```
-
-### Environment Setup
-
-1. Copy `.env.example` to `.env`
-2. Add required API keys:
-   - `DEEPSEEK_API_KEY` - DeepSeek API key
-   - `DB_FILE_NAME` - Database file name (optional)
-
-## Current Architecture Implementation
+## Architecture
 
 ### Directory Structure
 
 ```
 src/
-├── main/                           # Backend (Node.js/Electron)
-│   ├── user/                      # User bounded context
-│   │   ├── authentication/        # Auth handlers and services
-│   │   ├── profile/              # User profile management
-│   │   └── direct-messages/      # Direct messaging
-│   ├── project/                   # Project bounded context
-│   │   ├── channels/             # Channel management
-│   │   ├── members/              # Project membership
-│   │   ├── forums/               # Forum discussions
-│   │   └── issues/               # Issue management
-│   ├── conversations/             # Conversation bounded context
-│   │   ├── channels/             # Channel chat
-│   │   ├── direct-messages/      # Direct message chat
-│   │   ├── routing/              # Message routing
-│   ├── agents/                    # Agent bounded context
-│   │   ├── worker/               # AI worker agents
-│   │   └── queue/                # Job queue management
-│   ├── database/                  # Database layer
-│   │   ├── connection.ts         # Database connection
-│   │   ├── schema/               # All schema definitions
-│   │   └── migrations/           # Database migrations
-│   ├── services/                  # Business logic services
-│   ├── utils/                     # Backend utilities
-│   └── main.ts                    # Application entry point
-├── renderer/                      # Frontend (React)
-│   ├── app/                      # TanStack Router pages
-│   │   ├── login.tsx             # Authentication page
-│   │   ├── (user)/               # User area routes
-│   │   └── project/              # Project area routes
-│   ├── components/                # Shared components
-│   ├── store/                     # Zustand state management
-│   │   ├── auth-store.ts         # Authentication state
-│   │   ├── project-store.ts      # Project state
-│   │   └── ui-store.ts           # UI state
-│   └── utils/                     # Frontend utilities
+├── main/                # Backend (Node.js/Electron)
+│   ├── user/           # User bounded context
+│   │   ├── authentication/  # Auth handlers and services
+│   │   └── profile/         # User profile management
+│   ├── project/        # Project bounded context
+│   │   ├── channels/        # Channel management
+│   │   ├── members/         # Project membership
+│   │   └── issues/          # Issue management
+│   ├── conversations/  # Conversation bounded context
+│   ├── agents/         # Agent bounded context
+│   ├── database/       # Database layer
+│   └── main.ts         # Application entry point
+├── renderer/           # Frontend (React)
+│   ├── app/           # TanStack Router pages
+│   ├── components/    # Shared components
+│   └── store/         # Zustand state management
 ```
 
 ### Database Schema
 
-The application uses SQLite with Drizzle ORM and includes the following tables:
+SQLite with Drizzle ORM including:
 
 - **users** - User accounts with local authentication
-- **agents** - AI agent definitions and configurations
 - **projects** - Project containers (Discord-like servers)
 - **channels** - Communication channels within projects
 - **messages** - Unified messaging for channels and DMs
-- **dm_conversations** - Direct message conversations
-- **forum_topics** & **forum_posts** - Structured forum discussions
-- **issues** & **issue_comments** - Kanban-style issue tracking
-- **project_agents** & **project_users** - Relationship tables
-
-### Authentication System
-
-Complete multi-account authentication system with:
-
-- **Local JWT authentication** - No external dependencies
-- **Account creation and login** - Full user registration flow
-- **Multi-user support** - Multiple accounts on same device
-- **Session management** - Persistent login sessions
-- **Security features** - Password hashing with bcrypt
-
-### Services Layer
-
-- **AuthService** - Complete authentication logic
-- **ProjectService** - Project management operations
-- **AgentService** - AI agent management
-- **ChatService** - Messaging functionality
-- **ChannelService** - Channel operations
-
-### IPC Communication
-
-Type-safe IPC handlers for:
-
-- **Authentication** - Login, register, validate token
-- **Projects** - CRUD operations for projects
-- **Agents** - Agent management
-- **Messages** - Chat functionality
-- **Users** - User operations
-
-## File Structure Rules
-
-### TypeScript Path Aliases
-
-```typescript
-// Frontend aliases
-import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth-store";
-import { AuthService } from "@/services/auth.service";
-
-// Backend aliases
-import { getDatabase } from "@/main/database/connection";
-import { users } from "@/main/database/schema/users.schema";
-```
+- **agents** - AI agent definitions and configurations
+- **issues** - Kanban-style issue tracking
 
 ## Code Quality Rules
 
-### ESLint Configuration
-
-The project uses comprehensive ESLint rules including:
-
-- TypeScript strict rules
-- React best practices
-- Import/export organization
-- Architectural boundaries enforcement
-
 ### Naming Conventions
 
-- **Files**: `kebab-case` (e.g., `create-project.function.ts`)
+- **Files**: `kebab-case` (e.g., `create-project.service.ts`)
 - **Variables/Functions**: `camelCase`
 - **Classes/Types**: `PascalCase`
 - **Constants**: `SCREAMING_SNAKE_CASE`
@@ -291,232 +122,78 @@ import { readFile } from "fs/promises";
 import { z } from "zod";
 import { drizzle } from "drizzle-orm";
 
-// 3. Internal imports (ordered by path)
-import { getDatabase } from "@/infrastructure/database";
-import { ProjectName } from "@/main-domains/projects/value-objects/project-name";
+// 3. Internal imports (use aliases)
+import { getDatabase } from "@/main/database/connection";
+import { usersTable } from "@/main/user/authentication/users.schema";
 
 // 4. Relative imports
-import { validateProjectData } from "./validate-project-data";
+import { validateUserData } from "./validate-user-data";
 ```
 
-## Database Schema
-
-### Drizzle ORM Usage
+### TypeScript Path Aliases
 
 ```typescript
-// Schema definition
-export const projectsSchema = sqliteTable("projects", {
-  id: text("id").primaryKey(),
+// Always use aliases, never relative imports
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/auth-store";
+import { AuthService } from "@/main/user/authentication/auth.service";
+```
+
+## Database Patterns
+
+### Schema Definition
+
+```typescript
+// ✅ Correct - Use type inference and custom types
+export type ProjectStatus = "active" | "archived";
+
+export const projectsTable = sqliteTable("projects", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
-  description: text("description"),
-  status: text("status").notNull().default("active"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  status: text("status").$type<ProjectStatus>().notNull().default("active"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
-// Type inference
-export type ProjectSchema = typeof projectsSchema.$inferSelect;
-export type NewProjectSchema = typeof projectsSchema.$inferInsert;
+// Type inference - don't recreate manually
+export type SelectProject = typeof projectsTable.$inferSelect;
+export type InsertProject = typeof projectsTable.$inferInsert;
+export type UpdateProject = Partial<InsertProject> & { id: string };
 ```
 
 ### Migration Workflow
 
-1. Modify/Create schema in `src/main/**/*.schema.ts`
-2. Run `npm run db:generate` to create migration
-3. Run `npm run db:migrate` to apply migration
+1. Create/modify schema in `src/main/**/*.schema.ts`
+2. `npm run db:generate` - auto-detects via `drizzle.config.ts`
+3. `npm run db:migrate` - applies migrations
 4. Update service layer if needed
+
+### Drizzle Query Syntax
+
+```typescript
+// ✅ Correct - Use db.select().from().where() with destructuring
+const [user] = await db
+  .select({ theme: usersTable.theme })
+  .from(usersTable)
+  .where(eq(usersTable.id, userId))
+  .limit(1);
+
+if (!user) {
+  throw new Error("User not found");
+}
+
+// ❌ Avoid - db.query requires schema registration
+const user = await db.query.usersTable.findFirst({
+  where: eq(usersTable.id, userId),
+});
+```
 
 ## IPC Communication
 
 ### Handler Pattern
-
-```typescript
-// Main process handler setup
-export function setupAuthHandlers(): void {
-  ipcMain.handle("auth:login", async (event, data: LoginInput) => {
-    try {
-      const result = await AuthService.login(data);
-      return { success: true, data: result };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Login failed",
-      };
-    }
-  });
-}
-
-// Service layer integration
-export class AuthService {
-  static async login(input: LoginInput): Promise<AuthResult> {
-    const db = getDatabase();
-    // Authentication logic...
-  }
-}
-```
-
-### Frontend API Usage
-
-```typescript
-// Zustand store integration
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      login: async (input: LoginInput) => {
-        set({ isLoading: true, error: null });
-        try {
-          const result: AuthResponse = await window.api.auth.login(input);
-          set({
-            user: result.user,
-            token: result.token,
-            isAuthenticated: true,
-          });
-        } catch (error) {
-          set({ error: error.message });
-        }
-      },
-    }),
-    { name: "auth-storage" },
-  ),
-);
-
-// React component usage
-const { login, isLoading, error } = useAuthStore();
-```
-
-## Internationalization
-
-### LinguiJS Setup
-
-```typescript
-// Extract messages
-npm run extract
-
-// Compile messages
-npm run compile
-
-// Usage in components
-import { Trans } from "@lingui/macro";
-
-<Trans>{"Welcome to Project Wiz"}</Trans>
-
-
-```
-
-## Deployment
-
-### Building for Production
-
-```bash
-# Extract and compile i18n messages, then build
-npm run build
-
-# Package for distribution
-npm run package
-
-# Create distributable packages
-npm run make
-```
-
-### Environment Variables
-
-Production deployments should set:
-
-- `DEEPSEEK_API_KEY` - Required for AI functionality
-- `DB_FILE_NAME` - Custom database file location (optional)
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Database locked errors**: Ensure no other instances are running
-2. **TypeScript errors**: Run `npm run type-check` for detailed errors
-3. **IPC communication failures**: Check handler registration in `src/main/ipc/index.ts`
-4. **Build failures**: Clear cache with `npm run clean`
-5. **Authentication issues**: Check JWT_SECRET in environment variables
-
-### Development Tips
-
-- Use `npm run dev` for hot reloading
-- Use `npm run test:watch` for continuous testing
-- Use `npm run db:studio` for database inspection
-- Check ESLint output for architectural violations
-- Use the existing authentication system for testing (admin/admin123)
-
-## Lessons Learned from Implementation
-
-### Drizzle ORM Schema Patterns
-
-**Schema Definition Best Practices:**
-
-```typescript
-// ✅ Correct - Use proper type inference
-export type SelectUser = typeof usersTable.$inferSelect; // Has ALL fields including auto-generated
-export type InsertUser = typeof usersTable.$inferInsert; // Excludes auto-generated fields (id, createdAt, updatedAt)
-export type UpdateUser = Partial<InsertUser> & { id: string }; // Partial fields + required ID
-
-// ❌ Avoid redundant manual type definitions when Drizzle provides inference
-```
-
-**Key Insights:**
-
-- `$inferSelect` includes ALL fields (for reading from DB)
-- `$inferInsert` automatically excludes auto-generated fields (for inserting to DB)
-- Don't manually recreate types that Drizzle already provides
-- Update types need the ID to identify which record to update
-
-**Migration Workflow:**
-
-1. Create schema file: `src/main/**/*.schema.ts`
-2. Run `npm run db:generate` - Drizzle automatically detects schema files via config
-3. The `drizzle.config.ts` with `schema: "./src/main/**/*.schema.ts"` handles everything
-4. No manual schema registration needed in connection files
-
-**Architecture Compliance:**
-
-- Follow the established directory structure exactly as defined in architecture docs
-- Implement one activity at a time from the development plan sequentially
-- Don't create redundant abstractions when the framework already provides them
-
-### Authentication Service Patterns
-
-**Local Desktop Authentication Best Practices:**
-
-```typescript
-// ✅ Correct - Simple in-memory session for Electron apps
-let currentUserId: string | null = null;
-
-export class AuthService {
-  static async login(credentials: LoginCredentials): Promise<AuthResult> {
-    // Verify credentials with bcrypt
-    const isValid = await bcrypt.compare(password, hash);
-
-    // Set simple session
-    currentUserId = user.id;
-
-    return { user: userWithoutPassword };
-  }
-
-  static logout(): void {
-    currentUserId = null;
-  }
-}
-
-// ❌ Avoid JWT for local desktop applications
-// JWT adds unnecessary complexity for single-user desktop apps
-```
-
-**Key Insights:**
-
-- **JWT is overkill for local Electron apps** - designed for distributed systems
-- **In-memory sessions are perfect** for desktop apps that restart when closed
-- **Simpler authentication = fewer bugs** and easier maintenance
-- **Still use bcrypt for password hashing** - essential for local security
-- **Session persists only while app runs** - expected behavior for desktop apps
-
-### IPC Handlers Implementation Patterns
-
-**Handlers IPC de Autenticação (Atividade 1.3) - Implementado 2025-07-18:**
 
 ```typescript
 // ✅ Correct IPC Handler Pattern
@@ -536,23 +213,21 @@ export function setupAuthHandlers(): void {
     },
   );
 }
+
+// Services return data directly - handlers do try/catch
+export class AuthService {
+  static async login(input: LoginInput): Promise<AuthResult> {
+    const db = getDatabase();
+    // Authentication logic...
+    return { user: userWithoutPassword };
+  }
+}
 ```
 
-**Estrutura de Tipos Correta:**
+### Type-Safe API Exposure
 
 ```typescript
-// ❌ ERRO CRÍTICO - Criar pasta shared/ que não existe na arquitetura
-src / shared / types / auth.types.ts;
-
-// ✅ CORRETO - Seguir estrutura definida na arquitetura
-src / main / types.ts; // Tipos globais (IpcResponse)
-src / main / user / authentication / auth.types.ts; // Tipos específicos do domínio
-```
-
-**Exposição IPC Type-Safe:**
-
-```typescript
-// preload.ts - Exposição da API
+// preload.ts - API exposure
 contextBridge.exposeInMainWorld("api", {
   auth: {
     login: (credentials: LoginCredentials): Promise<IpcResponse> =>
@@ -560,7 +235,7 @@ contextBridge.exposeInMainWorld("api", {
   },
 });
 
-// window.d.ts - Tipagem global
+// window.d.ts - Global typing
 declare global {
   interface Window {
     api: {
@@ -572,217 +247,122 @@ declare global {
 }
 ```
 
-**Aprendizados Críticos:**
-
-1. **SEMPRE seguir arquitetura definida** - Não criar estruturas que não existem no plano
-2. **IpcResponse como tipo global** - Reutilizável para todos os domínios futuros
-3. **Organização por domínio** - Tipos específicos ficam no próprio domínio
-4. **Registro centralizado** - Handlers registrados no main.ts via setup functions
-5. **Type-safety completa** - Do backend até o frontend via preload.ts e window.d.ts
-
-**Padrão para Próximos Handlers:**
-
-- Criar `dominio.handlers.ts` no respectivo domínio
-- Usar `IpcResponse<T>` de `@/main/types`
-- Registrar via `setupDominioHandlers()` no main.ts
-- Expor API tipada no preload.ts e window.d.ts
-
-### ProfileService Patterns
-
-**ProfileService Implementation Patterns (Atividade 1.4) - Implementado 2025-07-18:**
+### Frontend Integration
 
 ```typescript
-// ✅ Correct - Services return data directly
-export class ProfileService {
-  static async getTheme(userId: string): Promise<Theme> {
-    const [user] = await db
-      .select({ theme: usersTable.theme })
-      .from(usersTable)
-      .where(eq(usersTable.id, userId))
-      .limit(1);
+// Zustand store integration
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      login: async (input: LoginInput) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await window.api.auth.login(input);
+          set({ user: result.user, isAuthenticated: true });
+        } catch (error) {
+          set({ error: error.message });
+        }
+      },
+    }),
+    { name: "auth-storage" },
+  ),
+);
+```
 
-    if (!user) {
-      throw new Error("User not found");
-    }
+## Type Organization
 
-    return user.theme; // Return data directly
-  }
-}
+### Global Types
 
-// ✅ Correct - Handlers do try/catch
-export function setupProfileHandlers(): void {
-  ipcMain.handle(
-    "profile:getTheme",
-    async (_, userId: string): Promise<IpcResponse> => {
-      try {
-        const theme = await ProfileService.getTheme(userId);
-        return { success: true, data: theme };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to get theme",
-        };
-      }
-    },
-  );
+```typescript
+// src/main/types.ts - Global types
+export interface IpcResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 ```
 
-**Estrutura de Tipos Organizada:**
+### Domain Types
 
 ```typescript
-// ✅ CORRETO - Tipos organizados no schema para reutilização
+// ✅ Correct - Types in schema for reusability
 // src/main/user/authentication/users.schema.ts
 export type Theme = "dark" | "light" | "system";
 
-export const usersTable = sqliteTable("users", {
-  theme: text("theme").$type<Theme>().notNull().default("system"),
-  // ... outros campos
-});
-
-// ✅ CORRETO - Tipos derivados usando Omit e intersection
+// ✅ Correct - Derived types using Omit
 // src/main/user/authentication/auth.types.ts
-import type {
-  SelectUser,
-  InsertUser,
-} from "@/main/user/authentication/users.schema";
-
 export type AuthenticatedUser = Omit<SelectUser, "passwordHash">;
 export type RegisterUserInput = Omit<InsertUser, "passwordHash"> & {
   password: string;
 };
 ```
 
-**Sintaxe Drizzle Padrão:**
+## Authentication Patterns
+
+### Local Desktop Authentication
 
 ```typescript
-// ✅ CORRETO - Usar db.select().from().where() com desestruturação
-const [user] = await db
-  .select({ theme: usersTable.theme })
-  .from(usersTable)
-  .where(eq(usersTable.id, userId))
-  .limit(1);
+// ✅ Correct - Simple in-memory session for Electron
+let currentUserId: string | null = null;
 
-if (!user) {
-  throw new Error("User not found");
+export class AuthService {
+  static async login(credentials: LoginCredentials): Promise<AuthResult> {
+    // Verify with bcrypt
+    const isValid = await bcrypt.compare(password, hash);
+
+    // Set simple session
+    currentUserId = user.id;
+
+    return { user: userWithoutPassword };
+  }
+
+  static logout(): void {
+    currentUserId = null;
+  }
 }
 
-// ❌ EVITAR - db.query.tableName.findFirst() (requer schema na conexão)
-const user = await db.query.usersTable.findFirst({
-  where: eq(usersTable.id, userId),
-});
+// ❌ Avoid JWT for local desktop apps - unnecessary complexity
 ```
 
-**Organização de Imports:**
+## Key Principles
 
-```typescript
-// ✅ CORRETO - Sempre usar aliases
-import { ProfileService } from "@/main/user/profile/profile.service";
-import type { Theme } from "@/main/user/authentication/users.schema";
-import type { IpcResponse } from "@/main/types";
+### Follow Established Patterns
 
-// ❌ EVITAR - Imports relativos
-import { ProfileService } from "./profile.service";
-import type { Theme } from "../authentication/users.schema";
-```
+- Use existing service layer patterns (AuthService example)
+- Maintain type safety throughout IPC communication
+- Leverage existing database schema
+- Integrate with established Zustand patterns
 
-**Aprendizados Críticos:**
+### Architecture Compliance
 
-1. **Organização de Tipos**: Definir tipos no schema onde pertencem para reutilização entre domínios
-2. **Services Simples**: Retornar dados diretamente, deixar try/catch para handlers
-3. **Sintaxe Drizzle**: Usar `db.select().from().where()` com desestruturação `const [item] = await db...`
-4. **Tipos Derivados**: Usar `Omit` e intersection types ao invés de redefinir manualmente
-5. **Imports com Aliases**: Sempre usar `@/` para manter organização e evitar quebras de refatoração
-6. **Princípio KISS**: Implementar funcionalidade mínima primeiro (apenas tema) antes de expandir
-7. **Schema Type Safety**: Usar `.$type<CustomType>()` para tipos customizados no Drizzle
+- Follow directory structure exactly as defined
+- Don't create redundant abstractions when framework provides them
+- Organize types by domain, not in shared folders
+- Use bounded context organization (DDD)
 
-### Schema de Projetos Patterns
+### Critical Rules
 
-**Schema de Projetos Implementation Patterns (Atividade 2.1) - Implementado 2025-07-18:**
+1. **Always use path aliases** (`@/`) - never relative imports
+2. **Services return data directly** - handlers do try/catch
+3. **Use Drizzle type inference** - don't recreate types manually
+4. **Follow bounded context structure** - don't mix domains
+5. **Register handlers centrally** via setup functions in main.ts
+6. **Define types in schemas** for cross-domain reusability
 
-```typescript
-// ✅ Correct - Project schema following established patterns
-export type ProjectStatus = "active" | "archived";
+## Development Flow
 
-export const projectsTable = sqliteTable("projects", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  description: text("description"),
-  avatarUrl: text("avatar_url"),
-  gitUrl: text("git_url"),
-  localPath: text("local_path").notNull(),
-  status: text("status").$type<ProjectStatus>().notNull().default("active"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-});
+1. **Schema First** - Define/modify database schema
+2. **Generate Migration** - `npm run db:generate`
+3. **Apply Migration** - `npm run db:migrate`
+4. **Service Layer** - Implement business logic
+5. **IPC Handlers** - Create type-safe handlers
+6. **Frontend Integration** - Update stores and components
+7. **Quality Check** - `npm run quality:check`
 
-export type SelectProject = typeof projectsTable.$inferSelect;
-export type InsertProject = typeof projectsTable.$inferInsert;
-export type UpdateProject = Partial<InsertProject> & { id: string };
+## Troubleshooting
 
-export type CreateProjectInput = {
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  gitUrl?: string;
-  localPath: string;
-};
-```
-
-**Estrutura de Bounded Context:**
-
-```typescript
-// ✅ CORRETO - Organização por Bounded Context seguindo DDD
-src/main/project/               # Project Bounded Context
-├── projects.schema.ts          # Schema principal do domínio
-├── channels/                   # Aggregate: Channels (futuro)
-├── issues/                     # Aggregate: Issues (futuro)
-└── members/                    # Aggregate: Members (futuro)
-
-// ❌ EVITAR - Misturar domínios ou estruturas planas
-src/main/schemas/projects.ts    # Não seguir organização por domínio
-```
-
-**Workflow de Migração Drizzle:**
-
-```bash
-# ✅ CORRETO - Workflow automático completo
-npm run db:generate  # Detecta schemas automaticamente via drizzle.config.ts
-npm run db:migrate   # Aplica migrações ao banco SQLite
-
-# Arquivos gerados automaticamente:
-# - src/main/database/migrations/XXXX_migration_name.sql
-# - Meta files atualizados em migrations/meta/
-```
-
-**Tipos Customizados no Schema:**
-
-```typescript
-// ✅ CORRETO - Definir tipos customizados no schema para reutilização
-export type ProjectStatus = "active" | "archived";
-
-// Usar no campo com .$type<>()
-status: text("status").$type<ProjectStatus>()
-  .notNull()
-  .default("active"),
-
-// ❌ EVITAR - Hardcode de strings sem tipagem
-status: text("status").notNull().default("active"),
-```
-
-**Aprendizados Críticos:**
-
-1. **Detecção Automática de Schemas**: O `drizzle.config.ts` com pattern `./src/main/**/*.schema.ts` detecta todos os schemas automaticamente
-2. **Bounded Context Organization**: Manter schemas dentro de seus respectivos domínios para clareza arquitetural
-3. **Tipos Derivados Drizzle**: `$inferSelect` e `$inferInsert` eliminam duplicação e mantêm sincronização automática
-4. **Workflow de Migração**: `db:generate` → `db:migrate` é robusto e confiável para mudanças de schema
-5. **Tipos Customizados**: Usar `.$type<CustomType>()` para enums e tipos específicos do domínio
-6. **Nomenclatura Consistente**: Seguir padrão `{domain}Table` (ex: `projectsTable`, `usersTable`)
-7. **UUID Generation**: Usar `.$defaultFn(() => crypto.randomUUID())` para IDs únicos
-8. **Timestamps Padrão**: `sql\`CURRENT_TIMESTAMP\`` para campos de data automáticos
+- **Database locked**: Ensure no other instances running
+- **TypeScript errors**: `npm run type-check` for details
+- **IPC failures**: Check handler registration in main.ts
+- **Build failures**: Clear cache with `npm run clean`
+- **Auth issues**: Check credentials (admin/admin123 for testing)
