@@ -1,10 +1,12 @@
-import { eq, and, desc, lt } from "drizzle-orm";
-import { getDatabase } from "../../database/connection";
-import { messages } from "./messages.schema";
-import { dmConversations } from "../direct-messages/dm-conversations.schema";
-import { channels } from "../../project/channels/channels.schema";
-import { routeMessage } from "../routing/message.router";
+import { and, desc, eq, lt } from "drizzle-orm";
 import { z } from "zod";
+
+import { getDatabase } from "../database/connection";
+import { channels } from "../project/channels/channels.schema";
+
+import { dmConversations } from "./direct-messages/dm-conversations.schema";
+import { messages } from "./messages.schema";
+import { routeMessage } from "./routing/message.router";
 
 // Simple ID generator
 function generateId(): string {

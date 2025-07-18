@@ -1,7 +1,7 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import * as schema from "./schema-consolidated";
 import path from "path";
+
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 
 // Database file path
 const DB_PATH = process.env["DB_FILE_NAME"] || "./project-wiz.db";
@@ -17,7 +17,7 @@ sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("foreign_keys = ON");
 
 // Create Drizzle database instance
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(sqlite);
 
 export type DatabaseType = typeof db;
 

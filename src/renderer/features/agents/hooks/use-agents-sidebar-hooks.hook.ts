@@ -1,7 +1,7 @@
-import { useAgentsFilter } from "../hooks/use-agents-filter.hook";
-import { useAgentsSidebarActions } from "../hooks/use-agents-sidebar-actions.hook";
-import { useAgentsSidebarState } from "../hooks/use-agents-sidebar-state.hook";
-import { useAgents } from "../hooks/use-agents.hook";
+import { useAgentsFilter } from "./use-agents-filter.hook";
+import { useAgentsSidebarActions } from "./use-agents-sidebar-actions.hook";
+import { useAgentsSidebarState } from "./use-agents-sidebar-state.hook";
+import { useAgents } from "./use-agents.hook";
 
 import type { AgentDto } from "../../../../shared/types/agents/agent.types";
 

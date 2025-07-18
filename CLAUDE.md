@@ -174,7 +174,6 @@ src/
 │   │   ├── profile/              # User profile management
 │   │   └── direct-messages/      # Direct messaging
 │   ├── project/                   # Project bounded context
-│   │   ├── core/                 # Core project functionality
 │   │   ├── channels/             # Channel management
 │   │   ├── members/              # Project membership
 │   │   ├── forums/               # Forum discussions
@@ -183,7 +182,6 @@ src/
 │   │   ├── channels/             # Channel chat
 │   │   ├── direct-messages/      # Direct message chat
 │   │   ├── routing/              # Message routing
-│   │   └── core/                 # Core messaging
 │   ├── agents/                    # Agent bounded context
 │   │   ├── worker/               # AI worker agents
 │   │   └── queue/                # Job queue management
@@ -205,10 +203,6 @@ src/
 │   │   ├── project-store.ts      # Project state
 │   │   └── ui-store.ts           # UI state
 │   └── utils/                     # Frontend utilities
-└── shared/                        # Shared code
-    ├── types/                     # TypeScript types
-    ├── schemas/                   # Zod validation schemas
-    └── utils/                     # Shared utilities
 ```
 
 ### Database Schema
@@ -327,7 +321,7 @@ export type NewProjectSchema = typeof projectsSchema.$inferInsert;
 
 ### Migration Workflow
 
-1. Modify schema in `src/main/database/schema/`
+1. Modify/Create schema in `src/main/**/*.schema.ts`
 2. Run `npm run db:generate` to create migration
 3. Run `npm run db:migrate` to apply migration
 4. Update service layer if needed

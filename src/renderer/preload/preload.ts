@@ -1,18 +1,4 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type {
-  LoginInput,
-  RegisterInput,
-  CreateAgentInput,
-  UpdateAgentInput,
-  CreateProjectInput,
-  UpdateProjectInput,
-  CreateChannelInput,
-  UpdateChannelInput,
-  SendMessageInput,
-  ListOptions,
-} from "../shared/schemas/validation.schemas";
-// Types are used for TypeScript intellisense in the renderer process
-// These imports are needed for type checking but not used at runtime
 
 // Auth API
 const authAPI = {

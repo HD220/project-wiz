@@ -1,5 +1,5 @@
-import { app, dialog } from "electron";
-import { AppInitializer } from "./app/app-initializer";
+import { app } from "electron";
+
 import { getLogger } from "./utils/logger";
 
 const logger = getLogger("main");
@@ -8,33 +8,18 @@ const logger = getLogger("main");
 process.on("uncaughtException", (error) => {
   logger.error("Uncaught Exception:", error);
 
-  // Show error dialog to user
-  dialog.showErrorBox(
-    "Unexpected Error",
-    `An unexpected error occurred: ${error.message}\n\nThe application will now exit.`,
-  );
-
   // Gracefully exit
   app.quit();
 });
 
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled Promise Rejection:", { reason, promise });
-
-  // Don't exit on unhandled rejections, but log them
-  dialog.showErrorBox(
-    "Unhandled Error",
-    `An unhandled error occurred: ${reason}\n\nPlease restart the application if you experience issues.`,
-  );
 });
 
 // Application startup
 async function startApplication() {
   try {
     logger.info("Starting Project Wiz application...");
-
-    const appInitializer = new AppInitializer();
-    await appInitializer.initialize();
 
     logger.info("Application started successfully");
   } catch (error) {

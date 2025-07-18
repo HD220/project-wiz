@@ -1,15 +1,17 @@
 import { ipcMain } from "electron";
+
+import { requireUserId } from "../utils/auth-utils";
+
 import {
-  sendMessage,
+  deleteMessage,
   getChannelMessages,
   getDMMessages,
   getOrCreateDMConversation,
   getUserDMConversations,
   markDMAsRead,
+  sendMessage,
   updateMessage,
-  deleteMessage,
 } from "./message.service";
-import { requireUserId } from "../../utils/auth-utils";
 
 export function registerMessageHandlers(): void {
   ipcMain.handle("message:send", async (_, data) => {
