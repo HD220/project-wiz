@@ -10,12 +10,12 @@ import {
 import { getAgentsByProject } from "@/renderer/lib/placeholders";
 
 import { ProjectLayoutSkeleton } from "@/components/skeletons/project-layout-skeleton";
-import { AgentsSidebar } from "@/domains/agents/components";
+import { AgentsSidebar } from "@/features/agents/components";
 import {
   CreateChannelModal,
   ProjectNavigation,
-} from "@/domains/projects/components";
-import { useProjectChannels } from "@/domains/projects/hooks";
+} from "@/features/projects/components";
+import { useProjectChannels } from "@/features/projects/hooks";
 
 import { getPageInfo } from "./route-page-info";
 
@@ -106,7 +106,7 @@ export const Route = createFileRoute("/project/$projectId")({
   component: ProjectLayout,
   pendingComponent: ProjectLayoutSkeleton,
   loader: async ({ params }) => {
-    const { projectStore } = await import("@/domains/projects/stores");
+    const { projectStore } = await import("@/features/projects/stores");
     const project = await projectStore.getProjectById({ id: params.projectId });
     return {
       project,

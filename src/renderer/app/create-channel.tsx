@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { CreateChannelModal } from "@/domains/projects/components";
+import { CreateChannelModal } from "@/features/projects/components";
 
 export function CreateChannelPage() {
   const navigate = useNavigate();

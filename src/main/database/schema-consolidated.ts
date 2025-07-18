@@ -3,10 +3,10 @@
 
 // User bounded context
 export * from "../user/authentication/users.schema";
-export * from "../user/direct-messages/dm-conversations.schema";
+export * from "../conversations/direct-messages/dm-conversations.schema";
 
 // Project bounded context
-export * from "../project/core/projects.schema";
+export * from "../project/projects.schema";
 export * from "../project/channels/channels.schema";
 export * from "../project/members/project-agents.schema";
 
@@ -25,10 +25,10 @@ export * from "../conversations/core/messages.schema";
 // Relations (for queries)
 import { relations } from "drizzle-orm";
 import { users } from "../user/authentication/users.schema";
-import { dmConversations } from "../user/direct-messages/dm-conversations.schema";
+import { dmConversations } from "../conversations/direct-messages/dm-conversations.schema";
 import { agents } from "../agents/worker/agents.schema";
 import { llmProviders } from "../agents/llm/llm-providers.schema";
-import { projects } from "../project/core/projects.schema";
+import { projects } from "../project/projects.schema";
 import { channels } from "../project/channels/channels.schema";
 import { projectAgents } from "../project/members/project-agents.schema";
 import { messages } from "../conversations/core/messages.schema";

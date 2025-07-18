@@ -1,7 +1,7 @@
 import { eq, and, desc, lt } from "drizzle-orm";
 import { getDatabase } from "../../database/connection";
 import { messages } from "./messages.schema";
-import { dmConversations } from "../../user/direct-messages/dm-conversations.schema";
+import { dmConversations } from "../direct-messages/dm-conversations.schema";
 import { channels } from "../../project/channels/channels.schema";
 import { z } from "zod";
 

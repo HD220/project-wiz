@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { SettingsHeader, SettingsTabs } from "@/domains/users/components";
-import { useUser } from "@/domains/users/hooks";
+import { SettingsHeader, SettingsTabs } from "@/features/users/components";
+import { useUser } from "@/features/users/hooks";
 
 import {
   UserSettings,

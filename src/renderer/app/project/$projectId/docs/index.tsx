@@ -7,12 +7,12 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { DocTree } from "@/domains/projects/components/docs/doc-tree";
-import { DocViewer } from "@/domains/projects/components/docs/doc-viewer";
+import { DocTree } from "@/features/projects/components/docs/doc-tree";
+import { DocViewer } from "@/features/projects/components/docs/doc-viewer";
 import {
   mockDocs,
   type DocFile,
-} from "@/domains/projects/components/docs/mock-docs-data";
+} from "@/features/projects/components/docs/mock-docs-data";
 
 export const Route = createFileRoute("/project/$projectId/docs/")({
   component: ProjectDocsPage,

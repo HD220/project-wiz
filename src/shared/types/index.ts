@@ -1,9 +1,17 @@
-// Central export for all shared types organized by domains
-export * from "./domains/agents/agent.types";
-export * from "./domains/llm/llm-provider.types";
-export * from "./domains/users/message.types";
-export * from "./domains/projects/project.types";
-export * from "./domains/users/user.types";
+// Central export for all shared types - simplified structure
+export * from "./message-core.types";
+export * from "./project-core.types";
+export * from "./agent-core.types";
+export * from "./llm-provider-core.types";
+export * from "./user-core.types";
+
+// Legacy exports for backwards compatibility
+export * from "./common";
+export * from "./auth.types";
+export * from "./calendar.types";
+export * from "./electron.types";
+export * from "./page-info.types";
+export * from "./settings.types";
 
 // Re-export channel types to avoid conflicts
 export {

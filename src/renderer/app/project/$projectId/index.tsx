@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useProject } from "@/domains/projects/hooks";
+import { useProject } from "@/features/projects/hooks";
 
-import { ProjectActivityGrid } from "./project-activity-grid";
-import { ProjectHeader } from "./project-header";
-import { ProjectStatsGrid } from "./project-stats-grid";
+import { ProjectActivityGrid } from "@/features/projects/components/project-activity-grid";
+import { ProjectHeader } from "@/features/projects/components/project-header";
+import { ProjectStatsGrid } from "@/features/projects/components/project-stats-grid";
 
 export function ProjectIndexPage() {
   const { projectId } = Route.useParams();

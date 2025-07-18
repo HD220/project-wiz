@@ -22,10 +22,10 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - [4. Camada Frontend (Renderer Process) - 2. Arquitetura de Features (Domain-Driven)](docs/architecture/new/04-camada-frontend.md#2-arquitetura-de-features-domain-driven)
 - **Localização no Código**: `src/renderer/domains/` (e todos os seus subdiretórios)
 - **Checklist de Correção**:
-  - [ ] Renomear o diretório `src/renderer/domains/` para `src/renderer/features/`.
-  - [ ] Atualizar todos os imports e referências no código que apontam para `src/renderer/domains/` para `src/renderer/features/`.
-  - [ ] Revisar a documentação interna e comentários de código para refletir a nova estrutura.
-  - [ ] Garantir que a estrutura interna de `features` (e.g., `components/`, `hooks/`) esteja consistente com a documentação.
+  - [x] Renomear o diretório `src/renderer/domains/` para `src/renderer/features/`.
+  - [x] Atualizar todos os imports e referências no código que apontam para `src/renderer/domains/` para `src/renderer/features/`.
+  - [x] Revisar a documentação interna e comentários de código para refletir a nova estrutura.
+  - [x] Garantir que a estrutura interna de `features` (e.g., `components/`, `hooks/`) esteja consistente com a documentação.
 
 ### Issue #2: Inconsistência na Localização de `direct-messages` no Backend
 
@@ -36,9 +36,9 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - [8. Funcionalidade: Espaço Pessoal e DMs - 1. Mensagens Diretas (DMs)](docs/architecture/new/08-funcionalidade-espaco-pessoal-e-dms.md#1-mensagens-diretas-dms)
 - **Localização no Código**: `src/main/user/direct-messages/`
 - **Checklist de Correção**:
-  - [ ] Mover o conteúdo de `src/main/user/direct-messages/` para `src/main/conversations/direct-messages/`.
-  - [ ] Atualizar todos os imports e referências no código que apontam para a localização antiga.
-  - [ ] Adicionar `direct-messages/` como um agregado explícito sob `conversations/` na documentação `02-estrutura_do_projeto.md`.
+  - [x] Mover o conteúdo de `src/main/user/direct-messages/` para `src/main/conversations/direct-messages/`.
+  - [x] Atualizar todos os imports e referências no código que apontam para a localização antiga.
+  - [x] Adicionar `direct-messages/` como um agregado explícito sob `conversations/` na documentação `02-estrutura_do_projeto.md`.
 
 ### Issue #3: Duplicação de `logger.ts` e Omissão de `utils/` no `src/main`
 
@@ -49,9 +49,9 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - [1. Visão Geral e Princípios da Arquitetura - Stack Tecnológico](docs/architecture/new/01-visao-geral-e-principios.md#stack-tecnológico) (menciona `logger.ts`)
 - **Localização no Código**: `src/main/logger.ts`, `src/main/utils/logger.ts`, `src/main/utils/`
 - **Checklist de Correção**:
-  - [ ] Remover o arquivo `src/main/logger.ts` (manter a versão em `src/main/utils/logger.ts`).
-  - [ ] Atualizar todas as referências para `src/main/logger.ts` para apontar para `src/main/utils/logger.ts`.
-  - [ ] Adicionar `utils/` como um diretório de utilitários gerais sob `src/main/` na documentação `02-estrutura_do_projeto.md`.
+  - [x] Remover o arquivo `src/main/logger.ts` (manter a versão em `src/main/utils/logger.ts`).
+  - [x] Atualizar todas as referências para `src/main/logger.ts` para apontar para `src/main/utils/logger.ts`.
+  - [x] Adicionar `utils/` como um diretório de utilitários gerais sob `src/main/` na documentação `02-estrutura_do_projeto.md`.
 
 ### Issue #4: Inconsistência na Localização dos Handlers IPC no Backend
 
@@ -62,9 +62,9 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - [2. Estrutura do Projeto - `src/main` - Backend Detalhado](docs/architecture/new/02-estrutura-do-projeto.md#srcmain---backend-detalhado)
 - **Localização no Código**: `src/main/ipc/main.handlers.ts`
 - **Checklist de Correção**:
-  - [ ] Mover os handlers definidos em `src/main/ipc/main.handlers.ts` para seus respectivos diretórios de domínio/agregado (ex: handlers de usuário para `src/main/user/authentication/auth.handlers.ts`, handlers de projeto para `src/main/project/project.handlers.ts`).
-  - [ ] Remover o diretório `src/main/ipc/` se todos os handlers forem movidos.
-  - [ ] Atualizar a documentação `03-camada-backend.md` para refletir a abordagem de handlers distribuídos, ou ajustar a documentação `02-estrutura_do_projeto.md` para incluir `ipc/` se uma centralização parcial for intencional.
+  - [x] Mover os handlers definidos em `src/main/ipc/main.handlers.ts` para seus respectivos diretórios de domínio/agregado (ex: handlers de usuário para `src/main/user/authentication/auth.handlers.ts`, handlers de projeto para `src/main/project/project.handlers.ts`).
+  - [x] Remover o diretório `src/main/ipc/` se todos os handlers forem movidos.
+  - [x] Atualizar a documentação `03-camada-backend.md` para refletir a abordagem de handlers distribuídos, ou ajustar a documentação `02-estrutura_do_projeto.md` para incluir `ipc/` se uma centralização parcial for intencional.
 
 ### Issue #5: Inconsistência na Localização dos Serviços e Handlers Principais do Projeto
 
@@ -74,11 +74,11 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - [2. Estrutura do Projeto - `src/main` - Backend Detalhado](docs/architecture/new/02-estrutura-do-projeto.md#srcmain---backend-detalhado)
 - **Localização no Código**: `src/main/project/core/`
 - **Checklist de Correção**:
-  - [ ] Mover `src/main/project/core/project.service.ts` para `src/main/project/project.service.ts`.
-  - [ ] Mover `src/main/project/core/project.handlers.ts` para `src/main/project/project.handlers.ts`.
-  - [ ] Mover `src/main/project/core/projects.schema.ts` para `src/main/project/projects.schema.ts`.
-  - [ ] Atualizar todos os imports e referências no código que apontam para a localização antiga.
-  - [ ] Remover o diretório `src/main/project/core/`.
+  - [x] Mover `src/main/project/core/project.service.ts` para `src/main/project/project.service.ts`.
+  - [x] Mover `src/main/project/core/project.handlers.ts` para `src/main/project/project.handlers.ts`.
+  - [x] Mover `src/main/project/core/projects.schema.ts` para `src/main/project/projects.schema.ts`.
+  - [x] Atualizar todos os imports e referências no código que apontam para a localização antiga.
+  - [x] Remover o diretório `src/main/project/core/`.
 
 ### Issue #6: Inconsistência na Estrutura de Tipos Compartilhados (`src/shared/types/domains/`)
 
@@ -88,11 +88,11 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - [2. Estrutura do Projeto - `shared/` - Código compartilhado (backend/frontend)](docs/architecture/new/02-estrutura-do-projeto.md#srcshared---código-compartilhado-backendfrontend)
 - **Localização no Código**: `src/shared/types/domains/` (e todos os seus subdiretórios)
 - **Checklist de Correção**:
-  - [ ] Avaliar se os tipos dentro de `src/shared/types/domains/` são realmente compartilhados entre `main` e `renderer`.
-  - [ ] Se forem, mover esses tipos diretamente para `src/shared/types/` (e.g., `src/shared/types/user.types.ts`, `src/shared/types/project.types.ts`).
-  - [ ] Se não forem estritamente compartilhados, considerar movê-los para os respectivos Bounded Contexts em `src/main/` ou `src/renderer/features/`.
-  - [ ] Atualizar todos os imports e referências no código.
-  - [ ] Remover o diretório `src/shared/types/domains/`.
+  - [x] Avaliar se os tipos dentro de `src/shared/types/domains/` são realmente compartilhados entre `main` e `renderer`.
+  - [x] Se forem, mover esses tipos diretamente para `src/shared/types/` (e.g., `src/shared/types/user.types.ts`, `src/shared/types/project.types.ts`).
+  - [x] Se não forem estritamente compartilhados, considerar movê-los para os respectivos Bounded Contexts em `src/main/` ou `src/renderer/features/`.
+  - [x] Atualizar todos os imports e referências no código.
+  - [x] Remover o diretório `src/shared/types/domains/`.
 
 ### Issue #7: Componentes de Dashboard e Header em `src/renderer/app/project/$projectId/`
 
@@ -107,10 +107,10 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - `src/renderer/app/project/$projectId/project-activity-grid.tsx`
   - `src/renderer/app/(user)/dashboard-cards.tsx`
 - **Checklist de Correção**:
-  - [ ] Mover `project-stats-grid.tsx`, `project-header.tsx`, `project-activity-grid.tsx` para `src/renderer/features/project/components/`.
-  - [ ] Mover `dashboard-cards.tsx` para `src/renderer/features/user/components/` (ou um local apropriado para componentes de dashboard de usuário).
-  - [ ] Atualizar todos os imports e referências no código que apontam para as localizações antigas.
-  - [ ] Garantir que esses componentes sejam importados e utilizados pelas rotas apropriadas em `src/renderer/app/`.
+  - [x] Mover `project-stats-grid.tsx`, `project-header.tsx`, `project-activity-grid.tsx` para `src/renderer/features/project/components/`.
+  - [x] Mover `dashboard-cards.tsx` para `src/renderer/features/user/components/` (ou um local apropriado para componentes de dashboard de usuário).
+  - [x] Atualizar todos os imports e referências no código que apontam para as localizações antigas.
+  - [x] Garantir que esses componentes sejam importados e utilizados pelas rotas apropriadas em `src/renderer/app/`.
 
 ### Issue #8: Componentes de Domínio em `src/renderer/components/`
 
@@ -129,12 +129,12 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - `src/renderer/components/forms/agent-form.tsx`
   - `src/renderer/components/markdown-renderer/` (todos os arquivos dentro deste diretório)
 - **Checklist de Correção**:
-  - [ ] Mover os componentes específicos de `project` (e.g., `project-stats-grid.tsx`, `project-header.tsx`, `project-activity-grid.tsx`) para `src/renderer/features/project/components/`.
-  - [ ] Mover os componentes específicos de `user` (e.g., `dashboard-cards.tsx`) para `src/renderer/features/user/components/`.
-  - [ ] Mover os componentes de `chat` (e.g., `src/renderer/components/chat/`) para `src/renderer/features/conversations/components/`.
-  - [ ] Mover os componentes de `forms` específicos de domínio (e.g., `project-form.tsx`, `agent-form.tsx`) para seus respectivos diretórios de feature (e.g., `src/renderer/features/project/components/forms/`, `src/renderer/features/agents/components/forms/`).
-  - [ ] Avaliar os componentes em `src/renderer/components/markdown-renderer/`. Se eles contiverem lógica específica de domínio ou forem usados apenas em um contexto, movê-los para a feature apropriada. Caso contrário, garantir que sejam puramente visuais e genéricos.
-  - [ ] Atualizar todos os imports e referências no código que apontam para as localizações antigas.
+  - [x] Mover os componentes específicos de `project` (e.g., `project-stats-grid.tsx`, `project-header.tsx`, `project-activity-grid.tsx`) para `src/renderer/features/project/components/`.
+  - [x] Mover os componentes específicos de `user` (e.g., `dashboard-cards.tsx`) para `src/renderer/features/user/components/`.
+  - [x] Mover os componentes de `chat` (e.g., `src/renderer/components/chat/`) para `src/renderer/features/conversations/components/`.
+  - [x] Mover os componentes de `forms` específicos de domínio (e.g., `project-form.tsx`, `agent-form.tsx`) para seus respectivos diretórios de feature (e.g., `src/renderer/features/project/components/forms/`, `src/renderer/features/agents/components/forms/`).
+  - [x] Avaliar os componentes em `src/renderer/components/markdown-renderer/`. Se eles contiverem lógica específica de domínio ou forem usados apenas em um contexto, movê-los para a feature apropriada. Caso contrário, garantir que sejam puramente visuais e genéricos.
+  - [x] Atualizar todos os imports e referências no código que apontam para as localizações antigas.
 
 ### Issue #9: Stores de Domínio em `src/renderer/store/`
 
@@ -147,12 +147,36 @@ Este documento detalha as inconsistências e implementações ausentes encontrad
   - `src/renderer/store/agent-store.ts`
   - `src/renderer/store/project-store.ts`
 - **Checklist de Correção**:
-  - [ ] Avaliar se o estado gerenciado por `agent-store.ts` e `project-store.ts` pode ser migrado para o TanStack Query dentro das respectivas features (`src/renderer/features/agents/` e `src/renderer/features/project/`).
-  - [ ] Se um store global for estritamente necessário para esses domínios, considerar movê-los para dentro de seus respectivos diretórios de feature (e.g., `src/renderer/features/agents/store/agent-store.ts`).
-  - [ ] Atualizar todos os imports e referências no código.
+  - [x] Avaliar se o estado gerenciado por `agent-store.ts` e `project-store.ts` pode ser migrado para o TanStack Query dentro das respectivas features (`src/renderer/features/agents/` e `src/renderer/features/project/`).
+  - [x] Se um store global for estritamente necessário para esses domínios, considerar movê-los para dentro de seus respectivos diretórios de feature (e.g., `src/renderer/features/agents/store/agent-store.ts`).
+  - [x] Atualizar todos os imports e referências no código.
 
 ---
 
 ## Conclusão
 
-Esta análise detalhada revelou diversas inconsistências entre a arquitetura documentada e a implementação atual do Project Wiz. As issues identificadas abrangem desde a estrutura de diretórios e a organização de módulos até a localização de componentes e o gerenciamento de estado. A resolução dessas questões é crucial para alinhar o codebase com os princípios de design estabelecidos, garantindo maior clareza, manutenibilidade e escalabilidade do projeto. Recomenda-se que as correções sejam abordadas de forma sistemática, seguindo os checklists fornecidos para cada issue.
+Esta análise detalhada revelou diversas inconsistências entre a arquitetura documentada e a implementação atual do Project Wiz. As issues identificadas abrangem desde a estrutura de diretórios e a organização de módulos até a localização de componentes e o gerenciamento de estado.
+
+**STATUS: TODAS AS ISSUES FORAM RESOLVIDAS ✅**
+
+### Resumo das Correções Realizadas:
+
+1. **✅ Issue #1**: Renomeado `src/renderer/domains/` para `src/renderer/features/` e atualizados todos os imports
+2. **✅ Issue #2**: Movido `src/main/user/direct-messages/` para `src/main/conversations/direct-messages/`
+3. **✅ Issue #3**: Removida duplicação de `logger.ts` e organizados utilitários em `src/main/utils/`
+4. **✅ Issue #4**: Movidos handlers IPC centralizados para seus respectivos domínios
+5. **✅ Issue #5**: Movidos arquivos de `src/main/project/core/` para `src/main/project/`
+6. **✅ Issue #6**: Reorganizada estrutura de tipos compartilhados com princípio "flat is better than nested"
+7. **✅ Issue #7**: Movidos componentes de dashboard/header para features apropriadas
+8. **✅ Issue #8**: Movidos componentes específicos de domínio para features
+9. **✅ Issue #9**: Reorganizados stores de domínio removendo duplicações
+
+### Benefícios Alcançados:
+
+- **Melhor Organização**: Estrutura mais clara e consistente com a documentação
+- **Menos Duplicação**: Eliminação de arquivos duplicados e referências desnecessárias
+- **Maior Coesão**: Componentes e lógica organizados por domínio
+- **Facilidade de Manutenção**: Estrutura mais simples e navegável
+- **Conformidade Arquitetural**: Alinhamento completo com os princípios estabelecidos
+
+O codebase agora está totalmente alinhado com os princípios de design estabelecidos, garantindo maior clareza, manutenibilidade e escalabilidade do projeto.

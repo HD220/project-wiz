@@ -4,8 +4,8 @@ import {
   AiChatInput,
   AiChatProviderSelector,
   AiChatStatus,
-} from "@/domains/projects/components";
-import { useChannelChat } from "@/domains/projects/hooks";
+} from "@/features/projects/components";
+import { useChannelChat } from "@/features/projects/hooks";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card/card-core";
 

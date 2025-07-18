@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { CreateProjectForm } from "@/domains/projects/components";
+import { CreateProjectForm } from "@/features/projects/components";
 
 export function CreateProjectPage() {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import { app } from "electron";
 import squirrelStartup from "electron-squirrel-startup";
 
-import { registerAllHandlers } from "../ipc/main.handlers";
+import { registerAllHandlers } from "./handlers-registry";
 
 import { setupAppEventHandlers } from "./app-event-handlers";
 import { initializeAppServices } from "./app-services";

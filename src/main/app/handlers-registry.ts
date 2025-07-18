@@ -1,6 +1,6 @@
 // New IPC handlers following FILE-STRUCTURE.md
 import { registerAuthHandlers } from "../user/authentication/auth.handlers";
-import { registerProjectHandlers } from "../project/core/project.handlers";
+import { registerProjectHandlers } from "../project/project.handlers";
 import { registerChannelHandlers } from "../project/channels/channel.handlers";
 import { registerAgentHandlers } from "../agents/worker/agent.handlers";
 import { registerMessageHandlers } from "../conversations/core/message.handlers";

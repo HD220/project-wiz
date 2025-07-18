@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { channels } from "../../project/channels/channels.schema";
-import { dmConversations } from "../../user/direct-messages/dm-conversations.schema";
+import { dmConversations } from "../direct-messages/dm-conversations.schema";
 
 export const messages = sqliteTable("messages", {
   id: text("id").primaryKey(),

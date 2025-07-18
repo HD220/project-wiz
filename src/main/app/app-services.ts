@@ -1,6 +1,8 @@
-import { logger } from "../logger";
+import { getLogger } from "../utils/logger";
 
 export async function initializeAppServices(): Promise<void> {
+  const logger = getLogger("app-services");
+
   logger.info("Initializing application services...");
 
   try {

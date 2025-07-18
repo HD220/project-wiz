@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useProjectChannels } from "@/domains/projects/hooks";
+import { useProjectChannels } from "@/features/projects/hooks";
 
 import { ChatContainer } from "../../../../components/chat/chat-container";
 

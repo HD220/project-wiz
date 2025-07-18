@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ProjectSidebar } from "@/domains/projects/components";
+import { ProjectSidebar } from "@/features/projects/components";
 
 function DashboardButton() {
   return (

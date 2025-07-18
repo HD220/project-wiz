@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { AgentDashboard } from "@/domains/agents/components";
+import { AgentDashboard } from "@/features/agents/components";
 
 export const Route = createFileRoute("/project/$projectId/agents/")({
   component: ProjectAgentsPage,

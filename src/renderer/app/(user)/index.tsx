@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { PageTitle } from "@/components/page-title";
 
-import { DashboardCards } from "./dashboard-cards";
+import { DashboardCards } from "@/features/users/components/dashboard-cards";
 
 export const Route = createFileRoute("/(user)/")({
   component: UserDashboardPage,
