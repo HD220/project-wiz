@@ -1,12 +1,11 @@
-// avatar component - simplified for Object Calisthenics compliance
 "use client";
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/renderer/lib/utils";
 
-export function Avatar({
+function Avatar({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root>) {
@@ -22,7 +21,7 @@ export function Avatar({
   );
 }
 
-export function AvatarImage({
+function AvatarImage({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
@@ -35,7 +34,7 @@ export function AvatarImage({
   );
 }
 
-export function AvatarFallback({
+function AvatarFallback({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
@@ -50,3 +49,5 @@ export function AvatarFallback({
     />
   );
 }
+
+export { Avatar, AvatarImage, AvatarFallback };

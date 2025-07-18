@@ -1,11 +1,11 @@
 "use client";
 
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/renderer/lib/utils";
 
-export function ScrollArea({
+function ScrollArea({
   className,
   children,
   ...props
@@ -28,7 +28,7 @@ export function ScrollArea({
   );
 }
 
-export function ScrollBar({
+function ScrollBar({
   className,
   orientation = "vertical",
   ...props
@@ -54,3 +54,5 @@ export function ScrollBar({
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   );
 }
+
+export { ScrollArea, ScrollBar };
