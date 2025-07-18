@@ -129,45 +129,72 @@ import type { User } from '@/shared/types/user';
 import type { Project } from '@/shared/types/project';
 ```
 
-### Estrutura de Service
+### Estrutura de Domain Functions (KISS Approach)
 
 ```typescript
-// Template padrão para services
-export class DomainService {
-  /**
-   * Método principal público
-   * Sempre começar com validação → lógica → persistência → eventos
-   */
-  static async mainOperation(input: InputType): Promise<OutputType> {
-    // 1. Validação de entrada
-    const validated = ValidationSchema.parse(input);
-    
-    // 2. Verificações de negócio
-    await this.validateBusinessRules(validated);
-    
-    // 3. Operação principal
-    const result = await this.executeOperation(validated);
-    
-    // 4. Efeitos colaterais (eventos, notificações)
-    await this.handleSideEffects(result);
-    
-    return result;
-  }
+// ✅ Simple domain functions instead of complex classes
+export async function createProject(input: CreateProjectInput): Promise<Project> {
+  // 1. Validação de entrada
+  const validated = CreateProjectSchema.parse(input);
   
-  /**
-   * Métodos privados sempre abaixo dos públicos
-   */
-  private static async validateBusinessRules(data: ValidatedInput): Promise<void> {
-    // Validações específicas do domínio
-  }
+  // 2. Verificações de negócio
+  await validateProjectBusinessRules(validated);
   
-  private static async executeOperation(data: ValidatedInput): Promise<OutputType> {
-    // Operação no banco de dados
-  }
+  // 3. Operação principal
+  const db = getDatabase();
+  const project = await db.insert(projects).values({
+    id: generateId(),
+    ...validated,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
   
-  private static async handleSideEffects(result: OutputType): Promise<void> {
-    // Eventos e notificações
+  // 4. Efeitos colaterais (eventos)
+  publishEvent('project.created', project[0]);
+  
+  return project[0];
+}
+
+// ✅ Support functions are simple and focused
+async function validateProjectBusinessRules(data: CreateProjectInput): Promise<void> {
+  // Simple validation logic
+  if (await projectNameExists(data.name)) {
+    throw new ValidationError('Project name already exists');
   }
+}
+
+async function projectNameExists(name: string): Promise<boolean> {
+  const db = getDatabase();
+  const existing = await db.query.projects.findFirst({
+    where: eq(projects.name, name),
+  });
+  return !!existing;
+}
+```
+
+### Transparent Infrastructure Access
+
+```typescript
+// ✅ Simple utility functions for infrastructure
+import { getDatabase } from '@/infrastructure/database';
+import { getLogger } from '@/infrastructure/logger';
+import { publishEvent } from '@/infrastructure/events';
+
+// ✅ Use directly in domain functions
+export async function updateProject(id: string, input: UpdateProjectInput): Promise<Project> {
+  const logger = getLogger('projects');
+  const db = getDatabase();
+  
+  logger.info('Updating project', { id, input });
+  
+  const updated = await db.update(projects)
+    .set({ ...input, updatedAt: new Date() })
+    .where(eq(projects.id, id))
+    .returning();
+  
+  publishEvent('project.updated', updated[0]);
+  
+  return updated[0];
 }
 ```
 

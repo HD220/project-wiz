@@ -2,7 +2,7 @@
 
 **Versão:** 3.0  
 **Status:** Design Final  
-**Data:** 2025-01-17  
+**Data:** 2025-01-17
 
 ---
 
@@ -48,61 +48,23 @@ O Project Wiz implementa uma interface que **replica fielmente a experiência do
 /* CSS Variables seguindo o tema Discord */
 :root {
   /* Discord Dark Theme */
-  --discord-bg-primary: #36393f;      /* Background principal */
-  --discord-bg-secondary: #2f3136;    /* Background secundário */
-  --discord-bg-tertiary: #202225;     /* Background sidebar */
-  --discord-text-primary: #dcddde;    /* Texto principal */
-  --discord-text-secondary: #8e9297;  /* Texto secundário */
-  --discord-text-muted: #72767d;      /* Texto esmaecido */
-  --discord-accent: #5865f2;          /* Cor de destaque */
-  --discord-accent-hover: #4752c4;    /* Hover destaque */
-  --discord-success: #3ba55d;         /* Verde sucesso */
-  --discord-warning: #faa81a;         /* Amarelo warning */
-  --discord-danger: #ed4245;          /* Vermelho erro */
-  --discord-online: #3ba55d;          /* Status online */
-  --discord-away: #faa81a;            /* Status away */
-  --discord-busy: #ed4245;            /* Status busy */
-  --discord-offline: #747f8d;         /* Status offline */
+  --discord-bg-primary: #36393f; /* Background principal */
+  --discord-bg-secondary: #2f3136; /* Background secundário */
+  --discord-bg-tertiary: #202225; /* Background sidebar */
+  --discord-text-primary: #dcddde; /* Texto principal */
+  --discord-text-secondary: #8e9297; /* Texto secundário */
+  --discord-text-muted: #72767d; /* Texto esmaecido */
+  --discord-accent: #5865f2; /* Cor de destaque */
+  --discord-accent-hover: #4752c4; /* Hover destaque */
+  --discord-success: #3ba55d; /* Verde sucesso */
+  --discord-warning: #faa81a; /* Amarelo warning */
+  --discord-danger: #ed4245; /* Vermelho erro */
+  --discord-online: #3ba55d; /* Status online */
+  --discord-away: #faa81a; /* Status away */
+  --discord-busy: #ed4245; /* Status busy */
+  --discord-offline: #747f8d; /* Status offline */
 }
 ```
-
----
-
-## 🧩 Sistema de Componentes
-
-### Hierarquia de Componentes
-
-```
-components/
-├── layout/                    # Layout Discord-like
-│   ├── discord-layout.tsx    # Container principal
-│   ├── server-sidebar.tsx    # Sidebar projetos (servidores)
-│   ├── channel-sidebar.tsx   # Sidebar canais
-│   ├── chat-area.tsx         # Área principal de chat
-│   ├── member-sidebar.tsx    # Sidebar membros
-│   └── topbar.tsx            # Barra superior
-├── chat/                     # Componentes de chat
-│   ├── message-list.tsx      # Lista de mensagens
-│   ├── message-item.tsx      # Item de mensagem
-│   ├── chat-input.tsx        # Input de mensagem
-│   ├── typing-indicator.tsx  # Indicador digitação
-│   └── emoji-picker.tsx      # Seletor de emojis
-├── project/                  # Componentes de projeto
-│   ├── project-icon.tsx      # Ícone do projeto
-│   ├── channel-list.tsx      # Lista de canais
-│   └── project-settings.tsx  # Configurações
-├── agent/                    # Componentes de agentes
-│   ├── agent-avatar.tsx      # Avatar do agente
-│   ├── agent-status.tsx      # Status do agente
-│   └── agent-card.tsx        # Card do agente
-└── ui/                       # Componentes base (shadcn/ui)
-    ├── button.tsx
-    ├── input.tsx
-    ├── card.tsx
-    └── [outros componentes]
-```
-
----
 
 ## 🏠 Layout Principal
 
@@ -123,36 +85,36 @@ export function DiscordLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const { selectedProject } = useProjects();
   const [showMemberSidebar, setShowMemberSidebar] = useState(true);
-  
+
   return (
     <div className="flex h-screen bg-discord-bg-primary text-discord-text-primary">
       {/* Sidebar de Servidores/Projetos */}
       <ServerSidebar className="w-16 bg-discord-bg-tertiary" />
-      
+
       {/* Sidebar de Canais do Projeto Atual */}
       {selectedProject && (
-        <ChannelSidebar 
+        <ChannelSidebar
           project={selectedProject}
           className="w-60 bg-discord-bg-secondary"
         />
       )}
-      
+
       {/* Área Principal */}
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar 
+        <TopBar
           project={selectedProject}
           onToggleMemberSidebar={() => setShowMemberSidebar(!showMemberSidebar)}
         />
-        
+
         <div className="flex-1 flex min-h-0">
           {/* Conteúdo Principal */}
           <div className="flex-1 flex flex-col min-w-0">
             {children}
           </div>
-          
+
           {/* Sidebar de Membros/Agentes */}
           {showMemberSidebar && selectedProject && (
-            <MemberSidebar 
+            <MemberSidebar
               project={selectedProject}
               className="w-60 bg-discord-bg-secondary border-l border-discord-bg-tertiary"
             />
@@ -181,7 +143,7 @@ interface ServerSidebarProps {
 export function ServerSidebar({ className }: ServerSidebarProps) {
   const { projects, selectedProject, selectProject } = useProjects();
   const { navigateToHome, navigateToSettings } = useNavigation();
-  
+
   return (
     <div className={`flex flex-col items-center py-3 space-y-2 ${className}`}>
       {/* Botão Home */}
@@ -193,10 +155,10 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
       >
         <Home className="w-6 h-6 text-white" />
       </Button>
-      
+
       {/* Separator */}
       <div className="w-8 h-0.5 bg-discord-bg-primary rounded-full" />
-      
+
       {/* Lista de Projetos */}
       <div className="flex flex-col space-y-2">
         {projects.map((project) => (
@@ -208,7 +170,7 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
           />
         ))}
       </div>
-      
+
       {/* Botão Adicionar Projeto */}
       <Button
         variant="ghost"
@@ -218,10 +180,10 @@ export function ServerSidebar({ className }: ServerSidebarProps) {
       >
         <Plus className="w-6 h-6 text-discord-success" />
       </Button>
-      
+
       {/* Spacer */}
       <div className="flex-1" />
-      
+
       {/* Configurações */}
       <Button
         variant="ghost"
@@ -255,7 +217,7 @@ interface ChannelSidebarProps {
 export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
   const { channels } = useChannels(project.id);
   const { agents } = useAgents(project.id);
-  
+
   return (
     <div className={`flex flex-col ${className}`}>
       {/* Header do Projeto */}
@@ -267,7 +229,7 @@ export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
           <ChevronDown className="w-4 h-4 text-discord-text-secondary" />
         </div>
       </div>
-      
+
       {/* Conteúdo */}
       <div className="flex-1 overflow-y-auto">
         {/* Seção Canais de Texto */}
@@ -283,10 +245,10 @@ export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
               <Plus className="w-3 h-3" />
             </Button>
           </div>
-          
+
           <ChannelList channels={channels} />
         </div>
-        
+
         {/* Seção Issues */}
         <div className="p-2">
           <div className="flex items-center justify-between px-2 py-1">
@@ -297,7 +259,7 @@ export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-1">
             <Button
               variant="ghost"
@@ -308,7 +270,7 @@ export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
             </Button>
           </div>
         </div>
-        
+
         {/* Seção Fórum */}
         <div className="p-2">
           <div className="flex items-center justify-between px-2 py-1">
@@ -319,7 +281,7 @@ export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-1">
             <Button
               variant="ghost"
@@ -331,7 +293,7 @@ export function ChannelSidebar({ project, className }: ChannelSidebarProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Footer com configurações do projeto */}
       <div className="p-2 border-t border-discord-bg-tertiary">
         <Button
@@ -364,7 +326,7 @@ import { TypingIndicator } from './typing-indicator';
 export function ChatArea() {
   const { channelId } = useParams({ from: '/project/$projectId/chat/$channelId' });
   const { messages, sendMessage, isLoading } = useMessages(channelId);
-  
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -372,17 +334,17 @@ export function ChatArea() {
       </div>
     );
   }
-  
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Lista de Mensagens */}
       <MessageList messages={messages} className="flex-1" />
-      
+
       {/* Indicador de Digitação */}
       <TypingIndicator channelId={channelId} />
-      
+
       {/* Input de Mensagem */}
-      <ChatInput 
+      <ChatInput
         onSend={sendMessage}
         placeholder={`Message #${channel?.name || 'channel'}`}
       />
@@ -410,17 +372,17 @@ interface MessageItemProps {
   onDelete?: (message: Message) => void;
 }
 
-export function MessageItem({ 
-  message, 
+export function MessageItem({
+  message,
   showAvatar = true,
   onReply,
   onEdit,
-  onDelete 
+  onDelete
 }: MessageItemProps) {
   const [showActions, setShowActions] = useState(false);
-  
+
   return (
-    <div 
+    <div
       className="group px-4 py-2 hover:bg-discord-bg-tertiary/30 relative"
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
@@ -438,7 +400,7 @@ export function MessageItem({
             )}
           </div>
         )}
-        
+
         {/* Conteúdo */}
         <div className="flex-1 min-w-0">
           {/* Header */}
@@ -457,12 +419,12 @@ export function MessageItem({
               </span>
             </div>
           )}
-          
+
           {/* Mensagem */}
           <div className="text-discord-text-primary">
             {message.content}
           </div>
-          
+
           {/* Metadata (se houver) */}
           {message.messageType !== 'text' && (
             <div className="text-xs text-discord-text-muted mt-1">
@@ -472,7 +434,7 @@ export function MessageItem({
           )}
         </div>
       </div>
-      
+
       {/* Actions Menu */}
       {showActions && (
         <div className="absolute top-2 right-4 bg-discord-bg-secondary border border-discord-bg-tertiary rounded-md shadow-lg flex">
@@ -519,7 +481,7 @@ interface ChatInputProps {
 export function ChatInput({ onSend, placeholder, disabled }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
+
   const handleSend = () => {
     if (message.trim() && !disabled) {
       onSend(message.trim());
@@ -527,14 +489,14 @@ export function ChatInput({ onSend, placeholder, disabled }: ChatInputProps) {
       textareaRef.current?.focus();
     }
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
-  
+
   return (
     <div className="p-4">
       <div className="bg-discord-bg-tertiary rounded-lg">
@@ -547,7 +509,7 @@ export function ChatInput({ onSend, placeholder, disabled }: ChatInputProps) {
           >
             <Plus className="w-5 h-5" />
           </Button>
-          
+
           {/* Input de Texto */}
           <Textarea
             ref={textareaRef}
@@ -559,7 +521,7 @@ export function ChatInput({ onSend, placeholder, disabled }: ChatInputProps) {
             className="flex-1 mx-2 min-h-[24px] max-h-32 resize-none bg-transparent border-none text-discord-text-primary placeholder-discord-text-muted focus:ring-0"
             rows={1}
           />
-          
+
           {/* Botão Emoji */}
           <Button
             variant="ghost"
@@ -568,7 +530,7 @@ export function ChatInput({ onSend, placeholder, disabled }: ChatInputProps) {
           >
             <Smile className="w-5 h-5" />
           </Button>
-          
+
           {/* Botão Enviar */}
           <Button
             onClick={handleSend}
@@ -603,33 +565,33 @@ interface AgentAvatarProps {
   className?: string;
 }
 
-export function AgentAvatar({ 
-  agentId, 
-  size = 'md', 
+export function AgentAvatar({
+  agentId,
+  size = 'md',
   showStatus = true,
-  className 
+  className
 }: AgentAvatarProps) {
   const { agent } = useAgent(agentId);
-  
+
   const sizeClasses = {
     xs: 'w-6 h-6',
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
   };
-  
+
   if (!agent) {
     return (
       <div className={`${sizeClasses[size]} bg-discord-bg-tertiary rounded-full animate-pulse ${className}`} />
     );
   }
-  
+
   return (
     <div className={`relative ${className}`}>
       <div className={`${sizeClasses[size]} rounded-full overflow-hidden`}>
         {agent.avatarUrl ? (
-          <img 
-            src={agent.avatarUrl} 
+          <img
+            src={agent.avatarUrl}
             alt={agent.name}
             className="w-full h-full object-cover"
           />
@@ -639,10 +601,10 @@ export function AgentAvatar({
           </div>
         )}
       </div>
-      
+
       {showStatus && (
-        <AgentStatus 
-          status={agent.status} 
+        <AgentStatus
+          status={agent.status}
           className="absolute -bottom-0.5 -right-0.5"
           size={size === 'lg' ? 'md' : 'sm'}
         />
@@ -669,20 +631,20 @@ export function AgentStatus({ status, size = 'md', className }: AgentStatusProps
     sm: 'w-3 h-3',
     md: 'w-4 h-4',
   };
-  
+
   const statusColors = {
     online: 'bg-discord-online',
     busy: 'bg-discord-busy',
     offline: 'bg-discord-offline',
   };
-  
+
   return (
-    <div 
+    <div
       className={`
-        ${sizeClasses[size]} 
-        ${statusColors[status]} 
-        rounded-full 
-        border-2 
+        ${sizeClasses[size]}
+        ${statusColors[status]}
+        rounded-full
+        border-2
         border-discord-bg-secondary
         ${className}
       `}
@@ -710,17 +672,17 @@ interface ProjectIconProps {
 
 export function ProjectIcon({ project, isSelected, onClick }: ProjectIconProps) {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   return (
     <div className="relative">
       <button
         className={`
           w-12 h-12 rounded-3xl flex items-center justify-center
           transition-all duration-200 ease-out
-          ${isSelected 
-            ? 'bg-discord-accent rounded-2xl' 
-            : isHovered 
-              ? 'bg-discord-accent rounded-2xl' 
+          ${isSelected
+            ? 'bg-discord-accent rounded-2xl'
+            : isHovered
+              ? 'bg-discord-accent rounded-2xl'
               : 'bg-discord-bg-primary hover:bg-discord-accent'
           }
         `}
@@ -729,8 +691,8 @@ export function ProjectIcon({ project, isSelected, onClick }: ProjectIconProps) 
         onClick={onClick}
       >
         {project.iconUrl ? (
-          <img 
-            src={project.iconUrl} 
+          <img
+            src={project.iconUrl}
             alt={project.name}
             className="w-8 h-8 rounded-xl"
           />
@@ -742,16 +704,16 @@ export function ProjectIcon({ project, isSelected, onClick }: ProjectIconProps) 
           </span>
         )}
       </button>
-      
+
       {/* Indicator de seleção */}
-      <div 
+      <div
         className={`
           absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2
           w-2 bg-white rounded-r-full transition-all duration-200
           ${isSelected ? 'h-10' : isHovered ? 'h-5' : 'h-0'}
         `}
       />
-      
+
       {/* Tooltip */}
       {isHovered && !isSelected && (
         <div className="absolute left-16 top-1/2 transform -translate-y-1/2 z-50">
@@ -770,21 +732,25 @@ export function ProjectIcon({ project, isSelected, onClick }: ProjectIconProps) 
 ## 🎯 Benefícios da Interface Discord-like
 
 ### ✅ Familiaridade
+
 - **UX conhecida** - Desenvolvedores já sabem usar
 - **Curva de aprendizado zero** - Interface intuitiva
 - **Muscle memory** - Gestos e atalhos familiares
 
 ### ✅ Produtividade
+
 - **Navegação rápida** - Sidebar e atalhos eficientes
 - **Chat fluido** - Comunicação sem fricção
 - **Multi-contexto** - Múltiplos projetos/canais
 
 ### ✅ Escalabilidade
+
 - **Component-based** - Componentes reutilizáveis
 - **Type-safe** - TypeScript end-to-end
 - **Performance** - Otimizado para listas grandes
 
 ### ✅ Customização
+
 - **Temas** - Dark/Light mode
 - **Adaptável** - Funcionalidades específicas dev
 - **Extensível** - Fácil adicionar features
@@ -799,4 +765,4 @@ export function ProjectIcon({ project, isSelected, onClick }: ProjectIconProps) 
 
 ---
 
-*Esta interface Discord-like foi projetada para maximizar familiaridade e produtividade, oferecendo uma experiência intuitiva para desenvolvedores.*
+_Esta interface Discord-like foi projetada para maximizar familiaridade e produtividade, oferecendo uma experiência intuitiva para desenvolvedores._

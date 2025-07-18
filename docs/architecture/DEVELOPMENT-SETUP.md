@@ -8,7 +8,7 @@
 
 ## 🎯 Visão Geral
 
-Este documento detalha a **configuração completa do ambiente de desenvolvimento** para o Project Wiz, incluindo ferramentas, configurações, scripts e fluxos de trabalho essenciais para uma experiência de desenvolvimento eficiente.
+Este documento detalha a **configuração simplificada do ambiente de desenvolvimento** para o Project Wiz, seguindo os princípios KISS e Clean Code. Inclui ferramentas essenciais, configurações mínimas e fluxos de trabalho otimizados para máxima produtividade.
 
 ---
 

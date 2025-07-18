@@ -28,31 +28,48 @@ src/renderer/app/
 ├── __root.tsx                    # Layout raiz da aplicação
 ├── index.tsx                     # Página inicial (dashboard)
 ├── login.tsx                     # Página de login
-├── direct-messages/              # DMs routes
-│   ├── index.tsx                # Lista de DMs
-│   └── [agent-id].tsx           # Conversa DM específica
-├── project/                      # Project routes
-│   ├── create.tsx               # Criar projeto
-│   └── [project-id]/            # Projeto específico
-│       ├── layout.tsx           # Layout do projeto
-│       ├── index.tsx            # Overview do projeto
-│       ├── chat/                # Chat routes
-│       │   └── [channel-id].tsx # Canal específico
-│       ├── forum/               # Forum routes
-│       │   ├── index.tsx        # Lista de tópicos
-│       │   └── [topic-id].tsx   # Tópico específico
-│       ├── issues/              # Issues routes
-│       │   ├── index.tsx        # Kanban board
-│       │   ├── create.tsx       # Criar issue
-│       │   └── [issue-id].tsx   # Issue específica
-│       ├── agents/              # Agents routes
-│       │   └── index.tsx        # Lista de agentes
-│       └── settings/            # Settings routes
-│           └── index.tsx        # Configurações do projeto
-└── settings/                    # Settings globais
-    ├── index.tsx               # Configurações gerais
-    ├── agents.tsx              # Gestão de agentes
-    └── account.tsx             # Configurações da conta
+├── (user)/                       # User area routes
+│   ├── route.tsx                # User area layout
+│   ├── index.tsx                # Personal dashboard
+│   ├── conversation/             # DM routes
+│   │   └── $conversationId.tsx  # DM chat content
+│   ├── new-conversation.tsx     # Create new DM
+│   └── settings/                # Personal settings
+│       ├── route.tsx            # Settings layout
+│       ├── index.tsx            # General settings
+│       ├── new-llm-provider.tsx # Add LLM provider
+│       └── edit-llm-provider.$llmProviderId.tsx
+├── agents/                      # Agents management routes
+│   ├── index.tsx                # Agent list/dashboard
+│   ├── create.tsx               # Create agent
+│   ├── route.tsx                # Agent layout
+│   └── [agent-id]/              # Specific agent
+│       ├── index.tsx            # Agent overview
+│       ├── settings.tsx         # Agent settings
+│       └── jobs.tsx             # Agent jobs
+├── create-project.tsx           # Create project
+├── create-channel.tsx           # Create channel
+└── project/                     # Project area routes
+    ├── index.tsx                # Project list
+    ├── create.tsx               # Create project
+    ├── route.tsx                # Project layout (Discord-like)
+    └── [project-id]/            # Specific project
+        ├── index.tsx            # Project overview
+        ├── chat/                # Channel routes
+        │   ├── route.tsx        # Channel layout
+        │   ├── index.tsx        # Channel list
+        │   └── [channel-id]/
+        │       └── index.tsx    # Channel chat
+        ├── docs/                # Documentation routes
+        │   └── index.tsx        # Documentation view
+        ├── files/               # File explorer routes
+        │   └── index.tsx        # File explorer
+        ├── agents/              # Project agents
+        │   └── index.tsx        # Agent list
+        ├── tasks/               # Task management
+        │   └── index.tsx        # Task kanban
+        └── agent/               # Specific agent in project
+            └── $agentId.tsx     # Agent detail view
 ```
 
 ---

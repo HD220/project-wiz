@@ -8,55 +8,52 @@
 
 ## 🎯 Visão Geral da API
 
-O Project Wiz utiliza **Electron IPC (Inter-Process Communication)** para comunicação entre o frontend (renderer) e backend (main process). A API segue os princípios:
+O Project Wiz utiliza **Electron IPC (Inter-Process Communication)** para comunicação entre o frontend (renderer) e backend (main process). A API segue os princípios **KISS e Clean Code**:
 
-1. **Type-Safe** - Tipagem completa com TypeScript
-2. **RESTful-like** - Convenções similares ao REST
+1. **KISS First** - Simplicidade acima de tudo
+2. **Type-Safe** - Tipagem completa com TypeScript
 3. **Domain-Driven** - Organizadas por domínio de negócio
-4. **Consistent** - Padrões consistentes em todas as APIs
-5. **Error Handling** - Tratamento robusto de erros
-6. **Validation** - Validação com Zod schemas
+4. **Flat Structure** - Evitar aninhamento desnecessário
+5. **Convention over Configuration** - Padrões consistentes
+6. **Transparent Infrastructure** - Acesso direto via funções
 
 ---
 
-## 🏗️ Arquitetura IPC
+## 🏗️ Arquitetura IPC Simplificada
 
-### Padrão de Comunicação
+### Padrão de Comunicação KISS
 
 ```mermaid
 sequenceDiagram
     participant F as Frontend
     participant P as Preload
-    participant M as Main Process
-    participant S as Service
+    participant H as IPC Handler
+    participant Fn as Domain Function
     participant D as Database
 
     F->>P: api.projects.create(data)
-    P->>M: ipcRenderer.invoke('projects:create', data)
-    M->>M: Validate input (Zod)
-    M->>S: ProjectService.create(data)
-    S->>D: Database operations
-    D-->>S: Result
-    S-->>M: Service result
-    M->>M: Format response
-    M-->>P: IPC response
+    P->>H: ipcRenderer.invoke('projects:create', data)
+    H->>H: Validate input (Zod)
+    H->>Fn: createProject(data)
+    Fn->>D: getDatabase().insert()
+    D-->>Fn: Result
+    Fn-->>H: Domain result
+    H-->>P: IPC response
     P-->>F: Typed result
 ```
 
-### Convenções de Naming
+### Convenções de Naming Simplificadas
 
 ```typescript
-// Padrão: {domain}:{action}[:{sub-action}]
-"auth:login";
-"auth:register";
+// Padrão KISS: {domain}:{action}
+"users:create";
+"users:login";
 "projects:create";
-"projects:find-by-id";
-"projects:update";
-"projects:delete";
+"projects:findById";
 "agents:create";
-"agents:list-global";
+"agents:list";
 "messages:send";
-"messages:list-by-channel";
+"channels:create";
 ```
 
 ---

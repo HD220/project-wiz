@@ -1,4 +1,4 @@
-# Project Wiz: Nova Arquitetura - Documentação Completa
+# Project Wiz: Arquitetura Simplificada - Documentação Completa
 
 **Versão:** 3.0  
 **Status:** Design Final  
@@ -8,7 +8,7 @@
 
 ## 📋 Índice da Documentação
 
-Esta é a documentação completa da nova arquitetura do Project Wiz, projetada do zero para máxima simplicidade, manutenibilidade e experiência do desenvolvedor.
+Esta é a documentação completa da arquitetura simplificada do Project Wiz, seguindo princípios KISS (Keep It Simple, Stupid) e Clean Code para máxima simplicidade, manutenibilidade e experiência do desenvolvedor.
 
 ### 🏗️ Documentos Principais
 
@@ -154,29 +154,27 @@ Esta é a documentação completa da nova arquitetura do Project Wiz, projetada 
 
 ### Domínios de Negócio
 
-1. **projects/** - Workspaces colaborativos
-   - Projetos como "servidores"
-   - Canais de comunicação
-   - Issues e forum
-   - Configurações
+1. **user/** - Bounded Context: User
+   - **authentication/** - Aggregate: Authentication
+   - **profile/** - Aggregate: Profile  
+   - **direct-messages/** - Aggregate: Direct Messages
 
-2. **agents/** - Workers de IA
-   - Agentes especializados
-   - Background processing
-   - Git operations
-   - Task management
+2. **project/** - Bounded Context: Project
+   - **core/** - Core project functionality
+   - **channels/** - Aggregate: Channels
+   - **members/** - Aggregate: Members
+   - **forums/** - Aggregate: Forums
+   - **issues/** - Aggregate: Issues
 
-3. **users/** - Espaço pessoal
-   - Autenticação
-   - Configurações
-   - Direct messages
-   - Preferências
+3. **conversations/** - Bounded Context: Conversations  
+   - **channels/** - Aggregate: Channel Chat
+   - **direct-messages/** - Aggregate: DM Chat
+   - **routing/** - Aggregate: Message Routing
+   - **core/** - Core conversations
 
-4. **llm/** - Infraestrutura IA
-   - Providers (OpenAI, DeepSeek)
-   - Text generation
-   - Model configuration
-   - API integration
+4. **agents/** - Bounded Context: Agents
+   - **worker/** - Aggregate: Worker
+   - **queue/** - Aggregate: Queue
 
 ---
 

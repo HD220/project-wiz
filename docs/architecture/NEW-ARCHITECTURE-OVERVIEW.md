@@ -82,12 +82,14 @@ Project Wiz é uma aplicação Electron que replica a experiência do Discord/Sl
 A aplicação possui duas rotas principais com layouts distintos:
 
 #### 1. Área do Usuário (Espaço Pessoal)
+
 - Dashboard pessoal com estatísticas
 - Conversas diretas com agentes
 - Configurações pessoais
 - Histórico de atividades
 
 #### 2. Área de Projetos (Espaço Colaborativo)
+
 - Interface estilo Discord para projetos
 - Canais de equipe
 - Issues e fórum
@@ -143,6 +145,7 @@ A área pessoal do usuário tem um layout mais limpo e focado:
 ### Componentes por Área
 
 #### Área de Projetos:
+
 1. **Project Sidebar** - Lista de projetos disponíveis
 2. **Channel Sidebar** - Canais, issues, fórum do projeto atual
 3. **Content Area** - Área dinâmica que muda conforme a seção
@@ -153,6 +156,7 @@ A área pessoal do usuário tem um layout mais limpo e focado:
 4. **Member Sidebar** - Lista de agentes e usuários do projeto
 
 #### Área do Usuário:
+
 1. **Personal Sidebar** - Navegação pessoal (DMs, Settings, Activity)
 2. **Main Content** - Área principal que pode ser:
    - **Dashboard** com cards informativos
@@ -281,7 +285,7 @@ src/
 │
 ├── renderer/               # Frontend (React)
 │   ├── app/               # Routes (TanStack Router)
-│   ├── components/        # UI Components (organized by domain)
+│   ├── components/        # UI Components (organized)
 │   ├── hooks/             # Custom React hooks (flat)
 │   ├── store/             # Global state (Zustand)
 │   └── utils/             # Utilities (flat)
