@@ -35,8 +35,7 @@ O sistema oferece duas maneiras de adicionar agentes a um projeto.
     - O hook `use-agents.ts` fornece a função `createAgent`, que chama a API IPC.
     - O wizard guia o usuário na definição de:
       - **Nome e Aparência**: Avatar e nome do agente.
-      - **Role e Expertise**: Papel (ex: `developer`) e habilidades (`react`, `css`).
-      - **Personalidade**: Um `systemPrompt` que define o tom e o comportamento do agente. O sistema pode oferecer templates (ex: "Engenheiro Sênior prestativo", "Arquiteto de Software rigoroso").
+      - **Role e Backstory**: Papel (ex: `developer`) e estoria de fundo (`react`, `css`)
 
 ---
 
@@ -48,5 +47,5 @@ O usuário pode visualizar e gerenciar a equipe de Agentes de cada projeto.
 
 - **Backend**: O `ProjectService` e o `AgentService` colaboram para gerenciar a associação entre projetos e agentes, que é armazenada na tabela de junção `projectAgentsTable`.
 - **Frontend**: A lista de membros do projeto, incluindo usuários e Agentes, é exibida na sidebar direita da interface do projeto.
-  - O hook `use-project-members.ts` busca os dados dos membros.
+  - O hook `use-project.ts` busca os dados dos membros.
   - O usuário pode clicar em uma Persona para ver seus detalhes ou removê-la do projeto (o que a "demite" da equipe).

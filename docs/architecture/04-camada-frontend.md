@@ -40,9 +40,9 @@ function ProjectLayout() {
   const project = Route.useLoaderData();
   // O Outlet renderizará as rotas filhas (ex: chat, issues)
   return (
-    <div className="discord-layout">
+    <div>
       <ChannelSidebar project={project} />
-      <main className="main-content">
+      <main>
         <Outlet />
       </main>
     </div>
@@ -128,4 +128,4 @@ Zustand é usado para estados que não pertencem ao servidor e que precisam ser 
 Componentes que são puramente visuais e não estão atrelados a nenhum domínio de negócio específico residem em `src/renderer/components/`.
 
 - **`components/ui/`**: Componentes base da biblioteca `shadcn/ui` (Button, Input, Card, etc.).
-- **`components/layout/`**: Componentes que definem a estrutura da aplicação, como `DiscordLayout`, `Sidebar`, `Header`, etc. Eles consomem dados, mas não contêm lógica de negócio própria.
+- **`components/`**: Componentes que definem a estrutura da aplicação, como `DiscordLayout`, `Sidebar`, `Header`, etc. Eles consomem dados, mas não contêm lógica de negócio própria.

@@ -44,18 +44,13 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - Configurar `drizzle.config.ts`
     - Executar `npm run db:reset`
 
-
-    - `src/shared/utils/id-generator.ts`
-
 - **0.4. Ponto de Entrada do Processo Main (Backend)**
   - **Descrição**: Configurar o `main.ts` do Electron para inicializar o backend, incluindo o logger e o gerenciador de janelas.
   - **Referências**:
     - [2. Estrutura do Projeto - `src/main/main.ts`](docs/architecture/new/02-estrutura-do-projeto.md#srcmain---backend-detalhado)
-    - [Estrutura de Arquivos - `src/main/app/`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/app/) (implícito, para `app-initializer.ts`, `window-manager.ts`)
+    - [Estrutura de Arquivos - `src/main/app/`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/app/)
   - **Exemplo de Implementação**:
     - `src/main/main.ts`
-    - `src/main/app/app-initializer.ts`
-    - `src/main/app/window-manager.ts`
 
 - **0.5. Ponto de Entrada do Processo Renderer (Frontend)**
   - **Descrição**: Configurar o `main.tsx` do React para renderizar a aplicação frontend, incluindo a inicialização do TanStack Router e provedores de contexto.
@@ -88,9 +83,9 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
   - **Referências**:
     - [3. Camada Backend (Main Process) - 4. Data Layer: Persistência com Drizzle ORM](docs/architecture/new/03-camada-backend.md#4-data-layer-persistência-com-drizzle-orm)
     - [6. Autenticação e Fluxos de Usuário - 1. Sistema de Autenticação Local e Multi-Conta](docs/architecture/new/06-autenticacao-e-fluxos-de-usuario.md#1-sistema-de-autenticação-local-e-multi-conta)
-    - [Estrutura de Arquivos - `src/main/user/authentication/users.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/user/authentication/users.schema.ts)
+    - [Estrutura de Arquivos - `src/main/user/users.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/user/users.schema.ts)
   - **Exemplo de Implementação**:
-    - `src/main/user/authentication/users.schema.ts`
+    - `src/main/user/users.schema.ts`
 
 - **1.2. Serviço de Autenticação (`AuthService`)**
   - **Descrição**: Implementar a lógica de negócio para registro, login, validação de senha (bcrypt) e geração de tokens JWT.
@@ -154,7 +149,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [6. Autenticação e Fluxos de Usuário - Fluxo 1: Criação de um Novo Projeto](docs/architecture/new/06-autenticacao-e-fluxos-de-usuario.md#fluxo-1-criação-de-um-novo-projeto)
     - [Estrutura de Arquivos - `src/main/project/core/git.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/project/core/git.service.ts) (assumindo um local para serviços core de projeto)
   - **Exemplo de Implementação**:
-    - `src/main/project/core/git.service.ts` (métodos como `initializeRepo`, `cloneRepo`, `createWorktreeForTask`, `commitChanges`)
+    - `src/main/project/core/git.service.ts` (métodos como `initializeRepo`, `cloneRepo`, `createWorktreeForjob`, `commitChanges`)
 
 ### Fase 3: Backend - Domínio de Conversas e Mensagens
 
@@ -219,10 +214,10 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [3. Camada Backend (Main Process) - 4. Data Layer: Persistência com Drizzle ORM](docs/architecture/new/03-camada-backend.md#4-data-layer-persistência-com-drizzle-orm)
     - [5. Sistema de Agentes Autônomos - 🏗️ Arquitetura e Localização no Projeto](docs/architecture/new/05-sistema-de-agentes.md#arquitetura-e-localização-no-projeto)
     - [Estrutura de Arquivos - `src/main/agents/worker/agent.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/agents/worker/agent.schema.ts)
-    - [Estrutura de Arquivos - `src/main/agents/queue/task.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/agents/queue/task.schema.ts)
+    - [Estrutura de Arquivos - `src/main/agents/queue/job.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/agents/queue/job.schema.ts)
   - **Exemplo de Implementação**:
     - `src/main/agents/worker/agent.schema.ts`
-    - `src/main/agents/queue/task.schema.ts`
+    - `src/main/agents/queue/job.schema.ts`
 
 - **4.2. Serviço de Agentes (`AgentService`)**
   - **Descrição**: Implementar a lógica de negócio para criação, gerenciamento de ciclo de vida (online/offline, busy), e associação de agentes a projetos.
@@ -258,7 +253,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [6. Autenticação e Fluxos de Usuário - Fluxo 3: Agente Executando uma Tarefa de Código](docs/architecture/new/06-autenticacao-e-fluxos-de-usuario.md#fluxo-3-agente-executando-uma-tarefa-de-código)
     - [Estrutura de Arquivos - `src/main/agents/worker/agent.worker.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/agents/worker/agent.worker.ts)
   - **Exemplo de Implementação**:
-    - `src/main/agents/worker/agent.worker.ts` (com métodos para `executeTask`, `generateImplementation`, `runTests`, etc.)
+    - `src/main/agents/worker/agent.worker.ts` (com métodos para `executejob`, `generateImplementation`, `runTests`, etc.)
 
 - **4.6. Serviço LLM (`LLMService`)**
   - **Descrição**: Implementar um serviço para interagir com modelos de linguagem grandes (LLMs) para análise de intenção e geração de código.
@@ -267,7 +262,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [6. Autenticação e Fluxos de Usuário - Fluxo 3: Agente Executando uma Tarefa de Código](docs/architecture/new/06-autenticacao-e-fluxos-de-usuario.md#fluxo-3-agente-executando-uma-tarefa-de-código)
     - [Estrutura de Arquivos - `src/main/agents/llm/llm.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/agents/llm/llm.service.ts)
   - **Exemplo de Implementação**:
-    - `src/main/agents/llm/llm.service.ts` (métodos como `analyzeIntent`, `generateCode`)
+    - `src/main/agents/llm/llm.service.ts
 
 ### Fase 5: Frontend - Estrutura da UI e Roteamento
 
@@ -288,10 +283,10 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
   - **Referências**:
     - [4. Camada Frontend (Renderer Process) - 4. Componentes de UI Reutilizáveis](docs/architecture/new/04-camada-frontend.md#4-componentes-de-ui-reutilizáveis)
     - [Estrutura de Arquivos - `src/renderer/components/ui/`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/app/)
-    - [Estrutura de Arquivos - `src/renderer/components/layout/`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/app/)
+    - [Estrutura de Arquivos - `src/renderer/components/`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/app/)
   - **Exemplo de Implementação**:
     - `src/renderer/components/ui/button.tsx`
-    - `src/renderer/components/layout/discord-layout.tsx`
+    - `src/renderer/components/discord-layout.tsx`
 
 - **5.3. Gerenciamento de Estado (TanStack Query e Zustand)**
   - **Descrição**: Configurar os provedores para TanStack Query e Zustand, e criar os primeiros hooks/stores para gerenciamento de estado global e de servidor.
@@ -464,7 +459,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [Estrutura de Arquivos - `src/main/agents/queue/queue.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/agents/queue/queue.service.ts)
   - **Exemplo de Implementação**:
     - Atualizar `MessageRouter` para chamar `QueueService.addJob`
-    - Definir tipos de `Job` e `AgentTask`
+    - Definir tipos de `Job` e `Agentjob`
 
 - **11.2. Backend: Monitoramento de Jobs e Intervenção**
   - **Descrição**: Implementar o `JobService` para atualizar o status das tarefas e expor métodos para pausar/cancelar jobs.
@@ -484,40 +479,3 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
   - **Exemplo de Implementação**:
     - `src/renderer/app/project/[project-id]/activity/route.tsx`
     - `src/renderer/features/agents/hooks/use-jobs.ts`
-
-### Fase 12: Qualidade e Refinamento
-
-**Objetivo**: Garantir a qualidade do código, a cobertura de testes e a conformidade com os padrões de desenvolvimento. Esta fase deve ser contínua e integrada ao longo de todo o processo de desenvolvimento.
-
-- **12.1. Testes Unitários**
-  - **Descrição**: Escrever testes unitários para a lógica de negócio em serviços e componentes React.
-  - **Referências**:
-    - [7. Desenvolvimento e Qualidade - 3. Estratégia de Testes](docs/architecture/new/07-desenvolvimento-e-qualidade.md#3-estratégia-de-testes)
-    - [7. Desenvolvimento e Qualidade - Onde os Testes Ficam?](docs/architecture/new/07-desenvolvimento-e-qualidade.md#onde-os-testes-ficam)
-  - **Exemplo de Implementação**:
-    - `tests/main/user/authentication/auth.service.test.ts`
-    - `tests/renderer/features/user/authentication/components/login-form.test.tsx`
-
-- **12.2. Testes de Integração**
-  - **Descrição**: Escrever testes de integração para verificar a comunicação entre camadas (IPC, serviço-banco de dados).
-  - **Referências**:
-    - [7. Desenvolvimento e Qualidade - 3. Estratégia de Testes](docs/architecture/new/07-desenvolvimento-e-qualidade.md#3-estratégia-de-testes)
-    - [7. Desenvolvimento e Qualidade - Exemplo de Teste de Integração (Backend)](docs/architecture/new/07-desenvolvimento-e-qualidade.md#exemplo-de-teste-de-integração-backend)
-  - **Exemplo de Implementação**:
-    - `tests/main/project/project-service.integration.test.ts`
-
-- **12.3. Testes End-to-End (E2E)**
-  - **Descrição**: Implementar testes E2E para os fluxos de usuário mais críticos.
-  - **Referências**:
-    - [7. Desenvolvimento e Qualidade - 3. Estratégia de Testes](docs/architecture/new/07-desenvolvimento-e-qualidade.md#3-estratégia-de-testes)
-  - **Exemplo de Implementação**:
-    - `tests/e2e/login-flow.spec.ts`
-
-- **12.4. Verificações de Qualidade (Linting, Type Checking, Formatting)**
-  - **Descrição**: Garantir que o código esteja em conformidade com os padrões de qualidade definidos.
-  - **Referências**:
-    - [7. Desenvolvimento e Qualidade - 2. Padrões de Código e Convenções](docs/architecture/new/07-desenvolvimento-e-qualidade.md#2-padrões-de-código-e-convenções)
-    - [7. Desenvolvimento e Qualidade - Checklist de Qualidade Antes do Commit](docs/architecture/new/07-desenvolvimento-e-qualidade.md#checklist-de-qualidade-antes-do-commit)
-  - **Exemplo de Implementação**:
-    - Executar `npm run quality:check` regularmente.
-    - Configurar pre-commit hooks (Husky).

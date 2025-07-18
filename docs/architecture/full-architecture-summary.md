@@ -367,7 +367,7 @@ As configurações são gerenciadas em arquivos específicos para cada ferrament
 import type { Config } from "drizzle-kit";
 
 export default {
-  schema: "./src/main/database/schema-consolidated.ts", // Ou schemas individuais por domínio
+  schema: "./src/main/**/*.schema.ts", // já pega automaticamente todos schemas das suas respectivas pastas
   out: "./drizzle",
   driver: "better-sqlite",
   dbCredentials: {
@@ -375,24 +375,6 @@ export default {
   },
 } satisfies Config;
 ```
-
----
-
-## 🧪 Estratégia de Testes
-
-Nossa estratégia de testes pragmática garante a qualidade em todas as camadas da arquitetura.
-
-### Pirâmide de Testes
-
-- **Unit Tests (70%)**: Foco principal. Testam a lógica de negócio dentro de um `service` de um agregado ou a lógica de um componente React de uma `feature`.
-- **Integration Tests (20%)**: Verificam a interação entre diferentes partes do sistema, como a comunicação IPC entre frontend e backend ou a interação de um serviço com o banco de dados.
-- **End-to-End (E2E) Tests (10%)**: Simulam fluxos de usuário completos para os cenários mais críticos.
-
-### Onde os Testes Ficam?
-
-Os testes são colocados em um diretório `tests/` na raiz, espelhando a estrutura de `src/` para facilitar a localização.
-
----
 
 ## ✨ Funcionalidades Principais
 
@@ -448,4 +430,3 @@ O plano de desenvolvimento é dividido em fases sequenciais, garantindo a constr
 - **Fase 9: Funcionalidade - Gerenciamento de Agentes (Equipe de IA)**: Implementação da funcionalidade de contratação e gerenciamento de agentes (Personas) para projetos.
 - **Fase 10: Funcionalidade - Fórum de Discussão**: Implementação da funcionalidade de fórum para discussões estruturadas e assíncronas dentro dos projetos.
 - **Fase 11: Funcionalidade - Interação e Fluxo de Trabalho**: Implementação do fluxo de trabalho conversacional para iniciar tarefas e monitorar o progresso.
-- **Fase 12: Qualidade e Refinamento**: Garantia contínua da qualidade do código, cobertura de testes e conformidade com os padrões de desenvolvimento.

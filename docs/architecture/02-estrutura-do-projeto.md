@@ -12,7 +12,7 @@ A estrutura de arquivos do Project Wiz é um dos pilares da nossa filosofia de s
 
 1.  **Domain-Driven Organization**: O código é organizado por domínios de negócio (ex: `user`, `project`, `agents`), não por tipo técnico (ex: `controllers`, `models`).
 2.  **Flat is Better than Nested**: Evitamos aninhamento desnecessário de diretórios para facilitar a navegação e a descoberta de arquivos.
-3.  **Separação Clara de Responsabilidades**: As fronteiras entre o backend (`main`), o frontend (`renderer`) e o código compartilhado (`shared`) são estritamente definidas.
+3.  **Separação Clara de Responsabilidades**: As fronteiras entre o backend (`main`), o frontend (`renderer`) e o código compartilhado são estritamente definidas.
 4.  **Convention over Configuration**: A estrutura e as convenções de nomenclatura são previsíveis, reduzindo a carga cognitiva e a necessidade de configuração.
 
 ---
@@ -142,46 +142,3 @@ const unsubscribe = subscribeToEvent("project.created", (data) => {
 // Cancelar subscrição
 unsubscribe();
 ```
-
-### Gerador de IDs (`src/main/utils/id-generator.ts`)
-
-Sistema centralizado para geração de IDs únicos com prefixos específicos de domínio, garantindo identificação consistente em toda a aplicação.
-
-**Características:**
-
-- **Baseado em Crypto**: Utiliza `crypto.randomBytes` para melhor entropia que `Math.random()`
-- **Prefixos de Domínio**: Cada domínio tem seu próprio prefixo (ex: `user_`, `project_`, `agent_`)
-- **Timestamp Legível**: Inclui timestamp em base36 para facilitar debugging
-- **IDs Curtos**: Função especial para IDs de display com apenas 8 caracteres
-
-**Geradores Disponíveis:**
-
-- `generateUserId()` → `user_<timestamp>-<random>`
-- `generateProjectId()` → `project_<timestamp>-<random>`
-- `generateAgentId()` → `agent_<timestamp>-<random>`
-- `generateChannelId()` → `channel_<timestamp>-<random>`
-- `generateMessageId()` → `msg_<timestamp>-<random>`
-- `generateIssueId()` → `issue_<timestamp>-<random>`
-- `generateForumTopicId()` → `topic_<timestamp>-<random>`
-- `generateForumPostId()` → `post_<timestamp>-<random>`
-- `generateConversationId()` → `conv_<timestamp>-<random>`
-
-**Uso:**
-
-```typescript
-// Gerar ID com prefixo específico
-const userId = generateUserId(); // user_lz1234-abcd1234ef567890
-
-// Gerar ID genérico com prefixo personalizado
-const customId = generateId("custom"); // custom_lz1234-abcd1234ef567890
-
-// Gerar ID curto para display
-const shortId = generateShortId(); // abcd1234
-```
-
-**Implicações Arquiteturais:**
-
-- **Rastreabilidade**: IDs com prefixo facilitam debugging e logs
-- **Unicidade**: Combinação de timestamp e random garante unicidade global
-- **Legibilidade**: Base36 timestamp permite identificar idade do objeto
-- **Consistência**: Todos os domínios seguem o mesmo padrão de geração
