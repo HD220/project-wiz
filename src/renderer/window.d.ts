@@ -1,8 +1,9 @@
-import type { IpcResponse } from "../main/types";
+import type { IpcResponse } from "@/main/types";
 import type {
   LoginCredentials,
   RegisterUserInput,
-} from "../main/user/authentication/auth.types";
+} from "@/main/user/authentication/auth.types";
+import type { Theme } from "@/main/user/authentication/users.schema";
 
 declare global {
   interface Window {
@@ -19,6 +20,12 @@ declare global {
         logout: () => Promise<IpcResponse>;
         isLoggedIn: () => Promise<IpcResponse>;
         getUserById: (userId: string) => Promise<IpcResponse>;
+      };
+
+      // Profile API
+      profile: {
+        getTheme: (userId: string) => Promise<IpcResponse>;
+        updateTheme: (userId: string, theme: Theme) => Promise<IpcResponse>;
       };
     };
   }

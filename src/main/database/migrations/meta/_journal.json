@@ -8,6 +8,13 @@
       "when": 1752866943088,
       "tag": "0000_curvy_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1752870984045,
+      "tag": "0001_careful_the_executioner",
+      "breakpoints": true
     }
   ]
 }

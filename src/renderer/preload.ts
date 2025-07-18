@@ -2,11 +2,12 @@
 // This script has access to node.js APIs and will be executed before the renderer process loads
 
 import { contextBridge, ipcRenderer } from "electron";
-import type { IpcResponse } from "../main/types";
+import type { IpcResponse } from "@/main/types";
 import type {
   LoginCredentials,
   RegisterUserInput,
-} from "../main/user/authentication/auth.types";
+} from "@/main/user/authentication/auth.types";
+import type { Theme } from "@/main/user/authentication/users.schema";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -28,6 +29,14 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("auth:isLoggedIn"),
     getUserById: (userId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("auth:getUserById", userId),
+  },
+
+  // Profile API
+  profile: {
+    getTheme: (userId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("profile:getTheme", userId),
+    updateTheme: (userId: string, theme: Theme): Promise<IpcResponse> =>
+      ipcRenderer.invoke("profile:updateTheme", userId, theme),
   },
 });
 

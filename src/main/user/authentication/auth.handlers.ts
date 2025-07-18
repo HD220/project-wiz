@@ -1,7 +1,10 @@
 import { ipcMain } from "electron";
-import { AuthService } from "./auth.service";
+import { AuthService } from "@/main/user/authentication/auth.service";
 import type { IpcResponse } from "@/main/types";
-import type { LoginCredentials, RegisterUserInput } from "./auth.types";
+import type {
+  LoginCredentials,
+  RegisterUserInput,
+} from "@/main/user/authentication/auth.types";
 
 /**
  * Setup authentication IPC handlers
@@ -49,11 +52,10 @@ export function setupAuthHandlers(): void {
   // Get current authenticated user
   ipcMain.handle("auth:getCurrentUser", async (): Promise<IpcResponse> => {
     try {
-      const result = await AuthService.getCurrentUser();
+      const user = await AuthService.getCurrentUser();
       return {
-        success: result.valid,
-        data: result.user,
-        error: result.error,
+        success: true,
+        data: user,
       };
     } catch (error) {
       return {

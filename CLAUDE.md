@@ -586,3 +586,112 @@ declare global {
 - Usar `IpcResponse<T>` de `@/main/types`
 - Registrar via `setupDominioHandlers()` no main.ts
 - Expor API tipada no preload.ts e window.d.ts
+
+### ProfileService Patterns
+
+**ProfileService Implementation Patterns (Atividade 1.4) - Implementado 2025-07-18:**
+
+```typescript
+// ✅ Correct - Services return data directly
+export class ProfileService {
+  static async getTheme(userId: string): Promise<Theme> {
+    const [user] = await db
+      .select({ theme: usersTable.theme })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    return user.theme; // Return data directly
+  }
+}
+
+// ✅ Correct - Handlers do try/catch
+export function setupProfileHandlers(): void {
+  ipcMain.handle(
+    "profile:getTheme",
+    async (_, userId: string): Promise<IpcResponse> => {
+      try {
+        const theme = await ProfileService.getTheme(userId);
+        return { success: true, data: theme };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Failed to get theme",
+        };
+      }
+    },
+  );
+}
+```
+
+**Estrutura de Tipos Organizada:**
+
+```typescript
+// ✅ CORRETO - Tipos organizados no schema para reutilização
+// src/main/user/authentication/users.schema.ts
+export type Theme = "dark" | "light" | "system";
+
+export const usersTable = sqliteTable("users", {
+  theme: text("theme").$type<Theme>().notNull().default("system"),
+  // ... outros campos
+});
+
+// ✅ CORRETO - Tipos derivados usando Omit e intersection
+// src/main/user/authentication/auth.types.ts
+import type {
+  SelectUser,
+  InsertUser,
+} from "@/main/user/authentication/users.schema";
+
+export type AuthenticatedUser = Omit<SelectUser, "passwordHash">;
+export type RegisterUserInput = Omit<InsertUser, "passwordHash"> & {
+  password: string;
+};
+```
+
+**Sintaxe Drizzle Padrão:**
+
+```typescript
+// ✅ CORRETO - Usar db.select().from().where() com desestruturação
+const [user] = await db
+  .select({ theme: usersTable.theme })
+  .from(usersTable)
+  .where(eq(usersTable.id, userId))
+  .limit(1);
+
+if (!user) {
+  throw new Error("User not found");
+}
+
+// ❌ EVITAR - db.query.tableName.findFirst() (requer schema na conexão)
+const user = await db.query.usersTable.findFirst({
+  where: eq(usersTable.id, userId),
+});
+```
+
+**Organização de Imports:**
+
+```typescript
+// ✅ CORRETO - Sempre usar aliases
+import { ProfileService } from "@/main/user/profile/profile.service";
+import type { Theme } from "@/main/user/authentication/users.schema";
+import type { IpcResponse } from "@/main/types";
+
+// ❌ EVITAR - Imports relativos
+import { ProfileService } from "./profile.service";
+import type { Theme } from "../authentication/users.schema";
+```
+
+**Aprendizados Críticos:**
+
+1. **Organização de Tipos**: Definir tipos no schema onde pertencem para reutilização entre domínios
+2. **Services Simples**: Retornar dados diretamente, deixar try/catch para handlers
+3. **Sintaxe Drizzle**: Usar `db.select().from().where()` com desestruturação `const [item] = await db...`
+4. **Tipos Derivados**: Usar `Omit` e intersection types ao invés de redefinir manualmente
+5. **Imports com Aliases**: Sempre usar `@/` para manter organização e evitar quebras de refatoração
+6. **Princípio KISS**: Implementar funcionalidade mínima primeiro (apenas tema) antes de expandir
+7. **Schema Type Safety**: Usar `.$type<CustomType>()` para tipos customizados no Drizzle

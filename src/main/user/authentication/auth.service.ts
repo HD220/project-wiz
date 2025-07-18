@@ -2,13 +2,15 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-import { usersTable, type SelectUser, type InsertUser } from "./users.schema";
+import {
+  usersTable,
+  type InsertUser,
+} from "@/main/user/authentication/users.schema";
 import type {
   LoginCredentials,
   RegisterUserInput,
-  AuthResult,
-  SessionValidationResult,
-} from "./auth.types";
+  AuthenticatedUser,
+} from "@/main/user/authentication/auth.types";
 
 // Simple in-memory session store for current user
 let currentUserId: string | null = null;
@@ -17,13 +19,15 @@ export class AuthService {
   /**
    * Register a new user
    */
-  static async register(input: RegisterUserInput): Promise<AuthResult> {
+  static async register(input: RegisterUserInput): Promise<AuthenticatedUser> {
     const db = getDatabase();
 
     // Check if user already exists
-    const existingUser = await db.query.usersTable.findFirst({
-      where: eq(usersTable.username, input.username),
-    });
+    const [existingUser] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.username, input.username))
+      .limit(1);
 
     if (existingUser) {
       throw new Error("Username already exists");
@@ -53,21 +57,23 @@ export class AuthService {
     // Return user without password hash
     const { passwordHash: _, ...userWithoutPassword } = newUser;
 
-    return {
-      user: userWithoutPassword,
-    };
+    return userWithoutPassword;
   }
 
   /**
    * Login with username and password
    */
-  static async login(credentials: LoginCredentials): Promise<AuthResult> {
+  static async login(
+    credentials: LoginCredentials,
+  ): Promise<AuthenticatedUser> {
     const db = getDatabase();
 
     // Find user by username
-    const user = await db.query.usersTable.findFirst({
-      where: eq(usersTable.username, credentials.username),
-    });
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.username, credentials.username))
+      .limit(1);
 
     if (!user) {
       throw new Error("Invalid username or password");
@@ -89,39 +95,36 @@ export class AuthService {
     // Return user without password hash
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    return {
-      user: userWithoutPassword,
-    };
+    return userWithoutPassword;
   }
 
   /**
    * Get current authenticated user
    */
-  static async getCurrentUser(): Promise<SessionValidationResult> {
+  static async getCurrentUser(): Promise<AuthenticatedUser> {
     if (!currentUserId) {
-      return { valid: false, error: "No user logged in" };
+      throw new Error("No user logged in");
     }
 
     const db = getDatabase();
 
     // Find user by ID
-    const user = await db.query.usersTable.findFirst({
-      where: eq(usersTable.id, currentUserId),
-    });
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, currentUserId))
+      .limit(1);
 
     if (!user) {
       // Clear invalid session
       currentUserId = null;
-      return { valid: false, error: "User not found" };
+      throw new Error("User not found");
     }
 
     // Return user without password hash
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    return {
-      valid: true,
-      user: userWithoutPassword,
-    };
+    return userWithoutPassword;
   }
 
   /**
@@ -159,14 +162,14 @@ export class AuthService {
   /**
    * Get user by ID (utility method)
    */
-  static async getUserById(
-    userId: string,
-  ): Promise<Omit<SelectUser, "passwordHash"> | null> {
+  static async getUserById(userId: string): Promise<AuthenticatedUser | null> {
     const db = getDatabase();
 
-    const user = await db.query.usersTable.findFirst({
-      where: eq(usersTable.id, userId),
-    });
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
 
     if (!user) {
       return null;

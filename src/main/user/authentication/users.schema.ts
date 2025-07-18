@@ -1,6 +1,8 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
+export type Theme = "dark" | "light" | "system";
+
 export const usersTable = sqliteTable("users", {
   id: text("id")
     .primaryKey()
@@ -9,6 +11,7 @@ export const usersTable = sqliteTable("users", {
   name: text("name").notNull(),
   avatar: text("avatar"),
   passwordHash: text("password_hash").notNull(),
+  theme: text("theme").$type<Theme>().notNull().default("system"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
