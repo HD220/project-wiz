@@ -1,26 +1,30 @@
 import { ipcMain } from "electron";
 import { fileSystemService } from "./file-system.service";
-import { logger } from "@/main/utils/logger";
-import { errorHandler } from "@/main/utils/error-handler";
+import { getLogger } from "@/main/utils/logger";
+
+const logger = getLogger("file-system-handlers");
 
 export function setupFileSystemHandlers(): void {
   // Get project file system
-  ipcMain.handle("fileSystem:getProjectFiles", async (event, { projectId }) => {
+  ipcMain.handle("fileSystem:getProjectFiles", async (_, { projectId }) => {
     try {
       logger.info(`Getting file system for project: ${projectId}`);
       const result = await fileSystemService.getProjectFileSystem(projectId);
-      return result;
+      return { success: true, data: result };
     } catch (error) {
       logger.error("Error getting project file system:", error);
-      return errorHandler.handleError(error, {
-        context: "fileSystem:getProjectFiles",
-        projectId,
-      });
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to get project files",
+      };
     }
   });
 
   // Get file content
-  ipcMain.handle("fileSystem:getFileContent", async (event, { filePath }) => {
+  ipcMain.handle("fileSystem:getFileContent", async (_, { filePath }) => {
     try {
       logger.info(`Getting file content for: ${filePath}`);
       const result = await fileSystemService.getFileContent(filePath);

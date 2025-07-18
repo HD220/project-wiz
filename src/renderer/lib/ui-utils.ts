@@ -9,13 +9,6 @@ export { cn } from "./utils";
 export { StatusUtils } from "./status-utils";
 export { DateUtils } from "./date-utils";
 export { FieldUtils } from "./field-utils";
-export {
-  AgentUtils,
-  ProjectUtils,
-  UserUtils,
-  LLMUtils,
-  TaskUtils,
-} from "./domain-utils";
 
 // Legacy exports for backward compatibility
 export { getAgentStatusColor } from "./utils";

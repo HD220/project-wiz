@@ -1,12 +1,14 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { generateId } from "@/main/utils/id-generator";
-import { logger } from "@/main/utils/logger";
+import { getLogger } from "@/main/utils/logger";
 import type {
   FileTreeItem,
   FileSystemDto,
   FileContentDto,
 } from "@/shared/types/domains/projects/file-system.types";
+
+const logger = getLogger("file-system-service");
 
 class FileSystemService {
   private async isDirectory(filePath: string): Promise<boolean> {
@@ -56,7 +58,7 @@ class FileSystemService {
           id: generateId("file"),
           name: item,
           type: isDir ? "directory" : "file",
-          parentId,
+          ...(parentId && { parentId }),
           path: itemRelativePath,
           size: isDir ? undefined : stats.size,
           modified: stats.mtime,

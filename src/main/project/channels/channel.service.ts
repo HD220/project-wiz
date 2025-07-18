@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { getDatabase } from "../../database/connection";
 import { channels } from "./channels.schema";
-import { projects } from "../core/projects.schema";
+import { projects } from "../projects.schema";
 import { z } from "zod";
 
 // Simple validation schemas
