@@ -2,15 +2,15 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-import {
-  usersTable,
-  type InsertUser,
-} from "@/main/user/authentication/users.schema";
 import type {
   LoginCredentials,
   RegisterUserInput,
   AuthenticatedUser,
 } from "@/main/user/authentication/auth.types";
+import {
+  usersTable,
+  type InsertUser,
+} from "@/main/user/authentication/users.schema";
 
 // Simple in-memory session store for current user
 let currentUserId: string | null = null;

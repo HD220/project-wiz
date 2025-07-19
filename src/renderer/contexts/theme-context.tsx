@@ -42,6 +42,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       mediaQuery.addEventListener("change", updateTheme);
       return () => mediaQuery.removeEventListener("change", updateTheme);
     }
+
+    return undefined;
   }, [theme]);
 
   return (

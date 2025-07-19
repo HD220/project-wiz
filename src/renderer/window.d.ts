@@ -1,13 +1,13 @@
+import type {
+  InsertProject,
+  UpdateProject,
+} from "@/main/project/projects.schema";
 import type { IpcResponse } from "@/main/types";
 import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/user/authentication/auth.types";
 import type { Theme } from "@/main/user/authentication/users.schema";
-import type {
-  InsertProject,
-  UpdateProject,
-} from "@/main/project/projects.schema";
 
 declare global {
   interface Window {

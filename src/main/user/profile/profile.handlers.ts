@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
 
-import { ProfileService } from "@/main/user/profile/profile.service";
-import type { Theme } from "@/main/user/authentication/users.schema";
 import type { IpcResponse } from "@/main/types";
+import type { Theme } from "@/main/user/authentication/users.schema";
+import { ProfileService } from "@/main/user/profile/profile.service";
 
 export function setupProfileHandlers(): void {
   ipcMain.handle(

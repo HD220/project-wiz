@@ -6,7 +6,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import type { VariantProps } from "class-variance-authority";
 
 interface CustomLinkProps
-  extends Omit<LinkProps, "className">,
+  extends Omit<LinkProps, "className" | "to">,
     VariantProps<typeof buttonVariants> {
   className?: string;
   children: React.ReactNode;

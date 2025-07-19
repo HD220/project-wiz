@@ -2,16 +2,17 @@
 // This script has access to node.js APIs and will be executed before the renderer process loads
 
 import { contextBridge, ipcRenderer } from "electron";
+
+import type {
+  InsertProject,
+  UpdateProject,
+} from "@/main/project/projects.schema";
 import type { IpcResponse } from "@/main/types";
 import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/user/authentication/auth.types";
 import type { Theme } from "@/main/user/authentication/users.schema";
-import type {
-  InsertProject,
-  UpdateProject,
-} from "@/main/project/projects.schema";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object

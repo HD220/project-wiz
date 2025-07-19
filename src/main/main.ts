@@ -3,10 +3,10 @@ import * as path from "path";
 import { app, BrowserWindow } from "electron";
 import squirrel from "electron-squirrel-startup";
 
-import { getLogger } from "./utils/logger";
+import { setupProjectHandlers } from "./project/project.handlers";
 import { setupAuthHandlers } from "./user/authentication/auth.handlers";
 import { setupProfileHandlers } from "./user/profile/profile.handlers";
-import { setupProjectHandlers } from "./project/project.handlers";
+import { getLogger } from "./utils/logger";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;

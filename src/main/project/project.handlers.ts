@@ -1,22 +1,46 @@
 import { ipcMain } from "electron";
+
 import { ProjectService } from "@/main/project/project.service";
-import type { IpcResponse } from "@/main/types";
 import type {
   InsertProject,
   UpdateProject,
 } from "@/main/project/projects.schema";
+import type { IpcResponse } from "@/main/types";
 
 /**
  * Setup project IPC handlers
  * Exposes ProjectService methods to the frontend via IPC
  */
 export function setupProjectHandlers(): void {
-  // Create project
+  // Create project with Git integration
   ipcMain.handle(
     "projects:create",
-    async (_, input: InsertProject): Promise<IpcResponse> => {
+    async (
+      _,
+      input: Omit<InsertProject, "localPath">,
+    ): Promise<IpcResponse> => {
       try {
         const result = await ProjectService.create(input);
+        return {
+          success: true,
+          data: result,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error ? error.message : "Failed to create project",
+        };
+      }
+    },
+  );
+
+  // Create project (legacy method for backward compatibility)
+  ipcMain.handle(
+    "projects:createLegacy",
+    async (_, input: InsertProject): Promise<IpcResponse> => {
+      try {
+        const result = await ProjectService.createLegacy(input);
         return {
           success: true,
           data: result,

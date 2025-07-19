@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
-import { AuthService } from "@/main/user/authentication/auth.service";
+
 import type { IpcResponse } from "@/main/types";
+import { AuthService } from "@/main/user/authentication/auth.service";
 import type {
   LoginCredentials,
   RegisterUserInput,
