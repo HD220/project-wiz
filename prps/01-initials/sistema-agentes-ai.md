@@ -1,43 +1,85 @@
-# Sistema de Agentes de IA
+# Sistema de Agentes de IA Humanizados
 
 ## Resumo Executivo
 
-Implementação do sistema central de agentes de IA do Project Wiz, permitindo a criação, gerenciamento e execução de agentes autônomos que colaboram no desenvolvimento de software através de conversas e tarefas automatizadas.
+Implementação do sistema central de agentes humanizados do Project Wiz, criando "pessoas virtuais" autônomas que colaboram no desenvolvimento de software através de conversas naturais, auto-gestão de tarefas e interação orgânica com usuários e outros agentes.
 
 ## Contexto e Motivação
 
-O sistema de agentes representa o diferencial principal do Project Wiz. Atualmente, toda a infraestrutura base está implementada (usuários, projetos, conversas), mas o core value proposition - agentes de IA colaborativos - está completamente ausente. Esta é a funcionalidade que transforma o Project Wiz de um simples chat em uma "fábrica autônoma de software".
+O sistema de agentes representa o diferencial principal do Project Wiz. Atualmente, toda a infraestrutura base está implementada (usuários, projetos, conversas), mas o core value proposition - agentes humanizados colaborativos - está completamente ausente. Esta é a funcionalidade que transforma o Project Wiz de um simples chat em uma "fábrica autônoma de software" onde agentes virtuais trabalham como colegas reais.
+
+## Filosofia dos Agentes
+
+### Agentes como "Pessoas Virtuais"
+Os agentes não são ferramentas especializadas, mas **colegas de trabalho virtuais** com:
+- **Identidade própria**: Nome, avatar, backstory, personalidade e objetivos
+- **Autonomia total**: Criam e gerenciam suas próprias tarefas e prioridades
+- **Colaboração natural**: Conversam em DMs e canais como qualquer membro da equipe
+- **Memória persistente**: Mantêm contexto de longo prazo e registram aprendizados
+
+### Sistema de Contratação Inteligente
+- **Assistente Pessoal**: Cada usuário tem um agente assistente padrão que atua como "gerente de RH virtual"
+- **Contratação por Conversa**: Usuário discute necessidades com assistente, que aciona tools de contratação
+- **Análise Proativa**: Assistente analisa projeto periodicamente e sugere contratação de especialistas
+- **Processo de Seleção**: Sistema gera 3 candidatos com diferentes perfis para escolha
+- **Gestão Manual**: Interface para usuário criar/editar agentes diretamente
 
 ## Escopo
 
 ### Incluído:
 
-- Schema de dados para agentes, tarefas e filas de trabalho
-- AgentService para gerenciamento do ciclo de vida dos agentes
-- QueueService para distribuição e execução de tarefas
-- AgentWorker base class para execução de tarefas
-- Sistema de routing de mensagens para ativação de agentes
-- Integração com LLMs (OpenAI, DeepSeek) via AI SDK
-- Sistema de personas com roles e expertise específicas
-- Interface IPC para comunicação frontend-backend
+#### Core System
+- **Schema de dados** para agentes humanizados (persona, backstory, goals, status, memória)
+- **AgentService** para gerenciamento completo do ciclo de vida
+- **AgentWorker** com sistema de auto-gestão de filas de tarefas
+- **Sistema de status** (disponível, ocupado, ausente, offline) estilo Discord
+- **Sistema de memória e contexto** para conversas de longa duração
+
+#### Agent Tools & Capabilities  
+- **Ferramentas base**: Equivalentes às ferramentas do Claude (Bash, Read, Edit, etc.)
+- **Ferramentas da plataforma**: 
+  - Criar/gerenciar projetos
+  - Enviar mensagens (DM e canais)
+  - Interagir com sistema kanban/issues
+  - Gerenciar fila pessoal de tarefas
+  - Contratar outros agentes
+  - Análise de projetos
+- **Auto-agendamento**: Tarefas recorrentes e agendadas na fila pessoal
+
+#### Integration Layer
+- **Sistema de roteamento** inteligente baseado em expertise e contexto
+- **Integração LLM** (Claude, OpenAI, DeepSeek) via AI SDK
+- **Interface IPC** para comunicação frontend-backend
+- **Processamento em background** 24/7 das filas de tarefas
 
 ### Não Incluído:
-
 - Interface de usuário (será abordada em documento separado)
-- Análise automática de código para contratação de agentes
-- Sistema de worktrees Git para isolamento de trabalho
+- Sistema de permissões (implementação inicial com autonomia total)
 - Monitoramento avançado de performance
+- Sistema de "horário de trabalho" (agentes operam 24/7)
+
+## Arquitetura Técnica
+
+### Agent Lifecycle
+1. **Initialization**: Assistente ou usuário inicia processo de contratação
+2. **Generation**: LLM gera 3 candidatos com personas únicas
+3. **Selection**: Usuário ou assistente escolhe candidato ideal
+4. **Onboarding**: Agente se apresenta e estabelece objetivos iniciais
+5. **Operation**: Operação contínua 24/7 com processamento de filas
+6. **Learning**: Registro contínuo de memórias e aprendizados
 
 ## Impacto Esperado
 
-- **Usuários:** Capacidade de interagir com agentes de IA especializados através de conversas naturais
-- **Desenvolvedores:** Framework extensível para criação de novos tipos de agentes
-- **Sistema:** Transformação do Project Wiz em plataforma de automação de desenvolvimento
+- **Usuários:** Experiência de trabalhar com colegas virtuais especializados
+- **Assistentes:** Gestão inteligente e proativa da "equipe virtual"
+- **Agentes:** Ambiente de trabalho autônomo com ferramentas completas
+- **Sistema:** Plataforma de desenvolvimento colaborativo humano-AI
 
 ## Critérios de Sucesso
 
-- Agentes podem ser criados, configurados e associados a projetos
-- Mensagens em conversas ativam agentes relevantes quando apropriado
-- Agentes executam tarefas de código (análise, geração, testes) com sucesso
-- Sistema de filas processa tarefas de forma assíncrona e confiável
-- Integração perfeita com sistema de conversas existente
+- Assistente pessoal contrata agentes baseado em necessidades do projeto
+- Agentes conversam naturalmente e criam suas próprias tarefas
+- Sistema de memória mantém contexto de longo prazo efetivamente
+- Filas de tarefas processam trabalho em background continuamente
+- Roteamento inteligente direciona mensagens para agentes apropriados
+- Agentes colaboram entre si para resolver problemas complexos
