@@ -24,11 +24,3 @@ export const projectsTable = sqliteTable("projects", {
 export type SelectProject = typeof projectsTable.$inferSelect;
 export type InsertProject = typeof projectsTable.$inferInsert;
 export type UpdateProject = Partial<InsertProject> & { id: string };
-
-export type CreateProjectInput = {
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  gitUrl?: string;
-  localPath: string;
-};

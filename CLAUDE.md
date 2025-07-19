@@ -222,6 +222,36 @@ export class AuthService {
     return { user: userWithoutPassword };
   }
 }
+
+// ✅ Correct ProjectService Pattern
+export class ProjectService {
+  static async create(input: InsertProject): Promise<SelectProject> {
+    const db = getDatabase();
+
+    const [newProject] = await db
+      .insert(projectsTable)
+      .values(input)
+      .returning();
+
+    if (!newProject) {
+      throw new Error("Failed to create project");
+    }
+
+    return newProject; // Return data directly
+  }
+
+  static async findById(id: string): Promise<SelectProject | null> {
+    const db = getDatabase();
+
+    const [project] = await db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.id, id))
+      .limit(1);
+
+    return project || null;
+  }
+}
 ```
 
 ### Type-Safe API Exposure

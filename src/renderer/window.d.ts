@@ -4,6 +4,10 @@ import type {
   RegisterUserInput,
 } from "@/main/user/authentication/auth.types";
 import type { Theme } from "@/main/user/authentication/users.schema";
+import type {
+  InsertProject,
+  UpdateProject,
+} from "@/main/project/projects.schema";
 
 declare global {
   interface Window {
@@ -26,6 +30,15 @@ declare global {
       profile: {
         getTheme: (userId: string) => Promise<IpcResponse>;
         updateTheme: (userId: string, theme: Theme) => Promise<IpcResponse>;
+      };
+
+      // Projects API
+      projects: {
+        create: (input: InsertProject) => Promise<IpcResponse>;
+        findById: (id: string) => Promise<IpcResponse>;
+        listAll: () => Promise<IpcResponse>;
+        update: (input: UpdateProject) => Promise<IpcResponse>;
+        archive: (id: string) => Promise<IpcResponse>;
       };
     };
   }

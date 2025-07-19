@@ -8,6 +8,10 @@ import type {
   RegisterUserInput,
 } from "@/main/user/authentication/auth.types";
 import type { Theme } from "@/main/user/authentication/users.schema";
+import type {
+  InsertProject,
+  UpdateProject,
+} from "@/main/project/projects.schema";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -37,6 +41,19 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("profile:getTheme", userId),
     updateTheme: (userId: string, theme: Theme): Promise<IpcResponse> =>
       ipcRenderer.invoke("profile:updateTheme", userId, theme),
+  },
+
+  // Projects API
+  projects: {
+    create: (input: InsertProject): Promise<IpcResponse> =>
+      ipcRenderer.invoke("projects:create", input),
+    findById: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("projects:findById", id),
+    listAll: (): Promise<IpcResponse> => ipcRenderer.invoke("projects:listAll"),
+    update: (input: UpdateProject): Promise<IpcResponse> =>
+      ipcRenderer.invoke("projects:update", input),
+    archive: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("projects:archive", id),
   },
 });
 

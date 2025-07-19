@@ -194,23 +194,45 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - Tipos derivados do Drizzle eliminam duplicação e mantêm consistência
     - Workflow de migração (`db:generate` → `db:migrate`) é robusto e confiável
 
-- **2.2. Serviço de Projetos (`ProjectService`)**
+- **2.2. Serviço de Projetos (`ProjectService`)** ✅ **CONCLUÍDO**
   - **Descrição**: Implementar a lógica de negócio para operações CRUD de projetos, incluindo a inicialização de repositórios Git e a criação de canais padrão.
+  - **Status**: ✅ Implementado em 2025-07-19
+  - **Arquivos Criados**:
+    - `src/main/project/project.service.ts` - Serviço completo com operações CRUD
+    - `src/main/project/project.handlers.ts` - Handlers IPC type-safe
+  - **Arquivos Modificados**:
+    - `src/main/main.ts` - Registrado `setupProjectHandlers()`
+    - `src/renderer/preload.ts` - Exposta API `window.api.projects`
+    - `src/renderer/window.d.ts` - Tipagem completa para ProjectService
+  - **Métodos Implementados**:
+    - `create()` - Criar novo projeto
+    - `findById()` - Buscar projeto por ID
+    - `listAll()` - Listar todos os projetos ativos
+    - `update()` - Atualizar projeto existente
+    - `archive()` - Arquivar projeto
+  - **Handlers IPC Implementados**:
+    - `projects:create` - Criação de projeto
+    - `projects:findById` - Busca por ID
+    - `projects:listAll` - Listagem de projetos
+    - `projects:update` - Atualização de projeto
+    - `projects:archive` - Arquivamento de projeto
   - **Referências**:
     - [3. Camada Backend (Main Process) - 3. Service Layer: Lógica de Negócio do Domínio](docs/architecture/03-camada-backend.md#3-service-layer-lógica-de-negócio-do-domínio)
     - [6. Autenticação e Fluxos de Usuário - Fluxo 1: Criação de um Novo Projeto](docs/architecture/06-autenticacao-e-fluxos-de-usuario.md#fluxo-1-criação-de-um-novo-projeto)
     - [9. Funcionalidade: Gerenciamento de Projetos - 1. Ciclo de Vida do Projeto](docs/architecture/09-funcionalidade-gerenciamento-de-projetos.md#1-ciclo-de-vida-do-projeto)
-    - [Estrutura de Arquivos - `src/main/project/project.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/project/project.service.ts)
-  - **Exemplo de Implementação**:
-    - `src/main/project/project.service.ts` (incluir chamadas ao `GitService` e `ChannelService`)
+  - **Aprendizados**:
+    - Evitar criação de tipos desnecessários quando o schema já fornece tudo
+    - Usar apenas tipos derivados do Drizzle (`SelectProject`, `InsertProject`, `UpdateProject`)
+    - Não implementar funcionalidades (Git, Channels) até que sejam realmente necessárias
+    - Seguir rigorosamente os padrões estabelecidos pelos serviços existentes
+    - O banco automaticamente atualiza timestamps, não sobrescrever manualmente
 
-- **2.3. Handlers IPC de Projetos**
+- **2.3. Handlers IPC de Projetos** ✅ **CONCLUÍDO**
   - **Descrição**: Criar os handlers IPC para expor os métodos do `ProjectService` ao frontend.
+  - **Status**: ✅ Implementado como parte da atividade 2.2 em 2025-07-19
+  - **Integração Completa**: Handlers, preload.ts e window.d.ts atualizados
   - **Referências**:
     - [3. Camada Backend (Main Process) - 2. API Layer: Comunicação via IPC](docs/architecture/03-camada-backend.md#2-api-layer-comunicação-via-ipc)
-    - [Estrutura de Arquivos - `src/main/project/project.handlers.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/project/project.handlers.ts)
-  - **Exemplo de Implementação**:
-    - `src/main/project/project.handlers.ts`
 
 - **2.4. Serviço Git (`GitService`)**
   - **Descrição**: Implementar um serviço para interagir com o Git, incluindo inicialização de repositórios e criação de worktrees.

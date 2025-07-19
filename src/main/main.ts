@@ -6,6 +6,7 @@ import squirrel from "electron-squirrel-startup";
 import { getLogger } from "./utils/logger";
 import { setupAuthHandlers } from "./user/authentication/auth.handlers";
 import { setupProfileHandlers } from "./user/profile/profile.handlers";
+import { setupProjectHandlers } from "./project/project.handlers";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -79,6 +80,9 @@ app.whenReady().then(() => {
 
   setupProfileHandlers();
   logger.info("Profile IPC handlers registered");
+
+  setupProjectHandlers();
+  logger.info("Project IPC handlers registered");
 
   createMainWindow();
 
