@@ -234,7 +234,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
   - **Referências**:
     - [3. Camada Backend (Main Process) - 2. API Layer: Comunicação via IPC](docs/architecture/03-camada-backend.md#2-api-layer-comunicação-via-ipc)
 
-- **2.4. Serviço Git (`GitService`)**
+- **2.4. Serviço Git (`GitService`)** ✅ **CONCLUÍDO**
   - **Descrição**: Implementar um serviço para interagir com o Git, incluindo inicialização de repositórios e criação de worktrees.
   - **Referências**:
     - [5. Sistema de Agentes Autônomos - 🤖 O Core do Agent Worker (`agent.worker.ts`)](docs/architecture/05-sistema-de-agentes.md#o-core-do-agent-worker-agentworkerts)
