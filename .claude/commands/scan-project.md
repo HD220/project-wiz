@@ -4,13 +4,13 @@
 
 Analisar o repositório atual para identificar oportunidades de melhorias, novas funcionalidades ou refatoramentos necessários, gerando documentos em `prps/01-initials/[initial-slug].md` para cada oportunidade identificada.
 
-## Instruções de Execução
+## Instruções de Execução 
 
-1. **Análise Estrutural:**
+1. **Análise Estrutural profunda:**
    - Examine a arquitetura do projeto
    - Identifique padrões de código existentes
    - Analise dependências e tecnologias utilizadas
-   - Revise documentação existente
+   - Revise documentação existente: `README.md`, `docs`
 
 2. **Identificação de Oportunidades:**
    - Funcionalidades ausentes ou incompletas
@@ -23,8 +23,10 @@ Analisar o repositório atual para identificar oportunidades de melhorias, novas
    - Criar arquivos [initial-slug].md em `prps/01-initials/`
    - Nomear arquivos como `{nome-descritivo}.md`
    - Descrever a oportuniade identificada em alto nivel (a não ser que seja essenciamente tecnica e especifica)
+   
+4. **Criação/Atualização do indice de initials em `prps/01-initials/README.md` seguindo template
 
-## Template
+## Templates
 
 Para cada oportunidade identificada, use o seguinte template:
 
@@ -65,6 +67,16 @@ Para cada oportunidade identificada, use o seguinte template:
 - {Critério mensurável 3}
 ```
 
+Para o indice das initials use o template:
+```markdown
+# Project Wiz - Initials Index
+
+## 📋 Índice de Oportunidades
+
+| # | Documento | Impacto | Prioridade | Dependências |
+|---|-----------|---------|------------|--------------|
+```
+
 ## Resultado Esperado
 
-Múltiplos arquivos [slug].md salvos em `prps/01-initials/` com oportunidades priorizadas e bem documentadas.
+Múltiplos arquivos [slug].md salvos em `prps/01-initials/` com oportunidades priorizadas e bem documentadas e o indice atualizado.
