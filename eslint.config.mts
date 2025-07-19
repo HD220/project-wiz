@@ -191,6 +191,7 @@ export default [
       "public/**",
       "src/**/routeTree.gen.ts",
       "src/**/locales/*.ts",
+      "src/renderer/components/ui/**",
     ],
   },
   {
@@ -292,6 +293,14 @@ export default [
         { max: 120, skipBlankLines: true, skipComments: true },
       ],
       "max-statements": "off",
+    },
+  },
+
+  // 5. Override for preload.ts and window.d.ts - allow type imports from main
+  {
+    files: ["src/renderer/preload.ts", "src/renderer/window.d.ts"],
+    rules: {
+      "boundaries/element-types": "off",
     },
   },
 ];

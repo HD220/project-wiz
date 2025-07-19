@@ -10,8 +10,10 @@ import type {
   InsertLlmMessage,
 } from "./messages.schema";
 
-export interface SendMessageInput
-  extends Omit<InsertMessage, "id" | "createdAt" | "updatedAt"> {}
+export type SendMessageInput = Omit<
+  InsertMessage,
+  "id" | "createdAt" | "updatedAt"
+>;
 
 export interface SendLlmMessageInput {
   messageInput: SendMessageInput;

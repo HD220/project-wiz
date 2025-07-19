@@ -6,11 +6,10 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import type { VariantProps } from "class-variance-authority";
 
 interface CustomLinkProps
-  extends Omit<LinkProps, "className" | "to">,
+  extends Omit<LinkProps, "className">,
     VariantProps<typeof buttonVariants> {
   className?: string;
   children: React.ReactNode;
-  to: LinkProps["to"];
 }
 
 export const CustomLink = forwardRef<HTMLAnchorElement, CustomLinkProps>(

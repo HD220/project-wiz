@@ -4,7 +4,7 @@
  * Standard IPC response format
  * Used for all IPC communication between main and renderer processes
  */
-export interface IpcResponse<T = any> {
+export interface IpcResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

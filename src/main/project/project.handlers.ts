@@ -7,18 +7,10 @@ import type {
 } from "@/main/project/projects.schema";
 import type { IpcResponse } from "@/main/types";
 
-/**
- * Setup project IPC handlers
- * Exposes ProjectService methods to the frontend via IPC
- */
-export function setupProjectHandlers(): void {
-  // Create project with Git integration
+function setupCreateHandler(): void {
   ipcMain.handle(
     "projects:create",
-    async (
-      _,
-      input: Omit<InsertProject, "localPath">,
-    ): Promise<IpcResponse> => {
+    async (_, input: InsertProject): Promise<IpcResponse> => {
       try {
         const result = await ProjectService.create(input);
         return {
@@ -34,28 +26,9 @@ export function setupProjectHandlers(): void {
       }
     },
   );
+}
 
-  // Create project (legacy method for backward compatibility)
-  ipcMain.handle(
-    "projects:createLegacy",
-    async (_, input: InsertProject): Promise<IpcResponse> => {
-      try {
-        const result = await ProjectService.createLegacy(input);
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : "Failed to create project",
-        };
-      }
-    },
-  );
-
-  // Find project by ID
+function setupFindByIdHandler(): void {
   ipcMain.handle(
     "projects:findById",
     async (_, id: string): Promise<IpcResponse> => {
@@ -74,8 +47,9 @@ export function setupProjectHandlers(): void {
       }
     },
   );
+}
 
-  // List all projects
+function setupListAllHandler(): void {
   ipcMain.handle("projects:listAll", async (): Promise<IpcResponse> => {
     try {
       const projects = await ProjectService.listAll();
@@ -91,8 +65,9 @@ export function setupProjectHandlers(): void {
       };
     }
   });
+}
 
-  // Update project
+function setupUpdateHandler(): void {
   ipcMain.handle(
     "projects:update",
     async (_, input: UpdateProject): Promise<IpcResponse> => {
@@ -111,8 +86,9 @@ export function setupProjectHandlers(): void {
       }
     },
   );
+}
 
-  // Archive project
+function setupArchiveHandler(): void {
   ipcMain.handle(
     "projects:archive",
     async (_, id: string): Promise<IpcResponse> => {
@@ -133,4 +109,16 @@ export function setupProjectHandlers(): void {
       }
     },
   );
+}
+
+/**
+ * Setup project IPC handlers
+ * Exposes ProjectService methods to the frontend via IPC
+ */
+export function setupProjectHandlers(): void {
+  setupCreateHandler();
+  setupFindByIdHandler();
+  setupListAllHandler();
+  setupUpdateHandler();
+  setupArchiveHandler();
 }
