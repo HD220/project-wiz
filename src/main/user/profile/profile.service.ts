@@ -2,9 +2,9 @@ import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 import {
-  usersTable,
+  userPreferencesTable,
   type Theme,
-} from "@/main/user/authentication/users.schema";
+} from "@/main/user/profile/user-preferences.schema";
 
 export class ProfileService {
   /**
@@ -13,45 +13,24 @@ export class ProfileService {
   static async getTheme(userId: string): Promise<Theme> {
     const db = getDatabase();
 
-    const [user] = await db
-      .select({ theme: usersTable.theme })
-      .from(usersTable)
-      .where(eq(usersTable.id, userId))
+    const [preferences] = await db
+      .select({ theme: userPreferencesTable.theme })
+      .from(userPreferencesTable)
+      .where(eq(userPreferencesTable.userId, userId))
       .limit(1);
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return user.theme;
+    return preferences?.theme || "system";
   }
 
   /**
    * Update user's theme preference
    */
-  static async updateTheme(userId: string, theme: Theme): Promise<Theme> {
+  static async updateTheme(userId: string, theme: Theme): Promise<void> {
     const db = getDatabase();
 
-    // Verify user exists
-    const [existingUser] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(eq(usersTable.id, userId))
-      .limit(1);
-
-    if (!existingUser) {
-      throw new Error("User not found");
-    }
-
-    // Update theme
     await db
-      .update(usersTable)
-      .set({
-        theme,
-        updatedAt: new Date(),
-      })
-      .where(eq(usersTable.id, userId));
-
-    return theme;
+      .update(userPreferencesTable)
+      .set({ theme, updatedAt: new Date() })
+      .where(eq(userPreferencesTable.userId, userId));
   }
 }

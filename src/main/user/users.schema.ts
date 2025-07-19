@@ -1,17 +1,13 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export type Theme = "dark" | "light" | "system";
-
 export const usersTable = sqliteTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  username: text("username").notNull().unique(),
   name: text("name").notNull(),
   avatar: text("avatar"),
-  passwordHash: text("password_hash").notNull(),
-  theme: text("theme").$type<Theme>().notNull().default("system"),
+  type: text("type").$type<"human" | "agent">().notNull().default("human"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

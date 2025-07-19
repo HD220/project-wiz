@@ -1,17 +1,17 @@
 // Authentication types for the user domain
 
-import type {
-  SelectUser,
-  InsertUser,
-} from "@/main/user/authentication/users.schema";
+import type { SelectUser } from "@/main/user/users.schema";
 
 export interface LoginCredentials {
   username: string;
   password: string;
 }
 
-export type RegisterUserInput = Omit<InsertUser, "passwordHash"> & {
+export interface RegisterUserInput {
+  username: string;
+  name: string;
+  avatar?: string;
   password: string;
-};
+}
 
-export type AuthenticatedUser = Omit<SelectUser, "passwordHash">;
+export type AuthenticatedUser = SelectUser;

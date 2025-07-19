@@ -1,3 +1,5 @@
+import type { CreateConversationInput } from "@/main/conversations/conversation.service";
+import type { SendMessageInput } from "@/main/conversations/message.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -7,7 +9,7 @@ import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/user/authentication/auth.types";
-import type { Theme } from "@/main/user/authentication/users.schema";
+import type { Theme } from "@/main/user/profile/user-preferences.schema";
 
 declare global {
   interface Window {
@@ -39,6 +41,20 @@ declare global {
         listAll: () => Promise<IpcResponse>;
         update: (input: UpdateProject) => Promise<IpcResponse>;
         archive: (id: string) => Promise<IpcResponse>;
+      };
+
+      // Conversations API
+      conversations: {
+        create: (input: CreateConversationInput) => Promise<IpcResponse>;
+        getUserConversations: (userId: string) => Promise<IpcResponse>;
+      };
+
+      // Messages API
+      messages: {
+        send: (input: SendMessageInput) => Promise<IpcResponse>;
+        getConversationMessages: (
+          conversationId: string,
+        ) => Promise<IpcResponse>;
       };
     };
   }

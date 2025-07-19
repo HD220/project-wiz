@@ -3,6 +3,8 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
+import type { CreateConversationInput } from "@/main/conversations/conversation.service";
+import type { SendMessageInput } from "@/main/conversations/message.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -12,7 +14,7 @@ import type {
   LoginCredentials,
   RegisterUserInput,
 } from "@/main/user/authentication/auth.types";
-import type { Theme } from "@/main/user/authentication/users.schema";
+import type { Theme } from "@/main/user/profile/user-preferences.schema";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -55,6 +57,22 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("projects:update", input),
     archive: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("projects:archive", id),
+  },
+
+  // Conversations API
+  conversations: {
+    create: (input: CreateConversationInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:create", input),
+    getUserConversations: (userId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("conversations:getUserConversations", userId),
+  },
+
+  // Messages API
+  messages: {
+    send: (input: SendMessageInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("messages:send", input),
+    getConversationMessages: (conversationId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("messages:getConversationMessages", conversationId),
   },
 });
 

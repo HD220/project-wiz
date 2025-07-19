@@ -1,8 +1,8 @@
 import { ipcMain } from "electron";
 
 import type { IpcResponse } from "@/main/types";
-import type { Theme } from "@/main/user/authentication/users.schema";
 import { ProfileService } from "@/main/user/profile/profile.service";
+import type { Theme } from "@/main/user/profile/user-preferences.schema";
 
 export function setupProfileHandlers(): void {
   ipcMain.handle(
@@ -24,8 +24,8 @@ export function setupProfileHandlers(): void {
     "profile:updateTheme",
     async (_, userId: string, theme: Theme): Promise<IpcResponse> => {
       try {
-        const result = await ProfileService.updateTheme(userId, theme);
-        return { success: true, data: result };
+        await ProfileService.updateTheme(userId, theme);
+        return { success: true, data: { theme } };
       } catch (error) {
         return {
           success: false,

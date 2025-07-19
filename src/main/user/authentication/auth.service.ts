@@ -2,15 +2,14 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
+import { accountsTable } from "@/main/user/authentication/accounts.schema";
 import type {
   LoginCredentials,
   RegisterUserInput,
   AuthenticatedUser,
 } from "@/main/user/authentication/auth.types";
-import {
-  usersTable,
-  type InsertUser,
-} from "@/main/user/authentication/users.schema";
+import { userPreferencesTable } from "@/main/user/profile/user-preferences.schema";
+import { usersTable } from "@/main/user/users.schema";
 
 // Simple in-memory session store for current user
 let currentUserId: string | null = null;
@@ -22,42 +21,56 @@ export class AuthService {
   static async register(input: RegisterUserInput): Promise<AuthenticatedUser> {
     const db = getDatabase();
 
-    // Check if user already exists
-    const [existingUser] = await db
+    // Check if username already exists
+    const [existingAccount] = await db
       .select()
-      .from(usersTable)
-      .where(eq(usersTable.username, input.username))
+      .from(accountsTable)
+      .where(eq(accountsTable.username, input.username))
       .limit(1);
 
-    if (existingUser) {
+    if (existingAccount) {
       throw new Error("Username already exists");
     }
 
-    // Hash password
-    const passwordHash = await this.hashPassword(input.password);
+    // 1. Create user
+    const [user] = await db
+      .insert(usersTable)
+      .values({
+        name: input.name,
+        avatar: input.avatar,
+        type: "human",
+      })
+      .returning();
 
-    // Create user data
-    const userData: InsertUser = {
-      username: input.username,
-      name: input.name,
-      passwordHash,
-      avatar: input.avatar,
-    };
-
-    // Insert user into database
-    const [newUser] = await db.insert(usersTable).values(userData).returning();
-
-    if (!newUser) {
+    if (!user) {
       throw new Error("Failed to create user");
     }
 
+    // 2. Create account
+    const passwordHash = await this.hashPassword(input.password);
+    const [account] = await db
+      .insert(accountsTable)
+      .values({
+        userId: user.id,
+        username: input.username,
+        passwordHash,
+      })
+      .returning();
+
+    if (!account) {
+      throw new Error("Failed to create account");
+    }
+
+    // 3. Create preferences
+    await db.insert(userPreferencesTable).values({
+      userId: user.id,
+      theme: "system",
+    });
+
     // Set current session
-    currentUserId = newUser.id;
+    currentUserId = user.id;
 
-    // Return user without password hash
-    const { passwordHash: _, ...userWithoutPassword } = newUser;
-
-    return userWithoutPassword;
+    return user;
   }
 
   /**
@@ -68,21 +81,25 @@ export class AuthService {
   ): Promise<AuthenticatedUser> {
     const db = getDatabase();
 
-    // Find user by username
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.username, credentials.username))
+    // Buscar por username na tabela accounts
+    const [result] = await db
+      .select({
+        account: accountsTable,
+        user: usersTable,
+      })
+      .from(accountsTable)
+      .innerJoin(usersTable, eq(accountsTable.userId, usersTable.id))
+      .where(eq(accountsTable.username, credentials.username))
       .limit(1);
 
-    if (!user) {
+    if (!result) {
       throw new Error("Invalid username or password");
     }
 
     // Verify password
     const isPasswordValid = await this.comparePassword(
       credentials.password,
-      user.passwordHash,
+      result.account.passwordHash,
     );
 
     if (!isPasswordValid) {
@@ -90,12 +107,9 @@ export class AuthService {
     }
 
     // Set current session
-    currentUserId = user.id;
+    currentUserId = result.user.id;
 
-    // Return user without password hash
-    const { passwordHash: _, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    return result.user;
   }
 
   /**
@@ -121,10 +135,7 @@ export class AuthService {
       throw new Error("User not found");
     }
 
-    // Return user without password hash
-    const { passwordHash: _, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    return user;
   }
 
   /**
@@ -175,8 +186,6 @@ export class AuthService {
       return null;
     }
 
-    // Return user without password hash
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user;
   }
 }
