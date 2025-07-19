@@ -239,23 +239,23 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
   - **Referências**:
     - [5. Sistema de Agentes Autônomos - 🤖 O Core do Agent Worker (`agent.worker.ts`)](docs/architecture/05-sistema-de-agentes.md#o-core-do-agent-worker-agentworkerts)
     - [6. Autenticação e Fluxos de Usuário - Fluxo 1: Criação de um Novo Projeto](docs/architecture/06-autenticacao-e-fluxos-de-usuario.md#fluxo-1-criação-de-um-novo-projeto)
-    - [Estrutura de Arquivos - `src/main/project/core/git.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/project/core/git.service.ts) (assumindo um local para serviços core de projeto)
+    - [Estrutura de Arquivos - `src/main/project/git.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/project/git.service.ts) (assumindo um local para serviços core de projeto)
   - **Exemplo de Implementação**:
-    - `src/main/project/core/git.service.ts` (métodos como `initializeRepo`, `cloneRepo`, `createWorktreeForjob`, `commitChanges`)
+    - `src/main/project/git.service.ts` (métodos como `initializeRepo`, `cloneRepo`, `createWorktreeForjob`, `commitChanges`)
 
 ### Fase 3: Backend - Domínio de Conversas e Mensagens
 
 **Objetivo**: Implementar a lógica de backend para o gerenciamento de mensagens e o roteamento inicial de interações.
 
-- **3.1. Schema de Mensagens e Conversas**
+- **3.1. Schema de Mensagens e Conversas** ✅ **CONCLUÍDO**
   - **Descrição**: Definir os schemas Drizzle para mensagens e conversas (canais, DMs).
   - **Referências**:
     - [3. Camada Backend (Main Process) - 4. Data Layer: Persistência com Drizzle ORM](docs/architecture/03-camada-backend.md#4-data-layer-persistência-com-drizzle-orm)
     - [8. Funcionalidade: Espaço Pessoal e DMs - 1. Mensagens Diretas (DMs)](docs/architecture/08-funcionalidade-espaco-pessoal-e-dms.md#1-mensagens-diretas-dms)
-    - [Estrutura de Arquivos - `src/main/conversations/core/messages.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/core/messages.schema.ts)
+    - [Estrutura de Arquivos - `src/main/conversations/messages.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/messages.schema.ts)
     - [Estrutura de Arquivos - `src/main/conversations/channels/channels.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/channels/channels.schema.ts)
   - **Exemplo de Implementação**:
-    - `src/main/conversations/core/messages.schema.ts`
+    - `src/main/conversations/messages.schema.ts`
     - `src/main/conversations/channels/channels.schema.ts`
 
 - **3.2. Serviço de Mensagens (`MessageService`)**
@@ -264,9 +264,9 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [3. Camada Backend (Main Process) - 3. Service Layer: Lógica de Negócio do Domínio](docs/architecture/03-camada-backend.md#3-service-layer-lógica-de-negócio-do-domínio)
     - [6. Autenticação e Fluxos de Usuário - Fluxo 2: Envio de Mensagem e Interação do Agente](docs/architecture/06-autenticacao-e-fluxos-de-usuario.md#fluxo-2-envio-de-mensagem-e-interação-do-agente)
     - [8. Funcionalidade: Espaço Pessoal e DMs - 1. Mensagens Diretas (DMs)](docs/architecture/08-funcionalidade-espaco-pessoal-e-dms.md#1-mensagens-diretas-dms)
-    - [Estrutura de Arquivos - `src/main/conversations/core/message.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/core/message.service.ts)
+    - [Estrutura de Arquivos - `src/main/conversations/message.service.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/message.service.ts)
   - **Exemplo de Implementação**:
-    - `src/main/conversations/core/message.service.ts`
+    - `src/main/conversations/message.service.ts`
 
 - **3.3. Serviço de Canais (`ChannelService`)**
   - **Descrição**: Implementar a lógica para criação e gerenciamento de canais de projeto.
@@ -281,10 +281,10 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
   - **Referências**:
     - [3. Camada Backend (Main Process) - 2. API Layer: Comunicação via IPC](docs/architecture/03-camada-backend.md#2-api-layer-comunicação-via-ipc)
     - [Estrutura de Arquivos - `src/main/conversations/channels/channel.handlers.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/channels/channel.handlers.ts)
-    - [Estrutura de Arquivos - `src/main/conversations/core/message.handlers.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/core/message.handlers.ts)
+    - [Estrutura de Arquivos - `src/main/conversations/message.handlers.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/message.handlers.ts)
   - **Exemplo de Implementação**:
     - `src/main/conversations/channels/channel.handlers.ts`
-    - `src/main/conversations/core/message.handlers.ts`
+    - `src/main/conversations/message.handlers.ts`
 
 - **3.5. Roteador de Mensagens (`MessageRouter`)**
   - **Descrição**: Implementar a lógica inicial para analisar a intenção das mensagens e roteá-las para serviços apropriados (incluindo agentes).
@@ -464,7 +464,7 @@ Cada seção representa uma fase de desenvolvimento, com tarefas específicas, r
     - [Estrutura de Arquivos - `src/main/conversations/direct-messages/dm-conversations.schema.ts`](/mnt/d/Documentos/Pessoal/Github/project-wiz/src/main/conversations/direct-messages/dm-conversations.schema.ts)
   - **Exemplo de Implementação**:
     - `src/main/conversations/direct-messages/dm-conversations.schema.ts`
-    - Atualizar `src/main/conversations/core/message.service.ts` para suportar DMs.
+    - Atualizar `src/main/conversations/message.service.ts` para suportar DMs.
 
 - **8.2. Frontend: UI de DMs**
   - **Descrição**: Criar a interface para listar conversas de DM e exibir/enviar mensagens.
