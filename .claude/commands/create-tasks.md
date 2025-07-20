@@ -1,6 +1,6 @@
 # Create Tasks from PRP
 
-> Analyze a PRP README.md deeply and generate detailed, self-contained task files based on the universal task template
+> Analyze a PRP README.md deeply and generate evolutionary micro-features as self-contained tasks that deliver incremental functional value
 
 ## Usage
 
@@ -11,10 +11,11 @@
 ## Process Overview
 
 The command will:
-1. **Deep Analysis** of the PRP README.md to understand requirements, context, and implementation details
-2. **Task Breakdown** into logical, executable units following established patterns
-3. **Task Generation** using the universal template with complete context
-4. **File Creation** at `prps/{prp-folder}/tasks/{task-name}.md`
+1. **Deep Analysis** of the PRP README.md to understand the complete feature requirements
+2. **Evolutionary Breakdown** into micro-features that deliver end-to-end functionality
+3. **Task Generation** with complete backend→integration→frontend flow for each micro-feature
+4. **Progressive Complexity** starting simple and incrementally adding sophistication
+5. **File Creation** at `prps/{prp-folder}/tasks/{task-name}.md`
 
 ## Analysis Framework
 
@@ -70,48 +71,131 @@ project_intelligence:
     validation: {Validation patterns and commands}
 ```
 
-### 3. Task Decomposition Strategy
+### 3. Evolutionary Micro-Feature Strategy
 
-**DECOMPOSE** the PRP into logical implementation phases:
+**DECOMPOSE** the PRP into progressive micro-features that deliver functional value:
 
 ```yaml
-decomposition_framework:
-  phase_1_data:
-    - database_schema_design
-    - migration_creation
-    - type_definitions
+evolutionary_approach:
+  principle: "Each task delivers a complete, working micro-feature with full stack implementation"
+  
+  micro_feature_levels:
+    level_1_mvp:
+      description: "Minimal viable feature - basic CRUD with simple UI"
+      includes:
+        - Minimal database schema (1-2 tables)
+        - Basic service with essential operations
+        - Simple IPC handler registration
+        - Basic UI component with minimal styling
+        - Simple store integration
+      value: "User can immediately use the basic feature"
     
-  phase_2_core:
-    - service_layer_implementation
-    - business_logic_development
-    - data_access_patterns
+    level_2_enhanced:
+      description: "Enhanced feature - adds validation, error handling, UX improvements"
+      includes:
+        - Schema refinements and validations
+        - Service layer error handling and edge cases
+        - Enhanced UI with loading states and feedback
+        - Proper form validation
+        - Basic optimistic updates
+      value: "Feature becomes production-ready with good UX"
     
-  phase_3_integration:
-    - ipc_handler_creation
-    - api_exposure_setup
-    - main_process_registration
-    
-  phase_4_frontend:
-    - store_implementation
-    - component_development
-    - routing_setup
-    
-  phase_5_testing:
-    - unit_test_creation
-    - integration_testing
-    - end_to_end_validation
+    level_3_advanced:
+      description: "Advanced feature - adds performance, security, advanced UX"
+      includes:
+        - Schema optimizations and indexes
+        - Service layer caching and performance
+        - Advanced UI interactions and animations
+        - Real-time updates if applicable
+        - Advanced state management patterns
+      value: "Feature becomes highly polished and performant"
 
-complexity_analysis:
-  simple_tasks: {Can be completed in 1-2 hours}
-  moderate_tasks: {Require 3-4 hours with validation}
-  complex_tasks: {Need 5+ hours, multiple validations}
+  progression_example:
+    feature: "Agent Management"
+    micro_feature_1:
+      title: "Basic Agent Creation"
+      delivers: "User can create and view agents with name/description"
+      stack: "agents table → createAgent service → create-agent handler → AgentForm component"
+      
+    micro_feature_2:
+      title: "Agent Configuration"
+      delivers: "User can configure agent with model selection and parameters"
+      stack: "agent_configs table → configureAgent service → configure-agent handler → AgentConfig component"
+      
+    micro_feature_3:
+      title: "Agent Execution"
+      delivers: "User can execute agent and see results"
+      stack: "agent_runs table → executeAgent service → execute-agent handler → AgentRunner component"
+
+complexity_mapping:
+  micro_mvp: {1-2 hours - delivers basic functionality}
+  micro_enhanced: {2-3 hours - adds polish and robustness}
+  micro_advanced: {3-4 hours - adds sophistication}
+```
+
+## Micro-Feature Implementation Pattern
+
+### End-to-End Stack Flow
+
+Each micro-feature task must implement the complete flow:
+
+```yaml
+complete_flow_pattern:
+  1_backend_foundation:
+    - Database schema creation/update
+    - Type definitions and exports
+    - Service layer with business logic
+    - Data validation schemas
+    
+  2_integration_layer:
+    - IPC handler implementation
+    - API exposure in preload
+    - Type definitions for IPC
+    - Main process registration
+    
+  3_frontend_implementation:
+    - Zustand store creation/update
+    - UI component development
+    - Route integration if needed
+    - User interaction flow
+    
+  4_validation_testing:
+    - Manual testing steps
+    - Type checking validation
+    - Lint compliance
+    - Feature demonstration
+
+micro_feature_example:
+  task: "Create Project Feature - MVP"
+  
+  backend:
+    files:
+      - src/main/project/projects.schema.ts (basic schema)
+      - src/main/project/project.service.ts (create method)
+    delivers: "Database can store projects"
+    
+  integration:
+    files:
+      - src/main/project/project.handlers.ts (create handler)
+      - src/renderer/preload.ts (expose API)
+      - src/renderer/window.d.ts (type definitions)
+    delivers: "Frontend can call backend"
+    
+  frontend:
+    files:
+      - src/renderer/store/project-store.ts (state management)
+      - src/renderer/components/create-project-form.tsx (UI)
+      - src/renderer/app/projects/new.tsx (route)
+    delivers: "User can create projects through UI"
+    
+  result: "Complete working feature: User clicks button → form appears → submits → project saved → UI updates"
 ```
 
 ## Task Generation Process
 
 ### 1. Context Preparation
 
-For each task, prepare complete context by:
+For each micro-feature, prepare complete context by:
 
 ```yaml
 context_preparation:
@@ -129,115 +213,221 @@ context_preparation:
     - MAP dependencies and prerequisites
 ```
 
-### 2. Template Population
+### 2. Evolutionary Task Design
 
-Using `@prps/00-miscellaneous/prp-task.md`, populate:
+Design micro-features that build upon each other:
+
+```yaml
+evolutionary_design:
+  identify_core_value:
+    question: "What is the minimal feature that delivers user value?"
+    example: "User can create a project with just a name"
+    
+  map_progression:
+    mvp: "What's the simplest working version?"
+    enhanced: "What makes it production-ready?"
+    advanced: "What makes it delightful?"
+    
+  ensure_completeness:
+    backend: "Schema + Service + Types"
+    integration: "Handler + API + Registration"
+    frontend: "Store + Component + Route"
+    validation: "Works end-to-end"
+
+feature_progression_template:
+  mvp_characteristics:
+    - Minimal fields (only required)
+    - Basic operations (create/read)
+    - Simple UI (form + list)
+    - Basic feedback (success/error)
+    
+  enhanced_characteristics:
+    - Full field set
+    - Complete CRUD operations
+    - Validation and error handling
+    - Loading states and optimistic updates
+    - Proper user feedback
+    
+  advanced_characteristics:
+    - Performance optimizations
+    - Advanced interactions
+    - Real-time updates
+    - Batch operations
+    - Advanced filtering/search
+```
+
+### 3. Template Population
+
+Using `@prps/00-miscellaneous/prp-task.md`, populate each micro-feature:
 
 ```yaml
 template_population:
   meta_information:
     id: "TASK-{incremental_number}"
-    title: "{Specific, actionable task title}"
+    title: "{Feature} - {Level} Implementation"
+    description: "Implement {specific micro-feature} with complete backend→frontend flow"
     source_document: "{prp_folder}/README.md"
-    priority: "{high|medium|low based on PRP dependencies}"
-    estimated_effort: "{1-5 hours based on complexity}"
-    tech_stack: "{Project-specific technologies}"
+    priority: "{based on feature dependency chain}"
+    estimated_effort: "{1-4 hours for complete micro-feature}"
+    tech_stack: "{Electron, React, TypeScript, SQLite, Drizzle}"
     domain_context: "{Bounded context area}"
-    project_type: "desktop"
+    feature_level: "{mvp|enhanced|advanced}"
+    delivers_value: "{What user can do after this task}"
   
   complete_context:
-    project_architecture: "{Actual project structure}"
-    technology_specific: "{Fill with real project tech stack}"
-    existing_patterns: "{Real code patterns from codebase}"
-    project_conventions: "{Actual naming and coding conventions}"
-    validation_commands: "{Real commands from project setup}"
+    previous_tasks: "{List tasks this builds upon}"
+    feature_state: "{Current state of the feature}"
+    next_evolution: "{What comes after this task}"
+    
+  implementation_flow:
+    backend_phase:
+      - "Create/update schema in {domain}/schema.ts"
+      - "Implement service method in {domain}.service.ts"
+      - "Add validation schemas with Zod"
+      
+    integration_phase:
+      - "Create IPC handler in {domain}.handlers.ts"
+      - "Expose API in preload.ts"
+      - "Add types to window.d.ts"
+      - "Register handler in main.ts"
+      
+    frontend_phase:
+      - "Create/update Zustand store"
+      - "Build UI component with Shadcn/ui"
+      - "Integrate with TanStack Router"
+      - "Connect store to component"
+      
+    validation_phase:
+      - "Test complete flow: UI → IPC → Service → Database"
+      - "Run npm run type-check"
+      - "Run npm run lint"
+      - "Manual feature testing"
   
-  implementation_steps:
-    - "{Customized phases based on task type}"
-    - "{Real file paths and commands}"
-    - "{Actual validation steps}"
-  
-  validation_checkpoints:
-    - "{Project-specific validation commands}"
-    - "{Real test commands and expectations}"
-  
-  use_cases_examples:
-    - "{Realistic examples from PRP context}"
-    - "{Domain-specific scenarios}"
-  
-  troubleshooting:
-    - "{Technology-specific common issues}"
-    - "{Project-specific debug commands}"
+  deliverable_checklist:
+    - "[ ] User can perform {specific action}"
+    - "[ ] Data persists in database"
+    - "[ ] UI provides feedback"
+    - "[ ] Feature works end-to-end"
+    - "[ ] No TypeScript errors"
+    - "[ ] Code follows patterns"
 ```
 
-### 3. Task File Creation
+### 4. Task File Creation
 
-For each identified task:
+For each micro-feature evolution:
 
 ```bash
-CREATE prps/{prp-folder}/tasks/{task-name}.md:
-  - POPULATE: Universal template with complete context
-  - CUSTOMIZE: Implementation phases for specific task type
-  - INCLUDE: Real file paths, commands, and patterns
-  - VALIDATE: Template completeness and accuracy
+CREATE prps/{prp-folder}/tasks/{sequence}-{feature}-{level}.md:
+  - POPULATE: Template with complete end-to-end flow
+  - ENSURE: Backend → Integration → Frontend completeness
+  - VERIFY: Each task delivers working functionality
+  - VALIDATE: User value is immediately accessible
 ```
 
 ## Task Naming Convention
 
-Tasks should follow this naming pattern:
-- `{phase}-{component}-{action}.md`
-- Examples:
-  - `01-database-schema-setup.md`
-  - `02-agent-service-implementation.md`
-  - `03-ipc-handlers-creation.md`
-  - `04-frontend-store-integration.md`
-  - `05-ui-components-development.md`
+Tasks should follow evolutionary micro-feature naming:
+- `{sequence}-{feature}-{level}.md`
+- Pattern: `01-create-project-mvp.md` → `02-create-project-enhanced.md` → `03-create-project-advanced.md`
+
+Examples by feature evolution:
+```
+Project Management Evolution:
+  01-create-project-mvp.md         # Basic project creation
+  02-list-projects-mvp.md          # View all projects
+  03-project-details-mvp.md        # View single project
+  04-update-project-enhanced.md    # Edit with validation
+  05-delete-project-enhanced.md    # Delete with confirmation
+  06-project-search-advanced.md    # Advanced filtering
+
+Agent System Evolution:
+  01-create-agent-mvp.md           # Basic agent creation
+  02-list-agents-mvp.md            # View agents list
+  03-configure-agent-enhanced.md   # Model configuration
+  04-execute-agent-enhanced.md     # Run agent tasks
+  05-agent-history-advanced.md     # Execution history
+```
 
 ## Quality Assurance
 
 ### Pre-Generation Validation
-- [ ] PRP README.md completely analyzed
-- [ ] Project context intelligence gathered
-- [ ] Task decomposition strategy defined
-- [ ] Dependencies and prerequisites identified
+- [ ] PRP feature goals clearly understood
+- [ ] Micro-feature progression mapped (MVP → Enhanced → Advanced)
+- [ ] Each task delivers immediate user value
+- [ ] Feature dependencies identified and ordered
+
+### Micro-Feature Validation
+Each task must deliver:
+- [ ] Complete backend implementation (schema + service)
+- [ ] Full integration layer (handler + API exposure)
+- [ ] Working frontend (UI + state management)
+- [ ] End-to-end functionality user can immediately use
+- [ ] Clear value proposition stated
 
 ### Post-Generation Validation
-- [ ] All tasks are self-contained
-- [ ] Complete context included in each task
-- [ ] Real project patterns and commands used
-- [ ] Implementation steps are specific and actionable
-- [ ] Validation checkpoints are executable
-- [ ] Troubleshooting guides are technology-specific
+- [ ] Tasks follow evolutionary progression
+- [ ] Each task builds on previous functionality
+- [ ] Complete stack implementation in each task
+- [ ] Real file paths and working code patterns
+- [ ] Validation demonstrates working feature
+- [ ] User can see immediate results
 
 ### Task Completeness Check
 Each generated task must include:
-- [ ] Filled meta information (no placeholders)
-- [ ] Complete project context
-- [ ] Real implementation steps with actual file paths
-- [ ] Executable validation commands
-- [ ] Domain-specific examples and use cases
-- [ ] Technology-specific troubleshooting
+- [ ] Clear "delivers value" statement
+- [ ] Complete backend→integration→frontend flow
+- [ ] Specific implementation steps for all layers
+- [ ] Working validation that proves functionality
+- [ ] Connection to previous and next tasks
+- [ ] No isolated components - always full features
 
 ## Output Structure
 
 ```
 prps/{prp-folder}/tasks/
-├── 01-database-schema-setup.md
-├── 02-service-layer-implementation.md
-├── 03-ipc-handlers-creation.md
-├── 04-frontend-integration.md
-├── 05-testing-validation.md
-└── README.md (task index and dependencies)
+├── 01-create-agent-mvp.md          # User can create basic agents
+├── 02-list-agents-mvp.md           # User can view all agents
+├── 03-agent-details-mvp.md         # User can view agent details
+├── 04-configure-agent-enhanced.md  # User can configure agent models
+├── 05-execute-agent-enhanced.md    # User can run agents
+├── 06-agent-history-advanced.md    # User can view execution history
+└── README.md (feature progression map)
+```
+
+### Task Progression Example
+
+```markdown
+# Feature: Agent Management
+
+## MVP Phase (Tasks 1-3)
+After completion, user can:
+- Create agents with name and description
+- View list of all agents
+- Click to see agent details
+
+## Enhanced Phase (Tasks 4-5)
+After completion, user can:
+- Configure agent with AI models
+- Set agent parameters
+- Execute agents and see results
+- Handle errors gracefully
+
+## Advanced Phase (Task 6+)
+After completion, user can:
+- View complete execution history
+- Filter and search executions
+- Export results
+- Batch operations
 ```
 
 ## Success Criteria
 
-- [ ] All major PRP components broken down into implementable tasks
-- [ ] Each task is completely self-contained
-- [ ] Real project context and patterns included
-- [ ] Implementation steps are specific and actionable
-- [ ] Validation commands are executable
-- [ ] Task dependencies clearly defined
-- [ ] No placeholders remain in generated tasks
+- [ ] Each task delivers a complete, working micro-feature
+- [ ] Users see immediate value after each task completion
+- [ ] Features evolve from simple to sophisticated
+- [ ] Complete backend→frontend implementation in every task
+- [ ] Clear progression path from MVP to Advanced
+- [ ] No isolated technical tasks - only functional features
+- [ ] Tasks can be completed independently but build on each other
 
-**Remember**: Each task should be implementable by an LLM without requiring additional context or documentation lookups.
+**Remember**: Each task must deliver immediate, perceptible value to the user through a complete, working feature implementation.
