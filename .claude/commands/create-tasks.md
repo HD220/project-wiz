@@ -46,6 +46,7 @@ context_analysis:
 
 ### 2. Project Context Intelligence
 
+**READ** related docs `prps/00-miscellaneous/ai-docs/`:
 **ANALYZE** the current codebase to understand:
 
 ```yaml
@@ -429,5 +430,16 @@ After completion, user can:
 - [ ] Clear progression path from MVP to Advanced
 - [ ] No isolated technical tasks - only functional features
 - [ ] Tasks can be completed independently but build on each other
+
+For the index, use this template:
+```markdown
+# Tasks Index
+
+## 📋 Opportunities Index
+
+| # | Document | Impact | Priority | Dependencies |
+|---|-----------|---------|------------|--------------|
+```
+
 
 **Remember**: Each task must deliver immediate, perceptible value to the user through a complete, working feature implementation.

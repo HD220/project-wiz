@@ -87,56 +87,6 @@ Examples:
 
 ```
 
-### List of tasks to be completed to fulfill the PRP in the order they should be completed
-
-```yaml
-Task 1:
-MODIFY app/layout.tsx:
-  - FIND pattern: "export default function RootLayout"
-  - INJECT in metadata object
-  - PRESERVE children prop typing
-
-CREATE app/(dashboard)/layout.tsx:
-  - MIRROR pattern from: app/layout.tsx
-  - MODIFY for dashboard-specific layout
-  - KEEP TypeScript typing patterns identical
-
-...(...)
-
-Task N:
-...
-
-```
-
-### Per task pseudocode as needed added to each task
-
-```typescript
-
-# Task 1
-// Pseudocode with CRITICAL details don't write entire code
-export default async function NewFeature({ params }: { params: { id: string } }) {
-    // PATTERN: Always validate params first (see lib/validation.ts)
-    const validated = validateParams(params)  // throws ValidationError
-    
-    // GOTCHA: This library requires proper error boundaries
-    try {
-        // PATTERN: Use existing data fetching pattern
-        const data = await fetchData(validated.id)  // see lib/data.ts
-        
-        // CRITICAL: Server Components can fetch data directly
-        return (
-            <div>
-                {/* PATTERN: Use existing component patterns */}
-                <DataDisplay data={data} />
-            </div>
-        )
-    } catch (error) {
-        // PATTERN: Standardized error handling
-        return <ErrorBoundary error={error} />  // see components/error-boundary.tsx
-    }
-}
-```
-
 ### Integration Points
 
 ```yaml

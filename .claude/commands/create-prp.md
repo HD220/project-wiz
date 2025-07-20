@@ -10,6 +10,7 @@ Create comprehensive PRPs with deep research to enable one-pass implementation s
 
 - Start by reading the @prps/00-miscellaneous/prp-concept.md to understand what a PRP
 - Then read the template @prps/00-miscellaneous/prp-base.md
+- And read related existing docs `prps/00-miscellaneous/ai-docs/`:
 
 ## Feature Request
 
@@ -55,7 +56,7 @@ Using @prps/00-miscellaneous/prp-base.md as template:
 - Why: Business value and impact
 - What: User-visible behavior and technical requirements
 - All Needed Context: Comprehensive documentation and examples
-- Implementation Blueprint: Detailed pseudocode and task list
+- Implementation Blueprint: Detailed pseudocode 
 - Validation Loop: Executable validation commands
 
 **Critical Context to Include:**
