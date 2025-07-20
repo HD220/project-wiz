@@ -87,7 +87,7 @@ type AgentUpdateForm = z.infer<typeof agentUpdateSchema>;
 
 // Configuration templates for common agent types
 const agentTemplates = {
-  "code-assistant": {
+  ["code-assistant"]: {
     name: "Code Assistant",
     role: "Senior Software Developer",
     backstory:
@@ -99,7 +99,7 @@ const agentTemplates = {
       topP: 0.9,
     },
   },
-  "creative-writer": {
+  ["creative-writer"]: {
     name: "Creative Writer",
     role: "Content Creator & Storyteller",
     backstory:
@@ -111,7 +111,7 @@ const agentTemplates = {
       topP: 0.95,
     },
   },
-  "data-analyst": {
+  ["data-analyst"]: {
     name: "Data Analyst",
     role: "Data Science Specialist",
     backstory:
@@ -123,7 +123,7 @@ const agentTemplates = {
       topP: 0.8,
     },
   },
-  "research-assistant": {
+  ["research-assistant"]: {
     name: "Research Assistant",
     role: "Academic Researcher",
     backstory:
@@ -135,7 +135,7 @@ const agentTemplates = {
       topP: 0.7,
     },
   },
-  "customer-support": {
+  ["customer-support"]: {
     name: "Customer Support",
     role: "Customer Success Representative",
     backstory:

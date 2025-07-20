@@ -5,6 +5,11 @@ import { contextBridge, ipcRenderer } from "electron";
 
 import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
+import type {
+  MemoryCreationInput,
+  MemoryUpdateInput,
+  MemorySearchInput,
+} from "@/main/agents/memory/agent-memory.types";
 import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
@@ -147,11 +152,11 @@ contextBridge.exposeInMainWorld("api", {
 
   // Agent Memory API
   agentMemory: {
-    create: (input: any): Promise<IpcResponse> =>
+    create: (input: MemoryCreationInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:create", input),
     findById: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:find-by-id", id),
-    search: (criteria: any): Promise<IpcResponse> =>
+    search: (criteria: MemorySearchInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:search", criteria),
     getRecent: (
       agentId: string,
@@ -168,7 +173,7 @@ contextBridge.exposeInMainWorld("api", {
         conversationId,
         limit,
       ),
-    update: (id: string, updates: any): Promise<IpcResponse> =>
+    update: (id: string, updates: MemoryUpdateInput): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:update", id, updates),
     archive: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:archive", id),
@@ -200,16 +205,21 @@ contextBridge.exposeInMainWorld("api", {
         daysOld,
         minImportanceScore,
       ),
-    performMaintenance: (agentId: string, config?: any): Promise<IpcResponse> =>
+    performMaintenance: (
+      agentId: string,
+      config?: Record<string, unknown>,
+    ): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:perform-maintenance", agentId, config),
     getStatistics: (agentId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:get-statistics", agentId),
-    runAutomatedMaintenance: (config?: any): Promise<IpcResponse> =>
+    runAutomatedMaintenance: (
+      config?: Record<string, unknown>,
+    ): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-memory:run-automated-maintenance", config),
   },
 
   // General invoke method
-  invoke: (channel: string, ...args: any[]): Promise<IpcResponse> =>
+  invoke: (channel: string, ...args: unknown[]): Promise<IpcResponse> =>
     ipcRenderer.invoke(channel, ...args),
 });
 

@@ -4,8 +4,8 @@ import type {
   MemoryRelevanceScore,
   InsertAgentMemory,
   UpdateAgentMemory,
-} from "@/main/agents/memory/agent-memory.types";
-import type { IpcResponse } from "@/main/types";
+  IpcResponse,
+} from "@/renderer/types/agent-memory.types";
 
 export const agentMemoryApi = {
   /**

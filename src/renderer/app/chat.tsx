@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MessageSquare, Users } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 // import { createFileRoute } from "@tanstack/react-router";
 
 import { useAuthStore } from "@/renderer/store/auth-store";
@@ -25,9 +25,9 @@ export function Chat() {
 
   useEffect(() => {
     loadAgents();
-  }, []);
+  }, [loadAgents]);
 
-  const loadAgents = async () => {
+  const loadAgents = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await window.api.agents.list();
@@ -42,7 +42,7 @@ export function Chat() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedAgent]);
 
   if (!user) {
     return (
@@ -99,7 +99,15 @@ export function Chat() {
                       ? "bg-accent border-accent-foreground/20"
                       : "hover:bg-accent/50"
                   }`}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedAgent(agent)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedAgent(agent);
+                    }
+                  }}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">

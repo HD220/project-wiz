@@ -1,5 +1,10 @@
 import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
+import type {
+  MemoryCreationInput,
+  MemoryUpdateInput,
+  MemorySearchInput,
+} from "@/main/agents/memory/agent-memory.types";
 import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
@@ -114,9 +119,9 @@ declare global {
 
       // Agent Memory API
       agentMemory: {
-        create: (input: any) => Promise<IpcResponse>;
+        create: (input: MemoryCreationInput) => Promise<IpcResponse>;
         findById: (id: string) => Promise<IpcResponse>;
-        search: (criteria: any) => Promise<IpcResponse>;
+        search: (criteria: MemorySearchInput) => Promise<IpcResponse>;
         getRecent: (
           agentId: string,
           userId: string,
@@ -126,7 +131,10 @@ declare global {
           conversationId: string,
           limit?: number,
         ) => Promise<IpcResponse>;
-        update: (id: string, updates: any) => Promise<IpcResponse>;
+        update: (
+          id: string,
+          updates: MemoryUpdateInput,
+        ) => Promise<IpcResponse>;
         archive: (id: string) => Promise<IpcResponse>;
         delete: (id: string) => Promise<IpcResponse>;
         createRelation: (
@@ -143,14 +151,16 @@ declare global {
         ) => Promise<IpcResponse>;
         performMaintenance: (
           agentId: string,
-          config?: any,
+          config?: Record<string, unknown>,
         ) => Promise<IpcResponse>;
         getStatistics: (agentId: string) => Promise<IpcResponse>;
-        runAutomatedMaintenance: (config?: any) => Promise<IpcResponse>;
+        runAutomatedMaintenance: (
+          config?: Record<string, unknown>,
+        ) => Promise<IpcResponse>;
       };
 
       // General invoke method
-      invoke: (channel: string, ...args: any[]) => Promise<IpcResponse>;
+      invoke: (channel: string, ...args: unknown[]) => Promise<IpcResponse>;
     };
   }
 }

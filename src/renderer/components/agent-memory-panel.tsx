@@ -1,12 +1,12 @@
 import { Brain, Search, Archive, Trash2, Clock, Star } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import type {
   AgentMemoryWithMetadata,
   MemoryRelevanceScore,
   MemoryType,
   MemoryImportance,
-} from "@/main/agents/memory/agent-memory.types";
+} from "@/renderer/types/agent-memory.types";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,12 +48,7 @@ export function AgentMemoryPanel({
   const [selectedMemory, setSelectedMemory] =
     useState<AgentMemoryWithMetadata | null>(null);
 
-  // Load recent memories on mount
-  useEffect(() => {
-    loadRecentMemories();
-  }, [agentId, userId]);
-
-  const loadRecentMemories = async () => {
+  const loadRecentMemories = useCallback(async () => {
     setLoading(true);
     try {
       const response = await agentMemoryApi.getRecent(agentId, userId, 20);
@@ -65,7 +60,12 @@ export function AgentMemoryPanel({
     } finally {
       setLoading(false);
     }
-  };
+  }, [agentId, userId]);
+
+  // Load recent memories on mount
+  useEffect(() => {
+    loadRecentMemories();
+  }, [loadRecentMemories]);
 
   const searchMemories = async () => {
     if (!searchQuery.trim()) {
@@ -170,13 +170,12 @@ export function AgentMemoryPanel({
     }).format(new Date(date));
   };
 
-  const MemoryCard = ({
-    memory,
-    relevanceScore,
-  }: {
+  interface MemoryCardProps {
     memory: AgentMemoryWithMetadata;
     relevanceScore?: number;
-  }) => (
+  }
+
+  const MemoryCard = ({ memory, relevanceScore }: MemoryCardProps) => (
     <Card
       key={memory.id}
       className={`cursor-pointer transition-colors ${selectedMemory?.id === memory.id ? "ring-2 ring-blue-500" : ""}`}

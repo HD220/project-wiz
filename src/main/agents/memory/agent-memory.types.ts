@@ -56,7 +56,7 @@ export interface MemoryCreationInput {
   type: MemoryType;
   importance: MemoryImportance;
   keywords?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   conversationId?: string;
 }
 
@@ -66,7 +66,7 @@ export interface MemoryUpdateInput {
   type?: MemoryType;
   importance?: MemoryImportance;
   keywords?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MemorySearchInput {

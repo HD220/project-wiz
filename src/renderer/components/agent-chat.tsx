@@ -1,5 +1,5 @@
 import { Send, User, Bot } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import type {
   AgentData,
@@ -39,11 +39,7 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    loadConversation();
-  }, [agent.id, userId]);
-
-  const loadConversation = async () => {
+  const loadConversation = useCallback(async () => {
     try {
       const response = await window.api.agentChat.getConversation(
         userId,
@@ -61,7 +57,11 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
     } catch (error) {
       console.error("Error loading conversation:", error);
     }
-  };
+  }, [agent.id, userId]);
+
+  useEffect(() => {
+    loadConversation();
+  }, [loadConversation]);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;

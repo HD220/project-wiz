@@ -88,7 +88,7 @@ export type InsertMemoryRelation = typeof memoryRelationsTable.$inferInsert;
 export interface AgentMemoryWithMetadata
   extends Omit<SelectAgentMemory, "keywords" | "metadata"> {
   keywords?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MemorySearchCriteria {

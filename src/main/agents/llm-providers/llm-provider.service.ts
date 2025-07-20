@@ -288,9 +288,9 @@ export class LlmProviderService {
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            "x-api-key": apiKey,
-            "Content-Type": "application/json",
-            "anthropic-version": "2023-06-01",
+            ["x-api-key"]: apiKey,
+            ["Content-Type"]: "application/json",
+            ["anthropic-version"]: "2023-06-01",
           },
           body: JSON.stringify({
             model: "claude-3-haiku-20240307",
@@ -324,7 +324,7 @@ export class LlmProviderService {
         method: "GET",
         headers: {
           Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
+          ["Content-Type"]: "application/json",
         },
       });
 
