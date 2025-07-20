@@ -1,6 +1,6 @@
 # Create Tasks from PRP
 
-> Analyze a PRP README.md deeply and generate evolutionary micro-features as self-contained tasks that deliver incremental functional value
+> Analyze a PRP README.md deeply and generate evolutionary micro-features as self-contained tasks in the MCP Kanban that deliver incremental functional value
 
 ## Usage
 
@@ -15,7 +15,7 @@ The command will:
 2. **Evolutionary Breakdown** into micro-features that deliver end-to-end functionality
 3. **Task Generation** with complete backend→integration→frontend flow for each micro-feature
 4. **Progressive Complexity** starting simple and incrementally adding sophistication
-5. **File Creation** at `prps/{prp-folder}/tasks/{task-name}.md`
+5. **MCP Kanban Creation** using `mcp__vibe_kanban__create_task` for each micro-feature task
 
 ## Analysis Framework
 
@@ -313,16 +313,25 @@ template_population:
     - "[ ] Code follows patterns"
 ```
 
-### 4. Task File Creation
+### 4. Task Creation in MCP Kanban
 
 For each micro-feature evolution:
 
-```bash
-CREATE prps/{prp-folder}/tasks/{sequence}-{feature}-{level}.md:
-  - POPULATE: Template with complete end-to-end flow
-  - ENSURE: Backend → Integration → Frontend completeness
-  - VERIFY: Each task delivers working functionality
-  - VALIDATE: User value is immediately accessible
+```yaml
+mcp_kanban_creation:
+  project_id: "aa5160d4-63cd-4d5e-ade7-a0d662526912"  # Project Wiz ID
+  
+  task_creation_process:
+    - USE: mcp__vibe_kanban__create_task for each micro-feature
+    - TITLE: "{sequence}-{feature}-{level}" (e.g., "01-create-agent-mvp")
+    - DESCRIPTION: Complete task template content following prp-task.md structure
+    
+  task_content_structure:
+    - POPULATE: Template with complete end-to-end flow
+    - ENSURE: Backend → Integration → Frontend completeness
+    - VERIFY: Each task delivers working functionality
+    - VALIDATE: User value is immediately accessible
+    - MAINTAIN: Same content quality as file-based approach
 ```
 
 ## Task Naming Convention
@@ -384,15 +393,34 @@ Each generated task must include:
 
 ## Output Structure
 
-```
-prps/{prp-folder}/tasks/
-├── 01-create-agent-mvp.md          # User can create basic agents
-├── 02-list-agents-mvp.md           # User can view all agents
-├── 03-agent-details-mvp.md         # User can view agent details
-├── 04-configure-agent-enhanced.md  # User can configure agent models
-├── 05-execute-agent-enhanced.md    # User can run agents
-├── 06-agent-history-advanced.md    # User can view execution history
-└── README.md (feature progression map)
+```yaml
+mcp_kanban_tasks:
+  project_id: "aa5160d4-63cd-4d5e-ade7-a0d662526912"
+  
+  created_tasks:
+    - title: "01-create-agent-mvp"
+      description: "Complete task content following prp-task.md template"
+      deliverable: "User can create basic agents"
+      
+    - title: "02-list-agents-mvp"  
+      description: "Complete task content following prp-task.md template"
+      deliverable: "User can view all agents"
+      
+    - title: "03-agent-details-mvp"
+      description: "Complete task content following prp-task.md template"
+      deliverable: "User can view agent details"
+      
+    - title: "04-configure-agent-enhanced"
+      description: "Complete task content following prp-task.md template"
+      deliverable: "User can configure agent models"
+      
+    - title: "05-execute-agent-enhanced"
+      description: "Complete task content following prp-task.md template"
+      deliverable: "User can run agents"
+      
+    - title: "06-agent-history-advanced"
+      description: "Complete task content following prp-task.md template"
+      deliverable: "User can view execution history"
 ```
 
 ### Task Progression Example
@@ -431,15 +459,34 @@ After completion, user can:
 - [ ] No isolated technical tasks - only functional features
 - [ ] Tasks can be completed independently but build on each other
 
-For the index, use this template:
-```markdown
-# Tasks Index
+## MCP Kanban Integration Instructions
 
-## 📋 Opportunities Index
+### Project Configuration
+- **Project ID**: `aa5160d4-63cd-4d5e-ade7-a0d662526912` (Project Wiz)
+- **Always use**: `mcp__vibe_kanban__create_task` tool
+- **Task Status**: Created tasks will start with status "todo"
 
-| # | Document | Impact | Priority | Dependencies |
-|---|-----------|---------|------------|--------------|
-```
+### Task Creation Process
+1. **Analyze PRP**: Extract requirements and plan micro-features
+2. **Design Evolution**: Plan MVP → Enhanced → Advanced progression  
+3. **Create Tasks**: Use MCP tools to create each task in sequence
+4. **Validate Content**: Ensure each task follows prp-task.md template structure
+5. **Confirm Creation**: Verify tasks appear in Project Wiz kanban
 
+### Task Description Content
+Each task description must include the complete prp-task.md template content:
+- Task metadata (ID, title, description, source document, etc.)
+- Context and background
+- Implementation steps (backend → integration → frontend)
+- Validation and testing procedures
+- Deliverable checklist
 
-**Remember**: Each task must deliver immediate, perceptible value to the user through a complete, working feature implementation.
+### Success Validation
+After task creation, verify:
+- [ ] All tasks created successfully in MCP Kanban
+- [ ] Task titles follow naming convention
+- [ ] Task descriptions contain complete implementation guidance
+- [ ] Tasks follow evolutionary progression (MVP → Enhanced → Advanced)
+- [ ] Each task delivers immediate user value
+
+**Remember**: Each task must deliver immediate, perceptible value to the user through a complete, working feature implementation using the MCP Kanban system instead of file creation.

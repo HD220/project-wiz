@@ -8,10 +8,7 @@
     "dev": "electron-forge start",
     "build": "lingui extract && lingui compile --typescript && electron-forge make",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "prepare": "husky install",
-    "postinstall": "npm run rebuild && npm run db:migrate",
+    "postinstall": "npm run db:migrate",
     "lint": "eslint --ext .ts,.tsx .",
     "lint:fix": "eslint --fix --ext .ts,.tsx .",
     "type-check": "tsc --noEmit",
@@ -23,13 +20,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "db:reset": "rm -f project-wiz.db && npm run db:migrate",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
-    "quality:check": "npm run lint:check && npm run type-check && npm run format:check && npm run calisthenics:check && npm run test",
-    "calisthenics:check": "node scripts/validate-object-calisthenics.js",
-    "clean": "rm -rf .vite out && npm run db:reset"
+    "quality:check": "npm run lint:check && npm run type-check && npm run format:check && npm run calisthenics:check && npm run test"
   },
   "keywords": [
     "electron",
