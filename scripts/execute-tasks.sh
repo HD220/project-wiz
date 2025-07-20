@@ -68,18 +68,14 @@ IMPORTANTE: Esta é uma execução automatizada. Complete a task integralmente."
     # Executa Claude com timeout e captura a saída
     echo "🤖 Enviando task para Claude..."
     
-    if timeout 300 claude --dangerously-skip-permissions -p "$PROMPT" 2>&1; then
+    if claude --dangerously-skip-permissions -p "$PROMPT" 2>&1; then
         echo ""
         echo "✅ Task '$TASK_NAME' executada com sucesso!"
         echo "⏱️  Finalizada em: $(date '+%Y-%m-%d %H:%M:%S')"
     else
         EXIT_CODE=$?
         echo ""
-        if [ $EXIT_CODE -eq 124 ]; then
-            echo "⏰ TIMEOUT: Task '$TASK_NAME' excedeu 300 segundos"
-        else
-            echo "❌ ERRO: Task '$TASK_NAME' falhou (código: $EXIT_CODE)"
-        fi
+		echo "❌ ERRO: Task '$TASK_NAME' falhou (código: $EXIT_CODE)"
         echo "⏱️  Finalizada em: $(date '+%Y-%m-%d %H:%M:%S')"
     fi
     
