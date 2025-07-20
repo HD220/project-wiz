@@ -9,7 +9,6 @@ import type {
 } from "@/main/agents/llm-providers/llm-provider.types";
 import { createProviderSchema } from "@/main/agents/llm-providers/llm-provider.types";
 import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
-import { agentsTable } from "@/main/agents/agents.schema";
 import { getDatabase } from "@/main/database/connection";
 
 // Encryption configuration
@@ -20,7 +19,7 @@ export class LlmProviderService {
   /**
    * Convert SQLite timestamp to Date object
    */
-  private static convertTimestampToDate(timestamp: any): Date {
+  private static convertTimestampToDate(timestamp: unknown): Date {
     if (timestamp instanceof Date) {
       return timestamp;
     }

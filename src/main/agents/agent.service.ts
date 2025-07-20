@@ -20,7 +20,7 @@ export class AgentService {
   /**
    * Convert SQLite timestamp to Date object
    */
-  private static convertTimestampToDate(timestamp: any): Date {
+  private static convertTimestampToDate(timestamp: unknown): Date {
     if (timestamp instanceof Date) {
       return timestamp;
     }
@@ -110,7 +110,7 @@ export class AgentService {
     );
 
     // Use database transaction for atomicity
-    return await db.transaction( async (tx) => {
+    return await db.transaction(async (tx) => {
       // Create user entry first
       const [user] = await tx
         .insert(usersTable)

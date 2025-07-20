@@ -112,7 +112,7 @@ export function AgentCard({ agent, providerName }: AgentCardProps) {
   try {
     const config = JSON.parse(agent.modelConfig);
     modelInfo = config.model || "Unknown Model";
-  } catch (error) {
+  } catch (_error) {
     // Ignore parsing errors
   }
 

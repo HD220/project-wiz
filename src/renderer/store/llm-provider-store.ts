@@ -92,13 +92,13 @@ export const useLlmProviderStore = create<LlmProviderState>()(
 
           if (response.success) {
             // Transform dates from IPC response
-            const providers = (response.data as any[]) || [];
+            const providers = (response.data as SelectLlmProvider[]) || [];
             const transformedProviders = providers.map((provider) => ({
               ...provider,
               createdAt: new Date(provider.createdAt),
               updatedAt: new Date(provider.updatedAt),
             }));
-            
+
             set({
               providers: transformedProviders,
               isLoading: false,

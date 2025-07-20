@@ -93,13 +93,13 @@ export const useAgentStore = create<AgentState>()(
 
           if (response.success) {
             // Transform dates from IPC response
-            const agents = (response.data as any[]) || [];
+            const agents = (response.data as SelectAgent[]) || [];
             const transformedAgents = agents.map((agent) => ({
               ...agent,
               createdAt: new Date(agent.createdAt),
               updatedAt: new Date(agent.updatedAt),
             }));
-            
+
             set({
               agents: transformedAgents,
               isLoading: false,
@@ -125,12 +125,13 @@ export const useAgentStore = create<AgentState>()(
 
           if (response.success && response.data) {
             // Transform dates and update the agent in the list
+            const agentData = response.data as SelectAgent;
             const updatedAgent = {
-              ...response.data,
-              createdAt: new Date(response.data.createdAt),
-              updatedAt: new Date(response.data.updatedAt),
+              ...agentData,
+              createdAt: new Date(agentData.createdAt),
+              updatedAt: new Date(agentData.updatedAt),
             } as SelectAgent;
-            
+
             set((state) => ({
               agents: state.agents.map((agent) =>
                 agent.id === id ? updatedAgent : agent,
@@ -195,7 +196,7 @@ export const useAgentStore = create<AgentState>()(
               agents: state.agents.filter((agent) => agent.id !== id),
               isLoading: false,
             }));
-            
+
             // Reload the agents list to ensure data consistency
             await get().loadAgents();
           } else {
