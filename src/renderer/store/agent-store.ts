@@ -92,8 +92,16 @@ export const useAgentStore = create<AgentState>()(
           const response = await window.api.agents.list();
 
           if (response.success) {
+            // Transform dates from IPC response
+            const agents = (response.data as any[]) || [];
+            const transformedAgents = agents.map((agent) => ({
+              ...agent,
+              createdAt: new Date(agent.createdAt),
+              updatedAt: new Date(agent.updatedAt),
+            }));
+            
             set({
-              agents: (response.data as SelectAgent[]) || [],
+              agents: transformedAgents,
               isLoading: false,
             });
           } else {
@@ -116,10 +124,16 @@ export const useAgentStore = create<AgentState>()(
           const response = await window.api.agents.update(id, updates);
 
           if (response.success && response.data) {
-            // Update the agent in the list
+            // Transform dates and update the agent in the list
+            const updatedAgent = {
+              ...response.data,
+              createdAt: new Date(response.data.createdAt),
+              updatedAt: new Date(response.data.updatedAt),
+            } as SelectAgent;
+            
             set((state) => ({
               agents: state.agents.map((agent) =>
-                agent.id === id ? (response.data as SelectAgent) : agent,
+                agent.id === id ? updatedAgent : agent,
               ),
               isLoading: false,
             }));
