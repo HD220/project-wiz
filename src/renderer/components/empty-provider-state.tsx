@@ -13,8 +13,9 @@ export function EmptyProviderState() {
           No LLM providers configured
         </h3>
         <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-          Get started by adding your first AI model provider. You&apos;ll need an API
-          key from a supported provider like OpenAI, DeepSeek, or Anthropic.
+          Get started by adding your first AI model provider. You&apos;ll need
+          an API key from a supported provider like OpenAI, DeepSeek, or
+          Anthropic.
         </p>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Plus className="h-4 w-4" />
