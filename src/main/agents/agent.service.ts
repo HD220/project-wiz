@@ -110,9 +110,9 @@ export class AgentService {
     );
 
     // Use database transaction for atomicity
-    return db.transaction((tx) => {
+    return await db.transaction( async (tx) => {
       // Create user entry first
-      const [user] = tx
+      const [user] = await tx
         .insert(usersTable)
         .values({
           name: validatedInput.name,
@@ -126,7 +126,7 @@ export class AgentService {
       }
 
       // Then create agent entry
-      const [agent] = tx
+      const [agent] = await tx
         .insert(agentsTable)
         .values({
           userId: user.id,
@@ -314,7 +314,7 @@ export class AgentService {
     }
 
     // Use transaction to delete both agent and user
-    db.transaction((tx) => {
+    await db.transaction(async (tx) => {
       // Delete agent first (due to foreign key constraint)
       const agentResult = await tx
         .delete(agentsTable)
