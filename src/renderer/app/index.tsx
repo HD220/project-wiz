@@ -17,6 +17,8 @@ interface SelectLlmProvider {
   updatedAt: Date;
 }
 
+import { AgentForm } from "@/renderer/components/agent-form";
+import { AgentList } from "@/renderer/components/agent-list";
 import { LlmProviderForm } from "@/renderer/components/llm-provider-form";
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Badge } from "@/renderer/components/ui/badge";
@@ -28,28 +30,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/renderer/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/renderer/components/ui/tabs";
+import { useAgentStore } from "@/renderer/store/agent-store";
 import { useLlmProviderStore } from "@/renderer/store/llm-provider-store";
 
 export const Route = createFileRoute("/")({
   component: function Index() {
     const {
       providers,
-      isLoading,
-      error,
+      isLoading: providersLoading,
+      error: providersError,
       loadProviders,
       deleteProvider,
       setAsDefault,
-      clearError,
+      clearError: clearProvidersError,
     } = useLlmProviderStore();
 
-    const [showForm, setShowForm] = useState(false);
+    const {
+      agents,
+      error: agentsError,
+      loadAgents,
+      clearError: clearAgentsError,
+    } = useAgentStore();
+
+    const [showProviderForm, setShowProviderForm] = useState(false);
+    const [showAgentForm, setShowAgentForm] = useState(false);
 
     // Mock user ID - in a real app, this would come from auth context
     const userId = "demo-user-id";
 
     useEffect(() => {
       loadProviders(userId);
-    }, [loadProviders, userId]);
+      loadAgents();
+    }, [loadProviders, loadAgents, userId]);
 
     const handleDeleteProvider = async (id: string) => {
       if (confirm("Are you sure you want to delete this provider?")) {
@@ -69,70 +87,135 @@ export const Route = createFileRoute("/")({
       }
     };
 
-    const handleFormSuccess = () => {
-      setShowForm(false);
-      clearError();
+    const handleProviderFormSuccess = () => {
+      setShowProviderForm(false);
+      clearProvidersError();
+    };
+
+    const handleAgentFormSuccess = () => {
+      setShowAgentForm(false);
+      clearAgentsError();
     };
 
     return (
       <div className="container mx-auto py-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Project Wiz</h1>
-            <p className="text-muted-foreground">
-              LLM Provider Management - MVP Implementation
-            </p>
-          </div>
-          <Button onClick={() => setShowForm(!showForm)}>
-            {showForm ? "Cancel" : "Add Provider"}
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Project Wiz</h1>
+          <p className="text-muted-foreground">
+            AI Agent Management System - MVP Implementation
+          </p>
         </div>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+        <Tabs defaultValue="agents" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="agents">
+              AI Agents ({agents.length})
+            </TabsTrigger>
+            <TabsTrigger value="providers">
+              LLM Providers ({providers.length})
+            </TabsTrigger>
+          </TabsList>
 
-        {showForm && (
-          <Card>
-            <CardContent className="pt-6">
-              <LlmProviderForm userId={userId} onSuccess={handleFormSuccess} />
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Your Providers</h2>
-
-          {isLoading ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Loading providers...</p>
-            </div>
-          ) : providers.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-muted-foreground mb-4">
-                  No LLM providers configured yet.
+          <TabsContent value="agents" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">AI Agents</h2>
+                <p className="text-muted-foreground">
+                  Create and manage AI agents for your projects
                 </p>
-                <Button onClick={() => setShowForm(true)}>
-                  Add Your First Provider
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {providers.map((provider: SelectLlmProvider) => (
-                <ProviderCard
-                  key={provider.id}
-                  provider={provider}
-                  onDelete={handleDeleteProvider}
-                  onSetDefault={handleSetDefault}
-                />
-              ))}
+              </div>
+              <Button onClick={() => setShowAgentForm(!showAgentForm)}>
+                {showAgentForm ? "Cancel" : "Create Agent"}
+              </Button>
             </div>
-          )}
-        </div>
+
+            {agentsError && (
+              <Alert variant="destructive">
+                <AlertDescription>{agentsError}</AlertDescription>
+              </Alert>
+            )}
+
+            {showAgentForm && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create New Agent</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AgentForm
+                    userId={userId}
+                    onSuccess={handleAgentFormSuccess}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            <AgentList userId={userId} />
+          </TabsContent>
+
+          <TabsContent value="providers" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">LLM Providers</h2>
+                <p className="text-muted-foreground">
+                  Configure your AI model providers
+                </p>
+              </div>
+              <Button onClick={() => setShowProviderForm(!showProviderForm)}>
+                {showProviderForm ? "Cancel" : "Add Provider"}
+              </Button>
+            </div>
+
+            {providersError && (
+              <Alert variant="destructive">
+                <AlertDescription>{providersError}</AlertDescription>
+              </Alert>
+            )}
+
+            {showProviderForm && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Add Provider</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LlmProviderForm
+                    userId={userId}
+                    onSuccess={handleProviderFormSuccess}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="space-y-4">
+              {providersLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Loading providers...</p>
+                </div>
+              ) : providers.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <p className="text-muted-foreground mb-4">
+                      No LLM providers configured yet.
+                    </p>
+                    <Button onClick={() => setShowProviderForm(true)}>
+                      Add Your First Provider
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {providers.map((provider: SelectLlmProvider) => (
+                    <ProviderCard
+                      key={provider.id}
+                      provider={provider}
+                      onDelete={handleDeleteProvider}
+                      onSetDefault={handleSetDefault}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     );
   },

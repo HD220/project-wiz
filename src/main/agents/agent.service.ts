@@ -36,7 +36,7 @@ export class AgentService {
       const parsed = JSON.parse(configString);
       const validatedConfig = modelConfigSchema.parse(parsed);
       return validatedConfig;
-    } catch (error) {
+    } catch (_error) {
       throw new Error("Invalid model configuration");
     }
   }
@@ -46,7 +46,7 @@ export class AgentService {
    */
   static async create(
     input: CreateAgentInput,
-    ownerId: string,
+    _ownerId: string,
   ): Promise<SelectAgent> {
     // Validate input
     const validatedInput = createAgentSchema.parse(input);
@@ -154,7 +154,7 @@ export class AgentService {
   /**
    * Find all agents created by a specific user (owner)
    */
-  static async findByOwner(ownerId: string): Promise<SelectAgent[]> {
+  static async findByOwner(_ownerId: string): Promise<SelectAgent[]> {
     const db = getDatabase();
 
     // Get agents that belong to users created by this owner

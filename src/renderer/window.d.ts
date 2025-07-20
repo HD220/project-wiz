@@ -1,3 +1,4 @@
+import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
@@ -73,6 +74,20 @@ declare global {
           userId: string,
         ) => Promise<IpcResponse>;
         getDefault: (userId: string) => Promise<IpcResponse>;
+      };
+
+      // Agents API
+      agents: {
+        create: (input: CreateAgentInput) => Promise<IpcResponse>;
+        list: () => Promise<IpcResponse>;
+        get: (id: string) => Promise<IpcResponse>;
+        getWithProvider: (id: string) => Promise<IpcResponse>;
+        updateStatus: (id: string, status: AgentStatus) => Promise<IpcResponse>;
+        update: (
+          id: string,
+          updates: Partial<CreateAgentInput>,
+        ) => Promise<IpcResponse>;
+        delete: (id: string) => Promise<IpcResponse>;
       };
     };
   }

@@ -3,6 +3,7 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
+import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
@@ -95,6 +96,25 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("llm-providers:setDefault", providerId, userId),
     getDefault: (userId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:getDefault", userId),
+  },
+
+  // Agents API
+  agents: {
+    create: (input: CreateAgentInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:create", input),
+    list: (): Promise<IpcResponse> => ipcRenderer.invoke("agents:list"),
+    get: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:get", id),
+    getWithProvider: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:getWithProvider", id),
+    updateStatus: (id: string, status: AgentStatus): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:updateStatus", id, status),
+    update: (
+      id: string,
+      updates: Partial<CreateAgentInput>,
+    ): Promise<IpcResponse> => ipcRenderer.invoke("agents:update", id, updates),
+    delete: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agents:delete", id),
   },
 });
 
