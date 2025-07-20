@@ -2,6 +2,7 @@ import { ipcMain } from "electron";
 
 import type { IpcResponse } from "@/main/types";
 
+import { AgentChatWithMemoryService } from "./agent-chat-with-memory.service";
 import { AgentChatService } from "./agent-chat.service";
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
@@ -115,6 +116,48 @@ export function setupConversationsHandlers(): void {
             error instanceof Error
               ? error.message
               : "Failed to get agent conversation",
+        };
+      }
+    },
+  );
+
+  // Memory-enhanced agent chat handlers
+  ipcMain.handle(
+    "agent-chat:sendMessageWithMemory",
+    async (_, input: SendAgentMessageInput): Promise<IpcResponse> => {
+      try {
+        const response =
+          await AgentChatWithMemoryService.sendMessageToAgent(input);
+        return { success: true, data: response };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to send message to agent with memory",
+        };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "agent-chat:getConversationWithMemory",
+    async (_, userId: string, agentId: string): Promise<IpcResponse> => {
+      try {
+        const data =
+          await AgentChatWithMemoryService.getAgentConversationWithMemory(
+            userId,
+            agentId,
+          );
+        return { success: true, data };
+      } catch (error) {
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to get agent conversation with memory",
         };
       }
     },

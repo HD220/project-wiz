@@ -409,7 +409,8 @@ export function AgentEditDialog({
                         />
                       </FormControl>
                       <FormDescription>
-                        This helps define the agent&apos;s personality and expertise.
+                        This helps define the agent&apos;s personality and
+                        expertise.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

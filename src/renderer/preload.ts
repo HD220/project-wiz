@@ -130,7 +130,87 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("agent-chat:sendMessage", input),
     getConversation: (userId: string, agentId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agent-chat:getConversation", userId, agentId),
+    sendMessageWithMemory: (
+      input: SendAgentMessageInput,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-chat:sendMessageWithMemory", input),
+    getConversationWithMemory: (
+      userId: string,
+      agentId: string,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke(
+        "agent-chat:getConversationWithMemory",
+        userId,
+        agentId,
+      ),
   },
+
+  // Agent Memory API
+  agentMemory: {
+    create: (input: any): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:create", input),
+    findById: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:find-by-id", id),
+    search: (criteria: any): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:search", criteria),
+    getRecent: (
+      agentId: string,
+      userId: string,
+      limit?: number,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:get-recent", agentId, userId, limit),
+    getByConversation: (
+      conversationId: string,
+      limit?: number,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke(
+        "agent-memory:get-by-conversation",
+        conversationId,
+        limit,
+      ),
+    update: (id: string, updates: any): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:update", id, updates),
+    archive: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:archive", id),
+    delete: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:delete", id),
+    createRelation: (
+      sourceMemoryId: string,
+      targetMemoryId: string,
+      relationType: string,
+      strength?: number,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke(
+        "agent-memory:create-relation",
+        sourceMemoryId,
+        targetMemoryId,
+        relationType,
+        strength,
+      ),
+    getRelated: (memoryId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:get-related", memoryId),
+    prune: (
+      agentId: string,
+      daysOld?: number,
+      minImportanceScore?: number,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke(
+        "agent-memory:prune",
+        agentId,
+        daysOld,
+        minImportanceScore,
+      ),
+    performMaintenance: (agentId: string, config?: any): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:perform-maintenance", agentId, config),
+    getStatistics: (agentId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:get-statistics", agentId),
+    runAutomatedMaintenance: (config?: any): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-memory:run-automated-maintenance", config),
+  },
+
+  // General invoke method
+  invoke: (channel: string, ...args: any[]): Promise<IpcResponse> =>
+    ipcRenderer.invoke(channel, ...args),
 });
 
 console.log("Preload script loaded successfully");

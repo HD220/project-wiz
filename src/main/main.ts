@@ -5,6 +5,7 @@ import squirrel from "electron-squirrel-startup";
 
 import { setupAgentHandlers } from "./agents/agent.handlers";
 import { setupLlmProviderHandlers } from "./agents/llm-providers/llm-provider.handlers";
+import { setupAgentMemoryHandlers } from "./agents/memory/agent-memory.handlers";
 import { setupConversationsHandlers } from "./conversations/conversations.handlers";
 import { setupProjectHandlers } from "./project/project.handlers";
 import { setupAuthHandlers } from "./user/authentication/auth.handlers";
@@ -95,6 +96,9 @@ app.whenReady().then(() => {
 
   setupAgentHandlers();
   logger.info("Agent IPC handlers registered");
+
+  setupAgentMemoryHandlers();
+  logger.info("Agent Memory IPC handlers registered");
 
   createMainWindow();
 

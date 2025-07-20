@@ -103,7 +103,54 @@ declare global {
           userId: string,
           agentId: string,
         ) => Promise<IpcResponse>;
+        sendMessageWithMemory: (
+          input: SendAgentMessageInput,
+        ) => Promise<IpcResponse>;
+        getConversationWithMemory: (
+          userId: string,
+          agentId: string,
+        ) => Promise<IpcResponse>;
       };
+
+      // Agent Memory API
+      agentMemory: {
+        create: (input: any) => Promise<IpcResponse>;
+        findById: (id: string) => Promise<IpcResponse>;
+        search: (criteria: any) => Promise<IpcResponse>;
+        getRecent: (
+          agentId: string,
+          userId: string,
+          limit?: number,
+        ) => Promise<IpcResponse>;
+        getByConversation: (
+          conversationId: string,
+          limit?: number,
+        ) => Promise<IpcResponse>;
+        update: (id: string, updates: any) => Promise<IpcResponse>;
+        archive: (id: string) => Promise<IpcResponse>;
+        delete: (id: string) => Promise<IpcResponse>;
+        createRelation: (
+          sourceMemoryId: string,
+          targetMemoryId: string,
+          relationType: string,
+          strength?: number,
+        ) => Promise<IpcResponse>;
+        getRelated: (memoryId: string) => Promise<IpcResponse>;
+        prune: (
+          agentId: string,
+          daysOld?: number,
+          minImportanceScore?: number,
+        ) => Promise<IpcResponse>;
+        performMaintenance: (
+          agentId: string,
+          config?: any,
+        ) => Promise<IpcResponse>;
+        getStatistics: (agentId: string) => Promise<IpcResponse>;
+        runAutomatedMaintenance: (config?: any) => Promise<IpcResponse>;
+      };
+
+      // General invoke method
+      invoke: (channel: string, ...args: any[]) => Promise<IpcResponse>;
     };
   }
 }
