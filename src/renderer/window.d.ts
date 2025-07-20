@@ -1,8 +1,8 @@
 import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
+import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
-import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -75,6 +75,11 @@ declare global {
           userId: string,
         ) => Promise<IpcResponse>;
         getDefault: (userId: string) => Promise<IpcResponse>;
+        testApiKey: (
+          type: "openai" | "deepseek" | "anthropic",
+          apiKey: string,
+          baseUrl?: string,
+        ) => Promise<IpcResponse>;
       };
 
       // Agents API
@@ -94,7 +99,10 @@ declare global {
       // Agent Chat API
       agentChat: {
         sendMessage: (input: SendAgentMessageInput) => Promise<IpcResponse>;
-        getConversation: (userId: string, agentId: string) => Promise<IpcResponse>;
+        getConversation: (
+          userId: string,
+          agentId: string,
+        ) => Promise<IpcResponse>;
       };
     };
   }

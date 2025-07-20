@@ -1,15 +1,14 @@
-import { openai } from "@ai-sdk/openai";
 import { deepseek } from "@ai-sdk/deepseek";
+import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 import { AgentService } from "@/main/agents/agent.service";
+import type { SelectAgent } from "@/main/agents/agents.schema";
 import { LlmProviderService } from "@/main/agents/llm-providers/llm-provider.service";
+import type { SelectLlmProvider } from "@/main/agents/llm-providers/llm-providers.schema";
 
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
-
-import type { SelectAgent } from "@/main/agents/agents.schema";
-import type { SelectLlmProvider } from "@/main/agents/llm-providers/llm-providers.schema";
 
 export interface SendAgentMessageInput {
   agentId: string;
@@ -86,21 +85,21 @@ export class AgentChatService {
     conversationId: string,
   ): Promise<string> {
     const modelConfig = JSON.parse(agent.modelConfig);
-    const conversationHistory = await MessageService.getConversationMessages(
-      conversationId,
-    );
+    const conversationHistory =
+      await MessageService.getConversationMessages(conversationId);
 
     const messages = [
       {
         role: "system" as const,
         content: agent.systemPrompt,
       },
-      ...conversationHistory
-        .slice(-10)
-        .map((msg) => ({
-          role: msg.authorId === agent.id ? ("assistant" as const) : ("user" as const),
-          content: msg.content,
-        })),
+      ...conversationHistory.slice(-10).map((msg) => ({
+        role:
+          msg.authorId === agent.id
+            ? ("assistant" as const)
+            : ("user" as const),
+        content: msg.content,
+      })),
       {
         role: "user" as const,
         content: userMessage,
@@ -109,7 +108,7 @@ export class AgentChatService {
 
     try {
       let model;
-      
+
       switch (provider.type) {
         case "openai":
           model = openai(modelConfig.model || "gpt-4o-mini");

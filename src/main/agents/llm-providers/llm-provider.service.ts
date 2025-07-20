@@ -280,4 +280,168 @@ export class LlmProviderService {
 
     return provider ? this.sanitizeDates(provider) : null;
   }
+
+  /**
+   * Test API key connectivity
+   */
+  static async testApiKey(
+    type: "openai" | "deepseek" | "anthropic",
+    apiKey: string,
+    baseUrl?: string,
+  ): Promise<{ valid: boolean; message: string; model?: string }> {
+    try {
+      switch (type) {
+        case "openai":
+          return await this.testOpenAIKey(apiKey, baseUrl);
+        case "deepseek":
+          return await this.testDeepSeekKey(apiKey, baseUrl);
+        case "anthropic":
+          return await this.testAnthropicKey(apiKey, baseUrl);
+        default:
+          return {
+            valid: false,
+            message: "Unsupported provider type",
+          };
+      }
+    } catch (error) {
+      return {
+        valid: false,
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  /**
+   * Test OpenAI API key
+   */
+  private static async testOpenAIKey(
+    apiKey: string,
+    baseUrl?: string,
+  ): Promise<{ valid: boolean; message: string; model?: string }> {
+    const url = baseUrl || "https://api.openai.com/v1";
+
+    try {
+      const response = await fetch(`${url}/models`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const availableModels = data.data?.length || 0;
+        const firstModel = data.data?.[0]?.id;
+
+        return {
+          valid: true,
+          message: `Valid API key. ${availableModels} models available.`,
+          model: firstModel,
+        };
+      }
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        valid: false,
+        message:
+          errorData.error?.message ||
+          `HTTP ${response.status}: ${response.statusText}`,
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        message: error instanceof Error ? error.message : "Connection failed",
+      };
+    }
+  }
+
+  /**
+   * Test DeepSeek API key
+   */
+  private static async testDeepSeekKey(
+    apiKey: string,
+    baseUrl?: string,
+  ): Promise<{ valid: boolean; message: string; model?: string }> {
+    const url = baseUrl || "https://api.deepseek.com/v1";
+
+    try {
+      const response = await fetch(`${url}/models`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const availableModels = data.data?.length || 0;
+        const firstModel = data.data?.[0]?.id;
+
+        return {
+          valid: true,
+          message: `Valid API key. ${availableModels} models available.`,
+          model: firstModel,
+        };
+      }
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        valid: false,
+        message:
+          errorData.error?.message ||
+          `HTTP ${response.status}: ${response.statusText}`,
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        message: error instanceof Error ? error.message : "Connection failed",
+      };
+    }
+  }
+
+  /**
+   * Test Anthropic API key
+   */
+  private static async testAnthropicKey(
+    apiKey: string,
+    baseUrl?: string,
+  ): Promise<{ valid: boolean; message: string; model?: string }> {
+    const url = baseUrl || "https://api.anthropic.com/v1";
+
+    try {
+      // Anthropic doesn't have a models endpoint, so we'll make a minimal completion request
+      const response = await fetch(`${url}/messages`, {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "Content-Type": "application/json",
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 1,
+          messages: [{ role: "user", content: "Hi" }],
+        }),
+      });
+
+      if (response.ok) {
+        return {
+          valid: true,
+          message: "Valid API key. Anthropic Claude models available.",
+          model: "claude-3-haiku-20240307",
+        };
+      }
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        valid: false,
+        message:
+          errorData.error?.message ||
+          `HTTP ${response.status}: ${response.statusText}`,
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        message: error instanceof Error ? error.message : "Connection failed",
+      };
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -47,9 +48,15 @@ interface LlmProviderFormProps {
 }
 
 export function LlmProviderForm({ userId, onSuccess }: LlmProviderFormProps) {
-  const { createProvider, isLoading, error, clearError } =
+  const { createProvider, testApiKey, isLoading, error, clearError } =
     useLlmProviderStore();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{
+    valid: boolean;
+    message: string;
+    model?: string;
+  } | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -82,11 +89,45 @@ export function LlmProviderForm({ userId, onSuccess }: LlmProviderFormProps) {
 
       // Reset form on success
       form.reset();
+      setTestResult(null);
       onSuccess?.();
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Failed to create provider",
       );
+    }
+  };
+
+  const handleTestApiKey = async () => {
+    const type = form.getValues("type");
+    const apiKey = form.getValues("apiKey");
+    const baseUrl = form.getValues("baseUrl");
+
+    if (!apiKey.trim()) {
+      setTestResult({
+        valid: false,
+        message: "Please enter an API key first",
+      });
+      return;
+    }
+
+    setIsTesting(true);
+    setTestResult(null);
+
+    try {
+      const result = await testApiKey(
+        type as ProviderType,
+        apiKey,
+        baseUrl || undefined,
+      );
+      setTestResult(result);
+    } catch (error) {
+      setTestResult({
+        valid: false,
+        message: error instanceof Error ? error.message : "Test failed",
+      });
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -167,12 +208,45 @@ export function LlmProviderForm({ userId, onSuccess }: LlmProviderFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>API Key</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="sk-..." {...field} />
-                </FormControl>
+                <div className="flex gap-2">
+                  <FormControl>
+                    <Input type="password" placeholder="sk-..." {...field} />
+                  </FormControl>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleTestApiKey}
+                    disabled={isTesting || isLoading}
+                  >
+                    {isTesting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Testing...
+                      </>
+                    ) : (
+                      "Test"
+                    )}
+                  </Button>
+                </div>
                 <FormDescription>
                   Your API key will be encrypted and stored securely.
                 </FormDescription>
+                {testResult && (
+                  <div
+                    className={`flex items-center gap-2 p-2 rounded-md text-sm ${
+                      testResult.valid
+                        ? "bg-green-50 text-green-700 border border-green-200"
+                        : "bg-red-50 text-red-700 border border-red-200"
+                    }`}
+                  >
+                    {testResult.valid ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : (
+                      <XCircle className="h-4 w-4" />
+                    )}
+                    <span>{testResult.message}</span>
+                  </div>
+                )}
                 <FormMessage />
               </FormItem>
             )}

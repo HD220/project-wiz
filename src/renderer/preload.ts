@@ -5,9 +5,9 @@ import { contextBridge, ipcRenderer } from "electron";
 
 import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
+import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
-import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -97,6 +97,12 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("llm-providers:setDefault", providerId, userId),
     getDefault: (userId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("llm-providers:getDefault", userId),
+    testApiKey: (
+      type: "openai" | "deepseek" | "anthropic",
+      apiKey: string,
+      baseUrl?: string,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:testApiKey", type, apiKey, baseUrl),
   },
 
   // Agents API

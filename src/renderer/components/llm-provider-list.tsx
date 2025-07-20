@@ -24,9 +24,13 @@ interface LlmProvider {
 
 interface LlmProviderListProps {
   userId: string;
+  onEditProvider?: (provider: LlmProvider) => void;
 }
 
-export function LlmProviderList({ userId }: LlmProviderListProps) {
+export function LlmProviderList({
+  userId,
+  onEditProvider,
+}: LlmProviderListProps) {
   const { providers, isLoading, error, loadProviders, clearError } =
     useLlmProviderStore();
 
@@ -69,7 +73,11 @@ export function LlmProviderList({ userId }: LlmProviderListProps) {
   return (
     <div className="space-y-4">
       {providers.map((provider: LlmProvider) => (
-        <LlmProviderCard key={provider.id} provider={provider} />
+        <LlmProviderCard
+          key={provider.id}
+          provider={provider}
+          onEdit={onEditProvider}
+        />
       ))}
     </div>
   );

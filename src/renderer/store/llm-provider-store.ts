@@ -42,6 +42,11 @@ interface LlmProviderState {
   ) => Promise<void>;
   deleteProvider: (id: string) => Promise<void>;
   setAsDefault: (providerId: string, userId: string) => Promise<void>;
+  testApiKey: (
+    type: ProviderType,
+    apiKey: string,
+    baseUrl?: string,
+  ) => Promise<{ valid: boolean; message: string; model?: string }>;
   clearError: () => void;
   reset: () => void;
 
@@ -215,6 +220,39 @@ export const useLlmProviderStore = create<LlmProviderState>()(
                 : "Failed to set provider as default",
           });
           throw error;
+        }
+      },
+
+      // Test API key
+      testApiKey: async (
+        type: ProviderType,
+        apiKey: string,
+        baseUrl?: string,
+      ) => {
+        try {
+          const response = await window.api.llmProviders.testApiKey(
+            type,
+            apiKey,
+            baseUrl,
+          );
+
+          if (response.success) {
+            return response.data as {
+              valid: boolean;
+              message: string;
+              model?: string;
+            };
+          }
+          return {
+            valid: false,
+            message: response.error || "Failed to test API key",
+          };
+        } catch (error) {
+          return {
+            valid: false,
+            message:
+              error instanceof Error ? error.message : "Failed to test API key",
+          };
         }
       },
 

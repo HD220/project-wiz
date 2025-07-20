@@ -2,13 +2,13 @@ import { ipcMain } from "electron";
 
 import type { IpcResponse } from "@/main/types";
 
+import { AgentChatService } from "./agent-chat.service";
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
-import { AgentChatService } from "./agent-chat.service";
 
+import type { SendAgentMessageInput } from "./agent-chat.service";
 import type { CreateConversationInput } from "./conversation.service";
 import type { SendMessageInput } from "./message.service";
-import type { SendAgentMessageInput } from "./agent-chat.service";
 
 export function setupConversationsHandlers(): void {
   ipcMain.handle(
@@ -103,7 +103,10 @@ export function setupConversationsHandlers(): void {
     "agent-chat:getConversation",
     async (_, userId: string, agentId: string): Promise<IpcResponse> => {
       try {
-        const data = await AgentChatService.getAgentConversation(userId, agentId);
+        const data = await AgentChatService.getAgentConversation(
+          userId,
+          agentId,
+        );
         return { success: true, data };
       } catch (error) {
         return {

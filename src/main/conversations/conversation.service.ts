@@ -83,8 +83,8 @@ export class ConversationService {
       .where(
         and(
           eq(conversationsTable.agentId, agentId),
-          eq(conversationParticipantsTable.participantId, userId)
-        )
+          eq(conversationParticipantsTable.participantId, userId),
+        ),
       )
       .limit(1);
 

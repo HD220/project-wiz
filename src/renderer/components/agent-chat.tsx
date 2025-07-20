@@ -1,12 +1,5 @@
-import { useState, useEffect, useRef } from "react";
 import { Send, User, Bot } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef } from "react";
 
 import type {
   AgentData,
@@ -14,6 +7,13 @@ import type {
   AgentChatResponse,
   ConversationWithMessages,
 } from "@/renderer/types/agent-chat.types";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AgentChatProps {
   agent: AgentData;
@@ -45,7 +45,10 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
 
   const loadConversation = async () => {
     try {
-      const response = await window.api.agentChat.getConversation(userId, agent.id);
+      const response = await window.api.agentChat.getConversation(
+        userId,
+        agent.id,
+      );
       if (response.success && response.data) {
         const data = response.data as ConversationWithMessages;
         setConversationId(data.conversation.id);
@@ -77,7 +80,7 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
       isFromAgent: false,
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     try {
       const response = await window.api.agentChat.sendMessage({
@@ -98,7 +101,7 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
           isFromAgent: true,
         };
 
-        setMessages(prev => [...prev, agentMessage]);
+        setMessages((prev) => [...prev, agentMessage]);
         setConversationId(data.conversationId);
       } else {
         console.error("Failed to send message:", response.error);
@@ -163,7 +166,7 @@ export function AgentChat({ agent, userId }: AgentChatProps) {
                       </AvatarFallback>
                     </Avatar>
                   )}
-                  
+
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${
                       message.isFromAgent

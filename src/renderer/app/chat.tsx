@@ -1,20 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router";
+import { MessageSquare, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 // import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, Users } from "lucide-react";
-
-import { AgentChat } from "@/components/agent-chat";
-// import { AgentCard } from "@/components/agent-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 
 import { useAuthStore } from "@/renderer/store/auth-store";
 import type { AgentData } from "@/renderer/types/agent-chat.types";
 
+import { AgentChat } from "@/components/agent-chat";
+// import { AgentCard } from "@/components/agent-card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
 export const Route = createFileRoute("/chat")({
-   component: Chat,
+  component: Chat,
 });
 
 export function Chat() {
@@ -68,10 +68,7 @@ export function Chat() {
         <p className="text-muted-foreground mb-4">
           Create your first AI agent to start chatting.
         </p>
-        <a
-          href="/settings/agents"
-          className="text-primary hover:underline"
-        >
+        <a href="/settings/agents" className="text-primary hover:underline">
           Go to Agent Settings
         </a>
       </div>
@@ -112,7 +109,9 @@ export function Chat() {
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge
-                          variant={agent.status === "active" ? "default" : "secondary"}
+                          variant={
+                            agent.status === "active" ? "default" : "secondary"
+                          }
                           className="text-xs"
                         >
                           {agent.status}
