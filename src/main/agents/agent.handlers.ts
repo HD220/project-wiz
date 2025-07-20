@@ -1,9 +1,9 @@
 import { ipcMain } from "electron";
 
 import { AgentService } from "@/main/agents/agent.service";
-import { AuthService } from "@/main/user/authentication/auth.service";
 import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { IpcResponse } from "@/main/types";
+import { AuthService } from "@/main/user/authentication/auth.service";
 
 /**
  * Setup agent IPC handlers
@@ -54,33 +54,29 @@ export function setupAgentHandlers(): void {
     } catch (error) {
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : "Failed to list agents",
+        error: error instanceof Error ? error.message : "Failed to list agents",
       };
     }
   });
 
   // Get agent by ID
-  ipcMain.handle(
-    "agents:get",
-    async (_, id: string): Promise<IpcResponse> => {
-      try {
-        const result = await AgentService.findById(id);
-        if (!result) {
-          throw new Error("Agent not found");
-        }
-        return {
-          success: true,
-          data: result,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to get agent",
-        };
+  ipcMain.handle("agents:get", async (_, id: string): Promise<IpcResponse> => {
+    try {
+      const result = await AgentService.findById(id);
+      if (!result) {
+        throw new Error("Agent not found");
       }
-    },
-  );
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to get agent",
+      };
+    }
+  });
 
   // Get agent with provider information
   ipcMain.handle(
@@ -132,7 +128,11 @@ export function setupAgentHandlers(): void {
   // Update agent
   ipcMain.handle(
     "agents:update",
-    async (_, id: string, updates: Partial<CreateAgentInput>): Promise<IpcResponse> => {
+    async (
+      _,
+      id: string,
+      updates: Partial<CreateAgentInput>,
+    ): Promise<IpcResponse> => {
       try {
         const result = await AgentService.update(id, updates);
         return {

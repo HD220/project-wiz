@@ -1,9 +1,5 @@
 import { eq, and, desc } from "drizzle-orm";
 
-import { getDatabase } from "@/main/database/connection";
-import { agentsTable } from "@/main/agents/agents.schema";
-import { usersTable } from "@/main/user/users.schema";
-import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
 import type {
   CreateAgentInput,
   SelectAgent,
@@ -11,7 +7,14 @@ import type {
   AgentWithProvider,
   ModelConfig,
 } from "@/main/agents/agent.types";
-import { createAgentSchema, modelConfigSchema } from "@/main/agents/agent.types";
+import {
+  createAgentSchema,
+  modelConfigSchema,
+} from "@/main/agents/agent.types";
+import { agentsTable } from "@/main/agents/agents.schema";
+import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
+import { getDatabase } from "@/main/database/connection";
+import { usersTable } from "@/main/user/users.schema";
 
 export class AgentService {
   /**
@@ -63,7 +66,9 @@ export class AgentService {
       .limit(1);
 
     if (!provider) {
-      throw new Error(`LLM provider ${validatedInput.providerId} not found or inactive`);
+      throw new Error(
+        `LLM provider ${validatedInput.providerId} not found or inactive`,
+      );
     }
 
     // Validate model configuration
