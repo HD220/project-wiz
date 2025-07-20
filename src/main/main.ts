@@ -3,6 +3,7 @@ import * as path from "path";
 import { app, BrowserWindow } from "electron";
 import squirrel from "electron-squirrel-startup";
 
+import { setupLlmProviderHandlers } from "./agents/llm-providers/llm-provider.handlers";
 import { setupConversationsHandlers } from "./conversations/conversations.handlers";
 import { setupProjectHandlers } from "./project/project.handlers";
 import { setupAuthHandlers } from "./user/authentication/auth.handlers";
@@ -87,6 +88,9 @@ app.whenReady().then(() => {
 
   setupConversationsHandlers();
   logger.info("Conversations IPC handlers registered");
+
+  setupLlmProviderHandlers();
+  logger.info("LLM Provider IPC handlers registered");
 
   createMainWindow();
 

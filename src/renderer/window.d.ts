@@ -1,3 +1,4 @@
+import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
 import type {
@@ -55,6 +56,23 @@ declare global {
         getConversationMessages: (
           conversationId: string,
         ) => Promise<IpcResponse>;
+      };
+
+      // LLM Providers API
+      llmProviders: {
+        create: (input: CreateProviderInput) => Promise<IpcResponse>;
+        list: (userId: string) => Promise<IpcResponse>;
+        getById: (id: string) => Promise<IpcResponse>;
+        update: (
+          id: string,
+          updates: Partial<CreateProviderInput>,
+        ) => Promise<IpcResponse>;
+        delete: (id: string) => Promise<IpcResponse>;
+        setDefault: (
+          providerId: string,
+          userId: string,
+        ) => Promise<IpcResponse>;
+        getDefault: (userId: string) => Promise<IpcResponse>;
       };
     };
   }

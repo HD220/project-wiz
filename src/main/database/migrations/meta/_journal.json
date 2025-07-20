@@ -36,6 +36,13 @@
       "when": 1752901480259,
       "tag": "0004_refactor_users_and_add_conversations",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1752901580259,
+      "tag": "0005_add_llm_providers",
+      "breakpoints": true
     }
   ]
 }

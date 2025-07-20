@@ -3,6 +3,7 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 
+import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
 import type {
@@ -73,6 +74,27 @@ contextBridge.exposeInMainWorld("api", {
       ipcRenderer.invoke("messages:send", input),
     getConversationMessages: (conversationId: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("messages:getConversationMessages", conversationId),
+  },
+
+  // LLM Providers API
+  llmProviders: {
+    create: (input: CreateProviderInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:create", input),
+    list: (userId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:list", userId),
+    getById: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:getById", id),
+    update: (
+      id: string,
+      updates: Partial<CreateProviderInput>,
+    ): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:update", id, updates),
+    delete: (id: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:delete", id),
+    setDefault: (providerId: string, userId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:setDefault", providerId, userId),
+    getDefault: (userId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("llm-providers:getDefault", userId),
   },
 });
 
