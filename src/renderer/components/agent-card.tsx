@@ -219,10 +219,10 @@ export function AgentCard({ agent, providerName }: AgentCardProps) {
         <CardFooter className="pt-0">
           <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
             <span>
-              Created {new Date(agent.createdAt).toLocaleDateString()}
+              Created {agent.createdAt instanceof Date ? agent.createdAt.toLocaleDateString() : new Date(agent.createdAt).toLocaleDateString()}
             </span>
             <span>
-              Updated {new Date(agent.updatedAt).toLocaleDateString()}
+              Updated {agent.updatedAt instanceof Date ? agent.updatedAt.toLocaleDateString() : new Date(agent.updatedAt).toLocaleDateString()}
             </span>
           </div>
         </CardFooter>
