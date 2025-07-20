@@ -1,3 +1,5 @@
+import { createFileRoute } from "@tanstack/react-router";
+
 import { AgentForm } from "@/components/agent-form";
 import { AgentList } from "@/components/agent-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +8,11 @@ import { Separator } from "@/components/ui/separator";
 // TODO: Replace with actual user ID from auth context
 const CURRENT_USER_ID = "demo-user-id";
 
-export default function AgentsPage() {
+export const Route = createFileRoute("/settings/agents")({
+  component: AgentsPage,
+});
+
+function AgentsPage() {
   return (
     <div className="container max-w-6xl py-8">
       <div className="space-y-8">

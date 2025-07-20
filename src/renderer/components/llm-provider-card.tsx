@@ -215,8 +215,8 @@ export function LlmProviderCard({ provider, onEdit }: LlmProviderCardProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Provider</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{provider.name}&quot;? This action
-              cannot be undone.
+              Are you sure you want to delete &quot;{provider.name}&quot;? This
+              action cannot be undone.
               {provider.isDefault && " You cannot delete the default provider."}
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './app/__root'
 import { Route as ChatRouteImport } from './app/chat'
 import { Route as IndexRouteImport } from './app/index'
+import { Route as SettingsLlmProvidersRouteImport } from './app/settings/llm-providers'
+import { Route as SettingsAgentsRouteImport } from './app/settings/agents'
 
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
@@ -22,31 +24,54 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsLlmProvidersRoute = SettingsLlmProvidersRouteImport.update({
+  id: '/settings/llm-providers',
+  path: '/settings/llm-providers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsAgentsRoute = SettingsAgentsRouteImport.update({
+  id: '/settings/agents',
+  path: '/settings/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chat': typeof ChatRoute
+  '/settings/agents': typeof SettingsAgentsRoute
+  '/settings/llm-providers': typeof SettingsLlmProvidersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chat': typeof ChatRoute
+  '/settings/agents': typeof SettingsAgentsRoute
+  '/settings/llm-providers': typeof SettingsLlmProvidersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chat': typeof ChatRoute
+  '/settings/agents': typeof SettingsAgentsRoute
+  '/settings/llm-providers': typeof SettingsLlmProvidersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat'
+  fullPaths: '/' | '/chat' | '/settings/agents' | '/settings/llm-providers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat'
-  id: '__root__' | '/' | '/chat'
+  to: '/' | '/chat' | '/settings/agents' | '/settings/llm-providers'
+  id:
+    | '__root__'
+    | '/'
+    | '/chat'
+    | '/settings/agents'
+    | '/settings/llm-providers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChatRoute: typeof ChatRoute
+  SettingsAgentsRoute: typeof SettingsAgentsRoute
+  SettingsLlmProvidersRoute: typeof SettingsLlmProvidersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +90,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/llm-providers': {
+      id: '/settings/llm-providers'
+      path: '/settings/llm-providers'
+      fullPath: '/settings/llm-providers'
+      preLoaderRoute: typeof SettingsLlmProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/agents': {
+      id: '/settings/agents'
+      path: '/settings/agents'
+      fullPath: '/settings/agents'
+      preLoaderRoute: typeof SettingsAgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChatRoute: ChatRoute,
+  SettingsAgentsRoute: SettingsAgentsRoute,
+  SettingsLlmProvidersRoute: SettingsLlmProvidersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

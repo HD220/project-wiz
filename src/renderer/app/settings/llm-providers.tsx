@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { useAuthStore } from "@/renderer/store/auth-store";
@@ -21,7 +22,11 @@ interface LlmProvider {
   updatedAt: Date;
 }
 
-export default function LlmProvidersPage() {
+export const Route = createFileRoute("/settings/llm-providers")({
+  component: LlmProvidersPage,
+});
+
+function LlmProvidersPage() {
   const { user } = useAuthStore();
   const [editingProvider, setEditingProvider] = useState<LlmProvider | null>(
     null,

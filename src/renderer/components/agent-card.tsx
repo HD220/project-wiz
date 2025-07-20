@@ -19,6 +19,7 @@ interface SelectAgent {
 
 import { useAgentStore } from "@/renderer/store/agent-store";
 
+import { AgentEditDialog } from "@/components/agent-edit-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -57,6 +58,7 @@ interface AgentCardProps {
 export function AgentCard({ agent, providerName }: AgentCardProps) {
   const { updateAgentStatus, deleteAgent, error, clearError } = useAgentStore();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusChange = async (newStatus: AgentStatus) => {
@@ -155,6 +157,10 @@ export function AgentCard({ agent, providerName }: AgentCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                Edit Agent
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleStatusChange("active")}
                 disabled={isUpdating || agent.status === "active"}
@@ -249,6 +255,12 @@ export function AgentCard({ agent, providerName }: AgentCardProps) {
           </AlertDescription>
         </Alert>
       )}
+
+      <AgentEditDialog
+        agent={agent}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
 
       <AlertDialog
         open={isDeleteDialogOpen}
