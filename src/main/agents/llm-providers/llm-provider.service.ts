@@ -8,6 +8,7 @@ import type {
 } from "@/main/agents/llm-providers/llm-provider.types";
 import { createProviderSchema } from "@/main/agents/llm-providers/llm-provider.types";
 import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
+import { agentsTable } from "@/main/agents/agents.schema";
 import { getDatabase } from "@/main/database/connection";
 
 // Encryption configuration
@@ -183,6 +184,17 @@ export class LlmProviderService {
    */
   static async delete(id: string): Promise<void> {
     const db = getDatabase();
+
+    // First check if any agents are using this provider
+    const [agentUsingProvider] = await db
+      .select({ id: agentsTable.id })
+      .from(agentsTable)
+      .where(eq(agentsTable.providerId, id))
+      .limit(1);
+
+    if (agentUsingProvider) {
+      throw new Error("Cannot delete provider: It is currently being used by one or more agents. Please delete or reassign the agents first.");
+    }
 
     const result = await db
       .delete(llmProvidersTable)

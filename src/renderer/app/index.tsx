@@ -295,9 +295,10 @@ function ProviderCard({ provider, onDelete, onSetDefault }: ProviderCardProps) {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          <p>Created: {new Date(provider.createdAt).toLocaleDateString()}</p>
-          {provider.updatedAt !== provider.createdAt && (
-            <p>Updated: {new Date(provider.updatedAt).toLocaleDateString()}</p>
+          <p>Created: {provider.createdAt instanceof Date ? provider.createdAt.toLocaleDateString() : new Date(provider.createdAt).toLocaleDateString()}</p>
+          {provider.updatedAt instanceof Date && provider.createdAt instanceof Date && 
+           provider.updatedAt.getTime() !== provider.createdAt.getTime() && (
+            <p>Updated: {provider.updatedAt.toLocaleDateString()}</p>
           )}
         </div>
       </CardContent>
