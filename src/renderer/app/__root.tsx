@@ -18,13 +18,13 @@ export const Route = createRootRoute({
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/">
+              <Link to="/chat">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Chat
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/">
+              <Link to="/settings/agents">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Link>

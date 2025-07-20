@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router"
 import { useState, useEffect } from "react";
 // import { createFileRoute } from "@tanstack/react-router";
 import { MessageSquare, Users } from "lucide-react";
@@ -12,10 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/renderer/store/auth-store";
 import type { AgentData } from "@/renderer/types/agent-chat.types";
 
-// Temporarily commented out to fix build
-// export const Route = createFileRoute("/chat")({
-//   component: Chat,
-// });
+export const Route = createFileRoute("/chat")({
+   component: Chat,
+});
 
 export function Chat() {
   const { user } = useAuthStore();
