@@ -6,7 +6,6 @@ import type { IpcResponse } from "@/main/types";
 
 /**
  * Setup LLM provider IPC handlers
- * Exposes LlmProviderService methods to the frontend via IPC
  */
 export function setupLlmProviderHandlers(): void {
   // Create LLM provider
@@ -15,10 +14,7 @@ export function setupLlmProviderHandlers(): void {
     async (_, input: CreateProviderInput): Promise<IpcResponse> => {
       try {
         const result = await LlmProviderService.create(input);
-        return {
-          success: true,
-          data: result,
-        };
+        return { success: true, data: result };
       } catch (error) {
         return {
           success: false,
@@ -37,10 +33,7 @@ export function setupLlmProviderHandlers(): void {
     async (_, userId: string): Promise<IpcResponse> => {
       try {
         const result = await LlmProviderService.findByUserId(userId);
-        return {
-          success: true,
-          data: result,
-        };
+        return { success: true, data: result };
       } catch (error) {
         return {
           success: false,
@@ -168,7 +161,7 @@ export function setupLlmProviderHandlers(): void {
     "llm-providers:testApiKey",
     async (
       _,
-      type: "openai" | "deepseek" | "anthropic",
+      type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
       apiKey: string,
       baseUrl?: string,
     ): Promise<IpcResponse> => {

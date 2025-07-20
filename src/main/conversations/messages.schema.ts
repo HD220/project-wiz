@@ -11,10 +11,10 @@ export const messagesTable = sqliteTable("messages", {
     .$defaultFn(() => crypto.randomUUID()),
   conversationId: text("conversation_id")
     .notNull()
-    .references(() => conversationsTable.id),
+    .references(() => conversationsTable.id, { onDelete: "cascade" }),
   authorId: text("author_id")
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => usersTable.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -30,7 +30,7 @@ export const llmMessagesTable = sqliteTable("llm_messages", {
     .$defaultFn(() => crypto.randomUUID()),
   messageId: text("message_id")
     .notNull()
-    .references(() => messagesTable.id),
+    .references(() => messagesTable.id, { onDelete: "cascade" }),
   role: text("role")
     .$type<"user" | "assistant" | "system" | "tool">()
     .notNull(),

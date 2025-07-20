@@ -8,102 +8,102 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './app/__root'
-import { Route as ChatRouteImport } from './app/chat'
-import { Route as IndexRouteImport } from './app/index'
-import { Route as SettingsLlmProvidersRouteImport } from './app/settings/llm-providers'
-import { Route as SettingsAgentsRouteImport } from './app/settings/agents'
+import { Route as rootRouteImport } from "./app/__root";
+import { Route as ChatRouteImport } from "./app/chat";
+import { Route as IndexRouteImport } from "./app/index";
+import { Route as SettingsLlmProvidersRouteImport } from "./app/settings/llm-providers";
+import { Route as SettingsAgentsRouteImport } from "./app/settings/agents";
 
 const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
+  id: "/chat",
+  path: "/chat",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const SettingsLlmProvidersRoute = SettingsLlmProvidersRouteImport.update({
-  id: '/settings/llm-providers',
-  path: '/settings/llm-providers',
+  id: "/settings/llm-providers",
+  path: "/settings/llm-providers",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const SettingsAgentsRoute = SettingsAgentsRouteImport.update({
-  id: '/settings/agents',
-  path: '/settings/agents',
+  id: "/settings/agents",
+  path: "/settings/agents",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/settings/agents': typeof SettingsAgentsRoute
-  '/settings/llm-providers': typeof SettingsLlmProvidersRoute
+  "/": typeof IndexRoute;
+  "/chat": typeof ChatRoute;
+  "/settings/agents": typeof SettingsAgentsRoute;
+  "/settings/llm-providers": typeof SettingsLlmProvidersRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/settings/agents': typeof SettingsAgentsRoute
-  '/settings/llm-providers': typeof SettingsLlmProvidersRoute
+  "/": typeof IndexRoute;
+  "/chat": typeof ChatRoute;
+  "/settings/agents": typeof SettingsAgentsRoute;
+  "/settings/llm-providers": typeof SettingsLlmProvidersRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/settings/agents': typeof SettingsAgentsRoute
-  '/settings/llm-providers': typeof SettingsLlmProvidersRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/chat": typeof ChatRoute;
+  "/settings/agents": typeof SettingsAgentsRoute;
+  "/settings/llm-providers": typeof SettingsLlmProvidersRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat' | '/settings/agents' | '/settings/llm-providers'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat' | '/settings/agents' | '/settings/llm-providers'
+  fileRoutesByFullPath: FileRoutesByFullPath;
+  fullPaths: "/" | "/chat" | "/settings/agents" | "/settings/llm-providers";
+  fileRoutesByTo: FileRoutesByTo;
+  to: "/" | "/chat" | "/settings/agents" | "/settings/llm-providers";
   id:
-    | '__root__'
-    | '/'
-    | '/chat'
-    | '/settings/agents'
-    | '/settings/llm-providers'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/chat"
+    | "/settings/agents"
+    | "/settings/llm-providers";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ChatRoute: typeof ChatRoute
-  SettingsAgentsRoute: typeof SettingsAgentsRoute
-  SettingsLlmProvidersRoute: typeof SettingsLlmProvidersRoute
+  IndexRoute: typeof IndexRoute;
+  ChatRoute: typeof ChatRoute;
+  SettingsAgentsRoute: typeof SettingsAgentsRoute;
+  SettingsLlmProvidersRoute: typeof SettingsLlmProvidersRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/llm-providers': {
-      id: '/settings/llm-providers'
-      path: '/settings/llm-providers'
-      fullPath: '/settings/llm-providers'
-      preLoaderRoute: typeof SettingsLlmProvidersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/agents': {
-      id: '/settings/agents'
-      path: '/settings/agents'
-      fullPath: '/settings/agents'
-      preLoaderRoute: typeof SettingsAgentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    "/chat": {
+      id: "/chat";
+      path: "/chat";
+      fullPath: "/chat";
+      preLoaderRoute: typeof ChatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/settings/llm-providers": {
+      id: "/settings/llm-providers";
+      path: "/settings/llm-providers";
+      fullPath: "/settings/llm-providers";
+      preLoaderRoute: typeof SettingsLlmProvidersRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/settings/agents": {
+      id: "/settings/agents";
+      path: "/settings/agents";
+      fullPath: "/settings/agents";
+      preLoaderRoute: typeof SettingsAgentsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -112,7 +112,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   SettingsAgentsRoute: SettingsAgentsRoute,
   SettingsLlmProvidersRoute: SettingsLlmProvidersRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

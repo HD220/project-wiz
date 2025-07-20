@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD `theme` text DEFAULT 'system' NOT NULL;

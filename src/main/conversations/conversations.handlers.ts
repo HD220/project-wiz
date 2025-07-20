@@ -141,25 +141,5 @@ export function setupConversationsHandlers(): void {
     },
   );
 
-  ipcMain.handle(
-    "agent-chat:getConversationWithMemory",
-    async (_, userId: string, agentId: string): Promise<IpcResponse> => {
-      try {
-        const data =
-          await AgentChatWithMemoryService.getAgentConversationWithMemory(
-            userId,
-            agentId,
-          );
-        return { success: true, data };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to get agent conversation with memory",
-        };
-      }
-    },
-  );
+  // Handler removed - use separate conversation and memory endpoints
 }

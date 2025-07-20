@@ -1,11 +1,10 @@
-import { deepseek } from "@ai-sdk/deepseek";
-import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 import { AgentService } from "@/main/agents/agent.service";
 import type { SelectAgent } from "@/main/agents/agents.schema";
 import { LlmProviderService } from "@/main/agents/llm-providers/llm-provider.service";
 import type { SelectLlmProvider } from "@/main/agents/llm-providers/llm-providers.schema";
+import { LLMService } from "@/main/agents/llm-providers/llm.service";
 
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
@@ -53,6 +52,7 @@ export class AgentChatService {
       provider,
       input.content,
       conversation.id,
+      input.userId,
     );
 
     const agentMessage = await MessageService.sendWithLlmData({
@@ -83,6 +83,7 @@ export class AgentChatService {
     provider: SelectLlmProvider,
     userMessage: string,
     conversationId: string,
+    userId: string,
   ): Promise<string> {
     const modelConfig = JSON.parse(agent.modelConfig);
     const conversationHistory =
@@ -106,34 +107,20 @@ export class AgentChatService {
       },
     ];
 
-    try {
-      let model;
+    const model = await LLMService.getModel(
+      userId,
+      provider.id,
+      modelConfig.model,
+    );
 
-      switch (provider.type) {
-        case "openai":
-          model = openai(modelConfig.model || "gpt-4o-mini");
-          break;
-        case "deepseek":
-          model = deepseek(modelConfig.model || "deepseek-chat");
-          break;
-        default:
-          throw new Error(`Unsupported provider type: ${provider.type}`);
-      }
+    const { text } = await generateText({
+      model,
+      messages,
+      temperature: modelConfig.temperature || 0.7,
+      maxTokens: modelConfig.maxTokens || 2048,
+    });
 
-      const { text } = await generateText({
-        model,
-        messages,
-        temperature: modelConfig.temperature || 0.7,
-        maxTokens: modelConfig.maxTokens || 2048,
-      });
-
-      return text;
-    } catch (error) {
-      console.error("Error generating agent response:", error);
-      throw new Error(
-        `Failed to generate response: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
-    }
+    return text;
   }
 
   static async getAgentConversation(userId: string, agentId: string) {

@@ -3,10 +3,7 @@ import { ipcMain } from "electron";
 import type { IpcResponse } from "@/main/types";
 
 import { AgentMemoryService } from "./agent-memory.service";
-import {
-  MemoryMaintenanceService,
-  type MemoryMaintenanceConfig,
-} from "./memory-maintenance.service";
+import { MemoryMaintenanceService } from "./memory-maintenance.service";
 
 import type {
   AgentMemoryWithMetadata,
@@ -292,16 +289,12 @@ export function setupAgentMemoryHandlers(): void {
    * Perform comprehensive memory maintenance
    */
   ipcMain.handle(
-    "agent-memory:perform-maintenance",
-    async (
-      _,
-      agentId: string,
-      config?: Partial<MemoryMaintenanceConfig>,
-    ): Promise<IpcResponse> => {
+    "agent-memory:clean-old-memories",
+    async (_, agentId: string, daysOld?: number): Promise<IpcResponse> => {
       try {
-        const result = await MemoryMaintenanceService.performMaintenance(
+        const result = await MemoryMaintenanceService.cleanOldMemories(
           agentId,
-          config,
+          daysOld,
         );
         return { success: true, data: result };
       } catch (error) {
@@ -310,7 +303,7 @@ export function setupAgentMemoryHandlers(): void {
           error:
             error instanceof Error
               ? error.message
-              : "Failed to perform maintenance",
+              : "Failed to clean old memories",
         };
       }
     },
@@ -320,19 +313,18 @@ export function setupAgentMemoryHandlers(): void {
    * Get memory statistics
    */
   ipcMain.handle(
-    "agent-memory:get-statistics",
+    "agent-memory:get-count",
     async (_, agentId: string): Promise<IpcResponse> => {
       try {
-        const statistics =
-          await MemoryMaintenanceService.getMemoryStatistics(agentId);
-        return { success: true, data: statistics };
+        const count = await MemoryMaintenanceService.getMemoryCount(agentId);
+        return { success: true, data: { count } };
       } catch (error) {
         return {
           success: false,
           error:
             error instanceof Error
               ? error.message
-              : "Failed to get memory statistics",
+              : "Failed to get memory count",
         };
       }
     },
@@ -341,25 +333,4 @@ export function setupAgentMemoryHandlers(): void {
   /**
    * Run automated maintenance for all agents
    */
-  ipcMain.handle(
-    "agent-memory:run-automated-maintenance",
-    async (
-      _,
-      config?: Partial<MemoryMaintenanceConfig>,
-    ): Promise<IpcResponse> => {
-      try {
-        const results =
-          await MemoryMaintenanceService.runAutomatedMaintenance(config);
-        return { success: true, data: results };
-      } catch (error) {
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to run automated maintenance",
-        };
-      }
-    },
-  );
 }

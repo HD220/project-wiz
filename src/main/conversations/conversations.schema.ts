@@ -13,7 +13,9 @@ export const conversationsTable = sqliteTable("conversations", {
   name: text("name"),
   description: text("description"),
   type: text("type").$type<ConversationType>().notNull().default("dm"),
-  agentId: text("agent_id").references(() => agentsTable.id),
+  agentId: text("agent_id").references(() => agentsTable.id, {
+    onDelete: "cascade",
+  }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
@@ -30,10 +32,10 @@ export const conversationParticipantsTable = sqliteTable(
       .$defaultFn(() => crypto.randomUUID()),
     conversationId: text("conversation_id")
       .notNull()
-      .references(() => conversationsTable.id),
+      .references(() => conversationsTable.id, { onDelete: "cascade" }),
     participantId: text("participant_id")
       .notNull()
-      .references(() => usersTable.id),
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

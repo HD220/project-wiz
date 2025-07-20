@@ -1,0 +1,1 @@
+ALTER TABLE `llm_providers` ADD `default_model` text DEFAULT 'gpt-3.5-turbo' NOT NULL;

@@ -3,7 +3,12 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/user/users.schema";
 
-export type ProviderType = "openai" | "deepseek" | "anthropic";
+export type ProviderType =
+  | "openai"
+  | "deepseek"
+  | "anthropic"
+  | "google"
+  | "custom";
 
 export const llmProvidersTable = sqliteTable("llm_providers", {
   id: text("id")
@@ -16,6 +21,7 @@ export const llmProvidersTable = sqliteTable("llm_providers", {
   type: text("type").$type<ProviderType>().notNull(),
   apiKey: text("api_key").notNull(), // Will store encrypted
   baseUrl: text("base_url"),
+  defaultModel: text("default_model").notNull().default("gpt-3.5-turbo"),
   isDefault: integer("is_default", { mode: "boolean" })
     .notNull()
     .default(false),

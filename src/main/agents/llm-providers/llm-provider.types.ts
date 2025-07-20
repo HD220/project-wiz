@@ -16,9 +16,13 @@ export type CreateProviderInput = Omit<
 export const createProviderSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   name: z.string().min(1, "Provider name is required"),
-  type: z.enum(["openai", "deepseek", "anthropic"]),
+  type: z.enum(["openai", "deepseek", "anthropic", "google", "custom"]),
   apiKey: z.string().min(1, "API key is required"),
   baseUrl: z.string().url("Invalid URL").optional().nullable(),
+  defaultModel: z
+    .string()
+    .min(1, "Default model is required")
+    .default("gpt-3.5-turbo"),
   isDefault: z.boolean().default(false),
   isActive: z.boolean().default(true),
 });

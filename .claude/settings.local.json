@@ -1,6 +1,11 @@
 {
   "permissions": {
-    "allow": ["Bash(npm run type-check:*)"],
+    "allow": [
+      "Bash(npm run type-check:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:ai-sdk.dev)",
+      "Bash(rm:*)"
+    ],
     "deny": []
   }
 }

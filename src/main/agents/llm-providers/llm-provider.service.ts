@@ -12,44 +12,15 @@ import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.sch
 import { getDatabase } from "@/main/database/connection";
 
 // Encryption configuration
-const ALGORITHM = "aes-256-gcm";
 const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"] || crypto.randomBytes(32);
 
 export class LlmProviderService {
-  /**
-   * Convert SQLite timestamp to Date object
-   */
-  private static convertTimestampToDate(timestamp: unknown): Date {
-    if (timestamp instanceof Date) {
-      return timestamp;
-    }
-    if (typeof timestamp === "number") {
-      // SQLite timestamps are in seconds, JS Date expects milliseconds
-      return new Date(timestamp * 1000);
-    }
-    if (typeof timestamp === "string") {
-      return new Date(timestamp);
-    }
-    return new Date();
-  }
-
-  /**
-   * Sanitize provider dates for consistent format
-   */
-  private static sanitizeDates(provider: SelectLlmProvider): SelectLlmProvider {
-    return {
-      ...provider,
-      createdAt: this.convertTimestampToDate(provider.createdAt),
-      updatedAt: this.convertTimestampToDate(provider.updatedAt),
-    };
-  }
-
   /**
    * Encrypt API key for secure storage
    */
   private static encryptApiKey(apiKey: string): string {
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+    const cipher = crypto.createCipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
 
     let encrypted = cipher.update(apiKey, "utf8", "base64");
     encrypted += cipher.final("base64");
@@ -77,7 +48,11 @@ export class LlmProviderService {
       const authTag = combined.subarray(16, 32);
       const encrypted = combined.subarray(32);
 
-      const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+      const decipher = crypto.createDecipheriv(
+        "aes-256-gcm",
+        ENCRYPTION_KEY,
+        iv,
+      );
       decipher.setAuthTag(authTag);
 
       let decrypted = decipher.update(encrypted, undefined, "utf8");
@@ -109,6 +84,7 @@ export class LlmProviderService {
         type: validatedInput.type,
         apiKey: encryptedApiKey,
         baseUrl: validatedInput.baseUrl,
+        defaultModel: validatedInput.defaultModel,
         isDefault: validatedInput.isDefault,
         isActive: validatedInput.isActive,
       })
@@ -118,7 +94,7 @@ export class LlmProviderService {
       throw new Error("Failed to create LLM provider");
     }
 
-    return this.sanitizeDates(provider);
+    return provider;
   }
 
   /**
@@ -128,7 +104,7 @@ export class LlmProviderService {
     provider: SelectLlmProvider,
   ): SelectLlmProvider {
     return {
-      ...this.sanitizeDates(provider),
+      ...provider,
       apiKey: "••••••••", // Mask API key for UI
     };
   }
@@ -161,7 +137,7 @@ export class LlmProviderService {
       .where(eq(llmProvidersTable.id, id))
       .limit(1);
 
-    return provider ? this.sanitizeDates(provider) : null;
+    return provider || null;
   }
 
   /**
@@ -204,7 +180,7 @@ export class LlmProviderService {
       throw new Error("Failed to update provider");
     }
 
-    return this.sanitizeDates(provider);
+    return provider;
   }
 
   /**
@@ -278,51 +254,74 @@ export class LlmProviderService {
       )
       .limit(1);
 
-    return provider ? this.sanitizeDates(provider) : null;
+    return provider || null;
   }
 
   /**
-   * Test API key connectivity
+   * Find default provider by user ID (alias for getDefaultProvider)
+   */
+  static async findDefaultByUserId(
+    userId: string,
+  ): Promise<SelectLlmProvider | null> {
+    return this.getDefaultProvider(userId);
+  }
+
+  /**
+   * Test API key connectivity using simplified ping approach
    */
   static async testApiKey(
-    type: "openai" | "deepseek" | "anthropic",
+    type: "openai" | "deepseek" | "anthropic" | "google" | "custom",
     apiKey: string,
     baseUrl?: string,
   ): Promise<{ valid: boolean; message: string; model?: string }> {
     try {
-      switch (type) {
-        case "openai":
-          return await this.testOpenAIKey(apiKey, baseUrl);
-        case "deepseek":
-          return await this.testDeepSeekKey(apiKey, baseUrl);
-        case "anthropic":
-          return await this.testAnthropicKey(apiKey, baseUrl);
-        default:
+      const baseUrls = {
+        openai: "https://api.openai.com/v1",
+        deepseek: "https://api.deepseek.com/v1",
+        anthropic: "https://api.anthropic.com/v1",
+        google: "https://generativelanguage.googleapis.com/v1beta",
+      };
+
+      // For anthropic, use different endpoint and headers
+      if (type === "anthropic") {
+        const url = `${baseUrl || baseUrls.anthropic}/messages`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "x-api-key": apiKey,
+            "Content-Type": "application/json",
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-3-haiku-20240307",
+            max_tokens: 1,
+            messages: [{ role: "user", content: "test" }],
+          }),
+        });
+
+        if (response.status === 400) {
+          // 400 means API key is valid but request is malformed (expected)
           return {
-            valid: false,
-            message: "Unsupported provider type",
+            valid: true,
+            message: "Valid API key.",
+            model: "claude-3-haiku-20240307",
           };
+        }
       }
-    } catch (error) {
-      return {
-        valid: false,
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      };
-    }
-  }
 
-  /**
-   * Test OpenAI API key
-   */
-  private static async testOpenAIKey(
-    apiKey: string,
-    baseUrl?: string,
-  ): Promise<{ valid: boolean; message: string; model?: string }> {
-    const url = baseUrl || "https://api.openai.com/v1";
+      // For OpenAI-compatible providers (including custom)
+      const targetBaseUrl =
+        baseUrl || baseUrls[type as keyof typeof baseUrls] || baseUrl;
+      if (!targetBaseUrl) {
+        return {
+          valid: false,
+          message: "Base URL is required for custom providers",
+        };
+      }
 
-    try {
-      const response = await fetch(`${url}/models`, {
+      const url = `${targetBaseUrl}/models`;
+      const response = await fetch(url, {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
@@ -331,105 +330,16 @@ export class LlmProviderService {
 
       if (response.ok) {
         const data = await response.json();
-        const availableModels = data.data?.length || 0;
+        const modelCount = data.data?.length || 0;
         const firstModel = data.data?.[0]?.id;
 
         return {
           valid: true,
-          message: `Valid API key. ${availableModels} models available.`,
+          message: `Valid API key. ${modelCount} models available.`,
           model: firstModel,
         };
       }
-      const errorData = await response.json().catch(() => ({}));
-      return {
-        valid: false,
-        message:
-          errorData.error?.message ||
-          `HTTP ${response.status}: ${response.statusText}`,
-      };
-    } catch (error) {
-      return {
-        valid: false,
-        message: error instanceof Error ? error.message : "Connection failed",
-      };
-    }
-  }
 
-  /**
-   * Test DeepSeek API key
-   */
-  private static async testDeepSeekKey(
-    apiKey: string,
-    baseUrl?: string,
-  ): Promise<{ valid: boolean; message: string; model?: string }> {
-    const url = baseUrl || "https://api.deepseek.com/v1";
-
-    try {
-      const response = await fetch(`${url}/models`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const availableModels = data.data?.length || 0;
-        const firstModel = data.data?.[0]?.id;
-
-        return {
-          valid: true,
-          message: `Valid API key. ${availableModels} models available.`,
-          model: firstModel,
-        };
-      }
-      const errorData = await response.json().catch(() => ({}));
-      return {
-        valid: false,
-        message:
-          errorData.error?.message ||
-          `HTTP ${response.status}: ${response.statusText}`,
-      };
-    } catch (error) {
-      return {
-        valid: false,
-        message: error instanceof Error ? error.message : "Connection failed",
-      };
-    }
-  }
-
-  /**
-   * Test Anthropic API key
-   */
-  private static async testAnthropicKey(
-    apiKey: string,
-    baseUrl?: string,
-  ): Promise<{ valid: boolean; message: string; model?: string }> {
-    const url = baseUrl || "https://api.anthropic.com/v1";
-
-    try {
-      // Anthropic doesn't have a models endpoint, so we'll make a minimal completion request
-      const response = await fetch(`${url}/messages`, {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 1,
-          messages: [{ role: "user", content: "Hi" }],
-        }),
-      });
-
-      if (response.ok) {
-        return {
-          valid: true,
-          message: "Valid API key. Anthropic Claude models available.",
-          model: "claude-3-haiku-20240307",
-        };
-      }
       const errorData = await response.json().catch(() => ({}));
       return {
         valid: false,

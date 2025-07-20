@@ -11,7 +11,7 @@ export const userPreferencesTable = sqliteTable("user_preferences", {
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id")
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => usersTable.id, { onDelete: "cascade" }),
   theme: text("theme").$type<Theme>().notNull().default("system"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
