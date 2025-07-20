@@ -7,6 +7,7 @@ import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
+import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -115,6 +116,14 @@ contextBridge.exposeInMainWorld("api", {
     ): Promise<IpcResponse> => ipcRenderer.invoke("agents:update", id, updates),
     delete: (id: string): Promise<IpcResponse> =>
       ipcRenderer.invoke("agents:delete", id),
+  },
+
+  // Agent Chat API
+  agentChat: {
+    sendMessage: (input: SendAgentMessageInput): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-chat:sendMessage", input),
+    getConversation: (userId: string, agentId: string): Promise<IpcResponse> =>
+      ipcRenderer.invoke("agent-chat:getConversation", userId, agentId),
   },
 });
 

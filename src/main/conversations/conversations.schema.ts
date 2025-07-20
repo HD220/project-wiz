@@ -2,6 +2,9 @@ import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 import { usersTable } from "@/main/user/users.schema";
+import { agentsTable } from "@/main/agents/agents.schema";
+
+export type ConversationType = "dm" | "agent_chat";
 
 export const conversationsTable = sqliteTable("conversations", {
   id: text("id")
@@ -9,7 +12,8 @@ export const conversationsTable = sqliteTable("conversations", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
   description: text("description"),
-  type: text("type").$type<"dm">().notNull().default("dm"),
+  type: text("type").$type<ConversationType>().notNull().default("dm"),
+  agentId: text("agent_id").references(() => agentsTable.id),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

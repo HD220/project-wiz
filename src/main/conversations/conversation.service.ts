@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 
@@ -29,6 +29,7 @@ export class ConversationService {
         name: input.name,
         description: input.description,
         type: input.type,
+        agentId: input.agentId,
       })
       .returning();
 
@@ -64,5 +65,51 @@ export class ConversationService {
       .where(eq(conversationParticipantsTable.participantId, userId));
 
     return conversations.map((row) => row.conversation);
+  }
+
+  static async getOrCreateAgentConversation(
+    userId: string,
+    agentId: string,
+  ): Promise<SelectConversation> {
+    const db = getDatabase();
+
+    const [existingConversation] = await db
+      .select({ conversation: conversationsTable })
+      .from(conversationsTable)
+      .innerJoin(
+        conversationParticipantsTable,
+        eq(conversationsTable.id, conversationParticipantsTable.conversationId),
+      )
+      .where(
+        and(
+          eq(conversationsTable.agentId, agentId),
+          eq(conversationParticipantsTable.participantId, userId)
+        )
+      )
+      .limit(1);
+
+    if (existingConversation) {
+      return existingConversation.conversation;
+    }
+
+    return await this.create({
+      type: "agent_chat",
+      agentId,
+      participantIds: [userId],
+    });
+  }
+
+  static async getConversationWithAgent(
+    conversationId: string,
+  ): Promise<SelectConversation | null> {
+    const db = getDatabase();
+
+    const [conversation] = await db
+      .select()
+      .from(conversationsTable)
+      .where(eq(conversationsTable.id, conversationId))
+      .limit(1);
+
+    return conversation || null;
   }
 }

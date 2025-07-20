@@ -2,6 +2,7 @@ import type { CreateAgentInput, AgentStatus } from "@/main/agents/agent.types";
 import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
 import type { CreateConversationInput } from "@/main/conversations/conversation.service";
 import type { SendMessageInput } from "@/main/conversations/message.service";
+import type { SendAgentMessageInput } from "@/main/conversations/agent-chat.service";
 import type {
   InsertProject,
   UpdateProject,
@@ -88,6 +89,12 @@ declare global {
           updates: Partial<CreateAgentInput>,
         ) => Promise<IpcResponse>;
         delete: (id: string) => Promise<IpcResponse>;
+      };
+
+      // Agent Chat API
+      agentChat: {
+        sendMessage: (input: SendAgentMessageInput) => Promise<IpcResponse>;
+        getConversation: (userId: string, agentId: string) => Promise<IpcResponse>;
       };
     };
   }
