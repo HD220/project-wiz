@@ -11,13 +11,16 @@ O sistema de agentes representa o diferencial principal do Project Wiz. Atualmen
 ## Filosofia dos Agentes
 
 ### Agentes como "Pessoas Virtuais"
+
 Os agentes não são ferramentas especializadas, mas **colegas de trabalho virtuais** com:
+
 - **Identidade própria**: Nome, avatar, backstory, personalidade e objetivos
 - **Autonomia total**: Criam e gerenciam suas próprias tarefas e prioridades
 - **Colaboração natural**: Conversam em DMs e canais como qualquer membro da equipe
 - **Memória persistente**: Mantêm contexto de longo prazo e registram aprendizados
 
 ### Sistema de Contratação Inteligente
+
 - **Assistente Pessoal**: Cada usuário tem um agente assistente padrão que atua como "gerente de RH virtual"
 - **Contratação por Conversa**: Usuário discute necessidades com assistente, que aciona tools de contratação
 - **Análise Proativa**: Assistente analisa projeto periodicamente e sugere contratação de especialistas
@@ -29,15 +32,17 @@ Os agentes não são ferramentas especializadas, mas **colegas de trabalho virtu
 ### Incluído:
 
 #### Core System
+
 - **Schema de dados** para agentes humanizados (persona, backstory, goals, status, memória)
 - **AgentService** para gerenciamento completo do ciclo de vida
 - **AgentWorker** com sistema de auto-gestão de filas de tarefas
 - **Sistema de status** (disponível, ocupado, ausente, offline) estilo Discord
 - **Sistema de memória e contexto** para conversas de longa duração
 
-#### Agent Tools & Capabilities  
+#### Agent Tools & Capabilities
+
 - **Ferramentas base**: Equivalentes às ferramentas do Claude (Bash, Read, Edit, etc.)
-- **Ferramentas da plataforma**: 
+- **Ferramentas da plataforma**:
   - Criar/gerenciar projetos
   - Enviar mensagens (DM e canais)
   - Interagir com sistema kanban/issues
@@ -47,12 +52,14 @@ Os agentes não são ferramentas especializadas, mas **colegas de trabalho virtu
 - **Auto-agendamento**: Tarefas recorrentes e agendadas na fila pessoal
 
 #### Integration Layer
+
 - **Sistema de roteamento** inteligente baseado em expertise e contexto
 - **Integração LLM** (Claude, OpenAI, DeepSeek) via AI SDK
 - **Interface IPC** para comunicação frontend-backend
 - **Processamento em background** 24/7 das filas de tarefas
 
 ### Não Incluído:
+
 - Interface de usuário (será abordada em documento separado)
 - Sistema de permissões (implementação inicial com autonomia total)
 - Monitoramento avançado de performance
@@ -61,6 +68,7 @@ Os agentes não são ferramentas especializadas, mas **colegas de trabalho virtu
 ## Arquitetura Técnica
 
 ### Agent Lifecycle
+
 1. **Initialization**: Assistente ou usuário inicia processo de contratação
 2. **Generation**: LLM gera 3 candidatos com personas únicas
 3. **Selection**: Usuário ou assistente escolhe candidato ideal

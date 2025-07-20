@@ -19,6 +19,7 @@ interface SelectLlmProvider {
 
 import { AgentForm } from "@/renderer/components/agent-form";
 import { AgentList } from "@/renderer/components/agent-list";
+import { AuthButton } from "@/renderer/components/auth-button";
 import { LlmProviderForm } from "@/renderer/components/llm-provider-form";
 import { Alert, AlertDescription } from "@/renderer/components/ui/alert";
 import { Badge } from "@/renderer/components/ui/badge";
@@ -37,6 +38,7 @@ import {
   TabsTrigger,
 } from "@/renderer/components/ui/tabs";
 import { useAgentStore } from "@/renderer/store/agent-store";
+import { useAuthStore } from "@/renderer/store/auth-store";
 import { useLlmProviderStore } from "@/renderer/store/llm-provider-store";
 
 export const Route = createFileRoute("/")({
@@ -58,15 +60,25 @@ export const Route = createFileRoute("/")({
       clearError: clearAgentsError,
     } = useAgentStore();
 
+    const { user, getCurrentUser } = useAuthStore();
+
     const [showProviderForm, setShowProviderForm] = useState(false);
     const [showAgentForm, setShowAgentForm] = useState(false);
 
-    // Mock user ID - in a real app, this would come from auth context
-    const userId = "demo-user-id";
+    // Get user ID from authenticated user, fallback to demo for testing
+    const userId = user?.id || "demo-user-id";
 
     useEffect(() => {
-      loadProviders(userId);
-      loadAgents();
+      // Initialize auth state on app load
+      getCurrentUser();
+    }, [getCurrentUser]);
+
+    useEffect(() => {
+      // Load data when user changes
+      if (userId) {
+        loadProviders(userId);
+        loadAgents();
+      }
     }, [loadProviders, loadAgents, userId]);
 
     const handleDeleteProvider = async (id: string) => {
@@ -99,11 +111,14 @@ export const Route = createFileRoute("/")({
 
     return (
       <div className="container mx-auto py-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Project Wiz</h1>
-          <p className="text-muted-foreground">
-            AI Agent Management System - MVP Implementation
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Project Wiz</h1>
+            <p className="text-muted-foreground">
+              AI Agent Management System - MVP Implementation
+            </p>
+          </div>
+          <AuthButton />
         </div>
 
         <Tabs defaultValue="agents" className="space-y-6">

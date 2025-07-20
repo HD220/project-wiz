@@ -6,14 +6,14 @@
 
 ```yaml
 id: TASK-{NUMBER}
-title: {Concise Action Description}
-source_document: {Source document/issue/requirement}
+title: { Concise Action Description }
+source_document: { Source document/issue/requirement }
 priority: high|medium|low
-estimated_effort: {1-5 hours}
+estimated_effort: { 1-5 hours }
 dependencies: [list of prerequisite tasks]
 tech_stack: [specific technologies: React, Python, Go, etc.]
-domain_context: {feature/module/component area}
-project_type: {web|mobile|desktop|api|library|cli}
+domain_context: { feature/module/component area }
+project_type: { web|mobile|desktop|api|library|cli }
 ```
 
 ## Primary Goal
@@ -21,6 +21,7 @@ project_type: {web|mobile|desktop|api|library|cli}
 **Single sentence describing the main objective of this task**
 
 ### Success Criteria
+
 - [ ] Specific measurable outcome 1
 - [ ] Specific measurable outcome 2
 - [ ] All tests pass (if applicable)
@@ -30,6 +31,7 @@ project_type: {web|mobile|desktop|api|library|cli}
 ## Complete Context
 
 ### Project Architecture Context
+
 ```
 {PROJECT_ROOT}/
 ├── {source_code_dir}/           # Main source directory
@@ -45,46 +47,48 @@ project_type: {web|mobile|desktop|api|library|cli}
 ```
 
 ### Technology-Specific Context
+
 ```yaml
 # Fill in relevant sections based on project tech stack
 
 database:
-  type: {SQL|NoSQL|File-based|None}
-  orm_framework: {Prisma|Drizzle|TypeORM|Sequelize|SQLAlchemy|etc}
-  schema_location: {path/to/schema/files}
-  migration_command: {command to run migrations}
+  type: { SQL|NoSQL|File-based|None }
+  orm_framework: { Prisma|Drizzle|TypeORM|Sequelize|SQLAlchemy|etc }
+  schema_location: { path/to/schema/files }
+  migration_command: { command to run migrations }
 
 backend:
-  framework: {Express|FastAPI|Django|Gin|Spring|etc}
-  language: {TypeScript|Python|Go|Java|etc}
-  api_pattern: {REST|GraphQL|tRPC|gRPC}
-  auth_method: {JWT|Session|OAuth|etc}
+  framework: { Express|FastAPI|Django|Gin|Spring|etc }
+  language: { TypeScript|Python|Go|Java|etc }
+  api_pattern: { REST|GraphQL|tRPC|gRPC }
+  auth_method: { JWT|Session|OAuth|etc }
 
 frontend:
-  framework: {React|Vue|Angular|Svelte|etc}
-  state_management: {Redux|Zustand|Vuex|Context|etc}
-  routing: {React Router|Next.js|Vue Router|etc}
-  styling: {CSS|Tailwind|Styled Components|etc}
+  framework: { React|Vue|Angular|Svelte|etc }
+  state_management: { Redux|Zustand|Vuex|Context|etc }
+  routing: { React Router|Next.js|Vue Router|etc }
+  styling: { CSS|Tailwind|Styled Components|etc }
 
 testing:
-  unit_framework: {Jest|Vitest|pytest|Go test|etc}
-  integration_framework: {Cypress|Playwright|Supertest|etc}
-  test_command: {npm test|pytest|go test|etc}
+  unit_framework: { Jest|Vitest|pytest|Go test|etc }
+  integration_framework: { Cypress|Playwright|Supertest|etc }
+  test_command: { npm test|pytest|go test|etc }
 
 build_tools:
-  package_manager: {npm|yarn|pnpm|pip|go mod|cargo|etc}
-  bundler: {Webpack|Vite|Rollup|Parcel|etc}
-  linter: {ESLint|Pylint|golangci-lint|clippy|etc}
-  formatter: {Prettier|Black|gofmt|rustfmt|etc}
+  package_manager: { npm|yarn|pnpm|pip|go mod|cargo|etc }
+  bundler: { Webpack|Vite|Rollup|Parcel|etc }
+  linter: { ESLint|Pylint|golangci-lint|clippy|etc }
+  formatter: { Prettier|Black|gofmt|rustfmt|etc }
 ```
 
 ### Existing Code Patterns
+
 ```{language}
 // Pattern 1: {Pattern Name - e.g., Service Layer, Repository, Factory}
 // Example: Service class with static methods and error handling
 // Follow: class {Entity}Service { static async method() { ... } }
 
-// Pattern 2: {Pattern Name - e.g., Error Handling, Data Validation, API Response}  
+// Pattern 2: {Pattern Name - e.g., Error Handling, Data Validation, API Response}
 // Example: Standard IPC response format with try/catch in handlers
 // Follow: { success: boolean, data?: T, error?: string }
 
@@ -96,31 +100,33 @@ build_tools:
 ```
 
 ### Project-Specific Conventions
+
 ```yaml
 naming_conventions:
-  files: {kebab-case|camelCase|PascalCase|snake_case}
-  variables: {camelCase|snake_case}
-  constants: {SCREAMING_SNAKE_CASE|camelCase}
-  classes: {PascalCase|snake_case}
-  functions: {camelCase|snake_case}
+  files: { kebab-case|camelCase|PascalCase|snake_case }
+  variables: { camelCase|snake_case }
+  constants: { SCREAMING_SNAKE_CASE|camelCase }
+  classes: { PascalCase|snake_case }
+  functions: { camelCase|snake_case }
 
 import_organization:
-  - {external libraries first}
-  - {internal shared modules}
-  - {relative imports last}
-  - {use absolute imports when: always|never|for shared modules}
+  - { external libraries first }
+  - { internal shared modules }
+  - { relative imports last }
+  - { use absolute imports when: always|never|for shared modules }
 
 code_organization:
-  - {single responsibility per file}
-  - {co-locate related files}
-  - {separate concerns by: feature|layer|type}
+  - { single responsibility per file }
+  - { co-locate related files }
+  - { separate concerns by: feature|layer|type }
 
 error_handling:
-  pattern: {exceptions|error objects|result types}
-  logging: {console|structured logging|external service}
+  pattern: { exceptions|error objects|result types }
+  logging: { console|structured logging|external service }
 ```
 
 ### Validation Commands
+
 ```bash
 # Customize these commands based on your project's setup
 {build_command}          # e.g., npm run build, cargo build, go build
@@ -138,6 +144,7 @@ error_handling:
 > Customize these phases based on your project's architecture and requirements
 
 ### Phase 1: Data Layer (if applicable)
+
 ```
 READ {existing_data_files}:
   - UNDERSTAND: Current data structure and relationships
@@ -154,7 +161,7 @@ CREATE/UPDATE {path_to_data_schema}:
       - SQL: Follow existing table structure patterns
       - NoSQL: Use consistent document schemas
       - ORM: Apply existing entity relationship patterns
-  
+
   - VALIDATE: {schema_validation_command}
   - IF_FAIL: Check syntax and existing data conflicts
 
@@ -165,6 +172,7 @@ MIGRATE_DATA (if applicable):
 ```
 
 ### Phase 2: Core Logic Layer
+
 ```
 CREATE {path_to_core_file}:
   - FOLLOW_PATTERN: {path_to_similar_implementation}
@@ -177,13 +185,14 @@ CREATE {path_to_core_file}:
       - API endpoints: Use consistent route handler patterns
       - Data access: Apply repository/data access patterns
       - Business rules: Follow domain logic organization
-  
+
   - FOLLOW: Project naming conventions and patterns
   - VALIDATE: {type_check_command}
   - IF_FAIL: Check imports, dependencies, and type definitions
 ```
 
 ### Phase 3: Integration Layer (if applicable)
+
 ```
 CREATE {path_to_integration_file}:
   - DESIGN_INTEGRATION:
@@ -195,7 +204,7 @@ CREATE {path_to_integration_file}:
       - Event handlers: Use project's event handling patterns
       - External services: Follow established client setup patterns
       - Dependency injection: Use project's registration patterns
-  
+
   - VALIDATE: {integration_test_command}
   - IF_FAIL: Check configuration and connection setup
 
@@ -206,6 +215,7 @@ UPDATE {main_application_file}:
 ```
 
 ### Phase 4: User Interface Layer (if applicable)
+
 ```
 CREATE {path_to_ui_component}:
   - FOLLOW_PATTERN: {path_to_similar_component}
@@ -218,7 +228,7 @@ CREATE {path_to_ui_component}:
       - Forms: Use project's form validation and submission patterns
       - State: Apply consistent state management approaches
       - Styling: Follow project's CSS/styling methodology
-  
+
   - FOLLOW: Component architecture patterns
   - VALIDATE: {ui_build_command}
 
@@ -227,7 +237,7 @@ CREATE {path_to_state_management}:
     • Follow project's state management patterns and structure
     • Use established data flow and update patterns
     • Apply consistent action/mutation patterns if applicable
-  
+
   - VALIDATE: {type_check_command}
 
 UPDATE {routing_configuration}:
@@ -236,6 +246,7 @@ UPDATE {routing_configuration}:
 ```
 
 ### Phase 5: Testing Layer
+
 ```
 CREATE {path_to_unit_tests}:
   - DESIGN_TESTS:
@@ -247,7 +258,7 @@ CREATE {path_to_unit_tests}:
       - Assertions: Use project's preferred assertion library
       - Mocking: Follow established mock patterns for dependencies
       - Coverage: Target core functionality, edge cases, error scenarios
-  
+
   - VALIDATE: {unit_test_command}
   - EXPECT: All tests pass
 
@@ -256,7 +267,7 @@ CREATE {path_to_integration_tests} (if needed):
     • Test component interactions using project patterns
     • Follow established integration test setup and teardown
     • Use project's preferred integration testing approaches
-  
+
   - VALIDATE: {integration_test_command}
   - EXPECT: All tests pass
 
@@ -265,7 +276,7 @@ CREATE {path_to_e2e_tests} (if needed):
     • Follow project's end-to-end testing patterns
     • Use established user workflow testing approaches
     • Apply consistent page object or testing utility patterns
-  
+
   - VALIDATE: {e2e_test_command}
   - EXPECT: All scenarios pass
 ```
@@ -273,6 +284,7 @@ CREATE {path_to_e2e_tests} (if needed):
 ## Validation Checkpoints
 
 ### Checkpoint 1: Data Layer
+
 ```
 VALIDATE_DATA_LAYER:
   - RUN: {schema_validation_command}
@@ -283,6 +295,7 @@ VALIDATE_DATA_LAYER:
 ```
 
 ### Checkpoint 2: Core Logic
+
 ```
 VALIDATE_CORE_LOGIC:
   - RUN: {type_check_command}
@@ -293,6 +306,7 @@ VALIDATE_CORE_LOGIC:
 ```
 
 ### Checkpoint 3: Integration
+
 ```
 VALIDATE_INTEGRATION:
   - RUN: {build_command}
@@ -303,6 +317,7 @@ VALIDATE_INTEGRATION:
 ```
 
 ### Checkpoint 4: User Interface (if applicable)
+
 ```
 VALIDATE_UI:
   - RUN: {ui_build_command}
@@ -313,6 +328,7 @@ VALIDATE_UI:
 ```
 
 ### Checkpoint 5: End-to-End
+
 ```
 VALIDATE_E2E:
   - RUN: {quality_check_cmd}
@@ -325,6 +341,7 @@ VALIDATE_E2E:
 ## Use Cases & Examples
 
 ### Example Data/Input
+
 ```{language}
 // Example input data structure (simplified for pattern reference)
 const example{Entity}Input = {
@@ -342,17 +359,20 @@ const expected{Entity}Output = {
 ```
 
 ### Common Scenarios
+
 1. **{Primary Use Case}**: {Description of main functionality}
 2. **{Secondary Use Case}**: {Description of important alternative flow}
 3. **{Edge Use Case}**: {Description of boundary condition}
 4. **{Error Use Case}**: {Description of error handling scenario}
 
 ### Business Rules & Constraints
+
 - **{Rule 1}**: {Description of business logic constraint}
 - **{Rule 2}**: {Description of validation requirement}
 - **{Rule 3}**: {Description of workflow constraint}
 
 ### Edge Cases & Error Scenarios
+
 - **Invalid Input**: {Specific validation errors and responses}
 - **Resource Conflicts**: {Concurrent access, uniqueness violations}
 - **External Dependencies**: {Network failures, service unavailability}
@@ -363,9 +383,10 @@ const expected{Entity}Output = {
 ### Common Issues by Technology
 
 #### Build/Compilation Issues
+
 ```
 PROBLEM: Build fails with {common_error_pattern}
-SOLUTION: 
+SOLUTION:
   - Check for {specific_check_1}
   - Verify {specific_check_2}
   - Ensure {specific_check_3}
@@ -378,6 +399,7 @@ SOLUTION:
 ```
 
 #### Runtime Issues
+
 ```
 PROBLEM: Application fails to start
 SOLUTION:
@@ -393,6 +415,7 @@ SOLUTION:
 ```
 
 #### Integration Issues
+
 ```
 PROBLEM: External service integration fails
 SOLUTION:
@@ -408,6 +431,7 @@ SOLUTION:
 ```
 
 ### Debug Commands
+
 ```bash
 # Language/Framework specific debugging
 {debug_command_1}        # e.g., verbose logging, debug mode
@@ -423,16 +447,19 @@ SOLUTION:
 ## Dependencies & Prerequisites
 
 ### Required Files/Components
+
 - [ ] {Essential file 1}: `{path/to/file1}`
 - [ ] {Essential file 2}: `{path/to/file2}`
 - [ ] {Configuration file}: `{path/to/config}`
 
 ### Required Patterns/Conventions
+
 - [ ] {Pattern 1}: {Description of required pattern}
 - [ ] {Pattern 2}: {Description of architectural constraint}
 - [ ] {Pattern 3}: {Description of coding standard}
 
 ### Environment Setup
+
 - [ ] {Environment requirement 1}
 - [ ] {Environment requirement 2}
 - [ ] {Development tool requirement}
@@ -443,7 +470,7 @@ SOLUTION:
 ## Task Completion Checklist
 
 - [ ] All implementation phases completed according to plan
-- [ ] All validation checkpoints passed successfully  
+- [ ] All validation checkpoints passed successfully
 - [ ] Edge cases and error scenarios tested and handled
 - [ ] Code follows established project conventions and patterns
 - [ ] Tests written and passing (unit, integration, e2e as applicable)
@@ -470,29 +497,32 @@ SOLUTION:
 
 ### Placeholder Reference
 
-| Placeholder | Description | Example |
-|-------------|-------------|---------|
-| `{language}` | Programming language | typescript, python, go, java |
-| `{framework}` | Main framework | React, FastAPI, Spring Boot |
-| `{entity}` | Main entity/feature name | User, Product, Order |
-| `{command}` | Shell command | npm run test, python manage.py test |
-| `{path}` | File or directory path | src/components, api/routes |
+| Placeholder   | Description              | Example                             |
+| ------------- | ------------------------ | ----------------------------------- |
+| `{language}`  | Programming language     | typescript, python, go, java        |
+| `{framework}` | Main framework           | React, FastAPI, Spring Boot         |
+| `{entity}`    | Main entity/feature name | User, Product, Order                |
+| `{command}`   | Shell command            | npm run test, python manage.py test |
+| `{path}`      | File or directory path   | src/components, api/routes          |
 
 ### Adaptation Examples
 
 **For a Python Django API task:**
+
 - `{language}` → `python`
 - `{build_command}` → `python manage.py check`
 - `{test_command}` → `pytest`
 - `{lint_command}` → `flake8 . && black --check .`
 
 **For a Go microservice task:**
+
 - `{language}` → `go`
 - `{build_command}` → `go build ./...`
 - `{test_command}` → `go test ./...`
 - `{lint_command}` → `golangci-lint run`
 
 **For a React frontend task:**
+
 - `{language}` → `typescript`
 - `{build_command}` → `npm run build`
 - `{test_command}` → `npm test`

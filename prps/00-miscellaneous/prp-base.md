@@ -140,7 +140,7 @@ describe('NewFeature', () => {
   test('calls API with correct parameters', async () => {
     const mockFetch = jest.fn()
     global.fetch = mockFetch
-    
+
     render(<NewFeature />)
     // ... test API interaction
   })

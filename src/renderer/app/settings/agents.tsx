@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 // TODO: Replace with actual user ID from auth context
-const CURRENT_USER_ID = "current-user";
+const CURRENT_USER_ID = "demo-user-id";
 
 export default function AgentsPage() {
   return (

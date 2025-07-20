@@ -19,12 +19,15 @@ ${ARGUMENTS}
 ## Workflow Steps
 
 ### 1. Initial Analysis
+
 - Analyze the feature request in detail
 - Identify key requirements and constraints
 - Determine scope and complexity
 
 ### 2. Research Phase
+
 **Deep Codebase Analysis:**
+
 - Search for similar features/patterns in the codebase
 - Identify all necessary files to reference
 - Note existing conventions and patterns
@@ -32,13 +35,16 @@ ${ARGUMENTS}
 - Use TodoWrite to track research findings
 
 **External Research:**
+
 - Search for library documentation (include specific URLs)
 - Find implementation examples (GitHub/StackOverflow/blogs)
 - Identify best practices and common pitfalls
-- ALWAYS Ddocument what you discovered online in research that relates to the implementations `prps/00-miscellaneous/ai-docs/` in an organized way in different files with clear names 
+- ALWAYS Ddocument what you discovered online in research that relates to the implementations `prps/00-miscellaneous/ai-docs/` in an organized way in different files with clear names
 
 ### 3. Context Gathering
+
 Collect and organize:
+
 - **Documentation URLs** with specific sections
 - **Code Examples** from the codebase
 - **Gotchas** and library quirks
@@ -52,14 +58,16 @@ Using @prps/00-miscellaneous/prp-base.md as template:
 [ULTRA-THINKING]
 
 **Required Sections:**
+
 - Goal: Specific end state
 - Why: Business value and impact
 - What: User-visible behavior and technical requirements
 - All Needed Context: Comprehensive documentation and examples
-- Implementation Blueprint: Detailed pseudocode 
+- Implementation Blueprint: Detailed pseudocode
 - Validation Loop: Executable validation commands
 
 **Critical Context to Include:**
+
 - Documentation URLs with specific sections
 - Real code snippets from codebase
 - Library quirks and version issues
@@ -67,7 +75,9 @@ Using @prps/00-miscellaneous/prp-base.md as template:
 - Common pitfalls found during research
 
 ### 5. Validation Gates Design
+
 Create executable validation commands:
+
 ```bash
 # Syntax/Style
 ruff check --fix && mypy .
@@ -83,7 +93,9 @@ uv run pytest tests/ -v
 ```
 
 ### 6. Quality Assurance
+
 **Quality Checklist:**
+
 - [ ] All necessary context included
 - [ ] Validation gates are executable
 - [ ] References existing patterns
@@ -94,14 +106,15 @@ uv run pytest tests/ -v
 **Score the PRP** on a scale of 1-10 for confidence in one-pass implementation success.
 
 ### 7. Output
+
 Save as: `prps/{feature-name}/README.md`
 
-
 ## Success Criteria
+
 - PRP contains comprehensive context for one-pass implementation
 - Validation gates are executable by AI agents
 - References existing codebase patterns
 - Includes error handling and edge cases
 - Scores 8+ on confidence scale
 
-Remember: **The goal is one-pass implementation success through comprehensive context.** 
+Remember: **The goal is one-pass implementation success through comprehensive context.**

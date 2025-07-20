@@ -14,11 +14,11 @@ To use Node.js features in Electron's Web Workers:
 // In main.ts - BrowserWindow configuration
 mainWindow = new BrowserWindow({
   webPreferences: {
-    nodeIntegrationInWorker: true,  // CRITICAL: Enable Node.js in workers
-    nodeIntegration: false,         // Keep false for security
-    contextIsolation: true,         // Keep true for security
-    sandbox: false                  // Must be false for nodeIntegrationInWorker
-  }
+    nodeIntegrationInWorker: true, // CRITICAL: Enable Node.js in workers
+    nodeIntegration: false, // Keep false for security
+    contextIsolation: true, // Keep true for security
+    sandbox: false, // Must be false for nodeIntegrationInWorker
+  },
 });
 ```
 
@@ -36,6 +36,7 @@ mainWindow = new BrowserWindow({
 > "In practice, use a pool of Workers for these kinds of tasks. Otherwise, the overhead of creating Workers would likely exceed their benefit."
 
 Creating workers has significant overhead. A pool allows:
+
 - Reusable workers for multiple tasks
 - Capped maximum workers (typically CPU count - 1)
 - Queue management for incoming tasks
@@ -45,13 +46,14 @@ Creating workers has significant overhead. A pool allows:
 
 ```typescript
 // worker-pool.ts
-import { Worker } from 'worker_threads';
-import { cpus } from 'os';
+import { Worker } from "worker_threads";
+import { cpus } from "os";
 
 export class WorkerPool {
   private workers: Worker[] = [];
   private idleWorkers: Worker[] = [];
-  private taskQueue: Array<{task: any, resolve: Function, reject: Function}> = [];
+  private taskQueue: Array<{ task: any; resolve: Function; reject: Function }> =
+    [];
   private maxWorkers: number;
 
   constructor(workerScript: string, maxWorkers?: number) {
@@ -62,17 +64,17 @@ export class WorkerPool {
   private initializeWorkers(workerScript: string) {
     for (let i = 0; i < this.maxWorkers; i++) {
       const worker = new Worker(workerScript);
-      
-      worker.on('message', (result) => {
+
+      worker.on("message", (result) => {
         // Mark worker as idle and process next task
         this.idleWorkers.push(worker);
         this.processNextTask();
       });
-      
-      worker.on('error', (error) => {
-        console.error('Worker error:', error);
+
+      worker.on("error", (error) => {
+        console.error("Worker error:", error);
       });
-      
+
       this.workers.push(worker);
       this.idleWorkers.push(worker);
     }
@@ -93,13 +95,13 @@ export class WorkerPool {
     const worker = this.idleWorkers.pop()!;
     const { task, resolve, reject } = this.taskQueue.shift()!;
 
-    worker.once('message', (result) => {
+    worker.once("message", (result) => {
       this.idleWorkers.push(worker);
       resolve(result);
       this.processNextTask();
     });
 
-    worker.once('error', (error) => {
+    worker.once("error", (error) => {
       this.idleWorkers.push(worker);
       reject(error);
       this.processNextTask();
@@ -115,39 +117,42 @@ export class WorkerPool {
 Instead of implementing your own pool, consider battle-tested libraries:
 
 ### 1. **Piscina** (Recommended)
+
 ```bash
 npm install piscina
 ```
 
 ```typescript
-import Piscina from 'piscina';
+import Piscina from "piscina";
 
 const pool = new Piscina({
-  filename: path.resolve(__dirname, 'worker.js'),
+  filename: path.resolve(__dirname, "worker.js"),
   maxThreads: 4,
   idleTimeout: 30000,
 });
 
-const result = await pool.run({ task: 'process-code' });
+const result = await pool.run({ task: "process-code" });
 ```
 
 ### 2. **Workerpool**
+
 ```bash
 npm install workerpool
 ```
 
 ```typescript
-import workerpool from 'workerpool';
+import workerpool from "workerpool";
 
-const pool = workerpool.pool('./worker.js', {
+const pool = workerpool.pool("./worker.js", {
   minWorkers: 2,
   maxWorkers: 4,
 });
 
-const result = await pool.exec('processTask', [taskData]);
+const result = await pool.exec("processTask", [taskData]);
 ```
 
 ### 3. **Poolifier**
+
 ```bash
 npm install poolifier
 ```
@@ -158,34 +163,34 @@ npm install poolifier
 
 ```typescript
 // agent.worker.ts
-import { parentPort, workerData } from 'worker_threads';
+import { parentPort, workerData } from "worker_threads";
 
 interface WorkerMessage {
-  type: 'PROCESS_TASK' | 'SHUTDOWN';
+  type: "PROCESS_TASK" | "SHUTDOWN";
   taskId: string;
   data: any;
 }
 
 if (parentPort) {
-  parentPort.on('message', async (message: WorkerMessage) => {
+  parentPort.on("message", async (message: WorkerMessage) => {
     try {
       switch (message.type) {
-        case 'PROCESS_TASK':
+        case "PROCESS_TASK":
           const result = await processTask(message.data);
           parentPort.postMessage({
-            type: 'TASK_COMPLETE',
+            type: "TASK_COMPLETE",
             taskId: message.taskId,
             result,
           });
           break;
-          
-        case 'SHUTDOWN':
+
+        case "SHUTDOWN":
           process.exit(0);
           break;
       }
     } catch (error) {
       parentPort.postMessage({
-        type: 'TASK_ERROR',
+        type: "TASK_ERROR",
         taskId: message.taskId,
         error: error.message,
       });
@@ -205,7 +210,7 @@ async function processTask(data: any) {
 // tsconfig.json adjustments
 {
   "compilerOptions": {
-    "module": "commonjs",  // Important for worker compatibility
+    "module": "commonjs", // Important for worker compatibility
     "esModuleInterop": true,
     "preserveConstEnums": true
   }
@@ -220,18 +225,18 @@ In Electron, workers can be launched from preload scripts:
 
 ```typescript
 // preload.ts
-import { Worker } from 'worker_threads';
+import { Worker } from "worker_threads";
 
-const worker = new Worker('./worker.js');
+const worker = new Worker("./worker.js");
 
-contextBridge.exposeInMainWorld('workerAPI', {
+contextBridge.exposeInMainWorld("workerAPI", {
   runTask: (data: any) => {
     return new Promise((resolve, reject) => {
       worker.postMessage(data);
-      worker.once('message', resolve);
-      worker.once('error', reject);
+      worker.once("message", resolve);
+      worker.once("error", reject);
     });
-  }
+  },
 });
 ```
 
@@ -241,16 +246,16 @@ For Project Wiz, use IPC to coordinate between main process and workers:
 
 ```typescript
 // main process
-ipcMain.handle('agent:process-task', async (event, taskData) => {
+ipcMain.handle("agent:process-task", async (event, taskData) => {
   const result = await workerPool.execute(taskData);
   return { success: true, data: result };
 });
 
 // worker thread
-parentPort.on('message', async (task) => {
+parentPort.on("message", async (task) => {
   // Process task
   const result = await processWithAI(task);
-  
+
   // Send result back to main process via IPC
   parentPort.postMessage(result);
 });
@@ -261,11 +266,13 @@ parentPort.on('message', async (task) => {
 ### 1. When to Use Worker Threads
 
 **Use Workers for:**
+
 - CPU-intensive tasks (code parsing, analysis)
 - Long-running AI model inference
 - Blocking operations that would freeze UI
 
 **Don't Use Workers for:**
+
 - I/O operations (use async Node.js APIs)
 - Simple async tasks (use Promises)
 - Short-lived operations (overhead exceeds benefit)
@@ -277,12 +284,12 @@ class ManagedWorkerPool {
   async shutdown() {
     // Gracefully shutdown all workers
     await Promise.all(
-      this.workers.map(worker => {
-        return new Promise(resolve => {
-          worker.postMessage({ type: 'SHUTDOWN' });
-          worker.once('exit', resolve);
+      this.workers.map((worker) => {
+        return new Promise((resolve) => {
+          worker.postMessage({ type: "SHUTDOWN" });
+          worker.once("exit", resolve);
         });
-      })
+      }),
     );
   }
 }
@@ -291,19 +298,18 @@ class ManagedWorkerPool {
 ### 3. Error Handling
 
 ```typescript
-worker.on('error', (error) => {
-  logger.error('Worker thread error:', error);
+worker.on("error", (error) => {
+  logger.error("Worker thread error:", error);
   // Restart worker or handle gracefully
 });
 
-worker.on('exit', (code) => {
+worker.on("exit", (code) => {
   if (code !== 0) {
     logger.error(`Worker stopped with exit code ${code}`);
     // Replace worker in pool
   }
 });
 ```
-
 
 ## Performance Considerations
 

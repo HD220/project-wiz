@@ -14,6 +14,7 @@ Implementar o sistema central de agentes humanizados do Project Wiz, criando "pe
 ## What
 
 ### Core Functionality
+
 - **Agentes como Pessoas Virtuais**: Entidades com identidade, personalidade, backstory e objetivos próprios
 - **Sistema de Contratação Inteligente**: Assistente pessoal analisa necessidades e contrata especialistas
 - **Auto-gestão de Tarefas**: Agentes criam e gerenciam suas próprias filas de trabalho
@@ -21,6 +22,7 @@ Implementar o sistema central de agentes humanizados do Project Wiz, criando "pe
 - **Memória Persistente**: Contexto de longo prazo e aprendizado contínuo
 
 ### Success Criteria
+
 - [ ] Assistente pessoal analisa projetos e sugere contratação de agentes especializados
 - [ ] Sistema gera 3 candidatos com personas únicas para seleção
 - [ ] Agentes conversam naturalmente e criam suas próprias tarefas
@@ -39,7 +41,7 @@ Implementar o sistema central de agentes humanizados do Project Wiz, criando "pe
   why: Primary library for LLM integration, generateText for Electron main process
   critical: Use generateText instead of streamText in Electron to avoid IPC complexity
 
-- url: https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling  
+- url: https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling
   why: Agent tool calling capabilities for performing actions
   critical: Tool system is core to agent autonomy
 
@@ -128,8 +130,8 @@ src/main/
 ```typescript
 // CRITICAL: AI SDK in Electron main process
 // Use generateText, NOT streamText - streaming across IPC is complex
-import { generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 // CRITICAL: Users table already supports agents
 // usersTable.type: "human" | "agent" - reuse existing infrastructure
@@ -168,44 +170,74 @@ export interface IpcResponse<T = any> {
 export type ProviderType = "openai" | "deepseek" | "anthropic" | "mistral";
 
 export const llmProvidersTable = sqliteTable("llm_providers", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").notNull().references(() => usersTable.id),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id),
   name: text("name").notNull(), // User-defined name
   type: text("type").$type<ProviderType>().notNull(),
   apiKey: text("api_key").notNull(), // Encrypted API key
   baseUrl: text("base_url"), // For custom endpoints
-  isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+  isDefault: integer("is_default", { mode: "boolean" })
+    .notNull()
+    .default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
 // agents.schema.ts - Core agent data
 export type AgentStatus = "available" | "busy" | "absent" | "offline";
 
 export const agentsTable = sqliteTable("agents", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").notNull().references(() => usersTable.id), // Links to users table
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id), // Links to users table
   name: text("name").notNull(), // Human-readable name
   role: text("role").notNull(), // "Personal Assistant", "Frontend Developer", etc.
   backstory: text("backstory").notNull(), // Rich background story
   goal: text("goal").notNull(), // Current goal
   status: text("status").$type<AgentStatus>().notNull().default("available"),
   modelConfig: text("model_config").notNull(), // JSON: model, temperature, etc.
-  providerId: text("provider_id").notNull().references(() => llmProvidersTable.id), // LLM provider to use
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  providerId: text("provider_id")
+    .notNull()
+    .references(() => llmProvidersTable.id), // LLM provider to use
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
 // memory.schema.ts - Agent memory system
 export const agentMemoriesTable = sqliteTable("agent_memories", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  agentId: text("agent_id").notNull().references(() => agentsTable.id),
-  type: text("type").$type<"conversation" | "learning" | "goal" | "context">().notNull(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  agentId: text("agent_id")
+    .notNull()
+    .references(() => agentsTable.id),
+  type: text("type")
+    .$type<"conversation" | "learning" | "goal" | "context">()
+    .notNull(),
   content: text("content").notNull(),
   importance: integer("importance").notNull().default(1), // 1-10 scale
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
 // tasks.schema.ts - Agent task queue
@@ -213,8 +245,12 @@ export type TaskStatus = "pending" | "processing" | "completed" | "failed";
 export type TaskPriority = 1 | 2 | 3 | 4 | 5; // 5 = highest
 
 export const agentTasksTable = sqliteTable("agent_tasks", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  agentId: text("agent_id").notNull().references(() => agentsTable.id),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  agentId: text("agent_id")
+    .notNull()
+    .references(() => agentsTable.id),
   data: text("data").notNull(), // JSON task payload
   priority: integer("priority").$type<TaskPriority>().notNull().default(1),
   status: text("status").$type<TaskStatus>().notNull().default("pending"),
@@ -222,10 +258,14 @@ export const agentTasksTable = sqliteTable("agent_tasks", {
   result: text("result"), // JSON result after completion
   error: text("error"), // Error message if failed
   retries: integer("retries").notNull().default(0),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
-  startedAt: integer("started_at", { mode: "timestamp"}),
-  completedAt: integer("completed_at", { mode: "timestamp"}),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  startedAt: integer("started_at", { mode: "timestamp" }),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 ```
 
@@ -334,8 +374,12 @@ IMPLEMENT default personal assistant:
 ```typescript
 // Task 1: providers.schema.ts
 export const llmProvidersTable = sqliteTable("llm_providers", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").notNull().references(() => usersTable.id),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id),
   name: text("name").notNull(),
   type: text("type").$type<ProviderType>().notNull(),
   apiKey: text("api_key").notNull(), // Encrypted
@@ -347,8 +391,12 @@ export type InsertLlmProvider = typeof llmProvidersTable.$inferInsert;
 
 // Task 2: agents.schema.ts
 export const agentsTable = sqliteTable("agents", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").notNull().references(() => usersTable.id),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id),
   name: text("name").notNull(),
   role: text("role").notNull(),
   backstory: text("backstory").notNull(),
@@ -363,25 +411,33 @@ export type UpdateAgent = Partial<InsertAgent> & { id: string };
 export class ProviderService {
   static async create(input: CreateProviderInput): Promise<SelectLlmProvider> {
     const db = getDatabase();
-    
+
     // PATTERN: Encrypt API key before storage
     const encryptedApiKey = await this.encryptApiKey(input.apiKey);
-    
-    const [provider] = await db.insert(llmProvidersTable).values({
-      ...input,
-      apiKey: encryptedApiKey,
-    }).returning();
-    
+
+    const [provider] = await db
+      .insert(llmProvidersTable)
+      .values({
+        ...input,
+        apiKey: encryptedApiKey,
+      })
+      .returning();
+
     return provider;
   }
-  
-  static async getDecryptedProvider(providerId: string): Promise<DecryptedProvider> {
+
+  static async getDecryptedProvider(
+    providerId: string,
+  ): Promise<DecryptedProvider> {
     const db = getDatabase();
-    const [provider] = await db.select().from(llmProvidersTable)
-      .where(eq(llmProvidersTable.id, providerId)).limit(1);
-    
+    const [provider] = await db
+      .select()
+      .from(llmProvidersTable)
+      .where(eq(llmProvidersTable.id, providerId))
+      .limit(1);
+
     if (!provider) throw new Error("Provider not found");
-    
+
     // PATTERN: Decrypt API key for use
     const decryptedApiKey = await this.decryptApiKey(provider.apiKey);
     return { ...provider, apiKey: decryptedApiKey };
@@ -392,56 +448,65 @@ export class ProviderService {
 export class AgentService {
   static async create(input: CreateAgentInput): Promise<SelectAgent> {
     const db = getDatabase();
-    
+
     // PATTERN: First create user entry (agents are users with type="agent")
-    const [user] = await db.insert(usersTable).values({
-      name: input.name,
-      avatar: input.avatar,
-      type: "agent",
-    }).returning();
-    
+    const [user] = await db
+      .insert(usersTable)
+      .values({
+        name: input.name,
+        avatar: input.avatar,
+        type: "agent",
+      })
+      .returning();
+
     // PATTERN: Then create agent-specific data
-    const [agent] = await db.insert(agentsTable).values({
-      userId: user.id,
-      ...input,
-    }).returning();
-    
+    const [agent] = await db
+      .insert(agentsTable)
+      .values({
+        userId: user.id,
+        ...input,
+      })
+      .returning();
+
     return agent; // Return data directly, handler will wrap in IpcResponse
   }
-  
+
   static async findByUserId(userId: string): Promise<SelectAgent | null> {
     const db = getDatabase();
-    
+
     const [agent] = await db
       .select()
       .from(agentsTable)
       .where(eq(agentsTable.userId, userId))
       .limit(1);
-    
+
     return agent || null;
   }
 }
 
-// Task 6: agent-worker.ts  
+// Task 6: agent-worker.ts
 export class AgentWorker {
   private model: any;
   private tools: Record<string, Tool>;
-  
-  constructor(private agent: SelectAgent, private provider: DecryptedProvider) {
+
+  constructor(
+    private agent: SelectAgent,
+    private provider: DecryptedProvider,
+  ) {
     // PATTERN: Use AI SDK with user's provider credentials
     this.model = this.createModelFromProvider(provider);
     this.tools = createAgentTools(agent.id);
   }
-  
+
   private createModelFromProvider(provider: DecryptedProvider) {
     switch (provider.type) {
-      case 'openai':
-        return openai(provider.model || 'gpt-4o-mini', {
+      case "openai":
+        return openai(provider.model || "gpt-4o-mini", {
           apiKey: provider.apiKey,
           baseURL: provider.baseUrl,
         });
-      case 'deepseek':
-        return deepseek(provider.model || 'deepseek-chat', {
+      case "deepseek":
+        return deepseek(provider.model || "deepseek-chat", {
           apiKey: provider.apiKey,
           baseURL: provider.baseUrl,
         });
@@ -449,12 +514,12 @@ export class AgentWorker {
         throw new Error(`Unsupported provider: ${provider.type}`);
     }
   }
-  
+
   async processTask(task: SelectAgentTask): Promise<any> {
     // PATTERN: Get agent context and memories
     const memories = await MemoryService.getRecentMemories(this.agent.id);
     const context = this.buildContext(memories, task);
-    
+
     // PATTERN: Use generateText with tools
     const { text, toolCalls } = await generateText({
       model: this.model,
@@ -464,9 +529,9 @@ export class AgentWorker {
       temperature: 0.7,
       maxTokens: 2000,
     });
-    
+
     // PATTERN: Store result and update memory
-    await MemoryService.store(this.agent.id, 'conversation', text);
+    await MemoryService.store(this.agent.id, "conversation", text);
     return { response: text, toolCalls };
   }
 }
@@ -482,12 +547,13 @@ export function setupAgentHandlers(): void {
       } catch (error) {
         return {
           success: false,
-          error: error instanceof Error ? error.message : "Failed to create agent",
+          error:
+            error instanceof Error ? error.message : "Failed to create agent",
         };
       }
-    }
+    },
   );
-  
+
   // PATTERN: Follow same structure for all handlers
   ipcMain.handle("agent:chat", async (_, agentId: string, message: string) => {
     // Implementation follows same try/catch pattern
@@ -531,7 +597,7 @@ AI_SDK:
 ```bash
 # Run these FIRST - fix any errors before proceeding
 npm run lint                    # ESLint checks
-npm run type-check              # TypeScript type checking  
+npm run type-check              # TypeScript type checking
 npm run format                  # Prettier formatting
 
 # Expected: No errors. Common agent-specific issues:
@@ -544,52 +610,54 @@ npm run format                  # Prettier formatting
 
 ```typescript
 // CREATE src/main/agents/__tests__/agent.service.test.ts
-import { AgentService } from '../agent.service';
-import { getDatabase } from '@/main/database/connection';
+import { AgentService } from "../agent.service";
+import { getDatabase } from "@/main/database/connection";
 
-describe('AgentService', () => {
+describe("AgentService", () => {
   beforeEach(async () => {
     // Setup test database
     const db = getDatabase();
     await db.delete(agentsTable);
     await db.delete(usersTable);
   });
-  
-  test('creates agent with user entry', async () => {
+
+  test("creates agent with user entry", async () => {
     // First create a provider
     const providerInput: CreateProviderInput = {
-      userId: 'test-user-id',
-      name: 'My OpenAI',
-      type: 'openai',
-      apiKey: 'test-api-key',
+      userId: "test-user-id",
+      name: "My OpenAI",
+      type: "openai",
+      apiKey: "test-api-key",
       isDefault: true,
     };
     const provider = await ProviderService.create(providerInput);
-    
+
     const input: CreateAgentInput = {
-      name: 'Test Agent',
-      role: 'Developer',
-      backstory: 'A helpful coding assistant',
-      goal: 'Write clean code',
-      modelConfig: JSON.stringify({ model: 'gpt-4o-mini', temperature: 0.7 }),
+      name: "Test Agent",
+      role: "Developer",
+      backstory: "A helpful coding assistant",
+      goal: "Write clean code",
+      modelConfig: JSON.stringify({ model: "gpt-4o-mini", temperature: 0.7 }),
       providerId: provider.id,
     };
-    
+
     const agent = await AgentService.create(input);
-    
-    expect(agent.name).toBe('Test Agent');
+
+    expect(agent.name).toBe("Test Agent");
     expect(agent.userId).toBeDefined();
-    
+
     // Verify user was created
-    const user = await db.select().from(usersTable).where(eq(usersTable.id, agent.userId));
-    expect(user[0].type).toBe('agent');
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, agent.userId));
+    expect(user[0].type).toBe("agent");
   });
-  
-  test('handles invalid agent creation gracefully', async () => {
-    const invalidInput = { name: '' }; // Missing required fields
-    
-    await expect(AgentService.create(invalidInput as any))
-      .rejects.toThrow();
+
+  test("handles invalid agent creation gracefully", async () => {
+    const invalidInput = { name: "" }; // Missing required fields
+
+    await expect(AgentService.create(invalidInput as any)).rejects.toThrow();
   });
 });
 
@@ -621,7 +689,7 @@ ipcRenderer.invoke('provider:create', {
   // Then create agent with provider
   return ipcRenderer.invoke('agent:create', {
     name: 'Test Developer',
-    role: 'Frontend Developer', 
+    role: 'Frontend Developer',
     backstory: 'Expert in React and TypeScript',
     goal: 'Build user interfaces',
     modelConfig: '{\"model\": \"gpt-4o-mini\", \"temperature\": 0.7}',
@@ -632,10 +700,10 @@ ipcRenderer.invoke('provider:create', {
 
 # Expected: { success: true, data: { id: "...", name: "Test Developer", ... } }
 
-# Test agent task processing  
+# Test agent task processing
 node -e "
 const { TaskQueueService } = require('./src/main/agents/task-queue.service');
-TaskQueueService.enqueue(agentId, 'send_message', { 
+TaskQueueService.enqueue(agentId, 'send_message', {
   content: 'Hello from agent',
 }).then(console.log);
 "
@@ -673,7 +741,7 @@ npm run build
 # 5. User selects candidate, agent is hired and introduced
 # 6. New agent automatically creates tasks and starts working
 
-# Memory Persistence Test  
+# Memory Persistence Test
 # 1. Agent learns user preferences through conversation
 # 2. Restart application
 # 3. Agent remembers previous context and preferences
@@ -712,7 +780,7 @@ npm run build
 ## Anti-Patterns to Avoid
 
 - ❌ Don't use streamText in Electron main process - use generateText
-- ❌ Don't create separate user systems - reuse existing usersTable with type="agent"  
+- ❌ Don't create separate user systems - reuse existing usersTable with type="agent"
 - ❌ Don't expose API keys to renderer process - keep in main process only
 - ❌ Don't ignore worker thread limitations - no Electron APIs in workers
 - ❌ Don't skip database migrations - always generate and apply properly

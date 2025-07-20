@@ -6,19 +6,19 @@ This document compares popular Node.js worker pool libraries to help choose the 
 
 ## Library Comparison Table
 
-| Feature | Piscina | Workerpool | Poolifier | threads.js |
-|---------|---------|------------|-----------|------------|
-| **GitHub Stars** | 2.9k+ | 2k+ | 2.7k+ | 3k+ |
-| **TypeScript Support** | Excellent | Good | Excellent | Excellent |
-| **Worker Types** | Worker Threads | Worker Threads, Child Process, Web Workers | Worker Threads, Cluster | Worker Threads, Web Workers |
-| **Dynamic Pool Sizing** | Yes | Yes | Yes | No |
-| **Task Cancellation** | Yes | Yes | Yes | Limited |
-| **Task Priority** | No | No | Yes | No |
-| **Built-in Retry** | No | No | Yes | No |
-| **Memory Sharing** | SharedArrayBuffer | Limited | SharedArrayBuffer | Yes |
-| **Learning Curve** | Low | Low | Medium | High |
-| **Performance** | Excellent | Good | Excellent | Good |
-| **Bundle Size** | Small | Medium | Small | Large |
+| Feature                 | Piscina           | Workerpool                                 | Poolifier               | threads.js                  |
+| ----------------------- | ----------------- | ------------------------------------------ | ----------------------- | --------------------------- |
+| **GitHub Stars**        | 2.9k+             | 2k+                                        | 2.7k+                   | 3k+                         |
+| **TypeScript Support**  | Excellent         | Good                                       | Excellent               | Excellent                   |
+| **Worker Types**        | Worker Threads    | Worker Threads, Child Process, Web Workers | Worker Threads, Cluster | Worker Threads, Web Workers |
+| **Dynamic Pool Sizing** | Yes               | Yes                                        | Yes                     | No                          |
+| **Task Cancellation**   | Yes               | Yes                                        | Yes                     | Limited                     |
+| **Task Priority**       | No                | No                                         | Yes                     | No                          |
+| **Built-in Retry**      | No                | No                                         | Yes                     | No                          |
+| **Memory Sharing**      | SharedArrayBuffer | Limited                                    | SharedArrayBuffer       | Yes                         |
+| **Learning Curve**      | Low               | Low                                        | Medium                  | High                        |
+| **Performance**         | Excellent         | Good                                       | Excellent               | Good                        |
+| **Bundle Size**         | Small             | Medium                                     | Small                   | Large                       |
 
 ## Detailed Analysis
 
@@ -27,6 +27,7 @@ This document compares popular Node.js worker pool libraries to help choose the 
 **Repository**: https://github.com/piscinajs/piscina
 
 **Strengths**:
+
 - Designed specifically for Node.js worker threads
 - Excellent TypeScript support with full type definitions
 - Simple, clean API inspired by Web Workers
@@ -36,25 +37,26 @@ This document compares popular Node.js worker pool libraries to help choose the 
 - Maintained by Node.js contributors
 
 **Example Usage**:
+
 ```typescript
-import Piscina from 'piscina';
-import path from 'path';
+import Piscina from "piscina";
+import path from "path";
 
 const pool = new Piscina({
-  filename: path.resolve(__dirname, 'worker.js'),
+  filename: path.resolve(__dirname, "worker.js"),
   maxThreads: 4,
   idleTimeout: 30000,
-  maxQueue: 'auto',
+  maxQueue: "auto",
   resourceLimits: {
     maxOldGenerationSizeMb: 256,
-    maxYoungGenerationSizeMb: 64
-  }
+    maxYoungGenerationSizeMb: 64,
+  },
 });
 
 // Execute task
-const result = await pool.run({ 
-  action: 'processCode',
-  data: codeContent 
+const result = await pool.run({
+  action: "processCode",
+  data: codeContent,
 });
 
 // With AbortController for cancellation
@@ -66,6 +68,7 @@ abortController.abort();
 ```
 
 **Best For**:
+
 - CPU-intensive tasks
 - Applications requiring strict resource limits
 - Projects prioritizing performance and simplicity
@@ -75,6 +78,7 @@ abortController.abort();
 **Repository**: https://github.com/josdejong/workerpool
 
 **Strengths**:
+
 - Supports multiple worker types (threads, child processes, web workers)
 - Works in both Node.js and browsers
 - Proxy-based API for calling worker methods
@@ -82,26 +86,27 @@ abortController.abort();
 - Good error handling and debugging
 
 **Example Usage**:
+
 ```typescript
-import workerpool from 'workerpool';
+import workerpool from "workerpool";
 
 // Create pool
-const pool = workerpool.pool('./worker.js', {
+const pool = workerpool.pool("./worker.js", {
   minWorkers: 2,
   maxWorkers: 4,
-  workerType: 'thread' // or 'process', 'web'
+  workerType: "thread", // or 'process', 'web'
 });
 
 // Method 1: Execute named function
-const result = await pool.exec('processTask', [taskData]);
+const result = await pool.exec("processTask", [taskData]);
 
 // Method 2: Execute anonymous function
 const result = await pool.exec(
   (data) => {
     // This runs in worker
-    return data.map(x => x * 2);
+    return data.map((x) => x * 2);
   },
-  [arrayData]
+  [arrayData],
 );
 
 // Proxy API
@@ -110,6 +115,7 @@ const result = await worker.processTask(taskData);
 ```
 
 **Best For**:
+
 - Cross-platform applications (Node.js + Browser)
 - Projects needing different worker types
 - Simple function offloading
@@ -119,6 +125,7 @@ const result = await worker.processTask(taskData);
 **Repository**: https://github.com/poolifier/poolifier
 
 **Strengths**:
+
 - High performance with benchmarks
 - Multiple pool types (Fixed, Dynamic)
 - Task priority support
@@ -128,39 +135,41 @@ const result = await worker.processTask(taskData);
 - Both sync and async task execution
 
 **Example Usage**:
+
 ```typescript
-import { DynamicThreadPool, WorkerChoiceStrategies } from 'poolifier';
+import { DynamicThreadPool, WorkerChoiceStrategies } from "poolifier";
 
 const pool = new DynamicThreadPool(
   2, // min workers
   4, // max workers
-  './worker.js',
+  "./worker.js",
   {
     workerChoiceStrategy: WorkerChoiceStrategies.LEAST_USED,
     enableTasksQueue: true,
     tasksQueueOptions: {
       concurrency: 1,
-      queueMaxSize: 100
+      queueMaxSize: 100,
     },
     errorHandler: (error) => console.error(error),
-    messageHandler: (message) => console.log(message)
-  }
+    messageHandler: (message) => console.log(message),
+  },
 );
 
 // Execute with priority
-const result = await pool.execute(taskData, 'processTask', {
-  priority: 10 // Higher number = higher priority
+const result = await pool.execute(taskData, "processTask", {
+  priority: 10, // Higher number = higher priority
 });
 
 // With retry
 pool.setTasksQueueOptions({
   concurrency: 1,
   retries: 3,
-  retryDelay: 1000
+  retryDelay: 1000,
 });
 ```
 
 **Best For**:
+
 - Applications requiring fine-grained control
 - Systems with task prioritization needs
 - High-performance requirements with specific strategies
@@ -170,6 +179,7 @@ pool.setTasksQueueOptions({
 **Repository**: https://github.com/andywer/threads.js
 
 **Strengths**:
+
 - Modern API with Observables support
 - Excellent TypeScript integration
 - Supports async generators
@@ -178,18 +188,19 @@ pool.setTasksQueueOptions({
 - Works with webpack
 
 **Example Usage**:
+
 ```typescript
-import { spawn, Thread, Worker } from 'threads';
+import { spawn, Thread, Worker } from "threads";
 
 // Spawn a worker
-const worker = await spawn(new Worker('./worker'));
+const worker = await spawn(new Worker("./worker"));
 
 // Type-safe method calls
 const result = await worker.processTask(data);
 
 // Observable support
 const observable = worker.streamData();
-observable.subscribe(chunk => console.log(chunk));
+observable.subscribe((chunk) => console.log(chunk));
 
 // Transfer ownership
 const buffer = new ArrayBuffer(1024);
@@ -200,6 +211,7 @@ await Thread.terminate(worker);
 ```
 
 **Best For**:
+
 - Modern TypeScript applications
 - Projects using RxJS/Observables
 - Complex data streaming scenarios
@@ -232,39 +244,39 @@ For Project Wiz's agent system, **Piscina** is the recommended choice because:
 
 ```typescript
 // agent-pool.ts for Project Wiz
-import Piscina from 'piscina';
-import path from 'path';
+import Piscina from "piscina";
+import path from "path";
 
 export class AgentWorkerPool {
   private pool: Piscina;
-  
+
   constructor() {
     this.pool = new Piscina({
-      filename: path.resolve(__dirname, 'agent.worker.js'),
+      filename: path.resolve(__dirname, "agent.worker.js"),
       maxThreads: Math.max(2, cpus().length - 1),
       idleTimeout: 60000, // 1 minute
       resourceLimits: {
         maxOldGenerationSizeMb: 512,
-        maxYoungGenerationSizeMb: 128
-      }
+        maxYoungGenerationSizeMb: 128,
+      },
     });
   }
-  
+
   async processAgentTask(task: AgentTask): Promise<TaskResult> {
     return this.pool.run(task, {
-      name: 'processAgentTask'
+      name: "processAgentTask",
     });
   }
-  
+
   async shutdown(): Promise<void> {
     await this.pool.destroy();
   }
-  
+
   getStats() {
     return {
       threads: this.pool.threads.length,
       queueSize: this.pool.queueSize,
-      utilization: this.pool.utilization
+      utilization: this.pool.utilization,
     };
   }
 }
@@ -275,21 +287,23 @@ export class AgentWorkerPool {
 If you need to switch libraries later:
 
 ### From Piscina to Workerpool:
+
 ```typescript
 // Piscina
 const result = await pool.run(data);
 
 // Workerpool equivalent
-const result = await pool.exec('processTask', [data]);
+const result = await pool.exec("processTask", [data]);
 ```
 
 ### From Piscina to Poolifier:
+
 ```typescript
 // Piscina
-const pool = new Piscina({ filename: './worker.js' });
+const pool = new Piscina({ filename: "./worker.js" });
 
 // Poolifier equivalent
-const pool = new FixedThreadPool(4, './worker.js');
+const pool = new FixedThreadPool(4, "./worker.js");
 ```
 
 ## Performance Benchmarks

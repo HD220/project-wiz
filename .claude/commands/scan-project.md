@@ -7,12 +7,14 @@ Analyze the current repository to identify opportunities for improvements, new f
 ## Execution Instructions
 
 1. **Deep Structural Analysis:**
+
 - Examine the project architecture
 - Identify existing coding patterns
 - Analyze dependencies and technologies used
 - Review existing documentation: README.md, docs, prps/00-miscellaneous/ai-docs/
 
 2. **Opportunity Identification:**
+
 - Missing or incomplete features
 - Code that needs refactoring
 - Performance improvements
@@ -20,11 +22,12 @@ Analyze the current repository to identify opportunities for improvements, new f
 - Technical debt fixes
 
 3. **Document Generation:**
+
 - Create [initial-slug].md files in prps/01-initials/
 - Name files as [descriptive-name][descriptive-name].md
 - Describe the identified opportunity at a high level (unless it is essentially technical and specific)
 
-4. **Creating/Updating Index of initials in `prps/01-initials/README.md` following the template
+4. \*\*Creating/Updating Index of initials in `prps/01-initials/README.md` following the template
 
 ## Templates
 
@@ -68,13 +71,14 @@ For each opportunity identified, use the following template:
 ```
 
 For the index, use this template:
+
 ```markdown
 # Initials Index
 
 ## 📋 Opportunities Index
 
-| # | Document | Impact | Priority | Dependencies |
-|---|-----------|---------|------------|---------|
+| #   | Document | Impact | Priority | Dependencies |
+| --- | -------- | ------ | -------- | ------------ |
 ```
 
 ## Expected Result
