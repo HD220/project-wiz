@@ -1,9 +1,9 @@
+import { LogIn, LogOut, User } from "lucide-react";
 import React from "react";
 
-import { LogIn, LogOut, User } from "lucide-react";
+import { useAuthStore } from "@/renderer/store/auth-store";
 
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/renderer/store/auth-store";
 
 export function AuthButton() {
   const {

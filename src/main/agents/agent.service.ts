@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 
 import type {
   CreateAgentInput,
@@ -17,6 +17,34 @@ import { getDatabase } from "@/main/database/connection";
 import { usersTable } from "@/main/user/users.schema";
 
 export class AgentService {
+  /**
+   * Convert SQLite timestamp to Date object
+   */
+  private static convertTimestampToDate(timestamp: any): Date {
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    if (typeof timestamp === "number") {
+      // SQLite timestamps are in seconds, JS Date expects milliseconds
+      return new Date(timestamp * 1000);
+    }
+    if (typeof timestamp === "string") {
+      return new Date(timestamp);
+    }
+    return new Date();
+  }
+
+  /**
+   * Sanitize agent dates for consistent format
+   */
+  private static sanitizeDates(agent: SelectAgent): SelectAgent {
+    return {
+      ...agent,
+      createdAt: this.convertTimestampToDate(agent.createdAt),
+      updatedAt: this.convertTimestampToDate(agent.updatedAt),
+    };
+  }
+
   /**
    * Generate a comprehensive system prompt for the agent
    */
@@ -82,9 +110,9 @@ export class AgentService {
     );
 
     // Use database transaction for atomicity
-    return db.transaction((tx) => {
+    return await db.transaction(async (tx) => {
       // Create user entry first
-      const [user] = tx
+      const [user] = await tx
         .insert(usersTable)
         .values({
           name: validatedInput.name,
@@ -98,7 +126,7 @@ export class AgentService {
       }
 
       // Then create agent entry
-      const [agent] = tx
+      const [agent] = await tx
         .insert(agentsTable)
         .values({
           userId: user.id,
@@ -117,7 +145,7 @@ export class AgentService {
         throw new Error("Failed to create agent");
       }
 
-      return agent;
+      return this.sanitizeDates(agent);
     });
   }
 
@@ -133,7 +161,7 @@ export class AgentService {
       .where(eq(agentsTable.id, id))
       .limit(1);
 
-    return agent || null;
+    return agent ? this.sanitizeDates(agent) : null;
   }
 
   /**
@@ -148,7 +176,7 @@ export class AgentService {
       .where(eq(agentsTable.userId, userId))
       .limit(1);
 
-    return agent || null;
+    return agent ? this.sanitizeDates(agent) : null;
   }
 
   /**
@@ -166,7 +194,7 @@ export class AgentService {
       .from(agentsTable)
       .orderBy(desc(agentsTable.createdAt));
 
-    return agents;
+    return agents.map((agent) => this.sanitizeDates(agent));
   }
 
   /**
@@ -193,7 +221,7 @@ export class AgentService {
     }
 
     return {
-      ...result.agent,
+      ...this.sanitizeDates(result.agent),
       provider: result.provider,
     };
   }
@@ -208,7 +236,7 @@ export class AgentService {
       .update(agentsTable)
       .set({
         status,
-        updatedAt: new Date(),
+        updatedAt: sql`(strftime('%s', 'now'))`,
       })
       .where(eq(agentsTable.id, id));
 
@@ -256,7 +284,7 @@ export class AgentService {
       .set({
         ...updates,
         systemPrompt,
-        updatedAt: new Date(),
+        updatedAt: sql`(strftime('%s', 'now'))`,
       })
       .where(eq(agentsTable.id, id))
       .returning();
@@ -265,7 +293,7 @@ export class AgentService {
       throw new Error("Failed to update agent");
     }
 
-    return agent;
+    return this.sanitizeDates(agent);
   }
 
   /**
@@ -286,12 +314,24 @@ export class AgentService {
     }
 
     // Use transaction to delete both agent and user
-    db.transaction((tx) => {
+    await db.transaction(async (tx) => {
       // Delete agent first (due to foreign key constraint)
-      tx.delete(agentsTable).where(eq(agentsTable.id, id));
+      const agentResult = await tx
+        .delete(agentsTable)
+        .where(eq(agentsTable.id, id));
+
+      if (agentResult.changes === 0) {
+        throw new Error("Failed to delete agent");
+      }
 
       // Delete associated user
-      tx.delete(usersTable).where(eq(usersTable.id, agent.userId));
+      const userResult = await tx
+        .delete(usersTable)
+        .where(eq(usersTable.id, agent.userId));
+
+      if (userResult.changes === 0) {
+        throw new Error("Failed to delete associated user");
+      }
     });
   }
 }

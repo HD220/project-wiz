@@ -25,10 +25,10 @@ export const agentsTable = sqliteTable("agents", {
   modelConfig: text("model_config").notNull(), // JSON string
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`(strftime('%s', 'now'))`),
 });
 
 export type SelectAgent = typeof agentsTable.$inferSelect;

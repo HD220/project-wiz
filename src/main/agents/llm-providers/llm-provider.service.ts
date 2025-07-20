@@ -1,14 +1,14 @@
 import crypto from "crypto";
 
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 
+import { agentsTable } from "@/main/agents/agents.schema";
 import type {
   CreateProviderInput,
   SelectLlmProvider,
 } from "@/main/agents/llm-providers/llm-provider.types";
 import { createProviderSchema } from "@/main/agents/llm-providers/llm-provider.types";
 import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
-import { agentsTable } from "@/main/agents/agents.schema";
 import { getDatabase } from "@/main/database/connection";
 
 // Encryption configuration
@@ -16,6 +16,34 @@ const ALGORITHM = "aes-256-gcm";
 const ENCRYPTION_KEY = process.env["ENCRYPTION_KEY"] || crypto.randomBytes(32);
 
 export class LlmProviderService {
+  /**
+   * Convert SQLite timestamp to Date object
+   */
+  private static convertTimestampToDate(timestamp: any): Date {
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    if (typeof timestamp === "number") {
+      // SQLite timestamps are in seconds, JS Date expects milliseconds
+      return new Date(timestamp * 1000);
+    }
+    if (typeof timestamp === "string") {
+      return new Date(timestamp);
+    }
+    return new Date();
+  }
+
+  /**
+   * Sanitize provider dates for consistent format
+   */
+  private static sanitizeDates(provider: SelectLlmProvider): SelectLlmProvider {
+    return {
+      ...provider,
+      createdAt: this.convertTimestampToDate(provider.createdAt),
+      updatedAt: this.convertTimestampToDate(provider.updatedAt),
+    };
+  }
+
   /**
    * Encrypt API key for secure storage
    */
@@ -90,7 +118,7 @@ export class LlmProviderService {
       throw new Error("Failed to create LLM provider");
     }
 
-    return provider;
+    return this.sanitizeDates(provider);
   }
 
   /**
@@ -100,7 +128,7 @@ export class LlmProviderService {
     provider: SelectLlmProvider,
   ): SelectLlmProvider {
     return {
-      ...provider,
+      ...this.sanitizeDates(provider),
       apiKey: "••••••••", // Mask API key for UI
     };
   }
@@ -133,7 +161,7 @@ export class LlmProviderService {
       .where(eq(llmProvidersTable.id, id))
       .limit(1);
 
-    return provider || null;
+    return provider ? this.sanitizeDates(provider) : null;
   }
 
   /**
@@ -167,7 +195,7 @@ export class LlmProviderService {
       .update(llmProvidersTable)
       .set({
         ...updates,
-        updatedAt: new Date(),
+        updatedAt: sql`(strftime('%s', 'now'))`,
       })
       .where(eq(llmProvidersTable.id, id))
       .returning();
@@ -176,7 +204,7 @@ export class LlmProviderService {
       throw new Error("Failed to update provider");
     }
 
-    return provider;
+    return this.sanitizeDates(provider);
   }
 
   /**
@@ -193,7 +221,9 @@ export class LlmProviderService {
       .limit(1);
 
     if (agentUsingProvider) {
-      throw new Error("Cannot delete provider: It is currently being used by one or more agents. Please delete or reassign the agents first.");
+      throw new Error(
+        "Cannot delete provider: It is currently being used by one or more agents. Please delete or reassign the agents first.",
+      );
     }
 
     const result = await db
@@ -248,6 +278,6 @@ export class LlmProviderService {
       )
       .limit(1);
 
-    return provider || null;
+    return provider ? this.sanitizeDates(provider) : null;
   }
 }

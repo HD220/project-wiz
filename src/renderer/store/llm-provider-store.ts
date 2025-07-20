@@ -91,16 +91,8 @@ export const useLlmProviderStore = create<LlmProviderState>()(
           const response = await window.api.llmProviders.list(userId);
 
           if (response.success) {
-            // Transform dates from IPC response
-            const providers = (response.data as any[]) || [];
-            const transformedProviders = providers.map((provider) => ({
-              ...provider,
-              createdAt: new Date(provider.createdAt),
-              updatedAt: new Date(provider.updatedAt),
-            }));
-            
             set({
-              providers: transformedProviders,
+              providers: (response.data as SelectLlmProvider[]) || [],
               isLoading: false,
             });
           } else {

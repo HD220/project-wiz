@@ -92,16 +92,8 @@ export const useAgentStore = create<AgentState>()(
           const response = await window.api.agents.list();
 
           if (response.success) {
-            // Transform dates from IPC response
-            const agents = (response.data as any[]) || [];
-            const transformedAgents = agents.map((agent) => ({
-              ...agent,
-              createdAt: new Date(agent.createdAt),
-              updatedAt: new Date(agent.updatedAt),
-            }));
-            
             set({
-              agents: transformedAgents,
+              agents: (response.data as SelectAgent[]) || [],
               isLoading: false,
             });
           } else {
@@ -124,16 +116,10 @@ export const useAgentStore = create<AgentState>()(
           const response = await window.api.agents.update(id, updates);
 
           if (response.success && response.data) {
-            // Transform dates and update the agent in the list
-            const updatedAgent = {
-              ...response.data,
-              createdAt: new Date(response.data.createdAt),
-              updatedAt: new Date(response.data.updatedAt),
-            } as SelectAgent;
-            
+            // Update the agent in the list
             set((state) => ({
               agents: state.agents.map((agent) =>
-                agent.id === id ? updatedAgent : agent,
+                agent.id === id ? (response.data as SelectAgent) : agent,
               ),
               isLoading: false,
             }));
@@ -190,11 +176,14 @@ export const useAgentStore = create<AgentState>()(
           const response = await window.api.agents.delete(id);
 
           if (response.success) {
-            // Remove the agent from the list
+            // Remove the agent from the list and reload from server to ensure sync
             set((state) => ({
               agents: state.agents.filter((agent) => agent.id !== id),
               isLoading: false,
             }));
+            
+            // Reload the agents list to ensure data consistency
+            await get().loadAgents();
           } else {
             throw new Error(response.error || "Failed to delete agent");
           }
