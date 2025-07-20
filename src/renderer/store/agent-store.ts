@@ -190,11 +190,14 @@ export const useAgentStore = create<AgentState>()(
           const response = await window.api.agents.delete(id);
 
           if (response.success) {
-            // Remove the agent from the list
+            // Remove the agent from the list and reload from server to ensure sync
             set((state) => ({
               agents: state.agents.filter((agent) => agent.id !== id),
               isLoading: false,
             }));
+            
+            // Reload the agents list to ensure data consistency
+            await get().loadAgents();
           } else {
             throw new Error(response.error || "Failed to delete agent");
           }
