@@ -1,19 +1,34 @@
+import { AlertTriangle } from "lucide-react";
 import { useEffect } from "react";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
-
 import { useLlmProviderStore } from "@/renderer/store/llm-provider-store";
+
+import { EmptyProviderState } from "@/components/empty-provider-state";
 import { LlmProviderCard } from "@/components/llm-provider-card";
 import { ProviderListSkeleton } from "@/components/provider-list-skeleton";
-import { EmptyProviderState } from "@/components/empty-provider-state";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Local type definition to match the store
+interface LlmProvider {
+  id: string;
+  userId: string;
+  name: string;
+  type: "openai" | "deepseek" | "anthropic";
+  apiKey: string;
+  baseUrl: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface LlmProviderListProps {
   userId: string;
 }
 
 export function LlmProviderList({ userId }: LlmProviderListProps) {
-  const { providers, isLoading, error, loadProviders, clearError } = useLlmProviderStore();
+  const { providers, isLoading, error, loadProviders, clearError } =
+    useLlmProviderStore();
 
   // Load providers on mount
   useEffect(() => {
@@ -53,7 +68,7 @@ export function LlmProviderList({ userId }: LlmProviderListProps) {
   // List rendering
   return (
     <div className="space-y-4">
-      {providers.map((provider: any) => (
+      {providers.map((provider: LlmProvider) => (
         <LlmProviderCard key={provider.id} provider={provider} />
       ))}
     </div>

@@ -95,7 +95,9 @@ export class LlmProviderService {
   /**
    * Sanitize provider for display (hide API keys)
    */
-  private static sanitizeForDisplay(provider: SelectLlmProvider): SelectLlmProvider {
+  private static sanitizeForDisplay(
+    provider: SelectLlmProvider,
+  ): SelectLlmProvider {
     return {
       ...provider,
       apiKey: "••••••••", // Mask API key for UI
@@ -115,7 +117,7 @@ export class LlmProviderService {
       .orderBy(desc(llmProvidersTable.createdAt));
 
     // Sanitize API keys for display
-    return providers.map(provider => this.sanitizeForDisplay(provider));
+    return providers.map((provider) => this.sanitizeForDisplay(provider));
   }
 
   /**

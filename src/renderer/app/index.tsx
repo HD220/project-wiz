@@ -122,7 +122,7 @@ export const Route = createFileRoute("/")({
             </Card>
           ) : (
             <div className="grid gap-4">
-              {providers.map((provider: any) => (
+              {providers.map((provider: SelectLlmProvider) => (
                 <ProviderCard
                   key={provider.id}
                   provider={provider}

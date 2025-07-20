@@ -6,6 +6,8 @@ import { z } from "zod";
 // Local type definition to avoid boundary violations
 type ProviderType = "openai" | "deepseek" | "anthropic";
 
+import { useLlmProviderStore } from "@/renderer/store/llm-provider-store";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +28,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useLlmProviderStore } from "@/renderer/store/llm-provider-store";
 
 // Form validation schema
 const formSchema = z.object({

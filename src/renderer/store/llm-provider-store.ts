@@ -227,13 +227,18 @@ export const useLlmProviderStore = create<LlmProviderState>()(
       // Get active providers
       getActiveProviders: (): SelectLlmProvider[] => {
         const state = get();
-        return state.providers.filter((provider: SelectLlmProvider) => provider.isActive);
+        return state.providers.filter(
+          (provider: SelectLlmProvider) => provider.isActive,
+        );
       },
 
       // Get default provider
       getDefaultProvider: (): SelectLlmProvider | undefined => {
         const state = get();
-        return state.providers.find((provider: SelectLlmProvider) => provider.isDefault && provider.isActive);
+        return state.providers.find(
+          (provider: SelectLlmProvider) =>
+            provider.isDefault && provider.isActive,
+        );
       },
     }),
     {

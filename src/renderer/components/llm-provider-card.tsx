@@ -1,6 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Star, Link, CheckCircle, XCircle } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface LlmProvider {
   id: string;
@@ -21,7 +28,9 @@ interface LlmProviderCardProps {
 
 export function LlmProviderCard({ provider }: LlmProviderCardProps) {
   return (
-    <Card className={`transition-colors ${provider.isDefault ? 'border-primary bg-primary/5' : ''}`}>
+    <Card
+      className={`transition-colors ${provider.isDefault ? "border-primary bg-primary/5" : ""}`}
+    >
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
