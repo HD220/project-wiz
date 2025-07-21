@@ -11,7 +11,7 @@ import {
   type AgentMemoryWithMetadata,
   type MemorySearchCriteria,
   type MemoryRelevanceScore,
-} from "./agent-memories.schema";
+} from "@/main/features/agent/memory/memory.model";
 
 export class AgentMemoryService {
   /**

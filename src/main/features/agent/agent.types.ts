@@ -4,8 +4,8 @@ import type {
   SelectAgent,
   InsertAgent,
   AgentStatus,
-} from "@/main/agents/agents.schema";
-import type { SelectLlmProvider } from "@/main/agents/llm-providers/llm-providers.schema";
+} from "@/main/features/agent/agent.model";
+import type { SelectLlmProvider } from "@/main/features/agent/llm-provider/llm-provider.model";
 
 // Model configuration interface
 export interface ModelConfig {

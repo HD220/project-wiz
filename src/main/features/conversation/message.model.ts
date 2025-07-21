@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-import { usersTable } from "@/main/user/users.schema";
+import { usersTable } from "@/main/features/user/user.model";
 
-import { conversationsTable } from "./conversations.schema";
+import { conversationsTable } from "./conversation.model";
 
 export const messagesTable = sqliteTable("messages", {
   id: text("id")

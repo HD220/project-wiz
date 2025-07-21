@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-import { agentsTable } from "@/main/agents/agents.schema";
-import { usersTable } from "@/main/user/users.schema";
+import { agentsTable } from "@/main/features/agent/agent.model";
+import { usersTable } from "@/main/features/user/user.model";
 
 export type ConversationType = "dm" | "agent_chat";
 

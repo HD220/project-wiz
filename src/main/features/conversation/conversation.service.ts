@@ -5,12 +5,12 @@ import { getDatabase } from "@/main/database/connection";
 import {
   conversationsTable,
   conversationParticipantsTable,
-} from "./conversations.schema";
+} from "./conversation.model";
 
 import type {
   SelectConversation,
   InsertConversation,
-} from "./conversations.schema";
+} from "./conversation.model";
 
 export interface CreateConversationInput
   extends Omit<InsertConversation, "id" | "createdAt" | "updatedAt"> {

@@ -6,7 +6,7 @@ import {
   type SelectProject,
   type InsertProject,
   type UpdateProject,
-} from "@/main/project/projects.schema";
+} from "@/main/features/project/project.model";
 
 export class ProjectService {
   /**

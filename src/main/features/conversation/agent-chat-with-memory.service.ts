@@ -1,12 +1,12 @@
 import { generateText } from "ai";
 
-import { AgentService } from "@/main/agents/agent.service";
-import type { SelectAgent } from "@/main/agents/agents.schema";
-import { LlmProviderService } from "@/main/agents/llm-providers/llm-provider.service";
-import type { SelectLlmProvider } from "@/main/agents/llm-providers/llm-providers.schema";
-import { LLMService } from "@/main/agents/llm-providers/llm.service";
-import { AgentMemoryService } from "@/main/agents/memory/agent-memory.service";
-import type { MemoryContextWindow } from "@/main/agents/memory/agent-memory.types";
+import { AgentService } from "@/main/features/agent/agent.service";
+import type { SelectAgent } from "@/main/features/agent/agents.schema";
+import { LlmProviderService } from "@/main/features/agent/llm-providers/llm-provider.service";
+import type { SelectLlmProvider } from "@/main/features/agent/llm-providers/llm-providers.schema";
+import { LLMService } from "@/main/features/agent/llm-providers/llm.service";
+import { AgentMemoryService } from "@/main/features/agent/memory/agent-memory.service";
+import type { MemoryContextWindow } from "@/main/features/agent/memory/agent-memory.types";
 
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";

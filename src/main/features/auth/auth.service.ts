@@ -2,14 +2,14 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
-import { accountsTable } from "@/main/user/authentication/accounts.schema";
+import { accountsTable } from "@/main/features/auth/auth.model";
 import type {
   LoginCredentials,
   RegisterUserInput,
   AuthenticatedUser,
-} from "@/main/user/authentication/auth.types";
-import { userPreferencesTable } from "@/main/user/profile/user-preferences.schema";
-import { usersTable } from "@/main/user/users.schema";
+} from "@/main/features/auth/auth.types";
+import { userPreferencesTable } from "@/main/features/user/profile.model";
+import { usersTable } from "@/main/features/user/user.model";
 
 // Simple in-memory session store for current user
 let currentUserId: string | null = null;

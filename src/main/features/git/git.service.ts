@@ -10,7 +10,7 @@ import type {
   GitInitOptions,
   GitCloneOptions,
   CommitOptions,
-} from "@/main/git/git.types";
+} from "@/main/features/git/git.types";
 
 export class GitService {
   private static activeWorktrees = new Map<string, WorktreeInfo>();

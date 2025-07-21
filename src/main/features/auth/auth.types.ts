@@ -1,6 +1,6 @@
 // Authentication types for the user domain
 
-import type { SelectUser } from "@/main/user/users.schema";
+import type { SelectUser } from "@/main/features/user/user.model";
 
 export interface LoginCredentials {
   username: string;

@@ -4,7 +4,7 @@ import { getDatabase } from "@/main/database/connection";
 import {
   userPreferencesTable,
   type Theme,
-} from "@/main/user/profile/user-preferences.schema";
+} from "@/main/features/user/profile.model";
 
 export class ProfileService {
   /**

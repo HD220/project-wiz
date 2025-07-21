@@ -2,13 +2,13 @@ import crypto from "crypto";
 
 import { eq, and, desc, sql } from "drizzle-orm";
 
-import { agentsTable } from "@/main/agents/agents.schema";
+import { agentsTable } from "@/main/features/agent/agent.model";
 import type {
   CreateProviderInput,
   LlmProvider,
-} from "@/main/agents/llm-providers/llm-provider.types";
-import { createProviderSchema } from "@/main/agents/llm-providers/llm-provider.types";
-import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
+} from "@/main/features/agent/llm-provider/llm-provider.types";
+import { createProviderSchema } from "@/main/features/agent/llm-provider/llm-provider.types";
+import { llmProvidersTable } from "@/main/features/agent/llm-provider/llm-provider.model";
 import { getDatabase } from "@/main/database/connection";
 
 // Encryption configuration

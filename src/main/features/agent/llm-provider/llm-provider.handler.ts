@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 
-import { LlmProviderService } from "@/main/agents/llm-providers/llm-provider.service";
-import type { CreateProviderInput } from "@/main/agents/llm-providers/llm-provider.types";
+import { LlmProviderService } from "@/main/features/agent/llm-provider/llm-provider.service";
+import type { CreateProviderInput } from "@/main/features/agent/llm-provider/llm-provider.types";
 import type { IpcResponse } from "@/main/types";
 
 /**

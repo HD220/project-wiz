@@ -5,12 +5,12 @@ import type {
   SelectAgent,
   AgentStatus,
   AgentWithProvider,
-} from "@/main/agents/agent.types";
-import { createAgentSchema } from "@/main/agents/agent.types";
-import { agentsTable } from "@/main/agents/agents.schema";
-import { llmProvidersTable } from "@/main/agents/llm-providers/llm-providers.schema";
+} from "@/main/features/agent/agent.types";
+import { createAgentSchema } from "@/main/features/agent/agent.types";
+import { agentsTable } from "@/main/features/agent/agent.model";
+import { llmProvidersTable } from "@/main/features/agent/llm-provider.model";
 import { getDatabase } from "@/main/database/connection";
-import { usersTable } from "@/main/user/users.schema";
+import { usersTable } from "@/main/features/user/user.model";
 
 export class AgentService {
   /**

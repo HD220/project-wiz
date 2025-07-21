@@ -3,7 +3,7 @@ import { z } from "zod";
 import type {
   InsertLlmProvider,
   ProviderType,
-} from "@/main/agents/llm-providers/llm-providers.schema";
+} from "@/main/features/agent/llm-provider/llm-provider.model";
 
 // Input type for creating a provider (without generated fields)
 export type CreateProviderInput = Omit<

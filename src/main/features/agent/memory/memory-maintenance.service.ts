@@ -2,7 +2,7 @@ import { and, eq, lt, sql } from "drizzle-orm";
 
 import { getDatabase } from "@/main/database/connection";
 
-import { agentMemoriesTable } from "./agent-memories.schema";
+import { agentMemoriesTable } from "@/main/features/agent/memory/agent-memories.schema";
 
 /**
  * Simple memory maintenance service following YAGNI principle.

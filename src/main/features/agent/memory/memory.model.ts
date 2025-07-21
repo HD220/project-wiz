@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 
-import { agentsTable } from "@/main/agents/agents.schema";
-import { conversationsTable } from "@/main/conversations/conversations.schema";
-import { usersTable } from "@/main/user/users.schema";
+import { agentsTable } from "@/main/features/agent/agent.model";
+import { conversationsTable } from "@/main/features/conversation/conversation.model";
+import { usersTable } from "@/main/features/user/user.model";
 
 export type MemoryType =
   | "conversation"
