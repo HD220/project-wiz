@@ -33,9 +33,10 @@ function MessageInput(props: MessageInputProps) {
       await onSendMessage(trimmedMessage);
       setMessage("");
       
-      // Reset textarea height
+      // Reset textarea height and maintain focus
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
+        textareaRef.current.focus();
       }
     } catch (error) {
       console.error("Failed to send message:", error);

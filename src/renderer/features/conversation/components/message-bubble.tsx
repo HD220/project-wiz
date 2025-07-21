@@ -1,6 +1,5 @@
-import { formatDistance } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Bot, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/renderer/components/ui/avatar";
 import { cn } from "@/renderer/lib/utils";
@@ -18,13 +17,26 @@ interface MessageBubbleProps {
 function MessageBubble(props: MessageBubbleProps) {
   const { message, author, isCurrentUser, showAvatar = true, className } = props;
 
-  // Format timestamp
+  // Format timestamp - Discord style (short format)
   const getTimeAgo = () => {
     try {
-      return formatDistance(new Date(message.createdAt), new Date(), {
-        addSuffix: true,
-        locale: ptBR,
-      });
+      const now = new Date();
+      const messageDate = new Date(message.createdAt);
+      const diffInHours = Math.abs(now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
+      
+      if (diffInHours < 24) {
+        // Same day - show time
+        return messageDate.toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
+      } else {
+        // Different day - show relative time
+        return formatDistanceToNow(messageDate, {
+          addSuffix: false,
+          locale: ptBR,
+        });
+      }
     } catch {
       return "agora";
     }
@@ -34,75 +46,46 @@ function MessageBubble(props: MessageBubbleProps) {
   const authorName = author?.name || "Unknown";
   const authorAvatar = author?.avatar;
   const authorInitials = authorName.charAt(0).toUpperCase();
-  const isAgent = author?.type === "agent";
 
   return (
     <div
       className={cn(
-        "flex gap-3 group hover:bg-muted/30 px-4 py-2 rounded-md transition-colors",
-        isCurrentUser && "flex-row-reverse",
+        "flex gap-3 group hover:bg-muted/30 px-4 py-1.5 transition-colors",
         className
       )}
     >
-      {/* Avatar */}
-      {showAvatar && (
-        <div className="flex-shrink-0">
-          <div className="relative">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src={authorAvatar || undefined} />
-              <AvatarFallback className="text-xs font-medium">
-                {authorInitials}
-              </AvatarFallback>
-            </Avatar>
-            
-            {/* Type indicator */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-background rounded-full flex items-center justify-center border border-border">
-              {isAgent ? (
-                <Bot className="h-2.5 w-2.5 text-primary" />
-              ) : (
-                <User className="h-2.5 w-2.5 text-green-500" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Avatar - always on the left (Discord style) */}
+      <div className="flex-shrink-0 w-10">
+        {showAvatar ? (
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={authorAvatar || undefined} />
+            <AvatarFallback className="text-sm font-medium">
+              {authorInitials}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          /* Spacer for grouped messages */
+          <div className="w-10 h-5" />
+        )}
+      </div>
 
       {/* Message content */}
-      <div className={cn(
-        "flex-1 min-w-0",
-        isCurrentUser && "text-right"
-      )}>
-        {/* Author and timestamp header */}
-        <div className={cn(
-          "flex items-baseline gap-2 mb-1",
-          isCurrentUser && "flex-row-reverse"
-        )}>
-          <span className="text-sm font-medium text-foreground">
-            {authorName}
-          </span>
-          
-          {/* Agent badge */}
-          {isAgent && (
-            <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-              AI
+      <div className="flex-1 min-w-0">
+        {/* Author and timestamp header - only show for first message in group */}
+        {showAvatar && (
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-sm font-medium text-foreground hover:underline cursor-pointer">
+              {authorName}
             </span>
-          )}
-          
-          <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-            {getTimeAgo()}
-          </span>
-        </div>
+            
+            <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+              {getTimeAgo()}
+            </span>
+          </div>
+        )}
 
-        {/* Message text */}
-        <div
-          className={cn(
-            "text-sm text-foreground leading-relaxed break-words",
-            "bg-muted/50 rounded-lg px-3 py-2 inline-block max-w-full",
-            isCurrentUser 
-              ? "bg-primary text-primary-foreground" 
-              : "bg-muted/50 text-foreground"
-          )}
-        >
+        {/* Message text - Discord style (no bubbles) */}
+        <div className="text-sm text-foreground leading-relaxed break-words">
           <p className="whitespace-pre-wrap">{message.content}</p>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
-import { ScrollArea } from "@/renderer/components/ui/scroll-area";
 import { Separator } from "@/renderer/components/ui/separator";
 
 import type { ConversationWithMessagesAndParticipants } from "../conversation.types";
@@ -31,8 +30,8 @@ function ConversationChat(props: ConversationChatProps) {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current && scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [conversation.messages.length]);
 
@@ -55,7 +54,6 @@ function ConversationChat(props: ConversationChatProps) {
     const groups: {
       authorId: string;
       messages: typeof conversation.messages;
-      showAvatar: boolean;
     }[] = [];
 
     conversation.messages.forEach((message, index) => {
@@ -69,7 +67,6 @@ function ConversationChat(props: ConversationChatProps) {
         groups.push({
           authorId: message.authorId,
           messages: [message],
-          showAvatar: true, // First message in group shows avatar
         });
       }
     });
@@ -88,13 +85,13 @@ function ConversationChat(props: ConversationChatProps) {
   }
 
   return (
-    <div className={`flex-1 flex flex-col h-full ${className || ""}`}>
+    <div className={`h-full flex flex-col ${className || ""}`}>
       {/* Messages area - Discord style */}
-      <ScrollArea className="flex-1" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden" ref={scrollAreaRef}>
         <div className="p-4 space-y-1">
           {messageGroups.length === 0 ? (
             /* Empty conversation state */
-            <div className="flex-1 flex items-center justify-center py-16">
+            <div className="h-full flex items-center justify-center py-16">
               <div className="text-center space-y-2">
                 <p className="text-muted-foreground">
                   This is the beginning of your conversation
@@ -105,35 +102,37 @@ function ConversationChat(props: ConversationChatProps) {
               </div>
             </div>
           ) : (
-            messageGroups.map((group, groupIndex) => {
-              const author = getUserById(group.authorId);
-              const isCurrentUser = group.authorId === currentUser.id;
+            <>
+              {messageGroups.map((group, groupIndex) => {
+                const author = getUserById(group.authorId);
+                const isCurrentUser = group.authorId === currentUser.id;
 
-              return (
-                <div key={`group-${groupIndex}`} className="space-y-0.5">
-                  {group.messages.map((message, messageIndex) => (
-                    <MessageBubble
-                      key={message.id}
-                      message={message}
-                      author={author}
-                      isCurrentUser={isCurrentUser}
-                      showAvatar={messageIndex === 0} // Only show avatar for first message in group
-                    />
-                  ))}
-                  
-                  {/* Add some spacing between different authors */}
-                  {groupIndex < messageGroups.length - 1 && (
-                    <div className="h-2" />
-                  )}
-                </div>
-              );
-            })
+                return (
+                  <div key={`group-${groupIndex}`} className="space-y-0.5">
+                    {group.messages.map((message, messageIndex) => (
+                      <MessageBubble
+                        key={message.id}
+                        message={message}
+                        author={author}
+                        isCurrentUser={isCurrentUser}
+                        showAvatar={messageIndex === 0} // Only show avatar for first message in group
+                      />
+                    ))}
+                    
+                    {/* Add some spacing between different authors */}
+                    {groupIndex < messageGroups.length - 1 && (
+                      <div className="h-2" />
+                    )}
+                  </div>
+                );
+              })}
+              
+              {/* Scroll anchor */}
+              <div ref={messagesEndRef} />
+            </>
           )}
-          
-          {/* Scroll anchor */}
-          <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Separator */}
       <Separator />
