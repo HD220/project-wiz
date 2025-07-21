@@ -1,12 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { ThemeProvider } from "next-themes";
 import React from "react";
 import ReactDOMClient from "react-dom/client";
 
 import "./globals.css";
 // import { detectLocale, dynamicActivate } from '@/config/i18n';
 
-import { ThemeProvider } from "./contexts/theme-context";
 import { routeTree } from "./routeTree.gen";
 
 // Create a query client
@@ -36,7 +36,12 @@ const root = ReactDOMClient.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
         <RouterProvider router={router} />
       </ThemeProvider>
     </QueryClientProvider>

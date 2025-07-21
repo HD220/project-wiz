@@ -5,6 +5,7 @@ import { useAuthStore } from "@/renderer/store/auth-store";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { CustomLink } from "@/components/custom-link";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -160,13 +161,14 @@ export function RootSidebar({ className }: RootSidebarProps) {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
+              <CustomLink
+                to="/user/settings"
                 variant="ghost"
                 size="icon"
                 className="w-10 h-10 p-0 rounded-full border bg-muted border-muted-foreground/30 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
               >
                 <Settings className="w-5 h-5" />
-              </Button>
+              </CustomLink>
             </TooltipTrigger>
             <TooltipContent side="right">
               <p>Settings</p>

@@ -16,8 +16,12 @@ import { Route as AuthRegisterRouteImport } from './app/auth/register'
 import { Route as AuthLoginRouteImport } from './app/auth/login'
 import { Route as AuthenticatedUserRouteRouteImport } from './app/_authenticated/user/route'
 import { Route as AuthenticatedUserIndexRouteImport } from './app/_authenticated/user/index'
+import { Route as AuthenticatedUserSettingsRouteRouteImport } from './app/_authenticated/user/settings/route'
 import { Route as AuthenticatedProjectProjectIdRouteRouteImport } from './app/_authenticated/project/$projectId/route'
+import { Route as AuthenticatedUserSettingsIndexRouteImport } from './app/_authenticated/user/settings/index'
+import { Route as AuthenticatedUserDmIndexRouteImport } from './app/_authenticated/user/dm/index'
 import { Route as AuthenticatedProjectProjectIdIndexRouteImport } from './app/_authenticated/project/$projectId/index'
+import { Route as AuthenticatedUserSettingsLlmProvidersRouteImport } from './app/_authenticated/user/settings/llm-providers'
 import { Route as AuthenticatedUserDmAgentIdRouteImport } from './app/_authenticated/user/dm/$agentId'
 import { Route as AuthenticatedProjectProjectIdChannelChannelIdRouteImport } from './app/_authenticated/project/$projectId/channel/$channelId'
 
@@ -55,17 +59,41 @@ const AuthenticatedUserIndexRoute = AuthenticatedUserIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedUserRouteRoute,
 } as any)
+const AuthenticatedUserSettingsRouteRoute =
+  AuthenticatedUserSettingsRouteRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedUserRouteRoute,
+  } as any)
 const AuthenticatedProjectProjectIdRouteRoute =
   AuthenticatedProjectProjectIdRouteRouteImport.update({
     id: '/project/$projectId',
     path: '/project/$projectId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedUserSettingsIndexRoute =
+  AuthenticatedUserSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedUserSettingsRouteRoute,
+  } as any)
+const AuthenticatedUserDmIndexRoute =
+  AuthenticatedUserDmIndexRouteImport.update({
+    id: '/dm/',
+    path: '/dm/',
+    getParentRoute: () => AuthenticatedUserRouteRoute,
+  } as any)
 const AuthenticatedProjectProjectIdIndexRoute =
   AuthenticatedProjectProjectIdIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedProjectProjectIdRouteRoute,
+  } as any)
+const AuthenticatedUserSettingsLlmProvidersRoute =
+  AuthenticatedUserSettingsLlmProvidersRouteImport.update({
+    id: '/llm-providers',
+    path: '/llm-providers',
+    getParentRoute: () => AuthenticatedUserSettingsRouteRoute,
   } as any)
 const AuthenticatedUserDmAgentIdRoute =
   AuthenticatedUserDmAgentIdRouteImport.update({
@@ -87,9 +115,13 @@ export interface FileRoutesByFullPath {
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AuthenticatedIndexRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdRouteRouteWithChildren
+  '/user/settings': typeof AuthenticatedUserSettingsRouteRouteWithChildren
   '/user/': typeof AuthenticatedUserIndexRoute
   '/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
+  '/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRoute
   '/project/$projectId/': typeof AuthenticatedProjectProjectIdIndexRoute
+  '/user/dm': typeof AuthenticatedUserDmIndexRoute
+  '/user/settings/': typeof AuthenticatedUserSettingsIndexRoute
   '/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
 }
 export interface FileRoutesByTo {
@@ -99,7 +131,10 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/user': typeof AuthenticatedUserIndexRoute
   '/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
+  '/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdIndexRoute
+  '/user/dm': typeof AuthenticatedUserDmIndexRoute
+  '/user/settings': typeof AuthenticatedUserSettingsIndexRoute
   '/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
 }
 export interface FileRoutesById {
@@ -111,9 +146,13 @@ export interface FileRoutesById {
   '/auth/register': typeof AuthRegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/project/$projectId': typeof AuthenticatedProjectProjectIdRouteRouteWithChildren
+  '/_authenticated/user/settings': typeof AuthenticatedUserSettingsRouteRouteWithChildren
   '/_authenticated/user/': typeof AuthenticatedUserIndexRoute
   '/_authenticated/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
+  '/_authenticated/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRoute
   '/_authenticated/project/$projectId/': typeof AuthenticatedProjectProjectIdIndexRoute
+  '/_authenticated/user/dm/': typeof AuthenticatedUserDmIndexRoute
+  '/_authenticated/user/settings/': typeof AuthenticatedUserSettingsIndexRoute
   '/_authenticated/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
 }
 export interface FileRouteTypes {
@@ -125,9 +164,13 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/'
     | '/project/$projectId'
+    | '/user/settings'
     | '/user/'
     | '/user/dm/$agentId'
+    | '/user/settings/llm-providers'
     | '/project/$projectId/'
+    | '/user/dm'
+    | '/user/settings/'
     | '/project/$projectId/channel/$channelId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -137,7 +180,10 @@ export interface FileRouteTypes {
     | '/'
     | '/user'
     | '/user/dm/$agentId'
+    | '/user/settings/llm-providers'
     | '/project/$projectId'
+    | '/user/dm'
+    | '/user/settings'
     | '/project/$projectId/channel/$channelId'
   id:
     | '__root__'
@@ -148,9 +194,13 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/_authenticated/'
     | '/_authenticated/project/$projectId'
+    | '/_authenticated/user/settings'
     | '/_authenticated/user/'
     | '/_authenticated/user/dm/$agentId'
+    | '/_authenticated/user/settings/llm-providers'
     | '/_authenticated/project/$projectId/'
+    | '/_authenticated/user/dm/'
+    | '/_authenticated/user/settings/'
     | '/_authenticated/project/$projectId/channel/$channelId'
   fileRoutesById: FileRoutesById
 }
@@ -210,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUserIndexRouteImport
       parentRoute: typeof AuthenticatedUserRouteRoute
     }
+    '/_authenticated/user/settings': {
+      id: '/_authenticated/user/settings'
+      path: '/settings'
+      fullPath: '/user/settings'
+      preLoaderRoute: typeof AuthenticatedUserSettingsRouteRouteImport
+      parentRoute: typeof AuthenticatedUserRouteRoute
+    }
     '/_authenticated/project/$projectId': {
       id: '/_authenticated/project/$projectId'
       path: '/project/$projectId'
@@ -217,12 +274,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectProjectIdRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/user/settings/': {
+      id: '/_authenticated/user/settings/'
+      path: '/'
+      fullPath: '/user/settings/'
+      preLoaderRoute: typeof AuthenticatedUserSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsRouteRoute
+    }
+    '/_authenticated/user/dm/': {
+      id: '/_authenticated/user/dm/'
+      path: '/dm'
+      fullPath: '/user/dm'
+      preLoaderRoute: typeof AuthenticatedUserDmIndexRouteImport
+      parentRoute: typeof AuthenticatedUserRouteRoute
+    }
     '/_authenticated/project/$projectId/': {
       id: '/_authenticated/project/$projectId/'
       path: '/'
       fullPath: '/project/$projectId/'
       preLoaderRoute: typeof AuthenticatedProjectProjectIdIndexRouteImport
       parentRoute: typeof AuthenticatedProjectProjectIdRouteRoute
+    }
+    '/_authenticated/user/settings/llm-providers': {
+      id: '/_authenticated/user/settings/llm-providers'
+      path: '/llm-providers'
+      fullPath: '/user/settings/llm-providers'
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsRouteRoute
     }
     '/_authenticated/user/dm/$agentId': {
       id: '/_authenticated/user/dm/$agentId'
@@ -241,15 +319,37 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedUserSettingsRouteRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute
+  AuthenticatedUserSettingsIndexRoute: typeof AuthenticatedUserSettingsIndexRoute
+}
+
+const AuthenticatedUserSettingsRouteRouteChildren: AuthenticatedUserSettingsRouteRouteChildren =
+  {
+    AuthenticatedUserSettingsLlmProvidersRoute:
+      AuthenticatedUserSettingsLlmProvidersRoute,
+    AuthenticatedUserSettingsIndexRoute: AuthenticatedUserSettingsIndexRoute,
+  }
+
+const AuthenticatedUserSettingsRouteRouteWithChildren =
+  AuthenticatedUserSettingsRouteRoute._addFileChildren(
+    AuthenticatedUserSettingsRouteRouteChildren,
+  )
+
 interface AuthenticatedUserRouteRouteChildren {
+  AuthenticatedUserSettingsRouteRoute: typeof AuthenticatedUserSettingsRouteRouteWithChildren
   AuthenticatedUserIndexRoute: typeof AuthenticatedUserIndexRoute
   AuthenticatedUserDmAgentIdRoute: typeof AuthenticatedUserDmAgentIdRoute
+  AuthenticatedUserDmIndexRoute: typeof AuthenticatedUserDmIndexRoute
 }
 
 const AuthenticatedUserRouteRouteChildren: AuthenticatedUserRouteRouteChildren =
   {
+    AuthenticatedUserSettingsRouteRoute:
+      AuthenticatedUserSettingsRouteRouteWithChildren,
     AuthenticatedUserIndexRoute: AuthenticatedUserIndexRoute,
     AuthenticatedUserDmAgentIdRoute: AuthenticatedUserDmAgentIdRoute,
+    AuthenticatedUserDmIndexRoute: AuthenticatedUserDmIndexRoute,
   }
 
 const AuthenticatedUserRouteRouteWithChildren =
