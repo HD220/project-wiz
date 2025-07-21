@@ -158,102 +158,91 @@ function ProviderForm(props: ProviderFormProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>
-              {isEditing ? "Edit Provider" : "Add New Provider"}
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle>
+            {isEditing ? "Edit Provider" : "Add New Provider"}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Provider Type */}
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Provider Type *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isEditing} // Don't allow changing type when editing
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a provider type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
-                        <SelectItem key={key} value={key}>
-                          <div className="flex items-center gap-2">
-                            <span>{config.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Provider Configuration */}
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-medium text-sm">Provider Configuration</h4>
+                <p className="text-muted-foreground text-xs">
+                  Choose your AI provider and give it a name
+                </p>
+              </div>
 
-            {/* Provider Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Display Name *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="My AI Provider" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provider Type *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={isEditing}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(PROVIDER_CONFIGS).map(([key, config]) => (
+                            <SelectItem key={key} value={key}>
+                              {config.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* API Key */}
-            <FormField
-              control={form.control}
-              name="apiKey"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>API Key *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="sk-proj-..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="My AI Provider" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-            {/* Base URL (if required) */}
-            {showBaseUrl && (
+            <Separator />
+
+            {/* API Configuration */}
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-medium text-sm">API Configuration</h4>
+                <p className="text-muted-foreground text-xs">
+                  Configure your API credentials and settings
+                </p>
+              </div>
+
               <FormField
                 control={form.control}
-                name="baseUrl"
+                name="apiKey"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Base URL *</FormLabel>
+                    <FormLabel>API Key *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="https://api.example.com/v1"
+                        type="password"
+                        placeholder="sk-proj-..."
                         {...field}
                       />
                     </FormControl>
@@ -261,67 +250,103 @@ function ProviderForm(props: ProviderFormProps) {
                   </FormItem>
                 )}
               />
-            )}
 
-            {/* Default Model */}
-            <FormField
-              control={form.control}
-              name="defaultModel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Default Model</FormLabel>
-                  <FormControl>
-                    <Input placeholder="gpt-4o" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              {showBaseUrl && (
+                <FormField
+                  control={form.control}
+                  name="baseUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Base URL *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://api.example.com/v1"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
-
-            <Separator />
-
-            {/* Checkboxes */}
-            <div className="space-y-3">
-              <FormField
-                control={form.control}
-                name="isDefault"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Set as default provider</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
-                name="isActive"
+                name="defaultModel"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem>
+                    <FormLabel>Default Model</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Input placeholder="gpt-4o" {...field} />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Enable this provider</FormLabel>
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
+            <Separator />
+
+            {/* Provider Settings */}
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-medium text-sm">Provider Settings</h4>
+                <p className="text-muted-foreground text-xs">
+                  Configure provider behavior and status
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="isDefault"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-sm font-medium">
+                          Default Provider
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Use this provider by default for new agents
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-sm font-medium">
+                          Active Provider
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Enable this provider for use in agents
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             {/* Actions */}
-            <div className="flex gap-2 pt-4">
-              {/* Test API Button */}
+            <div className="flex items-center gap-3 pt-2">
               <TestApiButton
                 data={{
                   type: watchedType,
@@ -334,9 +359,11 @@ function ProviderForm(props: ProviderFormProps) {
 
               <div className="flex-1" />
 
-              {/* Save Button */}
+              <Button variant="outline" onClick={onClose} disabled={isLoading}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Provider"}
+                {isLoading ? "Saving..." : isEditing ? "Update" : "Create"}
               </Button>
             </div>
           </form>

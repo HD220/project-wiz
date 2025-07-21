@@ -35,18 +35,18 @@ function TestApiButton(props: TestApiButtonProps) {
 
       if (success) {
         setTestResult("success");
-        toast.success("API key test successful!");
+        toast.success("API connection successful!");
       } else {
         setTestResult("error");
-        toast.error("API key test failed");
+        toast.error("API connection failed");
       }
 
-      // Clear result after 3 seconds
-      setTimeout(() => setTestResult(null), 3000);
+      // Clear result after 2.5 seconds
+      setTimeout(() => setTestResult(null), 2500);
     } catch (error) {
       setTestResult("error");
-      toast.error("API key test failed");
-      setTimeout(() => setTestResult(null), 3000);
+      toast.error("API connection failed");
+      setTimeout(() => setTestResult(null), 2500);
     }
   };
 
@@ -65,9 +65,9 @@ function TestApiButton(props: TestApiButtonProps) {
 
   const getButtonText = () => {
     if (isTesting) return "Testing...";
-    if (testResult === "success") return "Success!";
-    if (testResult === "error") return "Failed";
-    return "Test API";
+    if (testResult === "success") return "Test Passed";
+    if (testResult === "error") return "Test Failed";
+    return "Test Connection";
   };
 
   return (

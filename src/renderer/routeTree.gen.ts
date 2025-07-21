@@ -24,7 +24,12 @@ import { Route as AuthenticatedProjectProjectIdIndexRouteImport } from './app/_a
 import { Route as AuthenticatedUserSettingsLlmProvidersRouteImport } from './app/_authenticated/user/settings/llm-providers'
 import { Route as AuthenticatedUserSettingsAppearanceRouteImport } from './app/_authenticated/user/settings/appearance'
 import { Route as AuthenticatedUserDmAgentIdRouteImport } from './app/_authenticated/user/dm/$agentId'
+import { Route as AuthenticatedUserSettingsLlmProvidersIndexRouteImport } from './app/_authenticated/user/settings/llm-providers/index'
 import { Route as AuthenticatedProjectProjectIdChannelChannelIdRouteImport } from './app/_authenticated/project/$projectId/channel/$channelId'
+import { Route as AuthenticatedUserSettingsLlmProvidersEditRouteRouteImport } from './app/_authenticated/user/settings/llm-providers/edit/route'
+import { Route as AuthenticatedUserSettingsLlmProvidersNewIndexRouteImport } from './app/_authenticated/user/settings/llm-providers/new/index'
+import { Route as AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteImport } from './app/_authenticated/user/settings/llm-providers/edit.$providerId'
+import { Route as AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRouteImport } from './app/_authenticated/user/settings/llm-providers/edit/$providerId/index'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -108,11 +113,42 @@ const AuthenticatedUserDmAgentIdRoute =
     path: '/dm/$agentId',
     getParentRoute: () => AuthenticatedUserRouteRoute,
   } as any)
+const AuthenticatedUserSettingsLlmProvidersIndexRoute =
+  AuthenticatedUserSettingsLlmProvidersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRoute,
+  } as any)
 const AuthenticatedProjectProjectIdChannelChannelIdRoute =
   AuthenticatedProjectProjectIdChannelChannelIdRouteImport.update({
     id: '/channel/$channelId',
     path: '/channel/$channelId',
     getParentRoute: () => AuthenticatedProjectProjectIdRouteRoute,
+  } as any)
+const AuthenticatedUserSettingsLlmProvidersEditRouteRoute =
+  AuthenticatedUserSettingsLlmProvidersEditRouteRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRoute,
+  } as any)
+const AuthenticatedUserSettingsLlmProvidersNewIndexRoute =
+  AuthenticatedUserSettingsLlmProvidersNewIndexRouteImport.update({
+    id: '/new/',
+    path: '/new/',
+    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersRoute,
+  } as any)
+const AuthenticatedUserSettingsLlmProvidersEditProviderIdRoute =
+  AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteImport.update({
+    id: '/$providerId',
+    path: '/$providerId',
+    getParentRoute: () => AuthenticatedUserSettingsLlmProvidersEditRouteRoute,
+  } as any)
+const AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute =
+  AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () =>
+      AuthenticatedUserSettingsLlmProvidersEditProviderIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -126,11 +162,16 @@ export interface FileRoutesByFullPath {
   '/user/': typeof AuthenticatedUserIndexRoute
   '/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
   '/user/settings/appearance': typeof AuthenticatedUserSettingsAppearanceRoute
-  '/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRoute
+  '/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRouteWithChildren
   '/project/$projectId/': typeof AuthenticatedProjectProjectIdIndexRoute
   '/user/dm': typeof AuthenticatedUserDmIndexRoute
   '/user/settings/': typeof AuthenticatedUserSettingsIndexRoute
+  '/user/settings/llm-providers/edit': typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren
   '/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
+  '/user/settings/llm-providers/': typeof AuthenticatedUserSettingsLlmProvidersIndexRoute
+  '/user/settings/llm-providers/edit/$providerId': typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteWithChildren
+  '/user/settings/llm-providers/new': typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute
+  '/user/settings/llm-providers/edit/$providerId/': typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -140,11 +181,14 @@ export interface FileRoutesByTo {
   '/user': typeof AuthenticatedUserIndexRoute
   '/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
   '/user/settings/appearance': typeof AuthenticatedUserSettingsAppearanceRoute
-  '/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRoute
   '/project/$projectId': typeof AuthenticatedProjectProjectIdIndexRoute
   '/user/dm': typeof AuthenticatedUserDmIndexRoute
   '/user/settings': typeof AuthenticatedUserSettingsIndexRoute
+  '/user/settings/llm-providers/edit': typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren
   '/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
+  '/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersIndexRoute
+  '/user/settings/llm-providers/new': typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute
+  '/user/settings/llm-providers/edit/$providerId': typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -159,11 +203,16 @@ export interface FileRoutesById {
   '/_authenticated/user/': typeof AuthenticatedUserIndexRoute
   '/_authenticated/user/dm/$agentId': typeof AuthenticatedUserDmAgentIdRoute
   '/_authenticated/user/settings/appearance': typeof AuthenticatedUserSettingsAppearanceRoute
-  '/_authenticated/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRoute
+  '/_authenticated/user/settings/llm-providers': typeof AuthenticatedUserSettingsLlmProvidersRouteWithChildren
   '/_authenticated/project/$projectId/': typeof AuthenticatedProjectProjectIdIndexRoute
   '/_authenticated/user/dm/': typeof AuthenticatedUserDmIndexRoute
   '/_authenticated/user/settings/': typeof AuthenticatedUserSettingsIndexRoute
+  '/_authenticated/user/settings/llm-providers/edit': typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren
   '/_authenticated/project/$projectId/channel/$channelId': typeof AuthenticatedProjectProjectIdChannelChannelIdRoute
+  '/_authenticated/user/settings/llm-providers/': typeof AuthenticatedUserSettingsLlmProvidersIndexRoute
+  '/_authenticated/user/settings/llm-providers/edit/$providerId': typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteWithChildren
+  '/_authenticated/user/settings/llm-providers/new/': typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute
+  '/_authenticated/user/settings/llm-providers/edit/$providerId/': typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,7 +231,12 @@ export interface FileRouteTypes {
     | '/project/$projectId/'
     | '/user/dm'
     | '/user/settings/'
+    | '/user/settings/llm-providers/edit'
     | '/project/$projectId/channel/$channelId'
+    | '/user/settings/llm-providers/'
+    | '/user/settings/llm-providers/edit/$providerId'
+    | '/user/settings/llm-providers/new'
+    | '/user/settings/llm-providers/edit/$providerId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -192,11 +246,14 @@ export interface FileRouteTypes {
     | '/user'
     | '/user/dm/$agentId'
     | '/user/settings/appearance'
-    | '/user/settings/llm-providers'
     | '/project/$projectId'
     | '/user/dm'
     | '/user/settings'
+    | '/user/settings/llm-providers/edit'
     | '/project/$projectId/channel/$channelId'
+    | '/user/settings/llm-providers'
+    | '/user/settings/llm-providers/new'
+    | '/user/settings/llm-providers/edit/$providerId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -214,7 +271,12 @@ export interface FileRouteTypes {
     | '/_authenticated/project/$projectId/'
     | '/_authenticated/user/dm/'
     | '/_authenticated/user/settings/'
+    | '/_authenticated/user/settings/llm-providers/edit'
     | '/_authenticated/project/$projectId/channel/$channelId'
+    | '/_authenticated/user/settings/llm-providers/'
+    | '/_authenticated/user/settings/llm-providers/edit/$providerId'
+    | '/_authenticated/user/settings/llm-providers/new/'
+    | '/_authenticated/user/settings/llm-providers/edit/$providerId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -329,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUserDmAgentIdRouteImport
       parentRoute: typeof AuthenticatedUserRouteRoute
     }
+    '/_authenticated/user/settings/llm-providers/': {
+      id: '/_authenticated/user/settings/llm-providers/'
+      path: '/'
+      fullPath: '/user/settings/llm-providers/'
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersIndexRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute
+    }
     '/_authenticated/project/$projectId/channel/$channelId': {
       id: '/_authenticated/project/$projectId/channel/$channelId'
       path: '/channel/$channelId'
@@ -336,12 +405,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectProjectIdChannelChannelIdRouteImport
       parentRoute: typeof AuthenticatedProjectProjectIdRouteRoute
     }
+    '/_authenticated/user/settings/llm-providers/edit': {
+      id: '/_authenticated/user/settings/llm-providers/edit'
+      path: '/edit'
+      fullPath: '/user/settings/llm-providers/edit'
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute
+    }
+    '/_authenticated/user/settings/llm-providers/new/': {
+      id: '/_authenticated/user/settings/llm-providers/new/'
+      path: '/new'
+      fullPath: '/user/settings/llm-providers/new'
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersNewIndexRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute
+    }
+    '/_authenticated/user/settings/llm-providers/edit/$providerId': {
+      id: '/_authenticated/user/settings/llm-providers/edit/$providerId'
+      path: '/$providerId'
+      fullPath: '/user/settings/llm-providers/edit/$providerId'
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersEditRouteRoute
+    }
+    '/_authenticated/user/settings/llm-providers/edit/$providerId/': {
+      id: '/_authenticated/user/settings/llm-providers/edit/$providerId/'
+      path: '/'
+      fullPath: '/user/settings/llm-providers/edit/$providerId/'
+      preLoaderRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRouteImport
+      parentRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdRoute
+    }
   }
 }
 
+interface AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute
+}
+
+const AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteChildren: AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteChildren =
+  {
+    AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute:
+      AuthenticatedUserSettingsLlmProvidersEditProviderIdIndexRoute,
+  }
+
+const AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteWithChildren =
+  AuthenticatedUserSettingsLlmProvidersEditProviderIdRoute._addFileChildren(
+    AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteChildren,
+  )
+
+interface AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersEditProviderIdRoute: typeof AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteWithChildren
+}
+
+const AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren: AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren =
+  {
+    AuthenticatedUserSettingsLlmProvidersEditProviderIdRoute:
+      AuthenticatedUserSettingsLlmProvidersEditProviderIdRouteWithChildren,
+  }
+
+const AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren =
+  AuthenticatedUserSettingsLlmProvidersEditRouteRoute._addFileChildren(
+    AuthenticatedUserSettingsLlmProvidersEditRouteRouteChildren,
+  )
+
+interface AuthenticatedUserSettingsLlmProvidersRouteChildren {
+  AuthenticatedUserSettingsLlmProvidersEditRouteRoute: typeof AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren
+  AuthenticatedUserSettingsLlmProvidersIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersIndexRoute
+  AuthenticatedUserSettingsLlmProvidersNewIndexRoute: typeof AuthenticatedUserSettingsLlmProvidersNewIndexRoute
+}
+
+const AuthenticatedUserSettingsLlmProvidersRouteChildren: AuthenticatedUserSettingsLlmProvidersRouteChildren =
+  {
+    AuthenticatedUserSettingsLlmProvidersEditRouteRoute:
+      AuthenticatedUserSettingsLlmProvidersEditRouteRouteWithChildren,
+    AuthenticatedUserSettingsLlmProvidersIndexRoute:
+      AuthenticatedUserSettingsLlmProvidersIndexRoute,
+    AuthenticatedUserSettingsLlmProvidersNewIndexRoute:
+      AuthenticatedUserSettingsLlmProvidersNewIndexRoute,
+  }
+
+const AuthenticatedUserSettingsLlmProvidersRouteWithChildren =
+  AuthenticatedUserSettingsLlmProvidersRoute._addFileChildren(
+    AuthenticatedUserSettingsLlmProvidersRouteChildren,
+  )
+
 interface AuthenticatedUserSettingsRouteRouteChildren {
   AuthenticatedUserSettingsAppearanceRoute: typeof AuthenticatedUserSettingsAppearanceRoute
-  AuthenticatedUserSettingsLlmProvidersRoute: typeof AuthenticatedUserSettingsLlmProvidersRoute
+  AuthenticatedUserSettingsLlmProvidersRoute: typeof AuthenticatedUserSettingsLlmProvidersRouteWithChildren
   AuthenticatedUserSettingsIndexRoute: typeof AuthenticatedUserSettingsIndexRoute
 }
 
@@ -350,7 +498,7 @@ const AuthenticatedUserSettingsRouteRouteChildren: AuthenticatedUserSettingsRout
     AuthenticatedUserSettingsAppearanceRoute:
       AuthenticatedUserSettingsAppearanceRoute,
     AuthenticatedUserSettingsLlmProvidersRoute:
-      AuthenticatedUserSettingsLlmProvidersRoute,
+      AuthenticatedUserSettingsLlmProvidersRouteWithChildren,
     AuthenticatedUserSettingsIndexRoute: AuthenticatedUserSettingsIndexRoute,
   }
 

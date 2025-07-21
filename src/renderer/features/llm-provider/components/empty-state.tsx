@@ -1,41 +1,29 @@
 import { Bot, Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/renderer/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/renderer/components/ui/card";
 
-interface EmptyStateProps {
-  onAddProvider: () => void;
-}
-
-function EmptyState(props: EmptyStateProps) {
-  const { onAddProvider } = props;
-
+function EmptyState() {
   return (
-    <Card className="border-dashed border-2 border-muted-foreground/25">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="rounded-full bg-muted p-4">
-            <Bot className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold">
-              No AI Providers Configured
-            </h3>
-            <p className="text-muted-foreground max-w-md">
-              Get started by adding your first AI provider. Connect with OpenAI,
-              DeepSeek, Anthropic, or any custom provider to start using AI
-              agents.
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex justify-center pb-6">
-        <Button onClick={onAddProvider} className="gap-2">
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="mb-4">
+        <Bot className="h-12 w-12 text-muted-foreground/50" />
+      </div>
+      <div className="space-y-2 mb-6">
+        <h3 className="text-lg font-medium">
+          No AI Providers Configured
+        </h3>
+        <p className="text-muted-foreground text-sm max-w-sm">
+          Get started by adding your first AI provider to enable AI agents in your projects.
+        </p>
+      </div>
+      <Link to="/user/settings/llm-providers/new/">
+        <Button className="gap-2">
           <Plus className="h-4 w-4" />
           Add Your First Provider
         </Button>
-      </CardContent>
-    </Card>
+      </Link>
+    </div>
   );
 }
 
